@@ -6,7 +6,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { ArrowUp, Cross, SolidStop } from "@/icons/app"
+import { FileItem } from "@/experimental/RichText/FileItem"
+import {
+  ArrowUp,
+  Cross,
+  CrossedCircle,
+  Paperclip,
+  SolidStop,
+} from "@/icons/app"
+import { Skeleton } from "@/ui/skeleton"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
@@ -24,6 +32,57 @@ type ChatTextareaProps = InputProps & {
   onGetCredits?: () => void
 }
 
+type AttachedFile = {
+  id: string
+  file: File
+  status: "uploading" | "uploaded" | "error"
+  uploadedFile?: {
+    url: string
+    filename: string
+    mimetype: string
+  }
+}
+
+type UserTextPart = { type: "text"; text: string }
+type UserBinaryPart = {
+  type: "binary"
+  url: string
+  filename: string
+  mimeType: string
+}
+
+/**
+ * Check whether a file's MIME type matches an allowed pattern.
+ * Supports exact matches ("application/pdf") and wildcard patterns ("image/*").
+ */
+function matchesMimeType(fileType: string, pattern: string): boolean {
+  if (pattern === "*/*") return true
+  if (pattern.endsWith("/*")) {
+    const prefix = pattern.slice(0, pattern.indexOf("/"))
+    return fileType.startsWith(prefix + "/")
+  }
+  return fileType === pattern
+}
+
+/**
+ * Filter files against the allowed MIME types list.
+ * Returns only files whose type matches at least one allowed pattern.
+ * If no allowedMimeTypes are configured, all files pass through.
+ */
+function filterByMimeType(
+  files: File[],
+  allowedMimeTypes: string | string[] | undefined
+): File[] {
+  if (!allowedMimeTypes) return files
+  const patterns = Array.isArray(allowedMimeTypes)
+    ? allowedMimeTypes
+    : [allowedMimeTypes]
+  if (patterns.length === 0) return files
+  return files.filter((file) =>
+    patterns.some((pattern) => matchesMimeType(file.type, pattern))
+  )
+}
+
 export const ChatTextarea = ({
   submitLabel,
   inProgress,
@@ -39,17 +98,95 @@ export const ChatTextarea = ({
     toolHints,
     activeToolHint,
     setActiveToolHint,
+    fileAttachments,
+    sendMessage,
   } = useAiChat()
   const { messages, setMessages } = useCopilotChatInternal()
   const translation = useI18n()
   const messagesRef = useRef(messages)
   messagesRef.current = messages
-
   const [inputValue, setInputValue] = useState("")
   const [cursorPosition, setCursorPosition] = useState(0)
   const formRef = useRef<HTMLFormElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const highlightRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([])
+
+  const onUploadFiles = fileAttachments?.onUploadFiles
+  const allowedMimeTypes = fileAttachments?.allowedMimeTypes
+  const maxFiles = fileAttachments?.maxFiles
+
+  const acceptValue = useMemo(() => {
+    if (!allowedMimeTypes) return undefined
+    if (Array.isArray(allowedMimeTypes)) return allowedMimeTypes.join(",")
+    return allowedMimeTypes
+  }, [allowedMimeTypes])
+
+  const isAtMaxFiles =
+    maxFiles !== undefined && attachedFiles.length >= maxFiles
+
+  const handleFileSelect = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      let files = Array.from(e.target.files ?? [])
+      if (files.length === 0 || !onUploadFiles) return
+
+      // Validate MIME types client-side (the <input accept> attribute is not
+      // reliable — users can bypass it via drag-and-drop or file picker).
+      files = filterByMimeType(files, allowedMimeTypes)
+      if (files.length === 0) return
+
+      if (maxFiles !== undefined) {
+        const remaining = maxFiles - attachedFiles.length
+        if (remaining <= 0) return
+        files = files.slice(0, remaining)
+      }
+
+      const newAttached: AttachedFile[] = files.map((file) => ({
+        id: crypto.randomUUID(),
+        file,
+        status: "uploading" as const,
+      }))
+
+      setAttachedFiles((prev) => [...prev, ...newAttached])
+
+      try {
+        const uploaded = await onUploadFiles(files)
+        setAttachedFiles((prev) =>
+          prev.map((att) => {
+            const idx = newAttached.findIndex((n) => n.id === att.id)
+            if (idx === -1) return att
+            // Server returned a result for this file
+            if (uploaded[idx]) {
+              return {
+                ...att,
+                status: "uploaded" as const,
+                uploadedFile: uploaded[idx],
+              }
+            }
+            // Server returned fewer items than sent — mark as error
+            return { ...att, status: "error" as const }
+          })
+        )
+      } catch {
+        setAttachedFiles((prev) =>
+          prev.map((att) =>
+            newAttached.some((n) => n.id === att.id)
+              ? { ...att, status: "error" as const }
+              : att
+          )
+        )
+      }
+
+      // Reset input so the same file can be re-selected
+      e.target.value = ""
+    },
+    [onUploadFiles, maxFiles, attachedFiles.length, allowedMimeTypes]
+  )
+
+  const handleRemoveFile = useCallback((id: string) => {
+    setAttachedFiles((prev) => prev.filter((att) => att.id !== id))
+  }, [])
 
   const mentions = useMentions({
     inputValue,
@@ -78,6 +215,8 @@ export const ChatTextarea = ({
   }, [onStop, setMessages, translation.ai.responseStopped])
 
   const resolvedDefaultPlaceholder = translation.ai.inputPlaceholder
+  const uploadedFiles = attachedFiles.filter((f) => f.status === "uploaded")
+  const isUploading = attachedFiles.some((f) => f.status === "uploading")
   const hasDataToSend = inputValue.trim().length > 0
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -85,13 +224,39 @@ export const ChatTextarea = ({
     mentions.close()
     if (inProgress) {
       handleStop()
-    } else if (hasDataToSend) {
+    } else if (hasDataToSend && !isUploading) {
       const transformed = mentions.transformMentions(inputValue.trim())
+
       const withToolHint = activeToolHint
         ? `<tool-context tool="${activeToolHint.id}">${activeToolHint.prompt}</tool-context>\n\n${transformed}`
         : transformed
-      onSend(withToolHint)
+
+      const files = uploadedFiles.flatMap((f) =>
+        f.uploadedFile ? [f.uploadedFile] : []
+      )
+
+      if (files.length > 0) {
+        const contentParts: Array<UserTextPart | UserBinaryPart> = [
+          ...files.map((file) => ({
+            type: "binary" as const,
+            url: file.url,
+            filename: file.filename,
+            mimeType: file.mimetype,
+          })),
+          { type: "text" as const, text: withToolHint },
+        ]
+
+        sendMessage({
+          id: crypto.randomUUID(),
+          role: "user",
+          content: contentParts,
+        })
+      } else {
+        onSend(withToolHint)
+      }
+
       setInputValue("")
+      setAttachedFiles([])
     }
 
     textareaRef.current?.focus()
@@ -185,6 +350,33 @@ export const ChatTextarea = ({
         position={mentions.popoverPosition}
         onSelect={mentions.selectPerson}
       />
+
+      {attachedFiles.length > 0 && (
+        <div
+          aria-live="polite"
+          aria-busy={isUploading}
+          className="flex flex-wrap gap-1.5 px-3 pt-3"
+        >
+          {attachedFiles.map((att) =>
+            att.status === "uploading" ? (
+              <Skeleton key={att.id} className="h-9 w-36 rounded-lg" />
+            ) : (
+              <FileItem
+                key={att.id}
+                file={att.file}
+                size="lg"
+                actions={[
+                  {
+                    label: translation.ai.removeFile,
+                    icon: CrossedCircle,
+                    onClick: () => handleRemoveFile(att.id),
+                  },
+                ]}
+              />
+            )
+          )}
+        </div>
+      )}
 
       <div
         className={cn(
@@ -298,7 +490,32 @@ export const ChatTextarea = ({
       </div>
 
       <div className="flex shrink-0 items-center justify-between p-3">
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
+          {onUploadFiles && (
+            <>
+              <ButtonInternal
+                label={translation.ai.attachFile}
+                hideLabel
+                type="button"
+                icon={Paperclip}
+                variant="outline"
+                size="md"
+                disabled={isAtMaxFiles}
+                onClick={(e) => {
+                  e.preventDefault()
+                  fileInputRef.current?.click()
+                }}
+              />
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept={acceptValue}
+                className="hidden"
+                onChange={handleFileSelect}
+              />
+            </>
+          )}
           {toolHints && toolHints.length > 0 && setActiveToolHint && (
             <ToolHintSelector
               toolHints={toolHints}
@@ -319,8 +536,8 @@ export const ChatTextarea = ({
           ) : (
             <ButtonInternal
               type="submit"
-              disabled={!hasDataToSend}
-              variant={hasDataToSend ? "default" : "neutral"}
+              disabled={!hasDataToSend || isUploading}
+              variant={hasDataToSend && !isUploading ? "default" : "neutral"}
               label={submitLabel || translation.ai.sendMessage}
               icon={submitLabel ? undefined : ArrowUp}
               hideLabel={!submitLabel}

@@ -17,6 +17,20 @@ export type BackendMessage = {
 }
 
 type BackendTextPart = { type: "text"; text: string }
+type BackendFilePart = {
+  type: "binary"
+  mimeType: string
+  filename?: string
+  url?: string
+}
+type LegacyBackendFilePart = {
+  type: "file"
+  file: {
+    url: string
+    filename: string
+    mimetype: string
+  }
+}
 type BackendToolPart = {
   type: "tool-invocation"
   toolInvocation: {
@@ -27,7 +41,19 @@ type BackendToolPart = {
     result?: unknown
   }
 }
-type BackendPart = BackendTextPart | BackendToolPart
+type BackendPart =
+  | BackendTextPart
+  | BackendFilePart
+  | LegacyBackendFilePart
+  | BackendToolPart
+
+type MessageTextPart = { type: "text"; text: string }
+type MessageBinaryPart = {
+  type: "binary"
+  url: string
+  filename: string
+  mimeType: string
+}
 
 /**
  * Actions map shape — matches CopilotKit's `actions` from useCopilotContext().
@@ -65,11 +91,38 @@ export function convertBackendMessage(
 
   const messages: Message[] = []
   let partIndex = 0
+  const userParts: Array<MessageTextPart | MessageBinaryPart> = []
 
   for (const part of parts) {
     if (part.type === "text") {
       if (part.text) {
-        messages.push({ id: `${id}_t${partIndex}`, role, content: part.text })
+        if (role === "user") {
+          userParts.push({ type: "text", text: part.text })
+        } else {
+          messages.push({
+            id: `${id}_t${partIndex}`,
+            role,
+            content: part.text,
+          })
+        }
+      }
+    } else if (part.type === "binary") {
+      if (role === "user" && part.url && part.filename && part.mimeType) {
+        userParts.push({
+          type: "binary",
+          url: part.url,
+          filename: part.filename,
+          mimeType: part.mimeType,
+        })
+      }
+    } else if (part.type === "file") {
+      if (role === "user" && part.file) {
+        userParts.push({
+          type: "binary",
+          url: part.file.url,
+          filename: part.file.filename,
+          mimeType: part.file.mimetype,
+        })
       }
     } else {
       const { toolInvocation: inv } = part
@@ -113,6 +166,14 @@ export function convertBackendMessage(
       messages.push(msg)
     }
     partIndex++
+  }
+
+  if (role === "user" && userParts.length > 0) {
+    messages.push({
+      id,
+      role,
+      content: userParts,
+    })
   }
 
   return messages.length > 0

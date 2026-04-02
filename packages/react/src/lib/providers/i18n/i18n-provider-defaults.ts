@@ -347,6 +347,8 @@ export const defaultTranslations = {
         actionLabel: "Get credits",
       },
     },
+    attachFile: "Attach file",
+    removeFile: "Remove",
     growth: {
       demoCard: {
         title: "See {{moduleName}} in action",

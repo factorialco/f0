@@ -254,4 +254,68 @@ describe("convertBackendMessage", () => {
     expect(result).toHaveLength(1)
     expect(result[0].toolCalls).toBeDefined()
   })
+
+  it("converts user file parts into structured user content", () => {
+    const result = convertBackendMessage({
+      id: "msg_file_user",
+      role: "user",
+      content: {
+        parts: [
+          {
+            type: "binary",
+            url: "https://files.example.com/course.pdf",
+            filename: "course.pdf",
+            mimeType: "application/pdf",
+          },
+          { type: "text", text: "Please summarize this" },
+        ],
+      },
+    } as any)
+
+    expect(result).toHaveLength(1)
+    expect(result[0]).toEqual({
+      id: "msg_file_user",
+      role: "user",
+      content: [
+        {
+          type: "binary",
+          url: "https://files.example.com/course.pdf",
+          filename: "course.pdf",
+          mimeType: "application/pdf",
+        },
+        { type: "text", text: "Please summarize this" },
+      ],
+    })
+  })
+
+  it("creates user message when thread contains only file parts", () => {
+    const result = convertBackendMessage({
+      id: "msg_file_only",
+      role: "user",
+      content: {
+        parts: [
+          {
+            type: "binary",
+            url: "https://files.example.com/offer.pdf",
+            filename: "offer.pdf",
+            mimeType: "application/pdf",
+          },
+        ],
+      },
+    } as any)
+
+    expect(result).toHaveLength(1)
+    expect(result[0]).toMatchObject({
+      id: "msg_file_only",
+      role: "user",
+    })
+    expect(result[0].content).toEqual([
+      {
+        type: "binary",
+        url: "https://files.example.com/offer.pdf",
+        filename: "offer.pdf",
+        mimeType: "application/pdf",
+      },
+    ])
+  })
 })
