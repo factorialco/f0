@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.435.0](https://github.com/factorialco/f0/compare/f0-react-v1.434.0...f0-react-v1.435.0) (2026-04-02)
+
+
+### Features
+
+* **react:** refactor Storybook and move multiple components from experimental to stable ([#3834](https://github.com/factorialco/f0/issues/3834)) ([1c8ee20](https://github.com/factorialco/f0/commit/1c8ee204a4d03b2f7ea3d735586e844a1434404e))
+
 ## [1.434.0](https://github.com/factorialco/f0/compare/f0-react-v1.433.0...f0-react-v1.434.0) (2026-04-02)
 
 
