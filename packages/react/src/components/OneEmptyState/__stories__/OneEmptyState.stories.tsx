@@ -10,7 +10,7 @@ import { OneEmptyState } from "../OneEmptyState"
 const meta = {
   component: OneEmptyState,
   title: "EmptyState",
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs", "stable"],
   argTypes: {
     ...dataTestIdArgs,
   },

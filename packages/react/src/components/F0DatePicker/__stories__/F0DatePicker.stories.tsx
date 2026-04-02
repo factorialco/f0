@@ -1,32 +1,32 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { subDays } from "date-fns"
-import MockDate from "mockdate"
-import { useState } from "react"
-import { expect, fn, within } from "storybook/test"
+import { subDays } from "date-fns";
+import MockDate from "mockdate";
+import { useState } from "react";
+import { expect, fn, within } from "storybook/test";
 
-import { Placeholder } from "@/icons/app"
-import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
-import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
-import { getInputFieldArgs } from "@/ui/InputField/__stories__/InputField.args"
+import { Placeholder } from "@/icons/app";
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args";
+import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters";
+import { getInputFieldArgs } from "@/ui/InputField/__stories__/InputField.args";
 
-import { CalendarView, DateRange } from "@/components/OneCalendar/types"
-import { F0DatePicker } from "../index"
-import { predefinedPresets } from "../presets"
-import { datepickerSizes, DatePickerValue } from "../types"
-import { inputFieldInheritedProps } from "../types.internal"
+import { CalendarView, DateRange } from "@/components/OneCalendar/types";
+import { F0DatePicker } from "../index";
+import { predefinedPresets } from "../presets";
+import { datepickerSizes, DatePickerValue } from "../types";
+import { inputFieldInheritedProps } from "../types.internal";
 
-const mockDate = new Date(2025, 6, 30)
+const mockDate = new Date(2025, 6, 30);
 const meta = {
   title: "DatePicker",
   component: F0DatePicker,
   async beforeEach() {
-    MockDate.set(mockDate)
+    MockDate.set(mockDate);
 
     // 👇 Reset the Date after each story
     return () => {
-      MockDate.reset()
-    }
+      MockDate.reset();
+    };
   },
   parameters: {
     docs: {
@@ -96,15 +96,15 @@ const meta = {
     ...getInputFieldArgs(inputFieldInheritedProps),
     ...dataTestIdArgs,
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs", "stable"],
   decorators: [
     (Story, { args, parameters }) => {
-      const width = parameters?.width || "300px"
+      const width = parameters?.width || "300px";
       const [value, setValue] = useState<DatePickerValue | undefined>(
-        args?.value as DatePickerValue
-      )
+        args?.value as DatePickerValue,
+      );
 
-      const [valueSimple, setValueSimple] = useState<string | undefined>()
+      const [valueSimple, setValueSimple] = useState<string | undefined>();
 
       return (
         <div style={{ width }}>
@@ -113,8 +113,8 @@ const meta = {
               ...args,
               value: args?.value,
               onChange: (value, simple) => {
-                setValue(value)
-                setValueSimple(simple)
+                setValue(value);
+                setValueSimple(simple);
               },
             }}
           />
@@ -123,15 +123,15 @@ const meta = {
             <p>Value Simple: {valueSimple}</p>
           </div>
         </div>
-      )
+      );
     },
   ],
-} satisfies Meta<typeof F0DatePicker>
+} satisfies Meta<typeof F0DatePicker>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
-const today = mockDate
+const today = mockDate;
 const presets = [
   predefinedPresets.today,
   predefinedPresets.lastWeek,
@@ -147,14 +147,14 @@ const presets = [
       to: today,
     } as DateRange,
   },
-]
+];
 
 export const Default: Story = {
   args: {
     label: "Date",
     placeholder: "Select a date",
   },
-}
+};
 
 export const WithDataTestId: Story = {
   args: {
@@ -163,10 +163,10 @@ export const WithDataTestId: Story = {
     dataTestId: "my-test-date-picker",
   } as Story["args"] & { dataTestId: string },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await expect(canvas.getByTestId("my-test-date-picker")).toBeInTheDocument()
+    const canvas = within(canvasElement);
+    await expect(canvas.getByTestId("my-test-date-picker")).toBeInTheDocument();
   },
-}
+};
 
 export const WithValueWithMonthGranularity: Story = {
   args: {
@@ -180,7 +180,7 @@ export const WithValueWithMonthGranularity: Story = {
       granularity: "month",
     },
   },
-}
+};
 
 export const WithValueWithWeekGranularity: Story = {
   args: {
@@ -194,7 +194,7 @@ export const WithValueWithWeekGranularity: Story = {
       granularity: "week",
     },
   },
-}
+};
 
 export const WithValueWithRangeGranularity: Story = {
   args: {
@@ -208,7 +208,7 @@ export const WithValueWithRangeGranularity: Story = {
       granularity: "range",
     },
   },
-}
+};
 
 export const WithMultipleGranularities: Story = {
   args: {
@@ -216,7 +216,7 @@ export const WithMultipleGranularities: Story = {
     placeholder: "Select a date",
     granularities: ["day", "week", "month", "quarter"],
   },
-}
+};
 
 export const WithPresets: Story = {
   args: {
@@ -229,7 +229,7 @@ export const WithPresets: Story = {
     granularities: ["day", "week", "month", "quarter"],
     presets,
   },
-}
+};
 
 export const WithMinMaxDates: Story = {
   args: {
@@ -246,7 +246,7 @@ export const WithMinMaxDates: Story = {
     minDate: subDays(today, 30), // Can't select dates before 30 days ago
     maxDate: today, // Can't select dates after today
   },
-}
+};
 
 export const WithError: Story = {
   args: {
@@ -254,7 +254,7 @@ export const WithError: Story = {
     placeholder: "Select a date",
     error: true,
   },
-}
+};
 
 export const WithWarning: Story = {
   args: {
@@ -265,7 +265,7 @@ export const WithWarning: Story = {
       message: "Warning message",
     },
   },
-}
+};
 
 export const WithInfo: Story = {
   args: {
@@ -276,7 +276,7 @@ export const WithInfo: Story = {
       message: "Info message",
     },
   },
-}
+};
 
 export const WithHint: Story = {
   args: {
@@ -284,7 +284,7 @@ export const WithHint: Story = {
     placeholder: "Select a date",
     hint: "Hint message",
   },
-}
+};
 
 export const WithClearable: Story = {
   args: {
@@ -292,7 +292,7 @@ export const WithClearable: Story = {
     placeholder: "Select a date",
     clearable: true,
   },
-}
+};
 
 export const Snapshot: Story = {
   parameters: withSkipA11y(withSnapshot({ width: "100%" })),
@@ -304,7 +304,7 @@ export const Snapshot: Story = {
       clearable: true,
       labelIcon: Placeholder,
       label: "Label text here",
-    }
+    };
     const snapshotVariants: (Record<string, unknown> & typeof base)[] = [
       { ...base },
       { ...base, disabled: true },
@@ -321,7 +321,7 @@ export const Snapshot: Story = {
       { ...base, status: { type: "info" as const, message: "Info message" } },
       { ...base, hint: "Hint message" },
       { ...base, open: true },
-    ]
+    ];
     return (
       <div className="flex flex-col gap-4">
         {datepickerSizes.map((size) => (
@@ -350,6 +350,6 @@ export const Snapshot: Story = {
           </section>
         ))}
       </div>
-    )
+    );
   },
-}
+};
