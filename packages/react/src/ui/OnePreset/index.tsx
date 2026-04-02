@@ -1,4 +1,4 @@
-import { Await } from "@/components/Utilities/Await"
+import { Await } from "@/lib/Await"
 import { experimentalComponent } from "@/lib/experimental"
 import { Skeleton } from "@/ui/skeleton"
 

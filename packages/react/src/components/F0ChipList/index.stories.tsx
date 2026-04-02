@@ -11,7 +11,7 @@ import { F0ChipList } from "./index"
 
 const meta = {
   component: F0ChipList,
-  title: "ChipList",
+  title: "Chips/ChipList",
   parameters: {
     layout: "centered",
   },

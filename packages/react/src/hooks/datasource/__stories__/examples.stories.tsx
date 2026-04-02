@@ -27,7 +27,7 @@ const meta: Meta = {
 
 export default meta
 
-import { Await } from "@/components/Utilities/Await"
+import { Await } from "@/lib/Await"
 import {
   generateMockUsers,
   MockUser,

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps } from "react"
 import { expect, within } from "storybook/test"
 
-import { F0Box } from "@/components/F0Box"
+import { F0Box } from "@/lib/F0Box"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import * as SidebarStories from "@/components/Navigation/Sidebar/index.stories"

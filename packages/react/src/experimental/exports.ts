@@ -32,6 +32,10 @@ export * from "./Navigation/exports"
 export * from "../sds/inbox/OneApprovalHistory"
 export * from "./OneCalendar"
 /**
+ * @deprecated OneChip has moved to @/components/OneChip. Import from there instead.
+ */
+export * from "../components/OneChip"
+/**
  * @deprecated OneDataCollection has moved to @/patterns/OneDataCollection. Import from there instead.
  */
 export * from "../patterns/OneDataCollection/exports"

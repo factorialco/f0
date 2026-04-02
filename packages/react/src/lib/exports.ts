@@ -1,5 +1,5 @@
 export { F0Provider } from "@/lib/providers/f0"
-export { Await } from "../components/Utilities/Await/Await"
+export { Await } from "./Await/Await"
 export * from "./a11y"
 export * from "./data-testid"
 export { createAtlaskitDriver } from "./dnd/atlaskitDriver"

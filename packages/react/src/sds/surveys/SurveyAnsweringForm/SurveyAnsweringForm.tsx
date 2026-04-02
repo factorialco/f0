@@ -3,7 +3,7 @@ import { useCallback, useRef, useState, useMemo } from "react"
 import type { DialogPosition } from "@/components/F0Dialog/types"
 import type { F0FormSubmitResult } from "@/components/F0Form/types"
 
-import { F0Box } from "@/components/F0Box"
+import { F0Box } from "@/lib/F0Box"
 import { F0Dialog } from "@/components/F0Dialog"
 import { F0Form } from "@/components/F0Form/F0Form"
 import { useF0Form } from "@/components/F0Form/useF0Form"

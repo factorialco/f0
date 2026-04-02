@@ -9,7 +9,11 @@ export * from "../kits/Charts/exports"
  */
 export * from "../kits/F0DataChart"
 export * from "./F0BigNumber"
-export * from "./F0Box"
+export * from "./OneChip"
+/**
+ * @deprecated F0Box has moved to @/lib/F0Box. Import from there instead.
+ */
+export * from "../lib/F0Box"
 export * from "./F0Button"
 export * from "./F0ButtonDropdown"
 export * from "./F0ButtonToggle"
@@ -32,7 +36,10 @@ export * from "./F0Text"
 export * from "../sds/TimeLine"
 export * from "./OneFilterPicker/exports"
 export * from "./tags/exports"
-export * from "./Utilities/Await"
+/**
+ * @deprecated Await has moved to @/lib/Await. Import from there instead.
+ */
+export * from "../lib/Await"
 export * from "./Utilities/F0GridStack"
 export * from "./F0TableOfContentPopover"
 export * from "../sds/surveys/exports"
@@ -43,4 +50,7 @@ export * from "../sds/UpsellingKit/exports"
 // AI Components
 export * from "../ai/exports"
 // Analytics
-export * from "./F0AnalyticsDashboard"
+/**
+ * @deprecated F0AnalyticsDashboard has moved to @/patterns/F0AnalyticsDashboard. Import from there instead.
+ */
+export * from "../patterns/F0AnalyticsDashboard"
