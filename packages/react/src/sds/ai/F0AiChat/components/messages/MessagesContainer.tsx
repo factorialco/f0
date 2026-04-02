@@ -55,6 +55,7 @@ const Messages = ({
 }: MessagesContainerProps) => {
   const { messages, interrupt, isLoading } = useCopilotChat()
   const { modal, handleSubmit, handleClose } = useFeedbackSubmit()
+  const { clarifyingQuestion } = useAiChat()
 
   const translations = useI18n()
   const {
@@ -64,6 +65,8 @@ const Messages = ({
     isLoadingThread,
     setInProgress,
   } = useAiChat()
+
+  const isClarifying = clarifyingQuestion !== null
 
   const inProgress = inProgressProp ?? isLoading
 
@@ -387,7 +390,7 @@ const Messages = ({
           </div>
         </div>
 
-        {!noShadows && (
+        {!noShadows && !isClarifying && (
           // haz que tambien se quiten cuando esta clarifying
           <>
             <ScrollShadow position="top" key="shadow-top" />

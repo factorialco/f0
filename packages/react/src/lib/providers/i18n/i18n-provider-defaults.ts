@@ -354,6 +354,8 @@ export const defaultTranslations = {
       next: "Next",
       back: "Back",
       typeYourAnswer: "Type your answer…",
+      stepOf: "{{current}} of {{total}}",
+      custom: "own answer",
     },
     growth: {
       demoCard: {

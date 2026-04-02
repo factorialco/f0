@@ -1,6 +1,8 @@
 import { useCopilotAction } from "@copilotkit/react-core"
 import { useEffect, useRef, useState } from "react"
 
+import { useI18n } from "@/lib/providers/i18n"
+
 import type {
   ClarifyingQuestionState,
   ClarifyingSelectionMode,
@@ -71,6 +73,8 @@ function ClarifyingQuestionController({
 }: {
   steps: ClarifyingStepData[]
 }) {
+  const translation = useI18n()
+
   const { sendMessage, setClarifyingQuestion } = useAiChat()
 
   const [stepIndex, setStepIndex] = useState(0)
@@ -153,7 +157,9 @@ function ClarifyingQuestionController({
           : inter.isCustomActive && inter.customText.trim().length > 0
 
         if (includeCustom) {
-          labels.push(`(custom) ${inter.customText.trim()}`)
+          labels.push(
+            `(${translation.ai.clarifyingQuestion.custom}) ${inter.customText.trim()}`
+          )
         }
 
         const answer = labels.length > 0 ? labels.join(", ") : "(skipped)"

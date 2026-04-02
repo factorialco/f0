@@ -4,9 +4,10 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import type {
   ClarifyingQuestionState,
   ClarifyingSelectionMode,
-} from "../../../../actions/core/clarifyingQuestion/types"
-import { F0AiChatProvider, useAiChat } from "../../../.."
-import { ChatTextarea } from "../../ChatTextarea"
+} from "../../../actions/core/clarifyingQuestion/types"
+
+import { F0AiChatProvider, useAiChat } from "../../.."
+import { ChatTextarea } from "../ChatTextarea"
 
 // ---------------------------------------------------------------------------
 // Shared option sets
@@ -226,7 +227,7 @@ const StoryShell = ({
   description: string
   messages: string[]
 }) => (
-  <div className="w-96 space-y-4">
+  <div className="w-[360px] space-y-4">
     <div className="bg-gray-50 h-32 overflow-y-auto rounded-lg border p-4">
       {messages.length === 0 ? (
         <p className="text-gray-500 text-sm">{description}</p>
