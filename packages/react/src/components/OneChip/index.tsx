@@ -3,7 +3,6 @@ import { cva, type VariantProps } from "cva"
 import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { CrossedCircle } from "@/icons/app"
-import { experimentalComponent } from "@/lib/experimental"
 import { cn, focusRing } from "@/lib/utils"
 
 export const chipVariants = cva({
@@ -122,7 +121,4 @@ const _Chip = ({
   )
 }
 
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-export const Chip = experimentalComponent("Chip", _Chip)
+export const Chip = _Chip
