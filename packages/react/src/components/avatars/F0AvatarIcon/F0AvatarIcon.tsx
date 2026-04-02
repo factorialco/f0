@@ -33,7 +33,7 @@ export const F0AvatarIcon = ({
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledby}
     >
-      <F0Icon icon={icon} size={size} state={state} />
+      <F0Icon icon={icon} size={size} state={state} color="bold" />
     </div>
   )
 }

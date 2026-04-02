@@ -45,17 +45,22 @@ function IconCard({
   const [isHovered, setIsHovered] = useState(false)
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(`<F0AvatarIcon icon={${name}} />`)
-    setIsCopied(true)
-    setTimeout(() => setIsCopied(false), 1000)
+    void navigator.clipboard
+      .writeText(`<F0AvatarIcon icon={${name}} />`)
+      .then(() => {
+        setIsCopied(true)
+        setTimeout(() => setIsCopied(false), 1000)
+      })
+      .catch(() => {})
   }
 
   return (
-    <TooltipProvider delayDuration={1500} disableHoverableContent>
-      <Tooltip open={isHovered || isCopied ? true : undefined}>
+    <TooltipProvider delayDuration={500} disableHoverableContent>
+      <Tooltip open={isCopied ? true : undefined}>
         <TooltipTrigger asChild>
           <button
             onClick={copyToClipboard}
+            aria-label={`Copy ${name}`}
             className={cn("block rounded-sm", focusRing())}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
@@ -119,25 +124,27 @@ const moduleIdList: ModuleId[] = Object.keys(modules) as ModuleId[]
 
 function ModuleAvatarCard({ moduleId }: { moduleId: ModuleId }) {
   const [isCopied, setIsCopied] = useState(false)
-  const [isHovered, setIsHovered] = useState(false)
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(`<F0AvatarModule module="${moduleId}" />`)
-    setIsCopied(true)
-    setTimeout(() => {
-      setIsCopied(false)
-    }, 1000)
+    void navigator.clipboard
+      .writeText(`<F0AvatarModule module="${moduleId}" />`)
+      .then(() => {
+        setIsCopied(true)
+        setTimeout(() => {
+          setIsCopied(false)
+        }, 1000)
+      })
+      .catch(() => {})
   }
 
   return (
-    <TooltipProvider delayDuration={1500} disableHoverableContent>
-      <Tooltip open={isHovered || isCopied ? true : undefined}>
+    <TooltipProvider delayDuration={500} disableHoverableContent>
+      <Tooltip open={isCopied ? true : undefined}>
         <TooltipTrigger asChild>
           <button
             onClick={copyToClipboard}
+            aria-label={`Copy usage for module ${moduleId}`}
             className={cn("block rounded-sm", focusRing())}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
           >
             <F0AvatarModule module={moduleId} size="lg" />
           </button>
