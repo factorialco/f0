@@ -5,7 +5,7 @@ import { Cross } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
 
-import { useSidebar } from "@/examples/ApplicationFrame/FrameProvider"
+import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
 
 export type SidebarIconProps = {
   isExpanded: boolean

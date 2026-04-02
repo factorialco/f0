@@ -3,7 +3,7 @@
  * secondary value (under/over/two-tone coloring). Used as the base for hourDistribution
  * and other presets.
  */
-import { getColor } from "@/components/Charts/utils/colors"
+import { getColor } from "@/kits/Charts/utils/colors"
 import {
   TooltipContent,
   Tooltip as TooltipPrimitive,

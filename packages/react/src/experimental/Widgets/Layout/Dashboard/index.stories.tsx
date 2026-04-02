@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { AreaChartProps } from "../../../../components/Charts/AreaChart"
+import { AreaChartProps } from "@/kits/Charts/AreaChart"
 import { AreaChartWidget } from "../../Charts/AreaChartWidget"
 import AreaChartWidgetStoriesMeta from "../../Charts/AreaChartWidget/index.stories"
 import { BarChartWidget } from "../../Charts/BarChartWidget"

@@ -1,0 +1,292 @@
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+import * as ResourceHeaderStories from "./index.stories"
+
+<Meta of={ResourceHeaderStories} />
+
+# Resource header
+
+A structural component that provides context and key actions for a resource page.
+
+---
+
+# Overview
+
+## Purpose
+
+- Provide immediate context about the current resource the user is viewing
+- Centralize primary and secondary actions related to the resource
+- Display crucial metadata and status information
+- Create a consistent navigation pattern across different resource types
+
+## Anatomy
+
+<Canvas of={ResourceHeaderStories.Default} />
+<Controls of={ResourceHeaderStories.Default} />
+
+## Variants
+
+The Resource header is designed to adapt to different resource types, ensuring a
+clear and contextually relevant presentation of the information.
+
+### Person
+
+Designed to display information about an individual user.
+
+<Canvas of={ResourceHeaderStories.PersonHeader} />
+
+### Company
+
+Designed to display information about a company, client, or other entity.
+
+<Canvas of={ResourceHeaderStories.CompanyHeader} />
+
+### Team
+
+Designed to display information about a team.
+
+<Canvas of={ResourceHeaderStories.TeamHeader} />
+
+---
+
+# Guidelines
+
+## Content best practices
+
+- Keep titles concise and descriptive, with 2-5 words and no punctuation
+- Write descriptions with meaningful context in 1-2 sentences
+- Use action verbs in [verb + noun] format (e.g., "Edit profile" instead of
+  "Profile edition"). Capitalize only the first word unless it's a proper noun
+  (e.g., "Add to Factorial")
+- Ensure metadata labels are clear and consistent across the application
+
+## Design best practices
+
+<DoDonts
+  do={{
+    description: "Use Resource header when you need to:",
+    guidelines: [
+      "Display key information about a specific resource (employee, project, document, course, job post, expense, performance review, etc.)",
+      "Provide quick access to common actions related to the resource",
+      "Show the current status and important metadata of a resource",
+      "Create consistent navigation patterns across resource detail pages",
+    ],
+    children: (
+      <img
+        src="docs/headers/do.png"
+        alt="Do: use the resource header on resource detail pages"
+      />
+    ),
+  }}
+  dont={{
+    description: "Don't use Resource header when:",
+    guidelines: [
+      "You're displaying a data collection",
+      "The page doesn't represent a specific resource",
+      "You need minimal identification without actions or metadata",
+      "You're creating a dashboard overview",
+    ],
+    children: (
+      <img
+        src="docs/headers/dont.png"
+        alt="Don't use the resource header in the main module page"
+      />
+    ),
+  }}
+/>
+
+## Common actions
+
+### Primary action
+
+- Positioned far right of the header
+- Primary actions vary by context (e.g., "Add members")
+- Most visually prominent in the header
+- Can include icons when they aid recognition or match design patterns
+- Handle loading status by passing an async callback or using the `loading` prop
+
+### Edit
+
+- Positioned between Primary and Destructive actions (when applicable)
+- Must include the pencil icon
+- Uses an outline button type
+
+### Destructive
+
+- Positioned far left of all buttons
+- Always requires a confirmation dialog
+- Must include the trash icon
+- Uses a critical button type with a "danger" color
+
+## Layout
+
+- Elements are arranged to prioritize information hierarchy and visual clarity,
+  maintaining a logical order
+- Predictable alignment reinforces hierarchy, improves navigation, and reduces
+  cognitive load across views
+- Mandatory components establish a consistent framework, while optional elements
+  provide flexibility
+
+<img
+  src="docs/headers/resource-header-layout.png"
+  alt="Layout structure with mandatory and optional components"
+/>
+
+---
+
+# Resource metadata
+
+Metadata are key elements for displaying contextual information about a
+resource, allowing users to identify and interact with related data efficiently.
+
+The metadata section displays key-value pairs with the following characteristics:
+
+- Label-Data pairs displayed horizontally
+- Each pair consists of a label (grey text) followed by the corresponding data
+- Multiple pairs can be displayed in a row (Recommended maximum: 5)
+- Interactive elements within the metadata can trigger specific actions
+
+<Canvas of={ResourceHeaderStories.Metadata} />
+
+## Variants
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Type</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>Text</code>
+        </td>
+        <td>
+          Display a descriptive piece of information or a textual identifier
+          related to the resource
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>Avatar</code>
+        </td>
+        <td>
+          Represents entities that can be visualized with an avatar icon (user,
+          company and team)
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>Status</code>
+        </td>
+        <td>
+          Represent a state or situation associated with the resource, such as
+          "Active", "Inactive", "Pending"
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>List</code>
+        </td>
+        <td>
+          Display team members, task owners, or people associated with a
+          specific resource
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>Data List</code>
+        </td>
+        <td>
+          Display a vertical list of related data elements or values. Useful for
+          showing multiple pieces of information in a stacked format
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>Tag List</code>
+        </td>
+        <td>Identify or classify a resource with generic labels</td>
+      </tr>
+      <tr>
+        <td>
+          <code>Dot Tag</code>
+        </td>
+        <td>Same as Tag List, but allows setting the color of the tag</td>
+      </tr>
+      <tr>
+        <td>
+          <code>Date</code>
+        </td>
+        <td>
+          Display temporal information in a standardized format (creation dates,
+          due dates, or any other relevant timestamps)
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>Progress Bar</code>
+        </td>
+        <td>
+          Display progress or completion status as a visual bar with an optional
+          label
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Guidelines
+
+### Best practices
+
+1. Maintain consistent labeling conventions
+2. Group related metadata fields
+3. Prioritize important information in the layout
+4. Use clear, concise descriptions
+5. Include relevant actions based on context
+
+### Hover interactions
+
+The metadata fields reveal action options on hover. Each metadata can be
+configured to show relevant actions based on the content type and use case.
+
+<Canvas of={ResourceHeaderStories.Metadata} />
+
+When hovering over a metadata field, one or more of these actions may be displayed:
+
+- **Inline Edit**: Enables direct editing of the field content
+- **Quick Copy**: Provides one-click copying of exact values (ideal for financial data, IBANs, account numbers). By default, the copy button is placed on the right and the edit button on the left whenever they appear together
+- **Side Panel**: Opens a detailed view or complex editing interface
+- **Tooltip Info**: Shows additional information or context when needed
+
+---
+
+# Code
+
+## Import
+
+```tsx
+import { ResourceHeader } from "@factorialco/f0-react"
+```
+
+## Examples
+
+### Default
+
+<Canvas of={ResourceHeaderStories.Default} />
+
+### With dropdown action
+
+<Canvas of={ResourceHeaderStories.WithDropdownAction} />
+
+### With other actions
+
+<Canvas of={ResourceHeaderStories.WithOtherActions} />
+
+### Deactivated employee
+
+<Canvas of={ResourceHeaderStories.DeactivatedEmployee} />

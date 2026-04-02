@@ -6,7 +6,7 @@ import { expect, within } from "storybook/test"
 import { StandardLayout } from "@/layouts/StandardLayout"
 
 import { Placeholder } from "../../../lib/storybook-utils/placeholder"
-import { ApplicationFrame } from "@/examples/ApplicationFrame"
+import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import { PageHeader } from "../Header/PageHeader"
 import * as HeaderStories from "../Header/PageHeader/index.stories"
 import { Tabs } from "../Tabs"

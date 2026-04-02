@@ -1,7 +1,7 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 
-import { BarChartProps } from "../../../../components/Charts/BarChart"
-import { Default as BarChartStory } from "../../../../components/Charts/BarChart/index.stories"
+import { BarChartProps } from "@/kits/Charts/BarChart"
+import { Default as BarChartStory } from "@/kits/Charts/BarChart/index.stories"
 import { Placeholder } from "../../../../lib/storybook-utils/placeholder"
 import { BarChartWidget } from "../../../Widgets/Charts/BarChartWidget"
 import { DynamicCarousel } from "./index"

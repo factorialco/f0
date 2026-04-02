@@ -14,8 +14,14 @@ export * from "./AiPromotionChat/exports"
  * @deprecated Banners has moved to @/sds/ai/Banners. Import from there instead.
  */
 export * from "../sds/ai/Banners/exports"
-export * from "./Charts/exports"
-export * from "./F0ActionBar"
+/**
+ * @deprecated Charts has moved to @/kits/Charts. Import from there instead.
+ */
+export * from "../kits/Charts/exports"
+/**
+ * @deprecated F0ActionBar has moved to @/components/F0ActionBar. Import from there instead.
+ */
+export * from "../components/F0ActionBar"
 export * from "./F0VersionHistory"
 export * from "./Forms/exports"
 export * from "./Information/exports"
@@ -28,8 +34,18 @@ export * from "./Navigation/exports"
  */
 export * from "../sds/inbox/OneApprovalHistory"
 export * from "./OneCalendar"
-export * from "./OneDataCollection/exports"
-export * from "./OneDateNavigator"
+/**
+ * @deprecated OneChip has moved to @/components/OneChip. Import from there instead.
+ */
+export * from "../components/OneChip"
+/**
+ * @deprecated OneDataCollection has moved to @/patterns/OneDataCollection. Import from there instead.
+ */
+export * from "../patterns/OneDataCollection/exports"
+/**
+ * @deprecated OneDateNavigator has moved to @/patterns/OneDateNavigator. Import from there instead.
+ */
+export * from "../patterns/OneDateNavigator"
 export * from "./OneEmptyState"
 /**
  * @deprecated OnePagination has moved to @/ui/OnePagination. Import from there instead.
