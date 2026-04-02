@@ -14,7 +14,7 @@ const meta: Meta<typeof F0Widget> = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs", "stable"],
   decorators: [
     (Story) => (
       <div className="h-60 w-80">
