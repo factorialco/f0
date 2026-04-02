@@ -15,7 +15,7 @@ import type {
 import { buttonToggleGroupSizes, F0ButtonToggleGroup } from "../index"
 
 const meta = {
-  title: "ButtonToggleGroup",
+  title: "Button/ButtonToggleGroup",
   component: F0ButtonToggleGroup,
   parameters: {
     layout: "centered",
