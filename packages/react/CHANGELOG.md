@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.434.0](https://github.com/factorialco/f0/compare/f0-react-v1.433.0...f0-react-v1.434.0) (2026-04-02)
+
+
+### Features
+
+* **react:** add file attachments support to F0AiChat ([#3671](https://github.com/factorialco/f0/issues/3671)) ([cd5a9bd](https://github.com/factorialco/f0/commit/cd5a9bdb41d7c31f2a0359df0ed73ace4f57f01d))
+
 ## [1.433.0](https://github.com/factorialco/f0/compare/f0-react-v1.432.0...f0-react-v1.433.0) (2026-04-02)
 
 
