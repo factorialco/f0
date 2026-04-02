@@ -2,7 +2,7 @@ import { useMemo, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { FiltersDefinition } from "@/components/OneFilterPicker/types"
+import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import {
   GroupingDefinition,
   GroupingState,

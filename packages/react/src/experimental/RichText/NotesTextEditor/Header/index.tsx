@@ -3,7 +3,7 @@ import { cva } from "cva"
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { F0Icon, IconType } from "@/components/F0Icon"
-import { OneEllipsis } from "@/components/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { HeaderSecondaryAction } from "@/experimental/Information/Headers/BaseHeader"
 import {
   Metadata,

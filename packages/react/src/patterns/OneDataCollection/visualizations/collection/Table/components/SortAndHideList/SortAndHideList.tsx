@@ -1,7 +1,7 @@
 import { Reorder, useDragControls } from "motion/react"
 
 import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/components/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
 import { Handle, LockLocked } from "@/icons/app"
 import { cn } from "@/lib/utils"

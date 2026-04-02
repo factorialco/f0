@@ -7,7 +7,7 @@ import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { InputField, INPUTFIELD_SIZES } from "../"
 
 const meta = {
-  title: "Components/InputField",
+  title: "InputField",
   component: InputField,
   parameters: {
     docs: {

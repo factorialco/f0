@@ -1,5 +1,5 @@
 import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/components/OneEllipsis/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { Bullet } from "@/icons/app"
 import { cn, focusRing } from "@/lib/utils"
 

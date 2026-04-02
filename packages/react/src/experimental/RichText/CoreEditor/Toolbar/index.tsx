@@ -4,7 +4,7 @@ import { Fragment, ReactNode } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonToggle } from "@/components/F0ButtonToggle"
-import { Picker } from "@/experimental/Information/Reactions/Picker"
+import { Picker } from "@/kits/Social/Reactions/Picker"
 import {
   AlignTextCenter,
   AlignTextJustify,

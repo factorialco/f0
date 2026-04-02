@@ -2,9 +2,9 @@ import type {
   FiltersDefinition,
   FiltersState,
   PresetsDefinition,
-} from "@/components/OneFilterPicker/types"
+} from "@/patterns/OneFilterPicker/types"
 
-import { OneFilterPicker } from "@/components/OneFilterPicker"
+import { OneFilterPicker } from "@/patterns/OneFilterPicker"
 
 interface FilterBarProps<Filters extends FiltersDefinition> {
   filters?: Filters

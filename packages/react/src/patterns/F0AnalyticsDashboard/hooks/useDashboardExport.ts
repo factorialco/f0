@@ -3,7 +3,7 @@ import { useCallback, useState } from "react"
 import type {
   FiltersDefinition,
   FiltersState,
-} from "@/components/OneFilterPicker/types"
+} from "@/patterns/OneFilterPicker/types"
 
 import type {
   DashboardChartData,

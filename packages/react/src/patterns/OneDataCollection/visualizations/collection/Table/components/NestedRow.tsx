@@ -20,7 +20,7 @@ import { forwardRef, useCallback, useRef } from "react"
 
 import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
 
-import { FiltersDefinition } from "@/components/OneFilterPicker/types"
+import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"

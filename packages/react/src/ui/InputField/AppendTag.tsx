@@ -1,4 +1,4 @@
-import { OneEllipsis } from "@/components/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn } from "@/lib/utils"
 
 export const AppendTag = ({ text }: { text: string; disabled?: boolean }) => {

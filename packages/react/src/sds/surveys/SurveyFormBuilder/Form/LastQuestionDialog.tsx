@@ -1,4 +1,4 @@
-import { Dialog } from "@/experimental/Overlays/Dialog"
+import { Dialog } from "@/deprecated/Dialog"
 import { useI18n } from "@/lib/providers/i18n"
 
 type LastQuestionDialogProps = {

@@ -7,7 +7,7 @@ import type {
 import type {
   FiltersDefinition,
   FiltersState,
-} from "@/components/OneFilterPicker/types"
+} from "@/patterns/OneFilterPicker/types"
 import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 
 import { useMemo, useRef } from "react"

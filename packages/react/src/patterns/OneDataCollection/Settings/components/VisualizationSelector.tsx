@@ -5,7 +5,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { focusRing } from "@/lib/utils"
 import { cn } from "@/lib/utils"
 
-import { FiltersDefinition } from "../../../../components/OneFilterPicker/types"
+import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { ItemActionsDefinition } from "../../item-actions"
 import { NavigationFiltersDefinition } from "../../navigationFilters/types"
 import { SortingsDefinition, SummariesDefinition } from "../../types"

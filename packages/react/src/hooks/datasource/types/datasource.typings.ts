@@ -4,7 +4,7 @@ import {
   FiltersDefinition,
   FiltersState,
   PresetsDefinition,
-} from "@/components/OneFilterPicker/types"
+} from "@/patterns/OneFilterPicker/types"
 import { PromiseState } from "@/lib/promise-to-observable"
 
 import { DataAdapter } from "./fetch.typings"

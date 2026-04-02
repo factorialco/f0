@@ -60,6 +60,10 @@ const config: StorybookConfig = {
       titlePrefix: "Examples",
     },
     {
+      directory: "../src/deprecated",
+      titlePrefix: "Deprecated",
+    },
+    {
       directory: "../src/ui",
       titlePrefix: "🔒 Internal",
     },

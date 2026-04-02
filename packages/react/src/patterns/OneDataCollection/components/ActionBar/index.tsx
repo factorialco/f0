@@ -9,7 +9,7 @@ import {
   F0ButtonDropdown,
 } from "@/components/F0ButtonDropdown"
 import { IconType } from "@/components/F0Icon"
-import { OneEllipsis } from "@/components/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { Dropdown, MobileDropdown } from "@/experimental/Navigation/Dropdown"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"

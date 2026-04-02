@@ -3,9 +3,9 @@ import { FC, useMemo } from "react"
 import type {
   F0DialogPrimaryAction,
   F0DialogSecondaryAction,
-} from "@/components/F0Dialog/types"
+} from "@/patterns/F0Dialog/types"
 
-import { F0DialogInternal as F0Dialog } from "@/components/F0Dialog/F0DialogInternal"
+import { F0DialogInternal as F0Dialog } from "@/patterns/F0Dialog/F0DialogInternal"
 import ArrowLeft from "@/icons/app/ArrowLeft"
 import ArrowRight from "@/icons/app/ArrowRight"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"

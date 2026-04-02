@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type {
   FiltersDefinition,
   FiltersState,
-} from "@/components/OneFilterPicker/types"
+} from "@/patterns/OneFilterPicker/types"
 import type { DropdownItem as DropdownItemType } from "@/experimental/Navigation/Dropdown"
 
 import { F0Button } from "@/components/F0Button"

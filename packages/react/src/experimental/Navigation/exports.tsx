@@ -4,7 +4,10 @@
 export * from "../../patterns/ApplicationFrame"
 export { useSidebar } from "../../patterns/ApplicationFrame/FrameProvider"
 export * from "./Carousel"
-export * from "./DaytimePage"
+/**
+ * @deprecated DaytimePage has moved to @/sds/Home/DaytimePage. Import from there instead.
+ */
+export * from "../../sds/Home/DaytimePage"
 export * from "./Dropdown"
 export * from "./F0TableOfContent"
 export * from "./Header"
@@ -18,3 +21,7 @@ export * from "./Page"
  */
 export * from "../../components/Navigation/Sidebar"
 export * from "./Tabs"
+/**
+ * @deprecated VirtualList has moved to @/lib/VirtualList. Import from there instead.
+ */
+export * from "../../lib/VirtualList"

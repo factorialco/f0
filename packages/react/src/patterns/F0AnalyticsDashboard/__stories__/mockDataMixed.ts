@@ -1,4 +1,4 @@
-import type { PresetsDefinition } from "@/components/OneFilterPicker/types"
+import type { PresetsDefinition } from "@/patterns/OneFilterPicker/types"
 import type { RecordType } from "@/hooks/datasource"
 import type { PageBasedPaginatedResponse } from "@/hooks/datasource/types"
 

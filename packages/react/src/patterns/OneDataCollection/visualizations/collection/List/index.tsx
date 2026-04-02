@@ -15,7 +15,7 @@ import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
 import { cn } from "@/lib/utils"
 import { GroupHeader } from "@/ui/GroupHeader/GroupHeader"
 
-import type { FiltersDefinition } from "../../../../../components/OneFilterPicker/types"
+import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 
 import { PagesPagination } from "../../../components/PagesPagination"
 import { ItemActionsDefinition } from "../../../item-actions"

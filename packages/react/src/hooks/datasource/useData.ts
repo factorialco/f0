@@ -11,7 +11,7 @@ import { Observable } from "zen-observable-ts"
 import type {
   FiltersDefinition,
   FiltersState,
-} from "@/components/OneFilterPicker/types"
+} from "@/patterns/OneFilterPicker/types"
 
 import { getValueByPath } from "@/lib/objectPaths"
 import { PromiseState, promiseToObservable } from "@/lib/promise-to-observable"

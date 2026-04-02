@@ -3,7 +3,7 @@ import { Observable } from "zen-observable-ts"
 import {
   FiltersDefinition,
   FiltersState,
-} from "@/components/OneFilterPicker/types"
+} from "@/patterns/OneFilterPicker/types"
 import { SortingsStateMultiple } from "@/hooks/datasource/types/sortings.typings"
 import { PromiseState } from "@/lib/promise-to-observable"
 

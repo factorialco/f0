@@ -4,7 +4,7 @@ import {
   FiltersDefinition,
   FiltersState,
   PresetsDefinition,
-} from "@/components/OneFilterPicker/types"
+} from "@/patterns/OneFilterPicker/types"
 
 interface VisualizationWithFilterOverrides<Filters extends FiltersDefinition> {
   filters?: Partial<Filters>

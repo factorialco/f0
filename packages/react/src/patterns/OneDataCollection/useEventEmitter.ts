@@ -8,7 +8,7 @@ import {
 import {
   FiltersDefinition,
   FiltersState,
-} from "../../components/OneFilterPicker/types"
+} from "@/patterns/OneFilterPicker/types"
 import { EventScalar, useF0EventCatcher } from "../../lib/providers/events"
 
 type UseEventEmitterParams<Sortings extends SortingsDefinition> = {

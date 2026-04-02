@@ -2,7 +2,7 @@
  * Text cell type for displaying text or number values in data collections.
  * Supports both direct values and objects with placeholder states.
  */
-import { OneEllipsis } from "@/components/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn } from "@/lib/utils"
 
 import { tableDisplayClassNames } from "../../const"

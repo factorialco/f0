@@ -2,7 +2,7 @@
  * Long text cell type for displaying multiple lines of text in data collections.
  * Uses the OneEllipsis component to truncate the text and show a tooltip with the full text.
  */
-import { OneEllipsis } from "@/components/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn } from "@/lib/utils"
 
 import { tableDisplayClassNames } from "../../const"

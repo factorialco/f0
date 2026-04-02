@@ -1,7 +1,7 @@
 import type {
   FiltersDefinition,
   PresetsDefinition,
-} from "@/components/OneFilterPicker/types"
+} from "@/patterns/OneFilterPicker/types"
 
 import { IconType } from "@/components/F0Icon"
 import { OnSelectItemsCallback, RecordType } from "@/hooks/datasource"

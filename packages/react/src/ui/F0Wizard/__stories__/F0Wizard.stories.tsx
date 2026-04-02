@@ -12,7 +12,7 @@ import type { F0WizardStep } from "../types"
 import { F0Wizard } from "../index"
 
 const meta: Meta<typeof F0Wizard> = {
-  title: "F0Wizard",
+  title: "Wizard",
   component: F0Wizard,
   parameters: {
     layout: "fullscreen",

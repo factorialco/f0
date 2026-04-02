@@ -1,7 +1,7 @@
 import {
   FiltersDefinition,
   FiltersState,
-} from "@/components/OneFilterPicker/types"
+} from "@/patterns/OneFilterPicker/types"
 import { RecordPaths, RecordPathValue } from "@/lib/objectPaths"
 
 import { RecordType } from "./records.typings"

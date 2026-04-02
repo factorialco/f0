@@ -1,6 +1,6 @@
 import { ReactNode } from "react"
 
-import { DialogWidth } from "@/components/F0Dialog"
+import { DialogWidth } from "@/patterns/F0Dialog"
 
 export interface F0WizardStep {
   title: string

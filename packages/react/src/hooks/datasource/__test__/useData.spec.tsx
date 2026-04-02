@@ -2,7 +2,7 @@ import { act, renderHook } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { Observable } from "zen-observable-ts"
 
-import { FiltersState } from "@/components/OneFilterPicker/types"
+import { FiltersState } from "@/patterns/OneFilterPicker/types"
 import { PromiseState } from "@/lib/promise-to-observable"
 
 import {

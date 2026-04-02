@@ -5,7 +5,7 @@ import { useState } from "react"
 import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { F0SelectItemProps } from "@/components/F0Select/types"
-import { FiltersDefinition } from "@/components/OneFilterPicker"
+import { FiltersDefinition } from "@/patterns/OneFilterPicker"
 import { PaginatedFetchOptions } from "@/hooks/datasource"
 import {
   FIRST_NAMES_MOCK,

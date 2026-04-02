@@ -2,7 +2,7 @@ import type React from "react"
 
 import { createElement, forwardRef } from "react"
 
-import { OneEllipsis } from "@/components/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { parseMarkdown } from "@/lib/markdown"
 import { cn } from "@/lib/utils"
 

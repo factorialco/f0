@@ -3,7 +3,7 @@
  * Used for showing alerts on items in data collections.
  */
 import { F0AvatarFlag } from "@/components/avatars/F0AvatarFlag"
-import { OneEllipsis } from "@/components/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { CountryCode } from "@/lib/countries"
 
 import { ValueDisplayRendererContext } from "../../renderers"

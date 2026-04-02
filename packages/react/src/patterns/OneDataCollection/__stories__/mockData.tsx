@@ -19,7 +19,7 @@ import {
   FilterDefinition,
   FiltersState,
   PresetsDefinition,
-} from "@/components/OneFilterPicker"
+} from "@/patterns/OneFilterPicker"
 import {
   BulkActionsDefinition,
   DataCollectionBaseFetchOptions,

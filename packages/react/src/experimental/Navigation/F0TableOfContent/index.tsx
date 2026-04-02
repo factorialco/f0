@@ -7,7 +7,7 @@ import {
   useState,
 } from "react"
 
-import { OneEllipsis } from "@/components/OneEllipsis/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 

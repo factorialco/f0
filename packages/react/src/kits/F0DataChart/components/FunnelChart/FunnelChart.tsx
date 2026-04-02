@@ -1,6 +1,6 @@
 import { useRef } from "react"
 
-import { OneEllipsis } from "@/components/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { Tag } from "@/components/tags/F0Tag/F0Tag"
 
 import type {

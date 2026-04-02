@@ -15,7 +15,7 @@ import {
 } from "../Card"
 
 const meta: Meta<typeof Card> = {
-  title: "Components/Card",
+  title: "Card",
   component: Card,
   tags: ["autodocs"],
 }
