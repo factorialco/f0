@@ -36,18 +36,22 @@ const animatedIconList: IconEntry[] = Object.entries(AnimatedIcons).map(
   ([name, icon]) => ({ name, icon })
 )
 
-function IconCard({ name, icon }: IconEntry) {
+function IconCard({
+  name,
+  icon,
+  animated = false,
+}: IconEntry & { animated?: boolean }) {
   const [isCopied, setIsCopied] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(name)
+    navigator.clipboard.writeText(`<F0AvatarIcon icon={${name}} />`)
     setIsCopied(true)
     setTimeout(() => setIsCopied(false), 1000)
   }
 
   return (
-    <TooltipProvider delayDuration={300} disableHoverableContent>
+    <TooltipProvider delayDuration={1500} disableHoverableContent>
       <Tooltip open={isHovered || isCopied ? true : undefined}>
         <TooltipTrigger asChild>
           <button
@@ -56,7 +60,11 @@ function IconCard({ name, icon }: IconEntry) {
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
-            <F0AvatarIcon icon={icon} size="lg" />
+            <F0AvatarIcon
+              icon={icon}
+              size="lg"
+              state={animated && isHovered ? "animate" : "normal"}
+            />
           </button>
         </TooltipTrigger>
         <TooltipContent>
@@ -72,11 +80,13 @@ function IconSection({
   description,
   icons,
   searchTerm,
+  animated = false,
 }: {
   title: string
   description?: string
   icons: IconEntry[]
   searchTerm: string
+  animated?: boolean
 }) {
   const filtered = useMemo(
     () =>
@@ -98,7 +108,7 @@ function IconSection({
       </div>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(44px,1fr))] gap-4">
         {filtered.map((iconEntry) => (
-          <IconCard key={iconEntry.name} {...iconEntry} />
+          <IconCard key={iconEntry.name} {...iconEntry} animated={animated} />
         ))}
       </div>
     </div>
@@ -120,7 +130,7 @@ function ModuleAvatarCard({ moduleId }: { moduleId: ModuleId }) {
   }
 
   return (
-    <TooltipProvider delayDuration={300} disableHoverableContent>
+    <TooltipProvider delayDuration={1500} disableHoverableContent>
       <Tooltip open={isHovered || isCopied ? true : undefined}>
         <TooltipTrigger asChild>
           <button
@@ -219,9 +229,10 @@ export function IconGrid() {
           )}
           <IconSection
             title="Animated icons"
-            description="Animated SVG icons. Displayed here via F0AvatarIcon — to trigger animations, use F0Icon with state='animate'."
+            description="Hover over an icon to preview its animation."
             icons={animatedIconList}
             searchTerm={searchTerm}
+            animated
           />
         </>
       )}
