@@ -8,7 +8,6 @@ as interactive hover cards that lazily resolve rich profile data.
 
 ```
 markdownRenderers/
-├── ENTITY_REFS.md                         # this file
 ├── entityRef/
 │   ├── types.ts                           # EntityResolvers (imports from each entity)
 │   ├── components/                        # shared infrastructure
@@ -16,16 +15,13 @@ markdownRenderers/
 │   │   ├── EntityRefHoverCard.tsx         # generic hover card (fetch, cache, F0Card)
 │   │   ├── entityRefRegistry.ts           # entityRefRenderers record + getEntityRefRenderer
 │   │   └── __tests__/
-│   │       ├── EntityRef.test.tsx
-│   │       ├── EntityRefHoverCard.test.tsx
-│   │       └── entityRefRegistry.test.tsx
 │   └── entities/
-│       └── person/
-│           ├── PersonEntityRef.tsx         # "person" renderer (trigger + card mapping)
-│           ├── types.ts                   # PersonProfile type
-│           └── __tests__/
-│               └── PersonEntityRef.test.tsx
+│       ├── person/                        # "person" renderer
+│       ├── candidate/                     # "candidate" renderer
+│       └── jobPosting/                    # "job-posting" renderer
 ```
+
+Guide location: `documentation/ENTITY_REFS.md` (this file).
 
 ## Shared infrastructure
 

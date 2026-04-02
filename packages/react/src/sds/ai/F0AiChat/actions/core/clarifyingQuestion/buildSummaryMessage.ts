@@ -36,9 +36,9 @@ export const buildSummaryMessage = (
 
     if (labels.length > 0) {
       const answers = labels.map((l) => `${l}`).join("\n")
-      parts.push(`**${step.question}** \n ${answers}`)
+      parts.push(`**${step.question}**\n${answers}`)
     } else {
-      parts.push(`**${step.question}** \n (${translations.skipped})`)
+      parts.push(`**${step.question}**\n(${translations.skipped})`)
     }
   }
 

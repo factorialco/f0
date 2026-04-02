@@ -1,6 +1,8 @@
 # Canvas Entities
 
-The canvas system renders content alongside the AI chat sidebar. Each **entity type** (dashboard, survey, goal, job-posting…) is a self-contained module inside `canvas/entities/`. The shared canvas infrastructure knows nothing about specific entities.
+The canvas system renders content alongside the AI chat sidebar. Each **entity type** is a self-contained module inside `canvas/entities/`. The shared canvas infrastructure knows nothing about specific entities. Currently the only registered entity is `dashboard`.
+
+Guide location: `documentation/CANVAS_ENTITIES.md` (this file).
 
 ## Architecture
 

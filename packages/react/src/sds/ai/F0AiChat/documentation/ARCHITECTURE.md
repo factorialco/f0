@@ -10,36 +10,49 @@ F0AiChat/
 ├── types.ts                         # Public types
 ├── internal-types.ts                # Internal state types
 │
+├── documentation/                   # All feature & system guides
+│   ├── COPILOT_ACTIONS.md           # Guide for action development
+│   ├── CANVAS_ENTITIES.md           # Guide for canvas entities
+│   ├── ENTITY_REFS.md              # Guide for entity refs
+│   └── CLARIFYING_QUESTIONS.md      # Guide for clarifying questions
+│
 ├── actions/                         # Copilot action system (declarative)
 │   ├── registry.ts                  # copilotActions array (all action factories)
 │   ├── useRegisteredActions.ts      # Hook that invokes all configured factories
 │   ├── index.ts                     # Barrel with re-exports
-│   ├── COPILOT_ACTIONS.md           # Guide for action development
 │   └── core/                        # Built-in actions
+│       ├── clarifyingQuestion/      # Multi-step structured questions
+│       ├── dataDownload/            # Excel/CSV download
+│       ├── displayDashboard/        # Dashboard canvas + card
+│       ├── forms/                   # Form actions (fill, submit, get state, present)
+│       ├── messageCreditsWarning/   # Credit warning card
+│       ├── messageSources/          # Source attribution
+│       └── orchestratorThinking/    # Thinking visualization
 │
 ├── canvas/                          # Canvas entity system (declarative)
 │   ├── registry.ts                  # canvasEntities record (type → definition)
 │   ├── types.ts                     # CanvasEntityDefinition contract
 │   ├── index.ts                     # Barrel + re-exports
-│   ├── CANVAS_ENTITIES.md           # Guide for canvas entities
 │   ├── components/                  # Shared canvas UI (CanvasCard, etc.)
 │   └── entities/                    # One folder per entity type
+│       └── dashboard/
 │
 ├── components/
 │   ├── markdownRenderers/           # Markdown rendering system
 │   │   ├── MarkdownRenderers.tsx    # Renderer map (tag → component)
 │   │   ├── index.ts                 # Public exports
-│   │   ├── ENTITY_REFS.md          # Guide for entity refs
 │   │   ├── components/              # Tag renderers (Block, Table, etc.)
 │   │   └── entityRef/               # Entity reference system (declarative)
 │   │       ├── entityRefRegistry.ts # entityRefRenderers record + getEntityRefRenderer
 │   │       ├── EntityRef.tsx        # Dispatcher (reads registry)
 │   │       └── entities/            # One folder per entity type
-│   │           └── person/
+│   │           ├── person/
+│   │           ├── candidate/
+│   │           └── jobPosting/
 │   ├── messages/                    # Message rendering
 │   ├── feedback/                    # Thumbs up/down + feedback modal
 │   ├── history/                     # Thread history (list, search, CRUD)
-│   ├── input/                       # Textarea, mentions, tool hints
+│   ├── input/                       # Textarea, mentions, tool hints, clarifying questions
 │   ├── layout/                      # Chat shell (window, header, canvas, resize)
 │   └── shared/                      # Cross-cutting components
 │
@@ -75,7 +88,7 @@ Registries are static configuration — they never mutate at runtime.
 
 ### Adding a copilot action
 
-See `actions/COPILOT_ACTIONS.md`.
+See `documentation/COPILOT_ACTIONS.md`.
 
 1. Create `actions/core/<name>/use<Name>Action.tsx`
 2. Export the hook
@@ -83,7 +96,7 @@ See `actions/COPILOT_ACTIONS.md`.
 
 ### Adding a canvas entity
 
-See `canvas/CANVAS_ENTITIES.md`.
+See `documentation/CANVAS_ENTITIES.md`.
 
 1. Define content type in `types.ts`
 2. Create `canvas/entities/<name>/` with card, content, and header
@@ -93,11 +106,22 @@ See `canvas/CANVAS_ENTITIES.md`.
 
 ### Adding an entity ref
 
-See `markdownRenderers/ENTITY_REFS.md`.
+See `documentation/ENTITY_REFS.md`.
 
 1. Define profile type in `types.ts` + add resolver to `EntityResolvers`
 2. Create `entityRef/entities/<name>/<Name>EntityRef.tsx`
 3. Add it to the `entityRefRenderers` record in `entityRef/entityRefRegistry.ts`
+
+### Using clarifying questions
+
+See `documentation/CLARIFYING_QUESTIONS.md`.
+
+Clarifying questions let the agent ask structured multi-option questions inline in the chat textarea. The user selects options (single or multiple), optionally types a custom answer, and a formatted summary is sent back as a chat message. Supports multi-step flows.
+
+The feature is split between:
+
+- **factorial-agent**: `askClarifyingQuestion` Mastra tool (emits `ClarifyingQuestion` frontend action)
+- **f0 frontend**: `useClarifyingQuestionAction` hook + `ClarifyingQuestionPanel` component
 
 ### Adding a UI feature
 
@@ -124,3 +148,4 @@ F0AiChatProvider (user-facing)
 - **Declarative configuration** — actions, entities, and entity refs are declared in static arrays/records
 - **Tests in `__tests__/`** — co-located within each domain folder
 - **Stories in `__stories__/`** — co-located within each domain folder
+- **Documentation in `documentation/`** — all feature and system guides centralized
