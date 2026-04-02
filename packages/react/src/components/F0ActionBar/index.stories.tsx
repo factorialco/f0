@@ -24,7 +24,7 @@ const meta: Meta<typeof F0ActionBar> = {
       skipCi: true,
     },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs", "stable"],
   argTypes: {
     isOpen: {
       control: "boolean",

@@ -1,75 +1,74 @@
-import { DataAttributes } from "@/global.types"
-import { withDataTestId } from "@/lib/data-testid"
-import { experimentalComponent } from "@/lib/experimental"
-import { Checkbox as CheckboxRoot } from "@/ui/checkbox"
+import { DataAttributes } from "@/global.types";
+import { withDataTestId } from "@/lib/data-testid";
+import { Checkbox as CheckboxRoot } from "@/ui/checkbox";
 
 interface CheckboxProps extends DataAttributes {
   /**
    * The title of the checkbox
    */
-  title?: string
+  title?: string;
 
   /**
    * The id of the checkbox
    */
-  id?: string
+  id?: string;
 
   /**
    * The checked state of the checkbox
    * @default false
    */
-  checked?: boolean
+  checked?: boolean;
 
   /**
    * Whether the checkbox is indeterminate
    * @default false
    */
-  indeterminate?: boolean
+  indeterminate?: boolean;
 
   /**
    * The callback function that is called when the checkbox is checked
    */
-  onCheckedChange?: (checked: boolean) => void
+  onCheckedChange?: (checked: boolean) => void;
 
   /**
    * Whether the checkbox is disabled
    * @default false
    */
-  disabled?: boolean
+  disabled?: boolean;
 
   /**
    * The value of the checkbox
    */
-  value?: string
+  value?: string;
 
   /**
    * Whether to hide the label
    * @default false
    */
-  hideLabel?: boolean
+  hideLabel?: boolean;
 
   /**
    * Whether the checkbox is only presentational, so it does not have functionality
    * @default false
    */
-  presentational?: boolean
+  presentational?: boolean;
 
   /**
    * Whether the checkbox should stop event propagation
    * @default false
    */
-  stopPropagation?: boolean
+  stopPropagation?: boolean;
 
   /**
    * The name of the checkbox
    */
-  name?: string
+  name?: string;
 
   /**
    * Whether the checkbox is required
    * @default false
    */
-  required?: boolean
+  required?: boolean;
 }
 
 function _F0Checkbox({
@@ -103,12 +102,7 @@ function _F0Checkbox({
       onClick={(e) => stopPropagation && e.stopPropagation()}
       {...rest}
     />
-  )
+  );
 }
 
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-export const F0Checkbox = withDataTestId(
-  experimentalComponent<typeof _F0Checkbox>("F0Checkbox", _F0Checkbox)
-)
+export const F0Checkbox = withDataTestId(_F0Checkbox);

@@ -1,23 +1,23 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { Plus } from "lucide-react"
-import { expect, fn, within } from "storybook/test"
+import { Plus } from "lucide-react";
+import { expect, fn, within } from "storybook/test";
 
-import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args";
 
-import { OneEmptyState } from "../OneEmptyState"
+import { OneEmptyState } from "../OneEmptyState";
 
 const meta = {
   component: OneEmptyState,
   title: "EmptyState",
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs", "stable"],
   argTypes: {
     ...dataTestIdArgs,
   },
-} satisfies Meta<typeof OneEmptyState>
+} satisfies Meta<typeof OneEmptyState>;
 
-export default meta
-type Story = StoryObj<typeof OneEmptyState>
+export default meta;
+type Story = StoryObj<typeof OneEmptyState>;
 
 export const Basic: Story = {
   args: {
@@ -33,7 +33,7 @@ export const Basic: Story = {
       },
     ],
   },
-}
+};
 
 export const WithDataTestId: Story = {
   args: {
@@ -42,16 +42,16 @@ export const WithDataTestId: Story = {
     dataTestId: "my-test-empty-state",
   },
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
-    const canvas = within(canvasElement)
-    await expect(canvas.getByTestId("my-test-empty-state")).toBeInTheDocument()
+    const canvas = within(canvasElement);
+    await expect(canvas.getByTestId("my-test-empty-state")).toBeInTheDocument();
   },
-}
+};
 
 export const WithAlert: Story = {
   render: () => {
     const Divider = () => (
       <div className="h-px w-80 self-center bg-f1-background-secondary" />
-    )
+    );
     return (
       <div className="flex flex-col items-center gap-4">
         <OneEmptyState variant="warning" title="We couldn't load the data" />
@@ -60,9 +60,9 @@ export const WithAlert: Story = {
         <Divider />
         <OneEmptyState variant="critical" title="Unauthorized" />
       </div>
-    )
+    );
   },
-}
+};
 
 export const WithUpsell: Story = {
   args: {
@@ -105,4 +105,4 @@ export const WithUpsell: Story = {
       },
     ],
   },
-}
+};

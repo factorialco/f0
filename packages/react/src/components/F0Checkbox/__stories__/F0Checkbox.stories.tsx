@@ -1,15 +1,15 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { useState } from "react"
-import { expect, within } from "storybook/test"
+import { useState } from "react";
+import { expect, within } from "storybook/test";
 
-import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args";
 
-import { F0Checkbox } from "../F0Checkbox"
+import { F0Checkbox } from "../F0Checkbox";
 
 const meta = {
   component: F0Checkbox,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs", "stable"],
   title: "Checkbox",
   parameters: {
     layout: "centered",
@@ -53,10 +53,10 @@ const meta = {
     },
     ...dataTestIdArgs,
   },
-} satisfies Meta<typeof F0Checkbox>
+} satisfies Meta<typeof F0Checkbox>;
 
-export default meta
-type Story = StoryObj<typeof F0Checkbox>
+export default meta;
+type Story = StoryObj<typeof F0Checkbox>;
 
 export const Default: Story = {
   args: {
@@ -64,18 +64,18 @@ export const Default: Story = {
     "data-test": "foo",
   },
   render: (args) => {
-    const [checked, setChecked] = useState(false)
+    const [checked, setChecked] = useState(false);
     return (
       <F0Checkbox {...args} checked={checked} onCheckedChange={setChecked} />
-    )
+    );
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
+    const canvas = within(canvasElement);
 
-    const checkbox = canvas.getByRole("checkbox")
-    await expect(checkbox.dataset.test).toBe("foo")
+    const checkbox = canvas.getByRole("checkbox");
+    await expect(checkbox.dataset.test).toBe("foo");
   },
-}
+};
 
 export const WithDataTestId: Story = {
   args: {
@@ -83,16 +83,16 @@ export const WithDataTestId: Story = {
     dataTestId: "my-test-checkbox",
   },
   render: (args) => {
-    const [checked, setChecked] = useState(false)
+    const [checked, setChecked] = useState(false);
     return (
       <F0Checkbox {...args} checked={checked} onCheckedChange={setChecked} />
-    )
+    );
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await expect(canvas.getByTestId("my-test-checkbox")).toBeInTheDocument()
+    const canvas = within(canvasElement);
+    await expect(canvas.getByTestId("my-test-checkbox")).toBeInTheDocument();
   },
-}
+};
 
 export const Disabled: Story = {
   args: {
@@ -100,12 +100,12 @@ export const Disabled: Story = {
     disabled: true,
   },
   render: (args) => {
-    const [checked, setChecked] = useState(false)
+    const [checked, setChecked] = useState(false);
     return (
       <F0Checkbox {...args} checked={checked} onCheckedChange={setChecked} />
-    )
+    );
   },
-}
+};
 
 export const Indeterminate: Story = {
   args: {
@@ -113,12 +113,12 @@ export const Indeterminate: Story = {
     indeterminate: true,
   },
   render: (args) => {
-    const [checked, setChecked] = useState(false)
+    const [checked, setChecked] = useState(false);
     return (
       <F0Checkbox {...args} checked={checked} onCheckedChange={setChecked} />
-    )
+    );
   },
-}
+};
 
 export const Checked: Story = {
   args: {
@@ -126,9 +126,9 @@ export const Checked: Story = {
     checked: true,
   },
   render: (args) => {
-    const [checked, setChecked] = useState(true)
+    const [checked, setChecked] = useState(true);
     return (
       <F0Checkbox {...args} checked={checked} onCheckedChange={setChecked} />
-    )
+    );
   },
-}
+};
