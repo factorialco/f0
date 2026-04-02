@@ -7,7 +7,7 @@ import * as Icons from "@/icons/app"
 import { SidebarFooter } from "./index"
 
 const meta = {
-  title: "Sidebar/SidebarFooter",
+  title: "Navigation/SidebarFooter",
   component: SidebarFooter,
   tags: ["autodocs", "experimental"],
 } satisfies Meta<typeof SidebarFooter>

@@ -3,7 +3,7 @@ import React from "react"
 import { describe, expect, it, vi } from "vitest"
 import { z } from "zod"
 
-import { f0FormField } from "@/components/F0Form/f0Schema"
+import { f0FormField } from "@/patterns/F0Form/f0Schema"
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
 import type {

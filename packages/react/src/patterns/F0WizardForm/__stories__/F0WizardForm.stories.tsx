@@ -4,7 +4,7 @@ import { ComponentProps, useState } from "react"
 import { z } from "zod"
 
 import { F0Button } from "@/components/F0Button"
-import { f0FormField } from "@/components/F0Form/f0Schema"
+import { f0FormField } from "@/patterns/F0Form/f0Schema"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"

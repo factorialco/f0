@@ -1,14 +1,14 @@
 import { useCallback, useRef, useState, useMemo } from "react"
 
 import type { DialogPosition } from "@/patterns/F0Dialog/types"
-import type { F0FormSubmitResult } from "@/components/F0Form/types"
+import type { F0FormSubmitResult } from "@/patterns/F0Form/types"
 
 import { F0Box } from "@/lib/F0Box"
 import { F0Dialog } from "@/patterns/F0Dialog"
-import { F0Form } from "@/components/F0Form/F0Form"
-import { useF0Form } from "@/components/F0Form/useF0Form"
+import { F0Form } from "@/patterns/F0Form/F0Form"
+import { useF0Form } from "@/patterns/F0Form/useF0Form"
 import { ResourceHeader } from "@/patterns/ResourceHeader"
-import { OneEmptyState } from "@/experimental/OneEmptyState"
+import { OneEmptyState } from "@/components/OneEmptyState"
 import { ArrowLeft, ArrowRight, Maximize, Minimize } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"

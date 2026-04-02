@@ -9,7 +9,7 @@ import type {
   F0PerSectionSchema as WizardPerSectionSchema,
   F0FormSchema as WizardFormSchema,
   InferPerSectionValues,
-} from "@/components/F0WizardForm/types"
+} from "@/patterns/F0WizardForm/types"
 
 import { ActionBarStatus, F0ActionBarRef } from "@/components/F0ActionBar"
 import { F0Button } from "@/components/F0Button"

@@ -1,4 +1,4 @@
-import { DateRange } from "@/experimental/OneCalendar/types"
+import { DateRange } from "@/components/OneCalendar/types"
 import { RecordType } from "@/hooks/datasource"
 
 import dateFilter, { DateFilterDefinition } from "./DateFilter"

@@ -4,7 +4,7 @@ import { z } from "zod"
 
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
-import { useF0FormDefinition } from "../../F0WizardForm/useF0FormDefinition"
+import { useF0FormDefinition } from "@/patterns/F0WizardForm/useF0FormDefinition"
 import { F0Form } from "../F0Form"
 import { f0FormField } from "../f0Schema"
 

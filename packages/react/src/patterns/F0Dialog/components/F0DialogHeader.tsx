@@ -4,7 +4,7 @@ import {
   DropdownItemObject,
 } from "@/experimental/Navigation/Dropdown/internal"
 import { BreadcrumbItem } from "@/experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbItem"
-import { Tabs } from "@/experimental/Navigation/Tabs"
+import { Tabs } from "@/patterns/Navigation/Tabs"
 import CrossIcon from "@/icons/app/Cross"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"

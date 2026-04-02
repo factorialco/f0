@@ -1,5 +1,5 @@
-import { getGranularitySimpleDefinition } from "@/experimental/OneCalendar"
-import { DateRange } from "@/experimental/OneCalendar/types"
+import { getGranularitySimpleDefinition } from "@/components/OneCalendar"
+import { DateRange } from "@/components/OneCalendar/types"
 
 import { type BaseFilterDefinition } from "../filters"
 import { FilterTypeContext, FilterTypeDefinition } from "../types"

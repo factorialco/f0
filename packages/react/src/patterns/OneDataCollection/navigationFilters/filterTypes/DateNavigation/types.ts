@@ -1,5 +1,5 @@
-import { DateRange, DateRangeComplete } from "@/experimental/OneCalendar"
-import { GranularityDefinitionKey } from "@/experimental/OneCalendar/granularities/index"
+import { DateRange, DateRangeComplete } from "@/components/OneCalendar"
+import { GranularityDefinitionKey } from "@/components/OneCalendar/granularities/index"
 import { DatePreset } from "@/ui/DatePickerPopup"
 
 import {

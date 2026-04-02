@@ -6,8 +6,8 @@ import { InputMessages } from "@/ui/InputField/components/InputMessages"
 
 import type { F0FormFieldProps } from "./types"
 
-import { renderFieldInput } from "../F0Form/fields/renderFieldInput"
-import { isFieldRequired } from "../F0Form/fields/schema"
+import { renderFieldInput } from "@/patterns/F0Form/fields/renderFieldInput"
+import { isFieldRequired } from "@/patterns/F0Form/fields/schema"
 
 /**
  * Standalone form field component that renders the appropriate F0Form input

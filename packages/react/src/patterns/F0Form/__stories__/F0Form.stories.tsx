@@ -5,7 +5,7 @@ import { z } from "zod"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Dialog } from "@/patterns/F0Dialog"
-import { useF0FormDefinition } from "@/components/F0WizardForm"
+import { useF0FormDefinition } from "@/patterns/F0WizardForm"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import { ExternalLink, Plus, Settings } from "@/icons/app"
 

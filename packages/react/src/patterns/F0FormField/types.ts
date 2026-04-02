@@ -1,5 +1,5 @@
-import type { InitialFile } from "../F0Form/fields/file/types"
-import type { F0Field, F0FileField } from "../F0Form/fields/types"
+import type { InitialFile } from "@/patterns/F0Form/fields/file/types"
+import type { F0Field, F0FileField } from "@/patterns/F0Form/fields/types"
 import type { InputFieldStatus } from "@/ui/InputField/types"
 
 /**

@@ -510,7 +510,7 @@ export interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionSchema> {
 export interface F0FormPropsWithSingleSchemaDefinition<
   TSchema extends F0FormSchema,
 > {
-  formDefinition: import("@/components/F0WizardForm/types").F0FormDefinitionSingleSchema<TSchema>
+  formDefinition: import("@/patterns/F0WizardForm/types").F0FormDefinitionSingleSchema<TSchema>
   className?: string
   styling?: F0FormStylingConfig
   formRef?: React.MutableRefObject<F0FormRef | null>
@@ -532,7 +532,7 @@ export interface F0FormPropsWithSingleSchemaDefinition<
 export interface F0FormPropsWithPerSectionDefinition<
   T extends F0PerSectionSchema,
 > {
-  formDefinition: import("@/components/F0WizardForm/types").F0FormDefinitionPerSection<T>
+  formDefinition: import("@/patterns/F0WizardForm/types").F0FormDefinitionPerSection<T>
   className?: string
   styling?: F0FormStylingConfig
   formRef?: React.MutableRefObject<F0FormRef | null>

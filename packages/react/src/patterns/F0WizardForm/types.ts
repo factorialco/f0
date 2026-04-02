@@ -7,8 +7,8 @@ import type {
   F0PerSectionSubmitConfig,
   F0SectionConfig,
   F0PerSectionSectionConfig,
-} from "@/components/F0Form/types"
-import type { RenderCustomFieldFunction } from "@/components/F0Form/types"
+} from "@/patterns/F0Form/types"
+import type { RenderCustomFieldFunction } from "@/patterns/F0Form/types"
 
 import { DialogWidth } from "@/patterns/F0Dialog"
 

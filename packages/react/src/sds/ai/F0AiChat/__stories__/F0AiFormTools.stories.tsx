@@ -3,21 +3,21 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps, useEffect } from "react"
 import { z } from "zod"
 
-import type { F0AiAvailableFormDefinition } from "@/components/F0Form"
+import type { F0AiAvailableFormDefinition } from "@/patterns/F0Form"
 
 import {
   f0FormField,
   F0Form,
   F0AiFormRegistryProvider,
   useF0Form,
-} from "@/components/F0Form"
-import { useF0FormDefinition } from "@/components/F0WizardForm"
-import * as SidebarStories from "@/components/Navigation/Sidebar/index.stories"
-import { Sidebar } from "@/components/Navigation/Sidebar/Sidebar"
+} from "@/patterns/F0Form"
+import { useF0FormDefinition } from "@/patterns/F0WizardForm"
+import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
+import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
-import { Page } from "@/experimental/Navigation/Page"
+import { Page } from "@/patterns/Navigation/Page"
 
 import { F0AiChat, F0AiChatProvider, useAiChat } from ".."
 

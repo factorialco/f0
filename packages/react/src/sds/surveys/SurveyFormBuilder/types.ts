@@ -1,4 +1,4 @@
-import type { UseFileUpload } from "@/components/F0Form/fields/file/types"
+import type { UseFileUpload } from "@/patterns/F0Form/fields/file/types"
 import type { IconType } from "@/components/F0Icon/F0Icon"
 import type { F0SelectItemProps } from "@/components/F0Select/types"
 import type { DataSourceDefinition, RecordType } from "@/hooks/datasource"

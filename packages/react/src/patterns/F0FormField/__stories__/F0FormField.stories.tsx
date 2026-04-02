@@ -7,7 +7,7 @@ import type {
   FileUploadHookReturn,
   FileUploadResult,
   FileUploadStatus,
-} from "@/components/F0Form/fields/types"
+} from "@/patterns/F0Form/fields/types"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
