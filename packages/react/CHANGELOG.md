@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.438.2](https://github.com/factorialco/f0/compare/f0-react-v1.438.1...f0-react-v1.438.2) (2026-04-03)
+
+
+### Bug Fixes
+
+* auto-grow textarea fields ([#3857](https://github.com/factorialco/f0/issues/3857)) ([069c700](https://github.com/factorialco/f0/commit/069c700a55bd547167af09e17565cb678bd948de))
+
 ## [1.438.1](https://github.com/factorialco/f0/compare/f0-react-v1.438.0...f0-react-v1.438.1) (2026-04-03)
 
 
