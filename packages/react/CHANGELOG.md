@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.438.1](https://github.com/factorialco/f0/compare/f0-react-v1.438.0...f0-react-v1.438.1) (2026-04-03)
+
+
+### Bug Fixes
+
+* improve numeric fields in f0form ([#3854](https://github.com/factorialco/f0/issues/3854)) ([567b703](https://github.com/factorialco/f0/commit/567b703e881596d8019c925b893723da5136b9f6))
+
 ## [1.438.0](https://github.com/factorialco/f0/compare/f0-react-v1.437.0...f0-react-v1.438.0) (2026-04-03)
 
 
