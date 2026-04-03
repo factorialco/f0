@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.438.0](https://github.com/factorialco/f0/compare/f0-react-v1.437.0...f0-react-v1.438.0) (2026-04-03)
+
+
+### Features
+
+* add support to wiggle form action bar imperatively ([#3853](https://github.com/factorialco/f0/issues/3853)) ([27030dd](https://github.com/factorialco/f0/commit/27030dd6174a0548d99ba2e06fdf7d5d0e0039d6))
+
 ## [1.437.0](https://github.com/factorialco/f0/compare/f0-react-v1.436.1...f0-react-v1.437.0) (2026-04-03)
 
 
