@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
-import { expect, userEvent, within } from "storybook/test"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 
 import { Add, Briefcase, People } from "@/icons/app"
 
@@ -680,8 +680,10 @@ export const WithSelectedContent: Story = {
         await userEvent.click(radios[1])
         expect(radios[1]).toHaveAttribute("aria-checked", "true")
 
-        // The second card's content should now be visible
-        expect(canvas.getByText(/existing bulk payments/)).toBeVisible()
+        // The second card's content should now be visible (after animation)
+        await waitFor(() =>
+          expect(canvas.getByText(/existing bulk payments/)).toBeVisible()
+        )
       }
     )
 
