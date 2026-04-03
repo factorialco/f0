@@ -166,6 +166,7 @@ function configToF0Field(
         type: "switch",
         moreInfoLink:
           "moreInfoLink" in config ? config.moreInfoLink : undefined,
+        grouped: "grouped" in config ? config.grouped : undefined,
         renderIf: config.renderIf,
       } as F0Field
 
@@ -256,7 +257,15 @@ function configToF0Field(
         useUpload: "useUpload" in config ? config.useUpload : undefined,
         renderIf: config.renderIf,
       } as F0Field
-
+    case "cardSelect":
+      return {
+        ...baseProps,
+        type: "cardSelect",
+        options: "options" in config ? config.options : [],
+        hideLabel: "hideLabel" in config ? config.hideLabel : undefined,
+        grouped: "grouped" in config ? config.grouped : undefined,
+        renderIf: config.renderIf,
+      } as F0Field
     case "custom":
       return {
         ...baseProps,

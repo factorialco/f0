@@ -1,9 +1,12 @@
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
-import { NumberInput } from "@/experimental/Forms/Fields/NumberInput"
 import type { InputFieldStatus } from "@/ui/InputField/types"
-import type { F0NumberField } from "./types"
+
+import { NumberInput } from "@/experimental/Forms/Fields/NumberInput"
+
 import type { ResolvedField } from "../types"
+import type { F0NumberField } from "./types"
+
 import { FORM_SIZE } from "../../constants"
 
 interface NumberFieldRendererProps {
@@ -38,6 +41,7 @@ export function NumberFieldRenderer({
       onChange={(value) => formField.onChange(value)}
       size={FORM_SIZE}
       hideLabel
+      hint=""
       error={error}
       status={status}
       loading={loading}

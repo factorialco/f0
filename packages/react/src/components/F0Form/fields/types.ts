@@ -154,6 +154,7 @@ export type FieldType =
   | "daterange"
   | "richtext"
   | "file"
+  | "cardSelect"
   | "custom"
 
 // ============================================================================
@@ -195,6 +196,11 @@ export type {
   CustomFieldRenderPropsBase,
 } from "./custom/types"
 export type {
+  F0CardSelectConfig,
+  F0CardSelectField,
+  CardSelectOption,
+} from "./cardSelect/types"
+export type {
   MimeType,
   InitialFile,
   F0FileConfig,
@@ -205,6 +211,7 @@ export type {
   UseFileUpload,
 } from "./file/types"
 
+import type { F0CardSelectField } from "./cardSelect/types"
 import type { F0CheckboxField } from "./checkbox/types"
 import type { F0CustomField } from "./custom/types"
 import type { F0DateField, F0TimeField, F0DateTimeField } from "./date/types"
@@ -236,4 +243,5 @@ export type F0Field =
   | F0DateRangeField
   | F0RichTextField
   | F0FileField
+  | F0CardSelectField
   | F0CustomField

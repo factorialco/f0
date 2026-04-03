@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { flushSync } from "react-dom"
 import { DefaultValues, Path, useForm } from "react-hook-form"
 import { z } from "zod"
@@ -20,7 +20,6 @@ import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
 import { Form as FormProvider } from "@/ui/form"
 
-import type { F0SwitchField } from "./fields/switch/types"
 import type {
   F0FormPropsWithPerSectionSchema,
   F0FormPropsWithPerSectionDefinition,
@@ -30,9 +29,6 @@ import type {
   F0FormSchema,
   F0FormSubmitResult,
   F0PerSectionSchema,
-  FieldItem,
-  FormDefinitionItem,
-  RowDefinition,
   SectionDefinition,
 } from "./types"
 import type { F0FormStateCallback } from "./useF0Form"
@@ -46,16 +42,15 @@ import { createConditionalResolver } from "./conditionalResolver"
 import { FORM_MAX_WIDTH, SECTION_MARGIN } from "./constants"
 import { F0FormContext, generateAnchorId } from "./context"
 import { useF0AiFormRegistry } from "./F0AiFormRegistry"
+import { CardSelectDepsContext } from "./fields/cardSelect/CardSelectDepsContext"
 import { FieldRenderer } from "./fields/FieldRenderer"
+import {
+  buildCardSelectContentMap,
+  groupContiguousSwitches,
+} from "./groupingUtils"
 import { useErrorNavigation } from "./useErrorNavigation"
 import { useSchemaDefinition } from "./useSchemaDefinition"
 import { createZodErrorMap } from "./zodErrorMap"
-
-type GroupedItem =
-  | { type: "field"; item: FieldItem }
-  | { type: "row"; item: RowDefinition; index: number }
-  | { type: "section"; item: SectionDefinition }
-  | { type: "switchGroup"; fields: F0SwitchField[] }
 
 /**
  * Flatten RHF FieldErrors into a dot-path → message map.
@@ -82,41 +77,6 @@ function flattenFormErrors(
   }
 
   walk(errors, "")
-  return result
-}
-
-/**
- * Groups contiguous switch fields together for rendering in a bordered container
- */
-function groupContiguousSwitches(
-  definition: FormDefinitionItem[]
-): GroupedItem[] {
-  const result: GroupedItem[] = []
-  let currentSwitchGroup: F0SwitchField[] = []
-
-  const flushSwitchGroup = () => {
-    if (currentSwitchGroup.length > 0) {
-      result.push({ type: "switchGroup", fields: [...currentSwitchGroup] })
-      currentSwitchGroup = []
-    }
-  }
-
-  definition.forEach((item, index) => {
-    if (item.type === "field" && item.field.type === "switch") {
-      currentSwitchGroup.push(item.field as F0SwitchField)
-    } else {
-      flushSwitchGroup()
-      if (item.type === "field") {
-        result.push({ type: "field", item })
-      } else if (item.type === "row") {
-        result.push({ type: "row", item, index })
-      } else if (item.type === "section") {
-        result.push({ type: "section", item })
-      }
-    }
-  })
-
-  flushSwitchGroup()
   return result
 }
 
@@ -911,18 +871,36 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
           case "switchGroup":
             return (
               <div key={`switch-group-${index}`} className={fieldGapClass}>
-                <SwitchGroupRenderer fields={groupedItem.fields} />
+                <SwitchGroupRenderer
+                  fields={groupedItem.fields}
+                  dependentFields={groupedItem.dependentFields}
+                  cardSelectDependentFields={
+                    groupedItem.cardSelectDependentFields
+                  }
+                />
               </div>
             )
-          case "field":
+          case "field": {
+            const fieldContent = groupedItem.cardSelectDependentFields ? (
+              <CardSelectDepsContext.Provider
+                value={buildCardSelectContentMap(
+                  groupedItem.cardSelectDependentFields
+                )}
+              >
+                <FieldRenderer field={groupedItem.item.field} />
+              </CardSelectDepsContext.Provider>
+            ) : (
+              <FieldRenderer field={groupedItem.item.field} />
+            )
             return (
               <div
                 key={groupedItem.item.field.id}
                 className={cn(fieldGapClass, "empty:hidden")}
               >
-                <FieldRenderer field={groupedItem.item.field} />
+                {fieldContent}
               </div>
             )
+          }
           case "row":
             return (
               <div key={`row-${groupedItem.index}`} className={fieldGapClass}>

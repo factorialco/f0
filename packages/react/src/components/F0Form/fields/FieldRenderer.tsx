@@ -167,7 +167,10 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
   const isVisible = !field.renderIf || evaluateRenderIf(field.renderIf, values)
 
   // For checkbox and custom fields, label is handled internally
-  const showLabel = field.type !== "checkbox" && field.type !== "custom"
+  const showLabel =
+    field.type !== "checkbox" &&
+    field.type !== "custom" &&
+    !(field.type === "cardSelect" && field.hideLabel)
   const showFormMessage = field.type !== "custom"
 
   // Determine if field is required based on validation schema and field type

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from "react"
+import React, { useCallback, useEffect, useMemo, useRef } from "react"
 import { DefaultValues, Path, useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -9,16 +9,12 @@ import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
 import { Form as FormProvider } from "@/ui/form"
 
-import type { F0SwitchField } from "../fields/switch/types"
 import type {
   F0FormErrorTriggerMode,
   F0FormSchema,
   F0FormSubmitResult,
   F0PerSectionSectionConfig,
   F0PerSectionSubmitConfig,
-  FieldItem,
-  FormDefinitionItem,
-  RowDefinition,
   RenderCustomFieldFunction,
 } from "../types"
 import type { F0FormRef, F0FormStateCallback } from "../useF0Form"
@@ -26,7 +22,12 @@ import type { F0FormRef, F0FormStateCallback } from "../useF0Form"
 import { createConditionalResolver } from "../conditionalResolver"
 import { FIELD_GAP } from "../constants"
 import { F0FormContext } from "../context"
+import { CardSelectDepsContext } from "../fields/cardSelect/CardSelectDepsContext"
 import { FieldRenderer } from "../fields/FieldRenderer"
+import {
+  buildCardSelectContentMap,
+  groupContiguousSwitches,
+} from "../groupingUtils"
 import { useSchemaDefinition } from "../useSchemaDefinition"
 import { createZodErrorMap } from "../zodErrorMap"
 import { RowRenderer } from "./RowRenderer"
@@ -37,11 +38,6 @@ const ERROR_TRIGGER_MODE_MAP = {
   "on-change": "onChange",
   "on-submit": "onSubmit",
 } as const
-
-type GroupedItem =
-  | { type: "field"; item: FieldItem }
-  | { type: "row"; item: RowDefinition; index: number }
-  | { type: "switchGroup"; fields: F0SwitchField[] }
 
 /**
  * Flatten RHF FieldErrors into a dot-path → message map.
@@ -68,36 +64,6 @@ function flattenFormErrors(
   }
 
   walk(errors, "")
-  return result
-}
-
-function groupContiguousSwitches(
-  definition: FormDefinitionItem[]
-): GroupedItem[] {
-  const result: GroupedItem[] = []
-  let currentSwitchGroup: F0SwitchField[] = []
-
-  const flushSwitchGroup = () => {
-    if (currentSwitchGroup.length > 0) {
-      result.push({ type: "switchGroup", fields: [...currentSwitchGroup] })
-      currentSwitchGroup = []
-    }
-  }
-
-  definition.forEach((item, index) => {
-    if (item.type === "field" && item.field.type === "switch") {
-      currentSwitchGroup.push(item.field as F0SwitchField)
-    } else {
-      flushSwitchGroup()
-      if (item.type === "field") {
-        result.push({ type: "field", item })
-      } else if (item.type === "row") {
-        result.push({ type: "row", item, index })
-      }
-    }
-  })
-
-  flushSwitchGroup()
   return result
 }
 
@@ -335,17 +301,38 @@ export function F0FormSection<TSchema extends F0FormSchema>({
                     <SwitchGroupRenderer
                       key={`switch-group-${index}`}
                       fields={groupedItem.fields}
+                      dependentFields={groupedItem.dependentFields}
+                      cardSelectDependentFields={
+                        groupedItem.cardSelectDependentFields
+                      }
                       sectionId={sectionId}
                     />
                   )
-                case "field":
-                  return (
+                case "field": {
+                  const fieldContent = groupedItem.cardSelectDependentFields ? (
+                    <CardSelectDepsContext.Provider
+                      value={buildCardSelectContentMap(
+                        groupedItem.cardSelectDependentFields,
+                        sectionId
+                      )}
+                    >
+                      <FieldRenderer
+                        field={groupedItem.item.field}
+                        sectionId={sectionId}
+                      />
+                    </CardSelectDepsContext.Provider>
+                  ) : (
                     <FieldRenderer
-                      key={groupedItem.item.field.id}
                       field={groupedItem.item.field}
                       sectionId={sectionId}
                     />
                   )
+                  return (
+                    <React.Fragment key={groupedItem.item.field.id}>
+                      {fieldContent}
+                    </React.Fragment>
+                  )
+                }
                 case "row":
                   return (
                     <RowRenderer

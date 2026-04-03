@@ -1,59 +1,26 @@
+import React from "react"
 import { useFormContext } from "react-hook-form"
 
 import { F0Button } from "@/components/F0Button"
 import { SectionHeader } from "@/experimental/Information/Headers/SectionHeader"
 import { cn } from "@/lib/utils"
 
-import type { F0SwitchField } from "../fields/switch/types"
-import type { FieldItem, RowDefinition, SectionDefinition } from "../types"
+import type { SectionDefinition } from "../types"
 
 import { FIELD_GAP } from "../constants"
 import { generateAnchorId, useF0FormContext } from "../context"
+import { CardSelectDepsContext } from "../fields/cardSelect/CardSelectDepsContext"
 import { FieldRenderer } from "../fields/FieldRenderer"
 import { evaluateRenderIf } from "../fields/utils"
+import {
+  buildCardSelectContentMap,
+  groupContiguousSwitches,
+} from "../groupingUtils"
 import { RowRenderer } from "./RowRenderer"
 import { SwitchGroupRenderer } from "./SwitchGroupRenderer"
 
 interface SectionRendererProps {
   section: SectionDefinition
-}
-
-type RenderedItem =
-  | { type: "field"; item: FieldItem }
-  | { type: "row"; item: RowDefinition; index: number }
-  | { type: "switchGroup"; fields: F0SwitchField[] }
-
-/**
- * Groups contiguous switch fields together for rendering in a bordered container
- */
-function groupContiguousSwitches(
-  fields: (FieldItem | RowDefinition)[]
-): RenderedItem[] {
-  const result: RenderedItem[] = []
-  let currentSwitchGroup: F0SwitchField[] = []
-
-  const flushSwitchGroup = () => {
-    if (currentSwitchGroup.length > 0) {
-      result.push({ type: "switchGroup", fields: [...currentSwitchGroup] })
-      currentSwitchGroup = []
-    }
-  }
-
-  fields.forEach((item, index) => {
-    if (item.type === "field" && item.field.type === "switch") {
-      currentSwitchGroup.push(item.field as F0SwitchField)
-    } else {
-      flushSwitchGroup()
-      if (item.type === "field") {
-        result.push({ type: "field", item })
-      } else if (item.type === "row") {
-        result.push({ type: "row", item, index })
-      }
-    }
-  })
-
-  flushSwitchGroup()
-  return result
 }
 
 /**
@@ -109,17 +76,37 @@ export function SectionRenderer({ section }: SectionRendererProps) {
               <SwitchGroupRenderer
                 key={`switch-group-${index}`}
                 fields={item.fields}
+                dependentFields={item.dependentFields}
+                cardSelectDependentFields={item.cardSelectDependentFields}
                 sectionId={sectionId}
               />
             )
           }
           if (item.type === "field") {
-            return (
+            const fieldContent = item.cardSelectDependentFields ? (
+              <CardSelectDepsContext.Provider
+                value={buildCardSelectContentMap(
+                  item.cardSelectDependentFields,
+                  sectionId
+                )}
+              >
+                <FieldRenderer
+                  key={item.item.field.id}
+                  field={item.item.field}
+                  sectionId={sectionId}
+                />
+              </CardSelectDepsContext.Provider>
+            ) : (
               <FieldRenderer
                 key={item.item.field.id}
                 field={item.item.field}
                 sectionId={sectionId}
               />
+            )
+            return (
+              <React.Fragment key={item.item.field.id}>
+                {fieldContent}
+              </React.Fragment>
             )
           }
           if (item.type === "row") {

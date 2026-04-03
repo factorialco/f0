@@ -2924,3 +2924,391 @@ describe("F0Form switch group alert toggling", () => {
     )
   })
 })
+
+describe("F0Form cardSelect field", () => {
+  it("renders a cardSelect as a radiogroup with radio options", () => {
+    const formSchema = z.object({
+      color: f0FormField(z.string(), {
+        label: "Choose color",
+        fieldType: "cardSelect",
+        options: [
+          { value: "red", label: "Red", description: "A warm color" },
+          { value: "blue", label: "Blue" },
+        ],
+      }),
+    })
+
+    render(
+      <F0Form
+        name="card-select-basic"
+        schema={formSchema}
+        defaultValues={{ color: "" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const group = screen.getByRole("radiogroup", { name: "Choose color" })
+    expect(group).toBeInTheDocument()
+
+    const radios = screen.getAllByRole("radio")
+    expect(radios).toHaveLength(2)
+    expect(screen.getByText("Red")).toBeInTheDocument()
+    expect(screen.getByText("Blue")).toBeInTheDocument()
+    expect(screen.getByText("A warm color")).toBeInTheDocument()
+  })
+
+  it("selects a card option on click", async () => {
+    const user = userEvent.setup()
+
+    const formSchema = z.object({
+      color: f0FormField(z.string(), {
+        label: "Choose color",
+        fieldType: "cardSelect",
+        options: [
+          { value: "red", label: "Red" },
+          { value: "blue", label: "Blue" },
+        ],
+      }),
+    })
+
+    render(
+      <F0Form
+        name="card-select-click"
+        schema={formSchema}
+        defaultValues={{ color: "" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const radios = screen.getAllByRole("radio")
+    // Initially no option is selected
+    expect(radios[0]).toHaveAttribute("aria-checked", "false")
+    expect(radios[1]).toHaveAttribute("aria-checked", "false")
+
+    await user.click(radios[0])
+
+    await waitFor(() => {
+      expect(radios[0]).toHaveAttribute("aria-checked", "true")
+    })
+    expect(radios[1]).toHaveAttribute("aria-checked", "false")
+  })
+
+  it("hides the label when hideLabel is true", () => {
+    const formSchema = z.object({
+      color: f0FormField(z.string(), {
+        label: "Choose color",
+        fieldType: "cardSelect",
+        hideLabel: true,
+        options: [
+          { value: "red", label: "Red" },
+          { value: "blue", label: "Blue" },
+        ],
+      }),
+    })
+
+    render(
+      <F0Form
+        name="card-select-hidelabel"
+        schema={formSchema}
+        defaultValues={{ color: "" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    // The radiogroup still has an aria-label for accessibility
+    expect(
+      screen.getByRole("radiogroup", { name: "Choose color" })
+    ).toBeInTheDocument()
+    // But the visible label text rendered by FieldRenderer should not be present
+    // (the label "Choose color" should only appear as aria-label on the radiogroup, not as a visible <label>)
+    const labels = document.querySelectorAll("label")
+    const visibleLabel = Array.from(labels).find(
+      (l) => l.textContent === "Choose color"
+    )
+    expect(visibleLabel).toBeUndefined()
+  })
+})
+
+describe("F0Form cardSelect with dependent fields", () => {
+  it("renders dependent fields inside the selected card option", async () => {
+    const user = userEvent.setup()
+
+    const formSchema = z.object({
+      compensation: f0FormField(z.string(), {
+        label: "Compensation type",
+        fieldType: "cardSelect",
+        hideLabel: true,
+        options: [
+          { value: "monetary", label: "Monetary" },
+          { value: "timeoff", label: "Time Off" },
+        ],
+      }),
+      bonusPercent: f0FormField(z.string().optional(), {
+        label: "Bonus Percent",
+        renderIf: { fieldId: "compensation", equalsTo: "monetary" },
+      }),
+      daysOff: f0FormField(z.string().optional(), {
+        label: "Days Off",
+        renderIf: { fieldId: "compensation", equalsTo: "timeoff" },
+      }),
+    })
+
+    render(
+      <F0Form
+        name="card-select-deps"
+        schema={formSchema}
+        defaultValues={{ compensation: "", bonusPercent: "", daysOff: "" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    // Initially neither dependent field is visible
+    expect(screen.queryByLabelText("Bonus Percent")).not.toBeInTheDocument()
+    expect(screen.queryByLabelText("Days Off")).not.toBeInTheDocument()
+
+    // Select "Monetary"
+    const radios = screen.getAllByRole("radio")
+    await user.click(radios[0])
+
+    // "Bonus Percent" should appear inside the selected card
+    await waitFor(() => {
+      expect(screen.getByLabelText("Bonus Percent")).toBeInTheDocument()
+    })
+    expect(screen.queryByLabelText("Days Off")).not.toBeInTheDocument()
+
+    // Switch to "Time Off"
+    await user.click(radios[1])
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Days Off")).toBeInTheDocument()
+    })
+    expect(screen.queryByLabelText("Bonus Percent")).not.toBeInTheDocument()
+  })
+
+  it("renders row-based dependent fields inside the selected card option", async () => {
+    const user = userEvent.setup()
+
+    const formSchema = z.object({
+      plan: f0FormField(z.string(), {
+        label: "Plan",
+        fieldType: "cardSelect",
+        options: [
+          { value: "basic", label: "Basic" },
+          { value: "premium", label: "Premium" },
+        ],
+      }),
+      premiumFieldA: f0FormField(z.string().optional(), {
+        label: "Premium A",
+        renderIf: { fieldId: "plan", equalsTo: "premium" },
+        row: "premium-row",
+      }),
+      premiumFieldB: f0FormField(z.string().optional(), {
+        label: "Premium B",
+        renderIf: { fieldId: "plan", equalsTo: "premium" },
+        row: "premium-row",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="card-select-row-deps"
+        schema={formSchema}
+        defaultValues={{
+          plan: "",
+          premiumFieldA: "",
+          premiumFieldB: "",
+        }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    // Initially hidden
+    expect(screen.queryByLabelText("Premium A")).not.toBeInTheDocument()
+    expect(screen.queryByLabelText("Premium B")).not.toBeInTheDocument()
+
+    // Select "Premium"
+    const radios = screen.getAllByRole("radio")
+    await user.click(radios[1])
+
+    // Both row fields should appear
+    await waitFor(() => {
+      expect(screen.getByLabelText("Premium A")).toBeInTheDocument()
+    })
+    expect(screen.getByLabelText("Premium B")).toBeInTheDocument()
+  })
+
+  it("renders cardSelect dependent fields inside a switch group", async () => {
+    const user = userEvent.setup()
+
+    const formSchema = z.object({
+      enableOvertime: f0FormField(z.boolean(), {
+        label: "Enable Overtime",
+        fieldType: "switch",
+      }),
+      overtimeType: f0FormField(z.string().optional(), {
+        label: "Overtime Type",
+        fieldType: "cardSelect",
+        hideLabel: true,
+        options: [
+          { value: "paid", label: "Paid" },
+          { value: "comp", label: "Compensatory" },
+        ],
+        renderIf: { fieldId: "enableOvertime", equalsTo: true },
+      }),
+      paidRate: f0FormField(z.string().optional(), {
+        label: "Paid Rate",
+        renderIf: { fieldId: "overtimeType", equalsTo: "paid" },
+      }),
+      compDays: f0FormField(z.string().optional(), {
+        label: "Comp Days",
+        renderIf: { fieldId: "overtimeType", equalsTo: "comp" },
+      }),
+    })
+
+    render(
+      <F0Form
+        name="switch-card-select-deps"
+        schema={formSchema}
+        defaultValues={{
+          enableOvertime: false,
+          overtimeType: "",
+          paidRate: "",
+          compDays: "",
+        }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    // Initially the switch is off — no cardSelect or dependent fields visible
+    expect(screen.queryByRole("radiogroup")).not.toBeInTheDocument()
+    expect(screen.queryByLabelText("Paid Rate")).not.toBeInTheDocument()
+    expect(screen.queryByLabelText("Comp Days")).not.toBeInTheDocument()
+
+    // Turn on the switch
+    const switchEl = screen.getByRole("switch", { name: "Enable Overtime" })
+    await user.click(switchEl)
+
+    // CardSelect should appear
+    await waitFor(() => {
+      expect(screen.getByRole("radiogroup")).toBeInTheDocument()
+    })
+
+    // Select "Paid"
+    const radios = screen.getAllByRole("radio")
+    await user.click(radios[0])
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Paid Rate")).toBeInTheDocument()
+    })
+    expect(screen.queryByLabelText("Comp Days")).not.toBeInTheDocument()
+
+    // Switch to "Compensatory"
+    await user.click(radios[1])
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Comp Days")).toBeInTheDocument()
+    })
+    expect(screen.queryByLabelText("Paid Rate")).not.toBeInTheDocument()
+
+    // Turn off the switch — everything should disappear
+    await user.click(switchEl)
+
+    await waitFor(() => {
+      expect(screen.queryByRole("radiogroup")).not.toBeInTheDocument()
+    })
+    expect(screen.queryByLabelText("Comp Days")).not.toBeInTheDocument()
+  })
+})
+
+describe("F0Form grouped: false", () => {
+  it("does not group a switch with grouped: false into adjacent switch group", () => {
+    const formSchema = z.object({
+      optionA: f0FormField(z.boolean(), {
+        label: "Option A",
+        fieldType: "switch",
+      }),
+      standalone: f0FormField(z.boolean(), {
+        label: "Standalone",
+        fieldType: "switch",
+        grouped: false,
+      }),
+      optionB: f0FormField(z.boolean(), {
+        label: "Option B",
+        fieldType: "switch",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="switch-ungrouped"
+        schema={formSchema}
+        defaultValues={{
+          optionA: false,
+          standalone: false,
+          optionB: false,
+        }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const switches = screen.getAllByRole("switch")
+    expect(switches).toHaveLength(3)
+
+    // Option A should be in a grouped container (has the bordered wrapper)
+    // Standalone should NOT be in the same container as Option A
+    const optionASwitch = screen.getByRole("switch", { name: "Option A" })
+    const standaloneSwitch = screen.getByRole("switch", { name: "Standalone" })
+    const optionBSwitch = screen.getByRole("switch", { name: "Option B" })
+
+    // Grouped switches share a common rounded-xl bordered parent
+    const getGroupContainer = (el: HTMLElement) =>
+      el.closest("[class*='rounded-xl']")
+
+    const optionAContainer = getGroupContainer(optionASwitch)
+    const standaloneContainer = getGroupContainer(standaloneSwitch)
+    const optionBContainer = getGroupContainer(optionBSwitch)
+
+    // Option A and Option B should NOT share a container (Standalone breaks the chain)
+    // Standalone should have its own container or no grouped container
+    expect(optionAContainer).not.toBe(standaloneContainer)
+    expect(optionBContainer).not.toBe(standaloneContainer)
+  })
+
+  it("renders cardSelect options as separate cards when grouped is false", () => {
+    const formSchema = z.object({
+      color: f0FormField(z.string(), {
+        label: "Choose color",
+        fieldType: "cardSelect",
+        grouped: false,
+        options: [
+          { value: "red", label: "Red" },
+          { value: "blue", label: "Blue" },
+        ],
+      }),
+    })
+
+    render(
+      <F0Form
+        name="card-select-ungrouped"
+        schema={formSchema}
+        defaultValues={{ color: "" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const radios = screen.getAllByRole("radio")
+    expect(radios).toHaveLength(2)
+
+    // When not grouped, each radio should be inside its own bordered card
+    // (each has its own rounded-xl border container)
+    const getCard = (el: HTMLElement) => el.closest("[class*='rounded-xl']")
+
+    const redCard = getCard(radios[0])
+    const blueCard = getCard(radios[1])
+
+    expect(redCard).not.toBeNull()
+    expect(blueCard).not.toBeNull()
+    // Each option should be in a different container
+    expect(redCard).not.toBe(blueCard)
+  })
+})
