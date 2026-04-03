@@ -284,7 +284,10 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
           clearTimeout(wiggleTimeoutRef.current)
           wiggleTimeoutRef.current = null
         }
-        containerRef.current?.classList.remove(errorNavigateClassName)
+        containerRef.current?.classList.remove(
+          errorNavigateClassName,
+          wiggleClassName
+        )
       }
     }, [status])
 

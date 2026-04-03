@@ -628,7 +628,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     useState<ActionBarStatus>("idle")
   const [successMessage, setSuccessMessage] = useState<string | undefined>()
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const actionBarRef = useRef<F0ActionBarRef>(null)
+  const actionBarRef = useRef<F0ActionBarRef | null>(null)
 
   // Error navigation and auto-focus
   const {

@@ -133,3 +133,5 @@ export const FormActionBar = forwardRef<F0ActionBarRef, FormActionBarProps>(
     )
   }
 )
+
+FormActionBar.displayName = "FormActionBar"

@@ -2873,14 +2873,15 @@ export const WithDefaultValuesParamsSchema: Story = {
  * to programmatically trigger the action bar wiggle animation from outside the form.
  *
  * The `actionBar` property on `F0FormRef` exposes:
- * - `wiggle({ errorHighlight?: boolean })`: Plays an error-highlight shake + glow animation on the action bar.
+ * - `wiggle({ errorHighlight?: boolean })`: Plays the error-highlight shake + glow animation when `errorHighlight`
+ *   is `true` and the form has validation errors; otherwise, it falls back to the standard wiggle animation.
  *
  * This is useful when external logic (e.g. a save shortcut, AI validation, or a parent component)
  * needs to draw attention to the form's action bar without submitting.
  */
 export const ActionBarWiggle: Story = {
   render() {
-    const formRef = useRef<F0FormRef>(null)
+    const formRef = useRef<F0FormRef | null>(null)
 
     const formSchema = z.object({
       name: f0FormField(z.string().min(2, "Name is required"), {

@@ -176,6 +176,48 @@ describe("F0ActionBar wiggle ref", () => {
 
     const bar = screen.getByText("Unsaved changes").closest("[class*='fixed']")
     expect(bar).not.toHaveClass("f0-action-bar-error-navigate")
+    expect(bar).toHaveClass("f0-action-bar-wiggle")
+  })
+
+  it("removes f0-action-bar-wiggle class after 600ms", () => {
+    vi.useFakeTimers()
+    const ref = createRef<F0ActionBarRef>()
+    render(<F0ActionBar {...defaultProps} ref={ref} />)
+
+    act(() => {
+      ref.current?.wiggle()
+    })
+
+    const bar = screen.getByText("Unsaved changes").closest("[class*='fixed']")
+    expect(bar).toHaveClass("f0-action-bar-wiggle")
+
+    act(() => {
+      vi.advanceTimersByTime(600)
+    })
+
+    expect(bar).not.toHaveClass("f0-action-bar-wiggle")
+    vi.useRealTimers()
+  })
+
+  it("clears both wiggle classes when status changes during wiggle", () => {
+    vi.useFakeTimers()
+    const ref = createRef<F0ActionBarRef>()
+    const { rerender } = render(
+      <F0ActionBar {...defaultProps} ref={ref} status="idle" />
+    )
+
+    act(() => {
+      ref.current?.wiggle()
+    })
+
+    const bar = screen.getByText("Unsaved changes").closest("[class*='fixed']")
+    expect(bar).toHaveClass("f0-action-bar-wiggle")
+
+    rerender(<F0ActionBar {...defaultProps} ref={ref} status="loading" />)
+
+    expect(bar).not.toHaveClass("f0-action-bar-wiggle")
+    expect(bar).not.toHaveClass("f0-action-bar-error-navigate")
+    vi.useRealTimers()
   })
 })
 
