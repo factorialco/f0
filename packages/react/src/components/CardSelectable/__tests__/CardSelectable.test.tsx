@@ -1,9 +1,10 @@
 import { describe, expect, it, vi } from "vitest"
 
-import type { CardSelectableItem } from "@/components/CardSelectable/types"
-
-import { CardSelectableContainer } from "@/components/CardSelectable/index"
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
+
+import type { CardSelectableItem } from "../types"
+
+import { CardSelectableContainer } from "../index"
 
 const baseItems: CardSelectableItem<string>[] = [
   {
