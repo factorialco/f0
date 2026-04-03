@@ -8,6 +8,7 @@ import { isZodType, unwrapZodSchema } from "../../f0Schema"
 export interface NumberSchemaConstraints {
   min?: number
   max?: number
+  isInteger?: boolean
 }
 
 /**
@@ -32,14 +33,17 @@ export function extractNumberConstraints(
   const checks = innerSchema._def.checks || []
   let min: number | undefined
   let max: number | undefined
+  let isInteger = false
 
   for (const check of checks) {
     if (check.kind === "min") {
       min = check.value
     } else if (check.kind === "max") {
       max = check.value
+    } else if (check.kind === "int") {
+      isInteger = true
     }
   }
 
-  return { min, max }
+  return { min, max, isInteger }
 }

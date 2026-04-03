@@ -87,13 +87,14 @@ function configToF0Field(
     }
 
     case "number": {
-      const { min, max } = extractNumberConstraints(schema)
+      const { min, max, isInteger } = extractNumberConstraints(schema)
       return {
         ...baseProps,
         type: "number",
         step: "step" in config ? config.step : undefined,
         min,
         max,
+        maxDecimals: isInteger ? 0 : undefined,
         locale: "locale" in config ? config.locale : undefined,
         clearable,
         renderIf: config.renderIf,

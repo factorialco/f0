@@ -36,6 +36,7 @@ export function NumberFieldRenderer({
       step={field.step}
       min={field.min}
       max={field.max}
+      maxDecimals={field.maxDecimals}
       locale={field.locale ?? "en-US"}
       value={formField.value != null ? Number(formField.value) : undefined}
       onChange={(value) => formField.onChange(value)}
