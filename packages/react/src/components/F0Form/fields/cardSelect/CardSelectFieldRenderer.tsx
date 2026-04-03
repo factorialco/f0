@@ -5,7 +5,7 @@ import { useContext } from "react"
 import {
   CardSelectableContainer,
   type CardSelectableItem,
-} from "@/experimental/Forms/CardSelectable"
+} from "@/components/CardSelectable"
 
 import type { F0CardSelectField } from "./types"
 
@@ -34,7 +34,7 @@ export function CardSelectFieldRenderer({
       grouped={field.grouped !== false}
       items={items}
       value={formField.value as string | undefined}
-      onChange={(val) => formField.onChange(val)}
+      onChange={(val: string | undefined) => formField.onChange(val)}
       label={field.label}
       disabled={field.disabled}
     />
