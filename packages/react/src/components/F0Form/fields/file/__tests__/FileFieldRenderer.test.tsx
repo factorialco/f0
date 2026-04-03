@@ -1,21 +1,23 @@
+import userEvent from "@testing-library/user-event"
 import React from "react"
+import { describe, expect, it, vi } from "vitest"
+import { z } from "zod"
+
 import {
   zeroRender as render,
   screen,
   waitFor,
   fireEvent,
 } from "@/testing/test-utils"
-import { describe, expect, it, vi } from "vitest"
-import { z } from "zod"
-import userEvent from "@testing-library/user-event"
 
-import { F0Form } from "../../../F0Form"
-import { f0FormField } from "../../../f0Schema"
 import type {
   FileUploadResult,
   FileUploadStatus,
   UseFileUpload,
 } from "../types"
+
+import { F0Form } from "../../../F0Form"
+import { f0FormField } from "../../../f0Schema"
 
 function createMockUploadHook(
   options: {
@@ -81,7 +83,6 @@ describe("FileFieldRenderer", () => {
       file: f0FormField(z.string().optional(), {
         label: "Document",
         fieldType: "file",
-        useUpload: createMockUploadHook(),
       }),
     })
 
@@ -105,7 +106,6 @@ describe("FileFieldRenderer", () => {
       file: f0FormField(z.string().optional(), {
         label: "Document",
         fieldType: "file",
-        useUpload: createMockUploadHook(),
       }),
     })
 
@@ -132,7 +132,6 @@ describe("FileFieldRenderer", () => {
         label: "Document",
         fieldType: "file",
         status: { type: "warning", message: "Potential issue" },
-        useUpload: createMockUploadHook(),
       }),
     })
 
@@ -160,7 +159,6 @@ describe("FileFieldRenderer", () => {
         label: "Photo",
         fieldType: "file",
         description: "Upload a photo (max 5 MB)",
-        useUpload: createMockUploadHook(),
       }),
     })
 
@@ -182,7 +180,6 @@ describe("FileFieldRenderer", () => {
         label: "Attachments",
         fieldType: "file",
         multiple: true,
-        useUpload: createMockUploadHook(),
       }),
     })
 
@@ -207,7 +204,6 @@ describe("FileFieldRenderer", () => {
       file: f0FormField(z.string().min(1), {
         label: "Document",
         fieldType: "file",
-        useUpload: createMockUploadHook(),
       }),
     })
 
@@ -217,6 +213,7 @@ describe("FileFieldRenderer", () => {
         schema={schema}
         defaultValues={{ file: "" }}
         onSubmit={onSubmit}
+        useUpload={createMockUploadHook()}
         submitConfig={{ label: "Save" }}
       />
     )
@@ -253,7 +250,6 @@ describe("FileFieldRenderer", () => {
         label: "Document",
         fieldType: "file",
         accept: ["application/pdf", "image/jpeg", "image/png"],
-        useUpload: createMockUploadHook(),
       }),
     })
 
@@ -277,7 +273,6 @@ describe("FileFieldRenderer", () => {
         label: "Photo Only",
         fieldType: "file",
         accept: ["image/jpeg", "image/png"],
-        useUpload: createMockUploadHook(),
       }),
     })
 
@@ -318,7 +313,6 @@ describe("FileFieldRenderer", () => {
         label: "Small File",
         fieldType: "file",
         maxSizeMB: 0.001, // ~1 KB
-        useUpload: createMockUploadHook(),
       }),
     })
 
@@ -350,7 +344,6 @@ describe("FileFieldRenderer", () => {
       file: f0FormField(z.string().optional(), {
         label: "Failing Upload",
         fieldType: "file",
-        useUpload: createMockUploadHook({ shouldFail: true }),
       }),
     })
 
@@ -359,6 +352,7 @@ describe("FileFieldRenderer", () => {
         name="test-fail"
         schema={schema}
         defaultValues={{ file: "" }}
+        useUpload={createMockUploadHook({ shouldFail: true })}
         onSubmit={async () => ({ success: true })}
       />
     )
@@ -380,7 +374,6 @@ describe("FileFieldRenderer", () => {
       file: f0FormField(z.string().optional(), {
         label: "Removable",
         fieldType: "file",
-        useUpload: createMockUploadHook(),
       }),
     })
 
@@ -423,7 +416,6 @@ describe("FileFieldRenderer", () => {
         label: "Disabled File",
         fieldType: "file",
         disabled: true,
-        useUpload: createMockUploadHook(),
       }),
     })
 
@@ -447,7 +439,6 @@ describe("FileFieldRenderer", () => {
       file: f0FormField(z.string().min(1), {
         label: "Contract",
         fieldType: "file",
-        useUpload: createMockUploadHook(),
       }),
     })
 
@@ -483,7 +474,6 @@ describe("FileFieldRenderer", () => {
       file: f0FormField(z.string().optional(), {
         label: "Contract",
         fieldType: "file",
-        useUpload: createMockUploadHook(),
       }),
     })
 
@@ -527,7 +517,6 @@ describe("FileFieldRenderer", () => {
         label: "Attachments",
         fieldType: "file",
         multiple: true,
-        useUpload: createMockUploadHook(),
       }),
     })
 
@@ -570,7 +559,6 @@ describe("FileFieldRenderer", () => {
         label: "Attachments",
         fieldType: "file",
         multiple: true,
-        useUpload: createMockUploadHook(),
       }),
     })
 
@@ -629,7 +617,6 @@ describe("FileFieldRenderer", () => {
       file: f0FormField(z.string().min(1), {
         label: "Document",
         fieldType: "file",
-        useUpload: createMockUploadHook(),
       }),
     })
 
@@ -672,7 +659,6 @@ describe("FileFieldRenderer", () => {
         label: "Multi Files",
         fieldType: "file",
         multiple: true,
-        useUpload: createMockUploadHook(),
       }),
     })
 

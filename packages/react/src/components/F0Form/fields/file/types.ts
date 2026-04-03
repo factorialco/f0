@@ -166,8 +166,15 @@ export interface F0FileConfig {
   multiple?: boolean
   /** Helper text shown in the dropzone area */
   description?: string
-  /** Consumer-provided hook that returns upload capabilities */
-  useUpload: UseFileUpload
+  /**
+   * Consumer-provided upload hook.
+   *
+   * When used inside `<F0Form>`, the form-level `useUpload` is preferred.
+   * This prop is primarily for standalone file fields rendered outside of
+   * `<F0Form>` / `F0FormContext.Provider`, where the upload hook cannot be
+   * supplied via context.
+   */
+  useUpload?: UseFileUpload
 }
 
 /**
@@ -183,8 +190,11 @@ export type F0FileField = F0BaseField & {
   multiple?: boolean
   /** Dropzone description text */
   description?: string
-  /** Consumer-provided upload hook */
-  useUpload: UseFileUpload
+  /**
+   * Consumer-provided upload hook for standalone usage.
+   * When inside `<F0Form>`, the form-level `useUpload` takes precedence.
+   */
+  useUpload?: UseFileUpload
   /** Conditional rendering */
   renderIf?: FileFieldRenderIf
 }
