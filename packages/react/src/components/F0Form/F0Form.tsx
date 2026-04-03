@@ -11,8 +11,8 @@ import type {
   InferPerSectionValues,
 } from "@/components/F0WizardForm/types"
 
+import { ActionBarStatus, F0ActionBarRef } from "@/components/F0ActionBar"
 import { F0Button } from "@/components/F0Button"
-import { ActionBarStatus } from "@/components/F0ActionBar"
 import { F0TableOfContent } from "@/experimental/Navigation/F0TableOfContent"
 import { TOCItem } from "@/experimental/Navigation/F0TableOfContent/types"
 import { Delete, Save } from "@/icons/app"
@@ -628,6 +628,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     useState<ActionBarStatus>("idle")
   const [successMessage, setSuccessMessage] = useState<string | undefined>()
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const actionBarRef = useRef<F0ActionBarRef | null>(null)
 
   // Error navigation and auto-focus
   const {
@@ -767,6 +768,16 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
         flattenFormErrors(form.formState.errors as Record<string, unknown>),
       getFieldNames: () =>
         Object.keys(form.getValues() as Record<string, unknown>),
+      actionBar: {
+        wiggle: (options) => {
+          const hasFormErrors = Object.keys(form.formState.errors).length > 0
+          actionBarRef.current?.wiggle(
+            options?.errorHighlight && !hasFormErrors
+              ? { ...options, errorHighlight: false }
+              : options
+          )
+        },
+      },
       _setStateCallback: opts?.stateCallback
         ? (callback: F0FormStateCallback) => {
             stateCallbackRef.current = callback
@@ -969,6 +980,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
 
         {!hideActionBar && (
           <FormActionBar
+            ref={actionBarRef}
             isActionBar={isActionBar}
             isDirty={isDirty}
             actionBarStatus={actionBarStatus}

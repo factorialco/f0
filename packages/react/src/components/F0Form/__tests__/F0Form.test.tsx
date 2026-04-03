@@ -1,12 +1,18 @@
 import userEvent from "@testing-library/user-event"
-import React from "react"
+import React, { useRef } from "react"
 import { describe, expect, it, vi } from "vitest"
 import { z } from "zod"
 
-import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
+import {
+  zeroRender as render,
+  screen,
+  waitFor,
+  act,
+} from "@/testing/test-utils"
 
 import type { F0FieldAlertProps } from "../f0Schema"
 import type { F0SectionConfig } from "../types"
+import type { F0FormRef } from "../useF0Form"
 
 import { createConditionalResolver } from "../conditionalResolver"
 import { generateAnchorId } from "../context"
@@ -3310,5 +3316,88 @@ describe("F0Form grouped: false", () => {
     expect(blueCard).not.toBeNull()
     // Each option should be in a different container
     expect(redCard).not.toBe(blueCard)
+  })
+})
+
+describe("F0Form actionBar.wiggle via formRef", () => {
+  const formSchema = z.object({
+    name: f0FormField(z.string().min(1), { label: "Name" }),
+  })
+
+  function WiggleHarness({
+    onRef,
+  }: {
+    onRef: (ref: React.RefObject<F0FormRef | null>) => void
+  }) {
+    const formRef = useRef<F0FormRef | null>(null)
+    React.useEffect(() => {
+      onRef(formRef)
+    }, [onRef])
+    return (
+      <F0Form
+        name="wiggle-test"
+        schema={formSchema}
+        defaultValues={{ name: "test" }}
+        onSubmit={async () => ({ success: true })}
+        submitConfig={{ type: "action-bar", label: "Save" }}
+        formRef={formRef}
+      />
+    )
+  }
+
+  it("triggers a plain wiggle via formRef.current.actionBar.wiggle()", async () => {
+    const user = userEvent.setup()
+    let ref: React.RefObject<F0FormRef | null> | undefined
+
+    render(<WiggleHarness onRef={(r) => (ref = r)} />)
+
+    // Make form dirty to show action bar
+    const input = screen.getByLabelText("Name")
+    await user.clear(input)
+    await user.type(input, "updated")
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("You have changes pending to be saved")
+      ).toBeInTheDocument()
+    })
+
+    act(() => {
+      ref?.current?.actionBar.wiggle()
+    })
+
+    const bar = screen
+      .getByText("You have changes pending to be saved")
+      .closest("[class*='fixed']")
+    expect(bar).toHaveClass("f0-action-bar-wiggle")
+  })
+
+  it("falls back to plain wiggle when errorHighlight is true but form has no errors", async () => {
+    const user = userEvent.setup()
+    let ref: React.RefObject<F0FormRef | null> | undefined
+
+    render(<WiggleHarness onRef={(r) => (ref = r)} />)
+
+    // Make form dirty with valid data
+    const input = screen.getByLabelText("Name")
+    await user.clear(input)
+    await user.type(input, "valid name")
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("You have changes pending to be saved")
+      ).toBeInTheDocument()
+    })
+
+    act(() => {
+      ref?.current?.actionBar.wiggle({ errorHighlight: true })
+    })
+
+    const bar = screen
+      .getByText("You have changes pending to be saved")
+      .closest("[class*='fixed']")
+    // Should use plain wiggle since the form has no validation errors
+    expect(bar).toHaveClass("f0-action-bar-wiggle")
+    expect(bar).not.toHaveClass("f0-action-bar-error-navigate")
   })
 })

@@ -87,6 +87,7 @@ export interface F0ActionBarRef {
 }
 
 const errorNavigateClassName = "f0-action-bar-error-navigate"
+const wiggleClassName = "f0-action-bar-wiggle"
 const WIGGLE_DURATION_MS = 600
 
 interface F0ActionBarProps {
@@ -237,19 +238,20 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
         const el = containerRef.current
         if (!el) return
 
-        const className = options?.errorHighlight ? errorNavigateClassName : ""
-        if (!className) return
+        const className = options?.errorHighlight
+          ? errorNavigateClassName
+          : wiggleClassName
 
         if (wiggleTimeoutRef.current) {
           clearTimeout(wiggleTimeoutRef.current)
         }
 
-        el.classList.remove(className)
+        el.classList.remove(errorNavigateClassName, wiggleClassName)
         void el.offsetWidth // Force reflow to restart animation
         el.classList.add(className)
 
         wiggleTimeoutRef.current = setTimeout(() => {
-          el.classList.remove(className)
+          el.classList.remove(errorNavigateClassName, wiggleClassName)
           wiggleTimeoutRef.current = null
         }, WIGGLE_DURATION_MS)
       },
@@ -282,7 +284,10 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
           clearTimeout(wiggleTimeoutRef.current)
           wiggleTimeoutRef.current = null
         }
-        containerRef.current?.classList.remove(errorNavigateClassName)
+        containerRef.current?.classList.remove(
+          errorNavigateClassName,
+          wiggleClassName
+        )
       }
     }, [status])
 

@@ -1,5 +1,7 @@
 import { useCallback, useRef, useState } from "react"
 
+import { F0ActionBarRef } from "@/components/F0ActionBar"
+
 /**
  * Callback to update form state in the hook
  */
@@ -66,6 +68,10 @@ export interface F0FormRef {
    * Get the list of field names in the form
    */
   getFieldNames: () => string[]
+  /**
+   * Access the action bar imperatively (e.g. to trigger a wiggle animation)
+   */
+  actionBar: F0ActionBarRef
   /**
    * Internal: Set the state callback for reactive updates
    * @internal

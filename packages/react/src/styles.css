@@ -114,6 +114,11 @@ div[role="dialog"] {
   }
 }
 
+/* Action bar wiggle animation (no error styling) */
+.f0-action-bar-wiggle {
+  animation: f0-form-error-shake 0.6s ease-in-out;
+}
+
 /* Action bar error highlight animation */
 .f0-action-bar-error-navigate {
   animation: f0-form-error-shake 0.6s ease-in-out;
@@ -156,6 +161,7 @@ div[role="dialog"] {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .f0-action-bar-wiggle,
   .f0-action-bar-error-navigate {
     animation: none;
   }
