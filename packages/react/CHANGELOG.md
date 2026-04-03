@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.437.0](https://github.com/factorialco/f0/compare/f0-react-v1.436.1...f0-react-v1.437.0) (2026-04-03)
+
+
+### Features
+
+* add support for nested fields rendered inside card selectable groups ([#3833](https://github.com/factorialco/f0/issues/3833)) ([5d7e2f8](https://github.com/factorialco/f0/commit/5d7e2f8f61db54710638b5190a982ca9b649b11b))
+
 ## [1.436.1](https://github.com/factorialco/f0/compare/f0-react-v1.436.0...f0-react-v1.436.1) (2026-04-03)
 
 
