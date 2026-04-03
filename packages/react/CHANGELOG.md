@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.436.1](https://github.com/factorialco/f0/compare/f0-react-v1.436.0...f0-react-v1.436.1) (2026-04-03)
+
+
+### Bug Fixes
+
+* pass useUpload hook at F0Form level instead of field-level ([#3752](https://github.com/factorialco/f0/issues/3752)) ([9e7775b](https://github.com/factorialco/f0/commit/9e7775b6a73e2c27e74637bc406e11ca69691f6f))
+
 ## [1.436.0](https://github.com/factorialco/f0/compare/f0-react-v1.435.0...f0-react-v1.436.0) (2026-04-02)
 
 
