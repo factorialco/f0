@@ -231,6 +231,9 @@ export function F0FormSection<TSchema extends F0FormSchema>({
         getFieldNames: () => {
           return Object.keys(form.getValues() as Record<string, unknown>)
         },
+        actionBar: {
+          wiggle: () => {},
+        },
         _setStateCallback: (callback: F0FormStateCallback) => {
           stateCallbackRef.current = callback
         },

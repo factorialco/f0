@@ -195,6 +195,9 @@ function createVirtualFormRef(
         return errors
       },
       getFieldNames: getShapeKeys,
+      actionBar: {
+        wiggle: () => {},
+      },
       _setStateCallback: () => {},
     },
   }

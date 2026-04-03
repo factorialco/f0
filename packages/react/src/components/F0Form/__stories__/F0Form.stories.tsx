@@ -22,6 +22,7 @@ import {
   F0SectionConfig,
   useF0Form,
   RenderCustomFieldProps,
+  F0FormRef,
 } from "../index"
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -2864,5 +2865,58 @@ export const WithDefaultValuesParamsSchema: Story = {
     })
 
     return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Demonstrates using `formRef.current.actionBar.wiggle({ errorHighlight })`
+ * to programmatically trigger the action bar wiggle animation from outside the form.
+ *
+ * The `actionBar` property on `F0FormRef` exposes:
+ * - `wiggle({ errorHighlight?: boolean })`: Plays an error-highlight shake + glow animation on the action bar.
+ *
+ * This is useful when external logic (e.g. a save shortcut, AI validation, or a parent component)
+ * needs to draw attention to the form's action bar without submitting.
+ */
+export const ActionBarWiggle: Story = {
+  render() {
+    const formRef = useRef<F0FormRef>(null)
+
+    const formSchema = z.object({
+      name: f0FormField(z.string().min(2, "Name is required"), {
+        label: "Name",
+        placeholder: "Enter your name",
+      }),
+      email: f0FormField(z.string().email("Invalid email"), {
+        label: "Email",
+        placeholder: "you@example.com",
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "wiggle-demo",
+      schema: formSchema,
+      defaultValues: { name: "Jane", email: "jane@example.com" },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+      submitConfig: { label: "Save", type: "action-bar" },
+    })
+
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="flex gap-2">
+          <F0Button
+            label="Wiggle action bar"
+            onClick={() => {
+              formRef.current?.actionBar.wiggle({ errorHighlight: true })
+            }}
+          />
+        </div>
+        <F0Form formDefinition={formDefinition} formRef={formRef} />
+      </div>
+    )
   },
 }
