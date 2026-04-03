@@ -1,10 +1,16 @@
-import * as React from "react"
+import {
+  forwardRef,
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+  type TextareaHTMLAttributes,
+} from "react"
 
 import { cn } from "../lib/utils"
 import { InputField, InputFieldProps } from "./InputField"
 
 export type TextareaProps = Omit<
-  React.TextareaHTMLAttributes<HTMLTextAreaElement>,
+  TextareaHTMLAttributes<HTMLTextAreaElement>,
   "onChange" | "value" | "onFocus" | "onBlur"
 > & {
   value?: string
@@ -33,7 +39,7 @@ export type TextareaProps = Omit<
     | "required"
   >
 
-const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
+const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   (
     {
       className,
@@ -60,11 +66,11 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     },
     ref
   ) => {
-    const textareaRef = React.useRef<HTMLTextAreaElement>(null)
+    const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-    React.useImperativeHandle(ref, () => textareaRef.current!)
+    useImperativeHandle(ref, () => textareaRef.current!)
 
-    React.useLayoutEffect(() => {
+    useLayoutEffect(() => {
       const textarea = textareaRef.current
       if (!textarea) return
 
@@ -78,7 +84,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         textarea.style.height = `${newHeight}px`
         textarea.style.overflowY = "hidden"
       }
-    })
+    }, [value, maxHeight])
 
     return (
       <InputField
