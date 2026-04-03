@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps } from "react"
 
-import { ApplicationFrame } from "@/examples/ApplicationFrame"
-import ApplicationFrameStoryMeta from "@/examples/ApplicationFrame/index.stories"
+import { ApplicationFrame } from "@/patterns/ApplicationFrame"
+import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
 import UpsellIcon from "@/icons/app/Upsell"
 
 import { ProductModal } from "./index"

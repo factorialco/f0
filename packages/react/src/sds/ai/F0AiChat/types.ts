@@ -6,8 +6,14 @@ import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults
 
 import type { ChatDashboardConfig } from "./canvas/entities/dashboard/types"
 export type { PersonProfile } from "./components/markdownRenderers/entityRef/entities/person/types"
-export type { EntityResolvers } from "./components/markdownRenderers/entityRef/types"
-import type { EntityResolvers } from "./components/markdownRenderers/entityRef/types"
+export type { CandidateProfile } from "./components/markdownRenderers/entityRef/entities/candidate/types"
+export type { JobPostingProfile } from "./components/markdownRenderers/entityRef/entities/jobPosting/types"
+export type {
+  EntityResolvers,
+  EntityUrlBuilders,
+  EntityRefs,
+} from "./components/markdownRenderers/entityRef/types"
+import type { EntityRefs } from "./components/markdownRenderers/entityRef/types"
 
 /**
  * Base shape shared by all canvas content types.
@@ -96,6 +102,22 @@ export type VisualizationMode = "sidepanel" | "fullscreen" | "canvas"
 /**
  * Tracking options for the AI chat
  */
+export type UploadedFile = {
+  url: string
+  filename: string
+  mimetype: string
+}
+
+export type AiChatFileAttachmentConfig = {
+  onUploadFiles: (files: File[]) => Promise<UploadedFile[]>
+  allowedMimeTypes?: string | string[]
+  /**
+   * Maximum number of files that can be attached at once.
+   * Omit or pass undefined for no limit.
+   */
+  maxFiles?: number
+}
+
 export type AiChatTrackingOptions = {
   onVisibility?: () => void
   onClose?: () => void
@@ -145,12 +167,11 @@ export type AiChatProviderProps = {
    */
   VoiceMode?: React.ComponentType
   /**
-   * Async resolver functions for entity references in markdown.
-   * Used to fetch profile data for inline entity mentions (hover cards).
-   * The consuming app provides these so the chat can resolve entity IDs
-   * (e.g. employee IDs) into rich profile data without knowing the API.
+   * Configuration for entity references in markdown.
+   * Groups resolver functions (data fetching for hover cards) and
+   * URL builders (navigation links) for each entity type.
    */
-  entityResolvers?: EntityResolvers
+  entityRefs?: EntityRefs
   /**
    * Available tool hints that the user can activate to provide intent context
    * to the AI. Renders a selector button next to the send button.
@@ -162,6 +183,10 @@ export type AiChatProviderProps = {
    * Groups fetchUsage, upgradePlanUrl, and company/plan display info.
    */
   credits?: AiChatCredits
+  /**
+   * File attachment configuration. When provided, enables file uploads in the chat.
+   */
+  fileAttachments?: AiChatFileAttachmentConfig
   onThumbsUp?: (
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }

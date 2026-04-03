@@ -4,40 +4,44 @@ import { Meta } from "@storybook/addon-docs/blocks"
 
 # How to add a new icon
 
-To add a new icon, you need to understand the architecture of the icons library:
+Icons in F0 are defined once in `packages/core/assets/icons` as SVG files and then generated into framework-specific components (React, React Native, etc.).
 
-The source of truth for the icons is the `packages/core/assets/icons` directory.
+## Directory structure
 
-**This directory contains the icons in SVG format.**
+```
+packages/core/assets/icons/
+  app/        # General purpose icons
+  modules/    # Factorial product module icons
+  animated/   # Motion-enhanced icons
+  ai/         # Factorial AI-related icons
+```
 
-There are 3 different directories in the `packages/core/assets/icons` directory:
+Choose the directory that best matches the icon's purpose.
 
-- `app`: General purpose icons
-- `modules`: Factorial's modules icons
-- `ai`: Factorial's AI related icons
+## SVG requirements
 
-Those SVGs are consumed by the different f0 packages, for example: react-native,
-react, etc.
+- Single color only (no hardcoded fills — use `currentColor` or stroke).
+- Must fit in a square — 24×24px recommended.
+- File name in **PascalCase** (e.g. `ChevronDown.svg`).
 
-## Icon SVG requirements
+## Steps
 
-The SVG files must meet the following requirements:
+1. Add the SVG file to the appropriate directory in `packages/core/assets/icons`.
+2. Run the icon generation command in the target package:
 
-- The SVG must be a single color.
-- The icon must fit in a square (recommended 24x24px).
+```bash
+# From packages/react
+pnpm generate-icons
+```
 
-## Icon SVG naming convention
+This generates React components into `packages/react/src/icons/`.
 
-- The icon name must be in PascalCase.
-- The name must be descriptive and concise.
+3. Verify the new icon appears in the [Icons browser](?path=/docs/foundations-icons--docs) and renders correctly.
 
-## Adding a new icon
+## Animated icons
 
-Add the SVG file to the appropriate directory in the
-`packages/core/assets/icons` directory.
+Animated icons support a `state` prop (`"normal"` | `"animate"`). The SVG must include the animation definition — refer to an existing animated icon in `packages/core/assets/icons/animated` as a reference.
 
-To generate the icons, for example for the react package, you need to run the
-`pnpm generate-icons` command in the `packages/react` directory.
+## Module icons
 
-This will generate react components for the icons in the
-`packages/react/src/icons` directory.
+After adding a module icon SVG, register it in `packages/react/src/components/avatars/F0AvatarModule/modules.ts` so it becomes available via `F0AvatarModule`.

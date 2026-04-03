@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils"
 
 import { useRegisteredActions } from "./actions"
 import { ChatTextarea } from "./components/input/ChatTextarea"
+import { CanvasPanel } from "./components/layout/CanvasPanel"
 import { MessagesContainer } from "./components/messages/MessagesContainer"
 import { useAiChat } from "./providers/AiChatStateProvider"
 
@@ -32,7 +33,9 @@ const FullscreenChatInput = () => {
 }
 
 export const F0AiFullscreenChatComponent = () => {
-  const { enabled } = useAiChat()
+  const { enabled, canvasContent, visualizationMode } = useAiChat()
+
+  const isCanvasMode = visualizationMode === "canvas"
 
   useRegisteredActions()
 
@@ -43,7 +46,7 @@ export const F0AiFullscreenChatComponent = () => {
   return (
     <div
       className={cn(
-        "flex h-full w-full flex-col overflow-hidden overscroll-none bg-f1-background",
+        "flex h-full w-full flex-col overflow-hidden overscroll-none",
         "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
         "[&_*]:[-webkit-tap-highlight-color:transparent]"
       )}
@@ -64,8 +67,15 @@ export const F0AiFullscreenChatComponent = () => {
           flex-direction: column;
         }
       `}</style>
+
+      {isCanvasMode && canvasContent && (
+        <div className={cn("pointer-events-none overflow-y-scroll")}>
+          <CanvasPanel />
+        </div>
+      )}
+
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <MessagesContainer />
+        <MessagesContainer noShadows />
       </div>
 
       <div

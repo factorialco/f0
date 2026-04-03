@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "f0-storybook": {
+      "type": "http",
+      "url": "http://localhost:6006/mcp",
+      "description": "F0 Design System Storybook MCP — component docs, story preview, and testing tools. Requires `pnpm storybook dev` running in packages/react/."
+    }
+  }
+}

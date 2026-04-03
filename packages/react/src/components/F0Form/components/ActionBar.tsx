@@ -1,6 +1,6 @@
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
-import { F0ActionBar, ActionBarStatus } from "@/experimental/F0ActionBar"
+import { F0ActionBar, ActionBarStatus } from "@/components/F0ActionBar"
 import { AlertCircle, ChevronDown, ChevronUp } from "@/icons/app"
 
 interface FormActionBarProps {
@@ -10,7 +10,6 @@ interface FormActionBarProps {
   hasErrors: boolean
   errorCount: number
   resolvedActionBarLabel: string | undefined
-  centerActionBarInFrameContent: boolean
   submitLabel: string
   submitIcon: IconType | undefined
   discardableChanges: boolean | "" | undefined
@@ -31,7 +30,6 @@ export function FormActionBar({
   hasErrors,
   errorCount,
   resolvedActionBarLabel,
-  centerActionBarInFrameContent,
   submitLabel,
   submitIcon,
   discardableChanges,
@@ -54,7 +52,6 @@ export function FormActionBar({
         }
         variant="light"
         status={hasErrors ? undefined : actionBarStatus}
-        centerInFrameContent={centerActionBarInFrameContent}
         label={resolvedActionBarLabel}
         leftContent={
           hasErrors ? (

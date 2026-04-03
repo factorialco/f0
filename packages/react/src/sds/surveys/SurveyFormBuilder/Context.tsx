@@ -8,6 +8,8 @@ import React, {
   useRef,
 } from "react"
 
+import type { UseFileUpload } from "@/components/F0Form/fields/file/types"
+
 import {
   getDefaultParamsForQuestionType,
   getDefaultQuestionTypeToAdd,
@@ -19,6 +21,7 @@ import {
   QuestionElement,
   QuestionType,
   SectionElement,
+  SurveyDatasets,
 } from "./types"
 
 type SurveyFormBuilderContextType = SurveyFormBuilderCallbacks & {
@@ -35,6 +38,8 @@ type SurveyFormBuilderContextType = SurveyFormBuilderCallbacks & {
   isQuestionTypeAllowed: (questionType: QuestionType) => boolean
   errors?: Record<string, string>
   onFieldBlur?: (questionId: string) => void
+  useUpload?: UseFileUpload
+  datasets?: SurveyDatasets
 }
 
 const SurveyFormBuilderContext = createContext<
@@ -51,6 +56,8 @@ type SurveyFormBuilderProviderProps = {
   allowedQuestionTypes?: QuestionType[]
   errors?: Record<string, string>
   onFieldBlur?: (questionId: string) => void
+  useUpload?: UseFileUpload
+  datasets?: SurveyDatasets
 }
 
 export function SurveyFormBuilderProvider({
@@ -63,6 +70,8 @@ export function SurveyFormBuilderProvider({
   allowedQuestionTypes,
   errors,
   onFieldBlur,
+  useUpload,
+  datasets,
 }: SurveyFormBuilderProviderProps) {
   const elementsRef = useRef(elements)
   elementsRef.current = elements
@@ -219,7 +228,13 @@ export function SurveyFormBuilderProvider({
   const handleAddNewElement: NonNullable<
     SurveyFormBuilderCallbacks["onAddNewElement"]
   > = useCallback(
-    ({ type, afterId }) => {
+    ({ type, afterId, datasetKey }) => {
+      if (
+        (type === "dropdown-single" || type === "dropdown-multi") &&
+        !datasetKey
+      ) {
+        throw new Error(`${type} questions require a datasetKey`)
+      }
       const newElementId = getNewElementId(
         type === "section" ? "section" : "question"
       )
@@ -257,6 +272,7 @@ export function SurveyFormBuilderProvider({
                 type,
                 required: true,
                 ...getDefaultParamsForQuestionType(type),
+                ...(datasetKey ? { datasetKey } : {}),
               } as QuestionElement,
             }
 
@@ -397,11 +413,14 @@ export function SurveyFormBuilderProvider({
 
   const isQuestionTypeAllowed = useCallback(
     (questionType: QuestionType) => {
+      if (questionType === "file" && !useUpload) {
+        return false
+      }
       return (
         !allowedQuestionTypes || allowedQuestionTypes.includes(questionType)
       )
     },
-    [allowedQuestionTypes]
+    [allowedQuestionTypes, useUpload]
   )
 
   const contextValue = useMemo(
@@ -421,6 +440,8 @@ export function SurveyFormBuilderProvider({
       isQuestionTypeAllowed,
       errors,
       onFieldBlur,
+      useUpload,
+      datasets,
     }),
     [
       handleQuestionChange,
@@ -438,6 +459,8 @@ export function SurveyFormBuilderProvider({
       isQuestionTypeAllowed,
       errors,
       onFieldBlur,
+      useUpload,
+      datasets,
     ]
   )
 

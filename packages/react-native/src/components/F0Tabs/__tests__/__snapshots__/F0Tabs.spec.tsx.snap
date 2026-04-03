@@ -1,0 +1,498 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`F0Tabs Snapshot - embedded 1`] = `
+<View
+  className="h-8 items-center justify-center px-3"
+>
+  <Text
+    className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+    ellipsizeMode="tail"
+    numberOfLines={1}
+  >
+    Overview
+  </Text>
+</View>
+`;
+
+exports[`F0Tabs Snapshot - primary (default) 1`] = `
+<RCTScrollView
+  horizontal={true}
+  showsHorizontalScrollIndicator={false}
+>
+  <View>
+    <View
+      accessibilityRole="tablist"
+      className="relative flex-row items-center gap-1 px-3 pt-1 pb-3"
+    >
+      <View
+        accessibilityLabel="Overview"
+        accessibilityRole="tab"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": true,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        className="overflow-hidden items-center justify-center rounded-md px-3 py-1.5 bg-f0-background-tertiary"
+        collapsable={false}
+        focusable={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onLayout={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          [
+            {
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <View
+          className="absolute inset-0"
+          pointerEvents="none"
+          style={
+            [
+              {
+                "opacity": 0,
+              },
+              {
+                "backgroundColor": "rgba(0, 0, 0, 1)",
+              },
+            ]
+          }
+        />
+        <Text
+          className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+          ellipsizeMode="tail"
+          numberOfLines={1}
+        >
+          Overview
+        </Text>
+      </View>
+      <View
+        accessibilityLabel="Courses"
+        accessibilityRole="tab"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": false,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        className="overflow-hidden items-center justify-center rounded-md px-3 py-1.5"
+        collapsable={false}
+        focusable={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onLayout={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          [
+            {
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <View
+          className="absolute inset-0"
+          pointerEvents="none"
+          style={
+            [
+              {
+                "opacity": 0,
+              },
+              {
+                "backgroundColor": "rgba(0, 0, 0, 1)",
+              },
+            ]
+          }
+        />
+        <Text
+          className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-secondary text-left"
+          ellipsizeMode="tail"
+          numberOfLines={1}
+        >
+          Courses
+        </Text>
+      </View>
+      <View
+        accessibilityLabel="Categories"
+        accessibilityRole="tab"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": false,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        className="overflow-hidden items-center justify-center rounded-md px-3 py-1.5"
+        collapsable={false}
+        focusable={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onLayout={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          [
+            {
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <View
+          className="absolute inset-0"
+          pointerEvents="none"
+          style={
+            [
+              {
+                "opacity": 0,
+              },
+              {
+                "backgroundColor": "rgba(0, 0, 0, 1)",
+              },
+            ]
+          }
+        />
+        <Text
+          className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-secondary text-left"
+          ellipsizeMode="tail"
+          numberOfLines={1}
+        >
+          Categories
+        </Text>
+      </View>
+      <View
+        className="absolute bottom-0 left-0 right-0 h-px bg-f0-border"
+        importantForAccessibility="no-hide-descendants"
+        pointerEvents="none"
+      />
+      <View
+        className="absolute bottom-0 h-px rounded-full bg-f0-foreground"
+        importantForAccessibility="no-hide-descendants"
+        pointerEvents="none"
+        style={
+          {
+            "transform": [
+              {
+                "translateX": 0,
+              },
+            ],
+            "width": 0,
+          }
+        }
+      />
+    </View>
+  </View>
+</RCTScrollView>
+`;
+
+exports[`F0Tabs Snapshot - secondary 1`] = `
+<RCTScrollView
+  horizontal={true}
+  showsHorizontalScrollIndicator={false}
+>
+  <View>
+    <View
+      accessibilityRole="tablist"
+      className="relative flex-row items-center gap-1 px-3 py-1"
+    >
+      <View
+        accessibilityLabel="Overview"
+        accessibilityRole="tab"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": true,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        className="overflow-hidden items-center justify-center rounded-md px-3 py-1.5 bg-f0-background-inverse-secondary"
+        collapsable={false}
+        focusable={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onLayout={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          [
+            {
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <View
+          className="absolute inset-0"
+          pointerEvents="none"
+          style={
+            [
+              {
+                "opacity": 0,
+              },
+              {
+                "backgroundColor": "rgba(0, 0, 0, 1)",
+              },
+            ]
+          }
+        />
+        <Text
+          className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-medium text-f0-foreground text-left"
+          ellipsizeMode="tail"
+          numberOfLines={1}
+        >
+          Overview
+        </Text>
+      </View>
+      <View
+        accessibilityLabel="Courses"
+        accessibilityRole="tab"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": false,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        className="overflow-hidden items-center justify-center rounded-md px-3 py-1.5"
+        collapsable={false}
+        focusable={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onLayout={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          [
+            {
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <View
+          className="absolute inset-0"
+          pointerEvents="none"
+          style={
+            [
+              {
+                "opacity": 0,
+              },
+              {
+                "backgroundColor": "rgba(0, 0, 0, 1)",
+              },
+            ]
+          }
+        />
+        <Text
+          className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-medium text-f0-foreground-secondary text-left"
+          ellipsizeMode="tail"
+          numberOfLines={1}
+        >
+          Courses
+        </Text>
+      </View>
+      <View
+        accessibilityLabel="Categories"
+        accessibilityRole="tab"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": false,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        className="overflow-hidden items-center justify-center rounded-md px-3 py-1.5"
+        collapsable={false}
+        focusable={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onLayout={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          [
+            {
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <View
+          className="absolute inset-0"
+          pointerEvents="none"
+          style={
+            [
+              {
+                "opacity": 0,
+              },
+              {
+                "backgroundColor": "rgba(0, 0, 0, 1)",
+              },
+            ]
+          }
+        />
+        <Text
+          className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-medium text-f0-foreground-secondary text-left"
+          ellipsizeMode="tail"
+          numberOfLines={1}
+        >
+          Categories
+        </Text>
+      </View>
+    </View>
+  </View>
+</RCTScrollView>
+`;
+
+exports[`F0Tabs Snapshot - single tab 1`] = `
+<View
+  className="relative flex-row items-center gap-1 px-3 pt-1 pb-3"
+  style={
+    {
+      "paddingHorizontal": 12,
+    }
+  }
+>
+  <Text
+    className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+    ellipsizeMode="tail"
+    numberOfLines={1}
+  >
+    Overview
+  </Text>
+</View>
+`;

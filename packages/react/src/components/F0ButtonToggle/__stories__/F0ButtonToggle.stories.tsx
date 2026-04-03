@@ -11,7 +11,7 @@ import { buttonToggleSizes, buttonToggleVariants } from "../"
 import { F0ButtonToggle } from "../F0ButtonToggle"
 
 const meta = {
-  title: "ButtonToggle",
+  title: "Button/ButtonToggle",
   component: F0ButtonToggle,
   parameters: {
     layout: "centered",

@@ -12,6 +12,7 @@ import { addons } from "storybook/preview-api"
 import { F0Alert } from "@/components/F0Alert"
 
 import lightTheme, { darkTheme } from "./FactorialOne.ts"
+import { ImportBanner } from "./ImportBanner.tsx"
 
 const channel = addons.getChannel()
 
@@ -48,6 +49,7 @@ export const DocsContainer: FC<PropsWithChildren<DocsContainerProps>> = (
           />
         </div>
       )}
+      <ImportBanner isDark={isDark} />
       {children}
     </BaseContainer>
   )

@@ -71,9 +71,8 @@ export const getDefaultParamsForQuestionType = (questionType: QuestionType) => {
         ],
       }
     case "dropdown-single":
-      return {
-        options: [],
-      }
+    case "dropdown-multi":
+      return {}
     case "text":
     case "longText":
       return {
@@ -91,6 +90,15 @@ export const getDefaultParamsForQuestionType = (questionType: QuestionType) => {
       return {
         value: new Date(),
       }
+    case "file":
+      return {
+        value: null,
+      }
+    case "checkbox":
+      return {
+        value: null,
+        label: "",
+      }
     default:
       throw new Error(`Unsupported question type: ${questionType}`)
   }
@@ -104,10 +112,11 @@ const DEFAULT_QUESTION_TYPES: QuestionType[] = [
   "longText",
   "select",
   "multi-select",
-  "dropdown-single",
   "numeric",
   "link",
   "date",
+  "file",
+  "checkbox",
 ]
 
 export const getDefaultQuestionTypeToAdd = (

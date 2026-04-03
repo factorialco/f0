@@ -12,11 +12,13 @@ describe("OneChip", () => {
 
   it("Snapshot", () => {
     const { toJSON } = render(<OneChip {...defaultProps} />)
+
     expect(toJSON()).toMatchSnapshot()
   })
 
   it("Snapshot variant selected", () => {
     const { toJSON } = render(<OneChip {...defaultProps} variant="selected" />)
+
     expect(toJSON()).toMatchSnapshot()
   })
 
@@ -24,6 +26,7 @@ describe("OneChip", () => {
     const { toJSON } = render(
       <OneChip {...defaultProps} icon={AppIcons.Placeholder} />
     )
+
     expect(toJSON()).toMatchSnapshot()
   })
 
@@ -32,15 +35,14 @@ describe("OneChip", () => {
     const { toJSON } = render(
       <OneChip {...defaultProps} onClose={handleOnClose} />
     )
+
     expect(toJSON()).toMatchSnapshot()
   })
 
   it("renders correctly with required props", () => {
     render(<OneChip {...defaultProps} />)
 
-    const number = screen.getByText("label")
-
-    expect(number).toBeDefined()
+    expect(screen.getByText("label")).toBeDefined()
   })
 
   it("renders correctly with onClose event", async () => {

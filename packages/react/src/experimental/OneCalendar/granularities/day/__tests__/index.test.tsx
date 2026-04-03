@@ -247,9 +247,19 @@ describe("dayGranularity", () => {
   })
 
   describe("label", () => {
-    it("formats the label correctly", () => {
+    it("formats the label correctly (default en-US)", () => {
       const result = dayGranularity.label(baseDate, i18n)
       expect(result).toBe("January 2024")
+    })
+
+    it("formats the label in French when locale is fr", () => {
+      const result = dayGranularity.label(baseDate, i18n, "fr")
+      expect(result).toMatch(/janvier/i)
+    })
+
+    it("formats the label in Spanish when locale is es", () => {
+      const result = dayGranularity.label(baseDate, i18n, "es")
+      expect(result).toMatch(/enero/i)
     })
   })
 

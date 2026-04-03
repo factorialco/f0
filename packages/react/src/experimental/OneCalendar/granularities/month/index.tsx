@@ -3,7 +3,6 @@ import {
   addMonths,
   addYears,
   endOfMonth,
-  formatDate,
   isSameMonth,
   isSameYear,
   parse,
@@ -43,23 +42,34 @@ const formatMonthShort = (date: Date | DateRange | undefined | null) => {
   return formatDateToString(date, MONTH_FORMAT)
 }
 
-const formatMonthLong = (date: Date | DateRange | undefined | null) => {
+const formatMonthLong = (
+  date: Date | DateRange | undefined | null,
+  locale = "en-US"
+) => {
   const dateRange = toMonthGranularityDateRange(date)
   if (!dateRange) {
     return ""
   }
+  const fmt = (d: Date) =>
+    new Intl.DateTimeFormat(locale, {
+      month: "long",
+      year: "numeric",
+    }).format(d)
   // Single date
   if (!dateRange.to || isSameMonth(dateRange.from, dateRange.to)) {
-    return formatDate(dateRange.from, "MMM yyyy")
+    return fmt(dateRange.from)
   }
 
   // Range
   if (isSameYear(dateRange.from, dateRange.to)) {
-    return `${formatDate(dateRange.from, "MMM")} ${rangeSeparator} ${formatDate(dateRange.to, "MMM yyyy")}`
+    const monthOnlyFmt = new Intl.DateTimeFormat(locale, {
+      month: "long",
+    })
+    return `${monthOnlyFmt.format(dateRange.from)} ${rangeSeparator} ${fmt(dateRange.to)}`
   }
 
   // Different month and year
-  return `${formatDate(dateRange.from, "MMM yyyy")} ${rangeSeparator} ${formatDate(dateRange.to, "MMM yyyy")}`
+  return `${fmt(dateRange.from)} ${rangeSeparator} ${fmt(dateRange.to)}`
 }
 
 export const monthGranularity: GranularityDefinition = {
@@ -89,10 +99,10 @@ export const monthGranularity: GranularityDefinition = {
   },
   toRangeString: (date) => formatDateRange(date, "MM/yyyy"),
   toRange: (date) => toMonthGranularityDateRange(date),
-  toString: (date, _, format = "default") => {
+  toString: (date, _, format = "default", locale = "en-US") => {
     const formats: Record<DateStringFormat, string> = {
       default: formatMonthShort(date),
-      long: formatMonthLong(date),
+      long: formatMonthLong(date, locale),
     }
     return formats[format] ?? formats.default
   },

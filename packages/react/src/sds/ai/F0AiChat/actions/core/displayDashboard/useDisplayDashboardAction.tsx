@@ -2,9 +2,6 @@ import { useCopilotAction, useCopilotContext } from "@copilotkit/react-core"
 import { useMemo } from "react"
 
 import type { ChatDashboardConfig } from "../../../canvas/entities/dashboard/types"
-import type { CanvasContent } from "../../../types"
-import { useAiChat } from "../../../providers/AiChatStateProvider"
-import { AutoOpenCanvas } from "../../../canvas/AutoOpenCanvas"
 import { DashboardCard } from "../../../canvas/entities/dashboard/DashboardCard"
 
 /**
@@ -25,7 +22,6 @@ import { DashboardCard } from "../../../canvas/entities/dashboard/DashboardCard"
  * via `emitFrontendTool` from the `displayDashboard` proxy tool.
  */
 export const useDisplayDashboardAction = () => {
-  const { openCanvas } = useAiChat()
   const { copilotApiConfig } = useCopilotContext()
 
   const apiConfig = useMemo(
@@ -118,46 +114,15 @@ export const useDisplayDashboardAction = () => {
     available: "frontend",
     render: (props) => {
       const args = props.args as Partial<ChatDashboardConfig>
-      const toolCallId = (props as { messageId?: string }).messageId
 
       // Bail out while arguments are still streaming in.
-      if (
-        props.status === "inProgress" ||
-        !args.title ||
-        !args.items ||
-        args.items.length === 0
-      ) {
+      if (!args.title || !args.items || args.items.length === 0) {
         return <></>
       }
 
       const config = args as ChatDashboardConfig
 
-      const canvasContent: CanvasContent = {
-        type: "dashboard",
-        title: config.title,
-        config,
-        apiConfig,
-        toolCallId,
-      }
-
-      return (
-        <>
-          <AutoOpenCanvas content={canvasContent} />
-          <DashboardCard
-            config={config}
-            toolCallId={toolCallId}
-            onView={(c) =>
-              openCanvas({
-                type: "dashboard",
-                title: c.title,
-                config: c,
-                apiConfig,
-                toolCallId,
-              })
-            }
-          />
-        </>
-      )
+      return <DashboardCard config={config} apiConfig={apiConfig} />
     },
   })
 }

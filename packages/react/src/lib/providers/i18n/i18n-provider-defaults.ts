@@ -173,6 +173,10 @@ export const defaultTranslations = {
         sum: "sum",
       },
     },
+    export: {
+      label: "Export to CSV",
+      description: "Download all data as a CSV file",
+    },
   },
   shortcut: "Shortcut",
   date: {
@@ -306,7 +310,7 @@ export const defaultTranslations = {
     unpinChat: "Unpin chat",
     deleteChat: "Delete chat",
     ask: "Ask One",
-    viewProfile: "View profile",
+    view: "View",
     tools: "Tools",
     credits: {
       title: "Credits",
@@ -332,6 +336,27 @@ export const defaultTranslations = {
       goal: "Goal",
       controls: "← → to move",
       escToExit: "Esc to exit",
+    },
+    creditWarning: {
+      soft: "You're running low on AI credits.",
+      getCredits: "Get credits",
+      dismiss: "Dismiss",
+      messageBanner: {
+        title: "This response requires credits",
+        description: "Your company has run out of AI credits.",
+        actionLabel: "Get credits",
+      },
+    },
+    attachFile: "Attach file",
+    removeFile: "Remove",
+    clarifyingQuestion: {
+      submit: "Submit",
+      next: "Next",
+      back: "Back",
+      typeYourAnswer: "Type your answer…",
+      stepOf: "{{current}} of {{total}}",
+      custom: "own answer",
+      skipped: "skipped",
     },
     growth: {
       demoCard: {
@@ -381,6 +406,7 @@ export const defaultTranslations = {
   surveyFormBuilder: {
     actions: {
       actions: "Actions",
+      addQuestion: "Add question",
       duplicateQuestion: "Duplicate question",
       deleteQuestion: "Delete question",
       duplicateSection: "Duplicate section",
@@ -399,6 +425,8 @@ export const defaultTranslations = {
       link: "Link",
       date: "Date",
       dropdownSingle: "Dropdown",
+      file: "File upload",
+      checkbox: "Checkbox",
     },
     selectQuestion: {
       addOption: "Add option",
@@ -407,6 +435,12 @@ export const defaultTranslations = {
       remove: "Remove",
       correct: "Correct",
       optionPlaceholder: "Type anything you want here...",
+    },
+    fileQuestion: {
+      uploadButton: "Upload file",
+    },
+    checkboxQuestion: {
+      placeholder: "Provide a label for the checkbox",
     },
     answer: {
       label: "Answer",
@@ -425,6 +459,9 @@ export const defaultTranslations = {
       questionDescriptionPlaceholder: "Describe the question in a few words",
       sectionDescriptionPlaceholder: "Describe the section in a few words",
       required: "Required",
+      allowMultiSelection: "Allow multi-selection",
+      singleSelection: "Single selection",
+      multiSelection: "Multi selection",
       questionType: "Question type",
       questionOptions: "Question options",
       actions: "Actions",

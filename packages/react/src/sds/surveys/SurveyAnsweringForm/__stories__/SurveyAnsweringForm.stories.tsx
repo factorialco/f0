@@ -1,13 +1,60 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { useState } from "react"
+import { useCallback, useRef, useState } from "react"
+
+import type {
+  FileUploadHookReturn,
+  FileUploadResult,
+  FileUploadStatus,
+  UseFileUpload,
+} from "@/components/F0Form/fields/file/types"
 
 import { F0Button } from "@/components/F0Button"
 
 import type { SurveyAnsweringFormProps } from "../types"
 
+import { mockDatasets } from "../../__stories__/mocks"
 import { SurveyFormBuilderElement } from "../../SurveyFormBuilder/types"
 import { SurveyAnsweringForm } from "../SurveyAnsweringForm"
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+const useMockUpload: UseFileUpload = (): FileUploadHookReturn => {
+  const [progress, setProgress] = useState(0)
+  const [status, setStatus] = useState<FileUploadStatus>("idle")
+  const abortRef = useRef(false)
+
+  const upload = useCallback(async (file: File): Promise<FileUploadResult> => {
+    abortRef.current = false
+    setStatus("processing")
+    setProgress(0)
+
+    await sleep(500)
+    if (abortRef.current) return { type: "aborted" }
+
+    setStatus("uploading")
+
+    for (let i = 1; i <= 10; i++) {
+      await sleep(150)
+      if (abortRef.current) return { type: "aborted" }
+      setProgress(i / 10)
+    }
+
+    setStatus("success")
+    return {
+      type: "success",
+      value: `signed_${file.name}_${globalThis.Date.now()}`,
+    }
+  }, [])
+
+  const cancelUpload = useCallback(() => {
+    abortRef.current = true
+    setStatus("idle")
+    setProgress(0)
+  }, [])
+
+  return { upload, cancelUpload, progress, status }
+}
 
 const sampleElements: SurveyFormBuilderElement[] = [
   {
@@ -62,13 +109,8 @@ const sampleElements: SurveyFormBuilderElement[] = [
           id: "q-department",
           title: "Which department are you in?",
           description: "Select the department you currently belong to",
-          type: "select" as const,
-          options: [
-            { value: "engineering", label: "Engineering" },
-            { value: "design", label: "Design" },
-            { value: "product", label: "Product" },
-            { value: "marketing", label: "Marketing" },
-          ],
+          type: "dropdown-single" as const,
+          datasetKey: "teams",
           required: true,
         },
         {
@@ -105,7 +147,7 @@ const sampleElements: SurveyFormBuilderElement[] = [
         {
           id: "q-career-goal",
           title: "What is your primary career goal for next year?",
-          type: "dropdown-single" as const,
+          type: "select" as const,
           options: [
             { value: "promotion", label: "Get promoted" },
             { value: "lateral-move", label: "Lateral move to new team" },
@@ -115,10 +157,32 @@ const sampleElements: SurveyFormBuilderElement[] = [
           required: true,
         },
         {
+          id: "q-collaborators",
+          title: "Who did you collaborate with recently?",
+          type: "dropdown-multi" as const,
+          datasetKey: "employees",
+          required: true,
+        },
+        {
           id: "q-dev-plan-link",
           title: "Link to your personal development plan",
           description: "Paste the URL to your development plan document",
           type: "link" as const,
+        },
+        {
+          id: "q-supporting-docs",
+          title: "Upload supporting documents",
+          description:
+            "Attach any relevant files such as certificates or reports",
+          type: "file" as const,
+        },
+        {
+          id: "q-terms",
+          title: "Acknowledgement",
+          description: "Please confirm before submitting",
+          type: "checkbox" as const,
+          label: "I confirm this information is accurate and complete",
+          required: true,
         },
       ],
     },
@@ -260,6 +324,8 @@ const meta: Meta<typeof SurveyAnsweringFormStory> = {
       label: "Engagement",
       href: "#",
     },
+    datasets: mockDatasets,
+    useUpload: useMockUpload,
   },
   parameters: {
     layout: "fullscreen",
@@ -321,7 +387,7 @@ export const WithDefaultValues: Story = {
     defaultValues: {
       "q-name": { type: "text", value: "Jane Doe" },
       "q-perf-rating": { type: "rating", value: 4 },
-      "q-department": { type: "select", value: "engineering" },
+      "q-department": { type: "dropdown-single", value: "engineering" },
     },
   },
 }
@@ -370,7 +436,7 @@ export const PreviewWithDefaultValues: Story = {
     defaultValues: {
       "q-name": { type: "text", value: "Jane Doe" },
       "q-perf-rating": { type: "rating", value: 4 },
-      "q-department": { type: "select", value: "engineering" },
+      "q-department": { type: "dropdown-single", value: "engineering" },
     },
   },
 }

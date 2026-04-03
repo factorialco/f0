@@ -1,5 +1,208 @@
 # Changelog
 
+## [1.436.0](https://github.com/factorialco/f0/compare/f0-react-v1.435.0...f0-react-v1.436.0) (2026-04-02)
+
+
+### Features
+
+* add clarifying questions to ai chat ([#3825](https://github.com/factorialco/f0/issues/3825)) ([209c19a](https://github.com/factorialco/f0/commit/209c19a7c41dfe13573fcff57ed3f90a1d40c11f))
+
+## [1.435.0](https://github.com/factorialco/f0/compare/f0-react-v1.434.0...f0-react-v1.435.0) (2026-04-02)
+
+
+### Features
+
+* **react:** refactor Storybook and move multiple components from experimental to stable ([#3834](https://github.com/factorialco/f0/issues/3834)) ([1c8ee20](https://github.com/factorialco/f0/commit/1c8ee204a4d03b2f7ea3d735586e844a1434404e))
+
+## [1.434.0](https://github.com/factorialco/f0/compare/f0-react-v1.433.0...f0-react-v1.434.0) (2026-04-02)
+
+
+### Features
+
+* **react:** add file attachments support to F0AiChat ([#3671](https://github.com/factorialco/f0/issues/3671)) ([cd5a9bd](https://github.com/factorialco/f0/commit/cd5a9bdb41d7c31f2a0359df0ed73ace4f57f01d))
+
+## [1.433.0](https://github.com/factorialco/f0/compare/f0-react-v1.432.0...f0-react-v1.433.0) (2026-04-02)
+
+
+### Features
+
+* **one:** add candidate and job-posting entity-ref renderers ([#3800](https://github.com/factorialco/f0/issues/3800)) ([2f54690](https://github.com/factorialco/f0/commit/2f54690f5860a2f872f9091100e323fd7b726933))
+
+## [1.432.0](https://github.com/factorialco/f0/compare/f0-react-v1.431.0...f0-react-v1.432.0) (2026-04-01)
+
+
+### Features
+
+* add support for datasets in dropdown single and multi questions ([#3823](https://github.com/factorialco/f0/issues/3823)) ([0fdc445](https://github.com/factorialco/f0/commit/0fdc445e441b1f1c618df4906a967880bc44225f))
+
+## [1.431.0](https://github.com/factorialco/f0/compare/f0-react-v1.430.0...f0-react-v1.431.0) (2026-04-01)
+
+
+### Features
+
+* add CSV export functionality to OneDataCollection ([#3338](https://github.com/factorialco/f0/issues/3338)) ([7149cce](https://github.com/factorialco/f0/commit/7149cce207c4d94d3e3b1ea0a3551887a82023c6))
+
+## [1.430.0](https://github.com/factorialco/f0/compare/f0-react-v1.429.0...f0-react-v1.430.0) (2026-04-01)
+
+
+### Features
+
+* wip add sentinel-based sticky parent rows for nested table hierarchies ([#3685](https://github.com/factorialco/f0/issues/3685)) ([4375423](https://github.com/factorialco/f0/commit/437542350c6f5a4e27cb6a74e16f26b771301e9f))
+
+## [1.429.0](https://github.com/factorialco/f0/compare/f0-react-v1.428.2...f0-react-v1.429.0) (2026-04-01)
+
+
+### Features
+
+* add Storybook MCP server for AI agent access ([#3814](https://github.com/factorialco/f0/issues/3814)) ([7843cc7](https://github.com/factorialco/f0/commit/7843cc72aa02fbedbb075a9b5aa61cb80f3e5ad4))
+
+## [1.428.2](https://github.com/factorialco/f0/compare/f0-react-v1.428.1...f0-react-v1.428.2) (2026-03-31)
+
+
+### Bug Fixes
+
+* prevent answer selection in edit mode for SelectOption ([#3811](https://github.com/factorialco/f0/issues/3811)) ([c44102d](https://github.com/factorialco/f0/commit/c44102dcc7cee982a61001c18177d76448351510))
+
+## [1.428.1](https://github.com/factorialco/f0/compare/f0-react-v1.428.0...f0-react-v1.428.1) (2026-03-31)
+
+
+### Bug Fixes
+
+* set proper F0Select spacing ([#3813](https://github.com/factorialco/f0/issues/3813)) ([f399581](https://github.com/factorialco/f0/commit/f399581def34b02658fcaa78308612f91e56cc84))
+
+## [1.428.0](https://github.com/factorialco/f0/compare/f0-react-v1.427.3...f0-react-v1.428.0) (2026-03-31)
+
+
+### Features
+
+* add search box functionality to dropdown single question ([#3810](https://github.com/factorialco/f0/issues/3810)) ([5493c45](https://github.com/factorialco/f0/commit/5493c457a1e8848bdd531168a1f83655f6edb48b))
+
+## [1.427.3](https://github.com/factorialco/f0/compare/f0-react-v1.427.2...f0-react-v1.427.3) (2026-03-31)
+
+
+### Bug Fixes
+
+* no dot allow sorting-through tabeofcontent when SurveyFormBuilder is disabled ([#3807](https://github.com/factorialco/f0/issues/3807)) ([ba57032](https://github.com/factorialco/f0/commit/ba57032ca06f10bb4d1d43a0d7aa2b70dcc23bd7))
+
+## [1.427.2](https://github.com/factorialco/f0/compare/f0-react-v1.427.1...f0-react-v1.427.2) (2026-03-31)
+
+
+### Bug Fixes
+
+* add error status to f0 action bar ([#3806](https://github.com/factorialco/f0/issues/3806)) ([507053f](https://github.com/factorialco/f0/commit/507053f3f0cfab0b8307e7cf5f309773f5fd4d27))
+
+## [1.427.1](https://github.com/factorialco/f0/compare/f0-react-v1.427.0...f0-react-v1.427.1) (2026-03-31)
+
+
+### Bug Fixes
+
+* survey-related UI fixes ([#3803](https://github.com/factorialco/f0/issues/3803)) ([5993be6](https://github.com/factorialco/f0/commit/5993be6fe68bf1b42e2b19d65bc045b490d6a6c4))
+
+## [1.427.0](https://github.com/factorialco/f0/compare/f0-react-v1.426.0...f0-react-v1.427.0) (2026-03-31)
+
+
+### Features
+
+* add wiggle and error highlight to F0ActionBar ([#3795](https://github.com/factorialco/f0/issues/3795)) ([7086b14](https://github.com/factorialco/f0/commit/7086b14592c2454aacfc9a1e7fe8d25cefea54bb))
+
+## [1.426.0](https://github.com/factorialco/f0/compare/f0-react-v1.425.4...f0-react-v1.426.0) (2026-03-30)
+
+
+### Features
+
+* **ai:** upgrade CopilotKit peer deps from ^1.10.6 to ^1.54.0 ([#3763](https://github.com/factorialco/f0/issues/3763)) ([7f672c8](https://github.com/factorialco/f0/commit/7f672c81d99863c5962576500bbb7b7c9e6b344c))
+
+## [1.425.4](https://github.com/factorialco/f0/compare/f0-react-v1.425.3...f0-react-v1.425.4) (2026-03-30)
+
+
+### Bug Fixes
+
+* clear visibleItems state when items becomes empty ([#3794](https://github.com/factorialco/f0/issues/3794)) ([a5f9a94](https://github.com/factorialco/f0/commit/a5f9a94f2155bd65c86beccb6ed80f027be6d565))
+
+## [1.425.3](https://github.com/factorialco/f0/compare/f0-react-v1.425.2...f0-react-v1.425.3) (2026-03-30)
+
+
+### Bug Fixes
+
+* do not show import banner on doc pages with no components ([#3792](https://github.com/factorialco/f0/issues/3792)) ([ec3ccf5](https://github.com/factorialco/f0/commit/ec3ccf542a0ee8a05229429d055eb6c42df44830))
+
+## [1.425.2](https://github.com/factorialco/f0/compare/f0-react-v1.425.1...f0-react-v1.425.2) (2026-03-30)
+
+
+### Bug Fixes
+
+* **editable-table:** fix disabled cell background color, add new color ([#3722](https://github.com/factorialco/f0/issues/3722)) ([7a93d73](https://github.com/factorialco/f0/commit/7a93d73ccddb7e93892b3f903e7b4f739288a479))
+
+## [1.425.1](https://github.com/factorialco/f0/compare/f0-react-v1.425.0...f0-react-v1.425.1) (2026-03-30)
+
+
+### Bug Fixes
+
+* **OneDateNavigator:** use locale from l10n context in granularity label ([#3767](https://github.com/factorialco/f0/issues/3767)) ([d3bcc52](https://github.com/factorialco/f0/commit/d3bcc521c79402ef9865a5743bc1fa05be20c33c))
+
+## [1.425.0](https://github.com/factorialco/f0/compare/f0-react-v1.424.0...f0-react-v1.425.0) (2026-03-30)
+
+
+### Features
+
+* add checkbox question type ([#3759](https://github.com/factorialco/f0/issues/3759)) ([266a4e0](https://github.com/factorialco/f0/commit/266a4e07c21a3a596f5a2eb371f206f3a84bfae6))
+
+## [1.424.0](https://github.com/factorialco/f0/compare/f0-react-v1.423.0...f0-react-v1.424.0) (2026-03-27)
+
+
+### Features
+
+* **EditableTable:** add NumberCell for editable numeric columns ([#3724](https://github.com/factorialco/f0/issues/3724)) ([0441735](https://github.com/factorialco/f0/commit/0441735153f9416446acfab9b03afe2eada6951a))
+
+## [1.423.0](https://github.com/factorialco/f0/compare/f0-react-v1.422.3...f0-react-v1.423.0) (2026-03-27)
+
+
+### Features
+
+* add file question type ([#3583](https://github.com/factorialco/f0/issues/3583)) ([62599da](https://github.com/factorialco/f0/commit/62599da2c0e0dfd1d43902066ffda3fe10659950))
+
+## [1.422.3](https://github.com/factorialco/f0/compare/f0-react-v1.422.2...f0-react-v1.422.3) (2026-03-27)
+
+
+### Bug Fixes
+
+* **editable-table:** add active, hover states to the cells of the editable table ([#3733](https://github.com/factorialco/f0/issues/3733)) ([a39652f](https://github.com/factorialco/f0/commit/a39652f92a86a4a86a238d1c7e152b3f3ac1d672))
+
+## [1.422.2](https://github.com/factorialco/f0/compare/f0-react-v1.422.1...f0-react-v1.422.2) (2026-03-26)
+
+
+### Bug Fixes
+
+* **OverflowList:** prevent multi-item jumps and add custom overflow trigger for FiltersPresets ([#3753](https://github.com/factorialco/f0/issues/3753)) ([94ad025](https://github.com/factorialco/f0/commit/94ad0250cb169661e24a7edfca141aa6310837d1))
+
+## [1.422.1](https://github.com/factorialco/f0/compare/f0-react-v1.422.0...f0-react-v1.422.1) (2026-03-26)
+
+
+### Bug Fixes
+
+* add import instructions on the docs of each component ([#3771](https://github.com/factorialco/f0/issues/3771)) ([e347d31](https://github.com/factorialco/f0/commit/e347d31427e158bf1902a56c94bc3b570d21dd49))
+
+## [1.422.0](https://github.com/factorialco/f0/compare/f0-react-v1.421.0...f0-react-v1.422.0) (2026-03-26)
+
+
+### Features
+
+* **F0AiChatTextArea:** add credit warning banner with upsell actions ([#3608](https://github.com/factorialco/f0/issues/3608)) ([8937f90](https://github.com/factorialco/f0/commit/8937f9099edc5c70490562d514d05a4dcde13a9c))
+
+## [1.421.0](https://github.com/factorialco/f0/compare/f0-react-v1.420.0...f0-react-v1.421.0) (2026-03-26)
+
+
+### Features
+
+* **value-display:** add compound renderer ([#3582](https://github.com/factorialco/f0/issues/3582)) ([35bddd9](https://github.com/factorialco/f0/commit/35bddd9f39a7afe7b06e6a0d196864002b6183ba))
+
+## [1.420.0](https://github.com/factorialco/f0/compare/f0-react-v1.419.0...f0-react-v1.420.0) (2026-03-26)
+
+
+### Features
+
+* **react:** add F0TimelineRow component ([#3727](https://github.com/factorialco/f0/issues/3727)) ([eb5e1f4](https://github.com/factorialco/f0/commit/eb5e1f4b3d5db5dd1cbbcfc1fa6950dfdb8b4016))
+
 ## [1.419.0](https://github.com/factorialco/f0/compare/f0-react-v1.418.1...f0-react-v1.419.0) (2026-03-24)
 
 

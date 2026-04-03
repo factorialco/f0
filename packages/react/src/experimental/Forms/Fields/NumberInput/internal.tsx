@@ -111,7 +111,7 @@ export const NumberInputInternal = forwardRef<
 
     if (value === undefined || value == extractedData?.value) return
 
-    setFieldValue(value ? formatValue(value, locale, maxDecimals) : "")
+    setFieldValue(value != null ? formatValue(value, locale, maxDecimals) : "")
   }, [fieldValue, maxDecimals, value, locale])
 
   return (
@@ -126,11 +126,13 @@ export const NumberInputInternal = forwardRef<
         hint={localHint}
         appendTag={units}
         append={
-          <Arrows
-            step={step}
-            disabled={props.disabled}
-            onClickArrow={handleStep}
-          />
+          step ? (
+            <Arrows
+              step={step}
+              disabled={props.disabled}
+              onClickArrow={handleStep}
+            />
+          ) : undefined
         }
       />
     </div>

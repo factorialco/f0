@@ -1,13 +1,15 @@
 import { type AIMessage, type Message } from "@copilotkit/shared"
 
+import { type ClarifyingQuestionState } from "./actions/core/clarifyingQuestion/types"
 import {
   type AiChatDisclaimer,
   type AiChatMode,
+  type AiChatFileAttachmentConfig,
   type AiChatTrackingOptions,
   type AiChatToolHint,
   type CanvasContent,
   type AiChatCredits,
-  type EntityResolvers,
+  type EntityRefs,
   type VisualizationMode,
   WelcomeScreenSuggestion,
 } from "./types"
@@ -28,9 +30,10 @@ export interface AiChatState {
   historyEnabled?: boolean
   footer?: React.ReactNode
   VoiceMode?: React.ComponentType
-  entityResolvers?: EntityResolvers
+  entityRefs?: EntityRefs
   toolHints?: AiChatToolHint[]
   credits?: AiChatCredits
+  fileAttachments?: AiChatFileAttachmentConfig
   placeholders?: string[]
   setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>
   onThumbsUp?: (
@@ -159,15 +162,22 @@ export type AiChatProviderReturnValue = {
   inProgress: boolean
   /** Set the in-progress state (synced from CopilotKit's isLoading) */
   setInProgress: (value: boolean) => void
+  /** The current clarifying question shown in the textarea, or null if none */
+  clarifyingQuestion: ClarifyingQuestionState | null
+  /** Set the current clarifying question (or null to dismiss) */
+  setClarifyingQuestion: React.Dispatch<
+    React.SetStateAction<ClarifyingQuestionState | null>
+  >
 } & Pick<
   AiChatState,
   | "greeting"
   | "agent"
   | "disclaimer"
   | "resizable"
-  | "entityResolvers"
+  | "entityRefs"
   | "toolHints"
   | "credits"
+  | "fileAttachments"
 > & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null
@@ -188,4 +198,23 @@ export type AiChatProviderReturnValue = {
  */
 export function isAgentStateMessage(message: Message): boolean {
   return message.role === "assistant" && message.agentName !== undefined
+}
+
+/**
+ * Check whether a message is a coagent-state-render placeholder injected by
+ * CopilotKit v1.51+.  These empty assistant messages are meant for
+ * `useCoAgentStateRender` which f0 does not use; they must be filtered out
+ * before any message-count or welcome-screen logic.
+ */
+export function isCoagentPlaceholder(message: Message): boolean {
+  return (
+    (message as Message & { name?: string }).name === "coagent-state-render"
+  )
+}
+
+/**
+ * Filter coagent-state-render placeholder messages from an array.
+ */
+export function filterCoagentPlaceholders(messages: Message[]): Message[] {
+  return messages.filter((m) => !isCoagentPlaceholder(m))
 }

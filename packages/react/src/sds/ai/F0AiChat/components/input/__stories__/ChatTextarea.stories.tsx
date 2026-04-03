@@ -1,6 +1,9 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect, useRef, useState } from "react"
 
+import { F0Button } from "@/components/F0Button/F0Button"
+import { Cross } from "@/icons/app"
+
 import { F0AiChatProvider, useAiChat } from "../../.."
 import { ChatTextarea } from "../ChatTextarea"
 
@@ -139,4 +142,53 @@ export const WithPlaceholders: Story = {
 
 export const WithOnePlaceholder: Story = {
   render: () => <ChatTextareaWrapper placeholders={[PLACEHOLDERS[0]]} />,
+}
+
+const CreditWarningExample = () => {
+  const [dismissed, setDismissed] = useState(false)
+
+  return (
+    <div className="flex w-96 flex-col rounded-xl bg-f1-background-info [&_form]:border-f1-border-info">
+      {!dismissed && (
+        <div className="flex items-center justify-between gap-2 px-4 py-2">
+          <p className="min-w-0 flex-1 text-sm font-medium text-f1-foreground">
+            You're running low on AI credits.
+          </p>
+          <div className="flex shrink-0 items-center gap-1">
+            <F0Button
+              label="Get credits"
+              size="sm"
+              variant="outline"
+              tooltip="Get credits"
+              onClick={() => alert("Upgrade clicked!")}
+            />
+            <F0Button
+              label="Dismiss"
+              size="sm"
+              variant="ghost"
+              icon={Cross}
+              hideLabel
+              onClick={() => setDismissed(true)}
+            />
+          </div>
+        </div>
+      )}
+      <ChatTextarea
+        inProgress={false}
+        onSend={async () => {
+          return {
+            id: "",
+            role: "assistant" as const,
+            content: "",
+          }
+        }}
+        onStop={() => undefined}
+      />
+    </div>
+  )
+}
+
+export const WithCreditWarning: Story = {
+  name: "Soft Credit Warning",
+  render: () => <CreditWarningExample />,
 }

@@ -19,6 +19,7 @@ export default {
   modulePathIgnorePatterns: ["<rootDir>/lib/"],
   moduleFileExtensions: ["js", "jsx", "ts", "tsx"],
   moduleNameMapper: {
+    "^expo-blur$": "<rootDir>/mocks/expo-blur.js",
     "\\.svg": "<rootDir>/mocks/svg.js",
     // Mock ViewConfigIgnore to avoid TypeScript parsing issues
     "^react-native/Libraries/NativeComponent/ViewConfigIgnore$":

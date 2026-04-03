@@ -3,10 +3,40 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 
 import { withSkipA11y } from "@/lib/storybook-utils/parameters"
+import { createDataSourceDefinition } from "@/hooks/datasource"
+import type { RecordType } from "@/hooks/datasource"
 
 import { DropdownSingleQuestion } from "."
 import { SurveyFormBuilderProvider } from "../../Context"
-import { SurveyFormBuilderElement } from "../../types"
+import { SurveyDatasets, SurveyFormBuilderElement } from "../../types"
+
+const datasets: SurveyDatasets = {
+  people: {
+    title: "People",
+    dataSource: createDataSourceDefinition({
+      dataAdapter: {
+        paginationType: "infinite-scroll",
+        fetchData: () =>
+          Promise.resolve({
+            type: "infinite-scroll" as const,
+            cursor: "3",
+            perPage: 3,
+            hasMore: false,
+            total: 3,
+            records: [
+              { id: "1", name: "Ada Lovelace" },
+              { id: "2", name: "Alan Turing" },
+              { id: "3", name: "Grace Hopper" },
+            ],
+          }),
+      },
+    }) as SurveyDatasets[string]["dataSource"],
+    mapOptions: (item: RecordType) => ({
+      value: String(item.id),
+      label: String(item.name),
+    }),
+  },
+}
 
 const meta: Meta<typeof DropdownSingleQuestion> = {
   title: "Surveys/SurveyFormBuilder/DropdownSingleQuestion",
@@ -22,7 +52,11 @@ const meta: Meta<typeof DropdownSingleQuestion> = {
 
     return (
       <div className="max-w-[750px]">
-        <SurveyFormBuilderProvider elements={elements} onChange={setElements}>
+        <SurveyFormBuilderProvider
+          elements={elements}
+          onChange={setElements}
+          datasets={datasets}
+        >
           <DropdownSingleQuestion {...args} {...question} />
         </SurveyFormBuilderProvider>
       </div>
@@ -40,12 +74,33 @@ export const Default: Story = {
     title: "Select your department",
     description: "Choose one option from the list",
     type: "dropdown-single",
+    datasetKey: "people",
     value: null,
-    options: [
-      { value: "engineering", label: "Engineering" },
-      { value: "design", label: "Design" },
-      { value: "marketing", label: "Marketing" },
-      { value: "sales", label: "Sales" },
-    ],
+  },
+}
+
+export const WithSearchBox: Story = {
+  parameters: withSkipA11y({}),
+  args: {
+    id: "question-2",
+    title: "Select your currency",
+    description: "Choose the currency for this purchase request",
+    type: "dropdown-single",
+    datasetKey: "people",
+    value: null,
+  },
+}
+
+export const WithSearchBoxExplicit: Story = {
+  parameters: withSkipA11y({}),
+  args: {
+    id: "question-3",
+    title: "Select your vendor",
+    description: "Search and select a vendor",
+    type: "dropdown-single",
+    datasetKey: "people",
+    showSearchBox: true,
+    searchBoxPlaceholder: "Search vendors...",
+    value: null,
   },
 }

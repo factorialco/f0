@@ -28,6 +28,16 @@ const textVariantMap: Record<
   xlarge: "heading-lg",
 }
 
+/**
+ * F0AvatarFile - File avatar variant.
+ *
+ * Derives its short label and semantic color from the file type while preserving
+ * the shared avatar sizing and optional badge overlay behavior.
+ *
+ * @example
+ * <F0AvatarFile file="document.pdf" size="md" />
+ * <F0AvatarFile file="photo.png" size="lg" />
+ */
 export const F0AvatarFile = React.memo(function F0AvatarFile({
   file,
   size = "md",

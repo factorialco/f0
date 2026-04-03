@@ -14,7 +14,7 @@ import {
 } from "../types.ts"
 
 const meta = {
-  title: "ButtonDropdown",
+  title: "Button/ButtonDropdown",
   component: F0ButtonDropdown,
   parameters: {
     layout: "centered",
@@ -68,11 +68,11 @@ const meta = {
       table: {
         type: {
           summary: "ButtonDropdownItem[]",
-          detail: `type ButtonDropdownItem = { 
-  value: string; 
-  label: string; 
-  icon?: IconType; 
-  critical?: boolean 
+          detail: `type ButtonDropdownItem = {
+  value: string;
+  label: string;
+  icon?: IconType;
+  critical?: boolean
 }`,
         },
       },

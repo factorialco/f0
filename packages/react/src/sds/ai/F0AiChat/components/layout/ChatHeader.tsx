@@ -2,7 +2,7 @@ import { breakpoints } from "@factorialco/f0-core"
 import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { useChatContext, type HeaderProps } from "@copilotkit/react-ui"
 import { motion } from "motion/react"
-import { useCallback, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -17,6 +17,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
 
+import { filterCoagentPlaceholders } from "../../internal-types"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { ChatHistoryDialog } from "../history/ChatHistoryDialog"
 import { CreditsPopover } from "./CreditsPopover"
@@ -148,7 +149,11 @@ const ChatHeaderLegacy = (props: HeaderProps) => {
   const fullscreen = visualizationMode === "fullscreen"
   const translations = useI18n()
   const hasDefaultTitle = labels.title === "CopilotKit"
-  const hasMessages = messages.length > 0
+  const filteredMessages = useMemo(
+    () => filterCoagentPlaceholders(messages),
+    [messages]
+  )
+  const hasMessages = filteredMessages.length > 0
   const isSmallScreen = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
     initializeWithValue: true,
   })

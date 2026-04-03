@@ -15,6 +15,15 @@ const containerSizes: Record<F0AvatarUtilitySize, string> = {
   lg: "h-10 w-10 rounded-lg",
 }
 
+/**
+ * F0AvatarIcon - Icon avatar variant.
+ *
+ * Wraps a semantic icon in the shared utility avatar container for system-facing
+ * and utility use cases.
+ *
+ * @example
+ * <F0AvatarIcon icon={Settings} size="md" />
+ */
 export const F0AvatarIcon = React.memo(function F0AvatarIcon({
   icon,
   size = "sm",

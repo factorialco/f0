@@ -35,6 +35,17 @@ function getStringContent(value: React.ReactNode): string | undefined {
   return undefined
 }
 
+/**
+ * F0Link - Semantic inline link with optional navigation handling.
+ *
+ * Supports text-style and plain variants, optional external-link affordance,
+ * and safe handling of either `href` navigation or custom `onPress` callbacks.
+ *
+ * @example
+ * <F0Link href="https://example.com">Visit site</F0Link>
+ * <F0Link href="https://example.com" external>Open externally</F0Link>
+ * <F0Link onPress={handlePress} variant="plain">Custom action</F0Link>
+ */
 const F0Link = React.memo(
   React.forwardRef<View, F0LinkProps>(function F0Link(
     {

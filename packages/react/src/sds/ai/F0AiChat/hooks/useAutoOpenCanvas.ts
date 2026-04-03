@@ -1,28 +1,33 @@
-import { breakpoints } from "@factorialco/f0-core"
 import { useEffect, useRef } from "react"
-import { useMediaQuery } from "usehooks-ts"
 
-import type { CanvasContent } from "../types"
-import { useAiChat } from "../providers/AiChatStateProvider"
+// Module-level set shared across all instances — survives remounts.
+const globalOpenedIds = new Set<string>()
 
 /**
- * Auto-opens the canvas panel the first time content is received from the agent.
- * On small screens, skips auto-open so the user can open manually via the card.
+ * Auto-opens a canvas card the first time it appears.
  *
- * Call this inside a copilot action's render callback, passing the canvas content
- * to open. It will only fire once per mount (i.e. per action invocation).
+ * Call inside any canvas card component (DashboardCard, SurveyCard, …)
+ * passing its `toolCallId` and a callback that opens the canvas.
+ * The hook fires the callback exactly once per `toolCallId` for the
+ * lifetime of the page.  If the user closes the canvas, it won't
+ * re-open for that same tool call.
+ *
+ * ```tsx
+ * useAutoOpenCanvas(toolCallId, () => openCanvas(content))
+ * ```
  */
-export function useAutoOpenCanvas(content: CanvasContent | null) {
-  const { openCanvas } = useAiChat()
-  const opened = useRef(false)
-  const isSmallScreen = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
-    initializeWithValue: true,
-  })
+export function useAutoOpenCanvas(
+  toolCallId: string | undefined,
+  open: () => void
+) {
+  const openRef = useRef(open)
+  openRef.current = open
 
   useEffect(() => {
-    if (content && !opened.current && !isSmallScreen) {
-      opened.current = true
-      openCanvas(content)
-    }
-  }, [content, isSmallScreen, openCanvas])
+    if (!toolCallId) return
+    if (globalOpenedIds.has(toolCallId)) return
+    if (window.innerWidth <= 624) return
+    globalOpenedIds.add(toolCallId)
+    openRef.current()
+  }, [toolCallId])
 }

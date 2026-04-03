@@ -19,6 +19,19 @@ import { F0AvatarModule } from "./F0AvatarModule"
 import { F0AvatarPerson } from "./F0AvatarPerson"
 import { F0AvatarTeam } from "./F0AvatarTeam"
 
+/**
+ * F0AvatarRoot - Shared polymorphic avatar root.
+ *
+ * Dispatches the discriminated `avatar` payload to the matching semantic avatar
+ * variant so hosts can render a single entry point when the avatar type is dynamic.
+ * Prefer `F0Avatar.*` named variants in product code.
+ *
+ * @example
+ * Prefer named variants in product code
+ * <F0Avatar.Person firstName="Alice" lastName="Smith" size="md" />
+ * Use the root when the avatar type is determined at runtime
+ * <F0AvatarRoot avatar={{ type: "person", firstName: "Alice", lastName: "Smith" }} size="md" />
+ */
 const F0AvatarRoot = ({ avatar, size = "xs" }: F0AvatarProps): ReactNode => {
   const internalSize = F0_AVATAR_SIZE_TO_INTERNAL_SIZE[size]
   const utilitySize = F0_AVATAR_INTERNAL_SIZE_TO_UTILITY_SIZE[internalSize]
@@ -114,6 +127,11 @@ type F0AvatarNamespace = typeof F0AvatarRoot & {
  *
  * Use `F0Avatar.*` semantic variants in product code,
  * or pass an `avatar` discriminated union to the root for polymorphic rendering.
+ *
+ * @example
+ * <F0Avatar.Person firstName="Alice" lastName="Smith" />
+ * <F0Avatar.Team name="Design" size="md" />
+ * <F0Avatar avatar={{ type: "flag", flag: "ES" }} size="sm" />
  */
 const F0Avatar = Object.assign(F0AvatarRoot, {
   Person: F0AvatarPerson,

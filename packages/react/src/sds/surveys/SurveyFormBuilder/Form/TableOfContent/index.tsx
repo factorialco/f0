@@ -5,6 +5,7 @@ import { F0TableOfContentPopover } from "@/components/F0TableOfContentPopover/F0
 import { IdStructure } from "@/experimental/Navigation/F0TableOfContent/types"
 import { useI18n } from "@/lib/providers/i18n"
 
+import { useSurveyFormBuilderContext } from "../../Context"
 import {
   SurveyFormBuilderElement,
   QuestionElement,
@@ -88,6 +89,7 @@ export const TableOfContent = ({
   answering?: boolean
 }) => {
   const { t } = useI18n()
+  const { disabled } = useSurveyFormBuilderContext()
   const { portalContainer } = useContext(F0DialogContext)
 
   const tocItems = useTableOfContentItems(elements, {
@@ -100,6 +102,8 @@ export const TableOfContent = ({
     questionOptionsLabel: t("surveyFormBuilder.labels.questionOptions"),
     requiredLabel: t("surveyFormBuilder.labels.required"),
     questionTypeLabel: t("surveyFormBuilder.labels.questionType"),
+    singleSelectionLabel: t("surveyFormBuilder.labels.singleSelection"),
+    multiSelectionLabel: t("surveyFormBuilder.labels.multiSelection"),
   })
 
   const handleReorder = useCallback(
@@ -117,7 +121,7 @@ export const TableOfContent = ({
         size="md"
         collapsible
         showChildrenCounter
-        sortable={!answering}
+        sortable={!answering && !disabled}
         onReorder={handleReorder}
         portalContainer={portalContainer}
       />

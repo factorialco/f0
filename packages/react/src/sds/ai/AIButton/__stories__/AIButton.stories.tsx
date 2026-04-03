@@ -7,7 +7,7 @@ import { AIButton } from "../AIButton"
 
 const meta = {
   component: AIButton,
-  title: "AIButton",
+  title: "AI/AIButton",
   parameters: {
     layout: "centered",
   },

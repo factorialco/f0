@@ -65,6 +65,15 @@ const iconSizeVariants = tv({
 const squirclePath =
   "M50,0 C43,0 36,0 30,1 23,2 17,5 12,9 5,16 1,25 0,36 0,43 0,57 0,64 1,75 5,84 12,91 17,95 23,98 30,99 36,100 43,100 50,100 57,100 64,100 70,99 77,98 83,95 88,91 95,84 99,75 100,64 100,57 100,43 100,36 99,25 95,16 88,9 83,5 77,2 70,1 64,0 57,0 50,0"
 
+/**
+ * F0AvatarModule - Branded module avatar variant.
+ *
+ * Renders the module icon inside the gradient squircle treatment used for branded
+ * module identity across the avatar system.
+ *
+ * @example
+ * <F0AvatarModule module="time" size="md" />
+ */
 export const F0AvatarModule = React.memo(function F0AvatarModule({
   module,
   size = "lg",

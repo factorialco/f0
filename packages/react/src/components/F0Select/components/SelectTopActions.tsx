@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useState } from "react"
 
 import { OneFilterPicker } from "@/components/OneFilterPicker"
-import { GroupingSelector } from "@/experimental/OneDataCollection/Settings/components/GroupingSelector"
+import { GroupingSelector } from "@/patterns/OneDataCollection/Settings/components/GroupingSelector"
 import {
   FiltersDefinition,
   FiltersState,

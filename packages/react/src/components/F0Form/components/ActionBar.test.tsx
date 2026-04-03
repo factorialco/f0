@@ -1,5 +1,6 @@
-import { zeroRender as render, screen } from "@/testing/test-utils"
 import { describe, expect, it, vi } from "vitest"
+
+import { zeroRender as render, screen } from "@/testing/test-utils"
 
 import { FormActionBar } from "./ActionBar"
 
@@ -10,7 +11,6 @@ const defaultProps = {
   hasErrors: false,
   errorCount: 0,
   resolvedActionBarLabel: "You have changes pending to be saved",
-  centerActionBarInFrameContent: false,
   submitLabel: "Save",
   submitIcon: undefined,
   discardableChanges: false,

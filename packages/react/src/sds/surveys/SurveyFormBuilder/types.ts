@@ -1,22 +1,33 @@
-import { DateQuestionProps } from "./QuestionTypes/DateQuestion"
-import { DropdownSingleQuestionProps } from "./QuestionTypes/DropdownSingleQuestion/types"
-import { LinkQuestionProps } from "./QuestionTypes/LinkQuestion"
-import { NumericQuestionProps } from "./QuestionTypes/NumericQuestion"
-import { RatingQuestionProps } from "./QuestionTypes/RatingQuestion"
-import { SectionProps } from "./Section/types"
-import { SelectQuestionProps } from "./QuestionTypes/SelectQuestion/types"
-import { TextQuestionProps } from "./QuestionTypes/TextQuestion"
+import type { UseFileUpload } from "@/components/F0Form/fields/file/types"
+import type { IconType } from "@/components/F0Icon/F0Icon"
+import type { F0SelectItemProps } from "@/components/F0Select/types"
+import type { DataSourceDefinition, RecordType } from "@/hooks/datasource"
+
+import type { CheckboxQuestionProps } from "./QuestionTypes/CheckboxQuestion"
+import type { DateQuestionProps } from "./QuestionTypes/DateQuestion"
+import type { DropdownMultiQuestionProps } from "./QuestionTypes/DropdownMultiQuestion/types"
+import type { DropdownSingleQuestionProps } from "./QuestionTypes/DropdownSingleQuestion/types"
+import type { FileQuestionProps } from "./QuestionTypes/FileQuestion"
+import type { LinkQuestionProps } from "./QuestionTypes/LinkQuestion"
+import type { NumericQuestionProps } from "./QuestionTypes/NumericQuestion"
+import type { RatingQuestionProps } from "./QuestionTypes/RatingQuestion"
+import type { SelectQuestionProps } from "./QuestionTypes/SelectQuestion/types"
+import type { TextQuestionProps } from "./QuestionTypes/TextQuestion"
+import type { SectionProps } from "./Section/types"
 
 export type QuestionType =
   | "rating"
   | "select"
   | "multi-select"
   | "dropdown-single"
+  | "dropdown-multi"
   | "text"
   | "longText"
   | "numeric"
   | "link"
   | "date"
+  | "file"
+  | "checkbox"
 
 export type ElementType = QuestionType | "section"
 
@@ -42,9 +53,15 @@ export type QuestionElement =
       DropdownSingleQuestionProps & { type: "dropdown-single" },
       QuestionPropsToOmit
     >
+  | Omit<
+      DropdownMultiQuestionProps & { type: "dropdown-multi" },
+      QuestionPropsToOmit
+    >
   | Omit<NumericQuestionProps & { type: "numeric" }, QuestionPropsToOmit>
   | Omit<LinkQuestionProps & { type: "link" }, QuestionPropsToOmit>
   | Omit<DateQuestionProps & { type: "date" }, QuestionPropsToOmit>
+  | Omit<FileQuestionProps & { type: "file" }, QuestionPropsToOmit>
+  | Omit<CheckboxQuestionProps & { type: "checkbox" }, QuestionPropsToOmit>
 
 export type SurveyFormBuilderElement =
   | { type: "section"; section: SectionElement }
@@ -72,6 +89,16 @@ export type SelectQuestionOption = {
   correct?: boolean
 }
 
+export type SurveyDataset = {
+  title: string
+  icon?: IconType
+  placeholder?: string
+  dataSource: DataSourceDefinition
+  mapOptions: (item: RecordType) => F0SelectItemProps<string, RecordType>
+}
+
+export type SurveyDatasets = Record<string, SurveyDataset>
+
 type OnChangeQuestionParams = BaseQuestionOnChangeParams &
   (
     | {
@@ -96,7 +123,16 @@ type OnChangeQuestionParams = BaseQuestionOnChangeParams &
     | {
         type: "dropdown-single"
         value?: string | null
-        options?: SelectQuestionOption[]
+        datasetKey?: string
+        showSearchBox?: boolean
+        searchBoxPlaceholder?: string
+      }
+    | {
+        type: "dropdown-multi"
+        value?: string[] | null
+        datasetKey?: string
+        showSearchBox?: boolean
+        searchBoxPlaceholder?: string
       }
     | {
         type: "numeric"
@@ -110,6 +146,15 @@ type OnChangeQuestionParams = BaseQuestionOnChangeParams &
         type: "date"
         value?: Date | null
       }
+    | {
+        type: "file"
+        value?: string[] | null
+      }
+    | {
+        type: "checkbox"
+        value?: boolean | null
+        label: string
+      }
   )
 
 export type QuestionActionParams = {
@@ -121,6 +166,7 @@ export type QuestionActionParams = {
 export type OnAddNewElementParams = {
   type: ElementType
   afterId?: string
+  datasetKey?: string
 }
 
 export type OnDuplicateElementParams = {
@@ -142,4 +188,6 @@ export type SurveyFormBuilderProps = {
   disallowOptionalQuestions?: boolean
   allowedQuestionTypes?: QuestionType[]
   applyingChanges?: boolean
+  useUpload?: UseFileUpload
+  datasets?: SurveyDatasets
 }

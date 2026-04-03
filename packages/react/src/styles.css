@@ -72,18 +72,20 @@ div[role="dialog"] {
 @keyframes f0-form-error-glow {
   0% {
     box-shadow: 0 0 0 0 transparent;
+    border-color: hsl(var(--critical-50));
   }
   50% {
     box-shadow: 0 0 8px 0px hsl(var(--critical-50));
+    border-color: hsl(var(--critical-50));
   }
   100% {
     box-shadow: 0 0 0px 0px hsl(var(--critical-50));
+    border-color: transparent;
   }
 }
 
 .f0-form-error-navigate [data-testid="input-field-wrapper"],
 .f0-form-error-navigate .rich-text-editor-container {
-  border-color: hsl(var(--critical-50)) !important;
   animation:
     f0-form-error-shake 0.5s ease-in-out,
     f0-form-error-glow 0.6s ease-in-out forwards;
@@ -108,6 +110,53 @@ div[role="dialog"] {
   .f0-form-error-navigate:not(:has([data-testid="input-field-wrapper"])):not(
       :has(.rich-text-editor-container)
     ) {
+    animation: none;
+  }
+}
+
+/* Action bar error highlight animation */
+.f0-action-bar-error-navigate {
+  animation: f0-form-error-shake 0.6s ease-in-out;
+}
+
+.f0-action-bar-error-navigate[data-variant="light"] {
+  animation:
+    f0-form-error-shake 0.6s ease-in-out,
+    f0-action-bar-glow 0.6s ease-in-out,
+    f0-action-bar-bg-flash 0.6s ease-in-out;
+}
+
+@keyframes f0-action-bar-glow {
+  0% {
+    box-shadow: 0 8px 30px 0 hsl(var(--shadow) / 0.12);
+    border-color: hsl(var(--critical-50));
+  }
+  50% {
+    box-shadow:
+      0 8px 30px 0 hsl(var(--shadow) / 0.12),
+      0 0 8px 0px hsl(var(--critical-50));
+    border-color: hsl(var(--critical-50));
+  }
+  100% {
+    box-shadow: 0 8px 30px 0 hsl(var(--shadow) / 0.12);
+    border-color: hsl(var(--critical-50));
+  }
+}
+
+@keyframes f0-action-bar-bg-flash {
+  0% {
+    background-color: hsl(var(--neutral-0));
+  }
+  50% {
+    background-color: hsl(var(--critical-50) / 0.2);
+  }
+  100% {
+    background-color: hsl(var(--critical-50) / 0.1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .f0-action-bar-error-navigate {
     animation: none;
   }
 }

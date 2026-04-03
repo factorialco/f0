@@ -8,7 +8,7 @@ import {
   useState,
 } from "react"
 
-import type { DashboardItemLayout } from "@/components/F0AnalyticsDashboard/types"
+import type { DashboardItemLayout } from "@/patterns/F0AnalyticsDashboard/types"
 
 import type { ChatDashboardConfig } from "./types"
 import { useSaveDashboardConfig } from "./useSaveDashboardConfig"
