@@ -36,9 +36,6 @@ jobs:
       - name: Setup Node and PNPM
         uses: ./.github/actions/setup-node-pnpm
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
       - name: Build Core
         run: pnpm --filter @factorialco/f0-core build
 
