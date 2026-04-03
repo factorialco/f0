@@ -19,10 +19,15 @@ export const TagCounter = ({ count, list }: Props) => {
   return (
     <HoverCard>
       <HoverCardTrigger>
-        <span className="cursor-pointer">{counter}</span>
+        <span className="pointer-events-auto relative z-[1] cursor-pointer">
+          {counter}
+        </span>
       </HoverCardTrigger>
-      <HoverCardContent side="top">
-        <ScrollArea className="[*[data-state=visible]_div]:bg-f1-background dark flex max-h-[220px] flex-col">
+      <HoverCardContent
+        side="top"
+        className="bg-f1-background text-f1-foreground shadow-md ring-1 ring-f1-border-secondary"
+      >
+        <ScrollArea className="flex max-h-[220px] flex-col">
           {list.map((tag, index) => (
             <div
               key={index}
@@ -39,10 +44,7 @@ export const TagCounter = ({ count, list }: Props) => {
               )}
             </div>
           ))}
-          <ScrollBar
-            orientation="vertical"
-            className="[&_div]:bg-f1-background"
-          />
+          <ScrollBar orientation="vertical" />
         </ScrollArea>
       </HoverCardContent>
     </HoverCard>
