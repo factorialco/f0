@@ -1,21 +1,23 @@
+import userEvent from "@testing-library/user-event"
 import React from "react"
+import { describe, expect, it, vi } from "vitest"
+import { z } from "zod"
+
 import {
   zeroRender as render,
   screen,
   waitFor,
   fireEvent,
 } from "@/testing/test-utils"
-import { describe, expect, it, vi } from "vitest"
-import { z } from "zod"
-import userEvent from "@testing-library/user-event"
 
-import { F0Form } from "../../../F0Form"
-import { f0FormField } from "../../../f0Schema"
 import type {
   FileUploadResult,
   FileUploadStatus,
   UseFileUpload,
 } from "../types"
+
+import { F0Form } from "../../../F0Form"
+import { f0FormField } from "../../../f0Schema"
 
 function createMockUploadHook(
   options: {
@@ -211,6 +213,7 @@ describe("FileFieldRenderer", () => {
         schema={schema}
         defaultValues={{ file: "" }}
         onSubmit={onSubmit}
+        useUpload={createMockUploadHook()}
         submitConfig={{ label: "Save" }}
       />
     )
@@ -341,7 +344,6 @@ describe("FileFieldRenderer", () => {
       file: f0FormField(z.string().optional(), {
         label: "Failing Upload",
         fieldType: "file",
-        useUpload: createMockUploadHook({ shouldFail: true }),
       }),
     })
 
@@ -350,6 +352,7 @@ describe("FileFieldRenderer", () => {
         name="test-fail"
         schema={schema}
         defaultValues={{ file: "" }}
+        useUpload={createMockUploadHook({ shouldFail: true })}
         onSubmit={async () => ({ success: true })}
       />
     )

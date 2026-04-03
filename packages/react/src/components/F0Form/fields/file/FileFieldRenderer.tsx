@@ -171,6 +171,7 @@ export function FileFieldRenderer({
 }: FileFieldRendererProps) {
   const { forms } = useI18n()
   const context = useOptionalF0FormContext()
+  const resolvedUseUpload = context?.useUpload ?? field.useUpload
   const initialFilesPool = initialFiles ?? context?.initialFiles
   const inputId = useId()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -240,6 +241,12 @@ export function FileFieldRenderer({
           continue
         }
 
+        if (!resolvedUseUpload) {
+          console.warn(
+            "[F0Form] No useUpload hook provided. Pass useUpload to <F0Form> or to the file field config."
+          )
+        }
+
         const key = `${file.name}-${file.size}-${Date.now()}-${Math.random()}`
         setEntries((prev) => {
           if (!isMultiple) return [{ key, file }]
@@ -247,7 +254,7 @@ export function FileFieldRenderer({
         })
       }
     },
-    [isMultiple, validateFile]
+    [isMultiple, validateFile, resolvedUseUpload]
   )
 
   const handleDragOver = useCallback(
@@ -442,7 +449,7 @@ export function FileFieldRenderer({
             <FileUploadItem
               key={entry.key}
               entry={entry}
-              useUpload={entry.file ? context?.useUpload : undefined}
+              useUpload={entry.file ? resolvedUseUpload : undefined}
               onUploadComplete={(value) =>
                 handleUploadComplete(entry.key, value)
               }
