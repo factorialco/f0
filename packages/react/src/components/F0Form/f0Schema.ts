@@ -76,6 +76,8 @@ export function unwrapToZodObject<T extends z.ZodRawShape>(
 export type F0FieldType =
   | "text"
   | "number"
+  | "percentage"
+  | "money"
   | "duration"
   | "textarea"
   | "select"
@@ -267,7 +269,16 @@ export type F0StringConfig<
  */
 export type F0NumberInputConfig = F0BaseConfig &
   F0NumberConfig & {
-    fieldType?: "number"
+    fieldType?: "number" | "percentage"
+  }
+
+/**
+ * Config for money fields - number input with currency suffix
+ */
+export type F0NumberMoneyConfig = F0BaseConfig &
+  F0NumberConfig & {
+    fieldType: "money"
+    currency: string
   }
 
 /**
@@ -298,7 +309,11 @@ export type F0NumberSelectConfig<
  */
 export type F0NumberFieldConfig<
   R extends Record<string, unknown> = Record<string, unknown>,
-> = F0NumberInputConfig | F0NumberSelectConfig<R> | F0DurationFieldConfig
+> =
+  | F0NumberInputConfig
+  | F0NumberMoneyConfig
+  | F0NumberSelectConfig<R>
+  | F0DurationFieldConfig
 
 /**
  * Config for boolean fields - checkbox

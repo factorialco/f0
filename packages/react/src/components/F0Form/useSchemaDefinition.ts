@@ -86,8 +86,16 @@ function configToF0Field(
       } as F0Field
     }
 
+    case "money":
+    case "percentage":
     case "number": {
       const { min, max, isInteger } = extractNumberConstraints(schema)
+      const units =
+        fieldType === "percentage"
+          ? "%"
+          : fieldType === "money" && "currency" in config
+            ? (config.currency as string)
+            : undefined
       return {
         ...baseProps,
         type: "number",
@@ -95,6 +103,7 @@ function configToF0Field(
         min,
         max,
         maxDecimals: isInteger ? 0 : undefined,
+        units,
         locale: "locale" in config ? config.locale : undefined,
         clearable,
         renderIf: config.renderIf,

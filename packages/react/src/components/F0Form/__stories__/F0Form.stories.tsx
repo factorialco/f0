@@ -68,12 +68,31 @@ export const Default: Story = {
         label: "Age",
         placeholder: "Enter age (integers only)",
       }),
+      discount: f0FormField(z.number().min(0).max(100), {
+        label: "Discount",
+        placeholder: "Enter discount",
+        fieldType: "percentage",
+      }),
+      budget: f0FormField(z.number().min(0), {
+        label: "Budget",
+        placeholder: "Enter budget",
+        fieldType: "money",
+        currency: "EUR",
+      }),
     })
 
     const formDefinition = useF0FormDefinition({
       name: "basic",
       schema: formSchema,
-      defaultValues: { username: "", email: "", bio: "", salary: 0, age: 0 },
+      defaultValues: {
+        username: "",
+        email: "",
+        bio: "",
+        salary: 0,
+        age: 0,
+        discount: 0,
+        budget: 0,
+      },
       onSubmit: async ({ data }) => {
         await sleep(1000)
         console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)

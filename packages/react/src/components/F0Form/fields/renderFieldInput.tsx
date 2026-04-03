@@ -63,7 +63,7 @@ export function renderFieldInput({
 
   const errorAndLoadingProps = {
     error: hasError,
-    loading: isValidating || !!isFormLoading,
+    loading: !!isFormLoading,
   }
 
   const visualStatus = hasError

@@ -68,6 +68,8 @@ export type F0NumberField = F0BaseField &
     max?: number
     /** Maximum decimal places (0 for integers, derived from z.number().int()) */
     maxDecimals?: number
+    /** Units suffix shown inside the input (e.g. "%") */
+    units?: string
     /** Whether the field can be cleared (derived from optional/nullable) */
     clearable?: boolean
     /** Conditional rendering based on another field's value */
