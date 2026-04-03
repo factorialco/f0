@@ -8,7 +8,7 @@ import { isZodType, unwrapZodSchema } from "../../f0Schema"
 export interface NumberSchemaConstraints {
   min?: number
   max?: number
-  isInteger?: boolean
+  isInteger: boolean
 }
 
 /**
@@ -27,7 +27,7 @@ export function extractNumberConstraints(
   const innerSchema = unwrapZodSchema(schema)
 
   if (!isZodType(innerSchema, "ZodNumber")) {
-    return {}
+    return { isInteger: false }
   }
 
   const checks = innerSchema._def.checks || []

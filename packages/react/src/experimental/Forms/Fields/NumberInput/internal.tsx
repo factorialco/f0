@@ -62,7 +62,7 @@ export const NumberInputInternal = forwardRef<
       const data = inputEvent.data
       if (!data) return
 
-      const input = e.target as HTMLInputElement
+      const input = e.currentTarget
       const start = input.selectionStart ?? 0
       const end = input.selectionEnd ?? 0
       const proposedValue =
@@ -160,3 +160,5 @@ export const NumberInputInternal = forwardRef<
     </div>
   )
 })
+
+NumberInputInternal.displayName = "NumberInputInternal"
