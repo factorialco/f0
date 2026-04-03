@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.436.0](https://github.com/factorialco/f0/compare/f0-react-v1.435.0...f0-react-v1.436.0) (2026-04-02)
+
+
+### Features
+
+* add clarifying questions to ai chat ([#3825](https://github.com/factorialco/f0/issues/3825)) ([209c19a](https://github.com/factorialco/f0/commit/209c19a7c41dfe13573fcff57ed3f90a1d40c11f))
+
+## [1.435.0](https://github.com/factorialco/f0/compare/f0-react-v1.434.0...f0-react-v1.435.0) (2026-04-02)
+
+
+### Features
+
+* **react:** refactor Storybook and move multiple components from experimental to stable ([#3834](https://github.com/factorialco/f0/issues/3834)) ([1c8ee20](https://github.com/factorialco/f0/commit/1c8ee204a4d03b2f7ea3d735586e844a1434404e))
+
+## [1.434.0](https://github.com/factorialco/f0/compare/f0-react-v1.433.0...f0-react-v1.434.0) (2026-04-02)
+
+
+### Features
+
+* **react:** add file attachments support to F0AiChat ([#3671](https://github.com/factorialco/f0/issues/3671)) ([cd5a9bd](https://github.com/factorialco/f0/commit/cd5a9bdb41d7c31f2a0359df0ed73ace4f57f01d))
+
 ## [1.433.0](https://github.com/factorialco/f0/compare/f0-react-v1.432.0...f0-react-v1.433.0) (2026-04-02)
 
 

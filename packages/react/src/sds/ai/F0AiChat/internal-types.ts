@@ -1,8 +1,10 @@
 import { type AIMessage, type Message } from "@copilotkit/shared"
 
+import { type ClarifyingQuestionState } from "./actions/core/clarifyingQuestion/types"
 import {
   type AiChatDisclaimer,
   type AiChatMode,
+  type AiChatFileAttachmentConfig,
   type AiChatTrackingOptions,
   type AiChatToolHint,
   type CanvasContent,
@@ -31,6 +33,7 @@ export interface AiChatState {
   entityRefs?: EntityRefs
   toolHints?: AiChatToolHint[]
   credits?: AiChatCredits
+  fileAttachments?: AiChatFileAttachmentConfig
   placeholders?: string[]
   setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>
   onThumbsUp?: (
@@ -159,6 +162,12 @@ export type AiChatProviderReturnValue = {
   inProgress: boolean
   /** Set the in-progress state (synced from CopilotKit's isLoading) */
   setInProgress: (value: boolean) => void
+  /** The current clarifying question shown in the textarea, or null if none */
+  clarifyingQuestion: ClarifyingQuestionState | null
+  /** Set the current clarifying question (or null to dismiss) */
+  setClarifyingQuestion: React.Dispatch<
+    React.SetStateAction<ClarifyingQuestionState | null>
+  >
 } & Pick<
   AiChatState,
   | "greeting"
@@ -168,6 +177,7 @@ export type AiChatProviderReturnValue = {
   | "entityRefs"
   | "toolHints"
   | "credits"
+  | "fileAttachments"
 > & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null

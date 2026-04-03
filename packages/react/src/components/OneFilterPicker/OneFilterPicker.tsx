@@ -1,7 +1,7 @@
 import type { ReactElement } from "react"
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
 
-import { useEventEmitter } from "@/experimental/OneDataCollection/useEventEmitter"
+import { useEventEmitter } from "@/patterns/OneDataCollection/useEventEmitter"
 import { DataTestIdWrapper } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
 

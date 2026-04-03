@@ -12,7 +12,7 @@ import type {
 } from "@/components/F0WizardForm/types"
 
 import { F0Button } from "@/components/F0Button"
-import { ActionBarStatus } from "@/experimental/F0ActionBar"
+import { ActionBarStatus } from "@/components/F0ActionBar"
 import { F0TableOfContent } from "@/experimental/Navigation/F0TableOfContent"
 import { TOCItem } from "@/experimental/Navigation/F0TableOfContent/types"
 import { Delete, Save } from "@/icons/app"

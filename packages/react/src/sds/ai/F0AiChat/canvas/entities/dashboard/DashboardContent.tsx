@@ -14,14 +14,14 @@ import type {
   DashboardItem,
   DashboardItemLayout,
   DashboardMetricItem,
-} from "@/components/F0AnalyticsDashboard/types"
+} from "@/patterns/F0AnalyticsDashboard/types"
 import type {
   FiltersDefinition,
   FiltersState,
 } from "@/components/OneFilterPicker/types"
 import type { RecordType } from "@/hooks/datasource"
 
-import { F0AnalyticsDashboard } from "@/components/F0AnalyticsDashboard/F0AnalyticsDashboard"
+import { F0AnalyticsDashboard } from "@/patterns/F0AnalyticsDashboard/F0AnalyticsDashboard"
 
 import type {
   ChatDashboardChartConfig,

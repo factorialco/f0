@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 
 import { F0Checkbox } from "@/components/F0Checkbox"
-import { Await } from "@/components/Utilities/Await"
+import { Await } from "@/lib/Await"
 import { Counter } from "@/ui/Counter"
 import { cn } from "@/lib/utils"
 import { ChevronToggle } from "@/ui/ChevronToggle/ChevronToggle"

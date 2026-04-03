@@ -1,6 +1,6 @@
 import { useMemo } from "react"
 
-import { Await } from "@/components/Utilities/Await"
+import { Await } from "@/lib/Await"
 import { cn, focusRing } from "@/lib/utils"
 import { Counter } from "@/ui/Counter"
 import { Preset } from "@/ui/OnePreset"

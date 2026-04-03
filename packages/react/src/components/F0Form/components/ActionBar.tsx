@@ -1,6 +1,6 @@
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
-import { F0ActionBar, ActionBarStatus } from "@/experimental/F0ActionBar"
+import { F0ActionBar, ActionBarStatus } from "@/components/F0ActionBar"
 import { AlertCircle, ChevronDown, ChevronUp } from "@/icons/app"
 
 interface FormActionBarProps {

@@ -102,6 +102,22 @@ export type VisualizationMode = "sidepanel" | "fullscreen" | "canvas"
 /**
  * Tracking options for the AI chat
  */
+export type UploadedFile = {
+  url: string
+  filename: string
+  mimetype: string
+}
+
+export type AiChatFileAttachmentConfig = {
+  onUploadFiles: (files: File[]) => Promise<UploadedFile[]>
+  allowedMimeTypes?: string | string[]
+  /**
+   * Maximum number of files that can be attached at once.
+   * Omit or pass undefined for no limit.
+   */
+  maxFiles?: number
+}
+
 export type AiChatTrackingOptions = {
   onVisibility?: () => void
   onClose?: () => void
@@ -167,6 +183,10 @@ export type AiChatProviderProps = {
    * Groups fetchUsage, upgradePlanUrl, and company/plan display info.
    */
   credits?: AiChatCredits
+  /**
+   * File attachment configuration. When provided, enables file uploads in the chat.
+   */
+  fileAttachments?: AiChatFileAttachmentConfig
   onThumbsUp?: (
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }

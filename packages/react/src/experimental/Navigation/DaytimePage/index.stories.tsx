@@ -5,7 +5,7 @@ import { expect, within } from "storybook/test"
 import { HomeLayout } from "@/layouts/HomeLayout"
 import { Default as DefaultHomeLayoutStory } from "@/layouts/HomeLayout/index.stories"
 
-import { ApplicationFrame } from "@/examples/ApplicationFrame"
+import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import { DaytimePage, DaytimePageProps } from "./index"
 
 const meta: Meta<typeof DaytimePage> = {

@@ -8,7 +8,7 @@ import { ScrollArea } from "@/ui/scrollarea"
 import { useReducedMotion } from "../../../lib/a11y"
 import { useI18n } from "../../../lib/providers/i18n"
 import { cn } from "../../../lib/utils"
-import { useSidebar } from "@/examples/ApplicationFrame/FrameProvider"
+import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
 import { SidebarFooter } from "./Footer"
 
 const ScrollShadow = ({ position }: { position: "top" | "bottom" }) => (
