@@ -1,9 +1,9 @@
+import type { TextRenderIfCondition } from "../text/types"
 import type {
   F0BaseField,
   F0BaseFieldRenderIfFunction,
   CommonRenderIfCondition,
 } from "../types"
-import type { TextRenderIfCondition } from "../text/types"
 
 // ============================================================================
 // Textarea Field RenderIf Conditions
@@ -31,6 +31,8 @@ export type TextareaFieldRenderIf =
 export interface F0TextareaConfig {
   /** Number of rows for the textarea */
   rows?: number
+  /** Maximum height in pixels. When set, the textarea scrolls beyond this height instead of growing. */
+  maxHeight?: number
 }
 
 /**
