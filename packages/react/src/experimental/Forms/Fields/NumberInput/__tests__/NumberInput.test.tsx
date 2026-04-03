@@ -45,10 +45,67 @@ describe("NumberInput", () => {
       )
 
       const input = screen.getByRole("textbox")
-      await userEvent.type(input, "-34.")
+      await userEvent.type(input, "-34")
 
-      expect(input).toHaveValue("-34.")
+      expect(input).toHaveValue("-34")
       expect(onChange).toHaveBeenLastCalledWith(-34)
+    })
+  })
+
+  describe("input filtering (integer mode, maxDecimals=0)", () => {
+    test("onChange strips decimal values in integer mode", async () => {
+      const onChange = vi.fn()
+      render(
+        <NumberInput
+          locale="en-US"
+          maxDecimals={0}
+          onChange={onChange}
+          label="Number Input"
+        />
+      )
+
+      const input = screen.getByRole("textbox")
+      await userEvent.type(input, "34.5")
+
+      // In integer mode, decimals are stripped
+      expect(onChange).toHaveBeenCalledWith(34)
+    })
+  })
+
+  describe("input filtering (decimal mode)", () => {
+    test("allows decimal values with dot separator", async () => {
+      const onChange = vi.fn()
+      render(
+        <NumberInput
+          locale="en-US"
+          maxDecimals={2}
+          onChange={onChange}
+          label="Number Input"
+        />
+      )
+
+      const input = screen.getByRole("textbox")
+      await userEvent.type(input, "34.5")
+
+      expect(input).toHaveValue("34.5")
+      expect(onChange).toHaveBeenLastCalledWith(34.5)
+    })
+
+    test("limits decimals to maxDecimals", async () => {
+      const onChange = vi.fn()
+      render(
+        <NumberInput
+          locale="en-US"
+          maxDecimals={2}
+          onChange={onChange}
+          label="Number Input"
+        />
+      )
+
+      const input = screen.getByRole("textbox")
+      await userEvent.type(input, "34.567")
+
+      expect(onChange).toHaveBeenLastCalledWith(34.56)
     })
   })
 

@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useMemo, useState } from "react"
+import { forwardRef, useCallback, useEffect, useMemo, useState } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
 import { Input } from "@/ui/input"
@@ -56,10 +56,31 @@ export const NumberInputInternal = forwardRef<
     // eslint-disable-next-line react-hooks/exhaustive-deps -- We don't need to re-render when the i18n changes
   }, [min, max, props.hint])
 
+  const handleBeforeInput = useCallback(
+    (e: React.FormEvent<HTMLInputElement>) => {
+      const inputEvent = e.nativeEvent as InputEvent
+      const data = inputEvent.data
+      if (!data) return
+
+      const input = e.currentTarget
+      const start = input.selectionStart ?? 0
+      const end = input.selectionEnd ?? 0
+      const proposedValue =
+        input.value.slice(0, start) + data + input.value.slice(end)
+
+      if (
+        !extractNumber(proposedValue, { maxDecimals }) ||
+        (maxDecimals === 0 && /[.,]/.test(data))
+      ) {
+        e.preventDefault()
+      }
+    },
+    [maxDecimals]
+  )
+
   const handleChange = (value: string) => {
     const extractedData = extractNumber(value, { maxDecimals })
     if (!extractedData) {
-      setFieldValue("")
       return
     }
 
@@ -120,9 +141,10 @@ export const NumberInputInternal = forwardRef<
         type="text"
         ref={ref}
         value={fieldValue}
-        inputMode="decimal"
+        inputMode={maxDecimals === 0 ? "numeric" : "decimal"}
         onChange={handleChange}
         {...props}
+        onBeforeInput={handleBeforeInput}
         hint={localHint}
         appendTag={units}
         append={
@@ -138,3 +160,5 @@ export const NumberInputInternal = forwardRef<
     </div>
   )
 })
+
+NumberInputInternal.displayName = "NumberInputInternal"

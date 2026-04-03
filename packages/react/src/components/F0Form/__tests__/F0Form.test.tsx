@@ -427,6 +427,18 @@ describe("inferFieldType", () => {
     } as const
     expect(inferFieldType(schema, config)).toBe("checkbox")
   })
+
+  it("infers percentage type from explicit fieldType", () => {
+    const schema = z.number()
+    const config = { label: "Test", fieldType: "percentage" } as const
+    expect(inferFieldType(schema, config)).toBe("percentage")
+  })
+
+  it("infers money type from explicit fieldType", () => {
+    const schema = z.number()
+    const config = { label: "Test", fieldType: "money" } as const
+    expect(inferFieldType(schema, config)).toBe("money")
+  })
 })
 
 describe("getSchemaDefinition", () => {
