@@ -117,6 +117,7 @@ function configToF0Field(
         ...baseProps,
         type: "textarea",
         rows: "rows" in config ? config.rows : undefined,
+        maxHeight: "maxHeight" in config ? config.maxHeight : undefined,
         maxLength,
         clearable,
         renderIf: config.renderIf,

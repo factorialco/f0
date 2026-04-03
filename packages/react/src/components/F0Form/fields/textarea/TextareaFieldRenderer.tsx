@@ -1,9 +1,12 @@
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
-import { Textarea } from "@/experimental/Forms/Fields/TextArea"
 import type { InputFieldStatus } from "@/ui/InputField/types"
-import type { F0TextareaField } from "./types"
+
+import { Textarea } from "@/experimental/Forms/Fields/TextArea"
+
 import type { ResolvedField } from "../types"
+import type { F0TextareaField } from "./types"
+
 import { FORM_SIZE } from "../../constants"
 
 interface TextareaFieldRendererProps {
@@ -32,6 +35,7 @@ export function TextareaFieldRenderer({
       disabled={field.disabled}
       rows={field.rows}
       maxLength={field.maxLength}
+      maxHeight={field.maxHeight}
       value={formField.value != null ? String(formField.value) : ""}
       size={FORM_SIZE}
       hideLabel
