@@ -8,6 +8,31 @@ import { MAX_CHAT_WIDTH, MIN_CHAT_WIDTH } from "../../utils/constants"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { ResizeHandle } from "./ResizeHandle"
 
+/**
+ * Compact floating chat window — renders as a small card (360x460px).
+ * Used when visualizationMode is "floating".
+ */
+export const FloatingWindow = ({ children }: WindowProps) => {
+  const { open } = useAiChat()
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          key="floating-chat"
+          className="pointer-events-auto flex h-full w-full flex-col overflow-hidden rounded-xl border border-solid border-f1-border-secondary bg-f1-special-page shadow-xl"
+          initial={{ opacity: 0, scale: 0.95, y: 10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 10 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+        >
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
+
 export const SidebarWindow = ({ children }: WindowProps) => {
   const {
     open,
