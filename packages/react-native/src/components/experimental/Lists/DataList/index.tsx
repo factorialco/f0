@@ -266,7 +266,7 @@ const CardItem = ({ action, name, thumbnailUrl, metadata }: CardItemProps) => {
           <F0Image source={thumbnailUrl} accessibilityLabel={name} />
         </View>
       ) : (
-        <View className="aspect-square h-32 w-32 rounded-sm bg-f0-background-secondary" />
+        <View className="h-32 w-full rounded-lg bg-f0-background-promote" />
       )}
       <View className="flex w-full flex-1 flex-col gap-2">
         <F0Text variant="heading-sm">{name}</F0Text>
