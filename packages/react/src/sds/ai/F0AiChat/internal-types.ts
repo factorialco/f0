@@ -168,6 +168,14 @@ export type AiChatProviderReturnValue = {
   setClarifyingQuestion: React.Dispatch<
     React.SetStateAction<ClarifyingQuestionState | null>
   >
+  /**
+   * Whether files are currently being dragged over the chat window.
+   * Set by the ChatWindow drag listeners and read by the DropOverlay
+   * to control its visibility.
+   */
+  fileDragOver: boolean
+  /** @internal Set the file drag-over state */
+  setFileDragOver: React.Dispatch<React.SetStateAction<boolean>>
 } & Pick<
   AiChatState,
   | "greeting"

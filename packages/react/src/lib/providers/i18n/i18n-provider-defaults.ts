@@ -349,6 +349,7 @@ export const defaultTranslations = {
     },
     attachFile: "Attach file",
     removeFile: "Remove",
+    dropFilesHere: "Drop your files here",
     clarifyingQuestion: {
       submit: "Submit",
       next: "Next",
