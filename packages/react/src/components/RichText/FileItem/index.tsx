@@ -3,7 +3,8 @@ import { forwardRef } from "react"
 
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import type { FileDef } from "@/components/avatars/F0AvatarFile/types"
-import { F0Icon, IconType } from "@/components/F0Icon"
+import { F0Button } from "@/components/F0Button"
+import { IconType } from "@/components/F0Icon"
 import {
   DropdownInternal,
   DropdownItem,
@@ -24,8 +25,8 @@ const fileItemVariants = cva({
   base: "flex w-fit flex-row items-center overflow-hidden bg-f1-background-tertiary",
   variants: {
     size: {
-      md: "max-w-40 gap-2 rounded-md p-0.5 pr-2",
-      lg: "max-w-56 gap-2.5 rounded-lg p-1 pr-3",
+      md: "max-w-40 gap-2 rounded p-0.5",
+      lg: "max-w-56 gap-2.5 rounded p-1",
     },
   },
   defaultVariants: {
@@ -40,9 +41,9 @@ const avatarSizeMap: Record<FileItemSize, "sm" | "md"> = {
   lg: "md",
 }
 
-const iconSizeMap: Record<FileItemSize, "md" | "lg"> = {
-  md: "md",
-  lg: "lg",
+const iconSizeMap: Record<FileItemSize, "sm" | "md"> = {
+  md: "sm",
+  lg: "md",
 }
 
 interface FileItemProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -81,18 +82,21 @@ const _FileItem = forwardRef<HTMLDivElement, FileItemProps>(
         </Tooltip>
         {hasActions &&
           (singleAction ? (
-            <F0Icon
+            <F0Button
+              label={singleAction.label}
               size={iconSizeMap[size]}
               icon={singleAction.icon ?? CrossedCircle}
-              className={cn(
-                "cursor-pointer text-f1-icon",
-                disabled ? "cursor-not-allowed" : "hover:text-f1-icon-bold",
-                singleAction.critical && "text-f1-foreground-critical"
-              )}
+              disabled={disabled}
               onClick={disabled ? undefined : singleAction.onClick}
+              hideLabel
+              variant="ghost"
             />
           ) : (
-            <DropdownInternal items={dropdownItems} icon={Ellipsis} size="sm" />
+            <DropdownInternal
+              items={dropdownItems}
+              icon={Ellipsis}
+              size={iconSizeMap[size]}
+            />
           ))}
       </div>
     )
