@@ -9,10 +9,10 @@ import {
   DropdownInternal,
   DropdownItem,
 } from "@/experimental/Navigation/Dropdown/internal"
-import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { CrossedCircle, Ellipsis } from "@/icons/app"
 import { withDataTestId } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
+import { OneEllipsis } from "@/components/OneEllipsis"
 
 type FileAction = {
   icon?: IconType
@@ -75,11 +75,14 @@ const _FileItem = forwardRef<HTMLDivElement, FileItemProps>(
         {...props}
       >
         <F0AvatarFile file={file} size={avatarSizeMap[size]} />
-        <Tooltip label={file.name}>
-          <p className="text-neutral-1000 grow overflow-hidden truncate text-ellipsis text-sm font-medium">
-            {file.name}
-          </p>
-        </Tooltip>
+        <OneEllipsis
+          className={cn(
+            "text-neutral-1000 grow text-sm font-medium",
+            !hasActions && "pr-3"
+          )}
+        >
+          {file.name}
+        </OneEllipsis>
         {hasActions &&
           (singleAction ? (
             <F0Button
