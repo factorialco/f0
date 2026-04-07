@@ -1612,7 +1612,10 @@ declare type ChildrenPaginationInfo = {
 
 declare type ChildrenResponse<R extends RecordType> = NestedResponseWithType<R>;
 
-export declare const Chip: ({ deactivated, label, variant, onClick, onClose, avatar, icon, }: ChipProps) => JSX_2.Element;
+/**
+ * @deprecated Use F0Chip instead
+ */
+export declare const Chip: ({ deactivated, label, variant, onClick, onClose, avatar, icon, }: F0ChipProps) => JSX_2.Element;
 
 declare type ChipLabel = {
     label: string;
@@ -1627,9 +1630,14 @@ declare type ChipLabel = {
     avatar?: never;
 });
 
-export declare type ChipProps = BaseChipProps & ChipVariants & {
-    variant?: "default" | "selected";
-};
+/**
+ * @deprecated Use F0ChipProps instead
+ */
+export declare type ChipProps = F0ChipProps;
+
+export declare type ChipVariantOption = (typeof chipVariantOptions)[number];
+
+export declare const chipVariantOptions: readonly ["default", "selected"];
 
 declare type ChipVariants = {
     /**
@@ -3671,6 +3679,12 @@ export declare const F0Callout: ForwardRefExoticComponent<Omit<CalloutInternalPr
 };
 
 export declare type F0CalloutProps = CalloutInternalProps;
+
+export declare const F0Chip: ({ deactivated, label, variant, onClick, onClose, avatar, icon, }: F0ChipProps) => JSX_2.Element;
+
+export declare type F0ChipProps = BaseChipProps & ChipVariants & {
+    variant?: ChipVariantOption;
+};
 
 declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
     icon: IconType;
@@ -7538,6 +7552,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -7584,9 +7603,4 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
