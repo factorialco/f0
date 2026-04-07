@@ -1,8 +1,9 @@
 import { cva, type VariantProps } from "cva"
 import { forwardRef } from "react"
 
-import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import type { FileDef } from "@/components/avatars/F0AvatarFile/types"
+
+import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import {
@@ -11,8 +12,8 @@ import {
 } from "@/experimental/Navigation/Dropdown/internal"
 import { CrossedCircle, Ellipsis } from "@/icons/app"
 import { withDataTestId } from "@/lib/data-testid"
+import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { cn } from "@/lib/utils"
-import { OneEllipsis } from "@/components/OneEllipsis"
 
 type FileAction = {
   icon?: IconType

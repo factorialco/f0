@@ -12,7 +12,6 @@ import { ClarifyingQuestionPanel } from "../ClarifyingQuestionPanel"
 import { MentionPopover } from "../MentionPopover"
 import { useMentions } from "../useMentions"
 import { buildHighlightSegments } from "../utils"
-
 import { ActionBar } from "./ActionBar"
 import { AttachedFilesList } from "./AttachedFilesList"
 import { CreditWarningWrapper } from "./CreditWarningWrapper"
