@@ -74,6 +74,15 @@ describe("F0Chip", () => {
       await userEvent.keyboard("{Enter}")
       expect(onClick).not.toHaveBeenCalled()
     })
+
+    it("does not fire onClick on Space when deactivated", async () => {
+      const onClick = vi.fn()
+      render(<F0Chip label="Disabled Space" deactivated onClick={onClick} />)
+      const chip = screen.getByRole("button", { name: "Disabled Space" })
+      chip.focus()
+      await userEvent.keyboard(" ")
+      expect(onClick).not.toHaveBeenCalled()
+    })
   })
 
   describe("onClick", () => {
@@ -150,6 +159,17 @@ describe("F0Chip", () => {
       expect(
         screen.queryByRole("button", { name: /Remove/ })
       ).not.toBeInTheDocument()
+    })
+
+    it("emits a console.warn when both onClick and onClose are provided", () => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+      render(<F0Chip label="Both warn" onClick={() => {}} onClose={() => {}} />)
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          "providing both onClick and onClose is not supported"
+        )
+      )
+      warn.mockRestore()
     })
   })
 
