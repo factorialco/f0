@@ -1142,7 +1142,9 @@ declare interface BaseChipProps extends VariantProps<typeof chipVariants> {
     onClose?: () => void;
     /**
      * If true, dims the label and disables all interaction.
-     * The element retains role="button" and aria-disabled="true" for screen readers.
+     * When onClick is provided (and onClose is not), the element retains role="button"
+     * and aria-disabled="true" for screen readers; keyboard events are swallowed.
+     * Has no effect on the close button when only onClose is provided.
      * */
     deactivated?: boolean;
 }
