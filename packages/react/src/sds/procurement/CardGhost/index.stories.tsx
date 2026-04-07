@@ -29,8 +29,6 @@ export const Filled: Story = {
     icon: FileFilled,
     title: "Pixar Animation",
     filled: true,
-    filledLabel: "Filled",
-    pendingLabel: "Pending",
     date: "04/12/2026",
   },
 }
@@ -40,8 +38,6 @@ export const Pending: Story = {
     icon: FileFilled,
     title: "Pixar Animation",
     filled: false,
-    filledLabel: "Filled",
-    pendingLabel: "Pending",
     date: "04/12/2026",
   },
 }
@@ -86,8 +82,6 @@ export const List: Story = {
             icon={FileFilled}
             title={card.title}
             filled={card.filled}
-            filledLabel="Filled"
-            pendingLabel="Pending"
             date={card.date}
             selected={selectedId === card.id}
             onClick={() =>

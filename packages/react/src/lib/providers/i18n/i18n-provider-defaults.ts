@@ -596,6 +596,12 @@ export const defaultTranslations = {
     submit: "Submit",
     stepOf: "Step {{current}} of {{total}}",
   },
+  procurement: {
+    cardGhost: {
+      filled: "Filled",
+      pending: "Pending",
+    },
+  },
 } as const
 
 type TranslationShape<T> = {

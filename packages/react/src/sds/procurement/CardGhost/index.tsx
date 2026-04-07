@@ -3,6 +3,7 @@ import { IconType } from "@/components/F0Icon"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { Check } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 export interface CardGhostProps {
@@ -12,10 +13,6 @@ export interface CardGhostProps {
   title: string
   /** Whether the document is filled */
   filled: boolean
-  /** Label for the filled/pending tag */
-  filledLabel: string
-  /** Label for the pending tag */
-  pendingLabel: string
   /** Date or secondary text */
   date: string
   /** Whether the card is selected */
@@ -28,12 +25,12 @@ export function CardGhost({
   icon,
   title,
   filled,
-  filledLabel,
-  pendingLabel,
   date,
   selected = false,
   onClick,
 }: CardGhostProps) {
+  const { procurement } = useI18n()
+
   return (
     <div
       role="button"
@@ -57,9 +54,12 @@ export function CardGhost({
         </span>
         <div className="flex items-center gap-2">
           {filled ? (
-            <F0TagRaw icon={Check} text={filledLabel} />
+            <F0TagRaw icon={Check} text={procurement.cardGhost.filled} />
           ) : (
-            <F0TagStatus variant="warning" text={pendingLabel} />
+            <F0TagStatus
+              variant="warning"
+              text={procurement.cardGhost.pending}
+            />
           )}
           <span className="text-sm text-f1-foreground-secondary">{date}</span>
         </div>
