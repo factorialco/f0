@@ -38,7 +38,6 @@ import { DotTagCellValue as DotTagCellValue_2 } from './experimental';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { Editor } from '@tiptap/react';
 import { EmployeeItemProps } from './types';
-import { F0SelectProps as F0SelectProps_2 } from './types';
 import { F0TagBalanceProps as F0TagBalanceProps_2 } from './types';
 import { F0TagCompanyProps } from './types';
 import { F0TagPersonProps } from './types';
@@ -107,6 +106,7 @@ import { TagType } from './experimental';
 import { TeamCellValue } from './types/team';
 import { TeamCellValue as TeamCellValue_2 } from './experimental';
 import { TeamItemProps } from './types';
+import { TextareaHTMLAttributes } from 'react';
 import { TextCellValue } from './types/text';
 import { TextCellValue as TextCellValue_2 } from './experimental';
 import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
@@ -1433,6 +1433,8 @@ export declare interface CardSelectableItem<T extends CardSelectableValue> {
         href: string;
         label?: string;
     };
+    /** Custom content rendered inside the card when it is selected, with an expand/collapse animation */
+    selectedContent?: ReactNode;
 }
 
 export declare interface CardSelectableMultipleProps<T extends CardSelectableValue> {
@@ -6224,7 +6226,7 @@ declare type SectionProps = {
     onItemVisible?: (id: string) => void;
 };
 
-export declare const Select: <T extends string = string, R = unknown>(props: F0SelectProps_2<T, R> & {
+export declare const Select: <T extends string = string, R = unknown>(props: F0SelectProps<T, R> & {
     ref?: React.Ref<HTMLButtonElement>;
 }) => React.ReactElement;
 
@@ -6411,11 +6413,11 @@ declare const spinnerVariants: (props?: ({
 
 export declare const Split: ForwardRefExoticComponent<Omit<HTMLAttributes<HTMLDivElement> & VariantProps<(props?: ({
 overflow?: "hidden" | "auto" | undefined;
-paddingX?: "none" | "p-2" | "p-4" | "p-8" | "p-12" | "p-16" | undefined;
+paddingX?: "none" | "p-4" | "p-2" | "p-8" | "p-12" | "p-16" | undefined;
 maxWidth?: "md" | "sm" | "xs" | "xl" | "screen-sm" | "screen-md" | "screen-lg" | "screen-xl" | "screen-2xl" | undefined;
 height?: "auto" | "full" | undefined;
 width?: "auto" | "full" | undefined;
-paddingY?: "none" | "p-2" | "p-4" | "p-8" | "p-12" | "p-16" | undefined;
+paddingY?: "none" | "p-4" | "p-2" | "p-8" | "p-12" | "p-16" | undefined;
 basis?: "0" | undefined;
 inline?: boolean | undefined;
 justifyContent?: "center" | "end" | "start" | "space-between" | "stretch" | undefined;
@@ -6441,11 +6443,11 @@ className?: ClassValue;
 
 export declare const Stack: ForwardRefExoticComponent<Omit<HTMLAttributes<HTMLDivElement> & VariantProps<(props?: ({
 overflow?: "hidden" | "auto" | undefined;
-paddingX?: "none" | "p-2" | "p-4" | "p-8" | "p-12" | "p-16" | undefined;
+paddingX?: "none" | "p-4" | "p-2" | "p-8" | "p-12" | "p-16" | undefined;
 maxWidth?: "md" | "sm" | "xs" | "xl" | "screen-sm" | "screen-md" | "screen-lg" | "screen-xl" | "screen-2xl" | undefined;
 height?: "auto" | "full" | undefined;
 width?: "auto" | "full" | undefined;
-paddingY?: "none" | "p-2" | "p-4" | "p-8" | "p-12" | "p-16" | undefined;
+paddingY?: "none" | "p-4" | "p-2" | "p-8" | "p-12" | "p-16" | undefined;
 basis?: "0" | undefined;
 inline?: boolean | undefined;
 justifyContent?: "center" | "end" | "start" | "space-between" | "stretch" | undefined;
@@ -6812,11 +6814,13 @@ declare type TeamTagProps = ComponentProps<typeof F0TagTeam>;
  */
 export declare const Textarea: FC<TextareaProps>;
 
-declare const Textarea_2: React_2.ForwardRefExoticComponent<Omit<React_2.TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange" | "onFocus" | "onBlur"> & {
-    value?: string;
-} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "size" | "icon" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "loading" | "maxLength" | "placeholder" | "required" | "error" | "hideLabel" | "hint" | "labelIcon" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
+declare const Textarea_2: ForwardRefExoticComponent<Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange" | "onFocus" | "onBlur"> & {
+value?: string;
+/** Maximum height in pixels. When set, the textarea scrolls beyond this height instead of growing. */
+maxHeight?: number;
+} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "size" | "icon" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "loading" | "maxLength" | "placeholder" | "required" | "error" | "hideLabel" | "hint" | "labelIcon" | "clearable" | "onClear"> & RefAttributes<HTMLTextAreaElement>>;
 
-export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error" | "size" | "loading" | "required">;
+export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error" | "size" | "loading" | "required" | "maxHeight">;
 
 declare const THEMES: {
     readonly light: "";
