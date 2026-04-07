@@ -213,7 +213,7 @@ The entity controls the full header — title, actions, and close button. Use `C
 
 ```tsx
 // SurveyHeader.tsx
-import { OneEllipsis } from "@/components/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { CloseCanvasButton } from "../../components/CloseCanvasButton"
 
 export function SurveyHeader({
@@ -224,10 +224,10 @@ export function SurveyHeader({
   onClose: () => void
 }) {
   return (
-    <div className="flex shrink-0 items-center gap-2 border-0 border-b border-solid border-f1-border-secondary px-7 py-5">
+    <div className="border-f1-border-secondary flex shrink-0 items-center gap-2 border-0 border-b border-solid px-7 py-5">
       <OneEllipsis
         tag="h2"
-        className="min-w-0 flex-1 text-2xl font-semibold text-f1-foreground"
+        className="text-f1-foreground min-w-0 flex-1 text-2xl font-semibold"
       >
         {title}
       </OneEllipsis>

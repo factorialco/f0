@@ -115,6 +115,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [clarifyingQuestion, setClarifyingQuestion] =
     useState<ClarifyingQuestionState | null>(null)
 
+  const [fileDragOver, setFileDragOver] = useState(false)
+
   // Persist chat width to localStorage
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -312,6 +314,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setActiveToolHint,
         clarifyingQuestion,
         setClarifyingQuestion,
+        fileDragOver,
+        setFileDragOver,
       }}
     >
       {children}
@@ -379,6 +383,8 @@ export function useAiChat(): AiChatProviderReturnValue {
       setActiveToolHint: noopFn,
       clarifyingQuestion: null,
       setClarifyingQuestion: noopFn,
+      fileDragOver: false,
+      setFileDragOver: noopFn,
     }
   }
 
