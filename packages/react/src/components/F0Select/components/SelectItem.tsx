@@ -1,6 +1,6 @@
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/components/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { F0TagDot } from "@/components/tags/F0TagDot"
 import { F0TagPerson } from "@/components/tags/F0TagPerson"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"

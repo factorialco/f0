@@ -1,7 +1,7 @@
 import {
   CategoryBarChart,
   CategoryBarProps,
-} from "@/components/Charts/CategoryBarChart"
+} from "@/kits/Charts/CategoryBarChart"
 import { cn } from "@/lib/utils"
 
 interface CategoryBarSectionProps {

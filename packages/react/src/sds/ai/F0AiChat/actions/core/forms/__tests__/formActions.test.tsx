@@ -2,13 +2,13 @@ import React from "react"
 import { describe, expect, it, vi, beforeEach } from "vitest"
 import { z } from "zod"
 
-import type { F0AiAvailableFormDefinition } from "@/components/F0Form/F0AiFormRegistry"
+import type { F0AiAvailableFormDefinition } from "@/patterns/F0Form/F0AiFormRegistry"
 
 import {
   F0AiFormRegistryProvider,
   useF0AiFormRegistry,
-} from "@/components/F0Form/F0AiFormRegistry"
-import { f0FormField } from "@/components/F0Form/f0Schema"
+} from "@/patterns/F0Form/F0AiFormRegistry"
+import { f0FormField } from "@/patterns/F0Form/f0Schema"
 import { zeroRender as render, waitFor } from "@/testing/test-utils"
 
 // ── Mocks ────────────────────────────────────────────────────────────────────

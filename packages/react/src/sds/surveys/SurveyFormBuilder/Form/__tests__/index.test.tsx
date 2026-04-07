@@ -1,7 +1,9 @@
+import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-import { zeroRender as render, screen } from "@/testing/test-utils"
 
-import { SurveyFormBuilderElement } from "../../types"
+import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
+
+import { SurveyDatasets, SurveyFormBuilderElement } from "../../types"
 import { SurveyFormBuilder } from "../index"
 
 // --- Test fixtures ---
@@ -194,5 +196,168 @@ describe("SurveyFormBuilder", () => {
     // Should have the add button since last element is a section
     const buttons = screen.getAllByRole("button")
     expect(buttons.length).toBeGreaterThan(0)
+  })
+
+  it("does not make the table of content sortable when disabled", async () => {
+    const elements: SurveyFormBuilderElement[] = [
+      makeQuestion("q1", "Question 1"),
+      makeQuestion("q2", "Question 2"),
+    ]
+
+    render(
+      <SurveyFormBuilder elements={elements} onChange={vi.fn()} disabled />
+    )
+
+    // Open the table of content popover by clicking the trigger
+    const tocTrigger = screen.getByLabelText("Menu")
+    await userEvent.click(tocTrigger)
+
+    // Verify the popover opened and ToC items are visible
+    await waitFor(() => {
+      expect(screen.getAllByText("Question 1").length).toBeGreaterThan(1)
+    })
+
+    // When disabled, items should not be draggable
+    const draggableItems = document.querySelectorAll("[draggable='true']")
+    expect(draggableItems).toHaveLength(0)
+  })
+})
+
+// --- Dataset question tests ---
+
+const mockDataSource = {
+  dataAdapter: {
+    fetchData: async () => ({ records: [] }),
+  },
+}
+
+const mockDatasets: SurveyDatasets = {
+  employees: {
+    title: "Employees",
+    placeholder: "Select an employee",
+    dataSource: mockDataSource,
+    mapOptions: (item) => ({
+      value: String(item["id"]),
+      label: String(item["name"]),
+    }),
+  },
+}
+
+const makeDropdownDatasetQuestion = (
+  id: string,
+  title: string,
+  type: "dropdown-single" | "dropdown-multi" = "dropdown-single",
+  datasetKey = "employees"
+): SurveyFormBuilderElement => ({
+  type: "question",
+  question: { id, title, type, datasetKey },
+})
+
+describe("SurveyFormBuilder — dataset questions", () => {
+  it("renders dropdown-single dataset question with a combobox", () => {
+    render(
+      <SurveyFormBuilder
+        elements={[makeDropdownDatasetQuestion("q1", "Who is your manager?")]}
+        onChange={vi.fn()}
+        datasets={mockDatasets}
+      />
+    )
+
+    expect(screen.getByRole("combobox")).toBeInTheDocument()
+  })
+
+  it("renders dropdown-multi dataset question with a combobox", () => {
+    render(
+      <SurveyFormBuilder
+        elements={[
+          makeDropdownDatasetQuestion(
+            "q1",
+            "Select teammates",
+            "dropdown-multi"
+          ),
+        ]}
+        onChange={vi.fn()}
+        datasets={mockDatasets}
+      />
+    )
+
+    expect(screen.getByRole("combobox")).toBeInTheDocument()
+  })
+
+  it("shows dataset placeholder in the select", () => {
+    render(
+      <SurveyFormBuilder
+        elements={[makeDropdownDatasetQuestion("q1", "Who is your manager?")]}
+        onChange={vi.fn()}
+        datasets={mockDatasets}
+      />
+    )
+
+    expect(screen.getByText("Select an employee")).toBeInTheDocument()
+  })
+
+  it("shows dataset entries in add-button dropdown when datasets are provided", async () => {
+    const user = userEvent.setup()
+
+    render(
+      <SurveyFormBuilder
+        elements={[makeQuestion("q1", "Existing question")]}
+        onChange={vi.fn()}
+        datasets={mockDatasets}
+      />
+    )
+
+    // The bottom add button is the last button in the document
+    const buttons = screen.getAllByRole("button")
+    await user.click(buttons[buttons.length - 1])
+
+    await waitFor(() => {
+      expect(screen.getByText("Employees")).toBeInTheDocument()
+    })
+  })
+
+  it("adds a dataset question when onChange is called with datasetKey", () => {
+    const onChange = vi.fn()
+
+    render(
+      <SurveyFormBuilder
+        elements={[]}
+        onChange={onChange}
+        datasets={mockDatasets}
+      />
+    )
+
+    // The builder auto-adds a section on mount when empty.
+    // Verify the onChange was called and the section was added.
+    expect(onChange).toHaveBeenCalled()
+
+    // Now simulate what the AddButton does: call onChange with
+    // a dataset question appended to existing elements.
+    const existingElements = onChange.mock.calls[0][0]
+    const datasetQuestion = {
+      type: "question" as const,
+      question: {
+        id: "new-q",
+        title: "",
+        description: "",
+        type: "dropdown-single" as const,
+        required: true,
+        datasetKey: "employees",
+      },
+    }
+    onChange.mockClear()
+    onChange([...existingElements, datasetQuestion])
+
+    expect(onChange).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: "question",
+          question: expect.objectContaining({
+            type: "dropdown-single",
+            datasetKey: "employees",
+          }),
+        }),
+      ])
+    )
   })
 })

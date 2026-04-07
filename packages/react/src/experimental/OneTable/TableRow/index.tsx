@@ -3,6 +3,9 @@ import { forwardRef } from "react"
 import { TableRow as TableRowRoot } from "@/ui/table"
 
 import { cn } from "../../../lib/utils"
+
+export const TABLE_ROW_STICKY_TOP_OFFSET = 40
+
 interface TableRowProps {
   children: React.ReactNode
   selected?: boolean
@@ -22,9 +25,9 @@ const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(
           "relative before:pointer-events-none before:absolute before:inset-0 before:z-10 before:content-['']",
           "[&:has(.table-cell-action-button:focus)]:before:rounded-sm [&:has(.table-cell-action-button:focus)]:before:ring-1 [&:has(.table-cell-action-button:focus)]:before:ring-inset [&:has(.table-cell-action-button:focus)]:before:ring-f1-special-ring",
           "[&:has(a:focus)]:before:rounded-sm [&:has(a:focus)]:before:ring-1 [&:has(a:focus)]:before:ring-inset [&:has(a:focus)]:before:ring-f1-special-ring",
-          sticky &&
-            "hover:bg-f1-background-hover! sticky top-10 z-50 bg-f1-background"
+          sticky && "hover:bg-f1-background-hover! sticky z-50 bg-f1-background"
         )}
+        style={sticky ? { top: TABLE_ROW_STICKY_TOP_OFFSET } : undefined}
       >
         {children}
       </TableRowRoot>

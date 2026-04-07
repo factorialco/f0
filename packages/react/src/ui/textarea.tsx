@@ -1,13 +1,21 @@
-import * as React from "react"
+import {
+  forwardRef,
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+  type TextareaHTMLAttributes,
+} from "react"
 
 import { cn } from "../lib/utils"
 import { InputField, InputFieldProps } from "./InputField"
 
 export type TextareaProps = Omit<
-  React.TextareaHTMLAttributes<HTMLTextAreaElement>,
+  TextareaHTMLAttributes<HTMLTextAreaElement>,
   "onChange" | "value" | "onFocus" | "onBlur"
 > & {
   value?: string
+  /** Maximum height in pixels. When set, the textarea scrolls beyond this height instead of growing. */
+  maxHeight?: number
 } & Pick<
     InputFieldProps<string>,
     | "label"
@@ -31,7 +39,7 @@ export type TextareaProps = Omit<
     | "required"
   >
 
-const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
+const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   (
     {
       className,
@@ -53,10 +61,31 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       placeholder,
       size,
       loading,
+      maxHeight,
       ...props
     },
     ref
   ) => {
+    const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+    useImperativeHandle(ref, () => textareaRef.current!)
+
+    useLayoutEffect(() => {
+      const textarea = textareaRef.current
+      if (!textarea) return
+
+      textarea.style.height = "auto"
+      const newHeight = textarea.scrollHeight
+
+      if (maxHeight != null && newHeight > maxHeight) {
+        textarea.style.height = `${maxHeight}px`
+        textarea.style.overflowY = "auto"
+      } else {
+        textarea.style.height = `${newHeight}px`
+        textarea.style.overflowY = "hidden"
+      }
+    }, [value, maxHeight])
+
     return (
       <InputField
         label={label}
@@ -78,11 +107,11 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         required={required}
         size={size}
         loading={loading}
+        inputRef={textareaRef}
         {...props}
       >
         <textarea
-          className={cn("block w-full pt-2", className)}
-          ref={ref}
+          className={cn("block w-full resize-none pt-2", className)}
           value={value}
           cols={cols}
           rows={rows}

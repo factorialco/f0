@@ -18,15 +18,18 @@ import { useSurveyFormBuilderContext } from "./Context"
 import { QuestionType } from "./types"
 
 export const useQuestionTypes = () => {
-  const { isQuestionTypeAllowed } = useSurveyFormBuilderContext()
+  const { isQuestionTypeAllowed, datasets } = useSurveyFormBuilderContext()
 
   const { t } = useI18n()
 
-  const allQuestionTypes: {
+  type SurveyQuestionTypeOption = {
     label: string
     icon: IconType
     questionType: QuestionType
-  }[] = [
+    datasetKey?: string
+  }
+
+  const allQuestionTypes: SurveyQuestionTypeOption[] = [
     {
       label: t("surveyFormBuilder.questionTypes.rating"),
       icon: Star,
@@ -68,11 +71,6 @@ export const useQuestionTypes = () => {
       questionType: "date",
     },
     {
-      label: t("surveyFormBuilder.questionTypes.dropdownSingle"),
-      icon: ChevronDown,
-      questionType: "dropdown-single",
-    },
-    {
       label: t("surveyFormBuilder.questionTypes.file"),
       icon: Upload,
       questionType: "file",
@@ -88,7 +86,17 @@ export const useQuestionTypes = () => {
     isQuestionTypeAllowed(questionType.questionType)
   )
 
-  return filteredQuestionTypes
+  const datasetQuestionTypes: SurveyQuestionTypeOption[] =
+    isQuestionTypeAllowed("dropdown-single")
+      ? Object.entries(datasets ?? {}).map(([datasetKey, dataset]) => ({
+          label: dataset.title,
+          icon: dataset.icon ?? ChevronDown,
+          questionType: "dropdown-single",
+          datasetKey,
+        }))
+      : []
+
+  return [...filteredQuestionTypes, ...datasetQuestionTypes]
 }
 
 /**
@@ -106,6 +114,7 @@ export const questionTypeIconMap: Record<QuestionType, IconType> = {
   link: Link,
   date: Calendar,
   "dropdown-single": ChevronDown,
+  "dropdown-multi": ChevronDown,
   file: Upload,
   checkbox: CheckCircle,
 }

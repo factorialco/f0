@@ -6,6 +6,7 @@ import { Switch } from "@/experimental/Forms/Fields/Switch"
 import {
   AlertCircleLine,
   Check,
+  CheckDouble,
   Delete,
   Ellipsis,
   Hub,
@@ -27,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
 
+import { useSurveyFormBuilderContext } from "../../../Context"
 import { RatingOptionType } from "../../../lib"
 import { QuestionType } from "../../../types"
 import { RATING_OPTIONS, useQuestionActions } from "./useQuestionActions"
@@ -65,21 +67,47 @@ const ToggleItem = ({
 const QuestionTypeMenuItem = ({
   label,
   value,
+  currentDatasetKey,
   questionTypes,
   currentRatingType,
+  isQuestionTypeAllowed,
   onSelectQuestionType,
   onSelectRatingType,
 }: {
   label: string
   value: QuestionType
-  questionTypes: { label: string; questionType: QuestionType; icon: IconType }[]
+  currentDatasetKey?: string
+  questionTypes: {
+    label: string
+    questionType: QuestionType
+    icon: IconType
+    datasetKey?: string
+  }[]
   currentRatingType: RatingOptionType | null
-  onSelectQuestionType: (type: QuestionType) => void
+  isQuestionTypeAllowed: (type: QuestionType) => boolean
+  onSelectQuestionType: (type: QuestionType, datasetKey?: string) => void
   onSelectRatingType: (type: RatingOptionType) => void
 }) => {
-  const selectedOptionLabel = questionTypes.find(
-    (option) => option.questionType === value
-  )?.label
+  const { t } = useI18n()
+  const regularTypes = questionTypes.filter((item) => !item.datasetKey)
+  // Group dataset types by datasetKey so each dataset gets one sub-submenu
+  const datasetKeys = Array.from(
+    new Set(
+      questionTypes
+        .filter((item) => !!item.datasetKey)
+        .map((item) => item.datasetKey as string)
+    )
+  )
+
+  const selectedOptionLabel = currentDatasetKey
+    ? (questionTypes.find(
+        (option) =>
+          option.questionType === value &&
+          option.datasetKey === currentDatasetKey
+      )?.label ?? undefined)
+    : (questionTypes.find(
+        (option) => option.questionType === value && !option.datasetKey
+      )?.label ?? undefined)
 
   return (
     <DropdownMenuSub>
@@ -96,9 +124,10 @@ const QuestionTypeMenuItem = ({
       </DropdownMenuSubTrigger>
       <DropdownMenuPortal>
         <DropdownMenuSubContent>
-          {questionTypes.map((questionType) => {
+          {regularTypes.map((questionType) => {
             const isRating = questionType.questionType === "rating"
-            const isSelected = value === questionType.questionType
+            const isSelected =
+              value === questionType.questionType && !currentDatasetKey
 
             if (isRating) {
               return (
@@ -152,6 +181,76 @@ const QuestionTypeMenuItem = ({
               </DropdownMenuItem>
             )
           })}
+          {datasetKeys.length > 0 && (
+            <>
+              <DropdownMenuSeparator />
+              {datasetKeys.map((dk) => {
+                // Find the single-select entry for this dataset (for icon/label)
+                const singleEntry = questionTypes.find(
+                  (item) =>
+                    item.datasetKey === dk &&
+                    item.questionType === "dropdown-single"
+                )
+                return (
+                  <DropdownMenuSub key={dk}>
+                    <DropdownMenuSubTrigger className="mx-1 px-2 data-[state=open]:rounded-sm data-[state=closed]:bg-transparent data-[state=open]:bg-f1-background-hover">
+                      <div className="flex w-full flex-row items-center gap-2">
+                        {singleEntry && (
+                          <F0Icon icon={singleEntry.icon} color="default" />
+                        )}
+                        <span className="flex-1 text-base font-medium">
+                          {singleEntry?.label ?? dk}
+                        </span>
+                        {currentDatasetKey === dk && (
+                          <F0Icon icon={Check} color="default" />
+                        )}
+                      </div>
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuPortal>
+                      <DropdownMenuSubContent>
+                        {isQuestionTypeAllowed("dropdown-single") && (
+                          <DropdownMenuItem
+                            onClick={() =>
+                              onSelectQuestionType("dropdown-single", dk)
+                            }
+                          >
+                            <div className="flex w-full flex-row items-center gap-2">
+                              <F0Icon icon={Check} color="default" />
+                              <span className="flex-1">
+                                {t("surveyFormBuilder.labels.singleSelection")}
+                              </span>
+                              {currentDatasetKey === dk &&
+                                value === "dropdown-single" && (
+                                  <F0Icon icon={Check} color="default" />
+                                )}
+                            </div>
+                          </DropdownMenuItem>
+                        )}
+                        {isQuestionTypeAllowed("dropdown-multi") && (
+                          <DropdownMenuItem
+                            onClick={() =>
+                              onSelectQuestionType("dropdown-multi", dk)
+                            }
+                          >
+                            <div className="flex w-full flex-row items-center gap-2">
+                              <F0Icon icon={CheckDouble} color="default" />
+                              <span className="flex-1">
+                                {t("surveyFormBuilder.labels.multiSelection")}
+                              </span>
+                              {currentDatasetKey === dk &&
+                                value === "dropdown-multi" && (
+                                  <F0Icon icon={Check} color="default" />
+                                )}
+                            </div>
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuSubContent>
+                    </DropdownMenuPortal>
+                  </DropdownMenuSub>
+                )
+              })}
+            </>
+          )}
         </DropdownMenuSubContent>
       </DropdownMenuPortal>
     </DropdownMenuSub>
@@ -197,14 +296,19 @@ export function ActionsMenu({
 }: ActionsMenuProps) {
   const { t } = useI18n()
 
+  const { isQuestionTypeAllowed } = useSurveyFormBuilderContext()
+
   const {
     question,
     questionTypes,
     currentRatingType,
+    currentDatasetKey,
+    isMultiSelectEnabled,
     disallowOptionalQuestions,
     handleChangeRequired,
     handleSelectQuestionType,
     handleSelectRatingType,
+    handleToggleMultiSelect,
     handleDuplicate,
     handleDelete,
   } = useQuestionActions({
@@ -239,12 +343,24 @@ export function ActionsMenu({
             />
           </DropdownMenuGroup>
         )}
+        {!!currentDatasetKey && (
+          <DropdownMenuGroup>
+            <ToggleItem
+              label={t("surveyFormBuilder.labels.allowMultiSelection")}
+              icon={CheckDouble}
+              checked={isMultiSelectEnabled}
+              onChange={handleToggleMultiSelect}
+            />
+          </DropdownMenuGroup>
+        )}
         <DropdownMenuGroup>
           <QuestionTypeMenuItem
             label={t("surveyFormBuilder.labels.questionType")}
             value={questionType}
+            currentDatasetKey={currentDatasetKey}
             questionTypes={questionTypes}
             currentRatingType={currentRatingType}
+            isQuestionTypeAllowed={isQuestionTypeAllowed}
             onSelectQuestionType={handleSelectQuestionType}
             onSelectRatingType={handleSelectRatingType}
           />

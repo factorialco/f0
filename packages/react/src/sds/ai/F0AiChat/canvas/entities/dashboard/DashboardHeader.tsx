@@ -2,9 +2,9 @@ import type { ReactNode } from "react"
 
 import { useCallback, useRef, useState } from "react"
 
-import { ExportDropdown } from "@/components/F0AnalyticsDashboard/components/ExportDropdown/ExportDropdown"
+import { ExportDropdown } from "@/patterns/F0AnalyticsDashboard/components/ExportDropdown/ExportDropdown"
 import { F0Button } from "@/components/F0Button"
-import { OneEllipsis } from "@/components/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { Pencil } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 

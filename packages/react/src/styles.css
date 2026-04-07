@@ -114,6 +114,11 @@ div[role="dialog"] {
   }
 }
 
+/* Action bar wiggle animation (no error styling) */
+.f0-action-bar-wiggle {
+  animation: f0-form-error-shake 0.6s ease-in-out;
+}
+
 /* Action bar error highlight animation */
 .f0-action-bar-error-navigate {
   animation: f0-form-error-shake 0.6s ease-in-out;
@@ -122,8 +127,8 @@ div[role="dialog"] {
 .f0-action-bar-error-navigate[data-variant="light"] {
   animation:
     f0-form-error-shake 0.6s ease-in-out,
-    f0-action-bar-glow 0.6s ease-in-out forwards,
-    f0-action-bar-bg-flash 0.6s ease-in-out forwards;
+    f0-action-bar-glow 0.6s ease-in-out,
+    f0-action-bar-bg-flash 0.6s ease-in-out;
 }
 
 @keyframes f0-action-bar-glow {
@@ -139,7 +144,7 @@ div[role="dialog"] {
   }
   100% {
     box-shadow: 0 8px 30px 0 hsl(var(--shadow) / 0.12);
-    border-color: transparent;
+    border-color: hsl(var(--critical-50));
   }
 }
 
@@ -151,19 +156,14 @@ div[role="dialog"] {
     background-color: hsl(var(--critical-50) / 0.2);
   }
   100% {
-    background-color: hsl(var(--neutral-0));
+    background-color: hsl(var(--critical-50) / 0.1);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .f0-action-bar-wiggle,
   .f0-action-bar-error-navigate {
     animation: none;
-    border-color: hsl(var(--critical-50)) !important;
-    box-shadow: 0 0 4px 1px hsl(var(--critical-50));
-  }
-
-  .f0-action-bar-error-navigate[data-variant="light"] {
-    background-color: hsl(var(--critical-50) / 0.1);
   }
 }
 

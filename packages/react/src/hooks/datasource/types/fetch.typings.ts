@@ -3,7 +3,7 @@ import { Observable } from "zen-observable-ts"
 import {
   FiltersDefinition,
   FiltersState,
-} from "@/components/OneFilterPicker/types"
+} from "@/patterns/OneFilterPicker/types"
 import { SortingsStateMultiple } from "@/hooks/datasource/types/sortings.typings"
 import { PromiseState } from "@/lib/promise-to-observable"
 
@@ -158,6 +158,12 @@ export type BaseDataAdapter<
     | FetchReturn
     | Promise<FetchReturn>
     | Observable<PromiseState<FetchReturn>>
+  /**
+   * Optional standalone fetch for CSV export that does NOT affect UI state.
+   * When provided, the export action uses this instead of fetchData to avoid
+   * side-effects on reactive adapters (e.g. Apollo watchQuery).
+   */
+  exportFetchData?: (options: Options) => FetchReturn | Promise<FetchReturn>
 }
 
 /**
@@ -187,6 +193,12 @@ export type PaginatedDataAdapter<
     | FetchReturn
     | Promise<FetchReturn>
     | Observable<PromiseState<FetchReturn>>
+  /**
+   * Optional standalone fetch for CSV export that does NOT affect UI state.
+   * When provided, the export action uses this instead of fetchData to avoid
+   * side-effects on reactive adapters (e.g. Apollo watchQuery).
+   */
+  exportFetchData?: (options: Options) => FetchReturn | Promise<FetchReturn>
 }
 
 /**

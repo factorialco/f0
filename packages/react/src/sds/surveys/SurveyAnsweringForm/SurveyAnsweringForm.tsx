@@ -1,14 +1,14 @@
 import { useCallback, useRef, useState, useMemo } from "react"
 
-import type { DialogPosition } from "@/components/F0Dialog/types"
-import type { F0FormSubmitResult } from "@/components/F0Form/types"
+import type { DialogPosition } from "@/patterns/F0Dialog/types"
+import type { F0FormSubmitResult } from "@/patterns/F0Form/types"
 
-import { F0Box } from "@/components/F0Box"
-import { F0Dialog } from "@/components/F0Dialog"
-import { F0Form } from "@/components/F0Form/F0Form"
-import { useF0Form } from "@/components/F0Form/useF0Form"
-import { ResourceHeader } from "@/experimental/Information/Headers/ResourceHeader"
-import { OneEmptyState } from "@/experimental/OneEmptyState"
+import { F0Box } from "@/lib/F0Box"
+import { F0Dialog } from "@/patterns/F0Dialog"
+import { F0Form } from "@/patterns/F0Form/F0Form"
+import { useF0Form } from "@/patterns/F0Form/useF0Form"
+import { ResourceHeader } from "@/patterns/ResourceHeader"
+import { OneEmptyState } from "@/components/OneEmptyState"
 import { ArrowLeft, ArrowRight, Maximize, Minimize } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -48,6 +48,7 @@ export function SurveyAnsweringForm({
   labels,
   preview = false,
   useUpload,
+  datasets,
 }: SurveyAnsweringFormProps) {
   const { t } = useI18n()
   const initialIsFullscreen = positionProp === "fullscreen"
@@ -95,7 +96,8 @@ export function SurveyAnsweringForm({
     isStepped ? accumulatedValuesRef.current : undefined,
     preview,
     isReadonlyPreview,
-    useUpload
+    useUpload,
+    datasets
   )
 
   const position: DialogPosition = isFullscreen
@@ -280,7 +282,12 @@ export function SurveyAnsweringForm({
       otherActions={otherActions}
       disableContentPadding={disableContentPadding}
     >
-      <SurveyFormBuilderProvider answering elements={elements} onChange={noop}>
+      <SurveyFormBuilderProvider
+        answering
+        elements={elements}
+        onChange={noop}
+        datasets={datasets}
+      >
         <div
           className={cn(
             "relative flex min-h-full flex-col @container",

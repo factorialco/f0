@@ -10,7 +10,7 @@ import { F0Heading } from "../index"
 const meta = {
   component: F0Heading,
   title: "Heading",
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs", "stable"],
   argTypes: {
     variant: {
       options: ["heading", "heading-large"],

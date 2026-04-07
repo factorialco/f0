@@ -29,6 +29,7 @@ export type TextareaProps = Pick<
   | "size"
   | "loading"
   | "required"
+  | "maxHeight"
 >
 
 const _Textarea: React.FC<TextareaProps> = Component(
