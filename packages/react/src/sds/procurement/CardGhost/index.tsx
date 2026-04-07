@@ -1,7 +1,8 @@
-import { ReactNode } from "react"
-
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { IconType } from "@/components/F0Icon"
+import { F0TagRaw } from "@/components/tags/F0TagRaw"
+import { F0TagStatus } from "@/components/tags/F0TagStatus"
+import { Check } from "@/icons/app"
 import { cn } from "@/lib/utils"
 
 export interface CardGhostProps {
@@ -9,8 +10,12 @@ export interface CardGhostProps {
   icon: IconType
   /** Card title */
   title: string
-  /** Tag element to display (e.g. F0TagRaw, F0TagStatus) */
-  tag: ReactNode
+  /** Whether the document is filled */
+  filled: boolean
+  /** Label for the filled/pending tag */
+  filledLabel: string
+  /** Label for the pending tag */
+  pendingLabel: string
   /** Date or secondary text */
   date: string
   /** Whether the card is selected */
@@ -22,7 +27,9 @@ export interface CardGhostProps {
 export function CardGhost({
   icon,
   title,
-  tag,
+  filled,
+  filledLabel,
+  pendingLabel,
   date,
   selected = false,
   onClick,
@@ -49,7 +56,11 @@ export function CardGhost({
           {title}
         </span>
         <div className="flex items-center gap-2">
-          {tag}
+          {filled ? (
+            <F0TagRaw icon={Check} text={filledLabel} />
+          ) : (
+            <F0TagStatus variant="warning" text={pendingLabel} />
+          )}
           <span className="text-sm text-f1-foreground-secondary">{date}</span>
         </div>
       </div>
