@@ -10,7 +10,7 @@ import { F0Text } from "../index"
 const meta = {
   component: F0Text,
   title: "Text",
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs", "stable"],
   argTypes: {
     variant: {
       options: ["body", "description", "small", "inverse", "code", "label"],
