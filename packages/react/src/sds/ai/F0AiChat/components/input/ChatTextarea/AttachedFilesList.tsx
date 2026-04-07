@@ -1,4 +1,4 @@
-import { FileItem } from "@/experimental/RichText/FileItem"
+import { FileItem } from "@/components/RichText/FileItem"
 import { CrossedCircle } from "@/icons/app"
 import { Skeleton } from "@/ui/skeleton"
 
