@@ -1615,7 +1615,10 @@ declare type ChildrenResponse<R extends RecordType> = NestedResponseWithType<R>;
 /**
  * @deprecated Use F0Chip instead
  */
-export declare const Chip: ({ deactivated, label, variant, onClick, onClose, avatar, icon, }: F0ChipProps) => JSX_2.Element;
+export declare const Chip: {
+    ({ deactivated, label, variant, onClick, onClose, avatar, icon, }: F0ChipProps): JSX_2.Element;
+    displayName: string;
+};
 
 declare type ChipLabel = {
     label: string;
@@ -3680,7 +3683,10 @@ export declare const F0Callout: ForwardRefExoticComponent<Omit<CalloutInternalPr
 
 export declare type F0CalloutProps = CalloutInternalProps;
 
-export declare const F0Chip: ({ deactivated, label, variant, onClick, onClose, avatar, icon, }: F0ChipProps) => JSX_2.Element;
+export declare const F0Chip: {
+    ({ deactivated, label, variant, onClick, onClose, avatar, icon, }: F0ChipProps): JSX_2.Element;
+    displayName: string;
+};
 
 export declare type F0ChipProps = BaseChipProps & ChipVariants & {
     variant?: ChipVariantOption;
@@ -7588,8 +7594,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
@@ -7597,10 +7605,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
