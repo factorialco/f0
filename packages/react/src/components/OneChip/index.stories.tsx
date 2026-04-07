@@ -33,6 +33,9 @@ const meta = {
     avatar: {
       description: "If defined, an avatar will be displayed in the chip",
       control: false,
+      table: {
+        type: { summary: "AvatarVariant" },
+      },
     },
     icon: {
       control: "select",

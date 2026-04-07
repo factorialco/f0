@@ -80,27 +80,28 @@ const _F0Chip = ({
   avatar,
   icon,
 }: F0ChipProps) => {
-  // Only apply role="button" when clickable AND there is no close button child
-  // to avoid nesting interactive elements (ARIA spec violation)
-  const isClickable = !!onClick && !deactivated
-  const hasButtonRole = isClickable && !onClose
+  // When onClose is present the <button> is the sole interactive child; adding role="button"
+  // to the outer div too would nest two interactive elements, violating the ARIA spec.
+  // In that layout onClick on the outer div is also suppressed — only the close button is
+  // keyboard-accessible, which is the correct UX for a dismissible chip.
+  const hasButtonRole = !!onClick && !onClose
 
   return (
     <div
       role={hasButtonRole ? "button" : undefined}
-      aria-disabled={deactivated ? true : undefined}
+      aria-disabled={hasButtonRole && deactivated ? true : undefined}
       className={cn(
         chipVariants({ variant }),
         onClose && "pr-1.5",
         avatar && "pl-0.5",
         avatar && avatar?.type !== "person" && "rounded-sm",
         icon && !avatar && "pl-1.5",
-        onClick && !deactivated && "cursor-pointer",
+        hasButtonRole && !deactivated && "cursor-pointer",
         hasButtonRole && focusRing()
       )}
-      onClick={isClickable ? onClick : undefined}
+      onClick={hasButtonRole && !deactivated ? onClick : undefined}
       onKeyDown={
-        hasButtonRole
+        hasButtonRole && !deactivated
           ? (e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault()
@@ -139,6 +140,8 @@ const _F0Chip = ({
     </div>
   )
 }
+
+_F0Chip.displayName = "F0Chip"
 
 export const F0Chip = _F0Chip
 

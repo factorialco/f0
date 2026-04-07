@@ -52,12 +52,27 @@ describe("F0Chip", () => {
       expect(span).not.toHaveAttribute("class")
     })
 
-    it("sets aria-disabled on the root element when deactivated", () => {
-      render(<F0Chip label="Disabled Chip" deactivated />)
-      const chip = screen
-        .getByText("Disabled Chip")
-        .closest('[class*="rounded-full"]')!
+    it("sets aria-disabled on the root element when deactivated with onClick", () => {
+      render(<F0Chip label="Disabled Chip" deactivated onClick={() => {}} />)
+      const chip = screen.getByRole("button", { name: "Disabled Chip" })
       expect(chip).toHaveAttribute("aria-disabled", "true")
+    })
+
+    it("does not fire onClick when deactivated", async () => {
+      const onClick = vi.fn()
+      render(<F0Chip label="Disabled" deactivated onClick={onClick} />)
+      const chip = screen.getByRole("button", { name: "Disabled" })
+      await userEvent.click(chip)
+      expect(onClick).not.toHaveBeenCalled()
+    })
+
+    it("does not fire onClick on Enter when deactivated", async () => {
+      const onClick = vi.fn()
+      render(<F0Chip label="Disabled KB" deactivated onClick={onClick} />)
+      const chip = screen.getByRole("button", { name: "Disabled KB" })
+      chip.focus()
+      await userEvent.keyboard("{Enter}")
+      expect(onClick).not.toHaveBeenCalled()
     })
   })
 
@@ -118,6 +133,14 @@ describe("F0Chip", () => {
       await userEvent.click(screen.getByRole("button", { name: "Remove Both" }))
       expect(onClose).toHaveBeenCalledTimes(1)
       expect(onClick).not.toHaveBeenCalled()
+    })
+
+    it("suppresses role=button on outer div when onClose is present", () => {
+      render(<F0Chip label="Both" onClick={() => {}} onClose={() => {}} />)
+      // Only the close button should have role=button; the outer div must not
+      const buttons = screen.getAllByRole("button")
+      expect(buttons).toHaveLength(1)
+      expect(buttons[0]).toHaveAttribute("aria-label", "Remove Both")
     })
 
     it("does not render a close button when onClose is not provided", () => {
