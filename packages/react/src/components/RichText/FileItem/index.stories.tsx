@@ -17,6 +17,7 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   tags: ["experimental"],
   args: {
+    size: "lg",
     file: new File(["test"], "test.txt", { type: "text/plain" }),
     actions: [
       {
@@ -32,6 +33,7 @@ export const Default: Story = {
 
 export const WithMultipleActions: Story = {
   args: {
+    size: "lg",
     file: new File(["test"], "test of a long file name.pdf", {
       type: "application/pdf",
     }),
@@ -57,6 +59,7 @@ export const WithMultipleActions: Story = {
 
 export const WithoutActions: Story = {
   args: {
+    size: "lg",
     file: new File(["test"], "test of a long file name.pdf", {
       type: "application/pdf",
     }),
