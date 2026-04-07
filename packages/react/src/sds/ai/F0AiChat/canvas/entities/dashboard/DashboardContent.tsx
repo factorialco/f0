@@ -292,7 +292,7 @@ ChatDashboard.displayName = "ChatDashboard"
 // Canvas content wrapper — bridges canvas context to ChatDashboard props
 // ---------------------------------------------------------------------------
 
-import { F0ActionBar } from "@/experimental/F0ActionBar"
+import { F0ActionBar } from "@/components/F0ActionBar"
 import { useI18n } from "@/lib/providers/i18n"
 
 import type { DashboardCanvasContent } from "../../../types"

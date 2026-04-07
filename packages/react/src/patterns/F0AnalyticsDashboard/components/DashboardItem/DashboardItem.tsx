@@ -7,7 +7,7 @@ import {
   type DropdownItem as DropdownItemType,
   type DropdownItemObject,
 } from "@/experimental/Navigation/Dropdown"
-import { OneEmptyState } from "@/experimental/OneEmptyState"
+import { OneEmptyState } from "@/components/OneEmptyState"
 import { ChartLine, Delete, Download, Ellipsis } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
