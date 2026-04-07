@@ -447,6 +447,16 @@ export declare const defaultTranslations: {
         };
         readonly attachFile: "Attach file";
         readonly removeFile: "Remove";
+        readonly dropFilesHere: "Drop your files here";
+        readonly clarifyingQuestion: {
+            readonly submit: "Submit";
+            readonly next: "Next";
+            readonly back: "Back";
+            readonly typeYourAnswer: "Type your answer…";
+            readonly stepOf: "{{current}} of {{total}}";
+            readonly custom: "own answer";
+            readonly skipped: "skipped";
+        };
         readonly growth: {
             readonly demoCard: {
                 readonly title: "See {{moduleName}} in action";

@@ -15,6 +15,10 @@ import { BarChartProps } from './experimental';
 import { BarSeriesCellValue } from './types/barSeries';
 import { baseColors } from '@factorialco/f0-core';
 import { ButtonHTMLAttributes } from 'react';
+import { CategoryBarProps } from './CategoryBarChart';
+import { ChartConfig } from './experimental';
+import { ChartConfig as ChartConfig_2 } from './utils/types';
+import { ChartPropsBase } from './utils/types';
 import { ClassValue } from 'cva';
 import { CompanyCellValue } from './types/company';
 import { CompanyCellValue as CompanyCellValue_2 } from './experimental';
@@ -58,7 +62,9 @@ import { ItemProps } from './types';
 import { JSONContent } from '@tiptap/react';
 import { JSONContent as JSONContent_2 } from '@tiptap/core';
 import { JSX as JSX_2 } from 'react';
+import { LineChartConfig } from './experimental';
 import { LineChartProps } from './experimental';
+import { LineChartPropsBase } from './utils/types';
 import { LongTextCellValue } from './types/longText';
 import { Message as Message_2 } from '@copilotkit/shared';
 import { NumberCellValue } from './types/number';
@@ -68,7 +74,8 @@ import { Observable } from 'zen-observable-ts';
 import { PercentageCellValue } from './types/percentage';
 import { PersonCellValue } from './types/person';
 import { PersonCellValue as PersonCellValue_2 } from './experimental';
-import { PieChartProps } from './experimental';
+import { PieChartProps } from './PieChart';
+import { PieChartProps as PieChartProps_2 } from './experimental';
 import { PopoverProps } from '@radix-ui/react-popover';
 import { ProgressBarCellValue } from './types/progressBar';
 import { ProgressBarCellValue as ProgressBarCellValue_2 } from './experimental';
@@ -100,18 +107,21 @@ import { TagType } from './experimental';
 import { TeamCellValue } from './types/team';
 import { TeamCellValue as TeamCellValue_2 } from './experimental';
 import { TeamItemProps } from './types';
+import { TextareaHTMLAttributes } from 'react';
 import { TextCellValue } from './types/text';
 import { TextCellValue as TextCellValue_2 } from './experimental';
 import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
 import { ValueDisplayRendererContext as ValueDisplayRendererContext_2 } from './experimental';
 import { VariantProps } from 'cva';
 import { VerticalBarChartProps } from './experimental';
+import { VirtualItem } from '@tanstack/react-virtual';
 import { WidgetProps as WidgetProps_2 } from './experimental';
 import { WithDataTestIdProps as WithDataTestIdProps_2 } from './experimental';
 import { WithDataTestIdReturnType } from './experimental';
 import { WithDataTestIdReturnType as WithDataTestIdReturnType_2 } from './experimental';
 import { WithDataTestIdReturnType as WithDataTestIdReturnType_3 } from './experimental';
 import { WithDataTestIdReturnType as WithDataTestIdReturnType_4 } from './experimental';
+import { WithDataTestIdReturnType as WithDataTestIdReturnType_5 } from './experimental';
 
 declare type Action = {
     label: string;
@@ -654,11 +664,18 @@ declare type Approver = {
     status: Status;
 };
 
+export declare const AreaChart: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<LineChartPropsBase<LineChartConfig> & {
+lineType?: "step" | "linear" | "natural" | "monotoneX";
+marginTop?: number;
+canBeBlurred?: boolean;
+blurArea?: "l" | "r" | "lr";
+} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
+
 export declare const AreaChartWidget: ForwardRefExoticComponent<Omit<AreaChartWidgetProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
 
 export declare const AutoGrid: ForwardRefExoticComponent<Omit<HTMLAttributes<HTMLDivElement> & VariantProps<(props?: ({
 tileSize?: "lg" | "md" | "sm" | undefined;
-gap?: "0" | "1" | "2" | "3" | "4" | "lg" | "md" | "sm" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "14" | "16" | "px" | "xl" | "0.5" | "1.5" | "2.5" | undefined;
+gap?: "0" | "1" | "2" | "3" | "4" | "lg" | "md" | "sm" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "14" | "16" | "px" | "xl" | "1.5" | "0.5" | "2.5" | undefined;
 } & ({
 class?: ClassValue;
 className?: never;
@@ -770,6 +787,20 @@ declare interface BannerProps {
 
 declare type BannerVariant = "info" | "warning" | "critical" | "neutral" | "positive";
 
+export declare const BarChart: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig> & {
+type?: "simple" | "stacked" | "stacked-by-sign";
+label?: boolean;
+legend?: boolean;
+showValueUnderLabel?: boolean;
+highlightLastBar?: boolean;
+onClick?: ((data: {
+label: string;
+values: {
+[x: string]: number;
+};
+}) => void) | undefined;
+} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
+
 export declare const BarChartWidget: ForwardRefExoticComponent<Omit<WidgetProps_2 & {
 chart: BarChartProps;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
@@ -841,6 +872,22 @@ export declare type BaseBannerProps = {
 };
 
 export declare const BaseCelebration: ({ link, firstName, lastName, src, onClick, canReact, lastEmojiReaction, onReactionSelect, type, typeLabel, date, }: CelebrationProps) => JSX_2.Element;
+
+declare interface BaseChipProps extends VariantProps<typeof chipVariants> {
+    /**
+     * The label of the chip
+     * */
+    label: string;
+    /**
+     * If defined, the chip will be clickable
+     * */
+    onClick?: () => void;
+    /**
+     * If defined, the close icon will be displayed and the chip will be clickable
+     * */
+    onClose?: () => void;
+    deactivated?: boolean;
+}
 
 declare type BaseColor = keyof typeof baseColors;
 
@@ -1387,6 +1434,8 @@ export declare interface CardSelectableItem<T extends CardSelectableValue> {
         href: string;
         label?: string;
     };
+    /** Custom content rendered inside the card when it is selected, with an expand/collapse animation */
+    selectedContent?: ReactNode;
 }
 
 export declare interface CardSelectableMultipleProps<T extends CardSelectableValue> {
@@ -1449,7 +1498,7 @@ declare type CardVisualizationOptions<T, _Filters extends FiltersDefinition, _So
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Carousel: WithDataTestIdReturnType_4<({ children, columns, showArrows, showDots, autoplay, delay, showPeek, doubleColumns, }: CarouselProps) => default_2.JSX.Element>;
+export declare const Carousel: WithDataTestIdReturnType_5<({ children, columns, showArrows, showDots, autoplay, delay, showPeek, doubleColumns, }: CarouselProps) => default_2.JSX.Element>;
 
 declare interface CarouselBreakpoints {
     default?: ColumnNumber;
@@ -1474,7 +1523,9 @@ declare interface CarouselProps {
     }[];
 }
 
-declare interface CategoryBarProps {
+export declare const CategoryBarChart: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<CategoryBarProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
+
+declare interface CategoryBarProps_2 {
     data: {
         name: string;
         value: number;
@@ -1489,7 +1540,7 @@ export declare function CategoryBarSection({ title, subtitle, data, helpText, le
 declare interface CategoryBarSectionProps {
     title: string;
     subtitle: string;
-    data: CategoryBarProps["data"];
+    data: CategoryBarProps_2["data"];
     helpText?: string;
     legend?: boolean;
     hideTooltip?: boolean;
@@ -1515,9 +1566,9 @@ export declare type CelebrationProps = {
 
 export declare const CelebrationSkeleton: () => JSX_2.Element;
 
-declare type ChartConfig = Record<string, ChartConfig_2[keyof ChartConfig_2]>;
+declare type ChartConfig_3 = Record<string, ChartConfig_4[keyof ChartConfig_4]>;
 
-declare type ChartConfig_2 = {
+declare type ChartConfig_4 = {
     [k in string]: {
         label?: React_2.ReactNode;
         icon?: React_2.ComponentType;
@@ -1533,11 +1584,11 @@ declare type ChartConfig_2 = {
 declare const ChartContainer: React_2.ForwardRefExoticComponent<Omit<ChartContainerComponentProps, "ref"> & React_2.RefAttributes<HTMLDivElement>>;
 
 declare interface ChartContainerComponentProps extends React_2.ComponentProps<"div">, VariantProps<typeof variants_2> {
-    config: ChartConfig_2;
+    config: ChartConfig_4;
     children: React_2.ComponentProps<typeof RechartsPrimitive.ResponsiveContainer>["children"];
 }
 
-declare type ChartItem<K extends ChartConfig> = {
+declare type ChartItem<K extends ChartConfig_3> = {
     label: string;
     values: {
         [key in keyof K]: number;
@@ -1547,7 +1598,7 @@ declare type ChartItem<K extends ChartConfig> = {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const ChartWidgetEmptyState: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Props_6 & RefAttributes<HTMLDivElement>>>;
+export declare const ChartWidgetEmptyState: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Props_6 & RefAttributes<HTMLDivElement>>>;
 
 export declare type ChatWidgetEmptyStateProps = Props_6;
 
@@ -1561,6 +1612,11 @@ declare type ChildrenPaginationInfo = {
 
 declare type ChildrenResponse<R extends RecordType> = NestedResponseWithType<R>;
 
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const Chip: ({ deactivated, label, variant, onClick, onClose, avatar, icon, }: ChipProps) => JSX_2.Element;
+
 declare type ChipLabel = {
     label: string;
 } & ({
@@ -1573,6 +1629,37 @@ declare type ChipLabel = {
     icon?: never;
     avatar?: never;
 });
+
+export declare type ChipProps = BaseChipProps & ChipVariants & {
+    variant?: "default" | "selected";
+};
+
+declare type ChipVariants = {
+    /**
+     * If defined, an avatar will be displayed in the chip
+     * */
+    avatar: AvatarVariant;
+    icon?: undefined;
+} | {
+    /**
+     * If defined, an icon will be displayed in the chip
+     * */
+    icon: IconType;
+    avatar?: undefined;
+} | {
+    avatar?: undefined;
+    icon?: undefined;
+};
+
+export declare const chipVariants: (props?: ({
+    variant?: "default" | "selected" | undefined;
+} & ({
+    class?: ClassValue;
+    className?: never;
+} | {
+    class?: never;
+    className?: ClassValue;
+})) | undefined) => string;
 
 export declare function ClockInControls({ trackedMinutes, remainingMinutes, data, labels, locationId, locations, canShowLocation, locationSelectorDisabled, onClockIn, onClockOut, onBreak, breakTypes, onChangeBreakTypeId, canShowBreakButton, canSeeGraph, canSeeRemainingTime, onChangeLocationId, canShowProject, projectSelectorElement, breakTypeName, }: ClockInControlsProps): JSX_2.Element;
 
@@ -1680,6 +1767,39 @@ declare const columnWidths: {
     readonly auto: undefined;
     readonly fit: 1;
 };
+
+export declare const ComboChart: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig> & {
+label?: boolean;
+legend?: boolean;
+showValueUnderLabel?: boolean;
+bar?: {
+categories: string | string[];
+axisLabel?: string;
+hideAxis?: boolean;
+axisPosition?: "left" | "right";
+} | undefined;
+line?: ({
+categories: string | string[];
+axisLabel?: string;
+hideAxis?: boolean;
+axisPosition?: "left" | "right";
+} & {
+dot?: boolean;
+lineType?: "natural" | "linear";
+}) | undefined;
+scatter?: {
+categories: string | string[];
+axisLabel?: string;
+hideAxis?: boolean;
+axisPosition?: "left" | "right";
+} | undefined;
+onClick?: ((data: {
+label: string;
+values: {
+[x: string]: number;
+};
+}) => void) | undefined;
+} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 export declare const CommunityPost: (({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, }: CommunityPostProps) => JSX_2.Element) & {
     Skeleton: ({ withEvent, withImage, }: CommunityPostSkeletonProps) => JSX_2.Element;
@@ -2252,7 +2372,7 @@ declare type DateValue = {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const DaytimePage: WithDataTestIdReturnType_4<typeof _DaytimePage>;
+export declare const DaytimePage: WithDataTestIdReturnType_5<typeof _DaytimePage>;
 
 declare function _DaytimePage({ children, header, period, embedded, }: DaytimePageProps): JSX_2.Element;
 
@@ -2733,6 +2853,16 @@ declare const defaultTranslations: {
         };
         readonly attachFile: "Attach file";
         readonly removeFile: "Remove";
+        readonly dropFilesHere: "Drop your files here";
+        readonly clarifyingQuestion: {
+            readonly submit: "Submit";
+            readonly next: "Next";
+            readonly back: "Back";
+            readonly typeYourAnswer: "Type your answer…";
+            readonly stepOf: "{{current}} of {{total}}";
+            readonly custom: "own answer";
+            readonly skipped: "skipped";
+        };
         readonly growth: {
             readonly demoCard: {
                 readonly title: "See {{moduleName}} in action";
@@ -2974,7 +3104,7 @@ declare const defaultTranslations: {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const DetailsItem: WithDataTestIdReturnType_4<ForwardRefExoticComponent<DetailsItemType & RefAttributes<HTMLDivElement>>>;
+export declare const DetailsItem: WithDataTestIdReturnType_5<ForwardRefExoticComponent<DetailsItemType & RefAttributes<HTMLDivElement>>>;
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -2994,7 +3124,7 @@ export declare interface DetailsItemType {
     spacingAtTheBottom?: boolean;
 }
 
-export declare const Dialog: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<DialogProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
+export declare const Dialog: WithDataTestIdReturnType_2<ForwardRefExoticComponent<Omit<DialogProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 declare type DialogProps = {
     header: {
@@ -3370,7 +3500,7 @@ export declare const F0AiBanner: ForwardRefExoticComponent<Omit<AiBannerInternal
 
 export declare type F0AiBannerProps = AiBannerInternalProps;
 
-declare const F0AvatarAlert: WithDataTestIdReturnType_4<({ type, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: AlertAvatarProps_2) => JSX_2.Element>;
+declare const F0AvatarAlert: WithDataTestIdReturnType_5<({ type, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: AlertAvatarProps_2) => JSX_2.Element>;
 
 declare type F0AvatarCompanyProps = {
     name: string;
@@ -3448,7 +3578,7 @@ declare type F0AvatarListPropsAvatars = {
     avatars: (Omit<FileAvatarVariant, "type"> & Record<string, unknown>)[];
 };
 
-export declare const F0AvatarModule: WithDataTestIdReturnType_4<typeof F0AvatarModule_2>;
+export declare const F0AvatarModule: WithDataTestIdReturnType_5<typeof F0AvatarModule_2>;
 
 /**
  * Module avatar
@@ -3674,13 +3804,13 @@ export declare type F0SelectTagProp = string | {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0TableOfContent: WithDataTestIdReturnType_4<typeof _F0TableOfContent>;
+export declare const F0TableOfContent: WithDataTestIdReturnType_5<typeof _F0TableOfContent>;
 
 declare function _F0TableOfContent(props: TOCProps): JSX_2.Element;
 
-declare const F0TagAlert: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Props_5 & RefAttributes<HTMLDivElement>>>;
+declare const F0TagAlert: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Props_5 & RefAttributes<HTMLDivElement>>>;
 
-declare const F0TagBalance: WithDataTestIdReturnType_4<ForwardRefExoticComponent<F0TagBalanceProps_2 & RefAttributes<HTMLDivElement>>>;
+declare const F0TagBalance: WithDataTestIdReturnType_5<ForwardRefExoticComponent<F0TagBalanceProps_2 & RefAttributes<HTMLDivElement>>>;
 
 declare type F0TagBalanceProps = {
     /**
@@ -3712,7 +3842,7 @@ declare type F0TagBalanceProps = {
     formatterOptions?: undefined;
 });
 
-declare const F0TagCompany: WithDataTestIdReturnType_4<ForwardRefExoticComponent<F0TagCompanyProps & RefAttributes<HTMLDivElement>>>;
+declare const F0TagCompany: WithDataTestIdReturnType_5<ForwardRefExoticComponent<F0TagCompanyProps & RefAttributes<HTMLDivElement>>>;
 
 declare type F0TagListProps<T extends TagType_2> = {
     /**
@@ -3734,9 +3864,9 @@ declare type F0TagListProps<T extends TagType_2> = {
     remainingCount?: number;
 };
 
-declare const F0TagPerson: WithDataTestIdReturnType_4<ForwardRefExoticComponent<F0TagPersonProps & RefAttributes<HTMLDivElement>>>;
+declare const F0TagPerson: WithDataTestIdReturnType_5<ForwardRefExoticComponent<F0TagPersonProps & RefAttributes<HTMLDivElement>>>;
 
-declare const F0TagRaw: WithDataTestIdReturnType_4<ForwardRefExoticComponent<F0TagRawProps_2 & RefAttributes<HTMLDivElement>>>;
+declare const F0TagRaw: WithDataTestIdReturnType_5<ForwardRefExoticComponent<F0TagRawProps_2 & RefAttributes<HTMLDivElement>>>;
 
 declare type F0TagRawProps = {
     /**
@@ -3769,7 +3899,7 @@ declare interface F0TagStatusProps {
     additionalAccessibleText?: string;
 }
 
-declare const F0TagTeam: WithDataTestIdReturnType_4<ForwardRefExoticComponent<F0TagTeamProps & RefAttributes<HTMLDivElement>>>;
+declare const F0TagTeam: WithDataTestIdReturnType_5<ForwardRefExoticComponent<F0TagTeamProps & RefAttributes<HTMLDivElement>>>;
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -3836,7 +3966,7 @@ declare type FileDef = {
     type: string;
 };
 
-export declare const FileItem: WithDataTestIdReturnType_4<ForwardRefExoticComponent<FileItemProps & RefAttributes<HTMLDivElement>>>;
+export declare const FileItem: WithDataTestIdReturnType_5<ForwardRefExoticComponent<FileItemProps & RefAttributes<HTMLDivElement>>>;
 
 declare interface FileItemProps extends React.HTMLAttributes<HTMLDivElement> {
     file: File | FileDef;
@@ -4531,6 +4661,10 @@ declare type Level = (typeof levels)[number];
 
 declare const levels: readonly ["info", "warning", "critical", "positive"];
 
+export declare const LineChart: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<LineChartPropsBase<LineChartConfig> & {
+lineType?: "natural" | "linear";
+} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
+
 export declare const LineChartWidget: ForwardRefExoticComponent<Omit<WidgetProps_2 & {
 chart: LineChartProps;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
@@ -5133,7 +5267,7 @@ action: BulkAction,
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const OneApprovalHistory: WithDataTestIdReturnType_4<FC<OneApprovalHistoryProps>>;
+export declare const OneApprovalHistory: WithDataTestIdReturnType_5<FC<OneApprovalHistoryProps>>;
 
 declare type OneApprovalHistoryProps = {
     steps: ApprovalStep[];
@@ -5162,13 +5296,10 @@ export declare interface OneCalendarInternalProps {
 
 export declare type OneCalendarProps = Omit<OneCalendarInternalProps, (typeof privateProps_5)[number]>;
 
-/**
- * @experimental This is an experimental component use it at your own risk
- */
 export declare const OneDataCollection: OneDataCollectionGeneric;
 
 /**
- * Generic component type so consumers can use <F0Select<T, R> />.
+ * Generic component type so consumers can use <OneDataCollection<T, R> />.
  * Preserves dataTestId and OneDataCollection
  */
 declare type OneDataCollectionGeneric = <R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>>(props: OneDataCollectionProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> & WithDataTestIdProps) => ReactElement | null;
@@ -5367,7 +5498,7 @@ declare interface OnePaginationProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const OnePersonListItem: WithDataTestIdReturnType_4<default_2.ForwardRefExoticComponent<OnePersonListItemProps & default_2.RefAttributes<HTMLDivElement>> & {
+export declare const OnePersonListItem: WithDataTestIdReturnType_5<default_2.ForwardRefExoticComponent<OnePersonListItemProps & default_2.RefAttributes<HTMLDivElement>> & {
 Skeleton: () => default_2.JSX.Element;
 }>;
 
@@ -5454,7 +5585,7 @@ declare interface OverflowListProps<T> {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Page: WithDataTestIdReturnType_4<typeof _Page>;
+export declare const Page: WithDataTestIdReturnType_5<typeof _Page>;
 
 declare function _Page({ children, header, embedded }: PageProps): JSX_2.Element;
 
@@ -5582,8 +5713,10 @@ declare type PersonProfile = {
 
 declare type PersonTagProps = ComponentProps<typeof F0TagPerson>;
 
+export declare const PieChart: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<PieChartProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
+
 export declare const PieChartWidget: ForwardRefExoticComponent<Omit<WidgetProps_2 & {
-chart: PieChartProps;
+chart: PieChartProps_2;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
 
 declare type PostDescriptionProps = {
@@ -5731,6 +5864,13 @@ declare type ProductUpdatesProp = {
     };
 };
 
+export declare const ProgressBarChart: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig_2> & {
+value: number;
+max?: number;
+label?: string;
+color?: string;
+} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
+
 /**
  * Utility type for handling both Promise and Observable return types.
  * @template T - The type of the value being promised or observed
@@ -5860,13 +6000,17 @@ declare type Pulse = (typeof pulses)[number];
 
 declare const pulses: readonly ["superNegative", "negative", "neutral", "positive", "superPositive"];
 
-export declare const RadarChart: RadarChartGeneric;
+export declare const RadarChart: <K extends ChartConfig_3>(props: RadarChartProps<K> & {
+    dataTestId?: string;
+} & {
+    ref?: ForwardedRef<HTMLDivElement>;
+}) => ReactElement | null;
 
-export declare const _RadarChart: <K extends ChartConfig>({ data, dataConfig, scaleMin, scaleMax, aspect }: RadarChartProps<K>, ref: ForwardedRef<HTMLDivElement>) => JSX_2.Element;
+export declare const _RadarChart: <K extends ChartConfig_3>({ data, dataConfig, scaleMin, scaleMax, aspect, dataTestId, }: RadarChartProps<K> & {
+    dataTestId?: string;
+}, ref: ForwardedRef<HTMLDivElement>) => JSX_2.Element;
 
-declare type RadarChartGeneric = <K extends ChartConfig>(props: RadarChartProps<K> & WithDataTestIdProps) => ReactElement | null;
-
-export declare type RadarChartProps<K extends ChartConfig> = {
+export declare type RadarChartProps<K extends ChartConfig_3> = {
     dataConfig: K;
     data: ChartItem<K>[];
     scaleMin?: number;
@@ -5884,7 +6028,14 @@ declare interface ReactionProps {
     onInteraction?: (emoji: string) => void;
 }
 
-declare interface ReactionsProps {
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const Reactions: typeof _Reactions;
+
+declare function _Reactions({ items, onInteraction, locale, action }: ReactionsProps): JSX_2.Element;
+
+export declare interface ReactionsProps {
     items: ReactionProps[];
     onInteraction?: (emoji: string) => void;
     locale?: string;
@@ -5949,7 +6100,7 @@ export declare type resultType = {
     mentionIds?: number[];
 };
 
-export declare const RichTextDisplay: WithDataTestIdReturnType_4<ForwardRefExoticComponent<RichTextDisplayProps & RefAttributes<HTMLDivElement>>>;
+export declare const RichTextDisplay: WithDataTestIdReturnType_5<ForwardRefExoticComponent<RichTextDisplayProps & RefAttributes<HTMLDivElement>>>;
 
 export declare type RichTextDisplayHandle = HTMLDivElement;
 
@@ -6167,7 +6318,7 @@ declare const shortcutVariants: (props?: ({
     className?: ClassValue;
 })) | undefined) => string;
 
-export declare const Sidebar: WithDataTestIdReturnType_4<typeof _Sidebar>;
+export declare const Sidebar: WithDataTestIdReturnType_5<typeof _Sidebar>;
 
 declare function _Sidebar({ header, body, footer, onFooterDropdownClick, }: SidebarProps): JSX_2.Element;
 
@@ -6267,15 +6418,15 @@ declare const spinnerVariants: (props?: ({
 
 export declare const Split: ForwardRefExoticComponent<Omit<HTMLAttributes<HTMLDivElement> & VariantProps<(props?: ({
 overflow?: "hidden" | "auto" | undefined;
-paddingX?: "none" | "p-2" | "p-4" | "p-8" | "p-12" | "p-16" | undefined;
+paddingX?: "none" | "p-4" | "p-2" | "p-8" | "p-12" | "p-16" | undefined;
 maxWidth?: "md" | "sm" | "xs" | "xl" | "screen-sm" | "screen-md" | "screen-lg" | "screen-xl" | "screen-2xl" | undefined;
 height?: "auto" | "full" | undefined;
 width?: "auto" | "full" | undefined;
-paddingY?: "none" | "p-2" | "p-4" | "p-8" | "p-12" | "p-16" | undefined;
+paddingY?: "none" | "p-4" | "p-2" | "p-8" | "p-12" | "p-16" | undefined;
 basis?: "0" | undefined;
 inline?: boolean | undefined;
-justifyContent?: "center" | "end" | "start" | "stretch" | "space-between" | undefined;
-alignItems?: "center" | "end" | "start" | "stretch" | "space-between" | undefined;
+justifyContent?: "center" | "end" | "start" | "space-between" | "stretch" | undefined;
+alignItems?: "center" | "end" | "start" | "space-between" | "stretch" | undefined;
 grow?: boolean | undefined;
 shrink?: boolean | undefined;
 } & ({
@@ -6285,7 +6436,7 @@ className?: never;
 class?: never;
 className?: ClassValue;
 })) | undefined) => string> & VariantProps<(props?: ({
-gap?: "0" | "1" | "2" | "3" | "4" | "lg" | "md" | "sm" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "14" | "16" | "px" | "xl" | "0.5" | "1.5" | "2.5" | undefined;
+gap?: "0" | "1" | "2" | "3" | "4" | "lg" | "md" | "sm" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "14" | "16" | "px" | "xl" | "1.5" | "0.5" | "2.5" | undefined;
 wrap?: boolean | undefined;
 } & ({
 class?: ClassValue;
@@ -6297,15 +6448,15 @@ className?: ClassValue;
 
 export declare const Stack: ForwardRefExoticComponent<Omit<HTMLAttributes<HTMLDivElement> & VariantProps<(props?: ({
 overflow?: "hidden" | "auto" | undefined;
-paddingX?: "none" | "p-2" | "p-4" | "p-8" | "p-12" | "p-16" | undefined;
+paddingX?: "none" | "p-4" | "p-2" | "p-8" | "p-12" | "p-16" | undefined;
 maxWidth?: "md" | "sm" | "xs" | "xl" | "screen-sm" | "screen-md" | "screen-lg" | "screen-xl" | "screen-2xl" | undefined;
 height?: "auto" | "full" | undefined;
 width?: "auto" | "full" | undefined;
-paddingY?: "none" | "p-2" | "p-4" | "p-8" | "p-12" | "p-16" | undefined;
+paddingY?: "none" | "p-4" | "p-2" | "p-8" | "p-12" | "p-16" | undefined;
 basis?: "0" | undefined;
 inline?: boolean | undefined;
-justifyContent?: "center" | "end" | "start" | "stretch" | "space-between" | undefined;
-alignItems?: "center" | "end" | "start" | "stretch" | "space-between" | undefined;
+justifyContent?: "center" | "end" | "start" | "space-between" | "stretch" | undefined;
+alignItems?: "center" | "end" | "start" | "space-between" | "stretch" | undefined;
 grow?: boolean | undefined;
 shrink?: boolean | undefined;
 } & ({
@@ -6315,7 +6466,7 @@ className?: never;
 class?: never;
 className?: ClassValue;
 })) | undefined) => string> & VariantProps<(props?: ({
-gap?: "0" | "1" | "2" | "3" | "4" | "lg" | "md" | "sm" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "14" | "16" | "px" | "xl" | "0.5" | "1.5" | "2.5" | undefined;
+gap?: "0" | "1" | "2" | "3" | "4" | "lg" | "md" | "sm" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "14" | "16" | "px" | "xl" | "1.5" | "0.5" | "2.5" | undefined;
 } & ({
 class?: ClassValue;
 className?: never;
@@ -6570,7 +6721,7 @@ export declare type TableVisualizationType = "table" | "editableTable";
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Tabs: WithDataTestIdReturnType_4<FC<TabsProps> & {
+export declare const Tabs: WithDataTestIdReturnType_5<FC<TabsProps> & {
 Skeleton: FC<Pick<TabsProps, "secondary">>;
 }>;
 
@@ -6668,11 +6819,13 @@ declare type TeamTagProps = ComponentProps<typeof F0TagTeam>;
  */
 export declare const Textarea: FC<TextareaProps>;
 
-declare const Textarea_2: React_2.ForwardRefExoticComponent<Omit<React_2.TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange" | "onFocus" | "onBlur"> & {
-    value?: string;
-} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "size" | "icon" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "loading" | "maxLength" | "placeholder" | "required" | "error" | "hideLabel" | "hint" | "labelIcon" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
+declare const Textarea_2: ForwardRefExoticComponent<Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange" | "onFocus" | "onBlur"> & {
+value?: string;
+/** Maximum height in pixels. When set, the textarea scrolls beyond this height instead of growing. */
+maxHeight?: number;
+} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "size" | "icon" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "loading" | "maxLength" | "placeholder" | "required" | "error" | "hideLabel" | "hint" | "labelIcon" | "clearable" | "onClear"> & RefAttributes<HTMLTextAreaElement>>;
 
-export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error" | "size" | "loading" | "required">;
+export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error" | "size" | "loading" | "required" | "maxHeight">;
 
 declare const THEMES: {
     readonly light: "";
@@ -6826,7 +6979,7 @@ export declare interface ToolbarProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Tooltip: WithDataTestIdReturnType_4<(props: TooltipProps) => default_2.JSX.Element>;
+export declare const Tooltip: WithDataTestIdReturnType_5<(props: TooltipProps) => default_2.JSX.Element>;
 
 declare type TooltipInternalProps = {
     children: default_2.ReactNode;
@@ -7050,6 +7203,12 @@ export declare interface VersionAuthor {
     src?: string;
 }
 
+export declare const VerticalBarChart: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig_2> & {
+label?: boolean;
+showRatio?: boolean;
+valueFormatter?: (value: string | number | undefined) => string | number;
+} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
+
 export declare const VerticalBarChartWidget: ForwardRefExoticComponent<Omit<WidgetProps_2 & {
 chart: VerticalBarChartProps;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
@@ -7057,6 +7216,19 @@ chart: VerticalBarChartProps;
 declare const VerticalOverflowList: {
     <T>({ items, renderListItem, className, gap, minSize, onVisibleItemsChange, }: OverflowListProps<T>): JSX_2.Element;
     displayName: string;
+};
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const VirtualList: default_2.ForwardRefExoticComponent<VirtualListProps & default_2.RefAttributes<HTMLDivElement>>;
+
+declare type VirtualListProps = {
+    height: number;
+    itemCount: number;
+    itemSize: number | ((index: number) => number);
+    renderer: (item: VirtualItem) => JSX.Element;
+    className?: string;
 };
 
 declare type VisualizacionTypeDefinition<Props, Settings = Record<string, never>> = {
@@ -7176,7 +7348,7 @@ declare type WelcomeScreenSuggestion = {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const Widget: WithDataTestIdReturnType_4<default_2.ForwardRefExoticComponent<WidgetProps & {
+export declare const Widget: WithDataTestIdReturnType_5<default_2.ForwardRefExoticComponent<WidgetProps & {
 children: ReactNode;
 } & default_2.RefAttributes<HTMLDivElement>> & {
 Skeleton: default_2.ForwardRefExoticComponent<WidgetSkeletonProps & default_2.RefAttributes<HTMLDivElement>>;
@@ -7201,7 +7373,7 @@ export declare type WidgetAvatarsListItemProps = {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const WidgetEmptyState: WithDataTestIdReturnType_4<typeof _WidgetEmptyState>;
+export declare const WidgetEmptyState: WithDataTestIdReturnType_5<typeof _WidgetEmptyState>;
 
 declare function _WidgetEmptyState({ title, description, emoji, actions, }: WidgetEmptyStateProps): JSX_2.Element;
 
@@ -7255,7 +7427,7 @@ export declare interface WidgetProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const WidgetSection: WithDataTestIdReturnType_4<ForwardRefExoticComponent<    {
+export declare const WidgetSection: WithDataTestIdReturnType_5<ForwardRefExoticComponent<    {
 children?: ReactNode | undefined;
 } & {
 title?: string;

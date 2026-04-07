@@ -100,7 +100,7 @@ const e = {
   jo: "Jordan",
   jp: "Japan",
   ke: "Kenya"
-}, a = {
+}, t = {
   countries: e,
   approvals: {
     history: "Approval history",
@@ -447,6 +447,16 @@ const e = {
     },
     attachFile: "Attach file",
     removeFile: "Remove",
+    dropFilesHere: "Drop your files here",
+    clarifyingQuestion: {
+      submit: "Submit",
+      next: "Next",
+      back: "Back",
+      typeYourAnswer: "Type your answer…",
+      stepOf: "{{current}} of {{total}}",
+      custom: "own answer",
+      skipped: "skipped"
+    },
     growth: {
       demoCard: {
         title: "See {{moduleName}} in action",
@@ -685,5 +695,5 @@ const e = {
   }
 };
 export {
-  a as defaultTranslations
+  t as defaultTranslations
 };
