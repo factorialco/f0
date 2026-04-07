@@ -1878,6 +1878,8 @@ export declare interface CardSelectableItem<T extends CardSelectableValue> {
         href: string;
         label?: string;
     };
+    /** Custom content rendered inside the card when it is selected, with an expand/collapse animation */
+    selectedContent?: ReactNode;
 }
 
 export declare interface CardSelectableMultipleProps<T extends CardSelectableValue> {
@@ -1923,6 +1925,26 @@ export declare interface CardSelectableSingleProps<T extends CardSelectableValue
 }
 
 export declare type CardSelectableValue = string | number;
+
+declare type CardSelectFieldRenderIf = CardSelectRenderIfCondition | CommonRenderIfCondition | F0BaseFieldRenderIfFunction;
+
+declare interface CardSelectOption {
+    value: string;
+    label: string;
+    description?: string;
+}
+
+declare interface CardSelectRenderIfBase {
+    fieldId: string;
+}
+
+declare type CardSelectRenderIfCondition = CardSelectRenderIfBase & ({
+    equalsTo: string;
+} | {
+    notEqualsTo: string;
+} | {
+    isEmpty: boolean;
+});
 
 declare type CardVisualizationOptions<T, _Filters extends FiltersDefinition, _Sortings extends SortingsDefinition> = {
     cardProperties: ReadonlyArray<CardPropertyDefinition<T>>;
@@ -5175,6 +5197,26 @@ compact?: boolean;
 
 export declare type F0CardProps = Omit<CardInternalProps, (typeof privateProps_3)[number]>;
 
+declare interface F0CardSelectConfig {
+    options: CardSelectOption[];
+    hideLabel?: boolean;
+    /**
+     * When false, renders each option as a separate bordered card
+     * instead of a single container with dividers.
+     * @default true
+     */
+    grouped?: boolean;
+}
+
+declare type F0CardSelectField = F0BaseField & {
+    type: "cardSelect";
+    options: CardSelectOption[];
+    hideLabel?: boolean;
+    /** When false, renders each option as a separate bordered card */
+    grouped?: boolean;
+    renderIf?: CardSelectFieldRenderIf;
+};
+
 export declare const F0Checkbox: WithDataTestIdReturnType_3<typeof _F0Checkbox>;
 
 declare function _F0Checkbox({ title, onCheckedChange, id, disabled, indeterminate, checked, value, hideLabel, presentational, stopPropagation, name, required, ...rest }: CheckboxProps): JSX_2.Element;
@@ -5202,6 +5244,9 @@ export declare type F0CheckboxField = F0BaseField & {
     renderIf?: CheckboxFieldRenderIf;
 };
 
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
 export declare const F0ChipList: WithDataTestIdReturnType_3<    {
 ({ chips, max, remainingCount: initialRemainingCount, layout, }: Props): JSX_2.Element;
 displayName: string;
@@ -5970,7 +6015,7 @@ export declare function F0EventCatcherProvider({ children, onEvent, enabled, cat
 /**
  * Union of all F0 field types used for rendering
  */
-export declare type F0Field = F0TextField | F0NumberField | F0DurationField | F0TextareaField | F0SelectField | F0CheckboxField | F0SwitchField | F0DateField | F0TimeField | F0DateTimeField | F0DateRangeField | F0RichTextField | F0FileField | F0CustomField;
+export declare type F0Field = F0TextField | F0NumberField | F0DurationField | F0TextareaField | F0SelectField | F0CheckboxField | F0SwitchField | F0DateField | F0TimeField | F0DateTimeField | F0DateRangeField | F0RichTextField | F0FileField | F0CardSelectField | F0CustomField;
 
 /**
  * Alert configuration for a field.
@@ -6005,12 +6050,12 @@ export declare type F0FieldAlertProps = Omit<F0AlertProps, "variant"> & {
  * @typeParam T - The value type for select fields (string or number)
  * @typeParam R - Record type for data source (when using source instead of options)
  */
-export declare type F0FieldConfig<T extends string | number = string | number, R extends Record<string, unknown> = Record<string, unknown>> = F0StringConfig<string, undefined, R> | F0NumberFieldConfig<R> | F0BooleanConfig | F0DateFieldConfig | F0TimeFieldConfig | F0DateTimeFieldConfig | F0ArrayConfig<T, R> | F0FileFieldConfig | F0ObjectConfig;
+export declare type F0FieldConfig<T extends string | number = string | number, R extends Record<string, unknown> = Record<string, unknown>> = F0StringConfig<string, undefined, R> | F0NumberFieldConfig<R> | F0BooleanConfig | F0DateFieldConfig | F0TimeFieldConfig | F0DateTimeFieldConfig | F0ArrayConfig<T, R> | F0FileFieldConfig | F0ObjectConfig | F0StringCardSelectConfig;
 
 /**
  * Field types for rendering
  */
-export declare type F0FieldType = "text" | "number" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "richtext" | "file" | "custom";
+export declare type F0FieldType = "text" | "number" | "percentage" | "money" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "richtext" | "file" | "cardSelect" | "custom";
 
 /**
  * F0 config options specific to file fields
@@ -6031,8 +6076,15 @@ export declare interface F0FileConfig {
     multiple?: boolean;
     /** Helper text shown in the dropzone area */
     description?: string;
-    /** Consumer-provided hook that returns upload capabilities */
-    useUpload: UseFileUpload;
+    /**
+     * Consumer-provided upload hook.
+     *
+     * When used inside `<F0Form>`, the form-level `useUpload` is preferred.
+     * This prop is primarily for standalone file fields rendered outside of
+     * `<F0Form>` / `F0FormContext.Provider`, where the upload hook cannot be
+     * supplied via context.
+     */
+    useUpload?: UseFileUpload;
 }
 
 /**
@@ -6048,8 +6100,11 @@ export declare type F0FileField = F0BaseField & {
     multiple?: boolean;
     /** Dropzone description text */
     description?: string;
-    /** Consumer-provided upload hook */
-    useUpload: UseFileUpload;
+    /**
+     * Consumer-provided upload hook for standalone usage.
+     * When inside `<F0Form>`, the form-level `useUpload` takes precedence.
+     */
+    useUpload?: UseFileUpload;
     /** Conditional rendering */
     renderIf?: FileFieldRenderIf;
 };
@@ -6242,7 +6297,7 @@ export declare function f0FormField<T extends z.ZodDate>(schema: T, config: F0Da
  * Enum field - select
  * @typeParam R - Record type for data source (when using source instead of options)
  */
-export declare function f0FormField<T extends z.ZodEnum<[string, ...string[]]>, R extends Record<string, unknown> = Record<string, unknown>>(schema: T, config: F0StringSelectConfig<R>): T & F0ZodType<T>;
+export declare function f0FormField<T extends z.ZodEnum<[string, ...string[]]>, R extends Record<string, unknown> = Record<string, unknown>>(schema: T, config: F0StringSelectConfig<R> | F0StringCardSelectConfig): T & F0ZodType<T>;
 
 /**
  * Array field - multi-select
@@ -6349,6 +6404,8 @@ export declare interface F0FormPropsWithPerSectionDefinition<T extends F0PerSect
     styling?: F0FormStylingConfig;
     formRef?: React.MutableRefObject<F0FormRef | null>;
     initialFiles?: InitialFile[];
+    /** Upload hook shared by all file fields in the form. */
+    useUpload?: UseFileUpload;
     /**
      * Callback that renders custom fields identified by `customFieldName`.
      * When a field has `customFieldName`, this function is called instead of the inline `render`.
@@ -6403,6 +6460,10 @@ export declare interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionS
      * `defaultValues` against `InitialFile.value`.
      */
     initialFiles?: InitialFile[];
+    /**
+     * Upload hook shared by all file fields in the form.
+     */
+    useUpload?: UseFileUpload;
     /**
      * Callback that renders custom fields identified by `customFieldName`.
      * When a field has `customFieldName`, this function is called instead of the inline `render`.
@@ -6459,6 +6520,11 @@ export declare interface F0FormPropsWithSingleSchema<TSchema extends F0FormSchem
      */
     initialFiles?: InitialFile[];
     /**
+     * Upload hook shared by all file fields in the form.
+     * Called once per file to obtain an independent upload instance.
+     */
+    useUpload?: UseFileUpload;
+    /**
      * Callback that renders custom fields identified by `customFieldName`.
      * When a field has `customFieldName`, this function is called instead of the inline `render`.
      */
@@ -6492,6 +6558,8 @@ export declare interface F0FormPropsWithSingleSchemaDefinition<TSchema extends F
     styling?: F0FormStylingConfig;
     formRef?: React.MutableRefObject<F0FormRef | null>;
     initialFiles?: InitialFile[];
+    /** Upload hook shared by all file fields in the form. */
+    useUpload?: UseFileUpload;
     /**
      * Callback that renders custom fields identified by `customFieldName`.
      * When a field has `customFieldName`, this function is called instead of the inline `render`.
@@ -6542,6 +6610,10 @@ export declare interface F0FormRef {
      * Get the list of field names in the form
      */
     getFieldNames: () => string[];
+    /**
+     * Access the action bar imperatively (e.g. to trigger a wiggle animation)
+     */
+    actionBar: F0ActionBarRef;
     /* Excluded from this release type: _setStateCallback */
 }
 
@@ -6730,6 +6802,10 @@ export declare type F0NumberField = F0BaseField & F0NumberConfig & {
     min?: number;
     /** Maximum value (derived from z.number().max()) */
     max?: number;
+    /** Maximum decimal places (0 for integers, derived from z.number().int()) */
+    maxDecimals?: number;
+    /** Units suffix shown inside the input (e.g. "%") */
+    units?: string;
     /** Whether the field can be cleared (derived from optional/nullable) */
     clearable?: boolean;
     /** Conditional rendering based on another field's value */
@@ -6740,13 +6816,21 @@ export declare type F0NumberField = F0BaseField & F0NumberConfig & {
  * Config for number fields
  * @typeParam R - Record type for data source (when using source instead of options)
  */
-export declare type F0NumberFieldConfig<R extends Record<string, unknown> = Record<string, unknown>> = F0NumberInputConfig | F0NumberSelectConfig<R> | F0DurationFieldConfig;
+export declare type F0NumberFieldConfig<R extends Record<string, unknown> = Record<string, unknown>> = F0NumberInputConfig | F0NumberMoneyConfig | F0NumberSelectConfig<R> | F0DurationFieldConfig;
 
 /**
  * Config for number fields - number input
  */
 declare type F0NumberInputConfig = F0BaseConfig & F0NumberConfig & {
-    fieldType?: "number";
+    fieldType?: "number" | "percentage";
+};
+
+/**
+ * Config for money fields - number input with currency suffix
+ */
+declare type F0NumberMoneyConfig = F0BaseConfig & F0NumberConfig & {
+    fieldType: "money";
+    currency: string;
 };
 
 /**
@@ -7126,13 +7210,20 @@ export declare type F0SelectTagProp = string | {
 };
 
 /**
+ * Config for string fields rendered as grouped radio cards
+ */
+declare type F0StringCardSelectConfig = F0BaseConfig & F0CardSelectConfig & {
+    fieldType: "cardSelect";
+};
+
+/**
  * Union of all string field configs
  *
  * @typeParam TValue - Type of the field value (for custom fields)
  * @typeParam TConfig - Type of the fieldConfig object (for custom fields)
  * @typeParam R - Record type for data source (when using source instead of options)
  */
-export declare type F0StringConfig<TValue = string, TConfig = undefined, R extends Record<string, unknown> = Record<string, unknown>> = F0StringTextConfig | F0StringTextareaConfig | F0StringSelectConfig<R> | F0StringFileConfig | F0CustomFieldConfig<TValue, TConfig>;
+export declare type F0StringConfig<TValue = string, TConfig = undefined, R extends Record<string, unknown> = Record<string, unknown>> = F0StringTextConfig | F0StringTextareaConfig | F0StringSelectConfig<R> | F0StringCardSelectConfig | F0StringFileConfig | F0CustomFieldConfig<TValue, TConfig>;
 
 /**
  * Config for file fields (single file upload, form value is a string identifier)
@@ -7175,6 +7266,12 @@ export declare interface F0SwitchConfig {
      * moreInfoLink: { href: "https://help.example.com/article", label: "Learn more" }
      */
     moreInfoLink?: F0MoreInfoLink;
+    /**
+     * When false, prevents this switch from being grouped with adjacent switches
+     * into a single bordered container. Renders as a standalone field instead.
+     * @default true
+     */
+    grouped?: boolean;
 }
 
 /**
@@ -7184,6 +7281,8 @@ export declare type F0SwitchField = F0BaseField & {
     type: "switch";
     /** Link displayed below the help text, typically pointing to external documentation */
     moreInfoLink?: F0MoreInfoLink;
+    /** When false, renders as a standalone field instead of grouping with adjacent switches */
+    grouped?: boolean;
     /** Conditional rendering based on another field's value */
     renderIf?: SwitchFieldRenderIf;
 };
@@ -7254,6 +7353,8 @@ export declare const F0Text: WithDataTestIdReturnType_3<ForwardRefExoticComponen
 export declare interface F0TextareaConfig {
     /** Number of rows for the textarea */
     rows?: number;
+    /** Maximum height in pixels. When set, the textarea scrolls beyond this height instead of growing. */
+    maxHeight?: number;
 }
 
 /**
@@ -7514,7 +7615,7 @@ export declare function fieldsToSeconds(fields: DurationFields): number;
 /**
  * Field types for rendering
  */
-export declare type FieldType = "text" | "number" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "richtext" | "file" | "custom";
+export declare type FieldType = "text" | "number" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "richtext" | "file" | "cardSelect" | "custom";
 
 export declare const FILE_TYPES: {
     readonly PDF: "pdf";
@@ -12195,11 +12296,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -12231,6 +12327,15 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
         videoEmbed: {
             setVideoEmbed: (options: {
                 src: string;
@@ -12240,10 +12345,6 @@ declare module "@tiptap/core" {
 }
 
 
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
-        };
-    }
+declare namespace Calendar {
+    var displayName: string;
 }

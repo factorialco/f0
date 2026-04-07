@@ -107,6 +107,7 @@ import { TagType } from './experimental';
 import { TeamCellValue } from './types/team';
 import { TeamCellValue as TeamCellValue_2 } from './experimental';
 import { TeamItemProps } from './types';
+import { TextareaHTMLAttributes } from 'react';
 import { TextCellValue } from './types/text';
 import { TextCellValue as TextCellValue_2 } from './experimental';
 import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
@@ -1433,6 +1434,8 @@ export declare interface CardSelectableItem<T extends CardSelectableValue> {
         href: string;
         label?: string;
     };
+    /** Custom content rendered inside the card when it is selected, with an expand/collapse animation */
+    selectedContent?: ReactNode;
 }
 
 export declare interface CardSelectableMultipleProps<T extends CardSelectableValue> {
@@ -6414,11 +6417,11 @@ declare const spinnerVariants: (props?: ({
 
 export declare const Split: ForwardRefExoticComponent<Omit<HTMLAttributes<HTMLDivElement> & VariantProps<(props?: ({
 overflow?: "hidden" | "auto" | undefined;
-paddingX?: "none" | "p-2" | "p-4" | "p-8" | "p-12" | "p-16" | undefined;
+paddingX?: "none" | "p-4" | "p-2" | "p-8" | "p-12" | "p-16" | undefined;
 maxWidth?: "md" | "sm" | "xs" | "xl" | "screen-sm" | "screen-md" | "screen-lg" | "screen-xl" | "screen-2xl" | undefined;
 height?: "auto" | "full" | undefined;
 width?: "auto" | "full" | undefined;
-paddingY?: "none" | "p-2" | "p-4" | "p-8" | "p-12" | "p-16" | undefined;
+paddingY?: "none" | "p-4" | "p-2" | "p-8" | "p-12" | "p-16" | undefined;
 basis?: "0" | undefined;
 inline?: boolean | undefined;
 justifyContent?: "center" | "end" | "start" | "space-between" | "stretch" | undefined;
@@ -6444,11 +6447,11 @@ className?: ClassValue;
 
 export declare const Stack: ForwardRefExoticComponent<Omit<HTMLAttributes<HTMLDivElement> & VariantProps<(props?: ({
 overflow?: "hidden" | "auto" | undefined;
-paddingX?: "none" | "p-2" | "p-4" | "p-8" | "p-12" | "p-16" | undefined;
+paddingX?: "none" | "p-4" | "p-2" | "p-8" | "p-12" | "p-16" | undefined;
 maxWidth?: "md" | "sm" | "xs" | "xl" | "screen-sm" | "screen-md" | "screen-lg" | "screen-xl" | "screen-2xl" | undefined;
 height?: "auto" | "full" | undefined;
 width?: "auto" | "full" | undefined;
-paddingY?: "none" | "p-2" | "p-4" | "p-8" | "p-12" | "p-16" | undefined;
+paddingY?: "none" | "p-4" | "p-2" | "p-8" | "p-12" | "p-16" | undefined;
 basis?: "0" | undefined;
 inline?: boolean | undefined;
 justifyContent?: "center" | "end" | "start" | "space-between" | "stretch" | undefined;
@@ -6815,11 +6818,13 @@ declare type TeamTagProps = ComponentProps<typeof F0TagTeam>;
  */
 export declare const Textarea: FC<TextareaProps>;
 
-declare const Textarea_2: React_2.ForwardRefExoticComponent<Omit<React_2.TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange" | "onFocus" | "onBlur"> & {
-    value?: string;
-} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "size" | "icon" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "loading" | "maxLength" | "placeholder" | "required" | "error" | "hideLabel" | "hint" | "labelIcon" | "clearable" | "onClear"> & React_2.RefAttributes<HTMLTextAreaElement>>;
+declare const Textarea_2: ForwardRefExoticComponent<Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange" | "onFocus" | "onBlur"> & {
+value?: string;
+/** Maximum height in pixels. When set, the textarea scrolls beyond this height instead of growing. */
+maxHeight?: number;
+} & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "size" | "icon" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "loading" | "maxLength" | "placeholder" | "required" | "error" | "hideLabel" | "hint" | "labelIcon" | "clearable" | "onClear"> & RefAttributes<HTMLTextAreaElement>>;
 
-export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error" | "size" | "loading" | "required">;
+export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error" | "size" | "loading" | "required" | "maxHeight">;
 
 declare const THEMES: {
     readonly light: "";
@@ -7536,11 +7541,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -7572,6 +7572,15 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
         videoEmbed: {
             setVideoEmbed: (options: {
                 src: string;
@@ -7581,10 +7590,6 @@ declare module "@tiptap/core" {
 }
 
 
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
-        };
-    }
+declare namespace Calendar {
+    var displayName: string;
 }
