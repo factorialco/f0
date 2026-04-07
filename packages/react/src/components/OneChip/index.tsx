@@ -123,7 +123,7 @@ const _F0Chip = ({
               if (e.key === "Enter" || e.key === " ") {
                 if (!deactivated) {
                   e.preventDefault()
-                  onClick()
+                  onClick?.()
                 }
               }
             }
