@@ -3,7 +3,7 @@ import { useCallback, useState } from "react"
 
 import { F0AvatarCompany } from "@/components/avatars/F0AvatarCompany"
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { OneEllipsis } from "@/components/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { Sliders } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Action } from "@/ui/Action"

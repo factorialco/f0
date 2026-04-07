@@ -3,14 +3,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type {
   FiltersDefinition,
   FiltersState,
-} from "@/components/OneFilterPicker/types"
+} from "@/patterns/OneFilterPicker/types"
 import type { DropdownItem as DropdownItemType } from "@/experimental/Navigation/Dropdown"
 
 import { F0Button } from "@/components/F0Button"
 import {
   F0GridStack,
   type GridStackReactWidget,
-} from "@/components/Utilities/F0GridStack/F0GridStack"
+} from "@/lib/F0GridStack/F0GridStack"
 import { Minus } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 

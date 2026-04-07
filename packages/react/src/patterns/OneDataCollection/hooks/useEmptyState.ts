@@ -5,7 +5,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import {
   ActionProps,
   OneEmptyStateProps,
-} from "@/experimental/OneEmptyState/types"
+} from "@/components/OneEmptyState/types"
 
 export type EmptyState = {
   emoji?: string

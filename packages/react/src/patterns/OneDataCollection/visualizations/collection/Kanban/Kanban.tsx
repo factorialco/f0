@@ -5,7 +5,7 @@ import type {
   CardMetadataProperty,
 } from "@/components/F0Card/types"
 import type { IconType } from "@/components/F0Icon"
-import type { FiltersDefinition } from "@/components/OneFilterPicker/types"
+import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import type { KanbanProps } from "@/ui/Kanban/types"
 
 import { useDataCollectionLanesData } from "@/patterns/OneDataCollection/hooks/useDataCollectionData/useDataCollectionLanesData"

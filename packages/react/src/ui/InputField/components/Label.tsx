@@ -1,5 +1,5 @@
 import { F0Icon, type IconType } from "@/components/F0Icon"
-import { OneEllipsis } from "@/components/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn } from "@/lib/utils"
 
 type LabelProps = {

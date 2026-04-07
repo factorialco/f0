@@ -8,7 +8,7 @@ import React, {
   useRef,
 } from "react"
 
-import type { UseFileUpload } from "@/components/F0Form/fields/file/types"
+import type { UseFileUpload } from "@/patterns/F0Form/fields/file/types"
 
 import {
   getDefaultParamsForQuestionType,

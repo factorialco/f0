@@ -1,5 +1,5 @@
 import { F0Button } from "@/components/F0Button"
-import { OneEllipsis } from "@/components/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 

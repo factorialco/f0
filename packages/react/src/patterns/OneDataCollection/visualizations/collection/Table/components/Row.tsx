@@ -3,7 +3,7 @@ import { forwardRef } from "react"
 import type { IconType } from "@/components/F0Icon"
 import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
 
-import { FiltersDefinition } from "@/components/OneFilterPicker/types"
+import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { ItemActionsMobile } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
 import { ItemActionsRowContainer } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsRowContainer"
 import { useItemActions } from "@/patterns/OneDataCollection/components/itemActions/useItemActions"

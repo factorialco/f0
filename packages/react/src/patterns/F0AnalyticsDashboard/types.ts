@@ -2,7 +2,7 @@ import type {
   FiltersDefinition,
   FiltersState,
   PresetsDefinition,
-} from "@/components/OneFilterPicker/types"
+} from "@/patterns/OneFilterPicker/types"
 
 import type {
   ChartColorToken,

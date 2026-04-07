@@ -5,7 +5,7 @@ import { useState } from "react"
 import { F0Button } from "@/components/F0Button"
 import { cn } from "@/lib/utils"
 
-import "@/experimental/Information/Reactions/Picker/index.css"
+import "@/kits/Social/Reactions/Picker/index.css"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 export type ScoreEditOptionProps = {

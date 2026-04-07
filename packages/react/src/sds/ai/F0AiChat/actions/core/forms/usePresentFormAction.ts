@@ -1,6 +1,6 @@
 import { useFrontendTool } from "@copilotkit/react-core"
 
-import { useF0AiFormRegistry } from "@/components/F0Form/F0AiFormRegistry"
+import { useF0AiFormRegistry } from "@/patterns/F0Form/F0AiFormRegistry"
 
 /**
  * AI tool that opens/renders a form for the user.

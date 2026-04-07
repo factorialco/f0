@@ -1,12 +1,12 @@
 import { useState, type ReactNode } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { OneEllipsis } from "@/components/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import {
   Dropdown,
   type DropdownItem as DropdownItemType,
 } from "@/experimental/Navigation/Dropdown"
-import { OneEmptyState } from "@/experimental/OneEmptyState"
+import { OneEmptyState } from "@/components/OneEmptyState"
 import { Ellipsis } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 

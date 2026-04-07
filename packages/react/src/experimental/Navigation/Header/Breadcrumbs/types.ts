@@ -1,6 +1,6 @@
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { F0SelectItemObject, F0SelectItemProps } from "@/components/F0Select"
-import { FiltersDefinition } from "@/components/OneFilterPicker"
+import { FiltersDefinition } from "@/patterns/OneFilterPicker"
 import { DropdownItemObject } from "@/experimental/Navigation/Dropdown"
 import { NavigationItem } from "@/experimental/Navigation/utils"
 import {
