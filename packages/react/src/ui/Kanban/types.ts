@@ -56,7 +56,7 @@ export interface KanbanProps<TRecord extends RecordType> {
     getIndexById: (laneId: string, id: string) => number
     onMove?: KanbanOnMove<TRecord>
     onBulkMove?: KanbanOnBulkMove<TRecord>
-    /** IDs of all currently selected items (for bulk drag-and-drop) */
+    /** Keys (from getKey) of all currently selected items (for bulk drag-and-drop) */
     selectedIds?: string[]
   }
 }
@@ -93,11 +93,11 @@ export type KanbanOnMoveParam =
     }
 
 export type KanbanOnBulkMoveParam = {
-  /** IDs of all selected items to move */
+  /** Keys (from getKey) of all selected items to move */
   selectedIds: string[]
   /** Target lane ID */
   toLaneId: string
-  /** Target card position (null = drop into empty lane or end of lane) */
+  /** Target card position (null = top of lane, i.e. index 0) */
   indexOfTarget: number | null
   position: "above" | "below" | null
 }

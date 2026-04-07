@@ -296,6 +296,9 @@ export function Kanban<TRecord extends RecordType>(
     const { selectedIds, toLaneId, indexOfTarget, position } = params
     if (!dnd?.onBulkMove || selectedIds.length === 0) return []
 
+    // Convert to Set for O(1) lookups inside nested loops
+    const selectedIdSet = new Set(selectedIds)
+
     // Snapshot
     const prev = localLanes
     const toLaneIdx = prev.findIndex((l) => l.id === toLaneId)
@@ -314,7 +317,7 @@ export function Kanban<TRecord extends RecordType>(
       for (let itemIdx = 0; itemIdx < lane.items.length; itemIdx++) {
         const item = lane.items[itemIdx]
         const key = String(getKey(item as TRecord, itemIdx, laneId))
-        if (selectedIds.includes(key)) {
+        if (selectedIdSet.has(key)) {
           moves.push({ fromLaneId: laneId, sourceRecord: item as TRecord })
           if (!removalsByLane.has(laneIdx)) {
             removalsByLane.set(laneIdx, [])

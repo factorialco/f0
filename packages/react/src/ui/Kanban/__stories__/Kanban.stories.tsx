@@ -633,7 +633,7 @@ export const BulkMove: Story = {
             toLaneId,
             position: destinyRecord
               ? `${destinyRecord.position} ${destinyRecord.record.title}`
-              : "end of lane",
+              : "top of lane",
           },
         ])
 
@@ -657,7 +657,7 @@ export const BulkMove: Story = {
                   destinyRecord.position === "above" ? targetIdx : targetIdx + 1
                 filtered.splice(insertIdx, 0, ...movedRecords)
               } else {
-                filtered.push(...movedRecords)
+                filtered.unshift(...movedRecords)
               }
             }
 

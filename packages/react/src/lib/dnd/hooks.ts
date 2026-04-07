@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 
 import type { DragPayload, OnGenerateDragPreviewArgs } from "./types"
 
@@ -22,16 +22,18 @@ export function useDraggable<T = unknown>(args: {
     onGenerateDragPreview,
   } = args
 
-  // Enrich payload with selectedIds when present
-  const enrichedPayload: DragPayload<T> = selectedIds?.length
-    ? { ...payload, selectedIds }
-    : payload
-
   // Create a key that includes both id and currentParentId to detect moves
   // This ensures we re-register when an item moves to a different parent
   const payloadData = payload.data as { currentParentId?: string | null }
   const payloadKey = payload.id + "|" + (payloadData?.currentParentId ?? "null")
   const selectedIdsKey = selectedIds?.join(",") ?? ""
+
+  // Memoize enriched payload to avoid creating a new object every render,
+  // which would cause unnecessary useEffect re-registrations
+  const enrichedPayload = useMemo<DragPayload<T>>(
+    () => (selectedIds?.length ? { ...payload, selectedIds } : payload),
+    [payloadKey, selectedIdsKey]
+  )
 
   useEffect(() => {
     if (!ref.current) return
