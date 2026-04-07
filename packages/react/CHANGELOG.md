@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.438.3](https://github.com/factorialco/f0/compare/f0-react-v1.438.2...f0-react-v1.438.3) (2026-04-07)
+
+
+### Bug Fixes
+
+* F0TagList overflow visibility, HoverCard interaction, and popover styling ([#3859](https://github.com/factorialco/f0/issues/3859)) ([e3077f7](https://github.com/factorialco/f0/commit/e3077f70d43819d9c3c0619a166238bd745d9d2e))
+
 ## [1.438.2](https://github.com/factorialco/f0/compare/f0-react-v1.438.1...f0-react-v1.438.2) (2026-04-03)
 
 
