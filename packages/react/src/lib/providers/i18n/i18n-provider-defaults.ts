@@ -329,6 +329,17 @@ export const defaultTranslations = {
       exportDashboard: "Export dashboard as {{format}}",
       exporting: "Exporting...",
     },
+    insight: {
+      title: "Insight",
+      save: "Pin insight",
+      saved: "Pinned",
+      refresh: "Refresh",
+      delete: "Delete",
+      emptyTitle: "No insights yet",
+      emptyDescription:
+        "Ask One for a metric or summary and pin it here for quick access.",
+      emptyAction: "Ask One",
+    },
     pong: {
       title: "Pong",
       youWin: "You win!",

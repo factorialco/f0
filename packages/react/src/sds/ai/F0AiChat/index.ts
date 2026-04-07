@@ -43,4 +43,20 @@ export {
   useDefaultCopilotActions,
   useOrchestratorThinkingAction,
   useMessageSourcesAction,
+  useInsightAction,
+  useInsightRefresh,
+  setInsightSaveHandler,
+  InsightCard,
+  SavedInsightCard,
+  InsightCarousel,
+} from "./actions"
+
+export type {
+  InsightHighlight,
+  InsightData,
+  InsightQueryDataParams,
+  InsightRefreshResult,
+  InsightCardProps,
+  SavedInsightCardProps,
+  InsightCarouselProps,
 } from "./actions"
