@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.438.4](https://github.com/factorialco/f0/compare/f0-react-v1.438.3...f0-react-v1.438.4) (2026-04-07)
+
+
+### Bug Fixes
+
+* sm avatar list not showing up properly on DetailsItemList component ([#3867](https://github.com/factorialco/f0/issues/3867)) ([5ae6265](https://github.com/factorialco/f0/commit/5ae6265fa861930ad69803dd5379c71838b8a61b))
+
 ## [1.438.3](https://github.com/factorialco/f0/compare/f0-react-v1.438.2...f0-react-v1.438.3) (2026-04-07)
 
 
