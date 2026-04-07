@@ -40,6 +40,7 @@ import { DeltaCellValue } from './types/delta';
 import { DotTagCellValue } from './f0';
 import { DotTagCellValue as DotTagCellValue_2 } from './types/dotTag';
 import type * as echarts_2 from 'echarts';
+import { Editor } from '@tiptap/react';
 import { F0AnalyticsDashboardProps as F0AnalyticsDashboardProps_2 } from './types';
 import { F0AvatarCompanyProps as F0AvatarCompanyProps_2 } from './types';
 import { F0AvatarDateProps } from './F0AvatarDate';
@@ -88,12 +89,14 @@ import { InputProps } from '@copilotkit/react-ui';
 import { internalAvatarColors as internalAvatarColors_2 } from './f0';
 import { internalAvatarSizes as internalAvatarSizes_2 } from './f0';
 import { internalAvatarTypes as internalAvatarTypes_2 } from './f0';
+import { JSONContent } from '@tiptap/react';
+import { JSONContent as JSONContent_2 } from '@tiptap/core';
 import { JSX as JSX_2 } from 'react';
 import { LineChartConfig as LineChartConfig_2 } from './f0';
 import { LineChartPropsBase } from './utils/types';
 import { LocalAudioTrack } from 'livekit-client';
 import { LongTextCellValue } from './types/longText';
-import { Message } from '@copilotkit/shared';
+import { Message as Message_2 } from '@copilotkit/shared';
 import { NumberCellValue } from './f0';
 import { NumberCellValue as NumberCellValue_2 } from './types/number';
 import { NumberFilterOptions } from './NumberFilter/NumberFilter';
@@ -141,6 +144,7 @@ import { WithDataTestIdReturnType as WithDataTestIdReturnType_4 } from './f0';
 import { WithDataTestIdReturnType as WithDataTestIdReturnType_5 } from './f0';
 import { WithDataTestIdReturnType as WithDataTestIdReturnType_6 } from './f0';
 import { WithDataTestIdReturnType as WithDataTestIdReturnType_7 } from './f0';
+import { WithDataTestIdReturnType as WithDataTestIdReturnType_8 } from './f0';
 import { z } from 'zod';
 import { ZodEffects } from 'zod';
 import { ZodRawShape } from 'zod';
@@ -302,11 +306,71 @@ declare const actionLinkVariants: readonly ["link", "unstyled", "mention"];
 
 declare type ActionProps = ActionLinkProps | ActionButtonProps;
 
+declare type ActionProps_2 = {
+    /**
+     * The label of the action
+     */
+    label: string;
+    /**
+     * The click handler of the action
+     */
+    onClick: () => void;
+    /**
+     * The variant of the action
+     * @default "default"
+     * @optional
+     */
+    variant?: "default" | "outline" | "promote";
+    /**
+     * The icon of the action
+     * @optional
+     */
+    icon?: IconType;
+} & ({
+    /**
+     * The type of the action
+     */
+    type: "upsell";
+    /**
+     * The error message of the action
+     */
+    errorMessage: ErrorMessageProps;
+    /**
+     * The success message of the action
+     */
+    successMessage: SuccessMessageProps;
+    /**
+     * The loading state of the action
+     */
+    loadingState: LoadingStateProps;
+    /**
+     * The next steps of the action
+     */
+    nextSteps: NextStepsProps;
+    /**
+     * The next steps of the action
+     */
+    closeLabel: string;
+} | {
+    /**
+     * The type of the action
+     */
+    type?: "default";
+});
+
 declare type ActionSize = (typeof actionSizes)[number];
 
 declare const actionSizes: readonly ["sm", "md", "lg"];
 
 export declare type ActionType = "duplicate" | "delete";
+
+export declare type actionType = {
+    label: string;
+    onClick: () => void;
+    disabled?: boolean;
+    variant: "default" | "outline" | "neutral" | undefined;
+    icon?: IconType;
+};
 
 declare type ActionType_2 = {
     label: string;
@@ -326,6 +390,20 @@ declare type AddRowActionsResult = PrimaryActionItemDefinition | PrimaryActionIt
 /* Excluded from this release type: AgentState */
 
 declare type AggregationType = "count" | "sum" | "avg" | "min" | "max" | "countDistinct";
+
+declare interface AIBlockConfig {
+    buttons?: AIButton[];
+    onClick: (type: string) => Promise<JSONContent_2 | null>;
+    title: string;
+}
+
+declare type AIButton = {
+    type: string;
+    emoji: string;
+    label: string;
+    icon: IconType;
+    editable?: boolean;
+};
 
 /**
  * Credits configuration for the AI chat.
@@ -492,7 +570,7 @@ declare type AiChatProviderReturnValue = {
      * Send a message to the chat
      * @param message - The message content as a string, or a full Message object
      */
-    sendMessage: (message: string | Message) => void;
+    sendMessage: (message: string | Message_2) => void;
     /* Excluded from this release type: setSendMessageFunction */
     /**
      * Current width of the chat window (for resizable mode)
@@ -544,6 +622,13 @@ declare type AiChatProviderReturnValue = {
     clarifyingQuestion: ClarifyingQuestionState | null;
     /** Set the current clarifying question (or null to dismiss) */
     setClarifyingQuestion: React.Dispatch<React.SetStateAction<ClarifyingQuestionState | null>>;
+    /**
+     * Whether files are currently being dragged over the chat window.
+     * Set by the ChatWindow drag listeners and read by the DropOverlay
+     * to control its visibility.
+     */
+    fileDragOver: boolean;
+    /* Excluded from this release type: setFileDragOver */
 } & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable" | "entityRefs" | "toolHints" | "credits" | "fileAttachments"> & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null;
@@ -617,7 +702,7 @@ declare type AiChatTrackingOptions = {
     onClose?: () => void;
     onWelcomeSuggestionClick?: (suggestion: WelcomeScreenSuggestion) => void;
     onNewChat?: () => void;
-    onMessage?: (message: Message) => void;
+    onMessage?: (message: Message_2) => void;
 };
 
 /**
@@ -729,6 +814,7 @@ export declare const aiTranslations: {
         };
         readonly attachFile: "Attach file";
         readonly removeFile: "Remove";
+        readonly dropFilesHere: "Drop your files here";
         readonly clarifyingQuestion: {
             readonly submit: "Submit";
             readonly next: "Next";
@@ -938,6 +1024,14 @@ declare type BannerAction = {
     variant?: "default" | "outline" | "ghost";
     icon?: IconType;
 };
+
+declare interface BannerProps {
+    icon: IconType;
+    title: string;
+    variant: BannerVariant;
+}
+
+declare type BannerVariant = "info" | "warning" | "critical" | "neutral" | "positive";
 
 export declare const BarChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig> & {
 type?: "simple" | "stacked" | "stacked-by-sign";
@@ -1326,6 +1420,18 @@ declare type BulkActionsDefinition<R extends RecordType, Filters extends Filters
     warningMessage: string;
 };
 
+export declare interface ButtonConfig {
+    key: string;
+    icon: IconType;
+    active: (editor: Editor) => boolean;
+    onClick: (editor: Editor) => void;
+    label: string;
+    tooltip: {
+        label: string;
+        shortcut: string[];
+    };
+}
+
 export declare type ButtonDropdownGroup<T = string> = {
     label?: string;
     items: ButtonDropdownItem<T>[];
@@ -1482,9 +1588,15 @@ export declare type ButtonVariant = Exclude<(typeof actionButtonVariants)[number
 
 export declare const buttonVariants: ("default" | "critical" | "promote" | "neutral" | "outline" | "ghost" | "outlinePromote")[];
 
-declare type CalendarMode = "single" | "range";
+export declare type CalendarDate = {
+    day: number;
+    month: number;
+    year: number;
+};
 
-declare type CalendarView = "day" | "month" | "year" | "week" | "quarter" | "halfyear";
+export declare type CalendarMode = "single" | "range";
+
+export declare type CalendarView = "day" | "month" | "year" | "week" | "quarter" | "halfyear";
 
 /**
  * Profile data for a candidate entity (ATS applicant), resolved asynchronously
@@ -3028,7 +3140,7 @@ declare type DateFilterOptions_2 = {
  */
 export declare type DateGranularity = "day" | "week" | "month" | "quarter" | "halfyear" | "year" | "range";
 
-declare type DateNavigationOptions = {
+export declare type DateNavigationOptions = {
     min?: Date;
     max?: Date;
 };
@@ -3088,12 +3200,17 @@ declare type DateQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
     value?: Date | null;
 };
 
-declare type DateRange = {
+export declare type DateRange = {
     from: Date;
     to?: Date;
 };
 
-declare type DateRangeComplete = Required<DateRange>;
+export declare type DateRangeComplete = Required<DateRange>;
+
+export declare type DateRangeError = {
+    from: boolean;
+    to: boolean;
+};
 
 /**
  * All valid renderIf conditions for date range fields
@@ -3114,7 +3231,7 @@ export declare type DateRangeRenderIfCondition = DateRangeRenderIfBase & {
     isEmpty: boolean;
 };
 
-declare type DateRangeString = {
+export declare type DateRangeString = {
     from: string;
     to?: string;
 };
@@ -3153,7 +3270,7 @@ export declare type DateRenderIfCondition = DateRenderIfBase & ({
     isEmpty: boolean;
 });
 
-declare type DateStringFormat = "default" | "long";
+export declare type DateStringFormat = "default" | "long";
 
 declare type DateValue = {
     value: DateRangeComplete;
@@ -3612,6 +3729,7 @@ export declare const defaultTranslations: {
         };
         readonly attachFile: "Attach file";
         readonly removeFile: "Remove";
+        readonly dropFilesHere: "Drop your files here";
         readonly clarifyingQuestion: {
             readonly submit: "Submit";
             readonly next: "Next";
@@ -4101,6 +4219,11 @@ declare type EditableTableVisualizationOptions<R extends RecordType, _Filters ex
 
 declare type EditableTableVisualizationSettings = TableVisualizationSettings;
 
+export declare type editorStateType = {
+    html: string;
+    json: JSONContent | null;
+};
+
 export declare type ElementType = QuestionType | "section";
 
 export declare function EmojiImage({ emoji, size, alt }: EmojiImageProps): JSX_2.Element;
@@ -4119,6 +4242,30 @@ declare const emojiVariants: (props?: ({
     class?: never;
     className?: ClassValue;
 })) | undefined) => string;
+
+export declare type enhanceConfig = {
+    onEnhanceText: (params: enhanceTextParams) => Promise<enhancedTextResponse>;
+    enhancementOptions?: EnhancementOption[];
+};
+
+export declare type enhancedTextResponse = {
+    success: boolean;
+    text: string;
+    error?: string;
+};
+
+export declare type EnhancementOption = {
+    id: string;
+    label: string;
+    subOptions?: EnhancementOption[];
+};
+
+export declare type enhanceTextParams = {
+    text: string;
+    selectedIntent?: string;
+    customIntent?: string;
+    context?: string;
+};
 
 /**
  * Grouped configuration for entity references in the AI chat.
@@ -6559,7 +6706,7 @@ export declare type F0FormSubmitResult = {
     errors?: Record<string, string>;
 };
 
-export declare const F0GridStack: WithDataTestIdReturnType_4<    {
+export declare const F0GridStack: WithDataTestIdReturnType_7<    {
 ({ options, widgets, onChange, className, static: isStatic, forcePositionSync, }: F0GridStackProps_2): JSX_2.Element;
 displayName: string;
 }>;
@@ -7482,6 +7629,28 @@ export declare function fieldsToSeconds(fields: DurationFields): number;
  */
 export declare type FieldType = "text" | "number" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "richtext" | "file" | "cardSelect" | "custom";
 
+export declare const FILE_TYPES: {
+    readonly PDF: "pdf";
+    readonly IMAGE: "image";
+    readonly DOC: "doc";
+    readonly EXCEL: "excel";
+    readonly PPT: "ppt";
+    readonly TXT: "txt";
+    readonly VIDEO: "video";
+    readonly AUDIO: "audio";
+    readonly ARCHIVE: "archive";
+    readonly CSV: "csv";
+    readonly HTML: "html";
+    readonly MARKDOWN: "markdown";
+};
+
+export declare type FileAction = {
+    icon?: IconType;
+    label: string;
+    onClick: () => void;
+    critical?: boolean;
+};
+
 export declare type FileAvatarVariant = Extract<AvatarVariant, {
     type: "file";
 }>;
@@ -7496,6 +7665,27 @@ declare type FileDef = {
  */
 declare type FileFieldRenderIf = CommonRenderIfCondition | F0BaseFieldRenderIfFunction;
 
+export declare const FileItem: WithDataTestIdReturnType_4<ForwardRefExoticComponent<FileItemProps & RefAttributes<HTMLDivElement>>>;
+
+declare interface FileItemProps extends React.HTMLAttributes<HTMLDivElement> {
+    file: File | FileDef;
+    actions?: FileAction[];
+    disabled?: boolean;
+    size?: FileItemSize;
+}
+
+export declare type FileItemSize = NonNullable<VariantProps<typeof fileItemVariants>["size"]>;
+
+declare const fileItemVariants: (props?: ({
+    size?: "lg" | "md" | undefined;
+} & ({
+    class?: ClassValue;
+    className?: never;
+} | {
+    class?: never;
+    className?: ClassValue;
+})) | undefined) => string;
+
 declare type FileQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
     type: "file";
     value?: string[] | null;
@@ -7503,6 +7693,15 @@ declare type FileQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
     accept?: MimeType_2[];
     maxSizeMB?: number;
 };
+
+export declare type filesConfig = {
+    onFiles: (files: File[]) => void;
+    multipleFiles: boolean;
+    maxFileSize?: number;
+    acceptedFileType?: FileType[];
+};
+
+export declare type FileType = (typeof FILE_TYPES)[keyof typeof FILE_TYPES];
 
 /**
  * Return type of the consumer-provided upload hook
@@ -7921,6 +8120,16 @@ export declare function getEmojiLabel(emoji: string): string;
  */
 export declare function getF0Config(schema: ZodTypeAny): F0FieldConfig | undefined;
 
+export declare const getGranularityDefinition: (granularityKey: GranularityDefinitionKey) => GranularityDefinition;
+
+/**
+ * Get granularity definitions with week granularity configured with the specified weekStartsOn.
+ * The week granularity is only created when needed (lazy creation).
+ */
+export declare function getGranularityDefinitions(weekStartsOn?: WeekStartsOn): Record<string, GranularityDefinition>;
+
+export declare const getGranularitySimpleDefinition: (granularityKey: GranularityDefinitionKey) => GranularityDefinitionSimple;
+
 /**
  * Non-hook version for extracting definition outside of React components.
  * Useful for server-side rendering or testing.
@@ -7931,7 +8140,7 @@ export declare function getF0Config(schema: ZodTypeAny): F0FieldConfig | undefin
  */
 export declare function getSchemaDefinition(schema: F0FormSchema, sections?: Record<string, F0SectionConfig>): FormDefinitionItem[];
 
-declare interface GranularityDefinition {
+export declare interface GranularityDefinition {
     calendarMode?: CalendarMode;
     calendarView: CalendarView;
     weekStartsOn?: WeekStartsOn;
@@ -7963,9 +8172,11 @@ declare interface GranularityDefinition {
     getPrevNext(date: DateRange, options: DateNavigationOptions): PrevNextDateNavigation;
 }
 
-declare type GranularityDefinitionKey = keyof typeof granularityDefinitions;
+export declare type GranularityDefinitionKey = keyof typeof granularityDefinitions;
 
-declare const granularityDefinitions: Record<string, GranularityDefinition>;
+export declare const granularityDefinitions: Record<string, GranularityDefinition>;
+
+export declare type GranularityDefinitionSimple = Pick<GranularityDefinition, "toRangeString" | "toString">;
 
 export declare type GridStackReactOptions = Omit<GridStackOptions, "children">;
 
@@ -8116,7 +8327,7 @@ declare interface HeatmapComputation {
     aggregation: AggregationType;
 }
 
-declare type heightType = "xxs" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "full" | "auto";
+export declare type heightType = "xxs" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "full" | "auto";
 
 export declare const HomeLayout: WithDataTestIdReturnType_2<ForwardRefExoticComponent<Omit<{
 widgets?: ReactNode[];
@@ -8167,6 +8378,17 @@ declare type ImageContextValue = {
 };
 
 declare type ImageProps = ImgHTMLAttributes<HTMLImageElement>;
+
+export declare interface ImageUploadConfig {
+    onUpload: (file: File) => Promise<{
+        url: string;
+        signedId?: string;
+    }>;
+    maxFileSize?: number;
+    onError?: (errorType: ImageUploadErrorType) => void;
+}
+
+declare type ImageUploadErrorType = "file-too-large" | "invalid-type" | "upload-failed";
 
 /**
  * Extract the inferred type from an F0 form schema
@@ -8482,6 +8704,11 @@ declare type Lane<Filters extends FiltersDefinition> = {
     filters: FiltersState<Filters>;
 };
 
+export declare type lastIntentType = {
+    selectedIntent?: string;
+    customIntent?: string;
+} | null;
+
 export declare const Layout: {
     Page: WithDataTestIdReturnType_3<ForwardRefExoticComponent<PageProps & RefAttributes<HTMLDivElement>>>;
     Block: WithDataTestIdReturnType_3<ForwardRefExoticComponent<BlockProps & RefAttributes<HTMLDivElement>>>;
@@ -8648,17 +8875,42 @@ export declare type MaskOptions = {
 
 declare const MAX_EXPANDED_ACTIONS = 2;
 
-declare type MentionedUser = {
+export declare type MentionedUser = {
     id: number;
     label: string;
     image_url?: string;
     href?: string;
 };
 
-declare type MentionsConfig = {
+export declare interface MentionItemComponentProps {
+    item: MentionedUser;
+    index: number;
+    selected: boolean;
+}
+
+export declare interface MentionListRef {
+    onKeyDown: (props: {
+        event: KeyboardEvent;
+    }) => boolean;
+}
+
+export declare interface MentionNodeAttrs {
+    id: string;
+    label: string;
+    image_url?: string;
+    href?: string;
+}
+
+export declare type MentionsConfig = {
     onMentionQueryStringChanged?: (queryString: string) => Promise<MentionedUser[]> | undefined;
     users: MentionedUser[];
 };
+
+export declare interface Message {
+    userId: string;
+    text: string;
+    dateTime: string;
+}
 
 declare type MetadataAction = {
     icon: IconType;
@@ -8932,6 +9184,49 @@ export declare interface NextStepsProps {
     items: StepItemProps[];
 }
 
+export declare const NotesTextEditor: ForwardRefExoticComponent<NotesTextEditorProps & RefAttributes<NotesTextEditorHandle>>;
+
+export declare type NotesTextEditorHandle = {
+    clear: () => void;
+    focus: () => void;
+    setContent: (content: string) => void;
+    insertAIBlock: () => void;
+    insertTranscript: (title: string, users: User[], messages: Message[]) => void;
+    pushContent: (content: string) => void;
+    insertImage: (file: File) => void;
+};
+
+export declare interface NotesTextEditorProps extends WithDataTestIdProps {
+    onChange: (value: {
+        json: JSONContent | null;
+        html: string | null;
+    }) => void;
+    placeholder: string;
+    initialEditorState?: {
+        content?: JSONContent | string;
+        title?: string;
+    };
+    readonly?: boolean;
+    aiBlockConfig?: AIBlockConfig;
+    imageUploadConfig?: ImageUploadConfig;
+    onTitleChange?: (title: string) => void;
+    titlePlaceholder?: string;
+    primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
+    secondaryActions?: HeaderSecondaryAction[];
+    otherActions?: DropdownItem[];
+    metadata?: MetadataItem[];
+    banner?: BannerProps;
+    showBubbleMenu?: boolean;
+}
+
+export declare const NotesTextEditorSkeleton: ({ withHeader, withTitle, withToolbar, }: NotesTextEditorSkeletonProps) => JSX_2.Element;
+
+export declare interface NotesTextEditorSkeletonProps {
+    withHeader?: boolean;
+    withTitle?: boolean;
+    withToolbar?: boolean;
+}
+
 declare type NumberCellConfig = {
     min?: number;
     max?: number;
@@ -9202,6 +9497,104 @@ export declare type OnDuplicateElementParams = {
     type: ElementType;
 };
 
+export declare const OneCalendar: WithDataTestIdReturnType_3<    {
+(props: OneCalendarProps): JSX_2.Element;
+displayName: string;
+}>;
+
+export declare const OneCalendarInternal: ({ mode, view, onSelect, defaultMonth, defaultSelected, showNavigation, showInput, minDate, maxDate, compact, weekStartsOn, }: OneCalendarInternalProps) => JSX_2.Element;
+
+export declare interface OneCalendarInternalProps {
+    mode: CalendarMode;
+    view: CalendarView;
+    onSelect?: (date: Date | DateRange | null) => void;
+    defaultMonth?: Date;
+    defaultSelected?: Date | DateRange | null;
+    showNavigation?: boolean;
+    showInput?: boolean;
+    minDate?: Date;
+    maxDate?: Date;
+    compact?: boolean;
+    weekStartsOn?: WeekStartsOn;
+}
+
+export declare type OneCalendarProps = Omit<OneCalendarInternalProps, (typeof privateProps_4)[number]>;
+
+export declare const OneEllipsis: default_2.ForwardRefExoticComponent<OneEllipsisProps & default_2.RefAttributes<HTMLElement>>;
+
+declare type OneEllipsisProps = {
+    /**
+     * The className to apply to the text.
+     */
+    className?: string;
+    /**
+     * The number of lines to display.
+     */
+    lines?: number;
+    /**
+     * Whether the ellipsis is disabled.
+     */
+    disabled?: boolean;
+    /**
+     * The children to display. (only string is supported)
+     */
+    children: string;
+    /**
+     * Whether the tooltip is disabled.
+     */
+    noTooltip?: boolean;
+    /**
+     * The tag to use for the text.
+     */
+    tag?: Tag_2;
+    /**
+     * Enable markdown parsing for content
+     * @default false
+     */
+    markdown?: boolean;
+};
+
+export declare const OneEmptyState: WithDataTestIdReturnType_3<typeof _OneEmptyState>;
+
+declare function _OneEmptyState({ title, description, variant, emoji, actions, ...rest }: Types.OneEmptyStateProps): JSX_2.Element;
+
+declare type OneEmptyStateProps = {
+    /**
+     * The title of the empty state
+     */
+    title: string;
+    /**
+     * If defined, a description will be displayed in the empty state
+     * @optional
+     */
+    description?: string;
+    /**
+     * An array of action objects to display as buttons in the empty state.
+     * Each action represents a user-interactable option, such as "Retry" or "Go Back",
+     * and can include a label, click handler, optional icon, and button variant.
+     * @optional
+     */
+    actions?: ActionProps_2[];
+} & ({
+    /**
+     * The variant of the empty state
+     * @optional
+     */
+    variant?: "default";
+    /**
+     * An icon will be displayed in the empty state.
+     * emoji string
+     */
+    emoji?: string;
+} | {
+    /**
+     * The variant of the empty state
+     * @optional
+     */
+    variant: Exclude<AlertAvatarProps["type"], "positive">;
+    emoji?: never;
+});
+
 export declare const OneFilterPicker: <Definition extends FiltersDefinition>(props: OneFilterPickerRootProps<Definition> & {
     dataTestId?: string;
 }) => ReactElement | null;
@@ -9451,7 +9844,7 @@ export declare type PresetDefinition<Filters extends FiltersDefinition> = {
 
 export declare type PresetsDefinition<Filters extends FiltersDefinition> = PresetDefinition<Filters>[];
 
-declare type PrevNextDateNavigation = {
+export declare type PrevNextDateNavigation = {
     prev: DateRange | false;
     next: DateRange | false;
 };
@@ -9481,6 +9874,11 @@ declare type PrimaryActionItemDefinition = Pick<DropdownItemObject, "label" | "i
  */
 declare type PrimaryActionsDefinitionFn = () => PrimaryActionItemDefinition | PrimaryActionItemDefinition[] | undefined;
 
+export declare type primaryActionType = {
+    action: actionType;
+    subActions?: subActionType[];
+};
+
 declare interface PrimaryDropdownAction<T> extends PrimaryAction {
     items: ButtonDropdownItem<T>[];
     value?: T;
@@ -9497,6 +9895,8 @@ declare const privateProps: readonly ["append", "className", "pressed", "compact
 declare const privateProps_2: readonly ["withBorder"];
 
 declare const privateProps_3: readonly ["forceVerticalMetadata", "disableOverlayLink"];
+
+declare const privateProps_4: readonly ["compact"];
 
 export declare const ProductBlankslate: WithDataTestIdReturnType_4<ForwardRefExoticComponent<ProductBlankslateProps & RefAttributes<HTMLDivElement>>>;
 
@@ -9781,6 +10181,8 @@ declare interface RadarComputation {
     sortOrder?: "asc" | "desc";
 }
 
+export declare const rangeSeparator = "\u2192";
+
 declare type RatingQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
     value?: number;
 } & {
@@ -9956,6 +10358,65 @@ export declare interface ResponsiveStyleProps {
     shrink?: boolean;
 }
 
+export declare type resultType = {
+    value: string | null;
+    mentionIds?: number[];
+};
+
+export declare const RichTextDisplay: WithDataTestIdReturnType_4<ForwardRefExoticComponent<RichTextDisplayProps & RefAttributes<HTMLDivElement>>>;
+
+export declare type RichTextDisplayHandle = HTMLDivElement;
+
+export declare interface RichTextDisplayProps extends HTMLAttributes<HTMLDivElement> {
+    content: string;
+    className?: string;
+    format?: "html" | "markdown";
+}
+
+export declare const RichTextEditor: ForwardRefExoticComponent<RichTextEditorProps & RefAttributes<RichTextEditorHandle>> & {
+    Skeleton: ({ rows }: RichTextEditorSkeletonProps) => JSX_2.Element;
+};
+
+export declare type RichTextEditorHandle = {
+    clear: () => void;
+    clearFiles: () => void;
+    focus: () => void;
+    setError: (error: string | null) => void;
+    setContent: (content: string) => void;
+};
+
+export declare interface RichTextEditorProps {
+    mentionsConfig?: MentionsConfig;
+    enhanceConfig?: enhanceConfig;
+    filesConfig?: filesConfig;
+    secondaryAction?: secondaryActionsType;
+    primaryAction?: primaryActionType;
+    onChange: (result: resultType) => void;
+    onBlur?: () => void;
+    maxCharacters?: number;
+    placeholder: string;
+    initialEditorState?: {
+        content?: string;
+        files?: File[];
+    };
+    title: string;
+    height?: heightType;
+    plainHtmlMode?: boolean;
+    fullScreenMode?: boolean;
+    onFullscreenChange?: (fullscreen: boolean) => void;
+    /** Whether the editor is disabled */
+    disabled?: boolean;
+    /** Whether the editor has an error state */
+    error?: boolean;
+    /** Whether the editor is in a loading state */
+    loading?: boolean;
+    dataTestId?: string;
+}
+
+declare interface RichTextEditorSkeletonProps {
+    rows?: number;
+}
+
 /**
  * All valid renderIf conditions for richtext fields
  */
@@ -10017,6 +10478,12 @@ declare type SecondaryActionsDefinition = {
 } | (() => SecondaryActionsItems | undefined);
 
 declare type SecondaryActionsItems = SecondaryActionItem[] | SecondaryActionItem[][] | SecondaryActionGroup[];
+
+export declare type secondaryActionsType = secondaryActionType | secondaryActionType[];
+
+export declare type secondaryActionType = (actionType | toggleActionType) & {
+    type?: "button" | "switch";
+};
 
 export declare function secondsToFields(totalSeconds: number): DurationFields;
 
@@ -10181,6 +10648,27 @@ export declare const selectSizes: readonly ["sm", "md"];
 declare type SelectValueType = string | number;
 
 /**
+ * @experimental This is an experimental component use it at your own risk
+ */
+declare const Shortcut: WithDataTestIdReturnType_3<typeof _Shortcut>;
+
+declare function _Shortcut({ keys, variant }: ShortcutProps): JSX_2.Element | null;
+
+declare interface ShortcutProps extends VariantProps<typeof shortcutVariants> {
+    keys: string[];
+}
+
+declare const shortcutVariants: (props?: ({
+    variant?: "default" | "inverse" | undefined;
+} & ({
+    class?: ClassValue;
+    className?: never;
+} | {
+    class?: never;
+    className?: ClassValue;
+})) | undefined) => string;
+
+/**
  * Response structure for non-paginated data
  */
 declare type SimpleResult<T> = T[];
@@ -10255,6 +10743,13 @@ export declare interface StepItemProps {
     text: string;
     isCompleted?: boolean;
 }
+
+export declare type subActionType = {
+    label: string;
+    onClick: () => void;
+    disabled?: boolean;
+    icon?: IconType;
+};
 
 export declare interface SuccessMessageProps {
     title: string;
@@ -10368,7 +10863,7 @@ export declare type SurveyDataset = {
 
 export declare type SurveyDatasets = Record<string, SurveyDataset>;
 
-export declare const SurveyFormBuilder: WithDataTestIdReturnType_7<({ elements: elementsProp, disabled, onChange, disallowOptionalQuestions, allowedQuestionTypes, applyingChanges, useUpload, datasets, }: SurveyFormBuilderProps) => JSX_2.Element>;
+export declare const SurveyFormBuilder: WithDataTestIdReturnType_8<({ elements: elementsProp, disabled, onChange, disallowOptionalQuestions, allowedQuestionTypes, applyingChanges, useUpload, datasets, }: SurveyFormBuilderProps) => JSX_2.Element>;
 
 export declare type SurveyFormBuilderCallbacks = {
     onQuestionChange?: (params: OnChangeQuestionParams) => void;
@@ -10560,6 +11055,8 @@ export declare const Tag: WithDataTestIdReturnType_4<({ tag }: {
 tag: TagVariant_2;
 }) => ReactNode>;
 
+declare type Tag_2 = (typeof tags)[number];
+
 export declare type TagAlertProps<Text extends string = string> = {
     text: Text extends "" ? never : Text;
     level: Level;
@@ -10669,6 +11166,8 @@ export declare type TagRawProps = {
     icon?: IconType;
     onlyIcon?: boolean;
 });
+
+declare const tags: readonly ["h1", "h2", "h3", "h4", "h5", "h6", "p", "span", "div", "label", "code"];
 
 export declare interface TagStatusProps {
     text: string;
@@ -10885,6 +11384,46 @@ declare interface TOCProps {
     scrollable?: boolean;
 }
 
+declare type toggleActionType = {
+    label: string;
+    checked: boolean;
+    onClick: (checked?: boolean) => void;
+    disabled?: boolean;
+    hideLabel?: boolean;
+};
+
+export declare interface ToolbarButtonProps {
+    onClick?: () => void;
+    active?: boolean;
+    label: string;
+    disabled: boolean;
+    icon: IconType;
+    tooltip?: {
+        description?: string;
+        label?: string;
+        shortcut?: ComponentProps<typeof Shortcut>["keys"];
+    };
+    showLabel?: boolean;
+}
+
+export declare interface ToolbarDropdownItem {
+    label: string;
+    icon: IconType;
+    onClick: () => void;
+    isActive: boolean;
+}
+
+export declare interface ToolbarProps {
+    editor: Editor;
+    isFullscreen?: boolean;
+    disableButtons: boolean;
+    onClose?: () => void;
+    animationComplete?: boolean;
+    darkMode?: boolean;
+    showEmojiPicker?: boolean;
+    plainHtmlMode?: boolean;
+}
+
 declare type TranslationKey = Join<PathsToStringProps<typeof defaultTranslations>, ".">;
 
 declare type TranslationShape<T> = {
@@ -10912,6 +11451,13 @@ export declare interface TwoColumnLayoutProps {
     sideContent: ReactNode;
     mainColumnPosition?: "left" | "right";
     sticky?: boolean;
+}
+
+declare namespace Types {
+    export {
+        ActionProps_2 as ActionProps,
+        OneEmptyStateProps
+    }
 }
 
 /**
@@ -11422,6 +11968,12 @@ export declare const usePrivacyMode: () => {
     toggle: () => void;
 };
 
+export declare interface User {
+    id: string;
+    fullname: string;
+    imageUrl: string;
+}
+
 export declare const useReducedMotion: () => boolean;
 
 /**
@@ -11635,7 +12187,7 @@ declare type VisualizationSettings = {
     [K in keyof typeof collectionVisualizations]: ExtractVisualizationSettings<(typeof collectionVisualizations)[K]>;
 };
 
-declare const WeekStartDay: {
+export declare const WeekStartDay: {
     readonly Sunday: 0;
     readonly Monday: 1;
     readonly Tuesday: 2;
@@ -11645,7 +12197,7 @@ declare const WeekStartDay: {
     readonly Saturday: 6;
 };
 
-declare type WeekStartsOn = (typeof WeekStartDay)[keyof typeof WeekStartDay];
+export declare type WeekStartsOn = (typeof WeekStartDay)[keyof typeof WeekStartDay];
 
 /**
  * Welcome screen suggestion item

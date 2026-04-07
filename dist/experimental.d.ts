@@ -114,6 +114,7 @@ import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
 import { ValueDisplayRendererContext as ValueDisplayRendererContext_2 } from './experimental';
 import { VariantProps } from 'cva';
 import { VerticalBarChartProps } from './experimental';
+import { VirtualItem } from '@tanstack/react-virtual';
 import { WidgetProps as WidgetProps_2 } from './experimental';
 import { WithDataTestIdProps as WithDataTestIdProps_2 } from './experimental';
 import { WithDataTestIdReturnType } from './experimental';
@@ -2852,6 +2853,7 @@ declare const defaultTranslations: {
         };
         readonly attachFile: "Attach file";
         readonly removeFile: "Remove";
+        readonly dropFilesHere: "Drop your files here";
         readonly clarifyingQuestion: {
             readonly submit: "Submit";
             readonly next: "Next";
@@ -3122,7 +3124,7 @@ export declare interface DetailsItemType {
     spacingAtTheBottom?: boolean;
 }
 
-export declare const Dialog: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<DialogProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
+export declare const Dialog: WithDataTestIdReturnType_2<ForwardRefExoticComponent<Omit<DialogProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 declare type DialogProps = {
     header: {
@@ -6026,7 +6028,14 @@ declare interface ReactionProps {
     onInteraction?: (emoji: string) => void;
 }
 
-declare interface ReactionsProps {
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const Reactions: typeof _Reactions;
+
+declare function _Reactions({ items, onInteraction, locale, action }: ReactionsProps): JSX_2.Element;
+
+export declare interface ReactionsProps {
     items: ReactionProps[];
     onInteraction?: (emoji: string) => void;
     locale?: string;
@@ -7207,6 +7216,19 @@ chart: VerticalBarChartProps;
 declare const VerticalOverflowList: {
     <T>({ items, renderListItem, className, gap, minSize, onVisibleItemsChange, }: OverflowListProps<T>): JSX_2.Element;
     displayName: string;
+};
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const VirtualList: default_2.ForwardRefExoticComponent<VirtualListProps & default_2.RefAttributes<HTMLDivElement>>;
+
+declare type VirtualListProps = {
+    height: number;
+    itemCount: number;
+    itemSize: number | ((index: number) => number);
+    renderer: (item: VirtualItem) => JSX.Element;
+    className?: string;
 };
 
 declare type VisualizacionTypeDefinition<Props, Settings = Record<string, never>> = {

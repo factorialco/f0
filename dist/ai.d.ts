@@ -241,6 +241,13 @@ declare type AiChatProviderReturnValue = {
     clarifyingQuestion: ClarifyingQuestionState | null;
     /** Set the current clarifying question (or null to dismiss) */
     setClarifyingQuestion: React.Dispatch<React.SetStateAction<ClarifyingQuestionState | null>>;
+    /**
+     * Whether files are currently being dragged over the chat window.
+     * Set by the ChatWindow drag listeners and read by the DropOverlay
+     * to control its visibility.
+     */
+    fileDragOver: boolean;
+    /* Excluded from this release type: setFileDragOver */
 } & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable" | "entityRefs" | "toolHints" | "credits" | "fileAttachments"> & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null;
@@ -426,6 +433,7 @@ export declare const aiTranslations: {
         };
         readonly attachFile: "Attach file";
         readonly removeFile: "Remove";
+        readonly dropFilesHere: "Drop your files here";
         readonly clarifyingQuestion: {
             readonly submit: "Submit";
             readonly next: "Next";
@@ -1251,6 +1259,7 @@ export declare const defaultTranslations: {
         };
         readonly attachFile: "Attach file";
         readonly removeFile: "Remove";
+        readonly dropFilesHere: "Drop your files here";
         readonly clarifyingQuestion: {
             readonly submit: "Submit";
             readonly next: "Next";
