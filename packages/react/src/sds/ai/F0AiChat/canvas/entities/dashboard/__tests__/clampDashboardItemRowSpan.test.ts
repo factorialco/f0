@@ -36,68 +36,43 @@ const baseCollection: ChatDashboardCollectionItem = {
 }
 
 describe("clampDashboardItemRowSpan", () => {
-  it("raises chart itemHeight to at least 336 when missing", () => {
+  it("raises chart rowSpan to at least 7 when missing", () => {
     const result = clampDashboardItemRowSpan(baseChart)
-    expect(result.itemHeight).toBe(336)
+    expect(result.rowSpan).toBe(7)
   })
 
-  it("raises chart itemHeight to at least 336 when too small", () => {
-    const result = clampDashboardItemRowSpan({
-      ...baseChart,
-      itemHeight: 100,
-    })
-    expect(result.itemHeight).toBe(336)
+  it("raises chart rowSpan to at least 7 when too small", () => {
+    const result = clampDashboardItemRowSpan({ ...baseChart, rowSpan: 1 })
+    expect(result.rowSpan).toBe(7)
   })
 
-  it("raises metric itemHeight to at least 144 when missing", () => {
+  it("raises metric rowSpan to at least 3 when missing", () => {
     const result = clampDashboardItemRowSpan(baseMetric)
-    expect(result.itemHeight).toBe(144)
+    expect(result.rowSpan).toBe(3)
   })
 
-  it("raises metric itemHeight to at least 144 when too small", () => {
-    const result = clampDashboardItemRowSpan({
-      ...baseMetric,
-      itemHeight: 50,
-    })
-    expect(result.itemHeight).toBe(144)
+  it("raises metric rowSpan to at least 3 when too small", () => {
+    const result = clampDashboardItemRowSpan({ ...baseMetric, rowSpan: 1 })
+    expect(result.rowSpan).toBe(3)
   })
 
-  it("raises collection itemHeight to at least 480 when missing", () => {
+  it("raises collection rowSpan to at least 10 when missing", () => {
     const result = clampDashboardItemRowSpan(baseCollection)
-    expect(result.itemHeight).toBe(480)
+    expect(result.rowSpan).toBe(10)
   })
 
-  it("raises collection itemHeight to at least 480 when too small", () => {
-    const result = clampDashboardItemRowSpan({
-      ...baseCollection,
-      itemHeight: 200,
-    })
-    expect(result.itemHeight).toBe(480)
+  it("raises collection rowSpan to at least 10 when too small", () => {
+    const result = clampDashboardItemRowSpan({ ...baseCollection, rowSpan: 2 })
+    expect(result.rowSpan).toBe(10)
   })
 
-  it("preserves itemHeight when agent sends a value above the minimum", () => {
-    const result = clampDashboardItemRowSpan({
-      ...baseChart,
-      itemHeight: 528,
-    })
-    expect(result.itemHeight).toBe(528)
+  it("preserves rowSpan when agent sends a value above the minimum", () => {
+    const result = clampDashboardItemRowSpan({ ...baseChart, rowSpan: 12 })
+    expect(result.rowSpan).toBe(12)
   })
 
-  it("returns the same item reference when itemHeight is already at or above the minimum", () => {
-    const item = { ...baseChart, itemHeight: 336 }
+  it("returns the same item reference when no clamp is needed", () => {
+    const item = { ...baseChart, rowSpan: 7 }
     expect(clampDashboardItemRowSpan(item)).toBe(item)
-  })
-
-  it("backwards compat: reads legacy `rowSpan * 48` when `itemHeight` is unset", () => {
-    const result = clampDashboardItemRowSpan({ ...baseChart, rowSpan: 9 })
-    // 9 * 48 = 432 > min 336, so the fallback rowSpan height is preserved
-    // and migrated into the canonical itemHeight field.
-    expect(result.itemHeight).toBe(432)
-  })
-
-  it("backwards compat: clamps legacy `rowSpan` below the per-type minimum", () => {
-    const result = clampDashboardItemRowSpan({ ...baseChart, rowSpan: 2 })
-    // 2 * 48 = 96 < 336, so it gets clamped to 336.
-    expect(result.itemHeight).toBe(336)
   })
 })
