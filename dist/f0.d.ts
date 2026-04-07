@@ -1134,9 +1134,16 @@ declare interface BaseChipProps extends VariantProps<typeof chipVariants> {
      * */
     onClick?: () => void;
     /**
-     * If defined, the close icon will be displayed and the chip will be clickable
+     * If defined, the close icon will be displayed and the chip will be clickable.
+     * Note: when onClose is provided, onClick is suppressed on the outer element
+     * to avoid nesting two interactive elements (ARIA spec). Only onClose is
+     * keyboard-accessible in that layout.
      * */
     onClose?: () => void;
+    /**
+     * If true, dims the label and disables all interaction.
+     * The element retains role="button" and aria-disabled="true" for screen readers.
+     * */
     deactivated?: boolean;
 }
 
@@ -12352,10 +12359,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
@@ -12363,8 +12368,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
