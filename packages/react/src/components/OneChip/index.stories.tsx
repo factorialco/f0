@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { fn } from "storybook/test"
+import { expect, fn, userEvent, within } from "storybook/test"
 import { useState } from "react"
 
 import * as Icons from "../../icons/app"
@@ -76,6 +76,12 @@ export const Clickable: Story = {
     variant: "default",
     onClose: undefined,
   },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+    const chip = canvas.getByRole("button", { name: "Label" })
+    await userEvent.click(chip)
+    expect(args.onClick).toHaveBeenCalledTimes(1)
+  },
 }
 
 export const WithClose: Story = {
@@ -107,6 +113,14 @@ export const WithClose: Story = {
         ))}
       </div>
     )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const closeBtn = canvas.getByRole("button", { name: "Remove First Chip" })
+    await userEvent.click(closeBtn)
+    expect(
+      canvas.queryByRole("button", { name: "Remove First Chip" })
+    ).not.toBeInTheDocument()
   },
 }
 
@@ -213,6 +227,8 @@ export const SelectedWithClose: Story = {
 export const Snapshot: Story = {
   args: {
     label: "Snapshot",
+    onClick: undefined,
+    onClose: undefined,
   },
   parameters: withSnapshot({}),
   render: () => (

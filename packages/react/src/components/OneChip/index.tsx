@@ -34,10 +34,17 @@ interface BaseChipProps extends VariantProps<typeof chipVariants> {
   onClick?: () => void
 
   /**
-   * If defined, the close icon will be displayed and the chip will be clickable
+   * If defined, the close icon will be displayed and the chip will be clickable.
+   * Note: when onClose is provided, onClick is suppressed on the outer element
+   * to avoid nesting two interactive elements (ARIA spec). Only onClose is
+   * keyboard-accessible in that layout.
    * */
   onClose?: () => void
 
+  /**
+   * If true, dims the label and disables all interaction.
+   * The element retains role="button" and aria-disabled="true" for screen readers.
+   * */
   deactivated?: boolean
 }
 
@@ -86,10 +93,18 @@ const _F0Chip = ({
   // keyboard-accessible, which is the correct UX for a dismissible chip.
   const hasButtonRole = !!onClick && !onClose
 
+  if (onClick && onClose) {
+    console.warn(
+      "F0Chip: providing both onClick and onClose is not supported. " +
+        "onClick will be suppressed on the outer element to prevent ARIA nesting violations. " +
+        "Only onClose will be keyboard-accessible."
+    )
+  }
+
   return (
     <div
       role={hasButtonRole ? "button" : undefined}
-      aria-disabled={hasButtonRole && deactivated ? true : undefined}
+      aria-disabled={hasButtonRole && deactivated ? "true" : undefined}
       className={cn(
         chipVariants({ variant }),
         onClose && "pr-1.5",
@@ -101,11 +116,13 @@ const _F0Chip = ({
       )}
       onClick={hasButtonRole && !deactivated ? onClick : undefined}
       onKeyDown={
-        hasButtonRole && !deactivated
+        hasButtonRole
           ? (e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault()
-                onClick()
+                if (!deactivated) {
+                  onClick()
+                }
               }
             }
           : undefined

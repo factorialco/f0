@@ -140,7 +140,9 @@ describe("F0Chip", () => {
       // Only the close button should have role=button; the outer div must not
       const buttons = screen.getAllByRole("button")
       expect(buttons).toHaveLength(1)
-      expect(buttons[0]).toHaveAttribute("aria-label", "Remove Both")
+      expect(
+        screen.getByRole("button", { name: "Remove Both" })
+      ).toBeInTheDocument()
     })
 
     it("does not render a close button when onClose is not provided", () => {
