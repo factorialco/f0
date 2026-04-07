@@ -7,9 +7,17 @@ import { cn } from "../../../../lib/utils"
 import { CompanyAvatar } from "../../../Avatars/CompanyAvatar"
 import { PersonAvatar } from "../../../Avatars/PersonAvatar"
 import { TeamAvatar } from "../../../Avatars/TeamAvatar"
-import { AlertTag, F0Image, F0Text, PressableFeedback } from "../../../exports"
+import {
+  F0Image,
+  F0TagAlert,
+  F0TagAlertProps,
+  F0TagStatus,
+  F0TagStatusProps,
+  F0Text,
+  PressableFeedback,
+} from "../../../exports"
 import { F0Icon, type IconType } from "../../../primitives/F0Icon"
-import { DotTag, DotTagProps, NewColor } from "../../../Tags/DotTag"
+import { DotTag, DotTagProps } from "../../../Tags/DotTag"
 
 import { ItemContainer } from "./ItemContainer"
 
@@ -170,12 +178,14 @@ const DotTagItem = ({ ...props }: DotTagItemProps) => {
   )
 }
 
+type CardMetadataStatus = F0TagStatusProps["variant"] | "completed"
+
 type CardMetadataProperty = {
   icon?: IconType
   type: "text" | "progress" | "statusTag" | "alertTag"
   value: string
-  status?: "warning" | "critical" | "completed" | "neutral"
-  level?: "info" | "warning" | "critical"
+  status?: CardMetadataStatus
+  level?: F0TagAlertProps["level"]
 }
 
 type CardItemProps = {
@@ -191,15 +201,13 @@ const CardItem = ({ action, name, thumbnailUrl, metadata }: CardItemProps) => {
     "--color-f0-background-info-bold",
   ])
 
-  const statusColor: Record<
-    "warning" | "critical" | "completed" | "neutral",
-    NewColor
-  > = {
-    warning: "yellow",
-    critical: "army",
-    completed: "viridian",
-    neutral: "smoke",
+  const resolveStatusVariant = (
+    status: CardMetadataStatus | undefined
+  ): F0TagStatusProps["variant"] => {
+    if (status === "completed") return "positive"
+    return status ?? "neutral"
   }
+
   const renderCardMetadata = (property: CardMetadataProperty) => {
     switch (property.type) {
       case "text":
@@ -244,14 +252,14 @@ const CardItem = ({ action, name, thumbnailUrl, metadata }: CardItemProps) => {
       }
       case "statusTag":
         return (
-          <DotTag
+          <F0TagStatus
             text={property.value.toString()}
-            color={statusColor[property?.status ?? "neutral"]}
+            variant={resolveStatusVariant(property.status)}
           />
         )
       case "alertTag":
         return (
-          <AlertTag text={property.value} level={property.level ?? "info"} />
+          <F0TagAlert text={property.value} level={property.level ?? "info"} />
         )
     }
   }

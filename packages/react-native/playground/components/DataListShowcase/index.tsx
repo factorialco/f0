@@ -1,21 +1,21 @@
-import React from "react";
-import { ScrollView, View, Text } from "react-native";
-import { Calendar } from "src/icons/app";
-import { useCSSVariable } from "uniwind";
+import React from "react"
+import { ScrollView, View, Text } from "react-native"
+import { Calendar } from "src/icons/app"
+import { useCSSVariable } from "uniwind"
 
-import { DataList } from "../../../src/components/experimental/Lists/DataList";
-import { AppIcons } from "../../../src/icons";
+import { DataList } from "../../../src/components/experimental/Lists/DataList"
+import { AppIcons } from "../../../src/icons"
 
-const { Check, Clock } = AppIcons;
+const { Check, Clock } = AppIcons
 
 export function DataListShowcase() {
-  const [f0Foreground] = useCSSVariable(["--color-f0-foreground"]);
+  const [f0Foreground] = useCSSVariable(["--color-f0-foreground"])
 
   const asString = (value: string | number | undefined): string => {
-    if (typeof value === "string") return value;
-    if (typeof value === "number") return String(value);
-    return "#000000";
-  };
+    if (typeof value === "string") return value
+    if (typeof value === "number") return String(value)
+    return "#000000"
+  }
 
   return (
     <ScrollView
@@ -222,7 +222,7 @@ export function DataListShowcase() {
               {
                 type: "statusTag",
                 value: "Completed",
-                status: "completed",
+                level: "positive",
               },
               {
                 type: "text",
@@ -300,5 +300,5 @@ export function DataListShowcase() {
         </DataList>
       </View>
     </ScrollView>
-  );
+  )
 }
