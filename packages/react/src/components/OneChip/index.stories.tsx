@@ -26,9 +26,13 @@ const meta = {
       description: "The variant of the chip",
       options: chipVariantOptions,
       control: "select",
+      table: {
+        type: { summary: chipVariantOptions.join(" | ") },
+      },
     },
     avatar: {
       description: "If defined, an avatar will be displayed in the chip",
+      control: false,
     },
     icon: {
       control: "select",

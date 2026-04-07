@@ -43,7 +43,7 @@ describe("F0Chip", () => {
     it("renders label with reduced opacity class when deactivated=true", () => {
       render(<F0Chip label="Inactive" deactivated />)
       const span = screen.getByText("Inactive")
-      expect(span.className).toContain("text-f1-foreground")
+      expect(span.className).toContain("text-f1-foreground/[0.61]")
     })
 
     it("does not apply deactivated class when deactivated is false", () => {

@@ -80,9 +80,14 @@ const _F0Chip = ({
   avatar,
   icon,
 }: F0ChipProps) => {
+  // Only apply role="button" when clickable AND there is no close button child
+  // to avoid nesting interactive elements (ARIA spec violation)
+  const isClickable = !!onClick && !deactivated
+  const hasButtonRole = isClickable && !onClose
+
   return (
     <div
-      role={onClick ? "button" : undefined}
+      role={hasButtonRole ? "button" : undefined}
       aria-disabled={deactivated ? true : undefined}
       className={cn(
         chipVariants({ variant }),
@@ -90,17 +95,21 @@ const _F0Chip = ({
         avatar && "pl-0.5",
         avatar && avatar?.type !== "person" && "rounded-sm",
         icon && !avatar && "pl-1.5",
-        onClick && "cursor-pointer",
-        onClick && focusRing()
+        onClick && !deactivated && "cursor-pointer",
+        hasButtonRole && focusRing()
       )}
-      onClick={onClick}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault()
-          onClick?.()
-        }
-      }}
-      tabIndex={onClick ? 0 : undefined}
+      onClick={isClickable ? onClick : undefined}
+      onKeyDown={
+        hasButtonRole
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault()
+                onClick()
+              }
+            }
+          : undefined
+      }
+      tabIndex={hasButtonRole ? 0 : undefined}
     >
       {avatar && <F0Avatar avatar={avatar} size="xs" />}
       <div className="flex items-center gap-0.5">
@@ -122,7 +131,6 @@ const _F0Chip = ({
               "[&_svg]:text-f1-icon-selected [&_svg]:hover:text-f1-icon-selected-hover [&_svg]:focus:text-f1-icon-selected-hover",
             focusRing()
           )}
-          tabIndex={0}
           aria-label={`Remove ${label}`}
         >
           <F0Icon icon={CrossedCircle} size="sm" />
