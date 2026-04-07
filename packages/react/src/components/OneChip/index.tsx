@@ -19,6 +19,9 @@ export const chipVariants = cva({
   },
 })
 
+export const chipVariantOptions = ["default", "selected"] as const
+export type ChipVariantOption = (typeof chipVariantOptions)[number]
+
 interface BaseChipProps extends VariantProps<typeof chipVariants> {
   /**
    * The label of the chip
@@ -58,12 +61,17 @@ type ChipVariants =
       icon?: undefined
     }
 
-export type ChipProps = BaseChipProps &
+export type F0ChipProps = BaseChipProps &
   ChipVariants & {
-    variant?: "default" | "selected"
+    variant?: ChipVariantOption
   }
 
-const _Chip = ({
+/**
+ * @deprecated Use F0ChipProps instead
+ */
+export type ChipProps = F0ChipProps
+
+const _F0Chip = ({
   deactivated,
   label,
   variant,
@@ -71,9 +79,11 @@ const _Chip = ({
   onClose,
   avatar,
   icon,
-}: ChipProps) => {
+}: F0ChipProps) => {
   return (
     <div
+      role={onClick ? "button" : undefined}
+      aria-disabled={deactivated ? true : undefined}
       className={cn(
         chipVariants({ variant }),
         onClose && "pr-1.5",
@@ -86,6 +96,7 @@ const _Chip = ({
       onClick={onClick}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault()
           onClick?.()
         }
       }}
@@ -112,7 +123,7 @@ const _Chip = ({
             focusRing()
           )}
           tabIndex={0}
-          aria-label="Close"
+          aria-label={`Remove ${label}`}
         >
           <F0Icon icon={CrossedCircle} size="sm" />
         </button>
@@ -121,4 +132,9 @@ const _Chip = ({
   )
 }
 
-export const Chip = _Chip
+export const F0Chip = _F0Chip
+
+/**
+ * @deprecated Use F0Chip instead
+ */
+export const Chip = _F0Chip
