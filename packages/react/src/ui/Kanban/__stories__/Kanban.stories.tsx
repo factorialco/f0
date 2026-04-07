@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { expect, fn, waitFor, within } from "storybook/test"
 
 import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
 
-import type { KanbanProps } from "../types"
+import type { KanbanOnBulkMove, KanbanProps } from "../types"
 
 import { KanbanCard } from "../components/KanbanCard"
 import { Kanban } from "../Kanban"
@@ -537,5 +537,317 @@ export const SimpleOnMoveTest: Story = {
       expect(secondCall).toHaveTextContent(/"title":"Design spec"/)
       expect(secondCall).toHaveTextContent(/"position":"above"/)
     })
+  },
+}
+
+const initialBulkMoveLanes: KanbanProps<Task>["lanes"] = [
+  {
+    id: "backlog",
+    title: "Backlog",
+    items: [
+      { id: "t1", title: "Design spec", assignee: "Alice" },
+      { id: "t2", title: "Implement UI", assignee: "Bob" },
+      { id: "t3", title: "Write docs", assignee: "Carol" },
+    ],
+    total: 3,
+    variant: "neutral",
+  },
+  {
+    id: "in-progress",
+    title: "In Progress",
+    items: [
+      { id: "t4", title: "Write tests", assignee: "Dave" },
+      { id: "t5", title: "Wire data", assignee: "Eve" },
+    ],
+    total: 2,
+    variant: "info",
+  },
+  {
+    id: "review",
+    title: "In Review",
+    items: [{ id: "t6", title: "Code review", assignee: "Frank" }],
+    total: 1,
+    variant: "warning",
+  },
+  {
+    id: "done",
+    title: "Done",
+    items: [],
+    total: 0,
+    variant: "positive",
+  },
+]
+
+/**
+ * Demonstrates bulk drag-and-drop: select multiple cards via their built-in
+ * checkboxes (hover over a card to reveal it), then drag any selected card
+ * to move **all** selected cards to the target lane. A badge on the drag
+ * preview shows the count.
+ *
+ * **How to use:**
+ * 1. Hover over cards to reveal checkboxes, click to select 2+ cards
+ * 2. Drag any selected card to another lane — all selected cards move together
+ * 3. Or use the simulation buttons below for programmatic bulk moves
+ * 4. Hit "Reset board" to start over
+ */
+export const BulkMove: Story = {
+  args: {
+    lanes: [],
+    renderCard: () => null,
+    getKey: () => "",
+  },
+  render: function Render() {
+    const [instanceId] = useState(() => Symbol("kanban-bulk-instance"))
+    const [selected, setSelected] = useState<Set<string>>(() => new Set())
+    const [bulkMoveLog, setBulkMoveLog] = useState<
+      Array<{
+        movedIds: string[]
+        toLaneId: string
+        position: string
+      }>
+    >([])
+
+    const [lanes, setLanes] =
+      useState<KanbanProps<Task>["lanes"]>(initialBulkMoveLanes)
+
+    const selectedIds = useMemo(() => Array.from(selected), [selected])
+
+    const toggleSelection = useCallback((id: string) => {
+      setSelected((prev) => {
+        const next = new Set(prev)
+        if (next.has(id)) {
+          next.delete(id)
+        } else {
+          next.add(id)
+        }
+        return next
+      })
+    }, [])
+
+    const handleBulkMove: KanbanOnBulkMove<Task> = useCallback(
+      async (moves, toLaneId, destinyRecord) => {
+        setBulkMoveLog((prev) => [
+          ...prev,
+          {
+            movedIds: moves.map((m) => m.sourceRecord.id),
+            toLaneId,
+            position: destinyRecord
+              ? `${destinyRecord.position} ${destinyRecord.record.title}`
+              : "end of lane",
+          },
+        ])
+
+        // Simulate server delay
+        await new Promise((r) => setTimeout(r, 100))
+
+        // Update lanes state
+        const movedRecords = moves.map((m) => m.sourceRecord)
+        const movedIds = new Set(movedRecords.map((r) => r.id))
+
+        setLanes((prevLanes) => {
+          return prevLanes.map((lane) => {
+            const filtered = lane.items.filter((item) => !movedIds.has(item.id))
+
+            if (lane.id === toLaneId) {
+              if (destinyRecord) {
+                const targetIdx = filtered.findIndex(
+                  (item) => item.id === destinyRecord.record.id
+                )
+                const insertIdx =
+                  destinyRecord.position === "above" ? targetIdx : targetIdx + 1
+                filtered.splice(insertIdx, 0, ...movedRecords)
+              } else {
+                filtered.push(...movedRecords)
+              }
+            }
+
+            return {
+              ...lane,
+              items: filtered,
+              total: filtered.length,
+            }
+          })
+        })
+
+        // Clear selection after bulk move
+        setSelected(new Set())
+
+        return movedRecords
+      },
+      []
+    )
+
+    const handleReset = () => {
+      setLanes(initialBulkMoveLanes)
+      setSelected(new Set())
+      setBulkMoveLog([])
+    }
+
+    const simulateBulkMoveToDone = () => {
+      if (selectedIds.length < 2) return
+      window.dispatchEvent(
+        new CustomEvent("kanban-test-bulk-move", {
+          detail: {
+            selectedIds,
+            toLaneId: "done",
+            indexOfTarget: null,
+            position: null,
+          },
+        })
+      )
+    }
+
+    const simulateBulkMoveToBacklog = () => {
+      if (selectedIds.length < 2) return
+      window.dispatchEvent(
+        new CustomEvent("kanban-test-bulk-move", {
+          detail: {
+            selectedIds,
+            toLaneId: "backlog",
+            indexOfTarget: null,
+            position: null,
+          },
+        })
+      )
+    }
+
+    return (
+      <div className="space-y-4">
+        {/* Action bar: selection info + actions */}
+        <div className="flex items-center gap-3 rounded-lg border border-f1-border bg-f1-background-secondary px-4 py-2.5">
+          <span className="text-sm font-medium">
+            {selectedIds.length === 0
+              ? "Hover over cards to reveal checkboxes, then select 2+ cards"
+              : `${selectedIds.length} card${selectedIds.length === 1 ? "" : "s"} selected`}
+          </span>
+          <div className="flex-1" />
+          <button
+            onClick={simulateBulkMoveToDone}
+            disabled={selectedIds.length < 2}
+            className="rounded bg-f1-background-positive px-3 py-1.5 text-xs font-medium text-f1-foreground-positive disabled:opacity-40"
+            data-testid="bulk-move-done"
+          >
+            Move to Done
+          </button>
+          <button
+            onClick={simulateBulkMoveToBacklog}
+            disabled={selectedIds.length < 2}
+            className="rounded bg-f1-background-info px-3 py-1.5 text-xs font-medium text-f1-foreground-info disabled:opacity-40"
+            data-testid="bulk-move-backlog"
+          >
+            Move to Backlog
+          </button>
+          {selectedIds.length > 0 && (
+            <button
+              onClick={() => setSelected(new Set())}
+              className="text-xs text-f1-foreground-secondary underline"
+            >
+              Clear selection
+            </button>
+          )}
+          <button
+            onClick={handleReset}
+            className="rounded border border-f1-border px-3 py-1.5 text-xs font-medium text-f1-foreground-secondary"
+            data-testid="reset-board"
+          >
+            Reset board
+          </button>
+        </div>
+
+        {/* Kanban board */}
+        <DndProvider driver={createAtlaskitDriver(instanceId)}>
+          <Kanban<Task>
+            lanes={lanes}
+            getKey={(item) => item.id}
+            dnd={{
+              instanceId,
+              getIndexById: (laneId, id) => {
+                const lane = lanes.find((l) => l.id === laneId)
+                return lane?.items.findIndex((item) => item.id === id) ?? -1
+              },
+              onMove: async (fromLaneId, toLaneId, sourceRecord, destiny) => {
+                await new Promise((r) => setTimeout(r, 50))
+                setLanes((prev) =>
+                  prev.map((lane) => {
+                    if (lane.id === fromLaneId) {
+                      return {
+                        ...lane,
+                        items: lane.items.filter(
+                          (item) => item.id !== sourceRecord.id
+                        ),
+                        total: (lane.total ?? lane.items.length) - 1,
+                      }
+                    }
+                    if (lane.id === toLaneId) {
+                      const items = [...lane.items]
+                      if (destiny) {
+                        const idx = items.findIndex(
+                          (i) => i.id === destiny.record.id
+                        )
+                        const insertIdx =
+                          destiny.position === "above" ? idx : idx + 1
+                        items.splice(insertIdx, 0, sourceRecord)
+                      } else {
+                        items.push(sourceRecord)
+                      }
+                      return {
+                        ...lane,
+                        items,
+                        total: (lane.total ?? lane.items.length) + 1,
+                      }
+                    }
+                    return lane
+                  })
+                )
+                return sourceRecord
+              },
+              onBulkMove: handleBulkMove,
+              selectedIds: selectedIds.length > 1 ? selectedIds : undefined,
+            }}
+            renderCard={(item, index, total, laneId) => (
+              <KanbanCard<Task>
+                drag={{
+                  id: item.id,
+                  type: "list-card",
+                  data: { ...item },
+                }}
+                id={item.id}
+                index={index}
+                total={total}
+                laneId={laneId}
+                draggable
+                title={item.title}
+                description={item.assignee}
+                selectable
+                selected={selected.has(item.id)}
+                onSelect={() => toggleSelection(item.id)}
+                selectedIds={selectedIds.length > 1 ? selectedIds : undefined}
+              />
+            )}
+          />
+        </DndProvider>
+
+        {/* Bulk move log (collapsible) */}
+        {bulkMoveLog.length > 0 && (
+          <details className="rounded-lg border border-f1-border p-3">
+            <summary className="cursor-pointer text-xs font-medium text-f1-foreground-secondary">
+              Bulk Move Log ({bulkMoveLog.length})
+            </summary>
+            <div className="mt-2 space-y-1">
+              {bulkMoveLog.map((log, i) => (
+                <div
+                  key={i}
+                  className="rounded bg-f1-background-secondary p-2 text-xs"
+                  data-testid={`bulk-log-${i}`}
+                >
+                  Moved [{log.movedIds.join(", ")}] to {log.toLaneId} (
+                  {log.position})
+                </div>
+              ))}
+            </div>
+          </details>
+        )}
+      </div>
+    )
   },
 }

@@ -46,6 +46,7 @@ export const KanbanCollection = <
   avatar,
   metadata: optionsMetadata,
   onMove,
+  onBulkMove,
   onCreate,
   source,
   onSelectItems,
@@ -174,6 +175,7 @@ export const KanbanCollection = <
           total={total}
           laneId={laneId}
           showIndicator={allowReorder}
+          selectedIds={allSelectedIds.length > 1 ? allSelectedIds : undefined}
           title={title ? title(item) : String(index)}
           description={description ? description(item) : undefined}
           avatar={avatar ? avatar(item) : undefined}
@@ -248,15 +250,6 @@ export const KanbanCollection = <
     return maps
   }, [laneItems, idProvider])
 
-  kanbanProps.dnd = {
-    instanceId: instanceId,
-    getIndexById: (laneId: string, id: string) => {
-      const idx = laneIndexMaps.get(laneId)?.get(id) ?? -1
-      return allowReorder ? idx : -1
-    },
-    onMove: onMove,
-  }
-
   /**
    * Selection
    */
@@ -283,6 +276,29 @@ export const KanbanCollection = <
   >(lanesDef, source, (selectItemsStatus, clearCallback) => {
     onSelectItems?.(selectItemsStatus, clearCallback)
   })
+
+  // Collect all selected IDs across all lanes for bulk drag-and-drop
+  const allSelectedIds = useMemo(() => {
+    if (!lanesUseSelectable) return []
+    const ids: string[] = []
+    lanesUseSelectable.forEach((hook) => {
+      hook.selectedItems.forEach((_, key) => {
+        ids.push(String(key))
+      })
+    })
+    return ids
+  }, [lanesUseSelectable])
+
+  kanbanProps.dnd = {
+    instanceId: instanceId,
+    getIndexById: (laneId: string, id: string) => {
+      const idx = laneIndexMaps.get(laneId)?.get(id) ?? -1
+      return allowReorder ? idx : -1
+    },
+    onMove: onMove,
+    onBulkMove: onBulkMove,
+    selectedIds: allSelectedIds.length > 1 ? allSelectedIds : undefined,
+  }
 
   return (
     <>

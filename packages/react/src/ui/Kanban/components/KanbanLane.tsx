@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils"
 import type { LaneProps } from "../../Lane/types"
 
 import { Lane } from "../../Lane"
-import { KanbanOnMoveParam } from "../types"
+import { KanbanOnBulkMoveParam, KanbanOnMoveParam } from "../types"
 import {
   findTypeOfDropForLane,
   optimisticDifferentLaneInsertOverCard,
@@ -30,11 +30,13 @@ export function KanbanLane<TRecord extends RecordType>({
   id,
   getLaneResourceIndexById,
   onMove,
+  onBulkMove,
   ...laneProps
 }: {
   id?: string
   getLaneResourceIndexById?: (id: string) => number
   onMove?: (param: KanbanOnMoveParam) => Promise<TRecord>
+  onBulkMove?: (param: KanbanOnBulkMoveParam) => Promise<TRecord[]>
   allowReorder?: boolean
 } & LaneProps<TRecord>) {
   const laneRef = useRef<HTMLDivElement | null>(null)
@@ -387,6 +389,45 @@ export function KanbanLane<TRecord extends RecordType>({
           return
         }
 
+        // --- Bulk move detection ---
+        // If the dragged card carries selectedIds (bulk drag), delegate to onBulkMove
+        const selectedIds = (source.data as { selectedIds?: string[] })
+          .selectedIds
+        if (selectedIds && selectedIds.length > 1 && onBulkMove) {
+          // Determine drop position from card target or forced indicator
+          const bulkCardTarget = location.current.dropTargets.find((t) => {
+            const data = t.data as { type?: string }
+            return data.type === "list-card-target"
+          })
+
+          let bulkIndexOfTarget: number | null = null
+          let bulkPosition: "above" | "below" | null = null
+
+          if (bulkCardTarget && bulkCardTarget.data) {
+            const targetIndex = (bulkCardTarget.data as { index?: number })
+              .index
+            const edge = (bulkCardTarget.data as { closestEdge?: string })
+              .closestEdge as "top" | "bottom" | undefined
+            if (targetIndex !== undefined && edge) {
+              bulkIndexOfTarget = targetIndex
+              bulkPosition = edge === "bottom" ? "below" : "above"
+            }
+          } else if (forcedIndex !== null && forcedEdge) {
+            bulkIndexOfTarget = forcedIndex
+            bulkPosition = forcedEdge === "bottom" ? "below" : "above"
+          }
+
+          await onBulkMove({
+            selectedIds,
+            toLaneId: id as string,
+            indexOfTarget: bulkIndexOfTarget,
+            position: bulkPosition,
+          })
+          setForcedIndex(null)
+          setForcedEdge(null)
+          return
+        }
+
         let onMoveParams: KanbanOnMoveParam | null = null
         const { type: typeOfDrop, cardTarget } = findTypeOfDrop(
           location.current.dropTargets
@@ -487,6 +528,7 @@ export function KanbanLane<TRecord extends RecordType>({
     id,
     getLaneResourceIndexById,
     onMove,
+    onBulkMove,
     isDragging,
     laneProps.items,
     laneProps.getKey,
@@ -529,7 +571,7 @@ export function KanbanLane<TRecord extends RecordType>({
     }
   })
 
-  // Test hook: allow stories to trigger onMove without real DnD
+  // Test hook: allow stories/tests to trigger onMove without real DnD
   useEffect(() => {
     const handler = (e: Event) => {
       if (!id) return
@@ -559,6 +601,31 @@ export function KanbanLane<TRecord extends RecordType>({
     return () =>
       window.removeEventListener("kanban-test-move", handler as EventListener)
   }, [id, onMove])
+
+  // Test hook: allow stories/tests to trigger onBulkMove without real DnD
+  useEffect(() => {
+    if (!onBulkMove) return
+    const handler = (e: Event) => {
+      if (!id) return
+      const detail = (
+        e as CustomEvent<{
+          selectedIds: string[]
+          toLaneId: string
+          indexOfTarget: number | null
+          position: "above" | "below" | null
+        }>
+      ).detail
+      if (!detail) return
+      if (detail.toLaneId !== id) return
+      void onBulkMove(detail).catch(() => {})
+    }
+    window.addEventListener("kanban-test-bulk-move", handler as EventListener)
+    return () =>
+      window.removeEventListener(
+        "kanban-test-bulk-move",
+        handler as EventListener
+      )
+  }, [id, onBulkMove])
 
   // Calculate dynamic height based on content and container
   useLayoutEffect(() => {

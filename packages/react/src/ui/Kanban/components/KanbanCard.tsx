@@ -4,7 +4,10 @@ import {
 } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge"
 import { DropIndicator } from "@atlaskit/pragmatic-drag-and-drop-react-drop-indicator/box"
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
-import { useEffect, useRef, useState } from "react"
+import { setCustomNativeDragPreview } from "@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview"
+import { useCallback, useEffect, useRef, useState } from "react"
+
+import type { OnGenerateDragPreviewArgs } from "@/lib/dnd/types"
 
 import { CardInternal } from "@/components/F0Card/CardInternal"
 import { F0Link } from "@/components/F0Link"
@@ -31,6 +34,7 @@ export function KanbanCard<T = unknown>({
   showIndicator = true,
   disabledEdges = [],
   forcedEdge = null,
+  selectedIds,
   ...props
 }: {
   drag: DragConfig<T>
@@ -42,14 +46,105 @@ export function KanbanCard<T = unknown>({
   showIndicator?: boolean
   disabledEdges?: Array<"top" | "bottom">
   forcedEdge?: "top" | "bottom" | null
+  /** IDs of all selected items for bulk drag (includes this card's id when selected) */
+  selectedIds?: string[]
 } & React.ComponentProps<typeof CardInternal>) {
   const ref = useRef<HTMLDivElement | null>(null)
   const linkRef = useRef<HTMLAnchorElement | null>(null)
   const [overEdge, setOverEdge] = useState<"top" | "bottom" | null>(null)
 
+  const isBulkDrag =
+    selectedIds && selectedIds.length > 1 && selectedIds.includes(drag.id)
+  const bulkCount = isBulkDrag ? selectedIds.length : 0
+
+  const handleGenerateDragPreview = useCallback(
+    ({ nativeSetDragImage }: OnGenerateDragPreviewArgs) => {
+      if (!nativeSetDragImage || !ref.current) return
+      setCustomNativeDragPreview({
+        nativeSetDragImage,
+        render: ({ container }) => {
+          const cardWidth = ref.current!.offsetWidth
+          const cardHeight = ref.current!.offsetHeight
+          const shadowCount = bulkCount >= 3 ? 2 : 1
+          const offset = 8
+          const totalOffset = shadowCount * offset
+
+          // Size the container to fit the card + shadow offset + badge overhang
+          Object.assign(container.style, {
+            position: "relative",
+            width: `${cardWidth + totalOffset + 12}px`,
+            height: `${cardHeight + totalOffset + 12}px`,
+          })
+
+          // Resolve the page background so clones look opaque
+          // (cards use semi-transparent fills that rely on the page behind them)
+          const pageBg =
+            window.getComputedStyle(document.body).backgroundColor || "#0d1626"
+
+          // Render shadow layers as empty card shells (deepest first)
+          for (let i = shadowCount; i >= 1; i--) {
+            const shadowClone = ref.current!.cloneNode(true) as HTMLElement
+            // Hide inner content so only the card shape is visible
+            for (const child of shadowClone.children) {
+              ;(child as HTMLElement).style.visibility = "hidden"
+            }
+            Object.assign(shadowClone.style, {
+              position: "absolute",
+              top: `${i * offset}px`,
+              left: `${(shadowCount - i) * offset}px`,
+              width: `${cardWidth}px`,
+              height: `${cardHeight}px`,
+              backgroundColor: pageBg,
+              borderRadius: "12px",
+              overflow: "hidden",
+            })
+            container.appendChild(shadowClone)
+          }
+
+          // Clone the card element as the top layer
+          const clone = ref.current!.cloneNode(true) as HTMLElement
+          Object.assign(clone.style, {
+            position: "absolute",
+            top: "0px",
+            left: `${totalOffset}px`,
+            width: `${cardWidth}px`,
+            backgroundColor: pageBg,
+            borderRadius: "12px",
+          })
+          container.appendChild(clone)
+
+          // Count badge
+          const badge = document.createElement("div")
+          badge.textContent = String(bulkCount)
+          Object.assign(badge.style, {
+            position: "absolute",
+            top: "-4px",
+            right: "0px",
+            width: "24px",
+            height: "24px",
+            borderRadius: "50%",
+            backgroundColor: "#0066FF",
+            color: "#FFFFFF",
+            fontSize: "12px",
+            fontWeight: "700",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+            zIndex: "1",
+          })
+          container.appendChild(badge)
+        },
+      })
+    },
+    [bulkCount]
+  )
+
   useDraggable<T>({
     ref: ref as React.RefObject<HTMLElement>,
     payload: { kind: drag.type ?? "list-card", id: drag.id, data: drag.data },
+    selectedIds: isBulkDrag ? selectedIds : undefined,
+    onGenerateDragPreview: isBulkDrag ? handleGenerateDragPreview : undefined,
   })
 
   useEffect(() => {

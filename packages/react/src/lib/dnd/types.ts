@@ -2,6 +2,12 @@ export type DragPayload<T = unknown> = {
   kind: string
   id: string
   data?: T
+  /** IDs of all selected items being moved together (including the primary dragged item) */
+  selectedIds?: string[]
+}
+
+export type OnGenerateDragPreviewArgs = {
+  nativeSetDragImage: DataTransfer["setDragImage"] | null
 }
 
 export type DropIntent =
@@ -23,6 +29,7 @@ export interface DndDriver<T = unknown> {
       payload: DragPayload<T>
       disabled?: boolean
       handle?: HTMLElement | null
+      onGenerateDragPreview?: (args: OnGenerateDragPreviewArgs) => void
     }
   ) => () => void
 
