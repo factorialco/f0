@@ -3,23 +3,19 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps } from "react"
 import { expect, within } from "storybook/test"
 
-import { F0Box } from "@/lib/F0Box"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
-import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
-import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
-import { Page } from "@/patterns/Navigation/Page"
-import * as PageStories from "@/patterns/Navigation/Page/index.stories"
 import { Lightbulb } from "@/icons/app"
 import ArrowRight from "@/icons/app/ArrowRight"
-import ChartLine from "@/icons/app/ChartLine"
 import ExternalLink from "@/icons/app/ExternalLink"
 import Marketplace from "@/icons/app/Marketplace"
-import People from "@/icons/app/People"
-import Table from "@/icons/app/Table"
+import { F0Box } from "@/lib/F0Box"
+import { Page } from "@/patterns/Navigation/Page"
+import * as PageStories from "@/patterns/Navigation/Page/index.stories"
+import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
+import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 import { useAiChat } from "@/sds/ai/F0AiChat"
 import {
-  type AiChatToolHint,
   type CandidateProfile,
   type JobPostingProfile,
   type PersonProfile,
@@ -190,34 +186,6 @@ const mockJobPostingResolver = (id: string): Promise<JobPostingProfile> =>
   })
 
 /**
- * Example tool hints for Storybook — these tell the AI the user's intent
- * without the user seeing the prompt in the chat.
- */
-const mockToolHints: AiChatToolHint[] = [
-  {
-    id: "tables",
-    label: "Generate tables",
-    icon: Table,
-    prompt:
-      "The user wants you to generate data tables. Format your response using markdown tables whenever possible. Structure data clearly with headers and rows.",
-  },
-  {
-    id: "data-analysis",
-    label: "Data analysis",
-    icon: ChartLine,
-    prompt:
-      "The user wants you to perform data analysis. Focus on analyzing data, identifying trends, and providing actionable insights. Use charts and tables when appropriate.",
-  },
-  {
-    id: "reportees",
-    label: "Reportees information",
-    icon: People,
-    prompt:
-      "The user wants information about their reportees and direct reports. Focus on team member details, roles, performance, and organizational structure.",
-  },
-]
-
-/**
  * Mock fetchCreditsUsage — simulates a 500ms API call returning usage data.
  */
 const mockFetchCreditsUsage = () =>
@@ -272,7 +240,6 @@ const meta: Meta<typeof ApplicationFrame> = {
           jobPosting: (id) => `/recruitment/jobs/${id}/applications`,
         },
       },
-      toolHints: mockToolHints,
       credits: {
         fetchUsage: mockFetchCreditsUsage,
         upgradePlanUrl: "https://example.com/upgrade",
@@ -505,7 +472,6 @@ export const FullscreenWithActions: Story = {
           jobPosting: (id) => `/recruitment/jobs/${id}/applications`,
         },
       },
-      toolHints: mockToolHints,
       credits: {
         fetchUsage: mockFetchCreditsUsage,
         upgradePlanUrl: "https://example.com/upgrade",

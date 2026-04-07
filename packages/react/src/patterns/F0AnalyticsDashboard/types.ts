@@ -336,6 +336,13 @@ export interface F0AnalyticsDashboardProps<
    */
   filters?: Filters
   /**
+   * When true and `filters` is not yet provided, a skeleton placeholder is
+   * rendered in the filter bar slot. Use this when the consumer already knows
+   * filters will appear but their definitions / options are still loading,
+   * so the UI does not shift once the real filter bar takes its place.
+   */
+  filtersLoading?: boolean
+  /**
    * Preset filter configurations shown as quick-select chips.
    */
   presets?: PresetsDefinition<Filters>
