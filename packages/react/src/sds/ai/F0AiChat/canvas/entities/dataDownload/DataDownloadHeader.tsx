@@ -2,7 +2,7 @@ import { useCallback } from "react"
 
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import Download from "@/icons/app/Download"
-import { OneEllipsis } from "@/components/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 
 import { CloseCanvasButton } from "../../components/CloseCanvasButton"
