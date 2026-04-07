@@ -17,6 +17,7 @@ import type { F0AnalyticsDashboardProps } from "./types"
 import { DashboardGrid } from "./components/DashboardGrid/DashboardGrid"
 import { ExportDropdown } from "./components/ExportDropdown/ExportDropdown"
 import { FilterBar } from "./components/FilterBar/FilterBar"
+import { FilterBarSkeleton } from "./components/FilterBar/FilterBarSkeleton"
 import { useDashboardExport } from "./hooks/useDashboardExport"
 
 /**
@@ -44,6 +45,7 @@ export const F0AnalyticsDashboard = <
   resetKey,
   onTransformChart,
   navigationFilters,
+  filtersLoading,
 }: F0AnalyticsDashboardProps<Filters>) => {
   const i18n = useI18n()
 
@@ -83,15 +85,19 @@ export const F0AnalyticsDashboard = <
 
   return (
     <div className="flex flex-col gap-5 py-4">
-      {(filters || enableExport || navigationFilters) && (
+      {(filters || filtersLoading || enableExport || navigationFilters) && (
         <div className="flex items-center justify-between gap-4 px-5">
           <div className="w-full">
-            <FilterBar
-              filters={filters}
-              value={currentFilters}
-              presets={presets}
-              onChange={setCurrentFilters}
-            />
+            {filters ? (
+              <FilterBar
+                filters={filters}
+                value={currentFilters}
+                presets={presets}
+                onChange={setCurrentFilters}
+              />
+            ) : filtersLoading ? (
+              <FilterBarSkeleton />
+            ) : null}
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {navigationFilters && (

@@ -151,7 +151,10 @@ export function DashboardCanvasProvider({
         savedDashboardConfigStore.set(content.toolCallId, updatedConfig)
       }
 
-      // Update canvas content without changing refreshKey (no data refetch)
+      // Update canvas content. handleSave only ever spreads the config / items
+      // so `fetchSpecs` keeps the same reference — DashboardContent uses that
+      // reference to gate its data refresh key, so this update does NOT
+      // trigger a recompute even though the canvas content reference changes.
       openCanvas({
         ...content,
         config: updatedConfig,

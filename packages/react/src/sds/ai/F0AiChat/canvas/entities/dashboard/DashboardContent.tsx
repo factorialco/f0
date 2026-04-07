@@ -28,11 +28,46 @@ import type {
   ChatDashboardChartItem,
   ChatDashboardCollectionItem,
   ChatDashboardConfig,
+  ChatDashboardItem,
   ChatDashboardMetricItem,
   FormatPreset,
 } from "./types"
 
 import { useDashboardCompute, type ItemResult } from "./useDashboardCompute"
+
+// ---------------------------------------------------------------------------
+// Minimum row span per item type
+// ---------------------------------------------------------------------------
+
+/**
+ * Minimum `rowSpan` enforced for every dashboard item received from the agent,
+ * regardless of what config it sends. This guarantees that every item renders
+ * at least at the same height as the F0AnalyticsDashboard defaults.
+ *
+ * The grid renders each item at `rowSpan * 48` px, so these values mirror the
+ * `ROW_HEIGHTS` defaults defined in
+ * `f0/packages/react/src/patterns/F0AnalyticsDashboard/components/DashboardGrid/DashboardGrid.tsx`
+ * (chart 336px, metric 144px, collection 480px). Keep both in sync.
+ */
+const MIN_ROW_SPAN_BY_TYPE: Record<ChatDashboardItem["type"], number> = {
+  chart: 7, // 7 * 48 = 336px
+  metric: 3, // 3 * 48 = 144px
+  collection: 10, // 10 * 48 = 480px
+}
+
+/**
+ * Returns the item with its `rowSpan` clamped to the minimum allowed for its
+ * type. If the agent omits `rowSpan` or sends a value below the minimum, it is
+ * raised; larger values are kept untouched.
+ */
+export function clampDashboardItemRowSpan(
+  item: ChatDashboardItem
+): ChatDashboardItem {
+  const min = MIN_ROW_SPAN_BY_TYPE[item.type]
+  const current = item.rowSpan ?? 0
+  if (current >= min) return item
+  return { ...item, rowSpan: min }
+}
 
 // ---------------------------------------------------------------------------
 // Format preset → formatter function
@@ -199,6 +234,13 @@ export function ChatDashboard({
     return () => clearInterval(interval)
   }, [getFilterOptions, refreshKey])
 
+  // True when the agent declared filters in the config but their options
+  // (and therefore the FiltersDefinition we pass to F0AnalyticsDashboard) are
+  // still being computed. The dashboard will render a filter bar skeleton in
+  // that window so the layout matches the eventual rendered state.
+  const filtersLoading =
+    !!config.filters && Object.keys(config.filters).length > 0 && !filterOptions
+
   const filterDefinitions = useMemo(() => {
     const filterSpecs = config.filters
     if (!filterSpecs || Object.keys(filterSpecs).length === 0) return undefined
@@ -275,6 +317,7 @@ export function ChatDashboard({
     <F0AnalyticsDashboard
       key={refreshKey}
       filters={filterDefinitions}
+      filtersLoading={filtersLoading}
       items={items}
       editMode={editMode}
       onLayoutChange={onLayoutChange}
@@ -301,7 +344,7 @@ import { useDashboardCanvas } from "./DashboardContext"
 
 export function DashboardContent({
   content,
-  refreshKey,
+  refreshKey: _parentRefreshKey,
 }: {
   content: DashboardCanvasContent
   refreshKey: number
@@ -320,23 +363,34 @@ export function DashboardContent({
 
   // Apply pending item transforms (chart type changes) to the config
   // without changing the base config reference — avoids data refetch.
+  // Also clamp every item's rowSpan to its per-type minimum so the dashboard
+  // always renders at a readable height regardless of the agent's config.
   const effectiveConfig = useMemo(() => {
-    if (itemTransforms.size === 0) return content.config
     return {
       ...content.config,
       items: content.config.items.map((item) => {
         const patch = itemTransforms.get(item.id)
-        return patch ? ({ ...item, ...patch } as typeof item) : item
+        const merged = patch ? ({ ...item, ...patch } as typeof item) : item
+        return clampDashboardItemRowSpan(merged)
       }),
     }
   }, [content.config, itemTransforms])
+
+  // Derive a refresh key tied only to the data identity (fetchSpecs reference).
+  // The canvas-level refreshKey from CanvasPanel bumps on every content
+  // reference change, which includes save (layout/transform persistence). On
+  // save, fetchSpecs is preserved by reference (handleSave only spreads the
+  // config / items), so this key stays stable and we avoid a redundant
+  // dashboard remount + recompute. LLM regeneration produces a new fetchSpecs
+  // reference, which correctly bumps this key and triggers a real refetch.
+  const dataRefreshKey = useMemo(() => Date.now(), [content.config.fetchSpecs])
 
   return (
     <>
       <ChatDashboard
         config={effectiveConfig}
         apiConfig={content.apiConfig}
-        refreshKey={refreshKey}
+        refreshKey={dataRefreshKey}
         resetKey={discardKey}
         editMode
         onLayoutChange={onLayoutChange}
