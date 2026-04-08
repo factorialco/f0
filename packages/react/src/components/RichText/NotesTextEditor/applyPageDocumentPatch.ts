@@ -52,6 +52,10 @@ const sanitizeInsertedBlocks = (nodes: JSONContent[]): JSONContent[] => {
   return nodes.map(stripNodeIds)
 }
 
+const getRuntimePatchType = (patch: unknown): unknown => {
+  return isPlainObject(patch) ? patch.type : undefined
+}
+
 const sanitizeReplacementBlock = (
   node: JSONContent,
   targetId: string
@@ -104,6 +108,18 @@ export class NotesTextEditorPatchTargetNotFoundError extends Error {
     )
     this.name = "NotesTextEditorPatchTargetNotFoundError"
     this.targetId = targetId
+    Object.setPrototypeOf(this, new.target.prototype)
+  }
+}
+
+export class NotesTextEditorUnsupportedPatchTypeError extends Error {
+  readonly code = "unsupported_patch_type"
+  readonly patchType: unknown
+
+  constructor(patchType: unknown) {
+    super(`Unsupported NotesTextEditor patch type: ${String(patchType)}`)
+    this.name = "NotesTextEditorUnsupportedPatchTypeError"
+    this.patchType = patchType
     Object.setPrototypeOf(this, new.target.prototype)
   }
 }
@@ -208,4 +224,10 @@ export const applyPageDocumentPatch = (
       return getNotesTextEditorSnapshot(editor)
     }
   }
+
+  const unsupportedPatch: never = patch
+
+  throw new NotesTextEditorUnsupportedPatchTypeError(
+    getRuntimePatchType(unsupportedPatch)
+  )
 }

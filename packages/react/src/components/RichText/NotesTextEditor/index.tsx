@@ -498,7 +498,10 @@ export const NotesTextEditorSkeleton = ({
 
 export type { Message, User } from "../CoreEditor/Extensions/Transcript"
 export type { ImageUploadConfig } from "./types"
-export { NotesTextEditorPatchTargetNotFoundError } from "./applyPageDocumentPatch"
+export {
+  NotesTextEditorPatchTargetNotFoundError,
+  NotesTextEditorUnsupportedPatchTypeError,
+} from "./applyPageDocumentPatch"
 export const NotesTextEditor = NotesTextEditorComponent
 export type {
   NotesTextEditorHandle,

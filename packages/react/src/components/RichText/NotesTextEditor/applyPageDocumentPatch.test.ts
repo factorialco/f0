@@ -6,6 +6,7 @@ import { StarterKitExtension } from "../CoreEditor/Extensions/StarterKit"
 import {
   applyPageDocumentPatch,
   NotesTextEditorPatchTargetNotFoundError,
+  NotesTextEditorUnsupportedPatchTypeError,
 } from "./applyPageDocumentPatch"
 
 const createEditor = (content?: JSONContent | string) => {
@@ -321,6 +322,30 @@ describe("applyPageDocumentPatch", () => {
           targetId: "missing-block",
         })
       }
+    } finally {
+      editor.destroy()
+    }
+  })
+
+  it("throws an explicit unsupported-patch-type error for invalid runtime patch types", () => {
+    const editor = createEditor(baseDocument)
+
+    try {
+      let error: unknown
+
+      try {
+        applyPageDocumentPatch(editor, {
+          type: "unsupported_runtime_patch_type",
+        } as any)
+      } catch (caughtError) {
+        error = caughtError
+      }
+
+      expect(error).toBeInstanceOf(NotesTextEditorUnsupportedPatchTypeError)
+      expect(error).toMatchObject({
+        code: "unsupported_patch_type",
+        patchType: "unsupported_runtime_patch_type",
+      })
     } finally {
       editor.destroy()
     }
