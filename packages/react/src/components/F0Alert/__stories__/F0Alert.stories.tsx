@@ -3,10 +3,12 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, fn, within } from "storybook/test"
 
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0Alert } from "../F0Alert"
+import { alertVariantOptions } from "../types"
 
-const meta: Meta<typeof F0Alert> = {
+const meta = {
   component: F0Alert,
   title: "Alert",
   tags: ["autodocs", "stable"],
@@ -29,7 +31,7 @@ const meta: Meta<typeof F0Alert> = {
     },
     variant: {
       control: "select",
-      options: ["info", "warning", "critical", "neutral", "positive"],
+      options: alertVariantOptions,
       description: "Variant for the alert composition",
     },
     ...dataTestIdArgs,
@@ -41,11 +43,11 @@ const meta: Meta<typeof F0Alert> = {
       </div>
     ),
   ],
-}
+} satisfies Meta<typeof F0Alert>
 
 export default meta
 
-type Story = StoryObj<typeof F0Alert>
+type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
@@ -141,6 +143,43 @@ export const InDialog: Story = {
   render: (args) => (
     <div className="w-[450px]">
       <F0Alert {...args} />
+    </div>
+  ),
+}
+
+export const Snapshot: Story = {
+  args: {
+    title: "Alert",
+    description: "Alert description",
+  },
+  parameters: withSnapshot({}),
+  render: () => (
+    <div className="flex w-[640px] flex-col gap-2">
+      <F0Alert
+        variant="info"
+        title="Info alert"
+        description="This is an info alert"
+      />
+      <F0Alert
+        variant="warning"
+        title="Warning alert"
+        description="This is a warning alert"
+      />
+      <F0Alert
+        variant="critical"
+        title="Critical alert"
+        description="This is a critical alert"
+      />
+      <F0Alert
+        variant="neutral"
+        title="Neutral alert"
+        description="This is a neutral alert"
+      />
+      <F0Alert
+        variant="positive"
+        title="Positive alert"
+        description="This is a positive alert"
+      />
     </div>
   ),
 }
