@@ -56,7 +56,6 @@ export default meta;
 type Story = StoryObj<typeof F0Alert>;
 
 export const Variants: Story = {
-  tags: ["!dev"],
   render: () => (
     <div className="flex w-[640px] flex-col gap-3">
       <F0Alert
@@ -92,7 +91,6 @@ export const Variants: Story = {
 };
 
 export const Default: Story = {
-  tags: ["!dev"],
   args: {
     title: "Your workspace includes up to 3 invoices.",
     description: "Start creating invoices: it's free with your plan!",
@@ -114,7 +112,6 @@ export const Default: Story = {
 };
 
 export const Narrow: Story = {
-  tags: ["!dev"],
   args: {
     ...Default.args,
     title: "Company page unactive",
@@ -135,7 +132,6 @@ export const Narrow: Story = {
 };
 
 export const DeactivatedAction: Story = {
-  tags: ["!dev"],
   args: {
     ...Default.args,
     title: "Company page unactive",
@@ -174,7 +170,6 @@ export const WithDataTestId: Story = {
 };
 
 export const InDialog: Story = {
-  tags: ["!dev"],
   args: {
     title: "Create a new job",
     description:
