@@ -16,6 +16,7 @@ export function BaseCell({
   showRightBorder = true,
   cursor = "text",
   isActive = false,
+  borderOnHover = true,
   error,
   children,
 }: {
@@ -24,6 +25,7 @@ export function BaseCell({
   cursor?: "text" | "pointer" | "default" | "not-allowed"
   isActive?: boolean
   error?: string
+  borderOnHover?: boolean
   children: ReactNode
 }) {
   return (
@@ -37,7 +39,9 @@ export function BaseCell({
           ? "relative z-[1] border-r-0 bg-f1-background-critical/10 shadow-[inset_0_0_0_1px_hsl(var(--critical-50))]"
           : isActive
             ? "relative z-[1] border-r-0 bg-f1-background shadow-[inset_0_0_0_1px_hsl(var(--selected-50))]"
-            : "shadow-none [&:not(:focus-within)]:hover:shadow-[inset_0_0_0_1px_hsl(var(--neutral-30))] focus-within:relative focus-within:z-[1] focus-within:border-r-0 focus-within:bg-f1-background focus-within:shadow-[inset_0_0_0_1px_hsl(var(--selected-50))]",
+            : borderOnHover
+              ? "shadow-none [&:not(:focus-within)]:hover:shadow-[inset_0_0_0_1px_hsl(var(--neutral-30))] focus-within:relative focus-within:z-[1] focus-within:border-r-0 focus-within:bg-f1-background focus-within:shadow-[inset_0_0_0_1px_hsl(var(--selected-50))]"
+              : "shadow-none",
         readonly && "bg-f1-background-secondary"
       )}
     >

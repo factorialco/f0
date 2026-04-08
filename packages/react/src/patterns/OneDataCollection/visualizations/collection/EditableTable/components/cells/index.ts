@@ -26,6 +26,7 @@ export type EditableCellProps<R extends RecordType> = {
 export type EditableTableCellEditType =
   | "text"
   | "number"
+  | "money"
   | "date"
   | "select"
   | "multiselect"
