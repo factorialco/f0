@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "motion/react"
 import React from "react"
 
 import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
+import { useReducedMotion } from "@/lib/a11y"
 import { Link } from "@/lib/linkHandler"
 import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
@@ -21,6 +22,7 @@ export const Action = React.forwardRef<
   HTMLButtonElement | HTMLAnchorElement,
   ActionProps
 >((props, ref) => {
+  const reducedMotion = useReducedMotion()
   const isAnchor = (props: ActionProps): props is ActionLinkProps => {
     return "href" in props
   }
@@ -95,7 +97,11 @@ export const Action = React.forwardRef<
             {isLinkStyled(localVariant) ? (
               <Skeleton className="absolute inset-0 my-auto h-full w-full" />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div
+                className="absolute inset-0 flex items-center justify-center"
+                role="status"
+                aria-live="polite"
+              >
                 <motion.div
                   className={cn(
                     loadingVariants({
@@ -105,7 +111,7 @@ export const Action = React.forwardRef<
                   )}
                   animate={{ rotate: 360 }}
                   transition={{
-                    duration: 1,
+                    duration: reducedMotion ? 0 : 1,
                     repeat: Infinity,
                     ease: "linear",
                   }}
@@ -132,7 +138,11 @@ export const Action = React.forwardRef<
     <Link
       {...CommonProps}
       //We need to pass the onClick, onFocus, and onBlur props as here the type narrows to ActionLinkProps
-      onClick={props.onClick}
+      onClick={
+        disabled
+          ? (e: React.MouseEvent<HTMLAnchorElement>) => e.preventDefault()
+          : props.onClick
+      }
       onFocus={props.onFocus}
       onBlur={props.onBlur}
       onMouseEnter={onMouseEnter}
@@ -142,6 +152,7 @@ export const Action = React.forwardRef<
       target={target}
       rel={target === "_blank" ? "noopener noreferrer" : undefined}
       aria-disabled={disabled}
+      tabIndex={disabled ? -1 : undefined}
       role="link"
     >
       {innerContent}
