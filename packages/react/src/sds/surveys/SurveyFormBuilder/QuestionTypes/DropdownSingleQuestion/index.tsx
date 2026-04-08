@@ -97,17 +97,22 @@ export const DropdownSingleQuestion = (
           field={field}
           value={isMulti ? (props.value ?? []) : (props.value ?? "")}
           onChange={(value) => {
+            const source = datasetKey
+              ? { datasetKey }
+              : { options: options ?? [] }
             if (isMulti) {
               onQuestionChange?.({
                 id: props.id,
                 type: "dropdown-multi",
                 value: value as string[],
+                ...source,
               })
             } else {
               onQuestionChange?.({
                 id: props.id,
                 type: "dropdown-single",
                 value: value as string,
+                ...source,
               })
             }
           }}

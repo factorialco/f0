@@ -125,22 +125,18 @@ type OnChangeQuestionParams = BaseQuestionOnChangeParams &
         value?: string[] | null
         options: SelectQuestionOption[]
       }
-    | {
+    | ({
         type: "dropdown-single"
         value?: string | null
-        datasetKey?: string
-        options?: SelectQuestionOption[]
         showSearchBox?: boolean
         searchBoxPlaceholder?: string
-      }
-    | {
+      } & ({ datasetKey: string } | { options: SelectQuestionOption[] }))
+    | ({
         type: "dropdown-multi"
         value?: string[] | null
-        datasetKey?: string
-        options?: SelectQuestionOption[]
         showSearchBox?: boolean
         searchBoxPlaceholder?: string
-      }
+      } & ({ datasetKey: string } | { options: SelectQuestionOption[] }))
     | {
         type: "numeric"
         value?: number | null
