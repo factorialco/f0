@@ -25,6 +25,7 @@ import { ScrollArea } from "@/ui/scrollarea"
 import { Skeleton } from "@/ui/skeleton"
 
 import { AIBlockConfig } from "../CoreEditor/Extensions/AIBlock"
+import { documentHasMissingBlockIds } from "../CoreEditor/Extensions/BlockIdExtension"
 import {
   ImageUploadConfig,
   ImageUploadErrorType,
@@ -149,9 +150,18 @@ const NotesTextEditorComponent = forwardRef<
       // BlockIdExtension's appendTransaction never fires for it. Re-setting
       // the content triggers a real transaction that lets the plugin assign
       // proper nanoid strings to every block that still has a null id.
+      if (!documentHasMissingBlockIds(editor.state.doc)) {
+        return
+      }
+
       const initialSnapshot = getNotesTextEditorSnapshot(editor)
 
-      editor.commands.setContent(editor.getJSON())
+      shouldSkipOnChangeRef.current = true
+      try {
+        editor.commands.setContent(editor.getJSON())
+      } finally {
+        shouldSkipOnChangeRef.current = false
+      }
 
       const normalizedSnapshot = getNotesTextEditorSnapshot(editor)
 

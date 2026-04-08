@@ -1,4 +1,4 @@
-import { Extension } from "@tiptap/core"
+import { Extension, type JSONContent } from "@tiptap/core"
 import { Node as ProseMirrorNode } from "@tiptap/pm/model"
 import { Plugin, PluginKey } from "@tiptap/pm/state"
 import { Editor } from "@tiptap/react"
@@ -20,6 +20,54 @@ const BLOCK_NODE_TYPES = [
 export const BLOCK_NODE_TYPES_SET: ReadonlySet<string> = new Set<string>(
   BLOCK_NODE_TYPES
 )
+
+const jsonDocumentHasMissingBlockIds = (
+  node: JSONContent | null | undefined
+): boolean => {
+  if (!node) {
+    return false
+  }
+
+  if (node.type && BLOCK_NODE_TYPES_SET.has(node.type) && !node.attrs?.id) {
+    return true
+  }
+
+  return node.content?.some(jsonDocumentHasMissingBlockIds) ?? false
+}
+
+const proseMirrorDocumentHasMissingBlockIds = (
+  node: ProseMirrorNode | null | undefined
+): boolean => {
+  if (!node) {
+    return false
+  }
+
+  if (BLOCK_NODE_TYPES_SET.has(node.type.name) && !node.attrs.id) {
+    return true
+  }
+
+  for (let index = 0; index < node.childCount; index += 1) {
+    if (proseMirrorDocumentHasMissingBlockIds(node.child(index))) {
+      return true
+    }
+  }
+
+  return false
+}
+
+export const documentHasMissingBlockIds = (
+  document: JSONContent | ProseMirrorNode | null | undefined
+): boolean => {
+  if (!document) {
+    return false
+  }
+
+  if (document instanceof ProseMirrorNode) {
+    return proseMirrorDocumentHasMissingBlockIds(document)
+  }
+
+  return jsonDocumentHasMissingBlockIds(document)
+}
 
 export const BlockIdExtension = Extension.create({
   name: "blockId",

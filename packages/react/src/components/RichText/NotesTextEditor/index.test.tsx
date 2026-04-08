@@ -1,6 +1,7 @@
+import { Editor } from "@tiptap/core"
 import { act, waitFor } from "@testing-library/react"
 import { createRef, type ReactNode } from "react"
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { zeroRender } from "@/testing/test-utils"
 
@@ -45,8 +46,44 @@ vi.mock("@/components/RichText/CoreEditor", async (importOriginal) => {
 import { NotesTextEditor } from "./index"
 import type { NotesTextEditorHandle } from "./types"
 
+const observeSetContentCalls = () => {
+  const setContentCalls: Array<Parameters<Editor["commands"]["setContent"]>> =
+    []
+  const getCommands = Object.getOwnPropertyDescriptor(
+    Editor.prototype,
+    "commands"
+  )?.get
+
+  if (!getCommands) {
+    throw new Error("Expected Editor.commands getter")
+  }
+
+  vi.spyOn(Editor.prototype, "commands", "get").mockImplementation(
+    function getObservedCommands() {
+      const commands = getCommands.call(this)
+      const wrappedSetContent: typeof commands.setContent = (...args) => {
+        setContentCalls.push(args)
+
+        return commands.setContent(...args)
+      }
+
+      return {
+        ...commands,
+        setContent: wrappedSetContent,
+      }
+    }
+  )
+
+  return setContentCalls
+}
+
 describe("NotesTextEditor", () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   it("emits corrected JSON with string block ids when initialized with null ids", async () => {
+    const setContentCalls = observeSetContentCalls()
     const onChange = vi.fn()
 
     zeroRender(
@@ -78,6 +115,7 @@ describe("NotesTextEditor", () => {
       expect(onChange).toHaveBeenCalledTimes(1)
     })
 
+    expect(setContentCalls).toHaveLength(1)
     expect(onChange).toHaveBeenCalledWith({
       json: {
         type: "doc",
@@ -98,7 +136,8 @@ describe("NotesTextEditor", () => {
     })
   })
 
-  it("does not emit onChange on mount when all block ids are already present", async () => {
+  it("skips mount-time normalization work when all block ids are already present", async () => {
+    const setContentCalls = observeSetContentCalls()
     const onChange = vi.fn()
     const ref = createRef<NotesTextEditorHandle>()
 
@@ -132,6 +171,7 @@ describe("NotesTextEditor", () => {
       expect(ref.current).not.toBeNull()
     })
 
+    expect(setContentCalls).toHaveLength(0)
     expect(onChange).not.toHaveBeenCalled()
   })
 
