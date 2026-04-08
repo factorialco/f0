@@ -367,7 +367,52 @@ export function SurveyAnsweringForm({
   )
 
   if (inline) {
-    return content
+    return (
+      <SurveyFormBuilderProvider
+        answering
+        elements={elements}
+        onChange={noop}
+        datasets={datasets}
+      >
+        <div className="flex w-full flex-col">
+          {loading ? (
+            mode === "stepped" ? (
+              <SurveySteppedLoadingSkeleton />
+            ) : (
+              <SurveyAllQuestionsLoadingSkeleton />
+            )
+          ) : !hasQuestions ? (
+            <F0Box
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              alignItems="center"
+              paddingX="lg"
+            >
+              <OneEmptyState
+                emoji={emptyLabels.emoji}
+                title={emptyLabels.title}
+                description={emptyLabels.description}
+              />
+            </F0Box>
+          ) : (
+            <F0Form
+              key={isStepped ? stepper.currentStep : undefined}
+              formRef={formRef}
+              name="survey-answering"
+              schema={schema}
+              defaultValues={formDefaultValues}
+              onSubmit={handleF0Submit}
+              submitConfig={{
+                hideSubmitButton: true,
+              }}
+              errorTriggerMode={errorTriggerMode}
+              sections={sections}
+            />
+          )}
+        </div>
+      </SurveyFormBuilderProvider>
+    )
   }
 
   return (
