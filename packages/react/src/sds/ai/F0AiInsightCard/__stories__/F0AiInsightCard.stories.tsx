@@ -4,10 +4,10 @@ import { fn } from "storybook/test"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import type { F0InsightCardProps, SparklineDataPoint } from "../types"
+import type { F0AiInsightCardProps, SparklineDataPoint } from "../types"
 import { contentTypes } from "../types"
 
-import { F0InsightCard } from ".."
+import { F0AiInsightCard } from ".."
 
 const sampleSparklineData: SparklineDataPoint[] = [
   { value: 8 },
@@ -50,8 +50,8 @@ const sampleSparklineDataNegative: SparklineDataPoint[] = [
 ]
 
 const meta = {
-  component: F0InsightCard,
-  title: "InsightCard",
+  component: F0AiInsightCard,
+  title: "AI/AiInsightCard",
   parameters: {
     layout: "centered",
   },
@@ -70,12 +70,12 @@ const meta = {
       description: "Content type determining what renders in the card body",
     },
   },
-} satisfies Meta<typeof F0InsightCard>
+} satisfies Meta<typeof F0AiInsightCard>
 
 export default meta
-type Story = StoryObj<typeof F0InsightCard>
+type Story = StoryObj<typeof F0AiInsightCard>
 
-const textArgs: F0InsightCardProps = {
+const textArgs: F0AiInsightCardProps = {
   content: "text",
   description: "Department",
   heading: "Total headcount across all departments",
@@ -85,10 +85,10 @@ const textArgs: F0InsightCardProps = {
 }
 
 export const Text: Story = {
-  render: () => <F0InsightCard {...textArgs} />,
+  render: () => <F0AiInsightCard {...textArgs} />,
 }
 
-const textOnlyArgs: F0InsightCardProps = {
+const textOnlyArgs: F0AiInsightCardProps = {
   content: "text",
   description: "Department",
   heading: "Total headcount across all departments",
@@ -97,10 +97,10 @@ const textOnlyArgs: F0InsightCardProps = {
 }
 
 export const TextOnly: Story = {
-  render: () => <F0InsightCard {...textOnlyArgs} />,
+  render: () => <F0AiInsightCard {...textOnlyArgs} />,
 }
 
-const personArgs: F0InsightCardProps = {
+const personArgs: F0AiInsightCardProps = {
   content: "person",
   description: "Top performer",
   heading: "Jane Cooper",
@@ -115,10 +115,10 @@ const personArgs: F0InsightCardProps = {
 }
 
 export const Person: Story = {
-  render: () => <F0InsightCard {...personArgs} />,
+  render: () => <F0AiInsightCard {...personArgs} />,
 }
 
-const peopleArgs: F0InsightCardProps = {
+const peopleArgs: F0AiInsightCardProps = {
   content: "people",
   description: "Team members",
   heading: "Engineering leads with outstanding reviews",
@@ -133,10 +133,10 @@ const peopleArgs: F0InsightCardProps = {
 }
 
 export const People: Story = {
-  render: () => <F0InsightCard {...peopleArgs} />,
+  render: () => <F0AiInsightCard {...peopleArgs} />,
 }
 
-const teamArgs: F0InsightCardProps = {
+const teamArgs: F0AiInsightCardProps = {
   content: "team",
   description: "Highest growth",
   heading: "Product Design",
@@ -150,10 +150,10 @@ const teamArgs: F0InsightCardProps = {
 }
 
 export const Team: Story = {
-  render: () => <F0InsightCard {...teamArgs} />,
+  render: () => <F0AiInsightCard {...teamArgs} />,
 }
 
-const companyArgs: F0InsightCardProps = {
+const companyArgs: F0AiInsightCardProps = {
   content: "company",
   description: "Entity",
   heading: "Factorial Inc.",
@@ -167,10 +167,10 @@ const companyArgs: F0InsightCardProps = {
 }
 
 export const Company: Story = {
-  render: () => <F0InsightCard {...companyArgs} />,
+  render: () => <F0AiInsightCard {...companyArgs} />,
 }
 
-const alertArgs: F0InsightCardProps = {
+const alertArgs: F0AiInsightCardProps = {
   content: "alert",
   description: "Alert",
   heading: "3 employees with expiring contracts",
@@ -182,10 +182,10 @@ const alertArgs: F0InsightCardProps = {
 }
 
 export const Alert: Story = {
-  render: () => <F0InsightCard {...alertArgs} />,
+  render: () => <F0AiInsightCard {...alertArgs} />,
 }
 
-const balancePositiveArgs: F0InsightCardProps = {
+const balancePositiveArgs: F0AiInsightCardProps = {
   content: "balance",
   description: "Revenue",
   heading: "Monthly recurring revenue growth",
@@ -204,10 +204,10 @@ const balancePositiveArgs: F0InsightCardProps = {
 }
 
 export const BalancePositive: Story = {
-  render: () => <F0InsightCard {...balancePositiveArgs} />,
+  render: () => <F0AiInsightCard {...balancePositiveArgs} />,
 }
 
-const balanceNegativeArgs: F0InsightCardProps = {
+const balanceNegativeArgs: F0AiInsightCardProps = {
   content: "balance",
   description: "Attrition",
   heading: "Employee turnover rate this quarter",
@@ -226,10 +226,10 @@ const balanceNegativeArgs: F0InsightCardProps = {
 }
 
 export const BalanceNegative: Story = {
-  render: () => <F0InsightCard {...balanceNegativeArgs} />,
+  render: () => <F0AiInsightCard {...balanceNegativeArgs} />,
 }
 
-const sparklinePositiveArgs: F0InsightCardProps = {
+const sparklinePositiveArgs: F0AiInsightCardProps = {
   content: "sparkline",
   description: "Trend",
   heading: "Employee satisfaction score",
@@ -240,10 +240,10 @@ const sparklinePositiveArgs: F0InsightCardProps = {
 }
 
 export const SparklinePositive: Story = {
-  render: () => <F0InsightCard {...sparklinePositiveArgs} />,
+  render: () => <F0AiInsightCard {...sparklinePositiveArgs} />,
 }
 
-const sparklineNegativeArgs: F0InsightCardProps = {
+const sparklineNegativeArgs: F0AiInsightCardProps = {
   content: "sparkline",
   description: "Trend",
   heading: "Attrition rate",
@@ -254,10 +254,10 @@ const sparklineNegativeArgs: F0InsightCardProps = {
 }
 
 export const SparklineNegative: Story = {
-  render: () => <F0InsightCard {...sparklineNegativeArgs} />,
+  render: () => <F0AiInsightCard {...sparklineNegativeArgs} />,
 }
 
-const selectedArgs: F0InsightCardProps = {
+const selectedArgs: F0AiInsightCardProps = {
   content: "text",
   description: "Selected card",
   heading: "This card is in the selected state with gradient border",
@@ -267,12 +267,12 @@ const selectedArgs: F0InsightCardProps = {
 }
 
 export const Selected: Story = {
-  render: () => <F0InsightCard {...selectedArgs} />,
+  render: () => <F0AiInsightCard {...selectedArgs} />,
 }
 
 export const Skeleton: Story = {
   parameters: withSnapshot({}),
-  render: () => <F0InsightCard.Skeleton />,
+  render: () => <F0AiInsightCard.Skeleton />,
 }
 
 export const Snapshot: Story = {
@@ -300,7 +300,7 @@ export const Snapshot: Story = {
             <h3 className="text-sm font-semibold text-f1-foreground-secondary">
               {key}
             </h3>
-            <F0InsightCard {...args} />
+            <F0AiInsightCard {...args} />
           </div>
         ))}
 
@@ -308,7 +308,7 @@ export const Snapshot: Story = {
           <h3 className="text-sm font-semibold text-f1-foreground-secondary">
             Skeleton
           </h3>
-          <F0InsightCard.Skeleton />
+          <F0AiInsightCard.Skeleton />
         </div>
       </div>
     )

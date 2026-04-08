@@ -8,25 +8,26 @@ import { CardInternal, type CardInternalProps } from "./internal"
 
 const privateProps = ["className"] as const
 
-export type F0InsightCardPublicProps = Omit<
+export type F0AiInsightCardPublicProps = Omit<
   CardInternalProps,
   (typeof privateProps)[number]
 >
 
-const F0InsightCardBase = forwardRef<HTMLDivElement, F0InsightCardPublicProps>(
-  (props, ref) => {
-    const publicProps = privateProps.reduce((acc, key) => {
-      const { [key]: _, ...rest } = acc
-      return rest
-    }, props as CardInternalProps)
+const F0AiInsightCardBase = forwardRef<
+  HTMLDivElement,
+  F0AiInsightCardPublicProps
+>((props, ref) => {
+  const publicProps = privateProps.reduce((acc, key) => {
+    const { [key]: _, ...rest } = acc
+    return rest
+  }, props as CardInternalProps)
 
-    return <CardInternal ref={ref} {...publicProps} />
-  }
-)
+  return <CardInternal ref={ref} {...publicProps} />
+})
 
-F0InsightCardBase.displayName = "F0InsightCard"
+F0AiInsightCardBase.displayName = "F0AiInsightCard"
 
-const F0InsightCardSkeleton = () => {
+const F0AiInsightCardSkeleton = () => {
   return (
     <div
       className="flex w-[217px] h-[200px] flex-col gap-2 rounded-2xl border border-solid border-f1-border-secondary bg-f1-background p-4"
@@ -48,6 +49,6 @@ const F0InsightCardSkeleton = () => {
   )
 }
 
-export const F0InsightCard = withDataTestId(
-  withSkeleton(F0InsightCardBase, F0InsightCardSkeleton)
+export const F0AiInsightCard = withDataTestId(
+  withSkeleton(F0AiInsightCardBase, F0AiInsightCardSkeleton)
 )

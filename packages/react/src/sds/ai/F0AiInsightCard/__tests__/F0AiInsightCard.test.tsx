@@ -9,7 +9,7 @@ import {
   waitFor,
 } from "@/testing/test-utils"
 
-import { F0InsightCard } from "../F0InsightCard"
+import { F0AiInsightCard } from "../F0AiInsightCard"
 
 // Mock Recharts since JSDOM does not support SVG layout
 vi.mock("recharts", () => ({
@@ -49,11 +49,11 @@ vi.mock("@/ui/OverflowList", () => ({
   },
 }))
 
-describe("F0InsightCard", () => {
+describe("F0AiInsightCard", () => {
   describe("text content", () => {
     it("renders heading, description, and label", () => {
       render(
-        <F0InsightCard
+        <F0AiInsightCard
           content="text"
           heading="Total headcount"
           description="Department"
@@ -67,7 +67,7 @@ describe("F0InsightCard", () => {
     })
 
     it("renders without optional props", () => {
-      render(<F0InsightCard content="text" heading="Headcount" />)
+      render(<F0AiInsightCard content="text" heading="Headcount" />)
 
       expect(screen.getByText("Headcount")).toBeInTheDocument()
     })
@@ -76,7 +76,7 @@ describe("F0InsightCard", () => {
   describe("person content", () => {
     it("renders a person avatar", () => {
       render(
-        <F0InsightCard
+        <F0AiInsightCard
           content="person"
           heading="Jane Cooper"
           avatar={{ firstName: "Jane", lastName: "Cooper", src: "" }}
@@ -91,7 +91,7 @@ describe("F0InsightCard", () => {
   describe("people content", () => {
     it("renders the heading and avatar initials", () => {
       render(
-        <F0InsightCard
+        <F0AiInsightCard
           content="people"
           heading="Engineering leads"
           avatars={[
@@ -108,7 +108,7 @@ describe("F0InsightCard", () => {
 
     it("shows overflow counter when avatars exceed max", () => {
       render(
-        <F0InsightCard
+        <F0AiInsightCard
           content="people"
           heading="Big team"
           avatars={[
@@ -131,7 +131,7 @@ describe("F0InsightCard", () => {
   describe("team content", () => {
     it("renders a team avatar", () => {
       render(
-        <F0InsightCard
+        <F0AiInsightCard
           content="team"
           heading="Product Design"
           avatar={{ name: "Product Design", src: "" }}
@@ -145,7 +145,7 @@ describe("F0InsightCard", () => {
   describe("company content", () => {
     it("renders a company avatar", () => {
       render(
-        <F0InsightCard
+        <F0AiInsightCard
           content="company"
           heading="Factorial Inc."
           avatar={{ name: "Factorial", src: "" }}
@@ -159,7 +159,7 @@ describe("F0InsightCard", () => {
   describe("alert content", () => {
     it("renders an alert tag", () => {
       render(
-        <F0InsightCard
+        <F0AiInsightCard
           content="alert"
           heading="Expiring contracts"
           level="warning"
@@ -175,7 +175,7 @@ describe("F0InsightCard", () => {
   describe("balance content", () => {
     it("renders a balance tag", () => {
       render(
-        <F0InsightCard
+        <F0AiInsightCard
           content="balance"
           heading="Monthly revenue"
           balance={{
@@ -195,7 +195,7 @@ describe("F0InsightCard", () => {
   describe("sparkline content", () => {
     it("renders sparkline and balance", () => {
       render(
-        <F0InsightCard
+        <F0AiInsightCard
           content="sparkline"
           heading="Employee satisfaction"
           data={[{ value: 10 }, { value: 20 }, { value: 15 }]}
@@ -209,7 +209,7 @@ describe("F0InsightCard", () => {
 
     it("renders sparkline balance pill and trend dot", () => {
       render(
-        <F0InsightCard
+        <F0AiInsightCard
           content="sparkline"
           heading="Chart card"
           data={[{ value: 10 }, { value: 20 }]}
@@ -223,7 +223,7 @@ describe("F0InsightCard", () => {
 
     it("renders negative trend chart", () => {
       render(
-        <F0InsightCard
+        <F0AiInsightCard
           content="sparkline"
           heading="Declining metric"
           data={[{ value: 20 }, { value: 10 }]}
@@ -237,7 +237,7 @@ describe("F0InsightCard", () => {
 
     it("auto-derives positive direction from ascending data", () => {
       render(
-        <F0InsightCard
+        <F0AiInsightCard
           content="sparkline"
           heading="Rising metric"
           data={[{ value: 5 }, { value: 10 }, { value: 20 }]}
@@ -254,7 +254,7 @@ describe("F0InsightCard", () => {
 
     it("auto-derives negative direction from descending data", () => {
       render(
-        <F0InsightCard
+        <F0AiInsightCard
           content="sparkline"
           heading="Falling metric"
           data={[{ value: 20 }, { value: 10 }, { value: 5 }]}
@@ -271,7 +271,7 @@ describe("F0InsightCard", () => {
 
     it("inverts direction when invertStatus is true", () => {
       render(
-        <F0InsightCard
+        <F0AiInsightCard
           content="sparkline"
           heading="Inverted metric"
           data={[{ value: 5 }, { value: 10 }, { value: 20 }]}
@@ -289,7 +289,7 @@ describe("F0InsightCard", () => {
 
     it("shows neutral direction for flat data", () => {
       render(
-        <F0InsightCard
+        <F0AiInsightCard
           content="sparkline"
           heading="Flat metric"
           data={[{ value: 10 }, { value: 10 }]}
@@ -311,7 +311,7 @@ describe("F0InsightCard", () => {
       const handleClick = vi.fn()
 
       render(
-        <F0InsightCard
+        <F0AiInsightCard
           content="text"
           heading="Clickable card"
           onClick={handleClick}
@@ -327,7 +327,7 @@ describe("F0InsightCard", () => {
       const handleClick = vi.fn()
 
       render(
-        <F0InsightCard
+        <F0AiInsightCard
           content="text"
           heading="Keyboard card"
           onClick={handleClick}
@@ -344,7 +344,7 @@ describe("F0InsightCard", () => {
       const handleClick = vi.fn()
 
       render(
-        <F0InsightCard
+        <F0AiInsightCard
           content="text"
           heading="Keyboard card"
           onClick={handleClick}
@@ -361,7 +361,7 @@ describe("F0InsightCard", () => {
       const handleAskOne = vi.fn()
 
       render(
-        <F0InsightCard
+        <F0AiInsightCard
           content="text"
           heading="Hoverable card"
           onAskOne={handleAskOne}
@@ -382,7 +382,7 @@ describe("F0InsightCard", () => {
       const user = userEvent.setup()
 
       render(
-        <F0InsightCard
+        <F0AiInsightCard
           content="text"
           heading="No icon card"
           onAskOne={vi.fn()}
@@ -403,7 +403,7 @@ describe("F0InsightCard", () => {
     it("does not show Ask One button when onAskOne is not provided", async () => {
       const user = userEvent.setup()
 
-      render(<F0InsightCard content="text" heading="No ask one" />)
+      render(<F0AiInsightCard content="text" heading="No ask one" />)
 
       const card = screen.getByText("No ask one").closest("div[class]")!
       await user.hover(card)
@@ -413,14 +413,18 @@ describe("F0InsightCard", () => {
 
     it("has button role when onClick is provided", () => {
       render(
-        <F0InsightCard content="text" heading="Interactive" onClick={vi.fn()} />
+        <F0AiInsightCard
+          content="text"
+          heading="Interactive"
+          onClick={vi.fn()}
+        />
       )
 
       expect(screen.getByRole("button")).toBeInTheDocument()
     })
 
     it("does not have button role when onClick is not provided", () => {
-      render(<F0InsightCard content="text" heading="Static" />)
+      render(<F0AiInsightCard content="text" heading="Static" />)
 
       expect(screen.queryByRole("button")).not.toBeInTheDocument()
     })
@@ -428,13 +432,13 @@ describe("F0InsightCard", () => {
 
   describe("selected state", () => {
     it("renders gradient border when selected", () => {
-      render(<F0InsightCard content="text" heading="Selected" selected />)
+      render(<F0AiInsightCard content="text" heading="Selected" selected />)
 
       expect(screen.getByTestId("selected-border")).toBeInTheDocument()
     })
 
     it("does not render gradient border when not selected", () => {
-      render(<F0InsightCard content="text" heading="Not selected" />)
+      render(<F0AiInsightCard content="text" heading="Not selected" />)
 
       expect(screen.queryByTestId("selected-border")).not.toBeInTheDocument()
     })
@@ -442,14 +446,14 @@ describe("F0InsightCard", () => {
 
   describe("skeleton", () => {
     it("renders skeleton state", () => {
-      const { container } = render(<F0InsightCard.Skeleton />)
+      const { container } = render(<F0AiInsightCard.Skeleton />)
 
       const skeleton = container.querySelector("[aria-busy='true']")
       expect(skeleton).toBeInTheDocument()
     })
 
     it("has aria-live polite on skeleton", () => {
-      const { container } = render(<F0InsightCard.Skeleton />)
+      const { container } = render(<F0AiInsightCard.Skeleton />)
 
       const skeleton = container.querySelector("[aria-live='polite']")
       expect(skeleton).toBeInTheDocument()

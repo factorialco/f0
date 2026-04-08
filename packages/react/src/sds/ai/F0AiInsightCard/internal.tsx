@@ -7,10 +7,10 @@ import { cn, focusRing } from "@/lib/utils"
 import { CardHeader } from "./components/CardHeader"
 import { CardMetadata } from "./components/CardMetadata"
 import { CardSparkline } from "./components/CardSparkline"
-import type { F0InsightCardProps } from "./types"
+import type { F0AiInsightCardProps } from "./types"
 import { cardVariants, headingVariants } from "./variants"
 
-export type CardInternalProps = F0InsightCardProps & {
+export type CardInternalProps = F0AiInsightCardProps & {
   className?: string
 }
 
@@ -123,4 +123,4 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
   }
 )
 
-CardInternal.displayName = "F0InsightCardInternal"
+CardInternal.displayName = "F0AiInsightCardInternal"

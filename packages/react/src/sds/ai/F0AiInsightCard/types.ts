@@ -32,7 +32,7 @@ export type BalanceConfig = {
   hint?: string
 }
 
-export type InsightCardContent =
+export type AiInsightCardContent =
   | { content: "text" }
   | {
       content: "person"
@@ -68,11 +68,11 @@ export type InsightCardContent =
       invertStatus?: boolean
     }
 
-export type F0InsightCardProps = {
+export type F0AiInsightCardProps = {
   description?: string
   heading: string
   label?: string
   selected?: boolean
   onClick?: () => void
   onAskOne?: () => void
-} & InsightCardContent
+} & AiInsightCardContent
