@@ -37,8 +37,8 @@ export function SurveyAnsweringForm({
   title,
   description,
   resourceHeader,
-  isOpen,
-  onClose,
+  isOpen = false,
+  onClose = noop,
   position: positionProp = "center",
   module,
   allowToChangeFullscreen = false,
@@ -49,6 +49,7 @@ export function SurveyAnsweringForm({
   preview = false,
   useUpload,
   datasets,
+  inline = false,
 }: SurveyAnsweringFormProps) {
   const { t } = useI18n()
   const initialIsFullscreen = positionProp === "fullscreen"
@@ -269,53 +270,38 @@ export function SurveyAnsweringForm({
   const disableContentPadding =
     position === "center" || position === "fullscreen"
 
-  return (
-    <F0Dialog
-      isOpen={isOpen}
-      onClose={onClose}
-      title={title}
-      module={module}
-      position={position}
-      width={dialogWidth}
-      primaryAction={primaryAction}
-      secondaryAction={secondaryAction}
-      otherActions={otherActions}
-      disableContentPadding={disableContentPadding}
+  const content = (
+    <SurveyFormBuilderProvider
+      answering
+      elements={elements}
+      onChange={noop}
+      datasets={datasets}
     >
-      <SurveyFormBuilderProvider
-        answering
-        elements={elements}
-        onChange={noop}
-        datasets={datasets}
+      <div
+        className={cn(
+          "relative flex min-h-full flex-col @container",
+          isStepped && !isFullscreen && !inline && "min-h-[600px]",
+          shouldCenterContent && !inline && "h-full"
+        )}
       >
+        {showTableOfContent && (
+          <TableOfContent elements={elements} onChange={noop} answering />
+        )}
+        {showStepperProgress && (
+          <div className="absolute left-0 right-0 top-0 [&>div>div>div]:h-1 [&>div>div>div]:rounded-none">
+            <ProgressBarCell label="Value" value={stepper.progress} hideLabel />
+          </div>
+        )}
         <div
           className={cn(
-            "relative flex min-h-full flex-col @container",
-            isStepped && !isFullscreen && "min-h-[600px]",
-            shouldCenterContent && "h-full"
+            "mx-auto flex w-full flex-col @lg:w-[750px] max-w-full",
+            mode === "all-questions" && !shouldCenterContent
+              ? "justify-start"
+              : "flex-1 justify-center",
+            !inline && disableContentPadding && "px-4 py-12"
           )}
         >
-          {showTableOfContent && (
-            <TableOfContent elements={elements} onChange={noop} answering />
-          )}
-          {showStepperProgress && (
-            <div className="absolute left-0 right-0 top-0 [&>div>div>div]:h-1 [&>div>div>div]:rounded-none">
-              <ProgressBarCell
-                label="Value"
-                value={stepper.progress}
-                hideLabel
-              />
-            </div>
-          )}
-          <div
-            className={cn(
-              "mx-auto flex w-full flex-col @lg:w-[750px] max-w-full",
-              mode === "all-questions" && !shouldCenterContent
-                ? "justify-start"
-                : "flex-1 justify-center",
-              disableContentPadding && "px-4 py-12"
-            )}
-          >
+          {!inline && (
             <div className="mb-6">
               <ResourceHeader
                 title={title}
@@ -323,58 +309,79 @@ export function SurveyAnsweringForm({
                 {...resourceHeader}
               />
             </div>
-            {loading ? (
-              mode === "stepped" ? (
-                <SurveySteppedLoadingSkeleton />
-              ) : (
-                <SurveyAllQuestionsLoadingSkeleton />
-              )
-            ) : !hasQuestions ? (
-              <F0Box
-                display="flex"
-                flexDirection="column"
-                height="full"
-                justifyContent="center"
-                alignItems="center"
-                paddingX="lg"
-              >
-                <OneEmptyState
-                  emoji={emptyLabels.emoji}
-                  title={emptyLabels.title}
-                  description={emptyLabels.description}
-                />
-              </F0Box>
-            ) : null}
-            {showSectionHeader && (
-              <div className="py-1 pl-5">
-                <span className="text-lg font-semibold text-f1-foreground">
-                  {stepper.currentQuestion?.sectionTitle}
-                </span>
-                {stepper.currentQuestion?.sectionDescription && (
-                  <p className="text-f1-foreground-secondary">
-                    {stepper.currentQuestion?.sectionDescription}
-                  </p>
-                )}
-              </div>
-            )}
-            {hasQuestions && !loading && (
-              <F0Form
-                key={isStepped ? stepper.currentStep : undefined}
-                formRef={formRef}
-                name="survey-answering"
-                schema={schema}
-                defaultValues={formDefaultValues}
-                onSubmit={handleF0Submit}
-                submitConfig={{
-                  hideSubmitButton: true,
-                }}
-                errorTriggerMode={errorTriggerMode}
-                sections={sections}
+          )}
+          {loading ? (
+            mode === "stepped" ? (
+              <SurveySteppedLoadingSkeleton />
+            ) : (
+              <SurveyAllQuestionsLoadingSkeleton />
+            )
+          ) : !hasQuestions ? (
+            <F0Box
+              display="flex"
+              flexDirection="column"
+              height="full"
+              justifyContent="center"
+              alignItems="center"
+              paddingX="lg"
+            >
+              <OneEmptyState
+                emoji={emptyLabels.emoji}
+                title={emptyLabels.title}
+                description={emptyLabels.description}
               />
-            )}
-          </div>
+            </F0Box>
+          ) : null}
+          {showSectionHeader && (
+            <div className="py-1 pl-5">
+              <span className="text-lg font-semibold text-f1-foreground">
+                {stepper.currentQuestion?.sectionTitle}
+              </span>
+              {stepper.currentQuestion?.sectionDescription && (
+                <p className="text-f1-foreground-secondary">
+                  {stepper.currentQuestion?.sectionDescription}
+                </p>
+              )}
+            </div>
+          )}
+          {hasQuestions && !loading && (
+            <F0Form
+              key={isStepped ? stepper.currentStep : undefined}
+              formRef={formRef}
+              name="survey-answering"
+              schema={schema}
+              defaultValues={formDefaultValues}
+              onSubmit={handleF0Submit}
+              submitConfig={{
+                hideSubmitButton: true,
+              }}
+              errorTriggerMode={errorTriggerMode}
+              sections={sections}
+            />
+          )}
         </div>
-      </SurveyFormBuilderProvider>
+      </div>
+    </SurveyFormBuilderProvider>
+  )
+
+  if (inline) {
+    return content
+  }
+
+  return (
+    <F0Dialog
+      isOpen={isOpen}
+      onClose={onClose}
+      title={title}
+      module={module!}
+      position={position}
+      width={dialogWidth}
+      primaryAction={primaryAction}
+      secondaryAction={secondaryAction}
+      otherActions={otherActions}
+      disableContentPadding={disableContentPadding}
+    >
+      {content}
     </F0Dialog>
   )
 }

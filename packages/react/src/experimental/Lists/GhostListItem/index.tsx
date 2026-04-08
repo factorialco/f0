@@ -37,8 +37,8 @@ const BaseGhostListItem = React.forwardRef<HTMLDivElement, GhostListItemProps>(
         role="button"
         tabIndex={0}
         className={cn(
-          "flex cursor-pointer items-start gap-3 rounded-xl border border-solid border-transparent bg-f1-background p-3 transition-all hover:border-f1-border",
-          selected && "bg-f1-background-tertiary"
+          "flex cursor-pointer items-start gap-3 rounded-xl border border-solid border-transparent bg-f1-background p-3 transition-all hover:bg-f1-background-hover",
+          selected && "border-f1-border bg-f1-background"
         )}
         onClick={onClick}
         onKeyDown={(e) => {
