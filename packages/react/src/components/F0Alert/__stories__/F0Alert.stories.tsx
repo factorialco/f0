@@ -1,36 +1,44 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { expect, fn, within } from "storybook/test"
+import { expect, fn, within } from "storybook/test";
 
-import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args";
 
-import { F0Alert } from "../F0Alert"
+import { F0Alert } from "../F0Alert";
 
 const meta: Meta<typeof F0Alert> = {
   component: F0Alert,
   title: "Alert",
-  tags: ["autodocs", "stable"],
+  tags: ["stable"],
   parameters: {
     layout: "centered",
   },
   argTypes: {
     title: {
-      description: "Main heading for the alert",
+      description:
+        'Main heading. Sentence case, no period. State the situation clearly — e.g. "Company page inactive".',
     },
     description: {
       description:
-        "Secondary text to provide additional information for the alert",
-    },
-    action: {
-      description: "Button configuration",
-    },
-    link: {
-      description: "Link configuration",
+        "Supporting text. One or two sentences max. Explain what the situation means and what can be done about it.",
     },
     variant: {
       control: "select",
       options: ["info", "warning", "critical", "neutral", "positive"],
-      description: "Variant for the alert composition",
+      description:
+        "Controls background color, title color, and semantic icon. Only `neutral` accepts a custom `icon` prop — all other variants use a fixed semantic icon.",
+    },
+    action: {
+      description:
+        "Optional action button rendered inside the alert. Use `disabled` to signal the action exists but is not yet available — keep it visible so it remains discoverable.",
+    },
+    link: {
+      description:
+        'Optional external link. Always opens in a new tab. Label should be descriptive of the destination — e.g. "See all invoices", never "Click here".',
+    },
+    icon: {
+      description:
+        'Custom icon for `variant="neutral"` only. Falls back to a placeholder when omitted. Has no effect on any other variant.',
     },
     ...dataTestIdArgs,
   },
@@ -41,13 +49,50 @@ const meta: Meta<typeof F0Alert> = {
       </div>
     ),
   ],
-}
+};
 
-export default meta
+export default meta;
 
-type Story = StoryObj<typeof F0Alert>
+type Story = StoryObj<typeof F0Alert>;
+
+export const Variants: Story = {
+  tags: ["!dev"],
+  render: () => (
+    <div className="flex w-[640px] flex-col gap-3">
+      <F0Alert
+        variant="info"
+        title="Your workspace includes up to 3 invoices."
+        description="Start creating invoices: it's free with your plan!"
+        action={{ label: "Request info", onClick: fn() }}
+      />
+      <F0Alert
+        variant="warning"
+        title="Company page inactive"
+        description="You are missing the company page. It is mandatory to be activated."
+        action={{ label: "Activate now", onClick: fn() }}
+      />
+      <F0Alert
+        variant="critical"
+        title="Payroll run failed"
+        description="One or more employees could not be processed. Review the errors before resubmitting."
+        action={{ label: "Review errors", onClick: fn() }}
+      />
+      <F0Alert
+        variant="positive"
+        title="Payroll sent successfully"
+        description="All employees have been processed and payments are on their way."
+      />
+      <F0Alert
+        variant="neutral"
+        title="Sync in progress"
+        description="Employee data is being imported from your HR system. This may take a few minutes."
+      />
+    </div>
+  ),
+};
 
 export const Default: Story = {
+  tags: ["!dev"],
   args: {
     title: "Your workspace includes up to 3 invoices.",
     description: "Start creating invoices: it's free with your plan!",
@@ -66,9 +111,10 @@ export const Default: Story = {
       <F0Alert {...args} />
     </div>
   ),
-}
+};
 
 export const Narrow: Story = {
+  tags: ["!dev"],
   args: {
     ...Default.args,
     title: "Company page unactive",
@@ -86,9 +132,10 @@ export const Narrow: Story = {
       <F0Alert {...args} />
     </div>
   ),
-}
+};
 
 export const DeactivatedAction: Story = {
+  tags: ["!dev"],
   args: {
     ...Default.args,
     title: "Company page unactive",
@@ -107,7 +154,7 @@ export const DeactivatedAction: Story = {
       <F0Alert {...args} />
     </div>
   ),
-}
+};
 
 export const WithDataTestId: Story = {
   args: {
@@ -121,12 +168,13 @@ export const WithDataTestId: Story = {
     </div>
   ),
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await expect(canvas.getByTestId("my-test-alert")).toBeInTheDocument()
+    const canvas = within(canvasElement);
+    await expect(canvas.getByTestId("my-test-alert")).toBeInTheDocument();
   },
-}
+};
 
 export const InDialog: Story = {
+  tags: ["!dev"],
   args: {
     title: "Create a new job",
     description:
@@ -143,4 +191,4 @@ export const InDialog: Story = {
       <F0Alert {...args} />
     </div>
   ),
-}
+};

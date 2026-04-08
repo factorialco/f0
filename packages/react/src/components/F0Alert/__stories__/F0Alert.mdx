@@ -1,0 +1,211 @@
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks";
+import * as Stories from "./F0Alert.stories";
+import { DoDonts } from "@/lib/storybook-utils/do-donts";
+import { F0Alert } from "../F0Alert";
+
+<Meta of={Stories} />
+
+# Alert
+
+Keeps users aware of something relevant to their current context — a missing
+setup, a failed process, a completed action — without interrupting the workflow.
+For transient feedback use a toast; for decisions that block the workflow use
+`F0Dialog`.
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+## Guidelines
+
+### Design best practices
+
+#### When to use
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use F0Alert when</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Persistent feedback tied to the current page or section</td>
+        <td>
+          The message must remain visible while the surrounding content stays
+          interactive
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+#### When not to use
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use instead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Transient confirmation after an action ("Saved successfully")</td>
+        <td>Toast notification</td>
+      </tr>
+      <tr>
+        <td>Decision that blocks the workflow before proceeding</td>
+        <td>
+          <code>F0Dialog</code>
+        </td>
+      </tr>
+      <tr>
+        <td>Validation error on a specific form field</td>
+        <td>Inline field error</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+#### Do's and don'ts
+
+<DoDonts
+  do={{
+    description: "Match the variant to the actual severity of the situation.",
+    guidelines: [
+      'variant="info" — helpful context, no action required',
+      'variant="warning" — something may go wrong if not addressed',
+      'variant="critical" — a process failed or data is at risk',
+    ],
+    children: (
+      <F0Alert
+        variant="warning"
+        title="Missing tax information"
+        description="Add it before the next payroll run to avoid delays."
+        action={{ label: "Add now", onClick: () => {} }}
+      />
+    ),
+  }}
+  dont={{
+    description:
+      "Don't use a higher severity variant just to draw more attention.",
+    guidelines: [
+      'Don\'t use variant="critical" when nothing has failed yet',
+      'Don\'t use variant="warning" when no action is needed',
+    ],
+    children: (
+      <F0Alert
+        variant="critical"
+        title="Missing tax information"
+        description="Add it before the next payroll run to avoid delays."
+        action={{ label: "Add now", onClick: () => {} }}
+      />
+    ),
+  }}
+/>
+
+### Content best practices
+
+- **Title**: Sentence case, no period. State the situation clearly ("Company page inactive")
+- **Description**: One or two sentences. Explain what the situation means and what can be done about it
+- **Action label**: Verb-first, no articles ("Request info", "Activate now")
+- **Link label**: Descriptive of the destination ("See all invoices"), never generic ("Click here")
+
+### Behavior
+
+- At narrow container widths the layout stacks vertically: icon and text on top, action and link below
+- At wider containers the layout is horizontal: icon and text on the left, action and link on the right
+- The alert stretches to fill its container — control width from the parent
+- When `action.disabled` is true, the button remains visible but non-interactive — keep it visible so the action remains discoverable
+
+## Variants
+
+<Canvas of={Stories.Variants} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Variant</th>
+        <th className="text-left">When to use</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>info</code>
+        </td>
+        <td>Helpful context or tips that don't require immediate action</td>
+      </tr>
+      <tr>
+        <td>
+          <code>warning</code>
+        </td>
+        <td>
+          Something may cause problems if not addressed; action is recommended
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>critical</code>
+        </td>
+        <td>A problem has occurred or a destructive action is pending</td>
+      </tr>
+      <tr>
+        <td>
+          <code>positive</code>
+        </td>
+        <td>An action completed successfully or a condition is met</td>
+      </tr>
+      <tr>
+        <td>
+          <code>neutral</code>
+        </td>
+        <td>
+          General notices without urgency; accepts a custom icon via the{" "}
+          <code>icon</code> prop
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Usage
+
+### Narrow layout
+
+At small container widths the layout stacks vertically — useful for sidebars,
+panels, or any tight container.
+
+<Canvas of={Stories.Narrow} />
+
+```tsx
+<F0Alert
+  variant="warning"
+  title="Company page inactive"
+  description="You are missing the company page. It is mandatory to be activated."
+  action={{ label: "Request info", onClick: () => {} }}
+/>
+```
+
+### Disabled action
+
+Use when the action is conditionally unavailable. Keep the button visible so
+the action is discoverable even when blocked.
+
+<Canvas of={Stories.DeactivatedAction} />
+
+```tsx
+<F0Alert
+  variant="warning"
+  title="Company page inactive"
+  description="You are missing the company page. It is mandatory to be activated."
+  action={{ label: "Request info", onClick: () => {}, disabled: true }}
+/>
+```
