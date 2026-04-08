@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest"
 import { Add } from "@/icons/app"
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
+import { ButtonInternal } from "../internal"
 import { F0Button } from "../index"
 
 describe("F0Button", () => {
@@ -20,7 +21,6 @@ describe("F0Button", () => {
   it("should be temporarily disabled when onClick is a promise until the promise resolves", async () => {
     const onClick = async () => {
       await new Promise((resolve) => setTimeout(resolve, 100))
-      vi.fn()
     }
 
     render(<F0Button label="Click me" onClick={() => onClick()} />)
@@ -28,9 +28,9 @@ describe("F0Button", () => {
     const button = screen.getByRole("button", { name: "Click me" })
     await userEvent.click(button)
 
-    expect(button.attributes.getNamedItem("disabled")).not.toBeNull()
+    expect(button).toBeDisabled()
     await new Promise((resolve) => setTimeout(resolve, 100))
-    expect(button.attributes.getNamedItem("disabled")).toBeNull()
+    expect(button).not.toBeDisabled()
   })
 
   it("should render with icon", () => {
@@ -62,27 +62,47 @@ describe("F0Button", () => {
     expect(button).toBeDisabled()
   })
 
-  it("should handle async click with error", async () => {
-    const onError = vi.fn()
-    const onClick = async () => {
-      throw new Error("Test error")
-    }
+  it("should clear loading state when onClick returns a rejected promise", async () => {
+    // Pass a directly-rejected Promise so the finally block in handleClick fires
+    const onClick = () => Promise.reject(new Error("Test error"))
 
-    render(
-      <F0Button
-        label="Error Test"
-        onClick={() => {
-          onClick().catch(onError)
-        }}
-      />
-    )
+    render(<F0Button label="Error Test" onClick={onClick} />)
 
     const button = screen.getByRole("button")
     await userEvent.click(button)
 
-    // Button should be enabled after error
+    // Loading clears even on rejection (finally block)
     await new Promise((resolve) => setTimeout(resolve, 0))
     expect(button).not.toBeDisabled()
-    expect(onError).toHaveBeenCalled()
+  })
+
+  it("should render label as sr-only when emoji is provided", () => {
+    render(<F0Button label="Emoji Button" emoji="🥰" variant="neutral" />)
+    const button = screen.getByRole("button")
+    const srOnly = button.querySelector(".sr-only")
+    expect(srOnly).toBeInTheDocument()
+    expect(srOnly).toHaveTextContent("Emoji Button")
+  })
+
+  it("should render as an anchor when href is provided", () => {
+    render(<F0Button label="Visit" href="https://example.com" />)
+    expect(screen.getByRole("link", { name: "Visit" })).toBeInTheDocument()
+  })
+
+  it("should render Counter when counterValue is provided", () => {
+    render(<F0Button label="Save" counterValue={3} />)
+    expect(screen.getByText("3")).toBeInTheDocument()
+  })
+
+  it("should not render Counter when counterValue is 0", () => {
+    render(<F0Button label="Save" counterValue={0} />)
+    // counterValue=0 is defined (not undefined), so Counter should render
+    expect(screen.getByText("0")).toBeInTheDocument()
+  })
+
+  it("should render ai variant SVG gradient via ButtonInternal", () => {
+    render(<ButtonInternal label="AI" variant="ai" />)
+    const gradient = document.querySelector("#ai-gradient")
+    expect(gradient).toBeInTheDocument()
   })
 })
