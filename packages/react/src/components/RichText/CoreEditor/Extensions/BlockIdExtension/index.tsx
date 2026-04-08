@@ -17,7 +17,9 @@ const BLOCK_NODE_TYPES = [
   "details",
 ] as const
 
-const BLOCK_NODE_TYPES_SET = new Set<string>(BLOCK_NODE_TYPES)
+export const BLOCK_NODE_TYPES_SET: ReadonlySet<string> = new Set<string>(
+  BLOCK_NODE_TYPES
+)
 
 export const BlockIdExtension = Extension.create({
   name: "blockId",
@@ -74,18 +76,17 @@ export const BlockIdExtension = Extension.create({
               const stepResult = step.getMap()
               // Iterate over changed ranges in this step
               stepResult.forEach((_oldStart, _oldEnd, newStart, newEnd) => {
-                // Map the positions to the new document state
-                const mappedFrom = transaction.mapping.map(newStart)
-                const mappedTo = transaction.mapping.map(newEnd)
-
-                // Ensure positions are valid and within document bounds
+                // step.getMap().forEach already reports positions in the new
+                // document. Re-mapping them through transaction.mapping can skip
+                // newly inserted ranges, which prevents fresh block ids from
+                // being assigned for prepend/insert-before/insert-after flows.
                 const from = Math.max(
                   0,
-                  Math.min(mappedFrom, newState.doc.content.size)
+                  Math.min(newStart, newState.doc.content.size)
                 )
                 const to = Math.max(
                   0,
-                  Math.min(mappedTo, newState.doc.content.size)
+                  Math.min(newEnd, newState.doc.content.size)
                 )
 
                 if (from < to) {
