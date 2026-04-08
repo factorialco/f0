@@ -5,7 +5,7 @@ import { Editor } from "@tiptap/react"
 import { nanoid } from "nanoid"
 
 // Block types that will be assigned an ID
-const BLOCK_NODE_TYPES = [
+export const BLOCK_NODE_TYPES = [
   "paragraph",
   "heading",
   "blockquote",
@@ -17,9 +17,15 @@ const BLOCK_NODE_TYPES = [
   "details",
 ] as const
 
-export const BLOCK_NODE_TYPES_SET: ReadonlySet<string> = new Set<string>(
-  BLOCK_NODE_TYPES
-)
+const BLOCK_NODE_TYPES_SET = new Set<string>(BLOCK_NODE_TYPES)
+
+export const isBlockNodeType = (type: string | null | undefined): boolean => {
+  if (!type) {
+    return false
+  }
+
+  return BLOCK_NODE_TYPES_SET.has(type)
+}
 
 const jsonDocumentHasMissingBlockIds = (
   node: JSONContent | null | undefined
@@ -28,7 +34,7 @@ const jsonDocumentHasMissingBlockIds = (
     return false
   }
 
-  if (node.type && BLOCK_NODE_TYPES_SET.has(node.type) && !node.attrs?.id) {
+  if (isBlockNodeType(node.type) && !node.attrs?.id) {
     return true
   }
 
@@ -42,7 +48,7 @@ const proseMirrorDocumentHasMissingBlockIds = (
     return false
   }
 
-  if (BLOCK_NODE_TYPES_SET.has(node.type.name) && !node.attrs.id) {
+  if (isBlockNodeType(node.type.name) && !node.attrs.id) {
     return true
   }
 
@@ -150,10 +156,7 @@ export const BlockIdExtension = Extension.create({
               // Add safety check for valid range
               if (from >= 0 && to <= newState.doc.content.size && from < to) {
                 newState.doc.nodesBetween(from, to, (node, pos) => {
-                  if (
-                    BLOCK_NODE_TYPES_SET.has(node.type.name) &&
-                    !node.attrs.id
-                  ) {
+                  if (isBlockNodeType(node.type.name) && !node.attrs.id) {
                     const id = nanoid(5)
                     tr.setNodeMarkup(pos, undefined, {
                       ...node.attrs,
@@ -168,7 +171,7 @@ export const BlockIdExtension = Extension.create({
             // Fallback: check whole document
             // (e.g., initial load or operations without clear ranges)
             newState.doc.descendants((node, pos) => {
-              if (BLOCK_NODE_TYPES_SET.has(node.type.name) && !node.attrs.id) {
+              if (isBlockNodeType(node.type.name) && !node.attrs.id) {
                 const id = nanoid(5)
                 tr.setNodeMarkup(pos, undefined, {
                   ...node.attrs,
@@ -223,7 +226,7 @@ export const getAllBlockIds = (editor: Editor): string[] => {
   const blockIds: string[] = []
 
   editor.state.doc.descendants((node: ProseMirrorNode) => {
-    if (node.attrs.id && BLOCK_NODE_TYPES_SET.has(node.type.name)) {
+    if (node.attrs.id && isBlockNodeType(node.type.name)) {
       blockIds.push(node.attrs.id)
     }
     return true

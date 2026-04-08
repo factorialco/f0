@@ -3,14 +3,12 @@ import type { Editor, JSONContent } from "@tiptap/react"
 
 import {
   getBlockById,
-  BLOCK_NODE_TYPES_SET,
+  isBlockNodeType,
 } from "../CoreEditor/Extensions/BlockIdExtension"
 import type {
   NotesTextEditorPageDocumentPatch,
   NotesTextEditorSnapshot,
 } from "./types"
-
-const ID_CAPABLE_NODE_TYPES = BLOCK_NODE_TYPES_SET
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value)
@@ -33,7 +31,7 @@ const stripNodeIds = (node: JSONContent): JSONContent => {
 
   if (
     nextNode.type &&
-    ID_CAPABLE_NODE_TYPES.has(nextNode.type) &&
+    isBlockNodeType(nextNode.type) &&
     isPlainObject(nextNode.attrs) &&
     "id" in nextNode.attrs
   ) {
@@ -62,7 +60,7 @@ const sanitizeReplacementBlock = (
 ): JSONContent => {
   const sanitizedNode = stripNodeIds(node)
 
-  return sanitizedNode.type && ID_CAPABLE_NODE_TYPES.has(sanitizedNode.type)
+  return sanitizedNode.type && isBlockNodeType(sanitizedNode.type)
     ? setNodeId(sanitizedNode, targetId)
     : sanitizedNode
 }

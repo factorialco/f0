@@ -154,8 +154,6 @@ const NotesTextEditorComponent = forwardRef<
         return
       }
 
-      const initialSnapshot = getNotesTextEditorSnapshot(editor)
-
       shouldSkipOnChangeRef.current = true
       try {
         editor.commands.setContent(editor.getJSON())
@@ -163,15 +161,10 @@ const NotesTextEditorComponent = forwardRef<
         shouldSkipOnChangeRef.current = false
       }
 
-      const normalizedSnapshot = getNotesTextEditorSnapshot(editor)
-
       // Only notify the consumer when IDs were actually populated, so pages
       // with already-valid content don't trigger a spurious onChange/autosave.
-      if (
-        JSON.stringify(initialSnapshot.json) !==
-        JSON.stringify(normalizedSnapshot.json)
-      ) {
-        onChange(normalizedSnapshot)
+      if (!documentHasMissingBlockIds(editor.state.doc)) {
+        onChange(getNotesTextEditorSnapshot(editor))
       }
     },
     editable: !readonly,

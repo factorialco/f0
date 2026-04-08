@@ -2,7 +2,24 @@ import { Editor, type JSONContent } from "@tiptap/core"
 import { afterEach, describe, expect, it } from "vitest"
 
 import { StarterKitExtension } from "../StarterKit"
-import { BlockIdExtension, documentHasMissingBlockIds } from "./index"
+import {
+  BlockIdExtension,
+  documentHasMissingBlockIds,
+  isBlockNodeType,
+} from "./index"
+
+describe("isBlockNodeType", () => {
+  it("returns true for supported block-id node types", () => {
+    expect(isBlockNodeType("paragraph")).toBe(true)
+    expect(isBlockNodeType("details")).toBe(true)
+  })
+
+  it("returns false for unsupported or nullish node types", () => {
+    expect(isBlockNodeType("mention")).toBe(false)
+    expect(isBlockNodeType(null)).toBe(false)
+    expect(isBlockNodeType(undefined)).toBe(false)
+  })
+})
 
 describe("documentHasMissingBlockIds", () => {
   const editors: Editor[] = []
