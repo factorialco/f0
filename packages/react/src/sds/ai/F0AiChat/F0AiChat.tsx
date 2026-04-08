@@ -14,6 +14,7 @@ import { WelcomeScreenSuggestion } from "./components/messages/WelcomeScreen"
 import { CopilotFunctionBridge } from "./components/shared/CopilotFunctionBridge"
 import { F0AiFullscreenChatComponent } from "./F0AiFullscreenChat"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
+import { OrderedMessagePartsProvider } from "./providers/OrderedMessagePartsProvider"
 import { AiChatProviderProps } from "./types"
 
 const F0AiChatProviderComponent = ({
@@ -74,8 +75,10 @@ const AiChatKitWrapper = ({
 
   return (
     <CopilotKit runtimeUrl="/copilotkit" agent={agent} {...copilotKitProps}>
-      <CopilotFunctionBridge />
-      {children}
+      <OrderedMessagePartsProvider>
+        <CopilotFunctionBridge />
+        {children}
+      </OrderedMessagePartsProvider>
     </CopilotKit>
   )
 }

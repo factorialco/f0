@@ -216,6 +216,8 @@
     "@copilotkit/react-ui": "^1.54.0",
     "@copilotkit/runtime": "^1.54.0",
     "@copilotkit/shared": "^1.54.0",
+    "@copilotkitnext/react": "^1.54.0",
+    "@ag-ui/client": "^0.0.47",
     "@hookform/resolvers": "^3.9.0",
     "@livekit/components-react": "^2.9.19",
     "@number-flow/react": "^0.5.10",
