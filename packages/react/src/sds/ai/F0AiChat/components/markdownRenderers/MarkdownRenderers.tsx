@@ -1,6 +1,6 @@
 import { type AssistantMessageProps } from "@copilotkit/react-ui"
 
-import { Blockquote, Code, Hr, Pre } from "./components/Block"
+import { Blockquote, Hr, Pre } from "./components/Block"
 import { Image } from "./components/Image"
 import { A } from "./components/Link"
 import { Li, Ol, Ul } from "./components/Lists"
@@ -20,7 +20,6 @@ export const markdownRenderers: NonNullable<
   em: Em,
   li: Li,
   pre: Pre,
-  code: Code,
   blockquote: Blockquote,
   hr: Hr,
   ul: Ul,
