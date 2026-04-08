@@ -146,9 +146,6 @@ importers:
       '@copilotkit/shared':
         specifier: ^1.54.0
         version: 1.54.0(@ag-ui/core@0.0.47)
-      '@copilotkitnext/react':
-        specifier: ^1.54.0
-        version: 1.54.0(@types/mdast@4.0.4)(@types/react-dom@18.3.1)(@types/react@18.3.27)(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(signal-polyfill@0.2.2)
       '@dnd-kit/core':
         specifier: ^6.3.1
         version: 6.3.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)

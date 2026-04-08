@@ -14,9 +14,8 @@ const fakeAgent = {
   }),
 }
 
-vi.mock("@copilotkitnext/react", () => ({
-  useAgent: () => ({ agent: fakeAgent }),
-  useCopilotChatConfiguration: () => ({ agentId: "test-agent" }),
+vi.mock("@copilotkit/react-core", () => ({
+  useCopilotChatInternal: () => ({ agent: fakeAgent }),
 }))
 
 import {

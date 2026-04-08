@@ -8,7 +8,7 @@ import {
   type TextMessageEndEvent,
   type TextMessageStartEvent,
 } from "@ag-ui/client"
-import { useAgent, useCopilotChatConfiguration } from "@copilotkitnext/react"
+import { useCopilotChatInternal as useCopilotChat } from "@copilotkit/react-core"
 import {
   type ReactNode,
   createContext,
@@ -81,8 +81,11 @@ export const OrderedMessagePartsProvider = ({
 }: {
   children: ReactNode
 }) => {
-  const config = useCopilotChatConfiguration()
-  const { agent } = useAgent({ agentId: config?.agentId })
+  // Reach the live AbstractAgent through useCopilotChatInternal — that hook
+  // returns the same agent useAgent({ agentId }) would, but it lives in
+  // @copilotkit/react-core which f0-react already declares as a peer dep.
+  // No extra deps required.
+  const { agent } = useCopilotChat()
 
   const storeRef = useRef<OrderedPartsStore>(new Map())
   // Tracks which message id is currently receiving text deltas, so
