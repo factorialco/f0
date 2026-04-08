@@ -485,8 +485,11 @@ export const RightSideMixedCorrectAnswers: Story = {
 }
 
 export const Inline: Story = {
+  parameters: {
+    layout: "padded",
+  },
   render: () => (
-    <div className="mx-auto max-w-3xl p-8">
+    <div className="w-full">
       <SurveyAnsweringForm
         inline
         preview
@@ -507,8 +510,11 @@ export const Inline: Story = {
 }
 
 export const InlineLoading: Story = {
+  parameters: {
+    layout: "padded",
+  },
   render: () => (
-    <div className="mx-auto max-w-3xl p-8">
+    <div className="w-full">
       <SurveyAnsweringForm
         inline
         preview
