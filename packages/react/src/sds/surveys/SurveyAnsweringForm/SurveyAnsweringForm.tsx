@@ -374,7 +374,7 @@ export function SurveyAnsweringForm({
         onChange={noop}
         datasets={datasets}
       >
-        <div className="flex w-full flex-col">
+        <div className="mx-auto flex w-full max-w-3xl flex-col">
           {loading ? (
             mode === "stepped" ? (
               <SurveySteppedLoadingSkeleton />
