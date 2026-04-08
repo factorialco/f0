@@ -7,7 +7,7 @@ import { FileFilled } from "@/icons/app"
 import { GhostListItem } from "./index"
 
 const meta: Meta<typeof GhostListItem> = {
-  title: "Lists/GhostListItem",
+  title: "List/GhostListItem",
   component: GhostListItem,
   tags: ["autodocs", "experimental"],
   decorators: [
