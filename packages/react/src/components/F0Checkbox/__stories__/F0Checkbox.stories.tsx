@@ -4,6 +4,7 @@ import { useState } from "react"
 import { expect, within } from "storybook/test"
 
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0Checkbox } from "../F0Checkbox"
 
@@ -56,7 +57,7 @@ const meta = {
 } satisfies Meta<typeof F0Checkbox>
 
 export default meta
-type Story = StoryObj<typeof F0Checkbox>
+type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
@@ -131,4 +132,8 @@ export const Checked: Story = {
       <F0Checkbox {...args} checked={checked} onCheckedChange={setChecked} />
     )
   },
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
 }

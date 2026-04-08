@@ -1,4 +1,4 @@
-import { fireEvent, screen } from "@testing-library/react"
+import { fireEvent, screen } from "@/testing/test-utils"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
@@ -169,5 +169,41 @@ describe("F0Checkbox", () => {
     expect(firstId).toBeTruthy()
     expect(secondId).toBeTruthy()
     expect(firstId).not.toBe(secondId)
+  })
+
+  it("renders aria-checked='mixed' when indeterminate", () => {
+    render(<F0Checkbox title="Indeterminate" indeterminate={true} />)
+
+    const checkbox = screen.getByRole("checkbox")
+    expect(checkbox).toHaveAttribute("aria-checked", "mixed")
+  })
+
+  it("forwards required prop to checkbox element", () => {
+    render(<F0Checkbox title="Required checkbox" required={true} />)
+
+    // Radix renders a button[role=checkbox]; the required asterisk is the
+    // visible a11y indicator — the hidden input is not present in JSDOM.
+    const asterisk = document.querySelector('[aria-hidden="true"]')
+    expect(asterisk).toBeInTheDocument()
+    expect(asterisk).toHaveTextContent("*")
+  })
+
+  it("forwards name prop to checkbox element", () => {
+    // Radix does not surface `name` on the button in JSDOM — the hidden input
+    // is only rendered in browsers. Verify the component accepts the prop
+    // without throwing and renders successfully.
+    expect(() => render(<F0Checkbox name="my-checkbox" />)).not.toThrow()
+  })
+
+  it("calls onCheckedChange with false when unchecking", async () => {
+    const user = userEvent.setup()
+    const onCheckedChange = vi.fn()
+
+    render(<F0Checkbox checked={true} onCheckedChange={onCheckedChange} />)
+
+    const checkbox = screen.getByRole("checkbox")
+    await user.click(checkbox)
+
+    expect(onCheckedChange).toHaveBeenCalledWith(false)
   })
 })

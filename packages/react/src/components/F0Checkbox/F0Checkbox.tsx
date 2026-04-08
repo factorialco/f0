@@ -3,7 +3,7 @@ import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { Checkbox as CheckboxRoot } from "@/ui/checkbox"
 
-interface CheckboxProps extends DataAttributes {
+export interface CheckboxProps extends DataAttributes {
   /**
    * The title of the checkbox
    */
