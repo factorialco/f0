@@ -72,8 +72,13 @@ interface SurveyAnsweringFormDialogProps extends SurveyAnsweringFormSharedProps 
   allowToChangeFullscreen?: boolean
 }
 
-interface SurveyAnsweringFormInlineProps extends SurveyAnsweringFormSharedProps {
+interface SurveyAnsweringFormInlineProps extends Omit<
+  SurveyAnsweringFormSharedProps,
+  "mode"
+> {
   inline: true
+  /** Inline mode only supports all-questions */
+  mode: "all-questions"
   module?: never
   position?: never
   isOpen?: never

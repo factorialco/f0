@@ -1,15 +1,24 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
+import { fn } from "storybook/test"
 
 import { FileFilled } from "@/icons/app"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { GhostListItem } from "./index"
+import { F0GhostListItem } from "./index"
 
-const meta: Meta<typeof GhostListItem> = {
-  title: "List/GhostListItem",
-  component: GhostListItem,
-  tags: ["autodocs", "experimental"],
+const meta = {
+  title: "List/F0GhostListItem",
+  component: F0GhostListItem,
+  tags: ["autodocs", "stable"],
+  args: {
+    icon: FileFilled,
+    title: "Pixar Animation",
+    filled: true,
+    date: "04/12/2026",
+    onClick: fn(),
+  },
   decorators: [
     (Story) => (
       <div className="flex w-full items-center justify-center p-8">
@@ -19,7 +28,7 @@ const meta: Meta<typeof GhostListItem> = {
       </div>
     ),
   ],
-}
+} satisfies Meta<typeof F0GhostListItem>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -54,7 +63,7 @@ export const Selected: Story = {
 
 export const SkeletonStory: Story = {
   name: "Skeleton",
-  render: () => <GhostListItem.Skeleton />,
+  render: () => <F0GhostListItem.Skeleton />,
 }
 
 export const List: Story = {
@@ -92,7 +101,7 @@ export const List: Story = {
     return (
       <div className="flex flex-col gap-1">
         {cards.map((card) => (
-          <GhostListItem
+          <F0GhostListItem
             key={card.id}
             icon={FileFilled}
             title={card.title}
@@ -112,9 +121,40 @@ export const List: Story = {
 export const ListWithSkeletons: Story = {
   render: () => (
     <div className="flex flex-col gap-1">
-      <GhostListItem.Skeleton />
-      <GhostListItem.Skeleton />
-      <GhostListItem.Skeleton />
+      <F0GhostListItem.Skeleton />
+      <F0GhostListItem.Skeleton />
+      <F0GhostListItem.Skeleton />
+    </div>
+  ),
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  render: () => (
+    <div className="flex max-w-md flex-col gap-2">
+      <F0GhostListItem
+        icon={FileFilled}
+        title="Filled item"
+        filled
+        date="04/12/2026"
+        onClick={() => {}}
+      />
+      <F0GhostListItem
+        icon={FileFilled}
+        title="Pending item"
+        filled={false}
+        date="04/12/2026"
+        onClick={() => {}}
+      />
+      <F0GhostListItem
+        icon={FileFilled}
+        title="Selected item"
+        filled
+        date="04/12/2026"
+        selected
+        onClick={() => {}}
+      />
+      <F0GhostListItem.Skeleton />
     </div>
   ),
 }
