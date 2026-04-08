@@ -39,6 +39,7 @@
     "generate-module-icons": "npx @svgr/cli --out-dir src/icons/modules node_modules/@factorialco/f0-core/assets/icons/modules",
     "generate-ai-icons": "npx @svgr/cli --out-dir src/icons/ai node_modules/@factorialco/f0-core/assets/icons/ai",
     "build-storybook": "storybook build",
+    "build-api": "cd api && npm install && npm run build",
     "serve-storybook": "http-server storybook-static",
     "test-storybook": "test-storybook --testTimeout=60000",
     "format": "sh -c 'oxfmt \"${@:-src/}\"' --",
