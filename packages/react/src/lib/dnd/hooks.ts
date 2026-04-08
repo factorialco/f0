@@ -29,10 +29,11 @@ export function useDraggable<T = unknown>(args: {
   const selectedIdsKey = selectedIds?.join(",") ?? ""
 
   // Memoize enriched payload to avoid creating a new object every render,
-  // which would cause unnecessary useEffect re-registrations
+  // which would cause unnecessary useEffect re-registrations.
+  // Include payload.kind so changes to the drag type also refresh registration.
   const enrichedPayload = useMemo<DragPayload<T>>(
     () => (selectedIds?.length ? { ...payload, selectedIds } : payload),
-    [payloadKey, selectedIdsKey]
+    [payloadKey, payload.kind, selectedIdsKey]
   )
 
   useEffect(() => {

@@ -46,7 +46,7 @@ export function KanbanCard<T = unknown>({
   showIndicator?: boolean
   disabledEdges?: Array<"top" | "bottom">
   forcedEdge?: "top" | "bottom" | null
-  /** IDs of all selected items for bulk drag (includes this card's id when selected) */
+  /** Keys (from getKey) of all selected items for bulk drag (includes this card's key when selected) */
   selectedIds?: string[]
 } & React.ComponentProps<typeof CardInternal>) {
   const ref = useRef<HTMLDivElement | null>(null)
