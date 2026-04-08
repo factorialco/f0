@@ -4,17 +4,19 @@ import {
   type HttpResponseInit,
   type InvocationContext,
 } from "@azure/functions"
-import { createStorybookMcpHandler, type Handler } from "@storybook/mcp"
+import { createStorybookMcpHandler } from "@storybook/mcp"
 import { basename } from "node:path"
 
 const MANIFESTS_BASE_URL = "https://ds.factorial.dev/manifests"
+
+type Handler = Awaited<ReturnType<typeof createStorybookMcpHandler>>
 
 let _handler: Handler | null = null
 
 async function getHandler(): Promise<Handler> {
   if (!_handler) {
     _handler = await createStorybookMcpHandler({
-      manifestProvider: async (_request, path) => {
+      manifestProvider: async (_request: Request | undefined, path: string) => {
         const fileName = basename(path)
         const response = await fetch(`${MANIFESTS_BASE_URL}/${fileName}`)
         if (!response.ok) {
