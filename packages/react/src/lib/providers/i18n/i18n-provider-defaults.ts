@@ -32,6 +32,9 @@ export const defaultTranslations = {
       hide: "Hide password",
     },
   },
+  link: {
+    opensInNewTab: "opens in new tab",
+  },
   actions: {
     add: "Add",
     edit: "Edit",
