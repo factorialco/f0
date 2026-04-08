@@ -31,15 +31,21 @@ import {
   insertImageFromFile,
 } from "../CoreEditor/Extensions/Image"
 import "./index.css"
+import {
+  applyPageDocumentPatch,
+  getNotesTextEditorSnapshot,
+} from "./applyPageDocumentPatch"
 import { createNotesTextEditorExtensions } from "./extensions"
 import Header from "./Header"
 import Title from "./Title"
-import {
+import type {
   BannerProps,
   DropdownItem,
   HeaderSecondaryAction,
   MetadataItem,
   NotesTextEditorHandle,
+  NotesTextEditorPageDocumentPatch,
+  NotesTextEditorSnapshot,
   PrimaryActionButton,
   PrimaryDropdownAction,
 } from "./types"
@@ -113,6 +119,8 @@ const NotesTextEditorComponent = forwardRef<
     }
   }, [title, onTitleChange])
 
+  const shouldSkipOnChangeRef = useRef(false)
+
   const editor = useEditor({
     extensions: createNotesTextEditorExtensions({
       placeholder,
@@ -129,19 +137,57 @@ const NotesTextEditorComponent = forwardRef<
     }),
     content: initialContent,
     onUpdate: ({ editor }: { editor: Editor }) => {
-      onChange(
-        editor.isEmpty
-          ? { json: null, html: null }
-          : { json: editor.getJSON(), html: editor.getHTML() }
-      )
+      if (shouldSkipOnChangeRef.current) {
+        return
+      }
+
+      onChange(getNotesTextEditorSnapshot(editor))
+    },
+    onCreate: ({ editor }) => {
+      // Legacy documents may contain block nodes with `id: null` because the
+      // initial content load is not a `docChanged` transaction, so
+      // BlockIdExtension's appendTransaction never fires for it. Re-setting
+      // the content triggers a real transaction that lets the plugin assign
+      // proper nanoid strings to every block that still has a null id.
+      const initialSnapshot = getNotesTextEditorSnapshot(editor)
+
+      editor.commands.setContent(editor.getJSON())
+
+      const normalizedSnapshot = getNotesTextEditorSnapshot(editor)
+
+      // Only notify the consumer when IDs were actually populated, so pages
+      // with already-valid content don't trigger a spurious onChange/autosave.
+      if (
+        JSON.stringify(initialSnapshot.json) !==
+        JSON.stringify(normalizedSnapshot.json)
+      ) {
+        onChange(normalizedSnapshot)
+      }
     },
     editable: !readonly,
   })
+
+  const runWithoutOnChange = useCallback(<T,>(callback: () => T): T => {
+    shouldSkipOnChangeRef.current = true
+
+    try {
+      return callback()
+    } finally {
+      shouldSkipOnChangeRef.current = false
+    }
+  }, [])
 
   useImperativeHandle(ref, () => ({
     clear: () => editor?.commands.clearContent(),
     focus: () => editor?.commands.focus(),
     setContent: (content) => editor?.commands.setContent(content),
+    applyPageDocumentPatch: (patch) => {
+      if (!editor) {
+        return { json: null, html: null }
+      }
+
+      return runWithoutOnChange(() => applyPageDocumentPatch(editor, patch))
+    },
     insertAIBlock: () => {
       if (!editor || !aiBlockConfig) return
       editor
@@ -178,6 +224,8 @@ const NotesTextEditorComponent = forwardRef<
         .run()
     },
     pushContent: (content: string) => {
+      // focus() must be called WITHOUT { scrollIntoView: false } — default scroll
+      // behavior is intentional so the editor scrolls to the insertion point.
       if (!editor) return
       editor
         .chain()
@@ -440,9 +488,12 @@ export const NotesTextEditorSkeleton = ({
 
 export type { Message, User } from "../CoreEditor/Extensions/Transcript"
 export type { ImageUploadConfig } from "./types"
+export { NotesTextEditorPatchTargetNotFoundError } from "./applyPageDocumentPatch"
 export const NotesTextEditor = NotesTextEditorComponent
 export type {
   NotesTextEditorHandle,
+  NotesTextEditorPageDocumentPatch,
   NotesTextEditorProps,
   NotesTextEditorSkeletonProps,
+  NotesTextEditorSnapshot,
 }
