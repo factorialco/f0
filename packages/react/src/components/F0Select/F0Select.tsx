@@ -580,7 +580,7 @@ const F0SelectComponent = forwardRef(function Select<
 
   const handleApply = useCallback(() => {
     handleChangeOpenLocal(false)
-  }, [])
+  }, [handleChangeOpenLocal])
 
   // Track when filters panel is open to hide bottom actions
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
@@ -817,12 +817,12 @@ const F0SelectComponent = forwardRef(function Select<
       <SelectPrimitive {...selectPrimitiveProps}>
         <SelectTrigger ref={ref} asChild>
           {children ? (
-            <div
+            <button
               className="flex w-full items-center justify-between"
               aria-label={label || placeholder}
             >
               {children}
-            </div>
+            </button>
           ) : (
             <InputField
               label={label}
@@ -878,7 +878,6 @@ const F0SelectComponent = forwardRef(function Select<
             >
               <button
                 className="flex w-full items-center justify-between"
-                aria-label={label || placeholder}
                 onClick={(e) => {
                   e.preventDefault()
                 }}

@@ -1,3 +1,5 @@
+import { useId } from "react"
+
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { OneEllipsis } from "@/lib/OneEllipsis"
@@ -28,6 +30,7 @@ export const SelectAll = ({
   paddingTop = false,
 }: SelectAllProps) => {
   const i18n = useI18n()
+  const selectAllId = useId()
 
   const handleChange = (checked: boolean) => {
     if (indeterminate) {
@@ -68,7 +71,7 @@ export const SelectAll = ({
       {!hideCheckbox ? (
         <div className="shrink-0 pr-1">
           <F0Checkbox
-            id="select-all"
+            id={selectAllId}
             title={i18n.actions.selectAll}
             checked={indeterminate || value}
             indeterminate={indeterminate}

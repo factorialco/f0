@@ -1,6 +1,5 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react"
+import { fireEvent, screen, waitFor } from "@/testing/test-utils"
 import userEvent from "@testing-library/user-event"
-import "@testing-library/jest-dom/vitest"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import type { RecordType } from "@/hooks/datasource"
@@ -58,9 +57,7 @@ const defaultSelectProps = {
   placeholder: "",
   label: "Pick an option",
   hideLabel: false,
-  onChange: (value: string) => {
-    console.log(value)
-  },
+  onChange: vi.fn(),
 }
 
 describe("Select", () => {
@@ -94,12 +91,12 @@ describe("Select", () => {
   })
 
   const openSelect = async (user: ReturnType<typeof userEvent.setup>) => {
-    user.click(screen.getByRole("combobox"))
+    await user.click(screen.getByRole("combobox"))
 
-    // Wait for animation to finish
+    // Wait for the listbox to appear, then trigger animationStart so the
+    // virtualizer becomes enabled and renders items in JSDOM (no real CSS animations)
     await waitFor(() => expect(screen.getByRole("listbox")).toBeInTheDocument())
-    const teaser = screen.getByRole("listbox")
-    fireEvent.animationStart(teaser)
+    fireEvent.animationStart(screen.getByRole("listbox"))
   }
 
   it("renders with placeholder", async () => {
@@ -367,7 +364,7 @@ describe("Select", () => {
     const handleChangeSelectedOption = vi.fn()
     const user = userEvent.setup()
 
-    const { container } = render(
+    render(
       <F0Select
         {...defaultSelectProps}
         options={mockOptions}
@@ -405,15 +402,13 @@ describe("Select", () => {
       expect(screen.getByText("Option 1")).toBeInTheDocument()
     })
 
-    // Find the clear button using the same approach as InputField tests
+    // Find the clear button using accessible role query
     // The clear button should be visible when there's a value
-    const clearButton = container.querySelector(
-      "button[data-testid='clear-button']"
-    )
+    const clearButton = screen.getByRole("button", { name: /clear/i })
     expect(clearButton).toBeInTheDocument()
 
-    // Click the clear button using fireEvent directly
-    await fireEvent.click(clearButton)
+    // Click the clear button using userEvent
+    await user.click(clearButton)
 
     // Verify that onChange is called with empty string and onChangeSelectedOption with undefined
     await waitFor(() => {

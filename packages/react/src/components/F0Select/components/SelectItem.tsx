@@ -24,7 +24,10 @@ export const SelectItem = <T extends string, R>({
           </div>
         )}
         {item.icon && (
-          <div className="flex shrink-0 items-center text-f1-icon">
+          <div
+            className="flex shrink-0 items-center text-f1-icon"
+            aria-hidden="true"
+          >
             <F0Icon icon={item.icon} />
           </div>
         )}
