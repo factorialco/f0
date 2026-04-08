@@ -8,18 +8,14 @@ export type DropdownSingleQuestionOnChangeParams =
   BaseQuestionOnChangeParams & {
     type: "dropdown-single"
     value?: string | null
-    datasetKey?: string
-    options?: SelectQuestionOption[]
     showSearchBox?: boolean
     searchBoxPlaceholder?: string
-  }
+  } & ({ datasetKey: string } | { options: SelectQuestionOption[] })
 
 export type DropdownSingleQuestionProps =
   BaseQuestionPropsForOtherQuestionComponents & {
     type: "dropdown-single"
-    datasetKey?: string
-    options?: SelectQuestionOption[]
     value?: string | null
     showSearchBox?: boolean
     searchBoxPlaceholder?: string
-  }
+  } & ({ datasetKey: string } | { options: SelectQuestionOption[] })

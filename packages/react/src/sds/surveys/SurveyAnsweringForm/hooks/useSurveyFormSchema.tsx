@@ -26,6 +26,7 @@ import type {
 } from "../types"
 
 import { BaseQuestion } from "../../SurveyFormBuilder/QuestionTypes/BaseQuestion"
+import { SEARCH_BOX_OPTIONS_THRESHOLD } from "../../SurveyFormBuilder/QuestionTypes/DropdownSingleQuestion/types"
 import { DEFAULT_FILE_ACCEPT } from "../../SurveyFormBuilder/QuestionTypes/FileQuestion"
 import {
   RatingQuestionField,
@@ -384,21 +385,20 @@ function buildFieldForQuestion(
     }
 
     case "dropdown-single": {
-      const dropdownSingleQ = q as QuestionElement & {
-        datasetKey?: string
-        options?: SelectQuestionOption[]
-      }
-      const dataset = dropdownSingleQ.datasetKey
-        ? datasets?.[dropdownSingleQ.datasetKey]
-        : undefined
+      const datasetKey =
+        "datasetKey" in q ? (q.datasetKey as string) : undefined
+      const options =
+        "options" in q ? (q.options as SelectQuestionOption[]) : undefined
+      const dataset = datasetKey ? datasets?.[datasetKey] : undefined
       const staticOptions =
-        dropdownSingleQ.options?.map((o) => ({
+        options?.map((o) => ({
           value: o.value,
           label: o.label,
         })) ?? []
       const showSearchBox = dataset
         ? (q.showSearchBox ?? true)
-        : (q.showSearchBox ?? staticOptions.length > 8)
+        : (q.showSearchBox ??
+          staticOptions.length > SEARCH_BOX_OPTIONS_THRESHOLD)
       const field: F0Field = dataset
         ? {
             id: q.id,
@@ -449,21 +449,20 @@ function buildFieldForQuestion(
     }
 
     case "dropdown-multi": {
-      const dropdownMultiQ = q as QuestionElement & {
-        datasetKey?: string
-        options?: SelectQuestionOption[]
-      }
-      const dataset = dropdownMultiQ.datasetKey
-        ? datasets?.[dropdownMultiQ.datasetKey]
-        : undefined
+      const datasetKey =
+        "datasetKey" in q ? (q.datasetKey as string) : undefined
+      const options =
+        "options" in q ? (q.options as SelectQuestionOption[]) : undefined
+      const dataset = datasetKey ? datasets?.[datasetKey] : undefined
       const staticOptions =
-        dropdownMultiQ.options?.map((o) => ({
+        options?.map((o) => ({
           value: o.value,
           label: o.label,
         })) ?? []
       const showSearchBox = dataset
         ? (q.showSearchBox ?? true)
-        : (q.showSearchBox ?? staticOptions.length > 8)
+        : (q.showSearchBox ??
+          staticOptions.length > SEARCH_BOX_OPTIONS_THRESHOLD)
       const field: F0Field = dataset
         ? {
             id: q.id,

@@ -22,13 +22,16 @@ import { BaseQuestion, useQuestionDisabled } from "../BaseQuestion"
  * - **Static options mode** (backward compatible): when no dataset is found,
  *   falls back to rendering with static `options` prop.
  */
-export const DropdownSingleQuestion = ({
-  datasetKey,
-  options,
-  showSearchBox: showSearchBoxProp,
-  searchBoxPlaceholder,
-  ...props
-}: DropdownSingleQuestionProps | DropdownMultiQuestionProps) => {
+export const DropdownSingleQuestion = (
+  allProps: DropdownSingleQuestionProps | DropdownMultiQuestionProps
+) => {
+  const {
+    showSearchBox: showSearchBoxProp,
+    searchBoxPlaceholder,
+    ...props
+  } = allProps
+  const datasetKey = "datasetKey" in allProps ? allProps.datasetKey : undefined
+  const options = "options" in allProps ? allProps.options : undefined
   const { onQuestionChange, answering, datasets } =
     useSurveyFormBuilderContext()
 

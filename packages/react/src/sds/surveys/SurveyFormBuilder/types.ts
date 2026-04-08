@@ -42,6 +42,11 @@ export type SectionElement = Omit<SectionProps, "onAction" | "onChange">
 
 type QuestionPropsToOmit = "onAction" | "onChange" | "onAddNewElement"
 
+// Omit doesn't distribute over union types, so we need a helper
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown
+  ? Omit<T, K>
+  : never
+
 export type QuestionElement =
   | Omit<TextQuestionProps, QuestionPropsToOmit>
   | Omit<RatingQuestionProps & { type: "rating" }, QuestionPropsToOmit>
@@ -49,11 +54,11 @@ export type QuestionElement =
       SelectQuestionProps & { type: "select" | "multi-select" },
       QuestionPropsToOmit
     >
-  | Omit<
+  | DistributiveOmit<
       DropdownSingleQuestionProps & { type: "dropdown-single" },
       QuestionPropsToOmit
     >
-  | Omit<
+  | DistributiveOmit<
       DropdownMultiQuestionProps & { type: "dropdown-multi" },
       QuestionPropsToOmit
     >
@@ -124,6 +129,7 @@ type OnChangeQuestionParams = BaseQuestionOnChangeParams &
         type: "dropdown-single"
         value?: string | null
         datasetKey?: string
+        options?: SelectQuestionOption[]
         showSearchBox?: boolean
         searchBoxPlaceholder?: string
       }
@@ -131,6 +137,7 @@ type OnChangeQuestionParams = BaseQuestionOnChangeParams &
         type: "dropdown-multi"
         value?: string[] | null
         datasetKey?: string
+        options?: SelectQuestionOption[]
         showSearchBox?: boolean
         searchBoxPlaceholder?: string
       }
