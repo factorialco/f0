@@ -1,4 +1,5 @@
-import { Editor, JSONContent } from "@tiptap/react"
+import { Editor } from "@tiptap/react"
+import type { JSONContent } from "@tiptap/react"
 import { describe, expect, it } from "vitest"
 
 import { BlockIdExtension } from "../CoreEditor/Extensions/BlockIdExtension"
@@ -336,7 +337,7 @@ describe("applyPageDocumentPatch", () => {
       try {
         applyPageDocumentPatch(editor, {
           type: "unsupported_runtime_patch_type",
-        } as any)
+        } as unknown as Parameters<typeof applyPageDocumentPatch>[1])
       } catch (caughtError) {
         error = caughtError
       }
