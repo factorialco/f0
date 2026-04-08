@@ -229,12 +229,6 @@ export function SurveyFormBuilderProvider({
     SurveyFormBuilderCallbacks["onAddNewElement"]
   > = useCallback(
     ({ type, afterId, datasetKey }) => {
-      if (
-        (type === "dropdown-single" || type === "dropdown-multi") &&
-        !datasetKey
-      ) {
-        throw new Error(`${type} questions require a datasetKey`)
-      }
       const newElementId = getNewElementId(
         type === "section" ? "section" : "question"
       )

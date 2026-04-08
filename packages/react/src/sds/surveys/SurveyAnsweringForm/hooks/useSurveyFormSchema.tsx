@@ -384,29 +384,50 @@ function buildFieldForQuestion(
     }
 
     case "dropdown-single": {
-      const dataset = datasets?.[q.datasetKey]
-      if (!dataset) {
-        throw new Error(
-          `Dataset "${q.datasetKey}" not found for dropdown-single`
-        )
+      const dropdownSingleQ = q as QuestionElement & {
+        datasetKey?: string
+        options?: SelectQuestionOption[]
       }
-      const showSearchBox = q.showSearchBox ?? true
-      const field: F0Field = {
-        id: q.id,
-        type: "select",
-        label,
-        placeholder:
-          dataset.placeholder ??
-          t("surveyFormBuilder.answer.dropdownPlaceholder"),
-        source: dataset.dataSource,
-        mapOptions: dataset.mapOptions,
-        icon: dataset.icon,
-        clearable: !q.required,
-        multiple: false,
-        disabled: disableFields,
-        showSearchBox,
-        searchBoxPlaceholder: q.searchBoxPlaceholder,
-      }
+      const dataset = dropdownSingleQ.datasetKey
+        ? datasets?.[dropdownSingleQ.datasetKey]
+        : undefined
+      const staticOptions =
+        dropdownSingleQ.options?.map((o) => ({
+          value: o.value,
+          label: o.label,
+        })) ?? []
+      const showSearchBox = dataset
+        ? (q.showSearchBox ?? true)
+        : (q.showSearchBox ?? staticOptions.length > 8)
+      const field: F0Field = dataset
+        ? {
+            id: q.id,
+            type: "select",
+            label,
+            placeholder:
+              dataset.placeholder ??
+              t("surveyFormBuilder.answer.dropdownPlaceholder"),
+            source: dataset.dataSource,
+            mapOptions: dataset.mapOptions,
+            icon: dataset.icon,
+            clearable: !q.required,
+            multiple: false,
+            disabled: disableFields,
+            showSearchBox,
+            searchBoxPlaceholder: q.searchBoxPlaceholder,
+          }
+        : {
+            id: q.id,
+            type: "select",
+            label,
+            placeholder: t("surveyFormBuilder.answer.dropdownPlaceholder"),
+            options: staticOptions,
+            clearable: !q.required,
+            multiple: false,
+            disabled: disableFields,
+            showSearchBox,
+            searchBoxPlaceholder: q.searchBoxPlaceholder,
+          }
       return f0FormField(buildStringSchema(!!q.required, t), {
         ...baseConfig,
         fieldType: "custom",
@@ -428,29 +449,50 @@ function buildFieldForQuestion(
     }
 
     case "dropdown-multi": {
-      const dataset = datasets?.[q.datasetKey]
-      if (!dataset) {
-        throw new Error(
-          `Dataset "${q.datasetKey}" not found for dropdown-multi`
-        )
+      const dropdownMultiQ = q as QuestionElement & {
+        datasetKey?: string
+        options?: SelectQuestionOption[]
       }
-      const showSearchBox = q.showSearchBox ?? true
-      const field: F0Field = {
-        id: q.id,
-        type: "select",
-        label,
-        placeholder:
-          dataset.placeholder ??
-          t("surveyFormBuilder.answer.dropdownPlaceholder"),
-        source: dataset.dataSource,
-        mapOptions: dataset.mapOptions,
-        icon: dataset.icon,
-        clearable: !q.required,
-        multiple: true,
-        disabled: disableFields,
-        showSearchBox,
-        searchBoxPlaceholder: q.searchBoxPlaceholder,
-      }
+      const dataset = dropdownMultiQ.datasetKey
+        ? datasets?.[dropdownMultiQ.datasetKey]
+        : undefined
+      const staticOptions =
+        dropdownMultiQ.options?.map((o) => ({
+          value: o.value,
+          label: o.label,
+        })) ?? []
+      const showSearchBox = dataset
+        ? (q.showSearchBox ?? true)
+        : (q.showSearchBox ?? staticOptions.length > 8)
+      const field: F0Field = dataset
+        ? {
+            id: q.id,
+            type: "select",
+            label,
+            placeholder:
+              dataset.placeholder ??
+              t("surveyFormBuilder.answer.dropdownPlaceholder"),
+            source: dataset.dataSource,
+            mapOptions: dataset.mapOptions,
+            icon: dataset.icon,
+            clearable: !q.required,
+            multiple: true,
+            disabled: disableFields,
+            showSearchBox,
+            searchBoxPlaceholder: q.searchBoxPlaceholder,
+          }
+        : {
+            id: q.id,
+            type: "select",
+            label,
+            placeholder: t("surveyFormBuilder.answer.dropdownPlaceholder"),
+            options: staticOptions,
+            clearable: !q.required,
+            multiple: true,
+            disabled: disableFields,
+            showSearchBox,
+            searchBoxPlaceholder: q.searchBoxPlaceholder,
+          }
       return f0FormField(buildMultiSelectSchema(!!q.required, t), {
         ...baseConfig,
         fieldType: "custom",

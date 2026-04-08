@@ -1,22 +1,30 @@
+import { useMemo } from "react"
+
 import type { F0SelectField } from "@/patterns/F0Form/fields/select/types"
 
 import { F0FormField } from "@/patterns/F0FormField"
 import { useI18n } from "@/lib/providers/i18n"
 
 import type { DropdownMultiQuestionProps } from "../DropdownMultiQuestion/types"
-import type { DropdownSingleQuestionProps } from "./types"
+import {
+  SEARCH_BOX_OPTIONS_THRESHOLD,
+  type DropdownSingleQuestionProps,
+} from "./types"
 
 import { useSurveyFormBuilderContext } from "../../Context"
 import { BaseQuestion, useQuestionDisabled } from "../BaseQuestion"
 
 /**
  * Unified component for both `dropdown-single` and `dropdown-multi` question
- * types. Keeping both types in a single component ensures React reconciles
- * in-place when toggling "Allow multi-selection" in the ActionsMenu, so the
- * menu stays open and no state is lost.
+ * types. Supports two modes:
+ * - **Dataset mode**: when `datasetKey` is provided and a matching dataset
+ *   exists in context, renders an F0Select backed by the dataset's data source.
+ * - **Static options mode** (backward compatible): when no dataset is found,
+ *   falls back to rendering with static `options` prop.
  */
 export const DropdownSingleQuestion = ({
   datasetKey,
+  options,
   showSearchBox: showSearchBoxProp,
   searchBoxPlaceholder,
   ...props
@@ -28,28 +36,56 @@ export const DropdownSingleQuestion = ({
 
   const { t } = useI18n()
 
-  const dataset = datasets?.[datasetKey]
-  if (!dataset) {
-    throw new Error(`Dataset "${datasetKey}" not found for ${props.type}`)
-  }
-
+  const dataset = datasetKey ? datasets?.[datasetKey] : undefined
   const isMulti = props.type === "dropdown-multi"
-  const showSearchBox = showSearchBoxProp ?? true
 
-  const field: F0SelectField = {
-    id: props.id,
-    type: "select",
-    label: t("surveyFormBuilder.answer.label"),
-    placeholder:
-      dataset.placeholder ?? t("surveyFormBuilder.answer.dropdownPlaceholder"),
-    source: dataset.dataSource,
-    mapOptions: dataset.mapOptions,
-    icon: dataset.icon,
-    clearable: !props.required,
-    multiple: isMulti,
+  const selectOptions = useMemo(
+    () => options?.map((o) => ({ value: o.value, label: o.label })) ?? [],
+    [options]
+  )
+
+  const showSearchBox = dataset
+    ? (showSearchBoxProp ?? true)
+    : (showSearchBoxProp ?? selectOptions.length > SEARCH_BOX_OPTIONS_THRESHOLD)
+
+  const field: F0SelectField = useMemo(() => {
+    const base = {
+      id: props.id,
+      type: "select" as const,
+      label: t("surveyFormBuilder.answer.label"),
+      clearable: !props.required,
+      multiple: isMulti,
+      showSearchBox,
+      searchBoxPlaceholder,
+    }
+
+    if (dataset) {
+      return {
+        ...base,
+        placeholder:
+          dataset.placeholder ??
+          t("surveyFormBuilder.answer.dropdownPlaceholder"),
+        source: dataset.dataSource,
+        mapOptions: dataset.mapOptions,
+        icon: dataset.icon,
+      }
+    }
+
+    return {
+      ...base,
+      placeholder: t("surveyFormBuilder.answer.dropdownPlaceholder"),
+      options: selectOptions,
+    }
+  }, [
+    props.id,
+    props.required,
+    isMulti,
+    dataset,
+    selectOptions,
+    t,
     showSearchBox,
     searchBoxPlaceholder,
-  }
+  ])
 
   return (
     <BaseQuestion {...props}>
