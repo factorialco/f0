@@ -279,7 +279,8 @@ export function SurveyAnsweringForm({
     >
       <div
         className={cn(
-          "relative flex min-h-full flex-col @container",
+          "relative flex flex-col @container",
+          inline ? "min-h-0" : "min-h-full",
           isStepped && !isFullscreen && !inline && "min-h-[600px]",
           shouldCenterContent && !inline && "h-full"
         )}
@@ -294,10 +295,11 @@ export function SurveyAnsweringForm({
         )}
         <div
           className={cn(
-            "mx-auto flex w-full flex-col @lg:w-[750px] max-w-full",
+            "mx-auto flex w-full flex-col max-w-full",
+            !inline && "@lg:w-[750px]",
             mode === "all-questions" && !shouldCenterContent
               ? "justify-start"
-              : "flex-1 justify-center",
+              : !inline && "flex-1 justify-center",
             !inline && disableContentPadding && "px-4 py-12"
           )}
         >
