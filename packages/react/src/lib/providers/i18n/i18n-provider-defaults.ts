@@ -596,8 +596,8 @@ export const defaultTranslations = {
     submit: "Submit",
     stepOf: "Step {{current}} of {{total}}",
   },
-  procurement: {
-    cardGhost: {
+  lists: {
+    ghostListItem: {
       filled: "Filled",
       pending: "Pending",
     },

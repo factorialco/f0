@@ -4,11 +4,11 @@ import { useState } from "react"
 
 import { FileFilled } from "@/icons/app"
 
-import { CardGhost } from "./index"
+import { GhostListItem } from "./index"
 
-const meta: Meta<typeof CardGhost> = {
-  title: "Procurement/CardGhost",
-  component: CardGhost,
+const meta: Meta<typeof GhostListItem> = {
+  title: "Lists/GhostListItem",
+  component: GhostListItem,
   tags: ["autodocs", "experimental"],
   decorators: [
     (Story) => (
@@ -40,6 +40,21 @@ export const Pending: Story = {
     filled: false,
     date: "04/12/2026",
   },
+}
+
+export const Selected: Story = {
+  args: {
+    icon: FileFilled,
+    title: "Pixar Animation",
+    filled: true,
+    date: "04/12/2026",
+    selected: true,
+  },
+}
+
+export const SkeletonStory: Story = {
+  name: "Skeleton",
+  render: () => <GhostListItem.Skeleton />,
 }
 
 export const List: Story = {
@@ -77,7 +92,7 @@ export const List: Story = {
     return (
       <div className="flex flex-col gap-1">
         {cards.map((card) => (
-          <CardGhost
+          <GhostListItem
             key={card.id}
             icon={FileFilled}
             title={card.title}
@@ -92,4 +107,14 @@ export const List: Story = {
       </div>
     )
   },
+}
+
+export const ListWithSkeletons: Story = {
+  render: () => (
+    <div className="flex flex-col gap-1">
+      <GhostListItem.Skeleton />
+      <GhostListItem.Skeleton />
+      <GhostListItem.Skeleton />
+    </div>
+  ),
 }
