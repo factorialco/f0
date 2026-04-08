@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.438.5](https://github.com/factorialco/f0/compare/f0-react-v1.438.4...f0-react-v1.438.5) (2026-04-08)
+
+
+### Bug Fixes
+
+* resolve mcp api build errors ([6f671e8](https://github.com/factorialco/f0/commit/6f671e8ecdba4695b2c4371fb8d357c8ddc741a7))
+
 ## [1.438.4](https://github.com/factorialco/f0/compare/f0-react-v1.438.3...f0-react-v1.438.4) (2026-04-07)
 
 
