@@ -1,0 +1,11 @@
+/**
+ * F0 React Native Styles Entry Point
+ * 
+ * Import this file in your app's global.css:
+ * @import '@factorialco/f0-react-native/styles';
+ * 
+ * And add source scanning:
+ * @source './node_modules/@factorialco/f0-react-native/lib';
+ */
+
+@import "./theme.css";

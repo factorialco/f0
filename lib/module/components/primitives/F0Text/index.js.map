@@ -1,0 +1,1 @@
+{"version":3,"names":["F0Text","TYPOGRAPHY_VARIANTS","TEXT_COLORS","TEXT_ALIGN","TEXT_DECORATIONS","TEXT_TRANSFORMS","AnimatedF0Text"],"sourceRoot":"../../../../../src","sources":["components/primitives/F0Text/index.ts"],"mappings":"AAOA,OAASA,MAAM,KAAQ,UAAU,CASjC,OACEC,mBAAmB,CACnBC,WAAW,CACXC,UAAU,CACVC,gBAAgB,CAChBC,eAAe,KACV,UAAU,CAEjB,OAASC,cAAc,KAAQ,kBAAkB","ignoreList":[]}
