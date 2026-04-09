@@ -22,6 +22,8 @@ export interface F0GhostListItemProps {
   date: string
   /** Whether the item is selected */
   selected?: boolean
+  /** Whether the item is disabled */
+  disabled?: boolean
   /** Click handler */
   onClick: () => void
 }
@@ -29,49 +31,67 @@ export interface F0GhostListItemProps {
 const BaseF0GhostListItem = React.forwardRef<
   HTMLDivElement,
   F0GhostListItemProps
->(({ icon, title, filled, date, selected = false, onClick }, ref) => {
-  const { t } = useI18n()
+>(
+  (
+    { icon, title, filled, date, selected = false, disabled = false, onClick },
+    ref
+  ) => {
+    const { t } = useI18n()
 
-  return (
-    <div
-      ref={ref}
-      role="button"
-      tabIndex={0}
-      aria-pressed={selected}
-      className={cn(
-        "flex cursor-pointer items-start gap-3 rounded-xl border border-solid border-transparent bg-f1-background p-3 transition-all hover:bg-f1-background-hover",
-        selected && "border-f1-border bg-f1-background",
-        focusRing()
-      )}
-      onClick={onClick}
-      onKeyDown={(e) => {
-        if (e.target !== e.currentTarget) return
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault()
-          onClick()
+    return (
+      <div
+        ref={ref}
+        role="button"
+        tabIndex={disabled ? -1 : 0}
+        aria-pressed={selected}
+        aria-disabled={disabled}
+        className={cn(
+          "flex items-start gap-3 rounded-xl border border-solid border-transparent bg-f1-background p-3 transition-all",
+          disabled
+            ? "cursor-not-allowed opacity-50"
+            : "cursor-pointer hover:bg-f1-background-hover",
+          selected && !disabled && "border-f1-border bg-f1-background",
+          !disabled && focusRing()
+        )}
+        onClick={disabled ? undefined : onClick}
+        onKeyDown={
+          disabled
+            ? undefined
+            : (e) => {
+                if (e.target !== e.currentTarget) return
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault()
+                  onClick()
+                }
+              }
         }
-      }}
-    >
-      <F0AvatarIcon icon={icon} size="md" />
-      <div className="flex min-w-0 flex-col gap-0.5">
-        <span className="truncate text-base font-semibold text-f1-foreground">
-          {title}
-        </span>
-        <div className="flex items-center gap-2">
-          {filled ? (
-            <F0TagRaw icon={Check} text={t("lists.ghostListItem.filled")} />
-          ) : (
-            <F0TagStatus
-              variant="warning"
-              text={t("lists.ghostListItem.pending")}
-            />
-          )}
-          <span className="text-sm text-f1-foreground-secondary">{date}</span>
+      >
+        <F0AvatarIcon icon={icon} size="md" />
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <span className="truncate text-base font-semibold text-f1-foreground">
+            {title}
+          </span>
+          <div className="flex items-center gap-2">
+            {disabled ? (
+              <F0TagStatus
+                variant="neutral"
+                text={t("lists.ghostListItem.disabled")}
+              />
+            ) : filled ? (
+              <F0TagRaw icon={Check} text={t("lists.ghostListItem.filled")} />
+            ) : (
+              <F0TagStatus
+                variant="warning"
+                text={t("lists.ghostListItem.pending")}
+              />
+            )}
+            <span className="text-sm text-f1-foreground-secondary">{date}</span>
+          </div>
         </div>
       </div>
-    </div>
-  )
-})
+    )
+  }
+)
 
 const F0GhostListItemSkeleton = () => {
   return (

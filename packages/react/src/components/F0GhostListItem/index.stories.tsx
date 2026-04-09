@@ -61,6 +61,16 @@ export const Selected: Story = {
   },
 }
 
+export const Disabled: Story = {
+  args: {
+    icon: FileFilled,
+    title: "Pixar Animation",
+    filled: false,
+    date: "04/12/2026",
+    disabled: true,
+  },
+}
+
 export const SkeletonStory: Story = {
   name: "Skeleton",
   render: () => <F0GhostListItem.Skeleton />,
@@ -96,6 +106,13 @@ export const List: Story = {
         filled: false,
         date: "04/15/2026",
       },
+      {
+        id: "6",
+        title: "Umbrella Corp",
+        filled: false,
+        date: "04/20/2026",
+        disabled: true,
+      },
     ]
 
     return (
@@ -107,6 +124,7 @@ export const List: Story = {
             title={card.title}
             filled={card.filled}
             date={card.date}
+            disabled={"disabled" in card && card.disabled}
             selected={selectedId === card.id}
             onClick={() =>
               setSelectedId(selectedId === card.id ? null : card.id)
@@ -152,6 +170,14 @@ export const Snapshot: Story = {
         filled
         date="04/12/2026"
         selected
+        onClick={() => {}}
+      />
+      <F0GhostListItem
+        icon={FileFilled}
+        title="Disabled item"
+        filled={false}
+        date="04/12/2026"
+        disabled
         onClick={() => {}}
       />
       <F0GhostListItem.Skeleton />

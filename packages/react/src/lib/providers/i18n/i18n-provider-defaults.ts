@@ -600,6 +600,7 @@ export const defaultTranslations = {
     ghostListItem: {
       filled: "Filled",
       pending: "Pending",
+      disabled: "Disabled",
     },
   },
 } as const
