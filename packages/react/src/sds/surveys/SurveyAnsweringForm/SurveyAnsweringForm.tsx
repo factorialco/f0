@@ -37,8 +37,8 @@ export function SurveyAnsweringForm({
   title,
   description,
   resourceHeader,
-  isOpen = false,
-  onClose = noop,
+  isOpen,
+  onClose,
   position: positionProp = "center",
   module,
   allowToChangeFullscreen = false,
@@ -49,7 +49,6 @@ export function SurveyAnsweringForm({
   preview = false,
   useUpload,
   datasets,
-  inline = false,
 }: SurveyAnsweringFormProps) {
   const { t } = useI18n()
   const initialIsFullscreen = positionProp === "fullscreen"
@@ -270,57 +269,6 @@ export function SurveyAnsweringForm({
   const disableContentPadding =
     position === "center" || position === "fullscreen"
 
-  // Inline mode: simplified render without F0Dialog
-  if (inline) {
-    return (
-      <SurveyFormBuilderProvider
-        answering
-        elements={elements}
-        onChange={noop}
-        datasets={datasets}
-      >
-        <div className="mx-auto flex w-full max-w-3xl flex-col">
-          {loading ? (
-            mode === "stepped" ? (
-              <SurveySteppedLoadingSkeleton />
-            ) : (
-              <SurveyAllQuestionsLoadingSkeleton />
-            )
-          ) : !hasQuestions ? (
-            <F0Box
-              display="flex"
-              flexDirection="column"
-              justifyContent="center"
-              alignItems="center"
-              paddingX="lg"
-            >
-              <OneEmptyState
-                emoji={emptyLabels.emoji}
-                title={emptyLabels.title}
-                description={emptyLabels.description}
-              />
-            </F0Box>
-          ) : (
-            <F0Form
-              key={isStepped ? stepper.currentStep : undefined}
-              formRef={formRef}
-              name="survey-answering"
-              schema={schema}
-              defaultValues={formDefaultValues}
-              onSubmit={handleF0Submit}
-              submitConfig={{
-                hideSubmitButton: true,
-              }}
-              errorTriggerMode={errorTriggerMode}
-              sections={sections}
-            />
-          )}
-        </div>
-      </SurveyFormBuilderProvider>
-    )
-  }
-
-  // Dialog mode: original render, unchanged
   return (
     <F0Dialog
       isOpen={isOpen}

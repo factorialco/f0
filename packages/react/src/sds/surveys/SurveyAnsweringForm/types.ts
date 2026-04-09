@@ -43,12 +43,17 @@ type SurveyAnsweringFormModule = {
   href: string
 }
 
-interface SurveyAnsweringFormSharedProps {
+interface SurveyAnsweringFormBaseProps {
   elements: SurveyFormBuilderElement[]
   mode: SurveyAnsweringFormMode
   title: string
   description?: string
   resourceHeader?: Omit<ResourceHeaderProps, "title" | "description">
+  module: SurveyAnsweringFormModule
+  position?: DialogPosition
+  isOpen: boolean
+  onClose: () => void
+  allowToChangeFullscreen?: boolean
   defaultValues?: Partial<SurveyAnswers>
   errorTriggerMode?: F0FormErrorTriggerMode
   loading?: boolean
@@ -62,33 +67,6 @@ interface SurveyAnsweringFormSharedProps {
     }
   }
 }
-
-interface SurveyAnsweringFormDialogProps extends SurveyAnsweringFormSharedProps {
-  inline?: false
-  module: SurveyAnsweringFormModule
-  position?: DialogPosition
-  isOpen: boolean
-  onClose: () => void
-  allowToChangeFullscreen?: boolean
-}
-
-interface SurveyAnsweringFormInlineProps extends Omit<
-  SurveyAnsweringFormSharedProps,
-  "mode"
-> {
-  inline: true
-  /** Inline mode only supports all-questions */
-  mode: "all-questions"
-  module?: never
-  position?: never
-  isOpen?: never
-  onClose?: never
-  allowToChangeFullscreen?: never
-}
-
-type SurveyAnsweringFormBaseProps =
-  | SurveyAnsweringFormDialogProps
-  | SurveyAnsweringFormInlineProps
 
 export type SurveyAnsweringFormDefaultProps = SurveyAnsweringFormBaseProps & {
   preview?: false
