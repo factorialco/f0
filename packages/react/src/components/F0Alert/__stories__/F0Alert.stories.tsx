@@ -1,10 +1,10 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
+import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { expect, fn, within } from "storybook/test";
+import { expect, fn, within } from "storybook/test"
 
-import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args";
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 
-import { F0Alert } from "../F0Alert";
+import { F0Alert } from "../F0Alert"
 
 const meta: Meta<typeof F0Alert> = {
   component: F0Alert,
@@ -49,11 +49,11 @@ const meta: Meta<typeof F0Alert> = {
       </div>
     ),
   ],
-};
+}
 
-export default meta;
+export default meta
 
-type Story = StoryObj<typeof F0Alert>;
+type Story = StoryObj<typeof F0Alert>
 
 export const Variants: Story = {
   render: () => (
@@ -88,7 +88,7 @@ export const Variants: Story = {
       />
     </div>
   ),
-};
+}
 
 export const Default: Story = {
   args: {
@@ -109,7 +109,7 @@ export const Default: Story = {
       <F0Alert {...args} />
     </div>
   ),
-};
+}
 
 export const Narrow: Story = {
   args: {
@@ -129,7 +129,7 @@ export const Narrow: Story = {
       <F0Alert {...args} />
     </div>
   ),
-};
+}
 
 export const DeactivatedAction: Story = {
   args: {
@@ -150,7 +150,7 @@ export const DeactivatedAction: Story = {
       <F0Alert {...args} />
     </div>
   ),
-};
+}
 
 export const WithDataTestId: Story = {
   args: {
@@ -164,10 +164,10 @@ export const WithDataTestId: Story = {
     </div>
   ),
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await expect(canvas.getByTestId("my-test-alert")).toBeInTheDocument();
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("my-test-alert")).toBeInTheDocument()
   },
-};
+}
 
 export const InDialog: Story = {
   args: {
@@ -186,4 +186,4 @@ export const InDialog: Story = {
       <F0Alert {...args} />
     </div>
   ),
-};
+}
