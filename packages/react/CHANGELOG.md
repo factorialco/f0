@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.439.0](https://github.com/factorialco/f0/compare/f0-react-v1.438.5...f0-react-v1.439.0) (2026-04-09)
+
+
+### Features
+
+* **SurveyAnsweringForm:** add read-only inline rendering mode ([#3904](https://github.com/factorialco/f0/issues/3904)) ([bbaef18](https://github.com/factorialco/f0/commit/bbaef183532a23e3f473bff2be3097919e4ecf7e))
+
 ## [1.438.5](https://github.com/factorialco/f0/compare/f0-react-v1.438.4...f0-react-v1.438.5) (2026-04-08)
 
 
