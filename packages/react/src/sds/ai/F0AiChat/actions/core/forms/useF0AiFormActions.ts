@@ -1,5 +1,5 @@
 import { useCoAgent } from "@copilotkit/react-core"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 
 import { useAiChat } from "@/ai"
 import { useF0AiFormRegistry } from "@/patterns/F0Form/F0AiFormRegistry"
@@ -28,8 +28,16 @@ export const useF0AiFormActions = () => {
     name: agentName || "one-workflow",
   })
 
+  const [runningForFirstTime, setRunningForFirstTime] = useState(false)
+
   useEffect(() => {
-    if (!running) return
+    if (running && !runningForFirstTime) {
+      setRunningForFirstTime(true)
+    }
+  }, [running, runningForFirstTime])
+
+  useEffect(() => {
+    if (!runningForFirstTime) return
 
     const formsOnCurrentPage = registry?.formsOnCurrentPage || []
     const availableForms = registry?.availableForms || []
@@ -42,8 +50,7 @@ export const useF0AiFormActions = () => {
       activeForm,
     }))
   }, [
-    running,
-    agentName,
+    runningForFirstTime,
     JSON.stringify(registry?.formsOnCurrentPage),
     JSON.stringify(registry?.availableForms),
     JSON.stringify(registry?.activeForm),

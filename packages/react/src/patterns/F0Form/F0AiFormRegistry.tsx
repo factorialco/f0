@@ -429,30 +429,6 @@ export function F0AiFormRegistryProvider({
             formName: name,
             ...(entry.description ? { description: entry.description } : {}),
           })
-
-          // If this is the active form, build full description
-          if (activeFormNameRef.current === name) {
-            nextActiveForm = {
-              formName: name,
-              ...(entry.description ? { description: entry.description } : {}),
-              formSchema: zodToJsonSchema(entry.schema) as Record<
-                string,
-                unknown
-              >,
-              fieldDescriptions: extractFieldDescriptions(entry.schema),
-              sectionDescriptions: extractSectionDescriptions(entry.sections),
-              formValues: ref.getValues(),
-              formErrors: ref.getErrors(),
-              isDirty: ref.isDirty(),
-              ...(entry.defaultValuesParamsSchema
-                ? {
-                    defaultValuesParamsSchema: zodToJsonSchema(
-                      entry.defaultValuesParamsSchema
-                    ) as Record<string, unknown>,
-                  }
-                : {}),
-            }
-          }
         } else {
           // Rendered forms → full runtime state for formsOnCurrentPage
           nextFormsOnCurrentPage.push({
@@ -475,6 +451,31 @@ export function F0AiFormRegistryProvider({
                 }
               : {}),
           })
+        }
+
+        // Build activeForm regardless of virtual/non-virtual status.
+        // A picked form stays active even if a rendered form takes over the entry.
+        if (activeFormNameRef.current === name) {
+          nextActiveForm = {
+            formName: name,
+            ...(entry.description ? { description: entry.description } : {}),
+            formSchema: zodToJsonSchema(entry.schema) as Record<
+              string,
+              unknown
+            >,
+            fieldDescriptions: extractFieldDescriptions(entry.schema),
+            sectionDescriptions: extractSectionDescriptions(entry.sections),
+            formValues: ref.getValues(),
+            formErrors: ref.getErrors(),
+            isDirty: ref.isDirty(),
+            ...(entry.defaultValuesParamsSchema
+              ? {
+                  defaultValuesParamsSchema: zodToJsonSchema(
+                    entry.defaultValuesParamsSchema
+                  ) as Record<string, unknown>,
+                }
+              : {}),
+          }
         }
       }
 

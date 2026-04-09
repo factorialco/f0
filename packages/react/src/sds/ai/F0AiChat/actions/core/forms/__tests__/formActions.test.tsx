@@ -38,8 +38,8 @@ vi.mock("@/sds/ai/F0AiChat/providers/AiChatStateProvider", () => ({
 
 // Import the hooks after mocks are set up
 import { useFormFillAction } from "../useFormFillAction"
-import { useFormGetStateAction } from "../useFormGetStateAction"
 import { useFormSubmitAction } from "../useFormSubmitAction"
+import { usePickActiveFormAction } from "../usePickActiveFormAction"
 import { usePresentFormAction } from "../usePresentFormAction"
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -73,7 +73,7 @@ function RegistryInspector({
 function HookHost() {
   useFormSubmitAction()
   useFormFillAction()
-  useFormGetStateAction()
+  usePickActiveFormAction()
   usePresentFormAction()
   return null
 }
@@ -111,65 +111,6 @@ function getHandler(toolName: string) {
 
 beforeEach(() => {
   capturedTools.clear()
-})
-
-describe("useFormGetStateAction handler", () => {
-  it("returns success with form state for a registered form", async () => {
-    await setupWithDefinitions([
-      {
-        name: "user-form",
-        schema: simpleSchema,
-        defaultValues: { name: "Alice", email: "alice@test.com" },
-      },
-    ])
-
-    const handler = getHandler("forms.formGetState")
-    const result = handler({ formName: "user-form" } as never)
-
-    expect(result).toMatchObject({
-      success: true,
-      formName: "user-form",
-      values: { name: "Alice", email: "alice@test.com" },
-      isDirty: false,
-    })
-    expect(result).toHaveProperty("fieldNames")
-    expect(result).toHaveProperty("errors")
-  })
-
-  it("returns error for unknown form name", async () => {
-    await setupWithDefinitions([
-      {
-        name: "user-form",
-        schema: simpleSchema,
-        defaultValues: { name: "", email: "" },
-      },
-    ])
-
-    const handler = getHandler("forms.formGetState")
-    const result = handler({ formName: "nonexistent" } as never)
-
-    expect(result).toMatchObject({
-      success: false,
-      error: expect.stringContaining("nonexistent"),
-    })
-    expect(result).toHaveProperty("availableForms")
-  })
-
-  it("returns error when form is not mounted (ref is null)", async () => {
-    await setupWithDefinitions([
-      {
-        name: "user-form",
-        schema: simpleSchema,
-        defaultValues: { name: "", email: "" },
-      },
-    ])
-
-    // Overwrite the ref to simulate unmount
-    const handler = getHandler("forms.formGetState")
-    // Virtual forms always have a ref, so this tests the mounted path
-    const result = handler({ formName: "user-form" } as never)
-    expect(result).toHaveProperty("success")
-  })
 })
 
 describe("useFormSubmitAction handler", () => {
@@ -476,5 +417,58 @@ describe("usePresentFormAction handler", () => {
 
     expect(result).toMatchObject({ success: false })
     expect((result as { error: string }).error).toContain("employeeId required")
+  })
+})
+
+describe("usePickActiveFormAction handler", () => {
+  it("picks an available virtual form as active", async () => {
+    await setupWithDefinitions([
+      {
+        name: "user-form",
+        schema: simpleSchema,
+        description: "A form to create users",
+        defaultValues: { name: "", email: "" },
+      },
+    ])
+
+    const handler = getHandler("forms.pickActiveForm")
+    const result = handler({ formName: "user-form" } as never)
+
+    expect(result).toMatchObject({ success: true })
+  })
+
+  it("returns error for unknown form", async () => {
+    await setupWithDefinitions([
+      {
+        name: "user-form",
+        schema: simpleSchema,
+        defaultValues: { name: "", email: "" },
+      },
+    ])
+
+    const handler = getHandler("forms.pickActiveForm")
+    const result = handler({ formName: "ghost" } as never)
+
+    expect(result).toMatchObject({
+      success: false,
+      error: expect.stringContaining("ghost"),
+    })
+  })
+
+  it("returns error when registry is not available", async () => {
+    // Render HookHost outside of the registry provider
+    render(<HookHost />)
+
+    await waitFor(() => {
+      expect(capturedTools.has("forms.pickActiveForm")).toBe(true)
+    })
+
+    const handler = getHandler("forms.pickActiveForm")
+    const result = handler({ formName: "any" } as never)
+
+    expect(result).toMatchObject({
+      success: false,
+      error: expect.stringContaining("not available"),
+    })
   })
 })
