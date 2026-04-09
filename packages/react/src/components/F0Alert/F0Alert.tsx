@@ -1,15 +1,15 @@
-import { cva } from "cva"
-import { useRef } from "react"
+import { cva } from "cva";
+import { useRef } from "react";
 
-import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
-import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
-import { F0Button } from "@/components/F0Button"
-import { F0Link } from "@/components/F0Link"
-import { Placeholder } from "@/icons/app"
-import { withDataTestId } from "@/lib/data-testid"
-import { cn } from "@/lib/utils"
+import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert";
+import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon";
+import { F0Button } from "@/components/F0Button";
+import { F0Link } from "@/components/F0Link";
+import { Cross, Placeholder } from "@/icons/app";
+import { withDataTestId } from "@/lib/data-testid";
+import { cn } from "@/lib/utils";
 
-import type { F0AlertProps } from "./types"
+import type { F0AlertProps } from "./types";
 
 const alertVariants = cva({
   base: "w-full rounded-md p-2 pr-3 text-f1-foreground",
@@ -25,7 +25,7 @@ const alertVariants = cva({
   defaultVariants: {
     variant: "neutral",
   },
-})
+});
 
 const titleVariants = cva({
   base: "font-medium",
@@ -41,7 +41,7 @@ const titleVariants = cva({
   defaultVariants: {
     variant: "info",
   },
-})
+});
 
 const _F0Alert = ({
   title,
@@ -50,15 +50,16 @@ const _F0Alert = ({
   link,
   icon,
   variant = "neutral",
+  onClose,
 }: F0AlertProps) => {
-  const containerRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null);
 
   return (
     <div ref={containerRef} className="@container">
       <div className={alertVariants({ variant })}>
         <div
           className={cn(
-            "flex flex-col items-start gap-3 @xs:flex-row @xs:items-center @xs:justify-between"
+            "flex flex-col items-start gap-3 @xs:flex-row @xs:items-center @xs:justify-between",
           )}
         >
           <div className="flex flex-row gap-2">
@@ -76,10 +77,10 @@ const _F0Alert = ({
               </p>
             </div>
           </div>
-          {(action || link) && (
+          {(action || link || onClose) && (
             <div
               className={cn(
-                "flex flex-shrink-0 flex-row items-center gap-3 pl-8 @xs:pl-0"
+                "flex flex-shrink-0 flex-row items-center gap-3 pl-8 @xs:pl-0",
               )}
             >
               {link && (
@@ -101,12 +102,22 @@ const _F0Alert = ({
                   disabled={action.disabled}
                 />
               )}
+              {onClose && (
+                <F0Button
+                  icon={Cross}
+                  label="Close"
+                  hideLabel
+                  variant="outline"
+                  size="sm"
+                  onClick={onClose}
+                />
+              )}
             </div>
           )}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export const F0Alert = withDataTestId(_F0Alert)
+export const F0Alert = withDataTestId(_F0Alert);

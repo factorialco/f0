@@ -1,24 +1,26 @@
-import type { IconType } from "@/components/F0Icon"
+import type { IconType } from "@/components/F0Icon";
 
 export type AlertVariant =
   | "info"
   | "warning"
   | "critical"
   | "neutral"
-  | "positive"
+  | "positive";
 
 export interface F0AlertProps {
-  title: string
-  description: string
+  title: string;
+  description: string;
   action?: {
-    label: string
-    disabled?: boolean
-    onClick: () => void
-  }
+    label: string;
+    disabled?: boolean;
+    onClick: () => void;
+  };
   link?: {
-    label: string
-    href: string
-  }
-  icon?: IconType
-  variant: AlertVariant
+    label: string;
+    href: string;
+  };
+  icon?: IconType;
+  variant: AlertVariant;
+  /** Called when the user dismisses the alert. When provided, a close button is shown. */
+  onClose?: () => void;
 }

@@ -1,7 +1,7 @@
-import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
-import * as Stories from "./F0Alert.stories"
-import { DoDonts } from "@/lib/storybook-utils/do-donts"
-import { F0Alert } from "../F0Alert"
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks";
+import * as Stories from "./F0Alert.stories";
+import { DoDonts } from "@/lib/storybook-utils/do-donts";
+import { F0Alert } from "../F0Alert";
 
 <Meta of={Stories} />
 
@@ -92,6 +92,16 @@ For transient feedback use a toast; for decisions that block the workflow use
         <td>Validation error on a specific form field</td>
         <td>Inline field error</td>
       </tr>
+      <tr>
+        <td>
+          The alert must stay visible until the issue is resolved (e.g. a
+          critical configuration is missing)
+        </td>
+        <td>
+          Omit <code>onClose</code> — do not give users a way to dismiss alerts
+          they must act on
+        </td>
+      </tr>
     </tbody>
   </table>
 </Unstyled>
@@ -142,7 +152,9 @@ For transient feedback use a toast; for decisions that block the workflow use
 
 ### Behavior
 
-- The alert is persistent — it does not dismiss automatically. It remains visible until the underlying condition changes or the parent component removes it. This is what distinguishes it from a toast.
+- The alert is persistent by default — it does not dismiss automatically. It remains visible until the underlying condition changes or the parent component removes it. This is what distinguishes it from a toast.
+- `onClose` is optional. Only provide it when the product team decides users should be able to dismiss the alert. When omitted, no close button is rendered and the alert cannot be dismissed.
+- When `onClose` is provided, the parent controls visibility and reappearance — for example, hiding the alert on close and showing it again after a timeout or on next page load if the issue is still unresolved.
 - At narrow container widths the layout stacks vertically: icon and text on top, action and link below
 - At wider containers the layout is horizontal: icon and text on the left, action and link on the right
 - The alert stretches to fill its container — control width from the parent
@@ -239,4 +251,28 @@ the action is discoverable even when blocked.
   description="You are missing the company page. It is mandatory to be activated."
   action={{ label: "Request info", onClick: () => {}, disabled: true }}
 />
+```
+
+### Dismissible alert
+
+Pass `onClose` to show a close button. The parent controls visibility and
+reappearance — hide the alert on close and decide when it should come back
+based on product logic (e.g. timeout, next session, or once the issue is resolved).
+
+<Canvas of={Stories.Dismissible} />
+
+```tsx
+import { useState } from "react";
+
+const [visible, setVisible] = useState(true);
+
+return visible ? (
+  <F0Alert
+    variant="info"
+    title="Your workspace includes up to 3 invoices."
+    description="Start creating invoices: it's free with your plan!"
+    action={{ label: "Request info", onClick: () => {} }}
+    onClose={() => setVisible(false)}
+  />
+) : null;
 ```
