@@ -123,14 +123,15 @@ export function MetadataValue({
         : getColor("categorical-1")
       const safeMax = value.max && value.max > 0 ? value.max : 100
       const clampedValue = Math.min(Math.max(0, value.value), safeMax)
+      const percentage = (clampedValue / safeMax) * 100
 
       return (
         <div className="flex items-center gap-2">
           <div className="min-w-16">
             <Progress
               color={barColor}
-              value={clampedValue}
-              max={safeMax}
+              value={percentage}
+              max={100}
               aria-label={item.label}
               aria-valuetext={value.label}
             />
