@@ -104,6 +104,8 @@ Every component that renders text props needs copy rules:
 
 **DoDonts rule:** The `do` panel shows correct copy or usage. The `dont` panel shows a common mistake. Both panels must use realistic Factorial-style content — not Lorem Ipsum, not "Example text".
 
+**Visual children rule:** When using `children` in DoDonts (for visual contrast between variants), the contrast must be **semantically unambiguous** — a viewer must not be able to argue that the "don't" example is a valid choice. If there is any reasonable argument for the "don't" being acceptable, use text-only DoDonts with a `guidelines` array instead. The semantic meaning must be the contrast, not just visual appearance.
+
 Use `guidelines` array (multiple bullet points) when there are more than two copy rules.
 
 ---

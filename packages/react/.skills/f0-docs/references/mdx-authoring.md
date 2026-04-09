@@ -133,6 +133,29 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
   onClick={() => console.log("clicked")}
 />
 ```
+
+## Accessibility
+
+<!--
+  Base this section entirely on the actual component code. Do not invent ARIA attributes or behaviors
+  that are not present in the implementation. If the component has no interactive behavior and no
+  ARIA roles, say so explicitly (e.g. "F0Alert has no ARIA role or live region by default").
+
+  For every interactive prop (e.g. onClose, onClick), document keyboard activation.
+  For every icon, document whether it is decorative (aria-hidden="true") or has a label.
+  For dynamic alerts (injected after user action), document the recommended aria-live pattern.
+-->
+
+### Keyboard interaction
+
+<!-- Only include if the component has interactive elements (buttons, inputs, focusable areas). -->
+<!-- Use the Keyboard table template from the Table Templates section. -->
+
+### Screen reader behavior
+
+- [ARIA role used, or explicit note that no role is set]
+- [aria-live recommendation if component is dynamically injected]
+- [Icon decoration note — e.g. "The leading icon is decorative (aria-hidden). The variant conveys meaning through text."]
 ````
 
 ---
@@ -401,6 +424,37 @@ import { F0Alert } from "../F0Alert";
 
 ---
 
+## Stories — Boolean Toggle for Optional Function Props
+
+When a component has an optional callback prop (e.g. `onClose?: () => void`) that you want users to toggle on/off in Storybook Controls, use `control: "boolean"` in `argTypes` and interpret the value in the story's `render` function. Do NOT use `control: "function"` — it does not exist in Storybook.
+
+**`argTypes` entry:**
+
+```tsx
+onClose: {
+  description:
+    "Optional callback. When provided, renders a dismiss button inside the alert.",
+  control: "boolean",
+},
+```
+
+**Story `render` function (interpret boolean → fn | undefined):**
+
+```tsx
+export const Default: Story = {
+  args: {
+    onClose: true, // boolean default — Controls shows a toggle
+  },
+  render: ({ onClose, ...args }) => (
+    <F0ComponentName {...args} onClose={onClose ? fn() : undefined} />
+  ),
+};
+```
+
+This pattern lets the Controls panel show a simple toggle for the optional callback, while the component receives a real `fn()` (from `@storybook/test`) or `undefined` depending on the toggle state.
+
+---
+
 ## Workflow — 4 Phases
 
 ### Phase 1: Analyze the component
@@ -492,7 +546,10 @@ Before marking MDX as done:
 - [ ] All `<Canvas of={Stories.X} />` reference actually existing stories — never add a Canvas for a story that doesn't exist or whose title doesn't match what the Canvas shows
 - [ ] "When to use" and "When not to use" are separate subsections with separate tables — never mixed
 - [ ] `<DoDonts>` used in Do's and don'ts subsection
+- [ ] DoDonts `children` used only when the do/don't contrast is **semantically unambiguous** — a viewer must not be able to argue the "don't" example is valid. Text-only DoDonts are preferred when the distinction requires explanation.
 - [ ] Components rendered as JSX in MDX (e.g. inside `<DoDonts children>`) are imported via relative path (`from "../F0Component"`), never from `@factorialco/f0-react` (causes module fetch error in dev)
+- [ ] `## Accessibility` section present — based on actual component code only; no invented ARIA attributes or behaviors
+- [ ] Optional function props use `control: "boolean"` in `argTypes` + `render` function to interpret boolean → `fn()` or `undefined` (never `control: "function"`)
 - [ ] No semicolons in `.tsx` import statements (oxfmt rule — does not apply to `.mdx` files)
 - [ ] English throughout, no emojis
 

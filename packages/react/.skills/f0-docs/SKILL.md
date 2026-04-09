@@ -47,8 +47,7 @@ Question list: [`references/component-analysis.md → Step 4`](./references/comp
 
 Before writing, decide the quality level to target (Acceptable / Good / Gold) based on the component's importance and completeness of available information. Check the gold standards:
 
-- `F0Alert/__stories__/F0Alert.mdx` — best in class for decision tables, DoDonts, a11y
-- `F0Button/__stories__/F0Button.mdx` — most complete (DocsNav, states, full props reference, 633 lines)
+- `F0Alert/__stories__/F0Alert.mdx` — gold standard: decision tables, DoDonts with visual children, a11y section, dismissible usage
 
 Quality criteria per section: [`references/documentation-quality.md`](./references/documentation-quality.md)
 
