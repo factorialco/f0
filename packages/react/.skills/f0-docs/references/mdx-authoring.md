@@ -146,16 +146,16 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 
 ### Usage examples
 
-<!-- Named scenarios that don't fit in When to use. Each gets a ### heading, 1–2 sentences, and a Canvas. -->
-<!-- This replaces a top-level ## Usage section — keep examples inside Guidelines. -->
+<!-- Named scenarios. Use **bold text** instead of #### headings — headings generate anchors
+     in the right-side nav and clutter it. Bold gives visual separation without nav entries. -->
 
-#### [Named scenario]
+**[Named scenario]**
 
 [1–2 sentences describing the use case and when to apply it.]
 
 <Canvas of={Stories.WithFeature} />
 
-#### [Another scenario — only include if the Canvas actually shows what the title claims]
+**[Another scenario — only include if the Canvas actually shows what the title claims]**
 
 <Canvas of={Stories.Advanced} />
 
@@ -572,6 +572,7 @@ Before marking MDX as done:
 - [ ] `## Anatomy` section contains `<Canvas of={Stories.Default} />` + `<Controls of={Stories.Default} />` — no separate Props section
 - [ ] `## Modes` / `## Variants` / `## Sizes` each have a Canvas of a story showing all options stacked, followed by a table
 - [ ] `## Guidelines` contains `### Design best practices` with `#### When to use` (may include Canvas), `#### When not to use`, `#### Do's and don'ts`, and `### Usage examples`
+- [ ] Inside `### Usage examples`, scenario titles use `**bold**` not `####` headings — headings generate right-side nav anchors and clutter the menu
 - [ ] All tables use `<Unstyled>` with HTML `<table>` (no raw markdown tables)
 - [ ] All `<Canvas of={Stories.X} />` reference actually existing stories — never add a Canvas for a story that doesn't exist or whose title doesn't match what the Canvas shows
 - [ ] "When to use" and "When not to use" are separate subsections with separate tables — never mixed
