@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.440.1](https://github.com/factorialco/f0/compare/f0-react-v1.440.0...f0-react-v1.440.1) (2026-04-09)
+
+
+### Bug Fixes
+
+* **F0AiInsightCard:** remove label for people card type ([#3908](https://github.com/factorialco/f0/issues/3908)) ([441b3ae](https://github.com/factorialco/f0/commit/441b3ae8e0302c1df210eab986ad3f62508dddfe))
+
 ## [1.440.0](https://github.com/factorialco/f0/compare/f0-react-v1.439.0...f0-react-v1.440.0) (2026-04-09)
 
 
