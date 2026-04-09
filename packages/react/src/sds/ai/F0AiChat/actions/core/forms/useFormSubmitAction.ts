@@ -10,7 +10,7 @@ export const useFormSubmitAction = () => {
   const registry = useF0AiFormRegistry()
 
   useFrontendTool({
-    name: "forms.formSubmit",
+    name: "forms.submitForm",
     description:
       "Submit an active form. Validates all fields first. Only calls the form's onSubmit handler if validation passes. Returns success or validation errors.",
     parameters: [

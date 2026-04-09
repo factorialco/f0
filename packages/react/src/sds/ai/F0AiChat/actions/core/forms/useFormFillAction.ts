@@ -90,7 +90,7 @@ export const useFormFillAction = () => {
   const registry = useF0AiFormRegistry()
 
   useFrontendTool({
-    name: "forms.formFill",
+    name: "forms.fillForm",
     description:
       "Fill one or more fields in an active form. After setting values, validation runs automatically. Returns success or any validation errors. Use formGetState first to learn field names and types.",
     parameters: [
