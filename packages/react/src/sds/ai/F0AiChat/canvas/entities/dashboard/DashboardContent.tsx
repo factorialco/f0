@@ -11,6 +11,7 @@ import type {
   DashboardChartConfig,
   DashboardChartItem,
   DashboardCollectionItem,
+  DashboardInsightItem,
   DashboardItem,
   DashboardItemLayout,
   DashboardMetricItem,
@@ -23,11 +24,14 @@ import type { RecordType } from "@/hooks/datasource"
 
 import { F0AnalyticsDashboard } from "@/patterns/F0AnalyticsDashboard/F0AnalyticsDashboard"
 
+import { F0AiInsightCard } from "@/sds/ai/F0AiInsightCard"
+
 import type {
   ChatDashboardChartConfig,
   ChatDashboardChartItem,
   ChatDashboardCollectionItem,
   ChatDashboardConfig,
+  ChatDashboardInsightItem,
   ChatDashboardItem,
   ChatDashboardMetricItem,
   FormatPreset,
@@ -53,6 +57,7 @@ const MIN_ROW_SPAN_BY_TYPE: Record<ChatDashboardItem["type"], number> = {
   chart: 7, // 7 * 48 = 336px
   metric: 3, // 3 * 48 = 144px
   collection: 10, // 10 * 48 = 480px
+  insight: 4, // 4 * 48 = 192px
 }
 
 /**
@@ -308,6 +313,8 @@ export function ChatDashboard({
             return mapMetricItem(item, makeFetchData(item.id))
           case "collection":
             return mapCollectionItem(item, makeFetchData(item.id))
+          case "insight":
+            return mapInsightItem(item)
         }
       }),
     [config.items, makeFetchData]
@@ -570,5 +577,30 @@ function mapCollectionItem(
         },
       },
     ],
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Insight item mapper — static content, no server-side computation
+// ---------------------------------------------------------------------------
+
+function mapInsightItem(item: ChatDashboardInsightItem): DashboardInsightItem {
+  return {
+    id: item.id,
+    title: item.title,
+    description: item.description,
+    colSpan: item.colSpan ?? 3,
+    rowSpan: item.rowSpan,
+    x: item.x,
+    y: item.y,
+    type: "insight",
+    renderContent: () => (
+      <F0AiInsightCard
+        heading={item.title}
+        description={item.description}
+        label={item.label}
+        {...item.insightContent}
+      />
+    ),
   }
 }

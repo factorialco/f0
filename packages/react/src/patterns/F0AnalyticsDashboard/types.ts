@@ -1,3 +1,5 @@
+import type { ReactNode } from "react"
+
 import type {
   FiltersDefinition,
   FiltersState,
@@ -280,14 +282,28 @@ export interface DashboardCollectionItem<
 }
 
 // ---------------------------------------------------------------------------
+// Insight item — static AI-generated insight rendered via F0AiInsightCard
+// ---------------------------------------------------------------------------
+
+/**
+ * A self-contained insight widget displayed inline in the dashboard grid.
+ * Unlike chart/metric/collection items, insights carry all data inline —
+ * they require no `fetchData` call.
+ */
+export interface DashboardInsightItem extends DashboardItemBase {
+  type: "insight"
+  /** React node rendered inside the grid cell. Produced by the consumer. */
+  renderContent: () => ReactNode
+}
+
+// ---------------------------------------------------------------------------
 // Item union — discriminated on `type`
 // ---------------------------------------------------------------------------
 
 /**
  * A single dashboard item. Discriminated on `type`.
  *
- * Currently supports `"chart"`, `"metric"`, and `"collection"`.
- * Future types (e.g. `"custom"`) extend this union.
+ * Currently supports `"chart"`, `"metric"`, `"collection"`, and `"insight"`.
  */
 export type DashboardItem<
   Filters extends FiltersDefinition = FiltersDefinition,
@@ -295,6 +311,7 @@ export type DashboardItem<
   | DashboardChartItem<Filters>
   | DashboardMetricItem<Filters>
   | DashboardCollectionItem<Filters>
+  | DashboardInsightItem
 
 // ---------------------------------------------------------------------------
 // Layout change descriptor — emitted by edit mode callbacks

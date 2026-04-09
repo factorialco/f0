@@ -36,6 +36,7 @@ const ROW_HEIGHTS: Record<string, number> = {
   chart: 336,
   metric: 144,
   collection: 480,
+  insight: 200,
 }
 const DEFAULT_ROW_HEIGHT = 336
 
@@ -44,6 +45,7 @@ const MIN_ROW_HEIGHTS: Record<string, number> = {
   chart: 240,
   metric: 120,
   collection: 300,
+  insight: 160,
 }
 const DEFAULT_MIN_ROW_HEIGHT = 120
 
@@ -633,6 +635,7 @@ function getSlotWeight<Filters extends FiltersDefinition>(
   item: DashboardItemType<Filters>
 ): number {
   if (item.type === "metric") return 1
+  if (item.type === "insight") return 1
   if (item.type === "chart") return 2
   if (item.type === "collection") return MAX_PER_ROW
   return 2
@@ -690,6 +693,12 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           editMode={editMode}
           handleDelete={onDelete}
         />
+      )
+    case "insight":
+      return (
+        <div className="flex h-full items-stretch p-2">
+          {item.renderContent()}
+        </div>
       )
     default: {
       const unknownItem = item as DashboardItemType<Filters>
