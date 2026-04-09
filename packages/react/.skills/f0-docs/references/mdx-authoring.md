@@ -43,9 +43,9 @@ Filename must match the stories file: `F0Button.stories.tsx` → `F0Button.mdx`
 **Heading hierarchy:**
 
 - `#` — component title. Visible on page but does NOT appear in Storybook's right-side nav.
-- `##` — main sections (Anatomy, Modes, Variants, Sizes, Guidelines, Accessibility, Usage). Appear in the right-side nav.
-- `###` — subsections (Design best practices, Content best practices, Behavior, Keyboard interaction, Screen reader behavior).
-- `####` — sub-subsections (When to use, When not to use, Do's and don'ts).
+- `##` — main sections (Anatomy, Guidelines, Accessibility). Appear in the right-side nav.
+- `###` — subsections of Anatomy (Modes, Variants, Sizes) and of Guidelines (Design best practices, Content best practices, Behavior, Usage examples) and of Accessibility (Keyboard interaction, Screen reader behavior).
+- `####` — sub-subsections of Design best practices (When to use, When not to use, Do's and don'ts).
 
 **No `---` dividers between sections.** Storybook renders them as visible horizontal rules that clutter the page. Use heading hierarchy alone to separate sections.
 
@@ -59,12 +59,14 @@ Filename must match the stories file: `F0Button.stories.tsx` → `F0Button.mdx`
 
 **Section order:**
 
-1. `## Anatomy` — `<Canvas>` of the Default story + `<Controls>` (interactive props table). This is what users see first: the component live, with all props explorable.
-2. `## Modes` — if the component has a `mode` prop with 2+ values: Canvas of a Modes story showing all modes, then a table (Mode | Description | When to use).
-3. `## Variants` — if the component has a `variant` prop with 2+ values: Canvas of a Variants story showing all variants stacked, then a table (Variant | When to use).
-4. `## Sizes` — if the component has a `size` prop with 2+ values: Canvas of a Sizes story showing all sizes stacked, then a table (Size | When to use).
-5. `## Guidelines` — When to use (con Canvas de stories relevantes) / When not to use / Do's and don'ts / Content best practices / Behavior / Usage examples.
-6. `## Accessibility` — Keyboard interaction table + Screen reader behavior.
+1. `## Anatomy` — `<Canvas>` of the Default story + `<Controls>` (interactive props table), then structural sub-sections:
+   - `### Modes` — if the component has a `mode` prop with 2+ values: Canvas of a Modes story showing all modes, then a table (Mode | Description | When to use).
+   - `### Variants` — if the component has a `variant` prop with 2+ values: Canvas of a Variants story showing all variants stacked, then a table (Variant | When to use).
+   - `### Sizes` — if the component has a `size` prop with 2+ values: Canvas of a Sizes story showing all sizes stacked, then a table (Size | When to use).
+2. `## Guidelines` — all usage guidance: When to use / When not to use / Do's and don'ts / Content / Behavior / Usage examples.
+3. `## Accessibility` — Keyboard interaction table + Screen reader behavior.
+
+**Rationale:** Modes, Variants and Sizes describe the structural forms the component can take — they are anatomy, not guidance. Keeping them under `## Anatomy` gives the right-side nav three clean top-level entries: Anatomy · Guidelines · Accessibility.
 
 ```mdx
 import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks";
@@ -83,7 +85,7 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 
 <Controls of={Stories.Default} />
 
-## Modes
+### Modes
 
 <!-- Only include if the component has a mode prop with 2+ values -->
 
@@ -91,7 +93,7 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 
 <!-- Modes table: Mode | Description | When to use — see Table Templates -->
 
-## Variants
+### Variants
 
 <!-- Only include if the component has a variant prop with 2+ values -->
 
@@ -99,7 +101,7 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 
 <!-- Variants table: Variant | When to use — see Table Templates -->
 
-## Sizes
+### Sizes
 
 <!-- Only include if the component has a size prop with 2+ values -->
 
@@ -567,10 +569,11 @@ Before marking MDX as done:
 - [ ] No `## Purpose` section — the description immediately after `# ComponentName` already serves this role
 - [ ] No `# Code` section — `<Controls>` in `## Anatomy` is the interactive props reference; a separate Code/Props section is redundant
 - [ ] No top-level `## Usage` section — named examples live inside `## Guidelines` under `### Usage examples`
-- [ ] Section order: Anatomy → Modes (if applicable) → Variants (if applicable) → Sizes (if applicable) → Guidelines → Accessibility
+- [ ] Section order: Anatomy → Guidelines → Accessibility (three top-level ## sections)
+- [ ] Modes / Variants / Sizes are `###` inside `## Anatomy`, not top-level `##` sections — they describe structural forms, not usage guidance
 - [ ] Component title (`# ComponentName`) followed immediately by a 1–2 sentence fused description (definition + purpose + cross-references)
 - [ ] `## Anatomy` section contains `<Canvas of={Stories.Default} />` + `<Controls of={Stories.Default} />` — no separate Props section
-- [ ] `## Modes` / `## Variants` / `## Sizes` each have a Canvas of a story showing all options stacked, followed by a table
+- [ ] `### Modes` / `### Variants` / `### Sizes` (inside `## Anatomy`) each have a Canvas of a story showing all options stacked, followed by a table
 - [ ] `## Guidelines` contains `### Design best practices` with `#### When to use` (may include Canvas), `#### When not to use`, `#### Do's and don'ts`, and `### Usage examples`
 - [ ] Inside `### Usage examples`, scenario titles use `**bold**` not `####` headings — headings generate right-side nav anchors and clutter the menu
 - [ ] All tables use `<Unstyled>` with HTML `<table>` (no raw markdown tables)
