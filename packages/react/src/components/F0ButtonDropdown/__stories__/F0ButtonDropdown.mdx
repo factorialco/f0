@@ -6,7 +6,7 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 
 # ButtonDropdown
 
-Consolidates multiple related actions under a single button. Comes in two modes: **split** (default) promotes the most common action to a one-click trigger while keeping the rest reachable via a chevron; **dropdown** presents all actions equally under a single trigger button.
+Consolidates multiple related actions under a single button. Comes in two modes: **split** (default) promotes the most common action to a one-click trigger while keeping the rest reachable via a chevron; **dropdown** presents all actions equally under a single trigger button. For a single action use `F0Button` instead.
 
 ## Anatomy
 
@@ -37,8 +37,8 @@ Consolidates multiple related actions under a single button. Comes in two modes:
           chevron opens the menu with the remaining items.
         </td>
         <td>
-          One action is more likely than the rest and should be one-click
-          accessible.
+          One action is clearly more frequent than the rest and should be
+          one-click accessible.
         </td>
       </tr>
       <tr>
@@ -139,6 +139,14 @@ Consolidates multiple related actions under a single button. Comes in two modes:
 
 #### When to use
 
+Use **split mode** when one action is clearly more frequent than the rest — the user can trigger it in one click without opening the menu.
+
+<Canvas of={Stories.SplitModeExample} />
+
+Use **dropdown mode** when all actions are equally likely and none should be promoted — a single trigger opens the full list.
+
+<Canvas of={Stories.DropdownModeExample} />
+
 <Unstyled>
   <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
     <thead>
@@ -151,8 +159,22 @@ Consolidates multiple related actions under a single button. Comes in two modes:
       <tr>
         <td>Multiple related actions on the same entity</td>
         <td>
-          The actions share context but have different consequences (e.g.
-          "Save", "Save and close", "Save as draft")
+          The actions share context but have different consequences (e.g. "Save
+          changes", "Save and close", "Discard")
+        </td>
+      </tr>
+      <tr>
+        <td>One action is significantly more common</td>
+        <td>
+          Use split mode — promotes it as a one-click trigger while keeping the
+          rest reachable via the chevron
+        </td>
+      </tr>
+      <tr>
+        <td>All actions are equally likely</td>
+        <td>
+          Use dropdown mode — no single action has priority (e.g. "Export as
+          CSV", "Export as PDF", "Export as Excel")
         </td>
       </tr>
       <tr>
@@ -160,13 +182,6 @@ Consolidates multiple related actions under a single button. Comes in two modes:
         <td>
           Consolidating secondary actions reduces visual noise while keeping
           them accessible
-        </td>
-      </tr>
-      <tr>
-        <td>One action is significantly more common</td>
-        <td>
-          Use split mode to surface it as a one-click trigger and keep the rest
-          in the menu
         </td>
       </tr>
     </tbody>
@@ -202,7 +217,7 @@ Consolidates multiple related actions under a single button. Comes in two modes:
       </tr>
       <tr>
         <td>All actions are equally destructive or critical</td>
-        <td>Surface them individually for clarity</td>
+        <td>Surface them individually so each requires deliberate intent</td>
       </tr>
     </tbody>
   </table>
@@ -264,6 +279,38 @@ Consolidates multiple related actions under a single button. Comes in two modes:
 - The `value` prop (split mode) controls which item is currently selected. When omitted, defaults to the first item's value.
 - `disabled` and `loading` apply to the entire control — both the main button and the chevron are affected.
 
+### Usage examples
+
+#### Items with descriptions and a critical action
+
+Use `description` to clarify what each item does when the label alone is ambiguous. Mark destructive actions with `critical: true` — they render in a danger style to signal irreversibility.
+
+<Canvas of={Stories.WithDescription} />
+
+#### Grouped items
+
+Use `ButtonDropdownGroup` objects to organize items into labeled sections with visual separators. Useful when the list mixes actions of different categories.
+
+<Canvas of={Stories.WithGroups} />
+
+#### Dropdown mode with custom trigger label
+
+Set `trigger` to give the button a label that describes the category rather than a specific item. Use this when the item list may change or when no single item should dominate the label.
+
+<Canvas of={Stories.DropdownModeWithTrigger} />
+
+#### With tooltip
+
+Use `tooltip` when the button's context needs additional explanation — for example in toolbars where space limits the label.
+
+<Canvas of={Stories.WithTooltip} />
+
+#### Critical items in context
+
+Use `critical: true` only for irreversible actions. Place them last in the list — after all safe actions — so users encounter them only after reviewing alternatives.
+
+<Canvas of={Stories.CriticalItems} />
+
 ## Accessibility
 
 ### Keyboard interaction
@@ -318,29 +365,3 @@ Consolidates multiple related actions under a single button. Comes in two modes:
 - Item icons are decorative — meaning is carried by the label and optional description
 - Critical items are distinguished by color only — no additional ARIA role marks them as destructive
 - The dropdown is Radix-based — it traps focus while open and restores it to the trigger on close
-
-## Usage
-
-### Items with descriptions and critical action
-
-Use `description` to clarify what each item does when labels alone are ambiguous. Mark destructive actions with `critical: true`.
-
-<Canvas of={Stories.WithDescription} />
-
-### Grouped items
-
-Use `ButtonDropdownGroup` objects to organize items into labeled sections with visual separators.
-
-<Canvas of={Stories.WithGroups} />
-
-### Dropdown mode with custom trigger
-
-Use `mode="dropdown"` with a `trigger` label when no single action has priority. The trigger label is independent of the item list.
-
-<Canvas of={Stories.DropdownModeWithTrigger} />
-
-### With tooltip
-
-Use `tooltip` when the button's context needs additional explanation — for example in toolbars where space is limited.
-
-<Canvas of={Stories.WithTooltip} />

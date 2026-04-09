@@ -473,6 +473,55 @@ export const Modes: Story = {
   ),
 };
 
+// Split mode: one action is clearly more frequent
+export const SplitModeExample: Story = {
+  tags: ["!dev"],
+  args: {
+    mode: "split",
+    items: [
+      { value: "save", label: "Save changes", icon: Save },
+      { value: "save-close", label: "Save and close", icon: Save },
+      {
+        value: "discard",
+        label: "Discard changes",
+        icon: Delete,
+        critical: true,
+      },
+    ],
+  },
+};
+
+// Dropdown mode: no single action has priority
+export const DropdownModeExample: Story = {
+  tags: ["!dev"],
+  args: {
+    mode: "dropdown",
+    trigger: "Export",
+    items: [
+      { value: "csv", label: "Export as CSV", icon: Add },
+      { value: "pdf", label: "Export as PDF", icon: Add },
+      { value: "xlsx", label: "Export as Excel", icon: Add },
+    ],
+  },
+};
+
+// When not to use: single action → use F0Button instead (shown as reference)
+export const CriticalItems: Story = {
+  tags: ["!dev"],
+  args: {
+    items: [
+      { value: "save", label: "Save changes", icon: Save },
+      { value: "archive", label: "Archive employee", icon: Pencil },
+      {
+        value: "delete",
+        label: "Delete employee",
+        icon: Delete,
+        critical: true,
+      },
+    ],
+  },
+};
+
 export const Snapshot: Story = {
   tags: ["!dev"],
   parameters: withSnapshot({}),
