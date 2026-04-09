@@ -433,7 +433,7 @@ function SurveyAnsweringFormInline({
     undefined,
     undefined,
     true,
-    !!defaultValues && Object.keys(defaultValues).length > 0,
+    true,
     useUpload,
     datasets
   )
@@ -471,13 +471,13 @@ function SurveyAnsweringFormInline({
           </F0Box>
         ) : (
           <F0Form
-            formRef={{ current: null }}
             name="survey-answering-inline"
             schema={schema}
             defaultValues={formDefaultValues}
             onSubmit={async () => ({ success: true })}
             submitConfig={{
               hideSubmitButton: true,
+              hideActionBar: true,
             }}
             sections={sections}
           />
