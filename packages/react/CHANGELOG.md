@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.440.2](https://github.com/factorialco/f0/compare/f0-react-v1.440.1...f0-react-v1.440.2) (2026-04-09)
+
+
+### Bug Fixes
+
+* **metadata:** normalize progress-bar value to percentage ([#3910](https://github.com/factorialco/f0/issues/3910)) ([dfae0e9](https://github.com/factorialco/f0/commit/dfae0e900afe7563f477e7cfa041aa473a502e37))
+
 ## [1.440.1](https://github.com/factorialco/f0/compare/f0-react-v1.440.0...f0-react-v1.440.1) (2026-04-09)
 
 
