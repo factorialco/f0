@@ -1,13 +1,14 @@
-import { forwardRef, useState, type KeyboardEvent } from "react"
 import { motion } from "motion/react"
+import { forwardRef, useState, type KeyboardEvent } from "react"
 
 import { useReducedMotion } from "@/lib/a11y"
 import { cn, focusRing } from "@/lib/utils"
 
+import type { F0AiInsightCardProps } from "./types"
+
 import { CardHeader } from "./components/CardHeader"
 import { CardMetadata } from "./components/CardMetadata"
 import { CardSparkline } from "./components/CardSparkline"
-import type { F0AiInsightCardProps } from "./types"
 import { cardVariants, headingVariants } from "./variants"
 
 export type CardInternalProps = F0AiInsightCardProps & {
@@ -28,8 +29,10 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
     } = props
 
     const [isHovered, setIsHovered] = useState(false)
+    const [isFocused, setIsFocused] = useState(false)
+    const isRevealed = isHovered || isFocused
     const shouldReduceMotion = useReducedMotion()
-    const shouldFadeContent = isHovered && !!onAskOne
+    const shouldFadeContent = isRevealed && !!onAskOne
 
     const fadeTransition = {
       duration: shouldReduceMotion ? 0 : 0.2,
@@ -41,6 +44,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
     }
 
     const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+      if (event.currentTarget !== event.target) return
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault()
         onClick?.()
@@ -86,10 +90,12 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
           onKeyDown={onClick ? handleKeyDown : undefined}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
         >
           <CardHeader
             description={description}
-            isHovered={isHovered}
+            isRevealed={isRevealed}
             onAskOne={onAskOne}
           />
 

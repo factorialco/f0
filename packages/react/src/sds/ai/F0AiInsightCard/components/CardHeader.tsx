@@ -1,21 +1,21 @@
 import { AnimatePresence, motion } from "motion/react"
 
 import { useReducedMotion } from "@/lib/a11y"
-import { AIButton } from "@/sds/ai/AIButton"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { AIButton } from "@/sds/ai/AIButton"
 
 import { descriptionVariants } from "../variants"
 
 type CardHeaderProps = {
   description?: string
-  isHovered: boolean
+  isRevealed: boolean
   onAskOne?: () => void
 }
 
 export const CardHeader = ({
   description,
-  isHovered,
+  isRevealed,
   onAskOne,
 }: CardHeaderProps) => {
   const t = useI18n()
@@ -29,7 +29,7 @@ export const CardHeader = ({
         </span>
       )}
       <AnimatePresence>
-        {onAskOne && isHovered && (
+        {onAskOne && isRevealed && (
           <motion.div
             className="absolute bottom-4 left-4 z-10"
             initial={{ opacity: 0 }}
@@ -40,7 +40,14 @@ export const CardHeader = ({
               ease: [0.33, 1, 0.68, 1],
             }}
           >
-            <AIButton size="md" label={t.ai.ask} onClick={onAskOne} />
+            <AIButton
+              size="md"
+              label={t.ai.ask}
+              onClick={(event) => {
+                event.stopPropagation()
+                onAskOne()
+              }}
+            />
           </motion.div>
         )}
       </AnimatePresence>

@@ -5,9 +5,9 @@ import { fn } from "storybook/test"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import type { F0AiInsightCardProps, SparklineDataPoint } from "../types"
-import { contentTypes } from "../types"
 
 import { F0AiInsightCard } from ".."
+import { contentTypes } from "../types"
 
 const sampleSparklineData: SparklineDataPoint[] = [
   { value: 8 },
@@ -174,7 +174,6 @@ const alertArgs: F0AiInsightCardProps = {
   content: "alert",
   description: "Alert",
   heading: "3 employees with expiring contracts",
-  label: "Contracts",
   level: "warning",
   alertLabel: "Needs attention",
   onClick: fn(),

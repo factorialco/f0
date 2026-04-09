@@ -9,6 +9,7 @@ import { F0TagBalance } from "@/components/tags/F0TagBalance"
 import { cn } from "@/lib/utils"
 
 import type { ContentType, AiInsightCardContent, BalanceConfig } from "../types"
+
 import { headingVariants, labelVariants } from "../variants"
 
 const hiddenBottomLabelTypes = new Set<ContentType>([
@@ -69,12 +70,15 @@ export const CardMetadata = (props: CardMetadataProps) => {
         )}
 
         {content === "people" && (
-          <F0AvatarList
-            type="person"
-            avatars={props.avatars}
-            size="md"
-            max={3}
-          />
+          <div className="flex flex-col gap-1">
+            <F0AvatarList
+              type="person"
+              avatars={props.avatars}
+              size="md"
+              max={3}
+            />
+            {label && <span className={cn(labelVariants())}>{label}</span>}
+          </div>
         )}
 
         {content === "team" && (
