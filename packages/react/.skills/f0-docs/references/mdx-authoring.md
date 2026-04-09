@@ -63,9 +63,8 @@ Filename must match the stories file: `F0Button.stories.tsx` → `F0Button.mdx`
 2. `## Modes` — if the component has a `mode` prop with 2+ values: Canvas of a Modes story showing all modes, then a table (Mode | Description | When to use).
 3. `## Variants` — if the component has a `variant` prop with 2+ values: Canvas of a Variants story showing all variants stacked, then a table (Variant | When to use).
 4. `## Sizes` — if the component has a `size` prop with 2+ values: Canvas of a Sizes story showing all sizes stacked, then a table (Size | When to use).
-5. `## Guidelines` — When to use / When not to use / Do's and don'ts / Content best practices / Behavior.
+5. `## Guidelines` — When to use (con Canvas de stories relevantes) / When not to use / Do's and don'ts / Content best practices / Behavior / Usage examples.
 6. `## Accessibility` — Keyboard interaction table + Screen reader behavior.
-7. `## Usage` — named scenarios with Canvas + optional tsx snippet for non-obvious usage.
 
 ```mdx
 import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks";
@@ -114,6 +113,10 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 
 #### When to use
 
+<!-- 1–2 sentences introducing the key decision. If there are distinct sub-cases (e.g. split vs dropdown), introduce each with a sentence and a Canvas before the table. -->
+
+<!-- Canvas of a story that illustrates the primary use case — only if it shows exactly what the prose describes -->
+
 <!-- 2-col table (Situation | Use F0X when) — positive cases only. See Table Templates. -->
 
 #### When not to use
@@ -141,6 +144,21 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 - [Layout or responsive behavior]
 - [State transitions]
 
+### Usage examples
+
+<!-- Named scenarios that don't fit in When to use. Each gets a ### heading, 1–2 sentences, and a Canvas. -->
+<!-- This replaces a top-level ## Usage section — keep examples inside Guidelines. -->
+
+#### [Named scenario]
+
+[1–2 sentences describing the use case and when to apply it.]
+
+<Canvas of={Stories.WithFeature} />
+
+#### [Another scenario — only include if the Canvas actually shows what the title claims]
+
+<Canvas of={Stories.Advanced} />
+
 ## Accessibility
 
 <!--
@@ -163,18 +181,6 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 - [ARIA role used, or explicit note that no role is set]
 - [aria-live recommendation if component is dynamically injected]
 - [Icon decoration note — e.g. "The leading icon is decorative (aria-hidden). The variant conveys meaning through text."]
-
-## Usage
-
-### [Named scenario]
-
-[1–2 sentences describing the use case and when to apply it.]
-
-<Canvas of={Stories.WithFeature} />
-
-### [Another scenario — only include if the Canvas actually shows what the title claims]
-
-<Canvas of={Stories.Advanced} />
 ```
 
 ---
@@ -560,11 +566,12 @@ Before marking MDX as done:
 - [ ] No visible import block (`import { F0X } from "@factorialco/f0-react"`) — ImportBanner injects this automatically on every page
 - [ ] No `## Purpose` section — the description immediately after `# ComponentName` already serves this role
 - [ ] No `# Code` section — `<Controls>` in `## Anatomy` is the interactive props reference; a separate Code/Props section is redundant
-- [ ] Section order: Anatomy → Modes (if applicable) → Variants (if applicable) → Sizes (if applicable) → Guidelines → Accessibility → Usage
+- [ ] No top-level `## Usage` section — named examples live inside `## Guidelines` under `### Usage examples`
+- [ ] Section order: Anatomy → Modes (if applicable) → Variants (if applicable) → Sizes (if applicable) → Guidelines → Accessibility
 - [ ] Component title (`# ComponentName`) followed immediately by a 1–2 sentence fused description (definition + purpose + cross-references)
 - [ ] `## Anatomy` section contains `<Canvas of={Stories.Default} />` + `<Controls of={Stories.Default} />` — no separate Props section
 - [ ] `## Modes` / `## Variants` / `## Sizes` each have a Canvas of a story showing all options stacked, followed by a table
-- [ ] `## Guidelines` contains `### Design best practices` with `#### When to use`, `#### When not to use`, `#### Do's and don'ts` subsections
+- [ ] `## Guidelines` contains `### Design best practices` with `#### When to use` (may include Canvas), `#### When not to use`, `#### Do's and don'ts`, and `### Usage examples`
 - [ ] All tables use `<Unstyled>` with HTML `<table>` (no raw markdown tables)
 - [ ] All `<Canvas of={Stories.X} />` reference actually existing stories — never add a Canvas for a story that doesn't exist or whose title doesn't match what the Canvas shows
 - [ ] "When to use" and "When not to use" are separate subsections with separate tables — never mixed
