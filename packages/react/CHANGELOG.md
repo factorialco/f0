@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.440.0](https://github.com/factorialco/f0/compare/f0-react-v1.439.0...f0-react-v1.440.0) (2026-04-09)
+
+
+### Features
+
+* **F0AiInsightCard:** add analytics insight card component ([#3864](https://github.com/factorialco/f0/issues/3864)) ([3187bdb](https://github.com/factorialco/f0/commit/3187bdb53f52c0345e39eaad0d1748b8d98ee584))
+
 ## [1.439.0](https://github.com/factorialco/f0/compare/f0-react-v1.438.5...f0-react-v1.439.0) (2026-04-09)
 
 
