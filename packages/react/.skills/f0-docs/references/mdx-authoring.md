@@ -43,15 +43,31 @@ Filename must match the stories file: `F0Button.stories.tsx` → `F0Button.mdx`
 **Heading hierarchy:**
 
 - `#` — component title. Visible on page but does NOT appear in Storybook's right-side nav.
-- `##` — main sections (Anatomy, Guidelines, Variants, Usage). Appear in the right-side nav.
-- `###` — subsections (Design best practices, Content best practices, Behavior).
+- `##` — main sections (Anatomy, Modes, Variants, Sizes, Guidelines, Accessibility, Usage). Appear in the right-side nav.
+- `###` — subsections (Design best practices, Content best practices, Behavior, Keyboard interaction, Screen reader behavior).
 - `####` — sub-subsections (When to use, When not to use, Do's and don'ts).
 
 **No `---` dividers between sections.** Storybook renders them as visible horizontal rules that clutter the page. Use heading hierarchy alone to separate sections.
 
 **No import banner needed.** The `ImportBanner` component in `.storybook/DocsContainer.tsx` automatically injects the `import { F0ComponentName } from "@factorialco/f0-react"` block into every docs page via a portal. Do NOT add a visible import block in the MDX.
 
-````mdx
+**No `DocsNav` and no manual menu.** Storybook has a native right-side navigation built from the heading hierarchy — a secondary nav component is redundant and confusing. Never import or use `DocsNav`.
+
+**No `## Purpose` section.** The 1–2 sentence description immediately after the component title already serves this role. A separate Purpose section restates the same information and adds noise.
+
+**No `# Code` section.** `<Controls of={Stories.Default} />` in `## Anatomy` is the interactive props table — users can explore all props there. A separate Code section with an import block and a static props reference table duplicates content that is already available interactively.
+
+**Section order:**
+
+1. `## Anatomy` — `<Canvas>` of the Default story + `<Controls>` (interactive props table). This is what users see first: the component live, with all props explorable.
+2. `## Modes` — if the component has a `mode` prop with 2+ values: Canvas of a Modes story showing all modes, then a table (Mode | Description | When to use).
+3. `## Variants` — if the component has a `variant` prop with 2+ values: Canvas of a Variants story showing all variants stacked, then a table (Variant | When to use).
+4. `## Sizes` — if the component has a `size` prop with 2+ values: Canvas of a Sizes story showing all sizes stacked, then a table (Size | When to use).
+5. `## Guidelines` — When to use / When not to use / Do's and don'ts / Content best practices / Behavior.
+6. `## Accessibility` — Keyboard interaction table + Screen reader behavior.
+7. `## Usage` — named scenarios with Canvas + optional tsx snippet for non-obvious usage.
+
+```mdx
 import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks";
 import * as Stories from "./ComponentName.stories";
 import { DoDonts } from "@/lib/storybook-utils/do-donts";
@@ -67,6 +83,30 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 <Canvas of={Stories.Default} />
 
 <Controls of={Stories.Default} />
+
+## Modes
+
+<!-- Only include if the component has a mode prop with 2+ values -->
+
+<Canvas of={Stories.Modes} />
+
+<!-- Modes table: Mode | Description | When to use — see Table Templates -->
+
+## Variants
+
+<!-- Only include if the component has a variant prop with 2+ values -->
+
+<Canvas of={Stories.Variants} />
+
+<!-- Variants table: Variant | When to use — see Table Templates -->
+
+## Sizes
+
+<!-- Only include if the component has a size prop with 2+ values -->
+
+<Canvas of={Stories.Sizes} />
+
+<!-- Sizes table: Size | When to use — see Table Templates -->
 
 ## Guidelines
 
@@ -101,39 +141,6 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 - [Layout or responsive behavior]
 - [State transitions]
 
-## Variants
-
-<!-- Include only if the component has a variant prop with 2+ values -->
-<!-- Canvas of a Variants story if one exists, then a 2-col table (Variant | When to use) -->
-
-<Canvas of={Stories.Variants} />
-
-<!-- Variants table — see Table Templates section below -->
-
-## Usage
-
-### [Named scenario]
-
-[1–2 sentences describing the use case and when to apply it.]
-
-<Canvas of={Stories.WithFeature} />
-
-```tsx
-<F0ComponentName label="Example" feature={true} />
-```
-
-### [Another scenario — only include if the Canvas actually shows what the title claims]
-
-<Canvas of={Stories.Advanced} />
-
-```tsx
-<F0ComponentName
-  label="Advanced"
-  variant="outline"
-  onClick={() => console.log("clicked")}
-/>
-```
-
 ## Accessibility
 
 <!--
@@ -156,7 +163,19 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 - [ARIA role used, or explicit note that no role is set]
 - [aria-live recommendation if component is dynamically injected]
 - [Icon decoration note — e.g. "The leading icon is decorative (aria-hidden). The variant conveys meaning through text."]
-````
+
+## Usage
+
+### [Named scenario]
+
+[1–2 sentences describing the use case and when to apply it.]
+
+<Canvas of={Stories.WithFeature} />
+
+### [Another scenario — only include if the Canvas actually shows what the title claims]
+
+<Canvas of={Stories.Advanced} />
+```
 
 ---
 
@@ -535,12 +554,16 @@ Before marking MDX as done:
 - [ ] `<Meta of={Stories} />` for standard components (or `<Meta title="..." />` for umbrella only)
 - [ ] `"autodocs"` removed from stories meta
 - [ ] Stories used in docs have `tags: ["!dev"]`
-- [ ] No `<DocsNav />` — Storybook has native sidebar navigation
+- [ ] No `<DocsNav />` and no manual navigation menu — Storybook has native right-side nav built from heading hierarchy
 - [ ] No import of `DocsNav` in the MDX file
 - [ ] No `---` dividers between sections — use heading hierarchy only
 - [ ] No visible import block (`import { F0X } from "@factorialco/f0-react"`) — ImportBanner injects this automatically on every page
+- [ ] No `## Purpose` section — the description immediately after `# ComponentName` already serves this role
+- [ ] No `# Code` section — `<Controls>` in `## Anatomy` is the interactive props reference; a separate Code/Props section is redundant
+- [ ] Section order: Anatomy → Modes (if applicable) → Variants (if applicable) → Sizes (if applicable) → Guidelines → Accessibility → Usage
 - [ ] Component title (`# ComponentName`) followed immediately by a 1–2 sentence fused description (definition + purpose + cross-references)
 - [ ] `## Anatomy` section contains `<Canvas of={Stories.Default} />` + `<Controls of={Stories.Default} />` — no separate Props section
+- [ ] `## Modes` / `## Variants` / `## Sizes` each have a Canvas of a story showing all options stacked, followed by a table
 - [ ] `## Guidelines` contains `### Design best practices` with `#### When to use`, `#### When not to use`, `#### Do's and don'ts` subsections
 - [ ] All tables use `<Unstyled>` with HTML `<table>` (no raw markdown tables)
 - [ ] All `<Canvas of={Stories.X} />` reference actually existing stories — never add a Canvas for a story that doesn't exist or whose title doesn't match what the Canvas shows
