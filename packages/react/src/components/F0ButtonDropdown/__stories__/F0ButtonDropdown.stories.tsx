@@ -1,17 +1,17 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { expect, within } from "storybook/test"
+import { expect, within } from "storybook/test";
 
-import { Add, Delete, Pencil, Replace, Save } from "@/icons/app/index.ts"
-import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
-import { withSnapshot } from "@/lib/storybook-utils/parameters.ts"
+import { Add, Delete, Pencil, Replace, Save } from "@/icons/app/index.ts";
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args";
+import { withSnapshot } from "@/lib/storybook-utils/parameters.ts";
 
-import { F0ButtonDropdown } from "../index"
+import { F0ButtonDropdown } from "../index";
 import {
   buttonDropdownModes,
   buttonDropdownSizes,
   buttonDropdownVariants,
-} from "../types.ts"
+} from "../types.ts";
 
 const meta = {
   title: "Button/ButtonDropdown",
@@ -30,11 +30,11 @@ const meta = {
       },
     },
   },
-  tags: ["autodocs"],
+  tags: ["stable"],
   args: {
     variant: "default",
     onClick: (value, item) => {
-      console.log("DropdownButton clicked => value:", value, "item:", item)
+      console.log("DropdownButton clicked => value:", value, "item:", item);
     },
   },
   argTypes: {
@@ -93,13 +93,14 @@ const meta = {
     },
     ...dataTestIdArgs,
   },
-} satisfies Meta<typeof F0ButtonDropdown>
+} satisfies Meta<typeof F0ButtonDropdown>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 // Basic Variants
 export const Default: Story = {
+  tags: ["!dev"],
   args: {
     variant: "default",
     items: [
@@ -119,7 +120,7 @@ export const Default: Story = {
       },
     ],
   },
-}
+};
 
 export const WithDataTestId: Story = {
   args: {
@@ -139,15 +140,16 @@ export const WithDataTestId: Story = {
     ],
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
+    const canvas = within(canvasElement);
     await expect(
-      canvas.getByTestId("my-test-button-dropdown")
-    ).toBeInTheDocument()
+      canvas.getByTestId("my-test-button-dropdown"),
+    ).toBeInTheDocument();
   },
-}
+};
 
 // Basic Variants
 export const WithTooltip: Story = {
+  tags: ["!dev"],
   args: {
     variant: "default",
     tooltip: "Tooltip to explain the button",
@@ -168,9 +170,10 @@ export const WithTooltip: Story = {
       },
     ],
   },
-}
+};
 
 export const WithDescription: Story = {
+  tags: ["!dev"],
   args: {
     items: [
       {
@@ -200,9 +203,10 @@ export const WithDescription: Story = {
       },
     ],
   },
-}
+};
 
 export const WithGroups: Story = {
+  tags: ["!dev"],
   args: {
     items: [
       {
@@ -235,10 +239,11 @@ export const WithGroups: Story = {
       },
     ],
   },
-}
+};
 
 // Dropdown mode stories
 export const DropdownMode: Story = {
+  tags: ["!dev"],
   args: {
     mode: "dropdown",
     items: [
@@ -269,9 +274,10 @@ export const DropdownMode: Story = {
       },
     ],
   },
-}
+};
 
 export const DropdownModeWithTrigger: Story = {
+  tags: ["!dev"],
   args: {
     mode: "dropdown",
     trigger: "New action",
@@ -296,9 +302,10 @@ export const DropdownModeWithTrigger: Story = {
       },
     ],
   },
-}
+};
 
 export const DropdownModeWithGroups: Story = {
+  tags: ["!dev"],
   args: {
     mode: "dropdown",
     trigger: "Actions",
@@ -333,9 +340,141 @@ export const DropdownModeWithGroups: Story = {
       },
     ],
   },
-}
+};
+
+export const Variants: Story = {
+  tags: ["!dev"],
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <F0ButtonDropdown
+        variant="default"
+        items={[
+          { value: "save", label: "Save draft", icon: Save },
+          {
+            value: "delete",
+            label: "Delete record",
+            icon: Delete,
+            critical: true,
+          },
+        ]}
+        onClick={() => {}}
+      />
+      <F0ButtonDropdown
+        variant="outline"
+        items={[
+          { value: "save", label: "Save draft", icon: Save },
+          {
+            value: "delete",
+            label: "Delete record",
+            icon: Delete,
+            critical: true,
+          },
+        ]}
+        onClick={() => {}}
+      />
+      <F0ButtonDropdown
+        variant="neutral"
+        items={[
+          { value: "save", label: "Save draft", icon: Save },
+          {
+            value: "delete",
+            label: "Delete record",
+            icon: Delete,
+            critical: true,
+          },
+        ]}
+        onClick={() => {}}
+      />
+    </div>
+  ),
+};
+
+export const Sizes: Story = {
+  tags: ["!dev"],
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <F0ButtonDropdown
+        size="sm"
+        items={[
+          { value: "save", label: "Save draft", icon: Save },
+          {
+            value: "delete",
+            label: "Delete record",
+            icon: Delete,
+            critical: true,
+          },
+        ]}
+        onClick={() => {}}
+      />
+      <F0ButtonDropdown
+        size="md"
+        items={[
+          { value: "save", label: "Save draft", icon: Save },
+          {
+            value: "delete",
+            label: "Delete record",
+            icon: Delete,
+            critical: true,
+          },
+        ]}
+        onClick={() => {}}
+      />
+      <F0ButtonDropdown
+        size="lg"
+        items={[
+          { value: "save", label: "Save draft", icon: Save },
+          {
+            value: "delete",
+            label: "Delete record",
+            icon: Delete,
+            critical: true,
+          },
+        ]}
+        onClick={() => {}}
+      />
+    </div>
+  ),
+};
+
+export const Modes: Story = {
+  tags: ["!dev"],
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <F0ButtonDropdown
+        mode="split"
+        items={[
+          { value: "save", label: "Save draft", icon: Save },
+          { value: "add", label: "Add item", icon: Add },
+          {
+            value: "delete",
+            label: "Delete record",
+            icon: Delete,
+            critical: true,
+          },
+        ]}
+        onClick={() => {}}
+      />
+      <F0ButtonDropdown
+        mode="dropdown"
+        trigger="Actions"
+        items={[
+          { value: "save", label: "Save draft", icon: Save },
+          { value: "add", label: "Add item", icon: Add },
+          {
+            value: "delete",
+            label: "Delete record",
+            icon: Delete,
+            critical: true,
+          },
+        ]}
+        onClick={() => {}}
+      />
+    </div>
+  ),
+};
 
 export const Snapshot: Story = {
+  tags: ["!dev"],
   parameters: withSnapshot({}),
   args: {
     items: [
@@ -357,4 +496,4 @@ export const Snapshot: Story = {
     ],
   },
   render: (args) => <F0ButtonDropdown {...args} />,
-}
+};
