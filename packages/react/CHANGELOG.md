@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.440.1](https://github.com/factorialco/f0/compare/f0-react-v1.440.0...f0-react-v1.440.1) (2026-04-09)
+
+
+### Bug Fixes
+
+* **F0AiInsightCard:** remove label for people card type ([#3908](https://github.com/factorialco/f0/issues/3908)) ([441b3ae](https://github.com/factorialco/f0/commit/441b3ae8e0302c1df210eab986ad3f62508dddfe))
+
+## [1.440.0](https://github.com/factorialco/f0/compare/f0-react-v1.439.0...f0-react-v1.440.0) (2026-04-09)
+
+
+### Features
+
+* **F0AiInsightCard:** add analytics insight card component ([#3864](https://github.com/factorialco/f0/issues/3864)) ([3187bdb](https://github.com/factorialco/f0/commit/3187bdb53f52c0345e39eaad0d1748b8d98ee584))
+
+## [1.439.0](https://github.com/factorialco/f0/compare/f0-react-v1.438.5...f0-react-v1.439.0) (2026-04-09)
+
+
+### Features
+
+* **SurveyAnsweringForm:** add read-only inline rendering mode ([#3904](https://github.com/factorialco/f0/issues/3904)) ([bbaef18](https://github.com/factorialco/f0/commit/bbaef183532a23e3f473bff2be3097919e4ecf7e))
+
+## [1.438.5](https://github.com/factorialco/f0/compare/f0-react-v1.438.4...f0-react-v1.438.5) (2026-04-08)
+
+
+### Bug Fixes
+
+* resolve mcp api build errors ([6f671e8](https://github.com/factorialco/f0/commit/6f671e8ecdba4695b2c4371fb8d357c8ddc741a7))
+
+## [1.438.4](https://github.com/factorialco/f0/compare/f0-react-v1.438.3...f0-react-v1.438.4) (2026-04-07)
+
+
+### Bug Fixes
+
+* sm avatar list not showing up properly on DetailsItemList component ([#3867](https://github.com/factorialco/f0/issues/3867)) ([5ae6265](https://github.com/factorialco/f0/commit/5ae6265fa861930ad69803dd5379c71838b8a61b))
+
 ## [1.438.3](https://github.com/factorialco/f0/compare/f0-react-v1.438.2...f0-react-v1.438.3) (2026-04-07)
 
 

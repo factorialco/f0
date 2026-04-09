@@ -1,0 +1,18 @@
+{
+  "name": "f0-storybook-mcp-api",
+  "version": "1.0.0",
+  "description": "Azure Function that exposes the Storybook MCP endpoint for F0 design system",
+  "type": "module",
+  "main": "dist/src/functions/mcp.js",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.6.0",
+    "@storybook/mcp": "^0.6.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
