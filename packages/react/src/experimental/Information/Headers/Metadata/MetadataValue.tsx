@@ -133,6 +133,9 @@ export function MetadataValue({
               value={percentage}
               max={100}
               aria-label={item.label}
+              aria-valuemin={0}
+              aria-valuemax={safeMax}
+              aria-valuenow={clampedValue}
               aria-valuetext={value.label}
             />
           </div>
