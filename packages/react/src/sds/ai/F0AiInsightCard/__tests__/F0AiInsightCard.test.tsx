@@ -106,6 +106,22 @@ describe("F0AiInsightCard", () => {
       expect(screen.getByText("AD")).toBeInTheDocument()
     })
 
+    it("does not render the label below avatars", () => {
+      render(
+        <F0AiInsightCard
+          content="people"
+          heading="Engineering leads"
+          label="3 people"
+          avatars={[
+            { firstName: "Jane", lastName: "Cooper", src: "" },
+            { firstName: "Alex", lastName: "Doe", src: "" },
+          ]}
+        />
+      )
+
+      expect(screen.queryByText("3 people")).not.toBeInTheDocument()
+    })
+
     it("shows overflow counter when avatars exceed max", () => {
       render(
         <F0AiInsightCard

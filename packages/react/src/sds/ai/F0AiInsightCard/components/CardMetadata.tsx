@@ -70,15 +70,12 @@ export const CardMetadata = (props: CardMetadataProps) => {
         )}
 
         {content === "people" && (
-          <div className="flex flex-col gap-1">
-            <F0AvatarList
-              type="person"
-              avatars={props.avatars}
-              size="md"
-              max={3}
-            />
-            {label && <span className={cn(labelVariants())}>{label}</span>}
-          </div>
+          <F0AvatarList
+            type="person"
+            avatars={props.avatars}
+            size="md"
+            max={3}
+          />
         )}
 
         {content === "team" && (
