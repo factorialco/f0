@@ -62,6 +62,8 @@ export interface F0FormDefinitionSingleSchema<TSchema extends F0FormSchema> {
   /** @internal Brand to distinguish from per-section at the type level */
   readonly _brand: "single"
   name: string
+  /** Human-readable description of the form's purpose */
+  description?: string
   schema: TSchema
   sections?: Record<string, F0SectionConfig>
   defaultValues?: Partial<z.infer<TSchema>>
@@ -84,6 +86,8 @@ export interface F0FormDefinitionPerSection<T extends F0PerSectionSchema> {
   /** @internal Brand to distinguish from single-schema at the type level */
   readonly _brand: "per-section"
   name: string
+  /** Human-readable description of the form's purpose */
+  description?: string
   schema: T
   sections?: Record<string, F0PerSectionSectionConfig>
   defaultValues?: { [K in keyof T]?: Partial<z.infer<T[K]>> }

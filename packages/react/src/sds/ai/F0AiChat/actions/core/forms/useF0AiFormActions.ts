@@ -6,6 +6,7 @@ import { useF0AiFormRegistry } from "@/patterns/F0Form/F0AiFormRegistry"
 
 import { useFormFillAction } from "./useFormFillAction"
 import { useFormSubmitAction } from "./useFormSubmitAction"
+import { usePickActiveFormAction } from "./usePickActiveFormAction"
 import { usePresentFormAction } from "./usePresentFormAction"
 
 /**
@@ -21,7 +22,7 @@ export const useF0AiFormActions = () => {
 
   const { agent: agentName } = useAiChat()
 
-  // Sync form descriptions into the co-agent shared state so the
+  // Sync form state into the co-agent shared state so the
   // backend agent can see what forms are active on the page.
   const { setState, running } = useCoAgent({
     name: agentName || "one-workflow",
@@ -30,16 +31,26 @@ export const useF0AiFormActions = () => {
   useEffect(() => {
     if (!running) return
 
-    const formDescriptions = registry?.formDescriptions || []
+    const formsOnCurrentPage = registry?.formsOnCurrentPage || []
+    const availableForms = registry?.availableForms || []
+    const activeForm = registry?.activeForm || null
 
     setState((currentState: any) => ({
       ...currentState,
-      formDescriptions,
+      formsOnCurrentPage,
+      availableForms,
+      activeForm,
     }))
-  }, [running, agentName, JSON.stringify(registry?.formDescriptions)])
+  }, [
+    running,
+    agentName,
+    JSON.stringify(registry?.formsOnCurrentPage),
+    JSON.stringify(registry?.availableForms),
+    JSON.stringify(registry?.activeForm),
+  ])
 
   useFormFillAction()
   useFormSubmitAction()
-  // useFormGetStateAction({ stateRef: currentState, setStateRef: setState })
+  usePickActiveFormAction()
   usePresentFormAction()
 }

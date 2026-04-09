@@ -44,6 +44,8 @@ interface UseF0FormDefinitionSingleSchemaInputBase<
   TSchema extends F0FormSchema,
 > {
   name: string
+  /** Human-readable description of the form's purpose */
+  description?: string
   schema: TSchema
   sections?: Record<string, F0SectionConfig>
   onSubmit: (
@@ -82,6 +84,8 @@ type UseF0FormDefinitionSingleSchemaInput<
 /** Base fields shared by all per-section input variants */
 interface UseF0FormDefinitionPerSectionInputBase<T extends F0PerSectionSchema> {
   name: string
+  /** Human-readable description of the form's purpose */
+  description?: string
   schema: T
   sections?: Record<string, F0PerSectionSectionConfig>
   onSubmit: (
@@ -247,6 +251,7 @@ export function useF0FormDefinition(
     submitConfig,
     errorTriggerMode,
     defaultValuesParamsSchema,
+    description,
   } = input
 
   // Store the raw function for the AI registry to call with actual params
@@ -267,6 +272,7 @@ export function useF0FormDefinition(
     const brand = isZodSchema(schema) ? "single" : "per-section"
     return {
       name,
+      description,
       schema,
       sections,
       defaultValues: resolvedDefaults,
@@ -283,6 +289,7 @@ export function useF0FormDefinition(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     name,
+    description,
     schema,
     sections,
     resolvedDefaults,

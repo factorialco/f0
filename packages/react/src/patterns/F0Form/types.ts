@@ -340,6 +340,8 @@ type PerSectionSubmitHandler<T extends F0PerSectionSchema> = (
 export interface F0FormPropsWithSingleSchema<TSchema extends F0FormSchema> {
   /** Unique name for the form, used for generating anchor links */
   name: string
+  /** Human-readable description of the form's purpose */
+  description?: string
   /** Zod object schema with F0 field configurations */
   schema: TSchema
   /** Section configurations keyed by section ID */

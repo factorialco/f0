@@ -11,6 +11,7 @@ import {
 import { zodToJsonSchema } from "zod-to-json-schema"
 
 import type { F0WizardFormStep } from "@/patterns/F0WizardForm/types"
+
 import type { F0FormSchema, F0SectionConfig } from "./types"
 import type { F0FormRef, F0FormSetValueOptions } from "./useF0Form"
 
@@ -23,6 +24,8 @@ import { getF0Config, unwrapZodSchema } from "./f0Schema"
 export interface F0AiFormEntry {
   ref: React.MutableRefObject<F0FormRef | null>
   schema: F0FormSchema
+  /** Human-readable description of the form's purpose */
+  description?: string
   /** Whether this entry was registered from an availableFormDefinition (not a rendered form) */
   virtual?: boolean
   /** Section configs (title, description) keyed by section ID */
@@ -292,6 +295,35 @@ export interface F0AiPresentedForm {
 /**
  * Context value for the AI form registry
  */
+/** Full runtime description of a form (used for formsOnCurrentPage and activeForm) */
+export interface F0AiFormDescription {
+  formName: string
+  description?: string
+  formSchema: Record<string, unknown>
+  fieldDescriptions: Record<
+    string,
+    {
+      label: string
+      section?: string
+      placeholder?: string
+      helpText?: string
+      description?: string
+    }
+  >
+  sectionDescriptions: Record<string, { title: string; description?: string }>
+  formValues: Record<string, unknown>
+  formErrors: Record<string, unknown>
+  isDirty: boolean
+  /** JSON Schema of defaultValuesParams accepted by presentForm (only for forms with defaultValuesParamsSchema) */
+  defaultValuesParamsSchema?: Record<string, unknown>
+}
+
+/** Lightweight summary of an available (virtual) form */
+export interface F0AiAvailableFormSummary {
+  formName: string
+  description?: string
+}
+
 interface F0AiFormRegistryContextValue {
   register: (
     name: string,
@@ -301,34 +333,22 @@ interface F0AiFormRegistryContextValue {
     defaultValuesParamsSchema?: ZodType,
     defaultValuesFn?: (
       params: Record<string, unknown>
-    ) => Promise<Record<string, unknown>>
+    ) => Promise<Record<string, unknown>>,
+    description?: string
   ) => void
   unregister: (name: string) => void
   get: (name: string) => F0AiFormEntry | undefined
   getFormNames: () => string[]
   /** Rebuild the form descriptions snapshot (call after mutating form state) */
   rebuildDescriptions: () => void
-  /** Structured descriptions of all active forms, updated on register/unregister */
-  formDescriptions: {
-    formName: string
-    formSchema: Record<string, unknown>
-    fieldDescriptions: Record<
-      string,
-      {
-        label: string
-        section?: string
-        placeholder?: string
-        helpText?: string
-        description?: string
-      }
-    >
-    sectionDescriptions: Record<string, { title: string; description?: string }>
-    formValues: Record<string, unknown>
-    formErrors: Record<string, unknown>
-    isDirty: boolean
-    /** JSON Schema of defaultValuesParams accepted by presentForm (only for forms with defaultValuesParamsSchema) */
-    defaultValuesParamsSchema?: Record<string, unknown>
-  }[]
+  /** Full runtime state of all rendered (non-virtual) forms on the current page */
+  formsOnCurrentPage: F0AiFormDescription[]
+  /** Lightweight summaries (name + description) of all virtual/available forms */
+  availableForms: F0AiAvailableFormSummary[]
+  /** Full runtime state of the form the AI is actively co-editing, or null */
+  activeForm: F0AiFormDescription | null
+  /** Set an available form as the active co-editing form */
+  setActiveForm: (formName: string) => { success: boolean; error?: string }
   /** Currently AI-presented form, or null */
   presentedForm: F0AiPresentedForm | null
   /** Called by the AI tool to present a form */
@@ -374,35 +394,70 @@ export function F0AiFormRegistryProvider({
     null
   )
 
-  // State-based snapshot of form descriptions, updated on register/unregister.
-  // This triggers re-renders so consumers (useF0AiFormActions) see the latest context.
-  const [formDescriptions, setFormDescriptions] = useState<
-    F0AiFormRegistryContextValue["formDescriptions"]
+  // Three-field state replacing the old flat formDescriptions array.
+  // formsOnCurrentPage: full runtime state for rendered (non-virtual) forms
+  // availableForms: lightweight summaries for virtual forms
+  // activeForm: full state of the form the AI is co-editing (set via setActiveForm)
+  const [formsOnCurrentPage, setFormsOnCurrentPage] = useState<
+    F0AiFormDescription[]
   >([])
+  const [availableForms, setAvailableForms] = useState<
+    F0AiAvailableFormSummary[]
+  >([])
+  const [activeForm, setActiveFormState] = useState<F0AiFormDescription | null>(
+    null
+  )
+  const activeFormNameRef = useRef<string | null>(null)
 
   const rebuildDescriptions = useCallback(() => {
     // Defer to avoid setState during render — register() is called from
     // F0Form's useEffect while the form may still be completing its render.
     queueMicrotask(() => {
       const entries = Array.from(registryRef.current.entries())
-      if (entries.length === 0) {
-        if (lastDescriptionsJsonRef.current !== "[]") {
-          lastDescriptionsJsonRef.current = "[]"
-          setFormDescriptions([])
-        }
-        return
-      }
 
-      const descriptions = entries
-        .map(([name, entry]) => {
-          const ref = entry.ref.current
+      const nextFormsOnCurrentPage: F0AiFormDescription[] = []
+      const nextAvailableForms: F0AiAvailableFormSummary[] = []
+      let nextActiveForm: F0AiFormDescription | null = null
 
-          if (!ref) {
-            return
-          }
+      for (const [name, entry] of entries) {
+        const ref = entry.ref.current
+        if (!ref) continue
 
-          const description = {
+        if (entry.virtual) {
+          // Virtual entries → lightweight summary for availableForms
+          nextAvailableForms.push({
             formName: name,
+            ...(entry.description ? { description: entry.description } : {}),
+          })
+
+          // If this is the active form, build full description
+          if (activeFormNameRef.current === name) {
+            nextActiveForm = {
+              formName: name,
+              ...(entry.description ? { description: entry.description } : {}),
+              formSchema: zodToJsonSchema(entry.schema) as Record<
+                string,
+                unknown
+              >,
+              fieldDescriptions: extractFieldDescriptions(entry.schema),
+              sectionDescriptions: extractSectionDescriptions(entry.sections),
+              formValues: ref.getValues(),
+              formErrors: ref.getErrors(),
+              isDirty: ref.isDirty(),
+              ...(entry.defaultValuesParamsSchema
+                ? {
+                    defaultValuesParamsSchema: zodToJsonSchema(
+                      entry.defaultValuesParamsSchema
+                    ) as Record<string, unknown>,
+                  }
+                : {}),
+            }
+          }
+        } else {
+          // Rendered forms → full runtime state for formsOnCurrentPage
+          nextFormsOnCurrentPage.push({
+            formName: name,
+            ...(entry.description ? { description: entry.description } : {}),
             formSchema: zodToJsonSchema(entry.schema) as Record<
               string,
               unknown
@@ -419,16 +474,20 @@ export function F0AiFormRegistryProvider({
                   ) as Record<string, unknown>,
                 }
               : {}),
-          }
+          })
+        }
+      }
 
-          return description
-        })
-        .filter((el): el is NonNullable<typeof el> => el !== null)
-
-      const json = JSON.stringify(descriptions)
+      const json = JSON.stringify({
+        formsOnCurrentPage: nextFormsOnCurrentPage,
+        availableForms: nextAvailableForms,
+        activeForm: nextActiveForm,
+      })
       if (json !== lastDescriptionsJsonRef.current) {
         lastDescriptionsJsonRef.current = json
-        setFormDescriptions(descriptions)
+        setFormsOnCurrentPage(nextFormsOnCurrentPage)
+        setAvailableForms(nextAvailableForms)
+        setActiveFormState(nextActiveForm)
       }
     })
   }, [])
@@ -442,12 +501,14 @@ export function F0AiFormRegistryProvider({
       defaultValuesParamsSchema?: ZodType,
       defaultValuesFn?: (
         params: Record<string, unknown>
-      ) => Promise<Record<string, unknown>>
+      ) => Promise<Record<string, unknown>>,
+      description?: string
     ) => {
       // Rendered forms always take precedence over virtual entries
       registryRef.current.set(name, {
         ref,
         schema,
+        description,
         sections,
         defaultValuesParamsSchema,
         defaultValuesFn,
@@ -474,6 +535,7 @@ export function F0AiFormRegistryProvider({
         registryRef.current.set(name, {
           ref: virtualRef,
           schema: virtualDef.schema,
+          description: virtualDef.description,
           sections: virtualDef.sections,
           virtual: true,
           defaultValuesParamsSchema: virtualDef.defaultValuesParamsSchema,
@@ -564,6 +626,29 @@ export function F0AiFormRegistryProvider({
     setPresentedForm(null)
   }, [])
 
+  const setActiveForm = useCallback(
+    (formName: string) => {
+      const entry = registryRef.current.get(formName)
+      if (!entry) {
+        const available = Array.from(registryRef.current.keys())
+        return {
+          success: false,
+          error: `Form "${formName}" not found. Available forms: ${available.join(", ")}`,
+        }
+      }
+      if (!entry.virtual) {
+        return {
+          success: false,
+          error: `Form "${formName}" is a rendered form on the current page. You can co-edit it directly without picking it as active.`,
+        }
+      }
+      activeFormNameRef.current = formName
+      rebuildDescriptions()
+      return { success: true }
+    },
+    [rebuildDescriptions]
+  )
+
   // Sync virtual form definitions: register forms that aren't rendered,
   // skip if a rendered (non-virtual) form with the same name already exists.
   const virtualNamesRef = useRef<Set<string>>(new Set())
@@ -587,6 +672,7 @@ export function F0AiFormRegistryProvider({
       registryRef.current.set(def.name, {
         ref: virtualRef,
         schema: def.schema,
+        description: def.description,
         sections: def.sections,
         virtual: true,
         defaultValuesParamsSchema: def.defaultValuesParamsSchema,
@@ -625,7 +711,10 @@ export function F0AiFormRegistryProvider({
     get,
     getFormNames,
     rebuildDescriptions,
-    formDescriptions,
+    formsOnCurrentPage,
+    availableForms,
+    activeForm,
+    setActiveForm,
     presentedForm,
     presentForm,
     dismissForm,
