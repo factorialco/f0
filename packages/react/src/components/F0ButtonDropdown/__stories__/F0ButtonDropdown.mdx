@@ -281,31 +281,31 @@ Use **dropdown mode** when all actions are equally likely and none should be pro
 
 ### Usage examples
 
-#### Items with descriptions and a critical action
+**Items with descriptions and a critical action**
 
 Use `description` to clarify what each item does when the label alone is ambiguous. Mark destructive actions with `critical: true` — they render in a danger style to signal irreversibility.
 
 <Canvas of={Stories.WithDescription} />
 
-#### Grouped items
+**Grouped items**
 
 Use `ButtonDropdownGroup` objects to organize items into labeled sections with visual separators. Useful when the list mixes actions of different categories.
 
 <Canvas of={Stories.WithGroups} />
 
-#### Dropdown mode with custom trigger label
+**Dropdown mode with custom trigger label**
 
 Set `trigger` to give the button a label that describes the category rather than a specific item. Use this when the item list may change or when no single item should dominate the label.
 
 <Canvas of={Stories.DropdownModeWithTrigger} />
 
-#### With tooltip
+**With tooltip**
 
 Use `tooltip` when the button's context needs additional explanation — for example in toolbars where space limits the label.
 
 <Canvas of={Stories.WithTooltip} />
 
-#### Critical items in context
+**Critical items in context**
 
 Use `critical: true` only for irreversible actions. Place them last in the list — after all safe actions — so users encounter them only after reviewing alternatives.
 
