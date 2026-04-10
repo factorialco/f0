@@ -24,7 +24,10 @@ export const CardHeader = ({
   return (
     <>
       {description && (
-        <span className={cn(descriptionVariants(), "truncate")}>
+        <span
+          className={cn(descriptionVariants(), "truncate")}
+          title={description}
+        >
           {description}
         </span>
       )}
