@@ -1,6 +1,9 @@
 module.exports = {
   presets: [
-    "babel-preset-expo",
+    // Disable the Reanimated/Worklets Babel plugin during the library build.
+    // The host app's Metro pipeline will workletize callbacks at bundle time
+    // using its own react-native-worklets version (same pattern as gesture-handler).
+    ["babel-preset-expo", { reanimated: false }],
     [
       "@babel/preset-typescript",
       {
