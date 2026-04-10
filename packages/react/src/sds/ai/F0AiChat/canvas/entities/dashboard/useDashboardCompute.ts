@@ -117,7 +117,9 @@ export function useDashboardCompute(
 
       const body = {
         fetchSpecs: cfg.fetchSpecs,
-        items: cfg.items,
+        // Exclude insight items — they carry inline static data and do
+        // not require any server-side computation.
+        items: cfg.items.filter((i) => i.type !== "insight"),
         filters: cfg.filters,
         filterValues:
           Object.keys(stringFilterValues).length > 0

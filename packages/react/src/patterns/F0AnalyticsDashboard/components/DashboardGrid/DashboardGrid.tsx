@@ -36,6 +36,7 @@ const ROW_HEIGHTS: Record<string, number> = {
   chart: 336,
   metric: 144,
   collection: 480,
+  insight: 200,
 }
 const DEFAULT_ROW_HEIGHT = 336
 
@@ -44,6 +45,7 @@ const MIN_ROW_HEIGHTS: Record<string, number> = {
   chart: 240,
   metric: 120,
   collection: 300,
+  insight: 160,
 }
 const DEFAULT_MIN_ROW_HEIGHT = 120
 
@@ -327,9 +329,12 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       {displayRows.map((row, ri) => {
         const isDropRow =
           dragId && dropTarget?.type === "into-row" && dropTarget.rowIdx === ri
+        const isInsightRow = row.ids.some(
+          (id) => itemMap.get(id)?.type === "insight"
+        )
 
         return (
-          <div key={ri} className="relative">
+          <div key={ri} className={cn("relative", isInsightRow && "mb-3")}>
             {/* Gap drop zone BEFORE this row (between rows) */}
             {canDrag && ri > 0 && (
               <RowGapDropZone
@@ -558,6 +563,10 @@ function buildRowsFromPositions<Filters extends FiltersDefinition>(
     (a, b) => (a.y ?? 0) - (b.y ?? 0) || (a.x ?? 0) - (b.x ?? 0)
   )
 
+  // Build a lookup so we can resolve item types by id
+  const itemById = new Map<string, DashboardItemType<Filters>>()
+  for (const item of sorted) itemById.set(item.id, item)
+
   const rowMap = new Map<number, { ids: string[]; maxHeight: number }>()
 
   for (const item of sorted) {
@@ -575,10 +584,13 @@ function buildRowsFromPositions<Filters extends FiltersDefinition>(
     if (h > entry.maxHeight) entry.maxHeight = h
   }
 
-  // Convert map to sorted array of rows
-  return [...rowMap.entries()]
+  // Convert map to sorted array of rows, then split any row that
+  // contains mixed item types so each type occupies its own row.
+  const rawRows = [...rowMap.entries()]
     .sort(([a], [b]) => a - b)
     .map(([, entry]) => ({ ids: entry.ids, height: entry.maxHeight }))
+
+  return rawRows.flatMap((row) => splitRowByType(row, itemById))
 }
 
 /** Greedy bin-packing for items without saved positions. */
@@ -589,6 +601,7 @@ function buildRowsGreedy<Filters extends FiltersDefinition>(
   let currentIds: string[] = []
   let currentSlots = 0
   let currentMaxHeight = 0
+  let currentType: string | null = null
 
   for (const item of items) {
     const weight = getSlotWeight(item)
@@ -596,7 +609,15 @@ function buildRowsGreedy<Filters extends FiltersDefinition>(
       ? item.rowSpan * 48
       : (ROW_HEIGHTS[item.type] ?? DEFAULT_ROW_HEIGHT)
 
-    if (currentSlots + weight > MAX_PER_ROW && currentIds.length > 0) {
+    // Break row when slot capacity exceeded OR item type changes.
+    // This prevents mixing different item types (e.g. insight + metric)
+    // in the same row, ensuring each type occupies its own row(s).
+    const typeChanged = currentType !== null && item.type !== currentType
+
+    if (
+      (currentSlots + weight > MAX_PER_ROW || typeChanged) &&
+      currentIds.length > 0
+    ) {
       rows.push({ ids: currentIds, height: currentMaxHeight })
       currentIds = []
       currentSlots = 0
@@ -605,13 +626,51 @@ function buildRowsGreedy<Filters extends FiltersDefinition>(
 
     currentIds.push(item.id)
     currentSlots += weight
-    if (h > currentMaxHeight) currentMaxHeight = h
+    currentMaxHeight = Math.max(currentMaxHeight, h)
+    currentType = item.type
   }
   if (currentIds.length > 0) {
     rows.push({ ids: currentIds, height: currentMaxHeight })
   }
 
   return rows
+}
+
+/**
+ * Split a single row into sub-rows so that each sub-row contains only one
+ * item type. This prevents e.g. insight cards and metrics from sharing a
+ * row when the agent places them at the same `y` coordinate.
+ */
+function splitRowByType<Filters extends FiltersDefinition>(
+  row: Row,
+  itemById: Map<string, DashboardItemType<Filters>>
+): Row[] {
+  if (row.ids.length <= 1) return [row]
+
+  const groups: { type: string; ids: string[]; maxHeight: number }[] = []
+  let current: (typeof groups)[number] | null = null
+
+  for (const id of row.ids) {
+    const item = itemById.get(id)
+    const type = item?.type ?? "unknown"
+    const h = item
+      ? item.rowSpan
+        ? item.rowSpan * 48
+        : (ROW_HEIGHTS[item.type] ?? DEFAULT_ROW_HEIGHT)
+      : DEFAULT_ROW_HEIGHT
+
+    if (!current || current.type !== type) {
+      current = { type, ids: [], maxHeight: 0 }
+      groups.push(current)
+    }
+    current.ids.push(id)
+    current.maxHeight = Math.max(current.maxHeight, h)
+  }
+
+  // No split needed — all same type
+  if (groups.length === 1) return [row]
+
+  return groups.map((g) => ({ ids: g.ids, height: g.maxHeight }))
 }
 
 /** Minimum height for a row based on the item types it contains. */
@@ -633,6 +692,7 @@ function getSlotWeight<Filters extends FiltersDefinition>(
   item: DashboardItemType<Filters>
 ): number {
   if (item.type === "metric") return 1
+  if (item.type === "insight") return 1
   if (item.type === "chart") return 2
   if (item.type === "collection") return MAX_PER_ROW
   return 2
@@ -690,6 +750,12 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           editMode={editMode}
           handleDelete={onDelete}
         />
+      )
+    case "insight":
+      return (
+        <div className="flex h-full items-stretch p-2">
+          {item.renderContent()}
+        </div>
       )
     default: {
       const unknownItem = item as DashboardItemType<Filters>

@@ -244,10 +244,73 @@ export interface ChatDashboardCollectionItem extends ChatDashboardItemBase {
   computation: CollectionComputation
 }
 
+// ---------------------------------------------------------------------------
+// Insight item — AI-generated proactive insight, rendered as F0AiInsightCard.
+// Static data (no server-side computation needed).
+// ---------------------------------------------------------------------------
+
+/**
+ * Content types for insight items — mirrors `AiInsightCardContent` from
+ * the F0AiInsightCard component but uses JSON-serializable shapes only
+ * (no functions, no React elements).
+ */
+export type ChatDashboardInsightContent =
+  | { content: "text" }
+  | {
+      content: "person"
+      avatar: { firstName?: string; lastName?: string; src?: string }
+    }
+  | {
+      content: "people"
+      avatars: Array<{ firstName?: string; lastName?: string; src?: string }>
+    }
+  | {
+      content: "team"
+      avatar: { name: string; src?: string }
+    }
+  | {
+      content: "company"
+      avatar: { name: string; src?: string }
+    }
+  | {
+      content: "alert"
+      level: "info" | "warning" | "critical" | "success"
+      alertLabel: string
+    }
+  | {
+      content: "balance"
+      balance: {
+        amount: { value: number; unit?: string }
+        percentage?: { value: number } | null
+        invertStatus?: boolean
+        hint?: string
+      }
+    }
+  | {
+      content: "sparkline"
+      data: Array<{ value: number }>
+      label: string
+      invertStatus?: boolean
+    }
+
+export interface ChatDashboardInsightItem extends ChatDashboardItemBase {
+  type: "insight"
+  /** Label shown above the heading (e.g. "Communities", "Engagement") */
+  label?: string
+  /** The insight content variant and its associated data */
+  insightContent: ChatDashboardInsightContent
+  /**
+   * Optional queryData params string that could be used to drill down
+   * into the data behind this insight (future bridge with one_analytics).
+   */
+  queryDataParams?: string | null
+}
+
 export type ChatDashboardItem =
   | ChatDashboardChartItem
   | ChatDashboardMetricItem
   | ChatDashboardCollectionItem
+  | ChatDashboardInsightItem
 
 // ---------------------------------------------------------------------------
 // Root config — the full dashboard payload received from the backend

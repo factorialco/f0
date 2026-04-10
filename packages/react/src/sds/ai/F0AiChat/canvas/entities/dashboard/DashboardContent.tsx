@@ -11,6 +11,7 @@ import type {
   DashboardChartConfig,
   DashboardChartItem,
   DashboardCollectionItem,
+  DashboardInsightItem,
   DashboardItem,
   DashboardItemLayout,
   DashboardMetricItem,
@@ -23,11 +24,14 @@ import type { RecordType } from "@/hooks/datasource"
 
 import { F0AnalyticsDashboard } from "@/patterns/F0AnalyticsDashboard/F0AnalyticsDashboard"
 
+import { F0AiInsightCard } from "@/sds/ai/F0AiInsightCard"
+
 import type {
   ChatDashboardChartConfig,
   ChatDashboardChartItem,
   ChatDashboardCollectionItem,
   ChatDashboardConfig,
+  ChatDashboardInsightItem,
   ChatDashboardItem,
   ChatDashboardMetricItem,
   FormatPreset,
@@ -53,6 +57,7 @@ const MIN_ROW_SPAN_BY_TYPE: Record<ChatDashboardItem["type"], number> = {
   chart: 7, // 7 * 48 = 336px
   metric: 3, // 3 * 48 = 144px
   collection: 10, // 10 * 48 = 480px
+  insight: 4, // 4 * 48 = 192px
 }
 
 /**
@@ -300,16 +305,28 @@ export function ChatDashboard({
 
   const items: DashboardItem<FiltersDefinition>[] = useMemo(
     () =>
-      config.items.map((item) => {
-        switch (item.type) {
-          case "chart":
-            return mapChartItem(item, makeFetchData(item.id))
-          case "metric":
-            return mapMetricItem(item, makeFetchData(item.id))
-          case "collection":
-            return mapCollectionItem(item, makeFetchData(item.id))
-        }
-      }),
+      config.items
+        // During SSE streaming CopilotKit may render the dashboard before
+        // every item is fully formed. Skip items that lack an `id` or `type`
+        // so the grid never receives an undefined key.
+        .filter(
+          (item): item is ChatDashboardItem =>
+            typeof item.id === "string" &&
+            item.id.length > 0 &&
+            typeof item.type === "string"
+        )
+        .map((item) => {
+          switch (item.type) {
+            case "chart":
+              return mapChartItem(item, makeFetchData(item.id))
+            case "metric":
+              return mapMetricItem(item, makeFetchData(item.id))
+            case "collection":
+              return mapCollectionItem(item, makeFetchData(item.id))
+            case "insight":
+              return mapInsightItem(item)
+          }
+        }),
     [config.items, makeFetchData]
   )
 
@@ -368,11 +385,17 @@ export function DashboardContent({
   const effectiveConfig = useMemo(() => {
     return {
       ...content.config,
-      items: content.config.items.map((item) => {
-        const patch = itemTransforms.get(item.id)
-        const merged = patch ? ({ ...item, ...patch } as typeof item) : item
-        return clampDashboardItemRowSpan(merged)
-      }),
+      items: content.config.items
+        // Skip partially-streamed items (see filter in ChatDashboard).
+        .filter(
+          (item): item is ChatDashboardItem =>
+            typeof item.id === "string" && item.id.length > 0
+        )
+        .map((item) => {
+          const patch = itemTransforms.get(item.id)
+          const merged = patch ? ({ ...item, ...patch } as typeof item) : item
+          return clampDashboardItemRowSpan(merged)
+        }),
     }
   }, [content.config, itemTransforms])
 
@@ -570,5 +593,40 @@ function mapCollectionItem(
         },
       },
     ],
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Insight item mapper — static content, no server-side computation
+// ---------------------------------------------------------------------------
+
+function mapInsightItem(item: ChatDashboardInsightItem): DashboardInsightItem {
+  return {
+    id: item.id,
+    title: item.title,
+    description: item.description,
+    colSpan: item.colSpan ?? 3,
+    rowSpan: item.rowSpan,
+    x: item.x,
+    y: item.y,
+    type: "insight",
+    renderContent: () => {
+      // Guard against partially-streamed items where insightContent
+      // may not be available yet.
+      if (
+        !item.insightContent ||
+        typeof item.insightContent.content !== "string"
+      ) {
+        return null
+      }
+      return (
+        <F0AiInsightCard
+          heading={item.title}
+          description={item.description}
+          label={item.label}
+          {...item.insightContent}
+        />
+      )
+    },
   }
 }

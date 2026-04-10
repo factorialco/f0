@@ -32,10 +32,13 @@
   "pnpm": {
     "overrides": {
       "esm-env": "npm:esm-env-runtime@^0.1.1",
-      "@types/react": "^18.3.18",
+      "@types/react": "18.3.18",
       "@types/react-dom": "^18.3.1",
       "react": "18.3.1",
-      "react-dom": "18.3.1"
+      "react-dom": "18.3.1",
+      "@factorialco/f0-react-native>react": "19.1.0",
+      "@factorialco/f0-react-native>react-dom": "19.1.0",
+      "@factorialco/f0-react-native>react-test-renderer": "19.1.0"
     }
   }
 }

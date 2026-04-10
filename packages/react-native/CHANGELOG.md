@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.49.1](https://github.com/factorialco/f0/compare/f0-react-native-v0.49.0...f0-react-native-v0.49.1) (2026-04-07)
+
+
+### Bug Fixes
+
+* no thumbnail variant ([#3860](https://github.com/factorialco/f0/issues/3860)) ([0eb01d8](https://github.com/factorialco/f0/commit/0eb01d828f60884d7535e5f69f675d4428195c7f))
+
 ## [0.49.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.48.0...f0-react-native-v0.49.0) (2026-03-26)
 
 

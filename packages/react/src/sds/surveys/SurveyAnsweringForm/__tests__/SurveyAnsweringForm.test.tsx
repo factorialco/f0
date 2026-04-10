@@ -427,6 +427,76 @@ describe("SurveyAnsweringForm", () => {
     })
   })
 
+  describe("inline mode", () => {
+    it("renders without dialog chrome", () => {
+      render(
+        <SurveyAnsweringForm
+          inline
+          elements={[makeTextQuestion("q1", "Name")]}
+          title="Inline Survey"
+        />
+      )
+
+      expect(screen.getByText("Inline Survey")).toBeInTheDocument()
+      expect(screen.getByText("Name")).toBeInTheDocument()
+      // No dialog backdrop or close button
+      expect(
+        screen.queryByRole("button", { name: /close/i })
+      ).not.toBeInTheDocument()
+    })
+
+    it("renders fields as disabled (read-only)", () => {
+      render(
+        <SurveyAnsweringForm
+          inline
+          elements={[makeTextQuestion("q1", "Name")]}
+          title="Inline Survey"
+          defaultValues={{
+            q1: { type: "text", value: "John" },
+          }}
+        />
+      )
+
+      expect(screen.getByDisplayValue("John")).toBeDisabled()
+    })
+
+    it("does not render submit button or action bar", () => {
+      render(
+        <SurveyAnsweringForm
+          inline
+          elements={[makeTextQuestion("q1", "Name")]}
+          title="Inline Survey"
+        />
+      )
+
+      expect(
+        screen.queryByRole("button", { name: /submit/i })
+      ).not.toBeInTheDocument()
+    })
+
+    it("renders loading skeleton", () => {
+      render(
+        <SurveyAnsweringForm
+          inline
+          elements={[makeTextQuestion("q1", "Name")]}
+          title="Inline Survey"
+          loading
+        />
+      )
+
+      expect(
+        screen.getByTestId("survey-answering-form-loading-all-questions")
+      ).toBeInTheDocument()
+      expect(screen.queryByText("Name")).not.toBeInTheDocument()
+    })
+
+    it("renders empty state when no elements", () => {
+      render(<SurveyAnsweringForm inline elements={[]} title="Inline Survey" />)
+
+      expect(screen.getByText("No questions to answer")).toBeInTheDocument()
+    })
+  })
+
   describe("checkbox question", () => {
     it("does not call onSubmit when required checkbox question is unchecked", async () => {
       const onSubmit = vi.fn()
