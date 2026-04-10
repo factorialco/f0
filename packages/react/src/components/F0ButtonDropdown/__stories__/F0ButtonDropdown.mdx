@@ -32,8 +32,9 @@ Consolidates multiple related actions under a single button. Comes in two modes:
           <code>split</code> (default)
         </td>
         <td>
-          Two interactive areas: main button triggers the selected action,
-          chevron opens the menu with the remaining items.
+          Two interactive areas: main button label and action come from the
+          selected item (defaults to the first item, controllable via{" "}
+          <code>value</code>). Chevron opens the menu with the remaining items.
         </td>
       </tr>
       <tr>
@@ -120,20 +121,6 @@ Use **dropdown mode** when all actions are equally likely and none should be pro
         </td>
       </tr>
       <tr>
-        <td>One action is significantly more common</td>
-        <td>
-          Use split mode — promotes it as a one-click trigger while keeping the
-          rest reachable via the chevron
-        </td>
-      </tr>
-      <tr>
-        <td>All actions are equally likely</td>
-        <td>
-          Use dropdown mode — no single action has priority (e.g. "Export as
-          CSV", "Export as PDF", "Export as Excel")
-        </td>
-      </tr>
-      <tr>
         <td>Surface is crowded with buttons</td>
         <td>
           Consolidating secondary actions reduces visual noise while keeping
@@ -173,7 +160,11 @@ Use **dropdown mode** when all actions are equally likely and none should be pro
       </tr>
       <tr>
         <td>All actions are equally destructive or critical</td>
-        <td>Surface them individually so each requires deliberate intent</td>
+        <td>
+          Surface them individually with separate <code>F0Button</code>{" "}
+          instances, or use <code>F0Dialog</code> to require explicit
+          confirmation before each
+        </td>
       </tr>
     </tbody>
   </table>
@@ -238,8 +229,6 @@ Use `tooltip` when the button's context needs additional explanation — for exa
 <Canvas of={Stories.WithTooltip} />
 
 **Critical items in context**
-
-Use `critical: true` only for irreversible actions. Place them last in the list — after all safe actions — so users encounter them only after reviewing alternatives.
 
 <Canvas of={Stories.CriticalItems} />
 

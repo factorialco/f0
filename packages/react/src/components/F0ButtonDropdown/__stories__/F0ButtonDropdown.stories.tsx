@@ -179,27 +179,27 @@ export const WithDescription: Story = {
   args: {
     items: [
       {
-        value: "1",
-        label: "Item 1",
-        description: "New creation process",
-        icon: Add,
-      },
-      {
-        value: "2",
-        label: "Item 2",
-        description: "Edit item's information",
-        icon: Pencil,
-      },
-      {
-        value: "3",
-        label: "Item 3",
-        description: "Save changes",
+        value: "save",
+        label: "Save changes",
+        description: "Save without closing the form",
         icon: Save,
       },
       {
-        value: "4",
-        label: "Item 4",
-        description: "Delete item",
+        value: "save-close",
+        label: "Save and close",
+        description: "Save and return to the list",
+        icon: Save,
+      },
+      {
+        value: "archive",
+        label: "Archive employee",
+        description: "Hide from active headcount",
+        icon: Pencil,
+      },
+      {
+        value: "delete",
+        label: "Delete employee",
+        description: "Permanently remove all data",
         icon: Delete,
         critical: true,
       },
