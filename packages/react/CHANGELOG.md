@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.441.0](https://github.com/factorialco/f0/compare/f0-react-v1.440.2...f0-react-v1.441.0) (2026-04-10)
+
+
+### Features
+
+* **rich-text:** add AI patch finalization API and harden BlockIdExtension (FCT-50714) ([#3781](https://github.com/factorialco/f0/issues/3781)) ([5d4181f](https://github.com/factorialco/f0/commit/5d4181f68471fa1c91e4bb4444ed1316c31d29b2))
+
 ## [1.440.2](https://github.com/factorialco/f0/compare/f0-react-v1.440.1...f0-react-v1.440.2) (2026-04-09)
 
 
