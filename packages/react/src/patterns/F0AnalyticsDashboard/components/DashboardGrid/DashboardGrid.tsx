@@ -560,6 +560,10 @@ function buildRowsFromPositions<Filters extends FiltersDefinition>(
     (a, b) => (a.y ?? 0) - (b.y ?? 0) || (a.x ?? 0) - (b.x ?? 0)
   )
 
+  // Build a lookup so we can resolve item types by id
+  const itemById = new Map<string, DashboardItemType<Filters>>()
+  for (const item of sorted) itemById.set(item.id, item)
+
   const rowMap = new Map<number, { ids: string[]; maxHeight: number }>()
 
   for (const item of sorted) {
@@ -577,10 +581,13 @@ function buildRowsFromPositions<Filters extends FiltersDefinition>(
     if (h > entry.maxHeight) entry.maxHeight = h
   }
 
-  // Convert map to sorted array of rows
-  return [...rowMap.entries()]
+  // Convert map to sorted array of rows, then split any row that
+  // contains mixed item types so each type occupies its own row.
+  const rawRows = [...rowMap.entries()]
     .sort(([a], [b]) => a - b)
     .map(([, entry]) => ({ ids: entry.ids, height: entry.maxHeight }))
+
+  return rawRows.flatMap((row) => splitRowByType(row, itemById))
 }
 
 /** Greedy bin-packing for items without saved positions. */
@@ -624,6 +631,43 @@ function buildRowsGreedy<Filters extends FiltersDefinition>(
   }
 
   return rows
+}
+
+/**
+ * Split a single row into sub-rows so that each sub-row contains only one
+ * item type. This prevents e.g. insight cards and metrics from sharing a
+ * row when the agent places them at the same `y` coordinate.
+ */
+function splitRowByType<Filters extends FiltersDefinition>(
+  row: Row,
+  itemById: Map<string, DashboardItemType<Filters>>
+): Row[] {
+  if (row.ids.length <= 1) return [row]
+
+  const groups: { type: string; ids: string[]; maxHeight: number }[] = []
+  let current: (typeof groups)[number] | null = null
+
+  for (const id of row.ids) {
+    const item = itemById.get(id)
+    const type = item?.type ?? "unknown"
+    const h = item
+      ? item.rowSpan
+        ? item.rowSpan * 48
+        : (ROW_HEIGHTS[item.type] ?? DEFAULT_ROW_HEIGHT)
+      : DEFAULT_ROW_HEIGHT
+
+    if (!current || current.type !== type) {
+      current = { type, ids: [], maxHeight: 0 }
+      groups.push(current)
+    }
+    current.ids.push(id)
+    current.maxHeight = Math.max(current.maxHeight, h)
+  }
+
+  // No split needed — all same type
+  if (groups.length === 1) return [row]
+
+  return groups.map((g) => ({ ids: g.ids, height: g.maxHeight }))
 }
 
 /** Minimum height for a row based on the item types it contains. */
