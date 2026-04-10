@@ -116,15 +116,29 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 
 **When to use**
 
-<!-- 1–2 sentences introducing the key decision. If there are distinct sub-cases (e.g. split vs dropdown), introduce each with a sentence and a Canvas before the table. -->
+<!-- 1–2 sentences introducing the key decision context.
+     If the component has 2+ modes/sub-cases (e.g. split vs dropdown), introduce each
+     with a sentence and a <Canvas> before the table:
 
-<!-- Canvas of a story that illustrates the primary use case — only if it shows exactly what the prose describes -->
+       Use `split` mode when there is a clear primary action and the secondary options
+       are infrequent. Use `dropdown` mode when all actions are equally important.
+
+       <Canvas of={Stories.SplitExample} />
+       <Canvas of={Stories.DropdownExample} />
+
+     The table then covers ONLY additional situations not already illustrated by the Canvas
+     above — never repeat what a Canvas already shows.
+-->
 
 <!-- 2-col table (Situation | Use F0X when) — positive cases only. See Table Templates. -->
 
 **When not to use**
 
-<!-- 2-col table (Situation | Use instead) — negative cases only. Name the alternative. See Table Templates. -->
+<!-- 2-col table (Situation | Use instead) — negative cases only.
+     "Use instead" must always name a CONCRETE component (`F0Dialog`) or pattern
+     ("toast notification") — never abstract instructions like "a simpler alternative"
+     or "something else". The reader must know exactly what to reach for.
+     See Table Templates. -->
 
 **Do's and don'ts**
 
@@ -370,7 +384,7 @@ Only positive cases (when TO use). Never mix with negative cases.
 
 ### When not to use — 2 columns (Situation | Use instead)
 
-Separate section, separate table. Never include these rows in the "When to use" table above.
+Separate section, separate table. Never include these rows in the "When to use" table above. The "Use instead" cell must name a **concrete component** (e.g. `F0Dialog`) or an established pattern (e.g. "toast notification") — never abstract instructions like "use a simpler alternative".
 
 ```mdx
 <Unstyled>
@@ -494,6 +508,42 @@ import { F0Alert } from "../F0Alert"
 
 {/* Wrong — causes module fetch error in Storybook */}
 import { F0Alert } from "@factorialco/f0-react"
+```
+
+**Provider-dependent components (e.g. components that call `useI18n`):** These cannot be rendered as JSX directly in MDX — they require an `I18nProvider` (or similar) that is only present in Storybook's decorator chain. Rendering them inline produces a "must be used within a provider" runtime error.
+
+Solution: create **dedicated stories with `tags: ["!dev"]`** for each do/don't case, then use `<Canvas of={Stories.X} sourceState="none" />` as `children` in the DoDonts component. The stories run inside the full decorator chain, the `children` prop renders the Canvas output inside the card, and `sourceState="none"` hides the code toggle so the card looks like a visual preview:
+
+```tsx
+// In F0ComponentName.stories.tsx — add dedicated stories for DoDonts
+export const DoDontDoCase: Story = {
+  tags: ["!dev"], // hidden from sidebar, accessible via Canvas in MDX
+  args: {
+    // props that illustrate the "do" scenario
+  },
+};
+
+export const DoDontDontCase: Story = {
+  tags: ["!dev"],
+  args: {
+    // props that illustrate the "don't" scenario
+  },
+};
+```
+
+```mdx
+{/* In the MDX file — use Canvas as children */}
+
+<DoDonts
+  do={{
+    description: "Description of correct usage.",
+    children: <Canvas of={Stories.DoDontDoCase} sourceState="none" />,
+  }}
+  dont={{
+    description: "Description of incorrect usage.",
+    children: <Canvas of={Stories.DoDontDontCase} sourceState="none" />,
+  }}
+/>
 ```
 
 Full pattern with `children` + `guidelines`:
@@ -660,14 +710,17 @@ Before marking MDX as done:
 - [ ] `### Modes` / `### Variants` (inside `## Anatomy`) each have a Canvas of a story showing all options stacked, followed by a table
 - [ ] `### Modes` table has only `Mode | Description` columns — no "When to use" (that belongs in Guidelines)
 - [ ] If the component is generic (`F0Component<T>`), `### Behavior` documents the type parameter and the full typed callback signature
-- [ ] `## Guidelines` contains `### Design best practices` with **When to use** (may include Canvas), **When not to use**, **Do's and don'ts** (all as `**bold**`, not `####` headings — headings generate nav anchors), and `### Usage examples`
+- [ ] `## Guidelines` contains `### Design best practices` with **When to use** (may include prose + Canvas per sub-case before the table), **When not to use**, **Do's and don'ts** (all as `**bold**`, not `####` headings — headings generate nav anchors), and `### Usage examples`
+- [ ] **When to use** table covers ONLY situations not already illustrated by a Canvas in that section — do not repeat rows that duplicate what a Modes/Variants Canvas already shows
 - [ ] Inside `### Usage examples`, scenario titles use `**bold**` not `####` headings — headings generate right-side nav anchors and clutter the menu
 - [ ] All tables use `<Unstyled>` with HTML `<table>` (no raw markdown tables)
 - [ ] All `<Canvas of={Stories.X} />` reference actually existing stories — never add a Canvas for a story that doesn't exist or whose title doesn't match what the Canvas shows
 - [ ] "When to use" and "When not to use" are separate subsections with separate tables — never mixed
+- [ ] "When not to use" rows in the "Use instead" column name a **concrete component** (`F0Dialog`) or established pattern ("toast notification") — never abstract instructions
 - [ ] `<DoDonts>` used in Do's and don'ts subsection
 - [ ] DoDonts `children` used only when the do/don't contrast is **semantically unambiguous** — a viewer must not be able to argue the "don't" example is valid. Text-only DoDonts are preferred when the distinction requires explanation.
 - [ ] Components rendered as JSX in MDX (e.g. inside `<DoDonts children>`) are imported via relative path (`from "../F0Component"`), never from `@factorialco/f0-react` (causes module fetch error in dev)
+- [ ] Components that require a provider (e.g. `useI18n`) are NOT rendered as inline JSX in MDX — instead, dedicated stories with `tags: ["!dev"]` are created and used as `<Canvas of={Stories.X} sourceState="none" />` inside DoDonts `children`
 - [ ] `## Accessibility` included only when the component type requires it — complex interactive (required), simple interactive (only if non-obvious), static display (only for live region or icon meaning), layout/typography (omit entirely)
 - [ ] Optional function props use `control: "boolean"` in `argTypes` + `render` function to interpret boolean → `fn()` or `undefined` (never `control: "function"`)
 - [ ] No semicolons in `.tsx` import statements (oxfmt rule — does not apply to `.mdx` files)
