@@ -1,7 +1,7 @@
-import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks";
-import * as Stories from "./F0Alert.stories";
-import { DoDonts } from "@/lib/storybook-utils/do-donts";
-import { F0Alert } from "../F0Alert";
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as Stories from "./F0Alert.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { F0Alert } from "../F0Alert"
 
 <Meta of={Stories} />
 
@@ -262,9 +262,9 @@ based on product logic (e.g. timeout, next session, or once the issue is resolve
 <Canvas of={Stories.Dismissible} />
 
 ```tsx
-import { useState } from "react";
+import { useState } from "react"
 
-const [visible, setVisible] = useState(true);
+const [visible, setVisible] = useState(true)
 
 return visible ? (
   <F0Alert
@@ -274,5 +274,5 @@ return visible ? (
     action={{ label: "Request info", onClick: () => {} }}
     onClose={() => setVisible(false)}
   />
-) : null;
+) : null
 ```
