@@ -369,10 +369,12 @@ This package requires the following peer dependencies to be installed in your ho
 | `uniwind`                        | `^1.2.7`         | ✅ Yes   | Tailwind CSS for React Native    |
 | `tailwind-merge`                 | `^3.4.0`         | ✅ Yes   | Class merging utility            |
 | `tailwind-variants`              | `^3.2.2`         | ✅ Yes   | Variant system                   |
-| `react-native-reanimated`        | `^4.1.0`         | ✅ Yes   | Animations                       |
-| `react-native-worklets`          | `>=0.5.0 <1.0.0` | ✅ Yes   | Worklet runtime for Reanimated 4 |
+| `react-native-reanimated`        | `>=4.1.1 <5.0.0` | ✅ Yes   | Animations                       |
+| `react-native-worklets`          | `>=0.5.1 <1.0.0` | ✅ Yes   | Worklet runtime for Reanimated 4 |
 | `react-native-safe-area-context` | `^5.6.0`         | ✅ Yes   | Safe area handling               |
 | `react-native-svg`               | `^15.12.1`       | ✅ Yes   | SVG support for icons            |
+| `expo-image`                     | `~3.0.11`        | ✅ Yes   | Image rendering                  |
+| `expo-blur`                      | `~15.0.8`        | ✅ Yes   | Blur effects                     |
 | `date-fns`                       | `^3.6.0`         | ✅ Yes   | Date utilities                   |
 | `twemoji-parser`                 | `^14.0.0`        | ✅ Yes   | Emoji support                    |
 
