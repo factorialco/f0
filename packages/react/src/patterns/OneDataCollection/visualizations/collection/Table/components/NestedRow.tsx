@@ -20,16 +20,16 @@ import { forwardRef, useCallback, useRef } from "react"
 
 import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
 
-import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
-import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
-import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
-import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
 import {
   GroupingDefinition,
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
+import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
+import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
+import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
+import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
+import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 
 import type {
   CellRendererProps,
@@ -40,6 +40,7 @@ import type {
 import { PrimaryActionItemDefinition } from "../../../../actions"
 import { useAddRow } from "../../EditableTable/context/AddRowContext"
 import { useCalculateConectorHeight } from "../hooks/useCalculateConectorHeight"
+import { HeaderGroupEntry } from "../hooks/useHeaderGroups"
 import { useLoadChildren } from "../hooks/useLoadChildren"
 import { useStickyParentRow } from "../hooks/useStickyParentRow"
 import { useNestedDataContext } from "../providers/NestedProvider"
@@ -47,7 +48,6 @@ import { AddRowRow } from "./AddRow"
 import { LoadMoreRow } from "./LoadMore"
 import { NestedRowProps, Row } from "./Row"
 import { RowLoading } from "./RowLoading"
-import { HeaderGroupEntry } from "../hooks/useHeaderGroups"
 
 const normalizeAddRowActions = (
   result:
@@ -155,6 +155,14 @@ const NestedRowContent = <
     : []
   const hasAddRowActions = addRowActions.length > 0
 
+  const firstRow = (props.nestedRowProps?.depth ?? 0) === 0
+
+  const { isSticky } = useStickyParentRow(
+    open && firstRow,
+    internalRowRef,
+    sentinelRef
+  )
+
   /**
    * useCalculateConectorHeight manages the visual tree connector lines
    * It calculates the height between first and last visible child to draw
@@ -163,7 +171,8 @@ const NestedRowContent = <
   const { calculatedHeight, setFirstChildRef, setLastChildRef } =
     useCalculateConectorHeight(
       childrenType,
-      !!shouldShowLoadMore || hasAddRowActions
+      !!shouldShowLoadMore || hasAddRowActions,
+      isSticky
     )
 
   /**
@@ -212,11 +221,8 @@ const NestedRowContent = <
    * - If this item is the last child and is open → hide border (noBorder = true), its children will show the border
    * - If this item is NOT the last child → hide border (noBorder = true)
    */
-  const firstRow = (props.nestedRowProps?.depth ?? 0) === 0
   const isLastChild = (props.nestedRowProps?.isLastChild || firstRow) ?? false
   const shouldHideBorder = (open || !isLastChild) && isTableVisualization
-
-  const { isSticky } = useStickyParentRow(open, internalRowRef, sentinelRef)
 
   return (
     <>
@@ -233,7 +239,6 @@ const NestedRowContent = <
             props.nestedRowProps?.parentHasChildren ?? children.length > 0,
           hasLoadedChildren: false,
           isLastChild,
-          isLastSibling: props.nestedRowProps?.isLastSibling,
           stickyRow: isSticky,
         }}
         tableWithChildren={props.tableWithChildren}
@@ -246,17 +251,6 @@ const NestedRowContent = <
           const childHasChildren = props.source.itemsWithChildren?.(childItem)
           const isFirstChild = childIndex === 0
           const isLastChildInLevel = childIndex === children.length - 1
-
-          /**
-           * isLastSibling controls the vertical connector style:
-           * - true → short connector (stops at horizontal offset)
-           * - false → full-height connector (continues to next sibling)
-           *
-           * When there's a LoadMore row, the last child in the array is NOT
-           * the last sibling visually — the LoadMore row follows it — so the
-           * vertical connector must continue downward.
-           */
-          const isLastSiblingInLevel = isLastChildInLevel && !shouldShowLoadMore
 
           const depth = (props.nestedRowProps?.depth ?? 0) + 1
 
@@ -317,7 +311,6 @@ const NestedRowContent = <
                   parentHasChildren: true,
                   depth: depth,
                   isLastChild: childIsLastInTree,
-                  isLastSibling: isLastSiblingInLevel,
                 }}
                 fromVisualization={props.fromVisualization}
               />
@@ -357,7 +350,6 @@ const NestedRowContent = <
                   nestedVariant: childrenType,
                   onExpand: handleExpand,
                   isLastChild: childIsLastInTree,
-                  isLastSibling: isLastSiblingInLevel,
                 }}
                 fromVisualization={props.fromVisualization}
                 tableWithChildren={props.tableWithChildren}
@@ -406,7 +398,6 @@ const NestedRowContent = <
             parentHasChildren: true,
             nestedVariant: childrenType,
             isLastChild,
-            isLastSibling: true,
           }}
         />
       )}

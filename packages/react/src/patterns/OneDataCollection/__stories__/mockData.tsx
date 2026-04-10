@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react"
 import { Observable } from "zen-observable-ts"
 
 import { AvatarVariant } from "@/components/avatars/F0Avatar"
-import { SummariesDefinition } from "@/patterns/OneDataCollection/summary.ts"
 import { PromiseState } from "@/lib/promise-to-observable"
 import { cn } from "@/lib/utils"
 import {
@@ -13,19 +12,9 @@ import {
   MockUser,
   TEAMS_MOCK,
 } from "@/mocks"
+import { SummariesDefinition } from "@/patterns/OneDataCollection/summary.ts"
 export { generateMockUsers, type MockUser }
 
-import {
-  FilterDefinition,
-  FiltersState,
-  PresetsDefinition,
-} from "@/patterns/OneFilterPicker"
-import {
-  BulkActionsDefinition,
-  DataCollectionBaseFetchOptions,
-  DataCollectionDataAdapter,
-  useDataCollectionSource,
-} from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 import {
   GroupingDefinition,
   GroupingState,
@@ -56,6 +45,17 @@ import {
   Upload,
 } from "@/icons/app"
 import { DEPARTMENTS_MOCK } from "@/mocks"
+import {
+  BulkActionsDefinition,
+  DataCollectionBaseFetchOptions,
+  DataCollectionDataAdapter,
+  useDataCollectionSource,
+} from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
+import {
+  FilterDefinition,
+  FiltersState,
+  PresetsDefinition,
+} from "@/patterns/OneFilterPicker"
 import { mockImage } from "@/testing/mocks/images"
 
 import { OneDataCollection } from ".."

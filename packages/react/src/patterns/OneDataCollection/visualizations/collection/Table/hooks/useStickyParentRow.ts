@@ -2,29 +2,10 @@ import { useLayoutEffect, useState } from "react"
 
 import { TABLE_ROW_STICKY_TOP_OFFSET } from "@/experimental/OneTable/TableRow"
 
+import { findScrollContainer } from "../lib/scroll"
+
 interface UseStickyParentRowResult {
   isSticky: boolean
-}
-
-const findScrollContainer = (element: HTMLElement): HTMLElement | null => {
-  let parent = element.parentElement
-
-  while (parent) {
-    const { overflow, overflowY } = getComputedStyle(parent)
-    const isScrollable =
-      overflow === "auto" ||
-      overflow === "scroll" ||
-      overflowY === "auto" ||
-      overflowY === "scroll"
-
-    if (isScrollable) {
-      return parent
-    }
-
-    parent = parent.parentElement
-  }
-
-  return null
 }
 
 export const useStickyParentRow = (

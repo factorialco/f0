@@ -6,9 +6,12 @@ import {
 } from "@/experimental/OneTable/TableCell/utils/nested"
 import { NestedVariant } from "@/hooks/datasource/types/nested.typings"
 
+import { subscribeToScroll } from "../lib/scroll"
+
 export const useCalculateConectorHeight = (
   nestedVariant: NestedVariant,
-  withHasMore: boolean
+  withHasMore: boolean,
+  isSticky?: boolean
 ) => {
   const [firstRow, setFirstRow] = useState<HTMLTableRowElement | null>(null)
   const [lastRow, setLastRow] = useState<HTMLTableRowElement | null>(null)
@@ -84,7 +87,17 @@ export const useCalculateConectorHeight = (
       const height =
         lastRowHeight - firstRowTop() + previousRowHeight() + hasMoreHeight()
 
-      setCalculatedHeight(height)
+      // When the parent row is sticky and children scroll above it,
+      // reduce the connector height by the amount the first child
+      // has scrolled past the parent's bottom edge.
+      let stickyAdjustment = 0
+      if (isSticky) {
+        const parentBottom = previousRow.getBoundingClientRect().bottom
+        const firstChildTop = firstRow.getBoundingClientRect().top
+        stickyAdjustment = Math.max(0, parentBottom - firstChildTop)
+      }
+
+      setCalculatedHeight(Math.max(0, height - stickyAdjustment))
     }
 
     calculateHeight()
@@ -112,11 +125,18 @@ export const useCalculateConectorHeight = (
       resizeObserver.observe(lastRow)
     }
 
+    // When the parent row is sticky, listen to scroll events to
+    // continuously update the connector height as children scroll.
+    const scrollCleanup = isSticky
+      ? subscribeToScroll(firstRow, calculateHeight)
+      : undefined
+
     return () => {
       observer.disconnect()
       resizeObserver.disconnect()
+      scrollCleanup?.()
     }
-  }, [firstRow, lastRow, nestedVariant])
+  }, [firstRow, lastRow, nestedVariant, isSticky])
 
   return { setFirstChildRef, setLastChildRef, calculatedHeight }
 }
