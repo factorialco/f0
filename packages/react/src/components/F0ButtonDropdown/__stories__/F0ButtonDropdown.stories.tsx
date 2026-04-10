@@ -105,18 +105,20 @@ export const Default: Story = {
     variant: "default",
     items: [
       {
-        value: "1",
-        label: "Item 1",
-        icon: Add,
+        value: "save",
+        label: "Save changes",
+        icon: Save,
       },
       {
-        value: "2",
-        label: "Item 2",
-        icon: Replace,
+        value: "save-close",
+        label: "Save and close",
+        icon: Save,
       },
       {
-        value: "3",
-        label: "Item 3",
+        value: "discard",
+        label: "Discard changes",
+        icon: Delete,
+        critical: true,
       },
     ],
   },

@@ -24,7 +24,6 @@ Consolidates multiple related actions under a single button. Comes in two modes:
       <tr>
         <th className="text-left">Mode</th>
         <th className="text-left">Description</th>
-        <th className="text-left">When to use</th>
       </tr>
     </thead>
     <tbody>
@@ -36,10 +35,6 @@ Consolidates multiple related actions under a single button. Comes in two modes:
           Two interactive areas: main button triggers the selected action,
           chevron opens the menu with the remaining items.
         </td>
-        <td>
-          One action is clearly more frequent than the rest and should be
-          one-click accessible.
-        </td>
       </tr>
       <tr>
         <td>
@@ -48,10 +43,6 @@ Consolidates multiple related actions under a single button. Comes in two modes:
         <td>
           Single unified button that opens a menu showing all items. A custom
           trigger label can be set independently of the items.
-        </td>
-        <td>
-          No single action has clear priority, or all options should be equally
-          discoverable.
         </td>
       </tr>
     </tbody>
@@ -107,7 +98,7 @@ Consolidates multiple related actions under a single button. Comes in two modes:
     <thead>
       <tr>
         <th className="text-left">Size</th>
-        <th className="text-left">When to use</th>
+        <th className="text-left">Description</th>
       </tr>
     </thead>
     <tbody>
@@ -115,19 +106,25 @@ Consolidates multiple related actions under a single button. Comes in two modes:
         <td>
           <code>sm</code>
         </td>
-        <td>Compact surfaces, toolbars, or inline actions inside tables.</td>
+        <td>
+          Reduced height and padding. Fits in dense surfaces like toolbars or
+          inline table actions.
+        </td>
       </tr>
       <tr>
         <td>
           <code>md</code> (default)
         </td>
-        <td>Standard placement in forms, page headers, or card actions.</td>
+        <td>Standard height and padding. The default for most contexts.</td>
       </tr>
       <tr>
         <td>
           <code>lg</code>
         </td>
-        <td>Hero areas or prominent calls to action.</td>
+        <td>
+          Increased height and padding. Use sparingly — uncommon for a dropdown
+          button outside of standalone action areas.
+        </td>
       </tr>
     </tbody>
   </table>
@@ -278,6 +275,7 @@ Use **dropdown mode** when all actions are equally likely and none should be pro
 - In dropdown mode all items appear in the menu. The `trigger` prop sets an independent label for the trigger button.
 - The `value` prop (split mode) controls which item is currently selected. When omitted, defaults to the first item's value.
 - `disabled` and `loading` apply to the entire control — both the main button and the chevron are affected.
+- The component is generic: `F0ButtonDropdown<T>` where `T` defaults to `string`. The `value` field of each `ButtonDropdownItem<T>` and the first argument of `onClick: (value: T, item: ButtonDropdownItem<T>) => void` share the same type. Pass a union, enum, or any literal type as `T` to get fully typed item values.
 
 ### Usage examples
 
@@ -292,12 +290,6 @@ Use `description` to clarify what each item does when the label alone is ambiguo
 Use `ButtonDropdownGroup` objects to organize items into labeled sections with visual separators. Useful when the list mixes actions of different categories.
 
 <Canvas of={Stories.WithGroups} />
-
-**Dropdown mode with custom trigger label**
-
-Set `trigger` to give the button a label that describes the category rather than a specific item. Use this when the item list may change or when no single item should dominate the label.
-
-<Canvas of={Stories.DropdownModeWithTrigger} />
 
 **With tooltip**
 
