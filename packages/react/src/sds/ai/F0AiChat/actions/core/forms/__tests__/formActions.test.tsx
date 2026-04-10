@@ -40,7 +40,6 @@ vi.mock("@/sds/ai/F0AiChat/providers/AiChatStateProvider", () => ({
 import { useFormFillAction } from "../useFormFillAction"
 import { useFormSubmitAction } from "../useFormSubmitAction"
 import { usePickActiveFormAction } from "../usePickActiveFormAction"
-import { usePresentFormAction } from "../usePresentFormAction"
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -74,7 +73,6 @@ function HookHost() {
   useFormSubmitAction()
   useFormFillAction()
   usePickActiveFormAction()
-  usePresentFormAction()
   return null
 }
 
@@ -322,101 +320,6 @@ describe("useFormFillAction handler", () => {
       success: false,
       error: expect.stringContaining("nope"),
     })
-  })
-})
-
-describe("usePresentFormAction handler", () => {
-  it("presents a registered form in dialog mode", async () => {
-    await setupWithDefinitions([
-      {
-        name: "user-form",
-        schema: simpleSchema,
-        defaultValues: { name: "", email: "" },
-        title: "Create User",
-      },
-    ])
-
-    const handler = getHandler("forms.presentForm")
-    const result = handler({
-      formName: "user-form",
-      mode: "dialog",
-    } as never)
-
-    expect(result).toMatchObject({ success: true })
-  })
-
-  it("returns error for unknown form", async () => {
-    await setupWithDefinitions([
-      {
-        name: "user-form",
-        schema: simpleSchema,
-        defaultValues: { name: "", email: "" },
-      },
-    ])
-
-    const handler = getHandler("forms.presentForm")
-    const result = handler({
-      formName: "ghost",
-      mode: "dialog",
-    } as never)
-
-    expect(result).toMatchObject({
-      success: false,
-      error: expect.stringContaining("ghost"),
-    })
-  })
-
-  it("passes defaultValuesParams to presentForm", async () => {
-    const paramsSchema = z.object({ employeeId: z.string() })
-
-    await setupWithDefinitions([
-      {
-        name: "edit-employee",
-        schema: simpleSchema,
-        defaultValuesParamsSchema: paramsSchema,
-        defaultValues: (params: Record<string, unknown>) => ({
-          name: `Employee ${params.employeeId}`,
-          email: `${params.employeeId}@factorial.co`,
-        }),
-      },
-    ])
-
-    const handler = getHandler("forms.presentForm")
-    const result = handler({
-      formName: "edit-employee",
-      mode: "dialog",
-      defaultValuesParams: { employeeId: "emp-99" },
-    } as never)
-
-    expect(result).toMatchObject({ success: true })
-  })
-
-  it("returns error for invalid params", async () => {
-    const paramsSchema = z.object({
-      employeeId: z.string().min(1, "employeeId required"),
-    })
-
-    await setupWithDefinitions([
-      {
-        name: "edit-employee",
-        schema: simpleSchema,
-        defaultValuesParamsSchema: paramsSchema,
-        defaultValues: (params: Record<string, unknown>) => ({
-          name: String(params.employeeId),
-          email: "",
-        }),
-      },
-    ])
-
-    const handler = getHandler("forms.presentForm")
-    const result = handler({
-      formName: "edit-employee",
-      mode: "dialog",
-      defaultValuesParams: { employeeId: "" },
-    } as never)
-
-    expect(result).toMatchObject({ success: false })
-    expect((result as { error: string }).error).toContain("employeeId required")
   })
 })
 

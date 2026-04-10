@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { z, type ZodType } from "zod"
 
+import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 import type {
   F0FormErrorTriggerMode,
   F0FormSubmitConfig,
@@ -46,6 +47,8 @@ interface UseF0FormDefinitionSingleSchemaInputBase<
   name: string
   /** Human-readable description of the form's purpose */
   description?: string
+  /** Module associated with this form (for avatar display in canvas cards) */
+  module?: ModuleId
   schema: TSchema
   sections?: Record<string, F0SectionConfig>
   onSubmit: (
@@ -86,6 +89,8 @@ interface UseF0FormDefinitionPerSectionInputBase<T extends F0PerSectionSchema> {
   name: string
   /** Human-readable description of the form's purpose */
   description?: string
+  /** Module associated with this form (for avatar display in canvas cards) */
+  module?: ModuleId
   schema: T
   sections?: Record<string, F0PerSectionSectionConfig>
   onSubmit: (
@@ -252,6 +257,7 @@ export function useF0FormDefinition(
     errorTriggerMode,
     defaultValuesParamsSchema,
     description,
+    module,
   } = input
 
   // Store the raw function for the AI registry to call with actual params
@@ -273,6 +279,7 @@ export function useF0FormDefinition(
     return {
       name,
       description,
+      module,
       schema,
       sections,
       defaultValues: resolvedDefaults,
@@ -290,6 +297,7 @@ export function useF0FormDefinition(
   }, [
     name,
     description,
+    module,
     schema,
     sections,
     resolvedDefaults,

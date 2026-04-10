@@ -1,5 +1,6 @@
 import { z, ZodRawShape, ZodEffects, type ZodType } from "zod"
 
+import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 import type {
   F0FormErrorTriggerMode,
   F0FormSubmitConfig,
@@ -64,6 +65,8 @@ export interface F0FormDefinitionSingleSchema<TSchema extends F0FormSchema> {
   name: string
   /** Human-readable description of the form's purpose */
   description?: string
+  /** Module associated with this form (for avatar display in canvas cards) */
+  module?: ModuleId
   schema: TSchema
   sections?: Record<string, F0SectionConfig>
   defaultValues?: Partial<z.infer<TSchema>>
@@ -88,6 +91,8 @@ export interface F0FormDefinitionPerSection<T extends F0PerSectionSchema> {
   name: string
   /** Human-readable description of the form's purpose */
   description?: string
+  /** Module associated with this form (for avatar display in canvas cards) */
+  module?: ModuleId
   schema: T
   sections?: Record<string, F0PerSectionSectionConfig>
   defaultValues?: { [K in keyof T]?: Partial<z.infer<T[K]>> }

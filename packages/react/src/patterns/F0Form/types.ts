@@ -1,5 +1,6 @@
 import type { z, ZodRawShape, ZodEffects, ZodType } from "zod"
 
+import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 import type { IconType } from "@/components/F0Icon"
 
 import type { CustomFieldRenderPropsBase } from "./fields/custom/types"
@@ -342,6 +343,8 @@ export interface F0FormPropsWithSingleSchema<TSchema extends F0FormSchema> {
   name: string
   /** Human-readable description of the form's purpose */
   description?: string
+  /** Module associated with this form (for avatar display in canvas cards) */
+  module?: ModuleId
   /** Zod object schema with F0 field configurations */
   schema: TSchema
   /** Section configurations keyed by section ID */

@@ -10,12 +10,12 @@ import {
 } from "react"
 import { zodToJsonSchema } from "zod-to-json-schema"
 
+import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 import type { F0WizardFormStep } from "@/patterns/F0WizardForm/types"
 
 import type { F0FormSchema, F0SectionConfig } from "./types"
 import type { F0FormRef, F0FormSetValueOptions } from "./useF0Form"
 
-import { F0AiFormPresenter } from "./F0AiFormPresenter"
 import { getF0Config, unwrapZodSchema } from "./f0Schema"
 
 /**
@@ -26,11 +26,13 @@ export interface F0AiFormEntry {
   schema: F0FormSchema
   /** Human-readable description of the form's purpose */
   description?: string
+  /** Module associated with this form (for avatar display in canvas cards) */
+  module?: ModuleId
   /** Whether this entry was registered from an availableFormDefinition (not a rendered form) */
   virtual?: boolean
   /** Section configs (title, description) keyed by section ID */
   sections?: Record<string, F0SectionConfig>
-  /** Zod schema for params accepted by presentForm (virtual entries only) */
+  /** Zod schema for params accepted by the AI (virtual entries only) */
   defaultValuesParamsSchema?: ZodType
   /** Raw defaultValues function that accepts params (from rendered forms with defaultValuesParamsSchema) */
   defaultValuesFn?: (
@@ -55,7 +57,7 @@ export interface F0AiAvailableFormDefinition<
   schema: F0FormSchema
   /**
    * Default values for the form fields.
-   * Can be a static object or a function that receives params (supplied by the AI via presentForm)
+   * Can be a static object or a function that receives params (supplied by the AI)
    * and returns the defaults.
    */
   defaultValues?:
@@ -63,7 +65,7 @@ export interface F0AiAvailableFormDefinition<
     | ((params: TParams) => Record<string, unknown>)
   /**
    * Zod schema that describes the params accepted by a functional `defaultValues`.
-   * When provided, the AI will see this schema and can supply params when calling presentForm.
+   * When provided, the AI will see this schema and can supply params.
    * Params are validated against this schema before being passed to `defaultValues`.
    */
   defaultValuesParamsSchema?: ZodType<TParams>
@@ -75,6 +77,8 @@ export interface F0AiAvailableFormDefinition<
   title?: string
   /** Description shown under the title in dialog mode */
   description?: string
+  /** Module associated with this form (for avatar display in canvas cards) */
+  module?: ModuleId
   /** Wizard steps (required for wizard mode to work with multiple steps) */
   steps?: F0WizardFormStep[]
 }
@@ -279,26 +283,17 @@ function extractSectionDescriptions(
 }
 
 /**
- * Tracks an AI-presented form (opened via the presentForm tool)
- */
-export interface F0AiPresentedForm {
-  /** Name of the form (matches an availableFormDefinition) */
-  name: string
-  /** Render mode chosen by the LLM */
-  mode: "dialog" | "wizard"
-  /** Resolved definition from availableFormDefinitions */
-  definition: F0AiAvailableFormDefinition
-  /** Snapshot of the virtual form's values at the time presentForm was called */
-  initialValues: Record<string, unknown>
-}
-
-/**
  * Context value for the AI form registry
  */
 /** Full runtime description of a form (used for formsOnCurrentPage and activeForm) */
 export interface F0AiFormDescription {
   formName: string
   description?: string
+  module?: ModuleId
+  /** Custom title for the card (set via pickActiveForm) */
+  cardTitle: string
+  /** Custom description for the card (set via pickActiveForm) */
+  cardDescription: string
   formSchema: Record<string, unknown>
   fieldDescriptions: Record<
     string,
@@ -314,7 +309,7 @@ export interface F0AiFormDescription {
   formValues: Record<string, unknown>
   formErrors: Record<string, unknown>
   isDirty: boolean
-  /** JSON Schema of defaultValuesParams accepted by presentForm (only for forms with defaultValuesParamsSchema) */
+  /** JSON Schema of defaultValuesParams (only for forms with defaultValuesParamsSchema) */
   defaultValuesParamsSchema?: Record<string, unknown>
 }
 
@@ -322,6 +317,7 @@ export interface F0AiFormDescription {
 export interface F0AiAvailableFormSummary {
   formName: string
   description?: string
+  module?: ModuleId
 }
 
 interface F0AiFormRegistryContextValue {
@@ -334,7 +330,8 @@ interface F0AiFormRegistryContextValue {
     defaultValuesFn?: (
       params: Record<string, unknown>
     ) => Promise<Record<string, unknown>>,
-    description?: string
+    description?: string,
+    module?: ModuleId
   ) => void
   unregister: (name: string) => void
   get: (name: string) => F0AiFormEntry | undefined
@@ -348,17 +345,12 @@ interface F0AiFormRegistryContextValue {
   /** Full runtime state of the form the AI is actively co-editing, or null */
   activeForm: F0AiFormDescription | null
   /** Set an available form as the active co-editing form */
-  setActiveForm: (formName: string) => { success: boolean; error?: string }
-  /** Currently AI-presented form, or null */
-  presentedForm: F0AiPresentedForm | null
-  /** Called by the AI tool to present a form */
-  presentForm: (
+  setActiveForm: (
     formName: string,
-    mode: "dialog" | "wizard",
-    defaultValuesParams?: Record<string, unknown>
+    cardMeta?: { cardTitle: string; cardDescription: string }
   ) => { success: boolean; error?: string }
-  /** Called when the presented form is closed (submit/cancel) */
-  dismissForm: () => void
+  /** Clear the active co-editing form (e.g. after submit) */
+  clearActiveForm: () => void
 }
 
 const F0AiFormRegistryContext =
@@ -390,9 +382,6 @@ export function F0AiFormRegistryProvider({
 }) {
   const registryRef = useRef<Map<string, F0AiFormEntry>>(new Map())
   const lastDescriptionsJsonRef = useRef<string>("")
-  const [presentedForm, setPresentedForm] = useState<F0AiPresentedForm | null>(
-    null
-  )
 
   // Three-field state replacing the old flat formDescriptions array.
   // formsOnCurrentPage: full runtime state for rendered (non-virtual) forms
@@ -408,6 +397,10 @@ export function F0AiFormRegistryProvider({
     null
   )
   const activeFormNameRef = useRef<string | null>(null)
+  const activeFormCardMetaRef = useRef<{
+    cardTitle?: string
+    cardDescription?: string
+  }>({})
 
   const rebuildDescriptions = useCallback(() => {
     // Defer to avoid setState during render — register() is called from
@@ -428,12 +421,16 @@ export function F0AiFormRegistryProvider({
           nextAvailableForms.push({
             formName: name,
             ...(entry.description ? { description: entry.description } : {}),
+            ...(entry.module ? { module: entry.module } : {}),
           })
         } else {
           // Rendered forms → full runtime state for formsOnCurrentPage
           nextFormsOnCurrentPage.push({
             formName: name,
             ...(entry.description ? { description: entry.description } : {}),
+            ...(entry.module ? { module: entry.module } : {}),
+            cardTitle: "",
+            cardDescription: "",
             formSchema: zodToJsonSchema(entry.schema) as Record<
               string,
               unknown
@@ -456,9 +453,13 @@ export function F0AiFormRegistryProvider({
         // Build activeForm regardless of virtual/non-virtual status.
         // A picked form stays active even if a rendered form takes over the entry.
         if (activeFormNameRef.current === name) {
+          const cardMeta = activeFormCardMetaRef.current
           nextActiveForm = {
             formName: name,
             ...(entry.description ? { description: entry.description } : {}),
+            ...(entry.module ? { module: entry.module } : {}),
+            cardTitle: cardMeta.cardTitle ?? "",
+            cardDescription: cardMeta.cardDescription ?? "",
             formSchema: zodToJsonSchema(entry.schema) as Record<
               string,
               unknown
@@ -503,13 +504,15 @@ export function F0AiFormRegistryProvider({
       defaultValuesFn?: (
         params: Record<string, unknown>
       ) => Promise<Record<string, unknown>>,
-      description?: string
+      description?: string,
+      module?: ModuleId
     ) => {
       // Rendered forms always take precedence over virtual entries
       registryRef.current.set(name, {
         ref,
         schema,
         description,
+        module,
         sections,
         defaultValuesParamsSchema,
         defaultValuesFn,
@@ -537,6 +540,7 @@ export function F0AiFormRegistryProvider({
           ref: virtualRef,
           schema: virtualDef.schema,
           description: virtualDef.description,
+          module: virtualDef.module,
           sections: virtualDef.sections,
           virtual: true,
           defaultValuesParamsSchema: virtualDef.defaultValuesParamsSchema,
@@ -556,79 +560,11 @@ export function F0AiFormRegistryProvider({
     return Array.from(registryRef.current.keys())
   }, [])
 
-  const presentForm = useCallback(
+  const setActiveForm = useCallback(
     (
       formName: string,
-      mode: "dialog" | "wizard",
-      defaultValuesParams?: Record<string, unknown>
+      cardMeta?: { cardTitle: string; cardDescription: string }
     ) => {
-      const def = availableFormDefinitions?.find((d) => d.name === formName)
-      if (!def) {
-        return {
-          success: false,
-          error: `Form "${formName}" not found in availableFormDefinitions`,
-        }
-      }
-
-      // Validate defaultValuesParams against the schema if provided
-      if (defaultValuesParams && def.defaultValuesParamsSchema) {
-        const parseResult =
-          def.defaultValuesParamsSchema.safeParse(defaultValuesParams)
-        if (!parseResult.success) {
-          return {
-            success: false,
-            error: `Invalid defaultValuesParams for form "${formName}": ${parseResult.error.issues.map((i) => i.message).join(", ")}`,
-          }
-        }
-      }
-
-      // Resolve defaults — if defaultValuesParams are provided and defaultValues is a function,
-      // call it with the validated params
-      const resolvedDefaults = resolveDefaultValues(
-        def.defaultValues,
-        defaultValuesParams ?? {}
-      )
-
-      // Merge values from the virtual form ref (which may have been set via fillForm).
-      // When defaultValuesParams are provided, use per-field dirty tracking so that
-      // param-resolved defaults are used for untouched fields. Otherwise, use the
-      // full ref values — they are either AI-modified or the original defaults.
-      const entry = registryRef.current.get(formName)
-      const ref = entry?.ref.current
-      let currentValues: Record<string, unknown>
-
-      if (defaultValuesParams && entry?.dirtyFields) {
-        // Params provided: start from param-resolved defaults, overlay only AI-touched fields
-        const refValues = ref?.getValues() ?? {}
-        const aiModified: Record<string, unknown> = {}
-        for (const field of entry.dirtyFields) {
-          if (field in refValues) {
-            aiModified[field] = refValues[field]
-          }
-        }
-        currentValues = { ...resolvedDefaults, ...aiModified }
-      } else {
-        // No params: just use whatever the ref has (fillForm values or original defaults)
-        currentValues = ref?.getValues() ?? resolvedDefaults
-      }
-
-      setPresentedForm({
-        name: formName,
-        mode,
-        definition: def,
-        initialValues: currentValues,
-      })
-      return { success: true }
-    },
-    [availableFormDefinitions]
-  )
-
-  const dismissForm = useCallback(() => {
-    setPresentedForm(null)
-  }, [])
-
-  const setActiveForm = useCallback(
-    (formName: string) => {
       const entry = registryRef.current.get(formName)
       if (!entry) {
         const available = Array.from(registryRef.current.keys())
@@ -644,11 +580,21 @@ export function F0AiFormRegistryProvider({
         }
       }
       activeFormNameRef.current = formName
+      activeFormCardMetaRef.current = {
+        cardTitle: cardMeta?.cardTitle ?? "",
+        cardDescription: cardMeta?.cardDescription ?? "",
+      }
       rebuildDescriptions()
       return { success: true }
     },
     [rebuildDescriptions]
   )
+
+  const clearActiveForm = useCallback(() => {
+    activeFormNameRef.current = null
+    activeFormCardMetaRef.current = { cardTitle: "", cardDescription: "" }
+    rebuildDescriptions()
+  }, [rebuildDescriptions])
 
   // Sync virtual form definitions: register forms that aren't rendered,
   // skip if a rendered (non-virtual) form with the same name already exists.
@@ -674,6 +620,7 @@ export function F0AiFormRegistryProvider({
         ref: virtualRef,
         schema: def.schema,
         description: def.description,
+        module: def.module,
         sections: def.sections,
         virtual: true,
         defaultValuesParamsSchema: def.defaultValuesParamsSchema,
@@ -716,20 +663,12 @@ export function F0AiFormRegistryProvider({
     availableForms,
     activeForm,
     setActiveForm,
-    presentedForm,
-    presentForm,
-    dismissForm,
+    clearActiveForm,
   }
 
   return (
     <F0AiFormRegistryContext.Provider value={value}>
       {children}
-      {presentedForm && (
-        <F0AiFormPresenter
-          presentedForm={presentedForm}
-          onClose={dismissForm}
-        />
-      )}
     </F0AiFormRegistryContext.Provider>
   )
 }

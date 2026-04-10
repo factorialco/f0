@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils"
 
 export type CanvasCardProps = {
   /** Module avatar to display (e.g. "analytics", "surveys", "goals") */
-  module: ModuleId
+  module?: ModuleId
   /** Primary title */
   title: string
   /** Secondary description line */
@@ -28,7 +28,7 @@ export type CanvasCardProps = {
  * When active, displays a focus ring and the button switches to "Close".
  */
 export function CanvasCard({
-  module,
+  module: cardModule,
   title,
   description,
   onOpen,
@@ -40,12 +40,13 @@ export function CanvasCard({
   return (
     <div
       className={cn(
-        "flex flex-row items-center justify-between gap-3 rounded-lg border border-solid p-4",
-        isActive ? "border-f1-border-hover" : "border-f1-border-secondary"
+        "flex flex-row hover:border-f1-border-hover items-center justify-between gap-3 rounded-lg border border-solid border-f1-border-secondary px-3 py-2",
+        !isActive && "border-f1-border-secondary cursor-pointer"
       )}
+      onClick={!isActive ? onOpen : undefined}
     >
       <div className="flex min-w-0 flex-row items-center gap-3">
-        <F0AvatarModule module={module} size="lg" />
+        {!!cardModule && <F0AvatarModule module={cardModule} size="lg" />}
         <div className="flex min-w-0 flex-col">
           <OneEllipsis className="text-lg font-semibold text-f1-foreground">
             {title}

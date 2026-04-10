@@ -50,6 +50,7 @@ export const useFormSubmitAction = () => {
         if (Object.keys(errors).length > 0) {
           return { success: false, errors }
         }
+        registry.clearActiveForm()
         return { success: true }
       } catch {
         const errors = ref.getErrors()

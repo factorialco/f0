@@ -5,6 +5,9 @@ import { z } from "zod"
 
 import type { F0AiAvailableFormDefinition } from "@/patterns/F0Form"
 
+import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
+import { ApplicationFrame } from "@/patterns/ApplicationFrame"
+import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
 import {
   f0FormField,
   F0Form,
@@ -12,14 +15,11 @@ import {
   useF0Form,
 } from "@/patterns/F0Form"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm"
+import { Page } from "@/patterns/Navigation/Page"
 import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
 import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
-import { ApplicationFrame } from "@/patterns/ApplicationFrame"
-import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
-import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
-import { Page } from "@/patterns/Navigation/Page"
 
-import { F0AiChat, F0AiChatProvider, useAiChat } from ".."
+import { F0AiChatProvider, useAiChat } from ".."
 
 const meta = {
   title: "AI/F0AiFormTools",
@@ -220,24 +220,15 @@ function FormWithAiDemo() {
   })
 
   return (
-    <div className="flex h-screen w-full">
-      {/* Left side: the form */}
-      <div className="flex-1 overflow-y-auto p-8">
-        <div className="mx-auto max-w-2xl">
-          <h1 className="font-bold mb-1 text-2xl text-f1-foreground">
-            New Employee
-          </h1>
-          <p className="mb-6 text-sm text-f1-foreground-secondary">
-            Try asking One to fill this form. Say something like: &quot;Fill the
-            new employee form with Jane Doe, engineer, starting next
-            Monday&quot;
-          </p>
-          <F0Form formRef={formRef} formDefinition={formDefinition} />
-        </div>
-      </div>
-
-      {/* Right side: AI Chat */}
-      <F0AiChat />
+    <div className="mx-auto max-w-2xl p-8">
+      <h1 className="font-bold mb-1 text-2xl text-f1-foreground">
+        New Employee
+      </h1>
+      <p className="mb-6 text-sm text-f1-foreground-secondary">
+        Try asking One to fill this form. Say something like: &quot;Fill the new
+        employee form with Jane Doe, engineer, starting next Monday&quot;
+      </p>
+      <F0Form formRef={formRef} formDefinition={formDefinition} />
     </div>
   )
 }
@@ -271,7 +262,14 @@ export const FormWithAiChat: Story = {
           greeting="Hello! I can help you fill out the employee form. Ask me to describe it, fill fields, or submit."
         >
           <AutoOpenChat>
-            <FormWithAiDemo />
+            <ApplicationFrame
+              {...applicationFrameProps}
+              sidebar={<Sidebar {...SidebarStories.default.args} />}
+            >
+              <Page header={<PageHeader module={storyModule} />}>
+                <FormWithAiDemo />
+              </Page>
+            </ApplicationFrame>
           </AutoOpenChat>
         </F0AiChatProvider>
       </F0AiFormRegistryProvider>
@@ -290,7 +288,7 @@ const storyModule = {
 }
 
 // =============================================================================
-// Story: presentForm — AI opens forms in dialog or wizard mode
+// Story: AvailableForms — AI fills forms shown via canvas card
 // =============================================================================
 
 const presentableFormSchema = z.object({
@@ -648,6 +646,7 @@ const presentableFormDefinitions: F0AiAvailableFormDefinition[] = [
     schema: timeOffRequestSchema,
     title: "Time Off Request",
     description: "Request time off for an employee",
+    module: "timeoff",
     defaultValues: {
       employeeName: "",
       leaveType: undefined,
@@ -668,6 +667,7 @@ const presentableFormDefinitions: F0AiAvailableFormDefinition[] = [
     schema: expenseReportSchema,
     title: "Expense Report",
     description: "Submit an expense report for reimbursement",
+    module: "my_spending",
     defaultValues: {
       description: "",
       amount: undefined,
@@ -701,6 +701,7 @@ const presentableFormDefinitions: F0AiAvailableFormDefinition[] = [
     defaultValues: { name: "", email: "", message: "" },
     title: "Quick Contact",
     description: "Send a quick message to someone",
+    module: "communities",
     onSubmit: async (values) => {
       // eslint-disable-next-line no-console
       console.info("Contact submitted:", JSON.stringify(values, null, 2))
@@ -709,6 +710,7 @@ const presentableFormDefinitions: F0AiAvailableFormDefinition[] = [
   {
     name: "new-employee",
     schema: presentableFormSchema,
+    module: "employees",
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -778,17 +780,15 @@ const presentableFormDefinitions: F0AiAvailableFormDefinition[] = [
 ]
 
 /**
- * AI can interact with virtual forms: fill fields, read state, submit,
- * and present them dynamically in dialog or wizard mode.
+ * AI can interact with virtual forms: fill fields, read state, and submit.
+ * A canvas card appears inline in the chat when a form is actively being filled.
+ * The user can open the card to see the form in the canvas panel.
  *
  * Four forms are registered via `availableFormDefinitions`:
- * - **time-off-request** — Simple leave request (dialog)
- * - **expense-report** — Expense submission (dialog)
- * - **quick-contact** — A simple 3-field form (dialog)
+ * - **time-off-request** — Simple leave request
+ * - **expense-report** — Expense submission
+ * - **quick-contact** — A simple 3-field form
  * - **new-employee** — A multi-section form with wizard steps
- *
- * The AI can `fillForm` to pre-populate values, then `presentForm` to show
- * the form to the user in either `"dialog"` or `"wizard"` mode.
  *
  * **Requires a running Mastra dev server** at
  * `https://mastra.local.factorial.dev/copilotkit`.
@@ -796,11 +796,10 @@ const presentableFormDefinitions: F0AiAvailableFormDefinition[] = [
  * Try prompts like:
  * - "What forms are available?"
  * - "Fill the time-off request for Jane Doe, vacation from April 1 to April 10"
- * - "Present the expense report as a dialog"
- * - "Fill the new employee form with Jane Doe, engineer, salary 75000 and then present it as a wizard"
+ * - "Fill the new employee form with Jane Doe, engineer, salary 75000"
  * - "Open the quick contact form"
  */
-export const PresentForm: Story = {
+export const AvailableForms: Story = {
   render() {
     return (
       <F0AiFormRegistryProvider
@@ -812,7 +811,7 @@ export const PresentForm: Story = {
           agent="one-workflow"
           credentials="include"
           showDevConsole={false}
-          greeting="Hello! I can help you with forms. I can fill, describe, present, and submit any of the available forms. Try asking me to fill a time-off request or present the new employee form as a wizard."
+          greeting="Hello! I can help you with forms. I can fill, describe, and submit any of the available forms. Try asking me to fill a time-off request or the new employee form."
         >
           <AutoOpenChat>
             <ApplicationFrame

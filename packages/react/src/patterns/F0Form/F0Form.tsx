@@ -406,6 +406,7 @@ function F0FormFromSingleDefinition<TSchema extends F0FormSchema>({
     <F0FormSingleSchema
       name={def.name}
       description={def.description}
+      module={def.module}
       schema={def.schema}
       sections={def.sections}
       defaultValues={def.defaultValues}
@@ -505,6 +506,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     defaultValuesParamsSchema,
     defaultValuesFn,
     description,
+    module,
   } = props
 
   const { useUpload } = props
@@ -831,7 +833,8 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
         sections,
         defaultValuesParamsSchema,
         defaultValuesFn,
-        description
+        description,
+        module
       )
       return () => {
         aiFormRegistry.unregister(name)
@@ -841,6 +844,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     aiFormRegistry,
     name,
     description,
+    module,
     schema,
     sections,
     formRef,

@@ -27,12 +27,32 @@ export const usePickActiveFormAction = () => {
           "Name of the available form to activate (must match an entry in availableForms)",
         required: true,
       },
+      {
+        name: "cardTitle",
+        type: "string",
+        description:
+          "Custom title to display on the form card shown inline in the chat",
+      },
+      {
+        name: "cardDescription",
+        type: "string",
+        description:
+          "Custom description to display on the form card shown inline in the chat",
+      },
     ],
-    handler: ({ formName }: { formName: string }) => {
+    handler: ({
+      formName,
+      cardTitle,
+      cardDescription,
+    }: {
+      formName: string
+      cardTitle: string
+      cardDescription: string
+    }) => {
       if (!registry) {
         return { success: false, error: "Form registry is not available" }
       }
-      return registry.setActiveForm(formName)
+      return registry.setActiveForm(formName, { cardTitle, cardDescription })
     },
   })
 }

@@ -173,3 +173,7 @@ div[role="dialog"] {
     @apply appearance-none;
   }
 }
+
+cpk-web-inspector {
+  display: none;
+}

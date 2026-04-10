@@ -1,6 +1,8 @@
 import { CopilotKitProps } from "@copilotkit/react-core"
 import { type AIMessage, type Message } from "@copilotkit/shared"
 
+import type { ModuleId } from "@/components/avatars/F0AvatarModule"
+
 import { IconType } from "@/components/F0Icon"
 import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
 
@@ -22,6 +24,7 @@ import type { EntityRefs } from "./components/markdownRenderers/entityRef/types"
 export type CanvasContentBase = {
   type: string
   title: string
+  description: string
   toolCallId?: string
 }
 
@@ -35,10 +38,20 @@ export type DashboardCanvasContent = CanvasContentBase & {
 }
 
 /**
+ * Form canvas content — renders an interactive F0Form in the canvas panel.
+ */
+export type FormCanvasContent = CanvasContentBase & {
+  type: "form"
+  formName: string
+  formDescription?: string
+  formModule?: ModuleId
+}
+
+/**
  * Discriminated union for canvas panel content.
  * Add new entity types to this union as they are implemented.
  */
-export type CanvasContent = DashboardCanvasContent
+export type CanvasContent = DashboardCanvasContent | FormCanvasContent
 
 /**
  * A tool hint that can be activated to prepend invisible context to the user's
