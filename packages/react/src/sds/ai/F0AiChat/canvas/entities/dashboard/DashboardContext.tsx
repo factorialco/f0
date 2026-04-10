@@ -1,92 +1,99 @@
-import { useCopilotContext } from "@copilotkit/react-core"
+import { useCopilotContext } from "@copilotkit/react-core";
 import {
   createContext,
   type ReactNode,
   useCallback,
   useContext,
   useState,
-} from "react"
+} from "react";
 
-import type { DashboardItemLayout } from "@/patterns/F0AnalyticsDashboard/types"
+import type { DashboardItemLayout } from "@/patterns/F0AnalyticsDashboard/types";
 
-import type { ChatDashboardConfig, ChatDashboardItem } from "./types"
-import { useSaveDashboardConfig } from "./useSaveDashboardConfig"
-import { useAiChat } from "../../../providers/AiChatStateProvider"
+import type { ChatDashboardConfig, ChatDashboardItem } from "./types";
+import { useSaveDashboardConfig } from "./useSaveDashboardConfig";
+import { useAiChat } from "../../../providers/AiChatStateProvider";
+import type {
+  DashboardCanvasContent,
+  SaveDashboardPayload,
+} from "../../../types";
 
-import { savedDashboardConfigStore } from "./configStore"
-import type { DashboardCanvasContent } from "../../../types"
+import { savedDashboardConfigStore } from "./configStore";
 
 type DashboardCanvasContextValue = {
   /** Whether there are unsaved layout changes */
-  isDirty: boolean
+  isDirty: boolean;
   /** Incrementing counter — changes when discard is called to reset the grid */
-  discardKey: number
+  discardKey: number;
   /** Pending item transforms keyed by item id (chart type changes, etc.) */
-  itemTransforms: Map<string, Partial<ChatDashboardItem>>
+  itemTransforms: Map<string, Partial<ChatDashboardItem>>;
   /** Called by the grid when layout changes (drag/resize/delete) */
-  onLayoutChange: (layout: DashboardItemLayout[]) => void
+  onLayoutChange: (layout: DashboardItemLayout[]) => void;
   /** Persist current layout and update canvas */
-  handleSave: () => Promise<void>
+  handleSave: () => Promise<void>;
   /** Discard pending layout changes */
-  handleDiscard: () => void
+  handleDiscard: () => void;
   /** Transform an item's config (e.g. change chart type). Marks dirty without refetch. */
-  transformItem: (itemId: string, patch: Partial<ChatDashboardItem>) => void
+  transformItem: (itemId: string, patch: Partial<ChatDashboardItem>) => void;
   /** Export the dashboard as Excel */
-  exportAsExcel?: () => Promise<void>
+  exportAsExcel?: () => Promise<void>;
   /** Register the export function from the dashboard component */
-  registerExport: (fn: (() => Promise<void>) | undefined) => void
-}
+  registerExport: (fn: (() => Promise<void>) | undefined) => void;
+  /** The current dashboard config (reflects any saved layout edits) */
+  config: ChatDashboardConfig;
+  /** Callback to persist the dashboard to the backend. Undefined when not provided by the host app. */
+  onSaveDashboard?: (payload: SaveDashboardPayload) => Promise<void>;
+};
 
 const DashboardCanvasContext =
-  createContext<DashboardCanvasContextValue | null>(null)
+  createContext<DashboardCanvasContextValue | null>(null);
 
 export function useDashboardCanvas(): DashboardCanvasContextValue {
-  const ctx = useContext(DashboardCanvasContext)
+  const ctx = useContext(DashboardCanvasContext);
   if (!ctx) {
     throw new Error(
-      "useDashboardCanvas must be used within DashboardCanvasProvider"
-    )
+      "useDashboardCanvas must be used within DashboardCanvasProvider",
+    );
   }
-  return ctx
+  return ctx;
 }
 
 export function DashboardCanvasProvider({
   content,
   children,
 }: {
-  content: DashboardCanvasContent
-  children: ReactNode
+  content: DashboardCanvasContent;
+  children: ReactNode;
 }): ReactNode {
   const [pendingLayout, setPendingLayout] = useState<
     DashboardItemLayout[] | null
-  >(null)
+  >(null);
   const [itemTransforms, setItemTransforms] = useState<
     Map<string, Partial<ChatDashboardItem>>
-  >(new Map())
-  const [discardKey, setDiscardKey] = useState(0)
+  >(new Map());
+  const [discardKey, setDiscardKey] = useState(0);
   const [exportAsExcel, setExportAsExcel] = useState<
     (() => Promise<void>) | undefined
-  >()
+  >();
   const registerExport = useCallback(
     (fn: (() => Promise<void>) | undefined) => {
-      setExportAsExcel(() => fn)
+      setExportAsExcel(() => fn);
     },
-    []
-  )
-  const { openCanvas } = useAiChat()
-  const { threadId } = useCopilotContext()
+    [],
+  );
+  const { openCanvas, onSaveDashboard } = useAiChat();
+  const { threadId } = useCopilotContext();
 
-  const saveConfigFn = useSaveDashboardConfig(content.apiConfig)
+  const saveConfigFn = useSaveDashboardConfig(content.apiConfig);
 
   const applyLayout = useCallback(
     (layout: DashboardItemLayout[]): ChatDashboardConfig | null => {
       const itemsById = new Map(
-        content.config.items.map((item) => [item.id, item])
-      )
+        content.config.items.map((item) => [item.id, item]),
+      );
       const newItems = layout
         .map((entry) => {
-          const original = itemsById.get(entry.id)
-          if (!original) return null
+          const original = itemsById.get(entry.id);
+          if (!original) return null;
           return {
             ...original,
             colSpan: entry.colSpan,
@@ -97,62 +104,62 @@ export function DashboardCanvasProvider({
             itemHeight: entry.itemHeight,
             x: entry.x,
             y: entry.y,
-          }
+          };
         })
-        .filter((item) => item !== null)
+        .filter((item) => item !== null);
 
-      return { ...content.config, items: newItems }
+      return { ...content.config, items: newItems };
     },
-    [content]
-  )
+    [content],
+  );
 
   const onLayoutChange = useCallback((layout: DashboardItemLayout[]) => {
-    setPendingLayout(layout)
-  }, [])
+    setPendingLayout(layout);
+  }, []);
 
   const transformItem = useCallback(
     (itemId: string, patch: Partial<ChatDashboardItem>) => {
       setItemTransforms((prev) => {
-        const next = new Map(prev)
-        next.set(itemId, patch)
-        return next
-      })
+        const next = new Map(prev);
+        next.set(itemId, patch);
+        return next;
+      });
     },
-    []
-  )
+    [],
+  );
 
   /** Apply item transforms to a config, producing a new config with patched items. */
   const applyTransforms = useCallback(
     (config: ChatDashboardConfig): ChatDashboardConfig => {
-      if (itemTransforms.size === 0) return config
+      if (itemTransforms.size === 0) return config;
       return {
         ...config,
         items: config.items.map((item) => {
-          const patch = itemTransforms.get(item.id)
-          return patch ? ({ ...item, ...patch } as typeof item) : item
+          const patch = itemTransforms.get(item.id);
+          return patch ? ({ ...item, ...patch } as typeof item) : item;
         }),
-      }
+      };
     },
-    [itemTransforms]
-  )
+    [itemTransforms],
+  );
 
   const handleSave = async () => {
-    const hasPendingChanges = pendingLayout || itemTransforms.size > 0
-    if (!hasPendingChanges) return
+    const hasPendingChanges = pendingLayout || itemTransforms.size > 0;
+    if (!hasPendingChanges) return;
 
     // Start from current config, apply layout then transforms
     let updatedConfig = pendingLayout
       ? applyLayout(pendingLayout)
-      : { ...content.config }
-    if (!updatedConfig || !threadId) return
+      : { ...content.config };
+    if (!updatedConfig || !threadId) return;
 
-    updatedConfig = applyTransforms(updatedConfig)
+    updatedConfig = applyTransforms(updatedConfig);
 
     try {
-      await saveConfigFn(threadId, content.toolCallId, updatedConfig)
+      await saveConfigFn(threadId, content.toolCallId, updatedConfig);
 
       if (content.toolCallId) {
-        savedDashboardConfigStore.set(content.toolCallId, updatedConfig)
+        savedDashboardConfigStore.set(content.toolCallId, updatedConfig);
       }
 
       // Update canvas content. handleSave only ever spreads the config / items
@@ -162,20 +169,20 @@ export function DashboardCanvasProvider({
       openCanvas({
         ...content,
         config: updatedConfig,
-      })
+      });
 
-      setPendingLayout(null)
-      setItemTransforms(new Map())
+      setPendingLayout(null);
+      setItemTransforms(new Map());
     } catch {
       // Keep pending state on failure so user can retry
     }
-  }
+  };
 
   const handleDiscard = () => {
-    setPendingLayout(null)
-    setItemTransforms(new Map())
-    setDiscardKey((k) => k + 1)
-  }
+    setPendingLayout(null);
+    setItemTransforms(new Map());
+    setDiscardKey((k) => k + 1);
+  };
 
   return (
     <DashboardCanvasContext.Provider
@@ -189,9 +196,11 @@ export function DashboardCanvasProvider({
         transformItem,
         exportAsExcel,
         registerExport,
+        config: content.config,
+        onSaveDashboard,
       }}
     >
       {children}
     </DashboardCanvasContext.Provider>
-  )
+  );
 }

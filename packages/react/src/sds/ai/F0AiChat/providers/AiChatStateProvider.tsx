@@ -16,9 +16,9 @@ import {
 
 import { useI18n } from "@/lib/providers/i18n"
 
-import { DEFAULT_CHAT_WIDTH } from "../utils/constants"
-import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
 import type { ClarifyingQuestionState } from "../actions/core/clarifyingQuestion/types"
+
+import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
 import {
   type AiChatMode,
   type AppendMessage,
@@ -27,6 +27,7 @@ import {
   type AiChatToolHint,
   WelcomeScreenSuggestion,
 } from "../types"
+import { DEFAULT_CHAT_WIDTH } from "../utils/constants"
 import {
   readFromLocalStorage,
   writeToLocalStorage,
@@ -66,6 +67,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   fileAttachments,
   onThumbsDown,
   onThumbsUp,
+  onSaveDashboard,
   tracking,
   ...rest
 }) => {
@@ -346,6 +348,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         toolHints,
         credits,
         fileAttachments,
+        onSaveDashboard,
         inProgress,
         setInProgress,
         canvasContent,
@@ -420,6 +423,7 @@ export function useAiChat(): AiChatProviderReturnValue {
       credits: undefined,
       creditWarning: undefined,
       fileAttachments: undefined,
+      onSaveDashboard: undefined,
       inProgress: false,
       setInProgress: noopFn,
       canvasContent: null,

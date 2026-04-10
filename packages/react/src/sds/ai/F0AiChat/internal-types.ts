@@ -12,6 +12,7 @@ import {
   type AiChatCredits,
   type AiChatCreditWarning,
   type EntityRefs,
+  type SaveDashboardPayload,
   type VisualizationMode,
   WelcomeScreenSuggestion,
 } from "./types"
@@ -48,6 +49,7 @@ export interface AiChatState {
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
   tracking?: AiChatTrackingOptions
+  onSaveDashboard?: (payload: SaveDashboardPayload) => Promise<void>
 }
 
 /**
@@ -210,6 +212,7 @@ export type AiChatProviderReturnValue = {
   | "credits"
   | "creditWarning"
   | "fileAttachments"
+  | "onSaveDashboard"
 > & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null

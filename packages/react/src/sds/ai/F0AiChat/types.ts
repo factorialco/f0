@@ -4,8 +4,8 @@ import { type AIMessage, type Message } from "@copilotkit/shared"
 import { IconType } from "@/components/F0Icon"
 import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
 
-import type { ChatDashboardConfig } from "./canvas/entities/dashboard/types"
 import type { DataDownloadDataset } from "./actions/core/dataDownload/types"
+import type { ChatDashboardConfig } from "./canvas/entities/dashboard/types"
 export type { PersonProfile } from "./components/markdownRenderers/entityRef/entities/person/types"
 export type { CandidateProfile } from "./components/markdownRenderers/entityRef/entities/candidate/types"
 export type { JobPostingProfile } from "./components/markdownRenderers/entityRef/entities/jobPosting/types"
@@ -36,6 +36,22 @@ export type AppendMessage = {
   role: "user" | "assistant"
   content: string
   toolCalls?: AppendToolCall[]
+}
+
+/**
+ * Payload passed to onSaveDashboard when the user saves a dashboard.
+ * Contains the full compute payload so it can be persisted and replayed
+ * without going through the AI agent.
+ */
+export type SaveDashboardPayload = {
+  /** Dashboard title */
+  title: string
+  /** Dashboard items (charts, metrics, collections) */
+  items: ChatDashboardConfig["items"]
+  /** Fetch specs for server-side data retrieval */
+  fetchSpecs: ChatDashboardConfig["fetchSpecs"]
+  /** Optional filter definitions */
+  filters?: ChatDashboardConfig["filters"]
 }
 
 /**
@@ -248,6 +264,12 @@ export type AiChatProviderProps = {
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
+  /**
+   * Callback fired when the user clicks "Save report" in the dashboard header.
+   * The host app provides this to persist the dashboard config to the backend.
+   * When not provided, the save button is hidden.
+   */
+  onSaveDashboard?: (payload: SaveDashboardPayload) => Promise<void>
   tracking?: AiChatTrackingOptions
 } & Pick<
   CopilotKitProps,

@@ -19,6 +19,7 @@ export type {
   EntityUrlBuilders,
   EntityRefs,
   PersonProfile,
+  SaveDashboardPayload,
   UploadedFile,
   VisualizationMode,
   WelcomeScreenSuggestion,
