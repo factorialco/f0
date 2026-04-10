@@ -1,6 +1,7 @@
 import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks";
 import * as Stories from "./F0ButtonDropdown.stories";
 import { DoDonts } from "@/lib/storybook-utils/do-donts";
+import { F0ButtonDropdown } from "../F0ButtonDropdown";
 
 <Meta of={Stories} />
 
@@ -210,6 +211,16 @@ Use **dropdown mode** when all actions are equally likely and none should be pro
       '"Delete employee" with critical: true — cannot be undone',
       '"Archive record" with critical: true — requires deliberate intent',
     ],
+    children: (
+      <F0ButtonDropdown
+        items={[
+          { value: "save", label: "Save changes" },
+          { value: "archive", label: "Archive record" },
+          { value: "delete", label: "Delete employee", critical: true },
+        ]}
+        onClick={() => {}}
+      />
+    ),
   }}
   dont={{
     description:
@@ -218,6 +229,16 @@ Use **dropdown mode** when all actions are equally likely and none should be pro
       '"Export report" with critical: true — exports are reversible',
       '"Send notification" with critical: true — not destructive; trains users to ignore the warning',
     ],
+    children: (
+      <F0ButtonDropdown
+        items={[
+          { value: "save", label: "Save changes" },
+          { value: "export", label: "Export report", critical: true },
+          { value: "notify", label: "Send notification", critical: true },
+        ]}
+        onClick={() => {}}
+      />
+    ),
   }}
 />
 
