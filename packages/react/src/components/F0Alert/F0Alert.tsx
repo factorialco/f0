@@ -56,62 +56,58 @@ const _F0Alert = ({
 
   return (
     <div ref={containerRef} className="@container">
-      <div className={alertVariants({ variant })}>
-        <div
-          className={cn(
-            "flex flex-col items-start gap-3 @xs:flex-row @xs:items-center @xs:justify-between"
-          )}
-        >
-          <div className="flex flex-row gap-2">
-            <div className="h-6 w-6 flex-shrink-0">
-              {variant === "neutral" ? (
-                <F0AvatarIcon icon={icon || Placeholder} size="sm" />
-              ) : (
-                <F0AvatarAlert type={variant} size="sm" />
-              )}
+      <div className={cn(alertVariants({ variant }), onClose && "pr-2")}>
+        <div className="flex flex-row gap-2">
+          <div className="flex flex-1 flex-col items-start gap-3 @xs:flex-row @xs:items-center @xs:justify-between">
+            <div className="flex flex-row gap-2">
+              <div className="h-6 w-6 flex-shrink-0">
+                {variant === "neutral" ? (
+                  <F0AvatarIcon icon={icon || Placeholder} size="sm" />
+                ) : (
+                  <F0AvatarAlert type={variant} size="sm" />
+                )}
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <p className={titleVariants({ variant })}>{title}</p>
+                <p className="text-base text-f1-foreground-secondary">
+                  {description}
+                </p>
+              </div>
             </div>
-            <div className="flex flex-col gap-0.5">
-              <p className={titleVariants({ variant })}>{title}</p>
-              <p className="text-base text-f1-foreground-secondary">
-                {description}
-              </p>
-            </div>
+            {(action || link) && (
+              <div className="flex flex-shrink-0 flex-row items-center gap-3 pl-8 @xs:pl-0">
+                {link && (
+                  <F0Link
+                    href={link.href}
+                    target="_blank"
+                    variant="link"
+                    size="sm"
+                  >
+                    {link.label}
+                  </F0Link>
+                )}
+                {action && (
+                  <F0Button
+                    label={action.label}
+                    variant="outline"
+                    onClick={action.onClick}
+                    size="sm"
+                    disabled={action.disabled}
+                  />
+                )}
+              </div>
+            )}
           </div>
-          {(action || link || onClose) && (
-            <div
-              className={cn(
-                "flex flex-shrink-0 flex-row items-center gap-3 pl-8 @xs:pl-0"
-              )}
-            >
-              {link && (
-                <F0Link
-                  href={link.href}
-                  target="_blank"
-                  variant="link"
-                  size="sm"
-                >
-                  {link.label}
-                </F0Link>
-              )}
-              {action && (
-                <F0Button
-                  label={action.label}
-                  variant="outline"
-                  onClick={action.onClick}
-                  size="sm"
-                  disabled={action.disabled}
-                />
-              )}
-              {onClose && (
-                <F0Button
-                  icon={Cross}
-                  label="Close"
-                  hideLabel
-                  variant="outline"
-                  size="sm"
-                  onClick={onClose}
-                />
-              )}
+          {onClose && (
+            <div className="flex-shrink-0 self-start">
+              <F0Button
+                icon={Cross}
+                label="Close"
+                hideLabel
+                variant="outline"
+                size="sm"
+                onClick={onClose}
+              />
             </div>
           )}
         </div>
