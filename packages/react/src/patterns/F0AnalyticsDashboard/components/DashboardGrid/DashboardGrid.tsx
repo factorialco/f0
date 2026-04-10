@@ -750,7 +750,7 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
       )
     case "insight":
       return (
-        <div className="flex h-full items-stretch p-2">
+        <div className="flex h-full items-stretch px-1 pt-1 pb-3">
           {item.renderContent()}
         </div>
       )
