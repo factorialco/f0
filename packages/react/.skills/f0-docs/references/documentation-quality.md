@@ -112,23 +112,25 @@ Use `guidelines` array (multiple bullet points) when there are more than two cop
 
 ### Accessibility section
 
-| Mediocre                                         | Gold                                                                           |
-| ------------------------------------------------ | ------------------------------------------------------------------------------ |
-| "Accessible by default"                          | Named ARIA attributes, screen reader announcements, focus behavior             |
-| Keyboard table present with no detail            | Keyboard table uses `<kbd>` tags, every key maps to a specific action          |
-| Missing keyboard table for interactive component | Keyboard table required for: buttons, inputs, dialogs, selects, toggles, menus |
-| No notes on loading/disabled states              | Explicit note if loading or disabled state is not announced to screen readers  |
+The section is **optional** — include it only when it adds real value. A section that says "accessible by default" or repeats what is obvious from the HTML is worse than no section at all.
 
-**Component type → a11y requirements:**
+| Mediocre                                           | Gold                                                                           |
+| -------------------------------------------------- | ------------------------------------------------------------------------------ |
+| "Accessible by default"                            | Named ARIA attributes, screen reader announcements, focus behavior             |
+| Section included for a layout/typography component | Omitted entirely — semantic HTML is handled internally, nothing for the dev    |
+| Keyboard table present with no detail              | Keyboard table uses `<kbd>` tags, every key maps to a specific action          |
+| Missing keyboard table for interactive component   | Keyboard table required for: buttons, inputs, dialogs, selects, toggles, menus |
+| No notes on loading/disabled states                | Explicit note if loading or disabled state is not announced to screen readers  |
 
-| Component type                        | Required in a11y section                                                 |
-| ------------------------------------- | ------------------------------------------------------------------------ |
-| Button / link                         | Keyboard table, sr-only note for icon-only, `aria-busy` note for loading |
-| Input / form field                    | Error state announcement, `aria-invalid`, label association              |
-| Dialog / modal                        | Focus trap, `aria-modal`, focus restoration on close                     |
-| Select / dropdown                     | Arrow key navigation, `aria-expanded`, `aria-selected`                   |
-| Toggle / checkbox                     | `aria-checked`, `aria-pressed`, keyboard activation                      |
-| Static display (Alert, Badge, Avatar) | Screen reader announcement, decorative icon note                         |
+**Component type → whether to include Accessibility:**
+
+| Component type                                             | Include?                     | What to cover                                                               |
+| ---------------------------------------------------------- | ---------------------------- | --------------------------------------------------------------------------- |
+| Complex interactive (Dropdown, Dialog, Select, DatePicker) | Yes — required               | Keyboard table + screen reader behavior + focus management                  |
+| Simple interactive (Button, Checkbox, Toggle)              | Only if non-obvious          | Skip if standard; include for sr-only labels, aria-busy, icon-only patterns |
+| Static display with dynamic injection (Alert, Toast)       | Only for live region         | aria-live guidance if the component appears after page load                 |
+| Static display (Badge, Avatar, Tag)                        | Only if icon carries meaning | Note if icon is decorative or if color alone conveys state                  |
+| Layout / typography (Text, Heading, Box)                   | No — omit entirely           | Nothing for the developer to do                                             |
 
 ---
 

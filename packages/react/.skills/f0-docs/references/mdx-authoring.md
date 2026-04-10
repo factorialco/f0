@@ -64,7 +64,7 @@ Filename must match the stories file: `F0Button.stories.tsx` → `F0Button.mdx`
    - `### Variants` — if the component has a `variant` prop with 2+ values: Canvas of a Variants story showing all variants stacked, then a table (Variant | When to use).
    - `### Sizes` — if the component has a `size` prop with 2+ values: Canvas of a Sizes story showing all sizes stacked, then a table (Size | When to use).
 2. `## Guidelines` — all usage guidance: When to use / When not to use / Do's and don'ts / Content / Behavior / Usage examples.
-3. `## Accessibility` — Keyboard interaction table + Screen reader behavior.
+3. `## Accessibility` — only when the component type requires it (see decision table below).
 
 **Rationale:** Modes, Variants and Sizes describe the structural forms the component can take — they are anatomy, not guidance. Keeping them under `## Anatomy` gives the right-side nav three clean top-level entries: Anatomy · Guidelines · Accessibility.
 
@@ -164,14 +164,20 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 ## Accessibility
 
 <!--
-  Base this section entirely on the actual component code. Do not invent ARIA attributes or behaviors
-  that are not present in the implementation. If the component has no interactive behavior and no
-  ARIA roles, say so explicitly (e.g. "F0Alert has no ARIA role or live region by default").
-
-  For every interactive prop (e.g. onClose, onClick), document keyboard activation.
-  For every icon, document whether it is decorative (aria-hidden="true") or has a label.
-  For dynamic alerts (injected after user action), document the recommended aria-live pattern.
+  Include this section only when it adds real value — see the decision table below.
+  Base content entirely on the actual component code. Never invent ARIA attributes or
+  behaviors not present in the implementation.
 -->
+
+### When to include Accessibility
+
+| Component type                                             | Include Accessibility?       | What to cover                                                                                       |
+| ---------------------------------------------------------- | ---------------------------- | --------------------------------------------------------------------------------------------------- |
+| Complex interactive (Dropdown, Dialog, Select, DatePicker) | Yes — required               | Keyboard table + screen reader behavior + focus management                                          |
+| Simple interactive (Button, Checkbox, Toggle)              | Only if non-obvious          | Skip if behavior is standard; include if there are sr-only labels, aria-busy, or icon-only patterns |
+| Static display with dynamic injection (Alert, Toast)       | Only for live region         | aria-live guidance if the component can appear after page load                                      |
+| Static display (Badge, Avatar, Tag)                        | Only if icon carries meaning | Note if icon is decorative or if color alone conveys state                                          |
+| Layout / typography (Text, Heading, Box)                   | No — omit entirely           | Semantic HTML is handled internally; nothing for the developer to do                                |
 
 ### Keyboard interaction
 
@@ -182,7 +188,7 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 
 - [ARIA role used, or explicit note that no role is set]
 - [aria-live recommendation if component is dynamically injected]
-- [Icon decoration note — e.g. "The leading icon is decorative (aria-hidden). The variant conveys meaning through text."]
+- [Icon decoration note — e.g. "The leading icon is decorative. The variant conveys meaning through text."]
 ```
 
 ---
@@ -582,7 +588,7 @@ Before marking MDX as done:
 - [ ] `<DoDonts>` used in Do's and don'ts subsection
 - [ ] DoDonts `children` used only when the do/don't contrast is **semantically unambiguous** — a viewer must not be able to argue the "don't" example is valid. Text-only DoDonts are preferred when the distinction requires explanation.
 - [ ] Components rendered as JSX in MDX (e.g. inside `<DoDonts children>`) are imported via relative path (`from "../F0Component"`), never from `@factorialco/f0-react` (causes module fetch error in dev)
-- [ ] `## Accessibility` section present — based on actual component code only; no invented ARIA attributes or behaviors
+- [ ] `## Accessibility` included only when the component type requires it — complex interactive (required), simple interactive (only if non-obvious), static display (only for live region or icon meaning), layout/typography (omit entirely)
 - [ ] Optional function props use `control: "boolean"` in `argTypes` + `render` function to interpret boolean → `fn()` or `undefined` (never `control: "function"`)
 - [ ] No semicolons in `.tsx` import statements (oxfmt rule — does not apply to `.mdx` files)
 - [ ] English throughout, no emojis
