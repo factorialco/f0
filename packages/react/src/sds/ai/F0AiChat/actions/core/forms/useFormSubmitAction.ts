@@ -1,5 +1,6 @@
 import { useFrontendTool } from "@copilotkit/react-core"
 
+import { useAiChat } from "@/ai"
 import { useF0AiFormRegistry } from "@/patterns/F0Form/F0AiFormRegistry"
 
 /**
@@ -8,6 +9,7 @@ import { useF0AiFormRegistry } from "@/patterns/F0Form/F0AiFormRegistry"
  */
 export const useFormSubmitAction = () => {
   const registry = useF0AiFormRegistry()
+  const { closeCanvas } = useAiChat()
 
   useFrontendTool({
     name: "forms.submitForm",
@@ -21,6 +23,7 @@ export const useFormSubmitAction = () => {
         required: true,
       },
     ],
+    followUp: false,
     handler: async ({ formName }: { formName: string }) => {
       if (!registry) {
         return { success: false, error: "Form registry is not available" }
@@ -50,7 +53,6 @@ export const useFormSubmitAction = () => {
         if (Object.keys(errors).length > 0) {
           return { success: false, errors }
         }
-        registry.clearActiveForm()
         return { success: true }
       } catch {
         const errors = ref.getErrors()
@@ -59,6 +61,8 @@ export const useFormSubmitAction = () => {
           errors,
         }
       } finally {
+        registry.clearActiveForm()
+        closeCanvas()
         registry.rebuildDescriptions()
       }
     },

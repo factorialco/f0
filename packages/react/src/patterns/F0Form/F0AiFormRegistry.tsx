@@ -40,6 +40,8 @@ export interface F0AiFormEntry {
   ) => Promise<Record<string, unknown>>
   /** Field names explicitly set via setValue/setValues on a virtual ref */
   dirtyFields?: Set<string>
+  /** Consumer submit callback (from availableFormDefinition). Preserved across virtual ↔ rendered transitions. */
+  onSubmit?: (values: Record<string, unknown>) => void | Promise<void>
 }
 
 /**
@@ -507,7 +509,10 @@ export function F0AiFormRegistryProvider({
       description?: string,
       module?: ModuleId
     ) => {
-      // Rendered forms always take precedence over virtual entries
+      // Rendered forms always take precedence over virtual entries.
+      // Preserve onSubmit from a previous virtual entry so canvas-submitted
+      // forms can still call the consumer's callback.
+      const existingEntry = registryRef.current.get(name)
       registryRef.current.set(name, {
         ref,
         schema,
@@ -516,6 +521,7 @@ export function F0AiFormRegistryProvider({
         sections,
         defaultValuesParamsSchema,
         defaultValuesFn,
+        onSubmit: existingEntry?.onSubmit,
       })
       rebuildDescriptions()
     },
@@ -527,13 +533,18 @@ export function F0AiFormRegistryProvider({
       const entry = registryRef.current.get(name)
       // Only unregister if it's not a virtual entry (virtual lifecycle is managed by the effect)
       if (entry?.virtual) return
+      // Capture current values before removing, so the virtual ref preserves them
+      const currentValues = entry?.ref.current?.getValues() ?? {}
       registryRef.current.delete(name)
       // If there's a virtual definition with this name, re-register it
+      // using the captured values so AI-filled data is not lost
       const virtualDef = availableFormDefinitions?.find((d) => d.name === name)
       if (virtualDef) {
+        const originalDefaults = resolveDefaultValues(virtualDef.defaultValues)
+        const mergedDefaults = { ...originalDefaults, ...currentValues }
         const { ref: virtualRef, dirtyFields } = createVirtualFormRef(
           virtualDef.schema,
-          resolveDefaultValues(virtualDef.defaultValues),
+          mergedDefaults,
           virtualDef.onSubmit
         )
         registryRef.current.set(name, {
@@ -545,6 +556,7 @@ export function F0AiFormRegistryProvider({
           virtual: true,
           defaultValuesParamsSchema: virtualDef.defaultValuesParamsSchema,
           dirtyFields,
+          onSubmit: virtualDef.onSubmit,
         })
       }
       rebuildDescriptions()
@@ -625,6 +637,7 @@ export function F0AiFormRegistryProvider({
         virtual: true,
         defaultValuesParamsSchema: def.defaultValuesParamsSchema,
         dirtyFields,
+        onSubmit: def.onSubmit,
       })
     }
 

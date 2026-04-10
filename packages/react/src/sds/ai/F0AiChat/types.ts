@@ -24,7 +24,7 @@ import type { EntityRefs } from "./components/markdownRenderers/entityRef/types"
 export type CanvasContentBase = {
   type: string
   title: string
-  description: string
+  description?: string
   toolCallId?: string
 }
 

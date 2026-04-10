@@ -51,7 +51,7 @@ function VirtualFormContent() {
   const currentValues = activeForm?.formValues ?? {}
 
   useEffect(() => {
-    ref?.setValues(currentValues)
+    ref?.setValues(currentValues, { shouldDirty: true, shouldValidate: true })
   }, [JSON.stringify(currentValues)])
 
   const formDefinition = useF0FormDefinition({
@@ -63,8 +63,10 @@ function VirtualFormContent() {
     description: entry?.description,
     submitConfig: { type: "default" },
     onSubmit: async ({ data }) => {
-      await ref?.submit()
-      void data
+      // Call the consumer's onSubmit with the validated data from the
+      // rendered F0Form — avoids chaining into the virtual ref's submit
+      // which holds stale in-memory values.
+      await entry?.onSubmit?.(data as Record<string, unknown>)
       return { success: true }
     },
   })
@@ -91,8 +93,8 @@ export function FormContent(): ReactNode {
   if (!formName) return null
 
   return (
-    <div className="mx-auto max-w-2xl p-6">
-      <VirtualFormContent key={`canvas-form-${formName}`} />
+    <div className="mx-auto h-fit max-w-2xl p-6">
+      <VirtualFormContent />
     </div>
   )
 }
