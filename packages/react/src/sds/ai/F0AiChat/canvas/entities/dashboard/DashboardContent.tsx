@@ -305,18 +305,28 @@ export function ChatDashboard({
 
   const items: DashboardItem<FiltersDefinition>[] = useMemo(
     () =>
-      config.items.map((item) => {
-        switch (item.type) {
-          case "chart":
-            return mapChartItem(item, makeFetchData(item.id))
-          case "metric":
-            return mapMetricItem(item, makeFetchData(item.id))
-          case "collection":
-            return mapCollectionItem(item, makeFetchData(item.id))
-          case "insight":
-            return mapInsightItem(item)
-        }
-      }),
+      config.items
+        // During SSE streaming CopilotKit may render the dashboard before
+        // every item is fully formed. Skip items that lack an `id` or `type`
+        // so the grid never receives an undefined key.
+        .filter(
+          (item): item is ChatDashboardItem =>
+            typeof item.id === "string" &&
+            item.id.length > 0 &&
+            typeof item.type === "string"
+        )
+        .map((item) => {
+          switch (item.type) {
+            case "chart":
+              return mapChartItem(item, makeFetchData(item.id))
+            case "metric":
+              return mapMetricItem(item, makeFetchData(item.id))
+            case "collection":
+              return mapCollectionItem(item, makeFetchData(item.id))
+            case "insight":
+              return mapInsightItem(item)
+          }
+        }),
     [config.items, makeFetchData]
   )
 
@@ -375,11 +385,17 @@ export function DashboardContent({
   const effectiveConfig = useMemo(() => {
     return {
       ...content.config,
-      items: content.config.items.map((item) => {
-        const patch = itemTransforms.get(item.id)
-        const merged = patch ? ({ ...item, ...patch } as typeof item) : item
-        return clampDashboardItemRowSpan(merged)
-      }),
+      items: content.config.items
+        // Skip partially-streamed items (see filter in ChatDashboard).
+        .filter(
+          (item): item is ChatDashboardItem =>
+            typeof item.id === "string" && item.id.length > 0
+        )
+        .map((item) => {
+          const patch = itemTransforms.get(item.id)
+          const merged = patch ? ({ ...item, ...patch } as typeof item) : item
+          return clampDashboardItemRowSpan(merged)
+        }),
     }
   }, [content.config, itemTransforms])
 
@@ -594,13 +610,23 @@ function mapInsightItem(item: ChatDashboardInsightItem): DashboardInsightItem {
     x: item.x,
     y: item.y,
     type: "insight",
-    renderContent: () => (
-      <F0AiInsightCard
-        heading={item.title}
-        description={item.description}
-        label={item.label}
-        {...item.insightContent}
-      />
-    ),
+    renderContent: () => {
+      // Guard against partially-streamed items where insightContent
+      // may not be available yet.
+      if (
+        !item.insightContent ||
+        typeof item.insightContent.content !== "string"
+      ) {
+        return null
+      }
+      return (
+        <F0AiInsightCard
+          heading={item.title}
+          description={item.description}
+          label={item.label}
+          {...item.insightContent}
+        />
+      )
+    },
   }
 }
