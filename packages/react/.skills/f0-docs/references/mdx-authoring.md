@@ -62,7 +62,7 @@ Filename must match the stories file: `F0Button.stories.tsx` → `F0Button.mdx`
 1. `## Anatomy` — `<Canvas>` of the Default story + `<Controls>` (interactive props table), then structural sub-sections:
    - `### Modes` — if the component has a `mode` prop with 2+ values: Canvas of a Modes story showing all modes, then a table (Mode | Description). No "When to use" column — that guidance belongs in `#### When to use` under Guidelines.
    - `### Variants` — if the component has a `variant` prop with 2+ values: Canvas of a Variants story showing all variants stacked, then a table (Variant | When to use).
-   - `### Sizes` — if the component has a `size` prop with 2+ values: Canvas of a Sizes story showing all sizes stacked, then a table (Size | Description). Use visual/structural descriptions (height, padding, density) — not generic placement advice. Add component-specific notes where a size is uncommon or has caveats.
+   - `### Sizes` — **omit in most cases.** Only include when the component has size-specific behavior that differs from the system default (e.g. a size is unavailable, affects surrounding layout, or has a real usage caveat). Do not document sizes just because the prop exists — repeating `sm/md/lg` descriptions across every component is noise.
 2. `## Guidelines` — all usage guidance: When to use / When not to use / Do's and don'ts / Content / Behavior / Usage examples.
 3. `## Accessibility` — only when the component type requires it (see decision table below).
 
@@ -103,11 +103,12 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 
 ### Sizes
 
-<!-- Only include if the component has a size prop with 2+ values -->
+<!-- Only include when the component has size-specific behavior not covered by the system default.
+     Omit if sm/md/lg behave identically to other components — repeating the same table is noise. -->
 
 <Canvas of={Stories.Sizes} />
 
-<!-- Sizes table: Size | Description (visual/structural) — see Table Templates -->
+<!-- Sizes table: Size | Description (component-specific caveats only) — see Table Templates -->
 
 ## Guidelines
 
@@ -654,12 +655,10 @@ Before marking MDX as done:
 - [ ] No `# Code` section — `<Controls>` in `## Anatomy` is the interactive props reference; a separate Code/Props section is redundant
 - [ ] No top-level `## Usage` section — named examples live inside `## Guidelines` under `### Usage examples`
 - [ ] Section order: Anatomy → Guidelines → Accessibility (three top-level ## sections)
-- [ ] Modes / Variants / Sizes are `###` inside `## Anatomy`, not top-level `##` sections — they describe structural forms, not usage guidance
-- [ ] Component title (`# ComponentName`) followed immediately by a 1–2 sentence fused description (definition + purpose + cross-references)
-- [ ] `## Anatomy` section contains `<Canvas of={Stories.Default} />` + `<Controls of={Stories.Default} />` — no separate Props section
-- [ ] `### Modes` / `### Variants` / `### Sizes` (inside `## Anatomy`) each have a Canvas of a story showing all options stacked, followed by a table
+- [ ] Modes / Variants are `###` inside `## Anatomy` — they describe structural forms, not usage guidance
+- [ ] `### Sizes` is omitted unless the component has size-specific behavior not covered by system defaults — do not document sizes just because the prop exists
+- [ ] `### Modes` / `### Variants` (inside `## Anatomy`) each have a Canvas of a story showing all options stacked, followed by a table
 - [ ] `### Modes` table has only `Mode | Description` columns — no "When to use" (that belongs in Guidelines)
-- [ ] `### Sizes` table has `Size | Description` columns with visual/structural descriptions, not generic placement advice
 - [ ] If the component is generic (`F0Component<T>`), `### Behavior` documents the type parameter and the full typed callback signature
 - [ ] `## Guidelines` contains `### Design best practices` with `#### When to use` (may include Canvas), `#### When not to use`, `#### Do's and don'ts`, and `### Usage examples`
 - [ ] Inside `### Usage examples`, scenario titles use `**bold**` not `####` headings — headings generate right-side nav anchors and clutter the menu
