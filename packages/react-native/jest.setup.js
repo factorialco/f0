@@ -35,7 +35,7 @@ jest.mock("expo-image", () => {
 
   return {
     Image: React.forwardRef((props, ref) =>
-      React.createElement(Image, { ...props, ref })
+      React.createElement(Image, { ...props, ref }),
     ),
   };
 });
