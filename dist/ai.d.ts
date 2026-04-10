@@ -1,13 +1,17 @@
 import { AgentState } from '@livekit/components-react';
 import { AIMessage } from '@copilotkit/shared';
+import * as AvatarPrimitive from '@radix-ui/react-avatar';
 import { ClassValue } from 'cva';
 import { ComponentProps } from 'react';
 import { CopilotKitProps } from '@copilotkit/react-core';
+import { f1Colors } from '@factorialco/f0-core';
 import { ForwardRefExoticComponent } from 'react';
 import { InputProps } from '@copilotkit/react-ui';
 import { JSX as JSX_2 } from 'react';
 import { LocalAudioTrack } from 'livekit-client';
 import { Message } from '@copilotkit/shared';
+import * as React_2 from 'react';
+import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 import { RefAttributes } from 'react';
 import { RemoteAudioTrack } from 'livekit-client';
@@ -15,6 +19,7 @@ import { SVGProps } from 'react';
 import * as SwitchPrimitive from '@radix-ui/react-switch';
 import { TrackReferenceOrPlaceholder } from '@livekit/components-react';
 import { VariantProps } from 'cva';
+import { WithDataTestIdReturnType } from '../../../lib/data-testid';
 
 export declare type ActionItemStatus = (typeof actionItemStatuses)[number];
 
@@ -339,6 +344,34 @@ export declare interface AiChatTranslationsProviderProps {
     translations: AiChatTranslations;
 }
 
+export declare type AiInsightCardContent = {
+    content: "text";
+} | {
+    content: "person";
+    avatar: Pick<F0AvatarPersonProps, "firstName" | "lastName" | "src">;
+} | {
+    content: "people";
+    avatars: Array<Pick<F0AvatarPersonProps, "firstName" | "lastName" | "src">>;
+} | {
+    content: "team";
+    avatar: Pick<F0AvatarTeamProps, "name" | "src">;
+} | {
+    content: "company";
+    avatar: Pick<F0AvatarCompanyProps, "name" | "src">;
+} | {
+    content: "alert";
+    level: Level;
+    alertLabel: string;
+} | {
+    content: "balance";
+    balance: BalanceConfig;
+} | {
+    content: "sparkline";
+    data: SparklineDataPoint[];
+    label: string;
+    invertStatus?: boolean;
+};
+
 /**
  * Default AI chat translations — derived from the global defaultTranslations
  * to avoid manual duplication.
@@ -468,6 +501,88 @@ export declare const aiTranslations: {
     };
 };
 
+declare type AvatarBadge = ({
+    type: "module";
+    module: ModuleId;
+} | {
+    type: Exclude<BadgeProps["type"], undefined>;
+    icon: BadgeProps["icon"];
+}) & {
+    tooltip?: string;
+};
+
+declare type AvatarSize = (typeof avatarSizes)[number];
+
+declare const avatarSizes: readonly ["xs", "sm", "md", "lg", "xl", "2xl"];
+
+declare interface BadgeProps extends VariantProps<typeof badgeVariants> {
+    icon: IconType;
+    type?: VariantProps<typeof badgeVariants>["type"];
+    size?: keyof typeof iconSizes;
+}
+
+declare const badgeVariants: (props?: ({
+    type?: "critical" | "warning" | "positive" | "neutral" | "highlight" | undefined;
+    size?: "lg" | "md" | "sm" | "xs" | undefined;
+} & ({
+    class?: ClassValue;
+    className?: never;
+} | {
+    class?: never;
+    className?: ClassValue;
+})) | undefined) => string;
+
+export declare type BalanceConfig = {
+    amount: RelaxedNumericWithFormatter | Numeric;
+    percentage?: (Omit<RelaxedNumericWithFormatter, "value"> & {
+        value: Omit<Numeric, "units" | "unitsPosition">;
+    }) | Omit<Numeric, "units" | "unitsPosition"> | null;
+    invertStatus?: boolean;
+    hint?: string;
+};
+
+declare type BaseAvatarProps = {
+    /**
+     * The type of the avatar.
+     */
+    type: InternalAvatarProps["type"];
+    /**
+     * The name of the avatar.
+     */
+    name: string | string[];
+    /**
+     * The source of the avatar's image.
+     */
+    src?: string;
+    /**
+     * This is a workaround until we implement the ability to deal with images
+     */
+    flag?: ReactElement;
+    /**
+     * Optional icon to display on the avatar. Will override the name or image if provided.
+     */
+    icon?: {
+        icon: IconType;
+        color?: F0IconProps["color"];
+    };
+    /**
+     * The color of the avatar.
+     * @default "random"
+     */
+    color?: InternalAvatarProps["color"] | "random";
+    /**
+     * The badge to display on the avatar. Can be a module badge or a custom badge.
+     */
+    badge?: AvatarBadge;
+} & Partial<Pick<InternalAvatarProps, "aria-label" | "aria-labelledby">> & ({
+    size: AvatarSize;
+} | {
+    /**
+     * @deprecated Use AvatarSize instead (xs, sm, md, lg, xl, 2xl)
+     */
+    size: InternalAvatarProps["size"];
+});
+
 /**
  * Profile data for a candidate entity (ATS applicant), resolved asynchronously
  * and displayed in the entity reference hover card.
@@ -529,6 +644,10 @@ export declare type CanvasEntityDefinition<T extends CanvasContentBase = CanvasC
         content: T;
         children: ReactNode;
     }) => ReactNode;
+};
+
+declare type CardInternalProps = F0AiInsightCardProps & {
+    className?: string;
 };
 
 declare interface ChartComputation {
@@ -774,6 +893,10 @@ declare interface CollectionComputation {
     sortOrder?: "asc" | "desc";
     limit?: number;
 }
+
+export declare type ContentType = (typeof contentTypes)[number];
+
+export declare const contentTypes: readonly ["text", "person", "people", "team", "company", "alert", "balance", "sparkline"];
 
 /**
  * Credits usage data returned by the host app
@@ -1083,6 +1206,7 @@ export declare const defaultTranslations: {
         readonly summaries: {
             readonly types: {
                 readonly sum: "sum";
+                readonly count: "count";
             };
         };
         readonly export: {
@@ -1584,6 +1708,21 @@ export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onSto
  */
 export declare const F0AiFullscreenChat: () => JSX_2.Element | null;
 
+export declare const F0AiInsightCard: WithDataTestIdReturnType<ForwardRefExoticComponent<F0AiInsightCardPublicProps & RefAttributes<HTMLDivElement>> & {
+Skeleton: () => JSX_2.Element;
+}>;
+
+export declare type F0AiInsightCardProps = {
+    description?: string;
+    heading: string;
+    label?: string;
+    selected?: boolean;
+    onClick?: () => void;
+    onAskOne?: () => void;
+} & AiInsightCardContent;
+
+declare type F0AiInsightCardPublicProps = Omit<CardInternalProps, (typeof privateProps)[number]>;
+
 export declare class F0AiMask {
     readonly element: HTMLElement;
     private canvas;
@@ -1635,6 +1774,59 @@ declare const F0AuraVoiceAnimationVariants: (props?: ({
     className?: ClassValue;
 })) | undefined) => string;
 
+declare type F0AvatarCompanyProps = {
+    name: string;
+    src?: string;
+    size?: BaseAvatarProps["size"];
+    badge?: AvatarBadge;
+} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
+
+declare type F0AvatarPersonProps = {
+    /**
+     * The first name of the person.
+     */
+    firstName: string;
+    /**
+     * The last name of the person.
+     */
+    lastName: string;
+    /**
+     * The source of the person's image.
+     */
+    src?: string;
+    /**
+     * The size of the avatar.
+     */
+    size?: BaseAvatarProps["size"];
+    /**
+     * The badge to display on the avatar. Can be a module badge or a custom badge.
+     */
+    badge?: AvatarBadge;
+    /**
+     * Whether the person is deactivated. If true, the avatar will display an icon instead of the person's name or picture.
+     */
+    deactivated?: boolean;
+} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
+
+declare type F0AvatarTeamProps = {
+    /**
+     * The name of the team.
+     */
+    name: string;
+    /**
+     * The source of the team's image.
+     */
+    src?: string;
+    /**
+     * The size of the avatar.
+     */
+    size?: BaseAvatarProps["size"];
+    /**
+     * The badge to display on the avatar. Can be a module badge or a custom badge.
+     */
+    badge?: AvatarBadge;
+} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
+
 export declare const F0HILActionConfirmation: ({ text, confirmationText, onConfirm, cancelText, onCancel, }: F0HILActionConfirmationProps) => JSX_2.Element;
 
 /**
@@ -1662,6 +1854,13 @@ export declare type F0HILActionConfirmationProps = {
      */
     onCancel: () => void;
 };
+
+declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
+    icon: IconType;
+    size?: "lg" | "md" | "sm" | "xs";
+    state?: "normal" | "animate";
+    color?: "default" | "currentColor" | `#${string}` | Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
+}
 
 export declare const F0OneIcon: ForwardRefExoticComponent<Omit<F0OneIconProps, "ref"> & RefAttributes<SVGSVGElement>>;
 
@@ -1752,9 +1951,38 @@ export declare interface I18nProviderProps {
     translations: TranslationsType;
 }
 
+declare const iconSizes: {
+    readonly xs: "xs";
+    readonly sm: "xs";
+    readonly md: "sm";
+    readonly lg: "md";
+};
+
 declare type IconType = ForwardRefExoticComponent<SVGProps<SVGSVGElement> & RefAttributes<SVGSVGElement> & {
     animate?: "normal" | "animate";
 }>;
+
+declare const iconVariants: (props?: ({
+    size?: "lg" | "md" | "sm" | "xs" | undefined;
+} & ({
+    class?: ClassValue;
+    className?: never;
+} | {
+    class?: never;
+    className?: ClassValue;
+})) | undefined) => string;
+
+declare const internalAvatarColors: readonly ["viridian", "malibu", "yellow", "purple", "lilac", "barbie", "smoke", "army", "flubber", "indigo", "camel"];
+
+declare type InternalAvatarProps = React_2.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & {
+    size?: (typeof internalAvatarSizes)[number];
+    type?: (typeof internalAvatarTypes)[number];
+    color?: (typeof internalAvatarColors)[number];
+};
+
+declare const internalAvatarSizes: readonly ["xsmall", "small", "medium", "large", "xlarge", "xxlarge"];
+
+declare const internalAvatarTypes: readonly ["base", "rounded"];
 
 /**
  * Profile data for a job posting entity (ATS opening), resolved asynchronously
@@ -1768,6 +1996,10 @@ declare type JobPostingProfile = {
 };
 
 declare type Join<T extends string[], D extends string> = T extends [] ? never : T extends [infer F] ? F : T extends [infer F, ...infer R] ? F extends string ? `${F}${D}${Join<Extract<R, string[]>, D>}` : never : string;
+
+declare type Level = (typeof levels)[number];
+
+declare const levels: readonly ["info", "warning", "critical", "positive"];
 
 export declare type MaskOptions = {
     /**
@@ -1831,6 +2063,209 @@ declare interface MetricComputation {
     column?: string;
 }
 
+declare type ModuleId = keyof typeof modules;
+
+declare const modules: {
+    readonly "ai-reports": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly ai_ticketing: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly analytics: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly ats: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly benefits: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly billing: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly calendar: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly cards: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly "clock-in": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly communities: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly company_attendance: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly company_documents: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly company_projects: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly company_trainings: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly compensations: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly complaints: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly device_catalog: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly discover: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly documents: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly employee_attendance: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly employees: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly engagement: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly engagement_insights: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly my_surveys: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly "finance-accounting": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly "finance-sales": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly "finance-spending": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly "finance-treasury": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly "finance-workspace": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly goals: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly get_started: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly home: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly hub: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly it_management: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly kudos: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly lms: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly meetings: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly my_benefits: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly my_documents: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly my_projects: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly my_spending: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly my_trainings: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly "new-trainings": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly notifications: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly inbox: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly overviews: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly pages: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly payroll_bundle: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly performance_v2: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly performance: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly playground: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly processes: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly profile: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly project_management: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly reports: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly salary_advance: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly settings: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly personal_settings: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly shift_management: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly shifts: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly social: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly software: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly space_control: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly talent_analytics: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly tasks: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly "time-tracking": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly timeoff: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly workflows: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+};
+
+/**
+ * Utility type to extract all possible paths from nested object.
+ * Generates hyphenated paths from nested object structure
+ * Only includes parent key if it has a DEFAULT property
+ */
+declare type NestedKeyOf<T> = {
+    [K in keyof T & string]: T[K] extends object ? K extends "DEFAULT" ? never : T[K] extends {
+        DEFAULT: string;
+    } ? `${K}` | `${K}-${NestedKeyOf<T[K]>}` : `${K}-${NestedKeyOf<T[K]>}` : K extends "DEFAULT" ? never : `${K}`;
+}[keyof T & string];
+
+declare type Numeric = NumericValue | number | undefined | null;
+
+/**
+ * Formats a numeric value according to the provided options.
+ *
+ * @param value - The numeric value to format.
+ * @param options - The formatting options.
+ * @returns The formatted value as a string.
+ */
+declare type NumericFormatter = (value: Numeric, options?: NumericFormatterOptions) => string;
+
+/**
+ * Configuration options for the numeric formatter.
+ */
+declare type NumericFormatterOptions = {
+    /**
+     * Locale string for number formatting (e.g., "en-US", "es-ES", "de-DE").
+     * Determines the decimal separator and other locale-specific formatting rules.
+     *
+     * @default "en-US"
+     */
+    locale?: string;
+    /**
+     * Maximum number of decimal places to display.
+     * The formatter will round the number to this precision.
+     *
+     * @default 2
+     */
+    decimalPlaces?: number;
+    /**
+     * Whether to hide the units from the formatted value.
+     *
+     * @default false
+     */
+    hideUnits?: boolean;
+    /**
+     * Whether to space the units from the formatted value.
+     *
+     * @default false
+     */
+    unitsSpaced?: boolean;
+    /**
+     * Whether to use compact notation for the formatted value.
+     *
+     * @default false
+     */
+    compact?: boolean;
+    /**
+     * Placeholder text to return when value is undefined or null.
+     */
+    emptyPlaceholder?: string;
+    /**
+     * Whether to use grouping for the formatted value.
+     *
+     * @default true
+     */
+    useGrouping?: boolean;
+};
+
+/**
+ * Represents a numeric value that can be formatted with optional units.
+ *
+ * The value can be provided in two formats:
+ * - `value`: Direct numeric value (e.g., 123.45)
+ * - `value_x100`: Value stored as integer multiplied by 100 (e.g., 12345 represents 123.45)
+ *
+ * @example
+ * ```ts
+ * // Direct value
+ * const directValue: NumericValue = { value: 123.45, units: "€" }
+ *
+ * // Value stored as x100 (useful for avoiding floating point precision issues)
+ * const x100Value: NumericValue = { value_x100: 12345, units: "€" }
+ * ```
+ */
+declare type NumericValue = {
+    /**
+     * Optional unit string to append or prepend to the formatted number.
+     * Common examples: "€", "$", "kg", "%", etc.
+     */
+    units?: string;
+    /**
+     * Position of the units relative to the number.
+     * - "prepend": Units appear before the number (e.g., "$123.45")
+     * - "append": Units appear after the number (e.g., "123.45€")
+     *
+     * @default "append"
+     */
+    unitsPosition?: "prepend" | "append";
+} & ({
+    /**
+     * Direct numeric value to format.
+     */
+    value: number | undefined;
+} | {
+    /**
+     * Numeric value stored as an integer multiplied by 100.
+     * This format is useful for avoiding floating-point precision issues.
+     * The formatter will automatically divide by 100 before formatting.
+     *
+     * @example
+     * value_x100: 12345 represents 123.45
+     */
+    value_x100: number | undefined;
+});
+
+/**
+ * A numeric value that can be formatted with an optional formatter and options.
+ *
+ * @param value - The numeric value to format.
+ * @param formatter - The formatter to use.
+ * @param formatterOptions - The formatting options.
+ */
+declare type NumericWithFormatter = {
+    numericValue: NumericValue;
+    formatter?: NumericFormatter;
+    formatterOptions?: NumericFormatterOptions;
+};
+
 export declare type OneIconSize = (typeof oneIconSizes)[number];
 
 export declare const oneIconSizes: readonly ["xs", "sm", "md", "lg"];
@@ -1861,6 +2296,8 @@ declare interface PieComputation {
     limit?: number;
 }
 
+declare const privateProps: readonly ["className"];
+
 declare interface RadarComputation {
     datasetId: string;
     seriesColumn: string;
@@ -1873,6 +2310,18 @@ declare interface RadarComputation {
     sortBy?: string;
     sortOrder?: "asc" | "desc";
 }
+
+/**
+ * A numeric value that can be formatted with an optional formatter and options.
+ * This is a relaxed version of NumericWithFormatter that allows the numeric value to be a Numeric.
+ */
+declare type RelaxedNumericWithFormatter = Omit<NumericWithFormatter, "numericValue"> & {
+    numericValue: Numeric;
+};
+
+export declare type SparklineDataPoint = {
+    value: number;
+};
 
 declare type TranslationKey = Join<PathsToStringProps<typeof defaultTranslations>, ".">;
 

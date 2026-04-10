@@ -270,7 +270,8 @@ const e = {
     },
     summaries: {
       types: {
-        sum: "sum"
+        sum: "sum",
+        count: "count"
       }
     },
     export: {
