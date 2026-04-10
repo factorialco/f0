@@ -1,7 +1,7 @@
-import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
-import * as Stories from "./F0Alert.stories"
-import { DoDonts } from "@/lib/storybook-utils/do-donts"
-import { F0Alert } from "../F0Alert"
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks";
+import * as Stories from "./F0Alert.stories";
+import { DoDonts } from "@/lib/storybook-utils/do-donts";
+import { F0Alert } from "../F0Alert";
 
 <Meta of={Stories} />
 
@@ -22,7 +22,7 @@ For transient feedback use a toast; for decisions that block the workflow use
 
 ### Design best practices
 
-#### When to use
+**When to use**
 
 <Unstyled>
   <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
@@ -67,7 +67,7 @@ For transient feedback use a toast; for decisions that block the workflow use
   </table>
 </Unstyled>
 
-#### When not to use
+**When not to use**
 
 <Unstyled>
   <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
@@ -106,7 +106,7 @@ For transient feedback use a toast; for decisions that block the workflow use
   </table>
 </Unstyled>
 
-#### Do's and don'ts
+**Do's and don'ts**
 
 <DoDonts
   do={{
@@ -262,9 +262,9 @@ based on product logic (e.g. timeout, next session, or once the issue is resolve
 <Canvas of={Stories.Dismissible} />
 
 ```tsx
-import { useState } from "react"
+import { useState } from "react";
 
-const [visible, setVisible] = useState(true)
+const [visible, setVisible] = useState(true);
 
 return visible ? (
   <F0Alert
@@ -274,5 +274,5 @@ return visible ? (
     action={{ label: "Request info", onClick: () => {} }}
     onClose={() => setVisible(false)}
   />
-) : null
+) : null;
 ```
