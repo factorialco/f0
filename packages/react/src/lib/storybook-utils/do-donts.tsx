@@ -1,18 +1,18 @@
-import { FC, ReactNode } from "react";
+import { FC, ReactNode } from "react"
 
-import { F0TagStatus } from "@/components/tags/F0TagStatus";
+import { F0TagStatus } from "@/components/tags/F0TagStatus"
 
 interface DoDontsProps {
   do: {
-    description: string;
-    guidelines?: Array<string>;
-    children?: ReactNode;
-  };
+    description: string
+    guidelines?: Array<string>
+    children?: ReactNode
+  }
   dont: {
-    description: string;
-    guidelines?: Array<string>;
-    children?: ReactNode;
-  };
+    description: string
+    guidelines?: Array<string>
+    children?: ReactNode
+  }
 }
 
 export const DoDonts: FC<DoDontsProps> = ({
@@ -66,4 +66,4 @@ export const DoDonts: FC<DoDontsProps> = ({
       )}
     </div>
   </div>
-);
+)
