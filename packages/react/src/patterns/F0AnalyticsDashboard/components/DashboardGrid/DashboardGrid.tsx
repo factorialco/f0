@@ -591,6 +591,7 @@ function buildRowsGreedy<Filters extends FiltersDefinition>(
   let currentIds: string[] = []
   let currentSlots = 0
   let currentMaxHeight = 0
+  let currentType: string | null = null
 
   for (const item of items) {
     const weight = getSlotWeight(item)
@@ -598,7 +599,15 @@ function buildRowsGreedy<Filters extends FiltersDefinition>(
       ? item.rowSpan * 48
       : (ROW_HEIGHTS[item.type] ?? DEFAULT_ROW_HEIGHT)
 
-    if (currentSlots + weight > MAX_PER_ROW && currentIds.length > 0) {
+    // Break row when slot capacity exceeded OR item type changes.
+    // This prevents mixing different item types (e.g. insight + metric)
+    // in the same row, ensuring each type occupies its own row(s).
+    const typeChanged = currentType !== null && item.type !== currentType
+
+    if (
+      (currentSlots + weight > MAX_PER_ROW || typeChanged) &&
+      currentIds.length > 0
+    ) {
       rows.push({ ids: currentIds, height: currentMaxHeight })
       currentIds = []
       currentSlots = 0
@@ -607,7 +616,8 @@ function buildRowsGreedy<Filters extends FiltersDefinition>(
 
     currentIds.push(item.id)
     currentSlots += weight
-    if (h > currentMaxHeight) currentMaxHeight = h
+    currentMaxHeight = Math.max(currentMaxHeight, h)
+    currentType = item.type
   }
   if (currentIds.length > 0) {
     rows.push({ ids: currentIds, height: currentMaxHeight })
