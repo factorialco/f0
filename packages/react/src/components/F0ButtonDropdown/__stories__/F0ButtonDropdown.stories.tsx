@@ -548,3 +548,37 @@ export const Snapshot: Story = {
   },
   render: (args) => <F0ButtonDropdown {...args} />,
 };
+
+// Do: only genuinely destructive actions marked as critical
+export const DoDontCriticalDo: Story = {
+  tags: ["!dev"],
+  args: {
+    items: [
+      { value: "save", label: "Save changes", icon: Save },
+      { value: "archive", label: "Archive record", icon: Pencil },
+      {
+        value: "delete",
+        label: "Delete employee",
+        icon: Delete,
+        critical: true,
+      },
+    ],
+  },
+};
+
+// Don't: non-destructive actions marked as critical
+export const DoDontCriticalDont: Story = {
+  tags: ["!dev"],
+  args: {
+    items: [
+      { value: "save", label: "Save changes", icon: Save },
+      { value: "export", label: "Export report", icon: Add, critical: true },
+      {
+        value: "notify",
+        label: "Send notification",
+        icon: Pencil,
+        critical: true,
+      },
+    ],
+  },
+};
