@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.441.1](https://github.com/factorialco/f0/compare/f0-react-v1.441.0...f0-react-v1.441.1) (2026-04-10)
+
+
+### Bug Fixes
+
+* **Table:** improve nested tables & editable tables UI ([#3901](https://github.com/factorialco/f0/issues/3901)) ([68b9969](https://github.com/factorialco/f0/commit/68b9969bfbea350fd08d4f0b3a78daaf98ee989f))
+
 ## [1.441.0](https://github.com/factorialco/f0/compare/f0-react-v1.440.2...f0-react-v1.441.0) (2026-04-10)
 
 
