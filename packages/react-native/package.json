@@ -99,24 +99,18 @@
     "expo-blur": "~15.0.8",
     "react": "*",
     "react-native": "*",
-    "react-native-reanimated": "^3.19.4",
-    "react-native-safe-area-context": "^5.4.0",
+    "react-native-reanimated": ">=4.1.1 <5.0.0",
+    "react-native-safe-area-context": "^5.6.0",
     "react-native-svg": "^15.12.1",
-    "react-native-worklets-core": "^1.6.2",
+    "react-native-worklets": ">=0.5.1 <1.0.0",
     "tailwind-merge": "^3.4.0",
     "tailwind-variants": "^3.2.2",
     "tailwindcss": "^4.1.18",
-    "twemoji-parser": "^14.0.0",
-    "uniwind": "^1.2.7"
-  },
-  "peerDependenciesMeta": {
-    "react-native-worklets-core": {
-      "optional": true
-    }
+    "uniwind": "^1.2.7",
+    "twemoji-parser": "^14.0.0"
   },
   "dependencies": {
     "expo-clipboard": "~8.0.8",
-    "lodash": "^4.17.21",
     "tailwind-merge": "^3.4.0",
     "tailwind-variants": "^3.2.2"
   },
@@ -141,9 +135,7 @@
     "expo-clipboard": "^8.0.8",
     "expo-constants": "~18.0.13",
     "expo-font": "~14.0.11",
-    "expo-haptics": "~15.0.8",
     "expo-image": "~3.0.11",
-    "expo-linking": "~8.0.11",
     "expo-router": "~6.0.22",
     "expo-splash-screen": "~31.0.13",
     "expo-status-bar": "~3.0.9",
@@ -161,7 +153,7 @@
     "react-native": "0.81.5",
     "react-native-builder-bob": "^0.40.12",
     "react-native-gesture-handler": "~2.28.0",
-    "react-native-reanimated": "~4.1.1",
+    "react-native-reanimated": "~4.1.7",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0",
     "react-native-svg": "^15.15.1",
