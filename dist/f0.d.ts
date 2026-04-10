@@ -30,6 +30,7 @@ import { ComponentType } from 'react';
 import { CompoundCellValue } from './types/compound';
 import { Context } from 'react';
 import { CopilotKitProps } from '@copilotkit/react-core';
+import { CountCellValue } from './types/count';
 import { CountryCellValue } from './types/country';
 import { DashboardProps as DashboardProps_2 } from './Dashboard';
 import { DateCellValue } from './f0';
@@ -123,6 +124,7 @@ import { SearchFilterOptions } from './SearchFilter/SearchFilter';
 import { SizeToken as SizeToken_2 } from './types';
 import { StatusCellValue } from './f0';
 import { StatusCellValue as StatusCellValue_2 } from './types/status';
+import { SummaryCellValue } from './types/summary';
 import { SVGProps } from 'react';
 import * as SwitchPrimitive from '@radix-ui/react-switch';
 import { TagCellValue } from './f0';
@@ -720,6 +722,34 @@ export declare interface AiChatTranslationsProviderProps {
     translations: AiChatTranslations;
 }
 
+export declare type AiInsightCardContent = {
+    content: "text";
+} | {
+    content: "person";
+    avatar: Pick<F0AvatarPersonProps, "firstName" | "lastName" | "src">;
+} | {
+    content: "people";
+    avatars: Array<Pick<F0AvatarPersonProps, "firstName" | "lastName" | "src">>;
+} | {
+    content: "team";
+    avatar: Pick<F0AvatarTeamProps, "name" | "src">;
+} | {
+    content: "company";
+    avatar: Pick<F0AvatarCompanyProps, "name" | "src">;
+} | {
+    content: "alert";
+    level: Level;
+    alertLabel: string;
+} | {
+    content: "balance";
+    balance: BalanceConfig;
+} | {
+    content: "sparkline";
+    data: SparklineDataPoint[];
+    label: string;
+    invertStatus?: boolean;
+};
+
 /**
  * Default AI chat translations — derived from the global defaultTranslations
  * to avoid manual duplication.
@@ -1015,6 +1045,15 @@ declare const badgeVariants: (props?: ({
     class?: never;
     className?: ClassValue;
 })) | undefined) => string;
+
+export declare type BalanceConfig = {
+    amount: RelaxedNumericWithFormatter | Numeric;
+    percentage?: (Omit<RelaxedNumericWithFormatter, "value"> & {
+        value: Omit<Numeric, "units" | "unitsPosition">;
+    }) | Omit<Numeric, "units" | "unitsPosition"> | null;
+    invertStatus?: boolean;
+    hint?: string;
+};
 
 declare type BalanceTagProps = ComponentProps<typeof F0TagBalance>;
 
@@ -1786,6 +1825,10 @@ declare interface CardInternalProps {
      */
     disableOverlayLink?: boolean;
 }
+
+declare type CardInternalProps_2 = F0AiInsightCardProps & {
+    className?: string;
+};
 
 declare type CardMetadata = {
     icon: IconType;
@@ -2571,6 +2614,10 @@ declare type ComponentTypes = (typeof componentTypes)[number];
 declare const componentTypes: readonly ["layout", "info", "action", "form"];
 
 export declare function computeSectionEndIds(elements: SurveyFormBuilderElement[]): Set<string>;
+
+export declare type ContentType = (typeof contentTypes)[number];
+
+export declare const contentTypes: readonly ["text", "person", "people", "team", "company", "alert", "balance", "sparkline"];
 
 declare type CountryCode = keyof TranslationsType["countries"];
 
@@ -3553,6 +3600,7 @@ export declare const defaultTranslations: {
         readonly summaries: {
             readonly types: {
                 readonly sum: "sum";
+                readonly count: "count";
             };
         };
         readonly export: {
@@ -3997,6 +4045,11 @@ export declare const defaultTranslations: {
  */
 export declare function defineAvailableForm<TParams extends Record<string, unknown> = Record<string, unknown>>(definition: F0AiAvailableFormDefinition<TParams>): F0AiAvailableFormDefinition<TParams>;
 
+declare interface DeleteBlockNotesTextEditorPageDocumentPatch {
+    type: "delete_block";
+    targetId: string;
+}
+
 /**
  * Introspect an F0Form schema and return a serializable array of field descriptions.
  * Pure function — usable outside React components.
@@ -4147,7 +4200,7 @@ export declare type DurationUnit = (typeof durationUnits)[number];
 export declare const durationUnits: readonly ["days", "hours", "minutes", "seconds"];
 
 /** The edit mode for a column cell in the editable table. */
-declare type EditableTableCellEditType = "text" | "number" | "date" | "select" | "multiselect" | "display-only" | "disabled";
+declare type EditableTableCellEditType = "text" | "number" | "money" | "date" | "select" | "multiselect" | "display-only" | "disabled";
 
 declare type EditableTableCollectionProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>> = CollectionProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, EditableTableVisualizationOptions<R, Filters, Sortings, Summaries>>;
 
@@ -4540,6 +4593,21 @@ export declare function F0AiFormRegistryProvider({ children, availableFormDefini
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const F0AiFullscreenChat: () => JSX_2.Element | null;
+
+export declare const F0AiInsightCard: WithDataTestIdReturnType_4<ForwardRefExoticComponent<F0AiInsightCardPublicProps & RefAttributes<HTMLDivElement>> & {
+Skeleton: () => JSX_2.Element;
+}>;
+
+export declare type F0AiInsightCardProps = {
+    description?: string;
+    heading: string;
+    label?: string;
+    selected?: boolean;
+    onClick?: () => void;
+    onAskOne?: () => void;
+} & AiInsightCardContent;
+
+declare type F0AiInsightCardPublicProps = Omit<CardInternalProps_2, (typeof privateProps_5)[number]>;
 
 export declare class F0AiMask {
     readonly element: HTMLElement;
@@ -5808,9 +5876,6 @@ export declare type F0DateFieldConfig = F0BaseConfig & F0DateConfig & {
  */
 declare type F0DateOrDateTimeFieldConfig = F0DateFieldConfig | F0TimeFieldConfig | F0DateTimeFieldConfig;
 
-/**
- * @experimental This is an experimental component use it at your own risk
- */
 export declare const F0DatePicker: WithDataTestIdReturnType_3<typeof F0DatePicker_2>;
 
 declare function F0DatePicker_2({ onChange, value, presets, granularities, minDate, maxDate, open, showIcon, displayFormat, ...inputProps }: F0DatePickerProps): JSX_2.Element;
@@ -8609,6 +8674,18 @@ declare const inputFieldStatus: readonly ["default", "warning", "info", "error"]
 
 declare type InputFieldStatusType = (typeof inputFieldStatus)[number];
 
+declare interface InsertAfterNotesTextEditorPageDocumentPatch {
+    type: "insert_after";
+    targetId: string;
+    blocks: JSONContent[];
+}
+
+declare interface InsertBeforeNotesTextEditorPageDocumentPatch {
+    type: "insert_before";
+    targetId: string;
+    blocks: JSONContent[];
+}
+
 declare const internalAvatarColors: readonly ["viridian", "malibu", "yellow", "purple", "lilac", "barbie", "smoke", "army", "flubber", "indigo", "camel"];
 
 declare type InternalAvatarProps = React_2.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & {
@@ -9186,15 +9263,24 @@ export declare interface NextStepsProps {
 
 export declare const NotesTextEditor: ForwardRefExoticComponent<NotesTextEditorProps & RefAttributes<NotesTextEditorHandle>>;
 
-export declare type NotesTextEditorHandle = {
+export declare interface NotesTextEditorHandle {
     clear: () => void;
     focus: () => void;
     setContent: (content: string) => void;
+    applyPageDocumentPatch: (patch: NotesTextEditorPageDocumentPatch) => NotesTextEditorSnapshot;
     insertAIBlock: () => void;
     insertTranscript: (title: string, users: User[], messages: Message[]) => void;
     pushContent: (content: string) => void;
     insertImage: (file: File) => void;
-};
+}
+
+export declare type NotesTextEditorPageDocumentPatch = TopLevelPrependNotesTextEditorPageDocumentPatch | TopLevelAppendNotesTextEditorPageDocumentPatch | InsertBeforeNotesTextEditorPageDocumentPatch | InsertAfterNotesTextEditorPageDocumentPatch | ReplaceBlockNotesTextEditorPageDocumentPatch | ReplaceContentNotesTextEditorPageDocumentPatch | DeleteBlockNotesTextEditorPageDocumentPatch;
+
+export declare class NotesTextEditorPatchTargetNotFoundError extends Error {
+    readonly code = "target_not_found";
+    readonly targetId: string;
+    constructor(targetId: string);
+}
 
 export declare interface NotesTextEditorProps extends WithDataTestIdProps {
     onChange: (value: {
@@ -9227,6 +9313,17 @@ export declare interface NotesTextEditorSkeletonProps {
     withToolbar?: boolean;
 }
 
+export declare interface NotesTextEditorSnapshot {
+    json: JSONContent | null;
+    html: string | null;
+}
+
+export declare class NotesTextEditorUnsupportedPatchTypeError extends Error {
+    readonly code = "unsupported_patch_type";
+    readonly patchType: unknown;
+    constructor(patchType: unknown);
+}
+
 declare type NumberCellConfig = {
     min?: number;
     max?: number;
@@ -9234,6 +9331,7 @@ declare type NumberCellConfig = {
     maxDecimals?: number;
     locale?: string;
     units?: string;
+    unitsPosition?: "before" | "after";
 };
 
 /**
@@ -9898,6 +9996,8 @@ declare const privateProps_3: readonly ["forceVerticalMetadata", "disableOverlay
 
 declare const privateProps_4: readonly ["compact"];
 
+declare const privateProps_5: readonly ["className"];
+
 export declare const ProductBlankslate: WithDataTestIdReturnType_4<ForwardRefExoticComponent<ProductBlankslateProps & RefAttributes<HTMLDivElement>>>;
 
 declare type ProductBlankslateProps = {
@@ -10297,6 +10397,18 @@ declare interface RenderIfBase {
  * Union of all possible RenderIf conditions (used internally for evaluation)
  */
 export declare type RenderIfCondition = CommonRenderIfCondition | TextRenderIfCondition | NumberRenderIfCondition | BooleanRenderIfCondition | SelectRenderIfCondition | DateRenderIfCondition | DateRangeRenderIfCondition;
+
+declare interface ReplaceBlockNotesTextEditorPageDocumentPatch {
+    type: "replace_block";
+    targetId: string;
+    block: JSONContent;
+}
+
+declare interface ReplaceContentNotesTextEditorPageDocumentPatch {
+    type: "replace_content";
+    targetId: string;
+    content: JSONContent[];
+}
 
 export declare type ResolvedRecordType<R> = R extends RecordType ? R : RecordType;
 
@@ -10723,6 +10835,10 @@ export declare type SortOrder = "asc" | "desc";
  */
 export declare type SpacingToken = "none" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl";
 
+export declare type SparklineDataPoint = {
+    value: number;
+};
+
 declare type SrcProps = Pick<ImgHTMLAttributes<HTMLImageElement>, "src" | "srcSet" | "sizes">;
 
 export declare const StandardLayout: WithDataTestIdReturnType_2<ForwardRefExoticComponent<Omit<StandardLayoutProps & HTMLAttributes<HTMLElement> & RefAttributes<HTMLElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
@@ -10769,36 +10885,43 @@ declare type SummaryKey<Definition extends SummariesDefinition> = Definition ext
 
 declare type SummaryType = "sum";
 
-export declare function SurveyAnsweringForm({ elements, onSubmit: onSubmitProp, mode, title, description, resourceHeader, isOpen, onClose, position: positionProp, module, allowToChangeFullscreen, defaultValues, errorTriggerMode, loading, labels, preview, useUpload, datasets, }: SurveyAnsweringFormProps): JSX_2.Element;
+export declare function SurveyAllQuestionsLoadingSkeleton(): JSX_2.Element;
 
-declare interface SurveyAnsweringFormBaseProps {
-    elements: SurveyFormBuilderElement[];
+export declare function SurveyAnsweringForm(props: SurveyAnsweringFormProps): JSX_2.Element;
+
+declare type SurveyAnsweringFormDefaultProps = SurveyAnsweringFormDialogProps & {
+    preview?: false;
+    onSubmit: (answers: SurveySubmitAnswers) => Promise<SurveyFormSubmitResult> | SurveyFormSubmitResult;
+};
+
+declare interface SurveyAnsweringFormDialogProps extends SurveyAnsweringFormSharedProps {
+    inline?: false;
     mode: SurveyAnsweringFormMode;
-    title: string;
-    description?: string;
-    resourceHeader?: Omit<ResourceHeaderProps, "title" | "description">;
     module: SurveyAnsweringFormModule;
     position?: DialogPosition;
     isOpen: boolean;
     onClose: () => void;
     allowToChangeFullscreen?: boolean;
-    defaultValues?: Partial<SurveyAnswers>;
     errorTriggerMode?: F0FormErrorTriggerMode;
-    loading?: boolean;
     useUpload?: UseFileUpload;
-    datasets?: SurveyDatasets;
-    labels?: {
-        empty?: {
-            title?: string;
-            description?: string;
-            emoji?: string;
-        };
-    };
 }
 
-declare type SurveyAnsweringFormDefaultProps = SurveyAnsweringFormBaseProps & {
-    preview?: false;
-    onSubmit: (answers: SurveySubmitAnswers) => Promise<SurveyFormSubmitResult> | SurveyFormSubmitResult;
+/** Inline mode: read-only rendering embedded in the page, no dialog */
+declare interface SurveyAnsweringFormInlineProps extends SurveyAnsweringFormSharedProps {
+    inline: true;
+    mode?: never;
+    module?: never;
+    position?: never;
+    isOpen?: never;
+    onClose?: never;
+    allowToChangeFullscreen?: never;
+    errorTriggerMode?: never;
+    useUpload?: UseFileUpload;
+}
+
+export declare type SurveyAnsweringFormInlineReadonlyProps = SurveyAnsweringFormInlineProps & {
+    preview?: never;
+    onSubmit?: never;
 };
 
 export declare type SurveyAnsweringFormMode = "stepped" | "all-questions";
@@ -10809,12 +10932,29 @@ declare type SurveyAnsweringFormModule = {
     href: string;
 };
 
-declare type SurveyAnsweringFormPreviewProps = SurveyAnsweringFormBaseProps & {
+declare type SurveyAnsweringFormPreviewProps = SurveyAnsweringFormDialogProps & {
     preview: true;
     onSubmit?: never;
 };
 
-export declare type SurveyAnsweringFormProps = SurveyAnsweringFormDefaultProps | SurveyAnsweringFormPreviewProps;
+export declare type SurveyAnsweringFormProps = SurveyAnsweringFormDefaultProps | SurveyAnsweringFormPreviewProps | SurveyAnsweringFormInlineReadonlyProps;
+
+declare interface SurveyAnsweringFormSharedProps {
+    elements: SurveyFormBuilderElement[];
+    title: string;
+    description?: string;
+    resourceHeader?: Omit<ResourceHeaderProps, "title" | "description">;
+    defaultValues?: Partial<SurveyAnswers>;
+    loading?: boolean;
+    datasets?: SurveyDatasets;
+    labels?: {
+        empty?: {
+            title?: string;
+            description?: string;
+            emoji?: string;
+        };
+    };
+}
 
 export declare type SurveyAnswers = Record<string, SurveyAnswerValue>;
 
@@ -10898,6 +11038,8 @@ export declare type SurveyFormSubmitResult = {
     success: false;
     errors?: Record<string, string>;
 };
+
+export declare function SurveySteppedLoadingSkeleton(): JSX_2.Element;
 
 export declare type SurveySubmitAnswers = Record<string, string | number | boolean | string[] | Date | null>;
 
@@ -11422,6 +11564,16 @@ export declare interface ToolbarProps {
     darkMode?: boolean;
     showEmojiPicker?: boolean;
     plainHtmlMode?: boolean;
+}
+
+declare interface TopLevelAppendNotesTextEditorPageDocumentPatch {
+    type: "top_level_append";
+    blocks: JSONContent[];
+}
+
+declare interface TopLevelPrependNotesTextEditorPageDocumentPatch {
+    type: "top_level_prepend";
+    blocks: JSONContent[];
 }
 
 declare type TranslationKey = Join<PathsToStringProps<typeof defaultTranslations>, ".">;
@@ -12143,6 +12295,8 @@ declare const valueDisplayRenderers: {
     readonly folder: (args: FolderCellValue_2) => JSX_2.Element;
     readonly country: (args: CountryCellValue, context: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly delta: (args: DeltaCellValue) => JSX_2.Element;
+    readonly summary: (args: SummaryCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly count: (args: CountCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
 };
 
 declare type ValueDisplayTableAlignment = "left" | "right";

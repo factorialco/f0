@@ -26,6 +26,7 @@ import { CompanyItemProps } from './types';
 import { ComponentProps } from 'react';
 import { CompoundCellValue } from './types/compound';
 import { CopilotKitProps } from '@copilotkit/react-core';
+import { CountCellValue } from './types/count';
 import { CountryCellValue } from './types/country';
 import { DateCellValue } from './types/date';
 import { DateCellValue as DateCellValue_2 } from './experimental';
@@ -92,6 +93,7 @@ import { ScrollAreaProps } from '@radix-ui/react-scroll-area';
 import { SearchFilterOptions } from './SearchFilter/SearchFilter';
 import { StatusCellValue } from './types/status';
 import { StatusCellValue as StatusCellValue_2 } from './experimental';
+import { SummaryCellValue } from './types/summary';
 import { SVGProps } from 'react';
 import { TagAlertProps } from './experimental';
 import { TagBalanceProps } from './experimental';
@@ -2677,6 +2679,7 @@ declare const defaultTranslations: {
         readonly summaries: {
             readonly types: {
                 readonly sum: "sum";
+                readonly count: "count";
             };
         };
         readonly export: {
@@ -3101,6 +3104,11 @@ declare const defaultTranslations: {
     };
 };
 
+declare interface DeleteBlockNotesTextEditorPageDocumentPatch {
+    type: "delete_block";
+    targetId: string;
+}
+
 /**
  * @experimental This is an experimental component use it at your own risk
  */
@@ -3208,7 +3216,7 @@ declare type DropdownProps = Omit<DropdownInternalProps, (typeof privateProps_4)
 } & WithDataTestIdProps;
 
 /** The edit mode for a column cell in the editable table. */
-declare type EditableTableCellEditType = "text" | "number" | "date" | "select" | "multiselect" | "display-only" | "disabled";
+declare type EditableTableCellEditType = "text" | "number" | "money" | "date" | "select" | "multiselect" | "display-only" | "disabled";
 
 declare type EditableTableCollectionProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>> = CollectionProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, EditableTableVisualizationOptions<R, Filters, Sortings, Summaries>>;
 
@@ -4578,6 +4586,18 @@ declare type InputInternalProps<T extends string> = Pick<ComponentProps<typeof I
 
 export declare type InputProps<T extends string> = Omit<InputInternalProps<T>, (typeof privateProps_2)[number]>;
 
+declare interface InsertAfterNotesTextEditorPageDocumentPatch {
+    type: "insert_after";
+    targetId: string;
+    blocks: JSONContent[];
+}
+
+declare interface InsertBeforeNotesTextEditorPageDocumentPatch {
+    type: "insert_before";
+    targetId: string;
+    blocks: JSONContent[];
+}
+
 declare const internalAvatarColors: readonly ["viridian", "malibu", "yellow", "purple", "lilac", "barbie", "smoke", "army", "flubber", "indigo", "camel"];
 
 declare type InternalAvatarProps = React_2.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & {
@@ -5036,15 +5056,24 @@ declare interface NextStepsProps {
 
 export declare const NotesTextEditor: ForwardRefExoticComponent<NotesTextEditorProps & RefAttributes<NotesTextEditorHandle>>;
 
-export declare type NotesTextEditorHandle = {
+export declare interface NotesTextEditorHandle {
     clear: () => void;
     focus: () => void;
     setContent: (content: string) => void;
+    applyPageDocumentPatch: (patch: NotesTextEditorPageDocumentPatch) => NotesTextEditorSnapshot;
     insertAIBlock: () => void;
     insertTranscript: (title: string, users: User[], messages: Message[]) => void;
     pushContent: (content: string) => void;
     insertImage: (file: File) => void;
-};
+}
+
+export declare type NotesTextEditorPageDocumentPatch = TopLevelPrependNotesTextEditorPageDocumentPatch | TopLevelAppendNotesTextEditorPageDocumentPatch | InsertBeforeNotesTextEditorPageDocumentPatch | InsertAfterNotesTextEditorPageDocumentPatch | ReplaceBlockNotesTextEditorPageDocumentPatch | ReplaceContentNotesTextEditorPageDocumentPatch | DeleteBlockNotesTextEditorPageDocumentPatch;
+
+export declare class NotesTextEditorPatchTargetNotFoundError extends Error {
+    readonly code = "target_not_found";
+    readonly targetId: string;
+    constructor(targetId: string);
+}
 
 export declare interface NotesTextEditorProps extends WithDataTestIdProps {
     onChange: (value: {
@@ -5077,6 +5106,17 @@ export declare interface NotesTextEditorSkeletonProps {
     withToolbar?: boolean;
 }
 
+export declare interface NotesTextEditorSnapshot {
+    json: JSONContent | null;
+    html: string | null;
+}
+
+export declare class NotesTextEditorUnsupportedPatchTypeError extends Error {
+    readonly code = "unsupported_patch_type";
+    readonly patchType: unknown;
+    constructor(patchType: unknown);
+}
+
 declare type NumberCellConfig = {
     min?: number;
     max?: number;
@@ -5084,6 +5124,7 @@ declare type NumberCellConfig = {
     maxDecimals?: number;
     locale?: string;
     units?: string;
+    unitsPosition?: "before" | "after";
 };
 
 export declare type NumberFilterDefinition = BaseFilterDefinition<"number"> & {
@@ -6079,6 +6120,18 @@ declare type RelaxedNumericWithFormatter = Omit<NumericWithFormatter, "numericVa
 
 declare type RendererDefinition = ValueDisplayRendererDefinition;
 
+declare interface ReplaceBlockNotesTextEditorPageDocumentPatch {
+    type: "replace_block";
+    targetId: string;
+    block: JSONContent;
+}
+
+declare interface ReplaceContentNotesTextEditorPageDocumentPatch {
+    type: "replace_content";
+    targetId: string;
+    content: JSONContent[];
+}
+
 export declare type ResolvedRecordType<R> = R extends RecordType ? R : RecordType;
 
 /**
@@ -6996,6 +7049,16 @@ declare type TooltipInternalProps = {
 
 export declare type TooltipProps = Omit<TooltipInternalProps, (typeof privateProps_6)[number]>;
 
+declare interface TopLevelAppendNotesTextEditorPageDocumentPatch {
+    type: "top_level_append";
+    blocks: JSONContent[];
+}
+
+declare interface TopLevelPrependNotesTextEditorPageDocumentPatch {
+    type: "top_level_prepend";
+    blocks: JSONContent[];
+}
+
 declare type TranslationKey = Join<PathsToStringProps<typeof defaultTranslations>, ".">;
 
 declare type TranslationShape<T> = {
@@ -7170,6 +7233,8 @@ declare const valueDisplayRenderers: {
     readonly folder: (args: FolderCellValue) => JSX_2.Element;
     readonly country: (args: CountryCellValue, context: ValueDisplayRendererContext) => JSX_2.Element;
     readonly delta: (args: DeltaCellValue) => JSX_2.Element;
+    readonly summary: (args: SummaryCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
+    readonly count: (args: CountCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
 };
 
 declare type ValueDisplayTableAlignment = "left" | "right";
