@@ -36,6 +36,7 @@ const F0AiChatProviderComponent = ({
   fileAttachments,
   onThumbsUp,
   onThumbsDown,
+  onSaveDashboard,
   children,
   agent,
   tracking,
@@ -63,6 +64,7 @@ const F0AiChatProviderComponent = ({
       credits={credits}
       creditWarning={creditWarning}
       fileAttachments={fileAttachments}
+      onSaveDashboard={onSaveDashboard}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>

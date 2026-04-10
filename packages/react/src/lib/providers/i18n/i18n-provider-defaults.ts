@@ -276,6 +276,7 @@ export const defaultTranslations = {
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
     closeDashboard: "Close dashboard",
+    saveReport: "Save report",
     unsavedChanges: "Unsaved changes",
     saveChanges: "Save changes",
     discardChanges: "Discard",
