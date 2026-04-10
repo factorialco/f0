@@ -190,6 +190,7 @@ Use **dropdown mode** when all actions are equally likely and none should be pro
       '"Delete employee" — states what will happen',
       '"Export as CSV" — specifies format and action',
     ],
+    children: <Canvas of={Stories.DoDontLabelsDo} sourceState="none" />,
   }}
   dont={{
     description:
@@ -199,6 +200,7 @@ Use **dropdown mode** when all actions are equally likely and none should be pro
       '"Deletion" — a noun, not an action',
       '"CSV" — format only, no verb',
     ],
+    children: <Canvas of={Stories.DoDontLabelsDont} sourceState="none" />,
   }}
 />
 

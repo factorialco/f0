@@ -1,18 +1,18 @@
-import { FC, ReactNode } from "react"
+import { FC, ReactNode } from "react";
 
-import { F0TagStatus } from "@/components/tags/F0TagStatus"
+import { F0TagStatus } from "@/components/tags/F0TagStatus";
 
 interface DoDontsProps {
   do: {
-    description: string
-    guidelines?: Array<string>
-    children?: ReactNode
-  }
+    description: string;
+    guidelines?: Array<string>;
+    children?: ReactNode;
+  };
   dont: {
-    description: string
-    guidelines?: Array<string>
-    children?: ReactNode
-  }
+    description: string;
+    guidelines?: Array<string>;
+    children?: ReactNode;
+  };
 }
 
 export const DoDonts: FC<DoDontsProps> = ({
@@ -25,7 +25,9 @@ export const DoDonts: FC<DoDontsProps> = ({
         <F0TagStatus text="Do" variant="positive" />
       </div>
       {doExample.children && (
-        <div className="[&>div]:m-0">{doExample.children}</div>
+        <div className="[&>div]:m-0 [&_.docs-story]:rounded-none [&_.docs-story]:border-0 [&_.docs-story]:bg-transparent [&_.docs-story]:p-0 [&_.docs-story]:shadow-none">
+          {doExample.children}
+        </div>
       )}
       <p className="!m-0 text-f1-foreground-secondary">
         {doExample.description}
@@ -46,7 +48,9 @@ export const DoDonts: FC<DoDontsProps> = ({
         <F0TagStatus text="Don't" variant="critical" />
       </div>
       {dontExample.children && (
-        <div className="[&>div]:m-0">{dontExample.children}</div>
+        <div className="[&>div]:m-0 [&_.docs-story]:rounded-none [&_.docs-story]:border-0 [&_.docs-story]:bg-transparent [&_.docs-story]:p-0 [&_.docs-story]:shadow-none">
+          {dontExample.children}
+        </div>
       )}
       <p className="!m-0 text-f1-foreground-secondary">
         {dontExample.description}
@@ -62,4 +66,4 @@ export const DoDonts: FC<DoDontsProps> = ({
       )}
     </div>
   </div>
-)
+);
