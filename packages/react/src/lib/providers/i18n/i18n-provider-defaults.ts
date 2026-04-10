@@ -559,6 +559,8 @@ export const defaultTranslations = {
       uploadFailed: "Upload failed",
       fileTooLarge: "File exceeds {{maxSize}} MB limit",
       invalidFileType: "File type not accepted. Accepted formats: {{types}}",
+      fileWeight: "File weight: {{size}}",
+      maxFilesReached: "Maximum {{maxFiles}} files",
     },
     moreInformation: "More information",
     validation: {

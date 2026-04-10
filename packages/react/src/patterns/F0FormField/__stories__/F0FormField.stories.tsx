@@ -388,6 +388,36 @@ export const File: Story = {
 }
 
 /**
+ * Multiple file uploads with grouped border-radius per position.
+ */
+export const FileMultiple: Story = {
+  render() {
+    const [value, setValue] = useState<string[]>([])
+
+    const field: F0Field = {
+      id: "attachments",
+      type: "file",
+      label: "Attachments",
+      multiple: true,
+      maxFiles: 3,
+      accept: ["image", "application/pdf"],
+      maxSizeMB: 10,
+      useUpload: useMockUpload,
+    }
+
+    return (
+      <div className="max-w-sm">
+        <F0FormField
+          field={field}
+          value={value}
+          onChange={(v) => setValue(v as string[])}
+        />
+      </div>
+    )
+  },
+}
+
+/**
  * A checkbox field.
  */
 export const Checkbox: Story = {

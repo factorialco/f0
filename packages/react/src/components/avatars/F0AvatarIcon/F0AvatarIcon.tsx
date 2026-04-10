@@ -13,7 +13,7 @@ export type F0AvatarIconProps = {
 
 const sizes = {
   sm: "size-6 rounded-sm",
-  md: "size-9 rounded-md",
+  md: "size-8 rounded-md",
   lg: "size-10 rounded-lg",
 }
 

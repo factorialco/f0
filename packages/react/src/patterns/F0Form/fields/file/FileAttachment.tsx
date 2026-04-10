@@ -5,7 +5,7 @@ import { F0Button } from "@/components/F0Button"
 import { Cross } from "@/icons/app"
 import { cn } from "@/lib/utils"
 
-import type { FileUploadItemProps } from "./types"
+import type { FileAttachmentProps } from "./types"
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
@@ -13,20 +13,37 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
+const positionRadius: Record<
+  NonNullable<FileAttachmentProps["position"]>,
+  string
+> = {
+  single: "rounded-xl",
+  top: "rounded-t-xl rounded-b-none",
+  middle: "rounded-none",
+  bottom: "rounded-b-xl rounded-t-none",
+}
+
 /**
- * Renders a single file row. Handles two modes:
+ * Renders a single file attachment row.
+ * Handles two modes:
  * - New upload (entry.file): triggers useUpload, shows progress
  * - Pre-existing (entry.initialFile): displays immediately, no upload
+ *
+ * The `position` prop controls border-radius for grouped lists:
+ * - "single": full radius (standalone)
+ * - "top" / "middle" / "bottom": partial radius for grouped lists
  */
-export function FileUploadItem({
+export function FileAttachment({
   entry,
   useUpload,
   onUploadComplete,
   onRemove,
   onError,
   disabled,
+  position = "single",
+  className,
   translations,
-}: FileUploadItemProps) {
+}: FileAttachmentProps) {
   const isNewUpload = !!entry.file
   const uploadHook = useUpload?.()
   const upload = uploadHook?.upload
@@ -88,35 +105,41 @@ export function FileUploadItem({
   const fileName = entry.file?.name ?? entry.initialFile?.name ?? ""
   const fileSize = entry.file?.size ?? entry.initialFile?.size
 
+  const subtitleText = error
+    ? error
+    : isUploading
+      ? status === "processing"
+        ? translations.processing
+        : `${translations.uploading} ${progressPercent}%`
+      : fileSize != null
+        ? translations.fileWeight.replace("{{size}}", formatFileSize(fileSize))
+        : null
+
   return (
     <div
       className={cn(
-        "flex items-center gap-3 rounded-lg border border-solid border-f1-border-secondary px-2.5 py-2",
-        error && "border-f1-border-critical"
+        "flex items-center gap-[10px] border border-solid bg-f1-background p-3",
+        positionRadius[position],
+        error ? "border-f1-border-critical" : "border-f1-border-secondary",
+        className
       )}
     >
-      <F0AvatarFile file={fileDef} size="md" />
+      <F0AvatarFile file={fileDef} size="lg" />
 
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="truncate text-base font-medium text-f1-foreground">
+      <div className="flex min-w-0 flex-1 flex-col">
+        <span className="truncate text-sm font-medium text-f1-foreground">
           {fileName}
         </span>
-        <span className="text-sm text-f1-foreground-secondary">
-          {error
-            ? error
-            : isUploading
-              ? status === "processing"
-                ? translations.processing
-                : `${translations.uploading} ${progressPercent}%`
-              : fileSize != null
-                ? formatFileSize(fileSize)
-                : null}
-        </span>
+        {subtitleText && (
+          <span className="text-sm text-f1-foreground-secondary">
+            {subtitleText}
+          </span>
+        )}
       </div>
 
       {!disabled && (
         <F0Button
-          variant="ghost"
+          variant="outline"
           size="sm"
           label={translations.remove}
           onClick={handleRemove}
