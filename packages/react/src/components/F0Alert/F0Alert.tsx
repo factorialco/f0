@@ -99,7 +99,7 @@ const _F0Alert = ({
             )}
           </div>
           {onClose && (
-            <div className="flex-shrink-0 self-start">
+            <div className="flex-shrink-0 self-start @xs:self-center">
               <F0Button
                 icon={Cross}
                 label="Close"
