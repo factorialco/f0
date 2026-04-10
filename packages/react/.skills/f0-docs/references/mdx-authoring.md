@@ -44,8 +44,8 @@ Filename must match the stories file: `F0Button.stories.tsx` → `F0Button.mdx`
 
 - `#` — component title. Visible on page but does NOT appear in Storybook's right-side nav.
 - `##` — main sections (Anatomy, Guidelines, Accessibility). Appear in the right-side nav.
-- `###` — subsections of Anatomy (Modes, Variants, Sizes) and of Guidelines (Design best practices, Content best practices, Behavior, Usage examples) and of Accessibility (Keyboard interaction, Screen reader behavior).
-- `####` — sub-subsections of Design best practices (When to use, When not to use, Do's and don'ts).
+- `###` — subsections of Anatomy (Modes, Variants) and of Guidelines (Design best practices, Content best practices, Behavior, Usage examples) and of Accessibility (Keyboard interaction, Screen reader behavior).
+- `####` — **never used inside Guidelines.** "When to use", "When not to use", and "Do's and don'ts" use `**bold**` instead — same visual separation without generating nav anchors.
 
 **No `---` dividers between sections.** Storybook renders them as visible horizontal rules that clutter the page. Use heading hierarchy alone to separate sections.
 
@@ -60,7 +60,7 @@ Filename must match the stories file: `F0Button.stories.tsx` → `F0Button.mdx`
 **Section order:**
 
 1. `## Anatomy` — `<Canvas>` of the Default story + `<Controls>` (interactive props table), then structural sub-sections:
-   - `### Modes` — if the component has a `mode` prop with 2+ values: Canvas of a Modes story showing all modes, then a table (Mode | Description). No "When to use" column — that guidance belongs in `#### When to use` under Guidelines.
+   - `### Modes` — if the component has a `mode` prop with 2+ values: Canvas of a Modes story showing all modes, then a table (Mode | Description). No "When to use" column — that guidance belongs in **When to use** under Guidelines.
    - `### Variants` — if the component has a `variant` prop with 2+ values: Canvas of a Variants story showing all variants stacked, then a table (Variant | When to use).
    - `### Sizes` — **omit in most cases.** Only include when the component has size-specific behavior that differs from the system default (e.g. a size is unavailable, affects surrounding layout, or has a real usage caveat). Do not document sizes just because the prop exists — repeating `sm/md/lg` descriptions across every component is noise.
 2. `## Guidelines` — all usage guidance: When to use / When not to use / Do's and don'ts / Content / Behavior / Usage examples.
@@ -114,7 +114,7 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 
 ### Design best practices
 
-#### When to use
+**When to use**
 
 <!-- 1–2 sentences introducing the key decision. If there are distinct sub-cases (e.g. split vs dropdown), introduce each with a sentence and a Canvas before the table. -->
 
@@ -122,11 +122,11 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 
 <!-- 2-col table (Situation | Use F0X when) — positive cases only. See Table Templates. -->
 
-#### When not to use
+**When not to use**
 
 <!-- 2-col table (Situation | Use instead) — negative cases only. Name the alternative. See Table Templates. -->
 
-#### Do's and don'ts
+**Do's and don'ts**
 
 <DoDonts
   do={{
@@ -660,7 +660,7 @@ Before marking MDX as done:
 - [ ] `### Modes` / `### Variants` (inside `## Anatomy`) each have a Canvas of a story showing all options stacked, followed by a table
 - [ ] `### Modes` table has only `Mode | Description` columns — no "When to use" (that belongs in Guidelines)
 - [ ] If the component is generic (`F0Component<T>`), `### Behavior` documents the type parameter and the full typed callback signature
-- [ ] `## Guidelines` contains `### Design best practices` with `#### When to use` (may include Canvas), `#### When not to use`, `#### Do's and don'ts`, and `### Usage examples`
+- [ ] `## Guidelines` contains `### Design best practices` with **When to use** (may include Canvas), **When not to use**, **Do's and don'ts** (all as `**bold**`, not `####` headings — headings generate nav anchors), and `### Usage examples`
 - [ ] Inside `### Usage examples`, scenario titles use `**bold**` not `####` headings — headings generate right-side nav anchors and clutter the menu
 - [ ] All tables use `<Unstyled>` with HTML `<table>` (no raw markdown tables)
 - [ ] All `<Canvas of={Stories.X} />` reference actually existing stories — never add a Canvas for a story that doesn't exist or whose title doesn't match what the Canvas shows
