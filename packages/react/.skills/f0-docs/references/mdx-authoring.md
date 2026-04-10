@@ -60,9 +60,9 @@ Filename must match the stories file: `F0Button.stories.tsx` → `F0Button.mdx`
 **Section order:**
 
 1. `## Anatomy` — `<Canvas>` of the Default story + `<Controls>` (interactive props table), then structural sub-sections:
-   - `### Modes` — if the component has a `mode` prop with 2+ values: Canvas of a Modes story showing all modes, then a table (Mode | Description | When to use).
+   - `### Modes` — if the component has a `mode` prop with 2+ values: Canvas of a Modes story showing all modes, then a table (Mode | Description). No "When to use" column — that guidance belongs in `#### When to use` under Guidelines.
    - `### Variants` — if the component has a `variant` prop with 2+ values: Canvas of a Variants story showing all variants stacked, then a table (Variant | When to use).
-   - `### Sizes` — if the component has a `size` prop with 2+ values: Canvas of a Sizes story showing all sizes stacked, then a table (Size | When to use).
+   - `### Sizes` — if the component has a `size` prop with 2+ values: Canvas of a Sizes story showing all sizes stacked, then a table (Size | Description). Use visual/structural descriptions (height, padding, density) — not generic placement advice. Add component-specific notes where a size is uncommon or has caveats.
 2. `## Guidelines` — all usage guidance: When to use / When not to use / Do's and don'ts / Content / Behavior / Usage examples.
 3. `## Accessibility` — only when the component type requires it (see decision table below).
 
@@ -91,7 +91,7 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 
 <Canvas of={Stories.Modes} />
 
-<!-- Modes table: Mode | Description | When to use — see Table Templates -->
+<!-- Modes table: Mode | Description — see Table Templates -->
 
 ### Variants
 
@@ -107,7 +107,7 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 
 <Canvas of={Stories.Sizes} />
 
-<!-- Sizes table: Size | When to use — see Table Templates -->
+<!-- Sizes table: Size | Description (visual/structural) — see Table Templates -->
 
 ## Guidelines
 
@@ -145,6 +145,7 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 
 - [Layout or responsive behavior]
 - [State transitions]
+- [Generic type note — if the component is generic (`F0Component<T>`): document the type parameter, what it controls, and the full signature of any typed callback (e.g. `onClick: (value: T, item: Item<T>) => void`). Mention that `T` defaults to `string` and that callers can pass a union, enum, or literal type.]
 
 ### Usage examples
 
@@ -243,6 +244,40 @@ Single unified table. Placed inside `## Anatomy`, after `<Canvas>` and `<Control
 </Unstyled>
 ```
 
+### Modes — 2 columns (Mode | Description)
+
+Describes structural behavior only. No "When to use" column — that guidance belongs in `#### When to use` under Guidelines.
+
+```mdx
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Mode</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>split</code> (default)
+        </td>
+        <td>
+          Two interactive areas: main button triggers the selected action,
+          chevron opens the menu with the remaining items.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>dropdown</code>
+        </td>
+        <td>Single unified button that opens a menu showing all items.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+```
+
 ### Variants — 2 columns (Variant | When to use)
 
 ```mdx
@@ -260,6 +295,49 @@ Single unified table. Placed inside `## Anatomy`, after `<Canvas>` and `<Control
           <code>default</code>
         </td>
         <td>Primary actions — one per page section</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+```
+
+### Sizes — 2 columns (Size | Description)
+
+Use visual/structural descriptions (height, padding, density). Avoid generic placement advice ("use in forms", "use in heroes") — that is guidance, not anatomy. Add component-specific notes where a size is unusual or has caveats.
+
+```mdx
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Size</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>sm</code>
+        </td>
+        <td>
+          Reduced height and padding. Fits in dense surfaces like toolbars or
+          inline table actions.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>md</code> (default)
+        </td>
+        <td>Standard height and padding. The default for most contexts.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>lg</code>
+        </td>
+        <td>
+          Increased height and padding. Use sparingly — add a note if this size
+          is uncommon for the specific component.
+        </td>
       </tr>
     </tbody>
   </table>
@@ -580,6 +658,9 @@ Before marking MDX as done:
 - [ ] Component title (`# ComponentName`) followed immediately by a 1–2 sentence fused description (definition + purpose + cross-references)
 - [ ] `## Anatomy` section contains `<Canvas of={Stories.Default} />` + `<Controls of={Stories.Default} />` — no separate Props section
 - [ ] `### Modes` / `### Variants` / `### Sizes` (inside `## Anatomy`) each have a Canvas of a story showing all options stacked, followed by a table
+- [ ] `### Modes` table has only `Mode | Description` columns — no "When to use" (that belongs in Guidelines)
+- [ ] `### Sizes` table has `Size | Description` columns with visual/structural descriptions, not generic placement advice
+- [ ] If the component is generic (`F0Component<T>`), `### Behavior` documents the type parameter and the full typed callback signature
 - [ ] `## Guidelines` contains `### Design best practices` with `#### When to use` (may include Canvas), `#### When not to use`, `#### Do's and don'ts`, and `### Usage examples`
 - [ ] Inside `### Usage examples`, scenario titles use `**bold**` not `####` headings — headings generate right-side nav anchors and clutter the menu
 - [ ] All tables use `<Unstyled>` with HTML `<table>` (no raw markdown tables)
