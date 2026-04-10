@@ -184,29 +184,6 @@ Use **dropdown mode** when all actions are equally likely and none should be pro
 <DoDonts
   do={{
     description:
-      "Use verb-first labels that clearly state what clicking will do.",
-    guidelines: [
-      '"Save draft" — verb-first, unambiguous',
-      '"Delete employee" — states what will happen',
-      '"Export as CSV" — specifies format and action',
-    ],
-    children: <Canvas of={Stories.DoDontLabelsDo} sourceState="none" />,
-  }}
-  dont={{
-    description:
-      "Don't use noun-only or vague labels that leave the action unclear.",
-    guidelines: [
-      '"Draft" — is this saving, opening, or creating?',
-      '"Deletion" — a noun, not an action',
-      '"CSV" — format only, no verb',
-    ],
-    children: <Canvas of={Stories.DoDontLabelsDont} sourceState="none" />,
-  }}
-/>
-
-<DoDonts
-  do={{
-    description:
       "Mark only genuinely destructive or irreversible actions as critical.",
     guidelines: [
       '"Delete employee" with critical: true — cannot be undone',

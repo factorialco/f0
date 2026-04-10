@@ -549,35 +549,6 @@ export const Snapshot: Story = {
   render: (args) => <F0ButtonDropdown {...args} />,
 };
 
-// Do: verb-first labels
-export const DoDontLabelsDo: Story = {
-  tags: ["!dev"],
-  args: {
-    items: [
-      { value: "save", label: "Save draft", icon: Save },
-      {
-        value: "delete",
-        label: "Delete employee",
-        icon: Delete,
-        critical: true,
-      },
-      { value: "export", label: "Export as CSV", icon: Add },
-    ],
-  },
-};
-
-// Don't: noun-only or vague labels
-export const DoDontLabelsDont: Story = {
-  tags: ["!dev"],
-  args: {
-    items: [
-      { value: "draft", label: "Draft", icon: Save },
-      { value: "deletion", label: "Deletion", icon: Delete, critical: true },
-      { value: "csv", label: "CSV", icon: Add },
-    ],
-  },
-};
-
 // Do: only genuinely destructive actions marked as critical
 export const DoDontCriticalDo: Story = {
   tags: ["!dev"],
