@@ -1,11 +1,11 @@
-import { motion } from "motion/react"
-import { useEffect, useRef, useState } from "react"
+import { motion } from "motion/react";
+import { useEffect, useRef, useState } from "react";
 
-import { F0Button } from "@/components/F0Button"
-import { F0Icon } from "@/components/F0Icon/F0Icon"
-import { ArrowUp, Check, Cross, Reset, SolidStop } from "@/icons/app"
-import { cn } from "@/lib/utils"
-import { F0ActionItem } from "@/sds/ai/F0ActionItem"
+import { F0Button } from "@/components/F0Button";
+import { F0Icon } from "@/components/F0Icon/F0Icon";
+import { ArrowUp, Check, Cross, Reset, SolidStop } from "@/icons/app";
+import { cn } from "@/lib/utils";
+import { F0ActionItem } from "@/sds/ai/F0ActionItem";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,29 +15,29 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@/ui/dropdown-menu"
+} from "@/ui/dropdown-menu";
 
-import { EnhancementOption } from "./types"
+import { EnhancementOption } from "./types";
 
 interface AIEnhanceMenuProps {
   onSelect: ({
     selectedIntent,
     customIntent,
   }: {
-    selectedIntent?: string
-    customIntent?: string
-  }) => void
-  enhancementOptions: EnhancementOption[]
-  inputPlaceholder: string
-  darkMode?: boolean
-  menuWidth?: number
-  menuState?: "idle" | "loading" | "review"
-  loadingLabel?: string
-  onAccept?: () => void
-  onReject?: () => void
-  onRetry?: () => void
-  canShowOptions?: boolean
-  compactReview?: boolean
+    selectedIntent?: string;
+    customIntent?: string;
+  }) => void;
+  enhancementOptions: EnhancementOption[];
+  inputPlaceholder: string;
+  darkMode?: boolean;
+  menuWidth?: number;
+  menuState?: "idle" | "loading" | "review";
+  loadingLabel?: string;
+  onAccept?: () => void;
+  onReject?: () => void;
+  onRetry?: () => void;
+  canShowOptions?: boolean;
+  compactReview?: boolean;
 }
 
 const AIEnhanceMenu = ({
@@ -54,40 +54,40 @@ const AIEnhanceMenu = ({
   canShowOptions = true,
   compactReview = false,
 }: AIEnhanceMenuProps) => {
-  const [searchQuery, setSearchQuery] = useState("")
-  const customInputRef = useRef<HTMLInputElement>(null)
+  const [searchQuery, setSearchQuery] = useState("");
+  const customInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const input = customInputRef.current
-    if (!input) return
+    const input = customInputRef.current;
+    if (!input) return;
 
     const timeoutId = window.setTimeout(() => {
-      input.focus({ preventScroll: true })
-      const length = input.value.length
-      input.setSelectionRange(length, length)
-    }, 300)
+      input.focus({ preventScroll: true });
+      const length = input.value.length;
+      input.setSelectionRange(length, length);
+    }, 300);
 
     return () => {
-      window.clearTimeout(timeoutId)
-    }
-  }, [])
+      window.clearTimeout(timeoutId);
+    };
+  }, []);
 
   const handleOptionSelect = (option: EnhancementOption) => {
-    onSelect({ selectedIntent: option.id, customIntent: undefined })
-  }
+    onSelect({ selectedIntent: option.id, customIntent: undefined });
+  };
 
-  const isIdle = menuState === "idle"
-  const isLoading = menuState === "loading"
-  const isReview = menuState === "review"
-  const useCompactReview = isReview && compactReview
-  const showOptions = isIdle && canShowOptions && enhancementOptions.length > 0
+  const isIdle = menuState === "idle";
+  const isLoading = menuState === "loading";
+  const isReview = menuState === "review";
+  const useCompactReview = isReview && compactReview;
+  const showOptions = isIdle && canShowOptions && enhancementOptions.length > 0;
 
   return (
     <div
       className={cn(
         "flex max-w-full flex-col",
         useCompactReview ? "w-fit" : "w-full",
-        darkMode && "dark"
+        darkMode && "dark",
       )}
       style={{
         width: !useCompactReview && menuWidth ? `${menuWidth}px` : undefined,
@@ -108,15 +108,15 @@ const AIEnhanceMenu = ({
                   "before:pointer-events-none before:absolute before:inset-px before:z-10 before:rounded-[inherit] before:bg-f1-background before:shadow-[0_2px_6px_-1px_rgba(13,22,37,.04),inset_0_-2px_4px_rgba(13,22,37,.04)] before:content-['']",
                   "after:pointer-events-none after:absolute after:inset-0 after:translate-y-px after:scale-90 after:animate-rotate-gradient after:rounded-[inherit] after:bg-[conic-gradient(from_var(--gradient-angle),hsla(229,57%,76%,0.7),hsla(348,80%,50%,0.7),hsla(348,80%,50%,0.7),hsla(18,80%,50%,0.7),hsla(229,57%,76%,0.7),hsla(229,57%,76%,0.7))] after:opacity-0 after:blur-sm after:content-[''] after:[transition:transform_200ms,opacity_200ms]",
                   "hover:after:scale-100 hover:after:opacity-80 has-[input:focus]:after:scale-100 has-[input:focus]:after:opacity-80",
-                  "pl-4"
+                  "pl-4",
                 ),
               compactReview &&
                 !isIdle &&
                 "border border-solid border-f1-border-secondary",
-              useCompactReview && "drop-shadow-sm"
+              useCompactReview && "drop-shadow-sm",
             )}
             onClick={() => {
-              customInputRef.current?.focus()
+              customInputRef.current?.focus();
             }}
           >
             {isIdle && (
@@ -130,13 +130,13 @@ const AIEnhanceMenu = ({
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => {
                     // Prevent DropdownMenuTrigger from intercepting Space/Enter/Arrow keys
-                    e.stopPropagation()
+                    e.stopPropagation();
                     if (e.key === "Enter" && searchQuery.trim()) {
-                      e.preventDefault()
+                      e.preventDefault();
                       onSelect({
                         selectedIntent: undefined,
                         customIntent: searchQuery.trim(),
-                      })
+                      });
                     }
                   }}
                   ref={customInputRef}
@@ -152,7 +152,7 @@ const AIEnhanceMenu = ({
                       onSelect({
                         selectedIntent: undefined,
                         customIntent: searchQuery.trim(),
-                      })
+                      });
                     }}
                   />
                 </div>
@@ -162,7 +162,7 @@ const AIEnhanceMenu = ({
               <div
                 className={cn(
                   "relative z-20 flex h-8 min-w-0 flex-1 items-center gap-2",
-                  darkMode && "dark"
+                  darkMode && "dark",
                 )}
               >
                 <F0ActionItem title={loadingLabel} status="executing" />
@@ -181,7 +181,7 @@ const AIEnhanceMenu = ({
                 className={cn(
                   "relative z-20 flex items-center justify-between gap-2",
                   useCompactReview ? "w-fit whitespace-nowrap" : "w-full",
-                  darkMode && "dark"
+                  darkMode && "dark",
                 )}
               >
                 <F0Button
@@ -215,7 +215,7 @@ const AIEnhanceMenu = ({
             sideOffset={4}
             className={cn(
               "scrollbar-macos max-h-60 w-72 !min-w-0 overflow-y-auto border border-solid border-f1-border-secondary",
-              darkMode && "dark"
+              darkMode && "dark",
             )}
             style={{ zIndex: 10000 }}
             onCloseAutoFocus={(e) => e.preventDefault()}
@@ -224,7 +224,7 @@ const AIEnhanceMenu = ({
           >
             {enhancementOptions.map((option) => {
               const hasSubOptions =
-                option.subOptions && option.subOptions.length > 0
+                option.subOptions && option.subOptions.length > 0;
 
               if (hasSubOptions) {
                 return (
@@ -243,7 +243,7 @@ const AIEnhanceMenu = ({
                       <DropdownMenuSubContent
                         className={cn(
                           darkMode && "dark",
-                          "border border-solid border-f1-border-secondary"
+                          "border border-solid border-f1-border-secondary",
                         )}
                         style={{ zIndex: 10001 }}
                       >
@@ -251,8 +251,8 @@ const AIEnhanceMenu = ({
                           <DropdownMenuItem
                             key={subOption.id}
                             onSelect={(e) => {
-                              e.preventDefault()
-                              handleOptionSelect(subOption)
+                              e.preventDefault();
+                              handleOptionSelect(subOption);
                             }}
                           >
                             <div className="flex w-full flex-row items-center gap-2">
@@ -266,15 +266,15 @@ const AIEnhanceMenu = ({
                       </DropdownMenuSubContent>
                     </DropdownMenuPortal>
                   </DropdownMenuSub>
-                )
+                );
               }
 
               return (
                 <DropdownMenuItem
                   key={option.id}
                   onSelect={(e) => {
-                    e.preventDefault()
-                    handleOptionSelect(option)
+                    e.preventDefault();
+                    handleOptionSelect(option);
                   }}
                 >
                   <div className="flex w-full flex-row items-center gap-2">
@@ -284,13 +284,13 @@ const AIEnhanceMenu = ({
                     <span className="flex-1">{option.label}</span>
                   </div>
                 </DropdownMenuItem>
-              )
+              );
             })}
           </DropdownMenuContent>
         )}
       </DropdownMenu>
     </div>
-  )
-}
+  );
+};
 
-export { AIEnhanceMenu }
+export { AIEnhanceMenu };

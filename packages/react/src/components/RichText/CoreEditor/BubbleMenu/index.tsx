@@ -1,31 +1,31 @@
-import { BubbleMenu, Editor, isTextSelection } from "@tiptap/react"
-import { NodeSelection } from "prosemirror-state"
-import { useEffect, useRef, useState } from "react"
+import { BubbleMenu, Editor, isTextSelection } from "@tiptap/react";
+import { NodeSelection } from "prosemirror-state";
+import { useEffect, useRef, useState } from "react";
 
-import { EnhanceActivator } from "../Enhance/EnhanceActivator"
-import { enhanceConfig } from "../Enhance/types"
-import { Toolbar, ToolbarDivider } from "../Toolbar"
+import { EnhanceActivator } from "../Enhance/EnhanceActivator";
+import { enhanceConfig } from "../Enhance/types";
+import { Toolbar, ToolbarDivider } from "../Toolbar";
 
 interface EditorBubbleMenuProps {
-  editor: Editor
-  disableButtons: boolean
-  isToolbarOpen: boolean
-  isFullscreen: boolean
-  editorId: string
-  plainHtmlMode?: boolean
+  editor: Editor;
+  disableButtons: boolean;
+  isToolbarOpen: boolean;
+  isFullscreen: boolean;
+  editorId: string;
+  plainHtmlMode?: boolean;
   // Optional enhance props
-  enhanceConfig?: enhanceConfig
+  enhanceConfig?: enhanceConfig;
   onEnhanceWithAI?: (
     selectedOption?: string,
-    customIntent?: string
-  ) => Promise<void>
-  isLoadingEnhance?: boolean
-  isAcceptChangesOpen?: boolean
-  onAcceptChanges?: () => void
-  onRejectChanges?: () => void
-  onRetryChanges?: () => void
+    customIntent?: string,
+  ) => Promise<void>;
+  isLoadingEnhance?: boolean;
+  isAcceptChangesOpen?: boolean;
+  onAcceptChanges?: () => void;
+  onRejectChanges?: () => void;
+  onRetryChanges?: () => void;
   /** When true, the bubble menu is hidden (during loading, accept changes, or error) */
-  enhanceActive?: boolean
+  enhanceActive?: boolean;
 }
 
 export const EditorBubbleMenu = ({
@@ -44,22 +44,22 @@ export const EditorBubbleMenu = ({
   onRetryChanges,
   enhanceActive = false,
 }: EditorBubbleMenuProps) => {
-  const showEnhance = enhanceConfig && onEnhanceWithAI
+  const showEnhance = enhanceConfig && onEnhanceWithAI;
   const shouldKeepEnhanceVisible =
-    !!showEnhance && (isLoadingEnhance || isAcceptChangesOpen)
-  const bubbleMenuContainerRef = useRef<HTMLDivElement>(null)
-  const [bubbleMenuWidth, setBubbleMenuWidth] = useState<number>()
+    !!showEnhance && (isLoadingEnhance || isAcceptChangesOpen);
+  const bubbleMenuContainerRef = useRef<HTMLDivElement>(null);
+  const [bubbleMenuWidth, setBubbleMenuWidth] = useState<number>();
 
   useEffect(() => {
-    if (!bubbleMenuContainerRef.current) return
+    if (!bubbleMenuContainerRef.current) return;
     const updateWidth = () => {
-      setBubbleMenuWidth(bubbleMenuContainerRef.current?.offsetWidth)
-    }
+      setBubbleMenuWidth(bubbleMenuContainerRef.current?.offsetWidth);
+    };
 
-    updateWidth()
-    window.addEventListener("resize", updateWidth)
-    return () => window.removeEventListener("resize", updateWidth)
-  }, [])
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
+    return () => window.removeEventListener("resize", updateWidth);
+  }, []);
 
   return (
     <BubbleMenu
@@ -103,23 +103,23 @@ export const EditorBubbleMenu = ({
       editor={editor}
       shouldShow={({ view, state, from, to }) => {
         if (shouldKeepEnhanceVisible) {
-          return true
+          return true;
         }
 
-        const { doc, selection } = state
-        const { empty } = selection
+        const { doc, selection } = state;
+        const { empty } = selection;
 
         if (selection instanceof NodeSelection) {
-          return false
+          return false;
         }
         const isEmptyTextBlock =
-          !doc.textBetween(from, to).length && isTextSelection(state.selection)
+          !doc.textBetween(from, to).length && isTextSelection(state.selection);
 
         const isChildOfMenu = document
           .getElementById(editorId)
-          ?.contains(document.activeElement)
+          ?.contains(document.activeElement);
 
-        const hasEditorFocus = view.hasFocus() || isChildOfMenu
+        const hasEditorFocus = view.hasFocus() || isChildOfMenu;
 
         if (
           !hasEditorFocus ||
@@ -127,10 +127,10 @@ export const EditorBubbleMenu = ({
           isEmptyTextBlock ||
           !editor.isEditable
         ) {
-          return false
+          return false;
         }
 
-        return true
+        return true;
       }}
     >
       {!isToolbarOpen && (!enhanceActive || shouldKeepEnhanceVisible) && (
@@ -167,5 +167,5 @@ export const EditorBubbleMenu = ({
         </div>
       )}
     </BubbleMenu>
-  )
-}
+  );
+};

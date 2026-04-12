@@ -1,44 +1,44 @@
-import * as Popover from "@radix-ui/react-popover"
-import { AnimatePresence, motion } from "motion/react"
-import { RefObject, useLayoutEffect, useRef, useState } from "react"
+import * as Popover from "@radix-ui/react-popover";
+import { AnimatePresence, motion } from "motion/react";
+import { RefObject, useLayoutEffect, useRef, useState } from "react";
 
-import { ButtonInternal } from "@/components/F0Button/internal"
-import { One } from "@/icons/ai"
-import { useI18n } from "@/lib/providers/i18n/i18n-provider"
-import { cn } from "@/lib/utils"
+import { ButtonInternal } from "@/components/F0Button/internal";
+import { One } from "@/icons/ai";
+import { useI18n } from "@/lib/providers/i18n/i18n-provider";
+import { cn } from "@/lib/utils";
 
-import { AIEnhanceMenu } from "./EnhanceMenu"
-import { enhanceConfig } from "./types"
+import { AIEnhanceMenu } from "./EnhanceMenu";
+import { enhanceConfig } from "./types";
 
 interface EnhanceActivatorProps {
   onEnhanceWithAI: (
     selectedOption?: string,
-    customIntent?: string
-  ) => Promise<void>
-  enhanceConfig?: enhanceConfig
-  disabled: boolean
-  hideLabel?: boolean
-  darkMode?: boolean
-  menuWidth?: number
-  menuContainerRef?: RefObject<HTMLElement | null>
-  isLoadingEnhance?: boolean
-  isAcceptChangesOpen?: boolean
-  onAcceptChanges?: () => void
-  onRejectChanges?: () => void
-  onRetryChanges?: () => void
-  lockToViewportOnLock?: boolean
+    customIntent?: string,
+  ) => Promise<void>;
+  enhanceConfig?: enhanceConfig;
+  disabled: boolean;
+  hideLabel?: boolean;
+  darkMode?: boolean;
+  menuWidth?: number;
+  menuContainerRef?: RefObject<HTMLElement | null>;
+  isLoadingEnhance?: boolean;
+  isAcceptChangesOpen?: boolean;
+  onAcceptChanges?: () => void;
+  onRejectChanges?: () => void;
+  onRetryChanges?: () => void;
+  lockToViewportOnLock?: boolean;
 }
 
 interface FrozenGeometry {
-  alignOffset: number
-  sideOffset: number
-  menuWidth?: number
+  alignOffset: number;
+  sideOffset: number;
+  menuWidth?: number;
 }
 
 interface FrozenViewportPosition {
-  left: number
-  top: number
-  width?: number
+  left: number;
+  top: number;
+  width?: number;
 }
 
 const EnhanceActivator = ({
@@ -56,159 +56,165 @@ const EnhanceActivator = ({
   onRetryChanges,
   lockToViewportOnLock = false,
 }: EnhanceActivatorProps) => {
-  const i18n = useI18n()
-  const enhanceButtonRef = useRef<HTMLButtonElement>(null)
-  const flowOwnerRef = useRef(false)
-  const prevLockedRef = useRef(false)
-  const [open, setOpen] = useState(false)
-  const [triggerHeight, setTriggerHeight] = useState(0)
-  const [computedAlignOffset, setComputedAlignOffset] = useState(-5)
-  const [computedSideOffset, setComputedSideOffset] = useState(-triggerHeight)
+  const i18n = useI18n();
+  const enhanceButtonRef = useRef<HTMLButtonElement>(null);
+  const flowOwnerRef = useRef(false);
+  const prevLockedRef = useRef(false);
+  const [open, setOpen] = useState(false);
+  const [triggerHeight, setTriggerHeight] = useState(0);
+  const [computedAlignOffset, setComputedAlignOffset] = useState(-5);
+  const [computedSideOffset, setComputedSideOffset] = useState(-triggerHeight);
   const [computedMenuWidth, setComputedMenuWidth] = useState<
     number | undefined
-  >(menuWidth)
+  >(menuWidth);
   const [frozenGeometry, setFrozenGeometry] = useState<FrozenGeometry | null>(
-    null
-  )
+    null,
+  );
   const [frozenViewportPosition, setFrozenViewportPosition] =
-    useState<FrozenViewportPosition | null>(null)
+    useState<FrozenViewportPosition | null>(null);
 
-  const isLocked = isLoadingEnhance || isAcceptChangesOpen
+  const isLocked = isLoadingEnhance || isAcceptChangesOpen;
 
   useLayoutEffect(() => {
-    if (!open) return
-    if (isLocked && flowOwnerRef.current) return
+    if (!open) return;
+    if (isLocked && flowOwnerRef.current) return;
 
     const updateGeometry = () => {
-      if (!enhanceButtonRef.current) return
+      if (!enhanceButtonRef.current) return;
 
-      setTriggerHeight(enhanceButtonRef.current.offsetHeight)
+      setTriggerHeight(enhanceButtonRef.current.offsetHeight);
 
       if (!menuContainerRef?.current) {
         const fallbackWidth =
-          menuWidth || enhanceButtonRef.current.offsetWidth || undefined
+          menuWidth || enhanceButtonRef.current.offsetWidth || undefined;
         if (fallbackWidth) {
-          const safeWidth = Math.min(fallbackWidth, window.innerWidth - 24)
-          const triggerRect = enhanceButtonRef.current.getBoundingClientRect()
-          const left = triggerRect.left
-          const minLeft = 12
-          const maxLeft = Math.max(minLeft, window.innerWidth - 12 - safeWidth)
-          const clampedLeft = Math.min(Math.max(left, minLeft), maxLeft)
-          setComputedAlignOffset(Math.round(clampedLeft - triggerRect.left))
-          setComputedMenuWidth(safeWidth)
+          const safeWidth = Math.min(fallbackWidth, window.innerWidth - 24);
+          const triggerRect = enhanceButtonRef.current.getBoundingClientRect();
+          const left = triggerRect.left;
+          const minLeft = 12;
+          const maxLeft = Math.max(minLeft, window.innerWidth - 12 - safeWidth);
+          const clampedLeft = Math.min(Math.max(left, minLeft), maxLeft);
+          setComputedAlignOffset(Math.round(clampedLeft - triggerRect.left));
+          setComputedMenuWidth(safeWidth);
         } else {
-          setComputedAlignOffset(-5)
-          setComputedMenuWidth(menuWidth)
+          setComputedAlignOffset(-5);
+          setComputedMenuWidth(menuWidth);
         }
-        setComputedSideOffset(-enhanceButtonRef.current.offsetHeight)
-        return
+        setComputedSideOffset(-enhanceButtonRef.current.offsetHeight);
+        return;
       }
 
-      const triggerRect = enhanceButtonRef.current.getBoundingClientRect()
-      const containerRect = menuContainerRef.current.getBoundingClientRect()
+      const triggerRect = enhanceButtonRef.current.getBoundingClientRect();
+      const containerRect = menuContainerRef.current.getBoundingClientRect();
       const desiredWidth =
-        menuContainerRef.current.offsetWidth || menuWidth || triggerRect.width
-      const safeWidth = Math.min(desiredWidth, window.innerWidth - 24)
-      const desiredLeft = containerRect.left
-      const minLeft = 12
-      const maxLeft = Math.max(minLeft, window.innerWidth - 12 - safeWidth)
-      const clampedLeft = Math.min(Math.max(desiredLeft, minLeft), maxLeft)
-      setComputedAlignOffset(Math.round(clampedLeft - triggerRect.left))
-      setComputedSideOffset(Math.round(containerRect.top - triggerRect.bottom))
-      setComputedMenuWidth(safeWidth)
-    }
+        menuContainerRef.current.offsetWidth || menuWidth || triggerRect.width;
+      const safeWidth = Math.min(desiredWidth, window.innerWidth - 24);
+      const desiredLeft = containerRect.left;
+      const minLeft = 12;
+      const maxLeft = Math.max(minLeft, window.innerWidth - 12 - safeWidth);
+      const clampedLeft = Math.min(Math.max(desiredLeft, minLeft), maxLeft);
+      setComputedAlignOffset(Math.round(clampedLeft - triggerRect.left));
+      setComputedSideOffset(Math.round(containerRect.top - triggerRect.bottom));
+      setComputedMenuWidth(safeWidth);
+    };
 
-    const rafId = requestAnimationFrame(updateGeometry)
-    const resizeObserver = new ResizeObserver(updateGeometry)
+    const rafId = requestAnimationFrame(updateGeometry);
+    const resizeObserver = new ResizeObserver(updateGeometry);
     if (enhanceButtonRef.current) {
-      resizeObserver.observe(enhanceButtonRef.current)
+      resizeObserver.observe(enhanceButtonRef.current);
     }
     if (menuContainerRef?.current) {
-      resizeObserver.observe(menuContainerRef.current)
+      resizeObserver.observe(menuContainerRef.current);
     }
-    window.addEventListener("resize", updateGeometry)
+    window.addEventListener("resize", updateGeometry);
     return () => {
-      cancelAnimationFrame(rafId)
-      resizeObserver.disconnect()
-      window.removeEventListener("resize", updateGeometry)
-    }
-  }, [open, menuContainerRef, menuWidth, isLocked])
+      cancelAnimationFrame(rafId);
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateGeometry);
+    };
+  }, [open, menuContainerRef, menuWidth, isLocked]);
 
   const handleEnhanceClick = (e: React.MouseEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (!enhanceButtonRef.current) {
-      flowOwnerRef.current = false
-      setOpen(false)
-      return
+      flowOwnerRef.current = false;
+      setOpen(false);
+      return;
     }
 
     setOpen((prev) => {
-      const next = !prev
-      flowOwnerRef.current = next
-      return next
-    })
-  }
+      const next = !prev;
+      flowOwnerRef.current = next;
+      return next;
+    });
+  };
 
   useLayoutEffect(() => {
     // Keep open only for the activator instance that initiated the flow.
     if (isLocked && flowOwnerRef.current) {
-      setOpen(true)
+      setOpen(true);
     }
-  }, [isLocked])
+  }, [isLocked]);
 
   useLayoutEffect(() => {
-    const isOwnerLocked = isLocked && flowOwnerRef.current
-    const wasLocked = prevLockedRef.current
+    const isOwnerLocked = isLocked && flowOwnerRef.current;
+    const wasLocked = prevLockedRef.current;
 
     if (isOwnerLocked && !wasLocked) {
-      const triggerRect = enhanceButtonRef.current?.getBoundingClientRect()
+      const triggerRect = enhanceButtonRef.current?.getBoundingClientRect();
       if (triggerRect && lockToViewportOnLock) {
-        const width = computedMenuWidth
-        const left = triggerRect.left + computedAlignOffset
+        const width = computedMenuWidth;
+        const left = triggerRect.left + computedAlignOffset;
         const top =
-          triggerRect.bottom + computedSideOffset + contextualVerticalOffset
-        setFrozenViewportPosition({ left, top, width })
+          triggerRect.bottom + computedSideOffset + contextualVerticalOffset;
+        setFrozenViewportPosition({ left, top, width });
       }
 
       setFrozenGeometry({
         alignOffset: computedAlignOffset,
         sideOffset: computedSideOffset,
         menuWidth: computedMenuWidth,
-      })
+      });
     }
 
     if (!isOwnerLocked && wasLocked) {
-      setFrozenGeometry(null)
-      setFrozenViewportPosition(null)
+      setFrozenGeometry(null);
+      setFrozenViewportPosition(null);
     }
 
-    prevLockedRef.current = isOwnerLocked
-  }, [isLocked, computedAlignOffset, computedSideOffset, computedMenuWidth, lockToViewportOnLock])
+    prevLockedRef.current = isOwnerLocked;
+  }, [
+    isLocked,
+    computedAlignOffset,
+    computedSideOffset,
+    computedMenuWidth,
+    lockToViewportOnLock,
+  ]);
 
-  const activeAlignOffset = frozenGeometry?.alignOffset ?? computedAlignOffset
-  const activeSideOffset = frozenGeometry?.sideOffset ?? computedSideOffset
-  const activeMenuWidth = frozenGeometry?.menuWidth ?? computedMenuWidth
-  const contextualVerticalOffset = 0
+  const activeAlignOffset = frozenGeometry?.alignOffset ?? computedAlignOffset;
+  const activeSideOffset = frozenGeometry?.sideOffset ?? computedSideOffset;
+  const activeMenuWidth = frozenGeometry?.menuWidth ?? computedMenuWidth;
+  const contextualVerticalOffset = 0;
   const renderAsFixedLockedPanel =
     lockToViewportOnLock &&
     isLocked &&
     flowOwnerRef.current &&
-    !!frozenViewportPosition
+    !!frozenViewportPosition;
 
   const handleCloseFlow = () => {
-    flowOwnerRef.current = false
-    setOpen(false)
-  }
+    flowOwnerRef.current = false;
+    setOpen(false);
+  };
 
   const enhanceMenuProps = {
     onSelect: ({
       selectedIntent,
       customIntent,
     }: {
-      selectedIntent?: string
-      customIntent?: string
+      selectedIntent?: string;
+      customIntent?: string;
     }) => {
-      onEnhanceWithAI(selectedIntent, customIntent)
+      onEnhanceWithAI(selectedIntent, customIntent);
     },
     enhancementOptions: enhanceConfig?.enhancementOptions || [],
     inputPlaceholder: i18n.richTextEditor.ai.customPromptPlaceholder,
@@ -221,32 +227,32 @@ const EnhanceActivator = ({
         : "idle") as "idle" | "loading" | "review",
     loadingLabel: i18n.richTextEditor.ai.loadingEnhanceLabel,
     onAccept: () => {
-      onAcceptChanges?.()
-      handleCloseFlow()
+      onAcceptChanges?.();
+      handleCloseFlow();
     },
     onReject: () => {
-      onRejectChanges?.()
-      handleCloseFlow()
+      onRejectChanges?.();
+      handleCloseFlow();
     },
     onRetry: onRetryChanges,
     canShowOptions: !isLocked,
     compactReview: lockToViewportOnLock,
-  }
+  };
 
   const preventIfLocked = (event: Event) => {
-    if (isLocked) event.preventDefault()
-  }
+    if (isLocked) event.preventDefault();
+  };
 
   return (
     <Popover.Root
       open={open}
       modal={false}
       onOpenChange={(o) => {
-        if (!o && isLocked) return
+        if (!o && isLocked) return;
         if (!o) {
-          flowOwnerRef.current = false
+          flowOwnerRef.current = false;
         }
-        setOpen(o)
+        setOpen(o);
       }}
     >
       <Popover.Trigger asChild>
@@ -312,7 +318,7 @@ const EnhanceActivator = ({
         </AnimatePresence>
       </Popover.Portal>
     </Popover.Root>
-  )
-}
+  );
+};
 
-export { EnhanceActivator }
+export { EnhanceActivator };

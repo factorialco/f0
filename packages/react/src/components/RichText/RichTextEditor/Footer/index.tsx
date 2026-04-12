@@ -1,45 +1,42 @@
-import { Editor } from "@tiptap/react"
-import { motion } from "motion/react"
-import { useEffect, useRef, useState } from "react"
+import { Editor } from "@tiptap/react";
+import { motion } from "motion/react";
+import { useEffect, useRef, useState } from "react";
 
-import { F0Button } from "@/components/F0Button"
-import { cn } from "@/lib/utils"
-import {
-  EnhanceActivator,
-  Toolbar,
-} from "@/components/RichText/CoreEditor"
-import { Paperclip, TextSize } from "@/icons/app"
+import { F0Button } from "@/components/F0Button";
+import { cn } from "@/lib/utils";
+import { EnhanceActivator, Toolbar } from "@/components/RichText/CoreEditor";
+import { Paperclip, TextSize } from "@/icons/app";
 
 import {
   enhanceConfig,
   primaryActionType,
   secondaryActionsType,
-} from "../utils/types"
-import { ActionsMenu } from "./ActionsMenu"
+} from "../utils/types";
+import { ActionsMenu } from "./ActionsMenu";
 
 interface FooterProps {
-  editor: Editor
-  maxCharacters: number | undefined
-  secondaryAction: secondaryActionsType | undefined
-  primaryAction: primaryActionType | undefined
-  fileInputRef: React.RefObject<HTMLInputElement>
-  canUseFiles: boolean
+  editor: Editor;
+  maxCharacters: number | undefined;
+  secondaryAction: secondaryActionsType | undefined;
+  primaryAction: primaryActionType | undefined;
+  fileInputRef: React.RefObject<HTMLInputElement>;
+  canUseFiles: boolean;
   onEnhanceWithAI: (
     selectedIntent?: string,
-    customIntent?: string
-  ) => Promise<void>
-  isLoadingEnhance: boolean
-  isAcceptChangesOpen: boolean
-  onAcceptChanges: () => void
-  onRejectChanges: () => void
-  onRetryChanges: () => void
-  disableButtons: boolean
-  disabled?: boolean
-  enhanceConfig: enhanceConfig | undefined
-  isFullscreen: boolean
-  setIsToolbarOpen: (isToolbarOpen: boolean) => void
-  isToolbarOpen: boolean
-  plainHtmlMode: boolean
+    customIntent?: string,
+  ) => Promise<void>;
+  isLoadingEnhance: boolean;
+  isAcceptChangesOpen: boolean;
+  onAcceptChanges: () => void;
+  onRejectChanges: () => void;
+  onRetryChanges: () => void;
+  disableButtons: boolean;
+  disabled?: boolean;
+  enhanceConfig: enhanceConfig | undefined;
+  isFullscreen: boolean;
+  setIsToolbarOpen: (isToolbarOpen: boolean) => void;
+  isToolbarOpen: boolean;
+  plainHtmlMode: boolean;
 }
 
 const Footer = ({
@@ -64,42 +61,42 @@ const Footer = ({
   plainHtmlMode,
 }: FooterProps) => {
   const [toolbarAnimationComplete, setToolbarAnimationComplete] =
-    useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [containerWidth, setContainerWidth] = useState(0)
+    useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
 
   useEffect(() => {
     if (containerRef.current) {
-      setContainerWidth(containerRef.current.offsetWidth)
+      setContainerWidth(containerRef.current.offsetWidth);
     }
     const handleResize = () => {
       if (containerRef.current) {
-        setContainerWidth(containerRef.current.offsetWidth)
+        setContainerWidth(containerRef.current.offsetWidth);
       }
-    }
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
-  const useLittleMode = containerWidth < 500
+  const useLittleMode = containerWidth < 500;
 
   const handleFileClick = (e: React.MouseEvent<HTMLElement>) => {
-    e.preventDefault()
+    e.preventDefault();
     if (fileInputRef?.current) {
-      fileInputRef.current.click()
+      fileInputRef.current.click();
     } else {
       const fileInput = document.getElementById(
-        "rich-text-editor-upload-button"
-      )
-      fileInput?.click()
+        "rich-text-editor-upload-button",
+      );
+      fileInput?.click();
     }
-  }
+  };
 
   const renderToolbarButton = () => (
     <F0Button
       onClick={(e) => {
-        e?.preventDefault()
-        setIsToolbarOpen(true)
+        e?.preventDefault();
+        setIsToolbarOpen(true);
       }}
       variant="outline"
       size="md"
@@ -108,7 +105,7 @@ const Footer = ({
       hideLabel
       icon={TextSize}
     />
-  )
+  );
 
   const renderActionButtons = () => (
     <>
@@ -143,7 +140,7 @@ const Footer = ({
         </p>
       )}
     </>
-  )
+  );
 
   return (
     <div
@@ -165,7 +162,7 @@ const Footer = ({
             }
             className={cn(
               "absolute left-0 top-0 z-10 h-full overflow-hidden",
-              disabled ? "bg-f1-background-tertiary" : "bg-f1-background"
+              disabled ? "bg-f1-background-tertiary" : "bg-f1-background",
             )}
             aria-label="Rich text editor toolbar"
           >
@@ -174,10 +171,10 @@ const Footer = ({
               isFullscreen={isFullscreen}
               disableButtons={disableButtons}
               onClose={() => {
-                setIsToolbarOpen(false)
-                setToolbarAnimationComplete(false)
+                setIsToolbarOpen(false);
+                setToolbarAnimationComplete(false);
                 // Restore focus after state update to trigger BubbleMenu
-                queueMicrotask(() => editor.commands.focus())
+                queueMicrotask(() => editor.commands.focus());
               }}
               animationComplete={toolbarAnimationComplete}
               plainHtmlMode={plainHtmlMode}
@@ -219,7 +216,7 @@ const Footer = ({
         isFullscreen={isFullscreen}
       />
     </div>
-  )
-}
+  );
+};
 
-export { Footer }
+export { Footer };
