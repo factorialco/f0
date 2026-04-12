@@ -1,8 +1,8 @@
 import { Markdown, type UserMessageProps } from "@copilotkit/react-ui"
 import { useEffect, useRef } from "react"
 
+import { F0FileItem } from "@/components/F0FileItem"
 import { F0Icon } from "@/components/F0Icon"
-import { FileItem } from "@/components/RichText/FileItem"
 import { Reply } from "@/icons/app"
 
 import { useAiChat } from "../../providers/AiChatStateProvider"
@@ -176,7 +176,7 @@ export const UserMessage = ({ message }: UserMessageProps) => {
       {uploadedFiles.length > 0 && (
         <div className="flex max-w-[90%] flex-wrap justify-end gap-1.5">
           {uploadedFiles.map((file, index) => (
-            <FileItem
+            <F0FileItem
               key={`${file.filename}-${index}`}
               file={{ name: file.filename, type: file.mimetype }}
               size="lg"
