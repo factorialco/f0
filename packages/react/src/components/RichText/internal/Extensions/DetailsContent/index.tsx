@@ -1,3 +1,3 @@
-import DetailsContent from "@tiptap/extension-details-content";
+import DetailsContent from "@tiptap/extension-details-content"
 
-export const DetailsContentExtension = DetailsContent;
+export const DetailsContentExtension = DetailsContent

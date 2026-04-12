@@ -1,21 +1,21 @@
-import { Editor } from "@tiptap/react";
-import type { JSONContent } from "@tiptap/react";
-import { describe, expect, it } from "vitest";
+import { Editor } from "@tiptap/react"
+import type { JSONContent } from "@tiptap/react"
+import { describe, expect, it } from "vitest"
 
-import { BlockIdExtension } from "../internal/Extensions/BlockIdExtension";
-import { StarterKitExtension } from "../internal/Extensions/StarterKit";
+import { BlockIdExtension } from "../internal/Extensions/BlockIdExtension"
+import { StarterKitExtension } from "../internal/Extensions/StarterKit"
 import {
   applyPageDocumentPatch,
   NotesTextEditorPatchTargetNotFoundError,
   NotesTextEditorUnsupportedPatchTypeError,
-} from "./applyPageDocumentPatch";
+} from "./applyPageDocumentPatch"
 
 const createEditor = (content?: JSONContent | string) => {
   return new Editor({
     extensions: [StarterKitExtension, BlockIdExtension],
     content: content ?? "",
-  });
-};
+  })
+}
 
 const baseDocument: JSONContent = {
   type: "doc",
@@ -31,14 +31,14 @@ const baseDocument: JSONContent = {
       content: [{ type: "text", text: "Second paragraph" }],
     },
   ],
-};
+}
 
 describe("applyPageDocumentPatch", () => {
   it("prepends top-level blocks without deleting existing empty nodes", () => {
     const editor = createEditor({
       type: "doc",
       content: [{ type: "paragraph" }],
-    });
+    })
 
     try {
       const snapshot = applyPageDocumentPatch(editor, {
@@ -50,7 +50,7 @@ describe("applyPageDocumentPatch", () => {
             content: [{ type: "text", text: "Prepended paragraph" }],
           },
         ],
-      });
+      })
 
       expect(snapshot.json).toMatchObject({
         type: "doc",
@@ -63,23 +63,21 @@ describe("applyPageDocumentPatch", () => {
             type: "paragraph",
           },
         ],
-      });
-      expect(snapshot.json?.content).toHaveLength(2);
-      expect(snapshot.json?.content?.[0]?.attrs?.id).toEqual(
-        expect.any(String),
-      );
-      expect(snapshot.json?.content?.[0]?.attrs?.id).not.toBe("ai-prepend-id");
-      expect(snapshot.html).toContain("Prepended paragraph");
+      })
+      expect(snapshot.json?.content).toHaveLength(2)
+      expect(snapshot.json?.content?.[0]?.attrs?.id).toEqual(expect.any(String))
+      expect(snapshot.json?.content?.[0]?.attrs?.id).not.toBe("ai-prepend-id")
+      expect(snapshot.html).toContain("Prepended paragraph")
     } finally {
-      editor.destroy();
+      editor.destroy()
     }
-  });
+  })
 
   it("appends top-level blocks without deleting existing empty nodes", () => {
     const editor = createEditor({
       type: "doc",
       content: [{ type: "paragraph" }],
-    });
+    })
 
     try {
       const snapshot = applyPageDocumentPatch(editor, {
@@ -91,7 +89,7 @@ describe("applyPageDocumentPatch", () => {
             content: [{ type: "text", text: "Appended paragraph" }],
           },
         ],
-      });
+      })
 
       expect(snapshot.json).toMatchObject({
         type: "doc",
@@ -104,20 +102,18 @@ describe("applyPageDocumentPatch", () => {
             content: [{ type: "text", text: "Appended paragraph" }],
           },
         ],
-      });
-      expect(snapshot.json?.content).toHaveLength(2);
-      expect(snapshot.json?.content?.[1]?.attrs?.id).toEqual(
-        expect.any(String),
-      );
-      expect(snapshot.json?.content?.[1]?.attrs?.id).not.toBe("ai-append-id");
-      expect(snapshot.html).toContain("Appended paragraph");
+      })
+      expect(snapshot.json?.content).toHaveLength(2)
+      expect(snapshot.json?.content?.[1]?.attrs?.id).toEqual(expect.any(String))
+      expect(snapshot.json?.content?.[1]?.attrs?.id).not.toBe("ai-append-id")
+      expect(snapshot.html).toContain("Appended paragraph")
     } finally {
-      editor.destroy();
+      editor.destroy()
     }
-  });
+  })
 
   it("inserts blocks before a targeted block id and generates fresh ids", () => {
-    const editor = createEditor(baseDocument);
+    const editor = createEditor(baseDocument)
 
     try {
       const snapshot = applyPageDocumentPatch(editor, {
@@ -130,7 +126,7 @@ describe("applyPageDocumentPatch", () => {
             content: [{ type: "text", text: "Inserted before" }],
           },
         ],
-      });
+      })
 
       expect(snapshot.json).toMatchObject({
         type: "doc",
@@ -150,18 +146,16 @@ describe("applyPageDocumentPatch", () => {
             content: [{ type: "text", text: "Second paragraph" }],
           },
         ],
-      });
-      expect(snapshot.json?.content?.[1]?.attrs?.id).toEqual(
-        expect.any(String),
-      );
-      expect(snapshot.json?.content?.[1]?.attrs?.id).not.toBe("ai-before-id");
+      })
+      expect(snapshot.json?.content?.[1]?.attrs?.id).toEqual(expect.any(String))
+      expect(snapshot.json?.content?.[1]?.attrs?.id).not.toBe("ai-before-id")
     } finally {
-      editor.destroy();
+      editor.destroy()
     }
-  });
+  })
 
   it("inserts blocks after a targeted block id and generates fresh ids", () => {
-    const editor = createEditor(baseDocument);
+    const editor = createEditor(baseDocument)
 
     try {
       const snapshot = applyPageDocumentPatch(editor, {
@@ -174,7 +168,7 @@ describe("applyPageDocumentPatch", () => {
             content: [{ type: "text", text: "Inserted after" }],
           },
         ],
-      });
+      })
 
       expect(snapshot.json).toMatchObject({
         type: "doc",
@@ -194,18 +188,16 @@ describe("applyPageDocumentPatch", () => {
             content: [{ type: "text", text: "Second paragraph" }],
           },
         ],
-      });
-      expect(snapshot.json?.content?.[1]?.attrs?.id).toEqual(
-        expect.any(String),
-      );
-      expect(snapshot.json?.content?.[1]?.attrs?.id).not.toBe("ai-after-id");
+      })
+      expect(snapshot.json?.content?.[1]?.attrs?.id).toEqual(expect.any(String))
+      expect(snapshot.json?.content?.[1]?.attrs?.id).not.toBe("ai-after-id")
     } finally {
-      editor.destroy();
+      editor.destroy()
     }
-  });
+  })
 
   it("replaces a block while preserving the existing target id", () => {
-    const editor = createEditor(baseDocument);
+    const editor = createEditor(baseDocument)
 
     try {
       const snapshot = applyPageDocumentPatch(editor, {
@@ -216,7 +208,7 @@ describe("applyPageDocumentPatch", () => {
           attrs: { id: "ai-replacement-id" },
           content: [{ type: "text", text: "Replacement paragraph" }],
         },
-      });
+      })
 
       expect(snapshot.json).toMatchObject({
         type: "doc",
@@ -232,25 +224,25 @@ describe("applyPageDocumentPatch", () => {
             content: [{ type: "text", text: "Second paragraph" }],
           },
         ],
-      });
-      expect(snapshot.json?.content?.[0]?.attrs?.id).toBe("first-block");
+      })
+      expect(snapshot.json?.content?.[0]?.attrs?.id).toBe("first-block")
       expect(snapshot.json?.content?.[0]?.attrs?.id).not.toBe(
-        "ai-replacement-id",
-      );
+        "ai-replacement-id"
+      )
     } finally {
-      editor.destroy();
+      editor.destroy()
     }
-  });
+  })
 
   it("replaces block content while preserving the existing block id", () => {
-    const editor = createEditor(baseDocument);
+    const editor = createEditor(baseDocument)
 
     try {
       const snapshot = applyPageDocumentPatch(editor, {
         type: "replace_content",
         targetId: "first-block",
         content: [{ type: "text", text: "Updated inline content" }],
-      });
+      })
 
       expect(snapshot.json).toMatchObject({
         type: "doc",
@@ -266,21 +258,21 @@ describe("applyPageDocumentPatch", () => {
             content: [{ type: "text", text: "Second paragraph" }],
           },
         ],
-      });
-      expect(snapshot.json?.content?.[0]?.attrs?.id).toBe("first-block");
+      })
+      expect(snapshot.json?.content?.[0]?.attrs?.id).toBe("first-block")
     } finally {
-      editor.destroy();
+      editor.destroy()
     }
-  });
+  })
 
   it("deletes a targeted block", () => {
-    const editor = createEditor(baseDocument);
+    const editor = createEditor(baseDocument)
 
     try {
       const snapshot = applyPageDocumentPatch(editor, {
         type: "delete_block",
         targetId: "first-block",
-      });
+      })
 
       expect(snapshot.json).toMatchObject({
         type: "doc",
@@ -291,15 +283,15 @@ describe("applyPageDocumentPatch", () => {
             content: [{ type: "text", text: "Second paragraph" }],
           },
         ],
-      });
-      expect(snapshot.json?.content).toHaveLength(1);
+      })
+      expect(snapshot.json?.content).toHaveLength(1)
     } finally {
-      editor.destroy();
+      editor.destroy()
     }
-  });
+  })
 
   it("throws an explicit target-not-found error for missing block ids", () => {
-    const editor = createEditor(baseDocument);
+    const editor = createEditor(baseDocument)
 
     try {
       expect(() =>
@@ -312,8 +304,8 @@ describe("applyPageDocumentPatch", () => {
               content: [{ type: "text", text: "Will fail" }],
             },
           ],
-        }),
-      ).toThrowError(NotesTextEditorPatchTargetNotFoundError);
+        })
+      ).toThrowError(NotesTextEditorPatchTargetNotFoundError)
 
       try {
         applyPageDocumentPatch(editor, {
@@ -323,65 +315,65 @@ describe("applyPageDocumentPatch", () => {
             type: "paragraph",
             content: [{ type: "text", text: "Will fail" }],
           },
-        });
+        })
       } catch (error) {
-        expect(error).toBeInstanceOf(NotesTextEditorPatchTargetNotFoundError);
+        expect(error).toBeInstanceOf(NotesTextEditorPatchTargetNotFoundError)
         expect(error).toMatchObject({
           code: "target_not_found",
           targetId: "missing-block",
-        });
+        })
       }
     } finally {
-      editor.destroy();
+      editor.destroy()
     }
-  });
+  })
 
   it("throws an explicit unsupported-patch-type error for invalid runtime patch types", () => {
-    const editor = createEditor(baseDocument);
+    const editor = createEditor(baseDocument)
 
     try {
-      let error: unknown;
+      let error: unknown
 
       try {
         applyPageDocumentPatch(editor, {
           type: "unsupported_runtime_patch_type",
-        } as unknown as Parameters<typeof applyPageDocumentPatch>[1]);
+        } as unknown as Parameters<typeof applyPageDocumentPatch>[1])
       } catch (caughtError) {
-        error = caughtError;
+        error = caughtError
       }
 
-      expect(error).toBeInstanceOf(NotesTextEditorUnsupportedPatchTypeError);
+      expect(error).toBeInstanceOf(NotesTextEditorUnsupportedPatchTypeError)
       expect(error).toMatchObject({
         code: "unsupported_patch_type",
         patchType: "unsupported_runtime_patch_type",
-      });
+      })
     } finally {
-      editor.destroy();
+      editor.destroy()
     }
-  });
+  })
 
   it("surfaces raw editor execution failures for invalid insertions", () => {
-    const editor = createEditor(baseDocument);
+    const editor = createEditor(baseDocument)
 
     try {
-      let error: unknown;
+      let error: unknown
 
       try {
         applyPageDocumentPatch(editor, {
           type: "top_level_append",
           blocks: [{ type: "unknown_block_type" }],
-        });
+        })
       } catch (caughtError) {
-        error = caughtError;
+        error = caughtError
       }
 
-      expect(error).toBeInstanceOf(Error);
-      expect(error).not.toBeInstanceOf(NotesTextEditorPatchTargetNotFoundError);
+      expect(error).toBeInstanceOf(Error)
+      expect(error).not.toBeInstanceOf(NotesTextEditorPatchTargetNotFoundError)
       expect((error as Error).message).not.toContain(
-        "Could not find block node",
-      );
+        "Could not find block node"
+      )
     } finally {
-      editor.destroy();
+      editor.destroy()
     }
-  });
-});
+  })
+})

@@ -1,8 +1,8 @@
-import { Extension, type JSONContent } from "@tiptap/core";
-import { Node as ProseMirrorNode } from "@tiptap/pm/model";
-import { Plugin, PluginKey } from "@tiptap/pm/state";
-import { Editor } from "@tiptap/react";
-import { nanoid } from "nanoid";
+import { Extension, type JSONContent } from "@tiptap/core"
+import { Node as ProseMirrorNode } from "@tiptap/pm/model"
+import { Plugin, PluginKey } from "@tiptap/pm/state"
+import { Editor } from "@tiptap/react"
+import { nanoid } from "nanoid"
 
 // Block types that will be assigned an ID
 export const BLOCK_NODE_TYPES = [
@@ -15,65 +15,65 @@ export const BLOCK_NODE_TYPES = [
   "listItem",
   "table",
   "details",
-] as const;
+] as const
 
-const BLOCK_NODE_TYPES_SET = new Set<string>(BLOCK_NODE_TYPES);
+const BLOCK_NODE_TYPES_SET = new Set<string>(BLOCK_NODE_TYPES)
 
 export const isBlockNodeType = (type: string | null | undefined): boolean => {
   if (!type) {
-    return false;
+    return false
   }
 
-  return BLOCK_NODE_TYPES_SET.has(type);
-};
+  return BLOCK_NODE_TYPES_SET.has(type)
+}
 
 const jsonDocumentHasMissingBlockIds = (
-  node: JSONContent | null | undefined,
+  node: JSONContent | null | undefined
 ): boolean => {
   if (!node) {
-    return false;
+    return false
   }
 
   if (isBlockNodeType(node.type) && !node.attrs?.id) {
-    return true;
+    return true
   }
 
-  return node.content?.some(jsonDocumentHasMissingBlockIds) ?? false;
-};
+  return node.content?.some(jsonDocumentHasMissingBlockIds) ?? false
+}
 
 const proseMirrorDocumentHasMissingBlockIds = (
-  node: ProseMirrorNode | null | undefined,
+  node: ProseMirrorNode | null | undefined
 ): boolean => {
   if (!node) {
-    return false;
+    return false
   }
 
   if (isBlockNodeType(node.type.name) && !node.attrs.id) {
-    return true;
+    return true
   }
 
   for (let index = 0; index < node.childCount; index += 1) {
     if (proseMirrorDocumentHasMissingBlockIds(node.child(index))) {
-      return true;
+      return true
     }
   }
 
-  return false;
-};
+  return false
+}
 
 export const documentHasMissingBlockIds = (
-  document: JSONContent | ProseMirrorNode | null | undefined,
+  document: JSONContent | ProseMirrorNode | null | undefined
 ): boolean => {
   if (!document) {
-    return false;
+    return false
   }
 
   if (document instanceof ProseMirrorNode) {
-    return proseMirrorDocumentHasMissingBlockIds(document);
+    return proseMirrorDocumentHasMissingBlockIds(document)
   }
 
-  return jsonDocumentHasMissingBlockIds(document);
-};
+  return jsonDocumentHasMissingBlockIds(document)
+}
 
 export const BlockIdExtension = Extension.create({
   name: "blockId",
@@ -91,18 +91,18 @@ export const BlockIdExtension = Extension.create({
             // Render ID as data-id attribute in HTML
             renderHTML: (attributes) => {
               if (!attributes.id) {
-                return {};
+                return {}
               }
               return {
                 "data-id": attributes.id,
-              };
+              }
             },
             // Don't keep the ID when splitting blocks - generate a new one
             keepOnSplit: false,
           },
         },
       },
-    ];
+    ]
   },
 
   addProseMirrorPlugins() {
@@ -111,23 +111,23 @@ export const BlockIdExtension = Extension.create({
         key: new PluginKey("blockIdPlugin"),
         appendTransaction: (transactions, _oldState, newState) => {
           // Skip if document hasn't changed
-          const docChanged = transactions.some((tr) => tr.docChanged);
+          const docChanged = transactions.some((tr) => tr.docChanged)
           if (!docChanged) {
-            return null;
+            return null
           }
 
-          const tr = newState.tr;
-          let modified = false;
+          const tr = newState.tr
+          let modified = false
 
           // Collect affected ranges from all transactions
-          const affectedRanges: Array<{ from: number; to: number }> = [];
+          const affectedRanges: Array<{ from: number; to: number }> = []
 
           transactions.forEach((transaction) => {
-            if (!transaction.docChanged) return;
+            if (!transaction.docChanged) return
 
             // Get the mapping from old to new state
             transaction.steps.forEach((step) => {
-              const stepResult = step.getMap();
+              const stepResult = step.getMap()
               // Iterate over changed ranges in this step
               stepResult.forEach((_oldStart, _oldEnd, newStart, newEnd) => {
                 // step.getMap().forEach already reports positions in the new
@@ -136,19 +136,19 @@ export const BlockIdExtension = Extension.create({
                 // being assigned for prepend/insert-before/insert-after flows.
                 const from = Math.max(
                   0,
-                  Math.min(newStart, newState.doc.content.size),
-                );
+                  Math.min(newStart, newState.doc.content.size)
+                )
                 const to = Math.max(
                   0,
-                  Math.min(newEnd, newState.doc.content.size),
-                );
+                  Math.min(newEnd, newState.doc.content.size)
+                )
 
                 if (from < to) {
-                  affectedRanges.push({ from, to });
+                  affectedRanges.push({ from, to })
                 }
-              });
-            });
-          });
+              })
+            })
+          })
 
           // If we have specific affected ranges, only check those
           if (affectedRanges.length > 0) {
@@ -157,82 +157,82 @@ export const BlockIdExtension = Extension.create({
               if (from >= 0 && to <= newState.doc.content.size && from < to) {
                 newState.doc.nodesBetween(from, to, (node, pos) => {
                   if (isBlockNodeType(node.type.name) && !node.attrs.id) {
-                    const id = nanoid(5);
+                    const id = nanoid(5)
                     tr.setNodeMarkup(pos, undefined, {
                       ...node.attrs,
                       id,
-                    });
-                    modified = true;
+                    })
+                    modified = true
                   }
-                });
+                })
               }
-            });
+            })
           } else {
             // Fallback: check whole document
             // (e.g., initial load or operations without clear ranges)
             newState.doc.descendants((node, pos) => {
               if (isBlockNodeType(node.type.name) && !node.attrs.id) {
-                const id = nanoid(5);
+                const id = nanoid(5)
                 tr.setNodeMarkup(pos, undefined, {
                   ...node.attrs,
                   id,
-                });
-                modified = true;
+                })
+                modified = true
               }
-              return true;
-            });
+              return true
+            })
           }
 
           // Return the transaction only if we made changes
-          return modified ? tr : null;
+          return modified ? tr : null
         },
       }),
-    ];
+    ]
   },
-});
+})
 
 export const getBlockById = (
   editor: Editor,
-  blockId: string,
+  blockId: string
 ): { node: ProseMirrorNode; pos: number } | null => {
-  let result: { node: ProseMirrorNode; pos: number } | null = null;
+  let result: { node: ProseMirrorNode; pos: number } | null = null
 
   editor.state.doc.descendants((node: ProseMirrorNode, pos: number) => {
     if (node.attrs.id === blockId) {
-      result = { node, pos };
-      return false; // Stop traversing
+      result = { node, pos }
+      return false // Stop traversing
     }
-    return true; // Continue traversing
-  });
+    return true // Continue traversing
+  })
 
-  return result;
-};
+  return result
+}
 
 export const scrollToBlock = (editor: Editor, blockId: string): boolean => {
-  const block = getBlockById(editor, blockId);
+  const block = getBlockById(editor, blockId)
   if (!block) {
-    return false;
+    return false
   }
 
   // Set selection to the block
-  editor.commands.setTextSelection(block.pos);
+  editor.commands.setTextSelection(block.pos)
   // Scroll into view
-  editor.commands.scrollIntoView();
+  editor.commands.scrollIntoView()
 
-  return true;
-};
+  return true
+}
 
 export const getAllBlockIds = (editor: Editor): string[] => {
-  const blockIds: string[] = [];
+  const blockIds: string[] = []
 
   editor.state.doc.descendants((node: ProseMirrorNode) => {
     if (node.attrs.id && isBlockNodeType(node.type.name)) {
-      blockIds.push(node.attrs.id);
+      blockIds.push(node.attrs.id)
     }
-    return true;
-  });
+    return true
+  })
 
-  return blockIds;
-};
+  return blockIds
+}
 
-export type { Extension };
+export type { Extension }

@@ -1,4 +1,4 @@
-import Link from "@tiptap/extension-link";
+import Link from "@tiptap/extension-link"
 
 export const LinkExtension = Link.configure({
   openOnClick: true,
@@ -6,4 +6,4 @@ export const LinkExtension = Link.configure({
     rel: "noopener noreferrer",
     target: "_blank",
   },
-});
+})

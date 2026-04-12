@@ -1,8 +1,8 @@
-import { Extension } from "@tiptap/react";
-import { Plugin, PluginKey } from "prosemirror-state";
-import { Decoration, DecorationSet } from "prosemirror-view";
+import { Extension } from "@tiptap/react"
+import { Plugin, PluginKey } from "prosemirror-state"
+import { Decoration, DecorationSet } from "prosemirror-view"
 
-const persistSelectionKey = new PluginKey("persistSelection");
+const persistSelectionKey = new PluginKey("persistSelection")
 
 const persistSelectionPlugin = new Plugin({
   key: persistSelectionKey,
@@ -14,31 +14,31 @@ const persistSelectionPlugin = new Plugin({
               class: "preserved-selection",
             }),
           ])
-        : DecorationSet.empty;
+        : DecorationSet.empty
     },
     apply(newState) {
-      const { doc, selection } = newState;
+      const { doc, selection } = newState
       return selection.from !== selection.to
         ? DecorationSet.create(doc, [
             Decoration.inline(selection.from, selection.to, {
               class: "preserved-selection",
             }),
           ])
-        : DecorationSet.empty;
+        : DecorationSet.empty
     },
   },
   props: {
     decorations(state) {
-      return this.getState(state);
+      return this.getState(state)
     },
   },
-});
+})
 
 const PersistSelection = Extension.create({
   name: "persistSelection",
   addProseMirrorPlugins() {
-    return [persistSelectionPlugin];
+    return [persistSelectionPlugin]
   },
-});
+})
 
-export { PersistSelection };
+export { PersistSelection }

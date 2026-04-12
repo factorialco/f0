@@ -11,7 +11,7 @@ const FILE_TYPES = {
   CSV: "csv",
   HTML: "html",
   MARKDOWN: "markdown",
-} as const;
+} as const
 
-export type FileType = (typeof FILE_TYPES)[keyof typeof FILE_TYPES];
-export { FILE_TYPES };
+export type FileType = (typeof FILE_TYPES)[keyof typeof FILE_TYPES]
+export { FILE_TYPES }

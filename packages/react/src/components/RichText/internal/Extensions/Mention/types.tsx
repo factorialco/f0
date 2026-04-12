@@ -1,30 +1,30 @@
 export interface MentionNodeAttrs {
-  id: string;
-  label: string;
-  image_url?: string;
-  href?: string;
+  id: string
+  label: string
+  image_url?: string
+  href?: string
 }
 
 export interface MentionListRef {
-  onKeyDown: (props: { event: KeyboardEvent }) => boolean;
+  onKeyDown: (props: { event: KeyboardEvent }) => boolean
 }
 
 export interface MentionItemComponentProps {
-  item: MentionedUser;
-  index: number;
-  selected: boolean;
+  item: MentionedUser
+  index: number
+  selected: boolean
 }
 
 export type MentionedUser = {
-  id: string | number;
-  label: string;
-  image_url?: string;
-  href?: string;
-};
+  id: string | number
+  label: string
+  image_url?: string
+  href?: string
+}
 
 export type MentionsConfig = {
   onMentionQueryStringChanged?: (
-    queryString: string,
-  ) => Promise<MentionedUser[]> | undefined;
-  users: MentionedUser[];
-};
+    queryString: string
+  ) => Promise<MentionedUser[]> | undefined
+  users: MentionedUser[]
+}

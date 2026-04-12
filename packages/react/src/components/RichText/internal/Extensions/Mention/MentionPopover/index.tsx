@@ -1,11 +1,11 @@
-import * as Popover from "@radix-ui/react-popover";
-import { Editor } from "@tiptap/react";
-import React from "react";
+import * as Popover from "@radix-ui/react-popover"
+import { Editor } from "@tiptap/react"
+import React from "react"
 
 interface MentionPopoverProps {
-  content: HTMLElement;
-  anchorRect: DOMRect;
-  editor: Editor;
+  content: HTMLElement
+  anchorRect: DOMRect
+  editor: Editor
 }
 
 export const MentionPopover = ({
@@ -19,7 +19,7 @@ export const MentionPopover = ({
     left: anchorRect.left + window.scrollX,
     width: 0,
     height: 0,
-  };
+  }
 
   return (
     <Popover.Root
@@ -27,7 +27,7 @@ export const MentionPopover = ({
       modal={false}
       onOpenChange={(open) => {
         if (open) {
-          editor?.commands.focus();
+          editor?.commands.focus()
         }
       }}
     >
@@ -42,23 +42,23 @@ export const MentionPopover = ({
         collisionPadding={10}
         style={{ zIndex: 9999 }}
         onMouseDownCapture={() => {
-          editor?.commands.focus();
+          editor?.commands.focus()
         }}
         onOpenAutoFocus={(event) => {
-          event.preventDefault();
+          event.preventDefault()
         }}
         onCloseAutoFocus={(event) => {
-          event.preventDefault();
+          event.preventDefault()
         }}
       >
         <div
           ref={(el) => {
             if (el && content.parentNode !== el) {
-              el.appendChild(content);
+              el.appendChild(content)
             }
           }}
         />
       </Popover.Content>
     </Popover.Root>
-  );
-};
+  )
+}

@@ -17,15 +17,15 @@ import {
   createCharacterCountExtension,
   createMentionExtensions,
   createPlaceholderExtension,
-} from "@/components/RichText/internal";
+} from "@/components/RichText/internal"
 
 interface ExtensionsConfigurationProps {
-  mentionsConfig?: MentionsConfig;
-  mentionSuggestions: MentionedUser[];
-  setMentionSuggestions: (suggestions: MentionedUser[]) => void;
-  placeholder: string;
-  maxCharacters?: number;
-  plainHtmlMode?: boolean;
+  mentionsConfig?: MentionsConfig
+  mentionSuggestions: MentionedUser[]
+  setMentionSuggestions: (suggestions: MentionedUser[]) => void
+  placeholder: string
+  maxCharacters?: number
+  plainHtmlMode?: boolean
 }
 
 const ExtensionsConfiguration = ({
@@ -54,10 +54,10 @@ const ExtensionsConfiguration = ({
     ...createMentionExtensions(
       mentionSuggestions,
       setMentionSuggestions,
-      mentionsConfig,
+      mentionsConfig
     ),
     createAccessibilityExtension(placeholder),
-  ];
-};
+  ]
+}
 
-export { ExtensionsConfiguration };
+export { ExtensionsConfiguration }

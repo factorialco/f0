@@ -1,3 +1,3 @@
-import Highlight from "@tiptap/extension-highlight";
+import Highlight from "@tiptap/extension-highlight"
 
-export const HighlightExtension = Highlight;
+export const HighlightExtension = Highlight

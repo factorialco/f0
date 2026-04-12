@@ -1,2 +1,2 @@
-export * from "./Extensions/Mention/types";
-export * from "./Toolbar/types";
+export * from "./Extensions/Mention/types"
+export * from "./Toolbar/types"

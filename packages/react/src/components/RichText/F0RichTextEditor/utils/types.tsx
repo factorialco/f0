@@ -1,8 +1,8 @@
-import { JSONContent } from "@tiptap/react";
+import { JSONContent } from "@tiptap/react"
 
-import { IconType } from "@/components/F0Icon";
+import { IconType } from "@/components/F0Icon"
 
-import { FileType } from "./constants";
+import { FileType } from "./constants"
 
 // Re-export enhance types from the shared CoreEditor/Enhance module
 export type {
@@ -10,53 +10,53 @@ export type {
   enhancedTextResponse,
   EnhancementOption,
   enhanceTextParams,
-} from "@/components/RichText/internal/Enhance/types";
+} from "@/components/RichText/internal/Enhance/types"
 
 type resultType = {
-  value: string | null;
-  mentionIds?: string[];
-};
+  value: string | null
+  mentionIds?: string[]
+}
 
 type filesConfig = {
-  onFiles: (files: File[]) => void;
-  multipleFiles: boolean;
-  maxFileSize?: number;
-  acceptedFileType?: FileType[];
-};
+  onFiles: (files: File[]) => void
+  multipleFiles: boolean
+  maxFileSize?: number
+  acceptedFileType?: FileType[]
+}
 
 type actionType = {
-  label: string;
-  onClick: () => void;
-  disabled?: boolean;
-  variant: "default" | "outline" | "neutral" | undefined;
-  icon?: IconType;
-};
+  label: string
+  onClick: () => void
+  disabled?: boolean
+  variant: "default" | "outline" | "neutral" | undefined
+  icon?: IconType
+}
 
 type toggleActionType = {
-  label: string;
-  checked: boolean;
-  onClick: (checked?: boolean) => void;
-  disabled?: boolean;
-  hideLabel?: boolean;
-};
+  label: string
+  checked: boolean
+  onClick: (checked?: boolean) => void
+  disabled?: boolean
+  hideLabel?: boolean
+}
 
 type secondaryActionType = (actionType | toggleActionType) & {
-  type?: "button" | "switch";
-};
+  type?: "button" | "switch"
+}
 
-type secondaryActionsType = secondaryActionType | secondaryActionType[];
+type secondaryActionsType = secondaryActionType | secondaryActionType[]
 
 type subActionType = {
-  label: string;
-  onClick: () => void;
-  disabled?: boolean;
-  icon?: IconType;
-};
+  label: string
+  onClick: () => void
+  disabled?: boolean
+  icon?: IconType
+}
 
 type primaryActionType = {
-  action: actionType;
-  subActions?: subActionType[];
-};
+  action: actionType
+  subActions?: subActionType[]
+}
 
 type heightType =
   | "xxs"
@@ -68,17 +68,17 @@ type heightType =
   | "2xl"
   | "3xl"
   | "full"
-  | "auto";
+  | "auto"
 
 type lastIntentType = {
-  selectedIntent?: string;
-  customIntent?: string;
-} | null;
+  selectedIntent?: string
+  customIntent?: string
+} | null
 
 type editorStateType = {
-  html: string;
-  json: JSONContent | null;
-};
+  html: string
+  json: JSONContent | null
+}
 
 export type {
   actionType,
@@ -91,4 +91,4 @@ export type {
   secondaryActionsType,
   secondaryActionType,
   subActionType,
-};
+}

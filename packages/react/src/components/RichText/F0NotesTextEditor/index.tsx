@@ -1,6 +1,6 @@
-import DragHandle from "@tiptap/extension-drag-handle-react";
-import { Node } from "@tiptap/pm/model";
-import { Editor, EditorContent, JSONContent, useEditor } from "@tiptap/react";
+import DragHandle from "@tiptap/extension-drag-handle-react"
+import { Node } from "@tiptap/pm/model"
+import { Editor, EditorContent, JSONContent, useEditor } from "@tiptap/react"
 import {
   forwardRef,
   useCallback,
@@ -10,35 +10,35 @@ import {
   useMemo,
   useRef,
   useState,
-} from "react";
+} from "react"
 
-import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert";
-import { F0Button } from "@/components/F0Button";
-import { ButtonInternal } from "@/components/F0Button/internal";
-import { F0Icon } from "@/components/F0Icon";
-import { EditorBubbleMenu } from "@/components/RichText/internal";
-import { Toolbar } from "@/components/RichText/internal";
-import { Handle, Plus } from "@/icons/app";
-import { DataTestIdWrapper, WithDataTestIdProps } from "@/lib/data-testid";
-import { useI18n } from "@/lib/providers/i18n";
-import { ScrollArea } from "@/ui/scrollarea";
-import { Skeleton } from "@/ui/skeleton";
+import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
+import { F0Button } from "@/components/F0Button"
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { F0Icon } from "@/components/F0Icon"
+import { EditorBubbleMenu } from "@/components/RichText/internal"
+import { Toolbar } from "@/components/RichText/internal"
+import { Handle, Plus } from "@/icons/app"
+import { DataTestIdWrapper, WithDataTestIdProps } from "@/lib/data-testid"
+import { useI18n } from "@/lib/providers/i18n"
+import { ScrollArea } from "@/ui/scrollarea"
+import { Skeleton } from "@/ui/skeleton"
 
-import { AIBlockConfig } from "../internal/Extensions/AIBlock";
-import { documentHasMissingBlockIds } from "../internal/Extensions/BlockIdExtension";
+import { AIBlockConfig } from "../internal/Extensions/AIBlock"
+import { documentHasMissingBlockIds } from "../internal/Extensions/BlockIdExtension"
 import {
   ImageUploadConfig,
   ImageUploadErrorType,
   insertImageFromFile,
-} from "../internal/Extensions/Image";
-import "./index.css";
+} from "../internal/Extensions/Image"
+import "./index.css"
 import {
   applyPageDocumentPatch,
   getNotesTextEditorSnapshot,
-} from "./applyPageDocumentPatch";
-import { createNotesTextEditorExtensions } from "./extensions";
-import Header from "./Header";
-import Title from "./Title";
+} from "./applyPageDocumentPatch"
+import { createNotesTextEditorExtensions } from "./extensions"
+import Header from "./Header"
+import Title from "./Title"
 import type {
   BannerProps,
   DropdownItem,
@@ -49,23 +49,23 @@ import type {
   NotesTextEditorSnapshot,
   PrimaryActionButton,
   PrimaryDropdownAction,
-} from "./types";
+} from "./types"
 
 interface NotesTextEditorProps extends WithDataTestIdProps {
-  onChange: (value: { json: JSONContent | null; html: string | null }) => void;
-  placeholder: string;
-  initialEditorState?: { content?: JSONContent | string; title?: string };
-  readonly?: boolean;
-  aiBlockConfig?: AIBlockConfig;
-  imageUploadConfig?: ImageUploadConfig;
-  onTitleChange?: (title: string) => void;
-  titlePlaceholder?: string;
-  primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
-  secondaryActions?: HeaderSecondaryAction[];
-  otherActions?: DropdownItem[];
-  metadata?: MetadataItem[];
-  banner?: BannerProps;
-  showBubbleMenu?: boolean;
+  onChange: (value: { json: JSONContent | null; html: string | null }) => void
+  placeholder: string
+  initialEditorState?: { content?: JSONContent | string; title?: string }
+  readonly?: boolean
+  aiBlockConfig?: AIBlockConfig
+  imageUploadConfig?: ImageUploadConfig
+  onTitleChange?: (title: string) => void
+  titlePlaceholder?: string
+  primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>
+  secondaryActions?: HeaderSecondaryAction[]
+  otherActions?: DropdownItem[]
+  metadata?: MetadataItem[]
+  banner?: BannerProps
+  showBubbleMenu?: boolean
 }
 
 const F0NotesTextEditorComponent = forwardRef<
@@ -89,38 +89,38 @@ const F0NotesTextEditorComponent = forwardRef<
     titlePlaceholder,
     dataTestId,
   },
-  ref,
+  ref
 ) {
-  const translations = useI18n();
+  const translations = useI18n()
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const hoveredRef = useRef<{ pos: number; nodeSize: number } | null>(null);
-  const editorId = useId();
+  const containerRef = useRef<HTMLDivElement>(null)
+  const hoveredRef = useRef<{ pos: number; nodeSize: number } | null>(null)
+  const editorId = useId()
 
-  const [initialContent] = useState(() => initialEditorState?.content || "");
-  const [title, setTitle] = useState(initialEditorState?.title || "");
-  const [error, setError] = useState<ImageUploadErrorType | null>(null);
+  const [initialContent] = useState(() => initialEditorState?.content || "")
+  const [title, setTitle] = useState(initialEditorState?.title || "")
+  const [error, setError] = useState<ImageUploadErrorType | null>(null)
 
   const getErrorMessage = (errorType: ImageUploadErrorType) => {
     switch (errorType) {
       case "file-too-large":
-        return translations.imageUpload.errors.fileTooLarge;
+        return translations.imageUpload.errors.fileTooLarge
       case "invalid-type":
-        return translations.imageUpload.errors.invalidType;
+        return translations.imageUpload.errors.invalidType
       case "upload-failed":
-        return translations.imageUpload.errors.uploadFailed;
+        return translations.imageUpload.errors.uploadFailed
       default:
-        return translations.imageUpload.errors.uploadFailed;
+        return translations.imageUpload.errors.uploadFailed
     }
-  };
+  }
 
   useEffect(() => {
     if (onTitleChange) {
-      onTitleChange(title);
+      onTitleChange(title)
     }
-  }, [title, onTitleChange]);
+  }, [title, onTitleChange])
 
-  const shouldSkipOnChangeRef = useRef(false);
+  const shouldSkipOnChangeRef = useRef(false)
 
   const editor = useEditor({
     extensions: createNotesTextEditorExtensions({
@@ -131,7 +131,7 @@ const F0NotesTextEditorComponent = forwardRef<
         ? {
             ...imageUploadConfig,
             onError: (errorType: ImageUploadErrorType) => {
-              setError(errorType);
+              setError(errorType)
             },
           }
         : undefined,
@@ -139,10 +139,10 @@ const F0NotesTextEditorComponent = forwardRef<
     content: initialContent,
     onUpdate: ({ editor }: { editor: Editor }) => {
       if (shouldSkipOnChangeRef.current) {
-        return;
+        return
       }
 
-      onChange(getNotesTextEditorSnapshot(editor));
+      onChange(getNotesTextEditorSnapshot(editor))
     },
     onCreate: ({ editor }) => {
       // Legacy documents may contain block nodes with `id: null` because the
@@ -151,34 +151,34 @@ const F0NotesTextEditorComponent = forwardRef<
       // the content triggers a real transaction that lets the plugin assign
       // proper nanoid strings to every block that still has a null id.
       if (!documentHasMissingBlockIds(editor.state.doc)) {
-        return;
+        return
       }
 
-      shouldSkipOnChangeRef.current = true;
+      shouldSkipOnChangeRef.current = true
       try {
-        editor.commands.setContent(editor.getJSON());
+        editor.commands.setContent(editor.getJSON())
       } finally {
-        shouldSkipOnChangeRef.current = false;
+        shouldSkipOnChangeRef.current = false
       }
 
       // Only notify the consumer when IDs were actually populated, so pages
       // with already-valid content don't trigger a spurious onChange/autosave.
       if (!documentHasMissingBlockIds(editor.state.doc)) {
-        onChange(getNotesTextEditorSnapshot(editor));
+        onChange(getNotesTextEditorSnapshot(editor))
       }
     },
     editable: !readonly,
-  });
+  })
 
   const runWithoutOnChange = useCallback(<T,>(callback: () => T): T => {
-    shouldSkipOnChangeRef.current = true;
+    shouldSkipOnChangeRef.current = true
 
     try {
-      return callback();
+      return callback()
     } finally {
-      shouldSkipOnChangeRef.current = false;
+      shouldSkipOnChangeRef.current = false
     }
-  }, []);
+  }, [])
 
   useImperativeHandle(ref, () => ({
     clear: () => editor?.commands.clearContent(),
@@ -186,13 +186,13 @@ const F0NotesTextEditorComponent = forwardRef<
     setContent: (content) => editor?.commands.setContent(content),
     applyPageDocumentPatch: (patch) => {
       if (!editor) {
-        return { json: null, html: null };
+        return { json: null, html: null }
       }
 
-      return runWithoutOnChange(() => applyPageDocumentPatch(editor, patch));
+      return runWithoutOnChange(() => applyPageDocumentPatch(editor, patch))
     },
     insertAIBlock: () => {
-      if (!editor || !aiBlockConfig) return;
+      if (!editor || !aiBlockConfig) return
       editor
         .chain()
         .focus()
@@ -207,10 +207,10 @@ const F0NotesTextEditorComponent = forwardRef<
           },
           { type: "paragraph" },
         ])
-        .run();
+        .run()
     },
     insertTranscript: (title, users, messages) => {
-      if (!editor) return;
+      if (!editor) return
       editor
         .chain()
         .focus()
@@ -224,49 +224,49 @@ const F0NotesTextEditorComponent = forwardRef<
           },
           { type: "paragraph" },
         ])
-        .run();
+        .run()
     },
     pushContent: (content: string) => {
       // focus() must be called WITHOUT { scrollIntoView: false } — default scroll
       // behavior is intentional so the editor scrolls to the insertion point.
-      if (!editor) return;
+      if (!editor) return
       editor
         .chain()
         .focus()
         .insertContentAt(editor.state.doc.content.size, content)
-        .run();
+        .run()
     },
     insertImage: (file: File) => {
-      if (!editor || !imageUploadConfig) return;
+      if (!editor || !imageUploadConfig) return
       insertImageFromFile(editor, file, {
         ...imageUploadConfig,
         onError: (errorType: ImageUploadErrorType) => {
-          setError(errorType);
+          setError(errorType)
         },
-      });
+      })
     },
-  }));
+  }))
 
   const tippyOptions = useMemo(
     () => ({
       offset: [0, 5] as [number, number],
     }),
-    [],
-  );
+    []
+  )
 
   const handleNodeChange = useCallback(
     ({ node, pos }: { node: Node | null; pos: number; editor: Editor }) => {
-      hoveredRef.current = node ? { pos, nodeSize: node.nodeSize } : null;
+      hoveredRef.current = node ? { pos, nodeSize: node.nodeSize } : null
     },
-    [],
-  );
+    []
+  )
 
   const handlePlusClick = useCallback(() => {
-    const hovered = hoveredRef.current;
-    if (!hovered || !editor) return;
+    const hovered = hoveredRef.current
+    if (!hovered || !editor) return
 
-    const { pos, nodeSize } = hovered;
-    const node = editor.state.doc.nodeAt(pos);
+    const { pos, nodeSize } = hovered
+    const node = editor.state.doc.nodeAt(pos)
 
     if (node && node.content.size === 0) {
       editor
@@ -274,9 +274,9 @@ const F0NotesTextEditorComponent = forwardRef<
         .focus()
         .setTextSelection(pos + 1)
         .insertContent("/")
-        .run();
+        .run()
     } else {
-      const afterBlock = pos + nodeSize;
+      const afterBlock = pos + nodeSize
 
       editor
         .chain()
@@ -284,19 +284,19 @@ const F0NotesTextEditorComponent = forwardRef<
         .insertContentAt(afterBlock, { type: "paragraph" })
         .setTextSelection(afterBlock + 1)
         .insertContent("/")
-        .run();
+        .run()
     }
-  }, [editor]);
+  }, [editor])
 
   const showHeader =
     primaryAction ||
     (secondaryActions && secondaryActions.length > 0) ||
     (metadata && metadata.length > 0) ||
     (otherActions && otherActions.length > 0) ||
-    banner;
-  const showTitle = onTitleChange || title;
+    banner
+  const showTitle = onTitleChange || title
 
-  if (!editor) return null;
+  if (!editor) return null
 
   return (
     <DataTestIdWrapper dataTestId={dataTestId}>
@@ -409,13 +409,13 @@ const F0NotesTextEditorComponent = forwardRef<
         )}
       </div>
     </DataTestIdWrapper>
-  );
-});
+  )
+})
 
 interface NotesTextEditorSkeletonProps {
-  withHeader?: boolean;
-  withTitle?: boolean;
-  withToolbar?: boolean;
+  withHeader?: boolean
+  withTitle?: boolean
+  withToolbar?: boolean
 }
 
 export const F0NotesTextEditorSkeleton = ({
@@ -486,20 +486,20 @@ export const F0NotesTextEditorSkeleton = ({
         </div>
       </ScrollArea>
     </div>
-  );
-};
+  )
+}
 
-export type { Message, User } from "../internal/Extensions/Transcript";
-export type { ImageUploadConfig } from "./types";
+export type { Message, User } from "../internal/Extensions/Transcript"
+export type { ImageUploadConfig } from "./types"
 export {
   NotesTextEditorPatchTargetNotFoundError,
   NotesTextEditorUnsupportedPatchTypeError,
-} from "./applyPageDocumentPatch";
-export const F0NotesTextEditor = F0NotesTextEditorComponent;
+} from "./applyPageDocumentPatch"
+export const F0NotesTextEditor = F0NotesTextEditorComponent
 export type {
   NotesTextEditorHandle,
   NotesTextEditorPageDocumentPatch,
   NotesTextEditorProps,
   NotesTextEditorSkeletonProps,
   NotesTextEditorSnapshot,
-};
+}

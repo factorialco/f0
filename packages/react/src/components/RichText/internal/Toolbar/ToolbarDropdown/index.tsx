@@ -1,29 +1,29 @@
-import * as Popover from "@radix-ui/react-popover";
-import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
+import * as Popover from "@radix-ui/react-popover"
+import { AnimatePresence, motion } from "motion/react"
+import { useState } from "react"
 
-import { F0ButtonToggle } from "@/components/F0ButtonToggle";
-import { F0Icon, IconType } from "@/components/F0Icon";
-import { cn } from "@/lib/utils";
-import { Action } from "@/ui/Action";
-import { actionVariants } from "@/ui/Action/variants";
+import { F0ButtonToggle } from "@/components/F0ButtonToggle"
+import { F0Icon, IconType } from "@/components/F0Icon"
+import { cn } from "@/lib/utils"
+import { Action } from "@/ui/Action"
+import { actionVariants } from "@/ui/Action/variants"
 interface ToolbarDropdownItem {
-  icon: IconType;
-  label: string;
-  onClick: () => void;
-  isActive?: boolean;
-  disabled?: boolean;
+  icon: IconType
+  label: string
+  onClick: () => void
+  isActive?: boolean
+  disabled?: boolean
 }
 
 interface ToolbarDropdownProps {
-  items: ToolbarDropdownItem[];
-  disabled?: boolean;
-  darkMode?: boolean;
-  position?: "top" | "bottom";
+  items: ToolbarDropdownItem[]
+  disabled?: boolean
+  darkMode?: boolean
+  position?: "top" | "bottom"
   activator: {
-    label: string;
-    icon: IconType;
-  };
+    label: string
+    icon: IconType
+  }
 }
 
 export const ToolbarDropdown = ({
@@ -33,12 +33,12 @@ export const ToolbarDropdown = ({
   darkMode = false,
   position = "top",
 }: ToolbarDropdownProps) => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false)
 
   const handleButtonClick = () => {
-    if (disabled) return;
-    setOpen(!open);
-  };
+    if (disabled) return
+    setOpen(!open)
+  }
 
   return (
     <Popover.Root open={open} modal={false} onOpenChange={setOpen}>
@@ -69,7 +69,7 @@ export const ToolbarDropdown = ({
                 transition={{ duration: 0.15 }}
                 className={cn(
                   "flex w-fit flex-col gap-0.5 overflow-hidden rounded-md border border-solid border-f1-border-secondary bg-f1-background p-0.5 drop-shadow-sm",
-                  darkMode && "dark",
+                  darkMode && "dark"
                 )}
               >
                 {items.map((item, index) => (
@@ -78,9 +78,9 @@ export const ToolbarDropdown = ({
                     variant="ghost"
                     size="md"
                     onClick={(e) => {
-                      e.preventDefault();
+                      e.preventDefault()
                       if (!disabled) {
-                        item.onClick();
+                        item.onClick()
                       }
                     }}
                     disabled={disabled}
@@ -89,7 +89,7 @@ export const ToolbarDropdown = ({
                       actionVariants({
                         variant: item.isActive ? "selected" : "ghost",
                       }),
-                      "justify-start",
+                      "justify-start"
                     )}
                   >
                     <div className="flex items-center gap-1">
@@ -104,7 +104,7 @@ export const ToolbarDropdown = ({
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>
-  );
-};
+  )
+}
 
-export type { ToolbarDropdownItem, ToolbarDropdownProps };
+export type { ToolbarDropdownItem, ToolbarDropdownProps }

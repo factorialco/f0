@@ -1,20 +1,20 @@
-import { forwardRef } from "react";
+import { forwardRef } from "react"
 
-import { F0Button } from "@/components/F0Button";
-import { OneEllipsis } from "@/lib/OneEllipsis";
-import { F0RichTextDisplay } from "@/components/RichText/F0RichTextDisplay";
-import { Cross } from "@/icons/app";
-import { cn } from "@/lib/utils";
-import { Skeleton } from "@/ui/skeleton";
+import { F0Button } from "@/components/F0Button"
+import { OneEllipsis } from "@/lib/OneEllipsis"
+import { F0RichTextDisplay } from "@/components/RichText/F0RichTextDisplay"
+import { Cross } from "@/icons/app"
+import { cn } from "@/lib/utils"
+import { Skeleton } from "@/ui/skeleton"
 
-import { AiBannerInternalProps, AiBannerSkeletonProps } from "./types";
+import { AiBannerInternalProps, AiBannerSkeletonProps } from "./types"
 
 export const AiBannerInternal = forwardRef<
   HTMLDivElement,
   AiBannerInternalProps
 >(function AiBannerInternal(
   { title, onClose, content, primaryAction, secondaryAction },
-  ref,
+  ref
 ) {
   return (
     <div
@@ -42,7 +42,7 @@ export const AiBannerInternal = forwardRef<
             "bg-f1-background px-4 py-3",
             secondaryAction || primaryAction
               ? "rounded-t-[13.25px]"
-              : "rounded-[13.25px]",
+              : "rounded-[13.25px]"
           )}
         >
           <F0RichTextDisplay content={content} />
@@ -73,8 +73,8 @@ export const AiBannerInternal = forwardRef<
         )}
       </div>
     </div>
-  );
-});
+  )
+})
 
 export const AiBannerSkeleton = ({ compact }: AiBannerSkeletonProps) => {
   return (
@@ -91,7 +91,7 @@ export const AiBannerSkeleton = ({ compact }: AiBannerSkeletonProps) => {
         <div
           className={cn(
             "rounded-t-[13.25px] bg-f1-background px-4 py-3",
-            compact && "rounded-[13.25px]",
+            compact && "rounded-[13.25px]"
           )}
         >
           <div className="flex flex-col gap-2">
@@ -108,5 +108,5 @@ export const AiBannerSkeleton = ({ compact }: AiBannerSkeletonProps) => {
         )}
       </div>
     </div>
-  );
-};
+  )
+}

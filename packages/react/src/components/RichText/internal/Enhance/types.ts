@@ -1,34 +1,34 @@
-import { IconType } from "@/components/F0Icon";
+import { IconType } from "@/components/F0Icon"
 
 type enhanceTextParams = {
-  text: string;
-  selectedIntent?: string;
-  customIntent?: string;
-  context?: string;
-};
+  text: string
+  selectedIntent?: string
+  customIntent?: string
+  context?: string
+}
 
 type enhancedTextResponse = {
-  success: boolean;
-  text: string;
-  error?: string;
-};
+  success: boolean
+  text: string
+  error?: string
+}
 
 type EnhancementOption = {
-  id: string;
-  label: string;
-  icon?: IconType;
-  subOptions?: EnhancementOption[];
-};
+  id: string
+  label: string
+  icon?: IconType
+  subOptions?: EnhancementOption[]
+}
 
 type enhanceConfig = {
-  onEnhanceText: (params: enhanceTextParams) => Promise<enhancedTextResponse>;
-  enhancementOptions?: EnhancementOption[];
-};
+  onEnhanceText: (params: enhanceTextParams) => Promise<enhancedTextResponse>
+  enhancementOptions?: EnhancementOption[]
+}
 
 type lastIntentType = {
-  selectedIntent?: string;
-  customIntent?: string;
-} | null;
+  selectedIntent?: string
+  customIntent?: string
+} | null
 
 export type {
   enhanceConfig,
@@ -36,4 +36,4 @@ export type {
   EnhancementOption,
   enhanceTextParams,
   lastIntentType,
-};
+}

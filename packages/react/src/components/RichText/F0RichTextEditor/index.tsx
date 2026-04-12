@@ -1,6 +1,6 @@
-import { FocusScope } from "@radix-ui/react-focus-scope";
-import { Editor, EditorContent, useEditor } from "@tiptap/react";
-import { AnimatePresence, motion } from "motion/react";
+import { FocusScope } from "@radix-ui/react-focus-scope"
+import { Editor, EditorContent, useEditor } from "@tiptap/react"
+import { AnimatePresence, motion } from "motion/react"
 import {
   forwardRef,
   useCallback,
@@ -9,8 +9,8 @@ import {
   useImperativeHandle,
   useRef,
   useState,
-} from "react";
-import ReactDOM from "react-dom";
+} from "react"
+import ReactDOM from "react-dom"
 
 import {
   EditorBubbleMenu,
@@ -21,29 +21,29 @@ import {
   Toolbar,
   ToolbarDivider,
   useEnhance,
-} from "@/components/RichText/internal";
+} from "@/components/RichText/internal"
 
-import { F0Button } from "@/components/F0Button";
-import { Cross } from "@/icons/app";
-import { DataTestIdWrapper } from "@/lib/data-testid";
-import { useI18n } from "@/lib/providers/i18n/i18n-provider";
-import { withSkeleton } from "@/lib/skeleton";
-import { cn } from "@/lib/utils";
+import { F0Button } from "@/components/F0Button"
+import { Cross } from "@/icons/app"
+import { DataTestIdWrapper } from "@/lib/data-testid"
+import { useI18n } from "@/lib/providers/i18n/i18n-provider"
+import { withSkeleton } from "@/lib/skeleton"
+import { cn } from "@/lib/utils"
 
-import "../index.css";
-import { Skeleton } from "@/ui/skeleton";
+import "../index.css"
+import { Skeleton } from "@/ui/skeleton"
 
-import { FileList } from "./FileList";
-import { Footer } from "./Footer";
-import { Head } from "./Head";
-import { ExtensionsConfiguration } from "./utils/extensions";
+import { FileList } from "./FileList"
+import { Footer } from "./Footer"
+import { Head } from "./Head"
+import { ExtensionsConfiguration } from "./utils/extensions"
 import {
   getHeight,
   getHeightThreshold,
   handleEditorUpdate,
   setEditorContent,
   setupContainerObservers,
-} from "./utils/helpers";
+} from "./utils/helpers"
 import {
   editorStateType,
   enhanceConfig,
@@ -52,43 +52,43 @@ import {
   primaryActionType,
   resultType,
   secondaryActionsType,
-} from "./utils/types";
+} from "./utils/types"
 
 interface RichTextEditorProps {
-  mentionsConfig?: MentionsConfig;
-  enhanceConfig?: enhanceConfig;
-  filesConfig?: filesConfig;
-  secondaryAction?: secondaryActionsType;
-  primaryAction?: primaryActionType;
-  onChange: (result: resultType) => void;
-  onBlur?: () => void;
-  maxCharacters?: number;
-  placeholder: string;
+  mentionsConfig?: MentionsConfig
+  enhanceConfig?: enhanceConfig
+  filesConfig?: filesConfig
+  secondaryAction?: secondaryActionsType
+  primaryAction?: primaryActionType
+  onChange: (result: resultType) => void
+  onBlur?: () => void
+  maxCharacters?: number
+  placeholder: string
   initialEditorState?: {
-    content?: string;
-    files?: File[];
-  };
-  title: string;
-  height?: heightType;
-  plainHtmlMode?: boolean;
-  fullScreenMode?: boolean;
-  onFullscreenChange?: (fullscreen: boolean) => void;
+    content?: string
+    files?: File[]
+  }
+  title: string
+  height?: heightType
+  plainHtmlMode?: boolean
+  fullScreenMode?: boolean
+  onFullscreenChange?: (fullscreen: boolean) => void
   /** Whether the editor is disabled */
-  disabled?: boolean;
+  disabled?: boolean
   /** Whether the editor has an error state */
-  error?: boolean;
+  error?: boolean
   /** Whether the editor is in a loading state */
-  loading?: boolean;
-  dataTestId?: string;
+  loading?: boolean
+  dataTestId?: string
 }
 
 type RichTextEditorHandle = {
-  clear: () => void;
-  clearFiles: () => void;
-  focus: () => void;
-  setError: (error: string | null) => void;
-  setContent: (content: string) => void;
-};
+  clear: () => void
+  clearFiles: () => void
+  focus: () => void
+  setError: (error: string | null) => void
+  setContent: (content: string) => void
+}
 
 const F0RichTextEditorComponent = forwardRef<
   RichTextEditorHandle,
@@ -115,84 +115,84 @@ const F0RichTextEditorComponent = forwardRef<
     onBlur,
     dataTestId,
   },
-  ref,
+  ref
 ) {
-  const i18n = useI18n();
-  const editorId = useId();
+  const i18n = useI18n()
+  const editorId = useId()
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const editorContentContainerRef = useRef<HTMLDivElement>(null);
-  const fullscreenToolbarRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const editorContentContainerRef = useRef<HTMLDivElement>(null)
+  const fullscreenToolbarRef = useRef<HTMLDivElement>(null)
 
-  const [hasFullHeight, setHasFullHeight] = useState(false);
-  const [isScrolledToBottom, setIsScrolledToBottom] = useState(true);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isToolbarOpen, setIsToolbarOpen] = useState(false);
-  const [fullscreenToolbarWidth, setFullscreenToolbarWidth] = useState(0);
-  const [files, setFiles] = useState<File[]>(initialEditorState?.files || []);
+  const [hasFullHeight, setHasFullHeight] = useState(false)
+  const [isScrolledToBottom, setIsScrolledToBottom] = useState(true)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isToolbarOpen, setIsToolbarOpen] = useState(false)
+  const [fullscreenToolbarWidth, setFullscreenToolbarWidth] = useState(0)
+  const [files, setFiles] = useState<File[]>(initialEditorState?.files || [])
   const [mentionSuggestions, setMentionSuggestions] = useState<MentionedUser[]>(
-    mentionsConfig?.users || [],
-  );
+    mentionsConfig?.users || []
+  )
   const [editorState, setEditorState] = useState<editorStateType>({
     html: initialEditorState?.content || "",
     json: null,
-  });
+  })
 
   useEffect(() => {
     if (isFullscreen) {
-      document.body.style.overflow = "hidden";
-      setIsToolbarOpen(true);
+      document.body.style.overflow = "hidden"
+      setIsToolbarOpen(true)
     } else {
-      document.body.style.overflow = "";
-      setIsToolbarOpen(false);
+      document.body.style.overflow = ""
+      setIsToolbarOpen(false)
     }
     return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isFullscreen]);
+      document.body.style.overflow = ""
+    }
+  }, [isFullscreen])
 
   useEffect(() => {
     const heightThreshold = isFullscreen
       ? window.innerHeight
-      : getHeightThreshold(height);
+      : getHeightThreshold(height)
     const cleanupObservers = setupContainerObservers({
       containerRef: editorContentContainerRef,
       onHeightChange: setHasFullHeight,
       onScrollChange: setIsScrolledToBottom,
       heightThreshold,
-    });
-    return cleanupObservers;
-  }, [height, isFullscreen]);
+    })
+    return cleanupObservers
+  }, [height, isFullscreen])
 
   useEffect(() => {
-    if (!isFullscreen || !isToolbarOpen) return;
+    if (!isFullscreen || !isToolbarOpen) return
 
     const updateWidth = () => {
       if (fullscreenToolbarRef.current) {
-        setFullscreenToolbarWidth(fullscreenToolbarRef.current.offsetWidth);
+        setFullscreenToolbarWidth(fullscreenToolbarRef.current.offsetWidth)
       }
-    };
+    }
 
-    updateWidth();
-    window.addEventListener("resize", updateWidth);
-    return () => window.removeEventListener("resize", updateWidth);
-  }, [isFullscreen, isToolbarOpen]);
+    updateWidth()
+    window.addEventListener("resize", updateWidth)
+    return () => window.removeEventListener("resize", updateWidth)
+  }, [isFullscreen, isToolbarOpen])
 
   const handleToggleFullscreen = () => {
     setIsFullscreen((prev) => {
-      const next = !prev;
-      if (onFullscreenChange) onFullscreenChange(next);
-      return next;
-    });
-  };
+      const next = !prev
+      if (onFullscreenChange) onFullscreenChange(next)
+      return next
+    })
+  }
 
   const onEditorUpdate = useCallback(
     ({ editor }: { editor: Editor }) => {
-      handleEditorUpdate({ editor, onChange, setEditorState });
+      handleEditorUpdate({ editor, onChange, setEditorState })
     },
-    [onChange],
-  );
+    [onChange]
+  )
 
   const editor = useEditor({
     extensions: ExtensionsConfiguration({
@@ -207,42 +207,42 @@ const F0RichTextEditorComponent = forwardRef<
     editable: !disabled,
     onUpdate: onEditorUpdate,
     onBlur: () => {
-      onBlur?.();
+      onBlur?.()
     },
-  });
+  })
 
-  const enhance = useEnhance(editor, enhanceConfig);
+  const enhance = useEnhance(editor, enhanceConfig)
 
   useEffect(() => {
     if ((enhance.error || disabled) && editor) {
-      editor.setEditable(false);
+      editor.setEditable(false)
     } else if (editor && !enhance.error && !disabled) {
-      editor.setEditable(true);
+      editor.setEditable(true)
     }
-  }, [enhance.error, disabled, editor]);
+  }, [enhance.error, disabled, editor])
 
   useImperativeHandle(ref, () => ({
     clear: () => editor?.commands.clearContent(),
     clearFiles: () => {
-      setFiles([]);
+      setFiles([])
       if (filesConfig) {
-        filesConfig.onFiles([]);
+        filesConfig.onFiles([])
       }
     },
     focus: () => editor?.commands.focus(),
     setError: (errorMessage: string | null) => {
-      enhance.setError(errorMessage);
+      enhance.setError(errorMessage)
     },
     setContent: (content: string) => {
       if (editor) {
-        setEditorContent({ editor, content });
+        setEditorContent({ editor, content })
       }
     },
-  }));
+  }))
 
-  if (!editor) return null;
+  if (!editor) return null
 
-  const disableAllButtons = enhance.disableButtons || disabled;
+  const disableAllButtons = enhance.disableButtons || disabled
 
   const editorContent = (
     <FocusScope trapped={false}>
@@ -260,7 +260,7 @@ const F0RichTextEditorComponent = forwardRef<
                 enhance.error || errorProp
                   ? "border-f1-border-critical-bold focus-within:border-f1-border-critical-bold focus-within:ring-f1-border-critical bg-f1-background-critical bg-opacity-10"
                   : "border-f1-border",
-              ],
+              ]
         )}
       >
         {isFullscreen && (
@@ -279,7 +279,7 @@ const F0RichTextEditorComponent = forwardRef<
           className="relative z-50 w-full flex-grow overflow-hidden"
           onClick={(e) => {
             // Only focus if clicking directly on the editor area, not on interactive elements
-            const target = e.target as HTMLElement;
+            const target = e.target as HTMLElement
             if (
               !target.closest("button") &&
               !target.closest('[role="button"]') &&
@@ -287,8 +287,8 @@ const F0RichTextEditorComponent = forwardRef<
               !target.closest("textarea") &&
               !target.closest("[data-radix-popper-content-wrapper]")
             ) {
-              e?.preventDefault();
-              editor?.commands.focus();
+              e?.preventDefault()
+              editor?.commands.focus()
             }
           }}
         >
@@ -298,13 +298,13 @@ const F0RichTextEditorComponent = forwardRef<
               "scrollbar-macos relative flex w-full items-start justify-center overflow-y-auto pb-1 pt-3",
               isFullscreen
                 ? "h-full px-10 pb-24"
-                : cn(getHeight(height), "pl-3 pr-10"),
+                : cn(getHeight(height), "pl-3 pr-10")
             )}
           >
             <div
               className={cn(
                 "w-full overflow-hidden",
-                isFullscreen && "max-w-[824px]",
+                isFullscreen && "max-w-[824px]"
               )}
             >
               <EditorContent editor={editor} />
@@ -333,10 +333,10 @@ const F0RichTextEditorComponent = forwardRef<
                     <div className="flex items-center gap-1">
                       <F0Button
                         onClick={(e) => {
-                          e.preventDefault();
-                          setIsToolbarOpen(false);
+                          e.preventDefault()
+                          setIsToolbarOpen(false)
                           // Restore focus after state update to trigger BubbleMenu
-                          queueMicrotask(() => editor.commands.focus());
+                          queueMicrotask(() => editor.commands.focus())
                         }}
                         variant="neutral"
                         size="md"
@@ -380,7 +380,7 @@ const F0RichTextEditorComponent = forwardRef<
           className={cn(
             "relative z-40 rounded-b-lg px-3",
             !disabled && !enhance.error && !errorProp && "bg-f1-background",
-            hasFullHeight && !isScrolledToBottom && "shadow-editor-tools",
+            hasFullHeight && !isScrolledToBottom && "shadow-editor-tools"
           )}
         >
           <AnimatePresence>
@@ -450,34 +450,34 @@ const F0RichTextEditorComponent = forwardRef<
         </div>
       </div>
     </FocusScope>
-  );
+  )
 
   return isFullscreen ? (
     ReactDOM.createPortal(
       <DataTestIdWrapper dataTestId={dataTestId}>
         {editorContent}
       </DataTestIdWrapper>,
-      document.body,
+      document.body
     )
   ) : (
     <DataTestIdWrapper dataTestId={dataTestId}>
       {editorContent}
     </DataTestIdWrapper>
-  );
-});
+  )
+})
 
 interface RichTextEditorSkeletonProps {
-  rows?: number;
+  rows?: number
 }
 
 const F0RichTextEditorSkeleton = ({
   rows = 2,
 }: RichTextEditorSkeletonProps) => {
-  const staticWidthPattern = ["75%", "100%", "60%", "85%", "70%"];
+  const staticWidthPattern = ["75%", "100%", "60%", "85%", "70%"]
   const widths = Array.from(
     { length: rows },
-    (_, i) => staticWidthPattern[i % staticWidthPattern.length],
-  );
+    (_, i) => staticWidthPattern[i % staticWidthPattern.length]
+  )
 
   return (
     <div className="relative flex w-full flex-col rounded-xl border border-solid border-f1-border bg-f1-background">
@@ -504,18 +504,18 @@ const F0RichTextEditorSkeleton = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export * from "./utils/constants";
-export * from "./utils/types";
+export * from "./utils/constants"
+export * from "./utils/types"
 export type {
   RichTextEditorHandle,
   RichTextEditorProps,
   RichTextEditorSkeletonProps,
-};
+}
 
 export const F0RichTextEditor = withSkeleton(
   F0RichTextEditorComponent,
-  F0RichTextEditorSkeleton,
-);
+  F0RichTextEditorSkeleton
+)

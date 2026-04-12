@@ -1,36 +1,36 @@
-import DOMPurify from "dompurify";
-import { forwardRef, HTMLAttributes, useMemo } from "react";
-import rehypeStringify from "rehype-stringify";
-import remarkGfm from "remark-gfm";
-import remarkParse from "remark-parse";
-import remarkRehype from "remark-rehype";
-import { unified } from "unified";
+import DOMPurify from "dompurify"
+import { forwardRef, HTMLAttributes, useMemo } from "react"
+import rehypeStringify from "rehype-stringify"
+import remarkGfm from "remark-gfm"
+import remarkParse from "remark-parse"
+import remarkRehype from "remark-rehype"
+import { unified } from "unified"
 
-import { withDataTestId } from "@/lib/data-testid";
-import { cn } from "@/lib/utils";
+import { withDataTestId } from "@/lib/data-testid"
+import { cn } from "@/lib/utils"
 
-import "../index.css";
+import "../index.css"
 
 interface RichTextDisplayProps extends HTMLAttributes<HTMLDivElement> {
-  content: string;
-  className?: string;
-  format?: "html" | "markdown";
+  content: string
+  className?: string
+  format?: "html" | "markdown"
 }
 
-type RichTextDisplayHandle = HTMLDivElement;
+type RichTextDisplayHandle = HTMLDivElement
 
 const PROCESSOR = unified()
   .use(remarkParse)
   .use(remarkGfm)
   .use(remarkRehype)
-  .use(rehypeStringify);
+  .use(rehypeStringify)
 
 const _F0RichTextDisplay = forwardRef<
   RichTextDisplayHandle,
   RichTextDisplayProps
 >(function F0RichTextDisplay(
   { content, className, format = "html", ...props },
-  ref,
+  ref
 ) {
   const sanitized = useMemo(
     () =>
@@ -41,11 +41,11 @@ const _F0RichTextDisplay = forwardRef<
         {
           ADD_ATTR: ["target"],
           ALLOWED_ATTR: ["href", "target", "rel", "class"],
-        },
+        }
       ),
-    [format, content],
-  );
-  const isHtml = /<[^>]*>/.test(sanitized);
+    [format, content]
+  )
+  const isHtml = /<[^>]*>/.test(sanitized)
 
   return (
     <div
@@ -53,15 +53,15 @@ const _F0RichTextDisplay = forwardRef<
       className={cn(
         "rich-text-display-container",
         !isHtml && "whitespace-pre-wrap",
-        className,
+        className
       )}
       dangerouslySetInnerHTML={{
         __html: sanitized,
       }}
       {...props}
     />
-  );
-});
+  )
+})
 
-export const F0RichTextDisplay = withDataTestId(_F0RichTextDisplay);
-export type { RichTextDisplayHandle, RichTextDisplayProps };
+export const F0RichTextDisplay = withDataTestId(_F0RichTextDisplay)
+export type { RichTextDisplayHandle, RichTextDisplayProps }

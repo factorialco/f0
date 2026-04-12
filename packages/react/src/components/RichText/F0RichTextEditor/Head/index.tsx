@@ -1,12 +1,12 @@
-import { F0Button } from "@/components/F0Button";
-import { Maximize, Minimize } from "@/icons/app";
+import { F0Button } from "@/components/F0Button"
+import { Maximize, Minimize } from "@/icons/app"
 
 interface HeadProps {
-  fullScreenMode: boolean;
-  isFullscreen: boolean;
-  handleToggleFullscreen: () => void;
-  disableAllButtons: boolean;
-  title: string;
+  fullScreenMode: boolean
+  isFullscreen: boolean
+  handleToggleFullscreen: () => void
+  disableAllButtons: boolean
+  title: string
 }
 
 const Head = ({
@@ -22,8 +22,8 @@ const Head = ({
         <div className="absolute right-3 top-3 z-[1300]">
           <F0Button
             onClick={(e) => {
-              e?.preventDefault();
-              handleToggleFullscreen();
+              e?.preventDefault()
+              handleToggleFullscreen()
             }}
             label="Fullscreen"
             aria-label="Toggle fullscreen mode"
@@ -41,7 +41,7 @@ const Head = ({
         </div>
       )}
     </>
-  );
-};
+  )
+}
 
-export { Head };
+export { Head }

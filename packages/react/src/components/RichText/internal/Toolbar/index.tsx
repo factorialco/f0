@@ -1,10 +1,10 @@
-import { Editor } from "@tiptap/react";
-import { compact } from "lodash";
-import { Fragment, ReactNode } from "react";
+import { Editor } from "@tiptap/react"
+import { compact } from "lodash"
+import { Fragment, ReactNode } from "react"
 
-import { F0Button } from "@/components/F0Button";
-import { F0ButtonToggle } from "@/components/F0ButtonToggle";
-import { Picker } from "@/kits/Social/Reactions/Picker";
+import { F0Button } from "@/components/F0Button"
+import { F0ButtonToggle } from "@/components/F0ButtonToggle"
+import { Picker } from "@/kits/Social/Reactions/Picker"
 import {
   AlignTextCenter,
   AlignTextJustify,
@@ -27,15 +27,15 @@ import {
   Quote,
   Strikethrough,
   Underline,
-} from "@/icons/app";
-import { useI18n } from "@/lib/providers/i18n";
-import { cn } from "@/lib/utils";
+} from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
+import { cn } from "@/lib/utils"
 
-import { LinkPopup } from "./LinkPopup";
-import { ToolbarDivider } from "./ToolbarDivider";
-import { ToolbarDropdown } from "./ToolbarDropdown";
-import { ButtonConfig, ToolbarProps } from "./types";
-import { getTextAlignIcon, getTextAlignLabel } from "./utils";
+import { LinkPopup } from "./LinkPopup"
+import { ToolbarDivider } from "./ToolbarDivider"
+import { ToolbarDropdown } from "./ToolbarDropdown"
+import { ButtonConfig, ToolbarProps } from "./types"
+import { getTextAlignIcon, getTextAlignLabel } from "./utils"
 
 const intersperse = (arr: ReactNode[], sep: ReactNode) =>
   arr.map((item, index) => (
@@ -43,7 +43,7 @@ const intersperse = (arr: ReactNode[], sep: ReactNode) =>
       {item}
       {index < arr.length - 1 && sep}
     </Fragment>
-  ));
+  ))
 
 export const Toolbar = ({
   editor,
@@ -55,7 +55,7 @@ export const Toolbar = ({
   showEmojiPicker = true,
   plainHtmlMode = false,
 }: ToolbarProps) => {
-  const translations = useI18n();
+  const translations = useI18n()
 
   // Format buttons configuration
   const formatButtons: ButtonConfig[] = [
@@ -103,7 +103,7 @@ export const Toolbar = ({
         shortcut: ["cmd", "shift", "s"],
       },
     },
-  ];
+  ]
 
   // Heading buttons configuration
   const headingButtons: ButtonConfig[] = [
@@ -143,7 +143,7 @@ export const Toolbar = ({
         shortcut: ["cmd", "3"],
       },
     },
-  ];
+  ]
 
   // List buttons configuration
   const listButtons: ButtonConfig[] = [
@@ -197,7 +197,7 @@ export const Toolbar = ({
           },
         ]
       : []),
-  ];
+  ]
 
   // Render buttons from configuration
   const renderButtons = (configs: ButtonConfig[]) => (
@@ -213,10 +213,10 @@ export const Toolbar = ({
         />
       ))}
     </div>
-  );
+  )
 
-  const formattingGroup = renderButtons(formatButtons);
-  const textSizeGroup = renderButtons(headingButtons);
+  const formattingGroup = renderButtons(formatButtons)
+  const textSizeGroup = renderButtons(headingButtons)
 
   const moreOptionsGroup = (
     <div className="flex flex-row items-center gap-0.5">
@@ -297,20 +297,20 @@ export const Toolbar = ({
         }}
       />
     </div>
-  );
+  )
 
   const linkGroup = [
     <LinkPopup key="link-popup" editor={editor} disabled={disableButtons} />,
-  ];
+  ]
 
   const emojiGroup = (
     <Picker
       variant="ghost"
       onSelect={(emoji) => {
-        editor.chain().focus().insertContent(emoji).run();
+        editor.chain().focus().insertContent(emoji).run()
       }}
     />
-  );
+  )
 
   const groups = compact([
     linkGroup,
@@ -318,15 +318,15 @@ export const Toolbar = ({
     formattingGroup,
     textSizeGroup,
     moreOptionsGroup,
-  ]);
+  ])
 
   return (
     <div className={cn("flex flex-row items-start gap-2 overflow-hidden")}>
       {onClose && (
         <F0Button
           onClick={(e) => {
-            e.preventDefault();
-            onClose();
+            e.preventDefault()
+            onClose()
           }}
           variant="neutral"
           size="md"
@@ -341,17 +341,17 @@ export const Toolbar = ({
           "flex grow flex-row items-center",
           animationComplete
             ? "scrollbar-macos overflow-x-auto overflow-y-hidden"
-            : "overflow-hidden",
+            : "overflow-hidden"
         )}
       >
         {intersperse(groups, <ToolbarDivider />)}
       </div>
     </div>
-  );
-};
+  )
+}
 
 // Export all toolbar components
-export { LinkPopup } from "./LinkPopup";
-export { ToolbarDivider } from "./ToolbarDivider";
-export { ToolbarDropdown } from "./ToolbarDropdown";
-export type { ButtonConfig, ToolbarProps } from "./types";
+export { LinkPopup } from "./LinkPopup"
+export { ToolbarDivider } from "./ToolbarDivider"
+export { ToolbarDropdown } from "./ToolbarDropdown"
+export type { ButtonConfig, ToolbarProps } from "./types"

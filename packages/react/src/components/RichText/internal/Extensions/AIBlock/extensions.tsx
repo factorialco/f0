@@ -14,7 +14,7 @@ import {
   TextStyleExtension,
   TypographyExtension,
   UnderlineExtension,
-} from "@/components/RichText/internal";
+} from "@/components/RichText/internal"
 
 export const createAIBlockEditorExtensions = () => {
   return [
@@ -33,5 +33,5 @@ export const createAIBlockEditorExtensions = () => {
     DetailsContentExtension,
     PersistSelection,
     createAccessibilityExtension("only read ai block"),
-  ];
-};
+  ]
+}

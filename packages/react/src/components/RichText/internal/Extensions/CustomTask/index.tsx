@@ -1,6 +1,6 @@
-import TaskItem from "@tiptap/extension-task-item";
+import TaskItem from "@tiptap/extension-task-item"
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
 
 const CustomTask = TaskItem.extend({
   addAttributes() {
@@ -13,10 +13,10 @@ const CustomTask = TaskItem.extend({
         renderHTML: (attributes) => {
           return {
             "data-checked": attributes.checked,
-          };
+          }
         },
       },
-    };
+    }
   },
 
   parseHTML() {
@@ -25,7 +25,7 @@ const CustomTask = TaskItem.extend({
         tag: `li[data-type="${this.name}"]`,
         priority: 51,
       },
-    ];
+    ]
   },
 
   renderHTML({ node, HTMLAttributes }) {
@@ -53,35 +53,35 @@ const CustomTask = TaskItem.extend({
         },
         0,
       ],
-    ];
+    ]
   },
 
   addKeyboardShortcuts() {
-    const shortcuts = this.parent?.() || {};
+    const shortcuts = this.parent?.() || {}
 
     return {
       ...shortcuts,
       Enter: () => {
         if (this.editor.isActive(this.name)) {
-          return this.editor.commands.splitListItem(this.name);
+          return this.editor.commands.splitListItem(this.name)
         }
-        return false;
+        return false
       },
       "Shift-Tab": () => {
         if (this.editor.isActive(this.name)) {
-          return this.editor.commands.liftListItem(this.name);
+          return this.editor.commands.liftListItem(this.name)
         }
-        return false;
+        return false
       },
-    };
+    }
   },
-});
+})
 
 export const CustomTaskExtension = CustomTask.configure({
   nested: true,
   HTMLAttributes: {
     class: "f1-task-item",
   },
-});
+})
 
-export { CustomTask };
+export { CustomTask }

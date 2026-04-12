@@ -5,120 +5,120 @@ import {
   useImperativeHandle,
   useRef,
   useState,
-} from "react";
+} from "react"
 
-import { F0Icon } from "@/components/F0Icon";
-import { cn } from "@/lib/utils";
+import { F0Icon } from "@/components/F0Icon"
+import { cn } from "@/lib/utils"
 
-import { CommandGroup, CommandItem } from "./AvailableCommands";
+import { CommandGroup, CommandItem } from "./AvailableCommands"
 
 interface CommandListHandle {
-  onKeyDown: ({ event }: { event: KeyboardEvent }) => boolean;
+  onKeyDown: ({ event }: { event: KeyboardEvent }) => boolean
 }
 
 interface CommandListProps {
-  items: CommandItem[];
-  groups?: CommandGroup[];
-  command: (item: CommandItem) => void;
+  items: CommandItem[]
+  groups?: CommandGroup[]
+  command: (item: CommandItem) => void
 }
 
 const CommandList = forwardRef<CommandListHandle, CommandListProps>(
   ({ items, groups, command }, ref) => {
-    const [selectedIndex, setSelectedIndex] = useState(0);
-    const containerRef = useRef<HTMLDivElement>(null);
-    const selectedItemRef = useRef<HTMLDivElement>(null);
+    const [selectedIndex, setSelectedIndex] = useState(0)
+    const containerRef = useRef<HTMLDivElement>(null)
+    const selectedItemRef = useRef<HTMLDivElement>(null)
 
     // Use groups if provided, otherwise fall back to flat items
-    const commandsToRender = groups || [{ title: "", commands: items }];
-    const allCommands = commandsToRender.flatMap((group) => group.commands);
+    const commandsToRender = groups || [{ title: "", commands: items }]
+    const allCommands = commandsToRender.flatMap((group) => group.commands)
 
     const selectItem = useCallback(
       (index: number) => {
-        const item = allCommands[index];
+        const item = allCommands[index]
         if (item) {
-          command(item);
+          command(item)
         }
       },
-      [allCommands, command],
-    );
+      [allCommands, command]
+    )
 
     const scrollIntoView = useCallback((element: HTMLElement) => {
-      const container = containerRef.current;
-      if (!container) return;
+      const container = containerRef.current
+      if (!container) return
 
-      const containerRect = container.getBoundingClientRect();
-      const elementRect = element.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect()
+      const elementRect = element.getBoundingClientRect()
 
       if (elementRect.top < containerRect.top) {
-        container.scrollTop += elementRect.top - containerRect.top;
+        container.scrollTop += elementRect.top - containerRect.top
       } else if (elementRect.bottom > containerRect.bottom) {
-        container.scrollTop += elementRect.bottom - containerRect.bottom;
+        container.scrollTop += elementRect.bottom - containerRect.bottom
       }
-    }, []);
+    }, [])
 
     const upHandler = useCallback(() => {
       setSelectedIndex((prev) => {
-        const newIndex = prev <= 0 ? allCommands.length - 1 : prev - 1;
-        return newIndex;
-      });
-    }, [allCommands.length]);
+        const newIndex = prev <= 0 ? allCommands.length - 1 : prev - 1
+        return newIndex
+      })
+    }, [allCommands.length])
 
     const downHandler = useCallback(() => {
       setSelectedIndex((prev) => {
-        const newIndex = prev >= allCommands.length - 1 ? 0 : prev + 1;
-        return newIndex;
-      });
-    }, [allCommands.length]);
+        const newIndex = prev >= allCommands.length - 1 ? 0 : prev + 1
+        return newIndex
+      })
+    }, [allCommands.length])
 
     const enterHandler = useCallback(() => {
-      selectItem(selectedIndex);
-    }, [selectedIndex, selectItem]);
+      selectItem(selectedIndex)
+    }, [selectedIndex, selectItem])
 
     // Scroll into view when selectedIndex changes
     useEffect(() => {
       if (selectedItemRef.current) {
-        scrollIntoView(selectedItemRef.current);
+        scrollIntoView(selectedItemRef.current)
       }
-    }, [selectedIndex, scrollIntoView]);
+    }, [selectedIndex, scrollIntoView])
 
     // Reset selection when items change
     useEffect(() => {
-      setSelectedIndex(0);
-    }, [items.length]);
+      setSelectedIndex(0)
+    }, [items.length])
 
     useImperativeHandle(
       ref,
       () => ({
         onKeyDown: ({ event }: { event: KeyboardEvent }) => {
           if (event.key === "ArrowUp") {
-            event.preventDefault();
-            upHandler();
-            return true;
+            event.preventDefault()
+            upHandler()
+            return true
           }
           if (event.key === "ArrowDown") {
-            event.preventDefault();
-            downHandler();
-            return true;
+            event.preventDefault()
+            downHandler()
+            return true
           }
           if (event.key === "Enter") {
-            event.preventDefault();
-            enterHandler();
-            return true;
+            event.preventDefault()
+            enterHandler()
+            return true
           }
-          return false;
+          return false
         },
       }),
-      [upHandler, downHandler, enterHandler],
-    );
+      [upHandler, downHandler, enterHandler]
+    )
 
     // Function to get the global index of a command within all commands
     const getGlobalIndex = (groupIndex: number, commandIndex: number) => {
-      let globalIndex = 0;
+      let globalIndex = 0
       for (let i = 0; i < groupIndex; i++) {
-        globalIndex += commandsToRender[i].commands.length;
+        globalIndex += commandsToRender[i].commands.length
       }
-      return globalIndex + commandIndex;
-    };
+      return globalIndex + commandIndex
+    }
 
     return (
       <div
@@ -139,8 +139,8 @@ const CommandList = forwardRef<CommandListHandle, CommandListProps>(
 
               {/* Group commands */}
               {group.commands.map((item, commandIndex) => {
-                const globalIndex = getGlobalIndex(groupIndex, commandIndex);
-                const isSelected = globalIndex === selectedIndex;
+                const globalIndex = getGlobalIndex(groupIndex, commandIndex)
+                const isSelected = globalIndex === selectedIndex
 
                 return (
                   <div
@@ -148,11 +148,11 @@ const CommandList = forwardRef<CommandListHandle, CommandListProps>(
                     ref={isSelected ? selectedItemRef : null}
                     className={cn(
                       "flex w-full cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-f1-background-hover",
-                      isSelected && "bg-f1-background-secondary",
+                      isSelected && "bg-f1-background-secondary"
                     )}
                     onClick={() => {
-                      setSelectedIndex(globalIndex);
-                      selectItem(globalIndex);
+                      setSelectedIndex(globalIndex)
+                      selectItem(globalIndex)
                     }}
                     onMouseEnter={() => setSelectedIndex(globalIndex)}
                   >
@@ -168,7 +168,7 @@ const CommandList = forwardRef<CommandListHandle, CommandListProps>(
                       {item.title}
                     </p>
                   </div>
-                );
+                )
               })}
             </div>
             {/* Divider between groups (only show if not the last group and we have multiple groups) */}
@@ -180,10 +180,10 @@ const CommandList = forwardRef<CommandListHandle, CommandListProps>(
           </div>
         ))}
       </div>
-    );
-  },
-);
+    )
+  }
+)
 
-CommandList.displayName = "CommandList";
+CommandList.displayName = "CommandList"
 
-export { CommandList };
+export { CommandList }

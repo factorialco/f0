@@ -1,35 +1,35 @@
-import { cva } from "cva";
+import { cva } from "cva"
 
-import { F0Button } from "@/components/F0Button";
-import { F0ButtonDropdown } from "@/components/F0ButtonDropdown";
-import { F0Icon, IconType } from "@/components/F0Icon";
-import { OneEllipsis } from "@/lib/OneEllipsis";
-import { HeaderSecondaryAction } from "@/experimental/Information/Headers/BaseHeader";
+import { F0Button } from "@/components/F0Button"
+import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
+import { F0Icon, IconType } from "@/components/F0Icon"
+import { OneEllipsis } from "@/lib/OneEllipsis"
+import { HeaderSecondaryAction } from "@/experimental/Information/Headers/BaseHeader"
 import {
   Metadata,
   MetadataItem,
-} from "@/experimental/Information/Headers/Metadata";
+} from "@/experimental/Information/Headers/Metadata"
 import {
   PrimaryAction,
   PrimaryActionButton,
   PrimaryDropdownAction,
-} from "@/experimental/Information/utils";
-import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown";
+} from "@/experimental/Information/utils"
+import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 
-type BannerVariant = "info" | "warning" | "critical" | "neutral" | "positive";
+type BannerVariant = "info" | "warning" | "critical" | "neutral" | "positive"
 
 interface BannerProps {
-  icon: IconType;
-  title: string;
-  variant: BannerVariant;
+  icon: IconType
+  title: string
+  variant: BannerVariant
 }
 
 export interface HeaderProps {
-  primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
-  secondaryActions?: HeaderSecondaryAction[];
-  metadata?: MetadataItem[];
-  otherActions?: DropdownItem[];
-  banner?: BannerProps;
+  primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>
+  secondaryActions?: HeaderSecondaryAction[]
+  metadata?: MetadataItem[]
+  otherActions?: DropdownItem[]
+  banner?: BannerProps
 }
 
 const bannerVariants = cva({
@@ -46,31 +46,31 @@ const bannerVariants = cva({
   defaultVariants: {
     variant: "info",
   },
-});
+})
 
 const isVisible = <T extends { isVisible?: boolean }>(action: T) =>
-  action.isVisible !== false;
+  action.isVisible !== false
 
 const isOtherActionVisible = (
-  action: DropdownItem & { isVisible?: boolean },
+  action: DropdownItem & { isVisible?: boolean }
 ): boolean => {
   if ("isVisible" in action) {
-    return action.isVisible !== false;
+    return action.isVisible !== false
   }
-  return true;
-};
+  return true
+}
 
 const isPrimaryDropdownAction = (
-  action: PrimaryAction | undefined,
+  action: PrimaryAction | undefined
 ): action is PrimaryDropdownAction<string> => {
-  return !!action && "items" in action;
-};
+  return !!action && "items" in action
+}
 
 const isPrimaryActionButton = (
-  action: PrimaryAction | undefined,
+  action: PrimaryAction | undefined
 ): action is PrimaryActionButton => {
-  return !!action && "label" in action && !("items" in action);
-};
+  return !!action && "label" in action && !("items" in action)
+}
 
 const Header = ({
   primaryAction,
@@ -79,14 +79,14 @@ const Header = ({
   otherActions = [],
   banner,
 }: HeaderProps) => {
-  const visibleSecondaryActions = secondaryActions.filter(isVisible);
-  const visibleOtherActions = otherActions.filter(isOtherActionVisible);
+  const visibleSecondaryActions = secondaryActions.filter(isVisible)
+  const visibleOtherActions = otherActions.filter(isOtherActionVisible)
 
-  const isPrimaryActionVisible = primaryAction && isVisible(primaryAction);
-  const hasSecondaryActions = visibleSecondaryActions.length > 0;
-  const hasOtherActions = visibleOtherActions.length > 0;
+  const isPrimaryActionVisible = primaryAction && isVisible(primaryAction)
+  const hasSecondaryActions = visibleSecondaryActions.length > 0
+  const hasOtherActions = visibleOtherActions.length > 0
   const hasActions =
-    hasSecondaryActions || hasOtherActions || isPrimaryActionVisible;
+    hasSecondaryActions || hasOtherActions || isPrimaryActionVisible
 
   return (
     <div className="flex flex-col">
@@ -142,8 +142,8 @@ const Header = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default Header;
-export type { BannerProps, BannerVariant };
+export default Header
+export type { BannerProps, BannerVariant }

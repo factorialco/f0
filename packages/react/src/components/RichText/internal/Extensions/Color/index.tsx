@@ -1,3 +1,3 @@
-import Color from "@tiptap/extension-color";
+import Color from "@tiptap/extension-color"
 
-export const ColorExtension = Color;
+export const ColorExtension = Color

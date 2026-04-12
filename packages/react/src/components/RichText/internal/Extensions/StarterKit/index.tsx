@@ -1,4 +1,4 @@
-import StarterKit from "@tiptap/starter-kit";
+import StarterKit from "@tiptap/starter-kit"
 
 export const StarterKitExtension = StarterKit.configure({
   heading: { levels: [1, 2, 3] },
@@ -12,4 +12,4 @@ export const StarterKitExtension = StarterKit.configure({
       class: "f1-ordered-list",
     },
   },
-});
+})

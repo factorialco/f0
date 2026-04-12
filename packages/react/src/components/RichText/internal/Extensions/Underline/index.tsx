@@ -1,3 +1,3 @@
-import Underline from "@tiptap/extension-underline";
+import Underline from "@tiptap/extension-underline"
 
-export const UnderlineExtension = Underline;
+export const UnderlineExtension = Underline

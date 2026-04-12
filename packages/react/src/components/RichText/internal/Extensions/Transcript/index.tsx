@@ -1,42 +1,42 @@
-import { Node } from "@tiptap/core";
+import { Node } from "@tiptap/core"
 import {
   NodeViewContent,
   NodeViewProps,
   NodeViewWrapper,
   ReactNodeViewRenderer,
-} from "@tiptap/react";
-import { format } from "date-fns";
-import React, { useState } from "react";
+} from "@tiptap/react"
+import { format } from "date-fns"
+import React, { useState } from "react"
 
-import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson";
-import { F0Button } from "@/components/F0Button";
-import { Dropdown } from "@/experimental/Navigation/Dropdown";
-import { ChevronDown, ChevronUp, Delete } from "@/icons/app";
-import { useI18n } from "@/lib/providers/i18n";
+import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
+import { F0Button } from "@/components/F0Button"
+import { Dropdown } from "@/experimental/Navigation/Dropdown"
+import { ChevronDown, ChevronUp, Delete } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 
 export interface User {
-  id: string;
-  fullname: string;
-  imageUrl: string;
+  id: string
+  fullname: string
+  imageUrl: string
 }
 
 export interface Message {
-  userId: string;
-  text: string;
-  dateTime: string;
+  userId: string
+  text: string
+  dateTime: string
 }
 
 export interface TranscriptData {
-  title: string;
-  messages: Message[];
-  users: User[];
+  title: string
+  messages: Message[]
+  users: User[]
 }
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     transcript: {
-      insertTranscript: (data: TranscriptData) => ReturnType;
-    };
+      insertTranscript: (data: TranscriptData) => ReturnType
+    }
   }
 }
 
@@ -45,18 +45,18 @@ export const TranscriptView: React.FC<NodeViewProps> = ({
   deleteNode,
   updateAttributes,
 }) => {
-  const translations = useI18n();
+  const translations = useI18n()
 
-  const [isOpen, setIsOpen] = useState<boolean>(node.attrs.isOpen ?? false);
-  const data = node.attrs.data as TranscriptData;
+  const [isOpen, setIsOpen] = useState<boolean>(node.attrs.isOpen ?? false)
+  const data = node.attrs.data as TranscriptData
 
-  if (!data) return null;
+  if (!data) return null
 
   const handleToggleCollapse = () => {
-    const newState = !isOpen;
-    setIsOpen(newState);
-    updateAttributes({ isOpen: newState });
-  };
+    const newState = !isOpen
+    setIsOpen(newState)
+    updateAttributes({ isOpen: newState })
+  }
 
   // Generate dropdown items
   const dropdownItems = [
@@ -66,23 +66,23 @@ export const TranscriptView: React.FC<NodeViewProps> = ({
       critical: true,
       onClick: () => deleteNode(),
     },
-  ];
+  ]
 
   // Find user by ID
   const getUserById = (userId: string): User | undefined => {
-    return data.users.find((user) => user.id === userId);
-  };
+    return data.users.find((user) => user.id === userId)
+  }
 
   // Format date for display
   const formatDateTime = (dateTimeStr: string): string => {
     try {
-      const date = new Date(dateTimeStr);
-      return format(date, "HH:mm");
+      const date = new Date(dateTimeStr)
+      return format(date, "HH:mm")
     } catch (e) {
-      console.error(e);
-      return dateTimeStr;
+      console.error(e)
+      return dateTimeStr
     }
-  };
+  }
 
   return (
     <NodeViewWrapper contentEditable={false}>
@@ -125,7 +125,7 @@ export const TranscriptView: React.FC<NodeViewProps> = ({
         {isOpen && (
           <div className="scrollbar-macos text-f1-text-primary flex max-h-[500px] flex-col gap-4 overflow-y-auto">
             {data.messages.map((message, index) => {
-              const user = getUserById(message.userId);
+              const user = getUserById(message.userId)
               return (
                 <div key={index} className="flex flex-row gap-3">
                   {user?.imageUrl && (
@@ -148,15 +148,15 @@ export const TranscriptView: React.FC<NodeViewProps> = ({
                     <p className="text-f1-text-secondary">{message.text}</p>
                   </div>
                 </div>
-              );
+              )
             })}
           </div>
         )}
       </div>
       <NodeViewContent style={{ display: "none" }} />
     </NodeViewWrapper>
-  );
-};
+  )
+}
 
 export const Transcript = Node.create({
   name: "transcript",
@@ -172,7 +172,7 @@ export const Transcript = Node.create({
   addOptions() {
     return {
       currentConfig: null,
-    };
+    }
   },
 
   addAttributes() {
@@ -180,14 +180,14 @@ export const Transcript = Node.create({
       data: {
         default: null,
         parseHTML: (element) => {
-          const dataAttr = element.getAttribute("data-transcript");
-          return dataAttr ? JSON.parse(dataAttr) : null;
+          const dataAttr = element.getAttribute("data-transcript")
+          return dataAttr ? JSON.parse(dataAttr) : null
         },
         renderHTML: (attributes) => {
-          if (!attributes.data) return {};
+          if (!attributes.data) return {}
           return {
             "data-transcript": JSON.stringify(attributes.data),
-          };
+          }
         },
       },
       config: {
@@ -196,7 +196,7 @@ export const Transcript = Node.create({
       isOpen: {
         default: false,
       },
-    };
+    }
   },
 
   parseHTML() {
@@ -204,12 +204,12 @@ export const Transcript = Node.create({
       {
         tag: "div[data-transcript]",
       },
-    ];
+    ]
   },
 
   renderHTML({ HTMLAttributes, node }) {
-    const data = node.attrs.data as TranscriptData;
-    if (!data) return ["div"];
+    const data = node.attrs.data as TranscriptData
+    if (!data) return ["div"]
 
     return [
       "div",
@@ -219,11 +219,11 @@ export const Transcript = Node.create({
         "data-transcript": JSON.stringify(data),
       },
       ["div", { class: "transcript-content" }, `Transcript: ${data.title}`],
-    ];
+    ]
   },
 
   addNodeView() {
-    return ReactNodeViewRenderer(TranscriptView);
+    return ReactNodeViewRenderer(TranscriptView)
   },
 
   addCommands() {
@@ -234,10 +234,10 @@ export const Transcript = Node.create({
           return commands.insertContent({
             type: this.name,
             attrs: { data },
-          });
+          })
         },
-    };
+    }
   },
-});
+})
 
-export const TranscriptExtension = Transcript;
+export const TranscriptExtension = Transcript

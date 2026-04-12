@@ -25,14 +25,14 @@ import {
   ImageUploadConfig,
   VideoEmbedExtension,
   createFileHandlerExtension,
-} from "@/components/RichText/internal";
-import { I18nContextType } from "@/lib/providers/i18n";
+} from "@/components/RichText/internal"
+import { I18nContextType } from "@/lib/providers/i18n"
 
 interface CreateNotesTextEditorExtensionsProps {
-  placeholder: string;
-  translations: I18nContextType;
-  aiBlockConfig?: AIBlockConfig;
-  imageUploadConfig?: ImageUploadConfig;
+  placeholder: string
+  translations: I18nContextType
+  aiBlockConfig?: AIBlockConfig
+  imageUploadConfig?: ImageUploadConfig
 }
 
 export const createNotesTextEditorExtensions = ({
@@ -75,5 +75,5 @@ export const createNotesTextEditorExtensions = ({
       translations,
       imageUploadConfig,
     }),
-  ];
-};
+  ]
+}

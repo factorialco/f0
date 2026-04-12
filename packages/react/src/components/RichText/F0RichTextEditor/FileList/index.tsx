@@ -1,19 +1,19 @@
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react"
 
-import { F0FileItem } from "../../../F0FileItem";
+import { F0FileItem } from "../../../F0FileItem"
 import {
   getAcceptFileTypeString,
   handleAddFiles,
   handleRemoveFile,
-} from "../utils/files";
-import { filesConfig } from "../utils/types";
+} from "../utils/files"
+import { filesConfig } from "../utils/types"
 
 interface FileListProps {
-  filesConfig: filesConfig | undefined;
-  files: File[];
-  disabled: boolean;
-  setFiles: React.Dispatch<React.SetStateAction<File[]>>;
-  fileInputRef: React.RefObject<HTMLInputElement>;
+  filesConfig: filesConfig | undefined
+  files: File[]
+  disabled: boolean
+  setFiles: React.Dispatch<React.SetStateAction<File[]>>
+  fileInputRef: React.RefObject<HTMLInputElement>
 }
 
 const FileList = ({
@@ -23,23 +23,23 @@ const FileList = ({
   disabled,
   fileInputRef,
 }: FileListProps) => {
-  if (!filesConfig) return null;
+  if (!filesConfig) return null
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = e.target.files;
+    const selectedFiles = e.target.files
     if (selectedFiles && selectedFiles.length > 0) {
-      let fileArray = Array.from(selectedFiles);
+      let fileArray = Array.from(selectedFiles)
       if (filesConfig?.maxFileSize) {
         fileArray = fileArray.filter(
-          (file) => file.size <= filesConfig.maxFileSize!,
-        );
+          (file) => file.size <= filesConfig.maxFileSize!
+        )
       }
-      handleAddFiles(fileArray, files, filesConfig, setFiles);
+      handleAddFiles(fileArray, files, filesConfig, setFiles)
     }
     if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+      fileInputRef.current.value = ""
     }
-  };
+  }
 
   return (
     <>
@@ -82,7 +82,7 @@ const FileList = ({
         )}
       </AnimatePresence>
     </>
-  );
-};
+  )
+}
 
-export { FileList };
+export { FileList }

@@ -1,3 +1,3 @@
-import Typography from "@tiptap/extension-typography";
+import Typography from "@tiptap/extension-typography"
 
-export const TypographyExtension = Typography;
+export const TypographyExtension = Typography

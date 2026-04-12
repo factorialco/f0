@@ -1,38 +1,38 @@
-import { Node } from "@tiptap/core";
+import { Node } from "@tiptap/core"
 import {
   NodeViewContent,
   NodeViewProps,
   NodeViewWrapper,
   ReactNodeViewRenderer,
-} from "@tiptap/react";
-import React, { useState } from "react";
+} from "@tiptap/react"
+import React, { useState } from "react"
 
 import {
   Pulse,
   pulseIcon,
   pulseIconColor,
-} from "@/components/avatars/F0AvatarPulse";
-import { F0Button } from "@/components/F0Button";
-import { F0Icon } from "@/components/F0Icon";
-import { Dropdown } from "@/experimental/Navigation/Dropdown";
-import { ChevronDown, ChevronUp, Delete } from "@/icons/app";
-import { useI18n } from "@/lib/providers/i18n/i18n-provider";
+} from "@/components/avatars/F0AvatarPulse"
+import { F0Button } from "@/components/F0Button"
+import { F0Icon } from "@/components/F0Icon"
+import { Dropdown } from "@/experimental/Navigation/Dropdown"
+import { ChevronDown, ChevronUp, Delete } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 
 interface MoodTrackerData {
-  title: string;
-  averageMoodComment: string;
+  title: string
+  averageMoodComment: string
   days: {
-    day: string;
-    mood: Pulse;
-    comment: string;
-  }[];
+    day: string
+    mood: Pulse
+    comment: string
+  }[]
 }
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     moodTracker: {
-      insertMoodTracker: (data: MoodTrackerData) => ReturnType;
-    };
+      insertMoodTracker: (data: MoodTrackerData) => ReturnType
+    }
   }
 }
 
@@ -41,19 +41,19 @@ export const MoodTrackerView: React.FC<NodeViewProps> = ({
   deleteNode,
   updateAttributes,
 }) => {
-  const translations = useI18n();
-  const [isOpen, setIsOpen] = useState<boolean>(node.attrs.isOpen ?? false);
-  const data = node.attrs.data as MoodTrackerData;
+  const translations = useI18n()
+  const [isOpen, setIsOpen] = useState<boolean>(node.attrs.isOpen ?? false)
+  const data = node.attrs.data as MoodTrackerData
 
   // Use dynamic config from extension options instead of persisted config
 
-  if (!data) return null;
+  if (!data) return null
 
   const handleToggleCollapse = () => {
-    const newState = !isOpen;
-    setIsOpen(newState);
-    updateAttributes({ isOpen: newState });
-  };
+    const newState = !isOpen
+    setIsOpen(newState)
+    updateAttributes({ isOpen: newState })
+  }
 
   // Generate dropdown items
   const getDropdownItems = [
@@ -63,7 +63,7 @@ export const MoodTrackerView: React.FC<NodeViewProps> = ({
       critical: true,
       onClick: () => deleteNode(),
     },
-  ];
+  ]
 
   return (
     <NodeViewWrapper contentEditable={false}>
@@ -141,8 +141,8 @@ export const MoodTrackerView: React.FC<NodeViewProps> = ({
       </div>
       <NodeViewContent style={{ display: "none" }} />
     </NodeViewWrapper>
-  );
-};
+  )
+}
 
 export const MoodTracker = Node.create({
   name: "moodTracker",
@@ -158,7 +158,7 @@ export const MoodTracker = Node.create({
   addOptions() {
     return {
       currentConfig: null,
-    };
+    }
   },
 
   addAttributes() {
@@ -166,14 +166,14 @@ export const MoodTracker = Node.create({
       data: {
         default: null,
         parseHTML: (element) => {
-          const dataAttr = element.getAttribute("data-mood-tracker");
-          return dataAttr ? JSON.parse(dataAttr) : null;
+          const dataAttr = element.getAttribute("data-mood-tracker")
+          return dataAttr ? JSON.parse(dataAttr) : null
         },
         renderHTML: (attributes) => {
-          if (!attributes.data) return {};
+          if (!attributes.data) return {}
           return {
             "data-mood-tracker": JSON.stringify(attributes.data),
-          };
+          }
         },
       },
       config: {
@@ -182,7 +182,7 @@ export const MoodTracker = Node.create({
       isOpen: {
         default: false,
       },
-    };
+    }
   },
 
   parseHTML() {
@@ -190,12 +190,12 @@ export const MoodTracker = Node.create({
       {
         tag: "div[data-mood-tracker]",
       },
-    ];
+    ]
   },
 
   renderHTML({ HTMLAttributes, node }) {
-    const data = node.attrs.data as MoodTrackerData;
-    if (!data) return ["div"];
+    const data = node.attrs.data as MoodTrackerData
+    if (!data) return ["div"]
 
     return [
       "div",
@@ -205,11 +205,11 @@ export const MoodTracker = Node.create({
         "data-mood-tracker": JSON.stringify(data),
       },
       ["div", { class: "mood-tracker-content" }, `Mood Tracker: ${data.title}`],
-    ];
+    ]
   },
 
   addNodeView() {
-    return ReactNodeViewRenderer(MoodTrackerView);
+    return ReactNodeViewRenderer(MoodTrackerView)
   },
 
   addCommands() {
@@ -220,10 +220,10 @@ export const MoodTracker = Node.create({
           return commands.insertContent({
             type: this.name,
             attrs: { data },
-          });
+          })
         },
-    };
+    }
   },
-});
+})
 
-export const MoodTrackerExtension = MoodTracker;
+export const MoodTrackerExtension = MoodTracker

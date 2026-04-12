@@ -4,72 +4,72 @@ import React, {
   useEffect,
   useImperativeHandle,
   useState,
-} from "react";
+} from "react"
 
-import { MentionItem } from "../MentionItem";
+import { MentionItem } from "../MentionItem"
 import {
   MentionedUser,
   MentionItemComponentProps,
   MentionListRef,
-} from "../types";
+} from "../types"
 
 export interface MentionListProps {
-  items: MentionedUser[];
-  command: (item: MentionedUser) => void;
-  component?: React.FC<MentionItemComponentProps>;
+  items: MentionedUser[]
+  command: (item: MentionedUser) => void
+  component?: React.FC<MentionItemComponentProps>
 }
 
 const MentionList = forwardRef<MentionListRef, MentionListProps>(
   ({ items, command, component: Component = MentionItem }, ref) => {
-    const [selectedIndex, setSelectedIndex] = useState(0);
+    const [selectedIndex, setSelectedIndex] = useState(0)
 
     const selectItem = useCallback(
       (index: number) => {
-        const item = items[index];
+        const item = items[index]
         if (item) {
-          command(item);
+          command(item)
         }
       },
-      [items, command],
-    );
+      [items, command]
+    )
 
     const upHandler = useCallback(() => {
-      setSelectedIndex((prev) => (prev + items.length - 1) % items.length);
-    }, [items.length]);
+      setSelectedIndex((prev) => (prev + items.length - 1) % items.length)
+    }, [items.length])
 
     const downHandler = useCallback(() => {
-      setSelectedIndex((prev) => (prev + 1) % items.length);
-    }, [items.length]);
+      setSelectedIndex((prev) => (prev + 1) % items.length)
+    }, [items.length])
 
     const enterHandler = useCallback(() => {
-      selectItem(selectedIndex);
-    }, [selectedIndex, selectItem]);
+      selectItem(selectedIndex)
+    }, [selectedIndex, selectItem])
 
     useEffect(() => {
-      setSelectedIndex(0);
-    }, [items]);
+      setSelectedIndex(0)
+    }, [items])
 
     useImperativeHandle(
       ref,
       () => ({
         onKeyDown: ({ event }: { event: KeyboardEvent }) => {
           if (event.key === "ArrowUp") {
-            upHandler();
-            return true;
+            upHandler()
+            return true
           }
           if (event.key === "ArrowDown") {
-            downHandler();
-            return true;
+            downHandler()
+            return true
           }
           if (event.key === "Enter") {
-            enterHandler();
-            return true;
+            enterHandler()
+            return true
           }
-          return false;
+          return false
         },
       }),
-      [upHandler, downHandler, enterHandler],
-    );
+      [upHandler, downHandler, enterHandler]
+    )
 
     return (
       <div className="flex max-h-72 w-60 flex-col gap-2 overflow-y-auto rounded-md border border-solid border-f1-border bg-f1-background p-0.5 drop-shadow-sm">
@@ -96,10 +96,10 @@ const MentionList = forwardRef<MentionListRef, MentionListProps>(
           ))
         )}
       </div>
-    );
-  },
-);
+    )
+  }
+)
 
-MentionList.displayName = "MentionList";
+MentionList.displayName = "MentionList"
 
-export { MentionList };
+export { MentionList }

@@ -1,6 +1,6 @@
-import { Editor } from "@tiptap/react";
+import { Editor } from "@tiptap/react"
 
-import { IconType } from "@/components/F0Icon";
+import { IconType } from "@/components/F0Icon"
 import {
   CheckDouble,
   ChevronDown,
@@ -14,33 +14,33 @@ import {
   OlList,
   Quote,
   Video,
-} from "@/icons/app";
-import { I18nContextType } from "@/lib/providers/i18n";
+} from "@/icons/app"
+import { I18nContextType } from "@/lib/providers/i18n"
 
-import { AIBlockConfig } from "../AIBlock";
+import { AIBlockConfig } from "../AIBlock"
 import {
   DEFAULT_ACCEPTED_TYPES,
   ImageUploadConfig,
   insertImageFromFile,
-} from "../Image";
-import { parseVideoUrl } from "../VideoEmbed";
+} from "../Image"
+import { parseVideoUrl } from "../VideoEmbed"
 
 interface CommandItem {
-  title: string;
-  icon?: IconType;
-  emoji?: string;
-  command: (editor: Editor) => void;
+  title: string
+  icon?: IconType
+  emoji?: string
+  command: (editor: Editor) => void
 }
 
 interface CommandGroup {
-  title: string;
-  commands: CommandItem[];
+  title: string
+  commands: CommandItem[]
 }
 
 interface AvailableCommandsProps {
-  aiBlockConfig?: AIBlockConfig;
-  imageUploadConfig?: ImageUploadConfig;
-  translations: I18nContextType;
+  aiBlockConfig?: AIBlockConfig
+  imageUploadConfig?: ImageUploadConfig
+  translations: I18nContextType
 }
 
 const availableCommands = ({
@@ -52,14 +52,14 @@ const availableCommands = ({
     aiBlockConfig,
     translations,
     imageUploadConfig,
-  });
-  return groups.flatMap((group) => group.commands);
-};
+  })
+  return groups.flatMap((group) => group.commands)
+}
 
 interface GetGroupedCommandsProps {
-  aiBlockConfig?: AIBlockConfig;
-  translations: I18nContextType;
-  imageUploadConfig?: ImageUploadConfig;
+  aiBlockConfig?: AIBlockConfig
+  translations: I18nContextType
+  imageUploadConfig?: ImageUploadConfig
 }
 
 const getGroupedCommands = ({
@@ -81,7 +81,7 @@ const getGroupedCommands = ({
                     .chain()
                     .focus()
                     .executeAIAction(button.type, aiBlockConfig)
-                    .run();
+                    .run()
                 },
                 icon: button.icon,
               })),
@@ -95,39 +95,39 @@ const getGroupedCommands = ({
         {
           title: translations.richTextEditor.heading1,
           command: (editor) => {
-            const { from, to } = editor.state.selection;
+            const { from, to } = editor.state.selection
             editor
               .chain()
               .focus()
               .setTextSelection({ from, to })
               .toggleHeading({ level: 1 })
-              .run();
+              .run()
           },
           icon: Heading1,
         },
         {
           title: translations.richTextEditor.heading2,
           command: (editor) => {
-            const { from, to } = editor.state.selection;
+            const { from, to } = editor.state.selection
             editor
               .chain()
               .focus()
               .setTextSelection({ from, to })
               .toggleHeading({ level: 2 })
-              .run();
+              .run()
           },
           icon: Heading2,
         },
         {
           title: translations.richTextEditor.heading3,
           command: (editor) => {
-            const { from, to } = editor.state.selection;
+            const { from, to } = editor.state.selection
             editor
               .chain()
               .focus()
               .setTextSelection({ from, to })
               .toggleHeading({ level: 3 })
-              .run();
+              .run()
           },
           icon: Heading3,
         },
@@ -139,39 +139,39 @@ const getGroupedCommands = ({
         {
           title: translations.richTextEditor.bulletList,
           command: (editor) => {
-            const { from, to } = editor.state.selection;
+            const { from, to } = editor.state.selection
             editor
               .chain()
               .focus()
               .setTextSelection({ from, to })
               .toggleBulletList()
-              .run();
+              .run()
           },
           icon: List,
         },
         {
           title: translations.richTextEditor.orderedList,
           command: (editor) => {
-            const { from, to } = editor.state.selection;
+            const { from, to } = editor.state.selection
             editor
               .chain()
               .focus()
               .setTextSelection({ from, to })
               .toggleOrderedList()
-              .run();
+              .run()
           },
           icon: OlList,
         },
         {
           title: translations.richTextEditor.taskList,
           command: (editor) => {
-            const { from, to } = editor.state.selection;
+            const { from, to } = editor.state.selection
             editor
               .chain()
               .focus()
               .setTextSelection({ from, to })
               .toggleTaskList()
-              .run();
+              .run()
           },
           icon: CheckDouble,
         },
@@ -186,16 +186,16 @@ const getGroupedCommands = ({
                 title: "Image",
                 command: (editor: Editor) => {
                   // Create a file input to select an image
-                  const input = document.createElement("input");
-                  input.type = "file";
-                  input.accept = DEFAULT_ACCEPTED_TYPES.join(",");
+                  const input = document.createElement("input")
+                  input.type = "file"
+                  input.accept = DEFAULT_ACCEPTED_TYPES.join(",")
                   input.onchange = () => {
-                    const file = input.files?.[0];
+                    const file = input.files?.[0]
                     if (file) {
-                      insertImageFromFile(editor, file, imageUploadConfig);
+                      insertImageFromFile(editor, file, imageUploadConfig)
                     }
-                  };
-                  input.click();
+                  }
+                  input.click()
                 },
                 icon: Image,
               },
@@ -205,14 +205,14 @@ const getGroupedCommands = ({
           title: translations.richTextEditor.video,
           command: (editor: Editor) => {
             const url = window.prompt(
-              translations.richTextEditor.videoUrlPrompt,
-            );
+              translations.richTextEditor.videoUrlPrompt
+            )
             if (url) {
-              const info = parseVideoUrl(url);
+              const info = parseVideoUrl(url)
               if (info) {
-                editor.commands.setVideoEmbed({ src: url });
+                editor.commands.setVideoEmbed({ src: url })
               } else {
-                window.alert(translations.richTextEditor.videoUrlInvalid);
+                window.alert(translations.richTextEditor.videoUrlInvalid)
               }
             }
           },
@@ -221,59 +221,59 @@ const getGroupedCommands = ({
         {
           title: translations.richTextEditor.details,
           command: (editor) => {
-            const { from, to } = editor.state.selection;
+            const { from, to } = editor.state.selection
             editor
               .chain()
               .focus()
               .setTextSelection({ from, to })
               .setDetails()
-              .run();
+              .run()
           },
           icon: ChevronDown,
         },
         {
           title: translations.richTextEditor.codeBlock,
           command: (editor) => {
-            const { from, to } = editor.state.selection;
+            const { from, to } = editor.state.selection
             editor
               .chain()
               .focus()
               .setTextSelection({ from, to })
               .toggleCodeBlock()
-              .run();
+              .run()
           },
           icon: Code,
         },
         {
           title: translations.richTextEditor.quote,
           command: (editor) => {
-            const { from, to } = editor.state.selection;
+            const { from, to } = editor.state.selection
             editor
               .chain()
               .focus()
               .setTextSelection({ from, to })
               .toggleBlockquote()
-              .run();
+              .run()
           },
           icon: Quote,
         },
         {
           title: translations.richTextEditor.divider,
           command: (editor) => {
-            const { from, to } = editor.state.selection;
+            const { from, to } = editor.state.selection
             editor
               .chain()
               .focus()
               .setTextSelection({ from, to })
               .setHorizontalRule()
-              .run();
+              .run()
           },
           icon: Minus,
         },
       ],
     },
-  ];
-};
+  ]
+}
 
-export { availableCommands, getGroupedCommands };
-export type { AIBlockConfig, CommandGroup, CommandItem };
+export { availableCommands, getGroupedCommands }
+export type { AIBlockConfig, CommandGroup, CommandItem }

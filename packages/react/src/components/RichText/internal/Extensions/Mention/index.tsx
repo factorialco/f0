@@ -1,7 +1,7 @@
-import Mention from "@tiptap/extension-mention";
+import Mention from "@tiptap/extension-mention"
 
-import { createSuggestionConfig } from "./suggestion";
-import { MentionedUser, MentionsConfig } from "./types";
+import { createSuggestionConfig } from "./suggestion"
+import { MentionedUser, MentionsConfig } from "./types"
 
 const CustomMention = Mention.extend({
   addAttributes() {
@@ -10,17 +10,17 @@ const CustomMention = Mention.extend({
       id: { default: null },
       label: { default: null },
       href: { default: "#" },
-    };
+    }
   },
-});
+})
 
 export const createMentionExtensions = (
   mentionSuggestions: MentionedUser[],
   setMentionSuggestions: (suggestions: MentionedUser[]) => void,
-  mentionsConfig?: MentionsConfig,
+  mentionsConfig?: MentionsConfig
 ) => {
   if (!mentionsConfig?.users?.length) {
-    return [];
+    return []
   }
 
   return [
@@ -41,20 +41,20 @@ export const createMentionExtensions = (
             target: "_blank",
           },
           `${node.attrs.label}`,
-        ];
+        ]
       },
       suggestion: createSuggestionConfig(
         mentionSuggestions,
         setMentionSuggestions,
         mentionsConfig.onMentionQueryStringChanged,
-        mentionsConfig.users,
+        mentionsConfig.users
       ),
     }),
-  ];
-};
+  ]
+}
 
 // Export components for external use if needed
-export { MentionItem } from "./MentionItem";
-export { MentionList } from "./MentionList";
-export { MentionPopover } from "./MentionPopover";
-export * from "./types";
+export { MentionItem } from "./MentionItem"
+export { MentionList } from "./MentionList"
+export { MentionPopover } from "./MentionPopover"
+export * from "./types"

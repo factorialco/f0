@@ -1,11 +1,11 @@
-import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson";
-import { cn } from "@/lib/utils";
+import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
+import { cn } from "@/lib/utils"
 
-import { MentionedUser } from "../types";
+import { MentionedUser } from "../types"
 
 interface MentionItemProps {
-  item: MentionedUser;
-  selected: boolean;
+  item: MentionedUser
+  selected: boolean
 }
 
 export const MentionItem = ({ item, selected }: MentionItemProps) => {
@@ -13,9 +13,7 @@ export const MentionItem = ({ item, selected }: MentionItemProps) => {
     <div
       className={cn(
         "flex items-center gap-2 rounded-md border border-solid p-1.5 hover:bg-f1-background-hover",
-        selected
-          ? "border-f1-border-selected-bold"
-          : "border-f1-border-inverse",
+        selected ? "border-f1-border-selected-bold" : "border-f1-border-inverse"
       )}
     >
       <F0AvatarPerson
@@ -28,5 +26,5 @@ export const MentionItem = ({ item, selected }: MentionItemProps) => {
         {item.label}
       </p>
     </div>
-  );
-};
+  )
+}

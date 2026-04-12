@@ -1,11 +1,11 @@
-import type { MentionsConfig } from "@/components/RichText/internal";
-import type { heightType } from "@/components/RichText/F0RichTextEditor";
+import type { MentionsConfig } from "@/components/RichText/internal"
+import type { heightType } from "@/components/RichText/F0RichTextEditor"
 
 import type {
   F0BaseField,
   F0BaseFieldRenderIfFunction,
   CommonRenderIfCondition,
-} from "../types";
+} from "../types"
 
 // ============================================================================
 // RichText Field RenderIf Conditions
@@ -17,7 +17,7 @@ import type {
  */
 export type RichTextFieldRenderIf =
   | CommonRenderIfCondition
-  | F0BaseFieldRenderIfFunction;
+  | F0BaseFieldRenderIfFunction
 
 // ============================================================================
 // RichText Value Type
@@ -28,9 +28,9 @@ export type RichTextFieldRenderIf =
  */
 export interface RichTextValue {
   /** HTML content of the editor */
-  value: string | null;
+  value: string | null
   /** IDs of mentioned users */
-  mentionIds?: string[];
+  mentionIds?: string[]
 }
 
 // ============================================================================
@@ -42,13 +42,13 @@ export interface RichTextValue {
  */
 export interface F0RichTextConfig {
   /** Maximum number of characters allowed */
-  maxCharacters?: number;
+  maxCharacters?: number
   /** Configuration for user mentions */
-  mentionsConfig?: MentionsConfig;
+  mentionsConfig?: MentionsConfig
   /** Height configuration for the editor */
-  height?: heightType;
+  height?: heightType
   /** Whether to use plain HTML mode */
-  plainHtmlMode?: boolean;
+  plainHtmlMode?: boolean
 }
 
 /**
@@ -56,7 +56,7 @@ export interface F0RichTextConfig {
  */
 export type F0RichTextField = F0BaseField &
   F0RichTextConfig & {
-    type: "richtext";
+    type: "richtext"
     /** Conditional rendering based on another field's value */
-    renderIf?: RichTextFieldRenderIf;
-  };
+    renderIf?: RichTextFieldRenderIf
+  }
