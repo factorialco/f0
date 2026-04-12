@@ -12,12 +12,19 @@ import {
   useState,
 } from "react"
 
+import { AnimatePresence, motion } from "motion/react"
+
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
-import { EditorBubbleMenu } from "@/components/RichText/internal"
-import { Toolbar } from "@/components/RichText/internal"
+import {
+  EditorBubbleMenu,
+  EnhanceErrorBanner,
+  Toolbar,
+  useEnhance,
+} from "@/components/RichText/internal"
+import { enhanceConfig } from "@/components/RichText/internal/Enhance/types"
 import { Handle, Plus } from "@/icons/app"
 import { DataTestIdWrapper, WithDataTestIdProps } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
@@ -58,6 +65,7 @@ interface NotesTextEditorProps extends WithDataTestIdProps {
   readonly?: boolean
   aiBlockConfig?: AIBlockConfig
   imageUploadConfig?: ImageUploadConfig
+  enhanceConfig?: enhanceConfig
   onTitleChange?: (title: string) => void
   titlePlaceholder?: string
   primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>
@@ -79,6 +87,7 @@ const F0NotesTextEditorComponent = forwardRef<
     readonly = false,
     aiBlockConfig,
     imageUploadConfig,
+    enhanceConfig: enhanceConfigProp,
     onTitleChange,
     primaryAction,
     secondaryActions,
@@ -127,6 +136,7 @@ const F0NotesTextEditorComponent = forwardRef<
       placeholder,
       translations,
       aiBlockConfig,
+      enhanceEnabled: !!enhanceConfigProp,
       imageUploadConfig: imageUploadConfig
         ? {
             ...imageUploadConfig,
@@ -169,6 +179,8 @@ const F0NotesTextEditorComponent = forwardRef<
     },
     editable: !readonly,
   })
+
+  const enhance = useEnhance(editor, enhanceConfigProp)
 
   const runWithoutOnChange = useCallback(<T,>(callback: () => T): T => {
     shouldSkipOnChangeRef.current = true
@@ -339,6 +351,23 @@ const F0NotesTextEditorComponent = forwardRef<
             </div>
           </div>
         )}
+        <AnimatePresence>
+          {enhance.error && !enhance.isLoading && (
+            <motion.div
+              key="enhance-error"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="mx-auto flex w-full max-w-[824px] px-14 py-2"
+            >
+              <EnhanceErrorBanner
+                error={enhance.error}
+                onDismiss={enhance.clearError}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
         {!readonly && !showBubbleMenu && (
           <div className="absolute bottom-8 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg border border-solid border-f1-border-secondary bg-f1-background p-2 shadow-md">
             <Toolbar
@@ -401,10 +430,18 @@ const F0NotesTextEditorComponent = forwardRef<
           <EditorBubbleMenu
             editorId={editorId}
             editor={editor}
-            disableButtons={false}
+            disableButtons={enhance.disableButtons}
             isToolbarOpen={!showBubbleMenu}
             isFullscreen={false}
             plainHtmlMode={false}
+            enhanceConfig={enhanceConfigProp}
+            onEnhanceWithAI={enhance.handleEnhanceWithAI}
+            isLoadingEnhance={enhance.isLoading}
+            isAcceptChangesOpen={enhance.isAcceptChangesOpen}
+            onAcceptChanges={enhance.acceptChanges}
+            onRejectChanges={enhance.rejectChanges}
+            onRetryChanges={enhance.retryChanges}
+            enhanceActive={!!enhance.error}
           />
         )}
       </div>

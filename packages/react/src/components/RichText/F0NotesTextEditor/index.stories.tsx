@@ -203,15 +203,9 @@ export const Default: Story = {
 export const Blank: Story = {
   args: {
     ...Default.args,
-    // @ts-expect-error
     enhanceConfig: undefined,
-    filesConfig: undefined,
     primaryAction: undefined,
-    secondaryAction: undefined,
     initialEditorState: undefined,
-    mentionsConfig: undefined,
-    maxCharacters: undefined,
-    plainHtmlMode: true,
   },
 }
 

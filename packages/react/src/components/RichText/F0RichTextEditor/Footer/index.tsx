@@ -120,12 +120,14 @@ const Footer = ({
         />
       )}
 
-      {enhanceConfig && (
+      {enhanceConfig && !isFullscreen && (
         <EnhanceActivator
           onEnhanceWithAI={onEnhanceWithAI}
           enhanceConfig={enhanceConfig}
           disabled={disableButtons}
           hideLabel={useLittleMode}
+          menuWidth={containerWidth}
+          menuContainerRef={containerRef}
           isLoadingEnhance={isLoadingEnhance}
           isAcceptChangesOpen={isAcceptChangesOpen}
           onAcceptChanges={onAcceptChanges}

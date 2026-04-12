@@ -48,7 +48,7 @@ const AIEnhanceMenu = ({
   darkMode = false,
   menuWidth,
   menuState = "idle",
-  loadingLabel = "Thinking...",
+  loadingLabel,
   onAccept,
   onReject,
   onRetry,
@@ -149,7 +149,7 @@ const AIEnhanceMenu = ({
                   <F0Button
                     variant="default"
                     icon={ArrowUp}
-                    label="send"
+                    label={i18n.actions.send}
                     hideLabel
                     disabled={!searchQuery.trim()}
                     onClick={() => {
@@ -171,7 +171,12 @@ const AIEnhanceMenu = ({
                   darkMode && "dark"
                 )}
               >
-                <F0ActionItem title={loadingLabel} status="executing" />
+                <F0ActionItem
+                  title={
+                    loadingLabel || i18n.richTextEditor.ai.loadingEnhanceLabel
+                  }
+                  status="executing"
+                />
               </div>
             )}
             {isReview && (

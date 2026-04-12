@@ -3,6 +3,10 @@ import type { Message, User } from "../internal/Extensions/Transcript"
 
 export type { ImageUploadConfig } from "../internal/Extensions/Image"
 export type {
+  enhanceConfig,
+  EnhancementOption,
+} from "../internal/Enhance/types"
+export type {
   MetadataItem,
   MetadataItemValue,
 } from "@/experimental/Information/Headers/Metadata"
