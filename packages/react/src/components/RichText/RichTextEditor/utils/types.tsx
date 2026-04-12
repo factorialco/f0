@@ -4,33 +4,17 @@ import { IconType } from "@/components/F0Icon"
 
 import { FileType } from "./constants"
 
+// Re-export enhance types from the shared CoreEditor/Enhance module
+export type {
+  enhanceConfig,
+  enhancedTextResponse,
+  EnhancementOption,
+  enhanceTextParams,
+} from "@/components/RichText/CoreEditor/Enhance/types"
+
 type resultType = {
   value: string | null
   mentionIds?: string[]
-}
-
-type enhanceTextParams = {
-  text: string
-  selectedIntent?: string
-  customIntent?: string
-  context?: string
-}
-
-type enhancedTextResponse = {
-  success: boolean
-  text: string
-  error?: string
-}
-
-type EnhancementOption = {
-  id: string
-  label: string
-  subOptions?: EnhancementOption[]
-}
-
-type enhanceConfig = {
-  onEnhanceText: (params: enhanceTextParams) => Promise<enhancedTextResponse>
-  enhancementOptions?: EnhancementOption[]
 }
 
 type filesConfig = {
@@ -99,10 +83,6 @@ type editorStateType = {
 export type {
   actionType,
   editorStateType,
-  enhanceConfig,
-  enhancedTextResponse,
-  EnhancementOption,
-  enhanceTextParams,
   filesConfig,
   heightType,
   lastIntentType,

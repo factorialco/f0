@@ -4,10 +4,12 @@ import { useEffect, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { cn } from "@/lib/utils"
-import { Toolbar } from "@/components/RichText/CoreEditor"
+import {
+  EnhanceActivator,
+  Toolbar,
+} from "@/components/RichText/CoreEditor"
 import { Paperclip, TextSize } from "@/icons/app"
 
-import { EnhanceActivator } from "../Enhance"
 import {
   enhanceConfig,
   primaryActionType,
@@ -27,16 +29,14 @@ interface FooterProps {
     customIntent?: string
   ) => Promise<void>
   isLoadingEnhance: boolean
+  isAcceptChangesOpen: boolean
+  onAcceptChanges: () => void
+  onRejectChanges: () => void
+  onRetryChanges: () => void
   disableButtons: boolean
   disabled?: boolean
   enhanceConfig: enhanceConfig | undefined
   isFullscreen: boolean
-  setLastIntent: (
-    lastIntent: {
-      selectedIntent?: string
-      customIntent?: string
-    } | null
-  ) => void
   setIsToolbarOpen: (isToolbarOpen: boolean) => void
   isToolbarOpen: boolean
   plainHtmlMode: boolean
@@ -51,9 +51,12 @@ const Footer = ({
   canUseFiles,
   onEnhanceWithAI,
   isLoadingEnhance,
+  isAcceptChangesOpen,
+  onAcceptChanges,
+  onRejectChanges,
+  onRetryChanges,
   enhanceConfig,
   isFullscreen,
-  setLastIntent,
   disableButtons,
   disabled = false,
   setIsToolbarOpen,
@@ -122,14 +125,15 @@ const Footer = ({
 
       {enhanceConfig && (
         <EnhanceActivator
-          editor={editor}
           onEnhanceWithAI={onEnhanceWithAI}
-          isLoadingEnhance={isLoadingEnhance}
           enhanceConfig={enhanceConfig}
-          disableButtons={disableButtons}
+          disabled={disableButtons}
           hideLabel={useLittleMode}
-          setLastIntent={setLastIntent}
-          position="top"
+          isLoadingEnhance={isLoadingEnhance}
+          isAcceptChangesOpen={isAcceptChangesOpen}
+          onAcceptChanges={onAcceptChanges}
+          onRejectChanges={onRejectChanges}
+          onRetryChanges={onRetryChanges}
         />
       )}
 
