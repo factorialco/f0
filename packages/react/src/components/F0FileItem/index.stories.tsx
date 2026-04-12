@@ -1,18 +1,18 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
+import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { expect, within } from "storybook/test";
+import { expect, within } from "storybook/test"
 
-import { CrossedCircle, Download } from "@/icons/app";
+import { CrossedCircle, Download } from "@/icons/app"
 
-import { FileItem } from ".";
+import { F0FileItem } from "."
 
 const meta = {
-  component: FileItem,
-  title: "Rich text/FileItem",
-} satisfies Meta<typeof FileItem>;
+  component: F0FileItem,
+  title: "Rich text/F0FileItem",
+} satisfies Meta<typeof F0FileItem>
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   tags: ["experimental"],
@@ -23,13 +23,13 @@ export const Default: Story = {
       {
         label: "Delete file",
         onClick: () => {
-          alert("file action");
+          alert("file action")
         },
       },
     ],
     disabled: false,
   },
-};
+}
 
 export const WithMultipleActions: Story = {
   args: {
@@ -42,20 +42,20 @@ export const WithMultipleActions: Story = {
         icon: Download,
         label: "Download file",
         onClick: () => {
-          alert("forward file");
+          alert("forward file")
         },
       },
       {
         icon: CrossedCircle,
         label: "Delete file",
         onClick: () => {
-          alert("delete file");
+          alert("delete file")
         },
         critical: true,
       },
     ],
   },
-};
+}
 
 export const WithoutActions: Story = {
   args: {
@@ -65,14 +65,14 @@ export const WithoutActions: Story = {
     }),
     actions: [],
   },
-};
+}
 
 export const Disabled: Story = {
   args: {
     ...Default.args,
     disabled: true,
   },
-};
+}
 
 export const WithDataTestId: Story = {
   args: {
@@ -80,7 +80,7 @@ export const WithDataTestId: Story = {
     dataTestId: "file-item-test-id",
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await expect(canvas.getByTestId("file-item-test-id")).toBeInTheDocument();
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("file-item-test-id")).toBeInTheDocument()
   },
-};
+}
