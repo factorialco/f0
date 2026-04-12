@@ -1,14 +1,14 @@
-import { FileItem } from "@/components/RichText/FileItem"
-import { CrossedCircle } from "@/icons/app"
-import { Skeleton } from "@/ui/skeleton"
+import { F0FileItem } from "@/components/F0FileItem";
+import { CrossedCircle } from "@/icons/app";
+import { Skeleton } from "@/ui/skeleton";
 
-import { type AttachedFile } from "./types"
+import { type AttachedFile } from "./types";
 
 interface AttachedFilesListProps {
-  attachedFiles: AttachedFile[]
-  isUploading: boolean
-  onRemove: (id: string) => void
-  removeLabel: string
+  attachedFiles: AttachedFile[];
+  isUploading: boolean;
+  onRemove: (id: string) => void;
+  removeLabel: string;
 }
 
 export const AttachedFilesList = ({
@@ -17,7 +17,7 @@ export const AttachedFilesList = ({
   onRemove,
   removeLabel,
 }: AttachedFilesListProps) => {
-  if (attachedFiles.length === 0) return null
+  if (attachedFiles.length === 0) return null;
 
   return (
     <div
@@ -29,7 +29,7 @@ export const AttachedFilesList = ({
         att.status === "uploading" ? (
           <Skeleton key={att.id} className="h-9 w-36 rounded-lg" />
         ) : (
-          <FileItem
+          <F0FileItem
             key={att.id}
             file={att.file}
             size="lg"
@@ -41,8 +41,8 @@ export const AttachedFilesList = ({
               },
             ]}
           />
-        )
+        ),
       )}
     </div>
-  )
-}
+  );
+};

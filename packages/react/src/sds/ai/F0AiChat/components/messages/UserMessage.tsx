@@ -1,47 +1,47 @@
-import { Markdown, type UserMessageProps } from "@copilotkit/react-ui"
-import { useEffect, useRef } from "react"
+import { Markdown, type UserMessageProps } from "@copilotkit/react-ui";
+import { useEffect, useRef } from "react";
 
-import { FileItem } from "@/components/RichText/FileItem"
+import { F0FileItem } from "@/components/F0FileItem";
 
-import { markdownRenderers } from "../markdownRenderers"
-import { useAiChat } from "../../providers/AiChatStateProvider"
+import { markdownRenderers } from "../markdownRenderers";
+import { useAiChat } from "../../providers/AiChatStateProvider";
 
 type UploadedFile = {
-  url: string
-  filename: string
-  mimetype: string
-}
+  url: string;
+  filename: string;
+  mimetype: string;
+};
 
 type RawDataWithUploads = {
-  uploadedFiles?: UploadedFile[]
-}
+  uploadedFiles?: UploadedFile[];
+};
 
-type MessageTextPart = { type: "text"; text?: string }
+type MessageTextPart = { type: "text"; text?: string };
 type MessageBinaryPart = {
-  type: "binary"
-  url?: string
-  filename?: string
-  mimeType?: string
-}
-type MessagePart = MessageTextPart | MessageBinaryPart
+  type: "binary";
+  url?: string;
+  filename?: string;
+  mimeType?: string;
+};
+type MessagePart = MessageTextPart | MessageBinaryPart;
 
 function getTextContent(
-  content: string | MessagePart[] | undefined
+  content: string | MessagePart[] | undefined,
 ): string | undefined {
-  if (typeof content === "string") return content
+  if (typeof content === "string") return content;
   if (Array.isArray(content)) {
     return content
       .filter((part): part is MessageTextPart => part.type === "text")
       .map((part) => part.text)
       .filter((part): part is string => typeof part === "string")
-      .join("")
+      .join("");
   }
-  return undefined
+  return undefined;
 }
 
 function getUploadedFiles(
   content: string | MessagePart[] | undefined,
-  rawData: RawDataWithUploads | undefined
+  rawData: RawDataWithUploads | undefined,
 ): UploadedFile[] {
   const uploadedFilesFromParts = Array.isArray(content)
     ? content
@@ -55,20 +55,20 @@ function getUploadedFiles(
           (file): file is UploadedFile =>
             typeof file?.filename === "string" &&
             typeof file?.mimetype === "string" &&
-            typeof file?.url === "string"
+            typeof file?.url === "string",
         )
-    : []
+    : [];
 
   if (uploadedFilesFromParts.length > 0) {
-    return uploadedFilesFromParts
+    return uploadedFilesFromParts;
   }
 
   return (rawData?.uploadedFiles ?? []).filter(
     (file): file is UploadedFile =>
       typeof file?.filename === "string" &&
       typeof file?.mimetype === "string" &&
-      typeof file?.url === "string"
-  )
+      typeof file?.url === "string",
+  );
 }
 
 /**
@@ -76,30 +76,30 @@ function getUploadedFiles(
  * Matches `<tool-context tool="...">...</tool-context>` followed by optional whitespace.
  */
 const TOOL_CONTEXT_RE =
-  /<tool-context\s+tool="[^"]*">[\s\S]*?<\/tool-context>\s*/g
+  /<tool-context\s+tool="[^"]*">[\s\S]*?<\/tool-context>\s*/g;
 
 export const UserMessage = ({ message }: UserMessageProps) => {
-  const ref = useRef<HTMLDivElement>(null)
+  const ref = useRef<HTMLDivElement>(null);
 
-  const { visualizationMode } = useAiChat()
-  const isFullscreen = visualizationMode === "fullscreen"
+  const { visualizationMode } = useAiChat();
+  const isFullscreen = visualizationMode === "fullscreen";
 
   useEffect(() => {
-    if (!ref.current || isFullscreen) return
+    if (!ref.current || isFullscreen) return;
 
     ref.current.scrollIntoView({
       behavior: "smooth",
-    })
-  }, [isFullscreen])
+    });
+  }, [isFullscreen]);
 
-  const rawData = (message as { rawData?: RawDataWithUploads }).rawData
+  const rawData = (message as { rawData?: RawDataWithUploads }).rawData;
   const uploadedFiles = getUploadedFiles(
     message?.content as MessagePart[],
-    rawData
-  )
-  const raw = getTextContent(message?.content as MessagePart[]) ?? ""
-  const content = raw.replace(TOOL_CONTEXT_RE, "").trim()
-  const hasVisibleText = content.trim().length > 0
+    rawData,
+  );
+  const raw = getTextContent(message?.content as MessagePart[]) ?? "";
+  const content = raw.replace(TOOL_CONTEXT_RE, "").trim();
+  const hasVisibleText = content.trim().length > 0;
 
   return (
     <div
@@ -109,7 +109,7 @@ export const UserMessage = ({ message }: UserMessageProps) => {
       {uploadedFiles.length > 0 && (
         <div className="flex max-w-[90%] flex-wrap justify-end gap-1.5">
           {uploadedFiles.map((file, index) => (
-            <FileItem
+            <F0FileItem
               key={`${file.filename}-${index}`}
               file={{ name: file.filename, type: file.mimetype }}
               size="lg"
@@ -123,5 +123,5 @@ export const UserMessage = ({ message }: UserMessageProps) => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};

@@ -1,15 +1,15 @@
-import { ControllerRenderProps, FieldValues } from "react-hook-form"
+import { ControllerRenderProps, FieldValues } from "react-hook-form";
 
-import { RichTextEditor } from "@/components/RichText/RichTextEditor"
+import { F0RichTextEditor } from "@/components/RichText/F0RichTextEditor";
 
-import type { F0RichTextField, RichTextValue } from "./types"
-import type { ResolvedField } from "../types"
+import type { F0RichTextField, RichTextValue } from "./types";
+import type { ResolvedField } from "../types";
 
 interface RichTextFieldRendererProps {
-  field: ResolvedField<F0RichTextField>
-  formField: ControllerRenderProps<FieldValues>
-  error?: boolean
-  loading?: boolean
+  field: ResolvedField<F0RichTextField>;
+  formField: ControllerRenderProps<FieldValues>;
+  error?: boolean;
+  loading?: boolean;
 }
 
 /**
@@ -21,10 +21,10 @@ export function RichTextFieldRenderer({
   error,
   loading,
 }: RichTextFieldRendererProps) {
-  const currentValue = formField.value as RichTextValue | undefined
+  const currentValue = formField.value as RichTextValue | undefined;
 
   return (
-    <RichTextEditor
+    <F0RichTextEditor
       {...formField}
       title={field.label}
       placeholder={field.placeholder ?? ""}
@@ -42,8 +42,8 @@ export function RichTextFieldRenderer({
         formField.onChange({
           value: result.value,
           mentionIds: result.mentionIds,
-        } satisfies RichTextValue)
+        } satisfies RichTextValue);
       }}
     />
-  )
+  );
 }
