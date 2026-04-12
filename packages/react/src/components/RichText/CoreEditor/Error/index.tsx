@@ -1,14 +1,14 @@
-import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
-import { F0Button } from "@/components/F0Button"
-import { useI18n } from "@/lib/providers/i18n/i18n-provider"
+import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert";
+import { F0Button } from "@/components/F0Button";
+import { useI18n } from "@/lib/providers/i18n/i18n-provider";
 
 interface EnhanceErrorBannerProps {
-  error: string
-  onDismiss: () => void
+  error: string;
+  onDismiss: () => void;
 }
 
 const EnhanceErrorBanner = ({ error, onDismiss }: EnhanceErrorBannerProps) => {
-  const i18n = useI18n()
+  const i18n = useI18n();
 
   return (
     <div className="flex w-max max-w-full items-center gap-10 rounded-md bg-f1-background-critical p-1 drop-shadow-sm">
@@ -27,15 +27,15 @@ const EnhanceErrorBanner = ({ error, onDismiss }: EnhanceErrorBannerProps) => {
         <F0Button
           variant="outline"
           onClick={(e) => {
-            e.preventDefault()
-            onDismiss()
+            e.preventDefault();
+            onDismiss();
           }}
           label={i18n.richTextEditor.ai.closeErrorButtonLabel}
           size="sm"
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export { EnhanceErrorBanner }
+export { EnhanceErrorBanner };
