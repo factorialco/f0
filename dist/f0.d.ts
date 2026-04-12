@@ -6192,6 +6192,8 @@ export declare type F0FileField = F0BaseField & {
  */
 export declare type F0FileFieldConfig = F0StringFileConfig | F0ArrayFileConfig;
 
+export declare const F0FileItem: WithDataTestIdReturnType_3<ForwardRefExoticComponent<FileItemProps & RefAttributes<HTMLDivElement>>>;
+
 export declare const F0FilterPickerContent: <Filters extends FiltersDefinition>(props: F0FilterPickerContentProps<Filters> & {
     dataTestId?: string;
 }) => ReactElement | null;
@@ -6856,6 +6858,10 @@ export declare interface F0MoreInfoLink {
     label?: string;
 }
 
+export declare const F0NotesTextEditor: ForwardRefExoticComponent<NotesTextEditorProps & RefAttributes<NotesTextEditorHandle>>;
+
+export declare const F0NotesTextEditorSkeleton: ({ withHeader, withTitle, withToolbar, }: NotesTextEditorSkeletonProps) => JSX_2.Element;
+
 /**
  * F0 config options specific to number fields
  *
@@ -7041,6 +7047,12 @@ export declare interface F0RichTextConfig {
     /** Whether to use plain HTML mode */
     plainHtmlMode?: boolean;
 }
+
+export declare const F0RichTextDisplay: WithDataTestIdReturnType_4<ForwardRefExoticComponent<RichTextDisplayProps & RefAttributes<HTMLDivElement>>>;
+
+export declare const F0RichTextEditor: ForwardRefExoticComponent<RichTextEditorProps & RefAttributes<RichTextEditorHandle>> & {
+    Skeleton: ({ rows, }: RichTextEditorSkeletonProps) => JSX_2.Element;
+};
 
 /**
  * Rich text field with all properties for rendering
@@ -7730,8 +7742,6 @@ declare type FileDef = {
  * All valid renderIf conditions for file fields
  */
 declare type FileFieldRenderIf = CommonRenderIfCondition | F0BaseFieldRenderIfFunction;
-
-export declare const FileItem: WithDataTestIdReturnType_4<ForwardRefExoticComponent<FileItemProps & RefAttributes<HTMLDivElement>>>;
 
 declare interface FileItemProps extends React.HTMLAttributes<HTMLDivElement> {
     file: File | FileDef;
@@ -9262,8 +9272,6 @@ export declare interface NextStepsProps {
     items: StepItemProps[];
 }
 
-export declare const NotesTextEditor: ForwardRefExoticComponent<NotesTextEditorProps & RefAttributes<NotesTextEditorHandle>>;
-
 export declare interface NotesTextEditorHandle {
     clear: () => void;
     focus: () => void;
@@ -9305,8 +9313,6 @@ export declare interface NotesTextEditorProps extends WithDataTestIdProps {
     banner?: BannerProps;
     showBubbleMenu?: boolean;
 }
-
-export declare const NotesTextEditorSkeleton: ({ withHeader, withTitle, withToolbar, }: NotesTextEditorSkeletonProps) => JSX_2.Element;
 
 export declare interface NotesTextEditorSkeletonProps {
     withHeader?: boolean;
@@ -10476,8 +10482,6 @@ export declare type resultType = {
     mentionIds?: number[];
 };
 
-export declare const RichTextDisplay: WithDataTestIdReturnType_4<ForwardRefExoticComponent<RichTextDisplayProps & RefAttributes<HTMLDivElement>>>;
-
 export declare type RichTextDisplayHandle = HTMLDivElement;
 
 export declare interface RichTextDisplayProps extends HTMLAttributes<HTMLDivElement> {
@@ -10485,10 +10489,6 @@ export declare interface RichTextDisplayProps extends HTMLAttributes<HTMLDivElem
     className?: string;
     format?: "html" | "markdown";
 }
-
-export declare const RichTextEditor: ForwardRefExoticComponent<RichTextEditorProps & RefAttributes<RichTextEditorHandle>> & {
-    Skeleton: ({ rows }: RichTextEditorSkeletonProps) => JSX_2.Element;
-};
 
 export declare type RichTextEditorHandle = {
     clear: () => void;
@@ -12463,6 +12463,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -12509,9 +12514,4 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

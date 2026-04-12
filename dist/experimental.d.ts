@@ -3692,6 +3692,16 @@ declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<type
     color?: "default" | "currentColor" | `#${string}` | Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
 }
 
+export declare const F0NotesTextEditor: ForwardRefExoticComponent<NotesTextEditorProps & RefAttributes<NotesTextEditorHandle>>;
+
+export declare const F0NotesTextEditorSkeleton: ({ withHeader, withTitle, withToolbar, }: NotesTextEditorSkeletonProps) => JSX_2.Element;
+
+export declare const F0RichTextDisplay: WithDataTestIdReturnType_5<ForwardRefExoticComponent<RichTextDisplayProps & RefAttributes<HTMLDivElement>>>;
+
+export declare const F0RichTextEditor: ForwardRefExoticComponent<RichTextEditorProps & RefAttributes<RichTextEditorHandle>> & {
+    Skeleton: ({ rows, }: RichTextEditorSkeletonProps) => JSX_2.Element;
+};
+
 /**
  * Base props shared across all F0Select variants
  */
@@ -3959,13 +3969,6 @@ export declare const FILE_TYPES: {
     readonly MARKDOWN: "markdown";
 };
 
-export declare type FileAction = {
-    icon?: IconType;
-    label: string;
-    onClick: () => void;
-    critical?: boolean;
-};
-
 declare type FileAvatarVariant = Extract<AvatarVariant, {
     type: "file";
 }>;
@@ -3974,27 +3977,6 @@ declare type FileDef = {
     name: string;
     type: string;
 };
-
-export declare const FileItem: WithDataTestIdReturnType_5<ForwardRefExoticComponent<FileItemProps & RefAttributes<HTMLDivElement>>>;
-
-declare interface FileItemProps extends React.HTMLAttributes<HTMLDivElement> {
-    file: File | FileDef;
-    actions?: FileAction[];
-    disabled?: boolean;
-    size?: FileItemSize;
-}
-
-export declare type FileItemSize = NonNullable<VariantProps<typeof fileItemVariants>["size"]>;
-
-declare const fileItemVariants: (props?: ({
-    size?: "lg" | "md" | undefined;
-} & ({
-    class?: ClassValue;
-    className?: never;
-} | {
-    class?: never;
-    className?: ClassValue;
-})) | undefined) => string;
 
 export declare type filesConfig = {
     onFiles: (files: File[]) => void;
@@ -5055,8 +5037,6 @@ declare interface NextStepsProps {
     items: StepItemProps[];
 }
 
-export declare const NotesTextEditor: ForwardRefExoticComponent<NotesTextEditorProps & RefAttributes<NotesTextEditorHandle>>;
-
 export declare interface NotesTextEditorHandle {
     clear: () => void;
     focus: () => void;
@@ -5098,8 +5078,6 @@ export declare interface NotesTextEditorProps extends WithDataTestIdProps {
     banner?: BannerProps;
     showBubbleMenu?: boolean;
 }
-
-export declare const NotesTextEditorSkeleton: ({ withHeader, withTitle, withToolbar, }: NotesTextEditorSkeletonProps) => JSX_2.Element;
 
 export declare interface NotesTextEditorSkeletonProps {
     withHeader?: boolean;
@@ -6154,8 +6132,6 @@ export declare type resultType = {
     mentionIds?: number[];
 };
 
-export declare const RichTextDisplay: WithDataTestIdReturnType_5<ForwardRefExoticComponent<RichTextDisplayProps & RefAttributes<HTMLDivElement>>>;
-
 export declare type RichTextDisplayHandle = HTMLDivElement;
 
 export declare interface RichTextDisplayProps extends HTMLAttributes<HTMLDivElement> {
@@ -6163,10 +6139,6 @@ export declare interface RichTextDisplayProps extends HTMLAttributes<HTMLDivElem
     className?: string;
     format?: "html" | "markdown";
 }
-
-export declare const RichTextEditor: ForwardRefExoticComponent<RichTextEditorProps & RefAttributes<RichTextEditorHandle>> & {
-    Skeleton: ({ rows }: RichTextEditorSkeletonProps) => JSX_2.Element;
-};
 
 export declare type RichTextEditorHandle = {
     clear: () => void;
@@ -7608,6 +7580,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -7654,9 +7631,4 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
