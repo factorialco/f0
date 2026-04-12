@@ -1,16 +1,13 @@
-import { Editor } from "@tiptap/react"
-
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0Button } from "@/components/F0Button"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 
-interface ErrorProps {
+interface EnhanceErrorBannerProps {
   error: string
-  editor: Editor
-  setError: (error: string | null) => void
+  onDismiss: () => void
 }
 
-const Error = ({ error, editor, setError }: ErrorProps) => {
+const EnhanceErrorBanner = ({ error, onDismiss }: EnhanceErrorBannerProps) => {
   const i18n = useI18n()
 
   return (
@@ -26,13 +23,12 @@ const Error = ({ error, editor, setError }: ErrorProps) => {
           {error || i18n.richTextEditor.ai.defaultError}
         </p>
       </div>
-      <div className="mr- flex-shrink-0">
+      <div className="flex-shrink-0">
         <F0Button
           variant="outline"
           onClick={(e) => {
             e.preventDefault()
-            setError(null)
-            editor.setEditable(true)
+            onDismiss()
           }}
           label={i18n.richTextEditor.ai.closeErrorButtonLabel}
           size="sm"
@@ -42,4 +38,4 @@ const Error = ({ error, editor, setError }: ErrorProps) => {
   )
 }
 
-export { Error }
+export { EnhanceErrorBanner }

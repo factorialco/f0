@@ -1,8 +1,9 @@
 import { BubbleMenu, Editor, isTextSelection } from "@tiptap/react"
 import { NodeSelection } from "prosemirror-state"
+import { useEffect, useRef, useState } from "react"
 
-import { EnhanceActivator } from "../../RichTextEditor/Enhance"
-import { enhanceConfig, lastIntentType } from "../../RichTextEditor/utils/types"
+import { EnhanceActivator } from "../Enhance/EnhanceActivator"
+import { enhanceConfig } from "../Enhance/types"
 import { Toolbar, ToolbarDivider } from "../Toolbar"
 
 interface EditorBubbleMenuProps {
@@ -19,10 +20,12 @@ interface EditorBubbleMenuProps {
     customIntent?: string
   ) => Promise<void>
   isLoadingEnhance?: boolean
-  setLastIntent?: (lastIntent: lastIntentType) => void
-  // Hide bubble menu when enhance is active
   isAcceptChangesOpen?: boolean
-  hasError?: boolean
+  onAcceptChanges?: () => void
+  onRejectChanges?: () => void
+  onRetryChanges?: () => void
+  /** When true, the bubble menu is hidden (during loading, accept changes, or error) */
+  enhanceActive?: boolean
 }
 
 export const EditorBubbleMenu = ({
@@ -35,30 +38,74 @@ export const EditorBubbleMenu = ({
   enhanceConfig,
   onEnhanceWithAI,
   isLoadingEnhance = false,
-  setLastIntent,
   isAcceptChangesOpen = false,
-  hasError = false,
+  onAcceptChanges,
+  onRejectChanges,
+  onRetryChanges,
+  enhanceActive = false,
 }: EditorBubbleMenuProps) => {
-  const showEnhance = enhanceConfig && onEnhanceWithAI && setLastIntent
+  const showEnhance = enhanceConfig && onEnhanceWithAI
+  const shouldKeepEnhanceVisible =
+    !!showEnhance && (isLoadingEnhance || isAcceptChangesOpen)
+  const bubbleMenuContainerRef = useRef<HTMLDivElement>(null)
+  const [bubbleMenuWidth, setBubbleMenuWidth] = useState<number>()
 
-  // Hide bubble menu during enhance flow
-  const shouldHideForEnhance =
-    isLoadingEnhance || isAcceptChangesOpen || hasError
+  useEffect(() => {
+    if (!bubbleMenuContainerRef.current) return
+    const updateWidth = () => {
+      setBubbleMenuWidth(bubbleMenuContainerRef.current?.offsetWidth)
+    }
+
+    updateWidth()
+    window.addEventListener("resize", updateWidth)
+    return () => window.removeEventListener("resize", updateWidth)
+  }, [])
 
   return (
     <BubbleMenu
       tippyOptions={{
         duration: 100,
-        placement: "top",
+        placement: "bottom",
         hideOnClick: false,
+        interactive: true,
+        maxWidth: "none",
         appendTo: () =>
           isFullscreen
             ? document.body
             : document.getElementById(editorId) || document.body,
         zIndex: 9999,
+        popperOptions: {
+          modifiers: [
+            {
+              name: "preventOverflow",
+              options: {
+                boundary: "viewport",
+                padding: 12,
+                altAxis: true,
+                tether: true,
+              },
+            },
+            {
+              name: "flip",
+              options: {
+                fallbackPlacements: [
+                  "bottom-start",
+                  "bottom-end",
+                  "top",
+                  "top-start",
+                  "top-end",
+                ],
+              },
+            },
+          ],
+        },
       }}
       editor={editor}
       shouldShow={({ view, state, from, to }) => {
+        if (shouldKeepEnhanceVisible) {
+          return true
+        }
+
         const { doc, selection } = state
         const { empty } = selection
 
@@ -86,21 +133,27 @@ export const EditorBubbleMenu = ({
         return true
       }}
     >
-      {!isToolbarOpen && !shouldHideForEnhance && (
-        <div className="dark z-50 flex w-max flex-row items-center gap-1 rounded-lg border border-solid border-f1-border bg-f1-background p-1 drop-shadow-sm">
+      {!isToolbarOpen && (!enhanceActive || shouldKeepEnhanceVisible) && (
+        <div
+          ref={bubbleMenuContainerRef}
+          className="dark z-50 flex w-max flex-row items-center gap-1 rounded-lg border border-solid border-f1-border bg-f1-background p-1.5 drop-shadow-sm"
+        >
           {showEnhance && (
             <>
               <EnhanceActivator
-                editor={editor}
                 onEnhanceWithAI={onEnhanceWithAI}
-                isLoadingEnhance={isLoadingEnhance}
                 enhanceConfig={enhanceConfig}
-                disableButtons={disableButtons}
-                hideLabel
-                position="top"
-                setLastIntent={setLastIntent}
+                disabled={disableButtons}
+                darkMode={true}
+                menuWidth={bubbleMenuWidth}
+                menuContainerRef={bubbleMenuContainerRef}
+                isLoadingEnhance={isLoadingEnhance}
+                isAcceptChangesOpen={isAcceptChangesOpen}
+                onAcceptChanges={onAcceptChanges}
+                onRejectChanges={onRejectChanges}
+                onRetryChanges={onRetryChanges}
+                lockToViewportOnLock
               />
-
               <ToolbarDivider />
             </>
           )}

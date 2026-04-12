@@ -1,6 +1,6 @@
 import { Editor } from "@tiptap/react"
 
-import { enhancedTextResponse, enhanceTextParams } from ".."
+import { enhancedTextResponse, enhanceTextParams } from "./types"
 
 function extractTextToEnhance(editor: Editor) {
   const selectedRange =
