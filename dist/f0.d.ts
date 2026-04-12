@@ -9304,6 +9304,7 @@ export declare interface NotesTextEditorProps extends WithDataTestIdProps {
     readonly?: boolean;
     aiBlockConfig?: AIBlockConfig;
     imageUploadConfig?: ImageUploadConfig;
+    enhanceConfig?: enhanceConfig;
     onTitleChange?: (title: string) => void;
     titlePlaceholder?: string;
     primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
