@@ -36159,10 +36159,7 @@ const T$ = /(?:^|\s)(!\[(.+|:?)]\((\S+)(?:(?:\s+)["'](\S+)["'])?\))$/, M$ = Ue.c
     return xl(N$);
   },
   renderHTML({ HTMLAttributes: t }) {
-    return [
-      "img",
-      we(this.options.HTMLAttributes, t)
-    ];
+    return ["img", we(this.options.HTMLAttributes, t)];
   }
 }).configure({
   inline: !1,
