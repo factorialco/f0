@@ -304,6 +304,11 @@ export interface ChatDashboardInsightItem extends ChatDashboardItemBase {
    * into the data behind this insight (future bridge with one_analytics).
    */
   queryDataParams?: string | null
+  /**
+   * ISO-8601 timestamp of when this insight was generated.
+   * Set automatically by the backend — used to display staleness indicators.
+   */
+  generatedAt?: string
 }
 
 export type ChatDashboardItem =

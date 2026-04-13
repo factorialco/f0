@@ -294,6 +294,11 @@ export interface DashboardInsightItem extends DashboardItemBase {
   type: "insight"
   /** React node rendered inside the grid cell. Produced by the consumer. */
   renderContent: () => ReactNode
+  /**
+   * ISO-8601 timestamp of when this insight was generated.
+   * Reserved for future use (e.g. freshness-based refresh).
+   */
+  generatedAt?: string
 }
 
 // ---------------------------------------------------------------------------

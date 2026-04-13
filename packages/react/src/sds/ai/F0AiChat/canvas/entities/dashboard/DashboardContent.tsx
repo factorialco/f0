@@ -610,6 +610,7 @@ function mapInsightItem(item: ChatDashboardInsightItem): DashboardInsightItem {
     x: item.x,
     y: item.y,
     type: "insight",
+    generatedAt: item.generatedAt,
     renderContent: () => {
       // Guard against partially-streamed items where insightContent
       // may not be available yet.

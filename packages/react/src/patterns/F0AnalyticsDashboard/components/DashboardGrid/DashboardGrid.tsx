@@ -329,12 +329,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       {displayRows.map((row, ri) => {
         const isDropRow =
           dragId && dropTarget?.type === "into-row" && dropTarget.rowIdx === ri
-        const isInsightRow = row.ids.some(
-          (id) => itemMap.get(id)?.type === "insight"
-        )
 
         return (
-          <div key={ri} className={cn("relative", isInsightRow && "mb-3")}>
+          <div key={ri} className="relative">
             {/* Gap drop zone BEFORE this row (between rows) */}
             {canDrag && ri > 0 && (
               <RowGapDropZone
@@ -345,7 +342,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
             )}
             <div
               className={cn(
-                "flex rounded-lg transition-colors duration-200",
+                "relative flex rounded-lg transition-colors duration-200",
                 isDropRow && "bg-f1-background-hover"
               )}
               style={{ gap: GAP, height: row.height }}
