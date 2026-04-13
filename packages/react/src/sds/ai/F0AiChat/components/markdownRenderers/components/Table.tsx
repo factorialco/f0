@@ -1,11 +1,22 @@
-import { useRef } from "react"
-import * as XLSX from "xlsx"
+import { useCallback, useRef } from "react"
 
-import { F0Button } from "@/components/F0Button"
-import DownloadIcon from "@/icons/app/Download"
+import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
+import { Download } from "@/icons/app"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+
+type DownloadFormat = "xlsx" | "csv"
+
+async function downloadTable(
+  table: HTMLTableElement,
+  format: DownloadFormat,
+  filename: string
+) {
+  const XLSX = await import("xlsx")
+  const workbook = XLSX.utils.table_to_book(table, { sheet: "Data" })
+  XLSX.writeFile(workbook, `${filename}.${format}`)
+}
 
 export function Table({
   children,
@@ -15,11 +26,14 @@ export function Table({
   const translation = useI18n()
   const ref = useRef<HTMLTableElement>(null)
 
-  const handleDownload = () => {
-    if (!ref.current) return
-    const workbook = XLSX.utils.table_to_book(ref.current, { sheet: "Data" })
-    XLSX.writeFile(workbook, "table.xlsx")
-  }
+  const handleDownload = useCallback(
+    (format: DownloadFormat) => {
+      if (!ref.current) return
+      const filename = title?.replace(/\s+/g, "_").toLowerCase() || "table"
+      downloadTable(ref.current, format, filename)
+    },
+    [title]
+  )
 
   return (
     <div className="group/table relative flex flex-col gap-2 rounded-md border border-solid border-f1-border-secondary">
@@ -32,13 +46,28 @@ export function Table({
             {title}
           </OneEllipsis>
         )}
-        <F0Button
+        <F0ButtonDropdown
           variant="outline"
-          label={translation.t("ai.dataDownload.download", { format: "Excel" })}
-          hideLabel={!!title}
           size="sm"
-          icon={DownloadIcon}
-          onClick={handleDownload}
+          mode="dropdown"
+          trigger={translation.t("ai.dataDownload.title")}
+          items={[
+            {
+              value: "xlsx",
+              icon: Download,
+              label: translation.t("ai.dataDownload.download", {
+                format: "Excel",
+              }),
+            },
+            {
+              value: "csv",
+              icon: Download,
+              label: translation.t("ai.dataDownload.download", {
+                format: "CSV",
+              }),
+            },
+          ]}
+          onClick={(format) => handleDownload(format as DownloadFormat)}
         />
       </div>
       <div className="scrollbar-macos overflow-x-auto">
