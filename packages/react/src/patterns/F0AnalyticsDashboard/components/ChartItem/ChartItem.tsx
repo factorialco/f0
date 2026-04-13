@@ -149,14 +149,15 @@ function buildChartProps(
 
       if (Array.isArray(data.series)) {
         const firstSeries = data.series[0] as
-          | { name: string; data: number[] }
+          | { name: string; data: (number | { value: number })[] }
           | undefined
         funnelSeries = {
           name: firstSeries?.name ?? "Funnel",
-          data: (data.categories ?? []).map((cat, i) => ({
-            name: cat,
-            value: firstSeries?.data[i] ?? 0,
-          })),
+          data: (data.categories ?? []).map((cat, i) => {
+            const raw = firstSeries?.data[i]
+            const value = typeof raw === "number" ? raw : (raw?.value ?? 0)
+            return { name: cat, value }
+          }),
         }
       } else {
         funnelSeries = data.series as F0DataChartFunnelSeries
