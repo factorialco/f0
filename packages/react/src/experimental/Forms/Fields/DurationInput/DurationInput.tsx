@@ -334,7 +334,6 @@ const _DurationInput = forwardRef<HTMLInputElement, DurationInputProps>(
 
 _DurationInput.displayName = "DurationInput"
 
-export { _DurationInput }
 export type { DurationInputProps }
 
 export const DurationInput = experimentalComponent(
