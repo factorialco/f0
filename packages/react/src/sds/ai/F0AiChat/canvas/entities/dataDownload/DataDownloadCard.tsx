@@ -3,12 +3,12 @@ import { useI18n } from "@/lib/providers/i18n"
 import type { DataDownloadDataset } from "../../../actions/core/dataDownload/types"
 import type { DataDownloadCanvasContent } from "../../../types"
 
-import { useToolCallId } from "../../../components/messages/AssistantMessage"
 import {
   Table,
   Td,
   Th,
 } from "../../../components/markdownRenderers/components/Table"
+import { useToolCallId } from "../../../components/messages/AssistantMessage"
 import { useAutoOpenCanvas } from "../../../hooks/useAutoOpenCanvas"
 import { useAiChat } from "../../../providers/AiChatStateProvider"
 import { CanvasCard } from "../../components/CanvasCard"
@@ -36,7 +36,9 @@ export function DataDownloadCard({
   const toolCallId = useToolCallId()
   const { canvasContent, openCanvas, closeCanvas } = useAiChat()
 
-  const title = titleProp || filename || translations.ai.dataDownload.title
+  const cleanFilename = filename?.replaceAll("_", " ")
+
+  const title = titleProp || cleanFilename || translations.ai.dataDownload.title
 
   // Render inline only when the rows we have represent the complete
   // dataset and it's small enough to display in the chat thread.
