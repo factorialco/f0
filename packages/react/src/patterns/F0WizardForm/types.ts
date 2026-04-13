@@ -83,6 +83,8 @@ export interface F0FormDefinitionSingleSchema<TSchema extends F0FormSchema> {
   defaultValuesFn?: (
     params: Record<string, unknown>
   ) => Promise<Partial<z.infer<TSchema>>>
+  /** Wizard steps — when present, F0WizardForm uses these instead of auto-deriving from sections */
+  steps?: F0WizardFormStep[]
 }
 
 export interface F0FormDefinitionPerSection<T extends F0PerSectionSchema> {
@@ -109,6 +111,8 @@ export interface F0FormDefinitionPerSection<T extends F0PerSectionSchema> {
   defaultValuesFn?: (
     params: Record<string, unknown>
   ) => Promise<{ [K in keyof T]?: Partial<z.infer<T[K]>> }>
+  /** Wizard steps — when present, F0WizardForm uses these instead of auto-deriving from sections */
+  steps?: F0WizardFormStep[]
 }
 
 export type F0FormDefinition<

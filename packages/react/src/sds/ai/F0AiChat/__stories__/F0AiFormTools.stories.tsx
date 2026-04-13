@@ -196,6 +196,13 @@ function FormWithAiDemo() {
     name: "new-employee",
     schema: employeeSchema,
     sections: employeeSections,
+    steps: [
+      { title: "Personal Info", sectionIds: ["personal"] },
+      { title: "Job Details", sectionIds: ["job"] },
+      { title: "Compensation", sectionIds: ["compensation"] },
+      { title: "Important Dates", sectionIds: ["dates"] },
+      { title: "Additional", sectionIds: ["additional"] },
+    ],
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -220,7 +227,7 @@ function FormWithAiDemo() {
   })
 
   return (
-    <div className="mx-auto max-w-2xl p-8">
+    <div className="mx-auto p-8">
       <h1 className="font-bold mb-1 text-2xl text-f1-foreground">
         New Employee
       </h1>
@@ -819,7 +826,7 @@ export const AvailableForms: Story = {
               sidebar={<Sidebar {...SidebarStories.default.args} />}
             >
               <Page header={<PageHeader module={storyModule} />}>
-                <div className="mx-auto max-w-2xl p-8">
+                <div className="mx-auto p-8">
                   <h1 className="font-bold mb-2 text-2xl text-f1-foreground">
                     AI Form Tools
                   </h1>

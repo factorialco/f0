@@ -1,5 +1,5 @@
 import { useCoAgent } from "@copilotkit/react-core"
-import { type FC, useEffect, type ReactNode } from "react"
+import { type FC, useEffect, type ReactNode, useMemo } from "react"
 import { z } from "zod"
 
 import type { ModuleId } from "@/components/avatars/F0AvatarModule"
@@ -28,6 +28,9 @@ const FALLBACK_SCHEMA = z.object({}) as unknown as F0FormSchema
 const DynamicF0Form = F0Form as FC<{
   formDefinition: F0FormDefinitionSingleSchema<F0FormSchema>
   formRef: ReturnType<typeof useF0Form>["formRef"]
+  styling?: {
+    showSectionsSidepanel?: boolean
+  }
 }>
 
 /**
@@ -51,7 +54,7 @@ function VirtualFormContent() {
   const currentValues = activeForm?.formValues ?? {}
 
   useEffect(() => {
-    ref?.setValues(currentValues, { shouldDirty: true, shouldValidate: true })
+    ref?.setValues(currentValues, { shouldDirty: true, shouldValidate: false })
   }, [formName, JSON.stringify(currentValues)])
 
   const formDefinition = useF0FormDefinition({
@@ -59,6 +62,7 @@ function VirtualFormContent() {
     schema: entry?.schema ?? FALLBACK_SCHEMA,
     defaultValues: currentValues,
     sections: entry?.sections,
+    steps: entry?.steps,
     module: entry?.module,
     description: entry?.description,
     submitConfig: { type: "default" },
@@ -71,9 +75,26 @@ function VirtualFormContent() {
     },
   })
 
+  const formHasSteps = !!formDefinition.steps?.length
+
+  const showSectionsSidepanel = formHasSteps
+
+  const formStyling = useMemo(
+    () => ({
+      showSectionsSidepanel,
+    }),
+    [showSectionsSidepanel]
+  )
+
   if (!activeForm || !entry) return null
 
-  return <DynamicF0Form formDefinition={formDefinition} formRef={formRef} />
+  return (
+    <DynamicF0Form
+      formDefinition={formDefinition}
+      formRef={formRef}
+      styling={formStyling}
+    />
+  )
 }
 
 /**
@@ -93,7 +114,7 @@ export function FormContent(): ReactNode {
   if (!formName) return null
 
   return (
-    <div className="mx-auto h-fit max-w-2xl p-6">
+    <div className="mx-auto h-fit">
       <VirtualFormContent />
     </div>
   )

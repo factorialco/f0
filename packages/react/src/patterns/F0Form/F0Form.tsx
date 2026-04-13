@@ -203,7 +203,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
           />
         </div>
         <div className="w-px bg-f1-border-secondary" />
-        <div className="flex flex-1 justify-center">{content}</div>
+        {content}
       </div>
     )
   }
@@ -878,7 +878,12 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const formContent = (
     <form
       onSubmit={form.handleSubmit(handleSubmit)}
-      className={cn("flex flex-col", FORM_MAX_WIDTH, className)}
+      className={cn(
+        "flex flex-1 flex-col mx-auto",
+        FORM_MAX_WIDTH,
+        className,
+        styling?.showSectionsSidepanel && "p-2 pb-6"
+      )}
     >
       {/* Render definition items with switch grouping */}
       {groupedItems.map((groupedItem, index) => {
@@ -980,7 +985,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             <div className="w-px bg-f1-border-secondary" />
 
             {/* Form content - centered in available space */}
-            <div className="flex flex-1 justify-center">{formContent}</div>
+            {formContent}
           </div>
         ) : (
           formContent

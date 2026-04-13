@@ -18,6 +18,7 @@ import type {
   F0PerSectionSchema,
   F0WizardFormPerSectionSubmitArg,
   F0WizardFormSingleSubmitArg,
+  F0WizardFormStep,
 } from "./types"
 
 // =============================================================================
@@ -56,6 +57,8 @@ interface UseF0FormDefinitionSingleSchemaInputBase<
   ) => Promise<F0FormSubmitResult> | F0FormSubmitResult
   submitConfig?: F0FormSubmitConfig
   errorTriggerMode?: F0FormErrorTriggerMode
+  /** Wizard steps — when present, F0WizardForm uses these instead of auto-deriving from sections */
+  steps?: F0WizardFormStep[]
 }
 
 /** Single-schema input WITHOUT `defaultValuesParamsSchema` → `defaultValues` is sync or `(signal) => Promise<T>` */
@@ -98,6 +101,8 @@ interface UseF0FormDefinitionPerSectionInputBase<T extends F0PerSectionSchema> {
   ) => Promise<F0FormSubmitResult> | F0FormSubmitResult
   submitConfig?: F0PerSectionSubmitConfig
   errorTriggerMode?: F0FormErrorTriggerMode
+  /** Wizard steps — when present, F0WizardForm uses these instead of auto-deriving from sections */
+  steps?: F0WizardFormStep[]
 }
 
 /** Per-section input WITHOUT `defaultValuesParamsSchema` */
@@ -260,6 +265,8 @@ export function useF0FormDefinition(
     module,
   } = input
 
+  const steps = "steps" in input ? input.steps : undefined
+
   // Store the raw function for the AI registry to call with actual params
   const defaultValuesFn =
     typeof defaultValues === "function" && defaultValuesParamsSchema
@@ -289,6 +296,7 @@ export function useF0FormDefinition(
       isLoading,
       defaultValuesParamsSchema,
       defaultValuesFn,
+      steps,
       _brand: brand,
     } as
       | F0FormDefinitionSingleSchema<F0FormSchema>
@@ -307,5 +315,6 @@ export function useF0FormDefinition(
     isLoading,
     defaultValuesParamsSchema,
     defaultValuesFn,
+    steps,
   ])
 }

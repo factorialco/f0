@@ -21,7 +21,8 @@ export function ActiveFormCard(): ReactNode {
   const cardTitle = form.cardTitle || form.formName
   const cardDescription = form.cardDescription || form.description
 
-  if (!cardTitle || !cardDescription) return null
+  if (!cardTitle || !cardDescription || !Object.keys(form.formValues).length)
+    return null
 
   return (
     <div className="mt-2 w-full">

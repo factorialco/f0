@@ -42,6 +42,8 @@ export interface F0AiFormEntry {
   dirtyFields?: Set<string>
   /** Consumer submit callback (from availableFormDefinition). Preserved across virtual ↔ rendered transitions. */
   onSubmit?: (values: Record<string, unknown>) => void | Promise<void>
+  /** Wizard steps (for multi-step form rendering) */
+  steps?: F0WizardFormStep[]
 }
 
 /**
@@ -522,6 +524,7 @@ export function F0AiFormRegistryProvider({
         defaultValuesParamsSchema,
         defaultValuesFn,
         onSubmit: existingEntry?.onSubmit,
+        steps: existingEntry?.steps,
       })
       rebuildDescriptions()
     },
@@ -557,6 +560,7 @@ export function F0AiFormRegistryProvider({
           defaultValuesParamsSchema: virtualDef.defaultValuesParamsSchema,
           dirtyFields,
           onSubmit: virtualDef.onSubmit,
+          steps: virtualDef.steps,
         })
       }
       rebuildDescriptions()
@@ -638,6 +642,7 @@ export function F0AiFormRegistryProvider({
         defaultValuesParamsSchema: def.defaultValuesParamsSchema,
         dirtyFields,
         onSubmit: def.onSubmit,
+        steps: def.steps,
       })
     }
 
