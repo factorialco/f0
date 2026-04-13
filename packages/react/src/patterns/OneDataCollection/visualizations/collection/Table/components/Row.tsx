@@ -3,15 +3,6 @@ import { forwardRef } from "react"
 import type { IconType } from "@/components/F0Icon"
 import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
 
-import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-import { ItemActionsMobile } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
-import { ItemActionsRowContainer } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsRowContainer"
-import { useItemActions } from "@/patterns/OneDataCollection/components/itemActions/useItemActions"
-import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
-import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
-import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
-import { renderProperty } from "@/patterns/OneDataCollection/property-render"
-import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
 import { TableCell, TableRow } from "@/experimental/OneTable"
 import {
   GroupingDefinition,
@@ -21,6 +12,15 @@ import {
 import { NestedVariant } from "@/hooks/datasource/types/nested.typings"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { ItemActionsMobile } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
+import { ItemActionsRowContainer } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsRowContainer"
+import { useItemActions } from "@/patterns/OneDataCollection/components/itemActions/useItemActions"
+import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
+import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
+import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
+import { renderProperty } from "@/patterns/OneDataCollection/property-render"
+import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
+import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { Checkbox } from "@/ui/checkbox"
 
 import type {
@@ -98,7 +98,6 @@ export type NestedRowProps = {
   expanded?: boolean
   hasLoadedChildren?: boolean
   isLastChild?: boolean
-  isLastSibling?: boolean
   nestedVariant?: NestedVariant
   parentHasChildren?: boolean
   onExpand?: () => void

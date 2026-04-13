@@ -277,6 +277,10 @@ type SurveyAnsweringFormStoryProps = DistributiveOmit<
 function SurveyAnsweringFormStory(props: SurveyAnsweringFormStoryProps) {
   const [isOpen, setIsOpen] = useState(false)
 
+  if ("inline" in props && props.inline) {
+    return <SurveyAnsweringForm {...props} />
+  }
+
   if (props.preview === true) {
     return (
       <>
@@ -469,4 +473,45 @@ export const RightSideMixedCorrectAnswers: Story = {
       "q-next-review": { type: "date", value: new Date("2026-03-20") },
     },
   },
+}
+
+export const Inline: Story = {
+  parameters: {
+    layout: "padded",
+  },
+  render: () => (
+    <div className="w-full">
+      <SurveyAnsweringForm
+        inline
+        elements={sampleElements}
+        title="Employee Review Q4"
+        description="Help us understand your recent performance."
+        datasets={mockDatasets}
+        useUpload={useMockUpload}
+        defaultValues={{
+          "q-name": { type: "text", value: "Jane Doe" },
+          "q-perf-rating": { type: "rating", value: 4 },
+          "q-department": { type: "dropdown-single", value: "engineering" },
+        }}
+      />
+    </div>
+  ),
+}
+
+export const InlineLoading: Story = {
+  parameters: {
+    layout: "padded",
+  },
+  render: () => (
+    <div className="w-full">
+      <SurveyAnsweringForm
+        inline
+        elements={sampleElements}
+        title="Employee Review Q4"
+        datasets={mockDatasets}
+        useUpload={useMockUpload}
+        loading
+      />
+    </div>
+  ),
 }

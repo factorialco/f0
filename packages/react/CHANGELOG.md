@@ -1,5 +1,47 @@
 # Changelog
 
+## [1.441.1](https://github.com/factorialco/f0/compare/f0-react-v1.441.0...f0-react-v1.441.1) (2026-04-10)
+
+
+### Bug Fixes
+
+* **Table:** improve nested tables & editable tables UI ([#3901](https://github.com/factorialco/f0/issues/3901)) ([68b9969](https://github.com/factorialco/f0/commit/68b9969bfbea350fd08d4f0b3a78daaf98ee989f))
+
+## [1.441.0](https://github.com/factorialco/f0/compare/f0-react-v1.440.2...f0-react-v1.441.0) (2026-04-10)
+
+
+### Features
+
+* **rich-text:** add AI patch finalization API and harden BlockIdExtension (FCT-50714) ([#3781](https://github.com/factorialco/f0/issues/3781)) ([5d4181f](https://github.com/factorialco/f0/commit/5d4181f68471fa1c91e4bb4444ed1316c31d29b2))
+
+## [1.440.2](https://github.com/factorialco/f0/compare/f0-react-v1.440.1...f0-react-v1.440.2) (2026-04-09)
+
+
+### Bug Fixes
+
+* **metadata:** normalize progress-bar value to percentage ([#3910](https://github.com/factorialco/f0/issues/3910)) ([dfae0e9](https://github.com/factorialco/f0/commit/dfae0e900afe7563f477e7cfa041aa473a502e37))
+
+## [1.440.1](https://github.com/factorialco/f0/compare/f0-react-v1.440.0...f0-react-v1.440.1) (2026-04-09)
+
+
+### Bug Fixes
+
+* **F0AiInsightCard:** remove label for people card type ([#3908](https://github.com/factorialco/f0/issues/3908)) ([441b3ae](https://github.com/factorialco/f0/commit/441b3ae8e0302c1df210eab986ad3f62508dddfe))
+
+## [1.440.0](https://github.com/factorialco/f0/compare/f0-react-v1.439.0...f0-react-v1.440.0) (2026-04-09)
+
+
+### Features
+
+* **F0AiInsightCard:** add analytics insight card component ([#3864](https://github.com/factorialco/f0/issues/3864)) ([3187bdb](https://github.com/factorialco/f0/commit/3187bdb53f52c0345e39eaad0d1748b8d98ee584))
+
+## [1.439.0](https://github.com/factorialco/f0/compare/f0-react-v1.438.5...f0-react-v1.439.0) (2026-04-09)
+
+
+### Features
+
+* **SurveyAnsweringForm:** add read-only inline rendering mode ([#3904](https://github.com/factorialco/f0/issues/3904)) ([bbaef18](https://github.com/factorialco/f0/commit/bbaef183532a23e3f473bff2be3097919e4ecf7e))
+
 ## [1.438.5](https://github.com/factorialco/f0/compare/f0-react-v1.438.4...f0-react-v1.438.5) (2026-04-08)
 
 

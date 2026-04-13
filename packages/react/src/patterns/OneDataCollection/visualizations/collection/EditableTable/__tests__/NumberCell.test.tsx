@@ -122,7 +122,8 @@ describe("NumberCell", () => {
       />
     )
 
-    expect(screen.getByText("EUR")).toBeInTheDocument()
+    const wrapper = screen.getByRole("textbox").closest("[data-units]")
+    expect(wrapper).toHaveAttribute("data-units", "EUR")
   })
 
   it("renders value '0' when stored value is '0' (no units)", () => {
@@ -143,6 +144,7 @@ describe("NumberCell", () => {
     )
 
     expect(screen.getByRole("textbox")).toHaveValue("0")
-    expect(screen.getByText("€")).toBeInTheDocument()
+    const wrapper = screen.getByRole("textbox").closest("[data-units]")
+    expect(wrapper).toHaveAttribute("data-units", "€")
   })
 })

@@ -124,6 +124,15 @@ export const Default: Story = {
           label: "75%",
         },
       },
+      {
+        label: "Vacancies",
+        value: {
+          type: "progress-bar",
+          value: 1,
+          max: 3,
+          label: "1/3",
+        },
+      },
     ],
   },
 }
