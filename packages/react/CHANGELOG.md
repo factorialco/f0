@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.442.0](https://github.com/factorialco/f0/compare/f0-react-v1.441.1...f0-react-v1.442.0) (2026-04-13)
+
+
+### Features
+
+* **icons:** add Basket, BookmarkFilled, UserProtected and update Bookmark, Watch ([#3802](https://github.com/factorialco/f0/issues/3802)) ([3b69d98](https://github.com/factorialco/f0/commit/3b69d985b1832a548c8ac9aab5058773921a5c43))
+
 ## [1.441.1](https://github.com/factorialco/f0/compare/f0-react-v1.441.0...f0-react-v1.441.1) (2026-04-10)
 
 
