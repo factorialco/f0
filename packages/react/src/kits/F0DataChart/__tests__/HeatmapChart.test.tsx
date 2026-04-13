@@ -80,9 +80,7 @@ describe("HeatmapChart — responsive breakpoints", () => {
     containerSize.width = 180
     render(<F0DataChart {...heatmapProps} />)
 
-    expect(
-      screen.getByText("Heatmap not supported at this size")
-    ).toBeInTheDocument()
+    expect(screen.getByText("Not supported")).toBeInTheDocument()
   })
 
   it("shows only the X axis at the medium breakpoint (220–519px)", () => {
@@ -107,20 +105,12 @@ describe("HeatmapChart — responsive breakpoints", () => {
 })
 
 describe("HeatmapChart — cell appearance", () => {
-  it("hides inline value labels by default (tooltip-only reveal)", () => {
-    containerSize.width = 720
-    render(<F0DataChart {...heatmapProps} />)
-
-    const option = getLatestOption()
-    expect(option.series[0].label?.show).toBe(false)
-  })
-
-  it("shows inline value labels when showLabels is true", () => {
+  it("never renders inline value labels (tooltip-only reveal)", () => {
     containerSize.width = 720
     render(<F0DataChart {...heatmapProps} showLabels />)
 
     const option = getLatestOption()
-    expect(option.series[0].label?.show).toBe(true)
+    expect(option.series[0].label?.show).toBe(false)
   })
 
   it("draws background-coloured borders to fake the cell gap", () => {

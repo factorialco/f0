@@ -1,7 +1,5 @@
 import { useRef } from "react"
 
-import { useI18n } from "@/lib/providers/i18n/i18n-provider"
-
 import type { F0DataChartHeatmapProps } from "../../types"
 
 import { resolveChartSize } from "../../utils/responsive"
@@ -12,7 +10,6 @@ import { useEChartsInstance } from "../../utils/useEChartsInstance"
 import { useHeatmapChartOptions } from "./useHeatmapChartOptions"
 
 export const HeatmapChart = (props: F0DataChartHeatmapProps) => {
-  const i18n = useI18n()
   const ref = useRef<HTMLDivElement>(null)
   const { width } = useContainerSize(ref)
   const size = resolveChartSize(width)
@@ -34,8 +31,8 @@ export const HeatmapChart = (props: F0DataChartHeatmapProps) => {
         className="h-full w-full data-[axis-hover=true]:[&_canvas]:!cursor-default"
       />
       {size === "sm" && (
-        <div className="absolute inset-0 flex items-center justify-center bg-f1-background p-3 text-center text-sm font-medium text-f1-foreground-tertiary">
-          {i18n.dataChart.heatmapNotSupported}
+        <div className="absolute inset-0 flex items-center justify-center bg-f1-background text-sm font-medium text-f1-foreground-secondary">
+          Not supported
         </div>
       )}
     </div>

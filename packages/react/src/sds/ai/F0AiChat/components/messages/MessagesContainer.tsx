@@ -11,8 +11,8 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
 import { F0ActionItem } from "../../../F0ActionItem"
-import { filterCoagentPlaceholders } from "../../internal-types"
 import { useMessageScroll } from "../../hooks/useMessageScroll"
+import { filterCoagentPlaceholders } from "../../internal-types"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import {
   type Turn,

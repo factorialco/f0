@@ -248,6 +248,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
     <DashboardItem
       title={item.title}
       description={item.description}
+      explanation={item.explanation}
       isLoading={isLoading}
       error={effectiveError}
       onRetry={retry}

@@ -332,6 +332,12 @@ export const defaultTranslations = {
       exporting: "Exporting...",
       rows: "rows",
     },
+    dashboardItem: {
+      chartType: "Chart type",
+      errorTitle: "Error loading data",
+      retry: "Retry",
+      dataExplanation: "Where does this data come from?",
+    },
     pong: {
       title: "Pong",
       youWin: "You win!",
