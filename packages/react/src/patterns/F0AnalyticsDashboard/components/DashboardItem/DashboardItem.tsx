@@ -198,8 +198,8 @@ export function DashboardItem({
                 ) : (
                   <>
                     {hasChartTypes && (
-                      <div className="flex flex-col gap-1 px-3 py-2">
-                        <OneEllipsis className="text-sm font-medium text-f1-foreground-secondary">
+                      <div className="flex flex-col items-start gap-2 border-0 border-b border-solid border-f1-border-secondary p-3">
+                        <OneEllipsis className="text-base font-medium text-f1-foreground-tertiary">
                           {translations.ai.dashboardItem.chartType}
                         </OneEllipsis>
                         <F0ButtonToggleGroup
@@ -216,8 +216,9 @@ export function DashboardItem({
                               .find((opt) => opt.value === value)
                               ?.onSelect()
                           }}
-                          size="md"
+                          size="lg"
                           required
+                          withBorder={false}
                         />
                       </div>
                     )}
