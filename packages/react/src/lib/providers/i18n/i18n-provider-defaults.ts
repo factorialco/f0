@@ -397,6 +397,8 @@ export const defaultTranslations = {
     barChartHorizontal: "Bar (horizontal)",
     lineChart: "Line",
     funnel: "Funnel",
+    pieChart: "Pie",
+    table: "Table",
   },
   select: {
     noResults: "No results found",
