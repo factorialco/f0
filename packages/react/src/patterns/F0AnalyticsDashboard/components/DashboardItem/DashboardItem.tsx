@@ -2,13 +2,14 @@ import { Markdown } from "@copilotkit/react-ui"
 import { useState, type ReactNode } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { F0Icon } from "@/components/F0Icon"
+import { F0ButtonToggleGroup } from "@/components/F0ButtonToggleGroup"
+import { F0Icon, type IconType } from "@/components/F0Icon"
 import { OneEmptyState } from "@/components/OneEmptyState"
 import {
   type DropdownItem as DropdownItemType,
   type DropdownItemObject,
 } from "@/experimental/Navigation/Dropdown"
-import { ChartLine, Delete, Download, Ellipsis, Ai } from "@/icons/app"
+import { Delete, Download, Ellipsis, Ai } from "@/icons/app"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -42,9 +43,11 @@ interface DashboardItemProps {
   handleDelete?: (itemId: string) => void
   /** Item ID — required when editMode is true for the delete callback */
   itemId?: string
-  /** Chart type transform options — renders as "Chart type" submenu */
+  /** Chart type transform options — rendered as a toggle group in the dropdown */
   chartTypeOptions?: {
     label: string
+    value: string
+    icon: IconType
     isActive: boolean
     onSelect: () => void
   }[]
@@ -194,6 +197,30 @@ export function DashboardItem({
                   </div>
                 ) : (
                   <>
+                    {hasChartTypes && (
+                      <div className="flex flex-col gap-1 px-3 py-2">
+                        <OneEllipsis className="text-sm font-medium text-f1-foreground-secondary">
+                          {translations.ai.dashboardItem.chartType}
+                        </OneEllipsis>
+                        <F0ButtonToggleGroup
+                          items={chartTypeOptions!.map((opt) => ({
+                            value: opt.value,
+                            icon: opt.icon,
+                            label: opt.label,
+                          }))}
+                          value={
+                            chartTypeOptions!.find((opt) => opt.isActive)?.value
+                          }
+                          onChange={(value: string) => {
+                            chartTypeOptions!
+                              .find((opt) => opt.value === value)
+                              ?.onSelect()
+                          }}
+                          size="md"
+                          required
+                        />
+                      </div>
+                    )}
                     {hasExplanation && (
                       <DropdownMenuGroup>
                         <DropdownMenuItem
@@ -214,37 +241,7 @@ export function DashboardItem({
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
                     )}
-                    {hasChartTypes && (
-                      <DropdownMenuGroup>
-                        <DropdownMenuSub>
-                          <DropdownMenuSubTrigger className="mx-1 rounded-sm px-2">
-                            <div className="flex w-full flex-row items-center gap-2 pr-2">
-                              <F0Icon icon={ChartLine} />
-                              <span className="flex-1 text-base font-medium">
-                                {translations.ai.dashboardItem.chartType}
-                              </span>
-                            </div>
-                          </DropdownMenuSubTrigger>
-                          <DropdownMenuPortal>
-                            <DropdownMenuSubContent>
-                              {chartTypeOptions!.map((opt) => (
-                                <DropdownMenuItem
-                                  key={opt.label}
-                                  onClick={opt.onSelect}
-                                  className={cn(
-                                    opt.isActive && "bg-f1-background-selected"
-                                  )}
-                                >
-                                  <div className="flex w-full flex-row items-center gap-2">
-                                    <span className="flex-1">{opt.label}</span>
-                                  </div>
-                                </DropdownMenuItem>
-                              ))}
-                            </DropdownMenuSubContent>
-                          </DropdownMenuPortal>
-                        </DropdownMenuSub>
-                      </DropdownMenuGroup>
-                    )}
+
                     {hasDownloads && (
                       <DropdownMenuGroup>
                         <DropdownMenuSub>

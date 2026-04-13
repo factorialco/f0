@@ -12,6 +12,14 @@ import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 
 import { useMemo, useRef } from "react"
 
+import type { IconType } from "@/components/F0Icon"
+import {
+  ChartFunnel,
+  ChartHorizontalBars,
+  ChartLine,
+  ChartVerticalBars,
+} from "@/icons/app"
+
 import { F0DataChart } from "@/kits/F0DataChart"
 import {
   BarChartSkeleton,
@@ -95,15 +103,29 @@ const AXIS_CHART_TYPES = ["bar", "line", "funnel"] as const
 
 type ChartTypeOption = {
   label: string
+  value: string
+  icon: IconType
   type: DashboardChartConfig["type"]
   orientation?: "vertical" | "horizontal"
 }
 
 const CHART_TYPE_OPTIONS: ChartTypeOption[] = [
-  { label: "Bar (vertical)", type: "bar", orientation: "vertical" },
-  { label: "Bar (horizontal)", type: "bar", orientation: "horizontal" },
-  { label: "Line", type: "line" },
-  { label: "Funnel", type: "funnel" },
+  {
+    label: "Bar (vertical)",
+    value: "bar-vertical",
+    icon: ChartVerticalBars,
+    type: "bar",
+    orientation: "vertical",
+  },
+  {
+    label: "Bar (horizontal)",
+    value: "bar-horizontal",
+    icon: ChartHorizontalBars,
+    type: "bar",
+    orientation: "horizontal",
+  },
+  { label: "Line", value: "line", icon: ChartLine, type: "line" },
+  { label: "Funnel", value: "funnel", icon: ChartFunnel, type: "funnel" },
 ]
 
 /**
@@ -237,6 +259,8 @@ export function ChartItem<Filters extends FiltersDefinition>({
     isAxisChart && onTransformChart
       ? CHART_TYPE_OPTIONS.map((opt) => ({
           label: opt.label,
+          value: opt.value,
+          icon: opt.icon,
           isActive:
             item.chart.type === opt.type &&
             (opt.type !== "bar" || currentOrientation === opt.orientation),
