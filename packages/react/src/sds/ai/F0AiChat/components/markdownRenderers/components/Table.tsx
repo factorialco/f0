@@ -1,6 +1,6 @@
 import { useCallback, useRef } from "react"
 
-import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
+import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { Download } from "@/icons/app"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
@@ -46,28 +46,25 @@ export function Table({
             {title}
           </OneEllipsis>
         )}
-        <F0ButtonDropdown
-          variant="outline"
-          size="sm"
-          mode="dropdown"
-          trigger={translation.t("ai.dataDownload.title")}
+        <Dropdown
+          icon={Download}
+          size="md"
           items={[
             {
-              value: "xlsx",
-              icon: Download,
               label: translation.t("ai.dataDownload.download", {
                 format: "Excel",
               }),
+              icon: Download,
+              onClick: () => handleDownload("xlsx"),
             },
             {
-              value: "csv",
-              icon: Download,
               label: translation.t("ai.dataDownload.download", {
                 format: "CSV",
               }),
+              icon: Download,
+              onClick: () => handleDownload("csv"),
             },
           ]}
-          onClick={(format) => handleDownload(format as DownloadFormat)}
         />
       </div>
       <div className="scrollbar-macos overflow-x-auto">
