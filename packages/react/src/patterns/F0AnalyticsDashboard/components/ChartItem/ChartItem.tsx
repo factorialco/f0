@@ -1,3 +1,7 @@
+import { useMemo, useRef } from "react"
+
+import type { IconType } from "@/components/F0Icon"
+import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import type {
   F0DataChartFunnelSeries,
   F0DataChartPieSeries,
@@ -8,18 +12,13 @@ import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 
-import { useMemo, useRef } from "react"
-
-import type { IconType } from "@/components/F0Icon"
 import {
   ChartFunnel,
   ChartHorizontalBars,
   ChartLine,
   ChartVerticalBars,
 } from "@/icons/app"
-
 import { F0DataChart } from "@/kits/F0DataChart"
 import {
   BarChartSkeleton,
@@ -30,6 +29,7 @@ import {
   PieChartSkeleton,
   RadarChartSkeleton,
 } from "@/kits/F0DataChart"
+import { useI18n } from "@/lib/providers/i18n"
 
 import type {
   DashboardChartConfig,
@@ -109,25 +109,6 @@ type ChartTypeOption = {
   orientation?: "vertical" | "horizontal"
 }
 
-const CHART_TYPE_OPTIONS: ChartTypeOption[] = [
-  {
-    label: "Bar (vertical)",
-    value: "bar-vertical",
-    icon: ChartVerticalBars,
-    type: "bar",
-    orientation: "vertical",
-  },
-  {
-    label: "Bar (horizontal)",
-    value: "bar-horizontal",
-    icon: ChartHorizontalBars,
-    type: "bar",
-    orientation: "horizontal",
-  },
-  { label: "Line", value: "line", icon: ChartLine, type: "line" },
-  { label: "Funnel", value: "funnel", icon: ChartFunnel, type: "funnel" },
-]
-
 /**
  * Build the full F0DataChart props by merging chart config with fetched data.
  *
@@ -146,7 +127,6 @@ function buildChartProps(
       // {value,name}[]) or the bar/line shape (array of {name, data: number[]}).
       // Convert the bar/line shape to funnel shape when needed.
       let funnelSeries: F0DataChartFunnelSeries
-
       if (Array.isArray(data.series)) {
         const firstSeries = data.series[0] as
           | { name: string; data: (number | { value: number })[] }
@@ -197,13 +177,29 @@ function buildChartProps(
       }
 
     case "bar":
-    case "line":
-      // Bar and Line charts require categories
+    case "line": {
+      // data.series may be funnel-shaped (single object) if the chart was
+      // just transformed from funnel. Normalize to the array shape that
+      // bar/line expect: [{name, data: number[]}].
+      let series = data.series
+      if (series && !Array.isArray(series)) {
+        const funnelSeries = series as {
+          name: string
+          data: { name: string; value: number }[]
+        }
+        series = [
+          {
+            name: funnelSeries.name,
+            data: funnelSeries.data.map((d) => d.value),
+          },
+        ]
+      }
       return {
         ...chart,
         categories: data.categories ?? [],
-        series: data.series,
+        series,
       } as F0DataChartProps
+    }
   }
 }
 
@@ -226,12 +222,43 @@ export function ChartItem<Filters extends FiltersDefinition>({
   handleDelete,
   onTransformChart,
 }: ChartItemProps<Filters>) {
+  const translations = useI18n()
+
   const enabled = item.useDashboardFilters !== false
   const { data, isLoading, error, retry } = useDashboardItemData<
     Filters,
     DashboardChartData
   >(item.fetchData, filters, enabled)
   const chartContainerRef = useRef<HTMLDivElement>(null)
+
+  const CHART_TYPE_OPTIONS: ChartTypeOption[] = [
+    {
+      label: translations.dataChart.barChartVertical,
+      value: "bar-vertical",
+      icon: ChartVerticalBars,
+      type: "bar",
+      orientation: "vertical",
+    },
+    {
+      label: translations.dataChart.barChartHorizontal,
+      value: "bar-horizontal",
+      icon: ChartHorizontalBars,
+      type: "bar",
+      orientation: "horizontal",
+    },
+    {
+      label: translations.dataChart.lineChart,
+      value: "line",
+      icon: ChartLine,
+      type: "line",
+    },
+    {
+      label: translations.dataChart.funnel,
+      value: "funnel",
+      icon: ChartFunnel,
+      type: "funnel",
+    },
+  ]
 
   const downloadActions = useChartDownloadActions({
     chartContainerRef,
