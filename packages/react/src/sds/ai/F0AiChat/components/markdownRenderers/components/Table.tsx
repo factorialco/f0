@@ -35,7 +35,7 @@ export function Table({
         <F0Button
           variant="outline"
           label={translation.t("ai.dataDownload.download", { format: "Excel" })}
-          hideLabel={title}
+          hideLabel={!!title}
           size="sm"
           icon={DownloadIcon}
           onClick={handleDownload}
