@@ -1,3 +1,7 @@
+import { useMemo, useRef } from "react"
+
+import type { IconType } from "@/components/F0Icon"
+import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import type {
   F0DataChartFunnelSeries,
   F0DataChartPieSeries,
@@ -8,10 +12,13 @@ import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 
-import { useMemo, useRef } from "react"
-
+import {
+  ChartFunnel,
+  ChartHorizontalBars,
+  ChartLine,
+  ChartVerticalBars,
+} from "@/icons/app"
 import { F0DataChart } from "@/kits/F0DataChart"
 import {
   BarChartSkeleton,
@@ -22,6 +29,7 @@ import {
   PieChartSkeleton,
   RadarChartSkeleton,
 } from "@/kits/F0DataChart"
+import { useI18n } from "@/lib/providers/i18n"
 
 import type {
   DashboardChartConfig,
@@ -81,6 +89,24 @@ interface ChartItemProps<Filters extends FiltersDefinition> {
   item: DashboardChartItem<Filters>
   filters: FiltersState<Filters>
   actions?: DropdownItem[]
+  editMode?: boolean
+  handleDelete?: (itemId: string) => void
+  onTransformChart?: (
+    itemId: string,
+    newType: string,
+    orientation?: "vertical" | "horizontal"
+  ) => void
+}
+
+/** Chart types that share the axis-based computation model and can be converted between each other. */
+const AXIS_CHART_TYPES = ["bar", "line", "funnel"] as const
+
+type ChartTypeOption = {
+  label: string
+  value: string
+  icon: IconType
+  type: DashboardChartConfig["type"]
+  orientation?: "vertical" | "horizontal"
 }
 
 /**
@@ -101,17 +127,17 @@ function buildChartProps(
       // {value,name}[]) or the bar/line shape (array of {name, data: number[]}).
       // Convert the bar/line shape to funnel shape when needed.
       let funnelSeries: F0DataChartFunnelSeries
-
       if (Array.isArray(data.series)) {
         const firstSeries = data.series[0] as
-          | { name: string; data: number[] }
+          | { name: string; data: (number | { value: number })[] }
           | undefined
         funnelSeries = {
           name: firstSeries?.name ?? "Funnel",
-          data: (data.categories ?? []).map((cat, i) => ({
-            name: cat,
-            value: firstSeries?.data[i] ?? 0,
-          })),
+          data: (data.categories ?? []).map((cat, i) => {
+            const raw = firstSeries?.data[i]
+            const value = typeof raw === "number" ? raw : (raw?.value ?? 0)
+            return { name: cat, value }
+          }),
         }
       } else {
         funnelSeries = data.series as F0DataChartFunnelSeries
@@ -151,13 +177,31 @@ function buildChartProps(
       }
 
     case "bar":
-    case "line":
-      // Bar and Line charts require categories
+    case "line": {
+      // data.series may be funnel-shaped (single object) if the chart was
+      // just transformed from funnel. Normalize to the array shape that
+      // bar/line expect and extract categories from the funnel data points.
+      let series = data.series
+      let categories = data.categories ?? []
+      if (series && !Array.isArray(series)) {
+        const funnelSeries = series as {
+          name: string
+          data: { name: string; value: number }[]
+        }
+        categories = funnelSeries.data.map((d) => d.name)
+        series = [
+          {
+            name: funnelSeries.name,
+            data: funnelSeries.data.map((d) => d.value),
+          },
+        ]
+      }
       return {
         ...chart,
-        categories: data.categories ?? [],
-        series: data.series,
+        categories,
+        series,
       } as F0DataChartProps
+    }
   }
 }
 
@@ -176,13 +220,47 @@ export function ChartItem<Filters extends FiltersDefinition>({
   item,
   filters,
   actions,
+  editMode,
+  handleDelete,
+  onTransformChart,
 }: ChartItemProps<Filters>) {
+  const translations = useI18n()
+
   const enabled = item.useDashboardFilters !== false
   const { data, isLoading, error, retry } = useDashboardItemData<
     Filters,
     DashboardChartData
   >(item.fetchData, filters, enabled)
   const chartContainerRef = useRef<HTMLDivElement>(null)
+
+  const CHART_TYPE_OPTIONS: ChartTypeOption[] = [
+    {
+      label: translations.dataChart.barChartVertical,
+      value: "bar-vertical",
+      icon: ChartVerticalBars,
+      type: "bar",
+      orientation: "vertical",
+    },
+    {
+      label: translations.dataChart.barChartHorizontal,
+      value: "bar-horizontal",
+      icon: ChartHorizontalBars,
+      type: "bar",
+      orientation: "horizontal",
+    },
+    {
+      label: translations.dataChart.lineChart,
+      value: "line",
+      icon: ChartLine,
+      type: "line",
+    },
+    {
+      label: translations.dataChart.funnel,
+      value: "funnel",
+      icon: ChartFunnel,
+      type: "funnel",
+    },
+  ]
 
   const downloadActions = useChartDownloadActions({
     chartContainerRef,
@@ -199,15 +277,43 @@ export function ChartItem<Filters extends FiltersDefinition>({
   const effectiveError =
     error ?? (!isLoading && !data ? new Error("No data available") : undefined)
 
+  // Build chart type transform options for axis-based charts
+  const isAxisChart = (AXIS_CHART_TYPES as readonly string[]).includes(
+    item.chart.type
+  )
+  const currentOrientation =
+    item.chart.type === "bar"
+      ? "orientation" in item.chart
+        ? (item.chart.orientation ?? "vertical")
+        : "vertical"
+      : undefined
+  const chartTypeOptions =
+    isAxisChart && onTransformChart
+      ? CHART_TYPE_OPTIONS.map((opt) => ({
+          label: opt.label,
+          value: opt.value,
+          icon: opt.icon,
+          isActive:
+            item.chart.type === opt.type &&
+            (opt.type !== "bar" || currentOrientation === opt.orientation),
+          onSelect: () => onTransformChart(item.id, opt.type, opt.orientation),
+        }))
+      : undefined
+
   return (
     <DashboardItem
       title={item.title}
       description={item.description}
+      explanation={item.explanation}
       isLoading={isLoading}
       error={effectiveError}
       onRetry={retry}
       skeleton={chartSkeleton(item.chart)}
       actions={allActions}
+      editMode={editMode}
+      handleDelete={handleDelete}
+      itemId={item.id}
+      chartTypeOptions={chartTypeOptions}
     >
       {data && (
         <div ref={chartContainerRef} className="h-full w-full px-4 py-3">

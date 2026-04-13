@@ -22,6 +22,23 @@ interface CategoryAxisOptions {
   boundaryGap?: boolean
   /** Max label width in pixels — when set, labels are truncated with ellipsis */
   maxLabelWidth?: number
+  /** Whether the axis (line, ticks, labels) is rendered at all */
+  show?: boolean
+  /**
+   * Enable the smart layout (compute `interval` + per-label `width` so all
+   * labels appear with ellipsis instead of being skipped). Used for the
+   * line/bar X axis. The legacy fixed `maxLabelWidth` path stays available
+   * for callers that need a hard cap.
+   */
+  smartLayout?: boolean
+  /**
+   * When true, anchor the first label to the left edge and the last label to
+   * the right edge of the axis. Required for `boundaryGap: false` charts
+   * (line charts) so that the leftmost/rightmost label cannot overflow the
+   * container. The label width is automatically tightened so the anchored
+   * edges don't overlap their centered neighbours.
+   */
+  edgeAligned?: boolean
 }
 
 /**
@@ -30,10 +47,19 @@ interface CategoryAxisOptions {
  */
 const MIN_LABEL_WIDTH = 60
 
+/** Smallest readable label width when truncating with ellipsis (~3 chars). */
+const MIN_TRUNCATED_LABEL_WIDTH = 24
+
+/** Horizontal breathing room reserved between adjacent centered labels. */
+const LABEL_GAP = 8
+
 /**
  * Compute how many labels to skip so that they don't overlap.
  * Returns 0 (show every label) when there's enough room, or N to
  * show every (N+1)th label.
+ *
+ * Kept for non-line chart consumers (e.g. heatmap) that don't need the
+ * smarter truncation layout.
  */
 export function computeLabelInterval(
   categoryCount: number,
@@ -48,6 +74,62 @@ export function computeLabelInterval(
   return Math.max(0, Math.ceil(categoryCount / fitCount) - 1)
 }
 
+interface CategoryAxisLayout {
+  /** ECharts `axisLabel.interval` — 0 = show every label */
+  interval: number
+  /** Max width per label in pixels (used as `axisLabel.width` for truncation) */
+  labelWidth: number
+}
+
+/**
+ * Smart category axis layout: prefer showing every label with ellipsis
+ * truncation. Only fall back to skipping labels when even a 3-char truncated
+ * label wouldn't fit.
+ *
+ * `edgeAligned` (line charts with `boundaryGap: false`): the first and last
+ * labels are anchored to the chart edges, so the centered neighbour two ticks
+ * away constrains the maximum width. To avoid overlap we cap the width at
+ * `step * 0.65`, which leaves enough breathing room on both sides.
+ */
+export function computeCategoryAxisLayout(
+  categoryCount: number,
+  axisLength: number | undefined,
+  edgeAligned: boolean
+): CategoryAxisLayout | undefined {
+  if (!axisLength || axisLength <= 0 || categoryCount <= 1) return undefined
+
+  const maxWidthForCount = (count: number): number => {
+    if (count <= 1) return Math.floor(axisLength)
+    if (edgeAligned) {
+      // step between adjacent ticks; first/last label anchored to chart edge
+      const step = axisLength / (count - 1)
+      return Math.floor(step * 0.65)
+    }
+    // Centered (boundaryGap: true): one slot per category, minus a gap
+    return Math.floor(axisLength / count) - LABEL_GAP
+  }
+
+  const fullWidth = maxWidthForCount(categoryCount)
+  if (fullWidth >= MIN_TRUNCATED_LABEL_WIDTH) {
+    return {
+      interval: 0,
+      labelWidth: Math.max(fullWidth, MIN_TRUNCATED_LABEL_WIDTH),
+    }
+  }
+
+  // Not enough room even with truncation — start dropping labels until each
+  // visible one has at least the minimum readable width.
+  const slot = MIN_TRUNCATED_LABEL_WIDTH + LABEL_GAP
+  const fitCount = Math.max(2, Math.floor(axisLength / slot))
+  const interval = Math.max(0, Math.ceil(categoryCount / fitCount) - 1)
+  const visibleCount = Math.max(1, Math.ceil(categoryCount / (interval + 1)))
+  const visibleWidth = maxWidthForCount(visibleCount)
+  return {
+    interval,
+    labelWidth: Math.max(MIN_TRUNCATED_LABEL_WIDTH, visibleWidth),
+  }
+}
+
 /** Build a styled category axis matching F0 chart conventions */
 export function buildCategoryAxis({
   data,
@@ -56,14 +138,31 @@ export function buildCategoryAxis({
   axisLength,
   boundaryGap,
   maxLabelWidth,
+  show = true,
+  smartLayout = false,
+  edgeAligned = false,
 }: CategoryAxisOptions) {
-  const interval = computeLabelInterval(data.length, axisLength)
+  // When smartLayout is enabled, compute `{interval, labelWidth}` from the
+  // available pixels so that we show as many labels as possible with ellipsis.
+  // Otherwise fall back to the legacy fixed-cap behaviour.
+  const layout =
+    smartLayout && show
+      ? computeCategoryAxisLayout(data.length, axisLength, edgeAligned)
+      : undefined
+
+  const interval =
+    layout?.interval ?? computeLabelInterval(data.length, axisLength)
+
+  // Resolved truncation width: smart layout takes precedence; otherwise the
+  // explicit `maxLabelWidth` override is used as before.
+  const resolvedLabelWidth = layout?.labelWidth ?? maxLabelWidth
 
   return {
     type: "category" as const,
     data,
     ...(boundaryGap !== undefined ? { boundaryGap } : {}),
     axisLine: {
+      show,
       lineStyle: {
         color: theme.colors.borderSecondary,
       },
@@ -72,25 +171,35 @@ export function buildCategoryAxis({
       show: false,
     },
     axisLabel: {
+      show,
       fontSize: theme.textStyle.fontSize,
       fontWeight: theme.textStyle.fontWeight,
       color: theme.colors.foregroundTertiary,
       hideOverlap: true,
+      // Edge-aligned charts must always render the first and last labels —
+      // skipping either of them would expose an unlabelled chart edge.
+      ...(edgeAligned ? { showMinLabel: true, showMaxLabel: true } : {}),
+      // Anchor first/last labels to the axis edges so they cannot overflow
+      // the chart container. Centered interior labels keep their default
+      // alignment.
+      ...(edgeAligned
+        ? { alignMinLabel: "left" as const, alignMaxLabel: "right" as const }
+        : {}),
       ...(interval !== undefined ? { interval } : {}),
       ...(formatter
         ? {
             formatter: (_value: string | number) => formatter(String(_value)),
           }
         : {}),
-      ...(maxLabelWidth !== undefined
+      ...(resolvedLabelWidth !== undefined
         ? {
-            width: maxLabelWidth,
+            width: resolvedLabelWidth,
             overflow: "truncate" as const,
             ellipsis: "...",
           }
         : {}),
     },
-    ...(maxLabelWidth !== undefined ? { triggerEvent: true } : {}),
+    ...(show && resolvedLabelWidth !== undefined ? { triggerEvent: true } : {}),
   }
 }
 
@@ -104,6 +213,8 @@ interface ValueAxisOptions {
   formatter?: (value: number) => string
   /** Max label width in pixels — when set, labels are truncated with ellipsis */
   maxLabelWidth?: number
+  /** Whether the axis labels are rendered. Grid lines stay controlled by showGrid. */
+  show?: boolean
 }
 
 /** Build a styled value axis with optional solid grid lines */
@@ -112,6 +223,7 @@ export function buildValueAxis({
   showGrid,
   formatter,
   maxLabelWidth,
+  show = true,
 }: ValueAxisOptions) {
   return {
     type: "value" as const,
@@ -122,6 +234,7 @@ export function buildValueAxis({
       show: false,
     },
     axisLabel: {
+      show,
       fontSize: theme.textStyle.fontSize,
       fontWeight: theme.textStyle.fontWeight,
       color: theme.colors.foregroundTertiary,
@@ -139,7 +252,7 @@ export function buildValueAxis({
           }
         : {}),
     },
-    ...(maxLabelWidth !== undefined ? { triggerEvent: true } : {}),
+    ...(show && maxLabelWidth !== undefined ? { triggerEvent: true } : {}),
     splitLine: {
       show: showGrid,
       lineStyle: {
@@ -158,25 +271,25 @@ interface LegendOptions {
   show: boolean
   data: string[]
   theme: ChartTheme
-  /** Container width in pixels — used to compute max label width */
-  containerWidth?: number
 }
 
 /**
  * Build the standard F0 chart legend: circle icons, centered at bottom,
  * with a 16px gap between chart area and legend.
+ *
+ * Uses ECharts' built-in scroll legend so that when items overflow the
+ * available width, the legend is paginated with left/right arrows. Only
+ * the legend pages — the chart area is unaffected.
  */
 export function buildLegend({
   show,
   data,
   theme,
-  containerWidth,
 }: LegendOptions): echarts.EChartsOption["legend"] {
   if (!show) return undefined
 
-  const maxTextWidth = Math.max(80, (containerWidth ?? 600) * 0.25)
-
   return {
+    type: "scroll",
     show: true,
     data,
     bottom: 0,
@@ -188,9 +301,11 @@ export function buildLegend({
     textStyle: {
       fontWeight: theme.textStyle.fontWeight,
       color: theme.colors.foregroundSecondary,
-      width: maxTextWidth,
-      overflow: "truncate",
-      ellipsis: "...",
+    },
+    pageIconColor: theme.colors.foregroundSecondary,
+    pageIconInactiveColor: theme.colors.borderSecondary,
+    pageTextStyle: {
+      color: theme.colors.foregroundTertiary,
     },
   } as echarts.EChartsOption["legend"]
 }
@@ -209,8 +324,8 @@ export function buildGrid({ showLegend }: GridOptions) {
     left: 4,
     right: 4,
     top: 8,
-    // Legend height (~20px) + 8px gap between chart and legend
-    bottom: showLegend ? 28 : 4,
+    // Legend height (~20px) + 12px breathing room between chart and legend
+    bottom: showLegend ? 32 : 4,
     containLabel: true,
   }
 }
@@ -394,6 +509,9 @@ export function buildAxes({
   containerWidth,
   containerHeight,
   boundaryGap,
+  showCategoryAxis = true,
+  showValueAxis = true,
+  categoryMaxLabelWidth,
 }: {
   isVertical: boolean
   categories: string[]
@@ -404,22 +522,51 @@ export function buildAxes({
   containerWidth?: number
   containerHeight?: number
   boundaryGap?: boolean
+  /** Hide the category axis labels and line entirely (grid space is reclaimed by ECharts) */
+  showCategoryAxis?: boolean
+  /** Hide the value axis labels (grid lines stay controlled by `showGrid`) */
+  showValueAxis?: boolean
+  /**
+   * When set, the category axis will truncate long labels with ellipsis.
+   * Used by line charts at the `lg` breakpoint so long category names like
+   * "September" still get rendered horizontally and truncate gracefully.
+   */
+  categoryMaxLabelWidth?: number
 }) {
   const yAxisMaxLabelWidth = Math.min(80, (containerWidth ?? 600) * 0.2)
+
+  // Estimate the horizontal space taken by the value (Y) axis labels + grid
+  // padding so the smart layout knows how wide the plot area really is.
+  // This is intentionally a rough constant — `containLabel: true` on the
+  // grid handles the precise reservation.
+  const Y_AXIS_RESERVED = 56
+  const xPlotLength = containerWidth
+    ? Math.max(0, containerWidth - Y_AXIS_RESERVED)
+    : undefined
 
   const categoryAxis = buildCategoryAxis({
     data: categories,
     theme,
     formatter: categoryFormatter,
-    axisLength: isVertical ? containerWidth : containerHeight,
+    axisLength: isVertical ? xPlotLength : containerHeight,
     boundaryGap,
-    ...(!isVertical ? { maxLabelWidth: yAxisMaxLabelWidth } : {}),
+    show: showCategoryAxis,
+    // Vertical charts get the smart layout (truncate-then-skip). Horizontal
+    // charts (category on Y axis) keep their fixed cap.
+    smartLayout: isVertical,
+    edgeAligned: isVertical && boundaryGap === false,
+    ...(categoryMaxLabelWidth !== undefined
+      ? { maxLabelWidth: categoryMaxLabelWidth }
+      : !isVertical
+        ? { maxLabelWidth: yAxisMaxLabelWidth }
+        : {}),
   })
 
   const valueAxis = buildValueAxis({
     theme,
     showGrid,
     formatter: valueFormatter,
+    show: showValueAxis,
     ...(isVertical ? { maxLabelWidth: yAxisMaxLabelWidth } : {}),
   })
 
@@ -468,6 +615,12 @@ interface BaseChartOptionsParams {
   containerHeight?: number
   /** Whether to leave space at the edges of the category axis */
   boundaryGap?: boolean
+  /** Whether the category axis labels/line are rendered (default true) */
+  showCategoryAxis?: boolean
+  /** Whether the value axis labels are rendered (default true) */
+  showValueAxis?: boolean
+  /** Optional ellipsis truncation width for the category axis labels */
+  categoryMaxLabelWidth?: number
 }
 
 /**
@@ -493,6 +646,9 @@ export function buildBaseChartOptions({
   containerWidth,
   containerHeight,
   boundaryGap,
+  showCategoryAxis = true,
+  showValueAxis = true,
+  categoryMaxLabelWidth,
 }: BaseChartOptionsParams): echarts.EChartsOption {
   const { xAxis, yAxis } = buildAxes({
     isVertical,
@@ -504,6 +660,9 @@ export function buildBaseChartOptions({
     containerWidth,
     containerHeight,
     boundaryGap,
+    showCategoryAxis,
+    showValueAxis,
+    categoryMaxLabelWidth,
   })
 
   const baseOptions: echarts.EChartsOption = {
@@ -520,7 +679,6 @@ export function buildBaseChartOptions({
       show: showLegend,
       data: legendData,
       theme,
-      containerWidth,
     }),
     grid: buildGrid({ showLegend }),
     tooltip: buildTooltip({

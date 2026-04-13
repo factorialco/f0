@@ -1,6 +1,6 @@
 import { useCopilotAction } from "@copilotkit/react-core"
 
-import { DataDownload } from "./DataDownload"
+import { DataDownloadCard } from "../../../canvas/entities/dataDownload/DataDownloadCard"
 import { DataDownloadProps } from "./types"
 
 /**
@@ -19,6 +19,13 @@ export const useDataDownloadAction = () => {
     description:
       "Display download buttons for query results. Sends the raw dataset to the frontend for client-side Excel and CSV generation, optionally with a markdown preview table.",
     parameters: [
+      {
+        name: "title",
+        type: "string",
+        description:
+          "Optional display title for the data card and canvas header, in the user's language. E.g. 'List of employees', 'Monthly sales'. Falls back to filename if not provided.",
+        required: false,
+      },
       {
         name: "markdown",
         type: "string",
@@ -78,13 +85,19 @@ export const useDataDownloadAction = () => {
     available: "frontend",
     render: (props) => {
       const rawArgs = props.args as Partial<DataDownloadProps>
-      const downloadProps: DataDownloadProps = {
-        markdown: rawArgs.markdown,
-        filename: rawArgs.filename,
-        dataset: rawArgs.dataset ?? { columns: [], rows: [] },
-      }
+      const dataset = rawArgs.dataset ?? { columns: [], rows: [] }
 
-      return <DataDownload {...downloadProps} />
+      // Guard while streaming — wait for columns to arrive
+      if (!dataset.columns?.length) return <></>
+
+      return (
+        <DataDownloadCard
+          title={rawArgs.title}
+          dataset={dataset}
+          filename={rawArgs.filename}
+          markdown={rawArgs.markdown}
+        />
+      )
     },
   })
 }

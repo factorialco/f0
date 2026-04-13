@@ -88,7 +88,7 @@ console.log(greeting);`}</Pre>
 
 export const TableExample: Story = {
   render: () => (
-    <Table>
+    <Table title="Employee List">
       <thead>
         <tr>
           <Th>Name</Th>

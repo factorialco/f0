@@ -31,7 +31,7 @@ export const BasePostEvent = ({
   }
 
   return (
-    <div className="flex w-full flex-col gap-1 rounded-xl border border-solid border-f1-border-secondary bg-f1-background-inverse-secondary p-1 shadow">
+    <div className="flex w-full flex-col gap-1 rounded-xl border border-solid border-f1-border-secondary bg-f1-background-inverse-secondary p-1 shadow dark:bg-f1-background-tertiary">
       {mediaUrl && (
         <div className="relative aspect-video w-full overflow-hidden rounded-md">
           {isVideo(mediaUrl) ? (
@@ -69,7 +69,7 @@ export const BasePostEvent = ({
 
 export const PostEventSkeleton = () => (
   <div
-    className="flex w-full flex-col gap-1 rounded-xl border border-solid border-f1-border-secondary bg-f1-background-inverse-secondary p-1"
+    className="flex w-full flex-col gap-1 rounded-xl border border-solid border-f1-border-secondary bg-f1-background-inverse-secondary p-1 dark:bg-f1-background-tertiary"
     role="status"
     aria-busy="true"
     aria-live="polite"

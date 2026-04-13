@@ -5,7 +5,44 @@ import { type RefObject, useMemo } from "react"
 import type { F0DataChartGaugeProps } from "../../types"
 
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
+import { buildItemTooltip } from "../../utils/options"
+import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
+
+/** Discrete responsive size for the gauge */
+export type GaugeChartSize = ChartResponsiveSize
+
+/**
+ * Maps the discrete `size` to the gauge's typography + ring thickness.
+ *
+ * - `sm` → compact: hide name, smaller value, thinner ring
+ * - `md` → medium value, medium ring
+ * - `lg` → large value, full ring
+ */
+function resolveResponsiveDisplay(size: GaugeChartSize) {
+  if (size === "sm") {
+    return {
+      showName: false,
+      detailFontSize: 18,
+      titleFontSize: 11,
+      ringWidth: 8,
+    }
+  }
+  if (size === "md") {
+    return {
+      showName: true,
+      detailFontSize: 24,
+      titleFontSize: 12,
+      ringWidth: 12,
+    }
+  }
+  return {
+    showName: true,
+    detailFontSize: 32,
+    titleFontSize: 12,
+    ringWidth: 18,
+  }
+}
 
 export function useGaugeChartOptions(
   containerRef: RefObject<HTMLDivElement | null>,
@@ -18,7 +55,8 @@ export function useGaugeChartOptions(
     showValue = true,
     valueFormatter,
     echartsOptions,
-  }: F0DataChartGaugeProps
+  }: F0DataChartGaugeProps,
+  size: GaugeChartSize
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
 
@@ -26,7 +64,9 @@ export function useGaugeChartOptions(
     const resolvedColor = color
       ? resolveChartColorToken(color)
       : paletteColor(0)
-    const { tooltip, colors } = theme
+    const { colors } = theme
+    const responsive = resolveResponsiveDisplay(size)
+    const effectiveShowName = responsive.showName && !!name
 
     const gaugeSeries: echarts.GaugeSeriesOption = {
       type: "gauge",
@@ -35,7 +75,7 @@ export function useGaugeChartOptions(
       data: [{ value, name: name ?? "" }],
       progress: {
         show: true,
-        width: 18,
+        width: responsive.ringWidth,
         roundCap: true,
         itemStyle: {
           color: resolvedColor,
@@ -47,7 +87,7 @@ export function useGaugeChartOptions(
       axisLine: {
         roundCap: true,
         lineStyle: {
-          width: 18,
+          width: responsive.ringWidth,
           color: [[1, theme.colors.borderSecondary]],
         },
       },
@@ -61,10 +101,10 @@ export function useGaugeChartOptions(
         show: false,
       },
       title: {
-        show: !!name,
+        show: effectiveShowName,
         offsetCenter: [0, showValue ? "25%" : "0%"],
         color: colors.foregroundSecondary,
-        fontSize: theme.textStyle.fontSize,
+        fontSize: responsive.titleFontSize,
         fontWeight: theme.textStyle.fontWeight,
         fontFamily: theme.textStyle.fontFamily,
       },
@@ -72,7 +112,7 @@ export function useGaugeChartOptions(
         show: showValue,
         offsetCenter: [0, "0%"],
         color: colors.foreground,
-        fontSize: 32,
+        fontSize: responsive.detailFontSize,
         fontWeight: 700,
         fontFamily: theme.textStyle.fontFamily,
         formatter: valueFormatter
@@ -87,23 +127,8 @@ export function useGaugeChartOptions(
         fontFamily: theme.textStyle.fontFamily,
       },
       series: [gaugeSeries],
-      tooltip: {
-        trigger: "item",
-        padding: tooltip.padding,
-        borderWidth: tooltip.borderWidth,
-        transitionDuration: tooltip.transitionDuration,
-        textStyle: {
-          color: colors.foreground,
-          fontSize: theme.textStyle.fontSize,
-        },
-        extraCssText: [
-          `box-shadow: ${tooltip.boxShadow}`,
-          `border-radius: ${tooltip.borderRadius}px`,
-          `border: 1px solid ${colors.borderSecondary}`,
-          "backdrop-filter: blur(30px)",
-          `-webkit-backdrop-filter: blur(30px)`,
-          `background: ${tooltip.background}`,
-        ].join("; "),
+      tooltip: buildItemTooltip({
+        theme,
         formatter: (params: unknown) => {
           const p = params as {
             marker?: string
@@ -117,7 +142,7 @@ export function useGaugeChartOptions(
           const label = p.name ? `<strong>${String(p.name)}</strong><br/>` : ""
           return `${label}${formattedValue}`
         },
-      } as echarts.EChartsOption["tooltip"],
+      }),
     }
 
     if (echartsOptions) {
@@ -135,5 +160,6 @@ export function useGaugeChartOptions(
     valueFormatter,
     echartsOptions,
     theme,
+    size,
   ])
 }

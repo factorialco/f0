@@ -16,6 +16,7 @@ export const F0ButtonToggleGroup = (props: F0ButtonToggleGroupProps) => {
     onChange,
     variant,
     disabled,
+    withBorder = true,
   } = props
 
   const [localValue, setLocalValue] = useState(value)
@@ -80,7 +81,7 @@ export const F0ButtonToggleGroup = (props: F0ButtonToggleGroupProps) => {
           <F0ButtonToggleInternal
             {...item}
             size={size}
-            withBorder
+            withBorder={withBorder}
             variant={variant}
             selected={!!selectedValues?.includes(item.value)}
             // Intentionally pass a no-op function to satisfy type requirements.

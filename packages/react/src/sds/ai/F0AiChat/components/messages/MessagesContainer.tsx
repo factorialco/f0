@@ -63,10 +63,7 @@ const Messages = ({
     welcomeScreenSuggestions,
     isLoadingThread,
     setInProgress,
-    clarifyingQuestion,
   } = useAiChat()
-
-  const isClarifying = clarifyingQuestion !== null
 
   const inProgress = inProgressProp ?? isLoading
 
@@ -390,10 +387,9 @@ const Messages = ({
           </div>
         </div>
 
-        {!noShadows && !isClarifying && (
+        {!noShadows && (
           <>
             <ScrollShadow position="top" key="shadow-top" />
-            <ScrollShadow position="bottom" key="shadow-bottom" />
           </>
         )}
       </div>
