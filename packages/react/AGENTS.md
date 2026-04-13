@@ -2,6 +2,22 @@
 
 This is the F0 React component library (`@factorialco/f0-react`). See the root [AGENTS.md](../../AGENTS.md) for monorepo-level guidelines.
 
+## Pre-Commit Checklist (MANDATORY)
+
+Before **every** `git commit`, run these two commands — no exceptions:
+
+```bash
+# 1. Format all changed source files
+pnpm --filter @factorialco/f0-react run format
+
+# 2. Type-check
+pnpm --filter @factorialco/f0-react run tsc
+```
+
+Failing to run `format` before committing will cause the `Format` CI check to fail on every PR.
+`oxfmt` rewrites whitespace, quote style, trailing commas, and import order — always run it last,
+after all code edits are done, and include the resulting changes in the same commit.
+
 ## Post-Implementation Quality Gate
 
 After completing **any code modification task** (new component, feature, bug fix, refactoring),
@@ -180,4 +196,6 @@ pnpm test-storybook # Storybook interaction + a11y tests
 pnpm lint           # lint check
 pnpm lint-fix       # auto-fix lint issues
 pnpm tsc            # type-check
+pnpm format         # auto-fix formatting (oxfmt) — run before every commit
+pnpm format:check   # check formatting without modifying files (same as CI)
 ```
