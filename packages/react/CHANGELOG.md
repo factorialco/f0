@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.442.1](https://github.com/factorialco/f0/compare/f0-react-v1.442.0...f0-react-v1.442.1) (2026-04-13)
+
+
+### Bug Fixes
+
+* passing props credit warning to applicationframe ([#3922](https://github.com/factorialco/f0/issues/3922)) ([84f3cdb](https://github.com/factorialco/f0/commit/84f3cdb22564ea1f0040140020ed03bf530daf49))
+
 ## [1.442.0](https://github.com/factorialco/f0/compare/f0-react-v1.441.1...f0-react-v1.442.0) (2026-04-13)
 
 
