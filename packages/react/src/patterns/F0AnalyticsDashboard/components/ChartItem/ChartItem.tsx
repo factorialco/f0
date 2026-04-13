@@ -180,13 +180,15 @@ function buildChartProps(
     case "line": {
       // data.series may be funnel-shaped (single object) if the chart was
       // just transformed from funnel. Normalize to the array shape that
-      // bar/line expect: [{name, data: number[]}].
+      // bar/line expect and extract categories from the funnel data points.
       let series = data.series
+      let categories = data.categories ?? []
       if (series && !Array.isArray(series)) {
         const funnelSeries = series as {
           name: string
           data: { name: string; value: number }[]
         }
+        categories = funnelSeries.data.map((d) => d.name)
         series = [
           {
             name: funnelSeries.name,
@@ -196,7 +198,7 @@ function buildChartProps(
       }
       return {
         ...chart,
-        categories: data.categories ?? [],
+        categories,
         series,
       } as F0DataChartProps
     }
