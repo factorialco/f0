@@ -252,8 +252,10 @@ export function ChartItem<Filters extends FiltersDefinition>({
     item.chart.type
   )
   const currentOrientation =
-    item.chart.type === "bar" && "orientation" in item.chart
-      ? (item.chart.orientation ?? "vertical")
+    item.chart.type === "bar"
+      ? "orientation" in item.chart
+        ? (item.chart.orientation ?? "vertical")
+        : "vertical"
       : undefined
   const chartTypeOptions =
     isAxisChart && onTransformChart
