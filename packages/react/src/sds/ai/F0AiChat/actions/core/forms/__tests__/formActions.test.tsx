@@ -9,7 +9,7 @@ import {
   useF0AiFormRegistry,
 } from "@/patterns/F0Form/F0AiFormRegistry"
 import { f0FormField } from "@/patterns/F0Form/f0Schema"
-import { zeroRender as render, waitFor } from "@/testing/test-utils"
+import { zeroRender as render, waitFor, act } from "@/testing/test-utils"
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
 
@@ -32,8 +32,10 @@ vi.mock("@copilotkit/react-core", () => ({
   }),
 }))
 
+const mockCloseCanvas = vi.fn()
+
 vi.mock("@/sds/ai/F0AiChat/providers/AiChatStateProvider", () => ({
-  useAiChat: () => ({ agent: "test-agent" }),
+  useAiChat: () => ({ agent: "test-agent", closeCanvas: mockCloseCanvas }),
 }))
 
 // Import the hooks after mocks are set up
@@ -109,6 +111,7 @@ function getHandler(toolName: string) {
 
 beforeEach(() => {
   capturedTools.clear()
+  mockCloseCanvas.mockClear()
 })
 
 describe("useFormSubmitAction handler", () => {
@@ -124,7 +127,7 @@ describe("useFormSubmitAction handler", () => {
       },
     ])
 
-    const handler = getHandler("forms.formSubmit")
+    const handler = getHandler("forms.submitForm")
     const result = await handler({ formName: "user-form" } as never)
 
     expect(result).toMatchObject({ success: true })
@@ -146,7 +149,7 @@ describe("useFormSubmitAction handler", () => {
       },
     ])
 
-    const handler = getHandler("forms.formSubmit")
+    const handler = getHandler("forms.submitForm")
     const result = await handler({ formName: "user-form" } as never)
 
     expect(result).toMatchObject({ success: false })
@@ -162,7 +165,7 @@ describe("useFormSubmitAction handler", () => {
       },
     ])
 
-    const handler = getHandler("forms.formSubmit")
+    const handler = getHandler("forms.submitForm")
     const result = await handler({ formName: "missing" } as never)
 
     expect(result).toMatchObject({
@@ -170,6 +173,47 @@ describe("useFormSubmitAction handler", () => {
       error: expect.stringContaining("missing"),
       availableForms: expect.arrayContaining(["user-form"]),
     })
+  })
+
+  it("calls clearActiveForm and closeCanvas after successful submit", async () => {
+    const onSubmit = vi.fn()
+
+    await setupWithDefinitions([
+      {
+        name: "user-form",
+        schema: simpleSchema,
+        defaultValues: { name: "Alice", email: "alice@test.com" },
+        onSubmit,
+      },
+    ])
+
+    const handler = getHandler("forms.submitForm")
+    const result = await act(async () => {
+      return handler({ formName: "user-form" } as never)
+    })
+
+    expect(result).toMatchObject({ success: true })
+    expect(onSubmit).toHaveBeenCalled()
+    expect(mockCloseCanvas).toHaveBeenCalled()
+  })
+
+  it("calls clearActiveForm and closeCanvas even when submit fails", async () => {
+    await setupWithDefinitions([
+      {
+        name: "user-form",
+        schema: simpleSchema,
+        defaultValues: { name: "", email: "not-an-email" },
+      },
+    ])
+
+    const handler = getHandler("forms.submitForm")
+    const result = await act(async () => {
+      return handler({ formName: "user-form" } as never)
+    })
+
+    // Submit fails validation but cleanup still happens in finally block
+    expect(result).toMatchObject({ success: false })
+    expect(mockCloseCanvas).toHaveBeenCalled()
   })
 })
 
@@ -183,7 +227,7 @@ describe("useFormFillAction handler", () => {
       },
     ])
 
-    const handler = getHandler("forms.formFill")
+    const handler = getHandler("forms.fillForm")
     const result = await handler({
       formName: "user-form",
       values: [
@@ -210,7 +254,7 @@ describe("useFormFillAction handler", () => {
       },
     ])
 
-    const handler = getHandler("forms.formFill")
+    const handler = getHandler("forms.fillForm")
     const result = await handler({
       formName: "user-form",
       values: [{ fieldName: "email", value: "not-valid" }],
@@ -233,7 +277,7 @@ describe("useFormFillAction handler", () => {
       },
     ])
 
-    const handler = getHandler("forms.formFill")
+    const handler = getHandler("forms.fillForm")
     const result = await handler({
       formName: "num-form",
       values: [{ fieldName: "age", value: "25" }],
@@ -259,7 +303,7 @@ describe("useFormFillAction handler", () => {
       },
     ])
 
-    const handler = getHandler("forms.formFill")
+    const handler = getHandler("forms.fillForm")
     const result = await handler({
       formName: "bool-form",
       values: [{ fieldName: "active", value: "true" }],
@@ -285,7 +329,7 @@ describe("useFormFillAction handler", () => {
       },
     ])
 
-    const handler = getHandler("forms.formFill")
+    const handler = getHandler("forms.fillForm")
     const result = await handler({
       formName: "date-form",
       values: [{ fieldName: "startDate", value: "2024-06-15" }],
@@ -310,7 +354,7 @@ describe("useFormFillAction handler", () => {
       },
     ])
 
-    const handler = getHandler("forms.formFill")
+    const handler = getHandler("forms.fillForm")
     const result = await handler({
       formName: "nope",
       values: [{ fieldName: "name", value: "x" }],

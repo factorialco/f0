@@ -329,7 +329,7 @@ describe("F0AiFormRegistryProvider availableFormDefinitions", () => {
     expect(fieldNames).toHaveLength(2)
   })
 
-  it("includes virtual forms in formDescriptions", async () => {
+  it("includes virtual forms in availableForms", async () => {
     const definitions: F0AiAvailableFormDefinition[] = [
       {
         name: "user-form",
@@ -351,19 +351,14 @@ describe("F0AiFormRegistryProvider availableFormDefinitions", () => {
     )
 
     await waitFor(() => {
-      expect(capturedRegistry?.formDescriptions).toHaveLength(1)
+      expect(capturedRegistry?.availableForms).toHaveLength(1)
     })
 
-    const desc = capturedRegistry!.formDescriptions[0]
-    expect(desc.formName).toBe("user-form")
-    expect(desc.formValues).toEqual({
-      name: "Alice",
-      email: "alice@test.com",
-    })
-    expect(desc.isDirty).toBe(false)
+    const summary = capturedRegistry!.availableForms[0]
+    expect(summary.formName).toBe("user-form")
   })
 
-  it("includes fieldDescriptions from f0FormField metadata in formDescriptions", async () => {
+  it("exposes field metadata when form is picked as active", async () => {
     const definitions: F0AiAvailableFormDefinition[] = [
       {
         name: "employee-form",
@@ -386,10 +381,21 @@ describe("F0AiFormRegistryProvider availableFormDefinitions", () => {
     )
 
     await waitFor(() => {
-      expect(capturedRegistry?.formDescriptions).toHaveLength(1)
+      expect(capturedRegistry?.get("employee-form")).toBeDefined()
     })
 
-    const desc = capturedRegistry!.formDescriptions[0]
+    act(() => {
+      capturedRegistry!.setActiveForm("employee-form", {
+        cardTitle: "Test",
+        cardDescription: "Test desc",
+      })
+    })
+
+    await waitFor(() => {
+      expect(capturedRegistry!.activeForm).not.toBeNull()
+    })
+
+    const desc = capturedRegistry!.activeForm!
     expect(desc.fieldDescriptions).toEqual({
       firstName: {
         label: "First Name",
@@ -405,7 +411,7 @@ describe("F0AiFormRegistryProvider availableFormDefinitions", () => {
     })
   })
 
-  it("includes sectionDescriptions from sections config in formDescriptions", async () => {
+  it("exposes section metadata when form is picked as active", async () => {
     const definitions: F0AiAvailableFormDefinition[] = [
       {
         name: "employee-form",
@@ -428,10 +434,21 @@ describe("F0AiFormRegistryProvider availableFormDefinitions", () => {
     )
 
     await waitFor(() => {
-      expect(capturedRegistry?.formDescriptions).toHaveLength(1)
+      expect(capturedRegistry?.get("employee-form")).toBeDefined()
     })
 
-    const desc = capturedRegistry!.formDescriptions[0]
+    act(() => {
+      capturedRegistry!.setActiveForm("employee-form", {
+        cardTitle: "Test",
+        cardDescription: "Test desc",
+      })
+    })
+
+    await waitFor(() => {
+      expect(capturedRegistry!.activeForm).not.toBeNull()
+    })
+
+    const desc = capturedRegistry!.activeForm!
     expect(desc.sectionDescriptions).toEqual({
       personal: {
         title: "Personal Information",
@@ -626,6 +643,7 @@ describe("F0AiFormRegistryProvider availableFormDefinitions", () => {
     })
 
     // Unregister the rendered form — virtual should come back
+    // with values preserved from the rendered form (not reset to original defaults)
     act(() => {
       capturedRegistry!.unregister("user-form")
     })
@@ -634,7 +652,222 @@ describe("F0AiFormRegistryProvider availableFormDefinitions", () => {
       const entry = capturedRegistry!.get("user-form")
       expect(entry).toBeDefined()
       expect(entry!.virtual).toBe(true)
-      expect(entry!.ref.current!.getValues().name).toBe("virtual-default")
+      // Values are preserved from the rendered form, not reset to "virtual-default"
+      expect(entry!.ref.current!.getValues().name).toBe("rendered")
+    })
+  })
+
+  it("stores onSubmit on virtual entry", async () => {
+    const onSubmit = vi.fn()
+
+    const definitions: F0AiAvailableFormDefinition[] = [
+      {
+        name: "user-form",
+        schema: simpleSchema,
+        defaultValues: { name: "Alice", email: "alice@test.com" },
+        onSubmit,
+      },
+    ]
+
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider availableFormDefinitions={definitions}>
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("user-form")).toBeDefined()
+    })
+
+    const entry = capturedRegistry!.get("user-form")!
+    expect(entry.onSubmit).toBe(onSubmit)
+  })
+
+  it("preserves onSubmit when rendered form registers over virtual", async () => {
+    const onSubmit = vi.fn()
+
+    const definitions: F0AiAvailableFormDefinition[] = [
+      {
+        name: "user-form",
+        schema: simpleSchema,
+        defaultValues: { name: "", email: "" },
+        onSubmit,
+      },
+    ]
+
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider availableFormDefinitions={definitions}>
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("user-form")?.virtual).toBe(true)
+    })
+
+    // Simulate a rendered form registering with the same name
+    const renderedRef: React.MutableRefObject<{
+      submit: () => Promise<void>
+      reset: () => void
+      isDirty: () => boolean
+      getValues: () => Record<string, unknown>
+      setValue: () => void
+      setValues: () => void
+      trigger: () => Promise<boolean>
+      getErrors: () => Record<string, string>
+      getFieldNames: () => string[]
+      _setStateCallback: () => void
+    }> = {
+      current: {
+        submit: async () => {},
+        reset: () => {},
+        isDirty: () => false,
+        getValues: () => ({ name: "rendered", email: "" }),
+        setValue: () => {},
+        setValues: () => {},
+        trigger: async () => true,
+        getErrors: () => ({}),
+        getFieldNames: () => ["name", "email"],
+        _setStateCallback: () => {},
+      },
+    }
+
+    act(() => {
+      capturedRegistry!.register("user-form", renderedRef, simpleSchema)
+    })
+
+    await waitFor(() => {
+      const entry = capturedRegistry!.get("user-form")
+      // Entry is no longer virtual, but onSubmit is preserved
+      expect(entry!.virtual).toBeUndefined()
+      expect(entry!.onSubmit).toBe(onSubmit)
+    })
+  })
+
+  it("restores onSubmit when rendered form unregisters back to virtual", async () => {
+    const onSubmit = vi.fn()
+
+    const definitions: F0AiAvailableFormDefinition[] = [
+      {
+        name: "user-form",
+        schema: simpleSchema,
+        defaultValues: { name: "", email: "" },
+        onSubmit,
+      },
+    ]
+
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider availableFormDefinitions={definitions}>
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("user-form")?.virtual).toBe(true)
+    })
+
+    // Register then unregister a rendered form
+    const renderedRef: React.MutableRefObject<{
+      submit: () => Promise<void>
+      reset: () => void
+      isDirty: () => boolean
+      getValues: () => Record<string, unknown>
+      setValue: () => void
+      setValues: () => void
+      trigger: () => Promise<boolean>
+      getErrors: () => Record<string, string>
+      getFieldNames: () => string[]
+      _setStateCallback: () => void
+    }> = {
+      current: {
+        submit: async () => {},
+        reset: () => {},
+        isDirty: () => false,
+        getValues: () => ({ name: "rendered", email: "" }),
+        setValue: () => {},
+        setValues: () => {},
+        trigger: async () => true,
+        getErrors: () => ({}),
+        getFieldNames: () => ["name", "email"],
+        _setStateCallback: () => {},
+      },
+    }
+
+    act(() => {
+      capturedRegistry!.register("user-form", renderedRef, simpleSchema)
+    })
+
+    act(() => {
+      capturedRegistry!.unregister("user-form")
+    })
+
+    await waitFor(() => {
+      const entry = capturedRegistry!.get("user-form")
+      expect(entry!.virtual).toBe(true)
+      expect(entry!.onSubmit).toBe(onSubmit)
+    })
+  })
+
+  it("clearActiveForm resets activeForm to null", async () => {
+    const definitions: F0AiAvailableFormDefinition[] = [
+      {
+        name: "user-form",
+        schema: simpleSchema,
+        defaultValues: { name: "", email: "" },
+      },
+    ]
+
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider availableFormDefinitions={definitions}>
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("user-form")).toBeDefined()
+    })
+
+    act(() => {
+      capturedRegistry!.setActiveForm("user-form", {
+        cardTitle: "Test",
+        cardDescription: "Test desc",
+      })
+    })
+
+    await waitFor(() => {
+      expect(capturedRegistry!.activeForm).not.toBeNull()
+    })
+
+    act(() => {
+      capturedRegistry!.clearActiveForm()
+    })
+
+    await waitFor(() => {
+      expect(capturedRegistry!.activeForm).toBeNull()
     })
   })
 })
