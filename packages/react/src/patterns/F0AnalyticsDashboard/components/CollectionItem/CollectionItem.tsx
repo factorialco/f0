@@ -72,6 +72,7 @@ export function CollectionItem<Filters extends FiltersDefinition>({
     <DashboardItem
       title={item.title}
       description={item.description}
+      explanation={item.explanation}
       isLoading={false}
       actions={allActions}
       editMode={editMode}

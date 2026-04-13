@@ -3,13 +3,15 @@ import * as XLSX from "xlsx"
 
 import { F0Button } from "@/components/F0Button"
 import DownloadIcon from "@/icons/app/Download"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 export function Table({
   children,
+  title,
   ...props
-}: React.HTMLAttributes<HTMLTableElement>) {
+}: React.HTMLAttributes<HTMLTableElement> & { title?: string }) {
   const translation = useI18n()
   const ref = useRef<HTMLTableElement>(null)
 
@@ -20,18 +22,26 @@ export function Table({
   }
 
   return (
-    <div className="group/table relative flex flex-col gap-2">
-      <div className="absolute right-2 top-2 z-20 opacity-0 transition-opacity group-hover/table:opacity-100">
+    <div className="group/table relative flex flex-col gap-2 rounded-md border border-solid border-f1-border-secondary">
+      <div className="flex items-center justify-between gap-3 border-0 border-b border-solid border-f1-border-secondary p-3">
+        {title && (
+          <OneEllipsis
+            tag="h2"
+            className="text-base font-medium text-f1-foreground"
+          >
+            {title}
+          </OneEllipsis>
+        )}
         <F0Button
           variant="outline"
           label={translation.t("ai.dataDownload.download", { format: "Excel" })}
-          hideLabel
+          hideLabel={title}
           size="sm"
           icon={DownloadIcon}
           onClick={handleDownload}
         />
       </div>
-      <div className="scrollbar-macos overflow-x-auto rounded-md border border-solid border-f1-border-secondary">
+      <div className="scrollbar-macos overflow-x-auto">
         <table
           ref={ref}
           {...props}

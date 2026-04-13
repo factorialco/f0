@@ -9,13 +9,31 @@ import {
   resolveDataPointColor,
 } from "../../utils/colors"
 import {
-  buildGrid,
   buildItemTooltip,
   buildLegend,
   DEFAULT_EMPHASIS,
 } from "../../utils/options"
+import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
+
+/** Discrete responsive size for the pie chart */
+export type PieChartSize = ChartResponsiveSize
+
+/**
+ * Maps the discrete `size` to which chrome (legend, outside labels) is
+ * rendered. Mirrors the rest of the F0DataChart family:
+ *
+ * - `sm` → no legend, no outside labels (tooltip is the only reveal)
+ * - `md` → legend below, no outside labels (they would crowd the small ring)
+ * - `lg` → legend below, outside labels with leader lines if `showLabels`
+ */
+function resolveResponsiveDisplay(size: PieChartSize) {
+  return {
+    showLegend: size !== "sm",
+    showOutsideLabels: size === "lg",
+  }
+}
 
 export function usePieChartOptions(
   containerRef: RefObject<HTMLDivElement | null>,
@@ -27,7 +45,8 @@ export function usePieChartOptions(
     showPercentage = false,
     valueFormatter,
     echartsOptions,
-  }: F0DataChartPieProps
+  }: F0DataChartPieProps,
+  size: PieChartSize
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
   const { width: containerWidth } = useContainerSize(containerRef)
@@ -37,6 +56,11 @@ export function usePieChartOptions(
     const resolvedSeriesColor = series.color
       ? resolveChartColorToken(series.color)
       : undefined
+
+    const responsive = resolveResponsiveDisplay(size)
+    // The user prop can still force chrome OFF, but never ON at sm/md.
+    const effectiveShowLegend = responsive.showLegend && showLegend
+    const effectiveShowLabels = responsive.showOutsideLabels && showLabels
 
     const pieData = dataPoints.map((point, i) => ({
       value: point.value,
@@ -51,7 +75,7 @@ export function usePieChartOptions(
     const legendData = dataPoints.map((d) => d.name)
 
     const buildLabel = (): echarts.PieSeriesOption["label"] => {
-      if (!showLabels) return { show: false }
+      if (!effectiveShowLabels) return { show: false }
 
       return {
         show: true,
@@ -77,31 +101,38 @@ export function usePieChartOptions(
       } as echarts.PieSeriesOption["label"]
     }
 
-    // Reduce outer radius when labels need space
-    const outerRadiusPct = showLabels ? 50 : 75
-    // Clamp inner radius so it's always smaller than outer radius
+    // Per-size center + radius. The breathing room above the legend is the
+    // same as Bar/Line (~32px reserved when legend is shown).
+    const center: [string, string] =
+      size === "sm"
+        ? ["50%", "50%"]
+        : effectiveShowLabels
+          ? ["50%", "45%"]
+          : ["50%", effectiveShowLegend ? "45%" : "50%"]
+
+    const outerRadiusPct = size === "sm" ? 85 : effectiveShowLabels ? 50 : 75
     const innerRadiusPct = Math.min(innerRadius, outerRadiusPct - 10)
 
     const pieSeries: echarts.PieSeriesOption = {
       name: series.name,
       type: "pie",
       radius: [`${innerRadiusPct}%`, `${outerRadiusPct}%`],
-      center: ["50%", showLegend ? "45%" : "50%"],
+      center,
       data: pieData,
       avoidLabelOverlap: true,
       label: buildLabel(),
       labelLine: {
-        show: showLabels,
+        show: effectiveShowLabels,
         length: 8,
         length2: 8,
         lineStyle: {
           color: theme.colors.borderSecondary,
         },
       },
-      labelLayout: showLabels ? { hideOverlap: true } : undefined,
+      labelLayout: effectiveShowLabels ? { hideOverlap: true } : undefined,
       emphasis: {
         label: {
-          show: showLabels,
+          show: effectiveShowLabels,
         },
         itemStyle: {
           shadowBlur: 0,
@@ -120,12 +151,11 @@ export function usePieChartOptions(
       },
       series: [pieSeries],
       legend: buildLegend({
-        show: showLegend,
+        show: effectiveShowLegend,
         data: legendData,
         theme,
         containerWidth,
       }),
-      grid: buildGrid({ showLegend }),
       tooltip: buildItemTooltip({
         theme,
         formatter: (params: unknown) => {
@@ -161,5 +191,6 @@ export function usePieChartOptions(
     echartsOptions,
     theme,
     containerWidth,
+    size,
   ])
 }

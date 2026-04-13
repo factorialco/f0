@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import type { F0DataChartProps } from "../types"
+
 import { F0DataChart } from "../index"
-import { ChartDecorator } from "./decorators"
+import { ChartDecorator, ResponsiveSnapshot } from "./decorators"
 
 const meta = {
   component: F0DataChart,
@@ -11,161 +13,95 @@ const meta = {
 } satisfies Meta<typeof F0DataChart>
 
 export default meta
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<typeof F0DataChart>
 
-export const Default: Story = {
+// ---------------------------------------------------------------------------
+// Sample data — three densities matching the Figma at file
+// `1smmEIugmR0CNeu7NvK33y` node `10218-20575` (Low / Medium / Large).
+// ---------------------------------------------------------------------------
+
+const PSEUDO_RANDOM = (seed: number) => {
+  let state = seed
+  return () => {
+    state = (state * 9301 + 49297) % 233280
+    return state / 233280
+  }
+}
+
+function buildGrid(
+  cols: number,
+  rows: number,
+  seed: number
+): {
+  xCategories: string[]
+  yCategories: string[]
+  data: [number, number, number][]
+} {
+  const rand = PSEUDO_RANDOM(seed)
+  const xCategories = Array.from({ length: cols }, (_, i) =>
+    String(i + 1).padStart(2, "0")
+  )
+  const yCategories = Array.from({ length: rows }, (_, i) =>
+    String(i + 1).padStart(2, "0")
+  )
+  const data: [number, number, number][] = []
+  for (let x = 0; x < cols; x++) {
+    for (let y = 0; y < rows; y++) {
+      data.push([x, y, Math.round(rand() * 100)])
+    }
+  }
+  return { xCategories, yCategories, data }
+}
+
+const LOW = buildGrid(6, 9, 11)
+const MEDIUM = buildGrid(12, 9, 23)
+const LARGE = buildGrid(40, 24, 47)
+
+export const Low: Story = {
   args: {
     type: "heatmap",
-    xCategories: [
-      "9am",
-      "10am",
-      "11am",
-      "12pm",
-      "1pm",
-      "2pm",
-      "3pm",
-      "4pm",
-      "5pm",
-    ],
-    yCategories: ["Mon", "Tue", "Wed", "Thu", "Fri"],
-    data: [
-      [0, 0, 5],
-      [1, 0, 12],
-      [2, 0, 18],
-      [3, 0, 8],
-      [4, 0, 6],
-      [5, 0, 15],
-      [6, 0, 20],
-      [7, 0, 14],
-      [8, 0, 9],
-      [0, 1, 8],
-      [1, 1, 15],
-      [2, 1, 22],
-      [3, 1, 10],
-      [4, 1, 7],
-      [5, 1, 18],
-      [6, 1, 25],
-      [7, 1, 16],
-      [8, 1, 11],
-      [0, 2, 3],
-      [1, 2, 9],
-      [2, 2, 14],
-      [3, 2, 6],
-      [4, 2, 4],
-      [5, 2, 12],
-      [6, 2, 16],
-      [7, 2, 10],
-      [8, 2, 7],
-      [0, 3, 10],
-      [1, 3, 18],
-      [2, 3, 24],
-      [3, 3, 12],
-      [4, 3, 9],
-      [5, 3, 20],
-      [6, 3, 28],
-      [7, 3, 19],
-      [8, 3, 13],
-      [0, 4, 6],
-      [1, 4, 11],
-      [2, 4, 15],
-      [3, 4, 7],
-      [4, 4, 5],
-      [5, 4, 10],
-      [6, 4, 13],
-      [7, 4, 8],
-      [8, 4, 4],
-    ],
+    ...LOW,
   },
 }
 
-export const WithLabels: Story = {
+export const Medium: Story = {
   args: {
     type: "heatmap",
-    xCategories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-    yCategories: ["Engineering", "Design", "Product", "Sales"],
-    showLabels: true,
-    data: [
-      [0, 0, 95],
-      [1, 0, 92],
-      [2, 0, 88],
-      [3, 0, 91],
-      [4, 0, 94],
-      [5, 0, 90],
-      [0, 1, 88],
-      [1, 1, 85],
-      [2, 1, 90],
-      [3, 1, 87],
-      [4, 1, 92],
-      [5, 1, 89],
-      [0, 2, 92],
-      [1, 2, 90],
-      [2, 2, 86],
-      [3, 2, 93],
-      [4, 2, 88],
-      [5, 2, 91],
-      [0, 3, 78],
-      [1, 3, 82],
-      [2, 3, 80],
-      [3, 3, 85],
-      [4, 3, 79],
-      [5, 3, 83],
-    ],
+    ...MEDIUM,
+  },
+}
+
+export const Large: Story = {
+  args: {
+    type: "heatmap",
+    ...LARGE,
+  },
+}
+
+export const WithFormatter: Story = {
+  args: {
+    type: "heatmap",
+    ...MEDIUM,
     valueFormatter: (v) => `${v}%`,
   },
 }
 
-export const CustomRange: Story = {
-  args: {
+// ---------------------------------------------------------------------------
+// Responsive snapshot — mirrors the Figma matrix exactly. Narrow column shows
+// the "Not supported" placeholder; medium and large render the heatmap.
+// ---------------------------------------------------------------------------
+
+const responsiveHeatmapProps = (
+  column: "low" | "normal" | "large"
+): F0DataChartProps => {
+  const grid = column === "low" ? LOW : column === "normal" ? MEDIUM : LARGE
+  return {
     type: "heatmap",
-    xCategories: ["Q1", "Q2", "Q3", "Q4"],
-    yCategories: ["Junior", "Mid", "Senior", "Lead"],
-    min: 0,
-    max: 50,
-    data: [
-      [0, 0, 12],
-      [1, 0, 15],
-      [2, 0, 18],
-      [3, 0, 14],
-      [0, 1, 25],
-      [1, 1, 28],
-      [2, 1, 22],
-      [3, 1, 30],
-      [0, 2, 35],
-      [1, 2, 38],
-      [2, 2, 42],
-      [3, 2, 40],
-      [0, 3, 45],
-      [1, 3, 48],
-      [2, 3, 44],
-      [3, 3, 50],
-    ],
-    valueFormatter: (v) => `${v}k €`,
-  },
+    ...grid,
+  }
 }
 
-export const NoVisualMap: Story = {
-  args: {
-    type: "heatmap",
-    xCategories: ["Mon", "Tue", "Wed", "Thu", "Fri"],
-    yCategories: ["Morning", "Afternoon", "Evening"],
-    showVisualMap: false,
-    showLabels: true,
-    data: [
-      [0, 0, 8],
-      [1, 0, 12],
-      [2, 0, 6],
-      [3, 0, 10],
-      [4, 0, 4],
-      [0, 1, 15],
-      [1, 1, 20],
-      [2, 1, 18],
-      [3, 1, 22],
-      [4, 1, 14],
-      [0, 2, 3],
-      [1, 2, 5],
-      [2, 2, 2],
-      [3, 2, 7],
-      [4, 2, 1],
-    ],
-  },
+export const ResponsiveSnapshotMatrix: Story = {
+  decorators: [(Story) => <Story />],
+  render: () => <ResponsiveSnapshot getProps={responsiveHeatmapProps} />,
 }

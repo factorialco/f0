@@ -1,10 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { useState } from "react"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { F0AnalyticsDashboard } from "../index"
 import type { DashboardItem } from "../types"
+
+import { F0AnalyticsDashboard } from "../index"
 import { dashboardFilters, dashboardPresets, mixedItems } from "./mockDataMixed"
 
 const meta = {
@@ -25,7 +27,7 @@ const InteractiveDashboard = ({ editMode }: { editMode?: boolean }) => {
         date: {
           type: "date-navigator",
           defaultValue: new Date(),
-          granularity: "week",
+          granularity: ["week", "day", "range"],
         },
       }}
       filters={dashboardFilters}
@@ -56,6 +58,11 @@ const InteractiveDashboard = ({ editMode }: { editMode?: boolean }) => {
 /**
  * Full dashboard with metrics, charts (bar, line, pie, radar, gauge, heatmap,
  * funnel), and a paginated collection — all wired to shared filters.
+ *
+ * Three items in `mixedItems` carry an `explanation` field — try the
+ * three-dot menu on **Total Headcount**, **Headcount by Department**, and
+ * the **Employee Directory** collection to see the new "Where does this data
+ * come from?" entry that opens a markdown-rendered dialog.
  */
 export const MixedDashboard: Story = {
   render: () => <InteractiveDashboard editMode />,

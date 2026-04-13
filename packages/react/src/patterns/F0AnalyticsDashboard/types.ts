@@ -175,10 +175,36 @@ export interface DashboardItemBase {
   title: string
   /** Optional description below the title */
   description?: string
-  /** Number of grid columns this item spans (1–12). */
+  /**
+   * Optional markdown explanation of how this item's data is calculated.
+   * When set, the per-item dropdown menu shows a "Where does this data come
+   * from?" entry that opens a dialog rendering this content as markdown.
+   * Omit to hide the entry entirely (backwards compatible).
+   */
+  explanation?: string
+  /**
+   * @deprecated Ignored by the renderer — items auto-size to equal-width
+   * slots based on the per-row slot budget. Kept for backwards compatibility
+   * with persisted layouts; safe to leave unset.
+   */
   colSpan?: number
-  /** Number of grid rows this item spans. */
+  /**
+   * @deprecated Use `itemHeight` (pixels) instead. Kept for backwards
+   * compatibility with persisted layouts: when `itemHeight` is unset, the
+   * grid still reads `rowSpan * 48` as a fallback.
+   */
   rowSpan?: number
+  /**
+   * Item height in pixels. Takes precedence over `rowSpan` when set. The
+   * row height in the grid is `max(itemHeight)` across all items in the row,
+   * so a single tall item makes the whole row tall. When neither
+   * `itemHeight` nor `rowSpan` is provided, the grid falls back to a
+   * type-specific default (chart 336, metric 144, collection 480).
+   *
+   * Should be a multiple of 48 to align with the grid's snap unit, but the
+   * field accepts any positive number for pixel-accurate persisted resizes.
+   */
+  itemHeight?: number
   /** Grid column position (0-based). When set, skip auto-packing. */
   x?: number
   /** Grid row position (0-based). When set, skip auto-packing. */
@@ -304,11 +330,16 @@ export type DashboardItem<
  * Minimal descriptor of a dashboard item's position and size.
  * Used by `onLayoutChange` so the consumer can reconcile layout
  * edits against its own source-of-truth config items.
+ *
+ * Both `rowSpan` (legacy, in 48-unit increments) and `itemHeight`
+ * (canonical, in pixels) are emitted. New consumers should persist
+ * `itemHeight` for pixel-accurate resize round-tripping.
  */
 export type DashboardItemLayout = {
   id: string
   colSpan: number
   rowSpan: number
+  itemHeight: number
   x: number
   y: number
 }

@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import type { F0DataChartProps } from "../types"
+
 import { F0DataChart } from "../index"
-import { ChartDecorator } from "./decorators"
+import { ChartDecorator, ResponsiveSnapshot } from "./decorators"
 
 const meta = {
   component: F0DataChart,
@@ -11,7 +13,7 @@ const meta = {
 } satisfies Meta<typeof F0DataChart>
 
 export default meta
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<typeof F0DataChart>
 
 export const Default: Story = {
   args: {
@@ -118,4 +120,40 @@ export const CustomColors: Story = {
       },
     ],
   },
+}
+
+// ---------------------------------------------------------------------------
+// Responsive snapshot
+// ---------------------------------------------------------------------------
+
+const responsiveRadarProps = (
+  column: "low" | "normal" | "large"
+): F0DataChartProps => {
+  const indicators = [
+    { name: "Performance", max: 100 },
+    { name: "Engagement", max: 100 },
+    { name: "Retention", max: 100 },
+    { name: "Growth", max: 100 },
+    { name: "Satisfaction", max: 100 },
+  ]
+  const series =
+    column === "low"
+      ? [{ name: "Team A", data: [85, 72, 90, 65, 78] }]
+      : column === "normal"
+        ? [
+            { name: "Team A", data: [85, 72, 90, 65, 78] },
+            { name: "Team B", data: [70, 88, 75, 80, 82] },
+          ]
+        : [
+            { name: "Team A", data: [85, 72, 90, 65, 78] },
+            { name: "Team B", data: [70, 88, 75, 80, 82] },
+            { name: "Team C", data: [60, 75, 80, 70, 88] },
+            { name: "Team D", data: [78, 65, 70, 90, 72] },
+          ]
+  return { type: "radar", indicators, series }
+}
+
+export const ResponsiveSnapshotMatrix: Story = {
+  decorators: [(Story) => <Story />],
+  render: () => <ResponsiveSnapshot getProps={responsiveRadarProps} />,
 }

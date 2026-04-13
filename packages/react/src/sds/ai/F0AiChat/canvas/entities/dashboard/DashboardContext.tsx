@@ -90,7 +90,11 @@ export function DashboardCanvasProvider({
           return {
             ...original,
             colSpan: entry.colSpan,
-            rowSpan: entry.rowSpan,
+            // Persist the canonical pixel-accurate height from the resize.
+            // `rowSpan` is stripped on persistence so subsequent renders read
+            // `itemHeight` exclusively (avoids drift between the two fields).
+            rowSpan: undefined,
+            itemHeight: entry.itemHeight,
             x: entry.x,
             y: entry.y,
           }

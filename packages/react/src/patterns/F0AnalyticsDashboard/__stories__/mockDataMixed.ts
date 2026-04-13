@@ -704,6 +704,8 @@ const metricItems: DashboardMetricItem<DashboardFiltersType>[] = [
     x: 0,
     y: 0,
     rowSpan: 3,
+    explanation:
+      "Total number of employees active in the company **as of the date selected** in the date navigator. Respects all dashboard filters (**department**, **location**, **status**) and updates whenever you move the date or change granularity.",
     fetchData: fetchTotalHeadcount,
   },
   {
@@ -727,6 +729,8 @@ const metricItems: DashboardMetricItem<DashboardFiltersType>[] = [
     rowSpan: 3,
     format: { type: "percent" },
     decimals: 1,
+    explanation:
+      "How many employees left the company this month compared to the **average headcount** of the month.\n\n```\nmonthly attrition = departures in the month / average headcount in the month\naverage headcount in the month = (headcount on day 1 + headcount on the last day) / 2\n```",
     fetchData: fetchAttritionMetric,
   },
 ]
@@ -735,6 +739,8 @@ const collectionItem: DashboardCollectionItem<DashboardFiltersType> = {
   id: "employee-table",
   title: "Employee Directory",
   description: "Paginated list of employees filtered by dashboard filters",
+  explanation:
+    "All employees that match the active dashboard filters (**department**, **location**, **status**), sorted alphabetically by name.\n\n- One row per active employee.\n- Paginated at **20 rows per page**.\n- Salary is shown in euros, with thousand separators.",
   type: "collection",
   colSpan: 12,
   x: 0,
@@ -756,6 +762,8 @@ export const mixedItems: DashboardItem<DashboardFiltersType>[] = [
     id: "headcount",
     title: "Headcount by Department",
     description: "Current headcount and open positions",
+    explanation:
+      "Active employees grouped by **department**, sorted from largest to smallest.\n\n- Only employees with an active contract today are counted.\n- The **target** value overlaid on each bar comes from the company's current hiring plan for that department.",
     type: "chart",
     colSpan: 4,
     x: 0,

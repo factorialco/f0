@@ -15,6 +15,7 @@ import type {
   DashboardItemLayout,
   DashboardMetricItem,
 } from "@/patterns/F0AnalyticsDashboard/types"
+import type { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import type {
   FiltersDefinition,
   FiltersState,
@@ -36,37 +37,49 @@ import type {
 import { useDashboardCompute, type ItemResult } from "./useDashboardCompute"
 
 // ---------------------------------------------------------------------------
-// Minimum row span per item type
+// Minimum item height per type
 // ---------------------------------------------------------------------------
 
 /**
- * Minimum `rowSpan` enforced for every dashboard item received from the agent,
- * regardless of what config it sends. This guarantees that every item renders
- * at least at the same height as the F0AnalyticsDashboard defaults.
- *
- * The grid renders each item at `rowSpan * 48` px, so these values mirror the
- * `ROW_HEIGHTS` defaults defined in
- * `f0/packages/react/src/patterns/F0AnalyticsDashboard/components/DashboardGrid/DashboardGrid.tsx`
+ * Minimum item height (in pixels) enforced for every dashboard item received
+ * from the agent, regardless of what config it sends. Mirrors the
+ * `ROW_HEIGHTS` defaults defined in F0AnalyticsDashboard's `DashboardGrid`
  * (chart 336px, metric 144px, collection 480px). Keep both in sync.
  */
-const MIN_ROW_SPAN_BY_TYPE: Record<ChatDashboardItem["type"], number> = {
-  chart: 7, // 7 * 48 = 336px
-  metric: 3, // 3 * 48 = 144px
-  collection: 10, // 10 * 48 = 480px
+const MIN_ITEM_HEIGHT_BY_TYPE: Record<ChatDashboardItem["type"], number> = {
+  chart: 336,
+  metric: 144,
+  collection: 480,
 }
 
 /**
- * Returns the item with its `rowSpan` clamped to the minimum allowed for its
- * type. If the agent omits `rowSpan` or sends a value below the minimum, it is
- * raised; larger values are kept untouched.
+ * Resolve an item's height in pixels using the same precedence as the F0
+ * grid: `itemHeight` (canonical) > `rowSpan * 48` (legacy) > 0 (no value).
+ */
+function readItemHeightPx(item: ChatDashboardItem): number {
+  if (item.itemHeight && item.itemHeight > 0) return item.itemHeight
+  if (item.rowSpan && item.rowSpan > 0) return item.rowSpan * 48
+  return 0
+}
+
+/**
+ * Returns the item with its `itemHeight` clamped to the per-type minimum.
+ *
+ * Backwards compat: when the agent sends only the legacy `rowSpan`, the
+ * function reads it as a fallback and writes the result into `itemHeight`
+ * so the grid uses the canonical pixel field downstream. Larger values
+ * (whether from `itemHeight` or `rowSpan`) are kept untouched.
+ *
+ * The function name is preserved for any external imports.
  */
 export function clampDashboardItemRowSpan(
   item: ChatDashboardItem
 ): ChatDashboardItem {
-  const min = MIN_ROW_SPAN_BY_TYPE[item.type]
-  const current = item.rowSpan ?? 0
-  if (current >= min) return item
-  return { ...item, rowSpan: min }
+  const min = MIN_ITEM_HEIGHT_BY_TYPE[item.type]
+  const current = readItemHeightPx(item)
+  const next = Math.max(min, current)
+  if (current >= min && item.itemHeight && item.itemHeight === next) return item
+  return { ...item, itemHeight: next }
 }
 
 // ---------------------------------------------------------------------------
@@ -272,6 +285,45 @@ export function ChatDashboard({
     return result as FiltersDefinition
   }, [config.filters, filterOptions])
 
+  /**
+   * Build the F0AnalyticsDashboard `navigationFilters` prop from the agent's
+   * config. The agent declares `{ type: "dateNavigation", column, datasetId,
+   * granularities, defaultGranularity? }` but F0's slot expects
+   * `{ type: "date-navigator", defaultValue, granularity, defaultGranularity? }`
+   * — we strip `column` and `datasetId` (those are agent-side metadata used
+   * by the compute SQL builder) and supply `defaultValue: new Date()` so the
+   * navigator initializes to the current period at the chosen granularity.
+   */
+  const dashboardNavigationFilters = useMemo<
+    NavigationFiltersDefinition | undefined
+  >(() => {
+    const navSpecs = config.navigationFilters
+    if (!navSpecs || Object.keys(navSpecs).length === 0) return undefined
+    const today = new Date()
+    const result: NavigationFiltersDefinition = {}
+    for (const [key, spec] of Object.entries(navSpecs)) {
+      if (spec.type !== "dateNavigation") continue
+      result[key] = {
+        type: "date-navigator",
+        defaultValue: today,
+        granularity: spec.granularities,
+        ...(spec.defaultGranularity
+          ? { defaultGranularity: spec.defaultGranularity }
+          : {}),
+      }
+    }
+    return Object.keys(result).length > 0 ? result : undefined
+  }, [config.navigationFilters])
+
+  // Set of keys belonging to navigation filters — used to split the merged
+  // filters object that F0AnalyticsDashboard passes to fetchData into the two
+  // separate compute payloads (`filterValues` for `in` filters,
+  // `navigationFilterValues` for the date navigator).
+  const navigationFilterKeys = useMemo(
+    () => new Set(Object.keys(config.navigationFilters ?? {})),
+    [config.navigationFilters]
+  )
+
   // Create fetchData functions that call the batch compute endpoint
   const makeFetchData = useCallback(
     (itemId: string) => {
@@ -279,23 +331,52 @@ export function ChatDashboard({
         filters: FiltersState<FiltersDefinition>
       ): Promise<ItemResult> => {
         const filterValues: Record<string, unknown[]> = {}
+        const navigationFilterValues: Record<string, string[]> = {}
+
         for (const [key, value] of Object.entries(filters)) {
+          if (navigationFilterKeys.has(key)) {
+            // Date navigator value shape:
+            //   { value: { from: Date, to: Date }, valueString, granularity }
+            const dateValue = value as
+              | {
+                  value?: { from?: Date | string; to?: Date | string }
+                }
+              | undefined
+            const range = dateValue?.value
+            if (!range) continue
+            const toIso = (d: Date | string | undefined): string => {
+              if (!d) return ""
+              const date = d instanceof Date ? d : new Date(d)
+              if (Number.isNaN(date.getTime())) return ""
+              // YYYY-MM-DD — DATE comparison in DuckDB ignores time-of-day.
+              return date.toISOString().slice(0, 10)
+            }
+            const fromIso = toIso(range.from)
+            const toIsoStr = toIso(range.to)
+            if (fromIso || toIsoStr) {
+              navigationFilterValues[key] = [fromIso, toIsoStr]
+            }
+            continue
+          }
           if (Array.isArray(value) && value.length > 0) {
             filterValues[key] = value as unknown[]
           }
         }
-        return fetchItem(itemId, filterValues).then((result) => {
-          // Update filter options from the response
-          const opts = getFilterOptions()
-          if (opts && !filterOptionsPolledRef.current) {
-            setFilterOptions(opts)
-            filterOptionsPolledRef.current = true
+
+        return fetchItem(itemId, filterValues, navigationFilterValues).then(
+          (result) => {
+            // Update filter options from the response
+            const opts = getFilterOptions()
+            if (opts && !filterOptionsPolledRef.current) {
+              setFilterOptions(opts)
+              filterOptionsPolledRef.current = true
+            }
+            return result
           }
-          return result
-        })
+        )
       }
     },
-    [fetchItem, getFilterOptions]
+    [fetchItem, getFilterOptions, navigationFilterKeys]
   )
 
   const items: DashboardItem<FiltersDefinition>[] = useMemo(
@@ -318,6 +399,7 @@ export function ChatDashboard({
       key={refreshKey}
       filters={filterDefinitions}
       filtersLoading={filtersLoading}
+      navigationFilters={dashboardNavigationFilters}
       items={items}
       editMode={editMode}
       onLayoutChange={onLayoutChange}
@@ -443,8 +525,10 @@ function mapChartItem(
     id: item.id,
     title: item.title,
     description: buildDescription(item.description, item.sourceDescription),
+    explanation: item.explanation,
     colSpan: item.colSpan,
     rowSpan: item.rowSpan,
+    itemHeight: item.itemHeight,
     x: item.x,
     y: item.y,
     type: "chart",
@@ -474,8 +558,10 @@ function mapMetricItem(
     id: item.id,
     title: item.title,
     description: buildDescription(item.description, item.sourceDescription),
+    explanation: item.explanation,
     colSpan: item.colSpan,
     rowSpan: item.rowSpan,
+    itemHeight: item.itemHeight,
     x: item.x,
     y: item.y,
     type: "metric",
@@ -494,8 +580,10 @@ function mapCollectionItem(
     id: item.id,
     title: item.title,
     description: buildDescription(item.description, item.sourceDescription),
+    explanation: item.explanation,
     colSpan: item.colSpan ?? 12,
     rowSpan: item.rowSpan,
+    itemHeight: item.itemHeight,
     x: item.x,
     y: item.y,
     type: "collection",
