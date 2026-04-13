@@ -77,7 +77,11 @@ function VirtualFormContent() {
 
   const formHasSteps = !!formDefinition.steps?.length
 
-  const showSectionsSidepanel = formHasSteps
+  const showSectionsSidepanel =
+    formHasSteps ||
+    !!(
+      formDefinition.sections && Object.keys(formDefinition.sections).length > 2
+    )
 
   const formStyling = useMemo(
     () => ({
@@ -89,11 +93,13 @@ function VirtualFormContent() {
   if (!activeForm || !entry) return null
 
   return (
-    <DynamicF0Form
-      formDefinition={formDefinition}
-      formRef={formRef}
-      styling={formStyling}
-    />
+    <div className={!showSectionsSidepanel ? "p-6" : undefined}>
+      <DynamicF0Form
+        formDefinition={formDefinition}
+        formRef={formRef}
+        styling={formStyling}
+      />
+    </div>
   )
 }
 
