@@ -7,6 +7,7 @@ import {
   useState,
 } from "react"
 
+import type { RecordType } from "@/hooks/datasource"
 import type {
   DashboardChartConfig,
   DashboardChartItem,
@@ -20,7 +21,6 @@ import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-import type { RecordType } from "@/hooks/datasource"
 
 import { F0AnalyticsDashboard } from "@/patterns/F0AnalyticsDashboard/F0AnalyticsDashboard"
 
@@ -494,7 +494,7 @@ export function DashboardContent({
         exportFilename={content.title}
       />
       <F0ActionBar
-        label="Changes detected"
+        label={translations.forms.actionBar.unsavedChanges}
         isOpen={isDirty}
         primaryActions={[
           {

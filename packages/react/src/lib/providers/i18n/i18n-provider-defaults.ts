@@ -330,7 +330,7 @@ export const defaultTranslations = {
       download: "Download {{format}}",
       exportDashboard: "Export dashboard as {{format}}",
       exporting: "Exporting...",
-      rows: "rows",
+      rows: "{{amount}} rows",
     },
     dashboardItem: {
       chartType: "Chart type",
@@ -393,6 +393,10 @@ export const defaultTranslations = {
   },
   dataChart: {
     heatmapNotSupported: "Heatmap not supported at this size",
+    barChartVertical: "Bar (vertical)",
+    barChartHorizontal: "Bar (horizontal)",
+    lineChart: "Line",
+    funnel: "Funnel",
   },
   select: {
     noResults: "No results found",
