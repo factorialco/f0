@@ -1,10 +1,10 @@
-import { Markdown } from "@copilotkit/react-ui"
 import { useState, type ReactNode } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0ButtonToggleGroup } from "@/components/F0ButtonToggleGroup"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { OneEmptyState } from "@/components/OneEmptyState"
+import { RichTextDisplay } from "@/components/RichText/RichTextDisplay"
 import {
   type DropdownItem as DropdownItemType,
   type DropdownItemObject,
@@ -13,7 +13,6 @@ import { Delete, Download, Ellipsis, Ai } from "@/icons/app"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { markdownRenderers } from "@/sds/ai/F0AiChat/components/markdownRenderers"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -190,9 +189,9 @@ export function DashboardItem({
               >
                 {isExplanationView && hasExplanation ? (
                   <div className="px-3 py-2 text-base text-f1-foreground [&>div]:flex [&>div]:flex-col [&>div]:gap-2">
-                    <Markdown
+                    <RichTextDisplay
                       content={explanation as string}
-                      components={markdownRenderers}
+                      format="markdown"
                     />
                   </div>
                 ) : (
@@ -217,6 +216,7 @@ export function DashboardItem({
                               ?.onSelect()
                           }}
                           size="lg"
+                          variant="expanded"
                           required
                           withBorder={false}
                         />
