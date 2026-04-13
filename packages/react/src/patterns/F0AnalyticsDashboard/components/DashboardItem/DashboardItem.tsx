@@ -216,7 +216,6 @@ export function DashboardItem({
                               ?.onSelect()
                           }}
                           size="lg"
-                          variant="expanded"
                           required
                           withBorder={false}
                         />
