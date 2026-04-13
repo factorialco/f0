@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.443.0](https://github.com/factorialco/f0/compare/f0-react-v1.442.1...f0-react-v1.443.0) (2026-04-13)
+
+
+### Features
+
+* **ai:** F0AnalyticsDashboard edit mode and DataDownload canvas ([#3819](https://github.com/factorialco/f0/issues/3819)) ([56afe21](https://github.com/factorialco/f0/commit/56afe21af606ce52ec9e279b8cad1e24ba9b794c))
+
 ## [1.442.1](https://github.com/factorialco/f0/compare/f0-react-v1.442.0...f0-react-v1.442.1) (2026-04-13)
 
 
