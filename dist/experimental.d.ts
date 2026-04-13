@@ -435,6 +435,21 @@ declare type AiChatCredits = {
 };
 
 /**
+ * Credit warning configuration.
+ * Groups severity level and action callbacks into a single object.
+ *
+ * When provided, a warning banner is shown above the chat textarea.
+ */
+declare type AiChatCreditWarning = {
+    /** The severity level of the warning. */
+    level: "soft";
+    /** Called when the user dismisses the credit warning banner. */
+    onDismiss?: () => void;
+    /** Called when the user clicks the "Get Credits" button. */
+    onGetCredits?: () => void;
+};
+
+/**
  * Disclaimer configuration for the chat input
  */
 declare type AiChatDisclaimer = {
@@ -510,6 +525,11 @@ declare type AiChatProviderProps = {
      * Groups fetchUsage, upgradePlanUrl, and company/plan display info.
      */
     credits?: AiChatCredits;
+    /**
+     * Credit warning configuration. When provided, shows a warning banner above the chat textarea.
+     * Groups severity level and action callbacks.
+     */
+    creditWarning?: AiChatCreditWarning;
     /**
      * File attachment configuration. When provided, enables file uploads in the chat.
      */
@@ -2832,9 +2852,17 @@ declare const defaultTranslations: {
             readonly openButton: "Open";
         };
         readonly dataDownload: {
+            readonly title: "Download";
             readonly download: "Download {{format}}";
             readonly exportDashboard: "Export dashboard as {{format}}";
             readonly exporting: "Exporting...";
+            readonly rows: "{{amount}} rows";
+        };
+        readonly dashboardItem: {
+            readonly chartType: "Chart type";
+            readonly errorTitle: "Error loading data";
+            readonly retry: "Retry";
+            readonly dataExplanation: "Where does this data come from?";
         };
         readonly pong: {
             readonly title: "Pong";
@@ -2888,6 +2916,13 @@ declare const defaultTranslations: {
                 readonly title: "Questions before getting started";
             };
         };
+    };
+    readonly dataChart: {
+        readonly heatmapNotSupported: "Heatmap not supported at this size";
+        readonly barChartVertical: "Bar (vertical)";
+        readonly barChartHorizontal: "Bar (horizontal)";
+        readonly lineChart: "Line";
+        readonly funnel: "Funnel";
     };
     readonly select: {
         readonly noResults: "No results found";

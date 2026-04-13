@@ -424,9 +424,17 @@ const e = {
       openButton: "Open"
     },
     dataDownload: {
+      title: "Download",
       download: "Download {{format}}",
       exportDashboard: "Export dashboard as {{format}}",
-      exporting: "Exporting..."
+      exporting: "Exporting...",
+      rows: "{{amount}} rows"
+    },
+    dashboardItem: {
+      chartType: "Chart type",
+      errorTitle: "Error loading data",
+      retry: "Retry",
+      dataExplanation: "Where does this data come from?"
     },
     pong: {
       title: "Pong",
@@ -480,6 +488,13 @@ const e = {
         title: "Questions before getting started"
       }
     }
+  },
+  dataChart: {
+    heatmapNotSupported: "Heatmap not supported at this size",
+    barChartVertical: "Bar (vertical)",
+    barChartHorizontal: "Bar (horizontal)",
+    lineChart: "Line",
+    funnel: "Funnel"
   },
   select: {
     noResults: "No results found",
