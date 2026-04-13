@@ -7,7 +7,7 @@ export type F0ButtonToggleGroupItem = Pick<
   value: string
 }
 
-export const buttonToggleGroupSizes = ["sm", "md"] as const
+export const buttonToggleGroupSizes = ["sm", "md", "lg"] as const
 export type ButtonToggleGroupSize = (typeof buttonToggleGroupSizes)[number]
 
 export type F0ButtonToggleGroupProps = {
@@ -42,6 +42,12 @@ export type F0ButtonToggleGroupProps = {
    * @default false
    */
   disabled?: boolean
+
+  /**
+   * Whether to render a border around each toggle button.
+   * @default true
+   */
+  withBorder?: boolean
 } & (
   | {
       multiple: true
