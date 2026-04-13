@@ -391,6 +391,9 @@ export const defaultTranslations = {
       },
     },
   },
+  dataChart: {
+    heatmapNotSupported: "Heatmap not supported at this size",
+  },
   select: {
     noResults: "No results found",
     loadingMore: "Loading...",

@@ -52,6 +52,8 @@ export function useHeatmapChartOptions(
     data,
     min: minProp,
     max: maxProp,
+    showLabels = false,
+    showVisualMap = false,
     valueFormatter,
     echartsOptions,
   }: F0DataChartHeatmapProps,
@@ -134,9 +136,16 @@ export function useHeatmapChartOptions(
         min,
         max,
         calculable: false,
-        show: false,
+        show: showVisualMap,
+        orient: "horizontal" as const,
+        bottom: 10,
+        left: "center",
         inRange: {
           color: colorScale,
+        },
+        textStyle: {
+          color: colors.foregroundTertiary,
+          fontSize: theme.textStyle.fontSize,
         },
       },
       grid: {
@@ -151,9 +160,18 @@ export function useHeatmapChartOptions(
           type: "heatmap" as const,
           data,
           label: {
-            // Figma never shows inline values — they're revealed in the
-            // tooltip on hover only.
-            show: false,
+            show: showLabels,
+            color: colors.foreground,
+            fontSize: theme.textStyle.fontSize,
+            fontWeight: theme.textStyle.fontWeight,
+            formatter: valueFormatter
+              ? (params: { value?: unknown[] }) => {
+                  const val = Number(
+                    (params.value as number[] | undefined)?.[2] ?? 0
+                  )
+                  return valueFormatter(val)
+                }
+              : undefined,
           },
           itemStyle: {
             borderRadius: cellBorderRadius,
@@ -201,6 +219,8 @@ export function useHeatmapChartOptions(
     data,
     minProp,
     maxProp,
+    showLabels,
+    showVisualMap,
     valueFormatter,
     echartsOptions,
     theme,

@@ -148,7 +148,6 @@ export function useRadarChartOptions(
         show: effectiveShowLegend,
         data: legendData,
         theme,
-        containerWidth: containerSize.width,
       }),
       tooltip: buildItemTooltip({
         theme,

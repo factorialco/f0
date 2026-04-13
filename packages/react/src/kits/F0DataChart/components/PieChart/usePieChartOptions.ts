@@ -154,7 +154,6 @@ export function usePieChartOptions(
         show: effectiveShowLegend,
         data: legendData,
         theme,
-        containerWidth,
       }),
       tooltip: buildItemTooltip({
         theme,

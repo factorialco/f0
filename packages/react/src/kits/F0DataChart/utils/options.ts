@@ -271,8 +271,6 @@ interface LegendOptions {
   show: boolean
   data: string[]
   theme: ChartTheme
-  /** Container width in pixels — used to compute max label width */
-  containerWidth?: number
 }
 
 /**
@@ -681,7 +679,6 @@ export function buildBaseChartOptions({
       show: showLegend,
       data: legendData,
       theme,
-      containerWidth,
     }),
     grid: buildGrid({ showLegend }),
     tooltip: buildTooltip({
