@@ -27,7 +27,7 @@ export function Table({
         {title && (
           <OneEllipsis
             tag="h2"
-            className="text-base font-medium text-f1-foreground"
+            className="text-base font-medium capitalize text-f1-foreground"
           >
             {title}
           </OneEllipsis>

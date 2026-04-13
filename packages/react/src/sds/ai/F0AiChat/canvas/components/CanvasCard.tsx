@@ -51,7 +51,7 @@ export function CanvasCard({
         <div className="flex min-w-0 flex-row items-center gap-3">
           <F0AvatarModule module={module} size="lg" />
           <div className="flex min-w-0 flex-col">
-            <OneEllipsis className="text-lg font-semibold text-f1-foreground">
+            <OneEllipsis className="text-lg font-semibold capitalize text-f1-foreground">
               {title}
             </OneEllipsis>
             <OneEllipsis className="text-base text-f1-foreground-secondary">
