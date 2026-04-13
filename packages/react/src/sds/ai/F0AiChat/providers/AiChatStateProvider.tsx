@@ -373,6 +373,7 @@ export function useAiChat(): AiChatProviderReturnValue {
       entityRefs: undefined,
       toolHints: undefined,
       credits: undefined,
+      creditWarning: undefined,
       fileAttachments: undefined,
       inProgress: false,
       setInProgress: noopFn,

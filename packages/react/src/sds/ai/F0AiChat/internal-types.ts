@@ -9,6 +9,7 @@ import {
   type AiChatToolHint,
   type CanvasContent,
   type AiChatCredits,
+  type AiChatCreditWarning,
   type EntityRefs,
   type VisualizationMode,
   WelcomeScreenSuggestion,
@@ -33,6 +34,7 @@ export interface AiChatState {
   entityRefs?: EntityRefs
   toolHints?: AiChatToolHint[]
   credits?: AiChatCredits
+  creditWarning?: AiChatCreditWarning
   fileAttachments?: AiChatFileAttachmentConfig
   placeholders?: string[]
   setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>
@@ -185,6 +187,7 @@ export type AiChatProviderReturnValue = {
   | "entityRefs"
   | "toolHints"
   | "credits"
+  | "creditWarning"
   | "fileAttachments"
 > & {
     /** The current canvas content, or null when canvas is closed */

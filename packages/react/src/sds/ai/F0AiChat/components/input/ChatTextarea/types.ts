@@ -1,10 +1,10 @@
 import { type InputProps } from "@copilotkit/react-ui"
 
+import { type AiChatCreditWarning } from "../../../types"
+
 export type ChatTextareaProps = InputProps & {
   submitLabel?: string
-  creditWarning?: "soft"
-  onDismissCreditWarning?: () => void
-  onGetCredits?: () => void
+  creditWarning?: AiChatCreditWarning
 }
 
 export type AttachedFile = {
