@@ -37,7 +37,7 @@ export function Table({
 
   return (
     <div className="group/table relative flex flex-col gap-2 rounded-md border border-solid border-f1-border-secondary">
-      <div className="flex items-center justify-between gap-3 border-0 border-b border-solid border-f1-border-secondary p-3">
+      <div className="flex items-center justify-between gap-3 border-0 border-b border-solid border-f1-border-secondary px-3 py-2">
         {title && (
           <OneEllipsis
             tag="h2"
