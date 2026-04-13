@@ -1,11 +1,11 @@
-import type { PresetsDefinition } from "@/patterns/OneFilterPicker/types"
 import type { RecordType } from "@/hooks/datasource"
 import type { PageBasedPaginatedResponse } from "@/hooks/datasource/types"
-
 import type {
   F0DataChartFunnelSeries,
   F0DataChartPieSeries,
 } from "@/kits/F0DataChart"
+import type { PresetsDefinition } from "@/patterns/OneFilterPicker/types"
+
 import type {
   DashboardChartData,
   DashboardCollectionItem,
@@ -871,7 +871,7 @@ export const mixedItems: DashboardItem<DashboardFiltersType>[] = [
     x: 0,
     y: 24,
     rowSpan: 7,
-    chart: { type: "heatmap", showLabels: true },
+    chart: { type: "heatmap" },
     fetchData: fetchActivityHeatmap,
   },
   // Row 5 — employee table (full width)

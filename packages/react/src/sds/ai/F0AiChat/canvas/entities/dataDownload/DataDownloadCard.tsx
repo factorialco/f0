@@ -32,13 +32,14 @@ export function DataDownloadCard({
   filename,
   markdown,
 }: DataDownloadCardProps) {
-  const translations = useI18n()
+  const { t } = useI18n()
+
   const toolCallId = useToolCallId()
   const { canvasContent, openCanvas, closeCanvas } = useAiChat()
 
   const cleanFilename = filename?.replaceAll("_", " ")
 
-  const title = titleProp || cleanFilename || translations.ai.dataDownload.title
+  const title = titleProp || cleanFilename || t("ai.dataDownload.title")
 
   // Render inline only when the rows we have represent the complete
   // dataset and it's small enough to display in the chat thread.
@@ -95,8 +96,8 @@ export function DataDownloadCard({
       title={title}
       description={
         dataset.totalCount != null
-          ? `${dataset.totalCount} ${translations.ai.dataDownload.rows}`
-          : translations.ai.dataDownload.title
+          ? t("ai.dataDownload.rows", { amount: dataset.totalCount })
+          : t("ai.dataDownload.title")
       }
       onOpen={handleOpen}
       onClose={() => closeCanvas()}
