@@ -1,5 +1,5 @@
 import { useCoAgent } from "@copilotkit/react-core"
-import { useEffect, type ReactNode } from "react"
+import { type FC, useEffect, type ReactNode } from "react"
 import { z } from "zod"
 
 import type { ModuleId } from "@/components/avatars/F0AvatarModule"
@@ -25,7 +25,7 @@ const FALLBACK_SCHEMA = z.object({}) as unknown as F0FormSchema
 
 // F0Form has complex generic inference that doesn't work well with the
 // dynamic F0FormSchema union type. We narrow to single-schema definition.
-const DynamicF0Form = F0Form as React.FC<{
+const DynamicF0Form = F0Form as FC<{
   formDefinition: F0FormDefinitionSingleSchema<F0FormSchema>
   formRef: ReturnType<typeof useF0Form>["formRef"]
 }>
@@ -52,7 +52,7 @@ function VirtualFormContent() {
 
   useEffect(() => {
     ref?.setValues(currentValues, { shouldDirty: true, shouldValidate: true })
-  }, [JSON.stringify(currentValues)])
+  }, [formName, JSON.stringify(currentValues)])
 
   const formDefinition = useF0FormDefinition({
     name: formName || "form",

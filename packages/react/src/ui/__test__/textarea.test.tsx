@@ -43,7 +43,8 @@ describe("Textarea", () => {
   describe("auto-grow", () => {
     let scrollHeightValue: number
     let originalDescriptor: PropertyDescriptor | undefined
-    let originalGetComputedStyle: typeof window.getComputedStyle
+    let originalGetComputedStyle: typeof window.getComputedStyle =
+      window.getComputedStyle
 
     beforeEach(() => {
       scrollHeightValue = 0

@@ -92,7 +92,7 @@ export const useFormFillAction = () => {
   useFrontendTool({
     name: "forms.fillForm",
     description:
-      "Fill one or more fields in an active form. After setting values, validation runs automatically. Returns success or any validation errors. Use formGetState first to learn field names and types.",
+      "Fill one or more fields in an active form. After setting values, validation runs automatically. Returns success or any validation errors. Check activeForm.fieldDescriptions or formsOnCurrentPage in the shared state to learn field names and types.",
     followUp: false,
     parameters: [
       {

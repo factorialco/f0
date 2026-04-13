@@ -16,7 +16,12 @@ export function ActiveFormCard(): ReactNode {
   const registry = useF0AiFormRegistry()
   const form = registry?.activeForm
 
-  if (!form || !form.cardTitle || !form.cardDescription) return null
+  if (!form) return null
+
+  const cardTitle = form.cardTitle || form.formName
+  const cardDescription = form.cardDescription || form.description
+
+  if (!cardTitle || !cardDescription) return null
 
   return (
     <div className="mt-2 w-full">
@@ -24,8 +29,8 @@ export function ActiveFormCard(): ReactNode {
         formName={form.formName}
         formDescription={form.description}
         module={form.module}
-        cardTitle={form.cardTitle}
-        cardDescription={form.cardDescription}
+        cardTitle={cardTitle}
+        cardDescription={cardDescription}
       />
     </div>
   )

@@ -42,7 +42,7 @@ export const useF0AiFormActions = () => {
     const availableForms = registry?.availableForms || []
     const activeForm = registry?.activeForm || null
 
-    setState((currentState: any) => ({
+    setState((currentState: Record<string, unknown>) => ({
       ...currentState,
       formsOnCurrentPage,
       availableForms,

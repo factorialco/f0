@@ -32,12 +32,14 @@ export const usePickActiveFormAction = () => {
         type: "string",
         description:
           "Custom title to display on the form card shown inline in the chat",
+        required: true,
       },
       {
         name: "cardDescription",
         type: "string",
         description:
           "Custom description to display on the form card shown inline in the chat",
+        required: true,
       },
     ],
     handler: ({
