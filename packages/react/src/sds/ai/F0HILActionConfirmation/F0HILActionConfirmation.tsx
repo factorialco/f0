@@ -1,5 +1,6 @@
 import { F0Button } from "@/components/F0Button"
 import Check from "@/icons/app/Check"
+import Warning from "@/icons/app/Warning"
 
 import { F0HILActionConfirmationProps } from "./types"
 
@@ -9,16 +10,19 @@ export const F0HILActionConfirmation = ({
   onConfirm,
   cancelText,
   onCancel,
+  variant = "default",
 }: F0HILActionConfirmationProps) => {
+  const isDestructive = variant === "destructive"
+
   return (
     <div className="flex flex-col gap-2">
       {text && <p>{text}</p>}
       <div className="flex gap-2">
         <F0Button
           type="button"
-          variant="outline"
+          variant={isDestructive ? "critical" : "outline"}
           size="sm"
-          icon={Check}
+          icon={isDestructive ? Warning : Check}
           onClick={onConfirm}
           label={confirmationText}
         />
