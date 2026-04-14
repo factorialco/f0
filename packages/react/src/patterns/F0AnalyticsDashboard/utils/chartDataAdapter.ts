@@ -136,14 +136,56 @@ function heatmapToCanonical(data: DashboardChartData): CanonicalChartData {
 }
 
 /**
+ * Detect the actual shape of the data regardless of what `chart.type` says.
+ * After a chart type transform, `item.chart.type` may have changed but the
+ * data returned by `fetchData` still has its original shape.
+ */
+export function detectDataShape(
+  data: DashboardChartData
+): DashboardChartConfig["type"] {
+  // Heatmap: has xCategories/yCategories + data tuples
+  if (
+    data.xCategories?.length ||
+    data.yCategories?.length ||
+    (data.data &&
+      Array.isArray(data.data) &&
+      data.data.length > 0 &&
+      Array.isArray(data.data[0]))
+  ) {
+    return "heatmap"
+  }
+  // Radar: has indicators
+  if (data.indicators?.length) {
+    return "radar"
+  }
+  // Gauge: series is a single object with a `value` property (not an array)
+  if (
+    data.series &&
+    !Array.isArray(data.series) &&
+    "value" in data.series &&
+    typeof (data.series as { value: unknown }).value === "number"
+  ) {
+    return "gauge"
+  }
+  // Funnel/Pie: series is a single object with a `data` array of {name, value}
+  if (data.series && !Array.isArray(data.series) && "data" in data.series) {
+    return "funnel"
+  }
+  // Bar/Line: series is an array
+  return "bar"
+}
+
+/**
  * Convert any chart data to the canonical intermediate shape.
- * The `sourceType` tells us how to interpret `data`.
+ * The `sourceType` tells us how to interpret `data`. When omitted,
+ * the shape is auto-detected (safer after chart type transforms).
  */
 export function toCanonical(
   data: DashboardChartData,
-  sourceType: DashboardChartConfig["type"]
+  sourceType?: DashboardChartConfig["type"]
 ): CanonicalChartData {
-  switch (sourceType) {
+  const effectiveType = sourceType ?? detectDataShape(data)
+  switch (effectiveType) {
     case "bar":
     case "line":
       return barLineToCanonical(data)
@@ -256,6 +298,76 @@ export function fromCanonical(
       // Heatmap needs 2D data — not meaningful from 1D canonical
       return { xCategories: [], yCategories: [], data: [] }
   }
+}
+
+// ---------------------------------------------------------------------------
+// Compatibility check — which target types are valid for a given source?
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns the set of chart types that the given source type can be
+ * meaningfully converted to. Used by ChartItem to filter the toggle
+ * options so the user never picks a combination that would crash or
+ * produce empty/meaningless output.
+ */
+export function compatibleTargetTypes(
+  sourceType: DashboardChartConfig["type"]
+): Set<DashboardChartConfig["type"] | "table"> {
+  const targets = new Set<DashboardChartConfig["type"] | "table">()
+
+  // Table is always available — chartDataToTabular handles every type
+  targets.add("table")
+
+  // The source type itself is always valid
+  targets.add(sourceType)
+
+  switch (sourceType) {
+    case "bar":
+    case "line":
+      // Multi-series: bar ↔ line freely. Funnel/pie only make sense with
+      // one series (they take the first and drop the rest), so they're
+      // included — the adapter handles the lossy conversion gracefully.
+      targets.add("bar")
+      targets.add("line")
+      targets.add("funnel")
+      targets.add("radar")
+      // Pie is only useful for single-series part-of-whole data — skip for
+      // multi-series sources since the result is confusing.
+      // (The caller can check series count to decide; here we include it
+      // since single-series bar/line → pie is valid.)
+      targets.add("pie")
+      break
+
+    case "funnel":
+    case "pie":
+      // Single-series shapes → can go to everything except heatmap
+      targets.add("bar")
+      targets.add("line")
+      targets.add("funnel")
+      targets.add("pie")
+      targets.add("radar")
+      break
+
+    case "radar":
+      // Radar indicators become categories → can go to bar/line/funnel/pie
+      targets.add("bar")
+      targets.add("line")
+      targets.add("funnel")
+      targets.add("pie")
+      break
+
+    case "gauge":
+      // Single value — only table and itself make sense
+      break
+
+    case "heatmap":
+      // 2D grid pivots to multi-series → bar/line work, but not pie/funnel
+      targets.add("bar")
+      targets.add("line")
+      break
+  }
+
+  return targets
 }
 
 // ---------------------------------------------------------------------------

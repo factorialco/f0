@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from "react"
 
 import type { IconType } from "@/components/F0Icon"
 import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
+import type { RecordType } from "@/hooks/datasource"
 import type { F0DataChartProps } from "@/kits/F0DataChart"
 import type {
   FiltersDefinition,
@@ -27,6 +28,8 @@ import {
   RadarChartSkeleton,
 } from "@/kits/F0DataChart"
 import { useI18n } from "@/lib/providers/i18n"
+import { OneDataCollection } from "@/patterns/OneDataCollection"
+import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 
 import type {
   DashboardChartConfig,
@@ -38,7 +41,9 @@ import { useChartDownloadActions } from "../../hooks/useChartDownloadActions"
 import { useDashboardItemData } from "../../hooks/useDashboardItemData"
 import {
   defaultChartConfig,
+  detectDataShape,
   fromCanonical,
+  compatibleTargetTypes,
   toCanonical,
 } from "../../utils/chartDataAdapter"
 import { chartDataToTabular } from "../../utils/chartDataToTabular"
@@ -55,11 +60,6 @@ type ChartTypeOption = {
   /** The DashboardChartConfig type, or "table" for the table view mode */
   type: DashboardChartConfig["type"] | "table"
   orientation?: "vertical" | "horizontal"
-  /**
-   * When set, this option is only shown if the source chart type is in this
-   * list. Omit to show for all source types.
-   */
-  availableFrom?: DashboardChartConfig["type"][]
 }
 
 function buildChartTypeOptions(
@@ -169,15 +169,22 @@ function buildChartProps(
   overrideOrientation?: "vertical" | "horizontal"
 ): F0DataChartProps {
   const targetType = overrideType ?? item.chart.type
+  // Detect actual data shape — after a transform, item.chart.type may have
+  // changed but the data from fetchData still has its original shape.
+  const dataShape = detectDataShape(data)
 
-  // When the target matches the source, pass data through directly
-  // (preserves any type-specific features like targets, color overrides, etc.)
-  if (targetType === item.chart.type && !overrideOrientation) {
+  // When the data shape matches the target and chart type, pass through
+  // directly to preserve type-specific features (targets, color overrides).
+  if (
+    targetType === dataShape &&
+    targetType === item.chart.type &&
+    !overrideOrientation
+  ) {
     return buildNativeChartProps(item, data)
   }
 
-  // Cross-type transform: source → canonical → target
-  const canonical = toCanonical(data, item.chart.type)
+  // Cross-type transform: auto-detect source shape → canonical → target
+  const canonical = toCanonical(data)
   const adapted = fromCanonical(canonical, targetType)
   const config = defaultChartConfig(targetType)
 
@@ -302,7 +309,7 @@ function buildNativeChartProps(
 }
 
 // ---------------------------------------------------------------------------
-// Simple table view
+// Table view — renders chart data as a OneDataCollection table
 // ---------------------------------------------------------------------------
 
 function ChartTableView({
@@ -312,39 +319,50 @@ function ChartTableView({
   config: DashboardChartConfig
   data: DashboardChartData
 }) {
-  const tabular = chartDataToTabular(config, data)
+  const tabular = useMemo(
+    () => chartDataToTabular(config, data),
+    [config, data]
+  )
+
+  const sourceDefinition = useMemo(
+    () => ({
+      dataAdapter: {
+        fetchData: () => ({ records: tabular.rows as RecordType[] }),
+      },
+      columns: tabular.columns.map((col) => ({
+        label: col,
+        id: col,
+      })),
+    }),
+    [tabular]
+  )
+
+  const source = useDataCollectionSource<RecordType>(sourceDefinition, [
+    tabular,
+  ])
+
+  const visualizations = useMemo(
+    () =>
+      [
+        {
+          type: "table" as const,
+          options: {
+            columns: tabular.columns.map((col) => ({
+              label: col,
+              render: (row: RecordType) => String(row[col] ?? ""),
+            })),
+          },
+        },
+      ] as const,
+    [tabular.columns]
+  )
 
   return (
-    <div className="scrollbar-macos h-full overflow-auto px-4 py-3">
-      <table className="w-full border-separate border-spacing-0">
-        <thead>
-          <tr>
-            {tabular.columns.map((col) => (
-              <th
-                key={col}
-                className="sticky top-0 z-10 whitespace-nowrap border-0 border-b border-solid border-f1-border-secondary bg-f1-background px-3 py-2 text-left text-sm font-medium text-f1-foreground-secondary"
-              >
-                {col}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {tabular.rows.map((row, i) => (
-            <tr key={i}>
-              {tabular.columns.map((col) => (
-                <td
-                  key={col}
-                  className="truncate border-0 border-b border-solid border-f1-border-secondary px-3 py-2 text-sm text-f1-foreground"
-                >
-                  {String(row[col] ?? "")}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <OneDataCollection
+      fullHeight
+      source={source}
+      visualizations={visualizations}
+    />
   )
 }
 
@@ -411,12 +429,27 @@ export function ChartItem<Filters extends FiltersDefinition>({
         : "vertical"
       : undefined
 
+  // Compute which target types are valid based on the actual data shape
+  // (not item.chart.type, which may have changed after a transform)
+  const dataShape = data ? detectDataShape(data) : item.chart.type
+  const allowedTargets = useMemo(
+    () => compatibleTargetTypes(dataShape),
+    [dataShape]
+  )
+
+  // Pie only makes sense with single-series data (part-of-whole)
+  const seriesCount = data
+    ? Array.isArray(data.series)
+      ? data.series.length
+      : 1
+    : 1
+
   const chartTypeOptions = onTransformChart
     ? CHART_TYPE_OPTIONS.filter((opt) => {
-        // Filter out options that don't apply to this source type
-        if (opt.availableFrom && !opt.availableFrom.includes(item.chart.type)) {
-          return false
-        }
+        const typeToCheck = opt.type === "bar" ? "bar" : opt.type
+        if (!allowedTargets.has(typeToCheck)) return false
+        // Hide pie for multi-series data — it only shows one series
+        if (opt.type === "pie" && seriesCount > 1) return false
         return true
       }).map((opt) => {
         const isTable = opt.type === "table"
