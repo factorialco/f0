@@ -14,6 +14,11 @@ import { F0ActionItem } from "../../../F0ActionItem"
 import { useMessageScroll } from "../../hooks/useMessageScroll"
 import { filterNonRenderableMessages } from "../../internal-types"
 import { useAiChat } from "../../providers/AiChatStateProvider"
+import { useOrderedMessageParts } from "../../providers/OrderedMessagePartsProvider"
+import {
+  expandFromOrderedParts,
+  legacyExpansion,
+} from "../../utils/expand-message-parts"
 import {
   type Turn,
   analyzeTurn,
@@ -54,6 +59,8 @@ const Messages = ({
   noShadows = false,
 }: MessagesContainerProps) => {
   const { messages, interrupt, isLoading } = useCopilotChat()
+  const { getOrderedParts, version: orderedPartsVersion } =
+    useOrderedMessageParts()
   const { modal, handleSubmit, handleClose } = useFeedbackSubmit()
 
   const translations = useI18n()
@@ -90,57 +97,42 @@ const Messages = ({
   // that carries the stringified return value of frontend tool handlers
   // (e.g. the JSON response from approveMutation's respond() callback).
   //
-  // CopilotKit v1.51+ AG-UI packs multiple tool calls into a single
-  // assistant message (e.g. 2× orchestratorThinking + 1× downloadData +
-  // text content).  The v1.10 format had one tool call per message.
+  // CopilotKit v1.51+ AG-UI packs multiple tool calls and text into a
+  // single assistant message (`{ content: "...", toolCalls: [...] }`),
+  // discarding the chronological position of each chunk. We split that
+  // back into one sub-message per segment so each can render in the
+  // correct order.
   //
-  // We expand each multi-tool-call message into individual messages so
-  // the turn/thinking pipeline (which expects one tool call per message)
-  // works correctly.  The actual rendering of tool call UIs is handled
-  // by AssistantMessage which looks up actions from CopilotKit context.
+  // Order source of truth (in priority order):
+  //   1. `OrderedMessagePartsProvider` — captures raw AG-UI events as they
+  //      stream in. Used for live messages so the chat respects the
+  //      exact order text and tool calls arrived. This is the only path
+  //      that handles `text → tool → more text` interleaving without
+  //      flicker.
+  //   2. Legacy expansion — used for messages that pre-date the provider
+  //      or come from a stream we did not subscribe to (e.g. history
+  //      loaded from `fetchThreadMessages` already arrives in `parts`
+  //      order via `convertBackendMessage`, so the legacy path is fine).
+  //
+  // The actual rendering of tool call UIs is handled by AssistantMessage
+  // which looks up actions from CopilotKit context.
   const filteredMessages = useMemo(
     () =>
       filterNonRenderableMessages(messages).flatMap((msg) => {
         if (msg.role !== "assistant") return [msg]
 
-        const toolCalls = msg.toolCalls as
-          | { id: string; function: { name: string; arguments: string } }[]
-          | undefined
-
-        // No tool calls — plain text message, pass through
-        if (!toolCalls || toolCalls.length === 0) return [msg]
-
-        // Single tool call, no text — pass through as-is
-        if (toolCalls.length === 1 && !msg.content) return [msg]
-
-        // Multiple tool calls and/or text content — expand into
-        // individual messages so thinking groups work correctly.
-        // Tool calls come first (they arrive before content during
-        // streaming), then text content.
-        const expanded: Message[] = []
-
-        // Each tool call becomes its own message
-        for (let i = 0; i < toolCalls.length; i++) {
-          expanded.push({
-            id: `${msg.id}_tc${i}`,
-            role: msg.role,
-            content: "",
-            toolCalls: [toolCalls[i]],
-          })
+        const ordered = getOrderedParts(msg.id)
+        if (ordered && ordered.length > 0) {
+          return expandFromOrderedParts(msg, ordered)
         }
 
-        // Text content becomes its own message (after tool calls)
-        if (msg.content) {
-          expanded.push({
-            id: `${msg.id}_text`,
-            role: msg.role,
-            content: msg.content,
-          })
-        }
-
-        return expanded
+        return legacyExpansion(msg)
       }),
-    [messages]
+    // orderedPartsVersion bumps every time the AG-UI subscriber captures
+    // a new event, so the memo re-runs and the new sub-messages reach
+    // React. Without it the memo would stay frozen on the initial
+    // message.id snapshot.
+    [messages, getOrderedParts, orderedPartsVersion]
   )
 
   const showWelcomeBlock =
