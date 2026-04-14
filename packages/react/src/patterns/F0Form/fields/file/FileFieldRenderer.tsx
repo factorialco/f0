@@ -236,29 +236,73 @@ export function FileFieldRenderer({
     (files: File[]) => {
       setValidationError(null)
 
-      const filesToProcess = isMultiple ? files : [files[0]]
-
-      for (const file of filesToProcess) {
+      if (!isMultiple) {
+        const file = files[0]
         const validationMsg = validateFile(file)
         if (validationMsg) {
           setValidationError(validationMsg)
-          continue
+          return
         }
-
         if (!resolvedUseUpload) {
           console.warn(
             "[F0Form] No useUpload hook provided. Pass useUpload to <F0Form> or to the file field config."
           )
         }
-
         const key = `${file.name}-${file.size}-${Date.now()}-${Math.random()}`
-        setEntries((prev) => {
-          if (!isMultiple) return [{ key, file }]
-          return [...prev, { key, file }]
-        })
+        setEntries([{ key, file }])
+        return
+      }
+
+      // Multiple mode: use functional updater to always read latest entries count.
+      // Validation error is captured via a local variable and scheduled after.
+      let errorMsg: string | null = null
+
+      setEntries((prev) => {
+        const remaining =
+          field.maxFiles != null ? field.maxFiles - prev.length : Infinity
+
+        if (remaining <= 0) {
+          errorMsg = translations.maxFilesReached.replace(
+            "{{maxFiles}}",
+            String(field.maxFiles)
+          )
+          return prev
+        }
+
+        const filesToProcess = files.slice(0, remaining)
+        if (files.length > remaining) {
+          errorMsg = translations.maxFilesReached.replace(
+            "{{maxFiles}}",
+            String(field.maxFiles)
+          )
+        }
+
+        const newEntries: FileEntry[] = []
+        for (const file of filesToProcess) {
+          const validationMsg = validateFile(file)
+          if (validationMsg) {
+            errorMsg = validationMsg
+            continue
+          }
+          if (!resolvedUseUpload) {
+            console.warn(
+              "[F0Form] No useUpload hook provided. Pass useUpload to <F0Form> or to the file field config."
+            )
+          }
+          newEntries.push({
+            key: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
+            file,
+          })
+        }
+        return [...prev, ...newEntries]
+      })
+
+      // Apply captured error after the state update batch
+      if (errorMsg !== null) {
+        setValidationError(errorMsg)
       }
     },
-    [isMultiple, validateFile, resolvedUseUpload]
+    [isMultiple, field.maxFiles, validateFile, resolvedUseUpload, translations]
   )
 
   const handleDragOver = useCallback(

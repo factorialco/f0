@@ -700,4 +700,95 @@ describe("FileFieldRenderer", () => {
       screen.getByText("Drag and drop files, or click to select")
     ).toBeInTheDocument()
   })
+
+  it("hides dropzone when maxFiles limit is reached", async () => {
+    const schema = z.object({
+      files: f0FormField(z.array(z.string()).optional(), {
+        label: "Files",
+        fieldType: "file",
+        multiple: true,
+        maxFiles: 2,
+      }),
+    })
+
+    render(
+      <F0Form
+        name="test-maxfiles-dropzone"
+        schema={schema}
+        defaultValues={{ files: ["file1.pdf", "file2.pdf"] }}
+        initialFiles={[
+          {
+            value: "file1.pdf",
+            name: "file1.pdf",
+            type: "application/pdf",
+            size: 100,
+          },
+          {
+            value: "file2.pdf",
+            name: "file2.pdf",
+            type: "application/pdf",
+            size: 100,
+          },
+        ]}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    // Both initial files rendered — limit reached, dropzone should be hidden
+    expect(screen.getByText("file1.pdf")).toBeInTheDocument()
+    expect(screen.getByText("file2.pdf")).toBeInTheDocument()
+    expect(
+      screen.queryByText("Drag and drop files, or click to select")
+    ).not.toBeInTheDocument()
+  })
+
+  it("shows maxFilesReached error when adding more files than remaining slots", async () => {
+    const schema = z.object({
+      files: f0FormField(z.array(z.string()).optional(), {
+        label: "Files",
+        fieldType: "file",
+        multiple: true,
+        maxFiles: 2,
+      }),
+    })
+
+    render(
+      <F0Form
+        name="test-maxfiles-error"
+        schema={schema}
+        defaultValues={{ files: ["file1.pdf"] }}
+        initialFiles={[
+          {
+            value: "file1.pdf",
+            name: "file1.pdf",
+            type: "application/pdf",
+            size: 100,
+          },
+        ]}
+        useUpload={createMockUploadHook()}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    // 1 initial file, 1 slot remaining — try to upload 2 at once
+    const input = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement
+
+    await userEvent.upload(input, [
+      createFile("file2.pdf"),
+      createFile("file3.pdf"),
+    ])
+
+    // file2 should be added (fits in remaining slot)
+    await waitFor(() =>
+      expect(screen.getByText("file2.pdf")).toBeInTheDocument()
+    )
+    // file3 should NOT appear (exceeded limit)
+    expect(screen.queryByText("file3.pdf")).not.toBeInTheDocument()
+    // Error message should be shown
+    await waitFor(() =>
+      expect(screen.getByText("Maximum 2 files")).toBeInTheDocument()
+    )
+  })
 })
