@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.445.0](https://github.com/factorialco/f0/compare/f0-react-v1.444.0...f0-react-v1.445.0) (2026-04-14)
+
+
+### Features
+
+* **F0AiChat:** render assistant messages in true streaming order ([#3895](https://github.com/factorialco/f0/issues/3895)) ([47130c9](https://github.com/factorialco/f0/commit/47130c9090c86799c2e5f59bcb246b51128c8508))
+
 ## [1.444.0](https://github.com/factorialco/f0/compare/f0-react-v1.443.0...f0-react-v1.444.0) (2026-04-14)
 
 
