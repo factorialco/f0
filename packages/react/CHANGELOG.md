@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.445.2](https://github.com/factorialco/f0/compare/f0-react-v1.445.1...f0-react-v1.445.2) (2026-04-14)
+
+
+### Bug Fixes
+
+* **F0Alert:** stability audit BLOCKING fixes ([#3900](https://github.com/factorialco/f0/issues/3900)) ([8ef3c7f](https://github.com/factorialco/f0/commit/8ef3c7f966206dcd23f4640380b2adf5ec8fb01f))
+
 ## [1.445.1](https://github.com/factorialco/f0/compare/f0-react-v1.445.0...f0-react-v1.445.1) (2026-04-14)
 
 
