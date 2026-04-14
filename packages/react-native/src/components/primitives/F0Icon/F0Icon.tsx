@@ -30,17 +30,29 @@ export function applyIconInterop(icon: IconType): IconType {
  * Renders SVG icons with consistent sizing and semantic colors.
  * Icons are automatically wrapped with UniWind for className support.
  *
+ * Prefer the semantic `color` prop for design-system colors.
+ * Use `tintColor` only when the color is determined at runtime
+ * (e.g. backend-driven widget colors).
+ *
  * @example
  * import { Archive } from '@/icons/app';
  *
  * <F0Icon icon={Archive} size="lg" />
  * <F0Icon icon={Archive} color="critical" />
- * <F0Icon icon={Archive} size="sm" color="positive" />
+ * <F0Icon icon={Archive} tintColor="#FF355E" />
  */
 const F0Icon = React.memo(
   React.forwardRef<Svg, F0IconProps>(
     (
-      { size = "md", color, icon, testID, className: customClassName, ...rest },
+      {
+        size = "md",
+        color,
+        tintColor,
+        icon,
+        testID,
+        className: customClassName,
+        ...rest
+      },
       ref
     ) => {
       const IconComponent = useMemo(
@@ -48,9 +60,15 @@ const F0Icon = React.memo(
         [icon]
       )
 
+      // When tintColor is set, skip the semantic color variant so it doesn't
+      // compete with the native SVG color prop.
       const className = useMemo(
-        () => cn(iconVariants({ size, color }), customClassName),
-        [size, color, customClassName]
+        () =>
+          cn(
+            iconVariants({ size, color: tintColor ? undefined : color }),
+            customClassName
+          ),
+        [size, color, tintColor, customClassName]
       )
 
       // Early return if no icon provided (after all hooks)
@@ -61,6 +79,9 @@ const F0Icon = React.memo(
           ref={ref}
           className={className}
           testID={testID}
+          // tintColor sets the native SVG `color` prop, which react-native-svg
+          // uses as the resolved value for `currentColor` in fill/stroke attrs.
+          {...(tintColor != null ? { color: tintColor } : {})}
           {...rest}
         />
       )

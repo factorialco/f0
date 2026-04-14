@@ -27,6 +27,8 @@ import { Home } from "@factorialco/f0-react-native/icons/modules"
 <F0Icon icon={Archive} color="critical" />
 
 <F0Icon icon={Archive} size="sm" color="positive" testID="archive-icon" />
+
+<F0Icon icon={Archive} tintColor="#FF355E" />
 ```
 
 ## Props
@@ -94,9 +96,25 @@ import { Archive } from "@factorialco/f0-react-native/icons/app"
 <F0Icon icon={Star} className="text-yellow-500" />
 ```
 
+### `tintColor`
+
+- **Type:** `ColorValue` (from `react-native`)
+- **Default:** none
+- **Description:** Arbitrary runtime color for the icon, bypassing semantic tokens. Accepts any React Native `ColorValue` (hex, rgb, hsl, named color). When set, overrides both the semantic `color` prop and any `text-*` class from `className`.
+
+Use sparingly — prefer the semantic `color` prop for design-system colors. This escape hatch exists for cases where the icon color is determined at runtime (e.g. backend-driven widget colors, user-customizable themes).
+
+When `tintColor` is set, it is passed as the native SVG `color` prop, which `react-native-svg` uses as the resolved value for `currentColor` in `fill`/`stroke` attributes.
+
+<!-- prettier-ignore -->
+```tsx
+<F0Icon icon={Star} tintColor="#FF355E" />
+<F0Icon icon={Star} tintColor={dynamicColor} size="lg" />
+```
+
 ### Other Props
 
-F0Icon accepts all SVG props from `react-native-svg` except `style` (use `color` or `className` instead).
+F0Icon accepts all SVG props from `react-native-svg` except `style` and `color` (use `color` for semantic tokens, `tintColor` for arbitrary colors, or `className` for Tailwind overrides).
 
 ## Size Variants
 
@@ -147,11 +165,12 @@ F0Icon automatically applies UniWind interop to icon components using `withUniwi
 
 ### TypeScript
 
-Style prop is blocked at compile-time to enforce `color`/`className` usage:
+`style` and the native SVG `color` props are blocked at compile-time to enforce `color`/`tintColor`/`className` usage:
 
 <!-- prettier-ignore -->
 ```tsx
 <F0Icon icon={Archive} color="critical" />
+<F0Icon icon={Archive} tintColor="#FF355E" />
 
 // TypeScript error - style not allowed
 <F0Icon icon={Archive} style={{ color: 'red' }} />

@@ -411,6 +411,59 @@ export function F0IconShowcase() {
           color="mood-super-positive"
         />
       </View>
+
+      {/* tintColor — Runtime Color Escape Hatch */}
+      <Text
+        className="mt-6 mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
+        tintColor — Runtime Colors
+      </Text>
+      <View
+        className="mb-4 flex-row flex-wrap justify-around rounded-lg p-4"
+        style={{ backgroundColor: asString(f0BackgroundSecondary) }}
+      >
+        <View className="items-center justify-center">
+          <F0Icon icon={AppIcons.Heart} size="lg" tintColor="#FF355E" />
+          <Text
+            className="mt-2 text-center text-xs"
+            style={{ color: asString(f0Foreground) }}
+          >
+            #FF355E
+          </Text>
+        </View>
+        <View className="items-center justify-center">
+          <F0Icon icon={AppIcons.Star} size="lg" tintColor="rgb(0, 200, 83)" />
+          <Text
+            className="mt-2 text-center text-xs"
+            style={{ color: asString(f0Foreground) }}
+          >
+            rgb(0, 200, 83)
+          </Text>
+        </View>
+        <View className="items-center justify-center">
+          <F0Icon
+            icon={AppIcons.Archive}
+            size="lg"
+            tintColor="hsl(270, 100%, 60%)"
+          />
+          <Text
+            className="mt-2 text-center text-xs"
+            style={{ color: asString(f0Foreground) }}
+          >
+            hsl(270, 100%, 60%)
+          </Text>
+        </View>
+        <View className="items-center justify-center">
+          <F0Icon icon={ModuleIcons.Home} size="lg" tintColor="orange" />
+          <Text
+            className="mt-2 text-center text-xs"
+            style={{ color: asString(f0Foreground) }}
+          >
+            orange
+          </Text>
+        </View>
+      </View>
     </ScrollView>
   )
 }
