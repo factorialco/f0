@@ -36,6 +36,12 @@ const meta = {
       action: "cancelled",
       description: "Callback fired when the cancel button is clicked",
     },
+    variant: {
+      control: "select",
+      options: ["default", "destructive"],
+      description:
+        'Visual variant. Use "destructive" for irreversible or high-impact actions.',
+    },
   },
 } satisfies Meta<typeof F0HILActionConfirmation>
 
@@ -54,5 +60,22 @@ export const WithDescriptiveText: Story = {
     text: "Are you sure you want to proceed with this action?",
     confirmationText: "Yes, proceed",
     cancelText: "No, cancel",
+  },
+}
+
+export const Destructive: Story = {
+  args: {
+    confirmationText: "Delete",
+    cancelText: "Cancel",
+    variant: "destructive",
+  },
+}
+
+export const DestructiveWithText: Story = {
+  args: {
+    text: "This will create inbox tasks for 12 managers. This action cannot be undone.",
+    confirmationText: "Yes, send reminders",
+    cancelText: "No, cancel",
+    variant: "destructive",
   },
 }
