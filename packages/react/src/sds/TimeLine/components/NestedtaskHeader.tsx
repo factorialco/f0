@@ -10,8 +10,10 @@ import type { F0TimelineRowNestedtaskProps } from "../types"
 
 export const NestedtaskHeader = ({
   props,
+  contentId,
 }: {
   props: F0TimelineRowNestedtaskProps
+  contentId?: string
 }) => {
   const {
     status,
@@ -35,6 +37,7 @@ export const NestedtaskHeader = ({
           <button
             type="button"
             aria-expanded={expanded}
+            aria-controls={contentId}
             onClick={onExpandToggle}
             className={cn(
               "pointer-events-auto flex items-center gap-3 rounded-sm",

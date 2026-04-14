@@ -1,13 +1,15 @@
+import { useId } from "react"
+
+import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon/F0AvatarIcon"
+import { F0Text } from "@/components/F0Text"
+import { Metadata } from "@/experimental/Information/Headers/Metadata"
+import Marker from "@/icons/app/Marker"
+import { cn } from "@/lib/utils"
+
 import type {
   F0TimelineRowNestedtaskProps,
   F0TimelineRowTaskProps,
 } from "../types"
-
-import { Metadata } from "@/experimental/Information/Headers/Metadata"
-import { F0Text } from "@/components/F0Text"
-import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon/F0AvatarIcon"
-import Marker from "@/icons/app/Marker"
-import { cn } from "@/lib/utils"
 
 import { Actions } from "./Actions"
 import { NestedtaskHeader } from "./NestedtaskHeader"
@@ -17,7 +19,7 @@ const NestedItem = ({ props }: { props: F0TimelineRowTaskProps }) => {
   const { status, icon = Marker, title, description } = props
 
   return (
-    <div className="flex items-center gap-3 min-h-8">
+    <div className="flex min-h-8 items-center gap-3">
       <F0AvatarIcon icon={icon} size="sm" />
       <h4
         className={cn(
@@ -49,6 +51,7 @@ export const NestedtaskRow = ({
     otherActions,
   } = props
 
+  const contentId = useId()
   const hasMetadata = metadata?.some(Boolean)
   const hasActions =
     primaryAction ||
@@ -58,7 +61,7 @@ export const NestedtaskRow = ({
   return (
     <TimelineRowLayout status={status} isLast={isLast} hideStatus={hideStatus}>
       <div className="flex min-h-8 items-center gap-3">
-        <NestedtaskHeader props={props} />
+        <NestedtaskHeader props={props} contentId={contentId} />
       </div>
       {metadata && hasMetadata && (
         <div className="pl-9">
@@ -66,7 +69,7 @@ export const NestedtaskRow = ({
         </div>
       )}
       {expanded && (
-        <div className="flex flex-col gap-0 pl-4">
+        <div id={contentId} role="region" className="flex flex-col gap-0 pl-4">
           {items.map((item: F0TimelineRowTaskProps, index: number) => (
             <NestedItem key={`${item.title}-${index}`} props={item} />
           ))}

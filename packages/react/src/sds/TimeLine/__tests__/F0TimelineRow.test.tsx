@@ -408,4 +408,83 @@ describe("F0TimelineRow", () => {
       expect(title.className).not.toContain("line-through")
     })
   })
+
+  describe("multitask with nestedtask items", () => {
+    const nestedtaskItem = {
+      status: "in-progress" as const,
+      icon: FileSigned,
+      title: "Sign document",
+      description: "Laptop agreement",
+      taskCount: 2,
+      completedCount: 1,
+      expanded: true,
+      onExpandToggle: vi.fn(),
+      items: [
+        {
+          status: "in-progress" as const,
+          icon: Clock,
+          title: "Hellen (hellen@factorial.co)",
+          description: "Pending",
+        },
+        {
+          status: "completed" as const,
+          icon: Check,
+          title: "Danilo (danilo@gmail.com)",
+          description: "Signed",
+        },
+      ],
+    }
+
+    it("renders nestedtask header inside multitask", () => {
+      render(
+        <F0TimelineRow
+          status="in-progress"
+          title="Tasks"
+          taskCount={2}
+          completedCount={0}
+          expanded={true}
+          onExpandToggle={() => {}}
+          items={[nestedtaskItem]}
+        />
+      )
+      expect(screen.getByText("Sign document")).toBeInTheDocument()
+      expect(screen.getByText("1/2")).toBeInTheDocument()
+    })
+
+    it("renders nestedtask nested items when expanded inside multitask", () => {
+      render(
+        <F0TimelineRow
+          status="in-progress"
+          title="Tasks"
+          taskCount={2}
+          completedCount={0}
+          expanded={true}
+          onExpandToggle={() => {}}
+          items={[nestedtaskItem]}
+        />
+      )
+      expect(
+        screen.getByText("Hellen (hellen@factorial.co)")
+      ).toBeInTheDocument()
+      expect(screen.getByText("Danilo (danilo@gmail.com)")).toBeInTheDocument()
+    })
+
+    it("calls nestedtask onExpandToggle when clicking its header", async () => {
+      const user = userEvent.setup()
+      const onNestedToggle = vi.fn()
+      render(
+        <F0TimelineRow
+          status="in-progress"
+          title="Tasks"
+          taskCount={2}
+          completedCount={0}
+          expanded={true}
+          onExpandToggle={() => {}}
+          items={[{ ...nestedtaskItem, onExpandToggle: onNestedToggle }]}
+        />
+      )
+      await user.click(screen.getByText("Sign document"))
+      expect(onNestedToggle).toHaveBeenCalledOnce()
+    })
+  })
 })

@@ -10,12 +10,13 @@ import { TaskRow } from "./components/TaskRow"
 
 const isNestedtask = (
   props: F0TimelineRowProps
-): props is F0TimelineRowNestedtaskProps => "items" in props && "icon" in props
+): props is F0TimelineRowNestedtaskProps =>
+  "items" in props && "icon" in props && props.icon !== undefined
 
 const isMultitask = (
   props: F0TimelineRowProps
 ): props is F0TimelineRowMultitaskProps =>
-  "items" in props && !("icon" in props)
+  "items" in props && !("icon" in props && props.icon !== undefined)
 
 export const F0TimelineRow = (props: F0TimelineRowProps) => {
   if (isNestedtask(props)) return <NestedtaskRow props={props} />
