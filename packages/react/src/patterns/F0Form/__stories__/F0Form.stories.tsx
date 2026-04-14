@@ -2341,8 +2341,11 @@ export const FormInDialog: Story = {
             label: "Cancel",
             onClick: () => setOpen(false),
           }}
+          disableContentPadding
         >
-          <F0Form formDefinition={formDefinition} formRef={formRef} />
+          <div className="p-4">
+            <F0Form formDefinition={formDefinition} formRef={formRef} />
+          </div>
         </F0Dialog>
       </>
     )

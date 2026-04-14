@@ -906,7 +906,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             return (
               <div
                 key={groupedItem.item.field.id}
-                className={cn(fieldGapClass, "empty:hidden")}
+                className={cn(fieldGapClass, "has-[>.hidden]:hidden")}
               >
                 {fieldContent}
               </div>

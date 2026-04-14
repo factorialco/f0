@@ -435,7 +435,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
         <div
           className={cn(
             "relative h-fit transition-all",
-            !noEdit && !disabled && "hover:border-f1-border-hover",
+            !noEdit && !disabled && !error && "hover:border-f1-border-hover",
             !transparent && [
               "border-[1px] border-solid border-f1-border bg-f1-background",
               "group focus-within:border-f1-border-hover focus-within:ring-1 focus-within:ring-f1-border-hover",
