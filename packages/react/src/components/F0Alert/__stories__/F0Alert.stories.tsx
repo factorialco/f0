@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { expect, fn, within } from "storybook/test"
 
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0Alert } from "../F0Alert"
 
@@ -61,6 +62,7 @@ export default meta
 type Story = StoryObj<typeof F0Alert>
 
 export const Variants: Story = {
+  parameters: withSnapshot({}),
   render: () => (
     <div className="flex w-[640px] flex-col gap-3">
       <F0Alert
@@ -118,6 +120,7 @@ export const Default: Story = {
 }
 
 export const Dismissible: Story = {
+  parameters: withSnapshot({}),
   args: {
     title: "Your workspace includes up to 3 invoices.",
     description: "Start creating invoices: it's free with your plan!",
