@@ -277,6 +277,7 @@ export const defaultTranslations = {
     thinking: "Thinking...",
     closeDashboard: "Close dashboard",
     saveReport: "Save report",
+    refreshDashboard: "Refresh",
     unsavedChanges: "Unsaved changes",
     saveChanges: "Save changes",
     discardChanges: "Discard",

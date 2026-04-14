@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { useCallback, useRef, useState } from "react";
 
 import { F0Button } from "@/components/F0Button";
-import { Save } from "@/icons/app";
+import { ArrowCycle, Save } from "@/icons/app";
 import { OneEllipsis } from "@/lib/OneEllipsis";
 import { useI18n } from "@/lib/providers/i18n";
 import { ExportDropdown } from "@/patterns/F0AnalyticsDashboard/components/ExportDropdown/ExportDropdown";
@@ -14,9 +14,11 @@ import { useDashboardCanvas } from "./DashboardContext";
 export function DashboardHeader({
   title,
   onClose,
+  onRefresh,
 }: {
   title: string;
   onClose: () => void;
+  onRefresh: () => void;
 }) {
   return (
     <div className="flex shrink-0 items-center gap-2 border-0 border-b border-solid border-f1-border-secondary p-5">
@@ -26,14 +28,14 @@ export function DashboardHeader({
       >
         {title}
       </OneEllipsis>
-      <DashboardActions />
+      <DashboardActions onRefresh={onRefresh} />
       <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
       <CloseCanvasButton onClick={onClose} />
     </div>
   );
 }
 
-function DashboardActions(): ReactNode {
+function DashboardActions({ onRefresh }: { onRefresh: () => void }): ReactNode {
   const {
     isDirty,
     handleSave,
@@ -95,6 +97,14 @@ function DashboardActions(): ReactNode {
           label={translations.ai.saveReport}
         />
       )}
+      <F0Button
+        variant="outline"
+        icon={ArrowCycle}
+        size="md"
+        onClick={onRefresh}
+        label={translations.ai.refreshDashboard}
+        hideLabel
+      />
       {exportAsExcel && (
         <ExportDropdown
           onExportExcel={handleExport}
