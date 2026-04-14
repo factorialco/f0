@@ -6,6 +6,7 @@ import { FormHeader } from "./FormHeader"
 
 export const formCanvasEntity: CanvasEntityDefinition<FormCanvasContent> = {
   type: "form",
+  overflowHidden: true,
   renderContent: () => <FormContent />,
   renderHeader: ({ content, onClose }) => (
     <FormHeader
