@@ -214,9 +214,10 @@ For transient feedback use a toast; for decisions that block the workflow use
 
 ## Accessibility
 
-- The component renders as a plain `<div>` with no ARIA role. It is not announced automatically when it appears — place it in the page on initial render or ensure the surrounding context gives it enough prominence.
-- For alerts that appear dynamically in response to an action (e.g. after a failed save), wrap the alert in an `aria-live="polite"` region so screen readers announce it without interrupting the current flow.
-- The icon (rendered via `F0AvatarAlert` or `F0AvatarIcon`) is decorative — the title and description carry the full meaning. Do not rely on the icon alone to communicate severity.
+- `neutral` alerts render as a plain `<div>` with no ARIA role and are not announced automatically when they appear. Use them for general, non-urgent notices or place them in the page on initial render.
+- Non-neutral variants render `F0AvatarAlert`, which includes `role="alert"`. When these alerts are inserted or updated dynamically, screen readers announce them automatically. Do not wrap them in an additional `aria-live` region unless you explicitly want duplicate announcements.
+- For `neutral` alerts that appear dynamically in response to an action (e.g. after a failed save), wrap the alert in an `aria-live="polite"` region so screen readers announce it without interrupting the current flow.
+- The icon is decorative — the title and description carry the full meaning. Do not rely on the icon alone to communicate severity.
 - The `action` button and `link` are fully keyboard-accessible via `Tab` and `Enter`.
 
 ## Usage
@@ -264,15 +265,17 @@ based on product logic (e.g. timeout, next session, or once the issue is resolve
 ```tsx
 import { useState } from "react"
 
-const [visible, setVisible] = useState(true)
+function DismissibleExample() {
+  const [visible, setVisible] = useState(true)
 
-return visible ? (
-  <F0Alert
-    variant="info"
-    title="Your workspace includes up to 3 invoices."
-    description="Start creating invoices: it's free with your plan!"
-    action={{ label: "Request info", onClick: () => {} }}
-    onClose={() => setVisible(false)}
-  />
-) : null
+  return visible ? (
+    <F0Alert
+      variant="info"
+      title="Your workspace includes up to 3 invoices."
+      description="Start creating invoices: it's free with your plan!"
+      action={{ label: "Request info", onClick: () => {} }}
+      onClose={() => setVisible(false)}
+    />
+  ) : null
+}
 ```

@@ -9,7 +9,7 @@ import { F0Alert } from "../F0Alert"
 const meta: Meta<typeof F0Alert> = {
   component: F0Alert,
   title: "Alert",
-  tags: ["stable"],
+  tags: ["stable", "!autodocs"],
   parameters: {
     layout: "centered",
   },
@@ -41,7 +41,7 @@ const meta: Meta<typeof F0Alert> = {
         'Custom icon for `variant="neutral"` only. Falls back to a placeholder when omitted. Has no effect on any other variant.',
     },
     onClose: {
-      control: "boolean",
+      control: false,
       description:
         "Optional callback fired when the user clicks the close button. When provided, a dismiss button (X) is shown. When omitted, no close button is rendered. The parent is responsible for hiding the alert and deciding if and when it reappears.",
     },
@@ -110,15 +110,14 @@ export const Default: Story = {
     variant: "info",
     onClose: fn(),
   },
-  render: ({ onClose, ...args }) => (
+  render: (args) => (
     <div className="w-[640px]">
-      <F0Alert {...args} onClose={onClose ? fn() : undefined} />
+      <F0Alert {...args} />
     </div>
   ),
 }
 
 export const Dismissible: Story = {
-  tags: ["!dev"],
   args: {
     title: "Your workspace includes up to 3 invoices.",
     description: "Start creating invoices: it's free with your plan!",

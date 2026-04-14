@@ -7,6 +7,7 @@ import { F0Button } from "@/components/F0Button"
 import { F0Link } from "@/components/F0Link"
 import { Cross, Placeholder } from "@/icons/app"
 import { withDataTestId } from "@/lib/data-testid"
+import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
 
 import type { F0AlertProps } from "./types"
@@ -53,6 +54,7 @@ const _F0Alert = ({
   onClose,
 }: F0AlertProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
+  const { actions } = useI18n()
 
   return (
     <div ref={containerRef} className="@container">
@@ -93,6 +95,7 @@ const _F0Alert = ({
                     onClick={action.onClick}
                     size="sm"
                     disabled={action.disabled}
+                    type="button"
                   />
                 )}
               </div>
@@ -102,11 +105,12 @@ const _F0Alert = ({
             <div className="flex-shrink-0 self-start @xs:self-center">
               <F0Button
                 icon={Cross}
-                label="Close"
+                label={actions.close}
                 hideLabel
                 variant="outline"
                 size="sm"
                 onClick={onClose}
+                type="button"
               />
             </div>
           )}
