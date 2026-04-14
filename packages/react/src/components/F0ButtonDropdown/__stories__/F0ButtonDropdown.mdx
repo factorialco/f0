@@ -178,7 +178,7 @@ Use **dropdown mode** when all actions are equally likely and none should be pro
       "Mark only genuinely destructive or irreversible actions as critical.",
     guidelines: [
       '"Delete employee" with critical: true — cannot be undone',
-      '"Archive record" with critical: true — requires deliberate intent',
+      '"Archive record" without critical: true — secondary but not destructive',
     ],
     children: <Canvas of={Stories.DoDontCriticalDo} sourceState="none" />,
   }}
@@ -206,7 +206,7 @@ Use **dropdown mode** when all actions are equally likely and none should be pro
 - In dropdown mode all items appear in the menu. The `trigger` prop sets an independent label for the trigger button.
 - The `value` prop (split mode) controls which item is currently selected. When omitted, defaults to the first item's value.
 - `disabled` and `loading` apply to the entire control — both the main button and the chevron are affected.
-- The component is generic: `F0ButtonDropdown<T>` where `T` defaults to `string`. The `value` field of each `ButtonDropdownItem<T>` and the first argument of `onClick: (value: T, item: ButtonDropdownItem<T>) => void` share the same type. Pass a union, enum, or any literal type as `T` to get fully typed item values.
+- Item values and the first argument passed to `onClick` are the same value. In split mode, `value` should match one of the item `value` fields.
 
 ### Usage examples
 
