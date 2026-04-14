@@ -229,3 +229,26 @@ export function isCoagentPlaceholder(message: Message): boolean {
 export function filterCoagentPlaceholders(messages: Message[]): Message[] {
   return messages.filter((m) => !isCoagentPlaceholder(m))
 }
+
+/**
+ * Check whether a message is a tool-result message (role: "tool").
+ *
+ * These are internal CopilotKit bookkeeping messages that carry the
+ * stringified return value of frontend tool handlers (e.g. the JSON
+ * response from `approveMutation`'s `respond()` callback).  They must
+ * never be rendered in the chat UI.
+ */
+function isToolResultMessage(message: Message): boolean {
+  return message.role === "tool"
+}
+
+/**
+ * Filter out all messages that should never be rendered in the chat UI:
+ * - coagent-state-render placeholders (CopilotKit internal)
+ * - tool-result messages (role: "tool") carrying frontend tool handler output
+ */
+export function filterNonRenderableMessages(messages: Message[]): Message[] {
+  return messages.filter(
+    (m) => !isCoagentPlaceholder(m) && !isToolResultMessage(m)
+  )
+}

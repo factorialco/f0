@@ -17,7 +17,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
 
-import { filterCoagentPlaceholders } from "../../internal-types"
+import { filterNonRenderableMessages } from "../../internal-types"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { ChatHistoryDialog } from "../history/ChatHistoryDialog"
 import { CreditsPopover } from "./CreditsPopover"
@@ -150,7 +150,7 @@ const ChatHeaderLegacy = (props: HeaderProps) => {
   const translations = useI18n()
   const hasDefaultTitle = labels.title === "CopilotKit"
   const filteredMessages = useMemo(
-    () => filterCoagentPlaceholders(messages),
+    () => filterNonRenderableMessages(messages),
     [messages]
   )
   const hasMessages = filteredMessages.length > 0
