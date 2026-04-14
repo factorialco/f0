@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.444.0](https://github.com/factorialco/f0/compare/f0-react-v1.443.0...f0-react-v1.444.0) (2026-04-14)
+
+
+### Features
+
+* **ai:** enhance message filtering to exclude non-renderable messages ([#3929](https://github.com/factorialco/f0/issues/3929)) ([62cf559](https://github.com/factorialco/f0/commit/62cf559ace65bdf4e17aac504ec4f2a5d204874d))
+
 ## [1.443.0](https://github.com/factorialco/f0/compare/f0-react-v1.442.1...f0-react-v1.443.0) (2026-04-13)
 
 
