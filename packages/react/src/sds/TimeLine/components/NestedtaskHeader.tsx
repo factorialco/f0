@@ -1,12 +1,12 @@
-import type { F0TimelineRowNestedtaskProps } from "../types"
-
+import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon/F0AvatarIcon"
 import { F0Icon } from "@/components/F0Icon"
 import { F0Text } from "@/components/F0Text"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
-import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon/F0AvatarIcon"
 import ChevronDown from "@/icons/app/ChevronDown"
 import ChevronUp from "@/icons/app/ChevronUp"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
+
+import type { F0TimelineRowNestedtaskProps } from "../types"
 
 export const NestedtaskHeader = ({
   props,
@@ -30,19 +30,23 @@ export const NestedtaskHeader = ({
       <div className="flex flex-1 items-center justify-between">
         <button
           type="button"
-          onClick={() => onExpandToggle()}
-          className="pointer-events-auto flex items-center gap-2"
+          aria-expanded={expanded}
+          onClick={onExpandToggle}
+          className={cn(
+            "pointer-events-auto flex items-center gap-3 rounded-sm",
+            focusRing()
+          )}
         >
-          <h4
+          <span
             className={cn(
               "text-base font-semibold text-f1-foreground whitespace-nowrap",
               status === "completed" && "line-through"
             )}
           >
             {title}
-          </h4>
+          </span>
           {description && (
-            <F0Text content={description} variant="description" />
+            <F0Text content={description} variant="description" as="span" />
           )}
           <F0Icon
             icon={expanded ? ChevronUp : ChevronDown}

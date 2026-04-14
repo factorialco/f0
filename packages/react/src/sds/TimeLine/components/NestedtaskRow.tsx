@@ -57,7 +57,7 @@ export const NestedtaskRow = ({
 
   return (
     <TimelineRowLayout status={status} isLast={isLast} hideStatus={hideStatus}>
-      <div className="flex min-h-8 items-center gap-2">
+      <div className="flex min-h-8 items-center gap-3">
         <NestedtaskHeader props={props} />
       </div>
       {metadata && hasMetadata && (

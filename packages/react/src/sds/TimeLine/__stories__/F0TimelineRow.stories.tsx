@@ -1118,6 +1118,10 @@ export const NestedtaskNotStarted: Story = {
     icon: FileSigned,
     title: "Sign document",
     description: "Estimated on 14/04/2026",
+    taskCount: 0,
+    expanded: false,
+    onExpandToggle: () => {},
+    items: [],
     metadata: [
       {
         label: "",
@@ -1237,7 +1241,7 @@ function MultitaskWithNestedtaskDemo() {
   const [nestedtaskExpanded, setNestedtaskExpanded] = useState(true)
 
   return (
-    <div className="f1-bg-surface-default p-4" style={{ maxWidth: 600 }}>
+    <div className="f1-bg-surface-default max-w-[600px] p-4">
       <F0TimelineRow
         status="in-progress"
         title="tasks"
