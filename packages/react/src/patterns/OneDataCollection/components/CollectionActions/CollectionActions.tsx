@@ -104,6 +104,11 @@ export const CollectionActions = ({
       )}
 
       {secondaryActionsButtons?.map((action) => {
+        const tooltipText = action.tooltip?.({
+          disabled: !!action.disabled,
+          loading: !!action.loading,
+        })
+
         const button = (
           <F0Button
             size="md"
@@ -117,8 +122,8 @@ export const CollectionActions = ({
           />
         )
 
-        return action.tooltip ? (
-          <Tooltip key={action.label} description={action.tooltip}>
+        return tooltipText ? (
+          <Tooltip key={action.label} description={tooltipText}>
             {button}
           </Tooltip>
         ) : (

@@ -271,7 +271,7 @@ describe("CollectionActions", () => {
   })
 
   describe("secondary actions tooltip", () => {
-    it("wraps secondary action with Tooltip when tooltip is provided", () => {
+    it("wraps secondary action with Tooltip when tooltip returns a string", () => {
       render(
         <CollectionActions
           secondaryActions={[
@@ -280,7 +280,8 @@ describe("CollectionActions", () => {
               icon: mockIcon,
               onClick: vi.fn(),
               disabled: true,
-              tooltip: "Nothing to export",
+              tooltip: ({ disabled }) =>
+                disabled ? "Nothing to export" : undefined,
             },
           ]}
         />
@@ -289,6 +290,26 @@ describe("CollectionActions", () => {
       const tooltip = screen.getByTestId("tooltip")
       expect(tooltip).toBeInTheDocument()
       expect(tooltip).toHaveAttribute("data-description", "Nothing to export")
+      expect(screen.getByText("Export")).toBeInTheDocument()
+    })
+
+    it("renders secondary action without Tooltip when tooltip returns undefined", () => {
+      render(
+        <CollectionActions
+          secondaryActions={[
+            {
+              label: "Export",
+              icon: mockIcon,
+              onClick: vi.fn(),
+              disabled: false,
+              tooltip: ({ disabled }) =>
+                disabled ? "Nothing to export" : undefined,
+            },
+          ]}
+        />
+      )
+
+      expect(screen.queryByTestId("tooltip")).not.toBeInTheDocument()
       expect(screen.getByText("Export")).toBeInTheDocument()
     })
 
