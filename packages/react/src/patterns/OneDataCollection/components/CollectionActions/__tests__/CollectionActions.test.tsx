@@ -88,6 +88,20 @@ vi.mock("@/experimental/Navigation/Dropdown", () => ({
   ),
 }))
 
+vi.mock("@/experimental/Overlays/Tooltip", () => ({
+  Tooltip: ({
+    children,
+    description,
+  }: {
+    children: React.ReactNode
+    description: string
+  }) => (
+    <div data-testid="tooltip" data-description={description}>
+      {children}
+    </div>
+  ),
+}))
+
 vi.mock("@/icons/app", () => ({
   Ellipsis: () => <div data-testid="ellipsis-icon">...</div>,
 }))
@@ -253,6 +267,46 @@ describe("CollectionActions", () => {
         />
       )
       expect(container).toBeEmptyDOMElement()
+    })
+  })
+
+  describe("secondary actions tooltip", () => {
+    it("wraps secondary action with Tooltip when tooltip is provided", () => {
+      render(
+        <CollectionActions
+          secondaryActions={[
+            {
+              label: "Export",
+              icon: mockIcon,
+              onClick: vi.fn(),
+              disabled: true,
+              tooltip: "Nothing to export",
+            },
+          ]}
+        />
+      )
+
+      const tooltip = screen.getByTestId("tooltip")
+      expect(tooltip).toBeInTheDocument()
+      expect(tooltip).toHaveAttribute("data-description", "Nothing to export")
+      expect(screen.getByText("Export")).toBeInTheDocument()
+    })
+
+    it("renders secondary action without Tooltip when tooltip is not provided", () => {
+      render(
+        <CollectionActions
+          secondaryActions={[
+            {
+              label: "Export",
+              icon: mockIcon,
+              onClick: vi.fn(),
+            },
+          ]}
+        />
+      )
+
+      expect(screen.queryByTestId("tooltip")).not.toBeInTheDocument()
+      expect(screen.getByText("Export")).toBeInTheDocument()
     })
   })
 })
