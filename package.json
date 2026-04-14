@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "1.443.0",
+  "version": "1.445.0",
   "private": false,
   "files": [
     "assets",
@@ -213,6 +213,7 @@
     "vitest": "^4.0.15"
   },
   "peerDependencies": {
+    "@ag-ui/client": "^0.0.47",
     "@copilotkit/react-core": "^1.54.0",
     "@copilotkit/react-ui": "^1.54.0",
     "@copilotkit/runtime": "^1.54.0",
