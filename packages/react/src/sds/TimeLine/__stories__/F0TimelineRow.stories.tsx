@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
 
+import { EyeVisible } from "@/icons/app"
 import Check from "@/icons/app/Check"
 import Clock from "@/icons/app/Clock"
 import Comment from "@/icons/app/Comment"
@@ -14,7 +15,6 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0TimelineRow } from "../"
 import { timelineRowStatuses } from "../types"
-import { EyeVisible } from "@/icons/app"
 
 const meta = {
   component: F0TimelineRow,
