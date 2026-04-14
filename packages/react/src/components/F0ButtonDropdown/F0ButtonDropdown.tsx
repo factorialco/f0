@@ -152,52 +152,57 @@ const SplitMode = ({
 
   return (
     selectedItem && (
-      <Action
-        onClick={handleClick}
-        variant={variant}
-        size={size}
-        disabled={disabled}
-        loading={loading}
-        data-testid="button-main"
-        aria-label={selectedItem.label}
-        prepend={selectedItem.icon && <F0Icon icon={selectedItem.icon} />}
-        className="rounded-r-none after:rounded-r-none"
-        tooltip={tooltip}
-        appendOutside={
-          <DropdownInternal
-            items={dropdownItems}
-            align="end"
-            open={isOpen && !disabled}
-            onOpenChange={(open) => {
-              if (disabled) return
-              setIsOpen(open)
-            }}
-          >
-            <button
-              className={cn(
-                actionVariants({
-                  variant: variant,
-                  pressed: isOpen && !disabled,
-                }),
-                buttonSizeVariants({ size: size }),
-                "-translate-x-px rounded-l-none px-0 after:rounded-l-none",
-                dropdownSize,
-                focusRing()
-              )}
-              disabled={disabled}
-              data-testid="button-menu"
-              data-pressed={isOpen && !disabled}
+      <div className="inline-flex">
+        <Action
+          onClick={handleClick}
+          variant={variant}
+          size={size}
+          disabled={disabled}
+          loading={loading}
+          data-testid="button-main"
+          aria-label={selectedItem.label}
+          prepend={selectedItem.icon && <F0Icon icon={selectedItem.icon} />}
+          className="rounded-r-none after:rounded-r-none"
+          tooltip={tooltip}
+          appendOutside={
+            <DropdownInternal
+              items={dropdownItems}
+              align="end"
+              open={isOpen && !disabled}
+              onOpenChange={(open) => {
+                if (disabled) return
+                setIsOpen(open)
+              }}
             >
-              <div className="main flex items-center justify-center gap-1">
-                <span className="sr-only">{t.actions.more}</span>
-                <F0Icon icon={ChevronDown} size={size === "sm" ? "sm" : "md"} />
-              </div>
-            </button>
-          </DropdownInternal>
-        }
-      >
-        {selectedItem.label}
-      </Action>
+              <button
+                className={cn(
+                  actionVariants({
+                    variant: variant,
+                    pressed: isOpen && !disabled,
+                  }),
+                  buttonSizeVariants({ size: size }),
+                  "-translate-x-px rounded-l-none px-0 !scale-100 after:rounded-l-none",
+                  dropdownSize,
+                  focusRing()
+                )}
+                disabled={disabled}
+                data-testid="button-menu"
+                data-pressed={isOpen && !disabled}
+              >
+                <div className="main flex items-center justify-center gap-1">
+                  <span className="sr-only">{t.actions.more}</span>
+                  <F0Icon
+                    icon={ChevronDown}
+                    size={size === "sm" ? "sm" : "md"}
+                  />
+                </div>
+              </button>
+            </DropdownInternal>
+          }
+        >
+          {selectedItem.label}
+        </Action>
+      </div>
     )
   )
 }
