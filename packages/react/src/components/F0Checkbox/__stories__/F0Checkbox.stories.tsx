@@ -9,7 +9,7 @@ import { F0Checkbox } from "../F0Checkbox"
 
 const meta = {
   component: F0Checkbox,
-  tags: ["autodocs", "experimental"],
+  tags: ["experimental", "!autodocs"],
   title: "Checkbox",
   parameters: {
     layout: "centered",

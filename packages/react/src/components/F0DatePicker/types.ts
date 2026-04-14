@@ -1,4 +1,4 @@
-import { DateStringFormat } from "@/experimental/OneCalendar/granularities/types"
+import { DateStringFormat } from "@/components/OneCalendar/granularities/types"
 import {
   DatePickerPopupProps,
   DatePickerValue as DatePickerPopupValue,

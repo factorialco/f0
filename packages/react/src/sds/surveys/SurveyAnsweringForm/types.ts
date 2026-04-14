@@ -1,10 +1,13 @@
 import type { ModuleId } from "@/components/avatars/F0AvatarModule"
-import type { DialogPosition } from "@/components/F0Dialog/types"
-import type { UseFileUpload } from "@/components/F0Form/fields/file/types"
-import type { F0FormErrorTriggerMode } from "@/components/F0Form/types"
-import type { ResourceHeaderProps } from "@/experimental/Information/Headers/ResourceHeader"
+import type { DialogPosition } from "@/patterns/F0Dialog/types"
+import type { UseFileUpload } from "@/patterns/F0Form/fields/file/types"
+import type { F0FormErrorTriggerMode } from "@/patterns/F0Form/types"
+import type { ResourceHeaderProps } from "@/patterns/ResourceHeader"
 
-import type { SurveyFormBuilderElement } from "../SurveyFormBuilder/types"
+import type {
+  SurveyDatasets,
+  SurveyFormBuilderElement,
+} from "../SurveyFormBuilder/types"
 
 export type { SurveyFormBuilderElement }
 
@@ -14,6 +17,7 @@ export type SurveyAnswerValue =
   | { type: "select"; value: string | null }
   | { type: "multi-select"; value: string[] | null }
   | { type: "dropdown-single"; value: string | null }
+  | { type: "dropdown-multi"; value: string[] | null }
   | { type: "numeric"; value: number | null }
   | { type: "link"; value: string | null }
   | { type: "date"; value: Date | null }
@@ -39,21 +43,14 @@ type SurveyAnsweringFormModule = {
   href: string
 }
 
-interface SurveyAnsweringFormBaseProps {
+interface SurveyAnsweringFormSharedProps {
   elements: SurveyFormBuilderElement[]
-  mode: SurveyAnsweringFormMode
   title: string
   description?: string
   resourceHeader?: Omit<ResourceHeaderProps, "title" | "description">
-  module: SurveyAnsweringFormModule
-  position?: DialogPosition
-  isOpen: boolean
-  onClose: () => void
-  allowToChangeFullscreen?: boolean
   defaultValues?: Partial<SurveyAnswers>
-  errorTriggerMode?: F0FormErrorTriggerMode
   loading?: boolean
-  useUpload?: UseFileUpload
+  datasets?: SurveyDatasets
   labels?: {
     empty?: {
       title?: string
@@ -63,21 +60,53 @@ interface SurveyAnsweringFormBaseProps {
   }
 }
 
-export type SurveyAnsweringFormDefaultProps = SurveyAnsweringFormBaseProps & {
+interface SurveyAnsweringFormDialogProps extends SurveyAnsweringFormSharedProps {
+  inline?: false
+  mode: SurveyAnsweringFormMode
+  module: SurveyAnsweringFormModule
+  position?: DialogPosition
+  isOpen: boolean
+  onClose: () => void
+  allowToChangeFullscreen?: boolean
+  errorTriggerMode?: F0FormErrorTriggerMode
+  useUpload?: UseFileUpload
+}
+
+/** Inline mode: read-only rendering embedded in the page, no dialog */
+interface SurveyAnsweringFormInlineProps extends SurveyAnsweringFormSharedProps {
+  inline: true
+  mode?: never
+  module?: never
+  position?: never
+  isOpen?: never
+  onClose?: never
+  allowToChangeFullscreen?: never
+  errorTriggerMode?: never
+  useUpload?: UseFileUpload
+}
+
+export type SurveyAnsweringFormDefaultProps = SurveyAnsweringFormDialogProps & {
   preview?: false
   onSubmit: (
     answers: SurveySubmitAnswers
   ) => Promise<SurveyFormSubmitResult> | SurveyFormSubmitResult
 }
 
-export type SurveyAnsweringFormPreviewProps = SurveyAnsweringFormBaseProps & {
+export type SurveyAnsweringFormPreviewProps = SurveyAnsweringFormDialogProps & {
   preview: true
   onSubmit?: never
 }
 
+export type SurveyAnsweringFormInlineReadonlyProps =
+  SurveyAnsweringFormInlineProps & {
+    preview?: never
+    onSubmit?: never
+  }
+
 export type SurveyAnsweringFormProps =
   | SurveyAnsweringFormDefaultProps
   | SurveyAnsweringFormPreviewProps
+  | SurveyAnsweringFormInlineReadonlyProps
 
 export type FlatQuestion = {
   id: string

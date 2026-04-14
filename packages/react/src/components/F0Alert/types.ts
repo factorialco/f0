@@ -21,4 +21,6 @@ export interface F0AlertProps {
   }
   icon?: IconType
   variant: AlertVariant
+  /** Called when the user dismisses the alert. When provided, a close button is shown. */
+  onClose?: () => void
 }

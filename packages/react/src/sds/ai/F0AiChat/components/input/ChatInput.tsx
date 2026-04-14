@@ -3,7 +3,7 @@ import { InputProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useMemo, useRef } from "react"
 
-import { OneEllipsis } from "@/components/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
 

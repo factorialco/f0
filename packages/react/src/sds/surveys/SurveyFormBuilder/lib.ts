@@ -71,9 +71,8 @@ export const getDefaultParamsForQuestionType = (questionType: QuestionType) => {
         ],
       }
     case "dropdown-single":
-      return {
-        options: [],
-      }
+    case "dropdown-multi":
+      return {}
     case "text":
     case "longText":
       return {
@@ -113,7 +112,6 @@ const DEFAULT_QUESTION_TYPES: QuestionType[] = [
   "longText",
   "select",
   "multi-select",
-  "dropdown-single",
   "numeric",
   "link",
   "date",

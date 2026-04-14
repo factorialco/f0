@@ -1,7 +1,7 @@
 import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
 
-import { ColorToken } from "./components/ColorToken"
-import { BareColor } from "./components/BareColor"
+import { BareColorList } from "./components/BareColorList"
+import { SemanticColorGroup } from "./components/SemanticColorGroup"
 
 <Meta title="Foundations/Colors" />
 
@@ -34,44 +34,25 @@ The full list of tokens:
 Use these tokens for texts.
 
 <Unstyled>
-  <div className="space-y-2">
-    <ColorToken
-      name="f1-foreground"
-      description="Primary text color for content"
-    />
-    <ColorToken
-      name="f1-foreground-secondary"
-      description="Secondary text color for content"
-    />
-    <ColorToken
-      name="f1-foreground-inverse"
-      description="Inverted text color in dark backgrounds"
-    />
-    <ColorToken
-      name="f1-foreground-disabled"
-      description="Indicates inactivity or disabled state"
-    />
-    <ColorToken
-      name="f1-foreground-accent"
-      description="Draws attention with a prominent color"
-    />
-    <ColorToken
-      name="f1-foreground-critical"
-      description="Indicates errors, warnings, or critical information"
-    />
-    <ColorToken
-      name="f1-foreground-info"
-      description="Provides contextual information"
-    />
-    <ColorToken
-      name="f1-foreground-warning"
-      description="Alerts users to potential issues"
-    />
-    <ColorToken
-      name="f1-foreground-positive"
-      description="Indicates success, confirmation, or positive outcomes"
-    />
-  </div>
+  <SemanticColorGroup
+    category="foreground"
+    descriptions={{
+      "f1-foreground": "Primary text color for content",
+      "f1-foreground-secondary": "Secondary text color for content",
+      "f1-foreground-tertiary": "Tertiary text color for content",
+      "f1-foreground-inverse": "Inverted text color in dark backgrounds",
+      "f1-foreground-inverse-secondary": "Secondary inverted text color",
+      "f1-foreground-disabled": "Indicates inactivity or disabled state",
+      "f1-foreground-accent": "Draws attention with a prominent color",
+      "f1-foreground-critical":
+        "Indicates errors, warnings, or critical information",
+      "f1-foreground-info": "Provides contextual information",
+      "f1-foreground-warning": "Alerts users to potential issues",
+      "f1-foreground-positive":
+        "Indicates success, confirmation, or positive outcomes",
+      "f1-foreground-selected": "Indicates a selected state",
+    }}
+  />
 </Unstyled>
 
 ### Background
@@ -79,48 +60,43 @@ Use these tokens for texts.
 Use these tokens for backgrounds.
 
 <Unstyled>
-  <div className="space-y-2">
-    <ColorToken
-      name="f1-background"
-      description="Primary background color for content"
-    />
-    <ColorToken
-      name="f1-background-disabled"
-      description="Background color for disabled elements"
-    />
-    <ColorToken
-      name="f1-background-secondary"
-      description="Secondary background color for content"
-    />
-    <ColorToken
-      name="f1-background-secondary-hover"
-      description="Hover state for secondary background color"
-    />
-    <ColorToken
-      name="f1-background-accent"
-      description="Accent background color for highlights"
-    />
-    <ColorToken
-      name="f1-background-critical"
-      description="Critical background color for errors"
-    />
-    <ColorToken
-      name="f1-background-info"
-      description="Info background color for notifications"
-    />
-    <ColorToken
-      name="f1-background-warning"
-      description="Warning background color for alerts"
-    />
-    <ColorToken
-      name="f1-background-positive"
-      description="Positive background color for success"
-    />
-    <ColorToken
-      name="f1-background-promote"
-      description="Promotional background color for highlights"
-    />
-  </div>
+  <SemanticColorGroup
+    category="background"
+    descriptions={{
+      "f1-background": "Primary background color for content",
+      "f1-background-hover": "Hover state for primary background color",
+      "f1-background-disabled": "Background color for disabled elements",
+      "f1-background-secondary": "Secondary background color for content",
+      "f1-background-secondary-hover":
+        "Hover state for secondary background color",
+      "f1-background-tertiary": "Tertiary background color for content",
+      "f1-background-inverse": "Inverted background color",
+      "f1-background-inverse-secondary": "Secondary inverted background color",
+      "f1-background-bold": "Bold background color",
+      "f1-background-accent": "Accent background color for highlights",
+      "f1-background-accent-bold": "Bold accent background color",
+      "f1-background-accent-bold-hover":
+        "Hover state for bold accent background",
+      "f1-background-promote": "Promotional background color for highlights",
+      "f1-background-promote-hover": "Hover state for promotional background",
+      "f1-background-promote-bold": "Bold promotional background color",
+      "f1-background-critical": "Critical background color for errors",
+      "f1-background-critical-bold": "Bold critical background color",
+      "f1-background-info": "Info background color for notifications",
+      "f1-background-info-bold": "Bold info background color",
+      "f1-background-warning": "Warning background color for alerts",
+      "f1-background-warning-bold": "Bold warning background color",
+      "f1-background-positive": "Positive background color for success",
+      "f1-background-positive-bold": "Bold positive background color",
+      "f1-background-selected": "Selected background color",
+      "f1-background-selected-secondary": "Secondary selected background color",
+      "f1-background-selected-hover": "Hover state for selected background",
+      "f1-background-selected-bold": "Bold selected background color",
+      "f1-background-selected-bold-hover":
+        "Hover state for bold selected background",
+      "f1-background-overlay": "Overlay background color",
+    }}
+  />
 </Unstyled>
 
 ### Border
@@ -128,20 +104,27 @@ Use these tokens for backgrounds.
 Use these tokens for borders.
 
 <Unstyled>
-  <div className="space-y-2">
-    <ColorToken
-      name="f1-border"
-      description="Primary border color for content separation"
-    />
-    <ColorToken
-      name="f1-border-hover"
-      description="Hover state for primary border color"
-    />
-    <ColorToken
-      name="f1-border-promote"
-      description="Promotional border color for highlights"
-    />
-  </div>
+  <SemanticColorGroup
+    category="border"
+    descriptions={{
+      "f1-border": "Primary border color for content separation",
+      "f1-border-hover": "Hover state for primary border color",
+      "f1-border-secondary": "Secondary border color",
+      "f1-border-inverse": "Inverted border color",
+      "f1-border-bold": "Bold border color",
+      "f1-border-promote": "Promotional border color for highlights",
+      "f1-border-selected": "Selected border color",
+      "f1-border-selected-bold": "Bold selected border color",
+      "f1-border-critical": "Critical border color for errors",
+      "f1-border-critical-bold": "Bold critical border color",
+      "f1-border-warning": "Warning border color for alerts",
+      "f1-border-warning-bold": "Bold warning border color",
+      "f1-border-info": "Info border color for notifications",
+      "f1-border-info-bold": "Bold info border color",
+      "f1-border-positive": "Positive border color for success",
+      "f1-border-positive-bold": "Bold positive border color",
+    }}
+  />
 </Unstyled>
 
 ### Icon
@@ -149,48 +132,29 @@ Use these tokens for borders.
 Use these tokens for icons.
 
 <Unstyled>
-  <div className="mb-12 space-y-2">
-    <ColorToken
-      name="f1-icon"
-      description="Default icon color for general use"
-    />
-    <ColorToken
-      name="f1-icon-secondary"
-      description="Secondary icon color for less prominent icons"
-    />
-    <ColorToken
-      name="f1-icon-inverse"
-      description="Inverse icon color for contrast"
-    />
-    <ColorToken
-      name="f1-icon-bold"
-      description="Bold icon color for emphasis"
-    />
-    <ColorToken
-      name="f1-icon-critical"
-      description="Critical icon color for errors"
-    />
-    <ColorToken
-      name="f1-icon-info"
-      description="Info icon color for notifications"
-    />
-    <ColorToken
-      name="f1-icon-warning"
-      description="Warning icon color for alerts"
-    />
-    <ColorToken
-      name="f1-icon-positive"
-      description="Positive icon color for success"
-    />
-    <ColorToken
-      name="f1-icon-accent"
-      description="Accent icon color for highlights"
-    />
-    <ColorToken
-      name="f1-icon-promote"
-      description="Promote icon color for upsell"
-    />
-  </div>
+  <SemanticColorGroup
+    category="icon"
+    descriptions={{
+      "f1-icon": "Default icon color for general use",
+      "f1-icon-secondary": "Secondary icon color for less prominent icons",
+      "f1-icon-inverse": "Inverse icon color for contrast",
+      "f1-icon-bold": "Bold icon color for emphasis",
+      "f1-icon-critical": "Critical icon color for errors",
+      "f1-icon-critical-bold": "Bold critical icon color",
+      "f1-icon-accent": "Accent icon color for highlights",
+      "f1-icon-info": "Info icon color for notifications",
+      "f1-icon-warning": "Warning icon color for alerts",
+      "f1-icon-positive": "Positive icon color for success",
+      "f1-icon-promote": "Promote icon color for upsell",
+      "f1-icon-selected": "Selected icon color",
+      "f1-icon-selected-hover": "Hover state for selected icon",
+      "f1-icon-mood-super-negative": "Mood super-negative icon color",
+      "f1-icon-mood-negative": "Mood negative icon color",
+      "f1-icon-mood-neutral": "Mood neutral icon color",
+      "f1-icon-mood-positive": "Mood positive icon color",
+      "f1-icon-mood-super-positive": "Mood super-positive icon color",
+    }}
+  />
 </Unstyled>
 
 ### Tokens naming convention
@@ -222,40 +186,4 @@ there is no other way.
 
 Bare colors available:
 
-<div className="mb-12 space-y-2">
-  <BareColor name="neutral-0" />
-  <BareColor name="neutral-2" />
-  <BareColor name="neutral-3" />
-  <BareColor name="neutral-5" />
-  <BareColor name="neutral-10" />
-  <BareColor name="neutral-20" />
-  <BareColor name="neutral-30" />
-  <BareColor name="neutral-40" />
-  <BareColor name="neutral-50" />
-  <BareColor name="neutral-60" />
-  <BareColor name="neutral-70" />
-  <BareColor name="neutral-80" />
-  <BareColor name="neutral-90" />
-  <BareColor name="neutral-100" />
-  <BareColor name="accent-50" />
-  <BareColor name="accent-60" />
-  <BareColor name="accent-70" />
-  <BareColor name="warning-50" />
-  <BareColor name="warning-60" />
-  <BareColor name="warning-70" />
-  <BareColor name="selected-50" />
-  <BareColor name="selected-60" />
-  <BareColor name="selected-70" />
-  <BareColor name="critical-50" />
-  <BareColor name="critical-60" />
-  <BareColor name="critical-70" />
-  <BareColor name="positive-50" />
-  <BareColor name="positive-60" />
-  <BareColor name="positive-70" />
-  <BareColor name="info-50" />
-  <BareColor name="info-60" />
-  <BareColor name="info-70" />
-  <BareColor name="promote-50" />
-  <BareColor name="promote-60" />
-  <BareColor name="promote-70" />
-</div>
+<BareColorList />

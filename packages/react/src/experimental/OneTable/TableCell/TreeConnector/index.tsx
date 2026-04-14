@@ -1,7 +1,7 @@
-import type { TableVisualizationType } from "@/experimental/OneDataCollection/types"
+import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
 
-import { NestedRowProps } from "@/experimental/OneDataCollection/visualizations/collection/Table/components/Row"
 import { cn } from "@/lib/utils"
+import { NestedRowProps } from "@/patterns/OneDataCollection/visualizations/collection/Table/components/Row"
 
 import {
   BUTTON_HEIGHT,

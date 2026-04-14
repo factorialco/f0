@@ -1,6 +1,5 @@
 import { ComponentProps, FC, forwardRef } from "react"
 
-import { withDataTestId } from "@/lib/data-testid"
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
 import { F0AvatarListProps } from "@/components/avatars/F0AvatarList/types"
 import { TagAlertProps } from "@/components/tags/F0TagAlert"
@@ -9,6 +8,7 @@ import { TagListProps, TagType } from "@/components/tags/F0TagList"
 import { TagRawProps } from "@/components/tags/F0TagRaw"
 import { TagStatusProps } from "@/components/tags/F0TagStatus"
 import { Weekdays } from "@/experimental/Widgets/Content/Weekdays"
+import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
 
@@ -83,7 +83,7 @@ const ItemContent: FC<{ content: Content }> = ({ content }) => (
       <DataList.TagListItem {...content.tagList} />
     )}
     {content.type === "avatar-list" && (
-      <li className="w-fit list-none px-1.5 py-1">
+      <li className="list-none px-1.5 py-1">
         <F0AvatarList {...content.avatarList} />
       </li>
     )}

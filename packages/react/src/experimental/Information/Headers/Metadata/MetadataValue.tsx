@@ -1,7 +1,7 @@
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
 import { F0AvatarListProps } from "@/components/avatars/F0AvatarList/types"
-import { getColor } from "@/components/Charts/utils/colors"
+import { getColor } from "@/kits/Charts/utils/colors"
 import { F0Icon } from "@/components/F0Icon"
 import { F0TagDot } from "@/components/tags/F0TagDot"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
@@ -123,15 +123,19 @@ export function MetadataValue({
         : getColor("categorical-1")
       const safeMax = value.max && value.max > 0 ? value.max : 100
       const clampedValue = Math.min(Math.max(0, value.value), safeMax)
+      const percentage = (clampedValue / safeMax) * 100
 
       return (
         <div className="flex items-center gap-2">
           <div className="min-w-16">
             <Progress
               color={barColor}
-              value={clampedValue}
-              max={safeMax}
+              value={percentage}
+              max={100}
               aria-label={item.label}
+              aria-valuemin={0}
+              aria-valuemax={safeMax}
+              aria-valuenow={clampedValue}
               aria-valuetext={value.label}
             />
           </div>

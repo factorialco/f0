@@ -1,7 +1,7 @@
 import { breakpoints } from "@factorialco/f0-core"
 import { type WindowProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
 import { MAX_CHAT_WIDTH, MIN_CHAT_WIDTH } from "../../utils/constants"
@@ -17,7 +17,54 @@ export const SidebarWindow = ({ children }: WindowProps) => {
     resizable,
     setChatWidth,
     resetChatWidth,
+    fileAttachments,
+    clarifyingQuestion,
+    setFileDragOver,
   } = useAiChat()
+  const dragCounterRef = useRef(0)
+  const canDrop =
+    fileAttachments?.onUploadFiles != null && clarifyingQuestion === null
+
+  const handleDragEnter = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      dragCounterRef.current++
+      if (canDrop) setFileDragOver(true)
+    },
+    [canDrop, setFileDragOver]
+  )
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }, [])
+
+  const handleDragLeave = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      dragCounterRef.current--
+      if (dragCounterRef.current <= 0) {
+        dragCounterRef.current = 0
+        setFileDragOver(false)
+      }
+    },
+    [setFileDragOver]
+  )
+
+  // Files are only accepted when dropped onto the DropOverlay itself.
+  // The window-level drop handler exists only to reset the visibility
+  // state if the user drops anywhere else inside the chat.
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      dragCounterRef.current = 0
+      setFileDragOver(false)
+    },
+    [setFileDragOver]
+  )
   const fullscreen = visualizationMode === "fullscreen"
   const [isResizing, setIsResizing] = useState(false)
   const isSmallScreen = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
@@ -74,6 +121,10 @@ export const SidebarWindow = ({ children }: WindowProps) => {
           <div
             aria-hidden={!open}
             className="relative flex h-full w-full flex-col overflow-hidden border border-solid border-f1-border-secondary bg-f1-special-page shadow xs:rounded-xl"
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
           >
             <motion.div
               className="relative flex h-full w-full flex-col overflow-hidden"

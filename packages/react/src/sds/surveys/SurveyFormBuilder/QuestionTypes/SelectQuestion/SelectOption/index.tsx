@@ -59,7 +59,7 @@ export const SelectOption = ({
   const isDraggingThisItem = isDragging && draggedItemId === value
 
   const handleClick = () => {
-    if (disabled && !answering) return
+    if (!disabled && !answering) return // edit mode — do not select answer
     onClick(value)
   }
 
@@ -67,11 +67,13 @@ export const SelectOption = ({
     onClickAction({ value, index, action })
   }
 
-  const handleClickMarkAsCorrect = () => {
+  const handleClickMarkAsCorrect = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation()
     handleClickAction("mark-as-correct")
   }
 
-  const handleClickRemove = () => {
+  const handleClickRemove = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation()
     handleClickAction("remove")
   }
 
@@ -145,7 +147,12 @@ export const SelectOption = ({
             !dragEnabled && "cursor-not-allowed"
           )}
         >
-          <div className="flex aspect-square w-6 scale-90 items-center justify-center">
+          <div
+            className={cn(
+              "flex aspect-square scale-90 items-center justify-center",
+              type === "multi-select" ? "w-6" : "w-5"
+            )}
+          >
             <F0Icon icon={Handle} size="sm" />
           </div>
         </div>

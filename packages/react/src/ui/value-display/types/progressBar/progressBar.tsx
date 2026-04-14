@@ -2,7 +2,7 @@
  * Progress Bar cell type for displaying progress values in data collections.
  * Supports both direct values and objects with placeholder states and custom labels.
  */
-import { getColor } from "@/components/Charts/utils/colors"
+import { getColor } from "@/kits/Charts/utils/colors"
 import { Progress } from "@/ui/progress"
 
 import { ValueDisplayRendererContext } from "../../renderers"

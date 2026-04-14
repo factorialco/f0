@@ -2,16 +2,18 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useCallback, useRef, useState } from "react"
 
-import { F0Button } from "@/components/F0Button"
 import type {
   FileUploadHookReturn,
   FileUploadResult,
   FileUploadStatus,
   UseFileUpload,
-} from "@/components/F0Form/fields/file/types"
+} from "@/patterns/F0Form/fields/file/types"
+
+import { F0Button } from "@/components/F0Button"
 
 import type { SurveyAnsweringFormProps } from "../types"
 
+import { mockDatasets } from "../../__stories__/mocks"
 import { SurveyFormBuilderElement } from "../../SurveyFormBuilder/types"
 import { SurveyAnsweringForm } from "../SurveyAnsweringForm"
 
@@ -107,13 +109,8 @@ const sampleElements: SurveyFormBuilderElement[] = [
           id: "q-department",
           title: "Which department are you in?",
           description: "Select the department you currently belong to",
-          type: "select" as const,
-          options: [
-            { value: "engineering", label: "Engineering" },
-            { value: "design", label: "Design" },
-            { value: "product", label: "Product" },
-            { value: "marketing", label: "Marketing" },
-          ],
+          type: "dropdown-single" as const,
+          datasetKey: "teams",
           required: true,
         },
         {
@@ -150,13 +147,20 @@ const sampleElements: SurveyFormBuilderElement[] = [
         {
           id: "q-career-goal",
           title: "What is your primary career goal for next year?",
-          type: "dropdown-single" as const,
+          type: "select" as const,
           options: [
             { value: "promotion", label: "Get promoted" },
             { value: "lateral-move", label: "Lateral move to new team" },
             { value: "specialise", label: "Deepen specialisation" },
             { value: "management", label: "Move into management" },
           ],
+          required: true,
+        },
+        {
+          id: "q-collaborators",
+          title: "Who did you collaborate with recently?",
+          type: "dropdown-multi" as const,
+          datasetKey: "employees",
           required: true,
         },
         {
@@ -273,6 +277,10 @@ type SurveyAnsweringFormStoryProps = DistributiveOmit<
 function SurveyAnsweringFormStory(props: SurveyAnsweringFormStoryProps) {
   const [isOpen, setIsOpen] = useState(false)
 
+  if ("inline" in props && props.inline) {
+    return <SurveyAnsweringForm {...props} />
+  }
+
   if (props.preview === true) {
     return (
       <>
@@ -320,6 +328,7 @@ const meta: Meta<typeof SurveyAnsweringFormStory> = {
       label: "Engagement",
       href: "#",
     },
+    datasets: mockDatasets,
     useUpload: useMockUpload,
   },
   parameters: {
@@ -382,7 +391,7 @@ export const WithDefaultValues: Story = {
     defaultValues: {
       "q-name": { type: "text", value: "Jane Doe" },
       "q-perf-rating": { type: "rating", value: 4 },
-      "q-department": { type: "select", value: "engineering" },
+      "q-department": { type: "dropdown-single", value: "engineering" },
     },
   },
 }
@@ -431,7 +440,7 @@ export const PreviewWithDefaultValues: Story = {
     defaultValues: {
       "q-name": { type: "text", value: "Jane Doe" },
       "q-perf-rating": { type: "rating", value: 4 },
-      "q-department": { type: "select", value: "engineering" },
+      "q-department": { type: "dropdown-single", value: "engineering" },
     },
   },
 }
@@ -464,4 +473,45 @@ export const RightSideMixedCorrectAnswers: Story = {
       "q-next-review": { type: "date", value: new Date("2026-03-20") },
     },
   },
+}
+
+export const Inline: Story = {
+  parameters: {
+    layout: "padded",
+  },
+  render: () => (
+    <div className="w-full">
+      <SurveyAnsweringForm
+        inline
+        elements={sampleElements}
+        title="Employee Review Q4"
+        description="Help us understand your recent performance."
+        datasets={mockDatasets}
+        useUpload={useMockUpload}
+        defaultValues={{
+          "q-name": { type: "text", value: "Jane Doe" },
+          "q-perf-rating": { type: "rating", value: 4 },
+          "q-department": { type: "dropdown-single", value: "engineering" },
+        }}
+      />
+    </div>
+  ),
+}
+
+export const InlineLoading: Story = {
+  parameters: {
+    layout: "padded",
+  },
+  render: () => (
+    <div className="w-full">
+      <SurveyAnsweringForm
+        inline
+        elements={sampleElements}
+        title="Employee Review Q4"
+        datasets={mockDatasets}
+        useUpload={useMockUpload}
+        loading
+      />
+    </div>
+  ),
 }

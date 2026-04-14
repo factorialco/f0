@@ -1,4 +1,4 @@
-import { RichTextDisplay } from "@/experimental/RichText/RichTextDisplay"
+import { RichTextDisplay } from "@/components/RichText/RichTextDisplay"
 import { Skeleton } from "@/ui/skeleton"
 
 import { withSkeleton } from "../../../../../lib/skeleton"

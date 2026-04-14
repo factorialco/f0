@@ -3,15 +3,15 @@ import { useCallback, useState } from "react"
 
 import { F0AvatarCompany } from "@/components/avatars/F0AvatarCompany"
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { OneEllipsis } from "@/components/OneEllipsis"
-import { Sliders } from "@/icons/app"
+import { OneEllipsis } from "@/lib/OneEllipsis"
+import { Sliders, Upsell } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { Action } from "@/ui/Action"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 import type { CreditsUsage } from "../../types"
 
 import { useAiChat } from "../../providers/AiChatStateProvider"
+import { F0Button } from "@/components/F0Button"
 
 export function CreditsPopover() {
   const { credits } = useAiChat()
@@ -161,9 +161,12 @@ export function CreditsPopover() {
           {credits.upgradePlanUrl && (
             <div className="flex items-center justify-between border-0 border-t border-solid border-f1-border-secondary p-3">
               <span>{i18n.t("ai.credits.needMoreCredits")}</span>
-              <Action variant="outline" href={credits.upgradePlanUrl}>
-                {i18n.t("ai.credits.upgradePlan")}
-              </Action>
+              <F0Button
+                variant="outlinePromote"
+                href={credits.upgradePlanUrl}
+                label={i18n.t("ai.credits.upgradePlan")}
+                icon={Upsell}
+              />
             </div>
           )}
         </div>

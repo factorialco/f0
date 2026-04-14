@@ -28,9 +28,10 @@ const F0AiChatProviderComponent = ({
   historyEnabled,
   footer,
   VoiceMode,
-  entityResolvers,
+  entityRefs,
   toolHints,
   credits,
+  fileAttachments,
   onThumbsUp,
   onThumbsDown,
   children,
@@ -55,9 +56,10 @@ const F0AiChatProviderComponent = ({
       footer={footer}
       VoiceMode={VoiceMode}
       tracking={tracking}
-      entityResolvers={entityResolvers}
+      entityRefs={entityRefs}
       toolHints={toolHints}
       credits={credits}
+      fileAttachments={fileAttachments}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>

@@ -1,11 +1,14 @@
 import type { Config } from "tailwindcss"
+
 import { borderRadius } from "./src/tokens/borderRadius"
 import { baseColors, f1Colors } from "./src/tokens/colors"
+import { boxShadow } from "./src/tokens/shadows"
 import {
   absoluteSpacing,
   betweenSpacing,
   relativeSpacing,
 } from "./src/tokens/spacing"
+import { fontSize, fontWeight } from "./src/tokens/typography"
 
 export const baseConfig: Omit<Config, "content"> = {
   darkMode: "class",
@@ -25,75 +28,23 @@ export const baseConfig: Omit<Config, "content"> = {
     fontFamily: {
       sans: ["Inter", "sans-serif"],
     },
-    fontWeight: {
-      normal: "400",
-      medium: "500",
-      semibold: "600",
-    },
-    fontSize: {
-      xs: [
-        ".625rem",
-        {
-          lineHeight: "0.75rem",
-        },
-      ],
-      sm: [
-        ".75rem",
-        {
-          lineHeight: "1rem",
-        },
-      ],
-      base: [
-        ".875rem",
-        {
-          lineHeight: "1.25rem",
-          letterSpacing: "-0.005em",
-        },
-      ],
-      lg: [
-        "1rem",
-        {
-          lineHeight: "1.5rem",
-          letterSpacing: "-0.01em",
-        },
-      ],
-      xl: [
-        "1.125rem",
-        {
-          lineHeight: "1.75rem",
-          letterSpacing: "-0.01em",
-        },
-      ],
-      "2xl": [
-        "1.375rem",
-        {
-          lineHeight: "1.75rem",
-          letterSpacing: "-0.01em",
-        },
-      ],
-      "3xl": [
-        "1.625rem",
-        {
-          lineHeight: "2rem",
-          letterSpacing: "-0.01em",
-        },
-      ],
-      "4xl": [
-        "2.25rem",
-        {
-          lineHeight: "2.5rem",
-          letterSpacing: "-0.02em",
-        },
-      ],
-    },
+    fontWeight,
+    fontSize: Object.fromEntries(
+      Object.entries(fontSize).map(([key, val]) => [
+        key,
+        [
+          val.size,
+          {
+            lineHeight: val.lineHeight,
+            ...("letterSpacing" in val
+              ? { letterSpacing: val.letterSpacing }
+              : {}),
+          },
+        ],
+      ])
+    ),
     borderRadius,
-    boxShadow: {
-      DEFAULT: "0 2px 20px 0 hsl(var(--shadow) / 0.04)",
-      md: "0 4px 20px 0 hsl(var(--shadow) / 0.08)",
-      lg: "0 8px 30px 0 hsl(var(--shadow) / 0.12)",
-      xl: "0 12px 56px 0 hsl(var(--shadow) / 0.16)",
-      none: "none",
-    },
+    boxShadow,
     // use pixel scale by default
     spacing: absoluteSpacing,
     extend: {

@@ -1,20 +1,26 @@
 import { useCallback, useRef, useState, useMemo } from "react"
 
-import type { DialogPosition } from "@/components/F0Dialog/types"
-import type { F0FormSubmitResult } from "@/components/F0Form/types"
+import type { DialogPosition } from "@/patterns/F0Dialog/types"
+import type { F0FormSubmitResult } from "@/patterns/F0Form/types"
 
-import { F0Box } from "@/components/F0Box"
-import { F0Dialog } from "@/components/F0Dialog"
-import { F0Form } from "@/components/F0Form/F0Form"
-import { useF0Form } from "@/components/F0Form/useF0Form"
-import { ResourceHeader } from "@/experimental/Information/Headers/ResourceHeader"
-import { OneEmptyState } from "@/experimental/OneEmptyState"
+import { F0Box } from "@/lib/F0Box"
+import { F0Dialog } from "@/patterns/F0Dialog"
+import { F0Form } from "@/patterns/F0Form/F0Form"
+import { useF0Form } from "@/patterns/F0Form/useF0Form"
+import { ResourceHeader } from "@/patterns/ResourceHeader"
+import { OneEmptyState } from "@/components/OneEmptyState"
 import { ArrowLeft, ArrowRight, Maximize, Minimize } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ProgressBarCell } from "@/ui/value-display/types/progressBar"
 
-import type { SurveyAnsweringFormProps, SurveySubmitAnswers } from "./types"
+import type {
+  SurveyAnsweringFormDefaultProps,
+  SurveyAnsweringFormInlineReadonlyProps,
+  SurveyAnsweringFormPreviewProps,
+  SurveyAnsweringFormProps,
+  SurveySubmitAnswers,
+} from "./types"
 
 import { SurveyFormBuilderProvider } from "../SurveyFormBuilder/Context"
 import { TableOfContent } from "../SurveyFormBuilder/Form/TableOfContent"
@@ -30,7 +36,15 @@ import {
 
 const noop = () => {}
 
-export function SurveyAnsweringForm({
+export function SurveyAnsweringForm(props: SurveyAnsweringFormProps) {
+  if (props.inline) {
+    return <SurveyAnsweringFormInline {...props} />
+  }
+
+  return <SurveyAnsweringFormDialog {...props} />
+}
+
+function SurveyAnsweringFormDialog({
   elements,
   onSubmit: onSubmitProp,
   mode,
@@ -48,7 +62,8 @@ export function SurveyAnsweringForm({
   labels,
   preview = false,
   useUpload,
-}: SurveyAnsweringFormProps) {
+  datasets,
+}: SurveyAnsweringFormDefaultProps | SurveyAnsweringFormPreviewProps) {
   const { t } = useI18n()
   const initialIsFullscreen = positionProp === "fullscreen"
   const nonFullscreenPosition =
@@ -95,7 +110,8 @@ export function SurveyAnsweringForm({
     isStepped ? accumulatedValuesRef.current : undefined,
     preview,
     isReadonlyPreview,
-    useUpload
+    useUpload,
+    datasets
   )
 
   const position: DialogPosition = isFullscreen
@@ -280,7 +296,12 @@ export function SurveyAnsweringForm({
       otherActions={otherActions}
       disableContentPadding={disableContentPadding}
     >
-      <SurveyFormBuilderProvider answering elements={elements} onChange={noop}>
+      <SurveyFormBuilderProvider
+        answering
+        elements={elements}
+        onChange={noop}
+        datasets={datasets}
+      >
         <div
           className={cn(
             "relative flex min-h-full flex-col @container",
@@ -369,5 +390,99 @@ export function SurveyAnsweringForm({
         </div>
       </SurveyFormBuilderProvider>
     </F0Dialog>
+  )
+}
+
+function SurveyAnsweringFormInline({
+  elements,
+  title,
+  description,
+  resourceHeader,
+  defaultValues,
+  loading = false,
+  labels,
+  useUpload,
+  datasets,
+}: SurveyAnsweringFormInlineReadonlyProps) {
+  const { t } = useI18n()
+
+  const flatQuestions = useMemo(
+    () => extractFlatQuestions(elements),
+    [elements]
+  )
+
+  const hasQuestions = flatQuestions.length > 0
+
+  const emptyLabels = {
+    title: labels?.empty?.title ?? t("surveyAnsweringForm.labels.empty.title"),
+    description:
+      labels?.empty?.description ??
+      t("surveyAnsweringForm.labels.empty.description"),
+    emoji: labels?.empty?.emoji ?? t("surveyAnsweringForm.labels.empty.emoji"),
+  }
+
+  const {
+    schema,
+    defaultValues: formDefaultValues,
+    sections,
+  } = useSurveyFormSchema(
+    elements,
+    "all-questions",
+    t,
+    defaultValues,
+    undefined,
+    undefined,
+    true,
+    true,
+    useUpload,
+    datasets
+  )
+
+  return (
+    <SurveyFormBuilderProvider
+      answering
+      elements={elements}
+      onChange={noop}
+      datasets={datasets}
+    >
+      <div className="mx-auto flex w-full max-w-3xl flex-col">
+        <div className="mb-6">
+          <ResourceHeader
+            title={title}
+            description={description}
+            {...resourceHeader}
+          />
+        </div>
+        {loading ? (
+          <SurveyAllQuestionsLoadingSkeleton />
+        ) : !hasQuestions ? (
+          <F0Box
+            display="flex"
+            flexDirection="column"
+            justifyContent="center"
+            alignItems="center"
+            paddingX="lg"
+          >
+            <OneEmptyState
+              emoji={emptyLabels.emoji}
+              title={emptyLabels.title}
+              description={emptyLabels.description}
+            />
+          </F0Box>
+        ) : (
+          <F0Form
+            name="survey-answering-inline"
+            schema={schema}
+            defaultValues={formDefaultValues}
+            onSubmit={async () => ({ success: true })}
+            submitConfig={{
+              hideSubmitButton: true,
+              hideActionBar: true,
+            }}
+            sections={sections}
+          />
+        )}
+      </div>
+    </SurveyFormBuilderProvider>
   )
 }

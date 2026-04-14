@@ -1,4 +1,10 @@
-import { Meta } from "@storybook/addon-docs/blocks"
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
+
+import {
+  AbsoluteSpacingTable,
+  BetweenSpacingTable,
+  RelativeSpacingTable,
+} from "./components/SpacingTable"
 
 <Meta title="Foundations/Spacing" />
 
@@ -20,3 +26,29 @@ must adapt the font size. Relative scale is used for block size properties, like
 
 The rest of the properties use pixels: `padding`, `margin`, `gap`, `space`,
 `translate`, `scrollMargin`, and `scrollPadding`.
+
+## Absolute scale
+
+Used for `padding`, `margin`, `gap`, `space`, `translate`, `scrollMargin`, and
+`scrollPadding`.
+
+<Unstyled>
+  <AbsoluteSpacingTable />
+</Unstyled>
+
+## Relative scale
+
+Used for `width`, `height`, `minWidth`, `maxWidth`, `minHeight`, `maxHeight`,
+`size`, `flexBasis`, and `textIndent`.
+
+<Unstyled>
+  <RelativeSpacingTable />
+</Unstyled>
+
+## Between scale
+
+Used for `gap` and `space` between common elements.
+
+<Unstyled>
+  <BetweenSpacingTable />
+</Unstyled>

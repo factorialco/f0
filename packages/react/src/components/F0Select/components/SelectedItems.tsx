@@ -1,7 +1,7 @@
 import { forwardRef } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/components/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 
 import type { F0SelectItemObject } from "../types"

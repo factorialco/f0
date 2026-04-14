@@ -1,0 +1,374 @@
+import React, { useCallback, useEffect, useMemo, useRef } from "react"
+import { DefaultValues, Path, useForm } from "react-hook-form"
+import { z } from "zod"
+
+import { F0Button } from "@/components/F0Button"
+import { SectionHeader } from "@/patterns/SectionHeader"
+import { Save } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n/i18n-provider"
+import { cn } from "@/lib/utils"
+import { Form as FormProvider } from "@/ui/form"
+
+import type {
+  F0FormErrorTriggerMode,
+  F0FormSchema,
+  F0FormSubmitResult,
+  F0PerSectionSectionConfig,
+  F0PerSectionSubmitConfig,
+  RenderCustomFieldFunction,
+} from "../types"
+import type { F0FormRef, F0FormStateCallback } from "../useF0Form"
+
+import { createConditionalResolver } from "../conditionalResolver"
+import { FIELD_GAP } from "../constants"
+import { F0FormContext } from "../context"
+import { CardSelectDepsContext } from "../fields/cardSelect/CardSelectDepsContext"
+import { FieldRenderer } from "../fields/FieldRenderer"
+import {
+  buildCardSelectContentMap,
+  groupContiguousSwitches,
+} from "../groupingUtils"
+import { useSchemaDefinition } from "../useSchemaDefinition"
+import { createZodErrorMap } from "../zodErrorMap"
+import { RowRenderer } from "./RowRenderer"
+import { SwitchGroupRenderer } from "./SwitchGroupRenderer"
+
+const ERROR_TRIGGER_MODE_MAP = {
+  "on-blur": "onBlur",
+  "on-change": "onChange",
+  "on-submit": "onSubmit",
+} as const
+
+/**
+ * Flatten RHF FieldErrors into a dot-path → message map.
+ * Handles nested errors (e.g. daterange `errors.range.from`).
+ */
+function flattenFormErrors(
+  errors: Record<string, unknown>
+): Record<string, string> {
+  const result: Record<string, string> = {}
+
+  function walk(obj: Record<string, unknown>, prefix: string) {
+    for (const [key, value] of Object.entries(obj)) {
+      if (key === "root") continue
+      const path = prefix ? `${prefix}.${key}` : key
+      if (value && typeof value === "object" && !Array.isArray(value)) {
+        const err = value as Record<string, unknown>
+        if ("message" in err && typeof err.message === "string") {
+          result[path] = err.message
+        } else {
+          walk(err, path)
+        }
+      }
+    }
+  }
+
+  walk(errors, "")
+  return result
+}
+
+interface F0FormSectionProps<TSchema extends F0FormSchema> {
+  formName: string
+  sectionId: string
+  schema: TSchema
+  sectionConfig?: F0PerSectionSectionConfig
+  defaultValues?: Partial<z.infer<TSchema>>
+  onSubmit: (
+    data: z.infer<TSchema>
+  ) => Promise<F0FormSubmitResult> | F0FormSubmitResult
+  submitConfig?: F0PerSectionSubmitConfig
+  errorTriggerMode: F0FormErrorTriggerMode
+  className?: string
+  initialFiles?: import("../fields/file/types").InitialFile[]
+  formRef?: React.MutableRefObject<F0FormRef | null>
+  renderCustomField?: RenderCustomFieldFunction
+  /** Upload hook shared by all file fields */
+  useUpload?: import("../fields/file/types").UseFileUpload
+  /** Whether async defaultValues are still being resolved */
+  isLoading?: boolean
+}
+
+/**
+ * Renders a single section as an independent form with its own
+ * react-hook-form instance, validation, and submit button.
+ */
+export function F0FormSection<TSchema extends F0FormSchema>({
+  formName,
+  sectionId,
+  schema,
+  sectionConfig,
+  defaultValues,
+  onSubmit,
+  submitConfig,
+  errorTriggerMode,
+  className,
+  initialFiles,
+  formRef,
+  renderCustomField,
+  useUpload,
+  isLoading: isFormLoading,
+}: F0FormSectionProps<TSchema>) {
+  const i18n = useI18n()
+
+  type TValues = z.infer<TSchema>
+
+  const definition = useSchemaDefinition(schema)
+
+  const submitLabel = submitConfig?.label ?? "Submit"
+  const submitIcon =
+    submitConfig?.icon === null ? undefined : (submitConfig?.icon ?? Save)
+  const showSubmitWhenDirty = submitConfig?.showSubmitWhenDirty ?? false
+  const hideSubmitButton = submitConfig?.hideSubmitButton ?? false
+
+  const errorMap = useMemo(() => createZodErrorMap(i18n), [i18n])
+  const formMode = ERROR_TRIGGER_MODE_MAP[errorTriggerMode]
+
+  const conditionalResolver = useMemo(
+    () => createConditionalResolver(schema, { errorMap }),
+    [schema, errorMap]
+  )
+
+  const form = useForm<TValues>({
+    resolver: conditionalResolver,
+    mode: formMode,
+    defaultValues: defaultValues as DefaultValues<TValues>,
+  })
+
+  // When async defaultValues finish loading, reset the form with resolved values
+  const wasLoadingRef = useRef(isFormLoading)
+  useEffect(() => {
+    if (wasLoadingRef.current && !isFormLoading && defaultValues) {
+      form.reset(defaultValues as DefaultValues<TValues>)
+    }
+    wasLoadingRef.current = isFormLoading
+  }, [isFormLoading, defaultValues, form])
+
+  const rootError = form.formState.errors.root
+  const { isSubmitting, isDirty } = form.formState
+  const hasErrors =
+    Object.keys(form.formState.errors).filter((k) => k !== "root").length > 0
+
+  const stateCallbackRef = useRef<F0FormStateCallback | null>(null)
+
+  const handleSubmit = useCallback(
+    async (data: TValues) => {
+      const cleanedData = { ...data }
+      for (const key of Object.keys(cleanedData)) {
+        if ((cleanedData as Record<string, unknown>)[key] === null) {
+          ;(cleanedData as Record<string, unknown>)[key] = undefined
+        }
+      }
+      const result = await onSubmit(cleanedData)
+
+      if (result.success) {
+        form.reset(data)
+      } else {
+        if (result.errors) {
+          Object.entries(result.errors).forEach(([field, message]) => {
+            form.setError(field as Path<TValues>, { message })
+          })
+        }
+        if (result.rootMessage) {
+          form.setError("root", { message: result.rootMessage })
+        }
+      }
+    },
+    [onSubmit, form]
+  )
+
+  useEffect(() => {
+    if (formRef) {
+      const refMethods: F0FormRef = {
+        submit: () => {
+          return new Promise<void>((resolve, reject) => {
+            form.handleSubmit(
+              async (data) => {
+                await handleSubmit(data)
+                resolve()
+              },
+              () => {
+                reject(new Error("Form validation failed"))
+              }
+            )()
+          })
+        },
+        reset: () => form.reset(),
+        isDirty: () => form.formState.isDirty,
+        getValues: () => form.getValues() as Record<string, unknown>,
+        setValue: (fieldName, value, options) => {
+          form.setValue(
+            fieldName as Path<TValues>,
+            value as TValues[keyof TValues],
+            {
+              shouldValidate: options?.shouldValidate ?? true,
+              shouldDirty: options?.shouldDirty ?? true,
+            }
+          )
+        },
+        setValues: (values, options) => {
+          for (const [fieldName, value] of Object.entries(values)) {
+            form.setValue(
+              fieldName as Path<TValues>,
+              value as TValues[keyof TValues],
+              {
+                shouldValidate: false,
+                shouldDirty: options?.shouldDirty ?? true,
+              }
+            )
+          }
+          if (options?.shouldValidate !== false) {
+            void form.trigger()
+          }
+        },
+        trigger: async (fieldName) => {
+          if (fieldName) {
+            return form.trigger(fieldName as Path<TValues>)
+          }
+          return form.trigger()
+        },
+        getErrors: () =>
+          flattenFormErrors(form.formState.errors as Record<string, unknown>),
+        getFieldNames: () => {
+          return Object.keys(form.getValues() as Record<string, unknown>)
+        },
+        actionBar: {
+          wiggle: () => {},
+        },
+        _setStateCallback: (callback: F0FormStateCallback) => {
+          stateCallbackRef.current = callback
+        },
+      }
+      formRef.current = refMethods
+    }
+
+    return () => {
+      if (formRef) {
+        formRef.current = null
+      }
+    }
+  }, [formRef, form, handleSubmit])
+
+  useEffect(() => {
+    if (stateCallbackRef.current) {
+      stateCallbackRef.current({ isSubmitting, hasErrors })
+    }
+  }, [isSubmitting, hasErrors])
+
+  const groupedItems = groupContiguousSwitches(definition)
+
+  const contextValue = useMemo(
+    () => ({
+      formName,
+      initialFiles,
+      renderCustomField,
+      isLoading: isFormLoading,
+      useUpload,
+    }),
+    [formName, initialFiles, renderCustomField, isFormLoading, useUpload]
+  )
+
+  const title = sectionConfig?.title ?? sectionId
+  const description = sectionConfig?.description
+
+  return (
+    <F0FormContext.Provider value={contextValue}>
+      <FormProvider {...form}>
+        <form
+          onSubmit={form.handleSubmit(handleSubmit)}
+          className={cn("flex flex-col", className)}
+        >
+          <div
+            className={cn(
+              "flex items-start justify-between py-5",
+              "[&>div]:px-0.5 [&>div]:mx-0 [&>div]:border-0"
+            )}
+          >
+            <SectionHeader title={title} description={description ?? ""} />
+            {sectionConfig?.action && (
+              <F0Button
+                label={sectionConfig.action.label}
+                icon={sectionConfig.action.icon}
+                onClick={sectionConfig.action.onClick}
+                href={sectionConfig.action.href}
+                variant="outline"
+                size="md"
+              />
+            )}
+          </div>
+
+          <div className={`flex flex-col ${FIELD_GAP}`}>
+            {groupedItems.map((groupedItem, index) => {
+              switch (groupedItem.type) {
+                case "switchGroup":
+                  return (
+                    <SwitchGroupRenderer
+                      key={`switch-group-${index}`}
+                      fields={groupedItem.fields}
+                      dependentFields={groupedItem.dependentFields}
+                      cardSelectDependentFields={
+                        groupedItem.cardSelectDependentFields
+                      }
+                      sectionId={sectionId}
+                    />
+                  )
+                case "field": {
+                  const fieldContent = groupedItem.cardSelectDependentFields ? (
+                    <CardSelectDepsContext.Provider
+                      value={buildCardSelectContentMap(
+                        groupedItem.cardSelectDependentFields,
+                        sectionId
+                      )}
+                    >
+                      <FieldRenderer
+                        field={groupedItem.item.field}
+                        sectionId={sectionId}
+                      />
+                    </CardSelectDepsContext.Provider>
+                  ) : (
+                    <FieldRenderer
+                      field={groupedItem.item.field}
+                      sectionId={sectionId}
+                    />
+                  )
+                  return (
+                    <React.Fragment key={groupedItem.item.field.id}>
+                      {fieldContent}
+                    </React.Fragment>
+                  )
+                }
+                case "row":
+                  return (
+                    <RowRenderer
+                      key={`row-${groupedItem.index}`}
+                      row={groupedItem.item}
+                      sectionId={sectionId}
+                    />
+                  )
+                default:
+                  return null
+              }
+            })}
+          </div>
+
+          {rootError && (
+            <p className="mt-4 text-base font-medium text-f1-foreground-critical">
+              {rootError.message}
+            </p>
+          )}
+
+          {!hideSubmitButton && (!showSubmitWhenDirty || isDirty) && (
+            <div className="mt-4">
+              <F0Button
+                type="submit"
+                label={submitLabel}
+                icon={submitIcon}
+                loading={isSubmitting}
+                disabled={hasErrors || isFormLoading}
+              />
+            </div>
+          )}
+        </form>
+      </FormProvider>
+    </F0FormContext.Provider>
+  )
+}

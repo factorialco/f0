@@ -8,7 +8,7 @@ import { F0TableOfContentPopover } from "../index"
 import { courseModulesData, mockTOCData } from "./mocks"
 
 const meta: Meta<typeof F0TableOfContentPopover> = {
-  title: "Navigation/TableOfContentPopover",
+  title: "TableOfContentPopover",
   component: F0TableOfContentPopover,
   parameters: {
     layout: "centered",
@@ -85,7 +85,7 @@ const createStoryRender = (
   getData: (setter: (id: string) => void) => TOCItem[] = mockTOCData,
   Wrapper?: ComponentType<{ children: ReactNode }>
 ): Story["render"] => {
-  return (args) => {
+  const StoryRender = (args: Parameters<NonNullable<Story["render"]>>[0]) => {
     const [activeItem, setActiveItem] = useState(defaultActiveItem)
     const menu = (
       <F0TableOfContentPopover
@@ -96,6 +96,8 @@ const createStoryRender = (
     )
     return Wrapper ? <Wrapper>{menu}</Wrapper> : menu
   }
+  StoryRender.displayName = "StoryRender"
+  return StoryRender
 }
 
 export const Default: Story = {

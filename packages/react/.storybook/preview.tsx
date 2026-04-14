@@ -11,7 +11,7 @@ import { addons } from "storybook/preview-api"
 
 import "../src/styles.css"
 import { aiTranslations } from "@/sds/ai/F0AiChat/types"
-import { WeekStartDay } from "@/experimental/OneCalendar/types"
+import { WeekStartDay } from "@/components/OneCalendar/types"
 import { dataCollectionLocalStorageHandler } from "@/lib/providers/datacollection"
 import { F0Provider } from "@/lib/providers/f0"
 import { buildTranslations, defaultTranslations } from "@/lib/providers/i18n"
@@ -23,8 +23,8 @@ MotionGlobalConfig.skipAnimations = isChromatic()
 
 const channel = addons.getChannel()
 
+// eslint-disable-next-line react/display-name
 export const withTheme = () => {
-  // eslint-disable-next-line react/display-name
   return (Story: StoryFn) => {
     const [isDark, setDark] = useState(false)
 
@@ -168,9 +168,14 @@ const preview: Preview = {
           "how-to-contribute",
           "ai-configuration",
           "foundations",
+          "components",
+          "patterns",
+          "kits",
+          "layouts",
           "library",
-          "data-testid",
-          "hooks",
+          "experimental",
+          "examples",
+          "internal",
         ]
 
         const aId = a.id.split("-")?.[0].toLowerCase()

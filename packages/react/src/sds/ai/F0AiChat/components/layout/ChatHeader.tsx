@@ -7,7 +7,7 @@ import { useMediaQuery } from "usehooks-ts"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/components/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import ChevronDown from "@/icons/app/ChevronDown"
 import Cross from "@/icons/app/Cross"
 import Maximize from "@/icons/app/Maximize"

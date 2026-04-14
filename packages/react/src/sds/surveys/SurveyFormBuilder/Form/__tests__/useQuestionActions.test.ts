@@ -130,6 +130,46 @@ describe("shouldResetParamsOnTypeChange", () => {
       shouldResetParamsOnTypeChange("rating", "multi-select", question)
     ).toBe(true)
   })
+
+  it("returns false when switching between dropdown-single and dropdown-multi with existing options", () => {
+    const question = { options: [{ value: "opt-1", label: "Option 1" }] }
+    expect(
+      shouldResetParamsOnTypeChange(
+        "dropdown-multi",
+        "dropdown-single",
+        question
+      )
+    ).toBe(false)
+    expect(
+      shouldResetParamsOnTypeChange(
+        "dropdown-single",
+        "dropdown-multi",
+        question
+      )
+    ).toBe(false)
+  })
+
+  it("returns false when switching between dropdown-single and dropdown-multi even without options", () => {
+    expect(
+      shouldResetParamsOnTypeChange("dropdown-multi", "dropdown-single", {
+        options: [],
+      })
+    ).toBe(false)
+    expect(
+      shouldResetParamsOnTypeChange("dropdown-single", "dropdown-multi", {
+        options: [],
+      })
+    ).toBe(false)
+  })
+
+  it("returns true when switching from a dropdown type to an unrelated type", () => {
+    expect(
+      shouldResetParamsOnTypeChange("text", "dropdown-single", undefined)
+    ).toBe(true)
+    expect(
+      shouldResetParamsOnTypeChange("rating", "dropdown-multi", undefined)
+    ).toBe(true)
+  })
 })
 
 describe("RATING_OPTIONS", () => {

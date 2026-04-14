@@ -1,4 +1,4 @@
-export * from "@/components/OneFilterPicker/types"
+export * from "@/patterns/OneFilterPicker/types"
 export * from "./types"
 export * from "./useData"
 export * from "./useDataSource"

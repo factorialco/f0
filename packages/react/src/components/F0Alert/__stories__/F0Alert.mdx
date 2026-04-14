@@ -1,7 +1,7 @@
-import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks";
-import * as Stories from "./F0Alert.stories";
-import { DoDonts } from "@/lib/storybook-utils/do-donts";
-import { F0Alert } from "../F0Alert";
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as Stories from "./F0Alert.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { F0Alert } from "../F0Alert"
 
 <Meta of={Stories} />
 
@@ -22,7 +22,7 @@ For transient feedback use a toast; for decisions that block the workflow use
 
 ### Design best practices
 
-#### When to use
+**When to use**
 
 <Unstyled>
   <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
@@ -67,7 +67,7 @@ For transient feedback use a toast; for decisions that block the workflow use
   </table>
 </Unstyled>
 
-#### When not to use
+**When not to use**
 
 <Unstyled>
   <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
@@ -92,11 +92,21 @@ For transient feedback use a toast; for decisions that block the workflow use
         <td>Validation error on a specific form field</td>
         <td>Inline field error</td>
       </tr>
+      <tr>
+        <td>
+          The alert must stay visible until the issue is resolved (e.g. a
+          critical configuration is missing)
+        </td>
+        <td>
+          Omit <code>onClose</code> — do not give users a way to dismiss alerts
+          they must act on
+        </td>
+      </tr>
     </tbody>
   </table>
 </Unstyled>
 
-#### Do's and don'ts
+**Do's and don'ts**
 
 <DoDonts
   do={{
@@ -142,7 +152,9 @@ For transient feedback use a toast; for decisions that block the workflow use
 
 ### Behavior
 
-- The alert is persistent — it does not dismiss automatically. It remains visible until the underlying condition changes or the parent component removes it. This is what distinguishes it from a toast.
+- The alert is persistent by default — it does not dismiss automatically. It remains visible until the underlying condition changes or the parent component removes it. This is what distinguishes it from a toast.
+- `onClose` is optional. Only provide it when the product team decides users should be able to dismiss the alert. When omitted, no close button is rendered and the alert cannot be dismissed.
+- When `onClose` is provided, the parent controls visibility and reappearance — for example, hiding the alert on close and showing it again after a timeout or on next page load if the issue is still unresolved.
 - At narrow container widths the layout stacks vertically: icon and text on top, action and link below
 - At wider containers the layout is horizontal: icon and text on the left, action and link on the right
 - The alert stretches to fill its container — control width from the parent
@@ -202,9 +214,10 @@ For transient feedback use a toast; for decisions that block the workflow use
 
 ## Accessibility
 
-- The component renders as a plain `<div>` with no ARIA role. It is not announced automatically when it appears — place it in the page on initial render or ensure the surrounding context gives it enough prominence.
-- For alerts that appear dynamically in response to an action (e.g. after a failed save), wrap the alert in an `aria-live="polite"` region so screen readers announce it without interrupting the current flow.
-- The icon (rendered via `F0AvatarAlert` or `F0AvatarIcon`) is decorative — the title and description carry the full meaning. Do not rely on the icon alone to communicate severity.
+- `neutral` alerts render as a plain `<div>` with no ARIA role and are not announced automatically when they appear. Use them for general, non-urgent notices or place them in the page on initial render.
+- Non-neutral variants render `F0AvatarAlert`, which includes `role="alert"`. When these alerts are inserted or updated dynamically, screen readers announce them automatically. Do not wrap them in an additional `aria-live` region unless you explicitly want duplicate announcements.
+- For `neutral` alerts that appear dynamically in response to an action (e.g. after a failed save), wrap the alert in an `aria-live="polite"` region so screen readers announce it without interrupting the current flow.
+- The icon is decorative — the title and description carry the full meaning. Do not rely on the icon alone to communicate severity.
 - The `action` button and `link` are fully keyboard-accessible via `Tab` and `Enter`.
 
 ## Usage
@@ -239,4 +252,30 @@ the action is discoverable even when blocked.
   description="You are missing the company page. It is mandatory to be activated."
   action={{ label: "Request info", onClick: () => {}, disabled: true }}
 />
+```
+
+### Dismissible alert
+
+Pass `onClose` to show a close button. The parent controls visibility and
+reappearance — hide the alert on close and decide when it should come back
+based on product logic (e.g. timeout, next session, or once the issue is resolved).
+
+<Canvas of={Stories.Dismissible} />
+
+```tsx
+import { useState } from "react"
+
+function DismissibleExample() {
+  const [visible, setVisible] = useState(true)
+
+  return visible ? (
+    <F0Alert
+      variant="info"
+      title="Your workspace includes up to 3 invoices."
+      description="Start creating invoices: it's free with your plan!"
+      action={{ label: "Request info", onClick: () => {} }}
+      onClose={() => setVisible(false)}
+    />
+  ) : null
+}
 ```
