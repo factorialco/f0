@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react"
+import React, { useMemo, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { Ellipsis } from "@/icons/app"
 
 import {
@@ -102,19 +103,33 @@ export const CollectionActions = ({
         )
       )}
 
-      {secondaryActionsButtons?.map((action) => (
-        <F0Button
-          size="md"
-          key={action.label}
-          onClick={action.onClick}
-          icon={action.icon}
-          variant="outline"
-          hideLabel={action.hideLabelWhenExpanded}
-          label={action.label}
-          disabled={action.disabled}
-          loading={action.loading}
-        />
-      ))}
+      {secondaryActionsButtons?.map((action) => {
+        const tooltipText = action.tooltip?.({
+          disabled: !!action.disabled,
+          loading: !!action.loading,
+        })
+
+        const button = (
+          <F0Button
+            size="md"
+            onClick={action.onClick}
+            icon={action.icon}
+            variant="outline"
+            hideLabel={action.hideLabelWhenExpanded}
+            label={action.label}
+            disabled={action.disabled}
+            loading={action.loading}
+          />
+        )
+
+        return tooltipText ? (
+          <Tooltip key={action.label} description={tooltipText}>
+            {button}
+          </Tooltip>
+        ) : (
+          <React.Fragment key={action.label}>{button}</React.Fragment>
+        )
+      })}
 
       {dropdownItems.length > 0 && (
         <Dropdown
