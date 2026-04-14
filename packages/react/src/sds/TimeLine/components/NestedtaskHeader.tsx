@@ -22,38 +22,57 @@ export const NestedtaskHeader = ({
     completedCount,
     expanded,
     onExpandToggle,
+    items,
   } = props
+
+  const hasItems = items.length > 0
 
   return (
     <>
       <F0AvatarIcon icon={icon} size="sm" />
       <div className="flex flex-1 items-center justify-between">
-        <button
-          type="button"
-          aria-expanded={expanded}
-          onClick={onExpandToggle}
-          className={cn(
-            "pointer-events-auto flex items-center gap-3 rounded-sm",
-            focusRing()
-          )}
-        >
-          <span
+        {hasItems ? (
+          <button
+            type="button"
+            aria-expanded={expanded}
+            onClick={onExpandToggle}
             className={cn(
-              "text-base font-semibold text-f1-foreground whitespace-nowrap",
-              status === "completed" && "line-through"
+              "pointer-events-auto flex items-center gap-3 rounded-sm",
+              focusRing()
             )}
           >
-            {title}
-          </span>
-          {description && (
-            <F0Text content={description} variant="description" as="span" />
-          )}
-          <F0Icon
-            icon={expanded ? ChevronUp : ChevronDown}
-            size="xs"
-            color="secondary"
-          />
-        </button>
+            <span
+              className={cn(
+                "text-base font-semibold text-f1-foreground whitespace-nowrap",
+                status === "completed" && "line-through"
+              )}
+            >
+              {title}
+            </span>
+            {description && (
+              <F0Text content={description} variant="description" as="span" />
+            )}
+            <F0Icon
+              icon={expanded ? ChevronUp : ChevronDown}
+              size="xs"
+              color="secondary"
+            />
+          </button>
+        ) : (
+          <div className="flex items-center gap-3">
+            <span
+              className={cn(
+                "text-base font-semibold text-f1-foreground whitespace-nowrap",
+                status === "completed" && "line-through"
+              )}
+            >
+              {title}
+            </span>
+            {description && (
+              <F0Text content={description} variant="description" as="span" />
+            )}
+          </div>
+        )}
         {completedCount !== undefined && (
           <F0TagStatus
             text={`${completedCount}/${taskCount}`}
