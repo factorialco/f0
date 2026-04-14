@@ -7,7 +7,7 @@ import { OneEllipsis } from "@/lib/OneEllipsis"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
 
-import { filterCoagentPlaceholders } from "../../internal-types"
+import { filterNonRenderableMessages } from "../../internal-types"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { ChatTextarea } from "./ChatTextarea"
 
@@ -22,7 +22,7 @@ export const ChatInput = (props: InputProps) => {
   const { messages } = useCopilotChatInternal()
   const containerRef = useRef<HTMLDivElement>(null)
   const filteredMessages = useMemo(
-    () => filterCoagentPlaceholders(messages),
+    () => filterNonRenderableMessages(messages),
     [messages]
   )
   const isWelcomeScreen = filteredMessages.length === 0 && !isLoadingThread

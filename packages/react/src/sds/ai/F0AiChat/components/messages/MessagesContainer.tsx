@@ -12,7 +12,7 @@ import { Skeleton } from "@/ui/skeleton"
 
 import { F0ActionItem } from "../../../F0ActionItem"
 import { useMessageScroll } from "../../hooks/useMessageScroll"
-import { filterCoagentPlaceholders } from "../../internal-types"
+import { filterNonRenderableMessages } from "../../internal-types"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import {
   type Turn,
@@ -83,7 +83,12 @@ const Messages = ({
     [initialMessage, translations.ai.defaultInitialMessage]
   )
 
-  // Filter coagent placeholders and expand multi-tool-call messages.
+  // Filter non-renderable messages and expand multi-tool-call messages.
+  //
+  // Non-renderable messages include coagent-state-render placeholders and
+  // tool-result messages (role: "tool") — internal CopilotKit bookkeeping
+  // that carries the stringified return value of frontend tool handlers
+  // (e.g. the JSON response from approveMutation's respond() callback).
   //
   // CopilotKit v1.51+ AG-UI packs multiple tool calls into a single
   // assistant message (e.g. 2× orchestratorThinking + 1× downloadData +
@@ -95,7 +100,7 @@ const Messages = ({
   // by AssistantMessage which looks up actions from CopilotKit context.
   const filteredMessages = useMemo(
     () =>
-      filterCoagentPlaceholders(messages).flatMap((msg) => {
+      filterNonRenderableMessages(messages).flatMap((msg) => {
         if (msg.role !== "assistant") return [msg]
 
         const toolCalls = msg.toolCalls as
