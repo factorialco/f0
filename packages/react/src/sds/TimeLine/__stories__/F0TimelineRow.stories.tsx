@@ -3,9 +3,12 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 
 import Check from "@/icons/app/Check"
+import Clock from "@/icons/app/Clock"
 import Comment from "@/icons/app/Comment"
 import Cross from "@/icons/app/Cross"
+import FileSigned from "@/icons/app/FileSigned"
 import Marker from "@/icons/app/Marker"
+import Pencil from "@/icons/app/Pencil"
 import ThumbsUp from "@/icons/app/ThumbsUp"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
@@ -851,4 +854,437 @@ export const Snapshot: Story = {
       />
     </div>
   ),
+}
+
+const NestedtaskInProgressDemo = () => {
+  const [expanded, setExpanded] = useState(true)
+
+  return (
+    <div className="w-full">
+      <F0TimelineRow
+        status="in-progress"
+        icon={FileSigned}
+        title="Sign document"
+        description="Estimated on 14/04/2026"
+        taskCount={2}
+        completedCount={0}
+        expanded={expanded}
+        onExpandToggle={() => setExpanded(!expanded)}
+        metadata={[
+          {
+            label: "",
+            hideLabel: true,
+            value: {
+              type: "list",
+              variant: "person",
+              avatars: [
+                {
+                  type: "person",
+                  firstName: "Hellen",
+                  lastName: "the HR",
+                },
+              ],
+            },
+          },
+          {
+            label: "",
+            actions: [
+              {
+                label: "View",
+                icon: EyeVisible,
+                onClick: () => {},
+              },
+            ],
+            value: {
+              type: "avatar",
+              variant: {
+                type: "file",
+                file: {
+                  name: "Demo notes.pdf",
+                  type: "application/pdf",
+                },
+              },
+              text: "Demo notes",
+            },
+          },
+        ]}
+        items={[
+          {
+            status: "in-progress",
+            icon: Clock,
+            title: "Hellen the HR (hellen@factorial.co)",
+            description: "Pending",
+          },
+          {
+            status: "in-progress",
+            icon: Clock,
+            title: "Danilo Pereira (danilo@gmail.com)",
+            description: "Pending",
+          },
+        ]}
+        isLast
+      />
+    </div>
+  )
+}
+
+export const NestedtaskInProgress: Story = {
+  args: {
+    status: "in-progress",
+  },
+
+  render: () => <NestedtaskInProgressDemo />,
+}
+
+const NestedtaskCompletedDemo = () => {
+  const [expanded, setExpanded] = useState(false)
+
+  return (
+    <div className="w-full">
+      <F0TimelineRow
+        status="completed"
+        icon={FileSigned}
+        title="Sign document"
+        description="Completed on 14/04/2026 06:08"
+        taskCount={2}
+        completedCount={2}
+        expanded={expanded}
+        onExpandToggle={() => setExpanded(!expanded)}
+        metadata={[
+          {
+            label: "",
+            hideLabel: true,
+            value: {
+              type: "list",
+              variant: "person",
+              avatars: [
+                {
+                  type: "person",
+                  firstName: "Hellen",
+                  lastName: "the HR",
+                  badge: { type: "positive", icon: Check },
+                },
+              ],
+            },
+          },
+          {
+            label: "",
+            actions: [
+              {
+                label: "View",
+                icon: EyeVisible,
+                onClick: () => {},
+              },
+            ],
+            value: {
+              type: "avatar",
+              variant: {
+                type: "file",
+                file: {
+                  name: "Demo notes.pdf",
+                  type: "application/pdf",
+                },
+              },
+              text: "Demo notes",
+            },
+          },
+        ]}
+        items={[
+          {
+            status: "completed",
+            icon: Check,
+            title: "Hellen the HR (hellen@factorial.co)",
+            description: "Signed",
+          },
+          {
+            status: "completed",
+            icon: Check,
+            title: "Danilo Pereira (danilo@gmail.com)",
+            description: "Signed",
+          },
+        ]}
+        isLast
+      />
+    </div>
+  )
+}
+
+export const NestedtaskCompleted: Story = {
+  render: () => <NestedtaskCompletedDemo />,
+}
+
+const NestedtaskTimelineDemo = () => {
+  const [expanded, setExpanded] = useState(true)
+
+  return (
+    <div className="w-full">
+      <F0TimelineRow
+        status="in-progress"
+        icon={FileSigned}
+        title="Sign document"
+        description="Estimated on 14/04/2026"
+        taskCount={2}
+        completedCount={0}
+        expanded={expanded}
+        onExpandToggle={() => setExpanded(!expanded)}
+        metadata={[
+          {
+            label: "",
+            hideLabel: true,
+            value: {
+              type: "list",
+              variant: "person",
+              avatars: [
+                {
+                  type: "person",
+                  firstName: "Hellen",
+                  lastName: "the HR",
+                },
+              ],
+            },
+          },
+          {
+            label: "",
+            actions: [
+              {
+                label: "View",
+                icon: EyeVisible,
+                onClick: () => {},
+              },
+            ],
+            value: {
+              type: "avatar",
+              variant: {
+                type: "file",
+                file: {
+                  name: "Demo notes.pdf",
+                  type: "application/pdf",
+                },
+              },
+              text: "Demo notes",
+            },
+          },
+        ]}
+        items={[
+          {
+            status: "in-progress",
+            icon: Clock,
+            title: "Hellen the HR (hellen@factorial.co)",
+            description: "Pending",
+          },
+          {
+            status: "in-progress",
+            icon: Clock,
+            title: "Danilo Pereira (danilo@gmail.com)",
+            description: "Pending",
+          },
+        ]}
+      />
+      <F0TimelineRow
+        status="not-started"
+        icon={ThumbsUp}
+        title="Manual review"
+        description="Estimated on 19/04/2026"
+        metadata={[
+          {
+            label: "",
+            hideLabel: true,
+            value: {
+              type: "list",
+              variant: "person",
+              avatars: [
+                {
+                  type: "person",
+                  firstName: "Hellen",
+                  lastName: "the HR",
+                },
+              ],
+            },
+          },
+        ]}
+        isLast
+      />
+    </div>
+  )
+}
+
+export const NestedtaskTimeline: Story = {
+  render: () => <NestedtaskTimelineDemo />,
+}
+
+export const NestedtaskNotStarted: Story = {
+  args: {
+    status: "not-started",
+    icon: FileSigned,
+    title: "Sign document",
+    description: "Estimated on 14/04/2026",
+    metadata: [
+      {
+        label: "",
+        hideLabel: true,
+        value: {
+          type: "list",
+          variant: "person",
+          avatars: [
+            {
+              type: "person",
+              firstName: "Hellen",
+              lastName: "the HR",
+            },
+          ],
+        },
+      },
+    ],
+    primaryAction: {
+      label: "Request signature",
+      icon: FileSigned,
+      onClick: () => {},
+    },
+    isLast: true,
+  },
+}
+
+const NestedtaskInProgressWithActionsDemo = () => {
+  const [expanded, setExpanded] = useState(true)
+
+  return (
+    <div className="w-full">
+      <F0TimelineRow
+        status="in-progress"
+        icon={FileSigned}
+        title="Sign document"
+        description="Estimated on 14/04/2026"
+        taskCount={2}
+        completedCount={0}
+        expanded={expanded}
+        onExpandToggle={() => setExpanded(!expanded)}
+        metadata={[
+          {
+            label: "",
+            hideLabel: true,
+            value: {
+              type: "list",
+              variant: "person",
+              avatars: [
+                {
+                  type: "person",
+                  firstName: "Hellen",
+                  lastName: "the HR",
+                },
+              ],
+            },
+          },
+          {
+            label: "",
+            actions: [
+              {
+                label: "View",
+                icon: EyeVisible,
+                onClick: () => {},
+              },
+            ],
+            value: {
+              type: "avatar",
+              variant: {
+                type: "file",
+                file: {
+                  name: "Demo notes.pdf",
+                  type: "application/pdf",
+                },
+              },
+              text: "Demo notes",
+            },
+          },
+        ]}
+        items={[
+          {
+            status: "in-progress",
+            icon: Clock,
+            title: "Hellen the HR (hellen@factorial.co)",
+            description: "Pending",
+          },
+          {
+            status: "in-progress",
+            icon: Clock,
+            title: "Danilo Pereira (danilo@gmail.com)",
+            description: "Pending",
+          },
+        ]}
+        secondaryActions={[
+          {
+            label: "Edit signature",
+            icon: Pencil,
+            onClick: () => {},
+          },
+          {
+            label: "Cancel signature",
+            icon: Cross,
+            onClick: () => {},
+          },
+        ]}
+        isLast
+      />
+    </div>
+  )
+}
+
+export const NestedtaskInProgressWithActions: Story = {
+  render: () => <NestedtaskInProgressWithActionsDemo />,
+}
+
+function MultitaskWithNestedtaskDemo() {
+  const [multitaskExpanded, setMultitaskExpanded] = useState(true)
+  const [nestedtaskExpanded, setNestedtaskExpanded] = useState(true)
+
+  return (
+    <div className="f1-bg-surface-default p-4" style={{ maxWidth: 600 }}>
+      <F0TimelineRow
+        status="in-progress"
+        title="tasks"
+        taskCount={3}
+        completedCount={1}
+        expanded={multitaskExpanded}
+        onExpandToggle={() => setMultitaskExpanded((v) => !v)}
+        items={[
+          {
+            status: "completed",
+            title: "Manager approval",
+          },
+          {
+            status: "in-progress",
+            icon: FileSigned,
+            title: "Sign document",
+            description: "Laptop agreement",
+            taskCount: 2,
+            completedCount: 1,
+            expanded: nestedtaskExpanded,
+            onExpandToggle: () => setNestedtaskExpanded((v) => !v),
+            items: [
+              {
+                status: "in-progress",
+                icon: Clock,
+                title: "Hellen the HR (hellen@factorial.co)",
+                description: "Pending",
+              },
+              {
+                status: "completed",
+                icon: Check,
+                title: "Danilo Pereira (danilo@gmail.com)",
+                description: "Signed",
+              },
+            ],
+          },
+          {
+            status: "not-started",
+            title: "Final review",
+          },
+        ]}
+        isLast
+      />
+    </div>
+  )
+}
+
+export const MultitaskWithNestedtask: Story = {
+  render: () => <MultitaskWithNestedtaskDemo />,
 }

@@ -5,7 +5,9 @@ import { F0TimelineRow as _F0TimelineRow } from "./F0TimelineRow"
 
 export type {
   F0TimelineRowAction,
+  F0TimelineRowMultitaskItemProps,
   F0TimelineRowMultitaskProps,
+  F0TimelineRowNestedtaskProps,
   F0TimelineRowOtherAction,
   F0TimelineRowProps,
   F0TimelineRowTaskProps,
