@@ -48,6 +48,7 @@ export type SecondaryActionItem = Pick<
   loading?: boolean
   disabled?: boolean
   onClick?: () => void | Promise<void>
+  tooltip?: string
 }
 
 export type SecondaryActionGroup = {

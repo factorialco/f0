@@ -4,6 +4,7 @@ import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { Ellipsis } from "@/icons/app"
 
 import {
@@ -102,19 +103,29 @@ export const CollectionActions = ({
         )
       )}
 
-      {secondaryActionsButtons?.map((action) => (
-        <F0Button
-          size="md"
-          key={action.label}
-          onClick={action.onClick}
-          icon={action.icon}
-          variant="outline"
-          hideLabel={action.hideLabelWhenExpanded}
-          label={action.label}
-          disabled={action.disabled}
-          loading={action.loading}
-        />
-      ))}
+      {secondaryActionsButtons?.map((action) => {
+        const button = (
+          <F0Button
+            size="md"
+            key={action.label}
+            onClick={action.onClick}
+            icon={action.icon}
+            variant="outline"
+            hideLabel={action.hideLabelWhenExpanded}
+            label={action.label}
+            disabled={action.disabled}
+            loading={action.loading}
+          />
+        )
+
+        return action.tooltip ? (
+          <Tooltip key={action.label} description={action.tooltip}>
+            {button}
+          </Tooltip>
+        ) : (
+          button
+        )
+      })}
 
       {dropdownItems.length > 0 && (
         <Dropdown
