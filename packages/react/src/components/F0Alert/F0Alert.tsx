@@ -1,5 +1,4 @@
 import { cva } from "cva"
-import { useRef } from "react"
 
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
@@ -51,11 +50,12 @@ const _F0Alert = ({
   icon,
   variant = "neutral",
 }: F0AlertProps) => {
-  const containerRef = useRef<HTMLDivElement>(null)
+  const alertRole =
+    variant === "critical" || variant === "warning" ? "alert" : "status"
 
   return (
-    <div ref={containerRef} className="@container">
-      <div className={alertVariants({ variant })}>
+    <div className="@container">
+      <div role={alertRole} className={alertVariants({ variant })}>
         <div
           className={cn(
             "flex flex-col items-start gap-3 @xs:flex-row @xs:items-center @xs:justify-between"
@@ -90,6 +90,7 @@ const _F0Alert = ({
                   size="sm"
                 >
                   {link.label}
+                  <span className="sr-only"> (opens in new tab)</span>
                 </F0Link>
               )}
               {action && (
