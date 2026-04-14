@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.447.0](https://github.com/factorialco/f0/compare/f0-react-v1.446.0...f0-react-v1.447.0) (2026-04-14)
+
+
+### Features
+
+* **TimeLine:** add F0TimelineRowNestedtask variant ([#3936](https://github.com/factorialco/f0/issues/3936)) ([3055e5c](https://github.com/factorialco/f0/commit/3055e5c1f705dca2d19300253b5a8d5e0366990f))
+
 ## [1.446.0](https://github.com/factorialco/f0/compare/f0-react-v1.445.3...f0-react-v1.446.0) (2026-04-14)
 
 
