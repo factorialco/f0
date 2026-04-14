@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import React, { useMemo, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -107,7 +107,6 @@ export const CollectionActions = ({
         const button = (
           <F0Button
             size="md"
-            key={action.label}
             onClick={action.onClick}
             icon={action.icon}
             variant="outline"
@@ -123,7 +122,7 @@ export const CollectionActions = ({
             {button}
           </Tooltip>
         ) : (
-          button
+          <React.Fragment key={action.label}>{button}</React.Fragment>
         )
       })}
 
