@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
-import { type ReactNode, useEffect, useRef, useState } from "react"
+import { type ReactNode, useCallback, useEffect, useRef, useState } from "react"
 
 import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
@@ -34,12 +34,17 @@ export function CanvasPanel(): ReactNode {
 
   const entity = canvasContent ? getCanvasEntity(canvasContent.type) : undefined
 
+  const handleRefresh = useCallback(() => {
+    setRefreshKey((k) => k + 1)
+  }, [])
+
   const renderInner = (): ReactNode => {
     if (!canvasContent || !entity) return null
 
     const header = entity.renderHeader({
       content: canvasContent,
       onClose: closeCanvas,
+      onRefresh: handleRefresh,
     })
     const content = entity.renderContent({
       content: canvasContent,

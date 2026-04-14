@@ -1,9 +1,9 @@
+import type { DashboardCanvasContent } from "../../../types"
 import type { CanvasEntityDefinition } from "../../types"
 
 import { DashboardContent } from "./DashboardContent"
 import { DashboardCanvasProvider } from "./DashboardContext"
 import { DashboardHeader } from "./DashboardHeader"
-import type { DashboardCanvasContent } from "../../../types"
 
 export const dashboardCanvasEntity: CanvasEntityDefinition<DashboardCanvasContent> =
   {
@@ -11,8 +11,12 @@ export const dashboardCanvasEntity: CanvasEntityDefinition<DashboardCanvasConten
     renderContent: ({ content, refreshKey }) => (
       <DashboardContent content={content} refreshKey={refreshKey} />
     ),
-    renderHeader: ({ content, onClose }) => (
-      <DashboardHeader title={content.title} onClose={onClose} />
+    renderHeader: ({ content, onClose, onRefresh }) => (
+      <DashboardHeader
+        title={content.title}
+        onClose={onClose}
+        onRefresh={onRefresh}
+      />
     ),
     wrapper: ({ content, children }) => (
       <DashboardCanvasProvider content={content}>

@@ -22,7 +22,11 @@ export type CanvasEntityDefinition<
   /** Renders the main body of the canvas panel */
   renderContent: (props: { content: T; refreshKey: number }) => ReactNode
   /** Renders the full header (title, actions, close button) */
-  renderHeader: (props: { content: T; onClose: () => void }) => ReactNode
+  renderHeader: (props: {
+    content: T
+    onClose: () => void
+    onRefresh: () => void
+  }) => ReactNode
   /**
    * Optional wrapper providing entity-scoped context around
    * both header and body (e.g. shared edit-mode state).
