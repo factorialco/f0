@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.445.1](https://github.com/factorialco/f0/compare/f0-react-v1.445.0...f0-react-v1.445.1) (2026-04-14)
+
+
+### Bug Fixes
+
+* **EntitySelect:** render popover inside dialogs and fix scroll/height issues ([#3921](https://github.com/factorialco/f0/issues/3921)) ([c7c9ad6](https://github.com/factorialco/f0/commit/c7c9ad6d5c94b3c983b0059d436944fc9922d6fe))
+
 ## [1.445.0](https://github.com/factorialco/f0/compare/f0-react-v1.444.0...f0-react-v1.445.0) (2026-04-14)
 
 
