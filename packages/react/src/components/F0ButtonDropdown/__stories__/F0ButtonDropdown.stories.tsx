@@ -2,16 +2,16 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { expect, within } from "storybook/test"
 
-import { Add, Delete, Pencil, Replace, Save } from "@/icons/app/index.ts"
+import { Add, Delete, Pencil, Replace, Save } from "@/icons/app"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
-import { withSnapshot } from "@/lib/storybook-utils/parameters.ts"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0ButtonDropdown } from "../index"
 import {
   buttonDropdownModes,
   buttonDropdownSizes,
   buttonDropdownVariants,
-} from "../types.ts"
+} from "../types"
 
 const meta = {
   title: "Button/ButtonDropdown",
@@ -100,7 +100,7 @@ type Story = StoryObj<typeof meta>
 
 // Basic Variants
 export const Default: Story = {
-  tags: ["!dev"],
+  tags: ["no-sidebar"],
   args: {
     variant: "default",
     items: [
@@ -151,7 +151,7 @@ export const WithDataTestId: Story = {
 
 // Basic Variants
 export const WithTooltip: Story = {
-  tags: ["!dev"],
+  tags: ["no-sidebar"],
   args: {
     variant: "default",
     tooltip: "Tooltip to explain the button",
@@ -175,7 +175,7 @@ export const WithTooltip: Story = {
 }
 
 export const WithDescription: Story = {
-  tags: ["!dev"],
+  tags: ["no-sidebar"],
   args: {
     items: [
       {
@@ -208,7 +208,7 @@ export const WithDescription: Story = {
 }
 
 export const WithGroups: Story = {
-  tags: ["!dev"],
+  tags: ["no-sidebar"],
   args: {
     items: [
       {
@@ -245,7 +245,7 @@ export const WithGroups: Story = {
 
 // Dropdown mode stories
 export const DropdownMode: Story = {
-  tags: ["!dev"],
+  tags: ["no-sidebar"],
   args: {
     mode: "dropdown",
     items: [
@@ -279,7 +279,7 @@ export const DropdownMode: Story = {
 }
 
 export const DropdownModeWithTrigger: Story = {
-  tags: ["!dev"],
+  tags: ["no-sidebar"],
   args: {
     mode: "dropdown",
     trigger: "New action",
@@ -307,7 +307,7 @@ export const DropdownModeWithTrigger: Story = {
 }
 
 export const DropdownModeWithGroups: Story = {
-  tags: ["!dev"],
+  tags: ["no-sidebar"],
   args: {
     mode: "dropdown",
     trigger: "Actions",
@@ -345,7 +345,7 @@ export const DropdownModeWithGroups: Story = {
 }
 
 export const Variants: Story = {
-  tags: ["!dev"],
+  tags: ["no-sidebar"],
   args: {
     items: [{ value: "save", label: "Save draft", icon: Save }],
     onClick: () => {},
@@ -396,7 +396,7 @@ export const Variants: Story = {
 }
 
 export const Sizes: Story = {
-  tags: ["!dev"],
+  tags: ["no-sidebar"],
   args: {
     items: [{ value: "save", label: "Save draft", icon: Save }],
     onClick: () => {},
@@ -447,7 +447,7 @@ export const Sizes: Story = {
 }
 
 export const Modes: Story = {
-  tags: ["!dev"],
+  tags: ["no-sidebar"],
   args: {
     items: [{ value: "save", label: "Save draft", icon: Save }],
     onClick: () => {},
@@ -489,7 +489,7 @@ export const Modes: Story = {
 
 // Split mode: one action is clearly more frequent
 export const SplitModeExample: Story = {
-  tags: ["!dev"],
+  tags: ["no-sidebar"],
   args: {
     mode: "split",
     items: [
@@ -507,7 +507,7 @@ export const SplitModeExample: Story = {
 
 // Dropdown mode: no single action has priority
 export const DropdownModeExample: Story = {
-  tags: ["!dev"],
+  tags: ["no-sidebar"],
   args: {
     mode: "dropdown",
     trigger: "Export",
@@ -521,7 +521,7 @@ export const DropdownModeExample: Story = {
 
 // When not to use: single action → use F0Button instead (shown as reference)
 export const CriticalItems: Story = {
-  tags: ["!dev"],
+  tags: ["no-sidebar"],
   args: {
     items: [
       { value: "save", label: "Save changes", icon: Save },
@@ -537,7 +537,7 @@ export const CriticalItems: Story = {
 }
 
 export const Snapshot: Story = {
-  tags: ["!dev"],
+  tags: ["no-sidebar"],
   parameters: withSnapshot({}),
   args: {
     items: [
@@ -563,7 +563,7 @@ export const Snapshot: Story = {
 
 // Do: only genuinely destructive actions marked as critical
 export const DoDontCriticalDo: Story = {
-  tags: ["!dev"],
+  tags: ["no-sidebar"],
   args: {
     items: [
       { value: "save", label: "Save changes", icon: Save },
@@ -580,7 +580,7 @@ export const DoDontCriticalDo: Story = {
 
 // Don't: non-destructive actions marked as critical
 export const DoDontCriticalDont: Story = {
-  tags: ["!dev"],
+  tags: ["no-sidebar"],
   args: {
     items: [
       { value: "save", label: "Save changes", icon: Save },
