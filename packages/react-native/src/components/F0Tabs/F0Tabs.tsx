@@ -47,6 +47,8 @@ export const F0Tabs = React.memo(function F0Tabs({
   activeTabId: controlledActiveTabId,
   setActiveTabId: onChangeActiveTabId,
   secondary = false,
+  disabled = false,
+  fullWidth = false,
   embedded = false,
 }: F0TabsProps) {
   const firstTab = tabs[0]
@@ -124,7 +126,7 @@ export const F0Tabs = React.memo(function F0Tabs({
   if (tabs.length === 1) {
     return (
       <View
-        className={f0TabsContainerVariants({ secondary })}
+        className={f0TabsContainerVariants({ secondary, fullWidth })}
         style={{ paddingHorizontal: 12 }}
       >
         <F0Text variant="body-md-medium" color="default" numberOfLines={1}>
@@ -135,30 +137,45 @@ export const F0Tabs = React.memo(function F0Tabs({
   }
 
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+    <ScrollView
+      horizontal
+      scrollEnabled={fullWidth ? false : undefined}
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={fullWidth ? { width: "100%" } : undefined}
+    >
       <View
-        className={f0TabsContainerVariants({ secondary })}
+        className={f0TabsContainerVariants({ secondary, fullWidth })}
         accessibilityRole="tablist"
       >
         {tabs.map((tab) => {
           const isActive = tab.id === activeId
+          const isDisabled = disabled || Boolean(tab.disabled)
 
           return (
             <PressableFeedback
               key={tab.id}
-              className={f0TabItemVariants({ active: isActive, secondary })}
+              className={f0TabItemVariants({
+                active: isActive,
+                secondary,
+                fullWidth,
+                disabled: isDisabled,
+              })}
               onLayout={(e) => handleTabLayout(tab.id, e)}
+              disabled={isDisabled}
               onPress={() => {
+                if (isDisabled) return
                 tab.onPress?.()
                 handleTabPress(tab.id)
               }}
               accessibilityRole="tab"
-              accessibilityState={{ selected: isActive }}
+              accessibilityState={{ selected: isActive, disabled: isDisabled }}
               accessibilityLabel={tab.label}
             >
               <F0Text
                 variant={secondary ? "body-sm-medium" : "body-md-medium"}
-                color={isActive ? "default" : "secondary"}
+                color={
+                  isDisabled ? "disabled" : isActive ? "default" : "secondary"
+                }
                 numberOfLines={1}
               >
                 {tab.label}

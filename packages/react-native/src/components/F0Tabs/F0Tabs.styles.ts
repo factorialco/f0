@@ -12,9 +12,14 @@ export const f0TabsContainerVariants = tv({
       true: "py-1",
       false: "pt-1 pb-3",
     },
+    fullWidth: {
+      true: "w-full",
+      false: "",
+    },
   },
   defaultVariants: {
     secondary: false,
+    fullWidth: false,
   },
 })
 
@@ -33,6 +38,14 @@ export const f0TabItemVariants = tv({
       true: "",
       false: "",
     },
+    fullWidth: {
+      true: "flex-1",
+      false: "",
+    },
+    disabled: {
+      true: "opacity-50",
+      false: "",
+    },
   },
   compoundVariants: [
     { active: true, secondary: false, class: "bg-f0-background-tertiary" },
@@ -45,6 +58,8 @@ export const f0TabItemVariants = tv({
   defaultVariants: {
     active: false,
     secondary: false,
+    fullWidth: false,
+    disabled: false,
   },
 })
 

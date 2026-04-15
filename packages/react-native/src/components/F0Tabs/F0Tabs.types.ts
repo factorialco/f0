@@ -11,6 +11,8 @@ export type F0TabItem = {
   index?: boolean
   /** Visual variant for the tab label. Accepted for API parity; `"upsell"` is not visually distinct in v1. */
   variant?: "default" | "upsell"
+  /** When `true`, this tab becomes non-interactive and renders with disabled visual treatment. */
+  disabled?: boolean
   /** Optional callback invoked when this tab is pressed, in addition to the tab state change. */
   onPress?: () => void
 }
@@ -30,6 +32,10 @@ export interface F0TabsProps {
   setActiveTabId?: Dispatch<string>
   /** When `true`, uses the secondary visual style (pill only, no underline). */
   secondary?: boolean
+  /** When `true`, all tabs become non-interactive and render with disabled visual treatment. */
+  disabled?: boolean
+  /** When `true`, distributes tabs evenly across all available width. */
+  fullWidth?: boolean
   /** When `true`, renders only the first tab as plain text (no interaction, no indicator). */
   embedded?: boolean
 }
