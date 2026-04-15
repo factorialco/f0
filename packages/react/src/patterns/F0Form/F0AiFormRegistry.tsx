@@ -313,9 +313,9 @@ export interface F0AiFormDescription {
   formName: string
   description?: string
   module?: ModuleId
-  /** Custom title for the card (set via pickActiveForm) */
+  /** Custom title for the card (set via fillForm) */
   cardTitle: string
-  /** Custom description for the card (set via pickActiveForm) */
+  /** Custom description for the card (set via fillForm) */
   cardDescription: string
   formSchema: Record<string, unknown>
   fieldDescriptions: Record<
@@ -335,13 +335,6 @@ export interface F0AiFormDescription {
   isDirty: boolean
   /** JSON Schema of defaultValuesParams (only for forms with defaultValuesParamsSchema) */
   defaultValuesParamsSchema?: Record<string, unknown>
-}
-
-/** Lightweight summary of an available (virtual) form */
-export interface F0AiAvailableFormSummary {
-  formName: string
-  description?: string
-  module?: ModuleId
 }
 
 interface F0AiFormRegistryContextValue {
@@ -364,8 +357,8 @@ interface F0AiFormRegistryContextValue {
   rebuildDescriptions: () => void
   /** Full runtime state of all rendered (non-virtual) forms on the current page */
   formsOnCurrentPage: F0AiFormDescription[]
-  /** Lightweight summaries (name + description) of all virtual/available forms */
-  availableForms: F0AiAvailableFormSummary[]
+  /** Full runtime state of all virtual/available forms */
+  availableForms: F0AiFormDescription[]
   /** Full runtime state of the form the AI is actively co-editing, or null */
   activeForm: F0AiFormDescription | null
   /** Set an available form as the active co-editing form */
@@ -416,14 +409,14 @@ export function F0AiFormRegistryProvider({
 
   // Three-field state replacing the old flat formDescriptions array.
   // formsOnCurrentPage: full runtime state for rendered (non-virtual) forms
-  // availableForms: lightweight summaries for virtual forms
+  // availableForms: full runtime state for virtual forms
   // activeForm: full state of the form the AI is co-editing (set via setActiveForm)
   const [formsOnCurrentPage, setFormsOnCurrentPage] = useState<
     F0AiFormDescription[]
   >([])
-  const [availableForms, setAvailableForms] = useState<
-    F0AiAvailableFormSummary[]
-  >([])
+  const [availableForms, setAvailableForms] = useState<F0AiFormDescription[]>(
+    []
+  )
   const [activeForm, setActiveFormState] = useState<F0AiFormDescription | null>(
     null
   )
@@ -440,7 +433,7 @@ export function F0AiFormRegistryProvider({
       const entries = Array.from(registryRef.current.entries())
 
       const nextFormsOnCurrentPage: F0AiFormDescription[] = []
-      const nextAvailableForms: F0AiAvailableFormSummary[] = []
+      const nextAvailableForms: F0AiFormDescription[] = []
       let nextActiveForm: F0AiFormDescription | null = null
 
       for (const [name, entry] of entries) {
@@ -448,11 +441,29 @@ export function F0AiFormRegistryProvider({
         if (!ref) continue
 
         if (entry.virtual) {
-          // Virtual entries → lightweight summary for availableForms
+          // Virtual entries → full runtime state for availableForms
           nextAvailableForms.push({
             formName: name,
             ...(entry.description ? { description: entry.description } : {}),
             ...(entry.module ? { module: entry.module } : {}),
+            cardTitle: "",
+            cardDescription: "",
+            formSchema: zodToJsonSchema(entry.schema) as Record<
+              string,
+              unknown
+            >,
+            fieldDescriptions: extractFieldDescriptions(entry.schema),
+            sectionDescriptions: extractSectionDescriptions(entry.sections),
+            formValues: ref.getValues(),
+            formErrors: ref.getErrors(),
+            isDirty: ref.isDirty(),
+            ...(entry.defaultValuesParamsSchema
+              ? {
+                  defaultValuesParamsSchema: zodToJsonSchema(
+                    entry.defaultValuesParamsSchema
+                  ) as Record<string, unknown>,
+                }
+              : {}),
           })
         } else {
           // Rendered forms → full runtime state for formsOnCurrentPage

@@ -6,7 +6,6 @@ import { useF0AiFormRegistry } from "@/patterns/F0Form/F0AiFormRegistry"
 
 import { useFormFillAction } from "./useFormFillAction"
 import { useFormSubmitAction } from "./useFormSubmitAction"
-import { usePickActiveFormAction } from "./usePickActiveFormAction"
 
 /**
  * Hook that registers all AI form interaction tools and pushes
@@ -57,5 +56,4 @@ export const useF0AiFormActions = () => {
 
   useFormFillAction()
   useFormSubmitAction()
-  usePickActiveFormAction()
 }

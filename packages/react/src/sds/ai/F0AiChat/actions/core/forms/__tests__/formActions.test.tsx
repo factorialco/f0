@@ -41,7 +41,6 @@ vi.mock("@/sds/ai/F0AiChat/providers/AiChatStateProvider", () => ({
 // Import the hooks after mocks are set up
 import { useFormFillAction } from "../useFormFillAction"
 import { useFormSubmitAction } from "../useFormSubmitAction"
-import { usePickActiveFormAction } from "../usePickActiveFormAction"
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -74,7 +73,6 @@ function RegistryInspector({
 function HookHost() {
   useFormSubmitAction()
   useFormFillAction()
-  usePickActiveFormAction()
   return null
 }
 
@@ -367,55 +365,126 @@ describe("useFormFillAction handler", () => {
   })
 })
 
-describe("usePickActiveFormAction handler", () => {
-  it("picks an available virtual form as active", async () => {
-    await setupWithDefinitions([
-      {
-        name: "user-form",
-        schema: simpleSchema,
-        description: "A form to create users",
-        defaultValues: { name: "", email: "" },
-      },
-    ])
+describe("useFormFillAction — virtual form activation", () => {
+  it("auto-activates a virtual form when no active form is set", async () => {
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
 
-    const handler = getHandler("forms.pickActiveForm")
-    const result = handler({ formName: "user-form" } as never)
+    render(
+      <F0AiFormRegistryProvider
+        availableFormDefinitions={[
+          {
+            name: "user-form",
+            schema: simpleSchema,
+            defaultValues: { name: "", email: "" },
+          },
+        ]}
+      >
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+        <HookHost />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => expect(capturedRegistry).not.toBeNull())
+
+    const handler = getHandler("forms.fillForm")
+    const result = await handler({
+      formName: "user-form",
+      values: [{ fieldName: "name", value: "Alice" }],
+    } as never)
 
     expect(result).toMatchObject({ success: true })
+    expect(capturedRegistry!.activeForm?.formName).toBe("user-form")
   })
 
-  it("returns error for unknown form", async () => {
-    await setupWithDefinitions([
-      {
-        name: "user-form",
-        schema: simpleSchema,
-        defaultValues: { name: "", email: "" },
-      },
-    ])
+  it("returns error when a different virtual form is already active", async () => {
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
 
-    const handler = getHandler("forms.pickActiveForm")
-    const result = handler({ formName: "ghost" } as never)
+    render(
+      <F0AiFormRegistryProvider
+        availableFormDefinitions={[
+          {
+            name: "form-a",
+            schema: simpleSchema,
+            defaultValues: { name: "", email: "" },
+          },
+          {
+            name: "form-b",
+            schema: simpleSchema,
+            defaultValues: { name: "", email: "" },
+          },
+        ]}
+      >
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+        <HookHost />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => expect(capturedRegistry).not.toBeNull())
+    act(() => {
+      capturedRegistry!.setActiveForm("form-a")
+    })
+
+    const handler = getHandler("forms.fillForm")
+    const result = await handler({
+      formName: "form-b",
+      values: [{ fieldName: "name", value: "Bob" }],
+    } as never)
 
     expect(result).toMatchObject({
       success: false,
-      error: expect.stringContaining("ghost"),
+      error: expect.stringContaining("form-a"),
+      activeFormName: "form-a",
     })
   })
 
-  it("returns error when registry is not available", async () => {
-    // Render HookHost outside of the registry provider
-    render(<HookHost />)
+  it("overwrites the active form when confirmOverwrite is true", async () => {
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
 
-    await waitFor(() => {
-      expect(capturedTools.has("forms.pickActiveForm")).toBe(true)
+    render(
+      <F0AiFormRegistryProvider
+        availableFormDefinitions={[
+          {
+            name: "form-a",
+            schema: simpleSchema,
+            defaultValues: { name: "", email: "" },
+          },
+          {
+            name: "form-b",
+            schema: simpleSchema,
+            defaultValues: { name: "", email: "" },
+          },
+        ]}
+      >
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+        <HookHost />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => expect(capturedRegistry).not.toBeNull())
+    act(() => {
+      capturedRegistry!.setActiveForm("form-a")
     })
 
-    const handler = getHandler("forms.pickActiveForm")
-    const result = handler({ formName: "any" } as never)
+    const handler = getHandler("forms.fillForm")
+    const result = await handler({
+      formName: "form-b",
+      values: [{ fieldName: "name", value: "Bob" }],
+      confirmOverwrite: true,
+    } as never)
 
-    expect(result).toMatchObject({
-      success: false,
-      error: expect.stringContaining("not available"),
-    })
+    expect(result).toMatchObject({ success: true })
+    expect(capturedRegistry!.activeForm?.formName).toBe("form-b")
   })
 })
