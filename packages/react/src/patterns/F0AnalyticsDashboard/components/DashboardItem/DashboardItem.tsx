@@ -9,7 +9,14 @@ import {
   type DropdownItem as DropdownItemType,
   type DropdownItemObject,
 } from "@/experimental/Navigation/Dropdown"
-import { Delete, Download, Ellipsis, Ai, Maximize, Minimize } from "@/icons/app"
+import {
+  Delete,
+  Download,
+  Ellipsis,
+  Maximize,
+  Minimize,
+  InfoCircleLine,
+} from "@/icons/app"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -257,7 +264,7 @@ export function DashboardItem({
                           }}
                         >
                           <div className="flex w-full flex-row items-center gap-2">
-                            <F0Icon icon={Ai} />
+                            <F0Icon icon={InfoCircleLine} />
                             <span className="flex-1">
                               {translations.ai.dashboardItem.dataExplanation}
                             </span>
