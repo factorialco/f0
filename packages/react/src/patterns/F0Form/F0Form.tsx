@@ -886,7 +886,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
         "flex flex-1 flex-col mx-auto",
         FORM_MAX_WIDTH,
         className,
-        styling?.showSectionsSidepanel && "p-2 pb-6"
+        styling?.showSectionsSidepanel && "p-2 [&>div:last-child]:pb-6"
       )}
     >
       {/* Render definition items with switch grouping */}
