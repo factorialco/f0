@@ -647,6 +647,8 @@ const expenseReportSchema = z.object({
   }),
 })
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
 const presentableFormDefinitions: F0AiAvailableFormDefinition[] = [
   {
     name: "time-off-request",
@@ -662,6 +664,7 @@ const presentableFormDefinitions: F0AiAvailableFormDefinition[] = [
       reason: undefined,
     },
     onSubmit: async (values) => {
+      await sleep(3000)
       // eslint-disable-next-line no-console
       console.info(
         "Time-off request submitted:",
@@ -686,6 +689,7 @@ const presentableFormDefinitions: F0AiAvailableFormDefinition[] = [
       notes: undefined,
     },
     onSubmit: async (values) => {
+      await sleep(3000)
       // eslint-disable-next-line no-console
       console.info("Expense report submitted:", JSON.stringify(values, null, 2))
     },
@@ -716,6 +720,7 @@ const presentableFormDefinitions: F0AiAvailableFormDefinition[] = [
     description: "Send a quick message to someone",
     module: "communities",
     onSubmit: async (values) => {
+      await sleep(3000)
       // eslint-disable-next-line no-console
       console.info("Contact submitted:", JSON.stringify(values, null, 2))
     },
@@ -789,6 +794,7 @@ const presentableFormDefinitions: F0AiAvailableFormDefinition[] = [
     //   { title: "Additional", sectionIds: ["additional"] },
     // ],
     onSubmit: async (values) => {
+      await sleep(3000)
       // eslint-disable-next-line no-console
       console.info("Employee created:", JSON.stringify(values, null, 2))
     },

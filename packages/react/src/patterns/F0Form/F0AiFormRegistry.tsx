@@ -377,6 +377,8 @@ interface F0AiFormRegistryContextValue {
   clearActiveForm: () => void
   /** Bump the fill-version counter for a form (called after fillForm succeeds) */
   incrementFillVersion: (formName: string) => void
+  /** Reset the fill-version counter for a form (e.g. after submit) */
+  resetFillVersion: (formName: string) => void
   /** Get the fill-version counter for a form (0 = never filled) */
   getFillVersion: (formName: string) => number
 }
@@ -646,6 +648,10 @@ export function F0AiFormRegistryProvider({
     fillVersionsRef.current.set(formName, current + 1)
   }, [])
 
+  const resetFillVersion = useCallback((formName: string) => {
+    fillVersionsRef.current.delete(formName)
+  }, [])
+
   const getFillVersion = useCallback((formName: string) => {
     return fillVersionsRef.current.get(formName) ?? 0
   }, [])
@@ -723,6 +729,7 @@ export function F0AiFormRegistryProvider({
     setActiveForm,
     clearActiveForm,
     incrementFillVersion,
+    resetFillVersion,
     getFillVersion,
   }
 

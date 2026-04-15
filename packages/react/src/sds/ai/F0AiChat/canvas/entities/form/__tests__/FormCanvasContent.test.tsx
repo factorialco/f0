@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest"
 import "@testing-library/jest-dom/vitest"
+import { act } from "react"
 
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 import { z } from "zod"
@@ -32,17 +33,26 @@ let mockCoAgentState: {
 
 let mockRegistryEntry: Record<string, unknown> | undefined
 
+const mockResetFillVersion = vi.fn()
+const mockClearActiveForm = vi.fn()
+const mockCloseCanvas = vi.fn()
+
 vi.mock("@copilotkit/react-core", () => ({
   useCoAgent: () => ({ state: mockCoAgentState }),
 }))
 
 vi.mock("@/ai", () => ({
-  useAiChat: () => ({ agent: "test-agent" }),
+  useAiChat: () => ({
+    agent: "test-agent",
+    closeCanvas: mockCloseCanvas,
+  }),
 }))
 
 vi.mock("@/patterns/F0Form/F0AiFormRegistry", () => ({
   useF0AiFormRegistry: () => ({
     get: () => mockRegistryEntry,
+    resetFillVersion: mockResetFillVersion,
+    clearActiveForm: mockClearActiveForm,
   }),
 }))
 
@@ -50,21 +60,26 @@ vi.mock("@/patterns/F0Form/useF0Form", () => ({
   useF0Form: () => ({ formRef: mockFormRef }),
 }))
 
-// Mock F0Form to render a simple div — avoids pulling in the real form internals
+// Capture the formDefinition passed to F0Form so we can inspect submitConfig and call onSubmit
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let capturedFormDefinition: any = null
+
 vi.mock("@/patterns/F0Form/F0Form", () => ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  F0Form: (props: any) => (
-    <div
-      data-testid="f0-form"
-      data-form-name={props.formDefinition?.name}
-      data-show-sections-sidepanel={
-        props.styling?.showSectionsSidepanel ? "true" : "false"
-      }
-    />
-  ),
+  F0Form: (props: any) => {
+    capturedFormDefinition = props.formDefinition
+    return (
+      <div
+        data-testid="f0-form"
+        data-form-name={props.formDefinition?.name}
+        data-show-sections-sidepanel={
+          props.styling?.showSectionsSidepanel ? "true" : "false"
+        }
+      />
+    )
+  },
 }))
 
-// Mock useF0FormDefinition to pass the config through as a definition
 vi.mock("@/patterns/F0WizardForm/useF0FormDefinition", () => ({
   useF0FormDefinition: (config: Record<string, unknown>) => ({
     _brand: "single" as const,
@@ -97,6 +112,7 @@ describe("FormCanvasContent", () => {
     vi.clearAllMocks()
     mockCoAgentState = {}
     mockRegistryEntry = undefined
+    capturedFormDefinition = null
   })
 
   describe("when no active form", () => {
@@ -108,10 +124,10 @@ describe("FormCanvasContent", () => {
   })
 
   // ==========================================================================
-  // Plain form (no steps)
+  // Submit config — F0Form's built-in submit button and action bar
   // ==========================================================================
 
-  describe("plain form (no steps)", () => {
+  describe("submitConfig (F0Form built-in submit)", () => {
     beforeEach(() => {
       mockCoAgentState = {
         activeForm: { formName: "test-form", formValues: {} },
@@ -119,7 +135,157 @@ describe("FormCanvasContent", () => {
       mockRegistryEntry = makeEntry()
     })
 
-    it("renders a submit button with default label", () => {
+    it("hides F0Form's built-in submit button (external footer button is used)", () => {
+      render(<FormContent />)
+      expect(capturedFormDefinition.submitConfig?.hideSubmitButton).toBe(true)
+    })
+
+    it("hides the action bar (always hidden in canvas)", () => {
+      render(<FormContent />)
+      expect(capturedFormDefinition.submitConfig?.hideActionBar).toBe(true)
+    })
+
+    it("uses type default for submitConfig", () => {
+      render(<FormContent />)
+      expect(capturedFormDefinition.submitConfig?.type).toBe("default")
+    })
+
+    it("uses default label when no submitConfig on entry", () => {
+      render(<FormContent />)
+      expect(capturedFormDefinition.submitConfig?.label).toBeUndefined()
+    })
+
+    it("passes custom label from entry submitConfig", () => {
+      mockRegistryEntry = makeEntry({
+        submitConfig: { label: "Create Employee" },
+      })
+      render(<FormContent />)
+      expect(capturedFormDefinition.submitConfig?.label).toBe("Create Employee")
+    })
+  })
+
+  // ==========================================================================
+  // onSubmit — canvas closes on success
+  // ==========================================================================
+
+  describe("onSubmit closes canvas on success", () => {
+    beforeEach(() => {
+      mockCoAgentState = {
+        activeForm: { formName: "test-form", formValues: {} },
+      }
+      mockRegistryEntry = makeEntry()
+    })
+
+    it("calls closeCanvas after a delay on successful submit", async () => {
+      vi.useFakeTimers()
+      render(<FormContent />)
+      await act(async () => {
+        await capturedFormDefinition.onSubmit({
+          data: { name: "Jane", email: "jane@test.com" },
+        })
+      })
+      expect(mockCloseCanvas).not.toHaveBeenCalled()
+      act(() => {
+        vi.advanceTimersByTime(1500)
+      })
+      expect(mockCloseCanvas).toHaveBeenCalledTimes(1)
+      vi.useRealTimers()
+    })
+
+    it("returns success from onSubmit", async () => {
+      render(<FormContent />)
+      let result: unknown
+      await act(async () => {
+        result = await capturedFormDefinition.onSubmit({
+          data: { name: "Jane", email: "jane@test.com" },
+        })
+      })
+      expect(result).toEqual({ success: true })
+    })
+
+    it("calls the entry onSubmit callback before closing canvas", async () => {
+      vi.useFakeTimers()
+      const entryOnSubmit = vi.fn()
+      mockRegistryEntry = makeEntry({ onSubmit: entryOnSubmit })
+      render(<FormContent />)
+      await act(async () => {
+        await capturedFormDefinition.onSubmit({
+          data: { name: "Jane", email: "jane@test.com" },
+        })
+      })
+      expect(entryOnSubmit).toHaveBeenCalledWith({
+        name: "Jane",
+        email: "jane@test.com",
+      })
+      expect(mockCloseCanvas).not.toHaveBeenCalled()
+      act(() => {
+        vi.advanceTimersByTime(1500)
+      })
+      expect(entryOnSubmit).toHaveBeenCalledBefore(mockCloseCanvas)
+      vi.useRealTimers()
+    })
+
+    it("still closes canvas when entry has no onSubmit", async () => {
+      vi.useFakeTimers()
+      mockRegistryEntry = makeEntry({ onSubmit: undefined })
+      render(<FormContent />)
+      await act(async () => {
+        await capturedFormDefinition.onSubmit({
+          data: { name: "Jane", email: "jane@test.com" },
+        })
+      })
+      act(() => {
+        vi.advanceTimersByTime(1500)
+      })
+      expect(mockCloseCanvas).toHaveBeenCalledTimes(1)
+      vi.useRealTimers()
+    })
+
+    it("resets fill version and clears active form after submit", async () => {
+      vi.useFakeTimers()
+      mockRegistryEntry = makeEntry({ onSubmit: vi.fn() })
+      render(<FormContent />)
+      await act(async () => {
+        await capturedFormDefinition.onSubmit({
+          data: { name: "Jane", email: "jane@test.com" },
+        })
+      })
+      // Not called immediately — deferred with closeCanvas
+      expect(mockResetFillVersion).not.toHaveBeenCalled()
+      expect(mockClearActiveForm).not.toHaveBeenCalled()
+      act(() => {
+        vi.advanceTimersByTime(1500)
+      })
+      expect(mockResetFillVersion).toHaveBeenCalledWith("test-form")
+      expect(mockClearActiveForm).toHaveBeenCalledTimes(1)
+      expect(mockCloseCanvas).toHaveBeenCalledTimes(1)
+      vi.useRealTimers()
+    })
+  })
+
+  // ==========================================================================
+  // Plain form (no steps) — layout
+  // ==========================================================================
+
+  describe("plain form layout (no steps)", () => {
+    beforeEach(() => {
+      mockCoAgentState = {
+        activeForm: { formName: "test-form", formValues: {} },
+      }
+      mockRegistryEntry = makeEntry()
+    })
+
+    it("applies overflow-auto and p-6 padding to form area when no sidepanel", () => {
+      render(<FormContent />)
+      const form = screen.getByTestId("f0-form")
+      const formArea = form.parentElement as HTMLElement
+      expect(formArea.className).toContain("overflow-auto")
+      expect(formArea.className).toContain("p-6")
+      expect(formArea.className).toContain("pb-6")
+      expect(formArea.className).toContain("relative")
+    })
+
+    it("renders a footer with a submit button", () => {
       render(<FormContent />)
       expect(screen.getByRole("button", { name: "Submit" })).toBeInTheDocument()
     })
@@ -134,10 +300,10 @@ describe("FormCanvasContent", () => {
       ).toBeInTheDocument()
     })
 
-    it("renders footer with border and shrink-0", () => {
+    it("renders footer with border-t and shrink-0", () => {
       render(<FormContent />)
       const button = screen.getByRole("button", { name: "Submit" })
-      const footer = button.closest(".flex.shrink-0") as HTMLElement
+      const footer = button.closest(".shrink-0") as HTMLElement
       expect(footer).toBeInTheDocument()
       expect(footer.className).toContain("border-t")
       expect(footer.className).toContain("shrink-0")
@@ -146,20 +312,10 @@ describe("FormCanvasContent", () => {
     it("uses flex-col layout so the footer stays at the bottom", () => {
       render(<FormContent />)
       const form = screen.getByTestId("f0-form")
-      // Walk up: form → formArea → layoutWrapper (flex-col)
       const layoutWrapper = form.parentElement?.parentElement
       expect(layoutWrapper?.className).toContain("flex")
       expect(layoutWrapper?.className).toContain("h-full")
       expect(layoutWrapper?.className).toContain("flex-col")
-    })
-
-    it("applies overflow-auto and p-6 padding to form area when no sidepanel", () => {
-      render(<FormContent />)
-      const form = screen.getByTestId("f0-form")
-      const formArea = form.parentElement as HTMLElement
-      expect(formArea.className).toContain("overflow-auto")
-      expect(formArea.className).toContain("p-6")
-      expect(formArea.className).toContain("pb-6")
     })
 
     it("calls formRef.submit when clicking the submit button", async () => {
@@ -167,6 +323,26 @@ describe("FormCanvasContent", () => {
       render(<FormContent />)
       await user.click(screen.getByRole("button", { name: "Submit" }))
       expect(mockSubmit).toHaveBeenCalledTimes(1)
+    })
+
+    it("hides footer and shows success overlay after onSubmit fires", async () => {
+      mockRegistryEntry = makeEntry({ onSubmit: vi.fn() })
+      render(<FormContent />)
+
+      // Footer is visible before submit
+      expect(screen.getByTestId("canvas-form-footer")).toBeInTheDocument()
+
+      // Trigger onSubmit (simulates what F0Form calls after validation passes)
+      await act(async () => {
+        await capturedFormDefinition.onSubmit({
+          data: { name: "Jane", email: "jane@test.com" },
+        })
+      })
+
+      // Footer is hidden and success overlay is shown
+      expect(screen.queryByTestId("canvas-form-footer")).not.toBeInTheDocument()
+      expect(screen.getByTestId("canvas-form-success")).toBeInTheDocument()
+      expect(screen.getByText("Saved")).toBeInTheDocument()
     })
   })
 
@@ -216,10 +392,10 @@ describe("FormCanvasContent", () => {
   })
 
   // ==========================================================================
-  // Wizard form (with steps)
+  // Wizard form (with steps) — layout
   // ==========================================================================
 
-  describe("wizard form (with steps)", () => {
+  describe("wizard form layout (with steps)", () => {
     beforeEach(() => {
       mockCoAgentState = {
         activeForm: { formName: "test-form", formValues: {} },
@@ -236,40 +412,22 @@ describe("FormCanvasContent", () => {
       })
     })
 
-    it("renders a submit button with default label", () => {
-      render(<FormContent />)
-      expect(screen.getByRole("button", { name: "Submit" })).toBeInTheDocument()
-    })
-
-    it("renders a submit button with custom label from submitConfig", () => {
-      mockRegistryEntry = makeEntry({
-        steps: [
-          { title: "Step 1", sectionIds: ["a"] },
-          { title: "Step 2", sectionIds: ["b"] },
-        ],
-        submitConfig: { label: "Save Employee" },
-      })
-      render(<FormContent />)
-      expect(
-        screen.getByRole("button", { name: "Save Employee" })
-      ).toBeInTheDocument()
-    })
-
-    it("renders footer with border and shrink-0", () => {
-      render(<FormContent />)
-      const button = screen.getByRole("button", { name: "Submit" })
-      const footer = button.closest(".flex.shrink-0") as HTMLElement
-      expect(footer).toBeInTheDocument()
-      expect(footer.className).toContain("border-t")
-    })
-
-    it("uses flex-col layout so the footer stays at the bottom", () => {
+    it("renders wizard layout with flex-col for footer positioning", () => {
       render(<FormContent />)
       const form = screen.getByTestId("f0-form")
+      // form → formArea → layoutWrapper (flex-col)
       const layoutWrapper = form.parentElement?.parentElement
       expect(layoutWrapper?.className).toContain("flex")
       expect(layoutWrapper?.className).toContain("h-full")
       expect(layoutWrapper?.className).toContain("flex-col")
+    })
+
+    it("renders wizard form area with overflow-hidden and height propagation", () => {
+      render(<FormContent />)
+      const form = screen.getByTestId("f0-form")
+      const formArea = form.parentElement as HTMLElement
+      expect(formArea.className).toContain("overflow-hidden")
+      expect(formArea.className).toContain("[&>div]:h-full")
     })
 
     it("passes showSectionsSidepanel true", () => {
@@ -278,11 +436,36 @@ describe("FormCanvasContent", () => {
       expect(form.getAttribute("data-show-sections-sidepanel")).toBe("true")
     })
 
-    it("calls formRef.submit when clicking the submit button", async () => {
+    it("renders a footer with submit button", () => {
+      render(<FormContent />)
+      expect(screen.getByRole("button", { name: "Submit" })).toBeInTheDocument()
+    })
+
+    it("renders footer with border-t and shrink-0", () => {
+      render(<FormContent />)
+      const button = screen.getByRole("button", { name: "Submit" })
+      const footer = button.closest(".shrink-0") as HTMLElement
+      expect(footer).toBeInTheDocument()
+      expect(footer.className).toContain("border-t")
+    })
+
+    it("calls formRef.submit when clicking the wizard submit button", async () => {
       const user = userEvent.setup()
       render(<FormContent />)
       await user.click(screen.getByRole("button", { name: "Submit" }))
       expect(mockSubmit).toHaveBeenCalledTimes(1)
+    })
+
+    it("passes custom submitConfig label through for wizard form", () => {
+      mockRegistryEntry = makeEntry({
+        steps: [
+          { title: "Step 1", sectionIds: ["a"] },
+          { title: "Step 2", sectionIds: ["b"] },
+        ],
+        submitConfig: { label: "Save Employee" },
+      })
+      render(<FormContent />)
+      expect(capturedFormDefinition.submitConfig?.label).toBe("Save Employee")
     })
   })
 })

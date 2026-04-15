@@ -18,8 +18,8 @@ export function ActiveFormCard(): ReactNode {
 
   if (!form) return null
 
-  const cardTitle = form.cardTitle || form.formName
-  const cardDescription = form.cardDescription || form.description
+  const cardTitle = form.cardTitle
+  const cardDescription = form.cardDescription
 
   const hasBeenFilled = (registry?.getFillVersion(form.formName) ?? 0) > 0
 

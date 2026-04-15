@@ -2,6 +2,7 @@ import { useCoAgent } from "@copilotkit/react-core"
 import {
   useCallback,
   useEffect,
+  useRef,
   useState,
   type ComponentType,
   type ReactNode,
@@ -17,6 +18,7 @@ import type { F0FormDefinitionSingleSchema } from "@/patterns/F0WizardForm/types
 
 import { useAiChat } from "@/ai"
 import { F0Button } from "@/components/F0Button"
+import { CheckCircleAnimated } from "@/icons/animated"
 import { cn } from "@/lib/utils"
 import { useF0AiFormRegistry } from "@/patterns/F0Form/F0AiFormRegistry"
 import { F0Form } from "@/patterns/F0Form/F0Form"
@@ -40,45 +42,62 @@ const F0CanvasForm = F0Form as unknown as ComponentType<
   F0FormPropsWithSingleSchemaDefinition<F0FormSchema>
 >
 
+// ---------- Submit success overlay ----------
+
+function SubmitSuccessOverlay() {
+  return (
+    <div
+      data-testid="canvas-form-success"
+      className="absolute inset-0 z-10 flex items-center justify-center bg-f1-background"
+    >
+      <div className="flex flex-col items-center gap-2">
+        <CheckCircleAnimated
+          animate="animate"
+          className="h-8 w-8 text-f1-icon-positive"
+        />
+        <span className="text-base font-medium text-f1-foreground">Saved</span>
+      </div>
+    </div>
+  )
+}
+
 // ---------- Wizard canvas content ----------
 
 function WizardCanvasContent({
   formDefinition,
+  formRef,
+  isSubmitting,
+  onSubmit,
 }: {
   formDefinition: F0FormDefinitionSingleSchema<F0FormSchema>
+  formRef: ReturnType<typeof useF0Form>["formRef"]
+  isSubmitting: boolean
+  onSubmit: () => void
 }) {
-  const form = useF0Form()
-
-  const [submitting, setSubmitting] = useState(false)
-
-  const handleSubmit = useCallback(async () => {
-    setSubmitting(true)
-    try {
-      await form.formRef.current?.submit()
-    } finally {
-      setSubmitting(false)
-    }
-  }, [form])
-
   return (
     <div className="flex h-full flex-col">
-      <div className="min-h-0 flex-1 overflow-hidden [&>div]:h-full">
+      <div className="relative min-h-0 flex-1 overflow-hidden [&>div]:h-full">
+        {isSubmitting && <SubmitSuccessOverlay />}
         <F0CanvasForm
           formDefinition={formDefinition}
           styling={{
             showSectionsSidepanel: true,
           }}
-          formRef={form.formRef}
+          formRef={formRef}
         />
       </div>
-      <div className="flex shrink-0 items-center justify-end gap-2 border-x-0 border-b-0 border-t border-solid border-f1-border-secondary bg-f1-background px-6 py-3">
-        <F0Button
-          variant="default"
-          onClick={() => void handleSubmit()}
-          loading={submitting}
-          label={formDefinition.submitConfig?.label ?? "Submit"}
-        />
-      </div>
+      {!isSubmitting && (
+        <div
+          data-testid="canvas-form-footer"
+          className="flex shrink-0 items-center justify-end gap-2 border-x-0 border-b-0 border-t border-solid border-f1-border-secondary bg-f1-background px-6 py-3"
+        >
+          <F0Button
+            variant="default"
+            onClick={onSubmit}
+            label={formDefinition.submitConfig?.label ?? "Submit"}
+          />
+        </div>
+      )}
     </div>
   )
 }
@@ -88,49 +107,47 @@ function WizardCanvasContent({
 function PlainFormContent({
   formDefinition,
   formRef,
+  isSubmitting,
+  onSubmit,
 }: {
   formDefinition: F0FormDefinitionSingleSchema<F0FormSchema>
   formRef: ReturnType<typeof useF0Form>["formRef"]
+  isSubmitting: boolean
+  onSubmit: () => void
 }) {
   const showSectionsSidepanel = !!(
     formDefinition.sections && Object.keys(formDefinition.sections).length > 2
   )
 
-  const [submitting, setSubmitting] = useState(false)
-
-  const handleSubmit = useCallback(async () => {
-    setSubmitting(true)
-    try {
-      await formRef.current?.submit()
-    } finally {
-      setSubmitting(false)
-    }
-  }, [formRef])
-
   return (
     <div className="flex h-full flex-col">
       <div
         className={cn(
-          "min-h-0 flex-1",
+          "relative min-h-0 flex-1",
           showSectionsSidepanel
             ? "overflow-hidden [&>div]:h-full"
             : "overflow-auto p-6 pb-6"
         )}
       >
+        {isSubmitting && <SubmitSuccessOverlay />}
         <F0CanvasForm
           formDefinition={formDefinition}
           formRef={formRef}
           styling={{ showSectionsSidepanel }}
         />
       </div>
-      <div className="flex shrink-0 items-center justify-end gap-2 border-x-0 border-b-0 border-t border-solid border-f1-border-secondary bg-f1-background px-6 py-3">
-        <F0Button
-          variant="default"
-          onClick={() => void handleSubmit()}
-          loading={submitting}
-          label={formDefinition.submitConfig?.label ?? "Submit"}
-        />
-      </div>
+      {!isSubmitting && (
+        <div
+          data-testid="canvas-form-footer"
+          className="flex shrink-0 items-center justify-end gap-2 border-x-0 border-b-0 border-t border-solid border-f1-border-secondary bg-f1-background px-6 py-3"
+        >
+          <F0Button
+            variant="default"
+            onClick={onSubmit}
+            label={formDefinition.submitConfig?.label ?? "Submit"}
+          />
+        </div>
+      )}
     </div>
   )
 }
@@ -148,8 +165,16 @@ function PlainFormContent({
  */
 function VirtualFormContent() {
   const { formRef } = useF0Form()
-  const { agent: agentName } = useAiChat()
+  const { agent: agentName, closeCanvas } = useAiChat()
   const registry = useF0AiFormRegistry()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout>>()
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
+    }
+  }, [])
 
   const { state } = useCoAgent<CoAgentFormState>({
     name: agentName || "one-workflow",
@@ -164,6 +189,10 @@ function VirtualFormContent() {
   useEffect(() => {
     ref?.setValues(currentValues, { shouldDirty: true, shouldValidate: false })
   }, [formName, JSON.stringify(currentValues)])
+
+  const handleSubmit = useCallback(() => {
+    formRef.current?.submit()
+  }, [formRef])
 
   const formDefinition = useF0FormDefinition({
     name: formName || "form",
@@ -181,7 +210,13 @@ function VirtualFormContent() {
       ...(entry?.submitConfig?.label && { label: entry.submitConfig.label }),
     },
     onSubmit: async ({ data }) => {
+      setIsSubmitting(true)
       await entry?.onSubmit?.(data as Record<string, unknown>)
+      closeTimerRef.current = setTimeout(() => {
+        registry?.resetFillVersion(formName)
+        registry?.clearActiveForm()
+        closeCanvas()
+      }, 1500)
       return { success: true }
     },
   })
@@ -189,10 +224,24 @@ function VirtualFormContent() {
   if (!activeForm || !entry) return null
 
   if (formDefinition.steps?.length) {
-    return <WizardCanvasContent formDefinition={formDefinition} />
+    return (
+      <WizardCanvasContent
+        formDefinition={formDefinition}
+        formRef={formRef}
+        isSubmitting={isSubmitting}
+        onSubmit={handleSubmit}
+      />
+    )
   }
 
-  return <PlainFormContent formDefinition={formDefinition} formRef={formRef} />
+  return (
+    <PlainFormContent
+      formDefinition={formDefinition}
+      formRef={formRef}
+      isSubmitting={isSubmitting}
+      onSubmit={handleSubmit}
+    />
+  )
 }
 
 /**
