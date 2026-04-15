@@ -268,6 +268,14 @@ declare const f1Colors: {
 };
 type F1Color = keyof typeof f1Colors;
 
+declare const boxShadow: {
+    readonly DEFAULT: "0 2px 20px 0 hsl(var(--shadow) / 0.04)";
+    readonly md: "0 4px 20px 0 hsl(var(--shadow) / 0.08)";
+    readonly lg: "0 8px 30px 0 hsl(var(--shadow) / 0.12)";
+    readonly xl: "0 12px 56px 0 hsl(var(--shadow) / 0.16)";
+    readonly none: "none";
+};
+
 /**
  * Spacing for the tailwind config
  * Provides scale in relative(rem) and absolute(px) units
@@ -281,4 +289,50 @@ declare const absoluteSpacing: ThemeConfig["spacing"];
 declare const relativeSpacing: ThemeConfig["spacing"];
 declare const betweenSpacing: ThemeConfig["spacing"];
 
-export { type BaseColor, type F1Color, absoluteSpacing, baseColors, betweenSpacing, borderRadius, breakpoints, f1Colors, relativeSpacing };
+declare const fontSize: {
+    readonly xs: {
+        readonly size: "0.625rem";
+        readonly lineHeight: "0.75rem";
+    };
+    readonly sm: {
+        readonly size: "0.75rem";
+        readonly lineHeight: "1rem";
+    };
+    readonly base: {
+        readonly size: "0.875rem";
+        readonly lineHeight: "1.25rem";
+        readonly letterSpacing: "-0.005em";
+    };
+    readonly lg: {
+        readonly size: "1rem";
+        readonly lineHeight: "1.5rem";
+        readonly letterSpacing: "-0.01em";
+    };
+    readonly xl: {
+        readonly size: "1.125rem";
+        readonly lineHeight: "1.75rem";
+        readonly letterSpacing: "-0.01em";
+    };
+    readonly "2xl": {
+        readonly size: "1.375rem";
+        readonly lineHeight: "1.75rem";
+        readonly letterSpacing: "-0.01em";
+    };
+    readonly "3xl": {
+        readonly size: "1.625rem";
+        readonly lineHeight: "2rem";
+        readonly letterSpacing: "-0.01em";
+    };
+    readonly "4xl": {
+        readonly size: "2.25rem";
+        readonly lineHeight: "2.5rem";
+        readonly letterSpacing: "-0.02em";
+    };
+};
+declare const fontWeight: {
+    readonly normal: "400";
+    readonly medium: "500";
+    readonly semibold: "600";
+};
+
+export { type BaseColor, type F1Color, absoluteSpacing, baseColors, betweenSpacing, borderRadius, boxShadow, breakpoints, f1Colors, fontSize, fontWeight, relativeSpacing };

@@ -24,8 +24,11 @@ __export(index_exports, {
   baseColors: () => baseColors,
   betweenSpacing: () => betweenSpacing,
   borderRadius: () => borderRadius,
+  boxShadow: () => boxShadow,
   breakpoints: () => breakpoints,
   f1Colors: () => f1Colors,
+  fontSize: () => fontSize,
+  fontWeight: () => fontWeight,
   relativeSpacing: () => relativeSpacing
 });
 module.exports = __toCommonJS(index_exports);
@@ -299,6 +302,15 @@ var f1Colors = {
   }
 };
 
+// src/tokens/shadows.ts
+var boxShadow = {
+  DEFAULT: "0 2px 20px 0 hsl(var(--shadow) / 0.04)",
+  md: "0 4px 20px 0 hsl(var(--shadow) / 0.08)",
+  lg: "0 8px 30px 0 hsl(var(--shadow) / 0.12)",
+  xl: "0 12px 56px 0 hsl(var(--shadow) / 0.16)",
+  none: "none"
+};
+
 // src/tokens/spacing.ts
 var absoluteSpacing = {
   px: "1px",
@@ -382,14 +394,34 @@ var betweenSpacing = {
   lg: relativeSpacing[3],
   xl: relativeSpacing[4]
 };
+
+// src/tokens/typography.ts
+var fontSize = {
+  xs: { size: "0.625rem", lineHeight: "0.75rem" },
+  sm: { size: "0.75rem", lineHeight: "1rem" },
+  base: { size: "0.875rem", lineHeight: "1.25rem", letterSpacing: "-0.005em" },
+  lg: { size: "1rem", lineHeight: "1.5rem", letterSpacing: "-0.01em" },
+  xl: { size: "1.125rem", lineHeight: "1.75rem", letterSpacing: "-0.01em" },
+  "2xl": { size: "1.375rem", lineHeight: "1.75rem", letterSpacing: "-0.01em" },
+  "3xl": { size: "1.625rem", lineHeight: "2rem", letterSpacing: "-0.01em" },
+  "4xl": { size: "2.25rem", lineHeight: "2.5rem", letterSpacing: "-0.02em" }
+};
+var fontWeight = {
+  normal: "400",
+  medium: "500",
+  semibold: "600"
+};
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   absoluteSpacing,
   baseColors,
   betweenSpacing,
   borderRadius,
+  boxShadow,
   breakpoints,
   f1Colors,
+  fontSize,
+  fontWeight,
   relativeSpacing
 });
 //# sourceMappingURL=index.js.map
