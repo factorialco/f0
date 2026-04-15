@@ -100,7 +100,7 @@ import { Archive } from "@factorialco/f0-react-native/icons/app"
 
 - **Type:** `ColorValue` (from `react-native`)
 - **Default:** none
-- **Description:** Arbitrary runtime color for the icon, bypassing semantic tokens. Accepts any React Native `ColorValue` (hex, rgb, hsl, named color). When set, overrides both the semantic `color` prop and any `text-*` class from `className`.
+- **Description:** Arbitrary runtime color for the icon, bypassing semantic tokens. Accepts any React Native `ColorValue` (hex, rgb, hsl, named color). When set, it disables the semantic `color` variant and strips `text-*` utilities from `className`, so `tintColor` is the deterministic color source.
 
 Use sparingly — prefer the semantic `color` prop for design-system colors. This escape hatch exists for cases where the icon color is determined at runtime (e.g. backend-driven widget colors, user-customizable themes).
 

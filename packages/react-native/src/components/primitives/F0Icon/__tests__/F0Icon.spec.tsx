@@ -178,6 +178,20 @@ describe("F0Icon", () => {
       expect(element.props.className).toContain("text-f0-icon-info")
     })
 
+    it("ignores unsafe cast native color prop when tintColor is undefined", () => {
+      const unsafeColorProps = {
+        icon: Archive,
+        color: "#00FF00",
+        testID: "icon",
+      } as unknown as React.ComponentProps<typeof F0Icon>
+
+      const { getByTestId } = render(<F0Icon {...unsafeColorProps} />)
+      const element = getByTestId("icon")
+      expect(element.props.color).toBeUndefined()
+      expect(element.props.className).toContain("w-5")
+      expect(element.props.className).toContain("h-5")
+    })
+
     it("combines tintColor with custom className layout", () => {
       const { getByTestId } = render(
         <F0Icon
@@ -190,6 +204,40 @@ describe("F0Icon", () => {
       const element = getByTestId("icon")
       expect(element.props.className).toContain("-ml-0.5")
       expect(element.props.color).toBe("rgb(255, 0, 0)")
+    })
+
+    it("strips custom text-* classes when tintColor is set", () => {
+      const { getByTestId } = render(
+        <F0Icon
+          icon={Archive}
+          tintColor="#FF355E"
+          className="text-red-500 opacity-50"
+          testID="icon"
+        />
+      )
+      const element = getByTestId("icon")
+      expect(element.props.className).not.toContain("text-red-500")
+      expect(element.props.className).toContain("opacity-50")
+      expect(element.props.color).toBe("#FF355E")
+    })
+
+    it("ignores unsafe cast style prop at runtime", () => {
+      const unsafeStyleProps = {
+        icon: Archive,
+        tintColor: "#FF355E",
+        style: { opacity: 0.5 },
+        testID: "icon",
+      } as unknown as React.ComponentProps<typeof F0Icon>
+
+      const { getByTestId } = render(<F0Icon {...unsafeStyleProps} />)
+      const element = getByTestId("icon")
+      const flattenedStyle = Array.isArray(element.props.style)
+        ? element.props.style.flat(Infinity)
+        : [element.props.style]
+      expect(flattenedStyle).not.toContainEqual(
+        expect.objectContaining({ opacity: 0.5 })
+      )
+      expect(element.props.color).toBe("#FF355E")
     })
   })
 })

@@ -44,6 +44,15 @@ export const ICON_COLORS = [
 export type IconColor = (typeof ICON_COLORS)[number]
 
 /**
+ * Runtime-blocked props that must not be forwarded to the underlying SVG.
+ *
+ * - `style` is banned from the public API for semantic consistency.
+ * - Native `color` is controlled by `color`/`tintColor` and must not be
+ *   forwardable via unsafe casts.
+ */
+export const F0_ICON_BLOCKED_FORWARD_PROPS = ["style", "color"] as const
+
+/**
  * Public F0Icon props
  * Supports semantic color via `color` prop, with `className` as escape hatch.
  */
