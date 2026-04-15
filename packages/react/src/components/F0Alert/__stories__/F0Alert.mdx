@@ -2,6 +2,7 @@ import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
 import * as Stories from "./F0Alert.stories"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 import { F0Alert } from "../F0Alert"
+import { I18nProvider, defaultTranslations } from "@/lib/providers/i18n"
 
 <Meta of={Stories} />
 
@@ -117,12 +118,14 @@ For transient feedback use a toast; for decisions that block the workflow use
       'variant="critical" — a process failed or data is at risk',
     ],
     children: (
-      <F0Alert
-        variant="warning"
-        title="Missing tax information"
-        description="Add it before the next payroll run to avoid delays."
-        action={{ label: "Add now", onClick: () => {} }}
-      />
+      <I18nProvider translations={defaultTranslations}>
+        <F0Alert
+          variant="warning"
+          title="Missing tax information"
+          description="Add it before the next payroll run to avoid delays."
+          action={{ label: "Add now", onClick: () => {} }}
+        />
+      </I18nProvider>
     ),
   }}
   dont={{
@@ -133,12 +136,14 @@ For transient feedback use a toast; for decisions that block the workflow use
       'Don\'t use variant="warning" when no action is needed',
     ],
     children: (
-      <F0Alert
-        variant="critical"
-        title="Missing tax information"
-        description="Add it before the next payroll run to avoid delays."
-        action={{ label: "Add now", onClick: () => {} }}
-      />
+      <I18nProvider translations={defaultTranslations}>
+        <F0Alert
+          variant="critical"
+          title="Missing tax information"
+          description="Add it before the next payroll run to avoid delays."
+          action={{ label: "Add now", onClick: () => {} }}
+        />
+      </I18nProvider>
     ),
   }}
 />
