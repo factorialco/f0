@@ -1,4 +1,5 @@
 import type { ForwardRefExoticComponent, RefAttributes } from "react"
+import type { ColorValue } from "react-native"
 import type { SvgProps } from "react-native-svg"
 import type { Svg } from "react-native-svg"
 import type { VariantProps } from "tailwind-variants"
@@ -43,10 +44,19 @@ export const ICON_COLORS = [
 export type IconColor = (typeof ICON_COLORS)[number]
 
 /**
+ * Runtime-blocked props that must not be forwarded to the underlying SVG.
+ *
+ * - `style` is banned from the public API for semantic consistency.
+ * - Native `color` is controlled by `color`/`tintColor` and must not be
+ *   forwardable via unsafe casts.
+ */
+export const F0_ICON_BLOCKED_FORWARD_PROPS = ["style", "color"] as const
+
+/**
  * Public F0Icon props
  * Supports semantic color via `color` prop, with `className` as escape hatch.
  */
-export interface F0IconProps extends Omit<SvgProps, "style"> {
+export interface F0IconProps extends Omit<SvgProps, "style" | "color"> {
   /**
    * Tailwind className for custom styling or color overrides.
    * Prefer the `color` prop for semantic icon colors.
@@ -54,8 +64,9 @@ export interface F0IconProps extends Omit<SvgProps, "style"> {
   className?: string
 
   /**
-   * Semantic icon color from the F0 design system
-   * Maps to f0-icon-* tokens (e.g. color="critical" -> text-f0-icon-critical)
+   * Semantic icon color from the F0 design system.
+   * Maps to f0-icon-* tokens (e.g. color="critical" -> text-f0-icon-critical).
+   * Ignored when `tintColor` is set.
    */
   color?: IconColor
 
@@ -74,4 +85,21 @@ export interface F0IconProps extends Omit<SvgProps, "style"> {
    * Test ID for testing
    */
   testID?: string
+
+  /**
+   * Arbitrary runtime color for the icon, bypassing semantic tokens.
+   * Accepts any React Native ColorValue (hex, rgb, hsl, named color, etc.).
+   * When set, overrides both `color` and any text-* class from `className`.
+   *
+   * Use sparingly — prefer the semantic `color` prop for design-system colors.
+   * This escape hatch exists for cases where icon color is determined at runtime
+   * (e.g. backend-driven widget colors, user-customizable themes).
+   *
+   * @example
+   * ```tsx
+   * <F0Icon icon={Star} tintColor="#FF355E" />
+   * <F0Icon icon={Star} tintColor={dynamicColor} size="lg" />
+   * ```
+   */
+  tintColor?: ColorValue
 }
