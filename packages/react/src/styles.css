@@ -173,7 +173,3 @@ div[role="dialog"] {
     @apply appearance-none;
   }
 }
-
-:where(.sb-show-main, #storybook-root) cpk-web-inspector {
-  display: none;
-}

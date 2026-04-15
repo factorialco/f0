@@ -110,7 +110,8 @@ export const useFormFillAction = () => {
           {
             name: "fieldName",
             type: "string",
-            description: "The field name (from formGetState).",
+            description:
+              "The field name (from activeForm.fieldDescriptions in the shared state).",
             required: true,
           },
           {

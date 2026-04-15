@@ -16,7 +16,7 @@ import type { F0WizardFormStep } from "@/patterns/F0WizardForm/types"
 import type { F0FormSchema, F0SectionConfig } from "./types"
 import type { F0FormRef, F0FormSetValueOptions } from "./useF0Form"
 
-import { getF0Config, unwrapZodSchema } from "./f0Schema"
+import { getF0Config, inferFieldType, unwrapZodSchema } from "./f0Schema"
 
 /**
  * Entry in the AI form registry
@@ -229,6 +229,7 @@ function extractFieldDescriptions(schema: F0FormSchema): Record<
     helpText?: string
     description?: string
     customFieldName?: string
+    fieldType?: string
   }
 > {
   const unwrapped = unwrapZodSchema(schema) as { shape?: ZodRawShape }
@@ -244,6 +245,7 @@ function extractFieldDescriptions(schema: F0FormSchema): Record<
       helpText?: string
       description?: string
       customFieldName?: string
+      fieldType?: string
     }
   > = {}
 
@@ -260,6 +262,10 @@ function extractFieldDescriptions(schema: F0FormSchema): Record<
         ...(zodDescription && { description: zodDescription }),
         ...(config?.customFieldName && {
           customFieldName: config.customFieldName,
+        }),
+        ...(inferFieldType(fieldSchema, config ?? { label: key }) !==
+          "text" && {
+          fieldType: inferFieldType(fieldSchema, config ?? { label: key }),
         }),
       }
     }
@@ -307,6 +313,7 @@ export interface F0AiFormDescription {
       placeholder?: string
       helpText?: string
       description?: string
+      fieldType?: string
     }
   >
   sectionDescriptions: Record<string, { title: string; description?: string }>

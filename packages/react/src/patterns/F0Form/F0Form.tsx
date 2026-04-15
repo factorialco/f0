@@ -853,6 +853,16 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     defaultValuesParamsSchema,
   ])
 
+  // Notify the AI registry whenever the user changes a field value so that
+  // formsOnCurrentPage always reflects the latest values.
+  useEffect(() => {
+    if (!aiFormRegistry) return
+    const subscription = form.watch(() => {
+      aiFormRegistry.rebuildDescriptions()
+    })
+    return () => subscription.unsubscribe()
+  }, [form, aiFormRegistry])
+
   // Group contiguous switch fields
   const groupedItems = groupContiguousSwitches(definition)
 
