@@ -500,6 +500,8 @@ export declare const defaultTranslations: {
         readonly barChartHorizontal: "Bar (horizontal)";
         readonly lineChart: "Line";
         readonly funnel: "Funnel";
+        readonly pieChart: "Pie";
+        readonly table: "Table";
     };
     readonly select: {
         readonly noResults: "No results found";

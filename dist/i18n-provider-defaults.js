@@ -499,7 +499,9 @@ const e = {
     barChartVertical: "Bar (vertical)",
     barChartHorizontal: "Bar (horizontal)",
     lineChart: "Line",
-    funnel: "Funnel"
+    funnel: "Funnel",
+    pieChart: "Pie",
+    table: "Table"
   },
   select: {
     noResults: "No results found",

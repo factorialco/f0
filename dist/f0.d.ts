@@ -601,6 +601,20 @@ declare type AiChatProviderReturnValue = {
     sendMessage: (message: string | Message_2) => void;
     /* Excluded from this release type: setSendMessageFunction */
     /**
+     * Append messages to the current conversation.
+     * Useful for injecting pre-built assistant responses (e.g. dashboards)
+     * from outside the chat. IDs are generated internally.
+     */
+    appendMessages: (messages: AppendMessage[]) => void;
+    /* Excluded from this release type: setAppendMessagesFunction */
+    /**
+     * Atomically clear the conversation and inject new messages.
+     * Starts a fresh thread without the race condition of calling
+     * clear() + appendMessages() separately.
+     */
+    clearAndAppend: (messages: AppendMessage[]) => void;
+    /* Excluded from this release type: setReplaceMessagesFunction */
+    /**
      * Current width of the chat window (for resizable mode)
      */
     chatWidth: number;
@@ -963,6 +977,28 @@ declare type AnimationVariantsOptions = {
     delay?: number;
     duration?: number;
     maxDelay?: number;
+};
+
+/**
+ * A message to inject via appendMessages.
+ * IDs are generated internally — callers only provide role, content, and
+ * optional tool calls.
+ */
+export declare type AppendMessage = {
+    role: "user" | "assistant";
+    content: string;
+    toolCalls?: AppendToolCall[];
+};
+
+/**
+ * A tool call to inject via appendMessages.
+ * IDs are generated internally — callers only provide the function payload.
+ */
+export declare type AppendToolCall = {
+    function: {
+        name: string;
+        arguments: string;
+    };
 };
 
 export declare const AreaChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<LineChartPropsBase<LineChartConfig_2> & {
@@ -3989,6 +4025,8 @@ export declare const defaultTranslations: {
         readonly barChartHorizontal: "Bar (horizontal)";
         readonly lineChart: "Line";
         readonly funnel: "Funnel";
+        readonly pieChart: "Pie";
+        readonly table: "Table";
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -5452,6 +5490,11 @@ declare type F0ButtonToggleInternalProps = {
      * Whether to show a border around the button toggle.
      */
     withBorder?: boolean;
+    /**
+     * @private
+     * Additional CSS class names to apply to the button root.
+     */
+    className?: string;
 } & ({
     selected: boolean;
     onSelectedChange: (selected: boolean) => void;
