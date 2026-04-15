@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.49.0](https://github.com/factorialco/f0/compare/f0-core-v1.48.2...f0-core-v1.49.0) (2026-04-13)
+
+
+### Features
+
+* **ai:** F0AnalyticsDashboard edit mode and DataDownload canvas ([#3819](https://github.com/factorialco/f0/issues/3819)) ([56afe21](https://github.com/factorialco/f0/commit/56afe21af606ce52ec9e279b8cad1e24ba9b794c))
+
 ## [1.48.2](https://github.com/factorialco/f0/compare/f0-core-v1.48.1...f0-core-v1.48.2) (2026-03-30)
 
 

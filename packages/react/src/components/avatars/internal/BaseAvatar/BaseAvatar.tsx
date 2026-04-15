@@ -2,7 +2,6 @@ import { forwardRef, useMemo } from "react"
 
 import { F0AvatarModule } from "@/components/avatars/F0AvatarModule"
 import { F0Icon, F0IconProps } from "@/components/F0Icon"
-import { Badge } from "@/ui/IconBadge"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import {
   Avatar as AvatarComponent,
@@ -10,6 +9,7 @@ import {
   AvatarImage,
   InternalAvatarProps,
 } from "@/ui/Avatar"
+import { Badge } from "@/ui/IconBadge"
 
 import { AvatarSize, avatarSizes, BaseAvatarProps, sizesMapping } from "./types"
 import {
@@ -133,7 +133,7 @@ export const BaseAvatar = forwardRef<HTMLDivElement, BaseAvatarProps>(
                 icon
                   ? "bg-f1-background-secondary"
                   : src || flag
-                    ? "bg-f1-background dark:bg-f1-background-inverse-secondary"
+                    ? "bg-f1-background-inverse-secondary dark:bg-f1-background-tertiary"
                     : ""
               }
             >

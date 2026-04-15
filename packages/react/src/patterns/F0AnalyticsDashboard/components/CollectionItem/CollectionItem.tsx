@@ -20,6 +20,8 @@ interface CollectionItemProps<Filters extends FiltersDefinition> {
   item: DashboardCollectionItem<Filters>
   filters: FiltersState<Filters>
   actions?: DropdownItem[]
+  editMode?: boolean
+  handleDelete?: (itemId: string) => void
 }
 
 /**
@@ -34,6 +36,8 @@ export function CollectionItem<Filters extends FiltersDefinition>({
   item,
   filters,
   actions,
+  editMode,
+  handleDelete,
 }: CollectionItemProps<Filters>) {
   const enabled = item.useDashboardFilters !== false
   const effectiveFilters = enabled ? filters : ({} as FiltersState<Filters>)
@@ -68,8 +72,12 @@ export function CollectionItem<Filters extends FiltersDefinition>({
     <DashboardItem
       title={item.title}
       description={item.description}
+      explanation={item.explanation}
       isLoading={false}
       actions={allActions}
+      editMode={editMode}
+      handleDelete={handleDelete}
+      itemId={item.id}
     >
       <OneDataCollection
         fullHeight

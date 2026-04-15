@@ -16,7 +16,7 @@ export const F0AvatarDate = ({
 
   return (
     <div
-      className="flex h-10 w-10 flex-col items-center justify-center rounded border border-solid border-f1-border-secondary bg-f1-background-inverse-secondary"
+      className="flex h-10 w-10 flex-col items-center justify-center rounded border border-solid border-f1-border-secondary bg-f1-background-inverse-secondary dark:bg-f1-background-tertiary"
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledby}
     >

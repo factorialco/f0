@@ -64,7 +64,8 @@ export function useDashboardCompute(
 ): {
   fetchItem: (
     itemId: string,
-    filterValues: Record<string, unknown[]>
+    filterValues: Record<string, unknown[]>,
+    navigationFilterValues?: Record<string, string[]>
   ) => Promise<ItemResult>
   getFilterOptions: () => Record<string, string[]> | undefined
 } {
@@ -89,9 +90,10 @@ export function useDashboardCompute(
   const fetchItem = useCallback(
     (
       itemId: string,
-      filterValues: Record<string, unknown[]>
+      filterValues: Record<string, unknown[]>,
+      navigationFilterValues?: Record<string, string[]>
     ): Promise<ItemResult> => {
-      const requestKey = `${refreshKeyRef.current}:${JSON.stringify(filterValues)}`
+      const requestKey = `${refreshKeyRef.current}:${JSON.stringify(filterValues)}:${JSON.stringify(navigationFilterValues ?? {})}`
 
       // Reuse in-flight request if it matches
       if (inflightRef.current?.key === requestKey) {
@@ -115,6 +117,9 @@ export function useDashboardCompute(
         }
       }
 
+      const hasNavValues =
+        navigationFilterValues && Object.keys(navigationFilterValues).length > 0
+
       const body = {
         fetchSpecs: cfg.fetchSpecs,
         items: cfg.items,
@@ -123,6 +128,10 @@ export function useDashboardCompute(
           Object.keys(stringFilterValues).length > 0
             ? stringFilterValues
             : undefined,
+        navigationFilters: cfg.navigationFilters,
+        navigationFilterValues: hasNavValues
+          ? navigationFilterValues
+          : undefined,
       }
 
       const promise = fetch(`${api.baseUrl}/dashboard/compute`, {

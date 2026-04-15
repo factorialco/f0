@@ -19,18 +19,26 @@ function usePortalTarget() {
   const containerRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
-    const title = document.querySelector(".sbdocs-title")
-    if (!title) return
+    // The title is a plain h1 inside #storybook-docs (no .sbdocs-title class)
+    const titleEl = document.querySelector(
+      "#storybook-docs h1:not(.docs-story *)"
+    )
+    if (!titleEl) return
 
-    // Insert before the first .sb-anchor element
-    const anchor = document.querySelector(".sb-anchor")
+    // Insert after h1 + p or h1 + div > p (the subtitle/description)
+    const sibling = titleEl.nextElementSibling
+    const afterEl =
+      sibling?.tagName === "P"
+        ? sibling
+        : sibling?.tagName === "DIV" && sibling.querySelector("p")
+          ? sibling
+          : titleEl
 
     if (!containerRef.current) {
       containerRef.current = document.createElement("div")
     }
-    const insertBefore = anchor ?? null
-    const parent = anchor?.parentElement ?? title.parentElement
-    parent?.insertBefore(containerRef.current, insertBefore)
+
+    afterEl.after(containerRef.current)
     setTarget(containerRef.current)
 
     return () => {
@@ -103,6 +111,6 @@ export function ImportBanner({ isDark }: ImportBannerProps) {
     return createPortal(content, portalTarget)
   }
 
-  // Fallback: render inline if portal target not found
-  return content
+  // Don't render inline — the portal isn't ready yet on first render
+  return null
 }

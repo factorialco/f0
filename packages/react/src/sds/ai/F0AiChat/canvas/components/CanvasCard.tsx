@@ -20,6 +20,8 @@ export type CanvasCardProps = {
   onClose: () => void
   /** Whether this card's content is currently shown in the canvas */
   isActive: boolean
+  /** Optional content rendered below the card header (e.g. a data preview) */
+  children?: React.ReactNode
 }
 
 /**
@@ -34,6 +36,7 @@ export function CanvasCard({
   onOpen,
   onClose,
   isActive,
+  children,
 }: CanvasCardProps) {
   const translations = useI18n()
 
@@ -55,17 +58,18 @@ export function CanvasCard({
             {description}
           </OneEllipsis>
         </div>
+        <F0Button
+          variant="neutral"
+          size="md"
+          label={
+            isActive
+              ? translations.actions.close
+              : translations.ai.reportCard.openButton
+          }
+          onClick={isActive ? onClose : onOpen}
+        />
       </div>
-      <F0Button
-        variant="neutral"
-        size="md"
-        label={
-          isActive
-            ? translations.actions.close
-            : translations.ai.reportCard.openButton
-        }
-        onClick={isActive ? onClose : onOpen}
-      />
+      {children}
     </div>
   )
 }

@@ -7,16 +7,22 @@ import { OneEllipsis } from "@/lib/OneEllipsis"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
 
-import { filterCoagentPlaceholders } from "../../internal-types"
+import { filterNonRenderableMessages } from "../../internal-types"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { ChatTextarea } from "./ChatTextarea"
 
 export const ChatInput = (props: InputProps) => {
-  const { disclaimer, footer, visualizationMode, isLoadingThread } = useAiChat()
+  const {
+    disclaimer,
+    footer,
+    visualizationMode,
+    isLoadingThread,
+    creditWarning,
+  } = useAiChat()
   const { messages } = useCopilotChatInternal()
   const containerRef = useRef<HTMLDivElement>(null)
   const filteredMessages = useMemo(
-    () => filterCoagentPlaceholders(messages),
+    () => filterNonRenderableMessages(messages),
     [messages]
   )
   const isWelcomeScreen = filteredMessages.length === 0 && !isLoadingThread
@@ -43,7 +49,7 @@ export const ChatInput = (props: InputProps) => {
           layout: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] },
         }}
       >
-        <ChatTextarea {...props} />
+        <ChatTextarea {...props} creditWarning={creditWarning} />
       </motion.div>
       {disclaimer?.text && (
         <motion.div

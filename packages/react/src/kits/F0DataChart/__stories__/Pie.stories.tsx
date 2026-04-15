@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import type { F0DataChartProps } from "../types"
+
 import { F0DataChart } from "../index"
-import { ChartDecorator } from "./decorators"
+import { ChartDecorator, ResponsiveSnapshot } from "./decorators"
 
 const meta = {
   component: F0DataChart,
@@ -11,7 +13,7 @@ const meta = {
 } satisfies Meta<typeof F0DataChart>
 
 export default meta
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<typeof F0DataChart>
 
 export const Default: Story = {
   args: {
@@ -90,4 +92,47 @@ export const NoLegend: Story = {
       ],
     },
   },
+}
+
+// ---------------------------------------------------------------------------
+// Responsive snapshot — same matrix as Bar/Line so the entire kit documents
+// breakpoint behaviour the same way.
+// ---------------------------------------------------------------------------
+
+const responsivePieProps = (
+  column: "low" | "normal" | "large"
+): F0DataChartProps => {
+  const data =
+    column === "low"
+      ? [
+          { value: 60, name: "Engineering" },
+          { value: 40, name: "Design" },
+        ]
+      : column === "normal"
+        ? [
+            { value: 120, name: "Engineering" },
+            { value: 45, name: "Product" },
+            { value: 60, name: "Sales" },
+            { value: 30, name: "HR" },
+            { value: 25, name: "Marketing" },
+          ]
+        : [
+            { value: 120, name: "Engineering" },
+            { value: 45, name: "Product" },
+            { value: 60, name: "Sales" },
+            { value: 30, name: "HR" },
+            { value: 25, name: "Marketing" },
+            { value: 18, name: "Operations" },
+            { value: 14, name: "Finance" },
+            { value: 12, name: "Legal" },
+          ]
+  return {
+    type: "pie",
+    series: { name: "Headcount", data },
+  }
+}
+
+export const ResponsiveSnapshotMatrix: Story = {
+  decorators: [(Story) => <Story />],
+  render: () => <ResponsiveSnapshot getProps={responsivePieProps} />,
 }
