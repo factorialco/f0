@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.449.1](https://github.com/factorialco/f0/compare/f0-react-v1.449.0...f0-react-v1.449.1) (2026-04-15)
+
+
+### Bug Fixes
+
+* richTextEditor issue with +3 mentions ([#3917](https://github.com/factorialco/f0/issues/3917)) ([54406a5](https://github.com/factorialco/f0/commit/54406a559db446b6e389598b9289cef899f2da12))
+
 ## [1.449.0](https://github.com/factorialco/f0/compare/f0-react-v1.448.0...f0-react-v1.449.0) (2026-04-15)
 
 
