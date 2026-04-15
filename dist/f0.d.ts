@@ -939,7 +939,9 @@ declare const alertAvatarVariants: (props?: ({
 
 declare type AlertTagProps = ComponentProps<typeof F0TagAlert>;
 
-export declare type AlertVariant = "info" | "warning" | "critical" | "neutral" | "positive";
+export declare type AlertVariant = (typeof alertVariantOptions)[number];
+
+export declare const alertVariantOptions: readonly ["info", "warning", "critical", "neutral", "positive"];
 
 /** Flex align items */
 export declare type AlignItemsToken = "start" | "center" | "end" | "stretch" | "baseline";
@@ -3619,6 +3621,9 @@ export declare const defaultTranslations: {
             readonly hide: "Hide password";
         };
     };
+    readonly link: {
+        readonly opensInNewTab: "opens in new tab";
+    };
     readonly actions: {
         readonly add: "Add";
         readonly edit: "Edit";
@@ -4827,7 +4832,7 @@ export declare interface F0AiPresentedForm {
     initialValues: Record<string, unknown>;
 }
 
-export declare const F0Alert: WithDataTestIdReturnType_3<({ title, description, action, link, icon, variant, }: F0AlertProps) => JSX_2.Element>;
+export declare const F0Alert: WithDataTestIdReturnType_3<({ title, description, action, link, icon, variant, onClose, }: F0AlertProps) => JSX_2.Element>;
 
 export declare interface F0AlertProps {
     title: string;
@@ -4843,6 +4848,8 @@ export declare interface F0AlertProps {
     };
     icon?: IconType;
     variant: AlertVariant;
+    /** Called when the user dismisses the alert. When provided, a close button is shown. */
+    onClose?: () => void;
 }
 
 /**
@@ -7731,6 +7738,9 @@ declare interface F0TimelineRowBaseProps {
     hideStatus?: boolean;
 }
 
+/** Item types that can be rendered inside a multitask row */
+export declare type F0TimelineRowMultitaskItemProps = F0TimelineRowTaskProps | F0TimelineRowNestedtaskProps;
+
 /** Props for a multitask (collapsible group) timeline row */
 export declare interface F0TimelineRowMultitaskProps extends F0TimelineRowBaseProps {
     /** Number of grouped tasks */
@@ -7741,13 +7751,44 @@ export declare interface F0TimelineRowMultitaskProps extends F0TimelineRowBasePr
     expanded: boolean;
     /** Callback when multitask row expand/collapse is toggled */
     onExpandToggle: () => void;
-    /** The subtask items to render when expanded */
+    /** The subtask items to render when expanded. Can be single tasks or nestedtask groups */
+    items: F0TimelineRowMultitaskItemProps[];
+}
+
+/**
+ * Props for a nestedtask timeline row.
+ * Renders a task-style header (custom icon, title, description, chevron toggle)
+ * with collapsible nested items and optional group-level metadata (assignees, file chips, etc.).
+ * Unlike multitask, the header looks like a regular task row with expand/collapse capability.
+ */
+export declare interface F0TimelineRowNestedtaskProps extends F0TimelineRowBaseProps {
+    /** The icon representing the task type */
+    icon: IconType;
+    /** Description text (e.g., "Estimated on 18/07/2025") */
+    description?: string;
+    /** Number of nested items (displayed in the progress pill) */
+    taskCount: number;
+    /** Number of completed items (displayed in the progress pill) */
+    completedCount?: number;
+    /** Whether the row is expanded (controlled) */
+    expanded: boolean;
+    /** Callback when expand/collapse is toggled */
+    onExpandToggle: () => void;
+    /** Metadata items displayed below the header (e.g., assignees, file chips). Always visible regardless of expand/collapse */
+    metadata?: (MetadataItem | undefined | boolean)[];
+    /** The nested task items to render when expanded */
     items: F0TimelineRowTaskProps[];
+    /** Primary action button (displayed on the right after a divider) */
+    primaryAction?: F0TimelineRowAction;
+    /** Secondary action buttons (displayed on the left) */
+    secondaryActions?: F0TimelineRowAction[];
+    /** Overflow menu items (displayed as a dropdown via ellipsis button) */
+    otherActions?: F0TimelineRowOtherAction[];
 }
 
 export declare type F0TimelineRowOtherAction = DropdownItem;
 
-export declare type F0TimelineRowProps = F0TimelineRowTaskProps | F0TimelineRowMultitaskProps;
+export declare type F0TimelineRowProps = F0TimelineRowTaskProps | F0TimelineRowMultitaskProps | F0TimelineRowNestedtaskProps;
 
 /** Props for a single-task timeline row */
 export declare interface F0TimelineRowTaskProps extends F0TimelineRowBaseProps {
@@ -10789,6 +10830,10 @@ declare type SecondaryActionItem = Pick<DropdownItemObject, "label" | "icon" | "
     loading?: boolean;
     disabled?: boolean;
     onClick?: () => void | Promise<void>;
+    tooltip?: (params: {
+        disabled: boolean;
+        loading: boolean;
+    }) => string | undefined;
 };
 
 declare type SecondaryActionsDefinition = {
@@ -12669,6 +12714,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -12715,9 +12765,4 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
