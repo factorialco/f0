@@ -668,6 +668,9 @@ const presentableFormDefinitions: F0AiAvailableFormDefinition[] = [
         JSON.stringify(values, null, 2)
       )
     },
+    submitConfig: {
+      label: "Request Time Off",
+    },
   },
   {
     name: "expense-report",
@@ -685,6 +688,9 @@ const presentableFormDefinitions: F0AiAvailableFormDefinition[] = [
     onSubmit: async (values) => {
       // eslint-disable-next-line no-console
       console.info("Expense report submitted:", JSON.stringify(values, null, 2))
+    },
+    submitConfig: {
+      label: "Submit Expense",
     },
   },
   {
@@ -712,6 +718,9 @@ const presentableFormDefinitions: F0AiAvailableFormDefinition[] = [
     onSubmit: async (values) => {
       // eslint-disable-next-line no-console
       console.info("Contact submitted:", JSON.stringify(values, null, 2))
+    },
+    submitConfig: {
+      label: "Send Message",
     },
   },
   {
@@ -772,16 +781,19 @@ const presentableFormDefinitions: F0AiAvailableFormDefinition[] = [
       },
     },
     title: "New Employee",
-    steps: [
-      { title: "Personal Info", sectionIds: ["personal"] },
-      { title: "Work Details", sectionIds: ["work"] },
-      { title: "Compensation", sectionIds: ["compensation"] },
-      { title: "Dates & Schedule", sectionIds: ["dates"] },
-      { title: "Additional", sectionIds: ["additional"] },
-    ],
+    // steps: [
+    //   { title: "Personal Info", sectionIds: ["personal"] },
+    //   { title: "Work Details", sectionIds: ["work"] },
+    //   { title: "Compensation", sectionIds: ["compensation"] },
+    //   { title: "Dates & Schedule", sectionIds: ["dates"] },
+    //   { title: "Additional", sectionIds: ["additional"] },
+    // ],
     onSubmit: async (values) => {
       // eslint-disable-next-line no-console
       console.info("Employee created:", JSON.stringify(values, null, 2))
+    },
+    submitConfig: {
+      label: "Create Employee",
     },
   },
 ]

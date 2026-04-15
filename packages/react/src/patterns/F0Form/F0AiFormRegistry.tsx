@@ -13,7 +13,12 @@ import { zodToJsonSchema } from "zod-to-json-schema"
 import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 import type { F0WizardFormStep } from "@/patterns/F0WizardForm/types"
 
-import type { F0FormSchema, F0SectionConfig } from "./types"
+import type {
+  F0FormErrorTriggerMode,
+  F0FormSchema,
+  F0SectionConfig,
+  F0FormSubmitConfig,
+} from "./types"
 import type { F0FormRef, F0FormSetValueOptions } from "./useF0Form"
 
 import { getF0Config, inferFieldType, unwrapZodSchema } from "./f0Schema"
@@ -44,6 +49,10 @@ export interface F0AiFormEntry {
   onSubmit?: (values: Record<string, unknown>) => void | Promise<void>
   /** Wizard steps (for multi-step form rendering) */
   steps?: F0WizardFormStep[]
+  /** Submit button configuration (label, icon, etc.) */
+  submitConfig?: F0FormSubmitConfig
+  /** When to trigger validation errors */
+  errorTriggerMode?: F0FormErrorTriggerMode
 }
 
 /**
@@ -85,6 +94,10 @@ export interface F0AiAvailableFormDefinition<
   module?: ModuleId
   /** Wizard steps (required for wizard mode to work with multiple steps) */
   steps?: F0WizardFormStep[]
+  /** Submit button configuration (label, icon, etc.) */
+  submitConfig?: F0FormSubmitConfig
+  /** When to trigger validation errors */
+  errorTriggerMode?: F0FormErrorTriggerMode
 }
 
 /**
@@ -362,6 +375,10 @@ interface F0AiFormRegistryContextValue {
   ) => { success: boolean; error?: string }
   /** Clear the active co-editing form (e.g. after submit) */
   clearActiveForm: () => void
+  /** Bump the fill-version counter for a form (called after fillForm succeeds) */
+  incrementFillVersion: (formName: string) => void
+  /** Get the fill-version counter for a form (0 = never filled) */
+  getFillVersion: (formName: string) => number
 }
 
 const F0AiFormRegistryContext =
@@ -393,6 +410,7 @@ export function F0AiFormRegistryProvider({
 }) {
   const registryRef = useRef<Map<string, F0AiFormEntry>>(new Map())
   const lastDescriptionsJsonRef = useRef<string>("")
+  const fillVersionsRef = useRef<Map<string, number>>(new Map())
 
   // Three-field state replacing the old flat formDescriptions array.
   // formsOnCurrentPage: full runtime state for rendered (non-virtual) forms
@@ -532,6 +550,8 @@ export function F0AiFormRegistryProvider({
         defaultValuesFn,
         onSubmit: existingEntry?.onSubmit,
         steps: existingEntry?.steps,
+        submitConfig: existingEntry?.submitConfig,
+        errorTriggerMode: existingEntry?.errorTriggerMode,
       })
       rebuildDescriptions()
     },
@@ -568,6 +588,8 @@ export function F0AiFormRegistryProvider({
           dirtyFields,
           onSubmit: virtualDef.onSubmit,
           steps: virtualDef.steps,
+          submitConfig: virtualDef.submitConfig,
+          errorTriggerMode: virtualDef.errorTriggerMode,
         })
       }
       rebuildDescriptions()
@@ -619,6 +641,15 @@ export function F0AiFormRegistryProvider({
     rebuildDescriptions()
   }, [rebuildDescriptions])
 
+  const incrementFillVersion = useCallback((formName: string) => {
+    const current = fillVersionsRef.current.get(formName) ?? 0
+    fillVersionsRef.current.set(formName, current + 1)
+  }, [])
+
+  const getFillVersion = useCallback((formName: string) => {
+    return fillVersionsRef.current.get(formName) ?? 0
+  }, [])
+
   // Sync virtual form definitions: register forms that aren't rendered,
   // skip if a rendered (non-virtual) form with the same name already exists.
   const virtualNamesRef = useRef<Set<string>>(new Set())
@@ -650,6 +681,8 @@ export function F0AiFormRegistryProvider({
         dirtyFields,
         onSubmit: def.onSubmit,
         steps: def.steps,
+        submitConfig: def.submitConfig,
+        errorTriggerMode: def.errorTriggerMode,
       })
     }
 
@@ -689,6 +722,8 @@ export function F0AiFormRegistryProvider({
     activeForm,
     setActiveForm,
     clearActiveForm,
+    incrementFillVersion,
+    getFillVersion,
   }
 
   return (

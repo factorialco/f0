@@ -194,15 +194,15 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
 
   if (showSectionsSidepanel && tocItems.length > 0) {
     return (
-      <div className="flex w-full gap-4 overflow-scroll">
-        <div className="sticky top-4 h-fit shrink-0 self-start pt-3">
+      <div className="flex w-full overflow-scroll">
+        <div className="sticky top-0 h-fit shrink-0 self-start pt-2 mr-4">
           <F0TableOfContent
             items={tocItems}
             activeItem={activeSection}
             scrollable={false}
           />
         </div>
-        <div className="w-px bg-f1-border-secondary" />
+        <div className="w-px sticky top-0 bottom-0 bg-f1-border-secondary" />
         {content}
       </div>
     )
@@ -985,9 +985,9 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     <F0FormContext.Provider value={contextValue}>
       <FormProvider {...form}>
         {showSectionsSidepanel && tocItems.length > 0 ? (
-          <div className="flex w-full gap-4 overflow-scroll">
+          <div className="flex w-full overflow-scroll">
             {/* Sections sidebar */}
-            <div className="sticky top-4 h-fit shrink-0 self-start pt-3">
+            <div className="sticky top-0 h-fit shrink-0 self-start pt-2">
               <F0TableOfContent
                 items={tocItems}
                 activeItem={activeSection}
@@ -996,7 +996,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             </div>
 
             {/* Separator */}
-            <div className="w-px bg-f1-border-secondary" />
+            <div className="w-px sticky top-0 bottom-0 bg-f1-border-secondary mr-4" />
 
             {/* Form content - centered in available space */}
             {formContent}

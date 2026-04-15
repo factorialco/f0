@@ -21,8 +21,9 @@ export function ActiveFormCard(): ReactNode {
   const cardTitle = form.cardTitle || form.formName
   const cardDescription = form.cardDescription || form.description
 
-  if (!cardTitle || !cardDescription || !Object.keys(form.formValues).length)
-    return null
+  const hasBeenFilled = (registry?.getFillVersion(form.formName) ?? 0) > 0
+
+  if (!cardTitle || !cardDescription || !hasBeenFilled) return null
 
   return (
     <div className="mt-2 w-full">

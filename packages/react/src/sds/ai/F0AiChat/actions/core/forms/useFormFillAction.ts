@@ -167,6 +167,7 @@ export const useFormFillAction = () => {
 
       // Refresh the registry snapshot so the co-agent picks up new values
       registry.rebuildDescriptions()
+      registry.incrementFillVersion(formName)
 
       const errors = ref.getErrors()
       const hasErrors = Object.keys(errors).length > 0

@@ -2,35 +2,26 @@ import { useCoAgent } from "@copilotkit/react-core"
 import {
   useCallback,
   useEffect,
-  useMemo,
+  useState,
   type ComponentType,
   type ReactNode,
 } from "react"
-import { z, type ZodTypeAny } from "zod"
+import { z } from "zod"
 
 import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 import type {
   F0FormSchema,
   F0FormPropsWithSingleSchemaDefinition,
-  F0SectionConfig,
 } from "@/patterns/F0Form/types"
-import type {
-  F0FormDefinitionSingleSchema,
-  F0WizardFormStep,
-} from "@/patterns/F0WizardForm/types"
-import type { F0WizardStep } from "@/ui/F0Wizard"
+import type { F0FormDefinitionSingleSchema } from "@/patterns/F0WizardForm/types"
 
 import { useAiChat } from "@/ai"
 import { F0Button } from "@/components/F0Button"
-import ArrowLeft from "@/icons/app/ArrowLeft"
-import ArrowRight from "@/icons/app/ArrowRight"
+import { cn } from "@/lib/utils"
 import { useF0AiFormRegistry } from "@/patterns/F0Form/F0AiFormRegistry"
 import { F0Form } from "@/patterns/F0Form/F0Form"
-import { getF0Config, unwrapToZodObject } from "@/patterns/F0Form/f0Schema"
 import { useF0Form } from "@/patterns/F0Form/useF0Form"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm/useF0FormDefinition"
-import { WizardProvider } from "@/ui/F0Wizard/components/WizardProvider"
-import { useWizardNavigation } from "@/ui/F0Wizard/hooks/useWizardNavigation"
 
 interface CoAgentFormState {
   activeForm?: {
@@ -49,28 +40,6 @@ const F0CanvasForm = F0Form as unknown as ComponentType<
   F0FormPropsWithSingleSchemaDefinition<F0FormSchema>
 >
 
-// ---------- helpers (ported from F0WizardForm) ----------
-
-function deriveSectionIdsFromSingleSchema(
-  schema: F0FormSchema,
-  sections?: Record<string, F0SectionConfig>
-): string[] {
-  if (sections) return Object.keys(sections)
-
-  const objectSchema = unwrapToZodObject(schema)
-  const shape = objectSchema.shape as Record<string, ZodTypeAny>
-  const sectionSet = new Set<string>()
-
-  for (const fieldSchema of Object.values(shape)) {
-    const config = getF0Config(fieldSchema)
-    if (config?.section) {
-      sectionSet.add(config.section)
-    }
-  }
-
-  return Array.from(sectionSet)
-}
-
 // ---------- Wizard canvas content ----------
 
 function WizardCanvasContent({
@@ -78,100 +47,39 @@ function WizardCanvasContent({
 }: {
   formDefinition: F0FormDefinitionSingleSchema<F0FormSchema>
 }) {
-  const { sections, steps } = formDefinition
-
-  const sectionIds = useMemo(
-    () => deriveSectionIdsFromSingleSchema(formDefinition.schema, sections),
-    [formDefinition.schema, sections]
-  )
-
   const form = useF0Form()
 
-  const onNextForStep = useCallback(
-    (_stepIndex: number) => async () => {
-      // Save current values without blocking on validation errors —
-      // the AI canvas lets users navigate freely between steps.
-    },
-    []
-  )
-
-  const stepsConfig: F0WizardFormStep[] = useMemo(
-    () =>
-      steps ??
-      sectionIds.map((id) => ({
-        title: sections?.[id]?.title ?? id,
-        sectionIds: [id],
-      })),
-    [steps, sectionIds, sections]
-  )
-
-  const wizardSteps: F0WizardStep[] = useMemo(
-    () =>
-      stepsConfig.map((stepConfig, index) => ({
-        title: stepConfig.title,
-        nextLabel: stepConfig.nextLabel,
-        previousLabel: stepConfig.previousLabel,
-        onNext: onNextForStep(index),
-      })),
-    [stepsConfig, onNextForStep]
-  )
+  const [submitting, setSubmitting] = useState(false)
 
   const handleSubmit = useCallback(async () => {
-    await form.formRef.current?.submit()
+    setSubmitting(true)
+    try {
+      await form.formRef.current?.submit()
+    } finally {
+      setSubmitting(false)
+    }
   }, [form])
 
-  const navigation = useWizardNavigation({
-    steps: wizardSteps,
-    onSubmit: handleSubmit,
-    allowStepSkipping: true,
-  })
-
-  const isLastStep = navigation.currentStep === wizardSteps.length - 1
-  const isFirstStep = navigation.currentStep === 0
-
   return (
-    <WizardProvider
-      currentStep={navigation.currentStep}
-      totalSteps={wizardSteps.length}
-      loading={navigation.loading}
-      goToStep={navigation.goToStep}
-      goNext={navigation.goNext}
-      goPrevious={navigation.goPrevious}
-      steps={wizardSteps}
-      allowStepSkipping={true}
-    >
-      <F0CanvasForm
-        formDefinition={formDefinition}
-        styling={{
-          showSectionsSidepanel: true,
-        }}
-        formRef={form.formRef}
-      />
-      <div className="absolute bottom-0 left-0 right-0 flex items-center justify-end gap-2 border-x-0 border-b-0 border-t border-solid border-f1-border-secondary bg-f1-background px-6 py-3">
-        {!isFirstStep && (
-          <F0Button
-            variant="outline"
-            onClick={navigation.goPrevious}
-            disabled={navigation.loading}
-            icon={ArrowLeft}
-            label={
-              wizardSteps[navigation.currentStep]?.previousLabel ?? "Previous"
-            }
-          />
-        )}
-        <F0Button
-          variant="default"
-          onClick={() => void navigation.goNext()}
-          loading={navigation.loading}
-          icon={isLastStep ? undefined : ArrowRight}
-          label={
-            isLastStep
-              ? (formDefinition.submitConfig?.label ?? "Submit")
-              : (wizardSteps[navigation.currentStep]?.nextLabel ?? "Next")
-          }
+    <div className="flex h-full flex-col">
+      <div className="min-h-0 flex-1 overflow-hidden [&>div]:h-full">
+        <F0CanvasForm
+          formDefinition={formDefinition}
+          styling={{
+            showSectionsSidepanel: true,
+          }}
+          formRef={form.formRef}
         />
       </div>
-    </WizardProvider>
+      <div className="flex shrink-0 items-center justify-end gap-2 border-x-0 border-b-0 border-t border-solid border-f1-border-secondary bg-f1-background px-6 py-3">
+        <F0Button
+          variant="default"
+          onClick={() => void handleSubmit()}
+          loading={submitting}
+          label={formDefinition.submitConfig?.label ?? "Submit"}
+        />
+      </div>
+    </div>
   )
 }
 
@@ -188,20 +96,41 @@ function PlainFormContent({
     formDefinition.sections && Object.keys(formDefinition.sections).length > 2
   )
 
-  const formStyling = useMemo(
-    () => ({
-      showSectionsSidepanel,
-    }),
-    [showSectionsSidepanel]
-  )
+  const [submitting, setSubmitting] = useState(false)
+
+  const handleSubmit = useCallback(async () => {
+    setSubmitting(true)
+    try {
+      await formRef.current?.submit()
+    } finally {
+      setSubmitting(false)
+    }
+  }, [formRef])
 
   return (
-    <div className={!showSectionsSidepanel ? "p-6" : undefined}>
-      <F0CanvasForm
-        formDefinition={formDefinition}
-        formRef={formRef}
-        styling={formStyling}
-      />
+    <div className="flex h-full flex-col">
+      <div
+        className={cn(
+          "min-h-0 flex-1",
+          showSectionsSidepanel
+            ? "overflow-hidden [&>div]:h-full"
+            : "overflow-auto p-6 pb-6"
+        )}
+      >
+        <F0CanvasForm
+          formDefinition={formDefinition}
+          formRef={formRef}
+          styling={{ showSectionsSidepanel }}
+        />
+      </div>
+      <div className="flex shrink-0 items-center justify-end gap-2 border-x-0 border-b-0 border-t border-solid border-f1-border-secondary bg-f1-background px-6 py-3">
+        <F0Button
+          variant="default"
+          onClick={() => void handleSubmit()}
+          loading={submitting}
+          label={formDefinition.submitConfig?.label ?? "Submit"}
+        />
+      </div>
     </div>
   )
 }
@@ -244,10 +173,12 @@ function VirtualFormContent() {
     steps: entry?.steps,
     module: entry?.module,
     description: entry?.description,
+    errorTriggerMode: entry?.errorTriggerMode,
     submitConfig: {
       type: "default",
       hideSubmitButton: true,
       hideActionBar: true,
+      ...(entry?.submitConfig?.label && { label: entry.submitConfig.label }),
     },
     onSubmit: async ({ data }) => {
       await entry?.onSubmit?.(data as Record<string, unknown>)
