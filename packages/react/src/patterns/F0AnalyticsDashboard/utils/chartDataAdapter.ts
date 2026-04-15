@@ -70,7 +70,9 @@ function barLineToCanonical(data: DashboardChartData): CanonicalChartData {
     categories,
     series: series.map((s) => ({
       name: s.name,
-      data: (s as { name: string; data: unknown[] }).data.map(numericValue),
+      data: ((s as { name: string; data?: unknown[] }).data ?? []).map(
+        numericValue
+      ),
     })),
   }
 }
@@ -123,13 +125,20 @@ function heatmapToCanonical(data: DashboardChartData): CanonicalChartData {
   const yCats = data.yCategories ?? []
   const points = data.data ?? []
 
+  if (xCats.length === 0 || yCats.length === 0) {
+    return { categories: [], series: [] }
+  }
+
+  // Build a lookup map for O(1) access instead of O(n) .find per cell
+  const pointMap = new Map<string, number>()
+  for (const [x, y, v] of points) {
+    pointMap.set(`${x},${y}`, v)
+  }
+
   // Pivot: each yCategory becomes a series, each xCategory a category
   const series = yCats.map((yLabel, yIdx) => ({
     name: yLabel,
-    data: xCats.map((_, xIdx) => {
-      const point = points.find(([px, py]) => px === xIdx && py === yIdx)
-      return point ? point[2] : 0
-    }),
+    data: xCats.map((_, xIdx) => pointMap.get(`${xIdx},${yIdx}`) ?? 0),
   }))
 
   return { categories: xCats, series }

@@ -23,6 +23,8 @@ interface MetricItemProps<Filters extends FiltersDefinition> {
   actions?: import("@/experimental/Navigation/Dropdown").DropdownItem[]
   editMode?: boolean
   handleDelete?: (itemId: string) => void
+  isFullscreen?: boolean
+  onFullscreenChange?: (fullscreen: boolean) => void
 }
 
 function formatValue(

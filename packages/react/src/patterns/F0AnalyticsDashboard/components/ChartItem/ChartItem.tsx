@@ -197,19 +197,24 @@ function buildChartProps(
     shared.showLegend = item.chart.showLegend
   }
 
-  if (targetType === "bar" && overrideOrientation) {
-    return {
-      ...config,
-      ...shared,
-      orientation: overrideOrientation,
-      categories: adapted.categories ?? [],
-      series: adapted.series,
-    } as F0DataChartProps
-  }
-
   // Build the final props by merging config + adapted data
   switch (targetType) {
-    case "bar":
+    case "bar": {
+      // Resolve orientation: explicit override > item config > default config
+      const orientation =
+        overrideOrientation ??
+        ("orientation" in item.chart
+          ? (item.chart as { orientation?: string }).orientation
+          : undefined) ??
+        (config as { orientation?: string }).orientation
+      return {
+        ...config,
+        ...shared,
+        ...(orientation ? { orientation } : {}),
+        categories: adapted.categories ?? [],
+        series: adapted.series,
+      } as F0DataChartProps
+    }
     case "line":
       return {
         ...config,
@@ -319,9 +324,17 @@ function ChartTableView({
   config: DashboardChartConfig
   data: DashboardChartData
 }) {
+  // After a chart type transform, item.chart.type may not match the actual
+  // data shape. Use detectDataShape to pick the right tabular converter.
+  const dataShape = detectDataShape(data)
+  const effectiveConfig =
+    dataShape !== config.type
+      ? ({ ...config, type: dataShape } as DashboardChartConfig)
+      : config
+
   const tabular = useMemo(
-    () => chartDataToTabular(config, data),
-    [config, data]
+    () => chartDataToTabular(effectiveConfig, data),
+    [effectiveConfig, data]
   )
 
   const sourceDefinition = useMemo(
@@ -381,6 +394,8 @@ interface ChartItemProps<Filters extends FiltersDefinition> {
     newType: string,
     orientation?: "vertical" | "horizontal"
   ) => void
+  isFullscreen?: boolean
+  onFullscreenChange?: (fullscreen: boolean) => void
 }
 
 export function ChartItem<Filters extends FiltersDefinition>({
@@ -390,6 +405,8 @@ export function ChartItem<Filters extends FiltersDefinition>({
   editMode,
   handleDelete,
   onTransformChart,
+  isFullscreen,
+  onFullscreenChange,
 }: ChartItemProps<Filters>) {
   const translations = useI18n()
   const [viewMode, setViewMode] = useState<"chart" | "table">("chart")
@@ -495,6 +512,8 @@ export function ChartItem<Filters extends FiltersDefinition>({
       handleDelete={handleDelete}
       itemId={item.id}
       chartTypeOptions={chartTypeOptions}
+      isFullscreen={isFullscreen}
+      onFullscreenChange={onFullscreenChange}
     >
       {data &&
         (viewMode === "table" ? (

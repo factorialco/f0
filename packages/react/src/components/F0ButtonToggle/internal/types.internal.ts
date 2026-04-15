@@ -34,6 +34,12 @@ export type F0ButtonToggleInternalProps = {
    * Whether to show a border around the button toggle.
    */
   withBorder?: boolean
+
+  /**
+   * @private
+   * Additional CSS class names to apply to the button root.
+   */
+  className?: string
 } & (
   | {
       selected: boolean

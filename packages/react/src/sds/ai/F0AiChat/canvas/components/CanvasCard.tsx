@@ -43,7 +43,7 @@ export function CanvasCard({
   return (
     <div
       className={cn(
-        "flex flex-col rounded-lg border border-solid",
+        "flex flex-col rounded-lg border border-solid bg-f1-background",
         isActive ? "border-f1-border-hover" : "border-f1-border-secondary"
       )}
     >

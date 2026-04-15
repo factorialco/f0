@@ -1,10 +1,11 @@
 import type { RefObject } from "react"
+
+import * as echarts from "echarts"
+import { useCallback, useMemo } from "react"
+
 import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 
-import { useCallback, useMemo } from "react"
-import * as echarts from "echarts"
-
-import { Download, Image } from "@/icons/app"
+import { Table, Image } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
 import type { DashboardChartConfig, DashboardChartData } from "../types"
@@ -83,12 +84,12 @@ export function useChartDownloadActions({
       },
       {
         label: t("ai.dataDownload.download", { format: "Excel" }),
-        icon: Download,
+        icon: Table,
         onClick: handleExcel,
       },
       {
         label: t("ai.dataDownload.download", { format: "CSV" }),
-        icon: Download,
+        icon: Table,
         onClick: handleCsv,
       },
     ]
