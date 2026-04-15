@@ -16,6 +16,7 @@ export type AttachedFile = {
     filename: string
     mimetype: string
   }
+  errorMessage?: string
 }
 
 export type UserTextPart = { type: "text"; text: string }

@@ -1,14 +1,19 @@
 import { useCallback, useMemo, useRef, useState } from "react"
 
+import { useI18n } from "@/lib/providers/i18n"
+
 import { type AiChatFileAttachmentConfig } from "../../../types"
 import { type AttachedFile } from "./types"
 import { filterByMimeType } from "./file-utils"
+
+const AUTO_REMOVE_ERROR_DELAY = 5000
 
 export function useFileAttachments(
   fileAttachments: AiChatFileAttachmentConfig | undefined
 ) {
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const translation = useI18n()
 
   const onUploadFiles = fileAttachments?.onUploadFiles
   const allowedMimeTypes = fileAttachments?.allowedMimeTypes
@@ -60,14 +65,23 @@ export function useFileAttachments(
             return { ...att, status: "error" as const }
           })
         )
-      } catch {
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : translation.ai.fileUploadError
+        const errorIds = newAttached.map((n) => n.id)
         setAttachedFiles((prev) =>
           prev.map((att) =>
-            newAttached.some((n) => n.id === att.id)
-              ? { ...att, status: "error" as const }
+            errorIds.includes(att.id)
+              ? { ...att, status: "error" as const, errorMessage }
               : att
           )
         )
+        // Auto-remove error files after a delay
+        setTimeout(() => {
+          setAttachedFiles((prev) =>
+            prev.filter((att) => !errorIds.includes(att.id))
+          )
+        }, AUTO_REMOVE_ERROR_DELAY)
       }
     },
     [onUploadFiles, maxFiles, attachedFiles.length, allowedMimeTypes]
