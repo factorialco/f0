@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.449.0](https://github.com/factorialco/f0/compare/f0-react-v1.448.0...f0-react-v1.449.0) (2026-04-15)
+
+
+### Features
+
+* **F0DataChart:** responsive accessibility patterns + universal chart type transforms ([#3928](https://github.com/factorialco/f0/issues/3928)) ([1806f37](https://github.com/factorialco/f0/commit/1806f373fe2dc75e420693dc307b97ebdd9231a6))
+
 ## [1.448.0](https://github.com/factorialco/f0/compare/f0-react-v1.447.0...f0-react-v1.448.0) (2026-04-15)
 
 
