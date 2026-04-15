@@ -9,7 +9,14 @@ import {
   type DropdownItem as DropdownItemType,
   type DropdownItemObject,
 } from "@/experimental/Navigation/Dropdown"
-import { Delete, Download, Ellipsis, Ai } from "@/icons/app"
+import {
+  Delete,
+  Download,
+  Ellipsis,
+  Maximize,
+  Minimize,
+  InfoCircleLine,
+} from "@/icons/app"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -57,6 +64,10 @@ interface DashboardItemProps {
    * entirely when omitted (backwards compatible).
    */
   explanation?: string
+  /** Whether this item is currently expanded to fill the grid */
+  isFullscreen?: boolean
+  /** Called when the user toggles fullscreen from the dropdown */
+  onFullscreenChange?: (fullscreen: boolean) => void
 }
 
 /**
@@ -81,6 +92,8 @@ export function DashboardItem({
   itemId,
   chartTypeOptions,
   explanation,
+  isFullscreen = false,
+  onFullscreenChange,
 }: DashboardItemProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   /**
@@ -108,6 +121,7 @@ export function DashboardItem({
   const hasDelete = editMode && handleDelete && itemId
   const hasChartTypes = chartTypeOptions && chartTypeOptions.length > 0
   const hasExplanation = !!explanation && explanation.trim().length > 0
+  const hasFullscreen = !!onFullscreenChange
   const showMenu = hasDownloads || hasDelete || hasChartTypes || hasExplanation
 
   if (error) {
@@ -163,10 +177,29 @@ export function DashboardItem({
             </OneEllipsis>
           )}
         </div>
-        {showMenu && (
-          <div
-            className={`flex-shrink-0 opacity-100 transition-opacity delay-150 duration-150 focus-within:delay-0 group-hover/dashitem:delay-0 sm:opacity-0 focus-within:sm:opacity-100 group-hover/dashitem:sm:opacity-100 ${isDropdownOpen ? "delay-0 sm:opacity-100" : ""}`}
-          >
+        <div
+          className={cn(
+            "flex flex-shrink-0 gap-0.5",
+            !isFullscreen &&
+              `opacity-100 transition-opacity delay-150 duration-150 focus-within:delay-0 group-hover/dashitem:delay-0 sm:opacity-0 focus-within:sm:opacity-100 group-hover/dashitem:sm:opacity-100 ${isDropdownOpen ? "delay-0 sm:opacity-100" : ""}`
+          )}
+        >
+          {hasFullscreen && (
+            <ButtonInternal
+              label={
+                isFullscreen
+                  ? translations.actions.collapse
+                  : translations.actions.expand
+              }
+              icon={isFullscreen ? Minimize : Maximize}
+              variant="ghost"
+              size="md"
+              hideLabel
+              compact
+              onClick={() => onFullscreenChange?.(!isFullscreen)}
+            />
+          )}
+          {showMenu && (
             <DropdownMenu
               open={isDropdownOpen}
               onOpenChange={handleDropdownOpenChange}
@@ -197,7 +230,7 @@ export function DashboardItem({
                 ) : (
                   <>
                     {hasChartTypes && (
-                      <div className="flex flex-col items-start gap-2 border-0 border-b border-solid border-f1-border-secondary p-3">
+                      <div className="mb-1 flex flex-col items-start gap-2 border-0 border-b border-solid border-f1-border-secondary p-3">
                         <OneEllipsis className="text-base font-medium text-f1-foreground-tertiary">
                           {translations.ai.dashboardItem.chartType}
                         </OneEllipsis>
@@ -218,6 +251,7 @@ export function DashboardItem({
                           size="lg"
                           required
                           withBorder={false}
+                          fullWidth
                         />
                       </div>
                     )}
@@ -225,15 +259,12 @@ export function DashboardItem({
                       <DropdownMenuGroup>
                         <DropdownMenuItem
                           onSelect={(e) => {
-                            // Keep the dropdown open and just swap its
-                            // content to the explanation view. No popover,
-                            // no race conditions, the trigger stays pressed.
                             e.preventDefault()
                             setIsExplanationView(true)
                           }}
                         >
                           <div className="flex w-full flex-row items-center gap-2">
-                            <F0Icon icon={Ai} />
+                            <F0Icon icon={InfoCircleLine} />
                             <span className="flex-1">
                               {translations.ai.dashboardItem.dataExplanation}
                             </span>
@@ -278,7 +309,10 @@ export function DashboardItem({
                     {hasDelete && (
                       <DropdownMenuGroup>
                         <DropdownMenuItem
-                          onClick={() => handleDelete(itemId)}
+                          onClick={() => {
+                            if (isFullscreen) onFullscreenChange?.(false)
+                            handleDelete(itemId)
+                          }}
                           className={cn("text-f1-foreground-critical")}
                         >
                           <div className="flex w-full flex-row items-center gap-2">
@@ -294,8 +328,8 @@ export function DashboardItem({
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
-        )}
+          )}
+        </div>
       </div>
       <div className="min-h-0 flex-1">{isLoading ? skeleton : children}</div>
     </div>

@@ -48,6 +48,12 @@ export type F0ButtonToggleGroupProps = {
    * @default true
    */
   withBorder?: boolean
+
+  /**
+   * Whether items should stretch to fill the full width of the container.
+   * @default false
+   */
+  fullWidth?: boolean
 } & (
   | {
       multiple: true

@@ -21,6 +21,7 @@ import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
 import type { ClarifyingQuestionState } from "../actions/core/clarifyingQuestion/types"
 import {
   type AiChatMode,
+  type AppendMessage,
   type CanvasContent,
   type VisualizationMode,
   type AiChatToolHint,
@@ -133,6 +134,14 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const sendMessageFunctionRef = useRef<((message: Message) => void) | null>(
     null
   )
+  // Store the appendMessages function bridged from CopilotKit
+  const appendMessagesFunctionRef = useRef<
+    ((messages: AppendMessage[]) => void) | null
+  >(null)
+  // Atomically replaces messages with a new thread (no race with reset)
+  const replaceMessagesFunctionRef = useRef<
+    ((messages: AppendMessage[]) => void) | null
+  >(null)
 
   const [currentThreadTitle, setCurrentThreadTitle] = useState<string | null>(
     null
@@ -157,6 +166,34 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     sendFn: ((message: Message) => void) | null
   ) => {
     sendMessageFunctionRef.current = sendFn
+  }
+
+  const setAppendMessagesFunction = (
+    fn: ((messages: AppendMessage[]) => void) | null
+  ) => {
+    appendMessagesFunctionRef.current = fn
+  }
+
+  const setReplaceMessagesFunction = (
+    fn: ((messages: AppendMessage[]) => void) | null
+  ) => {
+    replaceMessagesFunctionRef.current = fn
+  }
+
+  const appendMessages = (messages: AppendMessage[]) => {
+    appendMessagesFunctionRef.current?.(messages)
+  }
+
+  const clearAndAppend = (messages: AppendMessage[]) => {
+    // Reset UI state for a fresh conversation
+    setCurrentThreadTitle(null)
+    setIsLoadingThread(false)
+    setCanvasContent(null)
+    if (visualizationMode === "canvas") {
+      setVisualizationMode(previousVisualizationModeRef.current)
+    }
+    // Replace the current messages after resetting the related UI state
+    replaceMessagesFunctionRef.current?.(messages)
   }
 
   const clear = () => {
@@ -295,6 +332,10 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setPlaceholders,
         sendMessage,
         setSendMessageFunction,
+        appendMessages,
+        setAppendMessagesFunction,
+        clearAndAppend,
+        setReplaceMessagesFunction,
         disclaimer,
         resizable,
         chatWidth,
@@ -361,6 +402,10 @@ export function useAiChat(): AiChatProviderReturnValue {
       onThumbsDown: noopFn,
       sendMessage: noopFn,
       setSendMessageFunction: noopFn,
+      appendMessages: noopFn,
+      setAppendMessagesFunction: noopFn,
+      clearAndAppend: noopFn,
+      setReplaceMessagesFunction: noopFn,
       disclaimer: undefined,
       resizable: false,
       footer: undefined,

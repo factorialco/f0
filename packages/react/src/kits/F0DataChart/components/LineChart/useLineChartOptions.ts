@@ -57,7 +57,7 @@ function buildAreaStyle(color: string): echarts.LineSeriesOption["areaStyle"] {
   return {
     color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
       { offset: 0, color: `${color}59` },
-      { offset: 1, color: "rgba(0, 0, 0, 0)" },
+      { offset: 1, color: `${color}00` },
     ]),
   }
 }
