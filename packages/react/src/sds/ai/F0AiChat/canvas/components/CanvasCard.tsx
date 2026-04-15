@@ -15,7 +15,7 @@ export type CanvasCardProps = {
   /** Secondary description line */
   description: string
   /** Called when the user clicks the "Open" button */
-  onOpen: () => void
+  onOpen?: () => void
   /** Called when the user clicks the "Close" button (active state) */
   onClose: () => void
   /** Whether this card's content is currently shown in the canvas */
@@ -43,8 +43,9 @@ export function CanvasCard({
   return (
     <div
       className={cn(
-        "flex flex-row hover:border-f1-border-hover items-center justify-between gap-3 rounded-lg border border-solid border-f1-border-secondary px-3 py-2",
-        !isActive && "border-f1-border-secondary cursor-pointer"
+        "flex flex-col hover:border-f1-border-hover items-center justify-between gap-3 rounded-lg border border-solid border-f1-border-secondary px-3 py-2",
+        !isActive && "border-f1-border-secondary cursor-pointer",
+        !!children && "pb-3"
       )}
       onClick={!isActive ? onOpen : undefined}
     >
@@ -58,16 +59,18 @@ export function CanvasCard({
             {description}
           </OneEllipsis>
         </div>
-        <F0Button
-          variant="neutral"
-          size="md"
-          label={
-            isActive
-              ? translations.actions.close
-              : translations.ai.reportCard.openButton
-          }
-          onClick={isActive ? onClose : onOpen}
-        />
+        {(isActive || !!onOpen) && (
+          <F0Button
+            variant="neutral"
+            size="md"
+            label={
+              isActive
+                ? translations.actions.close
+                : translations.ai.reportCard.openButton
+            }
+            onClick={isActive ? onClose : onOpen}
+          />
+        )}
       </div>
       {children}
     </div>

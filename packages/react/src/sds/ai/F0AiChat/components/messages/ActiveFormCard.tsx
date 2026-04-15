@@ -33,6 +33,8 @@ export function ActiveFormCard(): ReactNode {
         module={form.module}
         cardTitle={cardTitle}
         cardDescription={cardDescription}
+        fieldDescriptions={form.fieldDescriptions}
+        formValues={form.formValues}
       />
     </div>
   )

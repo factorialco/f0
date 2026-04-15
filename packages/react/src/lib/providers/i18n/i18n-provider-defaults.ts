@@ -49,6 +49,7 @@ export const defaultTranslations = {
     expand: "Expand",
     showAll: "Show all",
     showLess: "Show less",
+    seeMore: "See more",
     skipToContent: "Skip to content",
     view: "View",
     unselect: "Unselect",
@@ -327,6 +328,9 @@ export const defaultTranslations = {
     reportCard: {
       reportLabel: "Report",
       openButton: "Open",
+    },
+    formCard: {
+      moreFields: "Open to see all fields",
     },
     dataDownload: {
       title: "Download",
