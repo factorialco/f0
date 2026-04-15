@@ -10,6 +10,7 @@ import { useI18n } from "@/lib/providers/i18n"
 
 import type { DashboardChartConfig, DashboardChartData } from "../types"
 
+import { detectDataShape } from "../utils/chartDataAdapter"
 import { chartDataToTabular } from "../utils/chartDataToTabular"
 import {
   downloadAsCsv,
@@ -54,17 +55,25 @@ export function useChartDownloadActions({
     [chartContainerRef, title]
   )
 
+  const effectiveConfig = useMemo(() => {
+    if (!data) return chartConfig
+    const dataShape = detectDataShape(data, chartConfig.type)
+    return dataShape !== chartConfig.type
+      ? ({ ...chartConfig, type: dataShape } as DashboardChartConfig)
+      : chartConfig
+  }, [chartConfig, data])
+
   const handleExcel = useCallback(() => {
     if (!data) return
-    const tabular = chartDataToTabular(chartConfig, data)
+    const tabular = chartDataToTabular(effectiveConfig, data)
     downloadAsExcel(tabular.columns, tabular.rows, title)
-  }, [chartConfig, data, title])
+  }, [effectiveConfig, data, title])
 
   const handleCsv = useCallback(() => {
     if (!data) return
-    const tabular = chartDataToTabular(chartConfig, data)
+    const tabular = chartDataToTabular(effectiveConfig, data)
     downloadAsCsv(tabular.columns, tabular.rows, title)
-  }, [chartConfig, data, title])
+  }, [effectiveConfig, data, title])
 
   return useMemo(() => {
     if (!data) return []

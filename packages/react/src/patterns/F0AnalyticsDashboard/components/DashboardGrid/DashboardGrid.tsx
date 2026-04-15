@@ -149,6 +149,13 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
     return () => observer.disconnect()
   }, [])
 
+  // Exit fullscreen if the item is no longer in the grid (deleted, filtered, etc.)
+  useEffect(() => {
+    if (fullscreenItemId && !itemMap.has(fullscreenItemId)) {
+      setFullscreenItemId(null)
+    }
+  }, [fullscreenItemId, itemMap])
+
   // ─── Emit layout changes ────────────────────────────────────
   const emitLayout = useCallback(
     (newRows: Row[]) => {
@@ -366,8 +373,8 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
         </div>
       )
     }
-    // Item not found — exit fullscreen
-    setFullscreenItemId(null)
+    // Item not found — the cleanup effect will exit fullscreen on the next cycle
+    return null
   }
 
   return (

@@ -171,7 +171,7 @@ function buildChartProps(
   const targetType = overrideType ?? item.chart.type
   // Detect actual data shape — after a transform, item.chart.type may have
   // changed but the data from fetchData still has its original shape.
-  const dataShape = detectDataShape(data)
+  const dataShape = detectDataShape(data, targetType)
 
   // When the data shape matches the target and chart type, pass through
   // directly to preserve type-specific features (targets, color overrides).
@@ -326,7 +326,7 @@ function ChartTableView({
 }) {
   // After a chart type transform, item.chart.type may not match the actual
   // data shape. Use detectDataShape to pick the right tabular converter.
-  const dataShape = detectDataShape(data)
+  const dataShape = detectDataShape(data, config.type)
   const effectiveConfig =
     dataShape !== config.type
       ? ({ ...config, type: dataShape } as DashboardChartConfig)
@@ -448,7 +448,9 @@ export function ChartItem<Filters extends FiltersDefinition>({
 
   // Compute which target types are valid based on the actual data shape
   // (not item.chart.type, which may have changed after a transform)
-  const dataShape = data ? detectDataShape(data) : item.chart.type
+  const dataShape = data
+    ? detectDataShape(data, item.chart.type)
+    : item.chart.type
   const allowedTargets = useMemo(
     () => compatibleTargetTypes(dataShape),
     [dataShape]

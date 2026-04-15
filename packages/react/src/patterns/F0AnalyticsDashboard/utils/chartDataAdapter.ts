@@ -150,7 +150,8 @@ function heatmapToCanonical(data: DashboardChartData): CanonicalChartData {
  * data returned by `fetchData` still has its original shape.
  */
 export function detectDataShape(
-  data: DashboardChartData
+  data: DashboardChartData,
+  hint?: DashboardChartConfig["type"]
 ): DashboardChartConfig["type"] {
   // Heatmap: has xCategories/yCategories + data tuples
   if (
@@ -176,9 +177,10 @@ export function detectDataShape(
   ) {
     return "gauge"
   }
-  // Funnel/Pie: series is a single object with a `data` array of {name, value}
+  // Funnel/Pie: series is a single object with a `data` array of {name, value}.
+  // Both shapes are structurally identical — use the hint to disambiguate.
   if (data.series && !Array.isArray(data.series) && "data" in data.series) {
-    return "funnel"
+    return hint === "pie" ? "pie" : "funnel"
   }
   // Bar/Line: series is an array
   return "bar"

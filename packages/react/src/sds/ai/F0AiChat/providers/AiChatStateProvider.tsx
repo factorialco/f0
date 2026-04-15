@@ -192,7 +192,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     if (visualizationMode === "canvas") {
       setVisualizationMode(previousVisualizationModeRef.current)
     }
-    // Atomically replace messages + assign new threadId (no race with reset)
+    // Replace the current messages after resetting the related UI state
     replaceMessagesFunctionRef.current?.(messages)
   }
 
