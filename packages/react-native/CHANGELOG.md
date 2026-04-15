@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.50.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.49.1...f0-react-native-v0.50.0) (2026-04-15)
+
+
+### Features
+
+* **F0Icon:** add tintColor prop for runtime color customization and … ([#3934](https://github.com/factorialco/f0/issues/3934)) ([403d9dd](https://github.com/factorialco/f0/commit/403d9dd18cefe77f386f4cd3c833085e7ce52e62))
+
 ## [0.49.1](https://github.com/factorialco/f0/compare/f0-react-native-v0.49.0...f0-react-native-v0.49.1) (2026-04-07)
 
 
