@@ -48,9 +48,9 @@ export function CanvasCard({
       )}
       onClick={!isActive ? onOpen : undefined}
     >
-      <div className="flex min-w-0 flex-row items-center gap-3">
+      <div className="flex min-w-0 w-full flex-row items-center gap-3">
         {!!cardModule && <F0AvatarModule module={cardModule} size="lg" />}
-        <div className="flex min-w-0 flex-col">
+        <div className="flex flex-1 min-w-0 flex-col">
           <OneEllipsis className="text-lg font-semibold text-f1-foreground">
             {title}
           </OneEllipsis>

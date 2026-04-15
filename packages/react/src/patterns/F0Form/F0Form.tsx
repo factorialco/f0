@@ -194,7 +194,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
 
   if (showSectionsSidepanel && tocItems.length > 0) {
     return (
-      <div className="flex w-full gap-4">
+      <div className="flex w-full gap-4 overflow-scroll">
         <div className="sticky top-4 h-fit shrink-0 self-start pt-3">
           <F0TableOfContent
             items={tocItems}
@@ -791,30 +791,11 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     [form, resetErrorNavigation]
   )
 
-  // Expose form methods via ref for external control
-  useEffect(() => {
-    if (formRef) {
-      formRef.current = buildRefMethods({ stateCallback: true })
-    }
-
-    return () => {
-      if (formRef) {
-        formRef.current = null
-      }
-    }
-  }, [formRef, buildRefMethods])
-
-  // Notify useF0Form hook of state changes
-  useEffect(() => {
-    if (stateCallbackRef.current) {
-      stateCallbackRef.current({
-        isSubmitting,
-        hasErrors,
-      })
-    }
-  }, [isSubmitting, hasErrors])
-
-  // Auto-register with AI form registry (when available)
+  // Auto-register with AI form registry (when available).
+  // IMPORTANT: this effect MUST be declared BEFORE the formRef exposure
+  // effect below. React runs effect cleanups in declaration order during
+  // unmount, and unregister() needs formRef.current to still be populated
+  // so it can capture the current form values into the virtual entry.
   const aiFormRegistry = useF0AiFormRegistry()
   const internalFormRef = useRef<F0FormRef | null>(null)
   // Keep a stable ref that mirrors formRef or internalFormRef
@@ -852,6 +833,29 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     buildRefMethods,
     defaultValuesParamsSchema,
   ])
+
+  // Expose form methods via ref for external control
+  useEffect(() => {
+    if (formRef) {
+      formRef.current = buildRefMethods({ stateCallback: true })
+    }
+
+    return () => {
+      if (formRef) {
+        formRef.current = null
+      }
+    }
+  }, [formRef, buildRefMethods])
+
+  // Notify useF0Form hook of state changes
+  useEffect(() => {
+    if (stateCallbackRef.current) {
+      stateCallbackRef.current({
+        isSubmitting,
+        hasErrors,
+      })
+    }
+  }, [isSubmitting, hasErrors])
 
   // Notify the AI registry whenever the user changes a field value so that
   // formsOnCurrentPage always reflects the latest values.
@@ -981,7 +985,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     <F0FormContext.Provider value={contextValue}>
       <FormProvider {...form}>
         {showSectionsSidepanel && tocItems.length > 0 ? (
-          <div className="flex w-full gap-4">
+          <div className="flex w-full gap-4 overflow-scroll">
             {/* Sections sidebar */}
             <div className="sticky top-4 h-fit shrink-0 self-start pt-3">
               <F0TableOfContent

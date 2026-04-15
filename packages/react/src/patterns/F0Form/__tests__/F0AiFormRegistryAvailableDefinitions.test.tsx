@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import { describe, expect, it, vi } from "vitest"
 import { z } from "zod"
 
@@ -10,6 +10,7 @@ import {
   F0AiFormRegistryProvider,
   useF0AiFormRegistry,
 } from "../F0AiFormRegistry"
+import { F0Form } from "../F0Form"
 import { f0FormField } from "../f0Schema"
 
 function RegistryInspector({
@@ -407,6 +408,7 @@ describe("F0AiFormRegistryProvider availableFormDefinitions", () => {
       role: {
         label: "Role",
         section: "work",
+        fieldType: "select",
       },
     })
   })
@@ -868,6 +870,93 @@ describe("F0AiFormRegistryProvider availableFormDefinitions", () => {
 
     await waitFor(() => {
       expect(capturedRegistry!.activeForm).toBeNull()
+    })
+  })
+
+  it("preserves virtual form values after rendered F0Form unmounts", async () => {
+    const formSchema = z.object({
+      name: f0FormField(z.string().min(1, "Name is required"), {
+        label: "Name",
+      }),
+      email: f0FormField(z.string().email("Invalid email"), {
+        label: "Email",
+      }),
+    })
+
+    const definitions: F0AiAvailableFormDefinition[] = [
+      {
+        name: "canvas-form",
+        schema: formSchema,
+        defaultValues: { name: "", email: "" },
+      },
+    ]
+
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+    let toggleForm: () => void
+
+    function TestWrapper() {
+      const [showForm, setShowForm] = useState(false)
+      toggleForm = () => setShowForm((prev) => !prev)
+
+      return (
+        <F0AiFormRegistryProvider availableFormDefinitions={definitions}>
+          <RegistryInspector
+            onRegistry={(r) => {
+              capturedRegistry = r
+            }}
+          />
+          {showForm && (
+            <F0Form
+              name="canvas-form"
+              schema={formSchema}
+              defaultValues={{ name: "Alice", email: "alice@test.com" }}
+              onSubmit={async () => ({ success: true })}
+            />
+          )}
+        </F0AiFormRegistryProvider>
+      )
+    }
+
+    render(<TestWrapper />)
+
+    // Wait for virtual form to be registered
+    await waitFor(() => {
+      expect(capturedRegistry?.get("canvas-form")).toBeDefined()
+      expect(capturedRegistry!.get("canvas-form")!.virtual).toBe(true)
+    })
+
+    // Mount the F0Form (simulates opening the canvas)
+    act(() => {
+      toggleForm()
+    })
+
+    // Wait for the rendered form to take over the entry
+    await waitFor(() => {
+      const entry = capturedRegistry!.get("canvas-form")
+      expect(entry).toBeDefined()
+      expect(entry!.virtual).toBeUndefined()
+    })
+
+    // Values should be in the rendered form
+    await waitFor(() => {
+      const ref = capturedRegistry!.get("canvas-form")!.ref.current
+      expect(ref).not.toBeNull()
+      expect(ref!.getValues().name).toBe("Alice")
+      expect(ref!.getValues().email).toBe("alice@test.com")
+    })
+
+    // Unmount the F0Form (simulates closing the canvas)
+    act(() => {
+      toggleForm()
+    })
+
+    // The entry should revert to virtual and PRESERVE the rendered form's values
+    await waitFor(() => {
+      const entry = capturedRegistry!.get("canvas-form")
+      expect(entry).toBeDefined()
+      expect(entry!.virtual).toBe(true)
+      expect(entry!.ref.current!.getValues().name).toBe("Alice")
+      expect(entry!.ref.current!.getValues().email).toBe("alice@test.com")
     })
   })
 })

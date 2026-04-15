@@ -140,15 +140,13 @@ function WizardCanvasContent({
       steps={wizardSteps}
       allowStepSkipping={true}
     >
-      <div className="relative flex h-full flex-1 flex-row">
-        <F0CanvasForm
-          formDefinition={formDefinition}
-          styling={{
-            showSectionsSidepanel: true,
-          }}
-          formRef={form.formRef}
-        />
-      </div>
+      <F0CanvasForm
+        formDefinition={formDefinition}
+        styling={{
+          showSectionsSidepanel: true,
+        }}
+        formRef={form.formRef}
+      />
       <div className="absolute bottom-0 left-0 right-0 flex items-center justify-end gap-2 border-x-0 border-b-0 border-t border-solid border-f1-border-secondary bg-f1-background px-6 py-3">
         {!isFirstStep && (
           <F0Button

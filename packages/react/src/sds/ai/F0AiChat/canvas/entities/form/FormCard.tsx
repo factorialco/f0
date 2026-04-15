@@ -1,5 +1,6 @@
 import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 
+import { useAutoOpenCanvas } from "../../../hooks/useAutoOpenCanvas"
 import { useAiChat } from "../../../providers/AiChatStateProvider"
 import { CanvasCard } from "../../components/CanvasCard"
 
@@ -10,9 +11,9 @@ export type FormCardProps = {
   formDescription?: string
   /** Module avatar for the card */
   module?: ModuleId
-  /** Custom title override for the card (set by the AI via pickActiveForm) */
+  /** Custom title override for the card (set by the AI via fillForm) */
   cardTitle: string
-  /** Custom description override for the card (set by the AI via pickActiveForm) */
+  /** Custom description override for the card (set by the AI via fillForm) */
   cardDescription: string
 }
 
@@ -45,6 +46,8 @@ export function FormCard({
       formDescription,
       formModule,
     })
+
+  useAutoOpenCanvas(formName, handleOpen)
 
   return (
     <CanvasCard
