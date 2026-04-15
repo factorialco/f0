@@ -60,12 +60,18 @@ export function useFileAttachments(
                 uploadedFile: uploaded[idx],
               }
             }
-            return { ...att, status: "error" as const }
+            return {
+              ...att,
+              status: "error" as const,
+              errorMessage: translation.ai.fileUploadError,
+            }
           })
         )
       } catch (err) {
         const errorMessage =
-          err instanceof Error ? err.message : translation.ai.fileUploadError
+          err instanceof Error && err.message
+            ? err.message
+            : translation.ai.fileUploadError
         const errorIds = newAttached.map((n) => n.id)
         setAttachedFiles((prev) =>
           prev.map((att) =>
