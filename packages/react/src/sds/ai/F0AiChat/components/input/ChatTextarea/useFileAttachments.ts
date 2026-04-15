@@ -6,8 +6,6 @@ import { type AiChatFileAttachmentConfig } from "../../../types"
 import { type AttachedFile } from "./types"
 import { filterByMimeType } from "./file-utils"
 
-const AUTO_REMOVE_ERROR_DELAY = 5000
-
 export function useFileAttachments(
   fileAttachments: AiChatFileAttachmentConfig | undefined
 ) {
@@ -76,12 +74,6 @@ export function useFileAttachments(
               : att
           )
         )
-        // Auto-remove error files after a delay
-        setTimeout(() => {
-          setAttachedFiles((prev) =>
-            prev.filter((att) => !errorIds.includes(att.id))
-          )
-        }, AUTO_REMOVE_ERROR_DELAY)
       }
     },
     [onUploadFiles, maxFiles, attachedFiles.length, allowedMimeTypes]
