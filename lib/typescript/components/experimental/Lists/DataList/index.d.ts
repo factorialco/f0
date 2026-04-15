@@ -1,4 +1,5 @@
 import React, { ReactElement } from "react";
+import { F0TagAlertProps, F0TagStatusProps } from "../../../exports";
 import { type IconType } from "../../../primitives/F0Icon";
 import { DotTagProps } from "../../../Tags/DotTag";
 export type DataListProps = {
@@ -47,12 +48,13 @@ type TeamItemProps = {
 };
 declare const TeamItem: ({ action, name }: TeamItemProps) => React.JSX.Element;
 type DotTagItemProps = DotTagProps;
+type CardMetadataStatus = F0TagStatusProps["variant"] | "completed";
 type CardMetadataProperty = {
     icon?: IconType;
     type: "text" | "progress" | "statusTag" | "alertTag";
     value: string;
-    status?: "warning" | "critical" | "completed" | "neutral";
-    level?: "info" | "warning" | "critical";
+    status?: CardMetadataStatus;
+    level?: F0TagAlertProps["level"];
 };
 type CardItemProps = {
     name: string;
