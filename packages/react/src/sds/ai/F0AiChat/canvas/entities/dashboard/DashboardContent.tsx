@@ -458,14 +458,16 @@ export function DashboardContent({
     }
   }, [content.config, itemTransforms])
 
-  // Derive a refresh key tied only to the data identity (fetchSpecs reference).
-  // The canvas-level refreshKey from CanvasPanel bumps on every content
-  // reference change, which includes save (layout/transform persistence). On
-  // save, fetchSpecs is preserved by reference (handleSave only spreads the
-  // config / items), so this key stays stable and we avoid a redundant
-  // dashboard remount + recompute. LLM regeneration produces a new fetchSpecs
-  // reference, which correctly bumps this key and triggers a real refetch.
-  const dataRefreshKey = useMemo(() => Date.now(), [content.config.fetchSpecs])
+  // Derive a refresh key tied to data identity (fetchSpecs reference) AND
+  // the parent refresh key from CanvasPanel. The parent key bumps on manual
+  // refresh (button click) and on content reference changes. We include it
+  // so that manual refreshes trigger a dashboard remount + recompute.
+  // On save, fetchSpecs is preserved by reference and _parentRefreshKey
+  // doesn't change, so we avoid a redundant recompute.
+  const dataRefreshKey = useMemo(
+    () => Date.now(),
+    [content.config.fetchSpecs, _parentRefreshKey]
+  )
 
   return (
     <>
