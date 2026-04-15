@@ -1,13 +1,17 @@
 import { AgentState } from '@livekit/components-react';
 import { AIMessage } from '@copilotkit/shared';
+import * as AvatarPrimitive from '@radix-ui/react-avatar';
 import { ClassValue } from 'cva';
 import { ComponentProps } from 'react';
 import { CopilotKitProps } from '@copilotkit/react-core';
+import { f1Colors } from '@factorialco/f0-core';
 import { ForwardRefExoticComponent } from 'react';
 import { InputProps } from '@copilotkit/react-ui';
 import { JSX as JSX_2 } from 'react';
 import { LocalAudioTrack } from 'livekit-client';
 import { Message } from '@copilotkit/shared';
+import * as React_2 from 'react';
+import { ReactElement } from 'react';
 import { ReactNode } from 'react';
 import { RefAttributes } from 'react';
 import { RemoteAudioTrack } from 'livekit-client';
@@ -15,6 +19,7 @@ import { SVGProps } from 'react';
 import * as SwitchPrimitive from '@radix-ui/react-switch';
 import { TrackReferenceOrPlaceholder } from '@livekit/components-react';
 import { VariantProps } from 'cva';
+import { WithDataTestIdReturnType } from '../../../lib/data-testid';
 
 export declare type ActionItemStatus = (typeof actionItemStatuses)[number];
 
@@ -44,12 +49,37 @@ export declare type AiChatCredits = {
 };
 
 /**
+ * Credit warning configuration.
+ * Groups severity level and action callbacks into a single object.
+ *
+ * When provided, a warning banner is shown above the chat textarea.
+ */
+export declare type AiChatCreditWarning = {
+    /** The severity level of the warning. */
+    level: "soft";
+    /** Called when the user dismisses the credit warning banner. */
+    onDismiss?: () => void;
+    /** Called when the user clicks the "Get Credits" button. */
+    onGetCredits?: () => void;
+};
+
+/**
  * Disclaimer configuration for the chat input
  */
 declare type AiChatDisclaimer = {
     text: string;
     link?: string;
     linkText?: string;
+};
+
+export declare type AiChatFileAttachmentConfig = {
+    onUploadFiles: (files: File[]) => Promise<UploadedFile[]>;
+    allowedMimeTypes?: string | string[];
+    /**
+     * Maximum number of files that can be attached at once.
+     * Omit or pass undefined for no limit.
+     */
+    maxFiles?: number;
 };
 
 /**
@@ -98,12 +128,11 @@ export declare type AiChatProviderProps = {
      */
     VoiceMode?: React.ComponentType;
     /**
-     * Async resolver functions for entity references in markdown.
-     * Used to fetch profile data for inline entity mentions (hover cards).
-     * The consuming app provides these so the chat can resolve entity IDs
-     * (e.g. employee IDs) into rich profile data without knowing the API.
+     * Configuration for entity references in markdown.
+     * Groups resolver functions (data fetching for hover cards) and
+     * URL builders (navigation links) for each entity type.
      */
-    entityResolvers?: EntityResolvers;
+    entityRefs?: EntityRefs;
     /**
      * Available tool hints that the user can activate to provide intent context
      * to the AI. Renders a selector button next to the send button.
@@ -115,6 +144,15 @@ export declare type AiChatProviderProps = {
      * Groups fetchUsage, upgradePlanUrl, and company/plan display info.
      */
     credits?: AiChatCredits;
+    /**
+     * Credit warning configuration. When provided, shows a warning banner above the chat textarea.
+     * Groups severity level and action callbacks.
+     */
+    creditWarning?: AiChatCreditWarning;
+    /**
+     * File attachment configuration. When provided, enables file uploads in the chat.
+     */
+    fileAttachments?: AiChatFileAttachmentConfig;
     onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
         threadId: string;
         feedback: string;
@@ -179,6 +217,20 @@ declare type AiChatProviderReturnValue = {
     sendMessage: (message: string | Message) => void;
     /* Excluded from this release type: setSendMessageFunction */
     /**
+     * Append messages to the current conversation.
+     * Useful for injecting pre-built assistant responses (e.g. dashboards)
+     * from outside the chat. IDs are generated internally.
+     */
+    appendMessages: (messages: AppendMessage[]) => void;
+    /* Excluded from this release type: setAppendMessagesFunction */
+    /**
+     * Atomically clear the conversation and inject new messages.
+     * Starts a fresh thread without the race condition of calling
+     * clear() + appendMessages() separately.
+     */
+    clearAndAppend: (messages: AppendMessage[]) => void;
+    /* Excluded from this release type: setReplaceMessagesFunction */
+    /**
      * Current width of the chat window (for resizable mode)
      */
     chatWidth: number;
@@ -224,7 +276,18 @@ declare type AiChatProviderReturnValue = {
     inProgress: boolean;
     /** Set the in-progress state (synced from CopilotKit's isLoading) */
     setInProgress: (value: boolean) => void;
-} & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable" | "entityResolvers" | "toolHints" | "credits"> & {
+    /** The current clarifying question shown in the textarea, or null if none */
+    clarifyingQuestion: ClarifyingQuestionState | null;
+    /** Set the current clarifying question (or null to dismiss) */
+    setClarifyingQuestion: React.Dispatch<React.SetStateAction<ClarifyingQuestionState | null>>;
+    /**
+     * Whether files are currently being dragged over the chat window.
+     * Set by the ChatWindow drag listeners and read by the DropOverlay
+     * to control its visibility.
+     */
+    fileDragOver: boolean;
+    /* Excluded from this release type: setFileDragOver */
+} & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable" | "entityRefs" | "toolHints" | "credits" | "creditWarning" | "fileAttachments"> & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null;
     /** Open the canvas panel with the given content */
@@ -253,9 +316,11 @@ declare interface AiChatState {
     historyEnabled?: boolean;
     footer?: React.ReactNode;
     VoiceMode?: React.ComponentType;
-    entityResolvers?: EntityResolvers;
+    entityRefs?: EntityRefs;
     toolHints?: AiChatToolHint[];
     credits?: AiChatCredits;
+    creditWarning?: AiChatCreditWarning;
+    fileAttachments?: AiChatFileAttachmentConfig;
     placeholders?: string[];
     setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>;
     onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
@@ -291,9 +356,6 @@ export declare type AiChatToolHint = {
     prompt: string;
 };
 
-/**
- * Tracking options for the AI chat
- */
 declare type AiChatTrackingOptions = {
     onVisibility?: () => void;
     onClose?: () => void;
@@ -316,6 +378,34 @@ export declare interface AiChatTranslationsProviderProps {
     children: React.ReactNode;
     translations: AiChatTranslations;
 }
+
+export declare type AiInsightCardContent = {
+    content: "text";
+} | {
+    content: "person";
+    avatar: Pick<F0AvatarPersonProps, "firstName" | "lastName" | "src">;
+} | {
+    content: "people";
+    avatars: Array<Pick<F0AvatarPersonProps, "firstName" | "lastName" | "src">>;
+} | {
+    content: "team";
+    avatar: Pick<F0AvatarTeamProps, "name" | "src">;
+} | {
+    content: "company";
+    avatar: Pick<F0AvatarCompanyProps, "name" | "src">;
+} | {
+    content: "alert";
+    level: Level;
+    alertLabel: string;
+} | {
+    content: "balance";
+    balance: BalanceConfig;
+} | {
+    content: "sparkline";
+    data: SparklineDataPoint[];
+    label: string;
+    invertStatus?: boolean;
+};
 
 /**
  * Default AI chat translations — derived from the global defaultTranslations
@@ -372,7 +462,7 @@ export declare const aiTranslations: {
         readonly unpinChat: "Unpin chat";
         readonly deleteChat: "Delete chat";
         readonly ask: "Ask One";
-        readonly viewProfile: "View profile";
+        readonly view: "View";
         readonly tools: "Tools";
         readonly credits: {
             readonly title: "Credits";
@@ -387,9 +477,17 @@ export declare const aiTranslations: {
             readonly openButton: "Open";
         };
         readonly dataDownload: {
+            readonly title: "Download";
             readonly download: "Download {{format}}";
             readonly exportDashboard: "Export dashboard as {{format}}";
             readonly exporting: "Exporting...";
+            readonly rows: "{{amount}} rows";
+        };
+        readonly dashboardItem: {
+            readonly chartType: "Chart type";
+            readonly errorTitle: "Error loading data";
+            readonly retry: "Retry";
+            readonly dataExplanation: "Where does this data come from?";
         };
         readonly pong: {
             readonly title: "Pong";
@@ -408,6 +506,18 @@ export declare const aiTranslations: {
                 readonly description: "Your company has run out of AI credits.";
                 readonly actionLabel: "Get credits";
             };
+        };
+        readonly attachFile: "Attach file";
+        readonly removeFile: "Remove";
+        readonly dropFilesHere: "Drop your files here";
+        readonly clarifyingQuestion: {
+            readonly submit: "Submit";
+            readonly next: "Next";
+            readonly back: "Back";
+            readonly typeYourAnswer: "Type your answer…";
+            readonly stepOf: "{{current}} of {{total}}";
+            readonly custom: "own answer";
+            readonly skipped: "skipped";
         };
         readonly growth: {
             readonly demoCard: {
@@ -435,10 +545,126 @@ export declare const aiTranslations: {
 };
 
 /**
+ * A message to inject via appendMessages.
+ * IDs are generated internally — callers only provide role, content, and
+ * optional tool calls.
+ */
+export declare type AppendMessage = {
+    role: "user" | "assistant";
+    content: string;
+    toolCalls?: AppendToolCall[];
+};
+
+/**
+ * A tool call to inject via appendMessages.
+ * IDs are generated internally — callers only provide the function payload.
+ */
+export declare type AppendToolCall = {
+    function: {
+        name: string;
+        arguments: string;
+    };
+};
+
+declare type AvatarBadge = ({
+    type: "module";
+    module: ModuleId;
+} | {
+    type: Exclude<BadgeProps["type"], undefined>;
+    icon: BadgeProps["icon"];
+}) & {
+    tooltip?: string;
+};
+
+declare type AvatarSize = (typeof avatarSizes)[number];
+
+declare const avatarSizes: readonly ["xs", "sm", "md", "lg", "xl", "2xl"];
+
+declare interface BadgeProps extends VariantProps<typeof badgeVariants> {
+    icon: IconType;
+    type?: VariantProps<typeof badgeVariants>["type"];
+    size?: keyof typeof iconSizes;
+}
+
+declare const badgeVariants: (props?: ({
+    type?: "critical" | "warning" | "positive" | "neutral" | "highlight" | undefined;
+    size?: "lg" | "md" | "sm" | "xs" | undefined;
+} & ({
+    class?: ClassValue;
+    className?: never;
+} | {
+    class?: never;
+    className?: ClassValue;
+})) | undefined) => string;
+
+export declare type BalanceConfig = {
+    amount: RelaxedNumericWithFormatter | Numeric;
+    percentage?: (Omit<RelaxedNumericWithFormatter, "value"> & {
+        value: Omit<Numeric, "units" | "unitsPosition">;
+    }) | Omit<Numeric, "units" | "unitsPosition"> | null;
+    invertStatus?: boolean;
+    hint?: string;
+};
+
+declare type BaseAvatarProps = {
+    /**
+     * The type of the avatar.
+     */
+    type: InternalAvatarProps["type"];
+    /**
+     * The name of the avatar.
+     */
+    name: string | string[];
+    /**
+     * The source of the avatar's image.
+     */
+    src?: string;
+    /**
+     * This is a workaround until we implement the ability to deal with images
+     */
+    flag?: ReactElement;
+    /**
+     * Optional icon to display on the avatar. Will override the name or image if provided.
+     */
+    icon?: {
+        icon: IconType;
+        color?: F0IconProps["color"];
+    };
+    /**
+     * The color of the avatar.
+     * @default "random"
+     */
+    color?: InternalAvatarProps["color"] | "random";
+    /**
+     * The badge to display on the avatar. Can be a module badge or a custom badge.
+     */
+    badge?: AvatarBadge;
+} & Partial<Pick<InternalAvatarProps, "aria-label" | "aria-labelledby">> & ({
+    size: AvatarSize;
+} | {
+    /**
+     * @deprecated Use AvatarSize instead (xs, sm, md, lg, xl, 2xl)
+     */
+    size: InternalAvatarProps["size"];
+});
+
+/**
+ * Profile data for a candidate entity (ATS applicant), resolved asynchronously
+ * and displayed in the entity reference hover card.
+ */
+declare type CandidateProfile = {
+    id: string | number;
+    firstName: string;
+    lastName: string;
+    avatarUrl?: string;
+    source?: string;
+};
+
+/**
  * Discriminated union for canvas panel content.
  * Add new entity types to this union as they are implemented.
  */
-export declare type CanvasContent = DashboardCanvasContent;
+export declare type CanvasContent = DashboardCanvasContent | DataDownloadCanvasContent;
 
 /**
  * Base shape shared by all canvas content types.
@@ -483,6 +709,10 @@ export declare type CanvasEntityDefinition<T extends CanvasContentBase = CanvasC
         content: T;
         children: ReactNode;
     }) => ReactNode;
+};
+
+declare type CardInternalProps = F0AiInsightCardProps & {
+    className?: string;
 };
 
 declare interface ChartComputation {
@@ -542,11 +772,20 @@ declare interface ChatDashboardConfig {
     title: string;
     /** Filter definitions — keys become filter IDs */
     filters?: Record<string, ChatDashboardFilterDefinition>;
+    /**
+     * Dashboard-level navigation filters (e.g. date navigator). Keys become
+     * filter IDs. Rendered above the grid by F0AnalyticsDashboard's
+     * `navigationFilters` slot.
+     */
+    navigationFilters?: Record<string, ChatDashboardNavigationFilterDefinition>;
     /** Ordered list of dashboard items with computation specs */
     items: ChatDashboardItem[];
     /** Fetch specs for server-side data retrieval, keyed by datasetId */
     fetchSpecs: Record<string, DashboardFetchSpec>;
 }
+
+/** Granularity options exposed by F0's `OneDateNavigator`. */
+declare type ChatDashboardDateNavigationGranularity = "day" | "week" | "month" | "quarter" | "halfyear" | "year" | "range";
 
 declare interface ChatDashboardFilterDefinition {
     type: "in";
@@ -591,8 +830,33 @@ declare interface ChatDashboardItemBase {
     description?: string;
     /** Source attribution shown as a subtitle (e.g. "Based on 8 feedbacks from 3 evaluators") */
     sourceDescription?: string;
+    /**
+     * Optional markdown explanation of how this item's data was calculated.
+     * Surfaced via the per-item dropdown's "Where does this data come from?"
+     * entry, which opens a dialog rendering the markdown. Omit to hide the
+     * entry — backwards compatible with persisted dashboards.
+     */
+    explanation?: string;
+    /**
+     * @deprecated Ignored by the renderer — items auto-size to equal-width
+     * slots based on the per-row slot budget. Kept for backwards compatibility
+     * with persisted layouts; safe to leave unset.
+     */
     colSpan?: number;
+    /**
+     * @deprecated Use `itemHeight` (pixels) instead. Kept for backwards
+     * compatibility with persisted layouts: when `itemHeight` is unset, the
+     * grid still reads `rowSpan * 48` as a fallback.
+     */
     rowSpan?: number;
+    /**
+     * Item height in pixels. Takes precedence over `rowSpan` when set. The
+     * row height in the grid is `max(itemHeight)` across all items in the row.
+     * Persisted resizes write a pixel-accurate value here; agent-generated
+     * dashboards should pick from a constrained set of values that match the
+     * data shape (more rows / more categories → taller).
+     */
+    itemHeight?: number;
     x?: number;
     y?: number;
 }
@@ -624,6 +888,22 @@ declare interface ChatDashboardMetricItem extends ChatDashboardItemBase {
     computation: MetricComputation;
 }
 
+/**
+ * Navigation filter definitions emitted by the LLM via `displayDashboard`.
+ * Discriminated on `type`. Today the only supported variant is
+ * `dateNavigation`, which renders F0's date navigator above the dashboard
+ * grid. The `column` and `datasetId` are agent-side metadata used by the
+ * compute SQL builder; they are stripped before reaching F0AnalyticsDashboard.
+ */
+declare type ChatDashboardNavigationFilterDefinition = {
+    type: "dateNavigation";
+    label: string;
+    column: string;
+    datasetId: string;
+    granularities: ChatDashboardDateNavigationGranularity[];
+    defaultGranularity?: ChatDashboardDateNavigationGranularity;
+};
+
 declare interface ChatDashboardPieChartConfig {
     type: "pie";
     innerRadius?: number;
@@ -642,10 +922,83 @@ export declare const ChatSpinner: ForwardRefExoticComponent<Omit<SVGProps<SVGSVG
 
 declare type ChatTextareaProps = InputProps & {
     submitLabel?: string;
-    creditWarning?: "soft";
-    onDismissCreditWarning?: () => void;
-    onGetCredits?: () => void;
+    creditWarning?: AiChatCreditWarning;
 };
+
+/**
+ * A single selectable option within a clarifying question step.
+ */
+declare interface ClarifyingOption {
+    /** Unique identifier for this option */
+    id: string;
+    /** Display label shown to the user */
+    label: string;
+}
+
+/**
+ * The active clarifying question state pushed into the AiChat context.
+ * When no clarifying question is active the context value is `null`.
+ *
+ * Navigation metadata (currentStepIndex, totalSteps) and callbacks live
+ * here so the panel component stays a pure view of this state.
+ */
+declare interface ClarifyingQuestionState {
+    /** The current step's data + interaction state */
+    currentStep: ClarifyingStepState;
+    /** Zero-based index of the current step */
+    currentStepIndex: number;
+    /** Total number of steps (1 for single-step questions) */
+    totalSteps: number;
+    /** Toggle selection of an option by its ID */
+    toggleOption: (optionId: string) => void;
+    /** Confirm the current step's selection and advance (or submit on final step) */
+    confirm: () => void;
+    /** Go back to the previous step */
+    back: () => void;
+    /** Set the custom answer text */
+    setCustomAnswerText: (text: string) => void;
+    /** Toggle whether the custom answer is included in the submission */
+    setCustomAnswerActive: (active: boolean) => void;
+    /** Activate the custom answer input (in single mode, clears predefined selections) */
+    activateCustomAnswer: () => void;
+}
+
+/**
+ * Selection mode for a clarifying question step.
+ * - "single": only one option can be selected (rendered as radio buttons)
+ * - "multiple": multiple options can be selected (rendered as checkboxes)
+ */
+declare type ClarifyingSelectionMode = "single" | "multiple";
+
+/**
+ * Pure data describing a single clarifying question step.
+ * This is what the AI backend sends — no UI state or callbacks.
+ */
+declare interface ClarifyingStepData {
+    /** The question text displayed to the user */
+    question: string;
+    /** Available options the user can select from */
+    options: ClarifyingOption[];
+    /** Selection mode. Defaults to "single" when omitted */
+    selectionMode?: ClarifyingSelectionMode;
+    /** Whether the user can skip this step without selecting any option */
+    optional?: boolean;
+    /** Whether the user can type a free-text custom answer */
+    allowCustomAnswer?: boolean;
+}
+
+/**
+ * A step enriched with the user's current interaction state.
+ * Used internally by the controller to track selections per step.
+ */
+declare interface ClarifyingStepState extends ClarifyingStepData {
+    /** IDs of currently selected options */
+    selectedOptionIds: string[];
+    /** Current custom answer text (preserved even when deactivated) */
+    customAnswerText?: string;
+    /** Whether the custom answer is currently included in the submission */
+    isCustomAnswerActive: boolean;
+}
 
 declare interface CollectionComputation {
     datasetId: string;
@@ -653,6 +1006,10 @@ declare interface CollectionComputation {
     sortOrder?: "asc" | "desc";
     limit?: number;
 }
+
+export declare type ContentType = (typeof contentTypes)[number];
+
+export declare const contentTypes: readonly ["text", "person", "people", "team", "company", "alert", "balance", "sparkline"];
 
 /**
  * Credits usage data returned by the host app
@@ -688,6 +1045,46 @@ declare interface DashboardFetchSpec {
     query: string | null;
     columnLabels?: Record<string, string>;
 }
+
+/**
+ * Data download canvas content — renders a full data table with download options.
+ */
+declare type DataDownloadCanvasContent = CanvasContentBase & {
+    type: "dataDownload";
+    dataset: DataDownloadDataset;
+    filename?: string;
+    markdown?: string;
+};
+
+/**
+ * Inline dataset for client-side file generation (Excel / CSV).
+ * Sent by the agent with the raw query results.
+ */
+declare type DataDownloadDataset = {
+    /**
+     * Column headers in display order.
+     */
+    columns: string[];
+    /**
+     * Array of row objects keyed by column name.
+     */
+    rows: Record<string, unknown>[];
+    /**
+     * Total number of rows returned by the query (before truncation).
+     * Used together with previewCount to render the preview note.
+     */
+    totalCount?: number;
+    /**
+     * Number of rows shown in the markdown preview table.
+     * Used together with totalCount to render the preview note.
+     */
+    previewCount?: number;
+    /**
+     * Map of raw column names to human-readable labels in the user's language.
+     * Used for Excel/CSV headers. Falls back to the raw column name when absent.
+     */
+    columnLabels?: Record<string, string>;
+};
 
 export declare const defaultTranslations: {
     readonly countries: {
@@ -822,6 +1219,9 @@ export declare const defaultTranslations: {
             readonly show: "Show password";
             readonly hide: "Hide password";
         };
+    };
+    readonly link: {
+        readonly opensInNewTab: "opens in new tab";
     };
     readonly actions: {
         readonly add: "Add";
@@ -962,6 +1362,7 @@ export declare const defaultTranslations: {
         readonly summaries: {
             readonly types: {
                 readonly sum: "sum";
+                readonly count: "count";
             };
         };
         readonly export: {
@@ -1099,7 +1500,7 @@ export declare const defaultTranslations: {
         readonly unpinChat: "Unpin chat";
         readonly deleteChat: "Delete chat";
         readonly ask: "Ask One";
-        readonly viewProfile: "View profile";
+        readonly view: "View";
         readonly tools: "Tools";
         readonly credits: {
             readonly title: "Credits";
@@ -1114,9 +1515,17 @@ export declare const defaultTranslations: {
             readonly openButton: "Open";
         };
         readonly dataDownload: {
+            readonly title: "Download";
             readonly download: "Download {{format}}";
             readonly exportDashboard: "Export dashboard as {{format}}";
             readonly exporting: "Exporting...";
+            readonly rows: "{{amount}} rows";
+        };
+        readonly dashboardItem: {
+            readonly chartType: "Chart type";
+            readonly errorTitle: "Error loading data";
+            readonly retry: "Retry";
+            readonly dataExplanation: "Where does this data come from?";
         };
         readonly pong: {
             readonly title: "Pong";
@@ -1135,6 +1544,18 @@ export declare const defaultTranslations: {
                 readonly description: "Your company has run out of AI credits.";
                 readonly actionLabel: "Get credits";
             };
+        };
+        readonly attachFile: "Attach file";
+        readonly removeFile: "Remove";
+        readonly dropFilesHere: "Drop your files here";
+        readonly clarifyingQuestion: {
+            readonly submit: "Submit";
+            readonly next: "Next";
+            readonly back: "Back";
+            readonly typeYourAnswer: "Type your answer…";
+            readonly stepOf: "{{current}} of {{total}}";
+            readonly custom: "own answer";
+            readonly skipped: "skipped";
         };
         readonly growth: {
             readonly demoCard: {
@@ -1158,6 +1579,15 @@ export declare const defaultTranslations: {
                 readonly title: "Questions before getting started";
             };
         };
+    };
+    readonly dataChart: {
+        readonly heatmapNotSupported: "Heatmap not supported at this size";
+        readonly barChartVertical: "Bar (vertical)";
+        readonly barChartHorizontal: "Bar (horizontal)";
+        readonly lineChart: "Line";
+        readonly funnel: "Funnel";
+        readonly pieChart: "Pie";
+        readonly table: "Table";
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -1375,6 +1805,15 @@ export declare const defaultTranslations: {
 };
 
 /**
+ * Grouped configuration for entity references in the AI chat.
+ * Combines resolver functions (data fetching) with URL builders (navigation).
+ */
+export declare type EntityRefs = {
+    resolvers?: EntityResolvers;
+    urls?: EntityUrlBuilders;
+};
+
+/**
  * Map of async resolver functions keyed by entity type.
  * Each resolver takes an entity ID and returns the profile data
  * needed to render the entity reference hover card.
@@ -1383,11 +1822,26 @@ export declare const defaultTranslations: {
  */
 export declare type EntityResolvers = {
     person?: (id: string) => Promise<PersonProfile>;
+    candidate?: (id: string) => Promise<CandidateProfile>;
+    jobPosting?: (id: string) => Promise<JobPostingProfile>;
     /**
      * Search for persons by name query. Used by the @mention autocomplete
      * in the chat input to let users reference specific employees.
      */
     searchPersons?: (query: string) => Promise<PersonProfile[]>;
+};
+
+/**
+ * Map of URL builder functions keyed by entity type.
+ * Each builder takes an entity ID and returns the URL to navigate to.
+ *
+ * When a URL builder is not provided for an entity type, the hover card
+ * will not show a navigation action.
+ */
+export declare type EntityUrlBuilders = {
+    person?: (id: string) => string;
+    candidate?: (id: string) => string;
+    jobPosting?: (id: string) => string;
 };
 
 export declare const F0ActionItem: ({ title, status, inGroup }: F0ActionItemProps) => JSX_2.Element;
@@ -1418,14 +1872,29 @@ export declare const F0AiChat: () => JSX_2.Element | null;
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityResolvers, toolHints, credits, onThumbsUp, onThumbsDown, children, agent, tracking, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, toolHints, credits, creditWarning, fileAttachments, onThumbsUp, onThumbsDown, children, agent, tracking, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
 
-export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, creditWarning, onDismissCreditWarning, onGetCredits, }: ChatTextareaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, creditWarning, }: ChatTextareaProps) => JSX_2.Element;
 
 /**
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const F0AiFullscreenChat: () => JSX_2.Element | null;
+
+export declare const F0AiInsightCard: WithDataTestIdReturnType<ForwardRefExoticComponent<F0AiInsightCardPublicProps & RefAttributes<HTMLDivElement>> & {
+Skeleton: () => JSX_2.Element;
+}>;
+
+export declare type F0AiInsightCardProps = {
+    description?: string;
+    heading: string;
+    label?: string;
+    selected?: boolean;
+    onClick?: () => void;
+    onAskOne?: () => void;
+} & AiInsightCardContent;
+
+declare type F0AiInsightCardPublicProps = Omit<CardInternalProps, (typeof privateProps)[number]>;
 
 export declare class F0AiMask {
     readonly element: HTMLElement;
@@ -1478,6 +1947,59 @@ declare const F0AuraVoiceAnimationVariants: (props?: ({
     className?: ClassValue;
 })) | undefined) => string;
 
+declare type F0AvatarCompanyProps = {
+    name: string;
+    src?: string;
+    size?: BaseAvatarProps["size"];
+    badge?: AvatarBadge;
+} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
+
+declare type F0AvatarPersonProps = {
+    /**
+     * The first name of the person.
+     */
+    firstName: string;
+    /**
+     * The last name of the person.
+     */
+    lastName: string;
+    /**
+     * The source of the person's image.
+     */
+    src?: string;
+    /**
+     * The size of the avatar.
+     */
+    size?: BaseAvatarProps["size"];
+    /**
+     * The badge to display on the avatar. Can be a module badge or a custom badge.
+     */
+    badge?: AvatarBadge;
+    /**
+     * Whether the person is deactivated. If true, the avatar will display an icon instead of the person's name or picture.
+     */
+    deactivated?: boolean;
+} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
+
+declare type F0AvatarTeamProps = {
+    /**
+     * The name of the team.
+     */
+    name: string;
+    /**
+     * The source of the team's image.
+     */
+    src?: string;
+    /**
+     * The size of the avatar.
+     */
+    size?: BaseAvatarProps["size"];
+    /**
+     * The badge to display on the avatar. Can be a module badge or a custom badge.
+     */
+    badge?: AvatarBadge;
+} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
+
 export declare const F0HILActionConfirmation: ({ text, confirmationText, onConfirm, cancelText, onCancel, }: F0HILActionConfirmationProps) => JSX_2.Element;
 
 /**
@@ -1505,6 +2027,13 @@ export declare type F0HILActionConfirmationProps = {
      */
     onCancel: () => void;
 };
+
+declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
+    icon: IconType;
+    size?: "lg" | "md" | "sm" | "xs";
+    state?: "normal" | "animate";
+    color?: "default" | "currentColor" | `#${string}` | Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
+}
 
 export declare const F0OneIcon: ForwardRefExoticComponent<Omit<F0OneIconProps, "ref"> & RefAttributes<SVGSVGElement>>;
 
@@ -1595,11 +2124,55 @@ export declare interface I18nProviderProps {
     translations: TranslationsType;
 }
 
+declare const iconSizes: {
+    readonly xs: "xs";
+    readonly sm: "xs";
+    readonly md: "sm";
+    readonly lg: "md";
+};
+
 declare type IconType = ForwardRefExoticComponent<SVGProps<SVGSVGElement> & RefAttributes<SVGSVGElement> & {
     animate?: "normal" | "animate";
 }>;
 
+declare const iconVariants: (props?: ({
+    size?: "lg" | "md" | "sm" | "xs" | undefined;
+} & ({
+    class?: ClassValue;
+    className?: never;
+} | {
+    class?: never;
+    className?: ClassValue;
+})) | undefined) => string;
+
+declare const internalAvatarColors: readonly ["viridian", "malibu", "yellow", "purple", "lilac", "barbie", "smoke", "army", "flubber", "indigo", "camel"];
+
+declare type InternalAvatarProps = React_2.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & {
+    size?: (typeof internalAvatarSizes)[number];
+    type?: (typeof internalAvatarTypes)[number];
+    color?: (typeof internalAvatarColors)[number];
+};
+
+declare const internalAvatarSizes: readonly ["xsmall", "small", "medium", "large", "xlarge", "xxlarge"];
+
+declare const internalAvatarTypes: readonly ["base", "rounded"];
+
+/**
+ * Profile data for a job posting entity (ATS opening), resolved asynchronously
+ * and displayed in the entity reference hover card.
+ */
+declare type JobPostingProfile = {
+    id: string | number;
+    title: string;
+    status?: string;
+    location?: string;
+};
+
 declare type Join<T extends string[], D extends string> = T extends [] ? never : T extends [infer F] ? F : T extends [infer F, ...infer R] ? F extends string ? `${F}${D}${Join<Extract<R, string[]>, D>}` : never : string;
+
+declare type Level = (typeof levels)[number];
+
+declare const levels: readonly ["info", "warning", "critical", "positive"];
 
 export declare type MaskOptions = {
     /**
@@ -1663,6 +2236,209 @@ declare interface MetricComputation {
     column?: string;
 }
 
+declare type ModuleId = keyof typeof modules;
+
+declare const modules: {
+    readonly "ai-reports": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly ai_ticketing: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly analytics: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly ats: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly benefits: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly billing: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly calendar: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly cards: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly "clock-in": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly communities: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly company_attendance: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly company_documents: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly company_projects: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly company_trainings: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly compensations: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly complaints: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly device_catalog: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly discover: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly documents: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly employee_attendance: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly employees: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly engagement: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly engagement_insights: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly my_surveys: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly "finance-accounting": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly "finance-sales": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly "finance-spending": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly "finance-treasury": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly "finance-workspace": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly goals: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly get_started: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly home: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly hub: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly it_management: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly kudos: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly lms: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly meetings: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly my_benefits: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly my_documents: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly my_projects: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly my_spending: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly my_trainings: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly "new-trainings": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly notifications: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly inbox: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly overviews: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly pages: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly payroll_bundle: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly performance_v2: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly performance: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly playground: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly processes: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly profile: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly project_management: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly reports: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly salary_advance: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly settings: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly personal_settings: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly shift_management: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly shifts: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly social: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly software: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly space_control: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly talent_analytics: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly tasks: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly "time-tracking": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly timeoff: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly workflows: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+};
+
+/**
+ * Utility type to extract all possible paths from nested object.
+ * Generates hyphenated paths from nested object structure
+ * Only includes parent key if it has a DEFAULT property
+ */
+declare type NestedKeyOf<T> = {
+    [K in keyof T & string]: T[K] extends object ? K extends "DEFAULT" ? never : T[K] extends {
+        DEFAULT: string;
+    } ? `${K}` | `${K}-${NestedKeyOf<T[K]>}` : `${K}-${NestedKeyOf<T[K]>}` : K extends "DEFAULT" ? never : `${K}`;
+}[keyof T & string];
+
+declare type Numeric = NumericValue | number | undefined | null;
+
+/**
+ * Formats a numeric value according to the provided options.
+ *
+ * @param value - The numeric value to format.
+ * @param options - The formatting options.
+ * @returns The formatted value as a string.
+ */
+declare type NumericFormatter = (value: Numeric, options?: NumericFormatterOptions) => string;
+
+/**
+ * Configuration options for the numeric formatter.
+ */
+declare type NumericFormatterOptions = {
+    /**
+     * Locale string for number formatting (e.g., "en-US", "es-ES", "de-DE").
+     * Determines the decimal separator and other locale-specific formatting rules.
+     *
+     * @default "en-US"
+     */
+    locale?: string;
+    /**
+     * Maximum number of decimal places to display.
+     * The formatter will round the number to this precision.
+     *
+     * @default 2
+     */
+    decimalPlaces?: number;
+    /**
+     * Whether to hide the units from the formatted value.
+     *
+     * @default false
+     */
+    hideUnits?: boolean;
+    /**
+     * Whether to space the units from the formatted value.
+     *
+     * @default false
+     */
+    unitsSpaced?: boolean;
+    /**
+     * Whether to use compact notation for the formatted value.
+     *
+     * @default false
+     */
+    compact?: boolean;
+    /**
+     * Placeholder text to return when value is undefined or null.
+     */
+    emptyPlaceholder?: string;
+    /**
+     * Whether to use grouping for the formatted value.
+     *
+     * @default true
+     */
+    useGrouping?: boolean;
+};
+
+/**
+ * Represents a numeric value that can be formatted with optional units.
+ *
+ * The value can be provided in two formats:
+ * - `value`: Direct numeric value (e.g., 123.45)
+ * - `value_x100`: Value stored as integer multiplied by 100 (e.g., 12345 represents 123.45)
+ *
+ * @example
+ * ```ts
+ * // Direct value
+ * const directValue: NumericValue = { value: 123.45, units: "€" }
+ *
+ * // Value stored as x100 (useful for avoiding floating point precision issues)
+ * const x100Value: NumericValue = { value_x100: 12345, units: "€" }
+ * ```
+ */
+declare type NumericValue = {
+    /**
+     * Optional unit string to append or prepend to the formatted number.
+     * Common examples: "€", "$", "kg", "%", etc.
+     */
+    units?: string;
+    /**
+     * Position of the units relative to the number.
+     * - "prepend": Units appear before the number (e.g., "$123.45")
+     * - "append": Units appear after the number (e.g., "123.45€")
+     *
+     * @default "append"
+     */
+    unitsPosition?: "prepend" | "append";
+} & ({
+    /**
+     * Direct numeric value to format.
+     */
+    value: number | undefined;
+} | {
+    /**
+     * Numeric value stored as an integer multiplied by 100.
+     * This format is useful for avoiding floating-point precision issues.
+     * The formatter will automatically divide by 100 before formatting.
+     *
+     * @example
+     * value_x100: 12345 represents 123.45
+     */
+    value_x100: number | undefined;
+});
+
+/**
+ * A numeric value that can be formatted with an optional formatter and options.
+ *
+ * @param value - The numeric value to format.
+ * @param formatter - The formatter to use.
+ * @param formatterOptions - The formatting options.
+ */
+declare type NumericWithFormatter = {
+    numericValue: NumericValue;
+    formatter?: NumericFormatter;
+    formatterOptions?: NumericFormatterOptions;
+};
+
 export declare type OneIconSize = (typeof oneIconSizes)[number];
 
 export declare const oneIconSizes: readonly ["xs", "sm", "md", "lg"];
@@ -1693,6 +2469,8 @@ declare interface PieComputation {
     limit?: number;
 }
 
+declare const privateProps: readonly ["className"];
+
 declare interface RadarComputation {
     datasetId: string;
     seriesColumn: string;
@@ -1705,6 +2483,18 @@ declare interface RadarComputation {
     sortBy?: string;
     sortOrder?: "asc" | "desc";
 }
+
+/**
+ * A numeric value that can be formatted with an optional formatter and options.
+ * This is a relaxed version of NumericWithFormatter that allows the numeric value to be a Numeric.
+ */
+declare type RelaxedNumericWithFormatter = Omit<NumericWithFormatter, "numericValue"> & {
+    numericValue: Numeric;
+};
+
+export declare type SparklineDataPoint = {
+    value: number;
+};
 
 declare type TranslationKey = Join<PathsToStringProps<typeof defaultTranslations>, ".">;
 
@@ -1720,6 +2510,15 @@ declare type TranslationShape_2<T> = {
 };
 
 export declare type TranslationsType = TranslationShape<typeof defaultTranslations>;
+
+/**
+ * Tracking options for the AI chat
+ */
+export declare type UploadedFile = {
+    url: string;
+    filename: string;
+    mimetype: string;
+};
 
 export declare function useAiChat(): AiChatProviderReturnValue;
 
@@ -1801,13 +2600,8 @@ declare module "gridstack" {
 }
 
 
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
-        };
-    }
+declare namespace Calendar {
+    var displayName: string;
 }
 
 
@@ -1816,6 +2610,16 @@ declare module "@tiptap/core" {
         aiBlock: {
             insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
             executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -1832,17 +2636,6 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
         transcript: {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
@@ -1850,6 +2643,12 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
+        };
+    }
 }

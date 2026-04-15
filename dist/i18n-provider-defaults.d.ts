@@ -132,6 +132,9 @@ export declare const defaultTranslations: {
             readonly hide: "Hide password";
         };
     };
+    readonly link: {
+        readonly opensInNewTab: "opens in new tab";
+    };
     readonly actions: {
         readonly add: "Add";
         readonly edit: "Edit";
@@ -271,6 +274,7 @@ export declare const defaultTranslations: {
         readonly summaries: {
             readonly types: {
                 readonly sum: "sum";
+                readonly count: "count";
             };
         };
         readonly export: {
@@ -408,7 +412,7 @@ export declare const defaultTranslations: {
         readonly unpinChat: "Unpin chat";
         readonly deleteChat: "Delete chat";
         readonly ask: "Ask One";
-        readonly viewProfile: "View profile";
+        readonly view: "View";
         readonly tools: "Tools";
         readonly credits: {
             readonly title: "Credits";
@@ -423,9 +427,17 @@ export declare const defaultTranslations: {
             readonly openButton: "Open";
         };
         readonly dataDownload: {
+            readonly title: "Download";
             readonly download: "Download {{format}}";
             readonly exportDashboard: "Export dashboard as {{format}}";
             readonly exporting: "Exporting...";
+            readonly rows: "{{amount}} rows";
+        };
+        readonly dashboardItem: {
+            readonly chartType: "Chart type";
+            readonly errorTitle: "Error loading data";
+            readonly retry: "Retry";
+            readonly dataExplanation: "Where does this data come from?";
         };
         readonly pong: {
             readonly title: "Pong";
@@ -444,6 +456,18 @@ export declare const defaultTranslations: {
                 readonly description: "Your company has run out of AI credits.";
                 readonly actionLabel: "Get credits";
             };
+        };
+        readonly attachFile: "Attach file";
+        readonly removeFile: "Remove";
+        readonly dropFilesHere: "Drop your files here";
+        readonly clarifyingQuestion: {
+            readonly submit: "Submit";
+            readonly next: "Next";
+            readonly back: "Back";
+            readonly typeYourAnswer: "Type your answer…";
+            readonly stepOf: "{{current}} of {{total}}";
+            readonly custom: "own answer";
+            readonly skipped: "skipped";
         };
         readonly growth: {
             readonly demoCard: {
@@ -467,6 +491,15 @@ export declare const defaultTranslations: {
                 readonly title: "Questions before getting started";
             };
         };
+    };
+    readonly dataChart: {
+        readonly heatmapNotSupported: "Heatmap not supported at this size";
+        readonly barChartVertical: "Bar (vertical)";
+        readonly barChartHorizontal: "Bar (horizontal)";
+        readonly lineChart: "Line";
+        readonly funnel: "Funnel";
+        readonly pieChart: "Pie";
+        readonly table: "Table";
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -737,13 +770,8 @@ declare module "gridstack" {
 }
 
 
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
-        };
-    }
+declare namespace Calendar {
+    var displayName: string;
 }
 
 
@@ -752,6 +780,16 @@ declare module "@tiptap/core" {
         aiBlock: {
             insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
             executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -768,17 +806,6 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
         transcript: {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
@@ -786,6 +813,12 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
+        };
+    }
 }

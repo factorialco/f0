@@ -132,6 +132,9 @@ const e = {
       hide: "Hide password"
     }
   },
+  link: {
+    opensInNewTab: "opens in new tab"
+  },
   actions: {
     add: "Add",
     edit: "Edit",
@@ -270,7 +273,8 @@ const e = {
     },
     summaries: {
       types: {
-        sum: "sum"
+        sum: "sum",
+        count: "count"
       }
     },
     export: {
@@ -408,7 +412,7 @@ const e = {
     unpinChat: "Unpin chat",
     deleteChat: "Delete chat",
     ask: "Ask One",
-    viewProfile: "View profile",
+    view: "View",
     tools: "Tools",
     credits: {
       title: "Credits",
@@ -423,9 +427,17 @@ const e = {
       openButton: "Open"
     },
     dataDownload: {
+      title: "Download",
       download: "Download {{format}}",
       exportDashboard: "Export dashboard as {{format}}",
-      exporting: "Exporting..."
+      exporting: "Exporting...",
+      rows: "{{amount}} rows"
+    },
+    dashboardItem: {
+      chartType: "Chart type",
+      errorTitle: "Error loading data",
+      retry: "Retry",
+      dataExplanation: "Where does this data come from?"
     },
     pong: {
       title: "Pong",
@@ -444,6 +456,18 @@ const e = {
         description: "Your company has run out of AI credits.",
         actionLabel: "Get credits"
       }
+    },
+    attachFile: "Attach file",
+    removeFile: "Remove",
+    dropFilesHere: "Drop your files here",
+    clarifyingQuestion: {
+      submit: "Submit",
+      next: "Next",
+      back: "Back",
+      typeYourAnswer: "Type your answer…",
+      stepOf: "{{current}} of {{total}}",
+      custom: "own answer",
+      skipped: "skipped"
     },
     growth: {
       demoCard: {
@@ -467,6 +491,15 @@ const e = {
         title: "Questions before getting started"
       }
     }
+  },
+  dataChart: {
+    heatmapNotSupported: "Heatmap not supported at this size",
+    barChartVertical: "Bar (vertical)",
+    barChartHorizontal: "Bar (horizontal)",
+    lineChart: "Line",
+    funnel: "Funnel",
+    pieChart: "Pie",
+    table: "Table"
   },
   select: {
     noResults: "No results found",
