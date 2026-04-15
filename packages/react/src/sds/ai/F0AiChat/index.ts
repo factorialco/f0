@@ -9,6 +9,8 @@ export type {
   AiChatFileAttachmentConfig,
   AiChatProviderProps,
   AiChatToolHint,
+  AppendMessage,
+  AppendToolCall,
   CanvasContent,
   CanvasContentBase,
   CreditsUsage,

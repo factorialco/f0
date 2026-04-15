@@ -17,6 +17,28 @@ export type {
 import type { EntityRefs } from "./components/markdownRenderers/entityRef/types"
 
 /**
+ * A tool call to inject via appendMessages.
+ * IDs are generated internally — callers only provide the function payload.
+ */
+export type AppendToolCall = {
+  function: {
+    name: string
+    arguments: string
+  }
+}
+
+/**
+ * A message to inject via appendMessages.
+ * IDs are generated internally — callers only provide role, content, and
+ * optional tool calls.
+ */
+export type AppendMessage = {
+  role: "user" | "assistant"
+  content: string
+  toolCalls?: AppendToolCall[]
+}
+
+/**
  * Base shape shared by all canvas content types.
  * Every entity adds its own fields on top of this.
  */
