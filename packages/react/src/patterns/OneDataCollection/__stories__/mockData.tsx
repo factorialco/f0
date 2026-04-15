@@ -623,6 +623,14 @@ export const getMockVisualizations = (options?: {
             // No-op handler when cache is not available
           }
         })(),
+        addRowActions: () => ({
+          label: "Add row",
+          onClick: () => console.log("Add row clicked"),
+        }),
+        addNestedRowActions: (parent) => ({
+          label: "Add child",
+          onClick: () => console.log("Add child clicked", parent),
+        }),
       },
     } as Visualization<
       MockUser,

@@ -634,6 +634,7 @@ export const TableCollection = <
                               item={item}
                               index={index}
                               groupIndex={groupIndex}
+                              onItemCheckedChange={handleSelectItemChange}
                               onCheckedChange={(checked) =>
                                 handleSelectItemChange(item, checked)
                               }
@@ -675,6 +676,7 @@ export const TableCollection = <
                     source={effectiveSource}
                     item={item}
                     index={index}
+                    onItemCheckedChange={handleSelectItemChange}
                     onCheckedChange={(checked) =>
                       handleSelectItemChange(item, checked)
                     }

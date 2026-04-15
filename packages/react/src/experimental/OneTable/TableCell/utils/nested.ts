@@ -32,7 +32,7 @@ export const getNestedMarginLeftForLoadMore = ({
 }) => {
   return getNestedMarginLeft({
     depth,
-    padding: isDetailedVariant ? -BUTTON_HEIGHT / 2 : -BUTTON_PADDING,
+    padding: isDetailedVariant ? -BUTTON_PADDING : -BUTTON_PADDING,
   })
 }
 

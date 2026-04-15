@@ -57,6 +57,7 @@ export type RowProps<
   index: number
   groupIndex: number
   onCheckedChange: (checked: boolean) => void
+  onItemCheckedChange?: (item: R, checked: boolean) => void
   selectedItems: Map<string | number, R>
   columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
   frozenColumnsLeft: number
@@ -125,6 +126,7 @@ const RowComponentInner = <
     source,
     item,
     onCheckedChange,
+    onItemCheckedChange,
     selectedItems,
     columns,
     frozenColumnsLeft,
@@ -195,6 +197,7 @@ const RowComponentInner = <
         source={source}
         item={item}
         onCheckedChange={onCheckedChange}
+        onItemCheckedChange={onItemCheckedChange}
         selectedItems={selectedItems}
         columns={columns}
         frozenColumnsLeft={frozenColumnsLeft}

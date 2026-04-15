@@ -4,11 +4,11 @@ import { describe, expect, it, vi } from "vitest"
 
 import type { GroupingDefinition, SortingsDefinition } from "@/hooks/datasource"
 
-import { TextCell } from "@/ui/value-display/types/text"
+import { BaseFetchOptions, FiltersDefinition } from "@/hooks/datasource"
 import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
-import { BaseFetchOptions, FiltersDefinition } from "@/hooks/datasource"
 import { zeroRender as render } from "@/testing/test-utils"
+import { TextCell } from "@/ui/value-display/types/text"
 
 import { ItemActionsDefinition } from "../../../../item-actions"
 import { SummariesDefinition } from "../../../../summary"
@@ -430,6 +430,61 @@ describe("EditableTable addRowActions (footer)", () => {
 })
 
 describe("EditableTable addNestedRowActions", () => {
+  it("reports the selected child item instead of the parent when selecting nested rows", async () => {
+    const user = userEvent.setup()
+    const onSelectItems = vi.fn()
+
+    render(
+      <TableCollection<
+        Person,
+        TestFilters,
+        SortingsDefinition,
+        SummariesDefinition,
+        ItemActionsDefinition<Person>,
+        TestNavigationFilters,
+        GroupingDefinition<Person>
+      >
+        columns={testColumns}
+        source={createNestedTestSource({
+          allPagesSelection: true,
+          selectable: (item) => item.id,
+        })}
+        onSelectItems={onSelectItems}
+        onLoadData={vi.fn()}
+        onLoadError={vi.fn()}
+      />
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText("Parent User")).toBeInTheDocument()
+    })
+
+    const parentRow = screen.getByText("Parent User").closest("tr")!
+    const chevron = parentRow.querySelector("[class*='cursor-pointer']")!
+    await user.click(chevron)
+
+    await waitFor(() => {
+      expect(screen.getByText("Child A")).toBeInTheDocument()
+    })
+
+    const childRow = screen.getByText("Child A").closest("tr")!
+    const childCheckbox = within(childRow).getByRole("checkbox")
+    await user.click(childCheckbox)
+
+    await waitFor(() => {
+      expect(
+        onSelectItems.mock.calls.some(([selection]) =>
+          selection.itemsStatus.some(
+            ({ checked, item }: { checked: boolean; item: Person }) =>
+              checked &&
+              item.id === childItems[0]?.id &&
+              item.name === childItems[0]?.name
+          )
+        )
+      ).toBe(true)
+    })
+  })
+
   it("does not render add-row button when addNestedRowActions is not provided", async () => {
     const user = userEvent.setup()
 
