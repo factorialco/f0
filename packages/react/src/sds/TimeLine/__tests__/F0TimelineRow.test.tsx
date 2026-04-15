@@ -2,8 +2,10 @@ import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
 import Check from "@/icons/app/Check"
+import Clock from "@/icons/app/Clock"
 import Comment from "@/icons/app/Comment"
 import Cross from "@/icons/app/Cross"
+import FileSigned from "@/icons/app/FileSigned"
 import Settings from "@/icons/app/Settings"
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
@@ -305,6 +307,184 @@ describe("F0TimelineRow", () => {
     it("does not render actions when not provided", () => {
       render(<F0TimelineRow {...defaultProps} />)
       expect(screen.queryByText("Approve")).not.toBeInTheDocument()
+    })
+  })
+
+  describe("nestedtask", () => {
+    const nestedtaskProps = {
+      status: "in-progress" as const,
+      icon: FileSigned,
+      title: "Sign document",
+      description: "Estimated on 14/04/2026",
+      taskCount: 2,
+      completedCount: 0,
+      expanded: false,
+      onExpandToggle: vi.fn(),
+      items: [
+        {
+          status: "in-progress" as const,
+          icon: Clock,
+          title: "Hellen (hellen@factorial.co)",
+          description: "Pending",
+        },
+        {
+          status: "in-progress" as const,
+          icon: Clock,
+          title: "Danilo (danilo@gmail.com)",
+          description: "Pending",
+        },
+      ],
+    }
+
+    it("renders the title and description", () => {
+      render(<F0TimelineRow {...nestedtaskProps} />)
+      expect(screen.getByText("Sign document")).toBeInTheDocument()
+      expect(screen.getByText("Estimated on 14/04/2026")).toBeInTheDocument()
+    })
+
+    it("renders the progress pill", () => {
+      render(<F0TimelineRow {...nestedtaskProps} />)
+      expect(screen.getByText("0/2")).toBeInTheDocument()
+    })
+
+    it("renders completed progress pill with positive variant", () => {
+      render(
+        <F0TimelineRow
+          {...nestedtaskProps}
+          status="completed"
+          completedCount={2}
+        />
+      )
+      expect(screen.getByText("2/2")).toBeInTheDocument()
+    })
+
+    it("calls onExpandToggle when clicking the header", async () => {
+      const user = userEvent.setup()
+      const onToggle = vi.fn()
+      render(<F0TimelineRow {...nestedtaskProps} onExpandToggle={onToggle} />)
+      await user.click(screen.getByText("Sign document"))
+      expect(onToggle).toHaveBeenCalledOnce()
+    })
+
+    it("shows items when expanded", () => {
+      render(<F0TimelineRow {...nestedtaskProps} expanded />)
+      expect(
+        screen.getByText("Hellen (hellen@factorial.co)")
+      ).toBeInTheDocument()
+      expect(screen.getByText("Danilo (danilo@gmail.com)")).toBeInTheDocument()
+    })
+
+    it("hides items when collapsed", () => {
+      render(<F0TimelineRow {...nestedtaskProps} expanded={false} />)
+      expect(
+        screen.queryByText("Hellen (hellen@factorial.co)")
+      ).not.toBeInTheDocument()
+    })
+
+    it("renders metadata when provided", () => {
+      render(
+        <F0TimelineRow
+          {...nestedtaskProps}
+          metadata={[
+            {
+              label: "Team",
+              value: { type: "text", content: "Operations" },
+            },
+          ]}
+        />
+      )
+      expect(screen.getByText("Operations")).toBeInTheDocument()
+    })
+
+    it("renders strikethrough title when completed", () => {
+      render(<F0TimelineRow {...nestedtaskProps} status="completed" />)
+      const title = screen.getByText("Sign document")
+      expect(title.className).toContain("line-through")
+    })
+
+    it("does not render strikethrough title when in-progress", () => {
+      render(<F0TimelineRow {...nestedtaskProps} />)
+      const title = screen.getByText("Sign document")
+      expect(title.className).not.toContain("line-through")
+    })
+  })
+
+  describe("multitask with nestedtask items", () => {
+    const nestedtaskItem = {
+      status: "in-progress" as const,
+      icon: FileSigned,
+      title: "Sign document",
+      description: "Laptop agreement",
+      taskCount: 2,
+      completedCount: 1,
+      expanded: true,
+      onExpandToggle: vi.fn(),
+      items: [
+        {
+          status: "in-progress" as const,
+          icon: Clock,
+          title: "Hellen (hellen@factorial.co)",
+          description: "Pending",
+        },
+        {
+          status: "completed" as const,
+          icon: Check,
+          title: "Danilo (danilo@gmail.com)",
+          description: "Signed",
+        },
+      ],
+    }
+
+    it("renders nestedtask header inside multitask", () => {
+      render(
+        <F0TimelineRow
+          status="in-progress"
+          title="Tasks"
+          taskCount={2}
+          completedCount={0}
+          expanded={true}
+          onExpandToggle={() => {}}
+          items={[nestedtaskItem]}
+        />
+      )
+      expect(screen.getByText("Sign document")).toBeInTheDocument()
+      expect(screen.getByText("1/2")).toBeInTheDocument()
+    })
+
+    it("renders nestedtask nested items when expanded inside multitask", () => {
+      render(
+        <F0TimelineRow
+          status="in-progress"
+          title="Tasks"
+          taskCount={2}
+          completedCount={0}
+          expanded={true}
+          onExpandToggle={() => {}}
+          items={[nestedtaskItem]}
+        />
+      )
+      expect(
+        screen.getByText("Hellen (hellen@factorial.co)")
+      ).toBeInTheDocument()
+      expect(screen.getByText("Danilo (danilo@gmail.com)")).toBeInTheDocument()
+    })
+
+    it("calls nestedtask onExpandToggle when clicking its header", async () => {
+      const user = userEvent.setup()
+      const onNestedToggle = vi.fn()
+      render(
+        <F0TimelineRow
+          status="in-progress"
+          title="Tasks"
+          taskCount={2}
+          completedCount={0}
+          expanded={true}
+          onExpandToggle={() => {}}
+          items={[{ ...nestedtaskItem, onExpandToggle: onNestedToggle }]}
+        />
+      )
+      await user.click(screen.getByText("Sign document"))
+      expect(onNestedToggle).toHaveBeenCalledOnce()
     })
   })
 })

@@ -34,10 +34,10 @@ import { F0DataChart } from "@factorialco/f0-react"
 
 ## Bar Chart
 
-Compare values across categories. Supports vertical/horizontal orientation, stacking, targets, and per-bar colors.
+Compare values across categories. Supports vertical/horizontal orientation, stacking, targets, and per-bar colors. Bars are responsive: at narrow widths the legend and axes are progressively hidden so the chart never feels crowded.
 
-<Canvas of={BarStories.Default} />
-<Controls of={BarStories.Default} />
+<Canvas of={BarStories.SingleSeries} />
+<Controls of={BarStories.SingleSeries} />
 
 ### Multiple Series
 
@@ -63,42 +63,47 @@ Override individual bar colors using F0 design tokens.
 
 <Canvas of={BarStories.PerBarColors} />
 
-### All Available Colors
+### Responsive Snapshot
 
-<Canvas of={BarStories.AllColors} />
+The same chart rendered in every breakpoint (small / medium / large) and every series count (low / normal / large) — mirrors the AI Analytics Figma matrix.
+
+<Canvas of={BarStories.ResponsiveSnapshotMatrix} />
+<Canvas of={BarStories.ResponsiveSnapshotMatrixHorizontal} />
 
 ---
 
 ## Line Chart
 
-Visualize trends over time. Supports linear, smooth, and step interpolation, area fill, dashed lines, and data point dots.
+Visualize trends over time. Supports linear, smooth, and step interpolation, area fill, dashed lines, and data point dots. Single-series charts get a soft area gradient under the line; multi-series charts always render lines only because overlapping fills become unreadable. The chart is responsive: at narrow widths the legend and axes are progressively hidden.
 
-<Canvas of={LineStories.Linear} />
-<Controls of={LineStories.Linear} />
+<Canvas of={LineStories.SingleLineWithArea} />
+<Controls of={LineStories.SingleLineWithArea} />
 
-### Smooth Interpolation
+### Multiple Lines
 
-<Canvas of={LineStories.Smooth} />
+<Canvas of={LineStories.MultipleLines} />
 
-### Step Interpolation
+### Line Styles
 
-<Canvas of={LineStories.Step} />
+`lineType` controls how segments are drawn — `linear`, `smooth` (bezier curves), or `step` (staircase). The story below renders all three side by side so you can compare them.
 
-### No Area Fill
+<Canvas of={LineStories.LineStyles} />
 
-<Canvas of={LineStories.NoFill} />
+### Actual vs Target (dashed series)
 
-### Multiple Series
+Use `dashed: true` on a series to render a target / projection line.
 
-<Canvas of={LineStories.MultipleSeries} />
-
-### Dashed Lines (Targets / Projections)
-
-<Canvas of={LineStories.MultipleSeriesWithDashed} />
+<Canvas of={LineStories.ActualVsTarget} />
 
 ### With Dots
 
 <Canvas of={LineStories.WithDots} />
+
+### Responsive Snapshot
+
+The same chart rendered in every breakpoint (small / medium / large) and every series count (low / normal / large) — mirrors the AI Analytics Figma matrix.
+
+<Canvas of={LineStories.ResponsiveSnapshotMatrix} />
 
 ---
 
@@ -146,6 +151,10 @@ Show part-of-whole distributions. Set `innerRadius > 0` for a donut variant.
 
 <Canvas of={PieStories.WithPercentage} />
 
+### Responsive Snapshot
+
+<Canvas of={PieStories.ResponsiveSnapshotMatrix} />
+
 ---
 
 ## Radar Chart
@@ -166,6 +175,10 @@ Compare multiple dimensions at once. Useful for performance reviews, team compar
 ### Custom Colors
 
 <Canvas of={RadarStories.CustomColors} />
+
+### Responsive Snapshot
+
+<Canvas of={RadarStories.ResponsiveSnapshotMatrix} />
 
 ---
 
@@ -188,26 +201,40 @@ Single-value KPI indicator. Shows progress toward a goal within a configurable r
 
 <Canvas of={GaugeStories.WithFormatter} />
 
+### Responsive Snapshot
+
+<Canvas of={GaugeStories.ResponsiveSnapshotMatrix} />
+
 ---
 
 ## Heatmap Chart
 
-Visualize density or intensity across two categorical dimensions. Each cell's color represents a numeric value.
+Visualize density or intensity across two categorical dimensions. Cells use a single-hue sequential color scale (light → saturated) and reveal their exact value only on hover via tooltip — matching the GitHub commits style. At the narrowest breakpoint (`< 220px`) the heatmap is intentionally not rendered ("Not supported") to match the AI Analytics Figma.
 
-<Canvas of={HeatmapStories.Default} />
-<Controls of={HeatmapStories.Default} />
+<Canvas of={HeatmapStories.Low} />
+<Controls of={HeatmapStories.Low} />
 
-### With Labels
+### Medium density
 
-<Canvas of={HeatmapStories.WithLabels} />
+Rounded squares with visible gaps between cells.
 
-### Custom Range
+<Canvas of={HeatmapStories.Medium} />
 
-<Canvas of={HeatmapStories.CustomRange} />
+### Large density
 
-### No Visual Map
+At high density rounded squares collapse into perfect dots — the same `borderRadius` math used at low density continues to work.
 
-<Canvas of={HeatmapStories.NoVisualMap} />
+<Canvas of={HeatmapStories.Large} />
+
+### With Formatter
+
+<Canvas of={HeatmapStories.WithFormatter} />
+
+### Responsive Snapshot
+
+The same chart rendered in every breakpoint (small / medium / large) and density (low / normal / large) — mirrors the Figma matrix at file `1smmEIugmR0CNeu7NvK33y` node `10218-20575`.
+
+<Canvas of={HeatmapStories.ResponsiveSnapshotMatrix} />
 
 ---
 

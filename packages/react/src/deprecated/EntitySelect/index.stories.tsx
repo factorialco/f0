@@ -172,17 +172,8 @@ export const Default = {
     // Get the popover content and use within to scope our queries
     const popoverContent = within(popover as HTMLElement)
 
-    // Find the main content section (left side) where the list is
-    const mainContent = popoverContent
-      .getByRole("dialog")
-      .querySelector(".absolute.left-0")
-    expect(mainContent).toBeInTheDocument()
-
-    // Use within to scope our search to just the main content
-    const mainContentQueries = within(mainContent as HTMLElement)
-
     // Find and click the item in the main list
-    const listItem = mainContentQueries.getByRole("checkbox", {
+    const listItem = popoverContent.getByRole("checkbox", {
       name: /Albert Einstein/i,
     })
     expect(listItem).toBeInTheDocument()

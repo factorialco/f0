@@ -1,5 +1,4 @@
 import { cva } from "cva"
-import { useRef } from "react"
 
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
@@ -11,6 +10,7 @@ import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
 
 import type { F0AlertProps } from "./types"
+import { useRef } from "react"
 
 const alertVariants = cva({
   base: "w-full rounded-md p-2 pr-3 text-f1-foreground",
@@ -56,9 +56,15 @@ const _F0Alert = ({
   const containerRef = useRef<HTMLDivElement>(null)
   const { actions } = useI18n()
 
+  const alertRole =
+    variant === "critical" || variant === "warning" ? "alert" : "status"
+
   return (
     <div ref={containerRef} className="@container">
-      <div className={cn(alertVariants({ variant }), onClose && "pr-2")}>
+      <div
+        role={alertRole}
+        className={cn(alertVariants({ variant }), onClose && "pr-2")}
+      >
         <div className="flex flex-row gap-2">
           <div className="flex flex-1 flex-col items-start gap-3 @xs:flex-row @xs:items-center @xs:justify-between">
             <div className="flex flex-row gap-2">
@@ -86,6 +92,7 @@ const _F0Alert = ({
                     size="sm"
                   >
                     {link.label}
+                    <span className="sr-only"> (opens in new tab)</span>
                   </F0Link>
                 )}
                 {action && (

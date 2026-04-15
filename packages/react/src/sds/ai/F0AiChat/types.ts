@@ -5,6 +5,7 @@ import { IconType } from "@/components/F0Icon"
 import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
 
 import type { ChatDashboardConfig } from "./canvas/entities/dashboard/types"
+import type { DataDownloadDataset } from "./actions/core/dataDownload/types"
 export type { PersonProfile } from "./components/markdownRenderers/entityRef/entities/person/types"
 export type { CandidateProfile } from "./components/markdownRenderers/entityRef/entities/candidate/types"
 export type { JobPostingProfile } from "./components/markdownRenderers/entityRef/entities/jobPosting/types"
@@ -35,10 +36,20 @@ export type DashboardCanvasContent = CanvasContentBase & {
 }
 
 /**
+ * Data download canvas content — renders a full data table with download options.
+ */
+export type DataDownloadCanvasContent = CanvasContentBase & {
+  type: "dataDownload"
+  dataset: DataDownloadDataset
+  filename?: string
+  markdown?: string
+}
+
+/**
  * Discriminated union for canvas panel content.
  * Add new entity types to this union as they are implemented.
  */
-export type CanvasContent = DashboardCanvasContent
+export type CanvasContent = DashboardCanvasContent | DataDownloadCanvasContent
 
 /**
  * A tool hint that can be activated to prepend invisible context to the user's
@@ -87,6 +98,21 @@ export type AiChatCredits = {
   companyLogoUrl?: string
   /** Plan name displayed below the company name (e.g. "Free plan", "Enterprise"). */
   planName?: string
+}
+
+/**
+ * Credit warning configuration.
+ * Groups severity level and action callbacks into a single object.
+ *
+ * When provided, a warning banner is shown above the chat textarea.
+ */
+export type AiChatCreditWarning = {
+  /** The severity level of the warning. */
+  level: "soft"
+  /** Called when the user dismisses the credit warning banner. */
+  onDismiss?: () => void
+  /** Called when the user clicks the "Get Credits" button. */
+  onGetCredits?: () => void
 }
 
 /**
@@ -183,6 +209,11 @@ export type AiChatProviderProps = {
    * Groups fetchUsage, upgradePlanUrl, and company/plan display info.
    */
   credits?: AiChatCredits
+  /**
+   * Credit warning configuration. When provided, shows a warning banner above the chat textarea.
+   * Groups severity level and action callbacks.
+   */
+  creditWarning?: AiChatCreditWarning
   /**
    * File attachment configuration. When provided, enables file uploads in the chat.
    */

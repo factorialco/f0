@@ -84,7 +84,7 @@ export const useDisplayDashboardAction = () => {
             name: "colSpan",
             type: "number",
             description:
-              "Column span (1-12). Metrics default to 3, charts to 4 or 6, tables to 12.",
+              "Deprecated — items auto-size in equal-width rows. Leave unset.",
             required: false,
           },
           {

@@ -66,7 +66,7 @@ export const BaseCelebration = ({
       href={link}
       onClick={onClick}
       className={cn(
-        "relative flex flex-col rounded-xl border border-solid border-f1-border-secondary bg-f1-background-inverse-secondary no-underline transition-shadow hover:shadow",
+        "relative flex flex-col rounded-xl border border-solid border-f1-border-secondary bg-f1-background-inverse-secondary dark:bg-f1-background-tertiary no-underline transition-shadow hover:shadow",
         focusRing()
       )}
       onMouseEnter={shouldReduceMotion ? undefined : handleMouseEnter}

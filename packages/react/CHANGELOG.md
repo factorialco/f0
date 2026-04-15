@@ -1,5 +1,75 @@
 # Changelog
 
+## [1.447.0](https://github.com/factorialco/f0/compare/f0-react-v1.446.0...f0-react-v1.447.0) (2026-04-14)
+
+
+### Features
+
+* **TimeLine:** add F0TimelineRowNestedtask variant ([#3936](https://github.com/factorialco/f0/issues/3936)) ([3055e5c](https://github.com/factorialco/f0/commit/3055e5c1f705dca2d19300253b5a8d5e0366990f))
+
+## [1.446.0](https://github.com/factorialco/f0/compare/f0-react-v1.445.3...f0-react-v1.446.0) (2026-04-14)
+
+
+### Features
+
+* add tooltip support to DataCollection secondary actions ([#3930](https://github.com/factorialco/f0/issues/3930)) ([21ce8a2](https://github.com/factorialco/f0/commit/21ce8a2c2a3ca9263d3bec7da26b3c3d9144cc2a))
+
+## [1.445.3](https://github.com/factorialco/f0/compare/f0-react-v1.445.2...f0-react-v1.445.3) (2026-04-14)
+
+
+### Bug Fixes
+
+* **F0Link:** resolve stability audit BLOCKING issues ([#3903](https://github.com/factorialco/f0/issues/3903)) ([15912e7](https://github.com/factorialco/f0/commit/15912e7efb3a83f679a8bae0789194b5d6cc8279))
+
+## [1.445.2](https://github.com/factorialco/f0/compare/f0-react-v1.445.1...f0-react-v1.445.2) (2026-04-14)
+
+
+### Bug Fixes
+
+* **F0Alert:** stability audit BLOCKING fixes ([#3900](https://github.com/factorialco/f0/issues/3900)) ([8ef3c7f](https://github.com/factorialco/f0/commit/8ef3c7f966206dcd23f4640380b2adf5ec8fb01f))
+
+## [1.445.1](https://github.com/factorialco/f0/compare/f0-react-v1.445.0...f0-react-v1.445.1) (2026-04-14)
+
+
+### Bug Fixes
+
+* **EntitySelect:** render popover inside dialogs and fix scroll/height issues ([#3921](https://github.com/factorialco/f0/issues/3921)) ([c7c9ad6](https://github.com/factorialco/f0/commit/c7c9ad6d5c94b3c983b0059d436944fc9922d6fe))
+
+## [1.445.0](https://github.com/factorialco/f0/compare/f0-react-v1.444.0...f0-react-v1.445.0) (2026-04-14)
+
+
+### Features
+
+* **F0AiChat:** render assistant messages in true streaming order ([#3895](https://github.com/factorialco/f0/issues/3895)) ([47130c9](https://github.com/factorialco/f0/commit/47130c9090c86799c2e5f59bcb246b51128c8508))
+
+## [1.444.0](https://github.com/factorialco/f0/compare/f0-react-v1.443.0...f0-react-v1.444.0) (2026-04-14)
+
+
+### Features
+
+* **ai:** enhance message filtering to exclude non-renderable messages ([#3929](https://github.com/factorialco/f0/issues/3929)) ([62cf559](https://github.com/factorialco/f0/commit/62cf559ace65bdf4e17aac504ec4f2a5d204874d))
+
+## [1.443.0](https://github.com/factorialco/f0/compare/f0-react-v1.442.1...f0-react-v1.443.0) (2026-04-13)
+
+
+### Features
+
+* **ai:** F0AnalyticsDashboard edit mode and DataDownload canvas ([#3819](https://github.com/factorialco/f0/issues/3819)) ([56afe21](https://github.com/factorialco/f0/commit/56afe21af606ce52ec9e279b8cad1e24ba9b794c))
+
+## [1.442.1](https://github.com/factorialco/f0/compare/f0-react-v1.442.0...f0-react-v1.442.1) (2026-04-13)
+
+
+### Bug Fixes
+
+* passing props credit warning to applicationframe ([#3922](https://github.com/factorialco/f0/issues/3922)) ([84f3cdb](https://github.com/factorialco/f0/commit/84f3cdb22564ea1f0040140020ed03bf530daf49))
+
+## [1.442.0](https://github.com/factorialco/f0/compare/f0-react-v1.441.1...f0-react-v1.442.0) (2026-04-13)
+
+
+### Features
+
+* **icons:** add Basket, BookmarkFilled, UserProtected and update Bookmark, Watch ([#3802](https://github.com/factorialco/f0/issues/3802)) ([3b69d98](https://github.com/factorialco/f0/commit/3b69d985b1832a548c8ac9aab5058773921a5c43))
+
 ## [1.441.1](https://github.com/factorialco/f0/compare/f0-react-v1.441.0...f0-react-v1.441.1) (2026-04-10)
 
 

@@ -1,11 +1,14 @@
 import type { IconType } from "@/components/F0Icon"
 
-export type AlertVariant =
-  | "info"
-  | "warning"
-  | "critical"
-  | "neutral"
-  | "positive"
+export const alertVariantOptions = [
+  "info",
+  "warning",
+  "critical",
+  "neutral",
+  "positive",
+] as const
+
+export type AlertVariant = (typeof alertVariantOptions)[number]
 
 export interface F0AlertProps {
   title: string

@@ -30,8 +30,6 @@ export const ChatTextarea = ({
   onSend,
   onStop,
   creditWarning,
-  onDismissCreditWarning,
-  onGetCredits,
 }: ChatTextareaProps) => {
   const {
     placeholders,
@@ -182,11 +180,7 @@ export const ChatTextarea = ({
     mentions.mentions.length > 0 || mentions.inlineCompletion !== null
 
   return (
-    <CreditWarningWrapper
-      creditWarning={creditWarning}
-      onDismissCreditWarning={onDismissCreditWarning}
-      onGetCredits={onGetCredits}
-    >
+    <CreditWarningWrapper creditWarning={creditWarning}>
       <motion.form
         aria-busy={inProgress}
         ref={formRef}

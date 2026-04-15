@@ -5,6 +5,8 @@ import { Cross } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
+import { type AiChatCreditWarning } from "../../../types"
+
 const creditWarningConfig = {
   soft: {
     text: "" as string,
@@ -15,16 +17,12 @@ const creditWarningConfig = {
 }
 
 interface CreditWarningWrapperProps {
-  creditWarning?: "soft"
-  onDismissCreditWarning?: () => void
-  onGetCredits?: () => void
+  creditWarning?: AiChatCreditWarning
   children: ReactNode
 }
 
 export const CreditWarningWrapper = ({
   creditWarning,
-  onDismissCreditWarning,
-  onGetCredits,
   children,
 }: CreditWarningWrapperProps) => {
   const translation = useI18n()
@@ -32,7 +30,7 @@ export const CreditWarningWrapper = ({
   if (!creditWarning) return children
 
   const config = {
-    ...creditWarningConfig[creditWarning],
+    ...creditWarningConfig[creditWarning.level],
     text: translation.ai.creditWarning.soft,
   }
 
@@ -47,23 +45,23 @@ export const CreditWarningWrapper = ({
           {config.text}
         </p>
         <div className="flex shrink-0 items-center gap-1">
-          {onGetCredits && (
+          {creditWarning.onGetCredits && (
             <F0Button
               label={translation.ai.creditWarning.getCredits ?? ""}
               size="sm"
               variant="outline"
               tooltip={translation.ai.creditWarning.getCredits ?? ""}
-              onClick={onGetCredits}
+              onClick={creditWarning.onGetCredits}
             />
           )}
-          {onDismissCreditWarning && (
+          {creditWarning.onDismiss && (
             <F0Button
               label={translation.ai.creditWarning.dismiss ?? ""}
               size="sm"
               variant="ghost"
               icon={Cross}
               hideLabel
-              onClick={onDismissCreditWarning}
+              onClick={creditWarning.onDismiss}
             />
           )}
         </div>
