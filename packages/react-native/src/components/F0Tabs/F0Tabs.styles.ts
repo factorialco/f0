@@ -43,7 +43,7 @@ export const f0TabItemVariants = tv({
       false: "",
     },
     disabled: {
-      true: "opacity-50",
+      true: "opacity-30",
       false: "",
     },
   },
