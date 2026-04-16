@@ -5,7 +5,7 @@ description: Document F0 React components in Storybook (MDX). Load automatically
 
 # F0 Docs
 
-Every component in `packages/react/src/components/` must have an MDX documentation file in its `__stories__/` folder. This skill defines the mandatory workflow for writing it correctly.
+Every component in `packages/react/src/components/` must have an MDX documentation file next to its stories. In this repo, that may be in `__stories__/`, in `__storybook__/`, or alongside flat story files such as `index.stories.tsx`. This skill defines the mandatory workflow for writing it correctly.
 
 ## When to Load
 
@@ -45,15 +45,15 @@ Question list: [`references/component-analysis.md → Step 4`](./references/comp
 
 ### Step 3 — Evaluate quality target
 
-Before writing, decide the quality level to target (Acceptable / Good / Gold) based on the component's importance and completeness of available information. Check the gold standards:
+Before writing, decide the quality level to target (Acceptable / Good / Gold) based on the component's importance and completeness of available information. Check the gold standard:
 
-- `F0Alert/__stories__/F0Alert.mdx` — gold standard: decision tables, DoDonts with visual children, a11y section, dismissible usage
+- `F0Alert/__stories__/F0Alert.mdx` — gold standard: decision tables, DoDonts with visual children, a11y section, dismissible usage (added in companion PR #3894)
 
 Quality criteria per section: [`references/documentation-quality.md`](./references/documentation-quality.md)
 
 ### Step 4 — Write the MDX and update stories
 
-Create the MDX file and remove `autodocs` from the stories meta. Follow the full template and validation checklist.
+Create the MDX file and update the corresponding `*.stories.tsx` file to disable autodocs using this repo's supported story-level override for manual MDX pages (do not rely on removing `autodocs` from the stories meta, because autodocs is enabled globally in this codebase). Follow the full template and validation checklist.
 
 Full template + workflow: [`references/mdx-authoring.md`](./references/mdx-authoring.md)
 
@@ -65,7 +65,7 @@ Full template + workflow: [`references/mdx-authoring.md`](./references/mdx-autho
 | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
 | Source analysis protocol, props inventory, WHEN→THEN extraction, creator questions                    | [`references/component-analysis.md`](./references/component-analysis.md)       |
 | Quality criteria per section, WHEN→THEN rules, component relationships, a11y by type, 11 global rules | [`references/documentation-quality.md`](./references/documentation-quality.md) |
-| Full MDX template, table templates, utility components (DocsNav, DoDonts), stories update, checklist  | [`references/mdx-authoring.md`](./references/mdx-authoring.md)                 |
+| Full MDX template, table templates, utility components (Unstyled, DoDonts), stories update, checklist | [`references/mdx-authoring.md`](./references/mdx-authoring.md)                 |
 | Which components have docs and which need them                                                        | [`references/component-status.md`](./references/component-status.md)           |
 
 ---

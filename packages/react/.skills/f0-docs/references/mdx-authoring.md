@@ -211,7 +211,7 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 
 ## Table Templates
 
-All tables use `<Unstyled>` with native HTML — never raw markdown tables (they break in dark mode).
+All tables use `<Unstyled>` with native HTML — never raw markdown tables (they break in dark mode). Some legacy docs may still use markdown tables and should be migrated when next updated.
 
 ### Props — 5 columns (Prop | Type | Default | Required | Description)
 
@@ -512,19 +512,19 @@ import { F0Alert } from "@factorialco/f0-react"
 
 **Provider-dependent components (e.g. components that call `useI18n`):** These cannot be rendered as JSX directly in MDX — they require an `I18nProvider` (or similar) that is only present in Storybook's decorator chain. Rendering them inline produces a "must be used within a provider" runtime error.
 
-Solution: create **dedicated stories with `tags: ["!dev"]`** for each do/don't case, then use `<Canvas of={Stories.X} sourceState="none" />` as `children` in the DoDonts component. The stories run inside the full decorator chain, the `children` prop renders the Canvas output inside the card, and `sourceState="none"` hides the code toggle so the card looks like a visual preview:
+Solution: create **dedicated stories with `tags: ["no-sidebar"]`** for each do/don't case, then use `<Canvas of={Stories.X} sourceState="none" />` as `children` in the DoDonts component. The stories run inside the full decorator chain, the `children` prop renders the Canvas output inside the card, and `sourceState="none"` hides the code toggle so the card looks like a visual preview:
 
 ```tsx
 // In F0ComponentName.stories.tsx — add dedicated stories for DoDonts
 export const DoDontDoCase: Story = {
-  tags: ["!dev"], // hidden from sidebar, accessible via Canvas in MDX
+  tags: ["no-sidebar"], // hidden from sidebar, accessible via Canvas in MDX
   args: {
     // props that illustrate the "do" scenario
   },
 };
 
 export const DoDontDontCase: Story = {
-  tags: ["!dev"],
+  tags: ["no-sidebar"],
   args: {
     // props that illustrate the "don't" scenario
   },
@@ -624,18 +624,18 @@ This pattern lets the Controls panel show a simple toggle for the optional callb
 1. Read `F0ComponentName.tsx` — extract all public props, variants, and JSDoc
 2. Read `types.ts` — extract exported types
 3. List all story exports from `[Name].stories.tsx` — these become `Stories.X` references in MDX
-4. Note if `tags: ["autodocs"]` is present — it must be removed in Phase 3
+4. Note if `tags: ["autodocs"]` is present — because autodocs is enabled globally in `.storybook/preview.tsx`, removing the tag from meta alone does NOT disable it; you need an explicit `"!autodocs"` opt-out tag (see Phase 3)
 
 ### Phase 2: Write the MDX file
 
 - Create `__stories__/[StoriesFilename].mdx` (filename matches stories file without `.stories`)
 - Follow the Full MDX Template above
-- Check the gold standards first: `F0Alert.mdx` and `F0Button.mdx`
+- Check the gold standard first: `F0Alert.mdx` (added in companion PR #3894)
 - If a `controls.mdx` stub already exists: **delete it** after creating the full MDX — two MDX files cause duplicate sidebar entries
 
 ### Phase 3: Update the stories file
 
-Remove `autodocs` from meta tags and add `"!dev"` to stories used in documentation:
+Remove `autodocs` from meta tags using `"!autodocs"` (required because this repo sets `tags: ["autodocs"]` globally in `.storybook/preview.tsx` — removing it from meta alone has no effect). Also add `"no-sidebar"` to stories that should be hidden from the sidebar but remain accessible via `<Canvas>` in MDX:
 
 ```tsx
 // BEFORE
@@ -650,21 +650,21 @@ export const Default: Story = { ... }
 const meta = {
   title: "ComponentName",
   component: F0ComponentName,
-  tags: ["stable"],           // autodocs removed
+  tags: ["!autodocs", "stable"],  // !autodocs required to disable global autodocs
 }
 export const Default: Story = {
-  tags: ["!dev"],             // hidden from sidebar, still usable in Canvas
+  tags: ["no-sidebar"],           // hidden from sidebar, still usable in Canvas
   ...
 }
 ```
 
 **Tag reference:**
 
-| Tag            | Applied to              | Effect                                                                                   |
-| -------------- | ----------------------- | ---------------------------------------------------------------------------------------- |
-| `"!dev"`       | Story export            | Hides story from sidebar in dev mode. Still accessible via `<Canvas>` in MDX.            |
-| `"no-sidebar"` | `<Meta>` in an MDX file | Hides the MDX page from the sidebar. Used by legacy stubs — not needed in new MDX files. |
-| `"autodocs"`   | Meta in stories file    | Auto-generates a docs tab. Remove when adding a manual MDX — they conflict.              |
+| Tag            | Applied to           | Effect                                                                                |
+| -------------- | -------------------- | ------------------------------------------------------------------------------------- |
+| `"!autodocs"`  | Meta in stories file | Disables the auto-generated docs tab. Required when adding a manual MDX in this repo. |
+| `"no-sidebar"` | Story export or Meta | Hides the entry from the sidebar. Use on stories embedded only via `<Canvas>` in MDX. |
+| `"autodocs"`   | Meta in stories file | Auto-generates a docs tab. This is set globally — use `"!autodocs"` to opt out.       |
 
 ### Phase 4: Verify sidebar
 
@@ -682,8 +682,8 @@ Not:
 Components/
 └── ComponentName/
     ├── Documentation
-    ├── Default         ← wrong: should be hidden with "!dev"
-    └── Variants        ← wrong: should be hidden with "!dev"
+    ├── Default         ← wrong: should be hidden with "no-sidebar"
+    └── Variants        ← wrong: should be hidden with "no-sidebar"
 ```
 
 ---
@@ -695,8 +695,8 @@ Before marking MDX as done:
 - [ ] MDX file created, filename matches stories file (e.g. `Card.mdx` for `Card.stories.tsx`)
 - [ ] Any pre-existing `controls.mdx` stub deleted
 - [ ] `<Meta of={Stories} />` for standard components (or `<Meta title="..." />` for umbrella only)
-- [ ] `"autodocs"` removed from stories meta
-- [ ] Stories used in docs have `tags: ["!dev"]`
+- [ ] `"autodocs"` disabled via `tags: ["!autodocs"]` in stories meta (required — autodocs is globally enabled)
+- [ ] Stories used only in docs have `tags: ["no-sidebar"]`
 - [ ] No `<DocsNav />` and no manual navigation menu — Storybook has native right-side nav built from heading hierarchy
 - [ ] No import of `DocsNav` in the MDX file
 - [ ] No `---` dividers between sections — use heading hierarchy only
@@ -720,7 +720,7 @@ Before marking MDX as done:
 - [ ] `<DoDonts>` used in Do's and don'ts subsection
 - [ ] DoDonts `children` used only when the do/don't contrast is **semantically unambiguous** — a viewer must not be able to argue the "don't" example is valid. Text-only DoDonts are preferred when the distinction requires explanation.
 - [ ] Components rendered as JSX in MDX (e.g. inside `<DoDonts children>`) are imported via relative path (`from "../F0Component"`), never from `@factorialco/f0-react` (causes module fetch error in dev)
-- [ ] Components that require a provider (e.g. `useI18n`) are NOT rendered as inline JSX in MDX — instead, dedicated stories with `tags: ["!dev"]` are created and used as `<Canvas of={Stories.X} sourceState="none" />` inside DoDonts `children`
+- [ ] Components that require a provider (e.g. `useI18n`) are NOT rendered as inline JSX in MDX — instead, dedicated stories with `tags: ["no-sidebar"]` are created and used as `<Canvas of={Stories.X} sourceState="none" />` inside DoDonts `children`
 - [ ] `## Accessibility` included only when the component type requires it — complex interactive (required), simple interactive (only if non-obvious), static display (only for live region or icon meaning), layout/typography (omit entirely)
 - [ ] Optional function props use `control: "boolean"` in `argTypes` + `render` function to interpret boolean → `fn()` or `undefined` (never `control: "function"`)
 - [ ] No semicolons in `.tsx` import statements (oxfmt rule — does not apply to `.mdx` files)

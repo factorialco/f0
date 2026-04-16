@@ -10,7 +10,7 @@ Read these files in order:
 
 1. **`F0ComponentName.tsx`** — public props, JSDoc comments, variants, conditional rendering, ARIA attributes, event handlers
 2. **`types.ts`** — exported types and union values
-3. **`index.tsx`** — export pattern (`experimentalComponent`, `Component({ name, type }`, or plain re-export)
+3. **`index.tsx`** — export pattern (`experimentalComponent`, `Component({ name, type })`, or plain re-export)
 4. **`F0ComponentName.stories.tsx`** — all named story exports; these become `Stories.X` in MDX
 5. **`__tests__/F0ComponentName.test.tsx`** — what behavior is already tested (informs guidelines)
 6. **`internal-types.ts`** (if exists) — private props to exclude from public documentation

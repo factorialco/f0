@@ -6,12 +6,12 @@ The difference between a stub and a gold-standard MDX file. Use this reference t
 
 ## Quality Levels
 
-| Level          | Description                                                                                                                                                                                   |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Stub**       | Auto-generated or empty. `autodocs` tag, no manual content. Unacceptable for any shipped component.                                                                                           |
-| **Acceptable** | All four sections present, all props documented, no broken Canvas references. Meets the minimum bar.                                                                                          |
-| **Good**       | WHEN→THEN rules in Guidelines, DoDonts, keyboard table for interactive components, 3+ named examples.                                                                                         |
-| **Gold**       | Everything in Good, plus: decision table (when to use vs. alternatives), component relationships, a11y notes per prop, real Factorial copy in examples. See `F0Alert.mdx` and `F0Button.mdx`. |
+| Level          | Description                                                                                                                                                                                     |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Stub**       | Auto-generated or empty. `autodocs` tag, no manual content. Unacceptable for any shipped component.                                                                                             |
+| **Acceptable** | Required top-level sections present (`Anatomy`, `Guidelines`, `Accessibility`), all props documented, no broken Canvas references. Meets the minimum bar.                                       |
+| **Good**       | WHEN→THEN rules in Guidelines, DoDonts, keyboard table for interactive components, 3+ named examples.                                                                                           |
+| **Gold**       | Everything in Good, plus: decision table (when to use vs. alternatives), component relationships, a11y notes per prop, real Factorial copy in examples. See `F0Alert.mdx` (companion PR #3894). |
 
 ---
 
@@ -35,14 +35,14 @@ The difference between a stub and a gold-standard MDX file. Use this reference t
 
 One table only — replaces both the old anatomy table and the old props reference table. Never create two separate tables.
 
-| Mediocre                                                | Gold                                                             |
-| ------------------------------------------------------- | ---------------------------------------------------------------- | --------- | ----------- |
-| Separate anatomy table + separate props reference table | Single table: Prop \| Type \| Default \| Required \| Description |
-| Generic descriptions ("The title prop")                 | Explains behavior ("Main heading. Sentence case, no period.")    |
-| Missing optional props                                  | All public props listed; optional show `—` in Required column    |
-| Type column omitted                                     | Full type string in `<code>` — e.g. `"info"                      | "warning" | "critical"` |
-| No default values                                       | Default column with actual defaults or `—`                       |
-| Missing `dataTestId`                                    | All props including testing props                                |
+| Mediocre                                                | Gold                                                                    |
+| ------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Separate anatomy table + separate props reference table | Single table: Prop \| Type \| Default \| Required \| Description        |
+| Generic descriptions ("The title prop")                 | Explains behavior ("Main heading. Sentence case, no period.")           |
+| Missing optional props                                  | All public props listed; optional show `—` in Required column           |
+| Type column omitted                                     | Full type string in `<code>` — e.g. `"info" \| "warning" \| "critical"` |
+| No default values                                       | Default column with actual defaults or `—`                              |
+| Missing `dataTestId`                                    | All props including testing props                                       |
 
 Place after `<Canvas>` and `<Controls>` — first thing visible after the component description.
 
@@ -51,8 +51,8 @@ Place after `<Canvas>` and `<Controls>` — first thing visible after the compon
 ### Variants table
 
 | Mediocre                             | Gold                                                                                         |
-| ------------------------------------ | -------------------------------------------------------------------------------------------- | ----------- | ----------- |
-| Only lists variant names             | 2–3 columns: Variant                                                                         | Description | When to use |
+| ------------------------------------ | -------------------------------------------------------------------------------------------- |
+| Only lists variant names             | 2–3 columns: Variant \| Description \| When to use                                           |
 | "default — the default variant"      | "default — Filled primary button — Primary action on a page or section, one per layout area" |
 | Omits edge variants (neutral, ghost) | All variants documented, including promotional and destructive                               |
 
@@ -63,8 +63,8 @@ Place after `<Canvas>` and `<Controls>` — first thing visible after the compon
 Include only when the component has meaningful interactive states (hover, focus, disabled, loading). Omit entirely for static display components.
 
 | Mediocre                         | Gold                                                             |
-| -------------------------------- | ---------------------------------------------------------------- | ----------- | ---------------- |
-| Lists states with no explanation | 3 columns: State                                                 | Description | Visual indicator |
+| -------------------------------- | ---------------------------------------------------------------- |
+| Lists states with no explanation | 3 columns: State \| Description \| Visual indicator              |
 | "Disabled — disabled"            | "Disabled — Action unavailable — Reduced opacity, not clickable" |
 
 ---
@@ -217,6 +217,6 @@ These apply to every MDX file, no exceptions:
 6. **English throughout** — no Spanish, no mixed language, no emoji
 7. **One unified props table** — Prop | Type | Default | Required | Description — never anatomy + props reference as two separate tables
 8. **No DocsNav** — Storybook has native sidebar navigation; do not import or use `DocsNav`
-9. **Import once** — `import { F0X } from "@factorialco/f0-react"` appears once as a tsx code block inside the Usage section, never duplicated
+9. **Do not duplicate the import banner** — `DocsContainer.tsx` injects the `import { F0X } from "@factorialco/f0-react"` banner automatically; do not add a separate import-only tsx code block in MDX
 10. **When to use ≠ When not to use** — always two separate sections with separate tables, never mixed in one table
 11. **Canvas must match its title** — only add a `<Canvas>` for a story that actually renders what the section title claims
