@@ -573,14 +573,23 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     sectionIds[0]
   )
 
+  // Ref to the scrollable container that holds both sidebar + form content
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+
   // Scroll to section when TOC item is clicked and mark it as active
   const handleSectionClick = useCallback(
     (sectionId: string) => {
       setActiveSection(sectionId)
       const anchorId = generateAnchorId(name, sectionId)
       const element = document.getElementById(anchorId)
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "start" })
+      const container = scrollContainerRef.current
+      if (element && container) {
+        // Scroll within the form's own scroll container to avoid
+        // shifting parent containers (e.g. the canvas panel).
+        container.scrollTo({
+          top: element.offsetTop - container.offsetTop,
+          behavior: "smooth",
+        })
       }
     },
     [name]
@@ -975,7 +984,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     <F0FormContext.Provider value={contextValue}>
       <FormProvider {...form}>
         {showSectionsSidepanel && tocItems.length > 0 ? (
-          <div className="flex w-full overflow-scroll">
+          <div ref={scrollContainerRef} className="flex w-full overflow-scroll">
             {/* Sections sidebar */}
             <div className="sticky top-0 h-fit shrink-0 self-start pt-2">
               <F0TableOfContent

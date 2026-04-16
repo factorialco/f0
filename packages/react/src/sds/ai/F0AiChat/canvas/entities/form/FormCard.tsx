@@ -3,7 +3,6 @@ import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { useAutoOpenCanvas } from "../../../hooks/useAutoOpenCanvas"
 import { useAiChat } from "../../../providers/AiChatStateProvider"
 import { CanvasCard } from "../../components/CanvasCard"
-import { AnimatePresence, motion } from "motion/react"
 import { DetailsItemsList } from "@/experimental/Lists/DetailsItemsList"
 
 const MAX_VISIBLE_FIELDS = 7
@@ -99,31 +98,22 @@ export function FormCard({
       onOpen={handleOpen}
       showOpenButton={isActive}
     >
-      <AnimatePresence>
-        {visibleFields.length > 0 && !isActive && (
-          <motion.div
-            key="form-fields"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.4, ease: [0.165, 0.84, 0.44, 1] }}
-            className="w-full flex flex-col -mx-3 overflow-hidden pb-1"
-          >
-            <DetailsItemsList
-              details={visibleFields.map((field) => ({
-                title: field.label,
-                content: {
-                  type: "item" as const,
-                  text: field.value,
-                },
-              }))}
-              showSeeMore={hasMore}
-              onClickSeeMore={handleOpen}
-              tableView
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {visibleFields.length > 0 && !isActive && (
+        <div className="w-full flex flex-col -mx-3 overflow-hidden pb-1">
+          <DetailsItemsList
+            details={visibleFields.map((field) => ({
+              title: field.label,
+              content: {
+                type: "item" as const,
+                text: field.value,
+              },
+            }))}
+            showSeeMore={hasMore}
+            onClickSeeMore={handleOpen}
+            tableView
+          />
+        </div>
+      )}
     </CanvasCard>
   )
 }
