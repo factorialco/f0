@@ -11,7 +11,9 @@ import { F0Text } from "../primitives/F0Text"
 import { PressableFeedback } from "../primitives/PressableFeedback"
 
 import {
+  f0TabsContentInsetVariants,
   f0TabItemVariants,
+  f0TabSeparatorContentInsetVariants,
   f0TabSeparatorVariants,
   f0TabUnderlineClass,
   f0TabsContainerVariants,
@@ -50,7 +52,8 @@ export const F0Tabs = React.memo(function F0Tabs({
   disabled = false,
   fullWidth = false,
   separatorInset = "full",
-  separatorWidth = "tabs",
+  separatorWidth = "container",
+  contentInset = "lg",
   embedded = false,
 }: F0TabsProps) {
   const firstTab = tabs[0]
@@ -142,7 +145,9 @@ export const F0Tabs = React.memo(function F0Tabs({
   // embedded: render only the first tab as non-interactive text (mirrors web)
   if (embedded) {
     return (
-      <View className="h-8 items-center justify-center px-3">
+      <View
+        className={`h-8 items-center justify-center ${f0TabsContentInsetVariants({ contentInset })}`}
+      >
         <F0Text variant="body-md-medium" color="default" numberOfLines={1}>
           {firstTab?.label ?? ""}
         </F0Text>
@@ -154,8 +159,7 @@ export const F0Tabs = React.memo(function F0Tabs({
   if (tabs.length === 1) {
     return (
       <View
-        className={f0TabsContainerVariants({ secondary, fullWidth })}
-        style={{ paddingHorizontal: 12 }}
+        className={`${f0TabsContainerVariants({ secondary, fullWidth })} ${f0TabsContentInsetVariants({ contentInset })}`}
       >
         <F0Text variant="body-md-medium" color="default" numberOfLines={1}>
           {firstTab?.label ?? ""}
@@ -179,7 +183,7 @@ export const F0Tabs = React.memo(function F0Tabs({
       }}
     >
       <View
-        className={f0TabsContainerVariants({ secondary, fullWidth })}
+        className={`${f0TabsContainerVariants({ secondary, fullWidth })} ${f0TabsContentInsetVariants({ contentInset })}`}
         style={tabListStyle}
         accessibilityRole="tablist"
       >
@@ -223,7 +227,7 @@ export const F0Tabs = React.memo(function F0Tabs({
         {/* Separator — full-width 1px bottom border (primary only, mirrors web) */}
         {!secondary && (
           <View
-            className={f0TabSeparatorVariants({ inset: separatorInset })}
+            className={`${f0TabSeparatorVariants({ inset: separatorInset })} ${separatorInset === "content" ? f0TabSeparatorContentInsetVariants({ contentInset }) : ""}`}
             importantForAccessibility="no-hide-descendants"
             pointerEvents="none"
           />

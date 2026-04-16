@@ -24,6 +24,27 @@ export const f0TabsContainerVariants = tv({
 })
 
 /**
+ * Horizontal content inset tokens for tabs.
+ * - `lg`: 24px (web parity)
+ * - `md`: 20px (mobile page gutter)
+ * - `sm`: 16px (compact containers)
+ * - `none`: 0px
+ */
+export const f0TabsContentInsetVariants = tv({
+  variants: {
+    contentInset: {
+      lg: "px-6",
+      md: "px-5",
+      sm: "px-4",
+      none: "px-0",
+    },
+  },
+  defaultVariants: {
+    contentInset: "lg",
+  },
+})
+
+/**
  * The PressableFeedback IS the pill — same as web's `<span py-1.5 px-3 rounded-md bg-...>`.
  * Active state applies the background color directly on the pressable.
  */
@@ -78,10 +99,28 @@ export const f0TabSeparatorVariants = tv({
   variants: {
     inset: {
       full: "left-0 right-0",
-      content: "left-3 right-3",
+      content: "",
     },
   },
   defaultVariants: {
     inset: "full",
+  },
+})
+
+/**
+ * Content-aligned separator inset tokens.
+ * Keep in sync with `f0TabsContentInsetVariants`.
+ */
+export const f0TabSeparatorContentInsetVariants = tv({
+  variants: {
+    contentInset: {
+      lg: "left-6 right-6",
+      md: "left-5 right-5",
+      sm: "left-4 right-4",
+      none: "left-0 right-0",
+    },
+  },
+  defaultVariants: {
+    contentInset: "lg",
   },
 })

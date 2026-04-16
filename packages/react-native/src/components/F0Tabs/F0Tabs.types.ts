@@ -40,6 +40,8 @@ export interface F0TabsProps {
   separatorInset?: "full" | "content"
   /** Separator width mode: `"tabs"` matches tabs content width, `"container"` fills available tabs container width. */
   separatorWidth?: "tabs" | "container"
+  /** Horizontal inset token for tab content and `separatorInset="content"`. */
+  contentInset?: "sm" | "md" | "lg" | "none"
   /** When `true`, renders only the first tab as plain text (no interaction, no indicator). */
   embedded?: boolean
 }

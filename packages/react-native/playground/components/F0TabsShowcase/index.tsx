@@ -129,6 +129,9 @@ export function F0TabsShowcase() {
           Separator inset
         </F0Text>
         <F0Text variant="body-sm-medium" color="secondary">
+          Inset tokens: lg=24, md=20, sm=16
+        </F0Text>
+        <F0Text variant="body-sm-medium" color="secondary">
           Full (default)
         </F0Text>
         <F0Tabs tabs={primaryTabs} />
@@ -136,6 +139,10 @@ export function F0TabsShowcase() {
           Content (no edge overhang)
         </F0Text>
         <F0Tabs tabs={primaryTabs} separatorInset="content" />
+        <F0Text variant="body-sm-medium" color="secondary">
+          Content + compact inset (16px)
+        </F0Text>
+        <F0Tabs tabs={primaryTabs} separatorInset="content" contentInset="sm" />
         <F0Text variant="body-sm-medium" color="secondary">
           Container span + content inset (fills row with few tabs)
         </F0Text>
