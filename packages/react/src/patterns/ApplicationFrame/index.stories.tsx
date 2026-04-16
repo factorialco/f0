@@ -302,6 +302,122 @@ export default meta
 
 type Story = StoryObj<typeof ApplicationFrame>
 
+const EmployeeListButton = () => {
+  const { clearAndAppend, setOpen } = useAiChat()
+
+  const handleClick = () => {
+    setOpen(true)
+    clearAndAppend([
+      {
+        role: "assistant",
+        content: "Here is the list of employees you requested:",
+        toolCalls: [
+          {
+            function: {
+              name: "downloadData",
+              arguments: JSON.stringify({
+                title: "Employee List",
+                filename: "employees",
+                dataset: {
+                  columns: ["id", "name", "email", "department", "salary"],
+                  columnLabels: {
+                    id: "ID",
+                    name: "Name",
+                    email: "Email",
+                    department: "Department",
+                    salary: "Salary",
+                  },
+                  rows: [
+                    {
+                      id: "1",
+                      name: "Hellen the HR",
+                      email: "hellen@factorial.co",
+                      department: "People",
+                      salary: 72000,
+                    },
+                    {
+                      id: "2",
+                      name: "Phebe Jacobson",
+                      email: "phebe@factorial.co",
+                      department: "Executive",
+                      salary: 95000,
+                    },
+                    {
+                      id: "3",
+                      name: "Arnulfo Maggio",
+                      email: "arnulfo@factorial.co",
+                      department: "Engineering",
+                      salary: 88000,
+                    },
+                    {
+                      id: "4",
+                      name: "Bernarda Wilkinson",
+                      email: "bernarda@factorial.co",
+                      department: "Finance",
+                      salary: 82000,
+                    },
+                    {
+                      id: "5",
+                      name: "Anitra Schaden",
+                      email: "anitra@factorial.co",
+                      department: "Marketing",
+                      salary: 76000,
+                    },
+                    {
+                      id: "6",
+                      name: "Fidel Johnson",
+                      email: "fidel@factorial.co",
+                      department: "People",
+                      salary: 70000,
+                    },
+                    {
+                      id: "7",
+                      name: "Jeanetta McCullough",
+                      email: "jeanetta@factorial.co",
+                      department: "Operations",
+                      salary: 68000,
+                    },
+                    {
+                      id: "8",
+                      name: "Florencio Little",
+                      email: "florencio@factorial.co",
+                      department: "Sales",
+                      salary: 74000,
+                    },
+                    {
+                      id: "9",
+                      name: "Fae Fritsch",
+                      email: "fae@factorial.co",
+                      department: "Design",
+                      salary: 71000,
+                    },
+                    {
+                      id: "10",
+                      name: "Jordan Kunze",
+                      email: "jordan@factorial.co",
+                      department: "Sales",
+                      salary: 73000,
+                    },
+                  ],
+                  totalCount: 10,
+                },
+              }),
+            },
+          },
+        ],
+      },
+    ])
+  }
+
+  return (
+    <F0Button
+      label="Open with Employee List"
+      onClick={handleClick}
+      icon={Lightbulb}
+    />
+  )
+}
+
 const DefaultStoryComponent = (
   args: ComponentProps<typeof ApplicationFrame>
 ) => {
@@ -311,7 +427,10 @@ const DefaultStoryComponent = (
       aiPromotion={args.aiPromotion}
       sidebar={<Sidebar {...SidebarStories.default.args} />}
     >
-      <Page {...PageStories.Default.args} />
+      <div className="flex w-full flex-col gap-2">
+        <EmployeeListButton />
+        <Page {...PageStories.Default.args} />
+      </div>
     </ApplicationFrame>
   )
 }

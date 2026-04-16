@@ -88,6 +88,24 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
 }: DashboardGridProps<Filters>) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isNarrow, setIsNarrow] = useState(false)
+  const [fullscreenItemId, setFullscreenItemId] = useState<string | null>(null)
+  const [fullscreenHeight, setFullscreenHeight] = useState<number>(0)
+
+  // Measure available height when entering fullscreen
+  useEffect(() => {
+    if (!fullscreenItemId || !containerRef.current) return
+    const measure = () => {
+      const rect = containerRef.current?.getBoundingClientRect()
+      if (rect) {
+        // Fill from the container's top to the bottom of the viewport,
+        // minus a small padding so it doesn't touch the edge
+        setFullscreenHeight(window.innerHeight - rect.top - 16)
+      }
+    }
+    measure()
+    window.addEventListener("resize", measure)
+    return () => window.removeEventListener("resize", measure)
+  }, [fullscreenItemId])
 
   // Build item lookup
   const itemMap = useMemo(() => {
@@ -130,6 +148,13 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
     observer.observe(el)
     return () => observer.disconnect()
   }, [])
+
+  // Exit fullscreen if the item is no longer in the grid (deleted, filtered, etc.)
+  useEffect(() => {
+    if (fullscreenItemId && !itemMap.has(fullscreenItemId)) {
+      setFullscreenItemId(null)
+    }
+  }, [fullscreenItemId, itemMap])
 
   // ─── Emit layout changes ────────────────────────────────────
   const emitLayout = useCallback(
@@ -324,6 +349,34 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
     dropTarget?.type === "new-row" &&
     dropTarget.afterRowIdx === afterIdx
 
+  // ─── Fullscreen mode — single item fills the grid ────────
+  if (fullscreenItemId) {
+    const fullscreenItem = itemMap.get(fullscreenItemId)
+    if (fullscreenItem) {
+      return (
+        <div
+          ref={containerRef}
+          className="flex flex-col"
+          style={{ height: Math.max(480, fullscreenHeight) }}
+        >
+          <DashboardGridItem
+            item={fullscreenItem}
+            filters={filters}
+            editMode={editMode}
+            onDelete={handleDelete}
+            onTransformChart={onTransformChart}
+            isFullscreen
+            onFullscreenChange={(fs) =>
+              setFullscreenItemId(fs ? fullscreenItemId : null)
+            }
+          />
+        </div>
+      )
+    }
+    // Item not found — the cleanup effect will exit fullscreen on the next cycle
+    return null
+  }
+
   return (
     <div ref={containerRef} className="flex flex-col" style={{ gap: GAP }}>
       {displayRows.map((row, ri) => {
@@ -380,6 +433,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
                       editMode={editMode}
                       onDelete={handleDelete}
                       onTransformChart={onTransformChart}
+                      onFullscreenChange={(fs) =>
+                        setFullscreenItemId(fs ? id : null)
+                      }
                     />
                   </RowItem>
                 )
@@ -663,6 +719,8 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
   editMode,
   onDelete,
   onTransformChart,
+  isFullscreen,
+  onFullscreenChange,
 }: {
   item: DashboardItemType<Filters>
   filters: FiltersState<Filters>
@@ -674,6 +732,8 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
     newType: string,
     orientation?: "vertical" | "horizontal"
   ) => void
+  isFullscreen?: boolean
+  onFullscreenChange?: (fullscreen: boolean) => void
 }) {
   switch (item.type) {
     case "chart":
@@ -685,6 +745,8 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           editMode={editMode}
           handleDelete={onDelete}
           onTransformChart={onTransformChart}
+          isFullscreen={isFullscreen}
+          onFullscreenChange={onFullscreenChange}
         />
       )
     case "metric":
@@ -695,6 +757,8 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           actions={actions}
           editMode={editMode}
           handleDelete={onDelete}
+          isFullscreen={isFullscreen}
+          onFullscreenChange={onFullscreenChange}
         />
       )
     case "collection":
@@ -705,6 +769,8 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           actions={actions}
           editMode={editMode}
           handleDelete={onDelete}
+          isFullscreen={isFullscreen}
+          onFullscreenChange={onFullscreenChange}
         />
       )
     default: {

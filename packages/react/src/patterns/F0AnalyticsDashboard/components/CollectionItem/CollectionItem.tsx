@@ -22,6 +22,8 @@ interface CollectionItemProps<Filters extends FiltersDefinition> {
   actions?: DropdownItem[]
   editMode?: boolean
   handleDelete?: (itemId: string) => void
+  isFullscreen?: boolean
+  onFullscreenChange?: (fullscreen: boolean) => void
 }
 
 /**
@@ -38,6 +40,8 @@ export function CollectionItem<Filters extends FiltersDefinition>({
   actions,
   editMode,
   handleDelete,
+  isFullscreen,
+  onFullscreenChange,
 }: CollectionItemProps<Filters>) {
   const enabled = item.useDashboardFilters !== false
   const effectiveFilters = enabled ? filters : ({} as FiltersState<Filters>)
@@ -78,6 +82,8 @@ export function CollectionItem<Filters extends FiltersDefinition>({
       editMode={editMode}
       handleDelete={handleDelete}
       itemId={item.id}
+      isFullscreen={isFullscreen}
+      onFullscreenChange={onFullscreenChange}
     >
       <OneDataCollection
         fullHeight

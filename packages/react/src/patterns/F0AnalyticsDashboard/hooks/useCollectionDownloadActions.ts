@@ -1,8 +1,8 @@
-import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
-
 import { useCallback, useMemo } from "react"
 
-import { Download } from "@/icons/app"
+import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
+
+import { Table } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
 import { downloadAsCsv, downloadAsExcel } from "../utils/downloadHelpers"
@@ -36,12 +36,12 @@ export function useCollectionDownloadActions({
     return [
       {
         label: t("ai.dataDownload.download", { format: "Excel" }),
-        icon: Download,
+        icon: Table,
         onClick: handleExcel,
       },
       {
         label: t("ai.dataDownload.download", { format: "CSV" }),
-        icon: Download,
+        icon: Table,
         onClick: handleCsv,
       },
     ]

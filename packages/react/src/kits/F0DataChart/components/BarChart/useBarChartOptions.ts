@@ -146,7 +146,7 @@ function buildSeriesEntries(
               : ([1, 0, 0, 0] as [number, number, number, number])),
             [
               { offset: 0, color: `${pointColor}33` },
-              { offset: 1, color: "rgba(0, 0, 0, 0)" },
+              { offset: 1, color: `${pointColor}00` },
             ]
           ),
           borderRadius,
@@ -178,7 +178,7 @@ function buildSeriesEntries(
           // offset 0 = far end from the solid bar → more opaque (darker)
           { offset: 0, color: `${color}33` },
           // offset 1 = near the solid bar → transparent
-          { offset: 1, color: "rgba(0, 0, 0, 0)" },
+          { offset: 1, color: `${color}00` },
         ]
       ),
       // Only round the far end (away from the solid bar)

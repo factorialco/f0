@@ -3,7 +3,7 @@ import { createRoot, Root } from "react-dom/client"
 
 import { MentionList } from "./MentionList"
 import { MentionPopover } from "./MentionPopover"
-import { MentionedUser, MentionListRef, MentionNodeAttrs } from "./types"
+import { MentionedUser, MentionListRef } from "./types"
 
 export function createSuggestionConfig(
   mentionSuggestions: MentionedUser[],
@@ -13,6 +13,13 @@ export function createSuggestionConfig(
   ) => Promise<MentionedUser[]> | undefined,
   users?: MentionedUser[]
 ) {
+  type SuggestionRenderProps = {
+    items: MentionedUser[]
+    clientRect?: (() => DOMRect | null) | null
+    editor: Editor
+    range: { from: number; to: number }
+  }
+
   return {
     char: "@",
     minLength: 0,
@@ -44,6 +51,7 @@ export function createSuggestionConfig(
       let component: ReactRenderer | null = null
       let popoverRoot: Root | null = null
       let container: HTMLDivElement | null = null
+      let latestProps: SuggestionRenderProps | null = null
 
       const getAtSymbolRect = (): DOMRect => {
         const selection = window.getSelection()
@@ -66,61 +74,18 @@ export function createSuggestionConfig(
       }
 
       return {
-        onStart: (props: {
-          items: MentionedUser[]
-          command: (attrs: MentionNodeAttrs) => void
-          clientRect?: (() => DOMRect | null) | null
-          editor: Editor
-          range: { from: number; to: number }
-        }) => {
+        onStart: (props: SuggestionRenderProps) => {
+          latestProps = props
+
           const commandFn = (item: MentionedUser) => {
-            // Get the current selection and document state
-            const { state } = props.editor
-            const { from, to } = state.selection
+            if (!latestProps) return
 
-            // Find the actual @ symbol position by looking backwards more conservatively
-            const doc = state.doc
-            const $from = doc.resolve(from)
+            const { editor, range } = latestProps
 
-            // Look backwards character by character to find the @ symbol
-            // but stop at word boundaries to avoid deleting too much
-            let atPosition = -1
-            const currentOffset = $from.parentOffset
-            const parentText = $from.parent.textContent || ""
-
-            // Search backwards from current position, but limit to reasonable mention length
-            for (
-              let i = currentOffset - 1;
-              i >= Math.max(0, currentOffset - 100);
-              i--
-            ) {
-              const char = parentText[i]
-              if (char === "@") {
-                atPosition = from - (currentOffset - i)
-                break
-              }
-              // Stop if we hit whitespace or newline before finding @
-              if (char === " " || char === "\n" || char === "\t") {
-                break
-              }
-            }
-
-            if (atPosition !== -1) {
-              props.editor
-                .chain()
-                .focus()
-                .deleteRange({ from: atPosition, to: to })
-                .run()
-            } else {
-              // Fallback to the provided range if we can't find the @ symbol
-              props.editor.chain().focus().deleteRange(props.range).run()
-            }
-
-            // Then insert the mention
-            props.editor
+            editor
               .chain()
               .focus()
-              .insertContent([
+              .insertContentAt(range, [
                 {
                   type: "mention",
                   attrs: {
@@ -136,7 +101,12 @@ export function createSuggestionConfig(
                 },
               ])
               .run()
+
+            const selection =
+              editor.view.dom.ownerDocument.defaultView?.getSelection()
+            selection?.collapseToEnd()
           }
+
           component = new ReactRenderer(MentionList, {
             props: { items: props.items, command: commandFn },
             editor: props.editor,
@@ -163,11 +133,9 @@ export function createSuggestionConfig(
           )
           props.editor?.commands.focus()
         },
-        onUpdate: (props: {
-          items: MentionedUser[]
-          clientRect?: (() => DOMRect | null) | null
-          editor: Editor
-        }) => {
+        onUpdate: (props: SuggestionRenderProps) => {
+          latestProps = props
+
           if (!component || !container || !popoverRoot) return
           component.updateProps({ items: props.items })
           const safeGetRect = () => {
@@ -195,6 +163,7 @@ export function createSuggestionConfig(
             return (component.ref as MentionListRef)?.onKeyDown(props) || false
           }
           if (props.event.key === "Escape") {
+            latestProps = null
             if (popoverRoot && container) {
               popoverRoot.unmount()
               container.remove()
@@ -204,6 +173,7 @@ export function createSuggestionConfig(
           return (component.ref as MentionListRef)?.onKeyDown(props) || false
         },
         onExit() {
+          latestProps = null
           if (popoverRoot && container) {
             popoverRoot.unmount()
             container.remove()

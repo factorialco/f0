@@ -1,14 +1,16 @@
 import type { RefObject } from "react"
+
+import * as echarts from "echarts"
+import { useCallback, useMemo } from "react"
+
 import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 
-import { useCallback, useMemo } from "react"
-import * as echarts from "echarts"
-
-import { Download, Image } from "@/icons/app"
+import { Table, Image } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
 import type { DashboardChartConfig, DashboardChartData } from "../types"
 
+import { detectDataShape } from "../utils/chartDataAdapter"
 import { chartDataToTabular } from "../utils/chartDataToTabular"
 import {
   downloadAsCsv,
@@ -53,17 +55,25 @@ export function useChartDownloadActions({
     [chartContainerRef, title]
   )
 
+  const effectiveConfig = useMemo(() => {
+    if (!data) return chartConfig
+    const dataShape = detectDataShape(data, chartConfig.type)
+    return dataShape !== chartConfig.type
+      ? ({ ...chartConfig, type: dataShape } as DashboardChartConfig)
+      : chartConfig
+  }, [chartConfig, data])
+
   const handleExcel = useCallback(() => {
     if (!data) return
-    const tabular = chartDataToTabular(chartConfig, data)
+    const tabular = chartDataToTabular(effectiveConfig, data)
     downloadAsExcel(tabular.columns, tabular.rows, title)
-  }, [chartConfig, data, title])
+  }, [effectiveConfig, data, title])
 
   const handleCsv = useCallback(() => {
     if (!data) return
-    const tabular = chartDataToTabular(chartConfig, data)
+    const tabular = chartDataToTabular(effectiveConfig, data)
     downloadAsCsv(tabular.columns, tabular.rows, title)
-  }, [chartConfig, data, title])
+  }, [effectiveConfig, data, title])
 
   return useMemo(() => {
     if (!data) return []
@@ -83,12 +93,12 @@ export function useChartDownloadActions({
       },
       {
         label: t("ai.dataDownload.download", { format: "Excel" }),
-        icon: Download,
+        icon: Table,
         onClick: handleExcel,
       },
       {
         label: t("ai.dataDownload.download", { format: "CSV" }),
-        icon: Download,
+        icon: Table,
         onClick: handleCsv,
       },
     ]

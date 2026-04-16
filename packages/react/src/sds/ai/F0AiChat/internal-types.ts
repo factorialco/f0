@@ -7,6 +7,7 @@ import {
   type AiChatFileAttachmentConfig,
   type AiChatTrackingOptions,
   type AiChatToolHint,
+  type AppendMessage,
   type CanvasContent,
   type AiChatCredits,
   type AiChatCreditWarning,
@@ -118,6 +119,26 @@ export type AiChatProviderReturnValue = {
    * @internal
    */
   setSendMessageFunction: (sendFn: ((message: Message) => void) | null) => void
+  /**
+   * Append messages to the current conversation.
+   * Useful for injecting pre-built assistant responses (e.g. dashboards)
+   * from outside the chat. IDs are generated internally.
+   */
+  appendMessages: (messages: AppendMessage[]) => void
+  /** @internal */
+  setAppendMessagesFunction: (
+    fn: ((messages: AppendMessage[]) => void) | null
+  ) => void
+  /**
+   * Atomically clear the conversation and inject new messages.
+   * Starts a fresh thread without the race condition of calling
+   * clear() + appendMessages() separately.
+   */
+  clearAndAppend: (messages: AppendMessage[]) => void
+  /** @internal */
+  setReplaceMessagesFunction: (
+    fn: ((messages: AppendMessage[]) => void) | null
+  ) => void
   /**
    * Current width of the chat window (for resizable mode)
    */

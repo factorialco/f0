@@ -365,6 +365,7 @@ export const defaultTranslations = {
     },
     attachFile: "Attach file",
     removeFile: "Remove",
+    fileUploadError: "Upload failed",
     dropFilesHere: "Drop your files here",
     clarifyingQuestion: {
       submit: "Submit",
@@ -404,6 +405,8 @@ export const defaultTranslations = {
     barChartHorizontal: "Bar (horizontal)",
     lineChart: "Line",
     funnel: "Funnel",
+    pieChart: "Pie",
+    table: "Table",
   },
   select: {
     noResults: "No results found",

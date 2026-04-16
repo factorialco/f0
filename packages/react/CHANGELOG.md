@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.449.2](https://github.com/factorialco/f0/compare/f0-react-v1.449.1...f0-react-v1.449.2) (2026-04-16)
+
+
+### Bug Fixes
+
+* **F0AiChat:** surface file upload errors to the user ([#3946](https://github.com/factorialco/f0/issues/3946)) ([2111042](https://github.com/factorialco/f0/commit/2111042eb1fac0f497d9bd1a7e9e377929933995))
+
+## [1.449.1](https://github.com/factorialco/f0/compare/f0-react-v1.449.0...f0-react-v1.449.1) (2026-04-15)
+
+
+### Bug Fixes
+
+* richTextEditor issue with +3 mentions ([#3917](https://github.com/factorialco/f0/issues/3917)) ([54406a5](https://github.com/factorialco/f0/commit/54406a559db446b6e389598b9289cef899f2da12))
+
+## [1.449.0](https://github.com/factorialco/f0/compare/f0-react-v1.448.0...f0-react-v1.449.0) (2026-04-15)
+
+
+### Features
+
+* **F0DataChart:** responsive accessibility patterns + universal chart type transforms ([#3928](https://github.com/factorialco/f0/issues/3928)) ([1806f37](https://github.com/factorialco/f0/commit/1806f373fe2dc75e420693dc307b97ebdd9231a6))
+
 ## [1.448.0](https://github.com/factorialco/f0/compare/f0-react-v1.447.0...f0-react-v1.448.0) (2026-04-15)
 
 
