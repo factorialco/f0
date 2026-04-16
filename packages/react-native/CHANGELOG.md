@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.51.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.50.0...f0-react-native-v0.51.0) (2026-04-16)
+
+
+### Features
+
+* **F0Tabs:** improvements and changes ([#3948](https://github.com/factorialco/f0/issues/3948)) ([488dfff](https://github.com/factorialco/f0/commit/488dfff3db73b2aa2888fec0dfcc5eeea7a1fd1f))
+
 ## [0.50.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.49.1...f0-react-native-v0.50.0) (2026-04-15)
 
 
