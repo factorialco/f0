@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.449.2](https://github.com/factorialco/f0/compare/f0-react-v1.449.1...f0-react-v1.449.2) (2026-04-16)
+
+
+### Bug Fixes
+
+* **F0AiChat:** surface file upload errors to the user ([#3946](https://github.com/factorialco/f0/issues/3946)) ([2111042](https://github.com/factorialco/f0/commit/2111042eb1fac0f497d9bd1a7e9e377929933995))
+
 ## [1.449.1](https://github.com/factorialco/f0/compare/f0-react-v1.449.0...f0-react-v1.449.1) (2026-04-15)
 
 
