@@ -293,7 +293,7 @@ exports[`F0Tabs Snapshot - globally disabled 1`] = `
           }
         }
         accessible={true}
-        className="overflow-hidden items-center justify-center rounded-md px-3 py-1.5 opacity-30 bg-f0-background-tertiary"
+        className="overflow-hidden items-center justify-center rounded-md px-3 py-1.5 opacity-50 bg-f0-background-tertiary"
         collapsable={false}
         focusable={true}
         onBlur={[Function]}
@@ -362,7 +362,7 @@ exports[`F0Tabs Snapshot - globally disabled 1`] = `
           }
         }
         accessible={true}
-        className="overflow-hidden items-center justify-center rounded-md px-3 py-1.5 opacity-30"
+        className="overflow-hidden items-center justify-center rounded-md px-3 py-1.5 opacity-50"
         collapsable={false}
         focusable={true}
         onBlur={[Function]}
@@ -431,7 +431,7 @@ exports[`F0Tabs Snapshot - globally disabled 1`] = `
           }
         }
         accessible={true}
-        className="overflow-hidden items-center justify-center rounded-md px-3 py-1.5 opacity-30"
+        className="overflow-hidden items-center justify-center rounded-md px-3 py-1.5 opacity-50"
         collapsable={false}
         focusable={true}
         onBlur={[Function]}
@@ -1087,7 +1087,7 @@ exports[`F0Tabs Snapshot - tab disabled 1`] = `
           }
         }
         accessible={true}
-        className="overflow-hidden items-center justify-center rounded-md px-3 py-1.5 opacity-30"
+        className="overflow-hidden items-center justify-center rounded-md px-3 py-1.5 opacity-50"
         collapsable={false}
         focusable={true}
         onBlur={[Function]}
