@@ -34,6 +34,11 @@ describe("F0Tabs", () => {
     expect(toJSON()).toMatchSnapshot()
   })
 
+  it("Snapshot - separator width container", () => {
+    const { toJSON } = render(<F0Tabs tabs={tabs} separatorWidth="container" />)
+    expect(toJSON()).toMatchSnapshot()
+  })
+
   it("Snapshot - globally disabled", () => {
     const { toJSON } = render(<F0Tabs tabs={tabs} disabled />)
     expect(toJSON()).toMatchSnapshot()

@@ -50,6 +50,7 @@ export const F0Tabs = React.memo(function F0Tabs({
   disabled = false,
   fullWidth = false,
   separatorInset = "full",
+  separatorWidth = "tabs",
   embedded = false,
 }: F0TabsProps) {
   const firstTab = tabs[0]
@@ -133,6 +134,11 @@ export const F0Tabs = React.memo(function F0Tabs({
     width: indicatorWidth.value,
   }))
 
+  const tabListStyle =
+    separatorWidth === "container" && !fullWidth && containerWidth > 0
+      ? { minWidth: containerWidth }
+      : undefined
+
   // embedded: render only the first tab as non-interactive text (mirrors web)
   if (embedded) {
     return (
@@ -174,6 +180,7 @@ export const F0Tabs = React.memo(function F0Tabs({
     >
       <View
         className={f0TabsContainerVariants({ secondary, fullWidth })}
+        style={tabListStyle}
         accessibilityRole="tablist"
       >
         {tabs.map((tab) => {

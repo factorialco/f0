@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { ScrollView, View } from "react-native";
+import React, { useState } from "react"
+import { ScrollView, View } from "react-native"
 
-import { F0Tabs } from "../../../src/components/F0Tabs";
-import type { F0TabItem } from "../../../src/components/F0Tabs";
-import { F0Text } from "../../../src/components/primitives/F0Text";
+import { F0Tabs } from "../../../src/components/F0Tabs"
+import type { F0TabItem } from "../../../src/components/F0Tabs"
+import { F0Text } from "../../../src/components/primitives/F0Text"
 
 const primaryTabs: F0TabItem[] = [
   { id: "overview", label: "Overview", index: true },
@@ -11,13 +11,13 @@ const primaryTabs: F0TabItem[] = [
   { id: "categories", label: "Categories" },
   { id: "catalog", label: "Catalog" },
   { id: "requests", label: "Requests" },
-];
+]
 
 const secondaryTabs: F0TabItem[] = [
   { id: "all", label: "All", index: true },
   { id: "active", label: "Active" },
   { id: "archived", label: "Archived" },
-];
+]
 
 const manyTabs: F0TabItem[] = [
   { id: "tab1", label: "Overview" },
@@ -27,7 +27,7 @@ const manyTabs: F0TabItem[] = [
   { id: "tab5", label: "Requests" },
   { id: "tab6", label: "Reports" },
   { id: "tab7", label: "Settings" },
-];
+]
 
 const primaryContent: Record<string, string> = {
   overview: "A summary of all your learning activity, progress and stats.",
@@ -35,21 +35,21 @@ const primaryContent: Record<string, string> = {
   categories: "Organise courses into categories to improve discoverability.",
   catalog: "The public catalog of courses available for self-enrolment.",
   requests: "Pending and completed course requests from your team.",
-};
+}
 
 const secondaryContent: Record<string, string> = {
   all: "Showing all items regardless of status.",
   active: "Items that are currently active and in progress.",
   archived: "Items that have been archived and are no longer active.",
-};
+}
 
 // ---------------------------------------------------------------------------
 // Piled example — primary + secondary with synced real content
 // ---------------------------------------------------------------------------
 
 function PiledExample() {
-  const [primaryTab, setPrimaryTab] = useState("overview");
-  const [secondaryTab, setSecondaryTab] = useState("all");
+  const [primaryTab, setPrimaryTab] = useState("overview")
+  const [secondaryTab, setSecondaryTab] = useState("all")
 
   return (
     <View>
@@ -73,7 +73,7 @@ function PiledExample() {
         </F0Text>
       </View>
     </View>
-  );
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -81,9 +81,9 @@ function PiledExample() {
 // ---------------------------------------------------------------------------
 
 export function F0TabsShowcase() {
-  const [activeTab, setActiveTab] = useState("overview");
-  const [fullWidthTab, setFullWidthTab] = useState("all");
-  const [tabDisabledActiveTab, setTabDisabledActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("overview")
+  const [fullWidthTab, setFullWidthTab] = useState("all")
+  const [tabDisabledActiveTab, setTabDisabledActiveTab] = useState("overview")
 
   return (
     <ScrollView
@@ -136,6 +136,14 @@ export function F0TabsShowcase() {
           Content (no edge overhang)
         </F0Text>
         <F0Tabs tabs={primaryTabs} separatorInset="content" />
+        <F0Text variant="body-sm-medium" color="secondary">
+          Container span + content inset (fills row with few tabs)
+        </F0Text>
+        <F0Tabs
+          tabs={secondaryTabs}
+          separatorInset="content"
+          separatorWidth="container"
+        />
       </View>
 
       {/* Overflow — many tabs */}
@@ -205,5 +213,5 @@ export function F0TabsShowcase() {
         <F0Tabs tabs={[{ id: "only", label: "Overview" }]} />
       </View>
     </ScrollView>
-  );
+  )
 }

@@ -38,6 +38,8 @@ export interface F0TabsProps {
   fullWidth?: boolean
   /** Separator inset mode: `"full"` spans edge to edge, `"content"` aligns with tab content. */
   separatorInset?: "full" | "content"
+  /** Separator width mode: `"tabs"` matches tabs content width, `"container"` fills available tabs container width. */
+  separatorWidth?: "tabs" | "container"
   /** When `true`, renders only the first tab as plain text (no interaction, no indicator). */
   embedded?: boolean
 }
