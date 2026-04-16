@@ -94,7 +94,7 @@ describe("NumberCell", () => {
     )
 
     const input = screen.getByRole("textbox")
-    const alignWrapper = input.closest('[class*="[&_input]"]')
+    const alignWrapper = input.closest(".justify-end")
     expect(alignWrapper).toBeInTheDocument()
   })
 
@@ -122,8 +122,7 @@ describe("NumberCell", () => {
       />
     )
 
-    const wrapper = screen.getByRole("textbox").closest("[data-units]")
-    expect(wrapper).toHaveAttribute("data-units", "EUR")
+    expect(screen.getByText("EUR")).toBeInTheDocument()
   })
 
   it("renders value '0' when stored value is '0' (no units)", () => {
@@ -144,7 +143,6 @@ describe("NumberCell", () => {
     )
 
     expect(screen.getByRole("textbox")).toHaveValue("0")
-    const wrapper = screen.getByRole("textbox").closest("[data-units]")
-    expect(wrapper).toHaveAttribute("data-units", "€")
+    expect(screen.getByText("€")).toBeInTheDocument()
   })
 })

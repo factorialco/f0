@@ -83,6 +83,7 @@ export type RowProps<
   index: number
   groupIndex: number
   onCheckedChange: (checked: boolean) => void
+  onItemCheckedChange?: (item: R, checked: boolean) => void
   selectedItems: Map<string | number, R>
   columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
   frozenColumnsLeft: number
@@ -150,9 +151,10 @@ const NestedRowContent = <
   const shouldShowChildren = open
   const shouldShowLoadMore = open && paginationInfo?.hasMore
 
-  const addRowActions = open
-    ? normalizeAddRowActions(addRow?.addNestedRowActions?.(props.item))
-    : []
+  const addRowActions =
+    open && !isLoading
+      ? normalizeAddRowActions(addRow?.addNestedRowActions?.(props.item))
+      : []
   const hasAddRowActions = addRowActions.length > 0
 
   const firstRow = (props.nestedRowProps?.depth ?? 0) === 0
@@ -304,6 +306,9 @@ const NestedRowContent = <
                 key={`nested-row-${props.groupIndex}-${child.id}-${props.index}-${childIndex}`}
                 index={childIndex}
                 item={childItem}
+                onCheckedChange={(checked) => {
+                  props.onItemCheckedChange?.(childItem, checked)
+                }}
                 tableWithChildren={props.tableWithChildren}
                 ref={getChildRef()}
                 nestedRowProps={{
@@ -341,6 +346,9 @@ const NestedRowContent = <
                 key={`row-${props.groupIndex}-${props.index}-${childIndex}`}
                 index={childIndex}
                 item={childItem}
+                onCheckedChange={(checked) => {
+                  props.onItemCheckedChange?.(childItem, checked)
+                }}
                 noBorder={leafShouldHideBorder}
                 ref={getChildRef()}
                 nestedRowProps={{
