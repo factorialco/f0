@@ -12,7 +12,7 @@ import { PressableFeedback } from "../primitives/PressableFeedback"
 
 import {
   f0TabItemVariants,
-  f0TabSeparatorClass,
+  f0TabSeparatorVariants,
   f0TabUnderlineClass,
   f0TabsContainerVariants,
 } from "./F0Tabs.styles"
@@ -49,6 +49,7 @@ export const F0Tabs = React.memo(function F0Tabs({
   secondary = false,
   disabled = false,
   fullWidth = false,
+  separatorInset = "full",
   embedded = false,
 }: F0TabsProps) {
   const firstTab = tabs[0]
@@ -215,7 +216,7 @@ export const F0Tabs = React.memo(function F0Tabs({
         {/* Separator — full-width 1px bottom border (primary only, mirrors web) */}
         {!secondary && (
           <View
-            className={f0TabSeparatorClass}
+            className={f0TabSeparatorVariants({ inset: separatorInset })}
             importantForAccessibility="no-hide-descendants"
             pointerEvents="none"
           />

@@ -36,6 +36,8 @@ export interface F0TabsProps {
   disabled?: boolean
   /** When `true`, distributes tabs evenly across all available width. */
   fullWidth?: boolean
+  /** Separator inset mode: `"full"` spans edge to edge, `"content"` aligns with tab content. */
+  separatorInset?: "full" | "content"
   /** When `true`, renders only the first tab as plain text (no interaction, no indicator). */
   embedded?: boolean
 }

@@ -73,5 +73,15 @@ export const f0TabUnderlineClass =
 /**
  * Full-width separator at the bottom of the primary container (mirrors web's border div).
  */
-export const f0TabSeparatorClass =
-  "absolute bottom-0 left-0 right-0 h-px bg-f0-border"
+export const f0TabSeparatorVariants = tv({
+  base: "absolute bottom-0 h-px bg-f0-border",
+  variants: {
+    inset: {
+      full: "left-0 right-0",
+      content: "left-3 right-3",
+    },
+  },
+  defaultVariants: {
+    inset: "full",
+  },
+})

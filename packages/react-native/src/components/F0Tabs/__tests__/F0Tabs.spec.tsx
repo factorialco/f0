@@ -29,6 +29,11 @@ describe("F0Tabs", () => {
     expect(toJSON()).toMatchSnapshot()
   })
 
+  it("Snapshot - separator inset content", () => {
+    const { toJSON } = render(<F0Tabs tabs={tabs} separatorInset="content" />)
+    expect(toJSON()).toMatchSnapshot()
+  })
+
   it("Snapshot - globally disabled", () => {
     const { toJSON } = render(<F0Tabs tabs={tabs} disabled />)
     expect(toJSON()).toMatchSnapshot()

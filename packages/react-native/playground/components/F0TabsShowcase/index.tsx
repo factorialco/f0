@@ -123,6 +123,21 @@ export function F0TabsShowcase() {
         <F0Tabs tabs={secondaryTabs} secondary />
       </View>
 
+      {/* Separator inset */}
+      <View className="gap-2">
+        <F0Text variant="body-md-medium" color="default">
+          Separator inset
+        </F0Text>
+        <F0Text variant="body-sm-medium" color="secondary">
+          Full (default)
+        </F0Text>
+        <F0Tabs tabs={primaryTabs} />
+        <F0Text variant="body-sm-medium" color="secondary">
+          Content (no edge overhang)
+        </F0Text>
+        <F0Tabs tabs={primaryTabs} separatorInset="content" />
+      </View>
+
       {/* Overflow — many tabs */}
       <View className="gap-2">
         <F0Text variant="body-md-medium" color="default">
