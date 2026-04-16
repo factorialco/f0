@@ -15,6 +15,14 @@ export type DashboardCardProps = {
   config: ChatDashboardConfig
   /** API config for server-side dashboard computation */
   apiConfig: { baseUrl: string; headers: Record<string, string> }
+  /** Present when the dashboard is a pre-saved dashboard */
+  savedDashboardId?: string
+  /** Category of the saved dashboard */
+  savedDashboardCategory?: string
+  /** Description of the saved dashboard */
+  savedDashboardDescription?: string
+  /** True when the agent iterated on a saved dashboard (has unsaved changes) */
+  savedDashboardUnsaved?: boolean
 }
 
 /**
@@ -30,6 +38,10 @@ export type DashboardCardProps = {
 export function DashboardCard({
   config: originalConfig,
   apiConfig,
+  savedDashboardId,
+  savedDashboardCategory,
+  savedDashboardDescription,
+  savedDashboardUnsaved = false,
 }: DashboardCardProps) {
   useSyncExternalStore(
     savedDashboardConfigStore.subscribe,
@@ -56,6 +68,10 @@ export function DashboardCard({
       config,
       apiConfig,
       toolCallId,
+      savedDashboardId,
+      savedDashboardCategory,
+      savedDashboardDescription,
+      savedDashboardUnsaved,
     })
 
   // Auto-open canvas the first time this card appears

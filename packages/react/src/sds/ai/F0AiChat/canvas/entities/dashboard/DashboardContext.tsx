@@ -73,7 +73,7 @@ export function DashboardCanvasProvider({
     },
     []
   )
-  const { openCanvas } = useAiChat()
+  const { openCanvas, canvasActions } = useAiChat()
   const { threadId } = useCopilotContext()
 
   const saveConfigFn = useSaveDashboardConfig(content.apiConfig)
@@ -137,7 +137,8 @@ export function DashboardCanvasProvider({
   )
 
   const handleSave = async () => {
-    const hasPendingChanges = pendingLayout || itemTransforms.size > 0
+    const hasPendingChanges =
+      pendingLayout || itemTransforms.size > 0 || content.savedDashboardUnsaved
     if (!hasPendingChanges) return
 
     // Start from current config, apply layout then transforms
@@ -151,6 +152,19 @@ export function DashboardCanvasProvider({
     try {
       await saveConfigFn(threadId, content.toolCallId, updatedConfig)
 
+      // If this is a saved dashboard, also persist externally
+      if (
+        content.savedDashboardId &&
+        content.savedDashboardCategory &&
+        canvasActions?.dashboard?.save
+      ) {
+        await canvasActions.dashboard.save(
+          content.savedDashboardId,
+          content.savedDashboardCategory,
+          updatedConfig
+        )
+      }
+
       if (content.toolCallId) {
         savedDashboardConfigStore.set(content.toolCallId, updatedConfig)
       }
@@ -159,9 +173,11 @@ export function DashboardCanvasProvider({
       // so `fetchSpecs` keeps the same reference — DashboardContent uses that
       // reference to gate its data refresh key, so this update does NOT
       // trigger a recompute even though the canvas content reference changes.
+      // Also clear the unsaved flag since changes are now persisted.
       openCanvas({
         ...content,
         config: updatedConfig,
+        savedDashboardUnsaved: false,
       })
 
       setPendingLayout(null)

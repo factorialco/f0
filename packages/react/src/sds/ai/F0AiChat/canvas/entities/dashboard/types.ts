@@ -329,3 +329,22 @@ export interface ChatDashboardConfig {
   /** Fetch specs for server-side data retrieval, keyed by datasetId */
   fetchSpecs: Record<string, DashboardFetchSpec>
 }
+
+/**
+ * Callbacks for persisting dashboards externally (beyond chat history).
+ */
+export type DashboardCanvasActions = {
+  /** Update an existing saved dashboard */
+  save: (
+    id: string,
+    category: string,
+    config: ChatDashboardConfig
+  ) => Promise<void>
+  /** Create a new saved dashboard */
+  create: (
+    title: string,
+    description: string,
+    config: ChatDashboardConfig,
+    category?: string
+  ) => Promise<void>
+}

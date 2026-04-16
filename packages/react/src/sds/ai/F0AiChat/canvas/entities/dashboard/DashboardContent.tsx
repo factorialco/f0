@@ -418,11 +418,14 @@ ChatDashboard.displayName = "ChatDashboard"
 // ---------------------------------------------------------------------------
 
 import { F0ActionBar } from "@/components/F0ActionBar"
+import { Save } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
 import type { DashboardCanvasContent } from "../../../types"
 
+import { useAiChat } from "../../../providers/AiChatStateProvider"
 import { useDashboardCanvas } from "./DashboardContext"
+import { SaveDashboardDialog } from "./SaveDashboardDialog"
 
 export function DashboardContent({
   content,
@@ -441,7 +444,25 @@ export function DashboardContent({
     transformItem,
     registerExport,
   } = useDashboardCanvas()
+  const { canvasActions } = useAiChat()
   const translations = useI18n()
+  const [isSaveAsDialogOpen, setIsSaveAsDialogOpen] = useState(false)
+
+  const isSavedDashboard = !!content.savedDashboardId
+  const isUnsaved = !!content.savedDashboardUnsaved
+  const hasDashboardActions = !!canvasActions?.dashboard
+
+  const handleSaveAs = useCallback(
+    async (title: string, description: string) => {
+      await canvasActions?.dashboard?.create(
+        title,
+        description,
+        content.config,
+        content.savedDashboardCategory
+      )
+    },
+    [canvasActions, content.config, content.savedDashboardCategory]
+  )
 
   // Apply pending item transforms (chart type changes) to the config
   // without changing the base config reference — avoids data refetch.
@@ -493,22 +514,81 @@ export function DashboardContent({
         onExportReady={registerExport}
         exportFilename={content.title}
       />
-      <F0ActionBar
-        label={translations.forms.actionBar.unsavedChanges}
-        isOpen={isDirty}
-        primaryActions={[
-          {
-            label: translations.ai.saveChanges,
-            onClick: handleSave,
-          },
-        ]}
-        secondaryActions={[
-          {
-            label: translations.ai.discardChanges,
-            onClick: handleDiscard,
-          },
-        ]}
-      />
+      {/* State A: New dashboard with canvasActions — always-visible Save bar */}
+      {!isSavedDashboard && hasDashboardActions && (
+        <F0ActionBar
+          label={translations.ai.dashboard.saveToAnalytics}
+          isOpen
+          primaryActions={[
+            {
+              label: translations.ai.dashboard.save,
+              onClick: () => setIsSaveAsDialogOpen(true),
+            },
+          ]}
+        />
+      )}
+      {/* State B1: Saved dashboard, user edited layout — Save + Save As + Discard */}
+      {isSavedDashboard && hasDashboardActions && isDirty && (
+        <F0ActionBar
+          label={translations.forms.actionBar.unsavedChanges}
+          isOpen
+          primaryActions={[
+            {
+              label: translations.ai.dashboard.save,
+              onClick: handleSave,
+              icon: Save,
+            },
+          ]}
+          secondaryActions={[
+            {
+              label: translations.ai.discardChanges,
+              onClick: handleDiscard,
+            },
+          ]}
+        />
+      )}
+      {/* State B2: Saved dashboard, agent iterated (unsaved) but no manual edits — Save + Save As */}
+      {isSavedDashboard && hasDashboardActions && !isDirty && isUnsaved && (
+        <F0ActionBar
+          label={translations.forms.actionBar.unsavedChanges}
+          isOpen
+          primaryActions={[
+            {
+              label: translations.ai.dashboard.save,
+              onClick: handleSave,
+              icon: Save,
+            },
+          ]}
+        />
+      )}
+      {/* State C: No canvasActions — original behavior */}
+      {!hasDashboardActions && (
+        <F0ActionBar
+          label={translations.forms.actionBar.unsavedChanges}
+          isOpen={isDirty}
+          primaryActions={[
+            {
+              label: translations.ai.saveChanges,
+              onClick: handleSave,
+            },
+          ]}
+          secondaryActions={[
+            {
+              label: translations.ai.discardChanges,
+              onClick: handleDiscard,
+            },
+          ]}
+        />
+      )}
+      {hasDashboardActions && (
+        <SaveDashboardDialog
+          isOpen={isSaveAsDialogOpen}
+          onClose={() => setIsSaveAsDialogOpen(false)}
+          onSave={handleSaveAs}
+          defaultTitle={content.title}
+          defaultDescription={content.savedDashboardDescription}
+        />
+      )}
     </>
   )
 }

@@ -3,6 +3,7 @@ import { useMemo } from "react"
 
 import type { ChatDashboardConfig } from "../../../canvas/entities/dashboard/types"
 import { DashboardCard } from "../../../canvas/entities/dashboard/DashboardCard"
+import { useAiChat } from "../../../providers/AiChatStateProvider"
 
 /**
  * Hook to register the displayDashboard copilot action.
@@ -23,6 +24,7 @@ import { DashboardCard } from "../../../canvas/entities/dashboard/DashboardCard"
  */
 export const useDisplayDashboardAction = () => {
   const { copilotApiConfig } = useCopilotContext()
+  const { canvasContent } = useAiChat()
 
   const apiConfig = useMemo(
     () => ({
@@ -31,6 +33,14 @@ export const useDisplayDashboardAction = () => {
     }),
     [copilotApiConfig.chatApiEndpoint, copilotApiConfig.headers]
   )
+
+  // Snapshot the savedDashboardId currently in the canvas.
+  // If the agent emits a new dashboard with the same id, it's an
+  // iteration and should be marked as unsaved.
+  const currentCanvasSavedId =
+    canvasContent?.type === "dashboard"
+      ? canvasContent.savedDashboardId
+      : undefined
 
   useCopilotAction({
     name: "displayDashboard",
@@ -110,19 +120,62 @@ export const useDisplayDashboardAction = () => {
           "Fetch specifications for server-side data retrieval. Keyed by datasetId, each describes how to fetch and query data.",
         required: false,
       },
+      {
+        name: "savedDashboardId",
+        type: "string",
+        description:
+          "ID of a pre-saved dashboard. Present only when iterating on an existing saved dashboard.",
+        required: false,
+      },
+      {
+        name: "savedDashboardCategory",
+        type: "string",
+        description: "Category of the saved dashboard.",
+        required: false,
+      },
+      {
+        name: "savedDashboardDescription",
+        type: "string",
+        description: "Description of the saved dashboard.",
+        required: false,
+      },
     ],
     available: "frontend",
     render: (props) => {
-      const args = props.args as Partial<ChatDashboardConfig>
+      const args = props.args as Partial<ChatDashboardConfig> & {
+        savedDashboardId?: string
+        savedDashboardCategory?: string
+        savedDashboardDescription?: string
+      }
 
       // Bail out while arguments are still streaming in.
       if (!args.title || !args.items || args.items.length === 0) {
         return <></>
       }
 
-      const config = args as ChatDashboardConfig
+      const {
+        savedDashboardId,
+        savedDashboardCategory,
+        savedDashboardDescription,
+        ...configArgs
+      } = args
+      const config = configArgs as ChatDashboardConfig
 
-      return <DashboardCard config={config} apiConfig={apiConfig} />
+      // A saved dashboard is "unsaved" when the agent iterates on it —
+      // i.e. the canvas already had a dashboard with the same savedDashboardId.
+      const isIteration =
+        !!savedDashboardId && currentCanvasSavedId === savedDashboardId
+
+      return (
+        <DashboardCard
+          config={config}
+          apiConfig={apiConfig}
+          savedDashboardId={savedDashboardId}
+          savedDashboardCategory={savedDashboardCategory}
+          savedDashboardDescription={savedDashboardDescription}
+          savedDashboardUnsaved={isIteration}
+        />
+      )
     },
   })
 }

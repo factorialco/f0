@@ -26,9 +26,9 @@ export type {
   AiChatTranslationsProviderProps,
 } from "./types"
 
-// Canvas entity registry
+// Canvas entity registry and types
 export { getCanvasEntity } from "./canvas"
-export type { CanvasEntityDefinition } from "./canvas"
+export type { CanvasEntityDefinition, CanvasActions } from "./canvas"
 
 export { aiTranslations } from "./types"
 
