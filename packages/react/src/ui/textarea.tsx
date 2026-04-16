@@ -74,8 +74,19 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       const textarea = textareaRef.current
       if (!textarea) return
 
-      textarea.style.height = "auto"
-      const newHeight = textarea.scrollHeight
+      // Collapse to zero so scrollHeight reports only content height,
+      // not the flex-stretched height from parent containers.
+      textarea.style.height = "0px"
+      const scrollHeight = textarea.scrollHeight
+
+      // Ensure height never drops below the rows-based minimum so the
+      // textarea doesn't look like a single-line input.
+      const computed = getComputedStyle(textarea)
+      const lineHeight = parseFloat(computed.lineHeight) || 20
+      const paddingBlock =
+        parseFloat(computed.paddingTop) + parseFloat(computed.paddingBottom)
+      const minHeight = lineHeight * (textarea.rows || 2) + paddingBlock
+      const newHeight = Math.max(scrollHeight, minHeight)
 
       if (maxHeight != null && newHeight > maxHeight) {
         textarea.style.height = `${maxHeight}px`
@@ -84,7 +95,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         textarea.style.height = `${newHeight}px`
         textarea.style.overflowY = "hidden"
       }
-    }, [value, maxHeight])
+    })
 
     return (
       <InputField

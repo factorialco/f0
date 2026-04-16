@@ -28,4 +28,9 @@ export type CanvasEntityDefinition<
    * both header and body (e.g. shared edit-mode state).
    */
   wrapper?: (props: { content: T; children: ReactNode }) => ReactNode
+  /**
+   * When true the content area uses `overflow-hidden` instead of
+   * `overflow-auto`, letting the entity manage its own scrolling.
+   */
+  overflowHidden?: boolean
 }

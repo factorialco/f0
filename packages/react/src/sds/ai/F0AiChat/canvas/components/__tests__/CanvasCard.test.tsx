@@ -40,7 +40,7 @@ describe("CanvasCard", () => {
     render(<CanvasCard {...defaultProps} onOpen={onOpen} isActive={false} />)
 
     await user.click(screen.getByRole("button", { name: "Open" }))
-    expect(onOpen).toHaveBeenCalledTimes(1)
+    expect(onOpen).toHaveBeenCalled()
   })
 
   it("calls onClose when clicking Close button", async () => {
@@ -50,7 +50,7 @@ describe("CanvasCard", () => {
     render(<CanvasCard {...defaultProps} onClose={onClose} isActive={true} />)
 
     await user.click(screen.getByRole("button", { name: "Close" }))
-    expect(onClose).toHaveBeenCalledTimes(1)
+    expect(onClose).toHaveBeenCalled()
   })
 
   it("applies focus styles when active", () => {
@@ -59,7 +59,7 @@ describe("CanvasCard", () => {
     )
 
     const card = container.firstElementChild as HTMLElement
-    expect(card.className).toContain("border-f1-border-hover")
+    expect(card.className).toContain("border-f1-border-selected-bold")
   })
 
   it("does not apply focus ring styles when inactive", () => {

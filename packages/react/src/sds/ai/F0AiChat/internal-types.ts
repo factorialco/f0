@@ -234,9 +234,8 @@ export function isAgentStateMessage(message: Message): boolean {
 
 /**
  * Check whether a message is a coagent-state-render placeholder injected by
- * CopilotKit v1.51+.  These empty assistant messages are meant for
- * `useCoAgentStateRender` which f0 does not use; they must be filtered out
- * before any message-count or welcome-screen logic.
+ * CopilotKit v1.51+.  These assistant messages are used by
+ * `useCoAgentStateRender` to render inline state UI (e.g. FormCard).
  */
 export function isCoagentPlaceholder(message: Message): boolean {
   return (
@@ -246,6 +245,8 @@ export function isCoagentPlaceholder(message: Message): boolean {
 
 /**
  * Filter coagent-state-render placeholder messages from an array.
+ * Used for message-count checks (welcome screen, empty state) where
+ * these placeholder messages should not count.
  */
 export function filterCoagentPlaceholders(messages: Message[]): Message[] {
   return messages.filter((m) => !isCoagentPlaceholder(m))

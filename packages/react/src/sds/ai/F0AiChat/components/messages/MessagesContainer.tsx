@@ -31,6 +31,7 @@ import {
   useFeedbackSubmit,
 } from "../feedback/FeedbackProvider"
 import { TurnFeedback } from "../feedback/TurnFeedback"
+import { ActiveFormCard } from "./ActiveFormCard"
 import { AssistantMessage as F0AssistantMessage } from "./AssistantMessage"
 import { ScrollShadow } from "./ScrollShadow"
 import { Thinking } from "./Thinking"
@@ -308,6 +309,7 @@ const Messages = ({
         {turnIsComplete && (
           <TurnFeedback messages={turnMessages} onCopy={onCopy} />
         )}
+        {isLastTurn && <ActiveFormCard />}
       </div>
     )
   }

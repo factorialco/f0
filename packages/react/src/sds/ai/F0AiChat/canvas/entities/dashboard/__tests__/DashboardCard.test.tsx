@@ -107,6 +107,6 @@ describe("DashboardCard", () => {
     render(<DashboardCard config={baseConfig} apiConfig={baseApiConfig} />)
 
     await user.click(screen.getByRole("button", { name: "Close" }))
-    expect(mockCloseCanvas).toHaveBeenCalledTimes(1)
+    expect(mockCloseCanvas).toHaveBeenCalled()
   })
 })

@@ -36,6 +36,14 @@ function coerceValue(value: unknown, fieldSchema: ZodTypeAny): unknown {
   const typeName: string | undefined = base._def?.typeName
 
   if (typeName === "ZodDate" && typeof value === "string") {
+    // Date-only strings (YYYY-MM-DD) are parsed as UTC by default,
+    // which can shift the date by a day depending on timezone.
+    // Force local-time interpretation by using component parts.
+    const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
+    if (dateOnlyMatch) {
+      const [, y, m, d] = dateOnlyMatch
+      return new Date(Number(y), Number(m) - 1, Number(d))
+    }
     const d = new Date(value)
     return isNaN(d.getTime()) ? value : d
   }
@@ -85,14 +93,22 @@ function getSchemaShape(
 /**
  * AI tool that fills one or more fields in an active F0Form.
  * After setting values, it triggers validation and returns any errors.
+ * If the form is virtual (available but not rendered) and no active form is set,
+ * it automatically activates the form first. If a different form is already active,
+ * an error is returned unless confirmOverwrite is true.
  */
 export const useFormFillAction = () => {
   const registry = useF0AiFormRegistry()
 
   useFrontendTool({
-    name: "forms.formFill",
+    name: "forms.fillForm",
     description:
-      "Fill one or more fields in an active form. After setting values, validation runs automatically. Returns success or any validation errors. Use formGetState first to learn field names and types.",
+      "Fill one or more fields in a form. " +
+      "If the form is an available (virtual) form and no activeForm is set, it will be activated automatically. " +
+      "If a different form is already active, pass confirmOverwrite: true to switch to this one. " +
+      "After setting values, validation runs automatically. " +
+      "Check activeForm.fieldDescriptions or formsOnCurrentPage in the shared state to learn field names and types.",
+    followUp: false,
     parameters: [
       {
         name: "formName",
@@ -109,7 +125,8 @@ export const useFormFillAction = () => {
           {
             name: "fieldName",
             type: "string",
-            description: "The field name (from formGetState).",
+            description:
+              "The field name (from activeForm.fieldDescriptions in the shared state).",
             required: true,
           },
           {
@@ -121,13 +138,37 @@ export const useFormFillAction = () => {
           },
         ],
       },
+      {
+        name: "confirmOverwrite",
+        type: "boolean",
+        description:
+          "Set to true to replace the currently active form with this one when a different form is already active.",
+      },
+      {
+        name: "cardTitle",
+        type: "string",
+        description:
+          "Custom title to display on the form card shown inline in the chat (used when activating a virtual form).",
+      },
+      {
+        name: "cardDescription",
+        type: "string",
+        description:
+          "Custom description to display on the form card shown inline in the chat (used when activating a virtual form).",
+      },
     ],
     handler: async ({
       formName,
       values,
+      confirmOverwrite,
+      cardTitle,
+      cardDescription,
     }: {
       formName: string
       values: { fieldName: string; value: string }[]
+      confirmOverwrite?: boolean
+      cardTitle?: string
+      cardDescription?: string
     }) => {
       if (!registry) {
         return { success: false, error: "Form registry is not available" }
@@ -140,6 +181,26 @@ export const useFormFillAction = () => {
           success: false,
           error: `Form "${formName}" not found`,
           availableForms: available,
+        }
+      }
+
+      // For virtual forms, manage activeForm activation
+      if (entry.virtual) {
+        const currentActive = registry.activeForm
+        if (currentActive && currentActive.formName !== formName) {
+          if (!confirmOverwrite) {
+            return {
+              success: false,
+              error: `Form "${currentActive.formName}" is already active. Pass confirmOverwrite: true to switch to "${formName}".`,
+              activeFormName: currentActive.formName,
+            }
+          }
+        }
+        if (!currentActive || currentActive.formName !== formName) {
+          registry.setActiveForm(formName, {
+            cardTitle: cardTitle ?? "",
+            cardDescription: cardDescription ?? "",
+          })
         }
       }
 
@@ -165,6 +226,7 @@ export const useFormFillAction = () => {
 
       // Refresh the registry snapshot so the co-agent picks up new values
       registry.rebuildDescriptions()
+      registry.incrementFillVersion(formName)
 
       const errors = ref.getErrors()
       const hasErrors = Object.keys(errors).length > 0

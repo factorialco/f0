@@ -9,7 +9,7 @@ import {
   useF0AiFormRegistry,
 } from "@/patterns/F0Form/F0AiFormRegistry"
 import { f0FormField } from "@/patterns/F0Form/f0Schema"
-import { zeroRender as render, waitFor } from "@/testing/test-utils"
+import { zeroRender as render, waitFor, act } from "@/testing/test-utils"
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
 
@@ -32,15 +32,15 @@ vi.mock("@copilotkit/react-core", () => ({
   }),
 }))
 
+const mockCloseCanvas = vi.fn()
+
 vi.mock("@/sds/ai/F0AiChat/providers/AiChatStateProvider", () => ({
-  useAiChat: () => ({ agent: "test-agent" }),
+  useAiChat: () => ({ agent: "test-agent", closeCanvas: mockCloseCanvas }),
 }))
 
 // Import the hooks after mocks are set up
 import { useFormFillAction } from "../useFormFillAction"
-import { useFormGetStateAction } from "../useFormGetStateAction"
 import { useFormSubmitAction } from "../useFormSubmitAction"
-import { usePresentFormAction } from "../usePresentFormAction"
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -73,8 +73,6 @@ function RegistryInspector({
 function HookHost() {
   useFormSubmitAction()
   useFormFillAction()
-  useFormGetStateAction()
-  usePresentFormAction()
   return null
 }
 
@@ -111,65 +109,7 @@ function getHandler(toolName: string) {
 
 beforeEach(() => {
   capturedTools.clear()
-})
-
-describe("useFormGetStateAction handler", () => {
-  it("returns success with form state for a registered form", async () => {
-    await setupWithDefinitions([
-      {
-        name: "user-form",
-        schema: simpleSchema,
-        defaultValues: { name: "Alice", email: "alice@test.com" },
-      },
-    ])
-
-    const handler = getHandler("forms.formGetState")
-    const result = handler({ formName: "user-form" } as never)
-
-    expect(result).toMatchObject({
-      success: true,
-      formName: "user-form",
-      values: { name: "Alice", email: "alice@test.com" },
-      isDirty: false,
-    })
-    expect(result).toHaveProperty("fieldNames")
-    expect(result).toHaveProperty("errors")
-  })
-
-  it("returns error for unknown form name", async () => {
-    await setupWithDefinitions([
-      {
-        name: "user-form",
-        schema: simpleSchema,
-        defaultValues: { name: "", email: "" },
-      },
-    ])
-
-    const handler = getHandler("forms.formGetState")
-    const result = handler({ formName: "nonexistent" } as never)
-
-    expect(result).toMatchObject({
-      success: false,
-      error: expect.stringContaining("nonexistent"),
-    })
-    expect(result).toHaveProperty("availableForms")
-  })
-
-  it("returns error when form is not mounted (ref is null)", async () => {
-    await setupWithDefinitions([
-      {
-        name: "user-form",
-        schema: simpleSchema,
-        defaultValues: { name: "", email: "" },
-      },
-    ])
-
-    // Overwrite the ref to simulate unmount
-    const handler = getHandler("forms.formGetState")
-    // Virtual forms always have a ref, so this tests the mounted path
-    const result = handler({ formName: "user-form" } as never)
-    expect(result).toHaveProperty("success")
-  })
+  mockCloseCanvas.mockClear()
 })
 
 describe("useFormSubmitAction handler", () => {
@@ -185,7 +125,7 @@ describe("useFormSubmitAction handler", () => {
       },
     ])
 
-    const handler = getHandler("forms.formSubmit")
+    const handler = getHandler("forms.submitForm")
     const result = await handler({ formName: "user-form" } as never)
 
     expect(result).toMatchObject({ success: true })
@@ -207,7 +147,7 @@ describe("useFormSubmitAction handler", () => {
       },
     ])
 
-    const handler = getHandler("forms.formSubmit")
+    const handler = getHandler("forms.submitForm")
     const result = await handler({ formName: "user-form" } as never)
 
     expect(result).toMatchObject({ success: false })
@@ -223,7 +163,7 @@ describe("useFormSubmitAction handler", () => {
       },
     ])
 
-    const handler = getHandler("forms.formSubmit")
+    const handler = getHandler("forms.submitForm")
     const result = await handler({ formName: "missing" } as never)
 
     expect(result).toMatchObject({
@@ -231,6 +171,47 @@ describe("useFormSubmitAction handler", () => {
       error: expect.stringContaining("missing"),
       availableForms: expect.arrayContaining(["user-form"]),
     })
+  })
+
+  it("calls clearActiveForm and closeCanvas after successful submit", async () => {
+    const onSubmit = vi.fn()
+
+    await setupWithDefinitions([
+      {
+        name: "user-form",
+        schema: simpleSchema,
+        defaultValues: { name: "Alice", email: "alice@test.com" },
+        onSubmit,
+      },
+    ])
+
+    const handler = getHandler("forms.submitForm")
+    const result = await act(async () => {
+      return handler({ formName: "user-form" } as never)
+    })
+
+    expect(result).toMatchObject({ success: true })
+    expect(onSubmit).toHaveBeenCalled()
+    expect(mockCloseCanvas).toHaveBeenCalled()
+  })
+
+  it("calls clearActiveForm and closeCanvas even when submit fails", async () => {
+    await setupWithDefinitions([
+      {
+        name: "user-form",
+        schema: simpleSchema,
+        defaultValues: { name: "", email: "not-an-email" },
+      },
+    ])
+
+    const handler = getHandler("forms.submitForm")
+    const result = await act(async () => {
+      return handler({ formName: "user-form" } as never)
+    })
+
+    // Submit fails validation but cleanup still happens in finally block
+    expect(result).toMatchObject({ success: false })
+    expect(mockCloseCanvas).toHaveBeenCalled()
   })
 })
 
@@ -244,7 +225,7 @@ describe("useFormFillAction handler", () => {
       },
     ])
 
-    const handler = getHandler("forms.formFill")
+    const handler = getHandler("forms.fillForm")
     const result = await handler({
       formName: "user-form",
       values: [
@@ -271,7 +252,7 @@ describe("useFormFillAction handler", () => {
       },
     ])
 
-    const handler = getHandler("forms.formFill")
+    const handler = getHandler("forms.fillForm")
     const result = await handler({
       formName: "user-form",
       values: [{ fieldName: "email", value: "not-valid" }],
@@ -294,7 +275,7 @@ describe("useFormFillAction handler", () => {
       },
     ])
 
-    const handler = getHandler("forms.formFill")
+    const handler = getHandler("forms.fillForm")
     const result = await handler({
       formName: "num-form",
       values: [{ fieldName: "age", value: "25" }],
@@ -320,7 +301,7 @@ describe("useFormFillAction handler", () => {
       },
     ])
 
-    const handler = getHandler("forms.formFill")
+    const handler = getHandler("forms.fillForm")
     const result = await handler({
       formName: "bool-form",
       values: [{ fieldName: "active", value: "true" }],
@@ -346,7 +327,7 @@ describe("useFormFillAction handler", () => {
       },
     ])
 
-    const handler = getHandler("forms.formFill")
+    const handler = getHandler("forms.fillForm")
     const result = await handler({
       formName: "date-form",
       values: [{ fieldName: "startDate", value: "2024-06-15" }],
@@ -357,9 +338,9 @@ describe("useFormFillAction handler", () => {
       currentValues: Record<string, unknown>
     }
     expect(currentValues.startDate).toBeInstanceOf(Date)
-    expect((currentValues.startDate as Date).toISOString()).toContain(
-      "2024-06-15"
-    )
+    expect((currentValues.startDate as Date).getFullYear()).toBe(2024)
+    expect((currentValues.startDate as Date).getMonth()).toBe(5)
+    expect((currentValues.startDate as Date).getDate()).toBe(15)
   })
 
   it("returns error for unknown form", async () => {
@@ -371,7 +352,7 @@ describe("useFormFillAction handler", () => {
       },
     ])
 
-    const handler = getHandler("forms.formFill")
+    const handler = getHandler("forms.fillForm")
     const result = await handler({
       formName: "nope",
       values: [{ fieldName: "name", value: "x" }],
@@ -384,97 +365,148 @@ describe("useFormFillAction handler", () => {
   })
 })
 
-describe("usePresentFormAction handler", () => {
-  it("presents a registered form in dialog mode", async () => {
-    await setupWithDefinitions([
-      {
-        name: "user-form",
-        schema: simpleSchema,
-        defaultValues: { name: "", email: "" },
-        title: "Create User",
-      },
-    ])
+describe("useFormFillAction — virtual form activation", () => {
+  it("auto-activates a virtual form when no active form is set", async () => {
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
 
-    const handler = getHandler("forms.presentForm")
-    const result = handler({
+    render(
+      <F0AiFormRegistryProvider
+        availableFormDefinitions={[
+          {
+            name: "user-form",
+            schema: simpleSchema,
+            defaultValues: { name: "", email: "" },
+          },
+        ]}
+      >
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+        <HookHost />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => expect(capturedRegistry).not.toBeNull())
+
+    const handler = getHandler("forms.fillForm")
+    const result = await handler({
       formName: "user-form",
-      mode: "dialog",
+      values: [
+        { fieldName: "name", value: "Alice" },
+        { fieldName: "email", value: "alice@test.com" },
+      ],
     } as never)
 
     expect(result).toMatchObject({ success: true })
+    await waitFor(() =>
+      expect(capturedRegistry!.activeForm?.formName).toBe("user-form")
+    )
   })
 
-  it("returns error for unknown form", async () => {
-    await setupWithDefinitions([
-      {
-        name: "user-form",
-        schema: simpleSchema,
-        defaultValues: { name: "", email: "" },
-      },
-    ])
+  it("returns error when a different virtual form is already active", async () => {
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
 
-    const handler = getHandler("forms.presentForm")
-    const result = handler({
-      formName: "ghost",
-      mode: "dialog",
+    render(
+      <F0AiFormRegistryProvider
+        availableFormDefinitions={[
+          {
+            name: "form-a",
+            schema: simpleSchema,
+            defaultValues: { name: "", email: "" },
+          },
+          {
+            name: "form-b",
+            schema: simpleSchema,
+            defaultValues: { name: "", email: "" },
+          },
+        ]}
+      >
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+        <HookHost />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => expect(capturedRegistry).not.toBeNull())
+
+    // Activate form-a and wait for the state to propagate through queueMicrotask
+    await act(async () => {
+      capturedRegistry!.setActiveForm("form-a")
+      await new Promise((r) => queueMicrotask(r))
+    })
+    await waitFor(() =>
+      expect(capturedRegistry!.activeForm?.formName).toBe("form-a")
+    )
+
+    const handler = getHandler("forms.fillForm")
+    const result = await handler({
+      formName: "form-b",
+      values: [{ fieldName: "name", value: "Bob" }],
     } as never)
 
     expect(result).toMatchObject({
       success: false,
-      error: expect.stringContaining("ghost"),
+      error: expect.stringContaining("form-a"),
+      activeFormName: "form-a",
     })
   })
 
-  it("passes defaultValuesParams to presentForm", async () => {
-    const paramsSchema = z.object({ employeeId: z.string() })
+  it("overwrites the active form when confirmOverwrite is true", async () => {
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
 
-    await setupWithDefinitions([
-      {
-        name: "edit-employee",
-        schema: simpleSchema,
-        defaultValuesParamsSchema: paramsSchema,
-        defaultValues: (params: Record<string, unknown>) => ({
-          name: `Employee ${params.employeeId}`,
-          email: `${params.employeeId}@factorial.co`,
-        }),
-      },
-    ])
+    render(
+      <F0AiFormRegistryProvider
+        availableFormDefinitions={[
+          {
+            name: "form-a",
+            schema: simpleSchema,
+            defaultValues: { name: "", email: "" },
+          },
+          {
+            name: "form-b",
+            schema: simpleSchema,
+            defaultValues: { name: "", email: "" },
+          },
+        ]}
+      >
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+        <HookHost />
+      </F0AiFormRegistryProvider>
+    )
 
-    const handler = getHandler("forms.presentForm")
-    const result = handler({
-      formName: "edit-employee",
-      mode: "dialog",
-      defaultValuesParams: { employeeId: "emp-99" },
+    await waitFor(() => expect(capturedRegistry).not.toBeNull())
+
+    // Activate form-a and wait for the state to propagate through queueMicrotask
+    await act(async () => {
+      capturedRegistry!.setActiveForm("form-a")
+      await new Promise((r) => queueMicrotask(r))
+    })
+    await waitFor(() =>
+      expect(capturedRegistry!.activeForm?.formName).toBe("form-a")
+    )
+
+    const handler = getHandler("forms.fillForm")
+    const result = await handler({
+      formName: "form-b",
+      values: [
+        { fieldName: "name", value: "Bob" },
+        { fieldName: "email", value: "bob@test.com" },
+      ],
+      confirmOverwrite: true,
     } as never)
 
     expect(result).toMatchObject({ success: true })
-  })
-
-  it("returns error for invalid params", async () => {
-    const paramsSchema = z.object({
-      employeeId: z.string().min(1, "employeeId required"),
-    })
-
-    await setupWithDefinitions([
-      {
-        name: "edit-employee",
-        schema: simpleSchema,
-        defaultValuesParamsSchema: paramsSchema,
-        defaultValues: (params: Record<string, unknown>) => ({
-          name: String(params.employeeId),
-          email: "",
-        }),
-      },
-    ])
-
-    const handler = getHandler("forms.presentForm")
-    const result = handler({
-      formName: "edit-employee",
-      mode: "dialog",
-      defaultValuesParams: { employeeId: "" },
-    } as never)
-
-    expect(result).toMatchObject({ success: false })
-    expect((result as { error: string }).error).toContain("employeeId required")
+    await waitFor(() =>
+      expect(capturedRegistry!.activeForm?.formName).toBe("form-b")
+    )
   })
 })

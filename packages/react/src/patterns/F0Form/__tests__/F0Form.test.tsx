@@ -3413,3 +3413,38 @@ describe("F0Form actionBar.wiggle via formRef", () => {
     expect(bar).not.toHaveClass("f0-action-bar-error-navigate")
   })
 })
+
+describe("F0Form sections sidepanel scroll", () => {
+  it("renders a scrollable container with a sticky sidebar when showSectionsSidepanel is true", () => {
+    const formSchema = z.object({
+      name: f0FormField(z.string(), { label: "Name", section: "personal" }),
+      email: f0FormField(z.string(), { label: "Email", section: "contact" }),
+      phone: f0FormField(z.string(), { label: "Phone", section: "contact" }),
+    })
+
+    const sections: Record<string, F0SectionConfig> = {
+      personal: { title: "Personal" },
+      contact: { title: "Contact" },
+    }
+
+    const { container } = render(
+      <F0Form
+        name="test-scroll"
+        schema={formSchema}
+        defaultValues={{ name: "", email: "", phone: "" }}
+        onSubmit={async () => ({ success: true })}
+        sections={sections}
+        styling={{ showSectionsSidepanel: true }}
+      />
+    )
+
+    // The container with sections uses overflow-scroll for internal scrolling
+    const scrollContainer = container.querySelector(".overflow-scroll")
+    expect(scrollContainer).toBeInTheDocument()
+
+    // The sidebar should have sticky positioning so it stays fixed while scrolling
+    const stickyElement = scrollContainer?.querySelector(".sticky")
+    expect(stickyElement).toBeInTheDocument()
+    expect(stickyElement).toHaveClass("top-0")
+  })
+})

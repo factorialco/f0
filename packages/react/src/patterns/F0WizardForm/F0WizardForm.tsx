@@ -9,12 +9,12 @@ import type {
 } from "@/patterns/F0Form/types"
 import type { F0WizardStep } from "@/ui/F0Wizard/types"
 
+import { F0ActionBar, type ActionBarStatus } from "@/components/F0ActionBar"
+import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { F0FormSection } from "@/patterns/F0Form/components/F0FormSection"
 import { F0Form } from "@/patterns/F0Form/F0Form"
 import { getF0Config, unwrapToZodObject } from "@/patterns/F0Form/f0Schema"
 import { useF0Form } from "@/patterns/F0Form/useF0Form"
-import { F0ActionBar, type ActionBarStatus } from "@/components/F0ActionBar"
-import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { F0Wizard } from "@/ui/F0Wizard/F0Wizard"
 
 import type {
@@ -231,10 +231,12 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
 
   const sectionIds = useMemo(() => Object.keys(schema), [schema])
 
-  const effectiveSteps = useMemo(() => {
-    if (!customSteps) return undefined
+  const resolvedSteps = customSteps ?? formDefinition.steps
 
-    const hasMultiSectionStep = customSteps.some(
+  const effectiveSteps = useMemo(() => {
+    if (!resolvedSteps) return undefined
+
+    const hasMultiSectionStep = resolvedSteps.some(
       (step) => step.sectionIds.length > 1
     )
 
@@ -248,7 +250,7 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
         )
       }
 
-      return customSteps.flatMap((step) =>
+      return resolvedSteps.flatMap((step) =>
         step.sectionIds.map((id) => ({
           title: sections?.[id]?.title ?? step.title,
           sectionIds: [id],
@@ -258,8 +260,8 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
       )
     }
 
-    return customSteps
-  }, [customSteps, sections])
+    return resolvedSteps
+  }, [resolvedSteps, sections])
 
   const fullDataRef = useRef<Record<string, unknown>>({})
   const currentStepRef = useRef(defaultStepIndex ?? 0)
@@ -637,14 +639,16 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
     [form.hasErrors]
   )
 
+  const resolvedSteps = customSteps ?? formDefinition.steps
+
   const stepsConfig: F0WizardFormStep[] = useMemo(
     () =>
-      customSteps ??
+      resolvedSteps ??
       sectionIds.map((id) => ({
         title: sections?.[id]?.title ?? id,
         sectionIds: [id],
       })),
-    [customSteps, sectionIds, sections]
+    [resolvedSteps, sectionIds, sections]
   )
 
   const isStepDataFilled = useCallback(
@@ -677,7 +681,7 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
       deriveWizardSteps(
         sectionIds,
         sections,
-        customSteps,
+        resolvedSteps,
         isStepAllDisabled,
         onNextForStep,
         hasErrorsForStep,
@@ -686,7 +690,7 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
     [
       sectionIds,
       sections,
-      customSteps,
+      resolvedSteps,
       isStepAllDisabled,
       onNextForStep,
       hasErrorsForStep,
@@ -759,7 +763,7 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
         const currentSectionIds = getSectionIdsForStep(
           currentStep,
           sectionIds,
-          customSteps
+          resolvedSteps
         )
 
         const stepSchema = buildSectionSubSchema(

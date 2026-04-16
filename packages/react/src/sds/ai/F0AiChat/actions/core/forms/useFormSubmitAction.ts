@@ -1,5 +1,6 @@
 import { useFrontendTool } from "@copilotkit/react-core"
 
+import { useAiChat } from "@/ai"
 import { useF0AiFormRegistry } from "@/patterns/F0Form/F0AiFormRegistry"
 
 /**
@@ -8,9 +9,10 @@ import { useF0AiFormRegistry } from "@/patterns/F0Form/F0AiFormRegistry"
  */
 export const useFormSubmitAction = () => {
   const registry = useF0AiFormRegistry()
+  const { closeCanvas } = useAiChat()
 
   useFrontendTool({
-    name: "forms.formSubmit",
+    name: "forms.submitForm",
     description:
       "Submit an active form. Validates all fields first. Only calls the form's onSubmit handler if validation passes. Returns success or validation errors.",
     parameters: [
@@ -21,6 +23,7 @@ export const useFormSubmitAction = () => {
         required: true,
       },
     ],
+    followUp: false,
     handler: async ({ formName }: { formName: string }) => {
       if (!registry) {
         return { success: false, error: "Form registry is not available" }
@@ -58,6 +61,8 @@ export const useFormSubmitAction = () => {
           errors,
         }
       } finally {
+        registry.clearActiveForm()
+        closeCanvas()
         registry.rebuildDescriptions()
       }
     },
