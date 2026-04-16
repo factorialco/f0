@@ -46,8 +46,10 @@ export function CanvasCard({
   return (
     <div
       className={cn(
-        "flex flex-col hover:border-f1-border-hover items-center justify-between gap-3 rounded-lg border border-solid border-f1-border-secondary px-3 py-2 cursor-pointer",
-        !isActive && "border-f1-border-secondary"
+        "flex flex-col items-center justify-between gap-3 rounded-lg border border-solid px-3 py-2 cursor-pointer",
+        isActive
+          ? "border-f1-border-selected-bold"
+          : "border-f1-border-secondary hover:border-f1-border-hover"
       )}
       onClick={isActive ? onClose : onOpen}
     >
