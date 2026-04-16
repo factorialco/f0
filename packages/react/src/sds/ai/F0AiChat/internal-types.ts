@@ -1,3 +1,7 @@
+import type {
+  F0FormSchema,
+  F0FormPropsWithSingleSchemaDefinition,
+} from "@/patterns/F0Form/types"
 import { type AIMessage, type Message } from "@copilotkit/shared"
 
 import { type ClarifyingQuestionState } from "./actions/core/clarifyingQuestion/types"
@@ -39,6 +43,9 @@ export interface AiChatState {
   fileAttachments?: AiChatFileAttachmentConfig
   placeholders?: string[]
   setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>
+  FormComponent?: React.ComponentType<
+    F0FormPropsWithSingleSchemaDefinition<F0FormSchema>
+  >
   onThumbsUp?: (
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
@@ -210,6 +217,7 @@ export type AiChatProviderReturnValue = {
   | "credits"
   | "creditWarning"
   | "fileAttachments"
+  | "FormComponent"
 > & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null

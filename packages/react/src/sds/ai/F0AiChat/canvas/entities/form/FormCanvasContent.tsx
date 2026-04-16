@@ -25,6 +25,15 @@ import { F0Form } from "@/patterns/F0Form/F0Form"
 import { useF0Form } from "@/patterns/F0Form/useF0Form"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm/useF0FormDefinition"
 
+function useCanvasFormComponent() {
+  const { FormComponent } = useAiChat()
+  // Bypass F0Form's distributive conditional generic — F0Form internally
+  // casts to AnyF0FormProps, so this narrowed alias is safe.
+  return (FormComponent ?? F0Form) as unknown as ComponentType<
+    F0FormPropsWithSingleSchemaDefinition<F0FormSchema>
+  >
+}
+
 interface CoAgentFormState {
   activeForm?: {
     formName: string
@@ -35,12 +44,6 @@ interface CoAgentFormState {
 }
 
 const FALLBACK_SCHEMA = z.object({}) as unknown as F0FormSchema
-
-// Bypass F0Form's distributive conditional generic — F0Form internally
-// casts to AnyF0FormProps, so this narrowed alias is safe.
-const F0CanvasForm = F0Form as unknown as ComponentType<
-  F0FormPropsWithSingleSchemaDefinition<F0FormSchema>
->
 
 // ---------- Submit success overlay ----------
 
@@ -74,11 +77,13 @@ function WizardCanvasContent({
   isSubmitting: boolean
   onSubmit: () => void
 }) {
+  const CanvasForm = useCanvasFormComponent()
+
   return (
     <div className="flex h-full flex-col">
       <div className="relative min-h-0 flex-1 overflow-hidden [&>div]:h-full">
         {isSubmitting && <SubmitSuccessOverlay />}
-        <F0CanvasForm
+        <CanvasForm
           formDefinition={formDefinition}
           styling={{
             showSectionsSidepanel: true,
@@ -115,6 +120,7 @@ function PlainFormContent({
   isSubmitting: boolean
   onSubmit: () => void
 }) {
+  const CanvasForm = useCanvasFormComponent()
   const showSectionsSidepanel = !!(
     formDefinition.sections && Object.keys(formDefinition.sections).length > 2
   )
@@ -130,7 +136,7 @@ function PlainFormContent({
         )}
       >
         {isSubmitting && <SubmitSuccessOverlay />}
-        <F0CanvasForm
+        <CanvasForm
           formDefinition={formDefinition}
           formRef={formRef}
           styling={{ showSectionsSidepanel }}
