@@ -271,16 +271,50 @@ To add a new cell type (e.g. `"date"`, `"select"`):
 
 ## Table vs Editable Table
 
-| Aspect                    | Table                   | Editable Table                                |
-| ------------------------- | ----------------------- | --------------------------------------------- |
-| Storage key               | `table`                 | `editableTable`                               |
-| Column order/hidden state | Shared for "Table view" | Independent from Table                        |
-| Cell editing              | Read-only               | Supports inline editing via `editType`        |
-| Item actions              | Supported               | Disabled (cells are interactive)              |
-| `onCellChange` callback   | N/A                     | Fires on every cell edit with the updated row |
-| Use case                  | Default read-only table | Inline editing or a different default layout  |
+| Aspect                    | Table                     | Editable Table                                |
+| ------------------------- | ------------------------- | --------------------------------------------- |
+| Storage key               | `table`                   | `editableTable`                               |
+| Column order/hidden state | Shared for "Table view"   | Independent from Table                        |
+| Cell editing              | Read-only                 | Supports inline editing via `editType`        |
+| Item actions              | Supported (hover overlay) | Supported (dedicated column)                  |
+| `onCellChange` callback   | N/A                       | Fires on every cell edit with the updated row |
+| Use case                  | Default read-only table   | Inline editing or a different default layout  |
 
 You can offer both in the same collection; users switch via the visualization
 selector and each view keeps its own column order and visibility.
 
 <Canvas of={EditableTableStories.TableAndEditableTable} />
+
+## Item Actions
+
+The editable table supports item actions rendered in a **dedicated, always-visible
+column** at the end of each row. This differs from the regular table, where
+actions appear as a floating overlay on hover.
+
+- Up to two **primary** actions are shown as icon buttons.
+- Remaining actions are grouped in an ellipsis dropdown menu.
+- The column is always visible — no hover required.
+
+Define `itemActions` in `useDataCollectionSource` the same way as for any other
+visualization:
+
+```tsx
+const dataSource = useDataCollectionSource({
+  itemActions: (item) => [
+    {
+      label: "Edit",
+      icon: Pencil,
+      onClick: () => console.log(`Editing ${item.name}`),
+      type: "primary",
+    },
+    {
+      label: "Delete",
+      icon: Delete,
+      onClick: () => console.log(`Deleting ${item.name}`),
+      critical: true,
+    },
+  ],
+})
+```
+
+<Canvas of={EditableTableStories.EditableTableWithItemActions} />

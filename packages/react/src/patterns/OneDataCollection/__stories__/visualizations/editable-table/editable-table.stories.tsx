@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from "react"
 import { action } from "storybook/actions"
 
 import { createDataSourceDefinition, RecordType } from "@/hooks/datasource"
+import { Delete, Pencil } from "@/icons/app"
 import { ROLES_MOCK } from "@/mocks"
 
 import { OneDataCollection } from "../../.."
@@ -1075,6 +1076,122 @@ export const TableAndEditableTable: Story = {
         ]}
         dataAdapter={dataAdapter}
         id="table-and-editable/v1"
+      />
+    )
+  },
+}
+
+export const EditableTableWithItemActions: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Editable table with item actions rendered in a dedicated, always-visible column. Up to two primary actions appear as buttons, with remaining actions in a dropdown menu. This differs from the regular table where actions appear on hover.",
+      },
+    },
+  },
+  render: () => {
+    const mockVisualizations = getMockVisualizations()
+    const { dataAdapter, onCellChange } = useEditableTableData()
+
+    const baseOptions = (
+      mockVisualizations.editableTable as Extract<
+        typeof mockVisualizations.editableTable,
+        { type: "editableTable" }
+      >
+    ).options
+
+    const source = useDataCollectionSource({
+      dataAdapter,
+      itemActions: (item) => [
+        {
+          label: "Edit",
+          icon: Pencil,
+          onClick: () => action("edit")(`Editing ${item.name}`),
+          type: "primary" as const,
+        },
+        {
+          label: "Delete",
+          icon: Delete,
+          onClick: () => action("delete")(`Deleting ${item.name}`),
+          type: "primary" as const,
+          critical: true,
+        },
+      ],
+    })
+
+    return (
+      <OneDataCollection
+        source={source}
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...baseOptions,
+              onCellChange,
+            },
+          },
+        ]}
+        id="editable-table-item-actions/v1"
+      />
+    )
+  },
+}
+
+export const EditableTableWithIconOnlyActions: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Editable table with icon-only action buttons using `hideLabel`. The label is still used for the tooltip and accessibility, but only the icon is rendered in the button.",
+      },
+    },
+  },
+  render: () => {
+    const mockVisualizations = getMockVisualizations()
+    const { dataAdapter, onCellChange } = useEditableTableData()
+
+    const baseOptions = (
+      mockVisualizations.editableTable as Extract<
+        typeof mockVisualizations.editableTable,
+        { type: "editableTable" }
+      >
+    ).options
+
+    const source = useDataCollectionSource({
+      dataAdapter,
+      itemActions: (item) => [
+        {
+          label: "Edit",
+          icon: Pencil,
+          onClick: () => action("edit")(`Editing ${item.name}`),
+          type: "primary" as const,
+          hideLabel: true,
+        },
+        {
+          label: "Delete",
+          icon: Delete,
+          onClick: () => action("delete")(`Deleting ${item.name}`),
+          type: "primary" as const,
+          critical: true,
+          hideLabel: true,
+        },
+      ],
+    })
+
+    return (
+      <OneDataCollection
+        source={source}
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...baseOptions,
+              onCellChange,
+            },
+          },
+        ]}
+        id="editable-table-icon-only-actions/v1"
       />
     )
   },

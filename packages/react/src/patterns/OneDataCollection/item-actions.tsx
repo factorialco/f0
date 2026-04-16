@@ -1,9 +1,8 @@
-import { RecordType } from "@/hooks/datasource"
-
 import {
   DropdownItemObject,
   DropdownItemSeparator,
 } from "@/experimental/Navigation/Dropdown/internal"
+import { RecordType } from "@/hooks/datasource"
 
 export type ActionDefinition =
   | DropdownItemSeparator
@@ -11,6 +10,7 @@ export type ActionDefinition =
       onClick: () => void
       enabled?: boolean
       type?: "primary" | "secondary" | "other"
+      hideLabel?: boolean
     })
 
 export type ItemActionsDefinition<T extends RecordType> = (

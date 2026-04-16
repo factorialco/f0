@@ -259,15 +259,15 @@ Provider that wraps each row. Normally not used directly; `EditableTableCollecti
 
 ## Differences from TableCollection
 
-| Feature                 | TableCollection | EditableTableCollection |
-| ----------------------- | --------------- | ----------------------- |
-| Editable cells          | ❌              | ✅                      |
-| `editType` on columns   | ❌              | ✅                      |
-| `editable` on columns   | ❌              | ✅ (required)           |
-| `onCellChange` callback | ❌              | ✅ (required)           |
-| Item actions            | ✅              | ❌ (disabled)           |
-| Row wrapper             | Optional        | `EditableRowProvider`   |
-| Cell renderer           | Optional        | `EditableCellRenderer`  |
+| Feature                 | TableCollection    | EditableTableCollection |
+| ----------------------- | ------------------ | ----------------------- |
+| Editable cells          | ❌                 | ✅                      |
+| `editType` on columns   | ❌                 | ✅                      |
+| `editable` on columns   | ❌                 | ✅ (required)           |
+| `onCellChange` callback | ❌                 | ✅ (required)           |
+| Item actions            | ✅ (hover overlay) | ✅ (dedicated column)   |
+| Row wrapper             | Optional           | `EditableRowProvider`   |
+| Cell renderer           | Optional           | `EditableCellRenderer`  |
 
 ---
 
