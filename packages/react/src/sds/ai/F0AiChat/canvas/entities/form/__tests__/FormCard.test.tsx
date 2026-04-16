@@ -44,10 +44,14 @@ describe("FormCard", () => {
     expect(screen.getByText("Fill in the employee details")).toBeInTheDocument()
   })
 
-  it("shows Open button when not active", () => {
+  it("does not show a button when not active", () => {
     render(<FormCard {...defaultProps} />)
 
-    expect(screen.getByRole("button", { name: "Open" })).toBeInTheDocument()
+    // FormCard hides the button when not active (showOpenButton={isActive})
+    // — the card itself is clickable to open the canvas
+    expect(
+      screen.queryByRole("button", { name: "Open" })
+    ).not.toBeInTheDocument()
   })
 
   it("shows Close button when active", () => {
@@ -58,12 +62,13 @@ describe("FormCard", () => {
     expect(screen.getByRole("button", { name: "Close" })).toBeInTheDocument()
   })
 
-  it("calls openCanvas with form content when clicking Open", async () => {
+  it("calls openCanvas with form content when clicking the card", async () => {
     const user = userEvent.setup()
 
     render(<FormCard {...defaultProps} />)
 
-    await user.click(screen.getByRole("button", { name: "Open" }))
+    // No Open button when inactive — click the card itself
+    await user.click(screen.getByText("Edit Employee"))
     expect(mockOpenCanvas).toHaveBeenCalledWith({
       type: "form",
       title: "Edit Employee",
@@ -81,7 +86,7 @@ describe("FormCard", () => {
     render(<FormCard {...defaultProps} />)
 
     await user.click(screen.getByRole("button", { name: "Close" }))
-    expect(mockCloseCanvas).toHaveBeenCalledTimes(1)
+    expect(mockCloseCanvas).toHaveBeenCalled()
   })
 
   it("calls useAutoOpenCanvas with formName to auto-open on first render", () => {

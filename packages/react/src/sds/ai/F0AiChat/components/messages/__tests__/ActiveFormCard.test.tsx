@@ -89,9 +89,8 @@ describe("ActiveFormCard", () => {
 
     const { container } = render(<ActiveFormCard />)
 
-    // Falls back to formName for cardTitle, so it should still render
-    expect(screen.getByText("edit-employee")).toBeInTheDocument()
-    expect(container.firstChild).not.toBeNull()
+    // cardTitle is empty string → ActiveFormCard returns null early
+    expect(container.firstChild).toBeNull()
   })
 
   it("renders nothing when both cardDescription and description are missing", () => {

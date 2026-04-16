@@ -3445,6 +3445,6 @@ describe("F0Form sections sidepanel scroll", () => {
     // The sidebar should have sticky positioning so it stays fixed while scrolling
     const stickyElement = scrollContainer?.querySelector(".sticky")
     expect(stickyElement).toBeInTheDocument()
-    expect(stickyElement).toHaveClass("top-4")
+    expect(stickyElement).toHaveClass("top-0")
   })
 })

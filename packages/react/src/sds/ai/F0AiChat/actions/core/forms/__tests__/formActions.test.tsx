@@ -338,9 +338,9 @@ describe("useFormFillAction handler", () => {
       currentValues: Record<string, unknown>
     }
     expect(currentValues.startDate).toBeInstanceOf(Date)
-    expect((currentValues.startDate as Date).toISOString()).toContain(
-      "2024-06-15"
-    )
+    expect((currentValues.startDate as Date).getFullYear()).toBe(2024)
+    expect((currentValues.startDate as Date).getMonth()).toBe(5)
+    expect((currentValues.startDate as Date).getDate()).toBe(15)
   })
 
   it("returns error for unknown form", async () => {
@@ -393,11 +393,16 @@ describe("useFormFillAction — virtual form activation", () => {
     const handler = getHandler("forms.fillForm")
     const result = await handler({
       formName: "user-form",
-      values: [{ fieldName: "name", value: "Alice" }],
+      values: [
+        { fieldName: "name", value: "Alice" },
+        { fieldName: "email", value: "alice@test.com" },
+      ],
     } as never)
 
     expect(result).toMatchObject({ success: true })
-    expect(capturedRegistry!.activeForm?.formName).toBe("user-form")
+    await waitFor(() =>
+      expect(capturedRegistry!.activeForm?.formName).toBe("user-form")
+    )
   })
 
   it("returns error when a different virtual form is already active", async () => {
@@ -428,9 +433,15 @@ describe("useFormFillAction — virtual form activation", () => {
     )
 
     await waitFor(() => expect(capturedRegistry).not.toBeNull())
-    act(() => {
+
+    // Activate form-a and wait for the state to propagate through queueMicrotask
+    await act(async () => {
       capturedRegistry!.setActiveForm("form-a")
+      await new Promise((r) => queueMicrotask(r))
     })
+    await waitFor(() =>
+      expect(capturedRegistry!.activeForm?.formName).toBe("form-a")
+    )
 
     const handler = getHandler("forms.fillForm")
     const result = await handler({
@@ -473,18 +484,29 @@ describe("useFormFillAction — virtual form activation", () => {
     )
 
     await waitFor(() => expect(capturedRegistry).not.toBeNull())
-    act(() => {
+
+    // Activate form-a and wait for the state to propagate through queueMicrotask
+    await act(async () => {
       capturedRegistry!.setActiveForm("form-a")
+      await new Promise((r) => queueMicrotask(r))
     })
+    await waitFor(() =>
+      expect(capturedRegistry!.activeForm?.formName).toBe("form-a")
+    )
 
     const handler = getHandler("forms.fillForm")
     const result = await handler({
       formName: "form-b",
-      values: [{ fieldName: "name", value: "Bob" }],
+      values: [
+        { fieldName: "name", value: "Bob" },
+        { fieldName: "email", value: "bob@test.com" },
+      ],
       confirmOverwrite: true,
     } as never)
 
     expect(result).toMatchObject({ success: true })
-    expect(capturedRegistry!.activeForm?.formName).toBe("form-b")
+    await waitFor(() =>
+      expect(capturedRegistry!.activeForm?.formName).toBe("form-b")
+    )
   })
 })
