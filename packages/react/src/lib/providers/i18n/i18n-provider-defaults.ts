@@ -361,6 +361,7 @@ export const defaultTranslations = {
     },
     attachFile: "Attach file",
     removeFile: "Remove",
+    fileUploadError: "Upload failed",
     dropFilesHere: "Drop your files here",
     clarifyingQuestion: {
       submit: "Submit",

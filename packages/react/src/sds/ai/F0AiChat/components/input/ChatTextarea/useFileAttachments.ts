@@ -1,5 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react"
 
+import { useI18n } from "@/lib/providers/i18n"
+
 import { type AiChatFileAttachmentConfig } from "../../../types"
 import { type AttachedFile } from "./types"
 import { filterByMimeType } from "./file-utils"
@@ -9,6 +11,7 @@ export function useFileAttachments(
 ) {
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const translation = useI18n()
 
   const onUploadFiles = fileAttachments?.onUploadFiles
   const allowedMimeTypes = fileAttachments?.allowedMimeTypes
@@ -57,14 +60,23 @@ export function useFileAttachments(
                 uploadedFile: uploaded[idx],
               }
             }
-            return { ...att, status: "error" as const }
+            return {
+              ...att,
+              status: "error" as const,
+              errorMessage: translation.ai.fileUploadError,
+            }
           })
         )
-      } catch {
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error && err.message
+            ? err.message
+            : translation.ai.fileUploadError
+        const errorIds = newAttached.map((n) => n.id)
         setAttachedFiles((prev) =>
           prev.map((att) =>
-            newAttached.some((n) => n.id === att.id)
-              ? { ...att, status: "error" as const }
+            errorIds.includes(att.id)
+              ? { ...att, status: "error" as const, errorMessage }
               : att
           )
         )
