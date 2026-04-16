@@ -41,6 +41,13 @@ vi.mock("@copilotkit/react-core", () => ({
   useCoAgent: () => ({ state: mockCoAgentState }),
 }))
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let mockFormComponent: React.ComponentType<any> | undefined
+
+vi.mock("@/lib/providers/f0", () => ({
+  useFormComponent: () => mockFormComponent,
+}))
+
 vi.mock("@/ai", () => ({
   useAiChat: () => ({
     agent: "test-agent",

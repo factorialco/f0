@@ -34,7 +34,6 @@ const F0AiChatProviderComponent = ({
   credits,
   creditWarning,
   fileAttachments,
-  FormComponent,
   onThumbsUp,
   onThumbsDown,
   children,
@@ -64,7 +63,6 @@ const F0AiChatProviderComponent = ({
       credits={credits}
       creditWarning={creditWarning}
       fileAttachments={fileAttachments}
-      FormComponent={FormComponent}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>

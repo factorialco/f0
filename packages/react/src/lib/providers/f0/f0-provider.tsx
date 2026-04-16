@@ -19,6 +19,8 @@ import { I18nProvider, I18nProviderProps } from "../i18n"
 import { L10nProvider, L10nProviderProps } from "../l10n"
 import { UserPlatformProvider } from "../user-platafform"
 
+import type { F0FormLikeComponent } from "@/patterns/F0Form/types"
+
 interface LayoutProps {
   fullScreen?: boolean
   addBodyClasses?: boolean
@@ -69,6 +71,12 @@ const MotionProvider: React.FC<{ children: React.ReactNode }> = ({
   return <MotionConfig reducedMotion="user">{children}</MotionConfig>
 }
 
+const FormComponentContext = createContext<F0FormLikeComponent | undefined>(
+  undefined
+)
+
+export const useFormComponent = () => useContext(FormComponentContext)
+
 export const F0Provider: React.FC<{
   children: React.ReactNode
   link?: LinkContextValue
@@ -81,6 +89,17 @@ export const F0Provider: React.FC<{
   showExperimentalWarnings?: boolean
   dataCollectionStorageHandler?: DataCollectionStorageHandler
   renderDataTestIdAttribute?: boolean
+  /**
+   * Custom form component to use instead of the default F0Form in
+   * AI canvas form panels. Useful for platform-level wrappers that
+   * auto-provide `renderCustomField` or `useUpload`.
+   *
+   * Cast overloaded components when passing:
+   * ```tsx
+   * <F0Provider FormComponent={FactorialF0Form as F0FormLikeComponent} />
+   * ```
+   */
+  FormComponent?: F0FormLikeComponent
 }> = ({
   children,
   layout,
@@ -93,6 +112,7 @@ export const F0Provider: React.FC<{
   dataCollectionStorageHandler,
   showExperimentalWarnings = false,
   renderDataTestIdAttribute = false,
+  FormComponent,
 }) => {
   return (
     <MotionProvider>
@@ -113,7 +133,9 @@ export const F0Provider: React.FC<{
                       <DataCollectionStorageProvider
                         handler={dataCollectionStorageHandler}
                       >
-                        {children}
+                        <FormComponentContext.Provider value={FormComponent}>
+                          {children}
+                        </FormComponentContext.Provider>
                       </DataCollectionStorageProvider>
                     </ImageProvider>
                   </PrivacyModeProvider>

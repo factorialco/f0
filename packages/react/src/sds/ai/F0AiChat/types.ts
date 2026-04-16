@@ -6,9 +6,6 @@ import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { IconType } from "@/components/F0Icon"
 import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
 
-import type { F0FormSchema } from "@/patterns/F0Form/types"
-import type { F0FormPropsWithSingleSchemaDefinition } from "@/patterns/F0Form/types"
-
 import type { ChatDashboardConfig } from "./canvas/entities/dashboard/types"
 import type { DataDownloadDataset } from "./actions/core/dataDownload/types"
 export type { PersonProfile } from "./components/markdownRenderers/entityRef/entities/person/types"
@@ -258,14 +255,6 @@ export type AiChatProviderProps = {
    * File attachment configuration. When provided, enables file uploads in the chat.
    */
   fileAttachments?: AiChatFileAttachmentConfig
-  /**
-   * Custom form component to use in the canvas form panel instead of the
-   * default F0Form. Useful for injecting platform-level wrappers that
-   * auto-provide `renderCustomField` or `useUpload` (e.g. FactorialF0Form).
-   */
-  FormComponent?: React.ComponentType<
-    F0FormPropsWithSingleSchemaDefinition<F0FormSchema>
-  >
   onThumbsUp?: (
     message: AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }

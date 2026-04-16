@@ -592,3 +592,16 @@ export type F0FormSubmitResult =
       /** Field-specific error messages */
       errors?: Record<string, string>
     }
+
+/**
+ * Component type for F0Form-like wrappers (e.g. FactorialF0Form).
+ *
+ * Because F0Form uses overloaded/generic signatures, neither F0Form
+ * nor FactorialF0Form can be directly assigned to this type.
+ * Cast the component when passing it:
+ *
+ * ```tsx
+ * <F0Provider FormComponent={FactorialF0Form as F0FormLikeComponent} />
+ * ```
+ */
+export type F0FormLikeComponent = React.ComponentType<F0FormProps>
