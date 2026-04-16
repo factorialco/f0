@@ -22,6 +22,8 @@ exports[`F0Tabs Snapshot - full width 1`] = `
     }
   }
   horizontal={true}
+  onContentSizeChange={[Function]}
+  onLayout={[Function]}
   scrollEnabled={false}
   showsHorizontalScrollIndicator={false}
 >
@@ -265,6 +267,8 @@ exports[`F0Tabs Snapshot - full width 1`] = `
 exports[`F0Tabs Snapshot - globally disabled 1`] = `
 <RCTScrollView
   horizontal={true}
+  onContentSizeChange={[Function]}
+  onLayout={[Function]}
   showsHorizontalScrollIndicator={false}
 >
   <View>
@@ -507,6 +511,8 @@ exports[`F0Tabs Snapshot - globally disabled 1`] = `
 exports[`F0Tabs Snapshot - primary (default) 1`] = `
 <RCTScrollView
   horizontal={true}
+  onContentSizeChange={[Function]}
+  onLayout={[Function]}
   showsHorizontalScrollIndicator={false}
 >
   <View>
@@ -749,6 +755,8 @@ exports[`F0Tabs Snapshot - primary (default) 1`] = `
 exports[`F0Tabs Snapshot - secondary 1`] = `
 <RCTScrollView
   horizontal={true}
+  onContentSizeChange={[Function]}
+  onLayout={[Function]}
   showsHorizontalScrollIndicator={false}
 >
   <View>
@@ -990,6 +998,8 @@ exports[`F0Tabs Snapshot - single tab 1`] = `
 exports[`F0Tabs Snapshot - tab disabled 1`] = `
 <RCTScrollView
   horizontal={true}
+  onContentSizeChange={[Function]}
+  onLayout={[Function]}
   showsHorizontalScrollIndicator={false}
 >
   <View>

@@ -56,11 +56,30 @@ export const F0Tabs = React.memo(function F0Tabs({
   const [activeId, setActiveId] = useState(
     controlledActiveTabId ?? firstTab?.id ?? ""
   )
+  const [containerWidth, setContainerWidth] = useState(0)
+  const [contentWidth, setContentWidth] = useState(0)
 
+  const scrollViewRef = useRef<ScrollView>(null)
   const tabLayouts = useRef<Record<string, { x: number; width: number }>>({})
   const hasInitialized = useRef(false)
   const indicatorX = useSharedValue(0)
   const indicatorWidth = useSharedValue(0)
+
+  const scrollToTab = useCallback(
+    (id: string, animated = true) => {
+      if (fullWidth) return
+
+      const layout = tabLayouts.current[id]
+      if (!layout || containerWidth <= 0) return
+
+      const targetX = layout.x + layout.width / 2 - containerWidth / 2
+      const maxOffset = Math.max(0, contentWidth - containerWidth)
+      const clampedOffset = Math.max(0, Math.min(targetX, maxOffset))
+
+      scrollViewRef.current?.scrollTo({ x: clampedOffset, animated })
+    },
+    [containerWidth, contentWidth, fullWidth]
+  )
 
   // Sync controlled active tab id → internal state + indicator animation
   useEffect(() => {
@@ -72,8 +91,9 @@ export const F0Tabs = React.memo(function F0Tabs({
     if (layout && hasInitialized.current) {
       indicatorX.value = withSpring(layout.x, SPRING_CONFIG)
       indicatorWidth.value = withSpring(layout.width, SPRING_CONFIG)
+      scrollToTab(controlledActiveTabId)
     }
-  }, [controlledActiveTabId, indicatorX, indicatorWidth])
+  }, [controlledActiveTabId, indicatorX, indicatorWidth, scrollToTab])
 
   const handleTabLayout = useCallback(
     (id: string, event: LayoutChangeEvent) => {
@@ -101,8 +121,9 @@ export const F0Tabs = React.memo(function F0Tabs({
       }
       setActiveId(id)
       onChangeActiveTabId?.(id)
+      scrollToTab(id)
     },
-    [indicatorX, indicatorWidth, onChangeActiveTabId]
+    [indicatorX, indicatorWidth, onChangeActiveTabId, scrollToTab]
   )
 
   // Only the underline slides — same x/width shared values drive it
@@ -138,10 +159,17 @@ export const F0Tabs = React.memo(function F0Tabs({
 
   return (
     <ScrollView
+      ref={scrollViewRef}
       horizontal
       scrollEnabled={fullWidth ? false : undefined}
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={fullWidth ? { width: "100%" } : undefined}
+      onLayout={(event) => {
+        setContainerWidth(event.nativeEvent.layout.width)
+      }}
+      onContentSizeChange={(width) => {
+        setContentWidth(width)
+      }}
     >
       <View
         className={f0TabsContainerVariants({ secondary, fullWidth })}
