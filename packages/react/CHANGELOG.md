@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.450.0](https://github.com/factorialco/f0/compare/f0-react-v1.449.2...f0-react-v1.450.0) (2026-04-16)
+
+
+### Features
+
+* changes in one form actions ([#3906](https://github.com/factorialco/f0/issues/3906)) ([74d891e](https://github.com/factorialco/f0/commit/74d891ec5b566f6508d08d0c49b19e9b16a0aa7e))
+
 ## [1.449.2](https://github.com/factorialco/f0/compare/f0-react-v1.449.1...f0-react-v1.449.2) (2026-04-16)
 
 
