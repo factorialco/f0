@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.450.1](https://github.com/factorialco/f0/compare/f0-react-v1.450.0...f0-react-v1.450.1) (2026-04-16)
+
+
+### Bug Fixes
+
+* **EditableTable:** improve nested row add button alignment and number cell clamping ([#3947](https://github.com/factorialco/f0/issues/3947)) ([3965a19](https://github.com/factorialco/f0/commit/3965a199993208fea4706f1279778801b63aded6))
+
 ## [1.450.0](https://github.com/factorialco/f0/compare/f0-react-v1.449.2...f0-react-v1.450.0) (2026-04-16)
 
 
