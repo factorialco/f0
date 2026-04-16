@@ -7,12 +7,15 @@ import Animated, {
   type WithSpringConfig,
 } from "react-native-reanimated"
 
+import { cn } from "../../lib/utils"
 import { F0Text } from "../primitives/F0Text"
 import { PressableFeedback } from "../primitives/PressableFeedback"
 
 import {
+  f0TabsContentInsetVariants,
   f0TabItemVariants,
-  f0TabSeparatorClass,
+  f0TabSeparatorContentInsetVariants,
+  f0TabSeparatorVariants,
   f0TabUnderlineClass,
   f0TabsContainerVariants,
 } from "./F0Tabs.styles"
@@ -47,6 +50,11 @@ export const F0Tabs = React.memo(function F0Tabs({
   activeTabId: controlledActiveTabId,
   setActiveTabId: onChangeActiveTabId,
   secondary = false,
+  disabled = false,
+  fullWidth = false,
+  separatorInset = "full",
+  separatorWidth = "container",
+  contentInset = "sm",
   embedded = false,
 }: F0TabsProps) {
   const firstTab = tabs[0]
@@ -54,11 +62,30 @@ export const F0Tabs = React.memo(function F0Tabs({
   const [activeId, setActiveId] = useState(
     controlledActiveTabId ?? firstTab?.id ?? ""
   )
+  const [containerWidth, setContainerWidth] = useState(0)
+  const [contentWidth, setContentWidth] = useState(0)
 
+  const scrollViewRef = useRef<ScrollView>(null)
   const tabLayouts = useRef<Record<string, { x: number; width: number }>>({})
   const hasInitialized = useRef(false)
   const indicatorX = useSharedValue(0)
   const indicatorWidth = useSharedValue(0)
+
+  const scrollToTab = useCallback(
+    (id: string, animated = true) => {
+      if (fullWidth) return
+
+      const layout = tabLayouts.current[id]
+      if (!layout || containerWidth <= 0) return
+
+      const targetX = layout.x + layout.width / 2 - containerWidth / 2
+      const maxOffset = Math.max(0, contentWidth - containerWidth)
+      const clampedOffset = Math.max(0, Math.min(targetX, maxOffset))
+
+      scrollViewRef.current?.scrollTo({ x: clampedOffset, animated })
+    },
+    [containerWidth, contentWidth, fullWidth]
+  )
 
   // Sync controlled active tab id → internal state + indicator animation
   useEffect(() => {
@@ -70,8 +97,9 @@ export const F0Tabs = React.memo(function F0Tabs({
     if (layout && hasInitialized.current) {
       indicatorX.value = withSpring(layout.x, SPRING_CONFIG)
       indicatorWidth.value = withSpring(layout.width, SPRING_CONFIG)
+      scrollToTab(controlledActiveTabId)
     }
-  }, [controlledActiveTabId, indicatorX, indicatorWidth])
+  }, [controlledActiveTabId, indicatorX, indicatorWidth, scrollToTab])
 
   const handleTabLayout = useCallback(
     (id: string, event: LayoutChangeEvent) => {
@@ -99,8 +127,9 @@ export const F0Tabs = React.memo(function F0Tabs({
       }
       setActiveId(id)
       onChangeActiveTabId?.(id)
+      scrollToTab(id)
     },
-    [indicatorX, indicatorWidth, onChangeActiveTabId]
+    [indicatorX, indicatorWidth, onChangeActiveTabId, scrollToTab]
   )
 
   // Only the underline slides — same x/width shared values drive it
@@ -109,10 +138,20 @@ export const F0Tabs = React.memo(function F0Tabs({
     width: indicatorWidth.value,
   }))
 
+  const tabListStyle =
+    separatorWidth === "container" && !fullWidth && containerWidth > 0
+      ? { minWidth: containerWidth }
+      : undefined
+
   // embedded: render only the first tab as non-interactive text (mirrors web)
   if (embedded) {
     return (
-      <View className="h-8 items-center justify-center px-3">
+      <View
+        className={cn(
+          "h-8 items-center justify-center",
+          f0TabsContentInsetVariants({ contentInset })
+        )}
+      >
         <F0Text variant="body-md-medium" color="default" numberOfLines={1}>
           {firstTab?.label ?? ""}
         </F0Text>
@@ -124,8 +163,10 @@ export const F0Tabs = React.memo(function F0Tabs({
   if (tabs.length === 1) {
     return (
       <View
-        className={f0TabsContainerVariants({ secondary })}
-        style={{ paddingHorizontal: 12 }}
+        className={cn(
+          f0TabsContainerVariants({ secondary, fullWidth }),
+          f0TabsContentInsetVariants({ contentInset })
+        )}
       >
         <F0Text variant="body-md-medium" color="default" numberOfLines={1}>
           {firstTab?.label ?? ""}
@@ -135,30 +176,56 @@ export const F0Tabs = React.memo(function F0Tabs({
   }
 
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+    <ScrollView
+      ref={scrollViewRef}
+      horizontal
+      scrollEnabled={fullWidth ? false : undefined}
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={fullWidth ? { width: "100%" } : undefined}
+      onLayout={(event) => {
+        setContainerWidth(event.nativeEvent.layout.width)
+      }}
+      onContentSizeChange={(width) => {
+        setContentWidth(width)
+      }}
+    >
       <View
-        className={f0TabsContainerVariants({ secondary })}
+        className={cn(
+          f0TabsContainerVariants({ secondary, fullWidth }),
+          f0TabsContentInsetVariants({ contentInset })
+        )}
+        style={tabListStyle}
         accessibilityRole="tablist"
       >
         {tabs.map((tab) => {
           const isActive = tab.id === activeId
+          const isDisabled = disabled || Boolean(tab.disabled)
 
           return (
             <PressableFeedback
               key={tab.id}
-              className={f0TabItemVariants({ active: isActive, secondary })}
+              className={f0TabItemVariants({
+                active: isActive,
+                secondary,
+                fullWidth,
+                disabled: isDisabled,
+              })}
               onLayout={(e) => handleTabLayout(tab.id, e)}
+              disabled={isDisabled}
               onPress={() => {
+                if (isDisabled) return
                 tab.onPress?.()
                 handleTabPress(tab.id)
               }}
               accessibilityRole="tab"
-              accessibilityState={{ selected: isActive }}
+              accessibilityState={{ selected: isActive, disabled: isDisabled }}
               accessibilityLabel={tab.label}
             >
               <F0Text
                 variant={secondary ? "body-sm-medium" : "body-md-medium"}
-                color={isActive ? "default" : "secondary"}
+                color={
+                  isDisabled ? "disabled" : isActive ? "default" : "secondary"
+                }
                 numberOfLines={1}
               >
                 {tab.label}
@@ -170,7 +237,12 @@ export const F0Tabs = React.memo(function F0Tabs({
         {/* Separator — full-width 1px bottom border (primary only, mirrors web) */}
         {!secondary && (
           <View
-            className={f0TabSeparatorClass}
+            className={cn(
+              f0TabSeparatorVariants({ inset: separatorInset }),
+              separatorInset === "content"
+                ? f0TabSeparatorContentInsetVariants({ contentInset })
+                : undefined
+            )}
             importantForAccessibility="no-hide-descendants"
             pointerEvents="none"
           />
