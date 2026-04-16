@@ -15,7 +15,9 @@ export type CanvasCardProps = {
   /** Secondary description line */
   description: string
   /** Called when the user clicks the "Open" button */
-  onOpen?: () => void
+  onOpen: () => void
+  /** Whether to show the "Open" button */
+  showOpenButton?: boolean
   /** Called when the user clicks the "Close" button (active state) */
   onClose: () => void
   /** Whether this card's content is currently shown in the canvas */
@@ -34,6 +36,7 @@ export function CanvasCard({
   title,
   description,
   onOpen,
+  showOpenButton = true,
   onClose,
   isActive,
   children,
@@ -43,11 +46,10 @@ export function CanvasCard({
   return (
     <div
       className={cn(
-        "flex flex-col hover:border-f1-border-hover items-center justify-between gap-3 rounded-lg border border-solid border-f1-border-secondary px-3 py-2",
-        !isActive && "border-f1-border-secondary cursor-pointer",
-        !!children && "pb-3"
+        "flex flex-col hover:border-f1-border-hover items-center justify-between gap-3 rounded-lg border border-solid border-f1-border-secondary px-3 py-2 cursor-pointer",
+        !isActive && "border-f1-border-secondary"
       )}
-      onClick={!isActive ? onOpen : undefined}
+      onClick={isActive ? onClose : onOpen}
     >
       <div className="flex min-w-0 w-full flex-row items-center gap-3">
         {!!cardModule && <F0AvatarModule module={cardModule} size="lg" />}
@@ -59,7 +61,7 @@ export function CanvasCard({
             {description}
           </OneEllipsis>
         </div>
-        {(isActive || !!onOpen) && (
+        {showOpenButton && (
           <F0Button
             variant="neutral"
             size="md"

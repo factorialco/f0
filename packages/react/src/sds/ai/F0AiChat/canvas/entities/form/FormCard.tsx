@@ -96,7 +96,8 @@ export function FormCard({
       description={description}
       onClose={closeCanvas}
       isActive={isActive}
-      onOpen={!!fields.length ? undefined : handleOpen}
+      onOpen={handleOpen}
+      showOpenButton={isActive}
     >
       <AnimatePresence>
         {visibleFields.length > 0 && !isActive && (
@@ -106,7 +107,7 @@ export function FormCard({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.4, ease: [0.165, 0.84, 0.44, 1] }}
-            className="w-full flex flex-col -mx-3 overflow-hidden"
+            className="w-full flex flex-col -mx-3 overflow-hidden pb-1"
           >
             <DetailsItemsList
               details={visibleFields.map((field) => ({

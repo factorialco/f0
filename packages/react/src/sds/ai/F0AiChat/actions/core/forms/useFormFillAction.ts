@@ -36,6 +36,14 @@ function coerceValue(value: unknown, fieldSchema: ZodTypeAny): unknown {
   const typeName: string | undefined = base._def?.typeName
 
   if (typeName === "ZodDate" && typeof value === "string") {
+    // Date-only strings (YYYY-MM-DD) are parsed as UTC by default,
+    // which can shift the date by a day depending on timezone.
+    // Force local-time interpretation by using component parts.
+    const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
+    if (dateOnlyMatch) {
+      const [, y, m, d] = dateOnlyMatch
+      return new Date(Number(y), Number(m) - 1, Number(d))
+    }
     const d = new Date(value)
     return isNaN(d.getTime()) ? value : d
   }
