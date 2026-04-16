@@ -1,12 +1,36 @@
 import { tv } from "tailwind-variants"
 
+import { F0_TABS_CONTENT_INSETS, type F0TabsContentInset } from "./F0Tabs.types"
+
+const contentInsetClassByToken = {
+  sm: "3",
+  md: "4",
+  lg: "5",
+  xl: "6",
+  none: "0",
+} as const satisfies Record<F0TabsContentInset, string>
+
+const f0TabsContentInsetPaddingClasses = Object.fromEntries(
+  F0_TABS_CONTENT_INSETS.map((token) => [
+    token,
+    `px-${contentInsetClassByToken[token]}`,
+  ])
+) as Record<F0TabsContentInset, string>
+
+const f0TabsSeparatorContentInsetClasses = Object.fromEntries(
+  F0_TABS_CONTENT_INSETS.map((token) => [
+    token,
+    `left-${contentInsetClassByToken[token]} right-${contentInsetClassByToken[token]}`,
+  ])
+) as Record<F0TabsContentInset, string>
+
 /**
  * Container for the tab strip.
  * Primary: pt-1 pb-3 creates the 12px gap below the pill for the underline (mirrors web pt-1 pb-3).
  * Secondary: py-1 symmetric, no underline.
  */
 export const f0TabsContainerVariants = tv({
-  base: "relative flex-row items-center gap-1 px-3",
+  base: "relative flex-row items-center gap-1",
   variants: {
     secondary: {
       true: "py-1",
@@ -25,22 +49,18 @@ export const f0TabsContainerVariants = tv({
 
 /**
  * Horizontal content inset tokens for tabs.
- * - `lg`: 24px (web parity)
- * - `md`: 20px (mobile page gutter)
- * - `sm`: 16px (compact containers)
+ * - `sm`: 12px (legacy default)
+ * - `md`: 16px (compact containers)
+ * - `lg`: 20px (mobile page gutter)
+ * - `xl`: 24px (web parity)
  * - `none`: 0px
  */
 export const f0TabsContentInsetVariants = tv({
   variants: {
-    contentInset: {
-      lg: "px-6",
-      md: "px-5",
-      sm: "px-4",
-      none: "px-0",
-    },
+    contentInset: f0TabsContentInsetPaddingClasses,
   },
   defaultVariants: {
-    contentInset: "lg",
+    contentInset: "sm",
   },
 })
 
@@ -109,18 +129,13 @@ export const f0TabSeparatorVariants = tv({
 
 /**
  * Content-aligned separator inset tokens.
- * Keep in sync with `f0TabsContentInsetVariants`.
+ * Uses the same token map as `f0TabsContentInsetVariants`.
  */
 export const f0TabSeparatorContentInsetVariants = tv({
   variants: {
-    contentInset: {
-      lg: "left-6 right-6",
-      md: "left-5 right-5",
-      sm: "left-4 right-4",
-      none: "left-0 right-0",
-    },
+    contentInset: f0TabsSeparatorContentInsetClasses,
   },
   defaultVariants: {
-    contentInset: "lg",
+    contentInset: "sm",
   },
 })

@@ -2,7 +2,7 @@
 
 exports[`F0Tabs Snapshot - embedded 1`] = `
 <View
-  className="h-8 items-center justify-center px-6"
+  className="h-8 items-center justify-center px-3"
 >
   <Text
     className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
@@ -30,7 +30,7 @@ exports[`F0Tabs Snapshot - full width 1`] = `
   <View>
     <View
       accessibilityRole="tablist"
-      className="relative flex-row items-center gap-1 px-3 pt-1 pb-3 w-full px-6"
+      className="relative flex-row items-center gap-1 pt-1 pb-3 w-full px-3"
     >
       <View
         accessibilityLabel="Overview"
@@ -240,7 +240,7 @@ exports[`F0Tabs Snapshot - full width 1`] = `
         </Text>
       </View>
       <View
-        className="absolute bottom-0 h-px bg-f0-border left-0 right-0 "
+        className="absolute bottom-0 h-px bg-f0-border left-0 right-0"
         importantForAccessibility="no-hide-descendants"
         pointerEvents="none"
       />
@@ -274,7 +274,7 @@ exports[`F0Tabs Snapshot - globally disabled 1`] = `
   <View>
     <View
       accessibilityRole="tablist"
-      className="relative flex-row items-center gap-1 px-3 pt-1 pb-3 px-6"
+      className="relative flex-row items-center gap-1 pt-1 pb-3 px-3"
     >
       <View
         accessibilityLabel="Overview"
@@ -484,7 +484,7 @@ exports[`F0Tabs Snapshot - globally disabled 1`] = `
         </Text>
       </View>
       <View
-        className="absolute bottom-0 h-px bg-f0-border left-0 right-0 "
+        className="absolute bottom-0 h-px bg-f0-border left-0 right-0"
         importantForAccessibility="no-hide-descendants"
         pointerEvents="none"
       />
@@ -518,7 +518,7 @@ exports[`F0Tabs Snapshot - primary (default) 1`] = `
   <View>
     <View
       accessibilityRole="tablist"
-      className="relative flex-row items-center gap-1 px-3 pt-1 pb-3 px-6"
+      className="relative flex-row items-center gap-1 pt-1 pb-3 px-3"
     >
       <View
         accessibilityLabel="Overview"
@@ -728,7 +728,7 @@ exports[`F0Tabs Snapshot - primary (default) 1`] = `
         </Text>
       </View>
       <View
-        className="absolute bottom-0 h-px bg-f0-border left-0 right-0 "
+        className="absolute bottom-0 h-px bg-f0-border left-0 right-0"
         importantForAccessibility="no-hide-descendants"
         pointerEvents="none"
       />
@@ -762,7 +762,7 @@ exports[`F0Tabs Snapshot - secondary 1`] = `
   <View>
     <View
       accessibilityRole="tablist"
-      className="relative flex-row items-center gap-1 px-3 py-1 px-6"
+      className="relative flex-row items-center gap-1 py-1 px-3"
     >
       <View
         accessibilityLabel="Overview"
@@ -986,7 +986,7 @@ exports[`F0Tabs Snapshot - separator inset content 1`] = `
   <View>
     <View
       accessibilityRole="tablist"
-      className="relative flex-row items-center gap-1 px-3 pt-1 pb-3 px-6"
+      className="relative flex-row items-center gap-1 pt-1 pb-3 px-3"
     >
       <View
         accessibilityLabel="Overview"
@@ -1196,7 +1196,7 @@ exports[`F0Tabs Snapshot - separator inset content 1`] = `
         </Text>
       </View>
       <View
-        className="absolute bottom-0 h-px bg-f0-border left-6 right-6"
+        className="absolute bottom-0 h-px bg-f0-border left-3 right-3"
         importantForAccessibility="no-hide-descendants"
         pointerEvents="none"
       />
@@ -1230,7 +1230,7 @@ exports[`F0Tabs Snapshot - separator width container 1`] = `
   <View>
     <View
       accessibilityRole="tablist"
-      className="relative flex-row items-center gap-1 px-3 pt-1 pb-3 px-6"
+      className="relative flex-row items-center gap-1 pt-1 pb-3 px-3"
     >
       <View
         accessibilityLabel="Overview"
@@ -1440,7 +1440,7 @@ exports[`F0Tabs Snapshot - separator width container 1`] = `
         </Text>
       </View>
       <View
-        className="absolute bottom-0 h-px bg-f0-border left-0 right-0 "
+        className="absolute bottom-0 h-px bg-f0-border left-0 right-0"
         importantForAccessibility="no-hide-descendants"
         pointerEvents="none"
       />
@@ -1466,7 +1466,7 @@ exports[`F0Tabs Snapshot - separator width container 1`] = `
 
 exports[`F0Tabs Snapshot - single tab 1`] = `
 <View
-  className="relative flex-row items-center gap-1 px-3 pt-1 pb-3 px-6"
+  className="relative flex-row items-center gap-1 pt-1 pb-3 px-3"
 >
   <Text
     className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
@@ -1488,7 +1488,7 @@ exports[`F0Tabs Snapshot - tab disabled 1`] = `
   <View>
     <View
       accessibilityRole="tablist"
-      className="relative flex-row items-center gap-1 px-3 pt-1 pb-3 px-6"
+      className="relative flex-row items-center gap-1 pt-1 pb-3 px-3"
     >
       <View
         accessibilityLabel="Overview"
@@ -1698,7 +1698,7 @@ exports[`F0Tabs Snapshot - tab disabled 1`] = `
         </Text>
       </View>
       <View
-        className="absolute bottom-0 h-px bg-f0-border left-0 right-0 "
+        className="absolute bottom-0 h-px bg-f0-border left-0 right-0"
         importantForAccessibility="no-hide-descendants"
         pointerEvents="none"
       />

@@ -47,11 +47,14 @@ import { F0Tabs } from "@factorialco/f0-react-native"
 // Separator spans full tabs container width (default)
 <F0Tabs tabs={tabs} separatorWidth="container" />
 
-// Medium inset token (20px)
+// Large inset token (20px)
 <F0Tabs tabs={tabs} contentInset="md" separatorInset="content" />
 
 // Small inset token (16px)
 <F0Tabs tabs={tabs} contentInset="sm" separatorInset="content" />
+
+// Extra-large inset token (24px)
+<F0Tabs tabs={tabs} contentInset="xl" separatorInset="content" />
 
 // Globally disabled
 <F0Tabs tabs={tabs} disabled />
@@ -74,18 +77,18 @@ import { F0Tabs } from "@factorialco/f0-react-native"
 
 ## Props
 
-| Prop             | Type                             | Default       | Description                                                           |
-| ---------------- | -------------------------------- | ------------- | --------------------------------------------------------------------- |
-| `tabs`           | `F0TabItem[]`                    | —             | List of tab items                                                     |
-| `activeTabId`    | `string`                         | —             | Controlled active tab id                                              |
-| `setActiveTabId` | `Dispatch<string>`               | —             | Called with new tab id on press                                       |
-| `secondary`      | `boolean`                        | `false`       | Uses secondary visual style (pill only, compact height)               |
-| `disabled`       | `boolean`                        | `false`       | Disables all tabs interaction and applies disabled visual             |
-| `fullWidth`      | `boolean`                        | `false`       | Distributes tabs evenly across full available width                   |
-| `separatorInset` | `"full" \| "content"`            | `"full"`      | Separator line inset: edge-to-edge or content-aligned                 |
-| `separatorWidth` | `"tabs" \| "container"`          | `"container"` | Separator width: tabs content width or full tabs container            |
-| `contentInset`   | `"sm" \| "md" \| "lg" \| "none"` | `"lg"`        | Horizontal inset token for tab content and `separatorInset="content"` |
-| `embedded`       | `boolean`                        | `false`       | Renders only the first tab as plain non-interactive text              |
+| Prop             | Type                                     | Default       | Description                                                                                                |
+| ---------------- | ---------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------- |
+| `tabs`           | `F0TabItem[]`                            | —             | List of tab items                                                                                          |
+| `activeTabId`    | `string`                                 | —             | Controlled active tab id                                                                                   |
+| `setActiveTabId` | `Dispatch<string>`                       | —             | Called with new tab id on press                                                                            |
+| `secondary`      | `boolean`                                | `false`       | Uses secondary visual style (pill only, compact height)                                                    |
+| `disabled`       | `boolean`                                | `false`       | Disables all tabs interaction and applies disabled visual                                                  |
+| `fullWidth`      | `boolean`                                | `false`       | Distributes tabs evenly across full available width                                                        |
+| `separatorInset` | `"full" \| "content"`                    | `"full"`      | Separator line inset: edge-to-edge or content-aligned                                                      |
+| `separatorWidth` | `"tabs" \| "container"`                  | `"container"` | Separator width: tabs content width or full tabs container                                                 |
+| `contentInset`   | `"sm" \| "md" \| "lg" \| "xl" \| "none"` | `"sm"`        | Horizontal inset token for tab content and `separatorInset="content"` (`sm=12`, `md=16`, `lg=20`, `xl=24`) |
+| `embedded`       | `boolean`                                | `false`       | Renders only the first tab as plain non-interactive text                                                   |
 
 ### `F0TabItem`
 
@@ -107,7 +110,7 @@ import { F0Tabs } from "@factorialco/f0-react-native"
 - Disabled model: `disabled` in `F0Tabs` disables every tab; `F0TabItem.disabled` disables an individual tab. When disabled, presses do not update active state and tab callbacks are not executed.
 - Separator inset: `separatorInset="full"` keeps current edge-to-edge line; `separatorInset="content"` insets the separator to align with tab content padding and remove edge overhang.
 - Separator width: `separatorWidth="tabs"` keeps separator tied to tabs content width; `separatorWidth="container"` lets separator fill available tabs container width.
-- Horizontal inset: `contentInset` controls tab content inset and also drives content-aligned separator inset using theme spacing tokens (`sm=16`, `md=20`, `lg=24`).
+- Horizontal inset: `contentInset` controls tab content inset and also drives content-aligned separator inset using theme spacing tokens (`sm=12`, `md=16`, `lg=20`, `xl=24`).
 - Accessibility: `accessibilityRole="tablist"` on the inner container inside the `ScrollView`, `accessibilityRole="tab"` + `accessibilityState={{ selected, disabled }}` on each tab
 
 ## Accessibility Notes

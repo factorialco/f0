@@ -129,7 +129,7 @@ export function F0TabsShowcase() {
           Separator inset
         </F0Text>
         <F0Text variant="body-sm-medium" color="secondary">
-          Inset tokens: lg=24, md=20, sm=16
+          Inset tokens: sm=12, md=16, lg=20, xl=24
         </F0Text>
         <F0Text variant="body-sm-medium" color="secondary">
           Full (default)
@@ -148,8 +148,8 @@ export function F0TabsShowcase() {
         </F0Text>
         <F0Tabs
           tabs={secondaryTabs}
-          separatorInset="content"
           separatorWidth="container"
+          contentInset="xl"
         />
       </View>
 

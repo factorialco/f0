@@ -7,6 +7,7 @@ import Animated, {
   type WithSpringConfig,
 } from "react-native-reanimated"
 
+import { cn } from "../../lib/utils"
 import { F0Text } from "../primitives/F0Text"
 import { PressableFeedback } from "../primitives/PressableFeedback"
 
@@ -53,7 +54,7 @@ export const F0Tabs = React.memo(function F0Tabs({
   fullWidth = false,
   separatorInset = "full",
   separatorWidth = "container",
-  contentInset = "lg",
+  contentInset = "sm",
   embedded = false,
 }: F0TabsProps) {
   const firstTab = tabs[0]
@@ -146,7 +147,10 @@ export const F0Tabs = React.memo(function F0Tabs({
   if (embedded) {
     return (
       <View
-        className={`h-8 items-center justify-center ${f0TabsContentInsetVariants({ contentInset })}`}
+        className={cn(
+          "h-8 items-center justify-center",
+          f0TabsContentInsetVariants({ contentInset })
+        )}
       >
         <F0Text variant="body-md-medium" color="default" numberOfLines={1}>
           {firstTab?.label ?? ""}
@@ -159,7 +163,10 @@ export const F0Tabs = React.memo(function F0Tabs({
   if (tabs.length === 1) {
     return (
       <View
-        className={`${f0TabsContainerVariants({ secondary, fullWidth })} ${f0TabsContentInsetVariants({ contentInset })}`}
+        className={cn(
+          f0TabsContainerVariants({ secondary, fullWidth }),
+          f0TabsContentInsetVariants({ contentInset })
+        )}
       >
         <F0Text variant="body-md-medium" color="default" numberOfLines={1}>
           {firstTab?.label ?? ""}
@@ -183,7 +190,10 @@ export const F0Tabs = React.memo(function F0Tabs({
       }}
     >
       <View
-        className={`${f0TabsContainerVariants({ secondary, fullWidth })} ${f0TabsContentInsetVariants({ contentInset })}`}
+        className={cn(
+          f0TabsContainerVariants({ secondary, fullWidth }),
+          f0TabsContentInsetVariants({ contentInset })
+        )}
         style={tabListStyle}
         accessibilityRole="tablist"
       >
@@ -227,7 +237,12 @@ export const F0Tabs = React.memo(function F0Tabs({
         {/* Separator — full-width 1px bottom border (primary only, mirrors web) */}
         {!secondary && (
           <View
-            className={`${f0TabSeparatorVariants({ inset: separatorInset })} ${separatorInset === "content" ? f0TabSeparatorContentInsetVariants({ contentInset }) : ""}`}
+            className={cn(
+              f0TabSeparatorVariants({ inset: separatorInset }),
+              separatorInset === "content"
+                ? f0TabSeparatorContentInsetVariants({ contentInset })
+                : undefined
+            )}
             importantForAccessibility="no-hide-descendants"
             pointerEvents="none"
           />

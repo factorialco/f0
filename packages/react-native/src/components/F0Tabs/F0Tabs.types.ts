@@ -17,6 +17,10 @@ export type F0TabItem = {
   onPress?: () => void
 }
 
+export const F0_TABS_CONTENT_INSETS = ["sm", "md", "lg", "xl", "none"] as const
+
+export type F0TabsContentInset = (typeof F0_TABS_CONTENT_INSETS)[number]
+
 /**
  * Props for `F0Tabs`.
  * Mirrors the web `TabsProps` exactly.
@@ -41,7 +45,7 @@ export interface F0TabsProps {
   /** Separator width mode: `"tabs"` matches tabs content width, `"container"` fills available tabs container width. */
   separatorWidth?: "tabs" | "container"
   /** Horizontal inset token for tab content and `separatorInset="content"`. */
-  contentInset?: "sm" | "md" | "lg" | "none"
+  contentInset?: F0TabsContentInset
   /** When `true`, renders only the first tab as plain text (no interaction, no indicator). */
   embedded?: boolean
 }
