@@ -12236,6 +12236,8 @@ export declare interface UseDataSourceItemNavigationProps<R extends RecordType> 
     isLoading: boolean;
     /** Overrides `dataSource.idProvider`. Extracts a unique ID from a record. Falls back to `item.id` */
     idProvider?: (item: R, index?: number) => string | number;
+    /** Returns the URL for a given item. Used to derive `nextItemUrl` / `previousItemUrl` */
+    itemUrl?: (item: R) => string | undefined;
     /** Controlled active item ID */
     activeItemId?: string | number | null;
     /** Default active item ID (uncontrolled) */
@@ -12261,6 +12263,10 @@ export declare interface UseDataSourceItemNavigationReturn<R extends RecordType>
     setActiveItemId: (id: string | number | null) => void;
     /** True while waiting for a page transition to resolve the pending navigation */
     isNavigating: boolean;
+    /** URL of the next item (derived via `itemUrl`), or null if unavailable */
+    nextItemUrl: string | null;
+    /** URL of the previous item (derived via `itemUrl`), or null if unavailable */
+    previousItemUrl: string | null;
 }
 
 /**
@@ -12853,8 +12859,13 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        };
+    }
 }
 
 
@@ -12863,16 +12874,6 @@ declare module "@tiptap/core" {
         enhanceHighlight: {
             setEnhanceHighlight: (from: number, to: number) => ReturnType;
             clearEnhanceHighlight: () => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }
@@ -12904,4 +12905,9 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
