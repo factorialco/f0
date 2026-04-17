@@ -535,6 +535,16 @@ export function DashboardContent({
               onClick: () => setIsSaveAsDialogOpen(true),
             },
           ]}
+          secondaryActions={
+            isDirty
+              ? [
+                  {
+                    label: translations.ai.discardChanges,
+                    onClick: handleDiscard,
+                  },
+                ]
+              : undefined
+          }
         />
       )}
       {/* State B1: Saved dashboard, user edited layout — Save + Save As + Discard */}
