@@ -50,6 +50,11 @@ function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, "").trim()
 }
 
+function capitalizeFirst(text: string): string {
+  if (!text) return text
+  return text.charAt(0).toUpperCase() + text.slice(1)
+}
+
 function formatDuration(totalSeconds: number): string {
   const { days, hours, minutes, seconds } = secondsToFields(totalSeconds)
   const parts: string[] = []
@@ -132,7 +137,7 @@ function formatFieldContent(
     return { type: "item", text: JSON.stringify(value) }
   }
 
-  return { type: "item", text: String(value) }
+  return { type: "item", text: capitalizeFirst(String(value)) }
 }
 
 function extractText(content: DetailsItemContent): string {
