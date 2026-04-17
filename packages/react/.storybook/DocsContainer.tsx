@@ -10,9 +10,13 @@ import { DOCS_RENDERED } from "storybook/internal/core-events"
 import { addons } from "storybook/preview-api"
 
 import { F0Alert } from "@/components/F0Alert"
+import { I18nProvider } from "@/lib/providers/i18n/i18n-provider"
+import { buildTranslations, defaultTranslations } from "@/lib/providers/i18n"
 
 import lightTheme, { darkTheme } from "./FactorialOne.ts"
 import { ImportBanner } from "./ImportBanner.tsx"
+
+const storybookTranslations = buildTranslations(defaultTranslations)
 
 const channel = addons.getChannel()
 
@@ -23,9 +27,11 @@ export const DocsContainer: FC<PropsWithChildren<DocsContainerProps>> = (
   const { context, children } = props
   const [storyId, setStoryId] = useState<string | null>(null)
 
-  context.channel.on(DOCS_RENDERED, (id) => {
-    setStoryId(id)
-  })
+  useEffect(() => {
+    const onDocsRendered = (id: string) => setStoryId(id)
+    context.channel.on(DOCS_RENDERED, onDocsRendered)
+    return () => context.channel.off(DOCS_RENDERED, onDocsRendered)
+  }, [context.channel])
 
   const experimental = storyId && storyId.startsWith("experimental-")
 
@@ -36,20 +42,22 @@ export const DocsContainer: FC<PropsWithChildren<DocsContainerProps>> = (
 
   return (
     <BaseContainer theme={isDark ? darkTheme : lightTheme} {...props}>
-      {experimental && (
-        <div className="sb-unstyled mb-8">
-          <F0Alert
-            variant="critical"
-            title="Experimental component"
-            description="Please don't use experimental components in production unless you're part of a testing group. To know more about our testing process please check out our Component Maturity Model"
-            link={{
-              href: "/?path=/docs/components-maturity--documentation",
-              label: "Component Maturity Model",
-            }}
-          />
-        </div>
-      )}
-      <ImportBanner isDark={isDark} />
+      <I18nProvider translations={storybookTranslations}>
+        {experimental && (
+          <div className="sb-unstyled mb-8">
+            <F0Alert
+              variant="critical"
+              title="Experimental component"
+              description="Please don't use experimental components in production unless you're part of a testing group. To know more about our testing process please check out our Component Maturity Model"
+              link={{
+                href: "/?path=/docs/components-maturity--documentation",
+                label: "Component Maturity Model",
+              }}
+            />
+          </div>
+        )}
+        <ImportBanner isDark={isDark} />
+      </I18nProvider>
       {children}
     </BaseContainer>
   )
