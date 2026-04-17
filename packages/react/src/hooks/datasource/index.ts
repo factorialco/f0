@@ -11,3 +11,4 @@ export type {
   UseSelectableReturn,
 } from "./useSelectable/typings"
 export * from "./useSelectable/useSelectable"
+export * from "./useDataSourceItemNavigation"
