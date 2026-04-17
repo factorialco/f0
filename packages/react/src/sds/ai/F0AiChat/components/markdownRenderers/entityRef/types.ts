@@ -1,6 +1,8 @@
 import type { CandidateProfile } from "./entities/candidate/types"
 import type { JobPostingProfile } from "./entities/jobPosting/types"
+import type { RequisitionProfile } from "./entities/requisition/types"
 import type { PersonProfile } from "./entities/person/types"
+import type { VacancyProfile } from "./entities/vacancy/types"
 
 /**
  * Map of async resolver functions keyed by entity type.
@@ -13,6 +15,8 @@ export type EntityResolvers = {
   person?: (id: string) => Promise<PersonProfile>
   candidate?: (id: string) => Promise<CandidateProfile>
   jobPosting?: (id: string) => Promise<JobPostingProfile>
+  requisition?: (id: string) => Promise<RequisitionProfile>
+  vacancy?: (id: string) => Promise<VacancyProfile>
   /**
    * Search for persons by name query. Used by the @mention autocomplete
    * in the chat input to let users reference specific employees.
@@ -31,6 +35,8 @@ export type EntityUrlBuilders = {
   person?: (id: string) => string
   candidate?: (id: string) => string
   jobPosting?: (id: string) => string
+  requisition?: (id: string) => string
+  vacancy?: (id: string) => string
 }
 
 /**

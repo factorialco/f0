@@ -11,6 +11,8 @@ import type { DataDownloadDataset } from "./actions/core/dataDownload/types"
 export type { PersonProfile } from "./components/markdownRenderers/entityRef/entities/person/types"
 export type { CandidateProfile } from "./components/markdownRenderers/entityRef/entities/candidate/types"
 export type { JobPostingProfile } from "./components/markdownRenderers/entityRef/entities/jobPosting/types"
+export type { RequisitionProfile } from "./components/markdownRenderers/entityRef/entities/requisition/types"
+export type { VacancyProfile } from "./components/markdownRenderers/entityRef/entities/vacancy/types"
 export type {
   EntityResolvers,
   EntityUrlBuilders,

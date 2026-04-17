@@ -18,8 +18,10 @@ import { useAiChat } from "@/sds/ai/F0AiChat"
 import {
   type CandidateProfile,
   type JobPostingProfile,
+  type RequisitionProfile,
   type PersonProfile,
   type UploadedFile,
+  type VacancyProfile,
 } from "@/sds/ai/F0AiChat/types"
 import { Action } from "@/ui/Action"
 
@@ -186,6 +188,86 @@ const mockJobPostingResolver = (id: string): Promise<JobPostingProfile> =>
   })
 
 /**
+ * Mock vacancies database for entity-ref hover cards in Storybook.
+ */
+const mockVacancies: VacancyProfile[] = [
+  {
+    id: "301",
+    name: "Senior Frontend Engineer",
+    status: "In Progress",
+    vacancyType: "New Position",
+  },
+  {
+    id: "302",
+    name: "Product Designer",
+    status: "To Do",
+    vacancyType: "Backfill",
+  },
+  {
+    id: "303",
+    name: "Backend Engineer",
+    status: "Hired",
+    vacancyType: "New Position",
+  },
+]
+
+/**
+ * Mock vacancy resolver — looks up from mockVacancies, falls back to generic profile.
+ */
+const mockVacancyResolver = (id: string): Promise<VacancyProfile> =>
+  new Promise((resolve) => {
+    setTimeout(() => {
+      const vacancy = mockVacancies.find((v) => String(v.id) === id)
+      resolve(
+        vacancy ?? {
+          id,
+          name: `Vacancy #${id}`,
+        }
+      )
+    }, 600)
+  })
+
+/**
+ * Mock requisitions database for entity-ref hover cards in Storybook.
+ */
+const mockRequisitions: RequisitionProfile[] = [
+  {
+    id: "401",
+    title: "Senior Frontend Engineer",
+    status: "Approved",
+    reason: "New Position",
+  },
+  {
+    id: "402",
+    title: "Product Designer",
+    status: "Pending",
+    reason: "Backfill",
+  },
+  {
+    id: "403",
+    title: "Backend Engineer",
+    status: "Rejected",
+    reason: "New Position",
+  },
+]
+
+/**
+ * Mock requisition resolver — looks up from mockRequisitions, falls back to generic profile.
+ */
+const mockRequisitionResolver = (id: string): Promise<RequisitionProfile> =>
+  new Promise((resolve) => {
+    setTimeout(() => {
+      const requisition = mockRequisitions.find((jr) => String(jr.id) === id)
+      resolve(
+        requisition ?? {
+          id,
+          title: `Requisition #${id}`,
+        }
+      )
+    }, 600)
+  })
+
+/**
  * Mock fetchCreditsUsage — simulates a 500ms API call returning usage data.
  */
 const mockFetchCreditsUsage = () =>
@@ -232,12 +314,16 @@ const meta: Meta<typeof ApplicationFrame> = {
           person: mockPersonResolver,
           candidate: mockCandidateResolver,
           jobPosting: mockJobPostingResolver,
+          vacancy: mockVacancyResolver,
+          requisition: mockRequisitionResolver,
           searchPersons: mockSearchPersons,
         },
         urls: {
           person: (id) => `/employees/${id}`,
           candidate: (id) => `/recruitment/candidates/${id}/applications`,
           jobPosting: (id) => `/recruitment/jobs/${id}/applications`,
+          vacancy: (id) => `/recruitment/hiring-plan/vacancies/${id}`,
+          requisition: (id) => `/recruitment/hiring-plan/requisitions/${id}`,
         },
       },
       credits: {
@@ -583,12 +669,16 @@ export const FullscreenWithActions: Story = {
           person: mockPersonResolver,
           candidate: mockCandidateResolver,
           jobPosting: mockJobPostingResolver,
+          vacancy: mockVacancyResolver,
+          requisition: mockRequisitionResolver,
           searchPersons: mockSearchPersons,
         },
         urls: {
           person: (id) => `/employees/${id}`,
           candidate: (id) => `/recruitment/candidates/${id}/applications`,
           jobPosting: (id) => `/recruitment/jobs/${id}/applications`,
+          vacancy: (id) => `/recruitment/hiring-plan/vacancies/${id}`,
+          requisition: (id) => `/recruitment/hiring-plan/requisitions/${id}`,
         },
       },
       credits: {
