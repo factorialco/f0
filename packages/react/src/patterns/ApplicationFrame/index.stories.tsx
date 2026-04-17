@@ -591,7 +591,10 @@ const ExpensesDashboardButton = () => {
                 id: crypto.randomUUID(),
                 function: {
                   name: "displayDashboard",
-                  arguments: JSON.stringify(mockExpensesDashboardConfig),
+                  arguments: JSON.stringify({
+                    ...mockExpensesDashboardConfig,
+                    savedDashboardUnsaved: false,
+                  }),
                 },
               },
             ],

@@ -444,7 +444,7 @@ export function DashboardContent({
     transformItem,
     registerExport,
   } = useDashboardCanvas()
-  const { canvasActions } = useAiChat()
+  const { canvasActions, openCanvas } = useAiChat()
   const translations = useI18n()
   const [isSaveAsDialogOpen, setIsSaveAsDialogOpen] = useState(false)
 
@@ -454,14 +454,24 @@ export function DashboardContent({
 
   const handleSaveAs = useCallback(
     async (title: string, description: string) => {
-      await canvasActions?.dashboard?.create(
+      const newId = await canvasActions?.dashboard?.create(
         title,
         description,
         content.config,
         content.savedDashboardCategory
       )
+      // After creating, transition to "saved" state (state 1 → state 2)
+      if (newId) {
+        openCanvas({
+          ...content,
+          savedDashboardId: newId,
+          savedDashboardCategory: content.savedDashboardCategory,
+          savedDashboardDescription: description,
+          savedDashboardUnsaved: false,
+        })
+      }
     },
-    [canvasActions, content.config, content.savedDashboardCategory]
+    [canvasActions, content, openCanvas]
   )
 
   // Apply pending item transforms (chart type changes) to the config

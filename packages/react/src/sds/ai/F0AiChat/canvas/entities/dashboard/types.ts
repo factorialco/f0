@@ -340,11 +340,11 @@ export type DashboardCanvasActions = {
     category: string,
     config: ChatDashboardConfig
   ) => Promise<void>
-  /** Create a new saved dashboard */
+  /** Create a new saved dashboard. Returns the new dashboard ID if available. */
   create: (
     title: string,
     description: string,
     config: ChatDashboardConfig,
     category?: string
-  ) => Promise<void>
+  ) => Promise<string | void>
 }
