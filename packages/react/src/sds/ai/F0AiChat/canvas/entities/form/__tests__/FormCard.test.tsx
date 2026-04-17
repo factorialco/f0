@@ -3,6 +3,8 @@ import "@testing-library/jest-dom/vitest"
 
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 
+import type { FormCardValueFormatter } from "../FormCard"
+
 const mockOpenCanvas = vi.fn()
 const mockCloseCanvas = vi.fn()
 let mockCanvasContent: Record<string, unknown> | null = null
@@ -112,6 +114,185 @@ describe("FormCard", () => {
       formName: "edit-employee",
       formDescription: "Edit an employee",
       formModule: "people",
+    })
+  })
+
+  describe("field value formatting", () => {
+    it("formats duration fields as compact time string", () => {
+      render(
+        <FormCard
+          {...defaultProps}
+          fieldDescriptions={{
+            shiftDuration: { label: "Duration", fieldType: "duration" },
+          }}
+          formValues={{ shiftDuration: 9000 }}
+        />
+      )
+
+      expect(screen.getByText("2h 30m")).toBeInTheDocument()
+    })
+
+    it("formats zero-second duration as 0s", () => {
+      render(
+        <FormCard
+          {...defaultProps}
+          fieldDescriptions={{
+            dur: { label: "Duration", fieldType: "duration" },
+          }}
+          formValues={{ dur: 0 }}
+        />
+      )
+
+      expect(screen.getByText("0s")).toBeInTheDocument()
+    })
+
+    it("strips HTML from rich text values", () => {
+      render(
+        <FormCard
+          {...defaultProps}
+          fieldDescriptions={{
+            desc: { label: "Description", fieldType: "richtext" },
+          }}
+          formValues={{
+            desc: {
+              value: "<p>Some <strong>bold</strong> text</p>",
+            },
+          }}
+        />
+      )
+
+      expect(screen.getByText("Some bold text")).toBeInTheDocument()
+    })
+
+    it("shows dash for richtext with null value", () => {
+      render(
+        <FormCard
+          {...defaultProps}
+          fieldDescriptions={{
+            desc: { label: "Description", fieldType: "richtext" },
+          }}
+          formValues={{
+            desc: { value: null },
+          }}
+        />
+      )
+
+      // Empty richtext → filtered out (shown as dash)
+      expect(screen.queryByText("Description")).not.toBeInTheDocument()
+    })
+
+    it("formats daterange as from – to", () => {
+      render(
+        <FormCard
+          {...defaultProps}
+          fieldDescriptions={{
+            period: { label: "Period", fieldType: "daterange" },
+          }}
+          formValues={{
+            period: {
+              from: new Date("2026-04-01"),
+              to: new Date("2026-04-30"),
+            },
+          }}
+        />
+      )
+
+      expect(screen.getByText("Period")).toBeInTheDocument()
+      // The text should contain a dash between two dates
+      const text = screen.getByText(/–/)
+      expect(text).toBeInTheDocument()
+    })
+
+    it("extracts label from objects with a label property", () => {
+      render(
+        <FormCard
+          {...defaultProps}
+          fieldDescriptions={{
+            status: { label: "Status" },
+          }}
+          formValues={{
+            status: { label: "In progress", id: 3 },
+          }}
+        />
+      )
+
+      expect(screen.getByText("In progress")).toBeInTheDocument()
+    })
+
+    it("uses valueFormatter when provided", () => {
+      const formatter: FormCardValueFormatter = (_key, _value, meta) => {
+        if (meta.customFieldName === "assignees_selector") {
+          return {
+            type: "item",
+            text: "Alice Garcia, Bob Martinez",
+          }
+        }
+        return undefined
+      }
+
+      render(
+        <FormCard
+          {...defaultProps}
+          fieldDescriptions={{
+            assignees: {
+              label: "Assignees",
+              fieldType: "custom",
+              customFieldName: "assignees_selector",
+            },
+          }}
+          formValues={{
+            assignees: { type: "manual", ids: ["5", "12"] },
+          }}
+          valueFormatter={formatter}
+        />
+      )
+
+      expect(screen.getByText("Alice Garcia, Bob Martinez")).toBeInTheDocument()
+    })
+
+    it("falls back to built-in formatting when valueFormatter returns undefined", () => {
+      const formatter: FormCardValueFormatter = () => undefined
+
+      render(
+        <FormCard
+          {...defaultProps}
+          fieldDescriptions={{
+            name: { label: "Name" },
+          }}
+          formValues={{ name: "Test value" }}
+          valueFormatter={formatter}
+        />
+      )
+
+      expect(screen.getByText("Test value")).toBeInTheDocument()
+    })
+
+    it("formats plain string values as item text", () => {
+      render(
+        <FormCard
+          {...defaultProps}
+          fieldDescriptions={{
+            concept: { label: "Concept" },
+          }}
+          formValues={{ concept: "Ticket restaurant" }}
+        />
+      )
+
+      expect(screen.getByText("Ticket restaurant")).toBeInTheDocument()
+    })
+
+    it("formats boolean values as Yes/No", () => {
+      render(
+        <FormCard
+          {...defaultProps}
+          fieldDescriptions={{
+            active: { label: "Active" },
+          }}
+          formValues={{ active: true }}
+        />
+      )
+
+      expect(screen.getByText("Yes")).toBeInTheDocument()
     })
   })
 })
