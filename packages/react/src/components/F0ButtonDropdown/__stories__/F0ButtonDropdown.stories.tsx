@@ -1,17 +1,17 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { expect, within } from "storybook/test"
+import { expect, within } from "storybook/test";
 
-import { Add, Delete, Pencil, Replace, Save } from "@/icons/app"
-import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { Add, Delete, Pencil, Replace, Save } from "@/icons/app";
+import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args";
+import { withSnapshot } from "@/lib/storybook-utils/parameters";
 
-import { F0ButtonDropdown } from "../index"
+import { F0ButtonDropdown } from "../index";
 import {
   buttonDropdownModes,
   buttonDropdownSizes,
   buttonDropdownVariants,
-} from "../types"
+} from "../types";
 
 const meta = {
   title: "Button/ButtonDropdown",
@@ -34,7 +34,7 @@ const meta = {
   args: {
     variant: "default",
     onClick: (value, item) => {
-      console.log("DropdownButton clicked => value:", value, "item:", item)
+      console.log("DropdownButton clicked => value:", value, "item:", item);
     },
   },
   argTypes: {
@@ -93,10 +93,10 @@ const meta = {
     },
     ...dataTestIdArgs,
   },
-} satisfies Meta<typeof F0ButtonDropdown>
+} satisfies Meta<typeof F0ButtonDropdown>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 // Basic Variants
 export const Default: Story = {
@@ -122,7 +122,7 @@ export const Default: Story = {
       },
     ],
   },
-}
+};
 
 export const WithDataTestId: Story = {
   args: {
@@ -142,12 +142,12 @@ export const WithDataTestId: Story = {
     ],
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
+    const canvas = within(canvasElement);
     await expect(
-      canvas.getByTestId("my-test-button-dropdown")
-    ).toBeInTheDocument()
+      canvas.getByTestId("my-test-button-dropdown"),
+    ).toBeInTheDocument();
   },
-}
+};
 
 // Basic Variants
 export const WithTooltip: Story = {
@@ -172,7 +172,7 @@ export const WithTooltip: Story = {
       },
     ],
   },
-}
+};
 
 export const WithDescription: Story = {
   tags: ["no-sidebar"],
@@ -205,7 +205,7 @@ export const WithDescription: Story = {
       },
     ],
   },
-}
+};
 
 export const WithGroups: Story = {
   tags: ["no-sidebar"],
@@ -241,7 +241,7 @@ export const WithGroups: Story = {
       },
     ],
   },
-}
+};
 
 // Dropdown mode stories
 export const DropdownMode: Story = {
@@ -276,7 +276,7 @@ export const DropdownMode: Story = {
       },
     ],
   },
-}
+};
 
 export const DropdownModeWithTrigger: Story = {
   tags: ["no-sidebar"],
@@ -304,7 +304,7 @@ export const DropdownModeWithTrigger: Story = {
       },
     ],
   },
-}
+};
 
 export const DropdownModeWithGroups: Story = {
   tags: ["no-sidebar"],
@@ -342,7 +342,7 @@ export const DropdownModeWithGroups: Story = {
       },
     ],
   },
-}
+};
 
 export const Variants: Story = {
   tags: ["no-sidebar"],
@@ -393,7 +393,7 @@ export const Variants: Story = {
       />
     </div>
   ),
-}
+};
 
 export const Sizes: Story = {
   tags: ["no-sidebar"],
@@ -444,7 +444,7 @@ export const Sizes: Story = {
       />
     </div>
   ),
-}
+};
 
 export const Modes: Story = {
   tags: ["no-sidebar"],
@@ -485,7 +485,7 @@ export const Modes: Story = {
       />
     </div>
   ),
-}
+};
 
 // Split mode: one action is clearly more frequent
 export const SplitModeExample: Story = {
@@ -503,7 +503,7 @@ export const SplitModeExample: Story = {
       },
     ],
   },
-}
+};
 
 // Dropdown mode: no single action has priority
 export const DropdownModeExample: Story = {
@@ -517,7 +517,7 @@ export const DropdownModeExample: Story = {
       { value: "xlsx", label: "Export as Excel", icon: Add },
     ],
   },
-}
+};
 
 // When not to use: single action → use F0Button instead (shown as reference)
 export const CriticalItems: Story = {
@@ -534,7 +534,7 @@ export const CriticalItems: Story = {
       },
     ],
   },
-}
+};
 
 export const Snapshot: Story = {
   tags: ["no-sidebar"],
@@ -559,7 +559,7 @@ export const Snapshot: Story = {
     ],
   },
   render: (args) => <F0ButtonDropdown {...args} />,
-}
+};
 
 // Do: only genuinely destructive actions marked as critical
 export const DoDontCriticalDo: Story = {
@@ -576,7 +576,7 @@ export const DoDontCriticalDo: Story = {
       },
     ],
   },
-}
+};
 
 // Don't: non-destructive actions marked as critical
 export const DoDontCriticalDont: Story = {
@@ -593,4 +593,4 @@ export const DoDontCriticalDont: Story = {
       },
     ],
   },
-}
+};
