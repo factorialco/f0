@@ -618,7 +618,7 @@ export interface F0FormCommonProps {
  * Cast the component when passing it:
  *
  * ```tsx
- * <F0Provider FormComponent={FactorialF0Form as F0FormLikeComponent} />
+ * <F0Provider formComponent={FactorialF0Form as F0FormLikeComponent} />
  * ```
  */
 export type F0FormLikeComponent = React.ComponentType<F0FormCommonProps>

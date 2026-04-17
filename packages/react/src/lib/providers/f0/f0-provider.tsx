@@ -96,10 +96,10 @@ export const F0Provider: React.FC<{
    *
    * Cast overloaded components when passing:
    * ```tsx
-   * <F0Provider FormComponent={FactorialF0Form as F0FormLikeComponent} />
+   * <F0Provider formComponent={FactorialF0Form as F0FormLikeComponent} />
    * ```
    */
-  FormComponent?: F0FormLikeComponent
+  formComponent?: F0FormLikeComponent
 }> = ({
   children,
   layout,
@@ -112,7 +112,7 @@ export const F0Provider: React.FC<{
   dataCollectionStorageHandler,
   showExperimentalWarnings = false,
   renderDataTestIdAttribute = false,
-  FormComponent,
+  formComponent,
 }) => {
   return (
     <MotionProvider>
@@ -133,7 +133,7 @@ export const F0Provider: React.FC<{
                       <DataCollectionStorageProvider
                         handler={dataCollectionStorageHandler}
                       >
-                        <FormComponentContext.Provider value={FormComponent}>
+                        <FormComponentContext.Provider value={formComponent}>
                           {children}
                         </FormComponentContext.Provider>
                       </DataCollectionStorageProvider>

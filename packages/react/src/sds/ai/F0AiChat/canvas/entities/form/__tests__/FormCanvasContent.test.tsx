@@ -2,6 +2,10 @@ import { describe, expect, it, vi, beforeEach } from "vitest"
 import "@testing-library/jest-dom/vitest"
 import { act } from "react"
 
+import type {
+  F0FormCommonProps,
+  F0FormLikeComponent,
+} from "@/patterns/F0Form/types"
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 import { z } from "zod"
 
@@ -41,8 +45,7 @@ vi.mock("@copilotkit/react-core", () => ({
   useCoAgent: () => ({ state: mockCoAgentState }),
 }))
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let mockFormComponent: React.ComponentType<any> | undefined
+let mockFormComponent: F0FormLikeComponent | undefined
 
 vi.mock("@/lib/providers/f0", () => ({
   useFormComponent: () => mockFormComponent,
@@ -490,8 +493,7 @@ describe("FormCanvasContent", () => {
     })
 
     it("renders custom FormComponent instead of default F0Form", () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      mockFormComponent = (props: any) => (
+      mockFormComponent = (props: F0FormCommonProps) => (
         <div
           data-testid="custom-form"
           data-form-name={props.formDefinition?.name}
@@ -509,10 +511,8 @@ describe("FormCanvasContent", () => {
     })
 
     it("passes formDefinition to custom FormComponent", () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let receivedProps: any = null
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      mockFormComponent = (props: any) => {
+      let receivedProps: F0FormCommonProps | null = null
+      mockFormComponent = (props: F0FormCommonProps) => {
         receivedProps = props
         return <div data-testid="custom-form" />
       }
@@ -523,10 +523,8 @@ describe("FormCanvasContent", () => {
     })
 
     it("passes styling to custom FormComponent", () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let receivedProps: any = null
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      mockFormComponent = (props: any) => {
+      let receivedProps: F0FormCommonProps | null = null
+      mockFormComponent = (props: F0FormCommonProps) => {
         receivedProps = props
         return <div data-testid="custom-form" />
       }
@@ -535,10 +533,8 @@ describe("FormCanvasContent", () => {
     })
 
     it("passes formRef to custom FormComponent", () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let receivedProps: any = null
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      mockFormComponent = (props: any) => {
+      let receivedProps: F0FormCommonProps | null = null
+      mockFormComponent = (props: F0FormCommonProps) => {
         receivedProps = props
         return <div data-testid="custom-form" />
       }
