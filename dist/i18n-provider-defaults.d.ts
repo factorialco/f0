@@ -132,6 +132,9 @@ export declare const defaultTranslations: {
             readonly hide: "Hide password";
         };
     };
+    readonly link: {
+        readonly opensInNewTab: "opens in new tab";
+    };
     readonly actions: {
         readonly add: "Add";
         readonly edit: "Edit";
@@ -146,6 +149,7 @@ export declare const defaultTranslations: {
         readonly expand: "Expand";
         readonly showAll: "Show all";
         readonly showLess: "Show less";
+        readonly seeMore: "See more";
         readonly skipToContent: "Skip to content";
         readonly view: "View";
         readonly unselect: "Unselect";
@@ -271,7 +275,12 @@ export declare const defaultTranslations: {
         readonly summaries: {
             readonly types: {
                 readonly sum: "sum";
+                readonly count: "count";
             };
+        };
+        readonly export: {
+            readonly label: "Export to CSV";
+            readonly description: "Download all data as a CSV file";
         };
     };
     readonly shortcut: "Shortcut";
@@ -355,9 +364,18 @@ export declare const defaultTranslations: {
     };
     readonly notifications: "Notifications";
     readonly ai: {
+        readonly orbVoiceAnimation: {
+            readonly connecting: "Connecting...";
+            readonly listening: "Listening...";
+            readonly thinking: "Thinking...";
+            readonly buffering: "Buffering...";
+            readonly disconnected: "Disconnected";
+            readonly failed: "Failed";
+        };
         readonly openChat: "Open Chat with One AI";
         readonly closeChat: "Close Chat with One AI";
         readonly startNewChat: "Start new chat";
+        readonly settings: "Settings";
         readonly scrollToBottom: "Scroll to bottom";
         readonly welcome: "Ask or create with One";
         readonly defaultInitialMessage: "How can I help you today?";
@@ -403,14 +421,66 @@ export declare const defaultTranslations: {
         readonly unpinChat: "Unpin chat";
         readonly deleteChat: "Delete chat";
         readonly ask: "Ask One";
-        readonly viewProfile: "View profile";
+        readonly view: "View";
         readonly tools: "Tools";
+        readonly credits: {
+            readonly title: "Credits";
+            readonly creditsLeft: "{{total}} left";
+            readonly monthlyCredits: "Monthly credits";
+            readonly creditsError: "Could not load credits";
+            readonly upgradePlan: "Upgrade";
+            readonly needMoreCredits: "Need more credits?";
+        };
         readonly reportCard: {
             readonly reportLabel: "Report";
             readonly openButton: "Open";
         };
+        readonly formCard: {
+            readonly moreFields: "Open to see all fields";
+        };
         readonly dataDownload: {
+            readonly title: "Download";
             readonly download: "Download {{format}}";
+            readonly exportDashboard: "Export dashboard as {{format}}";
+            readonly exporting: "Exporting...";
+            readonly rows: "{{amount}} rows";
+        };
+        readonly dashboardItem: {
+            readonly chartType: "Chart type";
+            readonly errorTitle: "Error loading data";
+            readonly retry: "Retry";
+            readonly dataExplanation: "Where does this data come from?";
+        };
+        readonly pong: {
+            readonly title: "Pong";
+            readonly youWin: "You win!";
+            readonly youLose: "You lose!";
+            readonly goal: "Goal";
+            readonly controls: "← → to move";
+            readonly escToExit: "Esc to exit";
+        };
+        readonly creditWarning: {
+            readonly soft: "You're running low on AI credits.";
+            readonly getCredits: "Get credits";
+            readonly dismiss: "Dismiss";
+            readonly messageBanner: {
+                readonly title: "This response requires credits";
+                readonly description: "Your company has run out of AI credits.";
+                readonly actionLabel: "Get credits";
+            };
+        };
+        readonly attachFile: "Attach file";
+        readonly removeFile: "Remove";
+        readonly fileUploadError: "Upload failed";
+        readonly dropFilesHere: "Drop your files here";
+        readonly clarifyingQuestion: {
+            readonly submit: "Submit";
+            readonly next: "Next";
+            readonly back: "Back";
+            readonly typeYourAnswer: "Type your answer…";
+            readonly stepOf: "{{current}} of {{total}}";
+            readonly custom: "own answer";
+            readonly skipped: "skipped";
         };
         readonly growth: {
             readonly demoCard: {
@@ -434,6 +504,15 @@ export declare const defaultTranslations: {
                 readonly title: "Questions before getting started";
             };
         };
+    };
+    readonly dataChart: {
+        readonly heatmapNotSupported: "Heatmap not supported at this size";
+        readonly barChartVertical: "Bar (vertical)";
+        readonly barChartHorizontal: "Bar (horizontal)";
+        readonly lineChart: "Line";
+        readonly funnel: "Funnel";
+        readonly pieChart: "Pie";
+        readonly table: "Table";
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -460,6 +539,7 @@ export declare const defaultTranslations: {
     readonly surveyFormBuilder: {
         readonly actions: {
             readonly actions: "Actions";
+            readonly addQuestion: "Add question";
             readonly duplicateQuestion: "Duplicate question";
             readonly deleteQuestion: "Delete question";
             readonly duplicateSection: "Duplicate section";
@@ -478,6 +558,8 @@ export declare const defaultTranslations: {
             readonly link: "Link";
             readonly date: "Date";
             readonly dropdownSingle: "Dropdown";
+            readonly file: "File upload";
+            readonly checkbox: "Checkbox";
         };
         readonly selectQuestion: {
             readonly addOption: "Add option";
@@ -486,6 +568,12 @@ export declare const defaultTranslations: {
             readonly remove: "Remove";
             readonly correct: "Correct";
             readonly optionPlaceholder: "Type anything you want here...";
+        };
+        readonly fileQuestion: {
+            readonly uploadButton: "Upload file";
+        };
+        readonly checkboxQuestion: {
+            readonly placeholder: "Provide a label for the checkbox";
         };
         readonly answer: {
             readonly label: "Answer";
@@ -504,6 +592,9 @@ export declare const defaultTranslations: {
             readonly questionDescriptionPlaceholder: "Describe the question in a few words";
             readonly sectionDescriptionPlaceholder: "Describe the section in a few words";
             readonly required: "Required";
+            readonly allowMultiSelection: "Allow multi-selection";
+            readonly singleSelection: "Single selection";
+            readonly multiSelection: "Multi selection";
             readonly questionType: "Question type";
             readonly questionOptions: "Question options";
             readonly actions: "Actions";
@@ -599,6 +690,7 @@ export declare const defaultTranslations: {
             readonly fileTooLarge: "File exceeds {{maxSize}} MB limit";
             readonly invalidFileType: "File type not accepted. Accepted formats: {{types}}";
         };
+        readonly moreInformation: "More information";
         readonly validation: {
             readonly required: "This field is required";
             readonly invalidType: "Invalid value";
@@ -691,11 +783,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -742,4 +829,9 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }

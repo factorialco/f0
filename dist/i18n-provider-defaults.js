@@ -100,7 +100,7 @@ const e = {
   jo: "Jordan",
   jp: "Japan",
   ke: "Kenya"
-}, a = {
+}, t = {
   countries: e,
   approvals: {
     history: "Approval history",
@@ -132,6 +132,9 @@ const e = {
       hide: "Hide password"
     }
   },
+  link: {
+    opensInNewTab: "opens in new tab"
+  },
   actions: {
     add: "Add",
     edit: "Edit",
@@ -146,6 +149,7 @@ const e = {
     expand: "Expand",
     showAll: "Show all",
     showLess: "Show less",
+    seeMore: "See more",
     skipToContent: "Skip to content",
     view: "View",
     unselect: "Unselect",
@@ -270,8 +274,13 @@ const e = {
     },
     summaries: {
       types: {
-        sum: "sum"
+        sum: "sum",
+        count: "count"
       }
+    },
+    export: {
+      label: "Export to CSV",
+      description: "Download all data as a CSV file"
     }
   },
   shortcut: "Shortcut",
@@ -355,9 +364,18 @@ const e = {
   },
   notifications: "Notifications",
   ai: {
+    orbVoiceAnimation: {
+      connecting: "Connecting...",
+      listening: "Listening...",
+      thinking: "Thinking...",
+      buffering: "Buffering...",
+      disconnected: "Disconnected",
+      failed: "Failed"
+    },
     openChat: "Open Chat with One AI",
     closeChat: "Close Chat with One AI",
     startNewChat: "Start new chat",
+    settings: "Settings",
     scrollToBottom: "Scroll to bottom",
     welcome: "Ask or create with One",
     defaultInitialMessage: "How can I help you today?",
@@ -403,14 +421,66 @@ const e = {
     unpinChat: "Unpin chat",
     deleteChat: "Delete chat",
     ask: "Ask One",
-    viewProfile: "View profile",
+    view: "View",
     tools: "Tools",
+    credits: {
+      title: "Credits",
+      creditsLeft: "{{total}} left",
+      monthlyCredits: "Monthly credits",
+      creditsError: "Could not load credits",
+      upgradePlan: "Upgrade",
+      needMoreCredits: "Need more credits?"
+    },
     reportCard: {
       reportLabel: "Report",
       openButton: "Open"
     },
+    formCard: {
+      moreFields: "Open to see all fields"
+    },
     dataDownload: {
-      download: "Download {{format}}"
+      title: "Download",
+      download: "Download {{format}}",
+      exportDashboard: "Export dashboard as {{format}}",
+      exporting: "Exporting...",
+      rows: "{{amount}} rows"
+    },
+    dashboardItem: {
+      chartType: "Chart type",
+      errorTitle: "Error loading data",
+      retry: "Retry",
+      dataExplanation: "Where does this data come from?"
+    },
+    pong: {
+      title: "Pong",
+      youWin: "You win!",
+      youLose: "You lose!",
+      goal: "Goal",
+      controls: "← → to move",
+      escToExit: "Esc to exit"
+    },
+    creditWarning: {
+      soft: "You're running low on AI credits.",
+      getCredits: "Get credits",
+      dismiss: "Dismiss",
+      messageBanner: {
+        title: "This response requires credits",
+        description: "Your company has run out of AI credits.",
+        actionLabel: "Get credits"
+      }
+    },
+    attachFile: "Attach file",
+    removeFile: "Remove",
+    fileUploadError: "Upload failed",
+    dropFilesHere: "Drop your files here",
+    clarifyingQuestion: {
+      submit: "Submit",
+      next: "Next",
+      back: "Back",
+      typeYourAnswer: "Type your answer…",
+      stepOf: "{{current}} of {{total}}",
+      custom: "own answer",
+      skipped: "skipped"
     },
     growth: {
       demoCard: {
@@ -434,6 +504,15 @@ const e = {
         title: "Questions before getting started"
       }
     }
+  },
+  dataChart: {
+    heatmapNotSupported: "Heatmap not supported at this size",
+    barChartVertical: "Bar (vertical)",
+    barChartHorizontal: "Bar (horizontal)",
+    lineChart: "Line",
+    funnel: "Funnel",
+    pieChart: "Pie",
+    table: "Table"
   },
   select: {
     noResults: "No results found",
@@ -460,6 +539,7 @@ const e = {
   surveyFormBuilder: {
     actions: {
       actions: "Actions",
+      addQuestion: "Add question",
       duplicateQuestion: "Duplicate question",
       deleteQuestion: "Delete question",
       duplicateSection: "Duplicate section",
@@ -477,7 +557,9 @@ const e = {
       numeric: "Numeric",
       link: "Link",
       date: "Date",
-      dropdownSingle: "Dropdown"
+      dropdownSingle: "Dropdown",
+      file: "File upload",
+      checkbox: "Checkbox"
     },
     selectQuestion: {
       addOption: "Add option",
@@ -486,6 +568,12 @@ const e = {
       remove: "Remove",
       correct: "Correct",
       optionPlaceholder: "Type anything you want here..."
+    },
+    fileQuestion: {
+      uploadButton: "Upload file"
+    },
+    checkboxQuestion: {
+      placeholder: "Provide a label for the checkbox"
     },
     answer: {
       label: "Answer",
@@ -504,6 +592,9 @@ const e = {
       questionDescriptionPlaceholder: "Describe the question in a few words",
       sectionDescriptionPlaceholder: "Describe the section in a few words",
       required: "Required",
+      allowMultiSelection: "Allow multi-selection",
+      singleSelection: "Single selection",
+      multiSelection: "Multi selection",
       questionType: "Question type",
       questionOptions: "Question options",
       actions: "Actions",
@@ -599,6 +690,7 @@ const e = {
       fileTooLarge: "File exceeds {{maxSize}} MB limit",
       invalidFileType: "File type not accepted. Accepted formats: {{types}}"
     },
+    moreInformation: "More information",
     validation: {
       required: "This field is required",
       invalidType: "Invalid value",
@@ -637,5 +729,5 @@ const e = {
   }
 };
 export {
-  a as defaultTranslations
+  t as defaultTranslations
 };
