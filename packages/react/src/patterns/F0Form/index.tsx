@@ -21,6 +21,7 @@ export type {
   F0SectionConfig,
   F0SectionAction,
   F0FormSubmitResult,
+  F0FormLikeComponent,
   SectionRenderIf,
 } from "./types"
 

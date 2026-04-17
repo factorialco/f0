@@ -2,6 +2,10 @@ import { describe, expect, it, vi, beforeEach } from "vitest"
 import "@testing-library/jest-dom/vitest"
 import { act } from "react"
 
+import type {
+  F0FormCommonProps,
+  F0FormLikeComponent,
+} from "@/patterns/F0Form/types"
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 import { z } from "zod"
 
@@ -39,6 +43,12 @@ const mockCloseCanvas = vi.fn()
 
 vi.mock("@copilotkit/react-core", () => ({
   useCoAgent: () => ({ state: mockCoAgentState }),
+}))
+
+let mockFormComponent: F0FormLikeComponent | undefined
+
+vi.mock("@/lib/providers/f0", () => ({
+  useFormComponent: () => mockFormComponent,
 }))
 
 vi.mock("@/ai", () => ({
@@ -113,6 +123,7 @@ describe("FormCanvasContent", () => {
     mockCoAgentState = {}
     mockRegistryEntry = undefined
     capturedFormDefinition = null
+    mockFormComponent = undefined
   })
 
   describe("when no active form", () => {
@@ -466,6 +477,69 @@ describe("FormCanvasContent", () => {
       })
       render(<FormContent />)
       expect(capturedFormDefinition.submitConfig?.label).toBe("Save Employee")
+    })
+  })
+
+  // ==========================================================================
+  // Custom FormComponent override via F0Provider
+  // ==========================================================================
+
+  describe("custom FormComponent from F0Provider", () => {
+    beforeEach(() => {
+      mockCoAgentState = {
+        activeForm: { formName: "test-form", formValues: {} },
+      }
+      mockRegistryEntry = makeEntry()
+    })
+
+    it("renders custom FormComponent instead of default F0Form", () => {
+      mockFormComponent = (props: F0FormCommonProps) => (
+        <div
+          data-testid="custom-form"
+          data-form-name={props.formDefinition?.name}
+        />
+      )
+      render(<FormContent />)
+      expect(screen.getByTestId("custom-form")).toBeInTheDocument()
+      expect(screen.queryByTestId("f0-form")).not.toBeInTheDocument()
+    })
+
+    it("falls back to F0Form when FormComponent is undefined", () => {
+      mockFormComponent = undefined
+      render(<FormContent />)
+      expect(screen.getByTestId("f0-form")).toBeInTheDocument()
+    })
+
+    it("passes formDefinition to custom FormComponent", () => {
+      let receivedProps: F0FormCommonProps | null = null
+      mockFormComponent = (props: F0FormCommonProps) => {
+        receivedProps = props
+        return <div data-testid="custom-form" />
+      }
+      render(<FormContent />)
+      expect(receivedProps).not.toBeNull()
+      expect(receivedProps.formDefinition).toBeDefined()
+      expect(receivedProps.formDefinition.name).toBe("test-form")
+    })
+
+    it("passes styling to custom FormComponent", () => {
+      let receivedProps: F0FormCommonProps | null = null
+      mockFormComponent = (props: F0FormCommonProps) => {
+        receivedProps = props
+        return <div data-testid="custom-form" />
+      }
+      render(<FormContent />)
+      expect(receivedProps.styling).toBeDefined()
+    })
+
+    it("passes formRef to custom FormComponent", () => {
+      let receivedProps: F0FormCommonProps | null = null
+      mockFormComponent = (props: F0FormCommonProps) => {
+        receivedProps = props
+        return <div data-testid="custom-form" />
+      }
+      render(<FormContent />)
+      expect(receivedProps.formRef).toBeDefined()
     })
   })
 })

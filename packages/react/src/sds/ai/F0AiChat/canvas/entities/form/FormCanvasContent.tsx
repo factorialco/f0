@@ -1,29 +1,27 @@
 import { useCoAgent } from "@copilotkit/react-core"
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ComponentType,
-  type ReactNode,
-} from "react"
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { z } from "zod"
 
 import type { ModuleId } from "@/components/avatars/F0AvatarModule"
-import type {
-  F0FormSchema,
-  F0FormPropsWithSingleSchemaDefinition,
-} from "@/patterns/F0Form/types"
+import type { F0FormSchema, F0FormLikeComponent } from "@/patterns/F0Form/types"
 import type { F0FormDefinitionSingleSchema } from "@/patterns/F0WizardForm/types"
 
 import { useAiChat } from "@/ai"
 import { F0Button } from "@/components/F0Button"
 import { CheckCircleAnimated } from "@/icons/animated"
+import { useFormComponent } from "@/lib/providers/f0"
 import { cn } from "@/lib/utils"
 import { useF0AiFormRegistry } from "@/patterns/F0Form/F0AiFormRegistry"
 import { F0Form } from "@/patterns/F0Form/F0Form"
 import { useF0Form } from "@/patterns/F0Form/useF0Form"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm/useF0FormDefinition"
+
+function useCanvasFormComponent(): F0FormLikeComponent {
+  const FormComponent = useFormComponent()
+  // Bypass F0Form's distributive conditional generic — F0Form internally
+  // casts to AnyF0FormProps, so this narrowed alias is safe.
+  return (FormComponent ?? F0Form) as F0FormLikeComponent
+}
 
 interface CoAgentFormState {
   activeForm?: {
@@ -35,12 +33,6 @@ interface CoAgentFormState {
 }
 
 const FALLBACK_SCHEMA = z.object({}) as unknown as F0FormSchema
-
-// Bypass F0Form's distributive conditional generic — F0Form internally
-// casts to AnyF0FormProps, so this narrowed alias is safe.
-const F0CanvasForm = F0Form as unknown as ComponentType<
-  F0FormPropsWithSingleSchemaDefinition<F0FormSchema>
->
 
 // ---------- Submit success overlay ----------
 
@@ -74,11 +66,13 @@ function WizardCanvasContent({
   isSubmitting: boolean
   onSubmit: () => void
 }) {
+  const CanvasForm = useCanvasFormComponent()
+
   return (
     <div className="flex h-full flex-col">
       <div className="relative min-h-0 flex-1 overflow-hidden [&>div]:h-full">
         {isSubmitting && <SubmitSuccessOverlay />}
-        <F0CanvasForm
+        <CanvasForm
           formDefinition={formDefinition}
           styling={{
             showSectionsSidepanel: true,
@@ -115,6 +109,7 @@ function PlainFormContent({
   isSubmitting: boolean
   onSubmit: () => void
 }) {
+  const CanvasForm = useCanvasFormComponent()
   const showSectionsSidepanel = !!(
     formDefinition.sections && Object.keys(formDefinition.sections).length > 2
   )
@@ -130,7 +125,7 @@ function PlainFormContent({
         )}
       >
         {isSubmitting && <SubmitSuccessOverlay />}
-        <F0CanvasForm
+        <CanvasForm
           formDefinition={formDefinition}
           formRef={formRef}
           styling={{ showSectionsSidepanel }}
