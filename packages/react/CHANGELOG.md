@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.453.0](https://github.com/factorialco/f0/compare/f0-react-v1.452.0...f0-react-v1.453.0) (2026-04-17)
+
+
+### Features
+
+* add support to pass custom form component to canvas form content ([#3956](https://github.com/factorialco/f0/issues/3956)) ([8822c00](https://github.com/factorialco/f0/commit/8822c00d011f9cd078b111021bc4e9e8c982b7a7))
+
+
+### Bug Fixes
+
+* storybook internal component doc pages broken ([#3961](https://github.com/factorialco/f0/issues/3961)) ([1c15cc0](https://github.com/factorialco/f0/commit/1c15cc02beb361aff81a27975a16fc611f52a014))
+
 ## [1.452.0](https://github.com/factorialco/f0/compare/f0-react-v1.451.0...f0-react-v1.452.0) (2026-04-17)
 
 
