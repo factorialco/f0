@@ -109,6 +109,8 @@ const PageBasedDemo = () => {
     hasPrevious,
     setActiveItemId,
     isNavigating,
+    nextItemUrl,
+    previousItemUrl,
   } = useDataSourceItemNavigation({
     dataSource,
     data,
@@ -117,6 +119,7 @@ const PageBasedDemo = () => {
     loadMore,
     isLoading,
     idProvider: (item) => (item as Item).id,
+    itemUrl: (item) => `/users/${(item as Item).id}`,
   })
 
   const activeFilter =
@@ -178,6 +181,22 @@ const PageBasedDemo = () => {
         </button>
         {isNavigating && <span style={{ color: "#888" }}>Loading…</span>}
       </div>
+
+      {(previousItemUrl || nextItemUrl) && (
+        <div style={{ marginBottom: 8, fontSize: "0.85em", color: "#666" }}>
+          {previousItemUrl && (
+            <span>
+              ← <a href={previousItemUrl}>{previousItemUrl}</a>
+            </span>
+          )}
+          {previousItemUrl && nextItemUrl && " | "}
+          {nextItemUrl && (
+            <span>
+              <a href={nextItemUrl}>{nextItemUrl}</a> →
+            </span>
+          )}
+        </div>
+      )}
 
       {activeItem && (
         <div
@@ -297,6 +316,8 @@ const InfiniteScrollDemo = () => {
     hasPrevious,
     setActiveItemId,
     isNavigating,
+    nextItemUrl,
+    previousItemUrl,
   } = useDataSourceItemNavigation({
     dataSource,
     data,
@@ -305,6 +326,7 @@ const InfiniteScrollDemo = () => {
     loadMore,
     isLoading: isLoading || isLoadingMore,
     idProvider: (item) => (item as Item).id,
+    itemUrl: (item) => `/users/${(item as Item).id}`,
   })
 
   return (
@@ -366,6 +388,22 @@ const InfiniteScrollDemo = () => {
         </button>
         {isNavigating && <span style={{ color: "#888" }}>Loading…</span>}
       </div>
+
+      {(previousItemUrl || nextItemUrl) && (
+        <div style={{ marginBottom: 8, fontSize: "0.85em", color: "#666" }}>
+          {previousItemUrl && (
+            <span>
+              ← <a href={previousItemUrl}>{previousItemUrl}</a>
+            </span>
+          )}
+          {previousItemUrl && nextItemUrl && " | "}
+          {nextItemUrl && (
+            <span>
+              <a href={nextItemUrl}>{nextItemUrl}</a> →
+            </span>
+          )}
+        </div>
+      )}
 
       {activeItem && (
         <div

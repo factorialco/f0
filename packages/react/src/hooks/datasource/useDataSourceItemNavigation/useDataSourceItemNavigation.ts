@@ -24,6 +24,7 @@ export function useDataSourceItemNavigation<R extends RecordType>(
     loadMore,
     isLoading,
     idProvider: idProviderOverride,
+    itemUrl,
     activeItemId: activeItemIdProp,
     defaultActiveItemId,
     onActiveItemChange,
@@ -196,6 +197,17 @@ export function useDataSourceItemNavigation<R extends RecordType>(
 
   const isNavigating = pendingNavigation.current !== null && isLoading
 
+  const nextItemUrl = useMemo(() => {
+    if (!itemUrl || activeIndex === -1 || activeIndex >= records.length - 1)
+      return null
+    return itemUrl(records[activeIndex + 1] as R) ?? null
+  }, [itemUrl, activeIndex, records])
+
+  const previousItemUrl = useMemo(() => {
+    if (!itemUrl || activeIndex <= 0) return null
+    return itemUrl(records[activeIndex - 1] as R) ?? null
+  }, [itemUrl, activeIndex, records])
+
   return {
     activeItemId,
     activeItem,
@@ -205,5 +217,7 @@ export function useDataSourceItemNavigation<R extends RecordType>(
     hasPrevious,
     setActiveItemId,
     isNavigating,
+    nextItemUrl,
+    previousItemUrl,
   }
 }
