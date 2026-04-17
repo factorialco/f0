@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.451.0](https://github.com/factorialco/f0/compare/f0-react-v1.450.1...f0-react-v1.451.0) (2026-04-17)
+
+
+### Features
+
+* **docs:** add f0-docs skill for MDX documentation workflow ([#3893](https://github.com/factorialco/f0/issues/3893)) ([c8d249a](https://github.com/factorialco/f0/commit/c8d249a1f0d687455ca93dba0a36523ba62e31ff))
+
 ## [1.450.1](https://github.com/factorialco/f0/compare/f0-react-v1.450.0...f0-react-v1.450.1) (2026-04-16)
 
 
