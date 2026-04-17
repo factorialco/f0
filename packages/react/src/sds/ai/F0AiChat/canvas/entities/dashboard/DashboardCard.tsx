@@ -21,7 +21,7 @@ export type DashboardCardProps = {
   savedDashboardCategory?: string
   /** Description of the saved dashboard */
   savedDashboardDescription?: string
-  /** True when the agent iterated on a saved dashboard (has unsaved changes) */
+  /** Whether the dashboard has unsaved changes */
   savedDashboardUnsaved?: boolean
 }
 
@@ -30,10 +30,8 @@ export type DashboardCardProps = {
  * subscription logic. Re-renders when the user edits and saves
  * the dashboard layout.
  *
- * Reads `toolCallId` from the ToolCallIdContext provided by
- * AssistantMessage — this is how cards identify themselves and
- * detect active state after CopilotKit v1.51+ stopped passing
- * toolCallId in render props.
+ * All saved-dashboard state (id, category, unsaved) is passed through
+ * from the action arguments — no detection logic here.
  */
 export function DashboardCard({
   config: originalConfig,
@@ -61,6 +59,13 @@ export function DashboardCard({
     canvasContent.toolCallId != null &&
     canvasContent.toolCallId === toolCallId
 
+  // Read the latest unsaved state from the canvas if this card is active.
+  // handleSave sets savedDashboardUnsaved=false on the canvas content,
+  // so re-opening after save correctly shows no pending changes.
+  const unsaved = isActive
+    ? (canvasContent.savedDashboardUnsaved ?? false)
+    : savedDashboardUnsaved
+
   const handleOpen = () =>
     openCanvas({
       type: "dashboard",
@@ -71,7 +76,7 @@ export function DashboardCard({
       savedDashboardId,
       savedDashboardCategory,
       savedDashboardDescription,
-      savedDashboardUnsaved,
+      savedDashboardUnsaved: unsaved,
     })
 
   // Auto-open canvas the first time this card appears

@@ -73,7 +73,8 @@ export function DashboardCanvasProvider({
     },
     []
   )
-  const { openCanvas, canvasActions } = useAiChat()
+  const { openCanvas, canvasActions, setPendingContext, pendingContext } =
+    useAiChat()
   const { threadId } = useCopilotContext()
 
   const saveConfigFn = useSaveDashboardConfig(content.apiConfig)
@@ -145,14 +146,23 @@ export function DashboardCanvasProvider({
     let updatedConfig = pendingLayout
       ? applyLayout(pendingLayout)
       : { ...content.config }
-    if (!updatedConfig || !threadId) return
+    if (!updatedConfig) return
 
     updatedConfig = applyTransforms(updatedConfig)
 
     try {
-      await saveConfigFn(threadId, content.toolCallId, updatedConfig)
+      // Persist to chat history (best-effort — may fail if no thread exists
+      // yet, e.g. for client-only seed messages injected before the user
+      // sends their first message).
+      if (threadId) {
+        try {
+          await saveConfigFn(threadId, content.toolCallId, updatedConfig)
+        } catch {
+          // Thread may not exist yet — continue with external save
+        }
+      }
 
-      // If this is a saved dashboard, also persist externally
+      // Persist externally via canvasActions (the actual save to backend)
       if (
         content.savedDashboardId &&
         content.savedDashboardCategory &&
@@ -167,6 +177,20 @@ export function DashboardCanvasProvider({
 
       if (content.toolCallId) {
         savedDashboardConfigStore.set(content.toolCallId, updatedConfig)
+      }
+
+      // Update pending context so the agent sees the latest config
+      // if the user sends a message after saving.
+      if (pendingContext) {
+        setPendingContext({
+          ...pendingContext,
+          context: JSON.stringify({
+            ...updatedConfig,
+            savedDashboardId: content.savedDashboardId,
+            savedDashboardCategory: content.savedDashboardCategory,
+            savedDashboardDescription: content.savedDashboardDescription,
+          }),
+        })
       }
 
       // Update canvas content. handleSave only ever spreads the config / items

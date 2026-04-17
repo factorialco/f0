@@ -3,7 +3,6 @@ import { useMemo } from "react"
 
 import type { ChatDashboardConfig } from "../../../canvas/entities/dashboard/types"
 import { DashboardCard } from "../../../canvas/entities/dashboard/DashboardCard"
-import { useAiChat } from "../../../providers/AiChatStateProvider"
 
 /**
  * Hook to register the displayDashboard copilot action.
@@ -24,7 +23,6 @@ import { useAiChat } from "../../../providers/AiChatStateProvider"
  */
 export const useDisplayDashboardAction = () => {
   const { copilotApiConfig } = useCopilotContext()
-  const { canvasContent } = useAiChat()
 
   const apiConfig = useMemo(
     () => ({
@@ -33,14 +31,6 @@ export const useDisplayDashboardAction = () => {
     }),
     [copilotApiConfig.chatApiEndpoint, copilotApiConfig.headers]
   )
-
-  // Snapshot the savedDashboardId currently in the canvas.
-  // If the agent emits a new dashboard with the same id, it's an
-  // iteration and should be marked as unsaved.
-  const currentCanvasSavedId =
-    canvasContent?.type === "dashboard"
-      ? canvasContent.savedDashboardId
-      : undefined
 
   useCopilotAction({
     name: "displayDashboard",
@@ -139,6 +129,13 @@ export const useDisplayDashboardAction = () => {
         description: "Description of the saved dashboard.",
         required: false,
       },
+      {
+        name: "savedDashboardUnsaved",
+        type: "boolean",
+        description:
+          "Whether the dashboard has unsaved changes (e.g. agent iteration not yet persisted).",
+        required: false,
+      },
     ],
     available: "frontend",
     render: (props) => {
@@ -146,6 +143,7 @@ export const useDisplayDashboardAction = () => {
         savedDashboardId?: string
         savedDashboardCategory?: string
         savedDashboardDescription?: string
+        savedDashboardUnsaved?: boolean
       }
 
       // Bail out while arguments are still streaming in.
@@ -157,14 +155,10 @@ export const useDisplayDashboardAction = () => {
         savedDashboardId,
         savedDashboardCategory,
         savedDashboardDescription,
+        savedDashboardUnsaved,
         ...configArgs
       } = args
       const config = configArgs as ChatDashboardConfig
-
-      // A saved dashboard is "unsaved" when the agent iterates on it —
-      // i.e. the canvas already had a dashboard with the same savedDashboardId.
-      const isIteration =
-        !!savedDashboardId && currentCanvasSavedId === savedDashboardId
 
       return (
         <DashboardCard
@@ -173,7 +167,7 @@ export const useDisplayDashboardAction = () => {
           savedDashboardId={savedDashboardId}
           savedDashboardCategory={savedDashboardCategory}
           savedDashboardDescription={savedDashboardDescription}
-          savedDashboardUnsaved={isIteration}
+          savedDashboardUnsaved={savedDashboardUnsaved}
         />
       )
     },
