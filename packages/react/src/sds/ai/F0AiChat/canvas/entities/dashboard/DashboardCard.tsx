@@ -8,7 +8,10 @@ import { useToolCallId } from "../../../components/messages/AssistantMessage"
 import { useAutoOpenCanvas } from "../../../hooks/useAutoOpenCanvas"
 import { useAiChat } from "../../../providers/AiChatStateProvider"
 import { CanvasCard } from "../../components/CanvasCard"
-import { savedDashboardConfigStore } from "./configStore"
+import {
+  savedDashboardConfigStore,
+  savedDashboardMetaStore,
+} from "./configStore"
 
 export type DashboardCardProps = {
   /** The original dashboard config from the agent */
@@ -31,19 +34,24 @@ export type DashboardCardProps = {
  * the dashboard layout.
  *
  * All saved-dashboard state (id, category, unsaved) is passed through
- * from the action arguments — no detection logic here.
+ * from the action arguments. The meta store overrides props after
+ * save/create operations so close/re-open preserves the latest state.
  */
 export function DashboardCard({
   config: originalConfig,
   apiConfig,
-  savedDashboardId,
-  savedDashboardCategory,
-  savedDashboardDescription,
-  savedDashboardUnsaved = false,
+  savedDashboardId: propSavedId,
+  savedDashboardCategory: propSavedCategory,
+  savedDashboardDescription: propSavedDescription,
+  savedDashboardUnsaved: propSavedUnsaved = false,
 }: DashboardCardProps) {
   useSyncExternalStore(
     savedDashboardConfigStore.subscribe,
     savedDashboardConfigStore.getSnapshot
+  )
+  useSyncExternalStore(
+    savedDashboardMetaStore.subscribe,
+    savedDashboardMetaStore.getSnapshot
   )
 
   const translations = useI18n()
@@ -54,17 +62,20 @@ export function DashboardCard({
     (toolCallId ? savedDashboardConfigStore.get(toolCallId) : undefined) ??
     originalConfig
 
+  // Read saved metadata from the meta store (updated by handleSave/handleSaveAs),
+  // falling back to the props from the original action render.
+  const meta = toolCallId ? savedDashboardMetaStore.get(toolCallId) : undefined
+  const savedDashboardId = meta?.savedDashboardId ?? propSavedId
+  const savedDashboardCategory =
+    meta?.savedDashboardCategory ?? propSavedCategory
+  const savedDashboardDescription =
+    meta?.savedDashboardDescription ?? propSavedDescription
+  const savedDashboardUnsaved = meta?.savedDashboardUnsaved ?? propSavedUnsaved
+
   const isActive =
     canvasContent?.type === "dashboard" &&
     canvasContent.toolCallId != null &&
     canvasContent.toolCallId === toolCallId
-
-  // Read the latest unsaved state from the canvas if this card is active.
-  // handleSave sets savedDashboardUnsaved=false on the canvas content,
-  // so re-opening after save correctly shows no pending changes.
-  const unsaved = isActive
-    ? (canvasContent.savedDashboardUnsaved ?? false)
-    : savedDashboardUnsaved
 
   const handleOpen = () =>
     openCanvas({
@@ -76,7 +87,7 @@ export function DashboardCard({
       savedDashboardId,
       savedDashboardCategory,
       savedDashboardDescription,
-      savedDashboardUnsaved: unsaved,
+      savedDashboardUnsaved,
     })
 
   // Auto-open canvas the first time this card appears

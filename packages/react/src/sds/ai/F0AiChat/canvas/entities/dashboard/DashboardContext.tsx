@@ -13,7 +13,10 @@ import type { ChatDashboardConfig, ChatDashboardItem } from "./types"
 import { useSaveDashboardConfig } from "./useSaveDashboardConfig"
 import { useAiChat } from "../../../providers/AiChatStateProvider"
 
-import { savedDashboardConfigStore } from "./configStore"
+import {
+  savedDashboardConfigStore,
+  savedDashboardMetaStore,
+} from "./configStore"
 import type { DashboardCanvasContent } from "../../../types"
 
 type DashboardCanvasContextValue = {
@@ -31,6 +34,8 @@ type DashboardCanvasContextValue = {
   handleDiscard: () => void
   /** Transform an item's config (e.g. change chart type). Marks dirty without refetch. */
   transformItem: (itemId: string, patch: Partial<ChatDashboardItem>) => void
+  /** Persist arbitrary config to chat history (best-effort). Used after create to store the new id. */
+  saveConfigToHistory: (config: Record<string, unknown>) => Promise<void>
   /** Export the dashboard as Excel */
   exportAsExcel?: () => Promise<void>
   /** Register the export function from the dashboard component */
@@ -154,9 +159,25 @@ export function DashboardCanvasProvider({
       // Persist to chat history (best-effort — may fail if no thread exists
       // yet, e.g. for client-only seed messages injected before the user
       // sends their first message).
+      // Include saved-dashboard metadata so the history preserves the full state.
       if (threadId) {
         try {
-          await saveConfigFn(threadId, content.toolCallId, updatedConfig)
+          const configWithMeta = {
+            ...updatedConfig,
+            ...(content.savedDashboardId
+              ? {
+                  savedDashboardId: content.savedDashboardId,
+                  savedDashboardCategory: content.savedDashboardCategory,
+                  savedDashboardDescription: content.savedDashboardDescription,
+                  savedDashboardUnsaved: false,
+                }
+              : {}),
+          }
+          await saveConfigFn(
+            threadId,
+            content.toolCallId,
+            configWithMeta as typeof updatedConfig
+          )
         } catch {
           // Thread may not exist yet — continue with external save
         }
@@ -177,6 +198,12 @@ export function DashboardCanvasProvider({
 
       if (content.toolCallId) {
         savedDashboardConfigStore.set(content.toolCallId, updatedConfig)
+        savedDashboardMetaStore.set(content.toolCallId, {
+          savedDashboardId: content.savedDashboardId,
+          savedDashboardCategory: content.savedDashboardCategory,
+          savedDashboardDescription: content.savedDashboardDescription,
+          savedDashboardUnsaved: false,
+        })
       }
 
       // Update pending context so the agent sees the latest config
@@ -211,6 +238,22 @@ export function DashboardCanvasProvider({
     }
   }
 
+  const saveConfigToHistory = useCallback(
+    async (config: Record<string, unknown>) => {
+      if (!threadId) return
+      try {
+        await saveConfigFn(
+          threadId,
+          content.toolCallId,
+          config as unknown as ChatDashboardConfig
+        )
+      } catch {
+        // Best-effort
+      }
+    },
+    [threadId, content.toolCallId, saveConfigFn]
+  )
+
   const handleDiscard = () => {
     setPendingLayout(null)
     setItemTransforms(new Map())
@@ -227,6 +270,7 @@ export function DashboardCanvasProvider({
         handleSave,
         handleDiscard,
         transformItem,
+        saveConfigToHistory,
         exportAsExcel,
         registerExport,
       }}

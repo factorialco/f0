@@ -424,6 +424,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import type { DashboardCanvasContent } from "../../../types"
 
 import { useAiChat } from "../../../providers/AiChatStateProvider"
+import { savedDashboardMetaStore } from "./configStore"
 import { useDashboardCanvas } from "./DashboardContext"
 import { SaveDashboardDialog } from "./SaveDashboardDialog"
 
@@ -442,6 +443,7 @@ export function DashboardContent({
     handleSave,
     handleDiscard,
     transformItem,
+    saveConfigToHistory,
     registerExport,
   } = useDashboardCanvas()
   const { canvasActions, openCanvas } = useAiChat()
@@ -462,16 +464,26 @@ export function DashboardContent({
       )
       // After creating, transition to "saved" state (state 1 → state 2)
       if (newId) {
-        openCanvas({
-          ...content,
+        const category = content.savedDashboardCategory
+        const meta = {
           savedDashboardId: newId,
-          savedDashboardCategory: content.savedDashboardCategory,
+          savedDashboardCategory: category,
           savedDashboardDescription: description,
           savedDashboardUnsaved: false,
-        })
+        }
+
+        openCanvas({ ...content, ...meta })
+
+        // Update meta store so close/re-open preserves the saved state
+        if (content.toolCallId) {
+          savedDashboardMetaStore.set(content.toolCallId, meta)
+        }
+
+        // Persist to chat history so it survives reload
+        void saveConfigToHistory({ ...content.config, ...meta })
       }
     },
-    [canvasActions, content, openCanvas]
+    [canvasActions, content, openCanvas, saveConfigToHistory]
   )
 
   // Apply pending item transforms (chart type changes) to the config

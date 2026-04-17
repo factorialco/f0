@@ -41,3 +41,46 @@ export const savedDashboardConfigStore = {
     return version
   },
 }
+
+/**
+ * External store for saved-dashboard metadata (id, category, unsaved flag).
+ * Mirrors savedDashboardConfigStore but for persistence metadata that
+ * needs to survive close/re-open of the canvas.
+ */
+export type SavedDashboardMeta = {
+  savedDashboardId?: string
+  savedDashboardCategory?: string
+  savedDashboardDescription?: string
+  savedDashboardUnsaved?: boolean
+}
+
+const metas = new Map<string, SavedDashboardMeta>()
+const metaListeners = new Set<Listener>()
+let metaVersion = 0
+
+function emitMetaChange(): void {
+  metaVersion++
+  for (const listener of metaListeners) {
+    listener()
+  }
+}
+
+export const savedDashboardMetaStore = {
+  get(toolCallId: string): SavedDashboardMeta | undefined {
+    return metas.get(toolCallId)
+  },
+
+  set(toolCallId: string, meta: SavedDashboardMeta): void {
+    metas.set(toolCallId, meta)
+    emitMetaChange()
+  },
+
+  subscribe(listener: Listener): () => void {
+    metaListeners.add(listener)
+    return () => metaListeners.delete(listener)
+  },
+
+  getSnapshot(): number {
+    return metaVersion
+  },
+}
