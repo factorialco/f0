@@ -120,6 +120,7 @@ describe("FormCanvasContent", () => {
     mockCoAgentState = {}
     mockRegistryEntry = undefined
     capturedFormDefinition = null
+    mockFormComponent = undefined
   })
 
   describe("when no active form", () => {
@@ -473,6 +474,76 @@ describe("FormCanvasContent", () => {
       })
       render(<FormContent />)
       expect(capturedFormDefinition.submitConfig?.label).toBe("Save Employee")
+    })
+  })
+
+  // ==========================================================================
+  // Custom FormComponent override via F0Provider
+  // ==========================================================================
+
+  describe("custom FormComponent from F0Provider", () => {
+    beforeEach(() => {
+      mockCoAgentState = {
+        activeForm: { formName: "test-form", formValues: {} },
+      }
+      mockRegistryEntry = makeEntry()
+    })
+
+    it("renders custom FormComponent instead of default F0Form", () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mockFormComponent = (props: any) => (
+        <div
+          data-testid="custom-form"
+          data-form-name={props.formDefinition?.name}
+        />
+      )
+      render(<FormContent />)
+      expect(screen.getByTestId("custom-form")).toBeInTheDocument()
+      expect(screen.queryByTestId("f0-form")).not.toBeInTheDocument()
+    })
+
+    it("falls back to F0Form when FormComponent is undefined", () => {
+      mockFormComponent = undefined
+      render(<FormContent />)
+      expect(screen.getByTestId("f0-form")).toBeInTheDocument()
+    })
+
+    it("passes formDefinition to custom FormComponent", () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let receivedProps: any = null
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mockFormComponent = (props: any) => {
+        receivedProps = props
+        return <div data-testid="custom-form" />
+      }
+      render(<FormContent />)
+      expect(receivedProps).not.toBeNull()
+      expect(receivedProps.formDefinition).toBeDefined()
+      expect(receivedProps.formDefinition.name).toBe("test-form")
+    })
+
+    it("passes styling to custom FormComponent", () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let receivedProps: any = null
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mockFormComponent = (props: any) => {
+        receivedProps = props
+        return <div data-testid="custom-form" />
+      }
+      render(<FormContent />)
+      expect(receivedProps.styling).toBeDefined()
+    })
+
+    it("passes formRef to custom FormComponent", () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let receivedProps: any = null
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mockFormComponent = (props: any) => {
+        receivedProps = props
+        return <div data-testid="custom-form" />
+      }
+      render(<FormContent />)
+      expect(receivedProps.formRef).toBeDefined()
     })
   })
 })

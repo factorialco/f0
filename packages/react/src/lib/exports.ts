@@ -1,4 +1,4 @@
-export { F0Provider } from "@/lib/providers/f0"
+export { F0Provider, useFormComponent } from "@/lib/providers/f0"
 export { Await } from "./Await/Await"
 export * from "./a11y"
 export * from "./data-testid"
