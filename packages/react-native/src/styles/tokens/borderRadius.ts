@@ -7,6 +7,7 @@ export const borderRadius = {
   md: "0.75rem",
   lg: "0.875rem",
   xl: "1rem",
-  "2xl": "1.5rem",
+  "2xl": "1.25rem",
+  "3xl": "1.5rem",
   full: "9999px",
-}
+};

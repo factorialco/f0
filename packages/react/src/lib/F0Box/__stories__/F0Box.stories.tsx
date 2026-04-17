@@ -1,15 +1,15 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
-import { ComponentProps } from "react"
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { ComponentProps } from "react";
 
-import { F0Box } from "../index"
-import { F0Text } from "@/components/F0Text"
-import { F0Heading } from "@/components/F0Heading"
-import { F0Button } from "@/components/F0Button"
-import { F0Icon } from "@/components/F0Icon"
-import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
-import { F0TagStatus } from "@/components/tags/F0TagStatus"
-import { F0TagDot } from "@/components/tags/F0TagDot"
-import { Badge } from "@/ui/badge"
+import { F0Box } from "../index";
+import { F0Text } from "@/components/F0Text";
+import { F0Heading } from "@/components/F0Heading";
+import { F0Button } from "@/components/F0Button";
+import { F0Icon } from "@/components/F0Icon";
+import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson";
+import { F0TagStatus } from "@/components/tags/F0TagStatus";
+import { F0TagDot } from "@/components/tags/F0TagDot";
+import { Badge } from "@/ui/badge";
 import {
   ChartLine,
   Clock,
@@ -21,7 +21,7 @@ import {
   AlertCircle,
   Briefcase,
   Person,
-} from "@/icons/app"
+} from "@/icons/app";
 
 // ─── Option arrays for controls ──────────────────────────────────
 
@@ -37,8 +37,8 @@ const spacingOptions = [
   "3xl",
   "4xl",
   "5xl",
-]
-const marginOptions = [...spacingOptions, "auto"]
+];
+const marginOptions = [...spacingOptions, "auto"];
 const gapOptions = [
   undefined,
   "none",
@@ -51,7 +51,7 @@ const gapOptions = [
   "3xl",
   "4xl",
   "5xl",
-]
+];
 const sizeOptions = [
   undefined,
   "auto",
@@ -84,8 +84,8 @@ const sizeOptions = [
   "2/3",
   "1/4",
   "3/4",
-]
-const borderWidthOptions = [undefined, "none", "default", "thick"]
+];
+const borderWidthOptions = [undefined, "none", "default", "thick"];
 const borderRadiusOptions = [
   undefined,
   "none",
@@ -97,7 +97,7 @@ const borderRadiusOptions = [
   "xl",
   "2xl",
   "full",
-]
+];
 const borderColorOptions = [
   undefined,
   "default",
@@ -114,7 +114,7 @@ const borderColorOptions = [
   "positive",
   "positive-bold",
   "promote",
-]
+];
 const borderStyleOptions = [
   undefined,
   "solid",
@@ -122,8 +122,8 @@ const borderStyleOptions = [
   "dotted",
   "double",
   "none",
-]
-const overflowOptions = [undefined, "visible", "hidden", "auto", "scroll"]
+];
+const overflowOptions = [undefined, "visible", "hidden", "auto", "scroll"];
 const backgroundOptions = [
   undefined,
   "transparent",
@@ -148,7 +148,7 @@ const backgroundOptions = [
   "selected-secondary",
   "selected-bold",
   "overlay",
-]
+];
 const columnsOptions = [
   undefined,
   "none",
@@ -164,7 +164,7 @@ const columnsOptions = [
   "10",
   "11",
   "12",
-]
+];
 const colSpanOptions = [
   undefined,
   "1",
@@ -180,7 +180,7 @@ const colSpanOptions = [
   "11",
   "12",
   "full",
-]
+];
 const positionOptions = [
   undefined,
   "static",
@@ -188,7 +188,7 @@ const positionOptions = [
   "absolute",
   "fixed",
   "sticky",
-]
+];
 
 // ─── Meta ────────────────────────────────────────────────────────
 
@@ -314,10 +314,10 @@ const meta = {
   },
   parameters: { layout: "padded" },
   tags: ["autodocs", "stable"],
-} satisfies Meta<ComponentProps<typeof F0Box>>
+} satisfies Meta<ComponentProps<typeof F0Box>>;
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 // ─── Helper components ───────────────────────────────────────────
 
@@ -325,8 +325,8 @@ const Label = ({
   children,
   subtitle,
 }: {
-  children: React.ReactNode
-  subtitle?: string
+  children: React.ReactNode;
+  subtitle?: string;
 }) => (
   <div className="flex flex-col gap-1 pb-2">
     <span className="text-lg font-semibold text-f1-foreground">{children}</span>
@@ -334,21 +334,21 @@ const Label = ({
       <span className="text-base text-f1-foreground-secondary">{subtitle}</span>
     )}
   </div>
-)
+);
 
 const Cell = ({
   children,
   color = "bg-f1-background-info",
 }: {
-  children: React.ReactNode
-  color?: string
+  children: React.ReactNode;
+  color?: string;
 }) => (
   <div
     className={`${color} flex items-center justify-center rounded-md px-4 py-3 text-sm text-f1-foreground`}
   >
     {children}
   </div>
-)
+);
 
 // ═══════════════════════════════════════════════════════════════════
 //  1. DEFAULT — Interactive playground
@@ -361,7 +361,7 @@ export const Default: Story = {
     borderRadius: "md",
     children: "A simple box — use the controls to explore all props",
   },
-}
+};
 
 // ═══════════════════════════════════════════════════════════════════
 //  2. DISPLAY
@@ -419,7 +419,7 @@ export const Display: Story = {
       </F0Box>
     </F0Box>
   ),
-}
+};
 
 // ═══════════════════════════════════════════════════════════════════
 //  3. POSITION
@@ -472,7 +472,7 @@ export const Position: Story = {
       </F0Box>
     </F0Box>
   ),
-}
+};
 
 // ═══════════════════════════════════════════════════════════════════
 //  4. PADDING
@@ -550,7 +550,7 @@ export const Padding: Story = {
       </F0Box>
     </F0Box>
   ),
-}
+};
 
 // ═══════════════════════════════════════════════════════════════════
 //  5. MARGIN
@@ -610,7 +610,7 @@ export const Margin: Story = {
       </F0Box>
     </F0Box>
   ),
-}
+};
 
 // ═══════════════════════════════════════════════════════════════════
 //  6. FLEX LAYOUT
@@ -681,7 +681,7 @@ export const FlexLayout: Story = {
               <Cell>{align}</Cell>
               <Cell color="bg-f1-background-warning">B</Cell>
             </F0Box>
-          )
+          ),
         )}
       </F0Box>
 
@@ -756,7 +756,7 @@ export const FlexLayout: Story = {
       </F0Box>
     </F0Box>
   ),
-}
+};
 
 // ═══════════════════════════════════════════════════════════════════
 //  7. GRID LAYOUT
@@ -935,7 +935,7 @@ export const GridLayout: Story = {
       </F0Box>
     </F0Box>
   ),
-}
+};
 
 // ═══════════════════════════════════════════════════════════════════
 //  8. DIMENSIONS
@@ -1002,7 +1002,7 @@ export const Dimensions: Story = {
       </F0Box>
     </F0Box>
   ),
-}
+};
 
 // ═══════════════════════════════════════════════════════════════════
 //  9. BACKGROUND
@@ -1054,7 +1054,7 @@ export const Background: Story = {
       </F0Box>
     </F0Box>
   ),
-}
+};
 
 // ═══════════════════════════════════════════════════════════════════
 //  10. BORDERS — all have background for visibility
@@ -1095,7 +1095,7 @@ export const BorderWidth: Story = {
       </F0Box>
     </F0Box>
   ),
-}
+};
 
 export const BorderPerSide: Story = {
   render: () => (
@@ -1243,7 +1243,7 @@ export const BorderPerSide: Story = {
       </F0Box>
     </F0Box>
   ),
-}
+};
 
 export const BorderShorthandWithOverrides: Story = {
   render: () => (
@@ -1315,7 +1315,7 @@ export const BorderShorthandWithOverrides: Story = {
       </F0Box>
     </F0Box>
   ),
-}
+};
 
 export const BorderColors: Story = {
   render: () => (
@@ -1389,7 +1389,7 @@ export const BorderColors: Story = {
       </F0Box>
     </F0Box>
   ),
-}
+};
 
 export const BorderStyle: Story = {
   render: () => (
@@ -1460,7 +1460,7 @@ export const BorderStyle: Story = {
       </F0Box>
     </F0Box>
   ),
-}
+};
 
 export const BorderRadius: Story = {
   render: () => (
@@ -1471,7 +1471,18 @@ export const BorderRadius: Story = {
 
       <F0Box display="flex" gap="md" flexWrap="wrap" alignItems="end">
         {(
-          ["none", "2xs", "xs", "sm", "md", "lg", "xl", "2xl", "full"] as const
+          [
+            "none",
+            "2xs",
+            "xs",
+            "sm",
+            "md",
+            "lg",
+            "xl",
+            "2xl",
+            "3xl",
+            "full",
+          ] as const
         ).map((r) => (
           <F0Box
             key={r}
@@ -1533,7 +1544,7 @@ export const BorderRadius: Story = {
       </F0Box>
     </F0Box>
   ),
-}
+};
 
 // ═══════════════════════════════════════════════════════════════════
 //  11. OVERFLOW
@@ -1586,7 +1597,7 @@ export const Overflow: Story = {
       </F0Box>
     </F0Box>
   ),
-}
+};
 
 // ═══════════════════════════════════════════════════════════════════
 //  12. DIVIDERS
@@ -1652,7 +1663,7 @@ export const Dividers: Story = {
       </F0Box>
     </F0Box>
   ),
-}
+};
 
 // ═══════════════════════════════════════════════════════════════════
 //  13. RESPONSIVE
@@ -1676,7 +1687,7 @@ export const ResponsivePadding: Story = {
       </span>
     </F0Box>
   ),
-}
+};
 
 export const ResponsiveFlexDirection: Story = {
   render: () => (
@@ -1694,7 +1705,7 @@ export const ResponsiveFlexDirection: Story = {
       <Cell color="bg-f1-background-positive">Responsive!</Cell>
     </F0Box>
   ),
-}
+};
 
 export const ResponsiveGrid: Story = {
   render: () => (
@@ -1720,7 +1731,7 @@ export const ResponsiveGrid: Story = {
       ))}
     </F0Box>
   ),
-}
+};
 
 export const ResponsiveDashboard: Story = {
   render: () => (
@@ -1771,7 +1782,7 @@ export const ResponsiveDashboard: Story = {
       </F0Box>
     </F0Box>
   ),
-}
+};
 
 export const ResponsiveDisplay: Story = {
   render: () => (
@@ -1798,7 +1809,7 @@ export const ResponsiveDisplay: Story = {
       </F0Box>
     </F0Box>
   ),
-}
+};
 
 // ═══════════════════════════════════════════════════════════════════
 //  14. NESTED / REAL-WORLD COMPOSITIONS
@@ -1848,7 +1859,7 @@ export const NestedLayout: Story = {
       </F0Box>
     </F0Box>
   ),
-}
+};
 
 export const ResponsiveDashboardExample: Story = {
   render: () => (
@@ -2257,7 +2268,7 @@ export const ResponsiveDashboardExample: Story = {
       </F0Box>
     </F0Box>
   ),
-}
+};
 
 export const ListWithDividers: Story = {
   render: () => (
@@ -2285,7 +2296,7 @@ export const ListWithDividers: Story = {
       ))}
     </F0Box>
   ),
-}
+};
 
 // ═══════════════════════════════════════════════════════════════════
 //  15. TOKEN REFERENCE — pixel values for all semantic tokens
@@ -2296,9 +2307,9 @@ const TokenRow = ({
   px,
   twClass,
 }: {
-  token: string
-  px: string
-  twClass: string
+  token: string;
+  px: string;
+  twClass: string;
 }) => (
   <F0Box
     display="flex"
@@ -2327,7 +2338,7 @@ const TokenRow = ({
       />
     </F0Box>
   </F0Box>
-)
+);
 
 const SectionHeader = ({ children }: { children: React.ReactNode }) => (
   <F0Box paddingX="lg" paddingY="sm" background="tertiary">
@@ -2335,7 +2346,7 @@ const SectionHeader = ({ children }: { children: React.ReactNode }) => (
       {children}
     </span>
   </F0Box>
-)
+);
 
 const ColumnHeaders = () => (
   <F0Box
@@ -2367,7 +2378,7 @@ const ColumnHeaders = () => (
       </span>
     </F0Box>
   </F0Box>
-)
+);
 
 export const TokenReference: Story = {
   render: () => (
@@ -2581,4 +2592,4 @@ export const TokenReference: Story = {
       </F0Box>
     </F0Box>
   ),
-}
+};

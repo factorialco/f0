@@ -3,7 +3,7 @@ import type {
   BorderRadiusToken,
   BorderStyleToken,
   BorderWidthToken,
-} from "../types"
+} from "../types";
 
 export const borderVariants = {
   // -- Color --
@@ -66,6 +66,7 @@ export const borderVariants = {
     lg: "rounded-lg",
     xl: "rounded-xl",
     "2xl": "rounded-2xl",
+    "3xl": "rounded-3xl",
     full: "rounded-full",
   } satisfies Record<BorderRadiusToken, string>,
 
@@ -79,6 +80,7 @@ export const borderVariants = {
     lg: "rounded-tl-lg",
     xl: "rounded-tl-xl",
     "2xl": "rounded-tl-2xl",
+    "3xl": "rounded-tl-3xl",
     full: "rounded-tl-full",
   } satisfies Record<BorderRadiusToken, string>,
 
@@ -91,6 +93,7 @@ export const borderVariants = {
     lg: "rounded-tr-lg",
     xl: "rounded-tr-xl",
     "2xl": "rounded-tr-2xl",
+    "3xl": "rounded-tr-3xl",
     full: "rounded-tr-full",
   } satisfies Record<BorderRadiusToken, string>,
 
@@ -103,6 +106,7 @@ export const borderVariants = {
     lg: "rounded-bl-lg",
     xl: "rounded-bl-xl",
     "2xl": "rounded-bl-2xl",
+    "3xl": "rounded-bl-3xl",
     full: "rounded-bl-full",
   } satisfies Record<BorderRadiusToken, string>,
 
@@ -115,6 +119,7 @@ export const borderVariants = {
     lg: "rounded-br-lg",
     xl: "rounded-br-xl",
     "2xl": "rounded-br-2xl",
+    "3xl": "rounded-br-3xl",
     full: "rounded-br-full",
   } satisfies Record<BorderRadiusToken, string>,
 
@@ -126,6 +131,6 @@ export const borderVariants = {
     double: "border-double",
     none: "border-none",
   } satisfies Record<BorderStyleToken, string>,
-}
+};
 
-export const borderDefaults = {}
+export const borderDefaults = {};
