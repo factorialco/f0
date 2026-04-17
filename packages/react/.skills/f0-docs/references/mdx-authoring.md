@@ -11,9 +11,9 @@ Everything needed to write the MDX file: template, table templates, utility comp
 ### Standard component (single stories file) — use in 95% of cases
 
 ```mdx
-import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks";
-import * as Stories from "./F0ComponentName.stories";
-import { DoDonts } from "@/lib/storybook-utils/do-donts";
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as Stories from "./F0ComponentName.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 <Meta of={Stories} />
 ```
@@ -23,10 +23,10 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 Use `<Meta title="..." />` only when the component spans multiple story files:
 
 ```mdx
-import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks";
-import * as BarStories from "./F0ComponentBar.stories";
-import * as LineStories from "./F0ComponentLine.stories";
-import { DoDonts } from "@/lib/storybook-utils/do-donts";
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as BarStories from "./F0ComponentBar.stories"
+import * as LineStories from "./F0ComponentLine.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 <Meta title="F0ComponentName/Overview" />
 ```
@@ -69,9 +69,9 @@ Filename must match the stories file: `F0Button.stories.tsx` → `F0Button.mdx`
 **Rationale:** Modes, Variants and Sizes describe the structural forms the component can take — they are anatomy, not guidance. Keeping them under `## Anatomy` gives the right-side nav three clean top-level entries: Anatomy · Guidelines · Accessibility.
 
 ```mdx
-import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks";
-import * as Stories from "./ComponentName.stories";
-import { DoDonts } from "@/lib/storybook-utils/do-donts";
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as Stories from "./ComponentName.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 <Meta of={Stories} />
 
@@ -549,7 +549,7 @@ export const DoDontDontCase: Story = {
 Full pattern with `children` + `guidelines`:
 
 ```mdx
-import { F0Alert } from "../F0Alert";
+import { F0Alert } from "../F0Alert"
 
 <DoDonts
   do={{
