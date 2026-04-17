@@ -8,6 +8,10 @@ import {
 } from "react"
 import { useIsomorphicLayoutEffect } from "usehooks-ts"
 
+import type { F0FormLikeComponent } from "@/patterns/F0Form/types"
+
+import { FormCardValueFormatterProvider } from "@/sds/ai/F0AiChat/providers/FormCardValueFormatterProvider"
+
 import { ImageContextValue, ImageProvider } from "../../imageHandler"
 import { LinkContextValue, LinkProvider } from "../../linkHandler"
 import { PrivacyModeProvider } from "../../privacyMode"
@@ -18,8 +22,6 @@ import { DataCollectionStorageHandler } from "../datacollection/types"
 import { I18nProvider, I18nProviderProps } from "../i18n"
 import { L10nProvider, L10nProviderProps } from "../l10n"
 import { UserPlatformProvider } from "../user-platafform"
-
-import type { F0FormLikeComponent } from "@/patterns/F0Form/types"
 
 interface LayoutProps {
   fullScreen?: boolean
@@ -134,7 +136,9 @@ export const F0Provider: React.FC<{
                         handler={dataCollectionStorageHandler}
                       >
                         <FormComponentContext.Provider value={formComponent}>
-                          {children}
+                          <FormCardValueFormatterProvider>
+                            {children}
+                          </FormCardValueFormatterProvider>
                         </FormComponentContext.Provider>
                       </DataCollectionStorageProvider>
                     </ImageProvider>
