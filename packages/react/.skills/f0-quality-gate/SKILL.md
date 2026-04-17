@@ -20,6 +20,7 @@ Run after completing **any** of:
 **Skip when:**
 
 - The user explicitly says to skip checks
+- The change is documentation-only (`.md` files or code comments — no `.ts`/`.tsx`/`.mdx` changed)
 - The change is icon generation or other auto-generated files
 
 > **Note:** `.mdx` files are NOT skip candidates — they go through `oxfmt` formatting and must pass `format:check`.

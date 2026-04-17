@@ -67,7 +67,6 @@ Reference the component's exported const array — don't hardcode the options:
 
 ```tsx
 import { buttonSizes, buttonVariants } from "../F0Example"
-
 argTypes: {
   size: {
     control: "select",
@@ -86,13 +85,13 @@ Omitting `args` causes a TypeScript error when the meta has required props.
 ```tsx
 // WRONG — TS error: Property 'args' is missing
 export const Variants: Story = {
-  tags: ["!dev"],
+  tags: ["no-sidebar"],
   render: () => <div>...</div>,
 };
 
 // CORRECT — provide required args even if render ignores them
 export const Variants: Story = {
-  tags: ["!dev"],
+  tags: ["no-sidebar"],
   args: { items: [], onClick: () => {} }, // satisfy required props from Meta
   render: () => <div>...</div>,
 };
