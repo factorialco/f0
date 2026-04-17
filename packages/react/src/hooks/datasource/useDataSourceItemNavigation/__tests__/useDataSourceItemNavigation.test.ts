@@ -664,4 +664,94 @@ describe("useDataSourceItemNavigation", () => {
       expect(result.current.activeItemId).toBe("gamma")
     })
   })
+
+  describe("nextItemUrl / previousItemUrl", () => {
+    const itemUrl = (item: TestRecord) => `/items/${item.id}`
+
+    it("returns null for both when no itemUrl is provided", () => {
+      const { result } = zeroRenderHook(() =>
+        useDataSourceItemNavigation(defaultProps({ defaultActiveItemId: 3 }))
+      )
+
+      expect(result.current.nextItemUrl).toBeNull()
+      expect(result.current.previousItemUrl).toBeNull()
+    })
+
+    it("returns null for both when no active item", () => {
+      const { result } = zeroRenderHook(() =>
+        useDataSourceItemNavigation(defaultProps({ itemUrl }))
+      )
+
+      expect(result.current.nextItemUrl).toBeNull()
+      expect(result.current.previousItemUrl).toBeNull()
+    })
+
+    it("returns next and previous URLs for a middle item", () => {
+      const { result } = zeroRenderHook(() =>
+        useDataSourceItemNavigation(
+          defaultProps({ defaultActiveItemId: 3, itemUrl })
+        )
+      )
+
+      expect(result.current.previousItemUrl).toBe("/items/2")
+      expect(result.current.nextItemUrl).toBe("/items/4")
+    })
+
+    it("returns null for previousItemUrl at first item", () => {
+      const { result } = zeroRenderHook(() =>
+        useDataSourceItemNavigation(
+          defaultProps({ defaultActiveItemId: 1, itemUrl })
+        )
+      )
+
+      expect(result.current.previousItemUrl).toBeNull()
+      expect(result.current.nextItemUrl).toBe("/items/2")
+    })
+
+    it("returns null for nextItemUrl at last item in page", () => {
+      const { result } = zeroRenderHook(() =>
+        useDataSourceItemNavigation(
+          defaultProps({ defaultActiveItemId: 5, itemUrl })
+        )
+      )
+
+      expect(result.current.nextItemUrl).toBeNull()
+      expect(result.current.previousItemUrl).toBe("/items/4")
+    })
+
+    it("updates URLs after navigation", () => {
+      const { result } = zeroRenderHook(() =>
+        useDataSourceItemNavigation(
+          defaultProps({ defaultActiveItemId: 2, itemUrl })
+        )
+      )
+
+      expect(result.current.previousItemUrl).toBe("/items/1")
+      expect(result.current.nextItemUrl).toBe("/items/3")
+
+      act(() => {
+        result.current.goToNext()
+      })
+
+      expect(result.current.previousItemUrl).toBe("/items/2")
+      expect(result.current.nextItemUrl).toBe("/items/4")
+    })
+
+    it("handles itemUrl returning undefined for some items", () => {
+      const conditionalUrl = (item: TestRecord) =>
+        item.id === 4 ? undefined : `/items/${item.id}`
+
+      const { result } = zeroRenderHook(() =>
+        useDataSourceItemNavigation(
+          defaultProps({
+            defaultActiveItemId: 3,
+            itemUrl: conditionalUrl,
+          })
+        )
+      )
+
+      expect(result.current.previousItemUrl).toBe("/items/2")
+      expect(result.current.nextItemUrl).toBeNull()
+    })
+  })
 })

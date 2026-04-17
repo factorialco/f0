@@ -22,6 +22,8 @@ export interface UseDataSourceItemNavigationProps<R extends RecordType> {
   isLoading: boolean
   /** Overrides `dataSource.idProvider`. Extracts a unique ID from a record. Falls back to `item.id` */
   idProvider?: (item: R, index?: number) => string | number
+  /** Returns the URL for a given item. Used to derive `nextItemUrl` / `previousItemUrl` */
+  itemUrl?: (item: R) => string | undefined
   /** Controlled active item ID */
   activeItemId?: string | number | null
   /** Default active item ID (uncontrolled) */
@@ -47,4 +49,8 @@ export interface UseDataSourceItemNavigationReturn<R extends RecordType> {
   setActiveItemId: (id: string | number | null) => void
   /** True while waiting for a page transition to resolve the pending navigation */
   isNavigating: boolean
+  /** URL of the next item (derived via `itemUrl`), or null if unavailable */
+  nextItemUrl: string | null
+  /** URL of the previous item (derived via `itemUrl`), or null if unavailable */
+  previousItemUrl: string | null
 }
