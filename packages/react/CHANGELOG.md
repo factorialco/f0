@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.452.0](https://github.com/factorialco/f0/compare/f0-react-v1.451.0...f0-react-v1.452.0) (2026-04-17)
+
+
+### Features
+
+* add VacancyEntityRef and RequisitionEntityRef ([#3954](https://github.com/factorialco/f0/issues/3954)) ([8df32c4](https://github.com/factorialco/f0/commit/8df32c490d47706afef4b2cf72824a0074d5e91c))
+
 ## [1.451.0](https://github.com/factorialco/f0/compare/f0-react-v1.450.1...f0-react-v1.451.0) (2026-04-17)
 
 
