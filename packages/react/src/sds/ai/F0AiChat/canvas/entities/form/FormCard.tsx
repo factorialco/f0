@@ -7,6 +7,7 @@ import { useI18n } from "@/lib/providers/i18n"
 
 import { useAutoOpenCanvas } from "../../../hooks/useAutoOpenCanvas"
 import { useAiChat } from "../../../providers/AiChatStateProvider"
+import { useFormCardValueFormatter } from "../../../providers/FormCardValueFormatterProvider"
 import { CanvasCard } from "../../components/CanvasCard"
 
 const MAX_VISIBLE_FIELDS = 7
@@ -157,6 +158,8 @@ export function FormCard({
 }: FormCardProps) {
   const { canvasContent, openCanvas, closeCanvas } = useAiChat()
   const i18n = useI18n()
+  const contextFormatter = useFormCardValueFormatter(formName)
+  const resolvedFormatter = valueFormatter ?? contextFormatter
 
   const title = cardTitle ?? formName
   const description = cardDescription ?? formDescription ?? ""
@@ -181,7 +184,7 @@ export function FormCard({
       ? Object.entries(fieldDescriptions)
           .map(([key, meta]) => {
             const raw = formValues[key]
-            const custom = valueFormatter?.(key, raw, {
+            const custom = resolvedFormatter?.(key, raw, {
               fieldType: meta.fieldType,
               customFieldName: meta.customFieldName,
             })

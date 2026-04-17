@@ -1,9 +1,13 @@
 import { describe, expect, it, vi, beforeEach } from "vitest"
 import "@testing-library/jest-dom/vitest"
-
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 
 import type { FormCardValueFormatter } from "../FormCard"
+
+import {
+  FormCardValueFormatterProvider,
+  useSetFormCardValueFormatter,
+} from "../../../../providers/FormCardValueFormatterProvider"
 
 const mockOpenCanvas = vi.fn()
 const mockCloseCanvas = vi.fn()
@@ -293,6 +297,156 @@ describe("FormCard", () => {
       )
 
       expect(screen.getByText("Yes")).toBeInTheDocument()
+    })
+
+    it("uses formatter from FormCardValueFormatterProvider context", () => {
+      function SetupFormatter() {
+        const setFormatter = useSetFormCardValueFormatter()
+        setFormatter({
+          customFieldName: "team_selector",
+          format: () => ({ type: "item", text: "Engineering Team" }),
+        })
+        return null
+      }
+
+      render(
+        <FormCardValueFormatterProvider>
+          <SetupFormatter />
+          <FormCard
+            {...defaultProps}
+            fieldDescriptions={{
+              team: {
+                label: "Team",
+                fieldType: "custom",
+                customFieldName: "team_selector",
+              },
+            }}
+            formValues={{ team: { id: 1, name: "eng" } }}
+          />
+        </FormCardValueFormatterProvider>
+      )
+
+      expect(screen.getByText("Engineering Team")).toBeInTheDocument()
+    })
+
+    it("uses scoped formatter when registered for a specific formName", () => {
+      function SetupFormatter() {
+        const setFormatter = useSetFormCardValueFormatter()
+        setFormatter({
+          formName: "edit-employee",
+          customFieldName: "team_selector",
+          format: () => ({ type: "item", text: "Scoped Team" }),
+        })
+        return null
+      }
+
+      render(
+        <FormCardValueFormatterProvider>
+          <SetupFormatter />
+          <FormCard
+            {...defaultProps}
+            fieldDescriptions={{
+              team: {
+                label: "Team",
+                fieldType: "custom",
+                customFieldName: "team_selector",
+              },
+            }}
+            formValues={{ team: { id: 1, name: "eng" } }}
+          />
+        </FormCardValueFormatterProvider>
+      )
+
+      expect(screen.getByText("Scoped Team")).toBeInTheDocument()
+    })
+
+    it("does not apply scoped formatter to a different formName", () => {
+      function SetupFormatter() {
+        const setFormatter = useSetFormCardValueFormatter()
+        setFormatter({
+          formName: "other-form",
+          format: () => ({ type: "item", text: "Should not appear" }),
+        })
+        return null
+      }
+
+      render(
+        <FormCardValueFormatterProvider>
+          <SetupFormatter />
+          <FormCard
+            {...defaultProps}
+            fieldDescriptions={{
+              name: { label: "Name" },
+            }}
+            formValues={{ name: "Test value" }}
+          />
+        </FormCardValueFormatterProvider>
+      )
+
+      expect(screen.getByText("Test value")).toBeInTheDocument()
+      expect(screen.queryByText("Should not appear")).not.toBeInTheDocument()
+    })
+
+    it("scoped formatter takes precedence over global formatter", () => {
+      function SetupFormatters() {
+        const setFormatter = useSetFormCardValueFormatter()
+        setFormatter({
+          format: () => ({ type: "item", text: "From global" }),
+        })
+        setFormatter({
+          formName: "edit-employee",
+          format: () => ({ type: "item", text: "From scoped" }),
+        })
+        return null
+      }
+
+      render(
+        <FormCardValueFormatterProvider>
+          <SetupFormatters />
+          <FormCard
+            {...defaultProps}
+            fieldDescriptions={{
+              name: { label: "Name" },
+            }}
+            formValues={{ name: "test" }}
+          />
+        </FormCardValueFormatterProvider>
+      )
+
+      expect(screen.getByText("From scoped")).toBeInTheDocument()
+      expect(screen.queryByText("From global")).not.toBeInTheDocument()
+    })
+
+    it("prop valueFormatter takes precedence over context formatter", () => {
+      function SetupFormatter() {
+        const setFormatter = useSetFormCardValueFormatter()
+        setFormatter({
+          format: () => ({ type: "item", text: "From context" }),
+        })
+        return null
+      }
+
+      const propFormatter: FormCardValueFormatter = () => ({
+        type: "item",
+        text: "From prop",
+      })
+
+      render(
+        <FormCardValueFormatterProvider>
+          <SetupFormatter />
+          <FormCard
+            {...defaultProps}
+            fieldDescriptions={{
+              name: { label: "Name" },
+            }}
+            formValues={{ name: "test" }}
+            valueFormatter={propFormatter}
+          />
+        </FormCardValueFormatterProvider>
+      )
+
+      expect(screen.getByText("From prop")).toBeInTheDocument()
+      expect(screen.queryByText("From context")).not.toBeInTheDocument()
     })
   })
 })

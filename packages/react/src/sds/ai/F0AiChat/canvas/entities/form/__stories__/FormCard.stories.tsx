@@ -1,8 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { useEffect } from "react"
+
 import type { FormCardValueFormatter } from "../FormCard"
 
 import { AiChatStateProvider } from "../../../../providers/AiChatStateProvider"
+import {
+  FormCardValueFormatterProvider,
+  useSetFormCardValueFormatter,
+} from "../../../../providers/FormCardValueFormatterProvider"
 import { FormCard } from "../FormCard"
 
 const meta = {
@@ -246,5 +252,70 @@ export const MixedFieldTypes: Story = {
       createPerAssignee: false,
     },
     valueFormatter: customValueFormatter,
+  },
+}
+
+/**
+ * Demonstrates the provider-based approach: the formatter is registered
+ * via `useSetFormCardValueFormatter` scoped to a specific formName
+ * and customFieldName, instead of being passed as a prop.
+ */
+function RegisterFormatter() {
+  const setFormatter = useSetFormCardValueFormatter()
+
+  useEffect(() => {
+    setFormatter({
+      formName: "create-task",
+      customFieldName: "assignees_selector",
+      format: () => ({
+        type: "avatar-list",
+        avatarList: {
+          type: "person" as const,
+          size: "sm",
+          avatars: [
+            { firstName: "Alice", lastName: "Garcia", src: "" },
+            { firstName: "Bob", lastName: "Martinez", src: "" },
+          ],
+        },
+      }),
+    })
+  }, [setFormatter])
+
+  return null
+}
+
+export const WithProviderFormatter: Story = {
+  decorators: [
+    (Story) => (
+      <AiChatStateProvider enabled={false}>
+        <FormCardValueFormatterProvider>
+          <RegisterFormatter />
+          <div className="w-[420px]">
+            <Story />
+          </div>
+        </FormCardValueFormatterProvider>
+      </AiChatStateProvider>
+    ),
+  ],
+  args: {
+    formName: "create-task",
+    formDescription: "Create a new task",
+    module: "tasks",
+    cardTitle: "Create task",
+    cardDescription: "Task with provider-based formatter",
+    fieldDescriptions: {
+      taskName: { label: "Task name" },
+      assignees: {
+        label: "Assignees",
+        fieldType: "custom",
+        customFieldName: "assignees_selector",
+      },
+      dueDate: { label: "Due date" },
+    },
+    formValues: {
+      taskName: "Prepare Q3 report",
+      assignees: { type: "manual", ids: ["5", "12"] },
+      dueDate: "2026-08-01",
+    },
   },
 }
