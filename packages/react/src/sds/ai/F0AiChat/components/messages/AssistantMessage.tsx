@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect } from "react"
 
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { markdownRenderers } from "../markdownRenderers"
+import { sanitizeEntityRefs } from "../markdownRenderers/entityRef/utils/sanitizeEntityRefs"
 
 /**
  * Context that provides the current tool call ID to action render
@@ -63,7 +64,7 @@ export const AssistantMessage = ({
         {message && content && (
           <div className="w-fit max-w-full [&>div]:flex [&>div]:flex-col [&>div]:gap-1">
             <Markdown
-              content={content}
+              content={sanitizeEntityRefs(content)}
               components={{ ...markdownRenderers, ...markdownTagRenderers }}
             />
           </div>
