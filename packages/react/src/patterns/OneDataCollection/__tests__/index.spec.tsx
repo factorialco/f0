@@ -1317,7 +1317,10 @@ describe("Collections", () => {
           defaultSortings: { field: "name", order: "desc" },
           grouping: {
             groupBy: {
-              department: { name: "Department" },
+              department: {
+                name: "Department",
+                label: (groupId) => String(groupId),
+              },
             },
           },
         }),
