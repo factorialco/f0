@@ -47,7 +47,15 @@ export type FormCardProps = {
 }
 
 function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, "").trim()
+  if (typeof DOMParser !== "undefined") {
+    const doc = new DOMParser().parseFromString(html, "text/html")
+    return doc.body.textContent?.replace(/\s+/g, " ").trim() ?? ""
+  }
+
+  return html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
 }
 
 function capitalizeFirst(text: string): string {
@@ -95,7 +103,8 @@ function formatFieldContent(
     "value" in value
   ) {
     const html = (value as { value: string | null }).value
-    return { type: "item", text: html ? stripHtml(html) : "—" }
+    const text = html ? stripHtml(html) : ""
+    return { type: "item", text: text || "—" }
   }
 
   if (
@@ -121,7 +130,7 @@ function formatFieldContent(
   if (Array.isArray(value)) {
     const texts = value
       .map((v) => {
-        const content = formatFieldContent(v)
+        const content = formatFieldContent(v, undefined, booleanLabels)
         if (Array.isArray(content)) return content.map(extractText).join(", ")
         return extractText(content)
       })

@@ -1,5 +1,7 @@
-import { describe, expect, it, vi, beforeEach } from "vitest"
+import { useEffect } from "react"
 import "@testing-library/jest-dom/vitest"
+import { describe, expect, it, vi, beforeEach } from "vitest"
+
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 
 import type { FormCardValueFormatter } from "../FormCard"
@@ -302,10 +304,12 @@ describe("FormCard", () => {
     it("uses formatter from FormCardValueFormatterProvider context", () => {
       function SetupFormatter() {
         const setFormatter = useSetFormCardValueFormatter()
-        setFormatter({
-          customFieldName: "team_selector",
-          format: () => ({ type: "item", text: "Engineering Team" }),
-        })
+        useEffect(() => {
+          setFormatter({
+            customFieldName: "team_selector",
+            format: () => ({ type: "item", text: "Engineering Team" }),
+          })
+        }, [setFormatter])
         return null
       }
 
@@ -332,11 +336,13 @@ describe("FormCard", () => {
     it("uses scoped formatter when registered for a specific formName", () => {
       function SetupFormatter() {
         const setFormatter = useSetFormCardValueFormatter()
-        setFormatter({
-          formName: "edit-employee",
-          customFieldName: "team_selector",
-          format: () => ({ type: "item", text: "Scoped Team" }),
-        })
+        useEffect(() => {
+          setFormatter({
+            formName: "edit-employee",
+            customFieldName: "team_selector",
+            format: () => ({ type: "item", text: "Scoped Team" }),
+          })
+        }, [setFormatter])
         return null
       }
 
@@ -363,10 +369,12 @@ describe("FormCard", () => {
     it("does not apply scoped formatter to a different formName", () => {
       function SetupFormatter() {
         const setFormatter = useSetFormCardValueFormatter()
-        setFormatter({
-          formName: "other-form",
-          format: () => ({ type: "item", text: "Should not appear" }),
-        })
+        useEffect(() => {
+          setFormatter({
+            formName: "other-form",
+            format: () => ({ type: "item", text: "Should not appear" }),
+          })
+        }, [setFormatter])
         return null
       }
 
@@ -390,13 +398,15 @@ describe("FormCard", () => {
     it("scoped formatter takes precedence over global formatter", () => {
       function SetupFormatters() {
         const setFormatter = useSetFormCardValueFormatter()
-        setFormatter({
-          format: () => ({ type: "item", text: "From global" }),
-        })
-        setFormatter({
-          formName: "edit-employee",
-          format: () => ({ type: "item", text: "From scoped" }),
-        })
+        useEffect(() => {
+          setFormatter({
+            format: () => ({ type: "item", text: "From global" }),
+          })
+          setFormatter({
+            formName: "edit-employee",
+            format: () => ({ type: "item", text: "From scoped" }),
+          })
+        }, [setFormatter])
         return null
       }
 
@@ -420,9 +430,11 @@ describe("FormCard", () => {
     it("prop valueFormatter takes precedence over context formatter", () => {
       function SetupFormatter() {
         const setFormatter = useSetFormCardValueFormatter()
-        setFormatter({
-          format: () => ({ type: "item", text: "From context" }),
-        })
+        useEffect(() => {
+          setFormatter({
+            format: () => ({ type: "item", text: "From context" }),
+          })
+        }, [setFormatter])
         return null
       }
 
