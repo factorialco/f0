@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.457.0](https://github.com/factorialco/f0/compare/f0-react-v1.456.3...f0-react-v1.457.0) (2026-04-20)
+
+
+### Features
+
+* **PageHeader:** support onClick handler on PageAction ([#3979](https://github.com/factorialco/f0/issues/3979)) ([7a8b8ca](https://github.com/factorialco/f0/commit/7a8b8ca4f51b6b268f8c0c9b80595929d805e2a1))
+
 ## [1.456.3](https://github.com/factorialco/f0/compare/f0-react-v1.456.2...f0-react-v1.456.3) (2026-04-20)
 
 
