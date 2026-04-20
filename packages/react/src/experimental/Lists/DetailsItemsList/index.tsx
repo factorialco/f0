@@ -16,6 +16,22 @@ interface DetailsItemsListProps extends WithDataTestIdProps {
   onClickSeeMore?: () => void
 }
 
+/**
+ * Leaf component wrapping the "see more" button so `useI18n()` is only read
+ * when `showSeeMore` is true. Keeps DetailsItemsList renderable without an
+ * `I18nProvider` for consumers (and tests) that don't opt into the button.
+ */
+const SeeMoreButton = ({ onClick }: { onClick?: () => void }) => {
+  const i18n = useI18n()
+  return (
+    <F0Button
+      label={i18n.actions.seeMore}
+      onClick={onClick}
+      variant="neutral"
+    />
+  )
+}
+
 const _DetailsItemsList = forwardRef<HTMLDivElement, DetailsItemsListProps>(
   function DetailsItemList(
     {
@@ -28,8 +44,6 @@ const _DetailsItemsList = forwardRef<HTMLDivElement, DetailsItemsListProps>(
     },
     ref
   ) {
-    const i18n = useI18n()
-
     return (
       <DataTestIdWrapper dataTestId={dataTestId}>
         <div ref={ref} className="flex flex-col gap-4">
@@ -62,13 +76,7 @@ const _DetailsItemsList = forwardRef<HTMLDivElement, DetailsItemsListProps>(
               </React.Fragment>
             ))}
           </div>
-          {showSeeMore && (
-            <F0Button
-              label={i18n.actions.seeMore}
-              onClick={onClickSeeMore}
-              variant="neutral"
-            />
-          )}
+          {showSeeMore && <SeeMoreButton onClick={onClickSeeMore} />}
         </div>
       </DataTestIdWrapper>
     )
