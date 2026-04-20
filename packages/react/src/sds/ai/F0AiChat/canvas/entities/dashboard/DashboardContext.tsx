@@ -178,8 +178,15 @@ export function DashboardCanvasProvider({
             content.toolCallId,
             configWithMeta as typeof updatedConfig
           )
-        } catch {
-          // Thread may not exist yet — continue with external save
+        } catch (err) {
+          // History persistence is best-effort — it's expected to fail when
+          // the thread hasn't been created yet (client-only seed). Log and
+          // continue so the external save below still runs.
+          // eslint-disable-next-line no-console
+          console.warn(
+            "[Dashboard] saveConfigToHistory failed, continuing with external save",
+            err
+          )
         }
       }
 
@@ -233,8 +240,11 @@ export function DashboardCanvasProvider({
 
       setPendingLayout(null)
       setItemTransforms(new Map())
-    } catch {
-      // Keep pending state on failure so user can retry
+    } catch (err) {
+      // Keep pending state on failure so user can retry. Surface the error
+      // so it's not silently lost.
+      // eslint-disable-next-line no-console
+      console.error("[Dashboard] save failed", err)
     }
   }
 
@@ -247,8 +257,10 @@ export function DashboardCanvasProvider({
           content.toolCallId,
           config as unknown as ChatDashboardConfig
         )
-      } catch {
-        // Best-effort
+      } catch (err) {
+        // Best-effort — log so failures aren't invisible.
+        // eslint-disable-next-line no-console
+        console.warn("[Dashboard] saveConfigToHistory failed", err)
       }
     },
     [threadId, content.toolCallId, saveConfigFn]

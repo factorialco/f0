@@ -18,7 +18,7 @@ import { DashboardHeader } from "../DashboardHeader"
 const baseContent: DashboardCanvasContent = {
   type: "dashboard",
   title: "My Dashboard",
-  config: { title: "My Dashboard", items: [] },
+  config: { title: "My Dashboard", items: [], fetchSpecs: {} },
   apiConfig: { baseUrl: "/copilotkit", headers: {} },
 }
 

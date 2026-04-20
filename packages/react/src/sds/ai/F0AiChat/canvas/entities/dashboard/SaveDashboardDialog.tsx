@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { Input } from "@/experimental/Forms/Fields/Input"
@@ -24,8 +24,17 @@ export function SaveDashboardDialog({
   const [description, setDescription] = useState(defaultDescription)
   const [isSaving, setIsSaving] = useState(false)
 
+  // Reset local state when the dialog opens so reopening with new defaults
+  // doesn't keep stale values from the previous open.
+  useEffect(() => {
+    if (isOpen) {
+      setTitle(defaultTitle)
+      setDescription(defaultDescription)
+    }
+  }, [isOpen, defaultTitle, defaultDescription])
+
   const handleSave = useCallback(async () => {
-    if (!title.trim()) return
+    if (!title.trim() || isSaving) return
     setIsSaving(true)
     try {
       await onSave(title.trim(), description.trim())
@@ -33,7 +42,9 @@ export function SaveDashboardDialog({
     } finally {
       setIsSaving(false)
     }
-  }, [title, description, onSave, onClose])
+  }, [title, description, isSaving, onSave, onClose])
+
+  const isTitleEmpty = !title.trim()
 
   return (
     <F0Dialog
@@ -44,14 +55,15 @@ export function SaveDashboardDialog({
       title={t("ai.dashboard.saveDialog.title")}
       container={null}
       primaryAction={{
-        label: isSaving
-          ? t("ai.dashboard.saveDialog.save")
-          : t("ai.dashboard.saveDialog.save"),
+        label: t("ai.dashboard.saveDialog.save"),
         onClick: handleSave,
+        loading: isSaving,
+        disabled: isSaving || isTitleEmpty,
       }}
       secondaryAction={{
         label: t("ai.dashboard.saveDialog.cancel"),
         onClick: onClose,
+        disabled: isSaving,
       }}
     >
       <div className="flex flex-col gap-4">

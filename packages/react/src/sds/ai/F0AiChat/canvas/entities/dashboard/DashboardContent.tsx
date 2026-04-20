@@ -450,41 +450,13 @@ export function DashboardContent({
   const translations = useI18n()
   const [isSaveAsDialogOpen, setIsSaveAsDialogOpen] = useState(false)
 
-  const isSavedDashboard = !!content.savedDashboardId
+  // Treat a dashboard as "saved" only when both id AND category are present —
+  // `handleSave` needs both to persist externally, so `id` alone is an
+  // incomplete state that shouldn't unlock the saved-dashboard UI.
+  const isSavedDashboard =
+    !!content.savedDashboardId && !!content.savedDashboardCategory
   const isUnsaved = !!content.savedDashboardUnsaved
   const hasDashboardActions = !!canvasActions?.dashboard
-
-  const handleSaveAs = useCallback(
-    async (title: string, description: string) => {
-      const newId = await canvasActions?.dashboard?.create(
-        title,
-        description,
-        content.config,
-        content.savedDashboardCategory
-      )
-      // After creating, transition to "saved" state (state 1 → state 2)
-      if (newId) {
-        const category = content.savedDashboardCategory
-        const meta = {
-          savedDashboardId: newId,
-          savedDashboardCategory: category,
-          savedDashboardDescription: description,
-          savedDashboardUnsaved: false,
-        }
-
-        openCanvas({ ...content, ...meta })
-
-        // Update meta store so close/re-open preserves the saved state
-        if (content.toolCallId) {
-          savedDashboardMetaStore.set(content.toolCallId, meta)
-        }
-
-        // Persist to chat history so it survives reload
-        void saveConfigToHistory({ ...content.config, ...meta })
-      }
-    },
-    [canvasActions, content, openCanvas, saveConfigToHistory]
-  )
 
   // Apply pending item transforms (chart type changes) to the config
   // without changing the base config reference — avoids data refetch.
@@ -500,6 +472,41 @@ export function DashboardContent({
       }),
     }
   }, [content.config, itemTransforms])
+
+  const handleSaveAs = useCallback(
+    async (title: string, description: string) => {
+      // Persist the config the user is actually looking at, including any
+      // pending chart-type transforms. Using `content.config` here would
+      // silently drop those transforms.
+      const newId = await canvasActions?.dashboard?.create(
+        title,
+        description,
+        effectiveConfig,
+        content.savedDashboardCategory
+      )
+      // After creating, transition to "saved" state (state 1 → state 2)
+      if (newId) {
+        const category = content.savedDashboardCategory
+        const meta = {
+          savedDashboardId: newId,
+          savedDashboardCategory: category,
+          savedDashboardDescription: description,
+          savedDashboardUnsaved: false,
+        }
+
+        openCanvas({ ...content, config: effectiveConfig, ...meta })
+
+        // Update meta store so close/re-open preserves the saved state
+        if (content.toolCallId) {
+          savedDashboardMetaStore.set(content.toolCallId, meta)
+        }
+
+        // Persist to chat history so it survives reload
+        void saveConfigToHistory({ ...effectiveConfig, ...meta })
+      }
+    },
+    [canvasActions, content, effectiveConfig, openCanvas, saveConfigToHistory]
+  )
 
   // Derive a refresh key tied only to the data identity (fetchSpecs reference).
   // The canvas-level refreshKey from CanvasPanel bumps on every content
@@ -559,7 +566,7 @@ export function DashboardContent({
           }
         />
       )}
-      {/* State B1: Saved dashboard, user edited layout — Save + Save As + Discard */}
+      {/* State B1: Saved dashboard, user edited layout — Save + Discard */}
       {isSavedDashboard && hasDashboardActions && isDirty && (
         <F0ActionBar
           label={translations.forms.actionBar.unsavedChanges}
@@ -579,7 +586,7 @@ export function DashboardContent({
           ]}
         />
       )}
-      {/* State B2: Saved dashboard, agent iterated (unsaved) but no manual edits — Save + Save As */}
+      {/* State B2: Saved dashboard, agent iterated (unsaved) but no manual edits — Save only */}
       {isSavedDashboard && hasDashboardActions && !isDirty && isUnsaved && (
         <F0ActionBar
           label={translations.forms.actionBar.unsavedChanges}
