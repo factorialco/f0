@@ -563,6 +563,8 @@ export const defaultTranslations = {
     },
   },
   forms: {
+    yes: "Yes",
+    no: "No",
     actionBar: {
       unsavedChanges: "You have changes pending to be saved",
       saving: "Saving...",

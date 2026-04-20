@@ -42,6 +42,12 @@ export {
   AiChatTranslationsProvider,
   useAiChatTranslations,
 } from "./providers/AiChatTranslationsProvider"
+export {
+  FormCardValueFormatterProvider,
+  useFormCardValueFormatter,
+  useSetFormCardValueFormatter,
+  type FormCardValueFormatterEntry,
+} from "./providers/FormCardValueFormatterProvider"
 
 // Copilot Actions
 export {
