@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.456.2](https://github.com/factorialco/f0/compare/f0-react-v1.456.1...f0-react-v1.456.2) (2026-04-20)
+
+
+### Bug Fixes
+
+* **F0Link:** hardcode opens-in-new-tab a11y text to avoid requiring I18nProvider ([#3975](https://github.com/factorialco/f0/issues/3975)) ([b370934](https://github.com/factorialco/f0/commit/b370934180b4cc9aacd301bfddc966a8ac5a51c5))
+
 ## [1.456.1](https://github.com/factorialco/f0/compare/f0-react-v1.456.0...f0-react-v1.456.1) (2026-04-20)
 
 
