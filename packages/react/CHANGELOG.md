@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.455.0](https://github.com/factorialco/f0/compare/f0-react-v1.454.0...f0-react-v1.455.0) (2026-04-20)
+
+
+### Features
+
+* allow to format fields properly in FormCard ([#3965](https://github.com/factorialco/f0/issues/3965)) ([22aa1f3](https://github.com/factorialco/f0/commit/22aa1f3db22ce8db51a65b3db49d237430a3bd89))
+
 ## [1.454.0](https://github.com/factorialco/f0/compare/f0-react-v1.453.0...f0-react-v1.454.0) (2026-04-20)
 
 
