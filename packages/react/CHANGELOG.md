@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.456.3](https://github.com/factorialco/f0/compare/f0-react-v1.456.2...f0-react-v1.456.3) (2026-04-20)
+
+
+### Bug Fixes
+
+* shrink useI18n blast radius in F0Alert and DetailsItemsList ([#3977](https://github.com/factorialco/f0/issues/3977)) ([2399164](https://github.com/factorialco/f0/commit/23991642d3c772e5a31554bbfba60c47eea550fd))
+
 ## [1.456.2](https://github.com/factorialco/f0/compare/f0-react-v1.456.1...f0-react-v1.456.2) (2026-04-20)
 
 
