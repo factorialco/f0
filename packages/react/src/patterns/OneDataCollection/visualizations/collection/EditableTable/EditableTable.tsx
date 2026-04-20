@@ -82,7 +82,6 @@ export const EditableTableCollection = <
         {...props}
         rowWrapper={RowWrapper}
         cellRenderer={EditableCellRenderer}
-        showItemActions={false}
         visualizationSettings={settings.visualization?.editableTable}
         fromVisualization="editableTable"
       />

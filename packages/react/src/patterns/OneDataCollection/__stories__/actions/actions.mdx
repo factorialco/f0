@@ -167,6 +167,10 @@ The items provide a streamlined interaction approach:
   resource, side panel or modal.
 - Do not support individual cell-level actions
 
+> **Editable table:** Item actions are rendered in a dedicated, always-visible
+> column instead of the hover overlay used by the regular table. Up to two
+> primary actions appear as buttons, with remaining actions in a dropdown menu.
+
 The actions are defined in the `itemActions` prop of the
 `useDataCollectionSource` hook via a function that get the item and returns an
 array of actions, that allows you to define diffrent actions for each item, or

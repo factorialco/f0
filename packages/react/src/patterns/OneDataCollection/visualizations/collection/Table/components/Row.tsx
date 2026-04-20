@@ -330,7 +330,22 @@ const RowComponentInner = <
       {hasItemActions &&
         !loading &&
         !nestedRowProps?.onLoadMoreChildren &&
-        !nestedRowProps?.onAddRow && (
+        !nestedRowProps?.onAddRow &&
+        (fromVisualization === "editableTable" ? (
+          <TableCell
+            key={`table-cell-${groupIndex}-${index}-actions`}
+            sticky={{ right: 0 }}
+            referenceRowType={referenceRowType}
+            className="border-0 border-b-[1px] border-l-[1px] border-solid border-f1-border-secondary bg-f1-background !px-3 align-middle"
+          >
+            <ItemActionsRow
+              className="flex flex-nowrap justify-center"
+              primaryItemActions={primaryItemActions}
+              dropdownItemActions={dropdownItemActions}
+              handleDropDownOpenChange={handleDropDownOpenChange}
+            />
+          </TableCell>
+        ) : (
           <>
             {/** Desktop item actions adds a sticky column to the table to not overflow when the table is scrolled horizontally*/}
             <td className="sticky right-0 top-0 z-10 hidden md:table-cell">
@@ -359,7 +374,7 @@ const RowComponentInner = <
               />
             </TableCell>
           </>
-        )}
+        ))}
     </TableRow>
   )
 }

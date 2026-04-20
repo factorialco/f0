@@ -3,9 +3,9 @@ import {
   DropdownItem,
   DropdownItemSeparator,
 } from "@/experimental/Navigation/Dropdown/internal"
+import { cn } from "@/lib/utils"
 import { ItemActionsDropdown } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsDropdown"
 import { ActionDefinition } from "@/patterns/OneDataCollection/item-actions"
-import { cn } from "@/lib/utils"
 
 type ItemActionsRowProps = {
   className?: string
@@ -21,11 +21,17 @@ export const ItemActionsRow = ({
   handleDropDownOpenChange,
 }: ItemActionsRowProps) => {
   return (
-    <aside className={cn("items-center justify-end gap-2 md:flex", className)}>
+    <aside
+      className={cn(
+        "pointer-events-auto items-center justify-end gap-2 md:flex",
+        className
+      )}
+    >
       {primaryItemActions.map((action) => (
         <F0Button
           key={action.label}
           label={action.label}
+          hideLabel={action.hideLabel}
           variant="outline"
           onClick={action.onClick}
           icon={action.icon}
