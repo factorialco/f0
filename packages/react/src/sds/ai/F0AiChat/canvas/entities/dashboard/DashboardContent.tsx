@@ -552,6 +552,7 @@ export function DashboardContent({
             {
               label: translations.ai.dashboard.save,
               onClick: () => setIsSaveAsDialogOpen(true),
+              icon: Save,
             },
           ]}
           secondaryActions={
@@ -609,6 +610,7 @@ export function DashboardContent({
             {
               label: translations.ai.saveChanges,
               onClick: handleSave,
+              icon: Save,
             },
           ]}
           secondaryActions={[
