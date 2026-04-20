@@ -238,5 +238,7 @@ export function useDataSource<
     setCurrentGrouping,
     currentGrouping,
     grouping,
+    defaultSortings,
+    defaultGrouping: externalDefaultGrouping ?? defaultGrouping,
   }
 }
