@@ -2,7 +2,6 @@ import { forwardRef } from "react"
 
 import ExternalLink from "@/icons/app/ExternalLink"
 import { withDataTestId } from "@/lib/data-testid"
-import { useI18n } from "@/lib/providers/i18n"
 import {
   Action,
   ActionLinkProps,
@@ -29,7 +28,6 @@ const _F0Link = forwardRef<HTMLAnchorElement, F0LinkProps>(function Link(
   },
   ref
 ) {
-  const i18n = useI18n()
   const { target } = props
   const external = target === "_blank"
 
@@ -67,7 +65,7 @@ const _F0Link = forwardRef<HTMLAnchorElement, F0LinkProps>(function Link(
       {external && (
         <>
           <F0Icon icon={ExternalLink} size="sm" aria-hidden={true} />
-          <span className="sr-only">{i18n.link.opensInNewTab}</span>
+          <span className="sr-only">opens in new tab</span>
         </>
       )}
     </Action>
