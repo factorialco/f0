@@ -660,18 +660,12 @@ export const PersistenceAcrossRemounts: Story = {
         story: `
 Manual reproduction harness for the per-visualization-filters storage race.
 
-**Steps**
-1. Click **Mount OneDataCollection**, switch between Table and Card and apply
-   filters/presets in each view. The snapshot panel shows
-   \`visualizationFilters\` populated with both \`"0"\` and \`"1"\` keys.
-2. Click **Unmount**, then **Mount** again to simulate navigating away and
-   back. Wait ~500ms; both keys should still be present.
-3. Alternatively click **Seed storage** (writes a multi-viz map directly),
-   then **Mount**, then watch the snapshot. The map should not lose any key.
-
-**Bug behaviour (without the fix)**: the snapshot collapses to a single-key
-\`visualizationFilters\` map shortly after mount because a pre-hydration write
-overwrites the persisted multi-viz state.
+Use the controls inside the story (Pre-fill storage / Reset storage / Mount)
+to verify that the persisted multi-visualization map survives a remount cycle.
+With the fix, the snapshot panel keeps both \`"0"\` and \`"1"\` keys; without it,
+one key disappears shortly after mount because a pre-hydration write overwrites
+the persisted multi-viz state. See the in-story description card for the full
+step-by-step.
         `,
       },
       source: {

@@ -14,6 +14,7 @@ import {
   DataCollectionStorage,
   DataCollectionStorageHandler,
 } from "@/lib/providers/datacollection/types"
+import { TestProviders } from "@/testing/test-utils"
 
 import { useDataCollectionStorage } from "../useDataCollectionStorage"
 import {
@@ -125,10 +126,17 @@ const buildFeatureProviders = (
   }
 }
 
-const wrapperWith =
-  (handler: DataCollectionStorageHandler) =>
-  ({ children }: { children: React.ReactNode }) =>
-    DataCollectionStorageProvider({ children, handler })
+const wrapperWith = (handler: DataCollectionStorageHandler) => {
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
+    <TestProviders>
+      <DataCollectionStorageProvider handler={handler}>
+        {children}
+      </DataCollectionStorageProvider>
+    </TestProviders>
+  )
+  Wrapper.displayName = "DeferredStorageWrapper"
+  return Wrapper
+}
 
 const flushMicrotasks = async () => {
   // Allow queued Promise callbacks (storage.get().then(...)) to run.
