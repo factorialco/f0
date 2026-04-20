@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.456.1](https://github.com/factorialco/f0/compare/f0-react-v1.456.0...f0-react-v1.456.1) (2026-04-20)
+
+
+### Bug Fixes
+
+* GraphQL Int -&gt; BigInt ID migration - allow strings as mentioned user IDs in the Rich Text editor ([#3737](https://github.com/factorialco/f0/issues/3737)) ([8a0922b](https://github.com/factorialco/f0/commit/8a0922bd2dea2f6451952be1cb85e9bd8a98b8df))
+
 ## [1.456.0](https://github.com/factorialco/f0/compare/f0-react-v1.455.0...f0-react-v1.456.0) (2026-04-20)
 
 
