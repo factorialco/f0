@@ -292,7 +292,7 @@ export const RichText: Story = {
   render() {
     const [value, setValue] = useState<{
       value: string | null
-      mentionIds?: number[]
+      mentionIds?: string[]
     }>({ value: null })
 
     const field: F0Field = {
@@ -308,7 +308,7 @@ export const RichText: Story = {
           field={field}
           value={value}
           onChange={(v) =>
-            setValue(v as { value: string | null; mentionIds?: number[] })
+            setValue(v as { value: string | null; mentionIds?: string[] })
           }
         />
       </div>

@@ -50,7 +50,7 @@ export const RequiredFieldsTest: Story = {
         z
           .object({
             value: z.string().nullable(),
-            mentionIds: z.array(z.number()).optional(),
+            mentionIds: z.array(z.string()).optional(),
           })
           .refine(
             (data) => data.value !== null && data.value.trim().length > 0,
