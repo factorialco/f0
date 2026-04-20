@@ -30,6 +30,7 @@ const F0AiChatProviderComponent = ({
   footer,
   VoiceMode,
   entityRefs,
+  canvasActions,
   toolHints,
   credits,
   creditWarning,
@@ -59,6 +60,7 @@ const F0AiChatProviderComponent = ({
       VoiceMode={VoiceMode}
       tracking={tracking}
       entityRefs={entityRefs}
+      canvasActions={canvasActions}
       toolHints={toolHints}
       credits={credits}
       creditWarning={creditWarning}

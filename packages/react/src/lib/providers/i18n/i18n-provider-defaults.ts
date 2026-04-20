@@ -332,6 +332,19 @@ export const defaultTranslations = {
     formCard: {
       moreFields: "Open to see all fields",
     },
+    dashboard: {
+      save: "Save",
+      saveToAnalytics: "Save the dashboard in Analytics",
+      saveAs: "Save as",
+      saveDialog: {
+        title: "Save dashboard",
+        titleLabel: "Title",
+        descriptionLabel: "Description",
+        descriptionPlaceholder: "Add a description (optional)",
+        save: "Save",
+        cancel: "Cancel",
+      },
+    },
     dataDownload: {
       title: "Download",
       download: "Download {{format}}",

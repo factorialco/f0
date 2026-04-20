@@ -6,6 +6,7 @@ import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { IconType } from "@/components/F0Icon"
 import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
 
+import type { CanvasActions } from "./canvas/types"
 import type { ChatDashboardConfig } from "./canvas/entities/dashboard/types"
 import type { DataDownloadDataset } from "./actions/core/dataDownload/types"
 export type { PersonProfile } from "./components/markdownRenderers/entityRef/entities/person/types"
@@ -22,9 +23,12 @@ import type { EntityRefs } from "./components/markdownRenderers/entityRef/types"
 
 /**
  * A tool call to inject via appendMessages.
- * IDs are generated internally — callers only provide the function payload.
+ * IDs are generated internally unless `id` is provided.
+ * When pairing with a tool-result message, provide the same `id`
+ * in both the tool call and the tool-result's `toolCallId`.
  */
 export type AppendToolCall = {
+  id?: string
   function: {
     name: string
     arguments: string
@@ -36,10 +40,35 @@ export type AppendToolCall = {
  * IDs are generated internally — callers only provide role, content, and
  * optional tool calls.
  */
-export type AppendMessage = {
-  role: "user" | "assistant"
-  content: string
-  toolCalls?: AppendToolCall[]
+export type AppendMessage =
+  | {
+      role: "user" | "assistant"
+      content: string
+      toolCalls?: AppendToolCall[]
+    }
+  | {
+      /** Tool result message — pairs with a toolCall from a previous assistant message */
+      role: "tool"
+      content: string
+      /**
+       * ID of the paired tool call. Must equal the corresponding assistant
+       * message's `toolCalls[i].id` — supply `AppendToolCall.id` on that call
+       * and pass the same value here so the messages are correctly paired.
+       */
+      toolCallId: string
+    }
+
+/**
+ * Pre-loaded context shown as an empty state in the chat.
+ * The `context` string is prepended to the user's first message
+ * as `<pending-context>...</pending-context>` so the agent receives it.
+ * The conversation is not created until the user actually sends a message.
+ */
+export type PendingContext = {
+  /** Human-readable label shown in the empty state (e.g. "Expenses dashboard") */
+  label: string
+  /** Full context string prepended invisibly to the first user message */
+  context: string
 }
 
 /**
@@ -60,6 +89,14 @@ export type DashboardCanvasContent = CanvasContentBase & {
   type: "dashboard"
   config: ChatDashboardConfig
   apiConfig: { baseUrl: string; headers: Record<string, string> }
+  /** Present when the dashboard is a pre-saved dashboard */
+  savedDashboardId?: string
+  /** Category of the saved dashboard */
+  savedDashboardCategory?: string
+  /** Description of the saved dashboard */
+  savedDashboardDescription?: string
+  /** True when the agent has iterated on a saved dashboard but the user hasn't saved yet */
+  savedDashboardUnsaved?: boolean
 }
 
 /**
@@ -237,6 +274,11 @@ export type AiChatProviderProps = {
    * URL builders (navigation links) for each entity type.
    */
   entityRefs?: EntityRefs
+  /**
+   * Canvas action callbacks grouped by entity type.
+   * Provides save/create functions for persisting canvas entities externally.
+   */
+  canvasActions?: CanvasActions
   /**
    * Available tool hints that the user can activate to provide intent context
    * to the AI. Renders a selector button next to the send button.

@@ -12,9 +12,11 @@ import {
   type AiChatCredits,
   type AiChatCreditWarning,
   type EntityRefs,
+  type PendingContext,
   type VisualizationMode,
   WelcomeScreenSuggestion,
 } from "./types"
+import { type CanvasActions } from "./canvas/types"
 
 /**
  * Internal state for the AiChat provider
@@ -33,6 +35,7 @@ export interface AiChatState {
   footer?: React.ReactNode
   VoiceMode?: React.ComponentType
   entityRefs?: EntityRefs
+  canvasActions?: CanvasActions
   toolHints?: AiChatToolHint[]
   credits?: AiChatCredits
   creditWarning?: AiChatCreditWarning
@@ -123,11 +126,18 @@ export type AiChatProviderReturnValue = {
    * Append messages to the current conversation.
    * Useful for injecting pre-built assistant responses (e.g. dashboards)
    * from outside the chat. IDs are generated internally.
+   *
+   * @param options.persist - Whether to persist messages to the backend thread.
+   *   Defaults to `true`. Pass `false` for client-only display messages that
+   *   should not create or modify a backend thread (e.g. seed messages).
    */
-  appendMessages: (messages: AppendMessage[]) => void
+  appendMessages: (
+    messages: AppendMessage[],
+    options?: { persist?: boolean }
+  ) => void
   /** @internal */
   setAppendMessagesFunction: (
-    fn: ((messages: AppendMessage[]) => void) | null
+    fn: ((messages: AppendMessage[], persist: boolean) => void) | null
   ) => void
   /**
    * Atomically clear the conversation and inject new messages.
@@ -199,6 +209,13 @@ export type AiChatProviderReturnValue = {
   fileDragOver: boolean
   /** @internal Set the file drag-over state */
   setFileDragOver: React.Dispatch<React.SetStateAction<boolean>>
+  /**
+   * Pre-loaded context shown as an empty state in the chat.
+   * Prepended to the first user message as `<pending-context>`.
+   */
+  pendingContext: PendingContext | null
+  /** Set pending context (pass null to clear) */
+  setPendingContext: React.Dispatch<React.SetStateAction<PendingContext | null>>
 } & Pick<
   AiChatState,
   | "greeting"
@@ -206,6 +223,7 @@ export type AiChatProviderReturnValue = {
   | "disclaimer"
   | "resizable"
   | "entityRefs"
+  | "canvasActions"
   | "toolHints"
   | "credits"
   | "creditWarning"

@@ -23,6 +23,7 @@ import {
   type AiChatMode,
   type AppendMessage,
   type CanvasContent,
+  type PendingContext,
   type VisualizationMode,
   type AiChatToolHint,
   WelcomeScreenSuggestion,
@@ -61,6 +62,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   footer: initialFooter,
   VoiceMode,
   entityRefs,
+  canvasActions,
   toolHints,
   credits,
   fileAttachments,
@@ -117,6 +119,9 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     useState<ClarifyingQuestionState | null>(null)
 
   const [fileDragOver, setFileDragOver] = useState(false)
+  const [pendingContext, setPendingContext] = useState<PendingContext | null>(
+    null
+  )
 
   // Persist chat width to localStorage
   useEffect(() => {
@@ -136,7 +141,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   )
   // Store the appendMessages function bridged from CopilotKit
   const appendMessagesFunctionRef = useRef<
-    ((messages: AppendMessage[]) => void) | null
+    ((messages: AppendMessage[], persist: boolean) => void) | null
   >(null)
   // Atomically replaces messages with a new thread (no race with reset)
   const replaceMessagesFunctionRef = useRef<
@@ -169,7 +174,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   }
 
   const setAppendMessagesFunction = (
-    fn: ((messages: AppendMessage[]) => void) | null
+    fn: ((messages: AppendMessage[], persist: boolean) => void) | null
   ) => {
     appendMessagesFunctionRef.current = fn
   }
@@ -180,14 +185,18 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     replaceMessagesFunctionRef.current = fn
   }
 
-  const appendMessages = (messages: AppendMessage[]) => {
-    appendMessagesFunctionRef.current?.(messages)
+  const appendMessages = (
+    messages: AppendMessage[],
+    options?: { persist?: boolean }
+  ) => {
+    appendMessagesFunctionRef.current?.(messages, options?.persist ?? true)
   }
 
   const clearAndAppend = (messages: AppendMessage[]) => {
     // Reset UI state for a fresh conversation
     setCurrentThreadTitle(null)
     setIsLoadingThread(false)
+    setPendingContext(null)
     setCanvasContent(null)
     if (visualizationMode === "canvas") {
       setVisualizationMode(previousVisualizationModeRef.current)
@@ -202,6 +211,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     }
     setCurrentThreadTitle(null)
     setIsLoadingThread(false)
+    setPendingContext(null)
     // Close canvas when starting a new conversation
     setCanvasContent(null)
     if (visualizationMode === "canvas") {
@@ -214,6 +224,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
       loadThreadFunctionRef.current(threadId)
     }
     setCurrentThreadTitle(title)
+    setPendingContext(null)
     // Close canvas when loading a different thread
     setCanvasContent(null)
     if (visualizationMode === "canvas") {
@@ -343,6 +354,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         resetChatWidth,
         tracking,
         entityRefs,
+        canvasActions,
         toolHints,
         credits,
         fileAttachments,
@@ -357,6 +369,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setClarifyingQuestion,
         fileDragOver,
         setFileDragOver,
+        pendingContext,
+        setPendingContext,
       }}
     >
       {children}
@@ -416,6 +430,7 @@ export function useAiChat(): AiChatProviderReturnValue {
       resetChatWidth: noopFn,
       tracking: undefined,
       entityRefs: undefined,
+      canvasActions: undefined,
       toolHints: undefined,
       credits: undefined,
       creditWarning: undefined,
@@ -431,6 +446,8 @@ export function useAiChat(): AiChatProviderReturnValue {
       setClarifyingQuestion: noopFn,
       fileDragOver: false,
       setFileDragOver: noopFn,
+      pendingContext: null,
+      setPendingContext: noopFn,
     }
   }
 
