@@ -8,4 +8,8 @@ export type PersonProfile = {
   lastName: string
   avatarUrl?: string
   jobTitle?: string
+  managerId?: string
+  managerFirstName?: string
+  managerLastName?: string
+  managerAvatarUrl?: string
 }

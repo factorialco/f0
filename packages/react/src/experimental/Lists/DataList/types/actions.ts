@@ -11,6 +11,7 @@ export type CopyActionType = {
 export type NavigateActionType = {
   type: "navigate"
   href: string
+  showChevron?: boolean
 }
 
 export type OpenLinkActionType = {

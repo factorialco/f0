@@ -13,7 +13,9 @@ import type { PersonProfile } from "../types"
 const mockResolver = vi.fn<(id: string) => Promise<PersonProfile>>()
 let mockEntityRefs: {
   resolvers?: { person?: typeof mockResolver }
-  urls?: { person?: (id: string) => string }
+  urls?: {
+    person?: (id: string) => string
+  }
 } = {
   resolvers: { person: mockResolver },
 }
@@ -32,6 +34,9 @@ const profile: PersonProfile = {
   lastName: "García",
   avatarUrl: "https://example.com/avatar.jpg",
   jobTitle: "Engineer",
+  managerId: "99",
+  managerFirstName: "Marta",
+  managerLastName: "Ruiz",
 }
 
 describe("PersonEntityRef", () => {
@@ -110,5 +115,78 @@ describe("PersonEntityRef", () => {
     await waitFor(() => {
       expect(screen.getByText("Ana García")).toBeInTheDocument()
     })
+  })
+
+  it("renders manager details", async () => {
+    const user = userEvent.setup()
+    mockResolver.mockResolvedValue(profile)
+
+    render(<PersonEntityRef id="42" label="Ana García" />)
+
+    await user.hover(screen.getByRole("button"))
+
+    await waitFor(() => {
+      expect(screen.getByText("Marta Ruiz")).toBeInTheDocument()
+    })
+  })
+
+  it("renders manager as a link when person URL builder is provided", async () => {
+    const user = userEvent.setup()
+    mockResolver.mockResolvedValue(profile)
+    mockEntityRefs = {
+      resolvers: { person: mockResolver },
+      urls: {
+        person: (pid) => `https://app.example.com/people/${pid}`,
+      },
+    }
+
+    render(<PersonEntityRef id="42" label="Ana García" />)
+
+    await user.hover(screen.getByRole("button"))
+
+    await waitFor(() => {
+      expect(screen.getByText("Marta Ruiz")).toBeInTheDocument()
+    })
+
+    const managerLink = screen.getByText("Marta Ruiz").closest("a")
+    expect(managerLink).toHaveAttribute(
+      "href",
+      "https://app.example.com/people/99"
+    )
+  })
+
+  it("renders manager as plain text when URL builder is absent", async () => {
+    const user = userEvent.setup()
+    mockResolver.mockResolvedValue(profile)
+
+    render(<PersonEntityRef id="42" label="Ana García" />)
+
+    await user.hover(screen.getByRole("button"))
+
+    await waitFor(() => {
+      expect(screen.getByText("Marta Ruiz")).toBeInTheDocument()
+    })
+
+    expect(screen.getByText("Marta Ruiz").closest("a")).toBeNull()
+  })
+
+  it("omits metadata rows when optional fields are absent", async () => {
+    const user = userEvent.setup()
+    mockResolver.mockResolvedValue({
+      id: "42",
+      firstName: "Ana",
+      lastName: "García",
+      jobTitle: "Engineer",
+    })
+
+    render(<PersonEntityRef id="42" label="Ana García" />)
+
+    await user.hover(screen.getByRole("button"))
+
+    await waitFor(() => {
+      expect(screen.getByText("Engineer")).toBeInTheDocument()
+    })
+
+    expect(screen.queryByText("Marta Ruiz")).not.toBeInTheDocument()
   })
 })
