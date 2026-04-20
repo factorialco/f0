@@ -54,10 +54,12 @@ type SettingsProps<
   onVisualizationChange: (index: number) => void
   grouping?: Grouping
   currentGrouping?: GroupingState<R, Grouping>
+  defaultGrouping?: GroupingState<R, Grouping>
   onGroupingChange: (groupingState: GroupingState<R, Grouping>) => void
   sortings?: SortingsDefinition
   summaries?: SummariesDefinition
   currentSortings: SortingsState<Sortings>
+  defaultSortings?: SortingsState<Sortings>
   onSortingsChange: (sortings: SortingsState<Sortings>) => void
 }
 
@@ -76,9 +78,11 @@ export const Settings = <
   grouping,
   // summaries, // TODO: implement summaries selector
   currentGrouping,
+  defaultGrouping,
   onGroupingChange,
   sortings,
   currentSortings,
+  defaultSortings,
   onSortingsChange,
 }: SettingsProps<
   R,
@@ -154,10 +158,11 @@ export const Settings = <
   const settingsContext = useDataCollectionSettings()
 
   const onResetSettings = () => {
-    // Call to the all visualizations reset handler
     Object.values(collectionVisualizations).forEach((visualization) => {
       visualization.settings.resetHandler?.(settingsContext)
     })
+    onSortingsChange(defaultSortings ?? null)
+    onGroupingChange(defaultGrouping)
   }
 
   return (
