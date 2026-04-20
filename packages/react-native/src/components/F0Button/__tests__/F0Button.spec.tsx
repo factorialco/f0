@@ -73,6 +73,24 @@ describe("F0Button", () => {
     })
   })
 
+  it("Snapshot - fullWidth button", () => {
+    const { toJSON } = render(<F0Button {...defaultProps} fullWidth />)
+    expect(toJSON()).toMatchSnapshot()
+  })
+
+  it("applies w-full wrapper when fullWidth is true", () => {
+    const { toJSON } = render(<F0Button {...defaultProps} fullWidth />)
+    const tree = toJSON() as { props: { className: string } }
+    expect(tree.props.className).toContain("w-full")
+    expect(tree.props.className).not.toContain("flex-1")
+  })
+
+  it("applies items-start wrapper when fullWidth is false", () => {
+    const { toJSON } = render(<F0Button {...defaultProps} />)
+    const tree = toJSON() as { props: { className: string } }
+    expect(tree.props.className).toContain("items-start")
+  })
+
   it("Snapshot - round button with hidden label", () => {
     const { toJSON } = render(<F0Button {...defaultProps} round hideLabel />)
     expect(toJSON()).toMatchSnapshot()

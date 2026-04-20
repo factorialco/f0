@@ -165,7 +165,7 @@ const F0Button = React.memo(
     })
 
     return (
-      <View className={`flex ${fullWidth ? "flex-1" : "items-start"}`}>
+      <View className={`flex ${fullWidth ? "w-full" : "items-start"}`}>
         <PressableFeedback
           ref={ref}
           {...forwardedProps}
