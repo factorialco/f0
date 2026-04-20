@@ -249,8 +249,8 @@ const OneDataCollectionComp = <
     activeSetCurrentFilters,
   ])
 
-  const defaultSortings = useRef(currentSortings)
-  const defaultGrouping = useRef(currentGrouping)
+  const defaultSortings = useRef(source.defaultSortings ?? currentSortings)
+  const defaultGrouping = useRef(source.defaultGrouping ?? currentGrouping)
 
   const { emitSortingChange } = useEventEmitter<Sortings>({
     defaultSorting: defaultSortings.current,
