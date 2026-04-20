@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.456.0](https://github.com/factorialco/f0/compare/f0-react-v1.455.0...f0-react-v1.456.0) (2026-04-20)
+
+
+### Features
+
+* **F0AiChat:** saved dashboards, canvas actions, pending context ([#3957](https://github.com/factorialco/f0/issues/3957)) ([47b799e](https://github.com/factorialco/f0/commit/47b799e40f90d43e81e3f485ada10996f147e195))
+
 ## [1.455.0](https://github.com/factorialco/f0/compare/f0-react-v1.454.0...f0-react-v1.455.0) (2026-04-20)
 
 
