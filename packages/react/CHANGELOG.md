@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.454.0](https://github.com/factorialco/f0/compare/f0-react-v1.453.0...f0-react-v1.454.0) (2026-04-20)
+
+
+### Features
+
+* editable table with actions column ([#3951](https://github.com/factorialco/f0/issues/3951)) ([059cb22](https://github.com/factorialco/f0/commit/059cb2205132ac083e98f5e6e8bd28f8e110503a))
+
 ## [1.453.0](https://github.com/factorialco/f0/compare/f0-react-v1.452.0...f0-react-v1.453.0) (2026-04-17)
 
 
