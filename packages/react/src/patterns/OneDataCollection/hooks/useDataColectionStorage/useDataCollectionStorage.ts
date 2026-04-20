@@ -82,6 +82,11 @@ export const useDataCollectionStorage = <
       return
     }
 
+    // Reset readiness while a new hydration is in flight so the write effect
+    // cannot schedule a debounced write under the new key using stale provider
+    // values left over from the previous key/inactive state.
+    setStorageReady(false)
+
     storageProvider.get(key!).then((status) => {
       Object.entries(featureProviders).forEach(
         ([featureName, featureProvider]) => {

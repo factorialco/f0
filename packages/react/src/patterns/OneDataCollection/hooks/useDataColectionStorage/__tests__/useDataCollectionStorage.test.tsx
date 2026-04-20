@@ -1,4 +1,4 @@
-import { act, renderHook } from "@testing-library/react"
+import { act } from "@testing-library/react"
 import {
   afterEach,
   beforeEach,
@@ -14,7 +14,7 @@ import {
   DataCollectionStorage,
   DataCollectionStorageHandler,
 } from "@/lib/providers/datacollection/types"
-import { TestProviders } from "@/testing/test-utils"
+import { TestProviders, zeroRenderHook } from "@/testing/test-utils"
 
 import { useDataCollectionStorage } from "../useDataCollectionStorage"
 import {
@@ -181,7 +181,7 @@ describe("useDataCollectionStorage — pre-hydration write race", () => {
       visualizationFilters: {},
     })
 
-    const { rerender } = renderHook(
+    const { rerender } = zeroRenderHook(
       ({ providers }) =>
         useDataCollectionStorage(
           "test/v1",
@@ -237,7 +237,7 @@ describe("useDataCollectionStorage — pre-hydration write race", () => {
       visualizationFilters: { "0": { seeded: true } },
     })
 
-    const { unmount } = renderHook(
+    const { unmount } = zeroRenderHook(
       ({ providers }) =>
         useDataCollectionStorage(
           "test/v1",
@@ -279,7 +279,7 @@ describe("useDataCollectionStorage — pre-hydration write race", () => {
       >,
     })
 
-    const { rerender } = renderHook(
+    const { rerender } = zeroRenderHook(
       ({ providers }) =>
         useDataCollectionStorage(
           "test/v1",
@@ -326,7 +326,7 @@ describe("useDataCollectionStorage — pre-hydration write race", () => {
     const { handler, setSpy } = createDeferredHandler()
     const { buildProviders } = buildFeatureProviders()
 
-    renderHook(
+    zeroRenderHook(
       () =>
         useDataCollectionStorage(
           undefined,
@@ -350,7 +350,7 @@ describe("useDataCollectionStorage — pre-hydration write race", () => {
     const { handler, setSpy } = createDeferredHandler()
     const { buildProviders } = buildFeatureProviders()
 
-    renderHook(
+    zeroRenderHook(
       () =>
         useDataCollectionStorage(
           "test/v1",
@@ -369,5 +369,101 @@ describe("useDataCollectionStorage — pre-hydration write race", () => {
     })
 
     expect(setSpy).not.toHaveBeenCalled()
+  })
+
+  it("blocks writes during the second hydration when key changes", async () => {
+    // First key already hydrated with cached state.
+    const persistedA: DataCollectionStorage = {
+      visualization: 0,
+      visualizationFilters: { "0": { fromA: true } },
+    } as DataCollectionStorage
+
+    const { handler, resolveGet, setSpy } = createDeferredHandler(persistedA)
+
+    const restoredA = buildFeatureProviders({
+      visualization: 0,
+      visualizationFilters: persistedA.visualizationFilters as Record<
+        string,
+        Record<string, unknown>
+      >,
+    })
+
+    const { rerender } = zeroRenderHook(
+      ({ providers, storageKey }) =>
+        useDataCollectionStorage(
+          storageKey,
+          features,
+          providers as AnyFeatureProviders
+        ),
+      {
+        wrapper: wrapperWith(handler),
+        initialProps: {
+          providers: restoredA.buildProviders(),
+          storageKey: "key-a/v1",
+        },
+      }
+    )
+
+    // Resolve hydration for key A so storageReady becomes true.
+    await act(async () => {
+      resolveGet(persistedA)
+    })
+    await flushMicrotasks()
+    await act(async () => {
+      vi.advanceTimersByTime(500)
+    })
+    setSpy.mockClear()
+
+    // Switch to key B with a seed (pre-hydration) provider state. Without the
+    // storageReady reset, the write effect would see storageReady=true and
+    // schedule a debounced write under key B with the seeded snapshot,
+    // potentially landing before key B's get resolves.
+    const seededB = buildFeatureProviders({
+      visualization: 0,
+      visualizationFilters: {},
+    })
+    rerender({
+      providers: seededB.buildProviders(),
+      storageKey: "key-b/v1",
+    })
+
+    // Advance well past the debounce window without resolving get(B).
+    await act(async () => {
+      vi.advanceTimersByTime(1000)
+    })
+
+    // No write should have happened under key B before its hydration.
+    expect(setSpy).not.toHaveBeenCalled()
+
+    // Now resolve hydration for key B and simulate the consumer applying the
+    // restored providers; subsequent writes must target key-b/v1, not key-a/v1.
+    const persistedB: DataCollectionStorage = {
+      visualization: 1,
+      visualizationFilters: { "0": { fromB: true }, "1": { fromB: true } },
+    } as DataCollectionStorage
+    await act(async () => {
+      resolveGet(persistedB)
+    })
+    await flushMicrotasks()
+
+    const restoredB = buildFeatureProviders({
+      visualization: 1,
+      visualizationFilters: persistedB.visualizationFilters as Record<
+        string,
+        Record<string, unknown>
+      >,
+    })
+    rerender({
+      providers: restoredB.buildProviders(),
+      storageKey: "key-b/v1",
+    })
+
+    await act(async () => {
+      vi.advanceTimersByTime(500)
+    })
+
+    for (const call of setSpy.mock.calls) {
+      expect(call[0]).toBe("key-b/v1")
+    }
   })
 })
