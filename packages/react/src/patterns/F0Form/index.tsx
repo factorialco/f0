@@ -144,6 +144,7 @@ export {
 export type {
   F0AiFormEntry,
   F0AiAvailableFormDefinition,
+  AvailableFormDefinitionItem,
 } from "./F0AiFormRegistry"
 
 // Export AI schema description utility
