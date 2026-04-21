@@ -107,50 +107,9 @@ jobs:
         with:
           workspace: "@factorialco/f0-react-native"
           registry_token: ${{ secrets.NPMJS_TOKEN }}
-      - name: Notify Slack
-        if: ${{ steps.publish.outputs.published == 'true' }}
-        env:
-          RELEASE_BODY_RAW: ${{ github.event.release.body }}
-          RELEASE_URL: ${{ github.event.release.html_url }}
-          RELEASE_NAME: ${{ github.event.release.name }}
-          PACKAGE: "@factorialco/f0-react-native"
-          NPM_URL: "https://www.npmjs.com/package/@factorialco/f0-react-native?activeTab=versions"
-        run: |
-          # 1️⃣  Convert GitHub-style markdown ➜ Slack mrkdwn
-          RELEASE_BODY=$(echo "$RELEASE_BODY_RAW" | perl -pe '
-            s/^### (.+)$/*\1*/;           # h3 ➜ bold
-            s/^## (.+)$/*\1*/;            # h2 ➜ bold
-            s/^(\s*[-*])\s+/• /;          # bullets
-            s/\[([^\]]+)\]\(([^)]+)\)/<\2|\1>/g;  # links
-          ')
-
-          # 2️⃣  JSON-escape the body (newline-preserving)
-          BODY_JSON=$(printf "%s" "$RELEASE_BODY" | jq -Rs .)
-
-          # 3️⃣  Build Block-Kit payload with jq
-          jq -n --arg body "$RELEASE_BODY" \
-                --arg rel_url "$RELEASE_URL" \
-                --arg rel_name "$RELEASE_NAME" \
-                --arg npm "$NPM_URL" \
-                --arg pkg "$PACKAGE" '
-          {
-            blocks: [
-              { type: "header",
-                text: { type: "plain_text", text: "📱 New version \($rel_name) released" } },
-              { type: "section",
-                text: { type: "mrkdwn", text: $body } },
-              { type: "context",
-                elements: [
-                  { type: "mrkdwn", text: "<\($npm)|npm package>" },
-                  { type: "mrkdwn", text: "<\($rel_url)|GitHub release>" }
-                ] }
-            ]
-          }' > /tmp/payload.json
-
-          # 4️⃣  Send
-          curl -X POST -H "Content-Type: application/json" \
-              --data @/tmp/payload.json \
-              "${{ secrets.SLACK_WEBHOOK_ZERO_UPDATER }}"
+      # Slack notification moved to publish-expo-production.yaml
+      # which sends the notification after publishing the EAS production update
+      # and creating the QR code update PR
 
   publish-core:
     name: "[🎯 CORE] Publish to npm"
