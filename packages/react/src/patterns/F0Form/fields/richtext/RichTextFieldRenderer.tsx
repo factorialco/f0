@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react"
+import { useCallback, useEffect, useRef } from "react"
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
 import {
@@ -25,9 +25,23 @@ export function RichTextFieldRenderer({
   error,
   loading,
 }: RichTextFieldRendererProps) {
-  const { ref: _formRef, ...formFieldRest } = formField
+  const { ref: formRef, ...formFieldRest } = formField
   const editorRef = useRef<RichTextEditorHandle>(null)
-  const lastInternalValueRef = useRef<string | null | undefined>(undefined)
+  const lastInternalContentRef = useRef<string>("")
+
+  // Compose react-hook-form's ref (used for shouldFocusError) with our own
+  const composedRef = useCallback(
+    (handle: RichTextEditorHandle | null) => {
+      ;(
+        editorRef as React.MutableRefObject<RichTextEditorHandle | null>
+      ).current = handle
+      // react-hook-form expects a callback ref for focus management
+      if (typeof formRef === "function") {
+        formRef(handle)
+      }
+    },
+    [formRef]
+  )
 
   // fillForm sets a plain string while the editor's onChange produces a
   // RichTextValue object. Normalise both shapes into a content string.
@@ -39,14 +53,14 @@ export function RichTextFieldRenderer({
   // The editor only reads initialEditorState on mount, so programmatic updates
   // via react-hook-form's setValue need to be pushed explicitly.
   useEffect(() => {
-    if (currentContent !== lastInternalValueRef.current) {
+    if (currentContent !== lastInternalContentRef.current) {
       editorRef.current?.setContent(currentContent)
     }
   }, [currentContent])
 
   return (
     <RichTextEditor
-      ref={editorRef}
+      ref={composedRef}
       {...formFieldRest}
       title={field.label}
       placeholder={field.placeholder ?? ""}
@@ -61,7 +75,7 @@ export function RichTextFieldRenderer({
         content: currentContent,
       }}
       onChange={(result) => {
-        lastInternalValueRef.current = result.value
+        lastInternalContentRef.current = result.value ?? ""
         formField.onChange({
           value: result.value,
           mentionIds: result.mentionIds,

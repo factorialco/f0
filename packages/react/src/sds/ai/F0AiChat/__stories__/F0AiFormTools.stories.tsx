@@ -575,6 +575,21 @@ const presentableFormSchema = z.object({
     rows: 3,
     helpText: "Internal notes visible only to HR",
   }),
+  welcomeMessage: f0FormField(
+    z.object({
+      value: z.string().optional(),
+      mentionIds: z.array(z.number()).optional(),
+    }),
+    {
+      label: "Welcome Message",
+      section: "additional",
+      fieldType: "richtext",
+      placeholder: "Write a welcome message for the new employee...",
+      height: "sm",
+      plainHtmlMode: true,
+      helpText: "Rich text welcome message sent on the first day",
+    }
+  ),
   termsAccepted: f0FormField(z.boolean(), {
     label: "Accepts Terms & Conditions",
     section: "additional",
@@ -761,6 +776,7 @@ const presentableFormDefinitions: F0AiAvailableFormDefinition[] = [
       emergencyContactName: undefined,
       emergencyContactPhone: undefined,
       notes: undefined,
+      welcomeMessage: { value: "" },
       termsAccepted: false,
     },
     sections: {
