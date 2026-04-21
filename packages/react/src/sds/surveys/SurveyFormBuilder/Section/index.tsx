@@ -70,18 +70,24 @@ export const Section = ({
     deleteElement(id)
   }
 
+  const hasLockedQuestions = questions.some((q) => q.locked)
+
   const actions = [
     {
       label: t("surveyFormBuilder.actions.duplicateSection"),
       icon: LayersFront,
       onClick: handleDuplicateSection,
     },
-    {
-      label: t("surveyFormBuilder.actions.deleteSection"),
-      icon: Delete,
-      onClick: handleDeleteSection,
-      critical: true,
-    },
+    ...(!hasLockedQuestions
+      ? [
+          {
+            label: t("surveyFormBuilder.actions.deleteSection"),
+            icon: Delete,
+            onClick: handleDeleteSection,
+            critical: true,
+          },
+        ]
+      : []),
   ]
 
   const inputDisabled = disabled || locked || answering

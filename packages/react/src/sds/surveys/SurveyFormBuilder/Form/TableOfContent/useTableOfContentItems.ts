@@ -250,6 +250,9 @@ export const useTableOfContentItems = (
           const sectionId = `co-creation-section-${section.id}`
           const questions = section.questions ?? []
           const isSingleQuestion = questions.length === 1
+          const hasLockedQuestions = questions.some(
+            (q: QuestionElement) => q.locked
+          )
 
           return {
             id: sectionId,
@@ -269,13 +272,17 @@ export const useTableOfContentItems = (
                         type: "section",
                       }),
                   },
-                  { type: "separator" as const },
-                  {
-                    label: deleteSectionLabel,
-                    icon: Delete,
-                    onClick: () => deleteElement(section.id),
-                    critical: true,
-                  },
+                  ...(!hasLockedQuestions
+                    ? [
+                        { type: "separator" as const },
+                        {
+                          label: deleteSectionLabel,
+                          icon: Delete,
+                          onClick: () => deleteElement(section.id),
+                          critical: true,
+                        },
+                      ]
+                    : []),
                 ] satisfies TOCItemAction[],
               }),
             children: questions.map((question: QuestionElement) => ({

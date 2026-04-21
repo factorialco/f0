@@ -16,7 +16,7 @@ const makeQuestion = (id: string, title: string): SurveyFormBuilderElement => ({
 const makeSection = (
   id: string,
   title: string,
-  questions: { id: string; title: string }[],
+  questions: { id: string; title: string; locked?: boolean }[],
   locked = false
 ): SurveyFormBuilderElement => ({
   type: "section",
@@ -27,6 +27,7 @@ const makeSection = (
       id: q.id,
       title: q.title,
       type: "text" as const,
+      locked: q.locked,
     })),
     locked,
   },
@@ -118,6 +119,38 @@ describe("SurveyFormBuilder", () => {
       "[class*='cursor-not-allowed']"
     )
     expect(notAllowed.length).toBeGreaterThanOrEqual(2) // section header + question
+  })
+
+  it("does not show delete section action when section contains locked questions", async () => {
+    const elements: SurveyFormBuilderElement[] = [
+      makeSection("s1", "Section With Locked", [
+        { id: "q1", title: "Q1", locked: true },
+        { id: "q2", title: "Q2" },
+      ]),
+    ]
+
+    render(<SurveyFormBuilder elements={elements} onChange={vi.fn()} />)
+
+    // Hover the section to reveal the actions dropdown
+    const sectionTitle = screen.getByDisplayValue("Section With Locked")
+    await userEvent.hover(sectionTitle)
+
+    // Click the section actions dropdown trigger (first "Actions" button inside the section header)
+    const sectionContainer = sectionTitle.closest("[id^='co-creation-section']")
+    const actionsButton =
+      // eslint-disable-next-line testing-library/no-node-access
+      sectionContainer!.querySelector<HTMLElement>(
+        "button[aria-label='Actions']"
+      )!
+    await userEvent.click(actionsButton)
+
+    // "Duplicate section" should still be available
+    await waitFor(() => {
+      expect(screen.getByText("Duplicate section")).toBeInTheDocument()
+    })
+
+    // "Delete section" should NOT be available
+    expect(screen.queryByText("Delete section")).not.toBeInTheDocument()
   })
 
   it("shows confirmation dialog when moving the last question out of a section", async () => {
