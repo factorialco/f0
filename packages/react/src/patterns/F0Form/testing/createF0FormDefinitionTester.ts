@@ -59,5 +59,7 @@ export function createF0FormDefinitionTester<TSchema extends F0FormSchema>(
     schema: definition.schema,
     defaultValues: definition.defaultValues,
     errorMap: options?.errorMap,
+    // Adapt the definition's onSubmit ({ data }) signature to the tester's (data) signature
+    onSubmit: (data) => definition.onSubmit({ data }),
   })
 }

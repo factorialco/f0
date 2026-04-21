@@ -1,6 +1,6 @@
 import { z, type ZodErrorMap, type ZodTypeAny } from "zod"
 
-import type { F0FormSchema } from "../types"
+import type { F0FormSchema, F0FormSubmitResult } from "../types"
 
 import { buildDynamicSchema } from "../conditionalResolver"
 import {
@@ -64,11 +64,41 @@ export interface F0FormTester<TSchema extends F0FormSchema> {
    * for the given values, merged with the tester's defaultValues.
    */
   getVisibleFields(values?: Record<string, unknown>): string[]
+
+  /**
+   * Run schema validation and, if it passes, call the `onSubmit` handler
+   * provided in the options. Useful for testing server-side errors that an
+   * `onSubmit` returns (e.g. duplicate email, insufficient permissions).
+   *
+   * If schema validation fails the handler is never called and the result
+   * is `{ success: false, errors: <validation errors> }`.
+   *
+   * Requires `onSubmit` to be set in `createF0FormTesterOptions`.
+   *
+   * @example
+   * ```ts
+   * const tester = createF0FormDefinitionTester(result.current)
+   *
+   * const result = await tester.submit({ name: "Alice", email: "taken@example.com" })
+   * expect(result.success).toBe(false)
+   * expect((result as { errors: Record<string,string> }).errors.email)
+   *   .toBe("Email already registered")
+   * ```
+   */
+  submit(values?: Record<string, unknown>): Promise<F0FormSubmitResult>
 }
 
 export interface CreateF0FormTesterOptions<TSchema extends F0FormSchema> {
   schema: TSchema
   defaultValues?: Partial<z.infer<TSchema>>
+  /**
+   * Optional submit handler. When provided, `tester.submit(values)` will run
+   * schema validation first and then call this handler if validation passes.
+   * Mirrors the signature used inside F0Form — the tester supplies `data`.
+   */
+  onSubmit?: (
+    data: z.infer<TSchema>
+  ) => Promise<F0FormSubmitResult> | F0FormSubmitResult
   /**
    * Optional Zod errorMap. Defaults to Zod's built-in English messages.
    * Pass a custom errorMap to get localised messages in assertions.
@@ -120,7 +150,7 @@ function flattenZodErrors(error: z.ZodError): Record<string, string> {
 export function createF0FormTester<TSchema extends F0FormSchema>(
   options: CreateF0FormTesterOptions<TSchema>
 ): F0FormTester<TSchema> {
-  const { schema, defaultValues, errorMap } = options
+  const { schema, defaultValues, errorMap, onSubmit } = options
 
   const validate = async (
     values?: Record<string, unknown>
@@ -182,11 +212,31 @@ export function createF0FormTester<TSchema extends F0FormSchema>(
     return visible
   }
 
+  const submit = async (
+    values?: Record<string, unknown>
+  ): Promise<F0FormSubmitResult> => {
+    if (!onSubmit) {
+      throw new Error(
+        "createF0FormTester: cannot call submit() without an onSubmit handler. " +
+          "Pass onSubmit in the options, or use createF0FormDefinitionTester which reads it from the definition."
+      )
+    }
+
+    const validation = await validate(values)
+    if (!validation.valid) {
+      return { success: false, errors: validation.errors }
+    }
+
+    const merged = { ...(defaultValues ?? {}), ...(values ?? {}) }
+    return onSubmit(merged as z.infer<TSchema>)
+  }
+
   return {
     validate,
     validateField,
     describeFields,
     getDefaultValues,
     getVisibleFields,
+    submit,
   }
 }

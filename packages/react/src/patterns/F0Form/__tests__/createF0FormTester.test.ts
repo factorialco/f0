@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import { z } from "zod"
 
 import { useF0FormDefinition } from "@/patterns/F0WizardForm/useF0FormDefinition"
@@ -242,26 +242,28 @@ describe("createF0FormTester", () => {
     })
   })
 
-  describe("validateField()", async () => {
-    const tester = createF0FormTester({ schema: contactSchema })
+  describe("validateField()", () => {
+    it("returns only the error for the specified field", async () => {
+      const tester = createF0FormTester({ schema: contactSchema })
 
-    const result = await tester.validateField("email", {
-      name: "Alice",
-      email: "bad",
+      const result = await tester.validateField("email", {
+        name: "Alice",
+        email: "bad",
+      })
+
+      expect(result.valid).toBe(false)
+      expect(result.errors).toHaveProperty("email")
+      expect(Object.keys(result.errors)).toHaveLength(1)
     })
 
-    expect(result.valid).toBe(false)
-    expect(result.errors).toHaveProperty("email")
-    expect(Object.keys(result.errors)).toHaveLength(1)
-  })
+    it("returns valid when the specified field passes", async () => {
+      const tester = createF0FormTester({ schema: contactSchema })
 
-  it("returns valid when the specified field passes", async () => {
-    const tester = createF0FormTester({ schema: contactSchema })
+      const result = await tester.validateField("name", { name: "Alice" })
 
-    const result = await tester.validateField("name", { name: "Alice" })
-
-    expect(result.valid).toBe(true)
-    expect(result.errors).toEqual({})
+      expect(result.valid).toBe(true)
+      expect(result.errors).toEqual({})
+    })
   })
 })
 
@@ -388,5 +390,115 @@ describe("createF0FormDefinitionTester", () => {
     })
 
     expect(valid).toBe(true)
+  })
+
+  describe("submit()", () => {
+    it("calls onSubmit and returns success when validation passes", async () => {
+      const { result } = zeroRenderHook(() =>
+        useF0FormDefinition({
+          name: "test-form",
+          schema: contactSchema,
+          onSubmit: async () => ({ success: true }),
+        })
+      )
+
+      const tester = createF0FormDefinitionTester(result.current)
+
+      const submitResult = await tester.submit({
+        name: "Alice",
+        email: "alice@example.com",
+      })
+
+      expect(submitResult.success).toBe(true)
+    })
+
+    it("returns server-side field errors from onSubmit without throwing", async () => {
+      // Simulates a duplicate-email check that only the server can perform
+      const { result } = zeroRenderHook(() =>
+        useF0FormDefinition({
+          name: "test-form",
+          schema: contactSchema,
+          onSubmit: async () => ({
+            success: false,
+            errors: { email: "Email already registered" },
+          }),
+        })
+      )
+
+      const tester = createF0FormDefinitionTester(result.current)
+
+      const submitResult = await tester.submit({
+        name: "Alice",
+        email: "taken@example.com",
+      })
+
+      expect(submitResult.success).toBe(false)
+      expect(submitResult.success === false && submitResult.errors?.email).toBe(
+        "Email already registered"
+      )
+    })
+
+    it("returns a root-level error message from onSubmit", async () => {
+      const { result } = zeroRenderHook(() =>
+        useF0FormDefinition({
+          name: "test-form",
+          schema: contactSchema,
+          onSubmit: async () => ({
+            success: false,
+            rootMessage: "You do not have permission to update this employee",
+          }),
+        })
+      )
+
+      const tester = createF0FormDefinitionTester(result.current)
+
+      const submitResult = await tester.submit({
+        name: "Alice",
+        email: "alice@example.com",
+      })
+
+      expect(submitResult.success).toBe(false)
+      expect(submitResult.success === false && submitResult.rootMessage).toBe(
+        "You do not have permission to update this employee"
+      )
+    })
+
+    it("does not call onSubmit when schema validation fails", async () => {
+      const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+      const { result } = zeroRenderHook(() =>
+        useF0FormDefinition({
+          name: "test-form",
+          schema: contactSchema,
+          onSubmit,
+        })
+      )
+
+      const tester = createF0FormDefinitionTester(result.current)
+
+      // email is invalid — schema validation should block the call
+      await tester.submit({ name: "Alice", email: "not-an-email" })
+
+      expect(onSubmit).not.toHaveBeenCalled()
+    })
+
+    it("returns validation errors directly when schema validation fails", async () => {
+      const { result } = zeroRenderHook(() =>
+        useF0FormDefinition({
+          name: "test-form",
+          schema: contactSchema,
+          onSubmit: async () => ({ success: true }),
+        })
+      )
+
+      const tester = createF0FormDefinitionTester(result.current)
+
+      const submitResult = await tester.submit({ name: "Alice", email: "" })
+
+      expect(submitResult.success).toBe(false)
+      expect(
+        submitResult.success === false && submitResult.errors?.email
+      ).toBeTruthy()
+    })
   })
 })
