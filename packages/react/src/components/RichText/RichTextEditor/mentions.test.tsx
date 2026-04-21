@@ -76,7 +76,7 @@ describe("RichTextEditor mentions", () => {
       .reverse()
       .find((value) => Array.isArray(value?.mentionIds))
 
-    expect(lastCallWithMentions?.mentionIds).toEqual([1, 2, 3, 4])
+    expect(lastCallWithMentions?.mentionIds).toEqual(["1", "2", "3", "4"])
   })
 
   it("supports mentions across paragraphs and consecutive mentions", async () => {
