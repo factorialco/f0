@@ -50,6 +50,12 @@ import {
  *   expect(valid).toBe(true)
  * })
  * ```
+ *
+ * @remarks
+ * This utility only supports **single-schema** form definitions
+ * (`F0FormDefinitionSingleSchema`). If your form uses per-section definitions
+ * (the array variant returned by {@link useF0FormDefinition}), you must create
+ * a {@link createF0FormTester} for each section's schema directly.
  */
 export function createF0FormDefinitionTester<TSchema extends F0FormSchema>(
   definition: F0FormDefinitionSingleSchema<TSchema>,

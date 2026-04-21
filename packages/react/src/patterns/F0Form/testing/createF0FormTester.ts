@@ -19,6 +19,11 @@ export interface F0FormValidationResult {
   valid: boolean
   /** Flat map of field name → error message for every failing field */
   errors: Record<string, string>
+  /**
+   * Root-level Zod error message (if any). Corresponds to issues with
+   * `path.length === 0` — e.g. from `.refine()` calls at the object level.
+   */
+  rootError?: string
 }
 
 export interface F0FormTester<TSchema extends F0FormSchema> {
@@ -110,18 +115,27 @@ export interface CreateF0FormTesterOptions<TSchema extends F0FormSchema> {
 // Implementation
 // =============================================================================
 
-function flattenZodErrors(error: z.ZodError): Record<string, string> {
-  const result: Record<string, string> = {}
+interface FlattenedZodErrors {
+  errors: Record<string, string>
+  rootError?: string
+}
+
+function flattenZodErrors(error: z.ZodError): FlattenedZodErrors {
+  const errors: Record<string, string> = {}
+  let rootError: string | undefined
   for (const issue of error.issues) {
-    // Skip root-level issues (matches flattenFormErrors in F0Form.tsx)
-    if (issue.path.length === 0) continue
+    if (issue.path.length === 0) {
+      // Root-level issue (e.g. from object-level .refine())
+      if (rootError === undefined) rootError = issue.message
+      continue
+    }
     const path = issue.path.join(".")
     // Keep only the first error per path
-    if (!(path in result)) {
-      result[path] = issue.message
+    if (!(path in errors)) {
+      errors[path] = issue.message
     }
   }
-  return result
+  return { errors, rootError }
 }
 
 /**
@@ -157,13 +171,15 @@ export function createF0FormTester<TSchema extends F0FormSchema>(
   ): Promise<F0FormValidationResult> => {
     const merged = { ...(defaultValues ?? {}), ...(values ?? {}) }
 
-    // Convert null → undefined to match real F0Form's conditional resolver
+    // Build dynamic schema from raw merged values BEFORE null conversion,
+    // matching the order used in createConditionalResolver.
+    const dynamicSchema = buildDynamicSchema(schema, merged)
+
+    // THEN convert null → undefined for Zod parsing
     const processed: Record<string, unknown> = {}
     for (const [key, value] of Object.entries(merged)) {
       processed[key] = value === null ? undefined : value
     }
-
-    const dynamicSchema = buildDynamicSchema(schema, processed)
 
     const parseOptions = errorMap ? { errorMap } : undefined
     const result = await dynamicSchema.safeParseAsync(processed, parseOptions)
@@ -172,7 +188,12 @@ export function createF0FormTester<TSchema extends F0FormSchema>(
       return { valid: true, errors: {} }
     }
 
-    return { valid: false, errors: flattenZodErrors(result.error) }
+    const { errors, rootError } = flattenZodErrors(result.error)
+    return {
+      valid: false,
+      errors,
+      ...(rootError !== undefined && { rootError }),
+    }
   }
 
   const validateField = async (
