@@ -2,7 +2,7 @@
 export { getCanvasEntity } from "./registry"
 
 // Types
-export type { CanvasEntityDefinition } from "./types"
+export type { CanvasEntityDefinition, CanvasActions } from "./types"
 
 // Shared components
 export { CanvasCard } from "./components/CanvasCard"

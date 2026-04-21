@@ -309,6 +309,20 @@ const meta: Meta<typeof ApplicationFrame> = {
       enabled: true,
       resizable: true,
       greeting: "Hello, John",
+      canvasActions: {
+        dashboard: {
+          save: async (id, category, config) => {
+            alert(
+              `Save dashboard\nid: ${id}\ncategory: ${category}\nconfig: ${JSON.stringify(config, null, 2)}`
+            )
+          },
+          create: async (title, description, config, category) => {
+            alert(
+              `Create dashboard\ntitle: ${title}\ndescription: ${description}\ncategory: ${category ?? "(none)"}\nconfig: ${JSON.stringify(config, null, 2)}`
+            )
+          },
+        },
+      },
       entityRefs: {
         resolvers: {
           person: mockPersonResolver,
@@ -388,118 +402,301 @@ export default meta
 
 type Story = StoryObj<typeof ApplicationFrame>
 
-const EmployeeListButton = () => {
-  const { clearAndAppend, setOpen } = useAiChat()
+const mockExpensesDashboardConfig = {
+  title: "Expenses dashboard",
+  savedDashboardId: "dash-expenses-001",
+  savedDashboardCategory: "trainings",
+  savedDashboardDescription:
+    "Overview of all company expenses by status, category and type with monthly trend.",
+  fetchSpecs: {
+    expenses: {
+      fetch: [
+        {
+          toolId: "fetchExpenses",
+          args: {
+            ids: null,
+            employeeIds: null,
+            status: [
+              "pending",
+              "approved",
+              "rejected",
+              "changes_requested",
+              "in_payroll",
+              "sent_to_pay",
+              "paid",
+              "reversed",
+            ],
+            from: null,
+            to: null,
+            categories: null,
+            search: null,
+            spendingAlertType: null,
+            pendingApproval: null,
+            expenseType: null,
+          },
+        },
+      ],
+      query:
+        "SELECT\n  CAST(SUBSTR(expensable_effectiveOn, 1, 10) AS DATE) AS expense_date,\n  expensable_status AS status,\n  owner_fullName AS employee,\n  expense_merchantName AS merchant,\n  expense_categoryName AS category,\n  CASE\n    WHEN expense_id IS NOT NULL THEN 'Expense'\n    WHEN mileage_id IS NOT NULL THEN 'Mileage'\n    WHEN perDiem_id IS NOT NULL THEN 'Per diem'\n    ELSE 'Other'\n  END AS expense_type,\n  expensable_currency AS currency,\n  expensable_amount AS amount_total,\n  CASE WHEN expensable_status = 'pending' THEN expensable_amount END AS amount_pending,\n  CASE WHEN expensable_status = 'approved' THEN expensable_amount END AS amount_approved,\n  CASE WHEN expensable_status = 'paid' THEN expensable_amount END AS amount_paid\nFROM fetchexpenses\nWHERE expensable_status <> 'draft'",
+      columnTransforms: {
+        amount_total: {
+          type: "currency",
+          fromCents: true,
+          currencyColumn: "currency",
+        },
+      },
+    },
+  },
+  items: [
+    {
+      id: "m_total",
+      title: "Total",
+      description: "Importe total de expenses en el periodo seleccionado.",
+      explanation:
+        "Suma del **importe total** de todos los expenses (expense/mileage/per diem) dentro del **periodo** seleccionado.",
+      type: "metric",
+      format: { type: "currency", currency: "EUR" },
+      decimals: 2,
+      computation: {
+        datasetId: "expenses",
+        aggregation: "sum",
+        column: "amount_total",
+      },
+      itemHeight: 144,
+    },
+    {
+      id: "m_pendiente",
+      title: "Pendiente",
+      description: "Importe total en estado pendiente.",
+      explanation:
+        "Suma del **importe** de los expenses cuyo **estado** es **pending**, dentro del periodo seleccionado.",
+      type: "metric",
+      format: { type: "currency", currency: "EUR" },
+      decimals: 2,
+      computation: {
+        datasetId: "expenses",
+        aggregation: "sum",
+        column: "amount_pending",
+      },
+      itemHeight: 144,
+    },
+    {
+      id: "m_aprobado",
+      title: "Aprobado",
+      description: "Importe total en estado aprobado.",
+      explanation:
+        "Suma del **importe** de los expenses cuyo **estado** es **approved**, dentro del periodo seleccionado.",
+      type: "metric",
+      format: { type: "currency", currency: "EUR" },
+      decimals: 2,
+      computation: {
+        datasetId: "expenses",
+        aggregation: "sum",
+        column: "amount_approved",
+      },
+      itemHeight: 144,
+    },
+    {
+      id: "m_pagado",
+      title: "Pagado",
+      description: "Importe total pagado.",
+      explanation:
+        "Suma del **importe** de los expenses cuyo **estado** es **paid**, dentro del periodo seleccionado.",
+      type: "metric",
+      format: { type: "currency", currency: "EUR" },
+      decimals: 2,
+      computation: {
+        datasetId: "expenses",
+        aggregation: "sum",
+        column: "amount_paid",
+      },
+      itemHeight: 144,
+    },
+    {
+      id: "c_trend",
+      title: "Gastos por mes",
+      description: "Evolución mensual del gasto total.",
+      explanation:
+        "Suma mensual del **importe total** (todos los tipos) según la **fecha del gasto**.",
+      type: "chart",
+      chart: {
+        type: "line",
+        lineType: "smooth",
+        valueFormat: { type: "currency", currency: "EUR" },
+        datasetId: "expenses",
+        xAxis: "expense_date",
+        yAxis: "amount_total",
+        aggregation: "sum",
+      },
+      itemHeight: 336,
+    },
+    {
+      id: "c_estado",
+      title: "Gasto por estado",
+      description: "Distribución del gasto total por estado.",
+      explanation: "Suma del **importe total** agrupado por **estado**.",
+      itemHeight: 432,
+      type: "chart",
+      chart: {
+        type: "bar",
+        orientation: "horizontal",
+        stacked: false,
+        valueFormat: { type: "currency", currency: "EUR" },
+        datasetId: "expenses",
+        xAxis: "status",
+        yAxis: "amount_total",
+        aggregation: "sum",
+        sortBy: "value",
+        sortOrder: "desc",
+      },
+    },
+    {
+      id: "c_categoria",
+      title: "Top categorías",
+      description: "Categorías con mayor gasto total.",
+      explanation: "Top 15 **categorías** por suma del **importe total**.",
+      itemHeight: 528,
+      type: "chart",
+      chart: {
+        type: "bar",
+        orientation: "horizontal",
+        stacked: false,
+        valueFormat: { type: "currency", currency: "EUR" },
+        datasetId: "expenses",
+        xAxis: "category",
+        yAxis: "amount_total",
+        aggregation: "sum",
+        sortBy: "value",
+        sortOrder: "desc",
+        limit: 15,
+      },
+    },
+    {
+      id: "c_tipo",
+      title: "Gasto por tipo",
+      description: "Distribución por tipo (expense, mileage, per diem).",
+      explanation:
+        "Suma del **importe total** agrupado por **tipo** de expense.",
+      type: "chart",
+      chart: {
+        type: "pie",
+        innerRadius: 0.55,
+        showPercentage: true,
+        valueFormat: { type: "currency", currency: "EUR" },
+        datasetId: "expenses",
+        nameColumn: "expense_type",
+        valueColumn: "amount_total",
+        aggregation: "sum",
+        sortBy: "value",
+        sortOrder: "desc",
+      },
+      itemHeight: 336,
+    },
+    {
+      id: "t_detalle",
+      title: "Detalle de expenses",
+      description: "Listado detallado de expenses filtrable.",
+      explanation:
+        "Tabla de detalle con **fecha**, **empleado**, **estado**, **tipo**, **categoría**, **comercio** e **importe**. Se actualiza con los filtros del dashboard.",
+      itemHeight: 720,
+      type: "collection",
+      columns: [
+        { id: "expense_date", label: "Fecha", width: 120 },
+        { id: "employee", label: "Empleado", width: 220 },
+        { id: "status", label: "Estado", width: 120 },
+        { id: "expense_type", label: "Tipo", width: 110 },
+        { id: "category", label: "Categoría", width: 160 },
+        { id: "merchant", label: "Comercio", width: 220 },
+        { id: "amount_total", label: "Importe total (€)", width: 140 },
+      ],
+      computation: {
+        datasetId: "expenses",
+        sortBy: "expense_date",
+        sortOrder: "desc",
+      },
+    },
+  ],
+  filters: {
+    estado: {
+      type: "in",
+      label: "Estado",
+      column: "status",
+      datasetId: "expenses",
+    },
+    empleado: {
+      type: "in",
+      label: "Empleado",
+      column: "employee",
+      datasetId: "expenses",
+    },
+    categoria: {
+      type: "in",
+      label: "Categoría",
+      column: "category",
+      datasetId: "expenses",
+    },
+  },
+  navigationFilters: {
+    periodo: {
+      type: "dateNavigation",
+      label: "Periodo",
+      column: "expense_date",
+      datasetId: "expenses",
+      granularities: ["month", "quarter", "year", "range"],
+      defaultGranularity: "month",
+    },
+  },
+}
+
+const ExpensesDashboardButton = () => {
+  const { clear, setOpen, appendMessages, setPendingContext } = useAiChat()
 
   const handleClick = () => {
+    clear()
     setOpen(true)
-    clearAndAppend([
-      {
-        role: "assistant",
-        content: "Here is the list of employees you requested:",
-        toolCalls: [
+
+    // Store the dashboard config as pending context.
+    // It will be sent as a separate text part in the user's first message.
+    setPendingContext({
+      label: "Expenses dashboard",
+      context: JSON.stringify(mockExpensesDashboardConfig),
+    })
+
+    // Inject a client-only assistant message with the dashboard toolCall
+    // so the card renders in the chat (with Open/Close, auto-open canvas, etc).
+    // persist: false avoids creating a backend thread.
+    // Deferred so clear() finishes first.
+    setTimeout(() => {
+      appendMessages(
+        [
           {
-            function: {
-              name: "downloadData",
-              arguments: JSON.stringify({
-                title: "Employee List",
-                filename: "employees",
-                dataset: {
-                  columns: ["id", "name", "email", "department", "salary"],
-                  columnLabels: {
-                    id: "ID",
-                    name: "Name",
-                    email: "Email",
-                    department: "Department",
-                    salary: "Salary",
-                  },
-                  rows: [
-                    {
-                      id: "1",
-                      name: "Hellen the HR",
-                      email: "hellen@factorial.co",
-                      department: "People",
-                      salary: 72000,
-                    },
-                    {
-                      id: "2",
-                      name: "Phebe Jacobson",
-                      email: "phebe@factorial.co",
-                      department: "Executive",
-                      salary: 95000,
-                    },
-                    {
-                      id: "3",
-                      name: "Arnulfo Maggio",
-                      email: "arnulfo@factorial.co",
-                      department: "Engineering",
-                      salary: 88000,
-                    },
-                    {
-                      id: "4",
-                      name: "Bernarda Wilkinson",
-                      email: "bernarda@factorial.co",
-                      department: "Finance",
-                      salary: 82000,
-                    },
-                    {
-                      id: "5",
-                      name: "Anitra Schaden",
-                      email: "anitra@factorial.co",
-                      department: "Marketing",
-                      salary: 76000,
-                    },
-                    {
-                      id: "6",
-                      name: "Fidel Johnson",
-                      email: "fidel@factorial.co",
-                      department: "People",
-                      salary: 70000,
-                    },
-                    {
-                      id: "7",
-                      name: "Jeanetta McCullough",
-                      email: "jeanetta@factorial.co",
-                      department: "Operations",
-                      salary: 68000,
-                    },
-                    {
-                      id: "8",
-                      name: "Florencio Little",
-                      email: "florencio@factorial.co",
-                      department: "Sales",
-                      salary: 74000,
-                    },
-                    {
-                      id: "9",
-                      name: "Fae Fritsch",
-                      email: "fae@factorial.co",
-                      department: "Design",
-                      salary: 71000,
-                    },
-                    {
-                      id: "10",
-                      name: "Jordan Kunze",
-                      email: "jordan@factorial.co",
-                      department: "Sales",
-                      salary: 73000,
-                    },
-                  ],
-                  totalCount: 10,
+            role: "assistant",
+            content: "Here is the expenses dashboard:",
+            toolCalls: [
+              {
+                id: crypto.randomUUID(),
+                function: {
+                  name: "displayDashboard",
+                  arguments: JSON.stringify({
+                    ...mockExpensesDashboardConfig,
+                    savedDashboardUnsaved: false,
+                  }),
                 },
-              }),
-            },
+              },
+            ],
           },
         ],
-      },
-    ])
+        { persist: false }
+      )
+    }, 0)
   }
 
   return (
     <F0Button
-      label="Open with Employee List"
+      label="Open Expenses Dashboard"
       onClick={handleClick}
       icon={Lightbulb}
+      variant="outline"
     />
   )
 }
@@ -514,8 +711,11 @@ const DefaultStoryComponent = (
       sidebar={<Sidebar {...SidebarStories.default.args} />}
     >
       <div className="flex w-full flex-col gap-2">
-        <EmployeeListButton />
-        <Page {...PageStories.Default.args} />
+        <Page {...PageStories.Default.args}>
+          <div className="p-5">
+            <ExpensesDashboardButton />
+          </div>
+        </Page>
       </div>
     </ApplicationFrame>
   )

@@ -16,7 +16,7 @@ export interface MentionItemComponentProps {
 }
 
 export type MentionedUser = {
-  id: number
+  id: string | number
   label: string
   image_url?: string
   href?: string

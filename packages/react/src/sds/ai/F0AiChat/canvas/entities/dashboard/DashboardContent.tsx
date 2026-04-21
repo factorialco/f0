@@ -418,11 +418,15 @@ ChatDashboard.displayName = "ChatDashboard"
 // ---------------------------------------------------------------------------
 
 import { F0ActionBar } from "@/components/F0ActionBar"
+import { Save } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
 import type { DashboardCanvasContent } from "../../../types"
 
+import { useAiChat } from "../../../providers/AiChatStateProvider"
+import { savedDashboardMetaStore } from "./configStore"
 import { useDashboardCanvas } from "./DashboardContext"
+import { SaveDashboardDialog } from "./SaveDashboardDialog"
 
 export function DashboardContent({
   content,
@@ -439,9 +443,20 @@ export function DashboardContent({
     handleSave,
     handleDiscard,
     transformItem,
+    saveConfigToHistory,
     registerExport,
   } = useDashboardCanvas()
+  const { canvasActions, openCanvas } = useAiChat()
   const translations = useI18n()
+  const [isSaveAsDialogOpen, setIsSaveAsDialogOpen] = useState(false)
+
+  // Treat a dashboard as "saved" only when both id AND category are present —
+  // `handleSave` needs both to persist externally, so `id` alone is an
+  // incomplete state that shouldn't unlock the saved-dashboard UI.
+  const isSavedDashboard =
+    !!content.savedDashboardId && !!content.savedDashboardCategory
+  const isUnsaved = !!content.savedDashboardUnsaved
+  const hasDashboardActions = !!canvasActions?.dashboard
 
   // Apply pending item transforms (chart type changes) to the config
   // without changing the base config reference — avoids data refetch.
@@ -457,6 +472,41 @@ export function DashboardContent({
       }),
     }
   }, [content.config, itemTransforms])
+
+  const handleSaveAs = useCallback(
+    async (title: string, description: string) => {
+      // Persist the config the user is actually looking at, including any
+      // pending chart-type transforms. Using `content.config` here would
+      // silently drop those transforms.
+      const newId = await canvasActions?.dashboard?.create(
+        title,
+        description,
+        effectiveConfig,
+        content.savedDashboardCategory
+      )
+      // After creating, transition to "saved" state (state 1 → state 2)
+      if (newId) {
+        const category = content.savedDashboardCategory
+        const meta = {
+          savedDashboardId: newId,
+          savedDashboardCategory: category,
+          savedDashboardDescription: description,
+          savedDashboardUnsaved: false,
+        }
+
+        openCanvas({ ...content, config: effectiveConfig, ...meta })
+
+        // Update meta store so close/re-open preserves the saved state
+        if (content.toolCallId) {
+          savedDashboardMetaStore.set(content.toolCallId, meta)
+        }
+
+        // Persist to chat history so it survives reload
+        void saveConfigToHistory({ ...effectiveConfig, ...meta })
+      }
+    },
+    [canvasActions, content, effectiveConfig, openCanvas, saveConfigToHistory]
+  )
 
   // Derive a refresh key tied only to the data identity (fetchSpecs reference).
   // The canvas-level refreshKey from CanvasPanel bumps on every content
@@ -493,22 +543,93 @@ export function DashboardContent({
         onExportReady={registerExport}
         exportFilename={content.title}
       />
-      <F0ActionBar
-        label={translations.forms.actionBar.unsavedChanges}
-        isOpen={isDirty}
-        primaryActions={[
-          {
-            label: translations.ai.saveChanges,
-            onClick: handleSave,
-          },
-        ]}
-        secondaryActions={[
-          {
-            label: translations.ai.discardChanges,
-            onClick: handleDiscard,
-          },
-        ]}
-      />
+      {/* State A: New dashboard with canvasActions — always-visible Save bar */}
+      {!isSavedDashboard && hasDashboardActions && (
+        <F0ActionBar
+          label={translations.ai.dashboard.saveToAnalytics}
+          isOpen
+          primaryActions={[
+            {
+              label: translations.ai.dashboard.save,
+              onClick: () => setIsSaveAsDialogOpen(true),
+              icon: Save,
+            },
+          ]}
+          secondaryActions={
+            isDirty
+              ? [
+                  {
+                    label: translations.ai.discardChanges,
+                    onClick: handleDiscard,
+                  },
+                ]
+              : undefined
+          }
+        />
+      )}
+      {/* State B1: Saved dashboard, user edited layout — Save + Discard */}
+      {isSavedDashboard && hasDashboardActions && isDirty && (
+        <F0ActionBar
+          label={translations.forms.actionBar.unsavedChanges}
+          isOpen
+          primaryActions={[
+            {
+              label: translations.ai.dashboard.save,
+              onClick: handleSave,
+              icon: Save,
+            },
+          ]}
+          secondaryActions={[
+            {
+              label: translations.ai.discardChanges,
+              onClick: handleDiscard,
+            },
+          ]}
+        />
+      )}
+      {/* State B2: Saved dashboard, agent iterated (unsaved) but no manual edits — Save only */}
+      {isSavedDashboard && hasDashboardActions && !isDirty && isUnsaved && (
+        <F0ActionBar
+          label={translations.forms.actionBar.unsavedChanges}
+          isOpen
+          primaryActions={[
+            {
+              label: translations.ai.dashboard.save,
+              onClick: handleSave,
+              icon: Save,
+            },
+          ]}
+        />
+      )}
+      {/* State C: No canvasActions — original behavior */}
+      {!hasDashboardActions && (
+        <F0ActionBar
+          label={translations.forms.actionBar.unsavedChanges}
+          isOpen={isDirty}
+          primaryActions={[
+            {
+              label: translations.ai.saveChanges,
+              onClick: handleSave,
+              icon: Save,
+            },
+          ]}
+          secondaryActions={[
+            {
+              label: translations.ai.discardChanges,
+              onClick: handleDiscard,
+            },
+          ]}
+        />
+      )}
+      {hasDashboardActions && (
+        <SaveDashboardDialog
+          isOpen={isSaveAsDialogOpen}
+          onClose={() => setIsSaveAsDialogOpen(false)}
+          onSave={handleSaveAs}
+          defaultTitle={content.title}
+          defaultDescription={content.savedDashboardDescription}
+        />
+      )}
     </>
   )
 }

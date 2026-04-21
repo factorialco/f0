@@ -77,6 +77,22 @@ export const Default: Story = {
   },
 }
 
+export const WithOnClickAction: Story = {
+  args: {
+    module: defaultModule,
+    actions: [
+      {
+        label: "Run",
+        icon: Settings,
+        onClick: () => {
+          // eslint-disable-next-line no-alert
+          alert("Run clicked")
+        },
+      },
+    ],
+  },
+}
+
 export const WithActions: Story = {
   args: {
     module: defaultModule,

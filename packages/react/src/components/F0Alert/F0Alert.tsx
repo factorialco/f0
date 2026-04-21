@@ -1,4 +1,5 @@
 import { cva } from "cva"
+import { useRef } from "react"
 
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
@@ -10,7 +11,6 @@ import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
 
 import type { F0AlertProps } from "./types"
-import { useRef } from "react"
 
 const alertVariants = cva({
   base: "w-full rounded-md p-2 pr-3 text-f1-foreground",
@@ -44,6 +44,27 @@ const titleVariants = cva({
   },
 })
 
+/**
+ * Leaf component wrapping the close button so `useI18n()` is only read when
+ * an `onClose` handler is actually provided. Keeps F0Alert renderable
+ * without an `I18nProvider` for consumers (and tests) that don't use the
+ * close affordance.
+ */
+const CloseButton = ({ onClose }: { onClose: () => void }) => {
+  const { actions } = useI18n()
+  return (
+    <F0Button
+      icon={Cross}
+      label={actions.close}
+      hideLabel
+      variant="outline"
+      size="sm"
+      onClick={onClose}
+      type="button"
+    />
+  )
+}
+
 const _F0Alert = ({
   title,
   description,
@@ -54,7 +75,6 @@ const _F0Alert = ({
   onClose,
 }: F0AlertProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
-  const { actions } = useI18n()
 
   const alertRole =
     variant === "critical" || variant === "warning" ? "alert" : "status"
@@ -92,7 +112,6 @@ const _F0Alert = ({
                     size="sm"
                   >
                     {link.label}
-                    <span className="sr-only"> (opens in new tab)</span>
                   </F0Link>
                 )}
                 {action && (
@@ -110,15 +129,7 @@ const _F0Alert = ({
           </div>
           {onClose && (
             <div className="flex-shrink-0 self-start @xs:self-center">
-              <F0Button
-                icon={Cross}
-                label={actions.close}
-                hideLabel
-                variant="outline"
-                size="sm"
-                onClick={onClose}
-                type="button"
-              />
+              <CloseButton onClose={onClose} />
             </div>
           )}
         </div>

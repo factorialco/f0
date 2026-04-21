@@ -27,7 +27,7 @@ describe("F0Link", () => {
         External Link
       </F0Link>
     )
-    expect(screen.getByText("opens in new tab")).toBeInTheDocument()
+    expect(screen.getByText(/opens in new tab/)).toBeInTheDocument()
   })
 
   it("applies custom className", () => {

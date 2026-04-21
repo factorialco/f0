@@ -6,7 +6,7 @@ import { FileType } from "./constants"
 
 type resultType = {
   value: string | null
-  mentionIds?: number[]
+  mentionIds?: string[]
 }
 
 type enhanceTextParams = {

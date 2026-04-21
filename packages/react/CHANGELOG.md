@@ -1,5 +1,47 @@
 # Changelog
 
+## [1.457.0](https://github.com/factorialco/f0/compare/f0-react-v1.456.3...f0-react-v1.457.0) (2026-04-20)
+
+
+### Features
+
+* **PageHeader:** support onClick handler on PageAction ([#3979](https://github.com/factorialco/f0/issues/3979)) ([7a8b8ca](https://github.com/factorialco/f0/commit/7a8b8ca4f51b6b268f8c0c9b80595929d805e2a1))
+
+## [1.456.3](https://github.com/factorialco/f0/compare/f0-react-v1.456.2...f0-react-v1.456.3) (2026-04-20)
+
+
+### Bug Fixes
+
+* shrink useI18n blast radius in F0Alert and DetailsItemsList ([#3977](https://github.com/factorialco/f0/issues/3977)) ([2399164](https://github.com/factorialco/f0/commit/23991642d3c772e5a31554bbfba60c47eea550fd))
+
+## [1.456.2](https://github.com/factorialco/f0/compare/f0-react-v1.456.1...f0-react-v1.456.2) (2026-04-20)
+
+
+### Bug Fixes
+
+* **F0Link:** hardcode opens-in-new-tab a11y text to avoid requiring I18nProvider ([#3975](https://github.com/factorialco/f0/issues/3975)) ([b370934](https://github.com/factorialco/f0/commit/b370934180b4cc9aacd301bfddc966a8ac5a51c5))
+
+## [1.456.1](https://github.com/factorialco/f0/compare/f0-react-v1.456.0...f0-react-v1.456.1) (2026-04-20)
+
+
+### Bug Fixes
+
+* GraphQL Int -&gt; BigInt ID migration - allow strings as mentioned user IDs in the Rich Text editor ([#3737](https://github.com/factorialco/f0/issues/3737)) ([8a0922b](https://github.com/factorialco/f0/commit/8a0922bd2dea2f6451952be1cb85e9bd8a98b8df))
+
+## [1.456.0](https://github.com/factorialco/f0/compare/f0-react-v1.455.0...f0-react-v1.456.0) (2026-04-20)
+
+
+### Features
+
+* **F0AiChat:** saved dashboards, canvas actions, pending context ([#3957](https://github.com/factorialco/f0/issues/3957)) ([47b799e](https://github.com/factorialco/f0/commit/47b799e40f90d43e81e3f485ada10996f147e195))
+
+## [1.455.0](https://github.com/factorialco/f0/compare/f0-react-v1.454.0...f0-react-v1.455.0) (2026-04-20)
+
+
+### Features
+
+* allow to format fields properly in FormCard ([#3965](https://github.com/factorialco/f0/issues/3965)) ([22aa1f3](https://github.com/factorialco/f0/commit/22aa1f3db22ce8db51a65b3db49d237430a3bd89))
+
 ## [1.454.0](https://github.com/factorialco/f0/compare/f0-react-v1.453.0...f0-react-v1.454.0) (2026-04-20)
 
 

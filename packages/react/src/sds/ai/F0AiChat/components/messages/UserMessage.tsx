@@ -3,8 +3,8 @@ import { useEffect, useRef } from "react"
 
 import { FileItem } from "@/components/RichText/FileItem"
 
-import { markdownRenderers } from "../markdownRenderers"
 import { useAiChat } from "../../providers/AiChatStateProvider"
+import { markdownRenderers } from "../markdownRenderers"
 
 type UploadedFile = {
   url: string
@@ -30,11 +30,13 @@ function getTextContent(
 ): string | undefined {
   if (typeof content === "string") return content
   if (Array.isArray(content)) {
-    return content
+    // When multiple text parts exist (e.g. pending context + user text),
+    // only show the last one — earlier parts are invisible context for the agent.
+    const textParts = content
       .filter((part): part is MessageTextPart => part.type === "text")
       .map((part) => part.text)
       .filter((part): part is string => typeof part === "string")
-      .join("")
+    return textParts[textParts.length - 1]
   }
   return undefined
 }
@@ -78,6 +80,10 @@ function getUploadedFiles(
 const TOOL_CONTEXT_RE =
   /<tool-context\s+tool="[^"]*">[\s\S]*?<\/tool-context>\s*/g
 
+/** Strips <pending-context> tags (used when loading from history where the
+ *  multipart structure was flattened into a single string). */
+const PENDING_CONTEXT_RE = /<pending-context>[\s\S]*?<\/pending-context>\s*/g
+
 export const UserMessage = ({ message }: UserMessageProps) => {
   const ref = useRef<HTMLDivElement>(null)
 
@@ -98,7 +104,10 @@ export const UserMessage = ({ message }: UserMessageProps) => {
     rawData
   )
   const raw = getTextContent(message?.content as MessagePart[]) ?? ""
-  const content = raw.replace(TOOL_CONTEXT_RE, "").trim()
+  const content = raw
+    .replace(TOOL_CONTEXT_RE, "")
+    .replace(PENDING_CONTEXT_RE, "")
+    .trim()
   const hasVisibleText = content.trim().length > 0
 
   return (

@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils"
 
 import { DataList } from "../DataList"
 
-type Content =
+export type DetailsItemContent =
   | (ComponentProps<typeof DataList.Item> & {
       type: "item"
     })
@@ -58,12 +58,18 @@ type Content =
 
 export interface DetailsItemType {
   title: string
-  content: Content | Content[]
+  content: DetailsItemContent | DetailsItemContent[]
   isHorizontal?: boolean
+  /**
+   * When true inside a tableView, keeps the table-row padding but stacks
+   * the label above the content instead of side-by-side. Useful for
+   * long-form text fields like rich-text or textarea.
+   */
+  verticalLayout?: boolean
   spacingAtTheBottom?: boolean
 }
 
-const ItemContent: FC<{ content: Content }> = ({ content }) => (
+const ItemContent: FC<{ content: DetailsItemContent }> = ({ content }) => (
   <>
     {content.type === "weekdays" && (
       <li className="list-none px-1.5 py-1">
@@ -92,7 +98,13 @@ const ItemContent: FC<{ content: Content }> = ({ content }) => (
 
 const _DetailsItem = forwardRef<HTMLDivElement, DetailsItemType>(
   function DetailsItem(
-    { title, content, isHorizontal = false, spacingAtTheBottom },
+    {
+      title,
+      content,
+      isHorizontal = false,
+      verticalLayout = false,
+      spacingAtTheBottom,
+    },
     ref
   ) {
     const contentArray = Array.isArray(content) ? content : [content]
@@ -103,7 +115,10 @@ const _DetailsItem = forwardRef<HTMLDivElement, DetailsItemType>(
         className={cn(
           "flex flex-col gap-0.5",
           spacingAtTheBottom && !isHorizontal && "pb-3",
-          isHorizontal && "xs:[&_ul>li]:p-0 [&_ul]:flex-1"
+          isHorizontal && !verticalLayout && "xs:[&_ul>li]:p-0 [&_ul]:flex-1",
+          isHorizontal &&
+            verticalLayout &&
+            "[&_ul>li>*]:px-0 [&_ul]:flex-1 xs:[&>div]:flex-col"
         )}
       >
         <DataList label={title} isHorizontal={isHorizontal}>
