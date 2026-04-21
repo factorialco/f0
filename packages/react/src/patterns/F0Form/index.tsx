@@ -150,6 +150,14 @@ export type {
 export { describeFormSchema } from "./describeFormSchema"
 export type { FormFieldDescription } from "./describeFormSchema"
 
+// Export headless testing utilities
+export { createF0FormTester, createF0FormDefinitionTester } from "./testing"
+export type {
+  F0FormTester,
+  F0FormValidationResult,
+  CreateF0FormTesterOptions,
+} from "./testing"
+
 import type {
   F0FormPropsWithSingleSchema,
   F0FormPropsWithPerSectionSchema,
