@@ -49,9 +49,21 @@ export const pressedVariants = tv({
       ghost: "bg-f0-background-secondary-hover",
       promote: "bg-f0-background-promote-hover",
     },
+    isDark: {
+      true: "",
+      false: "",
+    },
   },
+  compoundVariants: [
+    {
+      variant: "ghost",
+      isDark: true,
+      class: "bg-f0-background-inverse-secondary",
+    },
+  ],
   defaultVariants: {
     variant: "default",
+    isDark: false,
   },
 })
 
@@ -83,17 +95,32 @@ export const loadingIndicatorVariants = tv({
       md: "h-4 w-4 border-2",
       lg: "h-5 w-5 border-2",
     },
+    isDark: {
+      true: "",
+      false: "",
+    },
   },
+  compoundVariants: [
+    {
+      variant: "ghost",
+      isDark: true,
+      class: "border-f0-foreground-inverse",
+    },
+  ],
   defaultVariants: {
     variant: "default",
     size: "md",
+    isDark: false,
   },
 })
 
 export const getIconColor = (
   variant: ButtonVariant,
-  isPressed: boolean
+  isPressed: boolean,
+  isDark: boolean = false
 ): IconColor => {
+  if (isDark && variant === "ghost") return "inverse"
+
   switch (variant) {
     case "default":
       return "inverse"
@@ -106,8 +133,11 @@ export const getIconColor = (
 
 export const getIconOnlyColor = (
   variant: ButtonVariant,
-  isPressed: boolean
+  isPressed: boolean,
+  isDark: boolean = false
 ): IconColor => {
+  if (isDark && variant === "ghost") return "inverse"
+
   switch (variant) {
     case "critical":
       return isPressed ? "inverse" : "critical-bold"
@@ -124,8 +154,11 @@ export const getIconOnlyColor = (
 
 export const getTextColor = (
   variant: ButtonVariant,
-  isPressed: boolean
+  isPressed: boolean,
+  isDark: boolean = false
 ): TextColor => {
+  if (isDark && variant === "ghost") return "inverse"
+
   if (isPressed && variant === "critical") {
     return "inverse"
   }

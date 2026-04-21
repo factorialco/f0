@@ -96,6 +96,33 @@ describe("F0Button", () => {
     expect(toJSON()).toMatchSnapshot()
   })
 
+  it("Snapshot - ghost isDark button", () => {
+    const { toJSON } = render(
+      <F0Button {...defaultProps} variant="ghost" isDark />
+    )
+    expect(toJSON()).toMatchSnapshot()
+  })
+
+  it("uses inverse text color for ghost variant when isDark is true", () => {
+    render(
+      <F0Button {...defaultProps} variant="ghost" isDark testID="dark-ghost" />
+    )
+    const text = screen.getByText("Test Button")
+    expect(text.props.className).toContain("inverse")
+  })
+
+  it("ignores isDark for non-ghost variants", () => {
+    const { toJSON: withDark, unmount } = render(
+      <F0Button label="A" variant="default" isDark />
+    )
+    const darkSnapshot = JSON.stringify(withDark())
+    unmount()
+    const { toJSON: withoutDark } = render(
+      <F0Button label="A" variant="default" />
+    )
+    expect(darkSnapshot).toEqual(JSON.stringify(withoutDark()))
+  })
+
   it("renders correctly with required props", () => {
     render(<F0Button {...defaultProps} />)
     const button = screen.getByText("Test Button")

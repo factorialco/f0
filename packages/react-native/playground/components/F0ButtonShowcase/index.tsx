@@ -34,10 +34,13 @@ export function F0ButtonShowcase() {
       style={{ width: "100%" }}
     >
       {/* Basic Variants */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         Default Variants
       </Text>
-      <View className="flex-row flex-wrap gap-2 mb-6" style={{ width: "100%" }}>
+      <View className="mb-6 flex-row flex-wrap gap-2" style={{ width: "100%" }}>
         <F0Button
           variant="default"
           label="Default"
@@ -71,10 +74,13 @@ export function F0ButtonShowcase() {
       </View>
 
       {/* With Icons */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         With Icons
       </Text>
-      <View className="flex-row flex-wrap gap-2 mb-6" style={{ width: "100%" }}>
+      <View className="mb-6 flex-row flex-wrap gap-2" style={{ width: "100%" }}>
         <F0Button
           variant="default"
           label="Add item"
@@ -114,10 +120,13 @@ export function F0ButtonShowcase() {
       </View>
 
       {/* Icon Only */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         Icon Only
       </Text>
-      <View className="flex-row flex-wrap gap-2 mb-6">
+      <View className="mb-6 flex-row flex-wrap gap-2">
         <F0Button
           variant="default"
           label="Add"
@@ -178,24 +187,38 @@ export function F0ButtonShowcase() {
       </View>
 
       {/* Sizes */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         Sizes
       </Text>
-      <View className="flex-row items-center gap-2 mb-6">
-        <F0Button size="sm" label="Small" accessibilityHint="Small size button" />
+      <View className="mb-6 flex-row items-center gap-2">
+        <F0Button
+          size="sm"
+          label="Small"
+          accessibilityHint="Small size button"
+        />
         <F0Button
           size="md"
           label="Medium"
           accessibilityHint="Medium size button"
         />
-        <F0Button size="lg" label="Large" accessibilityHint="Large size button" />
+        <F0Button
+          size="lg"
+          label="Large"
+          accessibilityHint="Large size button"
+        />
       </View>
 
       {/* States */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         States
       </Text>
-      <View className="flex-row flex-wrap gap-2 mb-6">
+      <View className="mb-6 flex-row flex-wrap gap-2">
         <F0Button label="Default" accessibilityHint="Interactive button" />
         <F0Button
           disabled
@@ -210,10 +233,13 @@ export function F0ButtonShowcase() {
       </View>
 
       {/* Icon Button Groups */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         Icon Button Groups
       </Text>
-      <View className="flex-row items-center gap-2 mb-6">
+      <View className="mb-6 flex-row items-center gap-2">
         <F0Button
           variant="ghost"
           icon={Add}
@@ -241,10 +267,13 @@ export function F0ButtonShowcase() {
       </View>
 
       {/* Icon Only Sizes */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         Icon Only Sizes
       </Text>
-      <View className="flex-row items-center gap-2 mb-6">
+      <View className="mb-6 flex-row items-center gap-2">
         <F0Button
           variant="default"
           icon={Add}
@@ -273,7 +302,7 @@ export function F0ButtonShowcase() {
           accessibilityHint="Large icon-only button"
         />
       </View>
-      <View className="flex-row items-center gap-2 mb-6">
+      <View className="mb-6 flex-row items-center gap-2">
         <F0Button
           variant="critical"
           icon={Delete}
@@ -304,10 +333,13 @@ export function F0ButtonShowcase() {
       </View>
 
       {/* Emoji Buttons */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         Emoji Buttons
       </Text>
-      <View className="flex-row items-center gap-2 mb-6">
+      <View className="mb-6 flex-row items-center gap-2">
         <F0Button
           emoji="🥰"
           label="Love"
@@ -336,10 +368,13 @@ export function F0ButtonShowcase() {
       </View>
 
       {/* Notification Badge */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         With Notification Badge
       </Text>
-      <View className="flex-row flex-wrap gap-2 mb-6">
+      <View className="mb-6 flex-row flex-wrap gap-2">
         <F0Button
           variant="outline"
           label="Messages"
@@ -364,8 +399,55 @@ export function F0ButtonShowcase() {
         />
       </View>
 
+      {/* isDark Ghost (experimental) */}
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
+        isDark Ghost (experimental)
+      </Text>
+      <View
+        className="mb-6 gap-3 rounded-lg p-4"
+        style={{ backgroundColor: "#1a1a1a" }}
+      >
+        <View className="flex-row flex-wrap gap-2">
+          <F0Button
+            variant="ghost"
+            label="Ghost isDark"
+            isDark
+            accessibilityHint="Ghost button on dark surface"
+          />
+          <F0Button
+            variant="ghost"
+            label="With icon"
+            icon={Save}
+            isDark
+            accessibilityHint="Ghost button with icon on dark surface"
+          />
+          <F0Button
+            variant="ghost"
+            label="Icon only"
+            icon={Add}
+            hideLabel
+            round
+            isDark
+            accessibilityHint="Icon-only ghost on dark surface"
+          />
+        </View>
+        <View className="flex-row flex-wrap gap-2">
+          <F0Button
+            variant="ghost"
+            label="Ghost (no isDark)"
+            accessibilityHint="Ghost button without isDark — invisible on dark surface"
+          />
+        </View>
+      </View>
+
       {/* Loading Showcase */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         Loading Showcase
       </Text>
       <View className="mb-6 items-start gap-2">

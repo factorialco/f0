@@ -45,23 +45,24 @@ import { Archive } from "@factorialco/f0-react-native/icons/app"
 
 ## Props
 
-| Prop                | Type                             | Default     | Description                                                |
-| ------------------- | -------------------------------- | ----------- | ---------------------------------------------------------- |
-| `label`             | `string`                         | required    | Visible label and accessibility base label                 |
-| `onPress`           | `() => void \| Promise<unknown>` | —           | Press handler; async return enables auto-loading           |
-| `variant`           | `F0ButtonVariant`                | `"default"` | Visual style variant                                       |
-| `size`              | `F0ButtonSize`                   | `"md"`      | Control height and radius                                  |
-| `disabled`          | `boolean`                        | `false`     | Disabled state                                             |
-| `loading`           | `boolean`                        | `false`     | External loading control                                   |
-| `icon`              | `IconType`                       | —           | Optional icon                                              |
-| `emoji`             | `string`                         | —           | Optional emoji                                             |
-| `hideLabel`         | `boolean`                        | `false`     | Hide visible label (keeps accessibility label)             |
-| `round`             | `boolean`                        | `false`     | Makes icon-only mode circular                              |
-| `showBadge`         | `boolean`                        | `false`     | Notification badge (outline variant only)                  |
-| `fullWidth`         | `boolean`                        | `false`     | Makes button fill available horizontal space               |
-| `feedback`          | `PressableFeedbackVariant`       | `"both"`    | Press feedback mode (`both`, `scale`, `highlight`, `none`) |
-| `accessibilityHint` | `string`                         | —           | Optional screen-reader hint                                |
-| `testID`            | `string`                         | —           | Test identifier                                            |
+| Prop                | Type                             | Default     | Description                                                   |
+| ------------------- | -------------------------------- | ----------- | ------------------------------------------------------------- |
+| `label`             | `string`                         | required    | Visible label and accessibility base label                    |
+| `onPress`           | `() => void \| Promise<unknown>` | —           | Press handler; async return enables auto-loading              |
+| `variant`           | `F0ButtonVariant`                | `"default"` | Visual style variant                                          |
+| `size`              | `F0ButtonSize`                   | `"md"`      | Control height and radius                                     |
+| `disabled`          | `boolean`                        | `false`     | Disabled state                                                |
+| `loading`           | `boolean`                        | `false`     | External loading control                                      |
+| `icon`              | `IconType`                       | —           | Optional icon                                                 |
+| `emoji`             | `string`                         | —           | Optional emoji                                                |
+| `hideLabel`         | `boolean`                        | `false`     | Hide visible label (keeps accessibility label)                |
+| `round`             | `boolean`                        | `false`     | Makes icon-only mode circular                                 |
+| `showBadge`         | `boolean`                        | `false`     | Notification badge (outline variant only)                     |
+| `fullWidth`         | `boolean`                        | `false`     | Makes button fill available horizontal space                  |
+| `isDark`            | `boolean`                        | `false`     | @experimental — Inverse colors for dark surfaces (ghost only) |
+| `feedback`          | `PressableFeedbackVariant`       | `"both"`    | Press feedback mode (`both`, `scale`, `highlight`, `none`)    |
+| `accessibilityHint` | `string`                         | —           | Optional screen-reader hint                                   |
+| `testID`            | `string`                         | —           | Test identifier                                               |
 
 ### Variants
 
@@ -71,6 +72,18 @@ import { Archive } from "@factorialco/f0-react-native/icons/app"
 - `neutral` - neutral secondary action
 - `ghost` - subtle transparent action
 - `promote` - promotional/highlighted action
+
+### isDark (experimental)
+
+Makes `ghost` buttons readable on dark surfaces by switching text, icon, and loading
+indicator colors to `"inverse"`. Ignored for all other variants.
+
+<!-- prettier-ignore -->
+```tsx
+<View style={{ backgroundColor: "#1a1a1a" }}>
+  <F0Button label="Action" variant="ghost" isDark />
+</View>
+```
 
 ### Sizes
 

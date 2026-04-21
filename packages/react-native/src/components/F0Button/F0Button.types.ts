@@ -65,6 +65,12 @@ interface F0ButtonPropsInternal extends Omit<
   round?: boolean
   showBadge?: boolean
   fullWidth?: boolean
+  /**
+   * @experimental This prop is prone to change soon.
+   * Forces inverse (light) text and icon colors for use on dark surfaces.
+   * Only affects the `ghost` variant — ignored for all other variants.
+   */
+  isDark?: boolean
   accessibilityHint?: string
   testID?: string
   feedback?: PressableFeedbackVariant
