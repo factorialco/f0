@@ -60,6 +60,8 @@ interface F0ButtonPropsInternal extends Omit<
   disabled?: boolean
   loading?: boolean
   icon?: IconType
+  /** Position of the icon relative to the label. Defaults to `"left"`. */
+  iconPosition?: "left" | "right"
   emoji?: string
   hideLabel?: boolean
   round?: boolean

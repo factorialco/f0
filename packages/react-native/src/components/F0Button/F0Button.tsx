@@ -25,6 +25,7 @@ import {
   loadingContentVariants,
   loadingIndicatorVariants,
   pressedVariants,
+  getButtonPadding,
   getIconColor,
   getIconOnlyColor,
   getTextColor,
@@ -54,6 +55,7 @@ const F0Button = React.memo(
       disabled = false,
       loading = false,
       icon,
+      iconPosition = "left",
       emoji,
       hideLabel = false,
       variant = "default",
@@ -128,13 +130,16 @@ const F0Button = React.memo(
 
     const baseClassName = useMemo(
       () =>
-        buttonVariants({
-          variant,
-          size,
-          disabled: isDisabled,
-          round: isRound,
-        }),
-      [variant, size, isDisabled, isRound]
+        cn(
+          buttonVariants({
+            variant,
+            size,
+            disabled: isDisabled,
+            round: isRound,
+          }),
+          getButtonPadding(size, !!icon, hideLabel, isRound, iconPosition)
+        ),
+      [variant, size, isDisabled, isRound, icon, hideLabel, iconPosition]
     )
 
     const accessibilityLabel = useMemo(() => {
@@ -192,13 +197,8 @@ const F0Button = React.memo(
               className={loadingContentVariants({ loading: isBusy })}
             >
               <View className="flex-row items-center justify-center gap-1">
-                {icon && (
-                  <F0Icon
-                    icon={icon}
-                    size="lg"
-                    className={isRound ? undefined : "-ml-0.5"}
-                    color={iconColor}
-                  />
+                {icon && iconPosition === "left" && (
+                  <F0Icon icon={icon} size="lg" color={iconColor} />
                 )}
                 {emoji && (
                   <F0Text variant="body-md-medium" color={textColor}>
@@ -209,6 +209,9 @@ const F0Button = React.memo(
                   <F0Text variant="body-md-medium" color={textColor}>
                     {label}
                   </F0Text>
+                )}
+                {icon && iconPosition === "right" && (
+                  <F0Icon icon={icon} size="lg" color={iconColor} />
                 )}
               </View>
             </View>

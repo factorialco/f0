@@ -119,6 +119,37 @@ export function F0ButtonShowcase() {
         />
       </View>
 
+      {/* Icon Position Right */}
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
+        Icon Position Right
+      </Text>
+      <View className="mb-6 flex-row flex-wrap gap-2" style={{ width: "100%" }}>
+        <F0Button
+          variant="default"
+          label="Next"
+          icon={Add}
+          iconPosition="right"
+          accessibilityHint="Next with icon on the right"
+        />
+        <F0Button
+          variant="outline"
+          label="Continue"
+          icon={Save}
+          iconPosition="right"
+          accessibilityHint="Continue with icon on the right"
+        />
+        <F0Button
+          variant="ghost"
+          label="More"
+          icon={Archive}
+          iconPosition="right"
+          accessibilityHint="More with icon on the right"
+        />
+      </View>
+
       {/* Icon Only */}
       <Text
         className="mb-4 text-lg font-bold"

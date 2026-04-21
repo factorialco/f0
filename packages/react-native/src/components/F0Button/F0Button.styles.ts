@@ -3,7 +3,40 @@ import { tv } from "tailwind-variants"
 import type { IconColor } from "../primitives/F0Icon"
 import type { TextColor } from "../primitives/F0Text"
 
-import type { ButtonVariant } from "./F0Button.types"
+import type { ButtonSize, ButtonVariant } from "./F0Button.types"
+
+/**
+ * Horizontal padding classes per size, accounting for asymmetric padding
+ * when an icon is present next to a visible label.
+ *
+ * When an icon sits on one side, that side gets less padding to keep the
+ * icon optically centered with respect to the button edge:
+ * - sm: 2px less on the icon side
+ * - md/lg: 4px less on the icon side
+ */
+const ICON_PADDING = {
+  sm: { left: "pl-1.5 pr-2", right: "pl-2 pr-1.5" },
+  md: { left: "pl-2 pr-3", right: "pl-3 pr-2" },
+  lg: { left: "pl-3 pr-4", right: "pl-4 pr-3" },
+} as const
+
+const DEFAULT_PADDING = {
+  sm: "px-2",
+  md: "px-3",
+  lg: "px-4",
+} as const
+
+export const getButtonPadding = (
+  size: ButtonSize,
+  icon: boolean,
+  hideLabel: boolean,
+  round: boolean,
+  iconPosition: "left" | "right"
+): string => {
+  if (round) return ""
+  if (!icon || hideLabel) return DEFAULT_PADDING[size]
+  return ICON_PADDING[size][iconPosition]
+}
 
 export const buttonVariants = tv({
   base: "flex-row items-center justify-center rounded border-none grow-0",
@@ -27,7 +60,7 @@ export const buttonVariants = tv({
     },
     round: {
       true: "aspect-square p-0",
-      false: "gap-1 px-2 sm:px-3 lg:px-4",
+      false: "gap-1",
     },
   },
   defaultVariants: {

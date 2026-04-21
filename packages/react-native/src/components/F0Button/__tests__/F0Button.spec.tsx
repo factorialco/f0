@@ -41,6 +41,20 @@ describe("F0Button", () => {
     expect(toJSON()).toMatchSnapshot()
   })
 
+  it("Snapshot - with icon on the right", () => {
+    const { toJSON } = render(
+      <F0Button {...defaultProps} icon={mockIcon} iconPosition="right" />
+    )
+    expect(toJSON()).toMatchSnapshot()
+  })
+
+  it("accepts iconPosition right without error", () => {
+    const { toJSON } = render(
+      <F0Button {...defaultProps} icon={mockIcon} iconPosition="right" />
+    )
+    expect(toJSON()).toBeDefined()
+  })
+
   it("Snapshot - with emoji", () => {
     const { toJSON } = render(<F0Button {...defaultProps} emoji="👋" />)
     expect(toJSON()).toMatchSnapshot()

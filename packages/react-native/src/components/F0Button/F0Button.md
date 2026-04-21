@@ -54,6 +54,7 @@ import { Archive } from "@factorialco/f0-react-native/icons/app"
 | `disabled`          | `boolean`                        | `false`     | Disabled state                                                |
 | `loading`           | `boolean`                        | `false`     | External loading control                                      |
 | `icon`              | `IconType`                       | —           | Optional icon                                                 |
+| `iconPosition`      | `"left" \| "right"`              | `"left"`    | Position of the icon relative to the label                    |
 | `emoji`             | `string`                         | —           | Optional emoji                                                |
 | `hideLabel`         | `boolean`                        | `false`     | Hide visible label (keeps accessibility label)                |
 | `round`             | `boolean`                        | `false`     | Makes icon-only mode circular                                 |
