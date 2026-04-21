@@ -1,9 +1,13 @@
+import { useEffect, useRef } from "react"
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
-import { RichTextEditor } from "@/components/RichText/RichTextEditor"
+import {
+  RichTextEditor,
+  type RichTextEditorHandle,
+} from "@/components/RichText/RichTextEditor"
 
-import type { F0RichTextField, RichTextValue } from "./types"
 import type { ResolvedField } from "../types"
+import type { F0RichTextField, RichTextValue } from "./types"
 
 interface RichTextFieldRendererProps {
   field: ResolvedField<F0RichTextField>
@@ -21,11 +25,29 @@ export function RichTextFieldRenderer({
   error,
   loading,
 }: RichTextFieldRendererProps) {
-  const currentValue = formField.value as RichTextValue | undefined
+  const { ref: _formRef, ...formFieldRest } = formField
+  const editorRef = useRef<RichTextEditorHandle>(null)
+  const lastInternalValueRef = useRef<string | null | undefined>(undefined)
+
+  // fillForm sets a plain string while the editor's onChange produces a
+  // RichTextValue object. Normalise both shapes into a content string.
+  const rawValue = formField.value as RichTextValue | string | undefined
+  const currentContent =
+    typeof rawValue === "string" ? rawValue : (rawValue?.value ?? "")
+
+  // Sync external value changes (e.g. from fillForm) into the TipTap editor.
+  // The editor only reads initialEditorState on mount, so programmatic updates
+  // via react-hook-form's setValue need to be pushed explicitly.
+  useEffect(() => {
+    if (currentContent !== lastInternalValueRef.current) {
+      editorRef.current?.setContent(currentContent)
+    }
+  }, [currentContent])
 
   return (
     <RichTextEditor
-      {...formField}
+      ref={editorRef}
+      {...formFieldRest}
       title={field.label}
       placeholder={field.placeholder ?? ""}
       maxCharacters={field.maxCharacters}
@@ -36,9 +58,10 @@ export function RichTextFieldRenderer({
       error={error}
       loading={loading}
       initialEditorState={{
-        content: currentValue?.value ?? "",
+        content: currentContent,
       }}
       onChange={(result) => {
+        lastInternalValueRef.current = result.value
         formField.onChange({
           value: result.value,
           mentionIds: result.mentionIds,
