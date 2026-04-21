@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.458.1](https://github.com/factorialco/f0/compare/f0-react-v1.458.0...f0-react-v1.458.1) (2026-04-21)
+
+
+### Bug Fixes
+
+* rich text field not getting updated when co-editing form ([#3985](https://github.com/factorialco/f0/issues/3985)) ([b159bf7](https://github.com/factorialco/f0/commit/b159bf722bd57cb88f55ccf78462f5d0819590a9))
+
 ## [1.458.0](https://github.com/factorialco/f0/compare/f0-react-v1.457.1...f0-react-v1.458.0) (2026-04-21)
 
 
