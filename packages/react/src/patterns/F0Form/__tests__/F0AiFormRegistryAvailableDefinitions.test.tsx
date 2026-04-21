@@ -2,6 +2,11 @@ import React, { useState } from "react"
 import { describe, expect, it, vi } from "vitest"
 import { z } from "zod"
 
+import type {
+  F0FormDefinitionSingleSchema,
+  F0FormDefinitionPerSection,
+} from "@/patterns/F0WizardForm/types"
+
 import { zeroRender as render, waitFor, act } from "@/testing/test-utils"
 
 import type { F0AiAvailableFormDefinition } from "../F0AiFormRegistry"
@@ -9,6 +14,7 @@ import type { F0AiAvailableFormDefinition } from "../F0AiFormRegistry"
 import {
   F0AiFormRegistryProvider,
   useF0AiFormRegistry,
+  defineAvailableForm,
 } from "../F0AiFormRegistry"
 import { F0Form } from "../F0Form"
 import { f0FormField } from "../f0Schema"
@@ -958,5 +964,271 @@ describe("F0AiFormRegistryProvider availableFormDefinitions", () => {
       expect(entry!.ref.current!.getValues().name).toBe("Alice")
       expect(entry!.ref.current!.getValues().email).toBe("alice@test.com")
     })
+  })
+})
+
+// =============================================================================
+// Tests for F0FormDefinition normalization (single + per-section)
+// =============================================================================
+
+describe("F0AiFormRegistryProvider with F0FormDefinition items", () => {
+  const singleSchema = z.object({
+    firstName: z.string().min(1, "Required"),
+    lastName: z.string().min(1, "Required"),
+  })
+
+  const singleDefinition: F0FormDefinitionSingleSchema<typeof singleSchema> = {
+    _brand: "single",
+    name: "single-form",
+    schema: singleSchema,
+    description: "A single-schema form",
+    defaultValues: { firstName: "Jane", lastName: "Doe" },
+    onSubmit: vi.fn(async () => ({ success: true })),
+  }
+
+  it("registers a single-schema F0FormDefinition as virtual", async () => {
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider availableFormDefinitions={[singleDefinition]}>
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry).not.toBeNull()
+      expect(capturedRegistry!.getFormNames()).toContain("single-form")
+    })
+
+    const entry = capturedRegistry!.get("single-form")
+    expect(entry).toBeDefined()
+    expect(entry!.virtual).toBe(true)
+    expect(entry!.ref.current!.getValues()).toEqual({
+      firstName: "Jane",
+      lastName: "Doe",
+    })
+  })
+
+  it("single-schema onSubmit adapter wraps values in { data }", async () => {
+    const onSubmit = vi.fn(async () => ({ success: true as const }))
+    const def: F0FormDefinitionSingleSchema<typeof singleSchema> = {
+      ...singleDefinition,
+      onSubmit,
+    }
+
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider availableFormDefinitions={[def]}>
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("single-form")).toBeDefined()
+    })
+
+    const ref = capturedRegistry!.get("single-form")!.ref.current!
+    ref.setValues({ firstName: "Alice", lastName: "Smith" })
+    await ref.submit()
+
+    expect(onSubmit).toHaveBeenCalledWith({
+      data: { firstName: "Alice", lastName: "Smith" },
+    })
+  })
+
+  it("defineAvailableForm converts a single-schema F0FormDefinition", () => {
+    const result = defineAvailableForm(singleDefinition)
+    expect(result.name).toBe("single-form")
+    expect(result.description).toBe("A single-schema form")
+    // Should be a plain F0AiAvailableFormDefinition (no _brand)
+    expect("_brand" in result).toBe(false)
+  })
+
+  // -- Per-section tests --
+
+  const personalSchema = z.object({
+    firstName: z.string().min(1),
+    lastName: z.string().min(1),
+  })
+
+  const workSchema = z.object({
+    role: z.enum(["engineer", "designer"]),
+  })
+
+  const perSectionSchema = { personal: personalSchema, work: workSchema }
+
+  const perSectionDefinition: F0FormDefinitionPerSection<
+    typeof perSectionSchema
+  > = {
+    _brand: "per-section",
+    name: "per-section-form",
+    schema: perSectionSchema,
+    description: "A per-section form",
+    defaultValues: {
+      personal: { firstName: "Bob", lastName: "Jones" },
+      work: { role: "engineer" },
+    },
+    onSubmit: vi.fn(async () => ({ success: true })),
+  }
+
+  it("registers a per-section F0FormDefinition with flattened defaults", async () => {
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider
+        availableFormDefinitions={[perSectionDefinition]}
+      >
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry).not.toBeNull()
+      expect(capturedRegistry!.getFormNames()).toContain("per-section-form")
+    })
+
+    const entry = capturedRegistry!.get("per-section-form")
+    expect(entry).toBeDefined()
+    expect(entry!.virtual).toBe(true)
+    // defaultValues should be flattened
+    expect(entry!.ref.current!.getValues()).toEqual({
+      firstName: "Bob",
+      lastName: "Jones",
+      role: "engineer",
+    })
+  })
+
+  it("per-section merged schema contains all fields", async () => {
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider
+        availableFormDefinitions={[perSectionDefinition]}
+      >
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("per-section-form")).toBeDefined()
+    })
+
+    const ref = capturedRegistry!.get("per-section-form")!.ref.current!
+    const fieldNames = ref.getFieldNames()
+    expect(fieldNames).toContain("firstName")
+    expect(fieldNames).toContain("lastName")
+    expect(fieldNames).toContain("role")
+  })
+
+  it("per-section onSubmit reconstructs section data correctly", async () => {
+    const onSubmit = vi.fn(async () => ({ success: true as const }))
+    const def: F0FormDefinitionPerSection<typeof perSectionSchema> = {
+      ...perSectionDefinition,
+      onSubmit,
+    }
+
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider availableFormDefinitions={[def]}>
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("per-section-form")).toBeDefined()
+    })
+
+    const ref = capturedRegistry!.get("per-section-form")!.ref.current!
+    ref.setValues({
+      firstName: "Alice",
+      lastName: "Smith",
+      role: "designer",
+    })
+    await ref.submit()
+
+    // onSubmit is called once per section
+    expect(onSubmit).toHaveBeenCalledTimes(2)
+
+    // First call: personal section
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sectionId: "personal",
+        data: { firstName: "Alice", lastName: "Smith" },
+      })
+    )
+
+    // Second call: work section
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sectionId: "work",
+        data: { role: "designer" },
+      })
+    )
+  })
+
+  it("handles per-section with ZodEffects (refined schemas)", async () => {
+    const refinedPersonal = personalSchema.refine(
+      (v) => v.firstName !== v.lastName,
+      { message: "Names must differ" }
+    )
+
+    const refinedPerSection: F0FormDefinitionPerSection<{
+      personal: typeof refinedPersonal
+      work: typeof workSchema
+    }> = {
+      _brand: "per-section",
+      name: "refined-form",
+      schema: { personal: refinedPersonal, work: workSchema },
+      defaultValues: {
+        personal: { firstName: "A", lastName: "B" },
+        work: { role: "engineer" },
+      },
+      onSubmit: vi.fn(async () => ({ success: true })),
+    }
+
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider availableFormDefinitions={[refinedPerSection]}>
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("refined-form")).toBeDefined()
+    })
+
+    const ref = capturedRegistry!.get("refined-form")!.ref.current!
+    // Fields from the refined schema should still be extracted
+    const fieldNames = ref.getFieldNames()
+    expect(fieldNames).toContain("firstName")
+    expect(fieldNames).toContain("lastName")
+    expect(fieldNames).toContain("role")
   })
 })

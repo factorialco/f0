@@ -127,7 +127,39 @@ function isF0FormDefinition(
 ): item is
   | F0FormDefinitionSingleSchema<F0FormSchema>
   | F0FormDefinitionPerSection<F0PerSectionSchema> {
-  return "_brand" in item
+  return (
+    "_brand" in item &&
+    ((item as { _brand: unknown })._brand === "single" ||
+      (item as { _brand: unknown })._brand === "per-section")
+  )
+}
+
+/**
+ * Deeply unwraps a Zod schema, including ZodEffects (`.refine()`, `.transform()`, etc.),
+ * until it reaches a ZodObject with a `.shape`.
+ */
+function unwrapToZodObject(schema: ZodType): { shape?: ZodRawShape } {
+  let current: ZodType = schema
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  while (current) {
+    const def = (current as unknown as { _def: Record<string, unknown> })._def
+    // ZodObject → has shape
+    if ("shape" in def && typeof def.shape === "function") {
+      return { shape: (def.shape as () => ZodRawShape)() }
+    }
+    // ZodEffects → follow _def.schema
+    if ("schema" in def && def.schema instanceof z.ZodType) {
+      current = def.schema as ZodType
+      continue
+    }
+    // ZodOptional / ZodNullable / ZodDefault → follow innerType
+    if ("innerType" in def && def.innerType instanceof z.ZodType) {
+      current = def.innerType as ZodType
+      continue
+    }
+    break
+  }
+  return {}
 }
 
 /**
@@ -140,22 +172,41 @@ function toAvailableFormDefinition(
 ): F0AiAvailableFormDefinition {
   if (!isF0FormDefinition(item)) return item
 
+  // Build a mapping of sectionId → field keys for per-section definitions
+  const perSectionFieldKeys: Record<string, string[]> | undefined =
+    item._brand === "per-section"
+      ? Object.fromEntries(
+          Object.entries(item.schema as Record<string, F0FormSchema>).map(
+            ([sectionId, sectionSchema]) => [
+              sectionId,
+              Object.keys(unwrapToZodObject(sectionSchema).shape ?? {}),
+            ]
+          )
+        )
+      : undefined
+
   const schema: F0FormSchema =
     item._brand === "single"
       ? item.schema
-      : // Per-section: merge all section schemas into one object.
-        // The registry only understands a single F0FormSchema, so we
-        // merge the shapes into a flat z.object.
+      : // Per-section: merge all section schemas into one flat z.object.
+        // The registry only understands a single F0FormSchema.
         // (section boundaries are preserved in `sections`)
         (() => {
           const shapes: Record<string, ZodType> = {}
-          for (const sectionSchema of Object.values(
+          for (const [sectionId, sectionSchema] of Object.entries(
             item.schema as Record<string, F0FormSchema>
           )) {
-            const unwrapped = unwrapZodSchema(sectionSchema) as {
-              shape?: ZodRawShape
+            const unwrapped = unwrapToZodObject(sectionSchema)
+            if (!unwrapped.shape) continue
+            for (const [key, fieldSchema] of Object.entries(unwrapped.shape)) {
+              if (key in shapes) {
+                console.warn(
+                  `[toAvailableFormDefinition] Duplicate field "${key}" found in section "${sectionId}". ` +
+                    "The later section's field will overwrite the earlier one."
+                )
+              }
+              shapes[key] = fieldSchema
             }
-            if (unwrapped.shape) Object.assign(shapes, unwrapped.shape)
           }
           return z.object(shapes) as F0FormSchema
         })()
@@ -169,25 +220,52 @@ function toAvailableFormDefinition(
             originalOnSubmit as F0FormDefinitionSingleSchema<F0FormSchema>["onSubmit"]
           )({ data: values })
         } else {
-          // For per-section, wrap values as a single-section submit arg
-          const firstSection = Object.keys(
-            item.schema as Record<string, F0FormSchema>
-          )[0]
-          await (
-            originalOnSubmit as F0FormDefinitionPerSection<F0PerSectionSchema>["onSubmit"]
-          )({
-            sectionId: firstSection,
-            data: values,
-            fullData: values,
-          } as never)
+          // Reconstruct per-section fullData: { [sectionId]: { ...sectionFields } }
+          const sectionSchemas = item.schema as Record<string, F0FormSchema>
+          const fullData: Record<string, Record<string, unknown>> = {}
+          for (const [sectionId, fieldKeys] of Object.entries(
+            perSectionFieldKeys!
+          )) {
+            const sectionValues: Record<string, unknown> = {}
+            for (const key of fieldKeys) {
+              if (key in values) sectionValues[key] = values[key]
+            }
+            fullData[sectionId] = sectionValues
+          }
+          // Call onSubmit for each section (matching per-section contract)
+          const sectionIds = Object.keys(sectionSchemas)
+          for (const sectionId of sectionIds) {
+            await (
+              originalOnSubmit as F0FormDefinitionPerSection<F0PerSectionSchema>["onSubmit"]
+            )({
+              sectionId,
+              data: fullData[sectionId],
+              fullData,
+            } as never)
+          }
         }
       }
     : undefined
 
+  // Flatten per-section defaultValues from { sectionId: { field: val } } to { field: val }
+  let flatDefaultValues: Record<string, unknown> | undefined
+  if (item._brand === "per-section" && item.defaultValues) {
+    flatDefaultValues = {}
+    for (const sectionDefaults of Object.values(
+      item.defaultValues as Record<string, Record<string, unknown>>
+    )) {
+      Object.assign(flatDefaultValues, sectionDefaults)
+    }
+  } else {
+    flatDefaultValues = item.defaultValues as
+      | Record<string, unknown>
+      | undefined
+  }
+
   return {
     name: item.name,
     schema,
-    defaultValues: item.defaultValues as Record<string, unknown> | undefined,
+    defaultValues: flatDefaultValues,
     defaultValuesParamsSchema: item.defaultValuesParamsSchema,
     sections: item.sections as Record<string, F0SectionConfig> | undefined,
     onSubmit,
