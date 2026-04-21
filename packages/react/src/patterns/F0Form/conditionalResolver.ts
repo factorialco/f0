@@ -1,10 +1,12 @@
-import { zodResolver } from "@hookform/resolvers/zod"
 import type { Resolver, FieldValues, ResolverOptions } from "react-hook-form"
+
+import { zodResolver } from "@hookform/resolvers/zod"
 import { z, ZodTypeAny, ZodRawShape, ZodObject, ZodEffects } from "zod"
+
+import type { F0FormSchema } from "./types"
 
 import { getF0Config, isZodType, unwrapToZodObject } from "./f0Schema"
 import { evaluateRenderIf } from "./fields/utils"
-import type { F0FormSchema } from "./types"
 
 /**
  * Creates a conditional Zod resolver that only validates visible fields.
@@ -56,8 +58,10 @@ export function createConditionalResolver<TSchema extends F0FormSchema>(
  * - If renderIf evaluates to false (field is hidden), use z.any() to skip all validation
  *
  * If the original schema has refinements (ZodEffects), they are preserved.
+ *
+ * Exported for use in headless testing utilities (`createF0FormTester`).
  */
-function buildDynamicSchema<TSchema extends F0FormSchema>(
+export function buildDynamicSchema<TSchema extends F0FormSchema>(
   schema: TSchema,
   values: Record<string, unknown>
 ): ZodObject<ZodRawShape> | ZodEffects<ZodObject<ZodRawShape>> {
