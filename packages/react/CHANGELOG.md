@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.458.3](https://github.com/factorialco/f0/compare/f0-react-v1.458.2...f0-react-v1.458.3) (2026-04-21)
+
+
+### Bug Fixes
+
+* accept f0FormDefinition in availableFormDefinitions ([#3986](https://github.com/factorialco/f0/issues/3986)) ([a06950b](https://github.com/factorialco/f0/commit/a06950b46dbd87a269797fe482b07a54ce892c5d))
+
 ## [1.458.2](https://github.com/factorialco/f0/compare/f0-react-v1.458.1...f0-react-v1.458.2) (2026-04-21)
 
 
