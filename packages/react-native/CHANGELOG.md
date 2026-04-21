@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.52.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.51.0...f0-react-native-v0.52.0) (2026-04-21)
+
+
+### Features
+
+* **F0Button:** changes to F0Button and added new icons ([#3969](https://github.com/factorialco/f0/issues/3969)) ([15d9e88](https://github.com/factorialco/f0/commit/15d9e88f90f74a94adfb93d36cb263fc42427aa2))
+
 ## [0.51.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.50.0...f0-react-native-v0.51.0) (2026-04-16)
 
 
