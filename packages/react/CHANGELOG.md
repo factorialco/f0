@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.458.2](https://github.com/factorialco/f0/compare/f0-react-v1.458.1...f0-react-v1.458.2) (2026-04-21)
+
+
+### Bug Fixes
+
+* author not looking good on community post ([#3994](https://github.com/factorialco/f0/issues/3994)) ([3e6c4e3](https://github.com/factorialco/f0/commit/3e6c4e3d04344abd37b19a7494c4c9fcfe035ec1))
+
 ## [1.458.1](https://github.com/factorialco/f0/compare/f0-react-v1.458.0...f0-react-v1.458.1) (2026-04-21)
 
 
