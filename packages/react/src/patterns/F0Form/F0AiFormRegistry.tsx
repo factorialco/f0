@@ -115,8 +115,10 @@ export interface F0AiAvailableFormDefinition<
  */
 export type AvailableFormDefinitionItem =
   | F0AiAvailableFormDefinition
-  | F0FormDefinitionSingleSchema<F0FormSchema>
-  | F0FormDefinitionPerSection<F0PerSectionSchema>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  | F0FormDefinitionSingleSchema<any>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  | F0FormDefinitionPerSection<any>
 
 /**
  * Type guard: returns true when the item is an F0FormDefinition (single or per-section)
@@ -124,9 +126,7 @@ export type AvailableFormDefinitionItem =
  */
 function isF0FormDefinition(
   item: AvailableFormDefinitionItem
-): item is
-  | F0FormDefinitionSingleSchema<F0FormSchema>
-  | F0FormDefinitionPerSection<F0PerSectionSchema> {
+): item is F0FormDefinitionSingleSchema<any> | F0FormDefinitionPerSection<any> {
   return (
     "_brand" in item &&
     ((item as { _brand: unknown })._brand === "single" ||
