@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.458.0](https://github.com/factorialco/f0/compare/f0-react-v1.457.1...f0-react-v1.458.0) (2026-04-21)
+
+
+### Features
+
+* persistence per-viz filters data collection ([#3971](https://github.com/factorialco/f0/issues/3971)) ([3de0022](https://github.com/factorialco/f0/commit/3de0022e70294cec537ddd36cff82d035920e97f))
+
 ## [1.457.1](https://github.com/factorialco/f0/compare/f0-react-v1.457.0...f0-react-v1.457.1) (2026-04-21)
 
 
