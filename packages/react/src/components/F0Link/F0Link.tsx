@@ -60,7 +60,7 @@ const _F0Link = forwardRef<HTMLAnchorElement, F0LinkProps>(function Link(
   ) as ActionProps
 
   return (
-    <Action ref={ref} {...actionProps}>
+    <Action ref={ref} {...actionProps} variant="link">
       <span>{children}</span>
       {external && (
         <>
