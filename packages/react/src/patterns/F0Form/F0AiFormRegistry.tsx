@@ -5,17 +5,24 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react"
+import { z } from "zod"
 import { zodToJsonSchema } from "zod-to-json-schema"
 
 import type { ModuleId } from "@/components/avatars/F0AvatarModule"
-import type { F0WizardFormStep } from "@/patterns/F0WizardForm/types"
+import type {
+  F0FormDefinitionSingleSchema,
+  F0FormDefinitionPerSection,
+  F0WizardFormStep,
+} from "@/patterns/F0WizardForm/types"
 
 import type {
   F0FormErrorTriggerMode,
   F0FormSchema,
+  F0PerSectionSchema,
   F0SectionConfig,
   F0FormSubmitConfig,
 } from "./types"
@@ -101,6 +108,98 @@ export interface F0AiAvailableFormDefinition<
 }
 
 /**
+ * An item that can be passed in the `availableFormDefinitions` array.
+ * Accepts either a plain {@link F0AiAvailableFormDefinition} or the result
+ * of calling {@link useF0FormDefinition} (i.e. {@link F0FormDefinitionSingleSchema}
+ * or {@link F0FormDefinitionPerSection}).
+ */
+export type AvailableFormDefinitionItem =
+  | F0AiAvailableFormDefinition
+  | F0FormDefinitionSingleSchema<F0FormSchema>
+  | F0FormDefinitionPerSection<F0PerSectionSchema>
+
+/**
+ * Type guard: returns true when the item is an F0FormDefinition (single or per-section)
+ * produced by useF0FormDefinition, as opposed to a plain F0AiAvailableFormDefinition.
+ */
+function isF0FormDefinition(
+  item: AvailableFormDefinitionItem
+): item is
+  | F0FormDefinitionSingleSchema<F0FormSchema>
+  | F0FormDefinitionPerSection<F0PerSectionSchema> {
+  return "_brand" in item
+}
+
+/**
+ * Normalises any {@link AvailableFormDefinitionItem} into an
+ * {@link F0AiAvailableFormDefinition} so the rest of the registry can
+ * consume it uniformly.
+ */
+function toAvailableFormDefinition(
+  item: AvailableFormDefinitionItem
+): F0AiAvailableFormDefinition {
+  if (!isF0FormDefinition(item)) return item
+
+  const schema: F0FormSchema =
+    item._brand === "single"
+      ? item.schema
+      : // Per-section: merge all section schemas into one object.
+        // The registry only understands a single F0FormSchema, so we
+        // merge the shapes into a flat z.object.
+        // (section boundaries are preserved in `sections`)
+        (() => {
+          const shapes: Record<string, ZodType> = {}
+          for (const sectionSchema of Object.values(
+            item.schema as Record<string, F0FormSchema>
+          )) {
+            const unwrapped = unwrapZodSchema(sectionSchema) as {
+              shape?: ZodRawShape
+            }
+            if (unwrapped.shape) Object.assign(shapes, unwrapped.shape)
+          }
+          return z.object(shapes) as F0FormSchema
+        })()
+
+  // Adapt the typed onSubmit to the untyped (values) => void signature
+  const originalOnSubmit = item.onSubmit
+  const onSubmit = originalOnSubmit
+    ? async (values: Record<string, unknown>) => {
+        if (item._brand === "single") {
+          await (
+            originalOnSubmit as F0FormDefinitionSingleSchema<F0FormSchema>["onSubmit"]
+          )({ data: values })
+        } else {
+          // For per-section, wrap values as a single-section submit arg
+          const firstSection = Object.keys(
+            item.schema as Record<string, F0FormSchema>
+          )[0]
+          await (
+            originalOnSubmit as F0FormDefinitionPerSection<F0PerSectionSchema>["onSubmit"]
+          )({
+            sectionId: firstSection,
+            data: values,
+            fullData: values,
+          } as never)
+        }
+      }
+    : undefined
+
+  return {
+    name: item.name,
+    schema,
+    defaultValues: item.defaultValues as Record<string, unknown> | undefined,
+    defaultValuesParamsSchema: item.defaultValuesParamsSchema,
+    sections: item.sections as Record<string, F0SectionConfig> | undefined,
+    onSubmit,
+    description: item.description,
+    module: item.module,
+    steps: item.steps,
+    submitConfig: item.submitConfig as F0FormSubmitConfig | undefined,
+    errorTriggerMode: item.errorTriggerMode,
+  }
+}
+
+/**
  * Helper to define an available form with proper params typing.
  * TypeScript infers `TParams` from `defaultValuesParamsSchema`, so the
  * `defaultValues` callback receives fully typed params.
@@ -122,8 +221,21 @@ export function defineAvailableForm<
   TParams extends Record<string, unknown> = Record<string, unknown>,
 >(
   definition: F0AiAvailableFormDefinition<TParams>
-): F0AiAvailableFormDefinition<TParams> {
-  return definition
+): F0AiAvailableFormDefinition<TParams>
+
+/**
+ * Overload that accepts an `F0FormDefinitionSingleSchema` (the return value
+ * of `useF0FormDefinition` with a single schema) and converts it into an
+ * `F0AiAvailableFormDefinition`.
+ */
+export function defineAvailableForm<TSchema extends F0FormSchema>(
+  definition: F0FormDefinitionSingleSchema<TSchema>
+): F0AiAvailableFormDefinition
+
+export function defineAvailableForm(
+  definition: AvailableFormDefinitionItem
+): F0AiAvailableFormDefinition {
+  return toAvailableFormDefinition(definition)
 }
 
 /**
@@ -397,12 +509,20 @@ const F0AiFormRegistryContext =
  */
 export function F0AiFormRegistryProvider({
   children,
-  availableFormDefinitions,
+  availableFormDefinitions: rawAvailableFormDefinitions,
 }: {
   children: React.ReactNode
-  /** Form definitions the AI can interact with even if the form is not rendered on the page */
-  availableFormDefinitions?: F0AiAvailableFormDefinition[]
+  /** Form definitions the AI can interact with even if the form is not rendered on the page.
+   *  Accepts plain definitions, or the return value of `useF0FormDefinition` hooks. */
+  availableFormDefinitions?: AvailableFormDefinitionItem[]
 }) {
+  // Normalise all items to F0AiAvailableFormDefinition.
+  // Memoise so the reference stays stable when the raw input hasn't changed,
+  // preventing the downstream useEffect from firing on every render.
+  const availableFormDefinitions = useMemo(
+    () => rawAvailableFormDefinitions?.map(toAvailableFormDefinition),
+    [rawAvailableFormDefinitions]
+  )
   const registryRef = useRef<Map<string, F0AiFormEntry>>(new Map())
   const lastDescriptionsJsonRef = useRef<string>("")
   const fillVersionsRef = useRef<Map<string, number>>(new Map())
