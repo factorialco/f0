@@ -30,11 +30,11 @@ jobs:
         id: check-trigger
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
         run: |
           # Query the triggering workflow run's jobs to see if publish-react-native succeeded
-          RUN_ID=${{ github.event.workflow_run.id }}
           RN_JOB_CONCLUSION=$(gh api "repos/${{ github.repository }}/actions/runs/${RUN_ID}/jobs" \
-            --jq '.jobs[] | select(.name | contains("REACT NATIVE")) | .conclusion' 2>/dev/null || echo "not_found")
+            --jq '[.jobs[] | select(.name | contains("REACT NATIVE")) | .conclusion] | first' 2>/dev/null || echo "not_found")
 
           if [ "$RN_JOB_CONCLUSION" != "success" ]; then
             echo "React Native publish job did not succeed (got: $RN_JOB_CONCLUSION). Skipping."
@@ -65,9 +65,23 @@ jobs:
           RELEASE_JSON=$(gh api repos/${{ github.repository }}/releases \
             --jq '[.[] | select(.tag_name | startswith("react-native-v"))][0]')
 
-          echo "release_name=$(echo "$RELEASE_JSON" | jq -r '.name')" >> $GITHUB_OUTPUT
-          echo "release_url=$(echo "$RELEASE_JSON" | jq -r '.html_url')" >> $GITHUB_OUTPUT
-          echo "release_tag=$(echo "$RELEASE_JSON" | jq -r '.tag_name')" >> $GITHUB_OUTPUT
+          if [ -z "$RELEASE_JSON" ] || [ "$RELEASE_JSON" = "null" ]; then
+            echo "::error::No react-native release found. Cannot proceed."
+            exit 1
+          fi
+
+          RELEASE_NAME=$(echo "$RELEASE_JSON" | jq -r '.name // empty')
+          RELEASE_URL=$(echo "$RELEASE_JSON" | jq -r '.html_url // empty')
+          RELEASE_TAG=$(echo "$RELEASE_JSON" | jq -r '.tag_name // empty')
+
+          if [ -z "$RELEASE_TAG" ]; then
+            echo "::error::Release tag is empty. Cannot proceed."
+            exit 1
+          fi
+
+          echo "release_name=${RELEASE_NAME}" >> $GITHUB_OUTPUT
+          echo "release_url=${RELEASE_URL}" >> $GITHUB_OUTPUT
+          echo "release_tag=${RELEASE_TAG}" >> $GITHUB_OUTPUT
 
           # Multiline body
           EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
@@ -103,7 +117,7 @@ jobs:
         with:
           working-directory: packages/react-native
           comment: false
-          command: eas update --auto --branch production --message "${{ steps.release-info.outputs.release_name }}" --non-interactive
+          command: eas update --auto --branch production --message "${{ steps.release-info.outputs.release_name || 'Production update' }}" --non-interactive
 
       - name: Download QR code and update asset
         if: steps.preview.outcome == 'success'
