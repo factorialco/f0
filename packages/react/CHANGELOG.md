@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.457.1](https://github.com/factorialco/f0/compare/f0-react-v1.457.0...f0-react-v1.457.1) (2026-04-21)
+
+
+### Bug Fixes
+
+* update mentionIds to use string format in tests ([#3982](https://github.com/factorialco/f0/issues/3982)) ([9ef715e](https://github.com/factorialco/f0/commit/9ef715e27687c86259c6cfd4270ef35d315703db))
+
 ## [1.457.0](https://github.com/factorialco/f0/compare/f0-react-v1.456.3...f0-react-v1.457.0) (2026-04-20)
 
 
