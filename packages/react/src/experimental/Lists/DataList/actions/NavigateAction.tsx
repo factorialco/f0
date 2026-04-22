@@ -12,7 +12,12 @@ export type NavigateActionProps = {
 } & InternalNavigateActionType
 
 export const NavigateAction = memo(
-  ({ children, className, ...props }: NavigateActionProps) => {
+  ({
+    children,
+    className,
+    showChevron = true,
+    ...props
+  }: NavigateActionProps) => {
     return (
       <Link
         {...props}
@@ -23,9 +28,11 @@ export const NavigateAction = memo(
         )}
       >
         {children}
-        <div className="grid">
-          <F0Icon aria-hidden={true} icon={ChevronRight} size="md" />
-        </div>
+        {showChevron && (
+          <div className="grid">
+            <F0Icon aria-hidden={true} icon={ChevronRight} size="md" />
+          </div>
+        )}
       </Link>
     )
   }

@@ -9,7 +9,10 @@ import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults
 import type { CanvasActions } from "./canvas/types"
 import type { ChatDashboardConfig } from "./canvas/entities/dashboard/types"
 import type { DataDownloadDataset } from "./actions/core/dataDownload/types"
-export type { PersonProfile } from "./components/markdownRenderers/entityRef/entities/person/types"
+export type {
+  PersonProfile,
+  PersonRef,
+} from "./components/markdownRenderers/entityRef/entities/person/types"
 export type { CandidateProfile } from "./components/markdownRenderers/entityRef/entities/candidate/types"
 export type { JobPostingProfile } from "./components/markdownRenderers/entityRef/entities/jobPosting/types"
 export type { RequisitionProfile } from "./components/markdownRenderers/entityRef/entities/requisition/types"

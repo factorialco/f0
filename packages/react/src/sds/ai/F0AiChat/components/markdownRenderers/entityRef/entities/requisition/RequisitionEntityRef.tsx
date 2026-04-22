@@ -1,9 +1,15 @@
 import { forwardRef, useMemo } from "react"
 
 import type { F0CardProps } from "@/components/F0Card"
+import {
+  DetailsItem,
+  type DetailsItemType,
+} from "@/experimental/Lists/DetailsItem"
 
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
+
+import type { PersonRef } from "../person/types"
 
 import type { RequisitionProfile } from "./types"
 
@@ -30,9 +36,10 @@ RequisitionTrigger.displayName = "RequisitionTrigger"
 /**
  * Inline requisition entity reference with a hover card showing requisition details.
  *
- * Renders the trigger as a styled link. On hover, lazily fetches
- * the requisition data via `entityRefs.resolvers.requisition` and displays
- * title, status, and reason. Optionally links via `entityRefs.urls.requisition`.
+ * Renders the trigger as a styled link. On hover, lazily fetches the requisition
+ * data via `entityRefs.resolvers.requisition` and displays status and owner rows.
+ *
+ * Owner becomes a clickable link when `entityRefs.urls.person` is provided.
  */
 export function RequisitionEntityRef({
   id,
@@ -46,22 +53,55 @@ export function RequisitionEntityRef({
   const i18n = useI18n()
 
   const requisitionUrl = entityRefs?.urls?.requisition?.(id)
+  const personUrlBuilder = entityRefs?.urls?.person
 
   const mapToCard = useMemo(
     () =>
-      (profile: RequisitionProfile): F0CardProps => ({
-        title: profile.title,
-        description: [profile.status, profile.reason]
-          .filter(Boolean)
-          .join(" · "),
-        ...(requisitionUrl && {
-          secondaryActions: {
-            label: i18n.t("ai.view"),
-            href: requisitionUrl,
-          },
-        }),
-      }),
-    [i18n, requisitionUrl]
+      (profile: RequisitionProfile): F0CardProps => {
+        const details: DetailsItemType[] = []
+
+        if (profile.status) {
+          details.push({
+            title: i18n.t("ai.entityRef.requisition.status"),
+            content: {
+              type: "status-tag",
+              text: profile.status,
+              variant: profile.statusVariant ?? "neutral",
+            },
+          })
+        }
+
+        if (profile.owner) {
+          details.push(
+            personRow(
+              i18n.t("ai.entityRef.requisition.owner"),
+              profile.owner,
+              personUrlBuilder
+            )
+          )
+        }
+
+        return {
+          title: profile.title,
+          ...(profile.reason && { description: profile.reason }),
+          ...(details.length > 0 && {
+            children: (
+              <div className="-mx-1.5 flex flex-col gap-2">
+                {details.map((d) => (
+                  <DetailsItem key={d.title} {...d} />
+                ))}
+              </div>
+            ),
+          }),
+          ...(requisitionUrl && {
+            secondaryActions: {
+              label: i18n.t("ai.view"),
+              href: requisitionUrl,
+            },
+          }),
+        }
+      },
+    [i18n, requisitionUrl, personUrlBuilder]
   )
 
   const fallbackCard = useMemo(
@@ -90,4 +130,28 @@ export function RequisitionEntityRef({
       fallbackCard={fallbackCard}
     />
   )
+}
+
+function personRow(
+  title: string,
+  person: PersonRef,
+  urlBuilder: ((id: string) => string) | undefined
+): DetailsItemType {
+  const href = urlBuilder?.(String(person.id))
+  return {
+    title,
+    content: {
+      type: "person",
+      firstName: person.firstName,
+      lastName: person.lastName,
+      avatarUrl: person.avatarUrl,
+      ...(href && {
+        action: {
+          type: "navigate",
+          href,
+          showChevron: false,
+        },
+      }),
+    },
+  }
 }

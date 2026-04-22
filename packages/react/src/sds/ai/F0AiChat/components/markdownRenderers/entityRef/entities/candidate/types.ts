@@ -8,4 +8,6 @@ export type CandidateProfile = {
   lastName: string
   avatarUrl?: string
   source?: string
+  /** Pre-formatted application date (e.g. "25 Mar 2026"). */
+  appliedAt?: string
 }
