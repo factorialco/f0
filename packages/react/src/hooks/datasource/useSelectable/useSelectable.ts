@@ -722,9 +722,19 @@ export function useSelectable<
   }, [source.currentFilters, clearSelectedItems, disableSelectAll])
 
   // Clear selections when page changes, unless the user has triggered
-  // "select all items" (allSelectedCheck) or resetOnPageChange is disabled
+  // "select all items" (allSelectedCheck) or resetOnPageChange is disabled.
+  // NOTE: infinite-scroll pagination advances the cursor on every loadMore(),
+  // but the list is cumulative — previously-selected rows remain valid and the
+  // user has not navigated away. We never clear for infinite-scroll; the
+  // filter-change effect above handles the case where the dataset truly resets.
   useEffect(() => {
     if (!resetOnPageChange) return
+
+    // Infinite-scroll loadMore is not a page navigation — skip.
+    if (paginationInfo?.type === "infinite-scroll") {
+      previousPageIdentifierRef.current = currentPageIdentifier
+      return
+    }
 
     const previousPageIdentifier = previousPageIdentifierRef.current
 
@@ -745,6 +755,7 @@ export function useSelectable<
     allSelectedCheck,
     clearSelectedItems,
     resetOnPageChange,
+    paginationInfo?.type,
   ])
 
   // Store isAllSelected in ref to avoid circular dependencies
