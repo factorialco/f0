@@ -155,10 +155,19 @@ export function DashboardHeader({
     ]
   }, [metadata, locale, t])
 
+  // Title + description precedence: once the dashboard is saved (has an id)
+  // the backend metadata is the source of truth — the chat-history snapshot
+  // in `content` / `config` can drift if someone edited the dashboard from
+  // another surface (e.g. Analytics list page) after this conversation was
+  // opened. We prefer metadata values when present, fall back to the
+  // history copy otherwise (covers the pre-fetch window and drafts).
+  const displayTitle = metadata?.title ?? content.title
+  const displayDescription = metadata?.description ?? content.config.description
+
   return (
     <ResourceHeader
-      title={content.title}
-      description={content.config.description}
+      title={displayTitle}
+      description={displayDescription}
       status={status}
       metadata={headerMetadata}
       secondaryActions={secondaryActions}

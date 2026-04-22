@@ -338,7 +338,14 @@ const meta: Meta<typeof ApplicationFrame> = {
             // appear shortly after the canvas opens (mirrors prod UX).
             await new Promise((resolve) => setTimeout(resolve, 250))
             if (id === "dash-expenses-001") {
+              // Title + description intentionally DIFFER from the chat
+              // history mock to showcase the backend-wins-on-save contract
+              // — the header should render these instead of the config
+              // snapshot once metadata resolves.
               return {
+                title: "Expenses overview (backend)",
+                description:
+                  "Latest expenses summary pulled from the database, reflecting any edits made from the Analytics list after this chat was opened.",
                 creator: {
                   firstName: "Hellen",
                   lastName: "Schmidt",

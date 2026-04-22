@@ -341,8 +341,25 @@ export interface ChatDashboardConfig {
  * Creator + last-edited metadata for a saved dashboard. Returned by
  * `DashboardCanvasActions.getMetadata` so the header can render the author
  * avatar and the freshness signal only once a dashboard has been persisted.
+ *
+ * `title` and `description` are also returned: once a dashboard has an id
+ * the backend is the source of truth and may diverge from what's stored in
+ * the chat history (e.g. someone renamed the dashboard from the Analytics
+ * list page since this conversation was first opened). The header prefers
+ * these values over the ones baked into `content` / `config`.
  */
 export type DashboardMetadata = {
+  /**
+   * Latest persisted title. When present, the header displays this instead
+   * of `content.title` so the chat-history snapshot never shadows the
+   * authoritative backend copy.
+   */
+  title?: string
+  /**
+   * Latest persisted description. Same rationale as `title` — takes
+   * precedence over `config.description` once the dashboard is saved.
+   */
+  description?: string
   creator: {
     firstName: string
     lastName: string
