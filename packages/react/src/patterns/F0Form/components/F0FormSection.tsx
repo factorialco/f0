@@ -3,10 +3,10 @@ import { DefaultValues, Path, useForm } from "react-hook-form"
 import { z } from "zod"
 
 import { F0Button } from "@/components/F0Button"
-import { SectionHeader } from "@/patterns/SectionHeader"
 import { Save } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
+import { SectionHeader } from "@/patterns/SectionHeader"
 import { Form as FormProvider } from "@/ui/form"
 
 import type {
@@ -80,6 +80,8 @@ interface F0FormSectionProps<TSchema extends F0FormSchema> {
   errorTriggerMode: F0FormErrorTriggerMode
   className?: string
   initialFiles?: import("../fields/file/types").InitialFile[]
+  /** Whether async initialFiles are still being resolved */
+  isLoadingInitialFiles?: boolean
   formRef?: React.MutableRefObject<F0FormRef | null>
   renderCustomField?: RenderCustomFieldFunction
   /** Upload hook shared by all file fields */
@@ -103,6 +105,7 @@ export function F0FormSection<TSchema extends F0FormSchema>({
   errorTriggerMode,
   className,
   initialFiles,
+  isLoadingInitialFiles,
   formRef,
   renderCustomField,
   useUpload,
@@ -260,11 +263,19 @@ export function F0FormSection<TSchema extends F0FormSchema>({
     () => ({
       formName,
       initialFiles,
+      isLoadingInitialFiles,
       renderCustomField,
       isLoading: isFormLoading,
       useUpload,
     }),
-    [formName, initialFiles, renderCustomField, isFormLoading, useUpload]
+    [
+      formName,
+      initialFiles,
+      isLoadingInitialFiles,
+      renderCustomField,
+      isFormLoading,
+      useUpload,
+    ]
   )
 
   const title = sectionConfig?.title ?? sectionId

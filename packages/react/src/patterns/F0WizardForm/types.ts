@@ -86,6 +86,8 @@ export interface F0FormDefinitionSingleSchema<TSchema extends F0FormSchema> {
   ) => Promise<Partial<z.infer<TSchema>>>
   /** Pre-existing file metadata for file fields — resolved before the form renders */
   initialFiles?: InitialFile[]
+  /** Whether async initialFiles are still being resolved */
+  isLoadingInitialFiles?: boolean
   /** Wizard steps — when present, F0WizardForm uses these instead of auto-deriving from sections */
   steps?: F0WizardFormStep[]
 }
@@ -116,6 +118,8 @@ export interface F0FormDefinitionPerSection<T extends F0PerSectionSchema> {
   ) => Promise<{ [K in keyof T]?: Partial<z.infer<T[K]>> }>
   /** Pre-existing file metadata for file fields — resolved before the form renders */
   initialFiles?: InitialFile[]
+  /** Whether async initialFiles are still being resolved */
+  isLoadingInitialFiles?: boolean
   /** Wizard steps — when present, F0WizardForm uses these instead of auto-deriving from sections */
   steps?: F0WizardFormStep[]
 }

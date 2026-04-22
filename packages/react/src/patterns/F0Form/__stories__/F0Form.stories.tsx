@@ -1402,13 +1402,21 @@ export const FileFieldsWithInitialFiles: Story = {
 }
 
 /**
- * Same as `FileFieldsWithInitialFiles` but the file list is fetched
- * asynchronously — simulating a real API call. The form renders in a loading
- * state until the files resolve, then hydrates the file fields.
+ * Mix of regular and file fields where both `defaultValues` and `initialFiles`
+ * are fetched asynchronously. Default values resolve in ~800 ms; file metadata
+ * resolves in ~1 500 ms. The form stays in a full loading state until the
+ * slower of the two (initial files) finishes.
  */
 export const FileFieldsWithAsyncInitialFiles: Story = {
   render() {
     const formSchema = z.object({
+      title: f0FormField(z.string().min(1, "Required"), {
+        label: "Document Title",
+      }),
+      notes: f0FormField(z.string().optional(), {
+        label: "Notes",
+        fieldType: "textarea",
+      }),
       document: f0FormField(z.string().min(1, "Please upload a file"), {
         label: "Contract Document",
         fieldType: "file",
@@ -1429,9 +1437,14 @@ export const FileFieldsWithAsyncInitialFiles: Story = {
     const formDefinition = useF0FormDefinition({
       name: "file-initial-async",
       schema: formSchema,
-      defaultValues: {
-        document: "signed_contract_2024.pdf",
-        attachments: ["signed_invoice.pdf", "signed_receipt.png"],
+      defaultValues: async (_signal) => {
+        await sleep(800)
+        return {
+          title: "Q1 2024 Contract",
+          notes: "Reviewed and approved by legal.",
+          document: "signed_contract_2024.pdf",
+          attachments: ["signed_invoice.pdf", "signed_receipt.png"],
+        }
       },
       onSubmit: async ({ data }) => {
         await sleep(1000)

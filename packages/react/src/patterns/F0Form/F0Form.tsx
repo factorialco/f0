@@ -117,6 +117,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
     errorTriggerMode = "on-blur",
     styling,
     initialFiles,
+    isLoadingInitialFiles,
     renderCustomField,
     isLoading: isFormLoading,
     useUpload,
@@ -182,6 +183,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
               submitConfig={perSectionSubmitConfig}
               errorTriggerMode={errorTriggerMode}
               initialFiles={initialFiles}
+              isLoadingInitialFiles={isLoadingInitialFiles}
               renderCustomField={renderCustomField}
               isLoading={isFormLoading}
               useUpload={useUpload}
@@ -417,6 +419,7 @@ function F0FormFromSingleDefinition<TSchema extends F0FormSchema>({
       styling={styling}
       formRef={formRef}
       initialFiles={def.initialFiles ?? initialFiles}
+      isLoadingInitialFiles={def.isLoadingInitialFiles}
       renderCustomField={renderCustomField}
       useUpload={useUpload}
       isLoading={isLoading}
@@ -478,6 +481,7 @@ function F0FormFromPerSectionDefinition<T extends F0PerSectionSchema>({
       styling={styling}
       formRef={formRef}
       initialFiles={def.initialFiles ?? initialFiles}
+      isLoadingInitialFiles={def.isLoadingInitialFiles}
       renderCustomField={renderCustomField}
       useUpload={useUpload}
       isLoading={isLoading}
@@ -874,6 +878,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     () => ({
       formName: name,
       initialFiles: props.initialFiles,
+      isLoadingInitialFiles: props.isLoadingInitialFiles,
       renderCustomField: props.renderCustomField,
       isLoading: isFormLoading,
       useUpload,
@@ -881,6 +886,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     [
       name,
       props.initialFiles,
+      props.isLoadingInitialFiles,
       props.renderCustomField,
       isFormLoading,
       useUpload,
@@ -932,7 +938,10 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             return (
               <div
                 key={groupedItem.item.field.id}
-                className={cn(fieldGapClass, "empty:hidden")}
+                className={cn(
+                  fieldGapClass,
+                  "empty:hidden [&>span.hidden]:hidden"
+                )}
               >
                 {fieldContent}
               </div>

@@ -295,9 +295,8 @@ export function useF0FormDefinition(
     hasParamsSchema
   )
 
-  const { resolved: resolvedInitialFiles } = useAsyncDefaultValues<
-    InitialFile[]
-  >(initialFiles, false)
+  const { resolved: resolvedInitialFiles, isLoading: isLoadingInitialFiles } =
+    useAsyncDefaultValues<InitialFile[]>(initialFiles, false)
 
   return useMemo(() => {
     const brand = isZodSchema(schema) ? "single" : "per-section"
@@ -311,10 +310,11 @@ export function useF0FormDefinition(
       onSubmit,
       submitConfig,
       errorTriggerMode,
-      isLoading,
+      isLoading: isLoading || isLoadingInitialFiles,
       defaultValuesParamsSchema,
       defaultValuesFn,
       initialFiles: resolvedInitialFiles,
+      isLoadingInitialFiles,
       steps,
       _brand: brand,
     } as
@@ -335,6 +335,7 @@ export function useF0FormDefinition(
     defaultValuesParamsSchema,
     defaultValuesFn,
     resolvedInitialFiles,
+    isLoadingInitialFiles,
     steps,
   ])
 }
