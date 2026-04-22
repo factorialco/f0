@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.460.0](https://github.com/factorialco/f0/compare/f0-react-v1.459.1...f0-react-v1.460.0) (2026-04-22)
+
+
+### Features
+
+* **F0AiChat:** clarifying question UX, persistence, motion polish, reply ([#4004](https://github.com/factorialco/f0/issues/4004)) ([8fb49f4](https://github.com/factorialco/f0/commit/8fb49f49afb466d3a2ad24b3be1a5c038fa4611e))
+
 ## [1.459.1](https://github.com/factorialco/f0/compare/f0-react-v1.459.0...f0-react-v1.459.1) (2026-04-22)
 
 

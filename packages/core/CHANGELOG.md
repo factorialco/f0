@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.50.0](https://github.com/factorialco/f0/compare/f0-core-v1.49.0...f0-core-v1.50.0) (2026-04-22)
+
+
+### Features
+
+* **F0AiChat:** clarifying question UX, persistence, motion polish, reply ([#4004](https://github.com/factorialco/f0/issues/4004)) ([8fb49f4](https://github.com/factorialco/f0/commit/8fb49f49afb466d3a2ad24b3be1a5c038fa4611e))
+
 ## [1.49.0](https://github.com/factorialco/f0/compare/f0-core-v1.48.2...f0-core-v1.49.0) (2026-04-13)
 
 
