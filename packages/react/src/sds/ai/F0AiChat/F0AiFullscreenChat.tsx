@@ -9,7 +9,7 @@ import { MessagesContainer } from "./components/messages/MessagesContainer"
 import { useAiChat } from "./providers/AiChatStateProvider"
 
 const FullscreenChatInput = () => {
-  const { sendMessage, inProgress } = useAiChat()
+  const { sendMessage, inProgress, creditWarning } = useAiChat()
   const { stopGeneration } = useCopilotChatInternal()
 
   const handleSend = async (text: string) => {
@@ -27,6 +27,7 @@ const FullscreenChatInput = () => {
         inProgress={inProgress}
         onSend={handleSend}
         onStop={handleStop}
+        creditWarning={creditWarning}
       />
     </div>
   )

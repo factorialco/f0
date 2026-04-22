@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { z, type ZodType } from "zod"
 
+import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 import type {
   F0FormErrorTriggerMode,
   F0FormSubmitConfig,
@@ -17,6 +18,7 @@ import type {
   F0PerSectionSchema,
   F0WizardFormPerSectionSubmitArg,
   F0WizardFormSingleSubmitArg,
+  F0WizardFormStep,
 } from "./types"
 
 // =============================================================================
@@ -44,6 +46,10 @@ interface UseF0FormDefinitionSingleSchemaInputBase<
   TSchema extends F0FormSchema,
 > {
   name: string
+  /** Human-readable description of the form's purpose */
+  description?: string
+  /** Module associated with this form (for avatar display in canvas cards) */
+  module?: ModuleId
   schema: TSchema
   sections?: Record<string, F0SectionConfig>
   onSubmit: (
@@ -51,6 +57,8 @@ interface UseF0FormDefinitionSingleSchemaInputBase<
   ) => Promise<F0FormSubmitResult> | F0FormSubmitResult
   submitConfig?: F0FormSubmitConfig
   errorTriggerMode?: F0FormErrorTriggerMode
+  /** Wizard steps — when present, F0WizardForm uses these instead of auto-deriving from sections */
+  steps?: F0WizardFormStep[]
 }
 
 /** Single-schema input WITHOUT `defaultValuesParamsSchema` → `defaultValues` is sync or `(signal) => Promise<T>` */
@@ -82,6 +90,10 @@ type UseF0FormDefinitionSingleSchemaInput<
 /** Base fields shared by all per-section input variants */
 interface UseF0FormDefinitionPerSectionInputBase<T extends F0PerSectionSchema> {
   name: string
+  /** Human-readable description of the form's purpose */
+  description?: string
+  /** Module associated with this form (for avatar display in canvas cards) */
+  module?: ModuleId
   schema: T
   sections?: Record<string, F0PerSectionSectionConfig>
   onSubmit: (
@@ -89,6 +101,8 @@ interface UseF0FormDefinitionPerSectionInputBase<T extends F0PerSectionSchema> {
   ) => Promise<F0FormSubmitResult> | F0FormSubmitResult
   submitConfig?: F0PerSectionSubmitConfig
   errorTriggerMode?: F0FormErrorTriggerMode
+  /** Wizard steps — when present, F0WizardForm uses these instead of auto-deriving from sections */
+  steps?: F0WizardFormStep[]
 }
 
 /** Per-section input WITHOUT `defaultValuesParamsSchema` */
@@ -247,7 +261,11 @@ export function useF0FormDefinition(
     submitConfig,
     errorTriggerMode,
     defaultValuesParamsSchema,
+    description,
+    module,
   } = input
+
+  const steps = "steps" in input ? input.steps : undefined
 
   // Store the raw function for the AI registry to call with actual params
   const defaultValuesFn =
@@ -267,6 +285,8 @@ export function useF0FormDefinition(
     const brand = isZodSchema(schema) ? "single" : "per-section"
     return {
       name,
+      description,
+      module,
       schema,
       sections,
       defaultValues: resolvedDefaults,
@@ -276,6 +296,7 @@ export function useF0FormDefinition(
       isLoading,
       defaultValuesParamsSchema,
       defaultValuesFn,
+      steps,
       _brand: brand,
     } as
       | F0FormDefinitionSingleSchema<F0FormSchema>
@@ -283,6 +304,8 @@ export function useF0FormDefinition(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     name,
+    description,
+    module,
     schema,
     sections,
     resolvedDefaults,
@@ -292,5 +315,6 @@ export function useF0FormDefinition(
     isLoading,
     defaultValuesParamsSchema,
     defaultValuesFn,
+    steps,
   ])
 }

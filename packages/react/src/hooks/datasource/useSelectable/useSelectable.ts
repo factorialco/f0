@@ -420,12 +420,18 @@ export function useSelectable<
     (
       itemId: SelectionId | readonly SelectionId[],
       checked: boolean,
-      onlyIfNotPreviousState: boolean = false
+      onlyIfNotPreviousState: boolean = false,
+      fallbackItem?: R | readonly R[]
     ) => {
       const itemIds = (Array.isArray(itemId) ? itemId : [itemId]).slice(
         0,
         isMultiSelection ? undefined : 1
       )
+      const fallbackItems = Array.isArray(fallbackItem)
+        ? fallbackItem
+        : fallbackItem !== undefined
+          ? [fallbackItem]
+          : []
 
       setLocalSelectedState((current) => {
         // Single selection: replace previous selection entirely
@@ -441,8 +447,13 @@ export function useSelectable<
 
           updated++
           const existingItem = current.items?.get(id)?.item
+          const matchingFallbackItem = fallbackItems.find((item) => {
+            const fallbackId = getSelectable?.(item)
+            return fallbackId !== undefined && fallbackId === id
+          })
           const item =
             existingItem ??
+            matchingFallbackItem ??
             data.records.find((record) => {
               const recordId = getSelectable?.(record)
               return recordId !== undefined && recordId === id
@@ -513,7 +524,7 @@ export function useSelectable<
       if (isRecordItem(itemOrId, getSelectable !== undefined)) {
         const id = getSelectable?.(itemOrId)
         if (id !== undefined) {
-          handleSelectItemChangeInternal(id, checked)
+          handleSelectItemChangeInternal(id, checked, false, itemOrId)
         }
         return
       }

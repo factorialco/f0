@@ -94,7 +94,7 @@ describe("NumberCell", () => {
     )
 
     const input = screen.getByRole("textbox")
-    const alignWrapper = input.closest('[class*="[&_input]"]')
+    const alignWrapper = input.closest(".justify-end")
     expect(alignWrapper).toBeInTheDocument()
   })
 

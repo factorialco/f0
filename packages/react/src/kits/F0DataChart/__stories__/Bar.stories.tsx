@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import type { F0DataChartProps } from "../types"
+
 import { F0DataChart } from "../index"
-import { ChartDecorator } from "./decorators"
+import { ChartDecorator, ResponsiveSnapshot } from "./decorators"
 
 const meta = {
   component: F0DataChart,
@@ -13,11 +15,69 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof F0DataChart>
 
-export const Default: Story = {
+// ---------------------------------------------------------------------------
+// Sample data
+// ---------------------------------------------------------------------------
+
+const MONTHS_SHORT = ["Feb", "Mar", "Apr", "May", "Jun", "Jul"] as const
+
+const MONTHS_LONG = [
+  "September",
+  "October",
+  "November",
+  "December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+] as const
+
+const ONE_SERIES = [
+  {
+    name: "Headcount",
+    data: [142, 156, 168, 175, 189, 195, 188, 178, 169, 162],
+  },
+]
+
+const THREE_SERIES = [
+  {
+    name: "Engineering",
+    data: [45, 48, 52, 55, 58, 60, 59, 57, 54, 52],
+  },
+  {
+    name: "Design",
+    data: [22, 24, 25, 27, 28, 29, 28, 27, 25, 24],
+  },
+  {
+    name: "Product",
+    data: [18, 19, 20, 22, 23, 24, 24, 23, 22, 21],
+  },
+]
+
+const FIVE_SERIES = [
+  ...THREE_SERIES,
+  {
+    name: "Sales",
+    data: [30, 32, 35, 36, 38, 40, 39, 37, 35, 33],
+  },
+  {
+    name: "Support",
+    data: [12, 13, 14, 15, 16, 17, 16, 15, 14, 13],
+  },
+]
+
+// ---------------------------------------------------------------------------
+// Basics
+// ---------------------------------------------------------------------------
+
+/** A single revenue series — the most common bar chart. */
+export const SingleSeries: Story = {
   render: (args) => <F0DataChart {...args} />,
   args: {
     type: "bar",
-    categories: ["Feb", "Mar", "Apr", "May", "Jun", "Jul"],
+    categories: [...MONTHS_SHORT],
     series: [
       {
         name: "Revenue",
@@ -26,49 +86,39 @@ export const Default: Story = {
         ],
       },
     ],
-    showLegend: true,
     valueFormatter: (v) => `${v / 1_000_000}M`,
   },
 }
 
+/** Multiple series rendered side-by-side as grouped bars. */
 export const MultipleSeries: Story = {
   render: (args) => <F0DataChart {...args} />,
   args: {
     type: "bar",
     categories: ["New York", "London", "Barcelona", "Berlin", "Remote"],
     series: [
-      {
-        name: "Headcount",
-        data: [145, 89, 67, 90, 96],
-      },
-      {
-        name: "Open positions",
-        data: [12, 8, 40, 30, 22],
-      },
-      {
-        name: "Turnovers",
-        data: [8, 19, 4, 3, 2],
-      },
+      { name: "Headcount", data: [145, 89, 67, 90, 96] },
+      { name: "Open positions", data: [12, 8, 40, 30, 22] },
+      { name: "Turnovers", data: [8, 19, 4, 3, 2] },
     ],
   },
 }
 
+/**
+ * Each bar has a `target` value — the gap between the actual value and the
+ * target is rendered as a faded "ghost" bar above the solid one.
+ */
 export const WithTargets: Story = {
   render: (args) => <F0DataChart {...args} />,
   args: {
     type: "bar",
-    categories: ["Feb", "Mar", "Apr", "May", "Jun", "Jul"],
+    categories: [...MONTHS_SHORT],
     series: [
       {
         name: "Revenue",
         data: [
-          { value: 9_200_000, target: 12_000_000 },
-          { value: 10_800_000, target: 12_000_000 },
-          { value: 8_100_000, target: 12_000_000 },
-          { value: 5_400_000, target: 12_000_000 },
-          { value: 3_200_000, target: 12_000_000 },
-          { value: 2_400_000, target: 12_000_000 },
-        ],
+          9_200_000, 10_800_000, 8_100_000, 5_400_000, 3_200_000, 2_400_000,
+        ].map((value) => ({ value, target: 12_000_000 })),
       },
     ],
     showLegend: false,
@@ -76,35 +126,27 @@ export const WithTargets: Story = {
   },
 }
 
-export const MultipleSeriesWithTargets: Story = {
+/** Multiple series stacked into a single bar per category. */
+export const Stacked: Story = {
   render: (args) => <F0DataChart {...args} />,
   args: {
     type: "bar",
     categories: ["Q1", "Q2", "Q3", "Q4"],
+    stacked: true,
     series: [
-      {
-        name: "Sales",
-        data: [
-          { value: 4000, target: 6000 },
-          { value: 5200, target: 6000 },
-          { value: 3800, target: 6000 },
-          { value: 5800, target: 6000 },
-        ],
-      },
-      {
-        name: "Marketing",
-        data: [
-          { value: 2000, target: 3500 },
-          { value: 3100, target: 3500 },
-          { value: 2800, target: 3500 },
-          { value: 3400, target: 3500 },
-        ],
-      },
+      { name: "Fixed salary", data: [120_000, 125_000, 130_000, 128_000] },
+      { name: "Variable pay", data: [18_000, 22_000, 15_000, 30_000] },
+      { name: "Benefits", data: [8_000, 8_500, 9_000, 9_200] },
     ],
-    valueFormatter: (v) => `${v} €`,
+    valueFormatter: (v) => `${v / 1000}k €`,
   },
 }
 
+// ---------------------------------------------------------------------------
+// Horizontal variants
+// ---------------------------------------------------------------------------
+
+/** Horizontal bars — useful for ranking long category names. */
 export const Horizontal: Story = {
   render: (args) => <F0DataChart {...args} />,
   args: {
@@ -118,84 +160,34 @@ export const Horizontal: Story = {
       "Olivia Martinez",
       "David Brown",
     ],
-    series: [
-      {
-        name: "Successful hires",
-        data: [28, 25, 23, 21, 19, 18],
-      },
-    ],
+    series: [{ name: "Successful hires", data: [28, 25, 23, 21, 19, 18] }],
     showLegend: false,
     showLabels: true,
     valueFormatter: (v) => `${v} hires`,
   },
 }
 
-export const HorizontalWithTargets: Story = {
+/** Horizontal stacked variant. */
+export const HorizontalStacked: Story = {
   render: (args) => <F0DataChart {...args} />,
   args: {
     type: "bar",
     orientation: "horizontal",
-    categories: [
-      "Sarah Johnson",
-      "Michael Chen",
-      "Emma Thompson",
-      "James Wilson",
-      "Olivia Martinez",
-    ],
+    stacked: true,
+    categories: ["Engineering", "Design", "Product", "Sales"],
     series: [
-      {
-        name: "Completed",
-        data: [
-          { value: 28, target: 35 },
-          { value: 25, target: 35 },
-          { value: 23, target: 35 },
-          { value: 21, target: 35 },
-          { value: 19, target: 35 },
-        ],
-      },
+      { name: "Juniors", data: [30, 12, 8, 20] },
+      { name: "Mid-level", data: [45, 18, 15, 35] },
+      { name: "Seniors", data: [25, 10, 12, 15] },
     ],
-    showLegend: false,
-    valueFormatter: (v) => `${v} tasks`,
   },
 }
 
-export const CustomFormatters: Story = {
-  render: (args) => <F0DataChart {...args} />,
-  args: {
-    type: "bar",
-    categories: ["January", "February", "March", "April", "May", "June"],
-    series: [
-      {
-        name: "Profit",
-        data: [4000, 3200, 5000, 7000, 4500, 6200],
-      },
-      {
-        name: "Expenses",
-        data: [2800, 3100, 2500, 3800, 2900, 3500],
-      },
-    ],
-    valueFormatter: (v) => `${v / 1000}k €`,
-    categoryFormatter: (v) => v.slice(0, 3),
-  },
-}
+// ---------------------------------------------------------------------------
+// Per-bar customization
+// ---------------------------------------------------------------------------
 
-export const NoGrid: Story = {
-  render: (args) => <F0DataChart {...args} />,
-  args: {
-    type: "bar",
-    categories: ["Mon", "Tue", "Wed", "Thu", "Fri"],
-    series: [
-      {
-        name: "Tasks completed",
-        data: [12, 19, 8, 15, 22],
-      },
-    ],
-    showGrid: false,
-    showLabels: true,
-    showLegend: false,
-  },
-}
-
+/** Each bar can override its color via the `color` data point property. */
 export const PerBarColors: Story = {
   render: (args) => <F0DataChart {...args} />,
   args: {
@@ -217,117 +209,119 @@ export const PerBarColors: Story = {
   },
 }
 
-export const PerBarColorsWithTargets: Story = {
-  render: (args) => <F0DataChart {...args} />,
-  args: {
-    type: "bar",
-    categories: ["Engineering", "Design", "Product", "Sales"],
-    series: [
-      {
-        name: "Headcount",
-        data: [
-          { value: 45, target: 60, color: "malibu" },
-          { value: 28, target: 35, color: "purple" },
-          { value: 18, target: 25, color: "grass" },
-          { value: 32, target: 40, color: "orange" },
-        ],
-      },
-    ],
-    showLegend: false,
-  },
-}
+// ---------------------------------------------------------------------------
+// Formatting & minimal variants
+// ---------------------------------------------------------------------------
 
-export const Stacked: Story = {
+/** Custom value + category formatters. */
+export const CustomFormatters: Story = {
   render: (args) => <F0DataChart {...args} />,
   args: {
     type: "bar",
-    categories: ["Q1", "Q2", "Q3", "Q4"],
-    stacked: true,
+    categories: ["January", "February", "March", "April", "May", "June"],
     series: [
-      {
-        name: "Fixed salary",
-        data: [120_000, 125_000, 130_000, 128_000],
-      },
-      {
-        name: "Variable pay",
-        data: [18_000, 22_000, 15_000, 30_000],
-      },
-      {
-        name: "Benefits",
-        data: [8_000, 8_500, 9_000, 9_200],
-      },
+      { name: "Profit", data: [4000, 3200, 5000, 7000, 4500, 6200] },
+      { name: "Expenses", data: [2800, 3100, 2500, 3800, 2900, 3500] },
     ],
     valueFormatter: (v) => `${v / 1000}k €`,
+    categoryFormatter: (v) => v.slice(0, 3),
   },
 }
 
-export const StackedHorizontal: Story = {
+/** Minimal variant: no grid, no legend — just the bars with value labels. */
+export const Minimal: Story = {
   render: (args) => <F0DataChart {...args} />,
   args: {
     type: "bar",
-    categories: ["Engineering", "Design", "Product", "Sales"],
-    orientation: "horizontal",
-    stacked: true,
-    series: [
-      {
-        name: "Juniors",
-        data: [30, 12, 8, 20],
-      },
-      {
-        name: "Mid-level",
-        data: [45, 18, 15, 35],
-      },
-      {
-        name: "Seniors",
-        data: [25, 10, 12, 15],
-      },
-    ],
-  },
-}
-
-export const AllColors: Story = {
-  render: (args) => <F0DataChart {...args} />,
-  args: {
-    type: "bar",
-    categories: [
-      "Lilac",
-      "Barbie",
-      "Smoke",
-      "Army",
-      "Flubber",
-      "Indigo",
-      "Camel",
-      "Radical",
-      "Viridian",
-      "Orange",
-      "Red",
-      "Grass",
-      "Malibu",
-      "Yellow",
-      "Purple",
-    ],
-    series: [
-      {
-        name: "Color palette",
-        data: [
-          { value: 90, color: "lilac" },
-          { value: 85, color: "barbie" },
-          { value: 80, color: "smoke" },
-          { value: 75, color: "army" },
-          { value: 70, color: "flubber" },
-          { value: 65, color: "indigo" },
-          { value: 60, color: "camel" },
-          { value: 55, color: "radical" },
-          { value: 50, color: "viridian" },
-          { value: 45, color: "orange" },
-          { value: 40, color: "red" },
-          { value: 35, color: "grass" },
-          { value: 30, color: "malibu" },
-          { value: 25, color: "yellow" },
-          { value: 20, color: "purple" },
-        ],
-      },
-    ],
+    categories: ["Mon", "Tue", "Wed", "Thu", "Fri"],
+    series: [{ name: "Tasks completed", data: [12, 19, 8, 15, 22] }],
+    showGrid: false,
+    showLabels: true,
     showLegend: false,
   },
+}
+
+// ---------------------------------------------------------------------------
+// Responsive snapshot
+//
+// Mirrors the AI Analytics Figma matrix at file `1smmEIugmR0CNeu7NvK33y` node
+// `10181-31958` — same layout as the LineChart `ResponsiveSnapshotMatrix`.
+// Three rows = series counts (low / normal / large), three columns = container
+// sizes (sm / md / lg). Use this story to verify that BarChart matches
+// LineChart's responsive behaviour.
+// ---------------------------------------------------------------------------
+
+const responsiveProps = (
+  column: "low" | "normal" | "large"
+): F0DataChartProps => {
+  const series =
+    column === "low"
+      ? ONE_SERIES
+      : column === "normal"
+        ? THREE_SERIES
+        : FIVE_SERIES
+  return {
+    type: "bar",
+    categories: [...MONTHS_LONG],
+    series,
+  }
+}
+
+export const ResponsiveSnapshotMatrix: Story = {
+  decorators: [(Story) => <Story />],
+  render: () => <ResponsiveSnapshot getProps={responsiveProps} />,
+}
+
+/**
+ * Same matrix as `ResponsiveSnapshotMatrix` but rendered with
+ * `orientation: "horizontal"`. The category axis lives on Y instead of X, so
+ * at the medium breakpoint it's the Y axis (categories) that gets hidden and
+ * the X axis (values) that stays visible — the inverse of the vertical case.
+ */
+const responsivePropsHorizontal = (
+  column: "low" | "normal" | "large"
+): F0DataChartProps => ({
+  ...(responsiveProps(column) as Extract<F0DataChartProps, { type: "bar" }>),
+  orientation: "horizontal",
+})
+
+export const ResponsiveSnapshotMatrixHorizontal: Story = {
+  decorators: [(Story) => <Story />],
+  render: () => <ResponsiveSnapshot getProps={responsivePropsHorizontal} />,
+}
+
+/**
+ * Many series with long names — the legend paginates with arrow controls
+ * while the chart area stays the same size.
+ */
+export const ScrollableLegend: Story = {
+  parameters: { layout: "centered" },
+  decorators: [
+    (Story) => (
+      <div className="h-[320px] w-[720px]">
+        <Story />
+      </div>
+    ),
+  ],
+  render: () => (
+    <F0DataChart
+      type="bar"
+      categories={[...MONTHS_LONG]}
+      series={[
+        ...FIVE_SERIES,
+        {
+          name: "Petrol blue",
+          data: [22, 24, 25, 27, 28, 29, 28, 27, 25, 24],
+        },
+        {
+          name: "Coral sunset",
+          data: [18, 19, 20, 22, 23, 24, 24, 23, 22, 21],
+        },
+        {
+          name: "Forest green",
+          data: [12, 14, 15, 16, 17, 18, 17, 16, 15, 14],
+        },
+      ]}
+    />
+  ),
 }

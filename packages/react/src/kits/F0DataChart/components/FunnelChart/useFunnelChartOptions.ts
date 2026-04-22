@@ -173,7 +173,6 @@ export function useFunnelChartOptions(
         show: showLegend,
         data: legendData,
         theme,
-        containerWidth,
       }),
       grid: buildGrid({ showLegend }),
       tooltip: buildItemTooltip({

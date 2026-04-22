@@ -192,6 +192,36 @@ export interface ChatDashboardFilterDefinition {
 }
 
 // ---------------------------------------------------------------------------
+// Navigation filter definitions — dashboard-level controls (date navigator)
+// ---------------------------------------------------------------------------
+
+/** Granularity options exposed by F0's `OneDateNavigator`. */
+export type ChatDashboardDateNavigationGranularity =
+  | "day"
+  | "week"
+  | "month"
+  | "quarter"
+  | "halfyear"
+  | "year"
+  | "range"
+
+/**
+ * Navigation filter definitions emitted by the LLM via `displayDashboard`.
+ * Discriminated on `type`. Today the only supported variant is
+ * `dateNavigation`, which renders F0's date navigator above the dashboard
+ * grid. The `column` and `datasetId` are agent-side metadata used by the
+ * compute SQL builder; they are stripped before reaching F0AnalyticsDashboard.
+ */
+export type ChatDashboardNavigationFilterDefinition = {
+  type: "dateNavigation"
+  label: string
+  column: string
+  datasetId: string
+  granularities: ChatDashboardDateNavigationGranularity[]
+  defaultGranularity?: ChatDashboardDateNavigationGranularity
+}
+
+// ---------------------------------------------------------------------------
 // Collection column definition
 // ---------------------------------------------------------------------------
 
@@ -214,8 +244,33 @@ interface ChatDashboardItemBase {
   description?: string
   /** Source attribution shown as a subtitle (e.g. "Based on 8 feedbacks from 3 evaluators") */
   sourceDescription?: string
+  /**
+   * Optional markdown explanation of how this item's data was calculated.
+   * Surfaced via the per-item dropdown's "Where does this data come from?"
+   * entry, which opens a dialog rendering the markdown. Omit to hide the
+   * entry — backwards compatible with persisted dashboards.
+   */
+  explanation?: string
+  /**
+   * @deprecated Ignored by the renderer — items auto-size to equal-width
+   * slots based on the per-row slot budget. Kept for backwards compatibility
+   * with persisted layouts; safe to leave unset.
+   */
   colSpan?: number
+  /**
+   * @deprecated Use `itemHeight` (pixels) instead. Kept for backwards
+   * compatibility with persisted layouts: when `itemHeight` is unset, the
+   * grid still reads `rowSpan * 48` as a fallback.
+   */
   rowSpan?: number
+  /**
+   * Item height in pixels. Takes precedence over `rowSpan` when set. The
+   * row height in the grid is `max(itemHeight)` across all items in the row.
+   * Persisted resizes write a pixel-accurate value here; agent-generated
+   * dashboards should pick from a constrained set of values that match the
+   * data shape (more rows / more categories → taller).
+   */
+  itemHeight?: number
   x?: number
   y?: number
 }
@@ -263,8 +318,33 @@ export interface ChatDashboardConfig {
   title: string
   /** Filter definitions — keys become filter IDs */
   filters?: Record<string, ChatDashboardFilterDefinition>
+  /**
+   * Dashboard-level navigation filters (e.g. date navigator). Keys become
+   * filter IDs. Rendered above the grid by F0AnalyticsDashboard's
+   * `navigationFilters` slot.
+   */
+  navigationFilters?: Record<string, ChatDashboardNavigationFilterDefinition>
   /** Ordered list of dashboard items with computation specs */
   items: ChatDashboardItem[]
   /** Fetch specs for server-side data retrieval, keyed by datasetId */
   fetchSpecs: Record<string, DashboardFetchSpec>
+}
+
+/**
+ * Callbacks for persisting dashboards externally (beyond chat history).
+ */
+export type DashboardCanvasActions = {
+  /** Update an existing saved dashboard */
+  save: (
+    id: string,
+    category: string,
+    config: ChatDashboardConfig
+  ) => Promise<void>
+  /** Create a new saved dashboard. Returns the new dashboard ID if available. */
+  create: (
+    title: string,
+    description: string,
+    config: ChatDashboardConfig,
+    category?: string
+  ) => Promise<string | void>
 }

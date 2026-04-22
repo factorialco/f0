@@ -12,7 +12,7 @@ export const dashboardCanvasEntity: CanvasEntityDefinition<DashboardCanvasConten
       <DashboardContent content={content} refreshKey={refreshKey} />
     ),
     renderHeader: ({ content, onClose }) => (
-      <DashboardHeader title={content.title} onClose={onClose} />
+      <DashboardHeader content={content} onClose={onClose} />
     ),
     wrapper: ({ content, children }) => (
       <DashboardCanvasProvider content={content}>

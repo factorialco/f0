@@ -30,6 +30,9 @@ export type PageAction = {
       href: string
     }
   | {
+      onClick: () => void
+    }
+  | {
       actions: Array<{ label: string; href: string }>
     }
 )
@@ -309,6 +312,19 @@ function PageAction({ action }: { action: PageAction }): ReactElement {
           pressed={isOpen}
         />
       </Dropdown>
+    )
+  }
+
+  if ("onClick" in action) {
+    return (
+      <F0Button
+        size="md"
+        variant="outline"
+        label={action.label}
+        icon={action.icon}
+        hideLabel
+        onClick={action.onClick}
+      />
     )
   }
 

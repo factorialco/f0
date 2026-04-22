@@ -70,7 +70,7 @@ export const Content = ({
 
   return (
     <div
-      className="relative overflow-hidden"
+      className="flex overflow-hidden"
       style={{
         height:
           singleSelector && (!actions || actions.length === 0)
@@ -80,23 +80,7 @@ export const Content = ({
       }}
     >
       <div
-        className="absolute right-0 top-0"
-        style={{
-          width: asideWidth + "px",
-        }}
-      >
-        <SecondaryContent
-          groupView={groupView}
-          onRemove={onRemove}
-          onSubItemRemove={onSubItemRemove}
-          selectedEntities={selectedEntities ?? []}
-          selectedLabel={selectedLabel}
-          disabled={props.disabled}
-          hiddenAvatar={hiddenAvatar}
-        />
-      </div>
-      <div
-        className="absolute left-0"
+        className="min-h-0 flex-1"
         style={{ width: finalWidthMain + 1 + "px" }}
       >
         <MainContent
@@ -114,6 +98,24 @@ export const Content = ({
           onCreateLabel={onCreateLabel}
         />
       </div>
+      {isExpanded && (
+        <div
+          className="min-h-0"
+          style={{
+            width: asideWidth + "px",
+          }}
+        >
+          <SecondaryContent
+            groupView={groupView}
+            onRemove={onRemove}
+            onSubItemRemove={onSubItemRemove}
+            selectedEntities={selectedEntities ?? []}
+            selectedLabel={selectedLabel}
+            disabled={props.disabled}
+            hiddenAvatar={hiddenAvatar}
+          />
+        </div>
+      )}
     </div>
   )
 }

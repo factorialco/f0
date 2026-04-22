@@ -2,6 +2,7 @@ import type {
   F0SelectItemObject,
   F0SelectItemProps,
 } from "@/components/F0Select"
+
 import {
   DataSourceDefinition,
   FiltersDefinition,
@@ -37,6 +38,7 @@ export type NumberCellConfig = {
   maxDecimals?: number
   locale?: string
   units?: string
+  unitsPosition?: "before" | "after"
 }
 
 /**

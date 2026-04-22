@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { screen, zeroRender as render } from "@/testing/test-utils"
 import { describe, expect, it, vi } from "vitest"
 
 import { useNavigation } from "@/lib/linkHandler"
@@ -21,13 +21,13 @@ describe("F0Link", () => {
     expect(screen.getByRole("link")).toHaveClass("underline")
   })
 
-  it("shows external link icon when target is _blank", () => {
+  it("shows external link indicator when target is _blank", () => {
     render(
       <F0Link href="https://example.com" target="_blank">
         External Link
       </F0Link>
     )
-    expect(screen.getByRole("link").querySelector("svg")).toBeInTheDocument()
+    expect(screen.getByText(/opens in new tab/)).toBeInTheDocument()
   })
 
   it("applies custom className", () => {

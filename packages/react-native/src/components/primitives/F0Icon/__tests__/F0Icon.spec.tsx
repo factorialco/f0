@@ -128,4 +128,116 @@ describe("F0Icon", () => {
       expect(element.props.className).toContain("opacity-50")
     })
   })
+
+  describe("tintColor — runtime color escape hatch", () => {
+    it("renders with tintColor", () => {
+      const { getByTestId } = render(
+        <F0Icon icon={Archive} tintColor="#FF355E" testID="icon" />
+      )
+      expect(getByTestId("icon")).toBeTruthy()
+    })
+
+    it("passes tintColor as native SVG color prop", () => {
+      const { getByTestId } = render(
+        <F0Icon icon={Archive} tintColor="#FF355E" testID="icon" />
+      )
+      const element = getByTestId("icon")
+      expect(element.props.color).toBe("#FF355E")
+    })
+
+    it("skips semantic color variant when tintColor is set", () => {
+      const { getByTestId } = render(
+        <F0Icon
+          icon={Archive}
+          color="critical"
+          tintColor="#FF355E"
+          testID="icon"
+        />
+      )
+      const element = getByTestId("icon")
+      expect(element.props.className).not.toContain("text-f0-icon-critical")
+      expect(element.props.color).toBe("#FF355E")
+    })
+
+    it("preserves size variant when tintColor is set", () => {
+      const { getByTestId } = render(
+        <F0Icon icon={Archive} size="lg" tintColor="#00FF00" testID="icon" />
+      )
+      const element = getByTestId("icon")
+      expect(element.props.className).toContain("w-6")
+      expect(element.props.className).toContain("h-6")
+      expect(element.props.color).toBe("#00FF00")
+    })
+
+    it("does not set native color prop when tintColor is undefined", () => {
+      const { getByTestId } = render(
+        <F0Icon icon={Archive} color="info" testID="icon" />
+      )
+      const element = getByTestId("icon")
+      expect(element.props.color).toBeUndefined()
+      expect(element.props.className).toContain("text-f0-icon-info")
+    })
+
+    it("ignores unsafe cast native color prop when tintColor is undefined", () => {
+      const unsafeColorProps = {
+        icon: Archive,
+        color: "#00FF00",
+        testID: "icon",
+      } as unknown as React.ComponentProps<typeof F0Icon>
+
+      const { getByTestId } = render(<F0Icon {...unsafeColorProps} />)
+      const element = getByTestId("icon")
+      expect(element.props.color).toBeUndefined()
+      expect(element.props.className).toContain("w-5")
+      expect(element.props.className).toContain("h-5")
+    })
+
+    it("combines tintColor with custom className layout", () => {
+      const { getByTestId } = render(
+        <F0Icon
+          icon={Archive}
+          tintColor="rgb(255, 0, 0)"
+          className="-ml-0.5"
+          testID="icon"
+        />
+      )
+      const element = getByTestId("icon")
+      expect(element.props.className).toContain("-ml-0.5")
+      expect(element.props.color).toBe("rgb(255, 0, 0)")
+    })
+
+    it("strips custom text-* classes when tintColor is set", () => {
+      const { getByTestId } = render(
+        <F0Icon
+          icon={Archive}
+          tintColor="#FF355E"
+          className="text-red-500 opacity-50"
+          testID="icon"
+        />
+      )
+      const element = getByTestId("icon")
+      expect(element.props.className).not.toContain("text-red-500")
+      expect(element.props.className).toContain("opacity-50")
+      expect(element.props.color).toBe("#FF355E")
+    })
+
+    it("ignores unsafe cast style prop at runtime", () => {
+      const unsafeStyleProps = {
+        icon: Archive,
+        tintColor: "#FF355E",
+        style: { opacity: 0.5 },
+        testID: "icon",
+      } as unknown as React.ComponentProps<typeof F0Icon>
+
+      const { getByTestId } = render(<F0Icon {...unsafeStyleProps} />)
+      const element = getByTestId("icon")
+      const flattenedStyle = Array.isArray(element.props.style)
+        ? element.props.style.flat(Infinity)
+        : [element.props.style]
+      expect(flattenedStyle).not.toContainEqual(
+        expect.objectContaining({ opacity: 0.5 })
+      )
+      expect(element.props.color).toBe("#FF355E")
+    })
+  })
 })

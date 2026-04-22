@@ -26,7 +26,7 @@ export function Image({
         alt={alt}
         className={cn("max-w-full rounded-md", props.className)}
       />
-      <div className="absolute right-2 top-2 rounded bg-f1-background-inverse-secondary">
+      <div className="absolute right-2 top-2 rounded">
         <F0Button
           variant="neutral"
           label="Download"

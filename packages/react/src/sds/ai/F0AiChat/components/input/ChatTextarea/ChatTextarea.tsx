@@ -30,8 +30,6 @@ export const ChatTextarea = ({
   onSend,
   onStop,
   creditWarning,
-  onDismissCreditWarning,
-  onGetCredits,
 }: ChatTextareaProps) => {
   const {
     placeholders,
@@ -43,6 +41,8 @@ export const ChatTextarea = ({
     sendMessage,
     clarifyingQuestion,
     fileDragOver,
+    pendingContext,
+    setPendingContext,
   } = useAiChat()
   const { messages, setMessages } = useCopilotChatInternal()
   const translation = useI18n()
@@ -120,8 +120,19 @@ export const ChatTextarea = ({
         f.uploadedFile ? [f.uploadedFile] : []
       )
 
-      if (files.length > 0) {
+      // When there's pending context or files, send as multipart content.
+      // The context goes as a separate text part so the agent sees it
+      // without polluting the user's visible text.
+      if (pendingContext || files.length > 0) {
         const contentParts: Array<UserTextPart | UserBinaryPart> = [
+          ...(pendingContext
+            ? [
+                {
+                  type: "text" as const,
+                  text: `<pending-context>${pendingContext.context}</pending-context>`,
+                },
+              ]
+            : []),
           ...files.map((file) => ({
             type: "binary" as const,
             url: file.url,
@@ -130,6 +141,8 @@ export const ChatTextarea = ({
           })),
           { type: "text" as const, text: withToolHint },
         ]
+
+        if (pendingContext) setPendingContext(null)
 
         sendMessage({
           id: crypto.randomUUID(),
@@ -182,11 +195,7 @@ export const ChatTextarea = ({
     mentions.mentions.length > 0 || mentions.inlineCompletion !== null
 
   return (
-    <CreditWarningWrapper
-      creditWarning={creditWarning}
-      onDismissCreditWarning={onDismissCreditWarning}
-      onGetCredits={onGetCredits}
-    >
+    <CreditWarningWrapper creditWarning={creditWarning}>
       <motion.form
         aria-busy={inProgress}
         ref={formRef}

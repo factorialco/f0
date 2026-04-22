@@ -6,9 +6,10 @@ import { useQuestionCardAction } from "../../../UpsellingKit/ai/F0QuestionCard/u
 import { useClarifyingQuestionAction } from "./core/clarifyingQuestion/useClarifyingQuestionAction"
 import { useDataDownloadAction } from "./core/dataDownload/useDataDownloadAction"
 import { useDisplayDashboardAction } from "./core/displayDashboard/useDisplayDashboardAction"
+import { useF0AiFormActions } from "./core/forms/useF0AiFormActions"
+import { useMessageCreditsWarningAction } from "./core/messageCreditsWarning/useMessageCreditsWarningAction"
 import { useMessageSourcesAction } from "./core/messageSources/useMessageSourcesAction"
 import { useOrchestratorThinkingAction } from "./core/orchestratorThinking/useOrchestratorThinkingAction"
-import { useMessageCreditsWarningAction } from "./core/messageCreditsWarning/useMessageCreditsWarningAction"
 
 type ActionFactory = () => void
 
@@ -24,4 +25,5 @@ export const copilotActions: ActionFactory[] = [
   useModuleCardAction,
   useFAQCardAction,
   useMessageCreditsWarningAction,
+  useF0AiFormActions,
 ]

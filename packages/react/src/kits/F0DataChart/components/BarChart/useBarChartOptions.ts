@@ -9,6 +9,7 @@ import type {
 
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
 import { buildBaseChartOptions } from "../../utils/options"
+import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
 
@@ -145,7 +146,7 @@ function buildSeriesEntries(
               : ([1, 0, 0, 0] as [number, number, number, number])),
             [
               { offset: 0, color: `${pointColor}33` },
-              { offset: 1, color: "rgba(0, 0, 0, 0)" },
+              { offset: 1, color: `${pointColor}00` },
             ]
           ),
           borderRadius,
@@ -177,7 +178,7 @@ function buildSeriesEntries(
           // offset 0 = far end from the solid bar → more opaque (darker)
           { offset: 0, color: `${color}33` },
           // offset 1 = near the solid bar → transparent
-          { offset: 1, color: "rgba(0, 0, 0, 0)" },
+          { offset: 1, color: `${color}00` },
         ]
       ),
       // Only round the far end (away from the solid bar)
@@ -192,6 +193,26 @@ function buildSeriesEntries(
   }
 
   return [mainSeries, targetSeries]
+}
+
+/** Discrete responsive size for the bar chart (mirrors LineChart's `LineChartSize`) */
+export type BarChartSize = ChartResponsiveSize
+
+/**
+ * Maps a discrete `size` to which chrome (legend, axes) is rendered. The
+ * matrix is identical to `LineChart.resolveResponsiveDisplay` so the two
+ * chart families behave the same at every breakpoint:
+ *
+ * - `sm` → just the bars, no axes, no legend
+ * - `md` → bars + legend + value axis, no category axis
+ * - `lg` → bars + legend + both axes (with smart truncation on the category axis)
+ */
+function resolveResponsiveDisplay(size: BarChartSize) {
+  return {
+    showLegend: size !== "sm",
+    showCategoryAxis: size === "lg",
+    showValueAxis: size !== "sm",
+  }
 }
 
 /**
@@ -210,7 +231,8 @@ export function useBarChartOptions(
     valueFormatter,
     categoryFormatter,
     echartsOptions,
-  }: F0DataChartBarProps
+  }: F0DataChartBarProps,
+  size: BarChartSize
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
   const { width: containerWidth, height: containerHeight } =
@@ -218,6 +240,12 @@ export function useBarChartOptions(
 
   return useMemo(() => {
     const isVertical = orientation === "vertical"
+
+    const responsive = resolveResponsiveDisplay(size)
+    // The user-provided `showLegend` prop can still force the legend off,
+    // but it can never override the `sm` rule.
+    const effectiveShowLegend = responsive.showLegend && showLegend
+    const { showCategoryAxis, showValueAxis } = responsive
 
     // Build all ECharts series (including target ghost bars)
     const echartsSeries = series.flatMap((s, i) =>
@@ -290,7 +318,11 @@ export function useBarChartOptions(
       legendData,
       isVertical,
       showGrid,
-      showLegend,
+      showLegend: effectiveShowLegend,
+      // For vertical bars the category axis is the X axis, for horizontal
+      // bars it's the Y axis. `buildAxes` already handles that mapping.
+      showCategoryAxis,
+      showValueAxis,
       valueFormatter,
       categoryFormatter,
       tooltipFilterSeries: (name) => name.endsWith(" (target)"),
@@ -325,5 +357,6 @@ export function useBarChartOptions(
     theme,
     containerWidth,
     containerHeight,
+    size,
   ])
 }

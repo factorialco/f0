@@ -82,6 +82,8 @@ function PiledExample() {
 
 export function F0TabsShowcase() {
   const [activeTab, setActiveTab] = useState("overview")
+  const [fullWidthTab, setFullWidthTab] = useState("all")
+  const [tabDisabledActiveTab, setTabDisabledActiveTab] = useState("overview")
 
   return (
     <ScrollView
@@ -118,9 +120,36 @@ export function F0TabsShowcase() {
         <F0Text variant="body-md-medium" color="default">
           Secondary (pill only, no underline)
         </F0Text>
+        <F0Tabs tabs={secondaryTabs} secondary />
+      </View>
+
+      {/* Separator inset */}
+      <View className="gap-2">
+        <F0Text variant="body-md-medium" color="default">
+          Separator inset
+        </F0Text>
+        <F0Text variant="body-sm-medium" color="secondary">
+          Inset tokens: sm=12, md=16, lg=20, xl=24
+        </F0Text>
+        <F0Text variant="body-sm-medium" color="secondary">
+          Full (default)
+        </F0Text>
+        <F0Tabs tabs={primaryTabs} />
+        <F0Text variant="body-sm-medium" color="secondary">
+          Content (no edge overhang)
+        </F0Text>
+        <F0Tabs tabs={primaryTabs} separatorInset="content" />
+        <F0Text variant="body-sm-medium" color="secondary">
+          Content + compact inset (16px)
+        </F0Text>
+        <F0Tabs tabs={primaryTabs} separatorInset="content" contentInset="sm" />
+        <F0Text variant="body-sm-medium" color="secondary">
+          Container span + content inset (fills row with few tabs)
+        </F0Text>
         <F0Tabs
           tabs={secondaryTabs}
-          secondary
+          separatorWidth="container"
+          contentInset="xl"
         />
       </View>
 
@@ -130,6 +159,49 @@ export function F0TabsShowcase() {
           Scrollable (many tabs)
         </F0Text>
         <F0Tabs tabs={manyTabs} />
+      </View>
+
+      {/* Full width */}
+      <View className="gap-2">
+        <F0Text variant="body-md-medium" color="default">
+          Full width (no horizontal scroll)
+        </F0Text>
+        <F0Tabs
+          tabs={secondaryTabs}
+          fullWidth
+          activeTabId={fullWidthTab}
+          setActiveTabId={setFullWidthTab}
+        />
+      </View>
+
+      {/* Disabled states */}
+      <View className="gap-2">
+        <F0Text variant="body-md-medium" color="default">
+          Disabled (global)
+        </F0Text>
+        <F0Tabs
+          tabs={secondaryTabs}
+          disabled
+          activeTabId="all"
+          setActiveTabId={() => {
+            // showcase: disabled tabs must not emit changes
+          }}
+        />
+      </View>
+
+      <View className="gap-2">
+        <F0Text variant="body-md-medium" color="default">
+          Disabled (per tab)
+        </F0Text>
+        <F0Tabs
+          tabs={[
+            { id: "overview", label: "Overview" },
+            { id: "courses", label: "Courses", disabled: true },
+            { id: "categories", label: "Categories" },
+          ]}
+          activeTabId={tabDisabledActiveTab}
+          setActiveTabId={setTabDisabledActiveTab}
+        />
       </View>
 
       {/* Embedded */}

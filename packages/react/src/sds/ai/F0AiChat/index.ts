@@ -4,10 +4,13 @@ export { F0AiChat, F0AiChatProvider, F0AiFullscreenChat } from "./F0AiChat"
 // Types
 export type {
   AiChatCredits,
+  AiChatCreditWarning,
   AiChatMode,
   AiChatFileAttachmentConfig,
   AiChatProviderProps,
   AiChatToolHint,
+  AppendMessage,
+  AppendToolCall,
   CanvasContent,
   CanvasContentBase,
   CreditsUsage,
@@ -15,17 +18,19 @@ export type {
   EntityResolvers,
   EntityUrlBuilders,
   EntityRefs,
+  RequisitionProfile,
   PersonProfile,
   UploadedFile,
+  VacancyProfile,
   VisualizationMode,
   WelcomeScreenSuggestion,
   AiChatTranslations,
   AiChatTranslationsProviderProps,
 } from "./types"
 
-// Canvas entity registry
+// Canvas entity registry and types
 export { getCanvasEntity } from "./canvas"
-export type { CanvasEntityDefinition } from "./canvas"
+export type { CanvasEntityDefinition, CanvasActions } from "./canvas"
 
 export { aiTranslations } from "./types"
 
@@ -37,6 +42,12 @@ export {
   AiChatTranslationsProvider,
   useAiChatTranslations,
 } from "./providers/AiChatTranslationsProvider"
+export {
+  FormCardValueFormatterProvider,
+  useFormCardValueFormatter,
+  useSetFormCardValueFormatter,
+  type FormCardValueFormatterEntry,
+} from "./providers/FormCardValueFormatterProvider"
 
 // Copilot Actions
 export {

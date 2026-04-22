@@ -1,5 +1,6 @@
 import type { z, ZodRawShape, ZodEffects, ZodType } from "zod"
 
+import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 import type { IconType } from "@/components/F0Icon"
 
 import type { CustomFieldRenderPropsBase } from "./fields/custom/types"
@@ -340,6 +341,10 @@ type PerSectionSubmitHandler<T extends F0PerSectionSchema> = (
 export interface F0FormPropsWithSingleSchema<TSchema extends F0FormSchema> {
   /** Unique name for the form, used for generating anchor links */
   name: string
+  /** Human-readable description of the form's purpose */
+  description?: string
+  /** Module associated with this form (for avatar display in canvas cards) */
+  module?: ModuleId
   /** Zod object schema with F0 field configurations */
   schema: TSchema
   /** Section configurations keyed by section ID */
@@ -587,3 +592,33 @@ export type F0FormSubmitResult =
       /** Field-specific error messages */
       errors?: Record<string, string>
     }
+
+/**
+ * Common props shared across all F0Form variants (formDefinition-based).
+ * Used as the constraint for `F0FormLikeComponent`.
+ */
+export interface F0FormCommonProps {
+  formDefinition:
+    | import("@/patterns/F0WizardForm/types").F0FormDefinitionSingleSchema<F0FormSchema>
+    | import("@/patterns/F0WizardForm/types").F0FormDefinitionPerSection<F0PerSectionSchema>
+  className?: string
+  styling?: F0FormStylingConfig
+  formRef?: React.MutableRefObject<F0FormRef | null>
+  initialFiles?: InitialFile[]
+  useUpload?: UseFileUpload
+  renderCustomField?: RenderCustomFieldFunction
+  isLoading?: boolean
+}
+
+/**
+ * Component type for F0Form-like wrappers (e.g. FactorialF0Form).
+ *
+ * Because F0Form uses overloaded/generic signatures, neither F0Form
+ * nor FactorialF0Form can be directly assigned to this type.
+ * Cast the component when passing it:
+ *
+ * ```tsx
+ * <F0Provider formComponent={FactorialF0Form as F0FormLikeComponent} />
+ * ```
+ */
+export type F0FormLikeComponent = React.ComponentType<F0FormCommonProps>

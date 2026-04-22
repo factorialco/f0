@@ -32,6 +32,9 @@ export const defaultTranslations = {
       hide: "Hide password",
     },
   },
+  link: {
+    opensInNewTab: "opens in new tab",
+  },
   actions: {
     add: "Add",
     edit: "Edit",
@@ -46,6 +49,7 @@ export const defaultTranslations = {
     expand: "Expand",
     showAll: "Show all",
     showLess: "Show less",
+    seeMore: "See more",
     skipToContent: "Skip to content",
     view: "View",
     unselect: "Unselect",
@@ -171,6 +175,7 @@ export const defaultTranslations = {
     summaries: {
       types: {
         sum: "sum",
+        count: "count",
       },
     },
     export: {
@@ -324,10 +329,34 @@ export const defaultTranslations = {
       reportLabel: "Report",
       openButton: "Open",
     },
+    formCard: {
+      moreFields: "Open to see all fields",
+    },
+    dashboard: {
+      save: "Save",
+      saveToAnalytics: "Save the dashboard in Analytics",
+      saveAs: "Save as",
+      saveDialog: {
+        title: "Save dashboard",
+        titleLabel: "Title",
+        descriptionLabel: "Description",
+        descriptionPlaceholder: "Add a description (optional)",
+        save: "Save",
+        cancel: "Cancel",
+      },
+    },
     dataDownload: {
+      title: "Download",
       download: "Download {{format}}",
       exportDashboard: "Export dashboard as {{format}}",
       exporting: "Exporting...",
+      rows: "{{amount}} rows",
+    },
+    dashboardItem: {
+      chartType: "Chart type",
+      errorTitle: "Error loading data",
+      retry: "Retry",
+      dataExplanation: "Where does this data come from?",
     },
     pong: {
       title: "Pong",
@@ -349,6 +378,7 @@ export const defaultTranslations = {
     },
     attachFile: "Attach file",
     removeFile: "Remove",
+    fileUploadError: "Upload failed",
     dropFilesHere: "Drop your files here",
     clarifyingQuestion: {
       submit: "Submit",
@@ -381,6 +411,15 @@ export const defaultTranslations = {
         title: "Questions before getting started",
       },
     },
+  },
+  dataChart: {
+    heatmapNotSupported: "Heatmap not supported at this size",
+    barChartVertical: "Bar (vertical)",
+    barChartHorizontal: "Bar (horizontal)",
+    lineChart: "Line",
+    funnel: "Funnel",
+    pieChart: "Pie",
+    table: "Table",
   },
   select: {
     noResults: "No results found",
@@ -537,6 +576,8 @@ export const defaultTranslations = {
     },
   },
   forms: {
+    yes: "Yes",
+    no: "No",
     actionBar: {
       unsavedChanges: "You have changes pending to be saved",
       saving: "Saving...",

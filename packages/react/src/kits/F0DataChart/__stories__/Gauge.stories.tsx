@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import type { F0DataChartProps } from "../types"
+
 import { F0DataChart } from "../index"
-import { ChartDecorator } from "./decorators"
+import { ChartDecorator, ResponsiveSnapshot } from "./decorators"
 
 const meta = {
   component: F0DataChart,
@@ -11,7 +13,7 @@ const meta = {
 } satisfies Meta<typeof F0DataChart>
 
 export default meta
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<typeof F0DataChart>
 
 export const Default: Story = {
   args: {
@@ -57,4 +59,22 @@ export const NoValue: Story = {
     name: "Progress",
     showValue: false,
   },
+}
+
+// ---------------------------------------------------------------------------
+// Responsive snapshot
+// ---------------------------------------------------------------------------
+
+const responsiveGaugeProps = (
+  column: "low" | "normal" | "large"
+): F0DataChartProps => ({
+  type: "gauge",
+  value: column === "low" ? 28 : column === "normal" ? 72 : 91,
+  name: "Engagement",
+  valueFormatter: (v) => `${v}%`,
+})
+
+export const ResponsiveSnapshotMatrix: Story = {
+  decorators: [(Story) => <Story />],
+  render: () => <ResponsiveSnapshot getProps={responsiveGaugeProps} />,
 }

@@ -14,6 +14,7 @@ import { WelcomeScreenSuggestion } from "./components/messages/WelcomeScreen"
 import { CopilotFunctionBridge } from "./components/shared/CopilotFunctionBridge"
 import { F0AiFullscreenChatComponent } from "./F0AiFullscreenChat"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
+import { OrderedMessagePartsProvider } from "./providers/OrderedMessagePartsProvider"
 import { AiChatProviderProps } from "./types"
 
 const F0AiChatProviderComponent = ({
@@ -29,8 +30,10 @@ const F0AiChatProviderComponent = ({
   footer,
   VoiceMode,
   entityRefs,
+  canvasActions,
   toolHints,
   credits,
+  creditWarning,
   fileAttachments,
   onThumbsUp,
   onThumbsDown,
@@ -57,8 +60,10 @@ const F0AiChatProviderComponent = ({
       VoiceMode={VoiceMode}
       tracking={tracking}
       entityRefs={entityRefs}
+      canvasActions={canvasActions}
       toolHints={toolHints}
       credits={credits}
+      creditWarning={creditWarning}
       fileAttachments={fileAttachments}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
@@ -74,8 +79,10 @@ const AiChatKitWrapper = ({
 
   return (
     <CopilotKit runtimeUrl="/copilotkit" agent={agent} {...copilotKitProps}>
-      <CopilotFunctionBridge />
-      {children}
+      <OrderedMessagePartsProvider>
+        <CopilotFunctionBridge />
+        {children}
+      </OrderedMessagePartsProvider>
     </CopilotKit>
   )
 }

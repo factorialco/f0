@@ -4,26 +4,41 @@ import {
   type ReactNode,
   useCallback,
   useContext,
-  useRef,
   useState,
 } from "react"
 
 import type { DashboardItemLayout } from "@/patterns/F0AnalyticsDashboard/types"
 
-import type { ChatDashboardConfig } from "./types"
+import type { ChatDashboardConfig, ChatDashboardItem } from "./types"
 import { useSaveDashboardConfig } from "./useSaveDashboardConfig"
 import { useAiChat } from "../../../providers/AiChatStateProvider"
 
-import { savedDashboardConfigStore } from "./configStore"
+import {
+  savedDashboardConfigStore,
+  savedDashboardMetaStore,
+} from "./configStore"
 import type { DashboardCanvasContent } from "../../../types"
 
 type DashboardCanvasContextValue = {
-  editMode: boolean
-  setEditMode: (editMode: boolean) => void
+  /** Whether there are unsaved layout changes */
+  isDirty: boolean
+  /** Incrementing counter — changes when discard is called to reset the grid */
+  discardKey: number
+  /** Pending item transforms keyed by item id (chart type changes, etc.) */
+  itemTransforms: Map<string, Partial<ChatDashboardItem>>
+  /** Called by the grid when layout changes (drag/resize/delete) */
   onLayoutChange: (layout: DashboardItemLayout[]) => void
+  /** Persist current layout and update canvas */
   handleSave: () => Promise<void>
+  /** Discard pending layout changes */
   handleDiscard: () => void
+  /** Transform an item's config (e.g. change chart type). Marks dirty without refetch. */
+  transformItem: (itemId: string, patch: Partial<ChatDashboardItem>) => void
+  /** Persist arbitrary config to chat history (best-effort). Used after create to store the new id. */
+  saveConfigToHistory: (config: Record<string, unknown>) => Promise<void>
+  /** Export the dashboard as Excel */
   exportAsExcel?: () => Promise<void>
+  /** Register the export function from the dashboard component */
   registerExport: (fn: (() => Promise<void>) | undefined) => void
 }
 
@@ -47,7 +62,13 @@ export function DashboardCanvasProvider({
   content: DashboardCanvasContent
   children: ReactNode
 }): ReactNode {
-  const [editMode, setEditMode] = useState(false)
+  const [pendingLayout, setPendingLayout] = useState<
+    DashboardItemLayout[] | null
+  >(null)
+  const [itemTransforms, setItemTransforms] = useState<
+    Map<string, Partial<ChatDashboardItem>>
+  >(new Map())
+  const [discardKey, setDiscardKey] = useState(0)
   const [exportAsExcel, setExportAsExcel] = useState<
     (() => Promise<void>) | undefined
   >()
@@ -57,8 +78,8 @@ export function DashboardCanvasProvider({
     },
     []
   )
-  const pendingLayoutRef = useRef<DashboardItemLayout[] | null>(null)
-  const { openCanvas } = useAiChat()
+  const { openCanvas, canvasActions, setPendingContext, pendingContext } =
+    useAiChat()
   const { threadId } = useCopilotContext()
 
   const saveConfigFn = useSaveDashboardConfig(content.apiConfig)
@@ -75,7 +96,11 @@ export function DashboardCanvasProvider({
           return {
             ...original,
             colSpan: entry.colSpan,
-            rowSpan: entry.rowSpan,
+            // Persist the canonical pixel-accurate height from the resize.
+            // `rowSpan` is stripped on persistence so subsequent renders read
+            // `itemHeight` exclusively (avoids drift between the two fields).
+            rowSpan: undefined,
+            itemHeight: entry.itemHeight,
             x: entry.x,
             y: entry.y,
           }
@@ -88,48 +113,176 @@ export function DashboardCanvasProvider({
   )
 
   const onLayoutChange = useCallback((layout: DashboardItemLayout[]) => {
-    pendingLayoutRef.current = layout
+    setPendingLayout(layout)
   }, [])
 
-  const handleSave = async () => {
-    if (pendingLayoutRef.current) {
-      const updatedConfig = applyLayout(pendingLayoutRef.current)
-      if (!updatedConfig || !threadId) return
+  const transformItem = useCallback(
+    (itemId: string, patch: Partial<ChatDashboardItem>) => {
+      setItemTransforms((prev) => {
+        const next = new Map(prev)
+        next.set(itemId, patch)
+        return next
+      })
+    },
+    []
+  )
 
-      try {
-        await saveConfigFn(threadId, content.toolCallId, updatedConfig)
-
-        if (content.toolCallId) {
-          savedDashboardConfigStore.set(content.toolCallId, updatedConfig)
-        }
-
-        openCanvas({
-          ...content,
-          config: updatedConfig,
-        })
-
-        pendingLayoutRef.current = null
-      } catch {
-        return
+  /** Apply item transforms to a config, producing a new config with patched items. */
+  const applyTransforms = useCallback(
+    (config: ChatDashboardConfig): ChatDashboardConfig => {
+      if (itemTransforms.size === 0) return config
+      return {
+        ...config,
+        items: config.items.map((item) => {
+          const patch = itemTransforms.get(item.id)
+          return patch ? ({ ...item, ...patch } as typeof item) : item
+        }),
       }
-    }
+    },
+    [itemTransforms]
+  )
 
-    setEditMode(false)
+  const handleSave = async () => {
+    const hasPendingChanges =
+      pendingLayout || itemTransforms.size > 0 || content.savedDashboardUnsaved
+    if (!hasPendingChanges) return
+
+    // Start from current config, apply layout then transforms
+    let updatedConfig = pendingLayout
+      ? applyLayout(pendingLayout)
+      : { ...content.config }
+    if (!updatedConfig) return
+
+    updatedConfig = applyTransforms(updatedConfig)
+
+    try {
+      // Persist to chat history (best-effort — may fail if no thread exists
+      // yet, e.g. for client-only seed messages injected before the user
+      // sends their first message).
+      // Include saved-dashboard metadata so the history preserves the full state.
+      if (threadId) {
+        try {
+          const configWithMeta = {
+            ...updatedConfig,
+            ...(content.savedDashboardId
+              ? {
+                  savedDashboardId: content.savedDashboardId,
+                  savedDashboardCategory: content.savedDashboardCategory,
+                  savedDashboardDescription: content.savedDashboardDescription,
+                  savedDashboardUnsaved: false,
+                }
+              : {}),
+          }
+          await saveConfigFn(
+            threadId,
+            content.toolCallId,
+            configWithMeta as typeof updatedConfig
+          )
+        } catch (err) {
+          // History persistence is best-effort — it's expected to fail when
+          // the thread hasn't been created yet (client-only seed). Log and
+          // continue so the external save below still runs.
+          // eslint-disable-next-line no-console
+          console.warn(
+            "[Dashboard] saveConfigToHistory failed, continuing with external save",
+            err
+          )
+        }
+      }
+
+      // Persist externally via canvasActions (the actual save to backend)
+      if (
+        content.savedDashboardId &&
+        content.savedDashboardCategory &&
+        canvasActions?.dashboard?.save
+      ) {
+        await canvasActions.dashboard.save(
+          content.savedDashboardId,
+          content.savedDashboardCategory,
+          updatedConfig
+        )
+      }
+
+      if (content.toolCallId) {
+        savedDashboardConfigStore.set(content.toolCallId, updatedConfig)
+        savedDashboardMetaStore.set(content.toolCallId, {
+          savedDashboardId: content.savedDashboardId,
+          savedDashboardCategory: content.savedDashboardCategory,
+          savedDashboardDescription: content.savedDashboardDescription,
+          savedDashboardUnsaved: false,
+        })
+      }
+
+      // Update pending context so the agent sees the latest config
+      // if the user sends a message after saving.
+      if (pendingContext) {
+        setPendingContext({
+          ...pendingContext,
+          context: JSON.stringify({
+            ...updatedConfig,
+            savedDashboardId: content.savedDashboardId,
+            savedDashboardCategory: content.savedDashboardCategory,
+            savedDashboardDescription: content.savedDashboardDescription,
+          }),
+        })
+      }
+
+      // Update canvas content. handleSave only ever spreads the config / items
+      // so `fetchSpecs` keeps the same reference — DashboardContent uses that
+      // reference to gate its data refresh key, so this update does NOT
+      // trigger a recompute even though the canvas content reference changes.
+      // Also clear the unsaved flag since changes are now persisted.
+      openCanvas({
+        ...content,
+        config: updatedConfig,
+        savedDashboardUnsaved: false,
+      })
+
+      setPendingLayout(null)
+      setItemTransforms(new Map())
+    } catch (err) {
+      // Keep pending state on failure so user can retry. Surface the error
+      // so it's not silently lost.
+      // eslint-disable-next-line no-console
+      console.error("[Dashboard] save failed", err)
+    }
   }
 
+  const saveConfigToHistory = useCallback(
+    async (config: Record<string, unknown>) => {
+      if (!threadId) return
+      try {
+        await saveConfigFn(
+          threadId,
+          content.toolCallId,
+          config as unknown as ChatDashboardConfig
+        )
+      } catch (err) {
+        // Best-effort — log so failures aren't invisible.
+        // eslint-disable-next-line no-console
+        console.warn("[Dashboard] saveConfigToHistory failed", err)
+      }
+    },
+    [threadId, content.toolCallId, saveConfigFn]
+  )
+
   const handleDiscard = () => {
-    pendingLayoutRef.current = null
-    setEditMode(false)
+    setPendingLayout(null)
+    setItemTransforms(new Map())
+    setDiscardKey((k) => k + 1)
   }
 
   return (
     <DashboardCanvasContext.Provider
       value={{
-        editMode,
-        setEditMode,
+        isDirty: pendingLayout !== null || itemTransforms.size > 0,
+        discardKey,
+        itemTransforms,
         onLayoutChange,
         handleSave,
         handleDiscard,
+        transformItem,
+        saveConfigToHistory,
         exportAsExcel,
         registerExport,
       }}

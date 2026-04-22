@@ -84,7 +84,7 @@ export const useDisplayDashboardAction = () => {
             name: "colSpan",
             type: "number",
             description:
-              "Column span (1-12). Metrics default to 3, charts to 4 or 6, tables to 12.",
+              "Deprecated — items auto-size in equal-width rows. Leave unset.",
             required: false,
           },
           {
@@ -110,19 +110,66 @@ export const useDisplayDashboardAction = () => {
           "Fetch specifications for server-side data retrieval. Keyed by datasetId, each describes how to fetch and query data.",
         required: false,
       },
+      {
+        name: "savedDashboardId",
+        type: "string",
+        description:
+          "ID of a pre-saved dashboard. Present only when iterating on an existing saved dashboard.",
+        required: false,
+      },
+      {
+        name: "savedDashboardCategory",
+        type: "string",
+        description: "Category of the saved dashboard.",
+        required: false,
+      },
+      {
+        name: "savedDashboardDescription",
+        type: "string",
+        description: "Description of the saved dashboard.",
+        required: false,
+      },
+      {
+        name: "savedDashboardUnsaved",
+        type: "boolean",
+        description:
+          "Whether the dashboard has unsaved changes (e.g. agent iteration not yet persisted).",
+        required: false,
+      },
     ],
     available: "frontend",
     render: (props) => {
-      const args = props.args as Partial<ChatDashboardConfig>
+      const args = props.args as Partial<ChatDashboardConfig> & {
+        savedDashboardId?: string
+        savedDashboardCategory?: string
+        savedDashboardDescription?: string
+        savedDashboardUnsaved?: boolean
+      }
 
       // Bail out while arguments are still streaming in.
       if (!args.title || !args.items || args.items.length === 0) {
         return <></>
       }
 
-      const config = args as ChatDashboardConfig
+      const {
+        savedDashboardId,
+        savedDashboardCategory,
+        savedDashboardDescription,
+        savedDashboardUnsaved,
+        ...configArgs
+      } = args
+      const config = configArgs as ChatDashboardConfig
 
-      return <DashboardCard config={config} apiConfig={apiConfig} />
+      return (
+        <DashboardCard
+          config={config}
+          apiConfig={apiConfig}
+          savedDashboardId={savedDashboardId}
+          savedDashboardCategory={savedDashboardCategory}
+          savedDashboardDescription={savedDashboardDescription}
+          savedDashboardUnsaved={savedDashboardUnsaved}
+        />
+      )
     },
   })
 }

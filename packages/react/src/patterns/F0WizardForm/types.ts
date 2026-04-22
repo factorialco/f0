@@ -1,5 +1,6 @@
 import { z, ZodRawShape, ZodEffects, type ZodType } from "zod"
 
+import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 import type {
   F0FormErrorTriggerMode,
   F0FormSubmitConfig,
@@ -62,6 +63,10 @@ export interface F0FormDefinitionSingleSchema<TSchema extends F0FormSchema> {
   /** @internal Brand to distinguish from per-section at the type level */
   readonly _brand: "single"
   name: string
+  /** Human-readable description of the form's purpose */
+  description?: string
+  /** Module associated with this form (for avatar display in canvas cards) */
+  module?: ModuleId
   schema: TSchema
   sections?: Record<string, F0SectionConfig>
   defaultValues?: Partial<z.infer<TSchema>>
@@ -78,12 +83,18 @@ export interface F0FormDefinitionSingleSchema<TSchema extends F0FormSchema> {
   defaultValuesFn?: (
     params: Record<string, unknown>
   ) => Promise<Partial<z.infer<TSchema>>>
+  /** Wizard steps — when present, F0WizardForm uses these instead of auto-deriving from sections */
+  steps?: F0WizardFormStep[]
 }
 
 export interface F0FormDefinitionPerSection<T extends F0PerSectionSchema> {
   /** @internal Brand to distinguish from single-schema at the type level */
   readonly _brand: "per-section"
   name: string
+  /** Human-readable description of the form's purpose */
+  description?: string
+  /** Module associated with this form (for avatar display in canvas cards) */
+  module?: ModuleId
   schema: T
   sections?: Record<string, F0PerSectionSectionConfig>
   defaultValues?: { [K in keyof T]?: Partial<z.infer<T[K]>> }
@@ -100,6 +111,8 @@ export interface F0FormDefinitionPerSection<T extends F0PerSectionSchema> {
   defaultValuesFn?: (
     params: Record<string, unknown>
   ) => Promise<{ [K in keyof T]?: Partial<z.infer<T[K]>> }>
+  /** Wizard steps — when present, F0WizardForm uses these instead of auto-deriving from sections */
+  steps?: F0WizardFormStep[]
 }
 
 export type F0FormDefinition<

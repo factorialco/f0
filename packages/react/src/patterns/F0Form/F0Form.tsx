@@ -194,16 +194,16 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
 
   if (showSectionsSidepanel && tocItems.length > 0) {
     return (
-      <div className="flex w-full gap-4">
-        <div className="sticky top-4 h-fit shrink-0 self-start pt-3">
+      <div className="flex w-full overflow-scroll">
+        <div className="sticky top-0 h-fit shrink-0 self-start pt-2 mr-4">
           <F0TableOfContent
             items={tocItems}
             activeItem={activeSection}
             scrollable={false}
           />
         </div>
-        <div className="w-px bg-f1-border-secondary" />
-        <div className="flex flex-1 justify-center">{content}</div>
+        <div className="w-px sticky top-0 bottom-0 bg-f1-border-secondary" />
+        {content}
       </div>
     )
   }
@@ -405,6 +405,8 @@ function F0FormFromSingleDefinition<TSchema extends F0FormSchema>({
   return (
     <F0FormSingleSchema
       name={def.name}
+      description={def.description}
+      module={def.module}
       schema={def.schema}
       sections={def.sections}
       defaultValues={def.defaultValues}
@@ -503,6 +505,8 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     isLoading: isFormLoading,
     defaultValuesParamsSchema,
     defaultValuesFn,
+    description,
+    module,
   } = props
 
   const { useUpload } = props
@@ -569,14 +573,23 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     sectionIds[0]
   )
 
+  // Ref to the scrollable container that holds both sidebar + form content
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+
   // Scroll to section when TOC item is clicked and mark it as active
   const handleSectionClick = useCallback(
     (sectionId: string) => {
       setActiveSection(sectionId)
       const anchorId = generateAnchorId(name, sectionId)
       const element = document.getElementById(anchorId)
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "start" })
+      const container = scrollContainerRef.current
+      if (element && container) {
+        // Scroll within the form's own scroll container to avoid
+        // shifting parent containers (e.g. the canvas panel).
+        container.scrollTo({
+          top: element.offsetTop - container.offsetTop,
+          behavior: "smooth",
+        })
       }
     },
     [name]
@@ -787,6 +800,49 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     [form, resetErrorNavigation]
   )
 
+  // Auto-register with AI form registry (when available).
+  // IMPORTANT: this effect MUST be declared BEFORE the formRef exposure
+  // effect below. React runs effect cleanups in declaration order during
+  // unmount, and unregister() needs formRef.current to still be populated
+  // so it can capture the current form values into the virtual entry.
+  const aiFormRegistry = useF0AiFormRegistry()
+  const internalFormRef = useRef<F0FormRef | null>(null)
+  // Keep a stable ref that mirrors formRef or internalFormRef
+  const registryFormRef = formRef ?? internalFormRef
+
+  useEffect(() => {
+    if (aiFormRegistry) {
+      // Build ref for registry use when no external formRef is provided
+      if (!formRef) {
+        internalFormRef.current = buildRefMethods()
+      }
+      aiFormRegistry.register(
+        name,
+        registryFormRef,
+        schema,
+        sections,
+        defaultValuesParamsSchema,
+        defaultValuesFn,
+        description,
+        module
+      )
+      return () => {
+        aiFormRegistry.unregister(name)
+      }
+    }
+  }, [
+    aiFormRegistry,
+    name,
+    description,
+    module,
+    schema,
+    sections,
+    formRef,
+    registryFormRef,
+    buildRefMethods,
+    defaultValuesParamsSchema,
+  ])
+
   // Expose form methods via ref for external control
   useEffect(() => {
     if (formRef) {
@@ -809,41 +865,6 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       })
     }
   }, [isSubmitting, hasErrors])
-
-  // Auto-register with AI form registry (when available)
-  const aiFormRegistry = useF0AiFormRegistry()
-  const internalFormRef = useRef<F0FormRef | null>(null)
-  // Keep a stable ref that mirrors formRef or internalFormRef
-  const registryFormRef = formRef ?? internalFormRef
-
-  useEffect(() => {
-    if (aiFormRegistry) {
-      // Build ref for registry use when no external formRef is provided
-      if (!formRef) {
-        internalFormRef.current = buildRefMethods()
-      }
-      aiFormRegistry.register(
-        name,
-        registryFormRef,
-        schema,
-        sections,
-        defaultValuesParamsSchema,
-        defaultValuesFn
-      )
-      return () => {
-        aiFormRegistry.unregister(name)
-      }
-    }
-  }, [
-    aiFormRegistry,
-    name,
-    schema,
-    sections,
-    formRef,
-    registryFormRef,
-    buildRefMethods,
-    defaultValuesParamsSchema,
-  ])
 
   // Group contiguous switch fields
   const groupedItems = groupContiguousSwitches(definition)
@@ -870,7 +891,12 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const formContent = (
     <form
       onSubmit={form.handleSubmit(handleSubmit)}
-      className={cn("flex flex-col", FORM_MAX_WIDTH, className)}
+      className={cn(
+        "flex flex-1 flex-col w-full mx-auto",
+        FORM_MAX_WIDTH,
+        className,
+        styling?.showSectionsSidepanel && "p-2 [&>div:last-child]:pb-6"
+      )}
     >
       {/* Render definition items with switch grouping */}
       {groupedItems.map((groupedItem, index) => {
@@ -958,9 +984,9 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     <F0FormContext.Provider value={contextValue}>
       <FormProvider {...form}>
         {showSectionsSidepanel && tocItems.length > 0 ? (
-          <div className="flex w-full gap-4">
+          <div ref={scrollContainerRef} className="flex w-full overflow-scroll">
             {/* Sections sidebar */}
-            <div className="sticky top-4 h-fit shrink-0 self-start pt-3">
+            <div className="sticky top-0 h-fit shrink-0 self-start pt-2">
               <F0TableOfContent
                 items={tocItems}
                 activeItem={activeSection}
@@ -969,10 +995,10 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             </div>
 
             {/* Separator */}
-            <div className="w-px bg-f1-border-secondary" />
+            <div className="w-px sticky top-0 bottom-0 bg-f1-border-secondary mr-4" />
 
             {/* Form content - centered in available space */}
-            <div className="flex flex-1 justify-center">{formContent}</div>
+            {formContent}
           </div>
         ) : (
           formContent

@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { ComponentProps } from "react"
 import { expect, within } from "storybook/test"
 
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
@@ -36,7 +35,7 @@ const meta = {
     href: "/foo",
     "data-test": "foo",
   },
-} satisfies Meta<ComponentProps<typeof F0Link>>
+} satisfies Meta<typeof F0Link>
 
 export default meta
 type Story = StoryObj<typeof meta>

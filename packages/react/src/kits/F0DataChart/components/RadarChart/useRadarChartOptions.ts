@@ -5,9 +5,35 @@ import { type RefObject, useMemo } from "react"
 import type { F0DataChartRadarProps } from "../../types"
 
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
-import { buildLegend, DEFAULT_EMPHASIS } from "../../utils/options"
+import {
+  buildItemTooltip,
+  buildLegend,
+  DEFAULT_EMPHASIS,
+} from "../../utils/options"
+import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
+
+/** Discrete responsive size for the radar chart */
+export type RadarChartSize = ChartResponsiveSize
+
+/**
+ * Maps the discrete `size` to which chrome (legend, indicator names) is
+ * rendered. Mirrors the rest of the F0DataChart family.
+ *
+ * - `sm` → no legend, no indicator names (the shape itself is the chart)
+ * - `md` → legend below, indicator names truncated to 56px
+ * - `lg` → legend below, indicator names truncated to 96px
+ */
+function resolveResponsiveDisplay(size: RadarChartSize) {
+  if (size === "sm") {
+    return { showLegend: false, showIndicatorNames: false, nameWidth: 0 }
+  }
+  if (size === "md") {
+    return { showLegend: true, showIndicatorNames: true, nameWidth: 56 }
+  }
+  return { showLegend: true, showIndicatorNames: true, nameWidth: 96 }
+}
 
 export function useRadarChartOptions(
   containerRef: RefObject<HTMLDivElement | null>,
@@ -19,13 +45,17 @@ export function useRadarChartOptions(
     showLabels = false,
     valueFormatter,
     echartsOptions,
-  }: F0DataChartRadarProps
+  }: F0DataChartRadarProps,
+  size: RadarChartSize
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
-  const size = useContainerSize(containerRef)
+  const containerSize = useContainerSize(containerRef)
 
   return useMemo(() => {
-    const maxNameWidth = Math.floor(size.width / 4) || undefined
+    const responsive = resolveResponsiveDisplay(size)
+    const effectiveShowLegend = responsive.showLegend && showLegend
+    const { showIndicatorNames, nameWidth } = responsive
+
     // Auto-calculate max for each indicator if not provided
     const radarIndicators = indicators.map((ind, i) => {
       const maxFromData =
@@ -61,7 +91,6 @@ export function useRadarChartOptions(
     })
 
     const legendData = series.map((s) => s.name)
-    const { tooltip, colors } = theme
 
     const baseOptions: echarts.EChartsOption = {
       animation: false,
@@ -73,14 +102,17 @@ export function useRadarChartOptions(
         indicator: radarIndicators,
         shape: "polygon",
         splitNumber: 4,
-        axisName: {
-          color: theme.colors.foregroundSecondary,
-          fontSize: theme.textStyle.fontSize,
-          fontWeight: theme.textStyle.fontWeight,
-          fontFamily: theme.textStyle.fontFamily,
-          overflow: "truncate",
-          ...(maxNameWidth ? { width: maxNameWidth } : {}),
-        },
+        axisName: showIndicatorNames
+          ? {
+              color: theme.colors.foregroundSecondary,
+              fontSize: theme.textStyle.fontSize,
+              fontWeight: theme.textStyle.fontWeight,
+              fontFamily: theme.textStyle.fontFamily,
+              overflow: "truncate" as const,
+              width: nameWidth,
+              ellipsis: "...",
+            }
+          : { show: false },
         splitArea: {
           show: false,
         },
@@ -107,33 +139,18 @@ export function useRadarChartOptions(
               shadowBlur: 0,
               shadowOffsetX: 0,
               shadowColor: "transparent",
+              opacity: 0.85,
             },
           },
         },
       ] as echarts.EChartsOption["series"],
       legend: buildLegend({
-        show: showLegend,
+        show: effectiveShowLegend,
         data: legendData,
         theme,
-        containerWidth: size.width,
       }),
-      tooltip: {
-        trigger: "item",
-        padding: tooltip.padding,
-        borderWidth: tooltip.borderWidth,
-        transitionDuration: tooltip.transitionDuration,
-        textStyle: {
-          color: colors.foreground,
-          fontSize: theme.textStyle.fontSize,
-        },
-        extraCssText: [
-          `box-shadow: ${tooltip.boxShadow}`,
-          `border-radius: ${tooltip.borderRadius}px`,
-          `border: 1px solid ${colors.borderSecondary}`,
-          "backdrop-filter: blur(30px)",
-          `-webkit-backdrop-filter: blur(30px)`,
-          `background: ${tooltip.background}`,
-        ].join("; "),
+      tooltip: buildItemTooltip({
+        theme,
         formatter: (params: unknown) => {
           const p = params as {
             marker?: string
@@ -153,7 +170,7 @@ export function useRadarChartOptions(
             .join("")
           return `${header}${items}`
         },
-      } as echarts.EChartsOption["tooltip"],
+      }),
       emphasis: DEFAULT_EMPHASIS,
     }
 
@@ -171,6 +188,7 @@ export function useRadarChartOptions(
     valueFormatter,
     echartsOptions,
     theme,
+    containerSize,
     size,
   ])
 }

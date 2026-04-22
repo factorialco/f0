@@ -3,15 +3,6 @@ import { forwardRef } from "react"
 import type { IconType } from "@/components/F0Icon"
 import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
 
-import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-import { ItemActionsMobile } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
-import { ItemActionsRowContainer } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsRowContainer"
-import { useItemActions } from "@/patterns/OneDataCollection/components/itemActions/useItemActions"
-import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
-import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
-import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
-import { renderProperty } from "@/patterns/OneDataCollection/property-render"
-import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
 import { TableCell, TableRow } from "@/experimental/OneTable"
 import {
   GroupingDefinition,
@@ -21,6 +12,15 @@ import {
 import { NestedVariant } from "@/hooks/datasource/types/nested.typings"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { ItemActionsMobile } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsMobile/ItemActionsMobile"
+import { ItemActionsRowContainer } from "@/patterns/OneDataCollection/components/itemActions/ItemActionsRowContainer"
+import { useItemActions } from "@/patterns/OneDataCollection/components/itemActions/useItemActions"
+import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
+import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
+import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
+import { renderProperty } from "@/patterns/OneDataCollection/property-render"
+import { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
+import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { Checkbox } from "@/ui/checkbox"
 
 import type {
@@ -57,6 +57,7 @@ export type RowProps<
   index: number
   groupIndex: number
   onCheckedChange: (checked: boolean) => void
+  onItemCheckedChange?: (item: R, checked: boolean) => void
   selectedItems: Map<string | number, R>
   columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
   frozenColumnsLeft: number
@@ -98,7 +99,6 @@ export type NestedRowProps = {
   expanded?: boolean
   hasLoadedChildren?: boolean
   isLastChild?: boolean
-  isLastSibling?: boolean
   nestedVariant?: NestedVariant
   parentHasChildren?: boolean
   onExpand?: () => void
@@ -126,6 +126,7 @@ const RowComponentInner = <
     source,
     item,
     onCheckedChange,
+    onItemCheckedChange,
     selectedItems,
     columns,
     frozenColumnsLeft,
@@ -196,6 +197,7 @@ const RowComponentInner = <
         source={source}
         item={item}
         onCheckedChange={onCheckedChange}
+        onItemCheckedChange={onItemCheckedChange}
         selectedItems={selectedItems}
         columns={columns}
         frozenColumnsLeft={frozenColumnsLeft}
@@ -328,7 +330,22 @@ const RowComponentInner = <
       {hasItemActions &&
         !loading &&
         !nestedRowProps?.onLoadMoreChildren &&
-        !nestedRowProps?.onAddRow && (
+        !nestedRowProps?.onAddRow &&
+        (fromVisualization === "editableTable" ? (
+          <TableCell
+            key={`table-cell-${groupIndex}-${index}-actions`}
+            sticky={{ right: 0 }}
+            referenceRowType={referenceRowType}
+            className="border-0 border-b-[1px] border-l-[1px] border-solid border-f1-border-secondary bg-f1-background !px-3 align-middle"
+          >
+            <ItemActionsRow
+              className="flex flex-nowrap justify-center"
+              primaryItemActions={primaryItemActions}
+              dropdownItemActions={dropdownItemActions}
+              handleDropDownOpenChange={handleDropDownOpenChange}
+            />
+          </TableCell>
+        ) : (
           <>
             {/** Desktop item actions adds a sticky column to the table to not overflow when the table is scrolled horizontally*/}
             <td className="sticky right-0 top-0 z-10 hidden md:table-cell">
@@ -357,7 +374,7 @@ const RowComponentInner = <
               />
             </TableCell>
           </>
-        )}
+        ))}
     </TableRow>
   )
 }

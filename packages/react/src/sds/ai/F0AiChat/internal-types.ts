@@ -7,12 +7,16 @@ import {
   type AiChatFileAttachmentConfig,
   type AiChatTrackingOptions,
   type AiChatToolHint,
+  type AppendMessage,
   type CanvasContent,
   type AiChatCredits,
+  type AiChatCreditWarning,
   type EntityRefs,
+  type PendingContext,
   type VisualizationMode,
   WelcomeScreenSuggestion,
 } from "./types"
+import { type CanvasActions } from "./canvas/types"
 
 /**
  * Internal state for the AiChat provider
@@ -31,8 +35,10 @@ export interface AiChatState {
   footer?: React.ReactNode
   VoiceMode?: React.ComponentType
   entityRefs?: EntityRefs
+  canvasActions?: CanvasActions
   toolHints?: AiChatToolHint[]
   credits?: AiChatCredits
+  creditWarning?: AiChatCreditWarning
   fileAttachments?: AiChatFileAttachmentConfig
   placeholders?: string[]
   setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>
@@ -117,6 +123,33 @@ export type AiChatProviderReturnValue = {
    */
   setSendMessageFunction: (sendFn: ((message: Message) => void) | null) => void
   /**
+   * Append messages to the current conversation.
+   * Useful for injecting pre-built assistant responses (e.g. dashboards)
+   * from outside the chat. IDs are generated internally.
+   *
+   * @param options.persist - Whether to persist messages to the backend thread.
+   *   Defaults to `true`. Pass `false` for client-only display messages that
+   *   should not create or modify a backend thread (e.g. seed messages).
+   */
+  appendMessages: (
+    messages: AppendMessage[],
+    options?: { persist?: boolean }
+  ) => void
+  /** @internal */
+  setAppendMessagesFunction: (
+    fn: ((messages: AppendMessage[], persist: boolean) => void) | null
+  ) => void
+  /**
+   * Atomically clear the conversation and inject new messages.
+   * Starts a fresh thread without the race condition of calling
+   * clear() + appendMessages() separately.
+   */
+  clearAndAppend: (messages: AppendMessage[]) => void
+  /** @internal */
+  setReplaceMessagesFunction: (
+    fn: ((messages: AppendMessage[]) => void) | null
+  ) => void
+  /**
    * Current width of the chat window (for resizable mode)
    */
   chatWidth: number
@@ -176,6 +209,13 @@ export type AiChatProviderReturnValue = {
   fileDragOver: boolean
   /** @internal Set the file drag-over state */
   setFileDragOver: React.Dispatch<React.SetStateAction<boolean>>
+  /**
+   * Pre-loaded context shown as an empty state in the chat.
+   * Prepended to the first user message as `<pending-context>`.
+   */
+  pendingContext: PendingContext | null
+  /** Set pending context (pass null to clear) */
+  setPendingContext: React.Dispatch<React.SetStateAction<PendingContext | null>>
 } & Pick<
   AiChatState,
   | "greeting"
@@ -183,8 +223,10 @@ export type AiChatProviderReturnValue = {
   | "disclaimer"
   | "resizable"
   | "entityRefs"
+  | "canvasActions"
   | "toolHints"
   | "credits"
+  | "creditWarning"
   | "fileAttachments"
 > & {
     /** The current canvas content, or null when canvas is closed */
@@ -210,9 +252,8 @@ export function isAgentStateMessage(message: Message): boolean {
 
 /**
  * Check whether a message is a coagent-state-render placeholder injected by
- * CopilotKit v1.51+.  These empty assistant messages are meant for
- * `useCoAgentStateRender` which f0 does not use; they must be filtered out
- * before any message-count or welcome-screen logic.
+ * CopilotKit v1.51+.  These assistant messages are used by
+ * `useCoAgentStateRender` to render inline state UI (e.g. FormCard).
  */
 export function isCoagentPlaceholder(message: Message): boolean {
   return (
@@ -222,7 +263,32 @@ export function isCoagentPlaceholder(message: Message): boolean {
 
 /**
  * Filter coagent-state-render placeholder messages from an array.
+ * Used for message-count checks (welcome screen, empty state) where
+ * these placeholder messages should not count.
  */
 export function filterCoagentPlaceholders(messages: Message[]): Message[] {
   return messages.filter((m) => !isCoagentPlaceholder(m))
+}
+
+/**
+ * Check whether a message is a tool-result message (role: "tool").
+ *
+ * These are internal CopilotKit bookkeeping messages that carry the
+ * stringified return value of frontend tool handlers (e.g. the JSON
+ * response from `approveMutation`'s `respond()` callback).  They must
+ * never be rendered in the chat UI.
+ */
+function isToolResultMessage(message: Message): boolean {
+  return message.role === "tool"
+}
+
+/**
+ * Filter out all messages that should never be rendered in the chat UI:
+ * - coagent-state-render placeholders (CopilotKit internal)
+ * - tool-result messages (role: "tool") carrying frontend tool handler output
+ */
+export function filterNonRenderableMessages(messages: Message[]): Message[] {
+  return messages.filter(
+    (m) => !isCoagentPlaceholder(m) && !isToolResultMessage(m)
+  )
 }

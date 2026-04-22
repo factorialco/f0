@@ -1,5 +1,6 @@
 import { EditableTableCellEditType } from "./components/cells"
 import { DateCell } from "./components/cells/DateCell"
+import { MoneyCell } from "./components/cells/MoneyCell"
 import { NumberCell } from "./components/cells/NumberCell"
 import { SelectCell } from "./components/cells/SelectCell"
 import { DisabledCell } from "./components/cells/status/DisabledCell"
@@ -27,6 +28,7 @@ export const editableCellMap: Record<
 > = {
   text: TextCell,
   number: NumberCell,
+  money: MoneyCell,
   date: DateCell,
   select: SelectCell,
   multiselect: TextCell,

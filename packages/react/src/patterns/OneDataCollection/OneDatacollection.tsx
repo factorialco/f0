@@ -2,7 +2,11 @@ import { useDeepCompareEffect } from "@reactuses/core"
 import { motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
-import { Spinner } from "@/ui/Spinner"
+import type {
+  FiltersDefinition,
+  FiltersState,
+} from "@/patterns/OneFilterPicker/types"
+
 import { OneEmptyState } from "@/components/OneEmptyState"
 import {
   GroupingDefinition,
@@ -15,11 +19,9 @@ import { useLayout } from "@/layouts/LayoutProvider"
 import { useI18n } from "@/lib/providers/i18n"
 import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
 import { cn } from "@/lib/utils"
+import { OneFilterPicker } from "@/patterns/OneFilterPicker"
+import { Spinner } from "@/ui/Spinner"
 
-import type {
-  FiltersDefinition,
-  FiltersState,
-} from "@/patterns/OneFilterPicker/types"
 import type {
   BulkActionDefinition,
   GroupingState,
@@ -29,7 +31,6 @@ import type {
 } from "./types"
 import type { Visualization } from "./visualizations/collection"
 
-import { OneFilterPicker } from "@/patterns/OneFilterPicker"
 import {
   filterActions,
   getPrimaryActions,
@@ -47,9 +48,9 @@ import {
 } from "./hooks/useDataColectionStorage/types"
 import { useDataCollectionStorage } from "./hooks/useDataColectionStorage/useDataCollectionStorage"
 import { DataCollectionSource } from "./hooks/useDataCollectionSource"
-import { usePerVisualizationFilters } from "./hooks/usePerVisualizationFilters"
 import { CustomEmptyStates, useEmptyState } from "./hooks/useEmptyState"
 import { useExportAction } from "./hooks/useExportAction"
+import { usePerVisualizationFilters } from "./hooks/usePerVisualizationFilters"
 import { ItemActionsDefinition } from "./item-actions"
 import { NavigationFiltersDefinition } from "./navigationFilters/types"
 import { Settings } from "./Settings"

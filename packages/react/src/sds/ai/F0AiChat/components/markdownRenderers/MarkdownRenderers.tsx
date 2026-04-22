@@ -1,12 +1,12 @@
 import { type AssistantMessageProps } from "@copilotkit/react-ui"
 
-import { Blockquote, Hr, Pre } from "./components/Block"
-import { EntityRef } from "./entityRef/components/EntityRef"
+import { Blockquote, Code, Hr, Pre } from "./components/Block"
 import { Image } from "./components/Image"
 import { A } from "./components/Link"
 import { Li, Ol, Ul } from "./components/Lists"
-import { Table, TableSimple, Td, Th } from "./components/Table"
+import { Table, Td, Th } from "./components/Table"
 import { Em, H1, H2, H3, P, Strong } from "./components/Typography"
+import { EntityRef } from "./entityRef/components/EntityRef"
 
 export const markdownRenderers: NonNullable<
   AssistantMessageProps["markdownTagRenderers"]
@@ -20,6 +20,7 @@ export const markdownRenderers: NonNullable<
   em: Em,
   li: Li,
   pre: Pre,
+  code: Code,
   blockquote: Blockquote,
   hr: Hr,
   ul: Ul,
@@ -29,15 +30,4 @@ export const markdownRenderers: NonNullable<
   td: Td,
   img: Image,
   "entity-ref": EntityRef,
-}
-
-/**
- * Markdown renderers without the table download button.
- * Use this when the parent component already provides its own download controls.
- */
-export const markdownRenderersSimple: NonNullable<
-  AssistantMessageProps["markdownTagRenderers"]
-> = {
-  ...markdownRenderers,
-  table: TableSimple,
 }

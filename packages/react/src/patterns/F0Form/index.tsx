@@ -21,6 +21,7 @@ export type {
   F0SectionConfig,
   F0SectionAction,
   F0FormSubmitResult,
+  F0FormLikeComponent,
   SectionRenderIf,
 } from "./types"
 
@@ -143,12 +144,20 @@ export {
 export type {
   F0AiFormEntry,
   F0AiAvailableFormDefinition,
-  F0AiPresentedForm,
+  AvailableFormDefinitionItem,
 } from "./F0AiFormRegistry"
 
 // Export AI schema description utility
 export { describeFormSchema } from "./describeFormSchema"
 export type { FormFieldDescription } from "./describeFormSchema"
+
+// Export headless testing utilities
+export { createF0FormTester, createF0FormDefinitionTester } from "./testing"
+export type {
+  F0FormTester,
+  F0FormValidationResult,
+  CreateF0FormTesterOptions,
+} from "./testing"
 
 import type {
   F0FormPropsWithSingleSchema,

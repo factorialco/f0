@@ -364,13 +364,13 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
                 : undefined
             }
             className={cn(
-              "fixed bottom-2 left-2 right-2 z-50 flex h-fit flex-col items-center gap-2 rounded-xl p-2 shadow-lg backdrop-blur-sm sm:bottom-5 sm:h-12 sm:w-max sm:flex-row sm:gap-4 sm:min-w-[475px] sm:justify-between",
+              "fixed bottom-2 left-2 right-2 z-50 flex h-fit flex-col items-center gap-2 rounded-xl p-2 shadow-lg backdrop-blur-sm sm:bottom-5 sm:h-12 sm:w-max sm:flex-row sm:gap-5 sm:justify-between",
               contentRect
                 ? "sm:left-auto sm:right-auto sm:mx-auto"
                 : "sm:left-2 sm:right-2 sm:mx-auto",
               isLight
                 ? "border border-solid bg-f1-background text-f1-foreground"
-                : "bg-f1-background-inverse text-f1-foreground dark:bg-f1-background-inverse-secondary",
+                : "bg-f1-background-inverse text-f1-foreground dark:bg-f1-background-tertiary",
               isLight && showErrorStyles
                 ? "border-f1-border-critical-bold bg-f1-background-critical/10"
                 : isLight

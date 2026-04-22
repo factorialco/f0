@@ -1,13 +1,19 @@
 import { CopilotKitProps } from "@copilotkit/react-core"
 import { type AIMessage, type Message } from "@copilotkit/shared"
 
+import type { ModuleId } from "@/components/avatars/F0AvatarModule"
+
 import { IconType } from "@/components/F0Icon"
 import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
 
+import type { CanvasActions } from "./canvas/types"
 import type { ChatDashboardConfig } from "./canvas/entities/dashboard/types"
+import type { DataDownloadDataset } from "./actions/core/dataDownload/types"
 export type { PersonProfile } from "./components/markdownRenderers/entityRef/entities/person/types"
 export type { CandidateProfile } from "./components/markdownRenderers/entityRef/entities/candidate/types"
 export type { JobPostingProfile } from "./components/markdownRenderers/entityRef/entities/jobPosting/types"
+export type { RequisitionProfile } from "./components/markdownRenderers/entityRef/entities/requisition/types"
+export type { VacancyProfile } from "./components/markdownRenderers/entityRef/entities/vacancy/types"
 export type {
   EntityResolvers,
   EntityUrlBuilders,
@@ -16,12 +22,63 @@ export type {
 import type { EntityRefs } from "./components/markdownRenderers/entityRef/types"
 
 /**
+ * A tool call to inject via appendMessages.
+ * IDs are generated internally unless `id` is provided.
+ * When pairing with a tool-result message, provide the same `id`
+ * in both the tool call and the tool-result's `toolCallId`.
+ */
+export type AppendToolCall = {
+  id?: string
+  function: {
+    name: string
+    arguments: string
+  }
+}
+
+/**
+ * A message to inject via appendMessages.
+ * IDs are generated internally — callers only provide role, content, and
+ * optional tool calls.
+ */
+export type AppendMessage =
+  | {
+      role: "user" | "assistant"
+      content: string
+      toolCalls?: AppendToolCall[]
+    }
+  | {
+      /** Tool result message — pairs with a toolCall from a previous assistant message */
+      role: "tool"
+      content: string
+      /**
+       * ID of the paired tool call. Must equal the corresponding assistant
+       * message's `toolCalls[i].id` — supply `AppendToolCall.id` on that call
+       * and pass the same value here so the messages are correctly paired.
+       */
+      toolCallId: string
+    }
+
+/**
+ * Pre-loaded context shown as an empty state in the chat.
+ * The `context` string is prepended to the user's first message
+ * as `<pending-context>...</pending-context>` so the agent receives it.
+ * The conversation is not created until the user actually sends a message.
+ */
+export type PendingContext = {
+  /** Human-readable label shown in the empty state (e.g. "Expenses dashboard") */
+  label: string
+  /** Full context string prepended invisibly to the first user message */
+  context: string
+}
+
+/**
  * Base shape shared by all canvas content types.
  * Every entity adds its own fields on top of this.
  */
 export type CanvasContentBase = {
   type: string
   title: string
+  description?: string
   toolCallId?: string
 }
 
@@ -32,13 +89,43 @@ export type DashboardCanvasContent = CanvasContentBase & {
   type: "dashboard"
   config: ChatDashboardConfig
   apiConfig: { baseUrl: string; headers: Record<string, string> }
+  /** Present when the dashboard is a pre-saved dashboard */
+  savedDashboardId?: string
+  /** Category of the saved dashboard */
+  savedDashboardCategory?: string
+  /** Description of the saved dashboard */
+  savedDashboardDescription?: string
+  /** True when the agent has iterated on a saved dashboard but the user hasn't saved yet */
+  savedDashboardUnsaved?: boolean
+}
+
+/**
+ * Form canvas content — renders an interactive F0Form in the canvas panel.
+ */
+export type FormCanvasContent = CanvasContentBase & {
+  type: "form"
+  formName: string
+  formDescription?: string
+  formModule?: ModuleId
+}
+/**
+ * Data download canvas content — renders a full data table with download options.
+ */
+export type DataDownloadCanvasContent = CanvasContentBase & {
+  type: "dataDownload"
+  dataset: DataDownloadDataset
+  filename?: string
+  markdown?: string
 }
 
 /**
  * Discriminated union for canvas panel content.
  * Add new entity types to this union as they are implemented.
  */
-export type CanvasContent = DashboardCanvasContent
+export type CanvasContent =
+  | DashboardCanvasContent
+  | FormCanvasContent
+  | DataDownloadCanvasContent
 
 /**
  * A tool hint that can be activated to prepend invisible context to the user's
@@ -87,6 +174,21 @@ export type AiChatCredits = {
   companyLogoUrl?: string
   /** Plan name displayed below the company name (e.g. "Free plan", "Enterprise"). */
   planName?: string
+}
+
+/**
+ * Credit warning configuration.
+ * Groups severity level and action callbacks into a single object.
+ *
+ * When provided, a warning banner is shown above the chat textarea.
+ */
+export type AiChatCreditWarning = {
+  /** The severity level of the warning. */
+  level: "soft"
+  /** Called when the user dismisses the credit warning banner. */
+  onDismiss?: () => void
+  /** Called when the user clicks the "Get Credits" button. */
+  onGetCredits?: () => void
 }
 
 /**
@@ -173,6 +275,11 @@ export type AiChatProviderProps = {
    */
   entityRefs?: EntityRefs
   /**
+   * Canvas action callbacks grouped by entity type.
+   * Provides save/create functions for persisting canvas entities externally.
+   */
+  canvasActions?: CanvasActions
+  /**
    * Available tool hints that the user can activate to provide intent context
    * to the AI. Renders a selector button next to the send button.
    * Only one tool hint can be active at a time.
@@ -183,6 +290,11 @@ export type AiChatProviderProps = {
    * Groups fetchUsage, upgradePlanUrl, and company/plan display info.
    */
   credits?: AiChatCredits
+  /**
+   * Credit warning configuration. When provided, shows a warning banner above the chat textarea.
+   * Groups severity level and action callbacks.
+   */
+  creditWarning?: AiChatCreditWarning
   /**
    * File attachment configuration. When provided, enables file uploads in the chat.
    */

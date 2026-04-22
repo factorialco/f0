@@ -122,6 +122,9 @@ importers:
 
   packages/react:
     dependencies:
+      '@ag-ui/client':
+        specifier: ^0.0.47
+        version: 0.0.47
       '@atlaskit/pragmatic-drag-and-drop':
         specifier: ^1.7.4
         version: 1.7.4
@@ -736,12 +739,6 @@ importers:
       expo-clipboard:
         specifier: ~8.0.8
         version: 8.0.8(expo@54.0.32)(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0)
-      lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
-      react-native-worklets-core:
-        specifier: ^1.6.2
-        version: 1.6.2(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0)
       tailwind-merge:
         specifier: ^3.4.0
         version: 3.4.0
@@ -809,18 +806,12 @@ importers:
       expo-font:
         specifier: ~14.0.11
         version: 14.0.11(expo@54.0.32)(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0)
-      expo-haptics:
-        specifier: ~15.0.8
-        version: 15.0.8(expo@54.0.32)
       expo-image:
         specifier: ~3.0.11
         version: 3.0.11(expo@54.0.32)(react-native-web@0.21.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0)
-      expo-linking:
-        specifier: ~8.0.11
-        version: 8.0.11(expo@54.0.32)(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0)
       expo-router:
         specifier: ~6.0.22
-        version: 6.0.22(i3rsrrbnbjwimviolftcw7w5ce)
+        version: 6.0.22(32467kkmye32gk4jxsmpz5fwma)
       expo-splash-screen:
         specifier: ~31.0.13
         version: 31.0.13(expo@54.0.32)
@@ -870,8 +861,8 @@ importers:
         specifier: ~2.28.0
         version: 2.28.0(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0)
       react-native-reanimated:
-        specifier: ~4.1.1
-        version: 4.1.6(@babel/core@7.28.6)(react-native-worklets@0.5.1(@babel/core@7.28.6)(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0)
+        specifier: ~4.1.7
+        version: 4.1.7(react-native-worklets@0.5.1(@babel/core@7.28.6)(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0)
       react-native-safe-area-context:
         specifier: ~5.6.0
         version: 5.6.2(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0)
@@ -2147,17 +2138,14 @@ packages:
   '@copilotkitnext/agent@1.54.0':
     resolution: {integrity: sha512-IDcisz4ce1zZq5OE+0bGQpOnI2RuuhubEQVSqffgWSUxvOlkln9yAP0ktFyAM6cX9oJkglrW10RNANlxNqFYsg==}
     engines: {node: '>=18'}
-    deprecated: This package is deprecated. Use @copilotkit/agent instead. V2 features are being integrated into the main @copilotkit exports and will be available under the /v2 subpath.
 
   '@copilotkitnext/core@1.54.0':
     resolution: {integrity: sha512-0aJSsfUnQjIZH/7lVobltUwp7hNpc1D8JtGz/cQVmRG+p3W0xFiAqli1qUfv4Ax9t5h6JxJESRbd6JdPmr5anA==}
     engines: {node: '>=18'}
-    deprecated: This package is deprecated. Use @copilotkit/core instead. V2 features are being integrated into the main @copilotkit exports and will be available under the /v2 subpath.
 
   '@copilotkitnext/react@1.54.0':
     resolution: {integrity: sha512-Yz+RBXmLTrl2l5PPuFKoU4SHsSOFKRXtP4rN1zDEmyBSxft3cOvy53CLl6HI0qEZQ4Xn8sSf3kVxCYEcfugqyg==}
     engines: {node: '>=18'}
-    deprecated: This package is deprecated. Use @copilotkit/react instead. V2 features are being integrated into the main @copilotkit exports and will be available under the /v2 subpath.
     peerDependencies:
       react: 18.3.1
       react-dom: 18.3.1
@@ -2165,7 +2153,6 @@ packages:
   '@copilotkitnext/runtime@1.54.0':
     resolution: {integrity: sha512-dW+veSk9ObTDRzE9wJKhdlBrblBB2jsTnVhXdgYcHw4eCO4zP2GqGgzkRaZQ0LBKNq7t9TI0xXuvynRrOreAYg==}
     engines: {node: '>=18'}
-    deprecated: This package is deprecated. Use @copilotkit/runtime instead. V2 features are being integrated into the main @copilotkit exports and will be available under the /v2 subpath.
     peerDependencies:
       '@ag-ui/client': 0.0.47
       '@ag-ui/core': 0.0.47
@@ -2175,12 +2162,10 @@ packages:
   '@copilotkitnext/shared@1.54.0':
     resolution: {integrity: sha512-g8K0+vvGa6mwx9etxgBz3x/P1ciHql/toghFthp1CDBlB9fM1R0TvyXL/vMYTJbjYOdRDiu5DRHZhQ+niblA1A==}
     engines: {node: '>=18'}
-    deprecated: This package is deprecated. Use @copilotkit/shared instead. V2 features are being integrated into the main @copilotkit exports and will be available under the /v2 subpath.
 
   '@copilotkitnext/web-inspector@1.54.0':
     resolution: {integrity: sha512-l2rWMXuFNdn5DcxZx9bsKRii1UPHdH+/uNm9/Jf0EbSztyCLJlWK0sYZI6Rbdx+XU1ELxeDbxVbwhPTp0Kd8mQ==}
     engines: {node: '>=18'}
-    deprecated: This package is deprecated. Use @copilotkit/web-inspector instead. V2 features are being integrated into the main @copilotkit exports and will be available under the /v2 subpath.
 
   '@csstools/color-helpers@5.0.1':
     resolution: {integrity: sha512-MKtmkA0BX87PKaO1NFRTFH+UnkgnmySQOvNxJubsadusqPEC2aJ9MOQiMceZJJ6oitUl/i0L6u0M1IrmAOmgBA==}
@@ -6222,7 +6207,6 @@ packages:
   '@xmldom/xmldom@0.8.10':
     resolution: {integrity: sha512-2WALfTl4xo2SkGCYRt6rDTFfk9R1czmBvUQy12gK2KuRKIpWEhcbbzy8EZXtz/jkRqHX8bFEc6FC1HjX4TUWYw==}
     engines: {node: '>=10.0.0'}
-    deprecated: this version has critical issues, please update to the latest version
 
   '@xtuc/ieee754@1.2.0':
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
@@ -6667,7 +6651,6 @@ packages:
   basic-ftp@5.0.5:
     resolution: {integrity: sha512-4Bcg1P8xhUuqcii/S0Z9wiHIrQVPMermM1any+MX5GeGD7faD3/msQUDGLol9wOcz4/jbg/WJnGqoJF6LiBdtg==}
     engines: {node: '>=10.0.0'}
-    deprecated: Security vulnerability fixed in 5.2.0, please upgrade
 
   better-opn@3.0.2:
     resolution: {integrity: sha512-aVNobHnJqLiUelTaHat9DZ1qM2w0C0Eym4LPI/3JxOnSokGVdsl1T1kN7TFvsEAD8G47A6VKQ0TVHqbBnYMJlQ==}
@@ -8048,7 +8031,6 @@ packages:
 
   expect-playwright@0.8.0:
     resolution: {integrity: sha512-+kn8561vHAY+dt+0gMqqj1oY+g5xWrsuGMk4QGxotT2WS545nVqqjs37z6hrYfIuucwqthzwJfCJUEYqixyljg==}
-    deprecated: ⚠️ The 'expect-playwright' package is deprecated. The Playwright core assertions (via @playwright/test) now cover the same functionality. Please migrate to built-in expect. See https://playwright.dev/docs/test-assertions for migration.
 
   expect-type@1.3.0:
     resolution: {integrity: sha512-knvyeauYhqjOYvQ66MznSMs83wmHrCycNEN6Ao+2AeYEfxUIkuiVxdEa1qlGEPK+We3n0THiDciYSsCcgW/DoA==}
@@ -8100,11 +8082,6 @@ packages:
       expo: '*'
       react: 18.3.1
       react-native: '*'
-
-  expo-haptics@15.0.8:
-    resolution: {integrity: sha512-lftutojy8Qs8zaDzzjwM3gKHFZ8bOOEZDCkmh2Ddpe95Ra6kt2izeOfOfKuP/QEh0MZ1j9TfqippyHdRd1ZM9g==}
-    peerDependencies:
-      expo: '*'
 
   expo-image@3.0.11:
     resolution: {integrity: sha512-4TudfUCLgYgENv+f48omnU8tjS2S0Pd9EaON5/s1ZUBRwZ7K8acEr4NfvLPSaeXvxW24iLAiyQ7sV7BXQH3RoA==}
@@ -8595,7 +8572,6 @@ packages:
   git-raw-commits@4.0.0:
     resolution: {integrity: sha512-ICsMM1Wk8xSGMowkOmPrzo2Fgmfo4bMHLNX6ytHjajRJUqvHOw/TFapQ+QG75c3X/tTDDhOSRPGC52dDbNM8FQ==}
     engines: {node: '>=16'}
-    deprecated: This package is no longer maintained. For the JavaScript API, please use @conventional-changelog/git-client instead.
     hasBin: true
 
   glob-parent@5.1.2:
@@ -8611,13 +8587,11 @@ packages:
 
   glob@10.5.0:
     resolution: {integrity: sha512-DfXN8DfhJ7NH3Oe7cFmu3NCu1wKbkReJ8TorzSAFbSKrlNaQSKfIzqYqVY8zlbs2NLBbWpRiU52GX2PbaBVNkg==}
-    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
     hasBin: true
 
   glob@11.1.0:
     resolution: {integrity: sha512-vuNwKSaKiqm7g0THUBu2x7ckSs3XJLXE+2ssL7/MfTGPLLcrJQ/4Uq1CjPTtO5cCIiRxqvN6Twy1qOwhL0Xjcw==}
     engines: {node: 20 || >=22}
-    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
     hasBin: true
 
   glob@13.0.6:
@@ -8626,12 +8600,10 @@ packages:
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
-    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   glob@8.1.0:
     resolution: {integrity: sha512-r8hpEjiQEYlF2QU0df3dS+nxxSIreXQS1qRhMJM0Q5NDdR386C7jb7Hwwod8Fgiuex+k0GFjgft18yvxm5XoCQ==}
     engines: {node: '>=12'}
-    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   global-directory@4.0.1:
     resolution: {integrity: sha512-wHTUcDUoZ1H5/0iVqEudYW4/kAlN5cZ3j/bXn0Dpbizl9iaUVeWSHqiOjsgk6OW2bkLclbBjzewBz6weQ1zA2Q==}
@@ -8798,7 +8770,6 @@ packages:
 
   hast@1.0.0:
     resolution: {integrity: sha512-vFUqlRV5C+xqP76Wwq2SrM0kipnmpxJm7OfvVXpB35Fp+Fn4MV+ozr+JZr5qFvyR1q/U+Foim2x+3P+x9S1PLA==}
-    deprecated: Renamed to rehype
 
   hastscript@6.0.0:
     resolution: {integrity: sha512-nDM6bvd7lIqDUiYEiu5Sl/+6ReP0BMk/2f4U/Rooccxkj0P5nm+acM5PrGJ/t5I8qPGiqZSE6hVAwZEdZIvP4w==}
@@ -8977,7 +8948,6 @@ packages:
 
   inflight@1.0.6:
     resolution: {integrity: sha512-k92I/b08q4wvFscXCLvqfsHCrjrF7yiXsQuIVvVE7N82W3+aqpzuUdBbfhWcy/FZR3/4IgflMgKLOsvPDrGCJA==}
-    deprecated: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
 
   inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
@@ -9424,7 +9394,6 @@ packages:
 
   jest-process-manager@0.4.0:
     resolution: {integrity: sha512-80Y6snDyb0p8GG83pDxGI/kQzwVTkCxc7ep5FPe/F6JYdvRDhwr6RzRmPSP7SEwuLhxo80lBS/NqOdUIbHIfhw==}
-    deprecated: ⚠️ The 'jest-process-manager' package is deprecated. Please migrate to Playwright's built-in test runner (@playwright/test) which now includes full Jest-style features and parallel testing. See https://playwright.dev/docs/intro for details.
 
   jest-regex-util@29.6.3:
     resolution: {integrity: sha512-KJJBsRCyyLNWCNBOvZyRDnAIfUiRJ8v+hOBQYGn8gDyF3UegwiP4gwRR3/SDa42g1YbVycTidUF3rKjyLFDWbg==}
@@ -10029,7 +9998,6 @@ packages:
 
   lodash.get@4.4.2:
     resolution: {integrity: sha512-z+Uw/vLuy6gQe8cfaFWD7p0wVv8fJl3mbzXh33RS+0oW2wvUqiRXiQ69gLWSLpgB5/6sU+r6BlQR0MBILadqTQ==}
-    deprecated: This package is deprecated. Use the optional chaining (?.) operator instead.
 
   lodash.isplainobject@4.0.6:
     resolution: {integrity: sha512-oSXzaWypCMHkPC3NvBEaPHf0KsA5mvPrOPgQWDsbg8n7orZ290M0BmC/jgRZ4vcJ6DTAhjrsSYgdsW/F+MFOBA==}
@@ -10741,7 +10709,6 @@ packages:
   node-domexception@1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
     engines: {node: '>=10.5.0'}
-    deprecated: Use your platform's native DOMException instead
 
   node-fetch@2.7.0:
     resolution: {integrity: sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==}
@@ -11686,13 +11653,12 @@ packages:
   react-native-monorepo-config@0.3.2:
     resolution: {integrity: sha512-Cl21GRCN/ZH3cEVtG7yY84NO2G6Bn57yEXReikOKFkFRUo6PFTAWfanEZReGqdAkhY5L/ORIml8abE1q83CZYQ==}
 
-  react-native-reanimated@4.1.6:
-    resolution: {integrity: sha512-F+ZJBYiok/6Jzp1re75F/9aLzkgoQCOh4yxrnwATa8392RvM3kx+fiXXFvwcgE59v48lMwd9q0nzF1oJLXpfxQ==}
+  react-native-reanimated@4.1.7:
+    resolution: {integrity: sha512-Q4H6xA3Tn7QL0/E/KjI86I1KK4tcf+ErRE04LH34Etka2oVQhW6oXQ+Q8ZcDCVxiWp5vgbBH6XcH8BOo4w/Rhg==}
     peerDependencies:
-      '@babel/core': ^7.0.0-0
       react: 18.3.1
-      react-native: '*'
-      react-native-worklets: '>=0.5.0'
+      react-native: 0.78 - 0.82
+      react-native-worklets: 0.5 - 0.8
 
   react-native-safe-area-context@5.6.2:
     resolution: {integrity: sha512-4XGqMNj5qjUTYywJqpdWZ9IG8jgkS3h06sfVjfw5yZQZfWnRFXczi0GnYyFyCc2EBps/qFmoCH8fez//WumdVg==}
@@ -11720,12 +11686,6 @@ packages:
 
   react-native-webview@13.15.0:
     resolution: {integrity: sha512-Vzjgy8mmxa/JO6l5KZrsTC7YemSdq+qB01diA0FqjUTaWGAGwuykpJ73MDj3+mzBSlaDxAEugHzTtkUQkQEQeQ==}
-    peerDependencies:
-      react: 18.3.1
-      react-native: '*'
-
-  react-native-worklets-core@1.6.2:
-    resolution: {integrity: sha512-zw73JfL40ZL/OD2TOil1El4D9ZwS3l6AFPeFfUWXh+V2/dHN8i28jHX8QXlz5DYtAkR+Ju3U1h4yiaODi/igZw==}
     peerDependencies:
       react: 18.3.1
       react-native: '*'
@@ -12063,7 +12023,6 @@ packages:
 
   rimraf@3.0.2:
     resolution: {integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==}
-    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
   robust-predicates@3.0.3:
@@ -12400,7 +12359,6 @@ packages:
   source-map@0.8.0-beta.0:
     resolution: {integrity: sha512-2ymg6oRBpebeZi9UUNsgQ89bhx01TcTkmNTGnNO88imTmbSgy4nfujrgVEFKWpMTEGA11EDkTt7mqObTPdigIA==}
     engines: {node: '>= 8'}
-    deprecated: The work that was done in this beta branch won't be included in future versions
 
   space-separated-tokens@1.1.5:
     resolution: {integrity: sha512-q/JSVd1Lptzhf5bkYm4ob4iWPjx0KiRe3sRFBNrVqbJkFaBm5vbbowy1mymoPNLRa52+oadOhJ+K49wsSeSjTA==}
@@ -12505,9 +12463,6 @@ packages:
   string-argv@0.3.2:
     resolution: {integrity: sha512-aqD2Q0144Z+/RqG52NeHEkZauTAUWJO8c6yTftGJKO3Tja5tUgIfmIl6kExvhtxSDP7fXB6DvzkfMpCd/F3G+Q==}
     engines: {node: '>=0.6.19'}
-
-  string-hash-64@1.0.3:
-    resolution: {integrity: sha512-D5OKWKvDhyVWWn2x5Y9b+37NUllks34q1dCDhk/vYcso9fmhs+Tl3KR/gE4v5UNj2UA35cnX4KdVVGkG1deKqw==}
 
   string-length@4.0.2:
     resolution: {integrity: sha512-+l6rNN5fYHNhZZy41RXsYptCjA2Igmq4EG7kZAYFQI1E1VTXarr6ZPXBg6eq7Y6eK4FEhY6AJlyuFIb/v/S0VQ==}
@@ -12703,7 +12658,6 @@ packages:
   tar@7.5.6:
     resolution: {integrity: sha512-xqUeu2JAIJpXyvskvU3uvQW8PAmHrtXp2KDuMJwQqW8Sqq0CaZBAQ+dKS3RBXVhU4wC5NjAdKrmh84241gO9cA==}
     engines: {node: '>=18'}
-    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   temp-dir@2.0.0:
     resolution: {integrity: sha512-aoBAniQmmwtcKp/7BzsH8Cxzv8OL736p7v1ihGb5e9DJ9kTwGWHrQrVB5+lfVDzfGrdRzXch+ig7LHaY1JTOrg==}
@@ -13472,12 +13426,10 @@ packages:
   whatwg-encoding@2.0.0:
     resolution: {integrity: sha512-p41ogyeMUrw3jWclHWTQg1k05DSVXPLcVxRTYsXUk+ZooOCZLcoYgPZ/HL/D/N+uQPOtcp1me1WhBEaX02mhWg==}
     engines: {node: '>=12'}
-    deprecated: Use @exodus/bytes instead for a more spec-conformant and faster implementation
 
   whatwg-encoding@3.1.1:
     resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
     engines: {node: '>=18'}
-    deprecated: Use @exodus/bytes instead for a more spec-conformant and faster implementation
 
   whatwg-fetch@3.6.20:
     resolution: {integrity: sha512-EqhiFU6daOA8kpjOWTL0olhVOF3i7OrFzSYiGsEMB8GcXS+RrzauAERX65xMeNWVqxA6HXH2m69Z9LaKKdisfg==}
@@ -16347,7 +16299,7 @@ snapshots:
       wrap-ansi: 7.0.0
       ws: 8.19.0
     optionalDependencies:
-      expo-router: 6.0.22(i3rsrrbnbjwimviolftcw7w5ce)
+      expo-router: 6.0.22(32467kkmye32gk4jxsmpz5fwma)
       react-native: 0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0)
     transitivePeerDependencies:
       - bufferutil
@@ -22968,10 +22920,6 @@ snapshots:
       react: 19.1.0
       react-native: 0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0)
 
-  expo-haptics@15.0.8(expo@54.0.32):
-    dependencies:
-      expo: 54.0.32(@babel/core@7.28.6)(@expo/metro-runtime@6.1.2)(expo-router@6.0.22)(graphql@16.12.0)(react-native-webview@13.15.0(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0)
-
   expo-image@3.0.11(expo@54.0.32)(react-native-web@0.21.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0):
     dependencies:
       expo: 54.0.32(@babel/core@7.28.6)(@expo/metro-runtime@6.1.2)(expo-router@6.0.22)(graphql@16.12.0)(react-native-webview@13.15.0(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0)
@@ -23019,7 +22967,7 @@ snapshots:
       react: 19.1.0
       react-native: 0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0)
 
-  expo-router@6.0.22(i3rsrrbnbjwimviolftcw7w5ce):
+  expo-router@6.0.22(32467kkmye32gk4jxsmpz5fwma):
     dependencies:
       '@expo/metro-runtime': 6.1.2(expo@54.0.32)(react-dom@19.1.0(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0)
       '@expo/schema-utils': 0.1.8
@@ -23055,7 +23003,7 @@ snapshots:
       '@testing-library/react-native': 13.3.3(jest@30.2.0(@types/node@22.19.3)(esbuild-register@3.6.0(esbuild@0.27.2)))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react-test-renderer@19.1.0(react@19.1.0))(react@19.1.0)
       react-dom: 19.1.0(react@19.1.0)
       react-native-gesture-handler: 2.28.0(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0)
-      react-native-reanimated: 4.1.6(@babel/core@7.28.6)(react-native-worklets@0.5.1(@babel/core@7.28.6)(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0)
+      react-native-reanimated: 4.1.7(react-native-worklets@0.5.1(@babel/core@7.28.6)(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0)
       react-native-web: 0.21.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
     transitivePeerDependencies:
       - '@react-native-masked-view/masked-view'
@@ -27515,14 +27463,13 @@ snapshots:
       escape-string-regexp: 5.0.0
       fast-glob: 3.3.3
 
-  react-native-reanimated@4.1.6(@babel/core@7.28.6)(react-native-worklets@0.5.1(@babel/core@7.28.6)(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0):
+  react-native-reanimated@4.1.7(react-native-worklets@0.5.1(@babel/core@7.28.6)(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0):
     dependencies:
-      '@babel/core': 7.28.6
       react: 19.1.0
       react-native: 0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0)
       react-native-is-edge-to-edge: 1.2.1(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0)
       react-native-worklets: 0.5.1(@babel/core@7.28.6)(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0)
-      semver: 7.7.2
+      semver: 7.7.3
 
   react-native-safe-area-context@5.6.2(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0):
     dependencies:
@@ -27567,12 +27514,6 @@ snapshots:
       react: 19.1.0
       react-native: 0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0)
     optional: true
-
-  react-native-worklets-core@1.6.2(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0):
-    dependencies:
-      react: 19.1.0
-      react-native: 0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0)
-      string-hash-64: 1.0.3
 
   react-native-worklets@0.5.1(@babel/core@7.28.6)(react-native@0.81.5(@babel/core@7.28.6)(@types/react@18.3.18)(react@19.1.0))(react@19.1.0):
     dependencies:
@@ -28635,8 +28576,6 @@ snapshots:
   strict-uri-encode@2.0.0: {}
 
   string-argv@0.3.2: {}
-
-  string-hash-64@1.0.3: {}
 
   string-length@4.0.2:
     dependencies:

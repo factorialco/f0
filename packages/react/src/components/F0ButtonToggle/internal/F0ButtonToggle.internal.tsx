@@ -74,6 +74,7 @@ export const F0ButtonToggleInternal = forwardRef<
       size = "md",
       variant = "compact",
       withBorder = false,
+      className: externalClassName,
       defaultSelected = false,
       ...props
     },
@@ -140,7 +141,8 @@ export const F0ButtonToggleInternal = forwardRef<
             variant,
             withBorder,
             selected: state.selected,
-          })
+          }),
+          externalClassName
         )}
         {...props}
       >

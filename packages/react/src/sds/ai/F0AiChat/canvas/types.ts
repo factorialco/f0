@@ -1,6 +1,16 @@
 import type { ReactNode } from "react"
 
 import type { CanvasContentBase } from "../types"
+import type { DashboardCanvasActions } from "./entities/dashboard/types"
+
+/**
+ * Canvas-level action callbacks grouped by entity type.
+ * Each entity defines its own actions type; this aggregates them.
+ * Passed by the host app to F0AiChatProvider via `canvasActions`.
+ */
+export type CanvasActions = {
+  dashboard?: DashboardCanvasActions
+}
 
 /**
  * Contract for a canvas entity type.
@@ -28,4 +38,9 @@ export type CanvasEntityDefinition<
    * both header and body (e.g. shared edit-mode state).
    */
   wrapper?: (props: { content: T; children: ReactNode }) => ReactNode
+  /**
+   * When true the content area uses `overflow-hidden` instead of
+   * `overflow-auto`, letting the entity manage its own scrolling.
+   */
+  overflowHidden?: boolean
 }

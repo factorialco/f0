@@ -10,6 +10,7 @@ import type {
 
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
 import { buildBaseChartOptions } from "../../utils/options"
+import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
 
@@ -56,7 +57,7 @@ function buildAreaStyle(color: string): echarts.LineSeriesOption["areaStyle"] {
   return {
     color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
       { offset: 0, color: `${color}59` },
-      { offset: 1, color: "rgba(0, 0, 0, 0)" },
+      { offset: 1, color: `${color}00` },
     ]),
   }
 }
@@ -111,6 +112,25 @@ function buildSeriesEntry(
   }
 }
 
+/** Discrete responsive size for the line chart */
+export type LineChartSize = ChartResponsiveSize
+
+/**
+ * Maps a discrete `size` to which chrome (legend, axes) is rendered.
+ *
+ * - `sm` → just the line/area, no axes, no legend
+ * - `md` → legend + Y axis, no X axis
+ * - `lg` → legend + Y axis + X axis (smart truncation: every label visible
+ *           with ellipsis when needed; first/last anchored to chart edges)
+ */
+function resolveResponsiveDisplay(size: LineChartSize) {
+  return {
+    showLegend: size !== "sm",
+    showCategoryAxis: size === "lg",
+    showValueAxis: size !== "sm",
+  }
+}
+
 /**
  * Converts typed line chart props into a full ECharts option object.
  */
@@ -128,19 +148,36 @@ export function useLineChartOptions(
     valueFormatter,
     categoryFormatter,
     echartsOptions,
-  }: F0DataChartLineProps
+  }: F0DataChartLineProps,
+  size: LineChartSize
 ): echarts.EChartsOption {
   const theme = useChartTheme(containerRef)
   const { width: containerWidth, height: containerHeight } =
     useContainerSize(containerRef)
 
   return useMemo(() => {
+    // Area mode is only allowed when there's exactly one series — multiple
+    // overlapping area fills are visually noisy and the design system forbids
+    // them. This rule overrides both the global `showArea` prop and per-series
+    // `series[].showArea` overrides.
+    const isMultiSeries = series.length > 1
+    const effectiveShowArea = isMultiSeries ? false : showArea
+
+    const responsive = resolveResponsiveDisplay(size)
+    // The size dictates the maximum chrome that's shown. The user-provided
+    // `showLegend` prop can still force the legend off (e.g. minimal stories),
+    // but it can never force it on at the `sm` breakpoint.
+    const effectiveShowLegend = responsive.showLegend && showLegend
+    const { showCategoryAxis, showValueAxis } = responsive
+
     const echartsSeries = series.map((s, i) =>
       buildSeriesEntry(
-        s,
+        // When forced off, also strip the per-series override so it doesn't
+        // accidentally re-enable area on a single series in `buildSeriesEntry`.
+        isMultiSeries ? { ...s, showArea: false } : s,
         i,
         lineType,
-        showArea,
+        effectiveShowArea,
         showDots,
         showLabels,
         theme.colors.foregroundSecondary
@@ -156,7 +193,9 @@ export function useLineChartOptions(
       legendData,
       isVertical: true,
       showGrid,
-      showLegend,
+      showLegend: effectiveShowLegend,
+      showCategoryAxis,
+      showValueAxis,
       valueFormatter,
       categoryFormatter,
       echartsOptions,
@@ -179,5 +218,6 @@ export function useLineChartOptions(
     theme,
     containerWidth,
     containerHeight,
+    size,
   ])
 }

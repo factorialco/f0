@@ -1021,7 +1021,7 @@ export const AllFieldTypes: Story = {
       richTextField: f0FormField(
         z.object({
           value: z.string().min(1),
-          mentionIds: z.array(z.number()).optional(),
+          mentionIds: z.array(z.string()).optional(),
         }),
         {
           label: "Rich Text Field",
@@ -1195,7 +1195,7 @@ export const AllFieldTypesDisabled: Story = {
       richTextField: f0FormField(
         z.object({
           value: z.string(),
-          mentionIds: z.array(z.number()).optional(),
+          mentionIds: z.array(z.string()).optional(),
         }),
         {
           label: "Rich Text Field",

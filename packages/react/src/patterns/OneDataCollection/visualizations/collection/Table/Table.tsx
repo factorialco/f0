@@ -4,8 +4,6 @@ import { Fragment, useEffect, useMemo, useState } from "react"
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { F0Checkbox } from "@/components/F0Checkbox"
-import { PagesPagination } from "@/patterns/OneDataCollection/components/PagesPagination"
-import { useDataCollectionSettings } from "@/patterns/OneDataCollection/Settings/SettingsProvider"
 import {
   OneTable,
   TableBody,
@@ -30,6 +28,8 @@ import {
 import { Add } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { PagesPagination } from "@/patterns/OneDataCollection/components/PagesPagination"
+import { useDataCollectionSettings } from "@/patterns/OneDataCollection/Settings/SettingsProvider"
 import { GroupHeader } from "@/ui/GroupHeader/index"
 import { Skeleton } from "@/ui/skeleton.tsx"
 
@@ -175,6 +175,11 @@ export const TableCollection = <
   const { currentSortings, setCurrentSortings, isLoading } = source
 
   const showItemActions = showItemActionsProp !== false && !!source.itemActions
+
+  // Editable tables render actions as a single dedicated column,
+  // while the regular table uses two columns (desktop overlay + mobile dropdown).
+  const isEditableTable = fromVisualization === "editableTable"
+  const actionColCount = isEditableTable ? 1 : 2
 
   const effectiveSource = useMemo(
     () =>
@@ -352,7 +357,8 @@ export const TableCollection = <
     paginationInfo?.total !== undefined &&
     paginationInfo.total > allSelectedStatus.selectedCount
 
-  const selectionHeaderColSpan = columns.length + (showItemActions ? 2 : 0)
+  const selectionHeaderColSpan =
+    columns.length + (showItemActions ? actionColCount : 0)
 
   const selectedText =
     allSelectedStatus.selectedCount === 1
@@ -469,20 +475,31 @@ export const TableCollection = <
                         </TableHead>
                       )
                     })}
-                    {showItemActions && (
-                      <>
-                        <th className="hidden md:table-cell" />
+                    {showItemActions &&
+                      (isEditableTable ? (
                         <TableHead
-                          hidden
-                          width={68}
                           key="actions"
                           sticky={{ right: 0 }}
-                          className="table-cell md:hidden"
+                          className="border-0 border-l-[1px] border-solid border-f1-border-secondary"
                         >
-                          <span />
+                          <span className="sr-only">
+                            {i18n.collections.actions.actions}
+                          </span>
                         </TableHead>
-                      </>
-                    )}
+                      ) : (
+                        <>
+                          <th className="hidden md:table-cell" />
+                          <TableHead
+                            hidden
+                            width={68}
+                            key="actions"
+                            sticky={{ right: 0 }}
+                            className="table-cell md:hidden"
+                          >
+                            <span />
+                          </TableHead>
+                        </>
+                      ))}
                   </TableRow>
                 ) : null}
                 <TableRow>
@@ -556,22 +573,31 @@ export const TableCollection = <
                       </TableHead>
                     )
                   })}
-                  {showItemActions && (
-                    <>
-                      <th className="hidden md:table-cell"></th>
+                  {showItemActions &&
+                    (isEditableTable ? (
                       <TableHead
                         key="actions"
-                        width={68}
-                        hidden
-                        sticky={{
-                          right: 0,
-                        }}
-                        className="table-cell md:hidden"
+                        sticky={{ right: 0 }}
+                        className="border-0 border-l-[1px] border-solid border-f1-border-secondary"
                       >
-                        {i18n.collections.actions.actions}
+                        <span />
                       </TableHead>
-                    </>
-                  )}
+                    ) : (
+                      <>
+                        <th className="hidden md:table-cell"></th>
+                        <TableHead
+                          key="actions"
+                          width={68}
+                          hidden
+                          sticky={{
+                            right: 0,
+                          }}
+                          className="table-cell md:hidden"
+                        >
+                          {i18n.collections.actions.actions}
+                        </TableHead>
+                      </>
+                    ))}
                 </TableRow>
               </>
             )}
@@ -634,6 +660,7 @@ export const TableCollection = <
                               item={item}
                               index={index}
                               groupIndex={groupIndex}
+                              onItemCheckedChange={handleSelectItemChange}
                               onCheckedChange={(checked) =>
                                 handleSelectItemChange(item, checked)
                               }
@@ -645,6 +672,7 @@ export const TableCollection = <
                               rowWrapper={RowWrapper}
                               cellRenderer={cellRenderer}
                               headerGroups={headerGroups}
+                              fromVisualization={fromVisualization}
                             />
                           )
                           if (RowWrapper) {
@@ -675,6 +703,7 @@ export const TableCollection = <
                     source={effectiveSource}
                     item={item}
                     index={index}
+                    onItemCheckedChange={handleSelectItemChange}
                     onCheckedChange={(checked) =>
                       handleSelectItemChange(item, checked)
                     }
@@ -816,21 +845,30 @@ export const TableCollection = <
                         )}
                       </TableCell>
                     ))}
-                    {showItemActions && (
-                      <>
-                        <th className="hidden md:table-cell"></th>
+                    {showItemActions &&
+                      (isEditableTable ? (
                         <TableCell
                           key="summary-actions"
-                          width={68}
-                          sticky={{
-                            right: 0,
-                          }}
-                          className="table-cell md:hidden"
+                          sticky={{ right: 0 }}
+                          className="border-0 border-l-[1px] border-solid border-f1-border-secondary"
                         >
                           {""}
                         </TableCell>
-                      </>
-                    )}
+                      ) : (
+                        <>
+                          <th className="hidden md:table-cell"></th>
+                          <TableCell
+                            key="summary-actions"
+                            width={68}
+                            sticky={{
+                              right: 0,
+                            }}
+                            className="table-cell md:hidden"
+                          >
+                            {""}
+                          </TableCell>
+                        </>
+                      ))}
                   </TableRow>
                 )}
                 {actions.length > 0 && (
@@ -839,7 +877,7 @@ export const TableCollection = <
                       colSpan={
                         columns.length +
                         (source.selectable ? 1 : 0) +
-                        (showItemActions ? 2 : 0)
+                        (showItemActions ? actionColCount : 0)
                       }
                       className="h-[48px] align-middle"
                     >
