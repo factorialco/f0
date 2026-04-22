@@ -30,10 +30,10 @@ export type SpacingToken =
   | "2xl"
   | "3xl"
   | "4xl"
-  | "5xl";
+  | "5xl"
 
 /** Margin tokens (spacing + auto for centering) */
-export type MarginToken = SpacingToken | "auto";
+export type MarginToken = SpacingToken | "auto"
 
 /**
  * Numeric size scale matching core spacing (relativeSpacing).
@@ -74,7 +74,7 @@ export type NumericSizeToken =
   | "64"
   | "72"
   | "80"
-  | "96";
+  | "96"
 
 /** Fraction tokens for proportional widths */
 export type FractionToken =
@@ -89,7 +89,7 @@ export type FractionToken =
   | "3/5"
   | "4/5"
   | "1/6"
-  | "5/6";
+  | "5/6"
 
 /** Size tokens for width/height/min/max dimensions */
 export type SizeToken =
@@ -100,7 +100,7 @@ export type SizeToken =
   | "max"
   | "fit"
   | NumericSizeToken
-  | FractionToken;
+  | FractionToken
 
 /**
  * Gap tokens for spacing between flex/grid children.
@@ -129,7 +129,7 @@ export type GapToken =
   | "2xl"
   | "3xl"
   | "4xl"
-  | "5xl";
+  | "5xl"
 
 /** Display modes */
 export type DisplayToken =
@@ -138,10 +138,10 @@ export type DisplayToken =
   | "inline"
   | "inline-flex"
   | "grid"
-  | "none";
+  | "none"
 
 /** Overflow values */
-export type OverflowToken = "visible" | "hidden" | "auto" | "scroll";
+export type OverflowToken = "visible" | "hidden" | "auto" | "scroll"
 
 /** Background tokens mapped to the f1 theme */
 export type BackgroundToken =
@@ -166,7 +166,7 @@ export type BackgroundToken =
   | "selected"
   | "selected-secondary"
   | "selected-bold"
-  | "overlay";
+  | "overlay"
 
 /** Border color tokens mapped to the f1 theme */
 export type BorderColorToken =
@@ -183,10 +183,10 @@ export type BorderColorToken =
   | "info-bold"
   | "positive"
   | "positive-bold"
-  | "promote";
+  | "promote"
 
 /** Border width tokens */
-export type BorderWidthToken = "none" | "default" | "thick";
+export type BorderWidthToken = "none" | "default" | "thick"
 
 /** Border radius tokens from core */
 export type BorderRadiusToken =
@@ -199,10 +199,10 @@ export type BorderRadiusToken =
   | "xl"
   | "2xl"
   | "3xl"
-  | "full";
+  | "full"
 
 /** Divider direction */
-export type DividerToken = "x" | "y";
+export type DividerToken = "x" | "y"
 
 /** Grid column count (1–12) */
 export type ColumnsToken =
@@ -218,7 +218,7 @@ export type ColumnsToken =
   | "10"
   | "11"
   | "12"
-  | "none";
+  | "none"
 
 /** Grid column span for children (1–12 + full) */
 export type ColSpanToken =
@@ -234,7 +234,7 @@ export type ColSpanToken =
   | "10"
   | "11"
   | "12"
-  | "full";
+  | "full"
 
 /** Grid column start position (1–13 + auto) */
 export type ColStartToken =
@@ -251,13 +251,13 @@ export type ColStartToken =
   | "10"
   | "11"
   | "12"
-  | "13";
+  | "13"
 
 /** Grid row span for children (1–6 + full) */
-export type RowSpanToken = "1" | "2" | "3" | "4" | "5" | "6" | "full";
+export type RowSpanToken = "1" | "2" | "3" | "4" | "5" | "6" | "full"
 
 /** Grid row count (1–6 + none) */
-export type RowsToken = "1" | "2" | "3" | "4" | "5" | "6" | "none";
+export type RowsToken = "1" | "2" | "3" | "4" | "5" | "6" | "none"
 
 /** Flex align items */
 export type AlignItemsToken =
@@ -265,7 +265,7 @@ export type AlignItemsToken =
   | "center"
   | "end"
   | "stretch"
-  | "baseline";
+  | "baseline"
 
 /** Flex justify content */
 export type JustifyContentToken =
@@ -275,17 +275,17 @@ export type JustifyContentToken =
   | "between"
   | "around"
   | "evenly"
-  | "stretch";
+  | "stretch"
 
 /** Flex direction */
 export type FlexDirectionToken =
   | "row"
   | "column"
   | "row-reverse"
-  | "column-reverse";
+  | "column-reverse"
 
 /** Flex wrap */
-export type FlexWrapToken = "nowrap" | "wrap" | "wrap-reverse";
+export type FlexWrapToken = "nowrap" | "wrap" | "wrap-reverse"
 
 /** CSS position */
 export type PositionToken =
@@ -293,12 +293,7 @@ export type PositionToken =
   | "relative"
   | "absolute"
   | "fixed"
-  | "sticky";
+  | "sticky"
 
 /** Border style */
-export type BorderStyleToken =
-  | "solid"
-  | "dashed"
-  | "dotted"
-  | "double"
-  | "none";
+export type BorderStyleToken = "solid" | "dashed" | "dotted" | "double" | "none"

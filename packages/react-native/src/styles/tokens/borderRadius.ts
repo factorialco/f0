@@ -10,4 +10,4 @@ export const borderRadius = {
   "2xl": "1.25rem",
   "3xl": "1.5rem",
   full: "9999px",
-};
+}

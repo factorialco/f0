@@ -3,7 +3,7 @@ import type {
   BorderRadiusToken,
   BorderStyleToken,
   BorderWidthToken,
-} from "../types";
+} from "../types"
 
 export const borderVariants = {
   // -- Color --
@@ -131,6 +131,6 @@ export const borderVariants = {
     double: "border-double",
     none: "border-none",
   } satisfies Record<BorderStyleToken, string>,
-};
+}
 
-export const borderDefaults = {};
+export const borderDefaults = {}

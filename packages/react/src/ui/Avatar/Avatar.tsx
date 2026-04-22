@@ -1,16 +1,16 @@
-"use client";
+"use client"
 
-import * as AvatarPrimitive from "@radix-ui/react-avatar";
-import { cva } from "cva";
-import * as React from "react";
+import * as AvatarPrimitive from "@radix-ui/react-avatar"
+import { cva } from "cva"
+import * as React from "react"
 
-import { useImageContext } from "../../lib/imageHandler";
-import { cn } from "../../lib/utils";
+import { useImageContext } from "../../lib/imageHandler"
+import { cn } from "../../lib/utils"
 import {
   internalAvatarColors,
   internalAvatarSizes,
   internalAvatarTypes,
-} from "./types";
+} from "./types"
 
 const avatarVariants = cva({
   base: "relative flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold ring-1 ring-inset ring-f1-border-secondary",
@@ -46,15 +46,15 @@ const avatarVariants = cva({
     type: "base",
     color: "viridian",
   },
-});
+})
 
 export type InternalAvatarProps = React.ComponentPropsWithoutRef<
   typeof AvatarPrimitive.Root
 > & {
-  size?: (typeof internalAvatarSizes)[number];
-  type?: (typeof internalAvatarTypes)[number];
-  color?: (typeof internalAvatarColors)[number];
-};
+  size?: (typeof internalAvatarSizes)[number]
+  type?: (typeof internalAvatarTypes)[number]
+  color?: (typeof internalAvatarColors)[number]
+}
 
 const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
@@ -66,17 +66,17 @@ const Avatar = React.forwardRef<
     className={cn(avatarVariants({ size, type, color, className }))}
     {...props}
   />
-));
-Avatar.displayName = AvatarPrimitive.Root.displayName;
+))
+Avatar.displayName = AvatarPrimitive.Root.displayName
 
 const AvatarImage = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Image>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
 >(({ className, ...props }, ref) => {
-  const { src: imageSrcContext } = useImageContext();
+  const { src: imageSrcContext } = useImageContext()
 
   const extraProps =
-    props.src && imageSrcContext ? imageSrcContext(props) : props;
+    props.src && imageSrcContext ? imageSrcContext(props) : props
 
   return (
     <AvatarPrimitive.Image
@@ -86,9 +86,9 @@ const AvatarImage = React.forwardRef<
       {...extraProps}
       loading="lazy"
     ></AvatarPrimitive.Image>
-  );
-});
-AvatarImage.displayName = AvatarPrimitive.Image.displayName;
+  )
+})
+AvatarImage.displayName = AvatarPrimitive.Image.displayName
 
 const AvatarFallback = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Fallback>,
@@ -99,11 +99,11 @@ const AvatarFallback = React.forwardRef<
     translate="no"
     className={cn(
       "flex h-full w-full items-center justify-center text-f1-foreground-inverse/90",
-      className,
+      className
     )}
     {...props}
   />
-));
-AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName;
+))
+AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName
 
-export { Avatar, AvatarFallback, AvatarImage };
+export { Avatar, AvatarFallback, AvatarImage }
