@@ -195,7 +195,7 @@ describe("useFormSubmitAction handler", () => {
     expect(mockCloseCanvas).toHaveBeenCalled()
   })
 
-  it("calls clearActiveForm and closeCanvas even when submit fails", async () => {
+  it("does NOT call clearActiveForm or closeCanvas when submit fails validation", async () => {
     await setupWithDefinitions([
       {
         name: "user-form",
@@ -209,9 +209,9 @@ describe("useFormSubmitAction handler", () => {
       return handler({ formName: "user-form" } as never)
     })
 
-    // Submit fails validation but cleanup still happens in finally block
+    // Canvas stays open so the user can fix the errors
     expect(result).toMatchObject({ success: false })
-    expect(mockCloseCanvas).toHaveBeenCalled()
+    expect(mockCloseCanvas).not.toHaveBeenCalled()
   })
 })
 

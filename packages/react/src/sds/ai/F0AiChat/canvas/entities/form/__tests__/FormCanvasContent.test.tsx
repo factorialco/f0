@@ -1,13 +1,14 @@
-import { describe, expect, it, vi, beforeEach } from "vitest"
-import "@testing-library/jest-dom/vitest"
 import { act } from "react"
+import "@testing-library/jest-dom/vitest"
+import { describe, expect, it, vi, beforeEach } from "vitest"
+import { z } from "zod"
 
 import type {
   F0FormCommonProps,
   F0FormLikeComponent,
 } from "@/patterns/F0Form/types"
+
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
-import { z } from "zod"
 
 // ---- Mock state ----
 
@@ -41,6 +42,8 @@ const mockResetFillVersion = vi.fn()
 const mockClearActiveForm = vi.fn()
 const mockCloseCanvas = vi.fn()
 
+let mockHasErrors = false
+
 vi.mock("@copilotkit/react-core", () => ({
   useCoAgent: () => ({ state: mockCoAgentState }),
 }))
@@ -67,7 +70,7 @@ vi.mock("@/patterns/F0Form/F0AiFormRegistry", () => ({
 }))
 
 vi.mock("@/patterns/F0Form/useF0Form", () => ({
-  useF0Form: () => ({ formRef: mockFormRef }),
+  useF0Form: () => ({ formRef: mockFormRef, hasErrors: mockHasErrors }),
 }))
 
 // Capture the formDefinition passed to F0Form so we can inspect submitConfig and call onSubmit
@@ -124,6 +127,7 @@ describe("FormCanvasContent", () => {
     mockRegistryEntry = undefined
     capturedFormDefinition = null
     mockFormComponent = undefined
+    mockHasErrors = false
   })
 
   describe("when no active form", () => {
@@ -540,6 +544,66 @@ describe("FormCanvasContent", () => {
       }
       render(<FormContent />)
       expect(receivedProps.formRef).toBeDefined()
+    })
+  })
+
+  // ==========================================================================
+  // Submit button disabled state — errorTriggerMode
+  // ==========================================================================
+
+  describe("submit button disabled state based on errorTriggerMode", () => {
+    beforeEach(() => {
+      mockCoAgentState = {
+        activeForm: { formName: "test-form", formValues: {} },
+      }
+    })
+
+    it("enables button when there are no errors (any mode)", () => {
+      mockHasErrors = false
+      mockRegistryEntry = makeEntry()
+      render(<FormContent />)
+      expect(screen.getByRole("button", { name: "Submit" })).not.toBeDisabled()
+    })
+
+    it("disables button when hasErrors and errorTriggerMode is the default (on-blur)", () => {
+      mockHasErrors = true
+      mockRegistryEntry = makeEntry()
+      render(<FormContent />)
+      expect(screen.getByRole("button", { name: "Submit" })).toBeDisabled()
+    })
+
+    it("disables button when hasErrors and errorTriggerMode is on-change", () => {
+      mockHasErrors = true
+      mockRegistryEntry = makeEntry({ errorTriggerMode: "on-change" })
+      render(<FormContent />)
+      expect(screen.getByRole("button", { name: "Submit" })).toBeDisabled()
+    })
+
+    it("does not disable button when hasErrors and errorTriggerMode is on-submit", () => {
+      mockHasErrors = true
+      mockRegistryEntry = makeEntry({ errorTriggerMode: "on-submit" })
+      render(<FormContent />)
+      expect(screen.getByRole("button", { name: "Submit" })).not.toBeDisabled()
+    })
+
+    it("disables wizard submit button when hasErrors and errorTriggerMode is on-blur", () => {
+      mockHasErrors = true
+      mockRegistryEntry = makeEntry({
+        steps: [{ title: "Step 1", sectionIds: ["a"] }],
+        errorTriggerMode: "on-blur",
+      })
+      render(<FormContent />)
+      expect(screen.getByRole("button", { name: "Submit" })).toBeDisabled()
+    })
+
+    it("does not disable wizard submit button when hasErrors and errorTriggerMode is on-submit", () => {
+      mockHasErrors = true
+      mockRegistryEntry = makeEntry({
+        steps: [{ title: "Step 1", sectionIds: ["a"] }],
+        errorTriggerMode: "on-submit",
+      })
+      render(<FormContent />)
+      expect(screen.getByRole("button", { name: "Submit" })).not.toBeDisabled()
     })
   })
 })

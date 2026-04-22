@@ -53,6 +53,9 @@ export const useFormSubmitAction = () => {
         if (Object.keys(errors).length > 0) {
           return { success: false, errors }
         }
+        registry.clearActiveForm()
+        closeCanvas()
+        registry.rebuildDescriptions()
         return { success: true }
       } catch {
         const errors = ref.getErrors()
@@ -60,10 +63,6 @@ export const useFormSubmitAction = () => {
           success: false,
           errors,
         }
-      } finally {
-        registry.clearActiveForm()
-        closeCanvas()
-        registry.rebuildDescriptions()
       }
     },
   })
