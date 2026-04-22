@@ -59,13 +59,16 @@ function WizardCanvasContent({
   formDefinition,
   formRef,
   isSubmitting,
+  hasErrors,
   onSubmit,
 }: {
   formDefinition: F0FormDefinitionSingleSchema<F0FormSchema>
   formRef: ReturnType<typeof useF0Form>["formRef"]
   isSubmitting: boolean
+  hasErrors: boolean
   onSubmit: () => void
 }) {
+  const errorTriggerMode = formDefinition.errorTriggerMode ?? "on-blur"
   const CanvasForm = useCanvasFormComponent()
 
   return (
@@ -88,6 +91,7 @@ function WizardCanvasContent({
           <F0Button
             variant="default"
             onClick={onSubmit}
+            disabled={hasErrors && errorTriggerMode !== "on-submit"}
             label={formDefinition.submitConfig?.label ?? "Submit"}
           />
         </div>
@@ -102,13 +106,16 @@ function PlainFormContent({
   formDefinition,
   formRef,
   isSubmitting,
+  hasErrors,
   onSubmit,
 }: {
   formDefinition: F0FormDefinitionSingleSchema<F0FormSchema>
   formRef: ReturnType<typeof useF0Form>["formRef"]
   isSubmitting: boolean
+  hasErrors: boolean
   onSubmit: () => void
 }) {
+  const errorTriggerMode = formDefinition.errorTriggerMode ?? "on-blur"
   const CanvasForm = useCanvasFormComponent()
   const showSectionsSidepanel = !!(
     formDefinition.sections && Object.keys(formDefinition.sections).length > 2
@@ -139,6 +146,7 @@ function PlainFormContent({
           <F0Button
             variant="default"
             onClick={onSubmit}
+            disabled={hasErrors && errorTriggerMode !== "on-submit"}
             label={formDefinition.submitConfig?.label ?? "Submit"}
           />
         </div>
@@ -159,7 +167,7 @@ function PlainFormContent({
  * Previous/Next/Submit navigation.
  */
 function VirtualFormContent() {
-  const { formRef } = useF0Form()
+  const { formRef, hasErrors } = useF0Form()
   const { agent: agentName, closeCanvas } = useAiChat()
   const registry = useF0AiFormRegistry()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -186,7 +194,9 @@ function VirtualFormContent() {
   }, [formName, JSON.stringify(currentValues)])
 
   const handleSubmit = useCallback(() => {
-    formRef.current?.submit()
+    formRef.current?.submit().catch(() => {
+      // Validation errors are displayed by the form
+    })
   }, [formRef])
 
   const formDefinition = useF0FormDefinition({
@@ -224,6 +234,7 @@ function VirtualFormContent() {
         formDefinition={formDefinition}
         formRef={formRef}
         isSubmitting={isSubmitting}
+        hasErrors={hasErrors}
         onSubmit={handleSubmit}
       />
     )
@@ -234,6 +245,7 @@ function VirtualFormContent() {
       formDefinition={formDefinition}
       formRef={formRef}
       isSubmitting={isSubmitting}
+      hasErrors={hasErrors}
       onSubmit={handleSubmit}
     />
   )
