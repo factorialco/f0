@@ -13,6 +13,7 @@ import {
   type AiChatCreditWarning,
   type EntityRefs,
   type PendingContext,
+  type PendingQuote,
   type VisualizationMode,
   WelcomeScreenSuggestion,
 } from "./types"
@@ -216,6 +217,14 @@ export type AiChatProviderReturnValue = {
   pendingContext: PendingContext | null
   /** Set pending context (pass null to clear) */
   setPendingContext: React.Dispatch<React.SetStateAction<PendingContext | null>>
+  /**
+   * Quoted fragment the user is replying to. Rendered as a chip above the
+   * textarea and, on submit, prepended as a markdown blockquote to the user's
+   * message (plus an invisible `<quote-context>` tag for the agent).
+   */
+  pendingQuote: PendingQuote | null
+  /** Set the pending quote (pass null to clear). */
+  setPendingQuote: React.Dispatch<React.SetStateAction<PendingQuote | null>>
 } & Pick<
   AiChatState,
   | "greeting"

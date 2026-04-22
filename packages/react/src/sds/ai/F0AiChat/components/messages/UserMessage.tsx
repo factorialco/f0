@@ -1,10 +1,14 @@
 import { Markdown, type UserMessageProps } from "@copilotkit/react-ui"
 import { useEffect, useRef } from "react"
 
+import { F0Icon } from "@/components/F0Icon"
 import { FileItem } from "@/components/RichText/FileItem"
+import { Reply } from "@/icons/app"
 
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { markdownRenderers } from "../markdownRenderers"
+import { ReplyPopover } from "./ReplyPopover"
+import { useReplySelection } from "./useReplySelection"
 
 type UploadedFile = {
   url: string
@@ -84,10 +88,50 @@ const TOOL_CONTEXT_RE =
  *  multipart structure was flattened into a single string). */
 const PENDING_CONTEXT_RE = /<pending-context>[\s\S]*?<\/pending-context>\s*/g
 
+/**
+ * Regex matching the `<reply-quote>...</reply-quote>` prefix that the
+ * composer prepends when the user replied to a selected fragment. The
+ * quote is rendered ABOVE the bubble — not inside — so we extract it
+ * before rendering the markdown content.
+ */
+const REPLY_QUOTE_RE = /^\s*<reply-quote>([\s\S]*?)<\/reply-quote>\s*/
+
+/**
+ * Decode the HTML-escaped quote body back to plain text. The composer
+ * escapes the user's selection with `escapeHtml` and turns newlines into
+ * `<br/>` so the payload is valid HTML — reverse that here.
+ */
+function decodeReplyQuote(raw: string): string {
+  return raw
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, "&")
+}
+
+/**
+ * Reply quote preview rendered above the user bubble. Renders the quoted
+ * text as Markdown so selections keep formatting (bold, links, code,
+ * lists…). The whole quote is shown — no height limit, no toggle.
+ */
+const ReplyQuoteBlock = ({ text }: { text: string }) => (
+  <div className="flex max-w-[90%] items-start gap-2 self-end pb-1 pr-2 text-f1-foreground-tertiary">
+    <div className="flex h-5 items-center">
+      <F0Icon icon={Reply} />
+    </div>
+    <div className="min-w-0 whitespace-pre-wrap text-base leading-5 [&>div]:flex [&>div]:flex-col [&>div]:gap-1 [&_p]:m-0">
+      <Markdown content={text} components={markdownRenderers} />
+    </div>
+  </div>
+)
+
 export const UserMessage = ({ message }: UserMessageProps) => {
   const ref = useRef<HTMLDivElement>(null)
+  const bubbleRef = useRef<HTMLDivElement>(null)
 
-  const { visualizationMode } = useAiChat()
+  const { visualizationMode, setPendingQuote } = useAiChat()
   const isFullscreen = visualizationMode === "fullscreen"
 
   useEffect(() => {
@@ -104,17 +148,31 @@ export const UserMessage = ({ message }: UserMessageProps) => {
     rawData
   )
   const raw = getTextContent(message?.content as MessagePart[]) ?? ""
-  const content = raw
+
+  // Extract the reply quote (if any) so we can render it as a separate
+  // block above the bubble instead of inside the markdown content.
+  const quoteMatch = raw.match(REPLY_QUOTE_RE)
+  const quoteText = quoteMatch ? decodeReplyQuote(quoteMatch[1]) : null
+  const rawWithoutQuote = quoteMatch ? raw.replace(REPLY_QUOTE_RE, "") : raw
+
+  const content = rawWithoutQuote
     .replace(TOOL_CONTEXT_RE, "")
     .replace(PENDING_CONTEXT_RE, "")
     .trim()
   const hasVisibleText = content.trim().length > 0
+
+  const { anchor, clear } = useReplySelection({
+    containerRef: bubbleRef,
+    enabled: hasVisibleText,
+  })
 
   return (
     <div
       ref={ref}
       className="my-4 flex w-full flex-col items-end gap-2 first:mt-0 last:mb-0"
     >
+      {quoteText && <ReplyQuoteBlock text={quoteText} />}
+
       {uploadedFiles.length > 0 && (
         <div className="flex max-w-[90%] flex-wrap justify-end gap-1.5">
           {uploadedFiles.map((file, index) => (
@@ -127,10 +185,21 @@ export const UserMessage = ({ message }: UserMessageProps) => {
         </div>
       )}
       {hasVisibleText && (
-        <div className="w-fit max-w-[90%] self-end whitespace-pre-wrap rounded-2xl border border-solid border-f1-border-secondary bg-f1-background-tertiary px-4 py-3">
+        <div
+          ref={bubbleRef}
+          className="w-fit max-w-[90%] self-end whitespace-pre-wrap rounded-2xl border border-solid border-f1-border-secondary bg-f1-background-tertiary px-4 py-3 [&>div]:flex [&>div]:flex-col [&>div]:gap-1"
+        >
           <Markdown content={content} components={markdownRenderers} />
         </div>
       )}
+      <ReplyPopover
+        anchor={anchor}
+        onReply={(text) => {
+          setPendingQuote({ text })
+          clear()
+          window.getSelection()?.removeAllRanges()
+        }}
+      />
     </div>
   )
 }

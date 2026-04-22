@@ -173,6 +173,29 @@ function useClarifyingQuestionStory(steps: StoryStep[]) {
     }
   }, [stepIndex, steps, interactions, setClarifyingQuestion])
 
+  const skip = useCallback(() => {
+    if (!currentStep.optional) return
+    updateInteraction({
+      selectedIds: [],
+      customText: "",
+      isCustomActive: false,
+    })
+    if (stepIndex < steps.length - 1) {
+      setStepIndex(stepIndex + 1)
+    } else {
+      setMessages((prev) => [...prev, "(skipped)"])
+      setClarifyingQuestion(null)
+      setStepIndex(0)
+      setInteractions({})
+    }
+  }, [
+    currentStep.optional,
+    stepIndex,
+    steps.length,
+    updateInteraction,
+    setClarifyingQuestion,
+  ])
+
   const back = useCallback(() => {
     if (stepIndex > 0) {
       setStepIndex(stepIndex - 1)
@@ -196,6 +219,7 @@ function useClarifyingQuestionStory(steps: StoryStep[]) {
       totalSteps: steps.length,
       toggleOption,
       confirm,
+      skip,
       back,
       setCustomAnswerText,
       setCustomAnswerActive,
@@ -209,6 +233,7 @@ function useClarifyingQuestionStory(steps: StoryStep[]) {
     steps.length,
     toggleOption,
     confirm,
+    skip,
     back,
     setCustomAnswerText,
     setCustomAnswerActive,
@@ -350,6 +375,31 @@ const ClarifyingCustomAnswerSingleExample = () => {
   )
 }
 
+const ClarifyingOptionalSkipExample = () => {
+  const steps = useMemo<StoryStep[]>(
+    () => [
+      {
+        question: "Any specific employee group to include? (optional)",
+        options: [
+          { id: "engineering", label: "Engineering" },
+          { id: "sales", label: "Sales" },
+          { id: "marketing", label: "Marketing" },
+        ],
+        selectionMode: "single",
+        optional: true,
+      },
+    ],
+    []
+  )
+  const { messages } = useClarifyingQuestionStory(steps)
+  return (
+    <StoryShell
+      description="Optional step — the Skip button appears in the footer and pressing Esc also skips."
+      messages={messages}
+    />
+  )
+}
+
 const ClarifyingCustomAnswerMultipleExample = () => {
   const steps = useMemo<StoryStep[]>(
     () => [
@@ -415,4 +465,9 @@ export const CustomAnswerSingle: Story = {
 export const CustomAnswerMultiple: Story = {
   name: "Custom Answer — Multiple",
   render: () => <ClarifyingCustomAnswerMultipleExample />,
+}
+
+export const OptionalWithSkip: Story = {
+  name: "Optional — Skip",
+  render: () => <ClarifyingOptionalSkipExample />,
 }

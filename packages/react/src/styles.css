@@ -167,6 +167,26 @@ div[role="dialog"] {
   }
 }
 
+@keyframes f0-chat-cursor-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.f0-chat-cursor-blink {
+  animation: f0-chat-cursor-blink 0.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .f0-chat-cursor-blink {
+    animation: none;
+  }
+}
+
 @layer utilities {
   input[type="number"]::-webkit-inner-spin-button,
   input[type="number"]::-webkit-outer-spin-button {
