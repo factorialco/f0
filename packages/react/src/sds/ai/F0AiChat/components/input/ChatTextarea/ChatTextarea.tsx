@@ -157,14 +157,14 @@ export const ChatTextarea = ({
         ? `<tool-context tool="${activeToolHint.id}">${activeToolHint.prompt}</tool-context>\n\n${safeUserText}`
         : safeUserText
 
-      // When replying to a selected fragment, prepend the quote as inline
-      // HTML (rehype-raw is enabled in CopilotKit's Markdown). This avoids
-      // the `\n\n` separator a markdown blockquote would need — which the
-      // bubble's `whitespace-pre-wrap` renders as visible blank lines. The
-      // <blockquote> + <em> tags still flow through the f0 renderers
-      // registered in markdownRenderers.
+      // When replying to a selected fragment, prepend the quote as a
+      // dedicated `<reply-quote>` tag. `UserMessage` strips this tag from
+      // the bubble content and renders the quote above the bubble (see
+      // the design: muted text with a reply arrow icon, mirroring the
+      // bubble alignment). Newlines are encoded as <br/> so they survive
+      // the HTML round-trip.
       const withQuote = pendingQuote
-        ? `<blockquote><em>${escapeHtml(pendingQuote.text).replace(/\n/g, "<br/>")}</em></blockquote>${withToolHint}`
+        ? `<reply-quote>${escapeHtml(pendingQuote.text).replace(/\n/g, "<br/>")}</reply-quote>${withToolHint}`
         : withToolHint
 
       const files = uploadedFiles.flatMap((f) =>
@@ -255,7 +255,7 @@ export const ChatTextarea = ({
         className={cn(
           "relative isolate z-20",
           "flex flex-col items-stretch md:gap-3 gap-2",
-          "rounded-lg border border-solid border-f1-border-secondary",
+          "rounded-lg border border-solid border-f1-border has-[textarea:focus]:border-f1-border-secondary",
           "transition-all hover:cursor-text",
           "p-0",
           "before:pointer-events-none before:absolute before:inset-0 before:z-[-1]",

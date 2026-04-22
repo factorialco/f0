@@ -1,6 +1,6 @@
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
-import { Cross, Quote } from "@/icons/app"
+import { Cross, Reply } from "@/icons/app"
 import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -25,16 +25,18 @@ export const PendingQuoteChip = ({
   const translation = useI18n()
 
   return (
-    <div className="px-1 pt-1">
+    <div className="p-1">
       <div
         className={cn(
-          "flex items-start gap-2",
-          "rounded-md bg-f1-background-tertiary py-1 px-2"
+          "flex items-start gap-2 justify-center",
+          "rounded-sm bg-f1-background-tertiary py-0.5 px-1"
         )}
       >
-        <F0Icon icon={Quote} size="md" />
+        <div className="flex items-center py-0.5">
+          <F0Icon icon={Reply} size="md" />
+        </div>
         <OneEllipsis
-          className="my-1 flex-1 text-sm text-f1-foreground-secondary"
+          className="h-full flex-1 py-1 text-sm text-f1-foreground-secondary"
           lines={2}
         >
           {quote.text}
