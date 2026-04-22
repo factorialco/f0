@@ -317,9 +317,40 @@ const meta: Meta<typeof ApplicationFrame> = {
             )
           },
           create: async (title, description, config, category) => {
+            // Simulate backend persistence by returning a random id AND a
+            // category so the canvas can transition into the "saved" state.
+            // The UI gates "saved" on both fields (handleSave needs the
+            // category to call the backend), so returning only the id would
+            // leave the action bar stuck in the "Save to Analytics" state.
+            const newId = `dash_${Math.random().toString(36).slice(2, 10)}`
+            const resolvedCategory = category ?? "general"
             alert(
-              `Create dashboard\ntitle: ${title}\ndescription: ${description}\ncategory: ${category ?? "(none)"}\nconfig: ${JSON.stringify(config, null, 2)}`
+              `Create dashboard\nid: ${newId}\ntitle: ${title}\ndescription: ${description}\ncategory: ${resolvedCategory}\nconfig: ${JSON.stringify(config, null, 2)}`
             )
+            return { id: newId, category: resolvedCategory }
+          },
+          // Mock creator + last-edited metadata. In a real integration this
+          // would hit the backend using the dashboard id. Returning different
+          // stub data per id lets the story cover the "different dashboard
+          // selected → different author" transition.
+          getMetadata: async (id) => {
+            // Simulate a small network delay so the avatar/last-edited
+            // appear shortly after the canvas opens (mirrors prod UX).
+            await new Promise((resolve) => setTimeout(resolve, 250))
+            if (id === "dash-expenses-001") {
+              return {
+                creator: {
+                  firstName: "Hellen",
+                  lastName: "Schmidt",
+                  src: "/avatars/person01.jpg",
+                },
+                lastEdited: new Date("2026-04-18T10:32:00Z"),
+              }
+            }
+            return {
+              creator: { firstName: "John", lastName: "Doe" },
+              lastEdited: new Date(),
+            }
           },
         },
       },
@@ -404,6 +435,8 @@ type Story = StoryObj<typeof ApplicationFrame>
 
 const mockExpensesDashboardConfig = {
   title: "Expenses dashboard",
+  description:
+    "Overview of company expenses by status, category and type with the monthly spending trend for the current period.",
   savedDashboardId: "dash-expenses-001",
   savedDashboardCategory: "trainings",
   savedDashboardDescription:

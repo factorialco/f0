@@ -46,7 +46,8 @@ export const useDisplayDashboardAction = () => {
       {
         name: "description",
         type: "string",
-        description: "Optional dashboard description",
+        description:
+          "AI-generated 1–2 sentence summary of what the dashboard shows. Rendered under the title in the canvas header. Lands on ChatDashboardConfig.description.",
         required: false,
       },
       {

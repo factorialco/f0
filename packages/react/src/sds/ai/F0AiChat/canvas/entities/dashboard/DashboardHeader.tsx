@@ -1,18 +1,23 @@
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 
-import { Download, Ellipsis } from "@/icons/app"
-import { OneEllipsis } from "@/lib/OneEllipsis"
+import { Download } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import {
-  DropdownInternal,
-  type DropdownItem,
-} from "@/experimental/Navigation/Dropdown/internal"
+import { useL10n } from "@/lib/providers/l10n"
+import { ResourceHeader } from "@/patterns/ResourceHeader"
 
 import type { DashboardCanvasContent } from "../../../types"
 
-import { CloseCanvasButton } from "../../components/CloseCanvasButton"
+import { useAiChat } from "../../../providers/AiChatStateProvider"
 import { useDashboardCanvas } from "./DashboardContext"
+import type { DashboardMetadata } from "./types"
 
+/**
+ * Canvas header for the dashboard entity. Delegates layout, actions, status
+ * tag and close button to `ResourceHeader` so the canvas stays visually
+ * consistent with other resource surfaces. The export dropdown is threaded
+ * through `otherActions`, and the saved/draft/unsaved state is computed from
+ * the saved-dashboard metadata on `content`.
+ */
 export function DashboardHeader({
   content,
   onClose,
@@ -21,8 +26,40 @@ export function DashboardHeader({
   onClose: () => void
 }) {
   const { t } = useI18n()
+  const { locale } = useL10n()
+  const { canvasActions } = useAiChat()
   const { exportAsExcel } = useDashboardCanvas()
   const [isExporting, setIsExporting] = useState(false)
+  const [metadata, setMetadata] = useState<DashboardMetadata | null>(null)
+
+  const savedDashboardId = content.savedDashboardId
+  const getMetadata = canvasActions?.dashboard?.getMetadata
+
+  // Fetch creator + last-edited only once the dashboard has been persisted.
+  // Guarded by `isCurrent` so a rapid id swap (user re-opens a different saved
+  // dashboard before the first request resolves) doesn't flash stale metadata.
+  useEffect(() => {
+    if (!savedDashboardId || !getMetadata) {
+      setMetadata(null)
+      return
+    }
+
+    let isCurrent = true
+    void (async () => {
+      try {
+        const result = await getMetadata(savedDashboardId)
+        if (!isCurrent) return
+        setMetadata(result ?? null)
+      } catch {
+        if (!isCurrent) return
+        setMetadata(null)
+      }
+    })()
+
+    return () => {
+      isCurrent = false
+    }
+  }, [savedDashboardId, getMetadata])
 
   const handleExport = useCallback(async () => {
     if (!exportAsExcel) return
@@ -34,33 +71,99 @@ export function DashboardHeader({
     }
   }, [exportAsExcel])
 
-  const dropdownItems = useMemo<DropdownItem[]>(() => {
-    const items: DropdownItem[] = []
-    if (exportAsExcel) {
-      items.push({
-        label: isExporting
-          ? t("ai.dataDownload.exporting")
-          : t("ai.dataDownload.exportDashboard", { format: "Excel" }),
+  const secondaryActions = useMemo(() => {
+    if (!exportAsExcel) return undefined
+    return [
+      {
+        label: t("ai.dataDownload.export"),
         icon: Download,
         onClick: handleExport,
-      })
-    }
-    return items
+        loading: isExporting,
+      },
+    ]
   }, [exportAsExcel, isExporting, handleExport, t])
 
+  // Status tag: Saved (has id, no pending iteration), Unsaved (has id but
+  // iteration not persisted), Draft (no id at all). handleSave in
+  // DashboardContext requires both id AND category to persist externally —
+  // for the purpose of the tag we only gate on id, matching the visible
+  // semantics of "has it ever been saved".
+  const isSaved = Boolean(content.savedDashboardId)
+  const isUnsaved = isSaved && content.savedDashboardUnsaved === true
+
+  const status = isUnsaved
+    ? {
+        label: t("ai.dashboard.statusLabel"),
+        text: t("ai.dashboard.status.unsaved"),
+        variant: "warning" as const,
+      }
+    : isSaved
+      ? {
+          label: t("ai.dashboard.statusLabel"),
+          text: t("ai.dashboard.status.saved"),
+          variant: "positive" as const,
+        }
+      : {
+          label: t("ai.dashboard.statusLabel"),
+          text: t("ai.dashboard.status.draft"),
+          variant: "neutral" as const,
+        }
+
+  // Creator avatar + last-edited date surfaced in the metadata strip (not as
+  // the main header avatar). This keeps the canvas header compact and groups
+  // "who / when" together as a single attribution block. Both rows only
+  // render when the host app returned metadata for the saved dashboard.
+  const headerMetadata = useMemo(() => {
+    if (!metadata) return undefined
+
+    const fullName =
+      `${metadata.creator.firstName} ${metadata.creator.lastName}`.trim()
+
+    const editedAt =
+      metadata.lastEdited instanceof Date
+        ? metadata.lastEdited
+        : new Date(metadata.lastEdited)
+    const hasValidDate = !Number.isNaN(editedAt.getTime())
+    const formattedDate = hasValidDate
+      ? editedAt.toLocaleDateString(locale, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : null
+
+    return [
+      {
+        label: t("ai.dashboard.createdBy"),
+        value: {
+          type: "avatar" as const,
+          variant: {
+            type: "person" as const,
+            firstName: metadata.creator.firstName,
+            lastName: metadata.creator.lastName,
+            src: metadata.creator.src,
+          },
+          text: fullName,
+        },
+      },
+      formattedDate
+        ? {
+            label: t("ai.dashboard.lastEdited"),
+            value: { type: "date" as const, formattedDate },
+          }
+        : undefined,
+    ]
+  }, [metadata, locale, t])
+
   return (
-    <div className="flex shrink-0 items-center gap-2 border-0 border-b border-solid border-f1-border-secondary p-5">
-      <OneEllipsis
-        tag="h2"
-        className="min-w-0 flex-1 text-2xl font-semibold text-f1-foreground"
-      >
-        {content.title}
-      </OneEllipsis>
-      {dropdownItems.length > 0 && (
-        <DropdownInternal items={dropdownItems} icon={Ellipsis} align="end" />
-      )}
-      <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
-      <CloseCanvasButton onClick={onClose} />
-    </div>
+    <ResourceHeader
+      title={content.title}
+      description={content.config.description}
+      status={status}
+      metadata={headerMetadata}
+      secondaryActions={secondaryActions}
+      onClose={onClose}
+      closeLabel={t("ai.closeDashboard")}
+    />
   )
 }

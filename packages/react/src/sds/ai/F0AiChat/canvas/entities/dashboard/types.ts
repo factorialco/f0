@@ -316,6 +316,13 @@ export type ChatDashboardItem =
 export interface ChatDashboardConfig {
   /** Dashboard title displayed in the canvas header and chat report card */
   title: string
+  /**
+   * AI-generated 1–2 sentence summary of what the dashboard shows. Displayed
+   * under the title in the canvas header. Optional at the type level so
+   * legacy persisted dashboards (before the agent started emitting it) still
+   * parse; the agent schema makes it required going forward.
+   */
+  description?: string
   /** Filter definitions — keys become filter IDs */
   filters?: Record<string, ChatDashboardFilterDefinition>
   /**
@@ -331,6 +338,25 @@ export interface ChatDashboardConfig {
 }
 
 /**
+ * Creator + last-edited metadata for a saved dashboard. Returned by
+ * `DashboardCanvasActions.getMetadata` so the header can render the author
+ * avatar and the freshness signal only once a dashboard has been persisted.
+ */
+export type DashboardMetadata = {
+  creator: {
+    firstName: string
+    lastName: string
+    /** Optional avatar image URL. Falls back to initials when omitted. */
+    src?: string
+  }
+  /**
+   * Last edited timestamp. Accepts `Date` or an ISO-8601 string so host apps
+   * can forward backend payloads verbatim without pre-parsing.
+   */
+  lastEdited: Date | string
+}
+
+/**
  * Callbacks for persisting dashboards externally (beyond chat history).
  */
 export type DashboardCanvasActions = {
@@ -340,11 +366,23 @@ export type DashboardCanvasActions = {
     category: string,
     config: ChatDashboardConfig
   ) => Promise<void>
-  /** Create a new saved dashboard. Returns the new dashboard ID if available. */
+  /**
+   * Create a new saved dashboard. Returns the new dashboard's id and
+   * category so subsequent edits can call `save` (which requires both).
+   * Returning void / undefined leaves the canvas in its current state.
+   */
   create: (
     title: string,
     description: string,
     config: ChatDashboardConfig,
     category?: string
-  ) => Promise<string | void>
+  ) => Promise<{ id: string; category: string } | void>
+  /**
+   * Fetch creator + last-edited metadata for a saved dashboard. The header
+   * calls this lazily, only when the current dashboard has a
+   * `savedDashboardId`. Returning `void` signals "no metadata available" —
+   * the header will skip rendering the avatar and the last-edited row
+   * instead of showing a placeholder.
+   */
+  getMetadata?: (id: string) => Promise<DashboardMetadata | void>
 }

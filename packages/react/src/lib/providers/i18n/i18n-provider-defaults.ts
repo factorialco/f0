@@ -283,6 +283,7 @@ export const defaultTranslations = {
     unsavedChanges: "Unsaved changes",
     saveChanges: "Save changes",
     discardChanges: "Discard",
+    saveAsChanges: "Save as",
     exportTable: "Download table",
     generatedTableFilename: "OneGeneratedTable",
     feedbackModal: {
@@ -350,12 +351,20 @@ export const defaultTranslations = {
         save: "Save",
         cancel: "Cancel",
       },
+      status: {
+        saved: "Saved",
+        draft: "Draft",
+        unsaved: "Unsaved",
+      },
+      statusLabel: "Status",
+      lastEdited: "Last edited",
+      createdBy: "Created by",
     },
     dataDownload: {
       title: "Download",
       download: "Download {{format}}",
       exportDashboard: "Export dashboard as {{format}}",
-      exporting: "Exporting...",
+      export: "Export",
       rows: "{{amount}} rows",
     },
     dashboardItem: {

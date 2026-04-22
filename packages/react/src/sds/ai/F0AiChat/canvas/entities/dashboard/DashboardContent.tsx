@@ -478,18 +478,19 @@ export function DashboardContent({
       // Persist the config the user is actually looking at, including any
       // pending chart-type transforms. Using `content.config` here would
       // silently drop those transforms.
-      const newId = await canvasActions?.dashboard?.create(
+      const created = await canvasActions?.dashboard?.create(
         title,
         description,
         effectiveConfig,
         content.savedDashboardCategory
       )
-      // After creating, transition to "saved" state (state 1 → state 2)
-      if (newId) {
-        const category = content.savedDashboardCategory
+      // After creating, transition to "saved" state (state 1 → state 2).
+      // Both id and category are required: `isSavedDashboard` gates on both,
+      // and `handleSave` needs the category to call the backend save endpoint.
+      if (created) {
         const meta = {
-          savedDashboardId: newId,
-          savedDashboardCategory: category,
+          savedDashboardId: created.id,
+          savedDashboardCategory: created.category,
           savedDashboardDescription: description,
           savedDashboardUnsaved: false,
         }
@@ -581,6 +582,10 @@ export function DashboardContent({
           ]}
           secondaryActions={[
             {
+              label: translations.ai.saveAsChanges,
+              onClick: () => setIsSaveAsDialogOpen(true),
+            },
+            {
               label: translations.ai.discardChanges,
               onClick: handleDiscard,
             },
@@ -597,6 +602,12 @@ export function DashboardContent({
               label: translations.ai.dashboard.save,
               onClick: handleSave,
               icon: Save,
+            },
+          ]}
+          secondaryActions={[
+            {
+              label: translations.ai.saveAsChanges,
+              onClick: () => setIsSaveAsDialogOpen(true),
             },
           ]}
         />
@@ -627,7 +638,13 @@ export function DashboardContent({
           onClose={() => setIsSaveAsDialogOpen(false)}
           onSave={handleSaveAs}
           defaultTitle={content.title}
-          defaultDescription={content.savedDashboardDescription}
+          // Prefer the persisted saved-dashboard description when editing an
+          // already-saved dashboard; fall back to the AI-generated summary on
+          // the config for first-time saves so the user doesn't start from a
+          // blank textarea.
+          defaultDescription={
+            content.savedDashboardDescription ?? content.config.description
+          }
         />
       )}
     </>

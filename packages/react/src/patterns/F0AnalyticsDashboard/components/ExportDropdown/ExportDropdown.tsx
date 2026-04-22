@@ -18,7 +18,7 @@ export function ExportDropdown({
       items={[
         {
           label: isExporting
-            ? t("ai.dataDownload.exporting")
+            ? t("ai.dataDownload.export")
             : t("ai.dataDownload.exportDashboard", { format: "Excel" }),
           icon: Download,
           onClick: onExportExcel,
