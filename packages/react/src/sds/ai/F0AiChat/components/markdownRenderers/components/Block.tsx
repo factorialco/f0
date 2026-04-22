@@ -56,7 +56,7 @@ export function Blockquote({
     <blockquote
       {...props}
       className={cn(
-        "m-0 mb-2.5 border-0 border-l-4 border-solid border-f1-border pl-4 text-base",
+        "mr-1 my-2 mb-2.5 border-0 border-l-4 border-solid border-f1-border pl-3 text-base",
         props.className
       )}
     >

@@ -24,6 +24,7 @@ import {
   type AppendMessage,
   type CanvasContent,
   type PendingContext,
+  type PendingQuote,
   type VisualizationMode,
   type AiChatToolHint,
   WelcomeScreenSuggestion,
@@ -122,6 +123,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [pendingContext, setPendingContext] = useState<PendingContext | null>(
     null
   )
+  const [pendingQuote, setPendingQuote] = useState<PendingQuote | null>(null)
 
   // Persist chat width to localStorage
   useEffect(() => {
@@ -197,6 +199,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     setCurrentThreadTitle(null)
     setIsLoadingThread(false)
     setPendingContext(null)
+    setPendingQuote(null)
     setCanvasContent(null)
     if (visualizationMode === "canvas") {
       setVisualizationMode(previousVisualizationModeRef.current)
@@ -212,6 +215,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     setCurrentThreadTitle(null)
     setIsLoadingThread(false)
     setPendingContext(null)
+    setPendingQuote(null)
     // Close canvas when starting a new conversation
     setCanvasContent(null)
     if (visualizationMode === "canvas") {
@@ -225,6 +229,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     }
     setCurrentThreadTitle(title)
     setPendingContext(null)
+    setPendingQuote(null)
     // Close canvas when loading a different thread
     setCanvasContent(null)
     if (visualizationMode === "canvas") {
@@ -371,6 +376,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setFileDragOver,
         pendingContext,
         setPendingContext,
+        pendingQuote,
+        setPendingQuote,
       }}
     >
       {children}
@@ -448,6 +455,8 @@ export function useAiChat(): AiChatProviderReturnValue {
       setFileDragOver: noopFn,
       pendingContext: null,
       setPendingContext: noopFn,
+      pendingQuote: null,
+      setPendingQuote: noopFn,
     }
   }
 

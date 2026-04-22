@@ -71,6 +71,7 @@ const Messages = ({
     welcomeScreenSuggestions,
     isLoadingThread,
     setInProgress,
+    clarifyingQuestion,
   } = useAiChat()
 
   const inProgress = inProgressProp ?? isLoading
@@ -157,6 +158,11 @@ const Messages = ({
     endRef,
     lastTurnRef,
     turnsCount: turns.length,
+    // Freeze the last-turn minHeight while the clarifying question panel
+    // is active — otherwise the input area's size change makes the
+    // viewport shrink, which would recalculate turnMinHeight and shift
+    // messages above, producing a visible "jump".
+    freezeTurnMinHeight: clarifyingQuestion != null,
   })
 
   // ─── Render a single turn's messages ───

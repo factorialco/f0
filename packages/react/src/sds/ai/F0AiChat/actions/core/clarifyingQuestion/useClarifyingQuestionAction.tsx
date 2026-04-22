@@ -1,4 +1,8 @@
-import { useCopilotAction } from "@copilotkit/react-core"
+import {
+  useCopilotAction,
+  useCopilotChatInternal,
+  useCopilotContext,
+} from "@copilotkit/react-core"
 import { useEffect, useRef, useState } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
@@ -7,10 +11,13 @@ import type {
   ClarifyingQuestionState,
   ClarifyingSelectionMode,
   ClarifyingStepData,
+  ResolvedStepAnswer,
 } from "./types"
 
+import { useToolCallId } from "../../../components/messages/AssistantMessage"
 import { useAiChat } from "../../../providers/AiChatStateProvider"
 import { buildSummaryMessage } from "./buildSummaryMessage"
+import { persistClarifyingResolution } from "./persistClarifyingResolution"
 
 // ---------------------------------------------------------------------------
 // Normalize raw args from the AI backend
@@ -43,6 +50,19 @@ function normalizeSteps(raw: RawStep[]): ClarifyingStepData[] {
 }
 
 // ---------------------------------------------------------------------------
+// Locally-resolved tool calls
+// ---------------------------------------------------------------------------
+
+/**
+ * Tracks toolCallIds the user has already resolved this session. The backend
+ * PATCH that persists `isResolved: true` may not round-trip before CopilotKit
+ * re-runs the render (e.g. after sendMessage causes a re-render), so without
+ * this cache the panel would briefly re-appear from step 0 before
+ * vanishing again.
+ */
+const locallyResolvedToolCallIds = new Set<string>()
+
+// ---------------------------------------------------------------------------
 // Per-step interaction state
 // ---------------------------------------------------------------------------
 
@@ -50,12 +70,14 @@ interface StepInteraction {
   selectedIds: string[]
   customText: string
   isCustomActive: boolean
+  skipped: boolean
 }
 
 const EMPTY_INTERACTION: StepInteraction = {
   selectedIds: [],
   customText: "",
   isCustomActive: false,
+  skipped: false,
 }
 
 function getInteraction(
@@ -71,12 +93,18 @@ function getInteraction(
 
 function ClarifyingQuestionController({
   steps,
+  rawSteps,
+  toolCallId,
 }: {
   steps: ClarifyingStepData[]
+  rawSteps: RawStep[]
+  toolCallId: string | undefined
 }) {
   const translation = useI18n()
 
   const { sendMessage, setClarifyingQuestion } = useAiChat()
+  const { threadId } = useCopilotChatInternal()
+  const { copilotApiConfig } = useCopilotContext()
 
   const [stepIndex, setStepIndex] = useState(0)
   const [interactions, setInteractions] = useState<
@@ -114,57 +142,139 @@ function ClarifyingQuestionController({
 
   const toggleOption = (optionId: string) => {
     if (mode === "single") {
-      updateInteraction({ selectedIds: [optionId] })
+      const current = getInteraction(interactions, step.question).selectedIds
+      const isAlreadySelected = current.length === 1 && current[0] === optionId
+      updateInteraction({
+        // Clicking the same option deselects it — this lets users clear
+        // their choice, which is especially useful on optional steps where
+        // "no selection" is a valid state that enables the Skip action.
+        selectedIds: isAlreadySelected ? [] : [optionId],
+        isCustomActive: false,
+        skipped: false,
+      })
     } else {
       const current = getInteraction(interactions, step.question).selectedIds
       const next = current.includes(optionId)
         ? current.filter((id) => id !== optionId)
         : [...current, optionId]
-      updateInteraction({ selectedIds: next })
+      updateInteraction({ selectedIds: next, skipped: false })
     }
   }
 
   const setCustomAnswerText = (text: string) => {
-    updateInteraction({ customText: text })
+    updateInteraction({ customText: text, skipped: false })
   }
 
   const setCustomAnswerActive = (active: boolean) => {
-    updateInteraction({ isCustomActive: active })
+    updateInteraction({ isCustomActive: active, skipped: false })
   }
 
   const activateCustomAnswer = () => {
-    const patch: Partial<StepInteraction> = { isCustomActive: true }
+    const patch: Partial<StepInteraction> = {
+      isCustomActive: true,
+      skipped: false,
+    }
     if (mode === "single") {
       patch.selectedIds = []
     }
     updateInteraction(patch)
   }
 
+  const buildAnswers = (
+    overrideCurrent?: Partial<StepInteraction>
+  ): ResolvedStepAnswer[] =>
+    steps.map((s, idx) => {
+      const baseInter = getInteraction(interactions, s.question)
+      const inter =
+        idx === stepIndex && overrideCurrent
+          ? { ...baseInter, ...overrideCurrent }
+          : baseInter
+
+      const customAnswer =
+        inter.isCustomActive && inter.customText.trim().length > 0
+          ? inter.customText.trim()
+          : undefined
+
+      return {
+        question: s.question,
+        selectedOptionIds: inter.selectedIds,
+        customAnswer,
+        skipped: inter.skipped || undefined,
+      }
+    })
+
+  const submitAll = (extraAnswers?: ResolvedStepAnswer[]) => {
+    const answers = extraAnswers ?? buildAnswers()
+
+    const message = buildSummaryMessage(
+      steps.map((s, idx) => {
+        const a = answers[idx]
+        return {
+          question: s.question,
+          options: s.options,
+          selectionMode: s.selectionMode,
+          selectedIds: a?.selectedOptionIds ?? [],
+          customText: a?.customAnswer ?? "",
+          isCustomActive: Boolean(a?.customAnswer),
+        }
+      }),
+      {
+        custom: translation.ai.clarifyingQuestion.custom,
+        skipped: translation.ai.clarifyingQuestion.skipped,
+      }
+    )
+
+    dismissedRef.current = true
+    setClarifyingQuestion(null)
+    // Mark this tool call as resolved locally so any subsequent render
+    // (before the PATCH round-trip) returns null immediately instead of
+    // flashing step 0.
+    if (toolCallId) locallyResolvedToolCallIds.add(toolCallId)
+    sendMessage(message)
+
+    // Persist resolution so the panel doesn't reappear on history reload.
+    if (toolCallId && threadId) {
+      void persistClarifyingResolution({
+        chatApiEndpoint: copilotApiConfig.chatApiEndpoint,
+        headers: copilotApiConfig.headers as Record<string, string> | undefined,
+        threadId,
+        toolCallId,
+        args: {
+          steps: rawSteps,
+          isResolved: true,
+          answers,
+        },
+      })
+    }
+  }
+
   const confirm = () => {
     const isLastStep = stepIndex >= steps.length - 1
-
     if (isLastStep) {
-      const message = buildSummaryMessage(
-        steps.map((s) => {
-          const inter = getInteraction(interactions, s.question)
-          return {
-            question: s.question,
-            options: s.options,
-            selectionMode: s.selectionMode,
-            selectedIds: inter.selectedIds,
-            customText: inter.customText,
-            isCustomActive: inter.isCustomActive,
-          }
-        }),
-        {
-          custom: translation.ai.clarifyingQuestion.custom,
-          skipped: translation.ai.clarifyingQuestion.skipped,
-        }
-      )
+      submitAll()
+    } else {
+      setStepIndex((i) => i + 1)
+    }
+  }
 
-      dismissedRef.current = true
-      setClarifyingQuestion(null)
-      sendMessage(message)
+  const skip = () => {
+    if (!step.optional) return
+    updateInteraction({
+      selectedIds: [],
+      customText: "",
+      isCustomActive: false,
+      skipped: true,
+    })
+    const isLastStep = stepIndex >= steps.length - 1
+    if (isLastStep) {
+      // Build answers with the skip applied to the current step
+      const answers = buildAnswers({
+        selectedIds: [],
+        customText: "",
+        isCustomActive: false,
+        skipped: true,
+      })
+      submitAll(answers)
     } else {
       setStepIndex((i) => i + 1)
     }
@@ -198,6 +308,7 @@ function ClarifyingQuestionController({
       totalSteps: steps.length,
       toggleOption,
       confirm,
+      skip,
       back,
       setCustomAnswerText,
       setCustomAnswerActive,
@@ -233,12 +344,25 @@ function ClarifyingQuestionRender(props: {
   args: Record<string, unknown>
   status: string
 }) {
-  const rawSteps = (props.args.steps ?? []) as RawStep[]
+  const toolCallId = useToolCallId()
 
+  // Resolved state is persisted back into the args. On history reload the
+  // render should be a no-op so the panel doesn't reappear. We also check a
+  // local cache for the window between submit and the PATCH round-trip.
+  if (props.args.isResolved === true) return <></>
+  if (toolCallId && locallyResolvedToolCallIds.has(toolCallId)) return <></>
+
+  const rawSteps = (props.args.steps ?? []) as RawStep[]
   if (rawSteps.length === 0) return <></>
 
   const steps = normalizeSteps(rawSteps)
-  return <ClarifyingQuestionController steps={steps} />
+  return (
+    <ClarifyingQuestionController
+      steps={steps}
+      rawSteps={rawSteps}
+      toolCallId={toolCallId}
+    />
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -247,8 +371,12 @@ function ClarifyingQuestionRender(props: {
 
 /**
  * Hook that registers the "ClarifyingQuestion" CopilotKit action.
- * When the AI backend invokes this action, it triggers a multi-step
- * question panel in the chat textarea for structured user input.
+ *
+ * The action is a **visual frontend-only tool** — the backend emits it via
+ * `emitFrontendTool` and doesn't await a result. When the user submits,
+ * the summary message is sent back via `sendMessage` and the tool-call args
+ * are patched with `{ isResolved: true, answers }` so the panel does not
+ * re-appear when the thread is reloaded from history.
  */
 export const useClarifyingQuestionAction = () => {
   useCopilotAction({
@@ -312,6 +440,20 @@ export const useClarifyingQuestionAction = () => {
             ],
           },
         ],
+      },
+      {
+        name: "isResolved",
+        type: "boolean",
+        description:
+          "Internal flag set by the frontend after the user answers. When true, the render is a no-op. Do not set from the backend.",
+        required: false,
+      },
+      {
+        name: "answers",
+        type: "object[]",
+        description:
+          "Internal snapshot of the user's answers. Populated by the frontend after resolution.",
+        required: false,
       },
     ],
     handler: async () => {

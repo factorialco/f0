@@ -380,14 +380,22 @@ export const defaultTranslations = {
     removeFile: "Remove",
     fileUploadError: "Upload failed",
     dropFilesHere: "Drop your files here",
+    reply: "Reply",
+    removeQuote: "Remove quote",
     clarifyingQuestion: {
       submit: "Submit",
       next: "Next",
       back: "Back",
+      skip: "Skip",
       typeYourAnswer: "Type your answer…",
       stepOf: "{{current}} of {{total}}",
       custom: "own answer",
       skipped: "skipped",
+      navHint: {
+        navigate: "navigate",
+        select: "select",
+        skip: "skip",
+      },
     },
     growth: {
       demoCard: {

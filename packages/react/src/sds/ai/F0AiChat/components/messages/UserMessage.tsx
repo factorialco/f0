@@ -5,6 +5,8 @@ import { FileItem } from "@/components/RichText/FileItem"
 
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { markdownRenderers } from "../markdownRenderers"
+import { ReplyPopover } from "./ReplyPopover"
+import { useReplySelection } from "./useReplySelection"
 
 type UploadedFile = {
   url: string
@@ -86,8 +88,9 @@ const PENDING_CONTEXT_RE = /<pending-context>[\s\S]*?<\/pending-context>\s*/g
 
 export const UserMessage = ({ message }: UserMessageProps) => {
   const ref = useRef<HTMLDivElement>(null)
+  const bubbleRef = useRef<HTMLDivElement>(null)
 
-  const { visualizationMode } = useAiChat()
+  const { visualizationMode, setPendingQuote } = useAiChat()
   const isFullscreen = visualizationMode === "fullscreen"
 
   useEffect(() => {
@@ -110,6 +113,11 @@ export const UserMessage = ({ message }: UserMessageProps) => {
     .trim()
   const hasVisibleText = content.trim().length > 0
 
+  const { anchor, clear } = useReplySelection({
+    containerRef: bubbleRef,
+    enabled: hasVisibleText,
+  })
+
   return (
     <div
       ref={ref}
@@ -127,10 +135,21 @@ export const UserMessage = ({ message }: UserMessageProps) => {
         </div>
       )}
       {hasVisibleText && (
-        <div className="w-fit max-w-[90%] self-end whitespace-pre-wrap rounded-2xl border border-solid border-f1-border-secondary bg-f1-background-tertiary px-4 py-3">
+        <div
+          ref={bubbleRef}
+          className="w-fit max-w-[90%] self-end whitespace-pre-wrap rounded-2xl border border-solid border-f1-border-secondary bg-f1-background-tertiary px-4 py-3 [&>div]:flex [&>div]:flex-col [&>div]:gap-1"
+        >
           <Markdown content={content} components={markdownRenderers} />
         </div>
       )}
+      <ReplyPopover
+        anchor={anchor}
+        onReply={(text) => {
+          setPendingQuote({ text })
+          clear()
+          window.getSelection()?.removeAllRanges()
+        }}
+      />
     </div>
   )
 }
