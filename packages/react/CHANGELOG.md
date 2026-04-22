@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.459.0](https://github.com/factorialco/f0/compare/f0-react-v1.458.3...f0-react-v1.459.0) (2026-04-22)
+
+
+### Features
+
+* **FileUpload:** improve document upload experience ([#3918](https://github.com/factorialco/f0/issues/3918)) ([442e397](https://github.com/factorialco/f0/commit/442e3977d83c39bea70ac93a455f6807c4f90814))
+
 ## [1.458.3](https://github.com/factorialco/f0/compare/f0-react-v1.458.2...f0-react-v1.458.3) (2026-04-21)
 
 
