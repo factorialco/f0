@@ -18,6 +18,7 @@ export type {
   EntityResolvers,
   EntityUrlBuilders,
   EntityRefs,
+  JobPostingProfile,
   RequisitionProfile,
   PersonProfile,
   UploadedFile,

@@ -317,6 +317,13 @@ export const defaultTranslations = {
     ask: "Ask One",
     view: "View",
     tools: "Tools",
+    entityRef: {
+      jobPosting: {
+        location: "Location",
+        vacancies: "Vacancies",
+        published: "Published",
+      },
+    },
     credits: {
       title: "Credits",
       creditsLeft: "{{total}} left",

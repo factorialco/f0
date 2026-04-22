@@ -1,9 +1,12 @@
 import { forwardRef, useMemo } from "react"
 
 import type { F0CardProps } from "@/components/F0Card"
+import { F0TagStatus } from "@/components/tags/F0TagStatus"
+import { getColor } from "@/kits/Charts/utils/colors"
 
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
+import { Progress } from "@/ui/progress"
 
 import type { JobPostingProfile } from "./types"
 
@@ -27,13 +30,34 @@ const JobPostingTrigger = forwardRef<HTMLButtonElement, { label: string }>(
 )
 JobPostingTrigger.displayName = "JobPostingTrigger"
 
-/**
- * Inline job posting entity reference with a hover card showing posting details.
- *
- * Renders the trigger as a styled link. On hover, lazily fetches
- * the job posting data via `entityRefs.resolvers.jobPosting` and displays
- * title, status, and location. Optionally links via `entityRefs.urls.jobPosting`.
- */
+function VacanciesProgress({
+  filled,
+  total,
+}: {
+  filled: number
+  total: number
+}) {
+  const percentage = total > 0 ? (filled / total) * 100 : 0
+  return (
+    <div className="flex w-full items-center gap-2">
+      <Progress
+        value={percentage}
+        max={100}
+        className="h-1.5 w-1/2"
+        color={getColor("categorical-1")}
+      />
+      <span className="shrink-0 tabular-nums">
+        {filled}/{total}
+      </span>
+    </div>
+  )
+}
+
+type JobPostingRow = {
+  title: string
+  value: React.ReactNode
+}
+
 export function JobPostingEntityRef({
   id,
   label,
@@ -49,18 +73,57 @@ export function JobPostingEntityRef({
 
   const mapToCard = useMemo(
     () =>
-      (profile: JobPostingProfile): F0CardProps => ({
-        title: profile.title,
-        description: [profile.status, profile.location]
-          .filter(Boolean)
-          .join(" · "),
-        ...(jobPostingUrl && {
-          secondaryActions: {
-            label: i18n.t("ai.view"),
-            href: jobPostingUrl,
+      (profile: JobPostingProfile): F0CardProps => {
+        const filled = profile.vacanciesFilled ?? 0
+        const total = profile.vacanciesTotal ?? 0
+
+        const rows: JobPostingRow[] = [
+          profile.location && {
+            title: i18n.t("ai.entityRef.jobPosting.location"),
+            value: profile.location,
           },
-        }),
-      }),
+          profile.publishedAt && {
+            title: i18n.t("ai.entityRef.jobPosting.published"),
+            value: profile.publishedAt,
+          },
+          total > 0 && {
+            title: i18n.t("ai.entityRef.jobPosting.vacancies"),
+            value: <VacanciesProgress filled={filled} total={total} />,
+          },
+        ].filter(Boolean) as JobPostingRow[]
+
+        const statusTag = profile.status ? (
+          <F0TagStatus
+            text={profile.status}
+            variant={profile.statusVariant ?? "neutral"}
+          />
+        ) : null
+
+        return {
+          title: profile.title,
+          ...((statusTag || rows.length > 0) && {
+            children: (
+              <div className="flex flex-col gap-2">
+                {statusTag}
+                {rows.map((row) => (
+                  <div key={row.title} className="flex flex-col">
+                    <p className="text-f1-foreground-secondary">{row.title}</p>
+                    <div className="flex items-center gap-1.5 font-medium text-f1-foreground">
+                      {row.value}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ),
+          }),
+          ...(jobPostingUrl && {
+            secondaryActions: {
+              label: i18n.t("ai.view"),
+              href: jobPostingUrl,
+            },
+          }),
+        }
+      },
     [i18n, jobPostingUrl]
   )
 
