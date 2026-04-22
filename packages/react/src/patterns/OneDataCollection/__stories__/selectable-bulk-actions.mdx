@@ -149,6 +149,19 @@ for cross-page selection.
   meta={DataCollectionStories}
 />
 
+**Infinite-scroll selection:**
+
+In infinite-scroll mode, manual row selections persist across `loadMore` calls.
+New rows that arrive when the user scrolls down appear unchecked — no existing
+selection is ever cleared. Use `allPagesSelection: true` alongside infinite-scroll
+if you also want the Gmail-style "Select all N items" banner to appear after
+selecting all visible rows.
+
+<Canvas
+  of={DataCollectionStories.WithInfiniteScrollSelection}
+  meta={DataCollectionStories}
+/>
+
 #### Examples
 
 **Default selected items**

@@ -937,6 +937,38 @@ export const WithCrossPageSelection: Story = {
   },
 }
 
+export const WithInfiniteScrollSelection: Story = {
+  render: () => {
+    // Create a fixed set of paginated users so we're not regenerating them on every render
+    const paginatedMockUsers = generateMockUsers(50)
+
+    return (
+      <div style={{ height: "500px", overflow: "auto" }}>
+        <ExampleComponent
+          selectable={(item) => item.id}
+          // Infinite-scroll: manual selections persist across loadMore — new rows arrive unchecked
+          dataAdapter={createDataAdapter({
+            data: paginatedMockUsers,
+            delay: 500,
+            paginationType: "infinite-scroll",
+            perPage: 10,
+          })}
+          bulkActions={({ selectedCount }) => ({
+            primary: [
+              {
+                label: `Delete ${selectedCount} item${selectedCount > 1 ? "s" : ""}`,
+                icon: Delete,
+                id: "delete-selected",
+                critical: true,
+              },
+            ],
+          })}
+        />
+      </div>
+    )
+  },
+}
+
 export const WithSelectableAndDefaultSelectedItems: Story = {
   render: () => (
     <ExampleComponent
