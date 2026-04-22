@@ -559,7 +559,7 @@ export const defaultTranslations = {
       uploadFailed: "Upload failed",
       fileTooLarge: "File exceeds {{maxSize}} MB limit",
       invalidFileType: "File type not accepted. Accepted formats: {{types}}",
-      fileWeight: "File size: {{size}}",
+      fileWeight: "File weight: {{size}}",
       maxFilesReached: "Maximum {{maxFiles}} files",
     },
     moreInformation: "More information",
