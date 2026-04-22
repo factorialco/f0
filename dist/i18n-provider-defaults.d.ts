@@ -132,6 +132,9 @@ export declare const defaultTranslations: {
             readonly hide: "Hide password";
         };
     };
+    readonly link: {
+        readonly opensInNewTab: "opens in new tab";
+    };
     readonly actions: {
         readonly add: "Add";
         readonly edit: "Edit";
@@ -146,6 +149,7 @@ export declare const defaultTranslations: {
         readonly expand: "Expand";
         readonly showAll: "Show all";
         readonly showLess: "Show less";
+        readonly seeMore: "See more";
         readonly skipToContent: "Skip to content";
         readonly view: "View";
         readonly unselect: "Unselect";
@@ -271,6 +275,7 @@ export declare const defaultTranslations: {
         readonly summaries: {
             readonly types: {
                 readonly sum: "sum";
+                readonly count: "count";
             };
         };
         readonly export: {
@@ -422,10 +427,34 @@ export declare const defaultTranslations: {
             readonly reportLabel: "Report";
             readonly openButton: "Open";
         };
+        readonly formCard: {
+            readonly moreFields: "Open to see all fields";
+        };
+        readonly dashboard: {
+            readonly save: "Save";
+            readonly saveToAnalytics: "Save the dashboard in Analytics";
+            readonly saveAs: "Save as";
+            readonly saveDialog: {
+                readonly title: "Save dashboard";
+                readonly titleLabel: "Title";
+                readonly descriptionLabel: "Description";
+                readonly descriptionPlaceholder: "Add a description (optional)";
+                readonly save: "Save";
+                readonly cancel: "Cancel";
+            };
+        };
         readonly dataDownload: {
+            readonly title: "Download";
             readonly download: "Download {{format}}";
             readonly exportDashboard: "Export dashboard as {{format}}";
             readonly exporting: "Exporting...";
+            readonly rows: "{{amount}} rows";
+        };
+        readonly dashboardItem: {
+            readonly chartType: "Chart type";
+            readonly errorTitle: "Error loading data";
+            readonly retry: "Retry";
+            readonly dataExplanation: "Where does this data come from?";
         };
         readonly pong: {
             readonly title: "Pong";
@@ -447,6 +476,7 @@ export declare const defaultTranslations: {
         };
         readonly attachFile: "Attach file";
         readonly removeFile: "Remove";
+        readonly fileUploadError: "Upload failed";
         readonly dropFilesHere: "Drop your files here";
         readonly clarifyingQuestion: {
             readonly submit: "Submit";
@@ -479,6 +509,15 @@ export declare const defaultTranslations: {
                 readonly title: "Questions before getting started";
             };
         };
+    };
+    readonly dataChart: {
+        readonly heatmapNotSupported: "Heatmap not supported at this size";
+        readonly barChartVertical: "Bar (vertical)";
+        readonly barChartHorizontal: "Bar (horizontal)";
+        readonly lineChart: "Line";
+        readonly funnel: "Funnel";
+        readonly pieChart: "Pie";
+        readonly table: "Table";
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -634,6 +673,8 @@ export declare const defaultTranslations: {
         };
     };
     readonly forms: {
+        readonly yes: "Yes";
+        readonly no: "No";
         readonly actionBar: {
             readonly unsavedChanges: "You have changes pending to be saved";
             readonly saving: "Saving...";
@@ -766,9 +807,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -776,8 +816,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }

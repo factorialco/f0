@@ -26,6 +26,7 @@ import { CompanyItemProps } from './types';
 import { ComponentProps } from 'react';
 import { CompoundCellValue } from './types/compound';
 import { CopilotKitProps } from '@copilotkit/react-core';
+import { CountCellValue } from './types/count';
 import { CountryCellValue } from './types/country';
 import { DateCellValue } from './types/date';
 import { DateCellValue as DateCellValue_2 } from './experimental';
@@ -92,6 +93,7 @@ import { ScrollAreaProps } from '@radix-ui/react-scroll-area';
 import { SearchFilterOptions } from './SearchFilter/SearchFilter';
 import { StatusCellValue } from './types/status';
 import { StatusCellValue as StatusCellValue_2 } from './experimental';
+import { SummaryCellValue } from './types/summary';
 import { SVGProps } from 'react';
 import { TagAlertProps } from './experimental';
 import { TagBalanceProps } from './experimental';
@@ -252,6 +254,7 @@ export declare type ActionDefinition = DropdownItemSeparator | (Pick<DropdownIte
     onClick: () => void;
     enabled?: boolean;
     type?: "primary" | "secondary" | "other";
+    hideLabel?: boolean;
 });
 
 declare type ActionLinkProps = ActionBaseProps & {
@@ -381,6 +384,8 @@ declare type ActivityItemProps = {
 
 declare type AddRowActionsResult = PrimaryActionItemDefinition | PrimaryActionItemDefinition[] | undefined;
 
+declare type AggregationType = "count" | "sum" | "avg" | "min" | "max" | "countDistinct";
+
 declare type AiBannerAction = {
     label: string;
     onClick: () => void;
@@ -430,6 +435,21 @@ declare type AiChatCredits = {
     companyLogoUrl?: string;
     /** Plan name displayed below the company name (e.g. "Free plan", "Enterprise"). */
     planName?: string;
+};
+
+/**
+ * Credit warning configuration.
+ * Groups severity level and action callbacks into a single object.
+ *
+ * When provided, a warning banner is shown above the chat textarea.
+ */
+declare type AiChatCreditWarning = {
+    /** The severity level of the warning. */
+    level: "soft";
+    /** Called when the user dismisses the credit warning banner. */
+    onDismiss?: () => void;
+    /** Called when the user clicks the "Get Credits" button. */
+    onGetCredits?: () => void;
 };
 
 /**
@@ -498,6 +518,11 @@ declare type AiChatProviderProps = {
      */
     entityRefs?: EntityRefs;
     /**
+     * Canvas action callbacks grouped by entity type.
+     * Provides save/create functions for persisting canvas entities externally.
+     */
+    canvasActions?: CanvasActions;
+    /**
      * Available tool hints that the user can activate to provide intent context
      * to the AI. Renders a selector button next to the send button.
      * Only one tool hint can be active at a time.
@@ -508,6 +533,11 @@ declare type AiChatProviderProps = {
      * Groups fetchUsage, upgradePlanUrl, and company/plan display info.
      */
     credits?: AiChatCredits;
+    /**
+     * Credit warning configuration. When provided, shows a warning banner above the chat textarea.
+     * Groups severity level and action callbacks.
+     */
+    creditWarning?: AiChatCreditWarning;
     /**
      * File attachment configuration. When provided, enables file uploads in the chat.
      */
@@ -1334,6 +1364,15 @@ declare type CandidateProfile = {
     source?: string;
 };
 
+/**
+ * Canvas-level action callbacks grouped by entity type.
+ * Each entity defines its own actions type; this aggregates them.
+ * Passed by the host app to F0AiChatProvider via `canvasActions`.
+ */
+declare type CanvasActions = {
+    dashboard?: DashboardCanvasActions;
+};
+
 declare type CardAvatarVariant = AvatarVariant | {
     type: "emoji";
     emoji: string;
@@ -1566,6 +1605,17 @@ export declare type CelebrationProps = {
 
 export declare const CelebrationSkeleton: () => JSX_2.Element;
 
+declare interface ChartComputation {
+    datasetId: string;
+    xAxis: string;
+    yAxis: string;
+    aggregation: AggregationType;
+    series?: string;
+    sortBy?: "value" | "category";
+    sortOrder?: "asc" | "desc";
+    limit?: number;
+}
+
 declare type ChartConfig_3 = Record<string, ChartConfig_4[keyof ChartConfig_4]>;
 
 declare type ChartConfig_4 = {
@@ -1599,6 +1649,198 @@ declare type ChartItem<K extends ChartConfig_3> = {
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const ChartWidgetEmptyState: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Props_6 & RefAttributes<HTMLDivElement>>>;
+
+declare interface ChatDashboardBarChartConfig extends ChatDashboardChartConfigBase {
+    type: "bar";
+    orientation?: "vertical" | "horizontal";
+    stacked?: boolean;
+}
+
+declare type ChatDashboardChartConfig = ChatDashboardBarChartConfig | ChatDashboardLineChartConfig | ChatDashboardFunnelChartConfig | ChatDashboardRadarChartConfig | ChatDashboardPieChartConfig | ChatDashboardGaugeChartConfig | ChatDashboardHeatmapChartConfig;
+
+declare interface ChatDashboardChartConfigBase {
+    showLegend?: boolean;
+    showGrid?: boolean;
+    showLabels?: boolean;
+    valueFormat?: FormatPreset;
+}
+
+declare interface ChatDashboardChartItem extends ChatDashboardItemBase {
+    type: "chart";
+    chart: ChatDashboardChartConfig;
+    computation: ChartComputation | RadarComputation | PieComputation | GaugeComputation | HeatmapComputation;
+}
+
+declare interface ChatDashboardCollectionItem extends ChatDashboardItemBase {
+    type: "collection";
+    columns: ChatDashboardColumn[];
+    computation: CollectionComputation;
+}
+
+declare interface ChatDashboardColumn {
+    /** Column key — must match a key in each row object */
+    id: string;
+    /** Display header label */
+    label: string;
+    /** Optional fixed width in pixels */
+    width?: number;
+}
+
+/**
+ * Complete dashboard configuration received via `displayDashboard`.
+ * Contains fetchSpecs that describe how to obtain data server-side —
+ * no raw data is included. Fully JSON-serializable.
+ */
+declare interface ChatDashboardConfig {
+    /** Dashboard title displayed in the canvas header and chat report card */
+    title: string;
+    /** Filter definitions — keys become filter IDs */
+    filters?: Record<string, ChatDashboardFilterDefinition>;
+    /**
+     * Dashboard-level navigation filters (e.g. date navigator). Keys become
+     * filter IDs. Rendered above the grid by F0AnalyticsDashboard's
+     * `navigationFilters` slot.
+     */
+    navigationFilters?: Record<string, ChatDashboardNavigationFilterDefinition>;
+    /** Ordered list of dashboard items with computation specs */
+    items: ChatDashboardItem[];
+    /** Fetch specs for server-side data retrieval, keyed by datasetId */
+    fetchSpecs: Record<string, DashboardFetchSpec>;
+}
+
+/** Granularity options exposed by F0's `OneDateNavigator`. */
+declare type ChatDashboardDateNavigationGranularity = "day" | "week" | "month" | "quarter" | "halfyear" | "year" | "range";
+
+declare interface ChatDashboardFilterDefinition {
+    type: "in";
+    label: string;
+    column: string;
+    datasetId: string;
+}
+
+declare interface ChatDashboardFunnelChartConfig {
+    type: "funnel";
+    sort?: "descending" | "ascending" | "none";
+    orient?: "horizontal" | "vertical";
+    labelPosition?: "inside" | "outside";
+    showLegend?: boolean;
+    showLabels?: boolean;
+    showConversion?: boolean;
+    valueFormat?: FormatPreset;
+}
+
+declare interface ChatDashboardGaugeChartConfig {
+    type: "gauge";
+    min?: number;
+    max?: number;
+    showValue?: boolean;
+    valueFormat?: FormatPreset;
+}
+
+declare interface ChatDashboardHeatmapChartConfig {
+    type: "heatmap";
+    min?: number;
+    max?: number;
+    showLabels?: boolean;
+    showVisualMap?: boolean;
+    valueFormat?: FormatPreset;
+}
+
+declare type ChatDashboardItem = ChatDashboardChartItem | ChatDashboardMetricItem | ChatDashboardCollectionItem;
+
+declare interface ChatDashboardItemBase {
+    id: string;
+    title: string;
+    description?: string;
+    /** Source attribution shown as a subtitle (e.g. "Based on 8 feedbacks from 3 evaluators") */
+    sourceDescription?: string;
+    /**
+     * Optional markdown explanation of how this item's data was calculated.
+     * Surfaced via the per-item dropdown's "Where does this data come from?"
+     * entry, which opens a dialog rendering the markdown. Omit to hide the
+     * entry — backwards compatible with persisted dashboards.
+     */
+    explanation?: string;
+    /**
+     * @deprecated Ignored by the renderer — items auto-size to equal-width
+     * slots based on the per-row slot budget. Kept for backwards compatibility
+     * with persisted layouts; safe to leave unset.
+     */
+    colSpan?: number;
+    /**
+     * @deprecated Use `itemHeight` (pixels) instead. Kept for backwards
+     * compatibility with persisted layouts: when `itemHeight` is unset, the
+     * grid still reads `rowSpan * 48` as a fallback.
+     */
+    rowSpan?: number;
+    /**
+     * Item height in pixels. Takes precedence over `rowSpan` when set. The
+     * row height in the grid is `max(itemHeight)` across all items in the row.
+     * Persisted resizes write a pixel-accurate value here; agent-generated
+     * dashboards should pick from a constrained set of values that match the
+     * data shape (more rows / more categories → taller).
+     */
+    itemHeight?: number;
+    x?: number;
+    y?: number;
+}
+
+declare interface ChatDashboardLineChartConfig extends ChatDashboardChartConfigBase {
+    type: "line";
+    lineType?: "linear" | "smooth" | "step";
+    showArea?: boolean;
+    showDots?: boolean;
+}
+
+declare type ChatDashboardMetricFormat = {
+    type: "number";
+} | {
+    type: "currency";
+    currency?: string;
+} | {
+    type: "percent";
+} | {
+    type: "custom";
+    suffix?: string;
+    prefix?: string;
+};
+
+declare interface ChatDashboardMetricItem extends ChatDashboardItemBase {
+    type: "metric";
+    format?: ChatDashboardMetricFormat;
+    decimals?: number;
+    computation: MetricComputation;
+}
+
+/**
+ * Navigation filter definitions emitted by the LLM via `displayDashboard`.
+ * Discriminated on `type`. Today the only supported variant is
+ * `dateNavigation`, which renders F0's date navigator above the dashboard
+ * grid. The `column` and `datasetId` are agent-side metadata used by the
+ * compute SQL builder; they are stripped before reaching F0AnalyticsDashboard.
+ */
+declare type ChatDashboardNavigationFilterDefinition = {
+    type: "dateNavigation";
+    label: string;
+    column: string;
+    datasetId: string;
+    granularities: ChatDashboardDateNavigationGranularity[];
+    defaultGranularity?: ChatDashboardDateNavigationGranularity;
+};
+
+declare interface ChatDashboardPieChartConfig {
+    type: "pie";
+    innerRadius?: number;
+    showLegend?: boolean;
+    showLabels?: boolean;
+    showPercentage?: boolean;
+    valueFormat?: FormatPreset;
+}
+
+declare interface ChatDashboardRadarChartConfig extends ChatDashboardChartConfigBase {
+    type: "radar";
+    showArea?: boolean;
+}
 
 export declare type ChatWidgetEmptyStateProps = Props_6;
 
@@ -1724,6 +1966,13 @@ declare interface ClockInGraphProps {
 declare type ClockInStatus = "clocked-in" | "break" | "clocked-out";
 
 declare type ColId = string;
+
+declare interface CollectionComputation {
+    datasetId: string;
+    sortBy?: string;
+    sortOrder?: "asc" | "desc";
+    limit?: number;
+}
 
 /**
  * Props for the Collection component.
@@ -1891,36 +2140,6 @@ declare type CompareToDef = {
 
 declare type CompareToDefKey = string;
 
-declare type Content = (ComponentProps<typeof DataList.Item> & {
-    type: "item";
-}) | (ComponentProps<typeof DataList.PersonItem> & {
-    type: "person";
-}) | (ComponentProps<typeof DataList.CompanyItem> & {
-    type: "company";
-}) | (ComponentProps<typeof DataList.TeamItem> & {
-    type: "team";
-}) | (ComponentProps<typeof Weekdays> & {
-    type: "weekdays";
-}) | (ComponentProps<typeof DataList.DotTagItem> & {
-    type: "dot-tag";
-}) | (Props_3 & {
-    type: "alert-tag";
-}) | (F0TagBalanceProps & {
-    type: "balance-tag";
-}) | (F0TagStatusProps & {
-    type: "status-tag";
-}) | (F0TagRawProps & {
-    type: "raw-tag";
-}) | {
-    [T in TagType_2]: {
-        type: "tag-list";
-        tagList: F0TagListProps<T>;
-    };
-}[TagType_2] | {
-    type: "avatar-list";
-    avatarList: F0AvatarListProps;
-};
-
 /**
  * @experimental This is an experimental component use it at your own risk
  */
@@ -1994,6 +2213,25 @@ export declare type CustomVisualizationProps<Source extends {
 export declare const Dashboard: ForwardRefExoticComponent<DashboardProps & RefAttributes<HTMLDivElement>> & {
     Skeleton: () => JSX_2.Element;
 };
+
+/**
+ * Callbacks for persisting dashboards externally (beyond chat history).
+ */
+declare type DashboardCanvasActions = {
+    /** Update an existing saved dashboard */
+    save: (id: string, category: string, config: ChatDashboardConfig) => Promise<void>;
+    /** Create a new saved dashboard. Returns the new dashboard ID if available. */
+    create: (title: string, description: string, config: ChatDashboardConfig, category?: string) => Promise<string | void>;
+};
+
+declare interface DashboardFetchSpec {
+    fetch: Array<{
+        toolId: string;
+        args: Record<string, unknown>;
+    }>;
+    query: string | null;
+    columnLabels?: Record<string, string>;
+}
 
 declare type DashboardProps = {
     widgetWidth?: WidgetWidth;
@@ -2538,6 +2776,9 @@ declare const defaultTranslations: {
             readonly hide: "Hide password";
         };
     };
+    readonly link: {
+        readonly opensInNewTab: "opens in new tab";
+    };
     readonly actions: {
         readonly add: "Add";
         readonly edit: "Edit";
@@ -2552,6 +2793,7 @@ declare const defaultTranslations: {
         readonly expand: "Expand";
         readonly showAll: "Show all";
         readonly showLess: "Show less";
+        readonly seeMore: "See more";
         readonly skipToContent: "Skip to content";
         readonly view: "View";
         readonly unselect: "Unselect";
@@ -2677,6 +2919,7 @@ declare const defaultTranslations: {
         readonly summaries: {
             readonly types: {
                 readonly sum: "sum";
+                readonly count: "count";
             };
         };
         readonly export: {
@@ -2828,10 +3071,34 @@ declare const defaultTranslations: {
             readonly reportLabel: "Report";
             readonly openButton: "Open";
         };
+        readonly formCard: {
+            readonly moreFields: "Open to see all fields";
+        };
+        readonly dashboard: {
+            readonly save: "Save";
+            readonly saveToAnalytics: "Save the dashboard in Analytics";
+            readonly saveAs: "Save as";
+            readonly saveDialog: {
+                readonly title: "Save dashboard";
+                readonly titleLabel: "Title";
+                readonly descriptionLabel: "Description";
+                readonly descriptionPlaceholder: "Add a description (optional)";
+                readonly save: "Save";
+                readonly cancel: "Cancel";
+            };
+        };
         readonly dataDownload: {
+            readonly title: "Download";
             readonly download: "Download {{format}}";
             readonly exportDashboard: "Export dashboard as {{format}}";
             readonly exporting: "Exporting...";
+            readonly rows: "{{amount}} rows";
+        };
+        readonly dashboardItem: {
+            readonly chartType: "Chart type";
+            readonly errorTitle: "Error loading data";
+            readonly retry: "Retry";
+            readonly dataExplanation: "Where does this data come from?";
         };
         readonly pong: {
             readonly title: "Pong";
@@ -2853,6 +3120,7 @@ declare const defaultTranslations: {
         };
         readonly attachFile: "Attach file";
         readonly removeFile: "Remove";
+        readonly fileUploadError: "Upload failed";
         readonly dropFilesHere: "Drop your files here";
         readonly clarifyingQuestion: {
             readonly submit: "Submit";
@@ -2885,6 +3153,15 @@ declare const defaultTranslations: {
                 readonly title: "Questions before getting started";
             };
         };
+    };
+    readonly dataChart: {
+        readonly heatmapNotSupported: "Heatmap not supported at this size";
+        readonly barChartVertical: "Bar (vertical)";
+        readonly barChartHorizontal: "Bar (horizontal)";
+        readonly lineChart: "Line";
+        readonly funnel: "Funnel";
+        readonly pieChart: "Pie";
+        readonly table: "Table";
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -3040,6 +3317,8 @@ declare const defaultTranslations: {
         };
     };
     readonly forms: {
+        readonly yes: "Yes";
+        readonly no: "No";
         readonly actionBar: {
             readonly unsavedChanges: "You have changes pending to be saved";
             readonly saving: "Saving...";
@@ -3111,6 +3390,36 @@ declare interface DeleteBlockNotesTextEditorPageDocumentPatch {
  */
 export declare const DetailsItem: WithDataTestIdReturnType_5<ForwardRefExoticComponent<DetailsItemType & RefAttributes<HTMLDivElement>>>;
 
+export declare type DetailsItemContent = (ComponentProps<typeof DataList.Item> & {
+    type: "item";
+}) | (ComponentProps<typeof DataList.PersonItem> & {
+    type: "person";
+}) | (ComponentProps<typeof DataList.CompanyItem> & {
+    type: "company";
+}) | (ComponentProps<typeof DataList.TeamItem> & {
+    type: "team";
+}) | (ComponentProps<typeof Weekdays> & {
+    type: "weekdays";
+}) | (ComponentProps<typeof DataList.DotTagItem> & {
+    type: "dot-tag";
+}) | (Props_3 & {
+    type: "alert-tag";
+}) | (F0TagBalanceProps & {
+    type: "balance-tag";
+}) | (F0TagStatusProps & {
+    type: "status-tag";
+}) | (F0TagRawProps & {
+    type: "raw-tag";
+}) | {
+    [T in TagType_2]: {
+        type: "tag-list";
+        tagList: F0TagListProps<T>;
+    };
+}[TagType_2] | {
+    type: "avatar-list";
+    avatarList: F0AvatarListProps;
+};
+
 /**
  * @experimental This is an experimental component use it at your own risk
  */
@@ -3120,12 +3429,20 @@ declare interface DetailsItemsListProps extends WithDataTestIdProps {
     title?: string;
     tableView?: boolean;
     details: DetailsItemType[];
+    showSeeMore?: boolean;
+    onClickSeeMore?: () => void;
 }
 
 export declare interface DetailsItemType {
     title: string;
-    content: Content | Content[];
+    content: DetailsItemContent | DetailsItemContent[];
     isHorizontal?: boolean;
+    /**
+     * When true inside a tableView, keeps the table-row padding but stacks
+     * the label above the content instead of side-by-side. Useful for
+     * long-form text fields like rich-text or textarea.
+     */
+    verticalLayout?: boolean;
     spacingAtTheBottom?: boolean;
 }
 
@@ -3213,7 +3530,7 @@ declare type DropdownProps = Omit<DropdownInternalProps, (typeof privateProps_4)
 } & WithDataTestIdProps;
 
 /** The edit mode for a column cell in the editable table. */
-declare type EditableTableCellEditType = "text" | "number" | "date" | "select" | "multiselect" | "display-only" | "disabled";
+declare type EditableTableCellEditType = "text" | "number" | "money" | "date" | "select" | "multiselect" | "display-only" | "disabled";
 
 declare type EditableTableCollectionProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>> = CollectionProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, EditableTableVisualizationOptions<R, Filters, Sortings, Summaries>>;
 
@@ -3347,6 +3664,8 @@ declare type EntityResolvers = {
     person?: (id: string) => Promise<PersonProfile>;
     candidate?: (id: string) => Promise<CandidateProfile>;
     jobPosting?: (id: string) => Promise<JobPostingProfile>;
+    requisition?: (id: string) => Promise<RequisitionProfile>;
+    vacancy?: (id: string) => Promise<VacancyProfile>;
     /**
      * Search for persons by name query. Used by the @mention autocomplete
      * in the chat input to let users reference specific employees.
@@ -3433,6 +3752,8 @@ declare type EntityUrlBuilders = {
     person?: (id: string) => string;
     candidate?: (id: string) => string;
     jobPosting?: (id: string) => string;
+    requisition?: (id: string) => string;
+    vacancy?: (id: string) => string;
 };
 
 declare type Enumerate<N extends number, Acc extends number[] = []> = Acc["length"] extends N ? [...Acc, N][number] : Enumerate<N, [...Acc, Acc["length"]]>;
@@ -4167,6 +4488,22 @@ declare type FontSize = (typeof fontSizes)[number];
 
 declare const fontSizes: readonly ["sm", "md", "lg"];
 
+/**
+ * A preset formatting instruction the LLM can specify instead of a
+ * real formatter function. The wrapper component maps these to actual
+ * `(value: number) => string` functions at render time.
+ */
+declare type FormatPreset = {
+    type: "number";
+} | {
+    type: "currency";
+    currency?: string;
+} | {
+    type: "percent";
+} | {
+    type: "compact";
+};
+
 declare interface FrameContextType {
     isSmallScreen: boolean;
     isLastToggleInvokedByUser: boolean;
@@ -4176,6 +4513,15 @@ declare interface FrameContextType {
         isInvokedByUser: boolean;
     }) => void;
     setForceFloat: (force: boolean) => void;
+}
+
+declare interface GaugeComputation {
+    datasetId: string;
+    aggregation: AggregationType;
+    column?: string;
+    min?: number;
+    max?: number;
+    name?: string;
 }
 
 export declare function generateCSVContent<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>>(data: R[], visualization: Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> | undefined, options?: CSVExportOptions): string;
@@ -4320,6 +4666,14 @@ declare type HeaderProps = {
 declare type HeaderSecondaryAction = SecondaryAction & {
     hideLabel?: boolean;
 };
+
+declare interface HeatmapComputation {
+    datasetId: string;
+    xAxis: string;
+    yAxis: string;
+    valueColumn: string;
+    aggregation: AggregationType;
+}
 
 export declare type heightType = "xxs" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "full" | "auto";
 
@@ -4710,7 +5064,7 @@ declare interface LoadingStateProps {
 export declare const MAX_EXPANDED_ACTIONS = 2;
 
 export declare type MentionedUser = {
-    id: number;
+    id: string | number;
     label: string;
     image_url?: string;
     href?: string;
@@ -4858,6 +5212,12 @@ declare interface MetadataProps {
      * If true and the metadata type is a list, it will be collapsed to the first item
      */
     collapse?: boolean;
+}
+
+declare interface MetricComputation {
+    datasetId: string;
+    aggregation: AggregationType;
+    column?: string;
 }
 
 /**
@@ -5121,6 +5481,7 @@ declare type NumberCellConfig = {
     maxDecimals?: number;
     locale?: string;
     units?: string;
+    unitsPosition?: "before" | "after";
 };
 
 export declare type NumberFilterDefinition = BaseFilterDefinition<"number"> & {
@@ -5636,6 +5997,8 @@ export declare type PageAction = {
 } & ({
     href: string;
 } | {
+    onClick: () => void;
+} | {
     actions: Array<{
         label: string;
         href: string;
@@ -5755,6 +6118,16 @@ export declare const PieChart: WithDataTestIdReturnType_4<ForwardRefExoticCompon
 export declare const PieChartWidget: ForwardRefExoticComponent<Omit<WidgetProps_2 & {
 chart: PieChartProps_2;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+
+declare interface PieComputation {
+    datasetId: string;
+    nameColumn: string;
+    valueColumn: string;
+    aggregation: AggregationType;
+    sortBy?: "value" | "name";
+    sortOrder?: "asc" | "desc";
+    limit?: number;
+}
 
 declare type PostDescriptionProps = {
     content: HTMLString;
@@ -6055,6 +6428,19 @@ export declare type RadarChartProps<K extends ChartConfig_3> = {
     aspect?: ComponentProps<typeof ChartContainer>["aspect"];
 };
 
+declare interface RadarComputation {
+    datasetId: string;
+    seriesColumn: string;
+    indicators: Array<{
+        column: string;
+        label: string;
+        max?: number;
+    }>;
+    limit?: number;
+    sortBy?: string;
+    sortOrder?: "asc" | "desc";
+}
+
 export declare const rangeSeparator = "\u2192";
 
 declare interface ReactionProps {
@@ -6128,6 +6514,17 @@ declare interface ReplaceContentNotesTextEditorPageDocumentPatch {
     content: JSONContent[];
 }
 
+/**
+ * Profile data for a requisition entity (ATS requisition), resolved asynchronously
+ * and displayed in the entity reference hover card.
+ */
+declare type RequisitionProfile = {
+    id: string | number;
+    title: string;
+    status?: string;
+    reason?: string;
+};
+
 export declare type ResolvedRecordType<R> = R extends RecordType ? R : RecordType;
 
 /**
@@ -6146,7 +6543,7 @@ declare type RestrictComponentProps = {
 
 export declare type resultType = {
     value: string | null;
-    mentionIds?: number[];
+    mentionIds?: string[];
 };
 
 export declare const RichTextDisplay: WithDataTestIdReturnType_5<ForwardRefExoticComponent<RichTextDisplayProps & RefAttributes<HTMLDivElement>>>;
@@ -6250,6 +6647,10 @@ export declare type SecondaryActionItem = Pick<DropdownItemObject, "label" | "ic
     loading?: boolean;
     disabled?: boolean;
     onClick?: () => void | Promise<void>;
+    tooltip?: (params: {
+        disabled: boolean;
+        loading: boolean;
+    }) => string | undefined;
 };
 
 export declare type SecondaryActionsDefinition = {
@@ -7187,6 +7588,17 @@ declare interface User_2 {
 
 export declare function useSidebar(): FrameContextType;
 
+/**
+ * Profile data for a vacancy entity (ATS vacancy/position), resolved asynchronously
+ * and displayed in the entity reference hover card.
+ */
+declare type VacancyProfile = {
+    id: string | number;
+    name: string;
+    status?: string;
+    vacancyType?: string;
+};
+
 declare type ValueDisplayRendererContext = {
     visualization: ValueDisplayVisualizationType;
     i18n: TranslationsType;
@@ -7229,6 +7641,8 @@ declare const valueDisplayRenderers: {
     readonly folder: (args: FolderCellValue) => JSX_2.Element;
     readonly country: (args: CountryCellValue, context: ValueDisplayRendererContext) => JSX_2.Element;
     readonly delta: (args: DeltaCellValue) => JSX_2.Element;
+    readonly summary: (args: SummaryCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
+    readonly count: (args: CountCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
 };
 
 declare type ValueDisplayTableAlignment = "left" | "right";
@@ -7618,9 +8032,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -7628,8 +8041,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
