@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.459.1](https://github.com/factorialco/f0/compare/f0-react-v1.459.0...f0-react-v1.459.1) (2026-04-22)
+
+
+### Bug Fixes
+
+* prevent form from being submitted from canva mode when it has validation errors ([#4001](https://github.com/factorialco/f0/issues/4001)) ([7afa840](https://github.com/factorialco/f0/commit/7afa840dc9a68bd20cf235557c1e51cfdea0d558))
+
 ## [1.459.0](https://github.com/factorialco/f0/compare/f0-react-v1.458.3...f0-react-v1.459.0) (2026-04-22)
 
 
