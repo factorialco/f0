@@ -8,4 +8,5 @@ export type CandidateProfile = {
   lastName: string
   avatarUrl?: string
   source?: string
+  appliedAt?: string
 }

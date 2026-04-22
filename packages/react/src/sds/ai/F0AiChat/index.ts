@@ -11,6 +11,7 @@ export type {
   AiChatToolHint,
   AppendMessage,
   AppendToolCall,
+  CandidateProfile,
   CanvasContent,
   CanvasContentBase,
   CreditsUsage,
