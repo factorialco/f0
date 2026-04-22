@@ -112,7 +112,7 @@ export function FileAttachment({
         ? translations.processing
         : `${translations.uploading} ${progressPercent}%`
       : fileSize != null
-        ? translations.fileWeight.replace("{{size}}", formatFileSize(fileSize))
+        ? formatFileSize(fileSize)
         : null
 
   return (

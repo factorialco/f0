@@ -460,7 +460,7 @@ describe("FileFieldRenderer", () => {
     )
 
     expect(screen.getByText("contract_2024.pdf")).toBeInTheDocument()
-    expect(screen.getByText("File weight: 2.4 MB")).toBeInTheDocument()
+    expect(screen.getByText("2.4 MB")).toBeInTheDocument()
 
     expect(
       screen.queryByText("Drag and drop a file, or click to select")

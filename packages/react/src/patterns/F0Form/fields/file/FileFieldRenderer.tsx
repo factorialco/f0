@@ -523,7 +523,6 @@ export function FileFieldRenderer({
                   uploading: translations.uploading,
                   processing: translations.processing,
                   uploadFailed: translations.uploadFailed,
-                  fileWeight: translations.fileWeight,
                 }}
               />
             )

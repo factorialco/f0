@@ -259,6 +259,5 @@ export interface FileAttachmentProps {
     uploading: string
     processing: string
     uploadFailed: string
-    fileWeight: string
   }
 }
