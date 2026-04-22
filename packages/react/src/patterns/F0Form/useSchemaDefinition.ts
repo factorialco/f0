@@ -264,6 +264,7 @@ function configToF0Field(
         accept: "accept" in config ? config.accept : undefined,
         maxSizeMB: "maxSizeMB" in config ? config.maxSizeMB : undefined,
         multiple: "multiple" in config ? config.multiple : undefined,
+        maxFiles: "maxFiles" in config ? config.maxFiles : undefined,
         description: "description" in config ? config.description : undefined,
         useUpload: "useUpload" in config ? config.useUpload : undefined,
         renderIf: config.renderIf,

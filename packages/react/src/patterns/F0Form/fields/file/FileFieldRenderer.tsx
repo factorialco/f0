@@ -3,8 +3,9 @@ import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
 import type { InputFieldStatusType } from "@/ui/InputField/types"
 
+import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Icon } from "@/components/F0Icon"
-import { Upload } from "@/icons/app"
+import { AlertCircle, Upload } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn, focusRing } from "@/lib/utils"
 
@@ -12,7 +13,7 @@ import type { ResolvedField } from "../types"
 import type { F0FileField, FileEntry, InitialFile } from "./types"
 
 import { useOptionalF0FormContext } from "../../context"
-import { FileUploadItem } from "./FileUploadItem"
+import { FileAttachment } from "./FileAttachment"
 
 const BARE_CATEGORIES = new Set([
   "image",
@@ -103,11 +104,11 @@ function getDropzoneStatusClasses({
   statusType?: InputFieldStatusType
 }): string {
   if (isDragOver) {
-    return "border-f1-border-accent bg-f1-background-accent-bold/5"
+    return "border-f1-border-selected-bold bg-f1-background-selected"
   }
 
   if (hasCriticalStatus) {
-    return "border-f1-border-critical-bold bg-f1-background-critical bg-opacity-10"
+    return "border-f1-border-critical-bold bg-f1-background-critical/10"
   }
 
   if (statusType === "warning") {
@@ -186,8 +187,11 @@ export function FileFieldRenderer({
 
   const hasFiles = entries.length > 0
 
-  // In single mode, hide dropzone once a file entry exists
-  const showDropzone = isMultiple || !hasFiles
+  // In single mode, hide dropzone once a file entry exists.
+  // In multiple mode, hide dropzone if maxFiles limit is reached.
+  const isAtLimit =
+    isMultiple && field.maxFiles != null && entries.length >= field.maxFiles
+  const showDropzone = !isAtLimit && (isMultiple || !hasFiles)
 
   const acceptString = field.accept
     ? field.accept.map(normalizeMime).join(",")
@@ -232,29 +236,73 @@ export function FileFieldRenderer({
     (files: File[]) => {
       setValidationError(null)
 
-      const filesToProcess = isMultiple ? files : [files[0]]
-
-      for (const file of filesToProcess) {
+      if (!isMultiple) {
+        const file = files[0]
         const validationMsg = validateFile(file)
         if (validationMsg) {
           setValidationError(validationMsg)
-          continue
+          return
         }
-
         if (!resolvedUseUpload) {
           console.warn(
             "[F0Form] No useUpload hook provided. Pass useUpload to <F0Form> or to the file field config."
           )
         }
-
         const key = `${file.name}-${file.size}-${Date.now()}-${Math.random()}`
-        setEntries((prev) => {
-          if (!isMultiple) return [{ key, file }]
-          return [...prev, { key, file }]
-        })
+        setEntries([{ key, file }])
+        return
+      }
+
+      // Multiple mode: use functional updater to always read latest entries count.
+      // Validation error is captured via a local variable and scheduled after.
+      let errorMsg: string | null = null
+
+      setEntries((prev) => {
+        const remaining =
+          field.maxFiles != null ? field.maxFiles - prev.length : Infinity
+
+        if (remaining <= 0) {
+          errorMsg = translations.maxFilesReached.replace(
+            "{{maxFiles}}",
+            String(field.maxFiles)
+          )
+          return prev
+        }
+
+        const filesToProcess = files.slice(0, remaining)
+        if (files.length > remaining) {
+          errorMsg = translations.maxFilesReached.replace(
+            "{{maxFiles}}",
+            String(field.maxFiles)
+          )
+        }
+
+        const newEntries: FileEntry[] = []
+        for (const file of filesToProcess) {
+          const validationMsg = validateFile(file)
+          if (validationMsg) {
+            errorMsg = validationMsg
+            continue
+          }
+          if (!resolvedUseUpload) {
+            console.warn(
+              "[F0Form] No useUpload hook provided. Pass useUpload to <F0Form> or to the file field config."
+            )
+          }
+          newEntries.push({
+            key: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
+            file,
+          })
+        }
+        return [...prev, ...newEntries]
+      })
+
+      // Apply captured error after the state update batch
+      if (errorMsg !== null) {
+        setValidationError(errorMsg)
       }
     },
-    [isMultiple, validateFile, resolvedUseUpload]
+    [isMultiple, field.maxFiles, validateFile, resolvedUseUpload, translations]
   )
 
   const handleDragOver = useCallback(
@@ -384,7 +432,7 @@ export function FileFieldRenderer({
   })
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-4">
       {showDropzone && (
         <div
           role="button"
@@ -396,25 +444,23 @@ export function FileFieldRenderer({
           onKeyDown={handleDropzoneKeyDown}
           aria-disabled={field.disabled}
           className={cn(
-            "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 transition-colors",
+            "flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-[1px] border-dashed px-4 py-10 transition-colors",
             dropzoneStatusClasses,
             !field.disabled &&
               !isDragOver &&
               !hasDecorativeStatus &&
               "hover:border-f1-border-hover hover:bg-f1-background-secondary",
             field.disabled && "cursor-not-allowed opacity-50",
-            focusRing("rounded-lg")
+            focusRing("rounded-xl")
           )}
         >
-          <div className="flex aspect-square items-center justify-center rounded-md border border-solid border-f1-border p-1 text-f1-icon">
-            <F0Icon icon={Upload} size="lg" />
-          </div>
+          <F0AvatarIcon icon={Upload} size="md" />
           <div className="flex flex-col items-center gap-0.5">
-            <span className="text-center text-base text-f1-foreground-secondary">
+            <span className="text-center text-base font-medium text-f1-foreground">
               {dropzoneText}
             </span>
-            {!isDragOver && acceptedTypesLabel && (
-              <span className="text-center text-sm text-f1-foreground-secondary/70">
+            {acceptedTypesLabel && (
+              <span className="text-center text-base text-f1-foreground-secondary">
                 {translations.acceptedTypes.replace(
                   "{{types}}",
                   acceptedTypesLabel
@@ -438,32 +484,49 @@ export function FileFieldRenderer({
       />
 
       {validationError && (
-        <p className="text-base text-f1-foreground-critical">
-          {validationError}
-        </p>
+        <div className="-mt-2 flex items-center gap-1">
+          <F0Icon icon={AlertCircle} color="critical" />
+          <p className="text-sm font-medium text-f1-foreground-critical">
+            {validationError}
+          </p>
+        </div>
       )}
 
       {entries.length > 0 && (
-        <div className="flex flex-col gap-2">
-          {entries.map((entry) => (
-            <FileUploadItem
-              key={entry.key}
-              entry={entry}
-              useUpload={entry.file ? resolvedUseUpload : undefined}
-              onUploadComplete={(value) =>
-                handleUploadComplete(entry.key, value)
-              }
-              onRemove={() => handleRemove(entry.key)}
-              onError={(msg) => handleUploadError(entry.key, msg)}
-              disabled={field.disabled}
-              translations={{
-                remove: translations.remove,
-                uploading: translations.uploading,
-                processing: translations.processing,
-                uploadFailed: translations.uploadFailed,
-              }}
-            />
-          ))}
+        <div className="flex flex-col">
+          {entries.map((entry, index) => {
+            const total = entries.length
+            const position =
+              total === 1
+                ? "single"
+                : index === 0
+                  ? "top"
+                  : index === total - 1
+                    ? "bottom"
+                    : "middle"
+
+            return (
+              <FileAttachment
+                key={entry.key}
+                className={index > 0 ? "-mt-px" : undefined}
+                entry={entry}
+                useUpload={entry.file ? resolvedUseUpload : undefined}
+                onUploadComplete={(value) =>
+                  handleUploadComplete(entry.key, value)
+                }
+                onRemove={() => handleRemove(entry.key)}
+                onError={(msg) => handleUploadError(entry.key, msg)}
+                disabled={field.disabled}
+                position={position}
+                translations={{
+                  remove: translations.remove,
+                  uploading: translations.uploading,
+                  processing: translations.processing,
+                  uploadFailed: translations.uploadFailed,
+                }}
+              />
+            )
+          })}
         </div>
       )}
     </div>
