@@ -42,7 +42,7 @@ export const ScoreEditOption = ({
   return (
     <div
       className={cn(
-        "group relative flex h-10 min-w-20 flex-1 items-center justify-center rounded-md border border-solid border-f1-border-secondary text-center font-medium",
+        "group relative flex h-10 min-w-20 flex-1 items-center justify-center rounded-md border border-solid border-f1-border text-center font-medium",
         selected &&
           "border-f1-border-selected bg-f1-background-selected-secondary",
         !disabled ? "cursor-pointer" : "cursor-default"

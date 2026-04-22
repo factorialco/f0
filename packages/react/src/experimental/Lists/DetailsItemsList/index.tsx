@@ -29,7 +29,7 @@ const _DetailsItemsList = forwardRef<HTMLDivElement, DetailsItemsListProps>(
             className={cn(
               "flex flex-col",
               tableView
-                ? "rounded-md border border-solid border-f1-border-secondary"
+                ? "rounded-md border border-solid border-f1-border"
                 : "gap-3"
             )}
           >
@@ -43,7 +43,7 @@ const _DetailsItemsList = forwardRef<HTMLDivElement, DetailsItemsListProps>(
                   isHorizontal={tableView}
                 />
                 {tableView && index !== details.length - 1 && (
-                  <div className="h-[1px] w-full bg-f1-border-secondary" />
+                  <div className="h-[1px] w-full bg-f1-border" />
                 )}
               </React.Fragment>
             ))}
