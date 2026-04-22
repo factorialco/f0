@@ -29,7 +29,11 @@ const profile: JobPostingProfile = {
   id: "99",
   title: "Senior Engineer",
   status: "Open",
+  statusVariant: "positive",
   location: "Barcelona",
+  publishedAt: "2024-01-15",
+  vacanciesFilled: 1,
+  vacanciesTotal: 3,
 }
 
 describe("JobPostingEntityRef", () => {
@@ -66,8 +70,96 @@ describe("JobPostingEntityRef", () => {
     await waitFor(() => {
       // Title appears both in the trigger and the card heading
       expect(screen.getAllByText("Senior Engineer")).toHaveLength(2)
-      expect(screen.getByText("Open · Barcelona")).toBeInTheDocument()
+      expect(screen.getByText("Open")).toBeInTheDocument()
     })
+  })
+
+  it("renders location as the card description and status with a label", async () => {
+    const user = userEvent.setup()
+    mockResolver.mockResolvedValue(profile)
+
+    render(<JobPostingEntityRef id="99" label="Senior Engineer" />)
+
+    await user.hover(screen.getByRole("button"))
+
+    await waitFor(() => {
+      expect(screen.getByText("Barcelona")).toBeInTheDocument()
+      expect(screen.getByText("Open")).toBeInTheDocument()
+    })
+
+    expect(screen.getByText("Status")).toBeInTheDocument()
+    expect(screen.queryByText("Location")).not.toBeInTheDocument()
+  })
+
+  it("renders published and vacancies rows with labels", async () => {
+    const user = userEvent.setup()
+    mockResolver.mockResolvedValue(profile)
+
+    render(<JobPostingEntityRef id="99" label="Senior Engineer" />)
+
+    await user.hover(screen.getByRole("button"))
+
+    await waitFor(() => {
+      expect(screen.getByText("Published")).toBeInTheDocument()
+      // publishedAt is formatted via toLocaleDateString; assert the label only.
+      expect(screen.getByText("Vacancies")).toBeInTheDocument()
+      expect(screen.getByText("1/3")).toBeInTheDocument()
+    })
+  })
+
+  it("applies the statusVariant to the rendered status tag", async () => {
+    const user = userEvent.setup()
+    mockResolver.mockResolvedValue(profile)
+
+    render(<JobPostingEntityRef id="99" label="Senior Engineer" />)
+
+    await user.hover(screen.getByRole("button"))
+
+    const statusTag = await waitFor(() =>
+      screen.getByText("Open").closest('[class*="bg-f1-background-positive"]')
+    )
+    expect(statusTag).toBeInTheDocument()
+  })
+
+  it("falls back to the neutral variant when statusVariant is missing", async () => {
+    const user = userEvent.setup()
+    mockResolver.mockResolvedValue({
+      id: "99",
+      title: "Senior Engineer",
+      status: "Pending",
+    })
+
+    render(<JobPostingEntityRef id="99" label="Senior Engineer" />)
+
+    await user.hover(screen.getByRole("button"))
+
+    const statusTag = await waitFor(() =>
+      screen
+        .getByText("Pending")
+        .closest('[class*="bg-f1-background-secondary"]')
+    )
+    expect(statusTag).toBeInTheDocument()
+  })
+
+  it("omits rows when optional fields are missing", async () => {
+    const user = userEvent.setup()
+    mockResolver.mockResolvedValue({
+      id: "99",
+      title: "Senior Engineer",
+    })
+
+    render(<JobPostingEntityRef id="99" label="Senior Engineer" />)
+
+    await user.hover(screen.getByRole("button"))
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Senior Engineer")).toHaveLength(2)
+    })
+
+    expect(screen.queryByText("Status")).not.toBeInTheDocument()
+    expect(screen.queryByText("Published")).not.toBeInTheDocument()
+    expect(screen.queryByText("Vacancies")).not.toBeInTheDocument()
+    expect(screen.queryByText("Barcelona")).not.toBeInTheDocument()
   })
 
   it("caches profile — resolver is called only once per id", async () => {
