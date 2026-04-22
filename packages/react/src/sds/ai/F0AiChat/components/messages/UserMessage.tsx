@@ -171,6 +171,8 @@ export const UserMessage = ({ message }: UserMessageProps) => {
       ref={ref}
       className="my-4 flex w-full flex-col items-end gap-2 first:mt-0 last:mb-0"
     >
+      {quoteText && <ReplyQuoteBlock text={quoteText} />}
+
       {uploadedFiles.length > 0 && (
         <div className="flex max-w-[90%] flex-wrap justify-end gap-1.5">
           {uploadedFiles.map((file, index) => (
@@ -182,7 +184,6 @@ export const UserMessage = ({ message }: UserMessageProps) => {
           ))}
         </div>
       )}
-      {quoteText && <ReplyQuoteBlock text={quoteText} />}
       {hasVisibleText && (
         <div
           ref={bubbleRef}
