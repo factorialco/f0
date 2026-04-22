@@ -195,14 +195,14 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
   if (showSectionsSidepanel && tocItems.length > 0) {
     return (
       <div className="flex w-full overflow-scroll">
-        <div className="sticky top-0 h-fit shrink-0 self-start pt-2 mr-4">
+        <div className="sticky top-0 mr-4 h-fit shrink-0 self-start pt-2">
           <F0TableOfContent
             items={tocItems}
             activeItem={activeSection}
             scrollable={false}
           />
         </div>
-        <div className="w-px sticky top-0 bottom-0 bg-f1-border-secondary" />
+        <div className="sticky bottom-0 top-0 w-px bg-f1-border-secondary" />
         {content}
       </div>
     )
@@ -416,7 +416,7 @@ function F0FormFromSingleDefinition<TSchema extends F0FormSchema>({
       className={className}
       styling={styling}
       formRef={formRef}
-      initialFiles={initialFiles}
+      initialFiles={def.initialFiles ?? initialFiles}
       renderCustomField={renderCustomField}
       useUpload={useUpload}
       isLoading={isLoading}
@@ -477,7 +477,7 @@ function F0FormFromPerSectionDefinition<T extends F0PerSectionSchema>({
       className={className}
       styling={styling}
       formRef={formRef}
-      initialFiles={initialFiles}
+      initialFiles={def.initialFiles ?? initialFiles}
       renderCustomField={renderCustomField}
       useUpload={useUpload}
       isLoading={isLoading}
@@ -995,7 +995,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             </div>
 
             {/* Separator */}
-            <div className="w-px sticky top-0 bottom-0 bg-f1-border-secondary mr-4" />
+            <div className="sticky bottom-0 top-0 mr-4 w-px bg-f1-border-secondary" />
 
             {/* Form content - centered in available space */}
             {formContent}

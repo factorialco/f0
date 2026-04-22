@@ -4,10 +4,10 @@ import { useState, useCallback, useRef } from "react"
 import { z } from "zod"
 
 import { F0Button } from "@/components/F0Button"
-import { F0Dialog } from "@/patterns/F0Dialog"
-import { useF0FormDefinition } from "@/patterns/F0WizardForm"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import { ExternalLink, Plus, Settings } from "@/icons/app"
+import { F0Dialog } from "@/patterns/F0Dialog"
+import { useF0FormDefinition } from "@/patterns/F0WizardForm"
 
 import type {
   FileUploadHookReturn,
@@ -1375,13 +1375,73 @@ export const FileFieldsWithInitialFiles: Story = {
         return { success: true, message: "Document updated" }
       },
       submitConfig: { label: "Update Document" },
+      initialFiles: [
+        {
+          value: "signed_contract_2024.pdf",
+          name: "contract_2024.pdf",
+          type: "application/pdf",
+          size: 2_500_000,
+        },
+        {
+          value: "signed_invoice.pdf",
+          name: "invoice_march.pdf",
+          type: "application/pdf",
+          size: 1_200_000,
+        },
+        {
+          value: "signed_receipt.png",
+          name: "receipt_photo.png",
+          type: "image/png",
+          size: 850_000,
+        },
+      ],
     })
 
-    return (
-      <F0Form
-        formDefinition={formDefinition}
-        useUpload={useMockUpload}
-        initialFiles={[
+    return <F0Form formDefinition={formDefinition} useUpload={useMockUpload} />
+  },
+}
+
+/**
+ * Same as `FileFieldsWithInitialFiles` but the file list is fetched
+ * asynchronously — simulating a real API call. The form renders in a loading
+ * state until the files resolve, then hydrates the file fields.
+ */
+export const FileFieldsWithAsyncInitialFiles: Story = {
+  render() {
+    const formSchema = z.object({
+      document: f0FormField(z.string().min(1, "Please upload a file"), {
+        label: "Contract Document",
+        fieldType: "file",
+        accept: ["application/pdf"],
+      }),
+      attachments: f0FormField(
+        z.array(z.string()).min(1, "Upload at least one file"),
+        {
+          label: "Supporting Documents",
+          fieldType: "file",
+          multiple: true,
+          accept: ["application/pdf", "image"],
+          maxSizeMB: 50,
+        }
+      ),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "file-initial-async",
+      schema: formSchema,
+      defaultValues: {
+        document: "signed_contract_2024.pdf",
+        attachments: ["signed_invoice.pdf", "signed_receipt.png"],
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Document updated" }
+      },
+      submitConfig: { label: "Update Document" },
+      initialFiles: async (_signal) => {
+        await sleep(1500)
+        return [
           {
             value: "signed_contract_2024.pdf",
             name: "contract_2024.pdf",
@@ -1400,9 +1460,11 @@ export const FileFieldsWithInitialFiles: Story = {
             type: "image/png",
             size: 850_000,
           },
-        ]}
-      />
-    )
+        ]
+      },
+    })
+
+    return <F0Form formDefinition={formDefinition} useUpload={useMockUpload} />
   },
 }
 
