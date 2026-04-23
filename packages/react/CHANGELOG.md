@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.463.0](https://github.com/factorialco/f0/compare/f0-react-v1.462.0...f0-react-v1.463.0) (2026-04-23)
+
+
+### Features
+
+* add F0Form field shortcuts ([#4014](https://github.com/factorialco/f0/issues/4014)) ([e39812f](https://github.com/factorialco/f0/commit/e39812f14a42948123e5de6d04e008848ba6c877))
+
 ## [1.462.0](https://github.com/factorialco/f0/compare/f0-react-v1.461.1...f0-react-v1.462.0) (2026-04-23)
 
 
