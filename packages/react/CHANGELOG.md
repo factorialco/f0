@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.462.0](https://github.com/factorialco/f0/compare/f0-react-v1.461.1...f0-react-v1.462.0) (2026-04-23)
+
+
+### Features
+
+* **CandidateEntityRef:** show source and applied date rows ([#3998](https://github.com/factorialco/f0/issues/3998)) ([c5c2fc9](https://github.com/factorialco/f0/commit/c5c2fc92af5ee5c07982f2ac00d5683def837cb4))
+
 ## [1.461.1](https://github.com/factorialco/f0/compare/f0-react-v1.461.0...f0-react-v1.461.1) (2026-04-23)
 
 
