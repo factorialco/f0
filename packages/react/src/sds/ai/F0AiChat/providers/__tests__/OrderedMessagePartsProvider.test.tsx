@@ -172,6 +172,46 @@ describe("OrderedMessagePartsProvider", () => {
     })
   })
 
+  it("accumulates every streamed delta, including the final one", () => {
+    // AG-UI's defaultApplyEvents dispatches onTextMessageContentEvent
+    // BEFORE appending the current delta to the message content. So
+    // `textMessageBuffer` is always the text-so-far WITHOUT the delta
+    // that just arrived. The provider must include `event.delta`
+    // itself, otherwise the very last delta is never captured (because
+    // no subsequent content event arrives to carry it in its buffer).
+    //
+    // Regression test for truncation of the final 1–2 symbols of
+    // streamed assistant replies (trailing "*", ")", "*)", etc.).
+    const seen: (OrderedPart[] | null)[] = []
+    renderWithProvider(
+      <Probe messageId="msg-stream" onParts={(p) => seen.push(p)} />
+    )
+
+    const sub = subscriberRef.current!
+
+    const deltas = ["Hello ", "how ", "are ", "you", "*)"]
+    const expected = deltas.join("")
+
+    act(() => {
+      sub.onTextMessageStartEvent?.({ event: { messageId: "msg-stream" } })
+
+      let accumulated = ""
+      for (const delta of deltas) {
+        sub.onTextMessageContentEvent?.({
+          event: { messageId: "msg-stream", delta },
+          textMessageBuffer: accumulated,
+        })
+        accumulated += delta
+      }
+
+      sub.onTextMessageEndEvent?.({ event: { messageId: "msg-stream" } })
+    })
+
+    const last = seen[seen.length - 1]
+    expect(last).toHaveLength(1)
+    expect(last?.[0]).toMatchObject({ kind: "text", text: expected })
+  })
+
   it("getOrderedParts returns a defensive copy that consumers cannot mutate back", () => {
     const seen: (OrderedPart[] | null)[] = []
     renderWithProvider(
