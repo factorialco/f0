@@ -120,9 +120,10 @@ const { source } = useDataCollectionSource({
 ```
 
 When `allPagesSelection` is enabled, a banner row appears directly below the column
-headers once all items on the current page are selected. The banner shows how many
-items are selected and offers a "Select all N items" button, following the Gmail-style
-pattern for cross-page selection. The column headers remain fully visible at all times.
+headers as soon as at least one row is selected. The banner shows the current selection
+count. Once all items on the current page are selected, it also offers a "Select all N
+items" button, following the Gmail-style pattern for cross-page selection. The column
+headers remain fully visible at all times.
 
 **Page-only selection (default behavior):**
 
@@ -142,7 +143,7 @@ pattern for cross-page selection. The column headers remain fully visible at all
 - Navigate to page 2 → previous selections are maintained
 - Select 3 items on page 2
 - All 5 items (2 from page 1 + 3 from page 2) are selected
-- When all items on a page are selected, a "Select all N items" banner row appears directly below the column headers (headers remain visible)
+- When any row is selected, a banner row appears directly below the column headers (headers remain visible). Once all rows on the current page are selected, it adds a "Select all N items" button.
 - You need to manage the full selection state in your backend
 
 <Canvas

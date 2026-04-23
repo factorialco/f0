@@ -454,7 +454,14 @@ export const TableCollection = <
                 >
                   <div className="ml-1.5 flex w-full items-center justify-start">
                     <F0Checkbox
-                      checked={hasSelection}
+                      checked={
+                        (allSelectedStatus.checked &&
+                          !allSelectedStatus.indeterminate) ||
+                        (!allSelectedStatus.checked &&
+                          allSelectedStatus.selectedCount > 0 &&
+                          allSelectedStatus.selectedCount ===
+                            (data?.records.length ?? -1))
+                      }
                       indeterminate={
                         hasSelection &&
                         (allSelectedStatus.indeterminate ||
@@ -524,7 +531,9 @@ export const TableCollection = <
                     sticky={{ right: 0 }}
                     className="border-0 border-l-[1px] border-solid border-f1-border-secondary"
                   >
-                    <span />
+                    <span className="sr-only">
+                      {i18n.collections.actions.actions}
+                    </span>
                   </TableHead>
                 ) : (
                   <>

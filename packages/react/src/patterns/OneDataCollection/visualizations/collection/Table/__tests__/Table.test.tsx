@@ -1620,7 +1620,7 @@ describe("TableCollection", () => {
       })
     })
 
-    it("shows header checkbox as active (checked) when only some items are selected", async () => {
+    it("shows header checkbox as indeterminate (unchecked + minus icon) when only some items are selected", async () => {
       const user = userEvent.setup()
 
       render(
@@ -1654,11 +1654,16 @@ describe("TableCollection", () => {
       await user.click(checkboxes[1])
 
       await waitFor(() => {
-        // Header checkbox becomes active (checked) to indicate partial selection
-        // F0Checkbox uses boolean `checked` so aria-checked is "true"/"false",
-        // not "mixed". Visual indeterminate is shown via Minus icon only.
+        // Header checkbox is unchecked (not checked) during partial selection so
+        // aria-checked="false" is correct. The Minus icon is shown via the
+        // indeterminate prop — a visual-only signal since F0Checkbox maps
+        // indeterminate to an icon swap rather than Radix's "indeterminate" state.
+        // Passing checked=false means clicking promotes to all-selected (correct
+        // toggle direction) rather than deselecting all.
         const headerCheckbox = screen.getAllByRole("checkbox")[0]
-        expect(headerCheckbox).toHaveAttribute("aria-checked", "true")
+        expect(headerCheckbox).toHaveAttribute("aria-checked", "false")
+        // data-state reflects the Radix checked value — unchecked during partial
+        expect(headerCheckbox).toHaveAttribute("data-state", "unchecked")
       })
     })
 
