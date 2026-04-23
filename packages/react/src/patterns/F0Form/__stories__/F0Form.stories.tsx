@@ -30,7 +30,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 const meta: Meta = {
   title: "Forms/F0Form",
   component: F0Form,
-  tags: ["autodocs"],
+  tags: ["stable", "!autodocs"],
   parameters: { a11y: { skipCi: true } },
 }
 
@@ -46,38 +46,42 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   render() {
     const formSchema = z.object({
-      username: f0FormField(z.string().min(2).max(20), {
+      username: f0FormField.text({
         label: "Username",
         placeholder: "Enter username",
         helpText: "Choose a unique username",
+        minLength: 2,
+        maxLength: 20,
       }),
-      email: f0FormField(z.string().email("Please enter a valid email"), {
+      email: f0FormField.email({
         label: "Email",
         placeholder: "you@example.com",
       }),
-      bio: f0FormField(z.string().max(500).optional(), {
+      bio: f0FormField.textarea({
         label: "Biography",
         helpText: "Tell us about yourself",
-        fieldType: "textarea",
+        optional: true,
         rows: 4,
       }),
-      salary: f0FormField(z.number().min(0), {
+      salary: f0FormField.number({
         label: "Salary",
         placeholder: "Enter salary (decimals allowed)",
+        min: 0,
       }),
-      age: f0FormField(z.number().int().min(0).max(120), {
+      age: f0FormField.number({
         label: "Age",
         placeholder: "Enter age (integers only)",
+        isInt: true,
+        min: 0,
+        max: 120,
       }),
-      discount: f0FormField(z.number().min(0).max(100), {
+      discount: f0FormField.percentage({
         label: "Discount",
         placeholder: "Enter discount",
-        fieldType: "percentage",
       }),
-      budget: f0FormField(z.number().min(0), {
+      budget: f0FormField.money({
         label: "Budget",
         placeholder: "Enter budget",
-        fieldType: "money",
         currency: "EUR",
       }),
     })
@@ -113,23 +117,25 @@ export const Default: Story = {
 export const WithRows: Story = {
   render() {
     const formSchema = z.object({
-      fullName: f0FormField(z.string().min(2), {
+      fullName: f0FormField.text({
         label: "Full Name",
+        minLength: 2,
       }),
-      email: f0FormField(z.string().email(), {
+      email: f0FormField.email({
         label: "Email",
         row: "contact-row",
       }),
-      phone: f0FormField(z.string().optional(), {
+      phone: f0FormField.text({
         label: "Phone",
         row: "contact-row",
         placeholder: "+1 (555) 000-0000",
+        optional: true,
       }),
-      city: f0FormField(z.string(), {
+      city: f0FormField.text({
         label: "City",
         row: "location-row",
       }),
-      country: f0FormField(z.string(), {
+      country: f0FormField.select({
         label: "Country",
         row: "location-row",
         options: [
@@ -150,7 +156,7 @@ export const WithRows: Story = {
         email: "",
         phone: "",
         city: "",
-        country: "",
+        country: undefined,
       },
       onSubmit: async ({ data }) => {
         await sleep(1000)
@@ -174,11 +180,11 @@ export const WithRows: Story = {
 export const WithRowsAndValidation: Story = {
   render() {
     const formSchema = z.object({
-      title: f0FormField(z.string().min(1), {
+      title: f0FormField.text({
         label: "Job Title",
         placeholder: "Enter job title",
       }),
-      location: f0FormField(z.string().min(1), {
+      location: f0FormField.select({
         label: "Location",
         row: "location-team",
         options: [
@@ -188,9 +194,10 @@ export const WithRowsAndValidation: Story = {
         ],
         placeholder: "Select location",
       }),
-      team: f0FormField(z.string().optional(), {
+      team: f0FormField.select({
         label: "Team",
         row: "location-team",
+        optional: true,
         options: [
           { value: "engineering", label: "Engineering" },
           { value: "design", label: "Design" },
@@ -198,18 +205,19 @@ export const WithRowsAndValidation: Story = {
         ],
         placeholder: "Select team",
       }),
-      vacancies: f0FormField(z.number().positive().optional(), {
+      vacancies: f0FormField.number({
         label: "Number of Vacancies",
         placeholder: "1",
-        fieldType: "number",
+        optional: true,
         row: "vacancies-date",
       }),
-      startDate: f0FormField(z.date().optional(), {
+      startDate: f0FormField.date({
         label: "Start Date",
         placeholder: "Select a date",
         row: "vacancies-date",
+        optional: true,
       }),
-      legalEntity: f0FormField(z.string().min(1), {
+      legalEntity: f0FormField.select({
         label: "Legal Entity",
         row: "legal-type",
         options: [
@@ -218,31 +226,25 @@ export const WithRowsAndValidation: Story = {
         ],
         placeholder: "Select legal entity",
       }),
-      workplaceType: f0FormField(
-        z.enum(["onsite", "hybrid", "remote"], {
-          required_error: "Please select a workplace type",
-        }),
-        {
-          label: "Workplace Type",
-          row: "legal-type",
-          fieldType: "select",
-          placeholder: "Select type",
-          options: [
-            { value: "onsite", label: "On-site" },
-            { value: "hybrid", label: "Hybrid" },
-            { value: "remote", label: "Remote" },
-          ],
-        }
-      ),
-      allowReferral: f0FormField(z.boolean().default(false), {
-        label: "Allow referrals",
-        fieldType: "checkbox",
-        row: "checkboxes",
+      workplaceType: f0FormField.select({
+        label: "Workplace Type",
+        row: "legal-type",
+        placeholder: "Select type",
+        options: [
+          { value: "onsite", label: "On-site" },
+          { value: "hybrid", label: "Hybrid" },
+          { value: "remote", label: "Remote" },
+        ],
       }),
-      allowInternal: f0FormField(z.boolean().default(false), {
-        label: "Allow internal applications",
-        fieldType: "checkbox",
+      allowReferral: f0FormField.checkbox({
+        label: "Allow referrals",
         row: "checkboxes",
+        optional: true,
+      }),
+      allowInternal: f0FormField.checkbox({
+        label: "Allow internal applications",
+        row: "checkboxes",
+        optional: true,
       }),
     })
 
@@ -251,11 +253,11 @@ export const WithRowsAndValidation: Story = {
       schema: formSchema,
       defaultValues: {
         title: "",
-        location: "",
+        location: undefined,
         team: undefined,
         vacancies: undefined,
         startDate: undefined,
-        legalEntity: "",
+        legalEntity: undefined,
         workplaceType: undefined,
         allowReferral: false,
         allowInternal: false,
@@ -279,33 +281,36 @@ export const WithRowsAndValidation: Story = {
 export const WithSections: Story = {
   render() {
     const formSchema = z.object({
-      firstName: f0FormField(z.string().min(1), {
+      firstName: f0FormField.text({
         label: "First Name",
         section: "personal",
       }),
-      lastName: f0FormField(z.string().min(1), {
+      lastName: f0FormField.text({
         label: "Last Name",
         section: "personal",
       }),
-      age: f0FormField(z.number().min(18).max(120), {
+      age: f0FormField.number({
         label: "Age",
         section: "personal",
         row: "personal-row",
+        min: 18,
+        max: 120,
       }),
-      birthdate: f0FormField(z.date().optional(), {
+      birthdate: f0FormField.date({
         label: "Birth Date",
         section: "personal",
         row: "personal-row",
+        optional: true,
       }),
-      newsletter: f0FormField(z.boolean(), {
+      newsletter: f0FormField.checkbox({
         label: "Subscribe to newsletter",
         section: "preferences",
-        fieldType: "checkbox",
+        optional: true,
       }),
-      darkMode: f0FormField(z.boolean(), {
+      darkMode: f0FormField.boolean({
         label: "Enable dark mode",
         section: "preferences",
-        fieldType: "switch",
+        optional: true,
       }),
     })
 
@@ -357,19 +362,19 @@ export const WithSectionsSidepanel: Story = {
   render() {
     const formSchema = z.object({
       // Basic Information
-      title: f0FormField(z.string().min(1), {
+      title: f0FormField.text({
         label: "Title",
         section: "basic",
         placeholder: "Enter survey title",
       }),
-      description: f0FormField(z.string().max(500).optional(), {
+      description: f0FormField.textarea({
         label: "Description (Optional)",
         section: "basic",
-        fieldType: "textarea",
+        optional: true,
         rows: 3,
       }),
       // Participants
-      participants: f0FormField(z.string(), {
+      participants: f0FormField.select({
         label: "Select participants",
         section: "participants",
         options: [
@@ -380,17 +385,19 @@ export const WithSectionsSidepanel: Story = {
         placeholder: "Select participants",
       }),
       // Schedule
-      publishOn: f0FormField(z.date().optional(), {
+      publishOn: f0FormField.date({
         label: "Publish on",
         section: "schedule",
         row: "schedule-dates",
+        optional: true,
       }),
-      endsAt: f0FormField(z.date().optional(), {
+      endsAt: f0FormField.date({
         label: "Ends at",
         section: "schedule",
         row: "schedule-dates",
+        optional: true,
       }),
-      recurrence: f0FormField(z.string(), {
+      recurrence: f0FormField.select({
         label: "Recurrence",
         section: "schedule",
         options: [
@@ -401,19 +408,19 @@ export const WithSectionsSidepanel: Story = {
         ],
       }),
       // Visibility & Privacy
-      managerVisibility: f0FormField(z.boolean(), {
+      managerVisibility: f0FormField.boolean({
         label: "Add visibility permissions to managers and team leads",
         helpText:
           "Grant access to managers and team leads. Even if they are not survey editors, they will be able to view the results of their own teams once responses are available",
         section: "visibility",
-        fieldType: "switch",
+        optional: true,
       }),
-      linkWorkflows: f0FormField(z.boolean(), {
+      linkWorkflows: f0FormField.boolean({
         label: "Link this course with Workflows",
         helpText:
           "Use our Workflows solution to automate actions such as generating course certificates or sending questionnaires.",
         section: "visibility",
-        fieldType: "switch",
+        optional: true,
         moreInfoLink: {
           href: "https://help.factorial.co/workflows",
         },
@@ -426,13 +433,13 @@ export const WithSectionsSidepanel: Story = {
               }
             : null,
       }),
-      anonymousAnswers: f0FormField(z.boolean(), {
+      anonymousAnswers: f0FormField.boolean({
         label: "Anonymous answers",
         section: "visibility",
-        fieldType: "switch",
+        optional: true,
       }),
       // Editors
-      editors: f0FormField(z.string(), {
+      editors: f0FormField.select({
         label: "Select editors",
         section: "editors",
         options: [
@@ -485,7 +492,7 @@ export const WithSectionsSidepanel: Story = {
         title: "Workplace climate survey",
         description:
           "This short workplace climate survey contains just 12 simple questions. It is designed to help measure employees' perceptions, experiences, and overall satisfaction within the workplace.",
-        participants: "",
+        participants: undefined,
         publishOn: undefined,
         endsAt: undefined,
         recurrence: "none",
@@ -518,32 +525,36 @@ export const WithSectionsSidepanel: Story = {
 export const ConditionalRendering: Story = {
   render() {
     const formSchema = z.object({
-      hasAccount: f0FormField(z.boolean(), {
+      hasAccount: f0FormField.checkbox({
         label: "I already have an account",
-        fieldType: "checkbox",
+        optional: true,
       }),
-      accountId: f0FormField(z.string().min(6), {
+      accountId: f0FormField.text({
         label: "Account ID",
         helpText: "Enter your existing account ID",
+        minLength: 6,
         // Condition object syntax
         renderIf: {
           fieldId: "hasAccount",
           equalsTo: true,
         },
       }),
-      newUsername: f0FormField(z.string().min(3), {
+      newUsername: f0FormField.text({
         label: "New Username",
         helpText: "Choose a username for your new account",
+        minLength: 3,
         // Function syntax - equivalent to the condition object above
         renderIf: ({ values }) => values.hasAccount === false,
       }),
-      employeeCount: f0FormField(z.number().min(1), {
+      employeeCount: f0FormField.number({
         label: "Number of Employees",
+        min: 1,
+        isInt: true,
       }),
-      enterprisePlan: f0FormField(z.boolean().optional(), {
+      enterprisePlan: f0FormField.checkbox({
         label: "Enable Enterprise Plan",
         helpText: "Available for companies with 50+ employees",
-        fieldType: "checkbox",
+        optional: true,
         // Function syntax for complex conditions
         renderIf: ({ values }) =>
           typeof values.employeeCount === "number" &&
@@ -581,34 +592,36 @@ export const ConditionalRendering: Story = {
 export const SwitchGroupWithDependentFields: Story = {
   render() {
     const formSchema = z.object({
-      enableRemoteWork: f0FormField(z.boolean(), {
+      enableRemoteWork: f0FormField.boolean({
         label: "Enable remote work",
         helpText: "Allow employees to work from home",
-        fieldType: "switch",
+        optional: true,
       }),
-      enableFlexHours: f0FormField(z.boolean(), {
+      enableFlexHours: f0FormField.boolean({
         label: "Enable flexible hours",
         helpText: "Let employees choose their own start and end times",
-        fieldType: "switch",
+        optional: true,
       }),
-      enableOvertime: f0FormField(z.boolean(), {
+      enableOvertime: f0FormField.boolean({
         label: "Enable overtime",
         helpText: "Allow employees to log overtime hours",
-        fieldType: "switch",
+        optional: true,
       }),
-      flexStartTime: f0FormField(z.string().optional(), {
+      flexStartTime: f0FormField.text({
         label: "Earliest start time",
         placeholder: "e.g. 07:00",
         row: "flex-hours-row",
+        optional: true,
         renderIf: { fieldId: "enableFlexHours", equalsTo: true },
       }),
-      flexEndTime: f0FormField(z.string().optional(), {
+      flexEndTime: f0FormField.text({
         label: "Latest end time",
         placeholder: "e.g. 20:00",
         row: "flex-hours-row",
+        optional: true,
         renderIf: { fieldId: "enableFlexHours", equalsTo: true },
       }),
-      overtimeRate: f0FormField(z.string(), {
+      overtimeRate: f0FormField.select({
         label: "Overtime rate multiplier",
         helpText: "Rate applied to overtime hours (e.g. 1.5x)",
         options: [
@@ -619,65 +632,73 @@ export const SwitchGroupWithDependentFields: Story = {
         placeholder: "Select rate",
         renderIf: { fieldId: "enableOvertime", equalsTo: true },
       }),
-      overtimeCapHours: f0FormField(z.number().min(1), {
+      overtimeCapHours: f0FormField.number({
         label: "Monthly overtime cap (hours)",
         helpText: "Maximum overtime hours allowed per month",
+        min: 1,
         renderIf: { fieldId: "enableOvertime", equalsTo: true },
       }),
-      overtimeCompensation: f0FormField(
-        z.enum(["monetary", "timeOff", "mixed"]),
-        {
-          label: "Compensation model",
-          fieldType: "cardSelect",
-          hideLabel: true,
-          options: [
-            {
-              value: "monetary",
-              label: "Monetary",
-              description: "Pay extra hours at the selected rate",
-            },
-            {
-              value: "timeOff",
-              label: "Time off",
-              description: "Compensate with equivalent time off",
-            },
-            {
-              value: "mixed",
-              label: "Mixed",
-              description: "Combine monetary and time off compensation",
-            },
-          ],
-        }
-      ),
-      monetaryBonusPercent: f0FormField(z.number().min(0).max(100).optional(), {
+      overtimeCompensation: f0FormField.cardSelect({
+        label: "Compensation model",
+        hideLabel: true,
+        options: [
+          {
+            value: "monetary",
+            label: "Monetary",
+            description: "Pay extra hours at the selected rate",
+          },
+          {
+            value: "timeOff",
+            label: "Time off",
+            description: "Compensate with equivalent time off",
+          },
+          {
+            value: "mixed",
+            label: "Mixed",
+            description: "Combine monetary and time off compensation",
+          },
+        ],
+      }),
+      monetaryBonusPercent: f0FormField.number({
         label: "Bonus percentage",
         helpText: "Additional bonus on top of the overtime rate",
+        min: 0,
+        max: 100,
+        optional: true,
         renderIf: {
           fieldId: "overtimeCompensation",
           equalsTo: "monetary",
         },
       }),
-      timeOffDaysPerHour: f0FormField(z.number().min(0).optional(), {
+      timeOffDaysPerHour: f0FormField.number({
         label: "Time off days per overtime hour",
         helpText: "How many days off the employee earns per overtime hour",
+        min: 0,
+        optional: true,
         renderIf: {
           fieldId: "overtimeCompensation",
           equalsTo: "timeOff",
         },
       }),
-      mixedMonetaryPercent: f0FormField(z.number().min(0).max(100).optional(), {
+      mixedMonetaryPercent: f0FormField.number({
         label: "Monetary share (%)",
         helpText:
           "Percentage of overtime compensated monetarily (rest is time off)",
+        min: 0,
+        max: 100,
+        optional: true,
         row: "mixed-row",
         renderIf: {
           fieldId: "overtimeCompensation",
           equalsTo: "mixed",
         },
       }),
-      mixedTimeOffPercent: f0FormField(z.number().min(0).max(100).optional(), {
+      mixedTimeOffPercent: f0FormField.number({
         label: "Time off share (%)",
         helpText: "Percentage of overtime compensated with time off",
+        min: 0,
+        max: 100,
+        optional: true,
         row: "mixed-row",
         renderIf: {
           fieldId: "overtimeCompensation",
@@ -695,7 +716,7 @@ export const SwitchGroupWithDependentFields: Story = {
         flexStartTime: "",
         flexEndTime: "",
         enableOvertime: false,
-        overtimeRate: "",
+        overtimeRate: undefined,
         overtimeCapHours: undefined,
         overtimeCompensation: "monetary",
         monetaryBonusPercent: undefined,
@@ -724,29 +745,28 @@ export const SwitchGroupWithDependentFields: Story = {
 export const UngroupedFields: Story = {
   render() {
     const formSchema = z.object({
-      enableNotifications: f0FormField(z.boolean(), {
+      enableNotifications: f0FormField.boolean({
         label: "Enable notifications",
         helpText: "Receive push notifications",
-        fieldType: "switch",
+        optional: true,
       }),
-      enableAnalytics: f0FormField(z.boolean(), {
+      enableAnalytics: f0FormField.boolean({
         label: "Enable analytics",
         helpText: "This switch is ungrouped from the others",
-        fieldType: "switch",
         grouped: false,
+        optional: true,
       }),
-      enableDarkMode: f0FormField(z.boolean(), {
+      enableDarkMode: f0FormField.boolean({
         label: "Enable dark mode",
         helpText: "Back to a grouped switch",
-        fieldType: "switch",
+        optional: true,
       }),
-      enableExperimental: f0FormField(z.boolean(), {
+      enableExperimental: f0FormField.boolean({
         label: "Enable experimental features",
-        fieldType: "switch",
+        optional: true,
       }),
-      billingCycle: f0FormField(z.string(), {
+      billingCycle: f0FormField.cardSelect({
         label: "Billing cycle",
-        fieldType: "cardSelect",
         grouped: false,
         options: [
           {
@@ -776,7 +796,6 @@ export const UngroupedFields: Story = {
         enableAnalytics: false,
         enableDarkMode: false,
         enableExperimental: false,
-        billingCycle: "",
       },
       onSubmit: async ({ data }) => {
         await sleep(1000)
@@ -800,7 +819,7 @@ export const UngroupedFields: Story = {
 export const DynamicDisabled: Story = {
   render() {
     const formSchema = z.object({
-      status: f0FormField(z.enum(["draft", "published", "archived"]), {
+      status: f0FormField.select({
         label: "Document Status",
         options: [
           { value: "draft", label: "Draft" },
@@ -809,48 +828,50 @@ export const DynamicDisabled: Story = {
         ],
         helpText: "Select 'Archived' to disable editing",
       }),
-      title: f0FormField(z.string().min(1), {
+      title: f0FormField.text({
         label: "Title",
         placeholder: "Enter document title",
         // Disabled when status is 'archived'
         disabled: ({ values }) => values.status === "archived",
         resetOnDisable: true,
       }),
-      content: f0FormField(z.string().optional(), {
+      content: f0FormField.textarea({
         label: "Content",
-        fieldType: "textarea",
         rows: 4,
         placeholder: "Enter document content",
+        optional: true,
         // Disabled when status is 'archived'
         disabled: ({ values }) => values.status === "archived",
       }),
-      enableNotifications: f0FormField(z.boolean(), {
+      enableNotifications: f0FormField.boolean({
         label: "Enable Notifications",
-        fieldType: "switch",
         helpText: "Receive notifications about this document",
+        optional: true,
       }),
-      notifyOnComments: f0FormField(z.boolean(), {
+      notifyOnComments: f0FormField.boolean({
         label: "Notify on Comments",
-        fieldType: "switch",
         helpText: "Get notified when someone comments",
+        optional: true,
         // Disabled when notifications are disabled, resets to false
         disabled: ({ values }) => !values.enableNotifications,
         resetOnDisable: true,
       }),
-      notifyOnEdits: f0FormField(z.boolean(), {
+      notifyOnEdits: f0FormField.boolean({
         label: "Notify on Edits",
-        fieldType: "switch",
         helpText: "Get notified when document is edited",
+        optional: true,
         // Disabled when notifications are disabled, resets to false
         disabled: ({ values }) => !values.enableNotifications,
         resetOnDisable: true,
       }),
-      employeeCount: f0FormField(z.number().min(1), {
+      employeeCount: f0FormField.number({
         label: "Number of Team Members",
         helpText: "Enter at least 10 to enable bulk actions",
+        min: 1,
       }),
-      bulkAction: f0FormField(z.string().optional(), {
+      bulkAction: f0FormField.select({
         label: "Bulk Action",
+        optional: true,
         options: [
           { value: "notify", label: "Notify All" },
           { value: "export", label: "Export Data" },
@@ -894,19 +915,19 @@ export const DynamicDisabled: Story = {
 export const AllFieldTypes: Story = {
   render() {
     const formSchema = z.object({
-      textField: f0FormField(z.string().min(1), {
+      textField: f0FormField.text({
         label: "Text Field",
         placeholder: "Regular text input",
       }),
-      emailField: f0FormField(z.string().email(), {
+      emailField: f0FormField.email({
         label: "Email Field",
       }),
-      passwordField: f0FormField(z.string().min(8), {
+      passwordField: f0FormField.text({
         label: "Password Field",
         placeholder: "Enter password",
         inputType: "password",
       }),
-      numberField: f0FormField(z.number().min(0).max(100), {
+      numberField: f0FormField.number({
         label: "Number Field",
         step: 1,
         alert: ({ fieldValue }) =>
@@ -923,18 +944,16 @@ export const AllFieldTypes: Story = {
               }
             : null,
       }),
-      durationField: f0FormField(z.number().min(1, "Duration is required"), {
+      durationField: f0FormField.duration({
         label: "Duration Field",
-        fieldType: "duration",
         units: ["hours", "minutes", "seconds"],
       }),
-      textareaField: f0FormField(z.string().min(1).max(500), {
+      textareaField: f0FormField.textarea({
         label: "Textarea Field",
-        fieldType: "textarea",
         rows: 3,
         placeholder: "Enter long text...",
       }),
-      selectField: f0FormField(z.enum(["option1", "option2", "option3"]), {
+      selectField: f0FormField.select({
         label: "Select Field",
         options: [
           { value: "option1", label: "Option 1" },
@@ -944,9 +963,8 @@ export const AllFieldTypes: Story = {
         placeholder: "Select an option",
         showSearchBox: true,
       }),
-      multiSelectField: f0FormField(z.array(z.enum(["a", "b", "c"])).min(1), {
+      multiSelectField: f0FormField.multiSelect({
         label: "Multi-Select Field",
-        multiple: true,
         options: [
           { value: "a", label: "Option A" },
           { value: "b", label: "Option B" },
@@ -954,23 +972,22 @@ export const AllFieldTypes: Story = {
         ],
         placeholder: "Select multiple options",
       }),
-      urlField: f0FormField(z.string().url(), {
+      urlField: f0FormField.url({
         label: "URL Field",
       }),
-      checkboxField: f0FormField(z.boolean(), {
+      checkboxField: f0FormField.checkbox({
         label: "Checkbox Field",
-        fieldType: "checkbox",
         helpText: "Check this box to agree",
+        optional: true,
       }),
-      requiredCheckboxField: f0FormField(z.literal(true), {
+      requiredCheckboxField: f0FormField.checkbox({
         label: "Required Checkbox Field",
-        fieldType: "checkbox",
         helpText: "Check this box to agree",
       }),
-      switchField: f0FormField(z.boolean(), {
+      switchField: f0FormField.boolean({
         label: "Switch Field",
-        fieldType: "switch",
         helpText: "Toggle this switch",
+        optional: true,
         moreInfoLink: {
           href: "https://help.factorial.co/example",
           label: "Learn more",
@@ -985,53 +1002,37 @@ export const AllFieldTypes: Story = {
               }
             : null,
       }),
-      requiredSwitchField: f0FormField(z.literal(true), {
+      requiredSwitchField: f0FormField.boolean({
         label: "Required Switch Field",
-        fieldType: "switch",
         helpText: "Toggle this switch",
       }),
-      dateField: f0FormField(z.date(), {
+      dateField: f0FormField.date({
         label: "Date Field",
         placeholder: "Select a date",
         granularities: ["day"],
       }),
-      timeField: f0FormField(z.date(), {
+      timeField: f0FormField.time({
         label: "Time Field",
-        fieldType: "time",
         helpText: "Select a time (HH:mm)",
       }),
-      datetimeField: f0FormField(z.date().optional(), {
+      datetimeField: f0FormField.datetime({
         label: "DateTime Field",
-        fieldType: "datetime",
         helpText: "Select date and time",
+        optional: true,
       }),
-      dateRangeField: f0FormField(
-        z.object({
-          from: z.date(),
-          to: z.date(),
-        }),
-        {
-          label: "Date Range Field",
-          placeholder: "Select date range",
-          fieldType: "daterange",
-          fromLabel: "Start",
-          toLabel: "End",
-        }
-      ),
-      richTextField: f0FormField(
-        z.object({
-          value: z.string().min(1),
-          mentionIds: z.array(z.string()).optional(),
-        }),
-        {
-          label: "Rich Text Field",
-          fieldType: "richtext",
-          placeholder: "Write something with formatting...",
-          maxCharacters: 1000,
-          height: "sm",
-          plainHtmlMode: true,
-        }
-      ),
+      dateRangeField: f0FormField.dateRange({
+        label: "Date Range Field",
+        placeholder: "Select date range",
+        fromLabel: "Start",
+        toLabel: "End",
+      }),
+      richTextField: f0FormField.richText({
+        label: "Rich Text Field",
+        placeholder: "Write something with formatting...",
+        maxCharacters: 1000,
+        height: "sm",
+        plainHtmlMode: true,
+      }),
     })
 
     const formDefinition = useF0FormDefinition({
@@ -1075,40 +1076,41 @@ export const AllFieldTypes: Story = {
 export const AllFieldTypesDisabled: Story = {
   render() {
     const formSchema = z.object({
-      textField: f0FormField(z.string().min(1), {
+      textField: f0FormField.text({
         label: "Text Field",
         placeholder: "Regular text input",
         disabled: true,
       }),
-      emailField: f0FormField(z.string().email(), {
+      emailField: f0FormField.email({
         label: "Email Field",
         disabled: true,
       }),
-      passwordField: f0FormField(z.string().min(8), {
+      passwordField: f0FormField.text({
         label: "Password Field",
         placeholder: "Enter password",
         inputType: "password",
+        minLength: 8,
         disabled: true,
       }),
-      numberField: f0FormField(z.number().min(0).max(100), {
+      numberField: f0FormField.number({
         label: "Number Field",
+        min: 0,
+        max: 100,
         step: 1,
         disabled: true,
       }),
-      durationField: f0FormField(z.number().min(0), {
+      durationField: f0FormField.duration({
         label: "Duration Field",
-        fieldType: "duration",
         units: ["hours", "minutes", "seconds"],
         disabled: true,
       }),
-      textareaField: f0FormField(z.string().max(500), {
+      textareaField: f0FormField.textarea({
         label: "Textarea Field",
-        fieldType: "textarea",
         rows: 3,
         placeholder: "Enter long text...",
         disabled: true,
       }),
-      selectField: f0FormField(z.enum(["option1", "option2", "option3"]), {
+      selectField: f0FormField.select({
         label: "Select Field",
         options: [
           { value: "option1", label: "Option 1" },
@@ -1119,9 +1121,8 @@ export const AllFieldTypesDisabled: Story = {
         showSearchBox: true,
         disabled: true,
       }),
-      multiSelectField: f0FormField(z.array(z.enum(["a", "b", "c"])).min(1), {
+      multiSelectField: f0FormField.multiSelect({
         label: "Multi-Select Field",
-        multiple: true,
         options: [
           { value: "a", label: "Option A" },
           { value: "b", label: "Option B" },
@@ -1130,83 +1131,64 @@ export const AllFieldTypesDisabled: Story = {
         placeholder: "Select multiple options",
         disabled: true,
       }),
-      urlField: f0FormField(z.string().url(), {
+      urlField: f0FormField.url({
         label: "URL Field",
         disabled: true,
       }),
-      checkboxField: f0FormField(z.boolean(), {
+      checkboxField: f0FormField.checkbox({
         label: "Checkbox Field",
-        fieldType: "checkbox",
         helpText: "Check this box to agree",
+        optional: true,
         disabled: true,
       }),
-      requiredCheckboxField: f0FormField(z.literal(true), {
+      requiredCheckboxField: f0FormField.checkbox({
         label: "Required Checkbox Field",
-        fieldType: "checkbox",
         helpText: "Check this box to agree",
         disabled: true,
       }),
-      switchField: f0FormField(z.boolean(), {
+      switchField: f0FormField.boolean({
         label: "Switch Field",
-        fieldType: "switch",
         helpText: "Toggle this switch",
         disabled: true,
       }),
-      requiredSwitchField: f0FormField(z.literal(true), {
+      requiredSwitchField: f0FormField.boolean({
         label: "Required Switch Field",
-        fieldType: "switch",
         helpText: "Toggle this switch",
         disabled: true,
       }),
-      dateField: f0FormField(z.date().optional(), {
+      dateField: f0FormField.date({
         label: "Date Field",
         placeholder: "Select a date",
         granularities: ["day"],
+        optional: true,
         disabled: true,
       }),
-      timeField: f0FormField(z.date(), {
+      timeField: f0FormField.time({
         label: "Time Field",
-        fieldType: "time",
         helpText: "Select a time (HH:mm)",
         disabled: true,
       }),
-      datetimeField: f0FormField(z.date(), {
+      datetimeField: f0FormField.datetime({
         label: "DateTime Field",
-        fieldType: "datetime",
         helpText: "Select date and time",
         disabled: true,
       }),
-      dateRangeField: f0FormField(
-        z
-          .object({
-            from: z.date(),
-            to: z.date(),
-          })
-          .optional(),
-        {
-          label: "Date Range Field",
-          placeholder: "Select date range",
-          fieldType: "daterange",
-          fromLabel: "Start",
-          toLabel: "End",
-          disabled: true,
-        }
-      ),
-      richTextField: f0FormField(
-        z.object({
-          value: z.string(),
-          mentionIds: z.array(z.string()).optional(),
-        }),
-        {
-          label: "Rich Text Field",
-          fieldType: "richtext",
-          placeholder: "Write something with formatting...",
-          maxCharacters: 1000,
-          height: "sm",
-          plainHtmlMode: true,
-          disabled: true,
-        }
-      ),
+      dateRangeField: f0FormField.dateRange({
+        label: "Date Range Field",
+        placeholder: "Select date range",
+        optional: true,
+        fromLabel: "Start",
+        toLabel: "End",
+        disabled: true,
+      }),
+      richTextField: f0FormField.richText({
+        label: "Rich Text Field",
+        placeholder: "Write something with formatting...",
+        maxCharacters: 1000,
+        height: "sm",
+        plainHtmlMode: true,
+        disabled: true,
+      }),
     })
 
     const formDefinition = useF0FormDefinition({
@@ -1287,30 +1269,24 @@ function useMockUpload(): FileUploadHookReturn {
 export const FileFields: Story = {
   render() {
     const formSchema = z.object({
-      title: f0FormField(z.string().min(1), {
+      title: f0FormField.text({
         label: "Document Title",
         placeholder: "Enter title",
       }),
-      singleFile: f0FormField(z.string().min(1, "Please upload a file"), {
+      singleFile: f0FormField.file({
         label: "Cover Image",
-        fieldType: "file",
         accept: ["image/jpeg", "image/png", "image/webp"],
         maxSizeMB: 5,
         description: "Upload a JPEG, PNG, or WebP image (max 5 MB)",
       }),
-      attachments: f0FormField(
-        z.array(z.string()).min(1, "Upload at least one file"),
-        {
-          label: "Attachments",
-          fieldType: "file",
-          multiple: true,
-          accept: ["application/pdf", "image"],
-          maxSizeMB: 50,
-        }
-      ),
-      notes: f0FormField(z.string().optional(), {
+      attachments: f0FormField.multiFile({
+        label: "Attachments",
+        accept: ["application/pdf", "image"],
+        maxSizeMB: 50,
+      }),
+      notes: f0FormField.textarea({
         label: "Notes",
-        fieldType: "textarea",
+        optional: true,
         rows: 3,
         placeholder: "Any additional notes...",
       }),
@@ -1345,21 +1321,15 @@ export const FileFields: Story = {
 export const FileFieldsWithInitialFiles: Story = {
   render() {
     const formSchema = z.object({
-      document: f0FormField(z.string().min(1, "Please upload a file"), {
+      document: f0FormField.file({
         label: "Contract Document",
-        fieldType: "file",
         accept: ["application/pdf"],
       }),
-      attachments: f0FormField(
-        z.array(z.string()).min(1, "Upload at least one file"),
-        {
-          label: "Supporting Documents",
-          fieldType: "file",
-          multiple: true,
-          accept: ["application/pdf", "image"],
-          maxSizeMB: 50,
-        }
-      ),
+      attachments: f0FormField.multiFile({
+        label: "Supporting Documents",
+        accept: ["application/pdf", "image"],
+        maxSizeMB: 50,
+      }),
     })
 
     const formDefinition = useF0FormDefinition({
@@ -1410,28 +1380,22 @@ export const FileFieldsWithInitialFiles: Story = {
 export const FileFieldsWithAsyncInitialFiles: Story = {
   render() {
     const formSchema = z.object({
-      title: f0FormField(z.string().min(1, "Required"), {
+      title: f0FormField.text({
         label: "Document Title",
       }),
-      notes: f0FormField(z.string().optional(), {
+      notes: f0FormField.textarea({
         label: "Notes",
-        fieldType: "textarea",
+        optional: true,
       }),
-      document: f0FormField(z.string().min(1, "Please upload a file"), {
+      document: f0FormField.file({
         label: "Contract Document",
-        fieldType: "file",
         accept: ["application/pdf"],
       }),
-      attachments: f0FormField(
-        z.array(z.string()).min(1, "Upload at least one file"),
-        {
-          label: "Supporting Documents",
-          fieldType: "file",
-          multiple: true,
-          accept: ["application/pdf", "image"],
-          maxSizeMB: 50,
-        }
-      ),
+      attachments: f0FormField.multiFile({
+        label: "Supporting Documents",
+        accept: ["application/pdf", "image"],
+        maxSizeMB: 50,
+      }),
     })
 
     const formDefinition = useF0FormDefinition({
@@ -1593,7 +1557,7 @@ export const CustomField: Story = {
     ]
 
     const formSchema = z.object({
-      title: f0FormField(z.string().min(1, "Title is required"), {
+      title: f0FormField.text({
         label: "Task Title",
         placeholder: "Enter task title",
       }),
@@ -1610,9 +1574,9 @@ export const CustomField: Story = {
         fieldType: "custom",
         customFieldName: "priority-picker",
       }),
-      description: f0FormField(z.string().optional(), {
+      description: f0FormField.textarea({
         label: "Description",
-        fieldType: "textarea",
+        optional: true,
         rows: 3,
       }),
     })
@@ -1722,7 +1686,7 @@ export const SelectWithCustomFieldName: Story = {
     })
 
     const formSchema = z.object({
-      name: f0FormField(z.string().min(1, "Name is required"), {
+      name: f0FormField.text({
         label: "Employee Name",
         placeholder: "Enter name",
       }),
@@ -1731,7 +1695,6 @@ export const SelectWithCustomFieldName: Story = {
         z.number({ required_error: "Pick a department" }),
         {
           label: "Department",
-          fieldType: "select",
           placeholder: "Select a department...",
           showSearchBox: true,
           customFieldName: "department-selector",
@@ -1740,7 +1703,6 @@ export const SelectWithCustomFieldName: Story = {
       // Multi-select field with customFieldName
       secondaryDepartments: f0FormField(z.array(z.number()).optional(), {
         label: "Secondary Departments",
-        fieldType: "select",
         placeholder: "Select additional departments...",
         showSearchBox: true,
         multiple: true,
@@ -1797,11 +1759,12 @@ export const SelectWithCustomFieldName: Story = {
 export const ServerValidation: Story = {
   render() {
     const formSchema = z.object({
-      username: f0FormField(z.string().min(3), {
+      username: f0FormField.text({
         label: "Username",
         helpText: "Try 'admin' to see server validation error",
+        minLength: 3,
       }),
-      email: f0FormField(z.string().email(), {
+      email: f0FormField.email({
         label: "Email",
         helpText: "Try 'taken@example.com' to see server validation error",
       }),
@@ -1850,21 +1813,21 @@ export const VisualDesignExample: Story = {
   render() {
     const formSchema = z.object({
       // Basic Information section
-      title: f0FormField(z.string().min(1), {
+      title: f0FormField.text({
         label: "Title",
         section: "basic-info",
         placeholder: "Workplace climate survey",
       }),
-      description: f0FormField(z.string().optional(), {
+      description: f0FormField.textarea({
         label: "Description (Optional)",
         section: "basic-info",
-        fieldType: "textarea",
+        optional: true,
         rows: 3,
         placeholder:
           "This short workplace climate survey contains just 12 simple questions...",
       }),
       // Participants section
-      participants: f0FormField(z.string(), {
+      participants: f0FormField.select({
         label: "Select participants",
         section: "participants",
         options: [
@@ -1875,17 +1838,19 @@ export const VisualDesignExample: Story = {
         placeholder: "Select participants",
       }),
       // Schedule section with row grouping
-      publishOn: f0FormField(z.date().optional(), {
+      publishOn: f0FormField.date({
         label: "Publish on",
         section: "schedule",
         row: "dates-row",
+        optional: true,
       }),
-      endsAt: f0FormField(z.date().optional(), {
+      endsAt: f0FormField.date({
         label: "Ends at",
         section: "schedule",
         row: "dates-row",
+        optional: true,
       }),
-      recurrence: f0FormField(z.string(), {
+      recurrence: f0FormField.select({
         label: "Recurrence",
         section: "schedule",
         options: [
@@ -1897,20 +1862,20 @@ export const VisualDesignExample: Story = {
         placeholder: "Does not repeat",
       }),
       // Visibility & Privacy section with switches
-      managerVisibility: f0FormField(z.boolean(), {
+      managerVisibility: f0FormField.boolean({
         label: "Add visibility permissions to managers and team leads",
         section: "visibility",
-        fieldType: "switch",
+        optional: true,
         helpText:
           "Grant access to managers and team leads. Even if they are not survey editors, they will be able to view the results of their own teams once responses are available",
       }),
-      anonymousAnswers: f0FormField(z.boolean(), {
+      anonymousAnswers: f0FormField.boolean({
         label: "Anonymous answers",
         section: "visibility",
-        fieldType: "switch",
+        optional: true,
       }),
       // Editors section
-      editors: f0FormField(z.string(), {
+      editors: f0FormField.select({
         label: "Select editors",
         section: "editors",
         options: [
@@ -1938,7 +1903,7 @@ export const VisualDesignExample: Story = {
         title: "Workplace climate survey",
         description:
           "This short workplace climate survey contains just 12 simple questions. It is designed to help measure employees' perceptions, experiences, and overall satisfaction within the workplace.",
-        participants: "",
+        participants: undefined,
         publishOn: undefined,
         endsAt: undefined,
         recurrence: "none",
@@ -1969,22 +1934,22 @@ export const VisualDesignExample: Story = {
 export const WithActionBar: Story = {
   render() {
     const formSchema = z.object({
-      firstName: f0FormField(z.string().min(1), {
+      firstName: f0FormField.text({
         label: "First Name",
         placeholder: "Enter first name",
       }),
-      lastName: f0FormField(z.string().min(1), {
+      lastName: f0FormField.text({
         label: "Last Name",
         placeholder: "Enter last name",
       }),
-      email: f0FormField(z.string().email(), {
+      email: f0FormField.email({
         label: "Email",
         placeholder: "you@example.com",
       }),
-      notifications: f0FormField(z.boolean(), {
+      notifications: f0FormField.boolean({
         label: "Enable notifications",
-        fieldType: "switch",
         helpText: "Receive email notifications about updates",
+        optional: true,
       }),
     })
 
@@ -2027,11 +1992,11 @@ export const WithActionBar: Story = {
 export const WithActionBarAndDiscard: Story = {
   render() {
     const formSchema = z.object({
-      companyName: f0FormField(z.string().min(1), {
+      companyName: f0FormField.text({
         label: "Company Name",
         placeholder: "Enter company name",
       }),
-      industry: f0FormField(z.string(), {
+      industry: f0FormField.select({
         label: "Industry",
         options: [
           { value: "tech", label: "Technology" },
@@ -2041,12 +2006,14 @@ export const WithActionBarAndDiscard: Story = {
         ],
         placeholder: "Select industry",
       }),
-      employeeCount: f0FormField(z.number().min(1).max(100000), {
+      employeeCount: f0FormField.number({
         label: "Number of Employees",
+        min: 1,
+        max: 100000,
       }),
-      publicCompany: f0FormField(z.boolean(), {
+      publicCompany: f0FormField.checkbox({
         label: "Publicly traded company",
-        fieldType: "checkbox",
+        optional: true,
       }),
     })
 
@@ -2092,14 +2059,12 @@ export const WithActionBarAndDiscard: Story = {
 export const ErrorTriggerModes: Story = {
   render() {
     const formSchema = z.object({
-      name: f0FormField(
-        z.string().min(2, "Name must be at least 2 characters"),
-        {
-          label: "Name",
-          placeholder: "Enter your name",
-        }
-      ),
-      email: f0FormField(z.string().email(), {
+      name: f0FormField.text({
+        label: "Name",
+        placeholder: "Enter your name",
+        minLength: 2,
+      }),
+      email: f0FormField.email({
         label: "Email",
       }),
     })
@@ -2354,18 +2319,16 @@ export const FormInDialog: Story = {
     const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
 
     const formSchema = z.object({
-      name: f0FormField(
-        z.string().min(2, "Name must be at least 2 characters"),
-        {
-          label: "Name",
-          placeholder: "Enter name",
-        }
-      ),
-      email: f0FormField(z.string().email("Please enter a valid email"), {
+      name: f0FormField.text({
+        label: "Name",
+        placeholder: "Enter name",
+        minLength: 2,
+      }),
+      email: f0FormField.email({
         label: "Email",
         placeholder: "Enter email address",
       }),
-      role: f0FormField(z.enum(["admin", "editor", "viewer"]), {
+      role: f0FormField.select({
         label: "Role",
         options: [
           { value: "admin", label: "Administrator" },
@@ -2437,13 +2400,10 @@ export const DynamicDateConstraints: Story = {
   render() {
     const formSchema = z
       .object({
-        projectName: f0FormField(
-          z.string().min(1, "Project name is required"),
-          {
-            label: "Project Name",
-            placeholder: "Enter project name",
-          }
-        ),
+        projectName: f0FormField.text({
+          label: "Project Name",
+          placeholder: "Enter project name",
+        }),
         startDate: f0FormField(
           z.date().min(new Date(), "Start date must be in the future"),
           {
@@ -2452,7 +2412,7 @@ export const DynamicDateConstraints: Story = {
             helpText: "When does the project begin?",
           }
         ),
-        endDate: f0FormField(z.date(), {
+        endDate: f0FormField.date({
           label: "End Date",
           placeholder: "Select end date",
           helpText:
@@ -2460,10 +2420,11 @@ export const DynamicDateConstraints: Story = {
           // Dynamic minDate: end date must be >= start date
           minDate: ({ values }) => new Date(`${values.startDate}`),
         }),
-        deadline: f0FormField(z.date().optional(), {
+        deadline: f0FormField.date({
           label: "Final Deadline (Optional)",
           placeholder: "Select deadline",
           helpText: "Must be after the end date",
+          optional: true,
           // Dynamic minDate based on end date
           minDate: ({ values }) => new Date(`${values.endDate}`),
         }),
@@ -2518,32 +2479,33 @@ export const PerSectionSubmit: Story = {
   render() {
     const schema = {
       personal: z.object({
-        firstName: f0FormField(z.string().min(1), {
+        firstName: f0FormField.text({
           label: "First Name",
           placeholder: "Enter first name",
         }),
-        lastName: f0FormField(z.string().min(1), {
+        lastName: f0FormField.text({
           label: "Last Name",
           placeholder: "Enter last name",
         }),
-        bio: f0FormField(z.string().max(300).optional(), {
+        bio: f0FormField.textarea({
           label: "Bio",
-          fieldType: "textarea",
+          optional: true,
           rows: 3,
         }),
       }),
       contact: z.object({
-        email: f0FormField(z.string().email(), {
+        email: f0FormField.email({
           label: "Email",
           placeholder: "you@example.com",
         }),
-        phone: f0FormField(z.string().optional(), {
+        phone: f0FormField.text({
           label: "Phone",
           placeholder: "+1 (555) 000-0000",
+          optional: true,
         }),
       }),
       preferences: z.object({
-        theme: f0FormField(z.enum(["light", "dark", "system"]), {
+        theme: f0FormField.select({
           label: "Theme",
           options: [
             { value: "light", label: "Light" },
@@ -2551,8 +2513,9 @@ export const PerSectionSubmit: Story = {
             { value: "system", label: "System" },
           ],
         }),
-        notifications: f0FormField(z.boolean(), {
+        notifications: f0FormField.boolean({
           label: "Enable notifications",
+          optional: true,
         }),
       }),
     }
@@ -2602,32 +2565,36 @@ export const PerSectionWithSidebar: Story = {
   render() {
     const schema = {
       general: z.object({
-        title: f0FormField(z.string().min(1), {
+        title: f0FormField.text({
           label: "Survey Title",
           placeholder: "Enter survey title",
         }),
-        description: f0FormField(z.string().max(500).optional(), {
+        description: f0FormField.textarea({
           label: "Description",
-          fieldType: "textarea",
+          optional: true,
           rows: 3,
         }),
       }),
       settings: z.object({
-        anonymousAnswers: f0FormField(z.boolean(), {
+        anonymousAnswers: f0FormField.boolean({
           label: "Anonymous answers",
           helpText: "Respondents' identities will not be recorded",
+          optional: true,
         }),
-        managerVisibility: f0FormField(z.boolean(), {
+        managerVisibility: f0FormField.boolean({
           label: "Manager visibility",
           helpText: "Allow managers to see individual responses",
+          optional: true,
         }),
       }),
       schedule: z.object({
-        publishOn: f0FormField(z.date().optional(), {
+        publishOn: f0FormField.date({
           label: "Publish date",
+          optional: true,
         }),
-        endsAt: f0FormField(z.date().optional(), {
+        endsAt: f0FormField.date({
           label: "End date",
+          optional: true,
         }),
       }),
     }
@@ -2680,35 +2647,41 @@ export const PerSectionShowSubmitWhenDirty: Story = {
   render() {
     const schema = {
       profile: z.object({
-        displayName: f0FormField(z.string().min(1), {
+        displayName: f0FormField.text({
           label: "Display Name",
           placeholder: "Enter your display name",
         }),
-        bio: f0FormField(z.string().max(200).optional(), {
+        bio: f0FormField.textarea({
           label: "Bio",
-          fieldType: "textarea",
+          optional: true,
           rows: 3,
           placeholder: "Tell us about yourself",
         }),
       }),
       notifications: z.object({
-        emailNotifications: f0FormField(z.boolean(), {
+        emailNotifications: f0FormField.boolean({
           label: "Email notifications",
           helpText: "Receive updates via email",
+          optional: true,
         }),
-        pushNotifications: f0FormField(z.boolean(), {
+        pushNotifications: f0FormField.boolean({
           label: "Push notifications",
           helpText: "Receive push notifications on your device",
+          optional: true,
         }),
       }),
       security: z.object({
-        currentPassword: f0FormField(z.string().min(8), {
+        currentPassword: f0FormField.text({
           label: "Current Password",
           placeholder: "Enter current password",
+          inputType: "password",
+          minLength: 8,
         }),
-        newPassword: f0FormField(z.string().min(8), {
+        newPassword: f0FormField.text({
           label: "New Password",
           placeholder: "Enter new password",
+          inputType: "password",
+          minLength: 8,
         }),
       }),
     }
@@ -2765,26 +2738,26 @@ export const PerSectionShowSubmitWhenDirty: Story = {
 export const AsyncDefaultValues: Story = {
   render() {
     const formSchema = z.object({
-      firstName: f0FormField(z.string().min(1), {
+      firstName: f0FormField.text({
         label: "First Name",
         placeholder: "Enter first name",
       }),
-      lastName: f0FormField(z.string().min(1), {
+      lastName: f0FormField.text({
         label: "Last Name",
         placeholder: "Enter last name",
       }),
-      email: f0FormField(z.string().email(), {
+      email: f0FormField.email({
         label: "Email",
         placeholder: "you@example.com",
       }),
-      bio: f0FormField(z.string().max(500).optional(), {
+      bio: f0FormField.textarea({
         label: "Biography",
-        fieldType: "textarea",
+        optional: true,
         rows: 3,
       }),
-      notifications: f0FormField(z.boolean(), {
+      notifications: f0FormField.boolean({
         label: "Enable notifications",
-        fieldType: "switch",
+        optional: true,
       }),
     })
 
@@ -2824,23 +2797,24 @@ export const AsyncDefaultValuesPerSection: Story = {
   render() {
     const schema = {
       personal: z.object({
-        firstName: f0FormField(z.string().min(1), {
+        firstName: f0FormField.text({
           label: "First Name",
           placeholder: "Enter first name",
         }),
-        lastName: f0FormField(z.string().min(1), {
+        lastName: f0FormField.text({
           label: "Last Name",
           placeholder: "Enter last name",
         }),
       }),
       contact: z.object({
-        email: f0FormField(z.string().email(), {
+        email: f0FormField.email({
           label: "Email",
           placeholder: "you@example.com",
         }),
-        phone: f0FormField(z.string().optional(), {
+        phone: f0FormField.text({
           label: "Phone",
           placeholder: "+1 (555) 000-0000",
+          optional: true,
         }),
       }),
     }
@@ -2897,21 +2871,22 @@ export const AsyncDefaultValuesPerSection: Story = {
 export const WithDefaultValuesParamsSchema: Story = {
   render() {
     const formSchema = z.object({
-      firstName: f0FormField(z.string().min(1), {
+      firstName: f0FormField.text({
         label: "First Name",
         placeholder: "Enter first name",
       }),
-      lastName: f0FormField(z.string().min(1), {
+      lastName: f0FormField.text({
         label: "Last Name",
         placeholder: "Enter last name",
       }),
-      email: f0FormField(z.string().email(), {
+      email: f0FormField.email({
         label: "Email",
         placeholder: "you@example.com",
       }),
-      role: f0FormField(z.string().optional(), {
+      role: f0FormField.text({
         label: "Role",
         placeholder: "e.g. Engineer",
+        optional: true,
       }),
     })
 
@@ -2986,11 +2961,12 @@ export const ActionBarWiggle: Story = {
     const formRef = useRef<F0FormRef | null>(null)
 
     const formSchema = z.object({
-      name: f0FormField(z.string().min(2, "Name is required"), {
+      name: f0FormField.text({
         label: "Name",
         placeholder: "Enter your name",
+        minLength: 2,
       }),
-      email: f0FormField(z.string().email("Invalid email"), {
+      email: f0FormField.email({
         label: "Email",
         placeholder: "you@example.com",
       }),
