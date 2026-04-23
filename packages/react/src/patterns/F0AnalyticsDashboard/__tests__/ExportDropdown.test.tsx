@@ -34,6 +34,9 @@ describe("ExportDropdown", () => {
       screen.getByRole("button", { name: "Toggle dropdown menu" })
     )
 
-    expect(await screen.findByText("Exporting...")).toBeInTheDocument()
+    // The dedicated "Exporting..." label was removed when the action moved
+    // to a button with a loading state; while loading the dropdown item
+    // now renders the generic "Export" label.
+    expect(await screen.findByText("Export")).toBeInTheDocument()
   })
 })

@@ -82,6 +82,17 @@ export function clampDashboardItemRowSpan(
   return { ...item, itemHeight: next }
 }
 
+/**
+ * True when the dashboard is effectively a table — a single item of type
+ * `collection`. Shared by the action bar copy, the inline report card and
+ * the canvas-level export gate so the UX stays consistent across surfaces.
+ */
+export function isSingleCollectionDashboard(
+  config: Pick<ChatDashboardConfig, "items">
+): boolean {
+  return config.items.length === 1 && config.items[0]?.type === "collection"
+}
+
 // ---------------------------------------------------------------------------
 // Format preset → formatter function
 // ---------------------------------------------------------------------------
@@ -547,7 +558,15 @@ export function DashboardContent({
       {/* State A: New dashboard with canvasActions — always-visible Save bar */}
       {!isSavedDashboard && hasDashboardActions && (
         <F0ActionBar
-          label={translations.ai.dashboard.saveToAnalytics}
+          label={
+            // A single-collection dashboard is really a table; the generic
+            // "Save the dashboard in Analytics" copy confuses users in that
+            // case. Swap to the table-specific label so the call-to-action
+            // matches what they're looking at.
+            isSingleCollectionDashboard(effectiveConfig)
+              ? translations.ai.dashboard.saveTableToAnalytics
+              : translations.ai.dashboard.saveToAnalytics
+          }
           isOpen
           primaryActions={[
             {
@@ -714,6 +733,50 @@ function mapCollectionItem(
   item: ChatDashboardCollectionItem,
   fetchData: (filters: FiltersState<FiltersDefinition>) => Promise<ItemResult>
 ): DashboardCollectionItem<FiltersDefinition> {
+  // Declare every column as sortable. OneDataCollection requires a sort key
+  // per column in the source's `sortings` record — the key mirrors the
+  // column id so header clicks map 1:1 back to the field being sorted.
+  const sortingDefs = item.columns.reduce<Record<string, { label: string }>>(
+    (acc, col) => {
+      acc[col.id] = { label: col.label }
+      return acc
+    },
+    {}
+  )
+
+  // Client-side comparator. Rows were eagerly fetched by the dashboard
+  // batch-compute so sort + search + pagination all run in memory — no
+  // server round-trip. Numbers and strings get type-aware ordering;
+  // everything else falls back to stringified compare.
+  const applySortings = (
+    rows: RecordType[],
+    sortings: Array<{ field: string; order: "asc" | "desc" }> | undefined
+  ): RecordType[] => {
+    if (!sortings || sortings.length === 0) return rows
+    const sorted = [...rows]
+    sorted.sort((a, b) => {
+      for (const { field, order } of sortings) {
+        const av = a[field]
+        const bv = b[field]
+        if (av === bv) continue
+        if (av == null) return order === "asc" ? -1 : 1
+        if (bv == null) return order === "asc" ? 1 : -1
+        let cmp: number
+        if (typeof av === "number" && typeof bv === "number") {
+          cmp = av - bv
+        } else {
+          cmp = String(av).localeCompare(String(bv), undefined, {
+            numeric: true,
+            sensitivity: "base",
+          })
+        }
+        if (cmp !== 0) return order === "asc" ? cmp : -cmp
+      }
+      return 0
+    })
+    return sorted
+  }
+
   return {
     id: item.id,
     title: item.title,
@@ -734,15 +797,17 @@ function mapCollectionItem(
       })
 
       return {
+        sortings: sortingDefs,
         dataAdapter: {
           paginationType: "pages" as const,
           perPage: COLLECTION_PER_PAGE,
           fetchData: async ({
+            sortings,
             pagination,
             search,
           }: {
             filters: Record<string, unknown>
-            sortings: unknown
+            sortings?: Array<{ field: string; order: "asc" | "desc" }>
             pagination: { currentPage: number; perPage?: number }
             search?: string
           }) => {
@@ -758,6 +823,7 @@ function mapCollectionItem(
                 )
               )
             }
+            rows = applySortings(rows, sortings)
             const page = pagination?.currentPage ?? 1
             const perPage = pagination?.perPage ?? COLLECTION_PER_PAGE
             const start = (page - 1) * perPage
@@ -783,9 +849,22 @@ function mapCollectionItem(
       {
         type: "table" as const,
         options: {
+          // Header click toggles sort; gear menu toggles visibility and
+          // column order. The dashboard-item download hook reads those
+          // settings via `onStateChange`, so the exported file always
+          // mirrors what the user is seeing.
+          allowColumnHiding: true,
+          allowColumnReordering: true,
+          // The first column is always the row's anchor (typically
+          // "Full Name", an id, or a primary label) — pin it so it stays
+          // visible while the user scrolls wide tables horizontally.
+          // Frozen columns are implicitly non-hidable / non-reorderable,
+          // which is exactly the behaviour we want for the anchor.
+          frozenColumns: 1 as const,
           columns: item.columns.map((col) => ({
             label: col.label,
             id: col.id,
+            sorting: col.id,
             ...(col.width ? { width: col.width } : {}),
             render: (row: RecordType) => {
               const value = row[col.id]

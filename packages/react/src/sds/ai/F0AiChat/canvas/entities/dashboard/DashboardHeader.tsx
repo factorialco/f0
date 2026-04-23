@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 
-import { Download } from "@/icons/app"
+import { Upload } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"
 import { ResourceHeader } from "@/patterns/ResourceHeader"
 
 import type { DashboardCanvasContent } from "../../../types"
+import type { DashboardMetadata } from "./types"
 
 import { useAiChat } from "../../../providers/AiChatStateProvider"
 import { useDashboardCanvas } from "./DashboardContext"
-import type { DashboardMetadata } from "./types"
 
 /**
  * Canvas header for the dashboard entity. Delegates layout, actions, status
@@ -76,7 +76,7 @@ export function DashboardHeader({
     return [
       {
         label: t("ai.dataDownload.export"),
-        icon: Download,
+        icon: Upload,
         onClick: handleExport,
         loading: isExporting,
       },

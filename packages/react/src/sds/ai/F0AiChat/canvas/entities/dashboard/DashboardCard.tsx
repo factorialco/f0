@@ -12,6 +12,7 @@ import {
   savedDashboardConfigStore,
   savedDashboardMetaStore,
 } from "./configStore"
+import { isSingleCollectionDashboard } from "./DashboardContent"
 
 export type DashboardCardProps = {
   /** The original dashboard config from the agent */
@@ -93,11 +94,18 @@ export function DashboardCard({
   // Auto-open canvas the first time this card appears
   useAutoOpenCanvas(toolCallId, handleOpen)
 
+  // Use the "Table" label when the dashboard is really a single-collection
+  // artifact (tables-as-dashboard flow). Otherwise keep "Report" so
+  // multi-widget dashboards read as reports in chat history.
+  const cardDescription = isSingleCollectionDashboard(config)
+    ? translations.ai.reportCard.tableLabel
+    : translations.ai.reportCard.reportLabel
+
   return (
     <CanvasCard
       module="analytics"
       title={config.title}
-      description={translations.ai.reportCard.reportLabel}
+      description={cardDescription}
       onOpen={handleOpen}
       onClose={() => closeCanvas()}
       isActive={isActive}

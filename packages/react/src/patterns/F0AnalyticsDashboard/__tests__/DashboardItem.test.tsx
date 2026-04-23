@@ -84,4 +84,32 @@ describe("DashboardItem", () => {
 
     expect(screen.queryByLabelText("Other actions")).not.toBeInTheDocument()
   })
+
+  it("renders the maximize button when onFullscreenChange is provided", () => {
+    render(
+      <DashboardItem
+        title="Revenue"
+        isLoading={false}
+        onFullscreenChange={vi.fn()}
+      >
+        <div>Content</div>
+      </DashboardItem>
+    )
+
+    // DashboardGrid uses `onFullscreenChange` as the opt-in for the
+    // maximize affordance; when a single-item dashboard locks fullscreen
+    // it omits the prop so the button goes away.
+    expect(screen.getByLabelText("Expand")).toBeInTheDocument()
+  })
+
+  it("hides the maximize button when onFullscreenChange is omitted (single-item lock)", () => {
+    render(
+      <DashboardItem title="Revenue" isLoading={false} isFullscreen>
+        <div>Content</div>
+      </DashboardItem>
+    )
+
+    expect(screen.queryByLabelText("Expand")).not.toBeInTheDocument()
+    expect(screen.queryByLabelText("Collapse")).not.toBeInTheDocument()
+  })
 })

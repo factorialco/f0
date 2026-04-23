@@ -1,16 +1,17 @@
 import { useEffect, useMemo, useState } from "react"
 
 import type {
-  FiltersDefinition,
-  FiltersState,
-} from "@/patterns/OneFilterPicker/types"
-import { NavigationFilters } from "@/patterns/OneDataCollection/components/NavigationFilters/NavigationFilters"
-import { navigationFilterTypes } from "@/patterns/OneDataCollection/navigationFilters"
-import type {
   NavigationFiltersDefinition,
   NavigationFiltersState,
 } from "@/patterns/OneDataCollection/navigationFilters/types"
+import type {
+  FiltersDefinition,
+  FiltersState,
+} from "@/patterns/OneFilterPicker/types"
+
 import { useI18n } from "@/lib/providers/i18n"
+import { NavigationFilters } from "@/patterns/OneDataCollection/components/NavigationFilters/NavigationFilters"
+import { navigationFilterTypes } from "@/patterns/OneDataCollection/navigationFilters"
 
 import type { F0AnalyticsDashboardProps } from "./types"
 
@@ -78,13 +79,28 @@ export const F0AnalyticsDashboard = <
     filename: exportFilename,
   })
 
+  // For single-collection-item dashboards (the `tables` skill output) we
+  // suppress the canvas-level Excel export. The inner OneDataCollection
+  // already exposes a CSV export via `csvExport` that respects the user's
+  // current sort + hidden columns + search — the canvas Excel would run
+  // on the raw dataset and silently drop those view choices, which is
+  // confusing UX for a single-table surface. Multi-item dashboards keep
+  // the canvas Excel (it aggregates every item into a multi-sheet file,
+  // which the inner CSV cannot do).
+  const isSingleCollection =
+    items.length === 1 && items[0]?.type === "collection"
+
   useEffect(() => {
+    if (isSingleCollection) {
+      onExportReady?.(undefined)
+      return
+    }
     onExportReady?.(exportAsExcel)
     return () => onExportReady?.(undefined)
-  }, [exportAsExcel, onExportReady])
+  }, [exportAsExcel, onExportReady, isSingleCollection])
 
   return (
-    <div className="flex flex-col gap-5 py-4">
+    <div className="flex flex-col gap-5 pb-10">
       {(filters || filtersLoading || enableExport || navigationFilters) && (
         <div className="flex items-center justify-between gap-4 px-5">
           <div className="w-full">

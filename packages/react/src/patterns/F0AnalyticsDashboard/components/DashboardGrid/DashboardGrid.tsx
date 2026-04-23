@@ -91,9 +91,14 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
   const [fullscreenItemId, setFullscreenItemId] = useState<string | null>(null)
   const [fullscreenHeight, setFullscreenHeight] = useState<number>(0)
 
-  // Measure available height when entering fullscreen
+  // Measure available height when entering fullscreen. Single-item
+  // dashboards render in the same fullscreen layout (no grid chrome), so
+  // their sizing also depends on this measurement — trigger it whenever
+  // the item is solo OR an explicit fullscreen target is set.
+  const isSingleItem = items.length === 1
   useEffect(() => {
-    if (!fullscreenItemId || !containerRef.current) return
+    if (!fullscreenItemId && !isSingleItem) return
+    if (!containerRef.current) return
     const measure = () => {
       const rect = containerRef.current?.getBoundingClientRect()
       if (rect) {
@@ -105,7 +110,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
     measure()
     window.addEventListener("resize", measure)
     return () => window.removeEventListener("resize", measure)
-  }, [fullscreenItemId])
+  }, [fullscreenItemId, isSingleItem])
 
   // Build item lookup
   const itemMap = useMemo(() => {
@@ -348,6 +353,33 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
     dragId &&
     dropTarget?.type === "new-row" &&
     dropTarget.afterRowIdx === afterIdx
+
+  // ─── Single-item dashboard — auto-fullscreen, no collapse ───────
+  // When the dashboard has exactly one item (e.g. the `tables` skill's
+  // single-collection output), skip grid layout entirely and render that
+  // item at full width. We deliberately DO NOT forward an
+  // `onFullscreenChange` handler so DashboardItem hides its maximize
+  // button (`hasFullscreen` gates on the callback being defined) — there
+  // is nothing to maximize or collapse to when only one item exists.
+  if (items.length === 1) {
+    const soleItem = items[0]
+    return (
+      <div
+        ref={containerRef}
+        className="flex flex-col"
+        style={{ height: Math.max(480, fullscreenHeight) }}
+      >
+        <DashboardGridItem
+          item={soleItem}
+          filters={filters}
+          editMode={editMode}
+          onDelete={handleDelete}
+          onTransformChart={onTransformChart}
+          isFullscreen
+        />
+      </div>
+    )
+  }
 
   // ─── Fullscreen mode — single item fills the grid ────────
   if (fullscreenItemId) {

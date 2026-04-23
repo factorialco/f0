@@ -334,6 +334,7 @@ export const defaultTranslations = {
     },
     reportCard: {
       reportLabel: "Report",
+      tableLabel: "Table",
       openButton: "Open",
     },
     formCard: {
@@ -342,6 +343,7 @@ export const defaultTranslations = {
     dashboard: {
       save: "Save",
       saveToAnalytics: "Save the dashboard in Analytics",
+      saveTableToAnalytics: "Save the table in Analytics",
       saveAs: "Save as",
       saveDialog: {
         title: "Save dashboard",
