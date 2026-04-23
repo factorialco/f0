@@ -222,6 +222,7 @@ export const useFormFillAction = () => {
       }
 
       ref.setValues(valuesToSet, { shouldValidate: false, shouldDirty: true })
+      registry.notifyFieldsFilled(formName, Object.keys(valuesToSet))
       await ref.trigger()
 
       // Refresh the registry snapshot so the co-agent picks up new values

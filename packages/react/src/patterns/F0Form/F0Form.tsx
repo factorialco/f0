@@ -40,7 +40,7 @@ import { SectionRenderer } from "./components/SectionRenderer"
 import { SwitchGroupRenderer } from "./components/SwitchGroupRenderer"
 import { createConditionalResolver } from "./conditionalResolver"
 import { FORM_MAX_WIDTH, SECTION_MARGIN } from "./constants"
-import { F0FormContext, generateAnchorId } from "./context"
+import { F0FormContext, F0FormAiGlowContext, generateAnchorId } from "./context"
 import { useF0AiFormRegistry } from "./F0AiFormRegistry"
 import { CardSelectDepsContext } from "./fields/cardSelect/CardSelectDepsContext"
 import { FieldRenderer } from "./fields/FieldRenderer"
@@ -873,6 +873,36 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   // Group contiguous switch fields
   const groupedItems = groupContiguousSwitches(definition)
 
+  // AI co-creation glow: track which fields were filled by the AI (fillForm).
+  // The glow persists until the user edits the field themselves.
+  const [aiGlowingFields, setAiGlowingFields] = useState<ReadonlySet<string>>(
+    () => new Set()
+  )
+
+  const clearFieldGlow = useCallback((fieldId: string) => {
+    setAiGlowingFields((prev) => {
+      if (!prev.has(fieldId)) return prev
+      const next = new Set(prev)
+      next.delete(fieldId)
+      return next
+    })
+  }, [])
+
+  useEffect(() => {
+    if (!aiFormRegistry) return
+
+    const unsubscribe = aiFormRegistry.subscribeFilledFields(
+      name,
+      (fieldNames) => {
+        setAiGlowingFields(new Set(fieldNames))
+      }
+    )
+
+    return () => {
+      unsubscribe()
+    }
+  }, [aiFormRegistry, name])
+
   // Context value for anchor links
   const contextValue = useMemo(
     () => ({
@@ -990,52 +1020,59 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   )
 
   return (
-    <F0FormContext.Provider value={contextValue}>
-      <FormProvider {...form}>
-        {showSectionsSidepanel && tocItems.length > 0 ? (
-          <div ref={scrollContainerRef} className="flex w-full overflow-scroll">
-            {/* Sections sidebar */}
-            <div className="sticky top-0 h-fit shrink-0 self-start pt-2">
-              <F0TableOfContent
-                items={tocItems}
-                activeItem={activeSection}
-                scrollable={false}
-              />
+    <F0FormAiGlowContext.Provider
+      value={{ glowingFields: aiGlowingFields, clearFieldGlow }}
+    >
+      <F0FormContext.Provider value={contextValue}>
+        <FormProvider {...form}>
+          {showSectionsSidepanel && tocItems.length > 0 ? (
+            <div
+              ref={scrollContainerRef}
+              className="flex w-full overflow-scroll"
+            >
+              {/* Sections sidebar */}
+              <div className="sticky top-0 h-fit shrink-0 self-start pt-2">
+                <F0TableOfContent
+                  items={tocItems}
+                  activeItem={activeSection}
+                  scrollable={false}
+                />
+              </div>
+
+              {/* Separator */}
+              <div className="sticky bottom-0 top-0 mr-4 w-px bg-f1-border-secondary" />
+
+              {/* Form content - centered in available space */}
+              {formContent}
             </div>
+          ) : (
+            formContent
+          )}
 
-            {/* Separator */}
-            <div className="sticky bottom-0 top-0 mr-4 w-px bg-f1-border-secondary" />
-
-            {/* Form content - centered in available space */}
-            {formContent}
-          </div>
-        ) : (
-          formContent
-        )}
-
-        {!hideActionBar && (
-          <FormActionBar
-            ref={actionBarRef}
-            isActionBar={isActionBar}
-            isDirty={isDirty}
-            actionBarStatus={actionBarStatus}
-            hasErrors={hasErrors}
-            errorCount={errorCount}
-            resolvedActionBarLabel={resolvedActionBarLabel}
-            submitLabel={submitLabel}
-            submitIcon={submitIcon}
-            discardableChanges={discardableChanges}
-            discardLabel={discardLabel}
-            discardIcon={discardIcon}
-            issuesOneLabel={forms.actionBar.issues.one}
-            issuesOtherLabel={forms.actionBar.issues.other}
-            onSubmit={form.handleSubmit(handleSubmit)}
-            onDiscard={handleDiscard}
-            goToPreviousError={goToPreviousError}
-            goToNextError={goToNextError}
-          />
-        )}
-      </FormProvider>
-    </F0FormContext.Provider>
+          {!hideActionBar && (
+            <FormActionBar
+              ref={actionBarRef}
+              isActionBar={isActionBar}
+              isDirty={isDirty}
+              actionBarStatus={actionBarStatus}
+              hasErrors={hasErrors}
+              errorCount={errorCount}
+              resolvedActionBarLabel={resolvedActionBarLabel}
+              submitLabel={submitLabel}
+              submitIcon={submitIcon}
+              discardableChanges={discardableChanges}
+              discardLabel={discardLabel}
+              discardIcon={discardIcon}
+              issuesOneLabel={forms.actionBar.issues.one}
+              issuesOtherLabel={forms.actionBar.issues.other}
+              onSubmit={form.handleSubmit(handleSubmit)}
+              onDiscard={handleDiscard}
+              goToPreviousError={goToPreviousError}
+              goToNextError={goToNextError}
+            />
+          )}
+        </FormProvider>
+      </F0FormContext.Provider>
+    </F0FormAiGlowContext.Provider>
   )
 }
