@@ -346,17 +346,21 @@ export const TableCollection = <
   const hasSelection =
     allSelectedStatus.selectedCount > 0 || allSelectedStatus.checked
 
-  // True when every visible record is selected (either via header checkbox or
-  // the "Select all N items" Gmail-style CTA)
-  const isAllSelected =
-    (allSelectedStatus.checked && !allSelectedStatus.indeterminate) ||
-    (allSelectedStatus.selectedCount > 0 &&
-      allSelectedStatus.selectedCount === (data?.records.length ?? -1))
-
+  // Every selectable row on the current page is checked, but the Gmail-style
+  // "select across all pages" CTA has not been activated. Used for banner text.
   const allOnPageSelected =
     !allSelectedStatus.checked &&
     allSelectedStatus.unselectedCount === 0 &&
     allSelectedStatus.selectedCount > 0
+
+  // True when the header checkbox should render as fully-checked: either the
+  // CTA is active, or every record on the page has been individually checked.
+  // Uses data.records.length as the denominator — consistent with the hook's
+  // own areAllKnownItemsSelected (checkedCount === totalKnownItemsCount).
+  const isAllSelected =
+    (allSelectedStatus.checked && !allSelectedStatus.indeterminate) ||
+    (allSelectedStatus.selectedCount > 0 &&
+      allSelectedStatus.selectedCount === (data?.records.length ?? -1))
 
   const showSelectAllOption =
     !!source.allPagesSelection &&
