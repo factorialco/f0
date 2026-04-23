@@ -262,6 +262,11 @@ describe("useSelectable", () => {
     })
 
     it("preserves manual selection after loadMore (cursor change)", async () => {
+      // Hoist data so the same record instances are passed to both the hook
+      // and the selection call — avoids false passes if identity ever matters.
+      const initialData = makeInfiniteData([1, 2])
+      const page2Data = makeInfiniteData([1, 2, 3, 4])
+
       const { result, rerender } = renderHook(
         ({ data, paginationInfo }) =>
           useSelectable({
@@ -273,7 +278,7 @@ describe("useSelectable", () => {
           }),
         {
           initialProps: {
-            data: makeInfiniteData([1, 2]),
+            data: initialData,
             paginationInfo: makeCursorInfo("cursor-0"),
           },
         }
@@ -281,17 +286,14 @@ describe("useSelectable", () => {
 
       // Select row 1 on the initial load
       act(() => {
-        result.current.handleSelectItemChange(
-          makeInfiniteData([1, 2]).records[0],
-          true
-        )
+        result.current.handleSelectItemChange(initialData.records[0], true)
       })
 
       await waitFor(() => expect(result.current.selectedItems.size).toBe(1))
 
       // Simulate loadMore: new page appended (ids 1-4 now in records), cursor advances
       rerender({
-        data: makeInfiniteData([1, 2, 3, 4]),
+        data: page2Data,
         paginationInfo: makeCursorInfo("cursor-1"),
       })
 
@@ -303,6 +305,10 @@ describe("useSelectable", () => {
     })
 
     it("preserves selection across multiple loadMore calls", async () => {
+      const page1Data = makeInfiniteData([1, 2])
+      const page2Data = makeInfiniteData([1, 2, 3, 4])
+      const page3Data = makeInfiniteData([1, 2, 3, 4, 5, 6])
+
       const { result, rerender } = renderHook(
         ({ data, paginationInfo }) =>
           useSelectable({
@@ -314,7 +320,7 @@ describe("useSelectable", () => {
           }),
         {
           initialProps: {
-            data: makeInfiniteData([1, 2]),
+            data: page1Data,
             paginationInfo: makeCursorInfo("cursor-0"),
           },
         }
@@ -322,21 +328,15 @@ describe("useSelectable", () => {
 
       // Select rows 1 and 2 on first page
       act(() => {
-        result.current.handleSelectItemChange(
-          makeInfiniteData([1]).records[0],
-          true
-        )
-        result.current.handleSelectItemChange(
-          makeInfiniteData([2]).records[0],
-          true
-        )
+        result.current.handleSelectItemChange(page1Data.records[0], true)
+        result.current.handleSelectItemChange(page1Data.records[1], true)
       })
 
       await waitFor(() => expect(result.current.selectedItems.size).toBe(2))
 
       // loadMore page 2
       rerender({
-        data: makeInfiniteData([1, 2, 3, 4]),
+        data: page2Data,
         paginationInfo: makeCursorInfo("cursor-1"),
       })
 
@@ -344,17 +344,14 @@ describe("useSelectable", () => {
 
       // Select row 3 on page 2
       act(() => {
-        result.current.handleSelectItemChange(
-          makeInfiniteData([3]).records[0],
-          true
-        )
+        result.current.handleSelectItemChange(page2Data.records[2], true)
       })
 
       await waitFor(() => expect(result.current.selectedItems.size).toBe(3))
 
       // loadMore page 3
       rerender({
-        data: makeInfiniteData([1, 2, 3, 4, 5, 6]),
+        data: page3Data,
         paginationInfo: makeCursorInfo("cursor-2"),
       })
 
@@ -456,6 +453,7 @@ describe("useSelectable", () => {
     })
 
     it("still clears selection on filter change in infinite-scroll mode", async () => {
+      const data = makeInfiniteData([1, 2])
       const sourceWithFilters = {
         ...mockSource,
         currentFilters: { status: "active" } as never,
@@ -464,7 +462,7 @@ describe("useSelectable", () => {
       const { result, rerender } = renderHook(
         ({ source }) =>
           useSelectable({
-            data: makeInfiniteData([1, 2]),
+            data,
             paginationInfo: makeCursorInfo("cursor-0"),
             source,
             onSelectItems: vi.fn(),
@@ -474,10 +472,7 @@ describe("useSelectable", () => {
       )
 
       act(() => {
-        result.current.handleSelectItemChange(
-          makeInfiniteData([1]).records[0],
-          true
-        )
+        result.current.handleSelectItemChange(data.records[0], true)
       })
 
       await waitFor(() => expect(result.current.selectedItems.size).toBe(1))
@@ -487,6 +482,78 @@ describe("useSelectable", () => {
         source: {
           ...sourceWithFilters,
           currentFilters: { status: "draft" } as never,
+        },
+      })
+
+      await waitFor(() => expect(result.current.selectedItems.size).toBe(0))
+    })
+
+    it("clears selection when sortings change in infinite-scroll mode", async () => {
+      const data = makeInfiniteData([1, 2])
+      const sourceWithSortings = {
+        ...mockSource,
+        currentSortings: { name: "asc" } as never,
+      }
+
+      const { result, rerender } = renderHook(
+        ({ source }) =>
+          useSelectable({
+            data,
+            paginationInfo: makeCursorInfo("cursor-0"),
+            source,
+            onSelectItems: vi.fn(),
+            selectionMode: "multi",
+          }),
+        { initialProps: { source: sourceWithSortings } }
+      )
+
+      act(() => {
+        result.current.handleSelectItemChange(data.records[0], true)
+      })
+
+      await waitFor(() => expect(result.current.selectedItems.size).toBe(1))
+
+      // Sortings change resets the dataset — selection must be cleared
+      rerender({
+        source: {
+          ...sourceWithSortings,
+          currentSortings: { name: "desc" } as never,
+        },
+      })
+
+      await waitFor(() => expect(result.current.selectedItems.size).toBe(0))
+    })
+
+    it("clears selection when search query changes in infinite-scroll mode", async () => {
+      const data = makeInfiniteData([1, 2])
+      const sourceWithSearch = {
+        ...mockSource,
+        debouncedCurrentSearch: "initial",
+      } as unknown as DataSourceDefinition<TestRecord, never, never, never>
+
+      const { result, rerender } = renderHook(
+        ({ source }) =>
+          useSelectable({
+            data,
+            paginationInfo: makeCursorInfo("cursor-0"),
+            source,
+            onSelectItems: vi.fn(),
+            selectionMode: "multi",
+          }),
+        { initialProps: { source: sourceWithSearch } }
+      )
+
+      act(() => {
+        result.current.handleSelectItemChange(data.records[0], true)
+      })
+
+      await waitFor(() => expect(result.current.selectedItems.size).toBe(1))
+
+      // Search query change resets the dataset — selection must be cleared
+      rerender({
+        source: {
+          ...sourceWithSearch,
+          debouncedCurrentSearch: "new-query",
         },
       })
 

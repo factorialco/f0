@@ -75,6 +75,13 @@ export function useSelectable<
   const hasInitialized = useRef(false)
   const isInitialMount = useRef(true)
   const previousFilters = useRef(source.currentFilters)
+  const previousSortings = useRef(source.currentSortings)
+  // debouncedCurrentSearch lives on DataSource (the runtime object) but is not
+  // part of DataSourceDefinition (the narrower type used here). We cast to
+  // access it safely — the value is always present at runtime.
+  const debouncedCurrentSearch = (source as { debouncedCurrentSearch?: string })
+    .debouncedCurrentSearch
+  const previousSearch = useRef(debouncedCurrentSearch)
   const previousDataRecordsKey = useRef<string>("")
   const previousSelectionState = useRef<string>("")
   const isAllSelectedRef = useRef(false)
@@ -697,29 +704,48 @@ export function useSelectable<
     updateLocalSelectedState(selectedState)
   }, [selectedState, getSelectedStateKey, updateLocalSelectedState])
 
-  // Clear selections when filters change (only when selectAll is enabled)
+  // Clear selections when the dataset identity changes (filters, sortings, or
+  // search query). This applies to ALL pagination types. For infinite-scroll,
+  // the page-change effect skips cursor advances so this effect is the only
+  // mechanism that clears on a true dataset reset caused by sortings/search.
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false
       previousFilters.current = source.currentFilters
+      previousSortings.current = source.currentSortings
+      previousSearch.current = debouncedCurrentSearch
       return
     }
 
-    // Deep comparison of filters to detect changes
-    const currentFiltersKey = JSON.stringify(source.currentFilters)
-    const previousFiltersKey = JSON.stringify(previousFilters.current)
+    const filtersChanged =
+      JSON.stringify(source.currentFilters) !==
+      JSON.stringify(previousFilters.current)
+    const sortingsChanged =
+      JSON.stringify(source.currentSortings) !==
+      JSON.stringify(previousSortings.current)
+    const searchChanged = debouncedCurrentSearch !== previousSearch.current
 
-    if (currentFiltersKey !== previousFiltersKey) {
-      // When disableSelectAll is true, maintain the selection even when filters change
-      // because the user is manually selecting items and expects them to persist
+    if (filtersChanged || sortingsChanged || searchChanged) {
+      // When disableSelectAll is true, maintain the selection even when the
+      // dataset changes because the user is manually selecting items and
+      // expects them to persist across soft reloads.
       if (!disableSelectAll) {
-        // Mark that we're clearing due to filter change to prevent data sync from restoring selections
+        // Mark that we're clearing due to dataset change to prevent the
+        // data-sync effect from restoring selections.
         justClearedByFilterChange.current = true
         clearSelectedItems()
       }
       previousFilters.current = source.currentFilters
+      previousSortings.current = source.currentSortings
+      previousSearch.current = debouncedCurrentSearch
     }
-  }, [source.currentFilters, clearSelectedItems, disableSelectAll])
+  }, [
+    source.currentFilters,
+    source.currentSortings,
+    debouncedCurrentSearch,
+    clearSelectedItems,
+    disableSelectAll,
+  ])
 
   // Clear selections when page changes, unless the user has triggered
   // "select all items" (allSelectedCheck) or resetOnPageChange is disabled.
