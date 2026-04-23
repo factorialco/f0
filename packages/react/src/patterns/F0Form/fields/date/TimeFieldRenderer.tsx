@@ -1,13 +1,15 @@
 import { useCallback, useMemo } from "react"
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
-import { Input } from "@/experimental/Forms/Fields/Input"
-import { Clock } from "@/icons/app"
 import type { InputFieldStatus } from "@/ui/InputField/types"
 
+import { Input } from "@/experimental/Forms/Fields/Input"
+import { Clock } from "@/icons/app"
+
 import type { ResolvedTimeField } from "./types"
-import { dateToTimeString, timeStringToDate } from "./utils"
+
 import { FORM_SIZE } from "../../constants"
+import { dateToTimeString, timeStringToDate } from "./utils"
 
 export interface TimeFieldRendererProps {
   field: ResolvedTimeField
@@ -38,20 +40,18 @@ export function TimeFieldRenderer({
   // Handle native time input change.
   // Uses null instead of undefined for cleared values because
   // react-hook-form treats undefined as "use defaultValue".
+  // Note: onBlur is NOT called here — validation is triggered on actual
+  // blur (the Input's onBlur prop), not after every keystroke.
   const handleChange = useCallback(
     (value: string | undefined) => {
       if (!value) {
         formField.onChange(null)
-        // Trigger validation after clearing
-        formField.onBlur()
         return
       }
 
       // Convert the time string to a Date object
       const date = timeStringToDate(value)
       formField.onChange(date)
-      // Trigger validation after selection
-      formField.onBlur()
     },
     [formField]
   )
@@ -63,6 +63,7 @@ export function TimeFieldRenderer({
       disabled={field.disabled}
       value={timeValue}
       onChange={handleChange}
+      onBlur={formField.onBlur}
       size={FORM_SIZE}
       hideLabel
       error={error}

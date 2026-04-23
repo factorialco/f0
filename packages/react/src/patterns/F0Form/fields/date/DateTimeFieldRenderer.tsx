@@ -2,11 +2,13 @@ import { useCallback, useMemo } from "react"
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
 import type { InputFieldStatus } from "@/ui/InputField/types"
+
 import type {
   ResolvedDateTimeField,
   ResolvedDateField,
   ResolvedTimeField,
 } from "./types"
+
 import { DateFieldRenderer } from "./DateFieldRenderer"
 import { TimeFieldRenderer } from "./TimeFieldRenderer"
 import { dateToTimeString, combineDateAndTime } from "./utils"
@@ -45,7 +47,8 @@ export function DateTimeFieldRenderer({
         formField.onChange(null)
         return
       }
-      // Combine new date with existing time
+      // Combine with existing time (empty string → midnight, which is fine —
+      // the user will set the time themselves)
       formField.onChange(combineDateAndTime(newDate, timeValue))
     },
     [formField, timeValue]
