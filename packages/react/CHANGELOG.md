@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.461.1](https://github.com/factorialco/f0/compare/f0-react-v1.461.0...f0-react-v1.461.1) (2026-04-23)
+
+
+### Bug Fixes
+
+* **F0AiChat:** preserve final streamed delta in ordered message parts ([#4011](https://github.com/factorialco/f0/issues/4011)) ([7496f2e](https://github.com/factorialco/f0/commit/7496f2e134025b148b54eace4ebbbcee28912586))
+
 ## [1.461.0](https://github.com/factorialco/f0/compare/f0-react-v1.460.0...f0-react-v1.461.0) (2026-04-23)
 
 
