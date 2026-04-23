@@ -109,6 +109,10 @@ describe("useSelectable", () => {
         pagesCount: 2,
       }
 
+      // Hoist data so the same record instances are passed to both the hook
+      // and the selection call — avoids false passes if identity ever matters.
+      const page1Data = makePagedData([1, 2])
+
       const { result, rerender } = renderHook(
         ({ data, paginationInfo }) =>
           useSelectable({
@@ -120,17 +124,14 @@ describe("useSelectable", () => {
           }),
         {
           initialProps: {
-            data: makePagedData([1, 2]),
+            data: page1Data,
             paginationInfo: page1Info,
           },
         }
       )
 
       act(() => {
-        result.current.handleSelectItemChange(
-          makePagedData([1, 2]).records[0],
-          true
-        )
+        result.current.handleSelectItemChange(page1Data.records[0], true)
       })
 
       await waitFor(() => expect(result.current.selectedItems.size).toBe(1))
@@ -157,6 +158,8 @@ describe("useSelectable", () => {
         pagesCount: 2,
       }
 
+      const page1Data = makePagedData([1, 2])
+
       const { result, rerender } = renderHook(
         ({ data, paginationInfo }) =>
           useSelectable({
@@ -169,17 +172,14 @@ describe("useSelectable", () => {
           }),
         {
           initialProps: {
-            data: makePagedData([1, 2]),
+            data: page1Data,
             paginationInfo: page1Info,
           },
         }
       )
 
       act(() => {
-        result.current.handleSelectItemChange(
-          makePagedData([1, 2]).records[0],
-          true
-        )
+        result.current.handleSelectItemChange(page1Data.records[0], true)
       })
 
       await waitFor(() => expect(result.current.selectedItems.size).toBe(1))
@@ -203,10 +203,12 @@ describe("useSelectable", () => {
         pagesCount: 1,
       }
 
+      const data = makePagedData([1, 2])
+
       const { result, rerender } = renderHook(
         ({ source }) =>
           useSelectable({
-            data: makePagedData([1, 2]),
+            data,
             paginationInfo,
             source,
             onSelectItems: vi.fn(),
@@ -216,10 +218,7 @@ describe("useSelectable", () => {
       )
 
       act(() => {
-        result.current.handleSelectItemChange(
-          makePagedData([1, 2]).records[0],
-          true
-        )
+        result.current.handleSelectItemChange(data.records[0], true)
       })
 
       await waitFor(() => expect(result.current.selectedItems.size).toBe(1))
