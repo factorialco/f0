@@ -109,27 +109,15 @@ return <F0Form formDefinition={formDefinition} />
       </tr>
       <tr>
         <td>`f0FormField.boolean(config)`</td>
-        <td>`z.boolean()`</td>
+        <td>`z.literal(true)` / `z.boolean()` when `optional`</td>
         <td>switch</td>
         <td>✓</td>
       </tr>
       <tr>
         <td>`f0FormField.checkbox(config)`</td>
-        <td>`z.boolean()`</td>
+        <td>`z.literal(true)` / `z.boolean()` when `optional`</td>
         <td>checkbox</td>
         <td>✓</td>
-      </tr>
-      <tr>
-        <td>`f0FormField.requiredCheckbox(config)`</td>
-        <td>`z.literal(true)`</td>
-        <td>checkbox (must be checked)</td>
-        <td>—</td>
-      </tr>
-      <tr>
-        <td>`f0FormField.requiredSwitch(config)`</td>
-        <td>`z.literal(true)`</td>
-        <td>switch (must be on)</td>
-        <td>—</td>
       </tr>
       <tr>
         <td>`f0FormField.date(config)`</td>

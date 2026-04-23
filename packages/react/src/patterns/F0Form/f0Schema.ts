@@ -891,12 +891,12 @@ export namespace f0FormField {
 
   export function boolean(
     config: SwitchConfig & { optional: true }
-  ): z.ZodOptional<z.ZodBoolean> & F0ZodType<z.ZodOptional<z.ZodBoolean>>
+  ): z.ZodBoolean & F0ZodType<z.ZodBoolean>
   export function boolean(
     config: SwitchConfig & { optional?: false | undefined }
-  ): z.ZodBoolean & F0ZodType<z.ZodBoolean>
+  ): z.ZodLiteral<true> & F0ZodType<z.ZodLiteral<true>>
   export function boolean({ optional, ...config }: SwitchConfig) {
-    const schema = optional ? z.boolean().optional() : z.boolean()
+    const schema = optional ? z.boolean() : z.literal(true as const)
     return f0FormField(
       schema as never,
       { ...config, fieldType: "switch" } as never
@@ -912,12 +912,12 @@ export namespace f0FormField {
 
   export function checkbox(
     config: CheckboxConfig & { optional: true }
-  ): z.ZodOptional<z.ZodBoolean> & F0ZodType<z.ZodOptional<z.ZodBoolean>>
+  ): z.ZodBoolean & F0ZodType<z.ZodBoolean>
   export function checkbox(
     config: CheckboxConfig & { optional?: false | undefined }
-  ): z.ZodBoolean & F0ZodType<z.ZodBoolean>
+  ): z.ZodLiteral<true> & F0ZodType<z.ZodLiteral<true>>
   export function checkbox({ optional, ...config }: CheckboxConfig) {
-    const schema = optional ? z.boolean().optional() : z.boolean()
+    const schema = optional ? z.boolean() : z.literal(true as const)
     return f0FormField(
       schema as never,
       { ...config, fieldType: "checkbox" } as never
@@ -1090,20 +1090,6 @@ export namespace f0FormField {
       schema as never,
       { ...config, fieldType: "file", multiple: true } as never
     ) as never
-  }
-
-  // ---- requiredCheckbox ----------------------------------------------------
-
-  /** @internal */
-  type RequiredCheckboxConfig = Omit<F0BooleanCheckboxConfig, "fieldType">
-
-  export function requiredCheckbox(
-    config: RequiredCheckboxConfig
-  ): z.ZodLiteral<true> & F0ZodType<z.ZodLiteral<true>> {
-    return f0FormField(z.literal(true as const), {
-      ...config,
-      fieldType: "checkbox",
-    }) as never
   }
 
   // ---- time ----------------------------------------------------------------
@@ -1352,19 +1338,5 @@ export namespace f0FormField {
     const base = z.array(z.string()).min(1)
     const schema = optional ? base.optional() : base
     return f0FormField(schema as never, rest as never)
-  }
-
-  // ---- requiredSwitch ------------------------------------------------------
-
-  /** @internal */
-  type RequiredSwitchConfig = Omit<F0BooleanSwitchConfig, "fieldType">
-
-  export function requiredSwitch(
-    config: RequiredSwitchConfig
-  ): z.ZodLiteral<true> & F0ZodType<z.ZodLiteral<true>> {
-    return f0FormField(z.literal(true as const), {
-      ...config,
-      fieldType: "switch",
-    }) as never
   }
 }
