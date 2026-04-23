@@ -1682,6 +1682,104 @@ export const TableColumnProperties: Story = {
   },
 }
 
+export const LongColumnLabels: Story = {
+  render: () => {
+    const dataSource = useDataCollectionSource({
+      dataAdapter: createDataAdapter({ data: mockUsers, delay: 300 }),
+    })
+
+    return (
+      <OneDataCollection
+        source={dataSource}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              columns: [
+                {
+                  label: "Full Name",
+                  render: (item) => item.name,
+                  width: 120,
+                },
+                {
+                  label: "Annual Gross Compensation (Before Tax)",
+                  render: (item) => `$${(item.salary ?? 0).toLocaleString()}`,
+                  width: 120,
+                },
+                {
+                  label: "Primary Organizational Department",
+                  render: (item) => item.department,
+                  width: 120,
+                },
+                {
+                  label: "Current Employment Role And Position Title",
+                  render: (item) => item.role,
+                  width: 120,
+                },
+                {
+                  label: "Corporate Electronic Mail Address",
+                  render: (item) => item.email,
+                  width: 150,
+                },
+              ],
+            },
+          },
+        ]}
+      />
+    )
+  },
+}
+
+export const LongColumnLabelsWithInfo: Story = {
+  render: () => {
+    const dataSource = useDataCollectionSource({
+      dataAdapter: createDataAdapter({ data: mockUsers, delay: 300 }),
+    })
+
+    return (
+      <OneDataCollection
+        source={dataSource}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              columns: [
+                {
+                  label: "Full Name",
+                  render: (item) => item.name,
+                  width: 120,
+                },
+                {
+                  label: "Annual Gross Compensation (Before Tax)",
+                  render: (item) => `$${(item.salary ?? 0).toLocaleString()}`,
+                  width: 120,
+                  info: "Total yearly salary before any tax withholdings or benefit deductions are applied",
+                },
+                {
+                  label: "Primary Organizational Department",
+                  render: (item) => item.department,
+                  width: 120,
+                  info: "The business unit this employee is assigned to",
+                },
+                {
+                  label: "Current Employment Role And Position Title",
+                  render: (item) => item.role,
+                  width: 120,
+                },
+                {
+                  label: "Corporate Electronic Mail Address",
+                  render: (item) => item.email,
+                  width: 150,
+                },
+              ],
+            },
+          },
+        ]}
+      />
+    )
+  },
+}
+
 export const TableWithNoFiltersAndSearch: Story = {
   render: () => {
     const dataSource = useDataCollectionSource({

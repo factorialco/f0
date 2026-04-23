@@ -5,6 +5,7 @@ import { TableHead as TableHeadRoot } from "@/ui/table"
 
 import { F0Icon, IconType } from "../../../components/F0Icon"
 import { ArrowDown, InfoCircleLine } from "../../../icons/app"
+import { OneEllipsis } from "../../../lib/OneEllipsis"
 import { cn, focusRing } from "../../../lib/utils"
 import { getColWidth } from "../utils/colWidth"
 import { ColumnWidth } from "../utils/sizes"
@@ -105,9 +106,17 @@ export function TableHead({
           align === "right" && "flex-row-reverse"
         )}
       >
-        <div className={cn("truncate", width !== "auto" && "overflow-hidden")}>
-          {children}
-        </div>
+        {typeof children === "string" ? (
+          <OneEllipsis className={cn(width !== "auto" && "overflow-hidden")}>
+            {children}
+          </OneEllipsis>
+        ) : (
+          <div
+            className={cn("truncate", width !== "auto" && "overflow-hidden")}
+          >
+            {children}
+          </div>
+        )}
         {hasContent && (
           <div className="flex items-center">
             {info && (
