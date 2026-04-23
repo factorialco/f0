@@ -70,6 +70,41 @@ Full template + workflow: [`references/mdx-authoring.md`](./references/mdx-autho
 
 ---
 
+## Authoring Principles
+
+These rules apply across the workflow. Violating them produces redundant, drift-prone, or low-quality docs.
+
+### Refactor without losing value
+
+When reorganizing an existing MDX into a new structure, **audit what already exists in that section first**. Do not delete a valuable visual or example just because you are changing the surrounding format. Combine them when they serve different purposes (e.g. scannable text bullets + visual `<DoDonts>` reference).
+
+### `### Behavior` is non-obvious runtime behavior
+
+`### Behavior` (inside `## Guidelines`) is for information that is **specific to this component AND not visible elsewhere in the doc**. Apply this filter:
+
+- ❌ Skip if `<Controls>` already shows it (props, defaults, types of individual props)
+- ❌ Skip if it's component-global behavior (e.g., `data-testid` support via `withDataTestId` applies to ALL components)
+- ❌ Skip if Modes / Variants tables in `## Anatomy` or `### Design best practices` already cover it
+- ✅ Include non-obvious runtime behavior — async `onClick` auto-loading, polymorphic rendering when an `href` is passed, controlled/uncontrolled rules, ref typing for polymorphic components, focus management specific to this component
+- ❌ Do NOT add a "Related components" section — it is not visual nor relevant on the Docs page; cross-references belong in the 1–2 sentence intro under `# ComponentName`
+- ❌ Do NOT call this section "Code", "Patterns", or "Advanced" — these aren't usage patterns, they are runtime behaviors
+
+If a subsection would only contain redundant info, omit it. If the component has no non-obvious behavior, omit `### Behavior` entirely.
+
+### Inline Correct / Incorrect for copy rules — pair with a visual DoDonts
+
+For wording and copy rules in `### Content best practices`, use **inline `**Correct:** / **Incorrect:**` bullets** for the rules themselves — more scannable than prose for textual examples. Use plain bold; never emojis (✅ / ❌).
+
+```mdx
+- Use imperative verbs
+  - **Correct:** "Save changes", "Delete account", "Export data"
+  - **Incorrect:** "Saved", "Deletion", "Exportation"
+```
+
+**Always pair the bullets with a `<DoDonts>` visual** showing one representative good vs bad label rendered as the actual component. The bullets give scannable rules; the DoDonts gives a real visual reference. The two formats complement each other — never drop the visual when adding the inline pattern.
+
+---
+
 ## Documentation is a Blocking Requirement
 
 A component is not considered done until its MDX file exists and covers all public props and variants. The `f0-quality-gate` enforces this:
