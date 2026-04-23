@@ -19,15 +19,6 @@ export type F0DialogPrimaryAction = {
   loading?: boolean
 }
 
-export type F0DialogPrimaryActionItem = {
-  value: string
-  label: string
-  icon?: IconType
-  onClick: () => void
-  disabled?: boolean
-  loading?: boolean
-}
-
 export type F0DialogSecondaryAction = {
   label: string
   icon?: IconType
@@ -36,7 +27,10 @@ export type F0DialogSecondaryAction = {
   loading?: boolean
 }
 
-export type F0DialogSecondaryActionItem = {
+// Shared base for action items used in multi-action dropdowns.
+// Note: disabled/loading on items are reserved for future use —
+// F0ButtonDropdown does not yet support per-item disabled/loading states.
+type F0DialogActionItem = {
   value: string
   label: string
   icon?: IconType
@@ -44,6 +38,9 @@ export type F0DialogSecondaryActionItem = {
   disabled?: boolean
   loading?: boolean
 }
+
+export type F0DialogPrimaryActionItem = F0DialogActionItem
+export type F0DialogSecondaryActionItem = F0DialogActionItem
 
 export type F0DialogActionsProps = {
   primaryAction?: F0DialogPrimaryAction | F0DialogPrimaryActionItem[]
