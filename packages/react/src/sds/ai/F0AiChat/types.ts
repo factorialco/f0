@@ -72,6 +72,17 @@ export type PendingContext = {
 }
 
 /**
+ * Quoted fragment the user is replying to. Shown as a chip above the
+ * textarea and, on submit, rendered as a markdown blockquote at the top of
+ * the resulting user message. The blockquote alone is enough context — the
+ * conversation thread tells the agent what it refers to.
+ */
+export type PendingQuote = {
+  /** Plain-text selection (markdown stripped by the browser's toString()). */
+  text: string
+}
+
+/**
  * Base shape shared by all canvas content types.
  * Every entity adds its own fields on top of this.
  */

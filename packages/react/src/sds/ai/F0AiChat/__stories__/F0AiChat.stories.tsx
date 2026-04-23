@@ -94,6 +94,49 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
+/**
+ * Demo of the reply-to-selection flow: select text inside any message (user or
+ * assistant) to trigger a floating "Reply" button. Clicking it quotes the
+ * fragment as a chip above the textarea; sending injects it as a markdown
+ * blockquote in the resulting user message.
+ */
+const ReplyToSelectionPrefill = () => {
+  const { appendMessages } = useAiChat()
+
+  useEffect(() => {
+    appendMessages(
+      [
+        {
+          role: "user",
+          content:
+            "Can you explain how our PTO policy works for new hires during their first three months?",
+        },
+        {
+          role: "assistant",
+          content: [
+            "Sure! Here's the high-level breakdown of the PTO policy for new hires:",
+            "",
+            "1. **Accrual** starts on day one at a rate of 1.25 days per month.",
+            "2. **During the first 90 days**, accrued PTO can be viewed but not taken except for emergencies.",
+            "3. **After 90 days**, the full accrued balance becomes available and can be requested through the standard Time Off flow.",
+            "4. Carry-over rules and bank holidays depend on the local calendar; check the country settings for exact figures.",
+            "",
+            "Let me know if you want me to pull up the policy document for a specific country.",
+          ].join("\n"),
+        },
+      ],
+      { persist: false }
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  return null
+}
+
+export const WithReplyToSelection: Story = {
+  render: () => <ReplyToSelectionPrefill />,
+}
+
 export const WithFooter: Story = {
   decorators: [
     (Story) => {

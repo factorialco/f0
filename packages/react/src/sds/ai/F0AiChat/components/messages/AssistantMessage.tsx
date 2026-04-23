@@ -1,9 +1,11 @@
 import { useLazyToolRenderer } from "@copilotkit/react-core"
 import { Markdown, type AssistantMessageProps } from "@copilotkit/react-ui"
-import { createContext, useContext, useEffect } from "react"
+import { createContext, useContext, useEffect, useRef } from "react"
 
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { markdownRenderers } from "../markdownRenderers"
+import { ReplyPopover } from "./ReplyPopover"
+import { useReplySelection } from "./useReplySelection"
 
 /**
  * Context that provides the current tool call ID to action render
@@ -45,7 +47,12 @@ export const AssistantMessage = ({
 
   const isEmptyMessage = !content && !subComponent
 
-  const { tracking } = useAiChat()
+  const { tracking, setPendingQuote } = useAiChat()
+  const contentRef = useRef<HTMLDivElement>(null)
+  const { anchor, clear } = useReplySelection({
+    containerRef: contentRef,
+    enabled: Boolean(message?.id && content),
+  })
 
   useEffect(() => {
     if (message?.id && !isLoading && !isGenerating) {
@@ -61,7 +68,10 @@ export const AssistantMessage = ({
     <ToolCallIdContext.Provider value={toolCallId}>
       <div className="relative isolate flex w-full flex-col items-start justify-center">
         {message && content && (
-          <div className="w-fit max-w-full [&>div]:flex [&>div]:flex-col [&>div]:gap-1">
+          <div
+            ref={contentRef}
+            className="w-fit max-w-full [&>div]:flex [&>div]:flex-col [&>div]:gap-1"
+          >
             <Markdown
               content={content}
               components={{ ...markdownRenderers, ...markdownTagRenderers }}
@@ -69,6 +79,14 @@ export const AssistantMessage = ({
           </div>
         )}
         {!!subComponent && <div className="w-full">{subComponent}</div>}
+        <ReplyPopover
+          anchor={anchor}
+          onReply={(text) => {
+            setPendingQuote({ text })
+            clear()
+            window.getSelection()?.removeAllRanges()
+          }}
+        />
       </div>
     </ToolCallIdContext.Provider>
   )

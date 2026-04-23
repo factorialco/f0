@@ -6,6 +6,14 @@ type UseMessageScrollOptions = {
   endRef: RefObject<HTMLDivElement | null>
   lastTurnRef: RefObject<HTMLDivElement | null>
   turnsCount: number
+  /**
+   * When true, pauses the ResizeObserver-driven turnMinHeight updates. Use
+   * this during transient input-area size changes (e.g. the clarifying
+   * question panel appearing/disappearing) to prevent the last turn's
+   * reserved minHeight from shrinking/growing and causing a visible
+   * content jump while the user is interacting.
+   */
+  freezeTurnMinHeight?: boolean
 }
 
 type UseMessageScrollReturn = {
@@ -24,10 +32,13 @@ export function useMessageScroll({
   endRef,
   lastTurnRef,
   turnsCount,
+  freezeTurnMinHeight = false,
 }: UseMessageScrollOptions): UseMessageScrollReturn {
   const [turnMinHeight, setTurnMinHeight] = useState(0)
   const [showScrollBtn, setShowScrollBtn] = useState(false)
   const prevTurnsCountRef = useRef(turnsCount)
+  const freezeRef = useRef(freezeTurnMinHeight)
+  freezeRef.current = freezeTurnMinHeight
 
   const scrollToBottom = useCallback(
     (behavior: ScrollBehavior = "smooth") => {
@@ -42,6 +53,11 @@ export function useMessageScroll({
     const content = contentRef.current
     if (!viewport || !content) return
     const observer = new ResizeObserver(() => {
+      // Skip updates while frozen — the input area is transiently
+      // resizing (e.g. clarifying panel animating in/out) and we want
+      // the reserved last-turn minHeight to stay put so messages above
+      // don't shift.
+      if (freezeRef.current) return
       const py =
         parseFloat(getComputedStyle(content).paddingTop) +
         parseFloat(getComputedStyle(content).paddingBottom) +

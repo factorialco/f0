@@ -46,6 +46,21 @@ export interface ClarifyingStepState extends ClarifyingStepData {
 }
 
 /**
+ * Snapshot of a resolved step's answer — persisted alongside the tool args
+ * so the render can restore state without re-invoking the panel.
+ */
+export interface ResolvedStepAnswer {
+  /** The question text (matches the source step) */
+  question: string
+  /** Selected option IDs at submit time */
+  selectedOptionIds: string[]
+  /** Custom free-text answer if provided */
+  customAnswer?: string
+  /** True when the user explicitly skipped an optional step */
+  skipped?: boolean
+}
+
+/**
  * The active clarifying question state pushed into the AiChat context.
  * When no clarifying question is active the context value is `null`.
  *
@@ -63,6 +78,8 @@ export interface ClarifyingQuestionState {
   toggleOption: (optionId: string) => void
   /** Confirm the current step's selection and advance (or submit on final step) */
   confirm: () => void
+  /** Skip the current step (only valid when the step is optional) */
+  skip: () => void
   /** Go back to the previous step */
   back: () => void
   /** Set the custom answer text */

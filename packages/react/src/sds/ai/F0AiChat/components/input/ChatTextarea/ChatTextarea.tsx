@@ -16,6 +16,7 @@ import { ActionBar } from "./ActionBar"
 import { AttachedFilesList } from "./AttachedFilesList"
 import { CreditWarningWrapper } from "./CreditWarningWrapper"
 import { DropOverlay } from "./DropOverlay"
+import { PendingQuoteChip } from "./PendingQuoteChip"
 import { TextareaField } from "./TextareaField"
 import {
   type ChatTextareaProps,
@@ -23,6 +24,40 @@ import {
   type UserTextPart,
 } from "./types"
 import { useFileAttachments } from "./useFileAttachments"
+
+const HTML_ESCAPES: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;",
+}
+
+/** Escape HTML entities so the quoted selection can't inject markup. */
+const escapeHtml = (s: string) => s.replace(/[&<>"']/g, (c) => HTML_ESCAPES[c])
+
+/** Markdown syntax characters that would otherwise trigger formatting. */
+const MD_SPECIAL = /[\\`*_{}[\]()#+\-.!|~>]/g
+
+/**
+ * Neutralize markdown / HTML metacharacters in user-typed text so `*hola*`,
+ * `# title`, `> quote`, etc. render literally in the bubble. Preserves the
+ * `<entity-ref>` tags that `transformMentions` inserts, so @mentions keep
+ * their interactive rendering.
+ */
+const escapeUserText = (s: string): string =>
+  s
+    .split(/(<entity-ref\b[^>]*>[\s\S]*?<\/entity-ref>)/g)
+    .map((part, i) => {
+      // Odd indices are entity-ref tags produced by transformMentions — leave
+      // them intact so the markdown renderer can turn them into chips.
+      if (i % 2 === 1) return part
+      return part
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(MD_SPECIAL, "\\$&")
+    })
+    .join("")
 
 export const ChatTextarea = ({
   submitLabel,
@@ -43,6 +78,8 @@ export const ChatTextarea = ({
     fileDragOver,
     pendingContext,
     setPendingContext,
+    pendingQuote,
+    setPendingQuote,
   } = useAiChat()
   const { messages, setMessages } = useCopilotChatInternal()
   const translation = useI18n()
@@ -111,10 +148,24 @@ export const ChatTextarea = ({
       handleStop()
     } else if (hasDataToSend && !isUploading) {
       const transformed = mentions.transformMentions(inputValue.trim())
+      // Escape markdown/HTML in the user's own text so `*hola*` stays literal
+      // and only features we control (quote blockquote, @mentions, tool
+      // hints) produce rich rendering in the bubble.
+      const safeUserText = escapeUserText(transformed)
 
       const withToolHint = activeToolHint
-        ? `<tool-context tool="${activeToolHint.id}">${activeToolHint.prompt}</tool-context>\n\n${transformed}`
-        : transformed
+        ? `<tool-context tool="${activeToolHint.id}">${activeToolHint.prompt}</tool-context>\n\n${safeUserText}`
+        : safeUserText
+
+      // When replying to a selected fragment, prepend the quote as a
+      // dedicated `<reply-quote>` tag. `UserMessage` strips this tag from
+      // the bubble content and renders the quote above the bubble (see
+      // the design: muted text with a reply arrow icon, mirroring the
+      // bubble alignment). Newlines are encoded as <br/> so they survive
+      // the HTML round-trip.
+      const withQuote = pendingQuote
+        ? `<reply-quote>${escapeHtml(pendingQuote.text).replace(/\n/g, "<br/>")}</reply-quote>${withToolHint}`
+        : withToolHint
 
       const files = uploadedFiles.flatMap((f) =>
         f.uploadedFile ? [f.uploadedFile] : []
@@ -139,10 +190,11 @@ export const ChatTextarea = ({
             filename: file.filename,
             mimeType: file.mimetype,
           })),
-          { type: "text" as const, text: withToolHint },
+          { type: "text" as const, text: withQuote },
         ]
 
         if (pendingContext) setPendingContext(null)
+        if (pendingQuote) setPendingQuote(null)
 
         sendMessage({
           id: crypto.randomUUID(),
@@ -150,7 +202,8 @@ export const ChatTextarea = ({
           content: contentParts,
         })
       } else {
-        onSend(withToolHint)
+        if (pendingQuote) setPendingQuote(null)
+        onSend(withQuote)
       }
 
       setInputValue("")
@@ -202,7 +255,7 @@ export const ChatTextarea = ({
         className={cn(
           "relative isolate z-20",
           "flex flex-col items-stretch md:gap-3 gap-2",
-          "rounded-lg border border-solid border-f1-border",
+          "rounded-lg border border-solid border-f1-border has-[textarea:focus]:border-f1-border-secondary",
           "transition-all hover:cursor-text",
           "p-0",
           "before:pointer-events-none before:absolute before:inset-0 before:z-[-1]",
@@ -238,7 +291,6 @@ export const ChatTextarea = ({
       >
         <DropOverlay
           visible={fileDragOver}
-          shouldReduceMotion={shouldReduceMotion}
           onFilesDropped={(files) => {
             void processFiles(files)
           }}
@@ -252,7 +304,7 @@ export const ChatTextarea = ({
           onSelect={mentions.selectPerson}
         />
 
-        <AnimatePresence mode="popLayout">
+        <AnimatePresence initial={false}>
           {isClarifying ? (
             <ClarifyingQuestionPanel
               key="clarifying"
@@ -261,18 +313,22 @@ export const ChatTextarea = ({
           ) : (
             <motion.div
               key="input"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{
-                opacity: 0,
-                // Exit instantly to avoid a visible empty-form gap (white line)
-                // before the clarifying panel begins its height animation.
-                transition: { duration: 0 },
-              }}
+              className="overflow-hidden"
+              initial={{ height: "auto", opacity: 1 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
               transition={{
-                duration: shouldReduceMotion ? 0 : 0.15,
+                duration: shouldReduceMotion ? 0 : 0.3,
+                ease: "easeOut",
               }}
             >
+              {pendingQuote && (
+                <PendingQuoteChip
+                  quote={pendingQuote}
+                  onRemove={() => setPendingQuote(null)}
+                />
+              )}
+
               <AttachedFilesList
                 attachedFiles={attachedFiles}
                 isUploading={isUploading}
