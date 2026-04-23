@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.461.0](https://github.com/factorialco/f0/compare/f0-react-v1.460.0...f0-react-v1.461.0) (2026-04-23)
+
+
+### Features
+
+* add support to define initial files resolution through f0 form definition ([#4006](https://github.com/factorialco/f0/issues/4006)) ([50ec9af](https://github.com/factorialco/f0/commit/50ec9afeb35f53b232053ced1c2a8d761597c76d))
+
 ## [1.460.0](https://github.com/factorialco/f0/compare/f0-react-v1.459.1...f0-react-v1.460.0) (2026-04-22)
 
 
