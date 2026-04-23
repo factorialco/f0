@@ -1,5 +1,5 @@
 import {
-  DataSourceDefinition,
+  DataSource,
   FiltersDefinition,
   FiltersState,
   GroupingDefinition,
@@ -44,7 +44,7 @@ export type UseSelectableProps<
 > = {
   data: Data<R>
   paginationInfo: PaginationInfo | null
-  source: DataSourceDefinition<R, Filters, Sortings, Grouping>
+  source: DataSource<R, Filters, Sortings, Grouping>
   onSelectItems?: OnSelectItemsCallback<R, Filters>
   selectionMode?: "multi" | "single"
   selectedState?: SelectedItemsState<R>

@@ -76,11 +76,7 @@ export function useSelectable<
   const isInitialMount = useRef(true)
   const previousFilters = useRef(source.currentFilters)
   const previousSortings = useRef(source.currentSortings)
-  // debouncedCurrentSearch lives on DataSource (the runtime object) but is not
-  // part of DataSourceDefinition (the narrower type used here). We cast to
-  // access it safely — the value is always present at runtime.
-  const debouncedCurrentSearch = (source as { debouncedCurrentSearch?: string })
-    .debouncedCurrentSearch
+  const debouncedCurrentSearch = source.debouncedCurrentSearch
   const previousSearch = useRef(debouncedCurrentSearch)
   const previousDataRecordsKey = useRef<string>("")
   const previousSelectionState = useRef<string>("")

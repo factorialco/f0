@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
-import { DataSourceDefinition, PaginationInfo } from "../types"
+import { DataSource, PaginationInfo } from "../types"
 import { Data, GROUP_ID_SYMBOL } from "../useData"
 import { useSelectable } from "../useSelectable/useSelectable"
 
@@ -528,7 +528,7 @@ describe("useSelectable", () => {
       const sourceWithSearch = {
         ...mockSource,
         debouncedCurrentSearch: "initial",
-      } as unknown as DataSourceDefinition<TestRecord, never, never, never>
+      } as unknown as DataSource<TestRecord, never, never, never>
 
       const { result, rerender } = renderHook(
         ({ source }) =>
