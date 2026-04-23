@@ -945,7 +945,10 @@ export const WithInfiniteScrollSelection: Story = {
       <div className="h-[500px] overflow-auto">
         <ExampleComponent
           selectable={(item) => item.id}
-          // Infinite-scroll: manual selections persist across loadMore — new rows arrive unchecked
+          allPagesSelection={true}
+          // Infinite-scroll + Gmail-style select-all: manual selections persist
+          // across loadMore, and the "Select all N items" banner appears once
+          // every loaded row is checked.
           dataAdapter={createDataAdapter({
             data: paginatedMockUsers,
             delay: 500,
