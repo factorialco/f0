@@ -36,7 +36,16 @@ export type F0DialogSecondaryAction = {
   loading?: boolean
 }
 
+export type F0DialogSecondaryActionItem = {
+  value: string
+  label: string
+  icon?: IconType
+  onClick: () => void
+  disabled?: boolean
+  loading?: boolean
+}
+
 export type F0DialogActionsProps = {
   primaryAction?: F0DialogPrimaryAction | F0DialogPrimaryActionItem[]
-  secondaryAction?: F0DialogSecondaryAction
+  secondaryAction?: F0DialogSecondaryAction | F0DialogSecondaryActionItem[]
 }

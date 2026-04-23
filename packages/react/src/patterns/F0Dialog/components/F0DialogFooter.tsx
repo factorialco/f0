@@ -5,11 +5,19 @@ import {
   F0DialogActionsProps,
   F0DialogPrimaryAction,
   F0DialogPrimaryActionItem,
+  F0DialogSecondaryAction,
+  F0DialogSecondaryActionItem,
 } from "../types"
 
 const isPrimaryActionArray = (
   action: F0DialogPrimaryAction | F0DialogPrimaryActionItem[]
 ): action is F0DialogPrimaryActionItem[] => {
+  return Array.isArray(action)
+}
+
+const isSecondaryActionArray = (
+  action: F0DialogSecondaryAction | F0DialogSecondaryActionItem[]
+): action is F0DialogSecondaryActionItem[] => {
   return Array.isArray(action)
 }
 
@@ -58,20 +66,45 @@ export const F0DialogFooter = ({
     )
   }
 
+  const renderSecondaryAction = () => {
+    if (!hasSecondaryAction) return null
+
+    if (isSecondaryActionArray(secondaryAction)) {
+      return (
+        <F0ButtonDropdown
+          items={secondaryAction.map((action) => ({
+            value: action.value,
+            label: action.label,
+            icon: action.icon,
+            disabled: action.disabled,
+            loading: action.loading,
+          }))}
+          onClick={(value) => {
+            const action = secondaryAction.find((a) => a.value === value)
+            action?.onClick()
+          }}
+          variant="outline"
+        />
+      )
+    }
+
+    return (
+      <F0Button
+        label={secondaryAction.label}
+        onClick={secondaryAction.onClick}
+        variant="outline"
+        icon={secondaryAction.icon}
+        disabled={secondaryAction.disabled}
+        loading={secondaryAction.loading}
+      />
+    )
+  }
+
   return (
     <div className="flex flex-row items-center justify-between border-x-0 border-b-0 border-t border-solid border-f1-border-secondary px-4 py-3">
       <div className="flex-1" />
       <div className="flex flex-row items-center gap-2">
-        {hasSecondaryAction && (
-          <F0Button
-            label={secondaryAction.label}
-            onClick={secondaryAction.onClick}
-            variant="outline"
-            icon={secondaryAction.icon}
-            disabled={secondaryAction.disabled}
-            loading={secondaryAction.loading}
-          />
-        )}
+        {renderSecondaryAction()}
         {renderPrimaryAction()}
       </div>
     </div>
