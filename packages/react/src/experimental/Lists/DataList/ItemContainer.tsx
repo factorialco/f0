@@ -28,6 +28,7 @@ export type InternalCopyActionType = {
 export type InternalNavigateActionType = {
   type: "navigate"
   href: string
+  showChevron?: boolean
 }
 
 export type InternalOpenLinkActionType = {
