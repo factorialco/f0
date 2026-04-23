@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.463.1](https://github.com/factorialco/f0/compare/f0-react-v1.463.0...f0-react-v1.463.1) (2026-04-23)
+
+
+### Bug Fixes
+
+* export CandidateProfile and JobPostingProfile types ([#3981](https://github.com/factorialco/f0/issues/3981)) ([c6724bf](https://github.com/factorialco/f0/commit/c6724bf90d2df8e6dfc73bda4b1e673c6f427ff4))
+
 ## [1.463.0](https://github.com/factorialco/f0/compare/f0-react-v1.462.0...f0-react-v1.463.0) (2026-04-23)
 
 
