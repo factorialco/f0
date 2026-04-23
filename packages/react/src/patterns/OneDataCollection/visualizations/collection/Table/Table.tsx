@@ -346,6 +346,13 @@ export const TableCollection = <
   const hasSelection =
     allSelectedStatus.selectedCount > 0 || allSelectedStatus.checked
 
+  // True when every visible record is selected (either via header checkbox or
+  // the "Select all N items" Gmail-style CTA)
+  const isAllSelected =
+    (allSelectedStatus.checked && !allSelectedStatus.indeterminate) ||
+    (allSelectedStatus.selectedCount > 0 &&
+      allSelectedStatus.selectedCount === (data?.records.length ?? -1))
+
   const allOnPageSelected =
     !allSelectedStatus.checked &&
     allSelectedStatus.unselectedCount === 0 &&
@@ -454,20 +461,8 @@ export const TableCollection = <
                 >
                   <div className="ml-1.5 flex w-full items-center justify-start">
                     <F0Checkbox
-                      checked={
-                        (allSelectedStatus.checked &&
-                          !allSelectedStatus.indeterminate) ||
-                        (!allSelectedStatus.checked &&
-                          allSelectedStatus.selectedCount > 0 &&
-                          allSelectedStatus.selectedCount ===
-                            (data?.records.length ?? -1))
-                      }
-                      indeterminate={
-                        hasSelection &&
-                        (allSelectedStatus.indeterminate ||
-                          (allSelectedStatus.selectedCount > 0 &&
-                            !allSelectedStatus.checked))
-                      }
+                      checked={isAllSelected}
+                      indeterminate={hasSelection && !isAllSelected}
                       onCheckedChange={handleSelectAll}
                       title={i18n.actions.selectAll}
                       hideLabel
