@@ -806,7 +806,8 @@ export namespace f0FormField {
     ...config
   }: TextConfig) {
     let schema = z.string()
-    if (minLength !== undefined) schema = schema.min(minLength)
+    const effectiveMin = !optional && minLength === undefined ? 1 : minLength
+    if (effectiveMin !== undefined) schema = schema.min(effectiveMin)
     if (maxLength !== undefined) schema = schema.max(maxLength)
     const finalSchema = optional ? schema.optional() : schema
     return f0FormField(finalSchema as never, config as never)

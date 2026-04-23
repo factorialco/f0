@@ -46,12 +46,14 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   render() {
     const formSchema = z.object({
-      username: f0FormField(z.string().min(2).max(20), {
+      username: f0FormField.text({
         label: "Username",
         placeholder: "Enter username",
         helpText: "Choose a unique username",
+        minLength: 2,
+        maxLength: 20,
       }),
-      email: f0FormField(z.string().email("Please enter a valid email"), {
+      email: f0FormField.email({
         label: "Email",
         placeholder: "you@example.com",
       }),
@@ -61,13 +63,17 @@ export const Default: Story = {
         optional: true,
         rows: 4,
       }),
-      salary: f0FormField(z.number().min(0), {
+      salary: f0FormField.number({
         label: "Salary",
         placeholder: "Enter salary (decimals allowed)",
+        min: 0,
       }),
-      age: f0FormField(z.number().int().min(0).max(120), {
+      age: f0FormField.number({
         label: "Age",
         placeholder: "Enter age (integers only)",
+        isInt: true,
+        min: 0,
+        max: 120,
       }),
       discount: f0FormField.percentage({
         label: "Discount",
@@ -111,8 +117,9 @@ export const Default: Story = {
 export const WithRows: Story = {
   render() {
     const formSchema = z.object({
-      fullName: f0FormField(z.string().min(2), {
+      fullName: f0FormField.text({
         label: "Full Name",
+        minLength: 2,
       }),
       email: f0FormField.email({
         label: "Email",
@@ -173,11 +180,11 @@ export const WithRows: Story = {
 export const WithRowsAndValidation: Story = {
   render() {
     const formSchema = z.object({
-      title: f0FormField(z.string().min(1), {
+      title: f0FormField.text({
         label: "Job Title",
         placeholder: "Enter job title",
       }),
-      location: f0FormField(z.string().min(1), {
+      location: f0FormField.select({
         label: "Location",
         row: "location-team",
         options: [
@@ -210,7 +217,7 @@ export const WithRowsAndValidation: Story = {
         row: "vacancies-date",
         optional: true,
       }),
-      legalEntity: f0FormField(z.string().min(1), {
+      legalEntity: f0FormField.select({
         label: "Legal Entity",
         row: "legal-type",
         options: [
@@ -246,11 +253,11 @@ export const WithRowsAndValidation: Story = {
       schema: formSchema,
       defaultValues: {
         title: "",
-        location: "",
+        location: undefined,
         team: undefined,
         vacancies: undefined,
         startDate: undefined,
-        legalEntity: "",
+        legalEntity: undefined,
         workplaceType: undefined,
         allowReferral: false,
         allowInternal: false,
@@ -274,11 +281,11 @@ export const WithRowsAndValidation: Story = {
 export const WithSections: Story = {
   render() {
     const formSchema = z.object({
-      firstName: f0FormField(z.string().min(1), {
+      firstName: f0FormField.text({
         label: "First Name",
         section: "personal",
       }),
-      lastName: f0FormField(z.string().min(1), {
+      lastName: f0FormField.text({
         label: "Last Name",
         section: "personal",
       }),
@@ -355,7 +362,7 @@ export const WithSectionsSidepanel: Story = {
   render() {
     const formSchema = z.object({
       // Basic Information
-      title: f0FormField(z.string().min(1), {
+      title: f0FormField.text({
         label: "Title",
         section: "basic",
         placeholder: "Enter survey title",
@@ -367,7 +374,7 @@ export const WithSectionsSidepanel: Story = {
         rows: 3,
       }),
       // Participants
-      participants: f0FormField(z.string(), {
+      participants: f0FormField.select({
         label: "Select participants",
         section: "participants",
         options: [
@@ -378,17 +385,19 @@ export const WithSectionsSidepanel: Story = {
         placeholder: "Select participants",
       }),
       // Schedule
-      publishOn: f0FormField(z.date().optional(), {
+      publishOn: f0FormField.date({
         label: "Publish on",
         section: "schedule",
         row: "schedule-dates",
+        optional: true,
       }),
-      endsAt: f0FormField(z.date().optional(), {
+      endsAt: f0FormField.date({
         label: "Ends at",
         section: "schedule",
         row: "schedule-dates",
+        optional: true,
       }),
-      recurrence: f0FormField(z.string(), {
+      recurrence: f0FormField.select({
         label: "Recurrence",
         section: "schedule",
         options: [
@@ -430,7 +439,7 @@ export const WithSectionsSidepanel: Story = {
         optional: true,
       }),
       // Editors
-      editors: f0FormField(z.string(), {
+      editors: f0FormField.select({
         label: "Select editors",
         section: "editors",
         options: [
@@ -483,7 +492,7 @@ export const WithSectionsSidepanel: Story = {
         title: "Workplace climate survey",
         description:
           "This short workplace climate survey contains just 12 simple questions. It is designed to help measure employees' perceptions, experiences, and overall satisfaction within the workplace.",
-        participants: "",
+        participants: undefined,
         publishOn: undefined,
         endsAt: undefined,
         recurrence: "none",
@@ -520,18 +529,20 @@ export const ConditionalRendering: Story = {
         label: "I already have an account",
         optional: true,
       }),
-      accountId: f0FormField(z.string().min(6), {
+      accountId: f0FormField.text({
         label: "Account ID",
         helpText: "Enter your existing account ID",
+        minLength: 6,
         // Condition object syntax
         renderIf: {
           fieldId: "hasAccount",
           equalsTo: true,
         },
       }),
-      newUsername: f0FormField(z.string().min(3), {
+      newUsername: f0FormField.text({
         label: "New Username",
         helpText: "Choose a username for your new account",
+        minLength: 3,
         // Function syntax - equivalent to the condition object above
         renderIf: ({ values }) => values.hasAccount === false,
       }),
@@ -817,7 +828,7 @@ export const DynamicDisabled: Story = {
         ],
         helpText: "Select 'Archived' to disable editing",
       }),
-      title: f0FormField(z.string().min(1), {
+      title: f0FormField.text({
         label: "Title",
         placeholder: "Enter document title",
         // Disabled when status is 'archived'
@@ -942,7 +953,7 @@ export const AllFieldTypes: Story = {
         rows: 3,
         placeholder: "Enter long text...",
       }),
-      selectField: f0FormField(z.enum(["option1", "option2", "option3"]), {
+      selectField: f0FormField.select({
         label: "Select Field",
         options: [
           { value: "option1", label: "Option 1" },
@@ -952,9 +963,8 @@ export const AllFieldTypes: Story = {
         placeholder: "Select an option",
         showSearchBox: true,
       }),
-      multiSelectField: f0FormField(z.array(z.enum(["a", "b", "c"])).min(1), {
+      multiSelectField: f0FormField.multiSelect({
         label: "Multi-Select Field",
-        multiple: true,
         options: [
           { value: "a", label: "Option A" },
           { value: "b", label: "Option B" },
@@ -1066,19 +1076,20 @@ export const AllFieldTypes: Story = {
 export const AllFieldTypesDisabled: Story = {
   render() {
     const formSchema = z.object({
-      textField: f0FormField(z.string().min(1), {
+      textField: f0FormField.text({
         label: "Text Field",
         placeholder: "Regular text input",
         disabled: true,
       }),
-      emailField: f0FormField(z.string().email(), {
+      emailField: f0FormField.email({
         label: "Email Field",
         disabled: true,
       }),
-      passwordField: f0FormField(z.string().min(8), {
+      passwordField: f0FormField.text({
         label: "Password Field",
         placeholder: "Enter password",
         inputType: "password",
+        minLength: 8,
         disabled: true,
       }),
       numberField: f0FormField.number({
@@ -1099,7 +1110,7 @@ export const AllFieldTypesDisabled: Story = {
         placeholder: "Enter long text...",
         disabled: true,
       }),
-      selectField: f0FormField(z.enum(["option1", "option2", "option3"]), {
+      selectField: f0FormField.select({
         label: "Select Field",
         options: [
           { value: "option1", label: "Option 1" },
@@ -1110,9 +1121,8 @@ export const AllFieldTypesDisabled: Story = {
         showSearchBox: true,
         disabled: true,
       }),
-      multiSelectField: f0FormField(z.array(z.enum(["a", "b", "c"])).min(1), {
+      multiSelectField: f0FormField.multiSelect({
         label: "Multi-Select Field",
-        multiple: true,
         options: [
           { value: "a", label: "Option A" },
           { value: "b", label: "Option B" },
@@ -1121,7 +1131,7 @@ export const AllFieldTypesDisabled: Story = {
         placeholder: "Select multiple options",
         disabled: true,
       }),
-      urlField: f0FormField(z.string().url(), {
+      urlField: f0FormField.url({
         label: "URL Field",
         disabled: true,
       }),
@@ -1146,10 +1156,11 @@ export const AllFieldTypesDisabled: Story = {
         helpText: "Toggle this switch",
         disabled: true,
       }),
-      dateField: f0FormField(z.date().optional(), {
+      dateField: f0FormField.date({
         label: "Date Field",
         placeholder: "Select a date",
         granularities: ["day"],
+        optional: true,
         disabled: true,
       }),
       timeField: f0FormField.time({
@@ -1258,7 +1269,7 @@ function useMockUpload(): FileUploadHookReturn {
 export const FileFields: Story = {
   render() {
     const formSchema = z.object({
-      title: f0FormField(z.string().min(1), {
+      title: f0FormField.text({
         label: "Document Title",
         placeholder: "Enter title",
       }),
@@ -1369,7 +1380,7 @@ export const FileFieldsWithInitialFiles: Story = {
 export const FileFieldsWithAsyncInitialFiles: Story = {
   render() {
     const formSchema = z.object({
-      title: f0FormField(z.string().min(1, "Required"), {
+      title: f0FormField.text({
         label: "Document Title",
       }),
       notes: f0FormField.textarea({
@@ -1546,7 +1557,7 @@ export const CustomField: Story = {
     ]
 
     const formSchema = z.object({
-      title: f0FormField(z.string().min(1, "Title is required"), {
+      title: f0FormField.text({
         label: "Task Title",
         placeholder: "Enter task title",
       }),
@@ -1675,7 +1686,7 @@ export const SelectWithCustomFieldName: Story = {
     })
 
     const formSchema = z.object({
-      name: f0FormField(z.string().min(1, "Name is required"), {
+      name: f0FormField.text({
         label: "Employee Name",
         placeholder: "Enter name",
       }),
@@ -1748,11 +1759,12 @@ export const SelectWithCustomFieldName: Story = {
 export const ServerValidation: Story = {
   render() {
     const formSchema = z.object({
-      username: f0FormField(z.string().min(3), {
+      username: f0FormField.text({
         label: "Username",
         helpText: "Try 'admin' to see server validation error",
+        minLength: 3,
       }),
-      email: f0FormField(z.string().email(), {
+      email: f0FormField.email({
         label: "Email",
         helpText: "Try 'taken@example.com' to see server validation error",
       }),
@@ -1801,7 +1813,7 @@ export const VisualDesignExample: Story = {
   render() {
     const formSchema = z.object({
       // Basic Information section
-      title: f0FormField(z.string().min(1), {
+      title: f0FormField.text({
         label: "Title",
         section: "basic-info",
         placeholder: "Workplace climate survey",
@@ -1815,7 +1827,7 @@ export const VisualDesignExample: Story = {
           "This short workplace climate survey contains just 12 simple questions...",
       }),
       // Participants section
-      participants: f0FormField(z.string(), {
+      participants: f0FormField.select({
         label: "Select participants",
         section: "participants",
         options: [
@@ -1826,17 +1838,19 @@ export const VisualDesignExample: Story = {
         placeholder: "Select participants",
       }),
       // Schedule section with row grouping
-      publishOn: f0FormField(z.date().optional(), {
+      publishOn: f0FormField.date({
         label: "Publish on",
         section: "schedule",
         row: "dates-row",
+        optional: true,
       }),
-      endsAt: f0FormField(z.date().optional(), {
+      endsAt: f0FormField.date({
         label: "Ends at",
         section: "schedule",
         row: "dates-row",
+        optional: true,
       }),
-      recurrence: f0FormField(z.string(), {
+      recurrence: f0FormField.select({
         label: "Recurrence",
         section: "schedule",
         options: [
@@ -1861,7 +1875,7 @@ export const VisualDesignExample: Story = {
         optional: true,
       }),
       // Editors section
-      editors: f0FormField(z.string(), {
+      editors: f0FormField.select({
         label: "Select editors",
         section: "editors",
         options: [
@@ -1889,7 +1903,7 @@ export const VisualDesignExample: Story = {
         title: "Workplace climate survey",
         description:
           "This short workplace climate survey contains just 12 simple questions. It is designed to help measure employees' perceptions, experiences, and overall satisfaction within the workplace.",
-        participants: "",
+        participants: undefined,
         publishOn: undefined,
         endsAt: undefined,
         recurrence: "none",
@@ -1920,15 +1934,15 @@ export const VisualDesignExample: Story = {
 export const WithActionBar: Story = {
   render() {
     const formSchema = z.object({
-      firstName: f0FormField(z.string().min(1), {
+      firstName: f0FormField.text({
         label: "First Name",
         placeholder: "Enter first name",
       }),
-      lastName: f0FormField(z.string().min(1), {
+      lastName: f0FormField.text({
         label: "Last Name",
         placeholder: "Enter last name",
       }),
-      email: f0FormField(z.string().email(), {
+      email: f0FormField.email({
         label: "Email",
         placeholder: "you@example.com",
       }),
@@ -1978,11 +1992,11 @@ export const WithActionBar: Story = {
 export const WithActionBarAndDiscard: Story = {
   render() {
     const formSchema = z.object({
-      companyName: f0FormField(z.string().min(1), {
+      companyName: f0FormField.text({
         label: "Company Name",
         placeholder: "Enter company name",
       }),
-      industry: f0FormField(z.string(), {
+      industry: f0FormField.select({
         label: "Industry",
         options: [
           { value: "tech", label: "Technology" },
@@ -1992,8 +2006,10 @@ export const WithActionBarAndDiscard: Story = {
         ],
         placeholder: "Select industry",
       }),
-      employeeCount: f0FormField(z.number().min(1).max(100000), {
+      employeeCount: f0FormField.number({
         label: "Number of Employees",
+        min: 1,
+        max: 100000,
       }),
       publicCompany: f0FormField.checkbox({
         label: "Publicly traded company",
@@ -2043,14 +2059,12 @@ export const WithActionBarAndDiscard: Story = {
 export const ErrorTriggerModes: Story = {
   render() {
     const formSchema = z.object({
-      name: f0FormField(
-        z.string().min(2, "Name must be at least 2 characters"),
-        {
-          label: "Name",
-          placeholder: "Enter your name",
-        }
-      ),
-      email: f0FormField(z.string().email(), {
+      name: f0FormField.text({
+        label: "Name",
+        placeholder: "Enter your name",
+        minLength: 2,
+      }),
+      email: f0FormField.email({
         label: "Email",
       }),
     })
@@ -2305,18 +2319,16 @@ export const FormInDialog: Story = {
     const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
 
     const formSchema = z.object({
-      name: f0FormField(
-        z.string().min(2, "Name must be at least 2 characters"),
-        {
-          label: "Name",
-          placeholder: "Enter name",
-        }
-      ),
-      email: f0FormField(z.string().email("Please enter a valid email"), {
+      name: f0FormField.text({
+        label: "Name",
+        placeholder: "Enter name",
+        minLength: 2,
+      }),
+      email: f0FormField.email({
         label: "Email",
         placeholder: "Enter email address",
       }),
-      role: f0FormField(z.enum(["admin", "editor", "viewer"]), {
+      role: f0FormField.select({
         label: "Role",
         options: [
           { value: "admin", label: "Administrator" },
@@ -2388,13 +2400,10 @@ export const DynamicDateConstraints: Story = {
   render() {
     const formSchema = z
       .object({
-        projectName: f0FormField(
-          z.string().min(1, "Project name is required"),
-          {
-            label: "Project Name",
-            placeholder: "Enter project name",
-          }
-        ),
+        projectName: f0FormField.text({
+          label: "Project Name",
+          placeholder: "Enter project name",
+        }),
         startDate: f0FormField(
           z.date().min(new Date(), "Start date must be in the future"),
           {
@@ -2403,7 +2412,7 @@ export const DynamicDateConstraints: Story = {
             helpText: "When does the project begin?",
           }
         ),
-        endDate: f0FormField(z.date(), {
+        endDate: f0FormField.date({
           label: "End Date",
           placeholder: "Select end date",
           helpText:
@@ -2411,10 +2420,11 @@ export const DynamicDateConstraints: Story = {
           // Dynamic minDate: end date must be >= start date
           minDate: ({ values }) => new Date(`${values.startDate}`),
         }),
-        deadline: f0FormField(z.date().optional(), {
+        deadline: f0FormField.date({
           label: "Final Deadline (Optional)",
           placeholder: "Select deadline",
           helpText: "Must be after the end date",
+          optional: true,
           // Dynamic minDate based on end date
           minDate: ({ values }) => new Date(`${values.endDate}`),
         }),
@@ -2469,11 +2479,11 @@ export const PerSectionSubmit: Story = {
   render() {
     const schema = {
       personal: z.object({
-        firstName: f0FormField(z.string().min(1), {
+        firstName: f0FormField.text({
           label: "First Name",
           placeholder: "Enter first name",
         }),
-        lastName: f0FormField(z.string().min(1), {
+        lastName: f0FormField.text({
           label: "Last Name",
           placeholder: "Enter last name",
         }),
@@ -2484,17 +2494,18 @@ export const PerSectionSubmit: Story = {
         }),
       }),
       contact: z.object({
-        email: f0FormField(z.string().email(), {
+        email: f0FormField.email({
           label: "Email",
           placeholder: "you@example.com",
         }),
-        phone: f0FormField(z.string().optional(), {
+        phone: f0FormField.text({
           label: "Phone",
           placeholder: "+1 (555) 000-0000",
+          optional: true,
         }),
       }),
       preferences: z.object({
-        theme: f0FormField(z.enum(["light", "dark", "system"]), {
+        theme: f0FormField.select({
           label: "Theme",
           options: [
             { value: "light", label: "Light" },
@@ -2502,8 +2513,9 @@ export const PerSectionSubmit: Story = {
             { value: "system", label: "System" },
           ],
         }),
-        notifications: f0FormField(z.boolean(), {
+        notifications: f0FormField.boolean({
           label: "Enable notifications",
+          optional: true,
         }),
       }),
     }
@@ -2553,7 +2565,7 @@ export const PerSectionWithSidebar: Story = {
   render() {
     const schema = {
       general: z.object({
-        title: f0FormField(z.string().min(1), {
+        title: f0FormField.text({
           label: "Survey Title",
           placeholder: "Enter survey title",
         }),
@@ -2564,21 +2576,25 @@ export const PerSectionWithSidebar: Story = {
         }),
       }),
       settings: z.object({
-        anonymousAnswers: f0FormField(z.boolean(), {
+        anonymousAnswers: f0FormField.boolean({
           label: "Anonymous answers",
           helpText: "Respondents' identities will not be recorded",
+          optional: true,
         }),
-        managerVisibility: f0FormField(z.boolean(), {
+        managerVisibility: f0FormField.boolean({
           label: "Manager visibility",
           helpText: "Allow managers to see individual responses",
+          optional: true,
         }),
       }),
       schedule: z.object({
-        publishOn: f0FormField(z.date().optional(), {
+        publishOn: f0FormField.date({
           label: "Publish date",
+          optional: true,
         }),
-        endsAt: f0FormField(z.date().optional(), {
+        endsAt: f0FormField.date({
           label: "End date",
+          optional: true,
         }),
       }),
     }
@@ -2631,7 +2647,7 @@ export const PerSectionShowSubmitWhenDirty: Story = {
   render() {
     const schema = {
       profile: z.object({
-        displayName: f0FormField(z.string().min(1), {
+        displayName: f0FormField.text({
           label: "Display Name",
           placeholder: "Enter your display name",
         }),
@@ -2643,23 +2659,29 @@ export const PerSectionShowSubmitWhenDirty: Story = {
         }),
       }),
       notifications: z.object({
-        emailNotifications: f0FormField(z.boolean(), {
+        emailNotifications: f0FormField.boolean({
           label: "Email notifications",
           helpText: "Receive updates via email",
+          optional: true,
         }),
-        pushNotifications: f0FormField(z.boolean(), {
+        pushNotifications: f0FormField.boolean({
           label: "Push notifications",
           helpText: "Receive push notifications on your device",
+          optional: true,
         }),
       }),
       security: z.object({
-        currentPassword: f0FormField(z.string().min(8), {
+        currentPassword: f0FormField.text({
           label: "Current Password",
           placeholder: "Enter current password",
+          inputType: "password",
+          minLength: 8,
         }),
-        newPassword: f0FormField(z.string().min(8), {
+        newPassword: f0FormField.text({
           label: "New Password",
           placeholder: "Enter new password",
+          inputType: "password",
+          minLength: 8,
         }),
       }),
     }
@@ -2716,15 +2738,15 @@ export const PerSectionShowSubmitWhenDirty: Story = {
 export const AsyncDefaultValues: Story = {
   render() {
     const formSchema = z.object({
-      firstName: f0FormField(z.string().min(1), {
+      firstName: f0FormField.text({
         label: "First Name",
         placeholder: "Enter first name",
       }),
-      lastName: f0FormField(z.string().min(1), {
+      lastName: f0FormField.text({
         label: "Last Name",
         placeholder: "Enter last name",
       }),
-      email: f0FormField(z.string().email(), {
+      email: f0FormField.email({
         label: "Email",
         placeholder: "you@example.com",
       }),
@@ -2775,23 +2797,24 @@ export const AsyncDefaultValuesPerSection: Story = {
   render() {
     const schema = {
       personal: z.object({
-        firstName: f0FormField(z.string().min(1), {
+        firstName: f0FormField.text({
           label: "First Name",
           placeholder: "Enter first name",
         }),
-        lastName: f0FormField(z.string().min(1), {
+        lastName: f0FormField.text({
           label: "Last Name",
           placeholder: "Enter last name",
         }),
       }),
       contact: z.object({
-        email: f0FormField(z.string().email(), {
+        email: f0FormField.email({
           label: "Email",
           placeholder: "you@example.com",
         }),
-        phone: f0FormField(z.string().optional(), {
+        phone: f0FormField.text({
           label: "Phone",
           placeholder: "+1 (555) 000-0000",
+          optional: true,
         }),
       }),
     }
@@ -2848,21 +2871,22 @@ export const AsyncDefaultValuesPerSection: Story = {
 export const WithDefaultValuesParamsSchema: Story = {
   render() {
     const formSchema = z.object({
-      firstName: f0FormField(z.string().min(1), {
+      firstName: f0FormField.text({
         label: "First Name",
         placeholder: "Enter first name",
       }),
-      lastName: f0FormField(z.string().min(1), {
+      lastName: f0FormField.text({
         label: "Last Name",
         placeholder: "Enter last name",
       }),
-      email: f0FormField(z.string().email(), {
+      email: f0FormField.email({
         label: "Email",
         placeholder: "you@example.com",
       }),
-      role: f0FormField(z.string().optional(), {
+      role: f0FormField.text({
         label: "Role",
         placeholder: "e.g. Engineer",
+        optional: true,
       }),
     })
 
@@ -2937,11 +2961,12 @@ export const ActionBarWiggle: Story = {
     const formRef = useRef<F0FormRef | null>(null)
 
     const formSchema = z.object({
-      name: f0FormField(z.string().min(2, "Name is required"), {
+      name: f0FormField.text({
         label: "Name",
         placeholder: "Enter your name",
+        minLength: 2,
       }),
-      email: f0FormField(z.string().email("Invalid email"), {
+      email: f0FormField.email({
         label: "Email",
         placeholder: "you@example.com",
       }),
