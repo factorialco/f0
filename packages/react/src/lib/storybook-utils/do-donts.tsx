@@ -19,7 +19,7 @@ export const DoDonts: FC<DoDontsProps> = ({
   do: doExample,
   dont: dontExample,
 }) => (
-  <div className="grid gap-4 md:grid-cols-2">
+  <div className="mb-4 grid gap-4 last:mb-0 md:grid-cols-2">
     <div className="flex flex-col gap-4 rounded-lg bg-f1-background-tertiary p-5">
       <div className="w-fit">
         <F0TagStatus text="Do" variant="positive" />
