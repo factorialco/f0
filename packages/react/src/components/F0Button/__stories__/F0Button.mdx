@@ -43,32 +43,53 @@ A button component that triggers actions or navigates to different parts of the 
     </thead>
     <tbody>
       <tr>
-        <td><code>default</code></td>
+        <td>
+          <code>default</code>
+        </td>
         <td>Primary filled button, high visual emphasis</td>
         <td>Primary actions — the main call to action on a page or modal</td>
       </tr>
       <tr>
-        <td><code>outline</code></td>
+        <td>
+          <code>outline</code>
+        </td>
         <td>Bordered button, medium emphasis</td>
         <td>Secondary actions alongside a primary button</td>
       </tr>
       <tr>
-        <td><code>neutral</code></td>
+        <td>
+          <code>neutral</code>
+        </td>
         <td>Subtle grey button</td>
-        <td>Tertiary or less important options within the interface — offers an extra level of hierarchy</td>
+        <td>
+          Tertiary or less important options within the interface — offers an
+          extra level of hierarchy
+        </td>
       </tr>
       <tr>
-        <td><code>ghost</code></td>
+        <td>
+          <code>ghost</code>
+        </td>
         <td>No background or border, blends with content</td>
-        <td>Secondary actions, blending subtly with content and standing out only on hover or focus</td>
+        <td>
+          Secondary actions, blending subtly with content and standing out only
+          on hover or focus
+        </td>
       </tr>
       <tr>
-        <td><code>critical</code></td>
+        <td>
+          <code>critical</code>
+        </td>
         <td>Red/destructive styling, high visual weight</td>
-        <td>Irreversible destructive actions (delete, remove, revoke). Always behind a confirmation step</td>
+        <td>
+          Irreversible destructive actions (delete, remove, revoke). Always
+          behind a confirmation step
+        </td>
       </tr>
       <tr>
-        <td><code>promote</code></td>
+        <td>
+          <code>promote</code>
+        </td>
         <td>Highlighted promotional styling</td>
         <td>Upsell, upgrade, or promotional calls to action</td>
       </tr>
@@ -95,17 +116,23 @@ A button component that triggers actions or navigates to different parts of the 
     </thead>
     <tbody>
       <tr>
-        <td><code>lg</code></td>
+        <td>
+          <code>lg</code>
+        </td>
         <td>Large touch target</td>
         <td>Mobile interfaces or prominent desktop CTAs</td>
       </tr>
       <tr>
-        <td><code>md</code></td>
+        <td>
+          <code>md</code>
+        </td>
         <td>Standard desktop size</td>
         <td>Default for most desktop actions</td>
       </tr>
       <tr>
-        <td><code>sm</code></td>
+        <td>
+          <code>sm</code>
+        </td>
         <td>Compact size</td>
         <td>Secondary actions, dense layouts, or inline controls</td>
       </tr>
@@ -128,14 +155,24 @@ A button component that triggers actions or navigates to different parts of the 
     </thead>
     <tbody>
       <tr>
-        <td><code>disabled</code></td>
+        <td>
+          <code>disabled</code>
+        </td>
         <td>Inactive — does not respond to interaction</td>
-        <td>Reduced opacity, not-allowed cursor, remains focusable for assistive tech</td>
+        <td>
+          Reduced opacity, not-allowed cursor, remains focusable for assistive
+          tech
+        </td>
       </tr>
       <tr>
-        <td><code>loading</code></td>
+        <td>
+          <code>loading</code>
+        </td>
         <td>Action in progress</td>
-        <td>Spinner icon, interaction blocked, announced via <code>aria-busy</code></td>
+        <td>
+          Spinner icon, interaction blocked, announced via{" "}
+          <code>aria-busy</code>
+        </td>
       </tr>
     </tbody>
   </table>
@@ -194,11 +231,13 @@ A button component that triggers actions or navigates to different parts of the 
 
 <DoDonts
   do={{
-    description: "Use clear, action-oriented labels: 'Save changes', 'Add employee', 'Delete request'",
+    description:
+      "Use clear, action-oriented labels: 'Save changes', 'Add employee', 'Delete request'",
     children: <F0Button label="Save changes" />,
   }}
   dont={{
-    description: "Use vague or generic labels: 'OK', 'Yes', 'Click here', 'Submit'",
+    description:
+      "Use vague or generic labels: 'OK', 'Yes', 'Click here', 'Submit'",
     children: <F0Button label="OK" />,
   }}
 />
@@ -212,7 +251,8 @@ A button component that triggers actions or navigates to different parts of the 
 
 <DoDonts
   do={{
-    description: "Pair a primary button with a secondary outline for cancel-style actions",
+    description:
+      "Pair a primary button with a secondary outline for cancel-style actions",
     guidelines: [
       "Place the primary action on the right",
       "Use consistent sizing across all buttons in the group",
@@ -225,7 +265,8 @@ A button component that triggers actions or navigates to different parts of the 
     ),
   }}
   dont={{
-    description: "Stack multiple primary buttons in the same group — it dilutes the hierarchy",
+    description:
+      "Stack multiple primary buttons in the same group — it dilutes the hierarchy",
     children: (
       <div className="flex gap-2">
         <F0Button label="Save" />
