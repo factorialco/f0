@@ -384,6 +384,11 @@ export interface F0FormPropsWithSingleSchema<TSchema extends F0FormSchema> {
    */
   initialFiles?: InitialFile[]
   /**
+   * Whether async `initialFiles` are still being resolved.
+   * When true, file fields show a skeleton until the files arrive.
+   */
+  isLoadingInitialFiles?: boolean
+  /**
    * Upload hook shared by all file fields in the form.
    * Called once per file to obtain an independent upload instance.
    */
@@ -490,6 +495,11 @@ export interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionSchema> {
    * `defaultValues` against `InitialFile.value`.
    */
   initialFiles?: InitialFile[]
+  /**
+   * Whether async `initialFiles` are still being resolved.
+   * When true, file fields show a skeleton until the files arrive.
+   */
+  isLoadingInitialFiles?: boolean
   /**
    * Upload hook shared by all file fields in the form.
    */

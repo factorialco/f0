@@ -8,6 +8,8 @@ interface F0FormContextValue {
   formName: string
   /** Shared pool of pre-existing file metadata for file fields */
   initialFiles?: InitialFile[]
+  /** Whether async initialFiles are still being resolved */
+  isLoadingInitialFiles?: boolean
   /** Callback that renders custom fields identified by customFieldName */
   renderCustomField?: RenderCustomFieldFunction
   /** Whether async defaultValues are still being resolved */

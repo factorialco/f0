@@ -1,4 +1,4 @@
-import { useCallback, useId, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
 import type { InputFieldStatusType } from "@/ui/InputField/types"
@@ -174,6 +174,7 @@ export function FileFieldRenderer({
   const context = useOptionalF0FormContext()
   const resolvedUseUpload = context?.useUpload ?? field.useUpload
   const initialFilesPool = initialFiles ?? context?.initialFiles
+  const isLoadingInitialFiles = context?.isLoadingInitialFiles ?? false
   const inputId = useId()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isDragOver, setIsDragOver] = useState(false)
@@ -181,6 +182,24 @@ export function FileFieldRenderer({
   const [entries, setEntries] = useState<FileEntry[]>(() =>
     resolveInitialEntries(initialFilesPool, formField.value, isMultiple)
   )
+  const initialFilesApplied = useRef(initialFilesPool != null)
+  useEffect(() => {
+    if (initialFilesApplied.current) return
+    if (initialFilesPool == null) return
+
+    // Wait for form values to be populated (e.g. after async defaultValues reset)
+    // before resolving entries — avoids a race where the pool arrives before
+    // react-hook-form has applied the reset values.
+    const hasFormValue = isMultiple
+      ? Array.isArray(formField.value) && formField.value.length > 0
+      : !!formField.value
+    if (!hasFormValue) return
+
+    initialFilesApplied.current = true
+    setEntries(
+      resolveInitialEntries(initialFilesPool, formField.value, isMultiple)
+    )
+  }, [initialFilesPool, formField.value, isMultiple])
   const [validationError, setValidationError] = useState<string | null>(null)
 
   const translations = forms.file
@@ -433,7 +452,13 @@ export function FileFieldRenderer({
 
   return (
     <div className="flex flex-col gap-4">
-      {showDropzone && (
+      {isLoadingInitialFiles && !hasFiles && (
+        <div className="flex animate-pulse flex-col gap-2 rounded-xl border border-dashed border-f1-border px-4 py-10">
+          <div className="mx-auto h-8 w-8 rounded-full bg-f1-background-secondary" />
+          <div className="mx-auto h-4 w-32 rounded bg-f1-background-secondary" />
+        </div>
+      )}
+      {!isLoadingInitialFiles && showDropzone && (
         <div
           role="button"
           tabIndex={field.disabled ? -1 : 0}
