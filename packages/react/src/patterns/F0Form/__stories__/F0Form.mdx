@@ -1,4 +1,4 @@
-import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import { Canvas, Meta, Unstyled } from "@storybook/addon-docs/blocks"
 import * as Stories from "./F0Form.stories"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
@@ -166,10 +166,10 @@ return <F0Form formDefinition={formDefinition} />
       <tr>
         <td>`f0FormField.richText(config)`</td>
         <td>
-          `z.object({"{"}value, mentionIds{"}"})`
+          `z.object({"{"}value, mentionIds{"}"})` or `.optional()`
         </td>
         <td>rich text editor</td>
-        <td>—</td>
+        <td>✓</td>
       </tr>
       <tr>
         <td>`f0FormField.select(config)`</td>
@@ -180,29 +180,29 @@ return <F0Form formDefinition={formDefinition} />
       <tr>
         <td>`f0FormField.multiSelect(config)`</td>
         <td>
-          `z.array(z.string())` or `z.array(z.enum([...]))` if `options`
-          provided
+          `z.array(...).min(1)` or `z.array(...).optional()` if `optional`; enum
+          inferred from `options` when provided
         </td>
         <td>multi-select</td>
-        <td>—</td>
+        <td>✓</td>
       </tr>
       <tr>
         <td>`f0FormField.cardSelect(config)`</td>
         <td>`z.enum([...])` inferred from `options`</td>
         <td>card select (radio cards)</td>
-        <td>—</td>
+        <td>✓</td>
       </tr>
       <tr>
         <td>`f0FormField.file(config)`</td>
         <td>`z.string()`</td>
         <td>file upload (single)</td>
-        <td>—</td>
+        <td>✓</td>
       </tr>
       <tr>
         <td>`f0FormField.multiFile(config)`</td>
         <td>`z.array(z.string())`</td>
         <td>file upload (multiple)</td>
-        <td>—</td>
+        <td>✓</td>
       </tr>
     </tbody>
   </table>
@@ -275,7 +275,6 @@ const formSchema = z.object({
       { value: "backend", label: "Backend" },
       { value: "design", label: "Design" },
     ],
-    optional: true,
   }),
   discount: f0FormField.percentage({ label: "Discount", min: 0, max: 100 }),
   budget: f0FormField.money({ label: "Budget", currency: "EUR" }),
@@ -322,6 +321,32 @@ The base call accepts any Zod schema (`z.string()`, `z.number()`, `z.date()`, `z
 - Use shortcut helpers for standard fields; reserve the base call for fields that need constraints not covered by shortcuts.
 - Provide `helpText` on fields with non-obvious constraints.
 - Use `row` grouping to lay out related fields side by side (e.g., first name + last name).
+
+<DoDonts
+  do={{
+    description:
+      "Use shortcuts for standard fields — they handle schema creation and fieldType wiring automatically.",
+    code: 'age: f0FormField.number({ label: "Age", min: 0, max: 120, isInt: true })',
+  }}
+  dont={{
+    description:
+      "Don't manually construct the Zod schema when a shortcut covers the use case.",
+    code: 'age: f0FormField(z.number().int().min(0).max(120), { label: "Age" })',
+  }}
+/>
+
+<DoDonts
+  do={{
+    description:
+      "Use the base call only when you need custom Zod constraints (e.g. custom error messages, `.refine()`, `.superRefine()`).",
+    code: 'email: f0FormField(z.string().email("Please use your company email"), { label: "Email" })',
+  }}
+  dont={{
+    description:
+      "Don't pass `optional: true` as a flag on shortcuts that don't support it (e.g. `multiSelect`). Use a base call with `z.array(...).optional()` instead.",
+    code: 'tags: f0FormField(z.array(z.string()).optional(), { label: "Tags" })',
+  }}
+/>
 
 ## Accessibility
 

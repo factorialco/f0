@@ -1020,54 +1020,75 @@ export namespace f0FormField {
     "fieldType" | "options"
   > & {
     options: Array<{ value: V } & Record<string, unknown>>
+    optional?: boolean
   }
 
   export function cardSelect<const V extends string>(
+    config: CardSelectConfig<V> & { optional: true }
+  ): z.ZodOptional<z.ZodEnum<[V, ...V[]]>> &
+    F0ZodType<z.ZodOptional<z.ZodEnum<[V, ...V[]]>>>
+  export function cardSelect<const V extends string>(
+    config: CardSelectConfig<V> & { optional?: false | undefined }
+  ): z.ZodEnum<[V, ...V[]]> & F0ZodType<z.ZodEnum<[V, ...V[]]>>
+  export function cardSelect<const V extends string>(
     config: CardSelectConfig<V>
-  ): z.ZodEnum<[V, ...V[]]> & F0ZodType<z.ZodEnum<[V, ...V[]]>> {
-    const values = config.options.map((o) => o.value) as [V, ...V[]]
+  ) {
+    if (config.options.length === 0) {
+      throw new Error(
+        "f0FormField.cardSelect requires at least one option to build a Zod enum"
+      )
+    }
+    const { optional, ...rest } = config
+    const values = rest.options.map((o) => o.value) as [V, ...V[]]
+    const schema = optional ? z.enum(values).optional() : z.enum(values)
     return f0FormField(
-      z.enum(values) as never,
-      {
-        ...config,
-        fieldType: "cardSelect",
-      } as never
+      schema as never,
+      { ...rest, fieldType: "cardSelect" } as never
     ) as never
   }
 
   // ---- file ----------------------------------------------------------------
 
   /** @internal */
-  type FileConfig = Omit<F0StringFileConfig, "fieldType" | "multiple">
+  type FileConfig = Omit<F0StringFileConfig, "fieldType" | "multiple"> & {
+    optional?: boolean
+  }
 
   export function file(
-    config: FileConfig
-  ): z.ZodString & F0ZodType<z.ZodString> {
+    config: FileConfig & { optional: true }
+  ): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>
+  export function file(
+    config: FileConfig & { optional?: false | undefined }
+  ): z.ZodString & F0ZodType<z.ZodString>
+  export function file({ optional, ...config }: FileConfig) {
+    const schema = optional ? z.string().optional() : z.string()
     return f0FormField(
-      z.string() as never,
-      {
-        ...config,
-        fieldType: "file",
-        multiple: false,
-      } as never
+      schema as never,
+      { ...config, fieldType: "file", multiple: false } as never
     ) as never
   }
 
   // ---- multiFile -----------------------------------------------------------
 
   /** @internal */
-  type MultiFileConfig = Omit<F0ArrayFileConfig, "fieldType" | "multiple">
+  type MultiFileConfig = Omit<F0ArrayFileConfig, "fieldType" | "multiple"> & {
+    optional?: boolean
+  }
 
   export function multiFile(
-    config: MultiFileConfig
-  ): z.ZodArray<z.ZodString> & F0ZodType<z.ZodArray<z.ZodString>> {
+    config: MultiFileConfig & { optional: true }
+  ): z.ZodOptional<z.ZodArray<z.ZodString>> &
+    F0ZodType<z.ZodOptional<z.ZodArray<z.ZodString>>>
+  export function multiFile(
+    config: MultiFileConfig & { optional?: false | undefined }
+  ): z.ZodArray<z.ZodString> & F0ZodType<z.ZodArray<z.ZodString>>
+  export function multiFile({ optional, ...config }: MultiFileConfig) {
+    const schema = optional
+      ? z.array(z.string()).optional()
+      : z.array(z.string())
     return f0FormField(
-      z.array(z.string()) as never,
-      {
-        ...config,
-        fieldType: "file",
-        multiple: true,
-      } as never
+      schema as never,
+      { ...config, fieldType: "file", multiple: true } as never
     ) as never
   }
 
@@ -1181,15 +1202,23 @@ export namespace f0FormField {
     mentionIds: z.ZodOptional<z.ZodArray<z.ZodString>>
   }>
   /** @internal */
-  type RichTextConfig = Omit<F0RichTextFieldConfig, "fieldType">
+  type RichTextConfig = Omit<F0RichTextFieldConfig, "fieldType"> & {
+    optional?: boolean
+  }
 
   export function richText(
-    config: RichTextConfig
-  ): RichTextObjectSchema & F0ZodType<RichTextObjectSchema> {
-    const schema = z.object({
+    config: RichTextConfig & { optional: true }
+  ): z.ZodOptional<RichTextObjectSchema> &
+    F0ZodType<z.ZodOptional<RichTextObjectSchema>>
+  export function richText(
+    config: RichTextConfig & { optional?: false | undefined }
+  ): RichTextObjectSchema & F0ZodType<RichTextObjectSchema>
+  export function richText({ optional, ...config }: RichTextConfig) {
+    const base = z.object({
       value: z.string(),
       mentionIds: z.array(z.string()).optional(),
     })
+    const schema = optional ? base.optional() : base
     return f0FormField(
       schema as never,
       { ...config, fieldType: "richtext" } as never
@@ -1234,14 +1263,21 @@ export namespace f0FormField {
   >(
     config: SelectConfig<R> & { optional?: false | undefined }
   ): z.ZodString & F0ZodType<z.ZodString>
-  export function select(config: any) {
-    const { optional, ...rest } = config
-    const opts: unknown[] | undefined = rest.options
+  export function select(config: unknown) {
+    if (typeof config !== "object" || config === null) {
+      throw new TypeError("f0FormField.select requires a config object")
+    }
+    const cfg = config as Record<string, unknown>
+    const { optional, ...rest } = cfg
+    const opts = Array.isArray(cfg.options) ? cfg.options : undefined
     if (opts && opts.length > 0) {
       const values = opts
         .filter(
           (o): o is { value: string } =>
-            typeof o === "object" && o !== null && "value" in o
+            typeof o === "object" &&
+            o !== null &&
+            "value" in o &&
+            typeof (o as { value: unknown }).value === "string"
         )
         .map((o) => o.value) as [string, ...string[]]
       if (values.length > 0) {
@@ -1259,36 +1295,63 @@ export namespace f0FormField {
   type MultiSelectConfig<
     V extends string | number = string,
     R extends Record<string, unknown> = Record<string, unknown>,
-  > = Omit<F0ArraySelectConfig<V, R>, "fieldType">
+  > = Omit<F0ArraySelectConfig<V, R>, "fieldType"> & { optional?: boolean }
 
-  // With typed options → z.array(z.enum(...)) inferred from option values
+  // With typed options → z.array(z.enum(...)).min(1) inferred from option values
   export function multiSelect<const V extends string>(
     config: Omit<MultiSelectConfig<string>, "options"> & {
       options: Array<{ value: V } & Record<string, unknown>>
+      optional: true
+    }
+  ): z.ZodOptional<z.ZodArray<z.ZodEnum<[V, ...V[]]>>> &
+    F0ZodType<z.ZodOptional<z.ZodArray<z.ZodEnum<[V, ...V[]]>>>>
+  export function multiSelect<const V extends string>(
+    config: Omit<MultiSelectConfig<string>, "options"> & {
+      options: Array<{ value: V } & Record<string, unknown>>
+      optional?: false | undefined
     }
   ): z.ZodArray<z.ZodEnum<[V, ...V[]]>> &
     F0ZodType<z.ZodArray<z.ZodEnum<[V, ...V[]]>>>
-  // Without options → z.array(z.string())
+  // Without options → z.array(z.string()).min(1)
   export function multiSelect<
     V extends string | number = string,
     R extends Record<string, unknown> = Record<string, unknown>,
   >(
-    config: MultiSelectConfig<V, R>
+    config: MultiSelectConfig<V, R> & { optional: true }
+  ): z.ZodOptional<z.ZodArray<z.ZodString>> &
+    F0ZodType<z.ZodOptional<z.ZodArray<z.ZodString>>>
+  export function multiSelect<
+    V extends string | number = string,
+    R extends Record<string, unknown> = Record<string, unknown>,
+  >(
+    config: MultiSelectConfig<V, R> & { optional?: false | undefined }
   ): z.ZodArray<z.ZodString> & F0ZodType<z.ZodArray<z.ZodString>>
-  export function multiSelect(config: any) {
-    const opts: unknown[] | undefined = config.options
+  export function multiSelect(config: unknown) {
+    if (typeof config !== "object" || config === null) {
+      throw new TypeError("f0FormField.multiSelect requires a config object")
+    }
+    const cfg = config as Record<string, unknown>
+    const { optional, ...rest } = cfg
+    const opts = Array.isArray(cfg.options) ? cfg.options : undefined
     if (opts && opts.length > 0) {
       const values = opts
         .filter(
           (o): o is { value: string } =>
-            typeof o === "object" && o !== null && "value" in o
+            typeof o === "object" &&
+            o !== null &&
+            "value" in o &&
+            typeof (o as { value: unknown }).value === "string"
         )
         .map((o) => o.value) as [string, ...string[]]
       if (values.length > 0) {
-        return f0FormField(z.array(z.enum(values)) as never, config as never)
+        const base = z.array(z.enum(values)).min(1)
+        const schema = optional ? base.optional() : base
+        return f0FormField(schema as never, rest as never)
       }
     }
-    return f0FormField(z.array(z.string()) as never, config as never)
+    const base = z.array(z.string()).min(1)
+    const schema = optional ? base.optional() : base
+    return f0FormField(schema as never, rest as never)
   }
 
   // ---- requiredSwitch ------------------------------------------------------
