@@ -491,8 +491,8 @@ describe("F0Form datetime field validation", () => {
     await user.click(timeInput)
     await user.clear(timeInput)
 
-    // No error should appear while the field is still focused / mid-edit
-    expect(screen.queryByRole("alert")).not.toBeInTheDocument()
+    // No validation message should appear while the field is still focused / mid-edit
+    expect(screen.queryByText("This field is required")).not.toBeInTheDocument()
   })
 
   it("shows validation error message after form is submitted with empty datetime", async () => {

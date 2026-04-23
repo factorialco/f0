@@ -2990,10 +2990,10 @@ export const WithDefaultValuesParamsSchema: Story = {
  *   matching the form's `errorTrigger` mode.
  *
  * Important: `minDate`/`maxDate` config restricts the calendar picker UI. For
- * the Zod validation, use `.refine()` (not `.min()`/`.max()`) with a callback
- * that calls `new Date()` — this way the constraint is re-evaluated at the
- * moment of each validation run (blur or submit), so a value that was valid
- * when entered but has since become past time is correctly rejected on submit.
+ * dynamic validation rules such as "must be after now", use `.refine()` with
+ * a callback that calls `new Date()` so the constraint is re-evaluated at the
+ * moment of each validation run (blur or submit). Fixed bounds, such as a
+ * precomputed `endOfYear`, can still use `.min()`/`.max()`.
  */
 export const DateTimeWithConstraints: Story = {
   render() {
@@ -3020,7 +3020,7 @@ export const DateTimeWithConstraints: Story = {
               fieldType: "datetime",
               helpText:
                 "Must be after now. Set a date and time, then submit or blur to validate.",
-              // Dynamic function so the picker also greys out already-past times
+              // Dynamic function so the picker also greys out already-past dates
               minDate: () => new Date(),
             }
           ),
