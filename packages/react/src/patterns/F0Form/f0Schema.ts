@@ -845,7 +845,7 @@ export namespace f0FormField {
     config: TextareaConfig & { optional?: false | undefined }
   ): z.ZodString & F0ZodType<z.ZodString>
   export function textarea({ optional, ...config }: TextareaConfig) {
-    const schema = optional ? z.string().optional() : z.string()
+    const schema = optional ? z.string().optional() : z.string().min(1)
     return f0FormField(
       schema as never,
       { ...config, fieldType: "textarea" } as never
@@ -1062,7 +1062,7 @@ export namespace f0FormField {
     config: FileConfig & { optional?: false | undefined }
   ): z.ZodString & F0ZodType<z.ZodString>
   export function file({ optional, ...config }: FileConfig) {
-    const schema = optional ? z.string().optional() : z.string()
+    const schema = optional ? z.string().optional() : z.string().min(1)
     return f0FormField(
       schema as never,
       { ...config, fieldType: "file", multiple: false } as never
@@ -1086,7 +1086,7 @@ export namespace f0FormField {
   export function multiFile({ optional, ...config }: MultiFileConfig) {
     const schema = optional
       ? z.array(z.string()).optional()
-      : z.array(z.string())
+      : z.array(z.string()).min(1)
     return f0FormField(
       schema as never,
       { ...config, fieldType: "file", multiple: true } as never
@@ -1333,11 +1333,14 @@ export namespace f0FormField {
       if (values.length > 0) {
         const base = z.array(z.enum(values)).min(1)
         const schema = optional ? base.optional() : base
-        return f0FormField(schema as never, rest as never)
+        return f0FormField(
+          schema as never,
+          { ...rest, multiple: true } as never
+        )
       }
     }
     const base = z.array(z.string()).min(1)
     const schema = optional ? base.optional() : base
-    return f0FormField(schema as never, rest as never)
+    return f0FormField(schema as never, { ...rest, multiple: true } as never)
   }
 }

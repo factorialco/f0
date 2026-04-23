@@ -331,7 +331,7 @@ The base call accepts any Zod schema (`z.string()`, `z.number()`, `z.date()`, `z
   }}
   dont={{
     description:
-      "Don't pass `optional: true` as a flag on shortcuts that don't support it (e.g. `multiSelect`). Use a base call with `z.array(...).optional()` instead.",
+      "Don't use the base call when a shortcut already supports the constraint. For example, `multiSelect` supports `optional: true` directly — no need for a base call.",
     code: 'tags: f0FormField(z.array(z.string()).optional(), { label: "Tags" })',
   }}
 />
