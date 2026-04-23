@@ -939,11 +939,10 @@ export const WithCrossPageSelection: Story = {
 
 export const WithInfiniteScrollSelection: Story = {
   render: () => {
-    // Create a fixed set of paginated users so we're not regenerating them on every render
     const paginatedMockUsers = generateMockUsers(50)
 
     return (
-      <div style={{ height: "500px", overflow: "auto" }}>
+      <div className="h-[500px] overflow-auto">
         <ExampleComponent
           selectable={(item) => item.id}
           // Infinite-scroll: manual selections persist across loadMore — new rows arrive unchecked

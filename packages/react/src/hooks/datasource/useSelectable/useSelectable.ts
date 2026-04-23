@@ -85,7 +85,7 @@ export function useSelectable<
   const previousDataRecordsKey = useRef<string>("")
   const previousSelectionState = useRef<string>("")
   const isAllSelectedRef = useRef(false)
-  const justClearedByFilterChange = useRef(false)
+  const justClearedByDatasetChange = useRef(false)
   const previousPageIdentifierRef = useRef<string | number | null | undefined>(
     undefined
   )
@@ -730,9 +730,9 @@ export function useSelectable<
       // dataset changes because the user is manually selecting items and
       // expects them to persist across soft reloads.
       if (!disableSelectAll) {
-        // Mark that we're clearing due to dataset change to prevent the
-        // data-sync effect from restoring selections.
-        justClearedByFilterChange.current = true
+        // Mark that we're clearing due to a dataset-identity change to prevent
+        // the data-sync effect from restoring selections.
+        justClearedByDatasetChange.current = true
         clearSelectedItems()
       }
       previousFilters.current = source.currentFilters
@@ -752,7 +752,7 @@ export function useSelectable<
   // NOTE: infinite-scroll pagination advances the cursor on every loadMore(),
   // but the list is cumulative — previously-selected rows remain valid and the
   // user has not navigated away. We never clear for infinite-scroll; the
-  // filter-change effect above handles the case where the dataset truly resets.
+  // dataset-identity effect above handles the case where the dataset truly resets.
   useEffect(() => {
     if (!resetOnPageChange) return
 
@@ -805,9 +805,9 @@ export function useSelectable<
     }
     previousDataRecordsKey.current = currentKey
 
-    // If we just cleared due to filter change, don't restore selections
-    if (justClearedByFilterChange.current) {
-      justClearedByFilterChange.current = false
+    // If we just cleared due to a dataset-identity change, don't restore selections
+    if (justClearedByDatasetChange.current) {
+      justClearedByDatasetChange.current = false
       return
     }
 

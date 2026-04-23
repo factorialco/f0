@@ -491,7 +491,7 @@ describe("useSelectable", () => {
       const data = makeInfiniteData([1, 2])
       const sourceWithSortings = {
         ...mockSource,
-        currentSortings: { name: "asc" } as never,
+        currentSortings: { field: "name", order: "asc" } as never,
       }
 
       const { result, rerender } = renderHook(
@@ -516,7 +516,7 @@ describe("useSelectable", () => {
       rerender({
         source: {
           ...sourceWithSortings,
-          currentSortings: { name: "desc" } as never,
+          currentSortings: { field: "name", order: "desc" } as never,
         },
       })
 
