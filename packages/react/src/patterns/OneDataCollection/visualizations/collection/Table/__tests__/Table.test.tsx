@@ -1762,6 +1762,51 @@ describe("TableCollection", () => {
         ).toBeInTheDocument()
       })
     })
+
+    it("does not show header as fully checked when cross-page selectedCount coincidentally equals page size but no current-page rows are selected", async () => {
+      // Regression test for: allSelectedStatus.selectedCount === data.records.length
+      // can be true when selections from another page match the current page size.
+      // The fix checks per-ID membership instead of comparing global counts.
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={{
+            ...createSelectableSource(true, 50),
+            // Pre-seed 2 selections with IDs that are NOT on the current page
+            // (current page has IDs 1 and 2; these are off-page IDs).
+            // selectedCount (2) would coincidentally equal data.records.length (2),
+            // triggering the bug in the old formula.
+            defaultSelectedItems: {
+              allSelected: false,
+              items: [
+                { id: 99, checked: true },
+                { id: 100, checked: true },
+              ],
+            },
+          }}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const headerCheckbox = screen.getAllByRole("checkbox")[0]
+      // No current-page row is selected — header must not appear fully checked
+      expect(headerCheckbox).toHaveAttribute("aria-checked", "false")
+      expect(headerCheckbox).toHaveAttribute("data-state", "unchecked")
+    })
   })
 
   it("does not render add-row button when no AddRowProvider wraps the table", async () => {

@@ -346,21 +346,24 @@ export const TableCollection = <
   const hasSelection =
     allSelectedStatus.selectedCount > 0 || allSelectedStatus.checked
 
-  // Every selectable row on the current page is checked, but the Gmail-style
-  // "select across all pages" CTA has not been activated. Used for banner text.
-  const allOnPageSelected =
-    !allSelectedStatus.checked &&
-    allSelectedStatus.unselectedCount === 0 &&
-    allSelectedStatus.selectedCount > 0
+  // True when every selectable row on the current page is in the selectedItems
+  // map. Checks membership per-ID so it is correct under both page-only and
+  // allPagesSelection modes — unlike comparing the cross-page selectedCount to
+  // data.records.length, which can produce false positives when selections from
+  // another page happen to equal the current page size.
+  const allPageRowsSelected =
+    (data?.records.length ?? 0) > 0 &&
+    (data?.records ?? []).every((record) => {
+      const id = source.selectable ? source.selectable(record) : undefined
+      return id !== undefined && selectedItems.has(id)
+    })
 
   // True when the header checkbox should render as fully-checked: either the
-  // CTA is active, or every record on the page has been individually checked.
-  // Uses data.records.length as the denominator — consistent with the hook's
-  // own areAllKnownItemsSelected (checkedCount === totalKnownItemsCount).
+  // Gmail-style "select across all pages" CTA is active, or every selectable
+  // row on the current page is selected.
   const isAllSelected =
     (allSelectedStatus.checked && !allSelectedStatus.indeterminate) ||
-    (allSelectedStatus.selectedCount > 0 &&
-      allSelectedStatus.selectedCount === (data?.records.length ?? -1))
+    allPageRowsSelected
 
   const showSelectAllOption =
     !!source.allPagesSelection &&
@@ -569,7 +572,7 @@ export const TableCollection = <
                                   paginationInfo?.total ??
                                   allSelectedStatus.selectedCount,
                               })
-                            : allOnPageSelected
+                            : allPageRowsSelected
                               ? t("status.selected.allOnPage", {
                                   count: allSelectedStatus.selectedCount,
                                 })
