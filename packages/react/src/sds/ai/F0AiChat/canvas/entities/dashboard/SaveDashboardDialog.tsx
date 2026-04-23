@@ -52,7 +52,7 @@ export function SaveDashboardDialog({
       position="center"
       isOpen={isOpen}
       onClose={onClose}
-      width="md"
+      width="sm"
       title={t("ai.dashboard.saveDialog.title")}
       container={null}
       primaryAction={{
@@ -82,6 +82,7 @@ export function SaveDashboardDialog({
           value={description}
           onChange={(value) => setDescription(value)}
           size="md"
+          rows={10}
         />
       </div>
     </F0Dialog>
