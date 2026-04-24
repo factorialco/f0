@@ -284,7 +284,8 @@ export const ChatTextarea = ({
           "from-[#E55619] via-[#A1ADE5] to-[#E51943]",
           "after:transition-all after:delay-200 after:duration-300",
           "has-[textarea:focus]:after:scale-100 has-[textarea:focus]:after:opacity-100",
-          isClarifying && "after:scale-100 after:opacity-100"
+          isClarifying &&
+            "after:scale-100 after:opacity-100 border-f1-background-tertiary"
         )}
         animate={{
           "--gradient-angle": ["0deg", "360deg"],
