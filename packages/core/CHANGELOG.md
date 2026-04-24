@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.50.1](https://github.com/factorialco/f0/compare/f0-core-v1.50.0...f0-core-v1.50.1) (2026-04-24)
+
+
+### Bug Fixes
+
+* **core:** align border radius tokens with Figma design system ([#3805](https://github.com/factorialco/f0/issues/3805)) ([63e20e1](https://github.com/factorialco/f0/commit/63e20e1b72c87b0a033dd903a7211138515fcfb1))
+
 ## [1.50.0](https://github.com/factorialco/f0/compare/f0-core-v1.49.0...f0-core-v1.50.0) (2026-04-22)
 
 

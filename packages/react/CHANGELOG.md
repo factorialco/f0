@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.464.3](https://github.com/factorialco/f0/compare/f0-react-v1.464.2...f0-react-v1.464.3) (2026-04-24)
+
+
+### Bug Fixes
+
+* **core:** align border radius tokens with Figma design system ([#3805](https://github.com/factorialco/f0/issues/3805)) ([63e20e1](https://github.com/factorialco/f0/commit/63e20e1b72c87b0a033dd903a7211138515fcfb1))
+
 ## [1.464.2](https://github.com/factorialco/f0/compare/f0-react-v1.464.1...f0-react-v1.464.2) (2026-04-24)
 
 
