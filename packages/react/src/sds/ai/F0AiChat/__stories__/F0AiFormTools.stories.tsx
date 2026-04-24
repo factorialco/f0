@@ -1039,7 +1039,7 @@ const editAircraftFormDefinition: F0AiAvailableFormDefinition = {
         "Aircraft id. Available aircraft: ac-1 (EC-LVL, Airbus A320), ac-2 (EC-MXV, Boeing 737 MAX 8), ac-3 (EC-NQK, Airbus A350-900)"
       ),
   }),
-  defaultValues: (async (params: Record<string, unknown>) => {
+  defaultValues: async (params: Record<string, unknown>) => {
     console.log("Received defaultValuesParams:", params)
     const id = params.id as string
     const aircraft = mockAircraft.find((a) => a.id === id)
@@ -1071,7 +1071,7 @@ const editAircraftFormDefinition: F0AiAvailableFormDefinition = {
       activeRoute: aircraft.activeRoute,
       notes: aircraft.notes,
     }
-  }) as unknown as (params: Record<string, unknown>) => Record<string, unknown>,
+  },
   sections: {
     identity: {
       title: "Identity",

@@ -50,7 +50,7 @@ export interface F0AiFormEntry {
   defaultValuesFn?: (
     params: Record<string, unknown>
   ) => Promise<Record<string, unknown>>
-  /** The params most recently used to pre-populate this form via defaultValuesFn */
+  /** The params most recently used to pre-populate this form (updated via updateActiveFormDefaultValuesParams through coagent state sync) */
   defaultValuesParams?: Record<string, unknown>
   /** Field names explicitly set via setValue/setValues on a virtual ref */
   dirtyFields?: Set<string>
@@ -79,12 +79,14 @@ export interface F0AiAvailableFormDefinition<
   schema: F0FormSchema
   /**
    * Default values for the form fields.
-   * Can be a static object or a function that receives params (supplied by the AI)
-   * and returns the defaults.
+   * Can be a static object, a sync function, or an async function that
+   * receives params (supplied by the AI) and returns the defaults.
    */
   defaultValues?:
     | Record<string, unknown>
-    | ((params: TParams) => Record<string, unknown>)
+    | ((
+        params: TParams
+      ) => Record<string, unknown> | Promise<Record<string, unknown>>)
   /**
    * Zod schema that describes the params accepted by a functional `defaultValues`.
    * When provided, the AI will see this schema and can supply params.
@@ -319,17 +321,27 @@ export function defineAvailableForm(
 }
 
 /**
- * Resolves defaultValues from a definition, handling both static objects and functions.
+ * Resolves defaultValues from a definition, handling static objects and functions.
+ * When the function returns a Promise (async defaults), returns {} synchronously —
+ * async resolution is handled by defaultValuesFn in the canvas.
  */
 function resolveDefaultValues(
   defaultValues:
     | Record<string, unknown>
-    | ((params: Record<string, unknown>) => Record<string, unknown>)
+    | ((
+        params: Record<string, unknown>
+      ) => Record<string, unknown> | Promise<Record<string, unknown>>)
     | undefined,
   params: Record<string, unknown> = {}
 ): Record<string, unknown> {
   if (typeof defaultValues === "function") {
-    return defaultValues(params)
+    const result = defaultValues(params)
+    // If the function returns a Promise (async defaults with params),
+    // return empty — async resolution is handled by defaultValuesFn.
+    if (result && typeof (result as Promise<unknown>).then === "function") {
+      return {}
+    }
+    return result as Record<string, unknown>
   }
   return defaultValues ?? {}
 }
@@ -578,11 +590,17 @@ interface F0AiFormRegistryContextValue {
   /** Mark a form as currently resolving async default values (fills will be queued) */
   markDefaultValuesResolving: (formName: string) => void
   /** Mark a form's default values as resolved and flush any queued fill actions */
-  markDefaultValuesResolved: (formName: string) => void
+  markDefaultValuesResolved: (
+    formName: string,
+    paramsKey?: string | null
+  ) => void
   /** Queue a fill callback to run after a form's defaults are resolved */
   queueFillAction: (formName: string, action: () => void) => void
   /** Whether a form's async defaults have ever been resolved (persists across canvas close/reopen) */
-  hasDefaultValuesEverResolved: (formName: string) => boolean
+  hasDefaultValuesEverResolved: (
+    formName: string,
+    paramsKey?: string | null
+  ) => boolean
 }
 
 const F0AiFormRegistryContext =
@@ -624,7 +642,7 @@ export function F0AiFormRegistryProvider({
   const lastDescriptionsJsonRef = useRef<string>("")
   const fillVersionsRef = useRef<Map<string, number>>(new Map())
   const defaultValuesResolvingRef = useRef<Set<string>>(new Set())
-  const defaultsEverResolvedRef = useRef<Set<string>>(new Set())
+  const defaultsEverResolvedRef = useRef<Map<string, string | null>>(new Map())
   const fillQueueRef = useRef<Map<string, Array<() => void>>>(new Map())
 
   // Three-field state replacing the old flat formDescriptions array.
@@ -823,8 +841,17 @@ export function F0AiFormRegistryProvider({
         )
         const virtualDefDefaultValuesFn =
           typeof virtualDef.defaultValues === "function"
-            ? async (params: Record<string, unknown>) =>
-                resolveDefaultValues(virtualDef.defaultValues, params)
+            ? (() => {
+                const fn = virtualDef.defaultValues
+                return async (params: Record<string, unknown>) => {
+                  const result = fn(params as never)
+                  return (
+                    typeof (result as Promise<unknown>)?.then === "function"
+                      ? await result
+                      : result
+                  ) as Record<string, unknown>
+                }
+              })()
             : undefined
         registryRef.current.set(name, {
           ref: virtualRef,
@@ -930,9 +957,9 @@ export function F0AiFormRegistryProvider({
   }, [])
 
   const markDefaultValuesResolved = useCallback(
-    (formName: string) => {
+    (formName: string, paramsKey?: string | null) => {
       defaultValuesResolvingRef.current.delete(formName)
-      defaultsEverResolvedRef.current.add(formName)
+      defaultsEverResolvedRef.current.set(formName, paramsKey ?? null)
       const queue = fillQueueRef.current.get(formName)
       if (queue?.length) {
         fillQueueRef.current.delete(formName)
@@ -954,9 +981,14 @@ export function F0AiFormRegistryProvider({
     []
   )
 
-  const hasDefaultValuesEverResolved = useCallback((formName: string) => {
-    return defaultsEverResolvedRef.current.has(formName)
-  }, [])
+  const hasDefaultValuesEverResolved = useCallback(
+    (formName: string, paramsKey?: string | null) => {
+      if (!defaultsEverResolvedRef.current.has(formName)) return false
+      if (paramsKey === undefined) return true
+      return defaultsEverResolvedRef.current.get(formName) === paramsKey
+    },
+    []
+  )
 
   // Sync virtual form definitions: register forms that aren't rendered,
   // skip if a rendered (non-virtual) form with the same name already exists.
@@ -980,8 +1012,17 @@ export function F0AiFormRegistryProvider({
       )
       const defDefaultValuesFn =
         typeof def.defaultValues === "function"
-          ? async (params: Record<string, unknown>) =>
-              resolveDefaultValues(def.defaultValues, params)
+          ? (() => {
+              const fn = def.defaultValues
+              return async (params: Record<string, unknown>) => {
+                const result = fn(params as never)
+                return (
+                  typeof (result as Promise<unknown>)?.then === "function"
+                    ? await result
+                    : result
+                ) as Record<string, unknown>
+              }
+            })()
           : undefined
       registryRef.current.set(def.name, {
         ref: virtualRef,

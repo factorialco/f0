@@ -249,9 +249,9 @@ export const useFormFillAction = () => {
       // If async default values haven't resolved yet, queue the fill
       // so it runs after resolution — preventing defaults from overwriting AI values.
       if (!registry.isDefaultValuesResolved(formName)) {
-        return new Promise<Record<string, unknown>>((resolve) => {
+        return new Promise<Record<string, unknown>>((resolve, reject) => {
           registry.queueFillAction(formName, () => {
-            executeFill().then(resolve)
+            void executeFill().then(resolve, reject)
           })
         })
       }

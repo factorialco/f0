@@ -793,7 +793,10 @@ describe("FormCanvasContent", () => {
         name: "AI Filled Name",
         email: "server@default.com",
       })
-      expect(mockMarkDefaultValuesResolved).toHaveBeenCalledWith("test-form")
+      expect(mockMarkDefaultValuesResolved).toHaveBeenCalledWith(
+        "test-form",
+        '{"employeeId":"42"}'
+      )
       vi.useRealTimers()
     })
 
@@ -908,7 +911,10 @@ describe("FormCanvasContent", () => {
 
       // Both have been called — resolving was signaled before resolved
       expect(mockMarkDefaultValuesResolving).toHaveBeenCalledWith("test-form")
-      expect(mockMarkDefaultValuesResolved).toHaveBeenCalledWith("test-form")
+      expect(mockMarkDefaultValuesResolved).toHaveBeenCalledWith(
+        "test-form",
+        '{"id":"1"}'
+      )
       expect(mockMarkDefaultValuesResolving).toHaveBeenCalledBefore(
         mockMarkDefaultValuesResolved
       )

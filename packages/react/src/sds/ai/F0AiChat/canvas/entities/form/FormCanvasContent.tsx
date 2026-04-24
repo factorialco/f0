@@ -241,10 +241,14 @@ function VirtualFormContent() {
     const name = formNameRef.current
     const params = defaultValuesParamsRef.current
 
-    // If defaults were already resolved on a previous mount, skip re-fetching.
-    // This prevents a slow async call when the canvas closes and reopens.
-    // Reset happens on submit via resetFillVersion.
-    if (name && registryRef.current?.hasDefaultValuesEverResolved?.(name)) {
+    // If defaults were already resolved on a previous mount with the same
+    // params, skip re-fetching. This prevents a slow async call when the
+    // canvas closes and reopens. Reset happens on submit via resetFillVersion.
+    const paramsKey = params ? JSON.stringify(params) : null
+    if (
+      name &&
+      registryRef.current?.hasDefaultValuesEverResolved?.(name, paramsKey)
+    ) {
       return Promise.resolve(
         e?.ref.current?.getValues() ?? currentValuesRef.current
       )
@@ -254,22 +258,29 @@ function VirtualFormContent() {
       // Capture AI-set values before async resolution — form.reset() after
       // defaults load would otherwise overwrite them.
       const virtualValues = e.ref.current?.getValues() ?? {}
+      const fallbackValues = { ...virtualValues }
       const dirty = e.dirtyFields ?? new Set<string>()
       // Signal that async resolution is in progress — any concurrent
       // fillForm calls will be queued until resolution completes.
       if (name) registryRef.current?.markDefaultValuesResolving?.(name)
-      return e.defaultValuesFn(params).then((values) => {
-        // Merge AI-filled fields on top of resolved defaults so
-        // F0Form's reset() preserves values set by fillForm.
-        const merged = { ...values }
-        for (const field of dirty) {
-          if (field in virtualValues) {
-            merged[field] = virtualValues[field]
+      return e
+        .defaultValuesFn(params)
+        .then((values) => {
+          // Merge AI-filled fields on top of resolved defaults so
+          // F0Form's reset() preserves values set by fillForm.
+          const merged = { ...values }
+          for (const field of dirty) {
+            if (field in virtualValues) {
+              merged[field] = virtualValues[field]
+            }
           }
-        }
-        if (name) registryRef.current?.markDefaultValuesResolved?.(name)
-        return merged
-      })
+          return merged
+        })
+        .catch(() => fallbackValues)
+        .finally(() => {
+          if (name)
+            registryRef.current?.markDefaultValuesResolved?.(name, paramsKey)
+        })
     }
     return Promise.resolve(currentValuesRef.current)
   }, [])
