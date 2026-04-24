@@ -95,7 +95,7 @@ export function WizardSteps() {
             aria-current={index === currentStep ? "step" : undefined}
             className={cn(
               focusRing(),
-              "flex cursor-pointer items-center gap-2 rounded-[10px] p-2 text-left",
+              "flex cursor-pointer items-center gap-2 rounded p-2 text-left",
               state === "active" && "bg-f1-background-selected",
               canNavigate && "hover:bg-f1-background-secondary-hover",
               !canNavigate &&

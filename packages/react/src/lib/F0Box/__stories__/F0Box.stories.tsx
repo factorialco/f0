@@ -1471,7 +1471,18 @@ export const BorderRadius: Story = {
 
       <F0Box display="flex" gap="md" flexWrap="wrap" alignItems="end">
         {(
-          ["none", "2xs", "xs", "sm", "md", "lg", "xl", "2xl", "full"] as const
+          [
+            "none",
+            "2xs",
+            "xs",
+            "sm",
+            "md",
+            "lg",
+            "xl",
+            "2xl",
+            "3xl",
+            "full",
+          ] as const
         ).map((r) => (
           <F0Box
             key={r}

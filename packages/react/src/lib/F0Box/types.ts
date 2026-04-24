@@ -198,6 +198,7 @@ export type BorderRadiusToken =
   | "lg"
   | "xl"
   | "2xl"
+  | "3xl"
   | "full"
 
 /** Divider direction */

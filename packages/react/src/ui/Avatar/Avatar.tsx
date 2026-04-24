@@ -21,7 +21,7 @@ const avatarVariants = cva({
       medium: "size-8 rounded",
       large: "size-10 rounded-md text-lg",
       xlarge: "size-14 rounded-xl text-2xl",
-      xxlarge: "size-18 rounded-[20px] text-3xl",
+      xxlarge: "size-18 rounded-2xl text-3xl",
     } satisfies Record<(typeof internalAvatarSizes)[number], string>,
     type: {
       base: "",

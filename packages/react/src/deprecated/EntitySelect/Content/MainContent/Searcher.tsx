@@ -36,7 +36,7 @@ export const Searcher = ({
   }
 
   return (
-    <div className="flex justify-between gap-1 rounded-[10px] border-[1px] border-solid border-f1-border px-2 py-[3px] transition-all focus-within:border-f1-border-hover hover:border-f1-border-hover">
+    <div className="flex justify-between gap-1 rounded border-[1px] border-solid border-f1-border px-2 py-[3px] transition-all focus-within:border-f1-border-hover hover:border-f1-border-hover">
       <F0Icon icon={Search} size="md" />
       <input
         disabled={disabled}
