@@ -1424,6 +1424,396 @@ describe("TableCollection", () => {
     })
   })
 
+  describe("allPagesSelection banner", () => {
+    const createSelectableSource = (
+      allPagesSelection = false,
+      totalItems = 2
+    ): DataCollectionSource<
+      Person,
+      TestFilters,
+      SortingsDefinition,
+      SummariesDefinition,
+      ItemActionsDefinition<Person>,
+      TestNavigationFilters,
+      GroupingDefinition<Person>
+    > => ({
+      ...createTestSource(),
+      selectable: (item: Person) => item.id,
+      allPagesSelection,
+      dataAdapter: {
+        paginationType: "pages",
+        perPage: totalItems,
+        fetchData: async () => ({
+          records: testData,
+          total: totalItems,
+          currentPage: 1,
+          perPage: totalItems,
+          pagesCount: 1,
+          type: "pages" as const,
+        }),
+      },
+    })
+
+    it("keeps column headers visible when items are selected", async () => {
+      const user = userEvent.setup()
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createSelectableSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // Column headers must be present before selection
+      expect(screen.getAllByRole("columnheader").length).toBeGreaterThan(0)
+
+      // Select one row via the first row's checkbox
+      const checkboxes = screen.getAllByRole("checkbox")
+      await user.click(checkboxes[1]) // index 0 is the header checkbox
+
+      // Column headers must still be present after selection
+      expect(screen.getAllByRole("columnheader").length).toBeGreaterThan(0)
+      expect(screen.getByText("name")).toBeInTheDocument()
+      expect(screen.getByText("email")).toBeInTheDocument()
+    })
+
+    it("does not render banner row when allPagesSelection is not enabled", async () => {
+      const user = userEvent.setup()
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createSelectableSource()} // allPagesSelection not enabled
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // Select one row
+      const checkboxes = screen.getAllByRole("checkbox")
+      await user.click(checkboxes[1])
+
+      await waitFor(() => {
+        // Header row is still present
+        expect(screen.getByText("name")).toBeInTheDocument()
+        expect(screen.getByText("email")).toBeInTheDocument()
+      })
+
+      // Banner content must not appear — no "Select all N items" button, no count text in thead
+      expect(
+        screen.queryByRole("button", { name: /select all/i })
+      ).not.toBeInTheDocument()
+
+      // thead must contain exactly one row (the column header row — no banner row)
+      const thead = document.querySelector("thead")
+      expect(thead?.querySelectorAll("tr")).toHaveLength(1)
+    })
+
+    it("shows allOnPage banner with 'Select all N items' button when page is fully selected and allPagesSelection is true", async () => {
+      const user = userEvent.setup()
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createSelectableSource(true, 50)}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // Select all items on the page via the header checkbox
+      const checkboxes = screen.getAllByRole("checkbox")
+      await user.click(checkboxes[0])
+
+      await waitFor(() => {
+        // "Select all 50 items" button should appear
+        expect(
+          screen.getByRole("button", { name: /select all 50/i })
+        ).toBeInTheDocument()
+      })
+    })
+
+    it("shows allItemsSelected text after clicking 'Select all N items'", async () => {
+      const user = userEvent.setup()
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createSelectableSource(true, 50)}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // Select all on page
+      const checkboxes = screen.getAllByRole("checkbox")
+      await user.click(checkboxes[0])
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", { name: /select all 50/i })
+        ).toBeInTheDocument()
+      })
+
+      // Click "Select all 50 items"
+      await user.click(screen.getByRole("button", { name: /select all 50/i }))
+
+      // "Select all N items" button should disappear (all items now selected)
+      await waitFor(() => {
+        expect(
+          screen.queryByRole("button", { name: /select all 50/i })
+        ).not.toBeInTheDocument()
+      })
+
+      // HighlightedCount splits the number into its own span so we can't use
+      // getByText directly — check via textContent instead
+      expect(document.body.textContent).toMatch(/All 50 items selected/)
+    })
+
+    it("shows header checkbox as indeterminate (unchecked + minus icon) when only some items are selected", async () => {
+      const user = userEvent.setup()
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createSelectableSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // Before selection: header checkbox is unchecked
+      const headerCheckboxBefore = screen.getAllByRole("checkbox")[0]
+      expect(headerCheckboxBefore).toHaveAttribute("aria-checked", "false")
+
+      // Select only one of two rows
+      const checkboxes = screen.getAllByRole("checkbox")
+      await user.click(checkboxes[1])
+
+      await waitFor(() => {
+        // Header checkbox is unchecked during partial selection: aria-checked="false"
+        // and data-state="unchecked" are correct for the toggle direction (clicking
+        // promotes to all-selected rather than deselecting).
+        // Note: F0Checkbox's indeterminate prop does not currently cause the minus
+        // icon to render when checked=false — Radix's Indicator only mounts when
+        // checked is truthy or "indeterminate". Forwarding Radix's indeterminate
+        // state is a known DS-level gap tracked separately.
+        const headerCheckbox = screen.getAllByRole("checkbox")[0]
+        expect(headerCheckbox).toHaveAttribute("aria-checked", "false")
+        // data-state reflects the Radix checked value — unchecked during partial
+        expect(headerCheckbox).toHaveAttribute("data-state", "unchecked")
+      })
+    })
+
+    it("shows checked header checkbox when all page items are selected", async () => {
+      const user = userEvent.setup()
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createSelectableSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // Select all via header checkbox
+      const checkboxes = screen.getAllByRole("checkbox")
+      await user.click(checkboxes[0])
+
+      await waitFor(() => {
+        const headerCheckbox = screen.getAllByRole("checkbox")[0]
+        expect(headerCheckbox).toHaveAttribute("aria-checked", "true")
+      })
+    })
+
+    it("after 'Select all N items' + deselecting one row, shows correct count and re-shows the select-all button", async () => {
+      const user = userEvent.setup()
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createSelectableSource(true, 50)}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // Select all on page via header checkbox
+      const checkboxes = screen.getAllByRole("checkbox")
+      await user.click(checkboxes[0])
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", { name: /select all 50/i })
+        ).toBeInTheDocument()
+      })
+
+      // Click "Select all 50 items"
+      await user.click(screen.getByRole("button", { name: /select all 50/i }))
+
+      await waitFor(() => {
+        expect(
+          screen.queryByRole("button", { name: /select all 50/i })
+        ).not.toBeInTheDocument()
+      })
+
+      // Deselect one row
+      const rowCheckboxes = screen.getAllByRole("checkbox")
+      await user.click(rowCheckboxes[1])
+
+      await waitFor(() => {
+        // Label must NOT say "all items selected"
+        expect(
+          screen.queryByText(/all 50 items selected/i)
+        ).not.toBeInTheDocument()
+
+        // "Select all N items" button must reappear
+        expect(
+          screen.getByRole("button", { name: /select all 50/i })
+        ).toBeInTheDocument()
+      })
+    })
+
+    it("does not show header as fully checked when cross-page selectedCount coincidentally equals page size but no current-page rows are selected", async () => {
+      // Regression test for: allSelectedStatus.selectedCount === data.records.length
+      // can be true when selections from another page match the current page size.
+      // The fix checks per-ID membership instead of comparing global counts.
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={{
+            ...createSelectableSource(true, 50),
+            // Pre-seed 2 selections with IDs that are NOT on the current page
+            // (current page has IDs 1 and 2; these are off-page IDs).
+            // selectedCount (2) would coincidentally equal data.records.length (2),
+            // triggering the bug in the old formula.
+            defaultSelectedItems: {
+              allSelected: false,
+              items: [
+                { id: 99, checked: true },
+                { id: 100, checked: true },
+              ],
+            },
+          }}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const headerCheckbox = screen.getAllByRole("checkbox")[0]
+      // No current-page row is selected — header must not appear fully checked
+      expect(headerCheckbox).toHaveAttribute("aria-checked", "false")
+      expect(headerCheckbox).toHaveAttribute("data-state", "unchecked")
+    })
+  })
+
   it("does not render add-row button when no AddRowProvider wraps the table", async () => {
     render(
       <TableCollection<
