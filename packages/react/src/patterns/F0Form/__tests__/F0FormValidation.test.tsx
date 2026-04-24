@@ -1,8 +1,9 @@
+import userEvent from "@testing-library/user-event"
 import React from "react"
-import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 import { describe, expect, it, vi } from "vitest"
 import { z } from "zod"
-import userEvent from "@testing-library/user-event"
+
+import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
 import { F0Form } from "../F0Form"
 import { f0FormField } from "../f0Schema"
@@ -461,5 +462,236 @@ describe("F0Form datetime field validation", () => {
     // Should render both date and time parts
     expect(screen.getByLabelText("Meeting")).toBeInTheDocument()
     expect(screen.getByLabelText("Time")).toBeInTheDocument()
+  })
+
+  it("does not show a validation error while the user is typing a time value", async () => {
+    const user = userEvent.setup()
+
+    const formSchema = z.object({
+      scheduledAt: f0FormField(z.date(), {
+        label: "Scheduled At",
+        fieldType: "datetime",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="datetime-no-premature-error"
+        schema={formSchema}
+        defaultValues={{
+          scheduledAt: new Date("2026-06-15T09:00:00"),
+        }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const timeInput = screen.getByLabelText("Time")
+
+    // Interact with the time input without leaving it
+    await user.click(timeInput)
+    await user.clear(timeInput)
+
+    // No validation message should appear while the field is still focused / mid-edit
+    expect(screen.queryByText("This field is required")).not.toBeInTheDocument()
+  })
+
+  it("shows validation error message after form is submitted with empty datetime", async () => {
+    const user = userEvent.setup()
+
+    const formSchema = z.object({
+      scheduledAt: f0FormField(z.date(), {
+        label: "Scheduled At",
+        fieldType: "datetime",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="datetime-blur-error"
+        schema={formSchema}
+        defaultValues={{
+          scheduledAt: undefined as unknown as Date,
+        }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    // Submit to trigger validation
+    await user.click(screen.getByText("Submit"))
+
+    await waitFor(() => {
+      // The required error message should appear after submission
+      expect(screen.getByText("This field is required")).toBeInTheDocument()
+    })
+  })
+
+  it("blocks submission when required datetime field is empty", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    const formSchema = z.object({
+      scheduledAt: f0FormField(z.date(), {
+        label: "Scheduled At",
+        fieldType: "datetime",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="datetime-required-test"
+        schema={formSchema}
+        defaultValues={{
+          scheduledAt: undefined as unknown as Date,
+        }}
+        onSubmit={onSubmit}
+      />
+    )
+
+    await user.click(screen.getByText("Submit"))
+
+    await waitFor(() => {
+      expect(onSubmit).not.toHaveBeenCalled()
+    })
+  })
+
+  it("submits successfully when a valid datetime is provided", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    const formSchema = z.object({
+      scheduledAt: f0FormField(z.date(), {
+        label: "Scheduled At",
+        fieldType: "datetime",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="datetime-submit-test"
+        schema={formSchema}
+        defaultValues={{
+          scheduledAt: new Date("2026-06-15T14:30:00"),
+        }}
+        onSubmit={onSubmit}
+      />
+    )
+
+    await user.click(screen.getByText("Submit"))
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledOnce()
+    })
+  })
+
+  it("shows min constraint error when time input is blurred and value violates the constraint", async () => {
+    const user = userEvent.setup()
+    // Default value is well before minDate, so validation should fail.
+    // Uses .refine() (not .min()) so the constraint is re-evaluated on each
+    // validation run rather than being captured once at schema creation.
+    const minDate = new Date("2030-01-01T10:00:00")
+
+    const formSchema = z.object({
+      scheduledAt: f0FormField(
+        z.date().refine((val) => val >= minDate, "Must be after 2030"),
+        {
+          label: "Scheduled At",
+          fieldType: "datetime",
+          minDate,
+        }
+      ),
+    })
+
+    render(
+      <F0Form
+        name="datetime-min-blur-test"
+        schema={formSchema}
+        defaultValues={{
+          scheduledAt: new Date("2026-01-01T09:00:00"),
+        }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const timeInput = screen.getByLabelText("Time")
+    // Focus then blur the time input — this should trigger validation in on-blur mode
+    await user.click(timeInput)
+    await user.tab()
+
+    await waitFor(() => {
+      expect(screen.getByText("Must be after 2030")).toBeInTheDocument()
+    })
+  })
+
+  it("rejects a past datetime on submit — simulates a value that was 'now' but went stale", async () => {
+    // Simulates: user sets datetime to the current moment (valid at that
+    // instant), then time passes and they submit — the value is now in the
+    // past and should be rejected.
+    // Using a pre-set past date avoids fake timers; the key is that .refine()
+    // calls new Date() freshly on each validation run, so it catches stale values.
+    const user = userEvent.setup()
+
+    const formSchema = z.object({
+      scheduledAt: f0FormField(
+        z
+          .date()
+          .refine((val) => val >= new Date(), "Must be after current time"),
+        {
+          label: "Scheduled At",
+          fieldType: "datetime",
+          minDate: () => new Date(),
+        }
+      ),
+    })
+
+    render(
+      <F0Form
+        name="datetime-stale-submit-test"
+        schema={formSchema}
+        defaultValues={{
+          // One hour in the past — represents a "now" value that went stale
+          scheduledAt: new Date(Date.now() - 60 * 60 * 1000),
+        }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    await user.click(screen.getByText("Submit"))
+
+    await waitFor(() => {
+      expect(screen.getByText("Must be after current time")).toBeInTheDocument()
+    })
+  })
+
+  it("shows max constraint error when time input is blurred and value violates z.date().max()", async () => {
+    const user = userEvent.setup()
+    // Default value is well after maxDate, so validation should fail
+    const maxDate = new Date("2020-12-31T23:59:59")
+
+    const formSchema = z.object({
+      scheduledAt: f0FormField(z.date().max(maxDate, "Must be before 2021"), {
+        label: "Scheduled At",
+        fieldType: "datetime",
+        maxDate,
+      }),
+    })
+
+    render(
+      <F0Form
+        name="datetime-max-blur-test"
+        schema={formSchema}
+        defaultValues={{
+          scheduledAt: new Date("2026-06-15T12:00:00"),
+        }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const timeInput = screen.getByLabelText("Time")
+    await user.click(timeInput)
+    await user.tab()
+
+    await waitFor(() => {
+      expect(screen.getByText("Must be before 2021")).toBeInTheDocument()
+    })
   })
 })

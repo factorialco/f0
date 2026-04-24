@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { useState, useCallback, useRef } from "react"
+import { useState, useCallback, useMemo, useRef } from "react"
 import { z } from "zod"
 
 import { F0Button } from "@/components/F0Button"
@@ -2956,6 +2956,81 @@ export const WithDefaultValuesParamsSchema: Story = {
  * This is useful when external logic (e.g. a save shortcut, AI validation, or a parent component)
  * needs to draw attention to the form's action bar without submitting.
  */
+/**
+ * DateTime field with `minDate` and `maxDate` constraints.
+ *
+ * Key behaviors:
+ * - Users can type any time freely — the constraint is **not** enforced
+ *   during typing. The validation error only appears on blur or submit,
+ *   matching the form's `errorTrigger` mode.
+ *
+ * Important: `minDate`/`maxDate` config restricts the calendar picker UI. For
+ * dynamic validation rules such as "must be after now", use `.refine()` with
+ * a callback that calls `new Date()` so the constraint is re-evaluated at the
+ * moment of each validation run (blur or submit). Fixed bounds, such as a
+ * precomputed `endOfYear`, can still use `.min()`/`.max()`.
+ */
+export const DateTimeWithConstraints: Story = {
+  render() {
+    const endOfYear = useMemo(() => {
+      const d = new Date()
+      d.setMonth(11, 31)
+      d.setHours(23, 59, 59, 0)
+      return d
+    }, [])
+
+    const formSchema = useMemo(
+      () =>
+        z.object({
+          startsAt: f0FormField(
+            // Use .refine() so `new Date()` is evaluated fresh on every
+            // validation run — both on blur and on submit. Using .min(now)
+            // would capture "now" once at schema creation, allowing a value
+            // that was valid when set to slip through if the user waits.
+            z
+              .date()
+              .refine((val) => val >= new Date(), "Must be after current time"),
+            {
+              label: "Starts At",
+              fieldType: "datetime",
+              helpText:
+                "Must be after now. Set a date and time, then submit or blur to validate.",
+              // Dynamic function so the picker also greys out already-past dates
+              minDate: () => new Date(),
+            }
+          ),
+          expiresAt: f0FormField(
+            z.date().max(endOfYear, "Must be within this year"),
+            {
+              label: "Expires At",
+              fieldType: "datetime",
+              helpText:
+                "Must be before end of this year. Set a date and time, then submit or blur to validate.",
+              maxDate: endOfYear,
+            }
+          ),
+        }),
+      [endOfYear]
+    )
+
+    const formDefinition = useF0FormDefinition({
+      name: "datetime-constraints",
+      schema: formSchema,
+      defaultValues: {
+        startsAt: undefined as unknown as Date,
+        expiresAt: undefined as unknown as Date,
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(500)
+        console.info(`Submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
 export const ActionBarWiggle: Story = {
   render() {
     const formRef = useRef<F0FormRef | null>(null)
