@@ -1,10 +1,15 @@
-/**
- * Profile data for a requisition entity (ATS requisition), resolved asynchronously
- * and displayed in the entity reference hover card.
- */
+import type { StatusVariant } from "@/components/tags/F0TagStatus"
+
 export type RequisitionProfile = {
   id: string | number
   title: string
   status?: string
+  statusVariant?: StatusVariant
   reason?: string
+  location?: string
+  lineManager?: {
+    firstName: string
+    lastName: string
+    avatarUrl?: string
+  }
 }
