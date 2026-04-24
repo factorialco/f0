@@ -9,6 +9,8 @@ import type {
   ResolvedTimeField,
 } from "./types"
 
+import { useF0FormAiGlowContext } from "../../context"
+import { GlowingFieldWrapper } from "../GlowingFieldWrapper"
 import { DateFieldRenderer } from "./DateFieldRenderer"
 import { TimeFieldRenderer } from "./TimeFieldRenderer"
 import { dateToTimeString, combineDateAndTime } from "./utils"
@@ -32,6 +34,10 @@ export function DateTimeFieldRenderer({
   loading,
   status,
 }: DateTimeFieldRendererProps) {
+  const { glowingFields, fadingFields, clearFieldGlow } =
+    useF0FormAiGlowContext()
+  const isGlowing = glowingFields.has(field.id)
+  const isFading = fadingFields.has(field.id)
   // Form value may be null (used to represent cleared state)
   const currentDate = (formField.value ?? undefined) as Date | undefined
 
@@ -43,6 +49,7 @@ export function DateTimeFieldRenderer({
   // react-hook-form treats undefined as "use defaultValue".
   const handleDateChange = useCallback(
     (newDate: Date | undefined) => {
+      clearFieldGlow(field.id)
       if (!newDate) {
         formField.onChange(null)
         return
@@ -51,13 +58,14 @@ export function DateTimeFieldRenderer({
       // the user will set the time themselves)
       formField.onChange(combineDateAndTime(newDate, timeValue))
     },
-    [formField, timeValue]
+    [formField, timeValue, clearFieldGlow, field.id]
   )
 
   // Handle time changes - preserve the date portion
   // TimeFieldRenderer now passes a Date object
   const handleTimeChange = useCallback(
     (newTimeDate: Date | undefined) => {
+      clearFieldGlow(field.id)
       if (!newTimeDate) {
         // Keep the date but clear the time
         if (currentDate) {
@@ -78,7 +86,7 @@ export function DateTimeFieldRenderer({
       }
       formField.onChange(combineDateAndTime(currentDate, timeString))
     },
-    [formField, currentDate]
+    [formField, currentDate, clearFieldGlow, field.id]
   )
 
   // Create synthetic field and formField props for DateFieldRenderer
@@ -131,22 +139,26 @@ export function DateTimeFieldRenderer({
   return (
     <div className="flex gap-2">
       <div className="flex-1">
-        <DateFieldRenderer
-          field={dateField}
-          formField={dateFormField}
-          error={error}
-          status={status}
-          loading={loading}
-        />
+        <GlowingFieldWrapper isGlowing={isGlowing} isFading={isFading}>
+          <DateFieldRenderer
+            field={dateField}
+            formField={dateFormField}
+            error={error}
+            status={status}
+            loading={loading}
+          />
+        </GlowingFieldWrapper>
       </div>
       <div className="w-32">
-        <TimeFieldRenderer
-          field={timeField}
-          formField={timeFormField}
-          error={error}
-          status={status}
-          loading={loading}
-        />
+        <GlowingFieldWrapper isGlowing={isGlowing} isFading={isFading}>
+          <TimeFieldRenderer
+            field={timeField}
+            formField={timeFormField}
+            error={error}
+            status={status}
+            loading={loading}
+          />
+        </GlowingFieldWrapper>
       </div>
     </div>
   )

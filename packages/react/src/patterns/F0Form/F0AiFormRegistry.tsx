@@ -623,6 +623,9 @@ export function F0AiFormRegistryProvider({
   const filledCallbacksRef = useRef<
     Map<string, (fieldNames: string[]) => void>
   >(new Map())
+  // Persists the last filled fields per form so canvas forms that mount after
+  // fillForm is called can still receive and show the glow on mount.
+  const lastFilledFieldsRef = useRef<Map<string, string[]>>(new Map())
 
   // Three-field state replacing the old flat formDescriptions array.
   // formsOnCurrentPage: full runtime state for rendered (non-virtual) forms
@@ -887,6 +890,12 @@ export function F0AiFormRegistryProvider({
   const subscribeFilledFields = useCallback(
     (formName: string, cb: (fieldNames: string[]) => void) => {
       filledCallbacksRef.current.set(formName, cb)
+      // Replay any fill that happened before this form mounted (e.g. canvas
+      // forms that open after fillForm has already been called).
+      const pending = lastFilledFieldsRef.current.get(formName)
+      if (pending && pending.length > 0) {
+        cb(pending)
+      }
       return () => {
         filledCallbacksRef.current.delete(formName)
       }
@@ -896,6 +905,7 @@ export function F0AiFormRegistryProvider({
 
   const notifyFieldsFilled = useCallback(
     (formName: string, fieldNames: string[]) => {
+      lastFilledFieldsRef.current.set(formName, fieldNames)
       filledCallbacksRef.current.get(formName)?.(fieldNames)
     },
     []

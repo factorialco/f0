@@ -147,7 +147,8 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
     isLoading: isFormLoading,
     renderCustomField,
   } = useF0FormContext()
-  const { glowingFields, clearFieldGlow } = useF0FormAiGlowContext()
+  const { glowingFields, fadingFields, clearFieldGlow } =
+    useF0FormAiGlowContext()
   const { forms } = useI18n()
 
   // Evaluate if field is currently disabled
@@ -204,15 +205,17 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
       name={field.id}
       render={({ field: formField, fieldState }) => {
         const isFieldGlowing = glowingFields.has(field.id)
-        const formFieldWithGlowClear = isFieldGlowing
-          ? {
-              ...formField,
-              onChange: (...args: Parameters<typeof formField.onChange>) => {
-                clearFieldGlow(field.id)
-                formField.onChange(...args)
-              },
-            }
-          : formField
+        const isFieldFading = fadingFields.has(field.id)
+        const formFieldWithGlowClear =
+          isFieldGlowing || isFieldFading
+            ? {
+                ...formField,
+                onChange: (...args: Parameters<typeof formField.onChange>) => {
+                  clearFieldGlow(field.id)
+                  formField.onChange(...args)
+                },
+              }
+            : formField
         return (
           <FormItem id={anchorId} className="scroll-mt-4">
             {showLabel && (
@@ -226,7 +229,25 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
                 )}
               </label>
             )}
-            <GlowingFieldWrapper isGlowing={isFieldGlowing}>
+            <GlowingFieldWrapper
+              isGlowing={
+                isFieldGlowing &&
+                field.type !== "checkbox" &&
+                field.type !== "datetime"
+              }
+              isFading={
+                isFieldFading &&
+                field.type !== "checkbox" &&
+                field.type !== "datetime"
+              }
+              overlayClassName={
+                field.type === "duration"
+                  ? "rounded-[10px]"
+                  : field.type === "richtext"
+                    ? "rounded-[16px]"
+                    : undefined
+              }
+            >
               <FormControl>
                 {renderFieldContent({
                   field,

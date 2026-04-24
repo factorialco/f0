@@ -44,12 +44,14 @@ export function useOptionalF0FormContext() {
 
 export interface F0FormAiGlowContextValue {
   glowingFields: ReadonlySet<string>
+  fadingFields: ReadonlySet<string>
   /** Clear the glow for a specific field (called when the user edits it) */
   clearFieldGlow: (fieldId: string) => void
 }
 
 export const F0FormAiGlowContext = createContext<F0FormAiGlowContextValue>({
   glowingFields: new Set(),
+  fadingFields: new Set(),
   clearFieldGlow: () => {},
 })
 

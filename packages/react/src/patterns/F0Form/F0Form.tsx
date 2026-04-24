@@ -874,13 +874,39 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const groupedItems = groupContiguousSwitches(definition)
 
   // AI co-creation glow: track which fields were filled by the AI (fillForm).
-  // The glow persists until the user edits the field themselves.
+  // The glow auto-clears after 3s or immediately when the user edits the field.
   const [aiGlowingFields, setAiGlowingFields] = useState<ReadonlySet<string>>(
     () => new Set()
   )
+  const [aiFadingFields, setAiFadingFields] = useState<ReadonlySet<string>>(
+    () => new Set()
+  )
+
+  const glowTimeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map()
+  )
+  const fadeTimeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map()
+  )
 
   const clearFieldGlow = useCallback((fieldId: string) => {
+    const existing = glowTimeoutsRef.current.get(fieldId)
+    if (existing) {
+      clearTimeout(existing)
+      glowTimeoutsRef.current.delete(fieldId)
+    }
+    const existingFade = fadeTimeoutsRef.current.get(fieldId)
+    if (existingFade) {
+      clearTimeout(existingFade)
+      fadeTimeoutsRef.current.delete(fieldId)
+    }
     setAiGlowingFields((prev) => {
+      if (!prev.has(fieldId)) return prev
+      const next = new Set(prev)
+      next.delete(fieldId)
+      return next
+    })
+    setAiFadingFields((prev) => {
       if (!prev.has(fieldId)) return prev
       const next = new Set(prev)
       next.delete(fieldId)
@@ -894,12 +920,62 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     const unsubscribe = aiFormRegistry.subscribeFilledFields(
       name,
       (fieldNames) => {
-        setAiGlowingFields(new Set(fieldNames))
+        setAiGlowingFields((prev) => {
+          const next = new Set(prev)
+          fieldNames.forEach((id) => next.add(id))
+          return next
+        })
+        // Auto-clear each field after 3s: first fade (500ms transition), then remove
+        fieldNames.forEach((id) => {
+          const existing = glowTimeoutsRef.current.get(id)
+          if (existing) clearTimeout(existing)
+          const existingFade = fadeTimeoutsRef.current.get(id)
+          if (existingFade) clearTimeout(existingFade)
+          // Cancel any in-progress fade for this field (re-filled while fading)
+          setAiFadingFields((prev) => {
+            if (!prev.has(id)) return prev
+            const next = new Set(prev)
+            next.delete(id)
+            return next
+          })
+          const t = setTimeout(() => {
+            glowTimeoutsRef.current.delete(id)
+            // Move to fading: remove from glowing, add to fading
+            setAiGlowingFields((prev) => {
+              if (!prev.has(id)) return prev
+              const next = new Set(prev)
+              next.delete(id)
+              return next
+            })
+            setAiFadingFields((prev) => {
+              const next = new Set(prev)
+              next.add(id)
+              return next
+            })
+            // After the CSS transition, fully remove
+            const ft = setTimeout(() => {
+              fadeTimeoutsRef.current.delete(id)
+              setAiFadingFields((prev) => {
+                if (!prev.has(id)) return prev
+                const next = new Set(prev)
+                next.delete(id)
+                return next
+              })
+            }, 550)
+            fadeTimeoutsRef.current.set(id, ft)
+          }, 5000)
+          glowTimeoutsRef.current.set(id, t)
+        })
       }
     )
 
     return () => {
       unsubscribe()
+      // Clear all pending timeouts on unmount
+      glowTimeoutsRef.current.forEach((t) => clearTimeout(t))
+      glowTimeoutsRef.current.clear()
+      fadeTimeoutsRef.current.forEach((t) => clearTimeout(t))
+      fadeTimeoutsRef.current.clear()
     }
   }, [aiFormRegistry, name])
 
@@ -1021,7 +1097,11 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
 
   return (
     <F0FormAiGlowContext.Provider
-      value={{ glowingFields: aiGlowingFields, clearFieldGlow }}
+      value={{
+        glowingFields: aiGlowingFields,
+        fadingFields: aiFadingFields,
+        clearFieldGlow,
+      }}
     >
       <F0FormContext.Provider value={contextValue}>
         <FormProvider {...form}>
