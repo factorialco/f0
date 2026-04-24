@@ -18,7 +18,7 @@ const mockFormRef = {
     submit: mockSubmit,
     reset: vi.fn(),
     isDirty: () => false,
-    getValues: () => ({}),
+    getValues: vi.fn().mockReturnValue({}),
     setValue: vi.fn(),
     setValues: vi.fn(),
     trigger: vi.fn().mockResolvedValue(true),
@@ -33,6 +33,7 @@ let mockCoAgentState: {
   activeForm?: {
     formName: string
     formValues?: Record<string, unknown>
+    defaultValuesParams?: Record<string, unknown>
   } | null
 } = {}
 
@@ -40,6 +41,8 @@ let mockRegistryEntry: Record<string, unknown> | undefined
 
 const mockResetFillVersion = vi.fn()
 const mockClearActiveForm = vi.fn()
+const mockGetFillVersion = vi.fn().mockReturnValue(0)
+const mockMarkDefaultValuesResolved = vi.fn()
 const mockCloseCanvas = vi.fn()
 
 let mockHasErrors = false
@@ -66,6 +69,8 @@ vi.mock("@/patterns/F0Form/F0AiFormRegistry", () => ({
     get: () => mockRegistryEntry,
     resetFillVersion: mockResetFillVersion,
     clearActiveForm: mockClearActiveForm,
+    getFillVersion: mockGetFillVersion,
+    markDefaultValuesResolved: mockMarkDefaultValuesResolved,
   }),
 }))
 
@@ -128,6 +133,8 @@ describe("FormCanvasContent", () => {
     capturedFormDefinition = null
     mockFormComponent = undefined
     mockHasErrors = false
+    mockGetFillVersion.mockReturnValue(0)
+    mockFormRef.current.getValues.mockReturnValue({})
   })
 
   describe("when no active form", () => {
@@ -604,6 +611,126 @@ describe("FormCanvasContent", () => {
       })
       render(<FormContent />)
       expect(screen.getByRole("button", { name: "Submit" })).not.toBeDisabled()
+    })
+  })
+
+  // ==========================================================================
+  // resolvedDefaultValues — defaultValuesFn + defaultValuesParams
+  // ==========================================================================
+
+  describe("resolvedDefaultValues with defaultValuesParams", () => {
+    it("calls defaultValuesFn with params when both are available", async () => {
+      const defaultValuesFn = vi.fn().mockResolvedValue({
+        name: "Resolved Name",
+        email: "resolved@test.com",
+      })
+      mockRegistryEntry = makeEntry({
+        defaultValuesFn,
+        defaultValuesParams: { employeeId: "123" },
+      })
+      mockCoAgentState = {
+        activeForm: {
+          formName: "test-form",
+          formValues: { name: "", email: "" },
+          defaultValuesParams: { employeeId: "123" },
+        },
+      }
+      render(<FormContent />)
+
+      const result = await capturedFormDefinition.defaultValues()
+      expect(defaultValuesFn).toHaveBeenCalledWith({ employeeId: "123" })
+      expect(result).toEqual({
+        name: "Resolved Name",
+        email: "resolved@test.com",
+      })
+    })
+
+    it("falls back to currentValues when no defaultValuesFn", async () => {
+      mockRegistryEntry = makeEntry()
+      mockCoAgentState = {
+        activeForm: {
+          formName: "test-form",
+          formValues: { name: "John", email: "john@test.com" },
+        },
+      }
+      render(<FormContent />)
+
+      const result = await capturedFormDefinition.defaultValues()
+      expect(result).toEqual({ name: "John", email: "john@test.com" })
+    })
+
+    it("falls back to currentValues when defaultValuesFn exists but no params", async () => {
+      const defaultValuesFn = vi.fn().mockResolvedValue({
+        name: "Should Not Resolve",
+      })
+      mockRegistryEntry = makeEntry({ defaultValuesFn })
+      mockCoAgentState = {
+        activeForm: {
+          formName: "test-form",
+          formValues: { name: "John", email: "john@test.com" },
+        },
+      }
+      render(<FormContent />)
+
+      const result = await capturedFormDefinition.defaultValues()
+      expect(defaultValuesFn).not.toHaveBeenCalled()
+      expect(result).toEqual({ name: "John", email: "john@test.com" })
+    })
+
+    it("always returns a thenable to prevent TypeError in useAsyncDefaultValues", () => {
+      mockRegistryEntry = makeEntry()
+      mockCoAgentState = {
+        activeForm: { formName: "test-form", formValues: {} },
+      }
+      render(<FormContent />)
+
+      const result = capturedFormDefinition.defaultValues()
+      expect(typeof result.then).toBe("function")
+    })
+  })
+
+  // ==========================================================================
+  // fillForm after resolving defaults — fillVersion guard
+  // ==========================================================================
+
+  describe("fillForm after resolving defaults preserves AI-filled values", () => {
+    it("does not overwrite virtual ref values when fillVersion > 0", () => {
+      mockGetFillVersion.mockReturnValue(1)
+      mockFormRef.current.getValues.mockReturnValue({
+        name: "AI Filled",
+        email: "ai@test.com",
+      })
+      mockRegistryEntry = makeEntry()
+      mockCoAgentState = {
+        activeForm: {
+          formName: "test-form",
+          formValues: { name: "original", email: "original@test.com" },
+        },
+      }
+      render(<FormContent />)
+
+      // fillVersion > 0 → effect reads getValues() for both valuesToApply and
+      // existing — they match, so setValues is NOT called.
+      // The form keeps the AI-filled values.
+      expect(mockFormRef.current.setValues).not.toHaveBeenCalled()
+    })
+
+    it("applies coagent formValues when fillVersion is 0", () => {
+      mockGetFillVersion.mockReturnValue(0)
+      mockFormRef.current.getValues.mockReturnValue({})
+      mockRegistryEntry = makeEntry()
+      mockCoAgentState = {
+        activeForm: {
+          formName: "test-form",
+          formValues: { name: "John", email: "john@test.com" },
+        },
+      }
+      render(<FormContent />)
+
+      expect(mockFormRef.current.setValues).toHaveBeenCalledWith(
+        { name: "John", email: "john@test.com" },
+        { shouldDirty: true, shouldValidate: false }
+      )
     })
   })
 })

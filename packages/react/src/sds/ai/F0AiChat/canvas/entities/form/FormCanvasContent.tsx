@@ -238,9 +238,28 @@ function VirtualFormContent() {
 
   const resolvedDefaultValues = useCallback(() => {
     const e = entryRef.current
+    const name = formNameRef.current
     const params = defaultValuesParamsRef.current
     if (e?.defaultValuesFn && params) {
-      return e.defaultValuesFn(params)
+      // Capture AI-set values before async resolution — form.reset() after
+      // defaults load would otherwise overwrite them.
+      const virtualValues = e.ref.current?.getValues() ?? {}
+      const dirty = e.dirtyFields ?? new Set<string>()
+      // Signal that async resolution is in progress — any concurrent
+      // fillForm calls will be queued until resolution completes.
+      if (name) registryRef.current?.markDefaultValuesResolving?.(name)
+      return e.defaultValuesFn(params).then((values) => {
+        // Merge AI-filled fields on top of resolved defaults so
+        // F0Form's reset() preserves values set by fillForm.
+        const merged = { ...values }
+        for (const field of dirty) {
+          if (field in virtualValues) {
+            merged[field] = virtualValues[field]
+          }
+        }
+        if (name) registryRef.current?.markDefaultValuesResolved?.(name)
+        return merged
+      })
     }
     return Promise.resolve(currentValuesRef.current)
   }, [])

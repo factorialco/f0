@@ -573,6 +573,14 @@ interface F0AiFormRegistryContextValue {
   resetFillVersion: (formName: string) => void
   /** Get the fill-version counter for a form (0 = never filled) */
   getFillVersion: (formName: string) => number
+  /** Whether a form's async default values have been resolved (true unless actively resolving) */
+  isDefaultValuesResolved: (formName: string) => boolean
+  /** Mark a form as currently resolving async default values (fills will be queued) */
+  markDefaultValuesResolving: (formName: string) => void
+  /** Mark a form's default values as resolved and flush any queued fill actions */
+  markDefaultValuesResolved: (formName: string) => void
+  /** Queue a fill callback to run after a form's defaults are resolved */
+  queueFillAction: (formName: string, action: () => void) => void
 }
 
 const F0AiFormRegistryContext =
@@ -613,6 +621,8 @@ export function F0AiFormRegistryProvider({
   const registryRef = useRef<Map<string, F0AiFormEntry>>(new Map())
   const lastDescriptionsJsonRef = useRef<string>("")
   const fillVersionsRef = useRef<Map<string, number>>(new Map())
+  const defaultValuesResolvingRef = useRef<Set<string>>(new Set())
+  const fillQueueRef = useRef<Map<string, Array<() => void>>>(new Map())
 
   // Three-field state replacing the old flat formDescriptions array.
   // formsOnCurrentPage: full runtime state for rendered (non-virtual) forms
@@ -899,11 +909,45 @@ export function F0AiFormRegistryProvider({
 
   const resetFillVersion = useCallback((formName: string) => {
     fillVersionsRef.current.delete(formName)
+    defaultValuesResolvingRef.current.delete(formName)
+    fillQueueRef.current.delete(formName)
   }, [])
 
   const getFillVersion = useCallback((formName: string) => {
     return fillVersionsRef.current.get(formName) ?? 0
   }, [])
+
+  const isDefaultValuesResolved = useCallback((formName: string) => {
+    return !defaultValuesResolvingRef.current.has(formName)
+  }, [])
+
+  const markDefaultValuesResolving = useCallback((formName: string) => {
+    defaultValuesResolvingRef.current.add(formName)
+  }, [])
+
+  const markDefaultValuesResolved = useCallback(
+    (formName: string) => {
+      defaultValuesResolvingRef.current.delete(formName)
+      const queue = fillQueueRef.current.get(formName)
+      if (queue?.length) {
+        fillQueueRef.current.delete(formName)
+        for (const action of queue) {
+          action()
+        }
+      }
+      rebuildDescriptions()
+    },
+    [rebuildDescriptions]
+  )
+
+  const queueFillAction = useCallback(
+    (formName: string, action: () => void) => {
+      const queue = fillQueueRef.current.get(formName) ?? []
+      queue.push(action)
+      fillQueueRef.current.set(formName, queue)
+    },
+    []
+  )
 
   // Sync virtual form definitions: register forms that aren't rendered,
   // skip if a rendered (non-virtual) form with the same name already exists.
@@ -988,6 +1032,10 @@ export function F0AiFormRegistryProvider({
       incrementFillVersion,
       resetFillVersion,
       getFillVersion,
+      isDefaultValuesResolved,
+      markDefaultValuesResolving,
+      markDefaultValuesResolved,
+      queueFillAction,
     }),
     [
       register,
@@ -1004,6 +1052,10 @@ export function F0AiFormRegistryProvider({
       incrementFillVersion,
       resetFillVersion,
       getFillVersion,
+      isDefaultValuesResolved,
+      markDefaultValuesResolving,
+      markDefaultValuesResolved,
+      queueFillAction,
     ]
   )
 
