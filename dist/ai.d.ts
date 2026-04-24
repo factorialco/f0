@@ -510,6 +510,12 @@ export declare const aiTranslations: {
         readonly ask: "Ask One";
         readonly view: "View";
         readonly tools: "Tools";
+        readonly entityRef: {
+            readonly candidate: {
+                readonly source: "Source";
+                readonly applied: "Applied on";
+            };
+        };
         readonly credits: {
             readonly title: "Credits";
             readonly creditsLeft: "{{total}} left";
@@ -780,12 +786,13 @@ declare type BaseTag<T extends {
  * Profile data for a candidate entity (ATS applicant), resolved asynchronously
  * and displayed in the entity reference hover card.
  */
-declare type CandidateProfile = {
+export declare type CandidateProfile = {
     id: string | number;
     firstName: string;
     lastName: string;
     avatarUrl?: string;
     source?: string;
+    appliedAt?: string;
 };
 
 /**
@@ -1695,6 +1702,12 @@ export declare const defaultTranslations: {
         readonly ask: "Ask One";
         readonly view: "View";
         readonly tools: "Tools";
+        readonly entityRef: {
+            readonly candidate: {
+                readonly source: "Source";
+                readonly applied: "Applied on";
+            };
+        };
         readonly credits: {
             readonly title: "Credits";
             readonly creditsLeft: "{{total}} left";
@@ -2632,7 +2645,7 @@ declare const internalAvatarTypes: readonly ["base", "rounded"];
  * Profile data for a job posting entity (ATS opening), resolved asynchronously
  * and displayed in the entity reference hover card.
  */
-declare type JobPostingProfile = {
+export declare type JobPostingProfile = {
     id: string | number;
     title: string;
     status?: string;
@@ -3283,10 +3296,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
@@ -3294,8 +3305,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }

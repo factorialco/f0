@@ -415,6 +415,12 @@ const e = {
     ask: "Ask One",
     view: "View",
     tools: "Tools",
+    entityRef: {
+      candidate: {
+        source: "Source",
+        applied: "Applied on"
+      }
+    },
     credits: {
       title: "Credits",
       creditsLeft: "{{total}} left",

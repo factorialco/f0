@@ -883,6 +883,12 @@ export declare const aiTranslations: {
         readonly ask: "Ask One";
         readonly view: "View";
         readonly tools: "Tools";
+        readonly entityRef: {
+            readonly candidate: {
+                readonly source: "Source";
+                readonly applied: "Applied on";
+            };
+        };
         readonly credits: {
             readonly title: "Credits";
             readonly creditsLeft: "{{total}} left";
@@ -1795,12 +1801,13 @@ export declare type CalendarView = "day" | "month" | "year" | "week" | "quarter"
  * Profile data for a candidate entity (ATS applicant), resolved asynchronously
  * and displayed in the entity reference hover card.
  */
-declare type CandidateProfile = {
+export declare type CandidateProfile = {
     id: string | number;
     firstName: string;
     lastName: string;
     avatarUrl?: string;
     source?: string;
+    appliedAt?: string;
 };
 
 /**
@@ -4165,6 +4172,12 @@ export declare const defaultTranslations: {
         readonly ask: "Ask One";
         readonly view: "View";
         readonly tools: "Tools";
+        readonly entityRef: {
+            readonly candidate: {
+                readonly source: "Source";
+                readonly applied: "Applied on";
+            };
+        };
         readonly credits: {
             readonly title: "Credits";
             readonly creditsLeft: "{{total}} left";
@@ -7034,6 +7047,190 @@ export declare function f0FormField<T extends ZodTypeAny, TConfig = undefined>(s
  */
 export declare function f0FormField<T extends ZodTypeAny, V extends string | number = string | number, R extends Record<string, unknown> = Record<string, unknown>>(schema: T, config: F0FieldConfig<V, R>): T & F0ZodType<T>;
 
+/**
+ * Shortcut helpers for common field types.
+ * These merge with the `f0FormField` function via TypeScript declaration merging,
+ * eliminating the need to manually create Zod schemas for the most common cases.
+ *
+ * @example
+ * // Instead of:
+ * name: f0FormField(z.string(), { label: "Name" })
+ * // Write:
+ * name: f0FormField.text({ label: "Name" })
+ *
+ * // Optional fields:
+ * nickname: f0FormField.text({ label: "Nickname", optional: true })
+ */
+export declare namespace f0FormField {
+    /* Excluded from this release type: TextConfig */
+    export function text(config: TextConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
+    export function text(config: TextConfig & {
+        optional?: false | undefined;
+    }): z.ZodString & F0ZodType<z.ZodString>;
+    /* Excluded from this release type: EmailConfig */
+    export function email(config: EmailConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
+    export function email(config: EmailConfig & {
+        optional?: false | undefined;
+    }): z.ZodString & F0ZodType<z.ZodString>;
+    /* Excluded from this release type: TextareaConfig */
+    export function textarea(config: TextareaConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
+    export function textarea(config: TextareaConfig & {
+        optional?: false | undefined;
+    }): z.ZodString & F0ZodType<z.ZodString>;
+    /* Excluded from this release type: NumberConfig */
+    export function number(config: NumberConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>;
+    export function number(config: NumberConfig & {
+        optional?: false | undefined;
+    }): z.ZodNumber & F0ZodType<z.ZodNumber>;
+    /* Excluded from this release type: SwitchConfig */
+    export function boolean(config: SwitchConfig & {
+        optional: true;
+    }): z.ZodBoolean & F0ZodType<z.ZodBoolean>;
+    export function boolean(config: SwitchConfig & {
+        optional?: false | undefined;
+    }): z.ZodLiteral<true> & F0ZodType<z.ZodLiteral<true>>;
+    /* Excluded from this release type: CheckboxConfig */
+    export function checkbox(config: CheckboxConfig & {
+        optional: true;
+    }): z.ZodBoolean & F0ZodType<z.ZodBoolean>;
+    export function checkbox(config: CheckboxConfig & {
+        optional?: false | undefined;
+    }): z.ZodLiteral<true> & F0ZodType<z.ZodLiteral<true>>;
+    /* Excluded from this release type: DateConfig */
+    export function date(config: DateConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodDate> & F0ZodType<z.ZodOptional<z.ZodDate>>;
+    export function date(config: DateConfig & {
+        optional?: false | undefined;
+    }): z.ZodDate & F0ZodType<z.ZodDate>;
+    /* Excluded from this release type: UrlConfig */
+    export function url(config: UrlConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
+    export function url(config: UrlConfig & {
+        optional?: false | undefined;
+    }): z.ZodString & F0ZodType<z.ZodString>;
+    /* Excluded from this release type: MoneyConfig */
+    export function money(config: MoneyConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>;
+    export function money(config: MoneyConfig & {
+        optional?: false | undefined;
+    }): z.ZodNumber & F0ZodType<z.ZodNumber>;
+    /* Excluded from this release type: PercentageConfig */
+    export function percentage(config: PercentageConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>;
+    export function percentage(config: PercentageConfig & {
+        optional?: false | undefined;
+    }): z.ZodNumber & F0ZodType<z.ZodNumber>;
+    /* Excluded from this release type: CardSelectConfig */
+    export function cardSelect<const V extends string>(config: CardSelectConfig<V> & {
+        optional: true;
+    }): z.ZodOptional<z.ZodEnum<[V, ...V[]]>> & F0ZodType<z.ZodOptional<z.ZodEnum<[V, ...V[]]>>>;
+    export function cardSelect<const V extends string>(config: CardSelectConfig<V> & {
+        optional?: false | undefined;
+    }): z.ZodEnum<[V, ...V[]]> & F0ZodType<z.ZodEnum<[V, ...V[]]>>;
+    /* Excluded from this release type: FileConfig */
+    export function file(config: FileConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
+    export function file(config: FileConfig & {
+        optional?: false | undefined;
+    }): z.ZodString & F0ZodType<z.ZodString>;
+    /* Excluded from this release type: MultiFileConfig */
+    export function multiFile(config: MultiFileConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodArray<z.ZodString>> & F0ZodType<z.ZodOptional<z.ZodArray<z.ZodString>>>;
+    export function multiFile(config: MultiFileConfig & {
+        optional?: false | undefined;
+    }): z.ZodArray<z.ZodString> & F0ZodType<z.ZodArray<z.ZodString>>;
+    /* Excluded from this release type: TimeConfig */
+    export function time(config: TimeConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodDate> & F0ZodType<z.ZodOptional<z.ZodDate>>;
+    export function time(config: TimeConfig & {
+        optional?: false | undefined;
+    }): z.ZodDate & F0ZodType<z.ZodDate>;
+    /* Excluded from this release type: DateTimeConfig */
+    export function datetime(config: DateTimeConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodDate> & F0ZodType<z.ZodOptional<z.ZodDate>>;
+    export function datetime(config: DateTimeConfig & {
+        optional?: false | undefined;
+    }): z.ZodDate & F0ZodType<z.ZodDate>;
+    /* Excluded from this release type: DurationConfig */
+    export function duration(config: DurationConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>;
+    export function duration(config: DurationConfig & {
+        optional?: false | undefined;
+    }): z.ZodNumber & F0ZodType<z.ZodNumber>;
+    /* Excluded from this release type: DateRangeObjectSchema */
+    /* Excluded from this release type: DateRangeConfig */
+    export function dateRange(config: DateRangeConfig & {
+        optional: true;
+    }): z.ZodOptional<DateRangeObjectSchema> & F0ZodType<z.ZodOptional<DateRangeObjectSchema>>;
+    export function dateRange(config: DateRangeConfig & {
+        optional?: false | undefined;
+    }): DateRangeObjectSchema & F0ZodType<DateRangeObjectSchema>;
+    /* Excluded from this release type: RichTextObjectSchema */
+    /* Excluded from this release type: RichTextConfig */
+    export function richText(config: RichTextConfig & {
+        optional: true;
+    }): z.ZodOptional<RichTextObjectSchema> & F0ZodType<z.ZodOptional<RichTextObjectSchema>>;
+    export function richText(config: RichTextConfig & {
+        optional?: false | undefined;
+    }): RichTextObjectSchema & F0ZodType<RichTextObjectSchema>;
+    /* Excluded from this release type: SelectConfig */
+    export function select<const V extends string, R extends Record<string, unknown> = Record<string, unknown>>(config: SelectConfig<R> & {
+        options: Array<{
+            value: V;
+        } & Record<string, unknown>>;
+        optional: true;
+    }): z.ZodOptional<z.ZodEnum<[V, ...V[]]>> & F0ZodType<z.ZodOptional<z.ZodEnum<[V, ...V[]]>>>;
+    export function select<const V extends string, R extends Record<string, unknown> = Record<string, unknown>>(config: SelectConfig<R> & {
+        options: Array<{
+            value: V;
+        } & Record<string, unknown>>;
+        optional?: false | undefined;
+    }): z.ZodEnum<[V, ...V[]]> & F0ZodType<z.ZodEnum<[V, ...V[]]>>;
+    export function select<R extends Record<string, unknown> = Record<string, unknown>>(config: SelectConfig<R> & {
+        optional: true;
+    }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
+    export function select<R extends Record<string, unknown> = Record<string, unknown>>(config: SelectConfig<R> & {
+        optional?: false | undefined;
+    }): z.ZodString & F0ZodType<z.ZodString>;
+    /* Excluded from this release type: MultiSelectConfig */
+    export function multiSelect<const V extends string>(config: Omit<MultiSelectConfig<string>, "options"> & {
+        options: Array<{
+            value: V;
+        } & Record<string, unknown>>;
+        optional: true;
+    }): z.ZodOptional<z.ZodArray<z.ZodEnum<[V, ...V[]]>>> & F0ZodType<z.ZodOptional<z.ZodArray<z.ZodEnum<[V, ...V[]]>>>>;
+    export function multiSelect<const V extends string>(config: Omit<MultiSelectConfig<string>, "options"> & {
+        options: Array<{
+            value: V;
+        } & Record<string, unknown>>;
+        optional?: false | undefined;
+    }): z.ZodArray<z.ZodEnum<[V, ...V[]]>> & F0ZodType<z.ZodArray<z.ZodEnum<[V, ...V[]]>>>;
+    export function multiSelect<V extends string | number = string, R extends Record<string, unknown> = Record<string, unknown>>(config: MultiSelectConfig<V, R> & {
+        optional: true;
+    }): z.ZodOptional<z.ZodArray<z.ZodString>> & F0ZodType<z.ZodOptional<z.ZodArray<z.ZodString>>>;
+    export function multiSelect<V extends string | number = string, R extends Record<string, unknown> = Record<string, unknown>>(config: MultiSelectConfig<V, R> & {
+        optional?: false | undefined;
+    }): z.ZodArray<z.ZodString> & F0ZodType<z.ZodArray<z.ZodString>>;
+        {};
+}
+
 declare interface F0FormFieldCommonProps {
     /** Field definition (type, label, placeholder, etc.) */
     /** Current field value */
@@ -9501,7 +9698,7 @@ declare type ItemDefinition = {
  * Profile data for a job posting entity (ATS opening), resolved asynchronously
  * and displayed in the entity reference hover card.
  */
-declare type JobPostingProfile = {
+export declare type JobPostingProfile = {
     id: string | number;
     title: string;
     status?: string;
@@ -13396,10 +13593,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
@@ -13407,8 +13602,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
