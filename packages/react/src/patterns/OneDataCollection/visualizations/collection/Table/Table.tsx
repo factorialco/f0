@@ -19,6 +19,7 @@ import {
   GroupingDefinition,
   isInfiniteScrollPagination,
   RecordType,
+  SelectionId,
   SortingKey,
   SortingsDefinition,
   SortingsState,
@@ -351,12 +352,15 @@ export const TableCollection = <
   // allPagesSelection modes — unlike comparing the cross-page selectedCount to
   // data.records.length, which can produce false positives when selections from
   // another page happen to equal the current page size.
+  // Non-selectable rows (source.selectable returns undefined) are filtered out
+  // so pages with mixed selectable/non-selectable rows still report correctly.
+  const currentPageSelectableIds = (data?.records ?? [])
+    .map((record) => source.selectable?.(record))
+    .filter((id): id is SelectionId => id !== undefined)
+
   const allPageRowsSelected =
-    (data?.records.length ?? 0) > 0 &&
-    (data?.records ?? []).every((record) => {
-      const id = source.selectable ? source.selectable(record) : undefined
-      return id !== undefined && selectedItems.has(id)
-    })
+    currentPageSelectableIds.length > 0 &&
+    currentPageSelectableIds.every((id) => selectedItems.has(id))
 
   // True when the header checkbox should render as fully-checked: either the
   // Gmail-style "select across all pages" CTA is active, or every selectable

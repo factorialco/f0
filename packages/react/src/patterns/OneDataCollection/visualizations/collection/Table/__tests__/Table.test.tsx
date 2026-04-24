@@ -1618,6 +1618,10 @@ describe("TableCollection", () => {
           screen.queryByRole("button", { name: /select all 50/i })
         ).not.toBeInTheDocument()
       })
+
+      // HighlightedCount splits the number into its own span so we can't use
+      // getByText directly — check via textContent instead
+      expect(document.body.textContent).toMatch(/All 50 items selected/)
     })
 
     it("shows header checkbox as indeterminate (unchecked + minus icon) when only some items are selected", async () => {
@@ -1654,12 +1658,13 @@ describe("TableCollection", () => {
       await user.click(checkboxes[1])
 
       await waitFor(() => {
-        // Header checkbox is unchecked (not checked) during partial selection so
-        // aria-checked="false" is correct. The Minus icon is shown via the
-        // indeterminate prop — a visual-only signal since F0Checkbox maps
-        // indeterminate to an icon swap rather than Radix's "indeterminate" state.
-        // Passing checked=false means clicking promotes to all-selected (correct
-        // toggle direction) rather than deselecting all.
+        // Header checkbox is unchecked during partial selection: aria-checked="false"
+        // and data-state="unchecked" are correct for the toggle direction (clicking
+        // promotes to all-selected rather than deselecting).
+        // Note: F0Checkbox's indeterminate prop does not currently cause the minus
+        // icon to render when checked=false — Radix's Indicator only mounts when
+        // checked is truthy or "indeterminate". Forwarding Radix's indeterminate
+        // state is a known DS-level gap tracked separately.
         const headerCheckbox = screen.getAllByRole("checkbox")[0]
         expect(headerCheckbox).toHaveAttribute("aria-checked", "false")
         // data-state reflects the Radix checked value — unchecked during partial
