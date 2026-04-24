@@ -164,6 +164,7 @@ const preview: Preview = {
        */
       storySort: (a, b) => {
         const topLevelOrder = [
+          "playground",
           "introduction",
           "how-to-contribute",
           "ai-configuration",

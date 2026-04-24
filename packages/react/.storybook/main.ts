@@ -23,6 +23,15 @@ const config: StorybookConfig = {
   stories: [
     "../docs/Introduction.mdx",
     "../docs/**/*.mdx",
+    // Playground stories: dev only, never shipped in published Storybook.
+    ...(process.env.STORYBOOK_PUBLIC_BUILD
+      ? []
+      : [
+          {
+            directory: "../playground",
+            titlePrefix: "Playground",
+          },
+        ]),
     {
       directory: "../src/components",
       titlePrefix: "Components",

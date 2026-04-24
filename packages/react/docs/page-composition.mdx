@@ -1,0 +1,430 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+import LinkTo from "@storybook/addon-links/react"
+
+<Meta title="Page composition" />
+
+# Page composition
+
+How to compose a screen using F0 components. This guide is the canonical reference for assembling a page: the shell it lives in, which page type to pick, where actions go, which blocks to include, in what order, and the patterns to avoid.
+
+> **For AI agents**: Always follow the decision tables and block order below. Never invent props — verify component APIs in the corresponding Storybook section before generating JSX.
+
+---
+
+## 1. Scope
+
+This document covers what goes **inside** the page content area. It assumes the application shell is already mounted by the consumer:
+
+- **`ApplicationFrame`** — provides the sidebar, the optional banner, and the AI chat. It exposes a single content slot (`children`).
+- **`Navigation/Page`** — the per-page wrapper that lives inside `ApplicationFrame`. It exposes a `header` slot (for `PageHeader` and `Tabs`) and a `children` slot (the page body).
+
+The composition rules below apply to the **`children` of `Navigation/Page`** — i.e. the actual page body. Everything above that level (sidebar, breadcrumbs, module-level actions, tabs) belongs to the shell.
+
+```
+ApplicationFrame                  ← shell (sidebar, banner, AI)
+└── Navigation/Page               ← per-page wrapper
+    ├── header slot               ← PageHeader (breadcrumbs, module actions) + Tabs
+    └── children slot             ← THIS DOCUMENT covers what goes here
+```
+
+---
+
+## 2. Tabs or single page?
+
+Modules can be split into tabs. Tabs live in the `header` slot of `Navigation/Page`, alongside `PageHeader` — **not** inside `ApplicationFrame`.
+
+| Question | Answer | What to do |
+|----------|--------|------------|
+| Does the module have multiple top-level views? | Yes | Use `Tabs` in the `Page` header. Each tab renders a distinct page body following this guide. |
+| Does the module have multiple top-level views? | No | Render the page body directly in `Page` `children`. |
+| Does a tab need internal sub-views? | Yes | Use a second `Tabs` instance with `secondary` for subtabs. |
+
+Each tab (or the single page when there are no tabs) is composed independently with the rules in sections 3–6.
+
+---
+
+## 3. Pick the page type
+
+Every page body is one of two types. Choose first, then compose.
+
+| Question | Module page | Resource page |
+|----------|-------------|---------------|
+| What is the page about? | A section of the product (list, dashboard, settings) | One specific entity (an employee, a project, an expense) |
+| Who renders the title and breadcrumbs? | `PageHeader` in the shell | `PageHeader` (module breadcrumbs) **plus** `ResourceHeader` (entity identity) |
+| Examples | Employees list, Reports dashboard, Settings | Employee profile, Project detail, Expense detail |
+| Use `ResourceHeader`? | No | Yes — as the first block of the page body |
+
+If you cannot answer "this page is about *one* identifiable entity", it is a **Module page**.
+
+---
+
+## 4. Where do actions go?
+
+Action placement is hierarchical. Pick the lowest level that still describes the action's scope.
+
+| Action scope | Where it goes | Prop / API |
+|--------------|---------------|-----------|
+| Module-wide (applies to the whole module, regardless of current view) | `PageHeader` in the shell | `actions` (`PageAction[]`) |
+| Resource-wide (applies to the entity the page represents) | `ResourceHeader` | `primaryAction`, `secondaryActions`, `otherActions` |
+| Section-wide (applies to one sub-section of the page) | `SectionHeader` | `action` |
+| Item-level (applies to one row, card, or item) | The content block itself | e.g. `OneDataCollection` item actions |
+
+Never duplicate the same action at two levels. Never put item-level actions in `PageHeader` or `ResourceHeader`.
+
+---
+
+## 5. Decide which blocks the page body needs
+
+Walk top to bottom. Include a block only if the answer is yes.
+
+| Block | Include when… | Skip when… |
+|-------|---------------|------------|
+| `F0Alert` | There is an important page-wide banner the user must see before interacting (trial warning, sync error, upsell). Always renders **above** all other content. | The notice is contextual to a specific section — put it inside that section instead. |
+| `ResourceHeader` | Page type is **Resource**. | Page type is **Module** (lists, dashboards, settings). |
+| `Tabs` (under `ResourceHeader`) | A Resource page splits its content into multiple sub-views (e.g. Profile / Documents / Activity). | The Resource page has a single view. |
+| `Layout.Page` | Almost always — it is the structural wrapper for the main content area. | Never — if the page has any content blocks, use `Layout.Page`. |
+| `Layout.Page` `header` slot | The content needs `OneDateNavigator` or `OneFilterPicker` above it. **Skip when the content is `OneDataCollection`** — it already includes both. | Content is `OneDataCollection`, or no date/filter UI is needed. |
+| `Layout.Page` `aside` slot | The page benefits from a persistent sidebar (details panel, summary, secondary navigation). | The page is a single-column list, form, or dashboard. |
+| `SectionHeader` | A sub-section needs its own title, description, optional help link, or section-scoped action. | The information would duplicate `PageHeader` or `ResourceHeader`. |
+| `OneEmptyState` | The dataset for a content block is empty. | There is data to display, even partial. |
+| `F0Box` | You need custom composition inside a `Layout.Block` (flex/grid arrangements, gaps, alignment) that the standard blocks do not cover. | Standard blocks already produce the layout you need — never wrap them in `F0Box` redundantly. |
+
+---
+
+## 6. Compose in this order
+
+Inside the page body (the `children` of `Navigation/Page`), blocks always appear in this order. Omit any block that the page does not need; never reorder.
+
+```
+1. F0Alert                    — page-wide banner (always on top)
+2. ResourceHeader             — only on Resource pages
+3. Tabs / subtabs             — only when a Resource page has sub-views
+4. Layout.Page                — structural wrapper
+   ├── header slot            — OneDateNavigator and/or OneFilterPicker
+   │                            (SKIP when content is OneDataCollection)
+   ├── aside slot             — optional sidebar (Layout.Block)
+   └── children
+       ├── Layout.Block             — section wrapper (no title)
+       ├── Layout.BlockContent      — section wrapper with title + description
+       │   ├── SectionHeader        — only when a sub-section needs it
+       │   └── content blocks       — OneDataCollection, F0Form, F0DataChart, OneEmptyState
+       └── F0Box                    — only for custom composition not covered by the above
+```
+
+Key placement rules:
+
+- **`F0Alert`** is the only block that always sits above everything else, as a top-level sibling of `Layout.Page`.
+- **`ResourceHeader`** is a sibling of `Layout.Page`, not inside its `header` slot.
+- **Tabs/subtabs for a Resource** sit between `ResourceHeader` and `Layout.Page`. Each tab renders its own `Layout.Page`.
+- **`OneDateNavigator` / `OneFilterPicker`** live in the `header` slot of `Layout.Page` — **except** when the content is `OneDataCollection`, which embeds both internally.
+- **`F0Box`** is the escape hatch for custom layouts inside `Layout.Block`. Never use raw `<div>` with ad-hoc Tailwind for layout.
+
+---
+
+## 7. Pick the right content block
+
+> **Always prefer `OneDataCollection` first.** If the page surfaces a set of records — anything that could be conceived as rows, cards, items, or events — the default block is `OneDataCollection`. It already integrates filters, date navigation, sorting, pagination, item actions, bulk actions, and visualization switching. Only fall back to a different block when the data is **not** a collection of records (a single form, a dashboard of aggregates, an empty state with no data).
+
+### 7a. First choice: `OneDataCollection`
+
+| Need | Component |
+|------|-----------|
+| Tabular data, list, card grid, kanban, calendar, gallery | **`OneDataCollection`** |
+| Create or edit a single entity | `F0Form` |
+| Aggregated metrics / KPIs / trend charts (no per-record interaction) | `F0DataChart` |
+| Dataset is empty (no records, no filters could ever produce results) | `OneEmptyState` |
+
+If you are unsure between `OneDataCollection` and another block, default to `OneDataCollection`.
+
+### 7b. Pick the right `OneDataCollection` visualization
+
+`OneDataCollection` accepts an array of `visualizations`. Pick the **default** one based on the dataset's nature; expose extra visualizations as alternatives only when they meaningfully serve the same data.
+
+| Visualization | Use as default when… |
+|---------------|----------------------|
+| `table` | The dataset is record-heavy and users compare many fields side by side (employees, expenses, contracts, audit logs). Default for back-office and admin views. |
+| `card` | Each record has a strong visual identity or a short summary that reads better stacked (people directories, project tiles, integrations). |
+| `list` | Records are short, mostly text, and density matters (notifications, activity feeds, simple settings entries). |
+| `kanban` | Records move through a discrete pipeline of statuses (tasks, candidates, approval flows). |
+| `calendar` | Records are time-bound events users browse by date (shifts, time-off, bookings). |
+| `gallery` | Records are media-first (documents, images, files). |
+
+Rules:
+
+- Always declare at least the default visualization. Add others (`table` + `card`, `kanban` + `table`) only when the dataset truly supports both readings.
+- Do not pick `kanban` or `calendar` unless the data has the required dimension (status field, date field). Otherwise you produce an empty board.
+- The visualization choice is content-driven, not stylistic. Do not switch from `table` to `card` purely for "looking nicer".
+
+→ <LinkTo kind="patterns-data-collection--documentation">OneDataCollection</LinkTo> · <LinkTo kind="patterns-forms-f0form">F0Form</LinkTo> · <LinkTo kind="kits-f0datachart-overview--documentation">F0DataChart</LinkTo> · <LinkTo kind="components-emptystate">OneEmptyState</LinkTo>
+
+---
+
+## 8. End-to-end examples
+
+All examples assume `ApplicationFrame` and `Navigation/Page` are already in place. The snippets show only the page body — i.e. what goes in the `children` slot of `Navigation/Page`.
+
+```tsx
+import { Layout } from "@factorialco/f0-react"
+```
+
+### Module page — filterable list (OneDataCollection)
+
+`OneDataCollection` already integrates filters and date navigation. Do **not** add `OneFilterPicker` or `OneDateNavigator` to `Layout.Page` `header` — pass them to the data source instead.
+
+```tsx
+<>
+  <F0Alert
+    variant="warning"
+    title="Sync paused"
+    description="Reconnect your calendar to resume sync."
+  />
+
+  <Layout.Page>
+    <Layout.Block>
+      <OneDataCollection source={employeesSource} />
+    </Layout.Block>
+  </Layout.Page>
+</>
+```
+
+### Module page — date-driven dashboard (chart, not collection)
+
+The content is a `F0DataChart`, not a `OneDataCollection`, so the date navigator goes in the `header` slot of `Layout.Page`.
+
+```tsx
+<Layout.Page
+  header={
+    <OneDateNavigator
+      value={date}
+      onSelect={setDate}
+      granularities={["day", "week", "month"]}
+    />
+  }
+>
+  <Layout.BlockContent
+    title="Attendance overview"
+    description="Hours tracked by team for the selected period."
+  >
+    <F0DataChart {...chartProps} />
+  </Layout.BlockContent>
+</Layout.Page>
+```
+
+### Module page — filterable dashboard (chart with filters)
+
+Same idea: when the content is not a `OneDataCollection`, put the filter picker in `Layout.Page` `header`.
+
+```tsx
+<Layout.Page
+  header={
+    <OneFilterPicker
+      filters={filtersDefinition}
+      value={filtersState}
+      onChange={setFiltersState}
+    />
+  }
+>
+  <Layout.BlockContent
+    title="Revenue by department"
+    description="Filtered by the selected criteria."
+  >
+    <F0DataChart {...chartProps} />
+  </Layout.BlockContent>
+</Layout.Page>
+```
+
+### Resource page — single view with aside
+
+A single-entity page with no sub-views. `ResourceHeader` first, then `Layout.Page` with an `aside` for secondary metadata.
+
+```tsx
+<>
+  <ResourceHeader
+    avatar={employee.avatar}
+    title={employee.name}
+    description={employee.role}
+    status={employee.status}
+    metadata={employee.metadata}
+    primaryAction={{ label: "Edit", onClick: onEdit }}
+    secondaryActions={secondaryActions}
+  />
+
+  <Layout.Page
+    variant="main-aside"
+    aside={
+      <Layout.Block>
+        <DetailsItemsList items={contactItems} />
+      </Layout.Block>
+    }
+  >
+    <Layout.BlockContent
+      title="Personal information"
+      description="Identification and contact details."
+    >
+      <F0Form {...personalFormProps} />
+    </Layout.BlockContent>
+
+    <Layout.BlockContent
+      title="Documents"
+      description="Files shared with this employee."
+    >
+      <OneDataCollection source={documentsSource} />
+    </Layout.BlockContent>
+  </Layout.Page>
+</>
+```
+
+### Resource page — multiple views with tabs
+
+When a Resource splits into sub-views, `Tabs` sit between `ResourceHeader` and `Layout.Page`. Each tab renders its own `Layout.Page`.
+
+```tsx
+<>
+  <ResourceHeader
+    avatar={employee.avatar}
+    title={employee.name}
+    description={employee.role}
+    status={employee.status}
+    metadata={employee.metadata}
+    primaryAction={{ label: "Edit", onClick: onEdit }}
+  />
+
+  <Tabs
+    tabs={[
+      { label: "Profile", href: "/employees/123/profile" },
+      { label: "Documents", href: "/employees/123/documents" },
+      { label: "Activity", href: "/employees/123/activity" },
+    ]}
+  />
+
+  {/* Body of the active tab — for example, the Documents tab: */}
+  <Layout.Page>
+    <Layout.Block>
+      <OneDataCollection source={documentsSource} />
+    </Layout.Block>
+  </Layout.Page>
+</>
+```
+
+### Custom composition with F0Box
+
+When a section needs a custom arrangement (two stats side by side, a wrapping toolbar) that the standard blocks do not produce, use `F0Box` inside `Layout.Block` — never raw `<div>` with ad-hoc Tailwind.
+
+```tsx
+<Layout.Page>
+  <Layout.BlockContent
+    title="Key metrics"
+    description="Snapshot of the current period."
+  >
+    <F0Box display="flex" gap="4" flexWrap="wrap">
+      <F0Box flex="1">
+        <F0DataChart {...headcountChart} />
+      </F0Box>
+      <F0Box flex="1">
+        <F0DataChart {...turnoverChart} />
+      </F0Box>
+    </F0Box>
+  </Layout.BlockContent>
+</Layout.Page>
+```
+
+### Empty content block
+
+Render `OneEmptyState` *inside* the same `Layout.Block` that would have rendered the data — never as a sibling of `Layout.Page`.
+
+```tsx
+<Layout.Page>
+  <Layout.Block>
+    {documents.length === 0 ? (
+      <OneEmptyState
+        variant="default"
+        emoji="📄"
+        title="No documents yet"
+        description="Upload a file to get started."
+        actions={[{ label: "Upload", onClick: onUpload }]}
+      />
+    ) : (
+      <OneDataCollection source={documentsSource} />
+    )}
+  </Layout.Block>
+</Layout.Page>
+```
+
+---
+
+## 9. Loading and skeleton states
+
+- **Page-level skeletons** belong inside the same `Layout.Block` / `Layout.BlockContent` that will hold the final content. The page shell (`Layout.Page`, `ResourceHeader`, filters) renders immediately; only the data blocks swap to skeleton.
+- Components that ship a skeleton expose it as a static property: `<F0Card.Skeleton />`, `<OneDataCollection.Skeleton />`. Always prefer the component-provided skeleton over a custom one.
+- `OneDataCollection` handles its own loading state when given an async source — do not wrap it in an external skeleton.
+- During load, set `aria-busy="true"` and `aria-live="polite"` on custom skeleton wrappers (the F0 skeletons do this automatically).
+
+---
+
+## 10. Responsive behaviour
+
+- `Layout.Page` is responsive by default. The `aside` collapses below `main` on narrow viewports.
+- Use `variant="main-aside"` (default) for entity detail pages where the main content is primary. Use `variant="aside-main"` only when the aside is a navigation rail that must read first.
+- `SectionHeader` already adapts: action buttons stack full-width on mobile, inline on desktop. Do not duplicate this logic.
+- `OneFilterPicker` and `OneDateNavigator` collapse into compact triggers on small screens — do not wrap them in custom responsive containers.
+- Avoid custom breakpoints inside page composition. If you need a different layout on mobile, prefer choosing different blocks rather than restyling existing ones.
+
+---
+
+## 11. Anti-patterns
+
+Do **not**:
+
+- Use `ResourceHeader` on list pages, dashboards, or settings — those are Module pages.
+- Render more than one `ResourceHeader` per page.
+- Place `ResourceHeader` inside `Layout.Page` `header` slot. It is a sibling of `Layout.Page`.
+- Place `Tabs` for a Resource above `ResourceHeader`. Tabs go **between** `ResourceHeader` and `Layout.Page`.
+- Repeat the entity title or breadcrumbs inside `SectionHeader` — that information is already in `PageHeader` or `ResourceHeader`.
+- Put item-level or section-level actions in `PageHeader.actions`. Module-level only.
+- Place tabs inside `ApplicationFrame`. Tabs live in the `header` slot of `Navigation/Page` (module tabs) or between `ResourceHeader` and `Layout.Page` (resource tabs).
+- Render `F0Alert` anywhere other than the top of the page body. Page-wide alerts are always above `Layout.Page`.
+- Stack multiple `F0Alert` banners. Pick the most important one; surface the rest contextually.
+- Add `OneFilterPicker` or `OneDateNavigator` next to a `OneDataCollection`. The collection already integrates both — configure them through its source.
+- Put `OneFilterPicker` or `OneDateNavigator` as siblings of `Layout.Page`. They go in `Layout.Page` `header` slot when the content is **not** a `OneDataCollection`.
+- Reorder the block sequence in section 6 (e.g. `ResourceHeader` after `Layout.Page`).
+- Render `OneEmptyState` as a sibling of `Layout.Page`. It belongs inside the `Layout.Block` whose data is empty.
+- Use raw `<div>` with ad-hoc Tailwind for layout inside `Layout.Block`. Use `F0Box` instead.
+- Wrap standard blocks in `F0Box` when they already produce the layout you need.
+- Add ad-hoc padding or margin around blocks. The layout system already handles spacing.
+- Use components from `experimental/` or `sds/` when a stable equivalent exists.
+
+---
+
+## 12. Component stability
+
+Always prefer stable components over experimental ones.
+
+| Tier | Storybook sections | Use in production? |
+|------|--------------------|---------------------|
+| **Stable** | `Components`, `Patterns`, `Kits`, `Library`, `Layouts` | Yes — preferred |
+| **Experimental** | `experimental`, `sds` | Only when no stable alternative exists |
+
+→ See <LinkTo kind="components-maturity--documentation">Components maturity</LinkTo>
+
+---
+
+## 13. Block reference
+
+Quick links to each block's full documentation.
+
+| Block | Storybook |
+|-------|-----------|
+| `ApplicationFrame` | <LinkTo kind="applicationframe">ApplicationFrame</LinkTo> |
+| `Navigation/Page` | <LinkTo kind="navigation-page">Navigation/Page</LinkTo> |
+| `Tabs` | <LinkTo kind="navigation-tabs">Tabs</LinkTo> |
+| `F0Alert` | <LinkTo kind="components-alert">F0Alert</LinkTo> |
+| `ResourceHeader` | <LinkTo kind="patterns-resourceheader">ResourceHeader</LinkTo> |
+| `OneDateNavigator` | <LinkTo kind="patterns-datenavigator">OneDateNavigator</LinkTo> |
+| `OneFilterPicker` | <LinkTo kind="patterns-filterpicker">OneFilterPicker</LinkTo> |
+| `Layout.Page` | <LinkTo kind="layouts-layout-system">Layout system</LinkTo> |
+| `SectionHeader` | <LinkTo kind="patterns-section-header">SectionHeader</LinkTo> |
+| `F0Box` | <LinkTo kind="library-f0box">F0Box</LinkTo> |
+| `OneDataCollection` | <LinkTo kind="patterns-data-collection--documentation">OneDataCollection</LinkTo> |
+| `F0Form` | <LinkTo kind="patterns-forms-f0form">F0Form</LinkTo> |
+| `F0DataChart` | <LinkTo kind="kits-f0datachart-overview--documentation">F0DataChart</LinkTo> |
+| `OneEmptyState` | <LinkTo kind="components-emptystate">OneEmptyState</LinkTo> |
