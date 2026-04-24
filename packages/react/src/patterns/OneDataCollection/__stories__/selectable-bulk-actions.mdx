@@ -331,7 +331,66 @@ The callback receives the following parameters:
 - `selectedItems`: The items selected by the user. Check the `onSelectItems`
   callback for more information about the structure of the object.
 
+It may return `void` (synchronous fire-and-forget) or `Promise<void>` — see
+[Async bulk actions with status feedback](#async-bulk-actions-with-status-feedback).
+
 <Canvas
   of={DataCollectionStories.WithSelectableAndBulkActions}
+  meta={DataCollectionStories}
+/>
+
+### Async bulk actions with status feedback
+
+When your handler does real async work (server call, batch update), opt in
+with `autoManageBulkActionStatus` and return a `Promise`. The action bar then
+drives a loading → success → idle (or loading → error) status machine
+automatically:
+
+- While the promise is pending, the bar shows a spinner and disables every
+  action (including other bulk actions) to prevent overlapping clicks.
+- On resolve, the bar flips to `success` for ~1.5 seconds (checkmark) before
+  returning to `idle`. Selection is cleared on resolve unless the action has
+  `keepSelection: true`.
+- On reject, the bar flips to `error`: the container wiggles, the error icon
+  stays until the next selection change, and the selection is preserved so the
+  user can retry.
+
+```tsx
+<OneDataCollection
+  autoManageBulkActionStatus
+  onBulkAction={async (action) => {
+    await api.run(action)
+  }}
+/>
+```
+
+Opt-in is required because handlers that **open a modal** typically resolve
+when the modal opens rather than when the user confirms — auto-managing those
+would flash a premature success. Without the flag, sync and async handlers
+both keep today's fire-and-forget behavior (selection clears immediately, no
+status transitions).
+
+For flows that can't be modelled as a single promise (confirmation dialogs,
+server polling, multi-step wizards), pass a controlled
+`bulkActionStatus: "idle" | "loading" | "success" | "error"` prop. When
+controlled, it overrides any internal auto-management.
+
+```tsx
+const [status, setStatus] = useState("idle")
+
+<OneDataCollection
+  bulkActionStatus={status}
+  onBulkAction={(action) => openConfirmModal({
+    onConfirm: async () => {
+      setStatus("loading")
+      try { await api.run(action); setStatus("success") }
+      catch { setStatus("error") }
+    }
+  })}
+/>
+```
+
+<Canvas
+  of={DataCollectionStories.WithAsyncBulkActions}
   meta={DataCollectionStories}
 />

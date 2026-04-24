@@ -37,7 +37,12 @@ import {
   getSecondaryActions,
   MAX_EXPANDED_ACTIONS,
 } from "./actions"
-import { ActionBar, ActionBarItem } from "./components/ActionBar"
+import {
+  ActionBar,
+  type ActionBarItem,
+  type ActionBarStatus,
+  type F0ActionBarRef,
+} from "./components/ActionBar"
 import { CollectionActions } from "./components/CollectionActions/CollectionActions"
 import { NavigationFilters as NavigationFiltersComponent } from "./components/NavigationFilters"
 import { Search } from "./components/Search"
@@ -58,6 +63,8 @@ import { useDataCollectionSettings } from "./Settings/SettingsProvider"
 import { SummariesDefinition } from "./summary"
 import { useEventEmitter } from "./useEventEmitter"
 import { VisualizationRenderer } from "./visualizations/collection"
+
+const SUCCESS_DISMISS_MS = 1500
 
 /**
  * A component that renders a collection of data with filtering and visualization capabilities.
@@ -112,6 +119,27 @@ export type OneDataCollectionProps<
   >
   onSelectItems?: OnSelectItemsCallback<R, Filters>
   onBulkAction?: OnBulkActionCallback<R, Filters>
+  /**
+   * Opt-in to auto-managed bulk-action status. When `true`, a `Promise`
+   * returned from `onBulkAction` drives the ActionBar through
+   * `loading → success → idle` (or `loading → error`) automatically.
+   *
+   * Opt-in is required because some consumers open modals from their bulk
+   * action handler whose promise resolves when the modal OPENS rather than
+   * when the user confirms — auto-managing those would flash a premature
+   * success. When `false` (default), async handlers keep today's
+   * fire-and-forget behavior. For those cases, use `bulkActionStatus` to
+   * drive status yourself from the modal's lifecycle.
+   * @default false
+   */
+  autoManageBulkActionStatus?: boolean
+  /**
+   * Controlled status for the bulk-action ActionBar. When provided, overrides
+   * any internal auto-management. Useful for multi-step flows (confirmation
+   * dialogs, server polling) where the component can't derive status from a
+   * single promise.
+   */
+  bulkActionStatus?: ActionBarStatus
   emptyStates?: CustomEmptyStates
   onTotalItemsChange?: (totalItems: number) => void
   fullHeight?: boolean
@@ -168,6 +196,8 @@ const OneDataCollectionComp = <
   visualizations,
   onSelectItems,
   onBulkAction,
+  autoManageBulkActionStatus = false,
+  bulkActionStatus: controlledBulkActionStatus,
   onStateChange,
   emptyStates,
   fullHeight,
@@ -417,6 +447,22 @@ const OneDataCollectionComp = <
 
   const [isAllItemsSelected, setIsAllItemsSelected] = useState(false)
 
+  const [internalBulkActionStatus, setInternalBulkActionStatus] =
+    useState<ActionBarStatus>("idle")
+  const actionBarRef = useRef<F0ActionBarRef>(null)
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current)
+      }
+    }
+  }, [])
+
+  const resolvedBulkActionStatus =
+    controlledBulkActionStatus ?? internalBulkActionStatus
+
   const i18n = useI18n()
 
   const totalItemSummaryFn = useMemo(() => {
@@ -443,6 +489,13 @@ const OneDataCollectionComp = <
       !!selectedItems.allSelected ||
         selectedItems.itemsStatus.some((item) => item.checked)
     )
+
+    /**
+     * Any selection change after an error clears the error so the bar doesn't
+     * persist a stale failure state across user actions. Loading/success
+     * transitions are owned by the bulk-action click handler.
+     */
+    setInternalBulkActionStatus((prev) => (prev === "error" ? "idle" : prev))
 
     /**
      * Selected items count
@@ -473,10 +526,46 @@ const OneDataCollectionComp = <
       return {
         ...bulkAction,
         onClick: () => {
-          onBulkAction?.(bulkAction.id, selectedItems, clearSelectedItems)
-          if (!bulkAction.keepSelection) {
-            clearSelectedItems()
+          const result = onBulkAction?.(
+            bulkAction.id,
+            selectedItems,
+            clearSelectedItems
+          )
+          const isPromise =
+            autoManageBulkActionStatus &&
+            result !== undefined &&
+            typeof (result as Promise<void>)?.then === "function"
+
+          if (!isPromise) {
+            // Sync path (or opt-out). Preserve today's fire-and-forget
+            // behavior: ignore any returned promise, clear selection now.
+            if (!bulkAction.keepSelection) {
+              clearSelectedItems()
+            }
+            return
           }
+
+          if (successTimerRef.current) {
+            clearTimeout(successTimerRef.current)
+            successTimerRef.current = null
+          }
+          setInternalBulkActionStatus("loading")
+          ;(result as Promise<void>).then(
+            () => {
+              setInternalBulkActionStatus("success")
+              if (!bulkAction.keepSelection) {
+                clearSelectedItems()
+              }
+              successTimerRef.current = setTimeout(() => {
+                setInternalBulkActionStatus("idle")
+                successTimerRef.current = null
+              }, SUCCESS_DISMISS_MS)
+            },
+            () => {
+              setInternalBulkActionStatus("error")
+              actionBarRef.current?.wiggle({ errorHighlight: true })
+            }
+          )
         },
       }
     }
@@ -858,7 +947,13 @@ const OneDataCollectionComp = <
         <>
           {bulkActions && (
             <ActionBar
-              isOpen={showActionBar}
+              ref={actionBarRef}
+              isOpen={
+                showActionBar ||
+                resolvedBulkActionStatus === "loading" ||
+                resolvedBulkActionStatus === "success"
+              }
+              status={resolvedBulkActionStatus}
               selectedNumber={selectedItemsCount}
               primaryActions={
                 bulkActionsGroups && "primary" in bulkActionsGroups
