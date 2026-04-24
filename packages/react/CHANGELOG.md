@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.464.2](https://github.com/factorialco/f0/compare/f0-react-v1.464.1...f0-react-v1.464.2) (2026-04-24)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** add allPagesSelection banner below header and fix indeterminate state ([#4023](https://github.com/factorialco/f0/issues/4023)) ([696d66a](https://github.com/factorialco/f0/commit/696d66a139416f673e7fe2052bd1cc38adb331fc))
+
 ## [1.464.1](https://github.com/factorialco/f0/compare/f0-react-v1.464.0...f0-react-v1.464.1) (2026-04-24)
 
 
