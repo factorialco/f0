@@ -29,6 +29,7 @@ interface CoAgentFormState {
     description?: string
     module?: ModuleId
     formValues?: Record<string, unknown>
+    defaultValuesParams?: Record<string, unknown>
   } | null
 }
 
@@ -188,10 +189,46 @@ function VirtualFormContent() {
   const entry = formName ? registry?.get(formName) : undefined
   const ref = entry?.ref.current
   const currentValues = activeForm?.formValues ?? {}
+  // Prefer params from the registry entry (written by useF0AiFormActions) as the
+  // canonical source; fall back to coagent state for the brief window before sync.
+  const defaultValuesParams =
+    entry?.defaultValuesParams ?? activeForm?.defaultValuesParams
 
+  // Keep refs so callbacks always capture the latest values without
+  // changing identity (which would cause useF0FormDefinition to recompute).
+  const entryRef = useRef(entry)
+  entryRef.current = entry
+  const defaultValuesParamsRef = useRef(defaultValuesParams)
+  defaultValuesParamsRef.current = defaultValuesParams
+  const currentValuesRef = useRef(currentValues)
+  currentValuesRef.current = currentValues
+  const registryRef = useRef(registry)
+  registryRef.current = registry
+  const formNameRef = useRef(formName)
+  formNameRef.current = formName
+  const closeCanvasRef = useRef(closeCanvas)
+  closeCanvasRef.current = closeCanvas
+
+  // Only apply values once when the canvas first opens for this form.
+  // After the initial population, the rendered F0Form manages its own state and
+  // AI fills go through fillForm → ref.setValues() directly.
+  // Re-applying formValues continuously from coagent state would cause a loop:
+  // form renders → rebuildDescriptions → coagent sync → setValues → re-render.
+  const initializedFormRef = useRef("")
   useEffect(() => {
-    ref?.setValues(currentValues, { shouldDirty: true, shouldValidate: false })
-  }, [formName, JSON.stringify(currentValues)])
+    if (!ref || !formName) return
+    if (initializedFormRef.current === formName) return
+    initializedFormRef.current = formName
+    // If the AI has already filled values on the virtual ref (fillVersion > 0),
+    // use the virtual ref values (which include AI-filled fields) rather than
+    // the coagent formValues snapshot (which may still reflect original defaults).
+    const valuesToApply = registry?.getFillVersion?.(formName)
+      ? (entry?.ref.current?.getValues() ?? currentValues)
+      : currentValues
+    const existing = ref.getValues()
+    if (JSON.stringify(existing) === JSON.stringify(valuesToApply)) return
+    ref.setValues(valuesToApply, { shouldDirty: true, shouldValidate: false })
+  }, [ref, formName, JSON.stringify(currentValues)])
 
   const handleSubmit = useCallback(() => {
     formRef.current?.submit().catch(() => {
@@ -199,10 +236,33 @@ function VirtualFormContent() {
     })
   }, [formRef])
 
+  const resolvedDefaultValues = useCallback(() => {
+    const e = entryRef.current
+    const params = defaultValuesParamsRef.current
+    if (e?.defaultValuesFn && params) {
+      return e.defaultValuesFn(params)
+    }
+    return Promise.resolve(currentValuesRef.current)
+  }, [])
+
+  const onSubmit = useCallback(
+    async ({ data }: { data: Record<string, unknown> }) => {
+      setIsSubmitting(true)
+      await entryRef.current?.onSubmit?.(data)
+      closeTimerRef.current = setTimeout(() => {
+        registryRef.current?.resetFillVersion(formNameRef.current)
+        registryRef.current?.clearActiveForm()
+        closeCanvasRef.current()
+      }, 1500)
+      return { success: true }
+    },
+    []
+  )
+
   const formDefinition = useF0FormDefinition({
     name: formName || "form",
     schema: entry?.schema ?? FALLBACK_SCHEMA,
-    defaultValues: currentValues,
+    defaultValues: resolvedDefaultValues,
     sections: entry?.sections,
     steps: entry?.steps,
     module: entry?.module,
@@ -214,16 +274,7 @@ function VirtualFormContent() {
       hideActionBar: true,
       ...(entry?.submitConfig?.label && { label: entry.submitConfig.label }),
     },
-    onSubmit: async ({ data }) => {
-      setIsSubmitting(true)
-      await entry?.onSubmit?.(data as Record<string, unknown>)
-      closeTimerRef.current = setTimeout(() => {
-        registry?.resetFillVersion(formName)
-        registry?.clearActiveForm()
-        closeCanvas()
-      }, 1500)
-      return { success: true }
-    },
+    onSubmit,
   })
 
   if (!activeForm || !entry) return null

@@ -50,6 +50,8 @@ export interface F0AiFormEntry {
   defaultValuesFn?: (
     params: Record<string, unknown>
   ) => Promise<Record<string, unknown>>
+  /** The params most recently used to pre-populate this form via defaultValuesFn */
+  defaultValuesParams?: Record<string, unknown>
   /** Field names explicitly set via setValue/setValues on a virtual ref */
   dirtyFields?: Set<string>
   /** Consumer submit callback (from availableFormDefinition). Preserved across virtual ↔ rendered transitions. */
@@ -525,6 +527,8 @@ export interface F0AiFormDescription {
   isDirty: boolean
   /** JSON Schema of defaultValuesParams (only for forms with defaultValuesParamsSchema) */
   defaultValuesParamsSchema?: Record<string, unknown>
+  /** The params most recently used to pre-populate this form (set when fillForm is called with defaultValuesParams) */
+  defaultValuesParams?: Record<string, unknown>
 }
 
 interface F0AiFormRegistryContextValue {
@@ -558,6 +562,11 @@ interface F0AiFormRegistryContextValue {
   ) => { success: boolean; error?: string }
   /** Clear the active co-editing form (e.g. after submit) */
   clearActiveForm: () => void
+  /** Write defaultValuesParams onto a registry entry (called when Mastra sets them in shared state) */
+  updateActiveFormDefaultValuesParams: (
+    formName: string,
+    params: Record<string, unknown> | undefined
+  ) => void
   /** Bump the fill-version counter for a form (called after fillForm succeeds) */
   incrementFillVersion: (formName: string) => void
   /** Reset the fill-version counter for a form (e.g. after submit) */
@@ -662,6 +671,9 @@ export function F0AiFormRegistryProvider({
                   ) as Record<string, unknown>,
                 }
               : {}),
+            ...(entry.defaultValuesParams
+              ? { defaultValuesParams: entry.defaultValuesParams }
+              : {}),
           })
         } else {
           // Rendered forms → full runtime state for formsOnCurrentPage
@@ -686,6 +698,9 @@ export function F0AiFormRegistryProvider({
                     entry.defaultValuesParamsSchema
                   ) as Record<string, unknown>,
                 }
+              : {}),
+            ...(entry.defaultValuesParams
+              ? { defaultValuesParams: entry.defaultValuesParams }
               : {}),
           })
         }
@@ -715,6 +730,9 @@ export function F0AiFormRegistryProvider({
                     entry.defaultValuesParamsSchema
                   ) as Record<string, unknown>,
                 }
+              : {}),
+            ...(entry.defaultValuesParams
+              ? { defaultValuesParams: entry.defaultValuesParams }
               : {}),
           }
         }
@@ -757,8 +775,10 @@ export function F0AiFormRegistryProvider({
         description,
         module,
         sections,
-        defaultValuesParamsSchema,
-        defaultValuesFn,
+        defaultValuesParamsSchema:
+          defaultValuesParamsSchema ?? existingEntry?.defaultValuesParamsSchema,
+        defaultValuesFn: defaultValuesFn ?? existingEntry?.defaultValuesFn,
+        defaultValuesParams: existingEntry?.defaultValuesParams,
         onSubmit: existingEntry?.onSubmit,
         steps: existingEntry?.steps,
         submitConfig: existingEntry?.submitConfig,
@@ -788,6 +808,11 @@ export function F0AiFormRegistryProvider({
           mergedDefaults,
           virtualDef.onSubmit
         )
+        const virtualDefDefaultValuesFn =
+          typeof virtualDef.defaultValues === "function"
+            ? async (params: Record<string, unknown>) =>
+                resolveDefaultValues(virtualDef.defaultValues, params)
+            : undefined
         registryRef.current.set(name, {
           ref: virtualRef,
           schema: virtualDef.schema,
@@ -796,6 +821,8 @@ export function F0AiFormRegistryProvider({
           sections: virtualDef.sections,
           virtual: true,
           defaultValuesParamsSchema: virtualDef.defaultValuesParamsSchema,
+          defaultValuesFn: virtualDefDefaultValuesFn,
+          defaultValuesParams: entry?.defaultValuesParams,
           dirtyFields,
           onSubmit: virtualDef.onSubmit,
           steps: virtualDef.steps,
@@ -852,6 +879,19 @@ export function F0AiFormRegistryProvider({
     rebuildDescriptions()
   }, [rebuildDescriptions])
 
+  const updateActiveFormDefaultValuesParams = useCallback(
+    (formName: string, params: Record<string, unknown> | undefined) => {
+      const entry = registryRef.current.get(formName)
+      if (!entry) return
+      entry.defaultValuesParams = params
+      // No rebuildDescriptions here — writing to the entry is enough.
+      // The params will appear in the next natural rebuild (e.g. fillForm).
+      // Triggering a rebuild here would cause a re-render cascade:
+      // rebuild → registry state change → coagent sync → setState → re-render.
+    },
+    []
+  )
+
   const incrementFillVersion = useCallback((formName: string) => {
     const current = fillVersionsRef.current.get(formName) ?? 0
     fillVersionsRef.current.set(formName, current + 1)
@@ -885,6 +925,11 @@ export function F0AiFormRegistryProvider({
         resolveDefaultValues(def.defaultValues),
         def.onSubmit
       )
+      const defDefaultValuesFn =
+        typeof def.defaultValues === "function"
+          ? async (params: Record<string, unknown>) =>
+              resolveDefaultValues(def.defaultValues, params)
+          : undefined
       registryRef.current.set(def.name, {
         ref: virtualRef,
         schema: def.schema,
@@ -893,6 +938,7 @@ export function F0AiFormRegistryProvider({
         sections: def.sections,
         virtual: true,
         defaultValuesParamsSchema: def.defaultValuesParamsSchema,
+        defaultValuesFn: defDefaultValuesFn,
         dirtyFields,
         onSubmit: def.onSubmit,
         steps: def.steps,
@@ -926,21 +972,40 @@ export function F0AiFormRegistryProvider({
     }
   }, [availableFormDefinitions, rebuildDescriptions])
 
-  const value: F0AiFormRegistryContextValue = {
-    register,
-    unregister,
-    get,
-    getFormNames,
-    rebuildDescriptions,
-    formsOnCurrentPage,
-    availableForms,
-    activeForm,
-    setActiveForm,
-    clearActiveForm,
-    incrementFillVersion,
-    resetFillVersion,
-    getFillVersion,
-  }
+  const value: F0AiFormRegistryContextValue = useMemo(
+    () => ({
+      register,
+      unregister,
+      get,
+      getFormNames,
+      rebuildDescriptions,
+      formsOnCurrentPage,
+      availableForms,
+      activeForm,
+      setActiveForm,
+      clearActiveForm,
+      updateActiveFormDefaultValuesParams,
+      incrementFillVersion,
+      resetFillVersion,
+      getFillVersion,
+    }),
+    [
+      register,
+      unregister,
+      get,
+      getFormNames,
+      rebuildDescriptions,
+      formsOnCurrentPage,
+      availableForms,
+      activeForm,
+      setActiveForm,
+      clearActiveForm,
+      updateActiveFormDefaultValuesParams,
+      incrementFillVersion,
+      resetFillVersion,
+      getFillVersion,
+    ]
+  )
 
   return (
     <F0AiFormRegistryContext.Provider value={value}>
