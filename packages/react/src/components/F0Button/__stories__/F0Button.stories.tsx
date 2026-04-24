@@ -30,7 +30,7 @@ const meta = {
       },
     },
   },
-  tags: ["!autodocs", "stable"],
+  tags: ["autodocs", "stable"],
   args: {
     variant: "default",
     onClick: () => {
