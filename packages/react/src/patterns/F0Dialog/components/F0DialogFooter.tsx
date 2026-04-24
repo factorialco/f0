@@ -42,8 +42,6 @@ export const F0DialogFooter = ({
             value: action.value,
             label: action.label,
             icon: action.icon,
-            disabled: action.disabled,
-            loading: action.loading,
           }))}
           onClick={(value) => {
             const action = primaryAction.find((a) => a.value === value)
@@ -76,8 +74,6 @@ export const F0DialogFooter = ({
             value: action.value,
             label: action.label,
             icon: action.icon,
-            disabled: action.disabled,
-            loading: action.loading,
           }))}
           onClick={(value) => {
             const action = secondaryAction.find((a) => a.value === value)
