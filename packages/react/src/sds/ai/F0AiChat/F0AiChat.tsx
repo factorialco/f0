@@ -1,7 +1,10 @@
 import { CopilotKit, CopilotKitProps } from "@copilotkit/react-core"
 import { CopilotSidebar } from "@copilotkit/react-ui"
 
+import { ButtonInternal } from "@/components/F0Button/internal"
+import Cross from "@/icons/app/Cross"
 import { experimentalComponent } from "@/lib/experimental"
+import { useI18n } from "@/lib/providers/i18n"
 
 import { useRegisteredActions } from "./actions"
 import { ChatInput } from "./components/input/ChatInput"
@@ -88,7 +91,8 @@ const AiChatKitWrapper = ({
 }
 
 const F0AiChatComponent = () => {
-  const { enabled, open, setOpen, mode, VoiceMode } = useAiChat()
+  const { enabled, open, setOpen, mode, VoiceMode, tracking } = useAiChat()
+  const translations = useI18n()
 
   useRegisteredActions()
 
@@ -100,6 +104,18 @@ const F0AiChatComponent = () => {
     return (
       <SidebarWindow clickOutsideToClose hitEscapeToClose shortcut="">
         <div className="flex h-full w-full flex-col">
+          <div className="absolute right-3 top-3 z-20">
+            <ButtonInternal
+              variant="ghost"
+              hideLabel
+              label={translations.ai.closeChat}
+              icon={Cross}
+              onClick={() => {
+                setOpen(false)
+                tracking?.onClose?.()
+              }}
+            />
+          </div>
           <VoiceMode />
         </div>
       </SidebarWindow>
