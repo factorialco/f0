@@ -564,6 +564,21 @@ interface F0AiFormRegistryContextValue {
   resetFillVersion: (formName: string) => void
   /** Get the fill-version counter for a form (0 = never filled) */
   getFillVersion: (formName: string) => number
+  /**
+   * Subscribe to field-fill events for a specific form.
+   * The callback is invoked each time fillForm successfully sets values,
+   * receiving the list of field names that were changed.
+   * Returns an unsubscribe function.
+   */
+  subscribeFilledFields: (
+    formName: string,
+    cb: (fieldNames: string[]) => void
+  ) => () => void
+  /**
+   * Notify subscribers that fields have been filled for a form.
+   * Called internally by useFormFillAction after setValues succeeds.
+   */
+  notifyFieldsFilled: (formName: string, fieldNames: string[]) => void
 }
 
 const F0AiFormRegistryContext =
@@ -604,6 +619,13 @@ export function F0AiFormRegistryProvider({
   const registryRef = useRef<Map<string, F0AiFormEntry>>(new Map())
   const lastDescriptionsJsonRef = useRef<string>("")
   const fillVersionsRef = useRef<Map<string, number>>(new Map())
+  // Subscriber callbacks for field-fill events (AI co-creation glow feature)
+  const filledCallbacksRef = useRef<
+    Map<string, (fieldNames: string[]) => void>
+  >(new Map())
+  // Persists the last filled fields per form so canvas forms that mount after
+  // fillForm is called can still receive and show the glow on mount.
+  const lastFilledFieldsRef = useRef<Map<string, string[]>>(new Map())
 
   // Three-field state replacing the old flat formDescriptions array.
   // formsOnCurrentPage: full runtime state for rendered (non-virtual) forms
@@ -865,6 +887,30 @@ export function F0AiFormRegistryProvider({
     return fillVersionsRef.current.get(formName) ?? 0
   }, [])
 
+  const subscribeFilledFields = useCallback(
+    (formName: string, cb: (fieldNames: string[]) => void) => {
+      filledCallbacksRef.current.set(formName, cb)
+      // Replay any fill that happened before this form mounted (e.g. canvas
+      // forms that open after fillForm has already been called).
+      const pending = lastFilledFieldsRef.current.get(formName)
+      if (pending && pending.length > 0) {
+        cb(pending)
+      }
+      return () => {
+        filledCallbacksRef.current.delete(formName)
+      }
+    },
+    []
+  )
+
+  const notifyFieldsFilled = useCallback(
+    (formName: string, fieldNames: string[]) => {
+      lastFilledFieldsRef.current.set(formName, fieldNames)
+      filledCallbacksRef.current.get(formName)?.(fieldNames)
+    },
+    []
+  )
+
   // Sync virtual form definitions: register forms that aren't rendered,
   // skip if a rendered (non-virtual) form with the same name already exists.
   const virtualNamesRef = useRef<Set<string>>(new Set())
@@ -940,6 +986,8 @@ export function F0AiFormRegistryProvider({
     incrementFillVersion,
     resetFillVersion,
     getFillVersion,
+    subscribeFilledFields,
+    notifyFieldsFilled,
   }
 
   return (

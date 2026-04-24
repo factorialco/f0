@@ -35,6 +35,30 @@ export function useOptionalF0FormContext() {
   return useContext(F0FormContext)
 }
 
+// ---------------------------------------------------------------------------
+// AI Fill Glow context — tracks which field IDs were recently filled by the
+// AI co-creation flow so FieldRenderer can show the animated border glow.
+// Provided by F0FormSingleSchema; NOT re-provided by F0FormSection so it
+// propagates through section boundaries naturally.
+// ---------------------------------------------------------------------------
+
+export interface F0FormAiGlowContextValue {
+  glowingFields: ReadonlySet<string>
+  fadingFields: ReadonlySet<string>
+  /** Clear the glow for a specific field (called when the user edits it) */
+  clearFieldGlow: (fieldId: string) => void
+}
+
+export const F0FormAiGlowContext = createContext<F0FormAiGlowContextValue>({
+  glowingFields: new Set(),
+  fadingFields: new Set(),
+  clearFieldGlow: () => {},
+})
+
+export function useF0FormAiGlowContext() {
+  return useContext(F0FormAiGlowContext)
+}
+
 /**
  * Generates an anchor ID for a form element
  * Format: forms.[formName].[sectionId].[fieldId]

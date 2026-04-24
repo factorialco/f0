@@ -16,7 +16,12 @@ import { InputMessages } from "@/ui/InputField/components/InputMessages"
 import type { RenderCustomFieldSelectConfig } from "../types"
 import type { F0Field } from "./types"
 
-import { generateAnchorId, useF0FormContext } from "../context"
+import {
+  generateAnchorId,
+  useF0FormContext,
+  useF0FormAiGlowContext,
+} from "../context"
+import { GlowingFieldWrapper } from "./GlowingFieldWrapper"
 import { renderFieldInput } from "./renderFieldInput"
 import { isFieldRequired } from "./schema"
 import { evaluateDisabled, evaluateRenderIf } from "./utils"
@@ -142,6 +147,8 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
     isLoading: isFormLoading,
     renderCustomField,
   } = useF0FormContext()
+  const { glowingFields, fadingFields, clearFieldGlow } =
+    useF0FormAiGlowContext()
   const { forms } = useI18n()
 
   // Evaluate if field is currently disabled
@@ -196,68 +203,105 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
     <FormFieldPrimitive
       control={form.control}
       name={field.id}
-      render={({ field: formField, fieldState }) => (
-        <FormItem id={anchorId} className="scroll-mt-4">
-          {showLabel && (
-            <label
-              htmlFor={field.id}
-              className="text-base font-medium leading-normal text-f1-foreground-secondary"
-            >
-              {field.label}
-              {isRequired && (
-                <span className="ml-0.5 text-f1-foreground-critical">*</span>
-              )}
-            </label>
-          )}
-          <FormControl>
-            {renderFieldContent({
-              field,
-              formField,
-              fieldState,
-              isSubmitting,
-              isRequired,
-              values,
-              isFormLoading,
-              renderCustomField,
-            })}
-          </FormControl>
-          {field.helpText && (
-            <FormDescription>{field.helpText}</FormDescription>
-          )}
-          {"moreInfoLink" in field && field.moreInfoLink && (
-            <F0Link
-              href={field.moreInfoLink.href}
-              target="_blank"
-              variant="link"
-            >
-              {field.moreInfoLink.label ?? forms.moreInformation}
-            </F0Link>
-          )}
-          {(() => {
-            if (!field.alert) return null
-            const alertProps =
-              typeof field.alert === "function"
-                ? field.alert({ fieldValue: formField.value, values })
-                : field.alert
-            if (!alertProps) return null
-            return (
-              <F0Alert {...alertProps} variant={alertProps.variant ?? "info"} />
-            )
-          })()}
-          {showFormMessage && !fieldState.error && (
-            <InputMessages status={field.status} />
-          )}
-          {showFormMessage && (
-            <FormMessage
-              fallback={
-                isRequired
-                  ? forms.validation.required
-                  : forms.validation.invalidType
+      render={({ field: formField, fieldState }) => {
+        const isFieldGlowing = glowingFields.has(field.id)
+        const isFieldFading = fadingFields.has(field.id)
+        const formFieldWithGlowClear =
+          isFieldGlowing || isFieldFading
+            ? {
+                ...formField,
+                onChange: (...args: Parameters<typeof formField.onChange>) => {
+                  clearFieldGlow(field.id)
+                  formField.onChange(...args)
+                },
               }
-            />
-          )}
-        </FormItem>
-      )}
+            : formField
+        return (
+          <FormItem id={anchorId} className="scroll-mt-4">
+            {showLabel && (
+              <label
+                htmlFor={field.id}
+                className="text-base font-medium leading-normal text-f1-foreground-secondary"
+              >
+                {field.label}
+                {isRequired && (
+                  <span className="ml-0.5 text-f1-foreground-critical">*</span>
+                )}
+              </label>
+            )}
+            <GlowingFieldWrapper
+              isGlowing={
+                isFieldGlowing &&
+                field.type !== "checkbox" &&
+                field.type !== "datetime"
+              }
+              isFading={
+                isFieldFading &&
+                field.type !== "checkbox" &&
+                field.type !== "datetime"
+              }
+              overlayClassName={
+                field.type === "duration"
+                  ? "rounded-[10px]"
+                  : field.type === "richtext"
+                    ? "rounded-[16px]"
+                    : undefined
+              }
+            >
+              <FormControl>
+                {renderFieldContent({
+                  field,
+                  formField: formFieldWithGlowClear,
+                  fieldState,
+                  isSubmitting,
+                  isRequired,
+                  values,
+                  isFormLoading,
+                  renderCustomField,
+                })}
+              </FormControl>
+            </GlowingFieldWrapper>
+            {field.helpText && (
+              <FormDescription>{field.helpText}</FormDescription>
+            )}
+            {"moreInfoLink" in field && field.moreInfoLink && (
+              <F0Link
+                href={field.moreInfoLink.href}
+                target="_blank"
+                variant="link"
+              >
+                {field.moreInfoLink.label ?? forms.moreInformation}
+              </F0Link>
+            )}
+            {(() => {
+              if (!field.alert) return null
+              const alertProps =
+                typeof field.alert === "function"
+                  ? field.alert({ fieldValue: formField.value, values })
+                  : field.alert
+              if (!alertProps) return null
+              return (
+                <F0Alert
+                  {...alertProps}
+                  variant={alertProps.variant ?? "info"}
+                />
+              )
+            })()}
+            {showFormMessage && !fieldState.error && (
+              <InputMessages status={field.status} />
+            )}
+            {showFormMessage && (
+              <FormMessage
+                fallback={
+                  isRequired
+                    ? forms.validation.required
+                    : forms.validation.invalidType
+                }
+              />
+            )}
+          </FormItem>
+        )
+      }}
     />
   )
 }

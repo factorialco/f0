@@ -21,6 +21,7 @@ import type {
   DurationUnit,
   F0DurationInputProps,
 } from "./types"
+
 import {
   DEFAULT_UNITS,
   UNIT_ORDER,
@@ -54,8 +55,8 @@ const containerVariants = cva({
   ],
   variants: {
     size: {
-      sm: "px-2 py-1",
-      md: "px-3 py-[6px]",
+      sm: "h-[32px] px-2",
+      md: "h-[40px] px-3",
     },
     status: {
       default:
