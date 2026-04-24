@@ -2433,6 +2433,22 @@ export declare type F0OneSwitchProps = React.ComponentPropsWithoutRef<typeof Swi
     autoOpen?: boolean;
 };
 
+export declare function F0OrbVoiceAnimation({ state, audioTrack, colors, className, ref, ...props }: F0OrbVoiceAnimationProps & React.ComponentProps<"div">): JSX_2.Element;
+
+export declare interface F0OrbVoiceAnimationColors {
+    colorA: string;
+    colorB: string;
+    colorC: string;
+    colorD: string;
+}
+
+export declare interface F0OrbVoiceAnimationProps {
+    className?: string;
+    state?: AgentState;
+    audioTrack?: LocalAudioTrack | RemoteAudioTrack | TrackReferenceOrPlaceholder;
+    colors?: F0OrbVoiceAnimationColors;
+}
+
 declare const F0TagAlert: WithDataTestIdReturnType<ForwardRefExoticComponent<Props_3 & RefAttributes<HTMLDivElement>>>;
 
 declare const F0TagBalance: WithDataTestIdReturnType<ForwardRefExoticComponent<F0TagBalanceProps_2 & RefAttributes<HTMLDivElement>>>;
@@ -3241,6 +3257,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -3287,9 +3308,4 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
