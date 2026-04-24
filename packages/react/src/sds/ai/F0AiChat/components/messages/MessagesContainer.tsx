@@ -395,7 +395,7 @@ const Messages = ({
         {!noShadows && (
           <>
             <ScrollShadow position="top" key="shadow-top" />
-            <ScrollShadow position="bottom" key="shadow-top" />
+            <ScrollShadow position="bottom" key="shadow-bottom" />
           </>
         )}
       </div>

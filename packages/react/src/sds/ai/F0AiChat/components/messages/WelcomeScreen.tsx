@@ -121,7 +121,7 @@ export const WelcomeScreen = ({
           )}
           {initialMessages.map((message) => (
             <motion.p
-              className="leading-[28px]text-f1-foreground text-2xl font-semibold"
+              className="text-2xl font-semibold leading-[28px] text-f1-foreground"
               key={message.id}
               initial={{ opacity: 0, filter: "blur(2px)", y: -8 }}
               animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}

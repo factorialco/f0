@@ -15,7 +15,7 @@ export const DropOverlay = ({ visible, onFilesDropped }: DropOverlayProps) => {
     <div
       className={cn(
         "absolute inset-1 z-50 flex flex-col items-center gap-2 justify-center rounded-[calc(theme(borderRadius.xl)-4px)] backdrop-blur bg-f1-background-tertiary/80 border border-dashed border-f1-border",
-        "transition-opacity duration-150 ease-out motion-reduce:transition-none dashed-lg",
+        "transition-opacity duration-150 ease-out motion-reduce:transition-none",
         visible
           ? "opacity-100 pointer-events-auto"
           : "pointer-events-none opacity-0"
