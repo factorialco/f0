@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.464.0](https://github.com/factorialco/f0/compare/f0-react-v1.463.2...f0-react-v1.464.0) (2026-04-24)
+
+
+### Features
+
+* voice mode close button ([#3990](https://github.com/factorialco/f0/issues/3990)) ([1d03183](https://github.com/factorialco/f0/commit/1d031836227d41959336d19775d527eef549c738))
+
 ## [1.463.2](https://github.com/factorialco/f0/compare/f0-react-v1.463.1...f0-react-v1.463.2) (2026-04-24)
 
 
