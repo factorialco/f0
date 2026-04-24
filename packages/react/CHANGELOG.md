@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.464.1](https://github.com/factorialco/f0/compare/f0-react-v1.464.0...f0-react-v1.464.1) (2026-04-24)
+
+
+### Bug Fixes
+
+* **TableHead:** show tooltip on truncated column headers via OneEllipsis ([#4025](https://github.com/factorialco/f0/issues/4025)) ([ece5621](https://github.com/factorialco/f0/commit/ece5621374e585cdcc9914c9af9d51561348633b))
+
 ## [1.464.0](https://github.com/factorialco/f0/compare/f0-react-v1.463.2...f0-react-v1.464.0) (2026-04-24)
 
 
