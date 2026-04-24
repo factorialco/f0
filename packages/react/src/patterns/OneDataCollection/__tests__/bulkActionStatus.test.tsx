@@ -257,4 +257,101 @@ describe("OneDataCollection bulk-action status", () => {
       btns.forEach((btn) => expect(btn).toBeDisabled())
     })
   })
+
+  test("Unselect button is disabled while a bulk action is loading", async () => {
+    // Regression guard for review comment #2: leftContent sits outside
+    // F0ActionBar's internal disabled logic, so we must disable it explicitly.
+    // Without this, clicking Unselect during loading clears the selection
+    // before a rejected promise can preserve it for retry.
+    let resolveHandler: (() => void) | undefined
+    const onBulkAction = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveHandler = resolve
+        })
+    )
+
+    const { result } = renderHook(() => useTestSource(), {
+      wrapper: TestWrapper,
+    })
+
+    render(
+      <TestWrapper>
+        <OneDataCollection
+          source={result.current}
+          visualizations={[{ type: "table", options: { columns } }]}
+          autoManageBulkActionStatus
+          onBulkAction={onBulkAction}
+        />
+      </TestWrapper>
+    )
+
+    const user = await selectFirstRow()
+    const [archive] = await findArchiveButtons()
+    await user.click(archive)
+
+    // While loading, the Unselect button must be disabled.
+    await waitFor(() => {
+      const unselectBtn = screen.queryByRole("button", { name: /unselect/i })
+      expect(unselectBtn).toBeInTheDocument()
+      expect(unselectBtn).toBeDisabled()
+    })
+
+    // Clean up: resolve so timers don't bleed into later tests.
+    resolveHandler?.()
+  })
+
+  test("selection change during a pending promise preserves the new selection on resolve", async () => {
+    // Regression guard for review comment #3: if the user clicks additional
+    // rows while a bulk action is in-flight, resolving the promise must NOT
+    // clear their new selection (only the original selection was acted on).
+    let resolveHandler: (() => void) | undefined
+    const onBulkAction = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveHandler = resolve
+        })
+    )
+
+    const { result } = renderHook(() => useTestSource(), {
+      wrapper: TestWrapper,
+    })
+
+    render(
+      <TestWrapper>
+        <OneDataCollection
+          source={result.current}
+          visualizations={[{ type: "table", options: { columns } }]}
+          autoManageBulkActionStatus
+          onBulkAction={onBulkAction}
+        />
+      </TestWrapper>
+    )
+
+    // Select the first row and fire Archive.
+    const user = await selectFirstRow()
+    const [archive] = await findArchiveButtons()
+    await user.click(archive)
+
+    // While the promise is pending, select the second row (changes selection).
+    await waitFor(() => {
+      const btns = queryArchiveButtons()
+      expect(btns.length).toBeGreaterThan(0)
+    })
+    const checkboxes = screen.getAllByRole("checkbox")
+    // 0: header; 1: first row (already checked); 2: second row.
+    await user.click(checkboxes[2])
+
+    // Now resolve — the new selection (row 2) must survive.
+    resolveHandler?.()
+
+    // Bar should stay open because the new selection (row 2) was NOT cleared.
+    await waitFor(
+      () => {
+        // The Archive buttons remain visible (bar still has a selection).
+        expect(queryArchiveButtons().length).toBeGreaterThan(0)
+      },
+      { timeout: 3000 }
+    )
+  })
 })

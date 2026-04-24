@@ -451,6 +451,13 @@ const OneDataCollectionComp = <
     useState<ActionBarStatus>("idle")
   const actionBarRef = useRef<F0ActionBarRef>(null)
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  /**
+   * Monotonically-incrementing counter that ticks on every selection change.
+   * Captured at bulk-action click time; compared on promise resolve so we only
+   * call clearSelectedItems() if the user hasn't changed the selection while
+   * the async operation was in flight.
+   */
+  const selectionVersionRef = useRef(0)
 
   useEffect(() => {
     return () => {
@@ -496,6 +503,12 @@ const OneDataCollectionComp = <
      * transitions are owned by the bulk-action click handler.
      */
     setInternalBulkActionStatus((prev) => (prev === "error" ? "idle" : prev))
+
+    /**
+     * Bump the version so any in-flight promise resolve can detect that
+     * selection changed and avoid clearing the user's updated selection.
+     */
+    selectionVersionRef.current += 1
 
     /**
      * Selected items count
@@ -549,11 +562,18 @@ const OneDataCollectionComp = <
             clearTimeout(successTimerRef.current)
             successTimerRef.current = null
           }
+          const versionAtClick = selectionVersionRef.current
           setInternalBulkActionStatus("loading")
           ;(result as Promise<void>).then(
             () => {
               setInternalBulkActionStatus("success")
-              if (!bulkAction.keepSelection) {
+              // Only clear if the user hasn't changed selection since clicking.
+              // If they did, their new selection is unrelated to this action
+              // and should be preserved.
+              if (
+                !bulkAction.keepSelection &&
+                selectionVersionRef.current === versionAtClick
+              ) {
                 clearSelectedItems()
               }
               successTimerRef.current = setTimeout(() => {

@@ -63,6 +63,12 @@ export const OneDataCollectionActionBar = forwardRef<
   const showAllItemsSelected =
     allPagesSelection && isAllItemsSelected && totalItems !== undefined
 
+  // Prevent the Unselect button from clearing the selection while a bulk
+  // action is in-flight. If it were clickable during loading/success, the
+  // selection could be wiped before a rejected promise gets a chance to
+  // preserve it for retry.
+  const isInteractionDisabled = status === "loading" || status === "success"
+
   const leftContent = useMemo(() => {
     if (warningMessage) {
       return <WarningAlert message={warningMessage} />
@@ -96,6 +102,7 @@ export const OneDataCollectionActionBar = forwardRef<
           variant="outline"
           label={i18n.actions.unselect}
           onClick={onUnselect}
+          disabled={isInteractionDisabled}
           size="sm"
         />
       </div>
@@ -107,6 +114,7 @@ export const OneDataCollectionActionBar = forwardRef<
     totalItems,
     selectedText,
     onUnselect,
+    isInteractionDisabled,
     i18n.actions.unselect,
     t,
   ])
