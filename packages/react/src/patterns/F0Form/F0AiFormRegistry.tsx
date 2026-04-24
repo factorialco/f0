@@ -581,6 +581,8 @@ interface F0AiFormRegistryContextValue {
   markDefaultValuesResolved: (formName: string) => void
   /** Queue a fill callback to run after a form's defaults are resolved */
   queueFillAction: (formName: string, action: () => void) => void
+  /** Whether a form's async defaults have ever been resolved (persists across canvas close/reopen) */
+  hasDefaultValuesEverResolved: (formName: string) => boolean
 }
 
 const F0AiFormRegistryContext =
@@ -622,6 +624,7 @@ export function F0AiFormRegistryProvider({
   const lastDescriptionsJsonRef = useRef<string>("")
   const fillVersionsRef = useRef<Map<string, number>>(new Map())
   const defaultValuesResolvingRef = useRef<Set<string>>(new Set())
+  const defaultsEverResolvedRef = useRef<Set<string>>(new Set())
   const fillQueueRef = useRef<Map<string, Array<() => void>>>(new Map())
 
   // Three-field state replacing the old flat formDescriptions array.
@@ -910,6 +913,7 @@ export function F0AiFormRegistryProvider({
   const resetFillVersion = useCallback((formName: string) => {
     fillVersionsRef.current.delete(formName)
     defaultValuesResolvingRef.current.delete(formName)
+    defaultsEverResolvedRef.current.delete(formName)
     fillQueueRef.current.delete(formName)
   }, [])
 
@@ -928,6 +932,7 @@ export function F0AiFormRegistryProvider({
   const markDefaultValuesResolved = useCallback(
     (formName: string) => {
       defaultValuesResolvingRef.current.delete(formName)
+      defaultsEverResolvedRef.current.add(formName)
       const queue = fillQueueRef.current.get(formName)
       if (queue?.length) {
         fillQueueRef.current.delete(formName)
@@ -948,6 +953,10 @@ export function F0AiFormRegistryProvider({
     },
     []
   )
+
+  const hasDefaultValuesEverResolved = useCallback((formName: string) => {
+    return defaultsEverResolvedRef.current.has(formName)
+  }, [])
 
   // Sync virtual form definitions: register forms that aren't rendered,
   // skip if a rendered (non-virtual) form with the same name already exists.
@@ -1036,6 +1045,7 @@ export function F0AiFormRegistryProvider({
       markDefaultValuesResolving,
       markDefaultValuesResolved,
       queueFillAction,
+      hasDefaultValuesEverResolved,
     }),
     [
       register,
@@ -1056,6 +1066,7 @@ export function F0AiFormRegistryProvider({
       markDefaultValuesResolving,
       markDefaultValuesResolved,
       queueFillAction,
+      hasDefaultValuesEverResolved,
     ]
   )
 

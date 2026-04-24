@@ -240,6 +240,16 @@ function VirtualFormContent() {
     const e = entryRef.current
     const name = formNameRef.current
     const params = defaultValuesParamsRef.current
+
+    // If defaults were already resolved on a previous mount, skip re-fetching.
+    // This prevents a slow async call when the canvas closes and reopens.
+    // Reset happens on submit via resetFillVersion.
+    if (name && registryRef.current?.hasDefaultValuesEverResolved?.(name)) {
+      return Promise.resolve(
+        e?.ref.current?.getValues() ?? currentValuesRef.current
+      )
+    }
+
     if (e?.defaultValuesFn && params) {
       // Capture AI-set values before async resolution — form.reset() after
       // defaults load would otherwise overwrite them.
