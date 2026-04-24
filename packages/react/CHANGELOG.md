@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.465.0](https://github.com/factorialco/f0/compare/f0-react-v1.464.3...f0-react-v1.465.0) (2026-04-24)
+
+
+### Features
+
+* **dialog:** add support for multiple secondary actions ([#4013](https://github.com/factorialco/f0/issues/4013)) ([2fd1a6e](https://github.com/factorialco/f0/commit/2fd1a6e30d763a9ae9eed0876ebe991a94ac5f6e))
+
 ## [1.464.3](https://github.com/factorialco/f0/compare/f0-react-v1.464.2...f0-react-v1.464.3) (2026-04-24)
 
 
