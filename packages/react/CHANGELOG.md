@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.463.2](https://github.com/factorialco/f0/compare/f0-react-v1.463.1...f0-react-v1.463.2) (2026-04-24)
+
+
+### Bug Fixes
+
+* buggy time input with min/max date ([#4024](https://github.com/factorialco/f0/issues/4024)) ([11915d3](https://github.com/factorialco/f0/commit/11915d33fd4e3dbe0cc0094aa49d4a17c9676a4d))
+
 ## [1.463.1](https://github.com/factorialco/f0/compare/f0-react-v1.463.0...f0-react-v1.463.1) (2026-04-23)
 
 
