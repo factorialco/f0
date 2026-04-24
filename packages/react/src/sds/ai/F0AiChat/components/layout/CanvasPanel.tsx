@@ -88,7 +88,10 @@ export function CanvasPanel(): ReactNode {
             className={cn(
               "flex h-full w-full flex-col overflow-hidden",
               "bg-f1-special-page",
-              "md:rounded-lg md:border md:border-solid border-f1-border-secondary rounded-none border-none"
+              // The canvas sits flush against the chat panel's ResizeHandle
+              // on its right side; drop the right border so canvas+handle+
+              // chat add up to a single 1px seam instead of 1+1+1 = 3px.
+              "md:rounded-l-lg md:border md:border-r-0 md:border-solid border-f1-border-secondary rounded-none border-none"
             )}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

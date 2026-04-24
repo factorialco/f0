@@ -1,5 +1,3 @@
-import { useCopilotChatInternal } from "@copilotkit/react-core"
-import { randomId } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
@@ -15,7 +13,6 @@ import { buildHighlightSegments } from "../utils"
 import { ActionBar } from "./ActionBar"
 import { AttachedFilesList } from "./AttachedFilesList"
 import { CreditWarningWrapper } from "./CreditWarningWrapper"
-import { DropOverlay } from "./DropOverlay"
 import { PendingQuoteChip } from "./PendingQuoteChip"
 import { TextareaField } from "./TextareaField"
 import {
@@ -74,18 +71,16 @@ export const ChatTextarea = ({
     setActiveToolHint,
     fileAttachments,
     sendMessage,
+    appendMessages,
     clarifyingQuestion,
-    fileDragOver,
     pendingContext,
     setPendingContext,
     pendingQuote,
     setPendingQuote,
+    setProcessDroppedFilesFunction,
   } = useAiChat()
-  const { messages, setMessages } = useCopilotChatInternal()
   const translation = useI18n()
   const shouldReduceMotion = useReducedMotion()
-  const messagesRef = useRef(messages)
-  messagesRef.current = messages
   const [inputValue, setInputValue] = useState("")
   const [cursorPosition, setCursorPosition] = useState(0)
   const formRef = useRef<HTMLFormElement>(null)
@@ -120,17 +115,39 @@ export const ChatTextarea = ({
     }
   }, [])
 
-  const handleStop = useCallback(async () => {
-    await onStop?.()
-    setMessages([
-      ...messagesRef.current,
-      {
-        id: randomId(),
-        role: "assistant" as const,
-        content: `*<!--response-stopped-->${translation.ai.responseStopped}*`,
-      },
-    ])
-  }, [onStop, setMessages, translation.ai.responseStopped])
+  // Register processFiles with the provider so the chat-wide DropOverlay
+  // (rendered in SidebarWindow) can dispatch file drops to this textarea's
+  // file-attachment state.
+  useEffect(() => {
+    setProcessDroppedFilesFunction((files) => {
+      void processFiles(files)
+    })
+    return () => {
+      setProcessDroppedFilesFunction(null)
+    }
+  }, [setProcessDroppedFilesFunction, processFiles])
+
+  const handleStop = useCallback(() => {
+    // Inject the stopped-indicator via appendMessages (which sanitizes the
+    // existing message list via JSON roundtrip before calling setMessages);
+    // calling useCopilotChatInternal's setMessages directly with the live
+    // messages fails under CopilotKit 1.54 because setMessages internally
+    // uses structuredClone and the resolved messages carry non-cloneable
+    // `generativeUI`/render function wrappers.
+    appendMessages(
+      [
+        {
+          role: "assistant",
+          content: `*<!--response-stopped-->${translation.ai.responseStopped}*`,
+        },
+      ],
+      { persist: false }
+    )
+    // Fire-and-forget: some agent implementations return a promise from
+    // abortRun() that only resolves after the stream drains, which would
+    // otherwise block the stopped-indicator from rendering.
+    void onStop?.()
+  }, [onStop, appendMessages, translation.ai.responseStopped])
 
   const resolvedDefaultPlaceholder = translation.ai.inputPlaceholder
   const uploadedFiles = attachedFiles.filter((f) => f.status === "uploaded")
@@ -255,13 +272,13 @@ export const ChatTextarea = ({
         className={cn(
           "relative isolate z-20",
           "flex flex-col items-stretch md:gap-3 gap-2",
-          "rounded-lg border border-solid border-f1-border has-[textarea:focus]:border-f1-border-secondary",
+          "rounded-lg border border-solid border-f1-border has-[textarea:focus]:border-f1-background-tertiary",
           "transition-all hover:cursor-text",
           "p-0",
           "before:pointer-events-none before:absolute before:inset-0 before:z-[-1]",
           "before:rounded-[inherit] before:bg-f1-background before:content-['']",
           "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2]",
-          "after:rounded-[inherit] after:blur-[5px] after:content-['']",
+          "after:rounded-md after:blur-[6px] after:content-['']",
           "after:scale-90 after:opacity-0",
           "after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
           "from-[#E55619] via-[#A1ADE5] to-[#E51943]",
@@ -289,12 +306,6 @@ export const ChatTextarea = ({
         }}
         onSubmit={handleSubmit}
       >
-        <DropOverlay
-          visible={fileDragOver}
-          onFilesDropped={(files) => {
-            void processFiles(files)
-          }}
-        />
         <MentionPopover
           isOpen={mentions.isOpen}
           results={mentions.results}

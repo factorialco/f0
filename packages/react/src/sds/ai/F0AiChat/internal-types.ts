@@ -211,6 +211,14 @@ export type AiChatProviderReturnValue = {
   /** @internal Set the file drag-over state */
   setFileDragOver: React.Dispatch<React.SetStateAction<boolean>>
   /**
+   * Process files that were dropped onto the chat. Delegates to the
+   * `processFiles` callback registered by `ChatTextarea`'s file-attachment
+   * hook. Used by the chat-wide DropOverlay rendered in `SidebarWindow`.
+   */
+  processDroppedFiles: (files: File[]) => void
+  /** @internal Registers the processFiles callback owned by ChatTextarea */
+  setProcessDroppedFilesFunction: (fn: ((files: File[]) => void) | null) => void
+  /**
    * Pre-loaded context shown as an empty state in the chat.
    * Prepended to the first user message as `<pending-context>`.
    */

@@ -36,6 +36,8 @@ import {
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
 
 const CHAT_WIDTH_STORAGE_KEY = "ONE-ai-chat-width"
+const CHAT_OPEN_STORAGE_KEY = "ONE-ai-chat-open"
+const CHAT_VISUALIZATION_MODE_STORAGE_KEY = "ONE-ai-chat-visualization-mode"
 
 const getStoredChatWidth = (): number => {
   if (typeof window === "undefined") return DEFAULT_CHAT_WIDTH
@@ -47,6 +49,41 @@ const getStoredChatWidth = (): number => {
     return stored
   }
   return DEFAULT_CHAT_WIDTH
+}
+
+/**
+ * Read the persisted open/closed state from localStorage.
+ * Falls back to `fallback` when there's no stored value or it's malformed.
+ * Because the AiChatStateProvider only mounts once `ai?.enabled === true`
+ * (see ApplicationFrame), reading in the `useState` initializer naturally
+ * handles a delayed activation of `ai.enabled`: as soon as the provider
+ * mounts, the persisted state is applied.
+ */
+const getStoredChatOpen = (fallback: boolean): boolean => {
+  if (typeof window === "undefined") return fallback
+  const stored = readFromLocalStorage<boolean | null>(
+    CHAT_OPEN_STORAGE_KEY,
+    null
+  )
+  if (typeof stored !== "boolean") return fallback
+  return stored
+}
+
+/**
+ * Read the persisted visualization mode. Only accepts the stable user-facing
+ * modes — "canvas" is transient and reverts to the previous mode on close,
+ * so it is never persisted.
+ */
+const getStoredVisualizationMode = (
+  fallback: VisualizationMode
+): VisualizationMode => {
+  if (typeof window === "undefined") return fallback
+  const stored = readFromLocalStorage<string | null>(
+    CHAT_VISUALIZATION_MODE_STORAGE_KEY,
+    null
+  )
+  if (stored === "sidepanel" || stored === "fullscreen") return stored
+  return fallback
 }
 
 export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
@@ -74,13 +111,28 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
 }) => {
   const [footer, setFooter] = useState<ReactNode | undefined>(initialFooter)
   const [enabledInternal, setEnabledInternal] = useState(enabled)
-  const [open, setOpen] = useState(defaultVisualizationMode === "fullscreen")
+  // Restore open/closed state and visualization mode from localStorage when
+  // the provider mounts. Falls back to `defaultVisualizationMode` when no
+  // prior state is stored. Because this provider only mounts once the host
+  // app sets `ai.enabled === true`, a delayed activation still applies the
+  // persisted state correctly (the `useState` initializers run on mount,
+  // not on the first render of the outer tree).
+  const fallbackVisualizationMode: VisualizationMode =
+    defaultVisualizationMode === "canvas"
+      ? "sidepanel"
+      : defaultVisualizationMode
+  const [open, setOpen] = useState(() =>
+    getStoredChatOpen(defaultVisualizationMode === "fullscreen")
+  )
   const [mode, setMode] = useState<AiChatMode>("chat")
   const [visualizationMode, setVisualizationMode] = useState<VisualizationMode>(
-    defaultVisualizationMode
+    () => getStoredVisualizationMode(fallbackVisualizationMode)
   )
   const [shouldPlayEntranceAnimation, setShouldPlayEntranceAnimation] =
-    useState(defaultVisualizationMode !== "fullscreen")
+    useState(
+      () =>
+        getStoredVisualizationMode(fallbackVisualizationMode) !== "fullscreen"
+    )
   const [agent, setAgent] = useState<string | undefined>(initialAgent)
   const [welcomeScreenSuggestions, setWelcomeScreenSuggestions] = useState<
     WelcomeScreenSuggestion[]
@@ -131,6 +183,25 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     writeToLocalStorage(CHAT_WIDTH_STORAGE_KEY, chatWidth)
   }, [chatWidth])
 
+  // Persist open/closed state so it survives reloads. Stored as a plain
+  // boolean; the provider's `useState` initializer reads it back on mount.
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    writeToLocalStorage(CHAT_OPEN_STORAGE_KEY, open)
+  }, [open])
+
+  // Persist the visualization mode, but only for the stable user-facing
+  // modes. "canvas" is a transient overlay (restored to the previous mode
+  // via `closeCanvas`) and should never be the restored-on-reload mode.
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    if (visualizationMode === "sidepanel" || visualizationMode === "fullscreen")
+      writeToLocalStorage(
+        CHAT_VISUALIZATION_MODE_STORAGE_KEY,
+        visualizationMode
+      )
+  }, [visualizationMode])
+
   // Store the reset function from CopilotKit
   const clearFunctionRef = useRef<(() => void) | null>(null)
   // Store the loadThread function from CopilotKit
@@ -148,6 +219,12 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   // Atomically replaces messages with a new thread (no race with reset)
   const replaceMessagesFunctionRef = useRef<
     ((messages: AppendMessage[]) => void) | null
+  >(null)
+  // Callback that processes files dropped onto the chat. Registered by
+  // ChatTextarea (which owns the file-attachment state) so the chat-wide
+  // DropOverlay rendered in SidebarWindow can dispatch drops to it.
+  const processDroppedFilesFunctionRef = useRef<
+    ((files: File[]) => void) | null
   >(null)
 
   const [currentThreadTitle, setCurrentThreadTitle] = useState<string | null>(
@@ -185,6 +262,16 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     fn: ((messages: AppendMessage[]) => void) | null
   ) => {
     replaceMessagesFunctionRef.current = fn
+  }
+
+  const setProcessDroppedFilesFunction = (
+    fn: ((files: File[]) => void) | null
+  ) => {
+    processDroppedFilesFunctionRef.current = fn
+  }
+
+  const processDroppedFiles = (files: File[]) => {
+    processDroppedFilesFunctionRef.current?.(files)
   }
 
   const appendMessages = (
@@ -374,6 +461,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setClarifyingQuestion,
         fileDragOver,
         setFileDragOver,
+        processDroppedFiles,
+        setProcessDroppedFilesFunction,
         pendingContext,
         setPendingContext,
         pendingQuote,
@@ -453,6 +542,8 @@ export function useAiChat(): AiChatProviderReturnValue {
       setClarifyingQuestion: noopFn,
       fileDragOver: false,
       setFileDragOver: noopFn,
+      processDroppedFiles: noopFn,
+      setProcessDroppedFilesFunction: noopFn,
       pendingContext: null,
       setPendingContext: noopFn,
       pendingQuote: null,

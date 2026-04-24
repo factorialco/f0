@@ -3,8 +3,8 @@ import { InputProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useMemo, useRef } from "react"
 
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import { Link } from "@/lib/linkHandler"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
@@ -44,7 +44,7 @@ export const ChatInput = (props: InputProps) => {
     <div
       ref={containerRef}
       className={cn(
-        "flex flex-col items-center gap-2 px-4 pb-4 pt-2",
+        "flex flex-col items-center gap-2 px-4 pb-3 pt-2",
         fullscreenWelcome && "flex-1"
       )}
     >
@@ -77,7 +77,8 @@ export const ChatInput = (props: InputProps) => {
             )}
           </motion.div>
         ) : (
-          disclaimer?.text && (
+          disclaimer?.text &&
+          !fullscreenWelcome && (
             <motion.div
               key="chat-disclaimer"
               className="flex w-full max-w-[712px] flex-row items-center justify-center gap-1"

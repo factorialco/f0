@@ -1,9 +1,9 @@
-import { FileItem } from "@/components/RichText/FileItem"
 import { F0Icon } from "@/components/F0Icon"
-import { AlertCircle, CrossedCircle } from "@/icons/app"
-import { Skeleton } from "@/ui/skeleton"
+import { FileItem } from "@/components/RichText/FileItem"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
+import { AlertCircle, Cross } from "@/icons/app"
 import { focusRing } from "@/lib/utils"
+import { Skeleton } from "@/ui/skeleton"
 
 import { type AttachedFile } from "./types"
 
@@ -26,11 +26,11 @@ export const AttachedFilesList = ({
     <div
       aria-live="polite"
       aria-busy={isUploading}
-      className="flex flex-wrap gap-1.5 px-3 pt-3"
+      className="flex flex-wrap gap-1 px-1 pt-1"
     >
       {attachedFiles.map((att) =>
         att.status === "uploading" ? (
-          <Skeleton key={att.id} className="h-9 w-36 rounded-lg" />
+          <Skeleton key={att.id} className="h-9 w-36 rounded-[10px]" />
         ) : att.status === "error" ? (
           <ErrorFilePill
             key={att.id}
@@ -42,11 +42,11 @@ export const AttachedFilesList = ({
           <FileItem
             key={att.id}
             file={att.file}
-            size="lg"
+            size="md"
             actions={[
               {
                 label: removeLabel,
-                icon: CrossedCircle,
+                icon: Cross,
                 onClick: () => onRemove(att.id),
               },
             ]}
@@ -80,7 +80,7 @@ function ErrorFilePill({
         )}
         onClick={() => onRemove(att.id)}
       >
-        <F0Icon icon={CrossedCircle} size="md" aria-hidden="true" />
+        <F0Icon icon={Cross} size="md" aria-hidden="true" />
       </button>
     </div>
   )

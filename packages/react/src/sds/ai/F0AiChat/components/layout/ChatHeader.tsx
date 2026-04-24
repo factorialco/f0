@@ -1,18 +1,18 @@
-import { breakpoints } from "@factorialco/f0-core"
 import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { useChatContext, type HeaderProps } from "@copilotkit/react-ui"
+import { breakpoints } from "@factorialco/f0-core"
 import { motion } from "motion/react"
 import { useCallback, useMemo, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/lib/OneEllipsis"
+import { New } from "@/icons/app"
 import ChevronDown from "@/icons/app/ChevronDown"
 import Cross from "@/icons/app/Cross"
 import Maximize from "@/icons/app/Maximize"
 import Minimize from "@/icons/app/Minimize"
-import { New } from "@/icons/app"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
@@ -76,7 +76,7 @@ const ChatHeaderWithHistory = (props: HeaderProps) => {
     <>
       <header
         className={cn(
-          "flex justify-between px-4 py-3 w-full overflow-hidden gap-3"
+          "flex justify-between pl-2.5 pr-3 py-3 w-full overflow-hidden gap-3"
         )}
       >
         <div className="flex min-w-0 flex-1 items-center">
