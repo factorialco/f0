@@ -220,6 +220,7 @@ function useClarifyingQuestionStory(steps: StoryStep[]) {
       toggleOption,
       confirm,
       skip,
+      cancel: () => setClarifyingQuestion(null),
       back,
       setCustomAnswerText,
       setCustomAnswerActive,

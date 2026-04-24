@@ -58,6 +58,12 @@ export interface ResolvedStepAnswer {
   customAnswer?: string
   /** True when the user explicitly skipped an optional step */
   skipped?: boolean
+  /**
+   * True when the user cancelled the flow before reaching this step.
+   * The step was therefore neither answered nor intentionally skipped —
+   * callers (e.g. the agent) should treat this as "no information".
+   */
+  cancelled?: boolean
 }
 
 /**
@@ -80,6 +86,13 @@ export interface ClarifyingQuestionState {
   confirm: () => void
   /** Skip the current step (only valid when the step is optional) */
   skip: () => void
+  /**
+   * Cancel the entire clarifying flow. Closes the panel, marks the tool
+   * call as resolved-but-not-completed so it doesn't re-appear on history
+   * reload, and sends a short notice to the agent so it knows to proceed
+   * without the clarification.
+   */
+  cancel: () => void
   /** Go back to the previous step */
   back: () => void
   /** Set the custom answer text */

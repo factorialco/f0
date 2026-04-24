@@ -400,7 +400,7 @@ export const defaultTranslations = {
       navHint: {
         navigate: "navigate",
         select: "select",
-        skip: "skip",
+        cancel: "cancel",
       },
     },
     growth: {

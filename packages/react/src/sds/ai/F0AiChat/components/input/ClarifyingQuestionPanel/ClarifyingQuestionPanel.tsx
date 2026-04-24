@@ -57,6 +57,7 @@ const ClarifyingQuestionContent = ({
     toggleOption,
     confirm,
     skip,
+    cancel,
     back,
     setCustomAnswerText,
     setCustomAnswerActive,
@@ -109,9 +110,14 @@ const ClarifyingQuestionContent = ({
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === "Escape" && optional === true) {
+    // Escape always cancels the whole flow — this is independent of
+    // `optional`, which only controls whether the current step can be
+    // individually skipped (via the Skip button or the skip handler).
+    // Cancelling closes the panel and marks the tool call as
+    // resolved-but-not-completed, regardless of which step we're on.
+    if (e.key === "Escape") {
       e.preventDefault()
-      skip()
+      cancel()
     }
   }
 

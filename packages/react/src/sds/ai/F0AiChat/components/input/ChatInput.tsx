@@ -33,7 +33,6 @@ export const ChatInput = (props: InputProps) => {
   const fullscreenWelcome = fullscreen && isWelcomeScreen
 
   const isClarifying = clarifyingQuestion != null
-  const currentStepOptional = clarifyingQuestion?.currentStep.optional === true
 
   useEffect(() => {
     const textarea = containerRef.current?.querySelector("textarea")
@@ -69,12 +68,12 @@ export const ChatInput = (props: InputProps) => {
               <kbd className="font-sans">Enter</kbd>{" "}
               {translation.ai.clarifyingQuestion.navHint.select}
             </span>
-            {currentStepOptional && (
-              <span>
-                <kbd className="font-sans">Esc</kbd>{" "}
-                {translation.ai.clarifyingQuestion.navHint.skip}
-              </span>
-            )}
+            {/* Cancel is always available — not gated on the step being
+                optional — so the Esc hint is unconditional. */}
+            <span>
+              <kbd className="font-sans">Esc</kbd>{" "}
+              {translation.ai.clarifyingQuestion.navHint.cancel}
+            </span>
           </motion.div>
         ) : (
           disclaimer?.text &&

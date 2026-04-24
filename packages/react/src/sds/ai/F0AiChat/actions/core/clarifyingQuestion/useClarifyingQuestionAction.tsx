@@ -280,6 +280,53 @@ function ClarifyingQuestionController({
     }
   }
 
+  /**
+   * Cancel the whole clarifying flow (user pressed Escape).
+   *
+   * Unlike `skip`, which advances past an optional step and records its
+   * explicit skip, `cancel` aborts the entire interaction:
+   *   - closes the panel so the textarea is back,
+   *   - marks the tool call as resolved locally + in the persisted args
+   *     (so the panel doesn't re-appear on history reload),
+   *   - and deliberately does **not** send a message to the agent.
+   *
+   * The ClarifyingQuestion action is a visual frontend-only tool — the
+   * backend emits it via `emitFrontendTool` and doesn't await a result —
+   * so cancelling silently is safe. The user simply gets their textarea
+   * back and can write whatever they want next.
+   */
+  const cancel = () => {
+    if (dismissedRef.current) return
+    dismissedRef.current = true
+    setClarifyingQuestion(null)
+
+    if (toolCallId) locallyResolvedToolCallIds.add(toolCallId)
+
+    // Every step is marked as `cancelled` so the persisted args carry an
+    // unambiguous signal: this tool call was resolved-but-not-completed,
+    // distinct from a normal "submitted with skipped step(s)" resolution.
+    const answers: ResolvedStepAnswer[] = steps.map((s) => ({
+      question: s.question,
+      selectedOptionIds: [],
+      cancelled: true,
+    }))
+
+    if (toolCallId && threadId) {
+      void persistClarifyingResolution({
+        chatApiEndpoint: copilotApiConfig.chatApiEndpoint,
+        headers: copilotApiConfig.headers as Record<string, string> | undefined,
+        threadId,
+        toolCallId,
+        args: {
+          steps: rawSteps,
+          isResolved: true,
+          answers,
+          cancelled: true,
+        },
+      })
+    }
+  }
+
   const back = () => {
     setStepIndex((i) => Math.max(0, i - 1))
   }
@@ -309,6 +356,7 @@ function ClarifyingQuestionController({
       toggleOption,
       confirm,
       skip,
+      cancel,
       back,
       setCustomAnswerText,
       setCustomAnswerActive,
