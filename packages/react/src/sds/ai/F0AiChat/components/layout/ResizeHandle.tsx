@@ -79,7 +79,9 @@ export const ResizeHandle = ({
         // `group-hover` never fires on the right side because the chat
         // panel's edge captures the mouse events first.
         "group relative z-10 h-full flex-shrink-0 cursor-ew-resize",
-        narrow ? "w-px bg-f1-background" : "w-1"
+        narrow
+          ? "w-1 bg-f1-background border border-x-0 border-solid border-f1-border-secondary"
+          : "w-1"
       )}
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
@@ -98,7 +100,7 @@ export const ResizeHandle = ({
         className={cn(
           "pointer-events-none absolute inset-y-0 left-1/2 -translate-x-1/2 rounded-full",
           "transition-[width,background-color] duration-150 ease-out",
-          narrow ? "w-px bg-f1-border-secondary" : "w-1 bg-transparent",
+          narrow ? "w-0 bg-f1-background" : "w-1 bg-transparent",
           "group-hover:w-1 group-hover:bg-f1-background-secondary-hover",
           isResizing && "!w-1 !bg-f1-background-secondary-hover"
         )}

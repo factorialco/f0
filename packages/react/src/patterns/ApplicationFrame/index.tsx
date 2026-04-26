@@ -329,10 +329,13 @@ function ApplicationFrameContent({
               {ai?.enabled && isCanvasMode && canvasContent && (
                 <div
                   className={cn(
+                    // z-[21] sits above the chat wrapper (z-20 in canvas
+                    // mode) so the canvas card's right-side shadow paints
+                    // over the chat surface instead of being clipped by it.
                     "pointer-events-none flex justify-end",
                     isSmallViewport
                       ? "fixed inset-0 z-[50]"
-                      : "absolute bottom-0 left-0 top-0 z-[15]"
+                      : "absolute bottom-0 left-0 top-0 z-[21]"
                   )}
                   style={
                     isSmallViewport ? undefined : { right: reservedChatWidth }

@@ -125,9 +125,10 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     getStoredChatOpen(defaultVisualizationMode === "fullscreen")
   )
   const [mode, setMode] = useState<AiChatMode>("chat")
-  const [visualizationMode, setVisualizationMode] = useState<VisualizationMode>(
-    () => getStoredVisualizationMode(fallbackVisualizationMode)
-  )
+  const [visualizationMode, setVisualizationModeRaw] =
+    useState<VisualizationMode>(() =>
+      getStoredVisualizationMode(fallbackVisualizationMode)
+    )
   const [shouldPlayEntranceAnimation, setShouldPlayEntranceAnimation] =
     useState(
       () =>
@@ -160,6 +161,21 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   }, [])
 
   const [canvasContent, setCanvasContent] = useState<CanvasContent | null>(null)
+
+  // Wrap the raw setter so leaving canvas mode also clears `canvasContent`
+  // in the same render — otherwise the canvas card stays mounted under the
+  // new mode until something else (closeCanvas, reload…) clears it.
+  const setVisualizationMode = useCallback<
+    React.Dispatch<React.SetStateAction<VisualizationMode>>
+  >((next) => {
+    setVisualizationModeRaw((prev) => {
+      const resolved = typeof next === "function" ? next(prev) : next
+      if (prev === "canvas" && resolved !== "canvas") {
+        setCanvasContent(null)
+      }
+      return resolved
+    })
+  }, [])
 
   // Track the mode before canvas was opened so we can restore it on close
   const previousVisualizationModeRef = useRef<VisualizationMode>("sidepanel")
