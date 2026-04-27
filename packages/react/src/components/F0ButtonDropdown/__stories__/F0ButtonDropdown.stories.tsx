@@ -344,53 +344,22 @@ export const DropdownModeWithGroups: Story = {
   },
 }
 
+const variantItems = [
+  { value: "save", label: "Save draft", icon: Save },
+  { value: "delete", label: "Delete record", icon: Delete, critical: true },
+]
+
 export const Variants: Story = {
   tags: ["no-sidebar"],
   args: {
-    items: [{ value: "save", label: "Save draft", icon: Save }],
+    items: variantItems,
     onClick: () => {},
   },
-  render: () => (
+  render: (args) => (
     <div className="flex flex-col gap-4">
-      <F0ButtonDropdown
-        variant="default"
-        items={[
-          { value: "save", label: "Save draft", icon: Save },
-          {
-            value: "delete",
-            label: "Delete record",
-            icon: Delete,
-            critical: true,
-          },
-        ]}
-        onClick={() => {}}
-      />
-      <F0ButtonDropdown
-        variant="outline"
-        items={[
-          { value: "save", label: "Save draft", icon: Save },
-          {
-            value: "delete",
-            label: "Delete record",
-            icon: Delete,
-            critical: true,
-          },
-        ]}
-        onClick={() => {}}
-      />
-      <F0ButtonDropdown
-        variant="neutral"
-        items={[
-          { value: "save", label: "Save draft", icon: Save },
-          {
-            value: "delete",
-            label: "Delete record",
-            icon: Delete,
-            critical: true,
-          },
-        ]}
-        onClick={() => {}}
-      />
+      {buttonDropdownVariants.map((variant) => (
+        <F0ButtonDropdown key={variant} {...args} variant={variant} />
+      ))}
     </div>
   ),
 }
