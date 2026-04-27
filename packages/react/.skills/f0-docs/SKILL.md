@@ -93,7 +93,7 @@ If a subsection would only contain redundant info, omit it. If the component has
 
 ### Inline Correct / Incorrect for copy rules — pair with a visual DoDonts
 
-For wording and copy rules in `### Content best practices`, use **inline `**Correct:** / **Incorrect:**` bullets** for the rules themselves — more scannable than prose for textual examples. Use plain bold; never emojis (✅ / ❌).
+For wording and copy rules in `### Content best practices`, use inline **Correct:** / **Incorrect:** bullets for the rules themselves — more scannable than prose for textual examples. Use plain bold; never emojis (✅ / ❌).
 
 ```mdx
 - Use imperative verbs

@@ -166,14 +166,16 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
   - **Correct:** "Save changes", "Delete account", "Export data"
   - **Incorrect:** "Saved", "Deletion", "Exportation"
 
+> Adapt the rendered JSX to the component's real API. Use children, `label`, or other props only if that component actually supports them.
+
 <DoDonts
   do={{
     description: "Use clear, action-oriented labels",
-    children: <F0ComponentName label="Save changes" />,
+    children: <F0ComponentName>Save changes</F0ComponentName>,
   }}
   dont={{
     description: "Don't use vague or generic labels",
-    children: <F0ComponentName label="OK" />,
+    children: <F0ComponentName>OK</F0ComponentName>,
   }}
 />
 
@@ -181,7 +183,7 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 
 <!--
   Non-obvious runtime behavior specific to this component. Apply the inclusion filter
-  from SKILL.md → Authoring Principles → '### Behavior is non-obvious runtime behavior':
+  from SKILL.md → Authoring Principles → `### Behavior`:
   skip if Controls / Variants / global behavior already covers it. Omit the section
   entirely if the component has no non-obvious behavior.
 -->
@@ -746,7 +748,7 @@ Before marking MDX as done:
 - [ ] "When not to use" rows in the "Use instead" column name a **concrete component** (`F0Dialog`) or established pattern ("toast notification") — never abstract instructions
 - [ ] `<DoDonts>` used in Do's and don'ts subsection
 - [ ] DoDonts `children` used only when the do/don't contrast is **semantically unambiguous** — a viewer must not be able to argue the "don't" example is valid. Text-only DoDonts are preferred when the distinction requires explanation.
-- [ ] `### Content best practices` rules with textual examples use the **inline `**Correct:** / **Incorrect:**` bullet pattern** (no emojis), AND are paired with a `<DoDonts>` visual showing one representative good vs bad label
+- [ ] `### Content best practices` rules with textual examples use inline **Correct:** / **Incorrect:** bullets (no emojis), AND are paired with a `<DoDonts>` visual showing one representative good vs bad label
 - [ ] `### Behavior` (under `## Guidelines`) only contains non-obvious runtime behavior specific to this component (async loading, polymorphic rendering, controlled/uncontrolled rules, ref typing). Section is omitted entirely if the component has no such behavior. No "Related components" section. Section is not renamed to "Code", "Patterns", or "Advanced".
 - [ ] When restructuring an existing MDX file, valuable visuals/examples from the previous version are preserved (combined with new patterns when they serve different purposes — e.g. scannable text + visual reference) — **don't lose value when refactoring**
 - [ ] Components rendered as JSX in MDX (e.g. inside `<DoDonts children>`) are imported via relative path (`from "../F0Component"`), never from `@factorialco/f0-react` (causes module fetch error in dev)
