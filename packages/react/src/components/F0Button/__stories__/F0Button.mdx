@@ -1,0 +1,305 @@
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as Stories from "./F0Button.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { F0Button } from "../F0Button"
+
+<Meta of={Stories} />
+
+# F0Button
+
+Triggers user actions or navigates to other parts of the application. Supports icons, async loading, href-based navigation, and several visual variants for different levels of emphasis. For navigation-only links without an action context, use `F0Link`.
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+### Type
+
+<Canvas of={Stories.Variants} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Type</th>
+        <th className="text-left">Description</th>
+        <th className="text-left">When to use</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>default</code>
+        </td>
+        <td>Primary filled button, high visual emphasis</td>
+        <td>Primary actions — the main call to action on a page or modal</td>
+      </tr>
+      <tr>
+        <td>
+          <code>outline</code>
+        </td>
+        <td>Bordered button, medium emphasis</td>
+        <td>Secondary actions alongside a primary button</td>
+      </tr>
+      <tr>
+        <td>
+          <code>neutral</code>
+        </td>
+        <td>Subtle grey button</td>
+        <td>
+          Tertiary or less important options — adds an extra level of hierarchy
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>ghost</code>
+        </td>
+        <td>No background or border, blends with content</td>
+        <td>
+          Secondary actions that should blend with content and stand out only on
+          hover or focus
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>critical</code>
+        </td>
+        <td>Red/destructive styling, high visual weight</td>
+        <td>
+          Irreversible destructive actions (delete, remove, revoke). Always
+          behind a confirmation step
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>promote</code>
+        </td>
+        <td>Highlighted promotional styling</td>
+        <td>Upsell, upgrade, or promotional calls to action</td>
+      </tr>
+      <tr>
+        <td>
+          <code>outlinePromote</code>
+        </td>
+        <td>Bordered promotional styling, medium emphasis</td>
+        <td>
+          Promotional or upgrade actions that should stand out, but with less
+          emphasis than the filled <code>promote</code> button
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Icon
+
+<Canvas of={Stories.IconVariants} />
+
+Icons reinforce the label meaning. Use leading icons for the most common case, trailing icons when the icon represents the result of the action (e.g. an external link arrow). Use `hideLabel` for icon-only buttons in toolbars or dense surfaces where context makes the action self-explanatory — the `label` prop is still required and becomes the accessible name and tooltip.
+
+### Sizes
+
+<Canvas of={Stories.Sizes} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Size</th>
+        <th className="text-left">Description</th>
+        <th className="text-left">When to use</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>lg</code>
+        </td>
+        <td>Large touch target</td>
+        <td>
+          Mobile interfaces or prominent desktop CTAs (minimum 44×44px touch
+          target)
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>md</code> (default)
+        </td>
+        <td>Standard desktop size</td>
+        <td>Default for most desktop actions</td>
+      </tr>
+      <tr>
+        <td>
+          <code>sm</code>
+        </td>
+        <td>Compact size</td>
+        <td>Secondary actions, dense layouts, toolbars or inline controls</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### States
+
+<Canvas of={Stories.States} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">State</th>
+        <th className="text-left">Description</th>
+        <th className="text-left">Behavior</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>disabled</code>
+        </td>
+        <td>Inactive — does not respond to interaction</td>
+        <td>
+          Reduced opacity, not-allowed cursor, removed from interaction and
+          keyboard focus
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>loading</code>
+        </td>
+        <td>Action in progress</td>
+        <td>
+          Spinner icon, interaction blocked, announced via{" "}
+          <code>aria-busy</code>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Guidelines
+
+### Design best practices
+
+**When to use**
+
+- Use a button to trigger an action with an immediate effect (save, delete, submit)
+- Use a button with `href` when you need navigation that benefits from native link behaviors (right-click, open in tab, middle click)
+- Use a single primary (`default`) button per section to guide the user toward the main action
+
+**When not to use**
+
+- Pure navigation without an action context — use `F0Link` instead
+- Toggle on/off state — use `F0Toggle` or `F0Switch`
+- A menu of actions from a single trigger — use `F0ButtonDropdown`
+- `loading` on buttons that do not trigger async operations — it creates false expectations
+
+**Critical variant rules**
+
+- Reserve `critical` for **irreversible** actions only (delete, remove, revoke). Reversible actions like Archive, Hide, or Unpublish should use `default` or `outline`
+- A `critical` button must always trigger a confirmation step (dialog or inline confirm) — never execute the destructive action on the first click
+- At most one `critical` button visible per context, and never as the primary CTA of a normal screen — it belongs in confirmation dialogs, contextual menus, or row actions
+
+<DoDonts
+  do={{
+    description: "Use critical only for irreversible actions, named explicitly",
+    children: <F0Button variant="critical" label="Delete employee" />,
+  }}
+  dont={{
+    description: "Don't use critical for reversible or generic actions",
+    children: <F0Button variant="critical" label="Archive" />,
+  }}
+/>
+
+**Layout and grouping**
+
+- Buttons adapt their width to their content by default — avoid fixed widths unless inside a form
+- When grouped, use consistent sizing and maintain adequate spacing (`gap-2` minimum)
+- In mobile layouts, prefer `lg` size for adequate touch targets (minimum 44×44px)
+- Place the primary action on the right when paired with a cancel-style secondary action
+
+<DoDonts
+  do={{
+    description:
+      "Pair a primary button with a secondary outline for cancel-style actions",
+    guidelines: [
+      "Place the primary action on the right",
+      "Use consistent sizing across all buttons in the group",
+    ],
+    children: (
+      <div className="flex gap-2">
+        <F0Button variant="outline" label="Cancel" />
+        <F0Button label="Save changes" />
+      </div>
+    ),
+  }}
+  dont={{
+    description:
+      "Don't stack multiple primary buttons in the same group — it dilutes the hierarchy",
+    children: (
+      <div className="flex gap-2">
+        <F0Button label="Save" />
+        <F0Button label="Confirm" />
+        <F0Button label="Continue" />
+      </div>
+    ),
+  }}
+/>
+
+### Content best practices
+
+- Sentence case, not title case
+- Keep labels short — 1–3 words is ideal; avoid sentence-length labels
+- Use imperative verbs
+  - **Correct:** "Save changes", "Delete account", "Export data"
+  - **Incorrect:** "Saved", "Deletion", "Exportation"
+- Be specific and actionable
+  - **Correct:** "Create employee", "Submit request", "Download report"
+  - **Incorrect:** "OK", "Yes", "Click here", "Submit"
+- For destructive actions, name the object
+  - **Correct:** "Delete employee", "Remove request"
+  - **Incorrect:** "Delete", "Remove"
+
+<DoDonts
+  do={{
+    description:
+      "Use clear, action-oriented labels: 'Save changes', 'Add employee', 'Delete request'",
+    children: <F0Button label="Save changes" />,
+  }}
+  dont={{
+    description:
+      "Don't use vague or generic labels: 'OK', 'Yes', 'Click here', 'Submit'",
+    children: <F0Button label="OK" />,
+  }}
+/>
+
+### Behavior
+
+**Async action**
+
+If the `onClick` handler returns a Promise, the button automatically enters the `loading` state until the promise resolves — no need to manage loading state manually.
+
+<Canvas of={Stories.AsyncAction} />
+
+**Navigation link**
+
+When `href` is provided, the component renders as an `<a>` element instead of a `<button>`, preserving native link behaviors (right-click, open in new tab, middle click).
+
+<Canvas of={Stories.WithHref} />
+
+**Polymorphic ref**
+
+The forwarded `ref` is typed as `HTMLButtonElement | HTMLAnchorElement` to reflect the polymorphic rendering driven by `href`. Narrow the type at the call site if you need to access element-specific APIs.
+
+## Accessibility
+
+### Screen reader behavior
+
+- The `label` prop is always required — it is used as the accessible name even when visually hidden via `hideLabel`
+- When `hideLabel` is true, the label is rendered as `sr-only` and also used as the auto-generated tooltip
+- `loading` state is communicated via `aria-busy` — handled internally; no consumer setup required
+- Disabled state uses the element's native disabled semantics — buttons are removed from tab order, disabled links render as non-interactive elements
+- Buttons rendered with `href` are exposed as `<a>` elements and announced as links by screen readers
+- Icon-only buttons (`hideLabel`) rely entirely on the `label` for screen reader output — never use icon-only without a meaningful label
