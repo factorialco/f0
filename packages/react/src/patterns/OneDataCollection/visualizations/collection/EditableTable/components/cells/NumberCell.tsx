@@ -5,7 +5,6 @@ import { RecordType } from "@/hooks/datasource/types/records.typings"
 import { cn } from "@/lib/utils"
 
 import type { EditableCellProps } from "."
-
 import { BaseCell } from "./BaseCell"
 import { useNumberCellLayout } from "./hooks/useNumberCellLayout"
 
@@ -33,7 +32,7 @@ export function NumberCell<R extends RecordType>({
 
   const handleChange = (newValue: number | null) => {
     if (newValue == null) {
-      if (value !== "") onChange("")
+      if (value !== "") onChange(null)
       return
     }
     let clamped = newValue

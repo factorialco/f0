@@ -2,10 +2,9 @@ import type { RecordType, SortingsDefinition } from "@/hooks/datasource"
 
 import type { SummariesDefinition } from "../../../../summary"
 import type { CellRendererProps } from "../../Table/types"
-import type { EditableTableColumnDefinition } from "../types"
-
 import { editableCellMap } from "../consts"
 import { useEditableRow } from "../context/EditableRowContext"
+import type { EditableTableColumnDefinition } from "../types"
 import { NonEditableCell } from "./cells/status/NonEditableCell"
 
 /**
@@ -68,7 +67,7 @@ export function EditableCellRenderer<
 
   const hasId = editableColumn.id !== undefined
 
-  const onChange = (value: string) => {
+  const onChange = (value: string | null) => {
     if (editableColumn.id !== undefined) {
       handleCellChange(editableColumn.id, value)
     }

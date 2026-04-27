@@ -63,10 +63,7 @@ export function EditableRowProvider<R extends RecordType>({
 
   const handleCellChange = useCallback(
     (columnId: string, value: unknown) => {
-      const updatedItem = {
-        ...localItemRef.current,
-        [columnId]: value === "" ? null : value,
-      } as R
+      const updatedItem = { ...localItemRef.current, [columnId]: value } as R
 
       setLocalItem(updatedItem)
 
