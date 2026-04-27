@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.466.0](https://github.com/factorialco/f0/compare/f0-react-v1.465.0...f0-react-v1.466.0) (2026-04-27)
+
+
+### Features
+
+* add support to resolve defaultValuesParams coming from One ([#4036](https://github.com/factorialco/f0/issues/4036)) ([6aaf334](https://github.com/factorialco/f0/commit/6aaf3343a45bd2d846b55ef702dd726f9a76dfc4))
+
 ## [1.465.0](https://github.com/factorialco/f0/compare/f0-react-v1.464.3...f0-react-v1.465.0) (2026-04-24)
 
 
