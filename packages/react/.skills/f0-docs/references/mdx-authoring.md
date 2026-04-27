@@ -153,13 +153,42 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 
 ### Content best practices
 
-- [Copywriting rule: capitalization, punctuation, tone]
+<!--
+  Copywriting and tone rules. For each rule that includes textual examples, use the
+  inline Correct/Incorrect bullet pattern (more scannable than prose) AND pair it with a
+  <DoDonts> visual showing one representative good vs bad label rendered as the actual
+  component. Bullets and DoDonts complement each other — never drop the visual.
+-->
+
+- [Capitalization, punctuation, tone rule]
 - [Length limit or character guidance]
+- Use imperative verbs
+  - **Correct:** "Save changes", "Delete account", "Export data"
+  - **Incorrect:** "Saved", "Deletion", "Exportation"
+
+> Adapt the rendered JSX to the component's real API. Use children, `label`, or other props only if that component actually supports them.
+
+<DoDonts
+  do={{
+    description: "Use clear, action-oriented labels",
+    children: <F0ComponentName>Save changes</F0ComponentName>,
+  }}
+  dont={{
+    description: "Don't use vague or generic labels",
+    children: <F0ComponentName>OK</F0ComponentName>,
+  }}
+/>
 
 ### Behavior
 
-- [Layout or responsive behavior]
-- [State transitions]
+<!--
+  Non-obvious runtime behavior specific to this component. Apply the inclusion filter
+  from SKILL.md → Authoring Principles → `### Behavior`:
+  skip if Controls / Variants / global behavior already covers it. Omit the section
+  entirely if the component has no non-obvious behavior.
+-->
+
+- [Async handler auto-loading, polymorphic rendering driven by an href, controlled/uncontrolled rules, focus management]
 - [Generic type note — if the component is generic (`F0Component<T>`): document the type parameter, what it controls, and the full signature of any typed callback (e.g. `onClick: (value: T, item: Item<T>) => void`). Mention that `T` defaults to `string` and that callers can pass a union, enum, or literal type.]
 
 ### Usage examples
@@ -719,6 +748,9 @@ Before marking MDX as done:
 - [ ] "When not to use" rows in the "Use instead" column name a **concrete component** (`F0Dialog`) or established pattern ("toast notification") — never abstract instructions
 - [ ] `<DoDonts>` used in Do's and don'ts subsection
 - [ ] DoDonts `children` used only when the do/don't contrast is **semantically unambiguous** — a viewer must not be able to argue the "don't" example is valid. Text-only DoDonts are preferred when the distinction requires explanation.
+- [ ] `### Content best practices` rules with textual examples use inline **Correct:** / **Incorrect:** bullets (no emojis), AND are paired with a `<DoDonts>` visual showing one representative good vs bad label
+- [ ] `### Behavior` (under `## Guidelines`) only contains non-obvious runtime behavior specific to this component (async loading, polymorphic rendering, controlled/uncontrolled rules, ref typing). Section is omitted entirely if the component has no such behavior. No "Related components" section. Section is not renamed to "Code", "Patterns", or "Advanced".
+- [ ] When restructuring an existing MDX file, valuable visuals/examples from the previous version are preserved (combined with new patterns when they serve different purposes — e.g. scannable text + visual reference) — **don't lose value when refactoring**
 - [ ] Components rendered as JSX in MDX (e.g. inside `<DoDonts children>`) are imported via relative path (`from "../F0Component"`), never from `@factorialco/f0-react` (causes module fetch error in dev)
 - [ ] Components that require a provider (e.g. `useI18n`) are NOT rendered as inline JSX in MDX — instead, dedicated stories with `tags: ["no-sidebar"]` are created and used as `<Canvas of={Stories.X} sourceState="none" />` inside DoDonts `children`
 - [ ] `## Accessibility` included only when the component type requires it — complex interactive (required), simple interactive (only if non-obvious), static display (only for live region or icon meaning), layout/typography (omit entirely)
