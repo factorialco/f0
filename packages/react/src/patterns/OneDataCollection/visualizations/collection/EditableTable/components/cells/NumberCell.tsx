@@ -35,6 +35,7 @@ export function NumberCell<R extends RecordType>({
       if (value !== "") onChange(null)
       return
     }
+
     let clamped = newValue
     if (config?.min != null && clamped < config.min) clamped = config.min
     if (config?.max != null && clamped > config.max) clamped = config.max
