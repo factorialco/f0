@@ -21,6 +21,8 @@ type EditableRowContextValue<R extends RecordType> = {
   cellLoading: Record<string, boolean>
   /** Update a single field and notify the parent via onCellChange */
   handleCellChange: (columnId: string, value: unknown) => void
+  /** Notify the parent that a cell lost focus */
+  handleCellBlur: (columnId: string) => void
 }
 
 // React's createContext does not support per-usage generics.
@@ -31,6 +33,7 @@ const EditableRowContext =
 export type EditableRowProviderProps<R extends RecordType> = {
   item: R
   onCellChange: (updatedItem: R) => Promise<void | Record<string, string>>
+  onCellBlur?: (item: R, columnId: string) => void
   children: React.ReactNode
 }
 
@@ -42,6 +45,7 @@ export type EditableRowProviderProps<R extends RecordType> = {
 export function EditableRowProvider<R extends RecordType>({
   item,
   onCellChange,
+  onCellBlur,
   children,
 }: EditableRowProviderProps<R>) {
   const [localItem, setLocalItem] = useState<R>(item)
@@ -98,9 +102,22 @@ export function EditableRowProvider<R extends RecordType>({
     [onCellChange, t]
   )
 
+  const handleCellBlur = useCallback(
+    (columnId: string) => {
+      onCellBlur?.(localItemRef.current, columnId)
+    },
+    [onCellBlur]
+  )
+
   return (
     <EditableRowContext.Provider
-      value={{ localItem, cellErrors, cellLoading, handleCellChange }}
+      value={{
+        localItem,
+        cellErrors,
+        cellLoading,
+        handleCellChange,
+        handleCellBlur,
+      }}
     >
       {children}
     </EditableRowContext.Provider>

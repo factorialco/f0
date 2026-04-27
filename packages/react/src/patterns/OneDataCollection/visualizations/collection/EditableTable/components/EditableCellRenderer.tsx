@@ -51,7 +51,13 @@ export function EditableCellRenderer<
     return <>{children}</>
   }
 
-  const { localItem, cellErrors, cellLoading, handleCellChange } = editableCtx
+  const {
+    localItem,
+    cellErrors,
+    cellLoading,
+    handleCellChange,
+    handleCellBlur,
+  } = editableCtx
   const editableColumn = column as EditableTableColumnDefinition<
     R,
     Sortings,
@@ -65,6 +71,12 @@ export function EditableCellRenderer<
   const onChange = (value: string) => {
     if (editableColumn.id !== undefined) {
       handleCellChange(editableColumn.id, value)
+    }
+  }
+
+  const onBlur = () => {
+    if (editableColumn.id !== undefined) {
+      handleCellBlur(editableColumn.id)
     }
   }
 
@@ -96,6 +108,7 @@ export function EditableCellRenderer<
             isLastColumn={isLastColumn}
             loading={loading}
             onChange={onChange}
+            onBlur={onBlur}
           />
         </div>
       )

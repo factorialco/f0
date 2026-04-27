@@ -30,6 +30,7 @@ export const EditableTableCollection = <
   Grouping extends GroupingDefinition<R>,
 >({
   onCellChange,
+  onCellBlur,
   addRowActions,
   addRowActionsLabel,
   addNestedRowActions,
@@ -50,12 +51,16 @@ export const EditableTableCollection = <
   const onCellChangeRef = useRef(onCellChange)
   onCellChangeRef.current = onCellChange
 
+  const onCellBlurRef = useRef(onCellBlur)
+  onCellBlurRef.current = onCellBlur
+
   const RowWrapper = useMemo(() => {
     return function EditableRowWrapper({ item, children }: RowWrapperProps<R>) {
       return (
         <EditableRowProvider
           item={item}
           onCellChange={(...args) => onCellChangeRef.current?.(...args)}
+          onCellBlur={(...args) => onCellBlurRef.current?.(...args)}
         >
           {children}
         </EditableRowProvider>
