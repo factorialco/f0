@@ -138,4 +138,41 @@ describe("MoneyCell", () => {
     expect(passedProps.loading).toBe(true)
     expect(passedProps.onChange).toBe(onChange)
   })
+
+  it("resolves units from a function based on the item", () => {
+    render(
+      <MoneyCell
+        {...baseProps}
+        item={{ id: "1", currency: "€" }}
+        editableColumn={{
+          ...baseColumn,
+          numberConfig: {
+            units: (item: { id: string; currency: string }) => item.currency,
+          },
+        }}
+      />
+    )
+
+    const passedProps = numberCellProps.mock.lastCall?.[0]
+    expect(passedProps.editableColumn.numberConfig.units).toBe("€")
+  })
+
+  it("resolves unitsPosition from locale when units is a function returning a currency code", () => {
+    render(
+      <MoneyCell
+        {...baseProps}
+        item={{ id: "1", currency: "USD" }}
+        editableColumn={{
+          ...baseColumn,
+          numberConfig: {
+            units: (item: { id: string; currency: string }) => item.currency,
+          },
+        }}
+      />
+    )
+
+    const passedProps = numberCellProps.mock.lastCall?.[0]
+    expect(passedProps.editableColumn.numberConfig.units).toBe("USD")
+    expect(passedProps.editableColumn.numberConfig.unitsPosition).toBe("before")
+  })
 })

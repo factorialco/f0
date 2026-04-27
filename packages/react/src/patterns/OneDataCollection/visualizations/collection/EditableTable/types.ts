@@ -31,13 +31,18 @@ export type AddRowActionsResult =
 
 export type EditableTableVisualizationSettings = TableVisualizationSettings
 
-export type NumberCellConfig = {
+export type NumberCellConfig<R extends RecordType = RecordType> = {
   min?: number
   max?: number
   step?: number
   maxDecimals?: number
   locale?: string
-  units?: string
+  /**
+   * Unit label displayed next to the number input.
+   * Can be a static string (e.g. `"h"`) or a function that receives the
+   * current row item to return a per-row unit (e.g. `(item) => item.type === "role" ? "h" : "u"`).
+   */
+  units?: string | ((item: R) => string | undefined)
   unitsPosition?: "before" | "after"
 }
 
@@ -118,7 +123,7 @@ export type EditableTableColumnDefinition<
    * stepping (`step`), formatting (`maxDecimals`, `locale`), and units.
    * Falls back to sensible defaults when omitted.
    */
-  numberConfig?: NumberCellConfig
+  numberConfig?: NumberCellConfig<R>
 }
 
 export type EditableTableVisualizationOptions<

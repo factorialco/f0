@@ -5,6 +5,7 @@ import { useL10n } from "@/lib/providers/l10n"
 
 import type { EditableCellProps } from "."
 
+import { resolveUnits } from "./hooks/useNumberCellLayout"
 import { NumberCell } from "./NumberCell"
 
 const isUnitBeforeNumber = (
@@ -29,14 +30,16 @@ export function MoneyCell<R extends RecordType>(props: EditableCellProps<R>) {
   const config = props.editableColumn.numberConfig
   const locale = config?.locale ?? contextLocale
 
+  const resolvedUnits = resolveUnits(config, props.item)
+
   const unitsBefore = useMemo(
     () =>
-      config?.units
-        ? config.unitsPosition
+      resolvedUnits
+        ? config?.unitsPosition
           ? config.unitsPosition === "before"
-          : isUnitBeforeNumber(locale, config.units)
+          : isUnitBeforeNumber(locale, resolvedUnits)
         : false,
-    [locale, config?.units]
+    [locale, resolvedUnits, config?.unitsPosition]
   )
 
   return (
@@ -46,7 +49,7 @@ export function MoneyCell<R extends RecordType>(props: EditableCellProps<R>) {
         ...props.editableColumn,
         numberConfig: {
           ...config,
-          units: config?.units ?? "$",
+          units: resolvedUnits ?? "$",
           unitsPosition: unitsBefore ? "before" : "after",
         },
       }}
