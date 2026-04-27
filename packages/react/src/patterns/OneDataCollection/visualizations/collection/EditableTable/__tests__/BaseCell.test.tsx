@@ -133,4 +133,27 @@ describe("BaseCell", () => {
     const cell = container.firstChild as HTMLElement
     expect(cell.className).toContain("bg-f1-background-secondary")
   })
+
+  it("preserves input focus when error transitions from undefined to a string", async () => {
+    const user = userEvent.setup()
+
+    const { rerender } = render(
+      <BaseCell>
+        <input data-testid="cell-input" />
+      </BaseCell>
+    )
+
+    const input = screen.getByTestId("cell-input")
+    await user.click(input)
+    expect(input).toHaveFocus()
+
+    // Simulate error appearing (e.g. after onCellChange rejects)
+    rerender(
+      <BaseCell error="Invalid value">
+        <input data-testid="cell-input" />
+      </BaseCell>
+    )
+
+    expect(screen.getByTestId("cell-input")).toHaveFocus()
+  })
 })
