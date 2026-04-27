@@ -3,6 +3,7 @@ import type {
   F0BaseFieldRenderIfFunction,
   CommonRenderIfCondition,
 } from "../types"
+import type { F0FormSetValueOptions } from "../../useF0Form"
 
 // ============================================================================
 // Number Field RenderIf Conditions
@@ -65,10 +66,7 @@ export interface F0MoneyFieldFormController {
   setValue: (
     fieldName: string,
     value: unknown,
-    options?: {
-      shouldValidate?: boolean
-      shouldDirty?: boolean
-    }
+    options?: F0FormSetValueOptions
   ) => void
   /** Trigger validation for one field or the whole form */
   trigger: (fieldName?: string) => Promise<boolean>

@@ -44,7 +44,10 @@ export function NumberFieldRenderer({
       form: {
         getValues: () => form.getValues() as Record<string, unknown>,
         setValue: (fieldName, nextValue, options) =>
-          form.setValue(fieldName, nextValue, options),
+          form.setValue(fieldName, nextValue, {
+            shouldValidate: options?.shouldValidate ?? true,
+            shouldDirty: options?.shouldDirty ?? true,
+          }),
         trigger: (fieldName) => form.trigger(fieldName),
       },
     })
