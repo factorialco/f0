@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.467.0](https://github.com/factorialco/f0/compare/f0-react-v1.466.1...f0-react-v1.467.0) (2026-04-27)
+
+
+### Features
+
+* **docs:** add F0ButtonDropdown Storybook documentation ([#3916](https://github.com/factorialco/f0/issues/3916)) ([fb00abb](https://github.com/factorialco/f0/commit/fb00abbfc9ecb7d8be7145f9ce06083ea3bc0864))
+
 ## [1.466.1](https://github.com/factorialco/f0/compare/f0-react-v1.466.0...f0-react-v1.466.1) (2026-04-27)
 
 
