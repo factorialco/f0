@@ -132,6 +132,9 @@ export declare const defaultTranslations: {
             readonly hide: "Hide password";
         };
     };
+    readonly link: {
+        readonly opensInNewTab: "opens in new tab";
+    };
     readonly actions: {
         readonly add: "Add";
         readonly edit: "Edit";
@@ -146,6 +149,7 @@ export declare const defaultTranslations: {
         readonly expand: "Expand";
         readonly showAll: "Show all";
         readonly showLess: "Show less";
+        readonly seeMore: "See more";
         readonly skipToContent: "Skip to content";
         readonly view: "View";
         readonly unselect: "Unselect";
@@ -411,6 +415,12 @@ export declare const defaultTranslations: {
         readonly ask: "Ask One";
         readonly view: "View";
         readonly tools: "Tools";
+        readonly entityRef: {
+            readonly candidate: {
+                readonly source: "Source";
+                readonly applied: "Applied on";
+            };
+        };
         readonly credits: {
             readonly title: "Credits";
             readonly creditsLeft: "{{total}} left";
@@ -422,6 +432,22 @@ export declare const defaultTranslations: {
         readonly reportCard: {
             readonly reportLabel: "Report";
             readonly openButton: "Open";
+        };
+        readonly formCard: {
+            readonly moreFields: "Open to see all fields";
+        };
+        readonly dashboard: {
+            readonly save: "Save";
+            readonly saveToAnalytics: "Save the dashboard in Analytics";
+            readonly saveAs: "Save as";
+            readonly saveDialog: {
+                readonly title: "Save dashboard";
+                readonly titleLabel: "Title";
+                readonly descriptionLabel: "Description";
+                readonly descriptionPlaceholder: "Add a description (optional)";
+                readonly save: "Save";
+                readonly cancel: "Cancel";
+            };
         };
         readonly dataDownload: {
             readonly title: "Download";
@@ -456,15 +482,24 @@ export declare const defaultTranslations: {
         };
         readonly attachFile: "Attach file";
         readonly removeFile: "Remove";
+        readonly fileUploadError: "Upload failed";
         readonly dropFilesHere: "Drop your files here";
+        readonly reply: "Reply";
+        readonly removeQuote: "Remove quote";
         readonly clarifyingQuestion: {
             readonly submit: "Submit";
             readonly next: "Next";
             readonly back: "Back";
+            readonly skip: "Skip";
             readonly typeYourAnswer: "Type your answer…";
             readonly stepOf: "{{current}} of {{total}}";
             readonly custom: "own answer";
             readonly skipped: "skipped";
+            readonly navHint: {
+                readonly navigate: "navigate";
+                readonly select: "select";
+                readonly skip: "skip";
+            };
         };
         readonly growth: {
             readonly demoCard: {
@@ -495,6 +530,8 @@ export declare const defaultTranslations: {
         readonly barChartHorizontal: "Bar (horizontal)";
         readonly lineChart: "Line";
         readonly funnel: "Funnel";
+        readonly pieChart: "Pie";
+        readonly table: "Table";
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -650,6 +687,8 @@ export declare const defaultTranslations: {
         };
     };
     readonly forms: {
+        readonly yes: "Yes";
+        readonly no: "No";
         readonly actionBar: {
             readonly unsavedChanges: "You have changes pending to be saved";
             readonly saving: "Saving...";
@@ -671,6 +710,7 @@ export declare const defaultTranslations: {
             readonly uploadFailed: "Upload failed";
             readonly fileTooLarge: "File exceeds {{maxSize}} MB limit";
             readonly invalidFileType: "File type not accepted. Accepted formats: {{types}}";
+            readonly maxFilesReached: "Maximum {{maxFiles}} files";
         };
         readonly moreInformation: "More information";
         readonly validation: {
@@ -765,6 +805,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -811,9 +856,4 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

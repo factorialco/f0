@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "1.445.0",
+  "version": "1.466.0",
   "private": false,
   "files": [
     "assets",
@@ -33,7 +33,8 @@
     "lint": "sh -c 'oxlint \"${@:-src/**/*}\" --max-warnings 0' --",
     "lint:fix": "sh -c 'oxlint \"${@:-src/**/*}\" --fix --max-warnings 0' --",
     "preview": "vite preview",
-    "generate-icons": "rm -fR src/icons/app/* src/icons/modules/* src/flags/components/* src/icons/ai/* && run-p generate-app-icons generate-module-icons generate-flag-icons generate-ai-icons && oxfmt \"src/{icons,flags}/**/*.tsx\"",
+    "generate-icons": "rm -fR src/icons/app/* src/icons/modules/* src/flags/components/* src/icons/ai/* && run-p generate-app-icons generate-module-icons generate-flag-icons generate-ai-icons && oxfmt \"src/{icons,flags}/**/*.tsx\" && pnpm generate-icon-barrels",
+    "generate-icon-barrels": "bash scripts/generate-icon-barrels.sh src/icons/app src/icons/modules src/icons/ai src/flags/components",
     "generate-app-icons": "npx @svgr/cli --out-dir src/icons/app node_modules/@factorialco/f0-core/assets/icons/app",
     "generate-flag-icons": "npx @svgr/cli --out-dir src/flags/components node_modules/@factorialco/f0-core/assets/flags",
     "generate-module-icons": "npx @svgr/cli --out-dir src/icons/modules node_modules/@factorialco/f0-core/assets/icons/modules",

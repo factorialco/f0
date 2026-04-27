@@ -100,7 +100,7 @@ const e = {
   jo: "Jordan",
   jp: "Japan",
   ke: "Kenya"
-}, t = {
+}, a = {
   countries: e,
   approvals: {
     history: "Approval history",
@@ -132,6 +132,9 @@ const e = {
       hide: "Hide password"
     }
   },
+  link: {
+    opensInNewTab: "opens in new tab"
+  },
   actions: {
     add: "Add",
     edit: "Edit",
@@ -146,6 +149,7 @@ const e = {
     expand: "Expand",
     showAll: "Show all",
     showLess: "Show less",
+    seeMore: "See more",
     skipToContent: "Skip to content",
     view: "View",
     unselect: "Unselect",
@@ -411,6 +415,12 @@ const e = {
     ask: "Ask One",
     view: "View",
     tools: "Tools",
+    entityRef: {
+      candidate: {
+        source: "Source",
+        applied: "Applied on"
+      }
+    },
     credits: {
       title: "Credits",
       creditsLeft: "{{total}} left",
@@ -422,6 +432,22 @@ const e = {
     reportCard: {
       reportLabel: "Report",
       openButton: "Open"
+    },
+    formCard: {
+      moreFields: "Open to see all fields"
+    },
+    dashboard: {
+      save: "Save",
+      saveToAnalytics: "Save the dashboard in Analytics",
+      saveAs: "Save as",
+      saveDialog: {
+        title: "Save dashboard",
+        titleLabel: "Title",
+        descriptionLabel: "Description",
+        descriptionPlaceholder: "Add a description (optional)",
+        save: "Save",
+        cancel: "Cancel"
+      }
     },
     dataDownload: {
       title: "Download",
@@ -456,15 +482,24 @@ const e = {
     },
     attachFile: "Attach file",
     removeFile: "Remove",
+    fileUploadError: "Upload failed",
     dropFilesHere: "Drop your files here",
+    reply: "Reply",
+    removeQuote: "Remove quote",
     clarifyingQuestion: {
       submit: "Submit",
       next: "Next",
       back: "Back",
+      skip: "Skip",
       typeYourAnswer: "Type your answer…",
       stepOf: "{{current}} of {{total}}",
       custom: "own answer",
-      skipped: "skipped"
+      skipped: "skipped",
+      navHint: {
+        navigate: "navigate",
+        select: "select",
+        skip: "skip"
+      }
     },
     growth: {
       demoCard: {
@@ -494,7 +529,9 @@ const e = {
     barChartVertical: "Bar (vertical)",
     barChartHorizontal: "Bar (horizontal)",
     lineChart: "Line",
-    funnel: "Funnel"
+    funnel: "Funnel",
+    pieChart: "Pie",
+    table: "Table"
   },
   select: {
     noResults: "No results found",
@@ -650,6 +687,8 @@ const e = {
     }
   },
   forms: {
+    yes: "Yes",
+    no: "No",
     actionBar: {
       unsavedChanges: "You have changes pending to be saved",
       saving: "Saving...",
@@ -670,7 +709,8 @@ const e = {
       processing: "Processing…",
       uploadFailed: "Upload failed",
       fileTooLarge: "File exceeds {{maxSize}} MB limit",
-      invalidFileType: "File type not accepted. Accepted formats: {{types}}"
+      invalidFileType: "File type not accepted. Accepted formats: {{types}}",
+      maxFilesReached: "Maximum {{maxFiles}} files"
     },
     moreInformation: "More information",
     validation: {
@@ -711,5 +751,5 @@ const e = {
   }
 };
 export {
-  t as defaultTranslations
+  a as defaultTranslations
 };
