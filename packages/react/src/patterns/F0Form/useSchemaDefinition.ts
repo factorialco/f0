@@ -109,6 +109,10 @@ function configToF0Field(
           fieldType === "money" && "onValueChange" in config
             ? config.onValueChange
             : undefined,
+        validateOnChange:
+          fieldType === "money" && "validateOnChange" in config
+            ? config.validateOnChange
+            : undefined,
         clearable,
         renderIf: config.renderIf,
       } as F0Field

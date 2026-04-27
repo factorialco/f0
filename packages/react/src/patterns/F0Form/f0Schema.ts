@@ -287,6 +287,14 @@ export type F0NumberMoneyConfig = F0BaseConfig &
      * Useful for cross-field behaviors (for example delayed range validation).
      */
     onValueChange?: F0MoneyFieldOnValueChange
+    /**
+     * When false, the field does not trigger RHF validation immediately on change.
+     * Use this together with `onValueChange` to implement debounced cross-field
+     * validation: product code calls `form.trigger()` manually after the desired delay.
+     *
+     * @default true
+     */
+    validateOnChange?: boolean
   }
 
 /**

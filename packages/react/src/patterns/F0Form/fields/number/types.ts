@@ -108,6 +108,12 @@ export type F0NumberField = F0BaseField &
     units?: string
     /** Called when a money field value changes */
     onValueChange?: F0MoneyFieldOnValueChange
+    /**
+     * When false, the field bypasses RHF's immediate validation on change.
+     * Product code must call `form.trigger()` manually to validate.
+     * @default true
+     */
+    validateOnChange?: boolean
     /** Whether the field can be cleared (derived from optional/nullable) */
     clearable?: boolean
     /** Conditional rendering based on another field's value */

@@ -2668,6 +2668,68 @@ describe("F0Form alert feature", () => {
     })
   })
 
+  it("does not show validation errors immediately when validateOnChange is false", async () => {
+    const user = userEvent.setup()
+    const onMoneyChange = vi.fn()
+
+    // Use object-level superRefine to avoid chaining .refine() on the field
+    // builder (which creates ZodEffects and breaks field type detection).
+    const formSchema = z
+      .object({
+        minAmount: f0FormField.money({
+          label: "Min amount",
+          currency: "EUR",
+        }),
+        maxAmount: f0FormField.money({
+          label: "Max amount",
+          currency: "EUR",
+          validateOnChange: false,
+          onValueChange: onMoneyChange,
+        }),
+      })
+      .superRefine(({ maxAmount }, ctx) => {
+        if (maxAmount !== null && maxAmount < 500) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Must be at least 500",
+            path: ["maxAmount"],
+          })
+        }
+      })
+
+    render(
+      <F0Form
+        name="validate-on-change-false"
+        schema={formSchema}
+        defaultValues={{ minAmount: 100, maxAmount: 200 }}
+        errorTriggerMode="on-change"
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const maxInput = screen.getByLabelText("Max amount")
+    await user.clear(maxInput)
+    await user.type(maxInput, "1")
+
+    // onValueChange must still fire
+    await waitFor(() => {
+      expect(onMoneyChange).toHaveBeenCalled()
+    })
+
+    // Error must NOT appear because validateOnChange is false
+    expect(screen.queryByText("Must be at least 500")).not.toBeInTheDocument()
+
+    // Calling trigger() via the callback context causes validation to run
+    const lastCallCtx = onMoneyChange.mock.calls.at(-1)?.[0] as {
+      form: { trigger: (field?: string) => Promise<boolean> }
+    }
+    await lastCallCtx.form.trigger()
+
+    await waitFor(() => {
+      expect(screen.getByText("Must be at least 500")).toBeInTheDocument()
+    })
+  })
+
   it("renders alert on a switch field within a switch group", () => {
     const formSchema = z.object({
       optionA: f0FormField(z.boolean(), {
