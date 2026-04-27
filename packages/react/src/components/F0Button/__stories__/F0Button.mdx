@@ -79,6 +79,16 @@ Triggers user actions or navigates to other parts of the application. Supports i
         <td>Highlighted promotional styling</td>
         <td>Upsell, upgrade, or promotional calls to action</td>
       </tr>
+      <tr>
+        <td>
+          <code>outlinePromote</code>
+        </td>
+        <td>Bordered promotional styling, medium emphasis</td>
+        <td>
+          Promotional or upgrade actions that should stand out, but with less
+          emphasis than the filled <code>promote</code> button
+        </td>
+      </tr>
     </tbody>
   </table>
 </Unstyled>
@@ -151,8 +161,8 @@ Icons reinforce the label meaning. Use leading icons for the most common case, t
         </td>
         <td>Inactive — does not respond to interaction</td>
         <td>
-          Reduced opacity, not-allowed cursor, remains focusable for assistive
-          tech
+          Reduced opacity, not-allowed cursor, removed from interaction and
+          keyboard focus
         </td>
       </tr>
       <tr>
@@ -289,7 +299,7 @@ The forwarded `ref` is typed as `HTMLButtonElement | HTMLAnchorElement` to refle
 
 - The `label` prop is always required — it is used as the accessible name even when visually hidden via `hideLabel`
 - When `hideLabel` is true, the label is rendered as `sr-only` and also used as the auto-generated tooltip
-- `loading` state is communicated via `aria-busy` and `aria-live` — handled internally; no consumer setup required
-- Disabled buttons remain focusable so assistive technologies can announce them
+- `loading` state is communicated via `aria-busy` — handled internally; no consumer setup required
+- Disabled state uses the element's native disabled semantics — buttons are removed from tab order, disabled links render as non-interactive elements
 - Buttons rendered with `href` are exposed as `<a>` elements and announced as links by screen readers
 - Icon-only buttons (`hideLabel`) rely entirely on the `label` for screen reader output — never use icon-only without a meaningful label
