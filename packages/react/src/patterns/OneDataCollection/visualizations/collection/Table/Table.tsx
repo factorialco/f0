@@ -534,6 +534,7 @@ export const TableCollection = <
                 (isEditableTable ? (
                   <TableHead
                     key="actions"
+                    width="fit"
                     sticky={{ right: 0 }}
                     className="border-0 border-l-[1px] border-solid border-f1-border-secondary"
                   >

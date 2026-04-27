@@ -12,20 +12,22 @@ import {
 } from "@/ui/tooltip"
 
 interface ErrorTooltipProps {
-  message: string
+  message?: string
   children: ReactNode
 }
 
 export function ErrorTooltip({ message, children }: ErrorTooltipProps) {
   const [open, setOpen] = useState(false)
 
-  const handleFocusCapture = useCallback(() => setOpen(true), [])
+  const handleFocusCapture = useCallback(() => {
+    if (message) setOpen(true)
+  }, [message])
   const handleBlurCapture = useCallback(() => setOpen(false), [])
 
   return (
     <div className="relative h-full w-full">
       <TooltipProvider delayDuration={100} disableHoverableContent>
-        <Tooltip open={open} onOpenChange={setOpen}>
+        <Tooltip open={open && !!message} onOpenChange={setOpen}>
           <TooltipTrigger asChild className="pointer-events-auto h-full w-full">
             <div
               className="flex h-full w-full items-center"
@@ -35,15 +37,17 @@ export function ErrorTooltip({ message, children }: ErrorTooltipProps) {
               {children}
             </div>
           </TooltipTrigger>
-          <TooltipContent
-            side="top"
-            className="flex items-center gap-1 border-black/10 bg-[#fff] shadow-md"
-          >
-            <F0Icon icon={AlertCircle} color="critical" size="sm" />
-            <span className="text-sm font-medium text-f1-foreground-critical">
-              {message}
-            </span>
-          </TooltipContent>
+          {message && (
+            <TooltipContent
+              side="top"
+              className="flex items-center gap-1 border-black/10 bg-[#fff] shadow-md"
+            >
+              <F0Icon icon={AlertCircle} color="critical" size="sm" />
+              <span className="text-sm font-medium text-f1-foreground-critical">
+                {message}
+              </span>
+            </TooltipContent>
+          )}
         </Tooltip>
       </TooltipProvider>
     </div>

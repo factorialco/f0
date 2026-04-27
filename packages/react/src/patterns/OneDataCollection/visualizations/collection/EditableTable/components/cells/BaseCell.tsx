@@ -45,11 +45,7 @@ export function BaseCell({
         readonly && "bg-f1-background-secondary"
       )}
     >
-      {error ? (
-        <ErrorTooltip message={error}>{children}</ErrorTooltip>
-      ) : (
-        children
-      )}
+      <ErrorTooltip message={error}>{children}</ErrorTooltip>
     </div>
   )
 }
