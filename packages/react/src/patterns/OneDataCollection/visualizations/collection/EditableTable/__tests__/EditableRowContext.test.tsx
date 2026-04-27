@@ -43,6 +43,18 @@ function TestConsumer() {
       >
         Update Name
       </button>
+      <button
+        onClick={() => ctx.handleCellChange("name", "")}
+        data-testid="clear-name"
+      >
+        Clear Name
+      </button>
+      <button
+        onClick={() => ctx.handleCellBlur("name")}
+        data-testid="blur-name"
+      >
+        Blur Name
+      </button>
     </div>
   )
 }
@@ -232,6 +244,72 @@ describe("EditableRowContext", () => {
       await waitFor(() => {
         expect(screen.getByTestId("name")).toHaveTextContent("Jane Doe")
       })
+    })
+
+    it("passes empty string through without converting to null", async () => {
+      const user = userEvent.setup()
+      const onCellChange = vi.fn().mockResolvedValue(undefined)
+
+      render(
+        <EditableRowProvider item={testItem} onCellChange={onCellChange}>
+          <TestConsumer />
+        </EditableRowProvider>
+      )
+
+      await user.click(screen.getByTestId("clear-name"))
+
+      expect(onCellChange).toHaveBeenCalledWith({
+        ...testItem,
+        name: "",
+      })
+    })
+  })
+
+  describe("handleCellBlur", () => {
+    it("calls onCellBlur with current item and column id", async () => {
+      const user = userEvent.setup()
+      const onCellChange = vi.fn().mockResolvedValue(undefined)
+      const onCellBlur = vi.fn()
+
+      render(
+        <EditableRowProvider
+          item={testItem}
+          onCellChange={onCellChange}
+          onCellBlur={onCellBlur}
+        >
+          <TestConsumer />
+        </EditableRowProvider>
+      )
+
+      await user.click(screen.getByTestId("blur-name"))
+
+      expect(onCellBlur).toHaveBeenCalledWith(testItem, "name")
+    })
+
+    it("calls onCellBlur with latest local item after changes", async () => {
+      const user = userEvent.setup()
+      const onCellChange = vi.fn().mockResolvedValue(undefined)
+      const onCellBlur = vi.fn()
+
+      render(
+        <EditableRowProvider
+          item={testItem}
+          onCellChange={onCellChange}
+          onCellBlur={onCellBlur}
+        >
+          <TestConsumer />
+        </EditableRowProvider>
+      )
+
+      // First update the name
+      await user.click(screen.getByTestId("update-name"))
+      // Then blur
+      await user.click(screen.getByTestId("blur-name"))
+
+      expect(onCellBlur).toHaveBeenCalledWith(
+        { ...testItem, name: "Updated Name" },
+        "name"
+      )
     })
   })
 })

@@ -73,4 +73,17 @@ describe("TextCell", () => {
     // Label should exist for a11y but not be visible
     expect(screen.getByLabelText("Name")).toBeInTheDocument()
   })
+
+  it("calls onBlur when the input loses focus", async () => {
+    const user = userEvent.setup()
+    const onBlur = vi.fn()
+
+    render(<TextCell {...defaultProps} onBlur={onBlur} />)
+
+    const input = screen.getByRole("textbox")
+    await user.click(input)
+    await user.tab()
+
+    expect(onBlur).toHaveBeenCalled()
+  })
 })

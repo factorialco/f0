@@ -1,10 +1,10 @@
-import { useState } from "react"
+import { useCallback, useState } from "react"
 
 import { F0Select } from "@/components/F0Select"
-import { renderProperty } from "@/patterns/OneDataCollection/property-render"
 import { RecordType } from "@/hooks/datasource/types/records.typings"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
+import { renderProperty } from "@/patterns/OneDataCollection/property-render"
 
 import { EditableCellProps } from "."
 import { BaseCell } from "./BaseCell"
@@ -17,10 +17,20 @@ export function SelectCell<R extends RecordType>({
   error,
   loading,
   onChange,
+  onBlur,
   item,
 }: EditableCellProps<R>) {
   const i18n = useI18n()
   const [isOpen, setIsOpen] = useState(false)
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      setIsOpen(open)
+      if (!open) {
+        onBlur?.()
+      }
+    },
+    [onBlur]
+  )
   const config = editableColumn.selectConfig
   if (!config) {
     if (!warnedColumns.has(editableColumn.label)) {
@@ -52,7 +62,7 @@ export function SelectCell<R extends RecordType>({
     showSearchBox: config.showSearchBox,
     defaultItem: config.defaultItem?.(item),
     multiple: false as const,
-    onOpenChange: setIsOpen,
+    onOpenChange: handleOpenChange,
   }
 
   const clearableProps = config.clearable

@@ -138,6 +138,11 @@ export type EditableTableVisualizationOptions<
    */
   onCellChange: (updatedItem: R) => Promise<void | Record<string, string>>
   /**
+   * Called when a cell loses focus. Receives the current item and the column id
+   * that was blurred. Useful for triggering validation or save on blur.
+   */
+  onCellBlur?: (item: R, columnId: string) => void
+  /**
    * When provided, renders action buttons at the bottom of the root-level table.
    * Returns a single action, an array of actions, or undefined to hide the row.
    */

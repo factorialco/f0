@@ -5,7 +5,6 @@ import { RecordType } from "@/hooks/datasource/types/records.typings"
 import { cn } from "@/lib/utils"
 
 import type { EditableCellProps } from "."
-
 import { BaseCell } from "./BaseCell"
 import { useNumberCellLayout } from "./hooks/useNumberCellLayout"
 
@@ -15,6 +14,7 @@ export function NumberCell<R extends RecordType>({
   error,
   loading,
   onChange,
+  onBlur,
 }: EditableCellProps<R>) {
   const config = editableColumn.numberConfig
   // When clamping produces the same value the parent already holds,
@@ -85,6 +85,7 @@ export function NumberCell<R extends RecordType>({
             hideLabel
             value={numericValue}
             onChange={handleChange}
+            onBlur={onBlur}
             loading={loading}
             transparent
             hint=""

@@ -2,10 +2,9 @@ import type { RecordType, SortingsDefinition } from "@/hooks/datasource"
 
 import type { SummariesDefinition } from "../../../../summary"
 import type { CellRendererProps } from "../../Table/types"
-import type { EditableTableColumnDefinition } from "../types"
-
 import { editableCellMap } from "../consts"
 import { useEditableRow } from "../context/EditableRowContext"
+import type { EditableTableColumnDefinition } from "../types"
 import { NonEditableCell } from "./cells/status/NonEditableCell"
 
 /**
@@ -51,7 +50,13 @@ export function EditableCellRenderer<
     return <>{children}</>
   }
 
-  const { localItem, cellErrors, cellLoading, handleCellChange } = editableCtx
+  const {
+    localItem,
+    cellErrors,
+    cellLoading,
+    handleCellChange,
+    handleCellBlur,
+  } = editableCtx
   const editableColumn = column as EditableTableColumnDefinition<
     R,
     Sortings,
@@ -65,6 +70,12 @@ export function EditableCellRenderer<
   const onChange = (value: string) => {
     if (editableColumn.id !== undefined) {
       handleCellChange(editableColumn.id, value)
+    }
+  }
+
+  const onBlur = () => {
+    if (editableColumn.id !== undefined) {
+      handleCellBlur(editableColumn.id)
     }
   }
 
@@ -96,6 +107,7 @@ export function EditableCellRenderer<
             isLastColumn={isLastColumn}
             loading={loading}
             onChange={onChange}
+            onBlur={onBlur}
           />
         </div>
       )

@@ -1,7 +1,6 @@
 import type { RecordType, SortingsDefinition } from "@/hooks/datasource"
 
 import type { SummariesDefinition } from "../../../../../summary"
-
 import { EditableTableColumnDefinition } from "../../types"
 
 /**
@@ -18,6 +17,7 @@ export type EditableCellProps<R extends RecordType> = {
   error?: string
   loading?: boolean
   onChange: (value: string) => void
+  onBlur?: () => void
   item: R
   isLastColumn?: boolean
 }

@@ -11,6 +11,7 @@ export function TextCell<R extends RecordType>({
   error,
   loading,
   onChange,
+  onBlur,
 }: EditableCellProps<R>) {
   return (
     <BaseCell error={error}>
@@ -27,6 +28,7 @@ export function TextCell<R extends RecordType>({
           hideLabel
           value={value}
           onChange={onChange}
+          onBlur={onBlur}
           loading={loading}
           transparent
         />
