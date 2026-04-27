@@ -80,7 +80,7 @@ export const ResizeHandle = ({
         // panel's edge captures the mouse events first.
         "group relative z-10 h-full flex-shrink-0 cursor-ew-resize",
         narrow
-          ? "w-1 bg-f1-background border border-x-0 border-solid border-f1-border-secondary"
+          ? "w-1 bg-f1-special-page border border-x-0 border-solid border-f1-border-secondary"
           : "w-1"
       )}
       onMouseDown={handleMouseDown}
