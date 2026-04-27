@@ -14,6 +14,7 @@ export function NumberCell<R extends RecordType>({
   error,
   loading,
   onChange,
+  onBlur,
 }: EditableCellProps<R>) {
   const config = editableColumn.numberConfig
   // When clamping produces the same value the parent already holds,
@@ -88,6 +89,7 @@ export function NumberCell<R extends RecordType>({
             hideLabel
             value={numericValue}
             onChange={handleChange}
+            onBlur={onBlur}
             loading={loading}
             transparent
             hint=""
