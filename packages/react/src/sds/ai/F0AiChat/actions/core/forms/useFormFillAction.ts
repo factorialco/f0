@@ -212,30 +212,51 @@ export const useFormFillAction = () => {
         }
       }
 
-      const valuesToSet: Record<string, unknown> = {}
-      const shape = getSchemaShape(entry.schema)
-      for (const { fieldName, value } of values) {
-        const fieldSchema = shape?.[fieldName]
-        valuesToSet[fieldName] = fieldSchema
-          ? coerceValue(value, fieldSchema)
-          : value
+      const executeFill = async () => {
+        // Re-look up the ref in case it changed while queued (e.g. virtual → rendered)
+        const currentEntry = registry.get(formName)
+        const currentRef = currentEntry?.ref.current ?? ref
+
+        const valuesToSet: Record<string, unknown> = {}
+        const shape = getSchemaShape(currentEntry?.schema ?? entry.schema)
+        for (const { fieldName, value } of values) {
+          const fieldSchema = shape?.[fieldName]
+          valuesToSet[fieldName] = fieldSchema
+            ? coerceValue(value, fieldSchema)
+            : value
+        }
+
+        currentRef.setValues(valuesToSet, {
+          shouldValidate: false,
+          shouldDirty: true,
+        })
+        await currentRef.trigger()
+
+        // Refresh the registry snapshot so the co-agent picks up new values
+        registry.rebuildDescriptions()
+        registry.incrementFillVersion(formName)
+
+        const errors = currentRef.getErrors()
+        const hasErrors = Object.keys(errors).length > 0
+        const result = {
+          success: !hasErrors,
+          ...(hasErrors ? { errors } : {}),
+          currentValues: currentRef.getValues(),
+        }
+        return result
       }
 
-      ref.setValues(valuesToSet, { shouldValidate: false, shouldDirty: true })
-      await ref.trigger()
-
-      // Refresh the registry snapshot so the co-agent picks up new values
-      registry.rebuildDescriptions()
-      registry.incrementFillVersion(formName)
-
-      const errors = ref.getErrors()
-      const hasErrors = Object.keys(errors).length > 0
-
-      return {
-        success: !hasErrors,
-        ...(hasErrors ? { errors } : {}),
-        currentValues: ref.getValues(),
+      // If async default values haven't resolved yet, queue the fill
+      // so it runs after resolution — preventing defaults from overwriting AI values.
+      if (!registry.isDefaultValuesResolved(formName)) {
+        return new Promise<Record<string, unknown>>((resolve, reject) => {
+          registry.queueFillAction(formName, () => {
+            void executeFill().then(resolve, reject)
+          })
+        })
       }
+
+      return executeFill()
     },
   })
 }
