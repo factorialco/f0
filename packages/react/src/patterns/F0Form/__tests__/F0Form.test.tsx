@@ -2672,8 +2672,6 @@ describe("F0Form alert feature", () => {
     const user = userEvent.setup()
     const onMoneyChange = vi.fn()
 
-    // Use object-level superRefine to avoid chaining .refine() on the field
-    // builder (which creates ZodEffects and breaks field type detection).
     const formSchema = z
       .object({
         minAmount: f0FormField.money({
@@ -2711,15 +2709,12 @@ describe("F0Form alert feature", () => {
     await user.clear(maxInput)
     await user.type(maxInput, "1")
 
-    // onValueChange must still fire
     await waitFor(() => {
       expect(onMoneyChange).toHaveBeenCalled()
     })
 
-    // Error must NOT appear because validateOnChange is false
     expect(screen.queryByText("Must be at least 500")).not.toBeInTheDocument()
 
-    // Calling trigger() via the callback context causes validation to run
     const lastCallCtx = onMoneyChange.mock.calls.at(-1)?.[0] as {
       form: { trigger: (field?: string) => Promise<boolean> }
     }
@@ -2861,26 +2856,6 @@ describe("getSchemaDefinition - alert and moreInfoLink config extraction", () =>
     }
 
     expect(fieldItem.field.alert).toBe(alertFn)
-  })
-
-  it("attaches money onValueChange callback to field definition", () => {
-    const onMoneyChange = vi.fn()
-
-    const formSchema = z.object({
-      budget: f0FormField.money({
-        label: "Budget",
-        currency: "EUR",
-        onValueChange: onMoneyChange,
-      }),
-    })
-
-    const definition = getSchemaDefinition(formSchema)
-    const fieldItem = definition[0] as {
-      type: "field"
-      field: { onValueChange?: unknown }
-    }
-
-    expect(fieldItem.field.onValueChange).toBe(onMoneyChange)
   })
 
   it("attaches moreInfoLink config to switch field definition", () => {

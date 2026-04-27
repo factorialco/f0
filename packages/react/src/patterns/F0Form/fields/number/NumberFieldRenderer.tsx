@@ -35,8 +35,6 @@ export function NumberFieldRenderer({
 
   const handleChange = (value: number | null) => {
     if (field.validateOnChange === false) {
-      // Bypass the RHF controller onChange to suppress immediate validation.
-      // Product code is responsible for calling form.trigger() when ready.
       form.setValue(field.id, value, {
         shouldValidate: false,
         shouldDirty: true,
