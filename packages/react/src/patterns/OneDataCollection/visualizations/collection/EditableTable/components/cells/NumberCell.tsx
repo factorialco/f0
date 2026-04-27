@@ -24,7 +24,7 @@ export function NumberCell<R extends RecordType>({
 
   const trimmed = typeof value === "string" ? value.trim() : value
   const parsed = trimmed !== "" && trimmed != null ? Number(trimmed) : NaN
-  const numericValue: number | null = isFinite(parsed) ? parsed : null
+  const numericValue: number | null = isFinite(parsed) ? parsed : 0
 
   const { ref, width, locale, units, unitsBefore } = useNumberCellLayout(
     config,
@@ -32,11 +32,7 @@ export function NumberCell<R extends RecordType>({
   )
 
   const handleChange = (newValue: number | null) => {
-    if (newValue == null) {
-      if (value !== "") onChange(null)
-      return
-    }
-    let clamped = newValue
+    let clamped = newValue ?? 0
     if (config?.min != null && clamped < config.min) clamped = config.min
     if (config?.max != null && clamped > config.max) clamped = config.max
 

@@ -16,7 +16,7 @@ export type EditableCellProps<R extends RecordType> = {
   inputPlaceholder?: string
   error?: string
   loading?: boolean
-  onChange: (value: string | null) => void
+  onChange: (value: string) => void
   onBlur?: () => void
   item: R
   isLastColumn?: boolean

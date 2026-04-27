@@ -67,7 +67,7 @@ export function EditableCellRenderer<
 
   const hasId = editableColumn.id !== undefined
 
-  const onChange = (value: string | null) => {
+  const onChange = (value: string) => {
     if (editableColumn.id !== undefined) {
       handleCellChange(editableColumn.id, value)
     }

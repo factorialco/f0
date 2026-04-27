@@ -34,11 +34,11 @@ describe("NumberCell", () => {
     expect(input).toHaveValue("42000")
   })
 
-  it("renders empty when value is an empty string", () => {
+  it("renders 0 when value is an empty string", () => {
     render(<NumberCell {...defaultProps} value="" />)
 
     const input = screen.getByRole("textbox")
-    expect(input).toHaveValue("")
+    expect(input).toHaveValue("0")
   })
 
   it("calls onChange with the serialized string value", async () => {
@@ -53,7 +53,7 @@ describe("NumberCell", () => {
     expect(onChange).toHaveBeenCalledWith("5")
   })
 
-  it("calls onChange with null when value is cleared", async () => {
+  it("calls onChange with '0' when value is cleared", async () => {
     const user = userEvent.setup()
     const onChange = vi.fn()
 
@@ -62,7 +62,7 @@ describe("NumberCell", () => {
     const input = screen.getByRole("textbox")
     await user.clear(input)
 
-    expect(onChange).toHaveBeenCalledWith(null)
+    expect(onChange).toHaveBeenCalledWith("0")
   })
 
   it("does not call onChange when value is unchanged", () => {
