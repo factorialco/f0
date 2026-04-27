@@ -56,6 +56,44 @@ export interface F0NumberConfig {
 }
 
 /**
+ * Imperative form helpers exposed to money onValueChange callbacks.
+ */
+export interface F0MoneyFieldFormController {
+  /** Get all current form values */
+  getValues: () => Record<string, unknown>
+  /** Set a specific field value */
+  setValue: (
+    fieldName: string,
+    value: unknown,
+    options?: {
+      shouldValidate?: boolean
+      shouldDirty?: boolean
+    }
+  ) => void
+  /** Trigger validation for one field or the whole form */
+  trigger: (fieldName?: string) => Promise<boolean>
+}
+
+/**
+ * Context passed to money onValueChange callbacks.
+ */
+export interface F0MoneyFieldOnValueChangeContext {
+  /** New value produced by the money input */
+  value: number | null
+  /** Current form values after the change */
+  values: Record<string, unknown>
+  /** Imperative form helpers */
+  form: F0MoneyFieldFormController
+}
+
+/**
+ * Callback for money field value changes.
+ */
+export type F0MoneyFieldOnValueChange = (
+  context: F0MoneyFieldOnValueChangeContext
+) => void
+
+/**
  * Number field with all properties for rendering
  * Includes properties derived from Zod schema
  */
@@ -70,6 +108,8 @@ export type F0NumberField = F0BaseField &
     maxDecimals?: number
     /** Units suffix shown inside the input (e.g. "%") */
     units?: string
+    /** Called when a money field value changes */
+    onValueChange?: F0MoneyFieldOnValueChange
     /** Whether the field can be cleared (derived from optional/nullable) */
     clearable?: boolean
     /** Conditional rendering based on another field's value */

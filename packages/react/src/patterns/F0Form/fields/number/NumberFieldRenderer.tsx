@@ -1,4 +1,8 @@
-import { ControllerRenderProps, FieldValues } from "react-hook-form"
+import {
+  ControllerRenderProps,
+  FieldValues,
+  useFormContext,
+} from "react-hook-form"
 
 import type { InputFieldStatus } from "@/ui/InputField/types"
 
@@ -27,6 +31,25 @@ export function NumberFieldRenderer({
   loading,
   status,
 }: NumberFieldRendererProps) {
+  const form = useFormContext()
+
+  const handleChange = (value: number | null) => {
+    formField.onChange(value)
+
+    if (!field.onValueChange) return
+
+    field.onValueChange({
+      value,
+      values: form.getValues() as Record<string, unknown>,
+      form: {
+        getValues: () => form.getValues() as Record<string, unknown>,
+        setValue: (fieldName, nextValue, options) =>
+          form.setValue(fieldName, nextValue, options),
+        trigger: (fieldName) => form.trigger(fieldName),
+      },
+    })
+  }
+
   return (
     <NumberInput
       {...formField}
@@ -40,7 +63,7 @@ export function NumberFieldRenderer({
       units={field.units}
       locale={field.locale ?? "en-US"}
       value={formField.value != null ? Number(formField.value) : undefined}
-      onChange={(value) => formField.onChange(value)}
+      onChange={handleChange}
       size={FORM_SIZE}
       hideLabel
       hint=""

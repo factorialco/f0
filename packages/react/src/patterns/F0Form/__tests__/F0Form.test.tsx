@@ -2604,6 +2604,70 @@ describe("F0Form alert feature", () => {
     })
   })
 
+  it("calls onValueChange for money fields with updated values", async () => {
+    const user = userEvent.setup()
+    const onMoneyChange = vi.fn()
+
+    const formSchema = z.object({
+      minAmount: f0FormField.money({
+        label: "Min amount",
+        currency: "EUR",
+      }),
+      maxAmount: f0FormField.money({
+        label: "Max amount",
+        currency: "EUR",
+        onValueChange: onMoneyChange,
+      }),
+    })
+
+    render(
+      <F0Form
+        name="money-on-value-change"
+        schema={formSchema}
+        defaultValues={{ minAmount: 100, maxAmount: 200 }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const maxInput = screen.getByLabelText("Max amount")
+    await user.clear(maxInput)
+    await user.type(maxInput, "300")
+
+    await waitFor(() => {
+      expect(onMoneyChange).toHaveBeenCalled()
+    })
+
+    const [lastCall] = onMoneyChange.mock.calls.slice(-1)
+    const callbackContext = lastCall?.[0] as {
+      value: number | null
+      values: Record<string, unknown>
+      form: {
+        getValues: () => Record<string, unknown>
+        setValue: (
+          fieldName: string,
+          value: unknown,
+          options?: { shouldValidate?: boolean; shouldDirty?: boolean }
+        ) => void
+      }
+    }
+
+    expect(callbackContext.value).toBe(300)
+    expect(callbackContext.values).toMatchObject({
+      minAmount: 100,
+      maxAmount: 300,
+    })
+    expect(callbackContext.form.getValues()).toMatchObject({
+      minAmount: 100,
+      maxAmount: 300,
+    })
+
+    callbackContext.form.setValue("minAmount", 250)
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("250")).toBeInTheDocument()
+    })
+  })
+
   it("renders alert on a switch field within a switch group", () => {
     const formSchema = z.object({
       optionA: f0FormField(z.boolean(), {
@@ -2735,6 +2799,26 @@ describe("getSchemaDefinition - alert and moreInfoLink config extraction", () =>
     }
 
     expect(fieldItem.field.alert).toBe(alertFn)
+  })
+
+  it("attaches money onValueChange callback to field definition", () => {
+    const onMoneyChange = vi.fn()
+
+    const formSchema = z.object({
+      budget: f0FormField.money({
+        label: "Budget",
+        currency: "EUR",
+        onValueChange: onMoneyChange,
+      }),
+    })
+
+    const definition = getSchemaDefinition(formSchema)
+    const fieldItem = definition[0] as {
+      type: "field"
+      field: { onValueChange?: unknown }
+    }
+
+    expect(fieldItem.field.onValueChange).toBe(onMoneyChange)
   })
 
   it("attaches moreInfoLink config to switch field definition", () => {

@@ -105,6 +105,10 @@ function configToF0Field(
         maxDecimals: isInteger ? 0 : undefined,
         units,
         locale: "locale" in config ? config.locale : undefined,
+        onValueChange:
+          fieldType === "money" && "onValueChange" in config
+            ? config.onValueChange
+            : undefined,
         clearable,
         renderIf: config.renderIf,
       } as F0Field

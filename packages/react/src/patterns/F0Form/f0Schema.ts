@@ -18,7 +18,10 @@ import type {
 } from "./fields/date/types"
 import type { F0DateRangeConfig } from "./fields/daterange/types"
 import type { F0FileConfig } from "./fields/file/types"
-import type { F0NumberConfig } from "./fields/number/types"
+import type {
+  F0MoneyFieldOnValueChange,
+  F0NumberConfig,
+} from "./fields/number/types"
 import type { F0RichTextConfig } from "./fields/richtext/types"
 import type { F0SelectConfig } from "./fields/select/types"
 import type { F0SwitchConfig } from "./fields/switch/types"
@@ -279,6 +282,11 @@ export type F0NumberMoneyConfig = F0BaseConfig &
   F0NumberConfig & {
     fieldType: "money"
     currency: string
+    /**
+     * Called whenever the money field value changes.
+     * Useful for cross-field behaviors (for example delayed range validation).
+     */
+    onValueChange?: F0MoneyFieldOnValueChange
   }
 
 /**
