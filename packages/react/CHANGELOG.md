@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.466.1](https://github.com/factorialco/f0/compare/f0-react-v1.466.0...f0-react-v1.466.1) (2026-04-27)
+
+
+### Bug Fixes
+
+* **NestedCell:** height for editable text inputs in nested table rows ([#4046](https://github.com/factorialco/f0/issues/4046)) ([043587f](https://github.com/factorialco/f0/commit/043587f93d5feaa78de1f180a6352c48437bb1fd))
+
 ## [1.466.0](https://github.com/factorialco/f0/compare/f0-react-v1.465.0...f0-react-v1.466.0) (2026-04-27)
 
 
