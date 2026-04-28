@@ -3,9 +3,8 @@ import EmojiPicker from "@emoji-mart/react"
 import { useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
-import { cn } from "@/lib/utils"
-
 import "@/kits/Social/Reactions/Picker/index.css"
+import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 export type ScoreEditOptionProps = {
@@ -50,12 +49,17 @@ export const ScoreEditOption = ({
       onClick={handleClick}
     >
       {isEmojiMode ? (
-        <Popover open={isEmojiPickerOpen} onOpenChange={setIsEmojiPickerOpen}>
+        <Popover
+          open={!disabled && isEmojiPickerOpen}
+          onOpenChange={disabled ? undefined : setIsEmojiPickerOpen}
+        >
           <PopoverTrigger asChild>
             <F0Button
               emoji={label}
               label={value.toString()}
               variant="ghost"
+              disabled={disabled}
+              withoutDisabledAppearance
               hideLabel
             />
           </PopoverTrigger>
