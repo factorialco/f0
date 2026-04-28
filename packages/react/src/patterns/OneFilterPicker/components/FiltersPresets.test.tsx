@@ -181,9 +181,7 @@ describe("FiltersPresets - Exact Match Selection", () => {
     const activePreset = getVisibleByText("Status: Active").closest("label")
     expect(activePreset).toHaveClass("bg-f1-background-selected-secondary")
 
-    const inactivePreset = getVisibleByText("Status: Inactive").closest(
-      "label"
-    )
+    const inactivePreset = getVisibleByText("Status: Inactive").closest("label")
     expect(inactivePreset).not.toHaveClass(
       "bg-f1-background-selected-secondary"
     )
@@ -205,9 +203,7 @@ describe("FiltersPresets - Exact Match Selection", () => {
     )
 
     const activePreset = getVisibleByText("Status: Active").closest("label")
-    expect(activePreset).not.toHaveClass(
-      "bg-f1-background-selected-secondary"
-    )
+    expect(activePreset).not.toHaveClass("bg-f1-background-selected-secondary")
   })
 
   it("should not show preset as selected when values differ", () => {
@@ -225,13 +221,9 @@ describe("FiltersPresets - Exact Match Selection", () => {
     )
 
     const activePreset = getVisibleByText("Status: Active").closest("label")
-    expect(activePreset).not.toHaveClass(
-      "bg-f1-background-selected-secondary"
-    )
+    expect(activePreset).not.toHaveClass("bg-f1-background-selected-secondary")
 
-    const inactivePreset = getVisibleByText("Status: Inactive").closest(
-      "label"
-    )
+    const inactivePreset = getVisibleByText("Status: Inactive").closest("label")
     expect(inactivePreset).toHaveClass("bg-f1-background-selected-secondary")
   })
 
@@ -316,9 +308,8 @@ describe("FiltersPresets - No Multiple Selection", () => {
     )
 
     const londonPreset = getVisibleByText("London Office").closest("label")
-    const engineeringPreset = getVisibleByText("Engineering Team").closest(
-      "label"
-    )
+    const engineeringPreset =
+      getVisibleByText("Engineering Team").closest("label")
     const activePreset = getVisibleByText("Active Status").closest("label")
 
     expect(londonPreset).not.toHaveClass("bg-f1-background-selected-secondary")
@@ -343,9 +334,8 @@ describe("FiltersPresets - No Multiple Selection", () => {
     )
 
     const londonPreset = getVisibleByText("London Office").closest("label")
-    const engineeringPreset = getVisibleByText("Engineering Team").closest(
-      "label"
-    )
+    const engineeringPreset =
+      getVisibleByText("Engineering Team").closest("label")
     const activePreset = getVisibleByText("Active Status").closest("label")
 
     expect(londonPreset).toHaveClass("bg-f1-background-selected-secondary")
