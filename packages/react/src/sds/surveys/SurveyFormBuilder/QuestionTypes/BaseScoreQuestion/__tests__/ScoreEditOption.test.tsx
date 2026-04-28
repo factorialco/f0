@@ -41,11 +41,9 @@ describe("ScoreEditOption", () => {
     const user = userEvent.setup()
     const onClick = vi.fn()
 
-    const { container } = render(
-      <ScoreEditOption {...defaultProps} onClick={onClick} disabled />
-    )
+    render(<ScoreEditOption {...defaultProps} onClick={onClick} disabled />)
 
-    const wrapper = container.firstElementChild as HTMLElement
+    const wrapper = screen.getByTestId("score-edit-option-1")
     await user.click(wrapper)
 
     expect(onClick).not.toHaveBeenCalled()
@@ -55,7 +53,7 @@ describe("ScoreEditOption", () => {
     const user = userEvent.setup()
     const onClick = vi.fn()
 
-    const { container } = render(
+    render(
       <ScoreEditOption
         {...defaultProps}
         onClick={onClick}
@@ -63,7 +61,7 @@ describe("ScoreEditOption", () => {
       />
     )
 
-    const wrapper = container.firstElementChild as HTMLElement
+    const wrapper = screen.getByTestId("score-edit-option-1")
     await user.click(wrapper)
 
     expect(onClick).toHaveBeenCalledWith(1)

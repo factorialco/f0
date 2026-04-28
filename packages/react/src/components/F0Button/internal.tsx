@@ -110,7 +110,8 @@ const ButtonInternal = forwardRef<
         className={cn(
           "max-w-full",
           withoutDisabledAppearance &&
-            "disabled:opacity-100 disabled:cursor-default disabled:hover:bg-transparent disabled:hover:shadow-none disabled:active:bg-transparent disabled:active:shadow-none",
+            disabled &&
+            "disabled:pointer-events-none disabled:opacity-100 disabled:cursor-default",
           className
         )}
         mode={hideLabel ? "only" : "default"}
