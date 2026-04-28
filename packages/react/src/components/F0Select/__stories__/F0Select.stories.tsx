@@ -715,6 +715,119 @@ export const WithDataSourceGrouping: Story = {
   },
 }
 
+export const WithDataSourceGroupingDefaultOpen: Story = {
+  args: {
+    label: "Data Source Grouping (Default Open)",
+    placeholder: "Select a value",
+    showSearchBox: true,
+    onChange: fn(),
+    value: "option-2",
+    source: createDataSourceDefinition<MockItem>({
+      grouping: {
+        mandatory: true,
+        collapsible: true,
+        defaultOpenGroups: true,
+        groupBy: {
+          role: {
+            name: "Role",
+            label: (groupId) => `${groupId}`,
+            itemCount: (groupId) =>
+              mockItems.filter((item) => item.role === groupId).length,
+          },
+        },
+      },
+      dataAdapter: {
+        paginationType: "infinite-scroll",
+        fetchData: (options) => {
+          const { search, pagination } = options
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              const pageSize = pagination.perPage ?? 10
+              const cursor = "cursor" in pagination ? pagination.cursor : null
+              const nextCursor = cursor ? Number(cursor) + pageSize : pageSize
+              const results = mockItems.filter(
+                (item) =>
+                  !search ||
+                  item.label.toLowerCase().includes(search.toLowerCase())
+              )
+              resolve({
+                type: "infinite-scroll" as const,
+                cursor: String(nextCursor),
+                perPage: pageSize,
+                hasMore: nextCursor < results.length,
+                records: results.slice(cursor ? Number(cursor) : 0, nextCursor),
+                total: results.length,
+              })
+            }, 100)
+          })
+        },
+      },
+    }),
+    mapOptions: (item: MockItem) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+      description: item.description,
+    }),
+  },
+}
+
+export const WithManyCollapsibleGroups: Story = {
+  args: {
+    label: "Many Collapsible Groups",
+    placeholder: "Select a value",
+    showSearchBox: true,
+    onChange: fn(),
+    source: createDataSourceDefinition<MockItem>({
+      grouping: {
+        mandatory: true,
+        collapsible: true,
+        defaultOpenGroups: false,
+        groupBy: {
+          role: {
+            name: "Role",
+            label: (groupId) => `${groupId}`,
+            itemCount: (groupId) =>
+              mockItems.filter((item) => item.role === groupId).length,
+          },
+        },
+      },
+      dataAdapter: {
+        paginationType: "infinite-scroll",
+        fetchData: (options) => {
+          const { search, pagination } = options
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              const pageSize = pagination.perPage ?? 50
+              const cursor = "cursor" in pagination ? pagination.cursor : null
+              const nextCursor = cursor ? Number(cursor) + pageSize : pageSize
+              const results = mockItems.filter(
+                (item) =>
+                  !search ||
+                  item.label.toLowerCase().includes(search.toLowerCase())
+              )
+              resolve({
+                type: "infinite-scroll" as const,
+                cursor: String(nextCursor),
+                perPage: pageSize,
+                hasMore: nextCursor < results.length,
+                records: results.slice(cursor ? Number(cursor) : 0, nextCursor),
+                total: results.length,
+              })
+            }, 100)
+          })
+        },
+      },
+    }),
+    mapOptions: (item: MockItem) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+      description: item.description,
+    }),
+  },
+}
+
 export const MultipleNotPaginated: Story = {
   args: {
     label: "Select Team Members",

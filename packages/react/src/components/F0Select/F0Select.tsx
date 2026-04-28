@@ -600,6 +600,7 @@ const F0SelectComponent = forwardRef(function Select<
     }
   }, [localSource.currentFilters, disableSelectAll])
 
+  const collapsible = localSource.grouping?.collapsible ?? false
   const defaultOpenGroups = localSource.grouping?.defaultOpenGroups
   const { openGroups, setGroupOpen } = useGroups(
     data?.type === "grouped" ? data.groups : [],
@@ -615,6 +616,8 @@ const F0SelectComponent = forwardRef(function Select<
         return mappedOption.type === "separator"
           ? {
               height: 1,
+              key: `separator-${index}`,
+              type: "separator",
               item: (
                 <SelectSeparator
                   key={`separator-${index}`}
@@ -624,6 +627,8 @@ const F0SelectComponent = forwardRef(function Select<
             }
           : {
               height: mappedOption.description ? 64 : 32,
+              key: `item-${mappedOption.value}`,
+              type: "item",
               item: (
                 <SelectItem
                   key={String(mappedOption.value)}
@@ -644,22 +649,49 @@ const F0SelectComponent = forwardRef(function Select<
       const items: VirtualItem[] = []
       data.groups.map((group) => {
         items.push({
-          height: 30,
+          height: 36,
+          key: `group-header-${group.key}`,
+          type: "group-header",
           item: (
             <GroupHeader
               label={group.label}
               itemCount={group.itemCount}
+              showOpenChange={collapsible}
               onOpenChange={(open) => setGroupOpen(group.key, open)}
               open={openGroups[group.key]}
+              chevronPosition="leading"
+              closedRotation={-90}
+              openRotation={0}
+              className="relative cursor-pointer rounded px-3 py-2 outline-none transition-colors after:absolute after:inset-x-1 after:inset-y-0 after:z-0 after:rounded after:bg-f1-background-hover after:opacity-0 after:transition-opacity after:duration-75 after:content-[''] hover:after:opacity-100 [&_*]:z-10"
             />
           ),
         })
-        items.push(...getItems(group.records))
+        if (!collapsible || openGroups[group.key]) {
+          items.push(
+            ...getItems(group.records).map((vi) => ({
+              ...vi,
+              key: `${group.key}:${vi.key}`,
+              item: collapsible ? (
+                <div className="pl-5">{vi.item}</div>
+              ) : (
+                vi.item
+              ),
+            }))
+          )
+        }
       })
       return items
     }
     return getItems(data.records)
-  }, [data.records, data.type, data.groups, getItems, openGroups, setGroupOpen])
+  }, [
+    data.records,
+    data.type,
+    data.groups,
+    getItems,
+    openGroups,
+    setGroupOpen,
+    collapsible,
+  ])
 
   const handleScrollBottom = () => {
     loadMore()

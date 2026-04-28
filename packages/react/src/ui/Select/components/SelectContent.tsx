@@ -101,7 +101,9 @@ const SelectContent = forwardRef<
 
     const isEmpty = useMemo(() => {
       if (isVirtual) {
-        return items.filter((item) => item.value).length === 0
+        return items.every(
+          (item) => !item.value && item.type !== "group-header"
+        )
       }
       return !children
     }, [isVirtual, items, children])
@@ -137,7 +139,12 @@ const SelectContent = forwardRef<
       count: items?.length || 0,
       getScrollElement: () => parentRef.current,
       estimateSize: (i: number) => items?.[i]?.height || 0,
+      getItemKey: (i: number) => items?.[i]?.key ?? i,
       overscan: 5,
+      // Round measured heights to whole pixels. Sub-pixel values from
+      // getBoundingClientRect() accumulate into translateY drift that is
+      // visible as jitter while scrolling up.
+      measureElement: (el) => Math.round(el.getBoundingClientRect().height),
       // If the content is a list, we need to check if the animation is enabled
       enabled: asList || prefersReducedMotion || animationStarted,
     })
@@ -151,8 +158,8 @@ const SelectContent = forwardRef<
     }, [open])
 
     useEffect(() => {
-      // Measure the items when the animation is finished
-      // Skip measurement when asList is true to prevent layout shifts from tooltips
+      // Measure the items when the animation is finished.
+      // Skip measurement when asList is true to prevent layout shifts from tooltips.
       if (!asList) {
         virtualizer.measure()
       }

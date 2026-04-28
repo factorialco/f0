@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event"
 import "@testing-library/jest-dom/vitest"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-import type { RecordType } from "@/hooks/datasource"
+import { createDataSourceDefinition, type RecordType } from "@/hooks/datasource"
 
 import { zeroRender as render } from "@/testing/test-utils"
 
@@ -421,6 +421,133 @@ describe("Select", () => {
     })
     await waitFor(() => {
       expect(handleChangeSelectedOption).toHaveBeenCalledWith(undefined, false)
+    })
+  })
+
+  describe("collapsible groups", () => {
+    type GroupedItem = {
+      value: string
+      label: string
+      role: string
+    }
+
+    const groupedItems: GroupedItem[] = [
+      { value: "a1", label: "Alice", role: "Engineer" },
+      { value: "a2", label: "Bob", role: "Engineer" },
+      { value: "b1", label: "Carol", role: "Designer" },
+      { value: "b2", label: "Dan", role: "Designer" },
+    ]
+
+    const buildSource = (defaultOpenGroups: boolean) =>
+      createDataSourceDefinition<GroupedItem>({
+        grouping: {
+          mandatory: true,
+          collapsible: true,
+          defaultOpenGroups,
+          groupBy: {
+            role: {
+              name: "Role",
+              label: (groupId) => `${groupId}`,
+              itemCount: (groupId) =>
+                groupedItems.filter((item) => item.role === groupId).length,
+            },
+          },
+        },
+        dataAdapter: {
+          paginationType: "infinite-scroll",
+          fetchData: () =>
+            Promise.resolve({
+              type: "infinite-scroll" as const,
+              cursor: "100",
+              perPage: 100,
+              hasMore: false,
+              records: groupedItems,
+              total: groupedItems.length,
+            }),
+        },
+      })
+
+    const mapOptions = (item: GroupedItem) => ({
+      value: item.value,
+      label: item.label,
+    })
+
+    it("shows group headers when all groups are collapsed (no false empty state)", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          source={buildSource(false)}
+          mapOptions={mapOptions}
+          searchEmptyMessage="No results found"
+          onChange={() => {}}
+        />
+      )
+
+      await openSelect(user)
+
+      // Group headers must be visible even though no items contribute a value
+      await waitFor(() => {
+        expect(screen.getByText("Engineer")).toBeInTheDocument()
+      })
+      expect(screen.getByText("Designer")).toBeInTheDocument()
+
+      // Records remain hidden while groups are closed
+      expect(screen.queryByText("Alice")).not.toBeInTheDocument()
+      expect(screen.queryByText("Carol")).not.toBeInTheDocument()
+
+      // Empty-state message must NOT show — group headers count as content
+      expect(screen.queryByText("No results found")).not.toBeInTheDocument()
+    })
+
+    it("shows group headers and records when groups are open by default", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          source={buildSource(true)}
+          mapOptions={mapOptions}
+          onChange={() => {}}
+        />
+      )
+
+      await openSelect(user)
+
+      await waitFor(() => {
+        expect(screen.getByText("Engineer")).toBeInTheDocument()
+      })
+      expect(screen.getByText("Alice")).toBeInTheDocument()
+      expect(screen.getByText("Bob")).toBeInTheDocument()
+      expect(screen.getByText("Carol")).toBeInTheDocument()
+      expect(screen.getByText("Dan")).toBeInTheDocument()
+    })
+
+    it("reveals records when a closed group header is clicked", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          source={buildSource(false)}
+          mapOptions={mapOptions}
+          onChange={() => {}}
+        />
+      )
+
+      await openSelect(user)
+
+      await waitFor(() => {
+        expect(screen.getByText("Engineer")).toBeInTheDocument()
+      })
+      expect(screen.queryByText("Alice")).not.toBeInTheDocument()
+
+      await user.click(screen.getByText("Engineer"))
+
+      await waitFor(() => {
+        expect(screen.getByText("Alice")).toBeInTheDocument()
+      })
+      expect(screen.getByText("Bob")).toBeInTheDocument()
+      // The other group remains collapsed
+      expect(screen.queryByText("Carol")).not.toBeInTheDocument()
     })
   })
 })
