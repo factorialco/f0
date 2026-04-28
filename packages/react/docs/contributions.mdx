@@ -1,82 +1,185 @@
-import { Meta } from "@storybook/addon-docs/blocks"
+import { Meta } from "@storybook/addon-docs/blocks";
 
 <Meta title="How to contribute?" />
 
 # How to contribute
 
-Thank you for your interest in helping us improve our platform. Your
-contributions are essential to keeping F0 robust and user-friendly. Below are
-several ways you can contribute to the design system, organized from small tasks
-to those that require more time.
+Thank you for your interest in helping us improve F0. Your contributions are essential
+to keeping the design system robust and user-friendly.
 
-Reach us in
-[#f0 Slack channel](https://factorialteam.slack.com/archives/C06QT46115K), we
-are happy to support you!
+Reach us in the
+[#f0 Slack channel](https://factorialteam.slack.com/archives/C06QT46115K) — we are
+happy to support you!
 
-## 📣 Report an issue
+---
 
-If you notice a bug, performance issue or if something that doesn't work as
-expected, leave us an
-[issue in Github](https://github.com/factorialco/f0/issues). Provide as much
-context as possible, including steps to reproduce, browser information, and
-screenshots if relevant.
+## Before you start: Validation Checklist
 
-### What to expect
+Before proposing any change, make sure your idea passes these checks:
 
-Once reported, the issue will be reviewed, prioritized, and tagged. We'll notify
-you if more information is needed or if it has been resolved. Do not resolve it
-until the bug is confirmed, unless the issue is crystal clear.
+- [ ] **Real need** — Is this solving a problem that at least 2 teams face?
+- [ ] **Not a duplicate** — Does F0 already have a component or pattern that covers this?
+- [ ] **Not too specific** — Could other teams reuse this, or is it a one-off for your product?
+- [ ] **Follows design rules** — Is the proposal consistent with F0's
+      [design rules](?path=/docs/foundations-design-rules--docs)?
+- [ ] **Accessible** — Does it meet WCAG 2.1 AA? (focus, keyboard, contrast, screen reader)
 
-## 🔧 Fix things and make small enhancements
+If you're unsure about any of these, open a conversation in #f0 first.
 
-Fixes, such as a bugs in the code, erroneous Figma library components,
-mismatching Names between the code and Figma or confusing documentation sentence
-changes.
+---
 
-Small enhancements, such as adding a new icon to the existing icon library. This
-change doesn’t break existing behavior and can be confined to minimize impact
-across the design system.
+## Contribution Types
 
-1. Open a [list of issues](https://github.com/factorialco/f0/issues) and pick
-   any bug, or enhancement you like.
-2. Claim the issue by commenting on it, then submit request with your solution.
+### Report an issue
 
-### What to expect
+If you notice a bug, performance issue, or something that doesn't work as expected,
+open an [issue on GitHub](https://github.com/factorialco/f0/issues).
 
-We’ll review it and provide feedback, or approve it if the contribution meets
-the guidelines. If a design review is needed, we'll bring the designers in.
-Usually it won't take much time.
+Provide as much context as possible:
 
-## 🛠️ Make large enhancements
+- Steps to reproduce
+- Browser / OS information
+- Screenshots or screen recordings
+- Expected vs. actual behavior
 
-A large enhancement extends an existing feature, such as an alert’s
-dismissibility, description, and position. Any major visual or code change is a
-large contribution.
+**What to expect:** The issue will be reviewed, prioritized, and tagged. We'll notify
+you if more information is needed. Do not close it until the fix is confirmed.
 
-1. Claim the issue by commenting on it, share the approach you want to take
-2. Get in contact with the team in #f0 channel
-3. Implement the enhancement and open a PR
-4. Keep repeating until done
+---
 
-### What to expect
+### Fix things and make small enhancements
 
-Expect the process to take more time than you expect. Big changes require
-thorough review of many people because they touch several zones of expertise:
-design, code, accessibility and documentation.
+Examples: bug fixes, Figma-to-code name mismatches, confusing documentation, adding a
+new icon to the existing icon library.
 
-## 🏗️ Propose new pattern or component
+1. Browse the [open issues](https://github.com/factorialco/f0/issues) and pick one
+2. Claim it by commenting on the issue
+3. Submit a PR with your solution
 
-To be successful, proposals need to show that the component or pattern being
-suggested would be useful and unique:
+**What to expect:** We'll review and provide feedback, or approve if it meets
+guidelines. If design review is needed, we'll bring designers in. Usually quick.
 
-- There is evidence that this component or pattern would be useful for many
-  teams or services
-- It does not replicate something already in the Design System.
+---
 
-There is no set process on how to add new components to the F0 yet. Get in
-contact with us in #f0 channel
+### Make large enhancements
 
-### What to expect
+A large enhancement extends an existing feature significantly (e.g., adding
+dismissibility, description, and position options to an alert component). Any major
+visual or behavioral change qualifies.
 
-It will take time and resources, since an introduction of a pattern requires all
-the pieces: research, design, code, documentation, etc.
+1. Claim the issue and share your approach
+2. Get in contact with the team in #f0
+3. Implement and open a PR
+4. Iterate until done
+
+**What to expect:** Expect this to take more time. Large changes require thorough
+review from multiple disciplines: design, code, accessibility, and documentation.
+
+---
+
+### Propose a new component or pattern
+
+New additions must demonstrate that the component or pattern is:
+
+- **Useful to many teams** — not just one product
+- **Unique** — doesn't replicate something already in F0
+
+---
+
+## Triage
+
+When a contribution is proposed, the F0 team triages it:
+
+| Decision     | Criteria                                                                | Next step                                  |
+| ------------ | ----------------------------------------------------------------------- | ------------------------------------------ |
+| **Accept**   | Clear need, multiple teams benefit, aligns with F0 direction            | Assign to contributor, begin collaboration |
+| **Defer**    | Good idea but not a priority right now                                  | Add to backlog, revisit quarterly          |
+| **Redirect** | Better solved locally in the product codebase                           | Guide contributor to implement locally     |
+| **Decline**  | Too specific, conflicts with F0 principles, or duplicates existing work | Explain reasoning, suggest alternatives    |
+
+---
+
+## Collaboration Flow
+
+Once a contribution is accepted, it follows these phases:
+
+| Phase                 | Who                       | What happens                                          |
+| --------------------- | ------------------------- | ----------------------------------------------------- |
+| **1. Kickoff**        | Contributor + F0 team     | Align on scope, agree on API surface and prop names   |
+| **2. Design**         | Contributor + F0 designer | Finalize visual design, review Figma, validate tokens |
+| **3. Implementation** | Contributor               | Write component code, tests, stories, documentation   |
+| **4. Review**         | F0 team                   | Code review, design review, a11y audit                |
+| **5. Merge**          | F0 team                   | Merge PR, publish in next release                     |
+
+### Tips for a smooth collaboration
+
+- Start small: propose the minimal API first, expand later
+- Show your work early — draft PRs are welcome
+- Use F0's component patterns (see the `f0-component-patterns` skill or existing components)
+- Write tests alongside your code, not after
+
+---
+
+## Quality Standards
+
+Every contribution must meet these before merging:
+
+### Code
+
+- TypeScript strict mode — no `any`
+- Named exports only
+- Uses `cn()` from `@/lib/utils` for className composition
+- Uses semantic `f1-` design tokens — no hardcoded values
+- `focusRing()` on all focusable elements
+
+### Tests
+
+- Unit tests with `vitest` (`.test.tsx`, not `.spec.ts`)
+- Storybook stories with interaction tests (play functions)
+- a11y checks pass via axe-playwright
+- Target: 80% coverage
+
+### Documentation
+
+- Storybook story file with all variants
+- Props documented via TypeScript interfaces
+- MDX documentation page (optional for small changes, required for new components)
+
+### Accessibility
+
+- Keyboard navigable
+- Focus ring visible
+- Screen reader compatible
+- Color contrast meets WCAG 2.1 AA (4.5:1 for text, 3:1 for large text)
+
+---
+
+## FAQ
+
+**Q: I need something urgently and can't wait for the full process. What do I do?**
+Build it locally in your product codebase following F0's design rules. When time
+allows, propose extracting it into F0 as a contribution.
+
+**Q: Can I contribute to `packages/react-native/` too?**
+Yes! The same process applies. Check `packages/react-native/AGENTS.md` for
+mobile-specific conventions.
+
+**Q: My component needs a new design token. What do I do?**
+Propose the token addition alongside your component PR. New tokens need approval from
+the F0 design team to ensure they fit the existing scale.
+
+**Q: How long does the review process take?**
+Small fixes: 1-3 days. Large enhancements: 1-2 weeks. New components: 2-4 weeks
+(including design review).
+
+**Q: What if I disagree with review feedback?**
+Open a discussion in #f0. We'll find a solution together.
+
+---
+
+## Useful Resources
+
+- [Design rules](?path=/docs/foundations-design-rules--docs) — Token usage, accessibility, naming, composability
+- [Components maturity](?path=/docs/components-maturity--docs) — How components evolve from experimental to stable
+- [GitHub issues](https://github.com/factorialco/f0/issues) — Report bugs and request features
+- [#f0 Slack channel](https://factorialteam.slack.com/archives/C06QT46115K) — Talk to the team
