@@ -21,6 +21,8 @@ import {
 } from "./F0Tabs.styles"
 import type { F0TabsProps } from "./F0Tabs.types"
 
+type AnyF0TabsProps = F0TabsProps<string>
+
 const SPRING_CONFIG: WithSpringConfig = {
   damping: 20,
   stiffness: 200,
@@ -45,7 +47,7 @@ const SPRING_CONFIG: WithSpringConfig = {
  * // Secondary
  * <F0Tabs tabs={tabs} secondary activeTabId={activeTab} setActiveTabId={setActiveTab} />
  */
-export const F0Tabs = React.memo(function F0Tabs({
+const F0TabsBase = React.memo(function F0Tabs({
   tabs,
   activeTabId: controlledActiveTabId,
   setActiveTabId: onChangeActiveTabId,
@@ -56,7 +58,7 @@ export const F0Tabs = React.memo(function F0Tabs({
   separatorWidth = "container",
   contentInset = "sm",
   embedded = false,
-}: F0TabsProps) {
+}: AnyF0TabsProps) {
   const firstTab = tabs[0]
 
   const [activeId, setActiveId] = useState(
@@ -261,3 +263,18 @@ export const F0Tabs = React.memo(function F0Tabs({
     </ScrollView>
   )
 })
+
+/**
+ * Generic-preserving public export of `F0Tabs`.
+ *
+ * `React.memo` does not preserve generics through its inferred type, so we
+ * cast the memoized component to a generic call signature. At runtime this is
+ * the exact same component; only the public type surface differs.
+ */
+export const F0Tabs: <T extends string = string>(
+  props: F0TabsProps<T>
+) => ReturnType<typeof F0TabsBase> = F0TabsBase as unknown as <
+  T extends string = string,
+>(
+  props: F0TabsProps<T>
+) => ReturnType<typeof F0TabsBase>
