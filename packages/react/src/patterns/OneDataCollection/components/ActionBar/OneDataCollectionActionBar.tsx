@@ -70,41 +70,43 @@ export const OneDataCollectionActionBar = forwardRef<
   const isInteractionDisabled = status === "loading" || status === "success"
 
   const leftContent = useMemo(() => {
-    if (warningMessage) {
-      return <WarningAlert message={warningMessage} />
-    }
-    if (!selectedNumber) {
+    if (!warningMessage && !selectedNumber) {
       return null
     }
     return (
-      <div className="dark flex h-8 w-full items-center justify-between gap-3 px-2 sm:h-auto sm:w-fit sm:justify-start sm:pl-2 sm:pr-0">
-        {showAllItemsSelected ? (
-          <span className="font-medium tabular-nums">
-            {t("status.selected.allItemsSelected", {
-              total: totalItems ?? 0,
-            })}
-          </span>
-        ) : (
-          <span className="flex items-center gap-1 font-medium tabular-nums">
-            <NumberFlow
-              value={selectedNumber}
-              spinTiming={{
-                duration: 200,
-                easing: "cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-              }}
+      <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
+        {warningMessage && <WarningAlert message={warningMessage} />}
+        {!!selectedNumber && (
+          <div className="dark flex h-8 w-full items-center justify-between gap-3 px-2 sm:h-auto sm:w-fit sm:justify-start sm:pl-2 sm:pr-0">
+            {showAllItemsSelected ? (
+              <span className="font-medium tabular-nums">
+                {t("status.selected.allItemsSelected", {
+                  total: totalItems ?? 0,
+                })}
+              </span>
+            ) : (
+              <span className="flex items-center gap-1 font-medium tabular-nums">
+                <NumberFlow
+                  value={selectedNumber}
+                  spinTiming={{
+                    duration: 200,
+                    easing: "cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                  }}
+                />
+                <OneEllipsis className="text-f1-foreground">
+                  {selectedText}
+                </OneEllipsis>
+              </span>
+            )}
+            <F0Button
+              variant="outline"
+              label={i18n.actions.unselect}
+              onClick={onUnselect}
+              disabled={isInteractionDisabled}
+              size="sm"
             />
-            <OneEllipsis className="text-f1-foreground">
-              {selectedText}
-            </OneEllipsis>
-          </span>
+          </div>
         )}
-        <F0Button
-          variant="outline"
-          label={i18n.actions.unselect}
-          onClick={onUnselect}
-          disabled={isInteractionDisabled}
-          size="sm"
-        />
       </div>
     )
   }, [

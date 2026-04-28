@@ -558,6 +558,13 @@ const OneDataCollectionComp = <
             return
           }
 
+          // Controlled mode: the consumer owns the full status + selection
+          // lifecycle via the bulkActionStatus prop. Don't start internal
+          // timers or clear selection — that would fight their state machine.
+          if (controlledBulkActionStatus !== undefined) {
+            return
+          }
+
           if (successTimerRef.current) {
             clearTimeout(successTimerRef.current)
             successTimerRef.current = null

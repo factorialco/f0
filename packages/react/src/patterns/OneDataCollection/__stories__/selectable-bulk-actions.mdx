@@ -346,8 +346,10 @@ with `autoManageBulkActionStatus` and return a `Promise`. The action bar then
 drives a loading → success → idle (or loading → error) status machine
 automatically:
 
-- While the promise is pending, the bar shows a spinner and disables every
-  action (including other bulk actions) to prevent overlapping clicks.
+- While the promise is pending, the bar shows a spinner and disables primary
+  actions and visible secondary action buttons to prevent overlapping clicks.
+  (Secondary actions rendered in the overflow dropdown on mobile are not yet
+  disabled — tracked for a future improvement to `F0ActionBar`.)
 - On resolve, the bar flips to `success` for ~1.5 seconds (checkmark) before
   returning to `idle`. Selection is cleared on resolve unless the action has
   `keepSelection: true`.

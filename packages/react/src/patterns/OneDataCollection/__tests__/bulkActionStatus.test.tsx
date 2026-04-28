@@ -1,6 +1,6 @@
 import { screen, waitFor } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
-import { describe, expect, test, vi } from "vitest"
+import { afterEach, describe, expect, test, vi } from "vitest"
 
 import { aiTranslations } from "@/sds/ai/F0AiChat"
 import { defaultTranslations, I18nProvider } from "@/lib/providers/i18n"
@@ -55,18 +55,23 @@ const findArchiveButtons = () =>
 const queryArchiveButtons = () =>
   screen.queryAllByRole("button", { name: /archive/i })
 
-const selectFirstRow = async () => {
+const selectFirstRow = async (user?: ReturnType<typeof userEvent.setup>) => {
   await waitFor(() => {
     expect(screen.getByText("Alpha")).toBeInTheDocument()
   })
-  const user = userEvent.setup()
+  const u = user ?? userEvent.setup()
   const checkboxes = screen.getAllByRole("checkbox")
   // 0: header checkbox; 1: first row checkbox.
-  await user.click(checkboxes[1])
-  return user
+  await u.click(checkboxes[1])
+  return u
 }
 
 describe("OneDataCollection bulk-action status", () => {
+  // Restore real timers after any test that switches to fake timers.
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   test("sync handler clears selection immediately and never enters loading", async () => {
     const onBulkAction = vi.fn()
     const { result } = renderHook(() => useTestSource(), {
@@ -142,7 +147,7 @@ describe("OneDataCollection bulk-action status", () => {
     })
   })
 
-  test("async handler WITH autoManageBulkActionStatus disables buttons while pending and dismisses on resolve", async () => {
+  test("async handler WITH autoManageBulkActionStatus disables buttons while pending", async () => {
     let resolveHandler: (() => void) | undefined
     const onBulkAction = vi.fn(
       () =>
@@ -177,15 +182,67 @@ describe("OneDataCollection bulk-action status", () => {
       btns.forEach((btn) => expect(btn).toBeDisabled())
     })
 
+    // Clean up: resolve so there are no dangling promises.
+    resolveHandler?.()
+  })
+
+  test("bar dismisses after SUCCESS_DISMISS_MS on resolve (fake timers)", async () => {
+    // Uses fake timers so the test completes instantly without waiting for the
+    // real 1500ms dismiss delay. userEvent must be set up with advanceTimers so
+    // its internal scheduler and fake timers don't deadlock.
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime.bind(vi),
+    })
+
+    let resolveHandler: (() => void) | undefined
+    const onBulkAction = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveHandler = resolve
+        })
+    )
+
+    const { result } = renderHook(() => useTestSource(), {
+      wrapper: TestWrapper,
+    })
+
+    render(
+      <TestWrapper>
+        <OneDataCollection
+          source={result.current}
+          visualizations={[{ type: "table", options: { columns } }]}
+          autoManageBulkActionStatus
+          onBulkAction={onBulkAction}
+        />
+      </TestWrapper>
+    )
+
+    await selectFirstRow(user)
+    const [archive] = await findArchiveButtons()
+    await user.click(archive)
+
+    // Confirm loading state before resolving.
+    await waitFor(() => {
+      const btns = queryArchiveButtons()
+      expect(btns.length).toBeGreaterThan(0)
+      btns.forEach((btn) => expect(btn).toBeDisabled())
+    })
+
     resolveHandler?.()
 
-    // After resolve, bar eventually dismisses (SUCCESS_DISMISS_MS = 1500ms).
-    await waitFor(
-      () => {
-        expect(queryArchiveButtons()).toHaveLength(0)
-      },
-      { timeout: 3000 }
-    )
+    // Flush microtasks so the .then() callback (setInternalBulkActionStatus
+    // "success" + setTimeout) runs synchronously from our perspective.
+    await Promise.resolve()
+
+    // Skip past the 1500ms success-dismiss timer instantly.
+    vi.advanceTimersByTime(1500)
+
+    // Bar must now be gone.
+    await waitFor(() => {
+      expect(queryArchiveButtons()).toHaveLength(0)
+    })
   })
 
   test("async rejection preserves selection and re-enables the button for retry", async () => {
@@ -255,6 +312,51 @@ describe("OneDataCollection bulk-action status", () => {
       const btns = queryArchiveButtons()
       expect(btns.length).toBeGreaterThan(0)
       btns.forEach((btn) => expect(btn).toBeDisabled())
+    })
+  })
+
+  test("controlled bulkActionStatus prevents auto-manage from clearing selection on resolve", async () => {
+    // Regression guard for review comment #1: when bulkActionStatus (controlled)
+    // is provided alongside autoManageBulkActionStatus, the auto-managed promise
+    // path must not clear selection — the consumer owns the full lifecycle.
+    let resolveHandler: (() => void) | undefined
+    const onBulkAction = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveHandler = resolve
+        })
+    )
+
+    const { result } = renderHook(() => useTestSource(), {
+      wrapper: TestWrapper,
+    })
+
+    render(
+      <TestWrapper>
+        <OneDataCollection
+          source={result.current}
+          visualizations={[{ type: "table", options: { columns } }]}
+          autoManageBulkActionStatus
+          bulkActionStatus="idle"
+          onBulkAction={onBulkAction}
+        />
+      </TestWrapper>
+    )
+
+    await selectFirstRow()
+    const [archive] = await findArchiveButtons()
+
+    // userEvent needs its own instance here; no fake timers.
+    const user = userEvent.setup()
+    await user.click(archive)
+
+    // Resolve the promise — auto-manage must NOT call clearSelectedItems.
+    resolveHandler?.()
+    await Promise.resolve()
+
+    // Selection is preserved: Archive buttons remain visible.
+    await waitFor(() => {
+      expect(queryArchiveButtons().length).toBeGreaterThan(0)
     })
   })
 
