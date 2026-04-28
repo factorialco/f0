@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.468.2](https://github.com/factorialco/f0/compare/f0-react-v1.468.1...f0-react-v1.468.2) (2026-04-28)
+
+
+### Bug Fixes
+
+* prevent users from editing emoji options when the question component is disabled ([#4052](https://github.com/factorialco/f0/issues/4052)) ([0042917](https://github.com/factorialco/f0/commit/0042917279f94ab01d8fba8be5c51ba4423f28d7))
+
 ## [1.468.1](https://github.com/factorialco/f0/compare/f0-react-v1.468.0...f0-react-v1.468.1) (2026-04-28)
 
 
