@@ -73,6 +73,19 @@ import { F0Tabs } from "@factorialco/f0-react-native"
 
 // Embedded — renders only the first tab as plain text, no interaction
 <F0Tabs tabs={tabs} embedded />
+
+// Typed tab ids — narrow `id` to a string-literal union
+type ScreenTab = "overview" | "settings"
+const tabs: F0TabItem<ScreenTab>[] = [
+  { id: "overview", label: "Overview" },
+  { id: "settings", label: "Settings" },
+]
+const [activeTab, setActiveTab] = useState<ScreenTab>("overview")
+<F0Tabs<ScreenTab>
+  tabs={tabs}
+  activeTabId={activeTab}
+  setActiveTabId={setActiveTab}
+/>
 ```
 
 ## Props
@@ -104,6 +117,7 @@ import { F0Tabs } from "@factorialco/f0-react-native"
 ## Architecture Notes
 
 - Single flat component — no namespace variants needed for this use case
+- Generic over the tab `id` type via `F0TabItem<T>` and `F0TabsProps<T>`. `T extends string` and defaults to `string` for backward compatibility. `React.memo` does not preserve generics, so the public export is cast to a generic call signature; runtime behaviour is unchanged.
 - Animation: Reanimated `useSharedValue` + `withSpring` for the underline; pill is a static `View` toggled instantly (mirrors web CSS class toggle)
 - Both controlled and uncontrolled modes share a single `useState` initialised from `activeTabId ?? tabs[0].id`
 - Tab layout positions collected via `onLayout` on each tab `View`; first active-tab layout sets indicator position directly without spring to avoid slide-from-zero on mount
