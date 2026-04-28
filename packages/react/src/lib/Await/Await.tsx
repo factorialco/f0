@@ -17,25 +17,34 @@ const _Await = <T,>({
   children,
   dataTestId,
 }: AwaitProps<T> & { dataTestId?: string }): ReactNode => {
-  const [resolvedValue, setResolvedValue] = useState<T | null>(null)
+  const [resolvedValue, setResolvedValue] = useState<T | null>(() =>
+    resolve instanceof Promise ? null : (resolve as T)
+  )
   const [error, setError] = useState<Error | null>(null)
   const [isPending, setIsPending] = useState(false)
 
   useEffect(() => {
     if (resolve instanceof Promise) {
       setIsPending(true)
+      setError(null)
+      setResolvedValue(null)
+      let cancelled = false
       resolve
         .then((value) => {
-          setResolvedValue(value)
+          if (!cancelled) setResolvedValue(value)
         })
         .catch((error) => {
-          setError(error)
+          if (!cancelled) setError(error)
         })
         .finally(() => {
-          setIsPending(false)
+          if (!cancelled) setIsPending(false)
         })
+      return () => {
+        cancelled = true
+      }
     } else {
       setResolvedValue(resolve)
+      setError(null)
       setIsPending(false)
     }
   }, [resolve])
