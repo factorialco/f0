@@ -8,7 +8,6 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 
 import { F0OneIcon } from "../../../F0OneIcon"
 import { WelcomeScreenSuggestion } from "../../types"
-import { PongGame } from "../PongGame"
 import { PongBall } from "../shared/PongBall"
 
 export type { WelcomeScreenSuggestion }
@@ -33,7 +32,6 @@ export const WelcomeScreen = ({
   initialMessages?: Message[]
   suggestions?: WelcomeScreenSuggestion[]
 }) => {
-  const [showPong, setShowPong] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -48,16 +46,12 @@ export const WelcomeScreen = ({
 
   const { sendMessage } = useCopilotChatInternal()
 
-  const { tracking } = useAiChat()
+  const { tracking, openGame } = useAiChat()
 
   const pickedSuggestions = useMemo(
     () => pickRandomSuggestions(suggestions),
     [suggestions]
   )
-
-  if (showPong) {
-    return <PongGame onClose={() => setShowPong(false)} />
-  }
 
   return (
     <AnimatePresence mode="popLayout">
@@ -79,7 +73,7 @@ export const WelcomeScreen = ({
           >
             <div
               className="relative cursor-pointer"
-              onClick={() => setShowPong(true)}
+              onClick={() => openGame("pong")}
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
             >

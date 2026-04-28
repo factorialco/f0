@@ -87,10 +87,9 @@ export interface ClarifyingQuestionState {
   /** Skip the current step (only valid when the step is optional) */
   skip: () => void
   /**
-   * Cancel the entire clarifying flow. Closes the panel, marks the tool
+   * Cancel the entire clarifying flow. Closes the panel and marks the tool
    * call as resolved-but-not-completed so it doesn't re-appear on history
-   * reload, and sends a short notice to the agent so it knows to proceed
-   * without the clarification.
+   * reload. Cancellation is silent — no message is sent to the agent.
    */
   cancel: () => void
   /** Go back to the previous step */

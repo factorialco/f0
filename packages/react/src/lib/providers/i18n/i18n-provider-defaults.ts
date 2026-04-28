@@ -372,6 +372,18 @@ export const defaultTranslations = {
       controls: "← → to move",
       escToExit: "Esc to exit",
     },
+    dino: {
+      title: "One Run",
+      tapToStart: "Press Space or tap to start",
+      gameOver: "Game over",
+      pressToRestart: "Space to restart",
+      score: "Score",
+      yourScore: "Your score",
+      newRecord: "New record!",
+      hi: "HI",
+      controls: "Space to jump · ↓ to crouch",
+      escToExit: "Esc to exit",
+    },
     creditWarning: {
       soft: "You're running low on AI credits.",
       getCredits: "Get credits",

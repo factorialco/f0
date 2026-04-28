@@ -252,6 +252,12 @@ export type AiChatProviderReturnValue = {
     openCanvas: (content: CanvasContent) => void
     /** Close the canvas panel and restore the previous visualization mode */
     closeCanvas: () => void
+    /** The currently active mini-game (easter egg), or null */
+    activeGame: "dino" | "pong" | null
+    /** Launch a mini-game overlay */
+    openGame: (game: "dino" | "pong") => void
+    /** Close the active mini-game overlay */
+    closeGame: () => void
     /** The currently active tool hint, or null if none is selected */
     activeToolHint: AiChatToolHint | null
     /** Set the active tool hint (pass null to clear) */

@@ -2,19 +2,19 @@ import { motion } from "motion/react"
 import { useCallback, useState } from "react"
 
 import { F0AvatarCompany } from "@/components/avatars/F0AvatarCompany"
+import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import { Sliders, Upsell } from "@/icons/app"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 import type { CreditsUsage } from "../../types"
 
 import { useAiChat } from "../../providers/AiChatStateProvider"
-import { F0Button } from "@/components/F0Button"
 
 export function CreditsPopover() {
-  const { credits } = useAiChat()
+  const { credits, openGame } = useAiChat()
   const i18n = useI18n()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -71,13 +71,22 @@ export function CreditsPopover() {
         className="flex w-[324px] flex-col gap-3 rounded-md border border-solid border-f1-border-secondary p-3"
       >
         {hasHeader && (
-          <div className="flex min-w-0 max-w-full flex-1 items-center gap-2 overflow-hidden rounded text-lg text-f1-foreground transition-colors">
+          // Easter egg: clicking the company logo launches the Dino mini-game.
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(false)
+              openGame("dino")
+            }}
+            aria-label={credits.companyName ?? ""}
+            className="flex min-w-0 max-w-full flex-1 cursor-pointer items-center gap-2 overflow-hidden rounded text-left text-lg text-f1-foreground transition-colors hover:bg-f1-background-secondary"
+          >
             <F0AvatarCompany
               name={credits.companyName ?? ""}
               src={credits.companyLogoUrl}
               size="lg"
             />
-            <div className="flex flex-col">
+            <div className="flex min-w-0 flex-col">
               <OneEllipsis tag="span" className="font-medium">
                 {credits.companyName ?? ""}
               </OneEllipsis>
@@ -90,7 +99,7 @@ export function CreditsPopover() {
                 </OneEllipsis>
               )}
             </div>
-          </div>
+          </button>
         )}
         <div className="flex flex-col rounded border border-solid border-f1-border-secondary">
           <div className="flex flex-col gap-2 p-3">

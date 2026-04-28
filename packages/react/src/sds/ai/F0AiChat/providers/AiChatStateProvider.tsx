@@ -129,11 +129,11 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     useState<VisualizationMode>(() =>
       getStoredVisualizationMode(fallbackVisualizationMode)
     )
+  // Derived from the initial visualizationMode so we don't re-read
+  // localStorage. `useState`'s initializer runs only on mount, so this
+  // captures the value at that moment.
   const [shouldPlayEntranceAnimation, setShouldPlayEntranceAnimation] =
-    useState(
-      () =>
-        getStoredVisualizationMode(fallbackVisualizationMode) !== "fullscreen"
-    )
+    useState(() => visualizationMode !== "fullscreen")
   const [agent, setAgent] = useState<string | undefined>(initialAgent)
   const [welcomeScreenSuggestions, setWelcomeScreenSuggestions] = useState<
     WelcomeScreenSuggestion[]
@@ -211,11 +211,15 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   // via `closeCanvas`) and should never be the restored-on-reload mode.
   useEffect(() => {
     if (typeof window === "undefined") return
-    if (visualizationMode === "sidepanel" || visualizationMode === "fullscreen")
+    if (
+      visualizationMode === "sidepanel" ||
+      visualizationMode === "fullscreen"
+    ) {
       writeToLocalStorage(
         CHAT_VISUALIZATION_MODE_STORAGE_KEY,
         visualizationMode
       )
+    }
   }, [visualizationMode])
 
   // Store the reset function from CopilotKit
@@ -413,6 +417,16 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     }
   }, [visualizationMode])
 
+  // Fullscreen mini-game overlay (easter egg). Lives in global state so any
+  // UI affordance — credits popover, welcome screen, future surfaces — can
+  // open the same game without prop drilling.
+  const [activeGame, setActiveGame] = useState<"dino" | "pong" | null>(null)
+  const openGame = useCallback(
+    (game: "dino" | "pong") => setActiveGame(game),
+    []
+  )
+  const closeGame = useCallback(() => setActiveGame(null), [])
+
   return (
     <AiChatStateContext.Provider
       value={{
@@ -471,6 +485,9 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         canvasContent,
         openCanvas,
         closeCanvas,
+        activeGame,
+        openGame,
+        closeGame,
         activeToolHint,
         setActiveToolHint,
         clarifyingQuestion,
@@ -552,6 +569,9 @@ export function useAiChat(): AiChatProviderReturnValue {
       canvasContent: null,
       openCanvas: noopFn,
       closeCanvas: noopFn,
+      activeGame: null,
+      openGame: noopFn,
+      closeGame: noopFn,
       activeToolHint: null,
       setActiveToolHint: noopFn,
       clarifyingQuestion: null,
