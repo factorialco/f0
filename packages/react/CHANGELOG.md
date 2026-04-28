@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.468.1](https://github.com/factorialco/f0/compare/f0-react-v1.468.0...f0-react-v1.468.1) (2026-04-28)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** preserve selection across infinite-scroll loadMore ([#4000](https://github.com/factorialco/f0/issues/4000)) ([c83c164](https://github.com/factorialco/f0/commit/c83c1648f358a0c1591b0be0aa1d6d7e6a7a70be))
+
 ## [1.468.0](https://github.com/factorialco/f0/compare/f0-react-v1.467.0...f0-react-v1.468.0) (2026-04-28)
 
 
