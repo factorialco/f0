@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.469.0](https://github.com/factorialco/f0/compare/f0-react-v1.468.2...f0-react-v1.469.0) (2026-04-28)
+
+
+### Features
+
+* **F0AiChat:** stop fix, chat-wide drop zone, canvas polish, history ([#4038](https://github.com/factorialco/f0/issues/4038)) ([aec0bb6](https://github.com/factorialco/f0/commit/aec0bb60512e08a435f77d15cac34e56045da6c7))
+
 ## [1.468.2](https://github.com/factorialco/f0/compare/f0-react-v1.468.1...f0-react-v1.468.2) (2026-04-28)
 
 
