@@ -2,7 +2,11 @@ import { act, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
-import type { GroupingDefinition, SortingsDefinition } from "@/hooks/datasource"
+import type {
+  GroupingDefinition,
+  GroupingState,
+  SortingsDefinition,
+} from "@/hooks/datasource"
 
 import { TextCell } from "@/ui/value-display/types/text"
 import { useDataCollectionData } from "@/patterns/OneDataCollection/hooks/useDataCollectionData/useDataCollectionData"
@@ -1223,7 +1227,9 @@ describe("TableCollection", () => {
       // Secondary actions go to dropdown (just verify dropdown exists)
       // ItemActionsRenderer renders both desktop and mobile versions,
       // so we expect 2 buttons total (1 desktop + 1 mobile for 1 row)
-      const actionsButtons = screen.getAllByRole("button", { name: /actions/i })
+      const actionsButtons = screen.getAllByRole("button", {
+        name: /actions/i,
+      })
       expect(actionsButtons).toHaveLength(2) // Desktop + Mobile
       expect(actionsButtons[0]).toBeInTheDocument()
     })
@@ -1840,5 +1846,224 @@ describe("TableCollection", () => {
     expect(
       screen.queryByRole("button", { name: /add row/i })
     ).not.toBeInTheDocument()
+  })
+  describe("grouped and selectable", () => {
+    type GroupedPerson = Person & { department: string }
+
+    const groupedTestData: GroupedPerson[] = [
+      {
+        id: 1,
+        name: "Alice",
+        email: "alice@example.com",
+        displayName: "Dr. Alice",
+        department: "Engineering",
+      },
+      {
+        id: 2,
+        name: "Bob",
+        email: "bob@example.com",
+        displayName: "Dr. Bob",
+        department: "Engineering",
+      },
+      {
+        id: 3,
+        name: "Carol",
+        email: "carol@example.com",
+        displayName: "Dr. Carol",
+        department: "Marketing",
+      },
+    ]
+
+    const groupedTestColumns = [
+      { label: "name", render: (item: GroupedPerson) => item.name },
+      { label: "email", render: (item: GroupedPerson) => item.email },
+      {
+        label: "department",
+        render: (item: GroupedPerson) => item.department,
+      },
+    ]
+
+    const createGroupedSelectableSource = (
+      data: GroupedPerson[] = groupedTestData,
+      collapsible = true
+    ): DataCollectionSource<
+      GroupedPerson,
+      TestFilters,
+      SortingsDefinition,
+      SummariesDefinition,
+      ItemActionsDefinition<GroupedPerson>,
+      TestNavigationFilters,
+      GroupingDefinition<GroupedPerson>
+    > => ({
+      currentFilters: {},
+      setCurrentFilters: vi.fn(),
+      currentSortings: null,
+      setCurrentSortings: vi.fn(),
+      currentNavigationFilters: {},
+      setCurrentNavigationFilters: vi.fn(),
+      navigationFilters: undefined,
+      currentSearch: undefined,
+      debouncedCurrentSearch: undefined,
+      setCurrentSearch: vi.fn(),
+      isLoading: false,
+      setIsLoading: vi.fn(),
+      dataAdapter: {
+        fetchData: async (_options: BaseFetchOptions<TestFilters>) => {
+          return { records: data }
+        },
+      },
+      selectable: (item: GroupedPerson) => item.id,
+      grouping: {
+        mandatory: true,
+        ...(collapsible
+          ? { collapsible: true, defaultOpenGroups: true }
+          : { collapsible: false }),
+        groupBy: {
+          department: {
+            name: "Department",
+            label: (groupId: string) => groupId,
+            itemCount: (groupId: string) =>
+              data.filter((p) => p.department === groupId).length,
+          },
+        },
+      },
+      currentGrouping: {
+        field: "department",
+        order: "asc",
+      } as GroupingState<GroupedPerson, GroupingDefinition<GroupedPerson>>,
+      setCurrentGrouping: vi.fn(),
+    })
+
+    it("renders group headers with separate checkbox cells when grouped and selectable", async () => {
+      render(
+        <TableCollection<
+          GroupedPerson,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<GroupedPerson>,
+          TestNavigationFilters,
+          GroupingDefinition<GroupedPerson>
+        >
+          columns={groupedTestColumns}
+          source={createGroupedSelectableSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          frozenColumns={2}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("Alice")).toBeInTheDocument()
+      })
+
+      // Both group headers are rendered (use getAllByText since "Engineering"
+      // also appears in department data cells)
+      expect(screen.getAllByText("Engineering").length).toBeGreaterThan(0)
+      expect(screen.getAllByText("Marketing").length).toBeGreaterThan(0)
+
+      // All data rows are rendered
+      expect(screen.getByText("Bob")).toBeInTheDocument()
+      expect(screen.getByText("Carol")).toBeInTheDocument()
+
+      // Each group header row contains a checkbox in its own cell.
+      // Target the <h6> group heading to find the group header row specifically.
+      const engineeringHeading = screen.getByRole("heading", {
+        name: "Engineering",
+      })
+      const engineeringRow = engineeringHeading.closest("tr")!
+      expect(within(engineeringRow).getByRole("checkbox")).toBeInTheDocument()
+
+      const marketingHeading = screen.getByRole("heading", {
+        name: "Marketing",
+      })
+      const marketingRow = marketingHeading.closest("tr")!
+      expect(within(marketingRow).getByRole("checkbox")).toBeInTheDocument()
+    })
+
+    it("group header checkbox toggles selection for that group's items", async () => {
+      const user = userEvent.setup()
+      const onSelectItems = vi.fn()
+
+      render(
+        <TableCollection<
+          GroupedPerson,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<GroupedPerson>,
+          TestNavigationFilters,
+          GroupingDefinition<GroupedPerson>
+        >
+          columns={groupedTestColumns}
+          source={createGroupedSelectableSource()}
+          onSelectItems={onSelectItems}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          frozenColumns={2}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("Alice")).toBeInTheDocument()
+      })
+
+      // Click the Engineering group header checkbox.
+      // Target the <h6> heading to find the group header row specifically.
+      const engineeringHeading = screen.getByRole("heading", {
+        name: "Engineering",
+      })
+      const engineeringRow = engineeringHeading.closest("tr")!
+      const groupCheckbox = within(engineeringRow).getByRole("checkbox")
+
+      await user.click(groupCheckbox)
+
+      // onSelectItems must have been called with Engineering group members selected
+      expect(onSelectItems).toHaveBeenCalled()
+      const lastCall =
+        onSelectItems.mock.calls[onSelectItems.mock.calls.length - 1]
+      const selectedItems = lastCall[0]
+      expect(selectedItems.selectedIds).toEqual(expect.arrayContaining([1, 2]))
+    })
+
+    it("group label text click does not toggle selection when table is not collapsible", async () => {
+      const user = userEvent.setup()
+      const onSelectItems = vi.fn()
+
+      render(
+        <TableCollection<
+          GroupedPerson,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<GroupedPerson>,
+          TestNavigationFilters,
+          GroupingDefinition<GroupedPerson>
+        >
+          columns={groupedTestColumns}
+          source={createGroupedSelectableSource(groupedTestData, false)}
+          onSelectItems={onSelectItems}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          frozenColumns={2}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("Alice")).toBeInTheDocument()
+      })
+
+      const callCountAfterRender = onSelectItems.mock.calls.length
+
+      // Click the group label heading text (not the checkbox) — it should not
+      // trigger group selection since the checkbox is the only selection affordance
+      const engineeringHeading = screen.getByRole("heading", {
+        name: "Engineering",
+      })
+      await user.click(engineeringHeading)
+
+      expect(onSelectItems.mock.calls.length).toBe(callCountAfterRender)
+    })
   })
 })
