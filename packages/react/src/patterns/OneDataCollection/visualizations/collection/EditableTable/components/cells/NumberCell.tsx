@@ -15,6 +15,7 @@ export function NumberCell<R extends RecordType>({
   error,
   loading,
   onChange,
+  item,
 }: EditableCellProps<R>) {
   const config = editableColumn.numberConfig
   // When clamping produces the same value the parent already holds,
@@ -28,7 +29,8 @@ export function NumberCell<R extends RecordType>({
 
   const { ref, width, locale, units, unitsBefore } = useNumberCellLayout(
     config,
-    numericValue
+    numericValue,
+    item
   )
 
   const handleChange = (newValue: number | null) => {

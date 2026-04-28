@@ -7,7 +7,7 @@ import { zeroRender as render } from "../../../../../../testing/test-utils"
 import { EditableCellProps } from "../components/cells"
 import { NumberCell } from "../components/cells/NumberCell"
 
-type TestRecord = { id: string; salary: number }
+type TestRecord = { id: string; salary: number; currency?: string }
 
 function makeEditableColumn(
   overrides: Partial<EditableCellProps<TestRecord>["editableColumn"]> = {}
@@ -143,6 +143,22 @@ describe("NumberCell", () => {
     )
 
     expect(screen.getByRole("textbox")).toHaveValue("0")
+    expect(screen.getByText("€")).toBeInTheDocument()
+  })
+
+  it("resolves units from a function based on the item", () => {
+    render(
+      <NumberCell
+        {...defaultProps}
+        item={{ id: "1", salary: 42000, currency: "€" }}
+        editableColumn={makeEditableColumn({
+          numberConfig: {
+            units: (item: TestRecord) => item.currency,
+          },
+        })}
+      />
+    )
+
     expect(screen.getByText("€")).toBeInTheDocument()
   })
 })
