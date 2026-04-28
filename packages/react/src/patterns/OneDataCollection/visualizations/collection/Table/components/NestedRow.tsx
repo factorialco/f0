@@ -171,11 +171,12 @@ const NestedRowContent = <
    * the vertical line connecting them to their parent
    */
   const { calculatedHeight, setFirstChildRef, setLastChildRef } =
-    useCalculateConectorHeight(
-      childrenType,
-      !!shouldShowLoadMore || hasAddRowActions,
-      isSticky
-    )
+    useCalculateConectorHeight({
+      nestedVariant: childrenType,
+      withHasMore: !!shouldShowLoadMore,
+      withAddRowActions: hasAddRowActions,
+      isSticky,
+    })
 
   /**
    * Combine internal and external refs
@@ -238,7 +239,8 @@ const NestedRowContent = <
           // If nestedRowProps.parentHasChildren is not provided, we need to set it to true if the parent has children
           // This nestedRowProps.parentHasChildren is provided on children iteration
           parentHasChildren:
-            props.nestedRowProps?.parentHasChildren ?? children.length > 0,
+            (props.nestedRowProps?.parentHasChildren ?? children.length > 0) ||
+            hasAddRowActions,
           hasLoadedChildren: false,
           isLastChild,
           stickyRow: isSticky,
@@ -417,7 +419,10 @@ const NestedRowContent = <
           rowRef={internalRowRef}
           addRowActions={addRowActions}
           addRowLabel={addRow?.addNestedRowActionsLabel}
-          ref={setLastChildRef}
+          ref={(el: HTMLTableRowElement | null) => {
+            if (children.length === 0) setFirstChildRef(el)
+            setLastChildRef(el)
+          }}
           nestedRowProps={{
             ...props.nestedRowProps,
             parentHasChildren: true,
