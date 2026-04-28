@@ -31,6 +31,7 @@ function buildState(
     toggleOption: vi.fn(),
     confirm: vi.fn(),
     skip: vi.fn(),
+    cancel: vi.fn(),
     back: vi.fn(),
     setCustomAnswerText: vi.fn(),
     setCustomAnswerActive: vi.fn(),
@@ -87,21 +88,23 @@ describe("ClarifyingQuestionPanel", () => {
     expect(state.toggleOption).toHaveBeenCalledWith("last-month")
   })
 
-  it("triggers skip on Escape when step is optional", async () => {
+  it("triggers cancel (not skip) on Escape when step is optional", async () => {
     const state = buildState({}, { optional: true })
     render(<ClarifyingQuestionPanel clarifyingQuestion={state} />)
     const radios = screen.getAllByRole("radio")
     radios[0].focus()
     await userEvent.keyboard("{Escape}")
-    expect(state.skip).toHaveBeenCalledOnce()
+    expect(state.cancel).toHaveBeenCalledOnce()
+    expect(state.skip).not.toHaveBeenCalled()
   })
 
-  it("does not trigger skip on Escape when step is required", async () => {
+  it("triggers cancel on Escape when step is required", async () => {
     const state = buildState()
     render(<ClarifyingQuestionPanel clarifyingQuestion={state} />)
     const radios = screen.getAllByRole("radio")
     radios[0].focus()
     await userEvent.keyboard("{Escape}")
+    expect(state.cancel).toHaveBeenCalledOnce()
     expect(state.skip).not.toHaveBeenCalled()
   })
 

@@ -29,14 +29,14 @@ export const PendingQuoteChip = ({
       <div
         className={cn(
           "flex items-start gap-2 justify-center",
-          "rounded-sm bg-f1-background-hover px-1"
+          "rounded-[10px] bg-f1-background-hover pl-2 py-1.5 pr-1.5"
         )}
       >
         <div className="flex items-center py-0.5">
-          <F0Icon icon={Reply} size="md" />
+          <F0Icon icon={Reply} size="md" color="default" />
         </div>
         <OneEllipsis
-          className="h-full flex-1 py-1 text-[12px] font-medium text-f1-foreground-secondary"
+          className="h-full flex-1 py-0.5 text-[12px] font-medium text-f1-foreground-secondary"
           lines={1}
         >
           {quote.text}

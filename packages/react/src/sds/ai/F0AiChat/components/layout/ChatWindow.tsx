@@ -1,11 +1,16 @@
-import { breakpoints } from "@factorialco/f0-core"
 import { type WindowProps } from "@copilotkit/react-ui"
+import { breakpoints } from "@factorialco/f0-core"
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
-import { MAX_CHAT_WIDTH, MIN_CHAT_WIDTH } from "../../utils/constants"
+import { cn } from "@/lib/utils"
+
 import { useAiChat } from "../../providers/AiChatStateProvider"
+import { MAX_CHAT_WIDTH, MIN_CHAT_WIDTH } from "../../utils/constants"
+import { DinoGame } from "../DinoGame"
+import { PongGame } from "../PongGame"
+import { DropOverlay } from "../input/ChatTextarea/DropOverlay"
 import { ResizeHandle } from "./ResizeHandle"
 
 export const SidebarWindow = ({ children }: WindowProps) => {
@@ -19,8 +24,14 @@ export const SidebarWindow = ({ children }: WindowProps) => {
     resetChatWidth,
     fileAttachments,
     clarifyingQuestion,
+    fileDragOver,
     setFileDragOver,
+    processDroppedFiles,
+    activeGame,
+    closeGame,
   } = useAiChat()
+  const isCanvasMode = visualizationMode === "canvas"
+
   const dragCounterRef = useRef(0)
   const canDrop =
     fileAttachments?.onUploadFiles != null && clarifyingQuestion === null
@@ -93,7 +104,7 @@ export const SidebarWindow = ({ children }: WindowProps) => {
       {open && (
         <motion.div
           key="chat-wrapper"
-          className="bg-f1-transparent pointer-events-auto relative ml-auto flex h-full md:py-1 md:pr-1 dark:bg-f1-background xs:rounded-xl"
+          className="bg-f1-transparent pointer-events-auto relative ml-auto flex h-full dark:bg-f1-background md:py-1 md:pr-1"
           initial={
             shouldPlayEntranceAnimation ? { opacity: 0, width: 0 } : false
           }
@@ -116,11 +127,19 @@ export const SidebarWindow = ({ children }: WindowProps) => {
               onReset={resetChatWidth}
               isResizing={isResizing}
               setIsResizing={setIsResizing}
+              narrow={isCanvasMode}
             />
           )}
           <div
             aria-hidden={!open}
-            className="relative flex h-full w-full flex-col overflow-hidden border border-solid border-f1-border-secondary bg-f1-special-page shadow xs:rounded-xl"
+            className={cn(
+              "relative flex h-full w-full flex-col overflow-hidden border border-solid border-f1-border-secondary bg-f1-special-page",
+              // In canvas mode the chat sits flush against the canvas with
+              // only the ResizeHandle (1px) between them. Dropping the left
+              // border avoids stacking canvas-border + handle + chat-border
+              // = 3px of visual separation; the handle is the single seam.
+              isCanvasMode ? "xs:rounded-r-xl border-l-0" : "xs:rounded-xl"
+            )}
             onDragEnter={handleDragEnter}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -139,6 +158,18 @@ export const SidebarWindow = ({ children }: WindowProps) => {
             >
               {children}
             </motion.div>
+            {canDrop && (
+              <DropOverlay
+                visible={fileDragOver}
+                onFilesDropped={(files) => {
+                  dragCounterRef.current = 0
+                  setFileDragOver(false)
+                  processDroppedFiles(files)
+                }}
+              />
+            )}
+            {activeGame === "dino" && <DinoGame onClose={closeGame} />}
+            {activeGame === "pong" && <PongGame onClose={closeGame} />}
           </div>
         </motion.div>
       )}

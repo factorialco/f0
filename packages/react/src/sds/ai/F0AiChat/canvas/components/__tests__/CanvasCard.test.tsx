@@ -59,7 +59,7 @@ describe("CanvasCard", () => {
     )
 
     const card = container.firstElementChild as HTMLElement
-    expect(card.className).toContain("border-f1-border-selected-bold")
+    expect(card.className).toContain("border-f1-border-hover")
   })
 
   it("does not apply focus ring styles when inactive", () => {

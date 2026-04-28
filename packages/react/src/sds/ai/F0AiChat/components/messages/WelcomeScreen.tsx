@@ -5,11 +5,9 @@ import { useCallback, useMemo, useRef, useState } from "react"
 
 import { useAiChat } from "@/ai"
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { cn } from "@/lib/utils"
 
 import { F0OneIcon } from "../../../F0OneIcon"
 import { WelcomeScreenSuggestion } from "../../types"
-import { PongGame } from "../PongGame"
 import { PongBall } from "../shared/PongBall"
 
 export type { WelcomeScreenSuggestion }
@@ -34,7 +32,6 @@ export const WelcomeScreen = ({
   initialMessages?: Message[]
   suggestions?: WelcomeScreenSuggestion[]
 }) => {
-  const [showPong, setShowPong] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -49,18 +46,12 @@ export const WelcomeScreen = ({
 
   const { sendMessage } = useCopilotChatInternal()
 
-  const { visualizationMode, tracking } = useAiChat()
-
-  const isFullscreen = visualizationMode === "fullscreen"
+  const { tracking, openGame } = useAiChat()
 
   const pickedSuggestions = useMemo(
     () => pickRandomSuggestions(suggestions),
     [suggestions]
   )
-
-  if (showPong) {
-    return <PongGame onClose={() => setShowPong(false)} />
-  }
 
   return (
     <AnimatePresence mode="popLayout">
@@ -69,7 +60,7 @@ export const WelcomeScreen = ({
         className="flex w-full flex-1 flex-col justify-end gap-6 sm:gap-4"
         initial={{ opacity: 1 }}
       >
-        <div className={!isFullscreen ? "pl-3" : ""}>
+        <div className="px-1">
           <motion.div
             className="flex w-fit justify-center"
             initial={{ opacity: 0, scale: 0.8, filter: "blur(6px)" }}
@@ -82,7 +73,7 @@ export const WelcomeScreen = ({
           >
             <div
               className="relative cursor-pointer"
-              onClick={() => setShowPong(true)}
+              onClick={() => openGame("pong")}
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
             >
@@ -108,9 +99,9 @@ export const WelcomeScreen = ({
               </motion.div>
             </div>
           </motion.div>
-          {greeting && !isFullscreen && (
+          {greeting && (
             <motion.p
-              className="text-lg font-semibold leading-[24px] text-f1-foreground-secondary"
+              className="text-2xl font-semibold leading-[28px] text-f1-foreground-tertiary"
               initial={{ opacity: 0, filter: "blur(2px)", y: -8 }}
               animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
               transition={{
@@ -124,10 +115,7 @@ export const WelcomeScreen = ({
           )}
           {initialMessages.map((message) => (
             <motion.p
-              className={cn(
-                "text-xl font-semibold leading-[24px] text-f1-foreground",
-                isFullscreen && "text-3xl"
-              )}
+              className="text-2xl font-semibold leading-[28px] text-f1-foreground"
               key={message.id}
               initial={{ opacity: 0, filter: "blur(2px)", y: -8 }}
               animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}

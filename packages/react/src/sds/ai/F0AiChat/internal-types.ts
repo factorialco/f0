@@ -211,6 +211,14 @@ export type AiChatProviderReturnValue = {
   /** @internal Set the file drag-over state */
   setFileDragOver: React.Dispatch<React.SetStateAction<boolean>>
   /**
+   * Process files that were dropped onto the chat. Delegates to the
+   * `processFiles` callback registered by `ChatTextarea`'s file-attachment
+   * hook. Used by the chat-wide DropOverlay rendered in `SidebarWindow`.
+   */
+  processDroppedFiles: (files: File[]) => void
+  /** @internal Registers the processFiles callback owned by ChatTextarea */
+  setProcessDroppedFilesFunction: (fn: ((files: File[]) => void) | null) => void
+  /**
    * Pre-loaded context shown as an empty state in the chat.
    * Prepended to the first user message as `<pending-context>`.
    */
@@ -244,6 +252,12 @@ export type AiChatProviderReturnValue = {
     openCanvas: (content: CanvasContent) => void
     /** Close the canvas panel and restore the previous visualization mode */
     closeCanvas: () => void
+    /** The currently active mini-game (easter egg), or null */
+    activeGame: "dino" | "pong" | null
+    /** Launch a mini-game overlay */
+    openGame: (game: "dino" | "pong") => void
+    /** Close the active mini-game overlay */
+    closeGame: () => void
     /** The currently active tool hint, or null if none is selected */
     activeToolHint: AiChatToolHint | null
     /** Set the active tool hint (pass null to clear) */

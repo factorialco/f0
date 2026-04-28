@@ -20,6 +20,13 @@ export interface PersistClarifyingResolutionParams {
     steps: unknown
     isResolved: true
     answers: ResolvedStepAnswer[]
+    /**
+     * Set to `true` when the user cancelled the flow with Escape. The
+     * tool call is still marked as resolved so the render is a no-op on
+     * reload, but the flag lets the agent (or any future UI) distinguish
+     * "answered" from "cancelled without answering".
+     */
+    cancelled?: boolean
   }
 }
 

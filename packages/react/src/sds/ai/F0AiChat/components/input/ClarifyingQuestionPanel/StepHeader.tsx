@@ -27,7 +27,7 @@ export const StepHeader = ({
   return (
     <div className="flex items-start gap-2 pl-4 pr-3">
       <OneEllipsis
-        className="min-w-0 flex-1 text-base font-semibold text-f1-foreground"
+        className="min-w-0 flex-1 text-lg font-semibold text-f1-foreground"
         lines={3}
       >
         {question}

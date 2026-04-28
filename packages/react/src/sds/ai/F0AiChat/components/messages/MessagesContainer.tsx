@@ -252,7 +252,7 @@ const Messages = ({
       <div
         ref={isLastTurn ? lastTurnRef : undefined}
         className={cn(
-          "flex flex-col items-start justify-start gap-2",
+          "flex flex-col items-start justify-start gap-2 px-1",
           isLastTurn && "pb-5"
         )}
         key={`turn-${turnIndex}`}
@@ -395,6 +395,7 @@ const Messages = ({
         {!noShadows && (
           <>
             <ScrollShadow position="top" key="shadow-top" />
+            <ScrollShadow position="bottom" key="shadow-bottom" />
           </>
         )}
       </div>
