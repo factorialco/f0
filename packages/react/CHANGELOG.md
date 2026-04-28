@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.470.0](https://github.com/factorialco/f0/compare/f0-react-v1.469.1...f0-react-v1.470.0) (2026-04-28)
+
+
+### Features
+
+* **editable-table:** null values in number cells, fix input focus loss and action column width ([#4050](https://github.com/factorialco/f0/issues/4050)) ([973ae1d](https://github.com/factorialco/f0/commit/973ae1d02053caea5ecdae23fa3b5c9f4bffe1e2))
+
 ## [1.469.1](https://github.com/factorialco/f0/compare/f0-react-v1.469.0...f0-react-v1.469.1) (2026-04-28)
 
 
