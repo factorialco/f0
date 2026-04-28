@@ -1,6 +1,7 @@
 import "@testing-library/jest-dom/vitest"
-import { cleanup } from "@testing-library/react"
 import type * as ReactTypes from "react"
+
+import { cleanup } from "@testing-library/react"
 import { afterEach, vi } from "vitest"
 
 afterEach(() => {
@@ -68,6 +69,20 @@ vi.stubGlobal(
     observe = vi.fn()
     unobserve = vi.fn()
     disconnect = vi.fn()
+  }
+)
+
+// Mock IntersectionObserver - required by @emoji-mart/react and other libs
+vi.stubGlobal(
+  "IntersectionObserver",
+  class MockedIntersectionObserver {
+    readonly root = null
+    readonly rootMargin = "0px"
+    readonly thresholds: ReadonlyArray<number> = [0]
+    observe = vi.fn()
+    unobserve = vi.fn()
+    disconnect = vi.fn()
+    takeRecords = vi.fn().mockReturnValue([])
   }
 )
 

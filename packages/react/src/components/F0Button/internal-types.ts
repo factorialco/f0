@@ -77,6 +77,11 @@ export type ButtonInternalProps = Pick<
      */
     disabled?: boolean
     /**
+     * If true and disabled is also true, the button retains its normal visual appearance
+     * (no reduced opacity or not-allowed cursor) while still being non-interactive.
+     */
+    withoutDisabledAppearance?: boolean
+    /**
      * @private
      * If true, the button is visually active or selected (pressed state).
      */
