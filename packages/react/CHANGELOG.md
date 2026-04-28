@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.468.0](https://github.com/factorialco/f0/compare/f0-react-v1.467.0...f0-react-v1.468.0) (2026-04-28)
+
+
+### Features
+
+* support per-row dynamic units in editable table number columns ([#4047](https://github.com/factorialco/f0/issues/4047)) ([3737b3e](https://github.com/factorialco/f0/commit/3737b3eb95aa407c553aec0e8eaeeae73694db0a))
+
 ## [1.467.0](https://github.com/factorialco/f0/compare/f0-react-v1.466.1...f0-react-v1.467.0) (2026-04-27)
 
 
