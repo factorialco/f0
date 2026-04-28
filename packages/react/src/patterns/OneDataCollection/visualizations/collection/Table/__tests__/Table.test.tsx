@@ -2065,6 +2065,5 @@ describe("TableCollection", () => {
 
       expect(onSelectItems.mock.calls.length).toBe(callCountAfterRender)
     })
-
   })
 })
