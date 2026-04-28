@@ -26,6 +26,8 @@ const _Await = <T,>({
   useEffect(() => {
     if (resolve instanceof Promise) {
       setIsPending(true)
+      setError(null)
+      setResolvedValue(null)
       let cancelled = false
       resolve
         .then((value) => {
@@ -42,6 +44,7 @@ const _Await = <T,>({
       }
     } else {
       setResolvedValue(resolve)
+      setError(null)
       setIsPending(false)
     }
   }, [resolve])
