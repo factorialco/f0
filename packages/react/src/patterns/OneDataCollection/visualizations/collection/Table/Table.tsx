@@ -34,11 +34,6 @@ import { useDataCollectionSettings } from "@/patterns/OneDataCollection/Settings
 import { GroupHeader } from "@/ui/GroupHeader/index"
 import { Skeleton } from "@/ui/skeleton.tsx"
 
-import type {
-  TableCustomizationProps,
-  TableVisualizationOptions,
-} from "./types"
-
 import { PrimaryActionItemDefinition } from "../../../actions"
 import { useDataCollectionData } from "../../../hooks/useDataCollectionData"
 import { useInfiniteScrollPagination } from "../../../hooks/useInfiniteScrollPagination"
@@ -52,6 +47,10 @@ import { Row } from "./components/Row"
 import { useColumns } from "./hooks/useColums"
 import { groupBorderClass, useHeaderGroups } from "./hooks/useHeaderGroups"
 import { NestedDataProvider } from "./providers/NestedProvider"
+import type {
+  TableCustomizationProps,
+  TableVisualizationOptions,
+} from "./types"
 import { useSticky } from "./useSticky"
 export * from "./settings/SettingsRenderer"
 
@@ -435,6 +434,7 @@ export const TableCollection = <
                   (isEditableTable ? (
                     <TableHead
                       key="actions"
+                      width="fit"
                       sticky={{ right: 0 }}
                       className="border-0 border-l-[1px] border-solid border-f1-border-secondary"
                     >
@@ -534,6 +534,7 @@ export const TableCollection = <
                 (isEditableTable ? (
                   <TableHead
                     key="actions"
+                    width="fit"
                     sticky={{ right: 0 }}
                     className="border-0 border-l-[1px] border-solid border-f1-border-secondary"
                   >

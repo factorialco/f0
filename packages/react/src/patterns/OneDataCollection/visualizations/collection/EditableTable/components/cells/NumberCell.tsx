@@ -5,7 +5,6 @@ import { RecordType } from "@/hooks/datasource/types/records.typings"
 import { cn } from "@/lib/utils"
 
 import type { EditableCellProps } from "."
-
 import { BaseCell } from "./BaseCell"
 import { useNumberCellLayout } from "./hooks/useNumberCellLayout"
 
@@ -25,7 +24,7 @@ export function NumberCell<R extends RecordType>({
 
   const trimmed = typeof value === "string" ? value.trim() : value
   const parsed = trimmed !== "" && trimmed != null ? Number(trimmed) : NaN
-  const numericValue: number | null = isFinite(parsed) ? parsed : 0
+  const numericValue: number | null = isFinite(parsed) ? parsed : null
 
   const { ref, width, locale, units, unitsBefore } = useNumberCellLayout(
     config,
@@ -34,7 +33,12 @@ export function NumberCell<R extends RecordType>({
   )
 
   const handleChange = (newValue: number | null) => {
-    let clamped = newValue ?? 0
+    if (newValue == null) {
+      if (value !== "") onChange(null)
+      return
+    }
+
+    let clamped = newValue
     if (config?.min != null && clamped < config.min) clamped = config.min
     if (config?.max != null && clamped > config.max) clamped = config.max
 
