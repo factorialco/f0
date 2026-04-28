@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.469.1](https://github.com/factorialco/f0/compare/f0-react-v1.469.0...f0-react-v1.469.1) (2026-04-28)
+
+
+### Bug Fixes
+
+* **F0Select:** fix collapsible groups hiding records and improve group UX ([#4039](https://github.com/factorialco/f0/issues/4039)) ([9d5a208](https://github.com/factorialco/f0/commit/9d5a208232a3948bac3d5d9bd701d8688625f8cd))
+
 ## [1.469.0](https://github.com/factorialco/f0/compare/f0-react-v1.468.2...f0-react-v1.469.0) (2026-04-28)
 
 
