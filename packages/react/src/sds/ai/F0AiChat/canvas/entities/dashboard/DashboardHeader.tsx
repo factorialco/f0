@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 
-import { Upload } from "@/icons/app"
+import { Cross, Download } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { useL10n } from "@/lib/providers/l10n"
 import { ResourceHeader } from "@/patterns/ResourceHeader"
@@ -12,11 +12,11 @@ import { useAiChat } from "../../../providers/AiChatStateProvider"
 import { useDashboardCanvas } from "./DashboardContext"
 
 /**
- * Canvas header for the dashboard entity. Delegates layout, actions, status
- * tag and close button to `ResourceHeader` so the canvas stays visually
- * consistent with other resource surfaces. The export dropdown is threaded
- * through `otherActions`, and the saved/draft/unsaved state is computed from
- * the saved-dashboard metadata on `content`.
+ * Canvas header for the dashboard entity. Layout, title, status tag,
+ * metadata strip, and the action row (export + close) are all delegated
+ * to `ResourceHeader`. The close button is just another `secondaryAction`
+ * with `hideLabel`, so the shared header component doesn't need to know
+ * about canvas-specific close affordances.
  */
 export function DashboardHeader({
   content,
@@ -36,11 +36,13 @@ export function DashboardHeader({
   const getMetadata = canvasActions?.dashboard?.getMetadata
 
   // Fetch creator + last-edited only once the dashboard has been persisted.
-  // Guarded by `isCurrent` so a rapid id swap (user re-opens a different saved
-  // dashboard before the first request resolves) doesn't flash stale metadata.
+  // Clear immediately on id change so we never flash the previous dashboard's
+  // metadata while the new request is in flight. `isCurrent` then prevents a
+  // late-arriving stale resolution from overwriting fresh state.
   useEffect(() => {
+    setMetadata(null)
+
     if (!savedDashboardId || !getMetadata) {
-      setMetadata(null)
       return
     }
 
@@ -50,8 +52,12 @@ export function DashboardHeader({
         const result = await getMetadata(savedDashboardId)
         if (!isCurrent) return
         setMetadata(result ?? null)
-      } catch {
+      } catch (error) {
         if (!isCurrent) return
+        console.warn("Failed to load dashboard metadata", {
+          dashboardId: savedDashboardId,
+          error,
+        })
         setMetadata(null)
       }
     })()
@@ -71,24 +77,36 @@ export function DashboardHeader({
     }
   }, [exportAsExcel])
 
+  // Close button rendered as the last secondary action (icon-only via
+  // `hideLabel`). Keeps it visually grouped with Export and lets
+  // `ResourceHeader` own the responsive action row.
   const secondaryActions = useMemo(() => {
-    if (!exportAsExcel) return undefined
-    return [
-      {
+    const actions = []
+    if (exportAsExcel) {
+      actions.push({
         label: t("ai.dataDownload.export"),
-        icon: Upload,
+        icon: Download,
         onClick: handleExport,
         loading: isExporting,
-      },
-    ]
-  }, [exportAsExcel, isExporting, handleExport, t])
+      })
+    }
+    actions.push({
+      label: t("ai.closeDashboard"),
+      icon: Cross,
+      hideLabel: true,
+      onClick: onClose,
+    })
+    return actions
+  }, [exportAsExcel, isExporting, handleExport, onClose, t])
 
-  // Status tag: Saved (has id, no pending iteration), Unsaved (has id but
-  // iteration not persisted), Draft (no id at all). handleSave in
-  // DashboardContext requires both id AND category to persist externally —
-  // for the purpose of the tag we only gate on id, matching the visible
-  // semantics of "has it ever been saved".
-  const isSaved = Boolean(content.savedDashboardId)
+  // Status tag: Saved (has id+category, no pending iteration), Unsaved (has
+  // id+category but iteration not persisted), Draft (missing either). Both
+  // fields are required to persist externally (see `DashboardContent.handleSave`
+  // / `isSavedDashboard`), so the tag follows the same gate to stay consistent
+  // with the actions the user can actually take.
+  const isSaved = Boolean(
+    content.savedDashboardId && content.savedDashboardCategory
+  )
   const isUnsaved = isSaved && content.savedDashboardUnsaved === true
 
   const status = isUnsaved
@@ -171,8 +189,6 @@ export function DashboardHeader({
       status={status}
       metadata={headerMetadata}
       secondaryActions={secondaryActions}
-      onClose={onClose}
-      closeLabel={t("ai.closeDashboard")}
     />
   )
 }

@@ -530,31 +530,39 @@ export function DashboardContent({
   const dataRefreshKey = useMemo(() => Date.now(), [content.config.fetchSpecs])
 
   return (
-    <>
-      <ChatDashboard
-        config={effectiveConfig}
-        apiConfig={content.apiConfig}
-        refreshKey={dataRefreshKey}
-        resetKey={discardKey}
-        editMode
-        onLayoutChange={onLayoutChange}
-        onTransformChart={(itemId, newType, orientation) => {
-          const item = effectiveConfig.items.find((i) => i.id === itemId)
-          if (!item || item.type !== "chart") return
-          const updatedChart = {
-            ...item.chart,
-            type: newType,
-            ...(newType === "bar"
-              ? { orientation: orientation ?? "vertical" }
-              : {}),
-          } as typeof item.chart
-          transformItem(itemId, { chart: updatedChart } as Partial<
-            import("./types").ChatDashboardItem
-          >)
-        }}
-        onExportReady={registerExport}
-        exportFilename={content.title}
-      />
+    <div className="flex h-full flex-col">
+      {/*
+       * Scrollable region: the dashboard takes the remaining height after the
+       * action bar. A single-item dashboard fills this region exactly via
+       * `flex-1` (see `F0AnalyticsDashboard` — no scroll needed); multi-item
+       * dashboards stack their rows naturally and scroll inside this wrapper.
+       */}
+      <div className="flex min-h-0 flex-1 flex-col overflow-auto">
+        <ChatDashboard
+          config={effectiveConfig}
+          apiConfig={content.apiConfig}
+          refreshKey={dataRefreshKey}
+          resetKey={discardKey}
+          editMode
+          onLayoutChange={onLayoutChange}
+          onTransformChart={(itemId, newType, orientation) => {
+            const item = effectiveConfig.items.find((i) => i.id === itemId)
+            if (!item || item.type !== "chart") return
+            const updatedChart = {
+              ...item.chart,
+              type: newType,
+              ...(newType === "bar"
+                ? { orientation: orientation ?? "vertical" }
+                : {}),
+            } as typeof item.chart
+            transformItem(itemId, { chart: updatedChart } as Partial<
+              import("./types").ChatDashboardItem
+            >)
+          }}
+          onExportReady={registerExport}
+          exportFilename={content.title}
+        />
+      </div>
       {/* State A: New dashboard with canvasActions — always-visible Save bar */}
       {!isSavedDashboard && hasDashboardActions && (
         <F0ActionBar
@@ -666,7 +674,7 @@ export function DashboardContent({
           }
         />
       )}
-    </>
+    </div>
   )
 }
 

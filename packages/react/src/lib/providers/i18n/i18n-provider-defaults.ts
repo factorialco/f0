@@ -367,6 +367,7 @@ export const defaultTranslations = {
       download: "Download {{format}}",
       exportDashboard: "Export dashboard as {{format}}",
       export: "Export",
+      exporting: "Exporting…",
       rows: "{{amount}} rows",
     },
     dashboardItem: {

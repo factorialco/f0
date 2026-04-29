@@ -214,22 +214,15 @@ export function useCollectionDownloadActions({
         const exportColumns = resolveExportColumns(columns, tableSettings)
         if (exportColumns.length === 0 || records.length === 0) return
 
-        // Re-shape records to match the resolved header order + labels so
-        // downstream download helpers (which just iterate columns in order)
-        // produce a file that mirrors the on-screen table.
-        const labelByKey = new Map<string, string>()
-        for (const col of exportColumns) labelByKey.set(col.id, col.label)
-        const headerKeys = exportColumns.map((c) => c.label)
-        const rows = records.map((row) => {
-          const out: Record<string, unknown> = {}
-          for (const col of exportColumns) out[col.label] = row[col.id]
-          return out
-        })
+        // Pass labels (header row) and ids (row lookup keys) separately so
+        // collections with two columns sharing the same label don't collide
+        // when re-shaping the row payload.
+        const headerLabels = exportColumns.map((c) => c.label)
+        const rowKeys = exportColumns.map((c) => c.id)
 
-        if (fmt === "excel") downloadAsExcel(headerKeys, rows, title)
-        else downloadAsCsv(headerKeys, rows, title)
-        // `labelByKey` held for clarity; avoids TS "unused binding" noise.
-        void labelByKey
+        if (fmt === "excel")
+          downloadAsExcel(headerLabels, records, title, rowKeys)
+        else downloadAsCsv(headerLabels, records, title, rowKeys)
       } finally {
         setIsExporting(false)
       }

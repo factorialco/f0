@@ -4,7 +4,6 @@ import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { StatusVariant } from "@/components/tags/F0TagStatus"
-import { Cross } from "@/icons/app"
 import { Description } from "@/experimental/Information/Headers/BaseHeader/Description"
 import {
   Metadata,
@@ -49,14 +48,6 @@ interface BaseHeaderProps {
     actions?: MetadataAction[]
   }
   metadata?: MetadataProps["items"]
-  /**
-   * When provided, renders a close icon button at the far right of the
-   * action row. Used by canvas-panel consumers (dashboard, form, etc.)
-   * that need the header to own the close affordance.
-   */
-  onClose?: () => void
-  /** Accessible label for the close button. Required when `onClose` is set. */
-  closeLabel?: string
 }
 
 const isVisible = (action: { isVisible?: boolean }) =>
@@ -72,8 +63,6 @@ export function BaseHeader({
   otherActions = [],
   status,
   metadata = [],
-  onClose,
-  closeLabel,
 }: BaseHeaderProps) {
   const allMetadata: BaseHeaderProps["metadata"] = [
     status && {
@@ -205,18 +194,6 @@ export function BaseHeader({
               <MobileDropdown items={visibleOtherActions} />
             </div>
           )}
-
-          {onClose && (
-            <div className="w-full md:hidden [&>*]:w-full">
-              <F0Button
-                variant="outline"
-                icon={Cross}
-                size="lg"
-                onClick={onClose}
-                label={closeLabel ?? "Close"}
-              />
-            </div>
-          )}
         </div>
 
         <div className="-m-1 hidden w-fit shrink-0 flex-wrap items-center gap-x-2 gap-y-2 p-1 md:flex md:overflow-x-auto">
@@ -271,25 +248,6 @@ export function BaseHeader({
                 loading={primaryAction.loading}
               />
             </div>
-          )}
-          {onClose && (
-            <>
-              {(isPrimaryActionVisible ||
-                hasSecondaryActions ||
-                hasOtherActions) && (
-                <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
-              )}
-              <div className="hidden md:block">
-                <F0Button
-                  variant="outline"
-                  icon={Cross}
-                  size="md"
-                  hideLabel
-                  onClick={onClose}
-                  label={closeLabel ?? "Close"}
-                />
-              </div>
-            </>
           )}
         </div>
       </div>

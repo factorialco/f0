@@ -27,16 +27,21 @@ function triggerDownload(blob: Blob, filename: string): void {
 }
 
 /**
- * Generate an .xlsx file from columns + rows and trigger a browser download.
+ * `columns` is used as the header row. By default rows are also looked up by
+ * the column string, so duplicate labels collide. Pass `keys` (parallel to
+ * `columns`) when row keys differ from headers (e.g. stable column ids vs.
+ * human-readable labels) to avoid the collision.
  */
 export function downloadAsExcel(
   columns: string[],
   rows: Record<string, unknown>[],
-  filename: string
+  filename: string,
+  keys?: string[]
 ): void {
+  const rowKeys = keys ?? columns
   const wsData = [
     columns,
-    ...rows.map((row) => columns.map((col) => serializeValue(row[col]))),
+    ...rows.map((row) => rowKeys.map((k) => serializeValue(row[k]))),
   ]
   const workbook = XLSX.utils.book_new()
   const worksheet = XLSX.utils.aoa_to_sheet(wsData)
@@ -50,13 +55,16 @@ export function downloadAsExcel(
 }
 
 /**
- * Generate a CSV string from columns + rows and trigger a browser download.
+ * Same `keys` semantics as `downloadAsExcel`: header strings come from
+ * `columns`, row values are read by `keys ?? columns`.
  */
 export function downloadAsCsv(
   columns: string[],
   rows: Record<string, unknown>[],
-  filename: string
+  filename: string,
+  keys?: string[]
 ): void {
+  const rowKeys = keys ?? columns
   const escapeCsv = (value: unknown): string => {
     const str = serializeValue(value)
     if (str.includes(",") || str.includes('"') || str.includes("\n")) {
@@ -67,7 +75,7 @@ export function downloadAsCsv(
 
   const lines = [
     columns.map(escapeCsv).join(","),
-    ...rows.map((row) => columns.map((col) => escapeCsv(row[col])).join(",")),
+    ...rows.map((row) => rowKeys.map((k) => escapeCsv(row[k])).join(",")),
   ]
 
   const blob = new Blob([lines.join("\n")], {

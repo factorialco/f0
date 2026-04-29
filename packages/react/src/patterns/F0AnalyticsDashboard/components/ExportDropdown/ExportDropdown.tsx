@@ -18,10 +18,13 @@ export function ExportDropdown({
       items={[
         {
           label: isExporting
-            ? t("ai.dataDownload.export")
+            ? t("ai.dataDownload.exporting")
             : t("ai.dataDownload.exportDashboard", { format: "Excel" }),
           icon: Download,
-          onClick: onExportExcel,
+          // Dropdown items have no built-in disabled/loading state, so guard
+          // the click ourselves to avoid firing a second export while one is
+          // already in flight.
+          onClick: isExporting ? () => {} : onExportExcel,
         },
       ]}
       icon={Ellipsis}
