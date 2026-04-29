@@ -8,9 +8,8 @@ import { cn } from "@/lib/utils"
 
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { MAX_CHAT_WIDTH, MIN_CHAT_WIDTH } from "../../utils/constants"
-import { DinoGame } from "../DinoGame"
-import { PongGame } from "../PongGame"
 import { DropOverlay } from "../input/ChatTextarea/DropOverlay"
+import { PongGame } from "../PongGame"
 import { ResizeHandle } from "./ResizeHandle"
 
 export const SidebarWindow = ({ children }: WindowProps) => {
@@ -168,7 +167,6 @@ export const SidebarWindow = ({ children }: WindowProps) => {
                 }}
               />
             )}
-            {activeGame === "dino" && <DinoGame onClose={closeGame} />}
             {activeGame === "pong" && <PongGame onClose={closeGame} />}
           </div>
         </motion.div>
