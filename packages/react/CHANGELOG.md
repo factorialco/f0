@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.470.1](https://github.com/factorialco/f0/compare/f0-react-v1.470.0...f0-react-v1.470.1) (2026-04-29)
+
+
+### Bug Fixes
+
+* **PageHeader:** fix embedded back button not navigating ([#4032](https://github.com/factorialco/f0/issues/4032)) ([e351d4f](https://github.com/factorialco/f0/commit/e351d4fc8a34baa4f379c8a28d74a9083b1d5ad7))
+
 ## [1.470.0](https://github.com/factorialco/f0/compare/f0-react-v1.469.1...f0-react-v1.470.0) (2026-04-28)
 
 
