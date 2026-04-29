@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.470.2](https://github.com/factorialco/f0/compare/f0-react-v1.470.1...f0-react-v1.470.2) (2026-04-29)
+
+
+### Bug Fixes
+
+* **F0AiChat:** remove DinoGame easter egg ([#4062](https://github.com/factorialco/f0/issues/4062)) ([1d52cc4](https://github.com/factorialco/f0/commit/1d52cc42a2445a0f81e6ee6b73875b7836e629c2))
+
 ## [1.470.1](https://github.com/factorialco/f0/compare/f0-react-v1.470.0...f0-react-v1.470.1) (2026-04-29)
 
 
