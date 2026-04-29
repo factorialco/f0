@@ -21,7 +21,7 @@ import {
 } from "./F0Tabs.styles"
 import type { F0TabsProps } from "./F0Tabs.types"
 
-type AnyF0TabsProps = F0TabsProps<string>
+type F0TabsBaseProps = F0TabsProps<string>
 
 const SPRING_CONFIG: WithSpringConfig = {
   damping: 20,
@@ -58,7 +58,7 @@ const F0TabsBase = React.memo(function F0Tabs({
   separatorWidth = "container",
   contentInset = "sm",
   embedded = false,
-}: AnyF0TabsProps) {
+}: F0TabsBaseProps) {
   const firstTab = tabs[0]
 
   const [activeId, setActiveId] = useState(
@@ -271,10 +271,6 @@ const F0TabsBase = React.memo(function F0Tabs({
  * cast the memoized component to a generic call signature. At runtime this is
  * the exact same component; only the public type surface differs.
  */
-export const F0Tabs: <T extends string = string>(
+export const F0Tabs = F0TabsBase as unknown as <T extends string = string>(
   props: F0TabsProps<T>
-) => ReturnType<typeof F0TabsBase> = F0TabsBase as unknown as <
-  T extends string = string,
->(
-  props: F0TabsProps<T>
-) => ReturnType<typeof F0TabsBase>
+) => React.ReactElement | null
