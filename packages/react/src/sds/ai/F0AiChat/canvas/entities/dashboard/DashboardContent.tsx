@@ -35,6 +35,7 @@ import type {
 } from "./types"
 
 import { useDashboardCompute, type ItemResult } from "./useDashboardCompute"
+import type { DashboardRepairFailure } from "./useDashboardCompute"
 
 // ---------------------------------------------------------------------------
 // Minimum item height per type
@@ -194,6 +195,15 @@ export interface ChatDashboardProps {
   onLayoutChange?: (layout: DashboardItemLayout[]) => void
   onExportReady?: (exportFn: (() => Promise<void>) | undefined) => void
   exportFilename?: string
+  /**
+   * Invoked once when the agent's `/compute` response carries a self-healed
+   * recipe. Wrappers should swap `config.fetchSpecs` and trigger persistence
+   * via the canvas save callback so future opens skip the repair round-trip.
+   */
+  onRepairedSpecs?: (
+    repairedSpecs: ChatDashboardConfig["fetchSpecs"],
+    repairFailures: DashboardRepairFailure[] | undefined
+  ) => void
 }
 
 /**
@@ -213,11 +223,13 @@ export function ChatDashboard({
   onTransformChart,
   onExportReady,
   exportFilename,
+  onRepairedSpecs,
 }: ChatDashboardProps) {
   const { fetchItem, getFilterOptions } = useDashboardCompute(
     config,
     apiConfig,
-    refreshKey
+    refreshKey,
+    onRepairedSpecs
   )
 
   // Filter options from the first compute response
@@ -517,6 +529,76 @@ export function DashboardContent({
   // reference, which correctly bumps this key and triggers a real refetch.
   const dataRefreshKey = useMemo(() => Date.now(), [content.config.fetchSpecs])
 
+  // Self-heal persistence: when /compute returns a repaired recipe, swap the
+  // canvas config and (for already-saved dashboards) call the external save
+  // callback so the repaired recipe is persisted. Guarded by a ref so a single
+  // logical repair never triggers a save more than once even if multiple
+  // in-flight fetchItem calls share the same response.
+  const repairAppliedRef = useRef<string | null>(null)
+  // Reset the dedupe gate when the underlying recipe changes (new agent turn,
+  // user reopen, etc.) so a subsequent compute can apply a new repair.
+  useEffect(() => {
+    repairAppliedRef.current = null
+  }, [content.config.fetchSpecs, content.savedDashboardId])
+
+  const handleRepairedSpecs = useCallback(
+    (
+      repairedSpecs: ChatDashboardConfig["fetchSpecs"],
+      _repairFailures: DashboardRepairFailure[] | undefined
+    ) => {
+      const dedupeKey = `${content.savedDashboardId ?? "unsaved"}:${content.toolCallId ?? ""}`
+      if (repairAppliedRef.current === dedupeKey) return
+      repairAppliedRef.current = dedupeKey
+
+      const updatedConfig: ChatDashboardConfig = {
+        ...content.config,
+        fetchSpecs: repairedSpecs,
+      }
+
+      // Swap the canvas config so the next compute uses the healed recipe.
+      // savedDashboardUnsaved stays false because this is a server-side fix,
+      // not a user edit — there is nothing for the user to "save" manually.
+      openCanvas({ ...content, config: updatedConfig })
+
+      // Persist to chat history (best-effort) so re-opening from history also
+      // sees the healed recipe.
+      void saveConfigToHistory({
+        ...updatedConfig,
+        ...(content.savedDashboardId
+          ? {
+              savedDashboardId: content.savedDashboardId,
+              savedDashboardCategory: content.savedDashboardCategory,
+              savedDashboardDescription: content.savedDashboardDescription,
+              savedDashboardUnsaved: false,
+            }
+          : {}),
+      })
+
+      // For saved dashboards, also persist to the external store via the
+      // canvas action so future opens skip the repair round-trip entirely.
+      if (
+        content.savedDashboardId &&
+        content.savedDashboardCategory &&
+        canvasActions?.dashboard?.save
+      ) {
+        void canvasActions.dashboard
+          .save(
+            content.savedDashboardId,
+            content.savedDashboardCategory,
+            updatedConfig
+          )
+          .catch((err) => {
+            // eslint-disable-next-line no-console
+            console.warn(
+              "[Dashboard] Failed to persist self-healed recipe externally",
+              err
+            )
+          })
+      }
+    },
+    [canvasActions, content, openCanvas, saveConfigToHistory]
+  )
+
   return (
     <>
       <ChatDashboard
@@ -542,6 +624,7 @@ export function DashboardContent({
         }}
         onExportReady={registerExport}
         exportFilename={content.title}
+        onRepairedSpecs={handleRepairedSpecs}
       />
       {/* State A: New dashboard with canvasActions — always-visible Save bar */}
       {!isSavedDashboard && hasDashboardActions && (
@@ -655,7 +738,10 @@ function mapChartItem(
     type: "chart",
     chart: toDashboardChartConfig(item.chart),
     fetchData: (filters: FiltersState<FiltersDefinition>) =>
-      fetchData(filters).then((r) => r.chart ?? { categories: [], series: [] }),
+      fetchData(filters).then((r) => {
+        if (r.error) throw new Error(r.error)
+        return r.chart ?? { categories: [], series: [] }
+      }),
   }
 }
 
@@ -689,7 +775,10 @@ function mapMetricItem(
     format: item.format,
     decimals: item.decimals,
     fetchData: (filters: FiltersState<FiltersDefinition>) =>
-      fetchData(filters).then((r) => r.metric ?? { value: 0 }),
+      fetchData(filters).then((r) => {
+        if (r.error) throw new Error(r.error)
+        return r.metric ?? { value: 0 }
+      }),
   }
 }
 
@@ -712,6 +801,7 @@ function mapCollectionItem(
       // Eagerly fetch data, then paginate client-side from the result
       let cachedRows: RecordType[] | null = null
       const dataPromise = fetchData(filters).then((r) => {
+        if (r.error) throw new Error(r.error)
         cachedRows = (r.collection?.rows ?? []) as RecordType[]
         return cachedRows
       })
