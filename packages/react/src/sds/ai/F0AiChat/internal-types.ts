@@ -1,6 +1,7 @@
 import { type AIMessage, type Message } from "@copilotkit/shared"
 
 import { type ClarifyingQuestionState } from "./actions/core/clarifyingQuestion/types"
+import { type CanvasActions } from "./canvas/types"
 import {
   type AiChatDisclaimer,
   type AiChatMode,
@@ -17,7 +18,6 @@ import {
   type VisualizationMode,
   WelcomeScreenSuggestion,
 } from "./types"
-import { type CanvasActions } from "./canvas/types"
 
 /**
  * Internal state for the AiChat provider
@@ -253,9 +253,9 @@ export type AiChatProviderReturnValue = {
     /** Close the canvas panel and restore the previous visualization mode */
     closeCanvas: () => void
     /** The currently active mini-game (easter egg), or null */
-    activeGame: "dino" | "pong" | null
+    activeGame: "pong" | null
     /** Launch a mini-game overlay */
-    openGame: (game: "dino" | "pong") => void
+    openGame: (game: "pong") => void
     /** Close the active mini-game overlay */
     closeGame: () => void
     /** The currently active tool hint, or null if none is selected */

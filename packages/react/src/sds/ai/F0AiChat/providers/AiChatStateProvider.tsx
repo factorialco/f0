@@ -16,9 +16,9 @@ import {
 
 import { useI18n } from "@/lib/providers/i18n"
 
-import { DEFAULT_CHAT_WIDTH } from "../utils/constants"
-import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
 import type { ClarifyingQuestionState } from "../actions/core/clarifyingQuestion/types"
+
+import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
 import {
   type AiChatMode,
   type AppendMessage,
@@ -29,6 +29,7 @@ import {
   type AiChatToolHint,
   WelcomeScreenSuggestion,
 } from "../types"
+import { DEFAULT_CHAT_WIDTH } from "../utils/constants"
 import {
   readFromLocalStorage,
   writeToLocalStorage,
@@ -420,11 +421,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   // Fullscreen mini-game overlay (easter egg). Lives in global state so any
   // UI affordance — credits popover, welcome screen, future surfaces — can
   // open the same game without prop drilling.
-  const [activeGame, setActiveGame] = useState<"dino" | "pong" | null>(null)
-  const openGame = useCallback(
-    (game: "dino" | "pong") => setActiveGame(game),
-    []
-  )
+  const [activeGame, setActiveGame] = useState<"pong" | null>(null)
+  const openGame = useCallback((game: "pong") => setActiveGame(game), [])
   const closeGame = useCallback(() => setActiveGame(null), [])
 
   return (

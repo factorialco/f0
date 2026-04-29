@@ -14,7 +14,7 @@ import type { CreditsUsage } from "../../types"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 
 export function CreditsPopover() {
-  const { credits, openGame } = useAiChat()
+  const { credits } = useAiChat()
   const i18n = useI18n()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -71,16 +71,7 @@ export function CreditsPopover() {
         className="flex w-[324px] flex-col gap-3 rounded-md border border-solid border-f1-border-secondary p-3"
       >
         {hasHeader && (
-          // Easter egg: clicking the company logo launches the Dino mini-game.
-          <button
-            type="button"
-            onClick={() => {
-              setOpen(false)
-              openGame("dino")
-            }}
-            aria-label={credits.companyName ?? ""}
-            className="flex min-w-0 max-w-full flex-1 cursor-pointer items-center gap-2 overflow-hidden rounded text-left text-lg text-f1-foreground transition-colors hover:bg-f1-background-secondary"
-          >
+          <div className="flex min-w-0 max-w-full flex-1 items-center gap-2 overflow-hidden text-left text-lg text-f1-foreground">
             <F0AvatarCompany
               name={credits.companyName ?? ""}
               src={credits.companyLogoUrl}
@@ -99,7 +90,7 @@ export function CreditsPopover() {
                 </OneEllipsis>
               )}
             </div>
-          </button>
+          </div>
         )}
         <div className="flex flex-col rounded border border-solid border-f1-border-secondary">
           <div className="flex flex-col gap-2 p-3">
