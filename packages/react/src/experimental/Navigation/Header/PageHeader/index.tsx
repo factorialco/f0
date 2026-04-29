@@ -8,13 +8,13 @@ import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { IconType } from "@/components/F0Icon"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
-import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
 import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { ChevronDown, ChevronLeft, ChevronUp, Menu } from "@/icons/app"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
+import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
 import { F0OneSwitch } from "@/sds/ai/F0OneSwitch"
 import { Skeleton } from "@/ui/skeleton"
 
@@ -134,13 +134,14 @@ export function PageHeader({
     ...breadcrumbs,
   ]
   const hasStatus = statusTag && Object.keys(statusTag).length !== 0
-  const hasNavigation = breadcrumbs.length > 0
+  const hasNavigation = embedded && breadcrumbs.length > 0
   const hasActions = !embedded && actions.length > 0
   const hasProductUpdates = !embedded && !!productUpdates?.isVisible
   const lastBreadcrumb = breadcrumbsTree[breadcrumbsTree.length - 1]
-  const parentBreadcrumb = hasNavigation
-    ? breadcrumbsTree[breadcrumbsTree.length - 2]
-    : null
+  const nav =
+    "navigation" in window ? (window as Record<string, any>).navigation : null
+  const canGoBack =
+    embedded && (nav ? !!nav.canGoBack : window.history.length > 1)
 
   return (
     <div
@@ -172,26 +173,21 @@ export function PageHeader({
         <div
           className={cn(
             "flex flex-grow items-center gap-2",
-            embedded && hasNavigation && "justify-center"
+            canGoBack && "justify-center"
           )}
         >
-          {embedded &&
-            hasNavigation &&
-            parentBreadcrumb &&
-            !("loading" in parentBreadcrumb) && (
-              <div className="absolute left-4">
-                <Link href={parentBreadcrumb.href}>
-                  <F0Button
-                    variant="ghost"
-                    hideLabel
-                    label="Back"
-                    icon={ChevronLeft}
-                    onClick={(e) => e.preventDefault()}
-                  />
-                </Link>
-              </div>
-            )}
-          {embedded && hasNavigation ? (
+          {embedded && canGoBack && (
+            <div className="absolute left-4">
+              <F0Button
+                variant="ghost"
+                hideLabel
+                label="Back"
+                icon={ChevronLeft}
+                onClick={() => window.history.back()}
+              />
+            </div>
+          )}
+          {canGoBack || hasNavigation ? (
             <div className="text-lg font-semibold text-f1-foreground">
               {"loading" in lastBreadcrumb ? (
                 <Skeleton className="h-4 w-24" />
