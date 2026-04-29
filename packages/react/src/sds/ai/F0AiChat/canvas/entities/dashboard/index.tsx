@@ -19,6 +19,10 @@ export const dashboardCanvasEntity: CanvasEntityDefinition<DashboardCanvasConten
         {children}
       </DashboardCanvasProvider>
     ),
+    // Dashboard manages its own scroll: the grid grows with `flex-1` so a
+    // single-item dashboard fills the remaining height (no scroll), while a
+    // multi-item dashboard scrolls internally above the persistent action bar.
+    overflowHidden: true,
   }
 
 export type { DashboardCanvasContent } from "../../../types"

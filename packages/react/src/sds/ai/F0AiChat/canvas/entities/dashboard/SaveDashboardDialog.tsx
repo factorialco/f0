@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react"
 
-import { F0Dialog } from "@/patterns/F0Dialog"
 import { Input } from "@/experimental/Forms/Fields/Input"
 import { useI18n } from "@/lib/providers/i18n"
+import { F0Dialog } from "@/patterns/F0Dialog"
+import { Textarea } from "@/ui/textarea"
 
 type SaveDashboardDialogProps = {
   isOpen: boolean
@@ -51,7 +52,7 @@ export function SaveDashboardDialog({
       position="center"
       isOpen={isOpen}
       onClose={onClose}
-      width="md"
+      width="sm"
       title={t("ai.dashboard.saveDialog.title")}
       container={null}
       primaryAction={{
@@ -75,13 +76,13 @@ export function SaveDashboardDialog({
           size="md"
           type="text"
         />
-        <Input
+        <Textarea
           label={t("ai.dashboard.saveDialog.descriptionLabel")}
           placeholder={t("ai.dashboard.saveDialog.descriptionPlaceholder")}
           value={description}
           onChange={(value) => setDescription(value)}
           size="md"
-          type="text"
+          rows={10}
         />
       </div>
     </F0Dialog>

@@ -67,6 +67,14 @@ interface DashboardGridProps<Filters extends FiltersDefinition> {
     newType: string,
     orientation?: "vertical" | "horizontal"
   ) => void
+  /**
+   * Notifies the parent when the grid enters/exits a "fill height" mode —
+   * triggered by click-to-fullscreen on a multi-item dashboard. The parent
+   * (`F0AnalyticsDashboard`) uses this to switch its root layout to the same
+   * `flex-1 h-full` chain that single-item dashboards use, so the fullscreen
+   * item fills the remaining viewport without producing scroll.
+   */
+  onFullscreenChange?: (isFullscreen: boolean) => void
 }
 
 // ─── Component ──────────────────────────────────────────────────
@@ -85,27 +93,17 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
   onLayoutChange,
   resetKey,
   onTransformChart,
+  onFullscreenChange,
 }: DashboardGridProps<Filters>) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isNarrow, setIsNarrow] = useState(false)
   const [fullscreenItemId, setFullscreenItemId] = useState<string | null>(null)
-  const [fullscreenHeight, setFullscreenHeight] = useState<number>(0)
 
-  // Measure available height when entering fullscreen
+  // Notify the parent whenever click-fullscreen state flips so it can apply
+  // the fill-height layout (same chain that single-item dashboards use).
   useEffect(() => {
-    if (!fullscreenItemId || !containerRef.current) return
-    const measure = () => {
-      const rect = containerRef.current?.getBoundingClientRect()
-      if (rect) {
-        // Fill from the container's top to the bottom of the viewport,
-        // minus a small padding so it doesn't touch the edge
-        setFullscreenHeight(window.innerHeight - rect.top - 16)
-      }
-    }
-    measure()
-    window.addEventListener("resize", measure)
-    return () => window.removeEventListener("resize", measure)
-  }, [fullscreenItemId])
+    onFullscreenChange?.(!!fullscreenItemId)
+  }, [fullscreenItemId, onFullscreenChange])
 
   // Build item lookup
   const itemMap = useMemo(() => {
@@ -349,16 +347,41 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
     dropTarget?.type === "new-row" &&
     dropTarget.afterRowIdx === afterIdx
 
+  // ─── Single-item dashboard — auto-fullscreen, no collapse ───────
+  // When the dashboard has exactly one item (e.g. the `tables` skill's
+  // single-collection output), skip grid layout entirely and render that
+  // item at full width. The container relies on the parent flex chain
+  // (`F0AnalyticsDashboard` → grid wrapper → here) to provide the available
+  // height — `h-full` then fills exactly that, so there's no scroll. We
+  // deliberately DO NOT forward an `onFullscreenChange` handler so
+  // DashboardItem hides its maximize button (`hasFullscreen` gates on the
+  // callback being defined) — there is nothing to maximize or collapse to
+  // when only one item exists.
+  if (items.length === 1) {
+    const soleItem = items[0]
+    return (
+      <div ref={containerRef} className="flex h-full min-h-0 flex-col">
+        <DashboardGridItem
+          item={soleItem}
+          filters={filters}
+          editMode={editMode}
+          onDelete={handleDelete}
+          onTransformChart={onTransformChart}
+          isFullscreen
+        />
+      </div>
+    )
+  }
+
   // ─── Fullscreen mode — single item fills the grid ────────
+  // Same fill-height layout as the single-item case: relies on the parent
+  // flex chain (`F0AnalyticsDashboard` reacts to `onFullscreenChange`) so the
+  // item fills the remaining viewport without pushing extra layout below.
   if (fullscreenItemId) {
     const fullscreenItem = itemMap.get(fullscreenItemId)
     if (fullscreenItem) {
       return (
-        <div
-          ref={containerRef}
-          className="flex flex-col"
-          style={{ height: Math.max(480, fullscreenHeight) }}
-        >
+        <div ref={containerRef} className="flex h-full min-h-0 flex-col">
           <DashboardGridItem
             item={fullscreenItem}
             filters={filters}
