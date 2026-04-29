@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.471.0](https://github.com/factorialco/f0/compare/f0-react-v1.470.2...f0-react-v1.471.0) (2026-04-29)
+
+
+### Features
+
+* **F0AiChat:** migrate dashboard header to ResourceHeader with status + creator metadata ([#4008](https://github.com/factorialco/f0/issues/4008)) ([96e3fe8](https://github.com/factorialco/f0/commit/96e3fe8b49327fb9efb5e5fc4bc3afd5bc5326c4))
+
 ## [1.470.2](https://github.com/factorialco/f0/compare/f0-react-v1.470.1...f0-react-v1.470.2) (2026-04-29)
 
 
