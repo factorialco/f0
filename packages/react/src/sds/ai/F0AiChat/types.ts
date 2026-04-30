@@ -129,6 +129,13 @@ export type DataDownloadCanvasContent = CanvasContentBase & {
   markdown?: string
 }
 
+export type TicketCanvasContent = CanvasContentBase & {
+  type: "ticket"
+  categoryName: string
+  priority?: string | null
+  status?: "preview" | "created"
+}
+
 /**
  * Discriminated union for canvas panel content.
  * Add new entity types to this union as they are implemented.
@@ -137,6 +144,7 @@ export type CanvasContent =
   | DashboardCanvasContent
   | FormCanvasContent
   | DataDownloadCanvasContent
+  | TicketCanvasContent
 
 /**
  * A tool hint that can be activated to prepend invisible context to the user's

@@ -3,6 +3,7 @@ import { useDemoCardAction } from "../../../UpsellingKit/ai/F0DemoCard/useDemoCa
 import { useFAQCardAction } from "../../../UpsellingKit/ai/F0FAQCard/useFAQCardAction"
 import { useModuleCardAction } from "../../../UpsellingKit/ai/F0ModuleCard/useModuleCardAction"
 import { useQuestionCardAction } from "../../../UpsellingKit/ai/F0QuestionCard/useQuestionCardAction"
+import { useConfirmTicketCreationAction } from "../../../TicketingKit/ai/F0TicketCard/useConfirmTicketCreationAction"
 import { useClarifyingQuestionAction } from "./core/clarifyingQuestion/useClarifyingQuestionAction"
 import { useDataDownloadAction } from "./core/dataDownload/useDataDownloadAction"
 import { useDisplayDashboardAction } from "./core/displayDashboard/useDisplayDashboardAction"
@@ -26,4 +27,5 @@ export const copilotActions: ActionFactory[] = [
   useFAQCardAction,
   useMessageCreditsWarningAction,
   useF0AiFormActions,
+  useConfirmTicketCreationAction,
 ]
