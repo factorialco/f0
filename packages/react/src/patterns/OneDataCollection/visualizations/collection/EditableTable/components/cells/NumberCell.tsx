@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback } from "react"
 
 import { NumberInput } from "@/experimental/Forms/Fields/NumberInput"
 import { RecordType } from "@/hooks/datasource/types/records.typings"
@@ -17,10 +17,6 @@ export function NumberCell<R extends RecordType>({
   item,
 }: EditableCellProps<R>) {
   const config = editableColumn.numberConfig
-  // When clamping produces the same value the parent already holds,
-  // NumberInput's internal state won't re-sync (the prop didn't change).
-  // Bumping a key forces a re-mount so the displayed text resets.
-  const [resetKey, setResetKey] = useState(0)
 
   const trimmed = typeof value === "string" ? value.trim() : value
   const parsed = trimmed !== "" && trimmed != null ? Number(trimmed) : NaN
@@ -45,8 +41,6 @@ export function NumberCell<R extends RecordType>({
     const stringValue = String(clamped)
     if (stringValue !== value) {
       onChange(stringValue)
-    } else {
-      setResetKey((k) => k + 1)
     }
   }
 
@@ -86,7 +80,6 @@ export function NumberCell<R extends RecordType>({
         >
           {unitsBefore && unitsSpan}
           <NumberInput
-            key={resetKey}
             label={editableColumn.label}
             hideLabel
             value={numericValue}
