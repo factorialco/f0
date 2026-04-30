@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.471.1](https://github.com/factorialco/f0/compare/f0-react-v1.471.0...f0-react-v1.471.1) (2026-04-30)
+
+
+### Bug Fixes
+
+* **EditableTable:** allow decimal separator in NumberCell ([#4067](https://github.com/factorialco/f0/issues/4067)) ([878f934](https://github.com/factorialco/f0/commit/878f934797e341345cda4e57c0b18018eae9269a))
+
 ## [1.471.0](https://github.com/factorialco/f0/compare/f0-react-v1.470.2...f0-react-v1.471.0) (2026-04-29)
 
 
