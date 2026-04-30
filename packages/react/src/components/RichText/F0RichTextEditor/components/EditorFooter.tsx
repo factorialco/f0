@@ -3,18 +3,18 @@ import { motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
-import { cn } from "@/lib/utils"
 import { EnhanceActivator, Toolbar } from "@/components/RichText/internal"
 import { Paperclip, TextSize } from "@/icons/app"
+import { cn } from "@/lib/utils"
 
 import {
   enhanceConfig,
   primaryActionType,
   secondaryActionsType,
-} from "../utils/types"
+} from "../types"
 import { ActionsMenu } from "./ActionsMenu"
 
-interface FooterProps {
+interface EditorFooterProps {
   editor: Editor
   maxCharacters: number | undefined
   secondaryAction: secondaryActionsType | undefined
@@ -39,7 +39,7 @@ interface FooterProps {
   plainHtmlMode: boolean
 }
 
-const Footer = ({
+const EditorFooter = ({
   editor,
   maxCharacters,
   secondaryAction,
@@ -59,7 +59,7 @@ const Footer = ({
   setIsToolbarOpen,
   isToolbarOpen,
   plainHtmlMode,
-}: FooterProps) => {
+}: EditorFooterProps) => {
   const [toolbarAnimationComplete, setToolbarAnimationComplete] =
     useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -163,7 +163,7 @@ const Footer = ({
               setToolbarAnimationComplete(isToolbarOpen)
             }
             className={cn(
-              "absolute left-0 top-0 z-10 h-full overflow-hidden",
+              "absolute left-0 top-0 z-10 h-full overflow-x-hidden",
               disabled ? "bg-f1-background-tertiary" : "bg-f1-background"
             )}
             aria-label="Rich text editor toolbar"
@@ -186,7 +186,7 @@ const Footer = ({
 
         {!isFullscreen && (
           <motion.div
-            className="flex items-center gap-2 overflow-hidden"
+            className="flex items-center gap-2"
             initial={{ opacity: 1 }}
             animate={{
               opacity: isToolbarOpen ? 0 : 1,
@@ -221,4 +221,4 @@ const Footer = ({
   )
 }
 
-export { Footer }
+export { EditorFooter }

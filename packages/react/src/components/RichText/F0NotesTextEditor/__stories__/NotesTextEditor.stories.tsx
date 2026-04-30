@@ -5,7 +5,7 @@ import { expect, within } from "storybook/test"
 import { NewColor } from "@/components/tags/F0TagDot"
 import { AcademicCap, List, Pencil, Placeholder } from "@/icons/app"
 
-import { F0NotesTextEditor, F0NotesTextEditorSkeleton } from "./index"
+import { F0NotesTextEditor, F0NotesTextEditorSkeleton } from ".."
 
 const meta: Meta<typeof F0NotesTextEditor> = {
   title: "Rich text/NotesTextEditor",

@@ -1,7 +1,7 @@
 import { Editor, JSONContent } from "@tiptap/react"
 import { RefObject } from "react"
 
-import { heightType, resultType } from "./types"
+import { heightType, resultType } from "../types"
 
 const checkContainerHeight = (
   containerRef: RefObject<HTMLDivElement>,

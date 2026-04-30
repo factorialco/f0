@@ -2,13 +2,13 @@ import { Editor } from "@tiptap/react"
 import type { JSONContent } from "@tiptap/react"
 import { describe, expect, it } from "vitest"
 
-import { BlockIdExtension } from "../internal/Extensions/BlockIdExtension"
-import { StarterKitExtension } from "../internal/Extensions/StarterKit"
+import { BlockIdExtension } from "../../internal/Extensions/BlockIdExtension"
+import { StarterKitExtension } from "../../internal/Extensions/StarterKit"
 import {
   applyPageDocumentPatch,
   NotesTextEditorPatchTargetNotFoundError,
   NotesTextEditorUnsupportedPatchTypeError,
-} from "./applyPageDocumentPatch"
+} from "../applyPageDocumentPatch"
 
 const createEditor = (content?: JSONContent | string) => {
   return new Editor({

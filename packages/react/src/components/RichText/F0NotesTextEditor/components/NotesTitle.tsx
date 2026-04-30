@@ -1,18 +1,18 @@
 import { KeyboardEvent } from "react"
 
-export interface TitleProps {
+export interface NotesTitleProps {
   value: string
   onChange?: (value: string) => void
   placeholder?: string
   disabled?: boolean
 }
 
-const Title = ({
+const NotesTitle = ({
   value,
   onChange,
   placeholder,
   disabled = false,
-}: TitleProps) => {
+}: NotesTitleProps) => {
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter") {
       e.preventDefault()
@@ -48,4 +48,4 @@ const Title = ({
   )
 }
 
-export default Title
+export { NotesTitle }

@@ -1,7 +1,7 @@
 import { expect, test, vi } from "vitest"
 
 import { screen, userEvent, zeroRender as render } from "@/testing/test-utils"
-import { F0RichTextEditor } from "./index"
+import { F0RichTextEditor } from ".."
 
 test("calls onFullscreenChange callback when fullscreen mode changes", async () => {
   const onFullscreenChange = vi.fn()

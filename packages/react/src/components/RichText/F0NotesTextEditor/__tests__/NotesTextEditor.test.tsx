@@ -18,11 +18,11 @@ vi.mock("tippy.js", () => ({
   }),
 }))
 
-vi.mock("./extensions", async () => {
+vi.mock("../extensions", async () => {
   const { StarterKitExtension } =
-    await import("../internal/Extensions/StarterKit")
+    await import("../../internal/Extensions/StarterKit")
   const { BlockIdExtension } =
-    await import("../internal/Extensions/BlockIdExtension")
+    await import("../../internal/Extensions/BlockIdExtension")
 
   return {
     createNotesTextEditorExtensions: () => [
@@ -43,8 +43,8 @@ vi.mock("@/components/RichText/internal", async (importOriginal) => {
   }
 })
 
-import { F0NotesTextEditor } from "./index"
-import type { NotesTextEditorHandle } from "./types"
+import { F0NotesTextEditor } from ".."
+import type { NotesTextEditorHandle } from "../types"
 
 const observeSetContentCalls = () => {
   const setContentCalls: Array<Parameters<Editor["commands"]["setContent"]>> =

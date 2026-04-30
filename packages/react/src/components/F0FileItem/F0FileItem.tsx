@@ -1,11 +1,8 @@
-import { cva, type VariantProps } from "cva"
+import { cva } from "cva"
 import { forwardRef } from "react"
-
-import type { FileDef } from "@/components/avatars/F0AvatarFile/types"
 
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import { F0Button } from "@/components/F0Button"
-import { IconType } from "@/components/F0Icon"
 import {
   DropdownInternal,
   DropdownItem,
@@ -15,12 +12,7 @@ import { withDataTestId } from "@/lib/data-testid"
 import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { cn } from "@/lib/utils"
 
-type FileAction = {
-  icon?: IconType
-  label: string
-  onClick: () => void
-  critical?: boolean
-}
+import type { FileItemProps, FileItemSize } from "./types"
 
 const fileItemVariants = cva({
   base: "flex w-fit flex-row items-center overflow-hidden bg-f1-background-tertiary rounded-[10px]",
@@ -35,8 +27,6 @@ const fileItemVariants = cva({
   },
 })
 
-type FileItemSize = NonNullable<VariantProps<typeof fileItemVariants>["size"]>
-
 const avatarSizeMap: Record<FileItemSize, "sm" | "md"> = {
   md: "md",
   lg: "md",
@@ -45,13 +35,6 @@ const avatarSizeMap: Record<FileItemSize, "sm" | "md"> = {
 const buttonSizeMap: Record<FileItemSize, "sm" | "md"> = {
   md: "sm",
   lg: "md",
-}
-
-interface FileItemProps extends React.HTMLAttributes<HTMLDivElement> {
-  file: File | FileDef
-  actions?: FileAction[]
-  disabled?: boolean
-  size?: FileItemSize
 }
 
 const _F0FileItem = forwardRef<HTMLDivElement, FileItemProps>(
@@ -109,4 +92,4 @@ const _F0FileItem = forwardRef<HTMLDivElement, FileItemProps>(
 _F0FileItem.displayName = "F0FileItem"
 
 export const F0FileItem = withDataTestId(_F0FileItem)
-export type { FileAction, FileItemSize }
+export type { FileAction, FileItemProps, FileItemSize } from "./types"

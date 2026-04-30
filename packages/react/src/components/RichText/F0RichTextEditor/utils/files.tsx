@@ -1,5 +1,5 @@
 import { FILE_TYPES } from "./constants"
-import { filesConfig } from "./types"
+import { filesConfig } from "../types"
 
 const handleAddFiles = (
   newFiles: File[],

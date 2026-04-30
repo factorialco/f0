@@ -13,7 +13,7 @@ vi.mock("@/components/RichText/internal", async (importOriginal) => {
   }
 })
 
-import { F0RichTextEditor } from "./index"
+import { F0RichTextEditor } from ".."
 
 describe("RichTextEditor mentions", () => {
   afterEach(() => {

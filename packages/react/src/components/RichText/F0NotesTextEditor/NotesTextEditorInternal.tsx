@@ -1,6 +1,7 @@
 import DragHandle from "@tiptap/extension-drag-handle-react"
 import { Node } from "@tiptap/pm/model"
-import { Editor, EditorContent, JSONContent, useEditor } from "@tiptap/react"
+import { Editor, EditorContent, useEditor } from "@tiptap/react"
+import { AnimatePresence, motion } from "motion/react"
 import {
   forwardRef,
   useCallback,
@@ -12,8 +13,6 @@ import {
   useState,
 } from "react"
 
-import { AnimatePresence, motion } from "motion/react"
-
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -24,59 +23,29 @@ import {
   Toolbar,
   useEnhance,
 } from "@/components/RichText/internal"
-import { enhanceConfig } from "@/components/RichText/internal/Enhance/types"
 import { Handle, Plus } from "@/icons/app"
-import { DataTestIdWrapper, WithDataTestIdProps } from "@/lib/data-testid"
+import { DataTestIdWrapper } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { ScrollArea } from "@/ui/scrollarea"
-import { Skeleton } from "@/ui/skeleton"
 
-import { AIBlockConfig } from "../internal/Extensions/AIBlock"
 import { documentHasMissingBlockIds } from "../internal/Extensions/BlockIdExtension"
 import {
-  ImageUploadConfig,
   ImageUploadErrorType,
   insertImageFromFile,
 } from "../internal/Extensions/Image"
+
 import "./index.css"
+
 import {
   applyPageDocumentPatch,
   getNotesTextEditorSnapshot,
 } from "./applyPageDocumentPatch"
+import { NotesHeader } from "./components/NotesHeader"
+import { NotesTitle } from "./components/NotesTitle"
 import { createNotesTextEditorExtensions } from "./extensions"
-import Header from "./Header"
-import Title from "./Title"
-import type {
-  BannerProps,
-  DropdownItem,
-  HeaderSecondaryAction,
-  MetadataItem,
-  NotesTextEditorHandle,
-  NotesTextEditorPageDocumentPatch,
-  NotesTextEditorSnapshot,
-  PrimaryActionButton,
-  PrimaryDropdownAction,
-} from "./types"
+import type { NotesTextEditorHandle, NotesTextEditorProps } from "./types"
 
-interface NotesTextEditorProps extends WithDataTestIdProps {
-  onChange: (value: { json: JSONContent | null; html: string | null }) => void
-  placeholder: string
-  initialEditorState?: { content?: JSONContent | string; title?: string }
-  readonly?: boolean
-  aiBlockConfig?: AIBlockConfig
-  imageUploadConfig?: ImageUploadConfig
-  enhanceConfig?: enhanceConfig
-  onTitleChange?: (title: string) => void
-  titlePlaceholder?: string
-  primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>
-  secondaryActions?: HeaderSecondaryAction[]
-  otherActions?: DropdownItem[]
-  metadata?: MetadataItem[]
-  banner?: BannerProps
-  showBubbleMenu?: boolean
-}
-
-const F0NotesTextEditorComponent = forwardRef<
+export const NotesTextEditorInternal = forwardRef<
   NotesTextEditorHandle,
   NotesTextEditorProps
 >(function F0NotesTextEditor(
@@ -318,7 +287,7 @@ const F0NotesTextEditorComponent = forwardRef<
         id={editorId}
       >
         {showHeader && (
-          <Header
+          <NotesHeader
             primaryAction={primaryAction}
             secondaryActions={secondaryActions}
             metadata={metadata}
@@ -380,7 +349,7 @@ const F0NotesTextEditorComponent = forwardRef<
         )}
         <ScrollArea className="h-full gap-6">
           {showTitle && (
-            <Title
+            <NotesTitle
               value={title}
               onChange={onTitleChange ? setTitle : undefined}
               placeholder={titlePlaceholder}
@@ -448,95 +417,3 @@ const F0NotesTextEditorComponent = forwardRef<
     </DataTestIdWrapper>
   )
 })
-
-interface NotesTextEditorSkeletonProps {
-  withHeader?: boolean
-  withTitle?: boolean
-  withToolbar?: boolean
-}
-
-export const F0NotesTextEditorSkeleton = ({
-  withHeader = false,
-  withTitle = true,
-  withToolbar = true,
-}: NotesTextEditorSkeletonProps) => {
-  return (
-    <div
-      className="relative flex h-full w-full flex-col"
-      aria-busy="true"
-      aria-live="polite"
-    >
-      {withHeader && (
-        <div className="flex items-center justify-between border-b border-f1-border px-6 py-3">
-          <div className="flex items-center gap-3">
-            <Skeleton className="h-6 w-20 rounded-md" />
-            <Skeleton className="h-6 w-24 rounded-md" />
-          </div>
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-8 w-16 rounded-md" />
-            <Skeleton className="h-8 w-12 rounded-md" />
-          </div>
-        </div>
-      )}
-
-      {withToolbar && (
-        <div className="absolute bottom-8 left-1/2 z-50 flex -translate-x-1/2 flex-row items-center gap-[9px] rounded-lg bg-f1-background p-2 shadow-md">
-          <Skeleton className="h-8 w-8 rounded" />
-          <div className="flex items-center gap-0.5">
-            <Skeleton className="h-8 w-8 rounded" />
-            <Skeleton className="h-8 w-8 rounded" />
-            <Skeleton className="h-8 w-8 rounded" />
-            <Skeleton className="h-8 w-8 rounded" />
-          </div>
-          <div className="flex items-center gap-0.5">
-            <Skeleton className="h-8 w-8 rounded" />
-            <Skeleton className="h-8 w-8 rounded" />
-            <Skeleton className="h-8 w-8 rounded" />
-          </div>
-          <div className="flex items-center gap-0.5">
-            <Skeleton className="h-8 w-8 rounded" />
-            <Skeleton className="h-8 w-8 rounded" />
-            <Skeleton className="h-8 w-8 rounded" />
-            <Skeleton className="h-8 w-8 rounded" />
-            <Skeleton className="h-8 w-8 rounded" />
-            <Skeleton className="h-8 w-8 rounded" />
-          </div>
-        </div>
-      )}
-      <ScrollArea className="h-full gap-6">
-        {withTitle && (
-          <div className="mx-auto flex w-full max-w-[824px] flex-col px-14 pb-5 pt-5">
-            <Skeleton className="h-8 w-80 rounded-md" />
-          </div>
-        )}
-
-        <div className="h-full">
-          <div className="pb-28 [&>div]:mx-auto [&>div]:w-full [&>div]:max-w-[824px] [&>div]:px-14">
-            <div className="flex flex-col gap-2">
-              <Skeleton className="h-5 w-full rounded-md" />
-              <Skeleton className="h-5 w-4/5 rounded-md" />
-              <Skeleton className="h-5 w-3/5 rounded-md" />
-              <Skeleton className="h-5 w-full rounded-md" />
-              <Skeleton className="h-5 w-1/2 rounded-md" />
-            </div>
-          </div>
-        </div>
-      </ScrollArea>
-    </div>
-  )
-}
-
-export type { Message, User } from "../internal/Extensions/Transcript"
-export type { ImageUploadConfig } from "./types"
-export {
-  NotesTextEditorPatchTargetNotFoundError,
-  NotesTextEditorUnsupportedPatchTypeError,
-} from "./applyPageDocumentPatch"
-export const F0NotesTextEditor = F0NotesTextEditorComponent
-export type {
-  NotesTextEditorHandle,
-  NotesTextEditorPageDocumentPatch,
-  NotesTextEditorProps,
-  NotesTextEditorSkeletonProps,
-  NotesTextEditorSnapshot,
-}

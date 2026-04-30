@@ -1,10 +1,13 @@
 import { JSONContent } from "@tiptap/react"
 
 import { IconType } from "@/components/F0Icon"
+import type { MentionsConfig } from "@/components/RichText/internal"
 
-import { FileType } from "./constants"
+import { FileType } from "./utils/constants"
 
-// Re-export enhance types from the shared CoreEditor/Enhance module
+import type { enhanceConfig } from "@/components/RichText/internal/Enhance/types"
+
+// Re-export enhance types from the shared internal/Enhance module
 export type {
   enhanceConfig,
   enhancedTextResponse,
@@ -80,6 +83,46 @@ type editorStateType = {
   json: JSONContent | null
 }
 
+interface RichTextEditorProps {
+  mentionsConfig?: MentionsConfig
+  enhanceConfig?: enhanceConfig
+  filesConfig?: filesConfig
+  secondaryAction?: secondaryActionsType
+  primaryAction?: primaryActionType
+  onChange: (result: resultType) => void
+  onBlur?: () => void
+  maxCharacters?: number
+  placeholder: string
+  initialEditorState?: {
+    content?: string
+    files?: File[]
+  }
+  title: string
+  height?: heightType
+  plainHtmlMode?: boolean
+  fullScreenMode?: boolean
+  onFullscreenChange?: (fullscreen: boolean) => void
+  /** Whether the editor is disabled */
+  disabled?: boolean
+  /** Whether the editor has an error state */
+  error?: boolean
+  /** Whether the editor is in a loading state */
+  loading?: boolean
+  dataTestId?: string
+}
+
+type RichTextEditorHandle = {
+  clear: () => void
+  clearFiles: () => void
+  focus: () => void
+  setError: (error: string | null) => void
+  setContent: (content: string) => void
+}
+
+interface RichTextEditorSkeletonProps {
+  rows?: number
+}
+
 export type {
   actionType,
   editorStateType,
@@ -88,6 +131,9 @@ export type {
   lastIntentType,
   primaryActionType,
   resultType,
+  RichTextEditorHandle,
+  RichTextEditorProps,
+  RichTextEditorSkeletonProps,
   secondaryActionsType,
   secondaryActionType,
   subActionType,

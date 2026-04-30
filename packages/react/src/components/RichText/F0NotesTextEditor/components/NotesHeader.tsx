@@ -24,7 +24,7 @@ interface BannerProps {
   variant: BannerVariant
 }
 
-export interface HeaderProps {
+export interface NotesHeaderProps {
   primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>
   secondaryActions?: HeaderSecondaryAction[]
   metadata?: MetadataItem[]
@@ -72,13 +72,13 @@ const isPrimaryActionButton = (
   return !!action && "label" in action && !("items" in action)
 }
 
-const Header = ({
+const NotesHeader = ({
   primaryAction,
   secondaryActions = [],
   metadata,
   otherActions = [],
   banner,
-}: HeaderProps) => {
+}: NotesHeaderProps) => {
   const visibleSecondaryActions = secondaryActions.filter(isVisible)
   const visibleOtherActions = otherActions.filter(isOtherActionVisible)
 
@@ -145,5 +145,5 @@ const Header = ({
   )
 }
 
-export default Header
+export { NotesHeader }
 export type { BannerProps, BannerVariant }

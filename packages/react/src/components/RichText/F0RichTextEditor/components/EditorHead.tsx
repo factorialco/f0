@@ -1,7 +1,7 @@
 import { F0Button } from "@/components/F0Button"
 import { Maximize, Minimize } from "@/icons/app"
 
-interface HeadProps {
+interface EditorHeadProps {
   fullScreenMode: boolean
   isFullscreen: boolean
   handleToggleFullscreen: () => void
@@ -9,13 +9,13 @@ interface HeadProps {
   title: string
 }
 
-const Head = ({
+const EditorHead = ({
   fullScreenMode,
   isFullscreen,
   handleToggleFullscreen,
   disableAllButtons,
   title,
-}: HeadProps) => {
+}: EditorHeadProps) => {
   return (
     <>
       {fullScreenMode && (
@@ -44,4 +44,4 @@ const Head = ({
   )
 }
 
-export { Head }
+export { EditorHead }

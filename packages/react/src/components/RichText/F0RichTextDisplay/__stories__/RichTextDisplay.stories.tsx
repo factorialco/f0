@@ -2,11 +2,11 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { expect, within } from "storybook/test"
 
-import { F0RichTextDisplay } from "."
+import { F0RichTextDisplay } from ".."
 
 const meta = {
   component: F0RichTextDisplay,
-  title: "Rich text/F0RichTextDisplay",
+  title: "Rich text/RichTextDisplay",
 } satisfies Meta<typeof F0RichTextDisplay>
 
 export default meta
@@ -119,7 +119,7 @@ export const WithDataTestId: Story = {
     ...Default.args,
     dataTestId: "rich-text-display-test-id",
   },
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement)
     await expect(
       canvas.getByTestId("rich-text-display-test-id")

@@ -4,11 +4,11 @@ import { expect, within } from "storybook/test"
 
 import { CrossedCircle, Download } from "@/icons/app"
 
-import { F0FileItem } from "."
+import { F0FileItem } from ".."
 
 const meta = {
   component: F0FileItem,
-  title: "Rich text/F0FileItem",
+  title: "FileItem",
 } satisfies Meta<typeof F0FileItem>
 
 export default meta
@@ -79,7 +79,7 @@ export const WithDataTestId: Story = {
     ...Default.args,
     dataTestId: "file-item-test-id",
   },
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const canvas = within(canvasElement)
     await expect(canvas.getByTestId("file-item-test-id")).toBeInTheDocument()
   },

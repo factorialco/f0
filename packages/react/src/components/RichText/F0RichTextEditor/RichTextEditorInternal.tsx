@@ -12,30 +12,31 @@ import {
 } from "react"
 import ReactDOM from "react-dom"
 
+import { F0Button } from "@/components/F0Button"
 import {
   EditorBubbleMenu,
   EnhanceActivator,
   EnhanceErrorBanner,
   MentionedUser,
-  MentionsConfig,
   Toolbar,
   ToolbarDivider,
   useEnhance,
 } from "@/components/RichText/internal"
-
-import { F0Button } from "@/components/F0Button"
 import { Cross } from "@/icons/app"
 import { DataTestIdWrapper } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
-import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"
 
 import "../index.css"
-import { Skeleton } from "@/ui/skeleton"
 
-import { FileList } from "./FileList"
-import { Footer } from "./Footer"
-import { Head } from "./Head"
+import { EditorFileList } from "./components/EditorFileList"
+import { EditorFooter } from "./components/EditorFooter"
+import { EditorHead } from "./components/EditorHead"
+import type {
+  editorStateType,
+  RichTextEditorHandle,
+  RichTextEditorProps,
+} from "./types"
 import { ExtensionsConfiguration } from "./utils/extensions"
 import {
   getHeight,
@@ -44,53 +45,8 @@ import {
   setEditorContent,
   setupContainerObservers,
 } from "./utils/helpers"
-import {
-  editorStateType,
-  enhanceConfig,
-  filesConfig,
-  heightType,
-  primaryActionType,
-  resultType,
-  secondaryActionsType,
-} from "./utils/types"
 
-interface RichTextEditorProps {
-  mentionsConfig?: MentionsConfig
-  enhanceConfig?: enhanceConfig
-  filesConfig?: filesConfig
-  secondaryAction?: secondaryActionsType
-  primaryAction?: primaryActionType
-  onChange: (result: resultType) => void
-  onBlur?: () => void
-  maxCharacters?: number
-  placeholder: string
-  initialEditorState?: {
-    content?: string
-    files?: File[]
-  }
-  title: string
-  height?: heightType
-  plainHtmlMode?: boolean
-  fullScreenMode?: boolean
-  onFullscreenChange?: (fullscreen: boolean) => void
-  /** Whether the editor is disabled */
-  disabled?: boolean
-  /** Whether the editor has an error state */
-  error?: boolean
-  /** Whether the editor is in a loading state */
-  loading?: boolean
-  dataTestId?: string
-}
-
-type RichTextEditorHandle = {
-  clear: () => void
-  clearFiles: () => void
-  focus: () => void
-  setError: (error: string | null) => void
-  setContent: (content: string) => void
-}
-
-const F0RichTextEditorComponent = forwardRef<
+export const RichTextEditorInternal = forwardRef<
   RichTextEditorHandle,
   RichTextEditorProps
 >(function F0RichTextEditor(
@@ -258,7 +214,7 @@ const F0RichTextEditorComponent = forwardRef<
             : [
                 "relative w-full rounded-xl border border-solid",
                 enhance.error || errorProp
-                  ? "border-f1-border-critical-bold focus-within:border-f1-border-critical-bold focus-within:ring-f1-border-critical bg-f1-background-critical bg-opacity-10"
+                  ? "border-f1-border-critical-bold focus-within:border-f1-border-critical-bold focus-within:ring-f1-border-critical bg-opacity-10"
                   : "border-f1-border",
               ]
         )}
@@ -267,7 +223,7 @@ const F0RichTextEditorComponent = forwardRef<
           <div className="pointer-events-none fixed inset-0 z-40" />
         )}
 
-        <Head
+        <EditorHead
           fullScreenMode={fullScreenMode}
           isFullscreen={isFullscreen}
           handleToggleFullscreen={handleToggleFullscreen}
@@ -401,7 +357,7 @@ const F0RichTextEditorComponent = forwardRef<
             )}
           </AnimatePresence>
 
-          <FileList
+          <EditorFileList
             files={files}
             disabled={disableAllButtons}
             filesConfig={filesConfig}
@@ -409,7 +365,7 @@ const F0RichTextEditorComponent = forwardRef<
             fileInputRef={fileInputRef}
           />
 
-          <Footer
+          <EditorFooter
             editor={editor}
             maxCharacters={maxCharacters}
             secondaryAction={secondaryAction}
@@ -465,57 +421,3 @@ const F0RichTextEditorComponent = forwardRef<
     </DataTestIdWrapper>
   )
 })
-
-interface RichTextEditorSkeletonProps {
-  rows?: number
-}
-
-const F0RichTextEditorSkeleton = ({
-  rows = 2,
-}: RichTextEditorSkeletonProps) => {
-  const staticWidthPattern = ["75%", "100%", "60%", "85%", "70%"]
-  const widths = Array.from(
-    { length: rows },
-    (_, i) => staticWidthPattern[i % staticWidthPattern.length]
-  )
-
-  return (
-    <div className="relative flex w-full flex-col rounded-xl border border-solid border-f1-border bg-f1-background">
-      <div className="relative w-full flex-grow overflow-hidden">
-        <div className="h-auto w-full pl-3 pr-4 pt-3">
-          <div className="flex flex-col gap-2">
-            {widths.map((width, index) => (
-              <Skeleton key={index} className="h-4" style={{ width }} />
-            ))}
-          </div>
-        </div>
-      </div>
-      <div className="px-3 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-8 w-8 rounded-md" />
-            <Skeleton className="h-8 w-8 rounded-md" />
-            <Skeleton className="h-8 w-8 rounded-md" />
-          </div>
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-8 w-24 rounded-md" />
-            <Skeleton className="h-8 w-32 rounded-md" />
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export * from "./utils/constants"
-export * from "./utils/types"
-export type {
-  RichTextEditorHandle,
-  RichTextEditorProps,
-  RichTextEditorSkeletonProps,
-}
-
-export const F0RichTextEditor = withSkeleton(
-  F0RichTextEditorComponent,
-  F0RichTextEditorSkeleton
-)

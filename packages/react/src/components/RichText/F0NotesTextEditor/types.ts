@@ -1,7 +1,25 @@
 import type { JSONContent } from "@tiptap/react"
-import type { Message, User } from "../internal/Extensions/Transcript"
 
-export type { ImageUploadConfig } from "../internal/Extensions/Image"
+import type { WithDataTestIdProps } from "@/lib/data-testid"
+
+import type { AIBlockConfig } from "../internal/Extensions/AIBlock"
+import type { ImageUploadConfig } from "../internal/Extensions/Image"
+import type { Message, User } from "../internal/Extensions/Transcript"
+import type { enhanceConfig } from "../internal/Enhance/types"
+import type { MetadataItem } from "@/experimental/Information/Headers/Metadata"
+import type { HeaderSecondaryAction } from "@/experimental/Information/Headers/BaseHeader"
+import type {
+  PrimaryActionButton,
+  PrimaryDropdownAction,
+} from "@/experimental/Information/utils"
+import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
+
+import type { BannerProps } from "./components/NotesHeader"
+
+export type {
+  ImageUploadConfig,
+  ImageUploadErrorType,
+} from "../internal/Extensions/Image"
 export type {
   enhanceConfig,
   EnhancementOption,
@@ -16,7 +34,7 @@ export type {
   PrimaryDropdownAction,
 } from "@/experimental/Information/utils"
 export type { DropdownItem } from "@/experimental/Navigation/Dropdown"
-export type { BannerProps, BannerVariant } from "./Header"
+export type { BannerProps, BannerVariant } from "./components/NotesHeader"
 
 interface NotesTextEditorSnapshot {
   json: JSONContent | null
@@ -84,12 +102,38 @@ interface NotesTextEditorHandle {
   insertImage: (file: File) => void
 }
 
+interface NotesTextEditorProps extends WithDataTestIdProps {
+  onChange: (value: { json: JSONContent | null; html: string | null }) => void
+  placeholder: string
+  initialEditorState?: { content?: JSONContent | string; title?: string }
+  readonly?: boolean
+  aiBlockConfig?: AIBlockConfig
+  imageUploadConfig?: ImageUploadConfig
+  enhanceConfig?: enhanceConfig
+  onTitleChange?: (title: string) => void
+  titlePlaceholder?: string
+  primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>
+  secondaryActions?: HeaderSecondaryAction[]
+  otherActions?: DropdownItem[]
+  metadata?: MetadataItem[]
+  banner?: BannerProps
+  showBubbleMenu?: boolean
+}
+
+interface NotesTextEditorSkeletonProps {
+  withHeader?: boolean
+  withTitle?: boolean
+  withToolbar?: boolean
+}
+
 export type {
   DeleteBlockNotesTextEditorPageDocumentPatch,
   InsertAfterNotesTextEditorPageDocumentPatch,
   InsertBeforeNotesTextEditorPageDocumentPatch,
   NotesTextEditorHandle,
   NotesTextEditorPageDocumentPatch,
+  NotesTextEditorProps,
+  NotesTextEditorSkeletonProps,
   NotesTextEditorSnapshot,
   ReplaceBlockNotesTextEditorPageDocumentPatch,
   ReplaceContentNotesTextEditorPageDocumentPatch,

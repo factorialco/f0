@@ -6,9 +6,9 @@ import {
   handleAddFiles,
   handleRemoveFile,
 } from "../utils/files"
-import { filesConfig } from "../utils/types"
+import { filesConfig } from "../types"
 
-interface FileListProps {
+interface EditorFileListProps {
   filesConfig: filesConfig | undefined
   files: File[]
   disabled: boolean
@@ -16,13 +16,13 @@ interface FileListProps {
   fileInputRef: React.RefObject<HTMLInputElement>
 }
 
-const FileList = ({
+const EditorFileList = ({
   filesConfig,
   files,
   setFiles,
   disabled,
   fileInputRef,
-}: FileListProps) => {
+}: EditorFileListProps) => {
   if (!filesConfig) return null
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,4 +85,4 @@ const FileList = ({
   )
 }
 
-export { FileList }
+export { EditorFileList }

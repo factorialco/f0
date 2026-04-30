@@ -2,11 +2,11 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { expect, within } from "storybook/test"
 
-import { EnhancementOption, FILE_TYPES, resultType, F0RichTextEditor } from "."
+import { EnhancementOption, FILE_TYPES, resultType, F0RichTextEditor } from ".."
 
 const meta = {
   component: F0RichTextEditor,
-  title: "Rich text/F0RichTextEditor",
+  title: "Rich text/RichTextEditor",
   tags: ["experimental"],
   argTypes: {
     title: {

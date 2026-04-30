@@ -10,7 +10,7 @@ import {
   primaryActionType,
   secondaryActionType,
   secondaryActionsType,
-} from "../../utils/types"
+} from "../types"
 
 interface ActionsMenuProps {
   secondaryAction?: secondaryActionsType
