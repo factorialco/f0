@@ -20,7 +20,7 @@ type BaseAction = {
 
 type UpsellAction = BaseAction & {
   type: "upsell"
-  variant: "promote" | "outlinePromote"
+  variant: "outlinePromote"
   errorMessage: ErrorMessageProps
   successMessage: SuccessMessageProps
   loadingState: LoadingStateProps
@@ -156,4 +156,5 @@ function _ProductWidget({
   )
 }
 
+/** @deprecated */
 export const ProductWidget = withDataTestId(_ProductWidget)

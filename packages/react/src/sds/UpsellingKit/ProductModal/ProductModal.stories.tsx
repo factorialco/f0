@@ -114,7 +114,7 @@ export const Default: Story = {
         await new Promise((resolve) => setTimeout(resolve, 1000))
       },
       icon: UpsellIcon,
-      variant: "promote",
+      variant: "outlinePromote",
     },
     secondaryAction: {
       label: "Learn more",

@@ -26,7 +26,7 @@ export const Default: Story = {
     actions: [
       {
         type: "regular",
-        variant: "promote",
+        variant: "outlinePromote",
         label: "Learn more",
         onClick: () => {
           alert("clicked")
@@ -81,7 +81,7 @@ export const WithUpsellingButton: Story = {
     actions: [
       {
         type: "upsell",
-        variant: "promote",
+        variant: "outlinePromote",
         label: "Request Information",
         errorMessage: {
           title: "Request failed",

@@ -176,4 +176,5 @@ function _ProductModal({
   )
 }
 
+/** @deprecated */
 export const ProductModal = withDataTestId(_ProductModal)

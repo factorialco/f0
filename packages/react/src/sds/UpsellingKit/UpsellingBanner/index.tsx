@@ -2,19 +2,11 @@ import { forwardRef } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { withDataTestId } from "@/lib/data-testid"
-import { IconType } from "@/components/F0Icon"
-import {
-  BaseBanner,
-  type BannerAction,
-  type BaseBannerProps,
-} from "@/sds/ai/Banners/BaseBanner"
+import { BaseBanner, type BaseBannerProps } from "@/sds/ai/Banners/BaseBanner"
 
 import { UpsellingButton, type UpsellingButtonProps } from "../UpsellingButton"
 
-type DefaultAction = BannerAction
-
-type PromoteAction = {
-  variant: "promote"
+type UpsellAction = {
   label: string
   onClick: () => void
   errorMessage: UpsellingButtonProps["errorMessage"]
@@ -24,15 +16,19 @@ type PromoteAction = {
   closeLabel: UpsellingButtonProps["closeLabel"]
   showIcon?: boolean
   showConfirmation?: boolean
-  icon?: IconType
+}
+
+type GhostAction = {
+  label: string
+  onClick: () => void
 }
 
 type UpsellingBannerProps = Omit<
   BaseBannerProps,
   "primaryAction" | "secondaryAction" | "children"
 > & {
-  primaryAction?: DefaultAction | PromoteAction
-  secondaryAction?: DefaultAction | PromoteAction
+  primaryAction: UpsellAction
+  secondaryAction?: GhostAction
 }
 
 const _UpsellingBanner = forwardRef<HTMLDivElement, UpsellingBannerProps>(
@@ -40,52 +36,29 @@ const _UpsellingBanner = forwardRef<HTMLDivElement, UpsellingBannerProps>(
     { primaryAction, secondaryAction, ...baseProps },
     ref
   ) {
-    const renderAction = (action: DefaultAction | PromoteAction) => {
-      if (action.variant === "promote") {
-        return (
-          <UpsellingButton
-            label={action.label}
-            onRequest={async () => {
-              await action.onClick()
-            }}
-            errorMessage={action.errorMessage}
-            successMessage={action.successMessage}
-            loadingState={action.loadingState}
-            nextSteps={action.nextSteps}
-            closeLabel={action.closeLabel}
-            showIcon={action.showIcon}
-            showConfirmation={action.showConfirmation}
-            variant={action.variant}
-          />
-        )
-      }
-
-      return (
-        <F0Button
-          onClick={action.onClick}
-          label={action.label}
-          variant={action.variant || "default"}
-          size="md"
-          icon={action.icon}
-        />
-      )
-    }
-
-    const basePrimaryAction =
-      primaryAction?.variant !== "promote" ? primaryAction : undefined
-    const baseSecondaryAction =
-      secondaryAction?.variant !== "promote" ? secondaryAction : undefined
-
     return (
-      <BaseBanner
-        ref={ref}
-        {...baseProps}
-        primaryAction={basePrimaryAction}
-        secondaryAction={baseSecondaryAction}
-      >
-        {primaryAction?.variant === "promote" && renderAction(primaryAction)}
-        {secondaryAction?.variant === "promote" &&
-          renderAction(secondaryAction)}
+      <BaseBanner ref={ref} {...baseProps}>
+        <UpsellingButton
+          label={primaryAction.label}
+          onRequest={async () => {
+            await primaryAction.onClick()
+          }}
+          errorMessage={primaryAction.errorMessage}
+          successMessage={primaryAction.successMessage}
+          loadingState={primaryAction.loadingState}
+          nextSteps={primaryAction.nextSteps}
+          closeLabel={primaryAction.closeLabel}
+          showIcon={primaryAction.showIcon}
+          showConfirmation={primaryAction.showConfirmation}
+        />
+        {secondaryAction && (
+          <F0Button
+            variant="ghost"
+            label={secondaryAction.label}
+            onClick={secondaryAction.onClick}
+            size="md"
+          />
+        )}
       </BaseBanner>
     )
   }

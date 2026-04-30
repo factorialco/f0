@@ -6,18 +6,11 @@ import { UpsellingPopover } from "."
 const meta: Meta<typeof UpsellingPopover> = {
   title: "UpsellingKit/UpsellingPopover",
   component: UpsellingPopover,
+  tags: ["autodocs"],
   argTypes: {
-    actions: {
-      control: "object",
-      description: "Custom actions component to display",
-    },
     label: {
       control: "text",
       description: "Label of the button that opens the popover",
-    },
-    icon: {
-      control: "object",
-      description: "Custom icon to display",
     },
     showIcon: {
       control: "boolean",
@@ -28,23 +21,10 @@ const meta: Meta<typeof UpsellingPopover> = {
       options: ["left", "right", "top", "bottom"],
       description: "Side of the popover",
     },
-    width: {
-      control: "text",
-      description: "Width of the popover",
-    },
-    trackVisibility: {
-      control: "object",
-      description: "Function to track visibility",
-    },
     align: {
       control: "select",
       options: ["start", "center", "end"],
       description: "Alignment of the popover",
-    },
-    variant: {
-      control: "select",
-      options: ["promote", "default"],
-      description: "Variant of the popover",
     },
     size: {
       control: "select",
@@ -72,8 +52,7 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
-    mediaUrl:
-      "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    mediaUrl: "https://placehold.co/400x225",
     title: "More benefits to René & your team",
     description:
       "Enjoy greater savings through flexible benefits like meals, transport, and health insurance.",
@@ -87,11 +66,11 @@ export const Default: Story = {
           console.log("clicked")
         },
         type: "regular",
-        variant: "promote",
+        variant: "outlinePromote",
       },
     ],
   },
-  tags: ["autodocs", "no-sidebar"],
+  tags: ["autodocs"],
   render: (args) => {
     const [isOpen, setIsOpen] = useState(false)
 
@@ -101,7 +80,7 @@ export const Default: Story = {
         label="Add reaction"
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        variant="promote"
+        variant="outlinePromote"
         size="md"
         showIcon={true}
         mediaUrl={args.mediaUrl}
@@ -115,8 +94,7 @@ export const Default: Story = {
 }
 export const WithUpsellingButton: Story = {
   args: {
-    mediaUrl:
-      "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    mediaUrl: "https://placehold.co/400x225",
     title: "More benefits to René & your team",
     description:
       "Enjoy greater savings through flexible benefits like meals, transport, and health insurance.",
@@ -126,7 +104,7 @@ export const WithUpsellingButton: Story = {
     actions: [
       {
         type: "upsell",
-        variant: "promote",
+        variant: "outlinePromote",
         label: "Request Information",
         showConfirmation: true,
         errorMessage: {
@@ -169,7 +147,7 @@ export const WithUpsellingButton: Story = {
       },
     ],
   },
-  tags: ["autodocs", "no-sidebar"],
+  tags: ["autodocs"],
   render: (args) => {
     const [isOpen, setIsOpen] = useState(false)
 
@@ -179,7 +157,7 @@ export const WithUpsellingButton: Story = {
         label="Add reaction"
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        variant="promote"
+        variant="outlinePromote"
         size="md"
         side="right"
         align="center"
