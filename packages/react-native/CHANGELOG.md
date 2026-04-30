@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.53.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.52.1...f0-react-native-v0.53.0) (2026-04-30)
+
+
+### Features
+
+* **F0Tabs:** make tab id type generic ([a0f43e9](https://github.com/factorialco/f0/commit/a0f43e920f34c71866cc0d8254ce3a58bc4f2794))
+
 ## [0.52.1](https://github.com/factorialco/f0/compare/f0-react-native-v0.52.0...f0-react-native-v0.52.1) (2026-04-24)
 
 
