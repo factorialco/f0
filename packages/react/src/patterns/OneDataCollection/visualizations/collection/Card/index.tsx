@@ -337,6 +337,7 @@ export const CardCollection = <
   onSelectItems,
   onLoadData,
   onLoadError,
+  onDataStateChange,
   tmpFullWidth,
 }: CollectionProps<
   Record,
@@ -363,25 +364,57 @@ export const CardCollection = <
     return source.dataAdapter
   }, [source.dataAdapter])
 
-  const { data, paginationInfo, setPage, isInitialLoading } =
-    useDataCollectionData<
-      Record,
-      Filters,
-      Sortings,
-      Summaries,
-      NavigationFilters,
-      Grouping
-    >(
-      {
-        ...source,
-        dataAdapter: overridenDataAdapter,
+  const {
+    data,
+    paginationInfo,
+    setPage,
+    isInitialLoading,
+    loadMore,
+    isLoadingMore,
+    error,
+  } = useDataCollectionData<
+    Record,
+    Filters,
+    Sortings,
+    Summaries,
+    NavigationFilters,
+    Grouping
+  >(
+    {
+      ...source,
+      dataAdapter: overridenDataAdapter,
+    },
+    {
+      onError: (error) => {
+        onLoadError(error)
       },
-      {
-        onError: (error) => {
-          onLoadError(error)
-        },
-      }
-    )
+    }
+  )
+
+  const { isLoading } = source
+
+  useEffect(() => {
+    if (error) return
+    onDataStateChange?.({
+      source,
+      data,
+      paginationInfo,
+      setPage,
+      loadMore,
+      isLoading,
+      isLoadingMore,
+    })
+  }, [
+    data,
+    error,
+    paginationInfo,
+    setPage,
+    loadMore,
+    isLoading,
+    isLoadingMore,
+    source,
+    onDataStateChange,
+  ])
 
   useEffect(() => {
     onLoadData({

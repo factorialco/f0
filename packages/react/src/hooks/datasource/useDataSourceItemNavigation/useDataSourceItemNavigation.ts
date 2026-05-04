@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useControllableState } from "@radix-ui/react-use-controllable-state"
 
 import { RecordType } from "../types/records.typings"
@@ -6,12 +6,24 @@ import { RecordType } from "../types/records.typings"
 import {
   UseDataSourceItemNavigationProps,
   UseDataSourceItemNavigationReturn,
+  DataSourceItemId,
 } from "./types"
 
-type PendingNavigation = "first" | "last" | "next-after-current" | null
+type PendingNavigation =
+  | { type: "first"; targetPage: number }
+  | { type: "last"; targetPage: number }
+  | {
+      type: "next-after-current"
+      previousId: DataSourceItemId | null
+      loadedItemsCount: number
+    }
+  | null
 
-const defaultIdProvider = (item: RecordType): string | number =>
-  "id" in item ? `${item.id}` : JSON.stringify(item)
+const defaultIdProvider = (
+  item: RecordType,
+  index?: number
+): DataSourceItemId =>
+  "id" in item ? `${item.id}` : (index ?? JSON.stringify(item))
 
 export function useDataSourceItemNavigation<R extends RecordType>(
   props: UseDataSourceItemNavigationProps<R>
@@ -33,37 +45,47 @@ export function useDataSourceItemNavigation<R extends RecordType>(
   const idProvider = useMemo(() => {
     if (idProviderOverride) return idProviderOverride
     if (dataSource.idProvider) {
-      return (item: R, index?: number) =>
-        dataSource.idProvider!(item, index) as string | number
+      return (item: R, index?: number) => dataSource.idProvider!(item, index)
     }
     return defaultIdProvider
   }, [idProviderOverride, dataSource.idProvider])
 
-  const [activeItemIdState, setActiveItemIdRaw] = useControllableState<
-    string | number | undefined
-  >({
-    prop: activeItemIdProp != null ? activeItemIdProp : undefined,
-    defaultProp: defaultActiveItemId != null ? defaultActiveItemId : undefined,
-    onChange: (value) => onActiveItemChange?.(value ?? null),
-  })
+  const [activeItemIdState, setActiveItemIdRaw] =
+    useControllableState<DataSourceItemId | null>({
+      prop: activeItemIdProp,
+      defaultProp: defaultActiveItemId ?? null,
+      onChange: (value) => onActiveItemChange?.(value ?? null),
+    })
 
-  const activeItemId: string | number | null = activeItemIdState ?? null
+  const activeItemId: DataSourceItemId | null = activeItemIdState ?? null
 
   const setActiveItemId = useCallback(
-    (id: string | number | null) => {
-      setActiveItemIdRaw(id != null ? id : undefined)
+    (id: DataSourceItemId | null) => {
+      setActiveItemIdRaw(id)
     },
     [setActiveItemIdRaw]
   )
 
   const pendingNavigation = useRef<PendingNavigation>(null)
-  const lastItemIdBeforeLoadMore = useRef<string | number | null>(null)
+  const pendingSawLoading = useRef(false)
+  const [isPendingNavigation, setIsPendingNavigation] = useState(false)
+
+  const clearPendingNavigation = useCallback(() => {
+    pendingNavigation.current = null
+    pendingSawLoading.current = false
+    setIsPendingNavigation(false)
+  }, [])
 
   const records = data.records
 
-  const { activeIndex, activeItem } = useMemo(() => {
+  const { activeIndex, activeItem, previousItem, nextItem } = useMemo(() => {
     if (activeItemId == null) {
-      return { activeIndex: -1, activeItem: null }
+      return {
+        activeIndex: -1,
+        activeItem: null,
+        previousItem: null,
+        nextItem: null,
+      }
     }
     const index = records.findIndex(
       (record, i) => idProvider(record, i) === activeItemId
@@ -71,8 +93,21 @@ export function useDataSourceItemNavigation<R extends RecordType>(
     return {
       activeIndex: index,
       activeItem: index >= 0 ? records[index] : null,
+      previousItem: index > 0 ? records[index - 1] : null,
+      nextItem:
+        index >= 0 && index < records.length - 1 ? records[index + 1] : null,
     }
   }, [records, activeItemId, idProvider])
+
+  const absoluteIndex = useMemo(() => {
+    if (activeIndex === -1 || !paginationInfo) return null
+    if (paginationInfo.type === "pages") {
+      return (
+        (paginationInfo.currentPage - 1) * paginationInfo.perPage + activeIndex
+      )
+    }
+    return activeIndex
+  }, [activeIndex, paginationInfo])
 
   const hasMorePages = useMemo(() => {
     if (!paginationInfo) return false
@@ -107,11 +142,12 @@ export function useDataSourceItemNavigation<R extends RecordType>(
   }, [activeIndex, hasPreviousPages])
 
   const goToNext = useCallback(() => {
+    if (pendingNavigation.current !== null || isLoading) return
     if (activeIndex === -1) return
 
     if (activeIndex < records.length - 1) {
-      const nextItem = records[activeIndex + 1]
-      setActiveItemId(idProvider(nextItem, activeIndex + 1))
+      const nextLoadedItem = records[activeIndex + 1]
+      setActiveItemId(idProvider(nextLoadedItem, activeIndex + 1))
       return
     }
 
@@ -119,16 +155,25 @@ export function useDataSourceItemNavigation<R extends RecordType>(
     if (!hasMorePages || !paginationInfo) return
 
     if (paginationInfo.type === "pages") {
-      pendingNavigation.current = "first"
+      pendingNavigation.current = {
+        type: "first",
+        targetPage: paginationInfo.currentPage + 1,
+      }
+      setIsPendingNavigation(true)
       setPage(paginationInfo.currentPage + 1)
     } else if (paginationInfo.type === "infinite-scroll") {
-      lastItemIdBeforeLoadMore.current = activeItemId
-      pendingNavigation.current = "next-after-current"
+      pendingNavigation.current = {
+        type: "next-after-current",
+        previousId: activeItemId,
+        loadedItemsCount: records.length,
+      }
+      setIsPendingNavigation(true)
       loadMore()
     }
   }, [
     activeIndex,
     activeItemId,
+    isLoading,
     records,
     hasMorePages,
     paginationInfo,
@@ -139,11 +184,12 @@ export function useDataSourceItemNavigation<R extends RecordType>(
   ])
 
   const goToPrevious = useCallback(() => {
+    if (pendingNavigation.current !== null || isLoading) return
     if (activeIndex === -1) return
 
     if (activeIndex > 0) {
-      const prevItem = records[activeIndex - 1]
-      setActiveItemId(idProvider(prevItem, activeIndex - 1))
+      const prevLoadedItem = records[activeIndex - 1]
+      setActiveItemId(idProvider(prevLoadedItem, activeIndex - 1))
       return
     }
 
@@ -151,11 +197,16 @@ export function useDataSourceItemNavigation<R extends RecordType>(
     if (!hasPreviousPages || !paginationInfo) return
 
     if (paginationInfo.type === "pages") {
-      pendingNavigation.current = "last"
+      pendingNavigation.current = {
+        type: "last",
+        targetPage: paginationInfo.currentPage - 1,
+      }
+      setIsPendingNavigation(true)
       setPage(paginationInfo.currentPage - 1)
     }
   }, [
     activeIndex,
+    isLoading,
     records,
     hasPreviousPages,
     paginationInfo,
@@ -167,50 +218,88 @@ export function useDataSourceItemNavigation<R extends RecordType>(
   // Resolve pending navigation after data changes
   useEffect(() => {
     if (pendingNavigation.current === null) return
-    if (isLoading) return
-    if (records.length === 0) return
+    if (isLoading) {
+      pendingSawLoading.current = true
+      return
+    }
+    if (records.length === 0) {
+      clearPendingNavigation()
+      return
+    }
 
     const pending = pendingNavigation.current
 
-    if (pending === "first") {
+    if (pending.type === "first") {
+      if (
+        paginationInfo?.type === "pages" &&
+        paginationInfo.currentPage !== pending.targetPage
+      ) {
+        if (pendingSawLoading.current) clearPendingNavigation()
+        return
+      }
       const firstItem = records[0]
       setActiveItemId(idProvider(firstItem, 0))
-    } else if (pending === "last") {
+    } else if (pending.type === "last") {
+      if (
+        paginationInfo?.type === "pages" &&
+        paginationInfo.currentPage !== pending.targetPage
+      ) {
+        if (pendingSawLoading.current) clearPendingNavigation()
+        return
+      }
       const lastItem = records[records.length - 1]
       setActiveItemId(idProvider(lastItem, records.length - 1))
-    } else if (pending === "next-after-current") {
-      const prevId = lastItemIdBeforeLoadMore.current
-      if (prevId != null) {
+    } else if (pending.type === "next-after-current") {
+      if (records.length <= pending.loadedItemsCount) {
+        if (pendingSawLoading.current) clearPendingNavigation()
+        return
+      }
+      if (pending.previousId != null) {
         const prevIndex = records.findIndex(
-          (record, i) => idProvider(record, i) === prevId
+          (record, i) => idProvider(record, i) === pending.previousId
         )
         if (prevIndex >= 0 && prevIndex < records.length - 1) {
           const nextItem = records[prevIndex + 1]
           setActiveItemId(idProvider(nextItem, prevIndex + 1))
+        } else {
+          clearPendingNavigation()
+          return
         }
       }
-      lastItemIdBeforeLoadMore.current = null
     }
 
-    pendingNavigation.current = null
-  }, [records, isLoading, idProvider, setActiveItemId])
+    clearPendingNavigation()
+  }, [
+    records,
+    isLoading,
+    paginationInfo,
+    idProvider,
+    setActiveItemId,
+    clearPendingNavigation,
+  ])
 
-  const isNavigating = pendingNavigation.current !== null && isLoading
+  const isNavigating =
+    isPendingNavigation || (pendingNavigation.current !== null && isLoading)
 
   const nextItemUrl = useMemo(() => {
-    if (!itemUrl || activeIndex === -1 || activeIndex >= records.length - 1)
-      return null
-    return itemUrl(records[activeIndex + 1] as R) ?? null
-  }, [itemUrl, activeIndex, records])
+    if (!itemUrl || !nextItem) return null
+    return itemUrl(nextItem) ?? null
+  }, [itemUrl, nextItem])
 
   const previousItemUrl = useMemo(() => {
-    if (!itemUrl || activeIndex <= 0) return null
-    return itemUrl(records[activeIndex - 1] as R) ?? null
-  }, [itemUrl, activeIndex, records])
+    if (!itemUrl || !previousItem) return null
+    return itemUrl(previousItem) ?? null
+  }, [itemUrl, previousItem])
 
   return {
     activeItemId,
     activeItem,
+    activeIndex,
+    absoluteIndex,
+    loadedItemsCount: records.length,
+    totalItems: paginationInfo?.total,
+    previousItem,
+    nextItem,
     goToNext,
     goToPrevious,
     hasNext,

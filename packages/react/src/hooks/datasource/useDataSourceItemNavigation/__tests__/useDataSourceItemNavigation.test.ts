@@ -3,7 +3,7 @@ import { act } from "@testing-library/react"
 
 import { zeroRenderHook } from "@/testing/test-utils"
 
-import { Data } from "../../useData"
+import { Data, GROUP_ID_SYMBOL } from "../../useData"
 import { PaginationInfo } from "../../types/fetch.typings"
 import { DataSource } from "../../types/datasource.typings"
 import { useDataSourceItemNavigation } from "../useDataSourceItemNavigation"
@@ -33,7 +33,7 @@ const makeRecords = (count: number, startId = 1): TestRecord[] =>
   }))
 
 const makeData = (records: TestRecord[]): Data<TestRecord> => ({
-  records: records.map((r) => ({ ...r, [Symbol("groupId")]: undefined })),
+  records: records.map((r) => ({ ...r, [GROUP_ID_SYMBOL]: undefined })),
   type: "flat",
   groups: [],
 })
@@ -111,6 +111,23 @@ describe("useDataSourceItemNavigation", () => {
         expect.objectContaining({ id: 2, name: "Item 2" })
       )
     })
+
+    it("supports controlled null activeItemId", () => {
+      const { result, rerender } = zeroRenderHook(
+        (props: UseDataSourceItemNavigationProps<TestRecord>) =>
+          useDataSourceItemNavigation(props),
+        {
+          initialProps: defaultProps({ activeItemId: 2 }),
+        }
+      )
+
+      expect(result.current.activeItemId).toBe(2)
+
+      rerender(defaultProps({ activeItemId: null }))
+
+      expect(result.current.activeItemId).toBeNull()
+      expect(result.current.activeItem).toBeNull()
+    })
   })
 
   describe("setActiveItemId", () => {
@@ -153,6 +170,23 @@ describe("useDataSourceItemNavigation", () => {
 
       expect(result.current.activeItemId).toBe(999)
       expect(result.current.activeItem).toBeNull()
+    })
+
+    it("sets active item to null", () => {
+      const onActiveItemChange = vi.fn()
+      const { result } = zeroRenderHook(() =>
+        useDataSourceItemNavigation(
+          defaultProps({ defaultActiveItemId: 2, onActiveItemChange })
+        )
+      )
+
+      act(() => {
+        result.current.setActiveItemId(null)
+      })
+
+      expect(result.current.activeItemId).toBeNull()
+      expect(result.current.activeItem).toBeNull()
+      expect(onActiveItemChange).toHaveBeenCalledWith(null)
     })
   })
 
@@ -416,6 +450,29 @@ describe("useDataSourceItemNavigation", () => {
 
       expect(result.current.hasPrevious).toBe(false)
     })
+
+    it("exposes index and loaded item metadata", () => {
+      const { result } = zeroRenderHook(() =>
+        useDataSourceItemNavigation(
+          defaultProps({
+            data: makeData(makeRecords(5, 6)),
+            defaultActiveItemId: 8,
+            paginationInfo: makePagePaginationInfo(2, 3, 15),
+          })
+        )
+      )
+
+      expect(result.current.activeIndex).toBe(2)
+      expect(result.current.absoluteIndex).toBe(7)
+      expect(result.current.loadedItemsCount).toBe(5)
+      expect(result.current.totalItems).toBe(15)
+      expect(result.current.previousItem).toEqual(
+        expect.objectContaining({ id: 7 })
+      )
+      expect(result.current.nextItem).toEqual(
+        expect.objectContaining({ id: 9 })
+      )
+    })
   })
 
   describe("pending navigation resolution (page-based)", () => {
@@ -463,6 +520,68 @@ describe("useDataSourceItemNavigation", () => {
       expect(result.current.activeItem).toEqual(
         expect.objectContaining({ id: 6, name: "Item 6" })
       )
+    })
+
+    it("does not resolve before the requested next page arrives", () => {
+      const setPage = vi.fn()
+      const { result, rerender } = zeroRenderHook(
+        (props: UseDataSourceItemNavigationProps<TestRecord>) =>
+          useDataSourceItemNavigation(props),
+        {
+          initialProps: defaultProps({
+            defaultActiveItemId: 5,
+            setPage,
+          }),
+        }
+      )
+
+      act(() => {
+        result.current.goToNext()
+      })
+
+      expect(result.current.isNavigating).toBe(true)
+
+      rerender(
+        defaultProps({
+          data: makeData(makeRecords(5)),
+          paginationInfo: makePagePaginationInfo(1, 3, 15),
+          setPage,
+          isLoading: false,
+        })
+      )
+
+      expect(result.current.activeItemId).toBe(5)
+      expect(result.current.isNavigating).toBe(true)
+    })
+
+    it("clears pending navigation when the requested page returns no records", () => {
+      const setPage = vi.fn()
+      const { result, rerender } = zeroRenderHook(
+        (props: UseDataSourceItemNavigationProps<TestRecord>) =>
+          useDataSourceItemNavigation(props),
+        {
+          initialProps: defaultProps({
+            defaultActiveItemId: 5,
+            setPage,
+          }),
+        }
+      )
+
+      act(() => {
+        result.current.goToNext()
+      })
+
+      rerender(
+        defaultProps({
+          data: makeData([]),
+          paginationInfo: makePagePaginationInfo(2, 3, 15),
+          setPage,
+          isLoading: false,
+        })
+      )
+
+      expect(result.current.activeItemId).toBe(5)
+      expect(result.current.isNavigating).toBe(false)
     })
 
     it("resolves to last item after navigating to previous page", () => {
@@ -544,6 +663,66 @@ describe("useDataSourceItemNavigation", () => {
       expect(result.current.activeItem).toEqual(
         expect.objectContaining({ id: 6, name: "Item 6" })
       )
+    })
+
+    it("ignores repeated next navigation while loadMore is pending", () => {
+      const loadMore = vi.fn()
+      const { result } = zeroRenderHook(() =>
+        useDataSourceItemNavigation(
+          defaultProps({
+            defaultActiveItemId: 5,
+            paginationInfo: makeInfiniteScrollPaginationInfo(true, 15),
+            loadMore,
+          })
+        )
+      )
+
+      act(() => {
+        result.current.goToNext()
+        result.current.goToNext()
+      })
+
+      expect(loadMore).toHaveBeenCalledTimes(1)
+      expect(result.current.isNavigating).toBe(true)
+    })
+
+    it("clears pending navigation when loadMore finishes without appended data", () => {
+      const loadMore = vi.fn()
+      const { result, rerender } = zeroRenderHook(
+        (props: UseDataSourceItemNavigationProps<TestRecord>) =>
+          useDataSourceItemNavigation(props),
+        {
+          initialProps: defaultProps({
+            defaultActiveItemId: 5,
+            paginationInfo: makeInfiniteScrollPaginationInfo(true, 15),
+            loadMore,
+          }),
+        }
+      )
+
+      act(() => {
+        result.current.goToNext()
+      })
+
+      rerender(
+        defaultProps({
+          defaultActiveItemId: 5,
+          paginationInfo: makeInfiniteScrollPaginationInfo(true, 15),
+          loadMore,
+          isLoading: true,
+        })
+      )
+      rerender(
+        defaultProps({
+          defaultActiveItemId: 5,
+          paginationInfo: makeInfiniteScrollPaginationInfo(false, 5),
+          loadMore,
+          isLoading: false,
+        })
+      )
+
+      expect(result.current.activeItemId).toBe(5)
+      expect(result.current.isNavigating).toBe(false)
     })
   })
 
@@ -662,6 +841,40 @@ describe("useDataSourceItemNavigation", () => {
         result.current.goToNext()
       })
       expect(result.current.activeItemId).toBe("gamma")
+    })
+
+    it("supports symbol IDs from dataSource.idProvider", () => {
+      const first = Symbol("first")
+      const second = Symbol("second")
+      const records: TestRecord[] = [
+        { id: 1, name: "first" },
+        { id: 2, name: "second" },
+      ]
+      const dataSource = {
+        ...mockDataSource,
+        idProvider: (item: TestRecord) => (item.id === 1 ? first : second),
+      } as unknown as DataSource<TestRecord, never, never, never>
+
+      const { result } = zeroRenderHook(() =>
+        useDataSourceItemNavigation(
+          defaultProps({
+            dataSource,
+            data: makeData(records),
+            defaultActiveItemId: first,
+            idProvider: undefined,
+          })
+        )
+      )
+
+      expect(result.current.activeItem).toEqual(
+        expect.objectContaining({ id: 1, name: "first" })
+      )
+
+      act(() => {
+        result.current.goToNext()
+      })
+
+      expect(result.current.activeItemId).toBe(second)
     })
   })
 

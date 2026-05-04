@@ -24,12 +24,14 @@ import { Spinner } from "@/ui/Spinner"
 
 import type {
   BulkActionDefinition,
+  DataCollectionItemNavigationDataState,
   GroupingState,
   OnBulkActionCallback,
   OnLoadDataCallback,
   SortingsState,
 } from "./types"
 import type { Visualization } from "./visualizations/collection"
+import type { DataCollectionItemNavigationController } from "./hooks/useDataCollectionItemNavigation"
 
 import {
   filterActions,
@@ -200,6 +202,9 @@ export type OneDataCollectionProps<
    * - `false` or `undefined` disables the export action (default)
    */
   csvExport?: boolean | { filename?: string }
+
+  /** Optional controller that exposes item prev/next navigation for the active visualization. */
+  itemNavigation?: DataCollectionItemNavigationController<R>
 }
 
 const OneDataCollectionComp = <
@@ -224,6 +229,7 @@ const OneDataCollectionComp = <
   id,
   tmpFullWidth,
   csvExport,
+  itemNavigation,
 }: OneDataCollectionProps<
   R,
   Filters,
@@ -265,6 +271,20 @@ const OneDataCollectionComp = <
   } = source
 
   const [currentVisualization, setCurrentVisualization] = useState(0)
+
+  const setItemNavigationDataState = itemNavigation?.setDataState
+
+  const handleDataStateChange = useCallback(
+    (state: DataCollectionItemNavigationDataState<R>) => {
+      setItemNavigationDataState?.(state)
+    },
+    [setItemNavigationDataState]
+  )
+
+  useEffect(() => {
+    if (!setItemNavigationDataState) return
+    return () => setItemNavigationDataState(null)
+  }, [setItemNavigationDataState])
 
   const {
     effectiveFilters,
@@ -1037,6 +1057,7 @@ const OneDataCollectionComp = <
           onSelectItems={onSelectItemsLocal}
           onLoadData={onLoadData}
           onLoadError={onLoadError}
+          onDataStateChange={itemNavigation ? handleDataStateChange : undefined}
           tmpFullWidth={tmpFullWidth}
         />
       </div>

@@ -102,6 +102,7 @@ export const TableCollection = <
   onSelectItems,
   onLoadData,
   onLoadError,
+  onDataStateChange,
   allowColumnHiding,
   allowColumnReordering,
   referenceRowType,
@@ -160,6 +161,7 @@ export const TableCollection = <
     isLoadingMore,
     loadMore,
     summaries: summariesData,
+    error,
   } = useDataCollectionData<
     R,
     Filters,
@@ -174,6 +176,29 @@ export const TableCollection = <
   })
 
   const { currentSortings, setCurrentSortings, isLoading } = source
+
+  useEffect(() => {
+    if (error) return
+    onDataStateChange?.({
+      source,
+      data,
+      paginationInfo,
+      setPage,
+      loadMore,
+      isLoading,
+      isLoadingMore,
+    })
+  }, [
+    data,
+    error,
+    paginationInfo,
+    setPage,
+    loadMore,
+    isLoading,
+    isLoadingMore,
+    source,
+    onDataStateChange,
+  ])
 
   const showItemActions = showItemActionsProp !== false && !!source.itemActions
 

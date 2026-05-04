@@ -5,11 +5,14 @@ import type {
 
 import { IconType } from "@/components/F0Icon"
 import {
+  Data,
   DataError,
   GroupingDefinition,
   OnSelectItemsCallback,
+  PaginationInfo,
   RecordType,
   SortingsDefinition,
+  UseDataReturn,
 } from "@/hooks/datasource"
 
 import { DataCollectionSource } from "./hooks/useDataCollectionSource/types"
@@ -68,6 +71,21 @@ export type OnLoadDataCallback<
 export type TableVisualizationType = "table" | "editableTable"
 
 export type OnLoadErrorCallback = (error: DataError) => void
+
+export type DataCollectionItemNavigationDataState<Record extends RecordType> = {
+  source: Pick<DataCollectionSource<Record>, "idProvider" | "itemUrl">
+  data: Data<Record>
+  paginationInfo: PaginationInfo | null
+  setPage: UseDataReturn<Record>["setPage"]
+  loadMore: UseDataReturn<Record>["loadMore"]
+  isLoading: boolean
+  isLoadingMore: boolean
+}
+
+export type OnDataStateChangeCallback<Record extends RecordType> = (
+  state: DataCollectionItemNavigationDataState<Record>
+) => void
+
 /**
  * Props for the Collection component.
  * @template Record - The type of records in the collection
@@ -100,6 +118,7 @@ export type CollectionProps<
   /** Function to handle data load */
   onLoadData: OnLoadDataCallback<Record, Filters>
   onLoadError: OnLoadErrorCallback
+  onDataStateChange?: OnDataStateChangeCallback<Record>
 
   /**
    * @deprecated This will be removed in the next major version

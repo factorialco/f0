@@ -10,6 +10,7 @@ import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import type { DataCollectionDataAdapter } from "../../hooks/useDataCollectionSource/types"
 import type {
   GroupingDefinition,
+  OnDataStateChangeCallback,
   OnLoadDataCallback,
   OnLoadErrorCallback,
 } from "../../types"
@@ -105,6 +106,7 @@ export type Visualization<
         onSelectItems: OnSelectItemsCallback<R, Filters>
         onLoadData: OnLoadDataCallback<R, Filters>
         onLoadError: OnLoadErrorCallback
+        onDataStateChange?: OnDataStateChangeCallback<R>
         source: DataCollectionSource<
           R,
           Filters,
@@ -191,6 +193,7 @@ export type CustomVisualizationProps<
   >
   onLoadData: OnLoadDataCallback<InferRecord<Source>, InferFilters<Source>>
   onLoadError: OnLoadErrorCallback
+  onDataStateChange?: OnDataStateChangeCallback<InferRecord<Source>>
   source: Source
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */

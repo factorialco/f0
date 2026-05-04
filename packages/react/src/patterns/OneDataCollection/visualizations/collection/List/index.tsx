@@ -62,6 +62,7 @@ export const ListCollection = <
   onSelectItems,
   onLoadData,
   onLoadError,
+  onDataStateChange,
   tmpFullWidth,
 }: ListCollectionProps<
   Record,
@@ -79,6 +80,7 @@ export const ListCollection = <
     isInitialLoading,
     isLoadingMore,
     loadMore,
+    error,
   } = useDataCollectionData<
     Record,
     Filters,
@@ -104,6 +106,29 @@ export const ListCollection = <
   }, [paginationInfo?.total, data.records])
 
   const { isLoading } = source
+
+  useEffect(() => {
+    if (error) return
+    onDataStateChange?.({
+      source,
+      data,
+      paginationInfo,
+      setPage,
+      loadMore,
+      isLoading,
+      isLoadingMore,
+    })
+  }, [
+    data,
+    error,
+    paginationInfo,
+    setPage,
+    loadMore,
+    isLoading,
+    isLoadingMore,
+    source,
+    onDataStateChange,
+  ])
 
   // Infinite scroll pagination
   const { loadingIndicatorRef } = useInfiniteScrollPagination(
