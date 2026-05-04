@@ -1,8 +1,7 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
-import { DataSourceItemId } from "@/hooks/datasource"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
 
 import { useDataCollectionItemNavigation } from "../../hooks/useDataCollectionItemNavigation"
@@ -57,7 +56,6 @@ export const ExternalControls: Story = {
   render: () => {
     const itemNavigation = useDataCollectionItemNavigation<MockUser>({
       defaultActiveItemId: users[0].id,
-      snapshotKey: "sidepanel-session",
       idProvider: (item) => item.id,
     })
 
@@ -75,8 +73,10 @@ export const ExternalControls: Story = {
         },
       },
       itemUrl: (item) => `/users/${item.id}`,
-      itemOnClick: (item) => () => itemNavigation.setActiveItemId(item.id),
+      itemOnClick: (item) => () => itemNavigation.openItem(item.id),
     })
+
+    const controls = itemNavigation.controls
 
     return (
       <div className="flex flex-col gap-4">
@@ -99,9 +99,8 @@ export const ExternalControls: Story = {
               {itemNavigation.activeItem?.name ?? "No selected item"}
             </div>
             <div className="text-f1-foreground-secondary text-sm">
-              {itemNavigation.absoluteIndex !== null &&
-              itemNavigation.totalItems
-                ? `${itemNavigation.absoluteIndex + 1} of ${itemNavigation.totalItems}`
+              {controls
+                ? `${controls.currentIndex + 1} of ${controls.totalCount}`
                 : "Select an item to start navigating"}
             </div>
           </div>
@@ -112,10 +111,8 @@ export const ExternalControls: Story = {
               icon={ChevronLeft}
               hideLabel
               label="Previous item"
-              disabled={
-                !itemNavigation.hasPrevious || itemNavigation.isNavigating
-              }
-              onClick={itemNavigation.goToPrevious}
+              disabled={!controls?.canGoPrevious}
+              onClick={controls?.goToPrevious}
             />
             <F0Button
               variant="ghost"
@@ -123,9 +120,9 @@ export const ExternalControls: Story = {
               icon={ChevronRight}
               hideLabel
               label="Next item"
-              disabled={!itemNavigation.hasNext || itemNavigation.isNavigating}
-              loading={itemNavigation.isNavigating}
-              onClick={itemNavigation.goToNext}
+              disabled={!controls?.canGoNext}
+              loading={controls?.isNavigating}
+              onClick={controls?.goToNext}
             />
           </div>
         </div>
@@ -152,21 +149,23 @@ export const SnapshotDuringRefetch: Story = {
   render: () => {
     const [availableUsers, setAvailableUsers] = useState(users.slice(0, 5))
     const [activeItemId, setActiveItemId] = useState(users[2].id)
-    const [snapshotKey, setSnapshotKey] = useState(0)
-
-    const openSession = (id: MockUser["id"]) => {
-      setActiveItemId(id)
-      setSnapshotKey((key) => key + 1)
-    }
 
     const itemNavigation = useDataCollectionItemNavigation<MockUser>({
       activeItemId,
-      onActiveItemChange: (id: DataSourceItemId | null) => {
-        if (typeof id === "string") setActiveItemId(id)
+      onActiveItemChange: (id) => {
+        if (typeof id === "string") {
+          setActiveItemId(id)
+        }
       },
-      snapshotKey,
+      snapshotMode: "session",
       idProvider: (item) => item.id,
     })
+
+    useEffect(() => {
+      itemNavigation.openItem(activeItemId)
+      // Only start the initial detail session on mount.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     const source = useDataCollectionSource<MockUser>(
       {
@@ -176,12 +175,13 @@ export const SnapshotDuringRefetch: Story = {
             return { records: availableUsers }
           },
         },
-        itemOnClick: (item) => () => openSession(item.id),
+        itemOnClick: (item) => () => itemNavigation.openItem(item.id),
       },
       [availableUsers]
     )
 
     const firstVisibleUser = availableUsers[0]
+    const controls = itemNavigation.controls
 
     return (
       <div className="flex flex-col gap-4">
@@ -213,7 +213,16 @@ export const SnapshotDuringRefetch: Story = {
               label="Start new session"
               disabled={!firstVisibleUser}
               onClick={() => {
-                if (firstVisibleUser) openSession(firstVisibleUser.id)
+                if (firstVisibleUser)
+                  itemNavigation.openItem(firstVisibleUser.id)
+              }}
+            />
+            <F0Button
+              variant="outline"
+              size="sm"
+              label="Reset snapshot"
+              onClick={() => {
+                itemNavigation.resetSnapshot()
               }}
             />
           </div>
@@ -236,10 +245,8 @@ export const SnapshotDuringRefetch: Story = {
               icon={ChevronLeft}
               hideLabel
               label="Previous item"
-              disabled={
-                !itemNavigation.hasPrevious || itemNavigation.isNavigating
-              }
-              onClick={itemNavigation.goToPrevious}
+              disabled={!controls?.canGoPrevious}
+              onClick={controls?.goToPrevious}
             />
             <F0Button
               variant="ghost"
@@ -247,8 +254,9 @@ export const SnapshotDuringRefetch: Story = {
               icon={ChevronRight}
               hideLabel
               label="Next item"
-              disabled={!itemNavigation.hasNext || itemNavigation.isNavigating}
-              onClick={itemNavigation.goToNext}
+              disabled={!controls?.canGoNext}
+              loading={controls?.isNavigating}
+              onClick={controls?.goToNext}
             />
           </div>
         </div>

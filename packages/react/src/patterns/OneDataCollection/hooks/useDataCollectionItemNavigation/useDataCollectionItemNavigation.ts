@@ -80,8 +80,20 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
   onActiveItemChange,
   idProvider,
   itemUrl,
+  snapshotMode,
   snapshotKey,
 }: UseDataCollectionItemNavigationProps<R> = {}): DataCollectionItemNavigationController<R> {
+  const effectiveSnapshotMode =
+    snapshotMode ?? (snapshotKey != null ? "manual" : "live")
+  const [sessionSnapshotKey, setSessionSnapshotKey] = useState(0)
+  const [resetSnapshotKey, setResetSnapshotKey] = useState(0)
+  const effectiveSnapshotKey =
+    effectiveSnapshotMode === "manual"
+      ? snapshotKey
+      : effectiveSnapshotMode === "session"
+        ? sessionSnapshotKey
+        : null
+
   const [versionedDataState, setVersionedDataState] = useState<
     VersionedDataState<R>
   >({
@@ -90,7 +102,8 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
   })
   const [snapshotData, setSnapshotData] = useState<Data<R> | null>(null)
   const [snapshotResetAttempt, setSnapshotResetAttempt] = useState(0)
-  const previousSnapshotKey = useRef(snapshotKey)
+  const previousSnapshotKey = useRef(effectiveSnapshotKey)
+  const handledResetSnapshotKey = useRef(resetSnapshotKey)
   const pendingSnapshotReset = useRef<PendingSnapshotReset | null>(null)
   const snapshotResetTimeout = useRef<ReturnType<typeof setTimeout> | null>(
     null
@@ -139,27 +152,43 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
 
   const stateData = dataState?.data ?? (emptyData as Data<R>)
 
+  const resetSnapshot = useCallback(() => {
+    setResetSnapshotKey((key) => key + 1)
+  }, [])
+
   useEffect(() => clearSnapshotResetTimeout, [clearSnapshotResetTimeout])
 
   useEffect(() => {
-    if (!dataState || snapshotKey == null) {
+    if (!dataState || effectiveSnapshotKey == null) {
       pendingSnapshotReset.current = null
       clearSnapshotResetTimeout()
       setSnapshotData(null)
-      previousSnapshotKey.current = snapshotKey
+      previousSnapshotKey.current = effectiveSnapshotKey
+      handledResetSnapshotKey.current = resetSnapshotKey
       return
     }
 
-    const snapshotKeyChanged = previousSnapshotKey.current !== snapshotKey
-    previousSnapshotKey.current = snapshotKey
+    if (handledResetSnapshotKey.current !== resetSnapshotKey) {
+      if (dataState.isLoading || dataState.isLoadingMore) return
+
+      handledResetSnapshotKey.current = resetSnapshotKey
+      pendingSnapshotReset.current = null
+      clearSnapshotResetTimeout()
+      setSnapshotData(createSnapshotData(dataState.data))
+      return
+    }
+
+    const snapshotKeyChanged =
+      previousSnapshotKey.current !== effectiveSnapshotKey
+    previousSnapshotKey.current = effectiveSnapshotKey
 
     if (snapshotKeyChanged) {
       pendingSnapshotReset.current = {
-        key: snapshotKey,
+        key: effectiveSnapshotKey,
         requestedAtVersion: dataStateVersion,
         canUseCurrentData: false,
       }
-      scheduleSnapshotResetAttempt(snapshotKey)
+      scheduleSnapshotResetAttempt(effectiveSnapshotKey)
       return
     }
 
@@ -168,7 +197,7 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
     }
 
     const pendingReset =
-      pendingSnapshotReset.current?.key === snapshotKey
+      pendingSnapshotReset.current?.key === effectiveSnapshotKey
         ? pendingSnapshotReset.current
         : null
 
@@ -216,10 +245,11 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
     clearSnapshotResetTimeout,
     dataState,
     dataStateVersion,
+    effectiveSnapshotKey,
     idProvider,
+    resetSnapshotKey,
     scheduleSnapshotResetAttempt,
     snapshotData,
-    snapshotKey,
     snapshotResetAttempt,
   ])
 
@@ -239,13 +269,65 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
     onActiveItemChange,
   })
 
+  const openItem = useCallback(
+    (id: DataSourceItemId) => {
+      if (effectiveSnapshotMode === "session") {
+        setSessionSnapshotKey((key) => key + 1)
+      }
+      navigation.setActiveItemId(id)
+    },
+    [effectiveSnapshotMode, navigation]
+  )
+
+  const closeItem = useCallback(() => {
+    pendingSnapshotReset.current = null
+    clearSnapshotResetTimeout()
+    setSnapshotData(null)
+    if (effectiveSnapshotMode === "session") {
+      setSessionSnapshotKey((key) => key + 1)
+    }
+    navigation.setActiveItemId(null)
+  }, [clearSnapshotResetTimeout, effectiveSnapshotMode, navigation])
+
+  const controls = useMemo(() => {
+    if (!navigation.activeItem || navigation.activeIndex < 0) return null
+
+    return {
+      activeItemId: navigation.activeItemId,
+      activeItem: navigation.activeItem,
+      currentIndex: navigation.absoluteIndex ?? navigation.activeIndex,
+      totalCount: navigation.totalItems ?? navigation.loadedItemsCount,
+      previousItem: navigation.previousItem,
+      nextItem: navigation.nextItem,
+      canGoPrevious: navigation.hasPrevious && !navigation.isNavigating,
+      canGoNext: navigation.hasNext && !navigation.isNavigating,
+      goToPrevious: navigation.goToPrevious,
+      goToNext: navigation.goToNext,
+      isNavigating: navigation.isNavigating,
+      previousItemUrl: navigation.previousItemUrl,
+      nextItemUrl: navigation.nextItemUrl,
+    }
+  }, [navigation])
+
   return useMemo(
     () => ({
       ...navigation,
       isReady: dataState !== null,
+      controls,
+      openItem,
+      closeItem,
+      resetSnapshot,
       setDataState: handleDataStateChange,
     }),
-    [navigation, dataState, handleDataStateChange]
+    [
+      navigation,
+      dataState,
+      controls,
+      openItem,
+      closeItem,
+      resetSnapshot,
+      handleDataStateChange,
+    ]
   )
 }
 

@@ -89,14 +89,17 @@ const itemNavigationPeople: ItemNavigationPerson[] = [
 const ItemNavigationStatus = ({
   fetchData,
   defaultActiveItemId = 1,
+  snapshotMode,
   snapshotKey,
 }: {
   fetchData: ItemNavigationFetchData
   defaultActiveItemId?: number
+  snapshotMode?: "live" | "session" | "manual"
   snapshotKey?: string
 }) => {
   const itemNavigation = useDataCollectionItemNavigation<ItemNavigationPerson>({
     defaultActiveItemId,
+    snapshotMode,
     snapshotKey,
   })
   const dataSource = useDataCollectionSource<ItemNavigationPerson>(
@@ -122,6 +125,12 @@ const ItemNavigationStatus = ({
         {itemNavigation.absoluteIndex ?? "none"}
       </div>
       <div data-testid="loaded-count">{itemNavigation.loadedItemsCount}</div>
+      <div data-testid="controls-current-index">
+        {itemNavigation.controls?.currentIndex ?? "none"}
+      </div>
+      <div data-testid="controls-total-count">
+        {itemNavigation.controls?.totalCount ?? "none"}
+      </div>
       <div data-testid="next-url">{itemNavigation.nextItemUrl ?? "none"}</div>
       <div data-testid="ready">{String(itemNavigation.isReady)}</div>
       <button type="button" onClick={itemNavigation.goToNext}>
@@ -130,8 +139,14 @@ const ItemNavigationStatus = ({
       <button type="button" onClick={itemNavigation.goToPrevious}>
         Previous item
       </button>
-      <button type="button" onClick={() => itemNavigation.setActiveItemId(3)}>
+      <button type="button" onClick={() => itemNavigation.openItem(3)}>
         Select Cleo
+      </button>
+      <button type="button" onClick={itemNavigation.resetSnapshot}>
+        Reset snapshot
+      </button>
+      <button type="button" onClick={itemNavigation.closeItem}>
+        Close item
       </button>
       <OneDataCollection
         source={dataSource}
@@ -178,6 +193,64 @@ const ItemNavigationSnapshotStatus = () => {
         fetchData={fetchData}
         defaultActiveItemId={3}
         snapshotKey={snapshotKey}
+      />
+    </>
+  )
+}
+
+const ItemNavigationSessionSnapshotStatus = () => {
+  const [records, setRecords] = useState(itemNavigationPeople.slice(0, 3))
+
+  const fetchData: ItemNavigationFetchData = () => ({
+    records,
+    total: records.length,
+    perPage: records.length || 1,
+    type: "infinite-scroll" as const,
+    cursor: null,
+    hasMore: false,
+  })
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setRecords(itemNavigationPeople.slice(0, 2))}
+      >
+        Remove active
+      </button>
+      <ItemNavigationStatus
+        fetchData={fetchData}
+        defaultActiveItemId={3}
+        snapshotMode="session"
+      />
+    </>
+  )
+}
+
+const ItemNavigationLiveSnapshotStatus = () => {
+  const [records, setRecords] = useState(itemNavigationPeople.slice(0, 3))
+
+  const fetchData: ItemNavigationFetchData = () => ({
+    records,
+    total: records.length,
+    perPage: records.length || 1,
+    type: "infinite-scroll" as const,
+    cursor: null,
+    hasMore: false,
+  })
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setRecords(itemNavigationPeople.slice(0, 2))}
+      >
+        Remove active
+      </button>
+      <ItemNavigationStatus
+        fetchData={fetchData}
+        defaultActiveItemId={3}
+        snapshotMode="live"
       />
     </>
   )
@@ -574,6 +647,8 @@ describe("Collections", () => {
     expect(screen.getByTestId("ready")).toHaveTextContent("true")
     expect(screen.getByTestId("absolute-index")).toHaveTextContent("0")
     expect(screen.getByTestId("loaded-count")).toHaveTextContent("2")
+    expect(screen.getByTestId("controls-current-index")).toHaveTextContent("0")
+    expect(screen.getByTestId("controls-total-count")).toHaveTextContent("5")
     expect(screen.getByTestId("next-url")).toHaveTextContent("/people/2")
     expect(fetchData).toHaveBeenCalledTimes(1)
   })
@@ -646,6 +721,84 @@ describe("Collections", () => {
     })
 
     expect(screen.getByTestId("loaded-count")).toHaveTextContent("2")
+  })
+
+  test("keeps session snapshots stable until resetSnapshot is called", async () => {
+    render(
+      <TestWrapper>
+        <ItemNavigationSessionSnapshotStatus />
+      </TestWrapper>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Cleo")
+    })
+
+    await userEvent.click(screen.getByRole("button", { name: "Select Cleo" }))
+    await userEvent.click(screen.getByRole("button", { name: "Remove active" }))
+
+    await waitFor(() => {
+      expect(screen.getByText("Bert")).toBeInTheDocument()
+    })
+
+    expect(screen.getByTestId("active-name")).toHaveTextContent("Cleo")
+    expect(screen.getByTestId("loaded-count")).toHaveTextContent("3")
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Reset snapshot" })
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("none")
+    })
+    expect(screen.getByTestId("loaded-count")).toHaveTextContent("2")
+  })
+
+  test("follows live collection data when snapshot mode is live", async () => {
+    render(
+      <TestWrapper>
+        <ItemNavigationLiveSnapshotStatus />
+      </TestWrapper>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Cleo")
+    })
+
+    await userEvent.click(screen.getByRole("button", { name: "Remove active" }))
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("none")
+    })
+    expect(screen.getByTestId("loaded-count")).toHaveTextContent("2")
+  })
+
+  test("closeItem clears active item and controls", async () => {
+    const fetchData = vi.fn<ItemNavigationFetchData>(() => ({
+      records: itemNavigationPeople.slice(0, 3),
+      total: 3,
+      perPage: 3,
+      type: "infinite-scroll" as const,
+      cursor: null,
+      hasMore: false,
+    }))
+
+    render(
+      <TestWrapper>
+        <ItemNavigationStatus fetchData={fetchData} />
+      </TestWrapper>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Ada")
+    })
+
+    await userEvent.click(screen.getByRole("button", { name: "Close item" }))
+
+    expect(screen.getByTestId("active-name")).toHaveTextContent("none")
+    expect(screen.getByTestId("controls-current-index")).toHaveTextContent(
+      "none"
+    )
   })
 
   test("resets snapshot with fresh data when snapshot key changes during loading", async () => {
