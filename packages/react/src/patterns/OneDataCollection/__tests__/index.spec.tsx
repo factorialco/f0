@@ -113,6 +113,7 @@ const ItemNavigationStatus = ({
     defaultActiveItemId,
     snapshotMode,
     snapshotKey,
+    idProvider: (item) => item.id,
   })
   const dataSource = useDataCollectionSource<ItemNavigationPerson>(
     {
@@ -121,7 +122,6 @@ const ItemNavigationStatus = ({
         perPage: 2,
         fetchData,
       },
-      idProvider: (item) => item.id,
       itemUrl: (item) => `/people/${item.id}`,
       itemOnClick: (item) => () => itemNavigation.setActiveItemId(item.id),
     },
@@ -203,7 +203,6 @@ const ItemNavigationPageStatus = () => {
           }
         },
       },
-      idProvider: (item) => item.id,
     },
     [records]
   )
@@ -263,7 +262,6 @@ const ItemNavigationRecordRefreshStatus = () => {
       dataAdapter: {
         fetchData: () => ({ records }),
       },
-      idProvider: (item) => item.id,
     },
     [records]
   )
@@ -499,7 +497,6 @@ const UnsupportedItemNavigationVisualizationStatus = () => {
     dataAdapter: {
       fetchData: () => ({ records: itemNavigationPeople.slice(0, 2) }),
     },
-    idProvider: (item) => item.id,
   })
 
   return (
