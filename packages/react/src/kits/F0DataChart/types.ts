@@ -1,6 +1,63 @@
 import type * as echarts from "echarts"
+import type { ReactNode } from "react"
+
+import type { IconType } from "@/components/F0Icon"
 
 import type { ChartColorToken } from "./utils/colors"
+
+// ---------------------------------------------------------------------------
+// Empty state
+// ---------------------------------------------------------------------------
+
+/**
+ * Configuration for the empty state shown when a chart has no data.
+ *
+ * `F0DataChart` auto-detects empty data across all variants and renders a
+ * default empty-state card. Use this prop to customize the copy, attach an
+ * action (typically "Clear filters" for a `no-results` state), or fully
+ * replace the rendered UI.
+ */
+export interface F0DataChartEmptyStateProps {
+  /**
+   * Discriminates the message tone. `no-data` is the default (e.g. dataset
+   * is empty); `no-results` signals "filters returned nothing" and is the
+   * usual case for showing a clear-filters action.
+   * @default "no-data"
+   */
+  type?: "no-data" | "no-results"
+  /** Override the default headline. */
+  title?: string
+  /** Override the default supporting copy. */
+  description?: string
+  /**
+   * Optional CTA button. Typical use: `{ label: "Clear filters", onClick }`
+   * for a `type: "no-results"` empty state.
+   */
+  action?: {
+    label: string
+    onClick: () => void
+    icon?: IconType
+  }
+  /**
+   * Render-prop escape hatch — when provided, replaces the entire empty
+   * state UI. Still gated by the empty-data detection.
+   */
+  render?: () => ReactNode
+  /**
+   * Skip empty-data detection and render the chart as usual. Use when zero
+   * values are legitimate (e.g. a "0 errors per day" timeline).
+   * @default false
+   */
+  disabled?: boolean
+}
+
+/**
+ * Props shared by every `F0DataChart` variant.
+ */
+interface F0DataChartCommonProps {
+  /** Customize or opt out of the empty state shown when data is empty. */
+  emptyState?: F0DataChartEmptyStateProps
+}
 
 // ---------------------------------------------------------------------------
 // Bar data types
@@ -71,7 +128,7 @@ export interface F0DataChartLineSeries {
 // Shared base props
 // ---------------------------------------------------------------------------
 
-interface F0DataChartBaseProps {
+interface F0DataChartBaseProps extends F0DataChartCommonProps {
   /** Labels for the category axis (one per data point) */
   categories: string[]
 
@@ -168,7 +225,7 @@ export interface F0DataChartFunnelSeries {
  * Funnels do NOT use category/value axes — stage names come from the data
  * points themselves. This interface is separate from `F0DataChartBaseProps`.
  */
-export interface F0DataChartFunnelProps {
+export interface F0DataChartFunnelProps extends F0DataChartCommonProps {
   /** Chart type */
   type: "funnel"
   /** The funnel series to render */
@@ -239,7 +296,7 @@ export interface F0DataChartPieSeries {
  * Pies do NOT use category/value axes — segment names come from the data
  * points themselves. This interface is separate from `F0DataChartBaseProps`.
  */
-export interface F0DataChartPieProps {
+export interface F0DataChartPieProps extends F0DataChartCommonProps {
   /** Chart type */
   type: "pie"
   /** The pie series to render */
@@ -293,7 +350,7 @@ export interface F0DataChartRadarSeries {
  *
  * Radar charts use a polar coordinate system — no cartesian axes.
  */
-export interface F0DataChartRadarProps {
+export interface F0DataChartRadarProps extends F0DataChartCommonProps {
   /** Chart type */
   type: "radar"
   /** Axes of the radar — defines the dimensions to compare */
@@ -321,7 +378,7 @@ export interface F0DataChartRadarProps {
  *
  * A single-value gauge indicator — no axes, no legend.
  */
-export interface F0DataChartGaugeProps {
+export interface F0DataChartGaugeProps extends F0DataChartCommonProps {
   /** Chart type */
   type: "gauge"
   /** Current value */
@@ -353,7 +410,7 @@ export interface F0DataChartGaugeProps {
  * Uses two category axes (x for columns, y for rows) and a visualMap for
  * value→color mapping.
  */
-export interface F0DataChartHeatmapProps {
+export interface F0DataChartHeatmapProps extends F0DataChartCommonProps {
   /** Chart type */
   type: "heatmap"
   /** Column labels (x-axis) */

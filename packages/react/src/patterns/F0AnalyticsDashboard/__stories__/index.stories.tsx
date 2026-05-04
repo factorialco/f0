@@ -92,3 +92,77 @@ export const Snapshot: Story = {
     />
   ),
 }
+
+// ---------------------------------------------------------------------------
+// Empty-state coverage
+// ---------------------------------------------------------------------------
+
+const emptyItems: DashboardItem<typeof dashboardFilters>[] = [
+  {
+    id: "empty-bar",
+    title: "Importe por mes",
+    description: "Evolución del gasto total por mes.",
+    type: "chart",
+    colSpan: 6,
+    x: 0,
+    y: 0,
+    rowSpan: 6,
+    chart: { type: "bar" },
+    fetchData: async () => ({ categories: [], series: [] }),
+  },
+  {
+    id: "empty-line",
+    title: "Importe por estado",
+    description: "Gasto total por estado.",
+    type: "chart",
+    colSpan: 6,
+    x: 6,
+    y: 0,
+    rowSpan: 6,
+    chart: { type: "line" },
+    fetchData: async () => ({ categories: [], series: [] }),
+  },
+  {
+    id: "empty-horizontal",
+    title: "Top empleados",
+    description: "Empleados con más gasto total.",
+    type: "chart",
+    colSpan: 12,
+    x: 0,
+    y: 6,
+    rowSpan: 6,
+    chart: { type: "bar", orientation: "horizontal" },
+    fetchData: async () => ({ categories: [], series: [] }),
+  },
+]
+
+/**
+ * Mirrors the bug case in the screenshot: every chart returns no data.
+ * Without filters, the empty state shows the "no-data" copy with the
+ * default chart-type illustration — instead of bare axes.
+ */
+export const EmptyDashboard: Story = {
+  render: () => (
+    <F0AnalyticsDashboard
+      filters={dashboardFilters}
+      presets={dashboardPresets}
+      items={emptyItems}
+    />
+  ),
+}
+
+/**
+ * Same empty data but the user has applied filters — the empty state now
+ * shows the "no-results" copy and a "Clear filters" button that resets
+ * everything (try selecting a department then clicking the button).
+ */
+export const NoResultsForFilters: Story = {
+  render: () => (
+    <F0AnalyticsDashboard
+      filters={dashboardFilters}
+      presets={dashboardPresets}
+      defaultFilters={{ department: ["Engineering"] }}
+      items={emptyItems}
+    />
+  ),
+}

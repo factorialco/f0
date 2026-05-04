@@ -1,3 +1,4 @@
+import { fireEvent } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
 import { zeroRender as render } from "@/testing/test-utils"
@@ -142,5 +143,94 @@ describe("F0DataChart", () => {
       />
     )
     expect(container.textContent).toContain("50.0%")
+  })
+
+  describe("empty state", () => {
+    it("renders default empty state when bar series is empty", () => {
+      const { getByText } = render(
+        <F0DataChart type="bar" categories={[]} series={[]} />
+      )
+      expect(getByText("No data available")).toBeInTheDocument()
+      expect(
+        getByText("Try a different date or fewer filters")
+      ).toBeInTheDocument()
+    })
+
+    it("renders CTA and fires the action handler", () => {
+      const onClick = vi.fn()
+      const { getByRole } = render(
+        <F0DataChart
+          type="bar"
+          categories={[]}
+          series={[]}
+          emptyState={{
+            type: "no-results",
+            action: { label: "Clear filters", onClick },
+          }}
+        />
+      )
+      const button = getByRole("button", { name: /clear filters/i })
+      fireEvent.click(button)
+      expect(onClick).toHaveBeenCalledTimes(1)
+    })
+
+    it("uses overrides for title and description", () => {
+      const { getByText } = render(
+        <F0DataChart
+          type="line"
+          categories={[]}
+          series={[]}
+          emptyState={{
+            title: "Nothing here yet",
+            description: "Try a different range",
+          }}
+        />
+      )
+      expect(getByText("Nothing here yet")).toBeInTheDocument()
+      expect(getByText("Try a different range")).toBeInTheDocument()
+    })
+
+    it("render-prop short-circuits the default UI", () => {
+      const { getByTestId, queryByText } = render(
+        <F0DataChart
+          type="bar"
+          categories={[]}
+          series={[]}
+          emptyState={{
+            render: () => <div data-testid="custom">Custom</div>,
+          }}
+        />
+      )
+      expect(getByTestId("custom")).toBeInTheDocument()
+      expect(queryByText("No data available")).not.toBeInTheDocument()
+    })
+
+    it("disabled: true bypasses empty-state detection", () => {
+      const { queryByText } = render(
+        <F0DataChart
+          type="bar"
+          categories={[]}
+          series={[]}
+          emptyState={{ disabled: true }}
+        />
+      )
+      expect(queryByText("No data available")).not.toBeInTheDocument()
+    })
+
+    it("does not render empty state when data is present", () => {
+      const { queryByText } = render(
+        <F0DataChart
+          type="bar"
+          categories={["Q1"]}
+          series={[{ name: "Revenue", data: [100] }]}
+        />
+      )
+      expect(queryByText("No data available")).not.toBeInTheDocument()
+    })
+
+    it("treats gauge with value 0 as non-empty", () => {
+      const { queryByText } = render(<F0DataChart type="gauge" value={0} />)
+      expect(queryByText("No data available")).not.toBeInTheDocument()
+    })
   })
 })

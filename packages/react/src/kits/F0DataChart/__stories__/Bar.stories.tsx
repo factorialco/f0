@@ -325,3 +325,16 @@ export const ScrollableLegend: Story = {
     />
   ),
 }
+
+/**
+ * No data — the empty state takes over so the chart never renders as a
+ * bare axis. See `F0DataChart/Empty states` for full coverage.
+ */
+export const Empty: Story = {
+  render: (args) => <F0DataChart {...args} />,
+  args: {
+    type: "bar",
+    categories: [],
+    series: [],
+  },
+}
