@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.473.0](https://github.com/factorialco/f0/compare/f0-react-v1.472.1...f0-react-v1.473.0) (2026-05-04)
+
+
+### Features
+
+* **F0DataChart:** add empty state to data charts ([#4076](https://github.com/factorialco/f0/issues/4076)) ([21e638a](https://github.com/factorialco/f0/commit/21e638a222405495d9afd94cf52301fd65005929))
+
 ## [1.472.1](https://github.com/factorialco/f0/compare/f0-react-v1.472.0...f0-react-v1.472.1) (2026-05-04)
 
 
