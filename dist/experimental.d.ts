@@ -254,6 +254,7 @@ export declare type ActionDefinition = DropdownItemSeparator | (Pick<DropdownIte
     onClick: () => void;
     enabled?: boolean;
     type?: "primary" | "secondary" | "other";
+    hideLabel?: boolean;
 });
 
 declare type ActionLinkProps = ActionBaseProps & {
@@ -382,6 +383,8 @@ declare type ActivityItemProps = {
 };
 
 declare type AddRowActionsResult = PrimaryActionItemDefinition | PrimaryActionItemDefinition[] | undefined;
+
+declare type AggregationType = "count" | "sum" | "avg" | "min" | "max" | "countDistinct";
 
 declare type AiBannerAction = {
     label: string;
@@ -514,6 +517,11 @@ declare type AiChatProviderProps = {
      * URL builders (navigation links) for each entity type.
      */
     entityRefs?: EntityRefs;
+    /**
+     * Canvas action callbacks grouped by entity type.
+     * Provides save/create functions for persisting canvas entities externally.
+     */
+    canvasActions?: CanvasActions;
     /**
      * Available tool hints that the user can activate to provide intent context
      * to the AI. Renders a selector button next to the send button.
@@ -1238,6 +1246,11 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      */
     disabled?: boolean;
     /**
+     * If true and disabled is also true, the button retains its normal visual appearance
+     * (no reduced opacity or not-allowed cursor) while still being non-interactive.
+     */
+    withoutDisabledAppearance?: boolean;
+    /**
      * @private
      * If true, the button is visually active or selected (pressed state).
      */
@@ -1354,6 +1367,16 @@ declare type CandidateProfile = {
     lastName: string;
     avatarUrl?: string;
     source?: string;
+    appliedAt?: string;
+};
+
+/**
+ * Canvas-level action callbacks grouped by entity type.
+ * Each entity defines its own actions type; this aggregates them.
+ * Passed by the host app to F0AiChatProvider via `canvasActions`.
+ */
+declare type CanvasActions = {
+    dashboard?: DashboardCanvasActions;
 };
 
 declare type CardAvatarVariant = AvatarVariant | {
@@ -1588,6 +1611,17 @@ export declare type CelebrationProps = {
 
 export declare const CelebrationSkeleton: () => JSX_2.Element;
 
+declare interface ChartComputation {
+    datasetId: string;
+    xAxis: string;
+    yAxis: string;
+    aggregation: AggregationType;
+    series?: string;
+    sortBy?: "value" | "category";
+    sortOrder?: "asc" | "desc";
+    limit?: number;
+}
+
 declare type ChartConfig_3 = Record<string, ChartConfig_4[keyof ChartConfig_4]>;
 
 declare type ChartConfig_4 = {
@@ -1621,6 +1655,205 @@ declare type ChartItem<K extends ChartConfig_3> = {
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const ChartWidgetEmptyState: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Props_6 & RefAttributes<HTMLDivElement>>>;
+
+declare interface ChatDashboardBarChartConfig extends ChatDashboardChartConfigBase {
+    type: "bar";
+    orientation?: "vertical" | "horizontal";
+    stacked?: boolean;
+}
+
+declare type ChatDashboardChartConfig = ChatDashboardBarChartConfig | ChatDashboardLineChartConfig | ChatDashboardFunnelChartConfig | ChatDashboardRadarChartConfig | ChatDashboardPieChartConfig | ChatDashboardGaugeChartConfig | ChatDashboardHeatmapChartConfig;
+
+declare interface ChatDashboardChartConfigBase {
+    showLegend?: boolean;
+    showGrid?: boolean;
+    showLabels?: boolean;
+    valueFormat?: FormatPreset;
+}
+
+declare interface ChatDashboardChartItem extends ChatDashboardItemBase {
+    type: "chart";
+    chart: ChatDashboardChartConfig;
+    computation: ChartComputation | RadarComputation | PieComputation | GaugeComputation | HeatmapComputation;
+}
+
+declare interface ChatDashboardCollectionItem extends ChatDashboardItemBase {
+    type: "collection";
+    columns: ChatDashboardColumn[];
+    computation: CollectionComputation;
+}
+
+declare interface ChatDashboardColumn {
+    /** Column key — must match a key in each row object */
+    id: string;
+    /** Display header label */
+    label: string;
+    /** Optional fixed width in pixels */
+    width?: number;
+}
+
+/**
+ * Complete dashboard configuration received via `displayDashboard`.
+ * Contains fetchSpecs that describe how to obtain data server-side —
+ * no raw data is included. Fully JSON-serializable.
+ */
+declare interface ChatDashboardConfig {
+    /** Dashboard title displayed in the canvas header and chat report card */
+    title: string;
+    /**
+     * AI-generated 1–2 sentence summary of what the dashboard shows. Displayed
+     * under the title in the canvas header. Optional at the type level so
+     * legacy persisted dashboards (before the agent started emitting it) still
+     * parse; the agent schema makes it required going forward.
+     */
+    description?: string;
+    /** Filter definitions — keys become filter IDs */
+    filters?: Record<string, ChatDashboardFilterDefinition>;
+    /**
+     * Dashboard-level navigation filters (e.g. date navigator). Keys become
+     * filter IDs. Rendered above the grid by F0AnalyticsDashboard's
+     * `navigationFilters` slot.
+     */
+    navigationFilters?: Record<string, ChatDashboardNavigationFilterDefinition>;
+    /** Ordered list of dashboard items with computation specs */
+    items: ChatDashboardItem[];
+    /** Fetch specs for server-side data retrieval, keyed by datasetId */
+    fetchSpecs: Record<string, DashboardFetchSpec>;
+}
+
+/** Granularity options exposed by F0's `OneDateNavigator`. */
+declare type ChatDashboardDateNavigationGranularity = "day" | "week" | "month" | "quarter" | "halfyear" | "year" | "range";
+
+declare interface ChatDashboardFilterDefinition {
+    type: "in";
+    label: string;
+    column: string;
+    datasetId: string;
+}
+
+declare interface ChatDashboardFunnelChartConfig {
+    type: "funnel";
+    sort?: "descending" | "ascending" | "none";
+    orient?: "horizontal" | "vertical";
+    labelPosition?: "inside" | "outside";
+    showLegend?: boolean;
+    showLabels?: boolean;
+    showConversion?: boolean;
+    valueFormat?: FormatPreset;
+}
+
+declare interface ChatDashboardGaugeChartConfig {
+    type: "gauge";
+    min?: number;
+    max?: number;
+    showValue?: boolean;
+    valueFormat?: FormatPreset;
+}
+
+declare interface ChatDashboardHeatmapChartConfig {
+    type: "heatmap";
+    min?: number;
+    max?: number;
+    showLabels?: boolean;
+    showVisualMap?: boolean;
+    valueFormat?: FormatPreset;
+}
+
+declare type ChatDashboardItem = ChatDashboardChartItem | ChatDashboardMetricItem | ChatDashboardCollectionItem;
+
+declare interface ChatDashboardItemBase {
+    id: string;
+    title: string;
+    description?: string;
+    /** Source attribution shown as a subtitle (e.g. "Based on 8 feedbacks from 3 evaluators") */
+    sourceDescription?: string;
+    /**
+     * Optional markdown explanation of how this item's data was calculated.
+     * Surfaced via the per-item dropdown's "Where does this data come from?"
+     * entry, which opens a dialog rendering the markdown. Omit to hide the
+     * entry — backwards compatible with persisted dashboards.
+     */
+    explanation?: string;
+    /**
+     * @deprecated Ignored by the renderer — items auto-size to equal-width
+     * slots based on the per-row slot budget. Kept for backwards compatibility
+     * with persisted layouts; safe to leave unset.
+     */
+    colSpan?: number;
+    /**
+     * @deprecated Use `itemHeight` (pixels) instead. Kept for backwards
+     * compatibility with persisted layouts: when `itemHeight` is unset, the
+     * grid still reads `rowSpan * 48` as a fallback.
+     */
+    rowSpan?: number;
+    /**
+     * Item height in pixels. Takes precedence over `rowSpan` when set. The
+     * row height in the grid is `max(itemHeight)` across all items in the row.
+     * Persisted resizes write a pixel-accurate value here; agent-generated
+     * dashboards should pick from a constrained set of values that match the
+     * data shape (more rows / more categories → taller).
+     */
+    itemHeight?: number;
+    x?: number;
+    y?: number;
+}
+
+declare interface ChatDashboardLineChartConfig extends ChatDashboardChartConfigBase {
+    type: "line";
+    lineType?: "linear" | "smooth" | "step";
+    showArea?: boolean;
+    showDots?: boolean;
+}
+
+declare type ChatDashboardMetricFormat = {
+    type: "number";
+} | {
+    type: "currency";
+    currency?: string;
+} | {
+    type: "percent";
+} | {
+    type: "custom";
+    suffix?: string;
+    prefix?: string;
+};
+
+declare interface ChatDashboardMetricItem extends ChatDashboardItemBase {
+    type: "metric";
+    format?: ChatDashboardMetricFormat;
+    decimals?: number;
+    computation: MetricComputation;
+}
+
+/**
+ * Navigation filter definitions emitted by the LLM via `displayDashboard`.
+ * Discriminated on `type`. Today the only supported variant is
+ * `dateNavigation`, which renders F0's date navigator above the dashboard
+ * grid. The `column` and `datasetId` are agent-side metadata used by the
+ * compute SQL builder; they are stripped before reaching F0AnalyticsDashboard.
+ */
+declare type ChatDashboardNavigationFilterDefinition = {
+    type: "dateNavigation";
+    label: string;
+    column: string;
+    datasetId: string;
+    granularities: ChatDashboardDateNavigationGranularity[];
+    defaultGranularity?: ChatDashboardDateNavigationGranularity;
+};
+
+declare interface ChatDashboardPieChartConfig {
+    type: "pie";
+    innerRadius?: number;
+    showLegend?: boolean;
+    showLabels?: boolean;
+    showPercentage?: boolean;
+    valueFormat?: FormatPreset;
+}
+
+declare interface ChatDashboardRadarChartConfig extends ChatDashboardChartConfigBase {
+    type: "radar";
+    showArea?: boolean;
+}
 
 export declare type ChatWidgetEmptyStateProps = Props_6;
 
@@ -1747,6 +1980,13 @@ declare type ClockInStatus = "clocked-in" | "break" | "clocked-out";
 
 declare type ColId = string;
 
+declare interface CollectionComputation {
+    datasetId: string;
+    sortBy?: string;
+    sortOrder?: "asc" | "desc";
+    limit?: number;
+}
+
 /**
  * Props for the Collection component.
  * @template Record - The type of records in the collection
@@ -1762,6 +2002,7 @@ export declare type CollectionProps<Record extends RecordType, Filters extends F
     /** Function to handle data load */
     onLoadData: OnLoadDataCallback<Record, Filters>;
     onLoadError: OnLoadErrorCallback;
+    onDataStateChange?: OnDataStateChangeCallback<Record>;
     /**
      * @deprecated This will be removed in the next major version
      * Temporary prop to force the full width of the data collection (removes the X padding)
@@ -1913,36 +2154,6 @@ declare type CompareToDef = {
 
 declare type CompareToDefKey = string;
 
-declare type Content = (ComponentProps<typeof DataList.Item> & {
-    type: "item";
-}) | (ComponentProps<typeof DataList.PersonItem> & {
-    type: "person";
-}) | (ComponentProps<typeof DataList.CompanyItem> & {
-    type: "company";
-}) | (ComponentProps<typeof DataList.TeamItem> & {
-    type: "team";
-}) | (ComponentProps<typeof Weekdays> & {
-    type: "weekdays";
-}) | (ComponentProps<typeof DataList.DotTagItem> & {
-    type: "dot-tag";
-}) | (Props_3 & {
-    type: "alert-tag";
-}) | (F0TagBalanceProps & {
-    type: "balance-tag";
-}) | (F0TagStatusProps & {
-    type: "status-tag";
-}) | (F0TagRawProps & {
-    type: "raw-tag";
-}) | {
-    [T in TagType_2]: {
-        type: "tag-list";
-        tagList: F0TagListProps<T>;
-    };
-}[TagType_2] | {
-    type: "avatar-list";
-    avatarList: F0AvatarListProps;
-};
-
 /**
  * @experimental This is an experimental component use it at your own risk
  */
@@ -2010,11 +2221,82 @@ export declare type CustomVisualizationProps<Source extends {
     onSelectItems: OnSelectItemsCallback<InferRecord<Source>, InferFilters<Source>>;
     onLoadData: OnLoadDataCallback<InferRecord<Source>, InferFilters<Source>>;
     onLoadError: OnLoadErrorCallback;
+    onDataStateChange?: OnDataStateChangeCallback<InferRecord<Source>>;
     source: Source;
 };
 
 export declare const Dashboard: ForwardRefExoticComponent<DashboardProps & RefAttributes<HTMLDivElement>> & {
     Skeleton: () => JSX_2.Element;
+};
+
+/**
+ * Callbacks for persisting dashboards externally (beyond chat history).
+ */
+declare type DashboardCanvasActions = {
+    /** Update an existing saved dashboard */
+    save: (id: string, category: string, config: ChatDashboardConfig) => Promise<void>;
+    /**
+     * Create a new saved dashboard. Returns the new dashboard's id and
+     * category so subsequent edits can call `save` (which requires both).
+     * Returning void / undefined leaves the canvas in its current state.
+     */
+    create: (title: string, description: string, config: ChatDashboardConfig, category?: string) => Promise<{
+        id: string;
+        category: string;
+    } | void>;
+    /**
+     * Fetch creator + last-edited metadata for a saved dashboard. The header
+     * calls this lazily, only when the current dashboard has a
+     * `savedDashboardId`. Returning `void` signals "no metadata available" —
+     * the header will skip rendering the avatar and the last-edited row
+     * instead of showing a placeholder.
+     */
+    getMetadata?: (id: string) => Promise<DashboardMetadata | void>;
+};
+
+declare interface DashboardFetchSpec {
+    fetch: Array<{
+        toolId: string;
+        args: Record<string, unknown>;
+    }>;
+    query: string | null;
+    columnLabels?: Record<string, string>;
+}
+
+/**
+ * Creator + last-edited metadata for a saved dashboard. Returned by
+ * `DashboardCanvasActions.getMetadata` so the header can render the author
+ * avatar and the freshness signal only once a dashboard has been persisted.
+ *
+ * `title` and `description` are also returned: once a dashboard has an id
+ * the backend is the source of truth and may diverge from what's stored in
+ * the chat history (e.g. someone renamed the dashboard from the Analytics
+ * list page since this conversation was first opened). The header prefers
+ * these values over the ones baked into `content` / `config`.
+ */
+declare type DashboardMetadata = {
+    /**
+     * Latest persisted title. When present, the header displays this instead
+     * of `content.title` so the chat-history snapshot never shadows the
+     * authoritative backend copy.
+     */
+    title?: string;
+    /**
+     * Latest persisted description. Same rationale as `title` — takes
+     * precedence over `config.description` once the dashboard is saved.
+     */
+    description?: string;
+    creator: {
+        firstName: string;
+        lastName: string;
+        /** Optional avatar image URL. Falls back to initials when omitted. */
+        src?: string;
+    };
+    /**
+     * Last edited timestamp. Accepts `Date` or an ISO-8601 string so host apps
+     * can forward backend payloads verbatim without pre-parsing.
+     */
+    lastEdited: Date | string;
 };
 
 declare type DashboardProps = {
@@ -2056,6 +2338,60 @@ export declare type DataCollectionDataAdapter<R extends RecordType = RecordType,
 declare type DataCollectionExtendFetchOptions<NavigationFilters extends NavigationFiltersDefinition> = {
     navigationFilters: NavigationFiltersState<NavigationFilters>;
 };
+
+export declare interface DataCollectionItemNavigationController<R extends RecordType> extends UseDataSourceItemNavigationReturn<R> {
+    /** True once a OneDataCollection visualization has registered its data state. */
+    isReady: boolean;
+    /** Render-ready controls for external headers/toolbars, or null when no item is active. */
+    controls: DataCollectionItemNavigationControls<R> | null;
+    /** Set an active item and start a new session snapshot when snapshotMode is "session". */
+    openItem: (id: DataSourceItemId) => void;
+    /** Clear the active item and the session snapshot. */
+    closeItem: () => void;
+    /** Replace the current snapshot with the latest live collection data. */
+    resetSnapshot: () => void;
+}
+
+export declare interface DataCollectionItemNavigationControls<R extends RecordType> {
+    /** The currently active item ID. */
+    activeItemId: DataSourceItemId | null;
+    /** The currently active item record. */
+    activeItem: R;
+    /** Zero-based active index. Uses the absolute index when pagination exposes it. */
+    currentIndex: number;
+    /** Total matching records when known, otherwise the loaded navigation records. */
+    totalCount: number;
+    /** Previous loaded item record, or null when unavailable. */
+    previousItem: R | null;
+    /** Next loaded item record, or null when unavailable. */
+    nextItem: R | null;
+    /** True when previous navigation can run now. */
+    canGoPrevious: boolean;
+    /** True when next navigation can run now. */
+    canGoNext: boolean;
+    /** Navigate to the previous item. */
+    goToPrevious: () => void;
+    /** Navigate to the next item. Loads more at the collection boundary. */
+    goToNext: () => void;
+    /** True while a boundary navigation is waiting for more collection data. */
+    isNavigating: boolean;
+    /** URL of the previous loaded item, or null when unavailable. */
+    previousItemUrl: string | null;
+    /** URL of the next loaded item, or null when unavailable. */
+    nextItemUrl: string | null;
+}
+
+export declare type DataCollectionItemNavigationDataState<Record extends RecordType> = {
+    source: Pick<DataCollectionSource<Record>, "idProvider" | "itemUrl">;
+    data: Data<Record>;
+    paginationInfo: PaginationInfo | null;
+    setPage: UseDataReturn<Record>["setPage"];
+    loadMore: UseDataReturn<Record>["loadMore"];
+    isLoading: boolean;
+    isLoadingMore: boolean;
+};
+
+export declare type DataCollectionItemNavigationSnapshotMode = "live" | "session" | "manual";
 
 /**
  * Extended base fetch options for data collection
@@ -2301,6 +2637,8 @@ export declare type DataSourceDefinition<R extends RecordType = RecordType, Filt
         pagination?: ChildrenPaginationInfo;
     }) => number | undefined;
 };
+
+declare type DataSourceItemId = string | number | symbol;
 
 export declare type DateFilterDefinition = BaseFilterDefinition<"date"> & {
     options?: DateFilterOptions_2;
@@ -2810,6 +3148,7 @@ declare const defaultTranslations: {
         readonly unsavedChanges: "Unsaved changes";
         readonly saveChanges: "Save changes";
         readonly discardChanges: "Discard";
+        readonly saveAsChanges: "Save as";
         readonly exportTable: "Download table";
         readonly generatedTableFilename: "OneGeneratedTable";
         readonly feedbackModal: {
@@ -2843,6 +3182,12 @@ declare const defaultTranslations: {
         readonly ask: "Ask One";
         readonly view: "View";
         readonly tools: "Tools";
+        readonly entityRef: {
+            readonly candidate: {
+                readonly source: "Source";
+                readonly applied: "Applied on";
+            };
+        };
         readonly credits: {
             readonly title: "Credits";
             readonly creditsLeft: "{{total}} left";
@@ -2853,16 +3198,40 @@ declare const defaultTranslations: {
         };
         readonly reportCard: {
             readonly reportLabel: "Report";
+            readonly tableLabel: "Table";
             readonly openButton: "Open";
         };
         readonly formCard: {
             readonly moreFields: "Open to see all fields";
         };
+        readonly dashboard: {
+            readonly save: "Save";
+            readonly saveToAnalytics: "Save the dashboard in Analytics";
+            readonly saveTableToAnalytics: "Save the table in Analytics";
+            readonly saveAs: "Save as";
+            readonly saveDialog: {
+                readonly title: "Save dashboard";
+                readonly titleLabel: "Title";
+                readonly descriptionLabel: "Description";
+                readonly descriptionPlaceholder: "Add a description (optional)";
+                readonly save: "Save";
+                readonly cancel: "Cancel";
+            };
+            readonly status: {
+                readonly saved: "Saved";
+                readonly draft: "Draft";
+                readonly unsaved: "Unsaved";
+            };
+            readonly statusLabel: "Status";
+            readonly lastEdited: "Last edited";
+            readonly createdBy: "Created by";
+        };
         readonly dataDownload: {
             readonly title: "Download";
             readonly download: "Download {{format}}";
             readonly exportDashboard: "Export dashboard as {{format}}";
-            readonly exporting: "Exporting...";
+            readonly export: "Export";
+            readonly exporting: "Exporting…";
             readonly rows: "{{amount}} rows";
         };
         readonly dashboardItem: {
@@ -2893,14 +3262,22 @@ declare const defaultTranslations: {
         readonly removeFile: "Remove";
         readonly fileUploadError: "Upload failed";
         readonly dropFilesHere: "Drop your files here";
+        readonly reply: "Reply";
+        readonly removeQuote: "Remove quote";
         readonly clarifyingQuestion: {
             readonly submit: "Submit";
             readonly next: "Next";
             readonly back: "Back";
+            readonly skip: "Skip";
             readonly typeYourAnswer: "Type your answer…";
             readonly stepOf: "{{current}} of {{total}}";
             readonly custom: "own answer";
             readonly skipped: "skipped";
+            readonly navHint: {
+                readonly navigate: "navigate";
+                readonly select: "select";
+                readonly cancel: "cancel";
+            };
         };
         readonly growth: {
             readonly demoCard: {
@@ -3088,6 +3465,8 @@ declare const defaultTranslations: {
         };
     };
     readonly forms: {
+        readonly yes: "Yes";
+        readonly no: "No";
         readonly actionBar: {
             readonly unsavedChanges: "You have changes pending to be saved";
             readonly saving: "Saving...";
@@ -3109,6 +3488,7 @@ declare const defaultTranslations: {
             readonly uploadFailed: "Upload failed";
             readonly fileTooLarge: "File exceeds {{maxSize}} MB limit";
             readonly invalidFileType: "File type not accepted. Accepted formats: {{types}}";
+            readonly maxFilesReached: "Maximum {{maxFiles}} files";
         };
         readonly moreInformation: "More information";
         readonly validation: {
@@ -3159,6 +3539,36 @@ declare interface DeleteBlockNotesTextEditorPageDocumentPatch {
  */
 export declare const DetailsItem: WithDataTestIdReturnType_5<ForwardRefExoticComponent<DetailsItemType & RefAttributes<HTMLDivElement>>>;
 
+export declare type DetailsItemContent = (ComponentProps<typeof DataList.Item> & {
+    type: "item";
+}) | (ComponentProps<typeof DataList.PersonItem> & {
+    type: "person";
+}) | (ComponentProps<typeof DataList.CompanyItem> & {
+    type: "company";
+}) | (ComponentProps<typeof DataList.TeamItem> & {
+    type: "team";
+}) | (ComponentProps<typeof Weekdays> & {
+    type: "weekdays";
+}) | (ComponentProps<typeof DataList.DotTagItem> & {
+    type: "dot-tag";
+}) | (Props_3 & {
+    type: "alert-tag";
+}) | (F0TagBalanceProps & {
+    type: "balance-tag";
+}) | (F0TagStatusProps & {
+    type: "status-tag";
+}) | (F0TagRawProps & {
+    type: "raw-tag";
+}) | {
+    [T in TagType_2]: {
+        type: "tag-list";
+        tagList: F0TagListProps<T>;
+    };
+}[TagType_2] | {
+    type: "avatar-list";
+    avatarList: F0AvatarListProps;
+};
+
 /**
  * @experimental This is an experimental component use it at your own risk
  */
@@ -3174,8 +3584,14 @@ declare interface DetailsItemsListProps extends WithDataTestIdProps {
 
 export declare interface DetailsItemType {
     title: string;
-    content: Content | Content[];
+    content: DetailsItemContent | DetailsItemContent[];
     isHorizontal?: boolean;
+    /**
+     * When true inside a tableView, keeps the table-row padding but stacks
+     * the label above the content instead of side-by-side. Useful for
+     * long-form text fields like rich-text or textarea.
+     */
+    verticalLayout?: boolean;
     spacingAtTheBottom?: boolean;
 }
 
@@ -3300,7 +3716,7 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
      * stepping (`step`), formatting (`maxDecimals`, `locale`), and units.
      * Falls back to sensible defaults when omitted.
      */
-    numberConfig?: NumberCellConfig;
+    numberConfig?: NumberCellConfig<R>;
 };
 
 declare type EditableTableVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = Omit<TableVisualizationOptions<R, _Filters, Sortings, Summaries>, "columns"> & {
@@ -3397,6 +3813,8 @@ declare type EntityResolvers = {
     person?: (id: string) => Promise<PersonProfile>;
     candidate?: (id: string) => Promise<CandidateProfile>;
     jobPosting?: (id: string) => Promise<JobPostingProfile>;
+    requisition?: (id: string) => Promise<RequisitionProfile>;
+    vacancy?: (id: string) => Promise<VacancyProfile>;
     /**
      * Search for persons by name query. Used by the @mention autocomplete
      * in the chat input to let users reference specific employees.
@@ -3483,6 +3901,8 @@ declare type EntityUrlBuilders = {
     person?: (id: string) => string;
     candidate?: (id: string) => string;
     jobPosting?: (id: string) => string;
+    requisition?: (id: string) => string;
+    vacancy?: (id: string) => string;
 };
 
 declare type Enumerate<N extends number, Acc extends number[] = []> = Acc["length"] extends N ? [...Acc, N][number] : Enumerate<N, [...Acc, Acc["length"]]>;
@@ -4217,6 +4637,22 @@ declare type FontSize = (typeof fontSizes)[number];
 
 declare const fontSizes: readonly ["sm", "md", "lg"];
 
+/**
+ * A preset formatting instruction the LLM can specify instead of a
+ * real formatter function. The wrapper component maps these to actual
+ * `(value: number) => string` functions at render time.
+ */
+declare type FormatPreset = {
+    type: "number";
+} | {
+    type: "currency";
+    currency?: string;
+} | {
+    type: "percent";
+} | {
+    type: "compact";
+};
+
 declare interface FrameContextType {
     isSmallScreen: boolean;
     isLastToggleInvokedByUser: boolean;
@@ -4226,6 +4662,15 @@ declare interface FrameContextType {
         isInvokedByUser: boolean;
     }) => void;
     setForceFloat: (force: boolean) => void;
+}
+
+declare interface GaugeComputation {
+    datasetId: string;
+    aggregation: AggregationType;
+    column?: string;
+    min?: number;
+    max?: number;
+    name?: string;
 }
 
 export declare function generateCSVContent<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>>(data: R[], visualization: Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> | undefined, options?: CSVExportOptions): string;
@@ -4370,6 +4815,14 @@ declare type HeaderProps = {
 declare type HeaderSecondaryAction = SecondaryAction & {
     hideLabel?: boolean;
 };
+
+declare interface HeatmapComputation {
+    datasetId: string;
+    xAxis: string;
+    yAxis: string;
+    valueColumn: string;
+    aggregation: AggregationType;
+}
 
 export declare type heightType = "xxs" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "full" | "auto";
 
@@ -4626,7 +5079,7 @@ declare const inputFieldStatus: readonly ["default", "warning", "info", "error"]
 
 declare type InputFieldStatusType = (typeof inputFieldStatus)[number];
 
-declare type InputInternalProps<T extends string> = Pick<ComponentProps<typeof Input_2>, "ref"> & Pick<InputFieldProps<T>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent"> & {
+declare type InputInternalProps<T extends string> = Pick<ComponentProps<typeof Input_2>, "ref"> & Pick<InputFieldProps<T>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur"> & {
     type?: Exclude<HTMLInputTypeAttribute, "number">;
     onPressEnter?: () => void;
 };
@@ -4760,7 +5213,7 @@ declare interface LoadingStateProps {
 export declare const MAX_EXPANDED_ACTIONS = 2;
 
 export declare type MentionedUser = {
-    id: number;
+    id: string | number;
     label: string;
     image_url?: string;
     href?: string;
@@ -4908,6 +5361,12 @@ declare interface MetadataProps {
      * If true and the metadata type is a list, it will be collapsed to the first item
      */
     collapse?: boolean;
+}
+
+declare interface MetricComputation {
+    datasetId: string;
+    aggregation: AggregationType;
+    column?: string;
 }
 
 /**
@@ -5164,13 +5623,18 @@ export declare class NotesTextEditorUnsupportedPatchTypeError extends Error {
     constructor(patchType: unknown);
 }
 
-declare type NumberCellConfig = {
+declare type NumberCellConfig<R extends RecordType = RecordType> = {
     min?: number;
     max?: number;
     step?: number;
     maxDecimals?: number;
     locale?: string;
-    units?: string;
+    /**
+     * Unit label displayed next to the number input.
+     * Can be a static string (e.g. `"h"`) or a function that receives the
+     * current row item to return a per-row unit (e.g. `(item) => item.type === "role" ? "h" : "u"`).
+     */
+    units?: string | ((item: R) => string | undefined);
     unitsPosition?: "before" | "after";
 };
 
@@ -5352,6 +5816,8 @@ action: BulkAction,
 ...Parameters<OnSelectItemsCallback<Record, Filters>>
 ]) => void;
 
+export declare type OnDataStateChangeCallback<Record extends RecordType> = (state: DataCollectionItemNavigationDataState<Record>) => void;
+
 /**
  * @experimental This is an experimental component use it at your own risk
  */
@@ -5454,6 +5920,8 @@ declare type OneDataCollectionProps<R extends RecordType, Filters extends Filter
     csvExport?: boolean | {
         filename?: string;
     };
+    /** Optional controller that exposes item prev/next navigation for supported collection visualizations. */
+    itemNavigation?: DataCollectionItemNavigationController<R>;
 };
 
 export declare const OneDateNavigator: typeof _OneDateNavigator;
@@ -5687,6 +6155,8 @@ export declare type PageAction = {
 } & ({
     href: string;
 } | {
+    onClick: () => void;
+} | {
     actions: Array<{
         label: string;
         href: string;
@@ -5806,6 +6276,16 @@ export declare const PieChart: WithDataTestIdReturnType_4<ForwardRefExoticCompon
 export declare const PieChartWidget: ForwardRefExoticComponent<Omit<WidgetProps_2 & {
 chart: PieChartProps_2;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+
+declare interface PieComputation {
+    datasetId: string;
+    nameColumn: string;
+    valueColumn: string;
+    aggregation: AggregationType;
+    sortBy?: "value" | "name";
+    sortOrder?: "asc" | "desc";
+    limit?: number;
+}
 
 declare type PostDescriptionProps = {
     content: HTMLString;
@@ -6106,6 +6586,19 @@ export declare type RadarChartProps<K extends ChartConfig_3> = {
     aspect?: ComponentProps<typeof ChartContainer>["aspect"];
 };
 
+declare interface RadarComputation {
+    datasetId: string;
+    seriesColumn: string;
+    indicators: Array<{
+        column: string;
+        label: string;
+        max?: number;
+    }>;
+    limit?: number;
+    sortBy?: string;
+    sortOrder?: "asc" | "desc";
+}
+
 export declare const rangeSeparator = "\u2192";
 
 declare interface ReactionProps {
@@ -6179,6 +6672,17 @@ declare interface ReplaceContentNotesTextEditorPageDocumentPatch {
     content: JSONContent[];
 }
 
+/**
+ * Profile data for a requisition entity (ATS requisition), resolved asynchronously
+ * and displayed in the entity reference hover card.
+ */
+declare type RequisitionProfile = {
+    id: string | number;
+    title: string;
+    status?: string;
+    reason?: string;
+};
+
 export declare type ResolvedRecordType<R> = R extends RecordType ? R : RecordType;
 
 /**
@@ -6197,7 +6701,7 @@ declare type RestrictComponentProps = {
 
 export declare type resultType = {
     value: string | null;
-    mentionIds?: number[];
+    mentionIds?: string[];
 };
 
 export declare const RichTextDisplay: WithDataTestIdReturnType_5<ForwardRefExoticComponent<RichTextDisplayProps & RefAttributes<HTMLDivElement>>>;
@@ -7168,6 +7672,34 @@ declare type UseDataCollectionDataReturn<R extends RecordType> = UseDataReturn<R
     summaries?: R;
 };
 
+export declare function useDataCollectionItemNavigation<R extends RecordType>({ activeItemId, defaultActiveItemId, onActiveItemChange, idProvider, itemUrl, snapshotMode, snapshotKey, }?: UseDataCollectionItemNavigationProps<R>): DataCollectionItemNavigationController<R>;
+
+export declare interface UseDataCollectionItemNavigationProps<R extends RecordType> {
+    /** Controlled active item ID. */
+    activeItemId?: DataSourceItemId | null;
+    /** Default active item ID for uncontrolled usage. */
+    defaultActiveItemId?: DataSourceItemId | null;
+    /** Callback fired whenever the active item changes. */
+    onActiveItemChange?: (id: DataSourceItemId | null) => void;
+    /** Overrides the collection source idProvider. */
+    idProvider?: (item: R, index?: number) => DataSourceItemId;
+    /** Overrides the collection source itemUrl. */
+    itemUrl?: (item: R) => string | undefined;
+    /**
+     * Controls how navigation reacts to collection refetches/mutations.
+     * - live: always follows current collection data
+     * - session: freezes order when openItem is called
+     * - manual: uses snapshotKey directly
+     * Defaults to manual when snapshotKey is provided, otherwise live.
+     */
+    snapshotMode?: DataCollectionItemNavigationSnapshotMode;
+    /**
+     * Manual snapshot key. Change the key when the user explicitly opens another
+     * item from the collection. Kept for advanced/manual control.
+     */
+    snapshotKey?: string | number | null;
+}
+
 export declare const useDataCollectionSource: <R extends RecordType = RecordType, FiltersSchema extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>(source: DataCollectionSourceDefinition<R, FiltersSchema, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>, deps?: ReadonlyArray<unknown>) => DataCollectionSource<R, FiltersSchema, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
 
 /**
@@ -7214,6 +7746,41 @@ declare interface UseDataReturn<R extends RecordType> {
     mergedFilters: FiltersState<FiltersDefinition>;
 }
 
+declare interface UseDataSourceItemNavigationReturn<R extends RecordType> {
+    /** The currently active item ID */
+    activeItemId: DataSourceItemId | null;
+    /** The currently active item record, or null if not found in loaded data */
+    activeItem: R | null;
+    /** The active item index within the currently loaded records */
+    activeIndex: number;
+    /** The active item index within the full collection when it can be inferred */
+    absoluteIndex: number | null;
+    /** Number of records currently loaded into the datasource */
+    loadedItemsCount: number;
+    /** Total number of matching records when pagination exposes it */
+    totalItems: number | undefined;
+    /** The previous loaded item record, or null if unavailable */
+    previousItem: R | null;
+    /** The next loaded item record, or null if unavailable */
+    nextItem: R | null;
+    /** Navigate to the next item. Fetches next page if at boundary */
+    goToNext: () => void;
+    /** Navigate to the previous item. Fetches previous page if at boundary */
+    goToPrevious: () => void;
+    /** Whether there is a next item (or more pages to load) */
+    hasNext: boolean;
+    /** Whether there is a previous item (or previous pages to load) */
+    hasPrevious: boolean;
+    /** Directly set the active item ID */
+    setActiveItemId: (id: DataSourceItemId | null) => void;
+    /** True while waiting for a page transition to resolve the pending navigation */
+    isNavigating: boolean;
+    /** URL of the next item (derived via `itemUrl`), or null if unavailable */
+    nextItemUrl: string | null;
+    /** URL of the previous item (derived via `itemUrl`), or null if unavailable */
+    previousItemUrl: string | null;
+}
+
 export declare function useExportAction<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>>({ source, currentVisualization, filename, enabled, }: UseExportActionProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>): SecondaryActionItem;
 
 declare interface UseExportActionProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>> {
@@ -7241,6 +7808,17 @@ declare interface User_2 {
 }
 
 export declare function useSidebar(): FrameContextType;
+
+/**
+ * Profile data for a vacancy entity (ATS vacancy/position), resolved asynchronously
+ * and displayed in the entity reference hover card.
+ */
+declare type VacancyProfile = {
+    id: string | number;
+    name: string;
+    status?: string;
+    vacancyType?: string;
+};
 
 declare type ValueDisplayRendererContext = {
     visualization: ValueDisplayVisualizationType;
@@ -7403,6 +7981,7 @@ declare type Visualization<R extends RecordType, Filters extends FiltersDefiniti
         onSelectItems: OnSelectItemsCallback<R, Filters>;
         onLoadData: OnLoadDataCallback<R, Filters>;
         onLoadError: OnLoadErrorCallback;
+        onDataStateChange?: OnDataStateChangeCallback<R>;
         source: DataCollectionSource<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
     }) => JSX.Element;
 } & VisualizationFilterOverrides<Filters>);
@@ -7658,6 +8237,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -7704,9 +8288,4 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

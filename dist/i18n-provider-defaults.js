@@ -382,6 +382,7 @@ const e = {
     unsavedChanges: "Unsaved changes",
     saveChanges: "Save changes",
     discardChanges: "Discard",
+    saveAsChanges: "Save as",
     exportTable: "Download table",
     generatedTableFilename: "OneGeneratedTable",
     feedbackModal: {
@@ -415,6 +416,12 @@ const e = {
     ask: "Ask One",
     view: "View",
     tools: "Tools",
+    entityRef: {
+      candidate: {
+        source: "Source",
+        applied: "Applied on"
+      }
+    },
     credits: {
       title: "Credits",
       creditsLeft: "{{total}} left",
@@ -425,16 +432,40 @@ const e = {
     },
     reportCard: {
       reportLabel: "Report",
+      tableLabel: "Table",
       openButton: "Open"
     },
     formCard: {
       moreFields: "Open to see all fields"
     },
+    dashboard: {
+      save: "Save",
+      saveToAnalytics: "Save the dashboard in Analytics",
+      saveTableToAnalytics: "Save the table in Analytics",
+      saveAs: "Save as",
+      saveDialog: {
+        title: "Save dashboard",
+        titleLabel: "Title",
+        descriptionLabel: "Description",
+        descriptionPlaceholder: "Add a description (optional)",
+        save: "Save",
+        cancel: "Cancel"
+      },
+      status: {
+        saved: "Saved",
+        draft: "Draft",
+        unsaved: "Unsaved"
+      },
+      statusLabel: "Status",
+      lastEdited: "Last edited",
+      createdBy: "Created by"
+    },
     dataDownload: {
       title: "Download",
       download: "Download {{format}}",
       exportDashboard: "Export dashboard as {{format}}",
-      exporting: "Exporting...",
+      export: "Export",
+      exporting: "Exporting…",
       rows: "{{amount}} rows"
     },
     dashboardItem: {
@@ -465,14 +496,22 @@ const e = {
     removeFile: "Remove",
     fileUploadError: "Upload failed",
     dropFilesHere: "Drop your files here",
+    reply: "Reply",
+    removeQuote: "Remove quote",
     clarifyingQuestion: {
       submit: "Submit",
       next: "Next",
       back: "Back",
+      skip: "Skip",
       typeYourAnswer: "Type your answer…",
       stepOf: "{{current}} of {{total}}",
       custom: "own answer",
-      skipped: "skipped"
+      skipped: "skipped",
+      navHint: {
+        navigate: "navigate",
+        select: "select",
+        cancel: "cancel"
+      }
     },
     growth: {
       demoCard: {
@@ -660,6 +699,8 @@ const e = {
     }
   },
   forms: {
+    yes: "Yes",
+    no: "No",
     actionBar: {
       unsavedChanges: "You have changes pending to be saved",
       saving: "Saving...",
@@ -680,7 +721,8 @@ const e = {
       processing: "Processing…",
       uploadFailed: "Upload failed",
       fileTooLarge: "File exceeds {{maxSize}} MB limit",
-      invalidFileType: "File type not accepted. Accepted formats: {{types}}"
+      invalidFileType: "File type not accepted. Accepted formats: {{types}}",
+      maxFilesReached: "Maximum {{maxFiles}} files"
     },
     moreInformation: "More information",
     validation: {

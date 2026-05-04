@@ -1,22 +1,41 @@
 import { AgentState } from '@livekit/components-react';
 import { AIMessage } from '@copilotkit/shared';
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
+import { baseColors } from '@factorialco/f0-core';
 import { ClassValue } from 'cva';
+import { CompanyItemProps } from './types';
 import { ComponentProps } from 'react';
 import { CopilotKitProps } from '@copilotkit/react-core';
+import { EmployeeItemProps } from './types';
+import { F0TagBalanceProps as F0TagBalanceProps_2 } from './types';
+import { F0TagCompanyProps } from './types';
+import { F0TagPersonProps } from './types';
+import { F0TagTeamProps } from './types';
 import { f1Colors } from '@factorialco/f0-core';
+import { ForwardedRef } from 'react';
 import { ForwardRefExoticComponent } from 'react';
 import { InputProps } from '@copilotkit/react-ui';
+import { ItemProps } from './types';
 import { JSX as JSX_2 } from 'react';
 import { LocalAudioTrack } from 'livekit-client';
 import { Message } from '@copilotkit/shared';
+import { Props as Props_3 } from './types';
 import * as React_2 from 'react';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
+import { Ref } from 'react';
 import { RefAttributes } from 'react';
 import { RemoteAudioTrack } from 'livekit-client';
 import { SVGProps } from 'react';
 import * as SwitchPrimitive from '@radix-ui/react-switch';
+import { TagAlertProps } from '../../../f0';
+import { TagBalanceProps } from '../../../f0';
+import { TagDotProps } from '../../../f0';
+import { TagListProps } from '../../../f0';
+import { TagRawProps } from '../../../f0';
+import { TagStatusProps } from '../../../f0';
+import { TagType } from '../../../f0';
+import { TeamItemProps } from './types';
 import { TrackReferenceOrPlaceholder } from '@livekit/components-react';
 import { VariantProps } from 'cva';
 import { WithDataTestIdReturnType } from '../../../lib/data-testid';
@@ -134,6 +153,11 @@ export declare type AiChatProviderProps = {
      */
     entityRefs?: EntityRefs;
     /**
+     * Canvas action callbacks grouped by entity type.
+     * Provides save/create functions for persisting canvas entities externally.
+     */
+    canvasActions?: CanvasActions;
+    /**
      * Available tool hints that the user can activate to provide intent context
      * to the AI. Renders a selector button next to the send button.
      * Only one tool hint can be active at a time.
@@ -220,8 +244,14 @@ declare type AiChatProviderReturnValue = {
      * Append messages to the current conversation.
      * Useful for injecting pre-built assistant responses (e.g. dashboards)
      * from outside the chat. IDs are generated internally.
+     *
+     * @param options.persist - Whether to persist messages to the backend thread.
+     *   Defaults to `true`. Pass `false` for client-only display messages that
+     *   should not create or modify a backend thread (e.g. seed messages).
      */
-    appendMessages: (messages: AppendMessage[]) => void;
+    appendMessages: (messages: AppendMessage[], options?: {
+        persist?: boolean;
+    }) => void;
     /* Excluded from this release type: setAppendMessagesFunction */
     /**
      * Atomically clear the conversation and inject new messages.
@@ -287,13 +317,41 @@ declare type AiChatProviderReturnValue = {
      */
     fileDragOver: boolean;
     /* Excluded from this release type: setFileDragOver */
-} & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable" | "entityRefs" | "toolHints" | "credits" | "creditWarning" | "fileAttachments"> & {
+    /**
+     * Process files that were dropped onto the chat. Delegates to the
+     * `processFiles` callback registered by `ChatTextarea`'s file-attachment
+     * hook. Used by the chat-wide DropOverlay rendered in `SidebarWindow`.
+     */
+    processDroppedFiles: (files: File[]) => void;
+    /* Excluded from this release type: setProcessDroppedFilesFunction */
+    /**
+     * Pre-loaded context shown as an empty state in the chat.
+     * Prepended to the first user message as `<pending-context>`.
+     */
+    pendingContext: PendingContext | null;
+    /** Set pending context (pass null to clear) */
+    setPendingContext: React.Dispatch<React.SetStateAction<PendingContext | null>>;
+    /**
+     * Quoted fragment the user is replying to. Rendered as a chip above the
+     * textarea and, on submit, prepended as a markdown blockquote to the user's
+     * message (plus an invisible `<quote-context>` tag for the agent).
+     */
+    pendingQuote: PendingQuote | null;
+    /** Set the pending quote (pass null to clear). */
+    setPendingQuote: React.Dispatch<React.SetStateAction<PendingQuote | null>>;
+} & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "toolHints" | "credits" | "creditWarning" | "fileAttachments"> & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null;
     /** Open the canvas panel with the given content */
     openCanvas: (content: CanvasContent) => void;
     /** Close the canvas panel and restore the previous visualization mode */
     closeCanvas: () => void;
+    /** The currently active mini-game (easter egg), or null */
+    activeGame: "pong" | null;
+    /** Launch a mini-game overlay */
+    openGame: (game: "pong") => void;
+    /** Close the active mini-game overlay */
+    closeGame: () => void;
     /** The currently active tool hint, or null if none is selected */
     activeToolHint: AiChatToolHint | null;
     /** Set the active tool hint (pass null to clear) */
@@ -317,6 +375,7 @@ declare interface AiChatState {
     footer?: React.ReactNode;
     VoiceMode?: React.ComponentType;
     entityRefs?: EntityRefs;
+    canvasActions?: CanvasActions;
     toolHints?: AiChatToolHint[];
     credits?: AiChatCredits;
     creditWarning?: AiChatCreditWarning;
@@ -431,6 +490,7 @@ export declare const aiTranslations: {
         readonly unsavedChanges: "Unsaved changes";
         readonly saveChanges: "Save changes";
         readonly discardChanges: "Discard";
+        readonly saveAsChanges: "Save as";
         readonly exportTable: "Download table";
         readonly generatedTableFilename: "OneGeneratedTable";
         readonly feedbackModal: {
@@ -464,6 +524,12 @@ export declare const aiTranslations: {
         readonly ask: "Ask One";
         readonly view: "View";
         readonly tools: "Tools";
+        readonly entityRef: {
+            readonly candidate: {
+                readonly source: "Source";
+                readonly applied: "Applied on";
+            };
+        };
         readonly credits: {
             readonly title: "Credits";
             readonly creditsLeft: "{{total}} left";
@@ -474,16 +540,40 @@ export declare const aiTranslations: {
         };
         readonly reportCard: {
             readonly reportLabel: "Report";
+            readonly tableLabel: "Table";
             readonly openButton: "Open";
         };
         readonly formCard: {
             readonly moreFields: "Open to see all fields";
         };
+        readonly dashboard: {
+            readonly save: "Save";
+            readonly saveToAnalytics: "Save the dashboard in Analytics";
+            readonly saveTableToAnalytics: "Save the table in Analytics";
+            readonly saveAs: "Save as";
+            readonly saveDialog: {
+                readonly title: "Save dashboard";
+                readonly titleLabel: "Title";
+                readonly descriptionLabel: "Description";
+                readonly descriptionPlaceholder: "Add a description (optional)";
+                readonly save: "Save";
+                readonly cancel: "Cancel";
+            };
+            readonly status: {
+                readonly saved: "Saved";
+                readonly draft: "Draft";
+                readonly unsaved: "Unsaved";
+            };
+            readonly statusLabel: "Status";
+            readonly lastEdited: "Last edited";
+            readonly createdBy: "Created by";
+        };
         readonly dataDownload: {
             readonly title: "Download";
             readonly download: "Download {{format}}";
             readonly exportDashboard: "Export dashboard as {{format}}";
-            readonly exporting: "Exporting...";
+            readonly export: "Export";
+            readonly exporting: "Exporting…";
             readonly rows: "{{amount}} rows";
         };
         readonly dashboardItem: {
@@ -514,14 +604,22 @@ export declare const aiTranslations: {
         readonly removeFile: "Remove";
         readonly fileUploadError: "Upload failed";
         readonly dropFilesHere: "Drop your files here";
+        readonly reply: "Reply";
+        readonly removeQuote: "Remove quote";
         readonly clarifyingQuestion: {
             readonly submit: "Submit";
             readonly next: "Next";
             readonly back: "Back";
+            readonly skip: "Skip";
             readonly typeYourAnswer: "Type your answer…";
             readonly stepOf: "{{current}} of {{total}}";
             readonly custom: "own answer";
             readonly skipped: "skipped";
+            readonly navHint: {
+                readonly navigate: "navigate";
+                readonly select: "select";
+                readonly cancel: "cancel";
+            };
         };
         readonly growth: {
             readonly demoCard: {
@@ -548,6 +646,8 @@ export declare const aiTranslations: {
     };
 };
 
+declare type AlertTagProps = ComponentProps<typeof F0TagAlert>;
+
 /**
  * A message to inject via appendMessages.
  * IDs are generated internally — callers only provide role, content, and
@@ -557,18 +657,37 @@ export declare type AppendMessage = {
     role: "user" | "assistant";
     content: string;
     toolCalls?: AppendToolCall[];
+} | {
+    /** Tool result message — pairs with a toolCall from a previous assistant message */
+    role: "tool";
+    content: string;
+    /**
+     * ID of the paired tool call. Must equal the corresponding assistant
+     * message's `toolCalls[i].id` — supply `AppendToolCall.id` on that call
+     * and pass the same value here so the messages are correctly paired.
+     */
+    toolCallId: string;
 };
 
 /**
  * A tool call to inject via appendMessages.
- * IDs are generated internally — callers only provide the function payload.
+ * IDs are generated internally unless `id` is provided.
+ * When pairing with a tool-result message, provide the same `id`
+ * in both the tool call and the tool-result's `toolCallId`.
  */
 export declare type AppendToolCall = {
+    id?: string;
     function: {
         name: string;
         arguments: string;
     };
 };
+
+declare const Avatar: React_2.ForwardRefExoticComponent<Omit<AvatarPrimitive.AvatarProps & React_2.RefAttributes<HTMLSpanElement>, "ref"> & {
+    size?: (typeof internalAvatarSizes)[number];
+    type?: (typeof internalAvatarTypes)[number];
+    color?: (typeof internalAvatarColors)[number];
+} & React_2.RefAttributes<HTMLSpanElement>>;
 
 declare type AvatarBadge = ({
     type: "module";
@@ -580,9 +699,37 @@ declare type AvatarBadge = ({
     tooltip?: string;
 };
 
+declare const avatarEmojiSizes: readonly ["sm", "md", "lg", "xl"];
+
+declare type AvatarFileSize = (typeof avatarFileSizes)[number];
+
+declare const avatarFileSizes: readonly ["xs", "sm", "md", "lg"];
+
+declare const avatarIconSizes: readonly ["sm", "md", "lg"];
+
+declare type AvatarListSize = (typeof avatarListSizes)[number];
+
+declare const avatarListSizes: readonly ["xs", "sm", "md"];
+
 declare type AvatarSize = (typeof avatarSizes)[number];
 
 declare const avatarSizes: readonly ["xs", "sm", "md", "lg", "xl", "2xl"];
+
+declare type AvatarVariant = DistributiveOmit<({
+    type: "person";
+} & F0AvatarPersonProps) | ({
+    type: "emoji";
+} & F0AvatarEmojiProps) | ({
+    type: "team";
+} & F0AvatarTeamProps) | ({
+    type: "company";
+} & F0AvatarCompanyProps) | ({
+    type: "file";
+} & F0AvatarFileProps) | ({
+    type: "flag";
+} & F0AvatarFlagProps) | ({
+    type: "icon";
+} & F0AvatarIconProps), "size">;
 
 declare interface BadgeProps extends VariantProps<typeof badgeVariants> {
     icon: IconType;
@@ -609,6 +756,8 @@ export declare type BalanceConfig = {
     invertStatus?: boolean;
     hint?: string;
 };
+
+declare type BalanceTagProps = ComponentProps<typeof F0TagBalance>;
 
 declare type BaseAvatarProps = {
     /**
@@ -652,16 +801,32 @@ declare type BaseAvatarProps = {
     size: InternalAvatarProps["size"];
 });
 
+declare type BaseColor = keyof typeof baseColors;
+
+declare type BaseTag<T extends {
+    type: string;
+}> = T & WithTooltipDescription;
+
 /**
  * Profile data for a candidate entity (ATS applicant), resolved asynchronously
  * and displayed in the entity reference hover card.
  */
-declare type CandidateProfile = {
+export declare type CandidateProfile = {
     id: string | number;
     firstName: string;
     lastName: string;
     avatarUrl?: string;
     source?: string;
+    appliedAt?: string;
+};
+
+/**
+ * Canvas-level action callbacks grouped by entity type.
+ * Each entity defines its own actions type; this aggregates them.
+ * Passed by the host app to F0AiChatProvider via `canvasActions`.
+ */
+export declare type CanvasActions = {
+    dashboard?: DashboardCanvasActions;
 };
 
 /**
@@ -780,6 +945,13 @@ declare interface ChatDashboardColumn {
 declare interface ChatDashboardConfig {
     /** Dashboard title displayed in the canvas header and chat report card */
     title: string;
+    /**
+     * AI-generated 1–2 sentence summary of what the dashboard shows. Displayed
+     * under the title in the canvas header. Optional at the type level so
+     * legacy persisted dashboards (before the agent started emitting it) still
+     * parse; the agent schema makes it required going forward.
+     */
+    description?: string;
     /** Filter definitions — keys become filter IDs */
     filters?: Record<string, ChatDashboardFilterDefinition>;
     /**
@@ -963,6 +1135,14 @@ declare interface ClarifyingQuestionState {
     toggleOption: (optionId: string) => void;
     /** Confirm the current step's selection and advance (or submit on final step) */
     confirm: () => void;
+    /** Skip the current step (only valid when the step is optional) */
+    skip: () => void;
+    /**
+     * Cancel the entire clarifying flow. Closes the panel and marks the tool
+     * call as resolved-but-not-completed so it doesn't re-appear on history
+     * reload. Cancellation is silent — no message is sent to the agent.
+     */
+    cancel: () => void;
     /** Go back to the previous step */
     back: () => void;
     /** Set the custom answer text */
@@ -1017,9 +1197,17 @@ declare interface CollectionComputation {
     limit?: number;
 }
 
+declare type CompanyAvatarVariant = Extract<AvatarVariant, {
+    type: "company";
+}>;
+
+declare type CompanyTagProps = ComponentProps<typeof F0TagCompany>;
+
 export declare type ContentType = (typeof contentTypes)[number];
 
 export declare const contentTypes: readonly ["text", "person", "people", "team", "company", "alert", "balance", "sparkline"];
+
+declare type CountryCode = keyof TranslationsType["countries"];
 
 /**
  * Credits usage data returned by the host app
@@ -1036,6 +1224,31 @@ export declare type CreditsUsage = {
 export declare type CSSRgbString = `rgb(${number}, ${number}, ${number})` | `rgb(${number},${number},${number})`;
 
 /**
+ * Callbacks for persisting dashboards externally (beyond chat history).
+ */
+declare type DashboardCanvasActions = {
+    /** Update an existing saved dashboard */
+    save: (id: string, category: string, config: ChatDashboardConfig) => Promise<void>;
+    /**
+     * Create a new saved dashboard. Returns the new dashboard's id and
+     * category so subsequent edits can call `save` (which requires both).
+     * Returning void / undefined leaves the canvas in its current state.
+     */
+    create: (title: string, description: string, config: ChatDashboardConfig, category?: string) => Promise<{
+        id: string;
+        category: string;
+    } | void>;
+    /**
+     * Fetch creator + last-edited metadata for a saved dashboard. The header
+     * calls this lazily, only when the current dashboard has a
+     * `savedDashboardId`. Returning `void` signals "no metadata available" —
+     * the header will skip rendering the avatar and the last-edited row
+     * instead of showing a placeholder.
+     */
+    getMetadata?: (id: string) => Promise<DashboardMetadata | void>;
+};
+
+/**
  * Dashboard canvas content — renders an analytics dashboard.
  */
 export declare type DashboardCanvasContent = CanvasContentBase & {
@@ -1045,6 +1258,14 @@ export declare type DashboardCanvasContent = CanvasContentBase & {
         baseUrl: string;
         headers: Record<string, string>;
     };
+    /** Present when the dashboard is a pre-saved dashboard */
+    savedDashboardId?: string;
+    /** Category of the saved dashboard */
+    savedDashboardCategory?: string;
+    /** Description of the saved dashboard */
+    savedDashboardDescription?: string;
+    /** True when the agent has iterated on a saved dashboard but the user hasn't saved yet */
+    savedDashboardUnsaved?: boolean;
 };
 
 declare interface DashboardFetchSpec {
@@ -1055,6 +1276,42 @@ declare interface DashboardFetchSpec {
     query: string | null;
     columnLabels?: Record<string, string>;
 }
+
+/**
+ * Creator + last-edited metadata for a saved dashboard. Returned by
+ * `DashboardCanvasActions.getMetadata` so the header can render the author
+ * avatar and the freshness signal only once a dashboard has been persisted.
+ *
+ * `title` and `description` are also returned: once a dashboard has an id
+ * the backend is the source of truth and may diverge from what's stored in
+ * the chat history (e.g. someone renamed the dashboard from the Analytics
+ * list page since this conversation was first opened). The header prefers
+ * these values over the ones baked into `content` / `config`.
+ */
+declare type DashboardMetadata = {
+    /**
+     * Latest persisted title. When present, the header displays this instead
+     * of `content.title` so the chat-history snapshot never shadows the
+     * authoritative backend copy.
+     */
+    title?: string;
+    /**
+     * Latest persisted description. Same rationale as `title` — takes
+     * precedence over `config.description` once the dashboard is saved.
+     */
+    description?: string;
+    creator: {
+        firstName: string;
+        lastName: string;
+        /** Optional avatar image URL. Falls back to initials when omitted. */
+        src?: string;
+    };
+    /**
+     * Last edited timestamp. Accepts `Date` or an ISO-8601 string so host apps
+     * can forward backend payloads verbatim without pre-parsing.
+     */
+    lastEdited: Date | string;
+};
 
 /**
  * Data download canvas content — renders a full data table with download options.
@@ -1094,6 +1351,27 @@ declare type DataDownloadDataset = {
      * Used for Excel/CSV headers. Falls back to the raw column name when absent.
      */
     columnLabels?: Record<string, string>;
+};
+
+declare const DataList: ForwardRefExoticComponent<DataListProps & RefAttributes<HTMLUListElement>> & {
+    Item: ForwardRefExoticComponent<ItemProps & RefAttributes<HTMLLIElement>>;
+    CompanyItem: ForwardRefExoticComponent<CompanyItemProps & RefAttributes<HTMLLIElement>>;
+    PersonItem: ForwardRefExoticComponent<EmployeeItemProps & RefAttributes<HTMLLIElement>>;
+    TeamItem: ForwardRefExoticComponent<TeamItemProps & RefAttributes<HTMLLIElement>>;
+    DotTagItem: ForwardRefExoticComponent<TagDotProps & RefAttributes<HTMLLIElement>>;
+    AlertTagItem: ForwardRefExoticComponent<TagAlertProps & RefAttributes<HTMLLIElement>>;
+    BalanceTagItem: ForwardRefExoticComponent<TagBalanceProps & RefAttributes<HTMLLIElement>>;
+    StatusTagItem: ForwardRefExoticComponent<TagStatusProps & RefAttributes<HTMLLIElement>>;
+    RawTagItem: ForwardRefExoticComponent<TagRawProps & RefAttributes<HTMLLIElement>>;
+    TagListItem: <T extends TagType>(props: TagListProps<T> & {
+        ref?: Ref<HTMLLIElement>;
+    }) => ReturnType<(<T_1 extends TagType>(props: TagListProps<T_1>, ref: ForwardedRef<HTMLLIElement>) => JSX_2.Element)>;
+};
+
+declare type DataListProps = {
+    children: ReactElement | ReactElement[];
+    label?: string;
+    isHorizontal?: boolean;
 };
 
 export declare const defaultTranslations: {
@@ -1480,6 +1758,7 @@ export declare const defaultTranslations: {
         readonly unsavedChanges: "Unsaved changes";
         readonly saveChanges: "Save changes";
         readonly discardChanges: "Discard";
+        readonly saveAsChanges: "Save as";
         readonly exportTable: "Download table";
         readonly generatedTableFilename: "OneGeneratedTable";
         readonly feedbackModal: {
@@ -1513,6 +1792,12 @@ export declare const defaultTranslations: {
         readonly ask: "Ask One";
         readonly view: "View";
         readonly tools: "Tools";
+        readonly entityRef: {
+            readonly candidate: {
+                readonly source: "Source";
+                readonly applied: "Applied on";
+            };
+        };
         readonly credits: {
             readonly title: "Credits";
             readonly creditsLeft: "{{total}} left";
@@ -1523,16 +1808,40 @@ export declare const defaultTranslations: {
         };
         readonly reportCard: {
             readonly reportLabel: "Report";
+            readonly tableLabel: "Table";
             readonly openButton: "Open";
         };
         readonly formCard: {
             readonly moreFields: "Open to see all fields";
         };
+        readonly dashboard: {
+            readonly save: "Save";
+            readonly saveToAnalytics: "Save the dashboard in Analytics";
+            readonly saveTableToAnalytics: "Save the table in Analytics";
+            readonly saveAs: "Save as";
+            readonly saveDialog: {
+                readonly title: "Save dashboard";
+                readonly titleLabel: "Title";
+                readonly descriptionLabel: "Description";
+                readonly descriptionPlaceholder: "Add a description (optional)";
+                readonly save: "Save";
+                readonly cancel: "Cancel";
+            };
+            readonly status: {
+                readonly saved: "Saved";
+                readonly draft: "Draft";
+                readonly unsaved: "Unsaved";
+            };
+            readonly statusLabel: "Status";
+            readonly lastEdited: "Last edited";
+            readonly createdBy: "Created by";
+        };
         readonly dataDownload: {
             readonly title: "Download";
             readonly download: "Download {{format}}";
             readonly exportDashboard: "Export dashboard as {{format}}";
-            readonly exporting: "Exporting...";
+            readonly export: "Export";
+            readonly exporting: "Exporting…";
             readonly rows: "{{amount}} rows";
         };
         readonly dashboardItem: {
@@ -1563,14 +1872,22 @@ export declare const defaultTranslations: {
         readonly removeFile: "Remove";
         readonly fileUploadError: "Upload failed";
         readonly dropFilesHere: "Drop your files here";
+        readonly reply: "Reply";
+        readonly removeQuote: "Remove quote";
         readonly clarifyingQuestion: {
             readonly submit: "Submit";
             readonly next: "Next";
             readonly back: "Back";
+            readonly skip: "Skip";
             readonly typeYourAnswer: "Type your answer…";
             readonly stepOf: "{{current}} of {{total}}";
             readonly custom: "own answer";
             readonly skipped: "skipped";
+            readonly navHint: {
+                readonly navigate: "navigate";
+                readonly select: "select";
+                readonly cancel: "cancel";
+            };
         };
         readonly growth: {
             readonly demoCard: {
@@ -1758,6 +2075,8 @@ export declare const defaultTranslations: {
         };
     };
     readonly forms: {
+        readonly yes: "Yes";
+        readonly no: "No";
         readonly actionBar: {
             readonly unsavedChanges: "You have changes pending to be saved";
             readonly saving: "Saving...";
@@ -1779,6 +2098,7 @@ export declare const defaultTranslations: {
             readonly uploadFailed: "Upload failed";
             readonly fileTooLarge: "File exceeds {{maxSize}} MB limit";
             readonly invalidFileType: "File type not accepted. Accepted formats: {{types}}";
+            readonly maxFilesReached: "Maximum {{maxFiles}} files";
         };
         readonly moreInformation: "More information";
         readonly validation: {
@@ -1819,6 +2139,52 @@ export declare const defaultTranslations: {
     };
 };
 
+declare type DetailsItemContent = (ComponentProps<typeof DataList.Item> & {
+    type: "item";
+}) | (ComponentProps<typeof DataList.PersonItem> & {
+    type: "person";
+}) | (ComponentProps<typeof DataList.CompanyItem> & {
+    type: "company";
+}) | (ComponentProps<typeof DataList.TeamItem> & {
+    type: "team";
+}) | (ComponentProps<typeof Weekdays> & {
+    type: "weekdays";
+}) | (ComponentProps<typeof DataList.DotTagItem> & {
+    type: "dot-tag";
+}) | (Props & {
+    type: "alert-tag";
+}) | (F0TagBalanceProps & {
+    type: "balance-tag";
+}) | (F0TagStatusProps & {
+    type: "status-tag";
+}) | (F0TagRawProps & {
+    type: "raw-tag";
+}) | {
+    [T in TagType_2]: {
+        type: "tag-list";
+        tagList: F0TagListProps<T>;
+    };
+}[TagType_2] | {
+    type: "avatar-list";
+    avatarList: F0AvatarListProps;
+};
+
+/**
+ * Remove a property from a union of objects.
+ * @example
+ * type Person = {
+ *   name: string
+ *   age: number
+ * } | {
+ *   name: string
+ *   height: number
+ * }
+ *
+ * type PersonWithoutName = DistributiveOmit<Person, "name">
+ * // { age: number } | { height: number }
+ */
+declare type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+
 /**
  * Grouped configuration for entity references in the AI chat.
  * Combines resolver functions (data fetching) with URL builders (navigation).
@@ -1839,6 +2205,8 @@ export declare type EntityResolvers = {
     person?: (id: string) => Promise<PersonProfile>;
     candidate?: (id: string) => Promise<CandidateProfile>;
     jobPosting?: (id: string) => Promise<JobPostingProfile>;
+    requisition?: (id: string) => Promise<RequisitionProfile>;
+    vacancy?: (id: string) => Promise<VacancyProfile>;
     /**
      * Search for persons by name query. Used by the @mention autocomplete
      * in the chat input to let users reference specific employees.
@@ -1857,6 +2225,8 @@ export declare type EntityUrlBuilders = {
     person?: (id: string) => string;
     candidate?: (id: string) => string;
     jobPosting?: (id: string) => string;
+    requisition?: (id: string) => string;
+    vacancy?: (id: string) => string;
 };
 
 export declare const F0ActionItem: ({ title, status, inGroup }: F0ActionItemProps) => JSX_2.Element;
@@ -1887,7 +2257,7 @@ export declare const F0AiChat: () => JSX_2.Element | null;
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, toolHints, credits, creditWarning, fileAttachments, onThumbsUp, onThumbsDown, children, agent, tracking, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, toolHints, credits, creditWarning, fileAttachments, onThumbsUp, onThumbsDown, children, agent, tracking, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
 
 export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, creditWarning, }: ChatTextareaProps) => JSX_2.Element;
 
@@ -1968,6 +2338,75 @@ declare type F0AvatarCompanyProps = {
     size?: BaseAvatarProps["size"];
     badge?: AvatarBadge;
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
+
+declare type F0AvatarEmojiProps = {
+    emoji: string;
+    size?: (typeof avatarEmojiSizes)[number];
+} & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>;
+
+declare type F0AvatarFileProps = Omit<React.ComponentPropsWithoutRef<typeof Avatar>, "type" | "size"> & {
+    file: FileDef;
+    size?: AvatarFileSize;
+    badge?: AvatarBadge;
+} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby"> & WithDataTestIdProps;
+
+declare type F0AvatarFlagProps = {
+    flag: CountryCode | (string & {});
+    size?: BaseAvatarProps["size"];
+    badge?: AvatarBadge;
+} & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">;
+
+declare type F0AvatarIconProps = {
+    icon: IconType;
+    size?: (typeof avatarIconSizes)[number];
+    state?: F0IconProps["state"];
+} & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>;
+
+declare type F0AvatarListProps = {
+    /**
+     * The size of the avatars in the list.
+     * @default "md"
+     */
+    size?: AvatarListSize;
+    /**
+     * Whether to hide tooltips in each avatar.
+     * @default false
+     */
+    noTooltip?: boolean;
+    /**
+     * The maximum number of avatars to display.
+     * @default 3
+     */
+    max?: number;
+    /**
+     * The remaining number to display.
+     */
+    remainingCount?: number;
+    /**
+     * The layout of the avatar list.
+     * - "fill" - Avatars will expand to fill the available width, with overflow items shown in a counter
+     * - "compact" - Avatars will be stacked tightly together up to the max limit, with remaining shown in counter
+     * @default "compact"
+     */
+    layout?: "fill" | "compact";
+} & F0AvatarListPropsAvatars;
+
+declare type F0AvatarListPropsAvatars = {
+    type: "person";
+    avatars: (Omit<PersonAvatarVariant, "type"> & Record<string, unknown>)[];
+} | {
+    type: "team";
+    avatars: (Omit<TeamAvatarVariant, "type"> & Record<string, unknown>)[];
+} | {
+    type: "company";
+    avatars: (Omit<CompanyAvatarVariant, "type"> & Record<string, unknown>)[];
+} | {
+    type: "flag";
+    avatars: (Omit<FlagAvatarVariant, "type"> & Record<string, unknown>)[];
+} | {
+    type: "file";
+    avatars: (Omit<FileAvatarVariant, "type"> & Record<string, unknown>)[];
+};
 
 declare type F0AvatarPersonProps = {
     /**
@@ -2093,6 +2532,110 @@ export declare type F0OneSwitchProps = React.ComponentPropsWithoutRef<typeof Swi
     autoOpen?: boolean;
 };
 
+declare const F0TagAlert: WithDataTestIdReturnType<ForwardRefExoticComponent<Props_3 & RefAttributes<HTMLDivElement>>>;
+
+declare const F0TagBalance: WithDataTestIdReturnType<ForwardRefExoticComponent<F0TagBalanceProps_2 & RefAttributes<HTMLDivElement>>>;
+
+declare type F0TagBalanceProps = {
+    /**
+     * Inverts the balance status color. Is useful when a negative percent mean something positive.
+     */
+    invertStatus?: boolean;
+    /**
+     * Hint text to display next to the tag (This text is not displayed when the balance is null or undefined)
+     */
+    hint?: string;
+    /**
+     * Info text to display an i icon and a tooltip next to the tag
+     */
+    info?: string;
+    /**
+     * Text to display when the balance is null or undefined
+     */
+    nullText?: string;
+    /**
+     * Value to display next to the tag can be a number, a Numeric or a NumericWithFormatter
+     */
+    amount: RelaxedNumericWithFormatter | Numeric;
+} & ({
+    percentage: (Omit<RelaxedNumericWithFormatter, "value"> & {
+        value: Omit<Numeric, "units" | "unitsPosition">;
+    }) | Omit<Numeric, "units" | "unitsPosition">;
+} | {
+    percentage?: null;
+    formatterOptions?: undefined;
+});
+
+declare const F0TagCompany: WithDataTestIdReturnType<ForwardRefExoticComponent<F0TagCompanyProps & RefAttributes<HTMLDivElement>>>;
+
+declare type F0TagListProps<T extends TagType_2> = {
+    /**
+     * The type of tags to display. Only one type can be used at a time.
+     */
+    type: T;
+    /**
+     * Array of tag data corresponding to the specified type.
+     */
+    tags: Array<TagTypeMapping[T]>;
+    /**
+     * The maximum number of tags to display.
+     * @default 4
+     */
+    max?: number;
+    /**
+     * The remaining number to display.
+     */
+    remainingCount?: number;
+};
+
+declare const F0TagPerson: WithDataTestIdReturnType<ForwardRefExoticComponent<F0TagPersonProps & RefAttributes<HTMLDivElement>>>;
+
+declare type F0TagRawProps = {
+    /**
+     * The label to display in the tag or used for accessible text
+     */
+    text: string;
+    /**
+     * Additional accessible text to display in the tag
+     */
+    additionalAccessibleText?: string;
+    /**
+     * Info text to display an i icon and a tooltip next to the tag
+     */
+    info?: string;
+} & ({
+    icon: IconType;
+    onlyIcon: true;
+} | {
+    icon?: IconType;
+    onlyIcon?: boolean;
+});
+
+declare interface F0TagStatusProps {
+    text: string;
+    variant: Variant;
+    /**
+     * Sometimes you need to clarify the status for screen reader users
+     * E.g., when showing a tooltip for sighted user, provide the tootip text to this prop because tooltips aren't accessible
+     */
+    additionalAccessibleText?: string;
+}
+
+declare const F0TagTeam: WithDataTestIdReturnType<ForwardRefExoticComponent<F0TagTeamProps & RefAttributes<HTMLDivElement>>>;
+
+declare type FileAvatarVariant = Extract<AvatarVariant, {
+    type: "file";
+}>;
+
+declare type FileDef = {
+    name: string;
+    type: string;
+};
+
+declare type FlagAvatarVariant = Extract<AvatarVariant, {
+    type: "flag";
+}>;
+
 /**
  * A preset formatting instruction the LLM can specify instead of a
  * real formatter function. The wrapper component maps these to actual
@@ -2118,6 +2661,23 @@ declare type FormCanvasContent = CanvasContentBase & {
     formDescription?: string;
     formModule?: ModuleId;
 };
+
+export declare interface FormCardValueFormatterEntry<T = unknown> {
+    /** Scope to a specific form. Omit to apply to all forms. */
+    formName?: string;
+    /** Scope to a specific custom field name. Omit to apply to all fields. */
+    customFieldName?: string;
+    /** Format function. Return `undefined` to fall back to built-in formatting. */
+    format: (value: T, meta: {
+        key: string;
+        fieldType?: string;
+        customFieldName?: string;
+    }) => DetailsItemContent | DetailsItemContent[] | undefined;
+}
+
+export declare function FormCardValueFormatterProvider({ children, }: {
+    children: ReactNode;
+}): JSX_2.Element;
 
 declare interface GaugeComputation {
     datasetId: string;
@@ -2186,7 +2746,7 @@ declare const internalAvatarTypes: readonly ["base", "rounded"];
  * Profile data for a job posting entity (ATS opening), resolved asynchronously
  * and displayed in the entity reference hover card.
  */
-declare type JobPostingProfile = {
+export declare type JobPostingProfile = {
     id: string | number;
     title: string;
     status?: string;
@@ -2345,6 +2905,8 @@ declare type NestedKeyOf<T> = {
     } ? `${K}` | `${K}-${NestedKeyOf<T[K]>}` : `${K}-${NestedKeyOf<T[K]>}` : K extends "DEFAULT" ? never : `${K}`;
 }[keyof T & string];
 
+declare type NewColor = Extract<BaseColor, (typeof tagDotColors)[number]>;
+
 declare type Numeric = NumericValue | number | undefined | null;
 
 /**
@@ -2473,6 +3035,34 @@ declare type PathsToStringProps<T> = T extends string ? [] : {
 }[Extract<keyof T, string>];
 
 /**
+ * Pre-loaded context shown as an empty state in the chat.
+ * The `context` string is prepended to the user's first message
+ * as `<pending-context>...</pending-context>` so the agent receives it.
+ * The conversation is not created until the user actually sends a message.
+ */
+declare type PendingContext = {
+    /** Human-readable label shown in the empty state (e.g. "Expenses dashboard") */
+    label: string;
+    /** Full context string prepended invisibly to the first user message */
+    context: string;
+};
+
+/**
+ * Quoted fragment the user is replying to. Shown as a chip above the
+ * textarea and, on submit, rendered as a markdown blockquote at the top of
+ * the resulting user message. The blockquote alone is enough context — the
+ * conversation thread tells the agent what it refers to.
+ */
+declare type PendingQuote = {
+    /** Plain-text selection (markdown stripped by the browser's toString()). */
+    text: string;
+};
+
+declare type PersonAvatarVariant = Extract<AvatarVariant, {
+    type: "person";
+}>;
+
+/**
  * Profile data for a person entity (employee), resolved asynchronously
  * and displayed in the entity reference hover card.
  */
@@ -2483,6 +3073,8 @@ export declare type PersonProfile = {
     avatarUrl?: string;
     jobTitle?: string;
 };
+
+declare type PersonTagProps = ComponentProps<typeof F0TagPerson>;
 
 declare interface PieComputation {
     datasetId: string;
@@ -2495,6 +3087,27 @@ declare interface PieComputation {
 }
 
 declare const privateProps: readonly ["className"];
+
+declare type Props<Text extends string = string> = {
+    text: Text extends "" ? never : Text;
+    level: Level;
+    /**
+     * Info text to display an i icon and a tooltip next to the tag
+     */
+    info?: string;
+};
+
+declare type Props_2 = {
+    text: string;
+    /**
+     * Info text to display an i icon and a tooltip next to the tag
+     */
+    info?: string;
+} & ({
+    color: NewColor;
+} | {
+    customColor: string;
+});
 
 declare interface RadarComputation {
     datasetId: string;
@@ -2517,9 +3130,69 @@ declare type RelaxedNumericWithFormatter = Omit<NumericWithFormatter, "numericVa
     numericValue: Numeric;
 };
 
+/**
+ * Profile data for a requisition entity (ATS requisition), resolved asynchronously
+ * and displayed in the entity reference hover card.
+ */
+export declare type RequisitionProfile = {
+    id: string | number;
+    title: string;
+    status?: string;
+    reason?: string;
+};
+
+declare type SetFormCardValueFormatter = <T = unknown>(entry: FormCardValueFormatterEntry<T>) => void;
+
 export declare type SparklineDataPoint = {
     value: number;
 };
+
+declare const statuses: readonly ["neutral", "info", "positive", "warning", "critical"];
+
+declare type TagDataType<T extends string> = Omit<Extract<TagVariant, {
+    type: T;
+}>, "type" | "description">;
+
+declare const tagDotColors: ["viridian", "malibu", "yellow", "purple", "lilac", "barbie", "smoke", "army", "flubber", "indigo", "camel"];
+
+declare type TagType_2 = (typeof tagTypes)[number];
+
+declare type TagTypeMapping = {
+    dot: TagDataType<"dot">;
+    person: TagDataType<"person">;
+    team: TagDataType<"team">;
+    company: TagDataType<"company">;
+    alert: TagDataType<"alert">;
+    status: TagDataType<"status">;
+    balance: TagDataType<"balance">;
+    raw: TagDataType<"raw">;
+};
+
+declare const tagTypes: readonly ["dot", "person", "team", "company", "alert", "status", "balance", "raw"];
+
+declare type TagVariant = BaseTag<{
+    type: "dot";
+} & Props_2> | BaseTag<{
+    type: "person";
+} & PersonTagProps> | BaseTag<{
+    type: "team";
+} & TeamTagProps> | BaseTag<{
+    type: "company";
+} & CompanyTagProps> | BaseTag<{
+    type: "alert";
+} & AlertTagProps> | BaseTag<{
+    type: "status";
+} & F0TagStatusProps> | BaseTag<{
+    type: "balance";
+} & BalanceTagProps> | BaseTag<{
+    type: "raw";
+} & F0TagRawProps>;
+
+declare type TeamAvatarVariant = Extract<AvatarVariant, {
+    type: "team";
+}>;
+
+declare type TeamTagProps = ComponentProps<typeof F0TagTeam>;
 
 declare type TranslationKey = Join<PathsToStringProps<typeof defaultTranslations>, ".">;
 
@@ -2555,6 +3228,17 @@ export declare function useAiChatTranslations(): AiChatTranslations;
  */
 export declare function useDefaultCopilotActions(): void;
 
+/**
+ * Returns a resolved formatter for the given `formName`.
+ * Matches registered formatters by specificity:
+ *   formName + customFieldName > formName only > customFieldName only > global
+ * Returns `null` when no provider is present or no formatters are registered.
+ */
+export declare function useFormCardValueFormatter(formName: string): ((key: string, value: unknown, meta: {
+    fieldType?: string;
+    customFieldName?: string;
+}) => DetailsItemContent | DetailsItemContent[] | undefined) | null;
+
 export declare function useI18n(): TranslationsType & {
     t: (key: TranslationKey, args?: Record<string, string | number>) => string;
 };
@@ -2572,9 +3256,50 @@ export declare const useMessageSourcesAction: () => void;
 export declare const useOrchestratorThinkingAction: () => void;
 
 /**
+ * Returns a setter to register value formatters used by FormCard.
+ *
+ * ```ts
+ * const setFormatter = useSetFormCardValueFormatter()
+ *
+ * // Global formatter (all forms, all fields)
+ * setFormatter({ format: (value) => ({ type: "item", text: String(value) }) })
+ *
+ * // Scoped to a form
+ * setFormatter({ formName: "create-task", format: (value) => ... })
+ *
+ * // Scoped to a custom field name (across all forms)
+ * setFormatter({ customFieldName: "assignees_selector", format: (value) => ... })
+ *
+ * // Scoped to both
+ * setFormatter({ formName: "create-task", customFieldName: "assignees_selector", format: (value) => ... })
+ * ```
+ */
+export declare function useSetFormCardValueFormatter(): SetFormCardValueFormatter;
+
+/**
+ * Profile data for a vacancy entity (ATS vacancy/position), resolved asynchronously
+ * and displayed in the entity reference hover card.
+ */
+export declare type VacancyProfile = {
+    id: string | number;
+    name: string;
+    status?: string;
+    vacancyType?: string;
+};
+
+declare type Variant = (typeof statuses)[number];
+
+/**
  * Visualization mode for the AI chat
  */
 export declare type VisualizationMode = "sidepanel" | "fullscreen" | "canvas";
+
+declare const Weekdays: ForwardRefExoticComponent<WeekdaysProps & RefAttributes<HTMLDivElement>>;
+
+declare interface WeekdaysProps {
+    activatedDays?: number[];
+    daysOfTheWeek?: string[];
+}
 
 /**
  * Welcome screen suggestion item
@@ -2584,6 +3309,17 @@ export declare type WelcomeScreenSuggestion = {
     message: string;
     prompt?: string;
 };
+
+declare type WithDataTestIdProps = {
+    dataTestId?: string;
+};
+
+declare interface WithTooltipDescription {
+    /**
+     * Optional description to show in the tooltip
+     */
+    description?: string;
+}
 
 export { }
 
@@ -2622,6 +3358,11 @@ declare module "gridstack" {
             h: number;
         }>;
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
 
 
@@ -2671,9 +3412,4 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
