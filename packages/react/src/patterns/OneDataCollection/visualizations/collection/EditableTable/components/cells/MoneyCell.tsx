@@ -32,15 +32,15 @@ export function MoneyCell<R extends RecordType>(props: EditableCellProps<R>) {
 
   const resolvedUnits = resolveUnits(config, props.item)
 
-  const unitsBefore = useMemo(
-    () =>
-      resolvedUnits
-        ? config?.unitsPosition
-          ? config.unitsPosition === "before"
-          : isUnitBeforeNumber(locale, resolvedUnits)
-        : false,
-    [locale, resolvedUnits, config?.unitsPosition]
-  )
+  const unitsBefore = useMemo(() => {
+    if (!resolvedUnits) return false
+
+    if (config?.unitsPosition) {
+      return config.unitsPosition === "before"
+    }
+
+    return isUnitBeforeNumber(locale, resolvedUnits)
+  }, [locale, resolvedUnits, config?.unitsPosition])
 
   return (
     <NumberCell

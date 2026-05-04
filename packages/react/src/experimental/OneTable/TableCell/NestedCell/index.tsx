@@ -91,7 +91,10 @@ export const NestedCell = ({
     >
       {onAddRow ? (
         <div
-          className={cn("pointer-events-auto flex items-center w-full h-full")}
+          className={cn(
+            "pointer-events-auto flex items-center w-full h-full",
+            detailedVariant && "pl-3"
+          )}
         >
           {onAddRow.actions.length === 1 ? (
             <F0Button
