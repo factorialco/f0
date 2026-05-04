@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.472.1](https://github.com/factorialco/f0/compare/f0-react-v1.472.0...f0-react-v1.472.1) (2026-05-04)
+
+
+### Bug Fixes
+
+* editable table QA ([#4055](https://github.com/factorialco/f0/issues/4055)) ([ac8fc10](https://github.com/factorialco/f0/commit/ac8fc103cbff32387dce0090f055535432b7e07b))
+
 ## [1.472.0](https://github.com/factorialco/f0/compare/f0-react-v1.471.2...f0-react-v1.472.0) (2026-05-04)
 
 
