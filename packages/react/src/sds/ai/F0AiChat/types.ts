@@ -14,6 +14,7 @@ export type { CandidateProfile } from "./components/markdownRenderers/entityRef/
 export type { JobPostingProfile } from "./components/markdownRenderers/entityRef/entities/jobPosting/types"
 export type { RequisitionProfile } from "./components/markdownRenderers/entityRef/entities/requisition/types"
 export type { VacancyProfile } from "./components/markdownRenderers/entityRef/entities/vacancy/types"
+export type { ExpenseProfile } from "./components/markdownRenderers/entityRef/entities/expense/types"
 export type {
   EntityResolvers,
   EntityUrlBuilders,
