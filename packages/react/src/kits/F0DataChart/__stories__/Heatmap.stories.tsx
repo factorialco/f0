@@ -105,3 +105,13 @@ export const ResponsiveSnapshotMatrix: Story = {
   decorators: [(Story) => <Story />],
   render: () => <ResponsiveSnapshot getProps={responsiveHeatmapProps} />,
 }
+
+/** No data — empty state takes over. See `F0DataChart/Empty states`. */
+export const Empty: Story = {
+  args: {
+    type: "heatmap",
+    xCategories: [],
+    yCategories: [],
+    data: [],
+  },
+}

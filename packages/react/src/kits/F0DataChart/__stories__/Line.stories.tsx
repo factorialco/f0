@@ -276,3 +276,16 @@ export const ScrollableLegend: Story = {
     />
   ),
 }
+
+/**
+ * No data — the empty state takes over with the line-chart illustration.
+ * See `F0DataChart/Empty states` for full coverage.
+ */
+export const Empty: Story = {
+  render: (args) => <F0DataChart {...args} />,
+  args: {
+    type: "line",
+    categories: [],
+    series: [],
+  },
+}

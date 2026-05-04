@@ -136,3 +136,11 @@ export const ResponsiveSnapshotMatrix: Story = {
   decorators: [(Story) => <Story />],
   render: () => <ResponsiveSnapshot getProps={responsivePieProps} />,
 }
+
+/** No data — empty state takes over. See `F0DataChart/Empty states`. */
+export const Empty: Story = {
+  args: {
+    type: "pie",
+    series: { name: "", data: [] },
+  },
+}
