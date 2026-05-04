@@ -110,7 +110,10 @@ export const ListCollection = <
   useEffect(() => {
     if (error) return
     onDataStateChange?.({
-      source,
+      source: {
+        idProvider: source.idProvider,
+        itemUrl: source.itemUrl,
+      },
       data,
       paginationInfo,
       setPage,
@@ -126,7 +129,8 @@ export const ListCollection = <
     loadMore,
     isLoading,
     isLoadingMore,
-    source,
+    source.idProvider,
+    source.itemUrl,
     onDataStateChange,
   ])
 

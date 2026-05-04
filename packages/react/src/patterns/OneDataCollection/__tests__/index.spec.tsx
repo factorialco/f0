@@ -27,7 +27,9 @@ import {
 
 import { useDataCollectionData } from "../hooks/useDataCollectionData/useDataCollectionData"
 import { useDataCollectionItemNavigation } from "../hooks/useDataCollectionItemNavigation"
+import { getDataCollectionItemNavigationDataStateSetter } from "../hooks/useDataCollectionItemNavigation/internal"
 import {
+  DataCollectionPaginatedFetchOptions,
   DataCollectionSource,
   useDataCollectionSource,
 } from "../hooks/useDataCollectionSource"
@@ -70,9 +72,19 @@ type ItemNavigationPerson = {
   name: string
 }
 
-type ItemNavigationFetchData = NonNullable<
-  DataCollectionSource<ItemNavigationPerson>["dataAdapter"]
->["fetchData"]
+type ItemNavigationFetchData = (
+  options: DataCollectionPaginatedFetchOptions<
+    FiltersDefinition,
+    NavigationFiltersDefinition
+  >
+) => {
+  records: ItemNavigationPerson[]
+  total: number
+  perPage: number
+  type: "infinite-scroll"
+  cursor: string | null
+  hasMore: boolean
+}
 
 const itemNavigationColumns = [
   { label: "Name", render: (item: ItemNavigationPerson) => item.name },
@@ -147,6 +159,131 @@ const ItemNavigationStatus = ({
       </button>
       <button type="button" onClick={itemNavigation.closeItem}>
         Close item
+      </button>
+      <OneDataCollection
+        source={dataSource}
+        storage={false}
+        itemNavigation={itemNavigation}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              columns: itemNavigationColumns,
+            },
+          },
+        ]}
+      />
+    </>
+  )
+}
+
+const ItemNavigationPageStatus = () => {
+  const [records, setRecords] = useState(itemNavigationPeople)
+  const itemNavigation = useDataCollectionItemNavigation<ItemNavigationPerson>({
+    defaultActiveItemId: 2,
+    snapshotMode: "session",
+    idProvider: (item) => item.id,
+  })
+
+  const dataSource = useDataCollectionSource<ItemNavigationPerson>(
+    {
+      dataAdapter: {
+        paginationType: "pages",
+        perPage: 2,
+        fetchData: ({ pagination }) => {
+          const currentPage = pagination.currentPage ?? 1
+          const start = (currentPage - 1) * 2
+          return {
+            records: records.slice(start, start + 2),
+            total: records.length,
+            perPage: 2,
+            type: "pages" as const,
+            currentPage,
+            pagesCount: Math.ceil(records.length / 2),
+          }
+        },
+      },
+      idProvider: (item) => item.id,
+    },
+    [records]
+  )
+
+  return (
+    <>
+      <div data-testid="active-name">
+        {itemNavigation.activeItem?.name ?? "none"}
+      </div>
+      <div data-testid="active-index">{itemNavigation.activeIndex}</div>
+      <div data-testid="absolute-index">
+        {itemNavigation.absoluteIndex ?? "none"}
+      </div>
+      <div data-testid="loaded-count">{itemNavigation.loadedItemsCount}</div>
+      <button type="button" onClick={itemNavigation.goToNext}>
+        Next item
+      </button>
+      <button
+        type="button"
+        onClick={() =>
+          setRecords((currentRecords) =>
+            currentRecords.map((record) =>
+              record.id === 3 ? { ...record, name: "Cleo updated" } : record
+            )
+          )
+        }
+      >
+        Update active
+      </button>
+      <OneDataCollection
+        source={dataSource}
+        storage={false}
+        itemNavigation={itemNavigation}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              columns: itemNavigationColumns,
+            },
+          },
+        ]}
+      />
+    </>
+  )
+}
+
+const ItemNavigationRecordRefreshStatus = () => {
+  const [records, setRecords] = useState(itemNavigationPeople.slice(0, 3))
+  const itemNavigation = useDataCollectionItemNavigation<ItemNavigationPerson>({
+    defaultActiveItemId: 3,
+    snapshotMode: "session",
+    idProvider: (item) => item.id,
+  })
+
+  const dataSource = useDataCollectionSource<ItemNavigationPerson>(
+    {
+      dataAdapter: {
+        fetchData: () => ({ records }),
+      },
+      idProvider: (item) => item.id,
+    },
+    [records]
+  )
+
+  return (
+    <>
+      <div data-testid="active-name">
+        {itemNavigation.activeItem?.name ?? "none"}
+      </div>
+      <button
+        type="button"
+        onClick={() =>
+          setRecords((currentRecords) =>
+            currentRecords.map((record) =>
+              record.id === 3 ? { ...record, name: "Cleo updated" } : record
+            )
+          )
+        }
+      >
+        Update active
       </button>
       <OneDataCollection
         source={dataSource}
@@ -266,11 +403,13 @@ const ItemNavigationLoadingSnapshotStatus = () => {
     snapshotKey,
     idProvider: (item) => item.id,
   })
+  const setItemNavigationDataState =
+    getDataCollectionItemNavigationDataStateSetter(itemNavigation)
 
   useEffect(() => {
     if (!loading) return
 
-    itemNavigation.setDataState({
+    setItemNavigationDataState?.({
       source: {},
       data: {
         type: "flat",
@@ -286,7 +425,7 @@ const ItemNavigationLoadingSnapshotStatus = () => {
       isLoading: true,
       isLoadingMore: false,
     })
-  }, [itemNavigation.setDataState, loading, records])
+  }, [loading, records, setItemNavigationDataState])
 
   return (
     <>
@@ -297,7 +436,7 @@ const ItemNavigationLoadingSnapshotStatus = () => {
       <button
         type="button"
         onClick={() => {
-          itemNavigation.setDataState({
+          setItemNavigationDataState?.({
             source: {},
             data: {
               type: "flat",
@@ -346,6 +485,56 @@ const ItemNavigationLoadingSnapshotStatus = () => {
       >
         Finish with smaller data
       </button>
+    </>
+  )
+}
+
+const UnsupportedItemNavigationVisualizationStatus = () => {
+  const itemNavigation = useDataCollectionItemNavigation<ItemNavigationPerson>({
+    defaultActiveItemId: 1,
+    idProvider: (item) => item.id,
+  })
+
+  const dataSource = useDataCollectionSource<ItemNavigationPerson>({
+    dataAdapter: {
+      fetchData: () => ({ records: itemNavigationPeople.slice(0, 2) }),
+    },
+    idProvider: (item) => item.id,
+  })
+
+  return (
+    <>
+      <div data-testid="ready">{String(itemNavigation.isReady)}</div>
+      <OneDataCollection
+        source={dataSource}
+        storage={false}
+        itemNavigation={itemNavigation}
+        visualizations={[
+          {
+            type: "custom",
+            label: "Custom",
+            icon: LayoutGrid,
+            component: ({ source }) => {
+              const { data } = useDataCollectionData<
+                ItemNavigationPerson,
+                FiltersDefinition,
+                SortingsDefinition,
+                SummariesDefinition,
+                NavigationFiltersDefinition,
+                GroupingDefinition<ItemNavigationPerson>
+              >(source)
+
+              return (
+                <div>
+                  {data.records.map((record) => (
+                    <div key={record.id}>{record.name}</div>
+                  ))}
+                </div>
+              )
+            },
+          },
+        ]}
+      />
     </>
   )
 }
@@ -694,6 +883,48 @@ describe("Collections", () => {
     expect(fetchData).toHaveBeenCalledTimes(2)
   })
 
+  test("replaces session snapshot when page-based navigation loads another page", async () => {
+    render(
+      <TestWrapper>
+        <ItemNavigationPageStatus />
+      </TestWrapper>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Bert")
+    })
+
+    await userEvent.click(screen.getByRole("button", { name: "Next item" }))
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Cleo")
+    })
+
+    expect(screen.getByTestId("active-index")).toHaveTextContent("0")
+    expect(screen.getByTestId("absolute-index")).toHaveTextContent("2")
+    expect(screen.getByTestId("loaded-count")).toHaveTextContent("2")
+  })
+
+  test("refreshes same-id snapshot records after refetch", async () => {
+    render(
+      <TestWrapper>
+        <ItemNavigationRecordRefreshStatus />
+      </TestWrapper>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Cleo")
+    })
+
+    await userEvent.click(screen.getByRole("button", { name: "Update active" }))
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent(
+        "Cleo updated"
+      )
+    })
+  })
+
   test("keeps snapshot navigation stable until the snapshot key changes", async () => {
     render(
       <TestWrapper>
@@ -835,6 +1066,20 @@ describe("Collections", () => {
     })
 
     expect(screen.getByTestId("loaded-count")).toHaveTextContent("2")
+  })
+
+  test("does not register item navigation for unsupported visualizations", async () => {
+    render(
+      <TestWrapper>
+        <UnsupportedItemNavigationVisualizationStatus />
+      </TestWrapper>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText("Ada")).toBeInTheDocument()
+    })
+
+    expect(screen.getByTestId("ready")).toHaveTextContent("false")
   })
 
   test("renders with custom visualization", async () => {

@@ -68,15 +68,70 @@ export function useDataSourceItemNavigation<R extends RecordType>(
 
   const pendingNavigation = useRef<PendingNavigation>(null)
   const pendingSawLoading = useRef(false)
+  const pendingClearTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [isPendingNavigation, setIsPendingNavigation] = useState(false)
 
+  const clearPendingTimeout = useCallback(() => {
+    if (pendingClearTimeout.current === null) return
+    clearTimeout(pendingClearTimeout.current)
+    pendingClearTimeout.current = null
+  }, [])
+
   const clearPendingNavigation = useCallback(() => {
+    clearPendingTimeout()
     pendingNavigation.current = null
     pendingSawLoading.current = false
     setIsPendingNavigation(false)
-  }, [])
+  }, [clearPendingTimeout])
 
   const records = data.records
+  const recordsRef = useRef(records)
+  const isLoadingRef = useRef(isLoading)
+  const idProviderRef = useRef(idProvider)
+  const setActiveItemIdRef = useRef(setActiveItemId)
+
+  recordsRef.current = records
+  isLoadingRef.current = isLoading
+  idProviderRef.current = idProvider
+  setActiveItemIdRef.current = setActiveItemId
+
+  const schedulePendingFallbackClear = useCallback(() => {
+    clearPendingTimeout()
+    pendingClearTimeout.current = setTimeout(() => {
+      pendingClearTimeout.current = null
+      if (
+        pendingNavigation.current === null ||
+        pendingSawLoading.current ||
+        isLoadingRef.current
+      ) {
+        return
+      }
+
+      const pending = pendingNavigation.current
+      if (pending.type === "next-after-current") {
+        const currentRecords = recordsRef.current
+        if (currentRecords.length > pending.loadedItemsCount) {
+          const prevIndex =
+            pending.previousId == null
+              ? -1
+              : currentRecords.findIndex(
+                  (record, i) =>
+                    idProviderRef.current(record, i) === pending.previousId
+                )
+          const nextItem = currentRecords[prevIndex + 1]
+          if (nextItem) {
+            setActiveItemIdRef.current(
+              idProviderRef.current(nextItem, prevIndex + 1)
+            )
+          }
+        }
+      }
+
+      clearPendingNavigation()
+    }, 0)
+  }, [clearPendingNavigation, clearPendingTimeout])
+
+  useEffect(() => clearPendingTimeout, [clearPendingTimeout])
 
   const { activeIndex, activeItem, previousItem, nextItem } = useMemo(() => {
     if (activeItemId == null) {
@@ -169,6 +224,7 @@ export function useDataSourceItemNavigation<R extends RecordType>(
       }
       setIsPendingNavigation(true)
       loadMore()
+      schedulePendingFallbackClear()
     }
   }, [
     activeIndex,
@@ -181,6 +237,7 @@ export function useDataSourceItemNavigation<R extends RecordType>(
     loadMore,
     idProvider,
     setActiveItemId,
+    schedulePendingFallbackClear,
   ])
 
   const goToPrevious = useCallback(() => {

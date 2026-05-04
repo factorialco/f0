@@ -4,8 +4,6 @@ import type {
   UseDataSourceItemNavigationReturn,
 } from "@/hooks/datasource"
 
-import type { DataCollectionItemNavigationDataState } from "../../types"
-
 export type DataCollectionItemNavigationSnapshotMode =
   | "live"
   | "session"
@@ -79,6 +77,4 @@ export interface DataCollectionItemNavigationController<
   closeItem: () => void
   /** Replace the current snapshot with the latest live collection data. */
   resetSnapshot: () => void
-  /** Internal bridge used by OneDataCollection visualizations. */
-  setDataState: (state: DataCollectionItemNavigationDataState<R> | null) => void
 }

@@ -13,6 +13,7 @@ import {
   DataCollectionItemNavigationController,
   UseDataCollectionItemNavigationProps,
 } from "./types"
+import { DATA_COLLECTION_ITEM_NAVIGATION_SET_DATA_STATE } from "./internal"
 
 const emptyData: Data<RecordType> = {
   records: [],
@@ -35,6 +36,11 @@ type PendingSnapshotReset = {
   canUseCurrentData: boolean
 }
 
+type SnapshotData<R extends RecordType> = {
+  data: Data<R>
+  paginationInfo: DataCollectionItemNavigationDataState<R>["paginationInfo"]
+}
+
 const defaultIdProvider = (
   item: RecordType,
   index?: number
@@ -50,12 +56,37 @@ const createSnapshotData = <R extends RecordType>(data: Data<R>): Data<R> => ({
   groups: data.groups,
 })
 
+const getSourceRecordId = <R extends RecordType>(
+  state: DataCollectionItemNavigationDataState<R>,
+  record: R,
+  index: number
+) =>
+  state.source.idProvider?.(record, index) ?? defaultIdProvider(record, index)
+
+const hasSameSourceMetadata = <R extends RecordType>(
+  current: DataCollectionItemNavigationDataState<R>,
+  next: DataCollectionItemNavigationDataState<R>
+) => {
+  const hasSameIds = current.data.records.every(
+    (record, index) =>
+      getSourceRecordId(current, record, index) ===
+      getSourceRecordId(next, record, index)
+  )
+  const hasSameUrls = current.data.records.every(
+    (record) =>
+      current.source.itemUrl?.(record) === next.source.itemUrl?.(record)
+  )
+
+  return hasSameIds && hasSameUrls
+}
+
 const isSameDataState = <R extends RecordType>(
   current: DataCollectionItemNavigationDataState<R> | null,
   next: DataCollectionItemNavigationDataState<R>
 ) =>
   current !== null &&
   current.data === next.data &&
+  hasSameSourceMetadata(current, next) &&
   current.paginationInfo === next.paginationInfo &&
   current.setPage === next.setPage &&
   current.loadMore === next.loadMore &&
@@ -73,6 +104,59 @@ const isSameRecordOrder = <R extends RecordType>(
       idProvider(record, index) ===
       idProvider(snapshotData.records[index], index)
   )
+
+const refreshSnapshotData = <R extends RecordType>(
+  snapshotData: Data<R>,
+  liveData: Data<R>,
+  idProvider: (item: R, index?: number) => DataSourceItemId
+): Data<R> => {
+  const liveRecords = new Map<DataSourceItemId, Data<R>["records"][number]>()
+  let changed = false
+
+  liveData.records.forEach((record, index) => {
+    liveRecords.set(idProvider(record, index), record)
+  })
+
+  const records = snapshotData.records.map((snapshotRecord, index) => {
+    const liveRecord = liveRecords.get(idProvider(snapshotRecord, index))
+    if (!liveRecord || liveRecord === snapshotRecord) return snapshotRecord
+
+    changed = true
+    return liveRecord
+  })
+
+  if (!changed) return snapshotData
+
+  return {
+    ...snapshotData,
+    records,
+  }
+}
+
+const shouldReplaceSnapshotForPagination = <R extends RecordType>(
+  currentSnapshot: SnapshotData<R>,
+  nextState: DataCollectionItemNavigationDataState<R>
+) => {
+  const currentPagination = currentSnapshot.paginationInfo
+  const nextPagination = nextState.paginationInfo
+
+  if (currentPagination?.type === "pages" || nextPagination?.type === "pages") {
+    return (
+      currentPagination?.type !== "pages" ||
+      nextPagination?.type !== "pages" ||
+      currentPagination.currentPage !== nextPagination.currentPage
+    )
+  }
+
+  return false
+}
+
+const createSnapshot = <R extends RecordType>(
+  state: DataCollectionItemNavigationDataState<R>
+): SnapshotData<R> => ({
+  data: createSnapshotData(state.data),
+  paginationInfo: state.paginationInfo,
+})
 
 export function useDataCollectionItemNavigation<R extends RecordType>({
   activeItemId,
@@ -100,7 +184,7 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
     state: null,
     version: 0,
   })
-  const [snapshotData, setSnapshotData] = useState<Data<R> | null>(null)
+  const [snapshotData, setSnapshotData] = useState<SnapshotData<R> | null>(null)
   const [snapshotResetAttempt, setSnapshotResetAttempt] = useState(0)
   const previousSnapshotKey = useRef(effectiveSnapshotKey)
   const handledResetSnapshotKey = useRef(resetSnapshotKey)
@@ -174,7 +258,7 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
       handledResetSnapshotKey.current = resetSnapshotKey
       pendingSnapshotReset.current = null
       clearSnapshotResetTimeout()
-      setSnapshotData(createSnapshotData(dataState.data))
+      setSnapshotData(createSnapshot(dataState))
       return
     }
 
@@ -207,7 +291,11 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
       const hasObservedNewDataState =
         dataStateVersion > pendingReset.requestedAtVersion
       const hasDifferentRecordOrder = snapshotData
-        ? !isSameRecordOrder(dataState.data, snapshotData, effectiveIdProvider)
+        ? !isSameRecordOrder(
+            dataState.data,
+            snapshotData.data,
+            effectiveIdProvider
+          )
         : true
 
       if (
@@ -228,18 +316,41 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
 
       pendingSnapshotReset.current = null
       clearSnapshotResetTimeout()
-      setSnapshotData(createSnapshotData(dataState.data))
+      setSnapshotData(createSnapshot(dataState))
       return
     }
 
     setSnapshotData((currentSnapshot) => {
       if (!currentSnapshot) {
-        return createSnapshotData(dataState.data)
+        return createSnapshot(dataState)
       }
-      if (dataState.data.records.length <= currentSnapshot.records.length) {
-        return currentSnapshot
+      const effectiveIdProvider =
+        idProvider ?? dataState.source.idProvider ?? defaultIdProvider
+      if (shouldReplaceSnapshotForPagination(currentSnapshot, dataState)) {
+        return createSnapshot(dataState)
       }
-      return createSnapshotData(dataState.data)
+      const refreshedSnapshotData = refreshSnapshotData(
+        currentSnapshot.data,
+        dataState.data,
+        effectiveIdProvider
+      )
+      if (
+        dataState.data.records.length <= currentSnapshot.data.records.length
+      ) {
+        if (
+          refreshedSnapshotData === currentSnapshot.data &&
+          currentSnapshot.paginationInfo === dataState.paginationInfo
+        ) {
+          return currentSnapshot
+        }
+
+        return {
+          ...currentSnapshot,
+          data: refreshedSnapshotData,
+          paginationInfo: dataState.paginationInfo,
+        }
+      }
+      return createSnapshot(dataState)
     })
   }, [
     clearSnapshotResetTimeout,
@@ -253,12 +364,14 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
     snapshotResetAttempt,
   ])
 
-  const navigationData = snapshotData ?? stateData
+  const navigationData = snapshotData?.data ?? stateData
+  const navigationPaginationInfo =
+    snapshotData?.paginationInfo ?? dataState?.paginationInfo ?? null
 
   const navigation = useDataSourceItemNavigation<R>({
     dataSource: dataState?.source ?? {},
     data: navigationData,
-    paginationInfo: dataState?.paginationInfo ?? null,
+    paginationInfo: navigationPaginationInfo,
     setPage: dataState?.setPage ?? noop,
     loadMore: dataState?.loadMore ?? noop,
     isLoading: Boolean(dataState?.isLoading || dataState?.isLoadingMore),
@@ -317,7 +430,7 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
       openItem,
       closeItem,
       resetSnapshot,
-      setDataState: handleDataStateChange,
+      [DATA_COLLECTION_ITEM_NAVIGATION_SET_DATA_STATE]: handleDataStateChange,
     }),
     [
       navigation,

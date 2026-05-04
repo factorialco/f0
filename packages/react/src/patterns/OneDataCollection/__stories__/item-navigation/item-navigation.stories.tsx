@@ -52,7 +52,24 @@ const createPaginatedResponse = (records: MockUser[], cursor: number) => {
   }
 }
 
-export const ExternalControls: Story = {
+const createPageResponse = (records: MockUser[], currentPage: number) => ({
+  records,
+  total: users.length,
+  perPage: 4,
+  type: "pages" as const,
+  currentPage,
+  pagesCount: Math.ceil(users.length / 4),
+})
+
+export const InfiniteScrollPagination: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Uses an infinite-scroll data adapter. When navigation reaches the last loaded item, it calls loadMore and activates the next appended record.",
+      },
+    },
+  },
   render: () => {
     const itemNavigation = useDataCollectionItemNavigation<MockUser>({
       defaultActiveItemId: users[0].id,
@@ -83,12 +100,11 @@ export const ExternalControls: Story = {
         <div className="border-f1-border-secondary flex items-center justify-between rounded-md border p-3">
           <div>
             <div className="text-f1-foreground font-medium">
-              External controls
+              Infinite scroll pagination
             </div>
             <div className="text-f1-foreground-secondary text-sm">
-              The header below is demo UI. Consumers can render these controls
-              in a dialog title, sidepanel header, toolbar, or keyboard shortcut
-              handler.
+              Move past the last loaded row to call loadMore and activate the
+              next appended item.
             </div>
           </div>
         </div>
@@ -112,6 +128,106 @@ export const ExternalControls: Story = {
               hideLabel
               label="Previous item"
               disabled={!controls?.canGoPrevious}
+              onClick={controls?.goToPrevious}
+            />
+            <F0Button
+              variant="ghost"
+              size="sm"
+              icon={ChevronRight}
+              hideLabel
+              label="Next item"
+              disabled={!controls?.canGoNext}
+              loading={controls?.isNavigating}
+              onClick={controls?.goToNext}
+            />
+          </div>
+        </div>
+
+        <OneDataCollection
+          source={source}
+          itemNavigation={itemNavigation}
+          storage={false}
+          visualizations={[
+            {
+              type: "table",
+              options: {
+                columns,
+              },
+            },
+          ]}
+        />
+      </div>
+    )
+  },
+}
+
+export const PageBasedPagination: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Uses a page-based data adapter. When navigation reaches a page boundary, it requests the next or previous page and activates the boundary item.",
+      },
+    },
+  },
+  render: () => {
+    const itemNavigation = useDataCollectionItemNavigation<MockUser>({
+      defaultActiveItemId: users[3].id,
+      idProvider: (item) => item.id,
+    })
+
+    const source = useDataCollectionSource<MockUser>({
+      dataAdapter: {
+        paginationType: "pages",
+        perPage: 4,
+        fetchData: async ({ pagination }) => {
+          await new Promise((resolve) => setTimeout(resolve, 150))
+          const currentPage = pagination.currentPage ?? 1
+          const start = (currentPage - 1) * 4
+
+          return createPageResponse(users.slice(start, start + 4), currentPage)
+        },
+      },
+      itemOnClick: (item) => () => itemNavigation.openItem(item.id),
+      itemUrl: (item) => `/users/${item.id}`,
+    })
+
+    const controls = itemNavigation.controls
+
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="border-f1-border-secondary flex items-center justify-between rounded-md border p-3">
+          <div>
+            <div className="text-f1-foreground font-medium">
+              Page-based pagination
+            </div>
+            <div className="text-f1-foreground-secondary text-sm">
+              Move past the last loaded row to fetch the next page and activate
+              its first item.
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-f1-background-secondary border-f1-border-secondary flex items-center justify-between rounded-md border p-3">
+          <div>
+            <div className="text-f1-foreground font-medium">
+              {itemNavigation.activeItem?.name ?? "No selected item"}
+            </div>
+            <div className="text-f1-foreground-secondary text-sm">
+              {controls
+                ? `${controls.currentIndex + 1} of ${controls.totalCount}`
+                : "Select an item to start navigating"}
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <F0Button
+              variant="ghost"
+              size="sm"
+              icon={ChevronLeft}
+              hideLabel
+              label="Previous item"
+              disabled={!controls?.canGoPrevious}
+              loading={controls?.isNavigating}
               onClick={controls?.goToPrevious}
             />
             <F0Button

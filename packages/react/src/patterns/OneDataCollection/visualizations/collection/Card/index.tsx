@@ -396,7 +396,10 @@ export const CardCollection = <
   useEffect(() => {
     if (error) return
     onDataStateChange?.({
-      source,
+      source: {
+        idProvider: source.idProvider,
+        itemUrl: source.itemUrl,
+      },
       data,
       paginationInfo,
       setPage,
@@ -412,7 +415,8 @@ export const CardCollection = <
     loadMore,
     isLoading,
     isLoadingMore,
-    source,
+    source.idProvider,
+    source.itemUrl,
     onDataStateChange,
   ])
 

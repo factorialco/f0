@@ -54,6 +54,7 @@ import {
   DataCollectionStorageFeaturesDefinition,
 } from "./hooks/useDataColectionStorage/types"
 import { useDataCollectionStorage } from "./hooks/useDataColectionStorage/useDataCollectionStorage"
+import { getDataCollectionItemNavigationDataStateSetter } from "./hooks/useDataCollectionItemNavigation/internal"
 import { DataCollectionSource } from "./hooks/useDataCollectionSource"
 import { CustomEmptyStates, useEmptyState } from "./hooks/useEmptyState"
 import { useExportAction } from "./hooks/useExportAction"
@@ -203,7 +204,7 @@ export type OneDataCollectionProps<
    */
   csvExport?: boolean | { filename?: string }
 
-  /** Optional controller that exposes item prev/next navigation for the active visualization. */
+  /** Optional controller that exposes item prev/next navigation for supported collection visualizations. */
   itemNavigation?: DataCollectionItemNavigationController<R>
 }
 
@@ -272,7 +273,15 @@ const OneDataCollectionComp = <
 
   const [currentVisualization, setCurrentVisualization] = useState(0)
 
-  const setItemNavigationDataState = itemNavigation?.setDataState
+  const setItemNavigationDataState =
+    getDataCollectionItemNavigationDataStateSetter(itemNavigation)
+
+  const currentVisualizationType = visualizations[currentVisualization]?.type
+  const supportsItemNavigation =
+    currentVisualizationType === "table" ||
+    currentVisualizationType === "editableTable" ||
+    currentVisualizationType === "list" ||
+    currentVisualizationType === "card"
 
   const handleDataStateChange = useCallback(
     (state: DataCollectionItemNavigationDataState<R>) => {
@@ -285,6 +294,11 @@ const OneDataCollectionComp = <
     if (!setItemNavigationDataState) return
     return () => setItemNavigationDataState(null)
   }, [setItemNavigationDataState])
+
+  useEffect(() => {
+    if (!setItemNavigationDataState || supportsItemNavigation) return
+    setItemNavigationDataState(null)
+  }, [setItemNavigationDataState, supportsItemNavigation])
 
   const {
     effectiveFilters,
@@ -1057,7 +1071,11 @@ const OneDataCollectionComp = <
           onSelectItems={onSelectItemsLocal}
           onLoadData={onLoadData}
           onLoadError={onLoadError}
-          onDataStateChange={itemNavigation ? handleDataStateChange : undefined}
+          onDataStateChange={
+            itemNavigation && supportsItemNavigation
+              ? handleDataStateChange
+              : undefined
+          }
           tmpFullWidth={tmpFullWidth}
         />
       </div>

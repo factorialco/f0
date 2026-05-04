@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { act } from "@testing-library/react"
+import { act, waitFor } from "@testing-library/react"
 
 import { zeroRenderHook } from "@/testing/test-utils"
 
@@ -723,6 +723,63 @@ describe("useDataSourceItemNavigation", () => {
 
       expect(result.current.activeItemId).toBe(5)
       expect(result.current.isNavigating).toBe(false)
+    })
+
+    it("clears pending navigation when loadMore synchronously returns no appended data", async () => {
+      const loadMore = vi.fn()
+      const { result } = zeroRenderHook(() =>
+        useDataSourceItemNavigation(
+          defaultProps({
+            defaultActiveItemId: 5,
+            paginationInfo: makeInfiniteScrollPaginationInfo(true, 15),
+            loadMore,
+          })
+        )
+      )
+
+      act(() => {
+        result.current.goToNext()
+      })
+
+      expect(loadMore).toHaveBeenCalledTimes(1)
+      expect(result.current.activeItemId).toBe(5)
+
+      await waitFor(() => {
+        expect(result.current.isNavigating).toBe(false)
+      })
+    })
+
+    it("resolves synchronous loadMore when appended data is already available", async () => {
+      const loadMore = vi.fn()
+      const appendedRecords = [...makeRecords(5), ...makeRecords(1, 6)]
+      const { result, rerender } = zeroRenderHook(
+        (props: UseDataSourceItemNavigationProps<TestRecord>) =>
+          useDataSourceItemNavigation(props),
+        {
+          initialProps: defaultProps({
+            defaultActiveItemId: 5,
+            paginationInfo: makeInfiniteScrollPaginationInfo(true, 15),
+            loadMore,
+          }),
+        }
+      )
+
+      act(() => {
+        result.current.goToNext()
+      })
+
+      rerender(
+        defaultProps({
+          data: makeData(appendedRecords),
+          paginationInfo: makeInfiniteScrollPaginationInfo(true, 15),
+          loadMore,
+        })
+      )
+
+      await waitFor(() => {
+        expect(result.current.isNavigating).toBe(false)
+      })
+      expect(result.current.activeItemId).toBe(6)
     })
   })
 
