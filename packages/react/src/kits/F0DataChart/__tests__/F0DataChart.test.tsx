@@ -1,4 +1,3 @@
-import { fireEvent } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
 import { zeroRender as render } from "@/testing/test-utils"
@@ -154,24 +153,6 @@ describe("F0DataChart", () => {
       expect(
         getByText("Try a different date or fewer filters")
       ).toBeInTheDocument()
-    })
-
-    it("renders CTA and fires the action handler", () => {
-      const onClick = vi.fn()
-      const { getByRole } = render(
-        <F0DataChart
-          type="bar"
-          categories={[]}
-          series={[]}
-          emptyState={{
-            type: "no-results",
-            action: { label: "Clear filters", onClick },
-          }}
-        />
-      )
-      const button = getByRole("button", { name: /clear filters/i })
-      fireEvent.click(button)
-      expect(onClick).toHaveBeenCalledTimes(1)
     })
 
     it("uses overrides for title and description", () => {

@@ -34,9 +34,6 @@ export const DataChartEmptyStateView = ({
       chartType={chartType}
       content={emptyState?.title ?? DEFAULT_COPY.title}
       description={emptyState?.description ?? DEFAULT_COPY.description}
-      buttonLabel={emptyState?.action?.label}
-      buttonIcon={emptyState?.action?.icon}
-      buttonAction={emptyState?.action?.onClick}
     />
   )
 }

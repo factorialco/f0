@@ -37,31 +37,24 @@ All variants share an optional `emptyState` prop — see [Empty states](#empty-s
 
 ## Empty states
 
-When data is empty (empty `series`, empty `data`, all-zero values, or a missing gauge `value`), `F0DataChart` auto-renders a styled empty-state card so you never see a bare axis. No prop is required to enable this — it is the default behavior.
+When data is empty (empty `series`, empty `data`, all-zero values, or a missing gauge `value`), `F0DataChart` auto-renders a faded chart skeleton with a centered message so you never see a bare axis. No prop is required — it is the default behavior.
+
+Default copy is **"No data available"** / **"Try a different date or fewer filters"**.
 
 <Canvas of={EmptyStatesStories.EmptyBar} />
 
-Use the `emptyState` prop to customize copy, attach a CTA, or replace the rendered UI entirely:
+Use the `emptyState` prop to customize copy, replace the UI entirely, or skip detection:
 
 ```ts
 type F0DataChartEmptyStateProps = {
-  /** @default "no-data" */
-  type?: "no-data" | "no-results"
   title?: string
   description?: string
-  action?: { label: string; onClick: () => void; icon?: IconType }
   /** Render-prop escape hatch — replaces the entire UI. */
   render?: () => ReactNode
   /** Skip empty detection and render the chart as usual. */
   disabled?: boolean
 }
 ```
-
-### No results + clear filters
-
-The most common analytics case: filters are active and returned nothing. Switch the `type` to `"no-results"` and pass an `action` to expose a clear-filters CTA.
-
-<Canvas of={EmptyStatesStories.NoResultsWithClearFilters} />
 
 ### Custom copy
 

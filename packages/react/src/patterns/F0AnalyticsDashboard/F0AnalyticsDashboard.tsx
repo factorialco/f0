@@ -113,13 +113,6 @@ export const F0AnalyticsDashboard = <
   const [isItemFullscreen, setIsItemFullscreen] = useState(false)
   const fillHeight = isSingleItem || isItemFullscreen
 
-  // Reset both filter sets so empty-state "Clear filters" CTAs in chart
-  // widgets can wipe the active filtering and let the data come back.
-  const handleClearFilters = () => {
-    setCurrentFilters({} as FiltersState<Filters>)
-    setCurrentNavigationFilters(initialNavState)
-  }
-
   return (
     <div
       className={cn("flex flex-col gap-5 pb-10", fillHeight && "h-full pb-0")}
@@ -174,7 +167,6 @@ export const F0AnalyticsDashboard = <
           onTransformChart={onTransformChart}
           resetKey={resetKey}
           onFullscreenChange={setIsItemFullscreen}
-          onClearFilters={handleClearFilters}
         />
       </div>
     </div>

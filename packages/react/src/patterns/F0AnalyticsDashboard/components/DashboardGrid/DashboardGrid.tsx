@@ -75,11 +75,6 @@ interface DashboardGridProps<Filters extends FiltersDefinition> {
    * item fills the remaining viewport without producing scroll.
    */
   onFullscreenChange?: (isFullscreen: boolean) => void
-  /**
-   * Reset all dashboard filters. Threaded down to chart empty states so the
-   * "Clear filters" CTA can wipe the active filter set.
-   */
-  onClearFilters?: () => void
 }
 
 // ─── Component ──────────────────────────────────────────────────
@@ -99,7 +94,6 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
   resetKey,
   onTransformChart,
   onFullscreenChange,
-  onClearFilters,
 }: DashboardGridProps<Filters>) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isNarrow, setIsNarrow] = useState(false)
@@ -373,7 +367,6 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
           editMode={editMode}
           onDelete={handleDelete}
           onTransformChart={onTransformChart}
-          onClearFilters={onClearFilters}
           isFullscreen
         />
       </div>
@@ -395,7 +388,6 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
             editMode={editMode}
             onDelete={handleDelete}
             onTransformChart={onTransformChart}
-            onClearFilters={onClearFilters}
             isFullscreen
             onFullscreenChange={(fs) =>
               setFullscreenItemId(fs ? fullscreenItemId : null)
@@ -464,7 +456,6 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
                       editMode={editMode}
                       onDelete={handleDelete}
                       onTransformChart={onTransformChart}
-                      onClearFilters={onClearFilters}
                       onFullscreenChange={(fs) =>
                         setFullscreenItemId(fs ? id : null)
                       }
@@ -753,7 +744,6 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
   onTransformChart,
   isFullscreen,
   onFullscreenChange,
-  onClearFilters,
 }: {
   item: DashboardItemType<Filters>
   filters: FiltersState<Filters>
@@ -767,7 +757,6 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
   ) => void
   isFullscreen?: boolean
   onFullscreenChange?: (fullscreen: boolean) => void
-  onClearFilters?: () => void
 }) {
   switch (item.type) {
     case "chart":
@@ -781,7 +770,6 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           onTransformChart={onTransformChart}
           isFullscreen={isFullscreen}
           onFullscreenChange={onFullscreenChange}
-          onClearFilters={onClearFilters}
         />
       )
     case "metric":

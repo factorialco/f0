@@ -138,30 +138,15 @@ const emptyItems: DashboardItem<typeof dashboardFilters>[] = [
 
 /**
  * Mirrors the bug case in the screenshot: every chart returns no data.
- * Without filters, the empty state shows the "no-data" copy with the
- * default chart-type illustration — instead of bare axes.
+ * Each tile shows a faded skeleton of its chart variant with the default
+ * "No data available" / "Try a different date or fewer filters" message —
+ * instead of bare axes.
  */
 export const EmptyDashboard: Story = {
   render: () => (
     <F0AnalyticsDashboard
       filters={dashboardFilters}
       presets={dashboardPresets}
-      items={emptyItems}
-    />
-  ),
-}
-
-/**
- * Same empty data but the user has applied filters — the empty state now
- * shows the "no-results" copy and a "Clear filters" button that resets
- * everything (try selecting a department then clicking the button).
- */
-export const NoResultsForFilters: Story = {
-  render: () => (
-    <F0AnalyticsDashboard
-      filters={dashboardFilters}
-      presets={dashboardPresets}
-      defaultFilters={{ department: ["Engineering"] }}
       items={emptyItems}
     />
   ),

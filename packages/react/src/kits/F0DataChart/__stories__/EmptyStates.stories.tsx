@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { useState } from "react"
-
 import { F0DataChart } from "../index"
 import { ChartDecorator } from "./decorators"
 
@@ -14,7 +12,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "When `F0DataChart` receives empty data (empty `series`, empty `data`, all-zero values, or missing `value` for gauges), it auto-renders a styled empty-state card so the chart never appears as a bare axis. Use the `emptyState` prop to override copy, attach a CTA, or escape-hatch with a custom render.",
+          "When `F0DataChart` receives empty data (empty `series`, empty `data`, all-zero values, or missing `value` for gauges), it auto-renders a faded chart skeleton + centered message so the chart never appears as a bare axis. Use the `emptyState` prop to override copy, escape-hatch with a custom render, or skip detection entirely.",
       },
     },
   },
@@ -65,32 +63,6 @@ export const EmptyHeatmap: Story = {
 // ---------------------------------------------------------------------------
 // Behavior showcases
 // ---------------------------------------------------------------------------
-
-/**
- * `type: "no-results"` swaps the copy to "No results match your filters" and
- * supports an action for clearing them. This is the typical analytics
- * dashboard scenario — a date filter returned zero rows.
- */
-export const NoResultsWithClearFilters: Story = {
-  render: (args) => {
-    const [hasFilters, setHasFilters] = useState(true)
-    return (
-      <F0DataChart
-        {...args}
-        type="bar"
-        categories={hasFilters ? [] : ["Q1", "Q2"]}
-        series={hasFilters ? [] : [{ name: "Revenue", data: [120, 180] }]}
-        emptyState={{
-          type: "no-results",
-          action: {
-            label: "Clear filters",
-            onClick: () => setHasFilters(false),
-          },
-        }}
-      />
-    )
-  },
-}
 
 /** Override `title` and `description` to surface domain-specific copy. */
 export const CustomCopy: Story = {

@@ -1,7 +1,5 @@
 import { forwardRef, type ReactNode } from "react"
 
-import { F0Button } from "@/components/F0Button"
-import { IconType } from "@/components/F0Icon"
 import { withDataTestId } from "@/lib/data-testid"
 
 import type { F0DataChartProps } from "../../types"
@@ -21,10 +19,6 @@ export interface DataChartEmptyStateProps {
   content: string
   /** Optional supporting copy shown below the headline. */
   description?: string
-  /** Optional CTA button label. */
-  buttonLabel?: string
-  buttonIcon?: IconType
-  buttonAction?: () => void
   /** Drives the background skeleton illustration. */
   chartType: F0DataChartProps["type"]
 }
@@ -48,10 +42,7 @@ const skeletonByType: Record<F0DataChartProps["type"], () => ReactNode> = {
 const _DataChartEmptyState = forwardRef<
   HTMLDivElement,
   DataChartEmptyStateProps
->(function DataChartEmptyState(
-  { content, description, buttonLabel, buttonIcon, buttonAction, chartType },
-  ref
-) {
+>(function DataChartEmptyState({ content, description, chartType }, ref) {
   return (
     <div
       ref={ref}
@@ -62,12 +53,18 @@ const _DataChartEmptyState = forwardRef<
         disables the `animate-pulse` baked into both the skeleton wrappers
         and the underlying `<Skeleton>` primitives. The lack of pulse is
         what tells the user "this isn't loading, it's empty".
+
+        We cap the skeleton size so a fullscreen dashboard tile doesn't
+        stretch the illustration to absurd proportions. The wrapper is
+        centered absolutely; on small chart cards it still fills normally.
       */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-50 [&_*]:animate-none"
+        className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-50 [&_*]:animate-none"
       >
-        {skeletonByType[chartType]()}
+        <div className="h-full max-h-[360px] w-full max-w-[720px]">
+          {skeletonByType[chartType]()}
+        </div>
       </div>
       <div className="relative flex flex-col items-center gap-1 px-6 text-center">
         <p className="text-lg font-medium text-f1-foreground">{content}</p>
@@ -75,16 +72,6 @@ const _DataChartEmptyState = forwardRef<
           <p className="text-md max-w-sm text-f1-foreground-secondary">
             {description}
           </p>
-        )}
-        {buttonLabel && (
-          <div className="mt-3">
-            <F0Button
-              label={buttonLabel}
-              icon={buttonIcon}
-              variant="default"
-              onClick={buttonAction}
-            />
-          </div>
         )}
       </div>
     </div>

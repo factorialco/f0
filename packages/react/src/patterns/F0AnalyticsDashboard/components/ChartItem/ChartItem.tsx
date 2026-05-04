@@ -396,21 +396,6 @@ interface ChartItemProps<Filters extends FiltersDefinition> {
   ) => void
   isFullscreen?: boolean
   onFullscreenChange?: (fullscreen: boolean) => void
-  /** Reset all dashboard filters. Wired into the empty-state CTA when filters are active. */
-  onClearFilters?: () => void
-}
-
-/**
- * Returns true when at least one filter is set — i.e. the empty result is
- * likely caused by user filtering rather than the dataset being empty.
- */
-function hasActiveFilters(filters: Record<string, unknown>): boolean {
-  return Object.values(filters).some((v) => {
-    if (v == null || v === "") return false
-    if (Array.isArray(v)) return v.length > 0
-    if (typeof v === "object") return Object.keys(v).length > 0
-    return true
-  })
 }
 
 export function ChartItem<Filters extends FiltersDefinition>({
@@ -422,7 +407,6 @@ export function ChartItem<Filters extends FiltersDefinition>({
   onTransformChart,
   isFullscreen,
   onFullscreenChange,
-  onClearFilters,
 }: ChartItemProps<Filters>) {
   const translations = useI18n()
   const [viewMode, setViewMode] = useState<"chart" | "table">("chart")
@@ -451,19 +435,8 @@ export function ChartItem<Filters extends FiltersDefinition>({
     [actions, downloadActions]
   )
 
-  // No fabricated error when data is absent — we now render a proper empty
-  // state inside the body (filter-aware when filters are active).
-  const filtersActive = hasActiveFilters(filters as Record<string, unknown>)
-  const emptyStateConfig = {
-    type: filtersActive ? ("no-results" as const) : ("no-data" as const),
-    action:
-      filtersActive && onClearFilters
-        ? {
-            label: translations.collections.emptyStates.noResults.clearFilters,
-            onClick: onClearFilters,
-          }
-        : undefined,
-  }
+  // No fabricated error when data is absent — `F0DataChart` (or the explicit
+  // fallback below for `!data`) renders a proper empty state instead.
 
   // Determine which chart type options are available for this chart
   const currentOrientation =
@@ -551,16 +524,12 @@ export function ChartItem<Filters extends FiltersDefinition>({
           <div ref={chartContainerRef} className="h-full w-full px-4 py-3">
             <F0DataChart
               {...buildChartProps(item as DashboardChartItem, data)}
-              emptyState={emptyStateConfig}
             />
           </div>
         )
       ) : !isLoading ? (
         <div className="h-full w-full px-4 py-3">
-          <DataChartEmptyStateView
-            chartType={item.chart.type}
-            emptyState={emptyStateConfig}
-          />
+          <DataChartEmptyStateView chartType={item.chart.type} />
         </div>
       ) : null}
     </DashboardItem>

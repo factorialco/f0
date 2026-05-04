@@ -1,8 +1,6 @@
 import type * as echarts from "echarts"
 import type { ReactNode } from "react"
 
-import type { IconType } from "@/components/F0Icon"
-
 import type { ChartColorToken } from "./utils/colors"
 
 // ---------------------------------------------------------------------------
@@ -13,31 +11,14 @@ import type { ChartColorToken } from "./utils/colors"
  * Configuration for the empty state shown when a chart has no data.
  *
  * `F0DataChart` auto-detects empty data across all variants and renders a
- * default empty-state card. Use this prop to customize the copy, attach an
- * action (typically "Clear filters" for a `no-results` state), or fully
- * replace the rendered UI.
+ * default empty state. Use this prop to customize the copy, fully replace
+ * the rendered UI via `render`, or skip detection via `disabled`.
  */
 export interface F0DataChartEmptyStateProps {
-  /**
-   * Discriminates the message tone. `no-data` is the default (e.g. dataset
-   * is empty); `no-results` signals "filters returned nothing" and is the
-   * usual case for showing a clear-filters action.
-   * @default "no-data"
-   */
-  type?: "no-data" | "no-results"
   /** Override the default headline. */
   title?: string
   /** Override the default supporting copy. */
   description?: string
-  /**
-   * Optional CTA button. Typical use: `{ label: "Clear filters", onClick }`
-   * for a `type: "no-results"` empty state.
-   */
-  action?: {
-    label: string
-    onClick: () => void
-    icon?: IconType
-  }
   /**
    * Render-prop escape hatch — when provided, replaces the entire empty
    * state UI. Still gated by the empty-data detection.
