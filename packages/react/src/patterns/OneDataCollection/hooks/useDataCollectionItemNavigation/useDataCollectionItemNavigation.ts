@@ -36,6 +36,11 @@ type PendingSnapshotReset = {
   canUseCurrentData: boolean
 }
 
+type PendingSnapshotNavigation = {
+  requestedAtVersion: number
+  sawLoading: boolean
+}
+
 type SnapshotData<R extends RecordType> = {
   data: Data<R>
   paginationInfo: DataCollectionItemNavigationDataState<R>["paginationInfo"]
@@ -189,6 +194,9 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
   const previousSnapshotKey = useRef(effectiveSnapshotKey)
   const handledResetSnapshotKey = useRef(resetSnapshotKey)
   const pendingSnapshotReset = useRef<PendingSnapshotReset | null>(null)
+  const pendingSnapshotNavigation = useRef<PendingSnapshotNavigation | null>(
+    null
+  )
   const snapshotResetTimeout = useRef<ReturnType<typeof setTimeout> | null>(
     null
   )
@@ -237,14 +245,26 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
   const stateData = dataState?.data ?? (emptyData as Data<R>)
 
   const resetSnapshot = useCallback(() => {
+    pendingSnapshotNavigation.current = null
     setResetSnapshotKey((key) => key + 1)
   }, [])
+
+  const hasPendingSnapshotNavigationData = Boolean(
+    pendingSnapshotNavigation.current &&
+    snapshotData &&
+    dataState &&
+    !dataState.isLoading &&
+    !dataState.isLoadingMore &&
+    (shouldReplaceSnapshotForPagination(snapshotData, dataState) ||
+      dataState.data.records.length > snapshotData.data.records.length)
+  )
 
   useEffect(() => clearSnapshotResetTimeout, [clearSnapshotResetTimeout])
 
   useEffect(() => {
     if (!dataState || effectiveSnapshotKey == null) {
       pendingSnapshotReset.current = null
+      pendingSnapshotNavigation.current = null
       clearSnapshotResetTimeout()
       setSnapshotData(null)
       previousSnapshotKey.current = effectiveSnapshotKey
@@ -257,6 +277,7 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
 
       handledResetSnapshotKey.current = resetSnapshotKey
       pendingSnapshotReset.current = null
+      pendingSnapshotNavigation.current = null
       clearSnapshotResetTimeout()
       setSnapshotData(createSnapshot(dataState))
       return
@@ -274,6 +295,32 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
       }
       scheduleSnapshotResetAttempt(effectiveSnapshotKey)
       return
+    }
+
+    const pendingNavigation = pendingSnapshotNavigation.current
+
+    if (pendingNavigation) {
+      if (dataState.isLoading || dataState.isLoadingMore) {
+        pendingNavigation.sawLoading = true
+        return
+      }
+
+      if (
+        snapshotData &&
+        (shouldReplaceSnapshotForPagination(snapshotData, dataState) ||
+          dataState.data.records.length > snapshotData.data.records.length)
+      ) {
+        pendingSnapshotNavigation.current = null
+        setSnapshotData(createSnapshot(dataState))
+        return
+      }
+
+      if (
+        pendingNavigation.sawLoading ||
+        dataStateVersion > pendingNavigation.requestedAtVersion
+      ) {
+        pendingSnapshotNavigation.current = null
+      }
     }
 
     if (dataState.isLoading || dataState.isLoadingMore) {
@@ -322,13 +369,12 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
 
     setSnapshotData((currentSnapshot) => {
       if (!currentSnapshot) {
+        if (dataState.data.records.length === 0) return currentSnapshot
+
         return createSnapshot(dataState)
       }
       const effectiveIdProvider =
         idProvider ?? dataState.source.idProvider ?? defaultIdProvider
-      if (shouldReplaceSnapshotForPagination(currentSnapshot, dataState)) {
-        return createSnapshot(dataState)
-      }
       const refreshedSnapshotData = refreshSnapshotData(
         currentSnapshot.data,
         dataState.data,
@@ -337,20 +383,24 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
       if (
         dataState.data.records.length <= currentSnapshot.data.records.length
       ) {
-        if (
-          refreshedSnapshotData === currentSnapshot.data &&
-          currentSnapshot.paginationInfo === dataState.paginationInfo
-        ) {
+        if (refreshedSnapshotData === currentSnapshot.data) {
           return currentSnapshot
         }
 
         return {
           ...currentSnapshot,
           data: refreshedSnapshotData,
-          paginationInfo: dataState.paginationInfo,
         }
       }
-      return createSnapshot(dataState)
+
+      if (refreshedSnapshotData === currentSnapshot.data) {
+        return currentSnapshot
+      }
+
+      return {
+        ...currentSnapshot,
+        data: refreshedSnapshotData,
+      }
     })
   }, [
     clearSnapshotResetTimeout,
@@ -364,9 +414,12 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
     snapshotResetAttempt,
   ])
 
-  const navigationData = snapshotData?.data ?? stateData
-  const navigationPaginationInfo =
-    snapshotData?.paginationInfo ?? dataState?.paginationInfo ?? null
+  const navigationData = hasPendingSnapshotNavigationData
+    ? (dataState?.data ?? stateData)
+    : (snapshotData?.data ?? stateData)
+  const navigationPaginationInfo = hasPendingSnapshotNavigationData
+    ? (dataState?.paginationInfo ?? null)
+    : (snapshotData?.paginationInfo ?? dataState?.paginationInfo ?? null)
 
   const navigation = useDataSourceItemNavigation<R>({
     dataSource: dataState?.source ?? {},
@@ -382,8 +435,39 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
     onActiveItemChange,
   })
 
+  const startPendingSnapshotNavigation = useCallback(() => {
+    if (effectiveSnapshotKey == null || snapshotData == null) return
+    pendingSnapshotNavigation.current = {
+      requestedAtVersion: dataStateVersion,
+      sawLoading: false,
+    }
+  }, [dataStateVersion, effectiveSnapshotKey, snapshotData])
+
+  const goToNext = useCallback(() => {
+    if (
+      navigation.hasNext &&
+      navigation.nextItem === null &&
+      !navigation.isNavigating
+    ) {
+      startPendingSnapshotNavigation()
+    }
+    navigation.goToNext()
+  }, [navigation, startPendingSnapshotNavigation])
+
+  const goToPrevious = useCallback(() => {
+    if (
+      navigation.hasPrevious &&
+      navigation.previousItem === null &&
+      !navigation.isNavigating
+    ) {
+      startPendingSnapshotNavigation()
+    }
+    navigation.goToPrevious()
+  }, [navigation, startPendingSnapshotNavigation])
+
   const openItem = useCallback(
     (id: DataSourceItemId) => {
+      pendingSnapshotNavigation.current = null
       if (effectiveSnapshotMode === "session") {
         setSessionSnapshotKey((key) => key + 1)
       }
@@ -394,6 +478,7 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
 
   const closeItem = useCallback(() => {
     pendingSnapshotReset.current = null
+    pendingSnapshotNavigation.current = null
     clearSnapshotResetTimeout()
     setSnapshotData(null)
     if (effectiveSnapshotMode === "session") {
@@ -414,17 +499,19 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
       nextItem: navigation.nextItem,
       canGoPrevious: navigation.hasPrevious && !navigation.isNavigating,
       canGoNext: navigation.hasNext && !navigation.isNavigating,
-      goToPrevious: navigation.goToPrevious,
-      goToNext: navigation.goToNext,
+      goToPrevious,
+      goToNext,
       isNavigating: navigation.isNavigating,
       previousItemUrl: navigation.previousItemUrl,
       nextItemUrl: navigation.nextItemUrl,
     }
-  }, [navigation])
+  }, [goToNext, goToPrevious, navigation])
 
   return useMemo(
     () => ({
       ...navigation,
+      goToNext,
+      goToPrevious,
       isReady: dataState !== null,
       controls,
       openItem,
@@ -436,6 +523,8 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
       navigation,
       dataState,
       controls,
+      goToNext,
+      goToPrevious,
       openItem,
       closeItem,
       resetSnapshot,

@@ -72,12 +72,7 @@ type ItemNavigationPerson = {
   name: string
 }
 
-type ItemNavigationFetchData = (
-  options: DataCollectionPaginatedFetchOptions<
-    FiltersDefinition,
-    NavigationFiltersDefinition
-  >
-) => {
+type ItemNavigationFetchResult = {
   records: ItemNavigationPerson[]
   total: number
   perPage: number
@@ -85,6 +80,13 @@ type ItemNavigationFetchData = (
   cursor: string | null
   hasMore: boolean
 }
+
+type ItemNavigationFetchData = (
+  options: DataCollectionPaginatedFetchOptions<
+    FiltersDefinition,
+    NavigationFiltersDefinition
+  >
+) => ItemNavigationFetchResult | Promise<ItemNavigationFetchResult>
 
 const itemNavigationColumns = [
   { label: "Name", render: (item: ItemNavigationPerson) => item.name },
@@ -144,6 +146,9 @@ const ItemNavigationStatus = ({
         {itemNavigation.controls?.totalCount ?? "none"}
       </div>
       <div data-testid="next-url">{itemNavigation.nextItemUrl ?? "none"}</div>
+      <div data-testid="is-navigating">
+        {String(itemNavigation.isNavigating)}
+      </div>
       <div data-testid="ready">{String(itemNavigation.isReady)}</div>
       <button type="button" onClick={itemNavigation.goToNext}>
         Next item
@@ -362,6 +367,37 @@ const ItemNavigationSessionSnapshotStatus = () => {
   )
 }
 
+const ItemNavigationBackgroundGrowthStatus = ({
+  snapshotMode,
+}: {
+  snapshotMode: "manual" | "session"
+}) => {
+  const [records, setRecords] = useState(itemNavigationPeople.slice(0, 3))
+
+  const fetchData: ItemNavigationFetchData = () => ({
+    records,
+    total: records.length,
+    perPage: records.length || 1,
+    type: "infinite-scroll" as const,
+    cursor: null,
+    hasMore: false,
+  })
+
+  return (
+    <>
+      <button type="button" onClick={() => setRecords(itemNavigationPeople)}>
+        Add background records
+      </button>
+      <ItemNavigationStatus
+        fetchData={fetchData}
+        defaultActiveItemId={2}
+        snapshotMode={snapshotMode}
+        snapshotKey={snapshotMode === "manual" ? "stable" : undefined}
+      />
+    </>
+  )
+}
+
 const ItemNavigationLiveSnapshotStatus = () => {
   const [records, setRecords] = useState(itemNavigationPeople.slice(0, 3))
 
@@ -483,6 +519,111 @@ const ItemNavigationLoadingSnapshotStatus = () => {
       >
         Finish with smaller data
       </button>
+    </>
+  )
+}
+
+const ItemNavigationPaginationFreezeStatus = () => {
+  const [records, setRecords] = useState(itemNavigationPeople.slice(0, 5))
+  const itemNavigation = useDataCollectionItemNavigation<ItemNavigationPerson>({
+    defaultActiveItemId: 5,
+    snapshotMode: "session",
+    idProvider: (item) => item.id,
+  })
+
+  const fetchData: ItemNavigationFetchData = ({ pagination }) => {
+    const cursor = pagination.cursor ? Number(pagination.cursor) : 0
+    const pageRecords = records.slice(cursor, cursor + 5)
+    const nextCursor = cursor + pageRecords.length
+
+    return {
+      records: pageRecords,
+      total: records.length,
+      perPage: 5,
+      type: "infinite-scroll" as const,
+      cursor: nextCursor < records.length ? String(nextCursor) : null,
+      hasMore: nextCursor < records.length,
+    }
+  }
+
+  const dataSource = useDataCollectionSource<ItemNavigationPerson>(
+    {
+      dataAdapter: {
+        paginationType: "infinite-scroll",
+        perPage: 5,
+        fetchData,
+      },
+    },
+    [records]
+  )
+
+  return (
+    <>
+      <div data-testid="active-name">
+        {itemNavigation.activeItem?.name ?? "none"}
+      </div>
+      <div data-testid="can-go-next">{String(itemNavigation.hasNext)}</div>
+      <div data-testid="controls-total-count">
+        {itemNavigation.controls?.totalCount ?? "none"}
+      </div>
+      <button
+        type="button"
+        onClick={() => {
+          setRecords(itemNavigationPeople.slice(0, 3))
+        }}
+      >
+        Remove live records
+      </button>
+      <OneDataCollection
+        source={dataSource}
+        storage={false}
+        itemNavigation={itemNavigation}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              columns: itemNavigationColumns,
+            },
+          },
+        ]}
+      />
+    </>
+  )
+}
+
+const ItemNavigationFailedLoadMoreStatus = () => {
+  const [shouldFail, setShouldFail] = useState(false)
+  const fetchData = vi.fn<ItemNavigationFetchData>(async ({ pagination }) => {
+    const cursor = pagination.cursor ? Number(pagination.cursor) : 0
+
+    if (shouldFail && cursor > 0) {
+      throw new Error("Failed to load more")
+    }
+
+    const pageRecords = itemNavigationPeople.slice(cursor, cursor + 2)
+    const nextCursor = cursor + pageRecords.length
+
+    return {
+      records: pageRecords,
+      total: itemNavigationPeople.length,
+      perPage: 2,
+      type: "infinite-scroll" as const,
+      cursor:
+        nextCursor < itemNavigationPeople.length ? String(nextCursor) : null,
+      hasMore: nextCursor < itemNavigationPeople.length,
+    }
+  })
+
+  return (
+    <>
+      <button type="button" onClick={() => setShouldFail(true)}>
+        Make load more fail
+      </button>
+      <ItemNavigationStatus
+        fetchData={fetchData}
+        defaultActiveItemId={2}
+        snapshotMode="session"
+      />
     </>
   )
 }
@@ -979,6 +1120,86 @@ describe("Collections", () => {
     await waitFor(() => {
       expect(screen.getByTestId("active-name")).toHaveTextContent("none")
     })
+    expect(screen.getByTestId("loaded-count")).toHaveTextContent("2")
+  })
+
+  test.each(["manual", "session"] as const)(
+    "does not grow %s snapshots from background collection growth",
+    async (snapshotMode) => {
+      render(
+        <TestWrapper>
+          <ItemNavigationBackgroundGrowthStatus snapshotMode={snapshotMode} />
+        </TestWrapper>
+      )
+
+      await waitFor(() => {
+        expect(screen.getByTestId("active-name")).toHaveTextContent("Bert")
+      })
+
+      expect(screen.getByTestId("loaded-count")).toHaveTextContent("3")
+      expect(screen.getByTestId("controls-total-count")).toHaveTextContent("3")
+
+      await userEvent.click(
+        screen.getByRole("button", { name: "Add background records" })
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("Eli")).toBeInTheDocument()
+      })
+
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Bert")
+      expect(screen.getByTestId("loaded-count")).toHaveTextContent("3")
+      expect(screen.getByTestId("controls-total-count")).toHaveTextContent("3")
+    }
+  )
+
+  test("keeps frozen snapshot pagination metadata after live data shrinks", async () => {
+    render(
+      <TestWrapper>
+        <ItemNavigationPaginationFreezeStatus />
+      </TestWrapper>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Eli")
+    })
+
+    expect(screen.getByTestId("controls-total-count")).toHaveTextContent("5")
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Remove live records" })
+    )
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Eli")).toHaveLength(1)
+    })
+
+    expect(screen.getByTestId("active-name")).toHaveTextContent("Eli")
+    expect(screen.getByTestId("can-go-next")).toHaveTextContent("false")
+    expect(screen.getByTestId("controls-total-count")).toHaveTextContent("5")
+  })
+
+  test("clears pending session navigation after a failed loadMore", async () => {
+    render(
+      <TestWrapper>
+        <ItemNavigationFailedLoadMoreStatus />
+      </TestWrapper>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Bert")
+    })
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Make load more fail" })
+    )
+    await userEvent.click(screen.getByRole("button", { name: "Next item" }))
+
+    await waitFor(() => {
+      expect(screen.getByTestId("is-navigating")).toHaveTextContent("false")
+    })
+
+    expect(screen.getByTestId("active-name")).toHaveTextContent("Bert")
     expect(screen.getByTestId("loaded-count")).toHaveTextContent("2")
   })
 

@@ -108,7 +108,6 @@ export const ListCollection = <
   const { isLoading } = source
 
   useEffect(() => {
-    if (error) return
     onDataStateChange?.({
       source: {
         idProvider: source.idProvider,
