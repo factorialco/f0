@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.472.0](https://github.com/factorialco/f0/compare/f0-react-v1.471.2...f0-react-v1.472.0) (2026-05-04)
+
+
+### Features
+
+* add ExpenseEntityRef component for entity-ref hover cards ([#4073](https://github.com/factorialco/f0/issues/4073)) ([ce2662e](https://github.com/factorialco/f0/commit/ce2662ebb00de90eee295785198f15481575d274))
+
 ## [1.471.2](https://github.com/factorialco/f0/compare/f0-react-v1.471.1...f0-react-v1.471.2) (2026-05-04)
 
 
