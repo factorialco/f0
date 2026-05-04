@@ -382,6 +382,7 @@ const e = {
     unsavedChanges: "Unsaved changes",
     saveChanges: "Save changes",
     discardChanges: "Discard",
+    saveAsChanges: "Save as",
     exportTable: "Download table",
     generatedTableFilename: "OneGeneratedTable",
     feedbackModal: {
@@ -416,10 +417,19 @@ const e = {
     view: "View",
     tools: "Tools",
     entityRef: {
+      candidate: {
+        source: "Source",
+        applied: "Applied on"
+      },
+      requisition: {
+        lineManager: "Line manager",
+        reason: "Reason",
+        status: "Status"
+      },
       jobPosting: {
-        location: "Location",
         vacancies: "Vacancies",
-        published: "Published"
+        published: "Published",
+        status: "Status"
       }
     },
     credits: {
@@ -432,6 +442,7 @@ const e = {
     },
     reportCard: {
       reportLabel: "Report",
+      tableLabel: "Table",
       openButton: "Open"
     },
     formCard: {
@@ -440,6 +451,7 @@ const e = {
     dashboard: {
       save: "Save",
       saveToAnalytics: "Save the dashboard in Analytics",
+      saveTableToAnalytics: "Save the table in Analytics",
       saveAs: "Save as",
       saveDialog: {
         title: "Save dashboard",
@@ -448,13 +460,22 @@ const e = {
         descriptionPlaceholder: "Add a description (optional)",
         save: "Save",
         cancel: "Cancel"
-      }
+      },
+      status: {
+        saved: "Saved",
+        draft: "Draft",
+        unsaved: "Unsaved"
+      },
+      statusLabel: "Status",
+      lastEdited: "Last edited",
+      createdBy: "Created by"
     },
     dataDownload: {
       title: "Download",
       download: "Download {{format}}",
       exportDashboard: "Export dashboard as {{format}}",
-      exporting: "Exporting...",
+      export: "Export",
+      exporting: "Exporting…",
       rows: "{{amount}} rows"
     },
     dashboardItem: {
@@ -485,14 +506,22 @@ const e = {
     removeFile: "Remove",
     fileUploadError: "Upload failed",
     dropFilesHere: "Drop your files here",
+    reply: "Reply",
+    removeQuote: "Remove quote",
     clarifyingQuestion: {
       submit: "Submit",
       next: "Next",
       back: "Back",
+      skip: "Skip",
       typeYourAnswer: "Type your answer…",
       stepOf: "{{current}} of {{total}}",
       custom: "own answer",
-      skipped: "skipped"
+      skipped: "skipped",
+      navHint: {
+        navigate: "navigate",
+        select: "select",
+        cancel: "cancel"
+      }
     },
     growth: {
       demoCard: {
@@ -524,7 +553,11 @@ const e = {
     lineChart: "Line",
     funnel: "Funnel",
     pieChart: "Pie",
-    table: "Table"
+    table: "Table",
+    emptyState: {
+      title: "No data available",
+      description: "Try a different date or fewer filters"
+    }
   },
   select: {
     noResults: "No results found",
@@ -702,7 +735,8 @@ const e = {
       processing: "Processing…",
       uploadFailed: "Upload failed",
       fileTooLarge: "File exceeds {{maxSize}} MB limit",
-      invalidFileType: "File type not accepted. Accepted formats: {{types}}"
+      invalidFileType: "File type not accepted. Accepted formats: {{types}}",
+      maxFilesReached: "Maximum {{maxFiles}} files"
     },
     moreInformation: "More information",
     validation: {

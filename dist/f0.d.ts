@@ -691,12 +691,27 @@ declare type AiChatProviderReturnValue = {
     fileDragOver: boolean;
     /* Excluded from this release type: setFileDragOver */
     /**
+     * Process files that were dropped onto the chat. Delegates to the
+     * `processFiles` callback registered by `ChatTextarea`'s file-attachment
+     * hook. Used by the chat-wide DropOverlay rendered in `SidebarWindow`.
+     */
+    processDroppedFiles: (files: File[]) => void;
+    /* Excluded from this release type: setProcessDroppedFilesFunction */
+    /**
      * Pre-loaded context shown as an empty state in the chat.
      * Prepended to the first user message as `<pending-context>`.
      */
     pendingContext: PendingContext | null;
     /** Set pending context (pass null to clear) */
     setPendingContext: React.Dispatch<React.SetStateAction<PendingContext | null>>;
+    /**
+     * Quoted fragment the user is replying to. Rendered as a chip above the
+     * textarea and, on submit, prepended as a markdown blockquote to the user's
+     * message (plus an invisible `<quote-context>` tag for the agent).
+     */
+    pendingQuote: PendingQuote | null;
+    /** Set the pending quote (pass null to clear). */
+    setPendingQuote: React.Dispatch<React.SetStateAction<PendingQuote | null>>;
 } & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "toolHints" | "credits" | "creditWarning" | "fileAttachments"> & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null;
@@ -704,6 +719,12 @@ declare type AiChatProviderReturnValue = {
     openCanvas: (content: CanvasContent) => void;
     /** Close the canvas panel and restore the previous visualization mode */
     closeCanvas: () => void;
+    /** The currently active mini-game (easter egg), or null */
+    activeGame: "pong" | null;
+    /** Launch a mini-game overlay */
+    openGame: (game: "pong") => void;
+    /** Close the active mini-game overlay */
+    closeGame: () => void;
     /** The currently active tool hint, or null if none is selected */
     activeToolHint: AiChatToolHint | null;
     /** Set the active tool hint (pass null to clear) */
@@ -842,6 +863,7 @@ export declare const aiTranslations: {
         readonly unsavedChanges: "Unsaved changes";
         readonly saveChanges: "Save changes";
         readonly discardChanges: "Discard";
+        readonly saveAsChanges: "Save as";
         readonly exportTable: "Download table";
         readonly generatedTableFilename: "OneGeneratedTable";
         readonly feedbackModal: {
@@ -876,10 +898,19 @@ export declare const aiTranslations: {
         readonly view: "View";
         readonly tools: "Tools";
         readonly entityRef: {
+            readonly candidate: {
+                readonly source: "Source";
+                readonly applied: "Applied on";
+            };
+            readonly requisition: {
+                readonly lineManager: "Line manager";
+                readonly reason: "Reason";
+                readonly status: "Status";
+            };
             readonly jobPosting: {
-                readonly location: "Location";
                 readonly vacancies: "Vacancies";
                 readonly published: "Published";
+                readonly status: "Status";
             };
         };
         readonly credits: {
@@ -892,6 +923,7 @@ export declare const aiTranslations: {
         };
         readonly reportCard: {
             readonly reportLabel: "Report";
+            readonly tableLabel: "Table";
             readonly openButton: "Open";
         };
         readonly formCard: {
@@ -900,6 +932,7 @@ export declare const aiTranslations: {
         readonly dashboard: {
             readonly save: "Save";
             readonly saveToAnalytics: "Save the dashboard in Analytics";
+            readonly saveTableToAnalytics: "Save the table in Analytics";
             readonly saveAs: "Save as";
             readonly saveDialog: {
                 readonly title: "Save dashboard";
@@ -909,12 +942,21 @@ export declare const aiTranslations: {
                 readonly save: "Save";
                 readonly cancel: "Cancel";
             };
+            readonly status: {
+                readonly saved: "Saved";
+                readonly draft: "Draft";
+                readonly unsaved: "Unsaved";
+            };
+            readonly statusLabel: "Status";
+            readonly lastEdited: "Last edited";
+            readonly createdBy: "Created by";
         };
         readonly dataDownload: {
             readonly title: "Download";
             readonly download: "Download {{format}}";
             readonly exportDashboard: "Export dashboard as {{format}}";
-            readonly exporting: "Exporting...";
+            readonly export: "Export";
+            readonly exporting: "Exporting…";
             readonly rows: "{{amount}} rows";
         };
         readonly dashboardItem: {
@@ -945,14 +987,22 @@ export declare const aiTranslations: {
         readonly removeFile: "Remove";
         readonly fileUploadError: "Upload failed";
         readonly dropFilesHere: "Drop your files here";
+        readonly reply: "Reply";
+        readonly removeQuote: "Remove quote";
         readonly clarifyingQuestion: {
             readonly submit: "Submit";
             readonly next: "Next";
             readonly back: "Back";
+            readonly skip: "Skip";
             readonly typeYourAnswer: "Type your answer…";
             readonly stepOf: "{{current}} of {{total}}";
             readonly custom: "own answer";
             readonly skipped: "skipped";
+            readonly navHint: {
+                readonly navigate: "navigate";
+                readonly select: "select";
+                readonly cancel: "cancel";
+            };
         };
         readonly growth: {
             readonly demoCard: {
@@ -1499,7 +1549,7 @@ export declare type BooleanRenderIfCondition = BooleanRenderIfBase & ({
 export declare type BorderColorToken = "default" | "secondary" | "bold" | "selected" | "selected-bold" | "critical" | "critical-bold" | "warning" | "warning-bold" | "info" | "info-bold" | "positive" | "positive-bold" | "promote";
 
 /** Border radius tokens from core */
-export declare type BorderRadiusToken = "none" | "2xs" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "full";
+export declare type BorderRadiusToken = "none" | "2xs" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "full";
 
 /** Border style */
 export declare type BorderStyleToken = "solid" | "dashed" | "dotted" | "double" | "none";
@@ -1521,11 +1571,11 @@ declare const boxVariants: (props?: ({
     borderBottom?: "none" | "default" | "thick" | undefined;
     borderLeft?: "none" | "default" | "thick" | undefined;
     borderRight?: "none" | "default" | "thick" | undefined;
-    borderRadius?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "full" | "2xs" | undefined;
-    borderRadiusTopLeft?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "full" | "2xs" | undefined;
-    borderRadiusTopRight?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "full" | "2xs" | undefined;
-    borderRadiusBottomLeft?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "full" | "2xs" | undefined;
-    borderRadiusBottomRight?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "full" | "2xs" | undefined;
+    borderRadius?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "full" | "3xl" | "2xs" | undefined;
+    borderRadiusTopLeft?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "full" | "3xl" | "2xs" | undefined;
+    borderRadiusTopRight?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "full" | "3xl" | "2xs" | undefined;
+    borderRadiusBottomLeft?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "full" | "3xl" | "2xs" | undefined;
+    borderRadiusBottomRight?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "full" | "3xl" | "2xs" | undefined;
     borderStyle?: "none" | "dashed" | "dotted" | "double" | "solid" | undefined;
     background?: "info" | "bold" | "secondary" | "inverse" | "critical" | "accent" | "warning" | "positive" | "promote" | "selected" | "critical-bold" | "transparent" | "overlay" | "primary" | "tertiary" | "inverse-secondary" | "accent-bold" | "info-bold" | "warning-bold" | "positive-bold" | "selected-secondary" | "selected-bold" | undefined;
     width?: SizeToken_2 | undefined;
@@ -1712,6 +1762,11 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      */
     disabled?: boolean;
     /**
+     * If true and disabled is also true, the button retains its normal visual appearance
+     * (no reduced opacity or not-allowed cursor) while still being non-interactive.
+     */
+    withoutDisabledAppearance?: boolean;
+    /**
      * @private
      * If true, the button is visually active or selected (pressed state).
      */
@@ -1786,12 +1841,13 @@ export declare type CalendarView = "day" | "month" | "year" | "week" | "quarter"
  * Profile data for a candidate entity (ATS applicant), resolved asynchronously
  * and displayed in the entity reference hover card.
  */
-declare type CandidateProfile = {
+export declare type CandidateProfile = {
     id: string | number;
     firstName: string;
     lastName: string;
     avatarUrl?: string;
     source?: string;
+    appliedAt?: string;
 };
 
 /**
@@ -2343,6 +2399,13 @@ declare interface ChatDashboardColumn {
 declare interface ChatDashboardConfig {
     /** Dashboard title displayed in the canvas header and chat report card */
     title: string;
+    /**
+     * AI-generated 1–2 sentence summary of what the dashboard shows. Displayed
+     * under the title in the canvas header. Optional at the type level so
+     * legacy persisted dashboards (before the agent started emitting it) still
+     * parse; the agent schema makes it required going forward.
+     */
+    description?: string;
     /** Filter definitions — keys become filter IDs */
     filters?: Record<string, ChatDashboardFilterDefinition>;
     /**
@@ -2654,6 +2717,14 @@ declare interface ClarifyingQuestionState {
     toggleOption: (optionId: string) => void;
     /** Confirm the current step's selection and advance (or submit on final step) */
     confirm: () => void;
+    /** Skip the current step (only valid when the step is optional) */
+    skip: () => void;
+    /**
+     * Cancel the entire clarifying flow. Closes the panel and marks the tool
+     * call as resolved-but-not-completed so it doesn't re-appear on history
+     * reload. Cancellation is silent — no message is sent to the agent.
+     */
+    cancel: () => void;
     /** Go back to the previous step */
     back: () => void;
     /** Set the custom answer text */
@@ -3037,8 +3108,23 @@ export declare const Dashboard: WithDataTestIdReturnType_3<ComponentType<Dashboa
 declare type DashboardCanvasActions = {
     /** Update an existing saved dashboard */
     save: (id: string, category: string, config: ChatDashboardConfig) => Promise<void>;
-    /** Create a new saved dashboard. Returns the new dashboard ID if available. */
-    create: (title: string, description: string, config: ChatDashboardConfig, category?: string) => Promise<string | void>;
+    /**
+     * Create a new saved dashboard. Returns the new dashboard's id and
+     * category so subsequent edits can call `save` (which requires both).
+     * Returning void / undefined leaves the canvas in its current state.
+     */
+    create: (title: string, description: string, config: ChatDashboardConfig, category?: string) => Promise<{
+        id: string;
+        category: string;
+    } | void>;
+    /**
+     * Fetch creator + last-edited metadata for a saved dashboard. The header
+     * calls this lazily, only when the current dashboard has a
+     * `savedDashboardId`. Returning `void` signals "no metadata available" —
+     * the header will skip rendering the avatar and the last-edited row
+     * instead of showing a placeholder.
+     */
+    getMetadata?: (id: string) => Promise<DashboardMetadata | void>;
 };
 
 /**
@@ -3206,6 +3292,42 @@ declare type DashboardItemLayout = {
     y: number;
 };
 
+/**
+ * Creator + last-edited metadata for a saved dashboard. Returned by
+ * `DashboardCanvasActions.getMetadata` so the header can render the author
+ * avatar and the freshness signal only once a dashboard has been persisted.
+ *
+ * `title` and `description` are also returned: once a dashboard has an id
+ * the backend is the source of truth and may diverge from what's stored in
+ * the chat history (e.g. someone renamed the dashboard from the Analytics
+ * list page since this conversation was first opened). The header prefers
+ * these values over the ones baked into `content` / `config`.
+ */
+declare type DashboardMetadata = {
+    /**
+     * Latest persisted title. When present, the header displays this instead
+     * of `content.title` so the chat-history snapshot never shadows the
+     * authoritative backend copy.
+     */
+    title?: string;
+    /**
+     * Latest persisted description. Same rationale as `title` — takes
+     * precedence over `config.description` once the dashboard is saved.
+     */
+    description?: string;
+    creator: {
+        firstName: string;
+        lastName: string;
+        /** Optional avatar image URL. Falls back to initials when omitted. */
+        src?: string;
+    };
+    /**
+     * Last edited timestamp. Accepts `Date` or an ISO-8601 string so host apps
+     * can forward backend payloads verbatim without pre-parsing.
+     */
+    lastEdited: Date | string;
+};
+
 /** Data returned by a metric item's fetchData */
 export declare interface DashboardMetricData {
     /** The main numeric value displayed in large text */
@@ -3254,6 +3376,19 @@ export declare type DataAdapter<R extends RecordType, Filters extends FiltersDef
 declare type DataAttributes_2 = {
     [key: `data-${string}`]: string | undefined;
 };
+
+/**
+ * Resolves an `F0DataChartEmptyStateProps` config (i18n defaults + overrides
+ * + render-prop) into rendered output. Used internally by `F0DataChart` and
+ * reused by dashboard wrappers when data is absent.
+ */
+export declare const DataChartEmptyStateView: ({ chartType, emptyState, }: DataChartEmptyStateViewProps) => JSX_2.Element;
+
+declare interface DataChartEmptyStateViewProps {
+    /** The chart variant — drives the background skeleton illustration. */
+    chartType: F0DataChartProps["type"];
+    emptyState?: F0DataChartEmptyStateProps;
+}
 
 declare type DataCollectionBaseFetchOptions<Filters extends FiltersDefinition, NavigationFilters extends NavigationFiltersDefinition> = BaseFetchOptions<Filters> & DataCollectionExtendFetchOptions<NavigationFilters>;
 
@@ -4121,6 +4256,7 @@ export declare const defaultTranslations: {
         readonly unsavedChanges: "Unsaved changes";
         readonly saveChanges: "Save changes";
         readonly discardChanges: "Discard";
+        readonly saveAsChanges: "Save as";
         readonly exportTable: "Download table";
         readonly generatedTableFilename: "OneGeneratedTable";
         readonly feedbackModal: {
@@ -4155,10 +4291,19 @@ export declare const defaultTranslations: {
         readonly view: "View";
         readonly tools: "Tools";
         readonly entityRef: {
+            readonly candidate: {
+                readonly source: "Source";
+                readonly applied: "Applied on";
+            };
+            readonly requisition: {
+                readonly lineManager: "Line manager";
+                readonly reason: "Reason";
+                readonly status: "Status";
+            };
             readonly jobPosting: {
-                readonly location: "Location";
                 readonly vacancies: "Vacancies";
                 readonly published: "Published";
+                readonly status: "Status";
             };
         };
         readonly credits: {
@@ -4171,6 +4316,7 @@ export declare const defaultTranslations: {
         };
         readonly reportCard: {
             readonly reportLabel: "Report";
+            readonly tableLabel: "Table";
             readonly openButton: "Open";
         };
         readonly formCard: {
@@ -4179,6 +4325,7 @@ export declare const defaultTranslations: {
         readonly dashboard: {
             readonly save: "Save";
             readonly saveToAnalytics: "Save the dashboard in Analytics";
+            readonly saveTableToAnalytics: "Save the table in Analytics";
             readonly saveAs: "Save as";
             readonly saveDialog: {
                 readonly title: "Save dashboard";
@@ -4188,12 +4335,21 @@ export declare const defaultTranslations: {
                 readonly save: "Save";
                 readonly cancel: "Cancel";
             };
+            readonly status: {
+                readonly saved: "Saved";
+                readonly draft: "Draft";
+                readonly unsaved: "Unsaved";
+            };
+            readonly statusLabel: "Status";
+            readonly lastEdited: "Last edited";
+            readonly createdBy: "Created by";
         };
         readonly dataDownload: {
             readonly title: "Download";
             readonly download: "Download {{format}}";
             readonly exportDashboard: "Export dashboard as {{format}}";
-            readonly exporting: "Exporting...";
+            readonly export: "Export";
+            readonly exporting: "Exporting…";
             readonly rows: "{{amount}} rows";
         };
         readonly dashboardItem: {
@@ -4224,14 +4380,22 @@ export declare const defaultTranslations: {
         readonly removeFile: "Remove";
         readonly fileUploadError: "Upload failed";
         readonly dropFilesHere: "Drop your files here";
+        readonly reply: "Reply";
+        readonly removeQuote: "Remove quote";
         readonly clarifyingQuestion: {
             readonly submit: "Submit";
             readonly next: "Next";
             readonly back: "Back";
+            readonly skip: "Skip";
             readonly typeYourAnswer: "Type your answer…";
             readonly stepOf: "{{current}} of {{total}}";
             readonly custom: "own answer";
             readonly skipped: "skipped";
+            readonly navHint: {
+                readonly navigate: "navigate";
+                readonly select: "select";
+                readonly cancel: "cancel";
+            };
         };
         readonly growth: {
             readonly demoCard: {
@@ -4264,6 +4428,10 @@ export declare const defaultTranslations: {
         readonly funnel: "Funnel";
         readonly pieChart: "Pie";
         readonly table: "Table";
+        readonly emptyState: {
+            readonly title: "No data available";
+            readonly description: "Try a different date or fewer filters";
+        };
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -4442,6 +4610,7 @@ export declare const defaultTranslations: {
             readonly uploadFailed: "Upload failed";
             readonly fileTooLarge: "File exceeds {{maxSize}} MB limit";
             readonly invalidFileType: "File type not accepted. Accepted formats: {{types}}";
+            readonly maxFilesReached: "Maximum {{maxFiles}} files";
         };
         readonly moreInformation: "More information";
         readonly validation: {
@@ -4731,7 +4900,7 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
      * stepping (`step`), formatting (`maxDecimals`, `locale`), and units.
      * Falls back to sensible defaults when omitted.
      */
-    numberConfig?: NumberCellConfig;
+    numberConfig?: NumberCellConfig<R>;
 };
 
 declare type EditableTableVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = Omit<TableVisualizationOptions<R, _Filters, Sortings, Summaries>, "columns"> & {
@@ -4833,6 +5002,7 @@ export declare type EntityRefs = {
 export declare type EntityResolvers = {
     person?: (id: string) => Promise<PersonProfile>;
     candidate?: (id: string) => Promise<CandidateProfile>;
+    expense?: (id: string) => Promise<ExpenseProfile>;
     jobPosting?: (id: string) => Promise<JobPostingProfile>;
     requisition?: (id: string) => Promise<RequisitionProfile>;
     vacancy?: (id: string) => Promise<VacancyProfile>;
@@ -4853,6 +5023,7 @@ export declare type EntityResolvers = {
 export declare type EntityUrlBuilders = {
     person?: (id: string) => string;
     candidate?: (id: string) => string;
+    expense?: (id: string) => string;
     jobPosting?: (id: string) => string;
     requisition?: (id: string) => string;
     vacancy?: (id: string) => string;
@@ -4884,6 +5055,17 @@ declare type EventName = "datacollection.filter-change" | "datacollection.sortin
 declare type EventParams = Record<string, EventScalar | Array<EventScalar>>;
 
 declare type EventScalar = string | number | boolean | undefined | null;
+
+/**
+ * Profile data for an expense entity, resolved asynchronously
+ * and displayed in the entity reference hover card.
+ */
+export declare type ExpenseProfile = {
+    id: string | number;
+    description?: string;
+    amount?: string;
+    status?: string;
+};
 
 export declare const experimental: <T extends React.ComponentType<any>>(name: string, component: T) => T;
 
@@ -4971,10 +5153,10 @@ export declare interface F0AiAvailableFormDefinition<TParams extends Record<stri
     schema: F0FormSchema;
     /**
      * Default values for the form fields.
-     * Can be a static object or a function that receives params (supplied by the AI)
-     * and returns the defaults.
+     * Can be a static object, a sync function, or an async function that
+     * receives params (supplied by the AI) and returns the defaults.
      */
-    defaultValues?: Record<string, unknown> | ((params: TParams) => Record<string, unknown>);
+    defaultValues?: Record<string, unknown> | ((params: TParams) => Record<string, unknown> | Promise<Record<string, unknown>>);
     /**
      * Zod schema that describes the params accepted by a functional `defaultValues`.
      * When provided, the AI will see this schema and can supply params.
@@ -5041,6 +5223,8 @@ declare interface F0AiFormDescription {
     isDirty: boolean;
     /** JSON Schema of defaultValuesParams (only for forms with defaultValuesParamsSchema) */
     defaultValuesParamsSchema?: Record<string, unknown>;
+    /** The params most recently used to pre-populate this form (set when fillForm is called with defaultValuesParams) */
+    defaultValuesParams?: Record<string, unknown>;
 }
 
 /**
@@ -5061,6 +5245,8 @@ export declare interface F0AiFormEntry {
     defaultValuesParamsSchema?: ZodType;
     /** Raw defaultValues function that accepts params (from rendered forms with defaultValuesParamsSchema) */
     defaultValuesFn?: (params: Record<string, unknown>) => Promise<Record<string, unknown>>;
+    /** The params most recently used to pre-populate this form (updated via updateActiveFormDefaultValuesParams through coagent state sync) */
+    defaultValuesParams?: Record<string, unknown>;
     /** Field names explicitly set via setValue/setValues on a virtual ref */
     dirtyFields?: Set<string>;
     /** Consumer submit callback (from availableFormDefinition). Preserved across virtual ↔ rendered transitions. */
@@ -5096,12 +5282,24 @@ declare interface F0AiFormRegistryContextValue {
     };
     /** Clear the active co-editing form (e.g. after submit) */
     clearActiveForm: () => void;
+    /** Write defaultValuesParams onto a registry entry (called when Mastra sets them in shared state) */
+    updateActiveFormDefaultValuesParams: (formName: string, params: Record<string, unknown> | undefined) => void;
     /** Bump the fill-version counter for a form (called after fillForm succeeds) */
     incrementFillVersion: (formName: string) => void;
     /** Reset the fill-version counter for a form (e.g. after submit) */
     resetFillVersion: (formName: string) => void;
     /** Get the fill-version counter for a form (0 = never filled) */
     getFillVersion: (formName: string) => number;
+    /** Whether a form's async default values have been resolved (true unless actively resolving) */
+    isDefaultValuesResolved: (formName: string) => boolean;
+    /** Mark a form as currently resolving async default values (fills will be queued) */
+    markDefaultValuesResolving: (formName: string) => void;
+    /** Mark a form's default values as resolved and flush any queued fill actions */
+    markDefaultValuesResolved: (formName: string, paramsKey?: string | null) => void;
+    /** Queue a fill callback to run after a form's defaults are resolved */
+    queueFillAction: (formName: string, action: () => void) => void;
+    /** Whether a form's async defaults have ever been resolved (persists across canvas close/reopen) */
+    hasDefaultValuesEverResolved: (formName: string, paramsKey?: string | null) => boolean;
 }
 
 /**
@@ -6045,7 +6243,7 @@ export declare interface F0DataChartBarSeries {
     color?: ChartColorToken;
 }
 
-declare interface F0DataChartBaseProps {
+declare interface F0DataChartBaseProps extends F0DataChartCommonProps {
     /** Labels for the category axis (one per data point) */
     categories: string[];
     /** Show the legend below the chart. @default true */
@@ -6060,6 +6258,39 @@ declare interface F0DataChartBaseProps {
     categoryFormatter?: (value: string) => string;
     /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
     echartsOptions?: Partial<echarts_2.EChartsOption>;
+}
+
+/**
+ * Props shared by every `F0DataChart` variant.
+ */
+declare interface F0DataChartCommonProps {
+    /** Customize or opt out of the empty state shown when data is empty. */
+    emptyState?: F0DataChartEmptyStateProps;
+}
+
+/**
+ * Configuration for the empty state shown when a chart has no data.
+ *
+ * `F0DataChart` auto-detects empty data across all variants and renders a
+ * default empty state. Use this prop to customize the copy, fully replace
+ * the rendered UI via `render`, or skip detection via `disabled`.
+ */
+export declare interface F0DataChartEmptyStateProps {
+    /** Override the default headline. */
+    title?: string;
+    /** Override the default supporting copy. */
+    description?: string;
+    /**
+     * Render-prop escape hatch — when provided, replaces the entire empty
+     * state UI. Still gated by the empty-data detection.
+     */
+    render?: () => ReactNode;
+    /**
+     * Skip empty-data detection and render the chart as usual. Use when zero
+     * values are legitimate (e.g. a "0 errors per day" timeline).
+     * @default false
+     */
+    disabled?: boolean;
 }
 
 /**
@@ -6081,7 +6312,7 @@ export declare interface F0DataChartFunnelDataPoint {
  * Funnels do NOT use category/value axes — stage names come from the data
  * points themselves. This interface is separate from `F0DataChartBaseProps`.
  */
-export declare interface F0DataChartFunnelProps {
+export declare interface F0DataChartFunnelProps extends F0DataChartCommonProps {
     /** Chart type */
     type: "funnel";
     /** The funnel series to render */
@@ -6131,7 +6362,7 @@ export declare interface F0DataChartFunnelSeries {
  *
  * A single-value gauge indicator — no axes, no legend.
  */
-export declare interface F0DataChartGaugeProps {
+export declare interface F0DataChartGaugeProps extends F0DataChartCommonProps {
     /** Chart type */
     type: "gauge";
     /** Current value */
@@ -6159,7 +6390,7 @@ export declare interface F0DataChartGaugeProps {
  * Uses two category axes (x for columns, y for rows) and a visualMap for
  * value→color mapping.
  */
-export declare interface F0DataChartHeatmapProps {
+export declare interface F0DataChartHeatmapProps extends F0DataChartCommonProps {
     /** Chart type */
     type: "heatmap";
     /** Column labels (x-axis) */
@@ -6245,7 +6476,7 @@ export declare interface F0DataChartPieDataPoint {
  * Pies do NOT use category/value axes — segment names come from the data
  * points themselves. This interface is separate from `F0DataChartBaseProps`.
  */
-export declare interface F0DataChartPieProps {
+export declare interface F0DataChartPieProps extends F0DataChartCommonProps {
     /** Chart type */
     type: "pie";
     /** The pie series to render */
@@ -6299,7 +6530,7 @@ export declare interface F0DataChartRadarIndicator {
  *
  * Radar charts use a polar coordinate system — no cartesian axes.
  */
-export declare interface F0DataChartRadarProps {
+export declare interface F0DataChartRadarProps extends F0DataChartCommonProps {
     /** Chart type */
     type: "radar";
     /** Axes of the radar — defines the dimensions to compare */
@@ -6523,9 +6754,18 @@ export declare type F0DateTimeFieldConfig = F0BaseConfig & F0DateTimeConfig & {
  */
 export declare const F0Dialog: WithDataTestIdReturnType_3<FC<F0DialogInternalProps>>;
 
+declare type F0DialogActionItem = {
+    value: string;
+    label: string;
+    icon?: IconType;
+    onClick: () => void;
+    disabled?: boolean;
+    loading?: boolean;
+};
+
 export declare type F0DialogActionsProps = {
     primaryAction?: F0DialogPrimaryAction | F0DialogPrimaryActionItem[];
-    secondaryAction?: F0DialogSecondaryAction;
+    secondaryAction?: F0DialogSecondaryAction | F0DialogSecondaryActionItem[];
 };
 
 export declare const F0DialogContext: Context<F0DialogContextType>;
@@ -6551,14 +6791,7 @@ export declare type F0DialogPrimaryAction = {
     loading?: boolean;
 };
 
-export declare type F0DialogPrimaryActionItem = {
-    value: string;
-    label: string;
-    icon?: IconType;
-    onClick: () => void;
-    disabled?: boolean;
-    loading?: boolean;
-};
+export declare type F0DialogPrimaryActionItem = F0DialogActionItem;
 
 export declare const F0DialogProvider: ({ isOpen, onClose, shownBottomSheet, position, children, portalContainer, }: F0DialogProviderProps) => JSX_2.Element;
 
@@ -6578,6 +6811,8 @@ export declare type F0DialogSecondaryAction = {
     disabled?: boolean;
     loading?: boolean;
 };
+
+export declare type F0DialogSecondaryActionItem = F0DialogActionItem;
 
 export declare type F0DropdownButtonProps<T = string> = {
     size?: ButtonDropdownSize;
@@ -6698,6 +6933,8 @@ export declare interface F0FileConfig {
     maxSizeMB?: number;
     /** Allow multiple file uploads (form value becomes `string[]`) */
     multiple?: boolean;
+    /** Maximum number of files allowed (only relevant when multiple is true) */
+    maxFiles?: number;
     /** Helper text shown in the dropzone area */
     description?: string;
     /**
@@ -6722,6 +6959,8 @@ export declare type F0FileField = F0BaseField & {
     maxSizeMB?: number;
     /** Allow multiple files */
     multiple?: boolean;
+    /** Maximum number of files allowed (only relevant when multiple is true) */
+    maxFiles?: number;
     /** Dropzone description text */
     description?: string;
     /**
@@ -6858,6 +7097,10 @@ export declare interface F0FormDefinitionPerSection<T extends F0PerSectionSchema
     defaultValuesFn?: (params: Record<string, unknown>) => Promise<{
         [K in keyof T]?: Partial<z.infer<T[K]>>;
     }>;
+    /** Pre-existing file metadata for file fields — resolved before the form renders */
+    initialFiles?: InitialFile[];
+    /** Whether async initialFiles are still being resolved */
+    isLoadingInitialFiles?: boolean;
     /** Wizard steps — when present, F0WizardForm uses these instead of auto-deriving from sections */
     steps?: F0WizardFormStep[];
 }
@@ -6881,6 +7124,10 @@ export declare interface F0FormDefinitionSingleSchema<TSchema extends F0FormSche
     defaultValuesParamsSchema?: ZodType;
     /** Raw defaultValues function for AI registry use when params are involved */
     defaultValuesFn?: (params: Record<string, unknown>) => Promise<Partial<z.infer<TSchema>>>;
+    /** Pre-existing file metadata for file fields — resolved before the form renders */
+    initialFiles?: InitialFile[];
+    /** Whether async initialFiles are still being resolved */
+    isLoadingInitialFiles?: boolean;
     /** Wizard steps — when present, F0WizardForm uses these instead of auto-deriving from sections */
     steps?: F0WizardFormStep[];
 }
@@ -6996,6 +7243,190 @@ export declare function f0FormField<T extends ZodTypeAny, TConfig = undefined>(s
  * @typeParam R - Record type for data source (when using source instead of options)
  */
 export declare function f0FormField<T extends ZodTypeAny, V extends string | number = string | number, R extends Record<string, unknown> = Record<string, unknown>>(schema: T, config: F0FieldConfig<V, R>): T & F0ZodType<T>;
+
+/**
+ * Shortcut helpers for common field types.
+ * These merge with the `f0FormField` function via TypeScript declaration merging,
+ * eliminating the need to manually create Zod schemas for the most common cases.
+ *
+ * @example
+ * // Instead of:
+ * name: f0FormField(z.string(), { label: "Name" })
+ * // Write:
+ * name: f0FormField.text({ label: "Name" })
+ *
+ * // Optional fields:
+ * nickname: f0FormField.text({ label: "Nickname", optional: true })
+ */
+export declare namespace f0FormField {
+    /* Excluded from this release type: TextConfig */
+    export function text(config: TextConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
+    export function text(config: TextConfig & {
+        optional?: false | undefined;
+    }): z.ZodString & F0ZodType<z.ZodString>;
+    /* Excluded from this release type: EmailConfig */
+    export function email(config: EmailConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
+    export function email(config: EmailConfig & {
+        optional?: false | undefined;
+    }): z.ZodString & F0ZodType<z.ZodString>;
+    /* Excluded from this release type: TextareaConfig */
+    export function textarea(config: TextareaConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
+    export function textarea(config: TextareaConfig & {
+        optional?: false | undefined;
+    }): z.ZodString & F0ZodType<z.ZodString>;
+    /* Excluded from this release type: NumberConfig */
+    export function number(config: NumberConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>;
+    export function number(config: NumberConfig & {
+        optional?: false | undefined;
+    }): z.ZodNumber & F0ZodType<z.ZodNumber>;
+    /* Excluded from this release type: SwitchConfig */
+    export function boolean(config: SwitchConfig & {
+        optional: true;
+    }): z.ZodBoolean & F0ZodType<z.ZodBoolean>;
+    export function boolean(config: SwitchConfig & {
+        optional?: false | undefined;
+    }): z.ZodLiteral<true> & F0ZodType<z.ZodLiteral<true>>;
+    /* Excluded from this release type: CheckboxConfig */
+    export function checkbox(config: CheckboxConfig & {
+        optional: true;
+    }): z.ZodBoolean & F0ZodType<z.ZodBoolean>;
+    export function checkbox(config: CheckboxConfig & {
+        optional?: false | undefined;
+    }): z.ZodLiteral<true> & F0ZodType<z.ZodLiteral<true>>;
+    /* Excluded from this release type: DateConfig */
+    export function date(config: DateConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodDate> & F0ZodType<z.ZodOptional<z.ZodDate>>;
+    export function date(config: DateConfig & {
+        optional?: false | undefined;
+    }): z.ZodDate & F0ZodType<z.ZodDate>;
+    /* Excluded from this release type: UrlConfig */
+    export function url(config: UrlConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
+    export function url(config: UrlConfig & {
+        optional?: false | undefined;
+    }): z.ZodString & F0ZodType<z.ZodString>;
+    /* Excluded from this release type: MoneyConfig */
+    export function money(config: MoneyConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>;
+    export function money(config: MoneyConfig & {
+        optional?: false | undefined;
+    }): z.ZodNumber & F0ZodType<z.ZodNumber>;
+    /* Excluded from this release type: PercentageConfig */
+    export function percentage(config: PercentageConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>;
+    export function percentage(config: PercentageConfig & {
+        optional?: false | undefined;
+    }): z.ZodNumber & F0ZodType<z.ZodNumber>;
+    /* Excluded from this release type: CardSelectConfig */
+    export function cardSelect<const V extends string>(config: CardSelectConfig<V> & {
+        optional: true;
+    }): z.ZodOptional<z.ZodEnum<[V, ...V[]]>> & F0ZodType<z.ZodOptional<z.ZodEnum<[V, ...V[]]>>>;
+    export function cardSelect<const V extends string>(config: CardSelectConfig<V> & {
+        optional?: false | undefined;
+    }): z.ZodEnum<[V, ...V[]]> & F0ZodType<z.ZodEnum<[V, ...V[]]>>;
+    /* Excluded from this release type: FileConfig */
+    export function file(config: FileConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
+    export function file(config: FileConfig & {
+        optional?: false | undefined;
+    }): z.ZodString & F0ZodType<z.ZodString>;
+    /* Excluded from this release type: MultiFileConfig */
+    export function multiFile(config: MultiFileConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodArray<z.ZodString>> & F0ZodType<z.ZodOptional<z.ZodArray<z.ZodString>>>;
+    export function multiFile(config: MultiFileConfig & {
+        optional?: false | undefined;
+    }): z.ZodArray<z.ZodString> & F0ZodType<z.ZodArray<z.ZodString>>;
+    /* Excluded from this release type: TimeConfig */
+    export function time(config: TimeConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodDate> & F0ZodType<z.ZodOptional<z.ZodDate>>;
+    export function time(config: TimeConfig & {
+        optional?: false | undefined;
+    }): z.ZodDate & F0ZodType<z.ZodDate>;
+    /* Excluded from this release type: DateTimeConfig */
+    export function datetime(config: DateTimeConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodDate> & F0ZodType<z.ZodOptional<z.ZodDate>>;
+    export function datetime(config: DateTimeConfig & {
+        optional?: false | undefined;
+    }): z.ZodDate & F0ZodType<z.ZodDate>;
+    /* Excluded from this release type: DurationConfig */
+    export function duration(config: DurationConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>;
+    export function duration(config: DurationConfig & {
+        optional?: false | undefined;
+    }): z.ZodNumber & F0ZodType<z.ZodNumber>;
+    /* Excluded from this release type: DateRangeObjectSchema */
+    /* Excluded from this release type: DateRangeConfig */
+    export function dateRange(config: DateRangeConfig & {
+        optional: true;
+    }): z.ZodOptional<DateRangeObjectSchema> & F0ZodType<z.ZodOptional<DateRangeObjectSchema>>;
+    export function dateRange(config: DateRangeConfig & {
+        optional?: false | undefined;
+    }): DateRangeObjectSchema & F0ZodType<DateRangeObjectSchema>;
+    /* Excluded from this release type: RichTextObjectSchema */
+    /* Excluded from this release type: RichTextConfig */
+    export function richText(config: RichTextConfig & {
+        optional: true;
+    }): z.ZodOptional<RichTextObjectSchema> & F0ZodType<z.ZodOptional<RichTextObjectSchema>>;
+    export function richText(config: RichTextConfig & {
+        optional?: false | undefined;
+    }): RichTextObjectSchema & F0ZodType<RichTextObjectSchema>;
+    /* Excluded from this release type: SelectConfig */
+    export function select<const V extends string, R extends Record<string, unknown> = Record<string, unknown>>(config: SelectConfig<R> & {
+        options: Array<{
+            value: V;
+        } & Record<string, unknown>>;
+        optional: true;
+    }): z.ZodOptional<z.ZodEnum<[V, ...V[]]>> & F0ZodType<z.ZodOptional<z.ZodEnum<[V, ...V[]]>>>;
+    export function select<const V extends string, R extends Record<string, unknown> = Record<string, unknown>>(config: SelectConfig<R> & {
+        options: Array<{
+            value: V;
+        } & Record<string, unknown>>;
+        optional?: false | undefined;
+    }): z.ZodEnum<[V, ...V[]]> & F0ZodType<z.ZodEnum<[V, ...V[]]>>;
+    export function select<R extends Record<string, unknown> = Record<string, unknown>>(config: SelectConfig<R> & {
+        optional: true;
+    }): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>;
+    export function select<R extends Record<string, unknown> = Record<string, unknown>>(config: SelectConfig<R> & {
+        optional?: false | undefined;
+    }): z.ZodString & F0ZodType<z.ZodString>;
+    /* Excluded from this release type: MultiSelectConfig */
+    export function multiSelect<const V extends string>(config: Omit<MultiSelectConfig<string>, "options"> & {
+        options: Array<{
+            value: V;
+        } & Record<string, unknown>>;
+        optional: true;
+    }): z.ZodOptional<z.ZodArray<z.ZodEnum<[V, ...V[]]>>> & F0ZodType<z.ZodOptional<z.ZodArray<z.ZodEnum<[V, ...V[]]>>>>;
+    export function multiSelect<const V extends string>(config: Omit<MultiSelectConfig<string>, "options"> & {
+        options: Array<{
+            value: V;
+        } & Record<string, unknown>>;
+        optional?: false | undefined;
+    }): z.ZodArray<z.ZodEnum<[V, ...V[]]>> & F0ZodType<z.ZodArray<z.ZodEnum<[V, ...V[]]>>>;
+    export function multiSelect<V extends string | number = string, R extends Record<string, unknown> = Record<string, unknown>>(config: MultiSelectConfig<V, R> & {
+        optional: true;
+    }): z.ZodOptional<z.ZodArray<z.ZodString>> & F0ZodType<z.ZodOptional<z.ZodArray<z.ZodString>>>;
+    export function multiSelect<V extends string | number = string, R extends Record<string, unknown> = Record<string, unknown>>(config: MultiSelectConfig<V, R> & {
+        optional?: false | undefined;
+    }): z.ZodArray<z.ZodString> & F0ZodType<z.ZodArray<z.ZodString>>;
+        {};
+}
 
 declare interface F0FormFieldCommonProps {
     /** Field definition (type, label, placeholder, etc.) */
@@ -7125,6 +7556,11 @@ export declare interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionS
      */
     initialFiles?: InitialFile[];
     /**
+     * Whether async `initialFiles` are still being resolved.
+     * When true, file fields show a skeleton until the files arrive.
+     */
+    isLoadingInitialFiles?: boolean;
+    /**
      * Upload hook shared by all file fields in the form.
      */
     useUpload?: UseFileUpload;
@@ -7187,6 +7623,11 @@ export declare interface F0FormPropsWithSingleSchema<TSchema extends F0FormSchem
      * `defaultValues` against `InitialFile.value`.
      */
     initialFiles?: InitialFile[];
+    /**
+     * Whether async `initialFiles` are still being resolved.
+     * When true, file fields show a skeleton until the files arrive.
+     */
+    isLoadingInitialFiles?: boolean;
     /**
      * Upload hook shared by all file fields in the form.
      * Called once per file to obtain an independent upload instance.
@@ -10058,13 +10499,18 @@ export declare class NotesTextEditorUnsupportedPatchTypeError extends Error {
     constructor(patchType: unknown);
 }
 
-declare type NumberCellConfig = {
+declare type NumberCellConfig<R extends RecordType = RecordType> = {
     min?: number;
     max?: number;
     step?: number;
     maxDecimals?: number;
     locale?: string;
-    units?: string;
+    /**
+     * Unit label displayed next to the number input.
+     * Can be a static string (e.g. `"h"`) or a function that receives the
+     * current row item to return a per-row unit (e.g. `(item) => item.type === "role" ? "h" : "u"`).
+     */
+    units?: string | ((item: R) => string | undefined);
     unitsPosition?: "before" | "after";
 };
 
@@ -10582,6 +11028,17 @@ declare type PendingContext = {
     label: string;
     /** Full context string prepended invisibly to the first user message */
     context: string;
+};
+
+/**
+ * Quoted fragment the user is replying to. Shown as a chip above the
+ * textarea and, on submit, rendered as a markdown blockquote at the top of
+ * the resulting user message. The blockquote alone is enough context — the
+ * conversation thread tells the agent what it refers to.
+ */
+declare type PendingQuote = {
+    /** Plain-text selection (markdown stripped by the browser's toString()). */
+    text: string;
 };
 
 /**
@@ -11157,15 +11614,18 @@ declare interface ReplaceContentNotesTextEditorPageDocumentPatch {
     content: JSONContent[];
 }
 
-/**
- * Profile data for a requisition entity (ATS requisition), resolved asynchronously
- * and displayed in the entity reference hover card.
- */
 export declare type RequisitionProfile = {
     id: string | number;
     title: string;
     status?: string;
+    statusVariant?: StatusVariant;
     reason?: string;
+    location?: string;
+    lineManager?: {
+        firstName: string;
+        lastName: string;
+        avatarUrl?: string;
+    };
 };
 
 export declare type ResolvedRecordType<R> = R extends RecordType ? R : RecordType;
@@ -12749,6 +13209,12 @@ declare interface UseF0FormDefinitionPerSectionInputBase<T extends F0PerSectionS
     onSubmit: (arg: F0WizardFormPerSectionSubmitArg<T>) => Promise<F0FormSubmitResult> | F0FormSubmitResult;
     submitConfig?: F0PerSectionSubmitConfig;
     errorTriggerMode?: F0FormErrorTriggerMode;
+    /**
+     * Pre-existing file metadata for file fields.
+     * Accepts a static array or an async function `(signal: AbortSignal) => Promise<InitialFile[]>`
+     * that resolves the list at mount time.
+     */
+    initialFiles?: AsyncOrSync<InitialFile[]>;
     /** Wizard steps — when present, F0WizardForm uses these instead of auto-deriving from sections */
     steps?: F0WizardFormStep[];
 }
@@ -12783,6 +13249,12 @@ declare interface UseF0FormDefinitionSingleSchemaInputBase<TSchema extends F0For
     onSubmit: (arg: F0WizardFormSingleSubmitArg<TSchema>) => Promise<F0FormSubmitResult> | F0FormSubmitResult;
     submitConfig?: F0FormSubmitConfig;
     errorTriggerMode?: F0FormErrorTriggerMode;
+    /**
+     * Pre-existing file metadata for file fields.
+     * Accepts a static array or an async function `(signal: AbortSignal) => Promise<InitialFile[]>`
+     * that resolves the list at mount time.
+     */
+    initialFiles?: AsyncOrSync<InitialFile[]>;
     /** Wizard steps — when present, F0WizardForm uses these instead of auto-deriving from sections */
     steps?: F0WizardFormStep[];
 }
@@ -12959,7 +13431,7 @@ export declare function useSelectable<R extends RecordType, Filters extends Filt
 export declare type UseSelectableProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>> = {
     data: Data<R>;
     paginationInfo: PaginationInfo | null;
-    source: DataSourceDefinition<R, Filters, Sortings, Grouping>;
+    source: DataSource<R, Filters, Sortings, Grouping>;
     onSelectItems?: OnSelectItemsCallback<R, Filters>;
     selectionMode?: "multi" | "single";
     selectedState?: SelectedItemsState<R>;
@@ -12985,9 +13457,14 @@ export declare type UseSelectableProps<R extends RecordType, Filters extends Fil
      */
     allPagesSelection?: boolean;
     /**
-     * When true (default), clears selection when the page changes
-     * (unless all items are selected). Set to false to persist
-     * selections across page changes unconditionally.
+     * When true (default), clears selection when navigating to a different page
+     * in page-based pagination (unless all items are selected via the
+     * "Select all N items" banner). Set to false to persist selections across
+     * page changes unconditionally.
+     *
+     * This flag has no effect on infinite-scroll pagination: loadMore() advances
+     * the cursor but the list is cumulative, so selections are always preserved
+     * across loadMore() calls regardless of this flag.
      */
     resetOnPageChange?: boolean;
 };
@@ -13290,8 +13767,13 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        };
+    }
 }
 
 
@@ -13316,16 +13798,6 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
         transcript: {
             insertTranscript: (data: TranscriptData) => ReturnType;
         };
@@ -13341,4 +13813,9 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
