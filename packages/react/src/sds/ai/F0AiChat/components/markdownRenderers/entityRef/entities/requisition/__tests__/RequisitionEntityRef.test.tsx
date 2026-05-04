@@ -110,6 +110,42 @@ describe("RequisitionEntityRef", () => {
     expect(screen.queryByText("Location")).not.toBeInTheDocument()
   })
 
+  it("applies the statusVariant to the rendered status tag", async () => {
+    const user = userEvent.setup()
+    mockResolver.mockResolvedValue(profile)
+
+    render(<RequisitionEntityRef id="88" label="Backend Engineer" />)
+
+    await user.hover(screen.getByRole("button"))
+
+    const statusTag = await waitFor(() =>
+      screen
+        .getByText("Approved")
+        .closest('[class*="bg-f1-background-positive"]')
+    )
+    expect(statusTag).toBeInTheDocument()
+  })
+
+  it("falls back to the neutral variant when statusVariant is missing", async () => {
+    const user = userEvent.setup()
+    mockResolver.mockResolvedValue({
+      id: "88",
+      title: "Backend Engineer",
+      status: "Pending",
+    })
+
+    render(<RequisitionEntityRef id="88" label="Backend Engineer" />)
+
+    await user.hover(screen.getByRole("button"))
+
+    const statusTag = await waitFor(() =>
+      screen
+        .getByText("Pending")
+        .closest('[class*="bg-f1-background-secondary"]')
+    )
+    expect(statusTag).toBeInTheDocument()
+  })
+
   it("omits rows when optional fields are missing", async () => {
     const user = userEvent.setup()
     mockResolver.mockResolvedValue({
