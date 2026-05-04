@@ -446,6 +446,10 @@ export const defaultTranslations = {
     funnel: "Funnel",
     pieChart: "Pie",
     table: "Table",
+    emptyState: {
+      title: "No data available",
+      description: "Try a different date or fewer filters",
+    },
   },
   select: {
     noResults: "No results found",

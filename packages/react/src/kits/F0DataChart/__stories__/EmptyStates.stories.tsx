@@ -1,5 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+
+import type { F0DataChartProps } from "../types"
+
 import { F0DataChart } from "../index"
 import { ChartDecorator } from "./decorators"
 
@@ -95,15 +99,65 @@ export const RenderPropEscapeHatch: Story = {
 }
 
 /**
- * `disabled: true` opts out of detection — useful when zero values are
- * legitimate (e.g. an "errors per day" timeline that's expected to show
- * zeros).
+ * `disabled: true` opts out of detection — render the chart frame even
+ * when there is no data. Rarely useful (the default detection only fires
+ * on genuinely empty data — all-zero datasets already render normally),
+ * but kept as an escape hatch for unusual cases.
  */
 export const Disabled: Story = {
   args: {
     type: "bar",
-    categories: ["Mon", "Tue", "Wed"],
-    series: [{ name: "Errors", data: [0, 0, 0] }],
+    categories: [],
+    series: [],
     emptyState: { disabled: true },
   },
+}
+
+// ---------------------------------------------------------------------------
+// Chromatic snapshot — covers every variant in a single shot
+// ---------------------------------------------------------------------------
+
+const SNAPSHOT_VARIANTS: { label: string; props: F0DataChartProps }[] = [
+  { label: "Bar", props: { type: "bar", categories: [], series: [] } },
+  { label: "Line", props: { type: "line", categories: [], series: [] } },
+  { label: "Pie", props: { type: "pie", series: { name: "", data: [] } } },
+  {
+    label: "Funnel",
+    props: { type: "funnel", series: { name: "", data: [] } },
+  },
+  {
+    label: "Radar",
+    props: { type: "radar", indicators: [], series: [] },
+  },
+  // Gauge: undefined value is the empty case.
+  { label: "Gauge", props: { type: "gauge" } as F0DataChartProps },
+  {
+    label: "Heatmap",
+    props: {
+      type: "heatmap",
+      xCategories: [],
+      yCategories: [],
+      data: [],
+    },
+  },
+]
+
+/** Chromatic-only matrix that covers every empty variant in one snapshot. */
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  decorators: [(Story) => <Story />],
+  render: () => (
+    <div className="grid grid-cols-2 gap-6 p-6">
+      {SNAPSHOT_VARIANTS.map(({ label, props }) => (
+        <div key={label} className="flex flex-col gap-2">
+          <span className="text-xs font-medium uppercase tracking-wide text-f1-foreground-secondary">
+            {label}
+          </span>
+          <div className="h-[260px] w-[420px] rounded-md border border-solid border-f1-border-secondary bg-f1-background">
+            <F0DataChart {...props} />
+          </div>
+        </div>
+      ))}
+    </div>
+  ),
 }

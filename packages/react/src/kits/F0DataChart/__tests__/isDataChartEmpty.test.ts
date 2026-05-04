@@ -28,18 +28,18 @@ describe("isDataChartEmpty", () => {
       }
     )
 
-    it.each(["bar", "line"] as const)("%s — all zeros", (type) => {
-      expect(
-        isDataChartEmpty({
-          type,
-          categories: ["A", "B"],
-          series: [
-            { name: "s1", data: [0, 0] },
-            { name: "s2", data: [{ value: 0 }, 0] },
-          ],
-        } as F0DataChartProps)
-      ).toBe(true)
-    })
+    it.each(["bar", "line"] as const)(
+      "%s — all-zero values are NOT empty (legitimate render)",
+      (type) => {
+        expect(
+          isDataChartEmpty({
+            type,
+            categories: ["A", "B"],
+            series: [{ name: "s1", data: [0, 0] }],
+          } as F0DataChartProps)
+        ).toBe(false)
+      }
+    )
 
     it.each(["bar", "line"] as const)("%s — single non-zero", (type) => {
       expect(
@@ -73,20 +73,23 @@ describe("isDataChartEmpty", () => {
       ).toBe(true)
     })
 
-    it.each(["funnel", "pie"] as const)("%s — all-zero values", (type) => {
-      expect(
-        isDataChartEmpty({
-          type,
-          series: {
-            name: "s",
-            data: [
-              { value: 0, name: "x" },
-              { value: 0, name: "y" },
-            ],
-          },
-        } as F0DataChartProps)
-      ).toBe(true)
-    })
+    it.each(["funnel", "pie"] as const)(
+      "%s — all-zero values are NOT empty",
+      (type) => {
+        expect(
+          isDataChartEmpty({
+            type,
+            series: {
+              name: "s",
+              data: [
+                { value: 0, name: "x" },
+                { value: 0, name: "y" },
+              ],
+            },
+          } as F0DataChartProps)
+        ).toBe(false)
+      }
+    )
 
     it.each(["funnel", "pie"] as const)("%s — one non-zero value", (type) => {
       expect(
@@ -115,14 +118,14 @@ describe("isDataChartEmpty", () => {
       ).toBe(true)
     })
 
-    it("all-zero data", () => {
+    it("all-zero data is NOT empty", () => {
       expect(
         isDataChartEmpty({
           type: "radar",
           indicators: [{ name: "a" }, { name: "b" }],
           series: [{ name: "s", data: [0, 0] }],
         })
-      ).toBe(true)
+      ).toBe(false)
     })
 
     it("single non-zero", () => {
@@ -165,7 +168,7 @@ describe("isDataChartEmpty", () => {
       ).toBe(true)
     })
 
-    it("all-zero values", () => {
+    it("all-zero values are NOT empty", () => {
       expect(
         isDataChartEmpty({
           type: "heatmap",
@@ -176,7 +179,7 @@ describe("isDataChartEmpty", () => {
             [1, 1, 0],
           ],
         })
-      ).toBe(true)
+      ).toBe(false)
     })
 
     it("one non-zero tuple is not empty", () => {

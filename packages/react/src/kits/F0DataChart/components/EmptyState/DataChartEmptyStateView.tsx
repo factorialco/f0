@@ -1,3 +1,5 @@
+import { useI18n } from "@/lib/providers/i18n"
+
 import type { F0DataChartEmptyStateProps, F0DataChartProps } from "../../types"
 
 import { DataChartEmptyState } from "./EmptyState"
@@ -9,31 +11,25 @@ interface DataChartEmptyStateViewProps {
 }
 
 /**
- * Default copy for the chart empty state. Hardcoded (not i18n) to keep the
- * chart-specific phrasing decoupled from the broader collections empty-state
- * copy. Consumers can override via `emptyState.title` / `emptyState.description`.
- */
-const DEFAULT_COPY = {
-  title: "No data available",
-  description: "Try a different date or fewer filters",
-}
-
-/**
- * Resolves an `F0DataChartEmptyStateProps` config (defaults + overrides +
- * render-prop) into rendered output. Used internally by `F0DataChart` and
+ * Resolves an `F0DataChartEmptyStateProps` config (i18n defaults + overrides
+ * + render-prop) into rendered output. Used internally by `F0DataChart` and
  * reused by dashboard wrappers when data is absent.
  */
 export const DataChartEmptyStateView = ({
   chartType,
   emptyState,
 }: DataChartEmptyStateViewProps) => {
+  const i18n = useI18n()
+
   if (emptyState?.render) return <>{emptyState.render()}</>
+
+  const defaults = i18n.dataChart.emptyState
 
   return (
     <DataChartEmptyState
       chartType={chartType}
-      content={emptyState?.title ?? DEFAULT_COPY.title}
-      description={emptyState?.description ?? DEFAULT_COPY.description}
+      content={emptyState?.title ?? defaults.title}
+      description={emptyState?.description ?? defaults.description}
     />
   )
 }

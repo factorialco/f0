@@ -1,22 +1,16 @@
-import type {
-  F0DataChartBarDataPoint,
-  F0DataChartLineDataPoint,
-  F0DataChartProps,
-} from "../types"
-
-const getBarOrLineValue = (
-  point: F0DataChartBarDataPoint | F0DataChartLineDataPoint
-): number => (typeof point === "number" ? point : (point?.value ?? 0))
-
-const allZeros = (values: number[]) => values.every((v) => v === 0)
+import type { F0DataChartProps } from "../types"
 
 /**
- * Returns `true` when a chart has no meaningful data to render — either
- * because the series/data arrays are empty or because every numeric value
- * resolves to `0`. Null-safe: malformed input is treated as empty.
+ * Returns `true` when a chart has no data points to render — i.e. the
+ * `series` / `data` arrays are missing or empty. **All-zero datasets are
+ * NOT empty** (e.g. `data: [0, 0, 0]` is a legitimate zero-valued chart),
+ * so this detection avoids hijacking what was previously a valid render.
  *
- * Note: gauges with `value === 0` are NOT considered empty (0% is a
- * legitimate state). Only `value == null` triggers the empty branch.
+ * Null-safe: malformed input is treated as empty.
+ *
+ * Consumers that prefer to surface the empty state for all-zero data can
+ * pass `emptyState.disabled: false` is the default — opt-in to a custom
+ * `render` prop or wrap the chart themselves.
  */
 export function isDataChartEmpty(props: F0DataChartProps): boolean {
   switch (props.type) {
@@ -24,47 +18,30 @@ export function isDataChartEmpty(props: F0DataChartProps): boolean {
     case "line": {
       const series = props.series
       if (!Array.isArray(series) || series.length === 0) return true
-      const allValues: number[] = []
-      for (const s of series) {
-        if (!s || !Array.isArray(s.data)) continue
-        for (const point of s.data) {
-          allValues.push(getBarOrLineValue(point))
-        }
-      }
-      if (allValues.length === 0) return true
-      return allZeros(allValues)
+      // Empty when every series has no data points at all.
+      return series.every(
+        (s) => !s || !Array.isArray(s.data) || s.data.length === 0
+      )
     }
     case "funnel":
     case "pie": {
       const series = props.series
-      if (!series || !Array.isArray(series.data) || series.data.length === 0) {
-        return true
-      }
-      return series.data.every((d) => !d || (d.value ?? 0) === 0)
+      return !series || !Array.isArray(series.data) || series.data.length === 0
     }
     case "radar": {
       const series = props.series
       if (!Array.isArray(series) || series.length === 0) return true
-      const allValues: number[] = []
-      for (const s of series) {
-        if (!s || !Array.isArray(s.data)) continue
-        for (const v of s.data) {
-          allValues.push(typeof v === "number" ? v : 0)
-        }
-      }
-      if (allValues.length === 0) return true
-      return allZeros(allValues)
+      return series.every(
+        (s) => !s || !Array.isArray(s.data) || s.data.length === 0
+      )
     }
     case "gauge": {
-      // 0% is a legitimate gauge state — only nullish values are empty.
+      // No value at all → empty. `0` is a legitimate gauge state.
       return props.value == null
     }
     case "heatmap": {
       const data = props.data
-      if (!Array.isArray(data) || data.length === 0) return true
-      return data.every(
-        (tuple) => !Array.isArray(tuple) || (tuple[2] ?? 0) === 0
-      )
+      return !Array.isArray(data) || data.length === 0
     }
     default:
       return true
