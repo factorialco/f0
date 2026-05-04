@@ -17,6 +17,7 @@ import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 import { useAiChat } from "@/sds/ai/F0AiChat"
 import {
   type CandidateProfile,
+  type ExpenseProfile,
   type JobPostingProfile,
   type RequisitionProfile,
   type PersonProfile,
@@ -268,6 +269,46 @@ const mockRequisitionResolver = (id: string): Promise<RequisitionProfile> =>
   })
 
 /**
+ * Mock expenses database for entity-ref hover cards in Storybook.
+ */
+const mockExpenses: ExpenseProfile[] = [
+  {
+    id: "91",
+    description: "Per diem — New York",
+    amount: "€331.00",
+    status: "Approved",
+  },
+  {
+    id: "97",
+    description: "Lunch with a friend",
+    amount: "€174.50",
+    status: "Approved",
+  },
+  {
+    id: "188",
+    description: "Per diem — New York",
+    amount: "€331.00",
+    status: "Pending",
+  },
+]
+
+/**
+ * Mock expense resolver — looks up from mockExpenses, falls back to generic profile.
+ */
+const mockExpenseResolver = (id: string): Promise<ExpenseProfile> =>
+  new Promise((resolve) => {
+    setTimeout(() => {
+      const expense = mockExpenses.find((e) => String(e.id) === id)
+      resolve(
+        expense ?? {
+          id,
+          description: `Expense #${id}`,
+        }
+      )
+    }, 600)
+  })
+
+/**
  * Mock fetchCreditsUsage — simulates a 500ms API call returning usage data.
  */
 const mockFetchCreditsUsage = () =>
@@ -365,6 +406,7 @@ const meta: Meta<typeof ApplicationFrame> = {
         resolvers: {
           person: mockPersonResolver,
           candidate: mockCandidateResolver,
+          expense: mockExpenseResolver,
           jobPosting: mockJobPostingResolver,
           vacancy: mockVacancyResolver,
           requisition: mockRequisitionResolver,
@@ -373,6 +415,7 @@ const meta: Meta<typeof ApplicationFrame> = {
         urls: {
           person: (id) => `/employees/${id}`,
           candidate: (id) => `/recruitment/candidates/${id}/applications`,
+          expense: (id) => `/expenses/${id}`,
           jobPosting: (id) => `/recruitment/jobs/${id}/applications`,
           vacancy: (id) => `/recruitment/hiring-plan/vacancies/${id}`,
           requisition: (id) => `/recruitment/hiring-plan/requisitions/${id}`,
@@ -908,6 +951,7 @@ export const FullscreenWithActions: Story = {
         resolvers: {
           person: mockPersonResolver,
           candidate: mockCandidateResolver,
+          expense: mockExpenseResolver,
           jobPosting: mockJobPostingResolver,
           vacancy: mockVacancyResolver,
           requisition: mockRequisitionResolver,
@@ -916,6 +960,7 @@ export const FullscreenWithActions: Story = {
         urls: {
           person: (id) => `/employees/${id}`,
           candidate: (id) => `/recruitment/candidates/${id}/applications`,
+          expense: (id) => `/expenses/${id}`,
           jobPosting: (id) => `/recruitment/jobs/${id}/applications`,
           vacancy: (id) => `/recruitment/hiring-plan/vacancies/${id}`,
           requisition: (id) => `/recruitment/hiring-plan/requisitions/${id}`,

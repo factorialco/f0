@@ -13,6 +13,7 @@ export type {
   AppendToolCall,
   CandidateProfile,
   CanvasContent,
+  ExpenseProfile,
   CanvasContentBase,
   CreditsUsage,
   DashboardCanvasContent,
