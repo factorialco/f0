@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.471.2](https://github.com/factorialco/f0/compare/f0-react-v1.471.1...f0-react-v1.471.2) (2026-05-04)
+
+
+### Bug Fixes
+
+* restore solid background on F0AvatarIcon ([#4069](https://github.com/factorialco/f0/issues/4069)) ([1e23b3e](https://github.com/factorialco/f0/commit/1e23b3e3be9ce7a76ef6f10a499a4a9439052e06))
+
 ## [1.471.1](https://github.com/factorialco/f0/compare/f0-react-v1.471.0...f0-react-v1.471.1) (2026-04-30)
 
 
