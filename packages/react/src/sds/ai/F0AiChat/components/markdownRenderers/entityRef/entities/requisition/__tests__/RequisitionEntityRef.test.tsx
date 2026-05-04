@@ -29,7 +29,14 @@ const profile: RequisitionProfile = {
   id: "88",
   title: "Backend Engineer",
   status: "Approved",
+  statusVariant: "positive",
   reason: "New Position",
+  location: "Remote",
+  lineManager: {
+    firstName: "Jane",
+    lastName: "Doe",
+    avatarUrl: "https://example.com/jane.png",
+  },
 }
 
 describe("RequisitionEntityRef", () => {
@@ -67,8 +74,96 @@ describe("RequisitionEntityRef", () => {
 
     await waitFor(() => {
       expect(screen.getAllByText("Backend Engineer")).toHaveLength(2)
-      expect(screen.getByText("Approved · New Position")).toBeInTheDocument()
+      expect(screen.getByText("Approved")).toBeInTheDocument()
+      expect(screen.getByText("New Position")).toBeInTheDocument()
     })
+  })
+
+  it("renders location and lineManager rows with avatar", async () => {
+    const user = userEvent.setup()
+    mockResolver.mockResolvedValue(profile)
+
+    render(<RequisitionEntityRef id="88" label="Backend Engineer" />)
+
+    await user.hover(screen.getByRole("button"))
+
+    await waitFor(() => {
+      expect(screen.getByText("Remote")).toBeInTheDocument()
+      expect(screen.getByText("Jane Doe")).toBeInTheDocument()
+    })
+  })
+
+  it("renders location as the card description and status with a label", async () => {
+    const user = userEvent.setup()
+    mockResolver.mockResolvedValue(profile)
+
+    render(<RequisitionEntityRef id="88" label="Backend Engineer" />)
+
+    await user.hover(screen.getByRole("button"))
+
+    await waitFor(() => {
+      expect(screen.getByText("Remote")).toBeInTheDocument()
+      expect(screen.getByText("Approved")).toBeInTheDocument()
+    })
+
+    expect(screen.getByText("Status")).toBeInTheDocument()
+    expect(screen.queryByText("Location")).not.toBeInTheDocument()
+  })
+
+  it("applies the statusVariant to the rendered status tag", async () => {
+    const user = userEvent.setup()
+    mockResolver.mockResolvedValue(profile)
+
+    render(<RequisitionEntityRef id="88" label="Backend Engineer" />)
+
+    await user.hover(screen.getByRole("button"))
+
+    const statusTag = await waitFor(() =>
+      screen
+        .getByText("Approved")
+        .closest('[class*="bg-f1-background-positive"]')
+    )
+    expect(statusTag).toBeInTheDocument()
+  })
+
+  it("falls back to the neutral variant when statusVariant is missing", async () => {
+    const user = userEvent.setup()
+    mockResolver.mockResolvedValue({
+      id: "88",
+      title: "Backend Engineer",
+      status: "Pending",
+    })
+
+    render(<RequisitionEntityRef id="88" label="Backend Engineer" />)
+
+    await user.hover(screen.getByRole("button"))
+
+    const statusTag = await waitFor(() =>
+      screen
+        .getByText("Pending")
+        .closest('[class*="bg-f1-background-secondary"]')
+    )
+    expect(statusTag).toBeInTheDocument()
+  })
+
+  it("omits rows when optional fields are missing", async () => {
+    const user = userEvent.setup()
+    mockResolver.mockResolvedValue({
+      id: "88",
+      title: "Backend Engineer",
+    })
+
+    render(<RequisitionEntityRef id="88" label="Backend Engineer" />)
+
+    await user.hover(screen.getByRole("button"))
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Backend Engineer")).toHaveLength(2)
+    })
+
+    expect(screen.queryByText("Remote")).not.toBeInTheDocument()
+    expect(screen.queryByText("Approved")).not.toBeInTheDocument()
+    expect(screen.queryByText("New Position")).not.toBeInTheDocument()
   })
 
   it("caches profile — resolver is called only once per id", async () => {

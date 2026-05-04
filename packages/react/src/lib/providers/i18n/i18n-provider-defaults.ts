@@ -323,6 +323,11 @@ export const defaultTranslations = {
         source: "Source",
         applied: "Applied on",
       },
+      requisition: {
+        lineManager: "Line manager",
+        reason: "Reason",
+        status: "Status",
+      },
     },
     credits: {
       title: "Credits",
