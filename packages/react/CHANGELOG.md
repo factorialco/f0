@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.474.0](https://github.com/factorialco/f0/compare/f0-react-v1.473.0...f0-react-v1.474.0) (2026-05-04)
+
+
+### Features
+
+* **F0AiChat:** enrich requisition entity ref card ([#4015](https://github.com/factorialco/f0/issues/4015)) ([615db87](https://github.com/factorialco/f0/commit/615db87094a270764cdd3cd075bc9f07c31b293e))
+
 ## [1.473.0](https://github.com/factorialco/f0/compare/f0-react-v1.472.1...f0-react-v1.473.0) (2026-05-04)
 
 
