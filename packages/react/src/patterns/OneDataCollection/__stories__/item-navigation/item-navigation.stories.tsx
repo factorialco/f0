@@ -152,18 +152,6 @@ const InfiniteScrollPaginationDemo = () => {
   )
 }
 
-export const InfiniteScrollPagination: Story = {
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "Uses an infinite-scroll data adapter. When navigation reaches the last loaded item, it calls loadMore and activates the next appended record.",
-      },
-    },
-  },
-  render: () => <InfiniteScrollPaginationDemo />,
-}
-
 const PageBasedPaginationDemo = () => {
   const itemNavigation = useDataCollectionItemNavigation<MockUser>({
     defaultActiveItemId: users[3].id,
@@ -356,20 +344,15 @@ const RouteSyncDemo = () => {
   )
 }
 
-export const PageBasedPagination: Story = {
-  parameters: {
+export const PaginationModes: Story = {
+  parameters: withSnapshot({
     docs: {
       description: {
         story:
-          "Uses a page-based data adapter. When navigation reaches a page boundary, it requests the next or previous page and activates the boundary item.",
+          "Shows both pagination strategies supported by item navigation: infinite-scroll loadMore and page-based setPage boundary navigation.",
       },
     },
-  },
-  render: () => <PageBasedPaginationDemo />,
-}
-
-export const Snapshot: Story = {
-  parameters: withSnapshot({}),
+  }),
   render: () => (
     <div className="grid gap-6 lg:grid-cols-2">
       <InfiniteScrollPaginationDemo />
@@ -390,7 +373,7 @@ export const RouteSync: Story = {
   render: () => <RouteSyncDemo />,
 }
 
-export const SnapshotDuringRefetch: Story = {
+export const SessionSnapshotDuringRefetch: Story = {
   render: () => {
     const [availableUsers, setAvailableUsers] = useState(users.slice(0, 5))
     const [activeItemId, setActiveItemId] = useState(users[2].id)
