@@ -2357,6 +2357,8 @@ export declare interface DataCollectionItemNavigationControls<R extends RecordTy
     activeItemId: DataSourceItemId | null;
     /** The currently active item record. */
     activeItem: R;
+    /** URL of the active item, or null when unavailable. */
+    activeItemUrl: string | null;
     /** Zero-based active index. Uses the absolute index when pagination exposes it. */
     currentIndex: number;
     /** Total matching records when known, otherwise the loaded navigation records. */
@@ -2390,6 +2392,15 @@ export declare type DataCollectionItemNavigationDataState<Record extends RecordT
     isLoading: boolean;
     isLoadingMore: boolean;
 };
+
+export declare interface DataCollectionItemNavigationRouteSyncResult<R extends RecordType> {
+    /** Route ID that should be used by the detail view for data fetching. */
+    activeRouteId: string | null;
+    /** Current active item-navigation ID. */
+    activeItemId: DataSourceItemId | null;
+    /** Render-ready controls from the item-navigation controller. */
+    controls: DataCollectionItemNavigationControls<R> | null;
+}
 
 export declare type DataCollectionItemNavigationSnapshotMode = "live" | "session" | "manual";
 
@@ -7700,6 +7711,28 @@ export declare interface UseDataCollectionItemNavigationProps<R extends RecordTy
     snapshotKey?: string | number | null;
 }
 
+/**
+ * Syncs a route-level item ID with a DataCollection item-navigation controller.
+ *
+ * F0 does not own routing or history mutation. Consumers provide `routeId` as
+ * the route/open-session source of truth and use `onRouteIdChange` to update
+ * URLs, router state, analytics, or any other app-owned side effects.
+ */
+export declare const useDataCollectionItemNavigationRouteSync: <R extends RecordType>({ itemNavigation, routeId, parseRouteId, formatItemId, onRouteIdChange, }: UseDataCollectionItemNavigationRouteSyncProps<R>) => DataCollectionItemNavigationRouteSyncResult<R>;
+
+export declare interface UseDataCollectionItemNavigationRouteSyncProps<R extends RecordType> {
+    /** Controller returned by useDataCollectionItemNavigation. */
+    itemNavigation?: DataCollectionItemNavigationController<R> | null;
+    /** Route-level item ID. Changing this starts a new item-navigation session. */
+    routeId: string | null | undefined;
+    /** Converts route IDs to item-navigation IDs. Defaults to string identity. */
+    parseRouteId?: (id: string) => DataSourceItemId;
+    /** Converts item-navigation IDs back to route IDs. Defaults to String(id). */
+    formatItemId?: (id: DataSourceItemId) => string;
+    /** Called when item navigation changes the active item and the app should update its route/URL. */
+    onRouteIdChange?: (routeId: string, itemId: DataSourceItemId) => void;
+}
+
 export declare const useDataCollectionSource: <R extends RecordType = RecordType, FiltersSchema extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>(source: DataCollectionSourceDefinition<R, FiltersSchema, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>, deps?: ReadonlyArray<unknown>) => DataCollectionSource<R, FiltersSchema, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
 
 /**
@@ -7763,6 +7796,8 @@ declare interface UseDataSourceItemNavigationReturn<R extends RecordType> {
     previousItem: R | null;
     /** The next loaded item record, or null if unavailable */
     nextItem: R | null;
+    /** URL of the active item (derived via `itemUrl`), or null if unavailable */
+    activeItemUrl: string | null;
     /** Navigate to the next item. Fetches next page if at boundary */
     goToNext: () => void;
     /** Navigate to the previous item. Fetches previous page if at boundary */
@@ -7775,9 +7810,9 @@ declare interface UseDataSourceItemNavigationReturn<R extends RecordType> {
     setActiveItemId: (id: DataSourceItemId | null) => void;
     /** True while waiting for a page transition to resolve the pending navigation */
     isNavigating: boolean;
-    /** URL of the next item (derived via `itemUrl`), or null if unavailable */
+    /** URL of the next loaded item (derived via `itemUrl`), or null if unavailable */
     nextItemUrl: string | null;
-    /** URL of the previous item (derived via `itemUrl`), or null if unavailable */
+    /** URL of the previous loaded item (derived via `itemUrl`), or null if unavailable */
     previousItemUrl: string | null;
 }
 
@@ -8237,11 +8272,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -8288,4 +8318,9 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }

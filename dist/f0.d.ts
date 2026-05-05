@@ -13083,6 +13083,8 @@ export declare interface UseDataSourceItemNavigationReturn<R extends RecordType>
     previousItem: R | null;
     /** The next loaded item record, or null if unavailable */
     nextItem: R | null;
+    /** URL of the active item (derived via `itemUrl`), or null if unavailable */
+    activeItemUrl: string | null;
     /** Navigate to the next item. Fetches next page if at boundary */
     goToNext: () => void;
     /** Navigate to the previous item. Fetches previous page if at boundary */
@@ -13095,9 +13097,9 @@ export declare interface UseDataSourceItemNavigationReturn<R extends RecordType>
     setActiveItemId: (id: DataSourceItemId | null) => void;
     /** True while waiting for a page transition to resolve the pending navigation */
     isNavigating: boolean;
-    /** URL of the next item (derived via `itemUrl`), or null if unavailable */
+    /** URL of the next loaded item (derived via `itemUrl`), or null if unavailable */
     nextItemUrl: string | null;
-    /** URL of the previous item (derived via `itemUrl`), or null if unavailable */
+    /** URL of the previous loaded item (derived via `itemUrl`), or null if unavailable */
     previousItemUrl: string | null;
 }
 
@@ -13760,11 +13762,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -13811,4 +13808,9 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
