@@ -5,7 +5,10 @@ import { F0Button } from "@/components/F0Button"
 import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { useDataCollectionItemNavigation } from "../../hooks/useDataCollectionItemNavigation"
+import {
+  useDataCollectionItemNavigation,
+  useDataCollectionItemNavigationRouteSync,
+} from "../../hooks/useDataCollectionItemNavigation"
 import { useDataCollectionSource } from "../../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../../index"
 import { generateMockUsers, MockUser } from "../mockData"
@@ -251,6 +254,108 @@ const PageBasedPaginationDemo = () => {
   )
 }
 
+const replaceLastPathSegment = (path: string, id: string) => {
+  const segments = path.split("/")
+  segments[segments.length - 1] = id
+  return segments.join("/")
+}
+
+const RouteSyncDemo = () => {
+  const [routeId, setRouteId] = useState(users[0].id)
+  const itemNavigation = useDataCollectionItemNavigation<MockUser>({
+    snapshotMode: "session",
+    idProvider: (item) => item.id,
+  })
+
+  const { activeRouteId, controls } = useDataCollectionItemNavigationRouteSync({
+    itemNavigation,
+    routeId,
+    onRouteIdChange: (nextRouteId) => {
+      setRouteId(nextRouteId)
+    },
+  })
+
+  const source = useDataCollectionSource<MockUser>({
+    dataAdapter: {
+      fetchData: async () => ({ records: users.slice(0, 5) }),
+    },
+    itemUrl: (item) => `/users/${item.id}`,
+    itemOnClick: (item) => () => setRouteId(item.id),
+  })
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="border-f1-border-secondary flex items-center justify-between gap-4 rounded-md border p-3">
+        <div>
+          <div className="text-f1-foreground font-medium">
+            Route-synced detail panel
+          </div>
+          <div className="text-f1-foreground-secondary text-sm">
+            The route ID opens the navigation session. Prev/next changes call
+            back so the consumer can update router state or browser history.
+          </div>
+        </div>
+        <div className="text-f1-foreground-secondary text-sm">
+          /users/{activeRouteId ?? "none"}
+        </div>
+      </div>
+
+      <div className="bg-f1-background-secondary border-f1-border-secondary flex items-center justify-between rounded-md border p-3">
+        <div>
+          <div className="text-f1-foreground font-medium">
+            {itemNavigation.activeItem?.name ?? "No selected item"}
+          </div>
+          <div className="text-f1-foreground-secondary text-sm">
+            {controls
+              ? `${controls.currentIndex + 1} of ${controls.totalCount} · ${controls.activeItemUrl ?? "No URL"}`
+              : "Select an item to start navigating"}
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <F0Button
+            variant="ghost"
+            size="sm"
+            icon={ChevronLeft}
+            hideLabel
+            label="Previous item"
+            disabled={!controls?.canGoPrevious}
+            onClick={controls?.goToPrevious}
+          />
+          <F0Button
+            variant="ghost"
+            size="sm"
+            icon={ChevronRight}
+            hideLabel
+            label="Next item"
+            disabled={!controls?.canGoNext}
+            loading={controls?.isNavigating}
+            onClick={controls?.goToNext}
+          />
+        </div>
+      </div>
+
+      <div className="text-f1-foreground-secondary text-sm">
+        Example history replacement target:{" "}
+        {replaceLastPathSegment("/users/example", routeId)}
+      </div>
+
+      <OneDataCollection
+        source={source}
+        itemNavigation={itemNavigation}
+        storage={false}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              columns,
+            },
+          },
+        ]}
+      />
+    </div>
+  )
+}
+
 export const PageBasedPagination: Story = {
   parameters: {
     docs: {
@@ -271,6 +376,18 @@ export const Snapshot: Story = {
       <PageBasedPaginationDemo />
     </div>
   ),
+}
+
+export const RouteSync: Story = {
+  parameters: withSnapshot({
+    docs: {
+      description: {
+        story:
+          "Uses the optional route-sync helper. F0 opens sessions from the provided route ID and notifies the consumer when prev/next should update route or URL state.",
+      },
+    },
+  }),
+  render: () => <RouteSyncDemo />,
 }
 
 export const SnapshotDuringRefetch: Story = {

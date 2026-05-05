@@ -343,6 +343,11 @@ export function useDataSourceItemNavigation<R extends RecordType>(
     return itemUrl(nextItem) ?? null
   }, [itemUrl, nextItem])
 
+  const activeItemUrl = useMemo(() => {
+    if (!itemUrl || !activeItem) return null
+    return itemUrl(activeItem) ?? null
+  }, [itemUrl, activeItem])
+
   const previousItemUrl = useMemo(() => {
     if (!itemUrl || !previousItem) return null
     return itemUrl(previousItem) ?? null
@@ -357,6 +362,7 @@ export function useDataSourceItemNavigation<R extends RecordType>(
     totalItems: paginationInfo?.total,
     previousItem,
     nextItem,
+    activeItemUrl,
     goToNext,
     goToPrevious,
     hasNext,

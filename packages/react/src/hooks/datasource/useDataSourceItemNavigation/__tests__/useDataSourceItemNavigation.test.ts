@@ -935,34 +935,37 @@ describe("useDataSourceItemNavigation", () => {
     })
   })
 
-  describe("nextItemUrl / previousItemUrl", () => {
+  describe("activeItemUrl / nextItemUrl / previousItemUrl", () => {
     const itemUrl = (item: TestRecord) => `/items/${item.id}`
 
-    it("returns null for both when no itemUrl is provided", () => {
+    it("returns null for URLs when no itemUrl is provided", () => {
       const { result } = zeroRenderHook(() =>
         useDataSourceItemNavigation(defaultProps({ defaultActiveItemId: 3 }))
       )
 
+      expect(result.current.activeItemUrl).toBeNull()
       expect(result.current.nextItemUrl).toBeNull()
       expect(result.current.previousItemUrl).toBeNull()
     })
 
-    it("returns null for both when no active item", () => {
+    it("returns null for URLs when no active item", () => {
       const { result } = zeroRenderHook(() =>
         useDataSourceItemNavigation(defaultProps({ itemUrl }))
       )
 
+      expect(result.current.activeItemUrl).toBeNull()
       expect(result.current.nextItemUrl).toBeNull()
       expect(result.current.previousItemUrl).toBeNull()
     })
 
-    it("returns next and previous URLs for a middle item", () => {
+    it("returns active, next, and previous URLs for a middle item", () => {
       const { result } = zeroRenderHook(() =>
         useDataSourceItemNavigation(
           defaultProps({ defaultActiveItemId: 3, itemUrl })
         )
       )
 
+      expect(result.current.activeItemUrl).toBe("/items/3")
       expect(result.current.previousItemUrl).toBe("/items/2")
       expect(result.current.nextItemUrl).toBe("/items/4")
     })
@@ -996,6 +999,7 @@ describe("useDataSourceItemNavigation", () => {
         )
       )
 
+      expect(result.current.activeItemUrl).toBe("/items/2")
       expect(result.current.previousItemUrl).toBe("/items/1")
       expect(result.current.nextItemUrl).toBe("/items/3")
 
@@ -1003,6 +1007,7 @@ describe("useDataSourceItemNavigation", () => {
         result.current.goToNext()
       })
 
+      expect(result.current.activeItemUrl).toBe("/items/3")
       expect(result.current.previousItemUrl).toBe("/items/2")
       expect(result.current.nextItemUrl).toBe("/items/4")
     })
@@ -1020,6 +1025,7 @@ describe("useDataSourceItemNavigation", () => {
         )
       )
 
+      expect(result.current.activeItemUrl).toBe("/items/3")
       expect(result.current.previousItemUrl).toBe("/items/2")
       expect(result.current.nextItemUrl).toBeNull()
     })

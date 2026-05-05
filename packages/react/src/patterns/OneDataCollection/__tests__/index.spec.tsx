@@ -146,6 +146,9 @@ const ItemNavigationStatus = ({
         {itemNavigation.controls?.totalCount ?? "none"}
       </div>
       <div data-testid="next-url">{itemNavigation.nextItemUrl ?? "none"}</div>
+      <div data-testid="controls-active-url">
+        {itemNavigation.controls?.activeItemUrl ?? "none"}
+      </div>
       <div data-testid="is-navigating">
         {String(itemNavigation.isNavigating)}
       </div>
@@ -976,6 +979,9 @@ describe("Collections", () => {
     expect(screen.getByTestId("loaded-count")).toHaveTextContent("2")
     expect(screen.getByTestId("controls-current-index")).toHaveTextContent("0")
     expect(screen.getByTestId("controls-total-count")).toHaveTextContent("5")
+    expect(screen.getByTestId("controls-active-url")).toHaveTextContent(
+      "/people/1"
+    )
     expect(screen.getByTestId("next-url")).toHaveTextContent("/people/2")
     expect(fetchData).toHaveBeenCalledTimes(1)
   })

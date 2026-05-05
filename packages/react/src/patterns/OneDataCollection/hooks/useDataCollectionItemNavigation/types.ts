@@ -14,6 +14,8 @@ export interface DataCollectionItemNavigationControls<R extends RecordType> {
   activeItemId: DataSourceItemId | null
   /** The currently active item record. */
   activeItem: R
+  /** URL of the active item, or null when unavailable. */
+  activeItemUrl: string | null
   /** Zero-based active index. Uses the absolute index when pagination exposes it. */
   currentIndex: number
   /** Total matching records when known, otherwise the loaded navigation records. */
@@ -62,6 +64,32 @@ export interface UseDataCollectionItemNavigationProps<R extends RecordType> {
    * item from the collection. Kept for advanced/manual control.
    */
   snapshotKey?: string | number | null
+}
+
+export interface UseDataCollectionItemNavigationRouteSyncProps<
+  R extends RecordType,
+> {
+  /** Controller returned by useDataCollectionItemNavigation. */
+  itemNavigation?: DataCollectionItemNavigationController<R> | null
+  /** Route-level item ID. Changing this starts a new item-navigation session. */
+  routeId: string | null | undefined
+  /** Converts route IDs to item-navigation IDs. Defaults to string identity. */
+  parseRouteId?: (id: string) => DataSourceItemId
+  /** Converts item-navigation IDs back to route IDs. Defaults to String(id). */
+  formatItemId?: (id: DataSourceItemId) => string
+  /** Called when item navigation changes the active item and the app should update its route/URL. */
+  onRouteIdChange?: (routeId: string, itemId: DataSourceItemId) => void
+}
+
+export interface DataCollectionItemNavigationRouteSyncResult<
+  R extends RecordType,
+> {
+  /** Route ID that should be used by the detail view for data fetching. */
+  activeRouteId: string | null
+  /** Current active item-navigation ID. */
+  activeItemId: DataSourceItemId | null
+  /** Render-ready controls from the item-navigation controller. */
+  controls: DataCollectionItemNavigationControls<R> | null
 }
 
 export interface DataCollectionItemNavigationController<

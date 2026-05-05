@@ -493,6 +493,7 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
     return {
       activeItemId: navigation.activeItemId,
       activeItem: navigation.activeItem,
+      activeItemUrl: navigation.activeItemUrl,
       currentIndex: navigation.absoluteIndex ?? navigation.activeIndex,
       totalCount: navigation.totalItems ?? navigation.loadedItemsCount,
       previousItem: navigation.previousItem,
