@@ -1,0 +1,38 @@
+/*
+ * f0compose — styles.
+ *
+ * f0-react ships its own pre-compiled Tailwind in `dist/styles.css`, including
+ * the f0 reset, all f1-* utilities, the safelist patterns and the design
+ * system tokens. We import that bundle as-is and DO NOT run our own Tailwind
+ * — running a second Tailwind compilation here would re-introduce its
+ * `preflight` reset on top of f0's reset and overwrite f0's typography
+ * defaults, which is what was making buttons / typography look "off".
+ */
+
+@import "@factorialco/f0-react/assets/fonts/style.css";
+@import "@factorialco/f0-react/dist/styles.css";
+
+:root {
+  /* color-scheme is set dynamically by FloatingControls via
+     `document.documentElement.style.colorScheme`. We default to light
+     here so first paint isn't affected by browser dark-mode hints. */
+  color-scheme: light;
+  /* Re-declared because dist/styles.css doesn't ship the source-only var. */
+  --ds-sidebar-width: 240px;
+}
+
+/* When FloatingControls toggles dark mode it adds the `.dark` class to
+   <html>; f0-react's compiled Tailwind already targets that class. */
+html.dark {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+}
