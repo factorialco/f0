@@ -7,47 +7,17 @@ import {
 } from "@factorialco/f0-react"
 import {
   ApplicationFrame,
+  OneDataCollection,
   Page,
 } from "@factorialco/f0-react/dist/experimental"
 import { useEffect } from "react"
-import { allPrototypes } from "@/prototypes/registry"
-import type { Category } from "@/prototypes/types"
-import { CatalogSidebar } from "@/shell/CatalogSidebar"
-import { categories } from "./categories"
-import { PrototypeCard } from "./CategoryCard"
 
-function CategorySection({
-  category,
-  prototypes,
-}: {
-  category: (typeof categories)[number]
-  prototypes: typeof allPrototypes
-}) {
-  if (prototypes.length === 0) return null
-  return (
-    <F0Box display="flex" flexDirection="column" gap="md">
-      <F0Box display="flex" flexDirection="row" gap="sm" alignItems="baseline">
-        <F0Heading
-          content={`${category.emoji} ${category.label}`}
-          variant="heading"
-          as="h2"
-        />
-        <F0Text content={category.description} variant="description" />
-      </F0Box>
-      <F0Box
-        display="grid"
-        columns="1"
-        gap="md"
-        sm={{ columns: "2" }}
-        lg={{ columns: "3" }}
-      >
-        {prototypes.map((meta) => (
-          <PrototypeCard key={meta.slug} meta={meta} />
-        ))}
-      </F0Box>
-    </F0Box>
-  )
-}
+import { allPrototypes } from "@/prototypes/registry"
+import { CatalogSidebar } from "@/shell/CatalogSidebar"
+import { emojiForModule } from "@/shell/modules"
+
+import { prototypeCardProperties } from "./prototypeCardProperties"
+import { usePrototypeCatalogSource } from "./usePrototypeCatalogSource"
 
 function GettingStarted() {
   return (
@@ -66,17 +36,33 @@ function GettingStarted() {
   )
 }
 
+function CatalogList() {
+  const source = usePrototypeCatalogSource()
+  return (
+    <OneDataCollection
+      source={source}
+      visualizations={[
+        {
+          type: "card",
+          options: {
+            cardProperties: prototypeCardProperties,
+            title: (m) => m.title,
+            description: (m) => m.description,
+            avatar: (m) => ({
+              type: "emoji",
+              emoji: emojiForModule[m.module],
+            }),
+          },
+        },
+      ]}
+    />
+  )
+}
+
 export function CatalogHome() {
   useEffect(() => {
     document.title = "f0compose · Factorial prototypes"
   }, [])
-
-  const grouped = new Map<Category, typeof allPrototypes>()
-  for (const meta of allPrototypes) {
-    const list = grouped.get(meta.category) ?? []
-    list.push(meta)
-    grouped.set(meta.category, list)
-  }
 
   return (
     <ApplicationFrame sidebar={<CatalogSidebar />}>
@@ -94,17 +80,7 @@ export function CatalogHome() {
             />
           </F0Box>
 
-          {allPrototypes.length === 0 ? (
-            <GettingStarted />
-          ) : (
-            categories.map((cat) => (
-              <CategorySection
-                key={cat.id}
-                category={cat}
-                prototypes={grouped.get(cat.id) ?? []}
-              />
-            ))
-          )}
+          {allPrototypes.length === 0 ? <GettingStarted /> : <CatalogList />}
         </StandardLayout>
       </Page>
     </ApplicationFrame>

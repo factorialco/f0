@@ -322,6 +322,91 @@ const source = useDataCollectionSource<TRow>(
 
 **Quick-filter chips like Active / Talent pool / Archived** are **presets**, not sub-tabs. Wire them via `presets` + `filters` + `dataAdapter` reading `options.filters`.
 
+### MANDATORY by default: pagination + functional sort + functional search
+
+Every OneDataCollection in a prototype MUST do all three for real, every time.
+**Opt out only when the user explicitly says "no pagination" / "no sort" / "no
+search"**, or when the dataset is bounded and tiny (≤10 rows) and the user has
+implicitly accepted that. Default = on.
+
+These rules exist because every one of these surfaces is interactive in the
+UI by default. Declaring them in the config without wiring them in `fetchData`
+produces a UI that *looks* live but does nothing — the worst kind of prototype
+lie. A designer demos it, the stakeholder clicks "sort by amount", nothing
+happens, and the prototype's credibility evaporates.
+
+1. **Pagination is the default.** Every source's `dataAdapter` MUST set
+   `paginationType: "pages"` and a `perPage` value, and `fetchData` MUST
+   return the page-shaped response (`{ type: "pages", records, total,
+   perPage, currentPage, pagesCount }`). Sensible per-page defaults: tables
+   20–25, dense tables 10, card grids 12 (divisible by 1/2/3/4 to match the
+   responsive column counts).
+
+2. **Sorts MUST be functional.** Every field declared in `sortings` MUST be
+   actually applied to records inside `fetchData`. Use the shared
+   `@/lib/applySort` helper — it accepts a per-source `getValue(item, field)`
+   so each hook decides how to read the field (number, lowercased string,
+   parsed date, etc.).
+
+3. **Search MUST be functional.** When `search: { enabled: true }` is
+   declared, `fetchData` MUST filter records by the search term against at
+   least one human-readable field (name / title / provider / email).
+
+#### Canonical `fetchData` body — filters → search → sort → paginate
+
+```ts
+import { applySort } from "@/lib/applySort"
+
+dataAdapter: {
+  paginationType: "pages",
+  perPage: 25,
+  fetchData: ({ filters, search, sortings, pagination }) => {
+    // 1. filters
+    const wanted = Array.isArray(filters?.status)
+      ? (filters.status as string[])
+      : []
+    const term = (search ?? "").toLowerCase().trim()
+
+    const filtered = rows
+      .filter((r) => wanted.length === 0 ? true : wanted.includes(r.status))
+      // 2. search — at least one human-readable field
+      .filter((r) =>
+        term === "" ? true : r.name.toLowerCase().includes(term)
+      )
+
+    // 3. sort — every declared sorting field must be handled here
+    const sorted = applySort(filtered, sortings, (r, field) => {
+      switch (field) {
+        case "name":      return r.name.toLowerCase()
+        case "amount":    return r.amount
+        case "createdAt": return Date.parse(r.createdAt)
+        default:          return null
+      }
+    })
+
+    // 4. paginate
+    const perPage = pagination?.perPage ?? 25
+    const currentPage =
+      pagination && "currentPage" in pagination && pagination.currentPage
+        ? pagination.currentPage
+        : 1
+    const total = sorted.length
+    const pagesCount = Math.max(1, Math.ceil(total / perPage))
+    const start = (currentPage - 1) * perPage
+    return {
+      type: "pages" as const,
+      records: sorted.slice(start, start + perPage),
+      total, perPage, currentPage, pagesCount,
+    }
+  },
+},
+```
+
+This is the shape every prototype's source hook must follow. Verify in the
+browser before declaring the prototype done: type in the search box, click a
+sortable column header, click page 2 — all three must actually change what's
+on screen.
+
 ## Step 8 — Mocks: ALWAYS @/fixtures
 
 ```tsx
@@ -478,6 +563,7 @@ Both green. Plus visually:
 - `/p/<slug>` renders without console errors.
 - No bare HTML in any file under `src/prototypes/<slug>/` (`grep -rE "<(div|span|p|ul|li|button|a |img|table|h[1-6])\b" src/prototypes/<slug>/` returns nothing).
 - Cells in OneDataCollection display values (not blank) — if blank, the `render` returns the wrong shape (see §11).
+- **Sort, search, and pagination all behave for real**: click a sortable column header → row order changes; type in the search box → rows narrow; navigate to page 2 → the table shows different rows. If any of those don't change anything visible, the corresponding handling in `fetchData` is missing — go back to Step 7.
 
 ### Modular structure check (for non-trivial prototypes)
 
@@ -563,6 +649,8 @@ After generating, ask the user if they want an `impeccable audit` pass. `f0-desi
 - DON'T skip `<StandardLayout>` in the body.
 - DON'T wrap OneDataCollection in a card/border `F0Box` — it has its own chrome.
 - DON'T return JSX from a OneDataCollection `render`.
+- DON'T declare `sortings` / `search` / `paginationType` in the source config without applying them in `fetchData`. That's a UI lie — buttons that don't do anything. See Step 7's MANDATORY rules and the canonical `fetchData` body.
+- DON'T ship a OneDataCollection without pagination unless the user explicitly says so or the dataset is bounded and tiny (≤10 rows).
 - DON'T guess cell value shapes — read `ui/value-display/types/<cellType>/<cellType>.tsx`.
 - DON'T guess component props — read `__stories__/<Component>.stories.tsx`.
 - DON'T use `as any`. f0 is strictly typed.

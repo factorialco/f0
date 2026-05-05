@@ -6,6 +6,7 @@ import {
 } from "@factorialco/f0-react/icons/app"
 
 import { departments, type Job, jobs } from "@/fixtures"
+import { applySort } from "@/lib/applySort"
 
 /**
  * useDataCollectionSource for the employee-facing "Internal opportunities"
@@ -111,7 +112,9 @@ export function useInternalOpportunitiesSource() {
         },
       },
       dataAdapter: {
-        fetchData: ({ filters, search }) => {
+        paginationType: "pages",
+        perPage: 12,
+        fetchData: ({ filters, search, sortings, pagination }) => {
           const wantedTypes = Array.isArray(filters?.jobType)
             ? (filters.jobType as Job["jobType"][])
             : []
@@ -124,7 +127,7 @@ export function useInternalOpportunitiesSource() {
           const dateValue = filters?.publishedAt as DateFilterValue
           const term = (search ?? "").toLowerCase().trim()
 
-          const records = publishedJobs
+          const filtered = publishedJobs
             .filter((j) =>
               wantedTypes.length === 0 ? true : wantedTypes.includes(j.jobType)
             )
@@ -143,7 +146,33 @@ export function useInternalOpportunitiesSource() {
               term === "" ? true : j.title.toLowerCase().includes(term)
             )
 
-          return { records }
+          const sorted = applySort(filtered, sortings, (j, field) => {
+            switch (field) {
+              case "publishedAt":
+                return j.publishedAt ? Date.parse(j.publishedAt) : null
+              default:
+                return null
+            }
+          })
+
+          const perPage = pagination?.perPage ?? 12
+          const currentPage =
+            pagination && "currentPage" in pagination && pagination.currentPage
+              ? pagination.currentPage
+              : 1
+          const total = sorted.length
+          const pagesCount = Math.max(1, Math.ceil(total / perPage))
+          const start = (currentPage - 1) * perPage
+          const records = sorted.slice(start, start + perPage)
+
+          return {
+            type: "pages" as const,
+            records,
+            total,
+            perPage,
+            currentPage,
+            pagesCount,
+          }
         },
       },
       itemActions: (job: Job) => [

@@ -62,3 +62,14 @@ export {
   type CandidateState,
   type CandidateStageCount,
 } from "./recruitment"
+export {
+  expenses,
+  expenseCountsByStatus,
+  expenseGroups,
+  groupCountsByStatus,
+  type Expense,
+  type ExpenseStatus,
+  type ExpenseCategory,
+  type ExpenseAlert,
+  type ExpenseGroup,
+} from "./expenses"
