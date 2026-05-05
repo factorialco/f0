@@ -1,0 +1,147 @@
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as Stories from "./Text.stories"
+
+<Meta of={Stories} />
+
+# F0Text
+
+Renders body copy, descriptions, code snippets, and labels across the interface. It wraps all text content that is not a heading.
+
+---
+
+## Overview
+
+### Purpose
+
+- Provides a consistent typographic system for all non-heading text content
+- Supports markdown rendering by default, enabling lightweight rich text without extra components
+- Covers every text role: body copy, secondary descriptions, small captions, inline code, and form labels
+- Enforces design tokens so text style stays in sync with the design system
+
+### Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+### Variants
+
+#### Type
+
+<Canvas of={Stories.Variants} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Variant</th>
+        <th className="text-left">Description</th>
+        <th className="text-left">When to use</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>body</code>
+        </td>
+        <td>Default text size and weight</td>
+        <td>Main content, paragraphs, general-purpose text</td>
+      </tr>
+      <tr>
+        <td>
+          <code>description</code>
+        </td>
+        <td>Slightly smaller, lower contrast</td>
+        <td>Supporting information, subtitles, helper text below a title</td>
+      </tr>
+      <tr>
+        <td>
+          <code>small</code>
+        </td>
+        <td>Smallest text size</td>
+        <td>Captions, timestamps, metadata, footnotes</td>
+      </tr>
+      <tr>
+        <td>
+          <code>code</code>
+        </td>
+        <td>Monospace font</td>
+        <td>Inline code snippets, technical values, identifiers</td>
+      </tr>
+      <tr>
+        <td>
+          <code>label</code>
+        </td>
+        <td>Bold, compact size</td>
+        <td>Form field labels, section labels, any UI label</td>
+      </tr>
+      <tr>
+        <td>
+          <code>inverse</code>
+        </td>
+        <td>Light-colored text for dark backgrounds</td>
+        <td>
+          Text placed on dark or colored backgrounds (banners, dark cards,
+          toasts)
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+---
+
+## Guidelines
+
+### Design best practices
+
+#### When to use
+
+- Use `body` for any general text content in the interface
+- Use `description` for secondary information that supports a title or heading — not as a standalone block
+- Use `small` for metadata, timestamps, and captions where space is limited
+- Use `code` for technical strings, identifiers, or short inline snippets
+- Use `label` for any UI label: form fields, stat labels, filter labels, column headers in compact layouts
+- Use `inverse` only when text appears on a dark or strongly colored background
+
+#### When NOT to use
+
+- Do not use `F0Text` for page titles or section headings: use `F0Heading` instead
+- Do not use `description` as the only text in a section — it lacks the visual weight to stand alone
+- Do not use `inverse` on light backgrounds: the contrast will fail accessibility requirements
+
+### Content best practices
+
+- Keep text concise — prefer one idea per sentence
+- Use `label` variant with `as="label"` when the text is associated with a form control to get correct HTML semantics
+- Avoid writing markdown in strings that don't need it — set `markdown={false}` to prevent unexpected formatting
+  - **Correct:** `<F0Text content="Price: $10" markdown={false} />`
+  - **Incorrect:** `<F0Text content="Price: $10" />` — the `$` could be misinterpreted in some markdown parsers
+
+### Accessibility
+
+- The `label` variant should use `as="label"` and a `htmlFor` prop when associated with a form input — this links the label to the control for screen readers
+- The `inverse` variant does not change contrast automatically — ensure the background provides sufficient contrast (WCAG AA: 4.5:1 for normal text)
+- Use `ellipsis` only when the full text is accessible through another means (tooltip, expanded view) — truncated text without a disclosure is an accessibility gap
+
+---
+
+## Behavior
+
+### Markdown is enabled by default
+
+`F0Text` renders its `content` prop as markdown by default (`markdown={true}`). Set `markdown={false}` explicitly for plain-text values where markdown syntax characters could appear in data (prices, codes, identifiers).
+
+<Canvas of={Stories.Markdown} />
+
+### Required marker
+
+When `variant="label"` and `required={true}` are combined, the component appends a visual required marker to the label.
+
+<Canvas of={Stories.Required} />
+
+### Ellipsis truncation
+
+When `ellipsis={true}`, the text truncates to a single line with `…`. The component must be placed in a container with a constrained width for the truncation to take effect.
+
+<Canvas of={Stories.TextEllipsis} />

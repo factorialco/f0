@@ -10,7 +10,7 @@ import { F0Text } from "../index"
 const meta = {
   component: F0Text,
   title: "Text",
-  tags: ["autodocs", "experimental"],
+  tags: ["experimental"],
   argTypes: {
     variant: {
       options: ["body", "description", "small", "inverse", "code", "label"],
@@ -62,6 +62,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
+  tags: ["!dev"],
   args: {
     variant: "body",
     content: "This is a text wrapped in the Text component.",
@@ -81,6 +82,7 @@ export const WithDataTestId: Story = {
 }
 
 export const Variants: Story = {
+  tags: ["!dev"],
   args: {
     content: "",
   },
@@ -116,6 +118,7 @@ export const TextAlignment: Story = {
 }
 
 export const TextEllipsis: Story = {
+  tags: ["!dev"],
   parameters: {
     chromatic: { disableSnapshot: true },
   },
@@ -135,12 +138,14 @@ export const TextEllipsis: Story = {
 }
 
 export const Markdown: Story = {
+  tags: ["!dev"],
   args: {
     content: "This is a **bold** text and this is a *italic* text.",
   },
 }
 
 export const MarkdownWithEllipsis: Story = {
+  tags: ["!dev"],
   args: {
     content:
       "This is a **bold** text and this is a *italic* text and this is a **bold** text and this is a *italic* text.",
@@ -149,6 +154,7 @@ export const MarkdownWithEllipsis: Story = {
 }
 
 export const Required: Story = {
+  tags: ["!dev"],
   args: {
     variant: "label",
     content: "Label text",
@@ -158,6 +164,7 @@ export const Required: Story = {
 }
 
 export const Snapshot: Story = {
+  tags: ["!dev"],
   parameters: withSnapshot({}),
   args: {
     content: "",
