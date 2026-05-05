@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.474.1](https://github.com/factorialco/f0/compare/f0-react-v1.474.0...f0-react-v1.474.1) (2026-05-05)
+
+
+### Bug Fixes
+
+* **F0Select:** prevent search clear in asList mode that resets selection ([#4077](https://github.com/factorialco/f0/issues/4077)) ([6f57d68](https://github.com/factorialco/f0/commit/6f57d68916a4b5101a5dfd89d3c3c47d6fab0f0b))
+
 ## [1.474.0](https://github.com/factorialco/f0/compare/f0-react-v1.473.0...f0-react-v1.474.0) (2026-05-04)
 
 
