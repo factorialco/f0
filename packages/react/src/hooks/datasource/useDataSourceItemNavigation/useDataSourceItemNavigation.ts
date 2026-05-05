@@ -87,11 +87,13 @@ export function useDataSourceItemNavigation<R extends RecordType>(
   const records = data.records
   const recordsRef = useRef(records)
   const isLoadingRef = useRef(isLoading)
+  const paginationInfoRef = useRef(paginationInfo)
   const idProviderRef = useRef(idProvider)
   const setActiveItemIdRef = useRef(setActiveItemId)
 
   recordsRef.current = records
   isLoadingRef.current = isLoading
+  paginationInfoRef.current = paginationInfo
   idProviderRef.current = idProvider
   setActiveItemIdRef.current = setActiveItemId
 
@@ -108,7 +110,13 @@ export function useDataSourceItemNavigation<R extends RecordType>(
       }
 
       const pending = pendingNavigation.current
-      if (pending.type === "next-after-current") {
+      if (pending.type === "first" || pending.type === "last") {
+        const currentPaginationInfo = paginationInfoRef.current
+        if (currentPaginationInfo?.type === "pages") {
+          if (currentPaginationInfo.currentPage === pending.targetPage) return
+          clearPendingNavigation()
+        }
+      } else if (pending.type === "next-after-current") {
         const currentRecords = recordsRef.current
         if (currentRecords.length > pending.loadedItemsCount) {
           const prevIndex =
@@ -215,7 +223,13 @@ export function useDataSourceItemNavigation<R extends RecordType>(
         targetPage: paginationInfo.currentPage + 1,
       }
       setIsPendingNavigation(true)
-      setPage(paginationInfo.currentPage + 1)
+      try {
+        setPage(paginationInfo.currentPage + 1)
+      } catch (error) {
+        clearPendingNavigation()
+        throw error
+      }
+      schedulePendingFallbackClear()
     } else if (paginationInfo.type === "infinite-scroll") {
       pendingNavigation.current = {
         type: "next-after-current",
@@ -238,6 +252,7 @@ export function useDataSourceItemNavigation<R extends RecordType>(
     idProvider,
     setActiveItemId,
     schedulePendingFallbackClear,
+    clearPendingNavigation,
   ])
 
   const goToPrevious = useCallback(() => {
@@ -259,7 +274,13 @@ export function useDataSourceItemNavigation<R extends RecordType>(
         targetPage: paginationInfo.currentPage - 1,
       }
       setIsPendingNavigation(true)
-      setPage(paginationInfo.currentPage - 1)
+      try {
+        setPage(paginationInfo.currentPage - 1)
+      } catch (error) {
+        clearPendingNavigation()
+        throw error
+      }
+      schedulePendingFallbackClear()
     }
   }, [
     activeIndex,
@@ -270,6 +291,8 @@ export function useDataSourceItemNavigation<R extends RecordType>(
     setPage,
     idProvider,
     setActiveItemId,
+    schedulePendingFallbackClear,
+    clearPendingNavigation,
   ])
 
   // Resolve pending navigation after data changes

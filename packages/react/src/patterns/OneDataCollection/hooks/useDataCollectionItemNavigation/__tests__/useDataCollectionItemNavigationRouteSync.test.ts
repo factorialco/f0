@@ -14,9 +14,11 @@ type TestRecord = { id: string; name: string }
 const createItemNavigation = ({
   activeItemId = null,
   openItem = vi.fn(),
+  closeItem = vi.fn(),
 }: {
   activeItemId?: string | number | symbol | null
   openItem?: (id: string | number | symbol) => void
+  closeItem?: () => void
 } = {}): DataCollectionItemNavigationController<TestRecord> =>
   ({
     activeItemId,
@@ -61,7 +63,7 @@ const createItemNavigation = ({
             nextItemUrl: null,
           },
     openItem,
-    closeItem: vi.fn(),
+    closeItem,
     resetSnapshot: vi.fn(),
   }) satisfies DataCollectionItemNavigationController<TestRecord>
 
@@ -76,6 +78,48 @@ const defaultProps = (
 })
 
 describe("useDataCollectionItemNavigationRouteSync", () => {
+  it("does not infer active route id from navigation when route is closed on mount", () => {
+    const itemNavigation = createItemNavigation({ activeItemId: "item-a" })
+    const { result } = zeroRenderHook(() =>
+      useDataCollectionItemNavigationRouteSync(
+        defaultProps({ itemNavigation, routeId: null })
+      )
+    )
+
+    expect(result.current.activeRouteId).toBeNull()
+    expect(result.current.activeItemId).toBeNull()
+    expect(result.current.controls).toBeNull()
+  })
+
+  it("closes and masks item navigation when the route is closed", () => {
+    const closeItem = vi.fn()
+    const { result, rerender } = zeroRenderHook(
+      (props: UseDataCollectionItemNavigationRouteSyncProps<TestRecord>) =>
+        useDataCollectionItemNavigationRouteSync(props),
+      {
+        initialProps: defaultProps({
+          itemNavigation: createItemNavigation({ activeItemId: "item-a" }),
+          routeId: "item-a",
+        }),
+      }
+    )
+
+    rerender(
+      defaultProps({
+        itemNavigation: createItemNavigation({
+          activeItemId: "item-a",
+          closeItem,
+        }),
+        routeId: null,
+      })
+    )
+
+    expect(closeItem).toHaveBeenCalledTimes(1)
+    expect(result.current.activeRouteId).toBeNull()
+    expect(result.current.activeItemId).toBeNull()
+    expect(result.current.controls).toBeNull()
+  })
+
   it("opens a navigation session when the route id changes", () => {
     const openItem = vi.fn()
     const { result, rerender } = zeroRenderHook(
@@ -274,6 +318,79 @@ describe("useDataCollectionItemNavigationRouteSync", () => {
 
     expect(onRouteIdChange).toHaveBeenCalledWith("record-43", 43)
     expect(result.current.activeRouteId).toBe("record-43")
+  })
+
+  it("ignores stale route echoes that no longer match the current navigation item", () => {
+    const openItem = vi.fn()
+    const onRouteIdChange = vi.fn()
+    const { result, rerender } = zeroRenderHook(
+      (props: UseDataCollectionItemNavigationRouteSyncProps<TestRecord>) =>
+        useDataCollectionItemNavigationRouteSync(props),
+      {
+        initialProps: defaultProps({
+          itemNavigation: createItemNavigation({
+            activeItemId: "item-a",
+            openItem,
+          }),
+          routeId: "item-a",
+          onRouteIdChange,
+        }),
+      }
+    )
+
+    rerender(
+      defaultProps({
+        itemNavigation: createItemNavigation({
+          activeItemId: "item-b",
+          openItem,
+        }),
+        routeId: "item-a",
+        onRouteIdChange,
+      })
+    )
+
+    rerender(
+      defaultProps({
+        itemNavigation: createItemNavigation({
+          activeItemId: "item-c",
+          openItem,
+        }),
+        routeId: "item-a",
+        onRouteIdChange,
+      })
+    )
+
+    expect(onRouteIdChange).toHaveBeenNthCalledWith(1, "item-b", "item-b")
+    expect(onRouteIdChange).toHaveBeenNthCalledWith(2, "item-c", "item-c")
+    expect(result.current.activeRouteId).toBe("item-c")
+
+    rerender(
+      defaultProps({
+        itemNavigation: createItemNavigation({
+          activeItemId: "item-c",
+          openItem,
+        }),
+        routeId: "item-b",
+        onRouteIdChange,
+      })
+    )
+
+    expect(openItem).not.toHaveBeenCalledWith("item-b")
+    expect(result.current.activeRouteId).toBe("item-c")
+
+    rerender(
+      defaultProps({
+        itemNavigation: createItemNavigation({
+          activeItemId: "item-c",
+          openItem,
+        }),
+        routeId: "item-c",
+        onRouteIdChange,
+      })
+    )
+
+    expect(openItem).not.toHaveBeenCalledWith("item-c")
+    expect(result.current.activeRouteId).toBe("item-c")
   })
 
   it("returns controls from the item navigation controller", () => {

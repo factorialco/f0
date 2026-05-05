@@ -554,6 +554,56 @@ describe("useDataSourceItemNavigation", () => {
       expect(result.current.isNavigating).toBe(true)
     })
 
+    it("clears pending next-page navigation when setPage throws synchronously", () => {
+      const error = new Error("setPage failed")
+      const setPage = vi.fn(() => {
+        throw error
+      })
+      const { result } = zeroRenderHook(() =>
+        useDataSourceItemNavigation(
+          defaultProps({
+            defaultActiveItemId: 5,
+            setPage,
+          })
+        )
+      )
+
+      let thrownError: unknown
+      act(() => {
+        try {
+          result.current.goToNext()
+        } catch (error) {
+          thrownError = error
+        }
+      })
+
+      expect(thrownError).toBe(error)
+      expect(result.current.activeItemId).toBe(5)
+      expect(result.current.isNavigating).toBe(false)
+    })
+
+    it("clears pending next-page navigation when no loading transition is observed", async () => {
+      const setPage = vi.fn()
+      const { result } = zeroRenderHook(() =>
+        useDataSourceItemNavigation(
+          defaultProps({
+            defaultActiveItemId: 5,
+            setPage,
+          })
+        )
+      )
+
+      act(() => {
+        result.current.goToNext()
+      })
+
+      expect(result.current.activeItemId).toBe(5)
+
+      await waitFor(() => {
+        expect(result.current.isNavigating).toBe(false)
+      })
+    })
+
     it("clears pending navigation when the requested page returns no records", () => {
       const setPage = vi.fn()
       const { result, rerender } = zeroRenderHook(
@@ -622,6 +672,62 @@ describe("useDataSourceItemNavigation", () => {
       expect(result.current.activeItem).toEqual(
         expect.objectContaining({ id: 5, name: "Item 5" })
       )
+    })
+
+    it("clears pending previous-page navigation when setPage throws synchronously", () => {
+      const error = new Error("setPage failed")
+      const setPage = vi.fn(() => {
+        throw error
+      })
+      const records = makeRecords(5, 6)
+      const { result } = zeroRenderHook(() =>
+        useDataSourceItemNavigation(
+          defaultProps({
+            defaultActiveItemId: 6,
+            data: makeData(records),
+            paginationInfo: makePagePaginationInfo(2, 3, 15),
+            setPage,
+          })
+        )
+      )
+
+      let thrownError: unknown
+      act(() => {
+        try {
+          result.current.goToPrevious()
+        } catch (error) {
+          thrownError = error
+        }
+      })
+
+      expect(thrownError).toBe(error)
+      expect(result.current.activeItemId).toBe(6)
+      expect(result.current.isNavigating).toBe(false)
+    })
+
+    it("clears pending previous-page navigation when no loading transition is observed", async () => {
+      const setPage = vi.fn()
+      const records = makeRecords(5, 6)
+      const { result } = zeroRenderHook(() =>
+        useDataSourceItemNavigation(
+          defaultProps({
+            defaultActiveItemId: 6,
+            data: makeData(records),
+            paginationInfo: makePagePaginationInfo(2, 3, 15),
+            setPage,
+          })
+        )
+      )
+
+      act(() => {
+        result.current.goToPrevious()
+      })
+
+      expect(result.current.activeItemId).toBe(6)
+
+      await waitFor(() => {
+        expect(result.current.isNavigating).toBe(false)
+      })
     })
   })
 

@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react"
 import { DataSourceItemId, RecordType } from "@/hooks/datasource"
 
 import {
-  DataCollectionItemNavigationController,
   DataCollectionItemNavigationRouteSyncResult,
   UseDataCollectionItemNavigationRouteSyncProps,
 } from "./types"
@@ -14,19 +13,14 @@ const defaultFormatItemId = (id: DataSourceItemId): string => String(id)
 const isSameId = (a: DataSourceItemId | null, b: DataSourceItemId | null) =>
   a === b
 
-const getInitialActiveRouteId = <R extends RecordType>({
-  itemNavigation,
+const getInitialActiveRouteId = ({
   routeId,
-  formatItemId,
 }: {
-  itemNavigation?: DataCollectionItemNavigationController<R> | null
   routeId: string | null | undefined
-  formatItemId: (id: DataSourceItemId) => string
 }) => {
   if (routeId != null) return routeId
-  if (itemNavigation?.activeItemId == null) return null
 
-  return formatItemId(itemNavigation.activeItemId)
+  return null
 }
 
 /**
@@ -44,50 +38,73 @@ export const useDataCollectionItemNavigationRouteSync = <R extends RecordType>({
   onRouteIdChange,
 }: UseDataCollectionItemNavigationRouteSyncProps<R>): DataCollectionItemNavigationRouteSyncResult<R> => {
   const [activeRouteId, setActiveRouteId] = useState<string | null>(() =>
-    getInitialActiveRouteId({ itemNavigation, routeId, formatItemId })
+    getInitialActiveRouteId({ routeId })
   )
   const openedRouteId = useRef<string | null>(null)
   const previousRouteId = useRef<string | null | undefined>(undefined)
+  const ignoredRouteId = useRef<string | null>(null)
   const pendingRouteItemId = useRef<DataSourceItemId | null>(null)
+  const closedItemId = useRef<DataSourceItemId | null>(null)
   const previousNavigationId = useRef<DataSourceItemId | null>(
     itemNavigation?.activeItemId ?? null
   )
-  const emittedRouteId = useRef<string | null>(null)
+  const emittedRouteIds = useRef(new Set<string>())
 
   useEffect(() => {
     const routeIdChanged = previousRouteId.current !== (routeId ?? null)
     previousRouteId.current = routeId ?? null
+    if (routeIdChanged && ignoredRouteId.current !== routeId) {
+      ignoredRouteId.current = null
+    }
 
     if (routeId == null) {
-      if (routeIdChanged) {
-        openedRouteId.current = null
-        pendingRouteItemId.current = null
-        emittedRouteId.current = null
-        setActiveRouteId(null)
+      openedRouteId.current = null
+      pendingRouteItemId.current = null
+      ignoredRouteId.current = null
+      emittedRouteIds.current.clear()
+      setActiveRouteId(null)
+
+      const currentItemId = itemNavigation?.activeItemId ?? null
+      if (currentItemId == null) {
+        closedItemId.current = null
+      } else if (!isSameId(closedItemId.current, currentItemId)) {
+        closedItemId.current = currentItemId
+        itemNavigation?.closeItem()
       }
       return
     }
+
+    const routeItemId = parseRouteId(routeId)
+
+    if (!itemNavigation) {
+      if (routeIdChanged) setActiveRouteId(routeId)
+      return
+    }
+
+    const isEmittedRouteId = emittedRouteIds.current.has(routeId)
+    if (isEmittedRouteId) {
+      if (!isSameId(itemNavigation.activeItemId ?? null, routeItemId)) {
+        ignoredRouteId.current = routeId
+        return
+      }
+
+      emittedRouteIds.current.clear()
+      ignoredRouteId.current = null
+      openedRouteId.current = routeId
+      pendingRouteItemId.current = null
+      setActiveRouteId(routeId)
+      return
+    }
+
+    if (ignoredRouteId.current === routeId) return
 
     if (routeIdChanged) {
       setActiveRouteId(routeId)
     }
 
-    const routeItemId = parseRouteId(routeId)
-
-    if (!itemNavigation) return
-
-    if (
-      emittedRouteId.current === routeId &&
-      isSameId(itemNavigation.activeItemId ?? null, routeItemId)
-    ) {
-      emittedRouteId.current = null
-      openedRouteId.current = routeId
-      pendingRouteItemId.current = null
-      return
-    }
-
     if (openedRouteId.current === routeId) return
 
+    closedItemId.current = null
     openedRouteId.current = routeId
     pendingRouteItemId.current = isSameId(
       itemNavigation.activeItemId ?? null,
@@ -99,6 +116,8 @@ export const useDataCollectionItemNavigationRouteSync = <R extends RecordType>({
   }, [itemNavigation, parseRouteId, routeId])
 
   useEffect(() => {
+    if (routeId == null) return
+
     const nextItemId = itemNavigation?.activeItemId ?? null
     if (isSameId(nextItemId, previousNavigationId.current)) return
 
@@ -120,7 +139,7 @@ export const useDataCollectionItemNavigationRouteSync = <R extends RecordType>({
     const nextRouteId = formatItemId(nextItemId)
     if (nextRouteId === activeRouteId) return
 
-    emittedRouteId.current = nextRouteId
+    emittedRouteIds.current.add(nextRouteId)
     setActiveRouteId(nextRouteId)
     onRouteIdChange?.(nextRouteId, nextItemId)
   }, [
@@ -128,11 +147,20 @@ export const useDataCollectionItemNavigationRouteSync = <R extends RecordType>({
     formatItemId,
     itemNavigation?.activeItemId,
     onRouteIdChange,
+    routeId,
   ])
 
+  const effectiveActiveRouteId = routeId == null ? null : activeRouteId
+
   return {
-    activeRouteId,
-    activeItemId: itemNavigation?.activeItemId ?? null,
-    controls: itemNavigation?.controls ?? null,
+    activeRouteId: effectiveActiveRouteId,
+    activeItemId:
+      effectiveActiveRouteId == null
+        ? null
+        : (itemNavigation?.activeItemId ?? null),
+    controls:
+      effectiveActiveRouteId == null
+        ? null
+        : (itemNavigation?.controls ?? null),
   }
 }

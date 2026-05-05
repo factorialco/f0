@@ -141,6 +141,57 @@ describe("CardCollection", () => {
   })
 
   describe("features", () => {
+    it("publishes data state for item navigation", async () => {
+      const onDataStateChange = vi.fn()
+      const source = {
+        ...createTestSource(),
+        idProvider: (item: Person) => item.id,
+        itemUrl: (item: Person) => `/people/${item.id}`,
+      }
+
+      zeroRender(
+        <CardCollection<
+          Person,
+          FiltersDefinition,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          NavigationFiltersDefinition,
+          GroupingDefinition<Person>
+        >
+          title={(item) => item.name}
+          cardProperties={testCardProperties}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          onDataStateChange={onDataStateChange}
+          source={source}
+        />
+      )
+
+      await waitFor(() => {
+        expect(onDataStateChange).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            source: {
+              idProvider: source.idProvider,
+              itemUrl: source.itemUrl,
+            },
+            data: expect.objectContaining({
+              records: expect.arrayContaining([
+                expect.objectContaining({ id: 1 }),
+                expect.objectContaining({ id: 2 }),
+              ]),
+            }),
+            paginationInfo: null,
+            setPage: expect.any(Function),
+            loadMore: expect.any(Function),
+            isLoading: false,
+            isLoadingMore: false,
+          })
+        )
+      })
+    })
+
     it("uses titleProperty when provided", async () => {
       zeroRender(
         <CardCollection<
