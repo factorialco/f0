@@ -680,6 +680,90 @@ const UnsupportedItemNavigationVisualizationStatus = () => {
   )
 }
 
+const CustomItemNavigationVisualizationStatus = () => {
+  const itemNavigation = useDataCollectionItemNavigation<ItemNavigationPerson>({
+    defaultActiveItemId: 1,
+    idProvider: (item) => item.id,
+  })
+
+  const dataSource = useDataCollectionSource<ItemNavigationPerson>({
+    dataAdapter: {
+      fetchData: () => ({ records: itemNavigationPeople.slice(0, 2) }),
+    },
+  })
+
+  return (
+    <>
+      <div data-testid="ready">{String(itemNavigation.isReady)}</div>
+      <div data-testid="active-name">
+        {itemNavigation.activeItem?.name ?? "none"}
+      </div>
+      <OneDataCollection
+        source={dataSource}
+        storage={false}
+        itemNavigation={itemNavigation}
+        visualizations={[
+          {
+            type: "custom",
+            label: "Custom",
+            icon: LayoutGrid,
+            component: ({ source, onDataStateChange }) => {
+              const {
+                data,
+                paginationInfo,
+                setPage,
+                isLoading,
+                isLoadingMore,
+                loadMore,
+              } = useDataCollectionData<
+                ItemNavigationPerson,
+                FiltersDefinition,
+                SortingsDefinition,
+                SummariesDefinition,
+                NavigationFiltersDefinition,
+                GroupingDefinition<ItemNavigationPerson>
+              >(source)
+
+              useEffect(() => {
+                onDataStateChange?.({
+                  source: {
+                    idProvider: source.idProvider,
+                    itemUrl: source.itemUrl,
+                  },
+                  data,
+                  paginationInfo,
+                  setPage,
+                  loadMore,
+                  isLoading,
+                  isLoadingMore,
+                })
+              }, [
+                data,
+                paginationInfo,
+                setPage,
+                loadMore,
+                isLoading,
+                isLoadingMore,
+                source.idProvider,
+                source.itemUrl,
+                onDataStateChange,
+              ])
+
+              return (
+                <div>
+                  {data.records.map((record) => (
+                    <div key={record.id}>{record.name}</div>
+                  ))}
+                </div>
+              )
+            },
+          },
+        ]}
+      />
+    </>
+  )
+}
+
 describe("Collections", () => {
   test("renders with basic search filter", async () => {
     const mockData: WithGroupId<{ name: string }>[] = [
@@ -1304,6 +1388,24 @@ describe("Collections", () => {
     })
 
     expect(screen.getByTestId("ready")).toHaveTextContent("false")
+  })
+
+  test("registers item navigation data state from custom visualizations", async () => {
+    render(
+      <TestWrapper>
+        <CustomItemNavigationVisualizationStatus />
+      </TestWrapper>
+    )
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Ada").length).toBeGreaterThan(0)
+    })
+
+    await waitFor(() => {
+      expect(screen.getByTestId("ready")).toHaveTextContent("true")
+    })
+
+    expect(screen.getByTestId("active-name")).toHaveTextContent("Ada")
   })
 
   test("renders with custom visualization", async () => {

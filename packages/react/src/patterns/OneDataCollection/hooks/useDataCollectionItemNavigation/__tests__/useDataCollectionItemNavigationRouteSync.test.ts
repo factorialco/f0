@@ -179,6 +179,37 @@ describe("useDataCollectionItemNavigationRouteSync", () => {
     expect(openUpdatedItem).not.toHaveBeenCalled()
   })
 
+  it("reopens the routed item when a recreated controller has no active item", () => {
+    const openInitialItem = vi.fn()
+    const openUpdatedItem = vi.fn()
+    const { rerender } = zeroRenderHook(
+      (props: UseDataCollectionItemNavigationRouteSyncProps<TestRecord>) =>
+        useDataCollectionItemNavigationRouteSync(props),
+      {
+        initialProps: defaultProps({
+          itemNavigation: createItemNavigation({
+            activeItemId: "item-a",
+            openItem: openInitialItem,
+          }),
+          routeId: "item-a",
+        }),
+      }
+    )
+
+    rerender(
+      defaultProps({
+        itemNavigation: createItemNavigation({
+          activeItemId: null,
+          openItem: openUpdatedItem,
+        }),
+        routeId: "item-a",
+      })
+    )
+
+    expect(openInitialItem).toHaveBeenCalledWith("item-a")
+    expect(openUpdatedItem).toHaveBeenCalledWith("item-a")
+  })
+
   it("calls onRouteIdChange when item navigation moves to another item", () => {
     const onRouteIdChange = vi.fn()
     const { result, rerender } = zeroRenderHook(

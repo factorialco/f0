@@ -102,7 +102,12 @@ export const useDataCollectionItemNavigationRouteSync = <R extends RecordType>({
       setActiveRouteId(routeId)
     }
 
-    if (openedRouteId.current === routeId) return
+    if (
+      openedRouteId.current === routeId &&
+      itemNavigation.activeItemId != null
+    ) {
+      return
+    }
 
     closedItemId.current = null
     openedRouteId.current = routeId

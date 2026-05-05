@@ -282,6 +282,8 @@ const OneDataCollectionComp = <
     currentVisualizationType === "editableTable" ||
     currentVisualizationType === "list" ||
     currentVisualizationType === "card"
+  const canPublishItemNavigationDataState =
+    supportsItemNavigation || currentVisualizationType === "custom"
 
   const handleDataStateChange = useCallback(
     (state: DataCollectionItemNavigationDataState<R>) => {
@@ -1072,7 +1074,7 @@ const OneDataCollectionComp = <
           onLoadData={onLoadData}
           onLoadError={onLoadError}
           onDataStateChange={
-            itemNavigation && supportsItemNavigation
+            itemNavigation && canPublishItemNavigationDataState
               ? handleDataStateChange
               : undefined
           }

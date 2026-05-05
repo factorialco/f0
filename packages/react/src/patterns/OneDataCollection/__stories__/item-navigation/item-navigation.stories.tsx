@@ -344,7 +344,7 @@ const RouteSyncDemo = () => {
   )
 }
 
-export const PaginationModes: Story = {
+export const Snapshot: Story = {
   parameters: withSnapshot({
     docs: {
       description: {
