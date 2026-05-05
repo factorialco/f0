@@ -10,7 +10,7 @@ import { F0Text } from "../index"
 const meta = {
   component: F0Text,
   title: "Text",
-  tags: ["experimental"],
+  tags: ["!autodocs", "experimental"],
   argTypes: {
     variant: {
       options: ["body", "description", "small", "inverse", "code", "label"],
@@ -96,6 +96,9 @@ export const Variants: Story = {
       <F0Text variant="small" content="This is a small text." />
       <F0Text variant="code" content="const example = 'code text';" />
       <F0Text variant="label" content="Label text" />
+      <div className="rounded bg-f1-background-inverse p-2">
+        <F0Text variant="inverse" content="Inverse text on dark background" />
+      </div>
     </div>
   ),
 }

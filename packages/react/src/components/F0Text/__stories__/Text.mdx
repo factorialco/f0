@@ -113,14 +113,16 @@ Renders body copy, descriptions, code snippets, and labels across the interface.
 ### Content best practices
 
 - Keep text concise — prefer one idea per sentence
-- Use `label` variant with `as="label"` when the text is associated with a form control to get correct HTML semantics
+- Use `label` variant with `as="label"` when the text is associated with a form control to get correct HTML semantics — wrap the input inside the label element rather than using `htmlFor`, since `F0Text` does not accept `htmlFor` as a prop:
+  - **Correct:** `<F0Text as="label" variant="label" content="Name"><input type="text" /></F0Text>`
+  - **Incorrect:** `<F0Text as="label" variant="label" htmlFor="name-input" content="Name" />`
 - Avoid writing markdown in strings that don't need it — set `markdown={false}` to prevent unexpected formatting
-  - **Correct:** `<F0Text content="Price: $10" markdown={false} />`
-  - **Incorrect:** `<F0Text content="Price: $10" />` — the `$` could be misinterpreted in some markdown parsers
+  - **Correct:** `<F0Text content="Status: **active**" markdown={false} />`
+  - **Incorrect:** `<F0Text content="Status: **active**" />` — the `**` asterisks will be rendered as bold
 
 ### Accessibility
 
-- The `label` variant should use `as="label"` and a `htmlFor` prop when associated with a form input — this links the label to the control for screen readers
+- The `label` variant should use `as="label"` when associated with a form input — wrap the input inside the label for correct HTML semantics, since `F0Text` does not accept a `htmlFor` prop
 - The `inverse` variant does not change contrast automatically — ensure the background provides sufficient contrast (WCAG AA: 4.5:1 for normal text)
 - Use `ellipsis` only when the full text is accessible through another means (tooltip, expanded view) — truncated text without a disclosure is an accessibility gap
 
@@ -130,7 +132,7 @@ Renders body copy, descriptions, code snippets, and labels across the interface.
 
 ### Markdown is enabled by default
 
-`F0Text` renders its `content` prop as markdown by default (`markdown={true}`). Set `markdown={false}` explicitly for plain-text values where markdown syntax characters could appear in data (prices, codes, identifiers).
+`F0Text` renders its `content` prop as markdown by default (`markdown={true}`). Only a limited subset is supported: **bold** (`**text**`) and _italic_ (`*text*`). Other markdown structures (links, headings, lists) are stripped by the sanitizer. Set `markdown={false}` explicitly for plain-text values where markdown syntax characters could appear in data.
 
 <Canvas of={Stories.Markdown} />
 
