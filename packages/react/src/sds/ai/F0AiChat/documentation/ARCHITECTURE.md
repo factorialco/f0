@@ -43,9 +43,11 @@ F0AiChat/
 │   │   ├── index.ts                 # Public exports
 │   │   ├── components/              # Tag renderers (Block, Table, etc.)
 │   │   └── entityRef/               # Entity reference system (declarative)
-│   │       ├── entityRefRegistry.ts # entityRefRenderers record + getEntityRefRenderer
-│   │       ├── EntityRef.tsx        # Dispatcher (reads registry)
-│   │       └── entities/            # One folder per entity type
+│   │       ├── components/
+│   │       │   ├── EntityRef.tsx    # Dispatcher (reads entityRefConfig)
+│   │       │   ├── ResourceRef.tsx  # Unified hover-card renderer
+│   │       │   └── entityRefConfig.ts # Per-type config map
+│   │       └── entities/            # One folder per entity type (profile types)
 │   │           ├── person/
 │   │           ├── candidate/
 │   │           └── jobPosting/
@@ -70,11 +72,11 @@ F0AiChat/
 
 F0AiChat uses three registries, all following the same declarative configuration pattern:
 
-| Registry        | Location                                           | Contains                            | Lookup used by           |
-| --------------- | -------------------------------------------------- | ----------------------------------- | ------------------------ |
-| **Actions**     | `actions/registry.ts`                              | Copilot action hook factories       | `useRegisteredActions()` |
-| **Canvas**      | `canvas/registry.ts`                               | Entity definitions (card + content) | `CanvasPanel`            |
-| **Entity refs** | `markdownRenderers/entityRef/entityRefRegistry.ts` | Inline mention renderers            | `EntityRef` dispatcher   |
+| Registry        | Location                                                    | Contains                                   | Lookup used by           |
+| --------------- | ----------------------------------------------------------- | ------------------------------------------ | ------------------------ |
+| **Actions**     | `actions/registry.ts`                                       | Copilot action hook factories              | `useRegisteredActions()` |
+| **Canvas**      | `canvas/registry.ts`                                        | Entity definitions (card + content)        | `CanvasPanel`            |
+| **Entity refs** | `markdownRenderers/entityRef/components/entityRefConfig.ts` | Per-type config (resolver, URL, mapToCard) | `EntityRef` dispatcher   |
 
 All three work the same way:
 
@@ -108,9 +110,9 @@ See `documentation/CANVAS_ENTITIES.md`.
 
 See `documentation/ENTITY_REFS.md`.
 
-1. Define profile type in `types.ts` + add resolver to `EntityResolvers`
-2. Create `entityRef/entities/<name>/<Name>EntityRef.tsx`
-3. Add it to the `entityRefRenderers` record in `entityRef/entityRefRegistry.ts`
+1. Define profile type in `entities/<name>/types.ts`
+2. Add resolver and URL builder fields to `EntityResolvers` / `EntityUrlBuilders` in `entityRef/types.ts`
+3. Add a config entry to `entityRefConfig` in `entityRef/components/entityRefConfig.ts`
 
 ### Using clarifying questions
 
