@@ -1025,6 +1025,65 @@ export const MultipleManualSelectionOnly: Story = {
 }
 
 /**
+ * Multi-select with preserved selections (default behavior).
+ *
+ * Selections persist across search and filter changes — the normal
+ * selector workflow. Try this:
+ * 1. Select a few employees
+ * 2. Type in the search box to filter
+ * 3. Select another employee from the filtered results
+ * 4. Clear the search — all selections are still there
+ * 5. Use a filter (e.g. department) — selections still preserved
+ */
+export const MultiplePreserveSelections: Story = {
+  args: {
+    label: "Preserve Selections (default)",
+    placeholder: "Search employees...",
+    multiple: true,
+    clearable: true,
+    showSearchBox: true,
+    source: employeeNestedPaginatedSource,
+    mapOptions: (item: Employee) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+      description: `${item.jobTitle} · ${item.departmentName}`,
+    }),
+    onSelectItems: fn((selectionStatus) => {
+      console.log("selectionStatus", selectionStatus)
+    }),
+  },
+}
+
+/**
+ * Multi-select that clears selections on dataset changes.
+ *
+ * When `preserveSelectionOnDatasetChange` is false, selections are
+ * cleared whenever the user searches, filters, or sorts. Try the
+ * same workflow as above — selections will be lost on each change.
+ */
+export const MultipleClearSelectionsOnDatasetChange: Story = {
+  args: {
+    label: "Clear Selections on change",
+    placeholder: "Search employees...",
+    multiple: true,
+    clearable: true,
+    showSearchBox: true,
+    preserveSelectionOnDatasetChange: false,
+    source: employeeNestedPaginatedSource,
+    mapOptions: (item: Employee) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+      description: `${item.jobTitle} · ${item.departmentName}`,
+    }),
+    onSelectItems: fn((selectionStatus) => {
+      console.log("selectionStatus", selectionStatus)
+    }),
+  },
+}
+
+/**
  * Single select with paginated data and filters.
  * Use `defaultItem` to provide label for pre-selected value not in the first page.
  * Filter by department, office, or legal entity to narrow down results.

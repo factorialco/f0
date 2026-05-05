@@ -40,6 +40,7 @@ export function useSelectable<
   isSearchActive = false,
   allPagesSelection,
   resetOnPageChange = true,
+  preserveSelectionOnDatasetChange = false,
 }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<
   R,
   Filters
@@ -725,7 +726,10 @@ export function useSelectable<
       // When disableSelectAll is true, maintain the selection even when the
       // dataset changes because the user is manually selecting items and
       // expects them to persist across soft reloads.
-      if (!disableSelectAll) {
+      // When preserveSelectionOnDatasetChange is true, never clear on dataset
+      // changes — used by selectors where search/filter is for finding items
+      // to add to an existing selection.
+      if (!disableSelectAll && !preserveSelectionOnDatasetChange) {
         // Mark that we're clearing due to a dataset-identity change to prevent
         // the data-sync effect from restoring selections.
         justClearedByDatasetChange.current = true
@@ -741,6 +745,7 @@ export function useSelectable<
     debouncedCurrentSearch,
     clearSelectedItems,
     disableSelectAll,
+    preserveSelectionOnDatasetChange,
   ])
 
   // Clear selections when page changes, unless the user has triggered
