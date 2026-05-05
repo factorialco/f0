@@ -196,19 +196,24 @@ const mockVacancies: VacancyProfile[] = [
     id: "301",
     name: "Senior Frontend Engineer",
     status: "In Progress",
-    vacancyType: "New Position",
+    statusVariant: "info",
+    location: "Barcelona",
+    deadline: "2025-07-15",
   },
   {
     id: "302",
     name: "Product Designer",
     status: "To Do",
-    vacancyType: "Backfill",
+    statusVariant: "neutral",
+    location: "Remote",
+    deadline: "2025-08-01",
   },
   {
     id: "303",
     name: "Backend Engineer",
     status: "Hired",
-    vacancyType: "New Position",
+    statusVariant: "positive",
+    location: "Berlin",
   },
 ]
 
