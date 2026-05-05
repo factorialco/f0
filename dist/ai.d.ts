@@ -536,6 +536,7 @@ export declare const aiTranslations: {
             };
             readonly jobPosting: {
                 readonly vacancies: "Vacancies";
+                readonly vacanciesProgress: "{{filled}} of {{total}} vacancies filled";
                 readonly published: "Published";
                 readonly status: "Status";
             };
@@ -1814,6 +1815,7 @@ export declare const defaultTranslations: {
             };
             readonly jobPosting: {
                 readonly vacancies: "Vacancies";
+                readonly vacanciesProgress: "{{filled}} of {{total}} vacancies filled";
                 readonly published: "Published";
                 readonly status: "Status";
             };
@@ -3415,16 +3417,6 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
@@ -3434,8 +3426,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -3447,6 +3440,15 @@ declare module "@tiptap/core" {
             setVideoEmbed: (options: {
                 src: string;
             }) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
