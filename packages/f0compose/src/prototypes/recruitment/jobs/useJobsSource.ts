@@ -2,19 +2,21 @@ import { useDataCollectionSource } from "@factorialco/f0-react/dist/experimental
 import { Add, Star, StarFilled } from "@factorialco/f0-react/icons/app"
 
 import { type Job, jobs } from "@/fixtures"
+import { applySort } from "@/lib/applySort"
 
 /**
  * useDataCollectionSource setup for the Jobs table:
  * - Status filter + presets (Published / Unlisted / Draft / Archived).
+ * - Search by job title.
+ * - Functional sort by title / location / publishedAt.
+ * - Page-based pagination (20 / page).
  * - Pin/Unpin row action branched on `item.pinned`.
  * - Primary action "New job opening".
- *
- * fetchData is mock-only — it slices the in-memory `jobs` fixture by the
- * currently-selected status filter.
  */
 export function useJobsSource() {
   return useDataCollectionSource<Job>(
     {
+      search: { enabled: true, sync: true },
       filters: {
         status: {
           type: "in",
@@ -36,21 +38,58 @@ export function useJobsSource() {
         { label: "Draft", filter: { status: ["draft"] } },
         { label: "Archived", filter: { status: ["archived"] } },
       ],
-      dataAdapter: {
-        fetchData: ({ filters }) => {
-          const raw = filters?.status
-          const wanted = Array.isArray(raw) ? (raw as string[]) : []
-          const filtered =
-            wanted.length === 0
-              ? jobs
-              : jobs.filter((j) => wanted.includes(j.status))
-          return { records: filtered }
-        },
-      },
       sortings: {
         title: { label: "Job opening" },
         location: { label: "Location" },
         publishedAt: { label: "Published" },
+      },
+      dataAdapter: {
+        paginationType: "pages",
+        perPage: 20,
+        fetchData: ({ filters, search, sortings, pagination }) => {
+          const wanted = Array.isArray(filters?.status)
+            ? (filters.status as string[])
+            : []
+          const term = (search ?? "").toLowerCase().trim()
+
+          const filtered = jobs
+            .filter((j) => (wanted.length === 0 ? true : wanted.includes(j.status)))
+            .filter((j) =>
+              term === "" ? true : j.title.toLowerCase().includes(term)
+            )
+
+          const sorted = applySort(filtered, sortings, (j, field) => {
+            switch (field) {
+              case "title":
+                return j.title.toLowerCase()
+              case "location":
+                return j.location.toLowerCase()
+              case "publishedAt":
+                return j.publishedAt ? Date.parse(j.publishedAt) : null
+              default:
+                return null
+            }
+          })
+
+          const perPage = pagination?.perPage ?? 20
+          const currentPage =
+            pagination && "currentPage" in pagination && pagination.currentPage
+              ? pagination.currentPage
+              : 1
+          const total = sorted.length
+          const pagesCount = Math.max(1, Math.ceil(total / perPage))
+          const start = (currentPage - 1) * perPage
+          const records = sorted.slice(start, start + perPage)
+
+          return {
+            type: "pages" as const,
+            records,
+            total,
+            perPage,
+            currentPage,
+            pagesCount,
+          }
+        },
       },
       primaryActions: () => ({
         label: "New job opening",
