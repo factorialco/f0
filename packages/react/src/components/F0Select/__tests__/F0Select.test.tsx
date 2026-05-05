@@ -424,6 +424,93 @@ describe("Select", () => {
     })
   })
 
+  describe("asList mode", () => {
+    it("preserves selection after searching and clicking an item", async () => {
+      const handleChange = vi.fn()
+      const user = userEvent.setup()
+
+      const source = createDataSourceDefinition<RecordType>({
+        dataAdapter: {
+          paginationType: "infinite-scroll",
+          fetchData: ({ search }) => {
+            const allRecords = [
+              { id: "1", name: "Alice" },
+              { id: "2", name: "Bob" },
+              { id: "3", name: "Carol" },
+            ]
+            const filtered = search
+              ? allRecords.filter((r) =>
+                  r.name.toLowerCase().includes(search.toLowerCase())
+                )
+              : allRecords
+            return Promise.resolve({
+              type: "infinite-scroll" as const,
+              cursor: "100",
+              perPage: 100,
+              hasMore: false,
+              records: filtered,
+              total: filtered.length,
+            })
+          },
+        },
+      })
+
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          source={source}
+          mapOptions={(item: RecordType) => ({
+            value: item.id as string,
+            label: item.name as string,
+          })}
+          onChange={handleChange}
+          asList
+          showSearchBox
+        />
+      )
+
+      // In asList mode, items are shown inline (no popover to open)
+      await waitFor(() => {
+        expect(screen.getAllByText("Alice").length).toBeGreaterThanOrEqual(1)
+      })
+
+      // Type in the search box to filter
+      const searchInput = screen.getByRole("searchbox")
+      await user.type(searchInput, "Ali")
+
+      // Wait for filtered results
+      await waitFor(() => {
+        expect(screen.getAllByText("Alice").length).toBeGreaterThanOrEqual(1)
+        expect(screen.queryByText("Bob")).not.toBeInTheDocument()
+      })
+
+      // Click the first "Alice" element to select it
+      await user.click(screen.getAllByText("Alice")[0])
+
+      // onChange should be called with the selected value
+      await waitFor(() => {
+        expect(handleChange).toHaveBeenCalledWith(
+          "1",
+          expect.objectContaining({ id: "1", name: "Alice" }),
+          expect.objectContaining({ value: "1", label: "Alice" })
+        )
+      })
+
+      // Wait a bit for any debounced effects to fire
+      await waitFor(
+        () => {
+          // onChange should NOT have been called with undefined (i.e., selection should not be cleared)
+          const calls = handleChange.mock.calls
+          const undefinedCall = calls.find(
+            (call: unknown[]) => call[0] === undefined
+          )
+          expect(undefinedCall).toBeUndefined()
+        },
+        { timeout: 1000 }
+      )
+    })
+  })
+
   describe("collapsible groups", () => {
     type GroupedItem = {
       value: string

@@ -477,7 +477,9 @@ const F0SelectComponent = forwardRef(function Select<
 
     // Only reset search in single select mode when dropdown is closed
     // Don't clear while user is still typing/searching with dropdown open
-    if (!multiple && !openLocal) {
+    // Don't clear in asList mode since openLocal is never true (no popover)
+    // and clearing would trigger useSelectable to reset the selection
+    if (!multiple && !openLocal && !asList) {
       setCurrentSearch(undefined)
     }
 
