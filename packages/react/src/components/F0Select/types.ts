@@ -56,6 +56,14 @@ type F0SelectBaseProps<T extends string, R = unknown> = {
    * @default false
    */
   showPreview?: boolean
+  /**
+   * When true, preserves selections when the dataset changes (search, filters,
+   * or sortings). Useful for picker components where the user searches and
+   * filters to find items to add to an existing selection.
+   *
+   * @default true
+   */
+  preserveSelectionOnDatasetChange?: boolean
 } & WithDataTestIdProps
 
 /**

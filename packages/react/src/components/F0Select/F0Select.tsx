@@ -123,6 +123,7 @@ const F0SelectComponent = forwardRef(function Select<
     portalContainer,
     asList = false,
     showPreview = false,
+    preserveSelectionOnDatasetChange = true,
     dataTestId,
     ...props
   }: F0SelectProps<T, R>,
@@ -366,6 +367,7 @@ const F0SelectComponent = forwardRef(function Select<
     isSearchActive: !!currentSearch,
     allPagesSelection: true,
     resetOnPageChange: false,
+    preserveSelectionOnDatasetChange,
   })
 
   /**
@@ -594,13 +596,17 @@ const F0SelectComponent = forwardRef(function Select<
     const curr = JSON.stringify(localSource.currentFilters)
     if (prev !== curr) {
       previousFiltersRef.current = localSource.currentFilters
-      if (!disableSelectAll) {
+      if (!disableSelectAll && !preserveSelectionOnDatasetChange) {
         selectedItemsCache.current.clear()
         setLocalValue([])
         hasUserInteracted.current = true
       }
     }
-  }, [localSource.currentFilters, disableSelectAll])
+  }, [
+    localSource.currentFilters,
+    disableSelectAll,
+    preserveSelectionOnDatasetChange,
+  ])
 
   const collapsible = localSource.grouping?.collapsible ?? false
   const defaultOpenGroups = localSource.grouping?.defaultOpenGroups
