@@ -3,6 +3,7 @@ import { useMemo } from "react"
 
 import type { ChatDashboardConfig } from "../../../canvas/entities/dashboard/types"
 import { DashboardCard } from "../../../canvas/entities/dashboard/DashboardCard"
+import { useAiChat } from "../../../providers/AiChatStateProvider"
 
 /**
  * Hook to register the displayDashboard copilot action.
@@ -23,13 +24,15 @@ import { DashboardCard } from "../../../canvas/entities/dashboard/DashboardCard"
  */
 export const useDisplayDashboardAction = () => {
   const { copilotApiConfig } = useCopilotContext()
+  const { runtimeFetch } = useAiChat()
 
   const apiConfig = useMemo(
     () => ({
       baseUrl: copilotApiConfig.chatApiEndpoint,
       headers: copilotApiConfig.headers as Record<string, string>,
+      runtimeFetch,
     }),
-    [copilotApiConfig.chatApiEndpoint, copilotApiConfig.headers]
+    [copilotApiConfig.chatApiEndpoint, copilotApiConfig.headers, runtimeFetch]
   )
 
   useCopilotAction({

@@ -100,7 +100,11 @@ export type CanvasContentBase = {
 export type DashboardCanvasContent = CanvasContentBase & {
   type: "dashboard"
   config: ChatDashboardConfig
-  apiConfig: { baseUrl: string; headers: Record<string, string> }
+  apiConfig: {
+    baseUrl: string
+    headers: Record<string, string>
+    runtimeFetch?: typeof fetch
+  }
   /** Present when the dashboard is a pre-saved dashboard */
   savedDashboardId?: string
   /** Category of the saved dashboard */
@@ -324,6 +328,10 @@ export type AiChatProviderProps = {
    * Optional hook called before a user message is sent. Return false to block submission.
    */
   onBeforeSendMessage?: () => boolean | Promise<boolean>
+  /**
+   * Optional fetch implementation for AI runtime requests owned by F0.
+   */
+  runtimeFetch?: typeof fetch
 } & Pick<
   CopilotKitProps,
   | "agent"

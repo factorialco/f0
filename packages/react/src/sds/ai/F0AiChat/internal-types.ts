@@ -56,6 +56,10 @@ export interface AiChatState {
    * Optional hook called before a user message is sent. Return false to block submission.
    */
   onBeforeSendMessage?: () => boolean | Promise<boolean>
+  /**
+   * Optional fetch implementation for AI runtime requests owned by F0.
+   */
+  runtimeFetch?: typeof fetch
 }
 
 /**
@@ -96,6 +100,10 @@ export type AiChatProviderReturnValue = {
    */
   onBeforeSendMessage?: () => boolean | Promise<boolean>
   /**
+   * Fetch implementation for AI runtime requests owned by F0.
+   */
+  runtimeFetch: typeof fetch
+  /**
    * Clear/reset the chat conversation
    */
   clear: () => void
@@ -125,10 +133,7 @@ export type AiChatProviderReturnValue = {
    * Send a message to the chat
    * @param message - The message content as a string, or a full Message object
    */
-  sendMessage: (
-    message: string | Message,
-    options?: { skipBeforeSend?: boolean }
-  ) => void
+  sendMessage: (message: string | Message) => void
   /**
    * Internal function to set the sendMessage function from CopilotKit
    * @internal

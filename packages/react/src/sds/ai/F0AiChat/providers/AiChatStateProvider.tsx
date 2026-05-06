@@ -109,6 +109,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   onThumbsUp,
   tracking,
   onBeforeSendMessage,
+  runtimeFetch = fetch,
   ...rest
 }) => {
   const [footer, setFooter] = useState<ReactNode | undefined>(initialFooter)
@@ -350,20 +351,13 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     setChatWidth(DEFAULT_CHAT_WIDTH)
   }
 
-  const sendMessage: AiChatProviderReturnValue["sendMessage"] = (
-    message,
-    options
-  ) => {
+  const sendMessage: AiChatProviderReturnValue["sendMessage"] = (message) => {
     if (!sendMessageFunctionRef.current) {
       return
     }
 
     void (async () => {
-      if (
-        !options?.skipBeforeSend &&
-        onBeforeSendMessage &&
-        (await onBeforeSendMessage()) === false
-      ) {
+      if (onBeforeSendMessage && (await onBeforeSendMessage()) === false) {
         return
       }
 
@@ -488,6 +482,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         resetChatWidth,
         tracking,
         onBeforeSendMessage,
+        runtimeFetch,
         entityRefs,
         canvasActions,
         toolHints,
@@ -572,6 +567,7 @@ export function useAiChat(): AiChatProviderReturnValue {
       resetChatWidth: noopFn,
       tracking: undefined,
       onBeforeSendMessage: undefined,
+      runtimeFetch: fetch,
       entityRefs: undefined,
       canvasActions: undefined,
       toolHints: undefined,

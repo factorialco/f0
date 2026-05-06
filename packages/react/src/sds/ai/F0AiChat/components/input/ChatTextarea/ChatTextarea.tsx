@@ -219,14 +219,11 @@ export const ChatTextarea = ({
         if (pendingContext) setPendingContext(null)
         if (pendingQuote) setPendingQuote(null)
 
-        sendMessage(
-          {
-            id: crypto.randomUUID(),
-            role: "user",
-            content: contentParts,
-          },
-          { skipBeforeSend: true }
-        )
+        sendMessage({
+          id: crypto.randomUUID(),
+          role: "user",
+          content: contentParts,
+        })
       } else {
         if (pendingQuote) setPendingQuote(null)
         onSend(withQuote)

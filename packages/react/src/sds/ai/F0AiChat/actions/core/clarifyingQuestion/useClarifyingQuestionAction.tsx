@@ -102,7 +102,7 @@ function ClarifyingQuestionController({
 }) {
   const translation = useI18n()
 
-  const { sendMessage, setClarifyingQuestion } = useAiChat()
+  const { sendMessage, setClarifyingQuestion, runtimeFetch } = useAiChat()
   const { threadId } = useCopilotChatInternal()
   const { copilotApiConfig } = useCopilotContext()
 
@@ -239,6 +239,7 @@ function ClarifyingQuestionController({
         headers: copilotApiConfig.headers as Record<string, string> | undefined,
         threadId,
         toolCallId,
+        runtimeFetch,
         args: {
           steps: rawSteps,
           isResolved: true,
@@ -317,6 +318,7 @@ function ClarifyingQuestionController({
         headers: copilotApiConfig.headers as Record<string, string> | undefined,
         threadId,
         toolCallId,
+        runtimeFetch,
         args: {
           steps: rawSteps,
           isResolved: true,
