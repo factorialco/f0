@@ -78,6 +78,7 @@ export const ChatTextarea = ({
     pendingQuote,
     setPendingQuote,
     setProcessDroppedFilesFunction,
+    onBeforeSendMessage,
   } = useAiChat()
   const translation = useI18n()
   const shouldReduceMotion = useReducedMotion()
@@ -154,7 +155,7 @@ export const ChatTextarea = ({
   const isUploading = attachedFiles.some((f) => f.status === "uploading")
   const hasDataToSend = inputValue.trim().length > 0
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     // When clarifying, form submit is a no-op — the panel handles its own confirm
@@ -164,6 +165,11 @@ export const ChatTextarea = ({
     if (inProgress) {
       handleStop()
     } else if (hasDataToSend && !isUploading) {
+      if (onBeforeSendMessage && (await onBeforeSendMessage()) === false) {
+        textareaRef.current?.focus()
+        return
+      }
+
       const transformed = mentions.transformMentions(inputValue.trim())
       // Escape markdown/HTML in the user's own text so `*hola*` stays literal
       // and only features we control (quote blockquote, @mentions, tool
@@ -213,11 +219,14 @@ export const ChatTextarea = ({
         if (pendingContext) setPendingContext(null)
         if (pendingQuote) setPendingQuote(null)
 
-        sendMessage({
-          id: crypto.randomUUID(),
-          role: "user",
-          content: contentParts,
-        })
+        sendMessage(
+          {
+            id: crypto.randomUUID(),
+            role: "user",
+            content: contentParts,
+          },
+          { skipBeforeSend: true }
+        )
       } else {
         if (pendingQuote) setPendingQuote(null)
         onSend(withQuote)

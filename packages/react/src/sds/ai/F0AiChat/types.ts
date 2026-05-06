@@ -320,6 +320,10 @@ export type AiChatProviderProps = {
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
   tracking?: AiChatTrackingOptions
+  /**
+   * Optional hook called before a user message is sent. Return false to block submission.
+   */
+  onBeforeSendMessage?: () => boolean | Promise<boolean>
 } & Pick<
   CopilotKitProps,
   | "agent"

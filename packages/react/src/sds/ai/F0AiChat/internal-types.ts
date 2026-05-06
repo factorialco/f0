@@ -52,6 +52,10 @@ export interface AiChatState {
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
   tracking?: AiChatTrackingOptions
+  /**
+   * Optional hook called before a user message is sent. Return false to block submission.
+   */
+  onBeforeSendMessage?: () => boolean | Promise<boolean>
 }
 
 /**
@@ -88,6 +92,10 @@ export type AiChatProviderReturnValue = {
   ) => void
   tracking?: AiChatTrackingOptions
   /**
+   * Optional hook called before a user message is sent. Return false to block submission.
+   */
+  onBeforeSendMessage?: () => boolean | Promise<boolean>
+  /**
    * Clear/reset the chat conversation
    */
   clear: () => void
@@ -117,7 +125,10 @@ export type AiChatProviderReturnValue = {
    * Send a message to the chat
    * @param message - The message content as a string, or a full Message object
    */
-  sendMessage: (message: string | Message) => void
+  sendMessage: (
+    message: string | Message,
+    options?: { skipBeforeSend?: boolean }
+  ) => void
   /**
    * Internal function to set the sendMessage function from CopilotKit
    * @internal
