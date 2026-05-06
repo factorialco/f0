@@ -12,6 +12,7 @@ import { cardPropertyRenderers } from "@/components/F0Card/components/CardMetada
 import { CardMetadata, CardMetadataProperty } from "@/components/F0Card/types"
 import { IconType } from "@/components/F0Icon"
 import { useDataCollectionData } from "@/patterns/OneDataCollection/hooks/useDataCollectionData"
+import { usePublishDataState } from "@/patterns/OneDataCollection/hooks/usePublishDataState"
 import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { GroupingDefinition, RecordType } from "@/hooks/datasource"
@@ -371,7 +372,6 @@ export const CardCollection = <
     isInitialLoading,
     loadMore,
     isLoadingMore,
-    error,
   } = useDataCollectionData<
     Record,
     Filters,
@@ -393,31 +393,16 @@ export const CardCollection = <
 
   const { isLoading } = source
 
-  useEffect(() => {
-    onDataStateChange?.({
-      source: {
-        idProvider: source.idProvider,
-        itemUrl: source.itemUrl,
-      },
-      data,
-      paginationInfo,
-      setPage,
-      loadMore,
-      isLoading,
-      isLoadingMore,
-    })
-  }, [
+  usePublishDataState({
+    source,
     data,
-    error,
     paginationInfo,
     setPage,
     loadMore,
     isLoading,
     isLoadingMore,
-    source.idProvider,
-    source.itemUrl,
     onDataStateChange,
-  ])
+  })
 
   useEffect(() => {
     onLoadData({

@@ -37,6 +37,7 @@ import { Skeleton } from "@/ui/skeleton.tsx"
 import { PrimaryActionItemDefinition } from "../../../actions"
 import { useDataCollectionData } from "../../../hooks/useDataCollectionData"
 import { useInfiniteScrollPagination } from "../../../hooks/useInfiniteScrollPagination"
+import { usePublishDataState } from "../../../hooks/usePublishDataState"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { SummariesDefinition } from "../../../summary"
@@ -161,7 +162,6 @@ export const TableCollection = <
     isLoadingMore,
     loadMore,
     summaries: summariesData,
-    error,
   } = useDataCollectionData<
     R,
     Filters,
@@ -177,31 +177,16 @@ export const TableCollection = <
 
   const { currentSortings, setCurrentSortings, isLoading } = source
 
-  useEffect(() => {
-    onDataStateChange?.({
-      source: {
-        idProvider: source.idProvider,
-        itemUrl: source.itemUrl,
-      },
-      data,
-      paginationInfo,
-      setPage,
-      loadMore,
-      isLoading,
-      isLoadingMore,
-    })
-  }, [
+  usePublishDataState({
+    source,
     data,
-    error,
     paginationInfo,
     setPage,
     loadMore,
     isLoading,
     isLoadingMore,
-    source.idProvider,
-    source.itemUrl,
     onDataStateChange,
-  ])
+  })
 
   const showItemActions = showItemActionsProp !== false && !!source.itemActions
 
