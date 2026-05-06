@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.474.2](https://github.com/factorialco/f0/compare/f0-react-v1.474.1...f0-react-v1.474.2) (2026-05-06)
+
+
+### Bug Fixes
+
+* **F0Select:** preserve multi-select selections across search and filter changes ([#4084](https://github.com/factorialco/f0/issues/4084)) ([c6ac2a8](https://github.com/factorialco/f0/commit/c6ac2a8fac859f7f39362584238321f0acd3de8a))
+
 ## [1.474.1](https://github.com/factorialco/f0/compare/f0-react-v1.474.0...f0-react-v1.474.1) (2026-05-05)
 
 
