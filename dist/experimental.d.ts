@@ -7729,8 +7729,8 @@ export declare interface UseDataCollectionItemNavigationRouteSyncProps<R extends
     parseRouteId?: (id: string) => DataSourceItemId;
     /** Converts item-navigation IDs back to route IDs. Defaults to String(id). */
     formatItemId?: (id: DataSourceItemId) => string;
-    /** Called when item navigation changes the active item and the app should update its route/URL. */
-    onRouteIdChange?: (routeId: string, itemId: DataSourceItemId) => void;
+    /** Called when item navigation changes or clears the active item and the app should update its route/URL. */
+    onRouteIdChange?: (routeId: string | null, itemId: DataSourceItemId | null) => void;
 }
 
 export declare const useDataCollectionSource: <R extends RecordType = RecordType, FiltersSchema extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>(source: DataCollectionSourceDefinition<R, FiltersSchema, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>, deps?: ReadonlyArray<unknown>) => DataCollectionSource<R, FiltersSchema, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
