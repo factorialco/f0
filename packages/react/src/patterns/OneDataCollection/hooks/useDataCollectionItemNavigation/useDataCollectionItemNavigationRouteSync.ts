@@ -6,6 +6,7 @@ import {
   DataCollectionItemNavigationRouteSyncResult,
   UseDataCollectionItemNavigationRouteSyncProps,
 } from "./types"
+import { getDataCollectionItemNavigationCloseSignal } from "./internal"
 
 const defaultParseRouteId = (id: string): DataSourceItemId => id
 const defaultFormatItemId = (id: DataSourceItemId): string => String(id)
@@ -48,9 +49,21 @@ export const useDataCollectionItemNavigationRouteSync = <R extends RecordType>({
   const previousNavigationId = useRef<DataSourceItemId | null>(
     itemNavigation?.activeItemId ?? null
   )
+  const previousItemNavigation = useRef(itemNavigation)
+  const previousCloseSignal = useRef(
+    getDataCollectionItemNavigationCloseSignal(itemNavigation)
+  )
   const emittedRouteIds = useRef(new Set<string>())
 
   useEffect(() => {
+    const itemNavigationChanged =
+      previousItemNavigation.current !== itemNavigation
+    previousItemNavigation.current = itemNavigation
+    const closeSignal =
+      getDataCollectionItemNavigationCloseSignal(itemNavigation)
+    const closeSignalChanged =
+      closeSignal !== undefined && previousCloseSignal.current !== closeSignal
+    previousCloseSignal.current = closeSignal
     const routeIdChanged = previousRouteId.current !== (routeId ?? null)
     previousRouteId.current = routeId ?? null
     if (routeIdChanged && ignoredRouteId.current !== routeId) {
@@ -104,7 +117,9 @@ export const useDataCollectionItemNavigationRouteSync = <R extends RecordType>({
 
     if (
       openedRouteId.current === routeId &&
-      itemNavigation.activeItemId != null
+      (!itemNavigationChanged ||
+        itemNavigation.activeItemId != null ||
+        closeSignalChanged)
     ) {
       return
     }
@@ -129,7 +144,14 @@ export const useDataCollectionItemNavigationRouteSync = <R extends RecordType>({
     previousNavigationId.current = nextItemId
 
     if (nextItemId == null) {
+      if (pendingRouteItemId.current != null) return
+
       pendingRouteItemId.current = null
+      emittedRouteIds.current.clear()
+      ignoredRouteId.current = routeId
+      openedRouteId.current = null
+      setActiveRouteId(null)
+      onRouteIdChange?.(null, null)
       return
     }
 

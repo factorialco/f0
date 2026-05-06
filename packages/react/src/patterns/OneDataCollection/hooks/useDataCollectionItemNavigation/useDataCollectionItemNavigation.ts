@@ -13,7 +13,10 @@ import {
   DataCollectionItemNavigationController,
   UseDataCollectionItemNavigationProps,
 } from "./types"
-import { DATA_COLLECTION_ITEM_NAVIGATION_SET_DATA_STATE } from "./internal"
+import {
+  DATA_COLLECTION_ITEM_NAVIGATION_CLOSE_SIGNAL,
+  DATA_COLLECTION_ITEM_NAVIGATION_SET_DATA_STATE,
+} from "./internal"
 
 const emptyData: Data<RecordType> = {
   records: [],
@@ -50,7 +53,12 @@ const defaultIdProvider = (
   item: RecordType,
   index?: number
 ): DataSourceItemId =>
-  "id" in item ? `${item.id}` : (index ?? JSON.stringify(item))
+  "id" in item &&
+  (typeof item.id === "string" ||
+    typeof item.id === "number" ||
+    typeof item.id === "symbol")
+    ? item.id
+    : (index ?? JSON.stringify(item))
 
 const createSnapshotData = <R extends RecordType>(data: Data<R>): Data<R> => ({
   type: data.type,
@@ -176,6 +184,7 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
     snapshotMode ?? (snapshotKey != null ? "manual" : "live")
   const [sessionSnapshotKey, setSessionSnapshotKey] = useState(0)
   const [resetSnapshotKey, setResetSnapshotKey] = useState(0)
+  const [closeSignal, setCloseSignal] = useState(0)
   const effectiveSnapshotKey =
     effectiveSnapshotMode === "manual"
       ? snapshotKey
@@ -484,6 +493,7 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
     if (effectiveSnapshotMode === "session") {
       setSessionSnapshotKey((key) => key + 1)
     }
+    setCloseSignal((signal) => signal + 1)
     navigation.setActiveItemId(null)
   }, [clearSnapshotResetTimeout, effectiveSnapshotMode, navigation])
 
@@ -519,6 +529,7 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
       closeItem,
       resetSnapshot,
       [DATA_COLLECTION_ITEM_NAVIGATION_SET_DATA_STATE]: handleDataStateChange,
+      [DATA_COLLECTION_ITEM_NAVIGATION_CLOSE_SIGNAL]: closeSignal,
     }),
     [
       navigation,
@@ -528,6 +539,7 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
       goToPrevious,
       openItem,
       closeItem,
+      closeSignal,
       resetSnapshot,
       handleDataStateChange,
     ]

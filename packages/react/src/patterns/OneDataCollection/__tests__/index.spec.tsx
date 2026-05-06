@@ -257,6 +257,68 @@ const ItemNavigationPageStatus = () => {
   )
 }
 
+const ItemNavigationAsyncPageStatus = () => {
+  const itemNavigation = useDataCollectionItemNavigation<ItemNavigationPerson>({
+    defaultActiveItemId: 2,
+    snapshotMode: "session",
+    idProvider: (item) => item.id,
+  })
+
+  const dataSource = useDataCollectionSource<ItemNavigationPerson>({
+    dataAdapter: {
+      paginationType: "pages",
+      perPage: 2,
+      fetchData: async ({ pagination }) => {
+        await new Promise((resolve) => setTimeout(resolve, 10))
+        const currentPage = pagination.currentPage ?? 1
+        const start = (currentPage - 1) * 2
+
+        return {
+          records: itemNavigationPeople.slice(start, start + 2),
+          total: itemNavigationPeople.length,
+          perPage: 2,
+          type: "pages" as const,
+          currentPage,
+          pagesCount: Math.ceil(itemNavigationPeople.length / 2),
+        }
+      },
+    },
+  })
+
+  return (
+    <>
+      <div data-testid="active-name">
+        {itemNavigation.activeItem?.name ?? "none"}
+      </div>
+      <div data-testid="controls-ready">
+        {String(itemNavigation.controls !== null)}
+      </div>
+      <div data-testid="controls-current-index">
+        {itemNavigation.controls?.currentIndex ?? "none"}
+      </div>
+      <button type="button" onClick={itemNavigation.goToNext}>
+        Next item
+      </button>
+      <button type="button" onClick={itemNavigation.goToPrevious}>
+        Previous item
+      </button>
+      <OneDataCollection
+        source={dataSource}
+        storage={false}
+        itemNavigation={itemNavigation}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              columns: itemNavigationColumns,
+            },
+          },
+        ]}
+      />
+    </>
+  )
+}
+
 const ItemNavigationRecordRefreshStatus = () => {
   const [records, setRecords] = useState(itemNavigationPeople.slice(0, 3))
   const itemNavigation = useDataCollectionItemNavigation<ItemNavigationPerson>({
@@ -1131,6 +1193,36 @@ describe("Collections", () => {
     expect(screen.getByTestId("active-index")).toHaveTextContent("0")
     expect(screen.getByTestId("absolute-index")).toHaveTextContent("2")
     expect(screen.getByTestId("loaded-count")).toHaveTextContent("2")
+  })
+
+  test("keeps controls while async page-based navigation loads boundary pages", async () => {
+    render(
+      <TestWrapper>
+        <ItemNavigationAsyncPageStatus />
+      </TestWrapper>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Bert")
+    })
+
+    await userEvent.click(screen.getByRole("button", { name: "Next item" }))
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Cleo")
+    })
+
+    expect(screen.getByTestId("controls-ready")).toHaveTextContent("true")
+    expect(screen.getByTestId("controls-current-index")).toHaveTextContent("2")
+
+    await userEvent.click(screen.getByRole("button", { name: "Previous item" }))
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Bert")
+    })
+
+    expect(screen.getByTestId("controls-ready")).toHaveTextContent("true")
+    expect(screen.getByTestId("controls-current-index")).toHaveTextContent("1")
   })
 
   test("refreshes same-id snapshot records after refetch", async () => {

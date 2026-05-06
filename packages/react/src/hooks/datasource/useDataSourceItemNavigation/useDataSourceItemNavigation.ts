@@ -23,7 +23,12 @@ const defaultIdProvider = (
   item: RecordType,
   index?: number
 ): DataSourceItemId =>
-  "id" in item ? `${item.id}` : (index ?? JSON.stringify(item))
+  "id" in item &&
+  (typeof item.id === "string" ||
+    typeof item.id === "number" ||
+    typeof item.id === "symbol")
+    ? item.id
+    : (index ?? JSON.stringify(item))
 
 export function useDataSourceItemNavigation<R extends RecordType>(
   props: UseDataSourceItemNavigationProps<R>
@@ -59,13 +64,6 @@ export function useDataSourceItemNavigation<R extends RecordType>(
 
   const activeItemId: DataSourceItemId | null = activeItemIdState ?? null
 
-  const setActiveItemId = useCallback(
-    (id: DataSourceItemId | null) => {
-      setActiveItemIdRaw(id)
-    },
-    [setActiveItemIdRaw]
-  )
-
   const pendingNavigation = useRef<PendingNavigation>(null)
   const pendingSawLoading = useRef(false)
   const pendingClearTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -83,6 +81,14 @@ export function useDataSourceItemNavigation<R extends RecordType>(
     pendingSawLoading.current = false
     setIsPendingNavigation(false)
   }, [clearPendingTimeout])
+
+  const setActiveItemId = useCallback(
+    (id: DataSourceItemId | null) => {
+      clearPendingNavigation()
+      setActiveItemIdRaw(id)
+    },
+    [clearPendingNavigation, setActiveItemIdRaw]
+  )
 
   const records = data.records
   const recordsRef = useRef(records)
@@ -140,6 +146,11 @@ export function useDataSourceItemNavigation<R extends RecordType>(
   }, [clearPendingNavigation, clearPendingTimeout])
 
   useEffect(() => clearPendingTimeout, [clearPendingTimeout])
+
+  useEffect(() => {
+    if (!isPendingNavigation || pendingNavigation.current === null) return
+    schedulePendingFallbackClear()
+  }, [isPendingNavigation, schedulePendingFallbackClear])
 
   const { activeIndex, activeItem, previousItem, nextItem } = useMemo(() => {
     if (activeItemId == null) {
@@ -229,7 +240,6 @@ export function useDataSourceItemNavigation<R extends RecordType>(
         clearPendingNavigation()
         throw error
       }
-      schedulePendingFallbackClear()
     } else if (paginationInfo.type === "infinite-scroll") {
       pendingNavigation.current = {
         type: "next-after-current",
@@ -238,7 +248,6 @@ export function useDataSourceItemNavigation<R extends RecordType>(
       }
       setIsPendingNavigation(true)
       loadMore()
-      schedulePendingFallbackClear()
     }
   }, [
     activeIndex,
@@ -251,7 +260,6 @@ export function useDataSourceItemNavigation<R extends RecordType>(
     loadMore,
     idProvider,
     setActiveItemId,
-    schedulePendingFallbackClear,
     clearPendingNavigation,
   ])
 
@@ -280,7 +288,6 @@ export function useDataSourceItemNavigation<R extends RecordType>(
         clearPendingNavigation()
         throw error
       }
-      schedulePendingFallbackClear()
     }
   }, [
     activeIndex,
@@ -291,7 +298,6 @@ export function useDataSourceItemNavigation<R extends RecordType>(
     setPage,
     idProvider,
     setActiveItemId,
-    schedulePendingFallbackClear,
     clearPendingNavigation,
   ])
 

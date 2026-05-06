@@ -582,6 +582,43 @@ describe("useDataSourceItemNavigation", () => {
       expect(result.current.isNavigating).toBe(false)
     })
 
+    it("cancels pending next-page navigation when active item is set manually", () => {
+      const setPage = vi.fn()
+      const { result, rerender } = zeroRenderHook(
+        (props: UseDataSourceItemNavigationProps<TestRecord>) =>
+          useDataSourceItemNavigation(props),
+        {
+          initialProps: defaultProps({
+            defaultActiveItemId: 5,
+            setPage,
+          }),
+        }
+      )
+
+      act(() => {
+        result.current.goToNext()
+      })
+      expect(result.current.isNavigating).toBe(true)
+
+      act(() => {
+        result.current.setActiveItemId(3)
+      })
+
+      expect(result.current.activeItemId).toBe(3)
+      expect(result.current.isNavigating).toBe(false)
+
+      rerender(
+        defaultProps({
+          data: makeData(makeRecords(5, 6)),
+          paginationInfo: makePagePaginationInfo(2, 3, 15),
+          setPage,
+          isLoading: false,
+        })
+      )
+
+      expect(result.current.activeItemId).toBe(3)
+    })
+
     it("clears pending next-page navigation when no loading transition is observed", async () => {
       const setPage = vi.fn()
       const { result } = zeroRenderHook(() =>
@@ -831,6 +868,44 @@ describe("useDataSourceItemNavigation", () => {
       expect(result.current.isNavigating).toBe(false)
     })
 
+    it("cancels pending loadMore navigation when active item is set manually", () => {
+      const loadMore = vi.fn()
+      const { result, rerender } = zeroRenderHook(
+        (props: UseDataSourceItemNavigationProps<TestRecord>) =>
+          useDataSourceItemNavigation(props),
+        {
+          initialProps: defaultProps({
+            defaultActiveItemId: 5,
+            paginationInfo: makeInfiniteScrollPaginationInfo(true, 15),
+            loadMore,
+          }),
+        }
+      )
+
+      act(() => {
+        result.current.goToNext()
+      })
+      expect(result.current.isNavigating).toBe(true)
+
+      act(() => {
+        result.current.setActiveItemId(3)
+      })
+
+      expect(result.current.activeItemId).toBe(3)
+      expect(result.current.isNavigating).toBe(false)
+
+      rerender(
+        defaultProps({
+          data: makeData([...makeRecords(5), ...makeRecords(5, 6)]),
+          paginationInfo: makeInfiniteScrollPaginationInfo(true, 15),
+          loadMore,
+          isLoading: false,
+        })
+      )
+
+      expect(result.current.activeItemId).toBe(3)
+    })
+
     it("clears pending navigation when loadMore synchronously returns no appended data", async () => {
       const loadMore = vi.fn()
       const { result } = zeroRenderHook(() =>
@@ -958,7 +1033,7 @@ describe("useDataSourceItemNavigation", () => {
       )
     })
 
-    it("falls back to default idProvider when neither override nor dataSource provides one", () => {
+    it("falls back to item.id without coercing ID type", () => {
       const dataSourceWithoutIdProvider = {
         ...mockDataSource,
         idProvider: undefined,
@@ -968,13 +1043,12 @@ describe("useDataSourceItemNavigation", () => {
         useDataSourceItemNavigation(
           defaultProps({
             dataSource: dataSourceWithoutIdProvider,
-            defaultActiveItemId: "3",
+            defaultActiveItemId: 3,
             idProvider: undefined,
           })
         )
       )
 
-      // Default idProvider converts item.id to string "3"
       expect(result.current.activeItem).toEqual(
         expect.objectContaining({ id: 3, name: "Item 3" })
       )

@@ -7,6 +7,7 @@ import type {
   DataCollectionItemNavigationController,
   UseDataCollectionItemNavigationRouteSyncProps,
 } from "../types"
+import { useDataCollectionItemNavigation } from "../useDataCollectionItemNavigation"
 import { useDataCollectionItemNavigationRouteSync } from "../useDataCollectionItemNavigationRouteSync"
 
 type TestRecord = { id: string; name: string }
@@ -210,6 +211,37 @@ describe("useDataCollectionItemNavigationRouteSync", () => {
     expect(openUpdatedItem).toHaveBeenCalledWith("item-a")
   })
 
+  it("does not clear the route while reopening a recreated empty controller", () => {
+    const onRouteIdChange = vi.fn()
+    const openUpdatedItem = vi.fn()
+    const { result, rerender } = zeroRenderHook(
+      (props: UseDataCollectionItemNavigationRouteSyncProps<TestRecord>) =>
+        useDataCollectionItemNavigationRouteSync(props),
+      {
+        initialProps: defaultProps({
+          itemNavigation: createItemNavigation({ activeItemId: "item-a" }),
+          routeId: "item-a",
+          onRouteIdChange,
+        }),
+      }
+    )
+
+    rerender(
+      defaultProps({
+        itemNavigation: createItemNavigation({
+          activeItemId: null,
+          openItem: openUpdatedItem,
+        }),
+        routeId: "item-a",
+        onRouteIdChange,
+      })
+    )
+
+    expect(openUpdatedItem).toHaveBeenCalledWith("item-a")
+    expect(onRouteIdChange).not.toHaveBeenCalled()
+    expect(result.current.activeRouteId).toBe("item-a")
+  })
+
   it("calls onRouteIdChange when item navigation moves to another item", () => {
     const onRouteIdChange = vi.fn()
     const { result, rerender } = zeroRenderHook(
@@ -234,6 +266,65 @@ describe("useDataCollectionItemNavigationRouteSync", () => {
 
     expect(onRouteIdChange).toHaveBeenCalledWith("item-b", "item-b")
     expect(result.current.activeRouteId).toBe("item-b")
+  })
+
+  it("calls onRouteIdChange with null when item navigation closes", () => {
+    const onRouteIdChange = vi.fn()
+    const itemNavigation = createItemNavigation({ activeItemId: "item-a" })
+    const { result, rerender } = zeroRenderHook(
+      (props: UseDataCollectionItemNavigationRouteSyncProps<TestRecord>) =>
+        useDataCollectionItemNavigationRouteSync(props),
+      {
+        initialProps: defaultProps({
+          itemNavigation,
+          routeId: "item-a",
+          onRouteIdChange,
+        }),
+      }
+    )
+
+    itemNavigation.activeItemId = null
+    itemNavigation.controls = null
+
+    rerender(
+      defaultProps({
+        itemNavigation,
+        routeId: "item-a",
+        onRouteIdChange,
+      })
+    )
+
+    expect(onRouteIdChange).toHaveBeenCalledWith(null, null)
+    expect(result.current.activeRouteId).toBeNull()
+    expect(result.current.activeItemId).toBeNull()
+    expect(result.current.controls).toBeNull()
+  })
+
+  it("calls onRouteIdChange with null when the real controller closes", () => {
+    const onRouteIdChange = vi.fn()
+    const { result } = zeroRenderHook(() => {
+      const itemNavigation = useDataCollectionItemNavigation<TestRecord>({
+        defaultActiveItemId: "item-a",
+      })
+
+      return {
+        itemNavigation,
+        routeSync: useDataCollectionItemNavigationRouteSync({
+          itemNavigation,
+          routeId: "item-a",
+          onRouteIdChange,
+        }),
+      }
+    })
+
+    act(() => {
+      result.current.itemNavigation.closeItem()
+    })
+
+    expect(onRouteIdChange).toHaveBeenCalledWith(null, null)
+    expect(result.current.routeSync.activeRouteId).toBeNull()
+    expect(result.current.routeSync.activeItemId).toBeNull()
+    expect(result.current.itemNavigation.activeItemId).toBeNull()
   })
 
   it("ignores stale active item changes while a route-open is pending", () => {

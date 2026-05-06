@@ -249,7 +249,7 @@ const replaceLastPathSegment = (path: string, id: string) => {
 }
 
 const RouteSyncDemo = () => {
-  const [routeId, setRouteId] = useState(users[0].id)
+  const [routeId, setRouteId] = useState<string | null>(users[0].id)
   const itemNavigation = useDataCollectionItemNavigation<MockUser>({
     snapshotMode: "session",
     idProvider: (item) => item.id,
@@ -324,7 +324,7 @@ const RouteSyncDemo = () => {
 
       <div className="text-f1-foreground-secondary text-sm">
         Example history replacement target:{" "}
-        {replaceLastPathSegment("/users/example", routeId)}
+        {routeId ? replaceLastPathSegment("/users/example", routeId) : "closed"}
       </div>
 
       <OneDataCollection

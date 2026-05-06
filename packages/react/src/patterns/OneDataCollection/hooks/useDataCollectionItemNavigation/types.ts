@@ -77,8 +77,11 @@ export interface UseDataCollectionItemNavigationRouteSyncProps<
   parseRouteId?: (id: string) => DataSourceItemId
   /** Converts item-navigation IDs back to route IDs. Defaults to String(id). */
   formatItemId?: (id: DataSourceItemId) => string
-  /** Called when item navigation changes the active item and the app should update its route/URL. */
-  onRouteIdChange?: (routeId: string, itemId: DataSourceItemId) => void
+  /** Called when item navigation changes or clears the active item and the app should update its route/URL. */
+  onRouteIdChange?: (
+    routeId: string | null,
+    itemId: DataSourceItemId | null
+  ) => void
 }
 
 export interface DataCollectionItemNavigationRouteSyncResult<
