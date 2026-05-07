@@ -1,0 +1,37 @@
+/* Cursor overrides for F0Graph.
+ * React Flow uses BEM class names (e.g. .react-flow__pane) which contain
+ * double underscores that Tailwind's arbitrary-variant syntax converts to
+ * spaces, breaking the selector. A plain CSS file avoids that issue. */
+
+.f0-graph .react-flow__pane.draggable {
+  cursor: default;
+}
+
+.f0-graph .react-flow__pane.dragging {
+  cursor: default;
+}
+
+.f0-graph .react-flow__node {
+  cursor: pointer;
+}
+
+.f0-graph .react-flow__node.selectable {
+  cursor: pointer;
+}
+
+.f0-graph .react-flow__node.draggable {
+  cursor: pointer;
+}
+
+/* Pan mode: grab cursor on canvas & nodes */
+.f0-graph .f0-graph--pan-mode .react-flow__pane.draggable {
+  cursor: grab;
+}
+
+.f0-graph .f0-graph--pan-mode .react-flow__pane.dragging {
+  cursor: grabbing;
+}
+
+.f0-graph .f0-graph--pan-mode .react-flow__node {
+  cursor: grab;
+}

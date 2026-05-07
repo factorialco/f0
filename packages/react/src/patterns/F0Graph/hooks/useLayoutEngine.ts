@@ -1,0 +1,261 @@
+import { useMemo } from "react"
+
+import type {
+  GraphEdge,
+  LayoutDirection,
+  LayoutEngine,
+  LayoutResult,
+  PositionedEdge,
+  PositionedNode,
+  TreeNode,
+} from "../types"
+
+const DEFAULT_NODE_WIDTH = 256
+const DEFAULT_NODE_HEIGHT = 56
+const DEFAULT_EXPANDER_WIDTH = 120
+const DEFAULT_EXPANDER_HEIGHT = 36
+const DEFAULT_RANK_SEP = 130
+const DEFAULT_NODE_SEP = 40
+
+interface UseLayoutEngineOptions {
+  direction?: LayoutDirection
+  nodeWidth?: number
+  nodeHeight?: number
+  rankSep?: number
+  nodeSep?: number
+}
+
+export function useLayoutEngine(
+  options?: UseLayoutEngineOptions
+): LayoutEngine {
+  const direction = options?.direction ?? "TB"
+  const nodeWidth = options?.nodeWidth ?? DEFAULT_NODE_WIDTH
+  const nodeHeight = options?.nodeHeight ?? DEFAULT_NODE_HEIGHT
+  const rankSep = options?.rankSep ?? DEFAULT_RANK_SEP
+  const nodeSep = options?.nodeSep ?? DEFAULT_NODE_SEP
+
+  return useMemo(
+    (): LayoutEngine => ({
+      computeLayout(
+        nodes: TreeNode[],
+        edges: GraphEdge[],
+        dir: LayoutDirection
+      ): LayoutResult {
+        return computeTreeLayout(
+          nodes,
+          edges,
+          dir,
+          nodeWidth,
+          nodeHeight,
+          rankSep,
+          nodeSep
+        )
+      },
+    }),
+    [direction, nodeWidth, nodeHeight, rankSep, nodeSep]
+  )
+}
+
+/**
+ * Deterministic top-down tree layout (cursor-based).
+ *
+ * Why not dagre? Dagre is a DAG layout engine. It re-derives sibling order
+ * from edge structure on every run via barycenter passes, which means
+ * collapsing or expanding a node can shuffle unrelated siblings to reduce
+ * crossings. For a strict tree (one parent per node) we can do better:
+ * sibling order is fixed by the input tree, and a simple post-order pass
+ * produces a stable, readable layout that never reorders nodes across
+ * expand/collapse cycles.
+ *
+ * Algorithm (TB direction):
+ *  1. Build a parent→children map from edges (preserving edge order).
+ *     Skip expander targets — they're drawn under their parent visually
+ *     and don't participate in layout.
+ *  2. Find roots (nodes with no incoming non-expander edge).
+ *  3. For each root, recursively place its subtree:
+ *     - Leaf: occupy one node-width starting at the cursor.
+ *     - Branch: lay out each child subtree left-to-right; center the
+ *       parent over the midpoint of first and last child centers.
+ *  4. Stack ranks vertically by depth (y = depth * (nodeHeight + rankSep)).
+ *  5. Expanders inherit their parent's position (F0Graph repositions them
+ *     manually using parent coords, so the layout output is just a
+ *     placeholder).
+ */
+function computeTreeLayout(
+  treeNodes: TreeNode[],
+  edges: GraphEdge[],
+  direction: LayoutDirection,
+  nodeWidth: number,
+  nodeHeight: number,
+  rankSep: number,
+  nodeSep: number
+): LayoutResult {
+  if (treeNodes.length === 0) {
+    return { nodes: [], edges: [], width: 0, height: 0 }
+  }
+
+  // 1. Build parent→children adjacency from edges, preserving edge order.
+  //    Expander targets are excluded — they live outside the layout tree.
+  const childrenMap = new Map<string, string[]>()
+  const parentOf = new Map<string, string>()
+  for (const edge of edges) {
+    if (edge.target.startsWith("expander-")) continue
+    const list = childrenMap.get(edge.source) ?? []
+    list.push(edge.target)
+    childrenMap.set(edge.source, list)
+    parentOf.set(edge.target, edge.source)
+  }
+
+  // 2. Roots = layout nodes that aren't a child of another layout node.
+  //    Preserve input order (which is DFS visible order from F0Graph).
+  const roots: string[] = []
+  for (const node of treeNodes) {
+    if (node.id.startsWith("expander-")) continue
+    if (!parentOf.has(node.id)) roots.push(node.id)
+  }
+
+  const isHorizontal = direction === "LR" || direction === "RL"
+  const flipMain = direction === "BT" || direction === "RL"
+
+  // Cross axis = sibling spread (X for TB/BT, Y for LR/RL)
+  // Main axis  = depth         (Y for TB/BT, X for LR/RL)
+  const crossSlot = nodeWidth + nodeSep // width consumed per leaf column
+  const mainStep = nodeHeight + rankSep // distance between rank centers
+  const subtreeGap = nodeSep * 2 // gap between subtrees of different parents
+
+  type LayoutPos = { cross: number; depth: number }
+  const positions = new Map<string, LayoutPos>()
+
+  // Returns the cross-axis end of the laid-out subtree (exclusive of trailing
+  // separation) and the cross-axis center of the root node.
+  function layoutSubtree(
+    nodeId: string,
+    crossStart: number,
+    depth: number
+  ): { crossEnd: number; centerCross: number } {
+    const children = childrenMap.get(nodeId) ?? []
+
+    if (children.length === 0) {
+      const center = crossStart + nodeWidth / 2
+      positions.set(nodeId, { cross: center, depth })
+      return { crossEnd: crossStart + nodeWidth, centerCross: center }
+    }
+
+    let cursor = crossStart
+    let firstCenter = 0
+    let lastCenter = 0
+    children.forEach((childId, idx) => {
+      const result = layoutSubtree(childId, cursor, depth + 1)
+      if (idx === 0) firstCenter = result.centerCross
+      lastCenter = result.centerCross
+      // Use larger gap after branch children (their kids are "siblings of different parents")
+      const isBranch = (childrenMap.get(childId)?.length ?? 0) > 0
+      cursor = result.crossEnd + (isBranch ? subtreeGap : nodeSep)
+    })
+    const lastChild = children[children.length - 1]
+    const lastIsBranch = (childrenMap.get(lastChild)?.length ?? 0) > 0
+    const subtreeEnd = cursor - (lastIsBranch ? subtreeGap : nodeSep)
+
+    let center = (firstCenter + lastCenter) / 2
+
+    // Guarantee the parent doesn't visually overflow its subtree.
+    // If the children span is narrower than the parent itself (single
+    // child), expand the subtree to fit the parent centered.
+    const parentLeft = center - nodeWidth / 2
+    const parentRight = center + nodeWidth / 2
+    let actualEnd = subtreeEnd
+    if (parentLeft < crossStart) {
+      const shift = crossStart - parentLeft
+      // Shift this whole subtree right by `shift` so the parent fits.
+      shiftSubtree(nodeId, shift)
+      center += shift
+      actualEnd = subtreeEnd + shift
+    }
+    if (parentRight > actualEnd) {
+      actualEnd = parentRight
+    }
+
+    positions.set(nodeId, { cross: center, depth })
+    return { crossEnd: actualEnd, centerCross: center }
+  }
+
+  // Shift every positioned node within `nodeId`'s subtree by `delta` on cross axis.
+  function shiftSubtree(nodeId: string, delta: number): void {
+    const stack = [nodeId]
+    while (stack.length > 0) {
+      const id = stack.pop()!
+      const pos = positions.get(id)
+      if (pos) pos.cross += delta
+      const kids = childrenMap.get(id)
+      if (kids) for (const k of kids) stack.push(k)
+    }
+  }
+
+  // 3. Lay out each root with a separator gap between them.
+  let rootCursor = 0
+  for (const rootId of roots) {
+    const result = layoutSubtree(rootId, rootCursor, 0)
+    rootCursor = result.crossEnd + crossSlot + subtreeGap
+  }
+
+  // 4. Compute total main-axis extent for BT/RL flipping.
+  let maxDepth = 0
+  for (const pos of positions.values()) {
+    if (pos.depth > maxDepth) maxDepth = pos.depth
+  }
+
+  // 5. Materialize PositionedNode entries for ALL input nodes.
+  //    Expanders inherit their parent's position (F0Graph re-positions them
+  //    manually relative to the parent — the layout value is unused but we
+  //    return it for completeness and safety).
+  let minX = Infinity
+  let minY = Infinity
+  let maxX = -Infinity
+  let maxY = -Infinity
+
+  const positionedNodes: PositionedNode[] = treeNodes.map((node) => {
+    const isExpander = node.id.startsWith("expander-")
+    const width = isExpander ? DEFAULT_EXPANDER_WIDTH : nodeWidth
+    const height = isExpander ? DEFAULT_EXPANDER_HEIGHT : nodeHeight
+
+    let pos: LayoutPos | undefined = positions.get(node.id)
+    if (!pos && isExpander && node.parentId) {
+      pos = positions.get(node.parentId)
+    }
+    const cross = pos?.cross ?? 0
+    const depth = pos?.depth ?? 0
+
+    let mainCenter = depth * mainStep + nodeHeight / 2
+    if (flipMain) {
+      mainCenter = (maxDepth - depth) * mainStep + nodeHeight / 2
+    }
+
+    const centerX = isHorizontal ? mainCenter : cross
+    const centerY = isHorizontal ? cross : mainCenter
+
+    const x = centerX - width / 2
+    const y = centerY - height / 2
+
+    if (x < minX) minX = x
+    if (y < minY) minY = y
+    if (x + width > maxX) maxX = x + width
+    if (y + height > maxY) maxY = y + height
+
+    return { id: node.id, x, y, width, height }
+  })
+
+  // 6. Edges: ReactFlow re-routes from node positions, so points can be empty.
+  const positionedEdges: PositionedEdge[] = edges.map((edge) => ({
+    id: edge.id,
+    source: edge.source,
+    target: edge.target,
+    points: [],
+  }))
+
+  return {
+    nodes: positionedNodes,
+    edges: positionedEdges,
+    width: maxX === -Infinity ? 0 : maxX - minX,
+    height: maxY === -Infinity ? 0 : maxY - minY,
+  }
+}
