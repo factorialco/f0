@@ -16,6 +16,14 @@ const ALLOWED_BARE = new Set([
   "react-router-dom",
   "@factorialco/f0-react",
   "@factorialco/f0-core",
+  // CopilotKit core hooks (`useCopilotAction`, `useCopilotReadable`) so
+  // prototypes can declare actions and shared state for the AI chat.
+  // The chat UI is provided by FactorialShell — prototypes never import
+  // the UI packages directly.
+  "@copilotkit/react-core",
+  // Zod is the schema language used by F0Form (`f0FormField` wraps a Zod
+  // schema). Prototypes that build co-created forms need it directly.
+  "zod",
 ])
 
 export function allowlistPlugin(): Plugin {

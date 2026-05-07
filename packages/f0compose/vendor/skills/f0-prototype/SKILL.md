@@ -1,6 +1,6 @@
 ---
 name: f0-prototype
-description: Use whenever a designer or PM wants to design a Factorial UI inside the f0compose app. Always activate this skill in `packages/f0compose/`. Covers the discovery interview + plan, checking existing prototypes for iteration before creating new ones, the modular folder layout (entry + tabs + columns + source hooks + helpers), the import allowlist, the f1-* tokens, the @/fixtures library, the FactorialShell wrapper, the catalog meta convention, proactively running `pnpm dev`, verifying tsc + route 200 before replying, and an end-of-turn response template that always includes the new prototype URL, the catalog link, related prototypes, a sanity check, and the "paste the error" reminder. Critical rules: propose iterating on existing prototypes when the topic overlaps; ALWAYS write a plan before code; ALWAYS consult `packages/react/.skills/`; only f0 components (no bare HTML); read component stories before using them; OneDataCollection for any list or table; split non-trivial prototypes into the canonical sub-folders.
+description: Use whenever a designer or PM wants to design a Factorial UI inside the f0compose app. Always activate this skill in `packages/f0compose/`. Covers the discovery interview + plan, checking existing prototypes for iteration before creating new ones, the modular folder layout (entry + tabs + columns + source hooks + helpers), the import allowlist, the f1-* tokens, the @/fixtures library, the FactorialShell wrapper, the catalog meta convention, proactively running `pnpm dev`, verifying tsc + route 200 before replying, and an end-of-turn response template that always includes the new prototype URL, the catalog link, related prototypes, a sanity check, and the "paste the error" reminder. ALSO covers multi-view prototypes (each sub-screen has a distinct URL via `useSearchParams`), mandatory breadcrumbs on sub-screens, sticky `ResourceHeader` for sub-screen titles, the `<Tabs>` URL-sync gotcha (per-tab `onClick` + `key={activeTabId}`), the AI chat that's always wired into every prototype (use `@/copilot` only — never import F0AiChat directly), the F0Form co-creation pattern (schema/sections at module scope; `useF0Form` + `useF0FormDefinition` MUST live inside the form component, never lifted to the prototype root or you get an infinite loop in the chat panel), the `f0FormField.text/.select/.number/.date/.checkbox/.multiSelect` builder API plus `row` for multi-column layouts, and the local-only escape hatch for editing `factorial-agent` (never commit). Critical rules: propose iterating on existing prototypes when the topic overlaps; ALWAYS write a plan before code; ALWAYS consult `packages/react/.skills/`; only f0 components (no bare HTML); read component stories before using them; OneDataCollection for any list or table; split non-trivial prototypes into the canonical sub-folders; never import `F0AiChat`/`F0AiChatProvider`/`@copilotkit/*` directly — always go through `@/copilot`.
 ---
 
 # f0-prototype
@@ -144,6 +144,156 @@ Reasons (don't skip any):
 - **No outer padding wrapper around StandardLayout** — StandardLayout handles padding itself.
 - **No card/border wrapper around OneDataCollection** — it has its own chrome.
 - **NEVER import or render `ApplicationFrame` from a prototype.** `FactorialShell` (in `PrototypeRoute`) wraps automatically.
+- **Breadcrumbs are MANDATORY whenever the user is NOT on the prototype's main / index screen.** Sub-screens (form pages, detail views, settings sub-tabs, anything reached by a navigation action) **must** pass `breadcrumbs={[...]}` to `<PageHeader>`.
+
+  **Critical detail**: `PageHeader` **auto-prepends** the `module` as the first breadcrumb (label = `module.name`, link = `module.href`). So `breadcrumbs={[...]}` should only contain the **leaf items past the index** — never include the index itself or you'll get a duplicate "Potatoes > Potatoes > New variety". Last item has no link and represents the current screen.
+
+  **Make `module.href` point at the prototype's actual route** (e.g. `/p/potatoes`, NOT `/potatoes`). The auto-prepended breadcrumb uses this href; if it's wrong the user 404s. For state-based sub-screens, drive the view from `useSearchParams` (`?view=create`) so navigating back to the bare route naturally resets state.
+
+  Pattern:
+
+  ```tsx
+  // On the sub-screen
+  <PageHeader
+    module={{ id: "documents", name: "Potatoes", href: "/p/potatoes" }}
+    breadcrumbs={[{ id: "new", label: "New variety" }]} // leaf only
+    actions={[{ label: "Cancel", icon: Cross, onClick: goToList }]}
+  />
+  ```
+
+  Sub-screens that wrap a form should also surface a **Cancel** entry in `actions` that returns to the main screen, so the user has two ways out (breadcrumb tap and explicit cancel button). On the index screen, omit `breadcrumbs` entirely.
+
+## Step 4.5 — Multi-view prototypes (sub-screens MUST have a distinct URL)
+
+**Non-negotiable.** When a prototype has more than one screen (catalog → detail, list → create form, settings → sub-tab, etc.), each screen **must have its own distinct URL**. This is how `potatoes` is wired and the canonical pattern for all multi-view prototypes.
+
+### Why distinct URLs
+
+- **Breadcrumbs work for free.** `PageHeader` auto-prepends a link to `module.href`. If the index uses `/p/<slug>` and the sub-screen uses `/p/<slug>?view=create`, clicking the breadcrumb (which links to the bare route) drops the user back to the index naturally — no manual `setView`/`onClick` plumbing.
+- **Browser back/forward works.** Refresh, deep-linking, and copy-paste all behave like a real product.
+- **The AI agent can navigate.** If you expose a `useCopilotAction` for navigation, the action just calls `setSearchParams({view: "create"})` and the URL is the source of truth.
+- **State doesn't leak.** Two prototypes opened in different tabs don't share a hidden React state machine.
+
+### Canonical pattern
+
+```tsx
+import { useSearchParams } from "react-router-dom"
+
+export default function MyPrototype() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const view =
+    searchParams.get("view") === "create" ? "create" : "list"
+  const goToCreate = () => setSearchParams({ view: "create" })
+  const goToList = () => setSearchParams({})
+
+  if (view === "create") {
+    return (
+      <Page
+        header={
+          <PageHeader
+            module={{ id: "...", name: "My module", href: "/p/my-prototype" }}
+            breadcrumbs={[{ id: "new", label: "New thing" }]}
+            actions={[{ label: "Cancel", icon: Cross, onClick: goToList }]}
+          />
+        }
+      >
+        <StandardLayout>{/* form */}</StandardLayout>
+      </Page>
+    )
+  }
+  return (/* list view */)
+}
+```
+
+### Rules
+
+- **Use `useSearchParams` from `react-router-dom`**, not `useState`, for view selection. The URL is always authoritative.
+- **One query param per axis of navigation.** `?view=create` for primary navigation, `?id=42` for selected entity, etc. Never bundle navigation state into JSON-stringified params.
+- **Reset state by clearing params.** `setSearchParams({})` returns to the index view, no extra logic.
+- **`module.href` is always `/p/<slug>`** (no query). Don't try to embed view state in `module.href`.
+- **Don't introduce nested routes via `react-router`'s nested routing for sub-screens of a single prototype.** The two-level glob registry (Step 5) only picks up the entry; nested routes would force restructuring. Query params are simpler and equally URL-friendly for prototype purposes.
+
+### Wiring URL state into `<Tabs>` (gotcha)
+
+`<Tabs>` from `@factorialco/f0-react/dist/experimental` keeps its **own
+`useState` internally** that's seeded from `initialActiveTabId` only on
+the first render. It does NOT re-sync when the prop changes later. If
+you drive the active tab from the URL with `useSearchParams`, the
+naive setup will desync and clicks will appear to do nothing.
+
+The canonical pattern:
+
+1. Wire each tab's per-item `onClick` to update the URL.
+2. **Don't** pass `setActiveTabId`.
+3. Pass `key={activeTabIdFromUrl}` so the component remounts (re-seeding
+   internal state) whenever the URL changes externally — breadcrumb
+   navigation, deep links, browser back/forward, etc.
+
+```tsx
+const moduleTabsWithNav = moduleTabs.map((t) => ({
+  ...t,
+  onClick: () => setActiveModuleTab(t.id),
+}))
+
+<Tabs
+  key={activeModuleTab}        // ← remount on external URL change
+  tabs={moduleTabsWithNav}     // ← per-item onClick drives nav
+  activeTabId={activeModuleTab}
+/>
+```
+
+This applies to BOTH the primary `<Tabs>` and any secondary `<Tabs secondary>`.
+
+This rule applies to **every** non-trivial prototype, not just ones with forms. Detail panes, edit screens, "manage X" sub-pages — all use distinct URLs.
+
+### Sticky title + description on sub-screens — use `ResourceHeader`
+
+When a sub-screen needs an explicit title and description (form pages
+typically do), put a `ResourceHeader` **inside `<Page header={<>...</>}>` after
+`PageHeader`**, not in the body. Page makes everything in the `header`
+slot sticky, so the resource header stays visible while the user
+scrolls a long form. Title placed in the body scrolls away and the
+user loses context.
+
+`ResourceHeader` is the canonical f0 component for "this is the main
+thing on this page" — title, description, and the Cancel/secondary
+actions all live there. **Don't roll your own `F0Heading + F0Text`
+combination.** Import `ResourceHeader` from
+`@factorialco/f0-react/dist/experimental`.
+
+```tsx
+import {
+  Page,
+  PageHeader,
+  ResourceHeader,
+} from "@factorialco/f0-react/dist/experimental"
+
+<Page
+  header={
+    <>
+      <PageHeader module={...} breadcrumbs={[{ id, label }]} />
+      <ResourceHeader
+        title="Create job posting"
+        description="Open a new role on the careers page."
+        secondaryActions={[
+          { label: "Cancel", icon: Cross, onClick: goToList },
+        ]}
+      />
+    </>
+  }
+>
+  <StandardLayout>{/* form / detail body */}</StandardLayout>
+</Page>
+```
+
+Notes:
+- Cancel goes in `ResourceHeader.secondaryActions`, NOT in
+  `PageHeader.actions`. The form's own Create/Submit button (owned by
+  `F0Form`) is the primary action; ResourceHeader has Cancel as the
+  visible escape hatch.
+- The index/list view does not need the inline title — the breadcrumb
+  leaf and the page chrome carry that already. ResourceHeader is for
+  sub-screens only.
 
 ## Step 5 — Prototype file convention
 
@@ -191,6 +341,49 @@ Rules for the split:
 - **Sub-components** (cards, drawers, side panels) get their own `.tsx`
   next to the tab that owns them.
 - **Anything reused across tabs** lives under `shared/`.
+- **F0Form module-level statics + hooks inside the component.** The
+  Zod schema, section configs, `defaultValues`, and `submitConfig` go
+  at module scope (truly static, never re-allocated). The hooks
+  `useF0Form()` + `useF0FormDefinition({...})` go **inside** the form
+  component itself so they're paired with the rendered `<F0Form>`. The
+  component takes a single `onCreate` prop. See
+  `potatoes/shared/AddVarietyForm.tsx` and
+  `recruitment/shared/CreateJobForm.tsx` for the canonical split.
+
+  **Why hooks must live with `<F0Form>`**: calling `useF0FormDefinition`
+  in a parent that doesn't also render the form leaves the AI form
+  registry in a "registered but no UI" state. The chat panel renders a
+  preview UI for that registered form which feedback-loops on every
+  re-render ("Maximum update depth exceeded" inside `Dle` / `Array.map`
+  in the `F0AiChat` bundle). The trade-off is real: the agent only
+  sees the form once the user has navigated to the create view. Make
+  the navigation easy — expose a copilot action that does
+  `setSearchParams({ view: "create" })` so the agent can navigate first
+  and then ask the user to fill via `forms.fillForm`.
+
+- **Use the `f0FormField.text/.select/.number/.date/.checkbox/.multiSelect`
+  builder API, not the verbose `f0FormField(z.enum(...), {...})` form.**
+  The builder is what the f0 stories use; the verbose form has caused
+  infinite render loops in the AI chat panel when complex enums are
+  passed to the registry. Mark optionality with `optional: true` in the
+  config, not via Zod's `.optional()`. Available builders include `text`,
+  `email`, `textarea`, `number`, `date`, `dateRange`, `datetime`,
+  `checkbox`, `select`, `multiSelect`, `cardSelect`, `multiFile`.
+
+- **Use `row: "<rowId>"` for multi-column layouts.** Fields in the same
+  schema with the same `row` value get rendered side-by-side. The
+  production "Create job posting" dialog is two columns — see
+  `recruitment/shared/CreateJobForm.tsx` for the canonical pattern.
+
+- **Wrap the form's `onCreate` callback in `useCallback`** at the
+  prototype root before passing it to the form hook. Unstable `onSubmit`
+  identity feedback-loops the AI registry's coagent state sync (the
+  chat panel goes into "Maximum update depth exceeded").
+
+- **Type the submitted data manually**, don't rely on `z.infer<typeof schema>`.
+  The f0 builders return wrapped types whose inference produces
+  partly-optional shapes even on required fields. Declare an explicit
+  `type NewX = { ... }` and `as NewX` cast inside `onSubmit({ data })`.
 - **Don't split prematurely.** A tiny prototype (one screen, one table) is
   fine in a single file — the rule kicks in when concerns multiply.
 
@@ -550,6 +743,140 @@ The real Factorial sidebar (per the production screenshot) has:
 
 ---
 
+## Step 11.A — AI chat & form co-creation (always available)
+
+Every prototype in f0compose is wrapped (by `FactorialShell`) in:
+
+1. `F0AiChatProvider` (via `ApplicationFrame`) — the chat panel itself,
+   talking to the running `factorial-agent` runtime at the canonical
+   Traefik URL `https://mastra.local.factorial.dev/copilotkit` (override
+   via `VITE_AGENT_URL` if needed). **Don't** hit the Mastra port
+   directly (`:4111`) — it bypasses Traefik and gives CORS errors.
+2. `F0AiFormRegistryProvider` — the AI form registry. Any `<F0Form>`
+   rendered inside a prototype is automatically discoverable by the
+   agent's built-in `forms.fillForm` tool.
+
+Prototype authors **never** import `F0AiChat`, `F0AiChatProvider`, or
+`@copilotkit/*` directly. Use `@/copilot` for the hooks they actually
+need.
+
+### Declaring actions and shared state
+
+```tsx
+import { useCopilotAction, useCopilotReadable } from "@/copilot"
+
+// Tell the agent what the user is currently looking at:
+useCopilotReadable({
+  description: "Employees visible in the list (after filters/search).",
+  value: visibleEmployees,
+})
+
+// Let the agent mutate prototype state:
+useCopilotAction({
+  name: "selectEmployee",
+  description: "Select an employee by id.",
+  parameters: [
+    { name: "employeeId", type: "string", required: true },
+  ],
+  handler: ({ employeeId }) => setSelectedId(employeeId),
+})
+```
+
+Rules:
+- Hooks at component top-level only. **Never** inside an action's
+  `render` function — `render` is a render function, not a component.
+- Type streaming args as `Partial<T>` and guard with
+  `status === "inProgress"` when you `render` mid-call.
+- For agent-driven navigation, expose an action whose handler calls
+  `setSearchParams({ view: "create" })` (per Step 4.5). Don't hide
+  navigation behind imperative `navigate()` from inside actions.
+
+### Form co-creation (the rule the AI registry depends on)
+
+A form is only visible to the AI registry **while
+`useF0FormDefinition({...})` is running on a mounted component**. If a
+form lives behind a sub-screen and the user is on the index, the agent
+sees no form and "fill the form" silently no-ops.
+
+**Call the form hook INSIDE the form component** (paired with the
+`<F0Form>` it produces). Lifting the hook to the prototype root —
+where the form UI is conditionally rendered — leaves the AI form
+registry in a "registered but not mounted" state. The chat panel
+attempts to render a preview UI for that registered form on every
+re-render and ends up in an infinite loop ("Maximum update depth
+exceeded" inside `Dle` / `Array.map` in the `F0AiChat` bundle). The
+trade-off is real: the agent only sees the form once the user has
+navigated to the create view. Make navigation easy by exposing a
+copilot action that calls `setSearchParams({ view: "create" })`, so the
+agent can navigate first and then ask the user to fill via
+`forms.fillForm`.
+
+```tsx
+// shared/AddVarietyForm.tsx — schema + sections at module scope (static)
+const varietySchema = z.object({
+  name: f0FormField.text({ label: "Variety name", section: "identity" }),
+  variety: f0FormField.select({ label: "Variety type", section: "classification", options: [...] }),
+  // ... other fields
+})
+const sections = { identity: { title: "Identity" }, /* ... */ }
+const defaultValues = { name: "", variety: undefined, /* ... */ }
+
+export type NewVariety = { name: string; variety: "..."; /* ... */ }
+
+// Hooks INSIDE the component — paired with the rendered <F0Form>.
+export function AddVarietyForm({ onCreate }: { onCreate: (v: NewVariety) => void }) {
+  const { formRef } = useF0Form()
+  const formDefinition = useF0FormDefinition({
+    name: "new-potato-variety",
+    schema: varietySchema,
+    sections,
+    defaultValues,
+    submitConfig: { label: "Create variety" },
+    onSubmit: async ({ data }) => {
+      onCreate(data as NewVariety)
+      return { success: true, message: "Variety added!" }
+    },
+  })
+  return <F0Form formRef={formRef} formDefinition={formDefinition} />
+}
+
+// Potatoes.tsx (entry)
+export default function Potatoes() {
+  const handleCreate = useCallback((data: NewVariety) => {
+    // ... append, navigate back via setSearchParams({})
+  }, [setSearchParams])
+
+  if (view === "create") {
+    return (
+      <Page header={/* PageHeader + ResourceHeader (Step 4.5) */}>
+        <StandardLayout>
+          <AddVarietyForm onCreate={handleCreate} />
+        </StandardLayout>
+      </Page>
+    )
+  }
+  // list view — form is NOT mounted; AI registry doesn't see it from here.
+  // To let the agent fill the form before the user manually navigates,
+  // expose a copilot action that calls setSearchParams({ view: "create" }).
+}
+```
+
+The agent's `forms.fillForm` tool auto-detects the form by `name` from
+the registry. The user submits via the form's own button — the agent
+only fills.
+
+### Reference docs (read these for non-trivial flows)
+
+These live in the f0-react package and are the source of truth:
+
+- `packages/react/src/sds/ai/F0AiChat/documentation/COPILOT_ACTIONS.md`
+- `packages/react/src/sds/ai/F0AiChat/documentation/CANVAS_ENTITIES.md`
+- `packages/react/src/sds/ai/F0AiChat/documentation/ENTITY_REFS.md`
+- `packages/react/src/sds/ai/F0AiChat/documentation/CLARIFYING_QUESTIONS.md`
+- `packages/react/src/sds/ai/F0AiChat/documentation/ARCHITECTURE.md`
+
+---
+
 ## Step 12 — Definition of done
 
 ```bash
@@ -667,3 +994,19 @@ After generating, ask the user if they want an `impeccable audit` pass. `f0-desi
 - DON'T inline column arrays in the tab component. Move them to `<tab>Columns.ts` (kept JSX-free).
 - DON'T create a sub-folder file that exports both `meta` and a `default` component — only the entry `<Slug>.tsx` may.
 - DON'T compose a prototype without first consulting the relevant file under `packages/react/.skills/` (Step 2). Cite it in the response so the user can audit.
+- DON'T omit `breadcrumbs` on a sub-screen (form view, detail view, settings sub-tab). Breadcrumbs are MANDATORY whenever the user is NOT on the prototype's main / index screen — see Step 4. The first item must navigate back; the last item is the current screen.
+- DON'T ship a sub-screen form without a Cancel button in `PageHeader.actions` that returns to the index. Two exits (breadcrumb + explicit Cancel) is the canonical pattern.
+- DON'T call `useF0Form()` / `useF0FormDefinition({...})` in a parent that doesn't ALSO render `<F0Form>`. Lifting the hook to the prototype root with the goal of "making the form discoverable from any view" leaves the AI registry in a "registered but no UI" state, and the chat panel goes into an infinite loop ("Maximum update depth exceeded" inside `Dle`). The hook MUST live next to the rendered form. The trade-off — agent only sees the form once the user navigates to it — is acceptable; expose a copilot action that performs the navigation.
+- DON'T use `useState` to drive view selection in a multi-view prototype. Use `useSearchParams` from `react-router-dom` so each screen has a distinct URL (`/p/<slug>` vs `/p/<slug>?view=create`). See Step 4.5 — distinct URLs are mandatory.
+- DON'T duplicate the module name as the first item of `breadcrumbs`. `PageHeader` already auto-prepends `module.name` linking to `module.href`; passing `[{label: "Potatoes"}, ...]` produces a duplicate "Potatoes > Potatoes > …". Pass only the leaf items past the index.
+- DON'T set `module.href` to anything other than the prototype's actual route (`/p/<slug>`). The auto-prepended breadcrumb uses this href as a real link, so a wrong value 404s the user.
+- DON'T put a sub-screen's title + description in the body. They go inside `<Page header={<>...</>}>` after `PageHeader` so they stay sticky while the user scrolls (Step 4.5).
+- DON'T import `F0AiChat`, `F0AiChatProvider`, `F0AiFormRegistryProvider`, or anything from `@copilotkit/*` directly inside a prototype. The shell wires them. Use `@/copilot` (`useCopilotAction`, `useCopilotReadable`, `useAiChat`) for prototype-level interactions.
+- DON'T point `VITE_AGENT_URL` at the Mastra port directly (`http://mastra.local.factorial.dev:4111/copilotkit`). It bypasses Traefik and produces CORS errors. Use the Traefik HTTPS route `https://mastra.local.factorial.dev/copilotkit` (the same one f0-react Storybook uses).
+- DON'T inline a non-trivial form's schema, sections, and `onSubmit` in the entry file. Modularize per Step 5: schema + Zod + `useF0FormDefinition` live in `shared/use<X>Form.ts`; the presentational `<F0Form>` wrapper lives in `shared/<X>Form.tsx`.
+- DON'T use the verbose `f0FormField(z.enum([...]), { options: [...] })` form for select fields. It has been observed to cause infinite render loops in the AI chat panel. **Always use the builder API**: `f0FormField.text/.email/.textarea/.number/.date/.checkbox/.select/.multiSelect/.cardSelect/...`. Mark optionality via `optional: true` in the config, not `.optional()` on Zod.
+- DON'T arrange related form fields one-per-row when the design groups them. Pair them via `row: "<rowId>"` for the canonical 2-column layout (see `recruitment/shared/CreateJobForm.tsx`).
+- DON'T pass an inline arrow function as `onSubmit` (or any callback the form hook captures) without `useCallback`. Unstable identity feedback-loops the AI registry's coagent state sync, which manifests as "Maximum update depth exceeded" inside the chat panel — the loop only fires when the chat is mounted, so it's easy to miss locally.
+- DON'T type the `onSubmit` payload as `z.infer<typeof schema>`. The f0 builders return wrapped types whose inference produces partly-optional fields even on required ones. Declare an explicit `type NewX = { ... }` for the runtime shape and cast `data as NewX`.
+- DON'T roll your own `F0Heading + F0Text + F0Box` for a sticky sub-screen header. Use `ResourceHeader` from `@factorialco/f0-react/dist/experimental` — it provides title, description, and `secondaryActions` (place Cancel here) in one cohesive component.
+- DON'T drive `<Tabs>` solely with the `setActiveTabId` callback when the active tab also lives in the URL. `<Tabs>` keeps its own internal `useState` and won't re-sync on prop changes — external nav (breadcrumb, deep link, browser back) silently breaks. Wire per-tab `onClick` for nav and pass `key={activeTabId}` so the component remounts on URL change. See Step 4.5 for the canonical snippet.

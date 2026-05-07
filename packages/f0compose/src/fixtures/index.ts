@@ -37,7 +37,17 @@ export {
   timeOffBalances,
   holidays,
 } from "./time-off"
-export { performanceReviews, goals } from "./performance"
+export {
+  performanceReviews,
+  performanceCycles,
+  cycleActivity,
+  goals,
+  type PerformanceCycle,
+  type ReviewCycleStatus,
+  type ReviewCycleType,
+  type CycleActivity,
+  type CycleActivityType,
+} from "./performance"
 export { onboardingTemplates, onboardingProgress } from "./onboarding"
 export {
   chartHeadcount,
