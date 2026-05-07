@@ -11,9 +11,9 @@ import { applySort } from "@/lib/applySort"
  * - Functional sort by title / location / publishedAt.
  * - Page-based pagination (20 / page).
  * - Pin/Unpin row action branched on `item.pinned`.
- * - Primary action "New job opening".
+ * - Primary action "New job opening" → navigates to the create sub-screen.
  */
-export function useJobsSource() {
+export function useJobsSource(onCreateJob: () => void) {
   return useDataCollectionSource<Job>(
     {
       search: { enabled: true, sync: true },
@@ -94,7 +94,7 @@ export function useJobsSource() {
       primaryActions: () => ({
         label: "New job opening",
         icon: Add,
-        onClick: () => {},
+        onClick: onCreateJob,
       }),
       itemActions: (item: Job) => [
         item.pinned
@@ -106,6 +106,6 @@ export function useJobsSource() {
         { label: "Archive", onClick: () => {}, critical: true },
       ],
     },
-    []
+    [onCreateJob]
   )
 }

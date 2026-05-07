@@ -1,10 +1,5 @@
 import { F0Box, F0Button, F0Icon } from "@factorialco/f0-react"
-import {
-  Home,
-  Lightbulb,
-  Moon,
-  Sliders,
-} from "@factorialco/f0-react/icons/app"
+import { Home, Lightbulb, Moon, Sliders } from "@factorialco/f0-react/icons/app"
 import { useEffect, useRef, useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 
@@ -35,7 +30,9 @@ function readCorner(): Corner {
 
 function readTheme(): "light" | "dark" {
   if (typeof window === "undefined") return "light"
-  return window.localStorage.getItem(STORAGE_THEME) === "dark" ? "dark" : "light"
+  return window.localStorage.getItem(STORAGE_THEME) === "dark"
+    ? "dark"
+    : "light"
 }
 
 function cornerStyle(corner: Corner): React.CSSProperties {
@@ -117,9 +114,7 @@ export function FloatingControls() {
   }
 
   const positionStyle: React.CSSProperties =
-    dragPos != null
-      ? { top: dragPos.y, left: dragPos.x }
-      : cornerStyle(corner)
+    dragPos != null ? { top: dragPos.y, left: dragPos.x } : cornerStyle(corner)
 
   // Menu position: opens TOWARD the page center based on corner.
   const menuPositionStyle: React.CSSProperties = (() => {
@@ -166,7 +161,7 @@ export function FloatingControls() {
             userSelect: "none",
             boxShadow: "0 6px 24px rgba(0,0,0,0.18)",
           }}
-          className="bg-f1-background border border-f1-border"
+          className="bg-f1-background border-f1-border-secondary border border-solid"
         >
           <F0Icon icon={Sliders} size="md" />
         </div>
@@ -178,19 +173,23 @@ export function FloatingControls() {
               minWidth: 220,
               ...menuPositionStyle,
             }}
+            className="drop-shadow"
           >
             <F0Box
               display="flex"
               flexDirection="column"
-              gap="xs"
-              padding="xs"
+              gap="md"
+              padding="md"
               background="primary"
               border="default"
+              borderColor="secondary"
               borderRadius="lg"
             >
               <F0Button
                 label={
-                  theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+                  theme === "dark"
+                    ? "Switch to light mode"
+                    : "Switch to dark mode"
                 }
                 icon={theme === "dark" ? Lightbulb : Moon}
                 variant="outline"

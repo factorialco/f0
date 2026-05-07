@@ -14,11 +14,21 @@ import { useJobsSource } from "./useJobsSource"
  * `activeSubTab` is owned by the parent so the secondary tabs can sit in the
  * Page header slot. Only "Job openings" has demo content; the "Requisitions"
  * sub-tab is part of the navigation scaffold.
+ *
+ * `onCreateJob` is wired to the table's primary action ("New job opening")
+ * and navigates the user to the create sub-screen at
+ * `/p/recruitment?view=create-job`.
  */
-export function JobsTab({ activeSubTab }: { activeSubTab: string }) {
+export function JobsTab({
+  activeSubTab,
+  onCreateJob,
+}: {
+  activeSubTab: string
+  onCreateJob: () => void
+}) {
   void activeSubTab
   const pinned = useMemo(() => jobs.filter((j) => j.pinned), [])
-  const source = useJobsSource()
+  const source = useJobsSource(onCreateJob)
 
   return (
     <F0Box display="flex" flexDirection="column" gap="xl">
