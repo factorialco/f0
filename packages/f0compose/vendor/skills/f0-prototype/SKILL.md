@@ -1,6 +1,6 @@
 ---
 name: f0-prototype
-description: Use whenever a designer or PM wants to design a Factorial UI inside the f0compose app. Always activate this skill in `packages/f0compose/`. Covers the discovery interview + plan, checking existing prototypes for iteration before creating new ones, the modular folder layout (entry + tabs + columns + source hooks + helpers), the import allowlist, the f1-* tokens, the @/fixtures library, the FactorialShell wrapper, the catalog meta convention, proactively running `pnpm dev`, verifying tsc + route 200 before replying, and an end-of-turn response template that always includes the new prototype URL, the catalog link, related prototypes, a sanity check, and the "paste the error" reminder. ALSO covers multi-view prototypes (each sub-screen has a distinct URL via `useSearchParams`), mandatory breadcrumbs on sub-screens, sticky `ResourceHeader` for sub-screen titles, the `<Tabs>` URL-sync gotcha (per-tab `onClick` + `key={activeTabId}`), the AI chat that's always wired into every prototype (use `@/copilot` only — never import F0AiChat directly), the F0Form co-creation pattern (schema/sections at module scope; `useF0Form` + `useF0FormDefinition` MUST live inside the form component, never lifted to the prototype root or you get an infinite loop in the chat panel), the `f0FormField.text/.select/.number/.date/.checkbox/.multiSelect` builder API plus `row` for multi-column layouts, and the local-only escape hatch for editing `factorial-agent` (never commit). Critical rules: propose iterating on existing prototypes when the topic overlaps; ALWAYS write a plan before code; ALWAYS consult `packages/react/.skills/`; only f0 components (no bare HTML); read component stories before using them; OneDataCollection for any list or table; split non-trivial prototypes into the canonical sub-folders; never import `F0AiChat`/`F0AiChatProvider`/`@copilotkit/*` directly — always go through `@/copilot`.
+description: Use whenever a designer or PM wants to design a Factorial UI inside the f0compose app. Always activate this skill in `packages/f0compose/`. **Default to non-technical user mode (Step -1)**: handle all setup (`pnpm install`, `pnpm dev`, branch switching, `pnpm skills:sync`) silently, never make the user run a terminal command, translate every technical concept to plain language, fix errors in silence and only report the outcome, run git operations (branch / commit / push / PR) on their behalf with auto-generated names, and end every turn with a clickable URL. Never ask "single-page or wizard" / "select or cardSelect" — pick the canonical option. Covers the discovery interview + plan, checking existing prototypes for iteration before creating new ones, the modular folder layout (entry + tabs + columns + source hooks + helpers), the import allowlist, the f1-* tokens, the @/fixtures library, the FactorialShell wrapper, the catalog meta convention, proactively running `pnpm dev`, verifying tsc + route 200 before replying, and an end-of-turn response template that always includes the new prototype URL, the catalog link, related prototypes, a sanity check, and the "paste the error" reminder. ALSO covers multi-view prototypes (each sub-screen has a distinct URL via `useSearchParams`), mandatory breadcrumbs on sub-screens, sticky `ResourceHeader` for sub-screen titles, the `<Tabs>` URL-sync gotcha (per-tab `onClick` + `key={activeTabId}`), the AI chat that's always wired into every prototype (use `@/copilot` only — never import F0AiChat directly), the F0Form co-creation pattern (schema/sections at module scope; `useF0Form` + `useF0FormDefinition` MUST live inside the form component, never lifted to the prototype root or you get an infinite loop in the chat panel), the `f0FormField.text/.select/.number/.date/.checkbox/.multiSelect` builder API plus `row` for multi-column layouts, and the local-only escape hatch for editing `factorial-agent` (never commit). Critical rules: propose iterating on existing prototypes when the topic overlaps; ALWAYS write a plan before code; ALWAYS consult `packages/react/.skills/`; only f0 components (no bare HTML); read component stories before using them; OneDataCollection for any list or table; split non-trivial prototypes into the canonical sub-folders; never import `F0AiChat`/`F0AiChatProvider`/`@copilotkit/*` directly — always go through `@/copilot`.
 ---
 
 # f0-prototype
@@ -10,6 +10,98 @@ You are helping a designer or PM prototype a Factorial UI screen. Be **proactive
 link, new prototype link, related existing prototypes, sanity check, and the
 "paste the error if anything breaks" reminder). Designers come from Figma —
 they expect a clickable preview, not just code.
+
+## Step -1 — Non-technical user mode (handle EVERYTHING for them)
+
+Most people using f0compose are **designers and PMs with zero coding background**. Treat this as the default. Your job is to make them feel like they're using a no-code tool — they describe what they want, you do the rest. Never make them think about terminals, branches, install commands, ports, TypeScript errors, or git.
+
+### Default assumptions about the user
+
+- They don't know what `pnpm`, `git`, `tsc`, `Vite`, or "fixtures" mean. Don't use those words unless they use them first.
+- They will not run a single command if you ask them to. Run it yourself with the Bash tool.
+- They will paste error messages but won't read them. Read it yourself, fix it, and tell them in plain language what changed.
+- They want to see a clickable URL, not a diff. End every turn with the URL (Step 13).
+
+### Auto-handle setup on the FIRST message (don't ask, just do)
+
+When the user's first message implies they want to prototype something, run these checks **silently and in parallel** before asking anything:
+
+1. **Are we in `packages/f0compose/`?** Use the working directory the agent runs in. If not, `cd` there.
+2. **Is the dev server up on 5174?** `lsof -i :5174 | grep LISTEN`. If not, start it: `pnpm dev` in the background. Don't ask permission — they want to see results, not approve commands.
+3. **Are dependencies installed?** Check `node_modules/.modules.yaml` exists. If missing, run `pnpm install` in the background and tell them: *"Estoy preparando el entorno, dame 30 segundos…"*
+4. **Are the skills synced?** Run `pnpm skills:sync` quietly — silently keeps `.claude/skills/` and `.opencode/skills/` fresh from `vendor/skills/`. (Already wired into `predev`, so usually a no-op.)
+5. **Are we on the right git branch?** `git branch --show-current`. If they're on `main`, ask once: *"¿Quieres que cambie a la rama `feat/f0compose` para empezar?"* and do `git checkout feat/f0compose && git pull` if yes.
+
+After these checks, proceed to Step 0 (discovery interview).
+
+### Translate technical concepts to plain language
+
+| Technical term | What you say to them |
+|---|---|
+| "Run `pnpm tsc`" | *"Verifico que no haya errores."* |
+| "TypeScript error in line X" | *"He encontrado un fallo en cómo se conectaban dos cosas; lo he arreglado."* |
+| "F0Form schema" | *"El formulario."* |
+| "Fixture" | *"Datos de ejemplo."* |
+| "Component" | *"Pieza"* or *"bloque."* |
+| "Route returning 200" | *"La página carga bien."* |
+| "git branch" | *"Versión separada de tu trabajo."* |
+| "Vite hot-reload" | *"Se actualiza solo en el navegador."* |
+| "Commit / push / PR" | *"Guardar tu trabajo y compartirlo con el equipo."* |
+
+### When something breaks, fix it in silence and report only the outcome
+
+If the AI agent or the prototype throws a TS error, lint error, or runtime error:
+
+1. Read the error yourself.
+2. Fix it (re-read the relevant file, edit, re-run `pnpm tsc`).
+3. Only when fixed, tell them in one line: *"Había un detalle técnico, ya está arreglado. Pruébalo en `<URL>`."*
+
+Do NOT show them the stack trace, the file path with line numbers, or the diff unless they explicitly ask *"qué pasó"*.
+
+**Exception**: if the error is something they can fix themselves (e.g., they typed a non-existent module name, or pasted an image you can't read), surface it kindly and ask one short question.
+
+### Handle git operations for them
+
+When they say something like *"quiero compartirlo"*, *"esto está bien, súbelo"*, *"cómo lo enseño a alguien"*, do the full git flow on their behalf:
+
+```bash
+git checkout -b prototype/<auto-generated-slug-from-their-screen>
+git add packages/f0compose/src/prototypes/<slug>/   # ONLY their prototype, not the whole tree
+git commit -m "prototype: <one-line description in their words>"
+git push -u origin prototype/<slug>
+gh pr create --fill   # or --title / --body if you have context
+```
+
+Then tell them: *"Lo he subido. Aquí tienes el link para compartir: `<PR URL>`."* The CI will surface the preview URL automatically.
+
+**Never ask** for branch name, commit message, or PR title — generate them from their request. If they push back ("usa este nombre"), update and re-push.
+
+### Things you should NEVER ask a non-technical user
+
+- ❌ "¿Usamos `select` o `cardSelect`?" → Just pick the better one and tell them you can swap it later.
+- ❌ "¿Quieres `useDataCollectionSource` o `useState`?" → Pick the canonical pattern (Step 7) and move on.
+- ❌ "¿Single-page form o wizard?" → Decide based on field count (≤6 single page, ≥7 wizard) and explain in plain language.
+- ❌ "¿Lo subo con `git push --force-with-lease` o `git push`?" → Just push.
+- ❌ "¿En qué rama estás?" → Check yourself.
+
+### Things you SHOULD ask
+
+- ✅ The 5 discovery questions in Step 0.2 — but phrase them in plain language ("¿Para qué pantalla?", not "¿Qué módulo del producto?").
+- ✅ "¿Iteramos sobre el prototipo `X` que ya existe o creamos uno nuevo?" (Step 0.1).
+- ✅ "Esto es lo que voy a crear: [resumen en 3 líneas]. ¿Te encaja?" before non-trivial work.
+- ✅ "¿Lo quieres más compacto, más espacioso, con menos columnas?" — visual preferences.
+
+### End-of-turn template, non-technical version
+
+Always finish with this shape (the structured Step 13 response, but in plain language):
+
+> ✅ Ya está. Pruébalo aquí: **<URL>**
+>
+> Catálogo de todos los prototipos: http://localhost:5174/
+>
+> Relacionados que quizá quieras mirar: `<slug-1>`, `<slug-2>`
+>
+> Si ves algo raro, copia el texto del error que aparezca en el navegador (clic derecho → Inspeccionar → Console) y pégamelo. Lo arreglo al momento.
 
 ## Step 0 — Discovery interview + plan (always first)
 
