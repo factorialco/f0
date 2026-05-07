@@ -108,6 +108,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   onThumbsDown,
   onThumbsUp,
   tracking,
+  onBeforeSendMessage,
+  runtimeFetch = fetch,
   ...rest
 }) => {
   const [footer, setFooter] = useState<ReactNode | undefined>(initialFooter)
@@ -349,26 +351,32 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     setChatWidth(DEFAULT_CHAT_WIDTH)
   }
 
-  const sendMessage = (message: string | Message) => {
+  const sendMessage: AiChatProviderReturnValue["sendMessage"] = (message) => {
     if (!sendMessageFunctionRef.current) {
       return
     }
 
-    // Ensure chat is open when sending a message
-    if (!open) {
-      setOpen(true)
-    }
+    void (async () => {
+      if (onBeforeSendMessage && (await onBeforeSendMessage()) === false) {
+        return
+      }
 
-    const messageToSend: Message =
-      typeof message === "string"
-        ? {
-            id: randomId(),
-            role: "user",
-            content: message,
-          }
-        : message
+      // Ensure chat is open when sending a message
+      if (!open) {
+        setOpen(true)
+      }
 
-    sendMessageFunctionRef.current?.(messageToSend)
+      const messageToSend: Message =
+        typeof message === "string"
+          ? {
+              id: randomId(),
+              role: "user",
+              content: message,
+            }
+          : message
+
+      sendMessageFunctionRef.current?.(messageToSend)
+    })()
   }
 
   useEffect(() => {
@@ -473,6 +481,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setChatWidth,
         resetChatWidth,
         tracking,
+        onBeforeSendMessage,
+        runtimeFetch,
         entityRefs,
         canvasActions,
         toolHints,
@@ -556,6 +566,8 @@ export function useAiChat(): AiChatProviderReturnValue {
       setChatWidth: noopFn,
       resetChatWidth: noopFn,
       tracking: undefined,
+      onBeforeSendMessage: undefined,
+      runtimeFetch: fetch,
       entityRefs: undefined,
       canvasActions: undefined,
       toolHints: undefined,

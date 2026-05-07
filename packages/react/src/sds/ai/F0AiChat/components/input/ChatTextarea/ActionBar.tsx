@@ -19,6 +19,7 @@ interface ActionBarProps {
   inProgress?: boolean
   hasDataToSend: boolean
   isUploading: boolean
+  isPreSending?: boolean
   submitLabel?: string
 }
 
@@ -34,6 +35,7 @@ export const ActionBar = ({
   inProgress,
   hasDataToSend,
   isUploading,
+  isPreSending,
   submitLabel,
 }: ActionBarProps) => {
   const translation = useI18n()
@@ -86,8 +88,12 @@ export const ActionBar = ({
         ) : (
           <ButtonInternal
             type="submit"
-            disabled={!hasDataToSend || isUploading}
-            variant={hasDataToSend && !isUploading ? "default" : "neutral"}
+            disabled={!hasDataToSend || isUploading || isPreSending}
+            variant={
+              hasDataToSend && !isUploading && !isPreSending
+                ? "default"
+                : "neutral"
+            }
             label={submitLabel || translation.ai.sendMessage}
             icon={submitLabel ? undefined : ArrowUp}
             hideLabel={!submitLabel}

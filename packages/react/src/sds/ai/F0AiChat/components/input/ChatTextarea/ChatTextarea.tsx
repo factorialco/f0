@@ -78,11 +78,13 @@ export const ChatTextarea = ({
     pendingQuote,
     setPendingQuote,
     setProcessDroppedFilesFunction,
+    onBeforeSendMessage,
   } = useAiChat()
   const translation = useI18n()
   const shouldReduceMotion = useReducedMotion()
   const [inputValue, setInputValue] = useState("")
   const [cursorPosition, setCursorPosition] = useState(0)
+  const [isPreSending, setIsPreSending] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const highlightRef = useRef<HTMLDivElement>(null)
@@ -154,7 +156,7 @@ export const ChatTextarea = ({
   const isUploading = attachedFiles.some((f) => f.status === "uploading")
   const hasDataToSend = inputValue.trim().length > 0
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     // When clarifying, form submit is a no-op — the panel handles its own confirm
@@ -163,7 +165,19 @@ export const ChatTextarea = ({
     mentions.close()
     if (inProgress) {
       handleStop()
-    } else if (hasDataToSend && !isUploading) {
+    } else if (hasDataToSend && !isUploading && !isPreSending) {
+      if (onBeforeSendMessage) {
+        setIsPreSending(true)
+        try {
+          if ((await onBeforeSendMessage()) === false) {
+            textareaRef.current?.focus()
+            return
+          }
+        } finally {
+          setIsPreSending(false)
+        }
+      }
+
       const transformed = mentions.transformMentions(inputValue.trim())
       // Escape markdown/HTML in the user's own text so `*hola*` stays literal
       // and only features we control (quote blockquote, @mentions, tool
@@ -379,6 +393,7 @@ export const ChatTextarea = ({
                 inProgress={inProgress}
                 hasDataToSend={hasDataToSend}
                 isUploading={isUploading}
+                isPreSending={isPreSending}
                 submitLabel={submitLabel}
               />
             </motion.div>

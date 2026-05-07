@@ -16,6 +16,7 @@ export interface PersistClarifyingResolutionParams {
   /** Unique tool call id emitted by the backend */
   toolCallId: string
   /** Updated args to persist on the tool call */
+  runtimeFetch?: typeof fetch
   args: {
     steps: unknown
     isResolved: true
@@ -43,9 +44,10 @@ export async function persistClarifyingResolution({
   threadId,
   toolCallId,
   args,
+  runtimeFetch = fetch,
 }: PersistClarifyingResolutionParams): Promise<void> {
   try {
-    await fetch(
+    await runtimeFetch(
       `${chatApiEndpoint}/chat-history/threads/${encodeURIComponent(
         threadId
       )}/tool-calls/${encodeURIComponent(toolCallId)}`,

@@ -191,7 +191,11 @@ const COLLECTION_PER_PAGE = 20
 
 export interface ChatDashboardProps {
   config: ChatDashboardConfig
-  apiConfig: { baseUrl: string; headers: Record<string, string> }
+  apiConfig: {
+    baseUrl: string
+    headers: Record<string, string>
+    runtimeFetch?: typeof fetch
+  }
   refreshKey?: number
   /** Incrementing counter that forces the grid to reset to initial layout */
   resetKey?: number

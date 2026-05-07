@@ -52,6 +52,14 @@ export interface AiChatState {
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
   tracking?: AiChatTrackingOptions
+  /**
+   * Optional hook called before a user message is sent. Return false to block submission.
+   */
+  onBeforeSendMessage?: () => boolean | Promise<boolean>
+  /**
+   * Optional fetch implementation for AI runtime requests owned by F0.
+   */
+  runtimeFetch?: typeof fetch
 }
 
 /**
@@ -87,6 +95,14 @@ export type AiChatProviderReturnValue = {
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
   tracking?: AiChatTrackingOptions
+  /**
+   * Optional hook called before a user message is sent. Return false to block submission.
+   */
+  onBeforeSendMessage?: () => boolean | Promise<boolean>
+  /**
+   * Fetch implementation for AI runtime requests owned by F0.
+   */
+  runtimeFetch: typeof fetch
   /**
    * Clear/reset the chat conversation
    */

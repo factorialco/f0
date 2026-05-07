@@ -18,7 +18,11 @@ export type DashboardCardProps = {
   /** The original dashboard config from the agent */
   config: ChatDashboardConfig
   /** API config for server-side dashboard computation */
-  apiConfig: { baseUrl: string; headers: Record<string, string> }
+  apiConfig: {
+    baseUrl: string
+    headers: Record<string, string>
+    runtimeFetch?: typeof fetch
+  }
   /** Present when the dashboard is a pre-saved dashboard */
   savedDashboardId?: string
   /** Category of the saved dashboard */
