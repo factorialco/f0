@@ -9,6 +9,7 @@ import type { ChatDashboardConfig } from "./types"
 export function useSaveDashboardConfig(apiConfig: {
   baseUrl: string
   headers: Record<string, string>
+  runtimeFetch?: typeof fetch
 }): (
   threadId: string,
   toolCallId: string | undefined,
@@ -20,25 +21,29 @@ export function useSaveDashboardConfig(apiConfig: {
       toolCallId: string | undefined,
       config: ChatDashboardConfig
     ) => {
-      const response = await fetch(`${apiConfig.baseUrl}/dashboard/config`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          ...apiConfig.headers,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          threadId,
-          ...(toolCallId ? { toolCallId } : {}),
-          toolName: "displayDashboard",
-          config,
-        }),
-      })
+      const runtimeFetch = apiConfig.runtimeFetch ?? fetch
+      const response = await runtimeFetch(
+        `${apiConfig.baseUrl}/dashboard/config`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            ...apiConfig.headers,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            threadId,
+            ...(toolCallId ? { toolCallId } : {}),
+            toolName: "displayDashboard",
+            config,
+          }),
+        }
+      )
 
       if (!response.ok) {
         throw new Error(`Failed to save dashboard config: ${response.status}`)
       }
     },
-    [apiConfig.baseUrl, apiConfig.headers]
+    [apiConfig.baseUrl, apiConfig.headers, apiConfig.runtimeFetch]
   )
 }

@@ -40,6 +40,8 @@ const F0AiChatProviderComponent = ({
   fileAttachments,
   onThumbsUp,
   onThumbsDown,
+  onBeforeSendMessage,
+  runtimeFetch,
   children,
   agent,
   tracking,
@@ -52,6 +54,8 @@ const F0AiChatProviderComponent = ({
       initialMessage={initialMessage}
       onThumbsUp={onThumbsUp}
       onThumbsDown={onThumbsDown}
+      onBeforeSendMessage={onBeforeSendMessage}
+      runtimeFetch={runtimeFetch}
       agent={agent}
       welcomeScreenSuggestions={welcomeScreenSuggestions}
       disclaimer={disclaimer}
