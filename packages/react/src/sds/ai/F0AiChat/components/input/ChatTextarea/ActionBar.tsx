@@ -89,7 +89,11 @@ export const ActionBar = ({
           <ButtonInternal
             type="submit"
             disabled={!hasDataToSend || isUploading || isPreSending}
-            variant={hasDataToSend && !isUploading && !isPreSending ? "default" : "neutral"}
+            variant={
+              hasDataToSend && !isUploading && !isPreSending
+                ? "default"
+                : "neutral"
+            }
             label={submitLabel || translation.ai.sendMessage}
             icon={submitLabel ? undefined : ArrowUp}
             hideLabel={!submitLabel}
