@@ -40,10 +40,6 @@ export const TextOption: Story = {
         label: "Personal information, Address, emergency contact",
       },
     ],
-    badge: {
-      label: "New employee",
-      variant: "primary",
-    },
   },
 }
 
@@ -73,10 +69,6 @@ export const WithAutomation: Story = {
         label: "Automatically send by ONE",
       },
     ],
-    badge: {
-      label: "New employee",
-      variant: "primary",
-    },
   },
 }
 
@@ -111,10 +103,6 @@ export const WithForm: Story = {
         onClick: () => alert("Opening survey..."),
       },
     ],
-    badge: {
-      label: "New employee",
-      variant: "primary",
-    },
   },
 }
 
@@ -155,10 +143,6 @@ export const WithDocument: Story = {
         onClick: () => alert("Downloading PDF..."),
       },
     ],
-    badge: {
-      label: "New employee",
-      variant: "primary",
-    },
   },
 }
 
@@ -208,10 +192,6 @@ export const AllOptionTypes: Story = {
         ],
       },
     ],
-    badge: {
-      label: "New employee",
-      variant: "primary",
-    },
   },
 }
 
@@ -238,10 +218,6 @@ export const SingleOption: Story = {
         onClick: () => alert("Opening document..."),
       },
     ],
-    badge: {
-      label: "Pending",
-      variant: "warning",
-    },
   },
 }
 
@@ -307,10 +283,6 @@ export const ThreeOptions: Story = {
         ],
       },
     ],
-    badge: {
-      label: "In Progress",
-      variant: "warning",
-    },
   },
 }
 
@@ -349,10 +321,6 @@ export const FourOptions: Story = {
         fileType: "pdf",
       },
     ],
-    badge: {
-      label: "Urgent",
-      variant: "error",
-    },
   },
 }
 
@@ -471,9 +439,5 @@ export const WithAssignee: Story = {
         lastName: "Doe",
       },
     ],
-    badge: {
-      label: "New employee",
-      variant: "primary",
-    },
   },
 }
