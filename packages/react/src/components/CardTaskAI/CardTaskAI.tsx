@@ -1,5 +1,8 @@
 import { forwardRef } from "react"
 import { withDataTestId } from "@/lib/data-testid"
+import { F0Card } from "@/components/F0Card"
+import { F0Icon } from "@/components/F0Icon"
+import { ListBullets, Zap, FileText, Tag } from "@/icons/app"
 import type { CardTaskAIProps, TaskOption } from "./types"
 
 const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
@@ -16,31 +19,36 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
     },
     ref
   ) => {
-    const badgeVariantConfig: Record<string, { bgColor: string; textColor: string }> =
-      {
-        default: {
-          bgColor: "bg-gray-100",
-          textColor: "text-gray-700",
-        },
-        primary: {
-          bgColor: "bg-blue-100",
-          textColor: "text-blue-700",
-        },
-        success: {
-          bgColor: "bg-green-100",
-          textColor: "text-green-700",
-        },
-        warning: {
-          bgColor: "bg-yellow-100",
-          textColor: "text-yellow-700",
-        },
-        error: {
-          bgColor: "bg-red-100",
-          textColor: "text-red-700",
-        },
-      }
+    const badgeVariantConfig: Record<
+      string,
+      { bgColor: string; textColor: string }
+    > = {
+      default: {
+        bgColor: "bg-gray-100",
+        textColor: "text-gray-700",
+      },
+      primary: {
+        bgColor: "bg-blue-100",
+        textColor: "text-blue-700",
+      },
+      success: {
+        bgColor: "bg-green-100",
+        textColor: "text-green-700",
+      },
+      warning: {
+        bgColor: "bg-yellow-100",
+        textColor: "text-yellow-700",
+      },
+      error: {
+        bgColor: "bg-red-100",
+        textColor: "text-red-700",
+      },
+    }
 
-    const tagVariantConfig: Record<string, { bgColor: string; textColor: string }> = {
+    const tagVariantConfig: Record<
+      string,
+      { bgColor: string; textColor: string }
+    > = {
       default: { bgColor: "bg-gray-100", textColor: "text-gray-700" },
       primary: { bgColor: "bg-blue-100", textColor: "text-blue-700" },
       success: { bgColor: "bg-green-100", textColor: "text-green-700" },
@@ -53,10 +61,12 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
         case "text":
           return (
             <div key={option.id} className="flex items-center gap-[8px]">
-              {option.icon && (
+              {option.icon ? (
                 <div className="flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center text-gray-600">
                   {option.icon}
                 </div>
+              ) : (
+                <F0Icon icon={ListBullets} size="sm" />
               )}
               <p className="text-[14px] font-normal leading-[20px] text-[rgba(1,22,55,0.61)]">
                 {option.label}
@@ -67,21 +77,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
         case "automation":
           return (
             <div key={option.id} className="flex items-center gap-[8px]">
-              <div className="flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center">
-                <svg
-                  className="h-5 w-5 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
-              </div>
+              <F0Icon icon={Zap} size="sm" />
               <p className="text-[14px] font-normal leading-[20px] text-[rgba(1,22,55,0.61)]">
                 {option.label || "Automatically send by ONE"}
               </p>
@@ -97,27 +93,12 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
               role={option.onClick ? "button" : undefined}
               tabIndex={option.onClick ? 0 : undefined}
             >
-              {option.icon && (
-                <div className="flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center text-gray-600">
+              {option.icon ? (
+                <div className="flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center">
                   {option.icon}
                 </div>
-              )}
-              {!option.icon && (
-                <div className="flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center">
-                  <svg
-                    className="h-5 w-5 text-gray-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                </div>
+              ) : (
+                <F0Icon icon={FileText} size="sm" />
               )}
               <p className="text-[14px] font-normal leading-[20px] text-[rgba(1,22,55,0.61)]">
                 {option.label}
@@ -134,27 +115,12 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
               role={option.onClick ? "button" : undefined}
               tabIndex={option.onClick ? 0 : undefined}
             >
-              {option.icon && (
-                <div className="flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center text-gray-600">
+              {option.icon ? (
+                <div className="flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center">
                   {option.icon}
                 </div>
-              )}
-              {!option.icon && (
-                <div className="flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center">
-                  <svg
-                    className="h-5 w-5 text-gray-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                    />
-                  </svg>
-                </div>
+              ) : (
+                <F0Icon icon={FileText} size="sm" />
               )}
               <div className="flex items-center gap-[4px]">
                 {option.fileType && (
@@ -171,11 +137,16 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
 
         case "tags":
           return (
-            <div key={option.id} className="flex flex-wrap items-center gap-[8px]">
-              {option.icon && (
+            <div
+              key={option.id}
+              className="flex flex-wrap items-center gap-[8px]"
+            >
+              {option.icon ? (
                 <div className="flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center">
                   {option.icon}
                 </div>
+              ) : (
+                <F0Icon icon={Tag} size="sm" />
               )}
               <div className="flex flex-wrap items-center gap-[6px]">
                 {option.tags.map((tag) => {
@@ -215,14 +186,13 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
     const badgeStyle = badgeVariantConfig[badgeVariant]
 
     return (
-      <div
+      <F0Card
         ref={ref}
         data-testid={testId || "card-task-ai"}
         onClick={handleClick}
         className={`
-          relative rounded-[12px] border border-[rgba(5,38,87,0.06)] 
-          bg-white transition-all duration-200 
-          ${onClick ? "cursor-pointer hover:shadow-md hover:border-[rgba(5,38,87,0.12)]" : ""}
+          transition-all duration-200 
+          ${onClick ? "cursor-pointer hover:shadow-md" : ""}
           ${className}
         `}
       >
@@ -281,7 +251,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
             )}
           </div>
         </div>
-      </div>
+      </F0Card>
     )
   }
 )
