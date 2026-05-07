@@ -29,6 +29,12 @@ export const TextOption: Story = {
     title: "Fill in your personal information",
     options: [
       {
+        type: "assignee",
+        id: "0",
+        firstName: "John",
+        lastName: "Doe",
+      },
+      {
         type: "text",
         id: "1",
         label: "Personal information, Address, emergency contact",
@@ -50,6 +56,12 @@ export const WithAutomation: Story = {
     icon: <FileAvatarIcon />,
     title: "Fill in your personal information",
     options: [
+      {
+        type: "assignee",
+        id: "0",
+        firstName: "John",
+        lastName: "Doe",
+      },
       {
         type: "text",
         id: "1",
@@ -77,6 +89,12 @@ export const WithForm: Story = {
     icon: <FileAvatarIcon />,
     title: "Fill in your personal information",
     options: [
+      {
+        type: "assignee",
+        id: "0",
+        firstName: "John",
+        lastName: "Doe",
+      },
       {
         type: "text",
         id: "1",
@@ -109,6 +127,12 @@ export const WithDocument: Story = {
     icon: <FileAvatarIcon />,
     title: "Fill in your personal information",
     options: [
+      {
+        type: "assignee",
+        id: "0",
+        firstName: "John",
+        lastName: "Doe",
+      },
       {
         type: "text",
         id: "1",
@@ -148,6 +172,12 @@ export const AllOptionTypes: Story = {
     icon: <FileAvatarIcon />,
     title: "Fill in your personal information",
     options: [
+      {
+        type: "assignee",
+        id: "0",
+        firstName: "John",
+        lastName: "Doe",
+      },
       {
         type: "text",
         id: "1",
@@ -195,6 +225,12 @@ export const SingleOption: Story = {
     description: "Please review the attached document",
     options: [
       {
+        type: "assignee",
+        id: "0",
+        firstName: "John",
+        lastName: "Doe",
+      },
+      {
         type: "document",
         id: "1",
         label: "Contract_Final.pdf",
@@ -218,6 +254,12 @@ export const TwoOptions: Story = {
     title: "Complete your profile",
     options: [
       {
+        type: "assignee",
+        id: "0",
+        firstName: "John",
+        lastName: "Doe",
+      },
+      {
         type: "text",
         id: "1",
         label: "Basic information, Work history, Skills",
@@ -240,6 +282,12 @@ export const ThreeOptions: Story = {
     title: "Onboarding checklist",
     description: "Complete your onboarding process",
     options: [
+      {
+        type: "assignee",
+        id: "0",
+        firstName: "John",
+        lastName: "Doe",
+      },
       {
         type: "text",
         id: "1",
@@ -274,6 +322,12 @@ export const FourOptions: Story = {
     icon: <FileAvatarIcon />,
     title: "Employee verification",
     options: [
+      {
+        type: "assignee",
+        id: "0",
+        firstName: "John",
+        lastName: "Doe",
+      },
       {
         type: "text",
         id: "1",
@@ -311,6 +365,12 @@ export const MultipleDocuments: Story = {
     title: "Review all documents",
     options: [
       {
+        type: "assignee",
+        id: "0",
+        firstName: "John",
+        lastName: "Doe",
+      },
+      {
         type: "text",
         id: "1",
         label: "Review and sign all required documents",
@@ -346,6 +406,12 @@ export const MultipleTagVariants: Story = {
     title: "Task assignment details",
     options: [
       {
+        type: "assignee",
+        id: "0",
+        firstName: "John",
+        lastName: "Doe",
+      },
+      {
         type: "tags",
         id: "1",
         tags: [
@@ -367,6 +433,12 @@ export const ClickableCard: Story = {
     icon: <FileAvatarIcon />,
     title: "Start onboarding",
     options: [
+      {
+        type: "assignee",
+        id: "0",
+        firstName: "John",
+        lastName: "Doe",
+      },
       {
         type: "form",
         id: "1",
