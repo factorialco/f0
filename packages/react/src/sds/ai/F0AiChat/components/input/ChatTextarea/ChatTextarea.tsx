@@ -84,6 +84,7 @@ export const ChatTextarea = ({
   const shouldReduceMotion = useReducedMotion()
   const [inputValue, setInputValue] = useState("")
   const [cursorPosition, setCursorPosition] = useState(0)
+  const [isPreSending, setIsPreSending] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const highlightRef = useRef<HTMLDivElement>(null)
@@ -165,9 +166,16 @@ export const ChatTextarea = ({
     if (inProgress) {
       handleStop()
     } else if (hasDataToSend && !isUploading) {
-      if (onBeforeSendMessage && (await onBeforeSendMessage()) === false) {
-        textareaRef.current?.focus()
-        return
+      if (onBeforeSendMessage) {
+        setIsPreSending(true)
+        try {
+          if ((await onBeforeSendMessage()) === false) {
+            textareaRef.current?.focus()
+            return
+          }
+        } finally {
+          setIsPreSending(false)
+        }
       }
 
       const transformed = mentions.transformMentions(inputValue.trim())
@@ -385,6 +393,7 @@ export const ChatTextarea = ({
                 inProgress={inProgress}
                 hasDataToSend={hasDataToSend}
                 isUploading={isUploading}
+                isPreSending={isPreSending}
                 submitLabel={submitLabel}
               />
             </motion.div>
