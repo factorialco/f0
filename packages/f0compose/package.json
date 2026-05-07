@@ -6,9 +6,10 @@
   "description": "Self-contained Vite app where designers and PMs prototype Factorial screens with AI, constrained to f0 components.",
   "scripts": {
     "postinstall": "tsx scripts/install-skills.ts",
-    "predev": "pnpm run generate:manifest && tsx scripts/ensure-f0-react-fresh.ts",
-    "prestart": "pnpm run generate:manifest && tsx scripts/ensure-f0-react-fresh.ts",
-    "prebuild": "pnpm run generate:manifest && tsx scripts/ensure-f0-react-fresh.ts",
+    "predev": "pnpm run generate:manifest && tsx scripts/ensure-f0-react-fresh.ts && tsx scripts/install-skills.ts",
+    "prestart": "pnpm run generate:manifest && tsx scripts/ensure-f0-react-fresh.ts && tsx scripts/install-skills.ts",
+    "prebuild": "pnpm run generate:manifest && tsx scripts/ensure-f0-react-fresh.ts && tsx scripts/install-skills.ts",
+    "skills:sync": "tsx scripts/install-skills.ts",
     "generate:manifest": "tsx scripts/build-manifest.ts",
     "skills:install": "npx -y skills add pbakaus/impeccable -y && tsx scripts/install-skills.ts",
     "skills:update": "npx -y impeccable skills update",

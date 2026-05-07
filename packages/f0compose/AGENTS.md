@@ -2,7 +2,15 @@
 
 This is the f0compose app: an isolated environment where designers and PMs
 prototype Factorial screens using AI. It bundles its own skills under
-`.opencode/skills/` and `.claude/skills/`, auto-installed on `pnpm install`.
+`.opencode/skills/` and `.claude/skills/`, **auto-installed from
+`vendor/skills/` on every `pnpm install`, `pnpm dev`, `pnpm start`, and
+`pnpm build`** (also on demand: `pnpm skills:sync`).
+
+To edit a skill: change `vendor/skills/<name>/SKILL.md` (the canonical
+source) and run `pnpm skills:sync`. Never edit the copies in
+`.opencode/skills/` or `.claude/skills/` directly — they're overwritten
+on every dev session. The sync script warns loudly if it detects a
+target newer than vendor.
 
 ## When you are running here
 
