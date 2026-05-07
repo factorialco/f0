@@ -256,7 +256,6 @@ export const ThreeOptions: Story = {
   args: {
     icon: <FileAvatarIcon />,
     title: "Onboarding checklist",
-    description: "Complete your onboarding process",
     options: [
       {
         type: "assignee",
