@@ -2,6 +2,7 @@ import { forwardRef } from "react"
 import { withDataTestId } from "@/lib/data-testid"
 import { F0Card } from "@/components/F0Card"
 import { F0Icon } from "@/components/F0Icon"
+import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { List, Sparkles, File, Tag } from "@/icons/app"
 import type { CardTaskAIProps, TaskOption } from "./types"
 
@@ -43,17 +44,6 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
         bgColor: "bg-red-100",
         textColor: "text-red-700",
       },
-    }
-
-    const tagVariantConfig: Record<
-      string,
-      { bgColor: string; textColor: string }
-    > = {
-      default: { bgColor: "bg-gray-100", textColor: "text-gray-700" },
-      primary: { bgColor: "bg-blue-100", textColor: "text-blue-700" },
-      success: { bgColor: "bg-green-100", textColor: "text-green-700" },
-      warning: { bgColor: "bg-yellow-100", textColor: "text-yellow-700" },
-      error: { bgColor: "bg-red-100", textColor: "text-red-700" },
     }
 
     const renderOption = (option: TaskOption) => {
@@ -149,26 +139,9 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
                 <F0Icon icon={Tag} size="sm" />
               )}
               <div className="flex flex-wrap items-center gap-[6px]">
-                {option.tags.map((tag) => {
-                  const tagStyle = tagVariantConfig[tag.variant || "default"]
-                  return (
-                    <div
-                      key={tag.id}
-                      className={`
-                        inline-flex items-center gap-[4px] rounded-full 
-                        px-[10px] py-[4px] text-[13px] font-medium
-                        ${tagStyle.bgColor} ${tagStyle.textColor}
-                      `}
-                    >
-                      {tag.icon && (
-                        <div className="flex h-[16px] w-[16px] items-center justify-center">
-                          {tag.icon}
-                        </div>
-                      )}
-                      {tag.label}
-                    </div>
-                  )
-                })}
+                {option.tags.map((tag) => (
+                  <F0TagRaw key={tag.id} text={tag.label} />
+                ))}
               </div>
             </div>
           )

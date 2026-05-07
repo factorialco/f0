@@ -58,7 +58,6 @@ export interface DocumentOption {
 export interface Tag {
   id: string
   label: string
-  variant?: "default" | "primary" | "success" | "warning" | "error"
   icon?: ReactNode
 }
 
@@ -69,7 +68,12 @@ export interface TagsOption {
   icon?: ReactNode
 }
 
-export type TaskOption = TextOption | AutomationOption | FormOption | DocumentOption | TagsOption
+export type TaskOption =
+  | TextOption
+  | AutomationOption
+  | FormOption
+  | DocumentOption
+  | TagsOption
 
 export interface CardTaskAIBadge {
   label: string
