@@ -2,7 +2,7 @@ import { forwardRef } from "react"
 import { withDataTestId } from "@/lib/data-testid"
 import { F0Card } from "@/components/F0Card"
 import { F0Icon } from "@/components/F0Icon"
-import { ListBullets, Zap, FileText, Tag } from "@/icons/app"
+import { List, Sparkles, File, Tag } from "@/icons/app"
 import type { CardTaskAIProps, TaskOption } from "./types"
 
 const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
@@ -66,7 +66,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
                   {option.icon}
                 </div>
               ) : (
-                <F0Icon icon={ListBullets} size="sm" />
+                <F0Icon icon={List} size="sm" />
               )}
               <p className="text-[14px] font-normal leading-[20px] text-[rgba(1,22,55,0.61)]">
                 {option.label}
@@ -77,7 +77,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
         case "automation":
           return (
             <div key={option.id} className="flex items-center gap-[8px]">
-              <F0Icon icon={Zap} size="sm" />
+              <F0Icon icon={Sparkles} size="sm" />
               <p className="text-[14px] font-normal leading-[20px] text-[rgba(1,22,55,0.61)]">
                 {option.label || "Automatically send by ONE"}
               </p>
@@ -98,7 +98,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
                   {option.icon}
                 </div>
               ) : (
-                <F0Icon icon={FileText} size="sm" />
+                <F0Icon icon={File} size="sm" />
               )}
               <p className="text-[14px] font-normal leading-[20px] text-[rgba(1,22,55,0.61)]">
                 {option.label}
@@ -120,7 +120,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
                   {option.icon}
                 </div>
               ) : (
-                <F0Icon icon={FileText} size="sm" />
+                <F0Icon icon={File} size="sm" />
               )}
               <div className="flex items-center gap-[4px]">
                 {option.fileType && (

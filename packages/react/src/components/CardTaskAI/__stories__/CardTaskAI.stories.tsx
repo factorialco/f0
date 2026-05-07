@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react"
 import React from "react"
 import { CardTaskAI } from "../CardTaskAI"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
-import { FileText } from "@/icons/app"
+import { File } from "@/icons/app"
 
 const meta = {
   title: "Components/CardTaskAI",
@@ -17,7 +17,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 // Mock avatar icon using F0
-const FileAvatarIcon = () => <F0AvatarIcon icon={FileText} color="primary" />
+const FileAvatarIcon = () => <F0AvatarIcon icon={File} color="primary" />
 
 /**
  * Casuistic 1: Single text option with list icon
