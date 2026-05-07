@@ -3,7 +3,7 @@ import { withDataTestId } from "@/lib/data-testid"
 import { F0Card } from "@/components/F0Card"
 import { F0Icon } from "@/components/F0Icon"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
-import { List, Sparkles, File, Tag } from "@/icons/app"
+import { List, Ai, Folders, Paperclip, Split } from "@/icons/app"
 import type { CardTaskAIProps, TaskOption } from "./types"
 
 const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
@@ -67,7 +67,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
         case "automation":
           return (
             <div key={option.id} className="flex items-center gap-[8px]">
-              <F0Icon icon={Sparkles} size="sm" />
+              <F0Icon icon={Ai} size="sm" />
               <p className="text-[14px] font-normal leading-[20px] text-[rgba(1,22,55,0.61)]">
                 {option.label || "Automatically send by ONE"}
               </p>
@@ -88,7 +88,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
                   {option.icon}
                 </div>
               ) : (
-                <F0Icon icon={File} size="sm" />
+                <F0Icon icon={Folders} size="sm" />
               )}
               <p className="text-[14px] font-normal leading-[20px] text-[rgba(1,22,55,0.61)]">
                 {option.label}
@@ -110,7 +110,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
                   {option.icon}
                 </div>
               ) : (
-                <F0Icon icon={File} size="sm" />
+                <F0Icon icon={Paperclip} size="sm" />
               )}
               <div className="flex items-center gap-[4px]">
                 {option.fileType && (
@@ -136,7 +136,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
                   {option.icon}
                 </div>
               ) : (
-                <F0Icon icon={Tag} size="sm" />
+                <F0Icon icon={Split} size="sm" />
               )}
               <div className="flex flex-wrap items-center gap-[6px]">
                 {option.tags.map((tag) => (

@@ -52,7 +52,9 @@ describe("CardTaskAI", () => {
           ]}
         />
       )
-      expect(screen.getByText("Fill in personal information")).toBeInTheDocument()
+      expect(
+        screen.getByText("Fill in personal information")
+      ).toBeInTheDocument()
     })
 
     it("renders text option with custom icon", () => {
@@ -331,7 +333,7 @@ describe("CardTaskAI", () => {
     })
 
     it("applies custom data-testid", () => {
-      const { container } = render(
+      const { _container } = render(
         <CardTaskAI {...defaultProps} data-testid="custom-card" />
       )
       expect(screen.getByTestId("custom-card")).toBeInTheDocument()
@@ -340,7 +342,13 @@ describe("CardTaskAI", () => {
 
   describe("Badge variants", () => {
     it("renders all badge variants", () => {
-      const variants = ["default", "primary", "success", "warning", "error"] as const
+      const variants = [
+        "default",
+        "primary",
+        "success",
+        "warning",
+        "error",
+      ] as const
 
       variants.forEach((variant) => {
         const { unmount } = render(
