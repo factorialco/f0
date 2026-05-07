@@ -6,6 +6,8 @@ import {
   type ReactNode,
   forwardRef,
   isValidElement,
+  useEffect,
+  useRef,
 } from "react"
 
 import { cn, focusRing } from "@/lib/utils"
@@ -35,6 +37,14 @@ function findSlot(
   return found
 }
 
+// CSS transition timing for pill (padding, border-width, transform)
+const PILL_TRANSITION =
+  "padding 200ms ease-out, border-width 200ms ease-out, transform 200ms ease-out"
+
+// CSS transition timing for text column (width, margin, opacity)
+const TEXT_COL_TRANSITION =
+  "width 200ms ease-out, margin-left 200ms ease-out, opacity 150ms ease-out"
+
 const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
   (
     {
@@ -53,7 +63,23 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
     const avatarSlot = findSlot(children, F0GraphNodeAvatar)
     const titleSlot = findSlot(children, F0GraphNodeTitle)
     const subtitleSlot = findSlot(children, F0GraphNodeSubtitle)
-    // Reserved for future metadata pills (salary, teams, workplace, tenure)
+    // Track previous variant to detect dot↔compact transitions.
+    // When dot is source or target, framer springs are bypassed and
+    // CSS transitions on plain divs handle the visual change instead,
+    // eliminating ~600 framer-motion animation instances per transition.
+    const prevVariantRef = useRef(variant)
+    const isDotTransition =
+      prevVariantRef.current !== variant &&
+      (variant === "dot" || prevVariantRef.current === "dot")
+
+    // Stable key for AnimatePresence: during dot transitions, keep the
+    // previous key so AnimatePresence doesn't trigger mount/unmount
+    // on 200+ nodes simultaneously.
+    const crossfadeKey = isDotTransition ? prevVariantRef.current : variant
+
+    useEffect(() => {
+      prevVariantRef.current = variant
+    }, [variant])
 
     const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
       if (e.key === "Enter" || e.key === " ") {
@@ -70,7 +96,6 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
       }
     }
 
-    // ── Unified branch: dot + compact + detail ──
     const isCompact = variant === "compact"
     const isDot = variant === "dot"
 
@@ -82,6 +107,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
         aria-expanded={hasChildren ? expanded : undefined}
         aria-level={level}
         aria-selected={state === "selected"}
+        data-zoom-level={variant}
         className={cn(
           graphNodeContainerVariants({ variant, state }),
           focusRing(
@@ -93,7 +119,11 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
         onClick={onClick}
         onKeyDown={handleKeyDown}
       >
-        <motion.div
+        {/* Pill — CSS transitions replace framer springs.
+            Dot↔compact: 200ms ease-out on padding/border/transform.
+            Detail↔compact: only paddingRight changes (16↔24, 8px delta),
+            indistinguishable from the previous spring at this magnitude. */}
+        <div
           className={cn(
             "inline-flex max-w-full items-center overflow-clip rounded-full border border-solid bg-f1-background backdrop-blur-[7px]",
             isDot ? "border-f1-border-secondary" : "border-f1-border",
@@ -109,20 +139,16 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
             state === "highlighted" && isDot && "ring-1 ring-f1-border-accent",
             state === "dimmed" && isDot && "opacity-40"
           )}
-          initial={false}
-          animate={{
+          style={{
             paddingTop: isDot ? 0 : 6,
             paddingBottom: isDot ? 0 : 6,
             paddingLeft: isDot ? 0 : 8,
             paddingRight: isDot ? 0 : isCompact ? 24 : 16,
             borderWidth: isDot ? 1.5 : 1,
-            scale: isDot ? 96 / 40 : 1,
-          }}
-          style={{ minHeight: 40, transformOrigin: "center center" }}
-          transition={{
-            type: "spring",
-            duration: 0.18,
-            bounce: 0.15,
+            transform: `scale(${isDot ? 96 / 40 : 1})`,
+            transformOrigin: "center center",
+            minHeight: 40,
+            transition: PILL_TRANSITION,
           }}
         >
           {/* Avatar — fixed 40×40; dot growth comes from pill scale */}
@@ -132,44 +158,44 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
             </div>
           </div>
 
-          {/* Text column — always mounted, animated to zero width in dot */}
-          <motion.div
-            initial={false}
-            animate={{
+          {/* Text column — always mounted, CSS-transitioned to zero width in dot */}
+          <div
+            style={{
               width: isDot ? 0 : 176,
               marginLeft: isDot ? 0 : 8,
               opacity: isDot ? 0 : 1,
+              transition: TEXT_COL_TRANSITION,
             }}
-            transition={{
-              width: {
-                type: "spring",
-                duration: 0.18,
-                bounce: 0.15,
-              },
-              marginLeft: {
-                type: "spring",
-                duration: 0.18,
-                bounce: 0.15,
-              },
-              opacity: { duration: 0.1 },
-            }}
-            className="relative min-w-0 flex-1 self-stretch whitespace-nowrap"
+            className="relative min-w-0 flex-1 self-stretch overflow-hidden whitespace-nowrap"
           >
-            {/* Single-swap crossfade: each variant renders its own
-                absolutely-positioned, self-centering text block.
-                No layout coupling between states — title can't shift. */}
+            {/* Crossfade — AnimatePresence handles detail↔compact text swap.
+                During dot transitions, crossfadeKey stays stable so
+                AnimatePresence skips the mount/unmount cycle entirely. */}
             <AnimatePresence mode="sync" initial={false}>
               <motion.div
-                key={variant}
-                initial={{ opacity: 0, filter: "blur(2.5px)" }}
+                key={crossfadeKey}
+                initial={
+                  isDotTransition
+                    ? false
+                    : { opacity: 0, filter: "blur(2.5px)" }
+                }
                 animate={{ opacity: 1, filter: "blur(0px)" }}
-                exit={{ opacity: 0, filter: "blur(2.5px)" }}
-                transition={{
-                  duration: 0.14,
-                  ease: [0.23, 1, 0.32, 1],
-                }}
+                exit={
+                  isDotTransition
+                    ? { opacity: 0 }
+                    : { opacity: 0, filter: "blur(2.5px)" }
+                }
+                transition={
+                  isDotTransition
+                    ? { duration: 0 }
+                    : { duration: 0.14, ease: [0.23, 1, 0.32, 1] }
+                }
                 className="absolute inset-0 flex flex-col justify-center"
-                style={{ willChange: "filter, opacity" }}
+                style={
+                  isDotTransition
+                    ? undefined
+                    : { willChange: "filter, opacity" }
+                }
               >
                 <p
                   className="w-full truncate tracking-[-0.07px] text-f1-foreground"
@@ -195,8 +221,8 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
                 )}
               </motion.div>
             </AnimatePresence>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
     )
   }

@@ -362,6 +362,11 @@ export function App() {
           showControls={showControls}
           showMinimap={showMinimap}
           fullScreen={fullScreen}
+          searchable={{
+            getLabel: (n) => n.data.name,
+            getSecondaryLabel: (n) => n.data.title,
+            placeholder: "Search people",
+          }}
           onVisibleNodesChange={setVisibleCount}
         />
         {showPerfPanel && (

@@ -53,6 +53,7 @@ import { F0GraphControls } from "./F0GraphControls"
 import { F0GraphEdge } from "./F0GraphEdge"
 import { F0GraphExpander } from "./F0GraphExpander"
 import { F0GraphNode } from "./F0GraphNode"
+import { F0GraphSearch, useGraphSearch, type Searchable } from "./F0GraphSearch"
 import "./F0Graph.css"
 import { useGraphZoomLevel } from "./hooks/useGraphZoomLevel"
 import { useLayoutEngine } from "./hooks/useLayoutEngine"
@@ -100,9 +101,22 @@ export interface F0GraphProps<T = unknown> {
   fullScreen?: boolean
 
   // ---- Search ----
+  /**
+   * Raw controlled search input. Renders the bare expandable search pill
+   * with no popover. Mutually exclusive with `searchable`.
+   */
   searchValue?: string
   onSearchChange?: (value: string | undefined) => void
   searchLoading?: boolean
+  /**
+   * Declarative search-with-popover. F0Graph builds the index from the
+   * source `nodes`/`rootNodes`, filters/sorts results, and on select:
+   * (1) auto-expands collapsed ancestors, (2) selects the node,
+   * (3) fly-to/fitView. Mutually exclusive with `searchValue`/`onSearchChange`.
+   */
+  searchable?: Searchable<T>
+  /** Optional observability callback when a search result is picked. */
+  onSearchResultSelect?: (id: string) => void
 
   // ---- Controls ----
   showControls?: boolean
@@ -451,6 +465,8 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     searchValue,
     onSearchChange,
     searchLoading,
+    searchable,
+    onSearchResultSelect,
     showControls = false,
     showMinimap = false,
     onZoomLevelChange,
@@ -942,6 +958,63 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     reactFlow.fitView({ duration: 400, padding: 0.1 })
   }, [reactFlow])
 
+  // ── Internal search-with-popover state ──
+  const [internalSearchQuery, setInternalSearchQuery] = useState("")
+  const { results: searchResults, hasQuery: hasSearchQuery } = useGraphSearch(
+    resolvedNodes,
+    internalSearchQuery,
+    searchable
+  )
+
+  const handleSearchResultSelect = useCallback(
+    (id: string) => {
+      // 1) Auto-expand collapsed ancestors so the node becomes visible.
+      const ancestorsToExpand: string[] = []
+      let cursor = nodeMap.get(id)?.parentId ?? null
+      while (cursor) {
+        if (!expandedNodes.has(cursor)) ancestorsToExpand.push(cursor)
+        cursor = nodeMap.get(cursor)?.parentId ?? null
+      }
+      if (ancestorsToExpand.length > 0) {
+        if (!controlledExpanded) {
+          setInternalExpanded((prev) => {
+            const next = new Set(prev)
+            for (const ancestorId of ancestorsToExpand) next.add(ancestorId)
+            return next
+          })
+        }
+        for (const ancestorId of ancestorsToExpand) {
+          onExpandToggle?.(ancestorId, true)
+        }
+      }
+
+      // 2) Select the node (no-op if selectionMode === "none").
+      selectNode(id)
+
+      // 3) Fly to it once the next layout pass has settled.
+      const timer = window.setTimeout(() => {
+        reactFlow.fitView({
+          nodes: [{ id }],
+          duration: 300,
+          padding: 0.5,
+        })
+      }, 100)
+
+      onSearchResultSelect?.(id)
+
+      return () => window.clearTimeout(timer)
+    },
+    [
+      nodeMap,
+      expandedNodes,
+      controlledExpanded,
+      onExpandToggle,
+      selectNode,
+      reactFlow,
+      onSearchResultSelect,
+    ]
+  )
+
   // ── Split context values (for performance — wrappers subscribe to only what they need) ──
   const zoomContextValue = useMemo(
     () => ({ zoomLevel, currentZoom }),
@@ -997,11 +1070,12 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
               >
                 <div
                   ref={containerRef}
+                  data-zoom-level={zoomLevel}
                   className={cn(
                     "f0-graph relative bg-f1-background-tertiary",
                     fullScreen
                       ? "h-full w-full"
-                      : "mx-3 my-1 h-[calc(100%-8px)] w-[calc(100%-24px)] overflow-hidden rounded-xl border border-f1-border-secondary"
+                      : "mx-3 my-1 h-[calc(100%-8px)] w-[calc(100%-24px)] overflow-hidden rounded-xl border border-f1-border"
                   )}
                   role="tree"
                   aria-label="Graph view"
@@ -1045,14 +1119,31 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
                     )}
                   </ReactFlow>
 
-                  {onSearchChange && (
+                  {searchable ? (
                     <div className="absolute left-3 top-3 z-10">
-                      <Search
-                        value={searchValue}
-                        onChange={onSearchChange}
+                      <F0GraphSearch
+                        value={internalSearchQuery}
+                        onChange={setInternalSearchQuery}
+                        results={searchResults}
+                        hasQuery={hasSearchQuery}
                         loading={searchLoading}
+                        placeholder={searchable.placeholder ?? "Search"}
+                        noResultsLabel={
+                          searchable.noResultsLabel ?? "No results"
+                        }
+                        onSelect={handleSearchResultSelect}
                       />
                     </div>
+                  ) : (
+                    onSearchChange && (
+                      <div className="absolute left-3 top-3 z-10">
+                        <Search
+                          value={searchValue}
+                          onChange={onSearchChange}
+                          loading={searchLoading}
+                        />
+                      </div>
+                    )
                   )}
 
                   {showControls && (
