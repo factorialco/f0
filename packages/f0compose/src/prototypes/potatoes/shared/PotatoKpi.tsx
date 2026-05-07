@@ -1,5 +1,6 @@
-import { F0Box, F0Heading, F0Icon, F0Text } from "@factorialco/f0-react"
 import type { IconType } from "@factorialco/f0-react"
+
+import { F0Box, F0Heading, F0Icon, F0Text } from "@factorialco/f0-react"
 
 /**
  * Compact KPI tile used in the Potatoes prototype. No trend comparison

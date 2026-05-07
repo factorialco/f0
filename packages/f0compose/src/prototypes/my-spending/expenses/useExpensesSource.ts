@@ -1,10 +1,5 @@
 import { useDataCollectionSource } from "@factorialco/f0-react/dist/experimental"
-import {
-  Add,
-  Delete,
-  Download,
-  Pencil,
-} from "@factorialco/f0-react/icons/app"
+import { Add, Delete, Download, Pencil } from "@factorialco/f0-react/icons/app"
 
 import {
   type Expense,
@@ -27,7 +22,12 @@ import { presetLabel } from "../shared/expenseStatus"
  *   - Per-row actions: View / Edit / Download receipt / Delete (critical).
  */
 
-const allStatuses: ExpenseStatus[] = ["draft", "pending", "approved", "in-payroll"]
+const allStatuses: ExpenseStatus[] = [
+  "draft",
+  "pending",
+  "approved",
+  "in-payroll",
+]
 
 const categoryOptions = [
   { value: "Meals", label: "Meals" },

@@ -1,12 +1,9 @@
 import { F0Text, StandardLayout } from "@factorialco/f0-react"
-import {
-  Page,
-  PageHeader,
-  Tabs,
-} from "@factorialco/f0-react/dist/experimental"
+import { Page, PageHeader, Tabs } from "@factorialco/f0-react/dist/experimental"
 import { useState } from "react"
 
 import type { PrototypeMeta } from "../types"
+
 import { ExpensesTab } from "./expenses/ExpensesTab"
 import { GroupsTab } from "./groups/GroupsTab"
 import { expensesSubTabs, moduleTabs } from "./tabs"

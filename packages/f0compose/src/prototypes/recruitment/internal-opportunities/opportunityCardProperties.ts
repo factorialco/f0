@@ -27,7 +27,9 @@ export const opportunityCardProperties = [
     render: (j: Job) => ({
       type: "tag" as const,
       value: {
-        label: j.departmentId ? (findDepartment(j.departmentId)?.name ?? "—") : "—",
+        label: j.departmentId
+          ? (findDepartment(j.departmentId)?.name ?? "—")
+          : "—",
       },
     }),
   },

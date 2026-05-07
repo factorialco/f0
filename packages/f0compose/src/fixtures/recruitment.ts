@@ -323,7 +323,9 @@ export const candidates: Candidate[] = candidateNames.map((fullName, i) => {
     firstName,
     lastName,
     email: `${fullName.toLowerCase().replace(/\s+/g, ".")}-app-x83564${i}@factorial.example`,
-    phone: `+34 ${600 + i}${(123456 + i * 17) % 1000000}`.padEnd(15, "0").slice(0, 15),
+    phone: `+34 ${600 + i}${(123456 + i * 17) % 1000000}`
+      .padEnd(15, "0")
+      .slice(0, 15),
     avatarUrl: avatarFor(`cand-${i}`),
     jobApplied,
     source,

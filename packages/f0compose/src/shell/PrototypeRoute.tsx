@@ -1,7 +1,9 @@
 import { useEffect } from "react"
 import { useParams } from "react-router-dom"
+
 import { NotFound } from "@/lib/notFound"
 import { prototypeRegistry } from "@/prototypes/registry"
+
 import { FactorialShell } from "./FactorialShell"
 
 /**

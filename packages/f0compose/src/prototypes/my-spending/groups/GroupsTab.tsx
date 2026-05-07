@@ -13,9 +13,7 @@ export function GroupsTab() {
   return (
     <OneDataCollection
       source={source}
-      visualizations={[
-        { type: "table", options: { columns: groupsColumns } },
-      ]}
+      visualizations={[{ type: "table", options: { columns: groupsColumns } }]}
     />
   )
 }

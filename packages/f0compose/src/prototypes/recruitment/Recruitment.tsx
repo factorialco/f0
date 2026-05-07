@@ -10,6 +10,7 @@ import { useCallback } from "react"
 import { useSearchParams } from "react-router-dom"
 
 import type { PrototypeMeta } from "../types"
+
 import { CandidatesTab } from "./candidates/CandidatesTab"
 import { InternalOpportunitiesTab } from "./internal-opportunities/InternalOpportunitiesTab"
 import { JobsTab } from "./jobs/JobsTab"
@@ -183,10 +184,7 @@ export default function Recruitment() {
     >
       <StandardLayout>
         {activeModuleTab === "jobs" && (
-          <JobsTab
-            activeSubTab={jobsSubTab}
-            onCreateJob={goToCreateJob}
-          />
+          <JobsTab activeSubTab={jobsSubTab} onCreateJob={goToCreateJob} />
         )}
         {activeModuleTab === "candidates" && <CandidatesTab />}
         {activeModuleTab === "internal-opportunities" && (

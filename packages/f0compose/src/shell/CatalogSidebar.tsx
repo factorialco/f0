@@ -1,9 +1,9 @@
-import { Home, Sparkles } from "@factorialco/f0-react/icons/app"
 import {
   Menu,
   Sidebar,
   SidebarHeader,
 } from "@factorialco/f0-react/dist/experimental"
+import { Home, Sparkles } from "@factorialco/f0-react/icons/app"
 import { useNavigate } from "react-router-dom"
 
 /**

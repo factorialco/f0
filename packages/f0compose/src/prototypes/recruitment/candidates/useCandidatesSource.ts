@@ -50,7 +50,9 @@ export function useCandidatesSource() {
           const term = (search ?? "").toLowerCase().trim()
 
           const filtered = candidates
-            .filter((c) => (wanted.length === 0 ? true : wanted.includes(c.state)))
+            .filter((c) =>
+              wanted.length === 0 ? true : wanted.includes(c.state)
+            )
             .filter((c) =>
               term === ""
                 ? true

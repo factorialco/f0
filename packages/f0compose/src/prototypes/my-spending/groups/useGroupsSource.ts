@@ -20,7 +20,12 @@ import { presetLabel } from "../shared/expenseStatus"
  *   - Per-row action "View".
  */
 
-const allStatuses: ExpenseStatus[] = ["draft", "pending", "approved", "in-payroll"]
+const allStatuses: ExpenseStatus[] = [
+  "draft",
+  "pending",
+  "approved",
+  "in-payroll",
+]
 
 export function useGroupsSource() {
   return useDataCollectionSource<ExpenseGroup>(

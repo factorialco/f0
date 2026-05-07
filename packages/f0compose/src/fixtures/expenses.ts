@@ -94,30 +94,36 @@ function buildExpenses(): Expense[] {
 
   // 26 pending — created within the last 14 days
   for (let i = 0; i < 26; i++) {
-    out.push(makeExpense({
-      seq: i,
-      status: "pending",
-      daysAgo: 1 + Math.floor(rand() * 14),
-      rand,
-    }))
+    out.push(
+      makeExpense({
+        seq: i,
+        status: "pending",
+        daysAgo: 1 + Math.floor(rand() * 14),
+        rand,
+      })
+    )
   }
   // 3 approved — last 30 days
   for (let i = 0; i < 3; i++) {
-    out.push(makeExpense({
-      seq: 26 + i,
-      status: "approved",
-      daysAgo: 5 + Math.floor(rand() * 25),
-      rand,
-    }))
+    out.push(
+      makeExpense({
+        seq: 26 + i,
+        status: "approved",
+        daysAgo: 5 + Math.floor(rand() * 25),
+        rand,
+      })
+    )
   }
   // 30 in-payroll — older, between 30 and 360 days
   for (let i = 0; i < 30; i++) {
-    out.push(makeExpense({
-      seq: 29 + i,
-      status: "in-payroll",
-      daysAgo: 30 + Math.floor(rand() * 330),
-      rand,
-    }))
+    out.push(
+      makeExpense({
+        seq: 29 + i,
+        status: "in-payroll",
+        daysAgo: 30 + Math.floor(rand() * 330),
+        rand,
+      })
+    )
   }
 
   return out

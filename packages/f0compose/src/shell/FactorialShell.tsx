@@ -1,8 +1,10 @@
 import { F0AiFormRegistryProvider } from "@factorialco/f0-react"
 import { ApplicationFrame } from "@factorialco/f0-react/dist/experimental"
+
 import type { ModuleId } from "./modules"
-import { FactorialSidebar } from "./FactorialSidebar"
+
 import { aiChatConfig } from "./aiChatConfig"
+import { FactorialSidebar } from "./FactorialSidebar"
 
 /**
  * Wraps a prototype in the canonical Factorial product shell:

@@ -53,7 +53,9 @@ export function useJobsSource(onCreateJob: () => void) {
           const term = (search ?? "").toLowerCase().trim()
 
           const filtered = jobs
-            .filter((j) => (wanted.length === 0 ? true : wanted.includes(j.status)))
+            .filter((j) =>
+              wanted.length === 0 ? true : wanted.includes(j.status)
+            )
             .filter((j) =>
               term === "" ? true : j.title.toLowerCase().includes(term)
             )

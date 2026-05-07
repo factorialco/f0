@@ -1,4 +1,3 @@
-import { Exit, Sliders, Sparkles } from "@factorialco/f0-react/icons/app"
 import {
   Menu,
   type MenuCategory,
@@ -7,7 +6,9 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@factorialco/f0-react/dist/experimental"
+import { Exit, Sliders, Sparkles } from "@factorialco/f0-react/icons/app"
 import { useNavigate } from "react-router-dom"
+
 import { type ModuleId, iconForModule, modules } from "./modules"
 
 function modulesIn(group: string): MenuCategory["items"] {
