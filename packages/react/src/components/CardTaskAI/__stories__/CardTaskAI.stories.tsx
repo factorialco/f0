@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
+import React from "react"
 import { CardTaskAI } from "../CardTaskAI"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { FileText } from "@/icons/app"
