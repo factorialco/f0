@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.475.0](https://github.com/factorialco/f0/compare/f0-react-v1.474.2...f0-react-v1.475.0) (2026-05-07)
+
+
+### Features
+
+* **F0AiChat:** add before-send hook ([#4087](https://github.com/factorialco/f0/issues/4087)) ([6861019](https://github.com/factorialco/f0/commit/6861019a43b2960a38a5ce40a7a9d4e637e289fb))
+
 ## [1.474.2](https://github.com/factorialco/f0/compare/f0-react-v1.474.1...f0-react-v1.474.2) (2026-05-06)
 
 
