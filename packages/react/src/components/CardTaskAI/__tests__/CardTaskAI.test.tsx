@@ -246,9 +246,9 @@ describe("CardTaskAI", () => {
               type: "tags",
               id: "1",
               tags: [
-                { id: "tag1", label: "Success", variant: "success" },
-                { id: "tag2", label: "Error", variant: "error" },
-                { id: "tag3", label: "Warning", variant: "warning" },
+                { id: "tag1", label: "Success" },
+                { id: "tag2", label: "Error" },
+                { id: "tag3", label: "Warning" },
               ],
             },
           ]}
@@ -257,6 +257,43 @@ describe("CardTaskAI", () => {
       expect(screen.getByText("Success")).toBeInTheDocument()
       expect(screen.getByText("Error")).toBeInTheDocument()
       expect(screen.getByText("Warning")).toBeInTheDocument()
+    })
+  })
+
+  describe("Option types - Assignee", () => {
+    it("renders assignee option with name", () => {
+      render(
+        <CardTaskAI
+          {...defaultProps}
+          options={[
+            {
+              type: "assignee",
+              id: "1",
+              firstName: "John",
+              lastName: "Doe",
+            },
+          ]}
+        />
+      )
+      expect(screen.getByText("John Doe")).toBeInTheDocument()
+    })
+
+    it("renders assignee option with avatar", () => {
+      render(
+        <CardTaskAI
+          {...defaultProps}
+          options={[
+            {
+              type: "assignee",
+              id: "1",
+              firstName: "Jane",
+              lastName: "Smith",
+              src: "https://example.com/avatar.jpg",
+            },
+          ]}
+        />
+      )
+      expect(screen.getByText("Jane Smith")).toBeInTheDocument()
     })
   })
 

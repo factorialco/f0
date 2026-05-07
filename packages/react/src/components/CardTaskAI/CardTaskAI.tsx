@@ -3,6 +3,7 @@ import { withDataTestId } from "@/lib/data-testid"
 import { F0Card } from "@/components/F0Card"
 import { F0Icon } from "@/components/F0Icon"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
+import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { List, Ai, Folders, Paperclip, Split } from "@/icons/app"
 import type { CardTaskAIProps, TaskOption } from "./types"
 
@@ -143,6 +144,22 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
                   <F0TagRaw key={tag.id} text={tag.label} />
                 ))}
               </div>
+            </div>
+          )
+
+        case "assignee":
+          return (
+            <div key={option.id} className="flex items-center gap-[8px]">
+              <F0AvatarPerson
+                firstName={option.firstName}
+                lastName={option.lastName}
+                src={option.src}
+                deactivated={option.deactivated}
+                size="xs"
+              />
+              <span className="text-[14px] font-normal leading-[20px] text-[rgba(1,22,55,0.61)]">
+                {option.firstName} {option.lastName}
+              </span>
             </div>
           )
 

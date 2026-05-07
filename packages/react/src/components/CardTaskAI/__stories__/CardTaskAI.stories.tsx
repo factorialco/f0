@@ -377,3 +377,31 @@ export const ClickableCard: Story = {
     onClick: () => alert("Card clicked!"),
   },
 }
+
+/**
+ * Casuistic: With assignee (person avatar)
+ * Shows task assignee using F0AvatarPerson metadata component
+ */
+export const WithAssignee: Story = {
+  args: {
+    icon: <FileAvatarIcon />,
+    title: "Fill in your personal information",
+    options: [
+      {
+        type: "text",
+        id: "1",
+        label: "Personal information, Address, emergency contact",
+      },
+      {
+        type: "assignee",
+        id: "2",
+        firstName: "John",
+        lastName: "Doe",
+      },
+    ],
+    badge: {
+      label: "New employee",
+      variant: "primary",
+    },
+  },
+}

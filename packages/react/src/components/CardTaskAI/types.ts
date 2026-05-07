@@ -2,7 +2,13 @@ import type { ReactNode } from "react"
 
 export type TaskItemStatus = "completed" | "in-progress" | "pending" | "error"
 
-export type OptionType = "text" | "automation" | "form" | "document" | "tags"
+export type OptionType =
+  | "text"
+  | "automation"
+  | "form"
+  | "document"
+  | "tags"
+  | "assignee"
 
 export interface TaskItem {
   id: string
@@ -68,12 +74,25 @@ export interface TagsOption {
   icon?: ReactNode
 }
 
+/**
+ * Assignee option - User metadata with avatar
+ */
+export interface AssigneeOption {
+  type: "assignee"
+  id: string
+  firstName: string
+  lastName: string
+  src?: string
+  deactivated?: boolean
+}
+
 export type TaskOption =
   | TextOption
   | AutomationOption
   | FormOption
   | DocumentOption
   | TagsOption
+  | AssigneeOption
 
 export interface CardTaskAIBadge {
   label: string
