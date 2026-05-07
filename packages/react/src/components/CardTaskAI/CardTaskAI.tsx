@@ -1,6 +1,6 @@
 import { forwardRef } from "react"
 import { withDataTestId } from "@/lib/data-testid"
-import type { CardTaskAIProps } from "./types"
+import type { CardTaskAIProps, TaskOption } from "./types"
 
 const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
   (
@@ -8,7 +8,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
       icon,
       title,
       description,
-      tasks,
+      options,
       badge,
       onClick,
       className = "",
@@ -16,14 +16,6 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
     },
     ref
   ) => {
-    const statusConfig: Record<string, { bgColor: string; textColor: string }> =
-      {
-        completed: { bgColor: "bg-green-50", textColor: "text-green-700" },
-        "in-progress": { bgColor: "bg-blue-50", textColor: "text-blue-700" },
-        pending: { bgColor: "bg-gray-50", textColor: "text-gray-700" },
-        error: { bgColor: "bg-red-50", textColor: "text-red-700" },
-      }
-
     const badgeVariantConfig: Record<string, { bgColor: string; textColor: string }> =
       {
         default: {
@@ -47,6 +39,173 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
           textColor: "text-red-700",
         },
       }
+
+    const tagVariantConfig: Record<string, { bgColor: string; textColor: string }> = {
+      default: { bgColor: "bg-gray-100", textColor: "text-gray-700" },
+      primary: { bgColor: "bg-blue-100", textColor: "text-blue-700" },
+      success: { bgColor: "bg-green-100", textColor: "text-green-700" },
+      warning: { bgColor: "bg-yellow-100", textColor: "text-yellow-700" },
+      error: { bgColor: "bg-red-100", textColor: "text-red-700" },
+    }
+
+    const renderOption = (option: TaskOption) => {
+      switch (option.type) {
+        case "text":
+          return (
+            <div key={option.id} className="flex items-center gap-[8px]">
+              {option.icon && (
+                <div className="flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center text-gray-600">
+                  {option.icon}
+                </div>
+              )}
+              <p className="text-[14px] font-normal leading-[20px] text-[rgba(1,22,55,0.61)]">
+                {option.label}
+              </p>
+            </div>
+          )
+
+        case "automation":
+          return (
+            <div key={option.id} className="flex items-center gap-[8px]">
+              <div className="flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center">
+                <svg
+                  className="h-5 w-5 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                </svg>
+              </div>
+              <p className="text-[14px] font-normal leading-[20px] text-[rgba(1,22,55,0.61)]">
+                {option.label || "Automatically send by ONE"}
+              </p>
+            </div>
+          )
+
+        case "form":
+          return (
+            <div
+              key={option.id}
+              className={`flex items-center gap-[8px] ${option.onClick ? "cursor-pointer" : ""}`}
+              onClick={option.onClick}
+              role={option.onClick ? "button" : undefined}
+              tabIndex={option.onClick ? 0 : undefined}
+            >
+              {option.icon && (
+                <div className="flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center text-gray-600">
+                  {option.icon}
+                </div>
+              )}
+              {!option.icon && (
+                <div className="flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center">
+                  <svg
+                    className="h-5 w-5 text-gray-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                </div>
+              )}
+              <p className="text-[14px] font-normal leading-[20px] text-[rgba(1,22,55,0.61)]">
+                {option.label}
+              </p>
+            </div>
+          )
+
+        case "document":
+          return (
+            <div
+              key={option.id}
+              className={`flex items-center gap-[8px] ${option.onClick ? "cursor-pointer" : ""}`}
+              onClick={option.onClick}
+              role={option.onClick ? "button" : undefined}
+              tabIndex={option.onClick ? 0 : undefined}
+            >
+              {option.icon && (
+                <div className="flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center text-gray-600">
+                  {option.icon}
+                </div>
+              )}
+              {!option.icon && (
+                <div className="flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center">
+                  <svg
+                    className="h-5 w-5 text-gray-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                    />
+                  </svg>
+                </div>
+              )}
+              <div className="flex items-center gap-[4px]">
+                {option.fileType && (
+                  <span className="inline-flex items-center rounded px-[6px] py-[2px] text-[11px] font-semibold uppercase tracking-wider text-red-600">
+                    {option.fileType}
+                  </span>
+                )}
+                <p className="text-[14px] font-normal leading-[20px] text-[rgba(1,22,55,0.61)]">
+                  {option.label}
+                </p>
+              </div>
+            </div>
+          )
+
+        case "tags":
+          return (
+            <div key={option.id} className="flex flex-wrap items-center gap-[8px]">
+              {option.icon && (
+                <div className="flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center">
+                  {option.icon}
+                </div>
+              )}
+              <div className="flex flex-wrap items-center gap-[6px]">
+                {option.tags.map((tag) => {
+                  const tagStyle = tagVariantConfig[tag.variant || "default"]
+                  return (
+                    <div
+                      key={tag.id}
+                      className={`
+                        inline-flex items-center gap-[4px] rounded-full 
+                        px-[10px] py-[4px] text-[13px] font-medium
+                        ${tagStyle.bgColor} ${tagStyle.textColor}
+                      `}
+                    >
+                      {tag.icon && (
+                        <div className="flex h-[16px] w-[16px] items-center justify-center">
+                          {tag.icon}
+                        </div>
+                      )}
+                      {tag.label}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )
+
+        default:
+          return null
+      }
+    }
 
     const handleClick = () => {
       if (onClick) onClick()
@@ -114,63 +273,10 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
               )}
             </div>
 
-            {/* Tasks List */}
-            {tasks && tasks.length > 0 && (
+            {/* Options List */}
+            {options && options.length > 0 && (
               <div className="flex flex-col gap-[8px]">
-                {tasks.map((task) => {
-                  const taskStatus = task.status || "pending"
-                  const taskStyle = statusConfig[taskStatus]
-
-                  return (
-                    <div
-                      key={task.id}
-                      className={`
-                        flex items-center gap-[8px] rounded-[6px] px-[8px] py-[6px]
-                        ${taskStyle.bgColor}
-                      `}
-                    >
-                      <div className="flex h-[16px] w-[16px] flex-shrink-0 items-center justify-center">
-                        {taskStatus === "completed" && (
-                          <svg
-                            className="h-4 w-4 text-green-700"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        )}
-                        {taskStatus === "in-progress" && (
-                          <div className="h-3 w-3 rounded-full border-2 border-blue-700 border-t-transparent animate-spin" />
-                        )}
-                        {taskStatus === "error" && (
-                          <svg
-                            className="h-4 w-4 text-red-700"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        )}
-                      </div>
-                      <span
-                        className={`
-                          flex-1 text-[13px] font-medium leading-[20px]
-                          ${taskStyle.textColor}
-                        `}
-                      >
-                        {task.label}
-                      </span>
-                    </div>
-                  )
-                })}
+                {options.map((option) => renderOption(option))}
               </div>
             )}
           </div>
