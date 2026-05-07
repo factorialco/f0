@@ -11,6 +11,7 @@ export * from "../kits/F0DataChart"
 export * from "./F0BigNumber"
 export * from "./F0ActionBar"
 export * from "./CardSelectable"
+export * from "./CardTaskAI"
 export * from "./OneChip"
 /**
  * @deprecated F0Box has moved to @/lib/F0Box. Import from there instead.
