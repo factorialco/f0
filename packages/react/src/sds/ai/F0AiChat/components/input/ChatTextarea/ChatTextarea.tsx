@@ -165,7 +165,7 @@ export const ChatTextarea = ({
     mentions.close()
     if (inProgress) {
       handleStop()
-    } else if (hasDataToSend && !isUploading) {
+    } else if (hasDataToSend && !isUploading && !isPreSending) {
       if (onBeforeSendMessage) {
         setIsPreSending(true)
         try {
