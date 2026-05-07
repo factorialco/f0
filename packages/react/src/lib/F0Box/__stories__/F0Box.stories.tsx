@@ -202,6 +202,11 @@ const meta = {
       options: ["block", "flex", "inline", "inline-flex", "grid", "none"],
     },
     position: { control: "select", options: positionOptions },
+    top: { control: "select", options: spacingOptions },
+    right: { control: "select", options: spacingOptions },
+    bottom: { control: "select", options: spacingOptions },
+    left: { control: "select", options: spacingOptions },
+    zIndex: { control: "number" },
     // Padding
     padding: { control: "select", options: spacingOptions },
     paddingX: { control: "select", options: spacingOptions },
@@ -442,11 +447,15 @@ export const Position: Story = {
         </span>
         <F0Box
           position="absolute"
+          top="xl"
+          right="xl"
+          zIndex={10}
           padding="md"
           background="info"
           borderRadius="sm"
         >
-          position=&quot;absolute&quot; (top-left by default)
+          position=&quot;absolute&quot; top=&quot;xl&quot; right=&quot;xl&quot;
+          zIndex=&#123;10&#125;
         </F0Box>
       </F0Box>
 

@@ -13,6 +13,7 @@ import type {
   FlexDirectionToken,
   FlexWrapToken,
   GapToken,
+  InsetToken,
   JustifyContentToken,
   MarginToken,
   OverflowToken,
@@ -30,6 +31,7 @@ import { displayVariants } from "./display"
 import { dividerVariants } from "./divider"
 import { flexVariants } from "./flex"
 import { gridVariants } from "./grid"
+import { insetVariants } from "./inset"
 import { marginVariants } from "./margin"
 import { overflowVariants } from "./overflow"
 import { paddingVariants } from "./padding"
@@ -41,6 +43,10 @@ export type Breakpoint = "sm" | "md" | "lg" | "xl"
 export interface ResponsiveStyleProps {
   display?: DisplayToken
   position?: PositionToken
+  top?: InsetToken
+  right?: InsetToken
+  bottom?: InsetToken
+  left?: InsetToken
   // Padding
   padding?: SpacingToken
   paddingX?: SpacingToken
@@ -109,6 +115,7 @@ export interface ResponsiveStyleProps {
  */
 const variantMap: Record<string, Record<string, string>> = {
   ...displayVariants,
+  ...insetVariants,
   ...paddingVariants,
   ...marginVariants,
   ...flexVariants,

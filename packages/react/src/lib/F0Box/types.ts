@@ -295,5 +295,8 @@ export type PositionToken =
   | "fixed"
   | "sticky"
 
+/** Position offsets */
+export type InsetToken = SpacingToken
+
 /** Border style */
 export type BorderStyleToken = "solid" | "dashed" | "dotted" | "double" | "none"

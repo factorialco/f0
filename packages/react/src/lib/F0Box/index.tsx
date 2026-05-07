@@ -26,6 +26,7 @@ export type {
   FlexWrapToken,
   FractionToken,
   GapToken,
+  InsetToken,
   JustifyContentToken,
   MarginToken,
   NumericSizeToken,
