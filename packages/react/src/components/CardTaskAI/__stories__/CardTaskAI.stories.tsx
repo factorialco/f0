@@ -34,6 +34,8 @@ export const TextOption: Story = {
   args: {
     icon: <FileAvatarIcon />,
     title: "Fill in your personal information",
+    actionLabel: "Edit",
+    onAction: () => alert("Edit clicked"),
     options: [
       {
         type: "assignee",
@@ -58,6 +60,8 @@ export const WithAutomation: Story = {
   args: {
     icon: <FileAvatarIcon />,
     title: "Collect employee preferences",
+    actionLabel: "Edit",
+    onAction: () => alert("Edit clicked"),
     options: [
       {
         type: "assignee",
@@ -90,6 +94,8 @@ export const WithForm: Story = {
   args: {
     icon: <FileAvatarIcon />,
     title: "Fill in your personal information",
+    actionLabel: "Edit",
+    onAction: () => alert("Edit clicked"),
     options: [
       {
         type: "assignee",
@@ -273,6 +279,8 @@ export const ConditionList: Story = {
   args: {
     icon: <FileAvatarIcon />,
     title: "Task applies to",
+    actionLabel: "Ask ONE",
+    onAction: () => alert("Ask ONE clicked"),
     options: [
       {
         type: "assignee",

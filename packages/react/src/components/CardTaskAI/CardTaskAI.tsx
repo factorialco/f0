@@ -5,7 +5,7 @@ import { F0Icon } from "@/components/F0Icon"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagList } from "@/components/tags/F0TagList"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
-import { List, Ai, Folders, Paperclip, Split } from "@/icons/app"
+import { List, Ai, Folders, Paperclip, Split, Pencil } from "@/icons/app"
 import type { CardTaskAIProps, TaskOption } from "./types"
 
 /**
@@ -133,6 +133,8 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
       options,
       badge,
       onClick,
+      actionLabel,
+      onAction,
       className = "",
       "data-testid": testId,
     },
@@ -322,72 +324,94 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
     const badgeStyle = badgeVariantConfig[badgeVariant]
 
     return (
-      <F0Card
+      <div
         ref={ref}
-        data-testid={testId || "card-task-ai"}
-        onClick={handleClick}
         className={`
-          !p-3 !pt-[10px] transition-all duration-200 
-          ${onClick ? "cursor-pointer hover:bg-[rgba(5,31,81,0.04)] hover:border hover:border-[rgba(5,38,87,0.06)]" : ""}
+          group transition-all duration-200 rounded-[16px]
+          ${onClick ? "cursor-pointer" : ""}
           ${className}
         `}
       >
-        <div className="flex items-start gap-[4px]">
-          {/* Icon Section */}
-          <div className="flex h-[40px] w-[40px] flex-shrink-0 items-center justify-center">
-            {icon}
-          </div>
+        <F0Card
+          data-testid={testId || "card-task-ai"}
+          onClick={handleClick}
+          className={`
+            !p-3 !pt-[10px] transition-all duration-200 
+            group-hover:bg-[rgba(5,31,81,0.04)] group-hover:border group-hover:border-[rgba(5,38,87,0.06)]
+          `}
+        >
+          <div className="flex items-start gap-[4px]">
+            {/* Icon Section */}
+            <div className="flex h-[40px] w-[40px] flex-shrink-0 items-center justify-center">
+              {icon}
+            </div>
 
-          {/* Content Section */}
-          <div className="flex flex-1 flex-col gap-0">
-            {/* Header with Title and Badge */}
-            <div className="flex items-start justify-between gap-[8px] h-[32px] pl-[4px]">
-              <div className="flex-1 min-w-0">
-                <h3 className="m-0 mt-[4px] truncate text-lg font-semibold leading-[24px] text-[#0d1625]">
-                  {title}
-                </h3>
-                {description && (
-                  <p className="mt-[4px] truncate text-sm leading-[24px] text-[rgba(1,22,55,0.61)]">
-                    {description}
-                  </p>
-                )}
-              </div>
+            {/* Content Section */}
+            <div className="flex flex-1 flex-col gap-0">
+              {/* Header with Title and Badge/Action */}
+              <div className="flex items-start justify-between gap-[8px] h-[32px] pl-[4px]">
+                <div className="flex-1 min-w-0">
+                  <h3 className="m-0 mt-[4px] truncate text-lg font-semibold leading-[24px] text-[#0d1625]">
+                    {title}
+                  </h3>
+                  {description && (
+                    <p className="mt-[4px] truncate text-sm leading-[24px] text-[rgba(1,22,55,0.61)]">
+                      {description}
+                    </p>
+                  )}
+                </div>
 
-              {/* Badge */}
-              {badge && (
-                <div
-                  className={`
+                {/* Badge (visible by default) */}
+                {badge && (
+                  <div
+                    className={`
                     inline-flex flex-shrink-0 items-center gap-[4px] 
                     rounded-[10px] px-[8px] py-[4px]
                     ${badgeStyle.bgColor}
                   `}
-                >
-                  {badge.avatar && (
-                    <div className="flex h-[20px] w-[20px] items-center justify-center">
-                      {badge.avatar}
-                    </div>
-                  )}
-                  <span
-                    className={`
+                  >
+                    {badge.avatar && (
+                      <div className="flex h-[20px] w-[20px] items-center justify-center">
+                        {badge.avatar}
+                      </div>
+                    )}
+                    <span
+                      className={`
                       whitespace-nowrap text-[12px] font-semibold leading-[16px]
                       ${badgeStyle.textColor}
                     `}
+                    >
+                      {badge.label}
+                    </span>
+                  </div>
+                )}
+
+                {/* Action Button (appears on hover when onAction is provided) */}
+                {actionLabel && onAction && !badge && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onAction()
+                    }}
+                    className="group/action inline-flex flex-shrink-0 items-center gap-[4px] rounded-[8px] px-[8px] py-[4px] text-[12px] font-semibold text-[#0d1625] transition-colors hover:bg-[rgba(13,22,37,0.08)]"
+                    type="button"
                   >
-                    {badge.label}
-                  </span>
+                    <F0Icon icon={Pencil} size="sm" />
+                    {actionLabel}
+                  </button>
+                )}
+              </div>
+
+              {/* Options List */}
+              {options && options.length > 0 && (
+                <div className="flex flex-col gap-[2px]">
+                  {options.map((option) => renderOption(option))}
                 </div>
               )}
             </div>
-
-            {/* Options List */}
-            {options && options.length > 0 && (
-              <div className="flex flex-col gap-[2px]">
-                {options.map((option) => renderOption(option))}
-              </div>
-            )}
           </div>
-        </div>
-      </F0Card>
+        </F0Card>
+      </div>
     )
   }
 )

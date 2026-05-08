@@ -130,6 +130,10 @@ export interface CardTaskAIProps {
   badge?: CardTaskAIBadge
   /** Click handler when card is clicked */
   onClick?: () => void
+  /** Optional action button (appears on hover) */
+  actionLabel?: string
+  /** Click handler for the action button */
+  onAction?: () => void
   /** Additional className for styling */
   className?: string
   /** Test identifier */
