@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.475.1](https://github.com/factorialco/f0/compare/f0-react-v1.475.0...f0-react-v1.475.1) (2026-05-08)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** fix z-index hierarchy for group header rows ([#3655](https://github.com/factorialco/f0/issues/3655)) ([d48ad7b](https://github.com/factorialco/f0/commit/d48ad7b235eba7b3476d79fd0273ec8af01a39b3))
+
 ## [1.475.0](https://github.com/factorialco/f0/compare/f0-react-v1.474.2...f0-react-v1.475.0) (2026-05-07)
 
 
