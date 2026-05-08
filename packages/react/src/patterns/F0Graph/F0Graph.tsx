@@ -1587,6 +1587,12 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
   // ── Internal search-with-popover state ──
   const [internalSearchQuery, setInternalSearchQuery] = useState("")
   const searchFlyTimerRef = useRef<number | null>(null)
+  const clearSearchFlyTimer = useCallback(() => {
+    if (searchFlyTimerRef.current !== null) {
+      window.clearTimeout(searchFlyTimerRef.current)
+      searchFlyTimerRef.current = null
+    }
+  }, [])
   const {
     results: searchResults,
     hasQuery: hasSearchQuery,
@@ -1619,9 +1625,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
       selectNode(id)
 
       // 3) Fly to it once the next layout pass has settled.
-      if (searchFlyTimerRef.current) {
-        window.clearTimeout(searchFlyTimerRef.current)
-      }
+      clearSearchFlyTimer()
       searchFlyTimerRef.current = window.setTimeout(() => {
         searchFlyTimerRef.current = null
         if (detailPanelEnabled) {
@@ -1647,17 +1651,14 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
       onSearchResultSelect,
       detailPanelEnabled,
       centerNodeWithPanelOffset,
+      clearSearchFlyTimer,
     ]
   )
 
   // Clean up the search-fly timer on unmount.
   useEffect(() => {
-    return () => {
-      if (searchFlyTimerRef.current) {
-        window.clearTimeout(searchFlyTimerRef.current)
-      }
-    }
-  }, [])
+    return clearSearchFlyTimer
+  }, [clearSearchFlyTimer])
 
   // ── Split context values (for performance — wrappers subscribe to only what they need) ──
   const zoomContextValue = useMemo(

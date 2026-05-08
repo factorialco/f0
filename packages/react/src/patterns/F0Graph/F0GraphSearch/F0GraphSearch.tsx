@@ -52,6 +52,14 @@ export const F0GraphSearch = ({
   const [popoverOpen, setPopoverOpen] = useState(false)
   const anchorRef = useRef<HTMLDivElement>(null)
   const activeResultRef = useRef<HTMLDivElement>(null)
+  const activeResultScrollTimerRef = useRef<number | null>(null)
+
+  const clearActiveResultScrollTimer = useCallback(() => {
+    if (activeResultScrollTimerRef.current !== null) {
+      window.clearTimeout(activeResultScrollTimerRef.current)
+      activeResultScrollTimerRef.current = null
+    }
+  }, [])
 
   // Gate visibility on having something meaningful to show. While the index
   // is debouncing with no prior results we keep the popover fully closed so
@@ -76,11 +84,17 @@ export const F0GraphSearch = ({
   // Keep the active row in view.
   useEffect(() => {
     if (!showResults) return
-    const id = window.requestAnimationFrame(() => {
+    clearActiveResultScrollTimer()
+    activeResultScrollTimerRef.current = window.setTimeout(() => {
+      activeResultScrollTimerRef.current = null
       activeResultRef.current?.scrollIntoView({ block: "nearest" })
-    })
-    return () => window.cancelAnimationFrame(id)
-  }, [activeIndex, results, showResults])
+    }, 0)
+    return clearActiveResultScrollTimer
+  }, [activeIndex, results, showResults, clearActiveResultScrollTimer])
+
+  useEffect(() => {
+    return clearActiveResultScrollTimer
+  }, [clearActiveResultScrollTimer])
 
   const handleSelect = useCallback(
     (id: string) => {
