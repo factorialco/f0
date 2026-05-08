@@ -7,6 +7,98 @@ import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { List, Ai, Folders, Paperclip, Split } from "@/icons/app"
 import type { CardTaskAIProps, TaskOption } from "./types"
 
+/**
+ * Runtime validation for CardTaskAI edge cases
+ * Logs warnings to console but doesn't crash the component
+ */
+const validateCardTaskAI = (props: CardTaskAIProps) => {
+  const { title, icon, options } = props
+
+  // Check required fields
+  if (!title || (typeof title === "string" && title.trim() === "")) {
+    console.warn(
+      "[CardTaskAI] Title is empty or missing. Component expects a non-empty title."
+    )
+  }
+
+  if (!icon) {
+    console.error(
+      "[CardTaskAI] Icon is required but was not provided. Rendering empty icon space."
+    )
+  }
+
+  if (!options || options.length === 0) {
+    console.warn(
+      "[CardTaskAI] No options provided. Card will appear empty. Consider adding at least an assignee."
+    )
+  } else {
+    // Check for assignee
+    const hasAssignee = options.some((opt) => opt.type === "assignee")
+    if (!hasAssignee) {
+      console.warn(
+        "[CardTaskAI] No assignee found in options. Recommend adding at least one assignee option."
+      )
+    }
+
+    // Check for duplicate IDs
+    const ids = options.map((opt) => opt.id)
+    const uniqueIds = new Set(ids)
+    if (ids.length !== uniqueIds.size) {
+      console.error(
+        "[CardTaskAI] Duplicate option IDs detected. Each option must have a unique id."
+      )
+    }
+
+    // Check for invalid option types
+    const validTypes = new Set([
+      "text",
+      "automation",
+      "form",
+      "document",
+      "tags",
+      "assignee",
+    ])
+    options.forEach((opt) => {
+      if (!validTypes.has(opt.type as string)) {
+        console.error(
+          `[CardTaskAI] Invalid option type: "${opt.type}". Use one of: text, automation, form, document, tags, assignee`
+        )
+      }
+    })
+
+    // Check for missing assignee data
+    options.forEach((opt) => {
+      if (opt.type === "assignee") {
+        const assigneeOpt = opt as Extract<TaskOption, { type: "assignee" }>
+        if (!assigneeOpt.firstName && !assigneeOpt.lastName) {
+          console.error(
+            `[CardTaskAI] Assignee option (id: ${opt.id}) missing both firstName and lastName. Skeleton will be shown.`
+          )
+        }
+      }
+    })
+
+    // Check for missing required labels
+    options.forEach((opt) => {
+      if (["text", "automation", "form", "document"].includes(opt.type)) {
+        const optWithLabel = opt as Extract<
+          TaskOption,
+          { type: "text" | "automation" | "form" | "document" }
+        >
+        if (
+          !optWithLabel.label ||
+          (typeof optWithLabel.label === "string" &&
+            optWithLabel.label.trim() === "")
+        ) {
+          console.warn(
+            `[CardTaskAI] Option (id: ${opt.id}, type: ${opt.type}) has missing or empty label. Skeleton will be shown.`
+          )
+        }
+      }
+    })
+  }
+}
+
 const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
   (
     {
@@ -21,6 +113,19 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
     },
     ref
   ) => {
+    // Validate props in development
+    if (process.env.NODE_ENV === "development") {
+      validateCardTaskAI({
+        icon,
+        title,
+        description,
+        options,
+        badge,
+        onClick,
+        className,
+        "data-testid": testId,
+      })
+    }
     const badgeVariantConfig: Record<
       string,
       { bgColor: string; textColor: string }

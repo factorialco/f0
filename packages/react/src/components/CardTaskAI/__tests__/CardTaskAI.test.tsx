@@ -441,5 +441,178 @@ describe("CardTaskAI", () => {
       const optionsList = container.querySelector('[class*="gap-0"]')
       expect(optionsList).not.toBeInTheDocument()
     })
+
+    it("renders many options without crashing (50+ items)", () => {
+      const manyOptions = Array.from({ length: 50 }, (_, i) => ({
+        type: "text" as const,
+        id: `${i}`,
+        label: `Item ${i}`,
+      }))
+
+      const { container } = render(
+        <CardTaskAI {...defaultProps} options={manyOptions} />
+      )
+      expect(container).toBeInTheDocument()
+      expect(screen.getByText("Item 0")).toBeInTheDocument()
+      expect(screen.getByText("Item 49")).toBeInTheDocument()
+    })
+
+    it("handles missing assignee names gracefully", () => {
+      render(
+        <CardTaskAI
+          {...defaultProps}
+          options={[
+            {
+              type: "assignee",
+              id: "1",
+              firstName: "John",
+              // lastName missing
+            },
+          ]}
+        />
+      )
+      expect(screen.getByText("John")).toBeInTheDocument()
+    })
+
+    it("renders with assignee missing both names", () => {
+      const { container } = render(
+        <CardTaskAI
+          {...defaultProps}
+          options={[
+            {
+              type: "assignee",
+              id: "1",
+              // firstName and lastName missing
+            },
+          ]}
+        />
+      )
+      // Should render something (skeleton or empty)
+      expect(container).toBeInTheDocument()
+    })
+
+    it("handles empty string labels gracefully", () => {
+      const { container } = render(
+        <CardTaskAI
+          {...defaultProps}
+          options={[
+            {
+              type: "text",
+              id: "1",
+              label: "",
+            },
+          ]}
+        />
+      )
+      expect(container).toBeInTheDocument()
+    })
+
+    it("handles document option without fileType", () => {
+      render(
+        <CardTaskAI
+          {...defaultProps}
+          options={[
+            {
+              type: "document",
+              id: "1",
+              label: "Document",
+              // fileType missing
+            },
+          ]}
+        />
+      )
+      expect(screen.getByText("Document")).toBeInTheDocument()
+    })
+
+    it("renders automation option without label", () => {
+      render(
+        <CardTaskAI
+          {...defaultProps}
+          options={[
+            {
+              type: "automation",
+              id: "1",
+              // label is optional for automation
+            },
+          ]}
+        />
+      )
+      // Should render automation option
+      expect(screen.getByText("Automatically send by ONE")).toBeInTheDocument()
+    })
+
+    it("handles tags option with many tags", () => {
+      const manyTags = Array.from({ length: 20 }, (_, i) => ({
+        id: `tag-${i}`,
+        label: `Tag ${i}`,
+      }))
+
+      render(
+        <CardTaskAI
+          {...defaultProps}
+          options={[
+            {
+              type: "tags",
+              id: "1",
+              tags: manyTags,
+            },
+          ]}
+        />
+      )
+      expect(screen.getByText("Tag 0")).toBeInTheDocument()
+      expect(screen.getByText("Tag 19")).toBeInTheDocument()
+    })
+
+    it("renders with empty title (should show warning)", () => {
+      // Suppress console warnings for this test
+      const consoleWarnSpy = vi
+        .spyOn(console, "warn")
+        .mockImplementation(() => {})
+
+      render(<CardTaskAI {...defaultProps} title="" />)
+      expect(consoleWarnSpy).toHaveBeenCalled()
+
+      consoleWarnSpy.mockRestore()
+    })
+
+    it("renders with no assignee option (should show warning)", () => {
+      const consoleWarnSpy = vi
+        .spyOn(console, "warn")
+        .mockImplementation(() => {})
+
+      render(
+        <CardTaskAI
+          {...defaultProps}
+          options={[
+            {
+              type: "text",
+              id: "1",
+              label: "Just text, no assignee",
+            },
+          ]}
+        />
+      )
+      expect(consoleWarnSpy).toHaveBeenCalled()
+
+      consoleWarnSpy.mockRestore()
+    })
+
+    it("handles special characters in labels", () => {
+      render(
+        <CardTaskAI
+          {...defaultProps}
+          options={[
+            {
+              type: "text",
+              id: "1",
+              label: "Tasks: 🎯 with emojis & special chars!",
+            },
+          ]}
+        />
+      )
+      expect(
+        screen.getByText("Tasks: 🎯 with emojis & special chars!")
+      ).toBeInTheDocument()
+    })
   })
 })
