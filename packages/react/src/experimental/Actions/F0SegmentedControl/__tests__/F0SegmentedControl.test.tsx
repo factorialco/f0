@@ -38,14 +38,26 @@ describe("F0SegmentedControl", () => {
 
   it("calls onChange when a segment is clicked", async () => {
     const onChange = vi.fn()
-    render(<F0SegmentedControl items={defaultItems} value="day" onChange={onChange} />)
+    render(
+      <F0SegmentedControl
+        items={defaultItems}
+        value="day"
+        onChange={onChange}
+      />
+    )
     await userEvent.click(screen.getByText("Week"))
     expect(onChange).toHaveBeenCalledWith("week")
   })
 
   it("does not deselect the current segment when clicked again", async () => {
     const onChange = vi.fn()
-    render(<F0SegmentedControl items={defaultItems} value="day" onChange={onChange} />)
+    render(
+      <F0SegmentedControl
+        items={defaultItems}
+        value="day"
+        onChange={onChange}
+      />
+    )
     await userEvent.click(screen.getByText("Day"))
     expect(onChange).not.toHaveBeenCalled()
   })
