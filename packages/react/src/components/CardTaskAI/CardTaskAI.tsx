@@ -6,8 +6,21 @@ import { F0Button } from "@/components/F0Button"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagList } from "@/components/tags/F0TagList"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
-import { List, Ai, Folders, Paperclip, Split } from "@/icons/app"
-import type { CardTaskAIProps, TaskOption } from "./types"
+import {
+  List,
+  Ai,
+  Folders,
+  Paperclip,
+  Split,
+  Bell,
+  Signature,
+  Todo,
+  Export,
+  FileFilled,
+  BookOpen,
+  Engagement,
+} from "@/icons/app"
+import type { CardTaskAIProps, TaskOption, TaskType } from "./types"
 
 /**
  * Runtime validation for CardTaskAI edge cases
@@ -128,6 +141,7 @@ const validateCardTaskAI = (props: CardTaskAIProps) => {
 const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
   (
     {
+      taskType,
       icon,
       title,
       description,
@@ -144,6 +158,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
     // Validate props in development
     if (process.env.NODE_ENV === "development") {
       validateCardTaskAI({
+        taskType,
         icon,
         title,
         description,
@@ -179,6 +194,47 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
         textColor: "text-red-700",
       },
     }
+
+    // Map task type to icon
+    const getTaskIcon = (type: TaskType) => {
+      switch (type) {
+        case "notification":
+          return Bell
+        case "sign":
+          return Signature
+        case "basic-task":
+          return Todo
+        case "upload-document":
+          return Export
+        case "data-collection":
+          return FileFilled
+        case "training":
+          return BookOpen
+        case "surveys":
+          return Engagement
+        default:
+          return Paperclip
+      }
+    }
+
+    // Map task type to colors
+    const getTaskColors = (type: TaskType) => {
+      if (type === "notification") {
+        return {
+          bgColor: "bg-[var(--background-warning-default)]",
+          borderColor: "border-[var(--border-default-secondary)]",
+          iconColor: "text-[var(--icon-warning-default)]",
+        }
+      }
+      return {
+        bgColor: "bg-[var(--background-info-default)]",
+        borderColor: "border-[var(--border-default-secondary)]",
+        iconColor: "text-[var(--icon-info-default)]",
+      }
+    }
+
+    const taskIcon = getTaskIcon(taskType)
+    const taskColors = getTaskColors(taskType)
 
     const renderOption = (option: TaskOption) => {
       switch (option.type) {
@@ -352,8 +408,13 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
         >
           <div className="flex items-start gap-[4px]">
             {/* Icon Section */}
-            <div className="flex h-[40px] w-[40px] flex-shrink-0 items-center justify-center">
-              {icon}
+            <div
+              className={`flex h-[40px] w-[40px] flex-shrink-0 items-center justify-center rounded-lg border ${taskColors.bgColor} ${taskColors.borderColor} ${taskColors.iconColor}`}
+              style={{
+                borderWidth: "1px",
+              }}
+            >
+              <F0Icon icon={taskIcon} size="md" />
             </div>
 
             {/* Content Section */}
