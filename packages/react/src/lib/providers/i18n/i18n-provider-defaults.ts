@@ -406,6 +406,7 @@ export const defaultTranslations = {
     attachFile: "Attach file",
     removeFile: "Remove",
     fileUploadError: "Upload failed",
+    tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
     dropFilesHere: "Drop your files here",
     reply: "Reply",
     removeQuote: "Remove quote",

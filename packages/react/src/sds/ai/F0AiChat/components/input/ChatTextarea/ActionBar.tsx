@@ -10,6 +10,7 @@ import { ToolHintSelector } from "../ToolHintSelector"
 interface ActionBarProps {
   onUploadFiles: ((files: File[]) => Promise<unknown>) | undefined
   isAtMaxFiles: boolean
+  maxFiles: number | undefined
   acceptValue: string | undefined
   fileInputRef: RefObject<HTMLInputElement>
   handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void
@@ -26,6 +27,7 @@ interface ActionBarProps {
 export const ActionBar = ({
   onUploadFiles,
   isAtMaxFiles,
+  maxFiles,
   acceptValue,
   fileInputRef,
   handleFileSelect,
@@ -61,7 +63,10 @@ export const ActionBar = ({
             <input
               ref={fileInputRef}
               type="file"
-              multiple
+              // Native picker only honors a binary "single vs multiple"
+              // selection — no per-N cap. We still validate the count in JS.
+              multiple={maxFiles !== 1}
+              disabled={isAtMaxFiles}
               accept={acceptValue}
               className="hidden"
               onChange={handleFileSelect}
