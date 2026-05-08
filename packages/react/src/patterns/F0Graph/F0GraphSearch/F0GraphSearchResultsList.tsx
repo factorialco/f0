@@ -18,7 +18,7 @@ interface F0GraphSearchResultsListProps {
   showActiveOutline: boolean
   listboxId: string
   noResultsLabel: string
-  activeResultRef: RefObject<HTMLDivElement | null>
+  activeResultRef: RefObject<HTMLDivElement>
   onHover: (index: number) => void
   onHoverEnd: () => void
   onSelect: (id: string) => void

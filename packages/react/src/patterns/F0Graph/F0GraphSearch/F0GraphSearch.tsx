@@ -173,7 +173,6 @@ export const F0GraphSearch = ({
             icon={SearchIcon}
             loading={loading}
             clearable
-            onClear={() => handleSearchChange("")}
           />
         </div>
       </Popover.Anchor>

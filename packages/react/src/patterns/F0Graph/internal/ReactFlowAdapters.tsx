@@ -339,7 +339,6 @@ function F0GraphCollapserWrapperInner({
             icon={Minimize}
             hideLabel
             label={ariaLabel}
-            tabIndex={-1}
             onClick={() => actionsCtx.toggleExpand(parentId)}
           />
         </div>

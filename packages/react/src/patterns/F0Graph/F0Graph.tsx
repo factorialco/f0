@@ -1586,7 +1586,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
 
   // ── Internal search-with-popover state ──
   const [internalSearchQuery, setInternalSearchQuery] = useState("")
-  const searchFlyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const searchFlyTimerRef = useRef<number | null>(null)
   const {
     results: searchResults,
     hasQuery: hasSearchQuery,
