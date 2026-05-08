@@ -221,15 +221,15 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
     const getTaskColors = (type: TaskType) => {
       if (type === "notification") {
         return {
-          backgroundColor: "rgba(232, 172, 38, 0.08)",
-          borderColor: "rgba(5, 38, 87, 0.06)",
-          color: "rgb(232, 172, 38)",
+          backgroundColor: "var(--background-warning-default)",
+          borderColor: "var(--border-default-secondary)",
+          color: "var(--icon-warning-default)",
         }
       }
       return {
-        backgroundColor: "rgba(5, 101, 233, 0.08)",
-        borderColor: "rgba(5, 38, 87, 0.06)",
-        color: "rgb(5, 101, 233)",
+        backgroundColor: "var(--background-info-default)",
+        borderColor: "var(--border-default-secondary)",
+        color: "var(--icon-info-default)",
       }
     }
 
@@ -416,9 +416,11 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
                 borderWidth: "1px",
               }}
             >
-              <div style={{ color: taskColors.color }}>
-                <F0Icon icon={taskIcon} size="md" />
-              </div>
+              <F0Icon
+                icon={taskIcon}
+                size="md"
+                style={{ color: taskColors.color }}
+              />
             </div>
 
             {/* Content Section */}
