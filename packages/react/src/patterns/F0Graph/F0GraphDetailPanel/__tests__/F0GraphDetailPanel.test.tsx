@@ -145,6 +145,19 @@ describe("F0GraphDetailPanel resize", () => {
     expect(handle).toHaveAttribute("tabindex", "0")
   })
 
+  it("keeps aria-valuemax in sync with the resize clamp max", () => {
+    renderPanel({ initialWidth: 400 })
+    const handle = getHandle()
+
+    fireEvent.pointerDown(handle, { clientX: 500 })
+    fireEvent.pointerMove(handle, { clientX: -500 })
+
+    const panelWidth = Number(getPanel().style.width.replace("px", ""))
+    const ariaMax = Number(handle.getAttribute("aria-valuemax"))
+
+    expect(panelWidth).toBe(ariaMax)
+  })
+
   // ── Drag resize ────────────────────────────────────────────────
 
   it("changes width on pointer drag", () => {

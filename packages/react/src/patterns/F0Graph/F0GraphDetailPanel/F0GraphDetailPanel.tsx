@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils"
 // ─── Constants ───────────────────────────────────────────────────
 
 const MIN_WIDTH = 320
+const MAX_WIDTH_RATIO = 0.4
 const KEYBOARD_STEP = 16
 const KEYBOARD_STEP_LARGE = 64
 const BORDER_HOVER_DELAY = 80
@@ -32,8 +33,14 @@ function storageKey(graphId: string): string {
   return `f0graph:detailPanelWidth:${graphId}`
 }
 
+function getMaxWidth(): number {
+  return typeof window !== "undefined"
+    ? Math.round(window.innerWidth * MAX_WIDTH_RATIO)
+    : 576
+}
+
 function clampWidth(width: number): number {
-  const maxWidth = typeof window !== "undefined" ? window.innerWidth * 0.4 : 576
+  const maxWidth = getMaxWidth()
   return Math.round(Math.min(Math.max(width, MIN_WIDTH), maxWidth))
 }
 
@@ -255,8 +262,7 @@ function ResizeHandle({
     [width, onResize, onResizeEnd]
   )
 
-  const maxWidth =
-    typeof window !== "undefined" ? Math.round(window.innerWidth * 0.3) : 576
+  const maxWidth = getMaxWidth()
   const i18n = useI18n()
 
   return (
