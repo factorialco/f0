@@ -398,16 +398,18 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
 
                 {/* Action Button (appears on hover when onAction is provided) */}
                 {actionLabel && onAction && !badge && isHovered && (
-                  <F0Button
-                    variant="outline"
-                    size="xs"
-                    icon={Pencil}
-                    label={actionLabel}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onAction()
-                    }}
-                  />
+                  <div className="flex-shrink-0 pl-[8px]">
+                    <F0Button
+                      variant="outline"
+                      size="xs"
+                      icon={Pencil}
+                      label={actionLabel}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onAction()
+                      }}
+                    />
+                  </div>
                 )}
               </div>
 
