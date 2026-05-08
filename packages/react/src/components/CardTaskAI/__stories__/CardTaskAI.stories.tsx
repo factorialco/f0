@@ -126,6 +126,8 @@ export const WithDocument: Story = {
   args: {
     icon: <FileAvatarIcon />,
     title: "Review and sign your contract",
+    actionLabel: "Edit",
+    onAction: () => alert("Edit clicked"),
     options: [
       {
         type: "assignee",
@@ -163,6 +165,8 @@ export const AllOptionTypes: Story = {
   args: {
     icon: <FileAvatarIcon />,
     title: "Fill in your personal information",
+    actionLabel: "Edit",
+    onAction: () => alert("Edit clicked"),
     options: [
       {
         type: "assignee",
@@ -206,6 +210,8 @@ export const MultipleDocuments: Story = {
   args: {
     icon: <FileAvatarIcon />,
     title: "Review all documents",
+    actionLabel: "Edit",
+    onAction: () => alert("Edit clicked"),
     options: [
       {
         type: "assignee",
@@ -247,6 +253,8 @@ export const ConditionInline: Story = {
   args: {
     icon: <FileAvatarIcon />,
     title: "Task applies to",
+    actionLabel: "Edit",
+    onAction: () => alert("Edit clicked"),
     options: [
       {
         type: "assignee",
@@ -316,6 +324,8 @@ export const LongLabel: Story = {
   args: {
     icon: <FileAvatarIcon />,
     title: "Complete employee information",
+    actionLabel: "Edit",
+    onAction: () => alert("Edit clicked"),
     options: [
       {
         type: "assignee",
