@@ -406,7 +406,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
                     }`}
                   >
                     <F0Button
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
                       label={actionLabel}
                       onClick={(e) => {
