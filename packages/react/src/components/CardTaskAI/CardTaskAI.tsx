@@ -18,7 +18,7 @@ import {
   Export,
   FileFilled,
   BookOpen,
-  Engagement,
+  MessageFilled,
 } from "@/icons/app"
 import type { CardTaskAIProps, TaskOption, TaskType } from "./types"
 
@@ -211,7 +211,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
         case "training":
           return BookOpen
         case "surveys":
-          return Engagement
+          return MessageFilled
         default:
           return Paperclip
       }
