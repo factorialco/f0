@@ -12,9 +12,9 @@ export interface UpsellingAlertProps {
    */
   description?: string
   /**
-   * The label for the upselling button
+   * The label for the upselling button. Defaults to "More info".
    */
-  actionLabel: string
+  actionLabel?: string
   /**
    * Function to be executed when the upsell button is clicked
    */
@@ -41,7 +41,7 @@ export interface UpsellingAlertProps {
   closeLabel: UpsellingButtonProps["closeLabel"]
 }
 
-const _UpsellingAlert = ({
+function _UpsellingAlert({
   title,
   description,
   actionLabel = "More info",
@@ -51,7 +51,7 @@ const _UpsellingAlert = ({
   loadingState,
   nextSteps,
   closeLabel,
-}: UpsellingAlertProps) => {
+}: UpsellingAlertProps) {
   return (
     <div className="@container">
       <div
