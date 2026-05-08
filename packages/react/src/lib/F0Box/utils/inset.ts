@@ -1,29 +1,52 @@
 import type { InsetToken } from "../types"
 
-const insetMap: Record<InsetToken, string> = {
-  none: "0",
-  xs: "1",
-  sm: "2",
-  md: "3",
-  lg: "4",
-  xl: "6",
-  "2xl": "8",
-  "3xl": "10",
-  "4xl": "12",
-  "5xl": "16",
-}
-
 export const insetVariants = {
-  top: Object.fromEntries(
-    Object.entries(insetMap).map(([token, value]) => [token, `top-${value}`])
-  ) as Record<InsetToken, string>,
-  right: Object.fromEntries(
-    Object.entries(insetMap).map(([token, value]) => [token, `right-${value}`])
-  ) as Record<InsetToken, string>,
-  bottom: Object.fromEntries(
-    Object.entries(insetMap).map(([token, value]) => [token, `bottom-${value}`])
-  ) as Record<InsetToken, string>,
-  left: Object.fromEntries(
-    Object.entries(insetMap).map(([token, value]) => [token, `left-${value}`])
-  ) as Record<InsetToken, string>,
+  top: {
+    none: "top-0",
+    xs: "top-1",
+    sm: "top-2",
+    md: "top-3",
+    lg: "top-4",
+    xl: "top-6",
+    "2xl": "top-8",
+    "3xl": "top-10",
+    "4xl": "top-12",
+    "5xl": "top-16",
+  } satisfies Record<InsetToken, string>,
+  right: {
+    none: "right-0",
+    xs: "right-1",
+    sm: "right-2",
+    md: "right-3",
+    lg: "right-4",
+    xl: "right-6",
+    "2xl": "right-8",
+    "3xl": "right-10",
+    "4xl": "right-12",
+    "5xl": "right-16",
+  } satisfies Record<InsetToken, string>,
+  bottom: {
+    none: "bottom-0",
+    xs: "bottom-1",
+    sm: "bottom-2",
+    md: "bottom-3",
+    lg: "bottom-4",
+    xl: "bottom-6",
+    "2xl": "bottom-8",
+    "3xl": "bottom-10",
+    "4xl": "bottom-12",
+    "5xl": "bottom-16",
+  } satisfies Record<InsetToken, string>,
+  left: {
+    none: "left-0",
+    xs: "left-1",
+    sm: "left-2",
+    md: "left-3",
+    lg: "left-4",
+    xl: "left-6",
+    "2xl": "left-8",
+    "3xl": "left-10",
+    "4xl": "left-12",
+    "5xl": "left-16",
+  } satisfies Record<InsetToken, string>,
 }

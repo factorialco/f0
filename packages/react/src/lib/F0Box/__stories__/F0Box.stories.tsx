@@ -483,6 +483,153 @@ export const Position: Story = {
   ),
 }
 
+export const InsetCorners: Story = {
+  render: () => (
+    <F0Box display="flex" flexDirection="column" gap="lg">
+      <Label subtitle="Use a relative parent and absolute children to anchor items to each corner">
+        Inset corners
+      </Label>
+
+      <div className="h-[200px] w-[800px] max-w-full rounded-xl bg-f1-background-tertiary p-6">
+        <F0Box
+          position="relative"
+          width="full"
+          height="full"
+          border="default"
+          borderRadius="md"
+        >
+          <F0Box
+            position="absolute"
+            top="none"
+            left="none"
+            padding="sm"
+            background="info"
+            borderRadius="sm"
+          >
+            top=&quot;none&quot; left=&quot;none&quot;
+          </F0Box>
+          <F0Box
+            position="absolute"
+            top="none"
+            right="none"
+            padding="sm"
+            background="warning"
+            borderRadius="sm"
+          >
+            top=&quot;none&quot; right=&quot;none&quot;
+          </F0Box>
+          <F0Box
+            position="absolute"
+            bottom="none"
+            left="none"
+            padding="sm"
+            background="positive"
+            borderRadius="sm"
+          >
+            bottom=&quot;none&quot; left=&quot;none&quot;
+          </F0Box>
+          <F0Box
+            position="absolute"
+            right="none"
+            bottom="none"
+            padding="sm"
+            background="promote"
+            borderRadius="sm"
+          >
+            right=&quot;none&quot; bottom=&quot;none&quot;
+          </F0Box>
+        </F0Box>
+      </div>
+
+      <F0Box display="grid" columns="2" gap="md">
+        <div className="h-[150px] rounded-xl bg-f1-background-tertiary p-6">
+          <F0Box
+            position="relative"
+            width="full"
+            height="full"
+            border="default"
+            borderRadius="md"
+          >
+            <F0Box
+              position="absolute"
+              top="none"
+              left="lg"
+              padding="sm"
+              background="info"
+              borderRadius="sm"
+            >
+              top=&quot;none&quot; left=&quot;lg&quot;
+            </F0Box>
+          </F0Box>
+        </div>
+
+        <div className="h-[150px] rounded-xl bg-f1-background-tertiary p-6">
+          <F0Box
+            position="relative"
+            width="full"
+            height="full"
+            border="default"
+            borderRadius="md"
+          >
+            <F0Box
+              position="absolute"
+              top="lg"
+              left="none"
+              padding="sm"
+              background="info"
+              borderRadius="sm"
+            >
+              top=&quot;lg&quot; left=&quot;none&quot;
+            </F0Box>
+          </F0Box>
+        </div>
+
+        <div className="h-[150px] rounded-xl bg-f1-background-tertiary p-6">
+          <F0Box
+            position="relative"
+            width="full"
+            height="full"
+            border="default"
+            borderRadius="md"
+          >
+            <F0Box
+              position="absolute"
+              bottom="none"
+              right="lg"
+              padding="sm"
+              background="info"
+              borderRadius="sm"
+            >
+              bottom=&quot;none&quot; right=&quot;lg&quot;
+            </F0Box>
+          </F0Box>
+        </div>
+
+        <div className="h-[150px] rounded-xl bg-f1-background-tertiary p-6">
+          <F0Box
+            position="relative"
+            width="full"
+            height="full"
+            border="default"
+            borderRadius="md"
+          >
+            <F0Box
+              position="absolute"
+              bottom="lg"
+              right="none"
+              padding="sm"
+              background="info"
+              borderRadius="sm"
+            >
+              bottom=&quot;lg&quot; right=&quot;none&quot;
+            </F0Box>
+          </F0Box>
+        </div>
+      </F0Box>
+    </F0Box>
+  ),
+}
+
 // ═══════════════════════════════════════════════════════════════════
 //  4. PADDING
 // ═══════════════════════════════════════════════════════════════════
