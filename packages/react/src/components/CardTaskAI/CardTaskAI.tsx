@@ -221,15 +221,15 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
     const getTaskColors = (type: TaskType) => {
       if (type === "notification") {
         return {
-          bgColor: "bg-[var(--background-warning-default)]",
-          borderColor: "border-[var(--border-default-secondary)]",
-          iconColor: "text-[var(--icon-warning-default)]",
+          backgroundColor: "var(--background-warning-default)",
+          borderColor: "var(--border-default-secondary)",
+          color: "var(--icon-warning-default)",
         }
       }
       return {
-        bgColor: "bg-[var(--background-info-default)]",
-        borderColor: "border-[var(--border-default-secondary)]",
-        iconColor: "text-[var(--icon-info-default)]",
+        backgroundColor: "var(--background-info-default)",
+        borderColor: "var(--border-default-secondary)",
+        color: "var(--icon-info-default)",
       }
     }
 
@@ -409,12 +409,18 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
           <div className="flex items-start gap-[4px]">
             {/* Icon Section */}
             <div
-              className={`flex h-[40px] w-[40px] flex-shrink-0 items-center justify-center rounded-lg border ${taskColors.bgColor} ${taskColors.borderColor} ${taskColors.iconColor}`}
+              className="flex h-[40px] w-[40px] flex-shrink-0 items-center justify-center rounded-lg border"
               style={{
+                backgroundColor: taskColors.backgroundColor,
+                borderColor: taskColors.borderColor,
                 borderWidth: "1px",
               }}
             >
-              <F0Icon icon={taskIcon} size="md" />
+              <F0Icon
+                icon={taskIcon}
+                size="md"
+                style={{ color: taskColors.color }}
+              />
             </div>
 
             {/* Content Section */}
