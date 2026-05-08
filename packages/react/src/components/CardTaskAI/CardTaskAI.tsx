@@ -59,7 +59,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
               ) : (
                 <F0Icon icon={List} size="sm" />
               )}
-              <p className="text-[14px] font-normal leading-[20px] text-[rgba(1,22,55,0.61)]">
+              <p className="text-[14px] font-normal leading-[24px] text-[rgba(1,22,55,0.61)]">
                 {option.label}
               </p>
             </div>
@@ -69,7 +69,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
           return (
             <div key={option.id} className="flex items-center gap-[8px]">
               <F0Icon icon={Ai} size="sm" />
-              <p className="text-[14px] font-normal leading-[20px] text-[rgba(1,22,55,0.61)]">
+              <p className="text-[14px] font-normal leading-[24px] text-[rgba(1,22,55,0.61)]">
                 {option.label || "Automatically send by ONE"}
               </p>
             </div>
@@ -91,7 +91,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
               ) : (
                 <F0Icon icon={Folders} size="sm" />
               )}
-              <p className="text-[14px] font-normal leading-[20px] text-[rgba(1,22,55,0.61)]">
+              <p className="text-[14px] font-normal leading-[24px] text-[rgba(1,22,55,0.61)]">
                 {option.label}
               </p>
             </div>
@@ -119,7 +119,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
                     {option.fileType}
                   </span>
                 )}
-                <p className="text-[14px] font-normal leading-[20px] text-[rgba(1,22,55,0.61)]">
+                <p className="text-[14px] font-normal leading-[24px] text-[rgba(1,22,55,0.61)]">
                   {option.label}
                 </p>
               </div>
@@ -157,7 +157,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
                 deactivated={option.deactivated}
                 size="xs"
               />
-              <span className="text-[14px] font-normal leading-[20px] text-[rgba(1,22,55,0.61)]">
+              <span className="text-[14px] font-normal leading-[24px] text-[rgba(1,22,55,0.61)]">
                 {option.firstName} {option.lastName}
               </span>
             </div>
@@ -186,7 +186,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
           ${className}
         `}
       >
-        <div className="flex items-start gap-[8px]">
+        <div className="flex items-start gap-[8px] pb-[12px] pt-[16px] px-[16px]">
           {/* Icon Section */}
           <div className="flex h-[40px] w-[40px] flex-shrink-0 items-center justify-center">
             {icon}
@@ -195,13 +195,13 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
           {/* Content Section */}
           <div className="flex flex-1 flex-col gap-[8px]">
             {/* Header with Title and Badge */}
-            <div className="flex items-start justify-between gap-[8px]">
+            <div className="flex items-start justify-between gap-[8px] h-[32px] pl-[4px]">
               <div className="flex-1">
-                <h3 className="m-0 text-lg font-semibold leading-[20px] text-[#0d1625]">
+                <h3 className="m-0 text-lg font-semibold leading-[24px] text-[#0d1625]">
                   {title}
                 </h3>
                 {description && (
-                  <p className="mt-[4px] text-sm leading-[20px] text-[rgba(1,22,55,0.61)]">
+                  <p className="mt-[4px] text-sm leading-[24px] text-[rgba(1,22,55,0.61)]">
                     {description}
                   </p>
                 )}
