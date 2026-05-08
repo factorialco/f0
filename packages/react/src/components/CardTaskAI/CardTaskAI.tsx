@@ -3,6 +3,7 @@ import { withDataTestId } from "@/lib/data-testid"
 import { F0Card } from "@/components/F0Card"
 import { F0Icon } from "@/components/F0Icon"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
+import { F0TagList } from "@/components/tags/F0TagList"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { List, Ai, Folders, Paperclip, Split } from "@/icons/app"
 import type { CardTaskAIProps, TaskOption } from "./types"
@@ -278,10 +279,14 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
                   ))}
                 </div>
               ) : (
-                <div className="flex flex-col gap-[2px]">
-                  {option.conditions.map((cond) => (
-                    <F0TagRaw key={cond.id} text={cond.label} />
-                  ))}
+                <div className="w-full">
+                  <F0TagList
+                    type="raw"
+                    tags={option.conditions.map((cond) => ({
+                      text: cond.label,
+                    }))}
+                    max={4}
+                  />
                 </div>
               )}
             </div>

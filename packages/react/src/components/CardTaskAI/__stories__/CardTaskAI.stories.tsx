@@ -44,13 +44,13 @@ export const TextOption: Story = {
 }
 
 /**
- * Casuistic 2: Text + Automation option
- * Shows what needs to be done + that ONE will handle it automatically
+ * Casuistic 2: Automation + Conditions
+ * Shows ONE will handle it automatically + conditions for when it applies
  */
 export const WithAutomation: Story = {
   args: {
     icon: <FileAvatarIcon />,
-    title: "Fill in your personal information",
+    title: "Collect employee preferences",
     options: [
       {
         type: "assignee",
@@ -59,21 +59,24 @@ export const WithAutomation: Story = {
         lastName: "Employee",
       },
       {
-        type: "single-task",
+        type: "one-automation",
         id: "1",
-        label: "Personal information, Address, emergency contact",
+        label: "Automatically send by ONE",
       },
       {
-        type: "one-automation",
+        type: "condition",
         id: "2",
-        label: "Automatically send by ONE",
+        conditions: [
+          { id: "cond1", label: "Engineering" },
+          { id: "cond2", label: "Barcelona" },
+        ],
       },
     ],
   },
 }
 
 /**
- * Casuistic 3: Text + Automation + Form option
+ * Casuistic 3: Form + Document option
  * Includes a survey or form that user needs to fill
  */
 export const WithForm: Story = {
@@ -93,12 +96,8 @@ export const WithForm: Story = {
         label: "Personal information, Address, emergency contact",
       },
       {
-        type: "one-automation",
-        id: "2",
-      },
-      {
         type: "with-folder",
-        id: "3",
+        id: "2",
         label: "Employee Satisfaction Survey",
         onClick: () => alert("Opening survey..."),
       },
@@ -144,7 +143,7 @@ export const WithDocument: Story = {
 
 /**
  * Casuistic 5: Complete - All 5 option types
- * Text + Automation + Form + Document + Tags (metadata pills)
+ * Text + Form + Document + Condition (metadata pills)
  * This is the full complexity case with all possible options
  */
 export const AllOptionTypes: Story = {
@@ -164,156 +163,24 @@ export const AllOptionTypes: Story = {
         label: "Personal information, Address, emergency contact",
       },
       {
-        type: "one-automation",
-        id: "2",
-      },
-      {
         type: "with-folder",
-        id: "3",
+        id: "2",
         label: "Employee Satisfaction Survey",
       },
       {
         type: "document-upload",
-        id: "4",
+        id: "3",
         label: "Employee Satisfaction Survey",
         fileType: "pdf",
       },
       {
         type: "condition",
-        id: "5",
+        id: "4",
         conditions: [
           { id: "cond1", label: "Operator" },
           { id: "cond2", label: "Barcelona" },
           { id: "cond3", label: "Interns" },
         ],
-      },
-    ],
-  },
-}
-
-/**
- * Minimal example: Single document option
- */
-export const SingleOption: Story = {
-  args: {
-    icon: <FileAvatarIcon />,
-    title: "Review document",
-    description: "Please review the attached document",
-    options: [
-      {
-        type: "assignee",
-        id: "0",
-        firstName: "New",
-        lastName: "Employee",
-      },
-      {
-        type: "document-upload",
-        id: "1",
-        label: "Contract_Final.pdf",
-        fileType: "pdf",
-        onClick: () => alert("Opening document..."),
-      },
-    ],
-  },
-}
-
-/**
- * Two options: Text + Automation
- */
-export const TwoOptions: Story = {
-  args: {
-    icon: <FileAvatarIcon />,
-    title: "Complete your profile",
-    options: [
-      {
-        type: "assignee",
-        id: "0",
-        firstName: "New",
-        lastName: "Employee",
-      },
-      {
-        type: "single-task",
-        id: "1",
-        label: "Basic information, Work history, Skills",
-      },
-      {
-        type: "one-automation",
-        id: "2",
-        label: "Will be verified by our AI",
-      },
-    ],
-  },
-}
-
-/**
- * Three options: Text + Form + Tags
- */
-export const ThreeOptions: Story = {
-  args: {
-    icon: <FileAvatarIcon />,
-    title: "Onboarding checklist",
-    options: [
-      {
-        type: "assignee",
-        id: "0",
-        firstName: "New",
-        lastName: "Employee",
-      },
-      {
-        type: "single-task",
-        id: "1",
-        label: "Personal details, Contact information",
-      },
-      {
-        type: "with-folder",
-        id: "2",
-        label: "Department preferences survey",
-      },
-      {
-        type: "tags",
-        id: "3",
-        tags: [
-          { id: "tag1", label: "Engineering" },
-          { id: "tag2", label: "Full-time" },
-        ],
-      },
-    ],
-  },
-}
-
-/**
- * Four options: Text + Automation + Form + Document
- */
-export const FourOptions: Story = {
-  args: {
-    icon: <FileAvatarIcon />,
-    title: "Employee verification",
-    options: [
-      {
-        type: "assignee",
-        id: "0",
-        firstName: "New",
-        lastName: "Employee",
-      },
-      {
-        type: "single-task",
-        id: "1",
-        label: "Identity verification, Background check",
-      },
-      {
-        type: "one-automation",
-        id: "2",
-      },
-      {
-        type: "with-folder",
-        id: "3",
-        label: "Employment verification form",
-      },
-      {
-        type: "document-upload",
-        id: "4",
-        label: "Verification_Guide.pdf",
-        fileType: "pdf",
       },
     ],
   },
@@ -361,7 +228,7 @@ export const MultipleDocuments: Story = {
 }
 
 /**
- * Condition: inline mode (≤3 conditions)
+ * Condition: inline mode (≤3 conditions) + Form
  */
 export const ConditionInline: Story = {
   args: {
@@ -375,8 +242,13 @@ export const ConditionInline: Story = {
         lastName: "Employee",
       },
       {
-        type: "condition",
+        type: "with-folder",
         id: "1",
+        label: "Department preferences survey",
+      },
+      {
+        type: "condition",
+        id: "2",
         conditions: [
           { id: "c1", label: "Engineering" },
           { id: "c2", label: "Barcelona" },
@@ -387,7 +259,8 @@ export const ConditionInline: Story = {
 }
 
 /**
- * Condition: list mode (>3 conditions)
+ * Condition: list mode (>3 conditions) + Document
+ * Tags wrap horizontally until they don't fit, then continue as list
  */
 export const ConditionList: Story = {
   args: {
@@ -401,8 +274,14 @@ export const ConditionList: Story = {
         lastName: "Employee",
       },
       {
-        type: "condition",
+        type: "document-upload",
         id: "1",
+        label: "Task_Guide.pdf",
+        fileType: "pdf",
+      },
+      {
+        type: "condition",
+        id: "2",
         conditions: [
           { id: "c1", label: "Engineering" },
           { id: "c2", label: "Barcelona" },
@@ -410,55 +289,6 @@ export const ConditionList: Story = {
           { id: "c4", label: "Full-time" },
           { id: "c5", label: "Permanent" },
         ],
-      },
-    ],
-  },
-}
-
-/**
- * Clickable card with form
- */
-export const ClickableCard: Story = {
-  args: {
-    icon: <FileAvatarIcon />,
-    title: "Start onboarding",
-    options: [
-      {
-        type: "assignee",
-        id: "0",
-        firstName: "New",
-        lastName: "Employee",
-      },
-      {
-        type: "with-folder",
-        id: "1",
-        label: "Onboarding form",
-        onClick: () => alert("Opening form..."),
-      },
-    ],
-    onClick: () => alert("Card clicked!"),
-  },
-}
-
-/**
- * Casuistic: With assignee (person avatar)
- * Shows task assignee using F0AvatarPerson metadata component
- */
-export const WithAssignee: Story = {
-  args: {
-    icon: <FileAvatarIcon />,
-    title: "Fill in your personal information",
-    options: [
-      {
-        type: "single-task",
-        id: "1",
-        label: "Personal information, Address, emergency contact",
-      },
-      {
-        type: "assignee",
-        id: "2",
-        firstName: "New",
-        lastName: "Employee",
       },
     ],
   },
