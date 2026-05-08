@@ -150,4 +150,56 @@ describe("F0Graph deferred loading", () => {
     expect(onComplete).not.toHaveBeenCalled()
     expect(screen.queryByTestId("node-c")).toBeNull()
   })
+
+  it("deferredLoading is true during loading and false after resolve", async () => {
+    let resolveFn!: (v: DeferredNodesPayload<string>) => void
+    const deferredPromise = new Promise<DeferredNodesPayload<string>>((r) => {
+      resolveFn = r
+    })
+
+    let capturedDeferredLoading: boolean | undefined
+
+    function capturingRenderNode(
+      node: GraphNode<string>,
+      ctx: F0GraphNodeRenderContext
+    ) {
+      // Capture the deferredLoading value from the context for the root node
+      if (node.id === "a") {
+        capturedDeferredLoading = ctx.deferredLoading
+      }
+      return (
+        <div
+          ref={ctx.nodeRef}
+          role="treeitem"
+          tabIndex={ctx.tabIndex}
+          data-testid={`node-${node.id}`}
+        >
+          {node.data}
+        </div>
+      )
+    }
+
+    zeroRender(
+      <div style={{ width: 800, height: 600 }}>
+        <F0Graph
+          nodes={initialNodes}
+          deferredNodes={deferredPromise}
+          renderNode={capturingRenderNode}
+          defaultExpandedNodes={new Set(["a"])}
+        />
+      </div>
+    )
+
+    // During loading, deferredLoading should be true
+    expect(capturedDeferredLoading).toBe(true)
+
+    // Resolve
+    await act(async () => {
+      resolveFn(deferredPayload)
+      await new Promise((r) => setTimeout(r, 0))
+    })
+
+    // After resolve, deferredLoading should be undefined (falsy)
+    expect(capturedDeferredLoading).toBeUndefined()
+  })
 })

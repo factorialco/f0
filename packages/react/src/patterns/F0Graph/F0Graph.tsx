@@ -1762,7 +1762,8 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
                           onZoomOut={handleZoomOut}
                           onFitView={handleFitView}
                           onFocusUser={
-                            props.currentUserNodeId
+                            props.currentUserNodeId &&
+                            nodeMap.has(props.currentUserNodeId)
                               ? handleFocusUser
                               : undefined
                           }
