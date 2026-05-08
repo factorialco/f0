@@ -412,4 +412,34 @@ describe("CardTaskAI", () => {
       expect(screen.getByTestId("badge-avatar")).toBeInTheDocument()
     })
   })
+
+  describe("Edge cases", () => {
+    it("truncates very long titles", () => {
+      const longTitle =
+        "This is a very long title that should be truncated with ellipsis to prevent card from growing exponentially"
+      const { container } = render(
+        <CardTaskAI {...defaultProps} title={longTitle} />
+      )
+      const titleElement = container.querySelector("h3")
+      expect(titleElement).toHaveClass("truncate")
+    })
+
+    it("truncates description when provided", () => {
+      const longDescription =
+        "This is a very long description that should also be truncated"
+      const { container } = render(
+        <CardTaskAI {...defaultProps} description={longDescription} />
+      )
+      const descElement = container.querySelector("p")
+      expect(descElement).toHaveClass("truncate")
+    })
+
+    it("handles empty options array", () => {
+      const { container } = render(
+        <CardTaskAI {...defaultProps} options={[]} />
+      )
+      const optionsList = container.querySelector('[class*="gap-0"]')
+      expect(optionsList).not.toBeInTheDocument()
+    })
+  })
 })

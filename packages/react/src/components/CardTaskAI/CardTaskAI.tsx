@@ -196,12 +196,12 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
           <div className="flex flex-1 flex-col gap-0">
             {/* Header with Title and Badge */}
             <div className="flex items-start justify-between gap-[8px] h-[32px] pl-[4px]">
-              <div className="flex-1">
-                <h3 className="m-0 mt-[4px] text-lg font-semibold leading-[24px] text-[#0d1625]">
+              <div className="flex-1 min-w-0">
+                <h3 className="m-0 mt-[4px] truncate text-lg font-semibold leading-[24px] text-[#0d1625]">
                   {title}
                 </h3>
                 {description && (
-                  <p className="mt-[4px] text-sm leading-[24px] text-[rgba(1,22,55,0.61)]">
+                  <p className="mt-[4px] truncate text-sm leading-[24px] text-[rgba(1,22,55,0.61)]">
                     {description}
                   </p>
                 )}
