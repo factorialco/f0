@@ -12,7 +12,7 @@ import { FiltersChipsList as FiltersChipsListComponent } from "./components/Filt
 import { FiltersControls as FiltersControlsComponent } from "./components/FiltersControls"
 import { FiltersPresets as FiltersPresetsComponent } from "./components/FiltersPresets"
 import { FiltersContext } from "./context"
-import { getPresetCoveredKeys } from "./internal/getPresetCoveredKeys"
+import { isPresetSelected } from "./internal/isPresetSelected"
 import { PresetsDefinition } from "./types"
 
 /**
@@ -38,6 +38,8 @@ export type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
   onOpenChange?: (isOpen: boolean) => void
   /** Display counter for the applied filters */
   displayCounter?: boolean
+  /** Total number of items matching the current filters, displayed as "N results for:" prefix in the chips row */
+  resultCount?: number
 }
 
 /**
@@ -261,11 +263,14 @@ const FiltersChipsList = () => {
     presets,
     removeFilterValue,
     setFiltersValue,
+    resultCount,
   } = useContext(FiltersContext)
 
-  // Get filter keys that are covered by currently selected presets
-  const presetCoveredKeys = useMemo(() => {
-    return getPresetCoveredKeys(presets, value)
+  // When any preset is selected (exact match), hide all chips
+  // since the preset chip already represents the active filters
+  const isAnyPresetActive = useMemo(() => {
+    if (!presets?.length) return false
+    return presets.some((preset) => isPresetSelected(preset, value))
   }, [presets, value])
 
   return (
@@ -276,7 +281,8 @@ const FiltersChipsList = () => {
         onFilterSelect={() => setIsFiltersOpen(true)}
         onFilterRemove={removeFilterValue}
         onClearAll={() => setFiltersValue({})}
-        excludedKeys={presetCoveredKeys}
+        hideChips={isAnyPresetActive}
+        resultCount={resultCount}
       />
     )
   )

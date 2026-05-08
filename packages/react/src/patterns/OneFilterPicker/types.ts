@@ -93,14 +93,11 @@ export type CurrentFilters<F extends FilterOptions<string>> = F extends {
 export type PresetDefinition<Filters extends FiltersDefinition> = {
   /** Display name for the preset */
   label: string
-  /** Filter configuration to apply when this preset is selected */
-  filter: FiltersState<Filters>
-  /**
-   * How the preset is applied when clicked:
-   * - 'replace' (default): Replace all current filters with preset's filter
-   * - 'additive': Merge preset's filter with current filters, preserving existing selections
+  /** Filter configuration to apply when this preset is selected.
+   * Clicking a preset replaces all current filters with this value.
+   * The preset shows as selected only when the current filters exactly match this value.
    */
-  mode?: "replace" | "additive"
+  filter: FiltersState<Filters>
   /** Function to count the number of items that match the filter */
   itemsCount?: (
     filters: FiltersState<Filters>

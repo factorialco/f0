@@ -8,6 +8,7 @@ import { OverflowList } from "@/ui/OverflowList"
 import { Skeleton } from "@/ui/skeleton"
 
 import { FiltersDefinition, FiltersState, PresetsDefinition } from "../types"
+import { isPresetSelected } from "../internal/isPresetSelected"
 
 interface FilterPresetsProps<Filters extends FiltersDefinition> {
   value: FiltersState<Filters>
@@ -33,37 +34,23 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
 
   /**
    * Computes the selection state and click handler for a preset.
-   * Presets merge with current filters when selected and remove only their keys when deselected.
+   * Presets replace all current filters when selected and clear all filters when deselected.
+   * A preset is considered selected only when the current filters exactly match the preset's filter.
    */
   const getPresetState = (preset: NonNullable<typeof presets>[number]) => {
-    // Ensure preset.filter is always a valid object, never null or undefined
-    const safePresetFilter =
-      preset.filter != null &&
-      typeof preset.filter === "object" &&
-      !Array.isArray(preset.filter)
-        ? preset.filter
-        : ({} as FiltersState<Filters>)
-
-    // Check if all preset filters are present in current value
-    const isSelected = Object.entries(safePresetFilter).every(
-      ([key, val]) => JSON.stringify(safeValue[key]) === JSON.stringify(val)
-    )
+    const selected = isPresetSelected(preset, safeValue)
 
     const handleClick = () => {
-      if (isSelected) {
-        // Remove only preset's keys from current filters
-        const newFilters = { ...safeValue }
-        Object.keys(safePresetFilter).forEach((key) => {
-          delete newFilters[key as keyof typeof newFilters]
-        })
-        onPresetsChange?.(newFilters)
+      if (selected) {
+        // Clear all filters when deselecting a preset
+        onPresetsChange?.({} as FiltersState<Filters>)
       } else {
-        // Merge preset's filter with current filters
-        onPresetsChange?.({ ...safeValue, ...safePresetFilter })
+        // Replace all current filters with the preset's filter
+        onPresetsChange?.({ ...preset.filter })
       }
     }
 
-    return { isSelected, handleClick }
+    return { isSelected: selected, handleClick }
   }
 
   const renderListPresetItem = (
