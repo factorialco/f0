@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.476.0](https://github.com/factorialco/f0/compare/f0-react-v1.475.1...f0-react-v1.476.0) (2026-05-08)
+
+
+### Features
+
+* **ClarifyingQuestionPanel:** implement auto-advance on selection in… ([#4093](https://github.com/factorialco/f0/issues/4093)) ([c02e9da](https://github.com/factorialco/f0/commit/c02e9da27be027354b4d584d9b6b4b429828ca99))
+
 ## [1.475.1](https://github.com/factorialco/f0/compare/f0-react-v1.475.0...f0-react-v1.475.1) (2026-05-08)
 
 
