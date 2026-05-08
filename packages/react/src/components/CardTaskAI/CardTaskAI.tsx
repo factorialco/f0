@@ -328,7 +328,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
         onClick={handleClick}
         className={`
           !p-3 !pt-[10px] transition-all duration-200 
-          ${onClick ? "cursor-pointer hover:shadow-md" : ""}
+          ${onClick ? "cursor-pointer hover:bg-[rgba(5,31,81,0.04)] hover:border hover:border-[rgba(5,38,87,0.06)]" : ""}
           ${className}
         `}
       >
