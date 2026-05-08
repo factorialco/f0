@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
+import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -97,10 +98,12 @@ export const ChatTextarea = ({
     onUploadFiles,
     acceptValue,
     isAtMaxFiles,
+    maxFiles,
     processFiles,
     handleFileSelect,
     handleRemoveFile,
     clearFiles,
+    transientError,
   } = useFileAttachments(fileAttachments)
 
   const mentions = useMentions({
@@ -355,6 +358,38 @@ export const ChatTextarea = ({
                 />
               )}
 
+              <AnimatePresence initial={false}>
+                {transientError && (
+                  <motion.div
+                    key="transient-error"
+                    role="alert"
+                    aria-live="polite"
+                    className="p-1"
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{
+                      duration: shouldReduceMotion ? 0 : 0.2,
+                      ease: "easeOut",
+                    }}
+                  >
+                    <div
+                      className={cn(
+                        "flex w-full flex-row items-center gap-2 rounded-md p-2 pr-3",
+                        "bg-f1-background-critical text-f1-foreground"
+                      )}
+                    >
+                      <div className="h-6 w-6 flex-shrink-0">
+                        <F0AvatarAlert type="critical" size="sm" />
+                      </div>
+                      <p className="font-medium text-f1-foreground-critical">
+                        {transientError}
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <AttachedFilesList
                 attachedFiles={attachedFiles}
                 isUploading={isUploading}
@@ -384,6 +419,7 @@ export const ChatTextarea = ({
               <ActionBar
                 onUploadFiles={onUploadFiles}
                 isAtMaxFiles={isAtMaxFiles}
+                maxFiles={maxFiles}
                 acceptValue={acceptValue}
                 fileInputRef={fileInputRef}
                 handleFileSelect={handleFileSelect}
