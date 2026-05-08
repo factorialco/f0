@@ -1,9 +1,29 @@
 /* Main styles */
-.mention {
-  @apply bg-f1-background-accent rounded-xs px-1.5 py-0.5 font-medium;
-}
 
-.mention:focus {
+/*
+ * Mention chip styling for serialized HTML.
+ *
+ * The Tiptap Mention extension renders mentions as `<a>` nodes that live
+ * outside any React tree, so they cannot rely on a component's `focusRing()`.
+ * These rules apply the shared mention recipe (background, padding, color,
+ * radius, focus outline) to two markup shapes:
+ *
+ *   - Legacy: `<a class="mention">` (older content already persisted in DBs).
+ *   - Current: `<a data-type="mention">` (Tiptap default attribute).
+ *
+ * Keeping both selectors guarantees historical content keeps the same
+ * visual treatment as new content rendered through the recipe.
+ */
+.rich-text-editor-container a.mention,
+.rich-text-display-container a.mention,
+.rich-text-editor-container a[data-type="mention"],
+.rich-text-display-container a[data-type="mention"] {
+  @apply bg-f1-background-secondary hover:bg-f1-background-secondary-hover text-f1-foreground rounded-xs !px-1.5 font-medium no-underline transition-colors;
+}
+.rich-text-editor-container a.mention:focus,
+.rich-text-display-container a.mention:focus,
+.rich-text-editor-container a[data-type="mention"]:focus,
+.rich-text-display-container a[data-type="mention"]:focus {
   @apply outline-f1-border-selected-bold outline outline-1 outline-offset-1;
 }
 
@@ -87,9 +107,9 @@
   @apply m-0 mb-2.5 list-decimal;
 }
 
-.rich-text-editor-container a,
-.rich-text-display-container a {
-  @apply text-f1-foreground-accent cursor-pointer font-medium no-underline;
+.rich-text-editor-container a:not([data-type="mention"]):not(.mention),
+.rich-text-display-container a:not([data-type="mention"]):not(.mention) {
+  @apply text-f1-foreground decoration-f1-border-hover hover:decoration-f1-border-bold cursor-pointer font-medium underline decoration-1 underline-offset-[5px];
 }
 
 .rich-text-editor-container strong,

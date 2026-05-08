@@ -12,16 +12,7 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-const htmlContent = `<p>
-  <a href="https://cdn.memegenerator.es/imagenes/memes/full/32/48/32486607.jpg" class="mention" data-id="3" rel="noopener noreferrer" target="_blank">
-    @Xavier Val Parejo
-  </a>
-  and
-  <a href="https://cdn.memegenerator.es/imagenes/memes/full/32/48/32486607.jpg" class="mention" data-id="2" rel="noopener noreferrer" target="_blank">
-    @Jacob Bamio Cordero
-  </a>
-  are trying to get fit so...
-</p>
+const htmlContent = `<p><a href="https://cdn.memegenerator.es/imagenes/memes/full/32/48/32486607.jpg" class="mention" data-id="3" rel="noopener noreferrer" target="_blank">@Xavier Val Parejo</a> and <a href="https://cdn.memegenerator.es/imagenes/memes/full/32/48/32486607.jpg" class="mention" data-id="2" rel="noopener noreferrer" target="_blank">@Jacob Bamio Cordero</a> are trying to get fit so...</p>
 <p></p>
 <p>
   🌍 <strong>How to Register to Gympass?</strong>
@@ -55,13 +46,10 @@ const htmlContent = `<p>
     </p>
   </li>
   <li>
-    <p>
-      <mark>
-        <a href="https://cdn.memegenerator.es/imagenes/memes/full/32/48/32486607.jpg" class="mention" data-id="1" rel="noopener noreferrer" target="_blank">
-          @Raúl Sigüenza Sánchez
-        </a>
-      </mark>
-    </p>
+    <p><a href="https://cdn.memegenerator.es/imagenes/memes/full/32/48/32486607.jpg" class="mention" data-id="1" rel="noopener noreferrer" target="_blank">@Raúl Sigüenza Sánchez</a> (legacy mention markup)</p>
+  </li>
+  <li>
+    <p><a href="https://cdn.memegenerator.es/imagenes/memes/full/32/48/32486607.jpg" data-type="mention" data-id="1" rel="noopener noreferrer" target="_blank">@Raúl Sigüenza Sánchez</a> (new mention markup)</p>
   </li>
 </ul>
 <hr>

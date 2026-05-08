@@ -37,10 +37,11 @@ export const createMentionExtensions = (
             href: node.attrs.href || "#",
             class: options.HTMLAttributes.class,
             "data-id": node.attrs.id,
+            "data-type": "mention",
             rel: "noopener noreferrer",
             target: "_blank",
           },
-          `${node.attrs.label}`,
+          `${options.suggestion.char ?? "@"}${node.attrs.label}`,
         ]
       },
       suggestion: createSuggestionConfig(

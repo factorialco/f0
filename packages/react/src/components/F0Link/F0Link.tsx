@@ -24,6 +24,7 @@ const _F0Link = forwardRef<HTMLAnchorElement, F0LinkProps>(function Link(
     stopPropagation = false,
     "aria-label": ariaLabel,
     href,
+    variant = "link",
     ...props
   },
   ref
@@ -60,7 +61,7 @@ const _F0Link = forwardRef<HTMLAnchorElement, F0LinkProps>(function Link(
   ) as ActionProps
 
   return (
-    <Action ref={ref} {...actionProps} variant="link">
+    <Action ref={ref} {...actionProps} variant={variant}>
       <span>{children}</span>
       {external && (
         <>
