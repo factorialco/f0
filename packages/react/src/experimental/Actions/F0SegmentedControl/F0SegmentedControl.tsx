@@ -1,8 +1,8 @@
-import { ToggleGroup, ToggleGroupItem } from "@radix-ui/react-toggle-group"
-import { useEffect, useState } from "react"
+import { useControllableState } from "@radix-ui/react-use-controllable-state"
 
 import { F0Icon } from "@/components/F0Icon"
 import { cn, focusRing } from "@/lib/utils"
+import { ToggleGroup, ToggleGroupItem } from "@/ui/ToggleGroup"
 
 import { F0SegmentedControlProps } from "./types"
 
@@ -13,20 +13,16 @@ export const F0SegmentedControl = ({
   disabled = false,
   fullWidth = false,
 }: F0SegmentedControlProps) => {
-  const [localValue, setLocalValue] = useState(value ?? "")
-
-  useEffect(() => {
-    if (value !== undefined && value !== localValue) {
-      setLocalValue(value)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value])
+  const [localValue, setLocalValue] = useControllableState({
+    prop: value,
+    defaultProp: items[0]?.value ?? "",
+    onChange,
+  })
 
   const handleChange = (newValue: string) => {
     // Prevent deselection — a segmented control always has one active segment
     if (!newValue) return
     setLocalValue(newValue)
-    onChange?.(newValue)
   }
 
   return (

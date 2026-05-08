@@ -4,7 +4,7 @@
  * ## Usage convention for interactive components
  *
  * Interactive elements (buttons, toggle items, segments) follow a size-based mapping
- * derived from `buttonSizeVariants` in `@/ui/Action/variants.ts`:
+ * derived from `buttonSizeVariants` in `packages/react/src/ui/Action/variants.ts`:
  *
  *   sm  → rounded-sm  (0.5rem)
  *   md  → rounded     (0.625rem, DEFAULT)

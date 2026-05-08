@@ -1,6 +1,7 @@
-import type { Meta, StoryObj } from "@storybook/react"
+import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { Calendar, List, Table } from "@/icons/app"
 
 import { F0SegmentedControl } from "../F0SegmentedControl"
@@ -8,7 +9,7 @@ import { F0SegmentedControl } from "../F0SegmentedControl"
 const meta = {
   title: "Components/F0SegmentedControl",
   component: F0SegmentedControl,
-  tags: ["autodocs"],
+  tags: ["autodocs", "experimental"],
   args: {
     items: [
       { value: "day", label: "Day" },
@@ -24,9 +25,12 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {}
+export const Default: Story = {
+  parameters: withSnapshot({}),
+}
 
 export const WithIcons: Story = {
+  parameters: withSnapshot({}),
   args: {
     items: [
       { value: "list", label: "List", icon: List },
@@ -38,18 +42,21 @@ export const WithIcons: Story = {
 }
 
 export const FullWidth: Story = {
+  parameters: withSnapshot({}),
   args: {
     fullWidth: true,
   },
 }
 
 export const Disabled: Story = {
+  parameters: withSnapshot({}),
   args: {
     disabled: true,
   },
 }
 
 export const WithDisabledItem: Story = {
+  parameters: withSnapshot({}),
   args: {
     items: [
       { value: "day", label: "Day" },
@@ -59,17 +66,21 @@ export const WithDisabledItem: Story = {
   },
 }
 
+const ControlledExample = () => {
+  const [value, setValue] = useState("week")
+  return (
+    <F0SegmentedControl
+      items={[
+        { value: "day", label: "Day" },
+        { value: "week", label: "Week" },
+        { value: "month", label: "Month" },
+      ]}
+      value={value}
+      onChange={setValue}
+    />
+  )
+}
+
 export const Controlled: Story = {
-  render: (args) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [value, setValue] = useState("week")
-    return <F0SegmentedControl {...args} value={value} onChange={setValue} />
-  },
-  args: {
-    items: [
-      { value: "day", label: "Day" },
-      { value: "week", label: "Week" },
-      { value: "month", label: "Month" },
-    ],
-  },
+  render: () => <ControlledExample />,
 }
