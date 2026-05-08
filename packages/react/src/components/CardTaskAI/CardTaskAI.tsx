@@ -406,8 +406,8 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
                     }`}
                   >
                     <F0Button
-                      variant="outline"
-                      size="xs"
+                      variant="ghost"
+                      size="sm"
                       label={actionLabel}
                       onClick={(e) => {
                         e.stopPropagation()
