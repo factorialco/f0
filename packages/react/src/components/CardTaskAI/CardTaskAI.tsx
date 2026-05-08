@@ -331,19 +331,24 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
         ref={ref}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className={`
-          rounded-[16px] transition-all duration-200
-          ${onClick ? "cursor-pointer" : ""}
-          ${className}
-        `}
+        className={`transition-all duration-200 ${className}`}
+        style={{
+          borderRadius: isHovered ? "12px" : "16px",
+          cursor: onClick ? "pointer" : "auto",
+        }}
       >
         <F0Card
           data-testid={testId || "card-task-ai"}
           onClick={handleClick}
           className={`
             !p-3 !pt-[10px] transition-all duration-200 
-            ${isHovered ? "bg-[rgba(5,31,81,0.04)] border border-[rgba(5,38,87,0.06)]" : ""}
           `}
+          style={{
+            backgroundColor: isHovered ? "rgba(5, 31, 81, 0.04)" : undefined,
+            borderColor: isHovered ? "rgba(5, 38, 87, 0.06)" : undefined,
+            borderWidth: isHovered ? "1px" : undefined,
+            borderStyle: isHovered ? "solid" : undefined,
+          }}
         >
           <div className="flex items-start gap-[4px]">
             {/* Icon Section */}
