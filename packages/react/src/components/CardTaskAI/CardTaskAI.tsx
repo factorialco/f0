@@ -27,7 +27,7 @@ import type { CardTaskAIProps, TaskOption, TaskType } from "./types"
  * Logs warnings to console but doesn't crash the component
  */
 const validateCardTaskAI = (props: CardTaskAIProps) => {
-  const { title, icon, options } = props
+  const { title, taskType, options } = props
 
   // Check required fields
   if (!title || (typeof title === "string" && title.trim() === "")) {
@@ -36,9 +36,9 @@ const validateCardTaskAI = (props: CardTaskAIProps) => {
     )
   }
 
-  if (!icon) {
+  if (!taskType) {
     console.error(
-      "[CardTaskAI] Icon is required but was not provided. Rendering empty icon space."
+      "[CardTaskAI] taskType is required. Choose from: notification, sign, basic-task, upload-document, data-collection, training, surveys"
     )
   }
 
