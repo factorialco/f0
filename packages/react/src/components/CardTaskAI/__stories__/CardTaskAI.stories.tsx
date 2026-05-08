@@ -31,8 +31,8 @@ export const TextOption: Story = {
       {
         type: "assignee",
         id: "0",
-        firstName: "John",
-        lastName: "Doe",
+        firstName: "New",
+        lastName: "Employee",
       },
       {
         type: "single-task",
@@ -55,8 +55,8 @@ export const WithAutomation: Story = {
       {
         type: "assignee",
         id: "0",
-        firstName: "John",
-        lastName: "Doe",
+        firstName: "New",
+        lastName: "Employee",
       },
       {
         type: "single-task",
@@ -84,8 +84,8 @@ export const WithForm: Story = {
       {
         type: "assignee",
         id: "0",
-        firstName: "John",
-        lastName: "Doe",
+        firstName: "New",
+        lastName: "Employee",
       },
       {
         type: "single-task",
@@ -118,8 +118,8 @@ export const WithDocument: Story = {
       {
         type: "assignee",
         id: "0",
-        firstName: "John",
-        lastName: "Doe",
+        firstName: "New",
+        lastName: "Employee",
       },
       {
         type: "single-task",
@@ -155,8 +155,8 @@ export const AllOptionTypes: Story = {
       {
         type: "assignee",
         id: "0",
-        firstName: "John",
-        lastName: "Doe",
+        firstName: "New",
+        lastName: "Employee",
       },
       {
         type: "single-task",
@@ -203,8 +203,8 @@ export const SingleOption: Story = {
       {
         type: "assignee",
         id: "0",
-        firstName: "John",
-        lastName: "Doe",
+        firstName: "New",
+        lastName: "Employee",
       },
       {
         type: "document-upload",
@@ -228,8 +228,8 @@ export const TwoOptions: Story = {
       {
         type: "assignee",
         id: "0",
-        firstName: "John",
-        lastName: "Doe",
+        firstName: "New",
+        lastName: "Employee",
       },
       {
         type: "single-task",
@@ -256,8 +256,8 @@ export const ThreeOptions: Story = {
       {
         type: "assignee",
         id: "0",
-        firstName: "John",
-        lastName: "Doe",
+        firstName: "New",
+        lastName: "Employee",
       },
       {
         type: "single-task",
@@ -292,8 +292,8 @@ export const FourOptions: Story = {
       {
         type: "assignee",
         id: "0",
-        firstName: "John",
-        lastName: "Doe",
+        firstName: "New",
+        lastName: "Employee",
       },
       {
         type: "single-task",
@@ -330,8 +330,8 @@ export const MultipleDocuments: Story = {
       {
         type: "assignee",
         id: "0",
-        firstName: "John",
-        lastName: "Doe",
+        firstName: "New",
+        lastName: "Employee",
       },
       {
         type: "single-task",
@@ -371,8 +371,8 @@ export const ConditionInline: Story = {
       {
         type: "assignee",
         id: "0",
-        firstName: "John",
-        lastName: "Doe",
+        firstName: "New",
+        lastName: "Employee",
       },
       {
         type: "condition",
@@ -397,8 +397,8 @@ export const ConditionList: Story = {
       {
         type: "assignee",
         id: "0",
-        firstName: "John",
-        lastName: "Doe",
+        firstName: "New",
+        lastName: "Employee",
       },
       {
         type: "condition",
@@ -426,8 +426,8 @@ export const ClickableCard: Story = {
       {
         type: "assignee",
         id: "0",
-        firstName: "John",
-        lastName: "Doe",
+        firstName: "New",
+        lastName: "Employee",
       },
       {
         type: "with-folder",
@@ -457,8 +457,8 @@ export const WithAssignee: Story = {
       {
         type: "assignee",
         id: "2",
-        firstName: "John",
-        lastName: "Doe",
+        firstName: "New",
+        lastName: "Employee",
       },
     ],
   },
@@ -475,8 +475,8 @@ export const LongLabel: Story = {
       {
         type: "assignee",
         id: "0",
-        firstName: "John",
-        lastName: "Doe",
+        firstName: "New",
+        lastName: "Employee",
       },
       {
         type: "single-task",
