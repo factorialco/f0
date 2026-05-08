@@ -1,6 +1,13 @@
 import { FocusScope } from "@radix-ui/react-focus-scope"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
-import { type ReactNode, useCallback, useEffect, useRef, useState } from "react"
+import {
+  type MouseEvent as ReactMouseEvent,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react"
 
 import type { F0AlertProps } from "@/components/F0Alert/types"
 import type { F0ButtonProps } from "@/components/F0Button/F0Button"
@@ -76,8 +83,14 @@ interface BaseProps {
 
 type ActionConfig = Pick<
   F0ButtonProps,
-  "label" | "icon" | "onClick" | "disabled" | "loading"
->
+  "label" | "icon" | "disabled" | "loading"
+> & {
+  onClick?: {
+    bivarianceHack(
+      event?: ReactMouseEvent<HTMLElement, MouseEvent>
+    ): void | Promise<unknown>
+  }["bivarianceHack"]
+}
 
 interface DefaultVariantProps extends BaseProps {
   variant?: "default"
@@ -485,10 +498,18 @@ const ResourceHeader = ({ header, actions, onClose }: ResourceVariantProps) => {
   const i18n = useI18n()
   const visible = actions?.slice(0, 2) ?? []
   const overflow = actions?.slice(2) ?? []
+
+  const invokeAction = (
+    action: ActionConfig,
+    event?: ReactMouseEvent<HTMLElement, MouseEvent>
+  ) => {
+    action.onClick?.(event)
+  }
+
   const overflowItems: DropdownItem[] = overflow.map((a) => ({
     label: a.label ?? "",
     icon: a.icon,
-    onClick: () => a.onClick?.({} as React.MouseEvent<HTMLButtonElement>),
+    onClick: () => invokeAction(a),
   }))
 
   return (
@@ -507,7 +528,7 @@ const ResourceHeader = ({ header, actions, onClose }: ResourceVariantProps) => {
                 size="md"
                 label={a.label}
                 icon={a.icon}
-                onClick={a.onClick}
+                onClick={(event) => invokeAction(a, event)}
                 disabled={a.disabled}
                 loading={a.loading}
               />

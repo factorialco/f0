@@ -1,4 +1,4 @@
-import { fireEvent, screen } from "@testing-library/react"
+import { act, fireEvent, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { zeroRender as render } from "@/testing/test-utils"
@@ -338,6 +338,62 @@ describe("F0GraphDetailPanel open/close", () => {
     const panel = screen.getByRole("complementary")
     // Default from i18n: "Details"
     expect(panel.getAttribute("aria-label")).toBe("Details")
+  })
+
+  it("invokes visible resource actions with the click event", () => {
+    const onVisibleAction = vi.fn()
+
+    render(
+      <F0GraphDetailPanel
+        open
+        variant="resource"
+        onClose={vi.fn()}
+        header={<div>Resource Header</div>}
+        actions={[
+          {
+            label: "Promote",
+            onClick: onVisibleAction,
+          },
+        ]}
+      />
+    )
+
+    fireEvent.click(screen.getByRole("button", { name: "Promote" }))
+
+    expect(onVisibleAction).toHaveBeenCalledTimes(1)
+    expect(onVisibleAction.mock.calls[0]?.[0]).toBeTruthy()
+  })
+
+  it("invokes overflow resource actions without a synthetic event", () => {
+    vi.useFakeTimers()
+
+    const onOverflowAction = vi.fn()
+
+    render(
+      <F0GraphDetailPanel
+        open
+        variant="resource"
+        onClose={vi.fn()}
+        header={<div>Resource Header</div>}
+        actions={[
+          { label: "Promote", onClick: vi.fn() },
+          { label: "Archive", onClick: vi.fn() },
+          { label: "Delete", onClick: onOverflowAction },
+        ]}
+      />
+    )
+
+    fireEvent.pointerDown(screen.getByLabelText("More actions"))
+    fireEvent.click(screen.getByRole("menuitem", { name: "Delete" }))
+
+    act(() => {
+      vi.advanceTimersByTime(250)
+    })
+
+    expect(onOverflowAction).toHaveBeenCalledTimes(1)
+    expect(onOverflowAction.mock.calls[0]?.[0]).toBeUndefined()
+
+    vi.useRealTimers()
   })
 })
 
