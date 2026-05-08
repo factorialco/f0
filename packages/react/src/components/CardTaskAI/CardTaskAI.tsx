@@ -235,7 +235,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
 
             {/* Options List */}
             {options && options.length > 0 && (
-              <div className="flex flex-col gap-[4px]">
+              <div className="flex flex-col gap-0">
                 {options.map((option) => renderOption(option))}
               </div>
             )}
