@@ -1,7 +1,17 @@
 // Core node type — generic T is the entity payload (opaque to F0Graph)
 export interface GraphNode<T = unknown> {
   id: string
+  /**
+   * For tree topology. For DAG nodes with multiple parents, use `parentIds`
+   * instead. If both are provided, `parentIds` wins.
+   */
   parentId: string | null
+  /**
+   * Optional list of parent IDs for DAG topology. When provided, takes
+   * precedence over `parentId`. A node with `parentIds.length > 1` indicates
+   * a DAG node.
+   */
+  parentIds?: string[]
   data: T
   childrenCount?: number
   childrenLoaded?: boolean
@@ -13,6 +23,11 @@ export interface GraphEdge {
   source: string
   target: string
   type?: "smoothstep" | "straight" | "bezier"
+  /**
+   * Optional consumer-defined edge metadata (labels, weights, semantic types).
+   * Type-erased — consumers narrow as needed.
+   */
+  data?: unknown
 }
 
 // Internal tree node (enriched during tree building)
@@ -24,6 +39,12 @@ export interface TreeNode<T = unknown> {
   depth: number
   childrenCount: number
   childrenLoaded: boolean
+  /**
+   * Present when a node has multiple parents in a DAG. Lists all logical
+   * parent IDs. The canonical layout parent (`parentId`) is the first entry.
+   * Only set when `parentIds` was provided on the input `GraphNode`.
+   */
+  dagParentIds?: string[]
 }
 
 // Zoom levels
@@ -46,9 +67,17 @@ export interface ZoomThresholds {
 }
 
 // Layout direction
-export type LayoutDirection = "TB" | "LR"
+export type LayoutDirection = "TB" | "LR" | "BT" | "RL"
 
-// Layout engine interface (abstract — implementations can be swapped)
+/**
+ * Layout engine interface (abstract — implementations can be swapped).
+ *
+ * The built-in implementation (`useLayoutEngine`) produces a deterministic
+ * tree layout. For DAG topologies where nodes have multiple parents, consumers
+ * should provide a custom engine wrapping a DAG layout library (e.g., dagre,
+ * ELK, or d3-dag). A custom engine receives the original `nodes` and `edges`
+ * (not the tree projection) and computes its own positions.
+ */
 export interface LayoutEngine {
   computeLayout(
     nodes: TreeNode[],
@@ -78,3 +107,14 @@ export interface PositionedEdge {
   target: string
   points: Array<{ x: number; y: number }>
 }
+
+// ─── Deferred payload ──────────────────────────────────────────
+
+/** Payload shape returned by the deferred nodes source. */
+export interface DeferredNodesPayload<T = unknown> {
+  nodes: GraphNode<T>[]
+  edges?: GraphEdge[]
+}
+
+/** Status of the deferred merge lifecycle. */
+export type DeferredStatus = "idle" | "loading" | "resolved" | "error"

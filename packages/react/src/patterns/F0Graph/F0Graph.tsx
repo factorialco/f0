@@ -1,8 +1,6 @@
 import {
   Background,
   BackgroundVariant,
-  Handle,
-  MiniMap,
   Position,
   ReactFlow,
   ReactFlowProvider,
@@ -11,10 +9,8 @@ import {
   type Edge as RFEdge,
   type NodeTypes,
   type EdgeTypes,
-  type NodeProps,
   type Viewport,
 } from "@xyflow/react"
-import { motion } from "motion/react"
 import {
   type ReactNode,
   useCallback,
@@ -26,39 +22,48 @@ import {
   memo,
 } from "react"
 
-import { F0Button } from "@/components/F0Button"
-import { Minimize } from "@/icons/app"
+import { Search } from "@/components/Search"
 import { cn } from "@/lib/utils"
 
 import type {
+  F0GraphNodeTagType,
+  GraphNodeState,
+  GraphNodeVariant,
+} from "./F0GraphNode"
+import type {
+  DeferredNodesPayload,
   GraphEdge,
   GraphNode,
   LayoutDirection,
+  LayoutEngine,
   TreeNode,
   ZoomLevel,
   ZoomPreset,
   ZoomThresholds,
 } from "./types"
 
-import { Search } from "../OneDataCollection/components/Search/Search"
-import { ClickSpark } from "./ClickSpark"
-import { F0GraphContext, type F0GraphContextValue } from "./context"
 import {
   F0GraphZoomContext,
   F0GraphExpandContext,
   F0GraphSelectionContext,
   F0GraphActionsContext,
-} from "./context/index"
+  F0GraphRenderConfigContext,
+  F0GraphFocusContext,
+} from "./contexts"
 import { F0GraphControls } from "./F0GraphControls"
-import { F0GraphEdge } from "./F0GraphEdge"
-import { F0GraphExpander } from "./F0GraphExpander"
-import { F0GraphNode } from "./F0GraphNode"
+import {
+  F0GraphDetailPanel,
+  type F0GraphDetailPanelProps,
+} from "./F0GraphDetailPanel"
+import { type EdgeVariant, type F0GraphEdgeProps } from "./F0GraphEdge"
+import { F0GraphEdgeBase } from "./F0GraphEdge/F0GraphEdge"
 import { F0GraphSearch, useGraphSearch, type Searchable } from "./F0GraphSearch"
-import "./F0Graph.css"
 import { useGraphZoomLevel } from "./hooks/useGraphZoomLevel"
+import "./F0Graph.css"
 import { useLayoutEngine } from "./hooks/useLayoutEngine"
 import { useLazyTree } from "./hooks/useLazyTree"
 import { useTreeBuilder } from "./hooks/useTreeBuilder"
+import { ClickSpark } from "./internal/ClickSpark"
 
 // ─── Props ─────────────────────────────────────────────────────
 export interface F0GraphProps<T = unknown> {
@@ -68,18 +73,68 @@ export interface F0GraphProps<T = unknown> {
 
   // ---- Data (lazy tree mode) ----
   rootNodes?: GraphNode<T>[]
+  /** Async callback to lazily load children when a node is expanded. Used with `rootNodes` for on-demand tree loading instead of providing the full `nodes` array upfront. */
   loadChildren?: (nodeId: string) => Promise<GraphNode<T>[]>
 
+  // ---- Data (staged / progressive loading) ----
+  /**
+   * A second batch of nodes (and optional edges) loaded after the initial
+   * paint. Pass a Promise that resolves with additional nodes, or a thunk
+   * that returns one (invoked after first paint). Only applies to full-tree
+   * mode — ignored when `rootNodes`/`loadChildren` are used.
+   *
+   * Deferred nodes are deduplicated by `id`; on conflict the deferred
+   * version wins. Edges are appended (deduped by `id`).
+   */
+  deferredNodes?:
+    | Promise<DeferredNodesPayload<T>>
+    | (() => Promise<DeferredNodesPayload<T>>)
+  /** Fired once when the deferred batch merges successfully. */
+  onDeferredLoadComplete?: () => void
+  /** Fired if the deferred promise rejects. */
+  onDeferredLoadError?: (error: Error) => void
+
   // ---- Rendering ----
-  renderNode: (node: GraphNode<T>, zoomLevel: ZoomLevel) => ReactNode
+  /**
+   * Required callback to render each node. Receives the node data and a context
+   * object describing how F0Graph wants the node to behave (zoom variant,
+   * selection state, expand callbacks, etc.).
+   *
+   * For the default pill-style node, spread `ctx` into `<F0GraphNode>`:
+   * ```tsx
+   * renderNode={(node, ctx) => (
+   *   <F0GraphNode {...ctx} avatar={...} title={...} subtitle={...} />
+   * )}
+   * ```
+   *
+   * For fully custom nodes, return any ReactNode and use `ctx` to wire up
+   * behavior (state, click, expand) however you like.
+   */
+  renderNode: (node: GraphNode<T>, ctx: F0GraphNodeRenderContext) => ReactNode
+  /** Optional callback to render custom edges. Receives the edge and its variant (`"default" | "highlighted" | "dimmed"`). Falls back to default edge rendering when omitted. */
+  renderEdge?: (edge: GraphEdge, variant: EdgeVariant) => React.ReactNode | null
+  /** Tree layout direction: `"TB"` (top-to-bottom) or `"LR"` (left-to-right). Defaults to `"TB"`. */
   direction?: LayoutDirection
   defaultDirection?: LayoutDirection
 
   // ---- Zoom ----
   zoomPreset?: ZoomPreset
   zoomThresholds?: ZoomThresholds
+  /** Initial zoom level. `1` = 100%. Defaults to `1`. */
   defaultZoom?: number
+  /**
+   * Smallest zoom level the user can pan to (the "zoom-out" limit).
+   * `1` = 100%, `0.05` = 5% (graph appears tiny / dot view).
+   *
+   * Defaults to `0.05`. Lower values allow extreme zoom-out where nodes
+   * collapse into dots; consumers with very large graphs that need a true
+   * birds-eye view can drop this to `0.01` or lower.
+   */
   minZoom?: number
+  /**
+   * Largest zoom level the user can pan to (the "zoom-in" limit).
+   * `1` = 100%, `2` = 200%. Defaults to `2`.
+   */
   maxZoom?: number
 
   // ---- Expand/collapse ----
@@ -87,11 +142,15 @@ export interface F0GraphProps<T = unknown> {
   defaultExpandedNodes?: Set<string>
   defaultExpandDepth?: number
   onExpandToggle?: (nodeId: string, expanded: boolean) => void
+  /** Fired with the complete new Set on every expand/collapse, in both controlled and uncontrolled mode. */
+  onExpandedNodesChange?: (next: Set<string>) => void
 
   // ---- Selection ----
   selectionMode?: "single" | "multi" | "none"
   selectedNodes?: Set<string>
   onNodeSelect?: (nodeId: string, selected: boolean) => void
+  /** Fired with the complete new Set on every selection change, in both controlled and uncontrolled mode. */
+  onSelectedNodesChange?: (next: Set<string>) => void
 
   // ---- Navigation ----
   focusedNode?: string
@@ -99,6 +158,12 @@ export interface F0GraphProps<T = unknown> {
 
   // ---- Layout ----
   fullScreen?: boolean
+  /** Layout sizing hint passed to the built-in layout engine. Defaults to 256. Override for compact nodes (icons, file rows). */
+  nodeWidth?: number
+  /** Layout sizing hint passed to the built-in layout engine. Defaults to 56. Override for compact nodes (icons, file rows). */
+  nodeHeight?: number
+  /** Optional custom layout engine. When provided, overrides the built-in tree layout. */
+  layoutEngine?: LayoutEngine
 
   // ---- Search ----
   /**
@@ -118,15 +183,88 @@ export interface F0GraphProps<T = unknown> {
   /** Optional observability callback when a search result is picked. */
   onSearchResultSelect?: (id: string) => void
 
+  // ---- Detail panel ----
+  /**
+   * When provided, clicking a node opens a right-side detail panel and
+   * centers the node in the remaining canvas space (offset by the panel
+   * width). Returns the full panel configuration for the given node —
+   * either the `default` variant (with title/description/alert/menu) or the
+   * `resource` variant (with custom header + primary/secondary action row).
+   */
+  detailPanel?: (
+    node: GraphNode<T>
+  ) => Omit<F0GraphDetailPanelProps, "open" | "onClose" | "width" | "ariaLabel">
+  /** Optional aria-label for the panel landmark. */
+  detailPanelAriaLabel?: string
+  /** Initial width of the detail panel in pixels. Defaults to 384 (matches F0 spec). If the user has resized the panel, the persisted width takes precedence. */
+  detailPanelWidth?: number
+  /** Stable identifier used to scope persisted detail-panel width in localStorage. Defaults to `"default"`. */
+  graphId?: string
+
   // ---- Controls ----
   showControls?: boolean
-  showMinimap?: boolean
+  /**
+   * Optional id of the node that represents the current user. When provided,
+   * a "Find me" button is rendered as the first control and clicking it
+   * centers the viewport on that node. When omitted, the button is hidden.
+   */
+  currentUserNodeId?: string
+  /** Override default English labels for interactive controls. */
+  controlLabels?: {
+    zoomIn?: string
+    zoomOut?: string
+    fitView?: string
+    findMe?: string
+    collapseChildren?: string
+    metadataSettings?: string
+  }
+
+  // ---- Tag metadata ----
+  /**
+   * Tag types present on the rendered nodes. When provided, a Sliders
+   * popover toggle is added to the controls bar that lets the user toggle
+   * each type's visibility individually. When omitted, no toggle is
+   * shown and tags render unfiltered.
+   *
+   * Order is preserved in the popover.
+   */
+  nodeTagTypes?: ReadonlyArray<F0GraphNodeTagType>
+  /**
+   * Controlled set of currently visible tag types. When omitted, falls
+   * back to `defaultVisibleTagTypes`.
+   */
+  visibleTagTypes?: ReadonlyArray<F0GraphNodeTagType>
+  /**
+   * Initial visible tag types for uncontrolled usage. Defaults to all of
+   * `nodeTagTypes`.
+   */
+  defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagType>
+  /** Fired when the visible tag types change (in either mode). */
+  onVisibleTagTypesChange?: (next: ReadonlyArray<F0GraphNodeTagType>) => void
+  /** Optional friendly labels per tag type, used in the popover toggles. */
+  nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagType, string>>
+  /**
+   * Whether the layout should reserve vertical room for one tag row beneath
+   * each node so the source handle (and outgoing edges) anchors below the
+   * tags rather than between the pill and the tags.
+   *
+   * Defaults:
+   * - When `nodeTagTypes` is provided: `true` only while at least one type is
+   *   currently visible (auto-collapses when all types are toggled off).
+   * - When `nodeTagTypes` is omitted: `true` (consumer is assumed to render
+   *   `tags` via `renderNode`). Pass `false` to opt out for a tighter layout.
+   */
+  reserveTagRow?: boolean
 
   // ---- Callbacks ----
   onZoomLevelChange?: (level: ZoomLevel) => void
   onViewportChange?: (viewport: { x: number; y: number; zoom: number }) => void
   onVisibleNodesChange?: (count: number) => void
 }
+
+// Squared pixel threshold matching React Flow's `nodeClickDistance` so a
+// pan drag ending over a node does not register as a click.
+const NODE_CLICK_DISTANCE_SQ = 4 * 4
 
 // ─── Helper: compute initial expanded set from depth ───────────
 function computeExpandedByDepth<T>(
@@ -194,237 +332,92 @@ function collectVisibleNodes<T>(
 }
 
 // ─── Custom Node Type for React Flow ───────────────────────────
-interface GraphNodeData extends Record<string, unknown> {
-  graphNode: GraphNode<unknown>
-  renderNode: (node: GraphNode<unknown>, zoomLevel: ZoomLevel) => ReactNode
+/**
+ * Behavior context passed to consumer's `renderNode`. Describes how F0Graph
+ * wants the node to behave for the current viewport / state. Spread into
+ * `<F0GraphNode>` for default rendering, or use individual fields when
+ * implementing a fully custom node.
+ */
+export interface F0GraphNodeRenderContext {
+  zoomLevel: ZoomLevel
+  variant: GraphNodeVariant
+  state: GraphNodeState
+  expanded: boolean
+  hasChildren: boolean
+  childrenCount?: number
+  level: number
+  tabIndex: 0 | -1
+  setSize: number
+  posInSet: number
+  nodeId: string
+  ariaOwns?: string
+  onExpandToggle: () => void
+  onClick: () => void
+  nodeRef: (el: HTMLDivElement | null) => void
+  /**
+   * Set of tag types currently visible. When undefined, all tag types are
+   * rendered. Driven by the `visibleTagTypes` / `nodeTagTypes` props and
+   * the popover toggle in the controls bar.
+   */
+  visibleTagTypes?: ReadonlySet<F0GraphNodeTagType>
 }
 
-type GraphRFNode = RFNode<GraphNodeData>
+// ─── Custom Edge Wrapper (supports renderEdge override via context) ────────
+import type { EdgeProps as RFEdgeProps } from "@xyflow/react"
 
-// Discrete zoom compensation: fixed scale per zoom level, animated by motion.dev.
-// Nodes stay constant size within a level — only change at boundaries.
-const ZOOM_SCALE: Record<ZoomLevel, number> = {
-  detail: 1,
-  compact: 1,
-  dot: 1,
+import { useF0GraphRenderConfigInternal } from "./contexts"
+import {
+  F0GraphNodeWrapper,
+  F0GraphExpanderWrapper,
+  F0GraphCollapserWrapper,
+  EXPANDER_Y_OFFSET_BY_ZOOM,
+  type GraphNodeData,
+  type ExpanderNodeData,
+  type CollapserNodeData,
+} from "./internal/ReactFlowAdapters"
+
+interface GraphEdgeData extends Record<string, unknown> {
+  graphEdge?: GraphEdge
+  variant?: EdgeVariant
 }
 
-function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
-  const zoomCtx = useF0GraphZoomInternal()
-  const expandCtx = useF0GraphExpandInternal()
-  const selectionCtx = useF0GraphSelectionInternal()
-  const actionsCtx = useF0GraphActionsInternal()
-  if (!zoomCtx || !expandCtx || !selectionCtx || !actionsCtx) return null
+function F0GraphEdgeWrapperInner(props: RFEdgeProps) {
+  const edgeData = props.data as GraphEdgeData | undefined
+  const graphEdge = edgeData?.graphEdge
+  const variant: EdgeVariant = edgeData?.variant ?? "default"
+  const renderConfig = useF0GraphRenderConfigInternal()
+  const renderEdgeFn = renderConfig?.renderEdge
 
-  const { zoomLevel } = zoomCtx
-  const { expandedNodes } = expandCtx
-  const { selectedNodes, highlightedNodes } = selectionCtx
-  const { toggleExpand, selectNode } = actionsCtx
-  const { graphNode, renderNode } = data as GraphNodeData
-  const compensationScale = ZOOM_SCALE[zoomLevel]
-
-  const isExpanded = expandedNodes.has(id)
-  const isSelected = selectedNodes.has(id)
-  const isHighlighted = highlightedNodes.has(id)
-
-  const nodeState = isSelected
-    ? "selected"
-    : isHighlighted
-      ? "highlighted"
-      : "default"
-
-  const variant =
-    zoomLevel === "dot" ? "dot" : zoomLevel === "compact" ? "compact" : "detail"
-
-  const hasChildren = (graphNode.childrenCount ?? 0) > 0
+  if (renderEdgeFn && graphEdge) {
+    const custom = renderEdgeFn(graphEdge, variant)
+    if (custom !== null) {
+      return <>{custom}</>
+    }
+  }
 
   return (
-    <>
-      <Handle type="target" position={Position.Top} className="!invisible" />
-      <div
-        className="pointer-events-none flex items-center justify-center"
-        style={{ width: "100%", height: "100%" }}
-      >
-        <motion.div
-          className="pointer-events-auto"
-          animate={{ scale: compensationScale }}
-          transition={{ duration: 0.15, ease: "easeOut" }}
-          style={{
-            transformOrigin: "center center",
-            maxWidth: "calc(100% - 20px)",
-          }}
-        >
-          <F0GraphNode
-            variant={variant}
-            state={nodeState}
-            expanded={isExpanded}
-            level={1}
-            hasChildren={hasChildren}
-            childrenCount={graphNode.childrenCount}
-            onExpandToggle={() => toggleExpand(id)}
-            onClick={() => {
-              selectNode(id)
-            }}
-          >
-            {renderNode(graphNode, zoomLevel)}
-          </F0GraphNode>
-        </motion.div>
-      </div>
-      <Handle type="source" position={Position.Bottom} className="!invisible" />
-    </>
+    <F0GraphEdgeBase
+      {...(props as F0GraphEdgeProps & RFEdgeProps)}
+      variant={variant}
+    />
   )
 }
 
-F0GraphNodeWrapperInner.displayName = "F0GraphNodeWrapper"
+F0GraphEdgeWrapperInner.displayName = "F0GraphEdgeWrapper"
 
-const F0GraphNodeWrapper = memo(F0GraphNodeWrapperInner, (prev, next) => {
+const F0GraphEdgeWrapper = memo(F0GraphEdgeWrapperInner, (prev, next) => {
   if (prev.id !== next.id) return false
-  const prevData = prev.data as GraphNodeData
-  const nextData = next.data as GraphNodeData
-  if (prevData.graphNode !== nextData.graphNode) return false
-  // renderNode is stabilized by Fix 2 — always the same reference
-  if (prev.positionAbsoluteX !== next.positionAbsoluteX) return false
-  if (prev.positionAbsoluteY !== next.positionAbsoluteY) return false
+  if (prev.data?.showDot !== next.data?.showDot) return false
+  if (prev.data?.variant !== next.data?.variant) return false
+  if (prev.data?.graphEdge !== next.data?.graphEdge) return false
+  if (prev.sourceX !== next.sourceX) return false
+  if (prev.sourceY !== next.sourceY) return false
+  if (prev.targetX !== next.targetX) return false
+  if (prev.targetY !== next.targetY) return false
+  if (prev.sourcePosition !== next.sourcePosition) return false
+  if (prev.targetPosition !== next.targetPosition) return false
   return true
 })
-
-// ─── Expander Node for React Flow ──────────────────────────────
-interface ExpanderNodeData {
-  [key: string]: unknown
-  avatars: { firstName: string; lastName: string; src?: string }[]
-  count: number
-  expanded: boolean
-  parentId: string
-  parentWidth: number
-}
-
-type ExpanderRFNode = RFNode<ExpanderNodeData>
-
-const EXPANDER_SIZE: Record<ZoomLevel, number> = {
-  detail: 32,
-  compact: 48,
-  dot: 72,
-}
-
-const EXPANDER_Y_OFFSET_BY_ZOOM: Record<ZoomLevel, number> = {
-  detail: 18,
-  compact: 18,
-  dot: 72,
-}
-
-function F0GraphExpanderWrapperInner({
-  data,
-  id: _id,
-}: NodeProps<ExpanderRFNode>) {
-  const zoomCtx = useF0GraphZoomInternal()
-  const expandCtx = useF0GraphExpandInternal()
-  const actionsCtx = useF0GraphActionsInternal()
-  if (!zoomCtx || !expandCtx || !actionsCtx) return null
-
-  const { avatars, count, parentId, parentWidth } = data as ExpanderNodeData
-  const expanded = expandCtx.expandedNodes.has(parentId)
-  const expanderSize = EXPANDER_SIZE[zoomCtx.zoomLevel]
-
-  return (
-    <>
-      <Handle type="target" position={Position.Top} className="!invisible" />
-      <div
-        className="pointer-events-auto flex items-start justify-center"
-        style={{ width: parentWidth, height: 80 }}
-      >
-        <F0GraphExpander
-          avatars={avatars}
-          count={count}
-          expanded={expanded}
-          size={expanderSize}
-          onClick={() => actionsCtx.toggleExpand(parentId)}
-        />
-      </div>
-      <Handle type="source" position={Position.Bottom} className="!invisible" />
-    </>
-  )
-}
-
-F0GraphExpanderWrapperInner.displayName = "F0GraphExpanderWrapper"
-
-const F0GraphExpanderWrapper = memo(
-  F0GraphExpanderWrapperInner,
-  (prev, next) => {
-    if (prev.id !== next.id) return false
-    const prevData = prev.data as ExpanderNodeData
-    const nextData = next.data as ExpanderNodeData
-    if (prevData.parentId !== nextData.parentId) return false
-    if (prevData.count !== nextData.count) return false
-    if (prevData.parentWidth !== nextData.parentWidth) return false
-    if (prev.positionAbsoluteX !== next.positionAbsoluteX) return false
-    if (prev.positionAbsoluteY !== next.positionAbsoluteY) return false
-    return true
-  }
-)
-
-// ─── Collapser Node for React Flow ─────────────────────────────
-interface CollapserNodeData {
-  [key: string]: unknown
-  parentId: string
-  parentWidth: number
-}
-
-type CollapserRFNode = RFNode<CollapserNodeData>
-
-function F0GraphCollapserWrapperInner({ data }: NodeProps<CollapserRFNode>) {
-  const zoomCtx = useF0GraphZoomInternal()
-  const actionsCtx = useF0GraphActionsInternal()
-  if (!zoomCtx || !actionsCtx) return null
-
-  const { parentId, parentWidth } = data as CollapserNodeData
-  if (zoomCtx.zoomLevel === "dot") return null
-
-  return (
-    <>
-      <Handle type="target" position={Position.Top} className="!invisible" />
-      <div
-        className="group pointer-events-auto flex items-start justify-center pt-2"
-        style={{ width: parentWidth, height: 80 }}
-      >
-        <div className="invisible backdrop-blur-[120px] group-hover:visible">
-          <F0Button
-            variant="neutral"
-            size="sm"
-            label="Collapse children"
-            icon={Minimize}
-            hideLabel
-            onClick={() => actionsCtx.toggleExpand(parentId)}
-          />
-        </div>
-      </div>
-      <Handle type="source" position={Position.Bottom} className="!invisible" />
-    </>
-  )
-}
-
-F0GraphCollapserWrapperInner.displayName = "F0GraphCollapserWrapper"
-
-const F0GraphCollapserWrapper = memo(
-  F0GraphCollapserWrapperInner,
-  (prev, next) => {
-    if (prev.id !== next.id) return false
-    const prevData = prev.data as CollapserNodeData
-    const nextData = next.data as CollapserNodeData
-    if (prevData.parentId !== nextData.parentId) return false
-    if (prevData.parentWidth !== nextData.parentWidth) return false
-    if (prev.positionAbsoluteX !== next.positionAbsoluteX) return false
-    if (prev.positionAbsoluteY !== next.positionAbsoluteY) return false
-    return true
-  }
-)
-
-// ─── Internal context hooks (non-throwing, for node wrappers) ──
-import {
-  useF0GraphZoomInternal,
-  useF0GraphExpandInternal,
-  useF0GraphSelectionInternal,
-  useF0GraphActionsInternal,
-} from "./context/index"
 
 // ─── Node & edge type maps ─────────────────────────────────────
 const nodeTypes: NodeTypes = {
@@ -433,8 +426,12 @@ const nodeTypes: NodeTypes = {
   collapserNode: F0GraphCollapserWrapper as unknown as NodeTypes[string],
 }
 
-const edgeTypes: EdgeTypes = {
-  graphEdge: F0GraphEdge as unknown as EdgeTypes[string],
+const defaultEdgeTypes: EdgeTypes = {
+  graphEdge: F0GraphEdgeBase as unknown as EdgeTypes[string],
+}
+
+const customEdgeTypes: EdgeTypes = {
+  graphEdge: F0GraphEdgeWrapper as unknown as EdgeTypes[string],
 }
 
 // ─── Inner component (needs ReactFlow hooks) ───────────────────
@@ -450,27 +447,37 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     zoomPreset,
     zoomThresholds,
     defaultZoom = 1,
-    minZoom = 0.01,
+    minZoom = 0.05,
     maxZoom = 2,
     expandedNodes: controlledExpanded,
     defaultExpandedNodes,
     defaultExpandDepth,
     onExpandToggle,
+    onExpandedNodesChange,
     selectionMode = "single",
     selectedNodes: controlledSelected,
     onNodeSelect,
+    onSelectedNodesChange,
     focusedNode,
     highlightedNodes: highlightedProp,
     fullScreen = true,
+    nodeWidth: nodeWidthProp,
+    nodeHeight: nodeHeightProp,
     searchValue,
     onSearchChange,
     searchLoading,
     searchable,
     onSearchResultSelect,
     showControls = false,
-    showMinimap = false,
     onZoomLevelChange,
     onViewportChange,
+    renderEdge,
+    nodeTagTypes,
+    visibleTagTypes: controlledVisibleTagTypes,
+    defaultVisibleTagTypes,
+    onVisibleTagTypesChange,
+    nodeTagTypeLabels,
+    reserveTagRow,
   } = props
 
   const reactFlow = useReactFlow()
@@ -482,13 +489,55 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
   const [internalDirection] = useState<LayoutDirection>(defaultDirection)
   const direction = controlledDirection ?? internalDirection
 
+  // ── Per-type tag visibility state (controlled / uncontrolled) ──
+  // When `nodeTagTypes` is undefined the popover is hidden and tags render
+  // unfiltered (no visibleTagTypes set is published into context).
+  const initialVisibleTagTypes = useMemo<ReadonlyArray<F0GraphNodeTagType>>(
+    () => defaultVisibleTagTypes ?? nodeTagTypes ?? [],
+    // Initial only — don't recompute on prop changes; consumers should use
+    // the controlled API to update visibility.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  )
+  const [internalVisibleTagTypes, setInternalVisibleTagTypes] = useState<
+    ReadonlyArray<F0GraphNodeTagType>
+  >(initialVisibleTagTypes)
+  const visibleTagTypesArr =
+    controlledVisibleTagTypes ?? internalVisibleTagTypes
+  const visibleTagTypesSet = useMemo(
+    () => new Set<F0GraphNodeTagType>(visibleTagTypesArr),
+    [visibleTagTypesArr]
+  )
+  const setVisibleTagTypes = useCallback(
+    (next: ReadonlyArray<F0GraphNodeTagType>) => {
+      if (controlledVisibleTagTypes === undefined) {
+        setInternalVisibleTagTypes(next)
+      }
+      onVisibleTagTypesChange?.(next)
+    },
+    [controlledVisibleTagTypes, onVisibleTagTypesChange]
+  )
+  const toggleTagType = useCallback(
+    (type: F0GraphNodeTagType) => {
+      const has = visibleTagTypesSet.has(type)
+      const next = has
+        ? visibleTagTypesArr.filter((t) => t !== type)
+        : [...visibleTagTypesArr, type]
+      setVisibleTagTypes(next)
+    },
+    [visibleTagTypesSet, visibleTagTypesArr, setVisibleTagTypes]
+  )
+
   // ── Stabilize renderNode: store in ref so rfNodes deps don't include the function ──
   const renderNodeRef = useRef(renderNode)
   renderNodeRef.current = renderNode
 
+  // ── Stabilize renderEdge: select edge type registry ──
+  const edgeTypes = renderEdge ? customEdgeTypes : defaultEdgeTypes
+
   const stableRenderNode = useCallback(
-    (node: GraphNode<unknown>, zl: ZoomLevel): ReactNode =>
-      renderNodeRef.current(node as GraphNode<T>, zl),
+    (node: GraphNode<unknown>, ctx: F0GraphNodeRenderContext): ReactNode =>
+      renderNodeRef.current(node as GraphNode<T>, ctx),
     []
   )
 
@@ -548,6 +597,29 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
   // ── Highlighted nodes ──
   const highlightedNodes = highlightedProp ?? new Set<string>()
 
+  // ── Focus state (roving tabindex) ──
+  const [focusedNodeId, setFocusedNodeId] = useState<string | null>(() => {
+    const visible = collectVisibleNodes(roots, expandedNodes)
+    return visible.length > 0 ? visible[0].id : null
+  })
+  const focusedNodeIdRef = useRef(focusedNodeId)
+  useEffect(() => {
+    focusedNodeIdRef.current = focusedNodeId
+  }, [focusedNodeId])
+
+  // Node ref map for imperative .focus() calls
+  const nodeRefsMapRef = useRef(new Map<string, HTMLElement>())
+  const registerNodeRef = useCallback(
+    (nodeId: string, el: HTMLElement | null) => {
+      if (el) {
+        nodeRefsMapRef.current.set(nodeId, el)
+      } else {
+        nodeRefsMapRef.current.delete(nodeId)
+      }
+    },
+    []
+  )
+
   // ── Zoom level ──
   const zoomLevel = useGraphZoomLevel(currentZoom, {
     preset: zoomPreset,
@@ -567,6 +639,70 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     () => collectVisibleNodes(roots, expandedNodes),
     [roots, expandedNodes]
   )
+
+  // ── Flat visible order (DFS) for keyboard navigation ──
+  // Includes expander/collapser pseudo-node IDs for roving tabindex
+  const flatVisibleOrder = useMemo(() => {
+    const order: string[] = []
+
+    function walk(nodes: TreeNode<unknown>[]): void {
+      for (const node of nodes) {
+        order.push(node.id)
+        if (expandedNodes.has(node.id) && node.children.length > 0) {
+          walk(node.children)
+          order.push(`collapser-${node.id}`)
+        } else if (node.childrenCount > 0) {
+          order.push(`expander-${node.id}`)
+        }
+      }
+    }
+
+    for (const root of roots) {
+      walk([root])
+    }
+    return order
+  }, [roots, expandedNodes])
+  const flatVisibleOrderRef = useRef(flatVisibleOrder)
+  useEffect(() => {
+    flatVisibleOrderRef.current = flatVisibleOrder
+  }, [flatVisibleOrder])
+
+  // ── Initialize / repair focused node ──
+  useEffect(() => {
+    if (flatVisibleOrder.length === 0) return
+    if (focusedNodeId === null || !flatVisibleOrder.includes(focusedNodeId)) {
+      // On initial mount, prefer first selected node if any are visible
+      const firstSelected =
+        focusedNodeId === null
+          ? flatVisibleOrder.find((id) => selectedNodes.has(id))
+          : undefined
+      setFocusedNodeId(firstSelected ?? flatVisibleOrder[0])
+    }
+  }, [flatVisibleOrder, focusedNodeId, selectedNodes])
+
+  // ── ARIA tree info (level, setSize, posInSet) ──
+  const ariaTreeInfo = useMemo(() => {
+    const info = new Map<
+      string,
+      { level: number; setSize: number; posInSet: number }
+    >()
+    const byParent = new Map<string | null, typeof visibleTreeNodes>()
+    for (const tn of visibleTreeNodes) {
+      const key = tn.parentId
+      if (!byParent.has(key)) byParent.set(key, [])
+      byParent.get(key)!.push(tn)
+    }
+    for (const siblings of byParent.values()) {
+      for (let i = 0; i < siblings.length; i++) {
+        info.set(siblings[i].id, {
+          level: siblings[i].depth + 1,
+          setSize: siblings.length,
+          posInSet: i + 1,
+        })
+      }
+    }
+    return info
+  }, [visibleTreeNodes])
 
   // Notify parent of visible node count changes
   useEffect(() => {
@@ -677,7 +813,26 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
   // ── Layout edges: include expander edges so the engine sees the full graph ──
   const layoutEdges = useMemo(() => visibleEdges, [visibleEdges])
 
-  const layoutEngine = useLayoutEngine({ direction })
+  // Extra vertical room for the tag row when any tag types are visible.
+  // Approximates one row of small F0Tag pills; multi-row wrap will overlap
+  // the next rank gap (still readable) — refine to per-node measurement
+  // in a follow-up.
+  const TAG_ROW_HEIGHT = 36
+  // When the consumer opts into the tag-types popover, the row only
+  // contributes to layout while at least one type is visible. Otherwise we
+  // assume tags may be rendered via `renderNode` and reserve the row by
+  // default so the source handle sits below them. `reserveTagRow` overrides.
+  const tagsAffectLayout =
+    reserveTagRow ?? (nodeTagTypes ? visibleTagTypesSet.size > 0 : true)
+  const effectiveNodeHeight =
+    (nodeHeightProp ?? 56) + (tagsAffectLayout ? TAG_ROW_HEIGHT : 0)
+
+  const builtInEngine = useLayoutEngine({
+    direction,
+    nodeWidth: nodeWidthProp,
+    nodeHeight: effectiveNodeHeight,
+  })
+  const layoutEngine = props.layoutEngine ?? builtInEngine
   const layout = useMemo(
     () => layoutEngine.computeLayout(layoutNodes, layoutEdges, direction),
     [layoutEngine, layoutNodes, layoutEdges, direction]
@@ -715,10 +870,29 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     const positionMap = new Map(layout.nodes.map((pn) => [pn.id, pn]))
 
     // Node dimensions (constant — compensation scale is applied inside the wrapper via context)
-    const BASE_W = 256
-    const BASE_H = 56
+    const BASE_W = nodeWidthProp ?? 256
+    const BASE_H = effectiveNodeHeight
 
     const yStretch = 1
+
+    // Direction-aware port positions for React Flow edge routing
+    const isHorizontal = direction === "LR" || direction === "RL"
+    const sourcePos =
+      direction === "TB"
+        ? Position.Bottom
+        : direction === "BT"
+          ? Position.Top
+          : direction === "LR"
+            ? Position.Right
+            : Position.Left
+    const targetPos =
+      direction === "TB"
+        ? Position.Top
+        : direction === "BT"
+          ? Position.Bottom
+          : direction === "LR"
+            ? Position.Left
+            : Position.Right
 
     const graphRfNodes: RFNode[] = visibleTreeNodes.map((treeNode): RFNode => {
       const pos = positionMap.get(treeNode.id)
@@ -729,6 +903,13 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
         childrenCount: treeNode.childrenCount,
         childrenLoaded: treeNode.childrenLoaded,
       }
+      const aria = ariaTreeInfo.get(treeNode.id)
+
+      // aria-owns: only for expanded nodes with visible children
+      const visibleChildIds =
+        expandedNodes.has(treeNode.id) && treeNode.children.length > 0
+          ? treeNode.children.map((c) => c.id)
+          : undefined
 
       return {
         id: treeNode.id,
@@ -739,32 +920,57 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
         },
         width: BASE_W,
         height: BASE_H,
+        sourcePosition: sourcePos,
+        targetPosition: targetPos,
         data: {
           graphNode,
           renderNode: stableRenderNode,
+          ariaLevel: aria?.level ?? 1,
+          ariaSetSize: aria?.setSize ?? 1,
+          ariaPosInSet: aria?.posInSet ?? 1,
+          visibleChildIds,
         } as GraphNodeData,
       }
     })
 
     // Expanders are not part of the layout tree; they're positioned
-    // manually below their parent for visual consistency
+    // manually adjacent to their parent on the "outgoing" edge of the layout
     const expanderRfNodes: RFNode[] = expanderNodes.map((exp): RFNode => {
       const parentPos = positionMap.get(exp.parentId)
-      const parentNode = parentPos ?? { x: 0, y: 0, width: 256, height: 56 }
-      const ph = parentNode.height ?? 56
+      const parentNode = parentPos ?? {
+        x: 0,
+        y: 0,
+        width: BASE_W,
+        height: BASE_H,
+      }
+      const pw = parentNode.width ?? BASE_W
+      const ph = parentNode.height ?? BASE_H
+      const expX = isHorizontal
+        ? direction === "LR"
+          ? parentNode.x + pw + EXPANDER_Y_OFFSET
+          : parentNode.x - pw
+        : parentNode.x
+      const expY = isHorizontal
+        ? parentNode.y * yStretch
+        : direction === "TB"
+          ? parentNode.y * yStretch + ph + EXPANDER_Y_OFFSET
+          : parentNode.y * yStretch - ph
       return {
         id: exp.id,
         type: "expanderNode",
         position: {
-          x: parentNode.x + anchorDx,
-          y: parentNode.y * yStretch + ph + EXPANDER_Y_OFFSET + anchorDy,
+          x: expX + anchorDx,
+          y: expY + anchorDy,
         },
+        sourcePosition: sourcePos,
+        targetPosition: targetPos,
         data: {
           avatars: exp.avatars,
           count: exp.count,
           expanded: expandedNodes.has(exp.parentId),
           parentId: exp.parentId,
           parentWidth: BASE_W,
+          parentName: exp.parentId,
         } as ExpanderNodeData,
       }
     })
@@ -776,19 +982,34 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
         const parentPos = positionMap.get(parent.id)
         const px = parentPos?.x ?? 0
         const py = parentPos?.y ?? 0
-        const ph = parentPos?.height ?? 56
+        const pw = parentPos?.width ?? BASE_W
+        const ph = parentPos?.height ?? BASE_H
+        const colX = isHorizontal
+          ? direction === "LR"
+            ? px + pw + EXPANDER_Y_OFFSET - 6
+            : px - pw
+          : px
+        const colY = isHorizontal
+          ? py * yStretch
+          : direction === "TB"
+            ? py * yStretch + ph + EXPANDER_Y_OFFSET - 6
+            : py * yStretch - ph
 
         return {
           id: `collapser-${parent.id}`,
           type: "collapserNode",
           zIndex: 10,
           position: {
-            x: px + anchorDx,
-            y: py * yStretch + ph + EXPANDER_Y_OFFSET - 6 + anchorDy,
+            x: colX + anchorDx,
+            y: colY + anchorDy,
           },
+          sourcePosition: sourcePos,
+          targetPosition: targetPos,
           data: {
             parentId: parent.id,
             parentWidth: BASE_W,
+            collapseLabel: props.controlLabels?.collapseChildren,
+            parentName: parent.id,
           } as CollapserNodeData,
         }
       })
@@ -802,6 +1023,11 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     stableRenderNode,
     anchorOffset,
     EXPANDER_Y_OFFSET,
+    nodeWidthProp,
+    nodeHeightProp,
+    direction,
+    ariaTreeInfo,
+    props.controlLabels?.collapseChildren,
   ])
 
   // ── Build React Flow edges ──
@@ -829,24 +1055,28 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     )
   }, [visibleEdges, visibleTreeNodes, expandedNodes])
 
-  // ── Expand / collapse ──
+  // ── Expand / collapse (stable via ref pattern to avoid context cascade) ──
+  const expandedNodesRef = useRef(expandedNodes)
+  useEffect(() => {
+    expandedNodesRef.current = expandedNodes
+  }, [expandedNodes])
+
   const toggleExpand = useCallback(
     (nodeId: string) => {
-      const wasExpanded = expandedNodes.has(nodeId)
+      const current = expandedNodesRef.current
+      const wasExpanded = current.has(nodeId)
+      const next = new Set(current)
+      if (wasExpanded) {
+        next.delete(nodeId)
+      } else {
+        next.add(nodeId)
+      }
 
       // Track which node to anchor
       anchorNodeRef.current = nodeId
 
       if (!controlledExpanded) {
-        setInternalExpanded((prev) => {
-          const next = new Set(prev)
-          if (wasExpanded) {
-            next.delete(nodeId)
-          } else {
-            next.add(nodeId)
-          }
-          return next
-        })
+        setInternalExpanded(next)
       }
 
       // Lazy mode: trigger fetch when expanding
@@ -858,67 +1088,357 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
       }
 
       onExpandToggle?.(nodeId, !wasExpanded)
+      onExpandedNodesChange?.(next)
     },
     [
-      expandedNodes,
       controlledExpanded,
       onExpandToggle,
+      onExpandedNodesChange,
       isLazyMode,
       nodeMap,
       lazyTree,
     ]
   )
 
-  // ── Selection (focus semantics: click selects, click again keeps, pane click clears) ──
-  const selectNode = useCallback(
-    (nodeId: string) => {
-      if (selectionMode === "none") return
+  // ── Detail panel state ──
+  const {
+    detailPanel,
+    detailPanelAriaLabel,
+    detailPanelWidth = 384,
+    graphId,
+  } = props
+  const detailPanelEnabled = Boolean(detailPanel)
+  const [detailNodeId, setDetailNodeId] = useState<string | null>(null)
+  const detailNode = useMemo<GraphNode<T> | null>(() => {
+    if (!detailNodeId) return null
+    const entry = nodeMap.get(detailNodeId)
+    if (!entry) return null
+    return {
+      id: detailNodeId,
+      parentId: entry.parentId ?? null,
+      data: entry.data,
+      childrenCount: entry.childrenCount,
+      childrenLoaded: entry.childrenLoaded,
+    }
+  }, [detailNodeId, nodeMap])
+  const detailOpen = detailPanelEnabled && detailNode !== null
 
-      const wasSelected = selectedNodes.has(nodeId)
-      if (wasSelected) return // already focused — no toggle
-
-      if (!controlledSelected) {
-        setInternalSelected((prev) => {
-          if (selectionMode === "single") {
-            return new Set([nodeId])
-          }
-          // multi
-          const next = new Set(prev)
-          next.add(nodeId)
-          return next
-        })
-      }
-
-      onNodeSelect?.(nodeId, true)
+  // Center a node accounting for the detail panel offset (panel sits on the right).
+  const centerNodeWithPanelOffset = useCallback(
+    (id: string, panelOpen: boolean) => {
+      const rfNode = reactFlow.getNode(id)
+      if (!rfNode) return
+      const nodeWidth =
+        rfNode.width ??
+        (rfNode as unknown as { measured?: { width?: number } }).measured
+          ?.width ??
+        240
+      const nodeHeight =
+        rfNode.height ??
+        (rfNode as unknown as { measured?: { height?: number } }).measured
+          ?.height ??
+        80
+      const targetZoom = Math.max(reactFlow.getZoom(), 1)
+      const offsetWorldX = panelOpen ? detailPanelWidth / 2 / targetZoom : 0
+      const cx = rfNode.position.x + nodeWidth / 2 + offsetWorldX
+      const cy = rfNode.position.y + nodeHeight / 2
+      reactFlow.setCenter(cx, cy, { zoom: targetZoom, duration: 400 })
     },
-    [selectionMode, selectedNodes, controlledSelected, onNodeSelect]
+    [reactFlow, detailPanelWidth]
   )
 
-  // ── Interaction mode (select vs pan) ──
-  const [interactionMode, setInteractionMode] = useState<"select" | "pan">(
-    "select"
+  // ── Selection (focus semantics: click selects, click again keeps, pane click clears) ──
+  const selectedNodesRef = useRef(selectedNodes)
+  useEffect(() => {
+    selectedNodesRef.current = selectedNodes
+  }, [selectedNodes])
+
+  const selectNode = useCallback(
+    (nodeId: string) => {
+      // Update roving tabindex focus (sync ref for immediate reads)
+      focusedNodeIdRef.current = nodeId
+      setFocusedNodeId(nodeId)
+
+      if (selectionMode !== "none") {
+        const current = selectedNodesRef.current
+        const wasSelected = current.has(nodeId)
+
+        if (!wasSelected) {
+          const next =
+            selectionMode === "single"
+              ? new Set([nodeId])
+              : new Set([...current, nodeId])
+
+          if (!controlledSelected) {
+            setInternalSelected(next)
+          }
+          onNodeSelect?.(nodeId, true)
+          onSelectedNodesChange?.(next)
+        }
+      }
+
+      // Open detail panel + center accounting for offset
+      if (detailPanelEnabled) {
+        setDetailNodeId(nodeId)
+        // Defer centering to next frame so the panel width is committed.
+        window.requestAnimationFrame(() => {
+          centerNodeWithPanelOffset(nodeId, true)
+        })
+      }
+    },
+    [
+      selectionMode,
+      controlledSelected,
+      onNodeSelect,
+      onSelectedNodesChange,
+      detailPanelEnabled,
+      centerNodeWithPanelOffset,
+    ]
   )
 
   const containerRef = useRef<HTMLDivElement>(null)
+  const canvasRef = useRef<HTMLDivElement>(null)
+
+  // Tracks pointerdown coordinates so we can distinguish a click on a node
+  // from a pan drag that happens to end over a node. Mirrors React Flow's
+  // own `nodeClickDistance` threshold below.
+  const pointerDownRef = useRef<{
+    x: number
+    y: number
+    id: number
+  } | null>(null)
 
   // ── Escape to clear focus and selection ──
   const clearSelection = useCallback(() => {
+    const current = selectedNodesRef.current
     if (!controlledSelected) {
       setInternalSelected(new Set())
     }
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur()
+    if (current.size > 0) {
+      onSelectedNodesChange?.(new Set())
     }
-  }, [controlledSelected])
+    setDetailNodeId(null)
+    setFocusedNodeId(null)
+    canvasRef.current?.focus()
+  }, [controlledSelected, onSelectedNodesChange])
 
-  const handleKeyDown = useCallback(
+  // ── Ref for nodeMap (used in keyboard handler without re-creating) ──
+  const nodeMapRef = useRef(nodeMap)
+  useEffect(() => {
+    nodeMapRef.current = nodeMap
+  }, [nodeMap])
+
+  const handleTreeKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === "Escape") {
         e.stopPropagation()
         clearSelection()
+        return
+      }
+
+      // Zoom shortcuts work even when a node is focused
+      const reducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches
+      switch (e.key) {
+        case "+":
+        case "=":
+          e.preventDefault()
+          reactFlow.zoomIn({ duration: reducedMotion ? 0 : 300 })
+          return
+        case "-":
+          e.preventDefault()
+          reactFlow.zoomOut({ duration: reducedMotion ? 0 : 300 })
+          return
+        case "0":
+          e.preventDefault()
+          reactFlow.fitView({
+            duration: reducedMotion ? 0 : 400,
+            padding: 0.1,
+          })
+          return
+      }
+
+      const currentId = focusedNodeIdRef.current
+      if (!currentId) return
+
+      const order = flatVisibleOrderRef.current
+      const currentIndex = order.indexOf(currentId)
+      if (currentIndex === -1) return
+
+      let targetId: string | null = null
+
+      switch (e.key) {
+        case "ArrowDown":
+          e.preventDefault()
+          e.stopPropagation()
+          if (currentIndex < order.length - 1) {
+            targetId = order[currentIndex + 1]
+          }
+          break
+        case "ArrowUp":
+          e.preventDefault()
+          e.stopPropagation()
+          if (currentIndex > 0) {
+            targetId = order[currentIndex - 1]
+          }
+          break
+        case "ArrowRight": {
+          e.preventDefault()
+          e.stopPropagation()
+          const node = nodeMapRef.current.get(currentId)
+          const hasKids =
+            node !== undefined &&
+            (node.children.length > 0 || node.childrenCount > 0)
+          if (hasKids) {
+            if (!expandedNodesRef.current.has(currentId)) {
+              toggleExpand(currentId)
+            } else if (currentIndex < order.length - 1) {
+              targetId = order[currentIndex + 1]
+            }
+          }
+          break
+        }
+        case "ArrowLeft": {
+          e.preventDefault()
+          e.stopPropagation()
+          const node = nodeMapRef.current.get(currentId)
+          const hasKidsL =
+            node !== undefined &&
+            (node.children.length > 0 || node.childrenCount > 0)
+          if (node && expandedNodesRef.current.has(currentId) && hasKidsL) {
+            toggleExpand(currentId)
+          } else if (node?.parentId) {
+            targetId = node.parentId
+          }
+          break
+        }
+        case "Home":
+          e.preventDefault()
+          e.stopPropagation()
+          if (order.length > 0) {
+            targetId = order[0]
+          }
+          break
+        case "End":
+          e.preventDefault()
+          e.stopPropagation()
+          if (order.length > 0) {
+            targetId = order[order.length - 1]
+          }
+          break
+        case "Enter":
+        case " ":
+          e.preventDefault()
+          e.stopPropagation()
+          if (
+            currentId.startsWith("expander-") ||
+            currentId.startsWith("collapser-")
+          ) {
+            toggleExpand(currentId.replace(/^(expander|collapser)-/, ""))
+          } else {
+            selectNode(currentId)
+          }
+          break
+        default:
+          return
+      }
+
+      if (targetId) {
+        focusedNodeIdRef.current = targetId
+        setFocusedNodeId(targetId)
+        const targetEl = nodeRefsMapRef.current.get(targetId)
+        if (targetEl) {
+          targetEl.focus()
+          // Fly-to focused node respecting reduced motion
+          const rm = window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+          ).matches
+          reactFlow.fitView({
+            nodes: [{ id: targetId.replace(/^(expander|collapser)-/, "") }],
+            duration: rm ? 0 : 300,
+            padding: 0.5,
+          })
+        }
       }
     },
-    [clearSelection]
+    [clearSelection, toggleExpand, selectNode, reactFlow]
+  )
+
+  // ── Canvas keyboard handler (pan/zoom when no node is focused) ──
+  const handleCanvasKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      // Only handle when the canvas wrapper itself has focus
+      if (e.target !== e.currentTarget) return
+
+      const reducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches
+      const duration = reducedMotion ? 0 : 200
+      const PAN_STEP = e.shiftKey ? 200 : 50
+
+      switch (e.key) {
+        case "ArrowUp":
+          e.preventDefault()
+          {
+            const vp = reactFlow.getViewport()
+            reactFlow.setViewport(
+              { x: vp.x, y: vp.y + PAN_STEP, zoom: vp.zoom },
+              { duration }
+            )
+          }
+          break
+        case "ArrowDown":
+          e.preventDefault()
+          {
+            const vp = reactFlow.getViewport()
+            reactFlow.setViewport(
+              { x: vp.x, y: vp.y - PAN_STEP, zoom: vp.zoom },
+              { duration }
+            )
+          }
+          break
+        case "ArrowLeft":
+          e.preventDefault()
+          {
+            const vp = reactFlow.getViewport()
+            reactFlow.setViewport(
+              { x: vp.x + PAN_STEP, y: vp.y, zoom: vp.zoom },
+              { duration }
+            )
+          }
+          break
+        case "ArrowRight":
+          e.preventDefault()
+          {
+            const vp = reactFlow.getViewport()
+            reactFlow.setViewport(
+              { x: vp.x - PAN_STEP, y: vp.y, zoom: vp.zoom },
+              { duration }
+            )
+          }
+          break
+        case "+":
+        case "=":
+          e.preventDefault()
+          reactFlow.zoomIn({ duration: reducedMotion ? 0 : 300 })
+          break
+        case "-":
+          e.preventDefault()
+          reactFlow.zoomOut({ duration: reducedMotion ? 0 : 300 })
+          break
+        case "0":
+          e.preventDefault()
+          reactFlow.fitView({
+            duration: reducedMotion ? 0 : 400,
+            padding: 0.1,
+          })
+          break
+        default:
+          return
+      }
+    },
+    [reactFlow]
   )
 
   // ── Focus node ──
@@ -958,34 +1478,39 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     reactFlow.fitView({ duration: 400, padding: 0.1 })
   }, [reactFlow])
 
+  const handleFocusUser = useCallback(() => {
+    if (!props.currentUserNodeId) return
+    centerNodeWithPanelOffset(props.currentUserNodeId, detailOpen)
+  }, [props.currentUserNodeId, centerNodeWithPanelOffset, detailOpen])
+
   // ── Internal search-with-popover state ──
   const [internalSearchQuery, setInternalSearchQuery] = useState("")
-  const { results: searchResults, hasQuery: hasSearchQuery } = useGraphSearch(
-    resolvedNodes,
-    internalSearchQuery,
-    searchable
-  )
+  const {
+    results: searchResults,
+    hasQuery: hasSearchQuery,
+    pending: searchPending,
+  } = useGraphSearch(resolvedNodes, internalSearchQuery, searchable)
 
   const handleSearchResultSelect = useCallback(
     (id: string) => {
       // 1) Auto-expand collapsed ancestors so the node becomes visible.
+      const current = expandedNodesRef.current
       const ancestorsToExpand: string[] = []
       let cursor = nodeMap.get(id)?.parentId ?? null
       while (cursor) {
-        if (!expandedNodes.has(cursor)) ancestorsToExpand.push(cursor)
+        if (!current.has(cursor)) ancestorsToExpand.push(cursor)
         cursor = nodeMap.get(cursor)?.parentId ?? null
       }
       if (ancestorsToExpand.length > 0) {
+        const next = new Set(current)
+        for (const ancestorId of ancestorsToExpand) next.add(ancestorId)
         if (!controlledExpanded) {
-          setInternalExpanded((prev) => {
-            const next = new Set(prev)
-            for (const ancestorId of ancestorsToExpand) next.add(ancestorId)
-            return next
-          })
+          setInternalExpanded(next)
         }
         for (const ancestorId of ancestorsToExpand) {
           onExpandToggle?.(ancestorId, true)
         }
+        onExpandedNodesChange?.(next)
       }
 
       // 2) Select the node (no-op if selectionMode === "none").
@@ -993,11 +1518,15 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
 
       // 3) Fly to it once the next layout pass has settled.
       const timer = window.setTimeout(() => {
-        reactFlow.fitView({
-          nodes: [{ id }],
-          duration: 300,
-          padding: 0.5,
-        })
+        if (detailPanelEnabled) {
+          centerNodeWithPanelOffset(id, true)
+        } else {
+          reactFlow.fitView({
+            nodes: [{ id }],
+            duration: 300,
+            padding: 0.5,
+          })
+        }
       }, 100)
 
       onSearchResultSelect?.(id)
@@ -1012,13 +1541,15 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
       selectNode,
       reactFlow,
       onSearchResultSelect,
+      detailPanelEnabled,
+      centerNodeWithPanelOffset,
     ]
   )
 
   // ── Split context values (for performance — wrappers subscribe to only what they need) ──
   const zoomContextValue = useMemo(
-    () => ({ zoomLevel, currentZoom }),
-    [zoomLevel, currentZoom]
+    () => ({ zoomLevel, currentZoom, direction }),
+    [zoomLevel, currentZoom, direction]
   )
 
   const expandContextValue = useMemo(() => ({ expandedNodes }), [expandedNodes])
@@ -1033,136 +1564,194 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     [toggleExpand, selectNode]
   )
 
-  // ── Composite context value (legacy — re-renders on any change) ──
-  const contextValue = useMemo(
-    (): F0GraphContextValue => ({
-      zoomLevel,
-      currentZoom,
-      expandedNodes,
-      selectedNodes,
-      highlightedNodes,
-      toggleExpand,
-      selectNode,
+  const renderConfigContextValue = useMemo(
+    () => ({
+      renderEdge,
+      // Only publish a Set when the consumer opted in via `nodeTagTypes`.
+      // Otherwise leave it undefined so F0GraphNode renders all tags.
+      visibleTagTypes: nodeTagTypes ? visibleTagTypesSet : undefined,
     }),
-    [
-      zoomLevel,
-      currentZoom,
-      expandedNodes,
-      selectedNodes,
-      highlightedNodes,
-      toggleExpand,
-      selectNode,
-    ]
+    [renderEdge, nodeTagTypes, visibleTagTypesSet]
+  )
+
+  const focusContextValue = useMemo(
+    () => ({ focusedNodeId, setFocusedNodeId, registerNodeRef }),
+    [focusedNodeId, registerNodeRef]
   )
 
   return (
     <F0GraphActionsContext.Provider value={actionsContextValue}>
-      <F0GraphZoomContext.Provider value={zoomContextValue}>
-        <F0GraphExpandContext.Provider value={expandContextValue}>
-          <F0GraphSelectionContext.Provider value={selectionContextValue}>
-            <F0GraphContext.Provider value={contextValue}>
-              <ClickSpark
-                sparkColor="hsl(var(--neutral-40))"
-                sparkSize={10}
-                sparkRadius={15}
-                sparkCount={8}
-                duration={400}
-              >
-                <div
-                  ref={containerRef}
-                  data-zoom-level={zoomLevel}
-                  className={cn(
-                    "f0-graph relative bg-f1-background-tertiary",
-                    fullScreen
-                      ? "h-full w-full"
-                      : "mx-3 my-1 h-[calc(100%-8px)] w-[calc(100%-24px)] overflow-hidden rounded-xl border border-f1-border"
-                  )}
-                  role="tree"
-                  aria-label="Graph view"
-                  onKeyDown={handleKeyDown}
+      <F0GraphRenderConfigContext.Provider value={renderConfigContextValue}>
+        <F0GraphFocusContext.Provider value={focusContextValue}>
+          <F0GraphZoomContext.Provider value={zoomContextValue}>
+            <F0GraphExpandContext.Provider value={expandContextValue}>
+              <F0GraphSelectionContext.Provider value={selectionContextValue}>
+                <ClickSpark
+                  sparkColor="var(--f0-graph-spark)"
+                  sparkSize={10}
+                  sparkRadius={15}
+                  sparkCount={8}
+                  duration={400}
                 >
-                  <ReactFlow
-                    nodes={rfNodes}
-                    edges={rfEdges}
-                    nodeTypes={nodeTypes}
-                    edgeTypes={edgeTypes}
-                    onlyRenderVisibleElements
-                    minZoom={minZoom}
-                    maxZoom={maxZoom}
-                    defaultViewport={{ x: 0, y: 0, zoom: defaultZoom }}
-                    onViewportChange={handleViewportChange}
-                    onPaneClick={clearSelection}
-                    proOptions={{ hideAttribution: true }}
-                    fitView
-                    nodesDraggable={false}
-                    nodesConnectable={false}
-                    elementsSelectable={false}
-                    panOnDrag
-                    zoomOnScroll
-                    zoomOnPinch
-                    className={
-                      interactionMode === "pan"
-                        ? "f0-graph--pan-mode"
-                        : undefined
-                    }
-                  >
-                    <Background
-                      id="f0-graph-bg"
-                      variant={BackgroundVariant.Dots}
-                      gap={32}
-                      size={4}
-                      bgColor="hsl(var(--neutral-5) / 0.7)"
-                      color="hsl(var(--neutral-10))"
-                    />
-                    {showMinimap && (
-                      <MiniMap nodeStrokeWidth={3} pannable zoomable />
+                  <div
+                    ref={canvasRef}
+                    tabIndex={0}
+                    aria-label="Graph canvas"
+                    onKeyDown={handleCanvasKeyDown}
+                    data-zoom-level={zoomLevel}
+                    className={cn(
+                      "f0-graph relative bg-f1-background-tertiary outline-none",
+                      fullScreen
+                        ? "h-full w-full"
+                        : "mx-3 my-3 h-[calc(100%-24px)] w-[calc(100%-24px)] overflow-hidden rounded-xl border border-solid border-f1-border-secondary"
                     )}
-                  </ReactFlow>
-
-                  {searchable ? (
-                    <div className="absolute left-3 top-3 z-10">
-                      <F0GraphSearch
-                        value={internalSearchQuery}
-                        onChange={setInternalSearchQuery}
-                        results={searchResults}
-                        hasQuery={hasSearchQuery}
-                        loading={searchLoading}
-                        placeholder={searchable.placeholder ?? "Search"}
-                        noResultsLabel={
-                          searchable.noResultsLabel ?? "No results"
+                  >
+                    <div
+                      ref={containerRef}
+                      role="tree"
+                      aria-label="Graph view"
+                      onKeyDown={handleTreeKeyDown}
+                      onPointerDown={(e) => {
+                        pointerDownRef.current = {
+                          x: e.clientX,
+                          y: e.clientY,
+                          id: e.pointerId,
                         }
-                        onSelect={handleSearchResultSelect}
-                      />
+                      }}
+                      onPointerUp={(e) => {
+                        // Select node on mouseup only if the pointer barely
+                        // moved (i.e. it was a click, not a pan drag). React
+                        // Flow's own onNodeClick is suppressed past
+                        // nodeClickDistance; we mirror that here so a pan
+                        // ending over a node does not trigger selection +
+                        // centering.
+                        const start = pointerDownRef.current
+                        pointerDownRef.current = null
+                        if (!start || start.id !== e.pointerId) return
+                        const dx = e.clientX - start.x
+                        const dy = e.clientY - start.y
+                        if (dx * dx + dy * dy > NODE_CLICK_DISTANCE_SQ) return
+                        const target = e.target as HTMLElement | null
+                        const nodeEl =
+                          target?.closest<HTMLElement>(".react-flow__node")
+                        if (!nodeEl) return
+                        const id = nodeEl.getAttribute("data-id")
+                        if (id) selectNode(id)
+                      }}
+                      className="h-full w-full"
+                    >
+                      <ReactFlow
+                        nodes={rfNodes}
+                        edges={rfEdges}
+                        nodeTypes={nodeTypes}
+                        edgeTypes={edgeTypes}
+                        onlyRenderVisibleElements
+                        minZoom={minZoom}
+                        maxZoom={maxZoom}
+                        defaultViewport={{ x: 0, y: 0, zoom: defaultZoom }}
+                        onViewportChange={handleViewportChange}
+                        onPaneClick={clearSelection}
+                        proOptions={{ hideAttribution: true }}
+                        fitView
+                        nodesDraggable={false}
+                        nodesConnectable={false}
+                        elementsSelectable={false}
+                        nodeClickDistance={4}
+                        panOnDrag
+                        zoomOnScroll
+                        zoomOnPinch
+                      >
+                        <Background
+                          id="f0-graph-bg"
+                          variant={BackgroundVariant.Dots}
+                          gap={32}
+                          size={4}
+                          color="var(--f0-graph-bg-dot)"
+                        />
+                      </ReactFlow>
                     </div>
-                  ) : (
-                    onSearchChange && (
-                      <div className="absolute left-3 top-3 z-10">
-                        <Search
-                          value={searchValue}
-                          onChange={onSearchChange}
+
+                    {searchable ? (
+                      <div className="absolute left-3 top-3 z-10" data-no-spark>
+                        <F0GraphSearch
+                          value={internalSearchQuery}
+                          onChange={setInternalSearchQuery}
+                          results={searchResults}
+                          hasQuery={hasSearchQuery}
+                          pending={searchPending}
                           loading={searchLoading}
+                          placeholder={searchable.placeholder}
+                          noResultsLabel={searchable.noResultsLabel}
+                          onSelect={handleSearchResultSelect}
                         />
                       </div>
-                    )
-                  )}
+                    ) : (
+                      onSearchChange && (
+                        <div
+                          className="absolute left-3 top-3 z-10"
+                          data-no-spark
+                        >
+                          <Search
+                            value={searchValue}
+                            onChange={onSearchChange}
+                            loading={searchLoading}
+                          />
+                        </div>
+                      )
+                    )}
 
-                  {showControls && (
-                    <div className="absolute bottom-3 left-3 z-10">
-                      <F0GraphControls
-                        mode={interactionMode}
-                        onModeChange={setInteractionMode}
-                        onZoomIn={handleZoomIn}
-                        onZoomOut={handleZoomOut}
-                        onFitView={handleFitView}
-                      />
-                    </div>
-                  )}
-                </div>
-              </ClickSpark>
-            </F0GraphContext.Provider>
-          </F0GraphSelectionContext.Provider>
-        </F0GraphExpandContext.Provider>
-      </F0GraphZoomContext.Provider>
+                    {showControls && (
+                      <div
+                        className="absolute bottom-3 left-3 z-10"
+                        data-no-spark
+                      >
+                        <F0GraphControls
+                          onZoomIn={handleZoomIn}
+                          onZoomOut={handleZoomOut}
+                          onFitView={handleFitView}
+                          onFocusUser={
+                            props.currentUserNodeId
+                              ? handleFocusUser
+                              : undefined
+                          }
+                          tagTypes={nodeTagTypes}
+                          visibleTagTypes={visibleTagTypesSet}
+                          onToggleTagType={toggleTagType}
+                          tagTypeLabels={nodeTagTypeLabels}
+                          labels={props.controlLabels}
+                        />
+                      </div>
+                    )}
+
+                    {detailPanelEnabled &&
+                      detailNode &&
+                      detailPanel &&
+                      (() => {
+                        const config = detailPanel(detailNode as GraphNode<T>)
+                        // TS can't narrow discriminated unions through JSX
+                        // spreads — config has the correct variant props, the
+                        // assertion is safe.
+                        const panelProps = {
+                          ...config,
+                          open: detailOpen,
+                          initialWidth: detailPanelWidth,
+                          graphId,
+                          ariaLabel: detailPanelAriaLabel,
+                          onClose: () => setDetailNodeId(null),
+                        } as F0GraphDetailPanelProps
+                        return (
+                          <div data-no-spark>
+                            <F0GraphDetailPanel {...panelProps} />
+                          </div>
+                        )
+                      })()}
+                  </div>
+                </ClickSpark>
+              </F0GraphSelectionContext.Provider>
+            </F0GraphExpandContext.Provider>
+          </F0GraphZoomContext.Provider>
+        </F0GraphFocusContext.Provider>
+      </F0GraphRenderConfigContext.Provider>
     </F0GraphActionsContext.Provider>
   )
 }
