@@ -1,48 +1,59 @@
-import { forwardRef, type CSSProperties } from "react"
+import { forwardRef } from "react"
 
-import { F0Button } from "@/components/F0Button"
-import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/providers/i18n"
+import { cn, focusRing } from "@/lib/utils"
 
 import type { F0GraphExpanderProps } from "./types"
 
+// CUSTOM: F0Button only supports sm/md/lg (24/32/40px). The expander needs
+// arbitrary pixel sizes (up to 72px at dot zoom). A native <button> styled
+// with F0 neutral-variant tokens is used instead.
+
 export const F0GraphExpander = forwardRef<HTMLDivElement, F0GraphExpanderProps>(
-  ({ count, expanded, onClick, size = 24 }, ref) => {
+  (
+    { count, expanded, onClick, size = 24, tabIndex, ariaLabel, loading },
+    ref
+  ) => {
+    const i18n = useI18n()
     const displayCount = count > 99 ? "+99" : String(count)
     const isOverflow = count > 99
     const fontSize = Math.round(size * 0.5)
 
     return (
-      <div
-        ref={ref}
-        className={cn(
-          "[&_button]:rounded-full [&_button]:p-0 [&_button>div]:min-w-fit [&_button>div]:overflow-visible",
-          isOverflow && "[&_button]:px-2"
-        )}
-        style={
-          {
-            "--f0-expander-size": `${size}px`,
-            "--f0-expander-font": `${fontSize}px`,
-          } as CSSProperties
-        }
-      >
-        <div
+      <div ref={ref} className="inline-flex">
+        <button
+          type="button"
+          tabIndex={tabIndex}
+          onClick={onClick}
+          aria-expanded={expanded}
+          aria-label={
+            ariaLabel ??
+            i18n.t(
+              expanded ? "graph.expander.collapse" : "graph.expander.expand",
+              { count }
+            )
+          }
           className={cn(
-            "[&_button]:!h-[var(--f0-expander-size)]",
-            isOverflow
-              ? "[&_button]:!w-auto [&_button]:!min-w-[var(--f0-expander-size)]"
-              : "[&_button]:!w-[var(--f0-expander-size)]",
-            "[&_button_*]:!text-[length:var(--f0-expander-font)] [&_button_*]:!leading-none"
+            "inline-flex items-center justify-center rounded-full border-none p-0 font-medium",
+            "bg-f1-background-secondary text-f1-foreground",
+            "shadow-[0_2px_6px_-1px_rgba(13,22,37,.04),inset_0_-2px_4px_rgba(13,22,37,.04)]",
+            "transition-colors",
+            "hover:bg-f1-background-secondary-hover",
+            "active:bg-f1-background-secondary-hover active:shadow-[inset_0_2px_8px_0_rgba(13,22,37,.16)]",
+            focusRing(),
+            isOverflow && "px-2",
+            loading && "animate-pulse"
           )}
+          style={{
+            height: size,
+            minWidth: size,
+            width: isOverflow ? "auto" : size,
+            fontSize,
+            lineHeight: 1,
+          }}
         >
-          <F0Button
-            variant="neutral"
-            size="sm"
-            label={displayCount}
-            onClick={onClick}
-            aria-expanded={expanded}
-            aria-label={`${expanded ? "Collapse" : "Expand"} ${count} items`}
-          />
-        </div>
+          {displayCount}
+        </button>
       </div>
     )
   }

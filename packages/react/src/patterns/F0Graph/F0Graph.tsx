@@ -252,8 +252,8 @@ export interface F0GraphProps<T = unknown> {
    * Defaults:
    * - When `nodeTagTypes` is provided: `true` only while at least one type is
    *   currently visible (auto-collapses when all types are toggled off).
-   * - When `nodeTagTypes` is omitted: `true` (consumer is assumed to render
-   *   `tags` via `renderNode`). Pass `false` to opt out for a tighter layout.
+   * - When `nodeTagTypes` is omitted: `false`. Set to `true` if you render
+   *   `tags` via `renderNode` and want the layout to leave room for them.
    */
   reserveTagRow?: boolean
 
@@ -361,6 +361,11 @@ export interface F0GraphNodeRenderContext {
    * the popover toggle in the controls bar.
    */
   visibleTagTypes?: ReadonlySet<F0GraphNodeTagType>
+  /**
+   * `true` while a deferred payload is still loading and this node
+   * may receive additional children once resolved.
+   */
+  deferredLoading?: boolean
 }
 
 // ─── Custom Edge Wrapper (supports renderEdge override via context) ────────
@@ -858,12 +863,13 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
   // the next rank gap (still readable) — refine to per-node measurement
   // in a follow-up.
   const TAG_ROW_HEIGHT = 36
-  // When the consumer opts into the tag-types popover, the row only
-  // contributes to layout while at least one type is visible. Otherwise we
-  // assume tags may be rendered via `renderNode` and reserve the row by
-  // default so the source handle sits below them. `reserveTagRow` overrides.
+  // The tag row only contributes to layout when the consumer opts into the
+  // popover (`nodeTagTypes`) and at least one type is currently visible, or
+  // when `reserveTagRow` is explicitly set (e.g. tags rendered via
+  // `renderNode` without using the popover). Inflating the box otherwise
+  // would push the source handle and the expander below the pill.
   const tagsAffectLayout =
-    reserveTagRow ?? (nodeTagTypes ? visibleTagTypesSet.size > 0 : true)
+    reserveTagRow ?? (nodeTagTypes ? visibleTagTypesSet.size > 0 : false)
   const effectiveNodeHeight =
     (nodeHeightProp ?? 56) + (tagsAffectLayout ? TAG_ROW_HEIGHT : 0)
 
@@ -1604,14 +1610,20 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     [toggleExpand, selectNode]
   )
 
+  const isDeferredLoading =
+    !isLazyMode &&
+    deferredNodes !== undefined &&
+    deferredMerge.deferredStatus === "loading"
+
   const renderConfigContextValue = useMemo(
     () => ({
       renderEdge,
       // Only publish a Set when the consumer opted in via `nodeTagTypes`.
       // Otherwise leave it undefined so F0GraphNode renders all tags.
       visibleTagTypes: nodeTagTypes ? visibleTagTypesSet : undefined,
+      deferredLoading: isDeferredLoading || undefined,
     }),
-    [renderEdge, nodeTagTypes, visibleTagTypesSet]
+    [renderEdge, nodeTagTypes, visibleTagTypesSet, isDeferredLoading]
   )
 
   const focusContextValue = useMemo(
