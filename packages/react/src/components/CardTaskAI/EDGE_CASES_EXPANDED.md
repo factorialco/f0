@@ -165,14 +165,14 @@ Options gap:       gap-0 (no spacing)
 ```tsx
 // BREAKS: assignee is required
 options: [
-  { type: "text", id: "1", label: "Docs" },
+  { type: "single-task", id: "1", label: "Docs" },
   // Missing assignee!
 ]
 
 // ✅ FIX: Always include assignee first
 options: [
   { type: "assignee", id: "0", firstName: "John", lastName: "Doe" },
-  { type: "text", id: "1", label: "Docs" },
+  { type: "single-task", id: "1", label: "Docs" },
 ]
 ```
 
@@ -200,14 +200,14 @@ options: [
 ```tsx
 // BREAKS: IDs must be unique
 options: [
-  { type: "text", id: "1", label: "A" },
-  { type: "text", id: "1", label: "B" }, // Duplicate ID!
+  { type: "single-task", id: "1", label: "A" },
+  { type: "single-task", id: "1", label: "B" }, // Duplicate ID!
 ]
 
 // ✅ FIX: Use unique IDs
 options: [
-  { type: "text", id: "1", label: "A" },
-  { type: "text", id: "2", label: "B" },
+  { type: "single-task", id: "1", label: "A" },
+  { type: "single-task", id: "2", label: "B" },
 ]
 ```
 
@@ -236,14 +236,14 @@ options: [{ type: "assignee", id: "0", firstName: "John", lastName: "Doe" }]
 ```tsx
 // Shows empty option
 {
-  type: "text",
+  type: "single-task",
   id: "1",
   label: ""  // Empty!
 }
 
 // ✅ FIX: Use undefined for skeleton, or provide label
 {
-  type: "text",
+  type: "single-task",
   id: "1",
   label: "Required information"
 }
@@ -260,7 +260,7 @@ options: [{ type: "assignee", id: "0", firstName: "John", lastName: "Doe" }]
 
 // ✅ FIX: Use valid type
 {
-  type: "text",  // ✅ Valid
+  type: "single-task",  // ✅ Valid
   id: "1",
   label: "Content"
 }

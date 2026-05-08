@@ -35,7 +35,7 @@ export const TextOption: Story = {
         lastName: "Doe",
       },
       {
-        type: "text",
+        type: "single-task",
         id: "1",
         label: "Personal information, Address, emergency contact",
       },
@@ -59,12 +59,12 @@ export const WithAutomation: Story = {
         lastName: "Doe",
       },
       {
-        type: "text",
+        type: "single-task",
         id: "1",
         label: "Personal information, Address, emergency contact",
       },
       {
-        type: "automation",
+        type: "one-automation",
         id: "2",
         label: "Automatically send by ONE",
       },
@@ -88,16 +88,16 @@ export const WithForm: Story = {
         lastName: "Doe",
       },
       {
-        type: "text",
+        type: "single-task",
         id: "1",
         label: "Personal information, Address, emergency contact",
       },
       {
-        type: "automation",
+        type: "one-automation",
         id: "2",
       },
       {
-        type: "form",
+        type: "with-folder",
         id: "3",
         label: "Employee Satisfaction Survey",
         onClick: () => alert("Opening survey..."),
@@ -122,21 +122,21 @@ export const WithDocument: Story = {
         lastName: "Doe",
       },
       {
-        type: "text",
+        type: "single-task",
         id: "1",
         label: "Personal information, Address, emergency contact",
       },
       {
-        type: "automation",
+        type: "one-automation",
         id: "2",
       },
       {
-        type: "form",
+        type: "with-folder",
         id: "3",
         label: "Employee Satisfaction Survey",
       },
       {
-        type: "document",
+        type: "document-upload",
         id: "4",
         label: "Employee Satisfaction Survey",
         fileType: "pdf",
@@ -163,21 +163,21 @@ export const AllOptionTypes: Story = {
         lastName: "Doe",
       },
       {
-        type: "text",
+        type: "single-task",
         id: "1",
         label: "Personal information, Address, emergency contact",
       },
       {
-        type: "automation",
+        type: "one-automation",
         id: "2",
       },
       {
-        type: "form",
+        type: "with-folder",
         id: "3",
         label: "Employee Satisfaction Survey",
       },
       {
-        type: "document",
+        type: "document-upload",
         id: "4",
         label: "Employee Satisfaction Survey",
         fileType: "pdf",
@@ -211,7 +211,7 @@ export const SingleOption: Story = {
         lastName: "Doe",
       },
       {
-        type: "document",
+        type: "document-upload",
         id: "1",
         label: "Contract_Final.pdf",
         fileType: "pdf",
@@ -236,12 +236,12 @@ export const TwoOptions: Story = {
         lastName: "Doe",
       },
       {
-        type: "text",
+        type: "single-task",
         id: "1",
         label: "Basic information, Work history, Skills",
       },
       {
-        type: "automation",
+        type: "one-automation",
         id: "2",
         label: "Will be verified by our AI",
       },
@@ -264,12 +264,12 @@ export const ThreeOptions: Story = {
         lastName: "Doe",
       },
       {
-        type: "text",
+        type: "single-task",
         id: "1",
         label: "Personal details, Contact information",
       },
       {
-        type: "form",
+        type: "with-folder",
         id: "2",
         label: "Department preferences survey",
       },
@@ -300,21 +300,21 @@ export const FourOptions: Story = {
         lastName: "Doe",
       },
       {
-        type: "text",
+        type: "single-task",
         id: "1",
         label: "Identity verification, Background check",
       },
       {
-        type: "automation",
+        type: "one-automation",
         id: "2",
       },
       {
-        type: "form",
+        type: "with-folder",
         id: "3",
         label: "Employment verification form",
       },
       {
-        type: "document",
+        type: "document-upload",
         id: "4",
         label: "Verification_Guide.pdf",
         fileType: "pdf",
@@ -338,24 +338,24 @@ export const MultipleDocuments: Story = {
         lastName: "Doe",
       },
       {
-        type: "text",
+        type: "single-task",
         id: "1",
         label: "Review and sign all required documents",
       },
       {
-        type: "document",
+        type: "document-upload",
         id: "2",
         label: "Employment Agreement",
         fileType: "pdf",
       },
       {
-        type: "document",
+        type: "document-upload",
         id: "3",
         label: "Handbook",
         fileType: "pdf",
       },
       {
-        type: "document",
+        type: "document-upload",
         id: "4",
         label: "Benefits Summary",
         fileType: "xlsx",
@@ -407,7 +407,7 @@ export const ClickableCard: Story = {
         lastName: "Doe",
       },
       {
-        type: "form",
+        type: "with-folder",
         id: "1",
         label: "Onboarding form",
         onClick: () => alert("Opening form..."),
@@ -427,7 +427,7 @@ export const WithAssignee: Story = {
     title: "Fill in your personal information",
     options: [
       {
-        type: "text",
+        type: "single-task",
         id: "1",
         label: "Personal information, Address, emergency contact",
       },
@@ -456,7 +456,7 @@ export const LongLabel: Story = {
         lastName: "Doe",
       },
       {
-        type: "text",
+        type: "single-task",
         id: "1",
         label:
           "Personal information, Address, emergency contact, professional certifications, and work experience details",

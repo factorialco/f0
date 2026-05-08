@@ -3,10 +3,10 @@ import type { ReactNode } from "react"
 export type TaskItemStatus = "completed" | "in-progress" | "pending" | "error"
 
 export type OptionType =
-  | "text"
-  | "automation"
-  | "form"
-  | "document"
+  | "single-task"
+  | "one-automation"
+  | "with-folder"
+  | "document-upload"
   | "tags"
   | "assignee"
 
@@ -17,29 +17,32 @@ export interface TaskItem {
 }
 
 /**
- * Text option - Simple description with list icon
+ * Single task option - Instructions or forms to fill for the assignee
+ * Icon: List
  */
-export interface TextOption {
-  type: "text"
+export interface SingleTaskOption {
+  type: "single-task"
   id: string
   label: string
   icon?: ReactNode
 }
 
 /**
- * Automation option - Shows task is sent by ONE AI
+ * ONE Automation option - Task automatically handled by ONE AI
+ * No user action needed. Icon: Ai
  */
-export interface AutomationOption {
-  type: "automation"
+export interface OneAutomationOption {
+  type: "one-automation"
   id: string
   label?: string
 }
 
 /**
- * Form option - Survey or form to fill
+ * With Folder option - Specifies where template/file comes from or where to save
+ * Icon: Folders
  */
-export interface FormOption {
-  type: "form"
+export interface WithFolderOption {
+  type: "with-folder"
   id: string
   label: string
   icon?: ReactNode
@@ -47,10 +50,11 @@ export interface FormOption {
 }
 
 /**
- * Document option - File download with type badge (PDF, DOC, etc)
+ * Document upload option - File available for download with type badge
+ * Icon: Paperclip
  */
-export interface DocumentOption {
-  type: "document"
+export interface DocumentUploadOption {
+  type: "document-upload"
   id: string
   label: string
   fileType?: "pdf" | "doc" | "docx" | "xlsx" | "pptx"
@@ -87,10 +91,10 @@ export interface AssigneeOption {
 }
 
 export type TaskOption =
-  | TextOption
-  | AutomationOption
-  | FormOption
-  | DocumentOption
+  | SingleTaskOption
+  | OneAutomationOption
+  | WithFolderOption
+  | DocumentUploadOption
   | TagsOption
   | AssigneeOption
 

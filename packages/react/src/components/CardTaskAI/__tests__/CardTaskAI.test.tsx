@@ -8,7 +8,7 @@ describe("CardTaskAI", () => {
   const defaultProps: CardTaskAIProps = {
     icon: <span data-testid="icon">📄</span>,
     title: "Test Task",
-    options: [{ type: "text", id: "1", label: "Task 1" }],
+    options: [{ type: "single-task", id: "1", label: "Task 1" }],
   }
 
   describe("Basic rendering", () => {
@@ -45,7 +45,7 @@ describe("CardTaskAI", () => {
           {...defaultProps}
           options={[
             {
-              type: "text",
+              type: "single-task",
               id: "1",
               label: "Fill in personal information",
             },
@@ -63,7 +63,7 @@ describe("CardTaskAI", () => {
           {...defaultProps}
           options={[
             {
-              type: "text",
+              type: "single-task",
               id: "1",
               label: "Task with icon",
               icon: <span data-testid="text-icon">📋</span>,
@@ -83,7 +83,7 @@ describe("CardTaskAI", () => {
           {...defaultProps}
           options={[
             {
-              type: "automation",
+              type: "one-automation",
               id: "1",
               label: "Automatically send by ONE",
             },
@@ -97,7 +97,7 @@ describe("CardTaskAI", () => {
       render(
         <CardTaskAI
           {...defaultProps}
-          options={[{ type: "automation", id: "1" }]}
+          options={[{ type: "one-automation", id: "1" }]}
         />
       )
       expect(screen.getByText("Automatically send by ONE")).toBeInTheDocument()
@@ -111,7 +111,7 @@ describe("CardTaskAI", () => {
           {...defaultProps}
           options={[
             {
-              type: "form",
+              type: "with-folder",
               id: "1",
               label: "Employee Survey",
             },
@@ -130,7 +130,7 @@ describe("CardTaskAI", () => {
           {...defaultProps}
           options={[
             {
-              type: "form",
+              type: "with-folder",
               id: "1",
               label: "Survey Form",
               onClick: handleClick,
@@ -152,7 +152,7 @@ describe("CardTaskAI", () => {
           {...defaultProps}
           options={[
             {
-              type: "document",
+              type: "document-upload",
               id: "1",
               label: "Contract.pdf",
               fileType: "pdf",
@@ -173,7 +173,7 @@ describe("CardTaskAI", () => {
           {...defaultProps}
           options={[
             {
-              type: "document",
+              type: "document-upload",
               id: "1",
               label: "Document.pdf",
               fileType: "pdf",
@@ -193,7 +193,12 @@ describe("CardTaskAI", () => {
         <CardTaskAI
           {...defaultProps}
           options={[
-            { type: "document", id: "1", label: "file.pdf", fileType: "pdf" },
+            {
+              type: "document-upload",
+              id: "1",
+              label: "file.pdf",
+              fileType: "pdf",
+            },
           ]}
         />
       )
@@ -204,7 +209,7 @@ describe("CardTaskAI", () => {
           {...defaultProps}
           options={[
             {
-              type: "document",
+              type: "document-upload",
               id: "1",
               label: "file.xlsx",
               fileType: "xlsx",
@@ -302,7 +307,7 @@ describe("CardTaskAI", () => {
       render(
         <CardTaskAI
           {...defaultProps}
-          options={[{ type: "text", id: "1", label: "Option 1" }]}
+          options={[{ type: "single-task", id: "1", label: "Option 1" }]}
         />
       )
       expect(screen.getByText("Option 1")).toBeInTheDocument()
@@ -313,8 +318,8 @@ describe("CardTaskAI", () => {
         <CardTaskAI
           {...defaultProps}
           options={[
-            { type: "text", id: "1", label: "Option 1" },
-            { type: "automation", id: "2" },
+            { type: "single-task", id: "1", label: "Option 1" },
+            { type: "one-automation", id: "2" },
           ]}
         />
       )
@@ -327,10 +332,15 @@ describe("CardTaskAI", () => {
         <CardTaskAI
           {...defaultProps}
           options={[
-            { type: "text", id: "1", label: "Text" },
-            { type: "automation", id: "2" },
-            { type: "form", id: "3", label: "Form" },
-            { type: "document", id: "4", label: "Doc.pdf", fileType: "pdf" },
+            { type: "single-task", id: "1", label: "Text" },
+            { type: "one-automation", id: "2" },
+            { type: "with-folder", id: "3", label: "Form" },
+            {
+              type: "document-upload",
+              id: "4",
+              label: "Doc.pdf",
+              fileType: "pdf",
+            },
             {
               type: "tags",
               id: "5",
@@ -444,7 +454,7 @@ describe("CardTaskAI", () => {
 
     it("renders many options without crashing (50+ items)", () => {
       const manyOptions = Array.from({ length: 50 }, (_, i) => ({
-        type: "text" as const,
+        type: "single-task" as const,
         id: `${i}`,
         label: `Item ${i}`,
       }))
@@ -497,7 +507,7 @@ describe("CardTaskAI", () => {
           {...defaultProps}
           options={[
             {
-              type: "text",
+              type: "single-task",
               id: "1",
               label: "",
             },
@@ -513,7 +523,7 @@ describe("CardTaskAI", () => {
           {...defaultProps}
           options={[
             {
-              type: "document",
+              type: "document-upload",
               id: "1",
               label: "Document",
               // fileType missing
@@ -530,7 +540,7 @@ describe("CardTaskAI", () => {
           {...defaultProps}
           options={[
             {
-              type: "automation",
+              type: "one-automation",
               id: "1",
               // label is optional for automation
             },
@@ -585,7 +595,7 @@ describe("CardTaskAI", () => {
           {...defaultProps}
           options={[
             {
-              type: "text",
+              type: "single-task",
               id: "1",
               label: "Just text, no assignee",
             },
@@ -603,7 +613,7 @@ describe("CardTaskAI", () => {
           {...defaultProps}
           options={[
             {
-              type: "text",
+              type: "single-task",
               id: "1",
               label: "Tasks: 🎯 with emojis & special chars!",
             },

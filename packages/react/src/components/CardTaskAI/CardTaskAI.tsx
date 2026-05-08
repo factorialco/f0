@@ -51,17 +51,17 @@ const validateCardTaskAI = (props: CardTaskAIProps) => {
 
     // Check for invalid option types
     const validTypes = new Set([
-      "text",
-      "automation",
-      "form",
-      "document",
+      "single-task",
+      "one-automation",
+      "with-folder",
+      "document-upload",
       "tags",
       "assignee",
     ])
     options.forEach((opt) => {
       if (!validTypes.has(opt.type as string)) {
         console.error(
-          `[CardTaskAI] Invalid option type: "${opt.type}". Use one of: text, automation, form, document, tags, assignee`
+          `[CardTaskAI] Invalid option type: "${opt.type}". Use one of: single-task, one-automation, with-folder, document-upload, tags, assignee`
         )
       }
     })
@@ -80,10 +80,23 @@ const validateCardTaskAI = (props: CardTaskAIProps) => {
 
     // Check for missing required labels
     options.forEach((opt) => {
-      if (["text", "automation", "form", "document"].includes(opt.type)) {
+      if (
+        [
+          "single-task",
+          "one-automation",
+          "with-folder",
+          "document-upload",
+        ].includes(opt.type)
+      ) {
         const optWithLabel = opt as Extract<
           TaskOption,
-          { type: "text" | "automation" | "form" | "document" }
+          {
+            type:
+              | "single-task"
+              | "one-automation"
+              | "with-folder"
+              | "document-upload"
+          }
         >
         if (
           !optWithLabel.label ||
@@ -154,7 +167,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
 
     const renderOption = (option: TaskOption) => {
       switch (option.type) {
-        case "text":
+        case "single-task":
           return (
             <div key={option.id} className="flex items-center gap-[8px]">
               {option.icon ? (
@@ -170,7 +183,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
             </div>
           )
 
-        case "automation":
+        case "one-automation":
           return (
             <div key={option.id} className="flex items-center gap-[8px]">
               <F0Icon icon={Ai} size="sm" />
@@ -180,7 +193,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
             </div>
           )
 
-        case "form":
+        case "with-folder":
           return (
             <div
               key={option.id}
@@ -202,7 +215,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
             </div>
           )
 
-        case "document":
+        case "document-upload":
           return (
             <div
               key={option.id}
