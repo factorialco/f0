@@ -6,7 +6,7 @@ import { F0Button } from "@/components/F0Button"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagList } from "@/components/tags/F0TagList"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
-import { List, Ai, Folders, Paperclip, Split, Pencil } from "@/icons/app"
+import { List, Ai, Folders, Paperclip, Split } from "@/icons/app"
 import type { CardTaskAIProps, TaskOption } from "./types"
 
 /**
@@ -408,7 +408,6 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
                     <F0Button
                       variant="outline"
                       size="xs"
-                      icon={Pencil}
                       label={actionLabel}
                       onClick={(e) => {
                         e.stopPropagation()
