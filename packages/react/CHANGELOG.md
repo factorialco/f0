@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.477.0](https://github.com/factorialco/f0/compare/f0-react-v1.476.2...f0-react-v1.477.0) (2026-05-08)
+
+
+### Features
+
+* **F0AiChat:** cap file attachments with transient error banner ([#4098](https://github.com/factorialco/f0/issues/4098)) ([f080293](https://github.com/factorialco/f0/commit/f0802932572fe7eebfd1cb7a3dfbde934700d5a1))
+
 ## [1.476.2](https://github.com/factorialco/f0/compare/f0-react-v1.476.1...f0-react-v1.476.2) (2026-05-08)
 
 
