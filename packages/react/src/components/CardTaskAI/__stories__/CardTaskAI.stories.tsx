@@ -32,7 +32,6 @@ const FileAvatarIcon = () => <F0AvatarIcon icon={Paperclip} color="primary" />
  */
 export const TextOption: Story = {
   args: {
-    taskType: "sign",
     icon: <FileAvatarIcon />,
     title: "Fill in your personal information",
     actionLabel: "Edit",
@@ -59,7 +58,6 @@ export const TextOption: Story = {
  */
 export const WithAutomation: Story = {
   args: {
-    taskType: "data-collection",
     icon: <FileAvatarIcon />,
     title: "Collect employee preferences",
     actionLabel: "Edit",
@@ -94,7 +92,6 @@ export const WithAutomation: Story = {
  */
 export const WithForm: Story = {
   args: {
-    taskType: "basic-task",
     icon: <FileAvatarIcon />,
     title: "Fill in your personal information",
     actionLabel: "Edit",
@@ -127,7 +124,6 @@ export const WithForm: Story = {
  */
 export const WithDocument: Story = {
   args: {
-    taskType: "upload-document",
     icon: <FileAvatarIcon />,
     title: "Review and sign your contract",
     actionLabel: "Edit",
@@ -167,7 +163,6 @@ export const WithDocument: Story = {
  */
 export const AllOptionTypes: Story = {
   args: {
-    taskType: "training",
     icon: <FileAvatarIcon />,
     title: "Fill in your personal information",
     actionLabel: "Edit",
@@ -213,7 +208,6 @@ export const AllOptionTypes: Story = {
  */
 export const MultipleDocuments: Story = {
   args: {
-    taskType: "surveys",
     icon: <FileAvatarIcon />,
     title: "Review all documents",
     actionLabel: "Edit",
@@ -257,7 +251,6 @@ export const MultipleDocuments: Story = {
  */
 export const ConditionInline: Story = {
   args: {
-    taskType: "notification",
     icon: <FileAvatarIcon />,
     title: "Task applies to",
     actionLabel: "Edit",
@@ -292,7 +285,6 @@ export const ConditionInline: Story = {
  */
 export const ConditionList: Story = {
   args: {
-    taskType: "surveys",
     icon: <FileAvatarIcon />,
     title: "Task applies to",
     actionLabel: "Edit",
@@ -330,7 +322,6 @@ export const ConditionList: Story = {
  */
 export const LongLabel: Story = {
   args: {
-    taskType: "sign",
     icon: <FileAvatarIcon />,
     title: "Complete employee information",
     actionLabel: "Edit",

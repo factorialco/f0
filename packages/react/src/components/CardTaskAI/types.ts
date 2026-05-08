@@ -2,15 +2,6 @@ import type { ReactNode } from "react"
 
 export type TaskItemStatus = "completed" | "in-progress" | "pending" | "error"
 
-export type TaskType =
-  | "notification"
-  | "sign"
-  | "basic-task"
-  | "upload-document"
-  | "data-collection"
-  | "training"
-  | "surveys"
-
 export type OptionType =
   | "single-task"
   | "one-automation"
@@ -127,8 +118,6 @@ export interface CardTaskAIBadge {
 }
 
 export interface CardTaskAIProps {
-  /** Type of task to determine icon and colors */
-  taskType: TaskType
   /** Icon to display (typically an avatar or icon component) */
   icon: ReactNode
   /** Main title of the task */
