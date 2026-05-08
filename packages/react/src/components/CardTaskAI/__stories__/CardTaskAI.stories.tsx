@@ -440,3 +440,27 @@ export const WithAssignee: Story = {
     ],
   },
 }
+
+/**
+ * Long label example: Shows how a much longer text option wraps
+ */
+export const LongLabel: Story = {
+  args: {
+    icon: <FileAvatarIcon />,
+    title: "Complete employee information",
+    options: [
+      {
+        type: "assignee",
+        id: "0",
+        firstName: "John",
+        lastName: "Doe",
+      },
+      {
+        type: "text",
+        id: "1",
+        label:
+          "Personal information, Address, emergency contact, professional certifications, and work experience details",
+      },
+    ],
+  },
+}
