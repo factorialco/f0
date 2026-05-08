@@ -62,6 +62,7 @@ import { useGraphZoomLevel } from "./hooks/useGraphZoomLevel"
 import "./F0Graph.css"
 import { useLayoutEngine } from "./hooks/useLayoutEngine"
 import { useLazyTree } from "./hooks/useLazyTree"
+import { useDeferredMerge } from "./hooks/useDeferredMerge"
 import { useTreeBuilder } from "./hooks/useTreeBuilder"
 import { ClickSpark } from "./internal/ClickSpark"
 
@@ -441,6 +442,9 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     edges: edgesProp,
     rootNodes,
     loadChildren,
+    deferredNodes,
+    onDeferredLoadComplete,
+    onDeferredLoadError,
     renderNode,
     direction: controlledDirection,
     defaultDirection = "TB",
@@ -553,9 +557,44 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
   })
 
   // ── Resolve flat node list ──
+  // When deferredNodes is provided in full-tree mode, merge initial + deferred.
+  const deferredMerge = useDeferredMerge<T>({
+    initialNodes: nodesProp ?? [],
+    initialEdges: edgesProp ?? [],
+    deferredNodes: isLazyMode ? undefined : deferredNodes,
+  })
+
+  // Fire deferred callbacks
+  const prevDeferredStatus = useRef(deferredMerge.deferredStatus)
+  useEffect(() => {
+    const prev = prevDeferredStatus.current
+    const curr = deferredMerge.deferredStatus
+    prevDeferredStatus.current = curr
+
+    if (prev !== "resolved" && curr === "resolved") {
+      onDeferredLoadComplete?.()
+    }
+    if (prev !== "error" && curr === "error" && deferredMerge.error) {
+      onDeferredLoadError?.(deferredMerge.error)
+    }
+  }, [
+    deferredMerge.deferredStatus,
+    deferredMerge.error,
+    onDeferredLoadComplete,
+    onDeferredLoadError,
+  ])
+
   const resolvedNodes: GraphNode<T>[] = isLazyMode
     ? lazyTree.nodes
-    : (nodesProp ?? [])
+    : deferredNodes
+      ? deferredMerge.mergedNodes
+      : (nodesProp ?? [])
+
+  const resolvedEdgesProp = isLazyMode
+    ? edgesProp
+    : deferredNodes
+      ? deferredMerge.mergedEdges
+      : edgesProp
 
   // ── Build tree ──
   const { roots, nodeMap } = useTreeBuilder(resolvedNodes)
@@ -740,9 +779,10 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
 
   // ── Edges ──
   const resolvedEdges = useMemo((): GraphEdge[] => {
-    if (edgesProp && edgesProp.length > 0) return edgesProp
+    if (resolvedEdgesProp && resolvedEdgesProp.length > 0)
+      return resolvedEdgesProp
     return deriveEdgesFromTree(roots)
-  }, [edgesProp, roots])
+  }, [resolvedEdgesProp, roots])
 
   // ── Visible edges rewritten through expanders ──
   const { visibleEdges, expanderNodes } = useMemo(() => {
