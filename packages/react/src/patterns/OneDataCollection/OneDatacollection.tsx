@@ -774,6 +774,7 @@ const OneDataCollectionComp = <
               presets={effectivePresets}
               presetsLoading={showPresetsLoading}
               onChange={(value) => activeSetCurrentFilters(value)}
+              resultCount={totalItems}
             >
               {isLoading && (
                 <motion.div

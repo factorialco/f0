@@ -87,6 +87,10 @@ export const defaultTranslations = {
     availableFilters: "Available filters",
     label: "Filters",
     applyFilters: "Apply filters",
+    resultsFor: {
+      one: "{{count}} result for:",
+      other: "{{count}} results for:",
+    },
     applySelection: "Apply selection",
     cancel: "Cancel",
     failedToLoadOptions: "Failed to load options",

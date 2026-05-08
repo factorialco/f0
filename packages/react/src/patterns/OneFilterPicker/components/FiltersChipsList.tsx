@@ -20,8 +20,10 @@ interface FiltersChipsListProps<Filters extends FiltersDefinition> {
   onFilterSelect: (key: keyof Filters) => void
   onFilterRemove: (key: keyof Filters) => void
   onClearAll: () => void
-  /** Filter keys to exclude from chip display (e.g., keys covered by presets) */
-  excludedKeys?: Set<string>
+  /** When true, hide all chips (e.g., when a preset is active and already represents the filters) */
+  hideChips?: boolean
+  /** Total number of items matching the current filters */
+  resultCount?: number
 }
 
 export function FiltersChipsList<Filters extends FiltersDefinition>({
@@ -30,26 +32,32 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
   onFilterSelect,
   onFilterRemove,
   onClearAll,
-  excludedKeys = new Set(),
+  hideChips = false,
+  resultCount,
 }: FiltersChipsListProps<Filters>) {
   const i18n = useI18n()
 
   const activeFilterKeys = getActiveFilterKeys(filters, value, i18n)
 
-  // Filter out keys that are covered by presets
-  const visibleFilterKeys = activeFilterKeys.filter(
-    (key) => !excludedKeys.has(String(key))
-  )
-
-  if (visibleFilterKeys.length === 0) {
+  if (hideChips || activeFilterKeys.length === 0) {
     return null
   }
 
   return (
     <div className="mt-2 flex items-start justify-between gap-2">
       <div className="flex flex-wrap items-center gap-2">
+        {resultCount !== undefined && (
+          <span className="whitespace-nowrap font-medium text-f1-foreground-secondary">
+            {i18n.t(
+              resultCount === 1
+                ? "filters.resultsFor.one"
+                : "filters.resultsFor.other",
+              { count: resultCount }
+            )}
+          </span>
+        )}
         <AnimatePresence presenceAffectsLayout initial={false}>
-          {visibleFilterKeys.map((key) => {
+          {activeFilterKeys.map((key) => {
             const filterSchema = filters[key]
 
             if (!filters[key]) {
