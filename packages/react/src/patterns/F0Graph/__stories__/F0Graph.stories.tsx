@@ -1,16 +1,17 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { useState } from "react"
 import "@xyflow/react/dist/style.css"
-import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
+import type { EdgeVariant } from "../F0GraphEdge"
+import type { Searchable } from "../F0GraphSearch"
+import type { DeferredNodesPayload, GraphEdge, GraphNode } from "../types"
 
-import type { GraphNode, ZoomLevel } from "../types"
-
-import { F0Graph, type F0GraphProps } from "../F0Graph"
 import {
-  F0GraphNodeAvatar,
-  F0GraphNodeTitle,
-  F0GraphNodeSubtitle,
-} from "../F0GraphNode"
+  F0Graph,
+  type F0GraphNodeRenderContext,
+  type F0GraphProps,
+} from "../F0Graph"
+import { F0GraphNode } from "../F0GraphNode"
 
 const meta: Meta<F0GraphProps<Employee>> = {
   title: "Graph/F0Graph",
@@ -18,11 +19,68 @@ const meta: Meta<F0GraphProps<Employee>> = {
   tags: ["stable", "!autodocs"],
   decorators: [
     (Story) => (
-      <div className="h-[600px] w-full bg-f1-background-tertiary">
+      <div className="h-[600px] w-full bg-f1-background">
         <Story />
       </div>
     ),
   ],
+  argTypes: {
+    // ---- Visible controls ----
+    direction: {
+      control: "inline-radio",
+      options: ["TB", "LR"],
+    },
+    selectionMode: {
+      control: "inline-radio",
+      options: ["single", "multi", "none"],
+    },
+    showControls: { control: "boolean" },
+    fullScreen: { control: "boolean" },
+    defaultExpandDepth: { control: { type: "number", min: 0, max: 5 } },
+    zoomPreset: {
+      control: "select",
+      options: ["default", "dense", "sparse"],
+    },
+    minZoom: {
+      control: { type: "number", min: 0.01, max: 1, step: 0.01 },
+    },
+    maxZoom: {
+      control: { type: "number", min: 1, max: 4, step: 0.1 },
+    },
+    detailPanelWidth: {
+      control: { type: "range", min: 200, max: 600, step: 8 },
+    },
+
+    // ---- Hidden from controls ----
+    nodes: { table: { disable: true } },
+    edges: { table: { disable: true } },
+    rootNodes: { table: { disable: true } },
+    loadChildren: { table: { disable: true } },
+    renderNode: { table: { disable: true } },
+    renderEdge: { table: { disable: true } },
+    defaultDirection: { table: { disable: true } },
+    zoomThresholds: { table: { disable: true } },
+    defaultZoom: { table: { disable: true } },
+    expandedNodes: { table: { disable: true } },
+    defaultExpandedNodes: { table: { disable: true } },
+    onExpandToggle: { table: { disable: true } },
+    selectedNodes: { table: { disable: true } },
+    onNodeSelect: { table: { disable: true } },
+    focusedNode: { table: { disable: true } },
+    highlightedNodes: { table: { disable: true } },
+    layoutEngine: { table: { disable: true } },
+    searchValue: { table: { disable: true } },
+    onSearchChange: { table: { disable: true } },
+    searchLoading: { table: { disable: true } },
+    searchable: { table: { disable: true } },
+    onSearchResultSelect: { table: { disable: true } },
+    detailPanel: { table: { disable: true } },
+    detailPanelAriaLabel: { table: { disable: true } },
+    controlLabels: { table: { disable: true } },
+    onZoomLevelChange: { table: { disable: true } },
+    onViewportChange: { table: { disable: true } },
+    onVisibleNodesChange: { table: { disable: true } },
+  },
 }
 
 export default meta
@@ -68,17 +126,19 @@ const BASIC_NODES: GraphNode<Employee>[] = [
   },
 ]
 
-function renderEmployee(node: GraphNode<Employee>, _zoomLevel: ZoomLevel) {
+function renderEmployee(
+  node: GraphNode<Employee>,
+  ctx: F0GraphNodeRenderContext
+) {
   const { name, title } = node.data as Employee
   const [firstName = "", lastName = ""] = name.split(" ")
   return (
-    <>
-      <F0GraphNodeAvatar>
-        <F0AvatarPerson firstName={firstName} lastName={lastName} size="lg" />
-      </F0GraphNodeAvatar>
-      <F0GraphNodeTitle>{name}</F0GraphNodeTitle>
-      <F0GraphNodeSubtitle>{title}</F0GraphNodeSubtitle>
-    </>
+    <F0GraphNode
+      {...ctx}
+      avatar={{ type: "person", firstName, lastName }}
+      title={name}
+      subtitle={title}
+    />
   )
 }
 
@@ -115,12 +175,20 @@ export const WithControls: Story = {
     nodes: BASIC_NODES,
     renderNode: renderEmployee,
     showControls: true,
-    showMinimap: true,
     defaultExpandDepth: 2,
   },
 }
 
-export const LazyTree: Story = {
+/** Demonstrates async loading via `rootNodes` + `loadChildren` for large or server-driven trees. */
+export const Lazy: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Use `rootNodes` + `loadChildren` to fetch a node's children on demand instead of providing the full tree upfront.",
+      },
+    },
+  },
   args: {
     rootNodes: [
       {
@@ -400,7 +468,320 @@ export const LargeTree: Story = {
     nodes: makeLargeTree(60),
     renderNode: renderEmployee,
     showControls: true,
-    showMinimap: true,
     defaultExpandDepth: 2,
+  },
+}
+
+// ─── Intent-searchable stories ─────────────────────────────────
+
+/** Demonstrates custom `renderNode` with rich content — avatar, badge overlay, and metadata. */
+export const CustomNode: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Provide a custom `renderNode` callback to fully control node content and layout per zoom level.",
+      },
+    },
+  },
+  args: {
+    nodes: BASIC_NODES,
+    renderNode: (node: GraphNode<Employee>, ctx: F0GraphNodeRenderContext) => {
+      const { name, title } = node.data as Employee
+      const [firstName = "", lastName = ""] = name.split(" ")
+      const isLeader = (node.childrenCount ?? 0) > 0
+      return (
+        <F0GraphNode
+          {...ctx}
+          avatar={{ type: "person", firstName, lastName }}
+          title={name}
+          subtitle={title}
+          tags={isLeader ? [{ type: "raw", text: "Manager" }] : undefined}
+        />
+      )
+    },
+    defaultExpandDepth: 2,
+    showControls: true,
+  },
+}
+
+/** Demonstrates `renderEdge` returning a custom styled edge element per edge variant. */
+export const CustomEdge: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Provide a custom `renderEdge` to style edges per variant or use a custom edge component.",
+      },
+    },
+  },
+  args: {
+    nodes: BASIC_NODES,
+    renderNode: renderEmployee,
+    renderEdge: (edge: GraphEdge, variant: EdgeVariant) => {
+      const color =
+        variant === "highlighted"
+          ? "var(--f1-color-accent)"
+          : variant === "dimmed"
+            ? "var(--f1-color-border-secondary)"
+            : "var(--f1-color-border)"
+      return (
+        <line
+          key={edge.id}
+          stroke={color}
+          strokeWidth={variant === "highlighted" ? 2.5 : 1.5}
+          strokeDasharray={variant === "dimmed" ? "4 2" : undefined}
+        />
+      )
+    },
+    defaultExpandDepth: 2,
+    showControls: true,
+  },
+}
+
+/** Demonstrates controlled `expandedNodes` and `selectedNodes` via external state. */
+export const Controlled: Story = {
+  render: () => {
+    const [expandedNodes, setExpandedNodes] = useState(
+      () => new Set(["1", "2"])
+    )
+    const [selectedNodes, setSelectedNodes] = useState(() => new Set<string>())
+
+    return (
+      <F0Graph<Employee>
+        nodes={BASIC_NODES}
+        renderNode={renderEmployee}
+        expandedNodes={expandedNodes}
+        onExpandToggle={(nodeId, expanded) => {
+          setExpandedNodes((prev) => {
+            const next = new Set(prev)
+            if (expanded) next.add(nodeId)
+            else next.delete(nodeId)
+            return next
+          })
+        }}
+        selectionMode="multi"
+        selectedNodes={selectedNodes}
+        onNodeSelect={(nodeId, selected) => {
+          setSelectedNodes((prev) => {
+            const next = new Set(prev)
+            if (selected) next.add(nodeId)
+            else next.delete(nodeId)
+            return next
+          })
+        }}
+        showControls
+      />
+    )
+  },
+}
+
+/** Demonstrates declarative `searchable` config for indexed search with auto-expand and fly-to. */
+export const WithSearch: Story = {
+  args: {
+    nodes: makeLargeTree(60),
+    renderNode: renderEmployee,
+    searchable: {
+      getLabel: (node: GraphNode<Employee>) => (node.data as Employee).name,
+      getSecondaryLabel: (node: GraphNode<Employee>) =>
+        (node.data as Employee).title,
+      placeholder: "Search people…",
+      noResultsLabel: "No matches found",
+    } satisfies Searchable<Employee>,
+    showControls: true,
+    defaultExpandDepth: 1,
+  },
+}
+
+/** Demonstrates `detailPanel` for a right-side detail view on node selection. */
+export const WithDetailPanel: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: "Wire `detailPanel` for a side detail view on node selection.",
+      },
+    },
+  },
+  args: {
+    nodes: BASIC_NODES,
+    renderNode: renderEmployee,
+    detailPanel: (node: GraphNode<Employee>) => {
+      const { name, title } = node.data as Employee
+      return {
+        variant: "default" as const,
+        title: name,
+        description: title,
+        children: (
+          <div className="flex flex-col gap-3 p-4">
+            <p className="text-sm text-f1-foreground">
+              Direct reports: {node.childrenCount ?? 0}
+            </p>
+            <p className="text-xs text-f1-foreground-secondary">
+              Node ID: {node.id}
+            </p>
+          </div>
+        ),
+      }
+    },
+    defaultExpandDepth: 2,
+    showControls: true,
+  },
+}
+
+// ─── Multi-Root ────────────────────────────────────────────────
+
+const MULTI_ROOT_NODES: GraphNode<Employee>[] = [
+  // Tree 1 — Engineering
+  {
+    id: "eng-root",
+    parentId: null,
+    data: { name: "Marcus Chen", title: "VP Engineering" },
+    childrenCount: 2,
+  },
+  {
+    id: "eng-fe",
+    parentId: "eng-root",
+    data: { name: "Nina Volkov", title: "Frontend Lead" },
+    childrenCount: 0,
+  },
+  {
+    id: "eng-be",
+    parentId: "eng-root",
+    data: { name: "Diego Martín", title: "Backend Lead" },
+    childrenCount: 0,
+  },
+  // Tree 2 — Product
+  {
+    id: "prod-root",
+    parentId: null,
+    data: { name: "Laura Kim", title: "VP Product" },
+    childrenCount: 2,
+  },
+  {
+    id: "prod-pm",
+    parentId: "prod-root",
+    data: { name: "Yuki Tanaka", title: "Product Manager" },
+    childrenCount: 0,
+  },
+  {
+    id: "prod-design",
+    parentId: "prod-root",
+    data: { name: "Priya Sharma", title: "Product Designer" },
+    childrenCount: 0,
+  },
+  // Tree 3 — People
+  {
+    id: "people-root",
+    parentId: null,
+    data: { name: "James Okafor", title: "VP People" },
+    childrenCount: 1,
+  },
+  {
+    id: "people-ops",
+    parentId: "people-root",
+    data: { name: "Fatima Benali", title: "People Operations" },
+    childrenCount: 0,
+  },
+]
+
+/** Demonstrates multiple disjoint trees rendered side-by-side (TB) via the built-in multi-root layout. */
+export const MultiRoot: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Three independent org trees with no shared parent. The built-in layout engine stacks them along the cross axis with a `rootSep` gap.",
+      },
+    },
+  },
+  args: {
+    nodes: MULTI_ROOT_NODES,
+    renderNode: renderEmployee,
+    defaultExpandDepth: 2,
+    showControls: true,
+  },
+}
+
+// ─── Progressive / staged loading stories ─────────────────────
+
+const INITIAL_STAGED_NODES = makeLargeTree(50)
+
+function makeDeferredPayload(count: number): DeferredNodesPayload<Employee> {
+  const nodes: GraphNode<Employee>[] = []
+  let nameIndex = 100
+  const getName = () => {
+    const first = FIRST_NAMES[nameIndex % FIRST_NAMES.length] ?? "Alex"
+    const last = LAST_NAMES[nameIndex % LAST_NAMES.length] ?? "Smith"
+    nameIndex++
+    return `${first} ${last}`
+  }
+
+  // Add more members to existing departments
+  for (let d = 0; d < DEPARTMENTS.length; d++) {
+    const dept = DEPARTMENTS[d]!
+    const perDept = Math.floor(count / DEPARTMENTS.length)
+    for (let i = 0; i < perDept; i++) {
+      nodes.push({
+        id: `dept-${d}-deferred-${i}`,
+        parentId: `dept-${d}`,
+        data: {
+          name: getName(),
+          title: dept.roles[i % dept.roles.length] ?? "Team Member",
+        },
+        childrenCount: 0,
+      })
+    }
+  }
+
+  return { nodes }
+}
+
+/** Demonstrates progressive payload loading: 50 nodes render immediately, 500 more merge after 1.5s. */
+export const StagedLoading: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Pass `deferredNodes` as a Promise to load additional nodes after the initial render. Here 50 nodes appear instantly while 500 more arrive after a simulated 1.5 s delay.",
+      },
+    },
+  },
+  args: {
+    nodes: INITIAL_STAGED_NODES,
+    deferredNodes: new Promise<DeferredNodesPayload<Employee>>((resolve) => {
+      setTimeout(() => resolve(makeDeferredPayload(500)), 1500)
+    }),
+    renderNode: renderEmployee,
+    showControls: true,
+    defaultExpandDepth: 2,
+    onDeferredLoadComplete: () => {
+      // eslint-disable-next-line no-console
+      console.log("[StagedLoading] Deferred nodes merged")
+    },
+  },
+}
+
+/** Demonstrates error handling when the deferred payload rejects. */
+export const StagedLoadingError: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "When `deferredNodes` rejects, `onDeferredLoadError` fires and the initial tree remains intact.",
+      },
+    },
+  },
+  args: {
+    nodes: INITIAL_STAGED_NODES,
+    deferredNodes: new Promise<DeferredNodesPayload<Employee>>((_, reject) => {
+      setTimeout(() => reject(new Error("Simulated network failure")), 1000)
+    }),
+    renderNode: renderEmployee,
+    showControls: true,
+    defaultExpandDepth: 2,
+    onDeferredLoadError: (error: Error) => {
+      // eslint-disable-next-line no-console
+      console.error("[StagedLoadingError] Deferred load failed:", error.message)
+    },
   },
 }

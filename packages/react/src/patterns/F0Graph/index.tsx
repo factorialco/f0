@@ -1,11 +1,14 @@
+/** Interactive tree/graph visualization with zoom levels, expand/collapse, selection, search, and detail panels. */
 export { F0Graph } from "./F0Graph"
+/** Props for configuring F0Graph — data, rendering, zoom, selection, layout, and customization. */
 export type { F0GraphProps } from "./F0Graph"
-export { F0GraphContext, useF0GraphContext } from "./context"
-export type { F0GraphContextValue } from "./context"
+/** Render context passed to the renderNode callback. */
+export type { F0GraphNodeRenderContext } from "./F0Graph"
+
+/** Core data and layout types used across the graph pattern. */
 export type {
   GraphNode,
   GraphEdge,
-  TreeNode,
   ZoomLevel,
   ZoomPreset,
   ZoomThresholds,
@@ -14,17 +17,21 @@ export type {
   LayoutResult,
   PositionedNode,
   PositionedEdge,
+  DeferredNodesPayload,
+  DeferredStatus,
 } from "./types"
-export { zoomLevels, zoomPresets } from "./types"
-export {
-  useTreeBuilder,
-  useGraphZoomLevel,
-  useLayoutEngine,
-  useLazyTree,
-} from "./hooks"
 
 // Sub-components
+/** Zoom/pan/fit controls toolbar. */
 export * from "./F0GraphControls"
+/** Edge renderer with animated flow and variant styles. */
 export * from "./F0GraphEdge"
+/** Collapse/expand pill shown below parent nodes. */
 export * from "./F0GraphExpander"
+/** Card wrapper for nodes with avatar, title, subtitle, metadata, and actions slots. */
 export * from "./F0GraphNode"
+
+// Hooks
+/** Focus context hook for reading/controlling roving tabindex focus within the graph. */
+export { useF0GraphFocus } from "./contexts"
+export type { F0GraphFocusContextValue } from "./contexts"
