@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.476.1](https://github.com/factorialco/f0/compare/f0-react-v1.476.0...f0-react-v1.476.1) (2026-05-08)
+
+
+### Bug Fixes
+
+* **ai:** add unit tests for auto-advance in ClarifyingQuestionPanel ([#4095](https://github.com/factorialco/f0/issues/4095)) ([ab57a64](https://github.com/factorialco/f0/commit/ab57a64728cb96bdb1e8e389e9c6dccb25ca0f2f))
+
 ## [1.476.0](https://github.com/factorialco/f0/compare/f0-react-v1.475.1...f0-react-v1.476.0) (2026-05-08)
 
 
