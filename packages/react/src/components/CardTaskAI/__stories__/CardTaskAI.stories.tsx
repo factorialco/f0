@@ -279,8 +279,8 @@ export const ConditionList: Story = {
   args: {
     icon: <FileAvatarIcon />,
     title: "Task applies to",
-    actionLabel: "Ask ONE",
-    onAction: () => alert("Ask ONE clicked"),
+    actionLabel: "Edit",
+    onAction: () => alert("Edit clicked"),
     options: [
       {
         type: "assignee",
