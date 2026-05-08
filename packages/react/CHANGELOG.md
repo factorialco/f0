@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.476.2](https://github.com/factorialco/f0/compare/f0-react-v1.476.1...f0-react-v1.476.2) (2026-05-08)
+
+
+### Bug Fixes
+
+* editable table money position ([#4097](https://github.com/factorialco/f0/issues/4097)) ([5336334](https://github.com/factorialco/f0/commit/53363344c16a77e9ac7c8e3cf7c18dd13022c7a4))
+
 ## [1.476.1](https://github.com/factorialco/f0/compare/f0-react-v1.476.0...f0-react-v1.476.1) (2026-05-08)
 
 
