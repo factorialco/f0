@@ -465,6 +465,8 @@ export const defaultTranslations = {
     noResults: "No results found",
     loadingMore: "Loading...",
     applySelection: "Apply selection",
+    create: "Create",
+    createEmptyMessage: "Try another search or create a new item",
   },
   numberInput: {
     between: "It should be between {{min}} and {{max}}",
@@ -540,6 +542,7 @@ export const defaultTranslations = {
       sectionDescriptionPlaceholder: "Describe the section in a few words",
       required: "Required",
       allowMultiSelection: "Allow multi-selection",
+      allowCreate: "Allow creation",
       singleSelection: "Single selection",
       multiSelection: "Multi selection",
       questionType: "Question type",

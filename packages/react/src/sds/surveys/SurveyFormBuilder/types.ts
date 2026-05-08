@@ -95,6 +95,7 @@ export type SurveyDataset = {
   placeholder?: string
   dataSource: DataSourceDefinition
   mapOptions: (item: RecordType) => F0SelectItemProps<string, RecordType>
+  onCreate?: (value: string) => Promise<RecordType>
 }
 
 export type SurveyDatasets = Record<string, SurveyDataset>
@@ -126,6 +127,7 @@ type OnChangeQuestionParams = BaseQuestionOnChangeParams &
         datasetKey?: string
         showSearchBox?: boolean
         searchBoxPlaceholder?: string
+        allowCreate?: boolean
       }
     | {
         type: "dropdown-multi"

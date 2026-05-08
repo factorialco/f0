@@ -14,6 +14,8 @@ import {
 import { useDebounceCallback } from "usehooks-ts"
 
 import { F0DialogContext } from "@/patterns/F0Dialog"
+import { F0Button } from "@/components/F0Button"
+import { Plus } from "@/icons/app"
 import {
   BaseFetchOptions,
   BaseResponse,
@@ -108,6 +110,7 @@ const F0SelectComponent = forwardRef(function Select<
     searchEmptyMessage,
     size = "sm",
     actions,
+    onCreate,
     source,
     label,
     icon,
@@ -741,11 +744,44 @@ const F0SelectComponent = forwardRef(function Select<
         as: asList ? ("list" as const) : undefined,
       } as const)
 
+  const handleCreate = onCreate
+    ? (value: string) => {
+        const result = onCreate(value)
+        if (result && typeof result.then === "function") {
+          result.then(() => {
+            setCurrentSearch(undefined)
+          })
+        } else {
+          setCurrentSearch(undefined)
+        }
+      }
+    : undefined
+
+  const createLabel = currentSearch
+    ? `${i18n.select.create} "${currentSearch}"`
+    : i18n.select.create
+
+  const emptyAction = handleCreate ? (
+    <div className="flex w-full">
+      <F0Button
+        variant="outline"
+        onClick={() => handleCreate(currentSearch ?? "")}
+        icon={Plus}
+        label={createLabel}
+      />
+    </div>
+  ) : undefined
+
   const selectContent = (
     <SelectContent
       items={items}
       taller={!!source?.filters}
-      emptyMessage={searchEmptyMessage ?? i18n.select.noResults}
+      emptyMessage={
+        onCreate
+          ? (i18n.select.createEmptyMessage ?? i18n.select.noResults)
+          : (searchEmptyMessage ?? i18n.select.noResults)
+      }
+      emptyAction={emptyAction}
       bottom={
         !isFiltersOpen ? (
           <SelectBottomActions

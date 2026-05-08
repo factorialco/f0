@@ -1,4 +1,5 @@
 import type { F0SelectField } from "@/patterns/F0Form/fields/select/types"
+import type { F0SelectItemObject } from "@/components/F0Select/types"
 
 import { F0FormField } from "@/patterns/F0FormField"
 import { useI18n } from "@/lib/providers/i18n"
@@ -35,6 +36,26 @@ export const DropdownSingleQuestion = ({
 
   const isMulti = props.type === "dropdown-multi"
   const showSearchBox = showSearchBoxProp ?? true
+  const allowCreate =
+    props.type === "dropdown-single"
+      ? (props as DropdownSingleQuestionProps).allowCreate
+      : undefined
+
+  const handleCreate =
+    answering && !isMulti && allowCreate && dataset.onCreate
+      ? (value: string) => {
+          dataset.onCreate!(value).then((record) => {
+            const option = dataset.mapOptions(
+              record
+            ) as F0SelectItemObject<string>
+            onQuestionChange?.({
+              id: props.id,
+              type: "dropdown-single",
+              value: option.value,
+            })
+          })
+        }
+      : undefined
 
   const field: F0SelectField = {
     id: props.id,
@@ -49,6 +70,7 @@ export const DropdownSingleQuestion = ({
     multiple: isMulti,
     showSearchBox,
     searchBoxPlaceholder,
+    onCreate: handleCreate,
   }
 
   return (

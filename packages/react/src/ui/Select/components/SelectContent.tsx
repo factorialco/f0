@@ -33,6 +33,7 @@ type SelectItemProps = ComponentPropsWithoutRef<
   bottom?: ReactNode
   right?: ReactNode
   emptyMessage?: string
+  emptyAction?: ReactNode
   showLoadingIndicator?: boolean
 } & (
     | {
@@ -81,6 +82,7 @@ const SelectContent = forwardRef<
       position = "popper",
       taller = false,
       emptyMessage,
+      emptyAction,
       onScrollBottom,
       onScrollTop,
       isLoadingMore,
@@ -173,8 +175,13 @@ const SelectContent = forwardRef<
     const virtualItems = virtualizer.getVirtualItems()
 
     const viewportContent = isEmpty ? (
-      <div className="flex h-full w-full items-center justify-center p-2">
+      <div className="flex h-full w-full flex-col items-center justify-center p-2">
         <p className="text-center">{emptyMessage || "-"}</p>
+        {emptyAction && (
+          <div className="mt-2 w-full border-0 border-t border-solid border-f1-border-secondary pt-2">
+            {emptyAction}
+          </div>
+        )}
       </div>
     ) : isVirtual ? (
       <div

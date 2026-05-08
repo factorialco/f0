@@ -9,6 +9,7 @@ import type {
 import type { F0Field, F0FileField } from "@/patterns/F0Form/fields/types"
 import type { F0SectionConfig } from "@/patterns/F0Form/types"
 import type { TranslationKey } from "@/lib/providers/i18n/i18n-provider-defaults"
+import type { F0SelectItemObject } from "@/components/F0Select/types"
 
 import { f0FormField } from "@/patterns/F0Form/f0Schema"
 import { F0FormField } from "@/patterns/F0FormField"
@@ -410,20 +411,36 @@ function buildFieldForQuestion(
       return f0FormField(buildStringSchema(!!q.required, t), {
         ...baseConfig,
         fieldType: "custom",
-        render: ({ value, onChange, onBlur, error }) => (
-          <BaseQuestion {...questionProps}>
-            <div className="flex flex-col items-start px-0.5 [&>div]:w-full">
-              <F0FormField
-                field={field}
-                value={value ?? ""}
-                onChange={onChange as (value: unknown) => void}
-                onBlur={onBlur}
-                error={!!error}
-                hideLabel
-              />
-            </div>
-          </BaseQuestion>
-        ),
+        render: ({ value, onChange, onBlur, error }) => {
+          const fieldWithCreate: F0Field =
+            q.allowCreate && dataset.onCreate
+              ? {
+                  ...field,
+                  onCreate: (searchValue: string) => {
+                    dataset.onCreate!(searchValue).then((record) => {
+                      const option = dataset.mapOptions(
+                        record
+                      ) as F0SelectItemObject<string>
+                      ;(onChange as (value: unknown) => void)(option.value)
+                    })
+                  },
+                }
+              : field
+          return (
+            <BaseQuestion {...questionProps}>
+              <div className="flex flex-col items-start px-0.5 [&>div]:w-full">
+                <F0FormField
+                  field={fieldWithCreate}
+                  value={value ?? ""}
+                  onChange={onChange as (value: unknown) => void}
+                  onBlur={onBlur}
+                  error={!!error}
+                  hideLabel
+                />
+              </div>
+            </BaseQuestion>
+          )
+        },
       })
     }
 
@@ -454,20 +471,22 @@ function buildFieldForQuestion(
       return f0FormField(buildMultiSelectSchema(!!q.required, t), {
         ...baseConfig,
         fieldType: "custom",
-        render: ({ value, onChange, onBlur, error }) => (
-          <BaseQuestion {...questionProps}>
-            <div className="flex flex-col items-start px-0.5 [&>div]:w-full">
-              <F0FormField
-                field={field}
-                value={value ?? []}
-                onChange={onChange as (value: unknown) => void}
-                onBlur={onBlur}
-                error={!!error}
-                hideLabel
-              />
-            </div>
-          </BaseQuestion>
-        ),
+        render: ({ value, onChange, onBlur, error }) => {
+          return (
+            <BaseQuestion {...questionProps}>
+              <div className="flex flex-col items-start px-0.5 [&>div]:w-full">
+                <F0FormField
+                  field={field}
+                  value={value ?? []}
+                  onChange={onChange as (value: unknown) => void}
+                  onBlur={onBlur}
+                  error={!!error}
+                  hideLabel
+                />
+              </div>
+            </BaseQuestion>
+          )
+        },
       })
     }
 
