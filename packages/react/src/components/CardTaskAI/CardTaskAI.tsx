@@ -32,6 +32,17 @@ const validateCardTaskAI = (props: CardTaskAIProps) => {
       "[CardTaskAI] No options provided. Card will appear empty. Consider adding at least an assignee."
     )
   } else {
+    // Check for automation exclusivity
+    const hasAutomation = options.some((opt) => opt.type === "one-automation")
+    const hasNonAssigneeNonAutomation = options.some(
+      (opt) => opt.type !== "one-automation" && opt.type !== "assignee"
+    )
+    if (hasAutomation && hasNonAssigneeNonAutomation) {
+      console.error(
+        "[CardTaskAI] 'one-automation' cannot coexist with single-task, with-folder, document-upload or condition options. Only assignee is allowed alongside automation."
+      )
+    }
+
     // Check for assignee
     const hasAssignee = options.some((opt) => opt.type === "assignee")
     if (!hasAssignee) {
@@ -169,14 +180,16 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
       switch (option.type) {
         case "single-task":
           return (
-            <div key={option.id} className="flex items-center gap-[8px]">
-              {option.icon ? (
-                <div className="flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center text-gray-600">
-                  {option.icon}
-                </div>
-              ) : (
-                <F0Icon icon={List} size="sm" />
-              )}
+            <div key={option.id} className="flex items-start gap-[8px]">
+              <div className="mt-[2px] flex-shrink-0">
+                {option.icon ? (
+                  <div className="flex h-[20px] w-[20px] items-center justify-center text-gray-600">
+                    {option.icon}
+                  </div>
+                ) : (
+                  <F0Icon icon={List} size="sm" />
+                )}
+              </div>
               <p className="text-[14px] font-normal leading-[24px] text-[rgba(1,22,55,0.61)]">
                 {option.label}
               </p>
@@ -185,8 +198,10 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
 
         case "one-automation":
           return (
-            <div key={option.id} className="flex items-center gap-[8px]">
-              <F0Icon icon={Ai} size="sm" />
+            <div key={option.id} className="flex items-start gap-[8px]">
+              <div className="mt-[2px] flex-shrink-0">
+                <F0Icon icon={Ai} size="sm" />
+              </div>
               <p className="text-[14px] font-normal leading-[24px] text-[rgba(1,22,55,0.61)]">
                 {option.label || "Automatically send by ONE"}
               </p>
@@ -197,18 +212,20 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
           return (
             <div
               key={option.id}
-              className={`flex items-center gap-[8px] ${option.onClick ? "cursor-pointer" : ""}`}
+              className={`flex items-start gap-[8px] ${option.onClick ? "cursor-pointer" : ""}`}
               onClick={option.onClick}
               role={option.onClick ? "button" : undefined}
               tabIndex={option.onClick ? 0 : undefined}
             >
-              {option.icon ? (
-                <div className="flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center">
-                  {option.icon}
-                </div>
-              ) : (
-                <F0Icon icon={Folders} size="sm" />
-              )}
+              <div className="mt-[2px] flex-shrink-0">
+                {option.icon ? (
+                  <div className="flex h-[20px] w-[20px] items-center justify-center">
+                    {option.icon}
+                  </div>
+                ) : (
+                  <F0Icon icon={Folders} size="sm" />
+                )}
+              </div>
               <p className="text-[14px] font-normal leading-[24px] text-[rgba(1,22,55,0.61)]">
                 {option.label}
               </p>
@@ -219,18 +236,20 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
           return (
             <div
               key={option.id}
-              className={`flex items-center gap-[8px] ${option.onClick ? "cursor-pointer" : ""}`}
+              className={`flex items-start gap-[8px] ${option.onClick ? "cursor-pointer" : ""}`}
               onClick={option.onClick}
               role={option.onClick ? "button" : undefined}
               tabIndex={option.onClick ? 0 : undefined}
             >
-              {option.icon ? (
-                <div className="flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center">
-                  {option.icon}
-                </div>
-              ) : (
-                <F0Icon icon={Paperclip} size="sm" />
-              )}
+              <div className="mt-[2px] flex-shrink-0">
+                {option.icon ? (
+                  <div className="flex h-[20px] w-[20px] items-center justify-center">
+                    {option.icon}
+                  </div>
+                ) : (
+                  <F0Icon icon={Paperclip} size="sm" />
+                )}
+              </div>
               <div className="flex items-center gap-[4px]">
                 {option.fileType && (
                   <span className="inline-flex items-center rounded px-[6px] py-[2px] text-[11px] font-semibold uppercase tracking-wider text-red-600">
@@ -244,26 +263,30 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
             </div>
           )
 
-        case "tags":
+        case "condition": {
+          const INLINE_LIMIT = 3
+          const isInlineMode = option.conditions.length <= INLINE_LIMIT
           return (
-            <div
-              key={option.id}
-              className="flex flex-wrap items-center gap-[8px]"
-            >
-              {option.icon ? (
-                <div className="flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center">
-                  {option.icon}
+            <div key={option.id} className="flex items-start gap-[8px]">
+              <div className="mt-[2px] flex-shrink-0">
+                <F0Icon icon={Split} size="sm" />
+              </div>
+              {isInlineMode ? (
+                <div className="flex flex-wrap items-center gap-[4px]">
+                  {option.conditions.map((cond) => (
+                    <F0TagRaw key={cond.id} text={cond.label} />
+                  ))}
                 </div>
               ) : (
-                <F0Icon icon={Split} size="sm" />
+                <div className="flex flex-col gap-[2px]">
+                  {option.conditions.map((cond) => (
+                    <F0TagRaw key={cond.id} text={cond.label} />
+                  ))}
+                </div>
               )}
-              <div className="flex flex-wrap items-center gap-[6px]">
-                {option.tags.map((tag) => (
-                  <F0TagRaw key={tag.id} text={tag.label} />
-                ))}
-              </div>
             </div>
           )
+        }
 
         case "assignee":
           return (

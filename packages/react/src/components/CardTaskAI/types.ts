@@ -7,7 +7,7 @@ export type OptionType =
   | "one-automation"
   | "with-folder"
   | "document-upload"
-  | "tags"
+  | "condition"
   | "assignee"
 
 export interface TaskItem {
@@ -63,19 +63,19 @@ export interface DocumentUploadOption {
 }
 
 /**
- * Tags option - Metadata pills/chips (location, role, category, etc)
+ * Condition option - Shows task conditions as tags (Split icon)
+ * Up to 3 tags shown inline; 4+ shown in list/stack mode
+ * Cannot coexist with one-automation
  */
-export interface Tag {
+export interface ConditionTag {
   id: string
   label: string
-  icon?: ReactNode
 }
 
-export interface TagsOption {
-  type: "tags"
+export interface ConditionOption {
+  type: "condition"
   id: string
-  tags: Tag[]
-  icon?: ReactNode
+  conditions: ConditionTag[]
 }
 
 /**
@@ -90,12 +90,25 @@ export interface AssigneeOption {
   deactivated?: boolean
 }
 
+/**
+ * ONE Automation is mutually exclusive with single-task, with-folder,
+ * document-upload and condition. Only assignee can coexist with it.
+ */
+export type AutomationOnlyOption = OneAutomationOption | AssigneeOption
+
+export type NonAutomationOption =
+  | SingleTaskOption
+  | WithFolderOption
+  | DocumentUploadOption
+  | ConditionOption
+  | AssigneeOption
+
 export type TaskOption =
   | SingleTaskOption
   | OneAutomationOption
   | WithFolderOption
   | DocumentUploadOption
-  | TagsOption
+  | ConditionOption
   | AssigneeOption
 
 export interface CardTaskAIBadge {

@@ -107,13 +107,13 @@ export const WithForm: Story = {
 }
 
 /**
- * Casuistic 4: Text + Automation + Form + Document option
- * Includes a downloadable document (PDF, etc) with file type badge
+ * Casuistic 4: Document upload option
+ * Downloadable file attached to the task. User can download it.
  */
 export const WithDocument: Story = {
   args: {
     icon: <FileAvatarIcon />,
-    title: "Fill in your personal information",
+    title: "Review and sign your contract",
     options: [
       {
         type: "assignee",
@@ -124,21 +124,17 @@ export const WithDocument: Story = {
       {
         type: "single-task",
         id: "1",
-        label: "Personal information, Address, emergency contact",
-      },
-      {
-        type: "one-automation",
-        id: "2",
+        label: "Download, review and sign the document below",
       },
       {
         type: "with-folder",
-        id: "3",
-        label: "Employee Satisfaction Survey",
+        id: "2",
+        label: "Legal / Contracts",
       },
       {
         type: "document-upload",
-        id: "4",
-        label: "Employee Satisfaction Survey",
+        id: "3",
+        label: "Employment_Contract_2026.pdf",
         fileType: "pdf",
         onClick: () => alert("Downloading PDF..."),
       },
@@ -183,12 +179,12 @@ export const AllOptionTypes: Story = {
         fileType: "pdf",
       },
       {
-        type: "tags",
+        type: "condition",
         id: "5",
-        tags: [
-          { id: "tag1", label: "Operator" },
-          { id: "tag2", label: "Barcelona" },
-          { id: "tag3", label: "Interns" },
+        conditions: [
+          { id: "cond1", label: "Operator" },
+          { id: "cond2", label: "Barcelona" },
+          { id: "cond3", label: "Interns" },
         ],
       },
     ],
@@ -365,12 +361,12 @@ export const MultipleDocuments: Story = {
 }
 
 /**
- * Tags with multiple variants
+ * Condition: inline mode (≤3 conditions)
  */
-export const MultipleTagVariants: Story = {
+export const ConditionInline: Story = {
   args: {
     icon: <FileAvatarIcon />,
-    title: "Task assignment details",
+    title: "Task applies to",
     options: [
       {
         type: "assignee",
@@ -379,13 +375,40 @@ export const MultipleTagVariants: Story = {
         lastName: "Doe",
       },
       {
-        type: "tags",
+        type: "condition",
         id: "1",
-        tags: [
-          { id: "tag1", label: "Engineering" },
-          { id: "tag2", label: "Senior" },
-          { id: "tag3", label: "Urgent" },
-          { id: "tag4", label: "Blocked" },
+        conditions: [
+          { id: "c1", label: "Engineering" },
+          { id: "c2", label: "Barcelona" },
+        ],
+      },
+    ],
+  },
+}
+
+/**
+ * Condition: list mode (>3 conditions)
+ */
+export const ConditionList: Story = {
+  args: {
+    icon: <FileAvatarIcon />,
+    title: "Task applies to",
+    options: [
+      {
+        type: "assignee",
+        id: "0",
+        firstName: "John",
+        lastName: "Doe",
+      },
+      {
+        type: "condition",
+        id: "1",
+        conditions: [
+          { id: "c1", label: "Engineering" },
+          { id: "c2", label: "Barcelona" },
+          { id: "c3", label: "Senior" },
+          { id: "c4", label: "Full-time" },
+          { id: "c5", label: "Permanent" },
         ],
       },
     ],

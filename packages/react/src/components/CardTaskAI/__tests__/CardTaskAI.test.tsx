@@ -221,18 +221,18 @@ describe("CardTaskAI", () => {
     })
   })
 
-  describe("Option types - Tags", () => {
-    it("renders tags option", () => {
+  describe("Option types - Condition", () => {
+    it("renders condition option in inline mode (≤3 conditions)", () => {
       render(
         <CardTaskAI
           {...defaultProps}
           options={[
             {
-              type: "tags",
+              type: "condition",
               id: "1",
-              tags: [
-                { id: "tag1", label: "Engineering" },
-                { id: "tag2", label: "Senior" },
+              conditions: [
+                { id: "cond1", label: "Engineering" },
+                { id: "cond2", label: "Senior" },
               ],
             },
           ]}
@@ -242,18 +242,19 @@ describe("CardTaskAI", () => {
       expect(screen.getByText("Senior")).toBeInTheDocument()
     })
 
-    it("renders tags with different variants", () => {
+    it("renders condition option in list mode (>3 conditions)", () => {
       render(
         <CardTaskAI
           {...defaultProps}
           options={[
             {
-              type: "tags",
+              type: "condition",
               id: "1",
-              tags: [
-                { id: "tag1", label: "Success" },
-                { id: "tag2", label: "Error" },
-                { id: "tag3", label: "Warning" },
+              conditions: [
+                { id: "cond1", label: "Success" },
+                { id: "cond2", label: "Error" },
+                { id: "cond3", label: "Warning" },
+                { id: "cond4", label: "Info" },
               ],
             },
           ]}
@@ -262,6 +263,7 @@ describe("CardTaskAI", () => {
       expect(screen.getByText("Success")).toBeInTheDocument()
       expect(screen.getByText("Error")).toBeInTheDocument()
       expect(screen.getByText("Warning")).toBeInTheDocument()
+      expect(screen.getByText("Info")).toBeInTheDocument()
     })
   })
 
@@ -342,9 +344,9 @@ describe("CardTaskAI", () => {
               fileType: "pdf",
             },
             {
-              type: "tags",
+              type: "condition",
               id: "5",
-              tags: [{ id: "t1", label: "Tag" }],
+              conditions: [{ id: "t1", label: "Tag" }],
             },
           ]}
         />
@@ -562,7 +564,7 @@ describe("CardTaskAI", () => {
           {...defaultProps}
           options={[
             {
-              type: "tags",
+              type: "condition",
               id: "1",
               tags: manyTags,
             },
@@ -605,6 +607,49 @@ describe("CardTaskAI", () => {
       expect(consoleWarnSpy).toHaveBeenCalled()
 
       consoleWarnSpy.mockRestore()
+    })
+
+    it("logs error when automation coexists with non-assignee options", () => {
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {})
+
+      render(
+        <CardTaskAI
+          {...defaultProps}
+          options={[
+            { type: "assignee", id: "0", firstName: "John", lastName: "Doe" },
+            { type: "one-automation", id: "1" },
+            { type: "single-task", id: "2", label: "This should not coexist" },
+          ]}
+        />
+      )
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining("one-automation")
+      )
+
+      consoleErrorSpy.mockRestore()
+    })
+
+    it("allows automation alongside assignee only", () => {
+      const consoleErrorSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {})
+
+      render(
+        <CardTaskAI
+          {...defaultProps}
+          options={[
+            { type: "assignee", id: "0", firstName: "John", lastName: "Doe" },
+            { type: "one-automation", id: "1" },
+          ]}
+        />
+      )
+      expect(consoleErrorSpy).not.toHaveBeenCalledWith(
+        expect.stringContaining("cannot coexist")
+      )
+
+      consoleErrorSpy.mockRestore()
     })
 
     it("handles special characters in labels", () => {
