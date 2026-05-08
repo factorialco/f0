@@ -197,7 +197,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
             {/* Header with Title and Badge */}
             <div className="flex items-start justify-between gap-[8px] h-[32px] pl-[4px]">
               <div className="flex-1">
-                <h3 className="m-0 text-lg font-semibold leading-[24px] text-[#0d1625]">
+                <h3 className="m-0 mt-[4px] text-lg font-semibold leading-[24px] text-[#0d1625]">
                   {title}
                 </h3>
                 {description && (
