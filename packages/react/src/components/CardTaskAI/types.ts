@@ -129,8 +129,8 @@ export interface CardTaskAIBadge {
 export interface CardTaskAIProps {
   /** Type of task to determine icon and colors */
   taskType: TaskType
-  /** Icon to display (typically an avatar or icon component) */
-  icon: ReactNode
+  /** Icon to display (deprecated - use taskType instead) */
+  icon?: ReactNode
   /** Main title of the task */
   title: string
   /** Optional description of the task */
