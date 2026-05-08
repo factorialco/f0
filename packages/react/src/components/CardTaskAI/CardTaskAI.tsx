@@ -327,7 +327,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
           ${className}
         `}
       >
-        <div className="flex items-start gap-[4px] p-[10px]">
+        <div className="flex items-start gap-[4px]">
           {/* Icon Section */}
           <div className="flex h-[40px] w-[40px] flex-shrink-0 items-center justify-center">
             {icon}
