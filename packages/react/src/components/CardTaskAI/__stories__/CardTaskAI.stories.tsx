@@ -10,6 +10,13 @@ const meta = {
   parameters: {
     layout: "centered",
   },
+  decorators: [
+    (Story) => (
+      <div style={{ width: "360px" }}>
+        <Story />
+      </div>
+    ),
+  ],
   tags: ["autodocs"],
 } satisfies Meta<typeof CardTaskAI>
 
