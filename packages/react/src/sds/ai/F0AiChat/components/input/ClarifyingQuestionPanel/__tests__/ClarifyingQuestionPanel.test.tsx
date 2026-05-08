@@ -122,6 +122,7 @@ describe("ClarifyingQuestionPanel", () => {
       await userEvent.click(screen.getByRole("radio", { name: "This month" }))
       // confirm() is deferred via microtask — flush before asserting
       await Promise.resolve()
+      expect(state.toggleOption).toHaveBeenCalledExactlyOnceWith("this-month")
       expect(state.confirm).toHaveBeenCalledOnce()
     })
 
@@ -133,6 +134,7 @@ describe("ClarifyingQuestionPanel", () => {
       render(<ClarifyingQuestionPanel clarifyingQuestion={state} />)
       await userEvent.click(screen.getByRole("radio", { name: "This month" }))
       await Promise.resolve()
+      expect(state.toggleOption).toHaveBeenCalledExactlyOnceWith("this-month")
       expect(state.confirm).not.toHaveBeenCalled()
     })
 
@@ -142,19 +144,21 @@ describe("ClarifyingQuestionPanel", () => {
       render(<ClarifyingQuestionPanel clarifyingQuestion={state} />)
       await userEvent.click(screen.getByRole("radio", { name: "This month" }))
       await Promise.resolve()
+      expect(state.toggleOption).toHaveBeenCalledExactlyOnceWith("this-month")
       expect(state.confirm).not.toHaveBeenCalled()
     })
 
-    it("does not call confirm() on option click in multi-select mode", async () => {
+    it("does not call confirm() on option click in multiple-selection mode", async () => {
       const state = buildState(
         { currentStepIndex: 0, totalSteps: 2 },
-        { selectionMode: "multi" }
+        { selectionMode: "multiple" }
       )
       render(<ClarifyingQuestionPanel clarifyingQuestion={state} />)
       await userEvent.click(
         screen.getByRole("checkbox", { name: "This month" })
       )
       await Promise.resolve()
+      expect(state.toggleOption).toHaveBeenCalledExactlyOnceWith("this-month")
       expect(state.confirm).not.toHaveBeenCalled()
     })
 
@@ -170,6 +174,7 @@ describe("ClarifyingQuestionPanel", () => {
       render(<ClarifyingQuestionPanel clarifyingQuestion={state} />)
       await userEvent.click(screen.getByRole("radio", { name: "This month" }))
       await Promise.resolve()
+      expect(state.toggleOption).toHaveBeenCalledExactlyOnceWith("this-month")
       expect(state.confirm).toHaveBeenCalledOnce()
     })
 
@@ -182,6 +187,7 @@ describe("ClarifyingQuestionPanel", () => {
       const input = screen.getByRole("textbox")
       await userEvent.type(input, "hello")
       await Promise.resolve()
+      expect(state.toggleOption).not.toHaveBeenCalled()
       expect(state.confirm).not.toHaveBeenCalled()
     })
   })
