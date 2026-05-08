@@ -40,7 +40,7 @@ import {
 import { ActionBar, ActionBarItem } from "./components/ActionBar"
 import { CollectionActions } from "./components/CollectionActions/CollectionActions"
 import { NavigationFilters as NavigationFiltersComponent } from "./components/NavigationFilters"
-import { Search } from "./components/Search"
+import { Search } from "@/components/Search"
 import { TotalItemsSummary } from "./components/TotalItemsSummary"
 import {
   DataCollectionStatusComplete,

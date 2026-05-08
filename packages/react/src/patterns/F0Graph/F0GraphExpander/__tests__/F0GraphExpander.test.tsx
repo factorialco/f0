@@ -11,24 +11,6 @@ describe("F0GraphExpander", () => {
     expect(screen.getByText("5")).toBeInTheDocument()
   })
 
-  it("renders avatars (up to 3)", () => {
-    const { container } = render(
-      <F0GraphExpander
-        avatars={[
-          "https://example.com/a.jpg",
-          "https://example.com/b.jpg",
-          "https://example.com/c.jpg",
-          "https://example.com/d.jpg",
-        ]}
-        count={4}
-        expanded={false}
-      />
-    )
-    const images = container.querySelectorAll("img")
-    // Only 4 avatars max
-    expect(images).toHaveLength(4)
-  })
-
   it("calls onClick when clicked", () => {
     const onClick = vi.fn()
     render(<F0GraphExpander count={3} expanded={false} onClick={onClick} />)
@@ -53,11 +35,5 @@ describe("F0GraphExpander", () => {
 
     rerender(<F0GraphExpander count={3} expanded={true} />)
     expect(screen.getByRole("button")).toHaveAttribute("aria-expanded", "true")
-  })
-
-  it("renders without avatars", () => {
-    const { container } = render(<F0GraphExpander count={2} expanded={false} />)
-    expect(screen.getByRole("button")).toBeInTheDocument()
-    expect(container.querySelectorAll("img")).toHaveLength(0)
   })
 })

@@ -127,6 +127,22 @@ export interface F0GraphRenderConfigContextValue {
    * F0GraphNodeWrapper to set `deferredLoading` on the render context.
    */
   deferredLoading?: boolean
+
+  /**
+   * Height of the tag row reserved in the node rect by the layout engine.
+   * `0` when tags don't affect layout (overflow mode) or when no tag types
+   * are configured. Used by the node wrapper to top-align the pill and
+   * offset the source Handle upward in compact/dot mode (where tags are
+   * hidden but the rect is still oversized).
+   */
+  tagRowHeight?: number
+  /**
+   * `true` when the graph has more rendered nodes than the snap threshold.
+   * F0GraphNode uses this to disable variant transitions (chrome opacity,
+   * avatar transform, text reveal) so changing zoomLevel snaps instantly
+   * instead of animating thousands of elements simultaneously.
+   */
+  largeGraph?: boolean
 }
 
 export const F0GraphRenderConfigContext =

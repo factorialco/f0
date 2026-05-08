@@ -1,0 +1,115 @@
+import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
+
+import * as Stories from "./F0GraphNode.stories"
+
+<Meta of={Stories} />
+
+# F0GraphNode
+
+The default pill-style node for F0Graph. Adapts its layout across
+three zoom levels — detail, compact, and dot — so the canvas stays
+readable from a small team to a full company.
+
+---
+
+# Overview
+
+F0GraphNode is the recommended building block for
+`renderNode`. Spread the render context (`ctx`) and provide
+your content props:
+
+```tsx
+renderNode={(node, ctx) => (
+  <F0GraphNode
+    {...ctx}
+    avatar={{ type: "person", firstName: "Alice", lastName: "Moreno" }}
+    title="Alice Moreno"
+    subtitle="Staff Designer"
+  />
+)}
+```
+
+<Canvas of={Stories.Default} />
+<Controls of={Stories.Default} />
+
+---
+
+# Variants
+
+## Detail
+
+Full pill with avatar, title, subtitle, and optional
+metadata/actions rows. Shown at normal reading zoom.
+
+<Canvas of={Stories.Default} />
+
+## Compact
+
+Avatar with initials only. Shown when the tree is zoomed out
+enough that full text would be unreadable but identity still
+matters.
+
+<Canvas of={Stories.Compact} />
+
+## Dot
+
+Single colored dot. Shown at very low zoom to reveal tree shape
+when individual identity is secondary to structure.
+
+<Canvas of={Stories.Dot} />
+
+---
+
+# States
+
+Nodes cycle through visual states based on interaction
+context:
+
+<Canvas of={Stories.States} />
+
+- **default** — neutral resting state
+- **selected** — user has clicked/tapped or included in multi-select
+- **highlighted** — visually emphasized (e.g. search result, hover target)
+- **dimmed** — de-emphasized during selection or search
+
+---
+
+# Props
+
+| Prop             | Type                                                   | Default     | Description                                         |
+| ---------------- | ------------------------------------------------------ | ----------- | --------------------------------------------------- |
+| `variant`        | `"detail" \| "compact" \| "dot"`                       | `"detail"`  | Visual variant based on zoom level                  |
+| `state`          | `"default" \| "selected" \| "highlighted" \| "dimmed"` | `"default"` | Visual state                                        |
+| `expanded`       | `boolean`                                              | `false`     | Whether the node is expanded (has visible children) |
+| `level`          | `number`                                               | —           | ARIA tree level (1-based depth)                     |
+| `hasChildren`    | `boolean`                                              | `false`     | Whether the node has children                       |
+| `childrenCount`  | `number`                                               | —           | Number of children (shown in expander)              |
+| `onExpandToggle` | `() => void`                                           | —           | Callback when expand/collapse is toggled            |
+| `onClick`        | `() => void`                                           | —           | Callback when the node is clicked                   |
+| `avatar`         | `AvatarVariant`                                        | —           | Avatar shown on the leading side of the pill        |
+| `title`          | `ReactNode`                                            | —           | Primary line of text (hidden in dot variant)        |
+| `subtitle`       | `ReactNode`                                            | —           | Secondary line of text (hidden in compact and dot)  |
+| `metadata`       | `ReactNode`                                            | —           | Optional metadata row below subtitle (detail only)  |
+| `actions`        | `ReactNode`                                            | —           | Optional action row at the bottom (detail only)     |
+
+---
+
+# Usage
+
+## Basic node
+
+```tsx
+<F0GraphNode
+  avatar={{ type: "person", firstName: "Alice", lastName: "Moreno" }}
+  title="Alice Moreno"
+  subtitle="Staff Designer"
+/>
+```
+
+## Node with all slots
+
+<Canvas of={Stories.WithAllSlots} />
+
+## Expanded node with children
+
+<Canvas of={Stories.Expanded} />

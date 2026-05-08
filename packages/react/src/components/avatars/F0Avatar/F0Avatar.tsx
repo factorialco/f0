@@ -10,7 +10,7 @@ import { F0AvatarTeam, F0AvatarTeamProps } from "../F0AvatarTeam"
 import { AvatarSize } from "../internal/BaseAvatar"
 
 export type AvatarProps = {
-  avatar: AvatarVariant
+  avatar: AvatarVariant | undefined
   size?: AvatarSize
   dataTestId?: string
 }
@@ -29,6 +29,7 @@ export const F0Avatar = ({
   size = "xs",
   dataTestId,
 }: AvatarProps): ReactNode => {
+  if (!avatar) return null
   switch (avatar.type) {
     case "person":
       return (

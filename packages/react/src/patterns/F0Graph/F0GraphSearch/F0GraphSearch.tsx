@@ -10,6 +10,7 @@ import {
 
 import { Input as F0Input } from "@/experimental/Forms/Fields/Input"
 import { Search as SearchIcon } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 
 import type { SearchResult } from "./types"
 
@@ -23,9 +24,10 @@ interface F0GraphSearchProps {
   onChange: (value: string) => void
   results: SearchResult[]
   hasQuery: boolean
+  pending?: boolean
   loading?: boolean
   placeholder?: string
-  noResultsLabel: string
+  noResultsLabel?: string
   onSelect: (id: string) => void
 }
 
@@ -34,11 +36,15 @@ export const F0GraphSearch = ({
   onChange,
   results,
   hasQuery,
+  pending,
   loading,
   placeholder,
   noResultsLabel,
   onSelect,
 }: F0GraphSearchProps) => {
+  const i18n = useI18n()
+  const effectivePlaceholder = placeholder ?? i18n.actions.search
+  const effectiveNoResultsLabel = noResultsLabel ?? i18n.graph.search.noResults
   const listboxId = useId()
   const [activeIndex, setActiveIndex] = useState(0)
   const [showActiveOutline, setShowActiveOutline] = useState(false)
@@ -47,11 +53,17 @@ export const F0GraphSearch = ({
   const anchorRef = useRef<HTMLDivElement>(null)
   const activeResultRef = useRef<HTMLDivElement>(null)
 
-  const showResults = popoverOpen && hasQuery
+  // Gate visibility on having something meaningful to show. While the index
+  // is debouncing with no prior results we keep the popover fully closed so
+  // Radix doesn't mount an empty Content box (which leaves a stray shadow).
+  const hasContent = results.length > 0 || (!pending && hasQuery)
+  const showResults = popoverOpen && hasQuery && hasContent
 
-  // Open popover when there is a query, close when cleared.
+  // Close popover when the query is cleared. Opening is driven by
+  // `handleSearchChange` so that typing always reopens the popover even if
+  // the user previously dismissed it via outside click.
   useEffect(() => {
-    setPopoverOpen(hasQuery)
+    if (!hasQuery) setPopoverOpen(false)
   }, [hasQuery])
 
   // Reset active/hover when results change.
@@ -86,6 +98,10 @@ export const F0GraphSearch = ({
     (next: string) => {
       onChange(next)
       setShowActiveOutline(false)
+      // Always reopen on input. `hasQuery` may not flip (e.g. user replaces
+      // "a" with "b"), so an effect on hasQuery alone won't reopen the popover
+      // after an outside-click dismissal.
+      if (next.trim().length > 0) setPopoverOpen(true)
     },
     [onChange]
   )
@@ -149,10 +165,9 @@ export const F0GraphSearch = ({
           style={{ width: INPUT_WIDTH }}
         >
           <F0Input
-            label={placeholder ?? "Search"}
+            label={effectivePlaceholder}
             hideLabel
-            size="md"
-            placeholder={placeholder}
+            placeholder={effectivePlaceholder}
             value={value}
             onChange={handleSearchChange}
             icon={SearchIcon}
@@ -178,11 +193,12 @@ export const F0GraphSearch = ({
         >
           <F0GraphSearchResultsList
             results={results}
+            pending={pending}
             activeIndex={activeIndex}
             hoverIndex={hoverIndex}
             showActiveOutline={showActiveOutline}
             listboxId={listboxId}
-            noResultsLabel={noResultsLabel}
+            noResultsLabel={effectiveNoResultsLabel}
             activeResultRef={activeResultRef}
             onHover={setHoverIndex}
             onHoverEnd={() => setHoverIndex(null)}

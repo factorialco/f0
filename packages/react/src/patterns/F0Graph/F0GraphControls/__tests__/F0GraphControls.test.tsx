@@ -6,10 +6,10 @@ import { screen, zeroRender as render } from "@/testing/test-utils"
 import { F0GraphControls } from "../F0GraphControls"
 
 describe("F0GraphControls", () => {
-  it("renders mode, fit view, zoom in, and zoom out buttons", () => {
+  it("renders fit view, zoom in, and zoom out buttons by default", () => {
     render(<F0GraphControls />)
 
-    expect(screen.getByLabelText("Select mode")).toBeInTheDocument()
+    expect(screen.queryByLabelText("Find me")).not.toBeInTheDocument()
     expect(screen.getByLabelText("Fit to view")).toBeInTheDocument()
     expect(screen.getByLabelText("Zoom in")).toBeInTheDocument()
     expect(screen.getByLabelText("Zoom out")).toBeInTheDocument()
@@ -39,12 +39,17 @@ describe("F0GraphControls", () => {
     expect(handler).toHaveBeenCalledTimes(1)
   })
 
-  it("calls onModeChange when select mode is clicked while in pan mode", async () => {
+  it("calls onFocusUser when the Find me button is clicked", async () => {
     const handler = vi.fn()
-    render(<F0GraphControls mode="pan" onModeChange={handler} />)
+    render(<F0GraphControls onFocusUser={handler} />)
 
-    await userEvent.click(screen.getByLabelText("Select mode"))
-    expect(handler).toHaveBeenCalledWith("select")
+    await userEvent.click(screen.getByLabelText("Find me"))
+    expect(handler).toHaveBeenCalledTimes(1)
+  })
+
+  it("hides the Find me button when onFocusUser is not provided", () => {
+    render(<F0GraphControls />)
+    expect(screen.queryByLabelText("Find me")).not.toBeInTheDocument()
   })
 
   it("has ARIA toolbar role", () => {

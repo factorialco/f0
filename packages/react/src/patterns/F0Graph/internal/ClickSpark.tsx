@@ -18,18 +18,27 @@ interface Spark {
   startTime: number
 }
 
-function resolveCssColor(raw: string, element: HTMLElement): string {
-  const varMatch = raw.match(/var\((--[^)]+)\)/)
-  if (!varMatch) return raw
-  const resolved = getComputedStyle(element)
-    .getPropertyValue(varMatch[1])
-    .trim()
-  if (!resolved) return raw
-  return raw.replace(`var(${varMatch[1]})`, resolved)
+/**
+ * Resolve any CSS color expression (including nested var() chains and tokens
+ * like `hsl(var(--x))`) to an absolute color the canvas can paint.
+ *
+ * We delegate to the browser by setting `color` on a probe element and reading
+ * back the computed value. The browser handles var() resolution, fallbacks,
+ * and color-space conversion, returning a concrete `rgb(...)` / `rgba(...)`.
+ */
+function resolveCssColor(raw: string, contextElement: HTMLElement): string {
+  const probe = document.createElement("span")
+  probe.style.color = raw
+  probe.style.display = "none"
+  contextElement.appendChild(probe)
+  const resolved = getComputedStyle(probe).color
+  probe.remove()
+  // Browser returns "" if `raw` is invalid — fall back to a sane default.
+  return resolved || "#000"
 }
 
 export function ClickSpark({
-  sparkColor = "hsl(var(--neutral-40))",
+  sparkColor = "var(--f0-graph-spark)",
   sparkSize = 10,
   sparkRadius = 15,
   sparkCount = 8,
@@ -42,6 +51,7 @@ export function ClickSpark({
   const sparksRef = useRef<Spark[]>([])
   const startTimeRef = useRef<number | null>(null)
   const resolvedColorRef = useRef<string>(sparkColor)
+  const startAnimationRef = useRef<(() => void) | null>(null)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -79,7 +89,11 @@ export function ClickSpark({
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    resolvedColorRef.current = resolveCssColor(sparkColor, canvas)
+    // Resolve from the .f0-graph child where --f0-graph-spark is declared.
+    // The probe element appended there inherits the F0Graph CSS scope.
+    const colorSource =
+      canvas.parentElement?.querySelector<HTMLElement>(".f0-graph") ?? canvas
+    resolvedColorRef.current = resolveCssColor(sparkColor, colorSource)
   }, [sparkColor])
 
   const easeFunc = useCallback(
@@ -104,7 +118,7 @@ export function ClickSpark({
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
-    let animationId: number
+    let animationId: number | null = null
 
     const draw = (timestamp: number) => {
       if (!startTimeRef.current) {
@@ -139,25 +153,33 @@ export function ClickSpark({
         return true
       })
 
-      animationId = requestAnimationFrame(draw)
+      // Only continue the loop if there are sparks to animate
+      if (sparksRef.current.length > 0) {
+        animationId = requestAnimationFrame(draw)
+      } else {
+        animationId = null
+      }
     }
 
-    animationId = requestAnimationFrame(draw)
+    // Expose a start function the click handler can trigger
+    startAnimationRef.current = () => {
+      if (animationId === null) {
+        animationId = requestAnimationFrame(draw)
+      }
+    }
 
     return () => {
-      cancelAnimationFrame(animationId)
+      if (animationId !== null) {
+        cancelAnimationFrame(animationId)
+      }
+      startAnimationRef.current = null
     }
-  }, [
-    sparkColor,
-    sparkSize,
-    sparkRadius,
-    sparkCount,
-    duration,
-    easeFunc,
-    extraScale,
-  ])
+  }, [sparkSize, sparkRadius, duration, easeFunc, extraScale])
 
   const handleClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement
+    if (target.closest("[data-no-spark]")) return
+
     const canvas = canvasRef.current
     if (!canvas) return
     const rect = canvas.getBoundingClientRect()
@@ -173,6 +195,7 @@ export function ClickSpark({
     }))
 
     sparksRef.current.push(...newSparks)
+    startAnimationRef.current?.()
   }
 
   return (

@@ -2,6 +2,7 @@ import { renderHook, act } from "@testing-library/react"
 import { describe, it, expect, vi } from "vitest"
 
 import type { DeferredNodesPayload, GraphEdge, GraphNode } from "../../types"
+
 import { useDeferredMerge } from "../useDeferredMerge"
 
 // ─── Helpers ───────────────────────────────────────────────────

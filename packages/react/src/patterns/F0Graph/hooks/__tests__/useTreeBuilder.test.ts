@@ -158,4 +158,117 @@ describe("useTreeBuilder", () => {
     expect(result.current.nodeMap.get("2")).toBeDefined()
     expect(result.current.nodeMap.get("3")).toBeDefined()
   })
+
+  // ── DAG support ───────────────────────────────────────────────────────
+
+  describe("DAG: parentIds support", () => {
+    it("node with parentIds resolves canonical parent to first entry", () => {
+      const nodes: GraphNode<string>[] = [
+        { id: "a", parentId: null, data: "root-a" },
+        { id: "b", parentId: null, data: "root-b" },
+        { id: "c", parentId: null, parentIds: ["a", "b"], data: "dag-child" },
+      ]
+
+      const { result } = renderTreeBuilder(nodes)
+      const dagNode = result.current.nodeMap.get("c")!
+      expect(dagNode.parentId).toBe("a")
+      expect(dagNode.dagParentIds).toEqual(["a", "b"])
+    })
+
+    it("parentIds wins over parentId when both provided", () => {
+      const nodes: GraphNode<string>[] = [
+        { id: "a", parentId: null, data: "root-a" },
+        { id: "b", parentId: null, data: "root-b" },
+        {
+          id: "c",
+          parentId: "x",
+          parentIds: ["a", "b"],
+          data: "dag-child",
+        },
+      ]
+
+      const { result } = renderTreeBuilder(nodes)
+      const dagNode = result.current.nodeMap.get("c")!
+      // parentIds wins — canonical parent is "a", not "x"
+      expect(dagNode.parentId).toBe("a")
+      expect(dagNode.dagParentIds).toEqual(["a", "b"])
+      // "c" should be a child of "a"
+      const rootA = result.current.nodeMap.get("a")!
+      expect(rootA.children.some((ch) => ch.id === "c")).toBe(true)
+    })
+
+    it("diamond DAG: D has two parents, positioned under canonical one", () => {
+      // A → B, A → C, B → D, C → D
+      const nodes: GraphNode<string>[] = [
+        { id: "A", parentId: null, data: "top" },
+        { id: "B", parentId: "A", data: "left" },
+        { id: "C", parentId: "A", data: "right" },
+        {
+          id: "D",
+          parentId: null,
+          parentIds: ["B", "C"],
+          data: "diamond-bottom",
+        },
+      ]
+
+      const { result } = renderTreeBuilder(nodes)
+      const dagNode = result.current.nodeMap.get("D")!
+      expect(dagNode.parentId).toBe("B")
+      expect(dagNode.dagParentIds).toEqual(["B", "C"])
+      // D appears as child of B (canonical), not C
+      const nodeB = result.current.nodeMap.get("B")!
+      const nodeC = result.current.nodeMap.get("C")!
+      expect(nodeB.children.some((ch) => ch.id === "D")).toBe(true)
+      expect(nodeC.children.some((ch) => ch.id === "D")).toBe(false)
+      // No cycles or orphans
+      expect(result.current.cycles).toHaveLength(0)
+      expect(result.current.orphans).toHaveLength(0)
+    })
+
+    it("empty parentIds falls back to parentId", () => {
+      const nodes: GraphNode<string>[] = [
+        { id: "a", parentId: null, data: "root" },
+        { id: "b", parentId: "a", parentIds: [], data: "child" },
+      ]
+
+      const { result } = renderTreeBuilder(nodes)
+      const node = result.current.nodeMap.get("b")!
+      expect(node.parentId).toBe("a")
+      expect(node.dagParentIds).toBeUndefined()
+    })
+
+    it("single-entry parentIds behaves like parentId", () => {
+      const nodes: GraphNode<string>[] = [
+        { id: "a", parentId: null, data: "root" },
+        { id: "b", parentId: null, parentIds: ["a"], data: "child" },
+      ]
+
+      const { result } = renderTreeBuilder(nodes)
+      const node = result.current.nodeMap.get("b")!
+      expect(node.parentId).toBe("a")
+      expect(node.dagParentIds).toEqual(["a"])
+    })
+
+    it("dagParentIds not set when only parentId is used", () => {
+      const nodes: GraphNode<string>[] = [
+        { id: "a", parentId: null, data: "root" },
+        { id: "b", parentId: "a", data: "child" },
+      ]
+
+      const { result } = renderTreeBuilder(nodes)
+      const node = result.current.nodeMap.get("b")!
+      expect(node.dagParentIds).toBeUndefined()
+    })
+
+    it("cycle detection still works with parentIds", () => {
+      // Self-referencing via parentIds
+      const nodes: GraphNode<string>[] = [
+        { id: "a", parentId: null, parentIds: ["a"], data: "self-ref" },
+      ]
+
+      const { result } = renderTreeBuilder(nodes)
+      expect(result.current.cycles).toContain("a")
+      expect(result.current.roots).toHaveLength(1)
+    })
+  })
 })

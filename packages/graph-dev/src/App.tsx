@@ -1,61 +1,156 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
-import type { GraphNode, ZoomLevel } from "@/patterns/F0Graph/types"
+import type { F0GraphNodeRenderContext } from "@/patterns/F0Graph/F0Graph"
+import type { GraphNode } from "@/patterns/F0Graph/types"
 
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
+import { F0Button } from "@/components/F0Button"
+import { F0Card } from "@/components/F0Card"
+import { F0Text } from "@/components/F0Text"
+import { F0TagPerson } from "@/components/tags/F0TagPerson"
+import { DataList } from "@/experimental/Lists/DataList"
+import { Weekdays } from "@/experimental/Widgets/Content/Weekdays"
+import { Pin, Add, WhatsappChat } from "@/icons/app"
 import { F0Graph } from "@/patterns/F0Graph/F0Graph"
-import { F0GraphNodeAvatar } from "@/patterns/F0Graph/F0GraphNode/components/F0GraphNodeAvatar"
-import { F0GraphNodeSubtitle } from "@/patterns/F0Graph/F0GraphNode/components/F0GraphNodeSubtitle"
-import { F0GraphNodeTitle } from "@/patterns/F0Graph/F0GraphNode/components/F0GraphNodeTitle"
+import { F0GraphNode } from "@/patterns/F0Graph/F0GraphNode"
 
 import { DATASET_SIZES, generateOrgData } from "./generateOrgData"
+
+interface Team {
+  name: string
+  members: number
+}
 
 interface Employee {
   name: string
   title: string
+  pronouns?: string
+  email?: string
+  phone?: string
+  workEmail?: string
+  workplace?: string
+  workableDays?: ReadonlyArray<"M" | "T" | "W" | "R" | "F" | "S" | "U">
+  managerId?: string | null
+  teams?: ReadonlyArray<Team>
+}
+
+const ALL_DAYS = ["M", "T", "W", "R", "F", "S", "U"] as const
+
+const DAY_CODE_TO_INDEX: Record<(typeof ALL_DAYS)[number], number> = {
+  M: 0,
+  T: 1,
+  W: 2,
+  R: 3,
+  F: 4,
+  S: 5,
+  U: 6,
+}
+
+function profileDefaults(
+  id: string,
+  name: string,
+  parentId: string | null
+): Partial<Employee> {
+  const slug = name
+    .toLowerCase()
+    .replace(/[^a-z]+/g, ".")
+    .replace(/^\.|\.$/g, "")
+  const hash = id.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0)
+  const cities = [
+    "Barcelona",
+    "Madrid",
+    "Lisbon",
+    "Berlin",
+    "Paris",
+    "Amsterdam",
+  ]
+  const teams: Team[] = [
+    { name: "Engineering", members: 23 },
+    { name: "Time Tracking", members: 16 },
+    { name: "Operations", members: 11 },
+    { name: "Design", members: 8 },
+  ]
+  return {
+    pronouns: hash % 2 === 0 ? "He/Him" : "She/Her",
+    email: `${slug}@example.com`,
+    phone: `+34 6${(700 + (hash % 99)).toString().padStart(2, "0")} ${(100 + (hash % 800)).toString().padStart(3, "0")} ${(100 + (hash % 800)).toString().padStart(3, "0")}`,
+    workEmail: `${slug}@company.com`,
+    workplace: cities[hash % cities.length],
+    workableDays: ["M", "T", "R", "F", "U"],
+    managerId: parentId,
+    teams: [teams[hash % teams.length], teams[(hash + 1) % teams.length]],
+  }
 }
 
 const STATIC_NODES: GraphNode<Employee>[] = [
   {
     id: "1",
     parentId: null,
-    data: { name: "Sofia Reyes", title: "Chief Executive Officer" },
+    data: {
+      name: "Sofia Reyes",
+      title: "Chief Executive Officer",
+      ...profileDefaults("1", "Sofia Reyes", null),
+    },
     childrenCount: 3,
   },
   {
     id: "2",
     parentId: "1",
-    data: { name: "Marcus Chen", title: "Chief Technology Officer" },
+    data: {
+      name: "Marcus Chen",
+      title: "Chief Technology Officer",
+      ...profileDefaults("2", "Marcus Chen", "1"),
+    },
     childrenCount: 2,
   },
   {
     id: "3",
     parentId: "1",
-    data: { name: "Elena Dupont", title: "Chief Financial Officer" },
+    data: {
+      name: "Elena Dupont",
+      title: "Chief Financial Officer",
+      ...profileDefaults("3", "Elena Dupont", "1"),
+    },
     childrenCount: 1,
   },
   {
     id: "4",
     parentId: "1",
-    data: { name: "Laura Vázquez", title: "Chief People Officer" },
+    data: {
+      name: "Laura Vázquez",
+      title: "Chief People Officer",
+      ...profileDefaults("4", "Laura Vazquez", "1"),
+    },
     childrenCount: 0,
   },
   {
     id: "5",
     parentId: "2",
-    data: { name: "Tomás Herrera", title: "Engineering Manager" },
+    data: {
+      name: "Tomás Herrera",
+      title: "Engineering Manager",
+      ...profileDefaults("5", "Tomas Herrera", "2"),
+    },
     childrenCount: 0,
   },
   {
     id: "6",
     parentId: "2",
-    data: { name: "Aisha Patel", title: "QA Lead" },
+    data: {
+      name: "Aisha Patel",
+      title: "QA Lead",
+      ...profileDefaults("6", "Aisha Patel", "2"),
+    },
     childrenCount: 0,
   },
   {
     id: "7",
     parentId: "3",
-    data: { name: "David Park", title: "Finance Manager" },
+    data: {
+      name: "David Park",
+      title: "Finance Manager",
+      ...profileDefaults("7", "David Park", "3"),
+    },
     childrenCount: 0,
   },
 ]
@@ -80,23 +175,74 @@ function getPortrait(id: string): string | undefined {
   return hash % 2 === 0 ? PORTRAITS[hash % PORTRAITS.length] : undefined
 }
 
-function renderEmployee(node: GraphNode<Employee>, _zoomLevel: ZoomLevel) {
+// Tag pools for deterministic metadata on every node
+const TEAM_POOL = [
+  "Engineering",
+  "Time Tracking",
+  "Operations",
+  "Design",
+  "People",
+  "Finance",
+  "Marketing",
+  "Product",
+] as const
+
+const LOCATION_POOL = [
+  "Barcelona",
+  "Madrid",
+  "Lisbon",
+  "Berlin",
+  "Paris",
+  "Amsterdam",
+  "Remote",
+] as const
+
+type EmployeeTag =
+  | { type: "team"; name: string }
+  | {
+      type: "raw"
+      text: string
+      icon: typeof Pin
+    }
+
+function getEmployeeTags(node: GraphNode<Employee>): EmployeeTag[] {
+  const hash = node.id.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0)
+  const teams = node.data.teams?.map((t) => t.name) ?? [
+    TEAM_POOL[hash % TEAM_POOL.length],
+    TEAM_POOL[(hash + 3) % TEAM_POOL.length],
+  ]
+  const workplace =
+    node.data.workplace ?? LOCATION_POOL[hash % LOCATION_POOL.length]
+  return [
+    ...teams.map((name) => ({ type: "team" as const, name })),
+    {
+      type: "raw" as const,
+      text: workplace,
+      icon: Pin,
+    },
+  ]
+}
+
+function renderEmployee(
+  node: GraphNode<Employee>,
+  ctx: F0GraphNodeRenderContext
+) {
   const { name, title } = node.data as Employee
   const [firstName = "", lastName = ""] = name.split(" ")
   const portrait = getPortrait(node.id)
   return (
-    <>
-      <F0GraphNodeAvatar>
-        <F0AvatarPerson
-          firstName={firstName}
-          lastName={lastName}
-          size="lg"
-          src={portrait}
-        />
-      </F0GraphNodeAvatar>
-      <F0GraphNodeTitle>{name}</F0GraphNodeTitle>
-      <F0GraphNodeSubtitle>{title}</F0GraphNodeSubtitle>
-    </>
+    <F0GraphNode
+      {...ctx}
+      avatar={{
+        type: "person",
+        firstName,
+        lastName,
+        src: portrait,
+      }}
+      title={name}
+      subtitle={title}
+      tags={getEmployeeTags(node)}
+    />
   )
 }
 
@@ -124,10 +270,30 @@ const checkboxLabelStyle: React.CSSProperties = {
   cursor: "pointer",
 }
 
+function Section({
+  title,
+  children,
+}: {
+  title: string
+  children: React.ReactNode
+}) {
+  return (
+    <section className="flex flex-col border-0 border-t border-dashed border-f1-border-secondary">
+      <header className="flex items-center px-4 pb-2 pt-3">
+        <F0Text
+          content={title}
+          as="span"
+          className="text-base font-semibold leading-5 text-f1-foreground"
+        />
+      </header>
+      <div className="flex flex-col gap-2 pb-2">{children}</div>
+    </section>
+  )
+}
+
 export function App() {
   const [defaultZoom, setDefaultZoom] = useState(1)
   const [showControls, setShowControls] = useState(true)
-  const [showMinimap, setShowMinimap] = useState(false)
   const [direction, setDirection] = useState<"TB" | "LR">("TB")
   const [expandDepth, setExpandDepth] = useState(3)
   const [selectionMode, setSelectionMode] = useState<
@@ -185,12 +351,24 @@ export function App() {
   }
 
   const nodes = useMemo(
-    () => (datasetSize === 0 ? STATIC_NODES : generateOrgData(datasetSize)),
+    () =>
+      datasetSize === 0
+        ? STATIC_NODES
+        : generateOrgData(datasetSize).map((n) => ({
+            ...n,
+            data: {
+              ...n.data,
+              ...profileDefaults(n.id, n.data.name, n.parentId),
+            },
+          })),
     [datasetSize]
   )
 
+  const nodesById = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes])
+
   return (
     <div
+      className="bg-f1-background text-f1-foreground"
       style={{
         height: "100vh",
         width: "100vw",
@@ -199,6 +377,7 @@ export function App() {
       }}
     >
       <div
+        className="border-f1-border-secondary bg-f1-background-secondary text-f1-foreground"
         style={{
           height: 24,
           minHeight: 24,
@@ -207,8 +386,7 @@ export function App() {
           alignItems: "center",
           gap: 12,
           padding: "0 8px",
-          background: "#fafafa",
-          borderBottom: "1px solid #eee",
+          borderBottom: "1px solid",
           fontFamily: "system-ui, sans-serif",
           overflow: "hidden",
         }}
@@ -283,15 +461,6 @@ export function App() {
         <label style={checkboxLabelStyle}>
           <input
             type="checkbox"
-            checked={showMinimap}
-            onChange={(e) => setShowMinimap(e.target.checked)}
-          />
-          minimap
-        </label>
-
-        <label style={checkboxLabelStyle}>
-          <input
-            type="checkbox"
             checked={fullScreen}
             onChange={(e) => setFullScreen(e.target.checked)}
           />
@@ -360,12 +529,150 @@ export function App() {
           defaultExpandDepth={expandDepth}
           selectionMode={selectionMode}
           showControls={showControls}
-          showMinimap={showMinimap}
           fullScreen={fullScreen}
           searchable={{
             getLabel: (n) => n.data.name,
             getSecondaryLabel: (n) => n.data.title,
             placeholder: "Search people",
+          }}
+          nodeTagTypes={["team", "raw"]}
+          nodeTagTypeLabels={{
+            team: "Teams",
+            raw: "Workplace",
+          }}
+          canvasActions={
+            <>
+              <F0Button variant="outline" size="md" label="Add" icon={Add} hideLabel />
+              <F0Button variant="outline" size="md" label="Pin" icon={Pin} hideLabel />
+            </>
+          }
+          detailPanel={(n) => {
+            const e = n.data
+            const [firstName = "", lastName = ""] = e.name.split(" ")
+            const portrait = getPortrait(n.id)
+            const manager = n.parentId ? nodesById.get(n.parentId) : undefined
+            const days = e.workableDays ?? []
+            return {
+              variant: "resource",
+              header: (
+                <div className="flex flex-col gap-[10px] px-5 pb-3 pt-6">
+                  <F0AvatarPerson
+                    firstName={firstName}
+                    lastName={lastName}
+                    src={portrait}
+                    size="xl"
+                  />
+                  <div className="flex flex-col">
+                    <div className="flex items-end gap-1.5">
+                      <F0Text
+                        as="span"
+                        content={e.name}
+                        className="text-xl font-semibold leading-7 text-f1-foreground"
+                      />
+                      {e.pronouns && (
+                        <F0Text
+                          as="span"
+                          content={`(${e.pronouns})`}
+                          className="text-sm font-medium leading-5 text-f1-foreground-secondary"
+                        />
+                      )}
+                    </div>
+                    {e.title && (
+                      <F0Text
+                        as="span"
+                        content={e.title}
+                        className="text-lg text-f1-foreground-secondary"
+                      />
+                    )}
+                  </div>
+                </div>
+              ),
+              actions: [
+                {
+                  label: "View profile",
+                  onClick: () => console.log("view profile", n.id),
+                },
+                {
+                  label: "Send message",
+                  icon: WhatsappChat,
+                  onClick: () => console.log("message", n.id),
+                },
+                {
+                  label: "Copy link",
+                  onClick: () => console.log("copy link", n.id),
+                },
+                {
+                  label: "Remove",
+                  onClick: () => console.log("remove", n.id),
+                },
+              ],
+              children: (
+                <>
+                  <Section title="Contact details">
+                    <div className="flex flex-col px-3 pb-1">
+                      <DataList label="Email">
+                        <DataList.Item text={e.email ?? "—"} />
+                      </DataList>
+                      <DataList label="Phone number">
+                        <DataList.Item text={e.phone ?? "—"} />
+                      </DataList>
+                    </div>
+                  </Section>
+                  <Section title="Work details">
+                    <div className="flex flex-col px-3 pb-1">
+                      <DataList label="Email">
+                        <DataList.Item text={e.workEmail ?? "—"} />
+                      </DataList>
+                      <DataList label="Workplace">
+                        <DataList.Item text={e.workplace ?? "—"} />
+                      </DataList>
+                    </div>
+                    <div className="flex flex-col gap-0.5 px-4 pb-2">
+                      <F0Text
+                        as="span"
+                        content="Workable days"
+                        className="text-base leading-5 text-f1-foreground-secondary"
+                      />
+                      <Weekdays
+                        activatedDays={days
+                          .map((d) => DAY_CODE_TO_INDEX[d])
+                          .filter((i): i is number => typeof i === "number")}
+                      />
+                    </div>
+                    {manager && (
+                      <div className="flex flex-col gap-0.5 px-4 pb-2">
+                        <F0Text
+                          as="span"
+                          content="Managed by"
+                          className="text-base leading-5 text-f1-foreground-secondary"
+                        />
+                        <F0TagPerson
+                          name={manager.data.name}
+                          src={getPortrait(manager.id)}
+                        />
+                      </div>
+                    )}
+                  </Section>
+                  {e.teams && e.teams.length > 0 && (
+                    <Section title="Teams">
+                      <div className="flex items-stretch gap-2 px-3 pb-5">
+                        {e.teams.map((t) => (
+                          <div key={t.name} className="flex-1">
+                            <F0Card
+                              compact
+                              fullHeight
+                              avatar={{ type: "team", name: t.name }}
+                              title={t.name}
+                              description={`${t.members} members`}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </Section>
+                  )}
+                </>
+              ),
+            }
           }}
           onVisibleNodesChange={setVisibleCount}
         />

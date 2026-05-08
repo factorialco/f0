@@ -3,6 +3,26 @@
  * double underscores that Tailwind's arbitrary-variant syntax converts to
  * spaces, breaking the selector. A plain CSS file avoids that issue. */
 
+/* Semantic color hooks for F0Graph internals.
+ * React Flow + SVG props need string color values, not Tailwind classes.
+ * Mirror the f1Colors token map (packages/core/src/tokens/colors.ts) so the
+ * component reads semantic intent and dark mode flips automatically via
+ * the underlying --neutral-* vars in base.css. */
+.f0-graph {
+  --f0-graph-spark: hsl(var(--neutral-solid-40)); /* f1-icon-secondary */
+  --f0-graph-bg-dot: hsl(var(--neutral-10)); /* f1-background-secondary */
+  /* Opaque pre-blended edge colors. Using alpha tokens here causes
+   * overlapping edges to compound darker at intersections; opaque
+   * equivalents avoid that artifact. */
+  --f0-graph-edge-default: #cdd4dd; /* grey.30 (213 87% 15% / 0.20) on white */
+  --f0-graph-edge-highlighted: hsl(var(--neutral-100)); /* f1-border-bold */
+}
+
+:root.dark .f0-graph {
+  /* Pre-blended white.30 on the dark surface (#1B1F25 ≈ neutral-2 dark). */
+  --f0-graph-edge-default: #545961;
+}
+
 .f0-graph .react-flow__pane.draggable {
   cursor: default;
 }
@@ -23,15 +43,10 @@
   cursor: pointer;
 }
 
-/* Pan mode: grab cursor on canvas & nodes */
-.f0-graph .f0-graph--pan-mode .react-flow__pane.draggable {
-  cursor: grab;
-}
-
-.f0-graph .f0-graph--pan-mode .react-flow__pane.dragging {
-  cursor: grabbing;
-}
-
-.f0-graph .f0-graph--pan-mode .react-flow__node {
-  cursor: grab;
+/* Respect OS reduced-motion preference — disable CSS transitions */
+@media (prefers-reduced-motion: reduce) {
+  .f0-graph [data-zoom-level],
+  .f0-graph [data-zoom-level] * {
+    transition-duration: 0s !important;
+  }
 }

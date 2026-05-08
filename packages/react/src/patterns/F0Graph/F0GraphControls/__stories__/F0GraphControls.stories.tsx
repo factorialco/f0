@@ -19,7 +19,6 @@ const meta: Meta<typeof F0GraphControls> = {
     onZoomIn: fn(),
     onZoomOut: fn(),
     onFitView: fn(),
-    onModeChange: fn(),
   },
   decorators: [
     (Story) => (
@@ -35,14 +34,8 @@ type Story = StoryObj<typeof F0GraphControls>
 
 export const Default: Story = {}
 
-export const SelectMode: Story = {
+export const WithFindMe: Story = {
   args: {
-    mode: "select",
-  },
-}
-
-export const PanMode: Story = {
-  args: {
-    mode: "pan",
+    onFocusUser: fn(),
   },
 }

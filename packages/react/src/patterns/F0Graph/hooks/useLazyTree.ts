@@ -80,15 +80,12 @@ export function useLazyTree<T>(
           const withoutOldChildren = prev.filter(
             (n) => n.parentId !== nodeId || rootNodes.some((r) => r.id === n.id)
           )
-          return [...withoutOldChildren, ...enrichedChildren]
-        })
-
-        // Mark parent as loaded
-        setAllNodes((prev) =>
-          prev.map((n) =>
+          const merged = [...withoutOldChildren, ...enrichedChildren]
+          // Mark parent as loaded in the same update
+          return merged.map((n) =>
             n.id === nodeId ? { ...n, childrenLoaded: true } : n
           )
-        )
+        })
       } catch (err) {
         setErrorNodes((prev) => {
           const next = new Map(prev)

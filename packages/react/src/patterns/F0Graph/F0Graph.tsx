@@ -58,13 +58,18 @@ import {
 import { type EdgeVariant, type F0GraphEdgeProps } from "./F0GraphEdge"
 import { F0GraphEdgeBase } from "./F0GraphEdge/F0GraphEdge"
 import { F0GraphSearch, useGraphSearch, type Searchable } from "./F0GraphSearch"
-import { useGraphZoomLevel } from "./hooks/useGraphZoomLevel"
+import { useDeferredMerge } from "./hooks/useDeferredMerge"
 import "./F0Graph.css"
+import { useGraphZoomLevel } from "./hooks/useGraphZoomLevel"
 import { useLayoutEngine } from "./hooks/useLayoutEngine"
 import { useLazyTree } from "./hooks/useLazyTree"
-import { useDeferredMerge } from "./hooks/useDeferredMerge"
 import { useTreeBuilder } from "./hooks/useTreeBuilder"
 import { ClickSpark } from "./internal/ClickSpark"
+
+// Singleton empty set used as a stable default for `highlightedNodes`.
+// A fresh Set per render would invalidate the selection context and
+// re-render every node wrapper.
+const EMPTY_HIGHLIGHTED_NODES: Set<string> = new Set<string>()
 
 // ─── Props ─────────────────────────────────────────────────────
 export interface F0GraphProps<T = unknown> {
@@ -184,6 +189,14 @@ export interface F0GraphProps<T = unknown> {
   /** Optional observability callback when a search result is picked. */
   onSearchResultSelect?: (id: string) => void
 
+  // ---- Canvas actions ----
+  /**
+   * Optional action buttons rendered below the search input, aligned to the
+   * left edge of the canvas. Consumers provide their own `<F0Button>` elements
+   * (use `size="md"` to match the navigation controls).
+   */
+  canvasActions?: ReactNode
+
   // ---- Detail panel ----
   /**
    * When provided, clicking a node opens a right-side detail panel and
@@ -218,6 +231,8 @@ export interface F0GraphProps<T = unknown> {
     findMe?: string
     collapseChildren?: string
     metadataSettings?: string
+    graphCanvas?: string
+    graphView?: string
   }
 
   // ---- Tag metadata ----
@@ -263,9 +278,33 @@ export interface F0GraphProps<T = unknown> {
   onVisibleNodesChange?: (count: number) => void
 }
 
+// Visual nudge to keep the collapser button optically aligned with the
+// node it sits next to. Determined empirically.
+const COLLAPSER_OFFSET_ADJUSTMENT = -6
+
+// Delay used after a layout-affecting change before calling `fitView`,
+// so React Flow can settle the new node positions in its store.
+// Replace with deterministic coordination if the timing-fix track lands.
+const FOCUS_SETTLE_DELAY_MS = 100
+
+// fitView paddings used in different fly-to scenarios.
+const FIT_VIEW_PADDING_TIGHT = 0.1
+const FIT_VIEW_PADDING_LOOSE = 0.5
+
+// Fallback dimensions when React Flow has not yet measured a node.
+const DEFAULT_NODE_WIDTH_FALLBACK = 240
+const DEFAULT_NODE_HEIGHT_FALLBACK = 80
+
 // Squared pixel threshold matching React Flow's `nodeClickDistance` so a
 // pan drag ending over a node does not register as a click.
 const NODE_CLICK_DISTANCE_SQ = 4 * 4
+
+// Above this rendered-node count we skip variant transitions on every node
+// (chrome opacity, avatar transform, text reveal). Animating thousands of
+// pills on a single zoomLevel change overwhelms the compositor; snapping
+// trades polish for responsiveness on large graphs. Tuned by feel — the
+// 200-node case still animates, the 4000-node case stays interactive.
+const LARGE_GRAPH_SNAP_THRESHOLD = 700
 
 // ─── Helper: compute initial expanded set from depth ───────────
 function computeExpandedByDepth<T>(
@@ -477,6 +516,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     searchLoading,
     searchable,
     onSearchResultSelect,
+    canvasActions,
     showControls = false,
     onZoomLevelChange,
     onViewportChange,
@@ -487,6 +527,10 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     onVisibleTagTypesChange,
     nodeTagTypeLabels,
     reserveTagRow,
+    onVisibleNodesChange,
+    layoutEngine: layoutEngineProp,
+    controlLabels,
+    currentUserNodeId,
   } = props
 
   const reactFlow = useReactFlow()
@@ -639,7 +683,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
   const selectedNodes = controlledSelected ?? internalSelected
 
   // ── Highlighted nodes ──
-  const highlightedNodes = highlightedProp ?? new Set<string>()
+  const highlightedNodes = highlightedProp ?? EMPTY_HIGHLIGHTED_NODES
 
   // ── Focus state (roving tabindex) ──
   const [focusedNodeId, setFocusedNodeId] = useState<string | null>(() => {
@@ -706,6 +750,10 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     }
     return order
   }, [roots, expandedNodes])
+  const flatVisibleOrderSet = useMemo(
+    () => new Set(flatVisibleOrder),
+    [flatVisibleOrder]
+  )
   const flatVisibleOrderRef = useRef(flatVisibleOrder)
   useEffect(() => {
     flatVisibleOrderRef.current = flatVisibleOrder
@@ -714,7 +762,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
   // ── Initialize / repair focused node ──
   useEffect(() => {
     if (flatVisibleOrder.length === 0) return
-    if (focusedNodeId === null || !flatVisibleOrder.includes(focusedNodeId)) {
+    if (focusedNodeId === null || !flatVisibleOrderSet.has(focusedNodeId)) {
       // On initial mount, prefer first selected node if any are visible
       const firstSelected =
         focusedNodeId === null
@@ -750,8 +798,8 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
 
   // Notify parent of visible node count changes
   useEffect(() => {
-    props.onVisibleNodesChange?.(visibleTreeNodes.length)
-  }, [visibleTreeNodes.length, props.onVisibleNodesChange])
+    onVisibleNodesChange?.(visibleTreeNodes.length)
+  }, [visibleTreeNodes.length, onVisibleNodesChange])
 
   // ── Expander data: for each visible parent with children, create an expander ──
   const expanderMap = useMemo(() => {
@@ -761,20 +809,15 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
         expanderId: string
         avatars: { firstName: string; lastName: string; src?: string }[]
         count: number
-        childIds: string[]
       }
     >()
 
     for (const treeNode of visibleTreeNodes) {
       if (treeNode.childrenCount > 0 && !expandedNodes.has(treeNode.id)) {
-        const childIds = expandedNodes.has(treeNode.id)
-          ? treeNode.children.map((c) => c.id)
-          : []
         map.set(treeNode.id, {
           expanderId: `expander-${treeNode.id}`,
           avatars: [],
           count: treeNode.childrenCount,
-          childIds,
         })
       }
     }
@@ -878,7 +921,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     nodeWidth: nodeWidthProp,
     nodeHeight: effectiveNodeHeight,
   })
-  const layoutEngine = props.layoutEngine ?? builtInEngine
+  const layoutEngine = layoutEngineProp ?? builtInEngine
   const layout = useMemo(
     () => layoutEngine.computeLayout(layoutNodes, layoutEdges, direction),
     [layoutEngine, layoutNodes, layoutEdges, direction]
@@ -965,7 +1008,6 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
           y: (pos?.y ?? 0) * yStretch + anchorDy,
         },
         width: BASE_W,
-        height: BASE_H,
         sourcePosition: sourcePos,
         targetPosition: targetPos,
         data: {
@@ -1032,13 +1074,16 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
         const ph = parentPos?.height ?? BASE_H
         const colX = isHorizontal
           ? direction === "LR"
-            ? px + pw + EXPANDER_Y_OFFSET - 6
+            ? px + pw + EXPANDER_Y_OFFSET + COLLAPSER_OFFSET_ADJUSTMENT
             : px - pw
           : px
         const colY = isHorizontal
           ? py * yStretch
           : direction === "TB"
-            ? py * yStretch + ph + EXPANDER_Y_OFFSET - 6
+            ? py * yStretch +
+              ph +
+              EXPANDER_Y_OFFSET +
+              COLLAPSER_OFFSET_ADJUSTMENT
             : py * yStretch - ph
 
         return {
@@ -1054,7 +1099,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
           data: {
             parentId: parent.id,
             parentWidth: BASE_W,
-            collapseLabel: props.controlLabels?.collapseChildren,
+            collapseLabel: controlLabels?.collapseChildren,
             parentName: parent.id,
           } as CollapserNodeData,
         }
@@ -1073,7 +1118,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     nodeHeightProp,
     direction,
     ariaTreeInfo,
-    props.controlLabels?.collapseChildren,
+    controlLabels?.collapseChildren,
   ])
 
   // ── Build React Flow edges ──
@@ -1169,28 +1214,39 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
   }, [detailNodeId, nodeMap])
   const detailOpen = detailPanelEnabled && detailNode !== null
 
-  // Center a node accounting for the detail panel offset (panel sits on the right).
+  // Canvas ref — wraps the ReactFlow viewport plus overlays (controls,
+  // search, detail panel). Declared here so it can be read by the
+  // panel-aware centering callback below; the same ref is attached to the
+  // canvas element further down.
+  const canvasRef = useRef<HTMLDivElement>(null)
+
+  // Read the actual rendered detail-panel width from the DOM. The panel
+  // persists its width to localStorage and may differ from the
+  // `detailPanelWidth` prop after the user resizes. Falling back to the
+  // prop value covers the first-paint case before the panel is measurable.
+  const getActualPanelWidth = useCallback((): number => {
+    const root = canvasRef.current
+    if (!root) return detailPanelWidth
+    const panel = root.querySelector<HTMLElement>('[role="complementary"]')
+    if (!panel) return detailPanelWidth
+    const measured = panel.getBoundingClientRect().width
+    return measured > 0 ? measured : detailPanelWidth
+  }, [detailPanelWidth])
+
   const centerNodeWithPanelOffset = useCallback(
     (id: string, panelOpen: boolean) => {
       const rfNode = reactFlow.getNode(id)
       if (!rfNode) return
-      const nodeWidth =
-        rfNode.width ??
-        (rfNode as unknown as { measured?: { width?: number } }).measured
-          ?.width ??
-        240
-      const nodeHeight =
-        rfNode.height ??
-        (rfNode as unknown as { measured?: { height?: number } }).measured
-          ?.height ??
-        80
+      const nodeWidth = rfNode.width ?? DEFAULT_NODE_WIDTH_FALLBACK
+      const nodeHeight = rfNode.height ?? DEFAULT_NODE_HEIGHT_FALLBACK
       const targetZoom = Math.max(reactFlow.getZoom(), 1)
-      const offsetWorldX = panelOpen ? detailPanelWidth / 2 / targetZoom : 0
+      const panelWidth = panelOpen ? getActualPanelWidth() : 0
+      const offsetWorldX = panelWidth / 2 / targetZoom
       const cx = rfNode.position.x + nodeWidth / 2 + offsetWorldX
       const cy = rfNode.position.y + nodeHeight / 2
       reactFlow.setCenter(cx, cy, { zoom: targetZoom, duration: 400 })
     },
-    [reactFlow, detailPanelWidth]
+    [reactFlow, getActualPanelWidth]
   )
 
   // ── Selection (focus semantics: click selects, click again keeps, pane click clears) ──
@@ -1243,7 +1299,6 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
   )
 
   const containerRef = useRef<HTMLDivElement>(null)
-  const canvasRef = useRef<HTMLDivElement>(null)
 
   // Tracks pointerdown coordinates so we can distinguish a click on a node
   // from a pan drag that happens to end over a node. Mirrors React Flow's
@@ -1300,7 +1355,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
           e.preventDefault()
           reactFlow.fitView({
             duration: reducedMotion ? 0 : 400,
-            padding: 0.1,
+            padding: FIT_VIEW_PADDING_TIGHT,
           })
           return
       }
@@ -1403,7 +1458,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
           reactFlow.fitView({
             nodes: [{ id: targetId.replace(/^(expander|collapser)-/, "") }],
             duration: rm ? 0 : 300,
-            padding: 0.5,
+            padding: FIT_VIEW_PADDING_LOOSE,
           })
         }
       }
@@ -1477,7 +1532,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
           e.preventDefault()
           reactFlow.fitView({
             duration: reducedMotion ? 0 : 400,
-            padding: 0.1,
+            padding: FIT_VIEW_PADDING_TIGHT,
           })
           break
         default:
@@ -1495,9 +1550,9 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
         reactFlow.fitView({
           nodes: [{ id: focusedNode }],
           duration: 300,
-          padding: 0.5,
+          padding: FIT_VIEW_PADDING_LOOSE,
         })
-      }, 100)
+      }, FOCUS_SETTLE_DELAY_MS)
       return () => clearTimeout(timer)
     }
   }, [focusedNode, reactFlow])
@@ -1521,16 +1576,17 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
   }, [reactFlow])
 
   const handleFitView = useCallback(() => {
-    reactFlow.fitView({ duration: 400, padding: 0.1 })
+    reactFlow.fitView({ duration: 400, padding: FIT_VIEW_PADDING_TIGHT })
   }, [reactFlow])
 
   const handleFocusUser = useCallback(() => {
-    if (!props.currentUserNodeId) return
-    centerNodeWithPanelOffset(props.currentUserNodeId, detailOpen)
-  }, [props.currentUserNodeId, centerNodeWithPanelOffset, detailOpen])
+    if (!currentUserNodeId) return
+    centerNodeWithPanelOffset(currentUserNodeId, detailOpen)
+  }, [currentUserNodeId, centerNodeWithPanelOffset, detailOpen])
 
   // ── Internal search-with-popover state ──
   const [internalSearchQuery, setInternalSearchQuery] = useState("")
+  const searchFlyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const {
     results: searchResults,
     hasQuery: hasSearchQuery,
@@ -1563,21 +1619,23 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
       selectNode(id)
 
       // 3) Fly to it once the next layout pass has settled.
-      const timer = window.setTimeout(() => {
+      if (searchFlyTimerRef.current) {
+        window.clearTimeout(searchFlyTimerRef.current)
+      }
+      searchFlyTimerRef.current = window.setTimeout(() => {
+        searchFlyTimerRef.current = null
         if (detailPanelEnabled) {
           centerNodeWithPanelOffset(id, true)
         } else {
           reactFlow.fitView({
             nodes: [{ id }],
             duration: 300,
-            padding: 0.5,
+            padding: FIT_VIEW_PADDING_LOOSE,
           })
         }
-      }, 100)
+      }, FOCUS_SETTLE_DELAY_MS)
 
       onSearchResultSelect?.(id)
-
-      return () => window.clearTimeout(timer)
     },
     [
       nodeMap,
@@ -1591,6 +1649,15 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
       centerNodeWithPanelOffset,
     ]
   )
+
+  // Clean up the search-fly timer on unmount.
+  useEffect(() => {
+    return () => {
+      if (searchFlyTimerRef.current) {
+        window.clearTimeout(searchFlyTimerRef.current)
+      }
+    }
+  }, [])
 
   // ── Split context values (for performance — wrappers subscribe to only what they need) ──
   const zoomContextValue = useMemo(
@@ -1622,8 +1689,26 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
       // Otherwise leave it undefined so F0GraphNode renders all tags.
       visibleTagTypes: nodeTagTypes ? visibleTagTypesSet : undefined,
       deferredLoading: isDeferredLoading || undefined,
+
+      // Tells the node wrapper how much extra height the layout reserved
+      // for tags. In compact/dot (where tags are hidden) the wrapper uses
+      // this to top-align the pill and pull the source Handle up.
+      tagRowHeight: tagsAffectLayout ? TAG_ROW_HEIGHT : 0,
+      // Snap variant transitions when the rendered tree exceeds this
+      // threshold. Animating thousands of pills (chrome opacity, avatar
+      // transform, text reveal, backdrop-blur activation) on a single
+      // zoomLevel change overwhelms the compositor; snapping keeps the
+      // dot↔compact / compact↔detail change instant in those cases.
+      largeGraph: visibleTreeNodes.length > LARGE_GRAPH_SNAP_THRESHOLD,
     }),
-    [renderEdge, nodeTagTypes, visibleTagTypesSet, isDeferredLoading]
+    [
+      renderEdge,
+      nodeTagTypes,
+      visibleTagTypesSet,
+      isDeferredLoading,
+      visibleTreeNodes.length,
+      tagsAffectLayout,
+    ]
   )
 
   const focusContextValue = useMemo(
@@ -1648,7 +1733,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
                   <div
                     ref={canvasRef}
                     tabIndex={0}
-                    aria-label="Graph canvas"
+                    aria-label={controlLabels?.graphCanvas ?? "Graph canvas"}
                     onKeyDown={handleCanvasKeyDown}
                     data-zoom-level={zoomLevel}
                     className={cn(
@@ -1661,7 +1746,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
                     <div
                       ref={containerRef}
                       role="tree"
-                      aria-label="Graph view"
+                      aria-label={controlLabels?.graphView ?? "Graph view"}
                       onKeyDown={handleTreeKeyDown}
                       onPointerDown={(e) => {
                         pointerDownRef.current = {
@@ -1724,7 +1809,10 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
                     </div>
 
                     {searchable ? (
-                      <div className="absolute left-3 top-3 z-10" data-no-spark>
+                      <div
+                        className="absolute left-3 top-3 z-10 flex w-[240px] flex-col gap-2"
+                        data-no-spark
+                      >
                         <F0GraphSearch
                           value={internalSearchQuery}
                           onChange={setInternalSearchQuery}
@@ -1736,11 +1824,16 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
                           noResultsLabel={searchable.noResultsLabel}
                           onSelect={handleSearchResultSelect}
                         />
+                        {canvasActions && (
+                          <div className="flex w-fit flex-col gap-2 rounded-md backdrop-blur-[140px]">
+                            {canvasActions}
+                          </div>
+                        )}
                       </div>
                     ) : (
                       onSearchChange && (
                         <div
-                          className="absolute left-3 top-3 z-10"
+                          className="absolute left-3 top-3 z-10 flex w-[240px] flex-col gap-2"
                           data-no-spark
                         >
                           <Search
@@ -1748,8 +1841,22 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
                             onChange={onSearchChange}
                             loading={searchLoading}
                           />
+                          {canvasActions && (
+                            <div className="flex w-fit flex-col gap-2 rounded-md backdrop-blur-[140px]">
+                              {canvasActions}
+                            </div>
+                          )}
                         </div>
                       )
+                    )}
+
+                    {!searchable && !onSearchChange && canvasActions && (
+                      <div
+                        className="absolute left-3 top-3 z-10 flex flex-col gap-2 rounded-md backdrop-blur-[140px]"
+                        data-no-spark
+                      >
+                        {canvasActions}
+                      </div>
                     )}
 
                     {showControls && (
@@ -1762,8 +1869,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
                           onZoomOut={handleZoomOut}
                           onFitView={handleFitView}
                           onFocusUser={
-                            props.currentUserNodeId &&
-                            nodeMap.has(props.currentUserNodeId)
+                            currentUserNodeId && nodeMap.has(currentUserNodeId)
                               ? handleFocusUser
                               : undefined
                           }
@@ -1771,7 +1877,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
                           visibleTagTypes={visibleTagTypesSet}
                           onToggleTagType={toggleTagType}
                           tagTypeLabels={nodeTagTypeLabels}
-                          labels={props.controlLabels}
+                          labels={controlLabels}
                         />
                       </div>
                     )}

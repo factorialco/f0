@@ -667,6 +667,28 @@ export const defaultTranslations = {
       },
     },
   },
+  graph: {
+    controls: {
+      findMe: "Find me",
+      fitToView: "Fit to view",
+      zoomIn: "Zoom in",
+      zoomOut: "Zoom out",
+      navigation: "Graph navigation",
+      metadataSettings: "Metadata visibility",
+    },
+    search: {
+      noResults: "No results",
+    },
+    detailPanel: {
+      details: "Details",
+      moreActions: "More actions",
+      resize: "Resize detail panel",
+    },
+    expander: {
+      collapse: "Collapse {{count}} items",
+      expand: "Expand {{count}} items",
+    },
+  },
   wizard: {
     previous: "Previous",
     next: "Continue",

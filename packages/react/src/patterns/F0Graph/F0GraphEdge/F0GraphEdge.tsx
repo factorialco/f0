@@ -9,14 +9,15 @@ import { memo } from "react"
 
 import type { F0GraphEdgeProps } from "./types"
 
-import { useF0GraphZoomInternal } from "../context/zoom"
+import { useF0GraphZoomInternal } from "../contexts"
 
-// Opaque equivalents of alpha tokens (pre-blended on white) to avoid
-// intersection artifacts from per-edge compositing.
+// Semantic edge stroke colors. Defined as CSS vars on .f0-graph in
+// F0Graph.css so they flip automatically in dark mode and stay aligned
+// with the f1Colors token map.
 const strokeColors = {
-  default: "#CDD4DD", // neutral-30 (rgba(5,38,87,0.20)) on white
-  highlighted: "hsl(var(--neutral-100))",
-  dimmed: "#CDD4DD",
+  default: "var(--f0-graph-edge-default)", // f1-border
+  highlighted: "var(--f0-graph-edge-highlighted)", // f1-border-bold
+  dimmed: "var(--f0-graph-edge-default)",
 } as const
 
 const MARKER_ID = "f0-edge-dot"
@@ -28,7 +29,7 @@ const pathGetters = {
   bezier: getBezierPath,
 } as const
 
-export function F0GraphEdgeInner({
+export function F0GraphEdgeBase({
   variant = "default",
   animated = false,
   strokeWidth: propStrokeWidth = 1,
@@ -113,9 +114,9 @@ export function F0GraphEdgeInner({
   )
 }
 
-F0GraphEdgeInner.displayName = "F0GraphEdge"
+F0GraphEdgeBase.displayName = "F0GraphEdge"
 
-export const F0GraphEdge = memo(F0GraphEdgeInner, (prev, next) => {
+export const F0GraphEdge = memo(F0GraphEdgeBase, (prev, next) => {
   if (prev.id !== next.id) return false
   if (prev.data?.showDot !== next.data?.showDot) return false
   if (prev.sourceX !== next.sourceX) return false

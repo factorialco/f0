@@ -1,0 +1,65 @@
+import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
+
+import * as Stories from "./F0GraphControls.stories"
+
+<Meta of={Stories} />
+
+# F0GraphControls
+
+A floating toolbar that provides zoom and viewport controls for the graph
+canvas, plus an optional "Find me" shortcut for centering on the current
+user's node.
+
+---
+
+# Overview
+
+F0GraphControls is rendered automatically by `<F0Graph>` when
+`showControls={true}`. It can also be used standalone for custom graph
+implementations that need a consistent control surface.
+
+<Canvas of={Stories.Default} />
+<Controls of={Stories.Default} />
+
+---
+
+# Variants
+
+## With Find me
+
+When `onFocusUser` is provided, a "Find me" button is rendered as the
+first control. Pass `currentUserNodeId` to `<F0Graph>` to enable this
+button automatically.
+
+<Canvas of={Stories.WithFindMe} />
+
+---
+
+# Props
+
+| Prop           | Type                   | Default | Description                                                    |
+| -------------- | ---------------------- | ------- | -------------------------------------------------------------- |
+| `onZoomIn`     | `() => void`           | —       | Callback for zoom-in button                                    |
+| `onZoomOut`    | `() => void`           | —       | Callback for zoom-out button                                   |
+| `onFitView`    | `() => void`           | —       | Callback for fit-to-view button                                |
+| `onFocusUser`  | `() => void`           | —       | Callback for the Find me button. Button is hidden if omitted.  |
+| `labels`       | `F0GraphControlLabels` | —       | Override default English labels for buttons                    |
+
+---
+
+# Usage
+
+Most consumers never render `F0GraphControls` directly — pass
+`showControls` (and optionally `currentUserNodeId`) to `<F0Graph>`
+instead. Use standalone only when building a custom graph canvas
+that needs the same control toolbar.
+
+```tsx
+import { F0GraphControls } from "@factorialco/f0-react"
+;<F0GraphControls
+  onZoomIn={handleZoomIn}
+  onZoomOut={handleZoomOut}
+  onFitView={handleFitView}
+  onFocusUser={handleFocusUser}
+/>
+```

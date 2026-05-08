@@ -11,7 +11,7 @@ export const graphNodeContainerVariants = cva({
     state: {
       default: "",
       selected: "",
-      highlighted: "ring-1 ring-f1-border-accent",
+      highlighted: "",
       dimmed: "opacity-40",
     },
   },
@@ -37,8 +37,8 @@ export const graphNodeSlotVisibility = {
     compact: "hidden",
     dot: "hidden",
   },
-  metadata: {
-    detail: "block",
+  tags: {
+    detail: "flex",
     compact: "hidden",
     dot: "hidden",
   },

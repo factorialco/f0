@@ -7,14 +7,10 @@ import {
 import { useId, useRef, useState } from "react"
 import { useOnClickOutside } from "usehooks-ts"
 
-import { F0Icon } from "../../../../components/F0Icon"
-import {
-  CrossedCircle,
-  Search as SearchIcon,
-  Spinner,
-} from "../../../../icons/app"
-import { useI18n } from "../../../../lib/providers/i18n"
-import { cn, focusRing } from "../../../../lib/utils"
+import { F0Icon } from "@/components/F0Icon"
+import { CrossedCircle, Search as SearchIcon, Spinner } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
+import { cn, focusRing } from "@/lib/utils"
 
 interface SearchProps {
   value?: string

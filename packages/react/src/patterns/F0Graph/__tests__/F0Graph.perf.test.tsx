@@ -4,9 +4,7 @@ import { beforeAll, describe, expect, it, vi } from "vitest"
 import { zeroRender, screen } from "@/testing/test-utils"
 
 import type { GraphNode, ZoomLevel } from "../../types"
-import type { F0GraphContextValue } from "../context"
 
-import { useF0GraphContext } from "../context"
 import { F0Graph } from "../F0Graph"
 
 // ─── Fixtures ──────────────────────────────────────────────────
@@ -139,49 +137,6 @@ describe("Fix 2 — renderNode stabilization", () => {
 // ─── Fix 3 — Split context ────────────────────────────────────
 
 describe("Fix 3 — Context split", () => {
-  it("useF0GraphContext() returns complete value including all slices", () => {
-    let contextValue: F0GraphContextValue | null = null
-
-    function ContextReader() {
-      contextValue = useF0GraphContext()
-      return null
-    }
-
-    zeroRender(
-      <div style={{ width: 800, height: 600 }}>
-        <F0Graph
-          nodes={makeNodes()}
-          renderNode={(node, _zl) => {
-            return (
-              <>
-                <ContextReader />
-                <span>{String(node.data)}</span>
-              </>
-            )
-          }}
-          defaultExpandedNodes={new Set(["1"])}
-        />
-      </div>
-    )
-
-    // Context should be populated after render
-    if (contextValue) {
-      const ctx = contextValue
-      expect(ctx).toHaveProperty("zoomLevel")
-      expect(ctx).toHaveProperty("currentZoom")
-      expect(ctx).toHaveProperty("expandedNodes")
-      expect(ctx).toHaveProperty("selectedNodes")
-      expect(ctx).toHaveProperty("highlightedNodes")
-      expect(ctx).toHaveProperty("toggleExpand")
-      expect(ctx).toHaveProperty("selectNode")
-      expect(typeof ctx.toggleExpand).toBe("function")
-      expect(typeof ctx.selectNode).toBe("function")
-      expect(ctx.expandedNodes).toBeInstanceOf(Set)
-      expect(ctx.selectedNodes).toBeInstanceOf(Set)
-      expect(ctx.highlightedNodes).toBeInstanceOf(Set)
-    }
-  })
-
   it("renders correctly with selection state", () => {
     const onNodeSelect = vi.fn()
 

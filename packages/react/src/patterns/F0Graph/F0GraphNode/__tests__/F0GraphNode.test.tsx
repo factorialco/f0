@@ -1,3 +1,4 @@
+import { fireEvent } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
 import { zeroRender as render, screen } from "@/testing/test-utils"
@@ -37,7 +38,7 @@ describe("F0GraphNode", () => {
         avatar={personAvatar}
         title="Alice"
         subtitle="Engineer"
-        metadata={<span>Madrid</span>}
+        tags={[{ type: "raw", text: "Madrid" }]}
         actions={<button type="button">Edit</button>}
       />
     )
@@ -53,7 +54,7 @@ describe("F0GraphNode", () => {
         avatar={personAvatar}
         title="Alice"
         subtitle="Engineer"
-        metadata={<span>Madrid</span>}
+        tags={[{ type: "raw", text: "Madrid" }]}
         actions={<button type="button">Edit</button>}
       />
     )
@@ -103,7 +104,8 @@ describe("F0GraphNode", () => {
   it("onClick fires on click", () => {
     const onClick = vi.fn()
     render(<F0GraphNode onClick={onClick} />)
-    screen.getByRole("treeitem").click()
+    const el = screen.getByRole("treeitem")
+    fireEvent.click(el)
     expect(onClick).toHaveBeenCalledOnce()
   })
 
@@ -147,18 +149,49 @@ describe("F0GraphNode", () => {
   })
 
   it("state variants apply correct classes", () => {
-    // State classes live on the inner pill, not the treeitem wrapper.
-    // `highlighted` and `dimmed` only style the pill in dot mode.
+    // Selected/highlighted ring lives on the pill wrapper for compact/detail.
+    // For the dot variant, the ring is applied to the avatar so it scales
+    // together with the visible dot circle. Dimmed applies opacity-40 to
+    // the wrapper, only in dot mode.
     const getPill = () =>
       screen.getByRole("treeitem").firstElementChild as HTMLElement
+    const getAvatarRingTarget = () => {
+      // Pill wrapper > [chrome layer, content row]; avatar wrapper is the
+      // first child of the content row.
+      const pill = getPill()
+      const contentRow = pill.children[1] as HTMLElement
+      return contentRow.firstElementChild as HTMLElement
+    }
 
     const { rerender } = render(<F0GraphNode state="selected" />)
     expect(getPill().className).toContain("ring-2")
 
     rerender(<F0GraphNode variant="dot" state="highlighted" />)
-    expect(getPill().className).toContain("ring-1")
+    expect(getAvatarRingTarget().className).toContain("ring-1")
 
     rerender(<F0GraphNode variant="dot" state="dimmed" />)
     expect(getPill().className).toContain("opacity-40")
+  })
+
+  it("forwards tabIndex prop to treeitem", () => {
+    const { rerender } = render(<F0GraphNode tabIndex={0} />)
+    expect(screen.getByRole("treeitem")).toHaveAttribute("tabindex", "0")
+
+    rerender(<F0GraphNode tabIndex={-1} />)
+    expect(screen.getByRole("treeitem")).toHaveAttribute("tabindex", "-1")
+  })
+
+  it("forwards aria-level, aria-setsize, aria-posinset to treeitem", () => {
+    render(<F0GraphNode level={3} setSize={5} posInSet={2} />)
+    const node = screen.getByRole("treeitem")
+    expect(node).toHaveAttribute("aria-level", "3")
+    expect(node).toHaveAttribute("aria-setsize", "5")
+    expect(node).toHaveAttribute("aria-posinset", "2")
+  })
+
+  it("calls nodeRef callback on mount", () => {
+    const nodeRef = vi.fn()
+    render(<F0GraphNode nodeRef={nodeRef} />)
+    expect(nodeRef).toHaveBeenCalledWith(expect.any(HTMLDivElement))
   })
 })

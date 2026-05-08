@@ -13,41 +13,66 @@ export function useTreeBuilder<T>(nodes: GraphNode<T>[]): TreeBuilderResult<T> {
   return useMemo(() => buildTree(nodes), [nodes])
 }
 
+/**
+ * Resolve the canonical parent ID for a node.
+ *
+ * Resolution rule:
+ * - If `parentIds` is present and non-empty, use the first entry.
+ * - Otherwise fall back to `parentId`.
+ */
+function resolveCanonicalParent<T>(node: GraphNode<T>): string | null {
+  if (node.parentIds && node.parentIds.length > 0) {
+    return node.parentIds[0]
+  }
+  return node.parentId
+}
+
 function buildTree<T>(nodes: GraphNode<T>[]): TreeBuilderResult<T> {
   const nodeMap = new Map<string, TreeNode<T>>()
   const orphans: string[] = []
   const cycles: string[] = []
 
-  // Step 1: Create TreeNode entries for every input node
+  // Step 1: Create TreeNode entries for every input node.
+  //         When `parentIds` is provided it takes precedence over `parentId`.
+  //         The first entry becomes the canonical layout parent; the full list
+  //         is stored as `dagParentIds`.
   for (const node of nodes) {
-    nodeMap.set(node.id, {
+    const canonicalParent = resolveCanonicalParent(node)
+    const dagParentIds =
+      node.parentIds && node.parentIds.length > 0 ? node.parentIds : undefined
+
+    const treeNode: TreeNode<T> = {
       id: node.id,
-      parentId: node.parentId,
+      parentId: canonicalParent,
       data: node.data,
       children: [],
       depth: 0,
       childrenCount: node.childrenCount ?? 0,
       childrenLoaded: node.childrenLoaded ?? false,
-    })
+    }
+    if (dagParentIds) {
+      treeNode.dagParentIds = dagParentIds
+    }
+    nodeMap.set(node.id, treeNode)
   }
 
-  // Step 2: Detect self-referencing nodes (parentId === id) as cycles
-  for (const node of nodes) {
-    if (node.parentId === node.id) {
-      cycles.push(node.id)
-      const treeNode = nodeMap.get(node.id)!
+  // Step 2: Detect self-referencing nodes (canonical parentId === id) as cycles
+  for (const [id, treeNode] of nodeMap) {
+    if (treeNode.parentId === id) {
+      cycles.push(id)
       treeNode.parentId = null
     }
   }
 
-  // Step 3: Attach children to parents, detect orphans
+  // Step 3: Attach children to their canonical parent, detect orphans.
+  //         In a DAG, a node may list multiple parents but is attached to the
+  //         canonical (first) parent only. The additional parents are recorded
+  //         in `dagParentIds` for consumers that need the full topology.
   const roots: TreeNode<T>[] = []
 
-  for (const node of nodes) {
-    const treeNode = nodeMap.get(node.id)!
-
+  for (const [id, treeNode] of nodeMap) {
     // Already promoted to root by cycle detection
-    if (cycles.includes(node.id)) {
+    if (cycles.includes(id)) {
       roots.push(treeNode)
       continue
     }
@@ -59,15 +84,18 @@ function buildTree<T>(nodes: GraphNode<T>[]): TreeBuilderResult<T> {
       if (parent) {
         parent.children.push(treeNode)
       } else {
-        // Orphan: parentId references non-existent node (ERR-002)
-        orphans.push(node.id)
+        // Orphan: canonical parentId references non-existent node (ERR-002)
+        orphans.push(id)
         treeNode.parentId = null
         roots.push(treeNode)
       }
     }
   }
 
-  // Step 4: Cycle detection via DFS traversal
+  // Step 4: Cycle detection via DFS on the canonical-parent tree.
+  //         DAG multi-parent edges don't create tree cycles — a node appearing
+  //         under multiple parents is valid. Only reachability cycles in the
+  //         canonical parent chain are errors.
   const visited = new Set<string>()
   const inStack = new Set<string>()
 

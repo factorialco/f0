@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import type {
   DeferredNodesPayload,
@@ -88,8 +88,14 @@ export function useDeferredMerge<T>(
   }, [deferredNodes])
 
   // Stable merge: dedup by id, deferred wins on conflict, append new.
-  const mergedNodes = mergeNodes(initialNodes, deferredPayload?.nodes)
-  const mergedEdges = mergeEdges(initialEdges, deferredPayload?.edges)
+  const mergedNodes = useMemo(
+    () => mergeNodes(initialNodes, deferredPayload?.nodes),
+    [initialNodes, deferredPayload]
+  )
+  const mergedEdges = useMemo(
+    () => mergeEdges(initialEdges, deferredPayload?.edges),
+    [initialEdges, deferredPayload]
+  )
 
   return { mergedNodes, mergedEdges, deferredStatus, error }
 }

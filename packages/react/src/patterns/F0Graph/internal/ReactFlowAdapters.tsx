@@ -6,8 +6,9 @@ import {
 } from "@xyflow/react"
 import { type ReactNode, memo } from "react"
 
+import { F0Button } from "@/components/F0Button"
 import { Minimize } from "@/icons/app"
-import { cn, focusRing } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 
 import type { F0GraphNodeRenderContext } from "../F0Graph"
 import type { GraphNodeState, GraphNodeVariant } from "../F0GraphNode"
@@ -167,8 +168,8 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
     <>
       <Handle type="target" position={targetPos} className="!invisible" />
       <div
-        className="pointer-events-none flex items-center justify-center"
-        style={{ width: "100%", height: "100%" }}
+        className="pointer-events-none flex items-start justify-center"
+        style={{ width: "100%" }}
       >
         <div
           className="pointer-events-auto"
@@ -322,28 +323,26 @@ function F0GraphCollapserWrapperInner({
             actionsCtx.toggleExpand(parentId)
           }
         }}
-        className={cn(
-          "group pointer-events-auto flex items-start justify-center pt-2 outline-none",
-          !isFocused && "[&>button]:invisible [&>button]:group-hover:visible",
-          isFocused && "[&>button]:visible"
-        )}
+        className="group pointer-events-auto flex items-start justify-center pt-2 outline-none"
         style={{ width: parentWidth, height: 80 }}
       >
-        <button
-          type="button"
-          tabIndex={-1}
-          onClick={() => actionsCtx.toggleExpand(parentId)}
+        <div
           className={cn(
-            "inline-flex items-center justify-center rounded-lg border-none p-2",
-            "bg-f1-background-secondary text-f1-foreground",
-            "shadow-[0_2px_6px_-1px_rgba(13,22,37,.04),inset_0_-2px_4px_rgba(13,22,37,.04)]",
-            "hover:bg-f1-background-secondary-hover",
             "backdrop-blur-[120px]",
-            focusRing()
+            !isFocused && "invisible group-hover:visible",
+            isFocused && "visible"
           )}
         >
-          <Minimize />
-        </button>
+          <F0Button
+            variant="neutral"
+            size={zoomCtx.zoomLevel === "compact" ? "lg" : "md"}
+            icon={Minimize}
+            hideLabel
+            label={ariaLabel}
+            tabIndex={-1}
+            onClick={() => actionsCtx.toggleExpand(parentId)}
+          />
+        </div>
       </div>
       <Handle type="source" position={sourcePos} className="!invisible" />
     </>

@@ -1,0 +1,309 @@
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+import * as F0GraphStories from "./F0Graph.stories"
+
+<Meta of={F0GraphStories} />
+
+# Graph
+
+A canvas for visualizing hierarchical relationships — org
+charts, team structures, project trees, account hierarchies —
+with built-in zoom, search, selection, and detail-panel
+interactions.
+
+---
+
+# Overview
+
+## Purpose
+
+- Reveal the **shape** of a hierarchy at a glance: who reports to whom, what
+  belongs to what, how a tree is balanced
+- Let users **explore in place** without losing context — expand, collapse,
+  search, focus, and inspect a node without leaving the canvas
+- Provide a **consistent navigation pattern** across every hierarchical
+  resource in the product (people, teams, accounts, projects, workspaces)
+
+A Graph is not a list with indentation. Use it when the **relationships
+between items** carry as much meaning as the items themselves.
+
+## Anatomy
+
+<Canvas of={F0GraphStories.BasicTree} />
+<Controls of={F0GraphStories.BasicTree} />
+
+A Graph is composed of:
+
+1. **Canvas** — the pannable, zoomable surface that holds the tree
+2. **Nodes** — rendered by the consumer via `renderNode`; F0 ships
+   `F0GraphNode` as the default pill-style node
+3. **Edges** — connectors between nodes; the default style adapts
+   to the current zoom level
+4. **Controls** — zoom in / out, fit-to-view, selection mode, collapse
+5. **Search** — expandable pill that filters and flies to a result
+6. **Detail panel** — right-side panel that opens on node click
+   and centers the selected node in the remaining canvas space
+
+---
+
+# Variants
+
+## Zoom-aware node rendering
+
+Nodes adapt to the user's current zoom level so the canvas stays
+readable from a 10-node team to a 500-node company. F0Graph
+passes a `variant` to `renderNode` and the default node responds
+accordingly:
+
+### Default
+
+Full pill with avatar, name, and subtitle. Use at normal reading
+distance.
+
+<Canvas of={F0GraphStories.BasicTree} />
+
+### Compact
+
+Avatar + initials only. Use when the tree no longer fits in the
+viewport but identity still matters.
+
+<Canvas of={F0GraphStories.CompactView} />
+
+### Dot
+
+Single dot per node. Use to show **shape** of very large trees
+(100+ nodes) where individual identity is secondary to structure.
+
+<Canvas of={F0GraphStories.DotView} />
+
+The thresholds between variants are configurable via
+`zoomThresholds` and a preset can be selected via
+`zoomPreset`.
+
+---
+
+# Behaviors
+
+## Loading the tree
+
+Two modes, mutually exclusive:
+
+- **Full tree** — pass `nodes` and `edges` upfront. Best for hierarchies up
+  to a few hundred nodes.
+- **Lazy tree** — pass `rootNodes` and a `loadChildren` async callback. F0
+  fetches subtrees on demand when a node is expanded. Best for large or
+  paginated hierarchies.
+
+<Canvas of={F0GraphStories.Lazy} />
+
+## Expand and collapse
+
+Every node with `childrenCount > 0` shows an expander. Use
+`defaultExpandDepth` to set how deep the tree opens on first render, or
+`defaultExpandedNodes` / `expandedNodes` for explicit control.
+
+## Selection
+
+Single, multi, or none — set via `selectionMode`. Selection is
+decoupled from focus and from the detail panel.
+
+## Search
+
+Two flavors:
+
+- **Raw** — pass `searchValue` / `onSearchChange` and own the input. The
+  pill renders, you drive everything.
+- **Declarative** — pass a `searchable` config and F0Graph indexes the data,
+  filters results, expands ancestors of the chosen result, selects it, and
+  flies the viewport to it.
+
+<Canvas of={F0GraphStories.WithSearch} />
+
+## Detail panel
+
+When `detailPanel` is provided, clicking a node opens a right-side panel
+and centers the node in the remaining canvas space. The same
+panel powers two layouts:
+
+- **Default variant** — title, description, optional alert, optional menu
+- **Resource variant** — custom header (typically an avatar block) plus a
+  primary + secondary action row and an overflow menu
+
+<Canvas of={F0GraphStories.WithDetailPanel} />
+
+---
+
+# Guidelines
+
+## When to use
+
+<DoDonts
+  do={{
+    description: "Use Graph when you need to:",
+    guidelines: [
+      "Visualize a hierarchy where relationships matter as much as the items (org charts, team structures, account trees)",
+      "Let users explore a tree in place — expand, collapse, search, inspect — without leaving the page",
+      "Show the shape and balance of a structure, not just its members",
+      "Provide a consistent canvas across every hierarchical resource in the product",
+    ],
+  }}
+  dont={{
+    description: "Don't use Graph when:",
+    guidelines: [
+      "A list, table, or tree-list would carry the same information with less interaction cost",
+      "The hierarchy has only one or two levels — a grouped list is clearer",
+      "Users need to compare attributes across many items at once — use OneDataCollection",
+      "The relationships are not strictly hierarchical (graphs with cycles, many-to-many) — Graph assumes a tree",
+    ],
+  }}
+/>
+
+## Content best practices
+
+- **Node labels are scannable.** Keep titles to 2–4 words, no punctuation.
+  Subtitles add one line of context (role, status, count) — never a
+  sentence.
+- **Use an avatar.** Even a generated initial avatar dramatically improves
+  scannability across a tree.
+- **Prefer counts over numbers in parentheses.** "12 members" reads better
+  than "Engineering (12)".
+- **Action labels in the detail panel** follow the standard verb + noun
+  convention ("View profile", "Send message"). Capitalize only the first
+  word.
+- **Empty states matter.** A single root with no children is still a tree —
+  render it; don't fall back to a list.
+
+## Design best practices
+
+### Pick the right default zoom
+
+Land users on the variant that matches their task:
+
+- **Browsing a small tree** (< 30 nodes) — start in `default`
+- **Navigating a department** (30–100 nodes) — start in `compact`
+- **Surveying the whole company** (100+ nodes) — start in `dot` and let
+  users zoom in
+
+### Reserve the detail panel for inspection
+
+The panel is for **reading and acting on a single node**. If a
+click should navigate away, link the node directly — don't open
+a panel only to put a "Go to page" button inside it.
+
+### One primary action per panel
+
+Match the rest of F0: one primary button, one secondary,
+everything else in the overflow menu. The action row collapses
+gracefully when only a primary is provided.
+
+### Keep edges quiet
+
+Default edges are intentionally low-contrast so the eye reads
+nodes first. Only override `renderEdge` when the relationship
+itself carries meaning (e.g. dotted = dotted-line manager,
+color = team).
+
+## Accessibility
+
+- The canvas is keyboard-navigable: arrow keys move focus between nodes,
+  `Enter` opens the detail panel, `Space` toggles expansion
+- The detail panel is a landmark region — provide a meaningful
+  `detailPanelAriaLabel` (defaults to "Details")
+- Search is a combobox with full keyboard support: type to filter,
+  ArrowDown / ArrowUp to navigate results, Enter to fly to and select
+- Override the default English control labels via `controlLabels` for
+  localized experiences
+
+## Performance
+
+- For trees over ~200 nodes, prefer the **lazy tree** mode — F0Graph keeps
+  only mounted subtrees in the React tree
+- Avoid heavy components inside `renderNode` — at the `dot` zoom variant
+  hundreds of nodes may be on screen simultaneously
+
+---
+
+# Props
+
+All props available on `<F0Graph>`, grouped by category.
+
+## Layout & Display
+
+| Prop           | Type                               | Default     | Description                                            |
+| -------------- | ---------------------------------- | ----------- | ------------------------------------------------------ |
+| `direction`    | `"TB" \| "LR"`                     | `"TB"`      | Tree layout direction (top-to-bottom or left-to-right) |
+| `fullScreen`   | `boolean`                          | `false`     | Expand canvas to fill the viewport                     |
+| `showControls` | `boolean`                          | `false`     | Show zoom/pan controls toolbar                         |
+| `zoomPreset`   | `"default" \| "dense" \| "sparse"` | `"default"` | Named zoom threshold preset                            |
+| `minZoom`      | `number`                           | —           | Minimum zoom level allowed                             |
+| `maxZoom`      | `number`                           | —           | Maximum zoom level allowed                             |
+
+## Data
+
+| Prop           | Type                                          | Default | Description                                                |
+| -------------- | --------------------------------------------- | ------- | ---------------------------------------------------------- |
+| `nodes`        | `GraphNode<T>[]`                              | —       | Full tree mode: all nodes upfront                          |
+| `edges`        | `GraphEdge[]`                                 | —       | Explicit edges (auto-generated from parentId when omitted) |
+| `rootNodes`    | `GraphNode<T>[]`                              | —       | Lazy tree mode: initial root nodes                         |
+| `loadChildren` | `(nodeId: string) => Promise<GraphNode<T>[]>` | —       | Async callback to fetch children on demand                 |
+
+## Rendering
+
+| Prop         | Type                                   | Default      | Description                    |
+| ------------ | -------------------------------------- | ------------ | ------------------------------ |
+| `renderNode` | `(node, ctx) => ReactNode`             | **required** | Callback to render each node   |
+| `renderEdge` | `(edge, variant) => ReactNode \| null` | —            | Optional custom edge rendering |
+
+## Selection
+
+| Prop               | Type                            | Default  | Description                                            |
+| ------------------ | ------------------------------- | -------- | ------------------------------------------------------ |
+| `selectionMode`    | `"single" \| "multi" \| "none"` | `"none"` | Node selection behavior                                |
+| `selectedNodes`    | `Set<string>`                   | —        | Controlled selected node IDs                           |
+| `onNodeSelect`     | `(nodeId, selected) => void`    | —        | Selection change callback                              |
+| `highlightedNodes` | `Set<string>`                   | —        | Nodes to highlight (visual emphasis without selection) |
+
+## Expand / Collapse
+
+| Prop                   | Type                         | Default | Description                               |
+| ---------------------- | ---------------------------- | ------- | ----------------------------------------- |
+| `defaultExpandDepth`   | `number`                     | `1`     | How many levels to expand on first render |
+| `expandedNodes`        | `Set<string>`                | —       | Controlled expanded node IDs              |
+| `defaultExpandedNodes` | `Set<string>`                | —       | Uncontrolled initial expanded set         |
+| `onExpandToggle`       | `(nodeId, expanded) => void` | —       | Expand/collapse change callback           |
+
+## Search
+
+| Prop                   | Type              | Default | Description                                           |
+| ---------------------- | ----------------- | ------- | ----------------------------------------------------- |
+| `searchValue`          | `string`          | —       | Raw controlled search input value                     |
+| `searchLoading`        | `boolean`         | —       | Show loading state in search pill                     |
+| `onSearchChange`       | `(value) => void` | —       | Search input change callback                          |
+| `searchable`           | `Searchable<T>`   | —       | Declarative search config with auto-expand and fly-to |
+| `onSearchResultSelect` | `(id) => void`    | —       | Observability callback when a search result is picked |
+
+## Detail Panel
+
+| Prop                   | Type                    | Default     | Description                                                   |
+| ---------------------- | ----------------------- | ----------- | ------------------------------------------------------------- |
+| `detailPanel`          | `(node) => PanelConfig` | —           | Returns panel config for a node; enables the right-side panel |
+| `detailPanelWidth`     | `number`                | `384`       | Width of the detail panel in pixels                           |
+| `detailPanelAriaLabel` | `string`                | `"Details"` | Accessible label for the panel landmark                       |
+
+## Zoom
+
+| Prop                | Type                 | Default | Description                                                                                                        |
+| ------------------- | -------------------- | ------- | ------------------------------------------------------------------------------------------------------------------ |
+| `defaultZoom`       | `number`             | `1`     | Initial zoom level. `1` = 100%.                                                                                    |
+| `minZoom`           | `number`             | `0.05`  | Smallest zoom level the user can pan to (zoom-out limit). Drop to `0.01` for very large graphs that need dot view. |
+| `maxZoom`           | `number`             | `2`     | Largest zoom level the user can pan to (zoom-in limit).                                                            |
+| `zoomThresholds`    | `ZoomThresholds`     | —       | Custom thresholds for detail/compact/dot levels                                                                    |
+| `onZoomLevelChange` | `(level) => void`    | —       | Fires when the zoom level category changes                                                                         |
+| `onViewportChange`  | `(viewport) => void` | —       | Fires on every viewport pan/zoom                                                                                   |
+
+## Accessibility
+
+| Prop            | Type                                                          | Default | Description                                  |
+| --------------- | ------------------------------------------------------------- | ------- | -------------------------------------------- |
+| `controlLabels` | `{ zoomIn?, zoomOut?, fitView?, findMe?, collapseChildren? }` | —       | Override default English labels for controls |

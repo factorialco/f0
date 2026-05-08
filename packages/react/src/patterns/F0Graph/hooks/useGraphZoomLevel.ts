@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react"
+import { useEffect, useMemo, useRef } from "react"
 
 import type { ZoomLevel, ZoomPreset, ZoomThresholds } from "../types"
 
@@ -44,9 +44,14 @@ export function useGraphZoomLevel(
     // If hysteresis keeps us at current level, stay; otherwise use raw
     const nextLevel = levelWithHysteresis === prev ? prev : rawLevel
 
-    lastStableLevel.current = nextLevel
     return nextLevel
   }, [zoomFactor, resolvedThresholds, hysteresis])
+
+  // Update the stable ref in an effect — useMemo is not guaranteed to
+  // execute exactly once per dep change (Strict Mode, future React).
+  useEffect(() => {
+    lastStableLevel.current = level
+  }, [level])
 
   return level
 }

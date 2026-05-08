@@ -16,6 +16,7 @@ const DEFAULT_EXPANDER_WIDTH = 120
 const DEFAULT_EXPANDER_HEIGHT = 36
 const DEFAULT_RANK_SEP = 130
 const DEFAULT_NODE_SEP = 40
+const DEFAULT_ROOT_SEP = 80
 
 interface UseLayoutEngineOptions {
   direction?: LayoutDirection
@@ -23,8 +24,23 @@ interface UseLayoutEngineOptions {
   nodeHeight?: number
   rankSep?: number
   nodeSep?: number
+  rootSep?: number
 }
 
+/**
+ * Built-in tree layout engine hook.
+ *
+ * This engine is intentionally tree-focused: it positions each node under its
+ * canonical parent only. When a `TreeNode` has `dagParentIds`, the extra
+ * parents are ignored for positioning — the node is laid out under its first
+ * parent (the canonical one).
+ *
+ * **DAG consumers:** For layouts where edges to all parents affect node
+ * positioning, provide a custom `layoutEngine` prop to F0Graph that wraps a
+ * DAG layout library (dagre, ELK, d3-dag). The custom engine receives the
+ * original `nodes` + `edges` arrays and computes its own `LayoutResult`.
+ * This hook serves as the reference implementation and fallback.
+ */
 export function useLayoutEngine(
   options?: UseLayoutEngineOptions
 ): LayoutEngine {
@@ -33,6 +49,7 @@ export function useLayoutEngine(
   const nodeHeight = options?.nodeHeight ?? DEFAULT_NODE_HEIGHT
   const rankSep = options?.rankSep ?? DEFAULT_RANK_SEP
   const nodeSep = options?.nodeSep ?? DEFAULT_NODE_SEP
+  const rootSep = options?.rootSep ?? DEFAULT_ROOT_SEP
 
   return useMemo(
     (): LayoutEngine => ({
@@ -48,11 +65,12 @@ export function useLayoutEngine(
           nodeWidth,
           nodeHeight,
           rankSep,
-          nodeSep
+          nodeSep,
+          rootSep
         )
       },
     }),
-    [direction, nodeWidth, nodeHeight, rankSep, nodeSep]
+    [direction, nodeWidth, nodeHeight, rankSep, nodeSep, rootSep]
   )
 }
 
@@ -80,6 +98,11 @@ export function useLayoutEngine(
  *  5. Expanders inherit their parent's position (F0Graph repositions them
  *     manually using parent coords, so the layout output is just a
  *     placeholder).
+ *
+ *  DAG note: When nodes have `dagParentIds`, this function positions them
+ *  under the canonical parent only. DAG-aware engines should receive the
+ *  original `nodes` + `edges` (not the tree projection) and compute their
+ *  own positions — see the `LayoutEngine` interface JSDoc in types.ts.
  */
 function computeTreeLayout(
   treeNodes: TreeNode[],
@@ -88,7 +111,8 @@ function computeTreeLayout(
   nodeWidth: number,
   nodeHeight: number,
   rankSep: number,
-  nodeSep: number
+  nodeSep: number,
+  rootSep: number
 ): LayoutResult {
   if (treeNodes.length === 0) {
     return { nodes: [], edges: [], width: 0, height: 0 }
@@ -119,7 +143,6 @@ function computeTreeLayout(
 
   // Cross axis = sibling spread (X for TB/BT, Y for LR/RL)
   // Main axis  = depth         (Y for TB/BT, X for LR/RL)
-  const crossSlot = nodeWidth + nodeSep // width consumed per leaf column
   const mainStep = nodeHeight + rankSep // distance between rank centers
   const subtreeGap = nodeSep * 2 // gap between subtrees of different parents
 
@@ -191,11 +214,44 @@ function computeTreeLayout(
     }
   }
 
-  // 3. Lay out each root with a separator gap between them.
-  let rootCursor = 0
+  // 3. Lay out each root independently from cross=0, then stack bounding
+  //    boxes along the cross axis with rootSep gaps. This isolates roots so
+  //    expanding/collapsing one root never shifts another.
+  interface RootExtent {
+    rootId: string
+    minCross: number
+    maxCross: number
+  }
+  const rootExtents: RootExtent[] = []
+
   for (const rootId of roots) {
-    const result = layoutSubtree(rootId, rootCursor, 0)
-    rootCursor = result.crossEnd + crossSlot + subtreeGap
+    layoutSubtree(rootId, 0, 0)
+
+    // Compute cross-axis bounding box for this root's subtree.
+    let minCross = Infinity
+    let maxCross = -Infinity
+    const walk = (nodeId: string) => {
+      const pos = positions.get(nodeId)
+      if (pos) {
+        const left = pos.cross - nodeWidth / 2
+        const right = pos.cross + nodeWidth / 2
+        if (left < minCross) minCross = left
+        if (right > maxCross) maxCross = right
+      }
+      const kids = childrenMap.get(nodeId)
+      if (kids) for (const k of kids) walk(k)
+    }
+    walk(rootId)
+
+    rootExtents.push({ rootId, minCross, maxCross })
+  }
+
+  // Translate each root's subtree so bounding boxes sit end-to-end.
+  let crossCursor = 0
+  for (const { rootId, minCross, maxCross } of rootExtents) {
+    const shift = crossCursor - minCross
+    if (shift !== 0) shiftSubtree(rootId, shift)
+    crossCursor += maxCross - minCross + rootSep
   }
 
   // 4. Compute total main-axis extent for BT/RL flipping.
