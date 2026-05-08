@@ -1,4 +1,4 @@
-import { forwardRef } from "react"
+import { forwardRef, useState } from "react"
 import { withDataTestId } from "@/lib/data-testid"
 import { F0Card } from "@/components/F0Card"
 import { F0Icon } from "@/components/F0Icon"
@@ -324,11 +324,15 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
     const badgeVariant = badge?.variant || "default"
     const badgeStyle = badgeVariantConfig[badgeVariant]
 
+    const [isHovered, setIsHovered] = useState(false)
+
     return (
       <div
         ref={ref}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         className={`
-          group transition-all duration-200 rounded-[16px]
+          rounded-[16px] transition-all duration-200
           ${onClick ? "cursor-pointer" : ""}
           ${className}
         `}
@@ -338,7 +342,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
           onClick={handleClick}
           className={`
             !p-3 !pt-[10px] transition-all duration-200 
-            group-hover:bg-[rgba(5,31,81,0.04)] group-hover:border group-hover:border-[rgba(5,38,87,0.06)]
+            ${isHovered ? "bg-[rgba(5,31,81,0.04)] border border-[rgba(5,38,87,0.06)]" : ""}
           `}
         >
           <div className="flex items-start gap-[4px]">
@@ -388,7 +392,7 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
                 )}
 
                 {/* Action Button (appears on hover when onAction is provided) */}
-                {actionLabel && onAction && !badge && (
+                {actionLabel && onAction && !badge && isHovered && (
                   <F0Button
                     variant="outline"
                     size="xs"
@@ -398,7 +402,6 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
                       e.stopPropagation()
                       onAction()
                     }}
-                    className="opacity-0 transition-opacity group-hover:opacity-100"
                   />
                 )}
               </div>
