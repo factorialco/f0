@@ -2,12 +2,13 @@ import { describe, expect, it, vi } from "vitest"
 
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
-import { F0GraphNodeActions } from "../components/F0GraphNodeActions"
-import { F0GraphNodeAvatar } from "../components/F0GraphNodeAvatar"
-import { F0GraphNodeMetadata } from "../components/F0GraphNodeMetadata"
-import { F0GraphNodeSubtitle } from "../components/F0GraphNodeSubtitle"
-import { F0GraphNodeTitle } from "../components/F0GraphNodeTitle"
 import { F0GraphNode } from "../F0GraphNode"
+
+const personAvatar = {
+  type: "person",
+  firstName: "Al",
+  lastName: "Ic",
+} as const
 
 describe("F0GraphNode", () => {
   it("renders with default props", () => {
@@ -15,58 +16,62 @@ describe("F0GraphNode", () => {
     expect(screen.getByRole("treeitem")).toBeInTheDocument()
   })
 
-  it("renders detail variant with all slots", () => {
+  it("renders detail variant with title and subtitle", () => {
     render(
-      <F0GraphNode variant="detail">
-        <F0GraphNodeAvatar>
-          <span>AV</span>
-        </F0GraphNodeAvatar>
-        <F0GraphNodeTitle>Alice</F0GraphNodeTitle>
-        <F0GraphNodeSubtitle>Engineer</F0GraphNodeSubtitle>
-      </F0GraphNode>
+      <F0GraphNode
+        variant="detail"
+        avatar={personAvatar}
+        title="Alice"
+        subtitle="Engineer"
+      />
     )
 
-    expect(screen.getByText("AV")).toBeInTheDocument()
     expect(screen.getByText("Alice")).toBeInTheDocument()
     expect(screen.getByText("Engineer")).toBeInTheDocument()
   })
 
-  it("renders compact variant (subtitle/metadata/actions hidden)", () => {
+  it("renders metadata and actions in detail variant", () => {
     render(
-      <F0GraphNode variant="compact">
-        <F0GraphNodeAvatar>
-          <span>AV</span>
-        </F0GraphNodeAvatar>
-        <F0GraphNodeTitle>Alice</F0GraphNodeTitle>
-        <F0GraphNodeSubtitle>Engineer</F0GraphNodeSubtitle>
-        <F0GraphNodeMetadata>
-          <span>Madrid</span>
-        </F0GraphNodeMetadata>
-        <F0GraphNodeActions>
-          <button type="button">Edit</button>
-        </F0GraphNodeActions>
-      </F0GraphNode>
+      <F0GraphNode
+        variant="detail"
+        avatar={personAvatar}
+        title="Alice"
+        subtitle="Engineer"
+        metadata={<span>Madrid</span>}
+        actions={<button type="button">Edit</button>}
+      />
     )
 
-    expect(screen.getByText("AV")).toBeInTheDocument()
+    expect(screen.getByText("Madrid")).toBeInTheDocument()
+    expect(screen.getByText("Edit")).toBeInTheDocument()
+  })
+
+  it("renders compact variant (subtitle/metadata/actions hidden)", () => {
+    render(
+      <F0GraphNode
+        variant="compact"
+        avatar={personAvatar}
+        title="Alice"
+        subtitle="Engineer"
+        metadata={<span>Madrid</span>}
+        actions={<button type="button">Edit</button>}
+      />
+    )
+
     expect(screen.getByText("Alice")).toBeInTheDocument()
-    // subtitle, metadata, actions are not rendered in compact
     expect(screen.queryByText("Engineer")).not.toBeInTheDocument()
     expect(screen.queryByText("Madrid")).not.toBeInTheDocument()
     expect(screen.queryByText("Edit")).not.toBeInTheDocument()
   })
 
   it("renders dot variant (minimal display)", () => {
-    render(
-      <F0GraphNode variant="dot">
-        <F0GraphNodeTitle>Alice</F0GraphNodeTitle>
-      </F0GraphNode>
-    )
+    render(<F0GraphNode variant="dot" title="Alice" />)
 
     const node = screen.getByRole("treeitem")
     expect(node).toBeInTheDocument()
-    // title is not rendered in dot variant
-    expect(screen.queryByText("Alice")).not.toBeInTheDocument()
+    expect(node).toHaveAttribute("data-zoom-level", "dot")
+    // Title text remains in the DOM for a11y/search; it is visually clipped
+    // by the scaled pill, so we don't assert on visibility here.
   })
 
   it("has ARIA treeitem role", () => {
@@ -142,14 +147,18 @@ describe("F0GraphNode", () => {
   })
 
   it("state variants apply correct classes", () => {
+    // State classes live on the inner pill, not the treeitem wrapper.
+    // `highlighted` and `dimmed` only style the pill in dot mode.
+    const getPill = () =>
+      screen.getByRole("treeitem").firstElementChild as HTMLElement
+
     const { rerender } = render(<F0GraphNode state="selected" />)
-    const node = screen.getByRole("treeitem")
-    expect(node.className).toContain("ring-2")
+    expect(getPill().className).toContain("ring-2")
 
-    rerender(<F0GraphNode state="highlighted" />)
-    expect(screen.getByRole("treeitem").className).toContain("ring-1")
+    rerender(<F0GraphNode variant="dot" state="highlighted" />)
+    expect(getPill().className).toContain("ring-1")
 
-    rerender(<F0GraphNode state="dimmed" />)
-    expect(screen.getByRole("treeitem").className).toContain("opacity-40")
+    rerender(<F0GraphNode variant="dot" state="dimmed" />)
+    expect(getPill().className).toContain("opacity-40")
   })
 })
