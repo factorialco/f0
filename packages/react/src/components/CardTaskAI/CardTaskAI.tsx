@@ -2,6 +2,7 @@ import { forwardRef } from "react"
 import { withDataTestId } from "@/lib/data-testid"
 import { F0Card } from "@/components/F0Card"
 import { F0Icon } from "@/components/F0Icon"
+import { F0Button } from "@/components/F0Button"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagList } from "@/components/tags/F0TagList"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
@@ -388,17 +389,17 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
 
                 {/* Action Button (appears on hover when onAction is provided) */}
                 {actionLabel && onAction && !badge && (
-                  <button
+                  <F0Button
+                    variant="outline"
+                    size="xs"
+                    icon={Pencil}
+                    label={actionLabel}
                     onClick={(e) => {
                       e.stopPropagation()
                       onAction()
                     }}
-                    className="group/action inline-flex flex-shrink-0 items-center gap-[4px] rounded-[8px] px-[8px] py-[4px] text-[12px] font-semibold text-[#0d1625] transition-colors hover:bg-[rgba(13,22,37,0.08)]"
-                    type="button"
-                  >
-                    <F0Icon icon={Pencil} size="sm" />
-                    {actionLabel}
-                  </button>
+                    className="opacity-0 transition-opacity group-hover:opacity-100"
+                  />
                 )}
               </div>
 
