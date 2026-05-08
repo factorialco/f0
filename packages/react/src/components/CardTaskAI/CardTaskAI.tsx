@@ -321,9 +321,8 @@ const CardTaskAIBase = forwardRef<HTMLDivElement, CardTaskAIProps>(
         ref={ref}
         data-testid={testId || "card-task-ai"}
         onClick={handleClick}
-        compact
         className={`
-          pt-[10px] transition-all duration-200 
+          !p-3 !pt-[10px] transition-all duration-200 
           ${onClick ? "cursor-pointer hover:shadow-md" : ""}
           ${className}
         `}
