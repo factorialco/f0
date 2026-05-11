@@ -33,11 +33,11 @@ describe("useGraphZoomLevel", () => {
   })
 
   it("hysteresis prevents flicker at threshold boundaries", () => {
-    // Default thresholds: detail=0.7, compact=0.3, dot=0.1
-    // Default hysteresis: 0.05
-    // Start at detail (zoom=0.8), then move to just below threshold
+    // Use explicit thresholds so this test is independent of default preset changes.
+    // Hysteresis=0.05 (default). detail=0.7, band=[0.65,0.7).
+    const thresholds = { detail: 0.7, compact: 0.3, dot: 0.1 }
     const { result, rerender } = zeroRenderHook(
-      ({ zoom }: { zoom: number }) => useGraphZoomLevel(zoom),
+      ({ zoom }: { zoom: number }) => useGraphZoomLevel(zoom, { thresholds }),
       { initialProps: { zoom: 0.8 } }
     )
     expect(result.current).toBe("detail")
