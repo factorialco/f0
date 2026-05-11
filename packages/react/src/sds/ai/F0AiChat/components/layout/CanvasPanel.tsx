@@ -4,7 +4,7 @@ import { type ReactNode, useEffect, useRef, useState } from "react"
 import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
 
-import { getCanvasEntity } from "../../canvas"
+import { useCanvasEntity } from "../../canvas/registry"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 
 /**
@@ -32,7 +32,7 @@ export function CanvasPanel(): ReactNode {
     prevCanvasContentRef.current = canvasContent
   }, [canvasContent])
 
-  const entity = canvasContent ? getCanvasEntity(canvasContent.type) : undefined
+  const entity = useCanvasEntity(canvasContent?.type)
 
   const renderInner = (): ReactNode => {
     if (!canvasContent || !entity) return null

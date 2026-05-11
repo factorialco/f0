@@ -6,3 +6,10 @@ export * from "./UpsellingBanner"
 export * from "./UpsellingButton"
 export * from "./UpsellingPopover"
 export * from "./UpsellRequestResponseDialog"
+
+// AI cards (host-app actions render these from inside <F0AiChatProvider>)
+export * from "./ai/F0DemoCard"
+export * from "./ai/F0FAQCard"
+export * from "./ai/F0ModuleCard"
+export * from "./ai/F0BookAMeetingCard"
+export * from "./ai/F0QuestionCard"
