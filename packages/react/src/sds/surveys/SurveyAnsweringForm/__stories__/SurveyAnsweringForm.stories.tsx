@@ -515,3 +515,34 @@ export const InlineLoading: Story = {
     </div>
   ),
 }
+
+export const WithAllowCreate: Story = {
+  args: {
+    mode: "all-questions",
+    title: "Team Assignment",
+    elements: [
+      {
+        type: "question",
+        question: {
+          id: "q-team",
+          title: "Select your team",
+          description:
+            "Search for a team or create a new one if it doesn't exist.",
+          type: "dropdown-single" as const,
+          datasetKey: "teams",
+          allowCreate: true,
+        },
+      },
+      {
+        type: "question",
+        question: {
+          id: "q-teams-collab",
+          title: "Teams you collaborate with",
+          description: "Multi-select without creation.",
+          type: "dropdown-multi" as const,
+          datasetKey: "teams",
+        },
+      },
+    ],
+  },
+}
