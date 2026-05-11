@@ -144,15 +144,13 @@ describe("SelectCell", () => {
     const onCellValueChange = vi.fn()
     const onSelect = vi.fn(
       ({
-        value,
         metadata,
         setCellValue,
       }: {
-        value: string
         metadata?: Record<string, unknown>
         setCellValue: (columnId: string, value: unknown) => void
       }) => {
-        setCellValue("plannedHours", metadata?.plannedHours ?? value)
+        setCellValue("plannedHours", metadata?.plannedHours ?? 0)
       }
     )
 
