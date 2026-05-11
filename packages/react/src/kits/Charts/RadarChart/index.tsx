@@ -20,7 +20,7 @@ import { getCategoricalColor, getColor } from "../utils/colors"
 import { fixedForwardRef } from "../utils/forwardRef"
 import { ChartConfig, ChartItem } from "../utils/types"
 
-type RadarChartProps<K extends ChartConfig> = {
+export type RadarChartProps<K extends ChartConfig> = {
   dataConfig: K
   data: ChartItem<K>[]
   scaleMin?: number
@@ -32,7 +32,7 @@ type RadarChartProps<K extends ChartConfig> = {
 type InteractiveLegendProps<K extends ChartConfig> = {
   series: { key: string; color: string; label: ReactNode }[]
   hiddenKeys: Array<keyof K>
-  onToggle: (key: string) => void
+  onToggle: (key: keyof K) => void
 }
 
 const InteractiveLegend = <K extends ChartConfig>({
@@ -92,7 +92,7 @@ const _RadarChart = <K extends ChartConfig>(
     label: config.label,
   }))
 
-  const toggleSeries = (key: string) => {
+  const toggleSeries = (key: keyof K) => {
     setHiddenKeys((prev) => {
       if (prev.includes(key)) {
         return prev.filter((hiddenKey) => hiddenKey !== key)

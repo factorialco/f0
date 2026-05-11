@@ -1,21 +1,22 @@
-import type { Meta } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { RadarChart } from "./index"
 
-const meta = {
+const meta: Meta = {
   title: "Charts/RadarChart",
   component: RadarChart,
-  tags: ["autodocs"],
+  tags: ["autodocs", "stable"],
   decorators: [
     (Story) => (
-      <div className="h-80 w-full max-w-md">
+      <div className="h-80">
         <Story />
       </div>
     ),
   ],
-} satisfies Meta<typeof RadarChart>
+}
 
 export default meta
+type Story = StoryObj<typeof meta>
 
 const skillsDataConfig = {
   alice: { label: "Alice" },
@@ -31,16 +32,14 @@ const skillsData = [
   { label: "Teamwork", values: { alice: 90, bob: 82, carol: 88 } },
 ]
 
-export const Default: Meta<typeof RadarChart<typeof skillsDataConfig>> = {
+export const Default: Story = {
   args: {
     dataConfig: skillsDataConfig,
     data: skillsData,
   },
 }
 
-export const WithInitialHiddenSeries: Meta<
-  typeof RadarChart<typeof skillsDataConfig>
-> = {
+export const WithInitialHiddenSeries: Story = {
   args: {
     dataConfig: skillsDataConfig,
     data: skillsData,
@@ -52,15 +51,17 @@ const singleDataConfig = {
   score: { label: "Score" },
 }
 
-export const SingleSeries: Meta<typeof RadarChart<typeof singleDataConfig>> = {
+const singleData = [
+  { label: "Speed", values: { score: 78 } },
+  { label: "Accuracy", values: { score: 85 } },
+  { label: "Endurance", values: { score: 62 } },
+  { label: "Agility", values: { score: 90 } },
+  { label: "Strength", values: { score: 71 } },
+]
+
+export const SingleSeries: Story = {
   args: {
     dataConfig: singleDataConfig,
-    data: [
-      { label: "Speed", values: { score: 78 } },
-      { label: "Accuracy", values: { score: 85 } },
-      { label: "Endurance", values: { score: 62 } },
-      { label: "Agility", values: { score: 90 } },
-      { label: "Strength", values: { score: 71 } },
-    ],
+    data: singleData,
   },
 }
