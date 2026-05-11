@@ -11,7 +11,7 @@ import { SelectCell } from "../components/cells/SelectCell"
 type TestRecord = { id: string; role: string }
 
 const staticOptions = [
-  { value: "dev", label: "Developer" },
+  { value: "dev", label: "Developer", metadata: { plannedHours: 8 } },
   { value: "des", label: "Designer" },
 ]
 
@@ -69,6 +69,7 @@ describe("SelectCell", () => {
     editableColumn: makeSelectColumn(),
     value: "dev",
     onChange: vi.fn(),
+    onCellValueChange: vi.fn(),
     item: testItem,
   }
 
@@ -135,6 +136,52 @@ describe("SelectCell", () => {
     await user.click(within(listbox).getByText("Developer"))
 
     expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it("calls selectConfig.onSelect and can update another cell by id", async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    const onCellValueChange = vi.fn()
+    const onSelect = vi.fn(
+      ({
+        value,
+        metadata,
+        setCellValue,
+      }: {
+        value: string
+        metadata?: Record<string, unknown>
+        setCellValue: (columnId: string, value: unknown) => void
+      }) => {
+        setCellValue("plannedHours", metadata?.plannedHours ?? value)
+      }
+    )
+
+    render(
+      <SelectCell
+        {...defaultProps}
+        value=""
+        onChange={onChange}
+        onCellValueChange={onCellValueChange}
+        editableColumn={makeSelectColumn({
+          selectConfig: {
+            options: staticOptions,
+            onSelect,
+          },
+        })}
+      />
+    )
+
+    await openSelect(user)
+    await user.click(screen.getByText("Developer"))
+
+    expect(onChange).toHaveBeenCalledWith("dev")
+    expect(onSelect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        value: "dev",
+        metadata: { plannedHours: 8 },
+      })
+    )
+    expect(onCellValueChange).toHaveBeenCalledWith("plannedHours", 8)
   })
 
   it("renders non-editable fallback when selectConfig is missing", () => {

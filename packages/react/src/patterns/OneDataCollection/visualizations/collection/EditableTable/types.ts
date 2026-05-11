@@ -56,6 +56,20 @@ export type SelectCellConfig<R extends RecordType> = {
   clearable?: boolean
   showSearchBox?: boolean
   defaultItem?: (item: R) => F0SelectItemObject<string, RecordType> | undefined
+  onSelect?: (params: {
+    /** Selected value from the cell. Empty string when the selection is cleared. */
+    value: string
+    /** Current editable row item. */
+    item: R
+    /** Original item associated to the selected option, when available. */
+    selectedItem?: RecordType
+    /** Optional custom metadata defined on the selected option. */
+    metadata?: Record<string, unknown>
+    /** Full selected option, when available. */
+    option?: F0SelectItemObject<string, RecordType>
+    /** Update any cell in the current row by column id. */
+    setCellValue: (columnId: string, value: unknown) => void
+  }) => void
 } & (
   | {
       options:

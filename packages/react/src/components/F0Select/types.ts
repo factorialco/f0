@@ -190,6 +190,7 @@ export type F0SelectItemObject<T, R = unknown> = {
   tag?: F0SelectTagProp
   icon?: IconType
   item?: R
+  metadata?: Record<string, unknown>
   disabled?: boolean
 }
 

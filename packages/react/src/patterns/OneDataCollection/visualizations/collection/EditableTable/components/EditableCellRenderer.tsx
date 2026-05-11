@@ -95,6 +95,7 @@ export function EditableCellRenderer<
             isLastColumn={isLastColumn}
             loading={loading}
             onChange={onChange}
+            onCellValueChange={handleCellChange}
           />
         </div>
       )
