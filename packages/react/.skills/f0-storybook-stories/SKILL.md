@@ -19,9 +19,9 @@ Creates `.stories.tsx` files for F0 components. For MDX docs (the Docs tab), use
 ### Imports
 
 ```tsx
-import type { Meta, StoryObj } from "@storybook/react-vite";
-import { fn, expect, within } from "storybook/test";
-import { withSnapshot, withSkipA11y } from "@/lib/storybook-utils/parameters";
+import type { Meta, StoryObj } from "@storybook/react-vite"
+import { fn, expect, within } from "storybook/test"
+import { withSnapshot, withSkipA11y } from "@/lib/storybook-utils/parameters"
 // Icons: "@/icons/app" | "@/icons/modules" | "@/icons/ai"
 ```
 
@@ -35,10 +35,10 @@ const meta = {
   component: F0Example,
   tags: ["stable", "!autodocs"], // or "experimental" | "internal" | "deprecated". Always include "!autodocs" when a manual MDX page exists.
   // ...
-} satisfies Meta<typeof F0Example>;
+} satisfies Meta<typeof F0Example>
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 ```
 
 ### Snapshots are OFF by default
@@ -48,7 +48,7 @@ Chromatic snapshots are globally disabled. Every story that should be captured m
 ```tsx
 export const Snapshot: Story = {
   parameters: withSnapshot({}), // opt in
-};
+}
 // With a11y skip: withSkipA11y(withSnapshot({}))
 ```
 
@@ -80,23 +80,26 @@ argTypes: {
 }
 ```
 
-### Render-only stories must include `args`
+### Render-only stories with required props
 
-Stories that use a custom `render` function without inheriting args from the meta
-**must** include an explicit `args` property to satisfy the `Story` type constraint.
-Omitting `args` causes a TypeScript error when the meta has required props.
+When a story uses a custom `render` function and ignores the meta's args, the
+`Story` type still requires `args` to be present if the component has required
+props. In that case, provide a minimal `args` object so the story compiles —
+even if `render` does not consume them. (Stories that consume args from the
+meta or have no required component props don't need this.)
 
 ```tsx
-// WRONG — TS error: Property 'args' is missing
+// Triggers TS error only if F0Example has required props that
+// the meta does not already supply via args.
 export const Variants: Story = {
   tags: ["no-sidebar"],
   render: () => <div>...</div>,
-};
+}
 
-// CORRECT — provide required args even if render ignores them
+// Provide minimal args to satisfy the required props.
 export const Variants: Story = {
   tags: ["no-sidebar"],
-  args: { items: [], onClick: () => {} }, // satisfy required props from Meta
+  args: { items: [], onClick: () => {} },
   render: () => <div>...</div>,
-};
+}
 ```
