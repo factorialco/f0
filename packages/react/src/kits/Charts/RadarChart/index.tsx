@@ -29,17 +29,17 @@ type RadarChartProps<K extends ChartConfig> = {
   defaultHiddenSeries?: Array<keyof K>
 }
 
-type InteractiveLegendProps = {
+type InteractiveLegendProps<K extends ChartConfig> = {
   series: { key: string; color: string; label: ReactNode }[]
   hiddenKeys: Array<keyof K>
   onToggle: (key: string) => void
 }
 
-const InteractiveLegend = ({
+const InteractiveLegend = <K extends ChartConfig>({
   series,
   hiddenKeys,
   onToggle,
-}: InteractiveLegendProps) => {
+}: InteractiveLegendProps<K>) => {
   return (
     <div className="relative flex flex-wrap items-center justify-center gap-4 text-f1-foreground-secondary">
       {series.map(({ key, color, label }) => {
