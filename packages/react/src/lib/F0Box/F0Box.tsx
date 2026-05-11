@@ -20,6 +20,7 @@ import {
   overflowVariants,
   paddingDefaults,
   paddingVariants,
+  zIndexVariants,
 } from "./utils"
 import {
   resolveResponsiveClasses,
@@ -41,6 +42,7 @@ const boxVariants = cva({
     ...borderVariants,
     ...overflowVariants,
     ...dividerVariants,
+    ...zIndexVariants,
   },
   defaultVariants: {
     ...paddingDefaults,
@@ -60,7 +62,6 @@ export interface F0BoxProps
       "display" | "width" | "height" | "border" | "className" | "style"
     >,
     BoxVariantProps {
-  zIndex?: React.CSSProperties["zIndex"]
   /** Responsive overrides applied from the `sm` breakpoint (≥640px) */
   sm?: ResponsiveStyleProps
   /** Responsive overrides applied from the `md` breakpoint (≥768px) */
@@ -182,6 +183,7 @@ export const F0Box = forwardRef<HTMLDivElement, F0BoxProps>(
             right,
             bottom,
             left,
+            zIndex,
             padding,
             paddingX,
             paddingY,
@@ -238,7 +240,6 @@ export const F0Box = forwardRef<HTMLDivElement, F0BoxProps>(
           divider && !dividerColor && "divide-f1-border",
           "scrollbar-macos"
         )}
-        style={zIndex === undefined ? undefined : { zIndex }}
         {...rest}
       />
     )

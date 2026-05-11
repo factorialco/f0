@@ -9,6 +9,7 @@ export { insetVariants } from "./inset"
 export { marginDefaults, marginVariants } from "./margin"
 export { overflowDefaults, overflowVariants } from "./overflow"
 export { paddingDefaults, paddingVariants } from "./padding"
+export { zIndexVariants } from "./zIndex"
 export {
   resolveResponsiveClasses,
   type Breakpoint,

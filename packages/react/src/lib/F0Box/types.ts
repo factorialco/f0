@@ -298,5 +298,8 @@ export type PositionToken =
 /** Position offsets */
 export type InsetToken = SpacingToken
 
+/** z-index values */
+export type ZIndexToken = "auto" | "0" | "10" | "20" | "30" | "40" | "50"
+
 /** Border style */
 export type BorderStyleToken = "solid" | "dashed" | "dotted" | "double" | "none"

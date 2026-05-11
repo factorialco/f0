@@ -189,6 +189,7 @@ const positionOptions = [
   "fixed",
   "sticky",
 ]
+const zIndexOptions = [undefined, "auto", "0", "10", "20", "30", "40", "50"]
 
 // ─── Meta ────────────────────────────────────────────────────────
 
@@ -206,7 +207,7 @@ const meta = {
     right: { control: "select", options: spacingOptions },
     bottom: { control: "select", options: spacingOptions },
     left: { control: "select", options: spacingOptions },
-    zIndex: { control: "number" },
+    zIndex: { control: "select", options: zIndexOptions },
     // Padding
     padding: { control: "select", options: spacingOptions },
     paddingX: { control: "select", options: spacingOptions },
@@ -449,13 +450,13 @@ export const Position: Story = {
           position="absolute"
           top="xl"
           right="xl"
-          zIndex={10}
+          zIndex="10"
           padding="md"
           background="info"
           borderRadius="sm"
         >
           position=&quot;absolute&quot; top=&quot;xl&quot; right=&quot;xl&quot;
-          zIndex=&#123;10&#125;
+          zIndex=&quot;10&quot;
         </F0Box>
       </F0Box>
 

@@ -32,6 +32,7 @@ export type {
   NumericSizeToken,
   OverflowToken,
   PositionToken,
+  ZIndexToken,
   RowSpanToken,
   RowsToken,
   SizeToken,
