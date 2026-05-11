@@ -1,5 +1,4 @@
-import { without } from "lodash"
-import { ComponentProps, ForwardedRef, useState } from "react"
+import { ComponentProps, ForwardedRef, ReactNode, useState } from "react"
 import {
   PolarAngleAxis,
   PolarGrid,
@@ -9,7 +8,7 @@ import {
 } from "recharts"
 
 import { DataTestIdWrapper } from "@/lib/data-testid"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 
 import {
   ChartContainer,
@@ -21,26 +20,26 @@ import { getCategoricalColor, getColor } from "../utils/colors"
 import { fixedForwardRef } from "../utils/forwardRef"
 import { ChartConfig, ChartItem } from "../utils/types"
 
-export type RadarChartProps<K extends ChartConfig> = {
+type RadarChartProps<K extends ChartConfig> = {
   dataConfig: K
   data: ChartItem<K>[]
   scaleMin?: number
   scaleMax?: number
   aspect?: ComponentProps<typeof ChartContainer>["aspect"]
-  hiddenSeries?: Array<keyof K>
+  defaultHiddenSeries?: Array<keyof K>
 }
 
-type InteractiveLegendProps<K extends ChartConfig> = {
-  series: { key: string; color: string; label: React.ReactNode }[]
+type InteractiveLegendProps = {
+  series: { key: string; color: string; label: ReactNode }[]
   hiddenKeys: Array<keyof K>
   onToggle: (key: string) => void
 }
 
-const InteractiveLegend = <K extends ChartConfig>({
+const InteractiveLegend = ({
   series,
   hiddenKeys,
   onToggle,
-}: InteractiveLegendProps<K>) => {
+}: InteractiveLegendProps) => {
   return (
     <div className="relative flex flex-wrap items-center justify-center gap-4 text-f1-foreground-secondary">
       {series.map(({ key, color, label }) => {
@@ -49,11 +48,14 @@ const InteractiveLegend = <K extends ChartConfig>({
         return (
           <button
             key={key}
+            type="button"
             className={cn(
               "flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-f1-foreground",
+              focusRing(),
               isHidden ? "opacity-40" : "opacity-100"
             )}
             aria-label={typeof label === "string" ? label : undefined}
+            aria-pressed={!isHidden}
             onClick={() => onToggle(key)}
           >
             <span
@@ -75,28 +77,30 @@ const _RadarChart = <K extends ChartConfig>(
     scaleMin,
     scaleMax,
     aspect,
-    hiddenSeries,
+    defaultHiddenSeries,
     dataTestId,
   }: RadarChartProps<K> & { dataTestId?: string },
   ref: ForwardedRef<HTMLDivElement>
 ) => {
-  const items = Object.keys(dataConfig)
   const [hiddenKeys, setHiddenKeys] = useState<Array<keyof K>>(
-    hiddenSeries ?? []
+    defaultHiddenSeries ?? []
   )
 
-  const series = items.map((key, index) => ({
-    key,
-    color: dataConfig[key].color
-      ? getColor(dataConfig[key].color)
-      : getCategoricalColor(index),
-    label: dataConfig[key].label,
+  const series = Object.entries(dataConfig).map(([key, config], index) => ({
+    key: key,
+    color: config.color ? getColor(config.color) : getCategoricalColor(index),
+    label: config.label,
   }))
 
   const toggleSeries = (key: string) => {
     setHiddenKeys((prev) => {
-      if (prev.length === series.length - 1 && !prev.includes(key)) return prev
-      if (prev.includes(key)) return without(prev, key)
+      if (prev.includes(key)) {
+        return prev.filter((hiddenKey) => hiddenKey !== key)
+      }
+
+      if (prev.length >= series.length - 1) {
+        return prev
+      }
 
       return [...prev, key]
     })
@@ -144,7 +148,7 @@ const _RadarChart = <K extends ChartConfig>(
               />
             ))}
 
-          {Object.keys(dataConfig).length > 1 && (
+          {series.length > 1 && (
             <ChartLegend
               iconType="star"
               content={

@@ -2,7 +2,7 @@ import type { Meta } from "@storybook/react-vite"
 
 import { RadarChart } from "./index"
 
-const meta: Meta = {
+const meta = {
   title: "Charts/RadarChart",
   component: RadarChart,
   tags: ["autodocs"],
@@ -13,7 +13,7 @@ const meta: Meta = {
       </div>
     ),
   ],
-}
+} satisfies Meta<typeof RadarChart>
 
 export default meta
 
@@ -44,7 +44,7 @@ export const WithInitialHiddenSeries: Meta<
   args: {
     dataConfig: skillsDataConfig,
     data: skillsData,
-    hiddenSeries: ["carol"],
+    defaultHiddenSeries: ["carol"],
   },
 }
 
