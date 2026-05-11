@@ -87,4 +87,21 @@ describe("F0SegmentedControl", () => {
     const svgs = document.querySelectorAll("svg")
     expect(svgs.length).toBe(2)
   })
+
+  it("forwards ariaLabel to the underlying radiogroup", () => {
+    render(<F0SegmentedControl items={defaultItems} ariaLabel="View mode" />)
+    expect(screen.getByRole("group", { name: "View mode" })).toBeInTheDocument()
+  })
+
+  it("forwards ariaLabelledBy to the underlying radiogroup", () => {
+    render(
+      <>
+        <span id="seg-label">Pick a view</span>
+        <F0SegmentedControl items={defaultItems} ariaLabelledBy="seg-label" />
+      </>
+    )
+    expect(
+      screen.getByRole("group", { name: "Pick a view" })
+    ).toBeInTheDocument()
+  })
 })

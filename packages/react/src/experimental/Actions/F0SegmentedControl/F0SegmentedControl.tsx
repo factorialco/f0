@@ -12,6 +12,8 @@ export const F0SegmentedControl = ({
   onChange,
   disabled = false,
   fullWidth = false,
+  ariaLabel,
+  ariaLabelledBy,
 }: F0SegmentedControlProps) => {
   const [localValue, setLocalValue] = useControllableState({
     prop: value,
@@ -20,8 +22,11 @@ export const F0SegmentedControl = ({
   })
 
   const handleChange = (newValue: string) => {
-    // Prevent deselection — a segmented control always has one active segment
-    if (!newValue) return
+    // Radix `ToggleGroup` (single mode) emits "" when the user re-clicks
+    // the active segment, signalling deselection. A segmented control
+    // always has one active segment, so we ignore that sentinel here.
+    // Note: this means item values must be non-empty strings.
+    if (newValue === "") return
     setLocalValue(newValue)
   }
 
@@ -31,6 +36,8 @@ export const F0SegmentedControl = ({
       value={localValue}
       onValueChange={handleChange}
       disabled={disabled}
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledBy}
       className={cn(
         "inline-flex items-center rounded-md bg-f1-background-secondary p-0.5 gap-0.5",
         fullWidth && "w-full"
