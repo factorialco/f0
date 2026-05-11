@@ -242,11 +242,6 @@ export const iconVariants = cva({
       class: "[&_svg:not([data-has-color])]:text-f1-icon",
     },
     {
-      variant: "mention",
-      mode: "default",
-      class: "[&_svg:not([data-has-color])]:text-f1-icon",
-    },
-    {
       variant: "ai",
       mode: "only",
       class:

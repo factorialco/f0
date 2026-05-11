@@ -45,8 +45,21 @@ import { mentionClasses, mentionFocusableClasses } from "@/lib/recipes"
 </a>
 
 // In a Tiptap extension that produces raw HTML:
+// (Combine with the legacy `mention` class so older stored content keeps
+// working with CSS rules that target `a.mention` directly.)
 Mention.configure({
-  HTMLAttributes: { class: mentionFocusableClasses },
+  HTMLAttributes: { class: "mention" },
+  renderHTML({ options, node }) {
+    return [
+      "a",
+      {
+        href: node.attrs.href,
+        class: cn(options.HTMLAttributes.class, mentionFocusableClasses),
+        "data-type": "mention",
+      },
+      `@${node.attrs.label}`,
+    ]
+  },
 })
 ```
 
@@ -78,8 +91,16 @@ export const actionVariants = cva({
 
 ## Rules
 
-- **Tokens only.** Recipes must compose F0 design tokens (`f1-*` Tailwind
-  utilities). Never hardcode colors, spacing or typography values.
+- **Token-first colors.** Recipes must use F0 color tokens (`bg-f1-*`,
+  `text-f1-*`, `border-f1-*`, `outline-f1-*`). Never hardcode hex/rgb
+  colors — that is the rule that absolutely cannot be broken, since color
+  is what couples the recipe to the design system's palette/theming.
+- **Plain Tailwind utilities for layout and typography are fine.**
+  Spacing (`px-1.5`), radius (`rounded-xs`), font weight (`font-medium`),
+  outline width (`outline-1`) etc. are stock Tailwind utilities that
+  encode the recipe's visual identity. They are part of the recipe's
+  contract — the rule is "no _hardcoded_ values" (e.g. `padding: 6px`),
+  not "no Tailwind utilities".
 - **Static classes only.** No conditional logic, no props. If you need
   variants, build a component or a `cva()`.
 - **No JSX.** Recipes export `string`s (or `string[]`), not React nodes.

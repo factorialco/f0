@@ -1,29 +1,25 @@
 /* Main styles */
 
 /*
- * Mention chip styling for serialized HTML.
+ * Legacy mention chip styling.
  *
- * The Tiptap Mention extension renders mentions as `<a>` nodes that live
- * outside any React tree, so they cannot rely on a component's `focusRing()`.
- * These rules apply the shared mention recipe (background, padding, color,
- * radius, focus outline) to two markup shapes:
+ * New mentions emitted by the Tiptap Mention extension carry the shared
+ * `mentionFocusableClasses` recipe directly on the `<a>` element, so they
+ * style themselves without needing CSS rules here. This block only exists
+ * to keep historical content (stored as `<a class="mention">…</a>` without
+ * the recipe classes) visually consistent with the new output.
  *
- *   - Legacy: `<a class="mention">` (older content already persisted in DBs).
- *   - Current: `<a data-type="mention">` (Tiptap default attribute).
- *
- * Keeping both selectors guarantees historical content keeps the same
- * visual treatment as new content rendered through the recipe.
+ * Keep these rules in sync with `lib/recipes/mention.ts` if the visual
+ * treatment changes. If a migration ever rewrites stored content to include
+ * the recipe classes (or to use `data-type="mention"` exclusively), this
+ * block can be removed.
  */
-.rich-text-editor-container a.mention,
-.rich-text-display-container a.mention,
-.rich-text-editor-container a[data-type="mention"],
-.rich-text-display-container a[data-type="mention"] {
+.rich-text-editor-container a.mention:not([data-type="mention"]),
+.rich-text-display-container a.mention:not([data-type="mention"]) {
   @apply bg-f1-background-secondary hover:bg-f1-background-secondary-hover text-f1-foreground rounded-xs !px-1.5 font-medium no-underline transition-colors;
 }
-.rich-text-editor-container a.mention:focus,
-.rich-text-display-container a.mention:focus,
-.rich-text-editor-container a[data-type="mention"]:focus,
-.rich-text-display-container a[data-type="mention"]:focus {
+.rich-text-editor-container a.mention:not([data-type="mention"]):focus,
+.rich-text-display-container a.mention:not([data-type="mention"]):focus {
   @apply outline-f1-border-selected-bold outline outline-1 outline-offset-1;
 }
 
