@@ -100,6 +100,12 @@ export const RESPONSIVE_SAFELIST = [
   "xl:bottom-0", "xl:bottom-1", "xl:bottom-2", "xl:bottom-3", "xl:bottom-4", "xl:bottom-6", "xl:bottom-8", "xl:bottom-10", "xl:bottom-12", "xl:bottom-16",
   "xl:left-0", "xl:left-1", "xl:left-2", "xl:left-3", "xl:left-4", "xl:left-6", "xl:left-8", "xl:left-10", "xl:left-12", "xl:left-16",
 
+  // ===================== Z-INDEX =====================
+  "sm:z-auto", "sm:z-0", "sm:z-10", "sm:z-20", "sm:z-30", "sm:z-40", "sm:z-50",
+  "md:z-auto", "md:z-0", "md:z-10", "md:z-20", "md:z-30", "md:z-40", "md:z-50",
+  "lg:z-auto", "lg:z-0", "lg:z-10", "lg:z-20", "lg:z-30", "lg:z-40", "lg:z-50",
+  "xl:z-auto", "xl:z-0", "xl:z-10", "xl:z-20", "xl:z-30", "xl:z-40", "xl:z-50",
+
   // ===================== GAP (none=gap-0, xs=gap-0.5, sm=gap-sm, md=gap-md, lg=gap-lg, xl=gap-xl, 2xl=gap-6, 3xl=gap-8, 4xl=gap-10, 5xl=gap-12) =====================
   "sm:gap-0", "sm:gap-0.5", "sm:gap-1", "sm:gap-2", "sm:gap-3", "sm:gap-4", "sm:gap-6", "sm:gap-8", "sm:gap-10", "sm:gap-12",
   "md:gap-0", "md:gap-0.5", "md:gap-1", "md:gap-2", "md:gap-3", "md:gap-4", "md:gap-6", "md:gap-8", "md:gap-10", "md:gap-12",

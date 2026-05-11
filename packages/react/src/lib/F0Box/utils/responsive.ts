@@ -22,6 +22,7 @@ import type {
   RowsToken,
   SizeToken,
   SpacingToken,
+  ZIndexToken,
 } from "../types"
 
 import { backgroundVariants } from "./background"
@@ -35,6 +36,7 @@ import { insetVariants } from "./inset"
 import { marginVariants } from "./margin"
 import { overflowVariants } from "./overflow"
 import { paddingVariants } from "./padding"
+import { zIndexVariants } from "./zIndex"
 
 /** Supported breakpoints */
 export type Breakpoint = "sm" | "md" | "lg" | "xl"
@@ -47,6 +49,7 @@ export interface ResponsiveStyleProps {
   right?: InsetToken
   bottom?: InsetToken
   left?: InsetToken
+  zIndex?: ZIndexToken
   // Padding
   padding?: SpacingToken
   paddingX?: SpacingToken
@@ -125,6 +128,7 @@ const variantMap: Record<string, Record<string, string>> = {
   ...borderVariants,
   ...overflowVariants,
   ...dividerVariants,
+  ...zIndexVariants,
 }
 
 /**
