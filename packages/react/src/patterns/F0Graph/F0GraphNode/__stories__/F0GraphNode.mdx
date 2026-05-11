@@ -39,7 +39,7 @@ renderNode={(node, ctx) => (
 ## Detail
 
 Full pill with avatar, title, subtitle, and optional
-metadata/actions rows. Shown at normal reading zoom.
+tag and action rows. Shown at normal reading zoom.
 
 <Canvas of={Stories.Default} />
 
@@ -57,6 +57,18 @@ Single colored dot. Shown at very low zoom to reveal tree shape
 when individual identity is secondary to structure.
 
 <Canvas of={Stories.Dot} />
+
+## Tag rows
+
+In `detail` variant, tags are rendered from `tags` as a wrapped row below
+the pill. Tags are auto-grouped by `type`: a single tag of a type renders
+directly, while 2+ tags of the same type collapse into one summary tag
+(for example, `3 teams`) with member names exposed in a tooltip.
+
+Use `visibleTagTypes` to filter which tag types are rendered and
+`tagLabels` to override the summary labels.
+
+<Canvas of={Stories.WithTags} />
 
 ---
 
@@ -76,21 +88,30 @@ context:
 
 # Props
 
-| Prop             | Type                                                   | Default     | Description                                         |
-| ---------------- | ------------------------------------------------------ | ----------- | --------------------------------------------------- |
-| `variant`        | `"detail" \| "compact" \| "dot"`                       | `"detail"`  | Visual variant based on zoom level                  |
-| `state`          | `"default" \| "selected" \| "highlighted" \| "dimmed"` | `"default"` | Visual state                                        |
-| `expanded`       | `boolean`                                              | `false`     | Whether the node is expanded (has visible children) |
-| `level`          | `number`                                               | —           | ARIA tree level (1-based depth)                     |
-| `hasChildren`    | `boolean`                                              | `false`     | Whether the node has children                       |
-| `childrenCount`  | `number`                                               | —           | Number of children (shown in expander)              |
-| `onExpandToggle` | `() => void`                                           | —           | Callback when expand/collapse is toggled            |
-| `onClick`        | `() => void`                                           | —           | Callback when the node is clicked                   |
-| `avatar`         | `AvatarVariant`                                        | —           | Avatar shown on the leading side of the pill        |
-| `title`          | `ReactNode`                                            | —           | Primary line of text (hidden in dot variant)        |
-| `subtitle`       | `ReactNode`                                            | —           | Secondary line of text (hidden in compact and dot)  |
-| `metadata`       | `ReactNode`                                            | —           | Optional metadata row below subtitle (detail only)  |
-| `actions`        | `ReactNode`                                            | —           | Optional action row at the bottom (detail only)     |
+| Prop              | Type                                                   | Default     | Description                                                                    |
+| ----------------- | ------------------------------------------------------ | ----------- | ------------------------------------------------------------------------------ |
+| `variant`         | `"detail" \| "compact" \| "dot"`                       | `"detail"`  | Visual variant based on zoom level                                             |
+| `state`           | `"default" \| "selected" \| "highlighted" \| "dimmed"` | `"default"` | Visual state                                                                   |
+| `expanded`        | `boolean`                                              | `false`     | Whether the node is expanded (has visible children)                            |
+| `level`           | `number`                                               | —           | ARIA tree level (1-based depth)                                                |
+| `tabIndex`        | `0 \| -1`                                              | `0`         | Tab index for roving tabindex (0 = focused, -1 = not focused)                  |
+| `setSize`         | `number`                                               | —           | ARIA set size — number of siblings at this level                               |
+| `posInSet`        | `number`                                               | —           | ARIA position in set — 1-based index among siblings                            |
+| `hasChildren`     | `boolean`                                              | `false`     | Whether the node has children                                                  |
+| `childrenCount`   | `number`                                               | —           | Number of children (shown in expander)                                         |
+| `onExpandToggle`  | `() => void`                                           | —           | Callback when expand/collapse is toggled                                       |
+| `onClick`         | `() => void`                                           | —           | Callback when the node is clicked                                              |
+| `nodeRef`         | `(el: HTMLDivElement \| null) => void`                 | —           | Ref callback for registering this node's DOM element (used by roving tabindex) |
+| `avatar`          | `AvatarVariant`                                        | —           | Avatar shown on the leading side of the pill                                   |
+| `title`           | `ReactNode`                                            | —           | Primary line of text (hidden in dot variant)                                   |
+| `subtitle`        | `ReactNode`                                            | —           | Secondary line of text (hidden in compact and dot)                             |
+| `tags`            | `TagVariant[]`                                         | —           | Tag row rendered in detail variant with per-type grouping                      |
+| `visibleTagTypes` | `ReadonlySet<F0GraphNodeTagType>`                      | —           | Filters rendered tags by type when provided                                    |
+| `tagLabels`       | `F0GraphNodeTagLabels`                                 | —           | Optional labels override for multi-tag summary text                            |
+| `actions`         | `ReactNode`                                            | —           | Optional action row shown at the bottom in detail variant only                 |
+| `loading`         | `boolean`                                              | `false`     | Show a skeleton/loading placeholder instead of real content                    |
+| `nodeId`          | `string`                                               | —           | DOM id for aria-owns cross-references                                          |
+| `ariaOwns`        | `string`                                               | —           | Space-separated DOM ids for aria-owns (accessible tree hierarchy)              |
 
 ---
 

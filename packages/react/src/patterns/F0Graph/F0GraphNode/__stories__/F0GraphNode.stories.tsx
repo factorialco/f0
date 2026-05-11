@@ -1,10 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { F0Button } from "@/components/F0Button"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+
 import { F0GraphNode } from ".."
+import { graphNodeStates, graphNodeVariants } from "../types"
 
 const meta = {
   component: F0GraphNode,
-  tags: ["stable", "!autodocs"],
+  tags: ["stable"],
   title: "Graph/F0GraphNode",
   parameters: {
     layout: "centered",
@@ -12,11 +16,11 @@ const meta = {
   argTypes: {
     variant: {
       control: "radio",
-      options: ["detail", "compact", "dot"],
+      options: graphNodeVariants,
     },
     state: {
       control: "radio",
-      options: ["default", "selected", "highlighted", "dimmed"],
+      options: graphNodeStates,
     },
     expanded: { control: "boolean" },
     hasChildren: { control: "boolean" },
@@ -55,6 +59,14 @@ export const Selected: Story = {
   args: { ...baseProps, state: "selected" },
 }
 
+export const Highlighted: Story = {
+  args: { ...baseProps, state: "highlighted" },
+}
+
+export const Dimmed: Story = {
+  args: { ...baseProps, state: "dimmed" },
+}
+
 export const Expanded: Story = {
   args: {
     ...baseProps,
@@ -81,14 +93,28 @@ export const WithAllSlots: Story = {
         name: "Bob Smith",
       },
     ],
-    actions: (
-      <button
-        type="button"
-        className="rounded px-2 py-1 text-xs text-f1-foreground-secondary hover:bg-f1-background-secondary"
-      >
-        View profile
-      </button>
-    ),
+    actions: <F0Button variant="ghost" size="sm" label="View profile" />,
+  },
+}
+
+export const WithTags: Story = {
+  args: {
+    ...baseProps,
+    tags: [
+      { type: "team", name: "Design" },
+      { type: "team", name: "Platform" },
+      { type: "team", name: "Research" },
+      { type: "status", text: "Manager", variant: "info" },
+      { type: "person", name: "Bob Smith" },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Tags are grouped by type automatically. A single tag type renders directly, while 2+ tags of the same type collapse into a summary tag with member names in the tooltip.",
+      },
+    },
   },
 }
 
@@ -106,6 +132,56 @@ export const States: Story = {
           />
         )
       )}
+    </div>
+  ),
+}
+
+export const Snapshot: Story = {
+  tags: ["no-sidebar"],
+  parameters: withSnapshot({}),
+  render: () => (
+    <div className="flex flex-col gap-4">
+      {(["detail", "compact", "dot"] as const).map((variant) => (
+        <div key={variant} className="flex flex-wrap items-center gap-3">
+          {(["default", "selected", "highlighted", "dimmed"] as const).map(
+            (state) => (
+              <F0GraphNode
+                key={`${variant}-${state}`}
+                avatar={personAvatar}
+                title={`${variant} · ${state}`}
+                subtitle="Variant/state"
+                variant={variant}
+                state={state}
+              />
+            )
+          )}
+        </div>
+      ))}
+      <div className="flex flex-wrap items-center gap-3">
+        <F0GraphNode
+          avatar={personAvatar}
+          title="Expanded"
+          subtitle="Expanded with children"
+          hasChildren
+          expanded
+          childrenCount={3}
+        />
+      </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <F0GraphNode
+          avatar={personAvatar}
+          title="With slots"
+          subtitle="Tags and actions"
+          hasChildren
+          childrenCount={5}
+          tags={[
+            { type: "team", name: "Design" },
+            { type: "team", name: "Platform" },
+            { type: "team", name: "Research" },
+          ]}
+          actions={WithAllSlots.args?.actions}
+        />
+      </div>
     </div>
   ),
 }

@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
 import "@xyflow/react/dist/style.css"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+
 import type { EdgeVariant } from "../F0GraphEdge"
 import type { Searchable } from "../F0GraphSearch"
 import type { DeferredNodesPayload, GraphEdge, GraphNode } from "../types"
@@ -13,10 +15,10 @@ import {
 } from "../F0Graph"
 import { F0GraphNode } from "../F0GraphNode"
 
-const meta: Meta<F0GraphProps<Employee>> = {
+const meta = {
   title: "Graph/F0Graph",
-  component: F0Graph as React.ComponentType<F0GraphProps<Employee>>,
-  tags: ["stable", "!autodocs"],
+  component: F0Graph,
+  tags: ["stable"],
   decorators: [
     (Story) => (
       <div className="h-[600px] w-full bg-f1-background">
@@ -81,7 +83,7 @@ const meta: Meta<F0GraphProps<Employee>> = {
     onViewportChange: { table: { disable: true } },
     onVisibleNodesChange: { table: { disable: true } },
   },
-}
+} satisfies Meta<F0GraphProps<Employee>>
 
 export default meta
 type Story = StoryObj<F0GraphProps<Employee>>
@@ -576,6 +578,44 @@ export const Controlled: Story = {
   },
 }
 
+/** Demonstrates raw controlled search input (`searchValue`/`onSearchChange`) with user-managed behavior. */
+export const RawSearch: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Raw search mode — own the input, drive everything yourself. Compare with WithSearch which uses the declarative `searchable` config.",
+      },
+    },
+  },
+  render: () => {
+    const [searchValue, setSearchValue] = useState<string | undefined>("")
+    const normalizedQuery = searchValue?.trim().toLowerCase() ?? ""
+    const highlightedNodes =
+      normalizedQuery.length === 0
+        ? new Set<string>()
+        : new Set(
+            BASIC_NODES.filter((node) => {
+              const label = `${node.data.name} ${node.data.title}`.toLowerCase()
+              return label.includes(normalizedQuery)
+            }).map((node) => node.id)
+          )
+
+    return (
+      <F0Graph<Employee>
+        nodes={BASIC_NODES}
+        renderNode={renderEmployee}
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        searchLoading={false}
+        highlightedNodes={highlightedNodes}
+        defaultExpandDepth={2}
+        showControls
+      />
+    )
+  },
+}
+
 /** Demonstrates declarative `searchable` config for indexed search with auto-expand and fly-to. */
 export const WithSearch: Story = {
   args: {
@@ -784,4 +824,70 @@ export const StagedLoadingError: Story = {
       console.error("[StagedLoadingError] Deferred load failed:", error.message)
     },
   },
+}
+
+export const Snapshot: Story = {
+  tags: ["no-sidebar"],
+  parameters: withSnapshot({}),
+  render: () => (
+    <div className="flex h-full w-full flex-col gap-2 p-2">
+      <div className="min-h-0 flex-1 overflow-hidden rounded-md border border-f1-border-secondary bg-f1-background">
+        <F0Graph<Employee>
+          nodes={BASIC_NODES}
+          renderNode={renderEmployee}
+          defaultExpandDepth={2}
+        />
+      </div>
+      <div className="min-h-0 flex-1 overflow-hidden rounded-md border border-f1-border-secondary bg-f1-background">
+        <F0Graph<Employee>
+          nodes={BASIC_NODES}
+          renderNode={renderEmployee}
+          showControls
+          defaultExpandDepth={2}
+        />
+      </div>
+      <div className="min-h-0 flex-1 overflow-hidden rounded-md border border-f1-border-secondary bg-f1-background">
+        <F0Graph<Employee>
+          nodes={makeLargeTree(60)}
+          renderNode={renderEmployee}
+          searchable={{
+            getLabel: (node: GraphNode<Employee>) =>
+              (node.data as Employee).name,
+            getSecondaryLabel: (node: GraphNode<Employee>) =>
+              (node.data as Employee).title,
+            placeholder: "Search people…",
+            noResultsLabel: "No matches found",
+          }}
+          showControls
+          defaultExpandDepth={1}
+        />
+      </div>
+      <div className="min-h-0 flex-1 overflow-hidden rounded-md border border-f1-border-secondary bg-f1-background">
+        <F0Graph<Employee>
+          nodes={BASIC_NODES}
+          renderNode={renderEmployee}
+          detailPanel={(node: GraphNode<Employee>) => {
+            const { name, title } = node.data as Employee
+            return {
+              variant: "default" as const,
+              title: name,
+              description: title,
+              children: (
+                <div className="flex flex-col gap-3 p-4">
+                  <p className="text-sm text-f1-foreground">
+                    Direct reports: {node.childrenCount ?? 0}
+                  </p>
+                  <p className="text-xs text-f1-foreground-secondary">
+                    Node ID: {node.id}
+                  </p>
+                </div>
+              ),
+            }
+          }}
+          defaultExpandDepth={2}
+          showControls
+        />
+      </div>
+    </div>
+  ),
 }

@@ -12,6 +12,64 @@ charts, team structures, project trees, account hierarchies —
 with built-in zoom, search, selection, and detail-panel
 interactions.
 
+# Quickstart
+
+Start with `nodes` plus a `renderNode` callback. `F0Graph` handles layout,
+zoom, panning, and expansion while you provide node content.
+
+```tsx
+import { F0Graph, F0GraphNode } from "@factorialco/f0-react"
+
+type NodeData = {
+  name: string
+  title: string
+}
+
+const nodes = [
+  {
+    id: "ceo",
+    parentId: null,
+    data: { name: "Sofia Reyes", title: "Chief Executive Officer" },
+    childrenCount: 0,
+  },
+]
+
+export function Example() {
+  return (
+    <F0Graph<NodeData>
+      nodes={nodes}
+      renderNode={(node, ctx) => (
+        <F0GraphNode
+          {...ctx}
+          title={node.data.name}
+          subtitle={node.data.title}
+        />
+      )}
+    />
+  )
+}
+```
+
+# Story Map
+
+| Story                | What it shows                                               |
+| -------------------- | ----------------------------------------------------------- |
+| `BasicTree`          | Default tree rendering with standard node content           |
+| `CompactView`        | Starting in compact zoom variant                            |
+| `DotView`            | Starting in dot zoom variant                                |
+| `WithControls`       | Visible zoom and canvas controls                            |
+| `Lazy`               | On-demand subtree loading with `rootNodes` + `loadChildren` |
+| `LargeTree`          | Higher node-count tree rendering                            |
+| `CustomNode`         | Fully custom node UI via `renderNode`                       |
+| `CustomEdge`         | Custom edge rendering via `renderEdge`                      |
+| `Controlled`         | Controlled expansion and selection state                    |
+| `RawSearch`          | Raw controlled search input driven by consumer state        |
+| `WithSearch`         | Declarative indexed search with auto-expand and fly-to      |
+| `WithDetailPanel`    | Right-side detail panel on node selection                   |
+| `MultiRoot`          | Multiple independent root trees in one canvas               |
+| `StagedLoading`      | Progressive deferred node loading after initial paint       |
+| `StagedLoadingError` | Deferred loading error path and fallback behavior           |
+
 ---
 
 # Overview
@@ -114,6 +172,9 @@ Two flavors:
 
 - **Raw** — pass `searchValue` / `onSearchChange` and own the input. The
   pill renders, you drive everything.
+
+<Canvas of={F0GraphStories.RawSearch} />
+
 - **Declarative** — pass a `searchable` config and F0Graph indexes the data,
   filters results, expands ancestors of the chosen result, selects it, and
   flies the viewport to it.
@@ -226,84 +287,127 @@ color = team).
 
 # Props
 
-All props available on `<F0Graph>`, grouped by category.
+All public props on `<F0Graph>`, grouped by behavior.
 
 ## Layout & Display
 
-| Prop           | Type                               | Default     | Description                                            |
-| -------------- | ---------------------------------- | ----------- | ------------------------------------------------------ |
-| `direction`    | `"TB" \| "LR"`                     | `"TB"`      | Tree layout direction (top-to-bottom or left-to-right) |
-| `fullScreen`   | `boolean`                          | `false`     | Expand canvas to fill the viewport                     |
-| `showControls` | `boolean`                          | `false`     | Show zoom/pan controls toolbar                         |
-| `zoomPreset`   | `"default" \| "dense" \| "sparse"` | `"default"` | Named zoom threshold preset                            |
-| `minZoom`      | `number`                           | —           | Minimum zoom level allowed                             |
-| `maxZoom`      | `number`                           | —           | Maximum zoom level allowed                             |
-
-## Data
-
-| Prop           | Type                                          | Default | Description                                                |
-| -------------- | --------------------------------------------- | ------- | ---------------------------------------------------------- |
-| `nodes`        | `GraphNode<T>[]`                              | —       | Full tree mode: all nodes upfront                          |
-| `edges`        | `GraphEdge[]`                                 | —       | Explicit edges (auto-generated from parentId when omitted) |
-| `rootNodes`    | `GraphNode<T>[]`                              | —       | Lazy tree mode: initial root nodes                         |
-| `loadChildren` | `(nodeId: string) => Promise<GraphNode<T>[]>` | —       | Async callback to fetch children on demand                 |
-
-## Rendering
-
-| Prop         | Type                                   | Default      | Description                    |
-| ------------ | -------------------------------------- | ------------ | ------------------------------ |
-| `renderNode` | `(node, ctx) => ReactNode`             | **required** | Callback to render each node   |
-| `renderEdge` | `(edge, variant) => ReactNode \| null` | —            | Optional custom edge rendering |
-
-## Selection
-
-| Prop               | Type                            | Default  | Description                                            |
-| ------------------ | ------------------------------- | -------- | ------------------------------------------------------ |
-| `selectionMode`    | `"single" \| "multi" \| "none"` | `"none"` | Node selection behavior                                |
-| `selectedNodes`    | `Set<string>`                   | —        | Controlled selected node IDs                           |
-| `onNodeSelect`     | `(nodeId, selected) => void`    | —        | Selection change callback                              |
-| `highlightedNodes` | `Set<string>`                   | —        | Nodes to highlight (visual emphasis without selection) |
-
-## Expand / Collapse
-
-| Prop                   | Type                         | Default | Description                               |
-| ---------------------- | ---------------------------- | ------- | ----------------------------------------- |
-| `defaultExpandDepth`   | `number`                     | `1`     | How many levels to expand on first render |
-| `expandedNodes`        | `Set<string>`                | —       | Controlled expanded node IDs              |
-| `defaultExpandedNodes` | `Set<string>`                | —       | Uncontrolled initial expanded set         |
-| `onExpandToggle`       | `(nodeId, expanded) => void` | —       | Expand/collapse change callback           |
-
-## Search
-
-| Prop                   | Type              | Default | Description                                           |
-| ---------------------- | ----------------- | ------- | ----------------------------------------------------- |
-| `searchValue`          | `string`          | —       | Raw controlled search input value                     |
-| `searchLoading`        | `boolean`         | —       | Show loading state in search pill                     |
-| `onSearchChange`       | `(value) => void` | —       | Search input change callback                          |
-| `searchable`           | `Searchable<T>`   | —       | Declarative search config with auto-expand and fly-to |
-| `onSearchResultSelect` | `(id) => void`    | —       | Observability callback when a search result is picked |
-
-## Detail Panel
-
-| Prop                   | Type                    | Default     | Description                                                   |
-| ---------------------- | ----------------------- | ----------- | ------------------------------------------------------------- |
-| `detailPanel`          | `(node) => PanelConfig` | —           | Returns panel config for a node; enables the right-side panel |
-| `detailPanelWidth`     | `number`                | `384`       | Width of the detail panel in pixels                           |
-| `detailPanelAriaLabel` | `string`                | `"Details"` | Accessible label for the panel landmark                       |
+| Prop               | Type              | Default              | Description                                                        |
+| ------------------ | ----------------- | -------------------- | ------------------------------------------------------------------ |
+| `direction`        | `LayoutDirection` | `"TB"`               | Tree layout direction (`"TB"`, `"LR"`, `"BT"`, `"RL"`).            |
+| `defaultDirection` | `LayoutDirection` | `"TB"`               | Initial layout direction when `direction` is uncontrolled.         |
+| `fullScreen`       | `boolean`         | `true`               | Whether the graph canvas fills its container.                      |
+| `nodeWidth`        | `number`          | `256`                | Layout sizing hint passed to the built-in layout engine.           |
+| `nodeHeight`       | `number`          | `56`                 | Layout sizing hint passed to the built-in layout engine.           |
+| `layoutEngine`     | `LayoutEngine`    | built-in tree engine | Custom layout engine. Overrides the built-in layout when provided. |
 
 ## Zoom
 
-| Prop                | Type                 | Default | Description                                                                                                        |
-| ------------------- | -------------------- | ------- | ------------------------------------------------------------------------------------------------------------------ |
-| `defaultZoom`       | `number`             | `1`     | Initial zoom level. `1` = 100%.                                                                                    |
-| `minZoom`           | `number`             | `0.05`  | Smallest zoom level the user can pan to (zoom-out limit). Drop to `0.01` for very large graphs that need dot view. |
-| `maxZoom`           | `number`             | `2`     | Largest zoom level the user can pan to (zoom-in limit).                                                            |
-| `zoomThresholds`    | `ZoomThresholds`     | —       | Custom thresholds for detail/compact/dot levels                                                                    |
-| `onZoomLevelChange` | `(level) => void`    | —       | Fires when the zoom level category changes                                                                         |
-| `onViewportChange`  | `(viewport) => void` | —       | Fires on every viewport pan/zoom                                                                                   |
+| Prop                   | Type                                                         | Default                   | Description                                                               |
+| ---------------------- | ------------------------------------------------------------ | ------------------------- | ------------------------------------------------------------------------- |
+| `zoomPreset`           | `ZoomPreset`                                                 | `"default"`               | Named threshold configuration used when `zoomThresholds` is not provided. |
+| `zoomThresholds`       | `ZoomThresholds`                                             | `zoomPresets[zoomPreset]` | Explicit thresholds for `detail`, `compact`, and `dot` zoom levels.       |
+| `defaultZoom`          | `number`                                                     | `1`                       | Initial zoom level (`1` = 100%).                                          |
+| `minZoom`              | `number`                                                     | `0.05`                    | Smallest zoom level the user can pan to (zoom-out limit).                 |
+| `maxZoom`              | `number`                                                     | `2`                       | Largest zoom level the user can pan to (zoom-in limit).                   |
+| `onZoomLevelChange`    | `(level: ZoomLevel) => void`                                 | —                         | Fired when the semantic zoom level category changes.                      |
+| `onViewportChange`     | `(viewport: { x: number; y: number; zoom: number }) => void` | —                         | Fired on viewport pan and zoom updates.                                   |
+| `onVisibleNodesChange` | `(count: number) => void`                                    | —                         | Fired when the visible node count changes.                                |
 
-## Accessibility
+## Data (full tree)
 
-| Prop            | Type                                                          | Default | Description                                  |
-| --------------- | ------------------------------------------------------------- | ------- | -------------------------------------------- |
-| `controlLabels` | `{ zoomIn?, zoomOut?, fitView?, findMe?, collapseChildren? }` | —       | Override default English labels for controls |
+| Prop    | Type             | Default           | Description                                                                      |
+| ------- | ---------------- | ----------------- | -------------------------------------------------------------------------------- |
+| `nodes` | `GraphNode<T>[]` | —                 | Full tree node list rendered upfront.                                            |
+| `edges` | `GraphEdge[]`    | derived from tree | Explicit edges. When omitted, edges are derived from parent-child relationships. |
+
+## Data (lazy tree)
+
+| Prop           | Type                                          | Default | Description                                          |
+| -------------- | --------------------------------------------- | ------- | ---------------------------------------------------- |
+| `rootNodes`    | `GraphNode<T>[]`                              | —       | Root nodes for lazy mode.                            |
+| `loadChildren` | `(nodeId: string) => Promise<GraphNode<T>[]>` | —       | Async callback to load children when a node expands. |
+
+## Data (staged loading)
+
+| Prop                     | Type                                                                           | Default | Description                                                                              |
+| ------------------------ | ------------------------------------------------------------------------------ | ------- | ---------------------------------------------------------------------------------------- |
+| `deferredNodes`          | `Promise<DeferredNodesPayload<T>> \| (() => Promise<DeferredNodesPayload<T>>)` | —       | Deferred batch of nodes (and optional edges) merged after first paint in full-tree mode. |
+| `onDeferredLoadComplete` | `() => void`                                                                   | —       | Fired once when deferred nodes merge successfully.                                       |
+| `onDeferredLoadError`    | `(error: Error) => void`                                                       | —       | Fired when deferred loading fails.                                                       |
+
+## Rendering
+
+| Prop         | Type                                                                 | Default                | Description                                    |
+| ------------ | -------------------------------------------------------------------- | ---------------------- | ---------------------------------------------- |
+| `renderNode` | `(node: GraphNode<T>, ctx: F0GraphNodeRenderContext) => ReactNode`   | **required**           | Callback that renders each node.               |
+| `renderEdge` | `(edge: GraphEdge, variant: EdgeVariant) => React.ReactNode \| null` | default edge rendering | Optional custom edge renderer by edge variant. |
+
+## Expand/collapse
+
+| Prop                    | Type                                          | Default             | Description                                                                                      |
+| ----------------------- | --------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------ |
+| `expandedNodes`         | `Set<string>`                                 | uncontrolled state  | Controlled expanded node IDs.                                                                    |
+| `defaultExpandedNodes`  | `Set<string>`                                 | root nodes expanded | Initial expanded set for uncontrolled mode.                                                      |
+| `defaultExpandDepth`    | `number`                                      | —                   | Auto-expands nodes down to this depth on first render when no explicit expanded set is provided. |
+| `onExpandToggle`        | `(nodeId: string, expanded: boolean) => void` | —                   | Fired when a node is expanded or collapsed.                                                      |
+| `onExpandedNodesChange` | `(next: Set<string>) => void`                 | —                   | Fired with the complete expanded set on every expand/collapse change.                            |
+
+## Selection
+
+| Prop                    | Type                                          | Default            | Description                                                     |
+| ----------------------- | --------------------------------------------- | ------------------ | --------------------------------------------------------------- |
+| `selectionMode`         | `"single" \| "multi" \| "none"`               | `"single"`         | Selection behavior for node clicks.                             |
+| `selectedNodes`         | `Set<string>`                                 | uncontrolled state | Controlled selected node IDs.                                   |
+| `onNodeSelect`          | `(nodeId: string, selected: boolean) => void` | —                  | Fired when a node selection toggles.                            |
+| `onSelectedNodesChange` | `(next: Set<string>) => void`                 | —                  | Fired with the complete selected set on every selection change. |
+
+## Navigation
+
+| Prop               | Type          | Default   | Description                                                       |
+| ------------------ | ------------- | --------- | ----------------------------------------------------------------- |
+| `focusedNode`      | `string`      | —         | Imperatively focuses and fits the viewport to a specific node ID. |
+| `highlightedNodes` | `Set<string>` | empty set | Node IDs rendered with highlighted edge/node variants.            |
+
+## Search
+
+| Prop                   | Type                                   | Default | Description                                                                                                  |
+| ---------------------- | -------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------ |
+| `searchValue`          | `string`                               | —       | Raw controlled search value. Mutually exclusive with `searchable`.                                           |
+| `onSearchChange`       | `(value: string \| undefined) => void` | —       | Raw controlled search change handler.                                                                        |
+| `searchLoading`        | `boolean`                              | —       | Loading state shown in the search input.                                                                     |
+| `searchable`           | `Searchable<T>`                        | —       | Declarative search config with built-in indexing, result selection, ancestor expansion, and fly-to behavior. |
+| `onSearchResultSelect` | `(id: string) => void`                 | —       | Optional callback fired when a search result is selected.                                                    |
+
+## Canvas actions
+
+| Prop            | Type        | Default | Description                                                            |
+| --------------- | ----------- | ------- | ---------------------------------------------------------------------- |
+| `canvasActions` | `ReactNode` | —       | Optional action buttons rendered below the search input on the canvas. |
+
+## Detail panel
+
+| Prop                   | Type                                                                                                   | Default     | Description                                                                |
+| ---------------------- | ------------------------------------------------------------------------------------------------------ | ----------- | -------------------------------------------------------------------------- |
+| `detailPanel`          | `(node: GraphNode<T>) => Omit<F0GraphDetailPanelProps, "open" \| "onClose" \| "width" \| "ariaLabel">` | —           | Enables the right-side panel and returns panel config for a selected node. |
+| `detailPanelAriaLabel` | `string`                                                                                               | `"Details"` | Optional landmark label for the detail panel.                              |
+| `detailPanelWidth`     | `number`                                                                                               | `384`       | Initial detail panel width in pixels.                                      |
+| `graphId`              | `string`                                                                                               | `"default"` | Stable ID used to scope persisted detail panel width in localStorage.      |
+
+## Controls
+
+| Prop                | Type                                                                                                                                                                       | Default          | Description                                                                     |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | ------------------------------------------------------------------------------- |
+| `showControls`      | `boolean`                                                                                                                                                                  | `false`          | Shows graph controls (zoom, fit view, metadata settings, and optional find-me). |
+| `currentUserNodeId` | `string`                                                                                                                                                                   | —                | Node ID used by the optional "Find me" control.                                 |
+| `controlLabels`     | `{ zoomIn?: string; zoomOut?: string; fitView?: string; findMe?: string; collapseChildren?: string; metadataSettings?: string; graphCanvas?: string; graphView?: string }` | English defaults | Optional label overrides for graph controls and ARIA labels.                    |
+
+## Tag metadata
+
+| Prop                      | Type                                                | Default                  | Description                                                                                                 |
+| ------------------------- | --------------------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `nodeTagTypes`            | `ReadonlyArray<F0GraphNodeTagType>`                 | —                        | Available node tag types. Enables metadata visibility controls when provided.                               |
+| `visibleTagTypes`         | `ReadonlyArray<F0GraphNodeTagType>`                 | `defaultVisibleTagTypes` | Controlled set of currently visible tag types.                                                              |
+| `defaultVisibleTagTypes`  | `ReadonlyArray<F0GraphNodeTagType>`                 | all `nodeTagTypes`       | Initial visible tag types for uncontrolled mode.                                                            |
+| `onVisibleTagTypesChange` | `(next: ReadonlyArray<F0GraphNodeTagType>) => void` | —                        | Fired when visible tag types change.                                                                        |
+| `nodeTagTypeLabels`       | `Partial<Record<F0GraphNodeTagType, string>>`       | —                        | Optional human-friendly labels per tag type.                                                                |
+| `reserveTagRow`           | `boolean`                                           | dynamic                  | Reserves layout space for a tag row below nodes when tag visibility is active (or when explicitly enabled). |

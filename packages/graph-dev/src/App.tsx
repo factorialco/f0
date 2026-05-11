@@ -4,13 +4,12 @@ import type { F0GraphNodeRenderContext } from "@/patterns/F0Graph/F0Graph"
 import type { GraphNode } from "@/patterns/F0Graph/types"
 
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
-import { F0Button } from "@/components/F0Button"
 import { F0Card } from "@/components/F0Card"
 import { F0Text } from "@/components/F0Text"
 import { F0TagPerson } from "@/components/tags/F0TagPerson"
 import { DataList } from "@/experimental/Lists/DataList"
 import { Weekdays } from "@/experimental/Widgets/Content/Weekdays"
-import { Pin, Add, WhatsappChat } from "@/icons/app"
+import { Pin, WhatsappChat } from "@/icons/app"
 import { F0Graph } from "@/patterns/F0Graph/F0Graph"
 import { F0GraphNode } from "@/patterns/F0Graph/F0GraphNode"
 
@@ -540,12 +539,6 @@ export function App() {
             team: "Teams",
             raw: "Workplace",
           }}
-          canvasActions={
-            <>
-              <F0Button variant="outline" size="md" label="Add" icon={Add} hideLabel />
-              <F0Button variant="outline" size="md" label="Pin" icon={Pin} hideLabel />
-            </>
-          }
           detailPanel={(n) => {
             const e = n.data
             const [firstName = "", lastName = ""] = e.name.split(" ")

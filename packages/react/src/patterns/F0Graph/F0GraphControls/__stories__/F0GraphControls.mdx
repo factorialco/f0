@@ -33,17 +33,42 @@ button automatically.
 
 <Canvas of={Stories.WithFindMe} />
 
+## Metadata visibility
+
+When `tagTypes.length > 0` and `onToggleTagType` is provided, a metadata
+popover button is rendered in the toolbar. The popover lists each
+tag type with a toggle switch bound to `visibleTagTypes`.
+
+If `tagTypes` is empty (or omitted), or `onToggleTagType` is not
+provided, the metadata popover button is hidden.
+
+<Canvas of={Stories.WithMetadataToggle} />
+
 ---
 
 # Props
 
-| Prop           | Type                   | Default | Description                                                    |
-| -------------- | ---------------------- | ------- | -------------------------------------------------------------- |
-| `onZoomIn`     | `() => void`           | —       | Callback for zoom-in button                                    |
-| `onZoomOut`    | `() => void`           | —       | Callback for zoom-out button                                   |
-| `onFitView`    | `() => void`           | —       | Callback for fit-to-view button                                |
-| `onFocusUser`  | `() => void`           | —       | Callback for the Find me button. Button is hidden if omitted.  |
-| `labels`       | `F0GraphControlLabels` | —       | Override default English labels for buttons                    |
+| Prop              | Type                                          | Default | Description                                                                                                          |
+| ----------------- | --------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------- |
+| `onZoomIn`        | `() => void`                                  | —       | Callback for zoom-in button                                                                                          |
+| `onZoomOut`       | `() => void`                                  | —       | Callback for zoom-out button                                                                                         |
+| `onFitView`       | `() => void`                                  | —       | Callback for fit-to-view button                                                                                      |
+| `onFocusUser`     | `() => void`                                  | —       | Callback for the Find me button. Button is hidden if omitted.                                                        |
+| `tagTypes`        | `ReadonlyArray<F0GraphNodeTagType>`           | —       | Tag types to expose in the metadata-visibility popover. When omitted (or empty), the popover button is not rendered. |
+| `visibleTagTypes` | `ReadonlySet<F0GraphNodeTagType>`             | —       | Currently visible tag types (set form). Required when `tagTypes` is set.                                             |
+| `onToggleTagType` | `(type: F0GraphNodeTagType) => void`          | —       | Callback when the user toggles a tag type in the popover.                                                            |
+| `tagTypeLabels`   | `Partial<Record<F0GraphNodeTagType, string>>` | —       | Friendly labels per tag type for the popover.                                                                        |
+| `labels`          | `F0GraphControlLabels`                        | —       | Override default English labels for controls (`zoomIn`, `zoomOut`, `fitView`, `findMe`, `metadataSettings`).         |
+
+### F0GraphControlLabels
+
+| Key                | Type     | Description                                                    |
+| ------------------ | -------- | -------------------------------------------------------------- |
+| `zoomIn`           | `string` | Label for zoom-in button                                       |
+| `zoomOut`          | `string` | Label for zoom-out button                                      |
+| `fitView`          | `string` | Label for fit-to-view button                                   |
+| `findMe`           | `string` | Label for the Find me button                                   |
+| `metadataSettings` | `string` | Aria label for the metadata-visibility popover trigger button. |
 
 ---
 
@@ -56,10 +81,15 @@ that needs the same control toolbar.
 
 ```tsx
 import { F0GraphControls } from "@factorialco/f0-react"
-;<F0GraphControls
-  onZoomIn={handleZoomIn}
-  onZoomOut={handleZoomOut}
-  onFitView={handleFitView}
-  onFocusUser={handleFocusUser}
-/>
+
+function Example() {
+  return (
+    <F0GraphControls
+      onZoomIn={handleZoomIn}
+      onZoomOut={handleZoomOut}
+      onFitView={handleFitView}
+      onFocusUser={handleFocusUser}
+    />
+  )
+}
 ```

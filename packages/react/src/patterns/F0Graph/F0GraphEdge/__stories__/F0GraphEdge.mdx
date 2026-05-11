@@ -19,6 +19,8 @@ unless a custom `renderEdge` is provided. It renders a smooth
 SVG path that stays visually quiet so nodes remain the primary
 focus.
 
+> When using `<F0Graph>`, you do NOT need to wrap with `ReactFlowProvider` — `F0Graph` mounts its own. The Storybook stories below use `ReactFlowProvider` only to render `F0GraphEdge` in isolation.
+
 <Canvas of={Stories.Default} />
 
 ---
@@ -74,18 +76,19 @@ handles edge rendering internally. Use `renderEdge` on
 meaning (e.g. dotted-line managers, team color coding).
 
 ```tsx
-import { F0Graph } from "@factorialco/f0-react"
-;<F0Graph
-  renderEdge={(edge, variant) => (
-    <line
-      stroke={
-        variant === "highlighted"
-          ? "var(--f1-color-accent)"
-          : "var(--f1-color-border)"
-      }
-      strokeWidth={variant === "highlighted" ? 2.5 : 1.5}
+import { F0Graph, F0GraphEdge } from "@factorialco/f0-react"
+
+function Example() {
+  return (
+    <F0Graph
+      nodes={nodes}
+      renderNode={renderNode}
+      renderEdge={(edge, variant) => (
+        <F0GraphEdge variant={variant} animated={edge.data?.dotted} />
+      )}
     />
-  )}
-  // ...other props
-/>
+  )
+}
 ```
+
+> `renderEdge` receives the edge and its variant only — `F0Graph` computes the path. To customize geometry directly, drop down to xyflow's edge API.

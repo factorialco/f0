@@ -4,7 +4,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { zeroRender as render } from "@/testing/test-utils"
 
 import { F0GraphEdge } from "../F0GraphEdge"
-
 import { edgeTypes, edgeVariants } from "../types"
 
 const { baseEdgeRenderSpy } = vi.hoisted(() => ({

@@ -139,8 +139,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
         data-zoom-level={variant}
         className={cn(
           graphNodeContainerVariants({ variant, state }),
-          // When tags row is visible, stack pill + tags vertically
-          tagsVisible && "flex-col gap-1.5",
+          "flex-col gap-1.5",
           "group outline-none"
         )}
         onClick={onClick}
@@ -348,26 +347,21 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
           )}
         </div>
 
-        <AnimatePresence initial={false}>
-          {tagsVisible && (
-            <motion.div
-              key="tags"
-              initial={noMotion ? false : { opacity: 0, filter: "blur(3px)" }}
-              animate={{ opacity: 1, filter: "blur(0px)" }}
-              exit={
-                noMotion ? { opacity: 0 } : { opacity: 0, filter: "blur(3px)" }
-              }
-              transition={
-                noMotion
-                  ? { duration: 0 }
-                  : { duration: 0.12, ease: [0.23, 1, 0.32, 1] }
-              }
-              className="max-w-[256px]"
-            >
-              <F0GraphNodeTags tags={filteredTags!} labels={tagLabels} />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {tagsVisible && (
+          <motion.div
+            key="tags"
+            initial={noMotion ? false : { opacity: 0, filter: "blur(3px)" }}
+            animate={{ opacity: 1, filter: "blur(0px)" }}
+            transition={
+              noMotion
+                ? { duration: 0 }
+                : { duration: 0.12, ease: [0.23, 1, 0.32, 1] }
+            }
+            className="max-w-[256px]"
+          >
+            <F0GraphNodeTags tags={filteredTags!} labels={tagLabels} />
+          </motion.div>
+        )}
       </div>
     )
   }

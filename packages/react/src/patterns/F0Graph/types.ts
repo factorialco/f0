@@ -53,7 +53,7 @@ export type ZoomLevel = (typeof zoomLevels)[number]
 
 // Zoom presets with named threshold configurations
 export const zoomPresets = {
-  default: { detail: 0.7, compact: 0.3, dot: 0.15 },
+  default: { detail: 0.56, compact: 0.3, dot: 0.18 },
   dense: { detail: 0.5, compact: 0.2, dot: 0.08 },
   sparse: { detail: 0.85, compact: 0.45, dot: 0.15 },
 } as const
