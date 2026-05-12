@@ -170,7 +170,6 @@ const ClarifyingQuestionContent = ({
               isCustomAnswerActive={isCustomAnswerActive}
               canProceed={canProceed}
               customInputRef={customInputRef}
-              autoFocus
               onToggleOption={handleToggleOption}
               onActivateCustom={handleActivateCustom}
               onChangeCustomText={setCustomAnswerText}
