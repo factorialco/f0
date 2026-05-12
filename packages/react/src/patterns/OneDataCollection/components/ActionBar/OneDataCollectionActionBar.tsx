@@ -151,6 +151,7 @@ export const OneDataCollectionActionBar = forwardRef<
               <span className="flex items-center gap-1 font-medium tabular-nums">
                 <NumberFlow
                   value={displayedSelectedNumber}
+                  className="text-f1-foreground"
                   spinTiming={{
                     duration: 200,
                     easing: "cubic-bezier(0.175, 0.885, 0.32, 1.275)",
