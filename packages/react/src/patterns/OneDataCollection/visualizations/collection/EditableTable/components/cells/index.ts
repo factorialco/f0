@@ -1,6 +1,8 @@
+import type { IconType, F0IconProps } from "@/components/F0Icon"
 import type { RecordType, SortingsDefinition } from "@/hooks/datasource"
 
 import type { SummariesDefinition } from "../../../../../summary"
+
 import { EditableTableColumnDefinition } from "../../types"
 
 /**
@@ -16,10 +18,13 @@ export type EditableCellProps<R extends RecordType> = {
   inputPlaceholder?: string
   error?: string
   loading?: boolean
-  onChange: (value: string | null) => void
-  onCellValueChange?: (columnId: string, value: unknown) => void
+  onChange: (
+    value: string | null,
+    context?: { selectedItem?: RecordType }
+  ) => void
   item: R
   isLastColumn?: boolean
+  hint?: { icon: IconType; message: string; iconColor?: F0IconProps["color"] }
 }
 
 /** The edit mode for a column cell in the editable table. */
