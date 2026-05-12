@@ -3698,9 +3698,28 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
         value: unknown;
         /** The current row item (before this change is applied). */
         item: R;
+        /** For select cells: the full record associated with the selected option. */
+        selectedItem?: RecordType;
         /** Update another cell in the same row by column id. */
         setCellValue: (columnId: string, value: unknown) => void;
     }) => void;
+    /**
+     * Returns a hint to display as an icon with tooltip inside the cell.
+     * Use to warn the user when a value diverges from its formula-inferred value.
+     *
+     * Return `undefined` to hide the hint.
+     *
+     * @example
+     * cellHint: (item) => {
+     *   if (item._inferredSalary != null && item.salary !== item._inferredSalary) {
+     *     return { icon: AlertCircle, message: `Differs from catalog (${item._inferredSalary})` }
+     *   }
+     * }
+     */
+    cellHint?: (item: R) => {
+        icon: IconType;
+        message: string;
+    } | undefined;
 };
 
 declare type EditableTableVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = Omit<TableVisualizationOptions<R, _Filters, Sortings, Summaries>, "columns"> & {
@@ -8176,8 +8195,13 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
+        };
+    }
 }
 
 
@@ -8186,16 +8210,6 @@ declare module "@tiptap/core" {
         aiBlock: {
             insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
             executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -8227,4 +8241,9 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
