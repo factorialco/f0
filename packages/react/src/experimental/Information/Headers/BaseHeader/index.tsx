@@ -23,9 +23,18 @@ import {
 } from "@/experimental/Navigation/Dropdown"
 import { cn } from "@/lib/utils"
 
-export type HeaderSecondaryAction = SecondaryAction & {
+export type HeaderSecondaryButtonAction = SecondaryAction & {
   hideLabel?: boolean
 }
+
+export type HeaderSecondaryDropdownAction = PrimaryDropdownAction<string> & {
+  variant?: "outline"
+}
+
+export type HeaderSecondaryAction =
+  | HeaderSecondaryButtonAction
+  | HeaderSecondaryDropdownAction
+
 interface BaseHeaderProps {
   title: string
   deactivated?: boolean
@@ -94,6 +103,17 @@ export function BaseHeader({
     action: PrimaryAction | undefined
   ): action is PrimaryActionButton => {
     return !!action && "label" in action && !("items" in action)
+  }
+
+  const getSecondaryActionKey = (
+    action: HeaderSecondaryAction,
+    index: number
+  ) => {
+    const actionKey = isSecondaryDropdownAction(action)
+      ? `${action.value ?? "default"}-${action.items.map((item) => item.value).join("-")}`
+      : action.label
+
+    return `${actionKey}-${index}`
   }
 
   return (
@@ -171,20 +191,33 @@ export function BaseHeader({
             </div>
           )}
 
-          {visibleSecondaryActions.map((action) => (
-            <Fragment key={action.label}>
+          {visibleSecondaryActions.map((action, index) => (
+            <Fragment key={getSecondaryActionKey(action, index)}>
               <div className="w-full md:hidden [&>*]:w-full [&>span]:block [&>span_div]:w-full">
-                <F0Button
-                  label={action.label}
-                  onClick={action.onClick}
-                  variant={action.variant ?? "outline"}
-                  icon={action.icon}
-                  size="lg"
-                  hideLabel={action.hideLabel}
-                  disabled={action.disabled}
-                  tooltip={action.tooltip}
-                  loading={action.loading}
-                />
+                {isSecondaryDropdownAction(action) ? (
+                  <F0ButtonDropdown
+                    items={action.items}
+                    onClick={action.onClick}
+                    variant={action.variant ?? "outline"}
+                    value={action.value}
+                    size="lg"
+                    disabled={action.disabled}
+                    tooltip={action.tooltip}
+                    loading={action.loading}
+                  />
+                ) : (
+                  <F0Button
+                    label={action.label}
+                    onClick={action.onClick}
+                    variant={action.variant ?? "outline"}
+                    icon={action.icon}
+                    size="lg"
+                    hideLabel={action.hideLabel}
+                    disabled={action.disabled}
+                    tooltip={action.tooltip}
+                    loading={action.loading}
+                  />
+                )}
               </div>
             </Fragment>
           ))}
@@ -202,19 +235,32 @@ export function BaseHeader({
               <Dropdown items={visibleOtherActions} />
             </div>
           )}
-          {visibleSecondaryActions.map((action) => (
-            <Fragment key={action.label}>
+          {visibleSecondaryActions.map((action, index) => (
+            <Fragment key={getSecondaryActionKey(action, index)}>
               <div className="hidden md:block">
-                <F0Button
-                  label={action.label}
-                  onClick={action.onClick}
-                  variant={action.variant ?? "outline"}
-                  icon={action.icon}
-                  hideLabel={action.hideLabel}
-                  disabled={action.disabled}
-                  tooltip={action.tooltip}
-                  loading={action.loading}
-                />
+                {isSecondaryDropdownAction(action) ? (
+                  <F0ButtonDropdown
+                    items={action.items}
+                    onClick={action.onClick}
+                    variant={action.variant ?? "outline"}
+                    value={action.value}
+                    size="md"
+                    disabled={action.disabled}
+                    tooltip={action.tooltip}
+                    loading={action.loading}
+                  />
+                ) : (
+                  <F0Button
+                    label={action.label}
+                    onClick={action.onClick}
+                    variant={action.variant ?? "outline"}
+                    icon={action.icon}
+                    hideLabel={action.hideLabel}
+                    disabled={action.disabled}
+                    tooltip={action.tooltip}
+                    loading={action.loading}
+                  />
+                )}
               </div>
             </Fragment>
           ))}
@@ -258,4 +304,10 @@ export function BaseHeader({
       )}
     </div>
   )
+}
+
+export const isSecondaryDropdownAction = (
+  action: HeaderSecondaryAction
+): action is HeaderSecondaryDropdownAction => {
+  return "items" in action
 }
