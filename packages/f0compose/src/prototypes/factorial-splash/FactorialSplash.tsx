@@ -73,6 +73,25 @@ const VALID_EMPLOYEES: Record<string, string> = {
   "4444": "James Osei",
 };
 
+// Workplace + workarea data
+const WORKPLACES: { id: string; name: string; workareas: string[] }[] = [
+  {
+    id: "dhl",
+    name: "DHL Distribution",
+    workareas: ["Llacuna 1C", "Sorting Bay", "Loading Dock A"],
+  },
+  {
+    id: "fedex",
+    name: "FedEx Logistics",
+    workareas: ["Terminal 2", "Gate 7", "Dispatch Center"],
+  },
+  {
+    id: "amazon",
+    name: "Amazon Warehouse",
+    workareas: ["Zone A", "Zone B", "Returns Desk"],
+  },
+];
+
 // Break types data
 const BREAK_TYPES: {
   id: string;
@@ -367,9 +386,259 @@ function CenterCard({
 }
 
 // ---------------------------------------------------------------------------
+// Page 0a — Workplace selection
+// ---------------------------------------------------------------------------
+function WorkplaceSelectPage({
+  onSelect,
+}: {
+  onSelect: (workplaceId: string) => void;
+}) {
+  const [hovered, setHovered] = useState<string | null>(null);
+
+  return (
+    <CenterCard width={480}>
+      {/* Icon */}
+      <div
+        style={{
+          width: 56,
+          height: 56,
+          borderRadius: 18,
+          border: "1.5px solid #E5E7EB",
+          background: "#ffffff",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginBottom: 28,
+        }}
+      >
+        <OfficeIcon style={{ width: 28, height: 28, color: PINK }} />
+      </div>
+
+      <div
+        style={{
+          fontSize: 28,
+          fontWeight: 600,
+          color: NAVY,
+          marginBottom: 8,
+        }}
+      >
+        Select your workplace
+      </div>
+      <div
+        style={{
+          fontSize: 15,
+          color: MID_GRAY,
+          marginBottom: 28,
+        }}
+      >
+        Where are you working today?
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {WORKPLACES.map((wp) => (
+          <button
+            key={wp.id}
+            onClick={() => onSelect(wp.id)}
+            onMouseEnter={() => setHovered(wp.id)}
+            onMouseLeave={() => setHovered(null)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 14,
+              padding: "14px 18px",
+              borderRadius: 14,
+              border: `1.5px solid ${hovered === wp.id ? "#0CA0AB" : "#E5E7EB"}`,
+              background: hovered === wp.id ? "rgba(12,160,171,0.04)" : "#fff",
+              cursor: "pointer",
+              textAlign: "left",
+              transition: "border-color 0.15s, background 0.15s",
+              width: "100%",
+              boxSizing: "border-box",
+            }}
+          >
+            <div
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 10,
+                border: "1.5px solid #E5E7EB",
+                background: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                color: NAVY,
+              }}
+            >
+              <OfficeIcon style={{ width: 20, height: 20 }} />
+            </div>
+            <span style={{ fontSize: 15, fontWeight: 500, color: NAVY }}>
+              {wp.name}
+            </span>
+            <svg
+              style={{ marginLeft: "auto", flexShrink: 0, color: MID_GRAY }}
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
+              <path
+                d="M6 3l5 5-5 5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        ))}
+      </div>
+    </CenterCard>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Page 0b — Workarea selection
+// ---------------------------------------------------------------------------
+function WorkareaSelectPage({
+  workplace,
+  onSelect,
+  onBack,
+}: {
+  workplace: { id: string; name: string; workareas: string[] };
+  onSelect: (workarea: string) => void;
+  onBack: () => void;
+}) {
+  const [hovered, setHovered] = useState<string | null>(null);
+
+  return (
+    <CenterCard width={480}>
+      {/* Back button + heading row */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 14,
+          marginBottom: 28,
+        }}
+      >
+        <button
+          onClick={onBack}
+          style={{
+            width: 34,
+            height: 34,
+            border: "1.5px solid #E5E7EB",
+            borderRadius: 10,
+            background: "#fff",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            transition: "background 0.15s",
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.background = "#F3F4F6";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.background = "#fff";
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path
+              d="M10 3L5 8l5 5"
+              stroke={NAVY}
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+        <div>
+          <div style={{ fontSize: 20, fontWeight: 600, color: NAVY }}>
+            Select workarea
+          </div>
+          <div style={{ fontSize: 13, color: MID_GRAY, marginTop: 2 }}>
+            {workplace.name}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {workplace.workareas.map((area) => (
+          <button
+            key={area}
+            onClick={() => onSelect(area)}
+            onMouseEnter={() => setHovered(area)}
+            onMouseLeave={() => setHovered(null)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 14,
+              padding: "14px 18px",
+              borderRadius: 14,
+              border: `1.5px solid ${hovered === area ? "#0CA0AB" : "#E5E7EB"}`,
+              background: hovered === area ? "rgba(12,160,171,0.04)" : "#fff",
+              cursor: "pointer",
+              textAlign: "left",
+              transition: "border-color 0.15s, background 0.15s",
+              width: "100%",
+              boxSizing: "border-box",
+            }}
+          >
+            <div
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 10,
+                border: "1.5px solid #E5E7EB",
+                background: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                color: NAVY,
+              }}
+            >
+              <Globe style={{ width: 20, height: 20 }} />
+            </div>
+            <span style={{ fontSize: 15, fontWeight: 500, color: NAVY }}>
+              {area}
+            </span>
+            <svg
+              style={{ marginLeft: "auto", flexShrink: 0, color: MID_GRAY }}
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
+              <path
+                d="M6 3l5 5-5 5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        ))}
+      </div>
+    </CenterCard>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Page 1 — ID entry
 // ---------------------------------------------------------------------------
-function EntryPage({ onSubmit }: { onSubmit: (id: string) => void }) {
+function EntryPage({
+  onSubmit,
+  workplace = "DHL Distribution",
+  workarea = "Llacuna 1C",
+}: {
+  onSubmit: (id: string) => void;
+  workplace?: string;
+  workarea?: string;
+}) {
   const [employeeId, setEmployeeId] = useState("");
   const [inputFocused, setInputFocused] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -458,7 +727,7 @@ function EntryPage({ onSubmit }: { onSubmit: (id: string) => void }) {
           <input
             id="employeeId"
             name="employeeId"
-            type="text"
+            type="password"
             placeholder="e.g. 1234"
             value={employeeId}
             onChange={handleChange}
@@ -518,8 +787,8 @@ function EntryPage({ onSubmit }: { onSubmit: (id: string) => void }) {
 
       {/* Info pills */}
       <div style={{ display: "flex", gap: 12, marginTop: 28 }}>
-        <InfoPill label="Workplace" value="DHL Distribution" />
-        <InfoPill label="Workarea" value="Llacuna 1C" />
+        <InfoPill label="Workplace" value={workplace} />
+        <InfoPill label="Workarea" value={workarea} />
       </div>
     </CenterCard>
   );
@@ -654,7 +923,7 @@ function SuccessModal({
         >
           <span style={{ color: NAVY }}>{title}</span>
           <span style={{ color: NAVY, fontWeight: 400 }}>·</span>
-          <span style={{ color: "#0CA0AB" }}>{timeLabel}</span>
+          <span style={{ color: "#0D1625" }}>{timeLabel}</span>
         </div>
 
         {/* Employee name */}
@@ -833,6 +1102,8 @@ function ClockedInPage({
   onBreakEnd,
   initialOnBreak = false,
   sessionSeconds,
+  workplace = "DHL Distribution",
+  workarea = "Llacuna 1C",
 }: {
   onDone: () => void;
   onSelectBreak: () => void;
@@ -840,6 +1111,8 @@ function ClockedInPage({
   onBreakEnd: () => void;
   initialOnBreak?: boolean;
   sessionSeconds: number;
+  workplace?: string;
+  workarea?: string;
 }) {
   const clockInTime = useRef(new Date(Date.now() - (4 * 60 + 21) * 60 * 1000));
   const [clockState, setClockState] = useState<ClockInState>(
@@ -919,8 +1192,8 @@ function ClockedInPage({
             Hellen Howard
           </div>
           <div style={{ fontSize: 13, marginTop: 2 }}>
-            <span style={{ color: "#0D1625" }}>DHL Distribution</span>
-            <span style={{ color: "rgba(1,22,55,0.61)" }}> · Llacuna 1C</span>
+            <span style={{ color: "#0D1625" }}>{workplace}</span>
+            <span style={{ color: "rgba(1,22,55,0.61)" }}> · {workarea}</span>
           </div>
         </div>
         {/* Back / close */}
@@ -1035,6 +1308,8 @@ function SessionTopBar({ secondsLeft }: { secondsLeft: number }) {
 // Root — orchestrates screens + session timeout
 // ---------------------------------------------------------------------------
 type Screen =
+  | "workplace-select"
+  | "workarea-select"
   | "entry"
   | "success-modal"
   | "clocked-in-widget"
@@ -1044,11 +1319,15 @@ type Screen =
   | "clockout-modal";
 
 export default function FactorialSplash() {
-  const [screen, setScreen] = useState<Screen>("entry");
+  const [screen, setScreen] = useState<Screen>("workplace-select");
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [sessionClockedIn] = useState(() => new Set<string>());
   const [selectedBreakName, setSelectedBreakName] = useState("");
   const [employeeOnBreak, setEmployeeOnBreak] = useState(false);
+  const [selectedWorkplaceId, setSelectedWorkplaceId] = useState<string | null>(
+    null,
+  );
+  const [selectedWorkarea, setSelectedWorkarea] = useState<string | null>(null);
 
   // Session timeout — only active on non-entry, non-modal screens
   const [sessionSeconds, setSessionSeconds] = useState(SESSION_TOTAL);
@@ -1072,12 +1351,21 @@ export default function FactorialSplash() {
     return () => clearInterval(id);
   }, [sessionActive, screen]);
 
-  // When session hits 0 — return to entry
+  // When session hits 0 — return to workplace select
   useEffect(() => {
     if (sessionActive && sessionSeconds === 0) {
-      setScreen("entry");
+      setScreen("workplace-select");
     }
   }, [sessionActive, sessionSeconds]);
+
+  const selectedWorkplace =
+    WORKPLACES.find((w) => w.id === selectedWorkplaceId) ?? null;
+
+  function goHome() {
+    setSelectedWorkplaceId(null);
+    setSelectedWorkarea(null);
+    setScreen("workplace-select");
+  }
 
   function handleIdSubmit(id: string) {
     setPendingId(id);
@@ -1112,16 +1400,42 @@ export default function FactorialSplash() {
   }
 
   function handleClockOutModalClose() {
-    setScreen("entry");
+    goHome();
   }
 
   return (
     <PageShell>
-      {screen === "entry" && <EntryPage onSubmit={handleIdSubmit} />}
+      {screen === "workplace-select" && (
+        <WorkplaceSelectPage
+          onSelect={(id) => {
+            setSelectedWorkplaceId(id);
+            setScreen("workarea-select");
+          }}
+        />
+      )}
+
+      {screen === "workarea-select" && selectedWorkplace && (
+        <WorkareaSelectPage
+          workplace={selectedWorkplace}
+          onSelect={(area) => {
+            setSelectedWorkarea(area);
+            setScreen("entry");
+          }}
+          onBack={() => setScreen("workplace-select")}
+        />
+      )}
+
+      {screen === "entry" && (
+        <EntryPage
+          onSubmit={handleIdSubmit}
+          workplace={selectedWorkplace?.name ?? ""}
+          workarea={selectedWorkarea ?? ""}
+        />
+      )}
 
       {screen === "clocked-in-widget" && (
         <ClockedInPage
-          onDone={() => setScreen("entry")}
+          onDone={goHome}
           onSelectBreak={() => {
             resetSession();
             setScreen("break-select");
@@ -1133,6 +1447,8 @@ export default function FactorialSplash() {
           }}
           initialOnBreak={employeeOnBreak}
           sessionSeconds={sessionSeconds}
+          workplace={selectedWorkplace?.name ?? ""}
+          workarea={selectedWorkarea ?? ""}
         />
       )}
 
@@ -1150,7 +1466,11 @@ export default function FactorialSplash() {
       {/* Clock-in success modal */}
       {screen === "success-modal" && (
         <>
-          <EntryPage onSubmit={() => {}} />
+          <EntryPage
+            onSubmit={() => {}}
+            workplace={selectedWorkplace?.name ?? ""}
+            workarea={selectedWorkarea ?? ""}
+          />
           <SuccessModal title="Clocked in" onClose={handleSuccessClose} />
         </>
       )}
@@ -1158,7 +1478,11 @@ export default function FactorialSplash() {
       {/* Break started modal */}
       {screen === "break-modal" && (
         <>
-          <EntryPage onSubmit={() => {}} />
+          <EntryPage
+            onSubmit={() => {}}
+            workplace={selectedWorkplace?.name ?? ""}
+            workarea={selectedWorkarea ?? ""}
+          />
           <SuccessModal
             title={
               selectedBreakName === "Coffee Break"
@@ -1173,7 +1497,11 @@ export default function FactorialSplash() {
       {/* Clock-out success modal */}
       {screen === "clockout-modal" && (
         <>
-          <EntryPage onSubmit={() => {}} />
+          <EntryPage
+            onSubmit={() => {}}
+            workplace={selectedWorkplace?.name ?? ""}
+            workarea={selectedWorkarea ?? ""}
+          />
           <SuccessModal
             title="Clocked out"
             onClose={handleClockOutModalClose}
@@ -1181,10 +1509,14 @@ export default function FactorialSplash() {
         </>
       )}
 
-      {/* Coffee break finished modal */}
+      {/* Break finished modal */}
       {screen === "break-finished-modal" && (
         <>
-          <EntryPage onSubmit={() => {}} />
+          <EntryPage
+            onSubmit={() => {}}
+            workplace={selectedWorkplace?.name ?? ""}
+            workarea={selectedWorkarea ?? ""}
+          />
           <SuccessModal
             title="Coffee break finished"
             onClose={() => setScreen("entry")}
