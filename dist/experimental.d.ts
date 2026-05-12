@@ -551,6 +551,14 @@ declare type AiChatProviderProps = {
         feedback: string;
     }) => void;
     tracking?: AiChatTrackingOptions;
+    /**
+     * Optional hook called before a user message is sent. Return false to block submission.
+     */
+    onBeforeSendMessage?: () => boolean | Promise<boolean>;
+    /**
+     * Optional fetch implementation for AI runtime requests owned by F0.
+     */
+    runtimeFetch?: typeof fetch;
 } & Pick<CopilotKitProps, "agent" | "credentials" | "children" | "runtimeUrl" | "showDevConsole" | "threadId" | "headers">;
 
 /**
@@ -1246,6 +1254,11 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      */
     disabled?: boolean;
     /**
+     * If true and disabled is also true, the button retains its normal visual appearance
+     * (no reduced opacity or not-allowed cursor) while still being non-interactive.
+     */
+    withoutDisabledAppearance?: boolean;
+    /**
      * @private
      * If true, the button is visually active or selected (pressed state).
      */
@@ -1695,6 +1708,13 @@ declare interface ChatDashboardColumn {
 declare interface ChatDashboardConfig {
     /** Dashboard title displayed in the canvas header and chat report card */
     title: string;
+    /**
+     * AI-generated 1–2 sentence summary of what the dashboard shows. Displayed
+     * under the title in the canvas header. Optional at the type level so
+     * legacy persisted dashboards (before the agent started emitting it) still
+     * parse; the agent schema makes it required going forward.
+     */
+    description?: string;
     /** Filter definitions — keys become filter IDs */
     filters?: Record<string, ChatDashboardFilterDefinition>;
     /**
@@ -2221,8 +2241,23 @@ export declare const Dashboard: ForwardRefExoticComponent<DashboardProps & RefAt
 declare type DashboardCanvasActions = {
     /** Update an existing saved dashboard */
     save: (id: string, category: string, config: ChatDashboardConfig) => Promise<void>;
-    /** Create a new saved dashboard. Returns the new dashboard ID if available. */
-    create: (title: string, description: string, config: ChatDashboardConfig, category?: string) => Promise<string | void>;
+    /**
+     * Create a new saved dashboard. Returns the new dashboard's id and
+     * category so subsequent edits can call `save` (which requires both).
+     * Returning void / undefined leaves the canvas in its current state.
+     */
+    create: (title: string, description: string, config: ChatDashboardConfig, category?: string) => Promise<{
+        id: string;
+        category: string;
+    } | void>;
+    /**
+     * Fetch creator + last-edited metadata for a saved dashboard. The header
+     * calls this lazily, only when the current dashboard has a
+     * `savedDashboardId`. Returning `void` signals "no metadata available" —
+     * the header will skip rendering the avatar and the last-edited row
+     * instead of showing a placeholder.
+     */
+    getMetadata?: (id: string) => Promise<DashboardMetadata | void>;
 };
 
 declare interface DashboardFetchSpec {
@@ -2233,6 +2268,42 @@ declare interface DashboardFetchSpec {
     query: string | null;
     columnLabels?: Record<string, string>;
 }
+
+/**
+ * Creator + last-edited metadata for a saved dashboard. Returned by
+ * `DashboardCanvasActions.getMetadata` so the header can render the author
+ * avatar and the freshness signal only once a dashboard has been persisted.
+ *
+ * `title` and `description` are also returned: once a dashboard has an id
+ * the backend is the source of truth and may diverge from what's stored in
+ * the chat history (e.g. someone renamed the dashboard from the Analytics
+ * list page since this conversation was first opened). The header prefers
+ * these values over the ones baked into `content` / `config`.
+ */
+declare type DashboardMetadata = {
+    /**
+     * Latest persisted title. When present, the header displays this instead
+     * of `content.title` so the chat-history snapshot never shadows the
+     * authoritative backend copy.
+     */
+    title?: string;
+    /**
+     * Latest persisted description. Same rationale as `title` — takes
+     * precedence over `config.description` once the dashboard is saved.
+     */
+    description?: string;
+    creator: {
+        firstName: string;
+        lastName: string;
+        /** Optional avatar image URL. Falls back to initials when omitted. */
+        src?: string;
+    };
+    /**
+     * Last edited timestamp. Accepts `Date` or an ISO-8601 string so host apps
+     * can forward backend payloads verbatim without pre-parsing.
+     */
+    lastEdited: Date | string;
+};
 
 declare type DashboardProps = {
     widgetWidth?: WidgetWidth;
@@ -2832,6 +2903,10 @@ declare const defaultTranslations: {
         readonly availableFilters: "Available filters";
         readonly label: "Filters";
         readonly applyFilters: "Apply filters";
+        readonly resultsFor: {
+            readonly one: "{{count}} result for:";
+            readonly other: "{{count}} results for:";
+        };
         readonly applySelection: "Apply selection";
         readonly cancel: "Cancel";
         readonly failedToLoadOptions: "Failed to load options";
@@ -3027,6 +3102,7 @@ declare const defaultTranslations: {
         readonly unsavedChanges: "Unsaved changes";
         readonly saveChanges: "Save changes";
         readonly discardChanges: "Discard";
+        readonly saveAsChanges: "Save as";
         readonly exportTable: "Download table";
         readonly generatedTableFilename: "OneGeneratedTable";
         readonly feedbackModal: {
@@ -3065,6 +3141,11 @@ declare const defaultTranslations: {
                 readonly source: "Source";
                 readonly applied: "Applied on";
             };
+            readonly requisition: {
+                readonly lineManager: "Line manager";
+                readonly reason: "Reason";
+                readonly status: "Status";
+            };
         };
         readonly credits: {
             readonly title: "Credits";
@@ -3076,6 +3157,7 @@ declare const defaultTranslations: {
         };
         readonly reportCard: {
             readonly reportLabel: "Report";
+            readonly tableLabel: "Table";
             readonly openButton: "Open";
         };
         readonly formCard: {
@@ -3084,6 +3166,7 @@ declare const defaultTranslations: {
         readonly dashboard: {
             readonly save: "Save";
             readonly saveToAnalytics: "Save the dashboard in Analytics";
+            readonly saveTableToAnalytics: "Save the table in Analytics";
             readonly saveAs: "Save as";
             readonly saveDialog: {
                 readonly title: "Save dashboard";
@@ -3093,12 +3176,21 @@ declare const defaultTranslations: {
                 readonly save: "Save";
                 readonly cancel: "Cancel";
             };
+            readonly status: {
+                readonly saved: "Saved";
+                readonly draft: "Draft";
+                readonly unsaved: "Unsaved";
+            };
+            readonly statusLabel: "Status";
+            readonly lastEdited: "Last edited";
+            readonly createdBy: "Created by";
         };
         readonly dataDownload: {
             readonly title: "Download";
             readonly download: "Download {{format}}";
             readonly exportDashboard: "Export dashboard as {{format}}";
-            readonly exporting: "Exporting...";
+            readonly export: "Export";
+            readonly exporting: "Exporting…";
             readonly rows: "{{amount}} rows";
         };
         readonly dashboardItem: {
@@ -3128,6 +3220,7 @@ declare const defaultTranslations: {
         readonly attachFile: "Attach file";
         readonly removeFile: "Remove";
         readonly fileUploadError: "Upload failed";
+        readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly dropFilesHere: "Drop your files here";
         readonly reply: "Reply";
         readonly removeQuote: "Remove quote";
@@ -3143,7 +3236,7 @@ declare const defaultTranslations: {
             readonly navHint: {
                 readonly navigate: "navigate";
                 readonly select: "select";
-                readonly skip: "skip";
+                readonly cancel: "cancel";
             };
         };
         readonly growth: {
@@ -3177,6 +3270,10 @@ declare const defaultTranslations: {
         readonly funnel: "Funnel";
         readonly pieChart: "Pie";
         readonly table: "Table";
+        readonly emptyState: {
+            readonly title: "No data available";
+            readonly description: "Try a different date or fewer filters";
+        };
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -3583,7 +3680,7 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
      * stepping (`step`), formatting (`maxDecimals`, `locale`), and units.
      * Falls back to sensible defaults when omitted.
      */
-    numberConfig?: NumberCellConfig;
+    numberConfig?: NumberCellConfig<R>;
 };
 
 declare type EditableTableVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = Omit<TableVisualizationOptions<R, _Filters, Sortings, Summaries>, "columns"> & {
@@ -3679,6 +3776,7 @@ declare type EntityRefs = {
 declare type EntityResolvers = {
     person?: (id: string) => Promise<PersonProfile>;
     candidate?: (id: string) => Promise<CandidateProfile>;
+    expense?: (id: string) => Promise<ExpenseProfile>;
     jobPosting?: (id: string) => Promise<JobPostingProfile>;
     requisition?: (id: string) => Promise<RequisitionProfile>;
     vacancy?: (id: string) => Promise<VacancyProfile>;
@@ -3767,6 +3865,7 @@ export declare type EntitySelectSubEntity = {
 declare type EntityUrlBuilders = {
     person?: (id: string) => string;
     candidate?: (id: string) => string;
+    expense?: (id: string) => string;
     jobPosting?: (id: string) => string;
     requisition?: (id: string) => string;
     vacancy?: (id: string) => string;
@@ -3778,6 +3877,17 @@ declare interface ErrorMessageProps {
     title: string;
     description: string;
 }
+
+/**
+ * Profile data for an expense entity, resolved asynchronously
+ * and displayed in the entity reference hover card.
+ */
+declare type ExpenseProfile = {
+    id: string | number;
+    description?: string;
+    amount?: string;
+    status?: string;
+};
 
 /**
  * Extracts the property keys from a record type.
@@ -4053,6 +4163,14 @@ declare type F0SelectBaseProps<T extends string, R = unknown> = {
      * @default false
      */
     showPreview?: boolean;
+    /**
+     * When true, preserves selections when the dataset changes (search, filters,
+     * or sortings). Useful for picker components where the user searches and
+     * filters to find items to add to an existing selection.
+     *
+     * @default true
+     */
+    preserveSelectionOnDatasetChange?: boolean;
 } & WithDataTestIdProps;
 
 declare type F0SelectItemObject<T, R = unknown> = {
@@ -5490,13 +5608,18 @@ export declare class NotesTextEditorUnsupportedPatchTypeError extends Error {
     constructor(patchType: unknown);
 }
 
-declare type NumberCellConfig = {
+declare type NumberCellConfig<R extends RecordType = RecordType> = {
     min?: number;
     max?: number;
     step?: number;
     maxDecimals?: number;
     locale?: string;
-    units?: string;
+    /**
+     * Unit label displayed next to the number input.
+     * Can be a static string (e.g. `"h"`) or a function that receives the
+     * current row item to return a per-row unit (e.g. `(item) => item.type === "role" ? "h" : "u"`).
+     */
+    units?: string | ((item: R) => string | undefined);
     unitsPosition?: "before" | "after";
 };
 
@@ -5859,6 +5982,8 @@ declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     onOpenChange?: (isOpen: boolean) => void;
     /** Display counter for the applied filters */
     displayCounter?: boolean;
+    /** Total number of items matching the current filters, displayed as "N results for:" prefix in the chips row */
+    resultCount?: number;
 };
 
 /**
@@ -6166,14 +6291,11 @@ export declare const predefinedPresets: Record<string, DatePreset>;
 export declare type PresetDefinition<Filters extends FiltersDefinition> = {
     /** Display name for the preset */
     label: string;
-    /** Filter configuration to apply when this preset is selected */
-    filter: FiltersState<Filters>;
-    /**
-     * How the preset is applied when clicked:
-     * - 'replace' (default): Replace all current filters with preset's filter
-     * - 'additive': Merge preset's filter with current filters, preserving existing selections
+    /** Filter configuration to apply when this preset is selected.
+     * Clicking a preset replaces all current filters with this value.
+     * The preset shows as selected only when the current filters exactly match this value.
      */
-    mode?: "replace" | "additive";
+    filter: FiltersState<Filters>;
     /** Function to count the number of items that match the filter */
     itemsCount?: (filters: FiltersState<Filters>) => Promise<number | undefined> | number | undefined;
 };
@@ -6530,15 +6652,18 @@ declare interface ReplaceContentNotesTextEditorPageDocumentPatch {
     content: JSONContent[];
 }
 
-/**
- * Profile data for a requisition entity (ATS requisition), resolved asynchronously
- * and displayed in the entity reference hover card.
- */
 declare type RequisitionProfile = {
     id: string | number;
     title: string;
     status?: string;
+    statusVariant?: StatusVariant;
     reason?: string;
+    location?: string;
+    lineManager?: {
+        firstName: string;
+        lastName: string;
+        avatarUrl?: string;
+    };
 };
 
 export declare type ResolvedRecordType<R> = R extends RecordType ? R : RecordType;

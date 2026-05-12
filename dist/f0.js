@@ -1,13 +1,13 @@
-import { fy as Or, a6 as se, bU as Tn, O as P, P as ht, fz as Mr, W as yt, dG as zo, aS as Yi, fA as Io, a7 as zr, a8 as de, u as oe, ar as he, fp as Ut, U as Bo, ac as Po, M as Ir, fB as un, aO as Oe, aL as hi, fC as Ho, fD as Wo, fE as qo, fF as Ji, a0 as Go, fG as $o, fH as Br, fI as jo, bd as fi, be as mi, a5 as Fn, bf as gi, aX as Pr, cR as hn, fJ as Hr, fK as Uo, eg as Vo, fL as Zi, ef as Qo, fM as Ko, fN as wt, fO as Vt, fP as Xo, fQ as Wr, fR as Yo, fS as Jo, fT as An, fU as Zo, fV as ea, R as We, b0 as ta, d4 as si, d3 as qr, fW as na, fX as pi, cn as ia, fY as ra, fZ as Gr, f_ as Ln, f$ as sa, g0 as oa, aI as vi, Q as Ce, aJ as aa, aK as fn, ce as la, g1 as ca, aR as On, g2 as $r, g3 as da, g4 as ua, g5 as ha, g6 as fa, cB as ma, m as ga, dq as pa, aq as jr, f4 as ft, g7 as Ur, f2 as Vr, g8 as mn, g9 as Qr, ch as Kr, ga as Xr, as as bi, at as yi, gb as xi, aw as wi, aB as De, gc as Ci, aD as xt, gd as At, ge as Lt, av as Ot, gf as Mt, gg as va, gh as Zt, gi as Yr, gj as gn, bM as Pt, gk as _e, cs as ba, gl as Jr, gm as ya, gn as pn, cr as xa, cq as wa, go as Ca, gp as Sa, bO as Mn, aE as zn, gq as Zr, bJ as Si, bP as Ei, bc as Ea, gr as Ae, gs as Na, gt as _a, gu as es, gv as In, gw as Da, gx as Ra, cj as ts, gy as ka, gz as Ta, gA as Fa, gB as Aa, bp as ns, bv as La, fs as Oa, ft as Ma, fv as za, gC as is, bW as Ia, b_ as Ba, gD as er, c5 as Pa, gE as rs, gF as Ha, gG as Wa } from "./F0AiChat-BoRKxuwC.js";
-import { hk as Lf, gL as Of, co as Mf, l as zf, hy as If, bo as Bf, k as Pf, F as Hf, a as Wf, C as qf, hb as Gf, b as $f, gY as jf, bN as Uf, c7 as Vf, _ as Qf, c8 as Kf, gI as Xf, bh as Yf, Y as Jf, X as Zf, Z as em, b3 as tm, gS as nm, gW as im, gJ as rm, gX as sm, gZ as om, g$ as am, hD as lm, bx as cm, n as dm, hv as um, b5 as hm, $ as fm, hf as mm, bB as gm, hg as pm, hi as vm, hj as bm, d1 as ym, c$ as xm, d as wm, gM as Cm, hl as Sm, gN as Em, gO as Nm, gP as _m, cN as Dm, cO as Rm, gH as km, gQ as Tm, hC as Fm, gR as Am, bu as Lm, d0 as Om, hh as Mm, cP as zm, cm as Im, hE as Bm, gT as Pm, gU as Hm, gV as Wm, gK as qm, cQ as Gm, hx as $m, hq as jm, hd as Um, h4 as Vm, h3 as Qm, h2 as Km, ha as Xm, ht as Ym, g as Jm, hp as Zm, bs as eg, cM as tg, cJ as ng, cL as ig, h9 as rg, cI as sg, h5 as og, ho as ag, hn as lg, h6 as cg, cw as dg, cK as ug, h0 as hg, h1 as fg, h7 as mg, c as gg, hm as pg, hr as vg, h as bg, hz as yg, hA as xg, hB as wg, bq as Cg, hc as Sg, g_ as Eg, he as Ng, e as _g, hw as Dg, hs as Rg, j as kg, i as Tg, bV as Fg, T as Ag, h8 as Lg, hu as Og, f as Mg, hF as zg } from "./F0AiChat-BoRKxuwC.js";
+import { fA as Or, a6 as se, bU as Tn, O as P, P as ht, fB as Mr, W as yt, dH as zo, aS as Yi, fC as Io, a7 as zr, a8 as de, u as oe, ar as he, fr as Ut, U as Bo, ac as Po, M as Ir, fD as un, aO as Oe, aL as hi, fE as Ho, fF as Wo, fG as qo, fH as Ji, a0 as Go, fI as $o, fJ as Br, fK as jo, bd as fi, be as mi, a5 as Fn, bf as gi, aX as Pr, cS as hn, fL as Hr, fM as Uo, eh as Vo, fN as Zi, eg as Qo, fO as Ko, fP as wt, fQ as Vt, fR as Xo, fS as Wr, fT as Yo, fU as Jo, fV as An, fW as Zo, fX as ea, R as We, b0 as ta, d5 as si, d4 as qr, fY as na, fZ as pi, cn as ia, f_ as ra, f$ as Gr, g0 as Ln, g1 as sa, g2 as oa, aI as vi, Q as Ce, aJ as aa, aK as fn, ce as la, g3 as ca, aR as On, fo as bi, g4 as $r, g5 as da, g6 as ua, g7 as ha, g8 as fa, cC as ma, m as ga, dr as pa, aq as jr, f6 as ft, g9 as Ur, f4 as Vr, ga as mn, gb as Qr, ch as Kr, gc as Xr, as as yi, at as xi, gd as wi, aw as Ci, aB as De, ge as Si, aD as xt, gf as At, gg as Lt, av as Ot, gh as Mt, gi as va, gj as Zt, gk as Yr, gl as gn, bM as Pt, gm as _e, cs as ba, gn as Jr, go as ya, gp as pn, cr as xa, cq as wa, gq as Ca, gr as Sa, bO as Mn, aE as zn, gs as Zr, bJ as Ei, bP as Ni, bc as Ea, gt as Ae, gu as Na, gv as _a, gw as es, gx as In, gy as Da, gz as Ra, cx as ts, cj as ns, gA as ka, gB as Ta, gC as Fa, gD as Aa, bp as is, bv as La, fu as Oa, fv as Ma, fx as za, gE as rs, bW as Ia, b_ as Ba, gF as er, c5 as Pa, gG as ss, gH as Ha, gI as Wa } from "./F0AiChat-DyuiSjT5.js";
+import { hn as Lf, gO as Of, co as Mf, l as zf, gM as If, hB as Bf, bo as Pf, k as Hf, F as Wf, a as qf, C as Gf, he as $f, b as jf, g$ as Uf, bN as Vf, c7 as Qf, _ as Kf, c8 as Xf, gK as Yf, bh as Jf, Y as Zf, X as em, Z as tm, b3 as nm, gV as im, gZ as rm, gL as sm, g_ as om, h0 as am, h2 as lm, hG as cm, bx as dm, n as um, hy as hm, b5 as fm, $ as mm, hi as gm, bB as pm, hj as vm, hl as bm, hm as ym, d2 as xm, d0 as wm, d as Cm, gP as Sm, ho as Em, gQ as Nm, gR as _m, gS as Dm, cO as Rm, cP as km, gJ as Tm, gT as Fm, hF as Am, gU as Lm, bu as Om, d1 as Mm, hk as zm, cQ as Im, cm as Bm, hH as Pm, gW as Hm, gX as Wm, gY as qm, gN as Gm, cR as $m, hA as jm, ht as Um, hg as Vm, h7 as Qm, h6 as Km, h5 as Xm, hd as Ym, hw as Jm, g as Zm, hs as eg, bs as tg, cN as ng, cK as ig, cM as rg, hc as sg, cJ as og, h8 as ag, hr as lg, hq as cg, h9 as dg, cw as ug, cL as hg, h3 as fg, h4 as mg, ha as gg, c as pg, hp as vg, hu as bg, h as yg, hC as xg, hD as wg, hE as Cg, bq as Sg, hf as Eg, h1 as Ng, hh as _g, e as Dg, hz as Rg, hv as kg, j as Tg, i as Fg, bV as Ag, T as Lg, hb as Og, hx as Mg, f as zg, hI as Ig } from "./F0AiChat-DyuiSjT5.js";
 import { jsx as l, jsxs as C, Fragment as we } from "react/jsx-runtime";
-import ae, { forwardRef as qe, useRef as W, useImperativeHandle as qa, Children as vn, createContext as Qe, useContext as Re, useState as j, useMemo as B, useEffect as V, useCallback as I, useLayoutEffect as oi, createElement as en, isValidElement as ss, Fragment as Ga, memo as os, useReducer as $a, cloneElement as ja, useId as as } from "react";
-import { g as Ua, h as Va } from "./types-B3Ug66fa.js";
-import { A as Bg, e as Pg, F as Hg, c as Wg, d as qg, b as Gg, a as $g, f as jg, o as Ug, u as Vg } from "./types-B3Ug66fa.js";
-import { createPortal as ls, unstable_batchedUpdates as tn } from "react-dom";
-import { C as Qa, M as Ni, D as Ka, z as Xa, u as cs, j as Ya } from "./index-CtgcQyyg.js";
-import { l as Kg, m as Xg, n as Yg, s as Jg, F as Zg, o as ep, w as tp, x as np, N as ip, y as rp, p as sp, P as op, r as ap, R as lp, q as cp, _ as dp, v as up, t as hp } from "./index-CtgcQyyg.js";
-import { defaultTranslations as mp } from "./i18n-provider-defaults.js";
+import ae, { forwardRef as qe, useRef as W, useImperativeHandle as qa, Children as vn, createContext as Qe, useContext as Re, useState as j, useMemo as B, useEffect as V, useCallback as I, useLayoutEffect as oi, createElement as en, isValidElement as os, Fragment as Ga, memo as as, useReducer as $a, cloneElement as ja, useId as ls } from "react";
+import { g as Ua, h as Va } from "./types-B-5t6PV6.js";
+import { A as Pg, e as Hg, F as Wg, c as qg, d as Gg, b as $g, a as jg, f as Ug, o as Vg, u as Qg } from "./types-B-5t6PV6.js";
+import { createPortal as cs, unstable_batchedUpdates as tn } from "react-dom";
+import { C as Qa, D as Ka, y as Xa, j as Ya } from "./index-BDTElkJN.js";
+import { l as Xg, m as Yg, n as Jg, s as Zg, F as ep, o as tp, v as np, w as ip, N as rp, x as sp, p as op, P as ap, r as lp, R as cp, q as dp, _ as up, u as hp, t as fp } from "./index-BDTElkJN.js";
+import { defaultTranslations as gp } from "./i18n-provider-defaults.js";
 import './f0.css';const Ja = {
   xs: 1,
   sm: 2,
@@ -515,7 +515,7 @@ function ul() {
   const { _reactContentMap: n } = hs(), { getWidgetContainer: e } = cl();
   return /* @__PURE__ */ l(we, { children: Array.from(n.value.entries()).map(([t, i]) => {
     const r = e(t);
-    return r ? /* @__PURE__ */ l(dl.Provider, { value: { widget: { id: t } }, children: i && ls(i, r) }, t) : (console.error(`Widget container not found for widget ${t}`), null);
+    return r ? /* @__PURE__ */ l(dl.Provider, { value: { widget: { id: t } }, children: i && cs(i, r) }, t) : (console.error(`Widget container not found for widget ${t}`), null);
   }) });
 }
 function hl(n, e, t, i, r) {
@@ -4641,7 +4641,7 @@ const Rl = ({
 }, kl = bl(
   "BlockContent",
   Rl
-), Tl = (n) => !ss(n) || !n.type || typeof n.type == "string" || typeof n.type == "symbol" ? !1 : "__isPageLayoutBlock" in n.type, Fl = (n) => !ss(n) || !n.type || typeof n.type == "string" || typeof n.type == "symbol" ? !1 : "__isPageLayoutGroup" in n.type, bs = (n, e, t) => {
+), Tl = (n) => !os(n) || !n.type || typeof n.type == "string" || typeof n.type == "symbol" ? !1 : "__isPageLayoutBlock" in n.type, Fl = (n) => !os(n) || !n.type || typeof n.type == "string" || typeof n.type == "symbol" ? !1 : "__isPageLayoutGroup" in n.type, bs = (n, e, t) => {
   const i = vn.toArray(e);
   for (const r of i)
     t.includes("block") && Tl(r) || t.includes("group") && Fl(r) || console.warn(
@@ -5045,7 +5045,7 @@ function jl(n) {
     id: a,
     announcement: o
   }));
-  return t ? ls(c, t) : c;
+  return t ? cs(c, t) : c;
 }
 var pe;
 (function(n) {
@@ -6693,7 +6693,7 @@ var dt;
 (function(n) {
   n[n.Uninitialized = 0] = "Uninitialized", n[n.Initializing = 1] = "Initializing", n[n.Initialized = 2] = "Initialized";
 })(dt || (dt = {}));
-const jc = /* @__PURE__ */ os(function(e) {
+const jc = /* @__PURE__ */ as(function(e) {
   var t, i, r, s;
   let {
     id: o,
@@ -9349,7 +9349,7 @@ function Ee({
   hideLabel: c,
   initialFiles: h
 }) {
-  const f = as(), m = d ?? (n.validation ? Wr(n.validation) : !1), p = !c && n.type !== "checkbox" && n.type !== "custom", v = {
+  const f = ls(), m = d ?? (n.validation ? Wr(n.validation) : !1), p = !c && n.type !== "checkbox" && n.type !== "custom", v = {
     value: e,
     onChange: t,
     onBlur: i ?? (() => {
@@ -10294,10 +10294,10 @@ const bf = se(ho), uu = ({
     primaryAction: a,
     secondaryActions: d,
     otherActions: u
-  } = n, c = as(), h = o?.some(Boolean), f = a || d && d.length > 0 || u && u.length > 0;
+  } = n, c = ls(), h = o?.some(Boolean), f = a || d && d.length > 0 || u && u.length > 0;
   return /* @__PURE__ */ C(Wi, { status: e, isLast: t, hideStatus: i, children: [
     /* @__PURE__ */ l("div", { className: "flex min-h-8 items-center gap-3", children: /* @__PURE__ */ l(hu, { props: n, contentId: c }) }),
-    o && h && /* @__PURE__ */ l("div", { className: "pl-9", children: /* @__PURE__ */ l(Ni, { items: o }) }),
+    o && h && /* @__PURE__ */ l("div", { className: "pl-9", children: /* @__PURE__ */ l(bi, { items: o }) }),
     r && /* @__PURE__ */ l("div", { id: c, role: "region", className: "flex flex-col gap-0 pl-4", children: s.map((m, p) => /* @__PURE__ */ l(gu, { props: m }, `${m.title}-${p}`)) }),
     f && /* @__PURE__ */ l("div", { className: "pl-9", children: /* @__PURE__ */ l(
       fo,
@@ -10311,7 +10311,7 @@ const bf = se(ho), uu = ({
 }, pu = ({ props: n }) => {
   const { metadata: e, primaryAction: t, secondaryActions: i, otherActions: r } = n, s = e?.some(Boolean), o = t || i && i.length > 0 || r && r.length > 0;
   return /* @__PURE__ */ C("div", { className: "pl-9", children: [
-    e && s && /* @__PURE__ */ l("div", { className: "mb-3", children: /* @__PURE__ */ l(Ni, { items: e }) }),
+    e && s && /* @__PURE__ */ l("div", { className: "mb-3", children: /* @__PURE__ */ l(bi, { items: e }) }),
     o && /* @__PURE__ */ l("div", { className: "mb-3", children: /* @__PURE__ */ l(
       fo,
       {
@@ -10338,7 +10338,7 @@ const bf = se(ho), uu = ({
       ),
       r && /* @__PURE__ */ l(qt, { content: r, variant: "description" })
     ] }),
-    /* @__PURE__ */ l("div", { className: "flex justify-end items-center gap-3 pl-9", children: e === "completed" && s && o && /* @__PURE__ */ l(Ni, { items: s }) })
+    /* @__PURE__ */ l("div", { className: "flex justify-end items-center gap-3 pl-9", children: e === "completed" && s && o && /* @__PURE__ */ l(bi, { items: s }) })
   ] });
 }, go = ({ props: n }) => {
   const { status: e, isLast: t = !1, hideStatus: i = !1 } = n;
@@ -10643,7 +10643,7 @@ const Sf = se(
     ),
     /* @__PURE__ */ l("span", { className: "font-medium", children: n.t("surveyFormBuilder.labels.applyingChanges") })
   ] });
-}, Au = os(Fu);
+}, Au = as(Fu);
 var Lu = Dd();
 const yr = /* @__PURE__ */ pa(Lu), bo = (n) => {
   switch (n) {
@@ -11083,20 +11083,20 @@ const $i = () => {
       o.filter((f) => !!f.datasetKey).map((f) => f.datasetKey)
     )
   );
-  return n || e ? null : /* @__PURE__ */ l("div", { className: "ml-6 flex justify-center", children: /* @__PURE__ */ C(bi, { open: r, onOpenChange: s, children: [
-    /* @__PURE__ */ l(yi, { asChild: !0, children: /* @__PURE__ */ l(
+  return n || e ? null : /* @__PURE__ */ l("div", { className: "ml-6 flex justify-center", children: /* @__PURE__ */ C(yi, { open: r, onOpenChange: s, children: [
+    /* @__PURE__ */ l(xi, { asChild: !0, children: /* @__PURE__ */ l(
       Ce,
       {
-        icon: xi,
+        icon: wi,
         label: a("surveyFormBuilder.actions.addQuestion"),
         size: "md",
         variant: "outline",
         hideLabel: !0
       }
     ) }),
-    /* @__PURE__ */ C(wi, { align: "center", className: "w-80", children: [
+    /* @__PURE__ */ C(Ci, { align: "center", className: "w-80", children: [
       /* @__PURE__ */ l(De, { onClick: u, children: /* @__PURE__ */ C("div", { className: "flex w-full flex-row items-center gap-2", children: [
-        /* @__PURE__ */ l(he, { icon: Ci, color: "default" }),
+        /* @__PURE__ */ l(he, { icon: Si, color: "default" }),
         /* @__PURE__ */ l("span", { className: "flex-1 text-base font-medium", children: a("surveyFormBuilder.questionTypes.section") })
       ] }) }),
       /* @__PURE__ */ l(xt, {}),
@@ -11452,8 +11452,8 @@ function qu({
     questionType: i,
     canDelete: r
   });
-  return /* @__PURE__ */ C(bi, { open: n, onOpenChange: e, children: [
-    /* @__PURE__ */ l(yi, { tabIndex: -1, asChild: !0, children: /* @__PURE__ */ l(
+  return /* @__PURE__ */ C(yi, { open: n, onOpenChange: e, children: [
+    /* @__PURE__ */ l(xi, { tabIndex: -1, asChild: !0, children: /* @__PURE__ */ l(
       Ce,
       {
         icon: un,
@@ -11464,7 +11464,7 @@ function qu({
         hideLabel: !0
       }
     ) }),
-    /* @__PURE__ */ C(wi, { className: "w-80", align: "start", children: [
+    /* @__PURE__ */ C(Ci, { className: "w-80", align: "start", children: [
       /* @__PURE__ */ l(va, { className: "p-4 pb-2 font-medium text-f1-foreground-secondary", children: s("surveyFormBuilder.labels.questionOptions") }),
       !f && /* @__PURE__ */ l(Zt, { children: /* @__PURE__ */ l(
         wr,
@@ -11580,7 +11580,7 @@ const Sr = {
     {
       id: `co-creation-question-${n}`,
       className: P(
-        "group/question relative flex w-full flex-col rounded-xl border border-solid border-f1-border-secondary bg-f1-background px-3 py-4",
+        "group/question relative flex w-full flex-col rounded-xl border border-solid border-f1-border bg-f1-background px-3 py-4",
         !R && !c && "hover:border-f1-border-hover",
         !c || t ? "gap-4" : "gap-2"
       ),
@@ -11678,25 +11678,25 @@ const Sr = {
               b && "opacity-100"
             ),
             children: /* @__PURE__ */ C(
-              bi,
+              yi,
               {
                 open: b,
                 onOpenChange: w,
                 children: [
-                  /* @__PURE__ */ l(yi, { asChild: !0, children: /* @__PURE__ */ l(
+                  /* @__PURE__ */ l(xi, { asChild: !0, children: /* @__PURE__ */ l(
                     Ce,
                     {
-                      icon: xi,
+                      icon: wi,
                       label: x("surveyFormBuilder.actions.addQuestion"),
                       size: "sm",
                       variant: "outline",
                       hideLabel: !0
                     }
                   ) }),
-                  /* @__PURE__ */ C(wi, { align: "center", className: "w-80", children: [
+                  /* @__PURE__ */ C(Ci, { align: "center", className: "w-80", children: [
                     !g && /* @__PURE__ */ C(we, { children: [
                       /* @__PURE__ */ l(De, { onClick: F, children: /* @__PURE__ */ C("div", { className: "flex w-full flex-row items-center gap-2", children: [
-                        /* @__PURE__ */ l(he, { icon: Ci, color: "default" }),
+                        /* @__PURE__ */ l(he, { icon: Si, color: "default" }),
                         /* @__PURE__ */ l("span", { className: "flex-1 text-base font-medium", children: x("surveyFormBuilder.questionTypes.section") })
                       ] }) }),
                       /* @__PURE__ */ l(xt, {})
@@ -12008,7 +12008,11 @@ const Sr = {
   disabled: r,
   isEmojiMode: s = !1
 }) => {
-  const { value: o, label: a } = n, [d, u] = j(!1), c = () => {
+  const { value: o, label: a } = n, [d, u] = j(!1);
+  V(() => {
+    r && u(!1);
+  }, [r]);
+  const c = () => {
     r || t(o);
   }, h = (f) => {
     i?.(o, f.native), u(!1);
@@ -12016,54 +12020,64 @@ const Sr = {
   return /* @__PURE__ */ l(
     "div",
     {
+      "data-testid": `score-edit-option-${o}`,
       className: P(
-        "group relative flex h-10 min-w-20 flex-1 items-center justify-center rounded-md border border-solid border-f1-border-secondary text-center font-medium",
+        "group relative flex h-10 min-w-20 flex-1 items-center justify-center rounded-md border border-solid border-f1-border text-center font-medium",
         e && "border-f1-border-selected bg-f1-background-selected-secondary",
         r ? "cursor-default" : "cursor-pointer"
       ),
       onClick: c,
-      children: s ? /* @__PURE__ */ C(fi, { open: d, onOpenChange: u, children: [
-        /* @__PURE__ */ l(mi, { asChild: !0, children: /* @__PURE__ */ l(
-          Ce,
-          {
-            emoji: a,
-            label: o.toString(),
-            variant: "ghost",
-            hideLabel: !0
-          }
-        ) }),
-        /* @__PURE__ */ l(
-          gi,
-          {
-            side: "bottom",
-            align: "center",
-            className: "w-fit border-none bg-transparent p-2 shadow-none",
-            onClick: (f) => {
-              f.preventDefault(), f.stopPropagation();
-            },
-            children: /* @__PURE__ */ l(
-              Ca,
+      children: s ? /* @__PURE__ */ C(
+        fi,
+        {
+          open: !r && d,
+          onOpenChange: r ? void 0 : u,
+          children: [
+            /* @__PURE__ */ l(mi, { asChild: !0, children: /* @__PURE__ */ l(
+              Ce,
               {
-                data: Sa,
-                onEmojiSelect: h,
-                locale: "en",
-                icons: "outline",
-                set: "twitter",
-                theme: "light",
-                emojiButtonSize: 32,
-                emojiButtonRadius: "10px",
-                emojiSize: 24,
-                maxFrequentRows: 2,
-                skinTonePosition: "none",
-                previewPosition: "none",
-                searchPosition: "top",
-                navPosition: "top",
-                dynamicWidth: !0
+                emoji: a,
+                label: o.toString(),
+                variant: "ghost",
+                disabled: r,
+                withoutDisabledAppearance: !0,
+                hideLabel: !0
+              }
+            ) }),
+            /* @__PURE__ */ l(
+              gi,
+              {
+                side: "bottom",
+                align: "center",
+                className: "w-fit border-none bg-transparent p-2 shadow-none",
+                onClick: (f) => {
+                  f.preventDefault(), f.stopPropagation();
+                },
+                children: /* @__PURE__ */ l(
+                  Ca,
+                  {
+                    data: Sa,
+                    onEmojiSelect: h,
+                    locale: "en",
+                    icons: "outline",
+                    set: "twitter",
+                    theme: "light",
+                    emojiButtonSize: 32,
+                    emojiButtonRadius: "10px",
+                    emojiSize: 24,
+                    maxFrequentRows: 2,
+                    skinTonePosition: "none",
+                    previewPosition: "none",
+                    searchPosition: "top",
+                    navPosition: "top",
+                    dynamicWidth: !0
+                  }
+                )
               }
             )
-          }
-        )
-      ] }) : /* @__PURE__ */ l("span", { className: "text-base font-medium", children: a })
+          ]
+        }
+      ) : /* @__PURE__ */ l("span", { className: "text-base font-medium", children: a })
     }
   );
 }, Ju = ({
@@ -12352,7 +12366,7 @@ const th = {
   };
   return o ? null : /* @__PURE__ */ l(ce, { ...e, children: /* @__PURE__ */ C("div", { className: "-mx-0.5 flex flex-col items-start [&>div]:w-full", children: [
     /* @__PURE__ */ l(Gi, { children: /* @__PURE__ */ l(
-      Si,
+      Ei,
       {
         axis: "y",
         values: n,
@@ -12384,7 +12398,7 @@ const th = {
       {
         label: u("surveyFormBuilder.selectQuestion.addOption"),
         variant: "ghost",
-        icon: xi,
+        icon: wi,
         onClick: p
       }
     ) })
@@ -12468,7 +12482,7 @@ const th = {
   showEndOfSection: e,
   className: t
 }) => {
-  const { isDragging: i, setIsDragging: r, setDraggedItemId: s, draggedItemId: o } = Nt(), a = Ei(), { disabled: d, answering: u, getSectionContainingQuestion: c } = ue(), h = c(n.question.id), f = !!h && o === h.id, m = () => {
+  const { isDragging: i, setIsDragging: r, setDraggedItemId: s, draggedItemId: o } = Nt(), a = Ni(), { disabled: d, answering: u, getSectionContainingQuestion: c } = ue(), h = c(n.question.id), f = !!h && o === h.id, m = () => {
     r(!0), s(n.question.id);
   }, p = () => {
     r(!1), s(null);
@@ -12524,7 +12538,7 @@ const th = {
     }
   );
 }, oh = ({ question: n }) => {
-  const { isDragging: e, setIsDragging: t, setDraggedItemId: i } = Nt(), r = Ei(), { disabled: s, answering: o, getSectionContainingQuestion: a } = ue(), d = a(n.id), u = () => {
+  const { isDragging: e, setIsDragging: t, setDraggedItemId: i } = Nt(), r = Ni(), { disabled: s, answering: o, getSectionContainingQuestion: a } = ue(), d = a(n.id), u = () => {
     t(!0), i(n.id);
   }, c = () => {
     t(!1), i(null);
@@ -12699,7 +12713,7 @@ const th = {
         ] }),
         !s && /* @__PURE__ */ C(we, { children: [
           /* @__PURE__ */ l(Gi, { children: /* @__PURE__ */ l(
-            Si,
+            Ei,
             {
               axis: "y",
               values: i,
@@ -12721,7 +12735,7 @@ const th = {
   item: n,
   className: e
 }) => {
-  const { isDragging: t, setIsDragging: i, setDraggedItemId: r, draggedItemId: s } = Nt(), o = Ei(), { disabled: a, answering: d } = ue(), u = s === n.section.id, c = () => {
+  const { isDragging: t, setIsDragging: i, setDraggedItemId: r, draggedItemId: s } = Nt(), o = Ni(), { disabled: a, answering: d } = ue(), u = s === n.section.id, c = () => {
     i(!0), r(n.section.id);
   }, h = () => {
     i(!1), r(null);
@@ -12906,7 +12920,7 @@ const th = {
         return {
           id: _,
           label: y.title || t,
-          icon: Ci,
+          icon: Si,
           onClick: S,
           ...!v && !g && !y.locked && {
             otherActions: [
@@ -13299,7 +13313,7 @@ const bh = ({
                 exit: { filter: "blur(0px)" },
                 children: [
                   /* @__PURE__ */ l(
-                    Si,
+                    Ei,
                     {
                       axis: "y",
                       values: h,
@@ -13558,7 +13572,7 @@ function Eh({
     "div",
     {
       className: P(
-        "flex h-10 min-w-20 items-center justify-center rounded-md border border-solid border-f1-border-secondary text-center font-medium",
+        "flex h-10 min-w-20 items-center justify-center rounded-md border border-solid border-f1-border text-center font-medium",
         s ? "cursor-not-allowed" : "cursor-pointer",
         n === a.value && "border-f1-border-selected bg-f1-background-selected-secondary"
       ),
@@ -14294,7 +14308,7 @@ function Ah({
                     ),
                     children: [
                       /* @__PURE__ */ l("div", { className: "mb-6", children: /* @__PURE__ */ l(
-                        cs,
+                        ts,
                         {
                           title: i,
                           description: r,
@@ -14311,7 +14325,7 @@ function Ah({
                           alignItems: "center",
                           paddingX: "lg",
                           children: /* @__PURE__ */ l(
-                            ts,
+                            ns,
                             {
                               emoji: L.emoji,
                               title: L.title,
@@ -14394,7 +14408,7 @@ function Lh({
       datasets: d,
       children: /* @__PURE__ */ C("div", { className: "mx-auto flex w-full max-w-3xl flex-col", children: [
         /* @__PURE__ */ l("div", { className: "mb-6", children: /* @__PURE__ */ l(
-          cs,
+          ts,
           {
             title: e,
             description: t,
@@ -14423,7 +14437,7 @@ function Lh({
             alignItems: "center",
             paddingX: "lg",
             children: /* @__PURE__ */ l(
-              ts,
+              ns,
               {
                 emoji: f.emoji,
                 title: f.title,
@@ -14471,7 +14485,7 @@ const Oh = ({ benefits: n }) => /* @__PURE__ */ l("div", { className: "flex flex
           /* @__PURE__ */ C("div", { className: "flex flex-col gap-5", children: [
             /* @__PURE__ */ C("div", { className: "flex flex-col gap-2", children: [
               /* @__PURE__ */ C("div", { className: "flex flex-row items-center gap-2", children: [
-                s && /* @__PURE__ */ l(ns, { module: s }),
+                s && /* @__PURE__ */ l(is, { module: s }),
                 o && /* @__PURE__ */ l("p", { className: "text-base font-medium text-f1-foreground", children: o })
               ] }),
               (a || d) && /* @__PURE__ */ C("div", { className: "flex justify-start gap-2", children: [
@@ -14517,7 +14531,7 @@ function Ih({
       children: [
         /* @__PURE__ */ C("div", { className: "flex flex-row items-center justify-between px-4 py-4", children: [
           /* @__PURE__ */ C(za, { className: "flex flex-row items-center gap-2 text-lg font-semibold text-f1-foreground", children: [
-            r && /* @__PURE__ */ l(ns, { module: r, size: "lg" }),
+            r && /* @__PURE__ */ l(is, { module: r, size: "lg" }),
             t
           ] }),
           /* @__PURE__ */ l(
@@ -14625,7 +14639,7 @@ function Bh({
       }
     ),
     T && b && /* @__PURE__ */ l(
-      is,
+      rs,
       {
         open: !0,
         onClose: () => {
@@ -14700,7 +14714,7 @@ function Ph({
     ] }),
     a && /* @__PURE__ */ l(Pa, { className: "p-3", children: a.map(
       (m) => m.type === "upsell" ? /* @__PURE__ */ l(
-        rs,
+        ss,
         {
           label: m.label,
           onRequest: m.onClick,
@@ -14728,7 +14742,7 @@ function Ph({
 const Hh = se(Ph), ko = qe(
   function({ primaryAction: e, secondaryAction: t, ...i }, r) {
     const s = (d) => d.variant === "promote" ? /* @__PURE__ */ l(
-      rs,
+      ss,
       {
         label: d.label,
         onRequest: async () => {
@@ -14843,7 +14857,7 @@ function Wh({
       )
     ] }),
     R?.type === "upsell" && R.showConfirmation && S && /* @__PURE__ */ l(
-      is,
+      rs,
       {
         open: !0,
         onClose: k,
@@ -14869,136 +14883,137 @@ const Rf = se(Wh), kf = Oe(
   }
 };
 export {
-  Bg as AiChatTranslationsProvider,
-  Kg as AreaChart,
+  Pg as AiChatTranslationsProvider,
+  Xg as AreaChart,
   Lf as Await,
-  Xg as BarChart,
+  Yg as BarChart,
   Of as BarChartSkeleton,
   Mf as CardSelectableContainer,
-  Yg as CategoryBarChart,
+  Jg as CategoryBarChart,
   zf as ChatSpinner,
   hn as Chip,
-  Jg as ComboChart,
+  Zg as ComboChart,
   Kh as Dashboard,
+  If as DataChartEmptyStateView,
   Qo as DataTestIdWrapper,
-  If as DndProvider,
-  Bf as EmojiImage,
+  Bf as DndProvider,
+  Pf as EmojiImage,
   ia as F0ActionBar,
-  Pf as F0ActionItem,
-  Hf as F0AiChat,
-  Wf as F0AiChatProvider,
-  qf as F0AiChatTextArea,
-  Gf as F0AiFormRegistryProvider,
-  $f as F0AiFullscreenChat,
-  Pg as F0AiInsightCard,
-  Hg as F0AiMask,
-  jf as F0Alert,
+  Hf as F0ActionItem,
+  Wf as F0AiChat,
+  qf as F0AiChatProvider,
+  Gf as F0AiChatTextArea,
+  $f as F0AiFormRegistryProvider,
+  jf as F0AiFullscreenChat,
+  Hg as F0AiInsightCard,
+  Wg as F0AiMask,
+  Uf as F0Alert,
   kf as F0AnalyticsDashboard,
-  Wg as F0AuraVoiceAnimation,
-  Uf as F0Avatar,
-  Vf as F0AvatarAlert,
-  Qf as F0AvatarCompany,
-  Zg as F0AvatarDate,
-  Kf as F0AvatarEmoji,
-  Xf as F0AvatarFile,
-  Yf as F0AvatarIcon,
-  Jf as F0AvatarList,
-  ns as F0AvatarModule,
-  Zf as F0AvatarPerson,
-  em as F0AvatarTeam,
+  qg as F0AuraVoiceAnimation,
+  Vf as F0Avatar,
+  Qf as F0AvatarAlert,
+  Kf as F0AvatarCompany,
+  ep as F0AvatarDate,
+  Xf as F0AvatarEmoji,
+  Yf as F0AvatarFile,
+  Jf as F0AvatarIcon,
+  Zf as F0AvatarList,
+  is as F0AvatarModule,
+  em as F0AvatarPerson,
+  tm as F0AvatarTeam,
   tf as F0BigNumber,
   no as F0Box,
   Ce as F0Button,
-  tm as F0ButtonDropdown,
-  nm as F0ButtonToggle,
-  im as F0Card,
+  nm as F0ButtonDropdown,
+  im as F0ButtonToggle,
+  rm as F0Card,
   pn as F0Checkbox,
   uf as F0ChipList,
-  rm as F0DataChart,
-  sm as F0DatePicker,
+  sm as F0DataChart,
+  om as F0DatePicker,
   Fa as F0Dialog,
   Ea as F0DialogContext,
-  om as F0DialogProvider,
-  am as F0DurationInput,
-  lm as F0EventCatcherProvider,
+  am as F0DialogProvider,
+  lm as F0DurationInput,
+  cm as F0EventCatcherProvider,
   mf as F0FilterPickerContent,
   pf as F0Form,
   Ee as F0FormField,
   Cf as F0GridStack,
-  qg as F0HILActionConfirmation,
+  Gg as F0HILActionConfirmation,
   bf as F0Heading,
   he as F0Icon,
-  cm as F0Link,
+  dm as F0Link,
   ga as F0OneIcon,
-  dm as F0OneSwitch,
-  um as F0Provider,
-  hm as F0Select,
+  um as F0OneSwitch,
+  hm as F0Provider,
+  fm as F0Select,
   Sf as F0TableOfContentPopover,
-  fm as F0TagAlert,
+  mm as F0TagAlert,
   Go as F0TagBalance,
-  mm as F0TagCompany,
-  gm as F0TagDot,
-  pm as F0TagList,
-  vm as F0TagPerson,
+  gm as F0TagCompany,
+  pm as F0TagDot,
+  vm as F0TagList,
+  bm as F0TagPerson,
   La as F0TagRaw,
   vi as F0TagStatus,
-  bm as F0TagTeam,
+  ym as F0TagTeam,
   qt as F0Text,
   xf as F0TimelineRow,
   vf as F0WizardForm,
-  ym as FILE_TYPES,
-  xm as FileItem,
-  wm as FormCardValueFormatterProvider,
-  Cm as FunnelChartSkeleton,
-  Sm as GROUP_ID_SYMBOL,
-  Em as GaugeChartSkeleton,
-  Nm as HeatmapChartSkeleton,
+  xm as FILE_TYPES,
+  wm as FileItem,
+  Cm as FormCardValueFormatterProvider,
+  Sm as FunnelChartSkeleton,
+  Em as GROUP_ID_SYMBOL,
+  Nm as GaugeChartSkeleton,
+  _m as HeatmapChartSkeleton,
   Zh as HomeLayout,
   Xh as Layout,
-  ep as LineChart,
-  _m as LineChartSkeleton,
-  tp as NotesTextEditor,
-  np as NotesTextEditorPatchTargetNotFoundError,
-  ip as NotesTextEditorSkeleton,
-  rp as NotesTextEditorUnsupportedPatchTypeError,
-  Dm as OneCalendar,
-  Rm as OneCalendarInternal,
+  tp as LineChart,
+  Dm as LineChartSkeleton,
+  np as NotesTextEditor,
+  ip as NotesTextEditorPatchTargetNotFoundError,
+  rp as NotesTextEditorSkeleton,
+  sp as NotesTextEditorUnsupportedPatchTypeError,
+  Rm as OneCalendar,
+  km as OneCalendarInternal,
   Yi as OneEllipsis,
-  ts as OneEmptyState,
-  km as OneFilterPicker,
-  sp as PieChart,
-  Tm as PieChartSkeleton,
-  Fm as PrivacyModeProvider,
+  ns as OneEmptyState,
+  Tm as OneFilterPicker,
+  op as PieChart,
+  Fm as PieChartSkeleton,
+  Am as PrivacyModeProvider,
   zh as ProductBlankslate,
-  op as ProductCard,
+  ap as ProductCard,
   _f as ProductModal,
   Hh as ProductWidget,
-  ap as ProgressBarChart,
-  lp as RadarChart,
-  Am as RadarChartSkeleton,
-  Lm as RichTextDisplay,
-  Om as RichTextEditor,
+  lp as ProgressBarChart,
+  cp as RadarChart,
+  Lm as RadarChartSkeleton,
+  Om as RichTextDisplay,
+  Mm as RichTextEditor,
   Yh as StandardLayout,
   _o as SurveyAllQuestionsLoadingSkeleton,
   Nf as SurveyAnsweringForm,
   Ef as SurveyFormBuilder,
   Ch as SurveySteppedLoadingSkeleton,
   wf as Tag,
-  Mm as TagCounter,
+  zm as TagCounter,
   Jh as TwoColumnLayout,
-  is as UpsellRequestResponseDialog,
+  rs as UpsellRequestResponseDialog,
   Df as UpsellingBanner,
-  rs as UpsellingButton,
+  ss as UpsellingButton,
   Rf as UpsellingPopover,
-  cp as VerticalBarChart,
-  zm as WeekStartDay,
-  dp as _RadarChart,
-  Im as actionBarStatuses,
-  Gg as actionItemStatuses,
-  $g as aiTranslations,
+  dp as VerticalBarChart,
+  Im as WeekStartDay,
+  up as _RadarChart,
+  Bm as actionBarStatuses,
+  $g as actionItemStatuses,
+  jg as aiTranslations,
   ff as alertVariantOptions,
   Qh as avatarVariants,
-  Bm as buildTranslations,
+  Pm as buildTranslations,
   af as buttonDropdownModes,
   of as buttonDropdownSizes,
   sf as buttonDropdownVariants,
@@ -15006,83 +15021,83 @@ export {
   cf as buttonToggleSizes,
   df as buttonToggleVariants,
   nf as buttonVariants,
-  Pm as cardImageAspectRatios,
-  Hm as cardImageFits,
-  Wm as cardImageSizes,
-  qm as chartColorTokens,
-  Gm as chipVariants,
+  Hm as cardImageAspectRatios,
+  Wm as cardImageFits,
+  qm as cardImageSizes,
+  Gm as chartColorTokens,
+  $m as chipVariants,
   gh as computeSectionEndIds,
-  jg as contentTypes,
-  $m as createAtlaskitDriver,
-  jm as createDataSourceDefinition,
+  Ug as contentTypes,
+  jm as createAtlaskitDriver,
+  Um as createDataSourceDefinition,
   gf as createF0FormDefinitionTester,
   Yd as createF0FormTester,
   bl as createPageLayoutBlock,
   yl as createPageLayoutBlockGroup,
   Tf as dataCollectionLocalStorageHandler,
   hf as datepickerSizes,
-  mp as defaultTranslations,
-  Um as defineAvailableForm,
+  gp as defaultTranslations,
+  Vm as defineAvailableForm,
   Kd as describeFormSchema,
-  Vm as durationInputSizes,
-  Qm as durationUnits,
+  Qm as durationInputSizes,
+  Km as durationUnits,
   Yo as evaluateRenderIf,
   Oe as experimental,
   Ae as f0FormField,
-  Km as fieldsToSeconds,
+  Xm as fieldsToSeconds,
   fh as flattenElements,
-  Xm as generateAnchorId,
-  Ym as getAnimationVariants,
-  Jm as getCanvasEntity,
-  Zm as getDataSourcePaginationType,
-  eg as getEmojiLabel,
+  Ym as generateAnchorId,
+  Jm as getAnimationVariants,
+  Zm as getCanvasEntity,
+  eg as getDataSourcePaginationType,
+  tg as getEmojiLabel,
   Vt as getF0Config,
-  tg as getGranularityDefinition,
-  ng as getGranularityDefinitions,
-  ig as getGranularitySimpleDefinition,
-  rg as getSchemaDefinition,
-  sg as granularityDefinitions,
-  og as hasF0Config,
+  ng as getGranularityDefinition,
+  ig as getGranularityDefinitions,
+  rg as getGranularitySimpleDefinition,
+  sg as getSchemaDefinition,
+  og as granularityDefinitions,
+  ag as hasF0Config,
   Xo as inferFieldType,
   mh as injectSectionEnds,
-  ag as isInfiniteScrollPagination,
-  lg as isPageBasedPagination,
-  cg as isZodType,
+  lg as isInfiniteScrollPagination,
+  cg as isPageBasedPagination,
+  dg as isZodType,
   lf as linkVariants,
-  dg as modules,
-  Ug as oneIconSizes,
-  up as predefinedPresets,
-  ug as rangeSeparator,
+  ug as modules,
+  Vg as oneIconSizes,
+  hp as predefinedPresets,
+  hg as rangeSeparator,
   Nr as reconstructElements,
-  hg as secondsToFields,
-  fg as secondsToVisibleFields,
-  hp as selectSizes,
+  fg as secondsToFields,
+  mg as secondsToVisibleFields,
+  fp as selectSizes,
   ef as tagDotColors,
   yf as timelineRowStatuses,
-  mg as unwrapZodSchema,
-  gg as useAiChat,
-  Vg as useAiChatTranslations,
-  pg as useData,
-  vg as useDataSource,
-  bg as useDefaultCopilotActions,
-  yg as useDndEvents,
-  xg as useDraggable,
-  wg as useDroppableList,
-  Cg as useEmojiConfetti,
-  Sg as useF0AiFormRegistry,
-  Eg as useF0Dialog,
+  gg as unwrapZodSchema,
+  pg as useAiChat,
+  Qg as useAiChatTranslations,
+  vg as useData,
+  bg as useDataSource,
+  yg as useDefaultCopilotActions,
+  xg as useDndEvents,
+  wg as useDraggable,
+  Cg as useDroppableList,
+  Sg as useEmojiConfetti,
+  Eg as useF0AiFormRegistry,
+  Ng as useF0Dialog,
   pi as useF0Form,
-  Ng as useF0FormDefinition,
-  _g as useFormCardValueFormatter,
-  Dg as useFormComponent,
-  Rg as useGroups,
-  kg as useMessageSourcesAction,
-  Tg as useOrchestratorThinkingAction,
-  Fg as usePrivacyMode,
-  Ag as useReducedMotion,
-  Lg as useSchemaDefinition,
-  Og as useSelectable,
-  Mg as useSetFormCardValueFormatter,
-  zg as useXRay,
+  _g as useF0FormDefinition,
+  Dg as useFormCardValueFormatter,
+  Rg as useFormComponent,
+  kg as useGroups,
+  Tg as useMessageSourcesAction,
+  Fg as useOrchestratorThinkingAction,
+  Ag as usePrivacyMode,
+  Lg as useReducedMotion,
+  Og as useSchemaDefinition,
+  Mg as useSelectable,
+  zg as useSetFormCardValueFormatter,
+  Ig as useXRay,
   se as withDataTestId
 };

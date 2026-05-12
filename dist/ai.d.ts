@@ -186,6 +186,14 @@ export declare type AiChatProviderProps = {
         feedback: string;
     }) => void;
     tracking?: AiChatTrackingOptions;
+    /**
+     * Optional hook called before a user message is sent. Return false to block submission.
+     */
+    onBeforeSendMessage?: () => boolean | Promise<boolean>;
+    /**
+     * Optional fetch implementation for AI runtime requests owned by F0.
+     */
+    runtimeFetch?: typeof fetch;
 } & Pick<CopilotKitProps, "agent" | "credentials" | "children" | "runtimeUrl" | "showDevConsole" | "threadId" | "headers">;
 
 /**
@@ -217,6 +225,14 @@ declare type AiChatProviderReturnValue = {
         feedback: string;
     }) => void;
     tracking?: AiChatTrackingOptions;
+    /**
+     * Optional hook called before a user message is sent. Return false to block submission.
+     */
+    onBeforeSendMessage?: () => boolean | Promise<boolean>;
+    /**
+     * Fetch implementation for AI runtime requests owned by F0.
+     */
+    runtimeFetch: typeof fetch;
     /**
      * Clear/reset the chat conversation
      */
@@ -318,6 +334,13 @@ declare type AiChatProviderReturnValue = {
     fileDragOver: boolean;
     /* Excluded from this release type: setFileDragOver */
     /**
+     * Process files that were dropped onto the chat. Delegates to the
+     * `processFiles` callback registered by `ChatTextarea`'s file-attachment
+     * hook. Used by the chat-wide DropOverlay rendered in `SidebarWindow`.
+     */
+    processDroppedFiles: (files: File[]) => void;
+    /* Excluded from this release type: setProcessDroppedFilesFunction */
+    /**
      * Pre-loaded context shown as an empty state in the chat.
      * Prepended to the first user message as `<pending-context>`.
      */
@@ -339,6 +362,12 @@ declare type AiChatProviderReturnValue = {
     openCanvas: (content: CanvasContent) => void;
     /** Close the canvas panel and restore the previous visualization mode */
     closeCanvas: () => void;
+    /** The currently active mini-game (easter egg), or null */
+    activeGame: "pong" | null;
+    /** Launch a mini-game overlay */
+    openGame: (game: "pong") => void;
+    /** Close the active mini-game overlay */
+    closeGame: () => void;
     /** The currently active tool hint, or null if none is selected */
     activeToolHint: AiChatToolHint | null;
     /** Set the active tool hint (pass null to clear) */
@@ -378,6 +407,14 @@ declare interface AiChatState {
         feedback: string;
     }) => void;
     tracking?: AiChatTrackingOptions;
+    /**
+     * Optional hook called before a user message is sent. Return false to block submission.
+     */
+    onBeforeSendMessage?: () => boolean | Promise<boolean>;
+    /**
+     * Optional fetch implementation for AI runtime requests owned by F0.
+     */
+    runtimeFetch?: typeof fetch;
 }
 
 /**
@@ -477,6 +514,7 @@ export declare const aiTranslations: {
         readonly unsavedChanges: "Unsaved changes";
         readonly saveChanges: "Save changes";
         readonly discardChanges: "Discard";
+        readonly saveAsChanges: "Save as";
         readonly exportTable: "Download table";
         readonly generatedTableFilename: "OneGeneratedTable";
         readonly feedbackModal: {
@@ -515,6 +553,11 @@ export declare const aiTranslations: {
                 readonly source: "Source";
                 readonly applied: "Applied on";
             };
+            readonly requisition: {
+                readonly lineManager: "Line manager";
+                readonly reason: "Reason";
+                readonly status: "Status";
+            };
         };
         readonly credits: {
             readonly title: "Credits";
@@ -526,6 +569,7 @@ export declare const aiTranslations: {
         };
         readonly reportCard: {
             readonly reportLabel: "Report";
+            readonly tableLabel: "Table";
             readonly openButton: "Open";
         };
         readonly formCard: {
@@ -534,6 +578,7 @@ export declare const aiTranslations: {
         readonly dashboard: {
             readonly save: "Save";
             readonly saveToAnalytics: "Save the dashboard in Analytics";
+            readonly saveTableToAnalytics: "Save the table in Analytics";
             readonly saveAs: "Save as";
             readonly saveDialog: {
                 readonly title: "Save dashboard";
@@ -543,12 +588,21 @@ export declare const aiTranslations: {
                 readonly save: "Save";
                 readonly cancel: "Cancel";
             };
+            readonly status: {
+                readonly saved: "Saved";
+                readonly draft: "Draft";
+                readonly unsaved: "Unsaved";
+            };
+            readonly statusLabel: "Status";
+            readonly lastEdited: "Last edited";
+            readonly createdBy: "Created by";
         };
         readonly dataDownload: {
             readonly title: "Download";
             readonly download: "Download {{format}}";
             readonly exportDashboard: "Export dashboard as {{format}}";
-            readonly exporting: "Exporting...";
+            readonly export: "Export";
+            readonly exporting: "Exporting…";
             readonly rows: "{{amount}} rows";
         };
         readonly dashboardItem: {
@@ -578,6 +632,7 @@ export declare const aiTranslations: {
         readonly attachFile: "Attach file";
         readonly removeFile: "Remove";
         readonly fileUploadError: "Upload failed";
+        readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly dropFilesHere: "Drop your files here";
         readonly reply: "Reply";
         readonly removeQuote: "Remove quote";
@@ -593,7 +648,7 @@ export declare const aiTranslations: {
             readonly navHint: {
                 readonly navigate: "navigate";
                 readonly select: "select";
-                readonly skip: "skip";
+                readonly cancel: "cancel";
             };
         };
         readonly growth: {
@@ -920,6 +975,13 @@ declare interface ChatDashboardColumn {
 declare interface ChatDashboardConfig {
     /** Dashboard title displayed in the canvas header and chat report card */
     title: string;
+    /**
+     * AI-generated 1–2 sentence summary of what the dashboard shows. Displayed
+     * under the title in the canvas header. Optional at the type level so
+     * legacy persisted dashboards (before the agent started emitting it) still
+     * parse; the agent schema makes it required going forward.
+     */
+    description?: string;
     /** Filter definitions — keys become filter IDs */
     filters?: Record<string, ChatDashboardFilterDefinition>;
     /**
@@ -1105,6 +1167,12 @@ declare interface ClarifyingQuestionState {
     confirm: () => void;
     /** Skip the current step (only valid when the step is optional) */
     skip: () => void;
+    /**
+     * Cancel the entire clarifying flow. Closes the panel and marks the tool
+     * call as resolved-but-not-completed so it doesn't re-appear on history
+     * reload. Cancellation is silent — no message is sent to the agent.
+     */
+    cancel: () => void;
     /** Go back to the previous step */
     back: () => void;
     /** Set the custom answer text */
@@ -1191,8 +1259,23 @@ export declare type CSSRgbString = `rgb(${number}, ${number}, ${number})` | `rgb
 declare type DashboardCanvasActions = {
     /** Update an existing saved dashboard */
     save: (id: string, category: string, config: ChatDashboardConfig) => Promise<void>;
-    /** Create a new saved dashboard. Returns the new dashboard ID if available. */
-    create: (title: string, description: string, config: ChatDashboardConfig, category?: string) => Promise<string | void>;
+    /**
+     * Create a new saved dashboard. Returns the new dashboard's id and
+     * category so subsequent edits can call `save` (which requires both).
+     * Returning void / undefined leaves the canvas in its current state.
+     */
+    create: (title: string, description: string, config: ChatDashboardConfig, category?: string) => Promise<{
+        id: string;
+        category: string;
+    } | void>;
+    /**
+     * Fetch creator + last-edited metadata for a saved dashboard. The header
+     * calls this lazily, only when the current dashboard has a
+     * `savedDashboardId`. Returning `void` signals "no metadata available" —
+     * the header will skip rendering the avatar and the last-edited row
+     * instead of showing a placeholder.
+     */
+    getMetadata?: (id: string) => Promise<DashboardMetadata | void>;
 };
 
 /**
@@ -1204,6 +1287,7 @@ export declare type DashboardCanvasContent = CanvasContentBase & {
     apiConfig: {
         baseUrl: string;
         headers: Record<string, string>;
+        runtimeFetch?: typeof fetch;
     };
     /** Present when the dashboard is a pre-saved dashboard */
     savedDashboardId?: string;
@@ -1223,6 +1307,42 @@ declare interface DashboardFetchSpec {
     query: string | null;
     columnLabels?: Record<string, string>;
 }
+
+/**
+ * Creator + last-edited metadata for a saved dashboard. Returned by
+ * `DashboardCanvasActions.getMetadata` so the header can render the author
+ * avatar and the freshness signal only once a dashboard has been persisted.
+ *
+ * `title` and `description` are also returned: once a dashboard has an id
+ * the backend is the source of truth and may diverge from what's stored in
+ * the chat history (e.g. someone renamed the dashboard from the Analytics
+ * list page since this conversation was first opened). The header prefers
+ * these values over the ones baked into `content` / `config`.
+ */
+declare type DashboardMetadata = {
+    /**
+     * Latest persisted title. When present, the header displays this instead
+     * of `content.title` so the chat-history snapshot never shadows the
+     * authoritative backend copy.
+     */
+    title?: string;
+    /**
+     * Latest persisted description. Same rationale as `title` — takes
+     * precedence over `config.description` once the dashboard is saved.
+     */
+    description?: string;
+    creator: {
+        firstName: string;
+        lastName: string;
+        /** Optional avatar image URL. Falls back to initials when omitted. */
+        src?: string;
+    };
+    /**
+     * Last edited timestamp. Accepts `Date` or an ISO-8601 string so host apps
+     * can forward backend payloads verbatim without pre-parsing.
+     */
+    lastEdited: Date | string;
+};
 
 /**
  * Data download canvas content — renders a full data table with download options.
@@ -1474,6 +1594,10 @@ export declare const defaultTranslations: {
         readonly availableFilters: "Available filters";
         readonly label: "Filters";
         readonly applyFilters: "Apply filters";
+        readonly resultsFor: {
+            readonly one: "{{count}} result for:";
+            readonly other: "{{count}} results for:";
+        };
         readonly applySelection: "Apply selection";
         readonly cancel: "Cancel";
         readonly failedToLoadOptions: "Failed to load options";
@@ -1669,6 +1793,7 @@ export declare const defaultTranslations: {
         readonly unsavedChanges: "Unsaved changes";
         readonly saveChanges: "Save changes";
         readonly discardChanges: "Discard";
+        readonly saveAsChanges: "Save as";
         readonly exportTable: "Download table";
         readonly generatedTableFilename: "OneGeneratedTable";
         readonly feedbackModal: {
@@ -1707,6 +1832,11 @@ export declare const defaultTranslations: {
                 readonly source: "Source";
                 readonly applied: "Applied on";
             };
+            readonly requisition: {
+                readonly lineManager: "Line manager";
+                readonly reason: "Reason";
+                readonly status: "Status";
+            };
         };
         readonly credits: {
             readonly title: "Credits";
@@ -1718,6 +1848,7 @@ export declare const defaultTranslations: {
         };
         readonly reportCard: {
             readonly reportLabel: "Report";
+            readonly tableLabel: "Table";
             readonly openButton: "Open";
         };
         readonly formCard: {
@@ -1726,6 +1857,7 @@ export declare const defaultTranslations: {
         readonly dashboard: {
             readonly save: "Save";
             readonly saveToAnalytics: "Save the dashboard in Analytics";
+            readonly saveTableToAnalytics: "Save the table in Analytics";
             readonly saveAs: "Save as";
             readonly saveDialog: {
                 readonly title: "Save dashboard";
@@ -1735,12 +1867,21 @@ export declare const defaultTranslations: {
                 readonly save: "Save";
                 readonly cancel: "Cancel";
             };
+            readonly status: {
+                readonly saved: "Saved";
+                readonly draft: "Draft";
+                readonly unsaved: "Unsaved";
+            };
+            readonly statusLabel: "Status";
+            readonly lastEdited: "Last edited";
+            readonly createdBy: "Created by";
         };
         readonly dataDownload: {
             readonly title: "Download";
             readonly download: "Download {{format}}";
             readonly exportDashboard: "Export dashboard as {{format}}";
-            readonly exporting: "Exporting...";
+            readonly export: "Export";
+            readonly exporting: "Exporting…";
             readonly rows: "{{amount}} rows";
         };
         readonly dashboardItem: {
@@ -1770,6 +1911,7 @@ export declare const defaultTranslations: {
         readonly attachFile: "Attach file";
         readonly removeFile: "Remove";
         readonly fileUploadError: "Upload failed";
+        readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly dropFilesHere: "Drop your files here";
         readonly reply: "Reply";
         readonly removeQuote: "Remove quote";
@@ -1785,7 +1927,7 @@ export declare const defaultTranslations: {
             readonly navHint: {
                 readonly navigate: "navigate";
                 readonly select: "select";
-                readonly skip: "skip";
+                readonly cancel: "cancel";
             };
         };
         readonly growth: {
@@ -1819,6 +1961,10 @@ export declare const defaultTranslations: {
         readonly funnel: "Funnel";
         readonly pieChart: "Pie";
         readonly table: "Table";
+        readonly emptyState: {
+            readonly title: "No data available";
+            readonly description: "Try a different date or fewer filters";
+        };
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -2103,6 +2249,7 @@ export declare type EntityRefs = {
 export declare type EntityResolvers = {
     person?: (id: string) => Promise<PersonProfile>;
     candidate?: (id: string) => Promise<CandidateProfile>;
+    expense?: (id: string) => Promise<ExpenseProfile>;
     jobPosting?: (id: string) => Promise<JobPostingProfile>;
     requisition?: (id: string) => Promise<RequisitionProfile>;
     vacancy?: (id: string) => Promise<VacancyProfile>;
@@ -2123,9 +2270,21 @@ export declare type EntityResolvers = {
 export declare type EntityUrlBuilders = {
     person?: (id: string) => string;
     candidate?: (id: string) => string;
+    expense?: (id: string) => string;
     jobPosting?: (id: string) => string;
     requisition?: (id: string) => string;
     vacancy?: (id: string) => string;
+};
+
+/**
+ * Profile data for an expense entity, resolved asynchronously
+ * and displayed in the entity reference hover card.
+ */
+export declare type ExpenseProfile = {
+    id: string | number;
+    description?: string;
+    amount?: string;
+    status?: string;
 };
 
 export declare const F0ActionItem: ({ title, status, inGroup }: F0ActionItemProps) => JSX_2.Element;
@@ -2156,7 +2315,7 @@ export declare const F0AiChat: () => JSX_2.Element | null;
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, toolHints, credits, creditWarning, fileAttachments, onThumbsUp, onThumbsDown, children, agent, tracking, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, toolHints, credits, creditWarning, fileAttachments, onThumbsUp, onThumbsDown, onBeforeSendMessage, runtimeFetch, children, agent, tracking, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
 
 export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, creditWarning, }: ChatTextareaProps) => JSX_2.Element;
 
@@ -3029,15 +3188,18 @@ declare type RelaxedNumericWithFormatter = Omit<NumericWithFormatter, "numericVa
     numericValue: Numeric;
 };
 
-/**
- * Profile data for a requisition entity (ATS requisition), resolved asynchronously
- * and displayed in the entity reference hover card.
- */
 export declare type RequisitionProfile = {
     id: string | number;
     title: string;
     status?: string;
+    statusVariant?: StatusVariant;
     reason?: string;
+    location?: string;
+    lineManager?: {
+        firstName: string;
+        lastName: string;
+        avatarUrl?: string;
+    };
 };
 
 declare type SetFormCardValueFormatter = <T = unknown>(entry: FormCardValueFormatterEntry<T>) => void;
@@ -3047,6 +3209,8 @@ export declare type SparklineDataPoint = {
 };
 
 declare const statuses: readonly ["neutral", "info", "positive", "warning", "critical"];
+
+declare type StatusVariant = Variant;
 
 declare type TagDataType<T extends string> = Omit<Extract<TagVariant, {
     type: T;

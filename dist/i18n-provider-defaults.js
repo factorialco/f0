@@ -187,6 +187,10 @@ const e = {
     availableFilters: "Available filters",
     label: "Filters",
     applyFilters: "Apply filters",
+    resultsFor: {
+      one: "{{count}} result for:",
+      other: "{{count}} results for:"
+    },
     applySelection: "Apply selection",
     cancel: "Cancel",
     failedToLoadOptions: "Failed to load options",
@@ -382,6 +386,7 @@ const e = {
     unsavedChanges: "Unsaved changes",
     saveChanges: "Save changes",
     discardChanges: "Discard",
+    saveAsChanges: "Save as",
     exportTable: "Download table",
     generatedTableFilename: "OneGeneratedTable",
     feedbackModal: {
@@ -419,6 +424,11 @@ const e = {
       candidate: {
         source: "Source",
         applied: "Applied on"
+      },
+      requisition: {
+        lineManager: "Line manager",
+        reason: "Reason",
+        status: "Status"
       }
     },
     credits: {
@@ -431,6 +441,7 @@ const e = {
     },
     reportCard: {
       reportLabel: "Report",
+      tableLabel: "Table",
       openButton: "Open"
     },
     formCard: {
@@ -439,6 +450,7 @@ const e = {
     dashboard: {
       save: "Save",
       saveToAnalytics: "Save the dashboard in Analytics",
+      saveTableToAnalytics: "Save the table in Analytics",
       saveAs: "Save as",
       saveDialog: {
         title: "Save dashboard",
@@ -447,13 +459,22 @@ const e = {
         descriptionPlaceholder: "Add a description (optional)",
         save: "Save",
         cancel: "Cancel"
-      }
+      },
+      status: {
+        saved: "Saved",
+        draft: "Draft",
+        unsaved: "Unsaved"
+      },
+      statusLabel: "Status",
+      lastEdited: "Last edited",
+      createdBy: "Created by"
     },
     dataDownload: {
       title: "Download",
       download: "Download {{format}}",
       exportDashboard: "Export dashboard as {{format}}",
-      exporting: "Exporting...",
+      export: "Export",
+      exporting: "Exporting…",
       rows: "{{amount}} rows"
     },
     dashboardItem: {
@@ -483,6 +504,7 @@ const e = {
     attachFile: "Attach file",
     removeFile: "Remove",
     fileUploadError: "Upload failed",
+    tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
     dropFilesHere: "Drop your files here",
     reply: "Reply",
     removeQuote: "Remove quote",
@@ -498,7 +520,7 @@ const e = {
       navHint: {
         navigate: "navigate",
         select: "select",
-        skip: "skip"
+        cancel: "cancel"
       }
     },
     growth: {
@@ -531,7 +553,11 @@ const e = {
     lineChart: "Line",
     funnel: "Funnel",
     pieChart: "Pie",
-    table: "Table"
+    table: "Table",
+    emptyState: {
+      title: "No data available",
+      description: "Try a different date or fewer filters"
+    }
   },
   select: {
     noResults: "No results found",

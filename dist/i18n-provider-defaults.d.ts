@@ -187,6 +187,10 @@ export declare const defaultTranslations: {
         readonly availableFilters: "Available filters";
         readonly label: "Filters";
         readonly applyFilters: "Apply filters";
+        readonly resultsFor: {
+            readonly one: "{{count}} result for:";
+            readonly other: "{{count}} results for:";
+        };
         readonly applySelection: "Apply selection";
         readonly cancel: "Cancel";
         readonly failedToLoadOptions: "Failed to load options";
@@ -382,6 +386,7 @@ export declare const defaultTranslations: {
         readonly unsavedChanges: "Unsaved changes";
         readonly saveChanges: "Save changes";
         readonly discardChanges: "Discard";
+        readonly saveAsChanges: "Save as";
         readonly exportTable: "Download table";
         readonly generatedTableFilename: "OneGeneratedTable";
         readonly feedbackModal: {
@@ -420,6 +425,11 @@ export declare const defaultTranslations: {
                 readonly source: "Source";
                 readonly applied: "Applied on";
             };
+            readonly requisition: {
+                readonly lineManager: "Line manager";
+                readonly reason: "Reason";
+                readonly status: "Status";
+            };
         };
         readonly credits: {
             readonly title: "Credits";
@@ -431,6 +441,7 @@ export declare const defaultTranslations: {
         };
         readonly reportCard: {
             readonly reportLabel: "Report";
+            readonly tableLabel: "Table";
             readonly openButton: "Open";
         };
         readonly formCard: {
@@ -439,6 +450,7 @@ export declare const defaultTranslations: {
         readonly dashboard: {
             readonly save: "Save";
             readonly saveToAnalytics: "Save the dashboard in Analytics";
+            readonly saveTableToAnalytics: "Save the table in Analytics";
             readonly saveAs: "Save as";
             readonly saveDialog: {
                 readonly title: "Save dashboard";
@@ -448,12 +460,21 @@ export declare const defaultTranslations: {
                 readonly save: "Save";
                 readonly cancel: "Cancel";
             };
+            readonly status: {
+                readonly saved: "Saved";
+                readonly draft: "Draft";
+                readonly unsaved: "Unsaved";
+            };
+            readonly statusLabel: "Status";
+            readonly lastEdited: "Last edited";
+            readonly createdBy: "Created by";
         };
         readonly dataDownload: {
             readonly title: "Download";
             readonly download: "Download {{format}}";
             readonly exportDashboard: "Export dashboard as {{format}}";
-            readonly exporting: "Exporting...";
+            readonly export: "Export";
+            readonly exporting: "Exporting…";
             readonly rows: "{{amount}} rows";
         };
         readonly dashboardItem: {
@@ -483,6 +504,7 @@ export declare const defaultTranslations: {
         readonly attachFile: "Attach file";
         readonly removeFile: "Remove";
         readonly fileUploadError: "Upload failed";
+        readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly dropFilesHere: "Drop your files here";
         readonly reply: "Reply";
         readonly removeQuote: "Remove quote";
@@ -498,7 +520,7 @@ export declare const defaultTranslations: {
             readonly navHint: {
                 readonly navigate: "navigate";
                 readonly select: "select";
-                readonly skip: "skip";
+                readonly cancel: "cancel";
             };
         };
         readonly growth: {
@@ -532,6 +554,10 @@ export declare const defaultTranslations: {
         readonly funnel: "Funnel";
         readonly pieChart: "Pie";
         readonly table: "Table";
+        readonly emptyState: {
+            readonly title: "No data available";
+            readonly description: "Try a different date or fewer filters";
+        };
     };
     readonly select: {
         readonly noResults: "No results found";
