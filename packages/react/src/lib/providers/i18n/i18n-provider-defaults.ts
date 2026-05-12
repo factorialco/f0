@@ -361,6 +361,8 @@ export const defaultTranslations = {
         descriptionPlaceholder: "Add a description (optional)",
         save: "Save",
         cancel: "Cancel",
+        findInAiReports: "Find saved report in AI Reports",
+        aiReportsLink: "AI Reports",
       },
       status: {
         saved: "Saved",

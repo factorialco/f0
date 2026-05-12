@@ -117,6 +117,8 @@ const _F0Alert = ({
                 {action && (
                   <F0Button
                     label={action.label}
+                    icon={action.icon}
+                    hideLabel={action.hideLabel}
                     variant="outline"
                     onClick={action.onClick}
                     size="sm"
