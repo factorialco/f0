@@ -881,7 +881,7 @@ export const WithSelectableAndBulkActions: Story = {
 
 export const WithAsyncBulkActions: Story = {
   render: () => {
-    const paginatedMockUsers = generateMockUsers(50)
+    const paginatedMockUsers = generateMockUsers(10)
 
     const mockVisualizations = getMockVisualizations({ frozenColumns: 0 })
 
@@ -901,6 +901,12 @@ export const WithAsyncBulkActions: Story = {
             icon: Delete,
             id: "delete-all",
             critical: true,
+          },
+        ],
+        secondary: [
+          {
+            label: "Export",
+            id: "export-all",
           },
         ],
       }),

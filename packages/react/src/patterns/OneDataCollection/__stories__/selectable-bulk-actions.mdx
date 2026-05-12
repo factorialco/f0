@@ -346,8 +346,12 @@ with `autoManageBulkActionStatus` and return a `Promise`. The action bar then
 drives a loading → success → idle (or loading → error) status machine
 automatically:
 
-- While the promise is pending, the bar shows a spinner and disables primary
-  actions and visible secondary action buttons to prevent overlapping clicks.
+- While the promise is pending, the action button itself shows a spinner and
+  becomes disabled, along with all other primary and secondary action buttons,
+  to prevent overlapping clicks. With a single primary action the spinner
+  appears inside the button; with multiple primary actions it appears on the
+  dropdown trigger. The bar-level status area is kept clear during loading so
+  the spinner is never shown twice.
   (Secondary actions rendered in the overflow dropdown on mobile are not yet
   disabled — tracked for a future improvement to `F0ActionBar`.)
 - On resolve, the bar flips to `success` for ~1.5 seconds (checkmark) before
