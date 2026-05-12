@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.479.1](https://github.com/factorialco/f0/compare/f0-react-v1.479.0...f0-react-v1.479.1) (2026-05-12)
+
+
+### Bug Fixes
+
+* accept more flexible prop types in F0Form ([#4113](https://github.com/factorialco/f0/issues/4113)) ([5c73ff4](https://github.com/factorialco/f0/commit/5c73ff47eb3a498697326d8ba1c0bc8237ac1ff0))
+
 ## [1.479.0](https://github.com/factorialco/f0/compare/f0-react-v1.478.1...f0-react-v1.479.0) (2026-05-12)
 
 
