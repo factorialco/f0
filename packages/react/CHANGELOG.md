@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.478.1](https://github.com/factorialco/f0/compare/f0-react-v1.478.0...f0-react-v1.478.1) (2026-05-11)
+
+
+### Bug Fixes
+
+* improve border accessibility with default token ([#3999](https://github.com/factorialco/f0/issues/3999)) ([4accea7](https://github.com/factorialco/f0/commit/4accea7de8795edd073c8928688a1510c60ec14d))
+
+## [1.478.0](https://github.com/factorialco/f0/compare/f0-react-v1.477.0...f0-react-v1.478.0) (2026-05-11)
+
+
+### Features
+
+* **F0Link:** add mention variant and shared mention recipe ([#4104](https://github.com/factorialco/f0/issues/4104)) ([4b42f1b](https://github.com/factorialco/f0/commit/4b42f1ba620286f1a45d23caf684fdd962aa0b72))
+
 ## [1.477.0](https://github.com/factorialco/f0/compare/f0-react-v1.476.2...f0-react-v1.477.0) (2026-05-08)
 
 
