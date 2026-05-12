@@ -56,20 +56,6 @@ export type SelectCellConfig<R extends RecordType> = {
   clearable?: boolean
   showSearchBox?: boolean
   defaultItem?: (item: R) => F0SelectItemObject<string, RecordType> | undefined
-  onSelect?: (params: {
-    /** Selected value from the cell. Empty string when the selection is cleared. */
-    value: string
-    /** Current editable row item. */
-    item: R
-    /** Original item associated to the selected option, when available. */
-    selectedItem?: RecordType
-    /** Optional custom metadata defined on the selected option. */
-    metadata?: Record<string, unknown>
-    /** Full selected option, when available. */
-    option?: F0SelectItemObject<string, RecordType>
-    /** Update any cell in the current row by column id. */
-    setCellValue: (columnId: string, value: unknown) => void
-  }) => void
 } & (
   | {
       options:
@@ -138,6 +124,27 @@ export type EditableTableColumnDefinition<
    * Falls back to sensible defaults when omitted.
    */
   numberConfig?: NumberCellConfig<R>
+
+  /**
+   * Called after this cell's value changes. Use to compute derived values
+   * and update other cells in the same row.
+   *
+   * Works with every cell type (text, number, date, select, etc.).
+   *
+   * @example
+   * formula: ({ value, setCellValue }) => {
+   *   const hours = roleHoursMap[value as string]
+   *   if (hours != null) setCellValue("plannedHours", hours)
+   * }
+   */
+  formula?: (params: {
+    /** The new value of this cell. */
+    value: unknown
+    /** The current row item (before this change is applied). */
+    item: R
+    /** Update another cell in the same row by column id. */
+    setCellValue: (columnId: string, value: unknown) => void
+  }) => void
 }
 
 export type EditableTableVisualizationOptions<

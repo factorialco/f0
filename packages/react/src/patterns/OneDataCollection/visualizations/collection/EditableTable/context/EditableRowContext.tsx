@@ -10,6 +10,7 @@ import {
 } from "react"
 
 import type { RecordType } from "@/hooks/datasource"
+
 import { useI18n } from "@/lib/providers/i18n"
 
 type EditableRowContextValue<R extends RecordType> = {
@@ -60,6 +61,7 @@ export function EditableRowProvider<R extends RecordType>({
   const handleCellChange = useCallback(
     (columnId: string, value: unknown) => {
       const updatedItem = { ...localItemRef.current, [columnId]: value } as R
+      localItemRef.current = updatedItem
 
       setLocalItem(updatedItem)
 
