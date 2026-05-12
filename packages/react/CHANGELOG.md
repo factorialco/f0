@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.481.0](https://github.com/factorialco/f0/compare/f0-react-v1.480.0...f0-react-v1.481.0) (2026-05-12)
+
+
+### Features
+
+* **RadarChart:** interactive legend with hiddenSeries support ([#4110](https://github.com/factorialco/f0/issues/4110)) ([d13b280](https://github.com/factorialco/f0/commit/d13b28019e2694ade602e3e2377939acb5d87db9))
+
 ## [1.480.0](https://github.com/factorialco/f0/compare/f0-react-v1.479.2...f0-react-v1.480.0) (2026-05-12)
 
 
