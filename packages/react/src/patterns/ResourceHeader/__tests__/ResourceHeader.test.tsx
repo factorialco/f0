@@ -36,10 +36,23 @@ describe("ResourceHeader", () => {
       expect.objectContaining({ value: "excel", label: "Export Excel" })
     )
 
-    await user.click(screen.getAllByRole("button", { name: "More" })[0])
+    await user.click(screen.getAllByTestId("button-menu")[0])
 
-    expect(
-      await screen.findByRole("menuitem", { name: "Export CSV" })
-    ).toBeInTheDocument()
+    const csvOption = await screen.findByRole("menuitem", {
+      name: "Export CSV",
+    })
+    await user.click(csvOption)
+
+    await vi.waitFor(() =>
+      expect(onExport).toHaveBeenCalledWith(
+        "csv",
+        expect.objectContaining({ value: "csv", label: "Export CSV" })
+      )
+    )
+
+    expect(onExport).toHaveBeenLastCalledWith(
+      "csv",
+      expect.objectContaining({ value: "csv", label: "Export CSV" })
+    )
   })
 })

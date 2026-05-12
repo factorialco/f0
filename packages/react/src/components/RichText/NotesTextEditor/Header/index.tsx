@@ -121,6 +121,7 @@ const Header = ({
                   hideLabel={action.hideLabel}
                   disabled={action.disabled}
                   tooltip={action.tooltip}
+                  loading={action.loading}
                 />
               )
             )}
