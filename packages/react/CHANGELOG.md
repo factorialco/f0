@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.479.0](https://github.com/factorialco/f0/compare/f0-react-v1.478.1...f0-react-v1.479.0) (2026-05-12)
+
+
+### Features
+
+* add inset props to F0Box ([#4088](https://github.com/factorialco/f0/issues/4088)) ([58f8964](https://github.com/factorialco/f0/commit/58f8964d64d2c9a92ea2b502ef75e8fc10d6d564))
+
 ## [1.478.1](https://github.com/factorialco/f0/compare/f0-react-v1.478.0...f0-react-v1.478.1) (2026-05-11)
 
 
