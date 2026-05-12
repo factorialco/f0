@@ -100,6 +100,38 @@ export const BasicEditableTable: Story = {
   },
 }
 
+export const EditableTableWithSelectableRows: Story = {
+  render: () => {
+    const mockVisualizations = getMockVisualizations({
+      table: {
+        nestedRecords: true,
+      },
+    })
+    const { dataAdapter, onCellChange } = useEditableTableData()
+    return (
+      <ExampleComponent
+        selectable={() => ""}
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...(
+                mockVisualizations.editableTable as Extract<
+                  typeof mockVisualizations.editableTable,
+                  { type: "editableTable" }
+                >
+              ).options,
+              onCellChange,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        id="editable-table-selectable/v1"
+      />
+    )
+  },
+}
+
 export const EditableTableWithColumnSettings: Story = {
   render: () => {
     const mockVisualizations = getMockVisualizations({

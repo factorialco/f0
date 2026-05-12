@@ -222,7 +222,8 @@ const RowComponentInner = <
   const cellRenderedClass = CellRenderer
     ? cn(
         "h-[48px] p-0 align-middle last:pr-0",
-        !tableWithChildren && "first:pl-0"
+        !tableWithChildren &&
+          (fromVisualization === "editableTable" ? "first:pl-3" : "first:pl-0")
       )
     : undefined
 
