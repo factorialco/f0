@@ -6,7 +6,7 @@ import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 import { ResourceHeader } from "../index"
 
 describe("ResourceHeader", () => {
-  it("renders a secondary dropdown action and calls the selected action", async () => {
+  it("renders secondary dropdown actions and calls the selected actions", async () => {
     const user = userEvent.setup()
     const onExport = vi.fn()
 
@@ -26,22 +26,36 @@ describe("ResourceHeader", () => {
       />
     )
 
-    const [mainButton] = screen.getAllByRole("button", {
+    const mainButtons = screen.getAllByRole("button", {
       name: "Export Excel",
     })
-    await user.click(mainButton)
+    const menuButtons = screen.getAllByTestId("button-menu")
+
+    expect(mainButtons).toHaveLength(2)
+    expect(menuButtons).toHaveLength(2)
+
+    await user.click(mainButtons[0])
 
     expect(onExport).toHaveBeenCalledWith(
       "excel",
       expect.objectContaining({ value: "excel", label: "Export Excel" })
     )
 
-    await user.click(screen.getAllByTestId("button-menu")[0])
+    await user.click(mainButtons[1])
 
-    const csvOption = await screen.findByRole("menuitem", {
+    expect(onExport).toHaveBeenCalledWith(
+      "excel",
+      expect.objectContaining({ value: "excel", label: "Export Excel" })
+    )
+
+    onExport.mockClear()
+
+    await user.click(menuButtons[0])
+
+    const firstCsvOption = await screen.findByRole("menuitem", {
       name: "Export CSV",
     })
-    await user.click(csvOption)
+    await user.click(firstCsvOption)
 
     await vi.waitFor(() =>
       expect(onExport).toHaveBeenCalledWith(
@@ -50,9 +64,20 @@ describe("ResourceHeader", () => {
       )
     )
 
-    expect(onExport).toHaveBeenLastCalledWith(
-      "csv",
-      expect.objectContaining({ value: "csv", label: "Export CSV" })
+    onExport.mockClear()
+
+    await user.click(menuButtons[1])
+
+    const secondCsvOption = await screen.findByRole("menuitem", {
+      name: "Export CSV",
+    })
+    await user.click(secondCsvOption)
+
+    await vi.waitFor(() =>
+      expect(onExport).toHaveBeenCalledWith(
+        "csv",
+        expect.objectContaining({ value: "csv", label: "Export CSV" })
+      )
     )
   })
 })

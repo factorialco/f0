@@ -2,10 +2,7 @@ import { Fragment } from "react"
 
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Button } from "@/components/F0Button"
-import {
-  ButtonDropdownItem,
-  F0ButtonDropdown,
-} from "@/components/F0ButtonDropdown"
+import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { StatusVariant } from "@/components/tags/F0TagStatus"
 import { Description } from "@/experimental/Information/Headers/BaseHeader/Description"
 import {
@@ -30,10 +27,7 @@ export type HeaderSecondaryButtonAction = SecondaryAction & {
   hideLabel?: boolean
 }
 
-export type HeaderSecondaryDropdownAction = PrimaryAction & {
-  items: ButtonDropdownItem<string>[]
-  value?: string
-  onClick: (value: string, item: ButtonDropdownItem<string>) => void
+export type HeaderSecondaryDropdownAction = PrimaryDropdownAction<string> & {
   variant?: "outline"
 }
 
