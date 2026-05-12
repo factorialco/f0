@@ -86,11 +86,6 @@ export const OneDataCollectionActionBar = forwardRef<
 ) {
   const { t, ...i18n } = useI18n()
 
-  const selectedText =
-    selectedNumber === 1
-      ? i18n.status.selected.singular
-      : i18n.status.selected.plural
-
   const showAllItemsSelected =
     allPagesSelection && isAllItemsSelected && totalItems !== undefined
 
@@ -113,6 +108,14 @@ export const OneDataCollectionActionBar = forwardRef<
     isInteractionDisabled && !selectedNumber
       ? lastSelectedNumberRef.current
       : selectedNumber
+
+  // Derive singular/plural from the displayed number (not the live selectedNumber)
+  // so the label stays consistent during the success state when selectedNumber
+  // has already been cleared to 0.
+  const selectedText =
+    displayedSelectedNumber === 1
+      ? i18n.status.selected.singular
+      : i18n.status.selected.plural
 
   // During loading we push the spinner down to the button/dropdown level
   // instead of showing a bar-level StatusIcon. For success and error the

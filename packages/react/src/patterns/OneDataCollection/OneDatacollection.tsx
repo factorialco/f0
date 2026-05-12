@@ -498,11 +498,24 @@ const OneDataCollectionComp = <
     )
 
     /**
-     * Any selection change after an error clears the error so the bar doesn't
-     * persist a stale failure state across user actions. Loading/success
-     * transitions are owned by the bulk-action click handler.
+     * Any selection change clears transient status feedback so a prior
+     * action's result doesn't linger into the next interaction:
+     * - error → idle: stale failure styling would mislead on a fresh selection
+     * - success → idle: 1.5s timer would keep actions disabled for the new
+     *   selection; cancel the timer too so the bar reacts immediately.
+     * Loading transitions are owned by the bulk-action click handler and must
+     * not be interrupted here.
      */
-    setInternalBulkActionStatus((prev) => (prev === "error" ? "idle" : prev))
+    setInternalBulkActionStatus((prev) => {
+      if (prev === "error" || prev === "success") {
+        if (prev === "success" && successTimerRef.current) {
+          clearTimeout(successTimerRef.current)
+          successTimerRef.current = null
+        }
+        return "idle"
+      }
+      return prev
+    })
 
     /**
      * Bump the version so any in-flight promise resolve can detect that
@@ -552,7 +565,13 @@ const OneDataCollectionComp = <
           if (!isPromise) {
             // Sync path (or opt-out). Preserve today's fire-and-forget
             // behavior: ignore any returned promise, clear selection now.
-            if (!bulkAction.keepSelection) {
+            // Skip if controlled mode — the consumer owns the selection
+            // lifecycle (e.g. a sync handler that opens a confirmation modal
+            // must not lose the selection before the user confirms).
+            if (
+              !bulkAction.keepSelection &&
+              controlledBulkActionStatus === undefined
+            ) {
               clearSelectedItems()
             }
             return
