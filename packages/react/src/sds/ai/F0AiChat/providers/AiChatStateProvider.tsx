@@ -59,6 +59,10 @@ const getStoredChatWidth = (): number => {
  * (see ApplicationFrame), reading in the `useState` initializer naturally
  * handles a delayed activation of `ai.enabled`: as soon as the provider
  * mounts, the persisted state is applied.
+ *
+ * On first visit (no stored value), defaults to open so the chat is
+ * discoverable. Subsequent visits respect the user's last choice, which is
+ * persisted by the effect below.
  */
 const getStoredChatOpen = (fallback: boolean): boolean => {
   if (typeof window === "undefined") return fallback
@@ -66,7 +70,7 @@ const getStoredChatOpen = (fallback: boolean): boolean => {
     CHAT_OPEN_STORAGE_KEY,
     null
   )
-  if (typeof stored !== "boolean") return fallback
+  if (typeof stored !== "boolean") return true
   return stored
 }
 
