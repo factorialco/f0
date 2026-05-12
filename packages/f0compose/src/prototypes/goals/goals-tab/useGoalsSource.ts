@@ -3,20 +3,48 @@ import { Add, Delete, Download, Pencil } from "@factorialco/f0-react/icons/app"
 
 import { applySort } from "@/lib/applySort"
 
-import { getGoalChildren, getGoalsByScope } from "../shared/fixtures"
+import type { CompanyId } from "../shared/companies"
+import {
+  getGoalCounts,
+  getGoalChildren,
+  getGoalsByScope,
+} from "../shared/fixtures"
 import type { GoalRecord, GoalStatus } from "../shared/types"
 
+/** The logged-in user id used for "My goals" and "Created by me". */
+const CURRENT_USER = "emp-001"
+
 /**
- * Source hook for the Goals OneDataCollection with nested records support.
- * Filters goals by scope (team/all/mine) and status, supports bulk actions.
- * "Update goal" renders as a hover button (type: "primary").
+ * Goals that need attention: cancelled, or not-started/on-track but
+ * past their due date (simulated "today" = 2026-04-01).
  */
+function needsAttention(g: GoalRecord): boolean {
+  if (g.status === "cancelled" || g.status === "off-track") return true
+  const today = new Date("2026-04-01")
+  const due = new Date(g.dueDate)
+  return (
+    (g.status === "not-started" || g.status === "on-track") &&
+    due < today &&
+    g.progress < 100
+  )
+}
+
 export function useGoalsSource(
   onCreateGoal: () => void,
   onSelectGoal: (id: string) => void,
   onEditGoal: (id: string) => void,
-  extraGoals: GoalRecord[]
+  extraGoals: GoalRecord[],
+  companyId: CompanyId
 ) {
+  const counts = getGoalCounts(companyId)
+
+  // Extra preset counts (top-level goals only, before extraGoals)
+  const allTopLevel = getGoalsByScope("all", companyId)
+  const createdByMeCount = allTopLevel.filter(
+    (g) => g.ownerId === CURRENT_USER
+  ).length
+  const needsAttentionCount = allTopLevel.filter(needsAttention).length
+
   return useDataCollectionSource<GoalRecord>(
     {
       search: { enabled: true, sync: true },
@@ -29,6 +57,8 @@ export function useGoalsSource(
               { value: "team", label: "Team goals" },
               { value: "all", label: "All goals" },
               { value: "mine", label: "My goals" },
+              { value: "created-by-me", label: "Created by me" },
+              { value: "needs-attention", label: "Needs attention" },
             ],
           },
         },
@@ -39,29 +69,45 @@ export function useGoalsSource(
             options: [
               { value: "not-started", label: "Not started" },
               { value: "on-track", label: "On track" },
+              { value: "off-track", label: "Off track" },
               { value: "achieved", label: "Achieved" },
               { value: "cancelled", label: "Cancelled" },
             ],
           },
         },
         dueDate: {
-          type: "in",
+          type: "date",
           label: "Due date",
-          options: {
-            options: [
-              { value: "q1-2026", label: "Q1 2026" },
-              { value: "q2-2026", label: "Q2 2026" },
-              { value: "q3-2026", label: "Q3 2026" },
-              { value: "q4-2026", label: "Q4 2026" },
-            ],
-          },
+          options: { mode: "single", view: "day" },
         },
       },
       currentFilters: { scope: ["team"] },
       presets: [
-        { label: "Team goals", filter: { scope: ["team"] } },
-        { label: "All goals", filter: { scope: ["all"] } },
-        { label: "My goals", filter: { scope: ["mine"] } },
+        {
+          label: "Team goals",
+          filter: { scope: ["team"] },
+          itemsCount: () => counts.team,
+        },
+        {
+          label: "All goals",
+          filter: { scope: ["all"] },
+          itemsCount: () => counts.all,
+        },
+        {
+          label: "My goals",
+          filter: { scope: ["mine"] },
+          itemsCount: () => counts.mine,
+        },
+        {
+          label: "Created by me",
+          filter: { scope: ["created-by-me"] },
+          itemsCount: () => createdByMeCount,
+        },
+        {
+          label: "Needs attention",
+          filter: { scope: ["needs-attention"] },
+          itemsCount: () => needsAttentionCount,
+        },
       ],
       sortings: {
         title: { label: "Goal" },
@@ -77,33 +123,45 @@ export function useGoalsSource(
           const scopeFilter = Array.isArray(filters?.scope)
             ? (filters.scope as string[])
             : ["team"]
-          const activeScope = scopeFilter[0] as "team" | "all" | "mine"
+          const activeScope = scopeFilter[0] as
+            | "team"
+            | "all"
+            | "mine"
+            | "created-by-me"
+            | "needs-attention"
           const statusFilter = Array.isArray(filters?.status)
             ? (filters.status as GoalStatus[])
             : []
-          const dueDateFilter = Array.isArray(filters?.dueDate)
-            ? (filters.dueDate as string[])
-            : []
+          const dueDateFilter = filters?.dueDate as string | undefined
 
-          let goals = [...getGoalsByScope(activeScope), ...extraGoals]
+          let goals: GoalRecord[]
+          if (activeScope === "created-by-me") {
+            goals = [
+              ...getGoalsByScope("all", companyId).filter(
+                (g) => g.ownerId === CURRENT_USER
+              ),
+              ...extraGoals.filter((g) => g.ownerId === CURRENT_USER),
+            ]
+          } else if (activeScope === "needs-attention") {
+            goals = [
+              ...getGoalsByScope("all", companyId).filter(needsAttention),
+              ...extraGoals.filter(needsAttention),
+            ]
+          } else {
+            goals = [
+              ...getGoalsByScope(activeScope, companyId),
+              ...extraGoals,
+            ]
+          }
 
           // Apply status filter
           if (statusFilter.length > 0) {
             goals = goals.filter((g) => statusFilter.includes(g.status))
           }
 
-          // Apply due date quarter filter
-          if (dueDateFilter.length > 0) {
-            goals = goals.filter((g) => {
-              const month = parseInt(g.dueDate.split("-")[1], 10)
-              const year = g.dueDate.split("-")[0]
-              let quarter = ""
-              if (month <= 3) quarter = `q1-${year}`
-              else if (month <= 6) quarter = `q2-${year}`
-              else if (month <= 9) quarter = `q3-${year}`
-              else quarter = `q4-${year}`
-              return dueDateFilter.includes(quarter)
-            })
+          // Apply due date filter (goals due on or before selected date)
+          if (dueDateFilter) {
+            goals = goals.filter((g) => g.dueDate <= dueDateFilter)
           }
 
           // Apply search
@@ -189,6 +247,6 @@ export function useGoalsSource(
         { label: "Delete", onClick: () => {}, critical: true },
       ],
     },
-    [onCreateGoal, onSelectGoal, onEditGoal, extraGoals]
+    [onCreateGoal, onSelectGoal, onEditGoal, extraGoals, companyId]
   )
 }

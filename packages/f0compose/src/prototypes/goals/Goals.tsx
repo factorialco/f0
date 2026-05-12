@@ -13,15 +13,11 @@ import type { PrototypeMeta } from "../types"
 import { GoalDetail } from "./goal-detail/GoalDetail"
 import { CreateGoalForm } from "./goals-tab/CreateGoalForm"
 import { GoalsTab } from "./goals-tab/GoalsTab"
-import { PeopleTab } from "./people-tab/PeopleTab"
+import { CompanySwitcherBar } from "./shared/CompanySwitcherBar"
+import { DEFAULT_COMPANY_ID, type CompanyId } from "./shared/companies"
 import { goalsFixtures } from "./shared/fixtures"
 import type { GoalRecord } from "./shared/types"
-import {
-  goalsSubTabs,
-  type GoalsSubTabId,
-  performanceTabs,
-  type PerformanceTabId,
-} from "./tabs"
+import { performanceTabs, type PerformanceTabId } from "./tabs"
 
 export const meta: PrototypeMeta = {
   slug: "goals",
@@ -36,7 +32,6 @@ export const meta: PrototypeMeta = {
 }
 
 const VALID_PERF_TABS = new Set<string>(performanceTabs.map((t) => t.id))
-const VALID_SUB_TABS = new Set<string>(goalsSubTabs.map((t) => t.id))
 
 type ViewKind = "list" | "create-goal" | "goal" | "edit-goal"
 
@@ -50,6 +45,8 @@ export default function Goals() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [extraGoals, setExtraGoals] = useState<GoalRecord[]>([])
   const [overrides, setOverrides] = useState<Record<string, GoalOverride>>({})
+  const [activeCompanyId, setActiveCompanyId] =
+    useState<CompanyId>(DEFAULT_COMPANY_ID)
 
   const view = parseView(searchParams.get("view"))
   const goalId = searchParams.get("id") ?? null
@@ -60,24 +57,9 @@ export default function Goals() {
       ? (rawTab as PerformanceTabId)
       : "goals"
 
-  const rawSub = searchParams.get("sub")
-  const activeSubTab: GoalsSubTabId =
-    rawSub && VALID_SUB_TABS.has(rawSub)
-      ? (rawSub as GoalsSubTabId)
-      : "goals"
-
   const setActiveTab = (id: string) => {
     const next = new URLSearchParams()
     if (id !== "goals") next.set("tab", id)
-    setSearchParams(next)
-  }
-
-  const setSubTab = (id: string) => {
-    const next = new URLSearchParams(searchParams)
-    if (id === "goals") next.delete("sub")
-    else next.set("sub", id)
-    next.delete("view")
-    next.delete("id")
     setSearchParams(next)
   }
 
@@ -118,11 +100,6 @@ export default function Goals() {
   const perfTabsWithNav = performanceTabs.map((t) => ({
     ...t,
     onClick: () => setActiveTab(t.id),
-  }))
-
-  const subTabsWithNav = goalsSubTabs.map((t) => ({
-    ...t,
-    onClick: () => setSubTab(t.id),
   }))
 
   // ─── Sub-screen: Create goal ─────────────────────────────────────
@@ -177,56 +154,51 @@ export default function Goals() {
   }
 
   // ─── Main view: tabbed module ────────────────────────────────────
-  const subTabsSlot =
-    activeTab === "goals" ? (
-      <Tabs
-        key={activeSubTab}
-        secondary
-        tabs={subTabsWithNav}
-        activeTabId={activeSubTab}
-      />
-    ) : null
-
   return (
-    <Page
-      key="list"
-      header={
-        <>
-          <PageHeader
-            module={{
-              id: "performance",
-              name: "Performance",
-              href: "/p/goals",
-            }}
-            actions={[]}
-          />
-          <Tabs
-            key={activeTab}
-            tabs={perfTabsWithNav}
-            activeTabId={activeTab}
-          />
-          {subTabsSlot}
-        </>
-      }
-    >
-      <StandardLayout>
-        {activeTab === "goals" && activeSubTab === "goals" && (
-          <GoalsTab
-            onCreateGoal={goToCreateGoal}
-            onSelectGoal={goToGoal}
-            onEditGoal={goToEditGoal}
-            extraGoals={extraGoals}
-          />
-        )}
-        {activeTab === "goals" && activeSubTab === "people" && <PeopleTab />}
-        {activeTab !== "goals" && (
-          <F0Text
-            content={`The "${performanceTabs.find((t) => t.id === activeTab)?.label}" tab is part of the prototype scaffold but has no demo content yet.`}
-            variant="description"
-          />
-        )}
-      </StandardLayout>
-    </Page>
+    <>
+      <Page
+        key="list"
+        header={
+          <>
+            <PageHeader
+              module={{
+                id: "performance",
+                name: "Performance",
+                href: "/p/goals",
+              }}
+              actions={[]}
+            />
+            <Tabs
+              key={activeTab}
+              tabs={perfTabsWithNav}
+              activeTabId={activeTab}
+            />
+          </>
+        }
+      >
+        <StandardLayout>
+          {activeTab === "goals" && (
+            <GoalsTab
+              onCreateGoal={goToCreateGoal}
+              onSelectGoal={goToGoal}
+              onEditGoal={goToEditGoal}
+              extraGoals={extraGoals}
+              companyId={activeCompanyId}
+            />
+          )}
+          {activeTab !== "goals" && (
+            <F0Text
+              content={`The "${performanceTabs.find((t) => t.id === activeTab)?.label}" tab is part of the prototype scaffold but has no demo content yet.`}
+              variant="description"
+            />
+          )}
+        </StandardLayout>
+      </Page>
+      <CompanySwitcherBar
+        activeCompanyId={activeCompanyId}
+        onSelectCompany={setActiveCompanyId}
+      />
+    </>
   )
 }
 

@@ -8,9 +8,11 @@ import type { GoalRecord } from "../shared/types"
 
 /**
  * OneDataCollection source for the "Sub-goals" widget on the detail page.
- * Pure read of the children of `parentGoalId`, with search + sort +
- * pagination wired so the table behaves like the design even when there
- * are many sub-goals.
+ * Reads the children of `parentGoalId` and mirrors the main goals table
+ * by exposing the full nested-row contract (`itemsWithChildren`,
+ * `childrenCount`, `fetchChildren`) so deeper levels of the goal tree
+ * can be expanded inline. Search + sort + pagination are wired so the
+ * table behaves like the design even when there are many sub-goals.
  */
 export function useSubGoalsSource(
   parentGoalId: string,
@@ -67,6 +69,16 @@ export function useSubGoalsSource(
             pagesCount,
           }
         },
+      },
+      itemsWithChildren: (item: GoalRecord) => item.childrenIds.length > 0,
+      childrenCount: ({ item }: { item: GoalRecord }) =>
+        item.childrenIds.length,
+      fetchChildren: async ({ item }: { item: GoalRecord }) => {
+        const children = getGoalChildren(item.id)
+        return {
+          records: children,
+          type: "basic" as const,
+        }
       },
       primaryActions: () => ({
         label: "New",

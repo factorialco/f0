@@ -25,6 +25,7 @@ const editGoalSchema = z.object({
     options: [
       { value: "not-started", label: "Not started" },
       { value: "on-track", label: "On track" },
+      { value: "off-track", label: "Off track" },
       { value: "achieved", label: "Achieved" },
       { value: "cancelled", label: "Cancelled" },
     ],

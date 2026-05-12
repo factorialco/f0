@@ -127,7 +127,11 @@ export function CreateGoalForm({ onCreateGoal }: Props) {
       const newGoal: GoalRecord = {
         id: `g-new-${nextId}`,
         title: formData.name,
-        assigneeId: formData.assignee ?? "emp-001",
+        ownerId: formData.assignee ?? "emp-001",
+        assignee: {
+          type: "individual",
+          employeeId: formData.assignee ?? "emp-001",
+        },
         status: "not-started",
         measure: buildMeasure(formData),
         progress: 0,

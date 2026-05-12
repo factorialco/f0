@@ -1,5 +1,4 @@
-import { findEmployee, employees } from "@/fixtures"
-
+import { renderAssigneeCell } from "../shared/assigneeCell"
 import type { GoalRecord, GoalStatus } from "../shared/types"
 
 function statusLabel(status: GoalStatus): string {
@@ -8,6 +7,8 @@ function statusLabel(status: GoalStatus): string {
       return "Not started"
     case "on-track":
       return "On track"
+    case "off-track":
+      return "Off track"
     case "achieved":
       return "Achieved"
     case "cancelled":
@@ -23,6 +24,8 @@ function statusVariant(
       return "neutral"
     case "on-track":
       return "info"
+    case "off-track":
+      return "warning"
     case "achieved":
       return "positive"
     case "cancelled":
@@ -40,23 +43,7 @@ export const goalsColumns = [
   {
     id: "assignee",
     label: "Assignee",
-    render: (item: GoalRecord) => {
-      const emp = findEmployee(item.assigneeId) ?? employees[0]
-      return {
-        type: "avatarList" as const,
-        value: {
-          type: "person" as const,
-          avatarList: [
-            {
-              firstName: emp.preferredName ?? emp.fullName.split(" ")[0],
-              lastName: emp.fullName.split(" ").slice(-1).join(" "),
-              src: emp.avatarUrl,
-            },
-          ],
-          max: 1,
-        },
-      }
-    },
+    render: (item: GoalRecord) => renderAssigneeCell(item.assignee),
   },
   {
     id: "status",
@@ -78,7 +65,15 @@ export const goalsColumns = [
     id: "progress",
     label: "Progress",
     sorting: "progress",
-    render: (item: GoalRecord) => `${item.progress}%`,
+    render: (item: GoalRecord) => ({
+      type: "progressBar" as const,
+      value: {
+        value: item.progress,
+        max: Math.max(100, item.progress),
+        label: `${item.progress}%`,
+        color: item.progress > 100 ? "categorical-4" : "categorical-1",
+      },
+    }),
   },
   {
     id: "dueDate",

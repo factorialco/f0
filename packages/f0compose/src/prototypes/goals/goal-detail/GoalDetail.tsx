@@ -14,9 +14,9 @@ import {
 } from "@factorialco/f0-react/icons/app"
 import { useCallback, useState } from "react"
 
-import { findEmployee } from "@/fixtures"
+import { findDepartment, findEmployee, findTeam } from "@/fixtures"
 
-import type { GoalRecord } from "../shared/types"
+import type { GoalAssignee, GoalRecord } from "../shared/types"
 import { ActivityTimeline } from "./ActivityTimeline"
 import { DetailsSidebar } from "./DetailsSidebar"
 import { EditGoalForm } from "./EditGoalForm"
@@ -64,7 +64,8 @@ export function GoalDetail({
   onSelectGoal,
   onBack,
 }: Props) {
-  const owner = findEmployee(goal.assigneeId)
+  const owner = findEmployee(goal.ownerId)
+  const assigneeMeta = describeAssignee(goal.assignee)
   const subGoalsSource = useSubGoalsSource(goal.id, onSelectGoal)
   const activity = getActivityForGoal(goal.id)
   const hasChildren = goal.childrenIds.length > 0
@@ -176,11 +177,7 @@ export function GoalDetail({
               },
               {
                 label: "Assignee",
-                value: {
-                  type: "avatar",
-                  variant: { type: "company", name: "Factorial" },
-                  text: "Factorial",
-                },
+                value: assigneeMeta,
               },
               {
                 label: "Due date",
@@ -262,6 +259,73 @@ function describeGoal(goal: GoalRecord): string {
   }
 }
 
+/**
+ * Build the metadata `value` payload used by ResourceHeader for the
+ * Assignee row, picking the right avatar variant and label depending on
+ * who the goal is assigned to (company / team / group / individual).
+ */
+function describeAssignee(assignee: GoalAssignee) {
+  switch (assignee.type) {
+    case "company":
+      return {
+        type: "avatar" as const,
+        variant: { type: "company" as const, name: assignee.name },
+        text: assignee.name,
+      }
+    case "department": {
+      const dept = findDepartment(assignee.departmentId)
+      const name = dept?.name ?? "Department"
+      return {
+        type: "avatar" as const,
+        variant: { type: "team" as const, name },
+        text: name,
+      }
+    }
+    case "team": {
+      const team = findTeam(assignee.teamId)
+      const name = team?.name ?? "Team"
+      return {
+        type: "avatar" as const,
+        variant: { type: "team" as const, name },
+        text: name,
+      }
+    }
+    case "area":
+      return {
+        type: "avatar" as const,
+        variant: { type: "team" as const, name: assignee.name },
+        text: assignee.name,
+      }
+    case "group": {
+      const people = assignee.employeeIds
+        .map((id) => findEmployee(id))
+        .filter((p): p is NonNullable<typeof p> => Boolean(p))
+      const label =
+        people.length === 0
+          ? "Group"
+          : `${people[0].fullName}${people.length > 1 ? ` +${people.length - 1}` : ""}`
+      return {
+        type: "text" as const,
+        content: `${label} (${people.length} people)`,
+      }
+    }
+    case "individual": {
+      const emp = findEmployee(assignee.employeeId)
+      if (!emp) return { type: "text" as const, content: "Unassigned" }
+      return {
+        type: "avatar" as const,
+        variant: {
+          type: "person" as const,
+          firstName: emp.preferredName ?? emp.fullName.split(" ")[0],
+          lastName: emp.fullName.split(" ").slice(-1).join(" "),
+          src: emp.avatarUrl,
+        },
+        text: emp.fullName,
+      }
+    }
+  }
+}
+
 function formatDueDate(d: string): string {
   if (!d || d === "—") return "—"
   const target = new Date(d)
@@ -281,6 +345,8 @@ function statusLabel(status: GoalRecord["status"]): string {
       return "Pending"
     case "on-track":
       return "On track"
+    case "off-track":
+      return "Off track"
     case "achieved":
       return "Achieved"
     case "cancelled":
@@ -296,6 +362,8 @@ function statusVariant(
       return "neutral"
     case "on-track":
       return "info"
+    case "off-track":
+      return "warning"
     case "achieved":
       return "positive"
     case "cancelled":

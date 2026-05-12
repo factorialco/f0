@@ -6,11 +6,4 @@ export const performanceTabs = [
   { id: "feedback", label: "Feedback" },
 ] as const
 
-/** Secondary tabs under Goals. */
-export const goalsSubTabs = [
-  { id: "goals", label: "Goals" },
-  { id: "people", label: "People" },
-] as const
-
 export type PerformanceTabId = (typeof performanceTabs)[number]["id"]
-export type GoalsSubTabId = (typeof goalsSubTabs)[number]["id"]

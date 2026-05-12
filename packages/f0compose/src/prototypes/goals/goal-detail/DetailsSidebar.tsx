@@ -104,7 +104,7 @@ function ParentGoalCard({
   goal: GoalRecord
   onSelectGoal: (id: string) => void
 }) {
-  const owner = findEmployee(goal.assigneeId)
+  const owner = findEmployee(goal.ownerId)
   return (
     <F0Card
       title={goal.title}

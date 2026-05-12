@@ -20,28 +20,45 @@ type Props = {
  *  - `description: <DD/MM/YYYY>`
  *  - `metadata`: author avatar + "Current <prev> → <new>" + optional Note
  */
+/**
+ * Fallback activity entries shown when a goal has no real activity data.
+ * Ensures the timeline always renders something meaningful in the prototype.
+ */
+const fallbackEntries: GoalActivity[] = [
+  {
+    id: "act-fallback-1",
+    goalId: "",
+    authorId: "emp-002",
+    date: "2026-04-28",
+    type: "progress-update",
+    previousValue: 0,
+    newValue: 15,
+    note: "Initial progress tracked after kickoff meeting with stakeholders.",
+  },
+  {
+    id: "act-fallback-2",
+    goalId: "",
+    authorId: "emp-001",
+    date: "2026-03-15",
+    type: "progress-update",
+    previousValue: 0,
+    newValue: 0,
+    note: "Goal created and assigned. Aligning with team on milestones.",
+  },
+]
+
 export function ActivityTimeline({ entries }: Props) {
-  if (entries.length === 0) {
-    return (
-      <F0Box display="flex" flexDirection="column" gap="md">
-        <F0Heading content="Activity" variant="heading" as="h3" />
-        <F0Text
-          content="No activity yet. Updates to this goal will show up here."
-          variant="description"
-        />
-      </F0Box>
-    )
-  }
+  const displayEntries = entries.length > 0 ? entries : fallbackEntries
 
   return (
     <F0Box display="flex" flexDirection="column" gap="lg">
       <F0Heading content="Activity" variant="heading" as="h3" />
       <F0Box display="flex" flexDirection="column">
-        {entries.map((entry, idx) => {
+        {displayEntries.map((entry, idx) => {
           const author = findEmployee(entry.authorId) ?? employees[0]
           const firstName = author.preferredName ?? author.fullName.split(" ")[0]
           const lastName = author.fullName.split(" ").slice(-1).join(" ")
-          const isLast = idx === entries.length - 1
+          const isLast = idx === displayEntries.length - 1
 
           return (
             <F0TimelineRow
