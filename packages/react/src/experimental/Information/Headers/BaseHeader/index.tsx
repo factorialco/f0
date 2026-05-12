@@ -105,10 +105,15 @@ export function BaseHeader({
     return !!action && "label" in action && !("items" in action)
   }
 
-  const getSecondaryActionKey = (action: HeaderSecondaryAction) => {
-    return isSecondaryDropdownAction(action)
-      ? action.items.map((item) => item.value).join("-")
+  const getSecondaryActionKey = (
+    action: HeaderSecondaryAction,
+    index: number
+  ) => {
+    const actionKey = isSecondaryDropdownAction(action)
+      ? `${action.value ?? "default"}-${action.items.map((item) => item.value).join("-")}`
       : action.label
+
+    return `${actionKey}-${index}`
   }
 
   return (
@@ -186,8 +191,8 @@ export function BaseHeader({
             </div>
           )}
 
-          {visibleSecondaryActions.map((action) => (
-            <Fragment key={getSecondaryActionKey(action)}>
+          {visibleSecondaryActions.map((action, index) => (
+            <Fragment key={getSecondaryActionKey(action, index)}>
               <div className="w-full md:hidden [&>*]:w-full [&>span]:block [&>span_div]:w-full">
                 {isSecondaryDropdownAction(action) ? (
                   <F0ButtonDropdown
@@ -230,8 +235,8 @@ export function BaseHeader({
               <Dropdown items={visibleOtherActions} />
             </div>
           )}
-          {visibleSecondaryActions.map((action) => (
-            <Fragment key={getSecondaryActionKey(action)}>
+          {visibleSecondaryActions.map((action, index) => (
+            <Fragment key={getSecondaryActionKey(action, index)}>
               <div className="hidden md:block">
                 {isSecondaryDropdownAction(action) ? (
                   <F0ButtonDropdown
