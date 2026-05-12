@@ -25,6 +25,10 @@ export interface HourDistributionDataPoint {
 
 export interface HourDistributionCellValue {
   dataPoints: HourDistributionDataPoint[]
+  /** Label for worked time in tooltips. Defaults to "Worked". */
+  workedLabel?: string
+  /** Label for justified absence in tooltips. Defaults to "Justified absence". */
+  justifiedAbsenceLabel?: string
 }
 
 const MAX_MINUTES_FOR_SCALE = 8 * 60 // 8 hours
@@ -69,12 +73,13 @@ function toBarSeriesDataPoint(
 
 function toBarSeriesValue(args: HourDistributionCellValue): BarSeriesCellValue {
   const dataPoints = args.dataPoints.map(toBarSeriesDataPoint)
+  const workedLabel = args.workedLabel ?? "Worked"
+  const absenceLabel = args.justifiedAbsenceLabel ?? "Justified absence"
   const maxMinutes = Math.max(
     ...args.dataPoints.map((p) =>
       Math.max(
         p.value + Math.max(p.justifiedAbsenceValue ?? 0, 0),
-        p.plannedValue ?? 0,
-        p.justifiedAbsenceFullDay ? MAX_MINUTES_FOR_SCALE : 0
+        p.plannedValue ?? 0
       )
     ),
     MAX_MINUTES_FOR_SCALE * 0.1
@@ -85,12 +90,12 @@ function toBarSeriesValue(args: HourDistributionCellValue): BarSeriesCellValue {
     formatLabel: formatDateForTooltip,
     formatValue: formatHours,
     formatTooltip: ({ point, formattedLabel, formattedValue }) => {
-      const parts = [`Worked ${formattedValue}`]
+      const parts = [`${workedLabel} ${formattedValue}`]
 
       if (point.neutralFullHeight) {
-        parts.push("Justified absence")
+        parts.push(absenceLabel)
       } else if (point.neutralValue != null && point.neutralValue > 0) {
-        parts.push(`Justified absence ${formatHours(point.neutralValue)}`)
+        parts.push(`${absenceLabel} ${formatHours(point.neutralValue)}`)
       }
 
       return `${formattedLabel} - ${parts.join(", ")}`

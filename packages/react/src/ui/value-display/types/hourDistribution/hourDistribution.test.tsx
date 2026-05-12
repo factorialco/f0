@@ -123,4 +123,30 @@ describe("HourDistributionCell", () => {
       )
     ).toBeInTheDocument()
   })
+
+  it("uses custom labels for tooltip when provided", () => {
+    const args: HourDistributionCellValue = {
+      dataPoints: [
+        {
+          date: "2025-12-18",
+          value: 240,
+          plannedValue: 480,
+          justifiedAbsenceValue: 120,
+        },
+      ],
+      workedLabel: "Trabajado",
+      justifiedAbsenceLabel: "Ausencia justificada",
+    }
+
+    const { container } = render(HourDistributionCell(args, defaultMeta))
+
+    expect(
+      container.querySelector('[role="img"][aria-label*="Trabajado 4h"]')
+    ).toBeInTheDocument()
+    expect(
+      container.querySelector(
+        '[role="img"][aria-label*="Ausencia justificada 2h"]'
+      )
+    ).toBeInTheDocument()
+  })
 })

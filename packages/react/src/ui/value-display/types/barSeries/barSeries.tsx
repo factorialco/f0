@@ -86,11 +86,15 @@ function BarWithTooltip({
 
   const heightValuePx =
     scaleMax > 0 ? Math.round(CHART_HEIGHT_PX * (value / scaleMax)) : 0
-  const heightNeutralPx = neutralFullHeight
+  const heightNeutralPxRaw = neutralFullHeight
     ? CHART_HEIGHT_PX
     : scaleMax > 0
       ? Math.round(CHART_HEIGHT_PX * (neutralSegmentValue / scaleMax))
       : 0
+  const heightNeutralPx = Math.min(
+    heightNeutralPxRaw,
+    CHART_HEIGHT_PX - heightValuePx
+  )
   const heightPlannedPx =
     secondaryValue != null && scaleMax > 0 && !isUnder
       ? Math.round(
@@ -246,8 +250,7 @@ export const BarSeriesCell = (
     ...dataPoints.map((p) =>
       Math.max(
         p.value + Math.max(p.neutralValue ?? 0, 0),
-        p.secondaryValue ?? 0,
-        p.neutralFullHeight ? CHART_HEIGHT_PX : 0
+        p.secondaryValue ?? 0
       )
     ),
     0
