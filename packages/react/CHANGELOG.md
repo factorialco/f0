@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.479.2](https://github.com/factorialco/f0/compare/f0-react-v1.479.1...f0-react-v1.479.2) (2026-05-12)
+
+
+### Bug Fixes
+
+* **editable-table:** first column alignment ([#4115](https://github.com/factorialco/f0/issues/4115)) ([229a8df](https://github.com/factorialco/f0/commit/229a8df5fd4992ffbd6971e62254a7b08a8c9914))
+
 ## [1.479.1](https://github.com/factorialco/f0/compare/f0-react-v1.479.0...f0-react-v1.479.1) (2026-05-12)
 
 
