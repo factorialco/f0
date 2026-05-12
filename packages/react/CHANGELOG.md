@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.480.0](https://github.com/factorialco/f0/compare/f0-react-v1.479.2...f0-react-v1.480.0) (2026-05-12)
+
+
+### Features
+
+* **ResourceHeader:** add secondary dropdown support ([#4117](https://github.com/factorialco/f0/issues/4117)) ([7ab770e](https://github.com/factorialco/f0/commit/7ab770ef4bf2ab50b7f0c9929ce1a988f084d843))
+
 ## [1.479.2](https://github.com/factorialco/f0/compare/f0-react-v1.479.1...f0-react-v1.479.2) (2026-05-12)
 
 
