@@ -1,6 +1,0 @@
-node_modules/
-dist/
-generated/
-.opencode/
-.claude/
-*.log
