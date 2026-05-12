@@ -13861,9 +13861,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -13871,8 +13870,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
