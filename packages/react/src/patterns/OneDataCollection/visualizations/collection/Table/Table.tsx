@@ -27,6 +27,7 @@ import {
   useSelectable,
 } from "@/hooks/datasource"
 import { Add } from "@/icons/app"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { PagesPagination } from "@/patterns/OneDataCollection/components/PagesPagination"
@@ -847,11 +848,13 @@ export const TableCollection = <
                                 }
 
                                 return (
-                                  <div className="flex gap-1">
-                                    <span className="text-f1-foreground-secondary">
+                                  <div className="flex min-w-0 gap-1">
+                                    <span className="shrink-0 text-f1-foreground-secondary">
                                       {i18n.collections.summaries.types.sum}
                                     </span>
-                                    {`${summaryValue}`}
+                                    <OneEllipsis className="min-w-0">
+                                      {`${summaryValue}`}
+                                    </OneEllipsis>
                                   </div>
                                 )
                               }
