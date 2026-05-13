@@ -134,10 +134,27 @@ export type OneDataCollectionProps<
    */
   autoManageBulkActionStatus?: boolean
   /**
-   * Controlled status for the bulk-action ActionBar. When provided, overrides
-   * any internal auto-management. Useful for multi-step flows (confirmation
-   * dialogs, server polling) where the component can't derive status from a
-   * single promise.
+   * Controlled status for the bulk-action ActionBar. Designed for multi-step
+   * flows (confirmation modals, server polling) where the component can't
+   * derive status from a single promise.
+   *
+   * - **`"idle"`** — transparent: F0's auto-manage handles immediate
+   *   (promise-returning) actions normally. Pass `"idle"` even when not
+   *   actively controlling; no need for a `status !== "idle" ? status : undefined`
+   *   conditional.
+   * - **`"loading"`** — consumer is performing an async operation (e.g. after
+   *   modal confirm). F0 disables actions and shows button-level spinners.
+   * - **`"success"`** — mutation resolved. F0 shows the checkmark, then after
+   *   1.5 s auto-clears selection and falls back to auto-manage. The consumer
+   *   does not need to set `"idle"` or clear selection manually.
+   * - **`"error"`** — mutation rejected. F0 shows the error state and wiggle
+   *   animation. Persists until the user changes selection or the consumer
+   *   sets a different status.
+   *
+   * When this prop is provided (even as `"idle"`), void-returning handlers
+   * will not auto-clear selection — F0 assumes the consumer has modal-gated
+   * actions and owns the selection lifecycle. Pair with
+   * `autoManageBulkActionStatus={true}` for mixed immediate + modal flows.
    */
   bulkActionStatus?: ActionBarStatus
   emptyStates?: CustomEmptyStates
@@ -467,8 +484,75 @@ const OneDataCollectionComp = <
     }
   }, [])
 
+  // "idle" is transparent: when the consumer's controlled status is idle (or
+  // was "success" and F0 has already dismissed it internally), fall through to
+  // the internal auto-managed state so immediate promise-returning actions
+  // still get auto-managed feedback.
+  //
+  // After the auto-dismiss timer fires for a controlled "success", F0 marks
+  // the success as dismissed (ref below) and calls setInternalBulkActionStatus
+  // to trigger a re-render. In that render, the dismissed success resolves to
+  // the internal "idle" so the bar closes without the consumer having to set
+  // their status back to "idle" themselves.
+  const controlledSuccessDismissedRef = useRef(false)
   const resolvedBulkActionStatus =
-    controlledBulkActionStatus ?? internalBulkActionStatus
+    controlledBulkActionStatus &&
+    controlledBulkActionStatus !== "idle" &&
+    !(
+      controlledBulkActionStatus === "success" &&
+      controlledSuccessDismissedRef.current
+    )
+      ? controlledBulkActionStatus
+      : internalBulkActionStatus
+
+  // True only when the consumer has explicitly taken over with a non-idle
+  // status. Used to decide whether auto-manage should run for promises.
+  const isControlledModeActive =
+    controlledBulkActionStatus !== undefined &&
+    controlledBulkActionStatus !== "idle"
+
+  // True whenever the bulkActionStatus prop is wired up, regardless of its
+  // current value. The mere presence of the prop signals that the consumer
+  // has modal-gated actions, so void-returning handlers must not auto-clear
+  // selection (the modal may not have confirmed yet).
+  const hasControlledBulkActionStatus = controlledBulkActionStatus !== undefined
+
+  // When the consumer transitions controlled status to "success", auto-dismiss
+  // after SUCCESS_DISMISS_MS: clear selection and let the status fall back to
+  // internal auto-manage (idle). This mirrors what the auto-managed promise
+  // path does — the consumer only needs to set "success", not manage the timer
+  // or call clearSelectedItems manually.
+  const prevControlledStatusRef = useRef(controlledBulkActionStatus)
+  useEffect(() => {
+    const prev = prevControlledStatusRef.current
+    prevControlledStatusRef.current = controlledBulkActionStatus
+
+    if (controlledBulkActionStatus === "success" && prev !== "success") {
+      // Entering success: reset dismiss flag and start auto-dismiss timer.
+      controlledSuccessDismissedRef.current = false
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current)
+      }
+      successTimerRef.current = setTimeout(() => {
+        clearSelectedItemsFunc?.()
+        // Mark the controlled "success" as dismissed so resolvedBulkActionStatus
+        // falls back to internal "idle". setInternalBulkActionStatus("idle")
+        // triggers the re-render that picks up the ref value.
+        controlledSuccessDismissedRef.current = true
+        setInternalBulkActionStatus("idle")
+        successTimerRef.current = null
+      }, SUCCESS_DISMISS_MS)
+    } else if (prev === "success" && controlledBulkActionStatus !== "success") {
+      // Consumer transitioned away from "success" (e.g. back to "idle" after
+      // cleanup, or directly to a new "loading"). Cancel any pending timer and
+      // reset the dismiss flag so the next "success" cycle works cleanly.
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current)
+        successTimerRef.current = null
+      }
+      controlledSuccessDismissedRef.current = false
+    }
+  }, [controlledBulkActionStatus, clearSelectedItemsFunc])
 
   const i18n = useI18n()
 
@@ -565,22 +649,19 @@ const OneDataCollectionComp = <
           if (!isPromise) {
             // Sync path (or opt-out). Preserve today's fire-and-forget
             // behavior: ignore any returned promise, clear selection now.
-            // Skip if controlled mode — the consumer owns the selection
-            // lifecycle (e.g. a sync handler that opens a confirmation modal
-            // must not lose the selection before the user confirms).
-            if (
-              !bulkAction.keepSelection &&
-              controlledBulkActionStatus === undefined
-            ) {
+            // Skip if the bulkActionStatus prop is wired up at all — the
+            // consumer has modal-gated actions and owns the selection
+            // lifecycle (void return = modal opened, not action completed).
+            if (!bulkAction.keepSelection && !hasControlledBulkActionStatus) {
               clearSelectedItems()
             }
             return
           }
 
-          // Controlled mode: the consumer owns the full status + selection
-          // lifecycle via the bulkActionStatus prop. Don't start internal
-          // timers or clear selection — that would fight their state machine.
-          if (controlledBulkActionStatus !== undefined) {
+          // Auto-manage bail-out: only skip internal state machine when the
+          // consumer is actively controlling status (non-idle). When the
+          // controlled status is "idle", F0 manages immediate actions normally.
+          if (isControlledModeActive) {
             return
           }
 

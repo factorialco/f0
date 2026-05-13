@@ -318,7 +318,9 @@ It returns an object with the following properties:
 - `id: string`: The id of the action. This is used to identify the action in the
   `onBulkAction` callback.
 - `keepSelection?: boolean`: If true, the selection will not be cleared after
-  the action is performed (false by default)
+  the action is performed. Use for actions where the user may want to act again
+  after completion (e.g. "Download CSV"). For modal-gated actions, use
+  `bulkActionStatus` instead — it handles selection clearing automatically.
 
 ### onBulkAction
 
@@ -377,24 +379,51 @@ both keep today's fire-and-forget behavior (selection clears immediately, no
 status transitions).
 
 For flows that can't be modelled as a single promise (confirmation dialogs,
-server polling, multi-step wizards), pass a controlled
-`bulkActionStatus: "idle" | "loading" | "success" | "error"` prop. When
-controlled, it overrides any internal auto-management.
+server polling, multi-step wizards), combine `autoManageBulkActionStatus` with
+the controlled `bulkActionStatus` prop. The two props work together:
+
+- **Immediate actions** (return `Promise`) — F0 auto-manages status normally
+  whenever `bulkActionStatus` is `"idle"`.
+- **Modal-gated actions** (return `void`) — F0 keeps the selection alive and
+  defers to your status transitions. You drive `"loading"` → `"success"` or
+  `"error"` from your modal confirm handler; F0 auto-clears selection and
+  resets to idle after ~1.5 s on success.
 
 ```tsx
-const [status, setStatus] = useState("idle")
+const [status, setStatus] = useState<ActionBarStatus>("idle")
 
 <OneDataCollection
+  autoManageBulkActionStatus
   bulkActionStatus={status}
-  onBulkAction={(action) => openConfirmModal({
-    onConfirm: async () => {
-      setStatus("loading")
-      try { await api.run(action); setStatus("success") }
-      catch { setStatus("error") }
+  onBulkAction={(action, selectedItems) => {
+    if (action === "delete") {
+      // Immediate — return Promise, F0 auto-manages
+      return api.delete(selectedItems)
     }
-  })}
+    // Modal-gated — return void, F0 keeps selection
+    openConfirmModal({
+      onConfirm: async () => {
+        setStatus("loading")
+        try {
+          await api.reject(selectedItems)
+          setStatus("success")
+          // No timer, no clearSelection needed — F0 handles both
+        } catch {
+          setStatus("error")
+        }
+      },
+    })
+  }}
 />
 ```
+
+When `bulkActionStatus` is provided, void-returning handlers never auto-clear
+selection regardless of the current value — F0 treats the prop's presence as
+a signal that some actions have modal lifecycles.
+
+`"error"` state persists until the user changes their selection (which resets
+it to `"idle"`) or the consumer sets a different value — allowing the user to
+retry the failed action.
 
 <Canvas
   of={DataCollectionStories.WithAsyncBulkActions}

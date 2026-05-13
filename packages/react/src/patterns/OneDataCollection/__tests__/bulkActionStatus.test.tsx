@@ -1,5 +1,6 @@
-import { screen, waitFor } from "@testing-library/react"
+import { act, screen, waitFor } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
+import { useState } from "react"
 import { afterEach, describe, expect, test, vi } from "vitest"
 
 import { aiTranslations } from "@/sds/ai/F0AiChat"
@@ -8,6 +9,7 @@ import {
   zeroRender as render,
   zeroRenderHook as renderHook,
 } from "@/testing/test-utils"
+import type { ActionBarStatus } from "@/components/F0ActionBar"
 
 import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../index"
@@ -315,10 +317,16 @@ describe("OneDataCollection bulk-action status", () => {
     })
   })
 
-  test("controlled bulkActionStatus prevents auto-manage from clearing selection on resolve", async () => {
-    // Regression guard for review comment #1: when bulkActionStatus (controlled)
-    // is provided alongside autoManageBulkActionStatus, the auto-managed promise
-    // path must not clear selection — the consumer owns the full lifecycle.
+  test("controlled bulkActionStatus='idle' is transparent — auto-manage runs for promise handlers", async () => {
+    // When bulkActionStatus="idle" is passed alongside autoManageBulkActionStatus,
+    // "idle" is transparent: F0's internal auto-manage drives immediate
+    // (promise-returning) actions exactly as if no bulkActionStatus were provided.
+    // The promise resolves → selection is cleared → bar dismisses.
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime.bind(vi),
+    })
+
     let resolveHandler: (() => void) | undefined
     const onBulkAction = vi.fn(
       () =>
@@ -343,20 +351,124 @@ describe("OneDataCollection bulk-action status", () => {
       </TestWrapper>
     )
 
-    await selectFirstRow()
+    await selectFirstRow(user)
     const [archive] = await findArchiveButtons()
-
-    // userEvent needs its own instance here; no fake timers.
-    const user = userEvent.setup()
     await user.click(archive)
 
-    // Resolve the promise — auto-manage must NOT call clearSelectedItems.
+    // Auto-manage kicks in: Archive is disabled during loading.
+    await waitFor(() => {
+      const btns = queryArchiveButtons()
+      expect(btns.length).toBeGreaterThan(0)
+      btns.forEach((btn) => expect(btn).toBeDisabled())
+    })
+
     resolveHandler?.()
     await Promise.resolve()
+    vi.advanceTimersByTime(1500)
 
-    // Selection is preserved: Archive buttons remain visible.
+    // Auto-manage cleared selection on resolve → bar dismissed.
+    await waitFor(() => {
+      expect(queryArchiveButtons()).toHaveLength(0)
+    })
+  })
+
+  test("void handler with bulkActionStatus wired keeps selection without keepSelection", async () => {
+    // When bulkActionStatus is provided (even as "idle"), void-returning handlers
+    // must NOT auto-clear selection. The prop's presence signals that some actions
+    // have external lifecycles — consumers no longer need keepSelection: true on
+    // modal-gated actions.
+    const onBulkAction = vi.fn() // returns void
+
+    const { result } = renderHook(() => useTestSource(), {
+      wrapper: TestWrapper,
+    })
+
+    render(
+      <TestWrapper>
+        <OneDataCollection
+          source={result.current}
+          visualizations={[{ type: "table", options: { columns } }]}
+          autoManageBulkActionStatus
+          bulkActionStatus="idle"
+          onBulkAction={onBulkAction}
+        />
+      </TestWrapper>
+    )
+
+    const user = await selectFirstRow()
+    const [archive] = await findArchiveButtons()
+    await user.click(archive)
+
+    // Void return with bulkActionStatus wired: selection is preserved.
     await waitFor(() => {
       expect(queryArchiveButtons().length).toBeGreaterThan(0)
+    })
+
+    // Handler was still called.
+    expect(onBulkAction).toHaveBeenCalledWith(
+      "archive",
+      expect.anything(),
+      expect.any(Function)
+    )
+  })
+
+  test("controlled 'success' auto-clears selection after SUCCESS_DISMISS_MS", async () => {
+    // When the consumer sets bulkActionStatus="success", F0 should auto-clear
+    // selection and reset to idle after ~1500ms — no manual timer or
+    // clearSelectedItems call needed from the consumer.
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime.bind(vi),
+    })
+
+    const { result } = renderHook(() => useTestSource(), {
+      wrapper: TestWrapper,
+    })
+
+    let setExternalStatus!: (s: ActionBarStatus) => void
+
+    const Harness = () => {
+      const [status, setStatus] = useState<ActionBarStatus>("idle")
+      setExternalStatus = setStatus
+      return (
+        <OneDataCollection
+          source={result.current}
+          visualizations={[{ type: "table", options: { columns } }]}
+          autoManageBulkActionStatus
+          bulkActionStatus={status}
+          onBulkAction={vi.fn()}
+        />
+      )
+    }
+
+    render(
+      <TestWrapper>
+        <Harness />
+      </TestWrapper>
+    )
+
+    // Select a row so the bar is visible.
+    await selectFirstRow(user)
+    await findArchiveButtons()
+
+    // Consumer transitions to "success" (as if a modal mutation succeeded).
+    act(() => {
+      setExternalStatus("success")
+    })
+
+    // Before timer: bar still visible (success checkmark shown).
+    await waitFor(() => {
+      expect(queryArchiveButtons().length).toBeGreaterThan(0)
+    })
+
+    // Advance past SUCCESS_DISMISS_MS.
+    act(() => {
+      vi.advanceTimersByTime(1500)
+    })
+
+    // Selection auto-cleared → bar dismissed.
+    await waitFor(() => {
+      expect(queryArchiveButtons()).toHaveLength(0)
     })
   })
 
