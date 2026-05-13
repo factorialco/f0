@@ -156,6 +156,7 @@ const ClarifyingQuestionContent = ({
               canProceed={canProceed}
               onBack={back}
               onNext={confirm}
+              onCancel={cancel}
             />
 
             <OptionsList
