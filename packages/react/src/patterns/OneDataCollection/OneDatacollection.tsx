@@ -534,13 +534,19 @@ const OneDataCollectionComp = <
         clearTimeout(successTimerRef.current)
       }
       successTimerRef.current = setTimeout(() => {
+        // Clear selection first. This render still sees status="success" so
+        // displayedSelectedNumber stays frozen — the checkmark remains visible
+        // without the bar shrinking.
         clearSelectedItemsFunc?.()
-        // Mark the controlled "success" as dismissed so resolvedBulkActionStatus
-        // falls back to internal "idle". setInternalBulkActionStatus("idle")
-        // triggers the re-render that picks up the ref value.
-        controlledSuccessDismissedRef.current = true
-        setInternalBulkActionStatus("idle")
         successTimerRef.current = null
+        // Defer the status transition to the next task so the selection-clear
+        // render completes with status still "success" before the bar closes.
+        // Without this deferral both changes land in the same render, the
+        // displayedSelectedNumber freeze never activates, and the bar flickers.
+        setTimeout(() => {
+          controlledSuccessDismissedRef.current = true
+          setInternalBulkActionStatus("idle")
+        }, 0)
       }, SUCCESS_DISMISS_MS)
     } else if (prev === "success" && controlledBulkActionStatus !== "success") {
       // Consumer transitioned away from "success" (e.g. back to "idle" after
