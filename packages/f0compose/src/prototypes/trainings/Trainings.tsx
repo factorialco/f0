@@ -75,7 +75,7 @@ export default function Trainings() {
   const goToClassesTab = (t: Training) => {
     const next = new URLSearchParams()
     next.set("training", t.id)
-    next.set("dtab", "trainingClasses")
+    next.set("dtab", "groups")
     setSearchParams(next)
   }
 

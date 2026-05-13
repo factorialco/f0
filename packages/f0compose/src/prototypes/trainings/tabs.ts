@@ -1,22 +1,20 @@
 export type DetailTabId =
   | "overview"
-  | "contentOverview"
+  | "content"
+  | "groups"
   | "participants"
-  | "trainingClasses"
   | "attachments"
   | "documents"
   | "surveys"
-  | "costs"
   | "fundae"
 
 export const detailTabs: { id: DetailTabId; label: string }[] = [
   { id: "overview", label: "Overview" },
-  { id: "contentOverview", label: "Content overview" },
+  { id: "content", label: "Content" },
+  { id: "groups", label: "Groups" },
   { id: "participants", label: "Participants" },
-  { id: "trainingClasses", label: "Classes" },
-  { id: "attachments", label: "Attachments" },
+  { id: "attachments", label: "Materials" },
   { id: "documents", label: "Documents" },
   { id: "surveys", label: "Surveys" },
-  { id: "costs", label: "Costs" },
   { id: "fundae", label: "Fundae" },
 ]

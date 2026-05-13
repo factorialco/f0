@@ -69,3 +69,58 @@ target newer than vendor.
   framework code.
 - Don't modify components in `packages/react/src/`.
 - Don't end the turn without the local URL.
+
+## Norma de paridad con upstream (módulos que replican producción)
+
+Esta norma aplica a cualquier prototipo que replica un módulo real de
+Factorial (trainings, performance, time, etc.). Su propósito: nunca más
+patch-by-patch, nunca más "casi parecido", nunca más declarar "hecho"
+sin verificar contra upstream.
+
+### 1. AUDIT FIRST, CODE LATER
+
+Antes de tocar UNA SOLA LÍNEA de un módulo replicado:
+
+- Leer el módulo upstream completo en
+  `/Users/jon.saenz/code/factorial/frontend/src/modules/<modulo>/`.
+- Enumerar por escrito: rutas, tabs (en orden), wizards, modales,
+  formularios, empty states, CTAs principales.
+- Extraer TODOS los labels de
+  `/Users/jon.saenz/code/factorial/frontend/src/translations/en.json`.
+  Nunca inventar copys. Si una key no existe upstream, preguntar.
+- Producir un diff escrito (gaps locales vs upstream) ANTES de editar.
+
+### 2. NO DECLARAR "HECHO" SIN
+
+- `pnpm tsc --noEmit` limpio.
+- Ruta HTTP 200 en cada sub-vista (`?dtab=`, `?wizard=`, modales).
+- Comparación visual explícita con upstream (screenshot o descripción
+  campo-a-campo).
+- Lista explícita de lo que quedó fuera, si algo queda fuera.
+
+### 3. UN AUDIT = UN COMMIT
+
+Si el audit revela 8 gaps, se arreglan los 8 en un commit, no en 8
+commits incrementales. Excepción única: el usuario pide explícitamente
+fix incremental.
+
+### 4. LABELS Y COPYS
+
+Siempre desde `en.json` upstream. Cero invención.
+
+### 5. COMMITS
+
+- Cuerpo del mensaje: líneas ≤ 100 caracteres.
+- El mensaje describe el AUDIT (qué se comparó, qué se arregló), no
+  solo el fix superficial.
+
+### 6. NUNCA pausar a mitad
+
+Si la tarea es "hazlo bien" o "hasta que esté", ejecutar hasta paridad
+real. No preguntar entre pasos. Solo parar si hay ambigüedad de
+producto que upstream no resuelve.
+
+### 7. Usuario no-técnico
+
+Explicar en castellano llano. Nada de jerga git/tsc/HTTP salvo que el
+usuario la introduzca. El usuario nunca toca terminal.

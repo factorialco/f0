@@ -52,7 +52,7 @@ function EmptyState({ trainingId }: { trainingId: string }) {
               icon={Add}
               variant="default"
               onClick={() =>
-                navigate(`/p/trainings-list?id=${trainingId}&dtab=trainingClasses`)
+                navigate(`/p/trainings-list?id=${trainingId}&dtab=groups`)
               }
             />
           </F0Box>
