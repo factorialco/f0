@@ -91,19 +91,39 @@ export function useTrainingsSource(
           label: "Year",
           options: { options: yearOptions },
         },
-        isMandatory: {
+        courseExpiration: {
           type: "in",
-          label: "Type",
+          label: "Re-take",
           options: {
             options: [
-              { value: "mandatory", label: "Mandatory" },
-              { value: "non_mandatory", label: "Non-mandatory" },
+              { value: "expired", label: "Yes" },
+              { value: "not_expired", label: "No" },
+            ],
+          },
+        },
+        isMandatory: {
+          type: "in",
+          label: "Mandatory",
+          options: {
+            options: [
+              { value: "mandatory", label: "Yes" },
+              { value: "non_mandatory", label: "No" },
+            ],
+          },
+        },
+        withCurrentTrainingClasses: {
+          type: "in",
+          label: "Active Courses",
+          options: {
+            options: [
+              { value: "yes", label: "Courses with active groups" },
+              { value: "no", label: "All Courses" },
             ],
           },
         },
       },
       presets: [
-        { label: "Expired participants", filter: { expiration: ["expired"] } },
+        { label: "Validity expired", filter: { courseExpiration: ["expired"] } },
         { label: "Published", filter: { status: ["active"] } },
       ],
       sortings: {
@@ -134,6 +154,12 @@ export function useTrainingsSource(
             : []
           const yearFilter = Array.isArray(filters?.year)
             ? (filters.year as number[])
+            : []
+          const courseExpirationFilter = Array.isArray(filters?.courseExpiration)
+            ? (filters.courseExpiration as string[])
+            : []
+          const activeClassesFilter = Array.isArray(filters?.withCurrentTrainingClasses)
+            ? (filters.withCurrentTrainingClasses as string[])
             : []
           const term = (search ?? "").toLowerCase().trim()
 
@@ -172,6 +198,25 @@ export function useTrainingsSource(
             .filter((t) =>
               yearFilter.length === 0 ? true : yearFilter.includes(t.year)
             )
+            .filter((t) => {
+              if (courseExpirationFilter.length === 0) return true
+              const hasExpired = (t.expiredParticipantCount ?? 0) > 0
+              if (courseExpirationFilter.includes("expired") && hasExpired)
+                return true
+              if (
+                courseExpirationFilter.includes("not_expired") &&
+                !hasExpired
+              )
+                return true
+              return false
+            })
+            .filter((t) => {
+              if (activeClassesFilter.length === 0) return true
+              const hasClasses = (t.classes?.length ?? 0) > 0
+              if (activeClassesFilter.includes("yes") && hasClasses) return true
+              if (activeClassesFilter.includes("no")) return true
+              return false
+            })
             .filter((t) =>
               term === "" ? true : t.name.toLowerCase().includes(term)
             )

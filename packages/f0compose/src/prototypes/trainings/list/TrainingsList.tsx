@@ -4,6 +4,7 @@ import { F0Dialog } from "@factorialco/f0-react"
 import { EyeVisible } from "@factorialco/f0-react/icons/app"
 
 import type { Training } from "@/fixtures"
+import { competencies } from "@/fixtures"
 
 import { useTrainingsSource, type TrainingsListAction } from "./useTrainingsSource"
 import { BulkActionModal, type BulkActionKind } from "./BulkActionModal"
@@ -130,13 +131,13 @@ export function TrainingsList({ onAdd, onSelect }: Props) {
                 }),
               },
               {
-                label: "Expired participants",
+                label: "Validity expired",
                 render: (item) => ({
                   type: "status",
                   value: {
                     status:
                       item.expiredParticipantCount > 0 ? "warning" : "positive",
-                    label: String(item.expiredParticipantCount),
+                    label: `${item.expiredParticipantCount} people`,
                   },
                 }),
               },
@@ -172,12 +173,39 @@ export function TrainingsList({ onAdd, onSelect }: Props) {
               },
               {
                 label: "Tags",
-                width: 300,
+                width: 400,
                 render: (item) => ({
                   type: "tagList",
                   value: {
                     type: "raw",
                     tags: item.categories.map((c) => ({ text: c.name })),
+                    max: 3,
+                  },
+                }),
+              },
+              {
+                label: "Axes",
+                width: 400,
+                render: (item) => ({
+                  type: "tagList",
+                  value: {
+                    type: "raw",
+                    tags: (item.axes ?? []).map((a) => ({ text: a.name })),
+                    max: 3,
+                  },
+                }),
+              },
+              {
+                label: "Competencies",
+                width: 400,
+                render: (item) => ({
+                  type: "tagList",
+                  value: {
+                    type: "raw",
+                    tags: (item.competencyIds ?? [])
+                      .map((id) => competencies.find((c) => c.id === id))
+                      .filter((c): c is { id: string; name: string } => !!c)
+                      .map((c) => ({ text: c.name })),
                     max: 3,
                   },
                 }),
