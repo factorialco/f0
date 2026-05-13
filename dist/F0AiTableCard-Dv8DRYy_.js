@@ -1,7 +1,7 @@
 import { defaultTranslations as Ne } from "./i18n-provider-defaults.js";
 import { jsxs as a, jsx as o, Fragment as Q1 } from "react/jsx-runtime";
 import { useInsertionEffect as _e, forwardRef as s, createContext as J1, useContext as M1, useState as d1, useRef as N, useCallback as E1, useMemo as b1, useEffect as h1, useId as Ue, createElement as De } from "react";
-import { c7 as Oe, c8 as Ge, c9 as ze, ca as We, cb as ee, cc as Xe, cd as Ye, ce as qe, cf as Ke, cg as Qe, ch as re, ci as Je, cj as er, ck as rr, cl as or, cm as tr, cn as nr, co as sr, cp as g1, cq as ir, cr as ar, cs as cr, ct as lr, cu as dr, cv as fr, Z as ur, cw as Cr, cx as hr, cy as gr, cz as vr, cA as pr, cB as wr, cC as mr, cD as kr, a7 as Lr, cE as xr, aK as Mr, cF as Er, ah as br, bL as Vr, ab as oe, ae as Rr, cG as Fr, a5 as yr, a1 as Hr, S as Sr, a4 as Br, be as Tr, cH as Ar, a$ as $r, bK as Zr, $ as Pr, av as jr, bi as Ir, cI as Nr, bI as _r, cJ as C1, bE as Ur, cK as Dr, cL as Or, a_ as Gr, cM as zr, cN as Wr, cO as Xr, cP as Yr, b1 as te, bx as qr, by as Kr, cQ as Qr, cR as Jr, cS as eo, cT as ro, cU as oo, cV as to, cW as no, cX as so, cY as io, cZ as ao, c_ as co, c$ as lo, d0 as fo, bJ as uo, ac as Co, bu as ho, d1 as go, d2 as vo, b0 as po, d3 as wo, d4 as mo, d5 as ko, d6 as Lo, d7 as xo, aq as Mo, d8 as Eo, N as bo, a0 as Vo, d9 as Ro, da as Fo, db as yo, bh as Ho, bg as So, dc as Bo, dd as To, de as Ao, df as $o, aZ as Zo, az as Po, dg as jo, at as Io, dh as No, bd as _o, di as Uo, dj as Do, dk as Oo, dl as Go, bm as ne, dm as zo, bG as Wo, bF as Xo, bH as Yo, dn as qo, H as Ko, G as Qo, dp as Jo, dq as et, dr as rt, ds as ot, dt as tt, du as nt, dv as st, dw as it, dx as at, dy as ct, dz as lt, ad as dt, dA as ft, M as ut, p as D, r as a1, bo as Ct, u as se, aR as ht, af as L1, Q as x1, dB as gt, aP as ie, E as vt, q as v1, al as pt, b8 as wt, b3 as mt, b2 as kt, b5 as Lt, b6 as xt, dC as Mt, dD as Et, dE as bt, dF as Vt, w as Rt, a9 as Ft, ag as yt, U as l1, dG as Ht, aT as St, J as Bt, a6 as Tt } from "./F0AiChat-CwrqfdqO.js";
+import { c7 as Oe, c8 as Ge, c9 as ze, ca as We, cb as ee, cc as Xe, cd as Ye, ce as qe, cf as Ke, cg as Qe, ch as re, ci as Je, cj as er, ck as rr, cl as or, cm as tr, cn as nr, co as sr, cp as g1, cq as ir, cr as ar, cs as cr, ct as lr, cu as dr, cv as fr, Z as ur, cw as Cr, cx as hr, cy as gr, cz as vr, cA as pr, cB as wr, cC as mr, cD as kr, a7 as Lr, cE as xr, aK as Mr, cF as Er, ah as br, bL as Vr, ab as oe, ae as Rr, cG as Fr, a5 as yr, a1 as Hr, S as Sr, a4 as Br, be as Tr, cH as Ar, a$ as $r, bK as Zr, $ as Pr, av as jr, bi as Ir, cI as Nr, bI as _r, cJ as C1, bE as Ur, cK as Dr, cL as Or, a_ as Gr, cM as zr, cN as Wr, cO as Xr, cP as Yr, b1 as te, bx as qr, by as Kr, cQ as Qr, cR as Jr, cS as eo, cT as ro, cU as oo, cV as to, cW as no, cX as so, cY as io, cZ as ao, c_ as co, c$ as lo, d0 as fo, bJ as uo, ac as Co, bu as ho, d1 as go, d2 as vo, b0 as po, d3 as wo, d4 as mo, d5 as ko, d6 as Lo, d7 as xo, aq as Mo, d8 as Eo, N as bo, a0 as Vo, d9 as Ro, da as Fo, db as yo, bh as Ho, bg as So, dc as Bo, dd as To, de as Ao, df as $o, aZ as Zo, az as Po, dg as jo, at as Io, dh as No, bd as _o, di as Uo, dj as Do, dk as Oo, dl as Go, bm as ne, dm as zo, bG as Wo, bF as Xo, bH as Yo, dn as qo, H as Ko, G as Qo, dp as Jo, dq as et, dr as rt, ds as ot, dt as tt, du as nt, dv as st, dw as it, dx as at, dy as ct, dz as lt, ad as dt, dA as ft, M as ut, p as D, r as a1, bo as Ct, u as se, aR as ht, af as v1, Q as x1, dB as gt, aP as ie, E as vt, q as p1, al as pt, b8 as wt, b3 as mt, b2 as kt, b5 as Lt, b6 as xt, dC as Mt, dD as Et, dE as bt, dF as Vt, w as Rt, a9 as Ft, ag as yt, U as l1, dG as Ht, aT as St, J as Bt, a6 as Tt } from "./F0AiChat-CwrqfdqO.js";
 import { useTrackVolume as At } from "@livekit/components-react";
 function $t(r, e, t) {
   _e(() => r.on(e, t), [r, e, t]);
@@ -6783,8 +6783,8 @@ const P4 = a1({
     justifyContent: Y,
     flexDirection: s1,
     flexWrap: c1,
-    grow: p1,
-    shrink: w1,
+    grow: w1,
+    shrink: m1,
     // Responsive breakpoint overrides
     sm: Se,
     md: Be,
@@ -6858,8 +6858,8 @@ const P4 = a1({
             justifyContent: Y,
             flexDirection: s1,
             flexWrap: c1,
-            grow: p1,
-            shrink: w1
+            grow: w1,
+            shrink: m1
           }),
           Ie,
           Pe && !H && "border-f1-border",
@@ -6872,7 +6872,7 @@ const P4 = a1({
   }
 );
 Ee.displayName = "F0Box";
-const m1 = Ct(
+const k1 = Ct(
   {
     name: "F0Box",
     type: "layout"
@@ -6966,8 +6966,8 @@ function I4({
         /* @__PURE__ */ a("div", { className: "flex w-full min-w-0 flex-row items-center gap-3", children: [
           !!r && /* @__PURE__ */ o(ht, { module: r, size: "lg" }),
           /* @__PURE__ */ a("div", { className: "flex min-w-0 flex-1 flex-col", children: [
-            /* @__PURE__ */ o(L1, { className: "text-lg font-semibold text-f1-foreground", children: e }),
-            /* @__PURE__ */ o(L1, { className: "text-base text-f1-foreground-secondary", children: t })
+            /* @__PURE__ */ o(v1, { className: "text-lg font-semibold text-f1-foreground", children: e }),
+            /* @__PURE__ */ o(v1, { className: "text-base text-f1-foreground-secondary", children: t })
           ] }),
           i && /* @__PURE__ */ o(
             x1,
@@ -7652,7 +7652,7 @@ const K4 = (r, e, t, n) => {
         )
       );
   }
-}, k1 = 9729, z1 = 9728, J4 = 9987, W1 = 33071, X1 = 10497;
+}, L1 = 9729, z1 = 9728, J4 = 9987, W1 = 33071, X1 = 10497;
 class e9 {
   gl;
   url;
@@ -7767,14 +7767,14 @@ class e9 {
       });
     }
     let b = await x(), T = (b.width & b.width - 1) === 0 && (b.height & b.height - 1) === 0;
-    return (e.wrapS !== W1 || e.wrapT !== W1 || e.minFilter !== z1 && e.minFilter !== k1) && !T && (b = this.makePowerOf2(b), T = !0), t.bindTexture(t.TEXTURE_2D, Z), t.pixelStorei(t.UNPACK_FLIP_Y_WEBGL, g), t.texImage2D(
+    return (e.wrapS !== W1 || e.wrapT !== W1 || e.minFilter !== z1 && e.minFilter !== L1) && !T && (b = this.makePowerOf2(b), T = !0), t.bindTexture(t.TEXTURE_2D, Z), t.pixelStorei(t.UNPACK_FLIP_Y_WEBGL, g), t.texImage2D(
       t.TEXTURE_2D,
       L,
       R,
       w,
       y,
       b
-    ), T && e.minFilter !== z1 && e.minFilter !== k1 && t.generateMipmap(t.TEXTURE_2D), t.texParameteri(
+    ), T && e.minFilter !== z1 && e.minFilter !== L1 && t.generateMipmap(t.TEXTURE_2D), t.texParameteri(
       t.TEXTURE_2D,
       t.TEXTURE_WRAP_S,
       this.wrapS || X1
@@ -7789,7 +7789,7 @@ class e9 {
     ), t.texParameteri(
       t.TEXTURE_2D,
       t.TEXTURE_MAG_FILTER,
-      this.magFilter || k1
+      this.magFilter || L1
     ), this._webglTexture = Z, this.source = b, this.isVideo = !1, this.isLoaded = !0, this.width = b.width || 0, this.height = b.height || 0, this;
   };
 }
@@ -8079,15 +8079,15 @@ ${u}`));
       for (let C = 0; C < $.current.length; C++) {
         const V = $.current[C];
         if (!V) return;
-        const { isVideo: U, _webglTexture: Y, source: s1, flipY: c1, isLoaded: p1 } = V;
-        if (!p1 || !Y || !s1) return;
+        const { isVideo: U, _webglTexture: Y, source: s1, flipY: c1, isLoaded: w1 } = V;
+        if (!w1 || !Y || !s1) return;
         if (m.current[`iChannel${C}`]?.isNeeded) {
           if (!w.current) return;
-          const w1 = u.getUniformLocation(
+          const m1 = u.getUniformLocation(
             w.current,
             `iChannel${C}`
           );
-          u.activeTexture(u.TEXTURE0 + C), u.bindTexture(u.TEXTURE_2D, Y), u.uniform1i(w1, C), U && V.updateTexture(
+          u.activeTexture(u.TEXTURE0 + C), u.bindTexture(u.TEXTURE_2D, Y), u.uniform1i(m1, C), U && V.updateTexture(
             Y,
             s1,
             c1
@@ -8575,7 +8575,7 @@ const O9 = ({
   return /* @__PURE__ */ a(Q1, { children: [
     r && /* @__PURE__ */ o("span", { className: D(C9(), "truncate"), children: r }),
     /* @__PURE__ */ o(vt, { children: t && e && /* @__PURE__ */ o(
-      v1.div,
+      p1.div,
       {
         className: "absolute bottom-4 left-4 z-10",
         initial: { opacity: 0 },
@@ -8624,7 +8624,7 @@ const O9 = ({
   return /* @__PURE__ */ a("div", { className: "flex flex-1 flex-col gap-2", children: [
     /* @__PURE__ */ o("span", { className: D(Re()), children: e }),
     /* @__PURE__ */ a(
-      v1.div,
+      p1.div,
       {
         className: "flex flex-1 flex-col justify-end gap-2",
         animate: { opacity: i ? 0 : 1 },
@@ -8679,7 +8679,7 @@ const O9 = ({
       }
     ),
     t && !g9.has(n) && /* @__PURE__ */ o(
-      v1.span,
+      p1.span,
       {
         className: D(u1()),
         animate: { opacity: i ? 0 : 1 },
@@ -8867,7 +8867,7 @@ const m9 = ({
             M.content === "sparkline" ? /* @__PURE__ */ a("div", { className: "flex flex-1 flex-col gap-2", children: [
               /* @__PURE__ */ o("span", { className: D(Re()), children: n }),
               /* @__PURE__ */ o(
-                v1.div,
+                p1.div,
                 {
                   className: "-ml-4 flex flex-1 flex-col",
                   animate: { opacity: w ? 0 : 1 },
@@ -8991,7 +8991,7 @@ function F9({
     [e, t]
   );
   return r.columns?.length ? /* @__PURE__ */ a(
-    m1,
+    k1,
     {
       display: "flex",
       flexDirection: "column",
@@ -9001,7 +9001,7 @@ function F9({
       borderColor: "secondary",
       children: [
         /* @__PURE__ */ a(
-          m1,
+          k1,
           {
             display: "flex",
             alignItems: "center",
@@ -9014,7 +9014,7 @@ function F9({
             paddingY: "sm",
             children: [
               /* @__PURE__ */ o(
-                L1,
+                v1,
                 {
                   tag: "h2",
                   className: "text-base font-medium capitalize text-f1-foreground",
@@ -9043,12 +9043,12 @@ function F9({
             ]
           }
         ),
-        /* @__PURE__ */ o(m1, { overflowX: "auto", children: /* @__PURE__ */ a(
+        /* @__PURE__ */ o(k1, { overflowX: "auto", children: /* @__PURE__ */ a(
           "table",
           {
             ref: n,
             className: D(
-              "w-full border-separate border-spacing-0 text-sm",
+              "w-full border-separate border-spacing-0 text-md",
               "[&_tbody_tr:last-child_td]:border-b-0"
             ),
             children: [
@@ -9065,8 +9065,8 @@ function F9({
                 return /* @__PURE__ */ o(
                   "td",
                   {
-                    className: "max-w-80 truncate border-0 border-b border-solid border-f1-border-secondary px-3 py-2 text-f1-foreground",
-                    children: g == null ? "" : String(g)
+                    className: "max-w-72 border-0 border-b border-solid border-f1-border-secondary px-3 py-2 text-f1-foreground",
+                    children: /* @__PURE__ */ o(v1, { children: g == null ? "" : String(g) })
                   },
                   p
                 );
@@ -9081,7 +9081,7 @@ function F9({
 F9.displayName = "F0AiTableCard";
 export {
   P9 as A,
-  m1 as B,
+  k1 as B,
   tn as C,
   K5 as D,
   J5 as E,

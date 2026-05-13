@@ -1,6 +1,6 @@
 import { h as e, g as r, F as t, a as i, C as o, b as n, f as F, i as C, j as l, I as u, d as A, e as d, u as m, c } from "./F0AiChat-CwrqfdqO.js";
 import { defaultTranslations as I } from "./i18n-provider-defaults.js";
-import { A as T, i as v, f as S, k as g, l as p, g as P, d as x, h as V, F as b, e as y, a as j, j as k, o as M, u as O, b as w, c as z } from "./F0AiTableCard-QAliMpV9.js";
+import { A as T, i as v, f as S, k as g, l as p, g as P, d as x, h as V, F as b, e as y, a as j, j as k, o as M, u as O, b as w, c as z } from "./F0AiTableCard-Dv8DRYy_.js";
 export {
   T as AiChatTranslationsProvider,
   e as ChatSpinner,
