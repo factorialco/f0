@@ -9,4 +9,6 @@ export * from "./F0OneIcon"
 export * from "./F0OneSwitch"
 export * from "./F0AiInsightCard"
 export * from "./F0AiProposalCard"
+export * from "./F0AiTableCard"
 export { ChatTextarea as F0AiChatTextArea } from "./F0AiChat/components/input/ChatTextarea"
+</content>

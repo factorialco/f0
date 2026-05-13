@@ -4,7 +4,7 @@ import { fn } from "storybook/test"
 import { F0CanvasCard } from "../F0CanvasCard"
 
 const meta = {
-  title: "AI/Canvas/F0CanvasCard",
+  title: "AI/F0CanvasCard",
   component: F0CanvasCard,
   parameters: {
     layout: "centered",
