@@ -2287,6 +2287,25 @@ export declare class F0AiMask {
     private render;
 }
 
+/**
+ * Compact inline table for small datasets shown directly in an AI chat
+ * stream. Headers come from `columnLabels` when present, otherwise from
+ * the raw column id. Pure presentational — no hooks, no AI coupling.
+ */
+export declare function F0AiTableCard({ dataset }: F0AiTableCardProps): JSX_2.Element | null;
+
+export declare namespace F0AiTableCard {
+    var displayName: string;
+}
+
+export declare type F0AiTableCardProps = {
+    /**
+     * Tabular data to render. Reuses the same shape used by the
+     * `dataDownload` canvas entity so the agent payload travels untouched.
+     */
+    dataset: DataDownloadDataset;
+};
+
 export declare function F0AuraVoiceAnimation({ size, state, color, colorShift, audioTrack, themeMode, className, ref, ...props }: F0AuraVoiceAnimationProps & ComponentProps<"div"> & VariantProps<typeof F0AuraVoiceAnimationVariants>): JSX_2.Element;
 
 export declare interface F0AuraVoiceAnimationProps {
@@ -3398,8 +3417,13 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
+        };
+    }
 }
 
 
@@ -3408,16 +3432,6 @@ declare module "@tiptap/core" {
         aiBlock: {
             insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
             executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -3449,4 +3463,9 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
