@@ -1,5 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import * as icons from "@/icons/app"
+import { Upsell } from "@/icons/app"
+
 import { UpsellingAlert } from "."
 
 const meta: Meta<typeof UpsellingAlert> = {
@@ -9,6 +12,14 @@ const meta: Meta<typeof UpsellingAlert> = {
     layout: "padded",
   },
   tags: ["autodocs"],
+  argTypes: {
+    icon: {
+      description: "Optional icon displayed as an avatar on the left side",
+      control: "select",
+      mapping: icons,
+      options: [undefined, ...Object.keys(icons)],
+    },
+  },
 }
 
 export default meta
@@ -44,5 +55,14 @@ export const Default: Story = {
       ],
     },
     closeLabel: "Close",
+  },
+}
+
+export const WithIcon: Story = {
+  args: {
+    ...Default.args,
+    icon: Upsell,
+    title: "Upgrade to unlock this feature",
+    description: "Upsell and grow your business with advanced tools.",
   },
 }
