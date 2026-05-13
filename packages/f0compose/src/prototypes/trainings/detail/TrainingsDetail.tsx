@@ -14,6 +14,7 @@ import { AdminModals, type AdminAction } from "./AdminModals"
 import { AttachmentsTab } from "./AttachmentsTab"
 import { ClassesTab } from "./ClassesTab"
 import { ContentTab } from "./ContentTab"
+import { CostsTab } from "./CostsTab"
 import { DocumentsTab } from "./DocumentsTab"
 import { FormsTab } from "./FormsTab"
 import { FundaeTab } from "./FundaeTab"
@@ -196,6 +197,7 @@ export function TrainingsDetail({ training, onBack }: Props) {
         {activeTab === "attachments" && <AttachmentsTab training={training} />}
         {activeTab === "documents" && <DocumentsTab training={training} />}
         {activeTab === "surveys" && <FormsTab training={training} />}
+        {activeTab === "costs" && <CostsTab training={training} />}
         {activeTab === "fundae" && <FundaeTab training={training} />}
 
         <AdminModals

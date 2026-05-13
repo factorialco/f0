@@ -6,6 +6,7 @@ export type DetailTabId =
   | "attachments"
   | "documents"
   | "surveys"
+  | "costs"
   | "fundae"
 
 export const detailTabs: { id: DetailTabId; label: string }[] = [
@@ -16,5 +17,6 @@ export const detailTabs: { id: DetailTabId; label: string }[] = [
   { id: "attachments", label: "Attachments" },
   { id: "documents", label: "Documents" },
   { id: "surveys", label: "Surveys" },
+  { id: "costs", label: "Costs" },
   { id: "fundae", label: "Fundae" },
 ]
