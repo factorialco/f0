@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/factorialco/f0/compare/f0-react-v1.482.0...f0-react-v2.0.0) (2026-05-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* **F0AiChat:** drop built-in actions and make canvas pluggable ([#4106](https://github.com/factorialco/f0/issues/4106))
+
+### Features
+
+* **F0AiChat:** drop built-in actions and make canvas pluggable ([#4106](https://github.com/factorialco/f0/issues/4106)) ([aab5ed9](https://github.com/factorialco/f0/commit/aab5ed967177e63a92cb1fc88e601a6bead9700b))
+
 ## [1.482.0](https://github.com/factorialco/f0/compare/f0-react-v1.481.1...f0-react-v1.482.0) (2026-05-13)
 
 
