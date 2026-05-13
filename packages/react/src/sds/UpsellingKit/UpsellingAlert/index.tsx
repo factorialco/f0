@@ -78,7 +78,7 @@ function _UpsellingAlert({
             )}
           >
             {icon && (
-              <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-sm border border-solid border-f1-border-promote text-f1-icon-promote [background:hsl(var(--promote-50)/0.1)]">
+              <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-sm border border-solid text-f1-icon-promote [background:hsl(var(--promote-50)/0.1)] [border-color:hsl(var(--promote-50)/0.1)]">
                 <F0Icon icon={icon} size="sm" />
               </div>
             )}
