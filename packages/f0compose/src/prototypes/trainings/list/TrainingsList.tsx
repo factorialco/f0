@@ -17,6 +17,7 @@ type SimpleDialog = {
   title: string
   description: string
   primaryLabel: string
+  cancelLabel?: string
   critical?: boolean
 }
 
@@ -33,53 +34,48 @@ export function TrainingsList({ onAdd, onSelect }: Props) {
     switch (action.kind) {
       case "export":
         setDialog({
-          title: "Export trainings",
+          title: "Export training report",
           description:
-            "All trainings matching the current filters will be exported as CSV. The download will start automatically.",
+            "The export has been queued, you will find it in your documents when completed.",
           primaryLabel: "Export",
         })
         break
       case "import":
         setDialog({
-          title: "Import trainings from CSV",
-          description:
-            "Upload a CSV file matching the trainings template. Existing trainings with the same code will be updated.",
+          title: "Course and participant import",
+          description: "Import a CSV or Excel file.",
           primaryLabel: "Choose file",
         })
         break
       case "import-courses":
         setDialog({
-          title: "Import courses from a provider",
-          description:
-            "Connect a learning provider (Udemy, Coursera, etc.) and bulk-import its catalog into your trainings.",
-          primaryLabel: "Continue",
+          title: "Course import",
+          description: "Import a CSV or Excel file.",
+          primaryLabel: "Choose file",
         })
         break
       case "duplicate":
         setDialog({
-          title: `Duplicate "${action.training.name}"?`,
-          description:
-            "A copy of this training will be created in draft status, including its content modules and forms.",
+          title: "Duplicate",
+          description: "Select everything you want to duplicate.",
           primaryLabel: "Duplicate",
         })
         break
       case "toggle-catalog":
         setDialog({
-          title: action.training.catalog
-            ? `Remove "${action.training.name}" from catalog?`
-            : `Add "${action.training.name}" to catalog?`,
+          title: "Update catalog",
           description: action.training.catalog
-            ? "Employees will no longer be able to discover or self-enrol in this training from the catalog."
-            : "Employees will be able to discover and self-enrol in this training from the catalog.",
-          primaryLabel: action.training.catalog ? "Remove" : "Add",
+            ? "Do you want to remove this course from the catalog? Once you do that the employees won't be able to request enter this course."
+            : "Do you want to add this course to the catalog? Once you do that the employees will be able to request enter this course.",
+          primaryLabel: "Confirm",
         })
         break
       case "delete":
         setDialog({
-          title: `Delete "${action.training.name}"?`,
-          description:
-            "This will permanently delete the training along with its classes, sessions, participants and content. This cannot be undone.",
-          primaryLabel: "Delete",
+          title: "Delete course",
+          description: "Are you sure you want to delete this course?",
+          primaryLabel: "Yes",
+          cancelLabel: "Return to the list",
           critical: true,
         })
         break
@@ -102,7 +98,7 @@ export function TrainingsList({ onAdd, onSelect }: Props) {
             ).length
         const kind: BulkActionKind =
           action === "display-catalog"
-            ? "show-catalog"
+            ? "display-catalog"
             : action === "hide-catalog"
               ? "hide-catalog"
               : action === "delete"
@@ -216,7 +212,7 @@ export function TrainingsList({ onAdd, onSelect }: Props) {
           onClick: () => setDialog(null),
         }}
         secondaryAction={{
-          label: "Cancel",
+          label: dialog.cancelLabel ?? "Cancel",
           onClick: () => setDialog(null),
         }}
       />

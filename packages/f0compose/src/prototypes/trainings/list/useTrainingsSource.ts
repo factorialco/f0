@@ -204,7 +204,7 @@ export function useTrainingsSource(
       },
       itemUrl: (item: Training) => `/p/trainings?training=${item.id}`,
       primaryActions: () => ({
-        label: "New training",
+        label: "New course",
         icon: Add,
         onClick: onAdd,
       }),
@@ -212,20 +212,20 @@ export function useTrainingsSource(
         expanded: 0,
         actions: () => [
           {
-            label: "Export",
-            description: "Download trainings as CSV",
+            label: "Export course",
+            description: "Export as .csv or excel",
             icon: Upload,
             onClick: () => onAction({ kind: "export" }),
           },
           {
-            label: "Import",
-            description: "Import trainings from CSV",
+            label: "Import course and participants",
+            description: "Import a CSV or Excel file",
             icon: Download,
             onClick: () => onAction({ kind: "import" }),
           },
           {
-            label: "Import courses",
-            description: "Bulk-import courses from a provider",
+            label: "Import course",
+            description: "Import a CSV or Excel file",
             icon: Download,
             onClick: () => onAction({ kind: "import-courses" }),
           },
@@ -242,13 +242,13 @@ export function useTrainingsSource(
           ? [
               item.catalog
                 ? {
-                    label: "Remove from catalog",
+                    label: "Hide from catalog",
                     icon: EyeInvisible,
                     onClick: () =>
                       onAction({ kind: "toggle-catalog", training: item }),
                   }
                 : {
-                    label: "Add to catalog",
+                    label: "Display in catalog",
                     icon: EyeVisible,
                     onClick: () =>
                       onAction({ kind: "toggle-catalog", training: item }),
@@ -265,8 +265,8 @@ export function useTrainingsSource(
       selectable: (item: Training) => item.id,
       bulkActions: () => ({
         primary: [
-          { id: "display-catalog", label: "Add to catalog" },
-          { id: "hide-catalog", label: "Remove from catalog" },
+          { id: "display-catalog", label: "Display in catalog" },
+          { id: "hide-catalog", label: "Hide from catalog" },
           { id: "export", label: "Export to CSV" },
         ],
         secondary: [{ id: "delete", label: "Delete" }],

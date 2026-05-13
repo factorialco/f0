@@ -31,9 +31,9 @@ type ListTabId = "courses" | "categories" | "axes" | "survey_templates"
 
 const listTabs: { id: ListTabId; label: string }[] = [
   { id: "courses", label: "All courses" },
-  { id: "categories", label: "Categories" },
+  { id: "categories", label: "Tags" },
   { id: "axes", label: "Axes" },
-  { id: "survey_templates", label: "Survey templates" },
+  { id: "survey_templates", label: "Survey Templates" },
 ]
 
 const VALID_LIST_TABS = new Set<string>(listTabs.map((t) => t.id))
@@ -108,7 +108,7 @@ export default function Trainings() {
         header={
           <>
             <PageHeader
-              module={{ id: "company_trainings", name: "Training", href: "/p/trainings" }}
+              module={{ id: "company_trainings", name: "Courses", href: "/p/trainings" }}
               actions={[]}
             />
             <Tabs
