@@ -5,6 +5,7 @@ import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useData
 import {
   FiltersDefinition,
   GroupingDefinition,
+  OnSelectItemsCallback,
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
@@ -120,7 +121,7 @@ describe("KanbanCollection - item click", () => {
 
 describe("KanbanCollection - lane select-all", () => {
   const renderKanban = (extra?: {
-    onSelectItems?: ReturnType<typeof vi.fn>
+    onSelectItems?: OnSelectItemsCallback<Person, TestFilters>
     selectable?: boolean
   }) => {
     const people: Person[] = [
@@ -158,7 +159,10 @@ describe("KanbanCollection - lane select-all", () => {
         description={(p) => p.name}
         metadata={() => []}
         source={source}
-        onSelectItems={extra?.onSelectItems ?? vi.fn()}
+        onSelectItems={
+          extra?.onSelectItems ??
+          (vi.fn() as unknown as OnSelectItemsCallback<Person, TestFilters>)
+        }
         onLoadData={vi.fn()}
         onLoadError={vi.fn()}
       />
