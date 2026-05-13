@@ -3120,6 +3120,7 @@ declare const defaultTranslations: {
         readonly responseStopped: "You stopped this response";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reflection";
+        readonly resourcesGroupTitle: "Resources";
         readonly thinking: "Thinking...";
         readonly feedbackModal: {
             readonly positive: {
@@ -3176,6 +3177,11 @@ declare const defaultTranslations: {
         };
         readonly formCard: {
             readonly moreFields: "Open to see all fields";
+        };
+        readonly aiTable: {
+            readonly title: "Table";
+            readonly downloadExcel: "Download Excel";
+            readonly downloadCsv: "Download CSV";
         };
         readonly dataDownload: {
             readonly title: "Download";

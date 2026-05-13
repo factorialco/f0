@@ -517,6 +517,7 @@ export declare const aiTranslations: {
         readonly responseStopped: "You stopped this response";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reflection";
+        readonly resourcesGroupTitle: "Resources";
         readonly thinking: "Thinking...";
         readonly feedbackModal: {
             readonly positive: {
@@ -573,6 +574,11 @@ export declare const aiTranslations: {
         };
         readonly formCard: {
             readonly moreFields: "Open to see all fields";
+        };
+        readonly aiTable: {
+            readonly title: "Table";
+            readonly downloadExcel: "Download Excel";
+            readonly downloadCsv: "Download CSV";
         };
         readonly dataDownload: {
             readonly title: "Download";
@@ -1747,6 +1753,7 @@ export declare const defaultTranslations: {
         readonly responseStopped: "You stopped this response";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reflection";
+        readonly resourcesGroupTitle: "Resources";
         readonly thinking: "Thinking...";
         readonly feedbackModal: {
             readonly positive: {
@@ -1803,6 +1810,11 @@ export declare const defaultTranslations: {
         };
         readonly formCard: {
             readonly moreFields: "Open to see all fields";
+        };
+        readonly aiTable: {
+            readonly title: "Table";
+            readonly downloadExcel: "Download Excel";
+            readonly downloadCsv: "Download CSV";
         };
         readonly dataDownload: {
             readonly title: "Download";
@@ -2304,7 +2316,7 @@ export declare type F0AiMessageSource = {
  * sources with a `link` render as clickable Actions. Pure presentational
  * — no hooks, no AI coupling.
  */
-export declare function F0AiMessageSources({ sources, title, }: F0AiMessageSourcesProps): JSX_2.Element | null;
+export declare function F0AiMessageSources({ sources, title: titleProp, }: F0AiMessageSourcesProps): JSX_2.Element | null;
 
 export declare namespace F0AiMessageSources {
     var displayName: string;
@@ -2312,7 +2324,10 @@ export declare namespace F0AiMessageSources {
 
 export declare type F0AiMessageSourcesProps = {
     sources: F0AiMessageSource[];
-    /** Override the section title (default: `"Resources"`). */
+    /**
+     * Override the section title. Defaults to the
+     * `ai.resourcesGroupTitle` translation key.
+     */
     title?: string;
 };
 
@@ -2323,7 +2338,7 @@ export declare type F0AiMessageSourcesProps = {
  * support is loaded lazily via `xlsx`. Pure presentational — no hooks,
  * no AI coupling.
  */
-export declare function F0AiTableCard({ dataset, title, filename, }: F0AiTableCardProps): JSX_2.Element | null;
+export declare function F0AiTableCard({ dataset, title: titleProp, filename, }: F0AiTableCardProps): JSX_2.Element | null;
 
 export declare namespace F0AiTableCard {
     var displayName: string;
@@ -2336,7 +2351,8 @@ export declare type F0AiTableCardProps = {
      */
     dataset: DataDownloadDataset;
     /**
-     * Title shown above the table. Defaults to `"Table"`.
+     * Title shown above the table. Defaults to the `ai.aiTable.title`
+     * translation key (English: "Table").
      */
     title?: string;
     /**
