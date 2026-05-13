@@ -1,7 +1,7 @@
 import { type AIMessage, type Message } from "@copilotkit/shared"
 
 import { type ClarifyingQuestionState } from "./actions/core/clarifyingQuestion/types"
-import { type CanvasActions } from "./canvas/types"
+import { type CanvasActions, type CanvasEntityDefinition } from "./canvas/types"
 import {
   type AiChatDisclaimer,
   type AiChatMode,
@@ -37,6 +37,7 @@ export interface AiChatState {
   VoiceMode?: React.ComponentType
   entityRefs?: EntityRefs
   canvasActions?: CanvasActions
+  canvasEntities?: Record<string, CanvasEntityDefinition>
   toolHints?: AiChatToolHint[]
   credits?: AiChatCredits
   creditWarning?: AiChatCreditWarning
@@ -257,6 +258,7 @@ export type AiChatProviderReturnValue = {
   | "resizable"
   | "entityRefs"
   | "canvasActions"
+  | "canvasEntities"
   | "toolHints"
   | "credits"
   | "creditWarning"

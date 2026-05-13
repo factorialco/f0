@@ -156,6 +156,7 @@ const ClarifyingQuestionContent = ({
               canProceed={canProceed}
               onBack={back}
               onNext={confirm}
+              onCancel={cancel}
             />
 
             <OptionsList
@@ -170,7 +171,6 @@ const ClarifyingQuestionContent = ({
               isCustomAnswerActive={isCustomAnswerActive}
               canProceed={canProceed}
               customInputRef={customInputRef}
-              autoFocus
               onToggleOption={handleToggleOption}
               onActivateCustom={handleActivateCustom}
               onChangeCustomText={setCustomAnswerText}

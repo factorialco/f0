@@ -6,7 +6,7 @@ import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { IconType } from "@/components/F0Icon"
 import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
 
-import type { CanvasActions } from "./canvas/types"
+import type { CanvasActions, CanvasEntityDefinition } from "./canvas/types"
 import type { ChatDashboardConfig } from "./canvas/entities/dashboard/types"
 import type { DataDownloadDataset } from "./actions/core/dataDownload/types"
 export type { PersonProfile } from "./components/markdownRenderers/entityRef/entities/person/types"
@@ -295,6 +295,14 @@ export type AiChatProviderProps = {
    * Provides save/create functions for persisting canvas entities externally.
    */
   canvasActions?: CanvasActions
+  /**
+   * Canvas entity definitions keyed by `CanvasContent["type"]`. The canvas
+   * panel looks up the matching definition when `openCanvas` is called.
+   *
+   * F0AiChat ships without built-in canvas entities; the host app supplies
+   * them here so canvas logic lives in one place.
+   */
+  canvasEntities?: Record<string, CanvasEntityDefinition>
   /**
    * Available tool hints that the user can activate to provide intent context
    * to the AI. Renders a selector button next to the send button.
