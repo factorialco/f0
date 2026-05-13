@@ -281,15 +281,7 @@ export const defaultTranslations = {
     responseStopped: "You stopped this response",
     sendMessage: "Send message",
     thoughtsGroupTitle: "Reflection",
-    resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
-    closeDashboard: "Close dashboard",
-    unsavedChanges: "Unsaved changes",
-    saveChanges: "Save changes",
-    discardChanges: "Discard",
-    saveAsChanges: "Save as",
-    exportTable: "Download table",
-    generatedTableFilename: "OneGeneratedTable",
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
@@ -302,8 +294,6 @@ export const defaultTranslations = {
         placeholder: "Share what didn’t work",
       },
     },
-    dataDownloadPreview:
-      "Preview {{shown}} of {{total}} rows — download the Excel to see all data.",
     expandChat: "Expand chat",
     collapseChat: "Collapse chat",
     chatHistory: "Chat history",
@@ -342,42 +332,17 @@ export const defaultTranslations = {
       needMoreCredits: "Need more credits?",
     },
     reportCard: {
-      reportLabel: "Report",
       tableLabel: "Table",
       openButton: "Open",
     },
     formCard: {
       moreFields: "Open to see all fields",
     },
-    dashboard: {
-      save: "Save",
-      saveToAnalytics: "Save the dashboard in Analytics",
-      saveTableToAnalytics: "Save the table in Analytics",
-      saveAs: "Save as",
-      saveDialog: {
-        title: "Save dashboard",
-        titleLabel: "Title",
-        descriptionLabel: "Description",
-        descriptionPlaceholder: "Add a description (optional)",
-        save: "Save",
-        cancel: "Cancel",
-      },
-      status: {
-        saved: "Saved",
-        draft: "Draft",
-        unsaved: "Unsaved",
-      },
-      statusLabel: "Status",
-      lastEdited: "Last edited",
-      createdBy: "Created by",
-    },
     dataDownload: {
       title: "Download",
       download: "Download {{format}}",
       exportDashboard: "Export dashboard as {{format}}",
-      export: "Export",
       exporting: "Exporting…",
-      rows: "{{amount}} rows",
     },
     dashboardItem: {
       chartType: "Chart type",
@@ -397,11 +362,6 @@ export const defaultTranslations = {
       soft: "You're running low on AI credits.",
       getCredits: "Get credits",
       dismiss: "Dismiss",
-      messageBanner: {
-        title: "This response requires credits",
-        description: "Your company has run out of AI credits.",
-        actionLabel: "Get credits",
-      },
     },
     attachFile: "Attach file",
     removeFile: "Remove",
@@ -616,8 +576,6 @@ export const defaultTranslations = {
     },
   },
   forms: {
-    yes: "Yes",
-    no: "No",
     actionBar: {
       unsavedChanges: "You have changes pending to be saved",
       saving: "Saving...",

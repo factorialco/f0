@@ -4,7 +4,7 @@ import { type ReactNode, useEffect, useRef, useState } from "react"
 import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
 
-import { useCanvasEntity } from "../../canvas/registry"
+import { useCanvasEntity } from "../../../canvas/registry"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 
 /**

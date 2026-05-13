@@ -16,7 +16,7 @@ import {
 
 import { useI18n } from "@/lib/providers/i18n"
 
-import type { ClarifyingQuestionState } from "../actions/core/clarifyingQuestion/types"
+import type { ClarifyingQuestionState } from "../../F0ClarifyingPanel/types"
 
 import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
 import {
