@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useRef, useState } from "react"
 
+import { LayoutProvider } from "@/layouts/LayoutProvider"
 import { cn } from "@/lib/utils"
 import { ScrollArea, ScrollBar } from "@/ui/scrollarea"
 
@@ -82,7 +83,7 @@ export const F0DialogContent = ({
             "h-full [&>div]:h-full [&>div>div]:h-full"
         )}
       >
-        {children}
+        <LayoutProvider layout={null}>{children}</LayoutProvider>
         <ScrollBar
           orientation="vertical"
           className="[&_div]:bg-f1-background"
