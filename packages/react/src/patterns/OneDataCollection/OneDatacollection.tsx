@@ -485,23 +485,19 @@ const OneDataCollectionComp = <
   }, [])
 
   // "idle" is transparent: when the consumer's controlled status is idle (or
-  // was "success" and F0 has already dismissed it internally), fall through to
-  // the internal auto-managed state so immediate promise-returning actions
-  // still get auto-managed feedback.
+  // was "success" and F0 has already dismissed it), fall through to the
+  // internal auto-managed state so immediate promise-returning actions still
+  // get auto-managed feedback.
   //
-  // After the auto-dismiss timer fires for a controlled "success", F0 marks
-  // the success as dismissed (ref below) and calls setInternalBulkActionStatus
-  // to trigger a re-render. In that render, the dismissed success resolves to
-  // the internal "idle" so the bar closes without the consumer having to set
-  // their status back to "idle" themselves.
-  const controlledSuccessDismissedRef = useRef(false)
+  // controlledSuccessDismissed is state (not a ref) so that setting it always
+  // triggers a re-render — even when internalBulkActionStatus was already
+  // "idle" (which would make setInternalBulkActionStatus a no-op bailout).
+  const [controlledSuccessDismissed, setControlledSuccessDismissed] =
+    useState(false)
   const resolvedBulkActionStatus =
     controlledBulkActionStatus &&
     controlledBulkActionStatus !== "idle" &&
-    !(
-      controlledBulkActionStatus === "success" &&
-      controlledSuccessDismissedRef.current
-    )
+    !(controlledBulkActionStatus === "success" && controlledSuccessDismissed)
       ? controlledBulkActionStatus
       : internalBulkActionStatus
 
@@ -518,10 +514,15 @@ const OneDataCollectionComp = <
   const hasControlledBulkActionStatus = controlledBulkActionStatus !== undefined
 
   // When the consumer transitions controlled status to "success", auto-dismiss
-  // after SUCCESS_DISMISS_MS: clear selection and let the status fall back to
-  // internal auto-manage (idle). This mirrors what the auto-managed promise
-  // path does — the consumer only needs to set "success", not manage the timer
-  // or call clearSelectedItems manually.
+  // after SUCCESS_DISMISS_MS: clear selection and collapse the bar back to
+  // idle. The consumer only needs to set "success" — no manual timer or
+  // clearSelectedItems call required.
+  //
+  // Single-phase: clear selection and mark success as dismissed atomically in
+  // one render. onSelectItemsLocal will reset internalBulkActionStatus to
+  // "idle" as a side-effect of the selection clear; setControlledSuccessDismissed
+  // (state, not ref) guarantees a re-render picks up the dismissed flag even
+  // when that internal reset is a no-op bailout.
   const prevControlledStatusRef = useRef(controlledBulkActionStatus)
   useEffect(() => {
     const prev = prevControlledStatusRef.current
@@ -529,34 +530,23 @@ const OneDataCollectionComp = <
 
     if (controlledBulkActionStatus === "success" && prev !== "success") {
       // Entering success: reset dismiss flag and start auto-dismiss timer.
-      controlledSuccessDismissedRef.current = false
+      setControlledSuccessDismissed(false)
       if (successTimerRef.current) {
         clearTimeout(successTimerRef.current)
       }
       successTimerRef.current = setTimeout(() => {
-        // Clear selection first. This render still sees status="success" so
-        // displayedSelectedNumber stays frozen — the checkmark remains visible
-        // without the bar shrinking.
         clearSelectedItemsFunc?.()
+        setControlledSuccessDismissed(true)
         successTimerRef.current = null
-        // Defer the status transition to the next task so the selection-clear
-        // render completes with status still "success" before the bar closes.
-        // Without this deferral both changes land in the same render, the
-        // displayedSelectedNumber freeze never activates, and the bar flickers.
-        setTimeout(() => {
-          controlledSuccessDismissedRef.current = true
-          setInternalBulkActionStatus("idle")
-        }, 0)
       }, SUCCESS_DISMISS_MS)
     } else if (prev === "success" && controlledBulkActionStatus !== "success") {
-      // Consumer transitioned away from "success" (e.g. back to "idle" after
-      // cleanup, or directly to a new "loading"). Cancel any pending timer and
-      // reset the dismiss flag so the next "success" cycle works cleanly.
+      // Consumer transitioned away from "success" before the timer fired.
+      // Cancel the timer and reset the dismiss flag for the next cycle.
       if (successTimerRef.current) {
         clearTimeout(successTimerRef.current)
         successTimerRef.current = null
       }
-      controlledSuccessDismissedRef.current = false
+      setControlledSuccessDismissed(false)
     }
   }, [controlledBulkActionStatus, clearSelectedItemsFunc])
 

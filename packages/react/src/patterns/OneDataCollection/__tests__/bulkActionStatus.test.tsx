@@ -466,11 +466,6 @@ describe("OneDataCollection bulk-action status", () => {
       vi.advanceTimersByTime(2000)
     })
 
-    // The nested setTimeout(0) defers the status transition — flush it.
-    act(() => {
-      vi.advanceTimersByTime(0)
-    })
-
     // Selection auto-cleared → bar dismissed.
     await waitFor(() => {
       expect(queryArchiveButtons()).toHaveLength(0)
