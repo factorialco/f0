@@ -91,7 +91,7 @@ function _UpsellingAlert({
               )}
             </div>
           </div>
-          <div className="flex flex-shrink-0">
+          <div className={cn("flex flex-shrink-0 @xs:pl-0", icon && "pl-8")}>
             <UpsellingButton
               label={actionLabel}
               onRequest={onRequest}
