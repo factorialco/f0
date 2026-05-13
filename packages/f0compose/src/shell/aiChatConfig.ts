@@ -64,11 +64,13 @@ export const aiChatConfig = {
   // it. ApplicationFrame already reserves the chosen width so the page
   // body reflows correctly.
   resizable: true,
-  // Enable thread history. The agent already exposes the chat-history
-  // routes under `/copilotkit/chat-history/threads/*` (see
-  // factorial-agent/src/mastra/index.ts), so users can switch between
-  // past conversations across prototype reloads.
-  historyEnabled: true,
+  // Thread history disabled — when Mastra isn't running locally the
+  // history fetch surfaces a "failed to fetch" toast on every prototype
+  // load. Re-enable (set back to `true`) once Mastra is reachable; the
+  // agent already exposes the routes under
+  // `/copilotkit/chat-history/threads/*`
+  // (see factorial-agent/src/mastra/index.ts).
+  historyEnabled: false,
   entityRefs: {
     resolvers: {
       person: async (id: string) => personFromEmployee(id),

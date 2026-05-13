@@ -82,4 +82,16 @@ export {
   type ExpenseCategory,
   type ExpenseAlert,
   type ExpenseGroup,
+  type ControllingFields,
 } from "./expenses"
+export {
+  costCenters,
+  projects,
+  vatRates,
+  controllingTags,
+  subcategoriesByCategory,
+  type CostCenter,
+  type Project,
+  type VatRate,
+  type ControllingTag,
+} from "./controlling"

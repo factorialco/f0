@@ -1,3 +1,10 @@
+import {
+  controllingTags,
+  costCenters,
+  projects,
+  subcategoriesByCategory,
+  vatRates,
+} from "./controlling"
 import { addDays, TODAY } from "./helpers"
 
 /**
@@ -5,7 +12,58 @@ import { addDays, TODAY } from "./helpers"
  * the prototype mirrors: 0 draft / 26 pending / 3 approved / 30 in-payroll.
  */
 
-export type ExpenseStatus = "draft" | "pending" | "approved" | "in-payroll"
+export type ExpenseStatus =
+  | "draft"
+  /**
+   * Approver returned the expense to the submitter for fixes (missing
+   * receipt, wrong amount, etc.). The submitter sees these alongside
+   * drafts in the "To-Do" preset because both require their action
+   * before the expense can be submitted again.
+   */
+  | "changes-requested"
+  | "pending"
+  | "approved"
+  /**
+   * Approved AND coded by finance — accounting fields filled in. Lives
+   * between Approved and Sent-to-Pay in the lifecycle. Soft-sequential:
+   * an expense MAY skip Controlled and be paid directly (Spec A BR-007).
+   */
+  | "controlled"
+  /**
+   * Transmitted to payroll/SEPA, awaiting payment confirmation. The
+   * "in-flight" intermediate state.
+   */
+  | "in-payroll"
+  /**
+   * Payment confirmed — the employee has been reimbursed. Terminal
+   * state. Distinguished from `in-payroll` so the Pay tab can show a
+   * green "Paid" preset that doesn't conflate with mid-flight rows.
+   */
+  | "paid"
+  | "refunded"
+  | "partially-refunded"
+
+/**
+ * Accounting metadata attached to an expense once finance has coded it
+ * (or partially coded it before Marking as controlled). All fields
+ * optional — finance can save partial values per Spec D BR-011.
+ */
+export type ControllingFields = {
+  /** Re-states the row's category for the controlling form. */
+  category?: ExpenseCategory
+  /** Subcategory string from `subcategoriesByCategory[category]`. */
+  subcategory?: string
+  /** Cost center id from `costCenters`. */
+  costCenter?: string
+  /** Project id from `projects`. */
+  project?: string
+  /** VAT rate id from `vatRates`. */
+  vatRate?: string
+  /** Free-text accounting note. */
+  description?: string
+  /** Tag ids from `controllingTags`. */
+  tags?: string[]
+}
 
 export type ExpenseCategory =
   | "Meals"
@@ -36,6 +94,25 @@ export type Expense = {
   alerts: ExpenseAlert[]
   /** Group/bundle this expense belongs to (null = ungrouped). */
   groupId: string | null
+  /**
+   * Nested rows shown when this row is expanded. Used today for refunded
+   * expenses, where the parent row summarises the net result and the children
+   * break down original charge + refund. `null`/`undefined` = no children.
+   */
+  children?: Expense[]
+  /**
+   * If true, this row represents a refund line (positive amount, displayed
+   * green with a leading `+`). Always lives inside a parent's `children`.
+   */
+  isRefund?: boolean
+  /** True for rows returned by `fetchChildren` — used to suppress status in the table. */
+  isChild?: boolean
+  /**
+   * Accounting metadata. Populated for `approved` (partial) and
+   * `controlled` (typically complete) rows. `undefined` for everything
+   * else.
+   */
+  controlling?: ControllingFields
 }
 
 // All provider names below are fictional — invented for prototype purposes.
@@ -101,8 +178,10 @@ function buildExpenses(): Expense[] {
       rand,
     }))
   }
-  // 3 approved — last 30 days
-  for (let i = 0; i < 3; i++) {
+  // 12 approved — last 30 days. The Pending Controlling tab uses these
+  // (plus the controlled set below) as its dataset; bumping the count
+  // from 3 → 12 ensures both presets have meaningful volume.
+  for (let i = 0; i < 12; i++) {
     out.push(makeExpense({
       seq: 26 + i,
       status: "approved",
@@ -110,12 +189,33 @@ function buildExpenses(): Expense[] {
       rand,
     }))
   }
-  // 30 in-payroll — older, between 30 and 360 days
-  for (let i = 0; i < 30; i++) {
+  // 6 controlled — already coded by finance, ready to be paid. Lives in
+  // both `Pending Controlling > Controlled` preset and `Pay > Unpaid`.
+  for (let i = 0; i < 6; i++) {
     out.push(makeExpense({
-      seq: 29 + i,
+      seq: 38 + i,
+      status: "controlled",
+      daysAgo: 8 + Math.floor(rand() * 30),
+      rand,
+    }))
+  }
+  // 12 in-payroll — recently transmitted, awaiting confirmation.
+  for (let i = 0; i < 12; i++) {
+    out.push(makeExpense({
+      seq: 44 + i,
       status: "in-payroll",
-      daysAgo: 30 + Math.floor(rand() * 330),
+      daysAgo: 30 + Math.floor(rand() * 60),
+      rand,
+    }))
+  }
+  // 18 paid — terminal state, older. The Pay tab's `Paid` preset uses
+  // these as the green-status set so finance can clearly tell what's
+  // actually been reimbursed vs what's still mid-flight.
+  for (let i = 0; i < 18; i++) {
+    out.push(makeExpense({
+      seq: 56 + i,
+      status: "paid",
+      daysAgo: 90 + Math.floor(rand() * 270),
       rand,
     }))
   }
@@ -133,12 +233,43 @@ function makeExpense(args: {
   const provider = providers[seq % providers.length]
   const category = categories[seq % categories.length]
   const amount = Math.round((5 + rand() * 195) * 100) / 100
-  // Sprinkle alerts on a minority of expenses (~25%).
+  // Sprinkle alerts. Pending expenses get a much higher rate (~60%)
+  // because they drive Approve & Pay > Approve's Needs review preset
+  // — we want a meaningful 10-15 expense backlog there. Other
+  // statuses keep the lighter ~25% rate so post-approval tabs stay
+  // mostly clean.
   const alerts: ExpenseAlert[] = []
   const r = rand()
-  if (r < 0.08) alerts.push("receipt-mismatch")
-  else if (r < 0.18) alerts.push("receipt-after-timeframe")
-  else if (r < 0.25) alerts.push("late-submission")
+  const isPending = status === "pending"
+  const t1 = isPending ? 0.2 : 0.08
+  const t2 = isPending ? 0.4 : 0.18
+  const t3 = isPending ? 0.6 : 0.25
+  if (r < t1) alerts.push("receipt-mismatch")
+  else if (r < t2) alerts.push("receipt-after-timeframe")
+  else if (r < t3) alerts.push("late-submission")
+
+  // Controlling fields:
+  // - `approved`  → partially coded (category only). Finance still has work to do.
+  // - `controlled`→ fully coded; ready for Pay.
+  // - everything else → no controlling block.
+  let controlling: ControllingFields | undefined
+  if (status === "approved") {
+    controlling = { category }
+  } else if (status === "controlled") {
+    const subcats = subcategoriesByCategory[category]
+    controlling = {
+      category,
+      subcategory: subcats[Math.floor(rand() * subcats.length)],
+      costCenter: costCenters[Math.floor(rand() * costCenters.length)].id,
+      project: projects[Math.floor(rand() * projects.length)].id,
+      vatRate: vatRates[Math.floor(rand() * vatRates.length)].id,
+      description: `Coded on ${addDays(TODAY, -Math.floor(rand() * 5))}.`,
+      tags: [
+        controllingTags[Math.floor(rand() * controllingTags.length)].id,
+      ],
+    }
+  }
+
   return {
     id: `exp-${String(seq + 1).padStart(3, "0")}`,
     provider,
@@ -148,10 +279,95 @@ function makeExpense(args: {
     category,
     alerts,
     groupId: null,
+    controlling,
   }
 }
 
-export const expenses: Expense[] = buildExpenses()
+export const expenses: Expense[] = (() => {
+  const base = buildExpenses()
+  // One refunded expense — a €100 charge fully refunded by the merchant
+  // before payroll ran, so the employee was never reimbursed. The parent
+  // row shows the NET amount (€0) plus a blue "Refunded" status tag, and
+  // expanding reveals the breakdown: the original pending charge and the
+  // +€100 refund that cancelled it out.
+  const refundedDate = addDays(TODAY, -7)
+  const refunded: Expense = {
+    id: "exp-refunded-001",
+    provider: "Skyfern Airways",
+    status: "refunded",
+    createdAt: refundedDate,
+    amount: 100,
+    category: "Travel",
+    alerts: [],
+    groupId: null,
+    children: [
+      {
+        id: "exp-refunded-001-original",
+        provider: "Skyfern Airways",
+        status: "pending",
+        createdAt: refundedDate,
+        amount: 100,
+        category: "Travel",
+        alerts: [],
+        groupId: null,
+        isChild: true,
+      },
+      {
+        id: "exp-refunded-001-refund",
+        provider: "Skyfern Airways",
+        status: "refunded",
+        createdAt: addDays(refundedDate, 2),
+        amount: 100,
+        category: "Travel",
+        alerts: [],
+        groupId: null,
+        isRefund: true,
+        isChild: true,
+      },
+    ],
+  }
+
+  // Partial refund — Roving Fork Co. had a €100 charge, €40 refunded by merchant.
+  // Parent shows the net owed (€40) with "Partially refunded" tag.
+  const partialRefundDate = addDays(TODAY, -5)
+  const partialRefund: Expense = {
+    id: "exp-partial-refund-001",
+    provider: "Roving Fork Co.",
+    status: "partially-refunded",
+    createdAt: partialRefundDate,
+    amount: 40,
+    category: "Meals",
+    alerts: [],
+    groupId: null,
+    children: [
+      {
+        id: "exp-partial-refund-001-original",
+        provider: "Roving Fork Co.",
+        status: "pending",
+        createdAt: partialRefundDate,
+        amount: 100,
+        category: "Meals",
+        alerts: [],
+        groupId: null,
+        isChild: true,
+      },
+      {
+        id: "exp-partial-refund-001-refund",
+        provider: "Roving Fork Co.",
+        status: "partially-refunded",
+        createdAt: addDays(partialRefundDate, 1),
+        amount: 60,
+        category: "Meals",
+        alerts: [],
+        groupId: null,
+        isRefund: true,
+        isChild: true,
+      },
+    ],
+  }
+  // Insert near the top so it's visible without paginating.
+  return [refunded, partialRefund, ...base]
+})()
 
 /** Counts by status — used by preset chips. Computed once at module load. */
 export const expenseCountsByStatus: Record<ExpenseStatus, number> =
@@ -160,10 +376,17 @@ export const expenseCountsByStatus: Record<ExpenseStatus, number> =
       acc[e.status] = (acc[e.status] ?? 0) + 1
       return acc
     },
-    { draft: 0, pending: 0, approved: 0, "in-payroll": 0 } as Record<
-      ExpenseStatus,
-      number
-    >
+    {
+      draft: 0,
+      "changes-requested": 0,
+      pending: 0,
+      approved: 0,
+      controlled: 0,
+      "in-payroll": 0,
+      paid: 0,
+      refunded: 0,
+      "partially-refunded": 0,
+    } as Record<ExpenseStatus, number>
   )
 
 /**
@@ -264,8 +487,15 @@ export const groupCountsByStatus: Record<ExpenseStatus, number> =
       acc[g.status] = (acc[g.status] ?? 0) + 1
       return acc
     },
-    { draft: 0, pending: 0, approved: 0, "in-payroll": 0 } as Record<
-      ExpenseStatus,
-      number
-    >
+    {
+      draft: 0,
+      "changes-requested": 0,
+      pending: 0,
+      approved: 0,
+      controlled: 0,
+      "in-payroll": 0,
+      paid: 0,
+      refunded: 0,
+      "partially-refunded": 0,
+    } as Record<ExpenseStatus, number>
   )

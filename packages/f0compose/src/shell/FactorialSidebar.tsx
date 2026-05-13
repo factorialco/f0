@@ -54,6 +54,13 @@ export function FactorialSidebar(_props: { activeModule: ModuleId | null }) {
       items: modulesIn("company"),
     },
     {
+      id: "finance",
+      title: "Finance",
+      isOpen: true,
+      isSortable: true,
+      items: modulesIn("finance"),
+    },
+    {
       id: "talent",
       title: "Talent",
       isOpen: true,
