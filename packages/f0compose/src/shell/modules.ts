@@ -2,9 +2,12 @@ import type { IconType } from "@factorialco/f0-react"
 
 import {
   Briefcase,
+  Building,
   Calendar,
   CheckCircleLine,
   Clock,
+  Code,
+  DollarBill,
   Files,
   Globe,
   Home,
@@ -12,9 +15,10 @@ import {
   Money,
   PalmTree,
   Person,
+  Receipt,
   Settings,
+  ShoppingCart,
   Sparkles,
-  Wallet,
 } from "@factorialco/f0-react/icons/app"
 
 /**
@@ -22,8 +26,10 @@ import {
  *
  * - Root (no group title): Home, Inbox, Discover
  * - Personal: Profile, My time tracking, Time off, My benefits, My documents,
- *             My spending, My projects, My training, Tasks
+ *             My projects, My training, Tasks
  * - Company: Organization, Documents, Policies
+ * - Finance: Spending (unified), Purchase Invoices, Procurement, Software,
+ *            Vendors, Sales
  * - Talent: Recruitment, Performance, Onboarding (kept for prototype targets)
  * - Payroll: Periods, Concepts, Settings (kept for prototype targets)
  */
@@ -32,6 +38,7 @@ export type ModuleGroup =
   | "root"
   | "personal"
   | "company"
+  | "finance"
   | "talent"
   | "payroll"
 
@@ -46,7 +53,6 @@ export type ModuleId =
   | "time-off"
   | "my-benefits"
   | "my-documents"
-  | "my-spending"
   | "my-projects"
   | "my-training"
   | "tasks"
@@ -54,6 +60,13 @@ export type ModuleId =
   | "organization"
   | "documents"
   | "policies"
+  // Finance
+  | "spending"
+  | "purchase-invoices"
+  | "procurement"
+  | "software"
+  | "vendors"
+  | "sales"
   // Talent
   | "recruitment"
   | "performance"
@@ -109,12 +122,6 @@ export const modules: ModuleDef[] = [
     groupLabel: "Personal",
   },
   {
-    id: "my-spending",
-    label: "My spending",
-    group: "personal",
-    groupLabel: "Personal",
-  },
-  {
     id: "my-projects",
     label: "My projects",
     group: "personal",
@@ -147,6 +154,39 @@ export const modules: ModuleDef[] = [
     group: "company",
     groupLabel: "Company",
   },
+
+  // Finance
+  {
+    id: "spending",
+    label: "Spend management",
+    group: "finance",
+    groupLabel: "Finance",
+  },
+  {
+    id: "purchase-invoices",
+    label: "Purchase Invoices",
+    group: "finance",
+    groupLabel: "Finance",
+  },
+  {
+    id: "procurement",
+    label: "Procurement",
+    group: "finance",
+    groupLabel: "Finance",
+  },
+  {
+    id: "software",
+    label: "Software",
+    group: "finance",
+    groupLabel: "Finance",
+  },
+  {
+    id: "vendors",
+    label: "Vendors",
+    group: "finance",
+    groupLabel: "Finance",
+  },
+  { id: "sales", label: "Sales", group: "finance", groupLabel: "Finance" },
 
   // Talent
   {
@@ -206,13 +246,18 @@ export const emojiForModule: Record<ModuleId, string> = {
   "time-off": "🌴",
   "my-benefits": "✨",
   "my-documents": "📄",
-  "my-spending": "💳",
   "my-projects": "📂",
   "my-training": "🎓",
   tasks: "✅",
   organization: "🏢",
   documents: "📁",
   policies: "📜",
+  spending: "💳",
+  "purchase-invoices": "🧾",
+  procurement: "🛒",
+  software: "🧩",
+  vendors: "🏬",
+  sales: "💵",
   recruitment: "💼",
   performance: "📈",
   onboarding: "🚀",
@@ -231,13 +276,18 @@ export const iconForModule: Record<ModuleId, IconType> = {
   "time-off": PalmTree,
   "my-benefits": Sparkles,
   "my-documents": Files,
-  "my-spending": Wallet,
   "my-projects": Briefcase,
   "my-training": Sparkles,
   tasks: CheckCircleLine,
   organization: Person,
   documents: Files,
   policies: Files,
+  spending: Money,
+  "purchase-invoices": Receipt,
+  procurement: ShoppingCart,
+  software: Code,
+  vendors: Building,
+  sales: DollarBill,
   recruitment: Briefcase,
   performance: Sparkles,
   onboarding: Person,

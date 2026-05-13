@@ -36,6 +36,7 @@ const ALLOWED_PATH_ALIASES = [
   "@/lib",
   "@/prototypes",
   "@/shell",
+  "@/copilot",
 ] as const
 
 const FORBIDDEN_COLOR_PATTERNS = [
