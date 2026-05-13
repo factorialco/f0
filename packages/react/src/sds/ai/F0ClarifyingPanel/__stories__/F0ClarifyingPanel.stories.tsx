@@ -264,12 +264,11 @@ const StoryShell = ({ steps }: { steps: StoryStep[] }) => {
 
 const meta = {
   title: "AI/F0ClarifyingPanel",
-  component: F0ClarifyingPanel,
   parameters: {
     layout: "centered",
   },
   tags: ["autodocs"],
-} satisfies Meta<typeof F0ClarifyingPanel>
+} satisfies Meta
 
 export default meta
 type Story = StoryObj<typeof meta>
