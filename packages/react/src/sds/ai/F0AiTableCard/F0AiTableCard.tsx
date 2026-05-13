@@ -110,7 +110,7 @@ export function F0AiTableCard({
         <table
           ref={tableRef}
           className={cn(
-            "w-full border-separate border-spacing-0 text-sm",
+            "w-full border-separate border-spacing-0 text-md",
             "[&_tbody_tr:last-child_td]:border-b-0"
           )}
         >
@@ -134,9 +134,11 @@ export function F0AiTableCard({
                   return (
                     <td
                       key={col}
-                      className="max-w-80 truncate border-0 border-b border-solid border-f1-border-secondary px-3 py-2 text-f1-foreground"
+                      className="max-w-72 border-0 border-b border-solid border-f1-border-secondary px-3 py-2 text-f1-foreground"
                     >
-                      {value == null ? "" : String(value)}
+                      <OneEllipsis>
+                        {value == null ? "" : String(value)}
+                      </OneEllipsis>
                     </td>
                   )
                 })}
