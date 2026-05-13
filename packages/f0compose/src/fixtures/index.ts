@@ -139,6 +139,11 @@ export {
   type TrainingFile,
   competencies,
   trainingProcesses,
+  trainingBudgetMovements,
+  movementsForBudget,
   type Competency,
   type TrainingProcess,
+  type TrainingBudgetMovement,
+  type TrainingGroupStatus,
+  type PaymentStatus,
 } from "./trainings-extra"

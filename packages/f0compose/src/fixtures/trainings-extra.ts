@@ -1133,3 +1133,207 @@ export const trainingProcesses: TrainingProcess[] = [
   { id: "proc-004", name: "Fundae subsidised flow" },
   { id: "proc-005", name: "Executive sponsorship" },
 ]
+
+// --- BUDGET MOVEMENTS (training groups consuming a budget) -----------------
+
+export type TrainingGroupStatus = "planned" | "ongoing" | "completed"
+export type PaymentStatus = "pending" | "spent"
+
+export type TrainingBudgetMovement = {
+  id: string
+  budgetId: string
+  trainingId: string
+  trainingName: string
+  groupId: string
+  groupName: string
+  groupStatus: TrainingGroupStatus
+  startDate: string | null
+  endDate: string | null
+  amountCents: number
+  currency: string
+  trainingProvider: string
+  trainingTeamId: string
+  trainingTeamName: string
+  paymentStatus: PaymentStatus
+  participantsCount: number
+  directCost: number
+  indirectCost: number
+  salaryCost: number
+}
+
+export const trainingBudgetMovements: TrainingBudgetMovement[] = [
+  // bud-001 — Company-wide 2026
+  {
+    id: "mov-001",
+    budgetId: "bud-001",
+    trainingId: "trn-001",
+    trainingName: "Management Fundamentals",
+    groupId: "cls-001a",
+    groupName: "Group A – Q1",
+    groupStatus: "completed",
+    startDate: "2026-02-10",
+    endDate: "2026-02-28",
+    amountCents: 320000,
+    currency: "EUR",
+    trainingProvider: "Internal",
+    trainingTeamId: "team-eng",
+    trainingTeamName: "Engineering",
+    paymentStatus: "spent",
+    participantsCount: 9,
+    directCost: 1200,
+    indirectCost: 180,
+    salaryCost: 2350,
+  },
+  {
+    id: "mov-002",
+    budgetId: "bud-001",
+    trainingId: "trn-001",
+    trainingName: "Management Fundamentals",
+    groupId: "cls-001b",
+    groupName: "Group B – Q2",
+    groupStatus: "planned",
+    startDate: "2026-04-07",
+    endDate: "2026-04-25",
+    amountCents: 280000,
+    currency: "EUR",
+    trainingProvider: "Internal",
+    trainingTeamId: "team-prd",
+    trainingTeamName: "Product",
+    paymentStatus: "pending",
+    participantsCount: 9,
+    directCost: 1200,
+    indirectCost: 180,
+    salaryCost: 1300,
+  },
+  {
+    id: "mov-003",
+    budgetId: "bud-001",
+    trainingId: "trn-003",
+    trainingName: "React Advanced Patterns",
+    groupId: "cls-003a",
+    groupName: "Self-paced cohort",
+    groupStatus: "ongoing",
+    startDate: "2026-01-15",
+    endDate: "2026-03-15",
+    amountCents: 380000,
+    currency: "EUR",
+    trainingProvider: "Frontend Masters",
+    trainingTeamId: "team-eng",
+    trainingTeamName: "Engineering",
+    paymentStatus: "spent",
+    participantsCount: 8,
+    directCost: 3800,
+    indirectCost: 0,
+    salaryCost: 0,
+  },
+  // bud-002 — Engineering 2026
+  {
+    id: "mov-004",
+    budgetId: "bud-002",
+    trainingId: "trn-003",
+    trainingName: "React Advanced Patterns",
+    groupId: "cls-003a",
+    groupName: "Self-paced cohort",
+    groupStatus: "ongoing",
+    startDate: "2026-01-15",
+    endDate: "2026-03-15",
+    amountCents: 380000,
+    currency: "EUR",
+    trainingProvider: "Frontend Masters",
+    trainingTeamId: "team-eng",
+    trainingTeamName: "Engineering",
+    paymentStatus: "spent",
+    participantsCount: 8,
+    directCost: 3800,
+    indirectCost: 0,
+    salaryCost: 9600,
+  },
+  {
+    id: "mov-005",
+    budgetId: "bud-002",
+    trainingId: "trn-001",
+    trainingName: "Management Fundamentals",
+    groupId: "cls-001a",
+    groupName: "Group A – Q1",
+    groupStatus: "completed",
+    startDate: "2026-02-10",
+    endDate: "2026-02-28",
+    amountCents: 240000,
+    currency: "EUR",
+    trainingProvider: "Internal",
+    trainingTeamId: "team-eng",
+    trainingTeamName: "Engineering",
+    paymentStatus: "spent",
+    participantsCount: 5,
+    directCost: 1200,
+    indirectCost: 180,
+    salaryCost: 2350,
+  },
+  {
+    id: "mov-006",
+    budgetId: "bud-002",
+    trainingId: "trn-001",
+    trainingName: "Management Fundamentals",
+    groupId: "cls-001b",
+    groupName: "Group B – Q2",
+    groupStatus: "planned",
+    startDate: "2026-04-07",
+    endDate: "2026-04-25",
+    amountCents: 150000,
+    currency: "EUR",
+    trainingProvider: "Internal",
+    trainingTeamId: "team-eng",
+    trainingTeamName: "Engineering",
+    paymentStatus: "pending",
+    participantsCount: 4,
+    directCost: 1200,
+    indirectCost: 180,
+    salaryCost: 1300,
+  },
+  // bud-003 — People & Talent 2026 (over budget)
+  {
+    id: "mov-007",
+    budgetId: "bud-003",
+    trainingId: "trn-002",
+    trainingName: "GDPR Compliance 2026",
+    groupId: "cls-002a",
+    groupName: "Full company – March",
+    groupStatus: "completed",
+    startDate: "2026-03-03",
+    endDate: "2026-03-03",
+    amountCents: 320000,
+    currency: "EUR",
+    trainingProvider: "Internal",
+    trainingTeamId: "team-ppl",
+    trainingTeamName: "People",
+    paymentStatus: "spent",
+    participantsCount: 20,
+    directCost: 0,
+    indirectCost: 0,
+    salaryCost: 1200,
+  },
+  {
+    id: "mov-008",
+    budgetId: "bud-003",
+    trainingId: "trn-004",
+    trainingName: "New Employee Orientation",
+    groupId: "cls-004a",
+    groupName: "Onboarding – January",
+    groupStatus: "completed",
+    startDate: "2026-01-10",
+    endDate: "2026-01-12",
+    amountCents: 290000,
+    currency: "EUR",
+    trainingProvider: "Internal",
+    trainingTeamId: "team-ppl",
+    trainingTeamName: "People",
+    paymentStatus: "spent",
+    participantsCount: 12,
+    directCost: 0,
+    indirectCost: 0,
+    salaryCost: 600,
+  },
+]
+
+export const movementsForBudget = (budgetId: string): TrainingBudgetMovement[] =>
+  trainingBudgetMovements.filter((m) => m.budgetId === budgetId)
