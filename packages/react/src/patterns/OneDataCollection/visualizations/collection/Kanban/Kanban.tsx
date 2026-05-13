@@ -145,8 +145,14 @@ export const KanbanCollection = <
       isInitialLoading: isInitialLoadingAggregated,
       data: Object.values(lanesHooks).flatMap((l) => l.data.records),
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- follow Table/List behavior: rerun when totals or loading change
-  }, [totalItemsAggregated, isInitialLoadingAggregated])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- rerun when totals, loading, records, filters or search change
+  }, [
+    totalItemsAggregated,
+    isInitialLoadingAggregated,
+    lanesHooks,
+    source.currentFilters,
+    source.currentSearch,
+  ])
 
   // Build index maps per lane when needed
   const laneIndexMaps = useMemo(() => {

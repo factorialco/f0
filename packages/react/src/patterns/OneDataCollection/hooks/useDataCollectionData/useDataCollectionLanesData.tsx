@@ -198,6 +198,11 @@ export function useDataCollectionLanesData<
     []
   )
 
+  // The deep-compare descriptor below tracks the *content* of `source` (and
+  // `options.onError`) so the `lanesProvider` useMemo re-runs whenever any
+  // captured value changes, even though `source`'s reference is unstable.
+  // Passing `source` directly to LaneProvider is safe: the memo re-runs on
+  // every content change, so children always receive the latest `source`.
   const lanesProviderDeps = {
     lanes,
     currentFilters: source.currentFilters,
@@ -207,6 +212,7 @@ export function useDataCollectionLanesData<
     currentSearch: source.currentSearch,
     grouping: source.grouping,
     dataAdapter: source.dataAdapter,
+    onError: options.onError,
   }
 
   const lanesProviderDepsMemoized = useDeepCompareMemoize(lanesProviderDeps)
