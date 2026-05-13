@@ -57,6 +57,32 @@ export default function Goals() {
       ? (rawTab as PerformanceTabId)
       : "goals"
 
+  const viewMode: "table" | "tree" =
+    searchParams.get("mode") === "tree" ? "tree" : "table"
+  const treeScope =
+    (searchParams.get("scope") as
+      | "team"
+      | "all"
+      | "mine"
+      | "created-by-me"
+      | "needs-attention"
+      | null) ?? "team"
+
+  const setViewMode = (m: "table" | "tree") => {
+    const next = new URLSearchParams(searchParams)
+    if (m === "tree") next.set("mode", "tree")
+    else next.delete("mode")
+    setSearchParams(next)
+  }
+
+  const setTreeScope = (
+    s: "team" | "all" | "mine" | "created-by-me" | "needs-attention"
+  ) => {
+    const next = new URLSearchParams(searchParams)
+    next.set("scope", s)
+    setSearchParams(next)
+  }
+
   const setActiveTab = (id: string) => {
     const next = new URLSearchParams()
     if (id !== "goals") next.set("tab", id)
@@ -184,6 +210,10 @@ export default function Goals() {
               onEditGoal={goToEditGoal}
               extraGoals={extraGoals}
               companyId={activeCompanyId}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              treeScope={treeScope}
+              onTreeScopeChange={setTreeScope}
             />
           )}
           {activeTab !== "goals" && (

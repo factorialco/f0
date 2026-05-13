@@ -1,6 +1,7 @@
 import { useDataCollectionSource } from "@factorialco/f0-react/dist/experimental"
 import { Add, Delete, Download, Pencil } from "@factorialco/f0-react/icons/app"
 
+import { employees, teams } from "@/fixtures"
 import { applySort } from "@/lib/applySort"
 
 import type { CompanyId } from "../shared/companies"
@@ -80,6 +81,56 @@ export function useGoalsSource(
           label: "Due date",
           options: { mode: "single", view: "day" },
         },
+        assigneeType: {
+          type: "in",
+          label: "Assignee",
+          options: {
+            options: [
+              { value: "company", label: "Company" },
+              {
+                value: "team",
+                label: "Team",
+                children: {
+                  filterKey: "assigneeTeam",
+                  options: teams.map((t) => ({
+                    value: t.id,
+                    label: t.name,
+                  })),
+                },
+              },
+              {
+                value: "employee",
+                label: "Employee",
+                children: {
+                  filterKey: "assigneeEmployee",
+                  options: employees.map((e) => ({
+                    value: e.id,
+                    label: e.fullName,
+                  })),
+                },
+              },
+            ],
+          },
+        },
+        assigneeTeam: {
+          type: "in",
+          label: "Team",
+          hideSelector: true,
+          options: {
+            options: teams.map((t) => ({ value: t.id, label: t.name })),
+          },
+        },
+        assigneeEmployee: {
+          type: "in",
+          label: "Employee",
+          hideSelector: true,
+          options: {
+            options: employees.map((e) => ({
+              value: e.id,
+              label: e.fullName,
+            })),
+          },
+        },
       },
       currentFilters: { scope: ["team"] },
       presets: [
@@ -133,6 +184,15 @@ export function useGoalsSource(
             ? (filters.status as GoalStatus[])
             : []
           const dueDateFilter = filters?.dueDate as string | undefined
+          const assigneeTypes = Array.isArray(filters?.assigneeType)
+            ? (filters.assigneeType as Array<"company" | "team" | "employee">)
+            : []
+          const teamIds = Array.isArray(filters?.assigneeTeam)
+            ? (filters.assigneeTeam as string[])
+            : []
+          const employeeIds = Array.isArray(filters?.assigneeEmployee)
+            ? (filters.assigneeEmployee as string[])
+            : []
 
           let goals: GoalRecord[]
           if (activeScope === "created-by-me") {
@@ -162,6 +222,37 @@ export function useGoalsSource(
           // Apply due date filter (goals due on or before selected date)
           if (dueDateFilter) {
             goals = goals.filter((g) => g.dueDate <= dueDateFilter)
+          }
+
+          // Apply assignee filter. Top-level type narrows the assignee
+          // shape; the optional team/employee sub-filters narrow further.
+          if (assigneeTypes.length > 0) {
+            goals = goals.filter((g) => {
+              const a = g.assignee
+              return assigneeTypes.some((t) => {
+                if (t === "company") return a.type === "company"
+                if (t === "team") {
+                  if (a.type !== "team") return false
+                  return teamIds.length === 0 || teamIds.includes(a.teamId)
+                }
+                if (t === "employee") {
+                  if (a.type === "individual") {
+                    return (
+                      employeeIds.length === 0 ||
+                      employeeIds.includes(a.employeeId)
+                    )
+                  }
+                  if (a.type === "group") {
+                    return (
+                      employeeIds.length === 0 ||
+                      a.employeeIds.some((id) => employeeIds.includes(id))
+                    )
+                  }
+                  return false
+                }
+                return false
+              })
+            })
           }
 
           // Apply search
