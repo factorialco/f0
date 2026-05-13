@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.481.1](https://github.com/factorialco/f0/compare/f0-react-v1.481.0...f0-react-v1.481.1) (2026-05-13)
+
+
+### Bug Fixes
+
+* **disabled:** make Switch and Dropdown disabled state behave correctly inside the monolith ([#4105](https://github.com/factorialco/f0/issues/4105)) ([55ca2b8](https://github.com/factorialco/f0/commit/55ca2b8bf92c001db8a1aafedb1285124a6cc61d))
+
 ## [1.481.0](https://github.com/factorialco/f0/compare/f0-react-v1.480.0...f0-react-v1.481.0) (2026-05-12)
 
 
