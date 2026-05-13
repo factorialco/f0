@@ -25,7 +25,7 @@ export const F0ActionItem = ({ title, status, inGroup }: F0ActionItemProps) => {
         </div>
       )}
       {status === "completed" && (
-        <div className="-mt-[2px] *:block">
+        <div className="*:block">
           <F0Icon
             color="secondary"
             state="animate"
