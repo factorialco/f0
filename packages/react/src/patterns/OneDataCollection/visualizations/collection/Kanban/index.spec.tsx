@@ -249,4 +249,179 @@ describe("KanbanCollection - lane select-all", () => {
       expect(boxes[0].getAttribute("aria-checked")).toBe("true")
     })
   })
+
+  // -------------------------------------------------------------------------
+  // Cross-page "select all items in lane" banner
+  // -------------------------------------------------------------------------
+
+  const renderKanbanWithBanner = (opts: {
+    allPagesSelection: boolean
+    total: number
+  }) => {
+    const people: Person[] = [
+      { id: 1, name: "John" },
+      { id: 2, name: "Jane" },
+    ]
+
+    const source: DataCollectionSource<
+      Person,
+      TestFilters,
+      SortingsDefinition,
+      SummariesDefinition,
+      ItemActionsDefinition<Person>,
+      TestNavigationFilters,
+      GroupingDefinition<Person>
+    > & {
+      lanes: Array<{ id: string; filters: Record<string, unknown> }>
+      allPagesSelection?: boolean
+    } = {
+      ...createSource(people),
+      selectable: (p: Person) => p.id,
+      allPagesSelection: opts.allPagesSelection,
+      lanes: [
+        { id: "todo", filters: {} },
+        { id: "doing", filters: {} },
+      ],
+      dataAdapter: {
+        paginationType: "pages",
+        perPage: people.length,
+        fetchData: async () => ({
+          records: people,
+          total: opts.total,
+          currentPage: 1,
+          perPage: people.length,
+          pagesCount: 1,
+          type: "pages" as const,
+        }),
+      },
+    }
+
+    zeroRender(
+      <KanbanCollection<
+        Person,
+        TestFilters,
+        SortingsDefinition,
+        SummariesDefinition,
+        ItemActionsDefinition<Person>,
+        TestNavigationFilters,
+        GroupingDefinition<Person>
+      >
+        lanes={[
+          { id: "todo", title: "Todo" },
+          { id: "doing", title: "Doing" },
+        ]}
+        title={(p) => p.name}
+        description={(p) => p.name}
+        metadata={() => []}
+        source={source}
+        onSelectItems={vi.fn()}
+        onLoadData={vi.fn()}
+        onLoadError={vi.fn()}
+      />
+    )
+  }
+
+  it("does not render the cross-page banner when allPagesSelection is not configured, even after selecting all loaded records", async () => {
+    const user = userEvent.setup()
+    renderKanbanWithBanner({ allPagesSelection: false, total: 10 })
+
+    await screen.findAllByTestId("card")
+    const selectAllBoxes = screen.getAllByRole("checkbox", {
+      name: "Select all",
+    })
+    await user.click(selectAllBoxes[0])
+
+    await waitFor(() => {
+      expect(selectAllBoxes[0].getAttribute("aria-checked")).toBe("true")
+    })
+
+    expect(
+      screen.queryByRole("button", { name: /select all .* in this lane/i })
+    ).not.toBeInTheDocument()
+  })
+
+  it("renders the cross-page banner with the correct CTA when all loaded records are selected and total > loaded count", async () => {
+    const user = userEvent.setup()
+    renderKanbanWithBanner({ allPagesSelection: true, total: 5 })
+
+    await screen.findAllByTestId("card")
+    const selectAllBoxes = screen.getAllByRole("checkbox", {
+      name: "Select all",
+    })
+    await user.click(selectAllBoxes[0])
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "Select all 5 in this lane" })
+      ).toBeInTheDocument()
+    })
+  })
+
+  it("switches the banner to the steady-state 'all items selected' copy after the CTA is clicked", async () => {
+    const user = userEvent.setup()
+    renderKanbanWithBanner({ allPagesSelection: true, total: 5 })
+
+    await screen.findAllByTestId("card")
+    const selectAllBoxes = screen.getAllByRole("checkbox", {
+      name: "Select all",
+    })
+    await user.click(selectAllBoxes[0])
+
+    const cta = await screen.findByRole("button", {
+      name: "Select all 5 in this lane",
+    })
+    await user.click(cta)
+
+    await waitFor(() => {
+      expect(screen.getByText("All 5 items selected")).toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: /select all .* in this lane/i })
+      ).not.toBeInTheDocument()
+    })
+  })
+
+  it("does not show the banner in lane A when only lane B has all records selected", async () => {
+    const user = userEvent.setup()
+    renderKanbanWithBanner({ allPagesSelection: true, total: 5 })
+
+    await screen.findAllByTestId("card")
+    const selectAllBoxes = screen.getAllByRole("checkbox", {
+      name: "Select all",
+    })
+    // Click lane B (second lane)
+    await user.click(selectAllBoxes[1])
+
+    await waitFor(() => {
+      // Exactly one CTA in the document — the one in lane B
+      expect(
+        screen.getAllByRole("button", { name: "Select all 5 in this lane" })
+      ).toHaveLength(1)
+    })
+  })
+
+  it("does not render the banner when total === selectedCount (no extra pages to extend selection over)", async () => {
+    const user = userEvent.setup()
+    renderKanbanWithBanner({ allPagesSelection: true, total: 2 })
+
+    await screen.findAllByTestId("card")
+    const selectAllBoxes = screen.getAllByRole("checkbox", {
+      name: "Select all",
+    })
+    // No banner expected: handleSelectAll (the per-lane checkbox handler) was
+    // called, NOT handleSelectAllItems — so useSelectable's allSelectedStatus.checked
+    // stays false. With total === selectedCount the "more pages to select" branch
+    // is also false. Both banner conditions miss → banner not rendered.
+    await user.click(selectAllBoxes[0])
+
+    await waitFor(() => {
+      expect(selectAllBoxes[0].getAttribute("aria-checked")).toBe("true")
+    })
+
+    expect(
+      screen.queryByRole("button", { name: /select all .* in this lane/i })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByText(/All \d+ items selected/i)
+    ).not.toBeInTheDocument()
+  })
 })

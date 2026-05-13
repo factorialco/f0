@@ -2,6 +2,9 @@ import type { ReactNode } from "react"
 
 import type { Variant } from "@/components/tags/F0TagStatus"
 import type { RecordType } from "@/hooks/datasource"
+import type { LaneSelectAllItemsConfig, LaneSelection } from "@/ui/Lane/types"
+
+export type { LaneSelectAllItemsConfig, LaneSelection }
 
 export type KanbanLaneAttributes<TRecord extends RecordType> = {
   id?: string
@@ -21,16 +24,10 @@ export type KanbanLaneAttributes<TRecord extends RecordType> = {
   total?: number
   /** Future: filters that would be applied to the shared data source */
   filters?: Partial<Record<string, unknown>>
-  /** Whether the lane should expose a select-all checkbox in its header. */
-  selectable?: boolean
-  /** Whether the lane select-all checkbox is checked. */
-  selected?: boolean
-  /** Whether the lane select-all checkbox is in indeterminate state. */
-  indeterminate?: boolean
-  /** Callback fired when the lane select-all checkbox is toggled. */
-  onSelectAll?: (checked: boolean) => void
-  /** Accessible label for the select-all checkbox (visually hidden). */
-  selectAllLabel?: string
+  /** Per-lane select-all configuration. Presence enables the header checkbox. */
+  selection?: LaneSelection
+  /** Secondary "select all items across pages" banner shown under the header. */
+  selectAllItems?: LaneSelectAllItemsConfig
 }
 
 export interface KanbanProps<TRecord extends RecordType> {

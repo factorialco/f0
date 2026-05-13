@@ -9,6 +9,7 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 import * as DataCollectionStories from "./index.stories"
 import * as ActionDataCollectionStories from "./actions/collection-actions.stories"
+import * as KanbanStories from "./visualizations/kanban.stories"
 
 <Meta title="Data collection/Selectable and bulk actions" />
 
@@ -168,6 +169,19 @@ once every loaded row is checked.
   of={DataCollectionStories.WithInfiniteScrollSelection}
   meta={DataCollectionStories}
 />
+
+**Kanban (per-lane two-level selection):**
+
+The Kanban visualization mirrors the Table's two-level selection model, scoped to
+each lane. The lane header exposes a select-all checkbox that toggles every loaded
+card in that lane. When `allPagesSelection: true` is set on the data source AND
+every loaded card in a lane is selected AND the lane has more items beyond the
+current page, a secondary banner appears directly under the lane header offering
+a "Select all N in this lane" CTA. Clicking it promotes the selection across
+every page of that lane only — other lanes are unaffected. Once active, the
+banner switches to a steady-state "All N items selected" copy.
+
+<Canvas of={KanbanStories.KanbanWithBulkSelectAllPages} meta={KanbanStories} />
 
 #### Examples
 

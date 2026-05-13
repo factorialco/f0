@@ -4,16 +4,14 @@ import { F0TagStatus, Variant } from "@/components/tags/F0TagStatus"
 import { Counter } from "@/ui/Counter"
 import { Plus } from "@/icons/app"
 
+import type { LaneSelection } from "../types"
+
 type LaneHeaderProps = {
   label: string
   variant?: Variant
   count: number
   onPrimaryAction?: () => void
-  selectable?: boolean
-  selected?: boolean
-  indeterminate?: boolean
-  onSelectAll?: (checked: boolean) => void
-  selectAllLabel?: string
+  selection?: LaneSelection
 }
 
 export const LaneHeader = ({
@@ -21,23 +19,19 @@ export const LaneHeader = ({
   variant,
   count,
   onPrimaryAction,
-  selectable = false,
-  selected = false,
-  indeterminate = false,
-  onSelectAll,
-  selectAllLabel,
+  selection,
 }: LaneHeaderProps) => {
   const showPrimary = Boolean(onPrimaryAction)
 
   return (
     <div className="flex items-center gap-2 px-1 pb-0.5 pt-2">
-      {selectable && (
+      {selection && (
         <F0Checkbox
-          title={selectAllLabel}
+          title={selection.selectAllLabel}
           hideLabel
-          checked={selected}
-          indeterminate={indeterminate}
-          onCheckedChange={onSelectAll}
+          checked={selection.selected ?? false}
+          indeterminate={selection.indeterminate ?? false}
+          onCheckedChange={selection.onSelectAll}
           disabled={count === 0}
         />
       )}

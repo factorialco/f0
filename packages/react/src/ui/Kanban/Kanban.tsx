@@ -303,14 +303,15 @@ export function Kanban<TRecord extends RecordType>(
             return localLanes.map(
               (lane: KanbanLaneAttributes<TRecord>, laneIndex: number) => {
                 const total = lane.total ?? lane.items.length
-                const propsLane = lane.id
-                  ? propsLaneMap.get(lane.id)
-                  : undefined
-                const selectable = propsLane?.selectable
-                const selected = propsLane?.selected
-                const indeterminate = propsLane?.indeterminate
-                const onSelectAll = propsLane?.onSelectAll
-                const selectAllLabel = propsLane?.selectAllLabel
+                // Selection-related props are read out-of-band from the latest
+                // `lanes` prop because `localLanes` is cached based on item
+                // identity to support optimistic DnD updates. When a lane has
+                // no `id` we cannot look it up in the map, so we fall back to
+                // the `lane` itself (which already carries the latest props).
+                const propsLane =
+                  (lane.id ? propsLaneMap.get(lane.id) : undefined) ?? lane
+                const selection = propsLane.selection
+                const selectAllItems = propsLane.selectAllItems
                 return (
                   <div
                     key={lane.id ?? String(laneIndex)}
@@ -349,11 +350,8 @@ export function Kanban<TRecord extends RecordType>(
                           ? () => onCreate(lane.id!)
                           : undefined
                       }
-                      selectable={selectable}
-                      selected={selected}
-                      indeterminate={indeterminate}
-                      onSelectAll={onSelectAll}
-                      selectAllLabel={selectAllLabel}
+                      selection={selection}
+                      selectAllItems={selectAllItems}
                     />
                   </div>
                 )

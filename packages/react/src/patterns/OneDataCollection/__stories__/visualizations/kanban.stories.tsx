@@ -4,6 +4,7 @@ import { fn } from "storybook/test"
 
 import { granularityDefinitions } from "@/components/OneCalendar/granularities"
 import { Delete, Pencil, Plus } from "@/icons/app"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import {
   createDataAdapter,
@@ -157,6 +158,7 @@ export const KanbanWithBulkSelect: Story = {
           "Kanban with per-lane bulk selection. Each lane header shows a checkbox that selects (or deselects) every loaded card in that lane. The checkbox reflects the lane's selection state (unchecked / indeterminate / checked) and is disabled for empty lanes.",
       },
     },
+    ...withSnapshot({}),
   },
   render: () => {
     const [items] = useState<MockUser[]>(() => generateMockUsers(24))
@@ -181,6 +183,64 @@ export const KanbanWithBulkSelect: Story = {
           primary: [
             {
               label: "Edit",
+              icon: Pencil,
+              onClick: fn(),
+              id: "edit-item",
+            },
+          ],
+          secondary: [
+            {
+              label: "Remove",
+              icon: Delete,
+              onClick: fn(),
+              critical: true,
+              id: "remove-item",
+            },
+          ],
+        })}
+        paginationType="infinite-scroll"
+        fullHeight={true}
+      />
+    )
+  },
+}
+
+export const KanbanWithBulkSelectAllPages: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Kanban with per-lane bulk selection AND `allPagesSelection: true`. After selecting every loaded card in a lane, a banner appears under the header offering a 'Select all N in this lane' Gmail-style CTA so the user can extend the selection across every page of that lane.",
+      },
+    },
+    ...withSnapshot({}),
+  },
+  render: () => {
+    const [items] = useState<MockUser[]>(() => generateMockUsers(120))
+    const mockVisualizations = getMockVisualizations({})
+
+    const dataAdapter = useMemo(
+      () =>
+        createDataAdapter({
+          data: items,
+          paginationType: "infinite-scroll",
+          perPage: 10,
+        }),
+      [items]
+    )
+
+    return (
+      <ExampleComponent
+        visualizations={[mockVisualizations.kanban]}
+        dataAdapter={dataAdapter}
+        selectable={(el) => el.id}
+        allPagesSelection={true}
+        bulkActions={({ allSelected, selectedCount }) => ({
+          primary: [
+            {
+              label: allSelected
+                ? "Edit all items"
+                : `Edit ${selectedCount} selected`,
               icon: Pencil,
               onClick: fn(),
               id: "edit-item",

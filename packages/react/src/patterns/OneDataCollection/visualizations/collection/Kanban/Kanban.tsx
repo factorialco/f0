@@ -7,6 +7,7 @@ import type {
 import type { IconType } from "@/components/F0Icon"
 import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import type { KanbanProps } from "@/ui/Kanban/types"
+import type { LaneSelectAllItemsConfig, LaneSelection } from "@/ui/Lane/types"
 
 import { useDataCollectionLanesData } from "@/patterns/OneDataCollection/hooks/useDataCollectionData/useDataCollectionLanesData"
 import { useSelectableLanes } from "@/patterns/OneDataCollection/hooks/useSelectableLanes"
@@ -171,6 +172,54 @@ export const KanbanCollection = <
         loadedSelectableIds.some((id) => laneSel?.selectedItems.has(id)) &&
         !selected
 
+      const selectedCount = laneSel?.allSelectedStatus.selectedCount ?? 0
+      const totalLaneItems =
+        laneData?.paginationInfo?.total !== undefined
+          ? laneData.paginationInfo.total
+          : 0
+      const allItemsSelectedStatus = !!(
+        laneSel?.allSelectedStatus.checked &&
+        !laneSel?.allSelectedStatus.indeterminate
+      )
+      const showSelectAllItemsBanner =
+        !!source.allPagesSelection &&
+        (allItemsSelectedStatus ||
+          (selected &&
+            laneData?.paginationInfo?.total !== undefined &&
+            totalLaneItems > selectedCount))
+
+      const selection: LaneSelection | undefined =
+        isSelectable && laneSel
+          ? {
+              onSelectAll: (checked: boolean) =>
+                laneSel.handleSelectAll(checked),
+              selectAllLabel: i18n.actions.selectAll,
+              selected,
+              indeterminate,
+            }
+          : undefined
+
+      const selectAllItems: LaneSelectAllItemsConfig | undefined =
+        showSelectAllItemsBanner && laneSel
+          ? {
+              onSelectAllItems: () => laneSel.handleSelectAllItems(true),
+              selectAllItemsLabel: i18n.t("status.selected.selectAllInLane", {
+                total: totalLaneItems,
+              }),
+              loadedSelectionLabel: i18n.t("status.selected.allLoadedInLane", {
+                count: loadedSelectableIds.length,
+              }),
+              allItemsSelectedLabel: i18n.t(
+                "status.selected.allItemsSelected",
+                {
+                  total: totalLaneItems,
+                }
+              ),
+              allItemsSelected: allItemsSelectedStatus,
+              totalItems: totalLaneItems,
+            }
+          : undefined
+
       return {
         id: l.id,
         title: l.title,
@@ -181,20 +230,8 @@ export const KanbanCollection = <
         loading: laneData?.isLoading || false,
         loadingMore: laneData?.isLoadingMore || false,
         fetchMore: hasMore ? () => laneData.loadMore() : undefined,
-        selectable: isSelectable,
-        selected,
-        indeterminate,
-        onSelectAll: (checked: boolean) => {
-          if (!laneSel) {
-            console.warn(
-              "[OneDataCollection/Kanban] onSelectAll called but laneSel is missing for lane",
-              l.id
-            )
-            return
-          }
-          laneSel.handleSelectAll(checked)
-        },
-        selectAllLabel: i18n.actions.selectAll,
+        selection,
+        selectAllItems,
       }
     }),
     loading: Object.values(lanesHooks).some(
