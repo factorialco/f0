@@ -163,6 +163,31 @@ describe("Select", () => {
     expect(screen.getByText("Search options")).toBeInTheDocument()
   })
 
+  it("renders icon tags with text", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={[
+          {
+            value: "icon-tag-option",
+            label: "Icon tag option",
+            tag: {
+              type: "icon",
+              text: "System",
+              icon: Search,
+            },
+          },
+        ]}
+        onChange={() => {}}
+      />
+    )
+
+    await openSelect(user)
+
+    expect(screen.getByText("System")).toBeInTheDocument()
+  })
+
   it("filters options based on search input", async () => {
     const user = userEvent.setup()
     render(
@@ -422,6 +447,96 @@ describe("Select", () => {
     await waitFor(() => {
       expect(handleChangeSelectedOption).toHaveBeenCalledWith(undefined, false)
     })
+  })
+
+  it("defers onChange until apply when onApply is passed", async () => {
+    const handleChange = vi.fn()
+    const handleApply = vi.fn()
+    const user = userEvent.setup()
+
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        multiple
+        options={mockOptions}
+        value={[]}
+        onChange={handleChange}
+        onApply={handleApply}
+      />
+    )
+
+    await openSelect(user)
+    await user.click(screen.getByText("Option 1"))
+
+    expect(handleChange).not.toHaveBeenCalled()
+    expect(handleApply).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole("button", { name: "Apply selection" }))
+
+    await waitFor(() => {
+      expect(handleChange).toHaveBeenCalledWith(
+        ["option1"],
+        [
+          {
+            id: "option1",
+            name: "Option 1",
+            description: "Description 1",
+          },
+        ],
+        [
+          expect.objectContaining({
+            label: "Option 1",
+            value: "option1",
+            description: "Description 1",
+          }),
+        ]
+      )
+    })
+    expect(handleApply).toHaveBeenCalledTimes(1)
+  })
+
+  it("cancels staged multi-select changes on outside click when onApply is passed", async () => {
+    const handleChange = vi.fn()
+    const handleApply = vi.fn()
+    const user = userEvent.setup()
+
+    render(
+      <div>
+        <button type="button">Outside</button>
+        <F0Select
+          {...defaultSelectProps}
+          multiple
+          options={mockOptions}
+          value={["option1", "option2"]}
+          onChange={handleChange}
+          onApply={handleApply}
+        />
+      </div>
+    )
+
+    await openSelect(user)
+    await user.click(screen.getByText("Option 2"))
+    fireEvent.pointerDown(document.body)
+
+    await waitFor(() => {
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+    })
+
+    expect(handleChange).not.toHaveBeenCalled()
+    expect(handleApply).not.toHaveBeenCalled()
+
+    await openSelect(user)
+    await user.click(screen.getByText("Option 3"))
+    await user.click(screen.getByRole("button", { name: "Apply selection" }))
+
+    await waitFor(() => {
+      expect(handleChange).toHaveBeenCalledTimes(1)
+    })
+
+    expect(handleChange.mock.calls[0]?.[0]).toEqual(
+      expect.arrayContaining(["option1", "option2", "option3"])
+    )
+    expect(handleApply).toHaveBeenCalledTimes(1)
   })
 
   describe("asList mode", () => {

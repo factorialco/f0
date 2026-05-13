@@ -93,6 +93,7 @@ const F0SelectComponent = forwardRef(function Select<
   {
     placeholder,
     onChange,
+    onApply,
     onChangeSelectedOption,
     value,
     options = [],
@@ -155,6 +156,7 @@ const F0SelectComponent = forwardRef(function Select<
   type ActualRecordType = ResolvedRecordType<R>
 
   const [openLocal, setOpenLocal] = useState(open)
+  const isApplyingRef = useRef(false)
 
   const defaultItems = useMemo(
     () =>
@@ -370,6 +372,45 @@ const F0SelectComponent = forwardRef(function Select<
     preserveSelectionOnDatasetChange,
   })
 
+  const cloneSelectedState = useCallback(
+    (
+      state: SelectedItemsState<ActualRecordType>
+    ): SelectedItemsState<ActualRecordType> => {
+      return {
+        allSelected: state.allSelected,
+        items: new Map(state.items),
+        groups: new Map(state.groups),
+      }
+    },
+    []
+  )
+
+  const getSelectedStateKey = useCallback(
+    (state: SelectedItemsState<ActualRecordType>): string => {
+      const itemsKeys = Array.from(state.items.entries())
+        .map(([id, item]) => `${id}:${item.checked}`)
+        .sort()
+        .join(",")
+      const groupsKeys = Array.from(state.groups.entries())
+        .map(([id, group]) => `${id}:${group.checked}`)
+        .sort()
+        .join(",")
+
+      return `${state.allSelected}|${itemsKeys}|${groupsKeys}`
+    },
+    []
+  )
+
+  const committedSelectionRef = useRef(
+    initialSelectedState
+      ? cloneSelectedState(initialSelectedState)
+      : {
+          allSelected: false,
+          items: new Map(),
+          groups: new Map(),
+        }
+  )
+
   /**
    * Get display items for the selection preview.
    * Uses localValue (the current value prop) to determine what to display.
@@ -415,6 +456,9 @@ const F0SelectComponent = forwardRef(function Select<
     setCurrentSearch(value)
     onSearchChange?.(value)
   }
+  // Show apply button when in multiple selection, and not rendered as a list
+  const showApplyButton = multiple && !asList
+  const hasDeferredApply = !!(onApply && showApplyButton)
 
   // Track whether the user has interacted with the selection
   const hasUserInteracted = useRef(false)
@@ -440,10 +484,13 @@ const F0SelectComponent = forwardRef(function Select<
         } else {
           selectedItemsCache.current.delete(String(value))
         }
-        onChangeSelectedOption?.(item.option, checked)
+        if (!hasDeferredApply) {
+          onChangeSelectedOption?.(item.option, checked)
+        }
       }
     },
     [
+      hasDeferredApply,
       onChangeSelectedOption,
       itemsByValue,
       handleSelectItemChange,
@@ -461,6 +508,57 @@ const F0SelectComponent = forwardRef(function Select<
     },
     [handleSelectAllItems]
   )
+
+  const getMultiSelectionPayload = useCallback(() => {
+    const checkedItems = Array.from(selectedState.items.values() || []).filter(
+      (item) => item.checked
+    )
+
+    const extractOriginalItem = (
+      record: ActualRecordType | undefined
+    ): ResolvedRecordType<R> | undefined => {
+      if (!record) return undefined
+      if (source) {
+        return record as unknown as ResolvedRecordType<R>
+      }
+
+      const option = record as unknown as F0SelectItemObject<
+        T,
+        ResolvedRecordType<R>
+      >
+      return option.item
+    }
+
+    const records = checkedItems
+      .map((item) => item.item)
+      .filter(
+        (item): item is WithGroupId<ResolvedRecordType<R>> => item !== undefined
+      )
+    const originalItems = records
+      .map(extractOriginalItem)
+      .filter((item): item is ResolvedRecordType<R> => item !== undefined)
+    const options = records.map((item) => {
+      return optionMapper(item) as F0SelectItemObject<T, ResolvedRecordType<R>>
+    })
+    // Use original option values to preserve the type (number vs string)
+    // Only use stringfied id as fallback if option is not available
+    const values = checkedItems.map((item) => {
+      if (item.item) {
+        const option = optionMapper(item.item as ActualRecordType)
+        return option.type !== "separator"
+          ? (option.value as T)
+          : (String(item.id) as T)
+      }
+
+      return String(item.id) as T
+    })
+
+    return {
+      values,
+      originalItems,
+      options,
+    }
+  }, [optionMapper, selectedState.items, source])
 
   /**
    * Emit the value change. The type depends on the multiple prop and selectionMode.
@@ -485,10 +583,6 @@ const F0SelectComponent = forwardRef(function Select<
       setCurrentSearch(undefined)
     }
 
-    const checkedItems = Array.from(selectedState.items.values() || []).filter(
-      (item) => item.checked
-    )
-
     // Helper to extract the original item from a record
     // For static options: the record IS the option, and option.item contains the original data
     // For datasource: the record is the original data, optionMapper creates the option
@@ -511,41 +605,20 @@ const F0SelectComponent = forwardRef(function Select<
     // TypeScript cannot infer the type of the onChange callback when it has generics,
     // so we need to cast it to the correct type
     if (multiple) {
-      const records = checkedItems
-        .map((item) => item.item)
-        .filter(
-          (item): item is WithGroupId<ResolvedRecordType<R>> =>
-            item !== undefined
-        )
-      const originalItems = records
-        .map(extractOriginalItem)
-        .filter((item): item is ResolvedRecordType<R> => item !== undefined)
-      const options = records.map((item) => {
-        return optionMapper(item) as F0SelectItemObject<
-          T,
-          ResolvedRecordType<R>
-        >
-      })
-
-      // Use original option values to preserve the type (number vs string)
-      // Only use stringified id as fallback if option is not available
-      const values = checkedItems.map((item) => {
-        if (item.item) {
-          const option = optionMapper(item.item as ActualRecordType)
-          return option.type !== "separator"
-            ? (option.value as T)
-            : (String(item.id) as T)
-        }
-        return String(item.id) as T
-      })
+      const { values, originalItems, options } = getMultiSelectionPayload()
 
       // Sync localValue with actual selection state (as strings for internal comparison)
       // This ensures the preview shows correct items after deselection
       // Use Set to ensure unique values and prevent duplicates
       setLocalValue(Array.from(new Set(values.map(String))))
 
-      onChange?.(values, originalItems, options)
+      if (!hasDeferredApply) {
+        onChange?.(values, originalItems, options)
+      }
     } else {
+      const checkedItems = Array.from(
+        selectedState.items.values() || []
+      ).filter((item) => item.checked)
       const selectedItem = checkedItems[0]
       const record = selectedItem?.item as ActualRecordType | undefined
       const originalItem = extractOriginalItem(record)
@@ -563,28 +636,103 @@ const F0SelectComponent = forwardRef(function Select<
       // Sync localValue with actual selection state (as string for internal comparison)
       setLocalValue(value !== undefined ? [String(value)] : [])
 
-      onChange?.(value as T, originalItem, option)
+      if (!hasDeferredApply) {
+        onChange?.(value as T, originalItem, option)
+      }
     }
-  }, [selectedState])
+  }, [
+    getMultiSelectionPayload,
+    hasDeferredApply,
+    optionMapper,
+    selectedState,
+    source,
+  ])
 
   const debouncedHandleChangeOpenLocal = useDebounceCallback(
     (open: boolean) => {
       onOpenChange?.(open)
       setOpenLocal(open)
+      if (!open) {
+        isApplyingRef.current = false
+      }
     },
     100
   )
 
+  const restoreCommittedSelection = useCallback(() => {
+    const committedSelection = committedSelectionRef.current
+
+    clearSelection()
+
+    if (committedSelection.allSelected) {
+      handleSelectAllWithTracking(true)
+
+      for (const itemState of committedSelection.items.values()) {
+        if (!itemState.checked) {
+          handleSelectItemChange(itemState.id, false)
+        }
+      }
+
+      return
+    }
+
+    const committedIds = Array.from(committedSelection.items.values())
+      .filter((itemState) => itemState.checked)
+      .map((itemState) => itemState.id)
+
+    if (committedIds.length > 0) {
+      handleSelectItemChange(committedIds, true)
+    }
+  }, [clearSelection, handleSelectAllWithTracking, handleSelectItemChange])
+
+  const emitCurrentSelection = useCallback(() => {
+    const { values, originalItems, options } = getMultiSelectionPayload()
+
+    ;(
+      onChange as
+        | ((
+            value: T[],
+            originalItems: ResolvedRecordType<R>[],
+            options: F0SelectItemObject<T, ResolvedRecordType<R>>[]
+          ) => void)
+        | undefined
+    )?.(values, originalItems, options)
+  }, [getMultiSelectionPayload, onChange])
+
   const handleChangeOpenLocal = (open: boolean) => {
+    if (!open && hasDeferredApply && !isApplyingRef.current) {
+      restoreCommittedSelection()
+    }
+
     debouncedHandleChangeOpenLocal(open)
   }
 
-  // Show apply button when in multiple selection, and not rendered as a list
-  const showApplyButton = multiple && !asList
-
   const handleApply = useCallback(() => {
+    if (hasDeferredApply) {
+      const nextCommittedSelection = cloneSelectedState(selectedState)
+
+      if (
+        getSelectedStateKey(nextCommittedSelection) !==
+        getSelectedStateKey(committedSelectionRef.current)
+      ) {
+        committedSelectionRef.current = nextCommittedSelection
+        emitCurrentSelection()
+      }
+
+      onApply?.()
+      isApplyingRef.current = true
+    }
+
     handleChangeOpenLocal(false)
-  }, [])
+  }, [
+    cloneSelectedState,
+    emitCurrentSelection,
+    getSelectedStateKey,
+    handleChangeOpenLocal,
+    hasDeferredApply,
+    onApply,
+    selectedState,
+  ])
 
   // Track when filters panel is open to hide bottom actions
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
