@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.482.0](https://github.com/factorialco/f0/compare/f0-react-v1.481.1...f0-react-v1.482.0) (2026-05-13)
+
+
+### Features
+
+* **table:** add `bordered` option to table visualization ([#4121](https://github.com/factorialco/f0/issues/4121)) ([d1a8fe7](https://github.com/factorialco/f0/commit/d1a8fe71f99082e87c8a13206f80628a6539bcfe))
+
 ## [1.481.1](https://github.com/factorialco/f0/compare/f0-react-v1.481.0...f0-react-v1.481.1) (2026-05-13)
 
 
