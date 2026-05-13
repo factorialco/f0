@@ -20,6 +20,7 @@ export type {
   EntityResolvers,
   EntityUrlBuilders,
   EntityRefs,
+  GeneratedCanvasContent,
   JobPostingProfile,
   RequisitionProfile,
   PersonProfile,
@@ -33,7 +34,14 @@ export type {
 
 // Canvas entity registry and types
 export { getCanvasEntity } from "./canvas"
-export type { CanvasEntityDefinition, CanvasActions } from "./canvas"
+export type {
+  CanvasEntityDefinition,
+  CanvasActions,
+  GeneratedCanvasData,
+  GeneratedCanvasEngine,
+  GeneratedCanvasRow,
+  GeneratedCanvasSelectedNode,
+} from "./canvas"
 
 export { aiTranslations } from "./types"
 

@@ -1,9 +1,13 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-import { useEffect } from "react"
-
+import { useEffect, useRef } from "react"
 import { Lightbulb, ThumbsDown, ThumbsUp } from "@/icons/app"
 
-import { F0AiChat, F0AiChatProvider, useAiChat } from ".."
+import { F0AiChat, F0AiChatProvider, F0AiFullscreenChat, useAiChat } from ".."
+import {
+  orgGalaxyContent,
+  productOrgContent,
+} from "../canvas/entities/generatedCanvas/__stories__/generatedCanvasDemo"
+import type { GeneratedCanvasContent as GeneratedCanvasContentType } from "../types"
 
 const AiChatWrapper = ({ children }: { children: React.ReactElement }) => {
   const { setOpen, setWelcomeScreenSuggestions } = useAiChat()
@@ -135,6 +139,49 @@ const ReplyToSelectionPrefill = () => {
 
 export const WithReplyToSelection: Story = {
   render: () => <ReplyToSelectionPrefill />,
+}
+
+const GeneratedCanvasOpenOnMount = ({
+  content = orgGalaxyContent,
+}: {
+  content?: GeneratedCanvasContentType
+}) => {
+  const { openCanvas } = useAiChat()
+  const hasOpenedRef = useRef(false)
+
+  useEffect(() => {
+    if (hasOpenedRef.current) return
+    const timeoutId = window.setTimeout(() => {
+      if (hasOpenedRef.current) return
+      hasOpenedRef.current = true
+      openCanvas({
+        ...content,
+        toolCallId: "storybook-generated-canvas",
+      })
+    }, 100)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [content, openCanvas])
+
+  return null
+}
+
+export const WithGeneratedCanvas: Story = {
+  render: () => (
+    <>
+      <GeneratedCanvasOpenOnMount />
+      <F0AiFullscreenChat />
+    </>
+  ),
+}
+
+export const WithGeneratedProductOrgCanvas: Story = {
+  render: () => (
+    <>
+      <GeneratedCanvasOpenOnMount content={productOrgContent} />
+      <F0AiFullscreenChat />
+    </>
+  ),
 }
 
 export const WithFooter: Story = {

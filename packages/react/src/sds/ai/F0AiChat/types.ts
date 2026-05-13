@@ -8,6 +8,10 @@ import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults
 
 import type { CanvasActions } from "./canvas/types"
 import type { ChatDashboardConfig } from "./canvas/entities/dashboard/types"
+import type {
+  GeneratedCanvasData,
+  GeneratedCanvasEngine,
+} from "./canvas/entities/generatedCanvas/types"
 import type { DataDownloadDataset } from "./actions/core/dataDownload/types"
 export type { PersonProfile } from "./components/markdownRenderers/entityRef/entities/person/types"
 export type { CandidateProfile } from "./components/markdownRenderers/entityRef/entities/candidate/types"
@@ -135,6 +139,18 @@ export type DataDownloadCanvasContent = CanvasContentBase & {
 }
 
 /**
+ * Generated canvas content — runs an AI-generated visual renderer against a
+ * JSON-serializable dataset in an isolated runtime.
+ */
+export type GeneratedCanvasContent = CanvasContentBase & {
+  type: "generatedCanvas"
+  engine: GeneratedCanvasEngine
+  rendererSource: string
+  data: GeneratedCanvasData
+  stylePrompt?: string
+}
+
+/**
  * Discriminated union for canvas panel content.
  * Add new entity types to this union as they are implemented.
  */
@@ -142,6 +158,7 @@ export type CanvasContent =
   | DashboardCanvasContent
   | FormCanvasContent
   | DataDownloadCanvasContent
+  | GeneratedCanvasContent
 
 /**
  * A tool hint that can be activated to prepend invisible context to the user's

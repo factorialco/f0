@@ -6,6 +6,7 @@ import { useQuestionCardAction } from "../../../UpsellingKit/ai/F0QuestionCard/u
 import { useClarifyingQuestionAction } from "./core/clarifyingQuestion/useClarifyingQuestionAction"
 import { useDataDownloadAction } from "./core/dataDownload/useDataDownloadAction"
 import { useDisplayDashboardAction } from "./core/displayDashboard/useDisplayDashboardAction"
+import { useDisplayGeneratedCanvasAction } from "./core/displayGeneratedCanvas/useDisplayGeneratedCanvasAction"
 import { useF0AiFormActions } from "./core/forms/useF0AiFormActions"
 import { useMessageCreditsWarningAction } from "./core/messageCreditsWarning/useMessageCreditsWarningAction"
 import { useMessageSourcesAction } from "./core/messageSources/useMessageSourcesAction"
@@ -18,6 +19,7 @@ export const copilotActions: ActionFactory[] = [
   useMessageSourcesAction,
   useDataDownloadAction,
   useDisplayDashboardAction,
+  useDisplayGeneratedCanvasAction,
   useClarifyingQuestionAction,
   useDemoCardAction,
   useBookAMeetingCardAction,
