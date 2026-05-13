@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/factorialco/f0/compare/f0-react-v2.0.1...f0-react-v2.1.0) (2026-05-13)
+
+
+### Features
+
+* support justified absences in hour distribution ([#4109](https://github.com/factorialco/f0/issues/4109)) ([ee9074e](https://github.com/factorialco/f0/commit/ee9074efcc869527d864b3b265e53b542dcb35dd))
+
 ## [2.0.1](https://github.com/factorialco/f0/compare/f0-react-v2.0.0...f0-react-v2.0.1) (2026-05-13)
 
 
