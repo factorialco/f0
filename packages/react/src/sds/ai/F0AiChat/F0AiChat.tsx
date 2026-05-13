@@ -34,7 +34,6 @@ const F0AiChatProviderComponent = ({
   entityRefs,
   canvasActions,
   canvasEntities,
-  toolHints,
   credits,
   employeeCredits,
   creditWarning,
@@ -70,7 +69,6 @@ const F0AiChatProviderComponent = ({
       entityRefs={entityRefs}
       canvasActions={canvasActions}
       canvasEntities={canvasEntities}
-      toolHints={toolHints}
       credits={credits}
       employeeCredits={employeeCredits}
       creditWarning={creditWarning}

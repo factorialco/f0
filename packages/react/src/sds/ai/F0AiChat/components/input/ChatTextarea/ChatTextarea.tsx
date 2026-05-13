@@ -67,9 +67,6 @@ export const ChatTextarea = ({
   const {
     placeholders,
     entityRefs,
-    toolHints,
-    activeToolHint,
-    setActiveToolHint,
     fileAttachments,
     sendMessage,
     appendMessages,
@@ -187,10 +184,6 @@ export const ChatTextarea = ({
       // hints) produce rich rendering in the bubble.
       const safeUserText = escapeUserText(transformed)
 
-      const withToolHint = activeToolHint
-        ? `<tool-context tool="${activeToolHint.id}">${activeToolHint.prompt}</tool-context>\n\n${safeUserText}`
-        : safeUserText
-
       // When replying to a selected fragment, prepend the quote as a
       // dedicated `<reply-quote>` tag. `UserMessage` strips this tag from
       // the bubble content and renders the quote above the bubble (see
@@ -198,8 +191,8 @@ export const ChatTextarea = ({
       // bubble alignment). Newlines are encoded as <br/> so they survive
       // the HTML round-trip.
       const withQuote = pendingQuote
-        ? `<reply-quote>${escapeHtml(pendingQuote.text).replace(/\n/g, "<br/>")}</reply-quote>${withToolHint}`
-        : withToolHint
+        ? `<reply-quote>${escapeHtml(pendingQuote.text).replace(/\n/g, "<br/>")}</reply-quote>${safeUserText}`
+        : safeUserText
 
       const files = uploadedFiles.flatMap((f) =>
         f.uploadedFile ? [f.uploadedFile] : []
@@ -423,9 +416,6 @@ export const ChatTextarea = ({
                 acceptValue={acceptValue}
                 fileInputRef={fileInputRef}
                 handleFileSelect={handleFileSelect}
-                toolHints={toolHints}
-                activeToolHint={activeToolHint}
-                setActiveToolHint={setActiveToolHint}
                 inProgress={inProgress}
                 hasDataToSend={hasDataToSend}
                 isUploading={isUploading}

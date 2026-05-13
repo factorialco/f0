@@ -8,7 +8,6 @@ export type {
   AiChatMode,
   AiChatFileAttachmentConfig,
   AiChatProviderProps,
-  AiChatToolHint,
   AppendMessage,
   AppendToolCall,
   CandidateProfile,

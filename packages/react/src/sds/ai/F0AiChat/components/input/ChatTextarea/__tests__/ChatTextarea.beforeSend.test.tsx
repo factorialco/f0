@@ -29,7 +29,6 @@ vi.mock("../TextareaField", () => ({
 
 const sendMessageMock = vi.fn()
 const appendMessagesMock = vi.fn()
-const setActiveToolHintMock = vi.fn()
 const setPendingContextMock = vi.fn()
 const setPendingQuoteMock = vi.fn()
 const setProcessDroppedFilesFunctionMock = vi.fn()
@@ -39,9 +38,6 @@ vi.mock("../../../../providers/AiChatStateProvider", () => ({
   useAiChat: () => ({
     placeholders: ["Ask anything"],
     entityRefs: undefined,
-    toolHints: undefined,
-    activeToolHint: null,
-    setActiveToolHint: setActiveToolHintMock,
     fileAttachments: undefined,
     sendMessage: sendMessageMock,
     appendMessages: appendMessagesMock,
@@ -61,7 +57,6 @@ describe("ChatTextarea before-send hook", () => {
   beforeEach(() => {
     sendMessageMock.mockClear()
     appendMessagesMock.mockClear()
-    setActiveToolHintMock.mockClear()
     setPendingContextMock.mockClear()
     setPendingQuoteMock.mockClear()
     setProcessDroppedFilesFunctionMock.mockClear()

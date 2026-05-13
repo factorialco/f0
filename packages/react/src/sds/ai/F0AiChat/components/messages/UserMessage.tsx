@@ -77,13 +77,6 @@ function getUploadedFiles(
   )
 }
 
-/**
- * Regex to strip the invisible tool-context prefix injected by the tool hint system.
- * Matches `<tool-context tool="...">...</tool-context>` followed by optional whitespace.
- */
-const TOOL_CONTEXT_RE =
-  /<tool-context\s+tool="[^"]*">[\s\S]*?<\/tool-context>\s*/g
-
 /** Strips <pending-context> tags (used when loading from history where the
  *  multipart structure was flattened into a single string). */
 const PENDING_CONTEXT_RE = /<pending-context>[\s\S]*?<\/pending-context>\s*/g
@@ -155,10 +148,7 @@ export const UserMessage = ({ message }: UserMessageProps) => {
   const quoteText = quoteMatch ? decodeReplyQuote(quoteMatch[1]) : null
   const rawWithoutQuote = quoteMatch ? raw.replace(REPLY_QUOTE_RE, "") : raw
 
-  const content = rawWithoutQuote
-    .replace(TOOL_CONTEXT_RE, "")
-    .replace(PENDING_CONTEXT_RE, "")
-    .trim()
+  const content = rawWithoutQuote.replace(PENDING_CONTEXT_RE, "").trim()
   const hasVisibleText = content.trim().length > 0
 
   const { anchor, clear } = useReplySelection({

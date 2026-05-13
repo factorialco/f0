@@ -312,7 +312,6 @@ export const defaultTranslations = {
     deleteChat: "Delete chat",
     ask: "Ask One",
     view: "View",
-    tools: "Tools",
     entityRef: {
       candidate: {
         source: "Source",

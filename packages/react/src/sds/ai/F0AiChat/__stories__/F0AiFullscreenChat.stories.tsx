@@ -72,39 +72,6 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
-export const WithToolHints: Story = {
-  decorators: [
-    (Story) => {
-      return (
-        <F0AiChatProvider
-          enabled
-          runtimeUrl="https://mastra.local.factorial.dev/copilotkit"
-          agent="one-workflow"
-          credentials="include"
-          showDevConsole={false}
-          greeting="Hello, John"
-          toolHints={[
-            {
-              id: "tables",
-              label: "Tables",
-              prompt: "The user wants you to generate tables",
-            },
-            {
-              id: "analysis",
-              label: "Data analysis",
-              prompt: "The user wants data analysis",
-            },
-          ]}
-        >
-          <FullscreenChatWrapper>
-            <Story />
-          </FullscreenChatWrapper>
-        </F0AiChatProvider>
-      )
-    },
-  ],
-}
-
 export const WithFooter: Story = {
   decorators: [
     (Story) => {

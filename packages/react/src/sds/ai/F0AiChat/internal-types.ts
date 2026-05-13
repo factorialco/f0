@@ -10,7 +10,6 @@ import {
   type AiChatMode,
   type AiChatFileAttachmentConfig,
   type AiChatTrackingOptions,
-  type AiChatToolHint,
   type AppendMessage,
   type CanvasContent,
   type AiChatCredits,
@@ -42,7 +41,6 @@ export interface AiChatState {
   entityRefs?: EntityRefs
   canvasActions?: CanvasActions
   canvasEntities?: Record<string, CanvasEntityDefinition>
-  toolHints?: AiChatToolHint[]
   credits?: AiChatCredits
   employeeCredits?: AiChatEmployeeCredits
   creditWarning?: AiChatCreditWarning
@@ -264,7 +262,6 @@ export type AiChatProviderReturnValue = {
   | "entityRefs"
   | "canvasActions"
   | "canvasEntities"
-  | "toolHints"
   | "credits"
   | "employeeCredits"
   | "creditWarning"
@@ -282,12 +279,6 @@ export type AiChatProviderReturnValue = {
     openGame: (game: "pong") => void
     /** Close the active mini-game overlay */
     closeGame: () => void
-    /** The currently active tool hint, or null if none is selected */
-    activeToolHint: AiChatToolHint | null
-    /** Set the active tool hint (pass null to clear) */
-    setActiveToolHint: React.Dispatch<
-      React.SetStateAction<AiChatToolHint | null>
-    >
   }
 
 /**

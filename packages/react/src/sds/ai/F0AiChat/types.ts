@@ -98,28 +98,6 @@ export type PendingQuote = {
 }
 
 /**
- * A tool hint that can be activated to prepend invisible context to the user's
- * message, telling the AI about the user's intent (e.g. "generate tables",
- * "data analysis"). Similar to Gemini's tool selector UI.
- *
- * Only one tool hint can be active at a time. It persists across messages
- * until the user explicitly removes it.
- */
-export type AiChatToolHint = {
-  /** Unique identifier for this tool hint */
-  id: string
-  /** Display label shown in the selector and chip */
-  label: string
-  /** Optional icon shown in the selector and chip */
-  icon?: IconType
-  /**
-   * Prompt text injected as invisible context before the user's message.
-   * The AI receives this but the user never sees it in the chat.
-   */
-  prompt: string
-}
-
-/**
  * Credits usage data returned by the host app
  */
 export type CreditsUsage = {
@@ -291,12 +269,6 @@ export type AiChatProviderProps = {
    * them here so canvas logic lives in one place.
    */
   canvasEntities?: Record<string, CanvasEntityDefinition>
-  /**
-   * Available tool hints that the user can activate to provide intent context
-   * to the AI. Renders a selector button next to the send button.
-   * Only one tool hint can be active at a time.
-   */
-  toolHints?: AiChatToolHint[]
   /**
    * Credits configuration. When provided, a credits button is shown in the chat header.
    * Groups fetchUsage, upgradePlanUrl, and company/plan display info.

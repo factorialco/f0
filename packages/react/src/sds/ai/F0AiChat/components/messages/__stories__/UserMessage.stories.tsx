@@ -61,16 +61,3 @@ export const WithEntityRef: Story = {
     rawData: {},
   },
 }
-
-export const WithToolContext: Story = {
-  args: {
-    message: {
-      id: "user-tool",
-      role: "user",
-      content:
-        '<tool-context tool="data-analysis">Analyze the data in detail</tool-context> Show me salary trends by department',
-    },
-    ImageRenderer: () => null,
-    rawData: {},
-  },
-}

@@ -4,9 +4,6 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowUp, Paperclip, SolidStop } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
-import { type AiChatToolHint } from "../../../types"
-import { ToolHintSelector } from "../ToolHintSelector"
-
 interface ActionBarProps {
   onUploadFiles: ((files: File[]) => Promise<unknown>) | undefined
   isAtMaxFiles: boolean
@@ -14,9 +11,6 @@ interface ActionBarProps {
   acceptValue: string | undefined
   fileInputRef: RefObject<HTMLInputElement>
   handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void
-  toolHints: AiChatToolHint[] | undefined
-  activeToolHint: AiChatToolHint | null | undefined
-  setActiveToolHint: ((hint: AiChatToolHint | null) => void) | undefined
   inProgress?: boolean
   hasDataToSend: boolean
   isUploading: boolean
@@ -31,9 +25,6 @@ export const ActionBar = ({
   acceptValue,
   fileInputRef,
   handleFileSelect,
-  toolHints,
-  activeToolHint,
-  setActiveToolHint,
   inProgress,
   hasDataToSend,
   isUploading,
@@ -72,13 +63,6 @@ export const ActionBar = ({
               onChange={handleFileSelect}
             />
           </>
-        )}
-        {toolHints && toolHints.length > 0 && setActiveToolHint && (
-          <ToolHintSelector
-            toolHints={toolHints}
-            activeToolHint={activeToolHint ?? null}
-            onChange={setActiveToolHint}
-          />
         )}
       </div>
       <div className="flex items-center">

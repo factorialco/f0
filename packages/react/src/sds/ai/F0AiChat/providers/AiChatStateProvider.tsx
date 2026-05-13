@@ -26,7 +26,6 @@ import {
   type PendingContext,
   type PendingQuote,
   type VisualizationMode,
-  type AiChatToolHint,
   WelcomeScreenSuggestion,
 } from "../types"
 import { DEFAULT_CHAT_WIDTH } from "../utils/constants"
@@ -107,7 +106,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   entityRefs,
   canvasActions,
   canvasEntities,
-  toolHints,
   credits,
   employeeCredits,
   fileAttachments,
@@ -188,10 +186,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
 
   // Track the mode before canvas was opened so we can restore it on close
   const previousVisualizationModeRef = useRef<VisualizationMode>("sidepanel")
-
-  const [activeToolHint, setActiveToolHint] = useState<AiChatToolHint | null>(
-    null
-  )
 
   const [clarifyingQuestion, setClarifyingQuestion] =
     useState<ClarifyingQuestionState | null>(null)
@@ -492,7 +486,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         entityRefs,
         canvasActions,
         canvasEntities,
-        toolHints,
         credits,
         employeeCredits,
         fileAttachments,
@@ -504,8 +497,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         activeGame,
         openGame,
         closeGame,
-        activeToolHint,
-        setActiveToolHint,
         clarifyingQuestion,
         setClarifyingQuestion,
         fileDragOver,
@@ -579,7 +570,6 @@ export function useAiChat(): AiChatProviderReturnValue {
       entityRefs: undefined,
       canvasActions: undefined,
       canvasEntities: undefined,
-      toolHints: undefined,
       credits: undefined,
       employeeCredits: undefined,
       creditWarning: undefined,
@@ -592,8 +582,6 @@ export function useAiChat(): AiChatProviderReturnValue {
       activeGame: null,
       openGame: noopFn,
       closeGame: noopFn,
-      activeToolHint: null,
-      setActiveToolHint: noopFn,
       clarifyingQuestion: null,
       setClarifyingQuestion: noopFn,
       fileDragOver: false,
