@@ -3,8 +3,7 @@ import * as Icons from "@/icons/app"
 import { ExternalLink, Search } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Action } from "@/ui/Action/Action"
-
-import { AiCollapsibleMessage } from "../F0AiChat/components/shared/AiCollapsibleMessage"
+import { CollapsibleMessage } from "./components/CollapsibleMessage"
 
 /**
  * Information source attached to an assistant message.
@@ -60,7 +59,7 @@ export function F0AiMessageSources({
   const title = titleProp ?? translations.ai.resourcesGroupTitle
 
   return (
-    <AiCollapsibleMessage icon={Search} title={title}>
+    <CollapsibleMessage icon={Search} title={title}>
       <div className="flex flex-col gap-1 rounded-lg border border-solid border-f1-border-secondary p-2">
         {sources.map((source, index) => {
           const sourceIcon = <SourceIcon iconName={source.icon} />
@@ -94,7 +93,7 @@ export function F0AiMessageSources({
           )
         })}
       </div>
-    </AiCollapsibleMessage>
+    </CollapsibleMessage>
   )
 }
 

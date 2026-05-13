@@ -1,34 +1,116 @@
 import { useCopilotChatInternal } from "@copilotkit/react-core"
+import { useCallback, useMemo } from "react"
 
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
-import { ChatTextarea } from "./components/input/ChatTextarea"
+import { filterNonRenderableMessages } from "./internal-types"
+
+import { F0AiChatTextArea } from "../F0AiChatTextArea"
+import {
+  type F0AiChatTextAreaSubmitPayload,
+  type UserBinaryPart,
+  type UserTextPart,
+} from "../F0AiChatTextArea/types"
+
+import { ConnectedMessagesContainer } from "./components/ConnectedMessagesContainer"
 import { CanvasPanel } from "./components/layout/CanvasPanel"
-import { MessagesContainer } from "./components/messages/MessagesContainer"
 import { useAiChat } from "./providers/AiChatStateProvider"
 
 const FullscreenChatInput = () => {
-  const { sendMessage, inProgress, creditWarning } = useAiChat()
-  const { stopGeneration } = useCopilotChatInternal()
+  const {
+    sendMessage,
+    appendMessages,
+    inProgress,
+    creditWarning,
+    placeholders,
+    entityRefs,
+    fileAttachments,
+    clarifyingQuestion,
+    pendingContext,
+    setPendingContext,
+    pendingQuote,
+    setPendingQuote,
+    setProcessDroppedFilesFunction,
+    onBeforeSendMessage,
+    disclaimer,
+    footer,
+    isLoadingThread,
+  } = useAiChat()
+  const { stopGeneration, messages } = useCopilotChatInternal()
+  const translation = useI18n()
+  const filteredMessages = useMemo(
+    () => filterNonRenderableMessages(messages),
+    [messages]
+  )
+  const isWelcomeScreen = filteredMessages.length === 0 && !isLoadingThread
 
-  const handleSend = async (text: string) => {
-    sendMessage(text)
-    return { id: "", role: "user" as const, content: text }
-  }
+  const handleSubmit = useCallback(
+    ({ text, files, context }: F0AiChatTextAreaSubmitPayload) => {
+      if (context || files.length > 0) {
+        const contentParts: Array<UserTextPart | UserBinaryPart> = [
+          ...(context
+            ? [
+                {
+                  type: "text" as const,
+                  text: `<pending-context>${context.context}</pending-context>`,
+                },
+              ]
+            : []),
+          ...files.map((file) => ({
+            type: "binary" as const,
+            url: file.url,
+            filename: file.filename,
+            mimeType: file.mimetype,
+          })),
+          { type: "text" as const, text },
+        ]
+        sendMessage({
+          id: crypto.randomUUID(),
+          role: "user",
+          content: contentParts,
+        })
+      } else {
+        sendMessage(text)
+      }
+    },
+    [sendMessage]
+  )
 
-  const handleStop = () => {
+  const handleStop = useCallback(() => {
+    appendMessages(
+      [
+        {
+          role: "assistant",
+          content: `*<!--response-stopped-->${translation.ai.responseStopped}*`,
+        },
+      ],
+      { persist: false }
+    )
     stopGeneration()
-  }
+  }, [appendMessages, stopGeneration, translation.ai.responseStopped])
 
   return (
-    <div className="w-full px-4 py-2">
-      <ChatTextarea
-        inProgress={inProgress}
-        onSend={handleSend}
-        onStop={handleStop}
-        creditWarning={creditWarning}
-      />
-    </div>
+    <F0AiChatTextArea
+      onSubmit={handleSubmit}
+      onStop={handleStop}
+      inProgress={inProgress}
+      onBeforeSubmit={onBeforeSendMessage}
+      placeholders={placeholders}
+      creditWarning={creditWarning}
+      clarifyingQuestion={clarifyingQuestion}
+      pendingContext={pendingContext}
+      onPendingContextChange={setPendingContext}
+      pendingQuote={pendingQuote}
+      onPendingQuoteChange={setPendingQuote}
+      fileAttachments={fileAttachments}
+      searchPersons={entityRefs?.resolvers?.searchPersons}
+      onProcessFilesRef={setProcessDroppedFilesFunction}
+      disclaimer={disclaimer}
+      footer={footer}
+      isWelcomeScreen={isWelcomeScreen}
+      fullscreen
+    />
   )
 }
 
@@ -73,7 +155,7 @@ export const F0AiFullscreenChatComponent = () => {
       )}
 
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <MessagesContainer noShadows />
+        <ConnectedMessagesContainer noShadows />
       </div>
 
       <div

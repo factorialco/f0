@@ -6,18 +6,18 @@ import Cross from "@/icons/app/Cross"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 
-import { ChatInput } from "./components/input/ChatInput"
+import { AssistantMessage } from "../F0AiMessagesContainer/components/AssistantMessage"
+import { UserMessage } from "../F0AiMessagesContainer/components/UserMessage"
+
+import { ConnectedChatInput } from "./components/ConnectedChatInput"
+import { ConnectedMessagesContainer } from "./components/ConnectedMessagesContainer"
 import { ChatHeader } from "./components/layout/ChatHeader"
 import { SidebarWindow } from "./components/layout/ChatWindow"
-import { AssistantMessage } from "./components/messages/AssistantMessage"
-import { MessagesContainer } from "./components/messages/MessagesContainer"
-import { UserMessage } from "./components/messages/UserMessage"
-import { WelcomeScreenSuggestion } from "./components/messages/WelcomeScreen"
 import { CopilotFunctionBridge } from "./components/shared/CopilotFunctionBridge"
 import { F0AiFullscreenChatComponent } from "./F0AiFullscreenChat"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
 import { OrderedMessagePartsProvider } from "./providers/OrderedMessagePartsProvider"
-import { AiChatProviderProps } from "./types"
+import { AiChatProviderProps, type WelcomeScreenSuggestion } from "./types"
 
 const F0AiChatProviderComponent = ({
   enabled = false,
@@ -134,11 +134,11 @@ const F0AiChatComponent = () => {
       }}
       Window={SidebarWindow}
       Header={ChatHeader}
-      Messages={MessagesContainer}
+      Messages={ConnectedMessagesContainer}
       Button={() => {
         return null // hide CopilotKit's default chat button
       }}
-      Input={ChatInput}
+      Input={ConnectedChatInput}
       UserMessage={UserMessage}
       AssistantMessage={AssistantMessage}
     />

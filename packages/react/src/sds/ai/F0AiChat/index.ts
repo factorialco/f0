@@ -33,7 +33,7 @@ export type {
 } from "./types"
 
 // Tool-call context (host actions need it to identify their own tool call)
-export { useToolCallId } from "./components/messages/AssistantMessage"
+export { useToolCallId } from "../F0AiMessagesContainer"
 
 export { aiTranslations } from "./types"
 
