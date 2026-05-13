@@ -26,7 +26,11 @@ const Switch = React.forwardRef<
         aria-label={props.title ?? "Switch"}
         className={cn(
           "relative h-5 w-[1.875rem] rounded-full bg-f1-border hover:bg-f1-border-hover data-[state=checked]:bg-f1-background-selected-bold",
-          disabled && "cursor-not-allowed opacity-50",
+          // `!cursor-not-allowed` defends against consumer CSS resets (e.g. ress.css)
+          // that target `[disabled]` / `[aria-disabled='true']` with the same
+          // specificity as `.cursor-not-allowed` and would otherwise win when
+          // loaded after F0 styles.
+          disabled && "!cursor-not-allowed opacity-50",
           focusRing(),
           className
         )}
@@ -43,7 +47,8 @@ const Switch = React.forwardRef<
           htmlFor={switchId}
           className={cn(
             "flex items-center justify-center pl-2.5 text-current",
-            disabled && "cursor-not-allowed opacity-50 hover:cursor-not-allowed"
+            disabled &&
+              "!cursor-not-allowed opacity-50 hover:!cursor-not-allowed"
           )}
         >
           {props.title}
