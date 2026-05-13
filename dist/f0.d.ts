@@ -5301,11 +5301,42 @@ export declare class F0AiMask {
 }
 
 /**
+ * Information source attached to an assistant message.
+ */
+export declare type F0AiMessageSource = {
+    title: string;
+    link?: string;
+    /** Name of an icon exported by `@factorialco/f0-react/icons/app`. */
+    icon?: string;
+    targetBlank?: boolean;
+};
+
+/**
+ * Renders a collapsible group of information sources attached to an
+ * assistant message. Sources without a `link` render as plain rows;
+ * sources with a `link` render as clickable Actions. Pure presentational
+ * — no hooks, no AI coupling.
+ */
+export declare function F0AiMessageSources({ sources, title, }: F0AiMessageSourcesProps): JSX_2.Element | null;
+
+export declare namespace F0AiMessageSources {
+    var displayName: string;
+}
+
+export declare type F0AiMessageSourcesProps = {
+    sources: F0AiMessageSource[];
+    /** Override the section title (default: `"Resources"`). */
+    title?: string;
+};
+
+/**
  * Compact inline table for small datasets shown directly in an AI chat
  * stream. Headers come from `columnLabels` when present, otherwise from
- * the raw column id. Pure presentational — no hooks, no AI coupling.
+ * the raw column id. Shows a download dropdown (Excel / CSV) — Excel
+ * support is loaded lazily via `xlsx`. Pure presentational — no hooks,
+ * no AI coupling.
  */
-export declare function F0AiTableCard({ dataset }: F0AiTableCardProps): JSX_2.Element | null;
+export declare function F0AiTableCard({ dataset, title, filename, }: F0AiTableCardProps): JSX_2.Element | null;
 
 export declare namespace F0AiTableCard {
     var displayName: string;
@@ -5317,6 +5348,15 @@ export declare type F0AiTableCardProps = {
      * `dataDownload` canvas entity so the agent payload travels untouched.
      */
     dataset: DataDownloadDataset;
+    /**
+     * Title shown above the table. Defaults to `"Table"`.
+     */
+    title?: string;
+    /**
+     * Filename used for downloads (without extension). Defaults to the
+     * slugified title, or `"table"` when no title is provided.
+     */
+    filename?: string;
 };
 
 export declare const F0Alert: WithDataTestIdReturnType_3<({ title, description, action, link, icon, variant, onClose, }: F0AlertProps) => JSX_2.Element>;
@@ -14026,13 +14066,8 @@ declare module "gridstack" {
 }
 
 
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
-        };
-    }
+declare namespace Calendar {
+    var displayName: string;
 }
 
 
@@ -14041,6 +14076,16 @@ declare module "@tiptap/core" {
         aiBlock: {
             insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
             executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -14072,9 +14117,4 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

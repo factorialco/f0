@@ -1,6 +1,6 @@
-import { h as e, g as r, F as t, a as i, C as o, b as n, f as F, i as C, j as l, I as u, d as A, e as d, u as m, c as h } from "./F0AiChat-mniTB5uk.js";
+import { h as e, g as r, F as t, a as i, C as o, b as n, f as F, i as C, j as l, I as u, d as A, e as d, u as m, c } from "./F0AiChat-CwrqfdqO.js";
 import { defaultTranslations as I } from "./i18n-provider-defaults.js";
-import { A as T, i as v, f as p, k as P, g as S, d as g, h as x, F as V, e as b, a as y, j, o as k, u as O, b as w, c as z } from "./F0AiTableCard-ChAPp60w.js";
+import { A as T, i as v, f as S, k as g, l as p, g as P, d as x, h as V, F as b, e as y, a as j, j as k, o as M, u as O, b as w, c as z } from "./F0AiTableCard-QAliMpV9.js";
 export {
   T as AiChatTranslationsProvider,
   e as ChatSpinner,
@@ -10,26 +10,27 @@ export {
   o as F0AiChatTextArea,
   n as F0AiFullscreenChat,
   v as F0AiInsightCard,
-  p as F0AiMask,
-  P as F0AiTableCard,
-  S as F0AuraVoiceAnimation,
-  g as F0CanvasCard,
+  S as F0AiMask,
+  g as F0AiMessageSources,
+  p as F0AiTableCard,
+  P as F0AuraVoiceAnimation,
+  x as F0CanvasCard,
   F as F0ClarifyingPanel,
-  x as F0HILActionConfirmation,
+  V as F0HILActionConfirmation,
   C as F0OneIcon,
   l as F0OneSwitch,
-  V as FormCardValueFormatterProvider,
+  b as FormCardValueFormatterProvider,
   u as I18nProvider,
-  b as actionItemStatuses,
-  y as aiTranslations,
-  j as contentTypes,
+  y as actionItemStatuses,
+  j as aiTranslations,
+  k as contentTypes,
   I as defaultTranslations,
-  k as oneIconSizes,
+  M as oneIconSizes,
   A as useAiChat,
   O as useAiChatTranslations,
   d as useCanvasEntity,
   w as useFormCardValueFormatter,
   m as useI18n,
   z as useSetFormCardValueFormatter,
-  h as useToolCallId
+  c as useToolCallId
 };
