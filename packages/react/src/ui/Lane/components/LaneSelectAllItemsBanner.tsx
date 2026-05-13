@@ -29,7 +29,9 @@ export const LaneSelectAllItemsBanner = ({
       )}
     >
       <span>
-        {allItemsSelected ? allItemsSelectedLabel : loadedSelectionLabel}
+        {allItemsSelected
+          ? (allItemsSelectedLabel ?? loadedSelectionLabel)
+          : loadedSelectionLabel}
       </span>
       {!allItemsSelected && selectAllItemsLabel && (
         <F0Button

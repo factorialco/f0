@@ -521,7 +521,7 @@ export const SelectableUnchecked: Story = {
     docs: {
       description: {
         story:
-          "Lane with `selectable` enabled. The header checkbox is unchecked when no items in the lane are selected.",
+          "Lane with a `selection` object passed in to enable the header checkbox. The checkbox is unchecked when no items in the lane are selected.",
       },
     },
   },
