@@ -1,6 +1,7 @@
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import * as Icons from "@/icons/app"
 import { ExternalLink, Search } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { Action } from "@/ui/Action/Action"
 
 import { AiCollapsibleMessage } from "../F0AiChat/components/shared/AiCollapsibleMessage"
@@ -18,7 +19,10 @@ export type F0AiMessageSource = {
 
 export type F0AiMessageSourcesProps = {
   sources: F0AiMessageSource[]
-  /** Override the section title (default: `"Resources"`). */
+  /**
+   * Override the section title. Defaults to the
+   * `ai.resourcesGroupTitle` translation key.
+   */
   title?: string
 }
 
@@ -45,11 +49,15 @@ const SourceIcon = ({ iconName }: { iconName?: string }) => {
  */
 export function F0AiMessageSources({
   sources,
-  title = "Resources",
+  title: titleProp,
 }: F0AiMessageSourcesProps) {
+  const translations = useI18n()
+
   if (!sources || sources.length === 0 || !Array.isArray(sources)) {
     return null
   }
+
+  const title = titleProp ?? translations.ai.resourcesGroupTitle
 
   return (
     <AiCollapsibleMessage icon={Search} title={title}>

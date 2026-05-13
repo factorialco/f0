@@ -281,6 +281,7 @@ export const defaultTranslations = {
     responseStopped: "You stopped this response",
     sendMessage: "Send message",
     thoughtsGroupTitle: "Reflection",
+    resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
     feedbackModal: {
       positive: {
@@ -338,6 +339,11 @@ export const defaultTranslations = {
     },
     formCard: {
       moreFields: "Open to see all fields",
+    },
+    aiTable: {
+      title: "Table",
+      downloadExcel: "Download Excel",
+      downloadCsv: "Download CSV",
     },
     dataDownload: {
       title: "Download",

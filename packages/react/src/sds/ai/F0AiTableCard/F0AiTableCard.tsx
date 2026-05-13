@@ -4,6 +4,7 @@ import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { Download } from "@/icons/app"
 import { F0Box } from "@/lib/F0Box"
 import { OneEllipsis } from "@/lib/OneEllipsis"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import type { DataDownloadDataset } from "../canvas/types"
@@ -27,7 +28,8 @@ export type F0AiTableCardProps = {
    */
   dataset: DataDownloadDataset
   /**
-   * Title shown above the table. Defaults to `"Table"`.
+   * Title shown above the table. Defaults to the `ai.aiTable.title`
+   * translation key (English: "Table").
    */
   title?: string
   /**
@@ -46,10 +48,13 @@ export type F0AiTableCardProps = {
  */
 export function F0AiTableCard({
   dataset,
-  title = "Table",
+  title: titleProp,
   filename,
 }: F0AiTableCardProps) {
+  const translations = useI18n()
   const tableRef = useRef<HTMLTableElement>(null)
+
+  const title = titleProp ?? translations.ai.aiTable.title
 
   const handleDownload = useCallback(
     (format: DownloadFormat) => {
@@ -94,12 +99,12 @@ export function F0AiTableCard({
           size="md"
           items={[
             {
-              label: "Download Excel",
+              label: translations.ai.aiTable.downloadExcel,
               icon: Download,
               onClick: () => handleDownload("xlsx"),
             },
             {
-              label: "Download CSV",
+              label: translations.ai.aiTable.downloadCsv,
               icon: Download,
               onClick: () => handleDownload("csv"),
             },
