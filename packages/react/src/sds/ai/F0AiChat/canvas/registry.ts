@@ -1,14 +1,16 @@
 import type { CanvasEntityDefinition } from "./types"
 
 import { dashboardCanvasEntity } from "./entities/dashboard"
-import { formCanvasEntity } from "./entities/form"
 import { dataDownloadCanvasEntity } from "./entities/dataDownload"
+import { dynamicCanvasEntity } from "./entities/dynamicCanvas"
+import { formCanvasEntity } from "./entities/form"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const canvasEntities: Record<string, CanvasEntityDefinition<any>> = {
   dashboard: dashboardCanvasEntity,
   form: formCanvasEntity,
   dataDownload: dataDownloadCanvasEntity,
+  dynamicCanvas: dynamicCanvasEntity,
 }
 
 /**

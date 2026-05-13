@@ -138,10 +138,33 @@ export type DataDownloadCanvasContent = CanvasContentBase & {
  * Discriminated union for canvas panel content.
  * Add new entity types to this union as they are implemented.
  */
+export type DynamicCanvasContent = CanvasContentBase & {
+  type: "dynamicCanvas"
+  renderer: string
+  specVersion?: string
+  spec: Record<string, unknown>
+  data?: Record<string, unknown>[]
+  datasetId?: string
+  fetchSpecs?: Record<
+    string,
+    {
+      fetch: Array<{ toolId: string; args: Record<string, unknown> }>
+      query: string | null
+      columnLabels?: Record<string, string>
+    }
+  >
+  apiConfig?: {
+    baseUrl: string
+    headers: Record<string, string>
+    runtimeFetch?: typeof fetch
+  }
+}
+
 export type CanvasContent =
   | DashboardCanvasContent
   | FormCanvasContent
   | DataDownloadCanvasContent
+  | DynamicCanvasContent
 
 /**
  * A tool hint that can be activated to prepend invisible context to the user's

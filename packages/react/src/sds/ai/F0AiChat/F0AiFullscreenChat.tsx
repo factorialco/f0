@@ -69,23 +69,37 @@ export const F0AiFullscreenChatComponent = () => {
         }
       `}</style>
 
-      {isCanvasMode && canvasContent && (
-        <div className={cn("pointer-events-none overflow-y-scroll")}>
-          <CanvasPanel />
-        </div>
-      )}
-
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <MessagesContainer noShadows />
-      </div>
-
       <div
         className={cn(
-          "z-10 flex w-full shrink-0 flex-col touch-none border-t border-f1-border bg-f1-background",
-          "pb-[env(safe-area-inset-bottom,12px)] focus-within:pb-0"
+          "flex min-h-0 flex-1 overflow-hidden",
+          isCanvasMode && canvasContent ? "flex-col md:flex-row" : "flex-col"
         )}
       >
-        <FullscreenChatInput />
+        {isCanvasMode && canvasContent && (
+          <div
+            className={cn(
+              "pointer-events-none h-[min(65vh,720px)] min-h-[420px] shrink-0 overflow-y-scroll",
+              "md:h-full md:min-h-0 md:w-[min(72vw,1280px)] md:overflow-hidden"
+            )}
+          >
+            <CanvasPanel />
+          </div>
+        )}
+
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            <MessagesContainer noShadows />
+          </div>
+
+          <div
+            className={cn(
+              "z-10 flex w-full shrink-0 flex-col touch-none border-t border-f1-border bg-f1-background",
+              "pb-[env(safe-area-inset-bottom,12px)] focus-within:pb-0"
+            )}
+          >
+            <FullscreenChatInput />
+          </div>
+        </div>
       </div>
     </div>
   )

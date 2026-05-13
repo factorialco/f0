@@ -5,6 +5,12 @@ import { Lightbulb, ThumbsDown, ThumbsUp } from "@/icons/app"
 
 import { F0AiChatProvider, F0AiFullscreenChat, useAiChat } from ".."
 
+const defaultRuntimeUrl = "https://mastra.local.factorial.dev/copilotkit"
+
+const getRuntimeUrl = () =>
+  (globalThis as { __F0_AI_RUNTIME_URL__?: string }).__F0_AI_RUNTIME_URL__ ??
+  defaultRuntimeUrl
+
 const FullscreenChatWrapper = ({
   children,
 }: {
@@ -47,7 +53,7 @@ const meta = {
       return (
         <F0AiChatProvider
           enabled
-          runtimeUrl="https://mastra.local.factorial.dev/copilotkit"
+          runtimeUrl={getRuntimeUrl()}
           agent="one-workflow"
           credentials="include"
           showDevConsole={false}
@@ -78,7 +84,7 @@ export const WithToolHints: Story = {
       return (
         <F0AiChatProvider
           enabled
-          runtimeUrl="https://mastra.local.factorial.dev/copilotkit"
+          runtimeUrl={getRuntimeUrl()}
           agent="one-workflow"
           credentials="include"
           showDevConsole={false}
@@ -111,7 +117,7 @@ export const WithFooter: Story = {
       return (
         <F0AiChatProvider
           enabled
-          runtimeUrl="https://mastra.local.factorial.dev/copilotkit"
+          runtimeUrl={getRuntimeUrl()}
           agent="one-workflow"
           credentials="include"
           showDevConsole={false}
