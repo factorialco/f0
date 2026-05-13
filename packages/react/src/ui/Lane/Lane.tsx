@@ -30,6 +30,11 @@ export function Lane<Record extends RecordType>({
   onPrimaryAction,
   onFooterAction,
   dropPlaceholderIndex,
+  selectable,
+  selected,
+  indeterminate,
+  onSelectAll,
+  selectAllLabel,
 }: LaneProps<Record>) {
   // Create pagination info for infinite scroll
   const paginationInfo = {
@@ -57,6 +62,11 @@ export function Lane<Record extends RecordType>({
         variant={variant}
         count={total ?? items.length}
         onPrimaryAction={onPrimaryAction}
+        selectable={selectable}
+        selected={selected}
+        indeterminate={indeterminate}
+        onSelectAll={onSelectAll}
+        selectAllLabel={selectAllLabel}
       />
 
       <div

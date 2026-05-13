@@ -77,4 +77,25 @@ export interface LaneProps<Record extends RecordType> {
    * If undefined, no placeholder is shown.
    */
   dropPlaceholderIndex?: number
+
+  /**
+   * Whether the lane should expose a select-all checkbox in its header.
+   */
+  selectable?: boolean
+  /**
+   * Whether the select-all checkbox in the header is checked.
+   */
+  selected?: boolean
+  /**
+   * Whether the select-all checkbox in the header is in indeterminate state.
+   */
+  indeterminate?: boolean
+  /**
+   * Callback fired when the select-all checkbox is toggled.
+   */
+  onSelectAll?: (checked: boolean) => void
+  /**
+   * Accessible label for the select-all checkbox (visually hidden).
+   */
+  selectAllLabel?: string
 }

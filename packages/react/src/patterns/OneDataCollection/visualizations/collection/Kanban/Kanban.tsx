@@ -17,6 +17,7 @@ import {
 } from "@/hooks/datasource"
 import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
+import { useI18n } from "@/lib/providers/i18n"
 import { useIsDev } from "@/lib/providers/user-platafform"
 import { Kanban } from "@/ui/Kanban"
 import { KanbanCard } from "@/ui/Kanban/components/KanbanCard"
@@ -111,6 +112,39 @@ export const KanbanCollection = <
     return Boolean(paginationInfo && paginationInfo.type === "infinite-scroll")
   }
 
+  /**
+   * Selection
+   */
+  const i18n = useI18n()
+
+  const lanesDef = useMemo(() => {
+    return lanes.map((lane) => ({
+      id: lane.id,
+      data: lanesHooks[lane.id]?.data || {
+        type: "flat",
+        records: [],
+        groups: [],
+      },
+      paginationInfo: lanesHooks[lane.id]?.paginationInfo || null,
+    }))
+  }, [lanes, lanesHooks])
+
+  const { lanesSelectProvider, lanesUseSelectable } = useSelectableLanes<
+    R,
+    Filters,
+    Sortings,
+    Summaries,
+    NavigationFilters,
+    Grouping
+  >(lanesDef, source, (selectItemsStatus, clearCallback) => {
+    onSelectItems?.(selectItemsStatus, clearCallback)
+  })
+
+  // Fine-grained reorder only when no sort order is applied
+  const allowReorder = source.currentSortings === null
+
+  const isSelectable = source.selectable !== undefined
+
   const kanbanProps: KanbanProps<R> = {
     lanes: laneItems.map((l) => {
       const laneData = lanesHooks[l.id]
@@ -119,6 +153,24 @@ export const KanbanCollection = <
       const hasMore =
         isInfiniteScrollPaginationInfo(laneData?.paginationInfo) &&
         laneData?.paginationInfo?.hasMore
+
+      const laneSel = lanesUseSelectable.get(l.id)
+      const laneRecords = laneData?.data?.records || []
+      const loadedSelectableIds = source.selectable
+        ? laneRecords
+            .map((record) => source.selectable!(record))
+            .filter(
+              (id): id is string | number =>
+                typeof id === "string" || typeof id === "number"
+            )
+        : []
+      const selected =
+        loadedSelectableIds.length > 0 &&
+        loadedSelectableIds.every((id) => laneSel?.selectedItems.has(id))
+      const indeterminate =
+        loadedSelectableIds.some((id) => laneSel?.selectedItems.has(id)) &&
+        !selected
+
       return {
         id: l.id,
         title: l.title,
@@ -129,6 +181,20 @@ export const KanbanCollection = <
         loading: laneData?.isLoading || false,
         loadingMore: laneData?.isLoadingMore || false,
         fetchMore: hasMore ? () => laneData.loadMore() : undefined,
+        selectable: isSelectable,
+        selected,
+        indeterminate,
+        onSelectAll: (checked: boolean) => {
+          if (!laneSel) {
+            console.warn(
+              "[OneDataCollection/Kanban] onSelectAll called but laneSel is missing for lane",
+              l.id
+            )
+            return
+          }
+          laneSel.handleSelectAll(checked)
+        },
+        selectAllLabel: i18n.actions.selectAll,
       }
     }),
     loading: Object.values(lanesHooks).some(
@@ -229,8 +295,6 @@ export const KanbanCollection = <
   }, [totalItemsAggregated, isInitialLoadingAggregated])
 
   // Fine-grained reorder only when no sort order is applied
-  const allowReorder = source.currentSortings === null
-
   // Build index maps per lane when needed
   const laneIndexMaps = useMemo(() => {
     const maps = new Map<string, Map<string, number>>()
@@ -256,33 +320,6 @@ export const KanbanCollection = <
     },
     onMove: onMove,
   }
-
-  /**
-   * Selection
-   */
-
-  const lanesDef = useMemo(() => {
-    return lanes.map((lane) => ({
-      id: lane.id,
-      data: lanesHooks[lane.id]?.data || {
-        type: "flat",
-        records: [],
-        groups: [],
-      },
-      paginationInfo: lanesHooks[lane.id]?.paginationInfo || null,
-    }))
-  }, [lanes, lanesHooks])
-
-  const { lanesSelectProvider, lanesUseSelectable } = useSelectableLanes<
-    R,
-    Filters,
-    Sortings,
-    Summaries,
-    NavigationFilters,
-    Grouping
-  >(lanesDef, source, (selectItemsStatus, clearCallback) => {
-    onSelectItems?.(selectItemsStatus, clearCallback)
-  })
 
   return (
     <>

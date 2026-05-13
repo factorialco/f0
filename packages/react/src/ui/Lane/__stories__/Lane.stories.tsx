@@ -515,6 +515,63 @@ export const TwoLanesDnD: Story = {
   },
 }
 
+export const SelectableUnchecked: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Lane with `selectable` enabled. The header checkbox is unchecked when no items in the lane are selected.",
+      },
+    },
+  },
+  args: {
+    title: "To do",
+    items: mockTasks,
+    getKey: (task: RecordType) => (task as MockTask).id,
+    selectable: true,
+    selected: false,
+    indeterminate: false,
+    selectAllLabel: "Select all",
+    onSelectAll: fn(),
+    renderCard: (task: RecordType) => (
+      <F0Card
+        title={(task as MockTask).title}
+        description={(task as MockTask).description}
+      />
+    ),
+  },
+}
+
+export const SelectableIndeterminate: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Lane header checkbox renders an indeterminate state when only some loaded items are selected.",
+      },
+    },
+  },
+  args: {
+    ...SelectableUnchecked.args,
+    indeterminate: true,
+  },
+}
+
+export const SelectableChecked: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Lane header checkbox is checked when every loaded item in the lane is selected.",
+      },
+    },
+  },
+  args: {
+    ...SelectableUnchecked.args,
+    selected: true,
+  },
+}
+
 // Types are kept inline in the effect to avoid unused warnings
 
 function MoveMonitor({
