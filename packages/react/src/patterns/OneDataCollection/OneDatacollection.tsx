@@ -64,7 +64,7 @@ import { SummariesDefinition } from "./summary"
 import { useEventEmitter } from "./useEventEmitter"
 import { VisualizationRenderer } from "./visualizations/collection"
 
-const SUCCESS_DISMISS_MS = 1500
+const SUCCESS_DISMISS_MS = 2000
 
 /**
  * A component that renders a collection of data with filtering and visualization capabilities.

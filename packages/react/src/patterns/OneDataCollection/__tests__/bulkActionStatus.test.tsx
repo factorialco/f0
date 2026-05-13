@@ -190,7 +190,7 @@ describe("OneDataCollection bulk-action status", () => {
 
   test("bar dismisses after SUCCESS_DISMISS_MS on resolve (fake timers)", async () => {
     // Uses fake timers so the test completes instantly without waiting for the
-    // real 1500ms dismiss delay. userEvent must be set up with advanceTimers so
+    // real 2000ms dismiss delay. userEvent must be set up with advanceTimers so
     // its internal scheduler and fake timers don't deadlock.
     vi.useFakeTimers({ shouldAdvanceTime: true })
 
@@ -238,8 +238,8 @@ describe("OneDataCollection bulk-action status", () => {
     // "success" + setTimeout) runs synchronously from our perspective.
     await Promise.resolve()
 
-    // Skip past the 1500ms success-dismiss timer instantly.
-    vi.advanceTimersByTime(1500)
+    // Skip past the 2000ms success-dismiss timer instantly.
+    vi.advanceTimersByTime(2000)
 
     // Bar must now be gone.
     await waitFor(() => {
@@ -414,7 +414,7 @@ describe("OneDataCollection bulk-action status", () => {
 
   test("controlled 'success' auto-clears selection after SUCCESS_DISMISS_MS", async () => {
     // When the consumer sets bulkActionStatus="success", F0 should auto-clear
-    // selection and reset to idle after ~1500ms — no manual timer or
+    // selection and reset to idle after ~2000ms — no manual timer or
     // clearSelectedItems call needed from the consumer.
     vi.useFakeTimers({ shouldAdvanceTime: true })
     const user = userEvent.setup({
@@ -463,7 +463,7 @@ describe("OneDataCollection bulk-action status", () => {
 
     // Advance past SUCCESS_DISMISS_MS.
     act(() => {
-      vi.advanceTimersByTime(1500)
+      vi.advanceTimersByTime(2000)
     })
 
     // The nested setTimeout(0) defers the status transition — flush it.
