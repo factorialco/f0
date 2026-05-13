@@ -5,6 +5,35 @@ import { zeroRender as render, screen } from "@/testing/test-utils"
 import { F0AiTableCard } from "../F0AiTableCard"
 
 describe("F0AiTableCard", () => {
+  it("renders the default title when none is provided", () => {
+    render(
+      <F0AiTableCard
+        dataset={{
+          columns: ["name"],
+          rows: [{ name: "Ada" }],
+        }}
+      />
+    )
+
+    expect(screen.getByRole("heading", { name: "Table" })).toBeInTheDocument()
+  })
+
+  it("renders a custom title when provided", () => {
+    render(
+      <F0AiTableCard
+        title="Headcount by country"
+        dataset={{
+          columns: ["country"],
+          rows: [{ country: "Spain" }],
+        }}
+      />
+    )
+
+    expect(
+      screen.getByRole("heading", { name: "Headcount by country" })
+    ).toBeInTheDocument()
+  })
+
   it("renders column headers using raw column ids when no labels are given", () => {
     render(
       <F0AiTableCard
