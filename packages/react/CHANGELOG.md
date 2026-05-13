@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/factorialco/f0/compare/f0-react-v2.0.0...f0-react-v2.0.1) (2026-05-13)
+
+
+### Bug Fixes
+
+* **F0ActionItem:** remove unnecessary margin utility ([#4128](https://github.com/factorialco/f0/issues/4128)) ([1d928a2](https://github.com/factorialco/f0/commit/1d928a2cfaa0e8f60641fcd69a1f1e142cc71af4))
+
 ## [2.0.0](https://github.com/factorialco/f0/compare/f0-react-v1.482.0...f0-react-v2.0.0) (2026-05-13)
 
 
