@@ -55,7 +55,7 @@ const personFromEmployee = (id: string) => {
 }
 
 export const aiChatConfig = {
-  enabled: true,
+  enabled: false,
   agent: import.meta.env.VITE_AGENT_NAME ?? DEFAULT_AGENT_NAME,
   runtimeUrl: import.meta.env.VITE_AGENT_URL ?? DEFAULT_AGENT_URL,
   credentials: "include" as const,
@@ -68,7 +68,7 @@ export const aiChatConfig = {
   // routes under `/copilotkit/chat-history/threads/*` (see
   // factorial-agent/src/mastra/index.ts), so users can switch between
   // past conversations across prototype reloads.
-  historyEnabled: true,
+  historyEnabled: false,
   entityRefs: {
     resolvers: {
       person: async (id: string) => personFromEmployee(id),

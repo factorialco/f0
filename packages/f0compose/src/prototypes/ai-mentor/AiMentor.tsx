@@ -3,25 +3,24 @@ import {
   PageHeader,
   Tabs,
 } from "@factorialco/f0-react/dist/experimental"
-import { Person, Sparkles } from "@factorialco/f0-react/icons/app"
+import { Person } from "@factorialco/f0-react/icons/app"
 import { useCallback } from "react"
 import { useSearchParams } from "react-router-dom"
 
 import type { PrototypeMeta } from "../types"
 import { type AiMentorTab, moduleTabs } from "./tabs"
-import { OverviewTab } from "./overview/OverviewTab"
-import { RecommendationsTab } from "./recommendations/RecommendationsTab"
-import { DraftCoursesTab } from "./draft-courses/DraftCoursesTab"
-import { CareerPathsTab } from "./career-paths/CareerPathsTab"
-import { CompanyContextTab } from "./company-context/CompanyContextTab"
+import { AiMentorSettingsTab } from "./settings/AiMentorSettingsTab"
+import { BudgetsTab } from "./budgets/BudgetsTab"
+import { InsightsTab } from "./insights/InsightsTab"
+import { RequestsTab } from "./requests/RequestsTab"
+import { TrainingsTab } from "./trainings/TrainingsTab"
 import { EmployeeView } from "./shared/EmployeeView"
-import { ManagerView } from "./shared/ManagerView"
 
 export const meta: PrototypeMeta = {
   slug: "ai-mentor",
   title: "AI Mentor",
   description:
-    "AI-powered personalised learning paths for every employee. The AI Mentor analyses performance reviews, goals, competencies and career paths to recommend the right course at the right time. Covers the L&D Admin dashboard, recommendation management, draft course review, career path configuration, company context settings, and both employee and manager views.",
+    "AI Mentor embedded in the real Trainings admin flow. Courses, requests, budgets and insights keep their existing logic; AI Mentor only adds context when a closed Performance Review creates a learning recommendation.",
   category: "Talent",
   module: "my-training",
   audience: ["admin", "manager", "employee"],
@@ -37,16 +36,14 @@ export default function AiMentor() {
   const requestedTab = searchParams.get("tab")
   const activeTab = VALID_TABS.has(requestedTab as AiMentorTab)
     ? (requestedTab as AiMentorTab)
-    : "overview"
+    : "trainings"
 
   const view = searchParams.get("view") ?? ""
   const employeeId = searchParams.get("employeeId") ?? ""
-  const managerId = searchParams.get("managerId") ?? ""
-
   const setTab = useCallback(
     (id: string) => {
       const next = new URLSearchParams()
-      if (id !== "overview") next.set("tab", id)
+      if (id !== "trainings") next.set("tab", id)
       setSearchParams(next)
     },
     [setSearchParams]
@@ -55,13 +52,6 @@ export default function AiMentor() {
   const goToEmployeeView = useCallback(
     (id: string) => {
       setSearchParams({ view: "employee", employeeId: id })
-    },
-    [setSearchParams]
-  )
-
-  const goToManagerView = useCallback(
-    (id: string) => {
-      setSearchParams({ view: "manager", managerId: id })
     },
     [setSearchParams]
   )
@@ -83,13 +73,6 @@ export default function AiMentor() {
   }
 
   // -------------------------------------------------------------------------
-  // Sub-screen: manager view
-  // -------------------------------------------------------------------------
-  if (view === "manager") {
-    return <ManagerView managerId={managerId} onBack={goBack} />
-  }
-
-  // -------------------------------------------------------------------------
   // Main admin view
   // -------------------------------------------------------------------------
   return (
@@ -98,20 +81,15 @@ export default function AiMentor() {
         <>
           <PageHeader
             module={{
-              id: "my_trainings",
-              name: "Training",
+              id: "company_trainings",
+              name: "Trainings",
               href: "/p/ai-mentor",
             }}
             actions={[
               {
-                label: "Employee view",
+                label: "Preview My trainings",
                 icon: Person,
                 onClick: () => goToEmployeeView("emp-005"),
-              },
-              {
-                label: "Manager view",
-                icon: Sparkles,
-                onClick: () => goToManagerView("emp-004"),
               },
             ]}
           />
@@ -124,18 +102,11 @@ export default function AiMentor() {
       }
     >
       <div className="flex flex-col gap-6 p-8">
-        {activeTab === "overview" && (
-          <OverviewTab
-            onViewEmployee={goToEmployeeView}
-            onViewManager={goToManagerView}
-          />
-        )}
-        {activeTab === "recommendations" && (
-          <RecommendationsTab onViewEmployee={goToEmployeeView} />
-        )}
-        {activeTab === "draft-courses" && <DraftCoursesTab />}
-        {activeTab === "career-paths" && <CareerPathsTab />}
-        {activeTab === "company-context" && <CompanyContextTab />}
+        {activeTab === "trainings" && <TrainingsTab />}
+        {activeTab === "requests" && <RequestsTab />}
+        {activeTab === "budgets" && <BudgetsTab />}
+        {activeTab === "insights" && <InsightsTab />}
+        {activeTab === "ai-mentor-settings" && <AiMentorSettingsTab />}
       </div>
     </Page>
   )

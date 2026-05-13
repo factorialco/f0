@@ -1,8 +1,10 @@
 import { F0Provider } from "@factorialco/f0-react"
+import { CopilotKit } from "@copilotkit/react-core"
 import { Outlet, useLocation, useNavigate } from "react-router-dom"
 import { defaultI18nTranslations, defaultL10n } from "@/lib/providers"
 import { prototypeRegistry } from "@/prototypes/registry"
 import { FloatingControls } from "@/shell/FloatingControls"
+import { aiChatConfig } from "@/shell/aiChatConfig"
 
 /**
  * Root layout. Wires F0Provider with:
@@ -27,7 +29,7 @@ export function App() {
     if (entry) currentPath = `/__module/${entry.meta.module}`
   }
 
-  return (
+  const inner = (
     <F0Provider
       i18n={{ translations: defaultI18nTranslations }}
       l10n={{ l10n: defaultL10n }}
@@ -45,7 +47,6 @@ export function App() {
                 return
               }
               event.preventDefault()
-              // Synthetic /__module/* hrefs are sidebar markers — no nav.
               if (href.startsWith("/__module/")) return
               navigate(href)
             }}
@@ -56,5 +57,11 @@ export function App() {
       <Outlet />
       <FloatingControls />
     </F0Provider>
+  )
+
+  return (
+    <CopilotKit runtimeUrl={aiChatConfig.runtimeUrl} agent={aiChatConfig.agent}>
+      {inner}
+    </CopilotKit>
   )
 }

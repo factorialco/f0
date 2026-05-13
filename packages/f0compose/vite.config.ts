@@ -9,6 +9,13 @@ export default defineConfig({
     alias: {
       "@": resolve(__dirname, "./src"),
     },
+    dedupe: [
+      "@copilotkit/react-core",
+      "@copilotkit/react-ui",
+      "@copilotkit/shared",
+      "react",
+      "react-dom",
+    ],
   },
   server: {
     port: 5174,

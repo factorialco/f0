@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "f0compose (Vite)",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@factorialco/f0compose", "run", "dev:vite"],
+      "port": 5174
+    },
+    {
+      "name": "f0-react Storybook",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@factorialco/f0-react", "run", "dev"],
+      "port": 6006
+    }
+  ]
+}

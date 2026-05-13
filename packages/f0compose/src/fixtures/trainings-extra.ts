@@ -1,0 +1,1135 @@
+/**
+ * Extra trainings fixtures — sessions, requests, budgets, axes, attendances,
+ * survey templates/answers, content modules, instructors, insights aggregates,
+ * Fundae settings. Layered on top of `./trainings.ts` so the original file
+ * stays intact.
+ *
+ * Anchored to the 3 real seeded trainings from `factorial_development`
+ * (Merchandising visual, Resolución de conflictos, Fundamentos ISO 9001)
+ * plus the existing synthetic ones (Management Fundamentals, GDPR, React
+ * Advanced Patterns, New Employee Orientation, Fire Safety, Public Speaking,
+ * Data Analysis with Python).
+ */
+
+import { avatarFor } from "./helpers"
+
+// --- TAGS / AXES ------------------------------------------------------------
+
+export type TrainingAxis = { id: string; name: string }
+
+export const trainingAxes: TrainingAxis[] = [
+  { id: "axis-001", name: "Strategic" },
+  { id: "axis-002", name: "Operational" },
+  { id: "axis-003", name: "Compliance" },
+  { id: "axis-004", name: "Career development" },
+  { id: "axis-005", name: "Onboarding" },
+  { id: "axis-006", name: "Wellbeing" },
+]
+
+// --- SESSIONS (per class) ---------------------------------------------------
+
+export type TrainingSessionMode = "online" | "in_person" | "hybrid"
+export type TrainingSessionStatus =
+  | "scheduled"
+  | "in_progress"
+  | "completed"
+  | "cancelled"
+
+export type TrainingSession = {
+  id: string
+  classId: string
+  trainingId: string
+  title: string
+  startsAt: string // ISO datetime
+  endsAt: string // ISO datetime
+  durationMinutes: number
+  mode: TrainingSessionMode
+  location: string | null
+  onlineLink: string | null
+  status: TrainingSessionStatus
+  attendedCount: number
+  totalCount: number
+  instructorIds: string[]
+  hasCalendarInvite: boolean
+  hasReminder: boolean
+  notes: string | null
+}
+
+export const trainingSessions: TrainingSession[] = [
+  // trn-001 / cls-001a — Management Fundamentals, Group A
+  {
+    id: "ses-001",
+    classId: "cls-001a",
+    trainingId: "trn-001",
+    title: "Kickoff: leadership foundations",
+    startsAt: "2026-02-10T09:00:00.000Z",
+    endsAt: "2026-02-10T11:00:00.000Z",
+    durationMinutes: 120,
+    mode: "in_person",
+    location: "HQ — Conference Room A",
+    onlineLink: null,
+    status: "completed",
+    attendedCount: 9,
+    totalCount: 9,
+    instructorIds: ["emp-001"],
+    hasCalendarInvite: true,
+    hasReminder: true,
+    notes: "Introductions, course structure, expectations.",
+  },
+  {
+    id: "ses-002",
+    classId: "cls-001a",
+    trainingId: "trn-001",
+    title: "Conflict management toolkit",
+    startsAt: "2026-02-17T09:00:00.000Z",
+    endsAt: "2026-02-17T11:00:00.000Z",
+    durationMinutes: 120,
+    mode: "hybrid",
+    location: "HQ — Conference Room A",
+    onlineLink: "https://meet.factorialhr.com/mgmt-fundamentals-a-2",
+    status: "completed",
+    attendedCount: 8,
+    totalCount: 9,
+    instructorIds: ["emp-001", "emp-002"],
+    hasCalendarInvite: true,
+    hasReminder: true,
+    notes: null,
+  },
+  {
+    id: "ses-003",
+    classId: "cls-001a",
+    trainingId: "trn-001",
+    title: "Decision-making frameworks",
+    startsAt: "2026-02-24T09:00:00.000Z",
+    endsAt: "2026-02-24T11:00:00.000Z",
+    durationMinutes: 120,
+    mode: "in_person",
+    location: "HQ — Conference Room A",
+    onlineLink: null,
+    status: "completed",
+    attendedCount: 9,
+    totalCount: 9,
+    instructorIds: ["emp-002"],
+    hasCalendarInvite: true,
+    hasReminder: false,
+    notes: null,
+  },
+  {
+    id: "ses-004",
+    classId: "cls-001a",
+    trainingId: "trn-001",
+    title: "Closing & action plans",
+    startsAt: "2026-02-28T15:00:00.000Z",
+    endsAt: "2026-02-28T17:00:00.000Z",
+    durationMinutes: 120,
+    mode: "online",
+    location: null,
+    onlineLink: "https://meet.factorialhr.com/mgmt-fundamentals-a-4",
+    status: "completed",
+    attendedCount: 6,
+    totalCount: 9,
+    instructorIds: ["emp-001"],
+    hasCalendarInvite: true,
+    hasReminder: true,
+    notes: "Group A wrap-up.",
+  },
+  // trn-001 / cls-001b — Group B
+  {
+    id: "ses-005",
+    classId: "cls-001b",
+    trainingId: "trn-001",
+    title: "Kickoff: leadership foundations",
+    startsAt: "2026-04-07T09:00:00.000Z",
+    endsAt: "2026-04-07T11:00:00.000Z",
+    durationMinutes: 120,
+    mode: "in_person",
+    location: "HQ — Conference Room A",
+    onlineLink: null,
+    status: "scheduled",
+    attendedCount: 0,
+    totalCount: 9,
+    instructorIds: ["emp-001"],
+    hasCalendarInvite: true,
+    hasReminder: true,
+    notes: null,
+  },
+  {
+    id: "ses-006",
+    classId: "cls-001b",
+    trainingId: "trn-001",
+    title: "Conflict management toolkit",
+    startsAt: "2026-04-14T09:00:00.000Z",
+    endsAt: "2026-04-14T11:00:00.000Z",
+    durationMinutes: 120,
+    mode: "in_person",
+    location: "HQ — Conference Room A",
+    onlineLink: null,
+    status: "scheduled",
+    attendedCount: 0,
+    totalCount: 9,
+    instructorIds: ["emp-001", "emp-002"],
+    hasCalendarInvite: true,
+    hasReminder: false,
+    notes: null,
+  },
+  // trn-002 — GDPR
+  {
+    id: "ses-007",
+    classId: "cls-002a",
+    trainingId: "trn-002",
+    title: "GDPR refresher — full company",
+    startsAt: "2026-03-03T10:00:00.000Z",
+    endsAt: "2026-03-03T12:00:00.000Z",
+    durationMinutes: 120,
+    mode: "online",
+    location: null,
+    onlineLink: "https://meet.factorialhr.com/gdpr-2026",
+    status: "completed",
+    attendedCount: 17,
+    totalCount: 20,
+    instructorIds: ["emp-003"],
+    hasCalendarInvite: true,
+    hasReminder: true,
+    notes: "Annual mandatory refresher.",
+  },
+  // trn-004 — New Employee Orientation
+  {
+    id: "ses-008",
+    classId: "cls-004a",
+    trainingId: "trn-004",
+    title: "Welcome day — April cohort",
+    startsAt: "2026-04-01T09:00:00.000Z",
+    endsAt: "2026-04-01T13:00:00.000Z",
+    durationMinutes: 240,
+    mode: "in_person",
+    location: "HQ — Main hall",
+    onlineLink: null,
+    status: "completed",
+    attendedCount: 5,
+    totalCount: 5,
+    instructorIds: ["emp-002"],
+    hasCalendarInvite: true,
+    hasReminder: true,
+    notes: null,
+  },
+  // trn-005 — Fire Safety
+  {
+    id: "ses-009",
+    classId: "cls-005a",
+    trainingId: "trn-005",
+    title: "Fire safety briefing — morning",
+    startsAt: "2026-05-06T10:00:00.000Z",
+    endsAt: "2026-05-06T11:00:00.000Z",
+    durationMinutes: 60,
+    mode: "in_person",
+    location: "HQ — Auditorium",
+    onlineLink: null,
+    status: "completed",
+    attendedCount: 9,
+    totalCount: 10,
+    instructorIds: ["emp-007"],
+    hasCalendarInvite: true,
+    hasReminder: true,
+    notes: null,
+  },
+  {
+    id: "ses-010",
+    classId: "cls-005b",
+    trainingId: "trn-005",
+    title: "Fire safety briefing — afternoon",
+    startsAt: "2026-05-06T15:00:00.000Z",
+    endsAt: "2026-05-06T16:00:00.000Z",
+    durationMinutes: 60,
+    mode: "in_person",
+    location: "HQ — Auditorium",
+    onlineLink: null,
+    status: "completed",
+    attendedCount: 8,
+    totalCount: 10,
+    instructorIds: ["emp-007"],
+    hasCalendarInvite: true,
+    hasReminder: true,
+    notes: null,
+  },
+]
+
+// --- REQUESTS ---------------------------------------------------------------
+
+export type TrainingRequestStatus =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "in_review"
+
+export type TrainingRequest = {
+  id: string
+  authorEmployeeId: string
+  authorEmployeeName: string
+  authorAvatar: string
+  trainingId: string | null
+  trainingName: string
+  externalReference: string | null
+  providerName: string | null
+  trainingNeed: string
+  comments: string
+  schedule: "during_working_hours" | "after_working_hours" | "mixed"
+  durationHours: number
+  cost: number
+  costToEmployee: number
+  paymentInstallments: number
+  startDate: string
+  endDate: string
+  status: TrainingRequestStatus
+  subsidized: boolean
+  createdAt: string
+  reviewerEmployeeId: string | null
+  reviewerEmployeeName: string | null
+}
+
+export const trainingRequests: TrainingRequest[] = [
+  {
+    id: "req-001",
+    authorEmployeeId: "emp-003",
+    authorEmployeeName: "Ana García",
+    authorAvatar: avatarFor("emp-003"),
+    trainingId: "trn-001",
+    trainingName: "Management Fundamentals",
+    externalReference: null,
+    providerName: null,
+    trainingNeed:
+      "I'm being asked to lead a small squad next quarter and want to formalise my management knowledge.",
+    comments: "Already discussed with my manager.",
+    schedule: "during_working_hours",
+    durationHours: 8,
+    cost: 0,
+    costToEmployee: 0,
+    paymentInstallments: 1,
+    startDate: "2026-04-07",
+    endDate: "2026-04-25",
+    status: "approved",
+    subsidized: false,
+    createdAt: "2026-03-20T09:12:00.000Z",
+    reviewerEmployeeId: "emp-001",
+    reviewerEmployeeName: "Javier Molina",
+  },
+  {
+    id: "req-002",
+    authorEmployeeId: "emp-006",
+    authorEmployeeName: "Dídac Mas",
+    authorAvatar: avatarFor("emp-006"),
+    trainingId: null,
+    trainingName: "Advanced TypeScript Patterns",
+    externalReference: "https://www.totaltypescript.com/",
+    providerName: "Total TypeScript",
+    trainingNeed:
+      "Looking to deepen TS knowledge to refactor our core domain types.",
+    comments: "Self-paced, accessible after-hours as well.",
+    schedule: "mixed",
+    durationHours: 24,
+    cost: 480,
+    costToEmployee: 0,
+    paymentInstallments: 1,
+    startDate: "2026-06-01",
+    endDate: "2026-07-31",
+    status: "pending",
+    subsidized: false,
+    createdAt: "2026-05-08T16:45:00.000Z",
+    reviewerEmployeeId: null,
+    reviewerEmployeeName: null,
+  },
+  {
+    id: "req-003",
+    authorEmployeeId: "emp-007",
+    authorEmployeeName: "Elena Ferrer",
+    authorAvatar: avatarFor("emp-007"),
+    trainingId: null,
+    trainingName: "AWS Solutions Architect Certification",
+    externalReference: "https://aws.amazon.com/certification/",
+    providerName: "AWS",
+    trainingNeed:
+      "We're migrating critical workloads — I need a deeper architectural foundation.",
+    comments: "",
+    schedule: "after_working_hours",
+    durationHours: 60,
+    cost: 1200,
+    costToEmployee: 200,
+    paymentInstallments: 2,
+    startDate: "2026-05-15",
+    endDate: "2026-08-15",
+    status: "in_review",
+    subsidized: true,
+    createdAt: "2026-04-29T11:00:00.000Z",
+    reviewerEmployeeId: "emp-001",
+    reviewerEmployeeName: "Javier Molina",
+  },
+  {
+    id: "req-004",
+    authorEmployeeId: "emp-004",
+    authorEmployeeName: "Bernat Puig",
+    authorAvatar: avatarFor("emp-004"),
+    trainingId: null,
+    trainingName: "Public Speaking & Presentation Skills",
+    externalReference: null,
+    providerName: "Dale Carnegie",
+    trainingNeed:
+      "I'm presenting more frequently to clients and want to be more impactful.",
+    comments: "",
+    schedule: "during_working_hours",
+    durationHours: 12,
+    cost: 2200,
+    costToEmployee: 0,
+    paymentInstallments: 1,
+    startDate: "2026-06-10",
+    endDate: "2026-06-12",
+    status: "rejected",
+    subsidized: false,
+    createdAt: "2026-04-10T08:30:00.000Z",
+    reviewerEmployeeId: "emp-001",
+    reviewerEmployeeName: "Javier Molina",
+  },
+  {
+    id: "req-005",
+    authorEmployeeId: "emp-005",
+    authorEmployeeName: "Carmen López",
+    authorAvatar: avatarFor("emp-005"),
+    trainingId: null,
+    trainingName: "Spanish for Business — B2",
+    externalReference: null,
+    providerName: "Cervantes Institute",
+    trainingNeed:
+      "Most of our customers are Spanish-speaking — I'd like to hold meetings in Spanish.",
+    comments: "Group lessons preferred.",
+    schedule: "after_working_hours",
+    durationHours: 40,
+    cost: 800,
+    costToEmployee: 0,
+    paymentInstallments: 4,
+    startDate: "2026-09-01",
+    endDate: "2026-12-15",
+    status: "pending",
+    subsidized: false,
+    createdAt: "2026-05-10T14:20:00.000Z",
+    reviewerEmployeeId: null,
+    reviewerEmployeeName: null,
+  },
+  {
+    id: "req-006",
+    authorEmployeeId: "emp-002",
+    authorEmployeeName: "Laura Soler",
+    authorAvatar: avatarFor("emp-002"),
+    trainingId: "trn-003",
+    trainingName: "React Advanced Patterns",
+    externalReference: null,
+    providerName: "Frontend Masters",
+    trainingNeed:
+      "Aligning frontend architecture across teams. Want to formalise patterns.",
+    comments: "From catalog.",
+    schedule: "during_working_hours",
+    durationHours: 16,
+    cost: 0,
+    costToEmployee: 0,
+    paymentInstallments: 1,
+    startDate: "2026-01-15",
+    endDate: "2026-03-15",
+    status: "approved",
+    subsidized: false,
+    createdAt: "2026-01-08T10:00:00.000Z",
+    reviewerEmployeeId: "emp-001",
+    reviewerEmployeeName: "Javier Molina",
+  },
+]
+
+// --- BUDGETS ---------------------------------------------------------------
+
+export type BudgetStatus = "active" | "exceeded" | "draft" | "closed"
+
+export type TrainingBudget = {
+  id: string
+  name: string
+  year: number
+  totalAmount: number
+  spentAmount: number
+  pendingAmount: number
+  remainingAmount: number
+  currency: string
+  status: BudgetStatus
+  scope: "company" | "department" | "team"
+  scopeName: string
+  ownerEmployeeId: string
+  ownerEmployeeName: string
+}
+
+export const trainingBudgets: TrainingBudget[] = [
+  {
+    id: "bud-001",
+    name: "Company-wide 2026",
+    year: 2026,
+    totalAmount: 25000,
+    spentAmount: 7800,
+    pendingAmount: 2200,
+    remainingAmount: 15000,
+    currency: "EUR",
+    status: "active",
+    scope: "company",
+    scopeName: "All employees",
+    ownerEmployeeId: "emp-001",
+    ownerEmployeeName: "Javier Molina",
+  },
+  {
+    id: "bud-002",
+    name: "Engineering 2026",
+    year: 2026,
+    totalAmount: 12000,
+    spentAmount: 6200,
+    pendingAmount: 1500,
+    remainingAmount: 4300,
+    currency: "EUR",
+    status: "active",
+    scope: "department",
+    scopeName: "Engineering",
+    ownerEmployeeId: "emp-002",
+    ownerEmployeeName: "Laura Soler",
+  },
+  {
+    id: "bud-003",
+    name: "People & Talent 2026",
+    year: 2026,
+    totalAmount: 6000,
+    spentAmount: 6100,
+    pendingAmount: 0,
+    remainingAmount: -100,
+    currency: "EUR",
+    status: "exceeded",
+    scope: "department",
+    scopeName: "People",
+    ownerEmployeeId: "emp-003",
+    ownerEmployeeName: "Ana García",
+  },
+  {
+    id: "bud-004",
+    name: "Retail operations 2026",
+    year: 2026,
+    totalAmount: 8000,
+    spentAmount: 0,
+    pendingAmount: 0,
+    remainingAmount: 8000,
+    currency: "EUR",
+    status: "draft",
+    scope: "department",
+    scopeName: "Retail",
+    ownerEmployeeId: "emp-004",
+    ownerEmployeeName: "Bernat Puig",
+  },
+]
+
+// --- SURVEY TEMPLATES & ANSWERS --------------------------------------------
+
+export type SurveyTemplate = {
+  id: string
+  name: string
+  description: string
+  questionCount: number
+  responseScale: "1-5" | "1-10" | "yes-no" | "mixed"
+  category: "satisfaction" | "knowledge" | "feedback"
+  createdAt: string
+  active: boolean
+}
+
+export const surveyTemplates: SurveyTemplate[] = [
+  {
+    id: "tpl-001",
+    name: "Post-training satisfaction",
+    description: "Default 10-question survey to send after every training.",
+    questionCount: 10,
+    responseScale: "1-5",
+    category: "satisfaction",
+    createdAt: "2025-09-01",
+    active: true,
+  },
+  {
+    id: "tpl-002",
+    name: "Knowledge check — Compliance",
+    description: "Yes/No questions to validate retention of key policies.",
+    questionCount: 8,
+    responseScale: "yes-no",
+    category: "knowledge",
+    createdAt: "2025-11-12",
+    active: true,
+  },
+  {
+    id: "tpl-003",
+    name: "Manager feedback on team training",
+    description: "Three open questions for managers to assess team uplift.",
+    questionCount: 3,
+    responseScale: "mixed",
+    category: "feedback",
+    createdAt: "2026-01-05",
+    active: true,
+  },
+  {
+    id: "tpl-004",
+    name: "Speaker evaluation",
+    description: "Specific scale on the instructor's effectiveness.",
+    questionCount: 5,
+    responseScale: "1-10",
+    category: "satisfaction",
+    createdAt: "2024-06-10",
+    active: false,
+  },
+]
+
+export type SurveyAnswer = {
+  id: string
+  surveyId: string
+  templateId: string
+  trainingId: string
+  employeeId: string
+  employeeName: string
+  employeeAvatar: string
+  submittedAt: string | null
+  averageScore: number | null
+  status: "pending" | "submitted" | "expired"
+}
+
+export const surveyAnswers: SurveyAnswer[] = [
+  {
+    id: "ans-001",
+    surveyId: "srv-001",
+    templateId: "tpl-001",
+    trainingId: "trn-001",
+    employeeId: "emp-003",
+    employeeName: "Ana García",
+    employeeAvatar: avatarFor("emp-003"),
+    submittedAt: "2026-03-01T18:00:00.000Z",
+    averageScore: 4.6,
+    status: "submitted",
+  },
+  {
+    id: "ans-002",
+    surveyId: "srv-001",
+    templateId: "tpl-001",
+    trainingId: "trn-001",
+    employeeId: "emp-004",
+    employeeName: "Bernat Puig",
+    employeeAvatar: avatarFor("emp-004"),
+    submittedAt: "2026-03-01T19:12:00.000Z",
+    averageScore: 4.2,
+    status: "submitted",
+  },
+  {
+    id: "ans-003",
+    surveyId: "srv-001",
+    templateId: "tpl-001",
+    trainingId: "trn-001",
+    employeeId: "emp-005",
+    employeeName: "Carmen López",
+    employeeAvatar: avatarFor("emp-005"),
+    submittedAt: null,
+    averageScore: null,
+    status: "pending",
+  },
+  {
+    id: "ans-004",
+    surveyId: "srv-002",
+    templateId: "tpl-002",
+    trainingId: "trn-002",
+    employeeId: "emp-001",
+    employeeName: "Javier Molina",
+    employeeAvatar: avatarFor("emp-001"),
+    submittedAt: "2026-03-04T08:30:00.000Z",
+    averageScore: 5,
+    status: "submitted",
+  },
+  {
+    id: "ans-005",
+    surveyId: "srv-002",
+    templateId: "tpl-002",
+    trainingId: "trn-002",
+    employeeId: "emp-002",
+    employeeName: "Laura Soler",
+    employeeAvatar: avatarFor("emp-002"),
+    submittedAt: "2026-03-04T09:15:00.000Z",
+    averageScore: 3.5,
+    status: "submitted",
+  },
+]
+
+// --- CONTENT MODULES (LMS) --------------------------------------------------
+
+export type ContentBlockType = "page" | "video" | "quiz" | "scorm"
+
+export type ContentBlock = {
+  id: string
+  moduleId: string
+  type: ContentBlockType
+  title: string
+  order: number
+  estimatedMinutes: number
+  preview: string | null
+  videoUrl?: string
+  questionCount?: number
+}
+
+export type ContentModule = {
+  id: string
+  trainingId: string
+  title: string
+  description: string
+  order: number
+  blocks: ContentBlock[]
+}
+
+export const contentModules: ContentModule[] = [
+  {
+    id: "mod-001",
+    trainingId: "trn-003",
+    title: "1 — Render performance",
+    description:
+      "How React decides what to re-render and how memo, useMemo and useCallback fit in.",
+    order: 1,
+    blocks: [
+      {
+        id: "blk-001",
+        moduleId: "mod-001",
+        type: "page",
+        title: "Reconciliation refresher",
+        order: 1,
+        estimatedMinutes: 8,
+        preview:
+          "React's reconciler walks the component tree and decides which subtrees need updates...",
+      },
+      {
+        id: "blk-002",
+        moduleId: "mod-001",
+        type: "video",
+        title: "When memo actually helps",
+        order: 2,
+        estimatedMinutes: 14,
+        preview: "Video walkthrough with practical examples.",
+        videoUrl: "https://example.com/video/memo-helps",
+      },
+      {
+        id: "blk-003",
+        moduleId: "mod-001",
+        type: "quiz",
+        title: "Quick check — performance",
+        order: 3,
+        estimatedMinutes: 5,
+        preview: null,
+        questionCount: 4,
+      },
+    ],
+  },
+  {
+    id: "mod-002",
+    trainingId: "trn-003",
+    title: "2 — Concurrent features",
+    description:
+      "Transitions, deferred values, Suspense and how to apply them to real UI.",
+    order: 2,
+    blocks: [
+      {
+        id: "blk-004",
+        moduleId: "mod-002",
+        type: "page",
+        title: "useTransition vs useDeferredValue",
+        order: 1,
+        estimatedMinutes: 12,
+        preview: "Two tools for the same problem — choose the right one.",
+      },
+      {
+        id: "blk-005",
+        moduleId: "mod-002",
+        type: "scorm",
+        title: "Interactive: build a search-as-you-type",
+        order: 2,
+        estimatedMinutes: 25,
+        preview: "SCORM package — published from our authoring tool.",
+      },
+    ],
+  },
+  {
+    id: "mod-003",
+    trainingId: "trn-003",
+    title: "3 — Compound components",
+    description: "Patterns for composable, type-safe component APIs.",
+    order: 3,
+    blocks: [
+      {
+        id: "blk-006",
+        moduleId: "mod-003",
+        type: "page",
+        title: "The accordion exercise",
+        order: 1,
+        estimatedMinutes: 10,
+        preview: "Hands-on: rebuild an accordion using the compound pattern.",
+      },
+    ],
+  },
+]
+
+// --- INSIGHTS AGGREGATES ----------------------------------------------------
+
+export const insightsAggregates = {
+  trainingsCount: 7,
+  totalCost: 6500,
+  totalSubsidizedCost: 800,
+  totalDurationHours: 71,
+  completionRatePct: 64,
+  participantsTotal: 71,
+  participantsCompleted: 45,
+  participantsInProgress: 12,
+  participantsExpired: 10,
+  participantsNotStarted: 4,
+  topCategory: { name: "Compliance", value: 24 },
+  monthlyParticipants: [
+    { month: "Jan", value: 4 },
+    { month: "Feb", value: 9 },
+    { month: "Mar", value: 22 },
+    { month: "Apr", value: 14 },
+    { month: "May", value: 18 },
+    { month: "Jun", value: 4 },
+  ],
+  costByCategory: [
+    { name: "Leadership", value: 1200 },
+    { name: "Compliance", value: 250 },
+    { name: "Technical Skills", value: 4400 },
+    { name: "Soft Skills", value: 2200 },
+    { name: "Onboarding", value: 0 },
+    { name: "Health & Safety", value: 250 },
+  ],
+  participantsByDepartment: [
+    { name: "Engineering", value: 18 },
+    { name: "People", value: 6 },
+    { name: "Retail", value: 24 },
+    { name: "Sales", value: 12 },
+    { name: "Operations", value: 11 },
+  ],
+  hoursByMonth: [
+    { month: "Jan", value: 12 },
+    { month: "Feb", value: 18 },
+    { month: "Mar", value: 32 },
+    { month: "Apr", value: 22 },
+    { month: "May", value: 28 },
+    { month: "Jun", value: 8 },
+  ],
+}
+
+// --- FUNDAE / SUBSIDY SETTINGS ----------------------------------------------
+
+export type FundaeSettings = {
+  enabled: boolean
+  cif: string
+  socialReason: string
+  contactName: string
+  contactEmail: string
+  bankAccount: string
+  digitalCertificateConfigured: boolean
+  rltConfigured: boolean
+  rltMembers: Array<{ name: string; role: string; signed: boolean }>
+  ccc: string
+  hasGroup: boolean
+  groupCcc: string
+  acceptedConditions: boolean
+}
+
+export const fundaeSettings: FundaeSettings = {
+  enabled: true,
+  cif: "B12345678",
+  socialReason: "Factorial Clothing Co. SL",
+  contactName: "Javier Molina",
+  contactEmail: "javier@factorialclothingco.co",
+  bankAccount: "ES91 2100 0418 4502 0005 1332",
+  digitalCertificateConfigured: true,
+  rltConfigured: true,
+  rltMembers: [
+    { name: "Ana García", role: "Workers' representative", signed: true },
+    { name: "Bernat Puig", role: "Workers' representative", signed: true },
+    { name: "Carmen López", role: "Workers' representative", signed: false },
+  ],
+  ccc: "08/12345678/90",
+  hasGroup: false,
+  groupCcc: "",
+  acceptedConditions: true,
+}
+
+// --- ATTENDANCE -------------------------------------------------------------
+
+export type AttendanceStatus = "attended" | "missed" | "excused" | "pending"
+
+export type SessionAttendance = {
+  sessionId: string
+  employeeId: string
+  employeeName: string
+  employeeAvatar: string
+  status: AttendanceStatus
+}
+
+export const sessionAttendances: SessionAttendance[] = [
+  // ses-001 — Group A kickoff (9/9 attended)
+  {
+    sessionId: "ses-001",
+    employeeId: "emp-003",
+    employeeName: "Ana García",
+    employeeAvatar: avatarFor("emp-003"),
+    status: "attended",
+  },
+  {
+    sessionId: "ses-001",
+    employeeId: "emp-004",
+    employeeName: "Bernat Puig",
+    employeeAvatar: avatarFor("emp-004"),
+    status: "attended",
+  },
+  {
+    sessionId: "ses-001",
+    employeeId: "emp-005",
+    employeeName: "Carmen López",
+    employeeAvatar: avatarFor("emp-005"),
+    status: "attended",
+  },
+  // ses-002 — one missed
+  {
+    sessionId: "ses-002",
+    employeeId: "emp-003",
+    employeeName: "Ana García",
+    employeeAvatar: avatarFor("emp-003"),
+    status: "attended",
+  },
+  {
+    sessionId: "ses-002",
+    employeeId: "emp-004",
+    employeeName: "Bernat Puig",
+    employeeAvatar: avatarFor("emp-004"),
+    status: "missed",
+  },
+  {
+    sessionId: "ses-002",
+    employeeId: "emp-005",
+    employeeName: "Carmen López",
+    employeeAvatar: avatarFor("emp-005"),
+    status: "attended",
+  },
+  // ses-005 — scheduled, pending
+  {
+    sessionId: "ses-005",
+    employeeId: "emp-006",
+    employeeName: "Dídac Mas",
+    employeeAvatar: avatarFor("emp-006"),
+    status: "pending",
+  },
+  {
+    sessionId: "ses-005",
+    employeeId: "emp-007",
+    employeeName: "Elena Ferrer",
+    employeeAvatar: avatarFor("emp-007"),
+    status: "pending",
+  },
+]
+
+// --- CERTIFICATES -----------------------------------------------------------
+
+export type Certificate = {
+  id: string
+  trainingId: string
+  employeeId: string
+  employeeName: string
+  employeeAvatar: string
+  fileName: string
+  fileSize: string
+  uploadedAt: string
+  expiresAt: string | null
+  status: "valid" | "expiring_soon" | "expired"
+}
+
+export const certificates: Certificate[] = [
+  {
+    id: "cert-001",
+    trainingId: "trn-001",
+    employeeId: "emp-003",
+    employeeName: "Ana García",
+    employeeAvatar: avatarFor("emp-003"),
+    fileName: "management-fundamentals-ana-garcia.pdf",
+    fileSize: "412 KB",
+    uploadedAt: "2026-02-28",
+    expiresAt: "2027-02-28",
+    status: "valid",
+  },
+  {
+    id: "cert-002",
+    trainingId: "trn-002",
+    employeeId: "emp-001",
+    employeeName: "Javier Molina",
+    employeeAvatar: avatarFor("emp-001"),
+    fileName: "gdpr-2026-javier-molina.pdf",
+    fileSize: "318 KB",
+    uploadedAt: "2026-03-03",
+    expiresAt: "2027-03-03",
+    status: "valid",
+  },
+  {
+    id: "cert-003",
+    trainingId: "trn-002",
+    employeeId: "emp-003",
+    employeeName: "Ana García",
+    employeeAvatar: avatarFor("emp-003"),
+    fileName: "gdpr-2025-ana-garcia.pdf",
+    fileSize: "298 KB",
+    uploadedAt: "2025-03-01",
+    expiresAt: "2026-03-01",
+    status: "expired",
+  },
+]
+
+// --- MATERIALS / FILES ------------------------------------------------------
+
+export type TrainingFile = {
+  id: string
+  trainingId: string
+  name: string
+  type: "pdf" | "video" | "doc" | "link" | "image" | "scorm"
+  size: string | null
+  url: string
+  uploadedAt: string
+  uploadedBy: string
+}
+
+export const trainingFiles: TrainingFile[] = [
+  {
+    id: "file-001",
+    trainingId: "trn-001",
+    name: "Leadership handbook.pdf",
+    type: "pdf",
+    size: "2.4 MB",
+    url: "#",
+    uploadedAt: "2026-01-15",
+    uploadedBy: "Javier Molina",
+  },
+  {
+    id: "file-002",
+    trainingId: "trn-001",
+    name: "Conflict role-play scenarios.docx",
+    type: "doc",
+    size: "184 KB",
+    url: "#",
+    uploadedAt: "2026-01-20",
+    uploadedBy: "Laura Soler",
+  },
+  {
+    id: "file-003",
+    trainingId: "trn-001",
+    name: "Recommended reading list",
+    type: "link",
+    size: null,
+    url: "https://example.com/leadership-books",
+    uploadedAt: "2026-01-22",
+    uploadedBy: "Javier Molina",
+  },
+  {
+    id: "file-004",
+    trainingId: "trn-002",
+    name: "GDPR policy 2026.pdf",
+    type: "pdf",
+    size: "1.1 MB",
+    url: "#",
+    uploadedAt: "2026-02-01",
+    uploadedBy: "Ana García",
+  },
+  {
+    id: "file-005",
+    trainingId: "trn-002",
+    name: "Breach reporting checklist.pdf",
+    type: "pdf",
+    size: "224 KB",
+    url: "#",
+    uploadedAt: "2026-02-05",
+    uploadedBy: "Ana García",
+  },
+  {
+    id: "file-006",
+    trainingId: "trn-003",
+    name: "Module 1 — slides.pdf",
+    type: "pdf",
+    size: "5.2 MB",
+    url: "#",
+    uploadedAt: "2026-01-10",
+    uploadedBy: "Dídac Mas",
+  },
+  {
+    id: "file-007",
+    trainingId: "trn-005",
+    name: "Evacuation map — HQ.pdf",
+    type: "pdf",
+    size: "412 KB",
+    url: "#",
+    uploadedAt: "2026-04-20",
+    uploadedBy: "Elena Ferrer",
+  },
+]
+
+// --- HELPERS ----------------------------------------------------------------
+
+export function sessionsForClass(classId: string): TrainingSession[] {
+  return trainingSessions.filter((s) => s.classId === classId)
+}
+
+export function sessionsForTraining(trainingId: string): TrainingSession[] {
+  return trainingSessions.filter((s) => s.trainingId === trainingId)
+}
+
+export function attendancesForSession(sessionId: string): SessionAttendance[] {
+  return sessionAttendances.filter((a) => a.sessionId === sessionId)
+}
+
+export function certificatesForTraining(trainingId: string): Certificate[] {
+  return certificates.filter((c) => c.trainingId === trainingId)
+}
+
+export function certificatesForEmployee(employeeId: string): Certificate[] {
+  return certificates.filter((c) => c.employeeId === employeeId)
+}
+
+export function filesForTraining(trainingId: string): TrainingFile[] {
+  return trainingFiles.filter((f) => f.trainingId === trainingId)
+}
+
+export function contentModulesForTraining(trainingId: string): ContentModule[] {
+  return contentModules.filter((m) => m.trainingId === trainingId)
+}
+
+export function answersForTraining(trainingId: string): SurveyAnswer[] {
+  return surveyAnswers.filter((a) => a.trainingId === trainingId)
+}
+
+export function requestsForEmployee(employeeId: string): TrainingRequest[] {
+  return trainingRequests.filter((r) => r.authorEmployeeId === employeeId)
+}
+
+// --- COMPETENCIES -----------------------------------------------------------
+
+export type Competency = { id: string; name: string }
+
+export const competencies: Competency[] = [
+  { id: "comp-001", name: "Leadership" },
+  { id: "comp-002", name: "Communication" },
+  { id: "comp-003", name: "Strategic thinking" },
+  { id: "comp-004", name: "Customer focus" },
+  { id: "comp-005", name: "Adaptability" },
+  { id: "comp-006", name: "Technical excellence" },
+  { id: "comp-007", name: "Data literacy" },
+  { id: "comp-008", name: "Collaboration" },
+  { id: "comp-009", name: "Innovation" },
+  { id: "comp-010", name: "Continuous improvement" },
+]
+
+// --- WORKFLOW PROCESSES -----------------------------------------------------
+
+export type TrainingProcess = { id: string; name: string }
+
+export const trainingProcesses: TrainingProcess[] = [
+  { id: "proc-001", name: "Standard approval (Manager → HR)" },
+  { id: "proc-002", name: "L&D committee review" },
+  { id: "proc-003", name: "Mandatory training auto-approval" },
+  { id: "proc-004", name: "Fundae subsidised flow" },
+  { id: "proc-005", name: "Executive sponsorship" },
+]

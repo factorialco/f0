@@ -1,14 +1,14 @@
 export type AiMentorTab =
-  | "overview"
-  | "recommendations"
-  | "draft-courses"
-  | "career-paths"
-  | "company-context"
+  | "trainings"
+  | "requests"
+  | "budgets"
+  | "insights"
+  | "ai-mentor-settings"
 
 export const moduleTabs = [
-  { id: "overview", label: "Overview" },
-  { id: "recommendations", label: "Recommendations" },
-  { id: "draft-courses", label: "Draft courses" },
-  { id: "career-paths", label: "Career paths" },
-  { id: "company-context", label: "Company context" },
+  { id: "trainings", label: "Trainings" },
+  { id: "requests", label: "Requests" },
+  { id: "budgets", label: "Budgets" },
+  { id: "insights", label: "Insights" },
+  { id: "ai-mentor-settings", label: "AI Mentor settings" },
 ] as const

@@ -1,226 +1,189 @@
-import { F0Alert, F0Button, F0Card, F0Text } from "@factorialco/f0-react"
+import { F0Alert, F0Button, F0Card, F0Heading, F0Text } from "@factorialco/f0-react"
 import {
   Page,
   PageHeader,
   ResourceHeader,
+  Tabs,
 } from "@factorialco/f0-react/dist/experimental"
 import { ArrowLeft, Sparkles } from "@factorialco/f0-react/icons/app"
+import { useState } from "react"
 
-import { findEmployee, goals, performanceReviews } from "@/fixtures"
-import {
-  competencies,
-  recommendations,
-} from "../fixtures"
+import { findEmployee } from "@/fixtures"
+
+import { recommendations, trainingCourses, trainingRequests } from "../fixtures"
 
 type Props = {
   employeeId: string
   onBack: () => void
 }
 
-const statusColor: Record<string, string> = {
-  "pending-review": "bg-f1-background-warning text-f1-foreground-warning",
-  ready: "bg-f1-background-info text-f1-foreground-info",
-  assigned: "bg-f1-background-positive text-f1-foreground-positive",
-  completed: "bg-f1-background-positive text-f1-foreground-positive",
-  overridden: "bg-f1-background-secondary text-f1-foreground-secondary",
-}
+const tabs = [
+  { id: "my-courses", label: "My courses" },
+  { id: "catalog", label: "Catalog" },
+  { id: "requests", label: "Requests" },
+] as const
 
-const statusLabel: Record<string, string> = {
-  "pending-review": "Pending review",
-  ready: "Ready to assign",
+const statusLabel = {
+  "needs-course-review": "Waiting for L&D review",
+  "ready-to-assign": "Ready to assign",
   assigned: "Assigned",
   completed: "Completed",
-  overridden: "Overridden",
-}
-
-const ratingColor: Record<string, string> = {
-  exceeds: "bg-f1-background-positive text-f1-foreground-positive",
-  meets: "bg-f1-background-info text-f1-foreground-info",
-  below: "bg-f1-background-warning text-f1-foreground-warning",
-}
-
-const ratingLabel: Record<string, string> = {
-  exceeds: "Exceeds expectations",
-  meets: "Meets expectations",
-  below: "Below expectations",
+  dismissed: "Dismissed",
 }
 
 export function EmployeeView({ employeeId, onBack }: Props) {
-  const emp = findEmployee(employeeId)
-  const rec = recommendations.find((r) => r.employeeId === employeeId)
-  const empGoals = goals.filter((g) => g.employeeId === employeeId)
-  const review = performanceReviews.find((r) => r.employeeId === employeeId)
-  const gapComp = rec
-    ? competencies.find((c) => c.id === rec.gapCompetencyId)
-    : null
+  const [activeTab, setActiveTab] = useState<string>("my-courses")
+  const employee = findEmployee(employeeId)
+  const recommendation = recommendations.find((r) => r.employeeId === employeeId)
+  const recommendedCourse = recommendation
+    ? trainingCourses.find((c) => c.id === recommendation.courseId)
+    : undefined
+  const employeeRequests = trainingRequests.filter((r) => r.employeeId === employeeId)
 
   return (
     <Page
       header={
         <>
           <PageHeader
-            module={{
-              id: "my_trainings",
-              name: "Training",
-              href: "/p/ai-mentor",
-            }}
+            module={{ id: "my_trainings", name: "My trainings", href: "/p/ai-mentor" }}
             breadcrumbs={[
-              { id: "ai-mentor", label: "AI Mentor" },
-              { id: "employee", label: emp?.fullName ?? "Employee" },
+              { id: "trainings", label: "Trainings" },
+              { id: "my-trainings", label: "My trainings" },
             ]}
           />
           <ResourceHeader
-            title={`${emp?.fullName ?? employeeId}'s learning recommendation`}
-            description={`${emp?.role ?? ""} · ${emp?.location ?? ""}`}
+            title="My trainings"
+            description={`${employee?.fullName ?? employeeId} · ${employee?.role ?? "Employee"}`}
             secondaryActions={[
-              { label: "Back to AI Mentor", icon: ArrowLeft, onClick: onBack },
+              { label: "Back to Trainings", icon: ArrowLeft, onClick: onBack },
             ]}
+          />
+          <Tabs
+            key={activeTab}
+            tabs={tabs.map((t) => ({ ...t, onClick: () => setActiveTab(t.id) }))}
+            activeTabId={activeTab}
           />
         </>
       }
     >
       <div className="flex flex-col gap-6 p-8">
-        {rec ? (
+        {activeTab === "my-courses" && (
           <>
-            {/* Personalised message — what the employee sees */}
-            <F0Card title="Your learning recommendation">
-              <div className="flex flex-col gap-4 p-4">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-f1-foreground-info" />
-                  <F0Text content="Recommended by AI Mentor" variant="label" />
-                  <span
-                    className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusColor[rec.status]}`}
-                  >
-                    {statusLabel[rec.status]}
-                  </span>
-                </div>
+            <header className="flex flex-col gap-1">
+              <F0Heading content="My courses" variant="heading-large" as="h1" />
+              <F0Text
+                content="Courses assigned to you, including recommendations created from your latest review cycle."
+                variant="body"
+              />
+            </header>
 
-                {/* Justification — personalised paragraph */}
-                <div className="rounded border border-f1-border bg-f1-background-secondary p-4">
-                  <F0Text content={rec.justification} variant="body" />
-                </div>
-
-                {/* Course card */}
-                <div className="flex items-center justify-between rounded border border-f1-border p-4">
-                  <div className="flex flex-col gap-0.5">
-                    <F0Text content={rec.courseTitle} variant="label" />
-                    <F0Text
-                      content={`${rec.courseDurationMin} min · Competency: ${gapComp?.name ?? rec.gapCompetencyId}`}
-                      variant="small"
+            {recommendation && recommendedCourse && (
+              <F0Card title="Recommended for you" description="Generated from your latest Performance Review and goals">
+                <div className="flex flex-col gap-4 p-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-f1-background-info px-2 py-0.5 text-xs text-f1-foreground-info">
+                      <Sparkles className="h-3 w-3" />
+                      AI Mentor
+                    </span>
+                    <span className="inline-flex items-center rounded-full bg-f1-background-secondary px-2 py-0.5 text-xs text-f1-foreground-secondary">
+                      {statusLabel[recommendation.status]}
+                    </span>
+                    <span className="inline-flex items-center rounded-full bg-f1-background-secondary px-2 py-0.5 text-xs text-f1-foreground-secondary">
+                      {recommendedCourse.durationMin} min
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-4 rounded border border-f1-border p-4">
+                    <div className="flex min-w-0 flex-col gap-1">
+                      <F0Text content={recommendedCourse.title} variant="label" />
+                      <F0Text
+                        content={`${recommendedCourse.competency} · ${recommendedCourse.provider}`}
+                        variant="small"
+                      />
+                      <F0Text content={recommendation.justification} variant="body" />
+                    </div>
+                    <F0Button
+                      label={recommendation.status === "assigned" ? "Start course" : "Not available yet"}
+                      variant="default"
+                      disabled={recommendation.status !== "assigned"}
+                      onClick={() => {}}
                     />
                   </div>
-                  <F0Button
-                    label="Start course"
-                    variant="default"
-                    onClick={() => {}}
-                    disabled={rec.status !== "assigned"}
-                  />
-                </div>
-
-                {rec.status === "completed" && rec.employeeSatisfaction && (
                   <F0Alert
-                    variant="positive"
-                    title="Course completed!"
-                    description={`You rated this course ${rec.employeeSatisfaction}/5. Thank you for your feedback — it helps the AI Mentor improve future recommendations.`}
+                    variant="info"
+                    title="Your review details stay private"
+                    description="The recommendation explains why the course is useful, but it does not expose raw review comments or private manager notes."
                   />
-                )}
-              </div>
-            </F0Card>
+                </div>
+              </F0Card>
+            )}
 
-            {/* Why this recommendation — audit transparency */}
-            <F0Card
-              title="Why this recommendation?"
-              description="How the AI Mentor analysed your profile to reach this decision"
-            >
-              <div className="flex flex-col gap-3 p-4">
-                <div className="flex flex-col gap-0.5">
-                  <F0Text content="Gap identified" variant="label" />
-                  <F0Text content={rec.gapSummary} variant="body" />
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <F0Text content="Competency to develop" variant="label" />
-                  <F0Text
-                    content={`${gapComp?.name ?? rec.gapCompetencyId} — ${gapComp?.description ?? ""}`}
-                    variant="body"
-                  />
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <F0Text content="Inputs analysed" variant="label" />
-                  <div className="flex flex-wrap gap-1 pt-1">
-                    {[
-                      "Performance Review",
-                      "Individual goals",
-                      "Role competencies",
-                      "Career path",
-                      "Company context",
-                    ].map((input) => (
-                      <span
-                        key={input}
-                        className="inline-flex items-center rounded bg-f1-background-secondary px-2 py-0.5 text-xs text-f1-foreground"
-                      >
-                        {input}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+            <F0Card title="Other assigned courses" description="Regular My trainings content">
+              <div className="flex flex-col divide-y divide-f1-border">
+                {trainingCourses
+                  .filter((course) => course.status === "published" && course.id !== recommendedCourse?.id)
+                  .slice(0, 3)
+                  .map((course) => (
+                    <div key={course.id} className="flex items-center justify-between gap-4 px-4 py-3">
+                      <div className="flex flex-col gap-0.5">
+                        <F0Text content={course.title} variant="label" />
+                        <F0Text content={`${course.provider} · ${course.durationMin} min`} variant="small" />
+                      </div>
+                      <F0Button label="Open" variant="outline" onClick={() => {}} />
+                    </div>
+                  ))}
               </div>
             </F0Card>
           </>
-        ) : (
-          <F0Alert
-            variant="info"
-            title="No recommendation yet for this employee"
-            description="The AI Mentor will generate a recommendation when their Performance Review cycle closes."
-          />
         )}
 
-        {/* Goals */}
-        {empGoals.length > 0 && (
-          <F0Card title="Current goals" description="Goals the AI Mentor took into account">
-            <div className="flex flex-col divide-y divide-f1-border">
-              {empGoals.map((g) => (
-                <div key={g.id} className="flex items-center justify-between gap-4 px-4 py-3">
-                  <div className="flex flex-col gap-0.5 min-w-0">
-                    <F0Text content={g.title} variant="label" />
-                    <F0Text content={g.description} variant="small" />
-                  </div>
-                  <div className="flex shrink-0 items-center gap-2">
-                    <div className="h-1.5 w-20 overflow-hidden rounded-full bg-f1-background-secondary">
-                      <div
-                        className="h-full rounded-full bg-f1-background-info"
-                        style={{ width: `${g.progress}%` }}
-                      />
+        {activeTab === "catalog" && (
+          <>
+            <header className="flex flex-col gap-1">
+              <F0Heading content="Catalog" variant="heading-large" as="h1" />
+              <F0Text content="Courses available for self-enrolment or request." variant="body" />
+            </header>
+            <div className="grid grid-cols-2 gap-4">
+              {trainingCourses
+                .filter((course) => course.status === "published")
+                .map((course) => (
+                  <F0Card key={course.id} title={course.title} description={`${course.provider} · ${course.competency}`}>
+                    <div className="flex items-center justify-between gap-3 p-4">
+                      <F0Text content={`${course.durationMin} min`} variant="small" />
+                      <F0Button label="Request" variant="outline" onClick={() => {}} />
                     </div>
-                    <F0Text content={`${g.progress}%`} variant="small" />
-                  </div>
-                </div>
-              ))}
+                  </F0Card>
+                ))}
             </div>
-          </F0Card>
+          </>
         )}
 
-        {/* Performance review summary */}
-        {review && (
-          <F0Card title="Last Performance Review" description="Summary visible only to the L&D Admin — not to the employee">
-            <div className="flex flex-col gap-3 p-4">
-              <div className="flex items-center gap-2">
-                {review.rating && (
-                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${ratingColor[review.rating]}`}>
-                    {ratingLabel[review.rating]}
-                  </span>
+        {activeTab === "requests" && (
+          <>
+            <header className="flex flex-col gap-1">
+              <F0Heading content="Requests" variant="heading-large" as="h1" />
+              <F0Text content="Training requests you created or that are linked to recommended learning." variant="body" />
+            </header>
+            <F0Card title="My requests">
+              <div className="flex flex-col divide-y divide-f1-border">
+                {employeeRequests.map((request) => (
+                  <div key={request.id} className="flex items-center justify-between gap-4 px-4 py-3">
+                    <div className="flex flex-col gap-0.5">
+                      <F0Text content={request.trainingName} variant="label" />
+                      <F0Text content={`${request.provider} · ${request.competency}`} variant="small" />
+                    </div>
+                    <span className="rounded-full bg-f1-background-secondary px-2 py-0.5 text-xs text-f1-foreground-secondary">
+                      {request.status}
+                    </span>
+                  </div>
+                ))}
+                {employeeRequests.length === 0 && (
+                  <div className="p-4">
+                    <F0Text content="You do not have any training requests yet." variant="body" />
+                  </div>
                 )}
-                <F0Text
-                  content={`Goals: ${review.goalsCompleted}/${review.goalsTotal} completed`}
-                  variant="small"
-                />
               </div>
-              <F0Alert
-                variant="info"
-                title="Review details are confidential"
-                description="The AI Mentor uses the qualitative and quantitative review data to reason, but only shows the employee the elaborated justification — never raw extracts from the review."
-              />
-            </div>
-          </F0Card>
+            </F0Card>
+          </>
         )}
       </div>
     </Page>

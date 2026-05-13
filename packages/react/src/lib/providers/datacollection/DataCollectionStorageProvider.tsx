@@ -3,7 +3,7 @@ import { createContext, useContext } from "react"
 import { DataCollectionStorage, DataCollectionStorageHandler } from "./types"
 
 const noopHandler = {
-  get: () => ({}) as Promise<DataCollectionStorage>,
+  get: () => Promise.resolve({}) as Promise<DataCollectionStorage>,
   set: () => Promise.resolve(),
 }
 
