@@ -1,4 +1,6 @@
 export * from "./F0AiChat"
+export * from "./canvas"
+export * from "./F0ClarifyingPanel"
 export * from "./F0ActionItem"
 export * from "./F0AiMask"
 export * from "./F0AuraVoiceAnimation"

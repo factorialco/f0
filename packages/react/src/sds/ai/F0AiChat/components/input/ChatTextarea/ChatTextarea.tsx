@@ -6,8 +6,8 @@ import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
+import { F0ClarifyingPanel } from "../../../../F0ClarifyingPanel"
 import { useAiChat } from "../../../providers/AiChatStateProvider"
-import { ClarifyingQuestionPanel } from "../ClarifyingQuestionPanel"
 import { MentionPopover } from "../MentionPopover"
 import { useMentions } from "../useMentions"
 import { buildHighlightSegments } from "../utils"
@@ -335,7 +335,7 @@ export const ChatTextarea = ({
 
         <AnimatePresence initial={false}>
           {isClarifying ? (
-            <ClarifyingQuestionPanel
+            <F0ClarifyingPanel
               key="clarifying"
               clarifyingQuestion={clarifyingQuestion}
             />

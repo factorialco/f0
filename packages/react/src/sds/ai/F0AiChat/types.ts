@@ -1,14 +1,28 @@
 import { CopilotKitProps } from "@copilotkit/react-core"
 import { type AIMessage, type Message } from "@copilotkit/shared"
 
-import type { ModuleId } from "@/components/avatars/F0AvatarModule"
-
 import { IconType } from "@/components/F0Icon"
 import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
 
-import type { CanvasActions, CanvasEntityDefinition } from "./canvas/types"
-import type { ChatDashboardConfig } from "./canvas/entities/dashboard/types"
-import type { DataDownloadDataset } from "./actions/core/dataDownload/types"
+import type {
+  CanvasActions,
+  CanvasContent,
+  CanvasContentBase,
+  CanvasEntityDefinition,
+  DashboardCanvasContent,
+  DataDownloadCanvasContent,
+  FormCanvasContent,
+} from "../canvas/types"
+
+// Re-export canvas content types for backwards-compatible public API
+export type {
+  CanvasContent,
+  CanvasContentBase,
+  DashboardCanvasContent,
+  DataDownloadCanvasContent,
+  FormCanvasContent,
+}
+
 export type { PersonProfile } from "./components/markdownRenderers/entityRef/entities/person/types"
 export type { CandidateProfile } from "./components/markdownRenderers/entityRef/entities/candidate/types"
 export type { JobPostingProfile } from "./components/markdownRenderers/entityRef/entities/jobPosting/types"
@@ -82,66 +96,6 @@ export type PendingQuote = {
   /** Plain-text selection (markdown stripped by the browser's toString()). */
   text: string
 }
-
-/**
- * Base shape shared by all canvas content types.
- * Every entity adds its own fields on top of this.
- */
-export type CanvasContentBase = {
-  type: string
-  title: string
-  description?: string
-  toolCallId?: string
-}
-
-/**
- * Dashboard canvas content — renders an analytics dashboard.
- */
-export type DashboardCanvasContent = CanvasContentBase & {
-  type: "dashboard"
-  config: ChatDashboardConfig
-  apiConfig: {
-    baseUrl: string
-    headers: Record<string, string>
-    runtimeFetch?: typeof fetch
-  }
-  /** Present when the dashboard is a pre-saved dashboard */
-  savedDashboardId?: string
-  /** Category of the saved dashboard */
-  savedDashboardCategory?: string
-  /** Description of the saved dashboard */
-  savedDashboardDescription?: string
-  /** True when the agent has iterated on a saved dashboard but the user hasn't saved yet */
-  savedDashboardUnsaved?: boolean
-}
-
-/**
- * Form canvas content — renders an interactive F0Form in the canvas panel.
- */
-export type FormCanvasContent = CanvasContentBase & {
-  type: "form"
-  formName: string
-  formDescription?: string
-  formModule?: ModuleId
-}
-/**
- * Data download canvas content — renders a full data table with download options.
- */
-export type DataDownloadCanvasContent = CanvasContentBase & {
-  type: "dataDownload"
-  dataset: DataDownloadDataset
-  filename?: string
-  markdown?: string
-}
-
-/**
- * Discriminated union for canvas panel content.
- * Add new entity types to this union as they are implemented.
- */
-export type CanvasContent =
-  | DashboardCanvasContent
-  | FormCanvasContent
-  | DataDownloadCanvasContent
 
 /**
  * A tool hint that can be activated to prepend invisible context to the user's

@@ -1,7 +1,10 @@
 import { type AIMessage, type Message } from "@copilotkit/shared"
 
-import { type ClarifyingQuestionState } from "./actions/core/clarifyingQuestion/types"
-import { type CanvasActions, type CanvasEntityDefinition } from "./canvas/types"
+import { type ClarifyingQuestionState } from "../F0ClarifyingPanel/types"
+import {
+  type CanvasActions,
+  type CanvasEntityDefinition,
+} from "../canvas/types"
 import {
   type AiChatDisclaimer,
   type AiChatMode,
