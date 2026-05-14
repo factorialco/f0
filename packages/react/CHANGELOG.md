@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.0](https://github.com/factorialco/f0/compare/f0-react-v2.2.0...f0-react-v2.3.0) (2026-05-14)
+
+
+### Features
+
+* **upselling-kit:** add UpsellingAlert component ([#4092](https://github.com/factorialco/f0/issues/4092)) ([3445b53](https://github.com/factorialco/f0/commit/3445b5335a9693559d9f74a1a9ec9930943649da))
+
 ## [2.2.0](https://github.com/factorialco/f0/compare/f0-react-v2.1.0...f0-react-v2.2.0) (2026-05-14)
 
 
