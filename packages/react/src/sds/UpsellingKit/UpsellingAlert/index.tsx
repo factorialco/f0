@@ -21,31 +21,7 @@ export interface UpsellingAlertProps {
    * The label for the upselling button. Defaults to "More info".
    */
   actionLabel?: string
-  /**
-   * Function to be executed when the upsell button is clicked
-   */
-  onRequest?: UpsellingButtonProps["onRequest"]
-  /**
-   * The error message to be displayed in the confirmation dialog
-   */
-  errorMessage: UpsellingButtonProps["errorMessage"]
-  /**
-   * The success message to be displayed in the confirmation dialog
-   */
-  successMessage: UpsellingButtonProps["successMessage"]
-  /**
-   * The label to be displayed in the button when the request is being processed
-   */
-  loadingState: UpsellingButtonProps["loadingState"]
-  /**
-   * The next steps to be displayed in the confirmation dialog
-   */
-  nextSteps: UpsellingButtonProps["nextSteps"]
-  /**
-   * The label to be displayed in the close button of the confirmation dialog
-   */
-  closeLabel: UpsellingButtonProps["closeLabel"]
-}
+} & Pick<UpsellingButtonProps, 'onRequest' | 'errorMessage' | 'successMessage' | ...>
 
 function _UpsellingAlert({
   icon,
