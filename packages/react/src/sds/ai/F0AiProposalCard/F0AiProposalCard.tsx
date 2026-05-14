@@ -115,18 +115,18 @@ export function F0AiProposalCard(props: F0AiProposalCardProps) {
       </div>
 
       {actions && (
-        <div className="flex items-center justify-between gap-3 border-0 border-t border-solid border-f1-border-secondary px-4 py-3">
+        <div className="flex items-center justify-end gap-3 border-0 border-t border-solid border-f1-border-secondary px-4 py-3">
+          <F0Button
+            type="button"
+            variant="outline"
+            label={actions.secondaryActionLabel}
+            onClick={actions.onSecondaryAction}
+          />
           <F0Button
             type="button"
             label={actions.primaryActionLabel}
             icon={actions.primaryActionIcon}
             onClick={actions.onPrimaryAction}
-          />
-          <F0Button
-            type="button"
-            variant="ghost"
-            label={actions.secondaryActionLabel}
-            onClick={actions.onSecondaryAction}
           />
         </div>
       )}
