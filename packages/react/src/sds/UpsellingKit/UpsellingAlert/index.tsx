@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 
 import { UpsellingButton, type UpsellingButtonProps } from "../UpsellingButton"
 
-export interface UpsellingAlertProps {
+export type UpsellingAlertProps = {
   /**
    * Optional icon displayed as an avatar on the left side of the alert.
    */
@@ -21,7 +21,15 @@ export interface UpsellingAlertProps {
    * The label for the upselling button. Defaults to "More info".
    */
   actionLabel?: string
-} & Pick<UpsellingButtonProps, 'onRequest' | 'errorMessage' | 'successMessage' | ...>
+} & Pick<
+  UpsellingButtonProps,
+  | "onRequest"
+  | "errorMessage"
+  | "successMessage"
+  | "loadingState"
+  | "nextSteps"
+  | "closeLabel"
+>
 
 function _UpsellingAlert({
   icon,
