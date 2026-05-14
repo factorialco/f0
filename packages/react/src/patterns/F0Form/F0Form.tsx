@@ -25,6 +25,7 @@ import type {
   F0FormPropsWithPerSectionDefinition,
   F0FormPropsWithSingleSchema,
   F0FormPropsWithSingleSchemaDefinition,
+  F0FormPropsWithDefinition,
   F0FormRef,
   F0FormSchema,
   F0FormSubmitResult,
@@ -255,6 +256,7 @@ type AnyF0FormProps =
   | F0FormPropsWithPerSectionSchema<F0PerSectionSchema>
   | F0FormPropsWithSingleSchemaDefinition<F0FormSchema>
   | F0FormPropsWithPerSectionDefinition<F0PerSectionSchema>
+  | F0FormPropsWithDefinition
 
 function hasFormDefinition(
   props: AnyF0FormProps

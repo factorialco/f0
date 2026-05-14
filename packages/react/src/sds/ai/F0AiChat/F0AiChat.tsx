@@ -6,7 +6,6 @@ import Cross from "@/icons/app/Cross"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 
-import { useRegisteredActions } from "./actions"
 import { ChatInput } from "./components/input/ChatInput"
 import { ChatHeader } from "./components/layout/ChatHeader"
 import { SidebarWindow } from "./components/layout/ChatWindow"
@@ -34,6 +33,7 @@ const F0AiChatProviderComponent = ({
   VoiceMode,
   entityRefs,
   canvasActions,
+  canvasEntities,
   toolHints,
   credits,
   creditWarning,
@@ -68,6 +68,7 @@ const F0AiChatProviderComponent = ({
       tracking={tracking}
       entityRefs={entityRefs}
       canvasActions={canvasActions}
+      canvasEntities={canvasEntities}
       toolHints={toolHints}
       credits={credits}
       creditWarning={creditWarning}
@@ -97,8 +98,6 @@ const AiChatKitWrapper = ({
 const F0AiChatComponent = () => {
   const { enabled, open, setOpen, mode, VoiceMode, tracking } = useAiChat()
   const translations = useI18n()
-
-  useRegisteredActions()
 
   if (!enabled) {
     return null

@@ -1,3 +1,4 @@
+import type { IconType, F0IconProps } from "@/components/F0Icon"
 import type {
   F0SelectItemObject,
   F0SelectItemProps,
@@ -124,6 +125,50 @@ export type EditableTableColumnDefinition<
    * Falls back to sensible defaults when omitted.
    */
   numberConfig?: NumberCellConfig<R>
+
+  /**
+   * Called after this cell's value changes. Use to compute derived values
+   * and update other cells in the same row.
+   *
+   * Works with every cell type (text, number, date, select, etc.).
+   *
+   * @example
+   * formula: ({ value, setCellValue }) => {
+   *   const hours = roleHoursMap[value as string]
+   *   if (hours != null) setCellValue("plannedHours", hours)
+   * }
+   */
+  formula?: (params: {
+    /** The new value of this cell. */
+    value: unknown
+    /** The current row item (before this change is applied). */
+    item: R
+    /** For select cells: the full record associated with the selected option. */
+    selectedItem?: RecordType
+    /** Update another cell in the same row by column id. */
+    setCellValue: (columnId: string, value: unknown) => void
+  }) => void
+
+  /**
+   * Returns a hint to display as an icon with tooltip inside the cell.
+   * Use to warn the user when a value diverges from its formula-inferred value.
+   *
+   * Return `undefined` to hide the hint.
+   *
+   * @example
+   * cellHint: (item) => {
+   *   if (item._inferredSalary != null && item.salary !== item._inferredSalary) {
+   *     return { icon: AlertCircle, message: `Differs from catalog (${item._inferredSalary})` }
+   *   }
+   * }
+   */
+  cellHint?: (item: R) =>
+    | {
+        icon: IconType
+        message: string
+        iconColor?: F0IconProps["color"]
+      }
+    | undefined
 }
 
 export type EditableTableVisualizationOptions<

@@ -7,6 +7,7 @@ import { ComboChart as ComboChartComponent } from "./ComboChart"
 import { LineChart as LineChartComponent } from "./LineChart"
 import { PieChart as PieChartComponent } from "./PieChart"
 import { ProgressBar as ProgressBarComponent } from "./ProgressChart"
+import { RadarChart as RadarChartComponent } from "./RadarChart"
 import { VerticalBarChart as VerticalBarChartComponent } from "./VerticalBarChart"
 
 export const AreaChart = withDataTestId(
@@ -47,4 +48,6 @@ export const ComboChart = withDataTestId(
   Component({ name: "ComboChart", type: "info" }, ComboChartComponent)
 )
 
-export * from "./RadarChart"
+export const RadarChart = withDataTestId(
+  Component({ name: "RadarChart", type: "info" }, RadarChartComponent)
+)

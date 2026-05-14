@@ -140,7 +140,7 @@ function _CardSelectable<T extends CardSelectableValue>({
               "rounded-xl border border-solid",
               selected && !isToggle
                 ? "border-f1-border-selected-bold bg-f1-background-selected-secondary"
-                : "border-f1-border-secondary bg-f1-background hover:border-f1-border"
+                : "border-f1-border bg-f1-background hover:border-f1-border-hover"
             ),
         isDisabled && "cursor-not-allowed opacity-50"
       )}
@@ -220,7 +220,7 @@ function _CardSelectable<T extends CardSelectableValue>({
           className="overflow-hidden"
         >
           <div
-            className="border-0 border-t border-solid border-f1-border-secondary"
+            className="border-0 border-t border-solid border-f1-border"
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
           >

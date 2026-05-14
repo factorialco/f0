@@ -568,6 +568,33 @@ export interface F0FormPropsWithPerSectionDefinition<
 }
 
 /**
+ * Props for F0Form when the formDefinition is a union (`F0FormDefinition`).
+ * This non-generic variant allows passing a definition whose exact schema
+ * branch is not statically known (e.g. stored in state or returned from a
+ * generic helper).
+ */
+export interface F0FormPropsWithDefinition {
+  formDefinition: import("@/patterns/F0WizardForm/types").F0FormDefinition
+  className?: string
+  styling?: F0FormStylingConfig
+  formRef?: React.MutableRefObject<F0FormRef | null>
+  initialFiles?: InitialFile[]
+  /** Upload hook shared by all file fields in the form. */
+  useUpload?: UseFileUpload
+  /**
+   * Callback that renders custom fields identified by `customFieldName`.
+   * When a field has `customFieldName`, this function is called instead of the inline `render`.
+   */
+  renderCustomField?: RenderCustomFieldFunction
+  /**
+   * Whether async defaultValues are still being resolved.
+   * When true, the form renders with loading indicators inside each field
+   * instead of replacing the entire form with skeleton placeholders.
+   */
+  isLoading?: boolean
+}
+
+/**
  * Union of all F0Form prop variants.
  * The component detects the mode based on whether `schema` is a single Zod schema
  * or a record of schemas keyed by section ID, or whether a `formDefinition` is provided.

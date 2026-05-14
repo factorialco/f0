@@ -1,23 +1,16 @@
+import { useAiChat } from "../providers/AiChatStateProvider"
 import type { CanvasEntityDefinition } from "./types"
 
-import { dashboardCanvasEntity } from "./entities/dashboard"
-import { formCanvasEntity } from "./entities/form"
-import { dataDownloadCanvasEntity } from "./entities/dataDownload"
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const canvasEntities: Record<string, CanvasEntityDefinition<any>> = {
-  dashboard: dashboardCanvasEntity,
-  form: formCanvasEntity,
-  dataDownload: dataDownloadCanvasEntity,
-}
-
 /**
- * Look up a canvas entity definition by content type.
- * Returns `undefined` if the type is not configured.
+ * Hook returning the canvas entity definition for `type` from the registry
+ * supplied to `F0AiChatProvider.canvasEntities`. Returns `undefined` when no
+ * matching entity is configured.
  */
-export function getCanvasEntity(
-  type: string
+export function useCanvasEntity(
+  type: string | undefined
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): CanvasEntityDefinition<any> | undefined {
+  const { canvasEntities } = useAiChat()
+  if (!type || !canvasEntities) return undefined
   return canvasEntities[type]
 }

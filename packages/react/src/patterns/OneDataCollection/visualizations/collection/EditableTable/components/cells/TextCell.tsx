@@ -11,9 +11,10 @@ export function TextCell<R extends RecordType>({
   error,
   loading,
   onChange,
+  hint,
 }: EditableCellProps<R>) {
   return (
-    <BaseCell error={error}>
+    <BaseCell error={error} hint={hint}>
       <div
         className={cn(
           "flex w-full min-w-0",

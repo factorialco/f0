@@ -232,6 +232,7 @@ const OneDataCollectionComp = <
     sourceSetCurrentFilters: setCurrentFilters,
     visualizations,
     currentVisualization,
+    storageKey: id,
   })
 
   // Patched source with per-viz currentFilters to avoid stale filters during transitions
@@ -774,6 +775,7 @@ const OneDataCollectionComp = <
               presets={effectivePresets}
               presetsLoading={showPresetsLoading}
               onChange={(value) => activeSetCurrentFilters(value)}
+              resultCount={totalItems}
             >
               {isLoading && (
                 <motion.div

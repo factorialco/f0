@@ -430,6 +430,7 @@ const meta: Meta<typeof ApplicationFrame> = {
       },
       fileAttachments: {
         onUploadFiles: mockUploadFiles,
+        maxFiles: 5,
       },
       disclaimer: {
         text: "One works within your permissions.",
@@ -975,6 +976,7 @@ export const FullscreenWithActions: Story = {
       },
       fileAttachments: {
         onUploadFiles: mockUploadFiles,
+        maxFiles: 5,
       },
       disclaimer: {
         text: "One works within your permissions.",
