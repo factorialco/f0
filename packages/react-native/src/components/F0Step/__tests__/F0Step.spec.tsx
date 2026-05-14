@@ -29,13 +29,13 @@ describe("F0StepSegment", () => {
 
     expect(
       screen.getByTestId("step-active").children[0].props.className
-    ).toContain("bg-f0-background-bold")
+    ).toContain("bg-f0-foreground")
     expect(screen.getByTestId("step-completed").props.className).toContain(
       "flex-1"
     )
     expect(
       screen.getByTestId("step-completed").children[0].props.className
-    ).toContain("bg-f0-background-selected-bold")
+    ).toContain("bg-f0-foreground")
     expect(
       screen.getByTestId("step-pending").children[0].props.className
     ).toContain("bg-f0-background-tertiary")
@@ -79,7 +79,7 @@ describe("F0Step", () => {
     })
     expect(
       screen.getByTestId("flow-progress-segment-0").children[0].props.className
-    ).toContain("bg-f0-background-bold")
+    ).toContain("bg-f0-foreground")
     expect(
       screen.getByTestId("flow-progress-segment-1").children[0].props.className
     ).toContain("bg-f0-background-tertiary")
@@ -97,7 +97,7 @@ describe("F0Step", () => {
     })
     expect(
       screen.getByTestId("flow-progress-segment-3").children[0].props.className
-    ).toContain("bg-f0-background-bold")
+    ).toContain("bg-f0-foreground")
   })
 
   it("falls back to one step for invalid step counts", () => {
@@ -151,7 +151,7 @@ describe("F0Step", () => {
     })
     expect(
       screen.getByTestId("flow-progress-segment-0").children[0].props.className
-    ).toContain("bg-f0-background-selected-bold")
+    ).toContain("bg-f0-foreground")
   })
 
   it("preserves completed progress in derived mode when currentStep moves backward", () => {
@@ -173,12 +173,12 @@ describe("F0Step", () => {
     })
     expect(
       screen.getByTestId("flow-progress-segment-0").children[0].props.className
-    ).toContain("bg-f0-background-bold")
+    ).toContain("bg-f0-foreground")
     expect(
       screen.getByTestId("flow-progress-segment-1").children[0].props.className
-    ).toContain("bg-f0-background-selected-bold")
+    ).toContain("bg-f0-foreground")
     expect(
       screen.getByTestId("flow-progress-segment-2").children[0].props.className
-    ).toContain("bg-f0-background-selected-bold")
+    ).toContain("bg-f0-foreground")
   })
 })
