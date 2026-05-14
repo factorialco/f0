@@ -64,7 +64,7 @@ import { SummariesDefinition } from "./summary"
 import { useEventEmitter } from "./useEventEmitter"
 import { VisualizationRenderer } from "./visualizations/collection"
 
-const SUCCESS_DISMISS_MS = 2000
+const SUCCESS_DISMISS_MS = 1500
 
 /**
  * A component that renders a collection of data with filtering and visualization capabilities.
@@ -475,14 +475,6 @@ const OneDataCollectionComp = <
    * the async operation was in flight.
    */
   const selectionVersionRef = useRef(0)
-  /**
-   * True while F0 itself is programmatically clearing the selection as part of
-   * a success/dismiss flow. Guards onSelectItemsLocal so that the automatic
-   * selection-change side-effect (resetting internalBulkActionStatus to "idle")
-   * does not fire during our own dismiss — which would cancel the success timer
-   * and prevent the checkmark from ever being visible.
-   */
-  const isDismissingRef = useRef(false)
 
   useEffect(() => {
     return () => {
@@ -543,9 +535,7 @@ const OneDataCollectionComp = <
         clearTimeout(successTimerRef.current)
       }
       successTimerRef.current = setTimeout(() => {
-        isDismissingRef.current = true
         clearSelectedItemsFunc?.()
-        isDismissingRef.current = false
         setControlledSuccessDismissed(true)
         successTimerRef.current = null
       }, SUCCESS_DISMISS_MS)
@@ -588,25 +578,12 @@ const OneDataCollectionComp = <
     )
 
     /**
-     * Any selection change clears transient status feedback so a prior
-     * action's result doesn't linger into the next interaction:
-     * - error → idle: stale failure styling would mislead on a fresh selection
-     * - success → idle: 1.5s timer would keep actions disabled for the new
-     *   selection; cancel the timer too so the bar reacts immediately.
-     * Loading transitions are owned by the bulk-action click handler and must
-     * not be interrupted here.
+     * Any selection change after an error clears the error so the bar doesn't
+     * persist a stale failure state across user actions. Loading/success
+     * transitions are owned by the bulk-action click handler and must not be
+     * interrupted here.
      */
-    setInternalBulkActionStatus((prev) => {
-      if (isDismissingRef.current) return prev
-      if (prev === "error" || prev === "success") {
-        if (prev === "success" && successTimerRef.current) {
-          clearTimeout(successTimerRef.current)
-          successTimerRef.current = null
-        }
-        return "idle"
-      }
-      return prev
-    })
+    setInternalBulkActionStatus((prev) => (prev === "error" ? "idle" : prev))
 
     /**
      * Bump the version so any in-flight promise resolve can detect that
@@ -688,9 +665,7 @@ const OneDataCollectionComp = <
                 !bulkAction.keepSelection &&
                 selectionVersionRef.current === versionAtClick
               ) {
-                isDismissingRef.current = true
                 clearSelectedItems()
-                isDismissingRef.current = false
               }
               successTimerRef.current = setTimeout(() => {
                 setInternalBulkActionStatus("idle")
