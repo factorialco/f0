@@ -23,20 +23,34 @@ const LABELS = {
 }
 
 describe("F0WizardSteps", () => {
-  it("Snapshot - single step", () => {
-    const { toJSON } = render(
-      <F0WizardSteps steps={makeSteps(1)} testID="wizard" {...LABELS} />
-    )
+  it("renders root, content area and nav buttons for a single step", () => {
+    render(<F0WizardSteps steps={makeSteps(1)} testID="wizard" {...LABELS} />)
 
-    expect(toJSON()).toMatchSnapshot()
+    expect(screen.getByTestId("wizard")).toBeTruthy()
+    expect(screen.getByTestId("wizard-content")).toBeTruthy()
+    expect(screen.getByTestId("wizard-back-button")).toBeTruthy()
+    expect(screen.getByTestId("wizard-next-button")).toBeTruthy()
+    // single step: back is disabled, next shows the submit label
+    expect(
+      screen.getByTestId("wizard-back-button").props.accessibilityState
+        ?.disabled
+    ).toBe(true)
+    expect(screen.getByText("Submit")).toBeTruthy()
   })
 
-  it("Snapshot - multiple steps at first step", () => {
-    const { toJSON } = render(
-      <F0WizardSteps steps={makeSteps(3)} testID="wizard" {...LABELS} />
-    )
+  it("renders root, content area and nav buttons for multiple steps", () => {
+    render(<F0WizardSteps steps={makeSteps(3)} testID="wizard" {...LABELS} />)
 
-    expect(toJSON()).toMatchSnapshot()
+    expect(screen.getByTestId("wizard")).toBeTruthy()
+    expect(screen.getByTestId("wizard-content")).toBeTruthy()
+    expect(screen.getByTestId("wizard-back-button")).toBeTruthy()
+    expect(screen.getByTestId("wizard-next-button")).toBeTruthy()
+    // first of 3 steps: back disabled, next shows the next label
+    expect(
+      screen.getByTestId("wizard-back-button").props.accessibilityState
+        ?.disabled
+    ).toBe(true)
+    expect(screen.getByText("Next")).toBeTruthy()
   })
 
   it("renders the title of the current step", () => {
