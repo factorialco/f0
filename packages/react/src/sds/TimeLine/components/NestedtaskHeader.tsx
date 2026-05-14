@@ -26,15 +26,17 @@ export const NestedtaskHeader = ({
     onExpandToggle,
     items,
     content,
+    collapsible = true,
   } = props
 
   const hasItems = (items?.length ?? 0) > 0 || content !== undefined
+  const showToggle = hasItems && collapsible
 
   return (
     <>
       <F0AvatarIcon icon={icon} size="sm" />
       <div className="flex flex-1 items-center justify-between">
-        {hasItems ? (
+        {showToggle ? (
           <button
             type="button"
             aria-expanded={expanded}

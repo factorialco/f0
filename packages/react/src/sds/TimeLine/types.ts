@@ -86,10 +86,17 @@ export interface F0TimelineRowNestedtaskProps extends F0TimelineRowBaseProps {
   taskCount: number
   /** Number of completed items (displayed in the progress pill) */
   completedCount?: number
-  /** Whether the row is expanded (controlled) */
-  expanded: boolean
-  /** Callback when expand/collapse is toggled */
-  onExpandToggle: () => void
+  /** Whether the row is expanded (controlled). When `collapsible` is false this is ignored and the row is always expanded. */
+  expanded?: boolean
+  /** Callback when expand/collapse is toggled. Not invoked when `collapsible` is false. */
+  onExpandToggle?: () => void
+  /**
+   * Whether the header chevron toggles the body. When false, the row is
+   * always expanded and the header has no toggle affordance — useful when
+   * the body controls its own expansion (e.g. a collapsible callout card).
+   * @default true
+   */
+  collapsible?: boolean
   /** Metadata items displayed below the header (e.g., assignees, file chips). Always visible regardless of expand/collapse */
   metadata?: (MetadataItem | undefined | boolean)[]
   /** The nested task items to render when expanded. Ignored when `content` is provided. */

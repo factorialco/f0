@@ -29,4 +29,15 @@ export interface F0InfoCardProps {
    * @default "neutral"
    */
   variant?: F0InfoCardVariant
+  /**
+   * When true, the header becomes a toggle that shows/hides the body.
+   * Has no effect when `body` is not provided.
+   * @default false
+   */
+  collapsible?: boolean
+  /**
+   * Initial expanded state when `collapsible` is true. Ignored otherwise.
+   * @default true
+   */
+  defaultExpanded?: boolean
 }

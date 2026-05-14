@@ -1,8 +1,11 @@
 import { cva } from "cva"
+import { useState } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
+import ChevronDown from "@/icons/app/ChevronDown"
+import ChevronUp from "@/icons/app/ChevronUp"
 import { withDataTestId } from "@/lib/data-testid"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 
 import type { F0InfoCardProps } from "./types"
 
@@ -54,23 +57,60 @@ const primaryTextVariants = cva({
   },
 })
 
-const _F0InfoCard = ({ title, body, variant = "neutral" }: F0InfoCardProps) => {
+const _F0InfoCard = ({
+  title,
+  body,
+  variant = "neutral",
+  collapsible = false,
+  defaultExpanded = true,
+}: F0InfoCardProps) => {
+  const hasBody = body !== undefined && body !== null
+  const isCollapsible = hasBody && collapsible
+  const [expanded, setExpanded] = useState(defaultExpanded)
+  const showBody = hasBody && (!isCollapsible || expanded)
+
+  const titleContent = (
+    <>
+      <div className={iconVariants({ variant })}>
+        <F0Icon icon={title.icon} size="sm" aria-hidden />
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <p className={primaryTextVariants({ variant })}>{title.primary}</p>
+        {title.secondary && (
+          <p className="text-base text-f1-foreground-secondary">
+            {title.secondary}
+          </p>
+        )}
+      </div>
+      {isCollapsible && (
+        <F0Icon
+          icon={expanded ? ChevronUp : ChevronDown}
+          size="sm"
+          color="secondary"
+          aria-hidden
+        />
+      )}
+    </>
+  )
+
   return (
     <div className={cardVariants({ variant })} role="group">
-      <div className="flex flex-row items-start gap-2">
-        <div className={iconVariants({ variant })}>
-          <F0Icon icon={title.icon} size="sm" aria-hidden />
-        </div>
-        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <p className={primaryTextVariants({ variant })}>{title.primary}</p>
-          {title.secondary && (
-            <p className="text-base text-f1-foreground-secondary">
-              {title.secondary}
-            </p>
+      {isCollapsible ? (
+        <button
+          type="button"
+          aria-expanded={expanded}
+          onClick={() => setExpanded((prev) => !prev)}
+          className={cn(
+            "flex w-full flex-row items-start gap-2 rounded-sm text-left",
+            focusRing()
           )}
-        </div>
-      </div>
-      {body !== undefined && body !== null && (
+        >
+          {titleContent}
+        </button>
+      ) : (
+        <div className="flex flex-row items-start gap-2">{titleContent}</div>
+      )}
+      {showBody && (
         <div className={cn("mt-3 overflow-hidden rounded-sm bg-f1-background")}>
           {body}
         </div>

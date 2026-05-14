@@ -44,6 +44,7 @@ export const NestedtaskRow = ({
     isLast = false,
     hideStatus = false,
     expanded,
+    collapsible = true,
     items,
     content,
     metadata,
@@ -53,6 +54,7 @@ export const NestedtaskRow = ({
   } = props
 
   const contentId = useId()
+  const isExpanded = collapsible ? expanded : true
   const hasMetadata = metadata?.some(Boolean)
   const hasActions =
     primaryAction ||
@@ -69,7 +71,7 @@ export const NestedtaskRow = ({
           <Metadata items={metadata} />
         </div>
       )}
-      {expanded && (
+      {isExpanded && (
         <div id={contentId} role="region" className="flex flex-col gap-0 pl-4">
           {content !== undefined
             ? content
