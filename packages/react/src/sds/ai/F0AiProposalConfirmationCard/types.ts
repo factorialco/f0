@@ -1,5 +1,6 @@
 import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 import type { IconType } from "@/components/F0Icon"
+import type { DataAttributes } from "@/global.types"
 
 export interface F0AiProposalConfirmationCardProps extends DataAttributes {
   /** Module avatar shown in the card header. */

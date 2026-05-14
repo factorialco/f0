@@ -2,7 +2,7 @@ import { useState } from "react"
 
 import { F0AvatarModule } from "@/components/avatars/F0AvatarModule"
 import { F0Button } from "@/components/F0Button"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 
 import type { F0AiProposalConfirmationCardProps } from "./types"
 
@@ -69,7 +69,10 @@ export function F0AiProposalConfirmationCard({
               {" "}
               <button
                 type="button"
-                className="inline cursor-pointer rounded-none border-0 bg-transparent p-0 text-base text-f1-foreground underline underline-offset-2 hover:text-f1-foreground-secondary"
+                className={cn(
+                  "inline cursor-pointer rounded-none border-0 bg-transparent p-0 text-base text-f1-foreground underline underline-offset-2 hover:text-f1-foreground-secondary",
+                  focusRing()
+                )}
                 onClick={() => setExpanded(true)}
               >
                 {seeMoreLabel}

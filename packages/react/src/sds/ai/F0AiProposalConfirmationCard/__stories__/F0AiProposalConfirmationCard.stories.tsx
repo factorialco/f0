@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { fn } from "storybook/test"
 
 import Check from "@/icons/app/Check"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0AiProposalConfirmationCard } from ".."
 
@@ -44,6 +45,10 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+}
 
 export const Collapsed: Story = {
   args: {
