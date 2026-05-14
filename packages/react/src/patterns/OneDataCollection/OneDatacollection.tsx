@@ -232,6 +232,7 @@ const OneDataCollectionComp = <
     sourceSetCurrentFilters: setCurrentFilters,
     visualizations,
     currentVisualization,
+    storageKey: id,
   })
 
   // Patched source with per-viz currentFilters to avoid stale filters during transitions
