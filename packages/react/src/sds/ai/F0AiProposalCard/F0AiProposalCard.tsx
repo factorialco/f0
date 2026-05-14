@@ -10,6 +10,9 @@ import type { F0AiProposalCardActions, F0AiProposalCardProps } from "./types"
 const DEFAULT_MAX_COLLAPSED_DESCRIPTION_LENGTH = 180
 
 const getSafeCollapsedDescriptionLength = (maxLength: number) => {
+  if (!Number.isFinite(maxLength))
+    return DEFAULT_MAX_COLLAPSED_DESCRIPTION_LENGTH
+
   return Math.max(0, Math.floor(maxLength))
 }
 

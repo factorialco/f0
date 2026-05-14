@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { fn } from "storybook/test"
 
+import { modules } from "@/components/avatars/F0AvatarModule"
 import Check from "@/icons/app/Check"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
@@ -35,6 +36,12 @@ const meta = {
     layout: "centered",
   },
   tags: ["autodocs", "stable"],
+  argTypes: {
+    module: {
+      control: "select",
+      options: Object.keys(modules),
+    },
+  },
   decorators: [
     (Story) => (
       <div className="w-[420px] p-8">

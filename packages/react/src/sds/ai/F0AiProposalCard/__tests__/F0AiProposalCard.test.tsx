@@ -152,4 +152,19 @@ describe("F0AiProposalCard", () => {
     expect(screen.getByText("...", { exact: false })).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "See more" })).toBeInTheDocument()
   })
+
+  it("falls back to the default collapsed description length for non-finite values", () => {
+    const description = "A".repeat(181)
+
+    render(
+      <F0AiProposalCard
+        {...defaultProps}
+        description={description}
+        maxCollapsedDescriptionLength={Number.NaN}
+      />
+    )
+
+    expect(screen.getByText(`${"A".repeat(180)}...`)).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "See more" })).toBeInTheDocument()
+  })
 })
