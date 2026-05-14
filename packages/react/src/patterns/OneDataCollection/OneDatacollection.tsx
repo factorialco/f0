@@ -148,8 +148,10 @@ export type OneDataCollectionProps<
    *   1.5 s auto-clears selection and falls back to auto-manage. The consumer
    *   does not need to set `"idle"` or clear selection manually.
    * - **`"error"`** — mutation rejected. F0 shows the error state and wiggle
-   *   animation. Persists until the user changes selection or the consumer
-   *   sets a different status.
+   *   animation. Persists until the consumer sets a different status.
+   *   Note: selection change only auto-clears the internal (auto-managed)
+   *   error state — when using controlled mode the consumer must explicitly
+   *   set a new status to dismiss the error.
    *
    * When this prop is provided (even as `"idle"`), void-returning handlers
    * will not auto-clear selection — F0 assumes the consumer has modal-gated
@@ -503,9 +505,15 @@ const OneDataCollectionComp = <
 
   // True only when the consumer has explicitly taken over with a non-idle
   // status. Used to decide whether auto-manage should run for promises.
+  //
+  // Mirrors the resolvedBulkActionStatus fall-through logic: once F0 has
+  // auto-dismissed a controlled "success" (controlledSuccessDismissed=true),
+  // the consumer does not need to manually reset to "idle" — the controlled
+  // success is considered done and immediate actions should auto-manage again.
   const isControlledModeActive =
     controlledBulkActionStatus !== undefined &&
-    controlledBulkActionStatus !== "idle"
+    controlledBulkActionStatus !== "idle" &&
+    !(controlledBulkActionStatus === "success" && controlledSuccessDismissed)
   // Ref copy so that onClick closures (captured inside onSelectItemsLocal on
   // each selection change) always read the current value at click time rather
   // than the value that was current when the closure was last rebuilt.

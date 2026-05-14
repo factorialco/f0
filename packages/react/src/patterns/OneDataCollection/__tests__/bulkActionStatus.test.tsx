@@ -190,7 +190,7 @@ describe("OneDataCollection bulk-action status", () => {
 
   test("bar dismisses after SUCCESS_DISMISS_MS on resolve (fake timers)", async () => {
     // Uses fake timers so the test completes instantly without waiting for the
-    // real 2000ms dismiss delay. userEvent must be set up with advanceTimers so
+    // real 1500ms dismiss delay. userEvent must be set up with advanceTimers so
     // its internal scheduler and fake timers don't deadlock.
     vi.useFakeTimers({ shouldAdvanceTime: true })
 
@@ -238,7 +238,7 @@ describe("OneDataCollection bulk-action status", () => {
     // "success" + setTimeout) runs synchronously from our perspective.
     await Promise.resolve()
 
-    // Skip past the 2000ms success-dismiss timer instantly.
+    // Skip past the 1500ms success-dismiss timer instantly.
     vi.advanceTimersByTime(2000)
 
     // Bar must now be gone.
@@ -414,7 +414,7 @@ describe("OneDataCollection bulk-action status", () => {
 
   test("controlled 'success' auto-clears selection after SUCCESS_DISMISS_MS", async () => {
     // When the consumer sets bulkActionStatus="success", F0 should auto-clear
-    // selection and reset to idle after ~2000ms — no manual timer or
+    // selection and reset to idle after ~1500ms — no manual timer or
     // clearSelectedItems call needed from the consumer.
     vi.useFakeTimers({ shouldAdvanceTime: true })
     const user = userEvent.setup({
@@ -570,14 +570,15 @@ describe("OneDataCollection bulk-action status", () => {
   })
 
   test("immediate promise action auto-manages after a prior modal-gated action", async () => {
-    // Regression guard for the stale-closure bug: when autoManageBulkActionStatus
-    // and bulkActionStatus are used together, the onClick closures for immediate
-    // actions are rebuilt inside onSelectItemsLocal. If a previous modal-gated
-    // action left controlledBulkActionStatus as 'loading' or 'success' at the
-    // moment of that rebuild, isControlledModeActive=true gets baked into the
-    // closure. Even after the consumer resets to 'idle', the stale closure
-    // bails out of auto-manage. Fix: read from isControlledModeActiveRef inside
-    // onClick so the check always reflects the current prop value at click time.
+    // Regression guard: when autoManageBulkActionStatus and bulkActionStatus are
+    // used together, a prior modal-gated action must not prevent subsequent
+    // immediate promise actions from auto-managing.
+    //
+    // Real consumers (e.g. Expenses) never reset bulkActionStatus back to "idle"
+    // after success — they rely on F0's auto-dismiss to handle the full lifecycle.
+    // After the dismiss timer fires (controlledSuccessDismissed=true), F0 must
+    // treat the controlled status as effectively idle so that isControlledModeActive
+    // becomes false and the next immediate action's promise is picked up.
     vi.useFakeTimers({ shouldAdvanceTime: true })
     const user = userEvent.setup({
       advanceTimers: vi.advanceTimersByTime.bind(vi),
@@ -617,7 +618,8 @@ describe("OneDataCollection bulk-action status", () => {
       </TestWrapper>
     )
 
-    // Step 1: simulate a full modal-gated action cycle (loading → success → idle).
+    // Step 1: simulate a modal-gated action cycle. Consumer sets "success" and
+    // never resets to "idle" — F0 must auto-dismiss and unblock auto-manage.
     await selectFirstRow(user)
     await findArchiveButtons()
 
@@ -627,7 +629,7 @@ describe("OneDataCollection bulk-action status", () => {
     act(() => {
       setExternalStatus("success")
     })
-    // Advance past SUCCESS_DISMISS_MS so F0 auto-dismisses and resets.
+    // Advance past SUCCESS_DISMISS_MS so F0 auto-dismisses.
     act(() => {
       vi.advanceTimersByTime(2000)
     })
@@ -635,10 +637,8 @@ describe("OneDataCollection bulk-action status", () => {
       expect(queryArchiveButtons()).toHaveLength(0)
     })
 
-    // Consumer resets to idle (as they would after dismissal).
-    act(() => {
-      setExternalStatus("idle")
-    })
+    // Note: consumer intentionally does NOT reset to "idle" here — that is the
+    // real-world contract. F0 must handle this via controlledSuccessDismissed.
 
     // Step 2: select again and fire an immediate promise action.
     await selectFirstRow(user)
