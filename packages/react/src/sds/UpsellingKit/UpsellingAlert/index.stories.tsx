@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import * as icons from "@/icons/app"
 import { Upsell } from "@/icons/app"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { UpsellingAlert } from "."
 
@@ -65,4 +66,9 @@ export const WithIcon: Story = {
     title: "Upgrade to unlock this feature",
     description: "Upsell and grow your business with advanced tools.",
   },
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  args: Default.args,
 }
