@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/factorialco/f0/compare/f0-react-v2.1.0...f0-react-v2.2.0) (2026-05-14)
+
+
+### Features
+
+* **editable-table:** add formulas & hint for Cells in Editable Table ([#4111](https://github.com/factorialco/f0/issues/4111)) ([2528aea](https://github.com/factorialco/f0/commit/2528aeaaaa4a85d69639ca5e90589bb6274b16af))
+
 ## [2.1.0](https://github.com/factorialco/f0/compare/f0-react-v2.0.1...f0-react-v2.1.0) (2026-05-13)
 
 
