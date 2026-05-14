@@ -14,16 +14,17 @@ const defaultProps = {
   description: "The employee cannot download last month's payslip.",
   seeMoreLabel: "See more",
   primaryActionLabel: "Send ticket",
-  secondaryActionLabel: "Cancel",
   onPrimaryAction: vi.fn(),
-  onSecondaryAction: vi.fn(),
 }
 
 describe("F0AiProposalCard", () => {
   it("renders proposal content and actions", () => {
-    render(<F0AiProposalCard {...defaultProps} />)
+    const { container } = render(<F0AiProposalCard {...defaultProps} />)
 
     expect(screen.getByText("Review this ticket")).toBeInTheDocument()
+    expect(
+      container.querySelector("[aria-hidden='true'] svg")
+    ).toBeInTheDocument()
     expect(screen.getByText("People Team · Payroll")).toBeInTheDocument()
     expect(
       screen.getByText("Cannot access payroll documents")
@@ -34,11 +35,10 @@ describe("F0AiProposalCard", () => {
     expect(
       screen.getByRole("button", { name: "Send ticket" })
     ).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument()
   })
 
   it("renders without optional module and subtitle", () => {
-    render(
+    const { container } = render(
       <F0AiProposalCard
         {...defaultProps}
         module={undefined}
@@ -47,6 +47,9 @@ describe("F0AiProposalCard", () => {
     )
 
     expect(screen.getByText("Review this ticket")).toBeInTheDocument()
+    expect(
+      container.querySelector("[aria-hidden='true'] svg")
+    ).not.toBeInTheDocument()
     expect(screen.queryByText("People Team · Payroll")).not.toBeInTheDocument()
   })
 
@@ -80,30 +83,23 @@ describe("F0AiProposalCard", () => {
     expect(
       screen.queryByRole("button", { name: "Send ticket" })
     ).not.toBeInTheDocument()
-    expect(
-      screen.queryByRole("button", { name: "Cancel" })
-    ).not.toBeInTheDocument()
   })
 
-  it("calls action callbacks", async () => {
+  it("calls the primary action callback", async () => {
     const user = userEvent.setup()
     const onPrimaryAction = vi.fn()
-    const onSecondaryAction = vi.fn()
 
     render(
       <F0AiProposalCard
         {...defaultProps}
         primaryActionIcon={Check}
         onPrimaryAction={onPrimaryAction}
-        onSecondaryAction={onSecondaryAction}
       />
     )
 
     await user.click(screen.getByRole("button", { name: "Send ticket" }))
-    await user.click(screen.getByRole("button", { name: "Cancel" }))
 
     expect(onPrimaryAction).toHaveBeenCalledTimes(1)
-    expect(onSecondaryAction).toHaveBeenCalledTimes(1)
   })
 
   it("truncates long descriptions and expands them inline", async () => {

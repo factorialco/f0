@@ -22,14 +22,12 @@ const defaultArgs: F0AiProposalCardProps = {
   description: longDescription,
   seeMoreLabel: "See more",
   primaryActionLabel: "Send ticket",
-  secondaryActionLabel: "Cancel",
   primaryActionIcon: Check,
   showActions: true,
   onPrimaryAction: fn(),
-  onSecondaryAction: fn(),
-}
+} satisfies F0AiProposalCardProps
 
-const meta = {
+const meta: Meta<F0AiProposalCardProps> = {
   title: "AI/F0AiProposalCard",
   component: F0AiProposalCard,
   parameters: {
@@ -50,10 +48,12 @@ const meta = {
     ),
   ],
   args: defaultArgs,
-} satisfies Meta<typeof F0AiProposalCard>
+}
 
 export default meta
-type Story = StoryObj<F0AiProposalCardProps>
+type Story = Omit<StoryObj<typeof meta>, "args"> & {
+  args?: Partial<F0AiProposalCardProps>
+}
 
 export const Default: Story = {}
 

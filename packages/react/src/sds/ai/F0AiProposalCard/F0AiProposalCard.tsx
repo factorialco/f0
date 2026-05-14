@@ -90,6 +90,7 @@ export function F0AiProposalCard(props: F0AiProposalCardProps) {
           tabIndex={expanded ? -1 : undefined}
           className={cn(
             "text-base text-f1-foreground whitespace-pre-wrap break-words",
+            expanded && focusRing(),
             !expanded && "inline"
           )}
         >
@@ -116,12 +117,6 @@ export function F0AiProposalCard(props: F0AiProposalCardProps) {
 
       {actions && (
         <div className="flex items-center justify-end gap-3 border-0 border-t border-solid border-f1-border-secondary px-4 py-3">
-          <F0Button
-            type="button"
-            variant="outline"
-            label={actions.secondaryActionLabel}
-            onClick={actions.onSecondaryAction}
-          />
           <F0Button
             type="button"
             label={actions.primaryActionLabel}

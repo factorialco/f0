@@ -22,16 +22,12 @@ export interface F0AiProposalCardBaseProps extends DataAttributes {
 export interface F0AiProposalCardActions {
   /** Label for the primary action button. */
   primaryActionLabel: string
-  /** Label for the secondary action button. */
-  secondaryActionLabel: string
   /** Optional icon shown before the primary action label. */
   primaryActionIcon?: IconType
   /** Whether the action footer is visible. */
   showActions?: true
   /** Called when the primary action is clicked. */
   onPrimaryAction: () => void
-  /** Called when the secondary action is clicked. */
-  onSecondaryAction: () => void
 }
 
 export interface F0AiProposalCardHiddenActions {
