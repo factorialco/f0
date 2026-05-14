@@ -96,6 +96,8 @@ Sidebar badges come from `.storybook/manager.ts`: `"experimental"` → 🚧, `"s
 
 Use `"no-sidebar"` to hide a story from navigation entirely.
 
+> **Pitfall:** when a component has an attached MDX (`<Meta of={Stories} />`), Storybook treats the **first exported story** as the "primary" and propagates its tags to the auto-generated `--documentation` entry. Adding `"no-sidebar"` to the primary story therefore hides the whole Documentation page from the sidebar. Apply `"no-sidebar"` only to secondary stories (Variants, Sizes, IconVariants, …).
+
 ## ArgTypes Patterns
 
 ### Const array options (most common)
