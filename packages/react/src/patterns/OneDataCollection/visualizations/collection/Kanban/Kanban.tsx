@@ -107,10 +107,12 @@ export const KanbanCollection = <
   // Fine-grained reorder only when no sort order is applied
   const allowReorder = source.currentSortings === null
 
-  // Report aggregated totals/loading so header total updates
+  // Aggregated totals/loading. A lane that has not yet reported counts as
+  // still initial-loading so we do not flash false while lanes are mounting.
   const { totalItemsAggregated, isInitialLoadingAggregated } = useMemo(() => {
     const hooks = Object.values(lanesHooks)
-    if (hooks.length === 0) {
+    const allLanesReported = hooks.length === lanes.length
+    if (hooks.length === 0 || !allLanesReported) {
       return {
         totalItemsAggregated: undefined,
         isInitialLoadingAggregated: true,
@@ -127,7 +129,7 @@ export const KanbanCollection = <
       totalItemsAggregated: total,
       isInitialLoadingAggregated: initialLoading,
     }
-  }, [lanesHooks])
+  }, [lanesHooks, lanes.length])
 
   // Used for kanbanProps.loading: empty hooks → not loading (preserves
   // pre-refactor behavior; isInitialLoadingAggregated keeps `true` fallback
@@ -218,7 +220,7 @@ export const KanbanCollection = <
           fetchMore: hasMore ? () => laneData.loadMore() : undefined,
         }
       }),
-    [laneItems, lanesHooks]
+    [laneItems, lanesHooks] // laneItems → items; lanesHooks → pagination/loading/fetchMore per lane
   )
 
   const getKey = useCallback<NonNullable<KanbanProps<R>["getKey"]>>(

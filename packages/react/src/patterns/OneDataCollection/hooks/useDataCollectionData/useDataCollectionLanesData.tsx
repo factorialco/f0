@@ -173,13 +173,27 @@ export function useDataCollectionLanesData<
     Record<string | symbol, UseDataCollectionData<R>>
   >({})
   const flushScheduledRef = useRef(false)
-  const isMountedRef = useRef(true)
+  // Initialized to false; the mount effect sets it to true. This prevents
+  // StrictMode's mount → cleanup → remount cycle from leaving the ref in a
+  // permanently-false state and silently dropping queued updates.
+  const isMountedRef = useRef(false)
 
   useEffect(() => {
     isMountedRef.current = true
     return () => {
       isMountedRef.current = false
     }
+  }, [])
+
+  // Stable wrapper around `options.onError` so passing it down to LaneProvider
+  // does not invalidate the lanesProvider memo when the caller's callback
+  // identity changes.
+  const onErrorRef = useRef(options.onError)
+  useEffect(() => {
+    onErrorRef.current = options.onError
+  })
+  const stableOnError = useCallback((error: DataError) => {
+    onErrorRef.current?.(error)
   }, [])
 
   const handleHookUpdate = useCallback(
@@ -198,11 +212,10 @@ export function useDataCollectionLanesData<
     []
   )
 
-  // The deep-compare descriptor below tracks the *content* of `source` (and
-  // `options.onError`) so the `lanesProvider` useMemo re-runs whenever any
-  // captured value changes, even though `source`'s reference is unstable.
-  // Passing `source` directly to LaneProvider is safe: the memo re-runs on
-  // every content change, so children always receive the latest `source`.
+  // Plain-data fields are deep-compared so the memo only rebuilds when
+  // content actually changes. Function/adapter fields fall back to reference
+  // equality — callers must stabilize them (useDataSource already does this
+  // for dataAdapter).
   const lanesProviderDeps = {
     lanes,
     currentFilters: source.currentFilters,
@@ -211,8 +224,9 @@ export function useDataCollectionLanesData<
     currentGrouping: source.currentGrouping,
     currentSearch: source.currentSearch,
     grouping: source.grouping,
+    summaries: source.summaries,
     dataAdapter: source.dataAdapter,
-    onError: options.onError,
+    itemPreFilter: source.itemPreFilter,
   }
 
   const lanesProviderDepsMemoized = useDeepCompareMemoize(lanesProviderDeps)
@@ -230,7 +244,7 @@ export function useDataCollectionLanesData<
         >
           key={String(lane.id)}
           lane={lane}
-          onError={options.onError}
+          onError={stableOnError}
           source={source}
           onHookUpdate={handleHookUpdate}
         />
