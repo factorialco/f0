@@ -1,10 +1,11 @@
-import { useState } from "react"
+import { useEffect, useId, useRef, useState } from "react"
 
 import { F0AvatarModule } from "@/components/avatars/F0AvatarModule"
 import { F0Button } from "@/components/F0Button"
+import type { DataAttributes } from "@/global.types"
 import { cn, focusRing } from "@/lib/utils"
 
-import type { F0AiProposalConfirmationCardProps } from "./types"
+import type { F0AiProposalCardActions, F0AiProposalCardProps } from "./types"
 
 const DEFAULT_MAX_COLLAPSED_DESCRIPTION_LENGTH = 180
 
@@ -14,27 +15,43 @@ const getCollapsedDescription = (description: string, maxLength: number) => {
   return `${description.slice(0, maxLength).trimEnd()}...`
 }
 
-export function F0AiProposalConfirmationCard({
-  module,
-  heading,
-  title,
-  subtitle,
-  description,
-  seeMoreLabel,
-  primaryActionLabel,
-  secondaryActionLabel,
-  primaryActionIcon,
-  showActions = true,
-  onPrimaryAction,
-  onSecondaryAction,
-  maxCollapsedDescriptionLength = DEFAULT_MAX_COLLAPSED_DESCRIPTION_LENGTH,
-  ...dataAttributes
-}: F0AiProposalConfirmationCardProps) {
+const hasActions = (
+  props: F0AiProposalCardProps
+): props is F0AiProposalCardProps & F0AiProposalCardActions => {
+  return props.showActions !== false
+}
+
+const getDataAttributes = (props: F0AiProposalCardProps): DataAttributes => {
+  return Object.fromEntries(
+    Object.entries(props).filter(([key]) => key.startsWith("data-"))
+  ) as DataAttributes
+}
+
+export function F0AiProposalCard(props: F0AiProposalCardProps) {
+  const {
+    module,
+    heading,
+    title,
+    subtitle,
+    description,
+    seeMoreLabel,
+    maxCollapsedDescriptionLength = DEFAULT_MAX_COLLAPSED_DESCRIPTION_LENGTH,
+  } = props
   const [expanded, setExpanded] = useState(false)
+  const descriptionId = useId()
+  const descriptionRef = useRef<HTMLParagraphElement>(null)
   const shouldTruncate = description.length > maxCollapsedDescriptionLength
   const visibleDescription = expanded
     ? description
     : getCollapsedDescription(description, maxCollapsedDescriptionLength)
+  const actions = hasActions(props) ? props : null
+  const dataAttributes = getDataAttributes(props)
+
+  useEffect(() => {
+    if (expanded) {
+      descriptionRef.current?.focus()
+    }
+  }, [expanded])
 
   return (
     <section
@@ -58,6 +75,9 @@ export function F0AiProposalConfirmationCard({
       <div className="flex flex-col gap-2 px-4 py-3">
         <h3 className="text-lg font-semibold text-f1-foreground">{title}</h3>
         <p
+          id={descriptionId}
+          ref={descriptionRef}
+          tabIndex={expanded ? -1 : undefined}
           className={cn(
             "text-base text-f1-foreground whitespace-pre-wrap break-words",
             !expanded && "inline"
@@ -73,6 +93,8 @@ export function F0AiProposalConfirmationCard({
                   "inline cursor-pointer rounded-none border-0 bg-transparent p-0 text-base text-f1-foreground underline underline-offset-2 hover:text-f1-foreground-secondary",
                   focusRing()
                 )}
+                aria-controls={descriptionId}
+                aria-expanded={expanded}
                 onClick={() => setExpanded(true)}
               >
                 {seeMoreLabel}
@@ -82,19 +104,19 @@ export function F0AiProposalConfirmationCard({
         </p>
       </div>
 
-      {showActions && (
+      {actions && (
         <div className="flex items-center justify-between gap-3 border-0 border-t border-solid border-f1-border-secondary px-4 py-3">
           <F0Button
             type="button"
-            label={primaryActionLabel}
-            icon={primaryActionIcon}
-            onClick={onPrimaryAction}
+            label={actions.primaryActionLabel}
+            icon={actions.primaryActionIcon}
+            onClick={actions.onPrimaryAction}
           />
           <F0Button
             type="button"
             variant="ghost"
-            label={secondaryActionLabel}
-            onClick={onSecondaryAction}
+            label={actions.secondaryActionLabel}
+            onClick={actions.onSecondaryAction}
           />
         </div>
       )}
@@ -102,4 +124,4 @@ export function F0AiProposalConfirmationCard({
   )
 }
 
-F0AiProposalConfirmationCard.displayName = "F0AiProposalConfirmationCard"
+F0AiProposalCard.displayName = "F0AiProposalCard"

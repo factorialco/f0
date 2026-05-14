@@ -4,7 +4,7 @@ import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 
 import Check from "@/icons/app/Check"
 
-import { F0AiProposalConfirmationCard } from "../F0AiProposalConfirmationCard"
+import { F0AiProposalCard } from "../F0AiProposalCard"
 
 const defaultProps = {
   module: "tasks" as const,
@@ -19,9 +19,9 @@ const defaultProps = {
   onSecondaryAction: vi.fn(),
 }
 
-describe("F0AiProposalConfirmationCard", () => {
+describe("F0AiProposalCard", () => {
   it("renders proposal content and actions", () => {
-    render(<F0AiProposalConfirmationCard {...defaultProps} />)
+    render(<F0AiProposalCard {...defaultProps} />)
 
     expect(screen.getByText("Review this ticket")).toBeInTheDocument()
     expect(screen.getByText("People Team · Payroll")).toBeInTheDocument()
@@ -39,7 +39,7 @@ describe("F0AiProposalConfirmationCard", () => {
 
   it("renders without optional module and subtitle", () => {
     render(
-      <F0AiProposalConfirmationCard
+      <F0AiProposalCard
         {...defaultProps}
         module={undefined}
         subtitle={undefined}
@@ -52,7 +52,14 @@ describe("F0AiProposalConfirmationCard", () => {
 
   it("hides action buttons when showActions is false", () => {
     render(
-      <F0AiProposalConfirmationCard {...defaultProps} showActions={false} />
+      <F0AiProposalCard
+        module="tasks"
+        heading="Review this ticket"
+        title="Cannot access payroll documents"
+        description="The employee cannot download last month's payslip."
+        seeMoreLabel="See more"
+        showActions={false}
+      />
     )
 
     expect(
@@ -69,7 +76,7 @@ describe("F0AiProposalConfirmationCard", () => {
     const onSecondaryAction = vi.fn()
 
     render(
-      <F0AiProposalConfirmationCard
+      <F0AiProposalCard
         {...defaultProps}
         primaryActionIcon={Check}
         onPrimaryAction={onPrimaryAction}
@@ -90,7 +97,7 @@ describe("F0AiProposalConfirmationCard", () => {
       "First line with context.\nSecond line with extra detail."
 
     render(
-      <F0AiProposalConfirmationCard
+      <F0AiProposalCard
         {...defaultProps}
         description={description}
         maxCollapsedDescriptionLength={24}
@@ -99,13 +106,20 @@ describe("F0AiProposalConfirmationCard", () => {
 
     expect(screen.getByText("First line with context....")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "See more" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "See more" })).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    )
     expect(screen.queryByText(description)).not.toBeInTheDocument()
 
     await user.click(screen.getByRole("button", { name: "See more" }))
 
-    expect(
-      screen.getByText((_, element) => element?.textContent === description)
-    ).toBeInTheDocument()
+    const expandedDescription = screen.getByText(
+      (_, element) => element?.textContent === description
+    )
+
+    expect(expandedDescription).toBeInTheDocument()
+    expect(expandedDescription).toHaveFocus()
     expect(
       screen.queryByRole("button", { name: "See more" })
     ).not.toBeInTheDocument()
