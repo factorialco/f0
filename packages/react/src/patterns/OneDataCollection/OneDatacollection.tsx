@@ -551,6 +551,10 @@ const OneDataCollectionComp = <
         clearTimeout(successTimerRef.current)
       }
       successTimerRef.current = setTimeout(() => {
+        // setShowActionBar(false) is batched with setControlledSuccessDismissed
+        // so isOpen flips to false in the same render — no intermediate frame
+        // where the bar shows idle content (stale action buttons) before closing.
+        setShowActionBar(false)
         clearSelectedItemsFunc?.()
         setControlledSuccessDismissed(true)
         successTimerRef.current = null
@@ -685,6 +689,11 @@ const OneDataCollectionComp = <
                   !bulkAction.keepSelection &&
                   selectionVersionRef.current === versionAtClick
                 ) {
+                  // setShowActionBar(false) is batched with
+                  // setInternalBulkActionStatus("idle") so isOpen flips to
+                  // false in the same render — no intermediate frame where the
+                  // bar shows idle content (stale action buttons) before closing.
+                  setShowActionBar(false)
                   clearSelectedItems()
                 }
                 setInternalBulkActionStatus("idle")
