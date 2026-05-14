@@ -50,6 +50,21 @@ describe("F0AiProposalCard", () => {
     expect(screen.queryByText("People Team · Payroll")).not.toBeInTheDocument()
   })
 
+  it("forwards data attributes to the root element", () => {
+    render(
+      <F0AiProposalCard
+        {...defaultProps}
+        data-testid="proposal-card"
+        data-tracking-id="ticket-proposal"
+      />
+    )
+
+    expect(screen.getByTestId("proposal-card")).toHaveAttribute(
+      "data-tracking-id",
+      "ticket-proposal"
+    )
+  })
+
   it("hides action buttons when showActions is false", () => {
     render(
       <F0AiProposalCard
@@ -123,5 +138,18 @@ describe("F0AiProposalCard", () => {
     expect(
       screen.queryByRole("button", { name: "See more" })
     ).not.toBeInTheDocument()
+  })
+
+  it("clamps invalid collapsed description lengths", () => {
+    render(
+      <F0AiProposalCard
+        {...defaultProps}
+        description="Short description"
+        maxCollapsedDescriptionLength={-1}
+      />
+    )
+
+    expect(screen.getByText("...", { exact: false })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "See more" })).toBeInTheDocument()
   })
 })

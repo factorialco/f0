@@ -9,6 +9,10 @@ import type { F0AiProposalCardActions, F0AiProposalCardProps } from "./types"
 
 const DEFAULT_MAX_COLLAPSED_DESCRIPTION_LENGTH = 180
 
+const getSafeCollapsedDescriptionLength = (maxLength: number) => {
+  return Math.max(0, Math.floor(maxLength))
+}
+
 const getCollapsedDescription = (description: string, maxLength: number) => {
   if (description.length <= maxLength) return description
 
@@ -40,10 +44,13 @@ export function F0AiProposalCard(props: F0AiProposalCardProps) {
   const [expanded, setExpanded] = useState(false)
   const descriptionId = useId()
   const descriptionRef = useRef<HTMLParagraphElement>(null)
-  const shouldTruncate = description.length > maxCollapsedDescriptionLength
+  const safeMaxCollapsedDescriptionLength = getSafeCollapsedDescriptionLength(
+    maxCollapsedDescriptionLength
+  )
+  const shouldTruncate = description.length > safeMaxCollapsedDescriptionLength
   const visibleDescription = expanded
     ? description
-    : getCollapsedDescription(description, maxCollapsedDescriptionLength)
+    : getCollapsedDescription(description, safeMaxCollapsedDescriptionLength)
   const actions = hasActions(props) ? props : null
   const dataAttributes = getDataAttributes(props)
 

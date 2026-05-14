@@ -67,6 +67,7 @@ export const Snapshot: Story = {
           {...visibleActionsArgs}
           maxCollapsedDescriptionLength={90}
         />
+        <F0AiProposalCard {...visibleActionsArgs} module={undefined} />
         <F0AiProposalCard {...hiddenActionsArgs} />
         <F0AiProposalCard {...visibleActionsArgs} subtitle={undefined} />
       </div>
