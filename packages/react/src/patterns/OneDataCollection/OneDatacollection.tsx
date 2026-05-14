@@ -506,6 +506,14 @@ const OneDataCollectionComp = <
   const isControlledModeActive =
     controlledBulkActionStatus !== undefined &&
     controlledBulkActionStatus !== "idle"
+  // Ref copy so that onClick closures (captured inside onSelectItemsLocal on
+  // each selection change) always read the current value at click time rather
+  // than the value that was current when the closure was last rebuilt.
+  // Without this, a closure built while status was 'loading'/'success' would
+  // stale-capture isControlledModeActive=true and bail out of auto-manage
+  // even after the consumer resets status back to 'idle'.
+  const isControlledModeActiveRef = useRef(false)
+  isControlledModeActiveRef.current = isControlledModeActive
 
   // True whenever the bulkActionStatus prop is wired up, regardless of its
   // current value. The mere presence of the prop signals that the consumer
@@ -645,7 +653,9 @@ const OneDataCollectionComp = <
           // Auto-manage bail-out: only skip internal state machine when the
           // consumer is actively controlling status (non-idle). When the
           // controlled status is "idle", F0 manages immediate actions normally.
-          if (isControlledModeActive) {
+          // Read from ref (not the closure-captured const) so this always
+          // reflects the prop value at click time, not at closure-creation time.
+          if (isControlledModeActiveRef.current) {
             return
           }
 

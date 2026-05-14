@@ -568,4 +568,97 @@ describe("OneDataCollection bulk-action status", () => {
       { timeout: 3000 }
     )
   })
+
+  test("immediate promise action auto-manages after a prior modal-gated action", async () => {
+    // Regression guard for the stale-closure bug: when autoManageBulkActionStatus
+    // and bulkActionStatus are used together, the onClick closures for immediate
+    // actions are rebuilt inside onSelectItemsLocal. If a previous modal-gated
+    // action left controlledBulkActionStatus as 'loading' or 'success' at the
+    // moment of that rebuild, isControlledModeActive=true gets baked into the
+    // closure. Even after the consumer resets to 'idle', the stale closure
+    // bails out of auto-manage. Fix: read from isControlledModeActiveRef inside
+    // onClick so the check always reflects the current prop value at click time.
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime.bind(vi),
+    })
+
+    let resolveHandler: (() => void) | undefined
+    const onBulkAction = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveHandler = resolve
+        })
+    )
+
+    const { result } = renderHook(() => useTestSource(), {
+      wrapper: TestWrapper,
+    })
+
+    let setExternalStatus!: (s: ActionBarStatus) => void
+
+    const Harness = () => {
+      const [status, setStatus] = useState<ActionBarStatus>("idle")
+      setExternalStatus = setStatus
+      return (
+        <OneDataCollection
+          source={result.current}
+          visualizations={[{ type: "table", options: { columns } }]}
+          autoManageBulkActionStatus
+          bulkActionStatus={status}
+          onBulkAction={onBulkAction}
+        />
+      )
+    }
+
+    render(
+      <TestWrapper>
+        <Harness />
+      </TestWrapper>
+    )
+
+    // Step 1: simulate a full modal-gated action cycle (loading → success → idle).
+    await selectFirstRow(user)
+    await findArchiveButtons()
+
+    act(() => {
+      setExternalStatus("loading")
+    })
+    act(() => {
+      setExternalStatus("success")
+    })
+    // Advance past SUCCESS_DISMISS_MS so F0 auto-dismisses and resets.
+    act(() => {
+      vi.advanceTimersByTime(2000)
+    })
+    await waitFor(() => {
+      expect(queryArchiveButtons()).toHaveLength(0)
+    })
+
+    // Consumer resets to idle (as they would after dismissal).
+    act(() => {
+      setExternalStatus("idle")
+    })
+
+    // Step 2: select again and fire an immediate promise action.
+    await selectFirstRow(user)
+    const [archive] = await findArchiveButtons()
+    await user.click(archive)
+
+    // The auto-manage state machine must have kicked in: Archive button should
+    // now be disabled (loading state active).
+    await waitFor(() => {
+      const btns = screen.getAllByRole("button", { name: /archive/i })
+      expect(btns[0]).toBeDisabled()
+    })
+
+    // Resolve and confirm success → bar dismisses.
+    resolveHandler?.()
+    // Flush microtasks so the .then() callback runs before we advance timers.
+    await Promise.resolve()
+    vi.advanceTimersByTime(2000)
+    await waitFor(() => {
+      expect(queryArchiveButtons()).toHaveLength(0)
+    })
+  })
 })
