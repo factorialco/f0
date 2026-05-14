@@ -669,19 +669,19 @@ const F0SelectComponent = forwardRef(function Select<
 
       for (const itemState of committedSelection.items.values()) {
         if (!itemState.checked) {
-          handleSelectItemChange(itemState.id, false)
+          handleSelectItemChange(itemState.item ?? itemState.id, false)
         }
       }
 
       return
     }
 
-    const committedIds = Array.from(committedSelection.items.values())
-      .filter((itemState) => itemState.checked)
-      .map((itemState) => itemState.id)
+    const committedItems = Array.from(committedSelection.items.values()).filter(
+      (itemState) => itemState.checked
+    )
 
-    if (committedIds.length > 0) {
-      handleSelectItemChange(committedIds, true)
+    for (const itemState of committedItems) {
+      handleSelectItemChange(itemState.item ?? itemState.id, true)
     }
   }, [clearSelection, handleSelectAllWithTracking, handleSelectItemChange])
 
