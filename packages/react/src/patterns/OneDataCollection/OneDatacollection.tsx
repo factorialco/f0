@@ -676,16 +676,17 @@ const OneDataCollectionComp = <
           ;(result as Promise<void>).then(
             () => {
               setInternalBulkActionStatus("success")
-              // Only clear if the user hasn't changed selection since clicking.
-              // If they did, their new selection is unrelated to this action
-              // and should be preserved.
-              if (
-                !bulkAction.keepSelection &&
-                selectionVersionRef.current === versionAtClick
-              ) {
-                clearSelectedItems()
-              }
               successTimerRef.current = setTimeout(() => {
+                // Clear selection atomically with the idle transition so the
+                // bar never renders a "no actions available" state between
+                // clearSelectedItems() and setInternalBulkActionStatus("idle").
+                // Only clear if the user hasn't changed selection since clicking.
+                if (
+                  !bulkAction.keepSelection &&
+                  selectionVersionRef.current === versionAtClick
+                ) {
+                  clearSelectedItems()
+                }
                 setInternalBulkActionStatus("idle")
                 successTimerRef.current = null
               }, SUCCESS_DISMISS_MS)
