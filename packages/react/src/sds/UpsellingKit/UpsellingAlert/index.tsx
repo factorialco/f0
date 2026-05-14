@@ -4,7 +4,17 @@ import { cn } from "@/lib/utils"
 
 import { UpsellingButton, type UpsellingButtonProps } from "../UpsellingButton"
 
-export type UpsellingAlertProps = {
+type AlertAction = {
+  label: string
+  onRequest: UpsellingButtonProps["onRequest"]
+  errorMessage: UpsellingButtonProps["errorMessage"]
+  successMessage: UpsellingButtonProps["successMessage"]
+  loadingState: UpsellingButtonProps["loadingState"]
+  nextSteps: UpsellingButtonProps["nextSteps"]
+  closeLabel: UpsellingButtonProps["closeLabel"]
+}
+
+export interface UpsellingAlertProps {
   /**
    * Optional icon displayed as an avatar on the left side of the alert.
    */
@@ -18,30 +28,16 @@ export type UpsellingAlertProps = {
    */
   description?: string
   /**
-   * The label for the upselling button. Defaults to "More info".
+   * The upselling action button configuration.
    */
-  actionLabel?: string
-} & Pick<
-  UpsellingButtonProps,
-  | "onRequest"
-  | "errorMessage"
-  | "successMessage"
-  | "loadingState"
-  | "nextSteps"
-  | "closeLabel"
->
+  action: AlertAction
+}
 
 function _UpsellingAlert({
   icon,
   title,
   description,
-  actionLabel = "More info",
-  onRequest,
-  errorMessage,
-  successMessage,
-  loadingState,
-  nextSteps,
-  closeLabel,
+  action,
 }: UpsellingAlertProps) {
   return (
     <div className="@container">
@@ -77,13 +73,13 @@ function _UpsellingAlert({
           </div>
           <div className={cn("flex flex-shrink-0 @xs:pl-0", icon && "pl-8")}>
             <UpsellingButton
-              label={actionLabel}
-              onRequest={onRequest}
-              errorMessage={errorMessage}
-              successMessage={successMessage}
-              loadingState={loadingState}
-              nextSteps={nextSteps}
-              closeLabel={closeLabel}
+              label={action.label}
+              onRequest={action.onRequest}
+              errorMessage={action.errorMessage}
+              successMessage={action.successMessage}
+              loadingState={action.loadingState}
+              nextSteps={action.nextSteps}
+              closeLabel={action.closeLabel}
               variant="outlinePromote"
               size="sm"
             />

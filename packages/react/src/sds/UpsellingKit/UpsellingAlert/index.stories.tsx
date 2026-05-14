@@ -31,31 +31,33 @@ export const Default: Story = {
     title: "Unlock advanced reports",
     description:
       "Get deeper insights with custom dashboards and export capabilities.",
-    actionLabel: "Request access",
-    onRequest: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+    action: {
+      label: "Request access",
+      onRequest: async () => {
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+      },
+      errorMessage: {
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+      },
+      successMessage: {
+        title: "Request sent!",
+        description: "Our team will get back to you shortly.",
+        buttonLabel: "Discover more modules",
+        buttonOnClick: () => alert("Discover more"),
+      },
+      loadingState: {
+        label: "Sending...",
+      },
+      nextSteps: {
+        title: "What happens next?",
+        items: [
+          { text: "Our team will review your request" },
+          { text: "You'll receive an email confirmation" },
+        ],
+      },
+      closeLabel: "Close",
     },
-    errorMessage: {
-      title: "Error",
-      description: "Something went wrong. Please try again.",
-    },
-    successMessage: {
-      title: "Request sent!",
-      description: "Our team will get back to you shortly.",
-      buttonLabel: "Discover more modules",
-      buttonOnClick: () => alert("Discover more"),
-    },
-    loadingState: {
-      label: "Sending...",
-    },
-    nextSteps: {
-      title: "What happens next?",
-      items: [
-        { text: "Our team will review your request" },
-        { text: "You'll receive an email confirmation" },
-      ],
-    },
-    closeLabel: "Close",
   },
 }
 
