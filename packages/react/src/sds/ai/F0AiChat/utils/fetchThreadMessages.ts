@@ -92,6 +92,30 @@ export function convertBackendMessage(
   const messages: Message[] = []
   let partIndex = 0
   const userParts: Array<MessageTextPart | MessageBinaryPart> = []
+  // Assistant text and binary parts accumulate between tool invocations.
+  // When a tool call splits the stream we flush whatever we have so the
+  // sub-messages stay in chronological order. `assistantBufferStart` is the
+  // partIndex of the first part in the buffer — we use it for the emitted
+  // message id so text-only emissions keep the legacy `_t{index}` shape.
+  let assistantBuffer: Array<MessageTextPart | MessageBinaryPart> = []
+  let assistantBufferStart = 0
+  const flushAssistantBuffer = () => {
+    if (assistantBuffer.length === 0) return
+    const onlyText =
+      assistantBuffer.length === 1 && assistantBuffer[0].type === "text"
+    const content: Message["content"] = onlyText
+      ? (assistantBuffer[0] as MessageTextPart).text
+      : // CopilotKit's `Message.content` is typed as `string`, but the
+        // runtime accepts multipart arrays — the user path below does the
+        // same with `userParts`. Keep the array shape so AssistantMessage
+        // can read both text and binary parts.
+        (assistantBuffer as unknown as string)
+    const suffix = onlyText
+      ? `_t${assistantBufferStart}`
+      : `_p${assistantBufferStart}`
+    messages.push({ id: `${id}${suffix}`, role, content })
+    assistantBuffer = []
+  }
 
   for (const part of parts) {
     if (part.type === "text") {
@@ -99,32 +123,43 @@ export function convertBackendMessage(
         if (role === "user") {
           userParts.push({ type: "text", text: part.text })
         } else {
-          messages.push({
-            id: `${id}_t${partIndex}`,
-            role,
-            content: part.text,
-          })
+          if (assistantBuffer.length === 0) assistantBufferStart = partIndex
+          assistantBuffer.push({ type: "text", text: part.text })
         }
       }
     } else if (part.type === "binary") {
-      if (role === "user" && part.url && part.filename && part.mimeType) {
-        userParts.push({
+      if (part.url && part.filename && part.mimeType) {
+        const binary: MessageBinaryPart = {
           type: "binary",
           url: part.url,
           filename: part.filename,
           mimeType: part.mimeType,
-        })
+        }
+        if (role === "user") {
+          userParts.push(binary)
+        } else {
+          if (assistantBuffer.length === 0) assistantBufferStart = partIndex
+          assistantBuffer.push(binary)
+        }
       }
     } else if (part.type === "file") {
-      if (role === "user" && part.file) {
-        userParts.push({
+      if (part.file) {
+        const binary: MessageBinaryPart = {
           type: "binary",
           url: part.file.url,
           filename: part.file.filename,
           mimeType: part.file.mimetype,
-        })
+        }
+        if (role === "user") {
+          userParts.push(binary)
+        } else {
+          if (assistantBuffer.length === 0) assistantBufferStart = partIndex
+          assistantBuffer.push(binary)
+        }
       }
     } else {
+      // Tool invocation — flush any preceding assistant text/files first
+      if (role === "assistant") flushAssistantBuffer()
       const { toolInvocation: inv } = part
       const toolCall = {
         id: inv.toolCallId,
@@ -175,6 +210,8 @@ export function convertBackendMessage(
       content: userParts,
     })
   }
+
+  if (role === "assistant") flushAssistantBuffer()
 
   return messages.length > 0
     ? messages

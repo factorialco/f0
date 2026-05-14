@@ -2,10 +2,39 @@ import { useLazyToolRenderer } from "@copilotkit/react-core"
 import { Markdown, type AssistantMessageProps } from "@copilotkit/react-ui"
 import { createContext, useContext, useEffect, useRef } from "react"
 
+import { Download } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
+
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { markdownRenderers } from "../markdownRenderers"
+import { MessageFiles } from "./MessageFiles"
+import {
+  type MessagePart,
+  type MessageTextPart,
+  type RawDataWithUploads,
+  downloadUploadedFile,
+  extractUploadedFiles,
+} from "./messageFiles"
 import { ReplyPopover } from "./ReplyPopover"
 import { useReplySelection } from "./useReplySelection"
+
+/**
+ * Reduce a possibly-multipart assistant content to the rendered text.
+ * Assistant turns that ship files arrive as `{ type: "text" } | { type: "binary" }`
+ * parts; we join the text parts so the markdown body stays intact while
+ * files are rendered separately below.
+ */
+function getAssistantText(content: string | MessagePart[] | undefined): string {
+  if (!content) return ""
+  if (typeof content === "string") return content
+  if (Array.isArray(content)) {
+    return content
+      .filter((part): part is MessageTextPart => part.type === "text")
+      .map((part) => part.text ?? "")
+      .join("")
+  }
+  return ""
+}
 
 /**
  * Context that provides the current tool call ID to action render
@@ -24,7 +53,15 @@ export const AssistantMessage = ({
   message,
   messages,
 }: AssistantMessageProps & { messages?: any[] }) => {
-  const content = message?.content || ""
+  const rawContent = message?.content
+  const content = getAssistantText(rawContent as string | MessagePart[])
+
+  const rawData = (message as { rawData?: RawDataWithUploads } | undefined)
+    ?.rawData
+  const uploadedFiles = extractUploadedFiles(
+    rawContent as string | MessagePart[] | undefined,
+    rawData
+  )
 
   // Use CopilotKit's lazy tool renderer to look up registered render
   // functions from copilotkit.renderToolCalls.  This handles actions
@@ -45,9 +82,10 @@ export const AssistantMessage = ({
   const toolCallId = (message?.toolCalls as { id: string }[] | undefined)?.[0]
     ?.id
 
-  const isEmptyMessage = !content && !subComponent
+  const isEmptyMessage = !content && !subComponent && uploadedFiles.length === 0
 
   const { tracking, setPendingQuote } = useAiChat()
+  const translation = useI18n()
   const contentRef = useRef<HTMLDivElement>(null)
   const { anchor, clear } = useReplySelection({
     containerRef: contentRef,
@@ -66,7 +104,7 @@ export const AssistantMessage = ({
 
   return (
     <ToolCallIdContext.Provider value={toolCallId}>
-      <div className="relative isolate flex w-full flex-col items-start justify-center">
+      <div className="relative isolate flex w-full flex-col items-start justify-center gap-2">
         {message && content && (
           <div
             ref={contentRef}
@@ -78,6 +116,17 @@ export const AssistantMessage = ({
             />
           </div>
         )}
+        <MessageFiles
+          files={uploadedFiles}
+          align="start"
+          actions={(file) => [
+            {
+              icon: Download,
+              label: translation.ai.downloadFile,
+              onClick: () => downloadUploadedFile(file),
+            },
+          ]}
+        />
         {!!subComponent && <div className="w-full">{subComponent}</div>}
         <ReplyPopover
           anchor={anchor}

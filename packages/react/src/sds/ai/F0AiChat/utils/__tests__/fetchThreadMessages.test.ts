@@ -291,6 +291,106 @@ describe("convertBackendMessage", () => {
     })
   })
 
+  it("converts assistant binary parts into multipart content alongside text", () => {
+    const result = convertBackendMessage({
+      id: "msg_asst_file",
+      role: "assistant",
+      content: {
+        parts: [
+          { type: "text", text: "Here is the report you asked for:" },
+          {
+            type: "binary",
+            url: "https://files.example.com/report.pdf",
+            filename: "report.pdf",
+            mimeType: "application/pdf",
+          },
+        ],
+      },
+    } as any)
+
+    expect(result).toHaveLength(1)
+    expect(result[0]).toMatchObject({
+      role: "assistant",
+      content: [
+        { type: "text", text: "Here is the report you asked for:" },
+        {
+          type: "binary",
+          url: "https://files.example.com/report.pdf",
+          filename: "report.pdf",
+          mimeType: "application/pdf",
+        },
+      ],
+    })
+  })
+
+  it("emits assistant text and files before a following tool invocation", () => {
+    const result = convertBackendMessage({
+      id: "msg_asst_mix",
+      role: "assistant",
+      content: {
+        parts: [
+          { type: "text", text: "Here you go" },
+          {
+            type: "binary",
+            url: "https://files.example.com/a.csv",
+            filename: "a.csv",
+            mimeType: "text/csv",
+          },
+          {
+            type: "tool-invocation",
+            toolInvocation: {
+              toolCallId: "tc_after",
+              toolName: "downloadData",
+              args: {},
+              state: "result",
+            },
+          },
+        ],
+      },
+    } as any)
+
+    expect(result).toHaveLength(2)
+    expect(result[0].content).toEqual([
+      { type: "text", text: "Here you go" },
+      {
+        type: "binary",
+        url: "https://files.example.com/a.csv",
+        filename: "a.csv",
+        mimeType: "text/csv",
+      },
+    ])
+    expect(result[1].toolCalls?.[0].function.name).toBe("downloadData")
+  })
+
+  it("converts assistant legacy `file` parts the same as `binary`", () => {
+    const result = convertBackendMessage({
+      id: "msg_asst_legacy",
+      role: "assistant",
+      content: {
+        parts: [
+          {
+            type: "file",
+            file: {
+              url: "https://files.example.com/x.txt",
+              filename: "x.txt",
+              mimetype: "text/plain",
+            },
+          },
+        ],
+      },
+    } as any)
+
+    expect(result).toHaveLength(1)
+    expect(result[0].content).toEqual([
+      {
+        type: "binary",
+        url: "https://files.example.com/x.txt",
+        filename: "x.txt",
+        mimeType: "text/plain",
+      },
+    ])
+  })
+
   it("creates user message when thread contains only file parts", () => {
     const result = convertBackendMessage({
       id: "msg_file_only",

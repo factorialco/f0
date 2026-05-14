@@ -2,32 +2,21 @@ import { Markdown, type UserMessageProps } from "@copilotkit/react-ui"
 import { useEffect, useRef } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
-import { FileItem } from "@/components/RichText/FileItem"
-import { Reply } from "@/icons/app"
+import { Download, Reply } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { markdownRenderers } from "../markdownRenderers"
+import { MessageFiles } from "./MessageFiles"
+import {
+  type MessagePart,
+  type MessageTextPart,
+  type RawDataWithUploads,
+  downloadUploadedFile,
+  extractUploadedFiles,
+} from "./messageFiles"
 import { ReplyPopover } from "./ReplyPopover"
 import { useReplySelection } from "./useReplySelection"
-
-type UploadedFile = {
-  url: string
-  filename: string
-  mimetype: string
-}
-
-type RawDataWithUploads = {
-  uploadedFiles?: UploadedFile[]
-}
-
-type MessageTextPart = { type: "text"; text?: string }
-type MessageBinaryPart = {
-  type: "binary"
-  url?: string
-  filename?: string
-  mimeType?: string
-}
-type MessagePart = MessageTextPart | MessageBinaryPart
 
 function getTextContent(
   content: string | MessagePart[] | undefined
@@ -43,38 +32,6 @@ function getTextContent(
     return textParts[textParts.length - 1]
   }
   return undefined
-}
-
-function getUploadedFiles(
-  content: string | MessagePart[] | undefined,
-  rawData: RawDataWithUploads | undefined
-): UploadedFile[] {
-  const uploadedFilesFromParts = Array.isArray(content)
-    ? content
-        .filter((part): part is MessageBinaryPart => part.type === "binary")
-        .map((part) => ({
-          url: part.url,
-          filename: part.filename,
-          mimetype: part.mimeType,
-        }))
-        .filter(
-          (file): file is UploadedFile =>
-            typeof file?.filename === "string" &&
-            typeof file?.mimetype === "string" &&
-            typeof file?.url === "string"
-        )
-    : []
-
-  if (uploadedFilesFromParts.length > 0) {
-    return uploadedFilesFromParts
-  }
-
-  return (rawData?.uploadedFiles ?? []).filter(
-    (file): file is UploadedFile =>
-      typeof file?.filename === "string" &&
-      typeof file?.mimetype === "string" &&
-      typeof file?.url === "string"
-  )
 }
 
 /**
@@ -132,6 +89,7 @@ export const UserMessage = ({ message }: UserMessageProps) => {
   const bubbleRef = useRef<HTMLDivElement>(null)
 
   const { visualizationMode, setPendingQuote } = useAiChat()
+  const translation = useI18n()
   const isFullscreen = visualizationMode === "fullscreen"
 
   useEffect(() => {
@@ -143,7 +101,7 @@ export const UserMessage = ({ message }: UserMessageProps) => {
   }, [isFullscreen])
 
   const rawData = (message as { rawData?: RawDataWithUploads }).rawData
-  const uploadedFiles = getUploadedFiles(
+  const uploadedFiles = extractUploadedFiles(
     message?.content as MessagePart[],
     rawData
   )
@@ -173,17 +131,18 @@ export const UserMessage = ({ message }: UserMessageProps) => {
     >
       {quoteText && <ReplyQuoteBlock text={quoteText} />}
 
-      {uploadedFiles.length > 0 && (
-        <div className="flex max-w-[90%] flex-wrap justify-end gap-1.5">
-          {uploadedFiles.map((file, index) => (
-            <FileItem
-              key={`${file.filename}-${index}`}
-              file={{ name: file.filename, type: file.mimetype }}
-              size="lg"
-            />
-          ))}
-        </div>
-      )}
+      <MessageFiles
+        files={uploadedFiles}
+        align="end"
+        actions={(file) => [
+          {
+            icon: Download,
+            label: translation.ai.downloadFile,
+            onClick: () => downloadUploadedFile(file),
+          },
+        ]}
+      />
+
       {hasVisibleText && (
         <div
           ref={bubbleRef}
