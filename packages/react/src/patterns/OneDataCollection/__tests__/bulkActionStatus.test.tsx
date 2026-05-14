@@ -515,10 +515,15 @@ describe("OneDataCollection bulk-action status", () => {
     resolveHandler?.()
   })
 
-  test("selection change during a pending promise preserves the new selection on resolve", async () => {
-    // Regression guard for review comment #3: if the user clicks additional
-    // rows while a bulk action is in-flight, resolving the promise must NOT
-    // clear their new selection (only the original selection was acted on).
+  test("selection changed during a pending promise is wiped on success", async () => {
+    // Selection is always cleared on success, even if the user selected new rows
+    // while the promise was in-flight. This prevents already-processed items from
+    // being mixed with a new selection and accidentally re-submitted.
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime.bind(vi),
+    })
+
     let resolveHandler: (() => void) | undefined
     const onBulkAction = vi.fn(
       () =>
@@ -543,30 +548,30 @@ describe("OneDataCollection bulk-action status", () => {
     )
 
     // Select the first row and fire Archive.
-    const user = await selectFirstRow()
+    const selectUser = await selectFirstRow()
     const [archive] = await findArchiveButtons()
-    await user.click(archive)
+    await selectUser.click(archive)
 
-    // While the promise is pending, select the second row (changes selection).
+    // While the promise is pending, select the second row.
     await waitFor(() => {
-      const btns = queryArchiveButtons()
-      expect(btns.length).toBeGreaterThan(0)
+      expect(queryArchiveButtons().length).toBeGreaterThan(0)
     })
     const checkboxes = screen.getAllByRole("checkbox")
     // 0: header; 1: first row (already checked); 2: second row.
     await user.click(checkboxes[2])
 
-    // Now resolve — the new selection (row 2) must survive.
+    // Resolve the promise — success starts the dismiss timer.
     resolveHandler?.()
 
-    // Bar should stay open because the new selection (row 2) was NOT cleared.
-    await waitFor(
-      () => {
-        // The Archive buttons remain visible (bar still has a selection).
-        expect(queryArchiveButtons().length).toBeGreaterThan(0)
-      },
-      { timeout: 3000 }
-    )
+    // Advance past the 1500ms success-dismiss timer.
+    await vi.advanceTimersByTimeAsync(2000)
+
+    // Bar should be dismissed and ALL selection cleared (including the new row).
+    await waitFor(() => {
+      expect(queryArchiveButtons().length).toBe(0)
+    })
+
+    vi.useRealTimers()
   })
 
   test("immediate promise action auto-manages after a prior modal-gated action", async () => {

@@ -470,14 +470,6 @@ const OneDataCollectionComp = <
     useState<ActionBarStatus>("idle")
   const actionBarRef = useRef<F0ActionBarRef>(null)
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  /**
-   * Monotonically-incrementing counter that ticks on every selection change.
-   * Captured at bulk-action click time; compared on promise resolve so we only
-   * call clearSelectedItems() if the user hasn't changed the selection while
-   * the async operation was in flight.
-   */
-  const selectionVersionRef = useRef(0)
-
   useEffect(() => {
     return () => {
       if (successTimerRef.current) {
@@ -606,12 +598,6 @@ const OneDataCollectionComp = <
     setInternalBulkActionStatus((prev) => (prev === "error" ? "idle" : prev))
 
     /**
-     * Bump the version so any in-flight promise resolve can detect that
-     * selection changed and avoid clearing the user's updated selection.
-     */
-    selectionVersionRef.current += 1
-
-    /**
      * Selected items count
      */
     setSelectedItemsCount(selectedItems.selectedCount)
@@ -675,7 +661,6 @@ const OneDataCollectionComp = <
             clearTimeout(successTimerRef.current)
             successTimerRef.current = null
           }
-          const versionAtClick = selectionVersionRef.current
           setInternalBulkActionStatus("loading")
           ;(result as Promise<void>).then(
             () => {
@@ -684,11 +669,10 @@ const OneDataCollectionComp = <
                 // Clear selection atomically with the idle transition so the
                 // bar never renders a "no actions available" state between
                 // clearSelectedItems() and setInternalBulkActionStatus("idle").
-                // Only clear if the user hasn't changed selection since clicking.
-                if (
-                  !bulkAction.keepSelection &&
-                  selectionVersionRef.current === versionAtClick
-                ) {
+                // Always wipe selection on success — any rows selected during
+                // the loading window are cleared too, preventing already-processed
+                // items from being mixed with new selections.
+                if (!bulkAction.keepSelection) {
                   // setShowActionBar(false) is batched with
                   // setInternalBulkActionStatus("idle") so isOpen flips to
                   // false in the same render — no intermediate frame where the
