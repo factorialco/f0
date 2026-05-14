@@ -138,6 +138,17 @@ export type TableVisualizationOptions<
    * Useful for embedding the table inside panels or detail views.
    */
   bordered?: boolean
+
+  /**
+   * Hide the column header row entirely. Useful when the table is embedded
+   * inside a card or callout where the surrounding context already explains
+   * the data and the header would be redundant.
+   *
+   * Note: when `headerless` is enabled, sorting and column hiding/reordering
+   * controls (which live in the header) become inaccessible.
+   * @default false
+   */
+  headerless?: boolean
 }
 
 export type TableCollectionProps<

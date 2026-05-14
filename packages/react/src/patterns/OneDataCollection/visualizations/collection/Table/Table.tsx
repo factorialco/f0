@@ -107,6 +107,7 @@ export const TableCollection = <
   referenceRowType,
   headerGroupLabels,
   bordered,
+  headerless = false,
   rowWrapper: RowWrapper,
   cellRenderer,
   showItemActions: showItemActionsProp,
@@ -395,45 +396,146 @@ export const TableCollection = <
           )}
         >
           <OneTable loading={isLoading}>
-            <TableHeader sticky={true}>
-              {headerGroups ? (
+            {!headerless && (
+              <TableHeader sticky={true}>
+                {headerGroups ? (
+                  <TableRow>
+                    {source.selectable && (
+                      <TableHead
+                        align="left"
+                        sticky={{ left: 0 }}
+                        width={checkColumnWidth}
+                        className={cn(
+                          groupBorderClass,
+                          "hover:after:bg-transparent"
+                        )}
+                      >
+                        <div className="ml-1.5 flex w-full items-center justify-start" />
+                      </TableHead>
+                    )}
+                    {headerGroups.map((entry, entryIndex) => {
+                      const borderClass = cn(
+                        groupBorderClass,
+                        "hover:after:bg-transparent"
+                      )
+                      return entry.type === "group" ? (
+                        <TableHead
+                          align="right"
+                          colSpan={entry.colSpan}
+                          className={borderClass}
+                          key={`header-group-${entry.id}-${entryIndex}`}
+                        >
+                          {entry.label}
+                        </TableHead>
+                      ) : (
+                        <TableHead
+                          align="right"
+                          className={borderClass}
+                          width={columns[entry.columnIndices[0]].width}
+                          key={`header-ungrouped-${entry.columnIndices[0]}`}
+                          sticky={getStickyPosition(entry.columnIndices[0])}
+                        >
+                          <span />
+                        </TableHead>
+                      )
+                    })}
+                    {showItemActions &&
+                      (isEditableTable ? (
+                        <TableHead
+                          key="actions"
+                          width="fit"
+                          sticky={{ right: 0 }}
+                          className="border-0 border-l-[1px] border-solid border-f1-border-secondary"
+                        >
+                          <span className="sr-only">
+                            {i18n.collections.actions.actions}
+                          </span>
+                        </TableHead>
+                      ) : (
+                        <>
+                          <th className="hidden md:table-cell" />
+                          <TableHead
+                            hidden
+                            width={68}
+                            key="actions"
+                            sticky={{ right: 0 }}
+                            className="table-cell md:hidden"
+                          >
+                            <span />
+                          </TableHead>
+                        </>
+                      ))}
+                  </TableRow>
+                ) : null}
                 <TableRow>
                   {source.selectable && (
                     <TableHead
-                      align="left"
-                      sticky={{ left: 0 }}
                       width={checkColumnWidth}
-                      className={cn(
-                        groupBorderClass,
-                        "hover:after:bg-transparent"
-                      )}
+                      sticky={{ left: 0 }}
+                      align="left"
+                      className={
+                        headerGroups
+                          ? cn("[&>div:first-child]:hidden", groupBorderClass)
+                          : undefined
+                      }
                     >
-                      <div className="ml-1.5 flex w-full items-center justify-start" />
+                      <div className="ml-1.5 flex w-full items-center justify-start">
+                        <F0Checkbox
+                          checked={isAllSelected}
+                          indeterminate={hasSelection && !isAllSelected}
+                          onCheckedChange={handleSelectAll}
+                          title={i18n.actions.selectAll}
+                          hideLabel
+                          disabled={data?.records.length === 0}
+                        />
+                      </div>
                     </TableHead>
                   )}
-                  {headerGroups.map((entry, entryIndex) => {
-                    const borderClass = cn(
-                      groupBorderClass,
-                      "hover:after:bg-transparent"
+                  {columns.map(({ sorting, label, ...column }, index) => {
+                    const headerGroup = headerGroups?.find(
+                      (group) =>
+                        group.type === "group" &&
+                        group.columnIndices.includes(index)
                     )
-                    return entry.type === "group" ? (
+                    const isLastInGroup =
+                      !!headerGroups &&
+                      (!headerGroup ||
+                        headerGroup.columnIndices[
+                          headerGroup.columnIndices.length - 1
+                        ] === index)
+
+                    return (
                       <TableHead
-                        align="right"
-                        colSpan={entry.colSpan}
-                        className={borderClass}
-                        key={`header-group-${entry.id}-${entryIndex}`}
+                        key={`table-head-${index}`}
+                        sortState={getColumnSortState(
+                          sorting,
+                          source.sortings,
+                          currentSortings
+                        )}
+                        width={column.width}
+                        align={column.align}
+                        sticky={getStickyPosition(index)}
+                        {...column}
+                        hidden={false}
+                        className={
+                          cn(
+                            headerGroups && "[&>div:first-child]:hidden",
+                            isLastInGroup && groupBorderClass,
+                            fromVisualization === "editableTable" &&
+                              index !== columns.length - 1 &&
+                              "border-0 border-r-[1px] border-solid border-f1-border-secondary"
+                          ) || undefined
+                        }
+                        onSortClick={
+                          sorting
+                            ? () => {
+                                if (!sorting) return
+                                handleSortClick(sorting)
+                              }
+                            : undefined
+                        }
                       >
-                        {entry.label}
-                      </TableHead>
-                    ) : (
-                      <TableHead
-                        align="right"
-                        className={borderClass}
-                        width={columns[entry.columnIndices[0]].width}
-                        key={`header-ungrouped-${entry.columnIndices[0]}`}
-                        sticky={getStickyPosition(entry.columnIndices[0])}
-                      >
-                        <span />
+                        {label}
                       </TableHead>
                     )
                   })}
@@ -451,168 +553,69 @@ export const TableCollection = <
                       </TableHead>
                     ) : (
                       <>
-                        <th className="hidden md:table-cell" />
+                        <th className="hidden md:table-cell"></th>
                         <TableHead
-                          hidden
-                          width={68}
                           key="actions"
-                          sticky={{ right: 0 }}
+                          width={68}
+                          hidden
+                          sticky={{
+                            right: 0,
+                          }}
                           className="table-cell md:hidden"
                         >
-                          <span />
+                          {i18n.collections.actions.actions}
                         </TableHead>
                       </>
                     ))}
                 </TableRow>
-              ) : null}
-              <TableRow>
-                {source.selectable && (
-                  <TableHead
-                    width={checkColumnWidth}
-                    sticky={{ left: 0 }}
-                    align="left"
-                    className={
-                      headerGroups
-                        ? cn("[&>div:first-child]:hidden", groupBorderClass)
-                        : undefined
-                    }
-                  >
-                    <div className="ml-1.5 flex w-full items-center justify-start">
-                      <F0Checkbox
-                        checked={isAllSelected}
-                        indeterminate={hasSelection && !isAllSelected}
-                        onCheckedChange={handleSelectAll}
-                        title={i18n.actions.selectAll}
-                        hideLabel
-                        disabled={data?.records.length === 0}
-                      />
-                    </div>
-                  </TableHead>
-                )}
-                {columns.map(({ sorting, label, ...column }, index) => {
-                  const headerGroup = headerGroups?.find(
-                    (group) =>
-                      group.type === "group" &&
-                      group.columnIndices.includes(index)
-                  )
-                  const isLastInGroup =
-                    !!headerGroups &&
-                    (!headerGroup ||
-                      headerGroup.columnIndices[
-                        headerGroup.columnIndices.length - 1
-                      ] === index)
-
-                  return (
-                    <TableHead
-                      key={`table-head-${index}`}
-                      sortState={getColumnSortState(
-                        sorting,
-                        source.sortings,
-                        currentSortings
-                      )}
-                      width={column.width}
-                      align={column.align}
-                      sticky={getStickyPosition(index)}
-                      {...column}
-                      hidden={false}
-                      className={
-                        cn(
-                          headerGroups && "[&>div:first-child]:hidden",
-                          isLastInGroup && groupBorderClass,
-                          fromVisualization === "editableTable" &&
-                            index !== columns.length - 1 &&
-                            "border-0 border-r-[1px] border-solid border-f1-border-secondary"
-                        ) || undefined
-                      }
-                      onSortClick={
-                        sorting
-                          ? () => {
-                              if (!sorting) return
-                              handleSortClick(sorting)
-                            }
-                          : undefined
-                      }
-                    >
-                      {label}
-                    </TableHead>
-                  )
-                })}
-                {showItemActions &&
-                  (isEditableTable ? (
-                    <TableHead
-                      key="actions"
-                      width="fit"
-                      sticky={{ right: 0 }}
-                      className="border-0 border-l-[1px] border-solid border-f1-border-secondary"
-                    >
-                      <span className="sr-only">
-                        {i18n.collections.actions.actions}
-                      </span>
-                    </TableHead>
-                  ) : (
-                    <>
-                      <th className="hidden md:table-cell"></th>
-                      <TableHead
-                        key="actions"
-                        width={68}
-                        hidden
-                        sticky={{
-                          right: 0,
-                        }}
-                        className="table-cell md:hidden"
+                {hasSelection &&
+                  source.selectable &&
+                  !!source.allPagesSelection && (
+                    <TableRow>
+                      <th
+                        colSpan={1 + selectionHeaderColSpan}
+                        className="h-11 border-0 border-t border-solid border-f1-border-secondary bg-f1-background-secondary px-5"
                       >
-                        {i18n.collections.actions.actions}
-                      </TableHead>
-                    </>
-                  ))}
-              </TableRow>
-              {hasSelection &&
-                source.selectable &&
-                !!source.allPagesSelection && (
-                  <TableRow>
-                    <th
-                      colSpan={1 + selectionHeaderColSpan}
-                      className="h-11 border-0 border-t border-solid border-f1-border-secondary bg-f1-background-secondary px-5"
-                    >
-                      <div className="flex items-center gap-3">
-                        <HighlightedCount
-                          text={
-                            allSelectedStatus.checked &&
-                            !allSelectedStatus.indeterminate
-                              ? t("status.selected.allItemsSelected", {
-                                  total:
-                                    paginationInfo?.total ??
-                                    allSelectedStatus.selectedCount,
-                                })
-                              : allPageRowsSelected
-                                ? t("status.selected.allOnPage", {
-                                    count: allSelectedStatus.selectedCount,
+                        <div className="flex items-center gap-3">
+                          <HighlightedCount
+                            text={
+                              allSelectedStatus.checked &&
+                              !allSelectedStatus.indeterminate
+                                ? t("status.selected.allItemsSelected", {
+                                    total:
+                                      paginationInfo?.total ??
+                                      allSelectedStatus.selectedCount,
                                   })
-                                : `${allSelectedStatus.selectedCount} ${selectedText}`
-                          }
-                          count={
-                            allSelectedStatus.checked &&
-                            !allSelectedStatus.indeterminate
-                              ? (paginationInfo?.total ??
-                                allSelectedStatus.selectedCount)
-                              : allSelectedStatus.selectedCount
-                          }
-                        />
-                        {showSelectAllOption && (
-                          <F0Button
-                            variant="outline"
-                            label={t("status.selected.selectAllItems", {
-                              total: paginationInfo?.total ?? 0,
-                            })}
-                            onClick={() => handleSelectAllItems(true)}
-                            size="sm"
+                                : allPageRowsSelected
+                                  ? t("status.selected.allOnPage", {
+                                      count: allSelectedStatus.selectedCount,
+                                    })
+                                  : `${allSelectedStatus.selectedCount} ${selectedText}`
+                            }
+                            count={
+                              allSelectedStatus.checked &&
+                              !allSelectedStatus.indeterminate
+                                ? (paginationInfo?.total ??
+                                  allSelectedStatus.selectedCount)
+                                : allSelectedStatus.selectedCount
+                            }
                           />
-                        )}
-                      </div>
-                    </th>
-                  </TableRow>
-                )}
-            </TableHeader>
+                          {showSelectAllOption && (
+                            <F0Button
+                              variant="outline"
+                              label={t("status.selected.selectAllItems", {
+                                total: paginationInfo?.total ?? 0,
+                              })}
+                              onClick={() => handleSelectAllItems(true)}
+                              size="sm"
+                            />
+                          )}
+                        </div>
+                      </th>
+                    </TableRow>
+                  )}
+              </TableHeader>
+            )}
             <TableBody>
               {data?.type === "grouped" &&
                 data.groups.map((group, groupIndex) => {

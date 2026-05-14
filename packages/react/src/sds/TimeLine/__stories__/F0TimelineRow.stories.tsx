@@ -1292,3 +1292,40 @@ function MultitaskWithNestedtaskDemo() {
 export const MultitaskWithNestedtask: Story = {
   render: () => <MultitaskWithNestedtaskDemo />,
 }
+
+const NestedtaskWithCustomContentDemo = () => {
+  const [expanded, setExpanded] = useState(true)
+
+  return (
+    <div className="w-full">
+      <F0TimelineRow
+        status="completed"
+        icon={FileSigned}
+        title="Sign documents"
+        description="Sent on 14/04/2026"
+        taskCount={2}
+        completedCount={1}
+        expanded={expanded}
+        onExpandToggle={() => setExpanded(!expanded)}
+        content={
+          <div className="rounded-md bg-f1-background-positive p-3">
+            <p className="font-medium text-f1-foreground-positive">
+              Documents sent for signing
+            </p>
+            <p className="text-base text-f1-foreground-secondary">
+              1/2 signed · Sent Monday 23, 6:40 PM
+            </p>
+            <div className="mt-3 rounded-sm bg-f1-background p-3 text-base">
+              Custom content (e.g. a table or a panel) can live here.
+            </div>
+          </div>
+        }
+        isLast
+      />
+    </div>
+  )
+}
+
+export const NestedtaskWithCustomContent: Story = {
+  render: () => <NestedtaskWithCustomContentDemo />,
+}

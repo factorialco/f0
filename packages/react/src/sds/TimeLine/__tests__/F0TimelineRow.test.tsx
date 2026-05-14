@@ -407,6 +407,39 @@ describe("F0TimelineRow", () => {
       const title = screen.getByText("Sign document")
       expect(title.className).not.toContain("line-through")
     })
+
+    it("renders custom content instead of items when content is provided", () => {
+      render(
+        <F0TimelineRow
+          {...nestedtaskProps}
+          expanded
+          content={<div>Custom panel content</div>}
+        />
+      )
+      expect(screen.getByText("Custom panel content")).toBeInTheDocument()
+      expect(
+        screen.queryByText("Hellen (hellen@factorial.co)")
+      ).not.toBeInTheDocument()
+    })
+
+    it("does not render custom content when collapsed", () => {
+      render(
+        <F0TimelineRow
+          {...nestedtaskProps}
+          expanded={false}
+          content={<div>Custom panel content</div>}
+        />
+      )
+      expect(screen.queryByText("Custom panel content")).not.toBeInTheDocument()
+    })
+
+    it("renders without items when only content is provided", () => {
+      const { items: _items, ...rest } = nestedtaskProps
+      render(
+        <F0TimelineRow {...rest} expanded content={<div>Only content</div>} />
+      )
+      expect(screen.getByText("Only content")).toBeInTheDocument()
+    })
   })
 
   describe("multitask with nestedtask items", () => {

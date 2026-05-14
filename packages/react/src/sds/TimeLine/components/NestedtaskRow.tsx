@@ -45,6 +45,7 @@ export const NestedtaskRow = ({
     hideStatus = false,
     expanded,
     items,
+    content,
     metadata,
     primaryAction,
     secondaryActions,
@@ -70,9 +71,11 @@ export const NestedtaskRow = ({
       )}
       {expanded && (
         <div id={contentId} role="region" className="flex flex-col gap-0 pl-4">
-          {items.map((item: F0TimelineRowTaskProps, index: number) => (
-            <NestedItem key={`${item.title}-${index}`} props={item} />
-          ))}
+          {content !== undefined
+            ? content
+            : items?.map((item: F0TimelineRowTaskProps, index: number) => (
+                <NestedItem key={`${item.title}-${index}`} props={item} />
+              ))}
         </div>
       )}
       {hasActions && (

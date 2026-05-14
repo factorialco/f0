@@ -92,8 +92,15 @@ export interface F0TimelineRowNestedtaskProps extends F0TimelineRowBaseProps {
   onExpandToggle: () => void
   /** Metadata items displayed below the header (e.g., assignees, file chips). Always visible regardless of expand/collapse */
   metadata?: (MetadataItem | undefined | boolean)[]
-  /** The nested task items to render when expanded */
-  items: F0TimelineRowTaskProps[]
+  /** The nested task items to render when expanded. Ignored when `content` is provided. */
+  items?: F0TimelineRowTaskProps[]
+  /**
+   * Custom content to render in the expanded body of the row. When provided,
+   * `items` is ignored and this React node is rendered instead. Use this to
+   * embed richer UI (callout cards, tables, custom panels) inside a nested
+   * timeline row.
+   */
+  content?: React.ReactNode
   /** Primary action button (displayed on the right after a divider) */
   primaryAction?: F0TimelineRowAction
   /** Secondary action buttons (displayed on the left) */

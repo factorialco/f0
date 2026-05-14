@@ -25,9 +25,10 @@ export const NestedtaskHeader = ({
     expanded,
     onExpandToggle,
     items,
+    content,
   } = props
 
-  const hasItems = items.length > 0
+  const hasItems = (items?.length ?? 0) > 0 || content !== undefined
 
   return (
     <>
