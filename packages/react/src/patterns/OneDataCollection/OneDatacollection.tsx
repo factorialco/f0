@@ -466,10 +466,69 @@ const OneDataCollectionComp = <
 
   const [isAllItemsSelected, setIsAllItemsSelected] = useState(false)
 
+  // ── Bulk-action status resolution ────────────────────────────────────────
+  // Two status sources: internal (auto-managed via promise) and controlled
+  // (consumer-driven via bulkActionStatus prop).
+  // Controlled wins unless it is "idle" or a "success" F0 already dismissed.
+  // Consumers never need to reset back to "idle" after success — F0 handles
+  // the auto-dismiss timer and marks the controlled success as done internally.
+  // isControlledModeActiveRef: ref copy for stale-closure safety in onClick
+  // handlers captured inside onSelectItemsLocal.
+
   const [internalBulkActionStatus, setInternalBulkActionStatus] =
     useState<ActionBarStatus>("idle")
+  // State (not ref) so setting it always triggers a re-render, even when
+  // internalBulkActionStatus is already "idle" (no-op bailout otherwise).
+  const [controlledSuccessDismissed, setControlledSuccessDismissed] =
+    useState(false)
+
   const actionBarRef = useRef<F0ActionBarRef>(null)
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // isControlledModeActive: true when controlled status is non-idle and not
+  // an already-dismissed success. Drives the auto-manage bail-out in onClick.
+  // Repeated for resolvedBulkActionStatus and isControlledModeActive — helper
+  // keeps the condition in one place.
+  const isControlledStatusActive = (dismissed: boolean) =>
+    controlledBulkActionStatus !== undefined &&
+    controlledBulkActionStatus !== "idle" &&
+    !(controlledBulkActionStatus === "success" && dismissed)
+
+  const resolvedBulkActionStatus = isControlledStatusActive(
+    controlledSuccessDismissed
+  )
+    ? controlledBulkActionStatus
+    : internalBulkActionStatus
+
+  const isControlledModeActive = isControlledStatusActive(
+    controlledSuccessDismissed
+  )
+  const isControlledModeActiveRef = useRef(false)
+  isControlledModeActiveRef.current = isControlledModeActive
+
+  // Prop presence alone signals modal-gated actions — void handlers must not
+  // auto-clear selection regardless of the current value.
+  const hasControlledBulkActionStatus = controlledBulkActionStatus !== undefined
+
+  // Shared dismiss helper: collapse bar + clear selection atomically so React
+  // batches the state updates into one render, preventing a flash of idle
+  // content (stale action buttons) between clearSelectedItems() and the status
+  // reset.
+  const scheduleDismiss = useCallback(
+    (onDismiss: () => void) => {
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current)
+      }
+      successTimerRef.current = setTimeout(() => {
+        setShowActionBar(false)
+        onDismiss()
+        successTimerRef.current = null
+      }, SUCCESS_DISMISS_MS)
+    },
+    // setShowActionBar is a stable setState ref — safe to omit from deps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  )
+
   useEffect(() => {
     return () => {
       if (successTimerRef.current) {
@@ -478,89 +537,27 @@ const OneDataCollectionComp = <
     }
   }, [])
 
-  // "idle" is transparent: when the consumer's controlled status is idle (or
-  // was "success" and F0 has already dismissed it), fall through to the
-  // internal auto-managed state so immediate promise-returning actions still
-  // get auto-managed feedback.
-  //
-  // controlledSuccessDismissed is state (not a ref) so that setting it always
-  // triggers a re-render — even when internalBulkActionStatus was already
-  // "idle" (which would make setInternalBulkActionStatus a no-op bailout).
-  const [controlledSuccessDismissed, setControlledSuccessDismissed] =
-    useState(false)
-  const resolvedBulkActionStatus =
-    controlledBulkActionStatus &&
-    controlledBulkActionStatus !== "idle" &&
-    !(controlledBulkActionStatus === "success" && controlledSuccessDismissed)
-      ? controlledBulkActionStatus
-      : internalBulkActionStatus
-
-  // True only when the consumer has explicitly taken over with a non-idle
-  // status. Used to decide whether auto-manage should run for promises.
-  //
-  // Mirrors the resolvedBulkActionStatus fall-through logic: once F0 has
-  // auto-dismissed a controlled "success" (controlledSuccessDismissed=true),
-  // the consumer does not need to manually reset to "idle" — the controlled
-  // success is considered done and immediate actions should auto-manage again.
-  const isControlledModeActive =
-    controlledBulkActionStatus !== undefined &&
-    controlledBulkActionStatus !== "idle" &&
-    !(controlledBulkActionStatus === "success" && controlledSuccessDismissed)
-  // Ref copy so that onClick closures (captured inside onSelectItemsLocal on
-  // each selection change) always read the current value at click time rather
-  // than the value that was current when the closure was last rebuilt.
-  // Without this, a closure built while status was 'loading'/'success' would
-  // stale-capture isControlledModeActive=true and bail out of auto-manage
-  // even after the consumer resets status back to 'idle'.
-  const isControlledModeActiveRef = useRef(false)
-  isControlledModeActiveRef.current = isControlledModeActive
-
-  // True whenever the bulkActionStatus prop is wired up, regardless of its
-  // current value. The mere presence of the prop signals that the consumer
-  // has modal-gated actions, so void-returning handlers must not auto-clear
-  // selection (the modal may not have confirmed yet).
-  const hasControlledBulkActionStatus = controlledBulkActionStatus !== undefined
-
-  // When the consumer transitions controlled status to "success", auto-dismiss
-  // after SUCCESS_DISMISS_MS: clear selection and collapse the bar back to
-  // idle. The consumer only needs to set "success" — no manual timer or
-  // clearSelectedItems call required.
-  //
-  // Single-phase: clear selection and mark success as dismissed atomically in
-  // one render. onSelectItemsLocal will reset internalBulkActionStatus to
-  // "idle" as a side-effect of the selection clear; setControlledSuccessDismissed
-  // (state, not ref) guarantees a re-render picks up the dismissed flag even
-  // when that internal reset is a no-op bailout.
   const prevControlledStatusRef = useRef(controlledBulkActionStatus)
   useEffect(() => {
     const prev = prevControlledStatusRef.current
     prevControlledStatusRef.current = controlledBulkActionStatus
 
     if (controlledBulkActionStatus === "success" && prev !== "success") {
-      // Entering success: reset dismiss flag and start auto-dismiss timer.
       setControlledSuccessDismissed(false)
-      if (successTimerRef.current) {
-        clearTimeout(successTimerRef.current)
-      }
-      successTimerRef.current = setTimeout(() => {
-        // setShowActionBar(false) is batched with setControlledSuccessDismissed
-        // so isOpen flips to false in the same render — no intermediate frame
-        // where the bar shows idle content (stale action buttons) before closing.
-        setShowActionBar(false)
+      scheduleDismiss(() => {
         clearSelectedItemsFunc?.()
         setControlledSuccessDismissed(true)
-        successTimerRef.current = null
-      }, SUCCESS_DISMISS_MS)
+      })
     } else if (prev === "success" && controlledBulkActionStatus !== "success") {
       // Consumer transitioned away from "success" before the timer fired.
-      // Cancel the timer and reset the dismiss flag for the next cycle.
       if (successTimerRef.current) {
         clearTimeout(successTimerRef.current)
         successTimerRef.current = null
       }
       setControlledSuccessDismissed(false)
     }
-  }, [controlledBulkActionStatus, clearSelectedItemsFunc])
+  }, [controlledBulkActionStatus, clearSelectedItemsFunc, scheduleDismiss])
+  // ─────────────────────────────────────────────────────────────────────────
 
   const i18n = useI18n()
 
@@ -648,41 +645,24 @@ const OneDataCollectionComp = <
             return
           }
 
-          // Auto-manage bail-out: only skip internal state machine when the
-          // consumer is actively controlling status (non-idle). When the
-          // controlled status is "idle", F0 manages immediate actions normally.
-          // Read from ref (not the closure-captured const) so this always
+          // Read from ref — not the closure-captured const — so this always
           // reflects the prop value at click time, not at closure-creation time.
           if (isControlledModeActiveRef.current) {
             return
           }
 
-          if (successTimerRef.current) {
-            clearTimeout(successTimerRef.current)
-            successTimerRef.current = null
-          }
           setInternalBulkActionStatus("loading")
           ;(result as Promise<void>).then(
             () => {
               setInternalBulkActionStatus("success")
-              successTimerRef.current = setTimeout(() => {
-                // Clear selection atomically with the idle transition so the
-                // bar never renders a "no actions available" state between
-                // clearSelectedItems() and setInternalBulkActionStatus("idle").
-                // Always wipe selection on success — any rows selected during
-                // the loading window are cleared too, preventing already-processed
-                // items from being mixed with new selections.
+              // Always wipe on success — prevents already-processed items from
+              // mixing with new selections made during loading.
+              scheduleDismiss(() => {
                 if (!bulkAction.keepSelection) {
-                  // setShowActionBar(false) is batched with
-                  // setInternalBulkActionStatus("idle") so isOpen flips to
-                  // false in the same render — no intermediate frame where the
-                  // bar shows idle content (stale action buttons) before closing.
-                  setShowActionBar(false)
                   clearSelectedItems()
                 }
                 setInternalBulkActionStatus("idle")
-                successTimerRef.current = null
-              }, SUCCESS_DISMISS_MS)
+              })
             },
             () => {
               setInternalBulkActionStatus("error")
