@@ -180,7 +180,6 @@ It does **not** own form state or field rendering. The consumer passes any React
 F0WizardSteps/
   F0WizardSteps.tsx          — implementation
   F0WizardSteps.types.ts     — public types
-  F0WizardSteps.styles.ts    — tailwind-variants styles
   F0WizardSteps.md           — this file
   index.ts                   — public exports
   __tests__/
