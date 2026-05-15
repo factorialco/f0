@@ -90,12 +90,25 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof F0GraphEdge>
 
-export const Default: Story = {
-  render: () => <EdgeStory />,
-}
-
-export const Hover: Story = {
-  render: () => <EdgeStory variant="hover" />,
+/**
+ * All four edge variants rendered side by side in a single canvas so they
+ * can be visually compared. Each panel mounts its own `F0Graph` and applies
+ * the variant via the edge `data.variant` field — exactly how `F0Graph`
+ * passes it to `F0GraphEdge` in production.
+ */
+export const Status: Story = {
+  render: () => (
+    <div className="flex flex-wrap gap-4">
+      {(["default", "hover", "highlighted", "dimmed"] as const).map((v) => (
+        <div key={v} className="flex flex-col gap-2">
+          <span className="text-sm capitalize text-f1-foreground-secondary">
+            {v}
+          </span>
+          <EdgeStory variant={v} width={260} height={180} />
+        </div>
+      ))}
+    </div>
+  ),
 }
 
 /**
@@ -124,14 +137,6 @@ export const NonInteractive: Story = {
       </div>
     </div>
   ),
-}
-
-export const Highlighted: Story = {
-  render: () => <EdgeStory variant="highlighted" />,
-}
-
-export const Dimmed: Story = {
-  render: () => <EdgeStory variant="dimmed" />,
 }
 
 export const Snapshot: Story = {

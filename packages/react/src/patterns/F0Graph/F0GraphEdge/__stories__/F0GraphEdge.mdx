@@ -21,18 +21,18 @@ focus.
 
 > When using `<F0Graph>`, you do NOT need to wrap with `ReactFlowProvider` — `F0Graph` mounts its own. The Storybook stories below use `ReactFlowProvider` only to render `F0GraphEdge` in isolation.
 
-<Canvas of={Stories.Default} />
+<Canvas of={Stories.Status} />
 
 ---
 
 # Variants
 
+All four variants shown side by side in the `Status` canvas above.
+
 ## Default
 
 Standard low-contrast connector. Used for most parent–child
 relationships.
-
-<Canvas of={Stories.Default} />
 
 ## Hover
 
@@ -40,21 +40,15 @@ Mid-contrast connector used when an interactive edge is hovered. Only
 applied to edges that opt in to interactivity via `onEdgeClick` or
 `onEdgeHover`.
 
-<Canvas of={Stories.Hover} />
-
 ## Highlighted
 
 Accent-colored edge drawn when the connected node is selected
 or hovered. Draws attention to the specific relationship.
 
-<Canvas of={Stories.Highlighted} />
-
 ## Dimmed
 
 Reduced-opacity edge used to de-emphasize non-relevant
 relationships during selection or search.
-
-<Canvas of={Stories.Dimmed} />
 
 ---
 

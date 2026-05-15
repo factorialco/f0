@@ -7,7 +7,7 @@ import {
 } from "@xyflow/react"
 import { memo } from "react"
 
-import type { F0GraphEdgeProps } from "./types"
+import type { EdgeVariant, F0GraphEdgeProps } from "./types"
 
 import { useF0GraphZoomInternal } from "../contexts"
 
@@ -31,12 +31,20 @@ const pathGetters = {
 } as const
 
 export function F0GraphEdgeBase({
-  variant = "default",
+  variant: variantProp,
   strokeWidth: propStrokeWidth = 1,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- React Flow passes `type` as the edge type key (e.g. "graphEdge"), ignore it
   type: _rfType,
   ...edgeProps
 }: F0GraphEdgeProps & EdgeProps) {
+  // When F0GraphEdgeBase is registered directly as a React Flow edge type
+  // (the default path, no `renderEdge` override), RF passes only raw
+  // EdgeProps — `variant` is not a top-level prop, it lives in `data.variant`.
+  // Fall back to `data.variant` so all four variants render their distinct
+  // stroke colors instead of always defaulting to "default".
+  const variantData = (edgeProps.data as { variant?: EdgeVariant } | undefined)
+    ?.variant
+  const variant: EdgeVariant = variantProp ?? variantData ?? "default"
   // Derive stroke width from zoom context (Fix 4) with fallback to prop/style
   const zoomCtx = useF0GraphZoomInternal()
   const zoomDerivedStrokeWidth = zoomCtx
@@ -119,6 +127,7 @@ export const F0GraphEdge = memo(F0GraphEdgeBase, (prev, next) => {
   if (prev.id !== next.id) return false
   if (prev.variant !== next.variant) return false
   if (prev.strokeWidth !== next.strokeWidth) return false
+  if (prev.data?.variant !== next.data?.variant) return false
   if (prev.data?.showDot !== next.data?.showDot) return false
   if (prev.data?.pathType !== next.data?.pathType) return false
   if (prev.style?.strokeWidth !== next.style?.strokeWidth) return false
