@@ -41,12 +41,10 @@ function renderPerson(node: GraphNode<Person>, ctx: F0GraphNodeRenderContext) {
 
 function EdgeStory({
   variant = "default",
-  animated = false,
   width = 400,
   height = 220,
 }: {
-  variant?: "default" | "highlighted" | "dimmed"
-  animated?: boolean
+  variant?: "default" | "hover" | "highlighted" | "dimmed"
   width?: number
   height?: number
 }) {
@@ -55,7 +53,7 @@ function EdgeStory({
       id: "a-b",
       source: "a",
       target: "b",
-      data: { variant, animated },
+      data: { variant },
     },
   ]
 
@@ -88,6 +86,10 @@ export const Default: Story = {
   render: () => <EdgeStory />,
 }
 
+export const Hover: Story = {
+  render: () => <EdgeStory variant="hover" />,
+}
+
 export const Highlighted: Story = {
   render: () => <EdgeStory variant="highlighted" />,
 }
@@ -96,19 +98,15 @@ export const Dimmed: Story = {
   render: () => <EdgeStory variant="dimmed" />,
 }
 
-export const Animated: Story = {
-  render: () => <EdgeStory animated />,
-}
-
 export const Snapshot: Story = {
   tags: ["no-sidebar"],
   parameters: withSnapshot({}),
   render: () => (
     <div className="flex flex-wrap gap-4">
       <EdgeStory width={260} height={180} />
+      <EdgeStory variant="hover" width={260} height={180} />
       <EdgeStory variant="highlighted" width={260} height={180} />
       <EdgeStory variant="dimmed" width={260} height={180} />
-      <EdgeStory animated width={260} height={180} />
     </div>
   ),
 }

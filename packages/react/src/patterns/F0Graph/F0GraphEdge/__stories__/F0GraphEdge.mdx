@@ -34,6 +34,14 @@ relationships.
 
 <Canvas of={Stories.Default} />
 
+## Hover
+
+Mid-contrast connector used when an interactive edge is hovered. Only
+applied to edges that opt in to interactivity via `onEdgeClick` or
+`onEdgeHover`.
+
+<Canvas of={Stories.Hover} />
+
 ## Highlighted
 
 Accent-colored edge drawn when the connected node is selected
@@ -48,23 +56,15 @@ relationships during selection or search.
 
 <Canvas of={Stories.Dimmed} />
 
-## Animated
-
-Shows a flowing animation along the path to indicate direction or active
-data flow.
-
-<Canvas of={Stories.Animated} />
-
 ---
 
 # Props
 
-| Prop          | Type                                     | Default        | Description                                   |
-| ------------- | ---------------------------------------- | -------------- | --------------------------------------------- |
-| `type`        | `"smoothstep" \| "straight" \| "bezier"` | `"smoothstep"` | Edge path rendering algorithm                 |
-| `variant`     | `"default" \| "highlighted" \| "dimmed"` | `"default"`    | Visual treatment                              |
-| `animated`    | `boolean`                                | `false`        | Whether to animate flow along the path        |
-| `strokeWidth` | `number`                                 | —              | Stroke width (adjusts with zoom when omitted) |
+| Prop          | Type                                                | Default        | Description                                   |
+| ------------- | --------------------------------------------------- | -------------- | --------------------------------------------- |
+| `type`        | `"smoothstep" \| "straight" \| "bezier"`            | `"smoothstep"` | Edge path rendering algorithm                 |
+| `variant`     | `"default" \| "hover" \| "highlighted" \| "dimmed"` | `"default"`    | Visual treatment                              |
+| `strokeWidth` | `number`                                            | —              | Stroke width (adjusts with zoom when omitted) |
 
 ---
 
@@ -83,9 +83,7 @@ function Example() {
     <F0Graph
       nodes={nodes}
       renderNode={renderNode}
-      renderEdge={(edge, variant) => (
-        <F0GraphEdge variant={variant} animated={edge.data?.dotted} />
-      )}
+      renderEdge={(edge, variant) => <F0GraphEdge variant={variant} />}
     />
   )
 }

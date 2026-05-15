@@ -51,7 +51,7 @@ describe("F0GraphEdge", () => {
   })
 
   it("exports correct edge variants", () => {
-    expect(edgeVariants).toEqual(["default", "highlighted", "dimmed"])
+    expect(edgeVariants).toEqual(["default", "hover", "highlighted", "dimmed"])
   })
 
   it("rerenders on style changes and skips geometry-stable noop rerenders", () => {
