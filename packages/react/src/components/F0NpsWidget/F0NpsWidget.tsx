@@ -77,7 +77,7 @@ export function F0NpsWidget({
       aria-label={t.npsWidget.survey}
       className={cn(
         "fixed bottom-6 left-6 z-50 w-[480px]",
-        "rounded-xl border border-f1-border bg-f1-background",
+        "rounded-xl border border-solid border-f1-border bg-f1-background",
         "shadow-[0_8px_24px_-4px_hsl(var(--shadow)/0.12),0_2px_8px_-2px_hsl(var(--shadow)/0.08)]"
       )}
     >
