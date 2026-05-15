@@ -17,13 +17,16 @@
   --f0-graph-edge-default: #cdd4dd; /* grey.30 (213 87% 15% / 0.20) on white */
   --f0-graph-edge-hover: hsl(var(--neutral-40)); /* f1-border-hover */
   --f0-graph-edge-highlighted: hsl(
-    var(--selected-50) / 0.4
-  ); /* f1-border-selected (viridian secondary) */
+    var(--selected-50)
+  ); /* f1-border-selected-bold (viridian secondary) */
 }
 
 :root.dark .f0-graph {
   /* Pre-blended white.30 on the dark surface (#1B1F25 ≈ neutral-2 dark). */
   --f0-graph-edge-default: #545961;
+  --f0-graph-edge-highlighted: hsl(
+    var(--selected-50)
+  ); /* f1-border-selected-bold (viridian secondary) */
 }
 
 .f0-graph .react-flow__pane.draggable {

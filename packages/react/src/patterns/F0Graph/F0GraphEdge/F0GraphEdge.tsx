@@ -17,7 +17,7 @@ import { useF0GraphZoomInternal } from "../contexts"
 const strokeColors = {
   default: "var(--f0-graph-edge-default)", // f1-border
   hover: "var(--f0-graph-edge-hover)", // f1-border-hover
-  highlighted: "var(--f0-graph-edge-highlighted)", // f1-border-selected (viridian secondary)
+  highlighted: "var(--f0-graph-edge-highlighted)", // f1-border-selected-bold (viridian secondary)
   dimmed: "var(--f0-graph-edge-default)",
 } as const
 
