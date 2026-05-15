@@ -13,7 +13,6 @@ import {
 } from "react"
 import { useDebounceCallback } from "usehooks-ts"
 
-import { F0DialogContext } from "@/patterns/F0Dialog"
 import {
   BaseFetchOptions,
   BaseResponse,
@@ -32,6 +31,7 @@ import { DataTestIdWrapper } from "@/lib/data-testid"
 import { useI18n } from "@/lib/providers/i18n"
 import { toArray } from "@/lib/toArray"
 import { cn } from "@/lib/utils"
+import { F0DialogContext } from "@/patterns/F0Dialog"
 import { GroupHeader } from "@/ui/GroupHeader/index"
 import { InputField } from "@/ui/InputField"
 import { InputMessages } from "@/ui/InputField/components/InputMessages"
@@ -125,11 +125,13 @@ const F0SelectComponent = forwardRef(function Select<
     showPreview = false,
     preserveSelectionOnDatasetChange = true,
     dataTestId,
+    id: propId,
     ...props
   }: F0SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
 ) {
-  const id = useId()
+  const generatedId = useId()
+  const id = propId ?? generatedId
 
   // If inside a OneDialog and no portalContainer is provided, use the dialog's container
   // only for center/fullscreen dialogs (which have focus trap).
@@ -865,6 +867,7 @@ const F0SelectComponent = forwardRef(function Select<
             </div>
           ) : (
             <InputField
+              id={id}
               label={label}
               error={error}
               required={required}

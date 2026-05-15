@@ -161,6 +161,7 @@ export type F0SelectProps<T extends string, R = unknown> = F0SelectBaseProps<
   ) &
   Pick<
     InputFieldProps<T>,
+    | "id"
     | "required"
     | "loading"
     | "hideLabel"
