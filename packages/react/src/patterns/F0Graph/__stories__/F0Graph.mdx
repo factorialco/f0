@@ -54,19 +54,14 @@ export function Example() {
 
 | Story                | What it shows                                               |
 | -------------------- | ----------------------------------------------------------- |
-| `BasicTree`          | Default tree rendering with standard node content           |
-| `CompactView`        | Starting in compact zoom variant                            |
-| `DotView`            | Starting in dot zoom variant                                |
+| `Tree`               | Default tree rendering with standard node content           |
+| `MultiRoot`          | Multiple independent root trees in one canvas               |
 | `WithControls`       | Visible zoom and canvas controls                            |
 | `Lazy`               | On-demand subtree loading with `rootNodes` + `loadChildren` |
-| `LargeTree`          | Higher node-count tree rendering                            |
-| `CustomNode`         | Fully custom node UI via `renderNode`                       |
-| `CustomEdge`         | Custom edge rendering via `renderEdge`                      |
+| `LargeTree`          | Higher node-count tree (≥ 600 nodes) for stress testing     |
 | `Controlled`         | Controlled expansion and selection state                    |
-| `RawSearch`          | Raw controlled search input driven by consumer state        |
 | `WithSearch`         | Declarative indexed search with auto-expand and fly-to      |
 | `WithDetailPanel`    | Right-side detail panel on node selection                   |
-| `MultiRoot`          | Multiple independent root trees in one canvas               |
 | `StagedLoading`      | Progressive deferred node loading after initial paint       |
 | `StagedLoadingError` | Deferred loading error path and fallback behavior           |
 
@@ -88,8 +83,8 @@ between items** carry as much meaning as the items themselves.
 
 ## Anatomy
 
-<Canvas of={F0GraphStories.BasicTree} />
-<Controls of={F0GraphStories.BasicTree} />
+<Canvas of={F0GraphStories.Tree} />
+<Controls of={F0GraphStories.Tree} />
 
 A Graph is composed of:
 
@@ -119,21 +114,19 @@ accordingly:
 Full pill with avatar, name, and subtitle. Use at normal reading
 distance.
 
-<Canvas of={F0GraphStories.BasicTree} />
+<Canvas of={F0GraphStories.Tree} />
 
 ### Compact
 
 Avatar + initials only. Use when the tree no longer fits in the
-viewport but identity still matters.
-
-<Canvas of={F0GraphStories.CompactView} />
+viewport but identity still matters. Reach this variant by zooming out,
+or by tuning `zoomThresholds` / `zoomPreset`.
 
 ### Dot
 
 Single dot per node. Use to show **shape** of very large trees
 (100+ nodes) where individual identity is secondary to structure.
-
-<Canvas of={F0GraphStories.DotView} />
+Reach this variant by continuing to zoom out from compact.
 
 The thresholds between variants are configurable via
 `zoomThresholds` and a preset can be selected via
@@ -172,8 +165,6 @@ Two flavors:
 
 - **Raw** — pass `searchValue` / `onSearchChange` and own the input. The
   pill renders, you drive everything.
-
-<Canvas of={F0GraphStories.RawSearch} />
 
 - **Declarative** — pass a `searchable` config and F0Graph indexes the data,
   filters results, expands ancestors of the chosen result, selects it, and

@@ -2,11 +2,18 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
 import "@xyflow/react/dist/style.css"
+import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
+import { F0Button } from "@/components/F0Button"
+import { F0Card } from "@/components/F0Card"
+import { F0Text } from "@/components/F0Text"
+import { F0TagPerson } from "@/components/tags/F0TagPerson"
+import { DataList } from "@/experimental/Lists/DataList"
+import { Weekdays } from "@/experimental/Widgets/Content/Weekdays"
+import { WhatsappChat } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import type { EdgeVariant } from "../F0GraphEdge"
 import type { Searchable } from "../F0GraphSearch"
-import type { DeferredNodesPayload, GraphEdge, GraphNode } from "../types"
+import type { DeferredNodesPayload, GraphNode } from "../types"
 
 import {
   F0Graph,
@@ -89,41 +96,134 @@ export default meta
 type Story = StoryObj<F0GraphProps<Employee>>
 
 // ─── Sample data ───────────────────────────────────────────────
+interface Team {
+  name: string
+  members: number
+}
+
 interface Employee {
   name: string
   title: string
-  avatar?: string
+  pronouns?: string
+  email?: string
+  phone?: string
+  workEmail?: string
+  workplace?: string
+  workableDays?: ReadonlyArray<"M" | "T" | "W" | "R" | "F" | "S" | "U">
+  teams?: ReadonlyArray<Team>
+}
+
+const ALL_DAYS = ["M", "T", "W", "R", "F", "S", "U"] as const
+
+const DAY_CODE_TO_INDEX: Record<(typeof ALL_DAYS)[number], number> = {
+  M: 0,
+  T: 1,
+  W: 2,
+  R: 3,
+  F: 4,
+  S: 5,
+  U: 6,
+}
+
+function profileDefaults(
+  id: string,
+  name: string
+): Pick<
+  Employee,
+  | "pronouns"
+  | "email"
+  | "phone"
+  | "workEmail"
+  | "workplace"
+  | "workableDays"
+  | "teams"
+> {
+  const slug = name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z]+/g, ".")
+    .replace(/^\.|\.$/g, "")
+  const hash = id.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0)
+  const cities = [
+    "Barcelona",
+    "Madrid",
+    "Lisbon",
+    "Berlin",
+    "Paris",
+    "Amsterdam",
+  ]
+  const teamPool: Team[] = [
+    { name: "Engineering", members: 23 },
+    { name: "Time Tracking", members: 16 },
+    { name: "Operations", members: 11 },
+    { name: "Design", members: 8 },
+  ]
+  const phoneSuffix = (n: number) =>
+    (100 + (hash % 800) + n).toString().padStart(3, "0")
+  return {
+    pronouns: hash % 2 === 0 ? "He/Him" : "She/Her",
+    email: `${slug}@example.com`,
+    phone: `+34 6${(700 + (hash % 99)).toString().padStart(2, "0")} ${phoneSuffix(0)} ${phoneSuffix(7)}`,
+    workEmail: `${slug}@company.com`,
+    workplace: cities[hash % cities.length],
+    workableDays: ["M", "T", "R", "F", "U"],
+    teams: [
+      teamPool[hash % teamPool.length]!,
+      teamPool[(hash + 1) % teamPool.length]!,
+    ],
+  }
 }
 
 const BASIC_NODES: GraphNode<Employee>[] = [
   {
     id: "1",
     parentId: null,
-    data: { name: "Sofia Reyes", title: "Chief Executive Officer" },
+    data: {
+      name: "Sofia Reyes",
+      title: "Chief Executive Officer",
+      ...profileDefaults("1", "Sofia Reyes"),
+    },
     childrenCount: 2,
   },
   {
     id: "2",
     parentId: "1",
-    data: { name: "Marcus Chen", title: "Chief Technology Officer" },
+    data: {
+      name: "Marcus Chen",
+      title: "Chief Technology Officer",
+      ...profileDefaults("2", "Marcus Chen"),
+    },
     childrenCount: 2,
   },
   {
     id: "3",
     parentId: "1",
-    data: { name: "Elena Dupont", title: "Chief Financial Officer" },
+    data: {
+      name: "Elena Dupont",
+      title: "Chief Financial Officer",
+      ...profileDefaults("3", "Elena Dupont"),
+    },
     childrenCount: 0,
   },
   {
     id: "4",
     parentId: "2",
-    data: { name: "Tomás Herrera", title: "Engineering Manager" },
+    data: {
+      name: "Tomás Herrera",
+      title: "Engineering Manager",
+      ...profileDefaults("4", "Tomas Herrera"),
+    },
     childrenCount: 0,
   },
   {
     id: "5",
     parentId: "2",
-    data: { name: "Aisha Patel", title: "QA Lead" },
+    data: {
+      name: "Aisha Patel",
+      title: "QA Lead",
+      ...profileDefaults("5", "Aisha Patel"),
+    },
     childrenCount: 0,
   },
 ]
@@ -132,7 +232,7 @@ function renderEmployee(
   node: GraphNode<Employee>,
   ctx: F0GraphNodeRenderContext
 ) {
-  const { name, title } = node.data as Employee
+  const { name, title } = node.data
   const [firstName = "", lastName = ""] = name.split(" ")
   return (
     <F0GraphNode
@@ -146,7 +246,7 @@ function renderEmployee(
 
 // ─── Stories ───────────────────────────────────────────────────
 
-export const BasicTree: Story = {
+export const Tree: Story = {
   args: {
     nodes: BASIC_NODES,
     renderNode: renderEmployee,
@@ -154,21 +254,77 @@ export const BasicTree: Story = {
   },
 }
 
-export const CompactView: Story = {
-  args: {
-    nodes: BASIC_NODES,
-    renderNode: renderEmployee,
-    defaultZoom: 0.5,
-    defaultExpandDepth: 2,
-  },
-}
+// ─── Multi-Root ────────────────────────────────────────────────
 
-export const DotView: Story = {
+const MULTI_ROOT_NODES: GraphNode<Employee>[] = [
+  // Tree 1 — Engineering
+  {
+    id: "eng-root",
+    parentId: null,
+    data: { name: "Marcus Chen", title: "VP Engineering" },
+    childrenCount: 2,
+  },
+  {
+    id: "eng-fe",
+    parentId: "eng-root",
+    data: { name: "Nina Volkov", title: "Frontend Lead" },
+    childrenCount: 0,
+  },
+  {
+    id: "eng-be",
+    parentId: "eng-root",
+    data: { name: "Diego Martín", title: "Backend Lead" },
+    childrenCount: 0,
+  },
+  // Tree 2 — Product
+  {
+    id: "prod-root",
+    parentId: null,
+    data: { name: "Laura Kim", title: "VP Product" },
+    childrenCount: 2,
+  },
+  {
+    id: "prod-pm",
+    parentId: "prod-root",
+    data: { name: "Yuki Tanaka", title: "Product Manager" },
+    childrenCount: 0,
+  },
+  {
+    id: "prod-design",
+    parentId: "prod-root",
+    data: { name: "Priya Sharma", title: "Product Designer" },
+    childrenCount: 0,
+  },
+  // Tree 3 — People
+  {
+    id: "people-root",
+    parentId: null,
+    data: { name: "James Okafor", title: "VP People" },
+    childrenCount: 1,
+  },
+  {
+    id: "people-ops",
+    parentId: "people-root",
+    data: { name: "Fatima Benali", title: "People Operations" },
+    childrenCount: 0,
+  },
+]
+
+/** Demonstrates multiple disjoint trees rendered side-by-side (TB) via the built-in multi-root layout. */
+export const MultiRoot: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Three independent org trees with no shared parent. The built-in layout engine stacks them along the cross axis with a `rootSep` gap.",
+      },
+    },
+  },
   args: {
-    nodes: BASIC_NODES,
+    nodes: MULTI_ROOT_NODES,
     renderNode: renderEmployee,
-    defaultZoom: 0.2,
     defaultExpandDepth: 2,
+    showControls: true,
   },
 }
 
@@ -181,65 +337,182 @@ export const WithControls: Story = {
   },
 }
 
-/** Demonstrates async loading via `rootNodes` + `loadChildren` for large or server-driven trees. */
+/** Demonstrates per-expansion async loading via `rootNodes` + `loadChildren`. */
 export const Lazy: Story = {
   parameters: {
     docs: {
       description: {
         story:
-          "Use `rootNodes` + `loadChildren` to fetch a node's children on demand instead of providing the full tree upfront.",
+          "**On-demand loading per expansion.** The CEO and her three direct reports are visible immediately — each VP shows an expand affordance because they declare `childrenCount > 0` with `childrenLoaded: false`. Expanding any node calls `loadChildren(nodeId)` (here with a simulated 800 ms delay) and merges the freshly fetched subtree. Several managers themselves have unloaded reports, so you can drill multiple levels deep — paying only for the branches you open.\n\nUse this pattern when the full tree is too large to ship upfront and the server can paginate by parent. Contrast with `StagedLoading`, which loads one full deferred batch after the initial paint.",
       },
     },
   },
   args: {
     rootNodes: [
       {
-        id: "root",
+        id: "ceo",
         parentId: null,
         data: { name: "Sofia Reyes", title: "Chief Executive Officer" },
         childrenCount: 3,
+        childrenLoaded: true,
+      },
+      {
+        id: "vp-eng",
+        parentId: "ceo",
+        data: { name: "Marcus Chen", title: "VP Engineering" },
+        childrenCount: 4,
+        childrenLoaded: false,
+      },
+      {
+        id: "vp-product",
+        parentId: "ceo",
+        data: { name: "Laura Kim", title: "VP Product" },
+        childrenCount: 3,
+        childrenLoaded: false,
+      },
+      {
+        id: "vp-people",
+        parentId: "ceo",
+        data: { name: "James Okafor", title: "VP People" },
+        childrenCount: 2,
         childrenLoaded: false,
       },
     ],
+    defaultExpandedNodes: new Set(["ceo"]),
     loadChildren: async (nodeId: string) => {
-      const teamsByNode: Record<
+      const lazyChildren: Record<
         string,
-        Array<{ name: string; title: string }>
+        Array<{
+          id: string
+          data: { name: string; title: string }
+          childrenCount: number
+        }>
       > = {
-        root: [
-          { name: "Marcus Chen", title: "VP Engineering" },
-          { name: "Laura Kim", title: "VP Product" },
-          { name: "James Okafor", title: "VP People" },
+        "vp-eng": [
+          {
+            id: "eng-mgr-1",
+            data: { name: "Nina Volkov", title: "Engineering Manager" },
+            childrenCount: 3,
+          },
+          {
+            id: "eng-mgr-2",
+            data: { name: "Diego Martín", title: "Engineering Manager" },
+            childrenCount: 2,
+          },
+          {
+            id: "eng-staff-1",
+            data: { name: "Yuki Tanaka", title: "Staff Engineer" },
+            childrenCount: 0,
+          },
+          {
+            id: "eng-staff-2",
+            data: { name: "Priya Sharma", title: "Staff Engineer" },
+            childrenCount: 0,
+          },
         ],
-        "root-child-0": [
-          { name: "Nina Volkov", title: "Staff Engineer" },
-          { name: "Diego Martín", title: "Senior Engineer" },
+        "vp-product": [
+          {
+            id: "pm-lead",
+            data: { name: "Aiko Saito", title: "Product Lead" },
+            childrenCount: 2,
+          },
+          {
+            id: "design-lead",
+            data: { name: "Tomás Vega", title: "Design Lead" },
+            childrenCount: 2,
+          },
+          {
+            id: "research-lead",
+            data: { name: "Sara Ahmed", title: "Research Lead" },
+            childrenCount: 0,
+          },
         ],
-        "root-child-1": [
-          { name: "Yuki Tanaka", title: "Product Manager" },
-          { name: "Priya Sharma", title: "Product Designer" },
+        "vp-people": [
+          {
+            id: "talent-lead",
+            data: { name: "Ethan O'Brien", title: "Talent Lead" },
+            childrenCount: 2,
+          },
+          {
+            id: "people-ops",
+            data: { name: "Mia Lefebvre", title: "People Ops" },
+            childrenCount: 0,
+          },
+        ],
+        "eng-mgr-1": [
+          {
+            id: "eng-mgr-1-ic-1",
+            data: { name: "Hiro Watanabe", title: "Senior Engineer" },
+            childrenCount: 0,
+          },
+          {
+            id: "eng-mgr-1-ic-2",
+            data: { name: "Carla Rivas", title: "Software Engineer" },
+            childrenCount: 0,
+          },
+          {
+            id: "eng-mgr-1-ic-3",
+            data: { name: "Ben Thompson", title: "Software Engineer" },
+            childrenCount: 0,
+          },
+        ],
+        "eng-mgr-2": [
+          {
+            id: "eng-mgr-2-ic-1",
+            data: { name: "Lina Petrov", title: "Senior Engineer" },
+            childrenCount: 0,
+          },
+          {
+            id: "eng-mgr-2-ic-2",
+            data: { name: "Omar Haddad", title: "Software Engineer" },
+            childrenCount: 0,
+          },
+        ],
+        "pm-lead": [
+          {
+            id: "pm-1",
+            data: { name: "Riya Kapoor", title: "Product Manager" },
+            childrenCount: 0,
+          },
+          {
+            id: "pm-2",
+            data: { name: "Léa Dubois", title: "Product Manager" },
+            childrenCount: 0,
+          },
+        ],
+        "design-lead": [
+          {
+            id: "des-1",
+            data: { name: "Kenji Mori", title: "Senior Designer" },
+            childrenCount: 0,
+          },
+          {
+            id: "des-2",
+            data: { name: "Eva Lindgren", title: "Product Designer" },
+            childrenCount: 0,
+          },
+        ],
+        "talent-lead": [
+          {
+            id: "rec-1",
+            data: { name: "Pablo Núñez", title: "Senior Recruiter" },
+            childrenCount: 0,
+          },
+          {
+            id: "rec-2",
+            data: { name: "Anya Sokolova", title: "Recruiter" },
+            childrenCount: 0,
+          },
         ],
       }
       // Simulate async delay
       await new Promise((r) => setTimeout(r, 800))
-      const team = teamsByNode[nodeId]
-      if (team) {
-        return team.map((member, i) => ({
-          id: `${nodeId}-child-${i}`,
-          parentId: nodeId,
-          data: member,
-          childrenCount: nodeId === "root" ? 2 : 0,
-          childrenLoaded: false,
-        }))
-      }
-      return Array.from({ length: 2 }, (_, i) => ({
-        id: `${nodeId}-child-${i}`,
+      const children = lazyChildren[nodeId] ?? []
+      return children.map((child) => ({
+        id: child.id,
         parentId: nodeId,
-        data: {
-          name: `Team Member ${i + 1}`,
-          title: "Individual Contributor",
-        },
-        childrenCount: 0,
+        data: child.data,
+        childrenCount: child.childrenCount,
         childrenLoaded: false,
       }))
     },
@@ -467,7 +740,7 @@ function makeLargeTree(count: number): GraphNode<Employee>[] {
 
 export const LargeTree: Story = {
   args: {
-    nodes: makeLargeTree(60),
+    nodes: makeLargeTree(600),
     renderNode: renderEmployee,
     showControls: true,
     defaultExpandDepth: 2,
@@ -476,142 +749,111 @@ export const LargeTree: Story = {
 
 // ─── Intent-searchable stories ─────────────────────────────────
 
-/** Demonstrates custom `renderNode` with rich content — avatar, badge overlay, and metadata. */
-export const CustomNode: Story = {
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "Provide a custom `renderNode` callback to fully control node content and layout per zoom level.",
-      },
-    },
-  },
-  args: {
-    nodes: BASIC_NODES,
-    renderNode: (node: GraphNode<Employee>, ctx: F0GraphNodeRenderContext) => {
-      const { name, title } = node.data as Employee
-      const [firstName = "", lastName = ""] = name.split(" ")
-      const isLeader = (node.childrenCount ?? 0) > 0
-      return (
-        <F0GraphNode
-          {...ctx}
-          avatar={{ type: "person", firstName, lastName }}
-          title={name}
-          subtitle={title}
-          tags={isLeader ? [{ type: "raw", text: "Manager" }] : undefined}
-        />
-      )
-    },
-    defaultExpandDepth: 2,
-    showControls: true,
-  },
-}
-
-/** Demonstrates `renderEdge` returning a custom styled edge element per edge variant. */
-export const CustomEdge: Story = {
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "Provide a custom `renderEdge` to style edges per variant or use a custom edge component.",
-      },
-    },
-  },
-  args: {
-    nodes: BASIC_NODES,
-    renderNode: renderEmployee,
-    renderEdge: (edge: GraphEdge, variant: EdgeVariant) => {
-      const color =
-        variant === "highlighted"
-          ? "var(--f1-color-accent)"
-          : variant === "dimmed"
-            ? "var(--f1-color-border-secondary)"
-            : "var(--f1-color-border)"
-      return (
-        <line
-          key={edge.id}
-          stroke={color}
-          strokeWidth={variant === "highlighted" ? 2.5 : 1.5}
-          strokeDasharray={variant === "dimmed" ? "4 2" : undefined}
-        />
-      )
-    },
-    defaultExpandDepth: 2,
-    showControls: true,
-  },
-}
-
-/** Demonstrates controlled `expandedNodes` and `selectedNodes` via external state. */
+/**
+ * Demonstrates fully controlled `expandedNodes` and `selectedNodes`.
+ *
+ * The toolbar above the graph shows the current controlled values and lets
+ * you mutate them from outside the component, proving that the graph
+ * reflects external state rather than owning it.
+ */
 export const Controlled: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Both `expandedNodes` and `selectedNodes` are passed as `Set<string>` props and updated only via the external buttons in the toolbar. The graph never mutates this state on its own — every change you see comes from the parent component.",
+      },
+    },
+  },
   render: () => {
+    const allIds = BASIC_NODES.map((n) => n.id)
     const [expandedNodes, setExpandedNodes] = useState(
-      () => new Set(["1", "2"])
+      () => new Set<string>(["1", "2"])
     )
     const [selectedNodes, setSelectedNodes] = useState(() => new Set<string>())
 
-    return (
-      <F0Graph<Employee>
-        nodes={BASIC_NODES}
-        renderNode={renderEmployee}
-        expandedNodes={expandedNodes}
-        onExpandToggle={(nodeId, expanded) => {
-          setExpandedNodes((prev) => {
-            const next = new Set(prev)
-            if (expanded) next.add(nodeId)
-            else next.delete(nodeId)
-            return next
-          })
-        }}
-        selectionMode="multi"
-        selectedNodes={selectedNodes}
-        onNodeSelect={(nodeId, selected) => {
-          setSelectedNodes((prev) => {
-            const next = new Set(prev)
-            if (selected) next.add(nodeId)
-            else next.delete(nodeId)
-            return next
-          })
-        }}
-        showControls
-      />
-    )
-  },
-}
-
-/** Demonstrates raw controlled search input (`searchValue`/`onSearchChange`) with user-managed behavior. */
-export const RawSearch: Story = {
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "Raw search mode — own the input, drive everything yourself. Compare with WithSearch which uses the declarative `searchable` config.",
-      },
-    },
-  },
-  render: () => {
-    const [searchValue, setSearchValue] = useState<string | undefined>("")
-    const normalizedQuery = searchValue?.trim().toLowerCase() ?? ""
-    const highlightedNodes =
-      normalizedQuery.length === 0
-        ? new Set<string>()
-        : new Set(
-            BASIC_NODES.filter((node) => {
-              const label = `${node.data.name} ${node.data.title}`.toLowerCase()
-              return label.includes(normalizedQuery)
-            }).map((node) => node.id)
-          )
+    const expandedLabel =
+      expandedNodes.size === 0 ? "(none)" : [...expandedNodes].sort().join(", ")
+    const selectedLabel =
+      selectedNodes.size === 0 ? "(none)" : [...selectedNodes].sort().join(", ")
 
     return (
-      <F0Graph<Employee>
-        nodes={BASIC_NODES}
-        renderNode={renderEmployee}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        searchLoading={false}
-        highlightedNodes={highlightedNodes}
-        defaultExpandDepth={2}
-        showControls
-      />
+      <div className="flex h-full flex-col gap-2">
+        <div className="flex flex-col gap-2 rounded-md border border-solid border-f1-border-secondary bg-f1-background-secondary p-3">
+          <div className="flex flex-col gap-1 text-sm text-f1-foreground">
+            <span>
+              <span className="font-semibold">expandedNodes:</span>{" "}
+              <code className="rounded bg-f1-background px-1 py-0.5 text-xs">
+                {expandedLabel}
+              </code>
+            </span>
+            <span>
+              <span className="font-semibold">selectedNodes:</span>{" "}
+              <code className="rounded bg-f1-background px-1 py-0.5 text-xs">
+                {selectedLabel}
+              </code>
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <F0Button
+              size="sm"
+              variant="outline"
+              label="Expand all"
+              onClick={() => setExpandedNodes(new Set(allIds))}
+            />
+            <F0Button
+              size="sm"
+              variant="outline"
+              label="Collapse all"
+              onClick={() => setExpandedNodes(new Set())}
+            />
+            <F0Button
+              size="sm"
+              variant="outline"
+              label="Select CTO"
+              onClick={() =>
+                setSelectedNodes((prev) => {
+                  const next = new Set(prev)
+                  next.add("2")
+                  return next
+                })
+              }
+            />
+            <F0Button
+              size="sm"
+              variant="outline"
+              label="Clear selection"
+              onClick={() => setSelectedNodes(new Set())}
+            />
+          </div>
+        </div>
+        <div className="min-h-0 flex-1">
+          <F0Graph<Employee>
+            nodes={BASIC_NODES}
+            renderNode={renderEmployee}
+            expandedNodes={expandedNodes}
+            onExpandToggle={(nodeId, expanded) => {
+              setExpandedNodes((prev) => {
+                const next = new Set(prev)
+                if (expanded) next.add(nodeId)
+                else next.delete(nodeId)
+                return next
+              })
+            }}
+            selectionMode="multi"
+            selectedNodes={selectedNodes}
+            onNodeSelect={(nodeId, selected) => {
+              setSelectedNodes((prev) => {
+                const next = new Set(prev)
+                if (selected) next.add(nodeId)
+                else next.delete(nodeId)
+                return next
+              })
+            }}
+            showControls
+          />
+        </div>
+      </div>
     )
   },
 }
@@ -622,9 +864,8 @@ export const WithSearch: Story = {
     nodes: makeLargeTree(60),
     renderNode: renderEmployee,
     searchable: {
-      getLabel: (node: GraphNode<Employee>) => (node.data as Employee).name,
-      getSecondaryLabel: (node: GraphNode<Employee>) =>
-        (node.data as Employee).title,
+      getLabel: (node: GraphNode<Employee>) => node.data.name,
+      getSecondaryLabel: (node: GraphNode<Employee>) => node.data.title,
       placeholder: "Search people…",
       noResultsLabel: "No matches found",
     } satisfies Searchable<Employee>,
@@ -633,12 +874,42 @@ export const WithSearch: Story = {
   },
 }
 
-/** Demonstrates `detailPanel` for a right-side detail view on node selection. */
+// ─── Detail Panel ──────────────────────────────────────────────
+
+function DetailPanelSection({
+  title,
+  children,
+}: {
+  title: string
+  children: React.ReactNode
+}) {
+  return (
+    <section className="flex flex-col border-0 border-t border-dashed border-f1-border-secondary">
+      <header className="flex items-center px-4 pb-2 pt-3">
+        <F0Text
+          content={title}
+          as="span"
+          className="text-base font-semibold leading-5 text-f1-foreground"
+        />
+      </header>
+      <div className="flex flex-col gap-2 pb-2">{children}</div>
+    </section>
+  )
+}
+
+const DETAIL_NODES_BY_ID = new Map(BASIC_NODES.map((n) => [n.id, n]))
+
+/**
+ * Demonstrates the `resource` detail-panel variant with a rich header,
+ * primary + secondary actions, an overflow menu, and grouped content
+ * sections — the same pattern used in the F0Graph dev playground.
+ */
 export const WithDetailPanel: Story = {
   parameters: {
     docs: {
       description: {
-        story: "Wire `detailPanel` for a side detail view on node selection.",
+        story:
+          "The detail panel uses the `resource` variant: a custom avatar header, action row (primary + secondary + overflow), and grouped sections built with `DataList`, `Weekdays`, `F0TagPerson`, and `F0Card`. Click any node to open it.",
       },
     },
   },
@@ -646,20 +917,131 @@ export const WithDetailPanel: Story = {
     nodes: BASIC_NODES,
     renderNode: renderEmployee,
     detailPanel: (node: GraphNode<Employee>) => {
-      const { name, title } = node.data as Employee
+      const e = node.data
+      const [firstName = "", lastName = ""] = e.name.split(" ")
+      const manager = node.parentId
+        ? DETAIL_NODES_BY_ID.get(node.parentId)
+        : undefined
+      const days = e.workableDays ?? []
       return {
-        variant: "default" as const,
-        title: name,
-        description: title,
-        children: (
-          <div className="flex flex-col gap-3 p-4">
-            <p className="text-sm text-f1-foreground">
-              Direct reports: {node.childrenCount ?? 0}
-            </p>
-            <p className="text-xs text-f1-foreground-secondary">
-              Node ID: {node.id}
-            </p>
+        variant: "resource" as const,
+        header: (
+          <div className="flex flex-col gap-[10px] px-5 pb-3 pt-6">
+            <F0AvatarPerson
+              firstName={firstName}
+              lastName={lastName}
+              size="xl"
+            />
+            <div className="flex flex-col">
+              <div className="flex items-end gap-1.5">
+                <F0Text
+                  as="span"
+                  content={e.name}
+                  className="text-xl font-semibold leading-7 text-f1-foreground"
+                />
+                {e.pronouns && (
+                  <F0Text
+                    as="span"
+                    content={`(${e.pronouns})`}
+                    className="text-sm font-medium leading-5 text-f1-foreground-secondary"
+                  />
+                )}
+              </div>
+              {e.title && (
+                <F0Text
+                  as="span"
+                  content={e.title}
+                  className="text-lg text-f1-foreground-secondary"
+                />
+              )}
+            </div>
           </div>
+        ),
+        actions: [
+          {
+            label: "View profile",
+            // eslint-disable-next-line no-console
+            onClick: () => console.log("view profile", node.id),
+          },
+          {
+            label: "Send message",
+            icon: WhatsappChat,
+            // eslint-disable-next-line no-console
+            onClick: () => console.log("message", node.id),
+          },
+          {
+            label: "Copy link",
+            // eslint-disable-next-line no-console
+            onClick: () => console.log("copy link", node.id),
+          },
+          {
+            label: "Remove",
+            // eslint-disable-next-line no-console
+            onClick: () => console.log("remove", node.id),
+          },
+        ],
+        children: (
+          <>
+            <DetailPanelSection title="Contact details">
+              <div className="flex flex-col px-3 pb-1">
+                <DataList label="Email">
+                  <DataList.Item text={e.email ?? "—"} />
+                </DataList>
+                <DataList label="Phone number">
+                  <DataList.Item text={e.phone ?? "—"} />
+                </DataList>
+              </div>
+            </DetailPanelSection>
+            <DetailPanelSection title="Work details">
+              <div className="flex flex-col px-3 pb-1">
+                <DataList label="Email">
+                  <DataList.Item text={e.workEmail ?? "—"} />
+                </DataList>
+                <DataList label="Workplace">
+                  <DataList.Item text={e.workplace ?? "—"} />
+                </DataList>
+              </div>
+              <div className="flex flex-col gap-0.5 px-4 pb-2">
+                <F0Text
+                  as="span"
+                  content="Workable days"
+                  className="text-base leading-5 text-f1-foreground-secondary"
+                />
+                <Weekdays
+                  activatedDays={days
+                    .map((d) => DAY_CODE_TO_INDEX[d])
+                    .filter((i): i is number => typeof i === "number")}
+                />
+              </div>
+              {manager && (
+                <div className="flex flex-col gap-0.5 px-4 pb-2">
+                  <F0Text
+                    as="span"
+                    content="Managed by"
+                    className="text-base leading-5 text-f1-foreground-secondary"
+                  />
+                  <F0TagPerson name={manager.data.name} />
+                </div>
+              )}
+            </DetailPanelSection>
+            {e.teams && e.teams.length > 0 && (
+              <DetailPanelSection title="Teams">
+                <div className="flex items-stretch gap-2 px-3 pb-5">
+                  {e.teams.map((t) => (
+                    <div key={t.name} className="flex-1">
+                      <F0Card
+                        compact
+                        fullHeight
+                        avatar={{ type: "team", name: t.name }}
+                        title={t.name}
+                        description={`${t.members} members`}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </DetailPanelSection>
+            )}
+          </>
         ),
       }
     },
@@ -668,83 +1050,9 @@ export const WithDetailPanel: Story = {
   },
 }
 
-// ─── Multi-Root ────────────────────────────────────────────────
-
-const MULTI_ROOT_NODES: GraphNode<Employee>[] = [
-  // Tree 1 — Engineering
-  {
-    id: "eng-root",
-    parentId: null,
-    data: { name: "Marcus Chen", title: "VP Engineering" },
-    childrenCount: 2,
-  },
-  {
-    id: "eng-fe",
-    parentId: "eng-root",
-    data: { name: "Nina Volkov", title: "Frontend Lead" },
-    childrenCount: 0,
-  },
-  {
-    id: "eng-be",
-    parentId: "eng-root",
-    data: { name: "Diego Martín", title: "Backend Lead" },
-    childrenCount: 0,
-  },
-  // Tree 2 — Product
-  {
-    id: "prod-root",
-    parentId: null,
-    data: { name: "Laura Kim", title: "VP Product" },
-    childrenCount: 2,
-  },
-  {
-    id: "prod-pm",
-    parentId: "prod-root",
-    data: { name: "Yuki Tanaka", title: "Product Manager" },
-    childrenCount: 0,
-  },
-  {
-    id: "prod-design",
-    parentId: "prod-root",
-    data: { name: "Priya Sharma", title: "Product Designer" },
-    childrenCount: 0,
-  },
-  // Tree 3 — People
-  {
-    id: "people-root",
-    parentId: null,
-    data: { name: "James Okafor", title: "VP People" },
-    childrenCount: 1,
-  },
-  {
-    id: "people-ops",
-    parentId: "people-root",
-    data: { name: "Fatima Benali", title: "People Operations" },
-    childrenCount: 0,
-  },
-]
-
-/** Demonstrates multiple disjoint trees rendered side-by-side (TB) via the built-in multi-root layout. */
-export const MultiRoot: Story = {
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "Three independent org trees with no shared parent. The built-in layout engine stacks them along the cross axis with a `rootSep` gap.",
-      },
-    },
-  },
-  args: {
-    nodes: MULTI_ROOT_NODES,
-    renderNode: renderEmployee,
-    defaultExpandDepth: 2,
-    showControls: true,
-  },
-}
-
 // ─── Progressive / staged loading stories ─────────────────────
 
-const INITIAL_STAGED_NODES = makeLargeTree(50)
+const INITIAL_STAGED_NODES = makeLargeTree(30)
 
 function makeDeferredPayload(count: number): DeferredNodesPayload<Employee> {
   const nodes: GraphNode<Employee>[] = []
@@ -776,20 +1084,20 @@ function makeDeferredPayload(count: number): DeferredNodesPayload<Employee> {
   return { nodes }
 }
 
-/** Demonstrates progressive payload loading: 50 nodes render immediately, 500 more merge after 1.5s. */
+/** Demonstrates progressive payload loading with deferred batch merge. */
 export const StagedLoading: Story = {
   parameters: {
     docs: {
       description: {
         story:
-          "Pass `deferredNodes` as a Promise to load additional nodes after the initial render. Here 50 nodes appear instantly while 500 more arrive after a simulated 1.5 s delay.",
+          "**Single deferred batch merged after initial paint.** 30 nodes appear immediately and the graph auto-expands to depth 2 so initial members are visible. After 2.5 s, 500 additional nodes resolve and merge in as new siblings under the existing departments — watch the columns grow.\n\nUse `deferredNodes` when you can ship a small navigable tree fast and stream the rest in one batch. For per-expansion fetching instead, see `Lazy`.",
       },
     },
   },
   args: {
     nodes: INITIAL_STAGED_NODES,
     deferredNodes: new Promise<DeferredNodesPayload<Employee>>((resolve) => {
-      setTimeout(() => resolve(makeDeferredPayload(500)), 1500)
+      setTimeout(() => resolve(makeDeferredPayload(500)), 2500)
     }),
     renderNode: renderEmployee,
     showControls: true,
@@ -851,10 +1159,8 @@ export const Snapshot: Story = {
           nodes={makeLargeTree(60)}
           renderNode={renderEmployee}
           searchable={{
-            getLabel: (node: GraphNode<Employee>) =>
-              (node.data as Employee).name,
-            getSecondaryLabel: (node: GraphNode<Employee>) =>
-              (node.data as Employee).title,
+            getLabel: (node: GraphNode<Employee>) => node.data.name,
+            getSecondaryLabel: (node: GraphNode<Employee>) => node.data.title,
             placeholder: "Search people…",
             noResultsLabel: "No matches found",
           }}
@@ -867,7 +1173,7 @@ export const Snapshot: Story = {
           nodes={BASIC_NODES}
           renderNode={renderEmployee}
           detailPanel={(node: GraphNode<Employee>) => {
-            const { name, title } = node.data as Employee
+            const { name, title } = node.data
             return {
               variant: "default" as const,
               title: name,
