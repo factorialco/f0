@@ -475,7 +475,7 @@ export function ChatDashboard({
             <OneEmptyState
               key={entry.datasetId}
               variant="critical"
-              title={translations.ai.dashboardDatasetFailure.title}
+              title={translations.t("ai.dashboardDatasetFailure.title")}
               description={translations.t(
                 "ai.dashboardDatasetFailure.description",
                 { reason: entry.message }
