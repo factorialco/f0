@@ -103,13 +103,6 @@ export const Avatars: Story = {
   render: () => {
     const nodes = [
       {
-        key: "none",
-        label: "no avatar",
-        avatar: undefined,
-        title: "Unassigned role",
-        subtitle: "Open seat",
-      },
-      {
         key: "person",
         label: "person",
         avatar: { type: "person", firstName: "Alice", lastName: "Moreno" },
@@ -187,7 +180,7 @@ export const Avatars: Story = {
     docs: {
       description: {
         story:
-          "Every avatar variant the node supports, plus the no-avatar case (first). Avatar is always rendered at size `lg` regardless of zoom level.",
+          "Every avatar variant the node supports. Avatar is always rendered at size `lg` regardless of zoom level.",
       },
     },
   },

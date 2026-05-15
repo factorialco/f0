@@ -163,9 +163,8 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
             // the layout box (which matches the visible compact/detail pill).
             // For dot variant the ring is moved to the avatar (see below).
             !isDot &&
-              state === "selected" &&
+              (state === "selected" || state === "highlighted") &&
               "ring-2 ring-f1-background-selected ring-offset-0",
-            !isDot && state === "highlighted" && "ring-1 ring-f1-border-accent",
             // Dimmed visually applies to the whole wrapper only in dot
             // (matches previous behaviour).
             state === "dimmed" && isDot && "opacity-40",
@@ -202,9 +201,11 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
               (!isDot || isDotTransition) && "backdrop-blur-[7px]",
               isDot ? "border-f1-border-secondary" : "border-f1-border",
               state !== "selected" &&
+                state !== "highlighted" &&
                 !isDot &&
                 "group-hover/pill:border-f1-border-hover group-hover/pill:bg-f1-background-hover",
-              state === "selected" && "border-f1-border-selected-bold"
+              (state === "selected" || state === "highlighted") &&
+                "border-f1-border-selected-bold"
             )}
             style={{
               borderWidth: isDot ? 1.5 : 1,
@@ -228,11 +229,8 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
               className={cn(
                 "flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full",
                 isDot &&
-                  state === "selected" &&
-                  "ring-2 ring-f1-background-selected ring-offset-0",
-                isDot &&
-                  state === "highlighted" &&
-                  "ring-1 ring-f1-border-accent"
+                  (state === "selected" || state === "highlighted") &&
+                  "ring-2 ring-f1-background-selected ring-offset-0"
               )}
               style={{
                 transform: `translateZ(0) scale(${isDot ? 96 / 40 : 1})`,
@@ -243,17 +241,15 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
                 willChange: "transform",
               }}
             >
-              {/* Inner clip — forces every F0Avatar variant (person,
-                  team, company, flag, file, emoji, icon) to render as a
-                  full circle. The underlying Avatar primitive applies
-                  `rounded-md` + an inset ring for non-Person variants
-                  (type="base"), which traces a square-ish outline
-                  inside our circular clip. We override that by forcing
-                  `rounded-full` on the descendant avatar element via
-                  its `role="img"` selector. `!important` is required
-                  because `rounded-md` lives in the same Tailwind layer
-                  and won't lose to source order alone. */}
-              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full [&_[role='img']]:!rounded-full">
+              {/* Avatar frame — circular border using the secondary
+                  border token. F0Avatar variants render with different
+                  intrinsic shapes (Person is round, Team/Company/Flag/
+                  Emoji/Icon are rounded squares). The graph node always
+                  wants a circular silhouette, so we frame the avatar
+                  with a rounded-full bordered wrapper. The clip is also
+                  rounded-full so the avatar content stays inside the
+                  circle. */}
+              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-solid border-f1-border-secondary">
                 {loading ? (
                   <Skeleton className="h-10 w-10 rounded-full" />
                 ) : (
