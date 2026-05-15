@@ -43,10 +43,12 @@ function EdgeStory({
   variant = "default",
   width = 400,
   height = 220,
+  interactive = false,
 }: {
   variant?: "default" | "hover" | "highlighted" | "dimmed"
   width?: number
   height?: number
+  interactive?: boolean
 }) {
   const edges: GraphEdge[] = [
     {
@@ -54,6 +56,12 @@ function EdgeStory({
       source: "a",
       target: "b",
       data: { variant },
+      ...(interactive
+        ? {
+            onEdgeClick: () => {},
+            onEdgeHover: () => {},
+          }
+        : null),
     },
   ]
 
@@ -88,6 +96,34 @@ export const Default: Story = {
 
 export const Hover: Story = {
   render: () => <EdgeStory variant="hover" />,
+}
+
+/**
+ * Edges only become interactive when the underlying `GraphEdge` defines
+ * `onEdgeClick` and/or `onEdgeHover`. Without those handlers the edge stays
+ * in its `default` variant on pointer-enter — no `hover` color swap, no
+ * pointer cursor — proving interactivity is opt-in per edge.
+ *
+ * Hover both panels: only the right one (interactive) shifts to the hover
+ * stroke color. The left one (non-interactive) stays default.
+ */
+export const NonInteractive: Story = {
+  render: () => (
+    <div className="flex flex-wrap gap-4">
+      <div className="flex flex-col gap-2">
+        <span className="text-sm text-f1-foreground-secondary">
+          Non-interactive (no handlers)
+        </span>
+        <EdgeStory width={320} height={200} />
+      </div>
+      <div className="flex flex-col gap-2">
+        <span className="text-sm text-f1-foreground-secondary">
+          Interactive (with handlers)
+        </span>
+        <EdgeStory width={320} height={200} interactive />
+      </div>
+    </div>
+  ),
 }
 
 export const Highlighted: Story = {

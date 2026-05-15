@@ -24,7 +24,7 @@ export type {
 // Sub-components
 /** Zoom/pan/fit controls toolbar. */
 export * from "./F0GraphControls"
-/** Edge renderer with animated flow and variant styles. */
+/** Edge renderer with variant styles (default, hover, highlighted, dimmed). */
 export * from "./F0GraphEdge"
 /** Collapse/expand pill shown below parent nodes. */
 export * from "./F0GraphExpander"
