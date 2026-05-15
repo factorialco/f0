@@ -32,6 +32,7 @@ function SelectWithOptions({
   }
 }) {
   const baseProps = {
+    id: field.id,
     label: field.label,
     placeholder: field.placeholder,
     disabled: field.disabled,
@@ -108,6 +109,7 @@ function SelectWithSource({
   }
 }) {
   const baseProps = {
+    id: field.id,
     label: field.label,
     placeholder: field.placeholder,
     disabled: field.disabled,
