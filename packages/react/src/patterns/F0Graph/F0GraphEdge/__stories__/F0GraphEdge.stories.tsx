@@ -1,51 +1,74 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { ReactFlow, ReactFlowProvider } from "@xyflow/react"
-import "@xyflow/react/dist/style.css"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
+import type { GraphEdge, GraphNode } from "../../types"
+
+import { F0Graph, type F0GraphNodeRenderContext } from "../../F0Graph"
+import { F0GraphNode } from "../../F0GraphNode"
 import { F0GraphEdge } from "../F0GraphEdge"
 
-const edgeTypeMap = { f0Edge: F0GraphEdge }
+interface Person {
+  name: string
+  title: string
+}
 
-const nodes = [
-  { id: "a", position: { x: 0, y: 0 }, data: { label: "A" } },
-  { id: "b", position: { x: 250, y: 0 }, data: { label: "B" } },
+const NODES: GraphNode<Person>[] = [
+  {
+    id: "a",
+    parentId: null,
+    data: { name: "Alice Moreno", title: "Manager" },
+    childrenCount: 1,
+  },
+  {
+    id: "b",
+    parentId: "a",
+    data: { name: "Bob Smith", title: "Engineer" },
+  },
 ]
 
+function renderPerson(node: GraphNode<Person>, ctx: F0GraphNodeRenderContext) {
+  const [firstName = "", lastName = ""] = node.data.name.split(" ")
+  return (
+    <F0GraphNode
+      {...ctx}
+      avatar={{ type: "person", firstName, lastName }}
+      title={node.data.name}
+      subtitle={node.data.title}
+    />
+  )
+}
+
 function EdgeStory({
-  variant,
-  animated,
+  variant = "default",
+  animated = false,
   width = 400,
-  height = 200,
+  height = 220,
 }: {
   variant?: "default" | "highlighted" | "dimmed"
   animated?: boolean
   width?: number
   height?: number
 }) {
-  const edges = [
+  const edges: GraphEdge[] = [
     {
       id: "a-b",
       source: "a",
       target: "b",
-      type: "f0Edge",
       data: { variant, animated },
     },
   ]
 
   return (
-    <ReactFlowProvider>
-      <div style={{ width, height }}>
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          edgeTypes={edgeTypeMap}
-          fitView
-          proOptions={{ hideAttribution: true }}
-        />
-      </div>
-    </ReactFlowProvider>
+    <div style={{ width, height }} className="bg-f1-background">
+      <F0Graph
+        nodes={NODES}
+        edges={edges}
+        renderNode={renderPerson}
+        defaultExpandDepth={1}
+        showControls={false}
+      />
+    </div>
   )
 }
 
@@ -82,10 +105,10 @@ export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: () => (
     <div className="flex flex-wrap gap-4">
-      <EdgeStory width={240} height={140} />
-      <EdgeStory variant="highlighted" width={240} height={140} />
-      <EdgeStory variant="dimmed" width={240} height={140} />
-      <EdgeStory animated width={240} height={140} />
+      <EdgeStory width={260} height={180} />
+      <EdgeStory variant="highlighted" width={260} height={180} />
+      <EdgeStory variant="dimmed" width={260} height={180} />
+      <EdgeStory animated width={260} height={180} />
     </div>
   ),
 }

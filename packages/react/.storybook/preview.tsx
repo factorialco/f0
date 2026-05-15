@@ -6,16 +6,16 @@ import { MotionGlobalConfig } from "motion/react"
 // organize-imports-ignore
 import React, { useEffect, useState } from "react"
 import { action } from "storybook/actions"
-import { INITIAL_VIEWPORTS } from "storybook/viewport"
 import { addons } from "storybook/preview-api"
+import { INITIAL_VIEWPORTS } from "storybook/viewport"
 
 import "../src/styles.css"
-import { aiTranslations } from "@/sds/ai/F0AiChat/types"
 import { WeekStartDay } from "@/components/OneCalendar/types"
 import { dataCollectionLocalStorageHandler } from "@/lib/providers/datacollection"
 import { F0Provider } from "@/lib/providers/f0"
 import { buildTranslations, defaultTranslations } from "@/lib/providers/i18n"
 import { ThemeProvider } from "@/lib/providers/theme"
+import { aiTranslations } from "@/sds/ai/F0AiChat/types"
 
 import { DocsContainer } from "./DocsContainer.tsx"
 
@@ -209,6 +209,19 @@ const preview: Preview = {
           }
           return isAFoundation ? -1 : 1
         }
+
+        const graphOrder = [
+          "Graph/F0Graph",
+          "Graph/F0GraphNode",
+          "Graph/F0GraphEdge",
+          "Graph/F0GraphControls",
+        ]
+        const aGraphIndex = graphOrder.indexOf(a.title)
+        const bGraphIndex = graphOrder.indexOf(b.title)
+        if (aGraphIndex !== -1 && bGraphIndex !== -1)
+          return aGraphIndex - bGraphIndex
+        if (aGraphIndex !== -1) return -1
+        if (bGraphIndex !== -1) return 1
 
         return a.title.localeCompare(b.title)
       },

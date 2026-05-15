@@ -206,35 +206,6 @@ describe("F0Graph", () => {
 
     expect(onSelectedNodesChange).not.toHaveBeenCalled()
   })
-
-  it("renders with defaultDirection='LR' without crashing", () => {
-    expect(() =>
-      zeroRender(
-        <div style={{ width: 800, height: 600 }}>
-          <F0Graph
-            nodes={makeNodes()}
-            renderNode={renderNodeFn}
-            defaultDirection="LR"
-          />
-        </div>
-      )
-    ).not.toThrow()
-  })
-
-  it("controlled direction overrides defaultDirection", () => {
-    expect(() =>
-      zeroRender(
-        <div style={{ width: 800, height: 600 }}>
-          <F0Graph
-            nodes={makeNodes()}
-            renderNode={renderNodeFn}
-            defaultDirection="TB"
-            direction="LR"
-          />
-        </div>
-      )
-    ).not.toThrow()
-  })
 })
 
 // ─── ARIA tree contract ────────────────────────────────────────

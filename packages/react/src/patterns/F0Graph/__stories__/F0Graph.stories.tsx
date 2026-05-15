@@ -35,10 +35,6 @@ const meta = {
   ],
   argTypes: {
     // ---- Visible controls ----
-    direction: {
-      control: "inline-radio",
-      options: ["TB", "LR"],
-    },
     selectionMode: {
       control: "inline-radio",
       options: ["single", "multi", "none"],
@@ -67,7 +63,6 @@ const meta = {
     loadChildren: { table: { disable: true } },
     renderNode: { table: { disable: true } },
     renderEdge: { table: { disable: true } },
-    defaultDirection: { table: { disable: true } },
     zoomThresholds: { table: { disable: true } },
     defaultZoom: { table: { disable: true } },
     expandedNodes: { table: { disable: true } },
@@ -334,6 +329,25 @@ export const WithControls: Story = {
     renderNode: renderEmployee,
     showControls: true,
     defaultExpandDepth: 2,
+  },
+}
+
+/** F0Graph rendered without the fullscreen toggle — useful when embedding inside a constrained container, modal, or panel. */
+export const WithoutFullscreen: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "F0Graph rendered with `fullScreen={false}`. The canvas is inset from its container with a rounded border instead of bleeding edge-to-edge — use this when embedding the graph inside a card, modal, or constrained panel rather than as a standalone page.",
+      },
+    },
+  },
+  args: {
+    nodes: BASIC_NODES,
+    renderNode: renderEmployee,
+    showControls: true,
+    defaultExpandDepth: 2,
+    fullScreen: false,
   },
 }
 

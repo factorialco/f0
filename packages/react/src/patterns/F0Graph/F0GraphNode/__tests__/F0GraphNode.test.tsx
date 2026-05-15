@@ -1,6 +1,7 @@
-import { ReactFlowProvider } from "@xyflow/react"
-import { fireEvent, render as rtlRender } from "@testing-library/react"
 import type { ReactElement, ReactNode } from "react"
+
+import { fireEvent, render as rtlRender } from "@testing-library/react"
+import { ReactFlowProvider } from "@xyflow/react"
 import { describe, expect, it, vi } from "vitest"
 
 import { TestProviders, screen } from "@/testing/test-utils"

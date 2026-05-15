@@ -119,9 +119,6 @@ export interface F0GraphProps<T = unknown> {
   renderNode: (node: GraphNode<T>, ctx: F0GraphNodeRenderContext) => ReactNode
   /** Optional callback to render custom edges. Receives the edge and its variant (`"default" | "highlighted" | "dimmed"`). Falls back to default edge rendering when omitted. */
   renderEdge?: (edge: GraphEdge, variant: EdgeVariant) => React.ReactNode | null
-  /** Tree layout direction: `"TB"` (top-to-bottom) or `"LR"` (left-to-right). Defaults to `"TB"`. */
-  direction?: LayoutDirection
-  defaultDirection?: LayoutDirection
 
   // ---- Zoom ----
   zoomPreset?: ZoomPreset
@@ -445,12 +442,14 @@ import {
 interface GraphEdgeData extends Record<string, unknown> {
   graphEdge?: GraphEdge
   variant?: EdgeVariant
+  animated?: boolean
 }
 
 function F0GraphEdgeWrapperInner(props: RFEdgeProps) {
   const edgeData = props.data as GraphEdgeData | undefined
   const graphEdge = edgeData?.graphEdge
   const variant: EdgeVariant = edgeData?.variant ?? "default"
+  const animated = edgeData?.animated ?? false
   const renderConfig = useF0GraphRenderConfigInternal()
   const renderEdgeFn = renderConfig?.renderEdge
 
@@ -465,6 +464,7 @@ function F0GraphEdgeWrapperInner(props: RFEdgeProps) {
     <F0GraphEdgeBase
       {...(props as F0GraphEdgeProps & RFEdgeProps)}
       variant={variant}
+      animated={animated}
     />
   )
 }
@@ -475,6 +475,7 @@ const F0GraphEdgeWrapper = memo(F0GraphEdgeWrapperInner, (prev, next) => {
   if (prev.id !== next.id) return false
   if (prev.data?.showDot !== next.data?.showDot) return false
   if (prev.data?.variant !== next.data?.variant) return false
+  if (prev.data?.animated !== next.data?.animated) return false
   if (prev.data?.graphEdge !== next.data?.graphEdge) return false
   if (prev.sourceX !== next.sourceX) return false
   if (prev.sourceY !== next.sourceY) return false
@@ -511,8 +512,6 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     onDeferredLoadComplete,
     onDeferredLoadError,
     renderNode,
-    direction: controlledDirection,
-    defaultDirection = "TB",
     zoomPreset,
     zoomThresholds,
     defaultZoom = 1,
@@ -559,9 +558,8 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
   // ── Viewport zoom (tracked via onViewportChange to avoid useViewport re-render churn) ──
   const [currentZoom, setCurrentZoom] = useState(defaultZoom)
 
-  // ── Direction state ──
-  const [internalDirection] = useState<LayoutDirection>(defaultDirection)
-  const direction = controlledDirection ?? internalDirection
+  // ── Direction ── (hardcoded to TB; layout engine still supports other values internally)
+  const direction: LayoutDirection = "TB"
 
   // ── Per-type tag visibility state (controlled / uncontrolled) ──
   // When `nodeTagTypes` is undefined the popover is hidden and tags render
@@ -1158,6 +1156,8 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
         target: edge.target,
         type: "graphEdge",
         data: {
+          ...(edge.data as Record<string, unknown> | undefined),
+          graphEdge: edge,
           showDot:
             !edge.target.startsWith("expander-") &&
             !edge.source.startsWith("expander-") &&

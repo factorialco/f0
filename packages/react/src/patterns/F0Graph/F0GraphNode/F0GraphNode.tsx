@@ -245,11 +245,15 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
             >
               {/* Inner clip — forces every F0Avatar variant (person,
                   team, company, flag, file, emoji, icon) to render as a
-                  full circle. The outer wrapper also has rounded-full
-                  but its scale + willChange transform can defeat the
-                  clip in some browsers; this immediate parent guarantees
-                  the circular mask. */}
-              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full">
+                  full circle. The underlying Avatar primitive applies
+                  `rounded-md` + an inset ring for non-Person variants
+                  (type="base"), which traces a square-ish outline
+                  inside our circular clip. We override that by forcing
+                  `rounded-full` on the descendant avatar element via
+                  its `role="img"` selector. `!important` is required
+                  because `rounded-md` lives in the same Tailwind layer
+                  and won't lose to source order alone. */}
+              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full [&_[role='img']]:!rounded-full">
                 {loading ? (
                   <Skeleton className="h-10 w-10 rounded-full" />
                 ) : (
