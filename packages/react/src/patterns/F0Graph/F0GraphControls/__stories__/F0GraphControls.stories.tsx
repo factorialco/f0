@@ -1,101 +1,75 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { useState } from "react"
-import { fn } from "storybook/test"
+import type { GraphNode } from "../../types"
 
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
-import type { F0GraphNodeTagType } from "../../F0GraphNode"
-
+import { F0Graph, type F0GraphNodeRenderContext } from "../../F0Graph"
+import { F0GraphNode } from "../../F0GraphNode"
 import { F0GraphControls } from "../F0GraphControls"
 
-const meta: Meta<typeof F0GraphControls> = {
+interface Person {
+  name: string
+  title: string
+}
+
+const NODES: GraphNode<Person>[] = [
+  {
+    id: "a",
+    parentId: null,
+    data: { name: "Alice Moreno", title: "Manager" },
+    childrenCount: 1,
+  },
+  {
+    id: "b",
+    parentId: "a",
+    data: { name: "Bob Smith", title: "Engineer" },
+  },
+]
+
+function renderPerson(node: GraphNode<Person>, ctx: F0GraphNodeRenderContext) {
+  const [firstName = "", lastName = ""] = node.data.name.split(" ")
+  return (
+    <F0GraphNode
+      {...ctx}
+      avatar={{ type: "person", firstName, lastName }}
+      title={node.data.name}
+      subtitle={node.data.title}
+    />
+  )
+}
+
+const meta = {
   component: F0GraphControls,
   title: "Graph/F0GraphControls",
   tags: ["stable"],
   parameters: {
     layout: "centered",
-    backgrounds: {
-      default: "neutral",
-      values: [{ name: "neutral", value: "hsl(var(--neutral-5))" }],
-    },
   },
-  args: {
-    onZoomIn: fn(),
-    onZoomOut: fn(),
-    onFitView: fn(),
-  },
-  decorators: [
-    (Story) => (
-      <div className="relative p-16">
-        <Story />
-      </div>
-    ),
-  ],
 } satisfies Meta<typeof F0GraphControls>
 
 export default meta
 type Story = StoryObj<typeof F0GraphControls>
 
-export const Default: Story = {}
-
-export const WithFindMe: Story = {
-  args: {
-    onFocusUser: fn(),
-  },
-}
-
-export const WithMetadataToggle: Story = {
+export const Default: Story = {
   parameters: {
     docs: {
       description: {
         story:
-          "Shows the metadata visibility popover. The popover button appears only when tagTypes is non-empty and onToggleTagType is provided.",
+          "Shows the toolbar with every available control enabled — Find me, fit-to-view, and the metadata-visibility popover — rendered inside a real `<F0Graph>`.",
       },
     },
   },
-  render: (args) => {
-    const [visibleTagTypes, setVisibleTagTypes] = useState<
-      Set<F0GraphNodeTagType>
-    >(() => new Set(["person", "team", "status"]))
-
-    const handleToggleTagType = (type: F0GraphNodeTagType) => {
-      setVisibleTagTypes((prev) => {
-        const next = new Set(prev)
-
-        if (next.has(type)) {
-          next.delete(type)
-        } else {
-          next.add(type)
-        }
-
-        return next
-      })
-    }
-
-    return (
-      <F0GraphControls
-        {...args}
-        tagTypes={["person", "team", "status"]}
-        visibleTagTypes={visibleTagTypes}
-        onToggleTagType={handleToggleTagType}
-        tagTypeLabels={{
-          person: "People",
-          team: "Teams",
-          status: "Statuses",
-        }}
+  render: () => (
+    <div style={{ width: 480, height: 320 }} className="bg-f1-background">
+      <F0Graph
+        nodes={NODES}
+        edges={[]}
+        renderNode={renderPerson}
+        defaultExpandDepth={1}
+        showControls
+        currentUserNodeId="a"
+        nodeTagTypes={["person", "team", "status"]}
+        defaultVisibleTagTypes={["person", "team", "status"]}
       />
-    )
-  },
-}
-
-export const Snapshot: Story = {
-  tags: ["no-sidebar"],
-  parameters: withSnapshot({}),
-  render: (args) => (
-    <div className="flex items-center gap-8">
-      <F0GraphControls {...args} />
-      <F0GraphControls {...args} onFocusUser={fn()} />
     </div>
   ),
 }

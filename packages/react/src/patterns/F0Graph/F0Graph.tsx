@@ -559,7 +559,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
   const [currentZoom, setCurrentZoom] = useState(defaultZoom)
 
   // ── Direction ── (hardcoded to TB; layout engine still supports other values internally)
-  const direction: LayoutDirection = "TB"
+  const direction = "TB" as LayoutDirection
 
   // ── Per-type tag visibility state (controlled / uncontrolled) ──
   // When `nodeTagTypes` is undefined the popover is hidden and tags render

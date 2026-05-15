@@ -8,7 +8,8 @@ import * as Stories from "./F0GraphControls.stories"
 
 A floating toolbar that provides zoom and viewport controls for the graph
 canvas, plus an optional "Find me" shortcut for centering on the current
-user's node.
+user's node and a metadata-visibility popover for toggling node tag
+types.
 
 ---
 
@@ -18,31 +19,25 @@ F0GraphControls is rendered automatically by `<F0Graph>` when
 `showControls={true}`. It can also be used standalone for custom graph
 implementations that need a consistent control surface.
 
+The story below renders `<F0Graph>` with every available control
+enabled — Find me, fit-to-view, and the metadata-visibility popover —
+so the toolbar is shown in its fully-loaded state.
+
 <Canvas of={Stories.Default} />
 <Controls of={Stories.Default} />
 
 ---
 
-# Variants
+# Behavior
 
-## With Find me
-
-When `onFocusUser` is provided, a "Find me" button is rendered as the
-first control. Pass `currentUserNodeId` to `<F0Graph>` to enable this
-button automatically.
-
-<Canvas of={Stories.WithFindMe} />
-
-## Metadata visibility
-
-When `tagTypes.length > 0` and `onToggleTagType` is provided, a metadata
-popover button is rendered in the toolbar. The popover lists each
-tag type with a toggle switch bound to `visibleTagTypes`.
-
-If `tagTypes` is empty (or omitted), or `onToggleTagType` is not
-provided, the metadata popover button is hidden.
-
-<Canvas of={Stories.WithMetadataToggle} />
+- **Find me** — appears when `onFocusUser` is provided. Pass
+  `currentUserNodeId` to `<F0Graph>` to enable this button automatically.
+- **Fit to view** — always rendered.
+- **Metadata visibility** — appears when `tagTypes.length > 0` and
+  `onToggleTagType` is provided. The popover lists each tag type with a
+  toggle switch bound to `visibleTagTypes`. If `tagTypes` is empty (or
+  omitted), or `onToggleTagType` is not provided, the metadata popover
+  button is hidden.
 
 ---
 
