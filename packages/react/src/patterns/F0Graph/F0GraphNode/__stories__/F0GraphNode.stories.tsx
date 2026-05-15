@@ -155,9 +155,12 @@ export const Avatars: Story = {
     ] as const
 
     return (
-      <div className="flex flex-wrap items-start gap-16">
+      <div className="grid grid-cols-4 items-start gap-x-12 gap-y-16">
         {nodes.map((n) => (
-          <div key={n.key} className="flex flex-col items-center gap-2">
+          <div
+            key={n.key}
+            className="flex flex-col items-center gap-2 justify-self-center"
+          >
             <F0GraphNode
               avatar={n.avatar}
               title={n.title}
