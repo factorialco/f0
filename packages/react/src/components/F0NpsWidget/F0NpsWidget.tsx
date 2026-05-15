@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
+import { F0Text } from "@/components/F0Text"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0AvatarModule } from "@/components/avatars/F0AvatarModule"
@@ -122,16 +123,15 @@ export function F0NpsWidget({
         </div>
         <div className="overflow-hidden">
           <AnimatePresence mode="wait" initial={false}>
-            <motion.p
+            <motion.div
               key={headerTitle}
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
-              className="text-base font-medium leading-snug text-f1-foreground"
             >
-              {headerTitle}
-            </motion.p>
+              <F0Text variant="label" content={headerTitle} />
+            </motion.div>
           </AnimatePresence>
         </div>
       </div>
