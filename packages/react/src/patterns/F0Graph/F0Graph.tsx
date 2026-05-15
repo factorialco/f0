@@ -553,6 +553,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
 
   // ── Viewport zoom (tracked via onViewportChange to avoid useViewport re-render churn) ──
   const [currentZoom, setCurrentZoom] = useState(defaultZoom)
+  const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null)
 
   // ── Direction ── (hardcoded to TB; layout engine still supports other values internally)
   const direction = "TB" as LayoutDirection
@@ -1145,23 +1146,29 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
         .map((n) => n.id)
     )
 
-    return visibleEdges.map(
-      (edge): RFEdge => ({
+    return visibleEdges.map((edge): RFEdge => {
+      const isInteractive = Boolean(edge.onEdgeClick || edge.onEdgeHover)
+      const isHovered = isInteractive && edge.id === hoveredEdgeId
+      const baseData = edge.data as Record<string, unknown> | undefined
+      return {
         id: edge.id,
         source: edge.source,
         target: edge.target,
         type: "graphEdge",
         data: {
-          ...(edge.data as Record<string, unknown> | undefined),
+          ...baseData,
           graphEdge: edge,
+          // Interactive edges shift to the `hover` variant on pointer-enter.
+          // Consumer-provided `variant` in edge.data still wins when not hovered.
+          ...(isHovered ? { variant: "hover" as const } : null),
           showDot:
             !edge.target.startsWith("expander-") &&
             !edge.source.startsWith("expander-") &&
             !parentsWithCollapsers.has(edge.source),
         },
-      })
-    )
-  }, [visibleEdges, visibleTreeNodes, expandedNodes])
+      }
+    })
+  }, [visibleEdges, visibleTreeNodes, expandedNodes, hoveredEdgeId])
 
   // ── Expand / collapse (stable via ref pattern to avoid context cascade) ──
   const expandedNodesRef = useRef(expandedNodes)
@@ -1897,6 +1904,27 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
                         defaultViewport={{ x: 0, y: 0, zoom: defaultZoom }}
                         onViewportChange={handleViewportChange}
                         onPaneClick={clearSelection}
+                        onEdgeMouseEnter={(_, edge) => {
+                          const ge = (edge.data as GraphEdgeData | undefined)
+                            ?.graphEdge
+                          if (!ge?.onEdgeClick && !ge?.onEdgeHover) return
+                          setHoveredEdgeId(edge.id)
+                          ge.onEdgeHover?.(ge)
+                        }}
+                        onEdgeMouseLeave={(_, edge) => {
+                          const ge = (edge.data as GraphEdgeData | undefined)
+                            ?.graphEdge
+                          if (!ge?.onEdgeClick && !ge?.onEdgeHover) return
+                          setHoveredEdgeId((current) =>
+                            current === edge.id ? null : current
+                          )
+                          ge.onEdgeHover?.(null)
+                        }}
+                        onEdgeClick={(_, edge) => {
+                          const ge = (edge.data as GraphEdgeData | undefined)
+                            ?.graphEdge
+                          ge?.onEdgeClick?.(ge)
+                        }}
                         proOptions={{ hideAttribution: true }}
                         fitView
                         nodesDraggable={false}

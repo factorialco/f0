@@ -28,6 +28,17 @@ export interface GraphEdge {
    * Type-erased — consumers narrow as needed.
    */
   data?: unknown
+  /**
+   * Optional click handler. When defined, the edge becomes interactive: it
+   * shows the `hover` variant on pointer-enter and invokes this on click.
+   */
+  onEdgeClick?: (edge: GraphEdge) => void
+  /**
+   * Optional hover handler. When defined, the edge becomes interactive: it
+   * shows the `hover` variant on pointer-enter and invokes this with the
+   * edge on enter and `null` on leave.
+   */
+  onEdgeHover?: (edge: GraphEdge | null) => void
 }
 
 // Internal tree node (enriched during tree building)
