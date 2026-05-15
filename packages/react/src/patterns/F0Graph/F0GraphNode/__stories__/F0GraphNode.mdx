@@ -36,27 +36,17 @@ renderNode={(node, ctx) => (
 
 # Variants
 
-## Detail
+Three zoom levels — `detail`, `compact`, and `dot` — keep the canvas
+readable as the tree scales.
 
-Full pill with avatar, title, subtitle, and optional
-tag and action rows. Shown at normal reading zoom.
+- **detail** — full pill with avatar, title, subtitle, and optional tag
+  and action rows. Shown at normal reading zoom.
+- **compact** — avatar with initials only. Shown when the tree is zoomed
+  out enough that full text would be unreadable but identity still matters.
+- **dot** — single colored dot. Shown at very low zoom to reveal tree
+  shape when individual identity is secondary to structure.
 
-<Canvas of={Stories.Default} />
-
-## Compact
-
-Avatar with initials only. Shown when the tree is zoomed out
-enough that full text would be unreadable but identity still
-matters.
-
-<Canvas of={Stories.Compact} />
-
-## Dot
-
-Single colored dot. Shown at very low zoom to reveal tree shape
-when individual identity is secondary to structure.
-
-<Canvas of={Stories.Dot} />
+<Canvas of={Stories.ZoomLevels} />
 
 ## Tag rows
 
@@ -127,10 +117,7 @@ context:
 />
 ```
 
-## Node with all slots
-
-<Canvas of={Stories.WithAllSlots} />
-
 ## Expanded node with children
 
-<Canvas of={Stories.Expanded} />
+The expanded state is shown alongside the other interaction states in
+[States](#states).

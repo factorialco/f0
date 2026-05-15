@@ -47,54 +47,50 @@ export const Default: Story = {
   args: { ...baseProps },
 }
 
-export const Compact: Story = {
-  args: { ...baseProps, variant: "compact" },
+export const States: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-start gap-4">
+      {(["default", "selected", "highlighted", "dimmed"] as const).map(
+        (state) => (
+          <F0GraphNode
+            key={state}
+            avatar={personAvatar}
+            title={state}
+            subtitle="State variant"
+            state={state}
+          />
+        )
+      )}
+      <F0GraphNode
+        avatar={personAvatar}
+        title="expanded"
+        subtitle="With children"
+        hasChildren
+        expanded
+        childrenCount={3}
+      />
+    </div>
+  ),
 }
 
-export const Dot: Story = {
-  args: { ...baseProps, variant: "dot" },
-}
-
-export const Selected: Story = {
-  args: { ...baseProps, state: "selected" },
-}
-
-export const Highlighted: Story = {
-  args: { ...baseProps, state: "highlighted" },
-}
-
-export const Dimmed: Story = {
-  args: { ...baseProps, state: "dimmed" },
-}
-
-export const Expanded: Story = {
-  args: {
-    ...baseProps,
-    hasChildren: true,
-    expanded: true,
-    childrenCount: 3,
-  },
-}
-
-export const WithAllSlots: Story = {
-  args: {
-    avatar: personAvatar,
-    title: "Alice Moreno",
-    subtitle: "Staff Designer · Product",
-    hasChildren: true,
-    expanded: false,
-    childrenCount: 5,
-    tags: [
-      { type: "team", name: "Design" },
-      { type: "team", name: "Platform" },
-      { type: "team", name: "Research" },
-      {
-        type: "person",
-        name: "Bob Smith",
-      },
-    ],
-    actions: <F0Button variant="ghost" size="sm" label="View profile" />,
-  },
+export const ZoomLevels: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-center gap-4">
+      {(["detail", "compact", "dot"] as const).map((variant) => (
+        <div key={variant} className="flex flex-col items-center gap-2">
+          <F0GraphNode
+            avatar={personAvatar}
+            title="Alice Moreno"
+            subtitle="Staff Designer"
+            variant={variant}
+          />
+          <span className="text-xs text-f1-foreground-secondary">
+            {variant}
+          </span>
+        </div>
+      ))}
+    </div>
+  ),
 }
 
 export const WithTags: Story = {
@@ -116,24 +112,6 @@ export const WithTags: Story = {
       },
     },
   },
-}
-
-export const States: Story = {
-  render: () => (
-    <div className="flex flex-wrap gap-4">
-      {(["default", "selected", "highlighted", "dimmed"] as const).map(
-        (state) => (
-          <F0GraphNode
-            key={state}
-            avatar={personAvatar}
-            title={state}
-            subtitle="State variant"
-            state={state}
-          />
-        )
-      )}
-    </div>
-  ),
 }
 
 export const Snapshot: Story = {
@@ -179,7 +157,7 @@ export const Snapshot: Story = {
             { type: "team", name: "Platform" },
             { type: "team", name: "Research" },
           ]}
-          actions={WithAllSlots.args?.actions}
+          actions={<F0Button variant="ghost" size="sm" label="View profile" />}
         />
       </div>
     </div>
