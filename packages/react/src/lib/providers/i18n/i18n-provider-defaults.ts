@@ -386,9 +386,9 @@ export const defaultTranslations = {
       dataExplanation: "Where does this data come from?",
     },
     dashboardDatasetFailure: {
-      title: "Some data couldn’t be loaded",
+      title: "This dashboard is no longer valid",
       description:
-        "We couldn’t load this section of the dashboard. Details: {{reason}}",
+        "We're sorry. Please contact support or ask One to generate a dashboard from scratch.",
     },
     pong: {
       title: "Pong",

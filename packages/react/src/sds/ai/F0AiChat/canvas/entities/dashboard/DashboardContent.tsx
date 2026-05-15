@@ -477,8 +477,7 @@ export function ChatDashboard({
               variant="critical"
               title={translations.t("ai.dashboardDatasetFailure.title")}
               description={translations.t(
-                "ai.dashboardDatasetFailure.description",
-                { reason: entry.message }
+                "ai.dashboardDatasetFailure.description"
               )}
             />
           ))}
