@@ -9,9 +9,9 @@ import { useI18n } from "@/lib/providers/i18n"
 import { AssistantMessage } from "../F0AiMessagesContainer/components/AssistantMessage"
 import { UserMessage } from "../F0AiMessagesContainer/components/UserMessage"
 
+import { ConnectedChatHeader } from "./components/ConnectedChatHeader"
 import { ConnectedChatInput } from "./components/ConnectedChatInput"
 import { ConnectedMessagesContainer } from "./components/ConnectedMessagesContainer"
-import { ChatHeader } from "./components/layout/ChatHeader"
 import { SidebarWindow } from "./components/layout/ChatWindow"
 import { CopilotFunctionBridge } from "./components/shared/CopilotFunctionBridge"
 import { F0AiFullscreenChatComponent } from "./F0AiFullscreenChat"
@@ -133,7 +133,7 @@ const F0AiChatComponent = () => {
         setOpen(isOpen)
       }}
       Window={SidebarWindow}
-      Header={ChatHeader}
+      Header={ConnectedChatHeader}
       Messages={ConnectedMessagesContainer}
       Button={() => {
         return null // hide CopilotKit's default chat button

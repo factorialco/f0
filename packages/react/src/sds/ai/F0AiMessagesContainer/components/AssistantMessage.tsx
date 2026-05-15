@@ -1,5 +1,3 @@
-import { type AssistantMessageProps } from "@copilotkit/react-ui"
-import { type Message } from "@copilotkit/shared"
 import {
   type ReactNode,
   createContext,
@@ -8,6 +6,9 @@ import {
   useRef,
 } from "react"
 
+import { RichTextDisplay } from "@/components/RichText/RichTextDisplay"
+
+import { type Message } from "../types"
 import { useReplySelection } from "../useReplySelection"
 
 import { ReplyPopover } from "./ReplyPopover"
@@ -43,10 +44,17 @@ export type F0AssistantMessageExtraProps = {
 }
 
 const defaultMarkdownFallback = (content: string): ReactNode => (
-  <div className="whitespace-pre-wrap text-base text-f1-foreground">
-    {content}
-  </div>
+  <RichTextDisplay content={content} format="markdown" />
 )
+
+type AssistantMessageBaseProps = {
+  /** Whether the agent is still streaming new content for this message. */
+  isGenerating?: boolean
+  /** Whether the message bubble is in its initial loading state. */
+  isLoading?: boolean
+  /** The message to render. */
+  message?: Message
+}
 
 export const AssistantMessage = ({
   isGenerating,
@@ -56,20 +64,18 @@ export const AssistantMessage = ({
   onReplyQuote,
   onRendered,
   renderMarkdown,
-}: Omit<AssistantMessageProps, "markdownTagRenderers"> &
-  F0AssistantMessageExtraProps) => {
-  const content = message?.content || ""
+}: AssistantMessageBaseProps & F0AssistantMessageExtraProps) => {
+  const content = typeof message?.content === "string" ? message.content : ""
 
   // Each rendered message carries at most one tool call (turns are
   // expanded upstream), so toolCalls[0] is correct.
   const subComponent =
-    (message && renderToolCall?.(message as Message)) ??
-    message?.generativeUI?.() ??
+    (message && renderToolCall?.(message)) ??
+    (message?.generativeUI?.() as ReactNode | undefined) ??
     null
 
   // Extract toolCallId from the message so action components can read it
-  const toolCallId = (message?.toolCalls as { id: string }[] | undefined)?.[0]
-    ?.id
+  const toolCallId = message?.toolCalls?.[0]?.id
 
   const isEmptyMessage = !content && !subComponent
 
@@ -81,7 +87,7 @@ export const AssistantMessage = ({
 
   useEffect(() => {
     if (message?.id && !isLoading && !isGenerating) {
-      onRendered?.(message as Message)
+      onRendered?.(message)
     }
   }, [message, isLoading, isGenerating, onRendered])
 

@@ -9,12 +9,13 @@ import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
-import type { CreditsUsage } from "../../types"
+import type { AiChatCredits, CreditsUsage } from "../../F0AiChat/types"
 
-import { useAiChat } from "../../providers/AiChatStateProvider"
+type CreditsPopoverProps = {
+  credits?: AiChatCredits
+}
 
-export function CreditsPopover() {
-  const { credits } = useAiChat()
+export function CreditsPopover({ credits }: CreditsPopoverProps) {
   const i18n = useI18n()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)

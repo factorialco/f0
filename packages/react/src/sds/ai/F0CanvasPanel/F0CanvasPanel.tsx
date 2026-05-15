@@ -4,45 +4,61 @@ import { type ReactNode, useEffect, useRef, useState } from "react"
 import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
 
-import { useCanvasEntity } from "../../../canvas/registry"
-import { useAiChat } from "../../providers/AiChatStateProvider"
+import type { CanvasContent, CanvasEntityDefinition } from "../canvas/types"
+
+export type F0CanvasPanelProps = {
+  /** Current canvas content to render. When null, the panel collapses. */
+  content: CanvasContent | null
+  /** Called when the user closes the canvas. */
+  onClose: () => void
+  /** Canvas entity registry keyed by `CanvasContent["type"]`. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  entities?: Record<string, CanvasEntityDefinition<any>>
+}
 
 /**
  * Entity-agnostic canvas panel that renders content alongside the chat sidebar.
  *
- * Looks up the entity definition from the registry based on `canvasContent.type`
- * and delegates rendering of body and header actions to the entity module.
- * The canvas shell handles: animation, title, close button, and refreshKey.
+ * Looks up the entity definition from the `entities` prop using
+ * `content.type` and delegates rendering of body and header actions to the
+ * entity module. The panel shell handles animation, body scroll area, and
+ * refreshKey bookkeeping (auto-increments when `content` changes by identity).
+ *
+ * Headless: no CopilotKit or `useAiChat()` dependency — the host wires
+ * `content`, `onClose` and `entities` directly.
  */
-export function CanvasPanel(): ReactNode {
-  const { canvasContent, closeCanvas } = useAiChat()
+export function F0CanvasPanel({
+  content,
+  onClose,
+  entities,
+}: F0CanvasPanelProps): ReactNode {
   const shouldReduceMotion = useReducedMotion()
   const [refreshKey, setRefreshKey] = useState(0)
 
   // Auto-increment refreshKey when content changes (e.g. LLM regeneration)
-  const prevCanvasContentRef = useRef(canvasContent)
+  const prevContentRef = useRef(content)
   useEffect(() => {
     if (
-      canvasContent &&
-      prevCanvasContentRef.current &&
-      canvasContent !== prevCanvasContentRef.current
+      content &&
+      prevContentRef.current &&
+      content !== prevContentRef.current
     ) {
       setRefreshKey((k) => k + 1)
     }
-    prevCanvasContentRef.current = canvasContent
-  }, [canvasContent])
+    prevContentRef.current = content
+  }, [content])
 
-  const entity = useCanvasEntity(canvasContent?.type)
+  const entity = content && entities ? entities[content.type] : undefined
 
   const renderInner = (): ReactNode => {
-    if (!canvasContent || !entity) return null
+    if (!content || !entity) return null
 
     const header = entity.renderHeader({
-      content: canvasContent,
-      onClose: closeCanvas,
+      content,
+      onClose,
     })
-    const content = entity.renderContent({
-      content: canvasContent,
+    const body = entity.renderContent({
+      content,
       refreshKey,
     })
 
@@ -55,13 +71,13 @@ export function CanvasPanel(): ReactNode {
             entity.overflowHidden ? "overflow-hidden" : "overflow-auto"
           )}
         >
-          {content}
+          {body}
         </div>
       </>
     )
 
     if (entity.wrapper) {
-      return entity.wrapper({ content: canvasContent, children: inner })
+      return entity.wrapper({ content, children: inner })
     }
 
     return inner
@@ -69,7 +85,7 @@ export function CanvasPanel(): ReactNode {
 
   return (
     <AnimatePresence>
-      {canvasContent && (
+      {content && (
         <motion.div
           className={cn(
             // No overflow on the outer wrappers so the inner card's
@@ -116,4 +132,4 @@ export function CanvasPanel(): ReactNode {
   )
 }
 
-CanvasPanel.displayName = "CanvasPanel"
+F0CanvasPanel.displayName = "F0CanvasPanel"

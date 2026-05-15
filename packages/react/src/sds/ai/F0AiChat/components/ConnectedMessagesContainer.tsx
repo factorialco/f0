@@ -72,7 +72,6 @@ const RESPONSE_STOPPED_MARKER = "<!--response-stopped-->"
 export const ConnectedMessagesContainer = ({
   inProgress: inProgressProp,
   children,
-  RenderMessage,
   AssistantMessage,
   UserMessage,
   onRegenerate,
@@ -297,7 +296,6 @@ export const ConnectedMessagesContainer = ({
       feedback={feedback}
       freezeLayout={clarifyingQuestion != null}
       noShadows={noShadows}
-      RenderMessage={RenderMessage}
       AssistantMessage={AssistantMessage}
       UserMessage={UserMessage}
       onRegenerate={onRegenerate}

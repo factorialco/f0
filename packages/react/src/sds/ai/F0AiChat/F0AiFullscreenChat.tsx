@@ -12,9 +12,9 @@ import {
   type UserBinaryPart,
   type UserTextPart,
 } from "../F0AiChatTextArea/types"
+import { F0CanvasPanel } from "../F0CanvasPanel"
 
 import { ConnectedMessagesContainer } from "./components/ConnectedMessagesContainer"
-import { CanvasPanel } from "./components/layout/CanvasPanel"
 import { useAiChat } from "./providers/AiChatStateProvider"
 
 const FullscreenChatInput = () => {
@@ -115,7 +115,13 @@ const FullscreenChatInput = () => {
 }
 
 export const F0AiFullscreenChatComponent = () => {
-  const { enabled, canvasContent, visualizationMode } = useAiChat()
+  const {
+    enabled,
+    canvasContent,
+    canvasEntities,
+    closeCanvas,
+    visualizationMode,
+  } = useAiChat()
 
   const isCanvasMode = visualizationMode === "canvas"
 
@@ -150,7 +156,11 @@ export const F0AiFullscreenChatComponent = () => {
 
       {isCanvasMode && canvasContent && (
         <div className={cn("pointer-events-none overflow-y-scroll")}>
-          <CanvasPanel />
+          <F0CanvasPanel
+            content={canvasContent}
+            onClose={closeCanvas}
+            entities={canvasEntities}
+          />
         </div>
       )}
 

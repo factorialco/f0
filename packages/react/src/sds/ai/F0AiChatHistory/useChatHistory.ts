@@ -1,12 +1,9 @@
 import { useCallback, useEffect, useState } from "react"
 
-import { useCopilotContext } from "@copilotkit/react-core"
-
-import { useAiChat } from "../../providers/AiChatStateProvider"
 import {
   readFromLocalStorage,
   writeToLocalStorage,
-} from "../../utils/local-storage"
+} from "../F0AiChat/utils/local-storage"
 
 export type ChatThread = {
   id: string
@@ -26,6 +23,21 @@ type UseChatHistoryReturn = {
   deleteThread: (id: string) => Promise<void>
 }
 
+type UseChatHistoryOptions = {
+  /** When true, fetches threads on mount. Default: `false`. */
+  enabled?: boolean
+  /**
+   * Async callback that returns the list of threads. The host owns the
+   * URL/auth/fetch — this hook only calls the callback and manages state.
+   */
+  fetchThreads: () => Promise<ChatThread[]>
+  /**
+   * Async callback that deletes a thread by id. Should throw or reject on
+   * failure; the hook will then re-fetch to restore consistency.
+   */
+  deleteThread: (id: string) => Promise<void>
+}
+
 const PINNED_STORAGE_KEY = "f0-ai-pinned-threads"
 
 function readPinnedIds(): Set<string> {
@@ -38,24 +50,16 @@ function writePinnedIds(ids: Set<string>): void {
 }
 
 /**
- * Hook to fetch the authenticated user's chat history threads from the
- * Mastra backend. The chat history endpoints are nested under the same
- * CopilotKit runtime path (e.g. /copilotkit/chat-history/threads), so
- * they are covered by the same proxy configuration.
- *
- * Also manages pinned threads in localStorage and thread deletion via
- * the backend DELETE endpoint.
- *
- * Fetches when `enabled` is true (default). Call `refetch()` to manually
- * trigger a reload, e.g. when the chat history dialog opens.
+ * Headless chat-history state manager. Pure UI logic — the caller injects
+ * `fetchThreads` and `deleteThread` callbacks so this hook never embeds
+ * URLs, auth headers or fetch wiring. Manages pinned threads in
+ * localStorage and the threads list (loading/error/data).
  */
 export function useChatHistory({
   enabled = false,
-}: { enabled?: boolean } = {}): UseChatHistoryReturn {
-  const { copilotApiConfig } = useCopilotContext()
-  const { runtimeFetch } = useAiChat()
-  const baseUrl = copilotApiConfig.chatApiEndpoint
-
+  fetchThreads: fetchThreadsCb,
+  deleteThread: deleteThreadCb,
+}: UseChatHistoryOptions): UseChatHistoryReturn {
   const [threads, setThreads] = useState<ChatThread[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -66,19 +70,8 @@ export function useChatHistory({
     setError(null)
 
     try {
-      const response = await runtimeFetch(`${baseUrl}/chat-history/threads`, {
-        credentials: "include",
-        headers: {
-          ...copilotApiConfig.headers,
-        },
-      })
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch chat history: ${response.status}`)
-      }
-
-      const data = (await response.json()) as { threads: ChatThread[] }
-      setThreads(data.threads)
+      const data = await fetchThreadsCb()
+      setThreads(data)
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to fetch chat history"
@@ -87,7 +80,7 @@ export function useChatHistory({
     } finally {
       setIsLoading(false)
     }
-  }, [baseUrl, copilotApiConfig.headers, runtimeFetch])
+  }, [fetchThreadsCb])
 
   useEffect(() => {
     if (enabled) {
@@ -116,20 +109,7 @@ export function useChatHistory({
   const deleteThread = useCallback(
     async (id: string) => {
       try {
-        const response = await runtimeFetch(
-          `${baseUrl}/chat-history/threads/${id}`,
-          {
-            method: "DELETE",
-            credentials: "include",
-            headers: {
-              ...copilotApiConfig.headers,
-            },
-          }
-        )
-
-        if (!response.ok && response.status !== 204) {
-          throw new Error(`Failed to delete thread: ${response.status}`)
-        }
+        await deleteThreadCb(id)
 
         // Optimistically remove from local state
         setThreads((prev) => prev.filter((t) => t.id !== id))
@@ -147,7 +127,7 @@ export function useChatHistory({
         void fetchThreads()
       }
     },
-    [baseUrl, copilotApiConfig.headers, fetchThreads, runtimeFetch]
+    [deleteThreadCb, fetchThreads]
   )
 
   return {

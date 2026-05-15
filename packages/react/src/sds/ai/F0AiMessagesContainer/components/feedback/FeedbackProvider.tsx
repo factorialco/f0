@@ -1,4 +1,3 @@
-import { AIMessage } from "@copilotkit/shared"
 import {
   createContext,
   FC,
@@ -6,6 +5,8 @@ import {
   useContext,
   useState,
 } from "react"
+
+import { type AIMessage } from "../../types"
 
 const FeedbackContext = createContext<FeedbackModal | null>(null)
 

@@ -1,10 +1,11 @@
-import { type UserMessageProps } from "@copilotkit/react-ui"
 import { type ReactNode, useEffect, useRef } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
 import { FileItem } from "@/components/RichText/FileItem"
+import { RichTextDisplay } from "@/components/RichText/RichTextDisplay"
 import { Reply } from "@/icons/app"
 
+import { type Message } from "../types"
 import { useReplySelection } from "../useReplySelection"
 
 import { ReplyPopover } from "./ReplyPopover"
@@ -104,9 +105,7 @@ function decodeReplyQuote(raw: string): string {
 }
 
 const defaultMarkdownFallback = (content: string): ReactNode => (
-  <div className="whitespace-pre-wrap text-base text-f1-foreground">
-    {content}
-  </div>
+  <RichTextDisplay content={content} format="markdown" />
 )
 
 /**
@@ -147,12 +146,17 @@ export type F0UserMessageExtraProps = {
   renderMarkdown?: (content: string) => ReactNode
 }
 
+type UserMessageBaseProps = {
+  /** The user message to render. */
+  message?: Message
+}
+
 export const UserMessage = ({
   message,
   onReplyQuote,
   autoScrollIntoView = true,
   renderMarkdown,
-}: UserMessageProps & F0UserMessageExtraProps) => {
+}: UserMessageBaseProps & F0UserMessageExtraProps) => {
   const ref = useRef<HTMLDivElement>(null)
   const bubbleRef = useRef<HTMLDivElement>(null)
 

@@ -1,4 +1,3 @@
-import { type AIMessage } from "@copilotkit/shared"
 import { useState } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
@@ -11,6 +10,8 @@ import {
 import { useI18n } from "@/lib/providers/i18n"
 import { Action } from "@/ui/Action"
 import { ButtonCopy } from "@/ui/ButtonCopy"
+
+import { type AIMessage } from "../../types"
 
 import { useFeedbackModal, UserReaction } from "./FeedbackProvider"
 

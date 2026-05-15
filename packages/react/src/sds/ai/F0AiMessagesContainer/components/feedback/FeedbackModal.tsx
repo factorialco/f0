@@ -1,9 +1,10 @@
-import { type AIMessage } from "@copilotkit/shared"
 import { useCallback, useEffect, useState } from "react"
 
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { Input } from "@/experimental/Forms/Fields/Input"
 import { useI18n } from "@/lib/providers/i18n"
+
+import { type AIMessage } from "../../types"
 
 import { UserReaction } from "./FeedbackProvider"
 

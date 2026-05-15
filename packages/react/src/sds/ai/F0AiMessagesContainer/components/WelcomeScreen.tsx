@@ -1,4 +1,3 @@
-import { Message } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useMemo, useRef, useState } from "react"
 
@@ -8,6 +7,7 @@ import { F0OneIcon } from "../../F0OneIcon"
 
 import { PongBall } from "../../F0AiPong"
 import { WelcomeScreenSuggestion } from "../../F0AiChat/types"
+import { type Message } from "../types"
 
 export type { WelcomeScreenSuggestion }
 

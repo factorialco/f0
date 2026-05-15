@@ -1,7 +1,5 @@
-import { type MessagesProps } from "@copilotkit/react-ui"
-import { type Message } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
-import { type ReactNode, useMemo, useRef } from "react"
+import { type ComponentType, type ReactNode, useMemo, useRef } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ArrowDown } from "@/icons/app"
@@ -31,17 +29,24 @@ import {
   type F0UserMessageExtraProps,
 } from "./components/UserMessage"
 import { WelcomeScreen } from "./components/WelcomeScreen"
-import { type RenderableTurn } from "./types"
+import { type Message, type RenderableTurn } from "./types"
 import { useMessageScroll } from "./useMessageScroll"
 
-export type F0AiMessagesContainerProps = Pick<
-  Partial<MessagesProps>,
-  | "RenderMessage"
-  | "AssistantMessage"
-  | "UserMessage"
-  | "onRegenerate"
-  | "onCopy"
-> & {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type MessageSlotComponent = ComponentType<any>
+
+export type F0AiMessagesContainerProps = {
+  /** Optional override for the per-message renderer (rarely used). */
+  RenderMessage?: MessageSlotComponent
+  /** Optional override for the assistant bubble component. */
+  AssistantMessage?: MessageSlotComponent
+  /** Optional override for the user bubble component. */
+  UserMessage?: MessageSlotComponent
+  /** Called when the user triggers regeneration on an assistant message. */
+  onRegenerate?: (messageId: string) => void
+  /** Called when the user copies an assistant message's content. */
+  onCopy?: (content: string) => void
+
   /** Pre-processed turns to render (assembled by the connected wrapper). */
   turns: RenderableTurn[]
   /** Show a skeleton in place of the turns while a thread is being fetched. */

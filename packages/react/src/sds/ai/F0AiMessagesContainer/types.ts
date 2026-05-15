@@ -1,4 +1,28 @@
-import type { Message } from "@copilotkit/shared"
+/**
+ * Loose message shape used by the headless container and its
+ * subcomponents. Mirrors the CopilotKit `Message` / `AIMessage` shape
+ * (which the connected wrapper builds upstream)
+ *
+ * Most fields are optional / wide on purpose — the headless renders
+ * what it finds and ignores the rest.
+ */
+export type Message = {
+  id?: string
+  role?: string
+  content?: unknown
+  toolCalls?: Array<{
+    id: string
+    type?: string
+    function?: { name: string; arguments: string }
+  }>
+  generativeUI?: () => unknown
+  rawData?: unknown
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any
+}
+
+/** Assistant-flavoured `Message`. Same shape — alias for self-documentation. */
+export type AIMessage = Message
 
 /**
  * Pre-processed turn ready to render. The connected wrapper assembles

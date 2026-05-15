@@ -11,31 +11,27 @@ import { Action } from "@/ui/Action"
 
 import { CollapsibleGroup } from "./components/CollapsibleGroup"
 import { ThreadListSkeleton } from "./components/ThreadListSkeleton"
-import type { DateGroup } from "./types"
-import { useChatHistory } from "./useChatHistory"
+import type { DateGroup, F0AiChatHistoryProps } from "./types"
 import { groupThreadsByDate } from "./utils"
 
-interface ChatHistoryDialogProps {
-  onClose: () => void
-  onSelectThread: (threadId: string, title: string) => void
-  onNewChat: () => void
-}
-
-export const ChatHistoryDialog = ({
+/**
+ * Headless chat-history dialog. Receives threads + handlers via props so
+ * it can be wired against any backend or mocked in stories. No CopilotKit
+ * or `useAiChat()` dependency.
+ */
+export const F0AiChatHistory = ({
   onClose,
   onSelectThread,
   onNewChat,
-}: ChatHistoryDialogProps) => {
+  threads,
+  isLoading,
+  error,
+  pinnedIds,
+  onPinThread,
+  onUnpinThread,
+  onDeleteThread,
+}: F0AiChatHistoryProps) => {
   const translations = useI18n()
-  const {
-    threads,
-    isLoading,
-    error,
-    pinnedIds,
-    pinThread,
-    unpinThread,
-    deleteThread,
-  } = useChatHistory({ enabled: true })
   const [search, setSearch] = useState("")
 
   // Close on Escape
@@ -100,9 +96,9 @@ export const ChatHistoryDialog = ({
 
   const handleDelete = useCallback(
     (id: string) => {
-      void deleteThread(id)
+      void onDeleteThread(id)
     },
-    [deleteThread]
+    [onDeleteThread]
   )
 
   const hasResults = pinnedThreads.length > 0 || groups.length > 0
@@ -189,8 +185,8 @@ export const ChatHistoryDialog = ({
                 threads={pinnedThreads}
                 pinnedIds={pinnedIds}
                 onSelect={handleSelectThread}
-                onPin={pinThread}
-                onUnpin={unpinThread}
+                onPin={onPinThread}
+                onUnpin={onUnpinThread}
                 onDelete={handleDelete}
               />
             )}
@@ -205,8 +201,8 @@ export const ChatHistoryDialog = ({
                   threads={group.threads}
                   pinnedIds={pinnedIds}
                   onSelect={handleSelectThread}
-                  onPin={pinThread}
-                  onUnpin={unpinThread}
+                  onPin={onPinThread}
+                  onUnpin={onUnpinThread}
                   onDelete={handleDelete}
                 />
               ))}

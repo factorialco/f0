@@ -10,26 +10,17 @@ import {
   CollapsibleTrigger,
 } from "@/ui/collapsible"
 
-interface AiCollapsibleMessageProps {
-  /**
-   * Icon to display in the collapsible trigger
-   */
+interface CollapsibleMessageProps {
   icon: IconType
-  /**
-   * Title text for the collapsible trigger
-   */
   title: string
-  /**
-   * Content to show when expanded
-   */
   children: ReactNode
 }
 
-export const AiCollapsibleMessage = ({
+export const CollapsibleMessage = ({
   icon,
   title,
   children,
-}: AiCollapsibleMessageProps) => {
+}: CollapsibleMessageProps) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const shouldReduceMotion = useReducedMotion()
 

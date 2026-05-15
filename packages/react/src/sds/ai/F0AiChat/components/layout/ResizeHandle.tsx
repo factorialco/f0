@@ -100,7 +100,7 @@ export const ResizeHandle = ({
         className={cn(
           "pointer-events-none absolute inset-y-0 left-1/2 -translate-x-1/2 rounded-full",
           "transition-[width,background-color] duration-150 ease-out",
-          narrow ? "w-px bg-f1-background" : "w-1 bg-transparent",
+          "w-px bg-transparent",
           "group-hover:w-1 group-hover:bg-f1-background-secondary-hover",
           isResizing && "!w-1 !bg-f1-background-secondary-hover"
         )}

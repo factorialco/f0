@@ -1,10 +1,9 @@
-import type { AIMessage, Message } from "@copilotkit/shared"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { BarGraph, Calendar, Lightbulb, Money } from "@/icons/app"
 
 import { F0AiMessagesContainer } from "../F0AiMessagesContainer"
-import { type RenderableTurn } from "../types"
+import { type AIMessage, type Message, type RenderableTurn } from "../types"
 
 const userMessage = (id: string, content: string): Message => ({
   id,
