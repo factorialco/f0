@@ -24,6 +24,9 @@ import type {
 
 import { F0AnalyticsDashboard } from "@/patterns/F0AnalyticsDashboard/F0AnalyticsDashboard"
 
+import { OneEmptyState } from "@/components/OneEmptyState"
+import { useI18n } from "@/lib/providers/i18n"
+
 import type {
   ChatDashboardChartConfig,
   ChatDashboardChartItem,
@@ -240,16 +243,20 @@ export function ChatDashboard({
   exportFilename,
   onRepairedSpecs,
 }: ChatDashboardProps) {
-  const { fetchItem, getFilterOptions } = useDashboardCompute(
-    config,
-    apiConfig,
-    refreshKey,
-    onRepairedSpecs
-  )
+  const { fetchItem, getFilterOptions, getDatasetFailures } =
+    useDashboardCompute(config, apiConfig, refreshKey, onRepairedSpecs)
+  const translations = useI18n()
 
   // Filter options from the first compute response
   const [filterOptions, setFilterOptions] = useState<
     Record<string, string[]> | undefined
+  >()
+
+  // Dataset-level failures surfaced by the agent's self-heal pass. When set,
+  // affected items are stripped from the grid (the banner above carries the
+  // error context so the per-item card would be redundant noise).
+  const [datasetFailures, setDatasetFailures] = useState<
+    Record<string, { reason: string; message: string }> | undefined
   >()
 
   // Update filter options when they become available
@@ -258,6 +265,7 @@ export function ChatDashboard({
   // Reset polling flag when refreshKey changes so filter options are re-polled
   useEffect(() => {
     filterOptionsPolledRef.current = false
+    setDatasetFailures(undefined)
   }, [refreshKey])
 
   useEffect(() => {
@@ -398,43 +406,92 @@ export function ChatDashboard({
               setFilterOptions(opts)
               filterOptionsPolledRef.current = true
             }
+            // Refresh dataset failures map regardless of polling state — the
+            // server can flip a previously failing dataset to healthy after a
+            // refetch and we want the banner / hidden items to update.
+            //
+            // NOTE: This is the only path that publishes the failures map to
+            // state. We piggy-back on `fetchItem` resolutions instead of
+            // polling because polling cannot distinguish "no response yet"
+            // from "response with zero failures" (both return `undefined`).
+            // If a future refactor introduces lazy / virtualized item mounts
+            // where some items never call `fetchData`, surface failures
+            // through a dedicated subscription on `useDashboardCompute`
+            // instead — otherwise the banner will silently stop appearing.
+            setDatasetFailures(getDatasetFailures())
             return result
           }
         )
       }
     },
-    [fetchItem, getFilterOptions, navigationFilterKeys]
+    [fetchItem, getFilterOptions, getDatasetFailures, navigationFilterKeys]
   )
 
   const items: DashboardItem<FiltersDefinition>[] = useMemo(
     () =>
-      config.items.map((item) => {
-        switch (item.type) {
-          case "chart":
-            return mapChartItem(item, makeFetchData(item.id))
-          case "metric":
-            return mapMetricItem(item, makeFetchData(item.id))
-          case "collection":
-            return mapCollectionItem(item, makeFetchData(item.id))
-        }
-      }),
-    [config.items, makeFetchData]
+      config.items
+        .filter(
+          (item) =>
+            !datasetFailures || !(item.computation.datasetId in datasetFailures)
+        )
+        .map((item) => {
+          switch (item.type) {
+            case "chart":
+              return mapChartItem(item, makeFetchData(item.id))
+            case "metric":
+              return mapMetricItem(item, makeFetchData(item.id))
+            case "collection":
+              return mapCollectionItem(item, makeFetchData(item.id))
+          }
+        }),
+    [config.items, datasetFailures, makeFetchData]
+  )
+
+  // Stable list of failed datasets for the banner above the grid. Each
+  // entry renders its own `OneEmptyState` so the user can see exactly which
+  // section is missing rather than one combined message.
+  const failedDatasetEntries = useMemo(
+    () =>
+      datasetFailures
+        ? Object.entries(datasetFailures).map(([datasetId, failure]) => ({
+            datasetId,
+            ...failure,
+          }))
+        : [],
+    [datasetFailures]
   )
 
   return (
-    <F0AnalyticsDashboard
-      key={refreshKey}
-      filters={filterDefinitions}
-      filtersLoading={filtersLoading}
-      navigationFilters={dashboardNavigationFilters}
-      items={items}
-      editMode={editMode}
-      onLayoutChange={onLayoutChange}
-      onTransformChart={onTransformChart}
-      onExportReady={onExportReady}
-      exportFilename={exportFilename}
-      resetKey={resetKey}
-    />
+    <div className="flex flex-col gap-4">
+      {failedDatasetEntries.length > 0 && (
+        <div className="flex flex-col gap-2">
+          {failedDatasetEntries.map((entry) => (
+            <OneEmptyState
+              key={entry.datasetId}
+              variant="critical"
+              title={translations.ai.dashboardDatasetFailure.title}
+              description={translations.t(
+                "ai.dashboardDatasetFailure.description",
+                { reason: entry.message }
+              )}
+            />
+          ))}
+        </div>
+      )}
+      <F0AnalyticsDashboard
+        key={refreshKey}
+        filters={filterDefinitions}
+        filtersLoading={filtersLoading}
+        navigationFilters={dashboardNavigationFilters}
+        items={items}
+        editMode={editMode}
+        onLayoutChange={onLayoutChange}
+        onTransformChart={onTransformChart}
+        onExportReady={onExportReady}
+        exportFilename={exportFilename}
+        resetKey={resetKey}
+      />
+    </div>
   )
 }
 
@@ -446,7 +503,6 @@ ChatDashboard.displayName = "ChatDashboard"
 
 import { F0ActionBar } from "@/components/F0ActionBar"
 import { Save } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
 
 import type { DashboardCanvasContent } from "../../../types"
 

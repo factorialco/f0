@@ -385,6 +385,11 @@ export const defaultTranslations = {
       retry: "Retry",
       dataExplanation: "Where does this data come from?",
     },
+    dashboardDatasetFailure: {
+      title: "Some data couldn’t be loaded",
+      description:
+        "We couldn’t load this section of the dashboard. Details: {{reason}}",
+    },
     pong: {
       title: "Pong",
       youWin: "You win!",
