@@ -682,7 +682,7 @@ const meta = {
   tags: ["!autodocs", "stable"],  // !autodocs required to disable global autodocs
 }
 export const Default: Story = {
-  // ⚠️ Do NOT add `tags: ["no-sidebar"]` to the FIRST exported story.
+  // Important: do NOT add `tags: ["no-sidebar"]` to the FIRST exported story.
   // Storybook treats it as the "primary" story for the attached MDX and
   // propagates its tags to the `--documentation` entry, which would hide
   // the entire Documentation page from the sidebar.
@@ -705,22 +705,25 @@ export const Variants: Story = {
 
 ### Phase 4: Verify sidebar
 
-After both files are created/updated, the Storybook sidebar should show:
+After both files are created/updated, the Storybook sidebar should show the Documentation page plus the primary story (which cannot be hidden — see the tag reference above):
 
 ```
 Components/
 └── ComponentName/
-    └── Documentation   ← only one entry
+    ├── Documentation   ← MDX page (must be visible)
+    └── Default         ← primary story (visible by design;
+                          do NOT tag it `no-sidebar`)
 ```
 
-Not:
+Secondary stories used only as `<Canvas>` embeds inside the MDX should be hidden:
 
 ```
 Components/
 └── ComponentName/
     ├── Documentation
-    ├── Default         ← wrong: should be hidden with "no-sidebar"
-    └── Variants        ← wrong: should be hidden with "no-sidebar"
+    ├── Default
+    ├── Variants        ← wrong: should be hidden with "no-sidebar"
+    └── Sizes           ← wrong: should be hidden with "no-sidebar"
 ```
 
 ---
