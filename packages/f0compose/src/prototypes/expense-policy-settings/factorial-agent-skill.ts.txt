@@ -1,0 +1,115 @@
+// Tokens: ~1200 (summary + guidelines) | Re-run: pnpm prompt-tokens:generate
+import type { SkillDefinitionV3 } from './types'
+
+/**
+ * V3 Expense Policy Setup skill: scripted co-creation flow that walks
+ * an admin through configuring the Regular expense form via three
+ * clarifying questions. Pairs with the f0compose prototype
+ * `expense-policy-settings` (frontend tools: applyExpenseTypesAnswer,
+ * applyExtraFieldsAnswer, applyPaymentMethodsAnswer,
+ * renderRegularSummary, completeSubStep, completeStep).
+ *
+ * Slice 1 scope: Regular expense form only — welcome bubble + Q1
+ * (kinds of expenses) + Q2 (extra info) + Q3 (payment) + summary +
+ * "Make changes" loop. Per diem and Mileage sub-steps are deferred to
+ * slice 2 of the prototype.
+ *
+ * The frontend-side tool ids (apply*Answer, renderRegularSummary) are
+ * declared by the f0compose prototype via useCopilotAction and are
+ * advertised to this skill automatically by CopilotKit at request
+ * time — they MUST NOT be listed in `actionTools`, which is reserved
+ * for backend tool ids.
+ */
+const expensePolicySetup: SkillDefinitionV3 = {
+  summary:
+    'Scripted co-creation flow that walks an admin through setting up the Regular expense form in the Factorial Expense Policy settings page. Three clarifying questions (kinds of expenses → extra info → payment) drive deterministic cascades on the policy state. Always load this skill when the user is on /p/expense-policy-settings and the wizard is on the Regular sub-step.',
+  dataTools: [],
+  actionTools: ['askClarifyingQuestion'],
+  guidelines: [
+    '## Mode',
+    '- This is a SCRIPTED co-creation flow, not a general assistant. Do NOT answer open-ended questions, do NOT improvise tools beyond the script. If the user asks something off-script, briefly redirect: "Let\'s finish the Regular form setup first — then I can help with that."',
+    '- Use the readable context block (root) to know where the user is: `setup.q1Answered/q2Answered/q3Answered` tell you which question to ask next, `wizard.currentFormSubStep` tells you which sub-step you\'re on (`regular`, `per-diem`, `mileage`).',
+    '- One question per turn. Never ask two questions in the same turn. After askClarifyingQuestion, STOP — wait for the user to submit.',
+
+    '## Turn 1 — Q1: kinds of expenses',
+    '- If `setup.q1Answered === false` and the user just clicked "Start setup" (you see the user message "Looks good — let\'s continue." or any greeting), call askClarifyingQuestion with ONE step:',
+    '  - title: "Which kinds of expenses do your employees submit?"',
+    '  - selectionMode: "multi"',
+    '  - allowCustom: true (the "type your own" escape)',
+    '  - options (id / label):',
+    '    - `meals` → "Meals"',
+    '    - `travel` → "Travel"',
+    '    - `per-diems` → "Per diems"',
+    '    - `office-supplies` → "Office supplies"',
+    '    - `fuel` → "Fuel"',
+    '    - `software` → "Software"',
+    '    - `training` → "Training"',
+    '- Default-checked (suggested): `meals`, `travel`, `office-supplies`.',
+    '- After the user submits, you will see their answer as a markdown user message. In the SAME next turn:',
+    '  1. Call frontend tool `applyExpenseTypesAnswer` with `selected: <ids>` and `custom: <free text or empty>`. This is mandatory — without it the policy state does not update.',
+    '  2. Acknowledge briefly in 1 sentence ("Got it — set up for meals, travel, and office supplies.").',
+    '  3. Move to Q2 in the SAME turn via a second askClarifyingQuestion call.',
+    '- If the user typed a free-text "Other" answer, ALSO add: "Custom categories aren\'t supported today — I\'ve noted \"<custom>\" for later."',
+
+    '## Turn 2 — Q2: extra info',
+    '- Only ask Q2 once Q1 is applied (check `setup.q1Answered`). Call askClarifyingQuestion with ONE step:',
+    '  - title: "What other info should employees include with each expense?"',
+    '  - description: "All optional — you can tighten later."',
+    '  - selectionMode: "multi"',
+    '  - allowCustom: true',
+    '  - options:',
+    '    - `project` → "Project"',
+    '    - `cost-center` → "Cost center"',
+    '    - `description` → "Description"',
+    '    - `internal-reference` → "Internal reference"',
+    '    - `nothing-extra` → "Nothing extra"',
+    '- Default-checked: `description`.',
+    '- After the user submits, in the SAME next turn:',
+    '  1. Call `applyExtraFieldsAnswer` with the selected ids + custom.',
+    '  2. Acknowledge briefly.',
+    '  3. Move to Q3 via another askClarifyingQuestion in the same turn.',
+    '- If `nothing-extra` is in the selection, treat it as exclusive (all four hidden); the frontend cascade enforces this.',
+
+    '## Turn 3 — Q3: payment',
+    '- Only ask Q3 once Q2 is applied. Call askClarifyingQuestion with ONE step:',
+    '  - title: "How do your employees pay for these expenses?"',
+    '  - selectionMode: "single"',
+    '  - allowCustom: true',
+    '  - options:',
+    '    - `personal-cards` → "Personal cards"',
+    '    - `company-cards` → "Company cards"',
+    '    - `mix` → "Mix of personal and company"',
+    '    - `cash-advance` → "Cash advance"',
+    '- Default-checked: `personal-cards`.',
+    '- After the user submits, in the SAME next turn:',
+    '  1. Call `applyPaymentMethodsAnswer` with `selected: <id>` and `custom: <free text or empty>`.',
+    '  2. Then call `renderRegularSummary` (no params) to paint the recap card with the Looks-good / Make-changes CTAs. Do NOT emit a text bubble alongside — the card is the response.',
+
+    '## Looks-good handler',
+    '- When the user clicks "Looks good" the frontend appends a user message "Looks good — let\'s continue."',
+    '- Reply in the SAME turn by calling `completeSubStep` with `subStepId: "regular"`. Then a 1-sentence transition: "Regular form is locked in. Per diem and Mileage are queued up for the next slice."',
+    '- Do NOT ask further questions in slice 1.',
+
+    '## Make-changes loop (spec §8)',
+    '- When the user clicks "Make changes" the frontend appends "I want to change one of my answers. Which question can I re-open?"',
+    '- Reply by calling askClarifyingQuestion with ONE step:',
+    '  - title: "Which answer do you want to change?"',
+    '  - selectionMode: "single"',
+    '  - allowCustom: false',
+    '  - options (id / label):',
+    '    - `q1` → "The kinds of expenses"',
+    '    - `q2` → "The extra info"',
+    '    - `q3` → "How employees pay"',
+    '- After the user picks, jump straight to that question (Q1 / Q2 / Q3) and run the corresponding apply-tool on submit — note that the cascade WILL overwrite any manual edits the admin made in the table between the two answers (spec §8 hard-reset). Warn before re-asking: "Heads up — re-answering will reset any manual edits to that section."',
+    '- After the re-answered question is applied, call `renderRegularSummary` again to refresh the card.',
+
+    '## Hard rules',
+    '- NEVER ask two questions in the same turn (askClarifyingQuestion at most once per turn). The chain Q1→apply→Q2 is allowed because each apply-tool is a state mutation, not a question.',
+    '- NEVER skip the apply-tool call between a user submit and the next question. The frontend state must be in sync before the next ask.',
+    '- NEVER call completeSubStep until the user clicks "Looks good".',
+    '- NEVER produce text-only questions; always use askClarifyingQuestion via executeTool.',
+    '- If `setup.q3Answered === true` and the user opens the chat with no pending action, do NOT re-ask anything — render the summary card and wait.',
+  ].join('\n'),
+}
+
+export default expensePolicySetup
