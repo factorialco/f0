@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { ReactFlowProvider } from "@xyflow/react"
 
 import { F0Button } from "@/components/F0Button"
-import { Building } from "@/icons/app"
+import { Building, Delete, Pencil } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0GraphNode } from ".."
@@ -14,6 +15,13 @@ const meta = {
   parameters: {
     layout: "centered",
   },
+  decorators: [
+    (Story) => (
+      <ReactFlowProvider>
+        <Story />
+      </ReactFlowProvider>
+    ),
+  ],
   argTypes: {
     variant: {
       control: "radio",
@@ -240,7 +248,8 @@ export const Snapshot: Story = {
         <F0GraphNode
           avatar={personAvatar}
           title="With slots"
-          subtitle="Tags and actions"
+          subtitle="Tags and selected toolbar"
+          state="selected"
           hasChildren
           childrenCount={5}
           tags={[
@@ -253,4 +262,92 @@ export const Snapshot: Story = {
       </div>
     </div>
   ),
+}
+
+export const SelectedSingleAction: Story = {
+  args: {
+    ...baseProps,
+    state: "selected",
+    actions: <F0Button variant="ghost" size="sm" label="View profile" />,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'When `state === "selected"` and the `detail` variant is active, `actions` render as a floating `NodeToolbar` above the node.',
+      },
+    },
+  },
+}
+
+export const SelectedMultipleActions: Story = {
+  args: {
+    ...baseProps,
+    state: "selected",
+    actions: (
+      <>
+        <F0Button variant="ghost" size="sm" label="View profile" />
+        <F0Button variant="ghost" size="sm" label="Edit" />
+        <F0Button variant="ghost" size="sm" label="Remove" />
+      </>
+    ),
+  },
+}
+
+export const ToolbarUnselected: Story = {
+  args: {
+    ...baseProps,
+    state: "default",
+    actions: <F0Button variant="ghost" size="sm" label="View profile" />,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "When the node is not selected, the toolbar is not visible — even when `actions` is provided.",
+      },
+    },
+  },
+}
+
+export const ToolbarCompactVariantHidden: Story = {
+  args: {
+    ...baseProps,
+    variant: "compact",
+    state: "selected",
+    actions: <F0Button variant="ghost" size="sm" label="View profile" />,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Toolbar is suppressed in `compact` and `dot` variants regardless of selection.",
+      },
+    },
+  },
+}
+
+export const SelectedIconOnlyButtons: Story = {
+  args: {
+    ...baseProps,
+    state: "selected",
+    actions: (
+      <>
+        <F0Button
+          variant="ghost"
+          size="sm"
+          icon={Pencil}
+          label="Edit"
+          hideLabel
+        />
+        <F0Button
+          variant="ghost"
+          size="sm"
+          icon={Delete}
+          label="Remove"
+          hideLabel
+        />
+      </>
+    ),
+  },
 }

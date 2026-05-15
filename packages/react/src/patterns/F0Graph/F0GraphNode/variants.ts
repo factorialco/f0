@@ -42,9 +42,4 @@ export const graphNodeSlotVisibility = {
     compact: "hidden",
     dot: "hidden",
   },
-  actions: {
-    detail: "flex",
-    compact: "hidden",
-    dot: "hidden",
-  },
 } as const

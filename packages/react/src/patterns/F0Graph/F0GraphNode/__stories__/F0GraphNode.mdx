@@ -98,7 +98,7 @@ context:
 | `tags`            | `TagVariant[]`                                         | —           | Tag row rendered in detail variant with per-type grouping                      |
 | `visibleTagTypes` | `ReadonlySet<F0GraphNodeTagType>`                      | —           | Filters rendered tags by type when provided                                    |
 | `tagLabels`       | `F0GraphNodeTagLabels`                                 | —           | Optional labels override for multi-tag summary text                            |
-| `actions`         | `ReactNode`                                            | —           | Optional action row shown at the bottom in detail variant only                 |
+| `actions`         | `ReactNode`                                            | —           | Floating toolbar (`NodeToolbar`) shown above the node when `state="selected"` in the detail variant. Requires a `ReactFlowProvider` ancestor. |
 | `loading`         | `boolean`                                              | `false`     | Show a skeleton/loading placeholder instead of real content                    |
 | `nodeId`          | `string`                                               | —           | DOM id for aria-owns cross-references                                          |
 | `ariaOwns`        | `string`                                               | —           | Space-separated DOM ids for aria-owns (accessible tree hierarchy)              |
@@ -114,6 +114,33 @@ context:
   avatar={{ type: "person", firstName: "Alice", lastName: "Moreno" }}
   title="Alice Moreno"
   subtitle="Staff Designer"
+/>
+```
+
+## Floating toolbar (selected detail nodes)
+
+When a node is `state="selected"` and rendered in the `detail` variant,
+the `actions` slot is rendered as a floating
+[`NodeToolbar`](https://reactflow.dev/api-reference/components/node-toolbar)
+above the node. It is suppressed in `compact` and `dot` variants and
+when the node is not selected.
+
+`F0Graph` already wraps its tree in a `ReactFlowProvider`, so this
+works out of the box. When rendering `F0GraphNode` standalone (e.g.
+in a custom canvas), wrap it in `ReactFlowProvider`.
+
+```tsx
+<F0GraphNode
+  avatar={{ type: "person", firstName: "Alice", lastName: "Moreno" }}
+  title="Alice Moreno"
+  subtitle="Staff Designer"
+  state="selected"
+  actions={
+    <>
+      <F0Button variant="ghost" size="sm" label="View profile" />
+      <F0Button variant="ghost" size="sm" label="Edit" />
+    </>
+  }
 />
 ```
 

@@ -81,7 +81,12 @@ export interface F0GraphNodeProps {
   visibleTagTypes?: ReadonlySet<F0GraphNodeTagType>
   /** Optional labels override for multi-tag summary text. */
   tagLabels?: F0GraphNodeTagLabels
-  /** Optional action row shown at the bottom in detail variant only. */
+  /**
+   * Floating toolbar shown above the node when it is selected (detail
+   * variant only). Rendered via ReactFlow `NodeToolbar`, so the host
+   * tree must be wrapped in a `ReactFlowProvider` for these actions to
+   * appear.
+   */
   actions?: ReactNode
   /** Show a skeleton/loading placeholder instead of real content. */
   loading?: boolean

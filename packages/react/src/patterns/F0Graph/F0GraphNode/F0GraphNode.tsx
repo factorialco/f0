@@ -1,3 +1,4 @@
+import { NodeToolbar, Position } from "@xyflow/react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import {
   type KeyboardEvent,
@@ -242,7 +243,13 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
                 willChange: "transform",
               }}
             >
-              <div className="flex items-center justify-center [&_img]:h-full [&_img]:w-full [&_img]:object-cover">
+              {/* Inner clip — forces every F0Avatar variant (person,
+                  team, company, flag, file, emoji, icon) to render as a
+                  full circle. The outer wrapper also has rounded-full
+                  but its scale + willChange transform can defeat the
+                  clip in some browsers; this immediate parent guarantees
+                  the circular mask. */}
+              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full">
                 {loading ? (
                   <Skeleton className="h-10 w-10 rounded-full" />
                 ) : (
@@ -339,13 +346,21 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
               </AnimatePresence>
             </div>
           </div>
+        </div>
 
-          {isDetail && actions && (
-            <div className="relative mt-2 flex items-center gap-1 border-t border-f1-border pl-12 pt-2">
+        {isDetail && actions && (
+          <NodeToolbar
+            nodeId={nodeId}
+            isVisible={state === "selected"}
+            position={Position.Top}
+            align="center"
+            offset={8}
+          >
+            <div className="flex items-center gap-1 rounded-md border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-md">
               {actions}
             </div>
-          )}
-        </div>
+          </NodeToolbar>
+        )}
 
         {tagsVisible && (
           <motion.div
