@@ -1,10 +1,10 @@
-# F0WizardSteps
+# F0Wizard
 
 Multi-step flow container for React Native. Wraps `F0Step` (progress bar) and `F0Button` (navigation) into a self-contained wizard shell. Step content is fully consumer-owned — no form primitives required.
 
 ## Overview
 
-`F0WizardSteps` manages:
+`F0Wizard` manages:
 
 - Progress display via `F0Step`
 - Step title rendering
@@ -16,10 +16,22 @@ It does **not** own form state or field rendering. The consumer passes any React
 
 ## Architecture
 
-- `F0WizardSteps` holds internal `currentStep` state (uncontrolled).
+- `F0Wizard` holds internal `currentStep` state (uncontrolled).
 - On Next press: calls the step's `onNext` callback (if provided). If it returns `{ canAdvance: false }`, navigation is blocked. Otherwise, the wizard advances or calls `onSubmit` on the last step.
 - `canAdvance` (boolean) disables the Next button reactively without async overhead.
 - Both `canAdvance` and `onNext` can be used together: `canAdvance` gates the button, `onNext` handles async validation before final advance.
+
+## Platform differences
+
+The **web** `F0Wizard` (`packages/react`) wraps `F0DialogInternal` and renders inside a dialog — it manages its own overlay/modal lifecycle.
+
+The **React Native** `F0Wizard` is a standalone `View`-based container with no built-in modal or sheet behavior. It renders inline wherever it is placed. The consumer is responsible for wrapping it in the appropriate container for their use case:
+
+- Full-screen step flow: embed directly in a screen component
+- Bottom sheet wizard: place inside a sheet library (e.g. `@gorhom/bottom-sheet`)
+- Modal wizard: wrap in a React Native `Modal`
+
+This design keeps `F0Wizard` composable and avoids coupling it to any specific navigation or overlay library.
 
 ## Usage examples
 
@@ -27,7 +39,7 @@ It does **not** own form state or field rendering. The consumer passes any React
 
 <!-- prettier-ignore -->
 ```tsx
-<F0WizardSteps
+<F0Wizard
   steps={[
     {
       title: "Personal info",
@@ -40,6 +52,9 @@ It does **not** own form state or field rendering. The consumer passes any React
       renderContent: () => <ConfirmationView name={name} />,
     },
   ]}
+  nextLabel="Next"
+  previousLabel="Back"
+  submitLabel="Submit"
   onSubmit={handleSubmit}
 />
 ```
@@ -48,7 +63,7 @@ It does **not** own form state or field rendering. The consumer passes any React
 
 <!-- prettier-ignore -->
 ```tsx
-<F0WizardSteps
+<F0Wizard
   steps={[
     {
       title: "Email",
@@ -63,6 +78,9 @@ It does **not** own form state or field rendering. The consumer passes any React
       canAdvance: email.includes("@"),
     },
   ]}
+  nextLabel="Next"
+  previousLabel="Back"
+  submitLabel="Submit"
   onSubmit={handleSubmit}
 />
 ```
@@ -71,7 +89,7 @@ It does **not** own form state or field rendering. The consumer passes any React
 
 <!-- prettier-ignore -->
 ```tsx
-<F0WizardSteps
+<F0Wizard
   steps={[
     {
       title: "Username",
@@ -83,6 +101,9 @@ It does **not** own form state or field rendering. The consumer passes any React
       },
     },
   ]}
+  nextLabel="Next"
+  previousLabel="Back"
+  submitLabel="Submit"
   onSubmit={handleSubmit}
 />
 ```
@@ -91,7 +112,7 @@ It does **not** own form state or field rendering. The consumer passes any React
 
 <!-- prettier-ignore -->
 ```tsx
-<F0WizardSteps
+<F0Wizard
   steps={steps}
   nextLabel="Continue"
   previousLabel="Go back"
@@ -105,7 +126,7 @@ It does **not** own form state or field rendering. The consumer passes any React
 
 <!-- prettier-ignore -->
 ```tsx
-<F0WizardSteps
+<F0Wizard
   steps={steps}
   nextLabel={t("wizard.next")}
   previousLabel={t("wizard.back")}
@@ -117,11 +138,11 @@ It does **not** own form state or field rendering. The consumer passes any React
 
 ## Props
 
-### `F0WizardStepsProps`
+### `F0WizardProps`
 
 | Prop                 | Type                          | Required | Description                                                                                |
 | -------------------- | ----------------------------- | -------- | ------------------------------------------------------------------------------------------ |
-| `steps`              | `F0WizardStepsStep[]`         | ✓        | Ordered list of steps                                                                      |
+| `steps`              | `F0WizardStep[]`              | ✓        | Ordered list of steps                                                                      |
 | `nextLabel`          | `string`                      | ✓        | Label for the Next button                                                                  |
 | `previousLabel`      | `string`                      | ✓        | Label for the Back button                                                                  |
 | `submitLabel`        | `string`                      | ✓        | Label for the button on the last step                                                      |
@@ -132,7 +153,7 @@ It does **not** own form state or field rendering. The consumer passes any React
 | `accessibilityLabel` | `string`                      | —        | Label for the root container                                                               |
 | `testID`             | `string`                      | —        | Test identifier for the root container                                                     |
 
-### `F0WizardStepsStep`
+### `F0WizardStep`
 
 | Prop            | Type                                                                | Required | Description                                                                 |
 | --------------- | ------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------- |
@@ -148,10 +169,11 @@ It does **not** own form state or field rendering. The consumer passes any React
 
 - `defaultStepIndex` is clamped to `[0, steps.length - 1]`.
 - An empty `steps` array renders nothing.
-- The Back button remains visible on the first step, but is disabled.
+- The Back button is always visible, disabled on the first step.
 - The Next button label changes to `submitLabel` on the last step.
-- During an async `onNext` call, the Next button shows a loading indicator and is non-interactive to prevent double-taps.
+- During an async `onNext` call or `onSubmit`, the Next button shows a loading indicator and is non-interactive to prevent double-taps.
 - `canAdvance` is evaluated synchronously on every render; `onNext` is only called on press.
+- There is no `onCancel` / `onDismiss` prop. Cancellation is intentionally left to the consumer: close the surrounding `Modal`, pop the screen, or dismiss the sheet. This avoids coupling `F0Wizard` to any specific navigation or overlay library.
 
 ## Accessibility
 
@@ -161,7 +183,6 @@ It does **not** own form state or field rendering. The consumer passes any React
 
 ## Testing
 
-- Snapshot: single step, multiple steps at first step.
 - Navigation: Next advances step, Back goes to previous step.
 - `onStepChanged` is called with the new index on both directions.
 - Submit: `onSubmit` is called when confirming the last step.
@@ -177,11 +198,12 @@ It does **not** own form state or field rendering. The consumer passes any React
 ## File structure
 
 ```
-F0WizardSteps/
-  F0WizardSteps.tsx          — implementation
-  F0WizardSteps.types.ts     — public types
-  F0WizardSteps.md           — this file
-  index.ts                   — public exports
+F0Wizard/
+  F0Wizard.tsx          — implementation
+  F0Wizard.types.ts     — public types
+  F0Wizard.styles.ts    — tailwind-variants styles
+  F0Wizard.md           — this file
+  index.ts              — public exports
   __tests__/
-    F0WizardSteps.spec.tsx   — unit tests
+    F0Wizard.spec.tsx   — unit tests
 ```

@@ -6,10 +6,10 @@ import {
   type LayoutChangeEvent,
 } from "react-native"
 
-import type { F0WizardStepsStep } from "../../../src/components/F0WizardSteps"
+import type { F0WizardStep } from "../../../src/components/F0Wizard"
 
 import { F0Button } from "../../../src/components/F0Button"
-import { F0WizardSteps } from "../../../src/components/F0WizardSteps"
+import { F0Wizard } from "../../../src/components/F0Wizard"
 import { F0Text } from "../../../src/components/primitives/F0Text"
 
 // =============================================================================
@@ -39,7 +39,7 @@ function BasicScenario() {
     )
   }
 
-  const steps: F0WizardStepsStep[] = [
+  const steps: F0WizardStep[] = [
     {
       title: "Welcome",
       subtitle: "Let's get started",
@@ -68,7 +68,7 @@ function BasicScenario() {
   ]
 
   return (
-    <F0WizardSteps
+    <F0Wizard
       steps={steps}
       nextLabel="Next"
       stepLabel="Step"
@@ -122,7 +122,7 @@ function ReactiveValidationScenario() {
     )
   }
 
-  const steps: F0WizardStepsStep[] = [
+  const steps: F0WizardStep[] = [
     {
       title: "Your name",
       renderContent: () => (
@@ -190,7 +190,7 @@ function ReactiveValidationScenario() {
   ]
 
   return (
-    <F0WizardSteps
+    <F0Wizard
       steps={steps}
       nextLabel="Next"
       stepLabel="Step"
@@ -235,7 +235,7 @@ function AsyncValidationScenario() {
     )
   }
 
-  const steps: F0WizardStepsStep[] = [
+  const steps: F0WizardStep[] = [
     {
       title: "Enter code",
       renderContent: () => (
@@ -287,7 +287,7 @@ function AsyncValidationScenario() {
   ]
 
   return (
-    <F0WizardSteps
+    <F0Wizard
       steps={steps}
       nextLabel="Next"
       stepLabel="Step"
@@ -304,7 +304,7 @@ function AsyncValidationScenario() {
 // =============================================================================
 
 function CustomLabelsScenario() {
-  const steps: F0WizardStepsStep[] = [
+  const steps: F0WizardStep[] = [
     {
       title: "Custom next label",
       renderContent: () => (
@@ -334,7 +334,7 @@ function CustomLabelsScenario() {
   ]
 
   return (
-    <F0WizardSteps
+    <F0Wizard
       steps={steps}
       nextLabel="Continue"
       previousLabel="Go back"
@@ -740,7 +740,7 @@ function LongFormScenario() {
     )
   }
 
-  const steps: F0WizardStepsStep[] = [
+  const steps: F0WizardStep[] = [
     {
       title: "Personal info",
       subtitle: "Tell us a bit about yourself",
@@ -778,7 +778,7 @@ function LongFormScenario() {
   ]
 
   return (
-    <F0WizardSteps
+    <F0Wizard
       steps={steps}
       nextLabel="Next"
       stepLabel="Step"
@@ -830,7 +830,7 @@ const SCENARIOS: { value: Scenario; label: string; description: string }[] = [
   },
 ]
 
-export function F0WizardStepsShowcase() {
+export function F0WizardShowcase() {
   const [scenario, setScenario] = useState<Scenario>("basic")
   const [containerHeight, setContainerHeight] = useState<number | undefined>()
   const [selectorHeight, setSelectorHeight] = useState(0)

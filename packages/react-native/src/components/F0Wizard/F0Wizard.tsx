@@ -5,10 +5,19 @@ import { F0Button } from "../F0Button"
 import { F0Step } from "../F0Step"
 import { F0Text } from "../primitives/F0Text"
 
-import type { F0WizardStepsProps } from "./F0WizardSteps.types"
+import {
+  wizardContentVariants,
+  wizardFooterButtonVariants,
+  wizardFooterVariants,
+  wizardHeaderVariants,
+  wizardRootVariants,
+  wizardScrollContentStyle,
+  wizardTitleBlockVariants,
+} from "./F0Wizard.styles"
+import type { F0WizardProps } from "./F0Wizard.types"
 
 /**
- * F0WizardSteps - Multi-step flow container for React Native.
+ * F0Wizard - Multi-step flow container for React Native.
  *
  * Manages step navigation, progress display, and per-step validation.
  * Step content is fully consumer-controlled via `renderContent` — no form
@@ -17,9 +26,13 @@ import type { F0WizardStepsProps } from "./F0WizardSteps.types"
  * Tapping Next runs the optional per-step `onNext` callback before advancing.
  * The Next button is disabled when `canAdvance` is explicitly `false`.
  *
+ * F0Wizard is a standalone `View`-based container with no built-in modal or
+ * sheet behavior. The consumer is responsible for embedding it inside a
+ * `Modal`, bottom sheet, or full-screen layout as appropriate.
+ *
  * @example
  * <!-- prettier-ignore -->
- * <F0WizardSteps
+ * <F0Wizard
  *   steps={[
  *     {
  *       title: "Personal info",
@@ -37,7 +50,7 @@ import type { F0WizardStepsProps } from "./F0WizardSteps.types"
  *   onSubmit={handleSubmit}
  * />
  */
-const F0WizardSteps = React.memo(function F0WizardSteps({
+const F0Wizard = React.memo(function F0Wizard({
   steps,
   defaultStepIndex = 0,
   nextLabel: globalNextLabel,
@@ -48,7 +61,7 @@ const F0WizardSteps = React.memo(function F0WizardSteps({
   onSubmit,
   accessibilityLabel,
   testID,
-}: F0WizardStepsProps) {
+}: F0WizardProps) {
   const [currentStep, setCurrentStep] = useState(() =>
     Math.min(Math.max(0, defaultStepIndex), steps.length - 1)
   )
@@ -109,19 +122,12 @@ const F0WizardSteps = React.memo(function F0WizardSteps({
     <View
       testID={testID}
       accessibilityLabel={accessibilityLabel}
-      style={{ flex: 1 }}
+      className={wizardRootVariants()}
     >
       {/* Header: progress bar + title block */}
-      <View
-        style={{
-          gap: 12,
-          paddingHorizontal: 16,
-          paddingTop: 16,
-          paddingBottom: 8,
-        }}
-      >
+      <View className={wizardHeaderVariants()}>
         <F0Step steps={steps.length} currentStep={currentStep} />
-        <View style={{ paddingTop: 4 }}>
+        <View className={wizardTitleBlockVariants()}>
           {stepLabel ? (
             <F0Text variant="body-sm-default" color="secondary">
               {stepLabel} {currentStep + 1}
@@ -137,9 +143,9 @@ const F0WizardSteps = React.memo(function F0WizardSteps({
       </View>
 
       {/* Scrollable content area */}
-      <View style={{ flex: 1 }}>
+      <View className={wizardContentVariants()}>
         <ScrollView
-          contentContainerStyle={{ padding: 16 }}
+          contentContainerStyle={wizardScrollContentStyle}
           keyboardShouldPersistTaps="handled"
           testID={testID ? `${testID}-content` : undefined}
         >
@@ -148,20 +154,12 @@ const F0WizardSteps = React.memo(function F0WizardSteps({
       </View>
 
       {/* Footer: Back + Next/Submit buttons.
-          Each button is wrapped in a flex:1 View because F0Button fullWidth uses
+          Each button is wrapped in a flex-1 flex-row View because F0Button fullWidth uses
           className="flex flex-1" internally (NativeWind), which collapses to 32px
           inside a flex-row container without an explicit height. The View wrapper
           provides the correct stretch behavior without relying on NativeWind. */}
-      <View
-        style={{
-          flexDirection: "row",
-          gap: 12,
-          paddingHorizontal: 16,
-          paddingTop: 12,
-          paddingBottom: 16,
-        }}
-      >
-        <View style={{ flex: 1, flexDirection: "row" }}>
+      <View className={wizardFooterVariants()}>
+        <View className={wizardFooterButtonVariants()}>
           <F0Button
             label={backButtonLabel}
             variant="outline"
@@ -171,7 +169,7 @@ const F0WizardSteps = React.memo(function F0WizardSteps({
             testID={testID ? `${testID}-back-button` : undefined}
           />
         </View>
-        <View style={{ flex: 1, flexDirection: "row" }}>
+        <View className={wizardFooterButtonVariants()}>
           <F0Button
             label={nextButtonLabel}
             onPress={handleNext}
@@ -186,6 +184,6 @@ const F0WizardSteps = React.memo(function F0WizardSteps({
   )
 })
 
-F0WizardSteps.displayName = "F0WizardSteps"
+F0Wizard.displayName = "F0Wizard"
 
-export { F0WizardSteps }
+export { F0Wizard }

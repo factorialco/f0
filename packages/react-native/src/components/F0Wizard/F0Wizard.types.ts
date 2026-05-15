@@ -1,6 +1,6 @@
 import React from "react"
 
-export interface F0WizardStepsStep {
+export interface F0WizardStep {
   /** Title displayed above the step content */
   title: string
   /** Optional subtitle displayed below the title */
@@ -31,9 +31,9 @@ export interface F0WizardStepsStep {
   onNext?: () => Promise<{ canAdvance: boolean }> | { canAdvance: boolean }
 }
 
-export interface F0WizardStepsProps {
+export interface F0WizardProps {
   /** Ordered list of steps to display */
-  steps: F0WizardStepsStep[]
+  steps: F0WizardStep[]
   /** Zero-based index of the step to show on first render. @default 0 */
   defaultStepIndex?: number
   /** Label for the Next button. */

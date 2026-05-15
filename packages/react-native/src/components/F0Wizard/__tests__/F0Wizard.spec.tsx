@@ -7,10 +7,10 @@ import {
 import React from "react"
 import { Text } from "react-native"
 
-import { F0WizardSteps } from "../F0WizardSteps"
-import type { F0WizardStepsStep } from "../F0WizardSteps.types"
+import { F0Wizard } from "../F0Wizard"
+import type { F0WizardStep } from "../F0Wizard.types"
 
-const makeSteps = (count: number): F0WizardStepsStep[] =>
+const makeSteps = (count: number): F0WizardStep[] =>
   Array.from({ length: count }, (_, i) => ({
     title: `Title ${i + 1}`,
     renderContent: () => <Text testID={`content-${i}`}>Content {i + 1}</Text>,
@@ -22,9 +22,9 @@ const LABELS = {
   submitLabel: "Submit",
 }
 
-describe("F0WizardSteps", () => {
+describe("F0Wizard", () => {
   it("renders root, content area and nav buttons for a single step", () => {
-    render(<F0WizardSteps steps={makeSteps(1)} testID="wizard" {...LABELS} />)
+    render(<F0Wizard steps={makeSteps(1)} testID="wizard" {...LABELS} />)
 
     expect(screen.getByTestId("wizard")).toBeTruthy()
     expect(screen.getByTestId("wizard-content")).toBeTruthy()
@@ -39,7 +39,7 @@ describe("F0WizardSteps", () => {
   })
 
   it("renders root, content area and nav buttons for multiple steps", () => {
-    render(<F0WizardSteps steps={makeSteps(3)} testID="wizard" {...LABELS} />)
+    render(<F0Wizard steps={makeSteps(3)} testID="wizard" {...LABELS} />)
 
     expect(screen.getByTestId("wizard")).toBeTruthy()
     expect(screen.getByTestId("wizard-content")).toBeTruthy()
@@ -54,19 +54,19 @@ describe("F0WizardSteps", () => {
   })
 
   it("renders the title of the current step", () => {
-    render(<F0WizardSteps steps={makeSteps(3)} testID="wizard" {...LABELS} />)
+    render(<F0Wizard steps={makeSteps(3)} testID="wizard" {...LABELS} />)
 
     expect(screen.getByText("Title 1")).toBeTruthy()
   })
 
   it("renders the content of the current step", () => {
-    render(<F0WizardSteps steps={makeSteps(3)} testID="wizard" {...LABELS} />)
+    render(<F0Wizard steps={makeSteps(3)} testID="wizard" {...LABELS} />)
 
     expect(screen.getByTestId("content-0")).toBeTruthy()
   })
 
   it("renders the Back button disabled on the first step", () => {
-    render(<F0WizardSteps steps={makeSteps(3)} testID="wizard" {...LABELS} />)
+    render(<F0Wizard steps={makeSteps(3)} testID="wizard" {...LABELS} />)
 
     expect(
       screen.getByTestId("wizard-back-button").props.accessibilityState
@@ -75,7 +75,7 @@ describe("F0WizardSteps", () => {
   })
 
   it("advances to the next step when Next is pressed", async () => {
-    render(<F0WizardSteps steps={makeSteps(3)} testID="wizard" {...LABELS} />)
+    render(<F0Wizard steps={makeSteps(3)} testID="wizard" {...LABELS} />)
 
     fireEvent.press(screen.getByTestId("wizard-next-button"))
 
@@ -86,7 +86,7 @@ describe("F0WizardSteps", () => {
   })
 
   it("enables the Back button after advancing to step 2", async () => {
-    render(<F0WizardSteps steps={makeSteps(3)} testID="wizard" {...LABELS} />)
+    render(<F0Wizard steps={makeSteps(3)} testID="wizard" {...LABELS} />)
 
     fireEvent.press(screen.getByTestId("wizard-next-button"))
 
@@ -99,7 +99,7 @@ describe("F0WizardSteps", () => {
   })
 
   it("goes back to previous step when Back is pressed", async () => {
-    render(<F0WizardSteps steps={makeSteps(3)} testID="wizard" {...LABELS} />)
+    render(<F0Wizard steps={makeSteps(3)} testID="wizard" {...LABELS} />)
 
     fireEvent.press(screen.getByTestId("wizard-next-button"))
     await waitFor(() => expect(screen.getByText("Title 2")).toBeTruthy())
@@ -111,7 +111,7 @@ describe("F0WizardSteps", () => {
   it("calls onStepChanged when navigating forward", async () => {
     const onStepChanged = jest.fn()
     render(
-      <F0WizardSteps
+      <F0Wizard
         steps={makeSteps(3)}
         testID="wizard"
         {...LABELS}
@@ -129,7 +129,7 @@ describe("F0WizardSteps", () => {
   it("calls onStepChanged when navigating backward", async () => {
     const onStepChanged = jest.fn()
     render(
-      <F0WizardSteps
+      <F0Wizard
         steps={makeSteps(3)}
         testID="wizard"
         {...LABELS}
@@ -148,7 +148,7 @@ describe("F0WizardSteps", () => {
 
   it("shows Submit label on the last step", async () => {
     render(
-      <F0WizardSteps
+      <F0Wizard
         steps={makeSteps(2)}
         testID="wizard"
         {...LABELS}
@@ -166,7 +166,7 @@ describe("F0WizardSteps", () => {
   it("calls onSubmit when confirming the last step", async () => {
     const onSubmit = jest.fn()
     render(
-      <F0WizardSteps
+      <F0Wizard
         steps={makeSteps(1)}
         testID="wizard"
         {...LABELS}
@@ -182,7 +182,7 @@ describe("F0WizardSteps", () => {
   })
 
   it("disables the Next button when canAdvance is false", () => {
-    const steps: F0WizardStepsStep[] = [
+    const steps: F0WizardStep[] = [
       {
         title: "Personal info",
         renderContent: () => <Text>Content</Text>,
@@ -194,7 +194,7 @@ describe("F0WizardSteps", () => {
       },
     ]
 
-    render(<F0WizardSteps steps={steps} testID="wizard" {...LABELS} />)
+    render(<F0Wizard steps={steps} testID="wizard" {...LABELS} />)
 
     expect(
       screen.getByTestId("wizard-next-button").props.accessibilityState
@@ -204,7 +204,7 @@ describe("F0WizardSteps", () => {
 
   it("blocks navigation when onNext returns canAdvance: false", async () => {
     const onNext = jest.fn().mockResolvedValue({ canAdvance: false })
-    const steps: F0WizardStepsStep[] = [
+    const steps: F0WizardStep[] = [
       {
         title: "Personal info",
         renderContent: () => <Text>Content</Text>,
@@ -216,7 +216,7 @@ describe("F0WizardSteps", () => {
       },
     ]
 
-    render(<F0WizardSteps steps={steps} testID="wizard" {...LABELS} />)
+    render(<F0Wizard steps={steps} testID="wizard" {...LABELS} />)
 
     fireEvent.press(screen.getByTestId("wizard-next-button"))
 
@@ -228,7 +228,7 @@ describe("F0WizardSteps", () => {
 
   it("advances when onNext returns canAdvance: true", async () => {
     const onNext = jest.fn().mockResolvedValue({ canAdvance: true })
-    const steps: F0WizardStepsStep[] = [
+    const steps: F0WizardStep[] = [
       {
         title: "Personal info",
         renderContent: () => <Text>Content</Text>,
@@ -240,7 +240,7 @@ describe("F0WizardSteps", () => {
       },
     ]
 
-    render(<F0WizardSteps steps={steps} testID="wizard" {...LABELS} />)
+    render(<F0Wizard steps={steps} testID="wizard" {...LABELS} />)
 
     fireEvent.press(screen.getByTestId("wizard-next-button"))
 
@@ -250,7 +250,7 @@ describe("F0WizardSteps", () => {
   })
 
   it("uses step-level nextLabel over global nextLabel", () => {
-    const steps: F0WizardStepsStep[] = [
+    const steps: F0WizardStep[] = [
       {
         title: "Personal info",
         renderContent: () => <Text>Content</Text>,
@@ -263,7 +263,7 @@ describe("F0WizardSteps", () => {
     ]
 
     render(
-      <F0WizardSteps
+      <F0Wizard
         steps={steps}
         testID="wizard"
         {...LABELS}
@@ -276,7 +276,7 @@ describe("F0WizardSteps", () => {
 
   it("respects defaultStepIndex", () => {
     render(
-      <F0WizardSteps
+      <F0Wizard
         steps={makeSteps(3)}
         testID="wizard"
         {...LABELS}
@@ -289,7 +289,7 @@ describe("F0WizardSteps", () => {
 
   it("clamps defaultStepIndex below 0 to 0", () => {
     render(
-      <F0WizardSteps
+      <F0Wizard
         steps={makeSteps(3)}
         testID="wizard"
         {...LABELS}
@@ -302,7 +302,7 @@ describe("F0WizardSteps", () => {
 
   it("clamps defaultStepIndex above last step to last step", () => {
     render(
-      <F0WizardSteps
+      <F0Wizard
         steps={makeSteps(3)}
         testID="wizard"
         {...LABELS}
@@ -314,14 +314,14 @@ describe("F0WizardSteps", () => {
   })
 
   it("renders nothing when steps is empty", () => {
-    const { toJSON } = render(<F0WizardSteps steps={[]} {...LABELS} />)
+    const { toJSON } = render(<F0Wizard steps={[]} {...LABELS} />)
 
     expect(toJSON()).toBeNull()
   })
 
   it("passes accessibilityLabel to the root view", () => {
     render(
-      <F0WizardSteps
+      <F0Wizard
         steps={makeSteps(1)}
         testID="wizard"
         {...LABELS}
@@ -335,7 +335,7 @@ describe("F0WizardSteps", () => {
   })
 
   it("updates F0Step progress when navigating", async () => {
-    render(<F0WizardSteps steps={makeSteps(3)} testID="wizard" {...LABELS} />)
+    render(<F0Wizard steps={makeSteps(3)} testID="wizard" {...LABELS} />)
 
     const progressBar = screen.getByRole("progressbar")
     expect(progressBar.props.accessibilityValue.now).toBe(1) // step 0 = active (counts as 1)
@@ -351,7 +351,7 @@ describe("F0WizardSteps", () => {
 
   it("renders stepLabel with step number when provided", () => {
     render(
-      <F0WizardSteps
+      <F0Wizard
         steps={makeSteps(3)}
         testID="wizard"
         {...LABELS}
@@ -363,14 +363,14 @@ describe("F0WizardSteps", () => {
   })
 
   it("does not render step counter when stepLabel is omitted", () => {
-    render(<F0WizardSteps steps={makeSteps(3)} testID="wizard" {...LABELS} />)
+    render(<F0Wizard steps={makeSteps(3)} testID="wizard" {...LABELS} />)
 
     expect(screen.queryByText("Step 1")).toBeNull()
   })
 
   it("stepLabel updates with current step number when navigating", async () => {
     render(
-      <F0WizardSteps
+      <F0Wizard
         steps={makeSteps(3)}
         testID="wizard"
         {...LABELS}
@@ -386,7 +386,7 @@ describe("F0WizardSteps", () => {
   })
 
   it("renders subtitle when provided", () => {
-    const steps: F0WizardStepsStep[] = [
+    const steps: F0WizardStep[] = [
       {
         title: "Personal info",
         subtitle: "Tell us about yourself",
@@ -394,20 +394,20 @@ describe("F0WizardSteps", () => {
       },
     ]
 
-    render(<F0WizardSteps steps={steps} testID="wizard" {...LABELS} />)
+    render(<F0Wizard steps={steps} testID="wizard" {...LABELS} />)
 
     expect(screen.getByText("Tell us about yourself")).toBeTruthy()
   })
 
   it("does not render subtitle when omitted", () => {
-    render(<F0WizardSteps steps={makeSteps(1)} testID="wizard" {...LABELS} />)
+    render(<F0Wizard steps={makeSteps(1)} testID="wizard" {...LABELS} />)
 
     expect(screen.queryByText("Tell us about yourself")).toBeNull()
   })
 
   it("canAdvance:false disables button and onNext is never called", async () => {
     const onNext = jest.fn().mockResolvedValue({ canAdvance: true })
-    const steps: F0WizardStepsStep[] = [
+    const steps: F0WizardStep[] = [
       {
         title: "Personal info",
         renderContent: () => <Text>Content</Text>,
@@ -420,7 +420,7 @@ describe("F0WizardSteps", () => {
       },
     ]
 
-    render(<F0WizardSteps steps={steps} testID="wizard" {...LABELS} />)
+    render(<F0Wizard steps={steps} testID="wizard" {...LABELS} />)
 
     expect(
       screen.getByTestId("wizard-next-button").props.accessibilityState
