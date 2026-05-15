@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.4.1](https://github.com/factorialco/f0/compare/f0-react-v2.4.0...f0-react-v2.4.1) (2026-05-15)
+
+
+### Bug Fixes
+
+* **icons:** align Marker and Multitask with app icon style ([#4137](https://github.com/factorialco/f0/issues/4137)) ([e616765](https://github.com/factorialco/f0/commit/e616765b8a129573a6e51b5f2a62a8e7fa51d814))
+
+## [2.4.0](https://github.com/factorialco/f0/compare/f0-react-v2.3.0...f0-react-v2.4.0) (2026-05-15)
+
+
+### Features
+
+* **ai:** add proposal card ([#4139](https://github.com/factorialco/f0/issues/4139)) ([d2688f0](https://github.com/factorialco/f0/commit/d2688f06ae86287b933a93b72fba8b2ca26e4f62))
+
 ## [2.3.0](https://github.com/factorialco/f0/compare/f0-react-v2.2.0...f0-react-v2.3.0) (2026-05-14)
 
 

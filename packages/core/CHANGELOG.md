@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.50.3](https://github.com/factorialco/f0/compare/f0-core-v1.50.2...f0-core-v1.50.3) (2026-05-15)
+
+
+### Bug Fixes
+
+* **icons:** align Marker and Multitask with app icon style ([#4137](https://github.com/factorialco/f0/issues/4137)) ([e616765](https://github.com/factorialco/f0/commit/e616765b8a129573a6e51b5f2a62a8e7fa51d814))
+
+## [1.50.2](https://github.com/factorialco/f0/compare/f0-core-v1.50.1...f0-core-v1.50.2) (2026-05-15)
+
+
+### Bug Fixes
+
+* **colors:** adjust secondary border color for improved contrast ([#4142](https://github.com/factorialco/f0/issues/4142)) ([d3eae7b](https://github.com/factorialco/f0/commit/d3eae7b60f1d0fb3a3bf0e10fbb523babf17f914))
+
 ## [1.50.1](https://github.com/factorialco/f0/compare/f0-core-v1.50.0...f0-core-v1.50.1) (2026-04-24)
 
 

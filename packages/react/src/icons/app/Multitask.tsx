@@ -11,6 +11,60 @@ const SvgMultitask = (
     ref={ref}
     {...props}
   >
+    <rect
+      width={5}
+      height={5}
+      x={4}
+      y={4}
+      stroke="currentColor"
+      rx={1}
+      vectorEffect="non-scaling-stroke"
+    />
+    <rect
+      width={5}
+      height={5}
+      x={15}
+      y={4}
+      stroke="currentColor"
+      rx={1}
+      vectorEffect="non-scaling-stroke"
+    />
+    <rect
+      width={5}
+      height={5}
+      x={4}
+      y={15}
+      stroke="currentColor"
+      rx={1}
+      vectorEffect="non-scaling-stroke"
+    />
+    <rect
+      width={5}
+      height={5}
+      x={15}
+      y={15}
+      stroke="currentColor"
+      rx={1}
+      vectorEffect="non-scaling-stroke"
+    />
+    <path
+      stroke="currentColor"
+      strokeLinecap="round"
+      d="M9 6.5H15"
+      vectorEffect="non-scaling-stroke"
+    />
+    <path
+      stroke="currentColor"
+      strokeLinecap="round"
+      d="M6.5 9V15"
+      vectorEffect="non-scaling-stroke"
+    />
+    <path
+      stroke="currentColor"
+      strokeLinecap="round"
+      d="M17.5 9V15"
+      vectorEffect="non-scaling-stroke"
+    />
     <path
       stroke="currentColor"
       strokeLinecap="round"
