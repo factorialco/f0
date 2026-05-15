@@ -574,6 +574,72 @@ describe("OneDataCollection bulk-action status", () => {
     vi.useRealTimers()
   })
 
+  test("keepSelection=true keeps bar and selection visible after async success", async () => {
+    // Regression guard: scheduleDismiss must NOT call setShowActionBar(false)
+    // when keepSelection=true — before the scheduleDismiss extraction, bar
+    // visibility was entirely driven by selection state (clearSelectedItems
+    // was skipped, so showActionBar stayed true). The extraction introduced
+    // an unconditional setShowActionBar(false) that broke this contract.
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime.bind(vi),
+    })
+
+    let resolveHandler: (() => void) | undefined
+    const onBulkAction = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveHandler = resolve
+        })
+    )
+
+    const { result } = renderHook(
+      () =>
+        useDataCollectionSource({
+          selectable: (item: Row) => item.id,
+          bulkActions: () => ({
+            primary: [{ label: "Archive", id: "archive", keepSelection: true }],
+          }),
+          dataAdapter: { fetchData: async () => ({ records: testRows }) },
+        }),
+      { wrapper: TestWrapper }
+    )
+
+    render(
+      <TestWrapper>
+        <OneDataCollection
+          source={result.current}
+          visualizations={[{ type: "table", options: { columns } }]}
+          autoManageBulkActionStatus
+          onBulkAction={onBulkAction}
+        />
+      </TestWrapper>
+    )
+
+    await selectFirstRow(user)
+    const [archive] = await findArchiveButtons()
+    await user.click(archive)
+
+    // Resolve the action — success timer starts.
+    resolveHandler?.()
+    await Promise.resolve()
+
+    // Advance past SUCCESS_DISMISS_MS.
+    act(() => {
+      vi.advanceTimersByTime(2000)
+    })
+
+    // Bar must still be visible — keepSelection=true preserves selection,
+    // so the bar should remain open for follow-up actions.
+    await waitFor(() => {
+      expect(queryArchiveButtons().length).toBeGreaterThan(0)
+    })
+
+    // The first-row checkbox must still be checked (selection preserved).
+    const checkboxes = screen.getAllByRole("checkbox")
+    expect(checkboxes[1]).toBeChecked()
+  })
+
   test("immediate promise action auto-manages after a prior modal-gated action", async () => {
     // Regression guard: when autoManageBulkActionStatus and bulkActionStatus are
     // used together, a prior modal-gated action must not prevent subsequent

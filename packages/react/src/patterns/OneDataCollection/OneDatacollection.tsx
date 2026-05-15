@@ -514,12 +514,12 @@ const OneDataCollectionComp = <
   // content (stale action buttons) between clearSelectedItems() and the status
   // reset.
   const scheduleDismiss = useCallback(
-    (onDismiss: () => void) => {
+    (onDismiss: () => void, hideBar = true) => {
       if (successTimerRef.current) {
         clearTimeout(successTimerRef.current)
       }
       successTimerRef.current = setTimeout(() => {
-        setShowActionBar(false)
+        if (hideBar) setShowActionBar(false)
         onDismiss()
         successTimerRef.current = null
       }, SUCCESS_DISMISS_MS)
@@ -662,7 +662,7 @@ const OneDataCollectionComp = <
                   clearSelectedItems()
                 }
                 setInternalBulkActionStatus("idle")
-              })
+              }, !bulkAction.keepSelection)
             },
             () => {
               setInternalBulkActionStatus("error")
