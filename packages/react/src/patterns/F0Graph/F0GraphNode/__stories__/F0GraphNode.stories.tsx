@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { F0Button } from "@/components/F0Button"
+import { Building } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0GraphNode } from ".."
@@ -87,6 +88,97 @@ export const ZoomLevels: Story = {
       ))}
     </div>
   ),
+}
+
+export const Avatars: Story = {
+  render: () => {
+    const nodes = [
+      {
+        key: "none",
+        label: "no avatar",
+        avatar: undefined,
+        title: "Unassigned role",
+        subtitle: "Open seat",
+      },
+      {
+        key: "person",
+        label: "person",
+        avatar: { type: "person", firstName: "Alice", lastName: "Moreno" },
+        title: "Alice Moreno",
+        subtitle: "Staff Designer",
+      },
+      {
+        key: "team",
+        label: "team",
+        avatar: { type: "team", name: "Design Systems" },
+        title: "Design Systems",
+        subtitle: "12 members",
+      },
+      {
+        key: "company",
+        label: "company",
+        avatar: { type: "company", name: "Factorial HR" },
+        title: "Factorial HR",
+        subtitle: "Barcelona, Spain",
+      },
+      {
+        key: "file",
+        label: "file",
+        avatar: {
+          type: "file",
+          file: { name: "Q4-roadmap.pdf", type: "application/pdf" },
+        },
+        title: "Q4 Roadmap",
+        subtitle: "Shared with Leadership",
+      },
+      {
+        key: "flag",
+        label: "flag",
+        avatar: { type: "flag", flag: "es" },
+        title: "Spain",
+        subtitle: "EMEA region",
+      },
+      {
+        key: "emoji",
+        label: "emoji",
+        avatar: { type: "emoji", emoji: "🚀" },
+        title: "Launch squad",
+        subtitle: "Cross-functional",
+      },
+      {
+        key: "icon",
+        label: "icon",
+        avatar: { type: "icon", icon: Building },
+        title: "HQ Office",
+        subtitle: "Workspace",
+      },
+    ] as const
+
+    return (
+      <div className="flex flex-wrap items-start gap-16">
+        {nodes.map((n) => (
+          <div key={n.key} className="flex flex-col items-center gap-2">
+            <F0GraphNode
+              avatar={n.avatar}
+              title={n.title}
+              subtitle={n.subtitle}
+            />
+            <span className="text-xs text-f1-foreground-secondary">
+              {n.label}
+            </span>
+          </div>
+        ))}
+      </div>
+    )
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Every avatar variant the node supports, plus the no-avatar case (first). Avatar is always rendered at size `lg` regardless of zoom level.",
+      },
+    },
+  },
 }
 
 export const WithTags: Story = {
