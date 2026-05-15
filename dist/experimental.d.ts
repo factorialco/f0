@@ -3199,6 +3199,10 @@ declare const defaultTranslations: {
             readonly retry: "Retry";
             readonly dataExplanation: "Where does this data come from?";
         };
+        readonly dashboardDatasetFailure: {
+            readonly title: "Some data couldn’t be loaded";
+            readonly description: "We couldn’t load this section of the dashboard. Details: {{reason}}";
+        };
         readonly pong: {
             readonly title: "Pong";
             readonly youWin: "You win!";
