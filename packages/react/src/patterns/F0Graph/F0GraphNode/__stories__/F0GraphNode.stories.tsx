@@ -61,14 +61,6 @@ export const States: Story = {
           />
         )
       )}
-      <F0GraphNode
-        avatar={personAvatar}
-        title="expanded"
-        subtitle="With children"
-        hasChildren
-        expanded
-        childrenCount={3}
-      />
     </div>
   ),
 }
