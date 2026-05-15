@@ -356,9 +356,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
             align="center"
             offset={8}
           >
-            <div className="flex items-center gap-1 rounded-md border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-md">
-              {actions}
-            </div>
+            <div className="flex items-center gap-1">{actions}</div>
           </NodeToolbar>
         )}
 
