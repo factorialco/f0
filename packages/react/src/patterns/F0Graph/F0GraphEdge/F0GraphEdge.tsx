@@ -16,7 +16,8 @@ import { useF0GraphZoomInternal } from "../contexts"
 // with the f1Colors token map.
 const strokeColors = {
   default: "var(--f0-graph-edge-default)", // f1-border
-  highlighted: "var(--f0-graph-edge-highlighted)", // f1-border-bold
+  hover: "var(--f0-graph-edge-hover)", // f1-border-hover
+  highlighted: "var(--f0-graph-edge-highlighted)", // f1-border-selected (viridian secondary)
   dimmed: "var(--f0-graph-edge-default)",
 } as const
 
@@ -31,7 +32,6 @@ const pathGetters = {
 
 export function F0GraphEdgeBase({
   variant = "default",
-  animated = false,
   strokeWidth: propStrokeWidth = 1,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- React Flow passes `type` as the edge type key (e.g. "graphEdge"), ignore it
   type: _rfType,
@@ -106,8 +106,7 @@ export function F0GraphEdgeBase({
         style={{
           stroke: color,
           strokeWidth,
-          opacity: variant === "dimmed" ? 0.3 : undefined,
-          animation: animated ? "f0-edge-flow 1s linear infinite" : undefined,
+          opacity: variant === "dimmed" ? 0.5 : undefined,
         }}
       />
     </>
@@ -119,7 +118,6 @@ F0GraphEdgeBase.displayName = "F0GraphEdge"
 export const F0GraphEdge = memo(F0GraphEdgeBase, (prev, next) => {
   if (prev.id !== next.id) return false
   if (prev.variant !== next.variant) return false
-  if (prev.animated !== next.animated) return false
   if (prev.strokeWidth !== next.strokeWidth) return false
   if (prev.data?.showDot !== next.data?.showDot) return false
   if (prev.data?.pathType !== next.data?.pathType) return false

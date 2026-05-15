@@ -442,14 +442,12 @@ import {
 interface GraphEdgeData extends Record<string, unknown> {
   graphEdge?: GraphEdge
   variant?: EdgeVariant
-  animated?: boolean
 }
 
 function F0GraphEdgeWrapperInner(props: RFEdgeProps) {
   const edgeData = props.data as GraphEdgeData | undefined
   const graphEdge = edgeData?.graphEdge
   const variant: EdgeVariant = edgeData?.variant ?? "default"
-  const animated = edgeData?.animated ?? false
   const renderConfig = useF0GraphRenderConfigInternal()
   const renderEdgeFn = renderConfig?.renderEdge
 
@@ -464,7 +462,6 @@ function F0GraphEdgeWrapperInner(props: RFEdgeProps) {
     <F0GraphEdgeBase
       {...(props as F0GraphEdgeProps & RFEdgeProps)}
       variant={variant}
-      animated={animated}
     />
   )
 }
@@ -475,7 +472,6 @@ const F0GraphEdgeWrapper = memo(F0GraphEdgeWrapperInner, (prev, next) => {
   if (prev.id !== next.id) return false
   if (prev.data?.showDot !== next.data?.showDot) return false
   if (prev.data?.variant !== next.data?.variant) return false
-  if (prev.data?.animated !== next.data?.animated) return false
   if (prev.data?.graphEdge !== next.data?.graphEdge) return false
   if (prev.sourceX !== next.sourceX) return false
   if (prev.sourceY !== next.sourceY) return false

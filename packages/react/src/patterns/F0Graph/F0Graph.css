@@ -15,7 +15,10 @@
    * overlapping edges to compound darker at intersections; opaque
    * equivalents avoid that artifact. */
   --f0-graph-edge-default: #cdd4dd; /* grey.30 (213 87% 15% / 0.20) on white */
-  --f0-graph-edge-highlighted: hsl(var(--neutral-100)); /* f1-border-bold */
+  --f0-graph-edge-hover: hsl(var(--neutral-40)); /* f1-border-hover */
+  --f0-graph-edge-highlighted: hsl(
+    var(--selected-50) / 0.4
+  ); /* f1-border-selected (viridian secondary) */
 }
 
 :root.dark .f0-graph {
