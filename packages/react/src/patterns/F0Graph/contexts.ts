@@ -87,6 +87,29 @@ export function useF0GraphSelectionInternal(): F0GraphSelectionContextValue | nu
 export interface F0GraphActionsContextValue {
   toggleExpand: (nodeId: string) => void
   selectNode: (nodeId: string) => void
+  /**
+   * Expand every expandable node in the graph.
+   *
+   * Eager mode: synchronously walks the resolved tree and adds all nodes
+   * that have children to the expanded set. Resolves immediately.
+   *
+   * Lazy mode (`rootNodes` + `loadChildren`): performs a BFS over the
+   * known tree, awaiting `loadChildren` for any node with
+   * `childrenCount > 0 && !childrenLoaded`. Newly-loaded children are
+   * enqueued and the cascade continues until the queue drains. Errors
+   * from individual `loadChildren` calls are swallowed so one failing
+   * branch does not abort the rest.
+   *
+   * Bulk actions emit a single `onExpandedNodesChange` once the operation
+   * settles. They do NOT fire `onExpandToggle` per node.
+   */
+  expandAll: () => Promise<void>
+  /**
+   * Collapse every node by clearing the expanded set. Lazy-mode children
+   * that have already been fetched stay cached — this only flips UI state.
+   * Emits a single `onExpandedNodesChange(new Set())`.
+   */
+  collapseAll: () => void
 }
 
 export const F0GraphActionsContext =

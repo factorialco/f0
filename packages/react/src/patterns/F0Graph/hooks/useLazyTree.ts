@@ -11,9 +11,15 @@ interface UseLazyTreeResult<T> {
   nodes: GraphNode<T>[]
   loadingNodes: Set<string>
   errorNodes: Map<string, Error>
-  expandNode: (nodeId: string) => Promise<void>
+  /**
+   * Loads children for `nodeId` if they are not already cached. Returns the
+   * freshly fetched children (or the previously cached ones, if any). The
+   * returned array lets bulk callers (e.g. `expandAll`) cascade through the
+   * tree without waiting for React to commit between awaits.
+   */
+  expandNode: (nodeId: string) => Promise<GraphNode<T>[]>
   collapseNode: (nodeId: string) => void
-  retryNode: (nodeId: string) => Promise<void>
+  retryNode: (nodeId: string) => Promise<GraphNode<T>[]>
 }
 
 export function useLazyTree<T>(
@@ -28,6 +34,13 @@ export function useLazyTree<T>(
 
   // Track which nodes have already been loaded to avoid duplicate fetches
   const loadedParents = useRef<Set<string>>(new Set())
+
+  // Mirror `allNodes` so callers awaiting `expandNode` can read cached
+  // children without waiting for a React commit.
+  const allNodesRef = useRef<GraphNode<T>[]>(allNodes)
+  useEffect(() => {
+    allNodesRef.current = allNodes
+  }, [allNodes])
 
   // Sync root nodes when they change externally (by id list)
   const prevRootIdsRef = useRef<string>(rootNodes.map((n) => n.id).join(","))
@@ -46,9 +59,11 @@ export function useLazyTree<T>(
   }, [rootNodes])
 
   const fetchChildren = useCallback(
-    async (nodeId: string) => {
-      // Already loaded — skip
-      if (loadedParents.current.has(nodeId)) return
+    async (nodeId: string): Promise<GraphNode<T>[]> => {
+      // Already loaded — return cached children synchronously from `allNodes`.
+      if (loadedParents.current.has(nodeId)) {
+        return allNodesRef.current.filter((n) => n.parentId === nodeId)
+      }
 
       setLoadingNodes((prev) => {
         const next = new Set(prev)
@@ -86,12 +101,15 @@ export function useLazyTree<T>(
             n.id === nodeId ? { ...n, childrenLoaded: true } : n
           )
         })
+
+        return enrichedChildren
       } catch (err) {
         setErrorNodes((prev) => {
           const next = new Map(prev)
           next.set(nodeId, err instanceof Error ? err : new Error(String(err)))
           return next
         })
+        return []
       } finally {
         setLoadingNodes((prev) => {
           const next = new Set(prev)
@@ -104,8 +122,8 @@ export function useLazyTree<T>(
   )
 
   const expandNode = useCallback(
-    async (nodeId: string) => {
-      await fetchChildren(nodeId)
+    async (nodeId: string): Promise<GraphNode<T>[]> => {
+      return await fetchChildren(nodeId)
     },
     [fetchChildren]
   )
@@ -116,10 +134,10 @@ export function useLazyTree<T>(
   }, [])
 
   const retryNode = useCallback(
-    async (nodeId: string) => {
+    async (nodeId: string): Promise<GraphNode<T>[]> => {
       // Allow re-fetch by clearing the loaded flag
       loadedParents.current.delete(nodeId)
-      await fetchChildren(nodeId)
+      return await fetchChildren(nodeId)
     },
     [fetchChildren]
   )

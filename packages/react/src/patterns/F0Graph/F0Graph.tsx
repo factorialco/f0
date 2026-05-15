@@ -328,6 +328,27 @@ function computeExpandedByDepth<T>(
   return expanded
 }
 
+// ─── Helper: collect all expandable node ids (eager mode) ──────
+// A node is "expandable" when it has children to reveal. In eager mode the
+// tree is fully known, so `children.length > 0` is sufficient.
+function collectExpandableNodeIds<T>(roots: TreeNode<T>[]): Set<string> {
+  const ids = new Set<string>()
+
+  function walk(node: TreeNode<T>): void {
+    if (node.children.length > 0) {
+      ids.add(node.id)
+      for (const child of node.children) {
+        walk(child)
+      }
+    }
+  }
+
+  for (const root of roots) {
+    walk(root)
+  }
+  return ids
+}
+
 // ─── Helper: derive edges from tree structure ──────────────────
 function deriveEdgesFromTree<T>(roots: TreeNode<T>[]): GraphEdge[] {
   const edges: GraphEdge[] = []
@@ -1191,6 +1212,97 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     ]
   )
 
+  // ── Bulk expand / collapse (refs so async closures see latest data) ──
+  // `rootsRef` and `lazyNodesRef` keep the bulk callbacks stable while still
+  // exposing fresh tree data — important for lazy-mode BFS, which must read
+  // newly-loaded children between awaits.
+  const rootsRef = useRef(roots)
+  useEffect(() => {
+    rootsRef.current = roots
+  }, [roots])
+
+  const lazyNodesRef = useRef(lazyTree.nodes)
+  useEffect(() => {
+    lazyNodesRef.current = lazyTree.nodes
+  }, [lazyTree.nodes])
+
+  const expandAll = useCallback(async (): Promise<void> => {
+    // ── Eager mode: full tree is known synchronously ──
+    if (!isLazyMode) {
+      const next = collectExpandableNodeIds(rootsRef.current)
+      if (!controlledExpanded) {
+        setInternalExpanded(next)
+      }
+      onExpandedNodesChange?.(next)
+      return
+    }
+
+    // ── Lazy mode: BFS, awaiting loadChildren level by level ──
+    // We drive the BFS off the children returned directly by
+    // `lazyTree.expandNode()` rather than reading rendered state — this
+    // avoids any dependency on React commit timing between awaits.
+    // Single state write at the end honors the "one onExpandedNodesChange
+    // per bulk action" contract documented on F0GraphActionsContextValue.
+    const accumulated = new Set<string>(expandedNodesRef.current)
+    const visited = new Set<string>()
+
+    // Seed the frontier with current root ids that have children.
+    let frontier: string[] = []
+    for (const node of lazyNodesRef.current) {
+      if (node.parentId === null && (node.childrenCount ?? 0) > 0) {
+        frontier.push(node.id)
+        visited.add(node.id)
+      }
+    }
+
+    while (frontier.length > 0) {
+      // Mark every frontier id as expanded.
+      for (const id of frontier) {
+        accumulated.add(id)
+      }
+
+      // Load each frontier node in parallel. `expandNode` resolves with the
+      // freshly loaded (or cached) children so we can build the next
+      // frontier from the result without waiting on React commits. Errors
+      // are swallowed per-node so one failing branch does not abort the
+      // cascade.
+      const results = await Promise.all(
+        frontier.map((id) =>
+          lazyTree
+            .expandNode(id)
+            .then((children) => ({ id, children }))
+            .catch(() => ({ id, children: [] as typeof lazyTree.nodes }))
+        )
+      )
+
+      // Build the next frontier from the returned children.
+      const next: string[] = []
+      for (const { children } of results) {
+        for (const child of children) {
+          if (visited.has(child.id)) continue
+          visited.add(child.id)
+          if ((child.childrenCount ?? 0) > 0) {
+            next.push(child.id)
+          }
+        }
+      }
+      frontier = next
+    }
+
+    if (!controlledExpanded) {
+      setInternalExpanded(accumulated)
+    }
+    onExpandedNodesChange?.(accumulated)
+  }, [isLazyMode, controlledExpanded, onExpandedNodesChange, lazyTree])
+
+  const collapseAll = useCallback((): void => {
+    const empty = new Set<string>()
+    if (!controlledExpanded) {
+      setInternalExpanded(empty)
+    }
+    onExpandedNodesChange?.(empty)
+  }, [controlledExpanded, onExpandedNodesChange])
+
   // ── Detail panel state ──
   const {
     detailPanel,
@@ -1674,8 +1786,8 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
   )
 
   const actionsContextValue = useMemo(
-    () => ({ toggleExpand, selectNode }),
-    [toggleExpand, selectNode]
+    () => ({ toggleExpand, selectNode, expandAll, collapseAll }),
+    [toggleExpand, selectNode, expandAll, collapseAll]
   )
 
   const isDeferredLoading =

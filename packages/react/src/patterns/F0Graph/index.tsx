@@ -35,3 +35,6 @@ export * from "./F0GraphNode"
 /** Focus context hook for reading/controlling roving tabindex focus within the graph. */
 export { useF0GraphFocus } from "./contexts"
 export type { F0GraphFocusContextValue } from "./contexts"
+/** Actions hook — exposes `toggleExpand`, `selectNode`, `expandAll`, `collapseAll` from inside an `<F0Graph>` subtree (e.g. via the `canvasActions` slot). */
+export { useF0GraphActions } from "./contexts"
+export type { F0GraphActionsContextValue } from "./contexts"
