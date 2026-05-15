@@ -30,6 +30,8 @@ export * from "./F0GraphEdge"
 export * from "./F0GraphExpander"
 /** Card wrapper for nodes with avatar, title, subtitle, metadata, and actions slots. */
 export * from "./F0GraphNode"
+/** Side panel that displays details about the currently selected node. */
+export * from "./F0GraphDetailPanel"
 
 // Hooks
 /** Focus context hook for reading/controlling roving tabindex focus within the graph. */

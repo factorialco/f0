@@ -42,16 +42,30 @@ export function useLazyTree<T>(
     allNodesRef.current = allNodes
   }, [allNodes])
 
-  // Sync root nodes when they change externally (by id list)
-  const prevRootIdsRef = useRef<string>(rootNodes.map((n) => n.id).join(","))
+  // Sync root nodes when they change externally (compared by id set, not a
+  // joined string — ids may legitimately contain commas, which would otherwise
+  // produce false matches/misses).
+  const prevRootIdsRef = useRef<Set<string>>(
+    new Set(rootNodes.map((n) => n.id))
+  )
 
   useEffect(() => {
-    const rootIds = rootNodes.map((n) => n.id).join(",")
-    if (prevRootIdsRef.current !== rootIds) {
+    const rootIds = new Set(rootNodes.map((n) => n.id))
+    const prev = prevRootIdsRef.current
+    let changed = rootIds.size !== prev.size
+    if (!changed) {
+      for (const id of rootIds) {
+        if (!prev.has(id)) {
+          changed = true
+          break
+        }
+      }
+    }
+    if (changed) {
       prevRootIdsRef.current = rootIds
       setAllNodes((prev) => {
         const nonRootNodes = prev.filter(
-          (n) => n.parentId !== null && !rootNodes.some((r) => r.id === n.id)
+          (n) => n.parentId !== null && !rootIds.has(n.id)
         )
         return [...rootNodes, ...nonRootNodes]
       })

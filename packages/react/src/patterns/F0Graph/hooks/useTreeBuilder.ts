@@ -31,6 +31,9 @@ function buildTree<T>(nodes: GraphNode<T>[]): TreeBuilderResult<T> {
   const nodeMap = new Map<string, TreeNode<T>>()
   const orphans: string[] = []
   const cycles: string[] = []
+  // Mirror of `cycles` for O(1) membership checks. Both are kept in sync so
+  // the external `cycles` array shape (TreeBuilderResult.cycles) is preserved.
+  const cycleSet = new Set<string>()
 
   // Step 1: Create TreeNode entries for every input node.
   //         When `parentIds` is provided it takes precedence over `parentId`.
@@ -60,6 +63,7 @@ function buildTree<T>(nodes: GraphNode<T>[]): TreeBuilderResult<T> {
   for (const [id, treeNode] of nodeMap) {
     if (treeNode.parentId === id) {
       cycles.push(id)
+      cycleSet.add(id)
       treeNode.parentId = null
     }
   }
@@ -72,7 +76,7 @@ function buildTree<T>(nodes: GraphNode<T>[]): TreeBuilderResult<T> {
 
   for (const [id, treeNode] of nodeMap) {
     // Already promoted to root by cycle detection
-    if (cycles.includes(id)) {
+    if (cycleSet.has(id)) {
       roots.push(treeNode)
       continue
     }
@@ -103,6 +107,7 @@ function buildTree<T>(nodes: GraphNode<T>[]): TreeBuilderResult<T> {
     if (inStack.has(node.id)) {
       // Cycle found (ERR-003)
       cycles.push(node.id)
+      cycleSet.add(node.id)
       return
     }
     if (visited.has(node.id)) return
@@ -114,6 +119,7 @@ function buildTree<T>(nodes: GraphNode<T>[]): TreeBuilderResult<T> {
     node.children = node.children.filter((child) => {
       if (inStack.has(child.id)) {
         cycles.push(child.id)
+        cycleSet.add(child.id)
         // Promote cyclic child to root
         child.parentId = null
         roots.push(child)

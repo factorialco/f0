@@ -33,6 +33,7 @@ const pathGetters = {
 export function F0GraphEdgeBase({
   variant: variantProp,
   strokeWidth: propStrokeWidth = 1,
+  pathType: pathTypeProp,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- React Flow passes `type` as the edge type key (e.g. "graphEdge"), ignore it
   type: _rfType,
   ...edgeProps
@@ -60,7 +61,9 @@ export function F0GraphEdgeBase({
     propStrokeWidth
   const showDot = edgeProps.data?.showDot !== false
   const pathType =
-    (edgeProps.data?.pathType as keyof typeof pathGetters) ?? "smoothstep"
+    pathTypeProp ??
+    (edgeProps.data?.pathType as keyof typeof pathGetters | undefined) ??
+    "smoothstep"
 
   // When source and target are nearly aligned on the cross-axis,
   // use a straight line to avoid smoothstep introducing a tiny jog ("wiggle")

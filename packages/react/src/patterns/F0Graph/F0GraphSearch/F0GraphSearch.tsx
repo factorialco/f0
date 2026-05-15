@@ -81,6 +81,17 @@ export const F0GraphSearch = ({
     setHoverIndex(null)
   }, [value])
 
+  // Clamp the active row whenever results change so `aria-activedescendant`
+  // never points past the end of the list (e.g. between an input change and
+  // the debounced recompute, or when the list shrinks).
+  useEffect(() => {
+    setActiveIndex((current) => {
+      if (results.length === 0) return 0
+      if (current >= results.length) return results.length - 1
+      return current
+    })
+  }, [results])
+
   // Keep the active row in view.
   useEffect(() => {
     if (!showResults) return
