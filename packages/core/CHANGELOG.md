@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.50.2](https://github.com/factorialco/f0/compare/f0-core-v1.50.1...f0-core-v1.50.2) (2026-05-15)
+
+
+### Bug Fixes
+
+* **colors:** adjust secondary border color for improved contrast ([#4142](https://github.com/factorialco/f0/issues/4142)) ([d3eae7b](https://github.com/factorialco/f0/commit/d3eae7b60f1d0fb3a3bf0e10fbb523babf17f914))
+
 ## [1.50.1](https://github.com/factorialco/f0/compare/f0-core-v1.50.0...f0-core-v1.50.1) (2026-04-24)
 
 
