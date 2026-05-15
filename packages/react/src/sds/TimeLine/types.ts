@@ -82,8 +82,12 @@ export interface F0TimelineRowNestedtaskProps extends F0TimelineRowBaseProps {
   icon: IconType
   /** Description text (e.g., "Estimated on 18/07/2025") */
   description?: string
-  /** Number of nested items (displayed in the progress pill) */
-  taskCount: number
+  /**
+   * Number of nested items (displayed in the progress pill alongside
+   * `completedCount`). Omit when the row body conveys progress on its own
+   * (e.g. an embedded info card or table) and a pill would be redundant.
+   */
+  taskCount?: number
   /** Number of completed items (displayed in the progress pill) */
   completedCount?: number
   /** Whether the row is expanded (controlled). When `collapsible` is false this is ignored and the row is always expanded. */

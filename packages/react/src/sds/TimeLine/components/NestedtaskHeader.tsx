@@ -79,7 +79,7 @@ export const NestedtaskHeader = ({
             )}
           </div>
         )}
-        {completedCount !== undefined && (
+        {completedCount !== undefined && taskCount !== undefined && (
           <F0TagStatus
             text={`${completedCount}/${taskCount}`}
             variant={status === "completed" ? "positive" : "warning"}
