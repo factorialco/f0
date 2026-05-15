@@ -211,4 +211,34 @@ describe("renderCustomField", () => {
 
     spy.mockRestore()
   })
+
+  it("associates label with combobox for select fields rendered via renderCustomField with select-config", () => {
+    const schema = z.object({
+      workplace: f0FormField(z.string().optional(), {
+        label: "Workplace",
+        fieldType: "select",
+        customFieldName: "workplace-selector",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="test-select-label"
+        schema={schema}
+        defaultValues={{ workplace: "" }}
+        onSubmit={async () => ({ success: true })}
+        renderCustomField={() => ({
+          _type: "select-config" as const,
+          options: [
+            { value: "office", label: "Office" },
+            { value: "remote", label: "Remote" },
+          ],
+        })}
+      />
+    )
+
+    expect(
+      screen.getByRole("combobox", { name: "Workplace" })
+    ).toBeInTheDocument()
+  })
 })

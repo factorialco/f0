@@ -125,13 +125,11 @@ const F0SelectComponent = forwardRef(function Select<
     showPreview = false,
     preserveSelectionOnDatasetChange = true,
     dataTestId,
-    id: propId,
     ...props
   }: F0SelectProps<T, R>,
   ref: React.ForwardedRef<HTMLButtonElement>
 ) {
-  const generatedId = useId()
-  const id = propId ?? generatedId
+  const id = useId()
 
   // If inside a OneDialog and no portalContainer is provided, use the dialog's container
   // only for center/fullscreen dialogs (which have focus trap).
@@ -867,7 +865,6 @@ const F0SelectComponent = forwardRef(function Select<
             </div>
           ) : (
             <InputField
-              id={id}
               label={label}
               error={error}
               required={required}
