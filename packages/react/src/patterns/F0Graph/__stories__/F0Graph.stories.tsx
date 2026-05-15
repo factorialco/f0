@@ -5,7 +5,6 @@ import "@xyflow/react/dist/style.css"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
 import { F0Card } from "@/components/F0Card"
-import { F0Text } from "@/components/F0Text"
 import { F0TagPerson } from "@/components/tags/F0TagPerson"
 import { DataList } from "@/experimental/Lists/DataList"
 import { Weekdays } from "@/experimental/Widgets/Content/Weekdays"
@@ -900,11 +899,9 @@ function DetailPanelSection({
   return (
     <section className="flex flex-col border-0 border-t border-dashed border-f1-border-secondary">
       <header className="flex items-center px-4 pb-2 pt-3">
-        <F0Text
-          content={title}
-          as="span"
-          className="text-base font-semibold leading-5 text-f1-foreground"
-        />
+        <span className="text-base font-semibold leading-5 text-f1-foreground">
+          {title}
+        </span>
       </header>
       <div className="flex flex-col gap-2 pb-2">{children}</div>
     </section>
@@ -948,25 +945,19 @@ export const WithDetailPanel: Story = {
             />
             <div className="flex flex-col">
               <div className="flex items-end gap-1.5">
-                <F0Text
-                  as="span"
-                  content={e.name}
-                  className="text-xl font-semibold leading-7 text-f1-foreground"
-                />
+                <span className="text-xl font-semibold leading-7 text-f1-foreground">
+                  {e.name}
+                </span>
                 {e.pronouns && (
-                  <F0Text
-                    as="span"
-                    content={`(${e.pronouns})`}
-                    className="text-sm font-medium leading-5 text-f1-foreground-secondary"
-                  />
+                  <span className="text-sm font-medium leading-5 text-f1-foreground-secondary">
+                    {`(${e.pronouns})`}
+                  </span>
                 )}
               </div>
               {e.title && (
-                <F0Text
-                  as="span"
-                  content={e.title}
-                  className="text-lg text-f1-foreground-secondary"
-                />
+                <span className="text-lg text-f1-foreground-secondary">
+                  {e.title}
+                </span>
               )}
             </div>
           </div>
@@ -1016,11 +1007,9 @@ export const WithDetailPanel: Story = {
                 </DataList>
               </div>
               <div className="flex flex-col gap-0.5 px-4 pb-2">
-                <F0Text
-                  as="span"
-                  content="Workable days"
-                  className="text-base leading-5 text-f1-foreground-secondary"
-                />
+                <span className="text-base leading-5 text-f1-foreground-secondary">
+                  Workable days
+                </span>
                 <Weekdays
                   activatedDays={days
                     .map((d) => DAY_CODE_TO_INDEX[d])
@@ -1029,11 +1018,9 @@ export const WithDetailPanel: Story = {
               </div>
               {manager && (
                 <div className="flex flex-col gap-0.5 px-4 pb-2">
-                  <F0Text
-                    as="span"
-                    content="Managed by"
-                    className="text-base leading-5 text-f1-foreground-secondary"
-                  />
+                  <span className="text-base leading-5 text-f1-foreground-secondary">
+                    Managed by
+                  </span>
                   <F0TagPerson name={manager.data.name} />
                 </div>
               )}
