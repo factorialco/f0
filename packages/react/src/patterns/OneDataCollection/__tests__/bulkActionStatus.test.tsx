@@ -473,10 +473,10 @@ describe("OneDataCollection bulk-action status", () => {
   })
 
   test("Unselect button is disabled while a bulk action is loading", async () => {
-    // Regression guard for review comment #2: leftContent sits outside
-    // F0ActionBar's internal disabled logic, so we must disable it explicitly.
-    // Without this, clicking Unselect during loading clears the selection
-    // before a rejected promise can preserve it for retry.
+    // leftContent sits outside F0ActionBar's internal disabled logic, so we
+    // must disable it explicitly. Without this, clicking Unselect during
+    // loading clears the selection before a rejected promise can preserve it
+    // for retry.
     let resolveHandler: (() => void) | undefined
     const onBulkAction = vi.fn(
       () =>
@@ -728,6 +728,52 @@ describe("OneDataCollection bulk-action status", () => {
     // Flush microtasks so the .then() callback runs before we advance timers.
     await Promise.resolve()
     vi.advanceTimersByTime(2000)
+    await waitFor(() => {
+      expect(queryArchiveButtons()).toHaveLength(0)
+    })
+  })
+
+  test("component mounted with initial bulkActionStatus='success' auto-dismisses", async () => {
+    // Regression guard: prevControlledStatusRef was initialized with the prop
+    // value, so mounting with "success" set prev===current and the dismiss
+    // timer was never scheduled — the bar stayed in success forever.
+    // Initializing the ref to undefined ensures the first render with "success"
+    // is treated as a fresh transition and the dismiss fires normally.
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime.bind(vi),
+    })
+
+    const { result } = renderHook(() => useTestSource(), {
+      wrapper: TestWrapper,
+    })
+
+    render(
+      <TestWrapper>
+        <OneDataCollection
+          source={result.current}
+          visualizations={[{ type: "table", options: { columns } }]}
+          autoManageBulkActionStatus
+          bulkActionStatus="success"
+          onBulkAction={vi.fn()}
+        />
+      </TestWrapper>
+    )
+
+    // Select a row so the bar is visible.
+    await selectFirstRow(user)
+
+    // Bar is open showing success (mounted with "success").
+    await waitFor(() => {
+      expect(queryArchiveButtons().length).toBeGreaterThan(0)
+    })
+
+    // Advance past SUCCESS_DISMISS_MS — dismiss must fire even though no
+    // transition from another status occurred.
+    act(() => {
+      vi.advanceTimersByTime(2000)
+    })
+
     await waitFor(() => {
       expect(queryArchiveButtons()).toHaveLength(0)
     })

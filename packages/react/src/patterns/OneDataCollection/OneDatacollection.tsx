@@ -537,7 +537,10 @@ const OneDataCollectionComp = <
     }
   }, [])
 
-  const prevControlledStatusRef = useRef(controlledBulkActionStatus)
+  // Initialize to undefined (not the current prop value) so that a component
+  // mounted with bulkActionStatus="success" is treated as a fresh transition
+  // and schedules the dismiss timer on first render.
+  const prevControlledStatusRef = useRef<ActionBarStatus | undefined>(undefined)
   useEffect(() => {
     const prev = prevControlledStatusRef.current
     prevControlledStatusRef.current = controlledBulkActionStatus

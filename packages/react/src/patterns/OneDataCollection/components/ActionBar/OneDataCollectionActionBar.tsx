@@ -97,9 +97,9 @@ export const OneDataCollectionActionBar = forwardRef<
 
   // Keep a snapshot of the last known selectedNumber so the leftContent area
   // (counter + Unselect button) doesn't vanish during the brief success state.
-  // Selection is cleared as soon as the promise resolves, but the bar stays
-  // open for ~1.5s to show the checkmark — without this the bar shrinks
-  // abruptly as leftContent disappears.
+  // Selection is cleared inside the success-dismiss timer (~1.5s after resolve),
+  // but selectedNumber drops to 0 immediately once clearSelectedItems() runs —
+  // without this snapshot the bar shrinks abruptly before the exit animation.
   const lastSelectedNumberRef = useRef(selectedNumber ?? 0)
   useEffect(() => {
     if (selectedNumber) lastSelectedNumberRef.current = selectedNumber
