@@ -2,6 +2,7 @@ import React from "react"
 import { describe, expect, it, vi } from "vitest"
 import { z } from "zod"
 
+import { createDataSourceDefinition, type RecordType } from "@/hooks/datasource"
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
 import { F0Form } from "../F0Form"
@@ -239,6 +240,66 @@ describe("renderCustomField", () => {
 
     expect(
       screen.getByRole("combobox", { name: "Workplace" })
+    ).toBeInTheDocument()
+  })
+
+  it("associates label with combobox for select fields in a row with source and mapOptions via renderCustomField", async () => {
+    const locationSource = createDataSourceDefinition<RecordType>({
+      dataAdapter: {
+        paginationType: "infinite-scroll",
+        fetchData: () =>
+          Promise.resolve({
+            type: "infinite-scroll" as const,
+            cursor: "100",
+            perPage: 100,
+            hasMore: false,
+            records: [
+              { id: "hq", name: "Headquarters" },
+              { id: "remote", name: "Remote" },
+            ],
+            total: 2,
+          }),
+      },
+    })
+
+    const mapLocationOptions = (item: RecordType) => ({
+      value: item.id as string,
+      label: item.name as string,
+    })
+
+    const schema = z.object({
+      jobTitle: f0FormField(z.string().optional(), {
+        label: "Job Title",
+        row: "job-row",
+      }),
+      workplace: f0FormField(z.string().optional(), {
+        label: "Workplace",
+        fieldType: "select",
+        customFieldName: "workplace-selector",
+        row: "job-row",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="test-select-source-row"
+        schema={schema}
+        defaultValues={{ jobTitle: "", workplace: "" }}
+        onSubmit={async () => ({ success: true })}
+        renderCustomField={() => ({
+          _type: "select-config" as const,
+          source: locationSource,
+          mapOptions: mapLocationOptions,
+          showSearchBox: true,
+        })}
+      />
+    )
+
+    expect(
+      screen.getByRole("combobox", { name: "Workplace" })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("textbox", { name: "Job Title" })
     ).toBeInTheDocument()
   })
 })
