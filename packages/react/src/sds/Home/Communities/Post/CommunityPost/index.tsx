@@ -21,6 +21,35 @@ import { PostDescription, PostDescriptionProps } from "../PostDescription"
 import { PostEvent, PostEventProps } from "../PostEvent"
 import { isVideo } from "./video"
 
+const ExpandDescriptionButton = ({
+  controls,
+  expanded,
+  onClick,
+}: {
+  controls: string
+  expanded: boolean
+  onClick: (event: React.MouseEvent<HTMLElement>) => void
+}) => {
+  const i18n = useI18n()
+
+  return (
+    <div className="text-base text-f1-foreground">
+      <button
+        type="button"
+        className={cn(
+          "inline cursor-pointer rounded-none border-0 bg-transparent p-0 text-base text-f1-foreground underline underline-offset-2 hover:text-f1-foreground-secondary",
+          focusRing()
+        )}
+        aria-controls={controls}
+        aria-expanded={expanded}
+        onClick={onClick}
+      >
+        {i18n.actions.seeMore}
+      </button>
+    </div>
+  )
+}
+
 export type CommunityPostAction = {
   label?: string
   icon?: IconType
@@ -92,7 +121,6 @@ export const BaseCommunityPost = ({
   noReactionsButton = false,
   descriptionExpandable = false,
 }: CommunityPostProps) => {
-  const i18n = useI18n()
   const descriptionId = useId()
   const descriptionRef = useRef<HTMLDivElement>(null)
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
@@ -264,20 +292,11 @@ export const BaseCommunityPost = ({
                   className={cn(isDescriptionExpanded && focusRing())}
                 />
                 {descriptionExpandable && !isDescriptionExpanded && (
-                  <div className="text-base text-f1-foreground">
-                    <button
-                      type="button"
-                      className={cn(
-                        "inline cursor-pointer rounded-none border-0 bg-transparent p-0 text-base text-f1-foreground underline underline-offset-2 hover:text-f1-foreground-secondary",
-                        focusRing()
-                      )}
-                      aria-controls={descriptionId}
-                      aria-expanded={isDescriptionExpanded}
-                      onClick={handleToggleDescription}
-                    >
-                      {i18n.actions.seeMore}
-                    </button>
-                  </div>
+                  <ExpandDescriptionButton
+                    controls={descriptionId}
+                    expanded={isDescriptionExpanded}
+                    onClick={handleToggleDescription}
+                  />
                 )}
               </>
             )}

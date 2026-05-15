@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import PushPin from "@/icons/app/PushPin"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { CommunityPost } from "./index"
 
@@ -230,6 +231,7 @@ export const LongUnspacedText: Story = {
 
 export const ExpandableDescription: Story = {
   decorators: Default.decorators,
+  parameters: withSnapshot({}),
   args: {
     ...Default.args,
     event: undefined,

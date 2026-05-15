@@ -37,6 +37,8 @@ export const BasePostDescription = forwardRef<
   )
 })
 
+BasePostDescription.displayName = "BasePostDescription"
+
 export const PostDescriptionSkeleton = () => (
   <div className="flex flex-col justify-around gap-3 py-2">
     <Skeleton className="h-2.5 w-1/2 rounded-2xs" />
