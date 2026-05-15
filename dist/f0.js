@@ -10274,8 +10274,8 @@ function Du({
       "aria-label": c.npsWidget.survey,
       className: M(
         "fixed bottom-6 left-6 z-50 w-[480px]",
-        "rounded-xl border border-solid border-f1-border bg-f1-background",
-        "shadow-[0_8px_24px_-4px_hsl(var(--shadow)/0.12),0_2px_8px_-2px_hsl(var(--shadow)/0.08)]"
+        "rounded-xl border border-solid border-f1-border-secondary bg-f1-background",
+        "shadow"
       ),
       children: [
         /* @__PURE__ */ v("div", { className: "flex flex-col gap-3 p-4 pb-3", children: [
