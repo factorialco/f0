@@ -421,9 +421,11 @@ When `bulkActionStatus` is provided, void-returning handlers never auto-clear
 selection regardless of the current value — F0 treats the prop's presence as
 a signal that some actions have modal lifecycles.
 
-`"error"` state persists until the user changes their selection (which resets
-it to `"idle"`) or the consumer sets a different value — allowing the user to
-retry the failed action.
+In **auto-managed mode**, `"error"` persists until the user changes their
+selection (which resets it to `"idle"`), allowing them to retry. In
+**controlled mode**, selection changes only reset the internal state — the
+controlled `"error"` prop remains active until the consumer explicitly sets a
+different value.
 
 <Canvas
   of={DataCollectionStories.WithAsyncBulkActions}
