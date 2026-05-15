@@ -148,7 +148,7 @@ It does **not** own form state or field rendering. The consumer passes any React
 
 - `defaultStepIndex` is clamped to `[0, steps.length - 1]`.
 - An empty `steps` array renders nothing.
-- The Back button is hidden on the first step.
+- The Back button remains visible on the first step, but is disabled.
 - The Next button label changes to `submitLabel` on the last step.
 - During an async `onNext` call, the Next button shows a loading indicator and is non-interactive to prevent double-taps.
 - `canAdvance` is evaluated synchronously on every render; `onNext` is only called on press.
