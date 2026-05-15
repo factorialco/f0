@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.0](https://github.com/factorialco/f0/compare/f0-react-v2.4.1...f0-react-v2.5.0) (2026-05-15)
+
+
+### Features
+
+* number input decimal separator fix allowing decimals ([#4148](https://github.com/factorialco/f0/issues/4148)) ([f7c433e](https://github.com/factorialco/f0/commit/f7c433e0ccc019c9706775d14f0e1f03aaadc6b9))
+
 ## [2.4.1](https://github.com/factorialco/f0/compare/f0-react-v2.4.0...f0-react-v2.4.1) (2026-05-15)
 
 
