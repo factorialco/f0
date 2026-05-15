@@ -67,7 +67,7 @@ export const States: Story = {
 
 export const ZoomLevels: Story = {
   render: () => (
-    <div className="flex flex-wrap items-center gap-16">
+    <div className="flex flex-wrap items-start gap-16">
       {(["detail", "compact", "dot"] as const).map((variant) => (
         <div key={variant} className="flex flex-col items-center gap-2">
           <F0GraphNode
@@ -76,7 +76,11 @@ export const ZoomLevels: Story = {
             subtitle="Staff Designer"
             variant={variant}
           />
-          <span className="text-xs text-f1-foreground-secondary">
+          <span
+            className={`text-xs text-f1-foreground-secondary ${
+              variant === "dot" ? "mt-[49px]" : ""
+            }`}
+          >
             {variant}
           </span>
         </div>
