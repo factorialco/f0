@@ -101,6 +101,29 @@ type ApiConfig = {
 // ---------------------------------------------------------------------------
 
 /**
+ * Read the datasetId of a dashboard item across all three variants. The
+ * f0 TypeScript model declares `computation.datasetId` on every variant,
+ * but the agent's persisted shape — and the compute route on the agent
+ * side — stores chart datasetIds under `item.chart.datasetId` instead.
+ * Legacy / in-flight dashboards therefore lack `item.computation` on
+ * chart items, which crashed earlier consumers. Mirror the agent
+ * accessor here so we are tolerant of both shapes.
+ *
+ * Exported for use by `DashboardContent` when filtering items.
+ */
+export function readItemDatasetId(
+  item: ChatDashboardConfig["items"][number]
+): string | undefined {
+  const fromComputation = (item as { computation?: { datasetId?: unknown } })
+    .computation?.datasetId
+  if (typeof fromComputation === "string") return fromComputation
+  const fromChart = (item as { chart?: { datasetId?: unknown } }).chart
+    ?.datasetId
+  if (typeof fromChart === "string") return fromChart
+  return undefined
+}
+
+/**
  * Build a `{ datasetId → DatasetFailure }` map from a compute response. We
  * include a dataset only when an item targeting it failed with a structured
  * `reason` — those failures affect the whole dataset and warrant a single
@@ -119,7 +142,8 @@ export function computeDatasetFailures(
 ): Record<string, DatasetFailure> | undefined {
   const byItemId = new Map<string, string>()
   for (const item of config.items) {
-    byItemId.set(item.id, item.computation.datasetId)
+    const datasetId = readItemDatasetId(item)
+    if (datasetId) byItemId.set(item.id, datasetId)
   }
 
   const failures: Record<string, DatasetFailure> = {}

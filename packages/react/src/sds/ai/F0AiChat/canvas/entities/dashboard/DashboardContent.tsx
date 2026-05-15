@@ -39,6 +39,7 @@ import type {
 
 import { useDashboardCompute, type ItemResult } from "./useDashboardCompute"
 import type { DashboardRepairFailure } from "./useDashboardCompute"
+import { readItemDatasetId } from "./useDashboardCompute"
 
 // ---------------------------------------------------------------------------
 // Minimum item height per type
@@ -430,10 +431,15 @@ export function ChatDashboard({
   const items: DashboardItem<FiltersDefinition>[] = useMemo(
     () =>
       config.items
-        .filter(
-          (item) =>
-            !datasetFailures || !(item.computation.datasetId in datasetFailures)
-        )
+        .filter((item) => {
+          if (!datasetFailures) return true
+          const datasetId = readItemDatasetId(item)
+          // Items without a resolvable datasetId (malformed / legacy) are
+          // kept so they can render their own per-item state rather than
+          // disappearing silently from the grid.
+          if (!datasetId) return true
+          return !(datasetId in datasetFailures)
+        })
         .map((item) => {
           switch (item.type) {
             case "chart":

@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest"
 
-import type { ChatDashboardConfig, ChatDashboardMetricItem } from "../types"
+import type {
+  ChatDashboardChartItem,
+  ChatDashboardConfig,
+  ChatDashboardMetricItem,
+} from "../types"
 import {
   computeDatasetFailures,
   type ComputeResponse,
@@ -15,6 +19,23 @@ const metricItem = (
   title: id,
   computation: { datasetId, aggregation: "count" },
 })
+
+/**
+ * Mirrors the agent's persisted shape for chart items: the `datasetId`
+ * lives on `chart`, not on `computation`. The f0 type system declares
+ * `computation` on every variant but live data violates that — see
+ * `readItemDatasetId` in useDashboardCompute.ts.
+ */
+const chartItemAgentShape = (
+  id: string,
+  datasetId: string
+): ChatDashboardChartItem =>
+  ({
+    id,
+    type: "chart",
+    title: id,
+    chart: { type: "bar", datasetId },
+  }) as unknown as ChatDashboardChartItem
 
 const config = (items: ChatDashboardConfig["items"]): ChatDashboardConfig => ({
   title: "Test dashboard",
@@ -107,6 +128,39 @@ describe("computeDatasetFailures", () => {
         ghost: { error: "boom", reason: "dataset_failed" },
       }),
       config([metricItem("m1", "dsA")])
+    )
+    expect(result).toBeUndefined()
+  })
+
+  it("reads datasetId from chart.datasetId when computation is absent (agent shape)", () => {
+    // Regression: live chart items lack `computation` — the agent persists
+    // chart datasetIds under `chart.datasetId`. The previous implementation
+    // crashed with "Cannot read properties of undefined (reading
+    // 'datasetId')" when filtering items.
+    const result = computeDatasetFailures(
+      response({
+        ch1: { error: "Cannot heal", reason: "unrepairable" },
+      }),
+      config([chartItemAgentShape("ch1", "dsChart")])
+    )
+    expect(result).toEqual({
+      dsChart: { reason: "unrepairable", message: "Cannot heal" },
+    })
+  })
+
+  it("does not crash on items missing both computation and chart.datasetId", () => {
+    // Worst-case malformed item: no resolvable datasetId at all. Must not
+    // throw and must not contribute to the failure map.
+    const malformed = {
+      id: "junk",
+      type: "metric",
+      title: "junk",
+    } as unknown as ChatDashboardMetricItem
+    const result = computeDatasetFailures(
+      response({
+        junk: { error: "boom", reason: "dataset_failed" },
+      }),
+      config([malformed])
     )
     expect(result).toBeUndefined()
   })
