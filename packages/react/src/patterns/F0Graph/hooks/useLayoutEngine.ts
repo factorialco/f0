@@ -10,6 +10,33 @@ import type {
   TreeNode,
 } from "../types"
 
+/**
+ * F0Graph layout engine — custom hierarchical tree layout.
+ *
+ * **Why not dagre / ELK?**
+ * React Flow's official layouting guide recommends dagre for trees
+ * (https://reactflow.dev/learn/layouting/layouting). We deliberately do not
+ * use it. Dagre's barycenter pass re-derives sibling order from edge
+ * structure, which causes siblings to shuffle whenever nodes are expanded
+ * or collapsed. For an org chart, stable sibling order across expand /
+ * collapse is a hard UX requirement — a manager's reports must not reorder
+ * just because a peer's subtree opened.
+ *
+ * **What this engine does**
+ * A deterministic, cursor-based post-order traversal that positions each
+ * node under its canonical parent and preserves the input sibling order
+ * exactly as provided by the consumer. Same input → same layout, every time.
+ *
+ * **Trade-off**
+ * We accept the maintenance cost of a custom layout (and give up automatic
+ * DAG optimization) in exchange for sibling stability and predictable output.
+ *
+ * **Escape hatch**
+ * Consumers that need DAG-aware layout can pass a custom `layoutEngine` prop
+ * to `<F0Graph>` wrapping dagre, ELK, or d3-dag. This hook is the default
+ * implementation and the fallback.
+ */
+
 const DEFAULT_NODE_WIDTH = 256
 const DEFAULT_NODE_HEIGHT = 56
 const DEFAULT_EXPANDER_WIDTH = 120
