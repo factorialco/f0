@@ -228,6 +228,17 @@ export const LongUnspacedText: Story = {
   },
 }
 
+export const ExpandableDescription: Story = {
+  decorators: Default.decorators,
+  args: {
+    ...Default.args,
+    event: undefined,
+    mediaUrl: undefined,
+    descriptionExpandable: true,
+    description: `<p class="TextEditorTheme__paragraph" dir="ltr"><span>This ticket comment contains enough context that consumers may want to keep the post compact until someone asks to read it in full. The first visible lines should stay clamped, and the inline See more control expands the rich text body without opening the post.</span></p><p class="TextEditorTheme__paragraph" dir="ltr"><span>Additional details can include troubleshooting steps, links, mentions, and follow-up notes from the requester.</span></p><p class="TextEditorTheme__paragraph" dir="ltr"><span>Once expanded, focus moves to the description so keyboard users keep their place.</span></p>`,
+  },
+}
+
 type SkeletonStory = StoryObj<typeof CommunityPost.Skeleton>
 
 export const Skeleton: SkeletonStory = {

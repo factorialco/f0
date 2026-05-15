@@ -11,9 +11,11 @@ import {
   Person as PersonIcon,
 } from "@/icons/app"
 import { getDisplayDateBasedOnDuration } from "@/lib/date"
+import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { withSkeleton } from "@/lib/skeleton"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
+import { useEffect, useId, useRef, useState } from "react"
 
 import { PostDescription, PostDescriptionProps } from "../PostDescription"
 import { PostEvent, PostEventProps } from "../PostEvent"
@@ -67,6 +69,8 @@ export type CommunityPostProps = {
   noReactionsButton?: boolean
 
   dropdownItems?: DropdownItem[]
+
+  descriptionExpandable?: boolean
 }
 
 export const BaseCommunityPost = ({
@@ -86,12 +90,17 @@ export const BaseCommunityPost = ({
   actions,
   dropdownItems,
   noReactionsButton = false,
+  descriptionExpandable = false,
 }: CommunityPostProps) => {
+  const i18n = useI18n()
+  const descriptionId = useId()
+  const descriptionRef = useRef<HTMLDivElement>(null)
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
   const countersDisplay = [counters.views, counters.comments]
     .filter(Boolean)
     .join(" · ")
 
-  const collapsed = true
+  const descriptionCollapsed = !isDescriptionExpanded
   const date = getDisplayDateBasedOnDuration(createdAt)
 
   const handleClick = () => {
@@ -105,6 +114,18 @@ export const BaseCommunityPost = ({
   const authorFullName = author
     ? `${author.firstName} ${author.lastName}`
     : undefined
+
+  const handleToggleDescription = (event: React.MouseEvent<HTMLElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+    setIsDescriptionExpanded(true)
+  }
+
+  useEffect(() => {
+    if (isDescriptionExpanded) {
+      descriptionRef.current?.focus()
+    }
+  }, [isDescriptionExpanded])
 
   return (
     <div
@@ -227,13 +248,38 @@ export const BaseCommunityPost = ({
             <p
               className={cn(
                 "text-xl font-semibold",
-                collapsed && "line-clamp-2 break-words"
+                "line-clamp-2 break-words"
               )}
             >
               {title}
             </p>
             {description && (
-              <PostDescription content={description} collapsed={collapsed} />
+              <>
+                <PostDescription
+                  ref={descriptionRef}
+                  id={descriptionId}
+                  content={description}
+                  collapsed={descriptionCollapsed}
+                  tabIndex={isDescriptionExpanded ? -1 : undefined}
+                  className={cn(isDescriptionExpanded && focusRing())}
+                />
+                {descriptionExpandable && !isDescriptionExpanded && (
+                  <div className="text-base text-f1-foreground">
+                    <button
+                      type="button"
+                      className={cn(
+                        "inline cursor-pointer rounded-none border-0 bg-transparent p-0 text-base text-f1-foreground underline underline-offset-2 hover:text-f1-foreground-secondary",
+                        focusRing()
+                      )}
+                      aria-controls={descriptionId}
+                      aria-expanded={isDescriptionExpanded}
+                      onClick={handleToggleDescription}
+                    >
+                      {i18n.actions.seeMore}
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
