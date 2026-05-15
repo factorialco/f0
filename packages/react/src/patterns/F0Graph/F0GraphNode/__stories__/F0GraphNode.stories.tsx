@@ -1,9 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { ReactFlowProvider } from "@xyflow/react"
-
+import {
+  ReactFlow,
+  ReactFlowProvider,
+  type Node,
+  type NodeTypes,
+} from "@xyflow/react"
+import "@xyflow/react/dist/style.css"
 import { F0Button } from "@/components/F0Button"
-import { Building, Delete, Pencil } from "@/icons/app"
+import { Building, Delete, Files, Pencil } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0GraphNode } from ".."
@@ -258,90 +263,95 @@ export const Snapshot: Story = {
   ),
 }
 
-export const SelectedSingleAction: Story = {
-  args: {
-    ...baseProps,
-    state: "selected",
-    actions: <F0Button variant="ghost" size="sm" label="View profile" />,
+function ToolbarDemoNode() {
+  return (
+    <F0GraphNode
+      {...baseProps}
+      nodeId="toolbar-demo"
+      state="selected"
+      actions={
+        <>
+          <span className="backdrop-blur-[180px]">
+            <F0Button
+              variant="neutral"
+              size="md"
+              icon={Files}
+              label="Copy"
+              hideLabel
+            />
+          </span>
+          <span className="backdrop-blur-[180px]">
+            <F0Button
+              variant="neutral"
+              size="md"
+              icon={Pencil}
+              label="Edit"
+              hideLabel
+            />
+          </span>
+          <span className="backdrop-blur-[180px]">
+            <F0Button
+              variant="neutral"
+              size="md"
+              icon={Delete}
+              label="Delete"
+              hideLabel
+            />
+          </span>
+        </>
+      }
+    />
+  )
+}
+
+const toolbarNodeTypes: NodeTypes = {
+  toolbarDemo: ToolbarDemoNode,
+}
+
+const toolbarDemoNodes: Node[] = [
+  {
+    id: "toolbar-demo",
+    type: "toolbarDemo",
+    position: { x: 0, y: 0 },
+    data: {},
+    draggable: false,
+    selectable: false,
   },
+]
+
+function ToolbarDemo() {
+  return (
+    <div style={{ width: 480, height: 240 }}>
+      <ReactFlow
+        nodes={toolbarDemoNodes}
+        nodeTypes={toolbarNodeTypes}
+        nodesDraggable={false}
+        nodesConnectable={false}
+        elementsSelectable={false}
+        panOnDrag={false}
+        panOnScroll={false}
+        zoomOnScroll={false}
+        zoomOnPinch={false}
+        zoomOnDoubleClick={false}
+        fitView
+        proOptions={{ hideAttribution: true }}
+      />
+    </div>
+  )
+}
+
+export const WithToolbar: Story = {
+  render: () => (
+    <ReactFlowProvider>
+      <ToolbarDemo />
+    </ReactFlowProvider>
+  ),
   parameters: {
     docs: {
       description: {
         story:
-          'When `state === "selected"` and the `detail` variant is active, `actions` render as a floating `NodeToolbar` above the node.',
+          "When the node is in the `selected` state, a toolbar appears above it with three icon-only actions: Copy, Edit, and Delete.",
       },
     },
-  },
-}
-
-export const SelectedMultipleActions: Story = {
-  args: {
-    ...baseProps,
-    state: "selected",
-    actions: (
-      <>
-        <F0Button variant="ghost" size="sm" label="View profile" />
-        <F0Button variant="ghost" size="sm" label="Edit" />
-        <F0Button variant="ghost" size="sm" label="Remove" />
-      </>
-    ),
-  },
-}
-
-export const ToolbarUnselected: Story = {
-  args: {
-    ...baseProps,
-    state: "default",
-    actions: <F0Button variant="ghost" size="sm" label="View profile" />,
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "When the node is not selected, the toolbar is not visible — even when `actions` is provided.",
-      },
-    },
-  },
-}
-
-export const ToolbarCompactVariantHidden: Story = {
-  args: {
-    ...baseProps,
-    variant: "compact",
-    state: "selected",
-    actions: <F0Button variant="ghost" size="sm" label="View profile" />,
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "Toolbar is suppressed in `compact` and `dot` variants regardless of selection.",
-      },
-    },
-  },
-}
-
-export const SelectedIconOnlyButtons: Story = {
-  args: {
-    ...baseProps,
-    state: "selected",
-    actions: (
-      <>
-        <F0Button
-          variant="ghost"
-          size="sm"
-          icon={Pencil}
-          label="Edit"
-          hideLabel
-        />
-        <F0Button
-          variant="ghost"
-          size="sm"
-          icon={Delete}
-          label="Remove"
-          hideLabel
-        />
-      </>
-    ),
   },
 }
