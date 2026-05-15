@@ -612,8 +612,8 @@ export declare const aiTranslations: {
             readonly dataExplanation: "Where does this data come from?";
         };
         readonly dashboardDatasetFailure: {
-            readonly title: "Some data couldn’t be loaded";
-            readonly description: "We couldn’t load this section of the dashboard. Details: {{reason}}";
+            readonly title: "This dashboard is no longer valid";
+            readonly description: "We're sorry. Please contact support or ask One to generate a dashboard from scratch.";
         };
         readonly pong: {
             readonly title: "Pong";
@@ -1895,8 +1895,8 @@ export declare const defaultTranslations: {
             readonly dataExplanation: "Where does this data come from?";
         };
         readonly dashboardDatasetFailure: {
-            readonly title: "Some data couldn’t be loaded";
-            readonly description: "We couldn’t load this section of the dashboard. Details: {{reason}}";
+            readonly title: "This dashboard is no longer valid";
+            readonly description: "We're sorry. Please contact support or ask One to generate a dashboard from scratch.";
         };
         readonly pong: {
             readonly title: "Pong";
@@ -3432,11 +3432,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -3449,8 +3444,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -3458,9 +3454,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -3483,4 +3478,9 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
