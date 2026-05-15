@@ -4,11 +4,10 @@ import { useState } from "react"
 import { F0Button } from "@/components/F0Button"
 import { F0Text } from "@/components/F0Text"
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
-import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0AvatarModule } from "@/components/avatars/F0AvatarModule"
-import { Cross, Messages } from "@/icons/app"
+import { Cross } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
+import { Card } from "@/ui/Card"
 
 import { NpsFeedback } from "./components/NpsFeedback"
 import { NpsScoring } from "./components/NpsScoring"
@@ -72,15 +71,11 @@ export function F0NpsWidget({
   if (!open) return null
 
   return (
-    <div
+    <Card
       role="dialog"
       aria-modal="true"
       aria-label={t.npsWidget.survey}
-      className={cn(
-        "fixed bottom-6 left-6 z-50 w-[480px]",
-        "rounded-xl border border-solid border-f1-border-secondary bg-f1-background",
-        "shadow"
-      )}
+      className="fixed bottom-6 left-6 z-50 w-full max-w-lg gap-0 bg-f1-background p-0"
     >
       {/* Header */}
       <div className="flex flex-col gap-3 p-4 pb-3">
@@ -104,11 +99,7 @@ export function F0NpsWidget({
                 exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.18, ease: "easeOut" }}
               >
-                {module ? (
-                  <F0AvatarModule module={module} size="lg" />
-                ) : (
-                  <F0AvatarIcon icon={Messages} size="md" />
-                )}
+                <F0AvatarModule module={module ?? "communities"} size="lg" />
               </motion.div>
             )}
           </AnimatePresence>
@@ -190,7 +181,7 @@ export function F0NpsWidget({
           )}
         </AnimatePresence>
       </div>
-    </div>
+    </Card>
   )
 }
 

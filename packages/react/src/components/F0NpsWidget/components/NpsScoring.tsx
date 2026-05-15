@@ -1,6 +1,7 @@
-import { useI18n } from "@/lib/providers/i18n"
-import { actionVariants, buttonSizeVariants } from "@/ui/Action/variants"
+import { F0Text } from "@/components/F0Text"
 import { cn, focusRing } from "@/lib/utils"
+import { useI18n } from "@/lib/providers/i18n"
+import { actionVariants } from "@/ui/Action/variants"
 
 const SCORES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
@@ -24,24 +25,21 @@ export function NpsScoring({ value, onChange }: NpsScoringProps) {
               aria-label={String(score)}
               aria-pressed={isSelected}
               className={cn(
-                "relative h-9 w-9 shrink-0 text-sm font-medium transition-colors",
+                "relative aspect-square flex-1 rounded transition-colors",
                 focusRing(),
-                buttonSizeVariants({ size: "md" }),
                 actionVariants({ variant: isSelected ? "selected" : "outline" })
               )}
             >
-              {score}
+              <span className="main flex items-center justify-center">
+                {score}
+              </span>
             </button>
           )
         })}
       </div>
       <div className="flex justify-between">
-        <span className="text-xs text-f1-foreground-secondary">
-          {t.npsWidget.notLikely}
-        </span>
-        <span className="text-xs text-f1-foreground-secondary">
-          {t.npsWidget.veryLikely}
-        </span>
+        <F0Text variant="small" content={t.npsWidget.notLikely} />
+        <F0Text variant="small" content={t.npsWidget.veryLikely} />
       </div>
     </div>
   )
