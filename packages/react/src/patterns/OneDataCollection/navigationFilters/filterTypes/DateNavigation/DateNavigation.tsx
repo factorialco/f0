@@ -21,7 +21,7 @@ export function DateNavigation({
     : [options.granularity]
 
   const granularityDefinition = getGranularityDefinition(
-    value.granularity || availableGranularities[0]
+    value?.granularity || availableGranularities[0]
   )
 
   const handleChange = (newDateRange: DatePickerValue | undefined) => {

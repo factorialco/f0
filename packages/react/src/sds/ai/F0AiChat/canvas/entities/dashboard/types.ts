@@ -181,15 +181,29 @@ export interface CollectionComputation {
 }
 
 // ---------------------------------------------------------------------------
-// Filter definitions — LLM declares which columns are filterable
+// Filter definitions — derived deterministically by the compute layer from
+// the SQL types of columns shared across dashboard datasets
 // ---------------------------------------------------------------------------
 
-export interface ChatDashboardFilterDefinition {
-  type: "in"
-  label: string
-  column: string
-  datasetId: string
-}
+export type ChatDashboardFilterDefinition =
+  | {
+      type: "in"
+      label: string
+      column: string
+      datasetId: string
+    }
+  | {
+      /**
+       * Numeric range slider/input pair backed by F0's `NumberFilter`. The
+       * compute layer emits `{ min, max }` bounds for the column alongside
+       * the definition so the frontend can clamp the range picker to the
+       * dataset's actual domain.
+       */
+      type: "numericRange"
+      label: string
+      column: string
+      datasetId: string
+    }
 
 // ---------------------------------------------------------------------------
 // Navigation filter definitions — dashboard-level controls (date navigator)

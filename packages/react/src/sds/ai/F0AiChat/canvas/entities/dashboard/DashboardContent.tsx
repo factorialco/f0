@@ -24,6 +24,8 @@ import type {
 
 import { F0AnalyticsDashboard } from "@/patterns/F0AnalyticsDashboard/F0AnalyticsDashboard"
 
+import type { NumberFilterValue } from "@/patterns/OneFilterPicker/filterTypes/NumberFilter/NumberFilter"
+
 import type {
   ChatDashboardChartConfig,
   ChatDashboardChartItem,
@@ -229,18 +231,33 @@ export function ChatDashboard({
   onExportReady,
   exportFilename,
 }: ChatDashboardProps) {
-  const { fetchItem, getFilterOptions } = useDashboardCompute(
-    config,
-    apiConfig,
-    refreshKey
-  )
+  const { fetchItem, getFilterOptions, getDerivedFilters } =
+    useDashboardCompute(config, apiConfig, refreshKey)
 
-  // Filter options from the first compute response
+  // Filter definitions + options from the first compute response.
+  // Filters are derived server-side (no longer authored by the agent), so the
+  // initial render has no filter chips until the first /dashboard/compute
+  // response lands — we poll briefly to surface them, then stop.
+  // - `in` filters → array of distinct string values
+  // - `numericRange` filters → `{ min, max }` bounds for the range picker
   const [filterOptions, setFilterOptions] = useState<
-    Record<string, string[]> | undefined
+    Record<string, string[] | { min: number; max: number }> | undefined
   >()
+  const [derivedFilters, setDerivedFilters] = useState<{
+    filters?: Record<string, import("./types").ChatDashboardFilterDefinition>
+    navigationFilters?: Record<
+      string,
+      import("./types").ChatDashboardNavigationFilterDefinition
+    >
+  }>({})
 
-  // Update filter options when they become available
+  // Bumped once when the first compute response lands. F0AnalyticsDashboard
+  // captures `navigationFilters` into its internal state only on mount
+  // (initialNavState `useMemo` with empty deps), so when filters arrive
+  // asynchronously we have to force a remount — otherwise the date navigator
+  // renders with an undefined value and crashes inside DateNavigation.
+  const [filterRevision, setFilterRevision] = useState(0)
+
   const filterOptionsPolledRef = useRef(false)
 
   // Reset polling flag when refreshKey changes so filter options are re-polled
@@ -250,69 +267,98 @@ export function ChatDashboard({
 
   useEffect(() => {
     if (filterOptionsPolledRef.current) return
-    // Poll briefly for filter options from the initial request
     const interval = setInterval(() => {
       const opts = getFilterOptions()
-      if (opts) {
-        setFilterOptions(opts)
+      const derived = getDerivedFilters()
+      if (opts || derived.filters || derived.navigationFilters) {
+        if (opts) setFilterOptions(opts)
+        setDerivedFilters(derived)
+        setFilterRevision((n) => n + 1)
         filterOptionsPolledRef.current = true
         clearInterval(interval)
       }
     }, 100)
     return () => clearInterval(interval)
-  }, [getFilterOptions, refreshKey])
+  }, [getFilterOptions, getDerivedFilters, refreshKey])
 
-  // True when the agent declared filters in the config but their options
-  // (and therefore the FiltersDefinition we pass to F0AnalyticsDashboard) are
-  // still being computed. The dashboard will render a filter bar skeleton in
-  // that window so the layout matches the eventual rendered state.
-  const filtersLoading =
-    !!config.filters && Object.keys(config.filters).length > 0 && !filterOptions
+  // Filter bar skeleton while the first compute response is in flight: we
+  // don't know yet whether the dataset will produce any filters, so we keep
+  // the skeleton up until the response lands.
+  const filtersLoading = !filterOptions && !derivedFilters.filters
 
   const filterDefinitions = useMemo(() => {
-    const filterSpecs = config.filters
+    const filterSpecs = derivedFilters.filters
     if (!filterSpecs || Object.keys(filterSpecs).length === 0) return undefined
     if (!filterOptions) return undefined
 
     const result: Record<
       string,
-      {
-        type: "in"
-        label: string
-        options: { options: Array<{ value: string; label: string }> }
-      }
+      | {
+          type: "in"
+          label: string
+          options: { options: Array<{ value: string; label: string }> }
+        }
+      | {
+          type: "number"
+          label: string
+          options: {
+            min: number
+            max: number
+            modes: ReadonlyArray<"range" | "single">
+          }
+        }
     > = {}
 
     for (const [key, spec] of Object.entries(filterSpecs)) {
-      const options = filterOptions[key] ?? []
-      if (options.length === 0) continue
-      result[key] = {
-        type: "in",
-        label: spec.label,
-        options: {
-          options: options.map((v) => ({ value: v, label: v })),
-        },
+      const options = filterOptions[key]
+      if (options === undefined) continue
+
+      if (spec.type === "numericRange") {
+        if (Array.isArray(options)) continue
+        if (options.min === options.max) continue
+        result[key] = {
+          type: "number",
+          label: spec.label,
+          options: {
+            min: options.min,
+            max: options.max,
+            modes: ["range"],
+          },
+        }
+        continue
+      }
+
+      if (spec.type === "in") {
+        if (!Array.isArray(options) || options.length === 0) continue
+        result[key] = {
+          type: "in",
+          label: spec.label,
+          options: {
+            options: options.map((v) => ({ value: v, label: v })),
+          },
+        }
       }
     }
 
     if (Object.keys(result).length === 0) return undefined
 
     return result as FiltersDefinition
-  }, [config.filters, filterOptions])
+  }, [derivedFilters.filters, filterOptions])
 
   /**
-   * Build the F0AnalyticsDashboard `navigationFilters` prop from the agent's
-   * config. The agent declares `{ type: "dateNavigation", column, datasetId,
-   * granularities, defaultGranularity? }` but F0's slot expects
-   * `{ type: "date-navigator", defaultValue, granularity, defaultGranularity? }`
-   * — we strip `column` and `datasetId` (those are agent-side metadata used
-   * by the compute SQL builder) and supply `defaultValue: new Date()` so the
-   * navigator initializes to the current period at the chosen granularity.
+   * Build the F0AnalyticsDashboard `navigationFilters` prop from the
+   * compute response's derived navigation filters. The backend ships
+   * `{ type: "dateNavigation", column, datasetId, granularities,
+   * defaultGranularity? }` but F0's slot expects `{ type: "date-navigator",
+   * defaultValue, granularity, defaultGranularity? }` — we strip `column`
+   * and `datasetId` (server-side metadata used only by the compute SQL
+   * builder) and supply `defaultValue: new Date()` so the navigator
+   * initializes to the current period at the chosen granularity.
    */
   const dashboardNavigationFilters = useMemo<
     NavigationFiltersDefinition | undefined
   >(() => {
-    const navSpecs = config.navigationFilters
+    const navSpecs = derivedFilters.navigationFilters
     if (!navSpecs || Object.keys(navSpecs).length === 0) return undefined
     const today = new Date()
     const result: NavigationFiltersDefinition = {}
@@ -328,16 +374,30 @@ export function ChatDashboard({
       }
     }
     return Object.keys(result).length > 0 ? result : undefined
-  }, [config.navigationFilters])
+  }, [derivedFilters.navigationFilters])
 
   // Set of keys belonging to navigation filters — used to split the merged
   // filters object that F0AnalyticsDashboard passes to fetchData into the two
   // separate compute payloads (`filterValues` for `in` filters,
   // `navigationFilterValues` for the date navigator).
   const navigationFilterKeys = useMemo(
-    () => new Set(Object.keys(config.navigationFilters ?? {})),
-    [config.navigationFilters]
+    () => new Set(Object.keys(derivedFilters.navigationFilters ?? {})),
+    [derivedFilters.navigationFilters]
   )
+
+  // Set of keys whose backing filter is `numericRange` — their state ships as
+  // `NumberFilterValue` and must be flattened into `[min, max]` strings before
+  // hitting the compute payload.
+  const numericRangeFilterKeys = useMemo(() => {
+    const keys = new Set<string>()
+    const specs = derivedFilters.filters
+    if (specs) {
+      for (const [key, spec] of Object.entries(specs)) {
+        if (spec.type === "numericRange") keys.add(key)
+      }
+    }
+    return keys
+  }, [derivedFilters.filters])
 
   // Create fetchData functions that call the batch compute endpoint
   const makeFetchData = useCallback(
@@ -373,6 +433,22 @@ export function ChatDashboard({
             }
             continue
           }
+          if (numericRangeFilterKeys.has(key)) {
+            const nfv = value as NumberFilterValue
+            if (!nfv) continue
+            const from = nfv.mode === "range" ? nfv.from?.value : nfv.value
+            const to = nfv.mode === "range" ? nfv.to?.value : nfv.value
+            const fromStr =
+              typeof from === "number" && Number.isFinite(from)
+                ? String(from)
+                : ""
+            const toStr =
+              typeof to === "number" && Number.isFinite(to) ? String(to) : ""
+            if (fromStr || toStr) {
+              filterValues[key] = [fromStr, toStr]
+            }
+            continue
+          }
           if (Array.isArray(value) && value.length > 0) {
             filterValues[key] = value as unknown[]
           }
@@ -380,10 +456,16 @@ export function ChatDashboard({
 
         return fetchItem(itemId, filterValues, navigationFilterValues).then(
           (result) => {
-            // Update filter options from the response
+            // Update filter options + derived filter definitions from the
+            // response so the chips reflect the latest compute pass.
             const opts = getFilterOptions()
-            if (opts && !filterOptionsPolledRef.current) {
-              setFilterOptions(opts)
+            const derived = getDerivedFilters()
+            if (
+              (opts || derived.filters || derived.navigationFilters) &&
+              !filterOptionsPolledRef.current
+            ) {
+              if (opts) setFilterOptions(opts)
+              setDerivedFilters(derived)
               filterOptionsPolledRef.current = true
             }
             return result
@@ -391,7 +473,13 @@ export function ChatDashboard({
         )
       }
     },
-    [fetchItem, getFilterOptions, navigationFilterKeys]
+    [
+      fetchItem,
+      getFilterOptions,
+      getDerivedFilters,
+      navigationFilterKeys,
+      numericRangeFilterKeys,
+    ]
   )
 
   const items: DashboardItem<FiltersDefinition>[] = useMemo(
@@ -411,7 +499,7 @@ export function ChatDashboard({
 
   return (
     <F0AnalyticsDashboard
-      key={refreshKey}
+      key={`${refreshKey}:${filterRevision}`}
       filters={filterDefinitions}
       filtersLoading={filtersLoading}
       navigationFilters={dashboardNavigationFilters}

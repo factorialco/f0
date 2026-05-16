@@ -1,6 +1,10 @@
 import { useCallback, useRef } from "react"
 
-import type { ChatDashboardConfig } from "./types"
+import type {
+  ChatDashboardConfig,
+  ChatDashboardFilterDefinition,
+  ChatDashboardNavigationFilterDefinition,
+} from "./types"
 
 // ---------------------------------------------------------------------------
 // Types
@@ -36,9 +40,26 @@ export type ItemResult = {
   error?: string
 }
 
+/**
+ * Filter options per filter id:
+ * - `in` filters → array of distinct string values
+ * - `numericRange` filters → `{ min, max }` bounds
+ */
+export type DashboardFilterOptions = Record<
+  string,
+  string[] | { min: number; max: number }
+>
+
 type ComputeResponse = {
   results: Record<string, ItemResult>
-  filterOptions?: Record<string, string[]>
+  filterOptions?: DashboardFilterOptions
+  /**
+   * Filter definitions derived deterministically by the compute layer from
+   * the SQL types of columns shared across dashboard datasets. The agent no
+   * longer authors these — they live exclusively on the compute response.
+   */
+  filters?: Record<string, ChatDashboardFilterDefinition>
+  navigationFilters?: Record<string, ChatDashboardNavigationFilterDefinition>
 }
 
 type ApiConfig = {
@@ -68,7 +89,11 @@ export function useDashboardCompute(
     filterValues: Record<string, unknown[]>,
     navigationFilterValues?: Record<string, string[]>
   ) => Promise<ItemResult>
-  getFilterOptions: () => Record<string, string[]> | undefined
+  getFilterOptions: () => DashboardFilterOptions | undefined
+  getDerivedFilters: () => {
+    filters?: Record<string, ChatDashboardFilterDefinition>
+    navigationFilters?: Record<string, ChatDashboardNavigationFilterDefinition>
+  }
 } {
   // Track the in-flight request so concurrent fetchItem calls share it
   const inflightRef = useRef<{
@@ -122,15 +147,16 @@ export function useDashboardCompute(
       const hasNavValues =
         navigationFilterValues && Object.keys(navigationFilterValues).length > 0
 
+      // Filter definitions are derived server-side from dataset column types;
+      // the request only carries the user's active values, keyed by the
+      // stable filter ids the compute response returns.
       const body = {
         fetchSpecs: cfg.fetchSpecs,
         items: cfg.items,
-        filters: cfg.filters,
         filterValues:
           Object.keys(stringFilterValues).length > 0
             ? stringFilterValues
             : undefined,
-        navigationFilters: cfg.navigationFilters,
         navigationFilterValues: hasNavValues
           ? navigationFilterValues
           : undefined,
@@ -169,5 +195,13 @@ export function useDashboardCompute(
     []
   )
 
-  return { fetchItem, getFilterOptions }
+  const getDerivedFilters = useCallback(
+    () => ({
+      filters: lastResponseRef.current?.filters,
+      navigationFilters: lastResponseRef.current?.navigationFilters,
+    }),
+    []
+  )
+
+  return { fetchItem, getFilterOptions, getDerivedFilters }
 }
