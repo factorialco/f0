@@ -204,6 +204,19 @@ export type ChatDashboardFilterDefinition =
       column: string
       datasetId: string
     }
+  | {
+      /**
+       * Open-domain date range picker backed by F0's `DateFilter`. Emitted for
+       * every DATE column that is NOT promoted as the dashboard's navigator
+       * pill (see `dateNavigatorColumn`). Value flows in via `filterValues`
+       * as `[fromISO, toISO]` strings — either side may be empty for an
+       * open-ended range.
+       */
+      type: "date"
+      label: string
+      column: string
+      datasetId: string
+    }
 
 // ---------------------------------------------------------------------------
 // Navigation filter definitions — dashboard-level controls (date navigator)
@@ -355,6 +368,20 @@ export interface ChatDashboardConfig {
   items: ChatDashboardItem[]
   /** Fetch specs for server-side data retrieval, keyed by datasetId */
   fetchSpecs: Record<string, DashboardFetchSpec>
+  /**
+   * `true` when the dashboard answers an "as of today" question — current
+   * headcount, current salaries, etc. The compute layer suppresses the
+   * date navigator in this case so it doesn't suggest a temporal axis the
+   * dashboard cannot honour. Defaults to `false` (period view).
+   */
+  snapshot?: boolean
+  /**
+   * Agent-named DATE column to promote as the navigator pill above the grid.
+   * When unset and exactly one DATE column is in play, the compute layer
+   * picks that column automatically. When unset and 2+ DATE columns exist,
+   * none is promoted — every date column flows into the Filters drawer.
+   */
+  dateNavigatorColumn?: string
 }
 
 /**

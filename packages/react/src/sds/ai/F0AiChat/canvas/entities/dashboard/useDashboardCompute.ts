@@ -149,7 +149,9 @@ export function useDashboardCompute(
 
       // Filter definitions are derived server-side from dataset column types;
       // the request only carries the user's active values, keyed by the
-      // stable filter ids the compute response returns.
+      // stable filter ids the compute response returns. `snapshot` and
+      // `dateNavigatorColumn` shape which filters the compute layer derives,
+      // so they travel with every request when set.
       const body = {
         fetchSpecs: cfg.fetchSpecs,
         items: cfg.items,
@@ -160,6 +162,10 @@ export function useDashboardCompute(
         navigationFilterValues: hasNavValues
           ? navigationFilterValues
           : undefined,
+        ...(cfg.snapshot ? { snapshot: true } : {}),
+        ...(cfg.dateNavigatorColumn
+          ? { dateNavigatorColumn: cfg.dateNavigatorColumn }
+          : {}),
       }
 
       const promise = runtimeFetch(`${api.baseUrl}/dashboard/compute`, {

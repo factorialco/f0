@@ -307,11 +307,19 @@ export function ChatDashboard({
             modes: ReadonlyArray<"range" | "single">
           }
         }
+      | {
+          type: "date"
+          label: string
+          options: { mode: "range" }
+        }
     > = {}
 
     for (const [key, spec] of Object.entries(filterSpecs)) {
+      // `date` filters use F0's open-domain DateFilter — no precomputed
+      // distinct/min-max options are emitted, so don't require a matching
+      // filterOptions entry. Every other type needs its options to render.
       const options = filterOptions[key]
-      if (options === undefined) continue
+      if (spec.type !== "date" && options === undefined) continue
 
       if (spec.type === "numericRange") {
         if (Array.isArray(options)) continue
@@ -324,6 +332,15 @@ export function ChatDashboard({
             max: options.max,
             modes: ["range"],
           },
+        }
+        continue
+      }
+
+      if (spec.type === "date") {
+        result[key] = {
+          type: "date",
+          label: spec.label,
+          options: { mode: "range" },
         }
         continue
       }
@@ -399,6 +416,20 @@ export function ChatDashboard({
     return keys
   }, [derivedFilters.filters])
 
+  // Set of keys whose backing filter is `date` — their state ships as F0's
+  // `DateRange { from, to? }` and must be flattened into `[fromISO, toISO]`
+  // strings, mirroring the date-navigator pill flatten path.
+  const dateFilterKeys = useMemo(() => {
+    const keys = new Set<string>()
+    const specs = derivedFilters.filters
+    if (specs) {
+      for (const [key, spec] of Object.entries(specs)) {
+        if (spec.type === "date") keys.add(key)
+      }
+    }
+    return keys
+  }, [derivedFilters.filters])
+
   // Create fetchData functions that call the batch compute endpoint
   const makeFetchData = useCallback(
     (itemId: string) => {
@@ -449,6 +480,27 @@ export function ChatDashboard({
             }
             continue
           }
+          if (dateFilterKeys.has(key)) {
+            // F0 DateFilter value shape (range mode): `{ from: Date, to?: Date }`.
+            // Flatten to `[fromISO, toISO]` for the backend, mirroring the
+            // date-navigator pill so the SQL builder can reuse one helper.
+            const range = value as
+              | { from?: Date | string; to?: Date | string }
+              | undefined
+            if (!range) continue
+            const toIso = (d: Date | string | undefined): string => {
+              if (!d) return ""
+              const date = d instanceof Date ? d : new Date(d)
+              if (Number.isNaN(date.getTime())) return ""
+              return date.toISOString().slice(0, 10)
+            }
+            const fromIso = toIso(range.from)
+            const toIsoStr = toIso(range.to)
+            if (fromIso || toIsoStr) {
+              filterValues[key] = [fromIso, toIsoStr]
+            }
+            continue
+          }
           if (Array.isArray(value) && value.length > 0) {
             filterValues[key] = value as unknown[]
           }
@@ -474,6 +526,7 @@ export function ChatDashboard({
       }
     },
     [
+      dateFilterKeys,
       fetchItem,
       getFilterOptions,
       getDerivedFilters,
