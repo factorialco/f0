@@ -122,4 +122,17 @@ export type InFilterDefinition<
   R extends RecordType = RecordType,
 > = BaseFilterDefinition<"in"> & {
   options: InFilterOptions<T, R>
+  /**
+   * Controls how selections interact across nested levels of the option tree.
+   *
+   * - `"independent"` (default): selections at each level are stored
+   *   independently. Ancestor and descendant can be selected simultaneously,
+   *   and the chip strip will show both.
+   * - `"exclusive"`: selecting an option auto-clears any of its ancestors
+   *   and descendants from their respective filter keys. The widget keeps
+   *   `FiltersState` minimal so consumers don't have to dedupe downstream.
+   *   The interlock only fires on user-driven selection (not on deselection
+   *   and not on initial state), so deep links keep working as written.
+   */
+  nestedSelection?: "independent" | "exclusive"
 }

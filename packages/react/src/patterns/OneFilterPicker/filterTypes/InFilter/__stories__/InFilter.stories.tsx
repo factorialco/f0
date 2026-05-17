@@ -398,3 +398,115 @@ export const WithDataSource: Story = {
     onChange: () => {},
   },
 }
+
+// --- Hierarchical / nested-selection examples ----------------------------
+//
+// A 3-level options tree (family → function → role). Each level lives under a
+// different `filterKey`, which is how the widget keeps selections at different
+// depths in separate `FiltersState` entries.
+const jobStructureOptions: InFilterOptionItem<string>[] = [
+  {
+    value: "engineering",
+    label: "Engineering",
+    children: {
+      filterKey: "function",
+      options: [
+        {
+          value: "backend",
+          label: "Backend",
+          children: {
+            filterKey: "role",
+            options: [
+              { value: "be-senior", label: "Senior" },
+              { value: "be-junior", label: "Junior" },
+            ],
+          },
+        },
+        {
+          value: "frontend",
+          label: "Frontend",
+          children: {
+            filterKey: "role",
+            options: [
+              { value: "fe-senior", label: "Senior" },
+              { value: "fe-junior", label: "Junior" },
+            ],
+          },
+        },
+      ],
+    },
+  },
+  {
+    value: "marketing",
+    label: "Marketing",
+    children: {
+      filterKey: "function",
+      options: [
+        { value: "growth", label: "Growth" },
+        { value: "brand", label: "Brand" },
+      ],
+    },
+  },
+]
+
+/**
+ * Mounts InFilter for a hierarchical tree by maintaining a tiny `FiltersState`
+ * locally and routing both the own-key setter (`onChange`) and the
+ * sibling-key setter (`onFilterChange`) back into the same state map. This
+ * mirrors how FiltersControls wires the real picker.
+ */
+const HierarchicalHarness = ({
+  nestedSelection,
+}: {
+  nestedSelection?: "independent" | "exclusive"
+}) => {
+  const ownKey = "family"
+  const [state, setState] = useState<Record<string, string[]>>({})
+
+  const writeKey = (key: string, value: unknown) =>
+    setState((prev) => ({ ...prev, [key]: value as string[] }))
+
+  return (
+    <div className="flex flex-col gap-2">
+      <InFilter<string>
+        schema={{
+          label: "Job structure",
+          nestedSelection,
+          options: { options: jobStructureOptions },
+        }}
+        value={state[ownKey] ?? []}
+        onChange={(v) => writeKey(ownKey, v)}
+        onFilterChange={writeKey}
+        allFiltersValue={state}
+        filterKey={ownKey}
+      />
+      <pre className="text-f1-foreground-secondary rounded bg-f1-background-secondary p-2 text-xs">
+        {JSON.stringify(state, null, 2)}
+      </pre>
+    </div>
+  )
+}
+
+export const HierarchicalIndependent: Story = {
+  render: () => <HierarchicalHarness />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Default behavior (`nestedSelection: 'independent'`). Selections at each level are stored independently — picking 'Engineering' and 'Engineering > Backend' leaves both in state, which produces redundant chips and forces consumers to dedupe downstream. Use the JSON readout under the widget to inspect `FiltersState` as you click.",
+      },
+    },
+  },
+}
+
+export const HierarchicalExclusive: Story = {
+  render: () => <HierarchicalHarness nestedSelection="exclusive" />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "With `nestedSelection: 'exclusive'`, selecting an option auto-clears its ancestors and descendants from their respective filter keys. Pick 'Engineering', then expand and pick 'Backend' — the family entry empties. Pick 'Engineering' again — the function entry empties. Sibling subtrees (e.g. Marketing) are not touched.",
+      },
+    },
+  },
+}

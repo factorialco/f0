@@ -23,6 +23,10 @@ export type InFilterOptionRowProps<T extends string> = {
   cacheKey: string
   searchTerm: string
   autoExpand: boolean
+  /** Called after a *selection* (not a deselection) so the parent widget can
+   *  apply the exclusive-nesting interlock by clearing ancestors and
+   *  descendants of the just-selected option. */
+  onAfterSelect?: (selectedFilterKey: string, selectedValue: T) => void
 }
 
 export function InFilterOptionRow<T extends string>({
@@ -36,6 +40,7 @@ export function InFilterOptionRow<T extends string>({
   cacheKey,
   searchTerm,
   autoExpand,
+  onAfterSelect,
 }: InFilterOptionRowProps<T>) {
   const [expanded, setExpanded] = useState(false)
   const hasChildren = !!option.children?.options.length
@@ -62,8 +67,18 @@ export function InFilterOptionRow<T extends string>({
         ? childValues.filter((v) => v !== childValue)
         : [...childValues, childValue]
       onFilterChange(childFilterKey, newValues)
+      if (!isChildSelected) {
+        onAfterSelect?.(childFilterKey, childValue)
+      }
     },
-    [childFilterKey, childValues, onFilterChange, cacheKey, option.label]
+    [
+      childFilterKey,
+      childValues,
+      onFilterChange,
+      cacheKey,
+      option.label,
+      onAfterSelect,
+    ]
   )
 
   const optionId = `option-${String(option.value)}-d${depth}`
@@ -147,6 +162,7 @@ export function InFilterOptionRow<T extends string>({
                   cacheKey={cacheKey}
                   searchTerm={searchTerm}
                   autoExpand={autoExpand}
+                  onAfterSelect={onAfterSelect}
                 />
               )
             })}

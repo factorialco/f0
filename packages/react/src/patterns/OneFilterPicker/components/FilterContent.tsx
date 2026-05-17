@@ -87,6 +87,7 @@ export function FilterContent<Definition extends FiltersDefinition>({
         isCompactMode?: boolean
         onFilterChange?: (key: string, value: unknown) => void
         allFiltersValue?: Record<string, unknown>
+        filterKey?: string
       }) => React.ReactNode
     )({
       schema,
@@ -95,6 +96,7 @@ export function FilterContent<Definition extends FiltersDefinition>({
       isCompactMode,
       onFilterChange: handleSiblingFilterChange,
       allFiltersValue: tempFilters as Record<string, unknown>,
+      filterKey: selectedFilterKey as string,
     })
   }
 

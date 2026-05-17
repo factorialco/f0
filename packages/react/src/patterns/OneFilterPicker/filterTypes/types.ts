@@ -31,6 +31,10 @@ export type FilterTypeComponentProps<
   onFilterChange?: (key: string, value: unknown) => void
   /** Current values of all filters (used to read sibling filter state) */
   allFiltersValue?: Record<string, unknown>
+  /** The key of this filter in the FiltersDefinition. Needed by filters that
+   * need to read or write their own entry in `allFiltersValue` by key (e.g.
+   * InFilter's hierarchical interlock). */
+  filterKey?: string
 }
 
 export type FilterTypeContext<Options extends object = never> = {
@@ -77,6 +81,7 @@ export type FilterTypeDefinition<
     isCompactMode?: boolean
     onFilterChange?: (key: string, value: unknown) => void
     allFiltersValue?: Record<string, unknown>
+    filterKey?: string
   }) => React.ReactNode
   /**
    * The value label to display in the filter chips

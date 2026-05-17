@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { OneEllipsis } from "@/lib/OneEllipsis"
@@ -15,7 +15,9 @@ import { FilterTypeComponentProps } from "../types"
 import { InFilterFlatOption } from "./components/InFilterFlatOption"
 import { InFilterOptionRow } from "./components/InFilterOptionRow"
 import {
+  buildInterlockIndex,
   collectNestedFilterKeys,
+  InterlockIndex,
   optionMatchesSearch,
 } from "./components/option-utils"
 import { InFilterOptionItem, InFilterOptions } from "./types"
@@ -29,11 +31,20 @@ import {
 /**
  * Props for the InFilter component.
  * @template T - The type of values that can be selected
+ *
+ * `nestedSelection` lives on `InFilterDefinition` but the base
+ * FilterTypeComponentProps narrows the schema to `{ label, options }`. We
+ * widen it here so callers (and Storybook stories) can pass the flag with
+ * type-checking.
  */
 type InFilterComponentProps<
   T = unknown,
   R extends RecordType = RecordType,
-> = FilterTypeComponentProps<T[], InFilterOptions<T, R>>
+> = Omit<FilterTypeComponentProps<T[], InFilterOptions<T, R>>, "schema"> & {
+  schema: FilterTypeComponentProps<T[], InFilterOptions<T, R>>["schema"] & {
+    nestedSelection?: "independent" | "exclusive"
+  }
+}
 
 /**
  * A multi-select filter component that allows users to select multiple options from a predefined list.
@@ -91,7 +102,9 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
   isCompactMode,
   onFilterChange,
   allFiltersValue,
+  filterKey,
 }: InFilterComponentProps<T, R>) {
+  const isExclusive = schema.nestedSelection === "exclusive"
   const i18n = useI18n()
 
   const [searchTerm, setSearchTerm] = useState("")
@@ -115,13 +128,13 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
     const populateNestedCache = (parentOptions: InFilterOptionItem<T>[]) => {
       for (const option of parentOptions) {
         if (option.children) {
-          const { filterKey, options: childOptions } = option.children
-          const childValues = (allFiltersValue[filterKey] as T[]) ?? []
+          const { filterKey: childKey, options: childOptions } = option.children
+          const childValues = (allFiltersValue[childKey] as T[]) ?? []
 
           for (const child of childOptions) {
             if (childValues.includes(child.value as T)) {
               const contextualLabel = `${option.label} > ${child.label}`
-              cacheNestedLabel(filterKey, child.value, contextualLabel)
+              cacheNestedLabel(childKey, child.value, contextualLabel)
               cacheLabel(cacheKey, child.value, child.label)
             }
             // Recurse for deeper nesting
@@ -170,6 +183,71 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
   const nestedFilterKeys = useMemo(
     () => collectNestedFilterKeys(schema.options),
     [schema.options]
+  )
+
+  // Index used by exclusive-nesting interlock to know, for any (filterKey,
+  // value), which ancestors and descendants to clear when it is selected.
+  // Built from the loaded `options` (which mirrors the schema's option tree).
+  const interlockIndex = useMemo<InterlockIndex<T> | null>(() => {
+    if (!isExclusive || !filterKey) return null
+    return buildInterlockIndex<T>(
+      filterKey,
+      options as Array<InFilterOptionItem<T>>
+    )
+  }, [isExclusive, filterKey, options])
+
+  // Reads the current value for a given filter key, preferring our own
+  // `value` prop for the widget's own key (since it reflects the freshest
+  // intended state from this render's onChange caller).
+  const readKey = useCallback(
+    (key: string): T[] => {
+      if (key === filterKey) return value
+      const v = allFiltersValue?.[key]
+      return Array.isArray(v) ? (v as T[]) : []
+    },
+    [filterKey, value, allFiltersValue]
+  )
+
+  // Routes a write to the correct setter: own filterKey → onChange,
+  // anything else → onFilterChange (sibling/nested setter).
+  const writeKey = useCallback(
+    (key: string, next: T[]) => {
+      if (key === filterKey) onChange(next)
+      else onFilterChange?.(key, next)
+    },
+    [filterKey, onChange, onFilterChange]
+  )
+
+  // Clear the selected option's ancestors and descendants from their
+  // respective filter keys. Fires only on user-driven *additions*; callers
+  // must not invoke this on deselection.
+  const applyExclusiveInterlock = useCallback(
+    (selectedKey: string, selectedValue: T) => {
+      if (!interlockIndex) return
+      const ctx = interlockIndex.get(selectedKey)?.get(selectedValue)
+      if (!ctx) return
+      // Group drops by filter key so each key is read once and written once.
+      // Otherwise sibling drops at the same key would each compute against the
+      // same render-time snapshot and the last write would clobber the rest.
+      const dropsByKey = new Map<string, Set<T>>()
+      for (const { filterKey: k, value: v } of [
+        ...ctx.ancestors,
+        ...ctx.descendants,
+      ]) {
+        let set = dropsByKey.get(k)
+        if (!set) {
+          set = new Set()
+          dropsByKey.set(k, set)
+        }
+        set.add(v)
+      }
+      for (const [k, drops] of dropsByKey) {
+        const current = readKey(k)
+        const filtered = current.filter((x) => !drops.has(x))
+        if (filtered.length !== current.length) writeKey(k, filtered)
+      }
+    },
+    [interlockIndex, readKey, writeKey]
   )
 
   const nestedSelectionsCount = useMemo(
@@ -274,6 +352,9 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
         ? value.filter((v) => v !== optionValue)
         : [...value, optionValue]
     )
+    if (!isSelected && isExclusive && filterKey) {
+      applyExclusiveInterlock(filterKey, optionValue)
+    }
   }
 
   const totalSelected = value.length + nestedSelectionsCount
@@ -354,6 +435,9 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
                 cacheKey={cacheKey}
                 searchTerm={searchTermLower}
                 autoExpand={autoExpand}
+                onAfterSelect={
+                  isExclusive ? applyExclusiveInterlock : undefined
+                }
               />
             ))
           : filteredOptions.map((option) => (
