@@ -23,13 +23,11 @@ export const ResizeHandle = ({
   onReset,
   isResizing,
   setIsResizing,
-  narrow,
 }: {
   onResize: (deltaX: number) => void
   onReset: () => void
   isResizing: boolean
   setIsResizing: (value: boolean) => void
-  narrow?: boolean
 }) => {
   const startXRef = useRef(0)
 
@@ -72,17 +70,12 @@ export const ResizeHandle = ({
 
   return (
     <div
-      className={cn(
-        // z-10 so the handle — and its invisible hit-area extension —
-        // paints above the chat-content sibling (same flex row, later
-        // in DOM, no stacking context of its own). Without this, the
-        // `group-hover` never fires on the right side because the chat
-        // panel's edge captures the mouse events first.
-        "group relative z-10 h-full flex-shrink-0 cursor-ew-resize",
-        narrow
-          ? "w-1 bg-f1-special-page border border-x-0 border-solid border-f1-border-secondary"
-          : "w-1"
-      )}
+      className=// z-10 so the handle — and its invisible hit-area extension —
+      // paints above the chat-content sibling (same flex row, later
+      // in DOM, no stacking context of its own). Without this, the
+      // `group-hover` never fires on the right side because the chat
+      // panel's edge captures the mouse events first.
+      "group relative z-10 h-full flex-shrink-0 cursor-ew-resize w-1"
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
     >

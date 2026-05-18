@@ -126,7 +126,6 @@ export const SidebarWindow = ({ children }: WindowProps) => {
               onReset={resetChatWidth}
               isResizing={isResizing}
               setIsResizing={setIsResizing}
-              narrow={isCanvasMode}
             />
           )}
           <div
