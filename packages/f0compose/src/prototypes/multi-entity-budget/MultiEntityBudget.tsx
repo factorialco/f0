@@ -5,13 +5,6 @@ import {
   F0Dialog,
   F0Heading,
   F0Text,
-  F0WizardForm,
-  f0FormField,
-  useF0FormDefinition,
-} from "@factorialco/f0-react"
-import type {
-  F0FormSubmitResult,
-  F0WizardFormStep,
 } from "@factorialco/f0-react"
 import {
   Input,
@@ -39,7 +32,6 @@ import {
 } from "@factorialco/f0-react/icons/app"
 import { useMemo, useState } from "react"
 import { useSearchParams } from "react-router-dom"
-import { z } from "zod"
 
 import {
   directCostFromMovement,
@@ -97,28 +89,12 @@ const STATUS_LABEL: Record<BudgetStatusKey, string> = {
   over_budget: "Over budget",
 }
 
-const GROUP_STATUS_LABEL: Record<TrainingBudgetMovement["groupStatus"], string> =
-  {
-    planned: "Planned",
-    ongoing: "Ongoing",
-    completed: "Completed",
-  }
-
-const GROUP_STATUS_COLOR: Record<
-  TrainingBudgetMovement["groupStatus"],
-  "yellow" | "viridian" | "indigo"
-> = {
-  planned: "indigo",
-  ongoing: "yellow",
-  completed: "viridian",
-}
-
 const PAYMENT_STATUS_LABEL: Record<
   TrainingBudgetMovement["paymentStatus"],
   string
 > = {
   pending: "Pending",
-  spent: "Spent",
+  spent: "Paid",
 }
 
 const PAYMENT_STATUS_COLOR: Record<
@@ -185,18 +161,6 @@ function classTotalCost(
   const indirect = Number(k.indirectCost ?? 0) || 0
   const salary = Number(k.salaryCost ?? 0) || 0
   return { direct, indirect, salary, total: direct + indirect + salary }
-}
-
-function calculateAllocated(selectedTrainingClassIds: string[]): number {
-  let total = 0
-  for (const id of selectedTrainingClassIds) {
-    const training = trainings.find((t) =>
-      t.classes.some((c) => c.id === id)
-    )
-    if (!training) continue
-    total += classTotalCost(training, id).total
-  }
-  return total
 }
 
 // ── Multi-entity helpers ────────────────────────────────────────────────────
@@ -694,6 +658,8 @@ function AddTrainingGroupDialog({
           <F0Text content="Training group" variant="label" />
           <Select<string>
             multiple
+            label="Training group"
+            hideLabel
             value={selectedIds}
             onChange={(values: string[]) => setSelectedIds(values)}
             options={allGroupOptions.map((o) => ({
@@ -764,7 +730,7 @@ function DetailView({
       search: { enabled: true, sync: true },
       presets: [
         { label: "Pending", filter: { paymentStatus: ["pending"] } },
-        { label: "Spent", filter: { paymentStatus: ["spent"] } },
+        { label: "Paid", filter: { paymentStatus: ["spent"] } },
       ],
       filters: {
         groupStatus: {
@@ -860,20 +826,20 @@ function DetailView({
       primaryActions: () => {
         if (!b) return undefined
         const isArchived = b.status === "closed"
-        return [
-          {
-            label: "Export budget",
-            icon: Upload,
-            onClick: () => setIsExportOpen(true),
-          },
-          {
-            label: "Add training group",
-            icon: Add,
-            disabled: isArchived,
-            onClick: () => setIsAddGroupOpen(true),
-          },
-        ]
+        return {
+          label: "Add training group",
+          icon: Add,
+          disabled: isArchived,
+          onClick: () => setIsAddGroupOpen(true),
+        }
       },
+      secondaryActions: () => [
+        {
+          label: "Export budget",
+          icon: Upload,
+          onClick: () => setIsExportOpen(true),
+        },
+      ],
       itemOnClick: (item) => () => setSelectedMovement(item),
       itemActions: (item: TrainingBudgetMovement) => [
         {
@@ -912,14 +878,14 @@ function DetailView({
   const pending = movements
     .filter((m) => m.paymentStatus === "pending")
     .reduce((s, m) => s + m.amountCents / 100, 0)
-  const committed = spent + pending
-  const available = total - committed
+  const allocated = spent + pending
+  const available = total - allocated
 
-  const { status } = calculateBudgetStatus(committed, total)
+  const { status } = calculateBudgetStatus(allocated, total)
   const isOver = status === "over_budget" && total > 0
   const isAtRisk = status === "budget_risk"
   const exceedAmount = isOver ? Math.abs(available) : 0
-  const exceedPct = total > 0 ? (committed * 100) / total : 0
+  const exceedPct = total > 0 ? (allocated * 100) / total : 0
   const isArchived = b.status === "closed"
 
   return (
@@ -928,7 +894,7 @@ function DetailView({
         <div className="flex flex-col gap-1">
           <F0Heading content={b.name} variant="heading-large" as="h1" />
           <F0Text
-            content={`${b.year} • ${b.scope === "company" ? "Company" : b.scope === "department" ? "Department" : "Team"} · ${b.scopeName} • Owner: ${b.ownerEmployeeName}`}
+            content="Control how training costs are allocated across groups and legal entities."
             variant="small"
           />
         </div>
@@ -964,12 +930,25 @@ function DetailView({
         />
       )}
 
+      <div className="flex flex-wrap items-center gap-2 text-sm text-f1-foreground-secondary">
+        <span className="inline-flex items-center gap-1 rounded-full bg-f1-background-positive px-2 py-1 text-f1-foreground-positive">
+          <span className="h-1.5 w-1.5 rounded-full bg-f1-foreground-positive" />
+          {STATUS_LABEL[status]}
+        </span>
+        <span>Type Training</span>
+        <span>Timeframe {b.year}</span>
+        <span>Groups {movements.length}</span>
+      </div>
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <AmountWidget label="Available" value={fmtEur(available)}
-          emphasize={available < 0 ? "negative" : "positive"} />
-        <AmountWidget label="Committed" value={fmtEur(committed)} />
+        <AmountWidget label="Total budget" value={fmtEur(total)} />
+        <AmountWidget label="Allocated" value={fmtEur(allocated)} />
         <AmountWidget label="Spent" value={fmtEur(spent)} />
-        <AmountWidget label="Total" value={fmtEur(total)} />
+        <AmountWidget
+          label="Available"
+          value={fmtEur(available)}
+          emphasize={available < 0 ? "negative" : "positive"}
+        />
       </div>
 
       <OneDataCollection
@@ -982,38 +961,19 @@ function DetailView({
             options: {
               columns: [
                 {
-                  label: "Training group",
+                  label: "Training",
+                  id: "trainingName",
+                  render: (item) => ({
+                    type: "text",
+                    value: item.trainingName,
+                  }),
+                },
+                {
+                  label: "Group",
                   id: "groupName",
                   render: (item) => ({
                     type: "text",
                     value: item.groupName,
-                  }),
-                },
-                {
-                  label: "Group status",
-                  id: "groupStatus",
-                  render: (item) => ({
-                    type: "dotTag",
-                    value: {
-                      color: GROUP_STATUS_COLOR[item.groupStatus],
-                      label: GROUP_STATUS_LABEL[item.groupStatus],
-                    },
-                  }),
-                },
-                {
-                  label: "Start date",
-                  id: "startDate",
-                  render: (item) => ({
-                    type: "text",
-                    value: fmtDate(item.startDate),
-                  }),
-                },
-                {
-                  label: "End date",
-                  id: "endDate",
-                  render: (item) => ({
-                    type: "text",
-                    value: fmtDate(item.endDate),
                   }),
                 },
                 {
@@ -1022,14 +982,6 @@ function DetailView({
                   render: (item) => ({
                     type: "text",
                     value: fmtEur(item.amountCents / 100),
-                  }),
-                },
-                {
-                  label: "Provider",
-                  id: "provider",
-                  render: (item) => ({
-                    type: "text",
-                    value: item.trainingProvider,
                   }),
                 },
                 {
@@ -1051,12 +1003,16 @@ function DetailView({
                     if (les.length === 0) {
                       return { type: "text", value: "—" }
                     }
-                    if (les.length === 1) {
-                      return { type: "text", value: les[0]!.legalName }
-                    }
                     return {
-                      type: "text",
-                      value: `${les[0]!.legalName} +${les.length - 1}`,
+                      type: "tagList",
+                      value: {
+                        type: "dot",
+                        tags: les.map((le) => ({
+                          text: le.legalName,
+                          color: "indigo" as const,
+                        })),
+                        max: 2,
+                      },
                     }
                   },
                 },
@@ -1167,172 +1123,88 @@ function DetailView({
   )
 }
 
-// ── NEW BUDGET WIZARD ───────────────────────────────────────────────────────
-// Upstream: TrainingsBudgetWizard — 3 steps:
-//   1. Basic information — Define the essential details of your training budget.
-//   2. Amount             — Set the total amount and timeframe for this budget.
-//   3. Allocation         — Select the training groups eligible to use this budget.
-
-const basicDetailsSchema = z.object({
-  legalEntityId: f0FormField.select({
-    label: "Legal entity",
-    placeholder: "Select a legal entity",
-    options: legalEntities.map((le) => ({
-      value: le.id,
-      label: le.legalName,
-    })),
-  }),
-  name: f0FormField.text({
-    label: "Title",
-    placeholder: "e.g. Engineering 2026",
-  }),
-  description: f0FormField.textarea({
-    label: "Description",
-    optional: true,
-    placeholder: "What is this budget for?",
-  }),
-})
-
-const amountsSchema = z.object({
-  amount: f0FormField.number({
-    label: "Amount",
-    placeholder: "0",
-    min: 0,
-  }),
-  effectiveFrom: f0FormField.date({
-    label: "Start date",
-    row: "dates",
-  }),
-  effectiveUntil: f0FormField.date({
-    label: "End date",
-    optional: true,
-    row: "dates",
-  }),
-})
-
-const allocationSchema = z.object({
-  selectedTrainingClassIds: f0FormField.multiSelect({
-    label: "Training groups",
-    optional: true,
-    helpText:
-      "Direct, indirect, and salary costs of the selected training groups will be deducted from this budget.",
-    options: trainings.flatMap((t) =>
-      t.classes.map((c) => ({
-        value: c.id,
-        label: `${t.name} — ${c.name}`,
-      }))
-    ),
-  }),
-})
-
-const wizardSchema = {
-  basicDetails: basicDetailsSchema,
-  amounts: amountsSchema,
-  allocation: allocationSchema,
-}
-
-type WizardSchema = typeof wizardSchema
-
-const wizardSections = {
-  basicDetails: {
-    title: "Basic information",
-    description: "Define the essential details of your training budget.",
-  },
-  amounts: {
-    title: "Amount",
-    description: "Set the total amount and timeframe for this budget.",
-  },
-  allocation: {
-    title: "Allocation",
-    description:
-      "Select the training groups eligible to use this budget.",
-  },
-}
-
-const wizardSteps: F0WizardFormStep[] = [
-  { title: "Basic information", sectionIds: ["basicDetails"] },
-  { title: "Amount", sectionIds: ["amounts"] },
-  {
-    title: "Allocation",
-    sectionIds: ["allocation"],
-    nextLabel: "Submit",
-  },
-]
-
-const wizardDefaults = {
-  basicDetails: { legalEntityId: legalEntities[0]!.id, name: "", description: "" },
-  amounts: { amount: 10000 },
-  allocation: { selectedTrainingClassIds: [] as string[] },
-}
-
 function NewBudgetView({
   setSearch,
 }: {
   setSearch: ReturnType<typeof useSearchParams>[1]
 }) {
-  const handleSubmit = useMemo(
-    () =>
-      async (arg: {
-        sectionId: keyof WizardSchema
-        data: unknown
-        fullData: {
-          basicDetails: z.infer<typeof basicDetailsSchema>
-          amounts: z.infer<typeof amountsSchema>
-          allocation: z.infer<typeof allocationSchema>
-        }
-      }): Promise<F0FormSubmitResult> => {
-        if (arg.sectionId !== "allocation") return { success: true }
+  const [name, setName] = useState("")
+  const [legalEntityId, setLegalEntityId] = useState(legalEntities[0]!.id)
+  const [amount, setAmount] = useState<number | null>(10000)
+  const [year, setYear] = useState<number | null>(2026)
 
-        const { basicDetails, amounts, allocation } = arg.fullData
-        const allocated = calculateAllocated(
-          allocation.selectedTrainingClassIds ?? []
-        )
-        const id = `bud-${Date.now()}`
-        const total = amounts.amount ?? 0
-        const legalEntityId = basicDetails.legalEntityId
-        const currency = legalEntityCurrencyMap[legalEntityId] ?? "EUR"
-        const newBudget: TrainingBudget = {
-          id,
-          name: basicDetails.name ?? "Untitled budget",
-          year: amounts.effectiveFrom
-            ? new Date(amounts.effectiveFrom).getFullYear()
-            : new Date().getFullYear(),
-          totalAmount: total,
-          spentAmount: 0,
-          pendingAmount: allocated,
-          remainingAmount: Math.max(0, total - allocated),
-          currency,
-          status: "active",
-          scope: "company",
-          scopeName: "All employees",
-          ownerEmployeeId: "emp-001",
-          ownerEmployeeName: "You",
-          legalEntityId,
-        }
-        trainingBudgets.unshift(newBudget)
-        go(setSearch, { view: "detail", budgetId: id })
-        return { success: true }
-      },
-    [setSearch]
-  )
-
-  const formDefinition = useF0FormDefinition({
-    name: "new-trainings-budget-wizard",
-    schema: wizardSchema,
-    sections: wizardSections,
-    defaultValues: wizardDefaults,
-    onSubmit: handleSubmit,
-  })
+  const createBudget = () => {
+    const id = `bud-${Date.now()}`
+    const total = amount ?? 0
+    const currency = legalEntityCurrencyMap[legalEntityId] ?? "EUR"
+    const newBudget: TrainingBudget = {
+      id,
+      name: name.trim() || "Untitled budget",
+      year: year ?? new Date().getFullYear(),
+      totalAmount: total,
+      spentAmount: 0,
+      pendingAmount: 0,
+      remainingAmount: total,
+      currency,
+      status: "active",
+      scope: "company",
+      scopeName: "All employees",
+      ownerEmployeeId: "emp-001",
+      ownerEmployeeName: "You",
+      legalEntityId,
+    }
+    trainingBudgets.unshift(newBudget)
+    go(setSearch, { view: "detail", budgetId: id })
+  }
 
   return (
-    <F0WizardForm
+    <F0Dialog
       isOpen
       title="New training budget"
-      formDefinition={formDefinition}
-      steps={wizardSteps}
+      description="Create a training budget and allocate groups from its detail page."
       onClose={() => go(setSearch, { view: "list", budgetId: null })}
-      autoCloseOnLastStepSubmit
-    />
+      position="center"
+      width="md"
+      primaryAction={{ label: "Create budget", icon: Add, onClick: createBudget }}
+      secondaryAction={{
+        label: "Cancel",
+        onClick: () => go(setSearch, { view: "list", budgetId: null }),
+      }}
+    >
+      <div className="flex flex-col gap-4">
+        <Input
+          label="Title"
+          value={name}
+          onChange={(value) => setName(value ?? "")}
+          placeholder="e.g. Engineering 2026"
+        />
+        <Select<string>
+          label="Legal entity"
+          value={legalEntityId}
+          onChange={(value: string) => setLegalEntityId(value)}
+          options={legalEntities.map((le) => ({
+            value: le.id,
+            label: le.legalName,
+          }))}
+        />
+        <div className="grid grid-cols-2 gap-4">
+          <NumberInput
+            label="Amount"
+            value={amount}
+            onChange={setAmount}
+            min={0}
+            locale="en-US"
+          />
+          <NumberInput
+            label="Year"
+            value={year}
+            onChange={setYear}
+            min={2024}
+            locale="en-US"
+          />
+        </div>
+      </div>
+    </F0Dialog>
   )
 }
 
@@ -1410,7 +1282,7 @@ function GroupSidepanelCostTab({
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>(
     movement.paymentStatus
   )
-  const [totalOpen, setTotalOpen] = useState(true)
+  const [totalOpen, setTotalOpen] = useState(false)
   const totalCost = grossCostFromMovement(movement)
   const participants = participantsForGroup(movement.groupId)
   const leBreakdownMap = new Map(
@@ -1419,29 +1291,43 @@ function GroupSidepanelCostTab({
       participantsByLegalEntityForMovement(movement)
     ).map((b) => [b.legalEntityId, b])
   )
-  const [openLeIds, setOpenLeIds] = useState<Set<string>>(new Set())
+  const [openLeIds, setOpenLeIds] = useState<Set<string>>(
+    () => new Set(les.slice(0, 1).map((le) => le.id))
+  )
 
   return (
     <F0Box display="flex" flexDirection="column" gap="md" paddingX="md">
+      <div className="flex flex-wrap items-center gap-2 text-sm text-f1-foreground-secondary">
+        <span className="inline-flex items-center gap-1 rounded-full bg-f1-background-positive px-2 py-1 text-f1-foreground-positive">
+          <span className="h-1.5 w-1.5 rounded-full bg-f1-foreground-positive" />
+          {PAYMENT_STATUS_LABEL[paymentStatus]}
+        </span>
+        <span>
+          {fmtDate(movement.startDate)} - {fmtDate(movement.endDate)}
+        </span>
+      </div>
+
       {/* Payment status */}
       <div className="flex flex-col gap-2">
         <F0Text content="Payment status" variant="label" />
         <Select<PaymentStatus>
+          label="Payment status"
+          hideLabel
           value={paymentStatus}
           onChange={(v: PaymentStatus) => setPaymentStatus(v)}
           options={[
             { value: "pending", label: "Pending" },
-            { value: "spent", label: "Spent" },
+            { value: "spent", label: "Paid" },
           ]}
         />
       </div>
 
       {/* Total cost card */}
-      <div className="rounded-lg border border-f1-border bg-f1-background">
+      <div className="rounded-xl border border-f1-border bg-f1-background">
         <button
           type="button"
           onClick={() => setTotalOpen((v) => !v)}
-          className="flex w-full items-center justify-between p-3"
+          className="flex w-full items-center justify-between p-4"
         >
           <div className="flex flex-col items-start gap-0.5">
             <F0Text content="Total cost" variant="label" />
@@ -1451,14 +1337,14 @@ function GroupSidepanelCostTab({
             />
           </div>
           <div className="flex items-center gap-2">
-            <F0Text content={fmtEur(totalCost)} variant="label" />
+            <F0Heading content={fmtEur(totalCost)} variant="heading" as="h3" />
             <span className="text-f1-foreground-secondary">
               {totalOpen ? <ArrowDown /> : <ArrowRight />}
             </span>
           </div>
         </button>
         {totalOpen && (
-          <div className="flex flex-col gap-1 border-t border-f1-border p-3">
+          <div className="flex flex-col gap-2 border-t border-f1-border p-4">
             <div className="flex justify-between">
               <F0Text content="Direct cost" variant="small" />
               <F0Text
@@ -1485,7 +1371,7 @@ function GroupSidepanelCostTab({
       </div>
 
       {/* Costs by legal entity switch card */}
-      <div className="flex items-start justify-between gap-3 rounded-lg border border-f1-border bg-f1-background p-3">
+      <div className="flex items-start justify-between gap-3 rounded-xl border border-f1-border bg-f1-background p-4">
         <div className="flex flex-col gap-0.5">
           <F0Text content="Costs by legal entity" variant="label" />
           <F0Text
@@ -1519,9 +1405,9 @@ function GroupSidepanelCostTab({
             return (
               <div
                 key={le.id}
-                className="rounded-lg border border-f1-border bg-f1-background"
+                className="rounded-xl border border-f1-border bg-f1-background"
               >
-                <div className="flex items-center justify-between p-3">
+                <div className="flex items-center justify-between p-4">
                   <button
                     type="button"
                     onClick={() =>
@@ -1557,28 +1443,28 @@ function GroupSidepanelCostTab({
                   </button>
                 </div>
                 {open && breakdown && (
-                  <div className="flex flex-col gap-1 border-t border-f1-border p-3">
-                    <div className="flex justify-between">
-                      <F0Text content="Direct cost" variant="small" />
-                      <F0Text
-                        content={fmtEur(breakdown.directCost)}
-                        variant="small"
-                      />
-                    </div>
-                    <div className="flex justify-between">
-                      <F0Text content="Indirect cost" variant="small" />
-                      <F0Text
-                        content={fmtEur(breakdown.indirectCost)}
-                        variant="small"
-                      />
-                    </div>
-                    <div className="flex justify-between">
-                      <F0Text content="Salary cost" variant="small" />
-                      <F0Text
-                        content={fmtEur(breakdown.salaryCost)}
-                        variant="small"
-                      />
-                    </div>
+                  <div className="grid grid-cols-1 gap-3 border-t border-f1-border p-4 sm:grid-cols-3">
+                    <NumberInput
+                      label="Direct cost"
+                      value={breakdown.directCost}
+                      onChange={() => undefined}
+                      disabled
+                      locale="en-US"
+                    />
+                    <NumberInput
+                      label="Indirect cost"
+                      value={breakdown.indirectCost}
+                      onChange={() => undefined}
+                      disabled
+                      locale="en-US"
+                    />
+                    <NumberInput
+                      label="Salary cost"
+                      value={breakdown.salaryCost}
+                      onChange={() => undefined}
+                      disabled
+                      locale="en-US"
+                    />
                   </div>
                 )}
               </div>
@@ -1586,7 +1472,7 @@ function GroupSidepanelCostTab({
           })}
 
           {/* Footer summary card: per-LE totals + Total cost */}
-          <div className="mt-2 rounded-lg border border-f1-border bg-f1-background-secondary p-3">
+          <div className="mt-2 rounded-xl border border-f1-border bg-f1-background-secondary p-4">
             <F0Text content="Cost breakdown" variant="label" />
             <div className="mt-2 flex flex-col gap-1">
               {les.map((le) => {

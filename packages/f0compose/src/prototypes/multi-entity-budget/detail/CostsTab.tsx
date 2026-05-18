@@ -7,7 +7,14 @@ import {
   F0Select,
 } from "@factorialco/f0-react"
 import { NumberInput, Switch } from "@factorialco/f0-react/dist/experimental"
-import { Calculator } from "@factorialco/f0-react/icons/app"
+import {
+  Briefcase,
+  Building,
+  Calculator,
+  DollarBill,
+  Receipt,
+} from "@factorialco/f0-react/icons/app"
+import type { IconType } from "@factorialco/f0-react"
 
 import type { Training, TrainingClass } from "@/fixtures"
 import {
@@ -43,14 +50,14 @@ function formatMoney(n: number, currency = "EUR"): string {
 }
 
 function CostBreakdownCard({
-  emoji,
+  icon: Icon,
   title,
   description,
   value,
   onChange,
   action,
 }: {
-  emoji: string
+  icon: IconType
   title: string
   description: string
   value: number
@@ -60,8 +67,8 @@ function CostBreakdownCard({
   return (
     <div className="flex flex-col gap-2 rounded-md border border-solid border-f1-border-secondary bg-f1-background p-4">
       <div className="flex items-center gap-2">
-        <span aria-hidden className="text-xl">
-          {emoji}
+        <span className="text-f1-foreground-secondary">
+          <Icon />
         </span>
         <F0Heading as="h4" variant="heading" content={title} />
       </div>
@@ -248,21 +255,21 @@ export function CostsTab({ training, klass }: Props) {
       {/* Three cost breakdown cards */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <CostBreakdownCard
-          emoji="💰"
+          icon={DollarBill}
           title="Direct cost"
           description="Training-related expenses, such as instructor fees, materials, venue, and logistics."
           value={directCost}
           onChange={setDirectCost}
         />
         <CostBreakdownCard
-          emoji="🏢"
+          icon={Building}
           title="Indirect cost"
           description="General business expenses related to training, such as utilities and administrative fees."
           value={indirectCost}
           onChange={setIndirectCost}
         />
         <CostBreakdownCard
-          emoji="📝"
+          icon={Briefcase}
           title="Salary cost"
           description="Cost of all employees' time spent on the course."
           value={salaryCost}
@@ -344,8 +351,8 @@ export function CostsTab({ training, klass }: Props) {
         </div>
         <div className="flex flex-col gap-2 rounded-md border border-solid border-f1-border-secondary bg-f1-background p-4">
           <div className="flex items-center gap-2">
-            <span aria-hidden className="text-xl">
-              🎟️
+            <span className="text-f1-foreground-secondary">
+              <Receipt />
             </span>
             <F0Heading as="h4" variant="heading" content="Subsidised cost" />
           </div>

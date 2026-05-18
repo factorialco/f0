@@ -18,7 +18,6 @@ import {
 
 import { ClassModals, type ClassAction } from "./ClassModals"
 import { CostsTab } from "./CostsTab"
-import { DocumentsTab as ClassDocumentsTab } from "./class/DocumentsTab"
 import { MaterialsTab as ClassMaterialsTab } from "./class/MaterialsTab"
 import { ParticipantsTab as ClassParticipantsTab } from "./class/ParticipantsTab"
 import { SessionsTab as ClassSessionsTab } from "./class/SessionsTab"
@@ -33,19 +32,13 @@ type Props = {
   onBackToClasses: () => void
 }
 
-type ClassTabId =
-  | "sessions"
-  | "participants"
-  | "materials"
-  | "documents"
-  | "costs"
+type ClassTabId = "sessions" | "participants" | "costs" | "materials"
 
 const CLASS_TABS: Array<{ id: ClassTabId; label: string }> = [
   { id: "sessions", label: "Sessions" },
   { id: "participants", label: "Participants" },
-  { id: "materials", label: "Materials" },
-  { id: "documents", label: "Documents" },
   { id: "costs", label: "Costs" },
+  { id: "materials", label: "Materials" },
 ]
 
 const VALID_CTABS = new Set<string>(CLASS_TABS.map((t) => t.id))
@@ -290,14 +283,11 @@ export function ClassDetail({
           {activeTab === "participants" && (
             <ClassParticipantsTab training={training} klass={klass} />
           )}
-          {activeTab === "materials" && (
-            <ClassMaterialsTab training={training} klass={klass} />
-          )}
-          {activeTab === "documents" && (
-            <ClassDocumentsTab training={training} klass={klass} />
-          )}
           {activeTab === "costs" && (
             <CostsTab training={training} klass={klass} />
+          )}
+          {activeTab === "materials" && (
+            <ClassMaterialsTab training={training} klass={klass} />
           )}
         </PageContent>
       </Page>
