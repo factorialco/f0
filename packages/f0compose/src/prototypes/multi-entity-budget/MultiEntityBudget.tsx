@@ -2,6 +2,7 @@ import {
   F0Alert,
   F0Box,
   F0Button,
+  F0Checkbox,
   F0Dialog,
   F0Heading,
   F0Text,
@@ -653,21 +654,37 @@ function AddTrainingGroupDialog({
           />
         )}
 
-        {/* Training group multi-select */}
+        {/* Training group selector */}
         <div className="flex flex-col gap-2">
           <F0Text content="Training group" variant="label" />
-          <Select<string>
-            multiple
-            label="Training group"
-            hideLabel
-            value={selectedIds}
-            onChange={(values: string[]) => setSelectedIds(values)}
-            options={allGroupOptions.map((o) => ({
-              value: o.value,
-              label: o.label,
-            }))}
-            placeholder="e.g., January group"
-          />
+          <div className="max-h-48 overflow-auto rounded-lg border border-f1-border bg-f1-background">
+            {allGroupOptions.map((option) => {
+              const selected = selectedIds.includes(option.value)
+              return (
+                <label
+                  key={option.value}
+                  className="flex cursor-pointer items-center justify-between gap-3 border-b border-f1-border px-3 py-2 last:border-b-0"
+                >
+                  <div className="flex flex-col gap-0.5">
+                    <F0Text content={option.label} variant="label" />
+                    <F0Text content={fmtEur(option.cost)} variant="small" />
+                  </div>
+                  <F0Checkbox
+                    title={option.label}
+                    hideLabel
+                    checked={selected}
+                    onCheckedChange={(checked) => {
+                      setSelectedIds((prev) =>
+                        checked === true
+                          ? [...prev, option.value]
+                          : prev.filter((id) => id !== option.value)
+                      )
+                    }}
+                  />
+                </label>
+              )
+            })}
+          </div>
         </div>
 
         {/* Budget deductions info banner (icon + 2 lines) */}
