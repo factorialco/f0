@@ -2487,6 +2487,13 @@ export declare interface ChatDashboardConfig {
      */
     snapshot?: boolean;
     /**
+     * ISO-8601 date this snapshot dashboard is keyed to. Surfaced as a
+     * single-day date pill above the grid; editing it refetches against the
+     * new date. Persists with the dashboard so saved snapshots round-trip
+     * their effective date.
+     */
+    snapshotDate?: string;
+    /**
      * Agent-named DATE column to promote as the navigator pill above the grid.
      * When unset and exactly one DATE column is in play, the compute layer
      * picks that column automatically. When unset and 2+ DATE columns exist,
@@ -14480,6 +14487,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -14511,15 +14523,6 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
         videoEmbed: {
             setVideoEmbed: (options: {
                 src: string;
@@ -14529,6 +14532,10 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
+        };
+    }
 }
