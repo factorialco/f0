@@ -228,9 +228,15 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   }
 
   const loadThread = (threadId: string, title: string) => {
-    loadThread_raw(threadId)
     resetForNewThread()
+    // `resetForNewThread()` clears `isLoadingThread` to handle the case
+    // of switching threads mid-load. Re-raise it synchronously so the
+    // skeleton renders before CopilotFunctionBridge.loadThreadFunction
+    // (which also sets the flag, but only after its async bridge wires
+    // through) gets a chance to confirm.
+    setIsLoadingThread(true)
     setCurrentThreadTitle(title)
+    loadThread_raw(threadId)
   }
 
   const resetChatWidth = () => {

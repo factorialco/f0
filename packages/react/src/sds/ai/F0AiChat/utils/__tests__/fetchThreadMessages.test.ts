@@ -321,6 +321,33 @@ describe("convertBackendMessage", () => {
       },
     ])
   })
+
+  it("extracts <vision_attachments> blocks from restored user text into binary parts", () => {
+    const rawText = `que hay aqui\n\n<vision_attachments>\nThe following image files are attached to this message and visible to you. Examine them visually to extract any relevant information (amounts, dates, merchants, line items, etc.):\n- Captura.png (image/png) — URL: https://api.example.com/blobs/abc\n</vision_attachments>`
+
+    const result = convertBackendMessage({
+      id: "msg_restored_with_attachments",
+      role: "user",
+      content: {
+        parts: [{ type: "text", text: rawText }],
+      },
+    } as any)
+
+    expect(result).toHaveLength(1)
+    expect(result[0]).toEqual({
+      id: "msg_restored_with_attachments",
+      role: "user",
+      content: [
+        {
+          type: "binary",
+          filename: "Captura.png",
+          mimeType: "image/png",
+          url: "https://api.example.com/blobs/abc",
+        },
+        { type: "text", text: "que hay aqui" },
+      ],
+    })
+  })
 })
 
 describe("fetchThreadMessages", () => {
