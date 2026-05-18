@@ -457,6 +457,11 @@ export type TrainingBudget = {
   scopeName: string
   ownerEmployeeId: string
   ownerEmployeeName: string
+  // Optional: legal entity that owns this budget. Currency is derived from
+  // the legal entity at creation time (mirrors `FinanceBudget.legalEntityId`
+  // upstream). Pre-existing fixtures omit it; consumers that need the
+  // currency-from-LE behavior should rely on this when present.
+  legalEntityId?: string
 }
 
 export const trainingBudgets: TrainingBudget[] = [

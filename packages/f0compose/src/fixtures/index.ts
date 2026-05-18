@@ -84,6 +84,15 @@ export {
   type ExpenseGroup,
 } from "./expenses"
 export {
+  legalEntities,
+  legalEntityCurrencyMap,
+  findLegalEntity,
+  legalEntityForEmployee,
+  legalEntityIdForEmployee,
+  legalEntitiesForCompany,
+  type LegalEntity,
+} from "./legal-entities"
+export {
   trainings,
   trainingCategories,
   trainingParticipants,
