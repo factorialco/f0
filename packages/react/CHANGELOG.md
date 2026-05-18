@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.2](https://github.com/factorialco/f0/compare/f0-react-v2.6.1...f0-react-v2.6.2) (2026-05-18)
+
+
+### Bug Fixes
+
+* **ai:** render custom placeholder when placeholders array has single element ([#4156](https://github.com/factorialco/f0/issues/4156)) ([007852a](https://github.com/factorialco/f0/commit/007852af3b01627a2b289bfa5f164d4797287ae6))
+
 ## [2.6.1](https://github.com/factorialco/f0/compare/f0-react-v2.6.0...f0-react-v2.6.1) (2026-05-18)
 
 
