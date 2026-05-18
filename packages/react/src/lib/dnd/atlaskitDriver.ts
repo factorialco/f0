@@ -39,7 +39,10 @@ export function createAtlaskitDriver(instanceId: symbol): DndDriver {
   )
 
   return {
-    registerDraggable(el, { payload, disabled, handle }) {
+    registerDraggable(
+      el,
+      { payload, disabled, handle, onGenerateDragPreview }
+    ) {
       if (disabled) return () => {}
       return draggable({
         element: el,
@@ -47,6 +50,11 @@ export function createAtlaskitDriver(instanceId: symbol): DndDriver {
           return { ...payload, instanceId }
         },
         dragHandle: handle ?? undefined,
+        onGenerateDragPreview: onGenerateDragPreview
+          ? ({ nativeSetDragImage }) => {
+              onGenerateDragPreview({ nativeSetDragImage })
+            }
+          : undefined,
       })
     },
     registerDroppable(el, { id }) {

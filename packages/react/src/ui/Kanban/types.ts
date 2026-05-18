@@ -55,6 +55,9 @@ export interface KanbanProps<TRecord extends RecordType> {
     instanceId: symbol
     getIndexById: (laneId: string, id: string) => number
     onMove?: KanbanOnMove<TRecord>
+    onBulkMove?: KanbanOnBulkMove<TRecord>
+    /** Keys (from getKey) of all currently selected items (for bulk drag-and-drop) */
+    selectedIds?: string[]
   }
 }
 
@@ -66,6 +69,12 @@ export type KanbanOnMove<TRecord extends RecordType> = (
   sourceRecord: TRecord,
   destinyRecord: { record: TRecord; position: "above" | "below" } | null
 ) => Promise<TRecord>
+
+export type KanbanOnBulkMove<TRecord extends RecordType> = (
+  moves: Array<{ fromLaneId: string; sourceRecord: TRecord }>,
+  toLaneId: string,
+  destinyRecord: { record: TRecord; position: "above" | "below" } | null
+) => Promise<TRecord[]>
 
 export type KanbanOnMoveParam =
   | {
@@ -82,6 +91,16 @@ export type KanbanOnMoveParam =
       indexOfTarget: number
       position: "above" | "below"
     }
+
+export type KanbanOnBulkMoveParam = {
+  /** Keys (from getKey) of all selected items to move */
+  selectedIds: string[]
+  /** Target lane ID */
+  toLaneId: string
+  /** Target card position (null = top of lane, i.e. index 0) */
+  indexOfTarget: number | null
+  position: "above" | "below" | null
+}
 
 // (Removed) Leave/Insert split: we simplified to a single onMove orchestrated by Kanban
 

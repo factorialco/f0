@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 
 import type {
   KanbanLaneAttributes,
+  KanbanOnBulkMoveParam,
   KanbanOnMoveParam,
   KanbanProps,
 } from "./types.ts"
@@ -291,6 +292,170 @@ export function Kanban<TRecord extends RecordType>(
     }
   }
 
+  const onBulkMove = async (params: KanbanOnBulkMoveParam) => {
+    const { selectedIds, toLaneId, indexOfTarget, position } = params
+    if (!dnd?.onBulkMove || selectedIds.length === 0) return []
+
+    // Convert to Set for O(1) lookups inside nested loops
+    const selectedIdSet = new Set(selectedIds)
+
+    // Snapshot
+    const prev = localLanes
+    const toLaneIdx = prev.findIndex((l) => l.id === toLaneId)
+    if (toLaneIdx === -1) return []
+
+    // Collect all selected records across lanes, preserving their relative order per lane
+    const moves: Array<{ fromLaneId: string; sourceRecord: TRecord }> = []
+    const removalsByLane = new Map<
+      number,
+      Array<{ index: number; record: TRecord }>
+    >()
+
+    for (let laneIdx = 0; laneIdx < prev.length; laneIdx++) {
+      const lane = prev[laneIdx]
+      const laneId = lane.id as string
+      for (let itemIdx = 0; itemIdx < lane.items.length; itemIdx++) {
+        const item = lane.items[itemIdx]
+        const key = String(getKey(item as TRecord, itemIdx, laneId))
+        if (selectedIdSet.has(key)) {
+          moves.push({ fromLaneId: laneId, sourceRecord: item as TRecord })
+          if (!removalsByLane.has(laneIdx)) {
+            removalsByLane.set(laneIdx, [])
+          }
+          removalsByLane
+            .get(laneIdx)!
+            .push({ index: itemIdx, record: item as TRecord })
+        }
+      }
+    }
+
+    if (moves.length === 0) return []
+
+    // Compute insertion index
+    let insertIndex = 0
+    if (indexOfTarget != null && position != null) {
+      insertIndex = indexOfTarget + (position === "below" ? 1 : 0)
+    }
+
+    // Build next lanes state:
+    // 1. Remove all selected items from their source lanes
+    // 2. Insert them at the target position preserving relative order
+    const recordsToInsert = moves.map((m) => m.sourceRecord)
+
+    const next = prev.map((lane, laneIdx) => {
+      const items = [...lane.items]
+      const isTgtLane = laneIdx === toLaneIdx
+
+      // Remove items from this lane (reverse order to maintain indices)
+      const removals = removalsByLane.get(laneIdx)
+      let removedCount = 0
+      if (removals) {
+        for (let i = removals.length - 1; i >= 0; i--) {
+          items.splice(removals[i].index, 1)
+          removedCount++
+        }
+      }
+
+      // Insert into target lane
+      if (isTgtLane) {
+        // Adjust insert index for items removed from THIS lane that were before the insert point
+        let adjustedInsert = insertIndex
+        if (removals) {
+          const removedBefore = removals.filter(
+            (r) => r.index < insertIndex
+          ).length
+          adjustedInsert = Math.max(0, insertIndex - removedBefore)
+        }
+        const boundedIndex = Math.max(0, Math.min(adjustedInsert, items.length))
+        items.splice(boundedIndex, 0, ...recordsToInsert)
+      }
+
+      // Adjust totals
+      const isSourceOnly = removedCount > 0 && !isTgtLane
+      const isTargetOnly = isTgtLane && removedCount === 0
+      let nextTotal = lane.total
+      if (typeof lane.total === "number") {
+        if (isSourceOnly) {
+          nextTotal = Math.max(0, lane.total - removedCount)
+        } else if (isTargetOnly) {
+          nextTotal = lane.total + recordsToInsert.length
+        } else if (isTgtLane && removedCount > 0) {
+          // Same lane: total stays the same (items moved within it + new ones added)
+          nextTotal = lane.total - removedCount + recordsToInsert.length
+        }
+      }
+
+      return { ...lane, items, total: nextTotal }
+    })
+
+    // Optimistic apply
+    setLocalLanes(next)
+
+    const optimisticSignature = next
+      .map(
+        (l) =>
+          `${l.id}:[${l.items.map((item, idx) => getKey(item, idx, l.id)).join(",")}]`
+      )
+      .join("|")
+
+    optimisticSignatureRef.current = optimisticSignature
+    lastLanesRef.current = optimisticSignature
+
+    try {
+      // Build destiny record for the external callback
+      const destinyRecord =
+        indexOfTarget == null
+          ? null
+          : (prev[toLaneIdx].items[indexOfTarget] as TRecord | undefined)
+
+      const results = await dnd.onBulkMove(
+        moves,
+        toLaneId,
+        destinyRecord
+          ? {
+              record: destinyRecord,
+              position: (position as "above" | "below") ?? "above",
+            }
+          : null
+      )
+
+      if (results && results.length > 0) {
+        // Replace records in target lane with backend versions
+        setLocalLanes((curr) => {
+          const updated = curr.map((lane) => {
+            if (lane.id !== toLaneId) return lane
+            const items = [...lane.items]
+            for (const result of results) {
+              const resultKey = String(getKey(result as TRecord, 0, toLaneId))
+              const idx = items.findIndex((item, index) => {
+                const key = String(getKey(item as TRecord, index, toLaneId))
+                return key === resultKey
+              })
+              if (idx !== -1) items.splice(idx, 1, result)
+            }
+            return { ...lane, items }
+          })
+
+          const serverSignature = updated
+            .map(
+              (l) =>
+                `${l.id}:[${l.items.map((item, idx) => getKey(item, idx, l.id)).join(",")}]`
+            )
+            .join("|")
+          lastLanesRef.current = serverSignature
+
+          return updated
+        })
+      }
+      return results
+    } catch (e) {
+      // Rollback and exit optimistic mode
+      setLocalLanes(prev)
+      optimisticSignatureRef.current = null
+      throw e
+    }
+  }
+
   return (
     <div className={cn("relative h-full w-full px-4", className)}>
       <ScrollArea
@@ -315,6 +480,7 @@ export function Kanban<TRecord extends RecordType>(
                         : undefined
                     }
                     onMove={onMove}
+                    onBulkMove={dnd?.onBulkMove ? onBulkMove : undefined}
                     title={lane.title}
                     items={lane.items}
                     getKey={(item, index) => getKey(item, index, lane.id)}
