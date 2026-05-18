@@ -492,6 +492,82 @@ export const performanceReviews: PerformanceReview[] = [
   },
 ]
 
+/**
+ * Competencies — skills/behaviors tracked across the org.
+ */
+export type CompetencyLevel = "novice" | "intermediate" | "advanced" | "expert"
+
+export type Competency = {
+  id: string
+  name: string
+  category: "technical" | "leadership" | "communication" | "execution"
+  description: string
+}
+
+export type EmployeeCompetency = {
+  id: string
+  employeeId: string
+  competencyId: string
+  currentLevel: CompetencyLevel
+  targetLevel: CompetencyLevel
+  assessedAt: string
+}
+
+export const competencies: Competency[] = [
+  { id: "comp-001", name: "System Design", category: "technical", description: "Ability to design scalable and maintainable systems" },
+  { id: "comp-002", name: "Code Quality", category: "technical", description: "Writing clean, tested, and well-documented code" },
+  { id: "comp-003", name: "People Management", category: "leadership", description: "Coaching, growing, and supporting direct reports" },
+  { id: "comp-004", name: "Strategic Thinking", category: "leadership", description: "Setting direction and making long-term decisions" },
+  { id: "comp-005", name: "Written Communication", category: "communication", description: "Clear, concise, and effective written communication" },
+  { id: "comp-006", name: "Presentation Skills", category: "communication", description: "Delivering engaging and clear presentations" },
+  { id: "comp-007", name: "Delivery", category: "execution", description: "Consistently shipping high-quality work on time" },
+  { id: "comp-008", name: "Problem Solving", category: "execution", description: "Breaking down complex problems into actionable steps" },
+]
+
+export const employeeCompetencies: EmployeeCompetency[] = [
+  { id: "ec-001", employeeId: "emp-003", competencyId: "comp-001", currentLevel: "expert", targetLevel: "expert", assessedAt: "2026-04-01" },
+  { id: "ec-002", employeeId: "emp-003", competencyId: "comp-002", currentLevel: "advanced", targetLevel: "expert", assessedAt: "2026-04-01" },
+  { id: "ec-003", employeeId: "emp-005", competencyId: "comp-002", currentLevel: "advanced", targetLevel: "expert", assessedAt: "2026-04-01" },
+  { id: "ec-004", employeeId: "emp-005", competencyId: "comp-007", currentLevel: "advanced", targetLevel: "advanced", assessedAt: "2026-04-01" },
+  { id: "ec-005", employeeId: "emp-004", competencyId: "comp-003", currentLevel: "advanced", targetLevel: "expert", assessedAt: "2026-03-15" },
+  { id: "ec-006", employeeId: "emp-004", competencyId: "comp-004", currentLevel: "intermediate", targetLevel: "advanced", assessedAt: "2026-03-15" },
+  { id: "ec-007", employeeId: "emp-007", competencyId: "comp-005", currentLevel: "intermediate", targetLevel: "advanced", assessedAt: "2026-04-01" },
+  { id: "ec-008", employeeId: "emp-007", competencyId: "comp-008", currentLevel: "advanced", targetLevel: "advanced", assessedAt: "2026-04-01" },
+  { id: "ec-009", employeeId: "emp-009", competencyId: "comp-004", currentLevel: "advanced", targetLevel: "expert", assessedAt: "2026-04-10" },
+  { id: "ec-010", employeeId: "emp-009", competencyId: "comp-005", currentLevel: "advanced", targetLevel: "advanced", assessedAt: "2026-04-10" },
+  { id: "ec-011", employeeId: "emp-001", competencyId: "comp-003", currentLevel: "expert", targetLevel: "expert", assessedAt: "2026-03-01" },
+  { id: "ec-012", employeeId: "emp-001", competencyId: "comp-004", currentLevel: "expert", targetLevel: "expert", assessedAt: "2026-03-01" },
+]
+
+/**
+ * Feedback — peer/manager feedback entries.
+ */
+export type FeedbackType = "praise" | "constructive" | "request"
+export type FeedbackVisibility = "public" | "private" | "manager-only"
+
+export type Feedback = {
+  id: string
+  fromEmployeeId: string
+  toEmployeeId: string
+  type: FeedbackType
+  visibility: FeedbackVisibility
+  content: string
+  createdAt: string
+}
+
+export const feedbacks: Feedback[] = [
+  { id: "fb-001", fromEmployeeId: "emp-001", toEmployeeId: "emp-003", type: "praise", visibility: "public", content: "Alan's architecture proposal for the event system was exceptional — clear trade-offs, pragmatic choices.", createdAt: "2026-05-02" },
+  { id: "fb-002", fromEmployeeId: "emp-004", toEmployeeId: "emp-005", type: "praise", visibility: "public", content: "Lin shipped the payroll migration ahead of schedule with zero regressions. Incredible attention to detail.", createdAt: "2026-04-28" },
+  { id: "fb-003", fromEmployeeId: "emp-005", toEmployeeId: "emp-004", type: "constructive", visibility: "private", content: "It would help if sprint priorities were communicated earlier — the late changes last week caused some churn.", createdAt: "2026-04-25" },
+  { id: "fb-004", fromEmployeeId: "emp-010", toEmployeeId: "emp-009", type: "praise", visibility: "public", content: "Great job facilitating the cross-team alignment. The outcome was much better than expected.", createdAt: "2026-04-20" },
+  { id: "fb-005", fromEmployeeId: "emp-002", toEmployeeId: "emp-007", type: "constructive", visibility: "manager-only", content: "The onboarding redesign needs more stakeholder input before moving to implementation.", createdAt: "2026-04-18" },
+  { id: "fb-006", fromEmployeeId: "emp-003", toEmployeeId: "emp-001", type: "praise", visibility: "public", content: "Ada's mentorship during the architecture review process has been invaluable.", createdAt: "2026-04-15" },
+  { id: "fb-007", fromEmployeeId: "emp-008", toEmployeeId: "emp-007", type: "praise", visibility: "public", content: "The onboarding flow improvements show real user empathy. Drop-off metrics are already improving.", createdAt: "2026-04-12" },
+  { id: "fb-008", fromEmployeeId: "emp-014", toEmployeeId: "emp-013", type: "constructive", visibility: "private", content: "Pipeline updates need to be more frequent — the team was surprised by the Q1 miss.", createdAt: "2026-04-10" },
+  { id: "fb-009", fromEmployeeId: "emp-001", toEmployeeId: "emp-004", type: "request", visibility: "private", content: "Would love your input on the new engineering ladder draft — your perspective on IC growth would be valuable.", createdAt: "2026-05-05" },
+  { id: "fb-010", fromEmployeeId: "emp-009", toEmployeeId: "emp-005", type: "praise", visibility: "public", content: "Lin's documentation on the new charting API saved the team hours of onboarding time.", createdAt: "2026-05-01" },
+]
+
 export const goals: Goal[] = [
   {
     id: "goal-001",

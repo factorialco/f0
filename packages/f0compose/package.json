@@ -26,8 +26,8 @@
   },
   "dependencies": {
     "@copilotkit/react-core": "^1.54.0",
-    "@factorialco/f0-react": "workspace:*",
     "@factorialco/f0-core": "workspace:*",
+    "@factorialco/f0-react": "workspace:*",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "^6.30.0",

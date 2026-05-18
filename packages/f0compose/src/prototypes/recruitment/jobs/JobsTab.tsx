@@ -22,9 +22,11 @@ import { useJobsSource } from "./useJobsSource"
 export function JobsTab({
   activeSubTab,
   onCreateJob,
+  onJobClick,
 }: {
   activeSubTab: string
   onCreateJob: () => void
+  onJobClick: (jobId: string) => void
 }) {
   void activeSubTab
   const pinned = useMemo(() => jobs.filter((j) => j.pinned), [])
@@ -37,7 +39,7 @@ export function JobsTab({
           <F0Heading content="Pinned jobs" variant="heading" as="h2" />
           <F0Box display="grid" columns="1" md={{ columns: "2" }} gap="md">
             {pinned.map((job) => (
-              <PinnedJobCard key={job.id} job={job} />
+              <PinnedJobCard key={job.id} job={job} onClick={() => onJobClick(job.id)} />
             ))}
           </F0Box>
         </F0Box>

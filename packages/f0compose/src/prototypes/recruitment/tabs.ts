@@ -2,6 +2,7 @@
 export const moduleTabs = [
   { id: "jobs", label: "Jobs" },
   { id: "candidates", label: "Candidates" },
+  { id: "organization", label: "Organization" },
   { id: "messages", label: "Messages" },
   { id: "internal-opportunities", label: "Internal opportunities" },
   { id: "insights", label: "Insights" },

@@ -10,13 +10,21 @@ import {
 import { useNavigate } from "react-router-dom"
 import { type ModuleId, iconForModule, modules } from "./modules"
 
+/** Map module IDs to prototype slugs for sidebar navigation. */
+const moduleToPrototype: Partial<Record<ModuleId, string>> = {
+  recruitment: "recruitment",
+  performance: "goals-strategy-map",
+}
+
 function modulesIn(group: string): MenuCategory["items"] {
   return modules
     .filter((m) => m.group === group)
     .map((m) => ({
       label: m.label,
       icon: iconForModule[m.id],
-      href: `/__module/${m.id}`,
+      href: moduleToPrototype[m.id]
+        ? `/p/${moduleToPrototype[m.id]}`
+        : `/__module/${m.id}`,
       exactMatch: true,
     }))
 }

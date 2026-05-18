@@ -54,6 +54,7 @@ export type ModuleId =
   | "organization"
   | "documents"
   | "policies"
+  | "engagement"
   // Talent
   | "recruitment"
   | "performance"
@@ -148,6 +149,13 @@ export const modules: ModuleDef[] = [
     groupLabel: "Company",
   },
 
+  {
+    id: "engagement",
+    label: "Engagement",
+    group: "company",
+    groupLabel: "Company",
+  },
+
   // Talent
   {
     id: "recruitment",
@@ -213,6 +221,7 @@ export const emojiForModule: Record<ModuleId, string> = {
   organization: "🏢",
   documents: "📁",
   policies: "📜",
+  engagement: "💬",
   recruitment: "💼",
   performance: "📈",
   onboarding: "🚀",
@@ -238,6 +247,7 @@ export const iconForModule: Record<ModuleId, IconType> = {
   organization: Person,
   documents: Files,
   policies: Files,
+  engagement: Sparkles,
   recruitment: Briefcase,
   performance: Sparkles,
   onboarding: Person,
