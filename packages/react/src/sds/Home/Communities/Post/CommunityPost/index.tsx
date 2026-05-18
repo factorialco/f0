@@ -124,6 +124,8 @@ export const BaseCommunityPost = ({
   const descriptionId = useId()
   const descriptionRef = useRef<HTMLDivElement>(null)
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
+  const [isDescriptionOverflowing, setIsDescriptionOverflowing] =
+    useState(false)
   const countersDisplay = [counters.views, counters.comments]
     .filter(Boolean)
     .join(" · ")
@@ -154,6 +156,34 @@ export const BaseCommunityPost = ({
       descriptionRef.current?.focus()
     }
   }, [isDescriptionExpanded])
+
+  useEffect(() => {
+    const descriptionElement = descriptionRef.current
+
+    if (
+      !descriptionExpandable ||
+      !descriptionElement ||
+      isDescriptionExpanded
+    ) {
+      setIsDescriptionOverflowing(false)
+      return
+    }
+
+    const updateDescriptionOverflow = () => {
+      setIsDescriptionOverflowing(
+        descriptionElement.scrollHeight > descriptionElement.clientHeight
+      )
+    }
+
+    updateDescriptionOverflow()
+
+    if (typeof ResizeObserver === "undefined") return
+
+    const resizeObserver = new ResizeObserver(updateDescriptionOverflow)
+    resizeObserver.observe(descriptionElement)
+
+    return () => resizeObserver.disconnect()
+  }, [descriptionExpandable, isDescriptionExpanded, description])
 
   return (
     <div
@@ -291,13 +321,15 @@ export const BaseCommunityPost = ({
                   tabIndex={isDescriptionExpanded ? -1 : undefined}
                   className={cn(isDescriptionExpanded && focusRing())}
                 />
-                {descriptionExpandable && !isDescriptionExpanded && (
-                  <ExpandDescriptionButton
-                    controls={descriptionId}
-                    expanded={isDescriptionExpanded}
-                    onClick={handleToggleDescription}
-                  />
-                )}
+                {descriptionExpandable &&
+                  isDescriptionOverflowing &&
+                  !isDescriptionExpanded && (
+                    <ExpandDescriptionButton
+                      controls={descriptionId}
+                      expanded={isDescriptionExpanded}
+                      onClick={handleToggleDescription}
+                    />
+                  )}
               </>
             )}
           </div>
