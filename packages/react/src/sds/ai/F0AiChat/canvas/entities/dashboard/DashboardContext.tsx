@@ -36,6 +36,8 @@ type DashboardCanvasContextValue = {
   transformItem: (itemId: string, patch: Partial<ChatDashboardItem>) => void
   /** Persist arbitrary config to chat history (best-effort). Used after create to store the new id. */
   saveConfigToHistory: (config: Record<string, unknown>) => Promise<void>
+  /** Stage a new `snapshotDate` from the navigator pill; flushed on handleSave. */
+  setPendingSnapshotDate: (isoDate: string | null) => void
   /** Export the dashboard as Excel */
   exportAsExcel?: () => Promise<void>
   /** Register the export function from the dashboard component */
@@ -65,6 +67,9 @@ export function DashboardCanvasProvider({
   const [pendingLayout, setPendingLayout] = useState<
     DashboardItemLayout[] | null
   >(null)
+  const [pendingSnapshotDate, setPendingSnapshotDate] = useState<string | null>(
+    null
+  )
   const [itemTransforms, setItemTransforms] = useState<
     Map<string, Partial<ChatDashboardItem>>
   >(new Map())
@@ -144,7 +149,10 @@ export function DashboardCanvasProvider({
 
   const handleSave = async () => {
     const hasPendingChanges =
-      pendingLayout || itemTransforms.size > 0 || content.savedDashboardUnsaved
+      pendingLayout ||
+      itemTransforms.size > 0 ||
+      pendingSnapshotDate !== null ||
+      content.savedDashboardUnsaved
     if (!hasPendingChanges) return
 
     // Start from current config, apply layout then transforms
@@ -154,6 +162,10 @@ export function DashboardCanvasProvider({
     if (!updatedConfig) return
 
     updatedConfig = applyTransforms(updatedConfig)
+
+    if (pendingSnapshotDate !== null) {
+      updatedConfig = { ...updatedConfig, snapshotDate: pendingSnapshotDate }
+    }
 
     try {
       // Persist to chat history (best-effort — may fail if no thread exists
@@ -240,6 +252,7 @@ export function DashboardCanvasProvider({
 
       setPendingLayout(null)
       setItemTransforms(new Map())
+      setPendingSnapshotDate(null)
     } catch (err) {
       // Keep pending state on failure so user can retry. Surface the error
       // so it's not silently lost.
@@ -269,13 +282,17 @@ export function DashboardCanvasProvider({
   const handleDiscard = () => {
     setPendingLayout(null)
     setItemTransforms(new Map())
+    setPendingSnapshotDate(null)
     setDiscardKey((k) => k + 1)
   }
 
   return (
     <DashboardCanvasContext.Provider
       value={{
-        isDirty: pendingLayout !== null || itemTransforms.size > 0,
+        isDirty:
+          pendingLayout !== null ||
+          itemTransforms.size > 0 ||
+          pendingSnapshotDate !== null,
         discardKey,
         itemTransforms,
         onLayoutChange,
@@ -283,6 +300,7 @@ export function DashboardCanvasProvider({
         handleDiscard,
         transformItem,
         saveConfigToHistory,
+        setPendingSnapshotDate,
         exportAsExcel,
         registerExport,
       }}

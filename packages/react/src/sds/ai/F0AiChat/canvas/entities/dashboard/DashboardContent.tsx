@@ -37,6 +37,7 @@ import type {
 } from "./types"
 
 import { useDashboardCompute, type ItemResult } from "./useDashboardCompute"
+import { SNAPSHOT_DATE_FILTER_KEY } from "./snapshot"
 
 // ---------------------------------------------------------------------------
 // Minimum item height per type
@@ -211,6 +212,10 @@ export interface ChatDashboardProps {
   onLayoutChange?: (layout: DashboardItemLayout[]) => void
   onExportReady?: (exportFn: (() => Promise<void>) | undefined) => void
   exportFilename?: string
+  /** Called when the user edits the snapshot date pill. Receives an ISO-8601
+   * string. Wired by the canvas wrapper to stage `pendingSnapshotDate` so
+   * `handleSave` can persist the edited value. */
+  onSnapshotDateChange?: (isoDate: string) => void
 }
 
 /**
@@ -230,6 +235,7 @@ export function ChatDashboard({
   onTransformChart,
   onExportReady,
   exportFilename,
+  onSnapshotDateChange,
 }: ChatDashboardProps) {
   const { fetchItem, getFilterOptions, getDerivedFilters } =
     useDashboardCompute(config, apiConfig, refreshKey)
@@ -376,31 +382,46 @@ export function ChatDashboard({
     NavigationFiltersDefinition | undefined
   >(() => {
     const navSpecs = derivedFilters.navigationFilters
-    if (!navSpecs || Object.keys(navSpecs).length === 0) return undefined
     const today = new Date()
     const result: NavigationFiltersDefinition = {}
-    for (const [key, spec] of Object.entries(navSpecs)) {
-      if (spec.type !== "dateNavigation") continue
-      result[key] = {
+    if (navSpecs) {
+      for (const [key, spec] of Object.entries(navSpecs)) {
+        if (spec.type !== "dateNavigation") continue
+        result[key] = {
+          type: "date-navigator",
+          defaultValue: today,
+          granularity: spec.granularities,
+          ...(spec.defaultGranularity
+            ? { defaultGranularity: spec.defaultGranularity }
+            : {}),
+        }
+      }
+    }
+    if (config.snapshot === true) {
+      // Snapshot dashboards expose a single-day date pill keyed to
+      // `config.snapshotDate` (defaulting to today). The key collides with
+      // any column literally named `__snapshotDate` — kept synthetic-looking
+      // to make that vanishingly unlikely.
+      result[SNAPSHOT_DATE_FILTER_KEY] = {
         type: "date-navigator",
-        defaultValue: today,
-        granularity: spec.granularities,
-        ...(spec.defaultGranularity
-          ? { defaultGranularity: spec.defaultGranularity }
-          : {}),
+        defaultValue: config.snapshotDate
+          ? new Date(config.snapshotDate)
+          : today,
+        granularity: "day",
       }
     }
     return Object.keys(result).length > 0 ? result : undefined
-  }, [derivedFilters.navigationFilters])
+  }, [derivedFilters.navigationFilters, config.snapshot, config.snapshotDate])
 
   // Set of keys belonging to navigation filters — used to split the merged
   // filters object that F0AnalyticsDashboard passes to fetchData into the two
   // separate compute payloads (`filterValues` for `in` filters,
   // `navigationFilterValues` for the date navigator).
-  const navigationFilterKeys = useMemo(
-    () => new Set(Object.keys(derivedFilters.navigationFilters ?? {})),
-    [derivedFilters.navigationFilters]
-  )
+  const navigationFilterKeys = useMemo(() => {
+    const keys = new Set(Object.keys(derivedFilters.navigationFilters ?? {}))
+    if (config.snapshot === true) keys.add(SNAPSHOT_DATE_FILTER_KEY)
+    return keys
+  }, [derivedFilters.navigationFilters, config.snapshot])
 
   // Set of keys whose backing filter is `numericRange` — their state ships as
   // `NumberFilterValue` and must be flattened into `[min, max]` strings before
@@ -461,6 +482,16 @@ export function ChatDashboard({
             const toIsoStr = toIso(range.to)
             if (fromIso || toIsoStr) {
               navigationFilterValues[key] = [fromIso, toIsoStr]
+            }
+            // Surface user edits to the snapshot pill so the canvas wrapper
+            // can stage the new value for persistence on save. Skip the
+            // initial value to avoid marking the dashboard dirty on first
+            // render.
+            if (key === SNAPSHOT_DATE_FILTER_KEY && fromIso) {
+              const initial = config.snapshotDate
+                ? new Date(config.snapshotDate).toISOString().slice(0, 10)
+                : undefined
+              if (initial !== fromIso) onSnapshotDateChange?.(fromIso)
             }
             continue
           }
@@ -532,6 +563,8 @@ export function ChatDashboard({
       getDerivedFilters,
       navigationFilterKeys,
       numericRangeFilterKeys,
+      onSnapshotDateChange,
+      config.snapshotDate,
     ]
   )
 
@@ -600,6 +633,7 @@ export function DashboardContent({
     handleDiscard,
     transformItem,
     saveConfigToHistory,
+    setPendingSnapshotDate,
     registerExport,
   } = useDashboardCanvas()
   const { canvasActions, openCanvas } = useAiChat()
@@ -706,6 +740,7 @@ export function DashboardContent({
           }}
           onExportReady={registerExport}
           exportFilename={content.title}
+          onSnapshotDateChange={setPendingSnapshotDate}
         />
       </div>
       {/* State A: New dashboard with canvasActions — always-visible Save bar */}

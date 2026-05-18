@@ -5,6 +5,7 @@ import type {
   ChatDashboardFilterDefinition,
   ChatDashboardNavigationFilterDefinition,
 } from "./types"
+import { SNAPSHOT_DATE_FILTER_KEY } from "./snapshot"
 
 // ---------------------------------------------------------------------------
 // Types
@@ -144,8 +145,31 @@ export function useDashboardCompute(
         }
       }
 
+      // Snapshot dashboards surface a synthetic `__snapshotDate` navigator
+      // pill. Strip it from `navigationFilterValues` and promote its value
+      // to the top-level `snapshotDate` field so the backend can rewrite
+      // per-tool args (e.g. `tenureDateBefore` on `fetchEmployees`). Fall
+      // back to the agent-supplied `cfg.snapshotDate` when the picker hasn't
+      // been touched.
+      let effectiveSnapshotDate: string | undefined = cfg.snapshotDate
+      let cleanedNavValues: Record<string, string[]> | undefined =
+        navigationFilterValues
+      if (
+        cfg.snapshot &&
+        navigationFilterValues &&
+        SNAPSHOT_DATE_FILTER_KEY in navigationFilterValues
+      ) {
+        const pillValue = navigationFilterValues[SNAPSHOT_DATE_FILTER_KEY]
+        if (Array.isArray(pillValue) && pillValue[0]) {
+          effectiveSnapshotDate = pillValue[0]
+        }
+        const { [SNAPSHOT_DATE_FILTER_KEY]: _stripped, ...rest } =
+          navigationFilterValues
+        cleanedNavValues = rest
+      }
+
       const hasNavValues =
-        navigationFilterValues && Object.keys(navigationFilterValues).length > 0
+        cleanedNavValues && Object.keys(cleanedNavValues).length > 0
 
       // Filter definitions are derived server-side from dataset column types;
       // the request only carries the user's active values, keyed by the
@@ -159,10 +183,11 @@ export function useDashboardCompute(
           Object.keys(stringFilterValues).length > 0
             ? stringFilterValues
             : undefined,
-        navigationFilterValues: hasNavValues
-          ? navigationFilterValues
-          : undefined,
+        navigationFilterValues: hasNavValues ? cleanedNavValues : undefined,
         ...(cfg.snapshot ? { snapshot: true } : {}),
+        ...(cfg.snapshot && effectiveSnapshotDate
+          ? { snapshotDate: effectiveSnapshotDate }
+          : {}),
         ...(cfg.dateNavigatorColumn
           ? { dateNavigatorColumn: cfg.dateNavigatorColumn }
           : {}),

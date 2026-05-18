@@ -376,6 +376,13 @@ export interface ChatDashboardConfig {
    */
   snapshot?: boolean
   /**
+   * ISO-8601 date this snapshot dashboard is keyed to. Surfaced as a
+   * single-day date pill above the grid; editing it refetches against the
+   * new date. Persists with the dashboard so saved snapshots round-trip
+   * their effective date.
+   */
+  snapshotDate?: string
+  /**
    * Agent-named DATE column to promote as the navigator pill above the grid.
    * When unset and exactly one DATE column is in play, the compute layer
    * picks that column automatically. When unset and 2+ DATE columns exist,
