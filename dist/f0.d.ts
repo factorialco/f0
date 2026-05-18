@@ -7523,6 +7523,28 @@ declare interface F0FormActionBarSubmitConfig extends F0FormSubmitConfigBase {
 }
 
 /**
+ * Submit configuration for autosubmit type.
+ *
+ * Automatically submits the form after the user stops editing for `delay` ms.
+ * Validation runs on every debounced submit attempt; invalid forms surface
+ * errors and skip `onSubmit` (handled by react-hook-form).
+ */
+declare interface F0FormAutosubmitConfig extends F0FormSubmitConfigBase {
+    /** Type of submit UI (debounced auto-submit) */
+    type: "autosubmit";
+    /**
+     * Delay in ms between the last change and the auto-submit.
+     * @default 800
+     */
+    delay?: number;
+    /**
+     * When true, hides the internal action bar (loading/success feedback).
+     * @default false
+     */
+    hideActionBar?: boolean;
+}
+
+/**
  * Common props shared across all F0Form variants (formDefinition-based).
  * Used as the constraint for `F0FormLikeComponent`.
  */
@@ -7636,7 +7658,7 @@ export declare interface F0FormDiscardConfig {
 }
 
 /**
- * When to trigger and display validation errors
+ * When to trigger and display validation errors (does not apply with autosubmit)
  * - "on-blur": Errors appear when the user leaves a field (default)
  * - "on-change": Errors appear as the user types (real-time validation)
  * - "on-submit": Errors only appear after attempting to submit the form
@@ -8278,7 +8300,7 @@ export declare interface F0FormStylingConfig {
 /**
  * Configuration for form submission behavior and appearance
  */
-export declare type F0FormSubmitConfig = F0FormDefaultSubmitConfig | F0FormActionBarSubmitConfig;
+export declare type F0FormSubmitConfig = F0FormDefaultSubmitConfig | F0FormActionBarSubmitConfig | F0FormAutosubmitConfig;
 
 /**
  * Base configuration shared by all submit types
