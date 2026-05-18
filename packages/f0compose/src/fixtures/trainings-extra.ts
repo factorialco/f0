@@ -1144,6 +1144,21 @@ export const trainingProcesses: TrainingProcess[] = [
 export type TrainingGroupStatus = "planned" | "ongoing" | "completed"
 export type PaymentStatus = "pending" | "spent"
 
+// Optional per-(movement, legalEntity) cost split. Mirrors the multi-entity
+// RFC frames 5/6/8: when this array is populated and the user toggles
+// "Costs by legal entity" ON in the sidepanel/Group detail, the three cost
+// figures shown to the user are the LE-scoped ones (not the movement-level
+// directCost/indirectCost/salaryCost, which act as the single-LE fallback
+// when this field is absent). Read-only at the budget level; editable only
+// from the Group detail Costs tab in upstream.
+export type TrainingMovementLegalEntityCost = {
+  legalEntityId: string
+  participantsCount: number
+  directCost: number
+  indirectCost: number
+  salaryCost: number
+}
+
 export type TrainingBudgetMovement = {
   id: string
   budgetId: string
@@ -1164,6 +1179,103 @@ export type TrainingBudgetMovement = {
   directCost: number
   indirectCost: number
   salaryCost: number
+  costsByLegalEntity?: TrainingMovementLegalEntityCost[]
+}
+
+// Sum of direct+indirect+salary across LE breakdown (gross cost upstream).
+export function grossCostFromBreakdown(
+  breakdown: TrainingMovementLegalEntityCost[]
+): number {
+  return breakdown.reduce(
+    (acc, le) => acc + le.directCost + le.indirectCost + le.salaryCost,
+    0
+  )
+}
+
+// Total cost shown to the user: breakdown sum when set, else movement-level
+// gross cost.
+export function grossCostFromMovement(movement: TrainingBudgetMovement): number {
+  if (movement.costsByLegalEntity && movement.costsByLegalEntity.length > 0) {
+    return grossCostFromBreakdown(movement.costsByLegalEntity)
+  }
+  return movement.directCost + movement.indirectCost + movement.salaryCost
+}
+
+// Per-bucket aggregates (Direct, Indirect, Salary) used in the Group detail
+// Costs page (frame 7) and breakdown card (frame 6 footer). When a movement
+// has a per-LE breakdown, the three figures are the sum of that column
+// across all LEs; otherwise they fall back to the movement-level field.
+export function directCostFromMovement(movement: TrainingBudgetMovement): number {
+  if (movement.costsByLegalEntity && movement.costsByLegalEntity.length > 0) {
+    return movement.costsByLegalEntity.reduce((acc, le) => acc + le.directCost, 0)
+  }
+  return movement.directCost
+}
+
+export function indirectCostFromMovement(movement: TrainingBudgetMovement): number {
+  if (movement.costsByLegalEntity && movement.costsByLegalEntity.length > 0) {
+    return movement.costsByLegalEntity.reduce(
+      (acc, le) => acc + le.indirectCost,
+      0
+    )
+  }
+  return movement.indirectCost
+}
+
+export function salaryCostFromMovement(movement: TrainingBudgetMovement): number {
+  if (movement.costsByLegalEntity && movement.costsByLegalEntity.length > 0) {
+    return movement.costsByLegalEntity.reduce((acc, le) => acc + le.salaryCost, 0)
+  }
+  return movement.salaryCost
+}
+
+// Resolve the per-LE cost breakdown for a movement. When the fixture defines
+// `costsByLegalEntity` explicitly (e.g. mov-001 mirroring the Figma), it is
+// returned verbatim. Otherwise costs are split PROPORTIONALLY by participant
+// count per LE — that's the semantic the toggle promises: "see all costs
+// split by legal entity".
+//
+// Returns one entry per legalEntityId provided, even when the sum is zero.
+export function breakdownByLegalEntityFor(
+  movement: TrainingBudgetMovement,
+  participantsByLegalEntity: Array<{ legalEntityId: string; count: number }>
+): TrainingMovementLegalEntityCost[] {
+  if (movement.costsByLegalEntity && movement.costsByLegalEntity.length > 0) {
+    // Honor the fixture; fill missing LEs with zeros so the UI can list them.
+    const map = new Map(
+      movement.costsByLegalEntity.map((c) => [c.legalEntityId, c])
+    )
+    return participantsByLegalEntity.map(
+      ({ legalEntityId, count }) =>
+        map.get(legalEntityId) ?? {
+          legalEntityId,
+          participantsCount: count,
+          directCost: 0,
+          indirectCost: 0,
+          salaryCost: 0,
+        }
+    )
+  }
+  const total = participantsByLegalEntity.reduce((s, p) => s + p.count, 0)
+  if (total === 0) {
+    return participantsByLegalEntity.map(({ legalEntityId, count }) => ({
+      legalEntityId,
+      participantsCount: count,
+      directCost: 0,
+      indirectCost: 0,
+      salaryCost: 0,
+    }))
+  }
+  return participantsByLegalEntity.map(({ legalEntityId, count }) => {
+    const ratio = count / total
+    return {
+      legalEntityId,
+      participantsCount: count,
+      directCost: Math.round(movement.directCost * ratio),
+      indirectCost: Math.round(movement.indirectCost * ratio),
+      salaryCost: Math.round(movement.salaryCost * ratio),
+    }
+  })
 }
 
 export const trainingBudgetMovements: TrainingBudgetMovement[] = [
@@ -1185,9 +1297,28 @@ export const trainingBudgetMovements: TrainingBudgetMovement[] = [
     trainingTeamName: "Engineering",
     paymentStatus: "spent",
     participantsCount: 9,
-    directCost: 1200,
-    indirectCost: 180,
-    salaryCost: 2350,
+    // Frame 6 of the RFC ("Costs by legal entity" toggle ON): the three
+    // movement-level figures equal the sum of the LE breakdown so the
+    // OFF/ON views show the same totals.
+    directCost: 6240,
+    indirectCost: 1310,
+    salaryCost: 2450,
+    costsByLegalEntity: [
+      {
+        legalEntityId: "le-acme-iberia",
+        participantsCount: 1,
+        directCost: 1240,
+        indirectCost: 310,
+        salaryCost: 517,
+      },
+      {
+        legalEntityId: "le-acme-france",
+        participantsCount: 2,
+        directCost: 5000,
+        indirectCost: 1000,
+        salaryCost: 1933,
+      },
+    ],
   },
   {
     id: "mov-002",
@@ -1342,3 +1473,49 @@ export const trainingBudgetMovements: TrainingBudgetMovement[] = [
 
 export const movementsForBudget = (budgetId: string): TrainingBudgetMovement[] =>
   trainingBudgetMovements.filter((m) => m.budgetId === budgetId)
+
+// ── Synthetic per-employee training cost data ───────────────────────────────
+// Hourly rate is derived from the employee's invented annualSalaryEur using a
+// standard ~1.760 productive hours/year. Hours completed for a given group
+// are derived deterministically from the (employeeId, groupId) pair so each
+// participant has their own value. Per-participant salary cost = rate × hours.
+// Not a payroll source of truth — purely prototype data.
+
+import { findEmployee } from "./employees"
+
+const ANNUAL_PRODUCTIVE_HOURS = 1760
+
+function hashCode(input: string): number {
+  let h = 0
+  for (let i = 0; i < input.length; i++) {
+    h = (h * 31 + input.charCodeAt(i)) | 0
+  }
+  return Math.abs(h)
+}
+
+/** Hourly rate in EUR derived from the employee's annual salary. */
+export function hourlyRateForEmployee(employeeId: string): number {
+  const emp = findEmployee(employeeId)
+  if (!emp?.annualSalaryEur) return 0
+  return Math.round((emp.annualSalaryEur / ANNUAL_PRODUCTIVE_HOURS) * 100) / 100
+}
+
+/** Stable hours-completed per employee for a given group, range 1.5–4.0h. */
+export function hoursCompletedForEmployee(
+  employeeId: string,
+  groupId: string
+): number {
+  const h = hashCode(`${employeeId}:${groupId}:hours`)
+  // 1.5 + (h % 251) / 100 => 1.50 … 4.00
+  return Math.round((1.5 + (h % 251) / 100) * 100) / 100
+}
+
+/** Per-employee salary cost in a group = hourlyRate × hoursCompleted. */
+export function salaryCostForEmployeeInGroup(
+  employeeId: string,
+  groupId: string
+): number {
+  const rate = hourlyRateForEmployee(employeeId)
+  const hours = hoursCompletedForEmployee(employeeId, groupId)
+  return Math.round(rate * hours * 100) / 100
+}

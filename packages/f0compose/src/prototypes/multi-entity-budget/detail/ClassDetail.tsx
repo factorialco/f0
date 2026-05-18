@@ -184,6 +184,11 @@ export function ClassDetail({
               breadcrumbs={[
                 { id: "list", label: "Training", onClick: onBackToList },
                 {
+                  id: "courses",
+                  label: "Courses",
+                  onClick: onBackToTraining,
+                },
+                {
                   id: training.id,
                   label: training.name,
                   onClick: onBackToTraining,

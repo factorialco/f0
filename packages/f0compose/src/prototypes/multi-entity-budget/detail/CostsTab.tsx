@@ -1,16 +1,30 @@
 import { useState } from "react"
 import {
   F0Alert,
+  F0Box,
   F0Button,
   F0Heading,
   F0Text,
   F0Select,
 } from "@factorialco/f0-react"
-import { NumberInput } from "@factorialco/f0-react/dist/experimental"
-import { Calculator } from "@factorialco/f0-react/icons/app"
+import { NumberInput, Switch } from "@factorialco/f0-react/dist/experimental"
+import {
+  ArrowDown,
+  ArrowRight,
+  Calculator,
+  ExternalLink,
+} from "@factorialco/f0-react/icons/app"
 
 import type { Training, TrainingClass } from "@/fixtures"
-import { trainingBudgets } from "@/fixtures"
+import {
+  breakdownByLegalEntityFor,
+  legalEntities,
+  legalEntityForEmployee,
+  trainingBudgets,
+  trainingBudgetMovements,
+  trainingParticipants,
+} from "@/fixtures"
+import { useLegalEntityToggle } from "../_shared/legalEntityToggleContext"
 
 type Props = { training: Training; klass?: TrainingClass }
 type PaymentStatus = "pending" | "paid" | ""
@@ -310,6 +324,8 @@ export function CostsTab({ training, klass }: Props) {
         </div>
       )}
 
+      <CostsByLegalEntitySection klass={klass} />
+
       {/* Other costs */}
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
@@ -348,5 +364,165 @@ export function CostsTab({ training, klass }: Props) {
         </div>
       </section>
     </div>
+  )
+}
+
+// ── Costs by legal entity (frame 7) ─────────────────────────────────────────
+// Sticks to the GROUP page (Costs tab). Reads the per-movement toggle from
+// the shared context so the GroupSidepanel and this page stay in sync.
+
+function CostsByLegalEntitySection({ klass }: { klass?: TrainingClass }) {
+  const toggleCtx = useLegalEntityToggle()
+  // Find the movement bound to this group (klass.id === movement.groupId).
+  // For prototypes we fall back to the first movement of bud-001 if there is
+  // no class context, so the section still renders in training-level views.
+  const movement =
+    (klass && trainingBudgetMovements.find((m) => m.groupId === klass.id)) ??
+    trainingBudgetMovements[0]
+  if (!movement) return null
+
+  const participants = trainingParticipants.filter(
+    (p) => p.classId === movement.groupId
+  )
+  const leIds = Array.from(
+    new Set(
+      participants
+        .map((p) => legalEntityForEmployee(p.employeeId)?.id)
+        .filter((id): id is string => Boolean(id))
+    )
+  )
+  const les = leIds
+    .map((id) => legalEntities.find((le) => le.id === id))
+    .filter((le): le is NonNullable<typeof le> => Boolean(le))
+
+  const canSplit = les.length > 1
+  const isOn = canSplit && toggleCtx.isOn(movement.id)
+
+  // Resolve per-LE cost breakdown: fixture-defined when available, else
+  // proportional split by participant count.
+  const countsByLe = leIds.map((legalEntityId) => ({
+    legalEntityId,
+    count: participants.filter(
+      (p) => legalEntityForEmployee(p.employeeId)?.id === legalEntityId
+    ).length,
+  }))
+  const breakdownMap = new Map(
+    breakdownByLegalEntityFor(movement, countsByLe).map((b) => [
+      b.legalEntityId,
+      b,
+    ])
+  )
+
+  const [openLeIds, setOpenLeIds] = useState<Set<string>>(new Set())
+
+  return (
+    <section className="flex flex-col gap-3">
+      <div className="flex items-start justify-between gap-3 rounded-md border border-solid border-f1-border-secondary bg-f1-background p-4">
+        <div className="flex flex-col gap-1">
+          <F0Heading
+            as="h3"
+            variant="heading"
+            content="Costs by legal entity"
+          />
+          <F0Text
+            variant="description"
+            content="Track and manage all costs per legal entity"
+          />
+        </div>
+        <Switch
+          title="Costs by legal entity"
+          hideLabel
+          checked={isOn}
+          onCheckedChange={(v: boolean) => toggleCtx.setOn(movement.id, v)}
+          disabled={!canSplit}
+        />
+      </div>
+
+      {isOn && (
+        <div className="flex flex-col gap-2">
+          {les.map((le) => {
+            const open = openLeIds.has(le.id)
+            const breakdown = breakdownMap.get(le.id)
+            const leTotal = breakdown
+              ? breakdown.directCost +
+                breakdown.indirectCost +
+                breakdown.salaryCost
+              : 0
+            const leParticipants = participants.filter(
+              (p) => legalEntityForEmployee(p.employeeId)?.id === le.id
+            )
+            return (
+              <div
+                key={le.id}
+                className="rounded-md border border-solid border-f1-border-secondary bg-f1-background"
+              >
+                <div className="flex items-center justify-between p-4">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setOpenLeIds((prev) => {
+                        const next = new Set(prev)
+                        if (next.has(le.id)) next.delete(le.id)
+                        else next.add(le.id)
+                        return next
+                      })
+                    }
+                    className="flex flex-1 items-center gap-2 text-left"
+                  >
+                    <span className="text-f1-foreground-secondary">
+                      {open ? <ArrowDown /> : <ArrowRight />}
+                    </span>
+                    <div className="flex flex-col gap-0.5">
+                      <F0Text variant="label" content={le.legalName} />
+                      <F0Text
+                        variant="small"
+                        content={`${leParticipants.length} ${leParticipants.length === 1 ? "participant" : "participants"}`}
+                      />
+                    </div>
+                  </button>
+                  <div className="flex items-center gap-2">
+                    <F0Text
+                      variant="label"
+                      content={formatMoney(leTotal, "EUR")}
+                    />
+                    <ExternalLink />
+                  </div>
+                </div>
+                {open && breakdown && (
+                  <F0Box
+                    display="flex"
+                    flexDirection="column"
+                    gap="xs"
+                    padding="md"
+                  >
+                    <div className="flex justify-between">
+                      <F0Text variant="small" content="Direct cost" />
+                      <F0Text
+                        variant="small"
+                        content={formatMoney(breakdown.directCost, "EUR")}
+                      />
+                    </div>
+                    <div className="flex justify-between">
+                      <F0Text variant="small" content="Indirect cost" />
+                      <F0Text
+                        variant="small"
+                        content={formatMoney(breakdown.indirectCost, "EUR")}
+                      />
+                    </div>
+                    <div className="flex justify-between">
+                      <F0Text variant="small" content="Salary cost" />
+                      <F0Text
+                        variant="small"
+                        content={formatMoney(breakdown.salaryCost, "EUR")}
+                      />
+                    </div>
+                  </F0Box>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </section>
   )
 }

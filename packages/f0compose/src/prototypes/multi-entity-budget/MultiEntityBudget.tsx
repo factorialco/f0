@@ -19,6 +19,7 @@ import {
   OneDataCollection,
   Page,
   PageHeader,
+  Select,
   Switch,
   Textarea,
   Widget,
@@ -26,6 +27,7 @@ import {
 } from "@factorialco/f0-react/dist/experimental"
 import {
   Add,
+  ArrowDown,
   ArrowRight,
   ChartLine,
   Delete,
@@ -40,22 +42,36 @@ import { useSearchParams } from "react-router-dom"
 import { z } from "zod"
 
 import {
+  directCostFromMovement,
+  findLegalEntity,
+  grossCostFromMovement,
+  breakdownByLegalEntityFor,
+  hoursCompletedForEmployee,
+  salaryCostForEmployeeInGroup,
+  indirectCostFromMovement,
   legalEntities,
   legalEntityCurrencyMap,
   legalEntityForEmployee,
   movementsForBudget,
+  salaryCostFromMovement,
   trainingBudgetMovements,
   trainingBudgets,
   trainingParticipants,
   trainings,
 } from "@/fixtures"
 import type {
+  PaymentStatus,
   Training,
   TrainingBudget,
   TrainingBudgetMovement,
 } from "@/fixtures"
 import type { PrototypeMeta } from "../types"
 import { ClassDetail } from "./detail/ClassDetail"
+import {
+  LegalEntityToggleProvider,
+  defaultToggleFor,
+  useLegalEntityToggle,
+} from "./_shared/legalEntityToggleContext"
 
 export const meta: PrototypeMeta = {
   slug: "multi-entity-budget",
@@ -219,6 +235,23 @@ function legalEntitiesForMovement(
     id,
     legalName: legalEntities.find((le) => le.id === id)?.legalName ?? id,
     currency: legalEntityCurrencyMap[id] ?? "EUR",
+  }))
+}
+
+// Participant counts per LE for a movement's group, used to compute the
+// proportional cost breakdown when the fixture does not define one.
+function participantsByLegalEntityForMovement(
+  movement: TrainingBudgetMovement
+): Array<{ legalEntityId: string; count: number }> {
+  const counts = new Map<string, number>()
+  for (const p of participantsForGroup(movement.groupId)) {
+    const le = legalEntityForEmployee(p.employeeId)
+    if (!le) continue
+    counts.set(le.id, (counts.get(le.id) ?? 0) + 1)
+  }
+  return Array.from(counts.entries()).map(([legalEntityId, count]) => ({
+    legalEntityId,
+    count,
   }))
 }
 
@@ -515,18 +548,55 @@ function AddTrainingGroupDialog({
   budget,
   onClose,
   onAdded,
+  currentMovements,
 }: {
   budget: TrainingBudget
   onClose: () => void
-  onAdded: (movement: TrainingBudgetMovement) => void
+  onAdded: (movements: TrainingBudgetMovement[]) => void
+  currentMovements: TrainingBudgetMovement[]
 }) {
-  const [trainingId, setTrainingId] = useState<string>(trainings[0]?.id ?? "")
-  const training = trainings.find((t) => t.id === trainingId) ?? trainings[0]
-  const firstClass = training?.classes[0]
-  const [classId, setClassId] = useState<string>(firstClass?.id ?? "")
+  // Multi-select of training groups, replicating frames 2 & 3.
+  // Selectable groups: any class from any training that is not already in
+  // this budget.
+  const allGroupOptions = useMemo(() => {
+    const taken = new Set(currentMovements.map((m) => m.groupId))
+    const out: Array<{
+      value: string
+      label: string
+      trainingId: string
+      cost: number
+    }> = []
+    for (const t of trainings) {
+      for (const c of t.classes) {
+        if (taken.has(c.id)) continue
+        const cost = classTotalCost(t, c.id)
+        if (!cost) continue
+        out.push({
+          value: c.id,
+          label: `${t.name} · ${c.name}`,
+          trainingId: t.id,
+          cost: cost.total,
+        })
+      }
+    }
+    return out
+  }, [currentMovements])
 
-  const klass = training?.classes.find((c) => c.id === classId)
-  const cost = training && klass ? classTotalCost(training, klass.id) : null
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+
+  const selectedOptions = allGroupOptions.filter((o) =>
+    selectedIds.includes(o.value)
+  )
+  const selectedCost = selectedOptions.reduce((s, o) => s + o.cost, 0)
+
+  // KPIs: Total budget, Allocated (current movements + selection), Available.
+  const allocatedNow = currentMovements.reduce(
+    (s, m) => s + grossCostFromMovement(m),
+    0
+  )
+  const allocatedAfter = allocatedNow + selectedCost
+  const available = budget.totalAmount - allocatedAfter
+  const isWithin = available >= 0
 
   return (
     <F0Dialog
@@ -534,100 +604,119 @@ function AddTrainingGroupDialog({
       onClose={onClose}
       position="center"
       width="md"
-      title="Add training group"
-      description="Add a training group so its costs are deducted from this budget."
+      title="Add group"
       primaryAction={{
         label: "Add",
-        disabled: !training || !klass,
+        disabled: selectedOptions.length === 0,
         onClick: () => {
-          if (!training || !klass || !cost) return
-          const mov: TrainingBudgetMovement = {
-            id: `mov-${Date.now()}`,
-            budgetId: budget.id,
-            trainingId: training.id,
-            trainingName: training.name,
-            groupId: klass.id,
-            groupName: klass.name,
-            groupStatus: "planned",
-            startDate: klass.startDate,
-            endDate: klass.endDate,
-            amountCents: Math.round(cost.total * 100),
-            currency: budget.currency,
-            trainingProvider:
-              training.type === "external"
-                ? (training.externalProvider ?? "External")
-                : "Internal",
-            trainingTeamId: "team-eng",
-            trainingTeamName: "Engineering",
-            paymentStatus: "pending",
-            participantsCount: klass.participantCount,
-            directCost: cost.direct,
-            indirectCost: cost.indirect,
-            salaryCost: cost.salary,
+          const movs: TrainingBudgetMovement[] = []
+          for (const opt of selectedOptions) {
+            const t = trainings.find((x) => x.id === opt.trainingId)
+            const c = t?.classes.find((x) => x.id === opt.value)
+            const cost = t && c ? classTotalCost(t, c.id) : null
+            if (!t || !c || !cost) continue
+            movs.push({
+              id: `mov-${Date.now()}-${c.id}`,
+              budgetId: budget.id,
+              trainingId: t.id,
+              trainingName: t.name,
+              groupId: c.id,
+              groupName: c.name,
+              groupStatus: "planned",
+              startDate: c.startDate,
+              endDate: c.endDate,
+              amountCents: Math.round(cost.total * 100),
+              currency: budget.currency,
+              trainingProvider:
+                t.type === "external"
+                  ? (t.externalProvider ?? "External")
+                  : "Internal",
+              trainingTeamId: "team-eng",
+              trainingTeamName: "Engineering",
+              paymentStatus: "pending",
+              participantsCount: c.participantCount,
+              directCost: cost.direct,
+              indirectCost: cost.indirect,
+              salaryCost: cost.salary,
+            })
           }
-          onAdded(mov)
+          onAdded(movs)
           onClose()
         },
       }}
       secondaryAction={{ label: "Cancel", onClick: onClose }}
     >
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <F0Text variant="label" content="Training" />
-          <select
-            value={trainingId}
-            onChange={(e) => {
-              setTrainingId(e.target.value)
-              const t = trainings.find((x) => x.id === e.target.value)
-              setClassId(t?.classes[0]?.id ?? "")
-            }}
-            className="rounded-md border border-f1-border bg-f1-background px-3 py-2 text-sm text-f1-foreground"
-          >
-            {trainings.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <F0Text variant="label" content="Training group" />
-          <select
-            value={classId}
-            onChange={(e) => setClassId(e.target.value)}
-            className="rounded-md border border-f1-border bg-f1-background px-3 py-2 text-sm text-f1-foreground"
-            disabled={!training || training.classes.length === 0}
-          >
-            {(training?.classes ?? []).map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {cost && (
-          <div className="flex flex-col gap-1 rounded-md border border-f1-border bg-f1-background-secondary p-3">
-            <F0Text variant="label" content="Cost breakdown" />
-            <div className="flex justify-between">
-              <F0Text content="Direct cost" variant="small" />
-              <F0Text content={fmtEur(cost.direct)} variant="small" />
-            </div>
-            <div className="flex justify-between">
-              <F0Text content="Indirect cost" variant="small" />
-              <F0Text content={fmtEur(cost.indirect)} variant="small" />
-            </div>
-            <div className="flex justify-between">
-              <F0Text content="Salary cost" variant="small" />
-              <F0Text content={fmtEur(cost.salary)} variant="small" />
-            </div>
-            <div className="flex justify-between border-t border-f1-border pt-2">
-              <F0Text content="Total" variant="label" />
-              <F0Text content={fmtEur(cost.total)} variant="label" />
-            </div>
+        {/* KPIs row (frames 2 & 3) */}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="rounded-lg border border-f1-border bg-f1-background p-3">
+            <F0Text content="Total budget" variant="small" />
+            <F0Heading
+              as="h4"
+              variant="heading"
+              content={fmtEur(budget.totalAmount)}
+            />
           </div>
+          <div className="rounded-lg border border-f1-border bg-f1-background p-3">
+            <F0Text content="Allocated" variant="small" />
+            <F0Heading
+              as="h4"
+              variant="heading"
+              content={fmtEur(allocatedAfter)}
+            />
+          </div>
+          <div className="rounded-lg border border-f1-border bg-f1-background p-3">
+            <F0Text content="Available" variant="small" />
+            <F0Heading
+              as="h4"
+              variant="heading"
+              content={fmtEur(Math.max(available, 0))}
+            />
+          </div>
+        </div>
+
+        {/* Within / Outside budget alert (frame 3 has it always; frame 2
+            hides it because nothing is selected yet) */}
+        {selectedOptions.length > 0 && (
+          <F0Alert
+            variant={isWithin ? "positive" : "warning"}
+            title={isWithin ? "Within budget" : "Outside budget"}
+            description={
+              isWithin
+                ? `${fmtEur(available)} remaining after this addition.`
+                : `This selection exceeds the budget by ${fmtEur(-available)}.`
+            }
+          />
         )}
+
+        {/* Training group multi-select */}
+        <div className="flex flex-col gap-2">
+          <F0Text content="Training group" variant="label" />
+          <Select<string>
+            multiple
+            value={selectedIds}
+            onChange={(values: string[]) => setSelectedIds(values)}
+            options={allGroupOptions.map((o) => ({
+              value: o.value,
+              label: o.label,
+            }))}
+            placeholder="e.g., January group"
+          />
+        </div>
+
+        {/* Budget deductions info banner (icon + 2 lines) */}
+        <div className="flex items-start gap-3 rounded-lg border border-f1-border bg-f1-background-secondary p-3">
+          <span className="mt-0.5 text-f1-foreground-secondary">
+            <DollarBill />
+          </span>
+          <div className="flex flex-col gap-0.5">
+            <F0Text content="Budget deductions" variant="label" />
+            <F0Text
+              content="Direct, indirect, and salary costs of the selected training groups will be deducted from this budget."
+              variant="small"
+            />
+          </div>
+        </div>
       </div>
     </F0Dialog>
   )
@@ -648,6 +737,10 @@ function DetailView({
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [selectedMovement, setSelectedMovement] =
     useState<TrainingBudgetMovement | null>(null)
+  const [selectedLegalEntityCost, setSelectedLegalEntityCost] = useState<{
+    movement: TrainingBudgetMovement
+    legalEntityId: string
+  } | null>(null)
   const [extraMovements, setExtraMovements] = useState<
     TrainingBudgetMovement[]
   >([])
@@ -998,8 +1091,9 @@ function DetailView({
       {isAddGroupOpen && (
         <AddTrainingGroupDialog
           budget={b}
+          currentMovements={movements}
           onClose={() => setIsAddGroupOpen(false)}
-          onAdded={(mov) => setExtraMovements((prev) => [...prev, mov])}
+          onAdded={(movs) => setExtraMovements((prev) => [...prev, ...movs])}
         />
       )}
 
@@ -1050,93 +1144,32 @@ function DetailView({
       )}
 
       {selectedMovement && (
-        <F0Dialog
-          isOpen
+        <GroupSidepanel
+          movement={selectedMovement}
+          budget={trainingBudgets.find(
+            (b) => b.id === selectedMovement.budgetId
+          )}
           onClose={() => setSelectedMovement(null)}
-          position="right"
-          width="md"
-          title={selectedMovement.groupName}
-          description={selectedMovement.trainingName}
-          primaryAction={{
-            label: "Go to Training group",
-            icon: ArrowRight,
-            onClick: () => {
-              const m = selectedMovement
-              setSelectedMovement(null)
-              goToTrainingGroup(m)
-            },
+          onGoToGroup={() => {
+            const m = selectedMovement
+            setSelectedMovement(null)
+            goToTrainingGroup(m)
           }}
-          secondaryAction={{
-            label: "Close",
-            onClick: () => setSelectedMovement(null),
+          onOpenLegalEntity={(le) => {
+            setSelectedLegalEntityCost({
+              movement: selectedMovement,
+              legalEntityId: le.id,
+            })
           }}
-        >
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1">
-              <F0Text content="Timeframe" variant="label" />
-              <F0Text
-                content={`${fmtDate(selectedMovement.startDate)} → ${fmtDate(selectedMovement.endDate)}`}
-                variant="body"
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <F0Text content="Group status" variant="label" />
-              <F0Text
-                content={GROUP_STATUS_LABEL[selectedMovement.groupStatus]}
-                variant="body"
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <F0Text content="Payment status" variant="label" />
-              <F0Text
-                content={PAYMENT_STATUS_LABEL[selectedMovement.paymentStatus]}
-                variant="body"
-              />
-            </div>
-            <div className="flex flex-col gap-2 rounded-md border border-f1-border bg-f1-background-secondary p-3">
-              <F0Text content="Cost breakdown" variant="label" />
-              <div className="flex justify-between">
-                <F0Text content="Direct cost" variant="small" />
-                <F0Text
-                  content={fmtEur(selectedMovement.directCost)}
-                  variant="small"
-                />
-              </div>
-              <div className="flex justify-between">
-                <F0Text content="Indirect cost" variant="small" />
-                <F0Text
-                  content={fmtEur(selectedMovement.indirectCost)}
-                  variant="small"
-                />
-              </div>
-              <div className="flex justify-between">
-                <F0Text content="Salary cost" variant="small" />
-                <F0Text
-                  content={fmtEur(selectedMovement.salaryCost)}
-                  variant="small"
-                />
-              </div>
-              <div className="flex justify-between border-t border-f1-border pt-2">
-                <F0Text content="Total cost" variant="label" />
-                <F0Text
-                  content={fmtEur(
-                    selectedMovement.directCost +
-                      selectedMovement.indirectCost +
-                      selectedMovement.salaryCost
-                  )}
-                  variant="label"
-                />
-              </div>
-            </div>
-            <div className="flex flex-col gap-1">
-              <F0Text content="Participants" variant="label" />
-              <F0Text
-                content={`${selectedMovement.participantsCount} participants`}
-                variant="body"
-              />
-            </div>
-          </div>
-        </F0Dialog>
+        />
+      )}
+
+      {selectedLegalEntityCost && (
+        <LegalEntityCostSidepanel
+          movement={selectedLegalEntityCost.movement}
+          legalEntityId={selectedLegalEntityCost.legalEntityId}
+          onClose={() => setSelectedLegalEntityCost(null)}
+        />
       )}
     </F0Box>
   )
@@ -1359,6 +1392,512 @@ function GroupDetailView({
   )
 }
 
+// ── SIDEPANELS ──────────────────────────────────────────────────────────────
+
+// Cost tab — frames 5 (toggle OFF) and 6 (toggle ON) of the Figma "Flow
+// validation" section. Shows:
+//   - Payment status select
+//   - Total cost card (collapsible)
+//   - Switch card "Costs by legal entity"
+//   - When ON: collapsible row per legal entity, each opening a secondary
+//     sidepanel (LegalEntityCostSidepanel) with the LE breakdown
+function GroupSidepanelCostTab({
+  movement,
+  budget,
+  onOpenLegalEntity,
+}: {
+  movement: TrainingBudgetMovement
+  budget: TrainingBudget | undefined
+  onOpenLegalEntity: (le: { id: string; legalName: string }) => void
+}) {
+  const toggle = useLegalEntityToggle()
+  const les = legalEntitiesForMovement(movement, budget)
+  const canSplit = les.length > 1
+  const isOn = canSplit && toggle.isOn(movement.id)
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>(
+    movement.paymentStatus
+  )
+  const [totalOpen, setTotalOpen] = useState(true)
+  const totalCost = grossCostFromMovement(movement)
+  const participants = participantsForGroup(movement.groupId)
+  const leBreakdownMap = new Map(
+    breakdownByLegalEntityFor(
+      movement,
+      participantsByLegalEntityForMovement(movement)
+    ).map((b) => [b.legalEntityId, b])
+  )
+  const [openLeIds, setOpenLeIds] = useState<Set<string>>(new Set())
+
+  return (
+    <F0Box display="flex" flexDirection="column" gap="md" paddingX="md">
+      {/* Payment status */}
+      <div className="flex flex-col gap-2">
+        <F0Text content="Payment status" variant="label" />
+        <Select<PaymentStatus>
+          value={paymentStatus}
+          onChange={(v: PaymentStatus) => setPaymentStatus(v)}
+          options={[
+            { value: "pending", label: "Pending" },
+            { value: "spent", label: "Spent" },
+          ]}
+        />
+      </div>
+
+      {/* Total cost card */}
+      <div className="rounded-lg border border-f1-border bg-f1-background">
+        <button
+          type="button"
+          onClick={() => setTotalOpen((v) => !v)}
+          className="flex w-full items-center justify-between p-3"
+        >
+          <div className="flex flex-col items-start gap-0.5">
+            <F0Text content="Total cost" variant="label" />
+            <F0Text
+              content={`${participants.length} ${participants.length === 1 ? "participant" : "participants"}`}
+              variant="small"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <F0Text content={fmtEur(totalCost)} variant="label" />
+            <span className="text-f1-foreground-secondary">
+              {totalOpen ? <ArrowDown /> : <ArrowRight />}
+            </span>
+          </div>
+        </button>
+        {totalOpen && (
+          <div className="flex flex-col gap-1 border-t border-f1-border p-3">
+            <div className="flex justify-between">
+              <F0Text content="Direct cost" variant="small" />
+              <F0Text
+                content={fmtEur(directCostFromMovement(movement))}
+                variant="small"
+              />
+            </div>
+            <div className="flex justify-between">
+              <F0Text content="Indirect cost" variant="small" />
+              <F0Text
+                content={fmtEur(indirectCostFromMovement(movement))}
+                variant="small"
+              />
+            </div>
+            <div className="flex justify-between">
+              <F0Text content="Salary cost" variant="small" />
+              <F0Text
+                content={fmtEur(salaryCostFromMovement(movement))}
+                variant="small"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Costs by legal entity switch card */}
+      <div className="flex items-start justify-between gap-3 rounded-lg border border-f1-border bg-f1-background p-3">
+        <div className="flex flex-col gap-0.5">
+          <F0Text content="Costs by legal entity" variant="label" />
+          <F0Text
+            content="Track and manage all costs per legal entity"
+            variant="small"
+          />
+        </div>
+        <Switch
+          checked={isOn}
+          onCheckedChange={(v) => toggle.setOn(movement.id, v)}
+          hideLabel
+          title="Costs by legal entity"
+          disabled={!canSplit}
+        />
+      </div>
+
+      {/* Per-LE rows when ON */}
+      {isOn && (
+        <div className="flex flex-col gap-2">
+          {les.map((le) => {
+            const open = openLeIds.has(le.id)
+            const breakdown = leBreakdownMap.get(le.id)
+            const leTotal = breakdown
+              ? breakdown.directCost +
+                breakdown.indirectCost +
+                breakdown.salaryCost
+              : 0
+            const leParticipants = participants.filter(
+              (p) => legalEntityForEmployee(p.employeeId)?.id === le.id
+            )
+            return (
+              <div
+                key={le.id}
+                className="rounded-lg border border-f1-border bg-f1-background"
+              >
+                <div className="flex items-center justify-between p-3">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setOpenLeIds((prev) => {
+                        const next = new Set(prev)
+                        if (next.has(le.id)) next.delete(le.id)
+                        else next.add(le.id)
+                        return next
+                      })
+                    }
+                    className="flex flex-1 items-center gap-2 text-left"
+                  >
+                    <span className="text-f1-foreground-secondary">
+                      {open ? <ArrowDown /> : <ArrowRight />}
+                    </span>
+                    <div className="flex flex-col gap-0.5">
+                      <F0Text content={le.legalName} variant="label" />
+                      <F0Text
+                        content={`${leParticipants.length} ${leParticipants.length === 1 ? "participant" : "participants"}`}
+                        variant="small"
+                      />
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onOpenLegalEntity(le)}
+                    className="flex items-center gap-2"
+                  >
+                    <F0Text content={fmtEur(leTotal)} variant="label" />
+                    <span className="text-f1-foreground-secondary">
+                      <ExternalLink />
+                    </span>
+                  </button>
+                </div>
+                {open && breakdown && (
+                  <div className="flex flex-col gap-1 border-t border-f1-border p-3">
+                    <div className="flex justify-between">
+                      <F0Text content="Direct cost" variant="small" />
+                      <F0Text
+                        content={fmtEur(breakdown.directCost)}
+                        variant="small"
+                      />
+                    </div>
+                    <div className="flex justify-between">
+                      <F0Text content="Indirect cost" variant="small" />
+                      <F0Text
+                        content={fmtEur(breakdown.indirectCost)}
+                        variant="small"
+                      />
+                    </div>
+                    <div className="flex justify-between">
+                      <F0Text content="Salary cost" variant="small" />
+                      <F0Text
+                        content={fmtEur(breakdown.salaryCost)}
+                        variant="small"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+
+          {/* Footer summary card: per-LE totals + Total cost */}
+          <div className="mt-2 rounded-lg border border-f1-border bg-f1-background-secondary p-3">
+            <F0Text content="Cost breakdown" variant="label" />
+            <div className="mt-2 flex flex-col gap-1">
+              {les.map((le) => {
+                const breakdown = leBreakdownMap.get(le.id)
+                const leTotal = breakdown
+                  ? breakdown.directCost +
+                    breakdown.indirectCost +
+                    breakdown.salaryCost
+                  : 0
+                return (
+                  <div key={le.id} className="flex justify-between">
+                    <F0Text content={le.legalName} variant="small" />
+                    <F0Text content={fmtEur(leTotal)} variant="small" />
+                  </div>
+                )
+              })}
+            </div>
+            <div className="mt-2 flex items-center justify-between border-t border-f1-border pt-2">
+              <div className="flex flex-col gap-0.5">
+                <F0Text content="Total cost" variant="label" />
+                <F0Text
+                  content="Gross cost = Direct + Indirect + Salary"
+                  variant="small"
+                />
+              </div>
+              <F0Heading as="h4" variant="heading" content={fmtEur(totalCost)} />
+            </div>
+          </div>
+        </div>
+      )}
+    </F0Box>
+  )
+}
+
+// Participants tab — list of trainees of the group, replicating the upstream
+// ParticipantsTab columns (name + a secondary column). Upstream uses Team;
+// here we use Status because f0compose fixtures have no teams.
+function GroupSidepanelParticipantsTab({
+  movement,
+}: {
+  movement: TrainingBudgetMovement
+}) {
+  const participants = participantsForGroup(movement.groupId)
+  const source = useDataCollectionSource({
+    filters: {},
+    dataAdapter: {
+      paginationType: "pages" as const,
+      perPage: 50,
+      fetchData: () => ({
+        type: "pages" as const,
+        records: participants,
+        total: participants.length,
+        perPage: 50,
+        currentPage: 1,
+        pagesCount: 1,
+      }),
+    },
+  })
+  return (
+    <F0Box display="flex" flexDirection="column" paddingX="md">
+      <OneDataCollection
+        source={source}
+        visualizations={[
+          {
+            type: "table" as const,
+            options: {
+              columns: [
+                {
+                  label: "Name",
+                  render: (p) => ({
+                    type: "person" as const,
+                    value: {
+                      firstName: p.employeeName.split(" ")[0] ?? "",
+                      lastName: p.employeeName.split(" ").slice(1).join(" "),
+                      src: p.employeeAvatar,
+                    },
+                  }),
+                },
+                {
+                  label: "Status",
+                  render: (p) => ({
+                    type: "text" as const,
+                    value: p.status,
+                  }),
+                },
+              ],
+            },
+          },
+        ]}
+      />
+    </F0Box>
+  )
+}
+
+function GroupSidepanel({
+  movement,
+  budget,
+  onClose,
+  onGoToGroup,
+  onOpenLegalEntity,
+}: {
+  movement: TrainingBudgetMovement
+  budget: TrainingBudget | undefined
+  onClose: () => void
+  onGoToGroup: () => void
+  onOpenLegalEntity: (le: { id: string; legalName: string }) => void
+}) {
+  const [tab, setTab] = useState<"cost" | "participants">("cost")
+  return (
+    <F0Dialog
+      isOpen
+      onClose={onClose}
+      position="right"
+      width="md"
+      title={movement.groupName}
+      description={movement.trainingName}
+      tabs={[
+        { id: "cost", label: "Cost", onClick: () => setTab("cost") },
+        {
+          id: "participants",
+          label: "Participants",
+          onClick: () => setTab("participants"),
+        },
+      ]}
+      activeTabId={tab}
+      setActiveTabId={(id: string) => setTab(id as "cost" | "participants")}
+      primaryAction={{
+        label: "Go to Training group",
+        icon: ArrowRight,
+        onClick: onGoToGroup,
+      }}
+      secondaryAction={{ label: "Close", onClick: onClose }}
+      disableContentPadding
+    >
+      {tab === "cost" && (
+        <GroupSidepanelCostTab
+          movement={movement}
+          budget={budget}
+          onOpenLegalEntity={onOpenLegalEntity}
+        />
+      )}
+      {tab === "participants" && (
+        <GroupSidepanelParticipantsTab movement={movement} />
+      )}
+    </F0Dialog>
+  )
+}
+
+// Frame 8 + 9 — secondary sidepanel that opens on top of the GroupSidepanel
+// when the user clicks a legal-entity row in the Cost tab. Mirrors the
+// GroupSidepanel layout (Cost + Participants tabs) but scoped to a single
+// legal entity.
+function LegalEntityCostSidepanel({
+  movement,
+  legalEntityId,
+  onClose,
+}: {
+  movement: TrainingBudgetMovement
+  legalEntityId: string
+  onClose: () => void
+}) {
+  const [tab, setTab] = useState<"cost" | "participants">("cost")
+  const le = findLegalEntity(legalEntityId)
+  const breakdown = breakdownByLegalEntityFor(
+    movement,
+    participantsByLegalEntityForMovement(movement)
+  ).find((c) => c.legalEntityId === legalEntityId)
+  const leTotal = breakdown
+    ? breakdown.directCost + breakdown.indirectCost + breakdown.salaryCost
+    : 0
+  const leParticipants = participantsForGroup(movement.groupId).filter(
+    (p) => legalEntityForEmployee(p.employeeId)?.id === legalEntityId
+  )
+
+  return (
+    <F0Dialog
+      isOpen
+      onClose={onClose}
+      position="right"
+      width="md"
+      title={le?.legalName ?? legalEntityId}
+      description={movement.groupName}
+      tabs={[
+        { id: "cost", label: "Cost", onClick: () => setTab("cost") },
+        {
+          id: "participants",
+          label: "Participants",
+          onClick: () => setTab("participants"),
+        },
+      ]}
+      activeTabId={tab}
+      setActiveTabId={(id: string) => setTab(id as "cost" | "participants")}
+      secondaryAction={{ label: "Close", onClick: onClose }}
+      disableContentPadding
+    >
+      {tab === "cost" && (
+        <F0Box display="flex" flexDirection="column" gap="md" paddingX="md">
+          <div className="flex flex-col gap-2">
+            <F0Text content="Cost breakdown" variant="label" />
+            <div className="rounded-lg border border-f1-border bg-f1-background">
+              <div className="flex items-start justify-between gap-3 p-3">
+                <div className="flex flex-col gap-0.5">
+                  <F0Text content="Direct cost" variant="label" />
+                  <F0Text
+                    content="Tuition, materials, instructor fees"
+                    variant="small"
+                  />
+                </div>
+                <F0Text
+                  content={fmtEur(breakdown?.directCost ?? 0)}
+                  variant="label"
+                />
+              </div>
+              <div className="flex items-start justify-between gap-3 border-t border-f1-border p-3">
+                <div className="flex flex-col gap-0.5">
+                  <F0Text content="Indirect cost" variant="label" />
+                  <F0Text
+                    content="Travel, lodging, per diem"
+                    variant="small"
+                  />
+                </div>
+                <F0Text
+                  content={fmtEur(breakdown?.indirectCost ?? 0)}
+                  variant="label"
+                />
+              </div>
+              <div className="flex items-start justify-between gap-3 border-t border-f1-border p-3">
+                <div className="flex flex-col gap-0.5">
+                  <F0Text content="Salary cost" variant="label" />
+                  <F0Text
+                    content="Hours spent in training x hourly rate"
+                    variant="small"
+                  />
+                </div>
+                <F0Text
+                  content={fmtEur(breakdown?.salaryCost ?? 0)}
+                  variant="label"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-f1-border bg-f1-background-secondary p-3">
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-0.5">
+                <F0Text content="Total cost" variant="label" />
+                <F0Text
+                  content="Gross cost = Direct + Indirect + Salary"
+                  variant="small"
+                />
+              </div>
+              <F0Heading as="h4" variant="heading" content={fmtEur(leTotal)} />
+            </div>
+          </div>
+        </F0Box>
+      )}
+      {tab === "participants" && (
+        <F0Box display="flex" flexDirection="column" paddingX="md">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-f1-border">
+                <th className="py-2 text-left">
+                  <F0Text content="Name" variant="small" />
+                </th>
+                <th className="py-2 text-right">
+                  <F0Text content="Hours completed" variant="small" />
+                </th>
+                <th className="py-2 text-right">
+                  <F0Text content="Salary cost" variant="small" />
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {leParticipants.map((p) => {
+                const hours = hoursCompletedForEmployee(
+                  p.employeeId,
+                  movement.groupId
+                )
+                const salary = salaryCostForEmployeeInGroup(
+                  p.employeeId,
+                  movement.groupId
+                )
+                return (
+                  <tr key={p.id} className="border-b border-f1-border">
+                    <td className="py-2">
+                      <F0Text content={p.employeeName} variant="small" />
+                    </td>
+                    <td className="py-2 text-right">
+                      <F0Text content={`${hours}h`} variant="small" />
+                    </td>
+                    <td className="py-2 text-right">
+                      <F0Text content={fmtEur(salary)} variant="small" />
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </F0Box>
+      )}
+    </F0Dialog>
+  )
+}
+
 // ── ROOT ────────────────────────────────────────────────────────────────────
 
 export default function MultiEntityBudget() {
@@ -1367,73 +1906,117 @@ export default function MultiEntityBudget() {
   const budgetId = params.get("budgetId")
   const movementId = params.get("movementId")
 
+  // Shared "Costs by legal entity" toggle state per movement. Persisted at
+  // the prototype root so the sidepanel and Group detail Costs tab stay in
+  // sync. Initialized lazily from the fixture (ON when a breakdown exists).
+  const [toggleByMovement, setToggleByMovement] = useState<
+    Record<string, boolean>
+  >(() =>
+    Object.fromEntries(
+      trainingBudgetMovements.map((m) => [m.id, defaultToggleFor(m)])
+    )
+  )
+  const toggleValue = useMemo(
+    () => ({
+      isOn: (id: string) => toggleByMovement[id] ?? false,
+      setOn: (id: string, on: boolean) =>
+        setToggleByMovement((prev) =>
+          prev[id] === on ? prev : { ...prev, [id]: on }
+        ),
+    }),
+    [toggleByMovement]
+  )
+
+  const currentBudget = budgetId
+    ? trainingBudgets.find((b) => b.id === budgetId)
+    : undefined
+  const currentMovement = movementId
+    ? trainingBudgetMovements.find((m) => m.id === movementId)
+    : undefined
+  const movementBudget = currentMovement
+    ? trainingBudgets.find((b) => b.id === currentMovement.budgetId)
+    : undefined
+
   const breadcrumbs =
     view === "list"
       ? [
           {
             id: "list",
-            label: "Trainings",
-            href: "/p/multi-entity-budget",
+            label: "Trainings budgets",
           },
-          { id: "budgets", label: "Budget" },
         ]
       : view === "group"
         ? [
             {
               id: "list",
-              label: "Trainings",
+              label: "Trainings budgets",
               href: "/p/multi-entity-budget",
             },
             {
-              id: "courses",
-              label: "Courses",
-              href: "/p/multi-entity-budget",
-            },
-            { id: "group", label: "Training group" },
-          ]
-        : [
-            {
-              id: "list",
-              label: "Trainings",
-              href: "/p/multi-entity-budget",
+              id: "budget",
+              label: movementBudget?.name ?? "Budget",
+              href: movementBudget
+                ? `/p/multi-entity-budget?view=detail&budgetId=${movementBudget.id}`
+                : "/p/multi-entity-budget",
             },
             {
-              id: "budgets",
-              label: "Budget",
-              href: "/p/multi-entity-budget",
-            },
-            {
-              id: "current",
-              label:
-                view === "new" ? "New training budget" : "Budget detail",
+              id: "group",
+              label: currentMovement?.groupName ?? "Training group",
             },
           ]
+        : view === "new"
+          ? [
+              {
+                id: "list",
+                label: "Trainings budgets",
+                href: "/p/multi-entity-budget",
+              },
+              { id: "current", label: "New training budget" },
+            ]
+          : [
+              {
+                id: "list",
+                label: "Trainings budgets",
+                href: "/p/multi-entity-budget",
+              },
+              {
+                id: "current",
+                label: currentBudget?.name ?? "Budget detail",
+              },
+            ]
 
-  return (
-    <Page
-      header={
-        <PageHeader
-          module={{
-            id: "company_trainings",
-            name: "Trainings",
-            href: "/p/multi-entity-budget",
-          }}
-          breadcrumbs={breadcrumbs}
-        />
-      }
-    >
-      {view === "list" && <ListView setSearch={setSearch} />}
-      {view === "detail" && (
-        <DetailView budgetId={budgetId} setSearch={setSearch} />
-      )}
-      {view === "new" && <NewBudgetView setSearch={setSearch} />}
-      {view === "group" && (
+  if (view === "group") {
+    return (
+      <LegalEntityToggleProvider value={toggleValue}>
         <GroupDetailView
           movementId={movementId}
           budgetId={budgetId}
           setSearch={setSearch}
         />
-      )}
-    </Page>
+      </LegalEntityToggleProvider>
+    )
+  }
+
+  return (
+    <LegalEntityToggleProvider value={toggleValue}>
+      <Page
+        header={
+          <PageHeader
+            module={{
+              id: "company_trainings",
+              name: "Trainings",
+              href: "/p/multi-entity-budget",
+            }}
+            breadcrumbs={breadcrumbs}
+          />
+        }
+      >
+        {view === "list" && <ListView setSearch={setSearch} />}
+        {view === "detail" && (
+          <DetailView budgetId={budgetId} setSearch={setSearch} />
+        )}
+        {view === "new" && <NewBudgetView setSearch={setSearch} />}
+      </Page>
+    </LegalEntityToggleProvider>
   )
 }
