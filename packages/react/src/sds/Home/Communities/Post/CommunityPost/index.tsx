@@ -130,7 +130,8 @@ export const BaseCommunityPost = ({
     .filter(Boolean)
     .join(" · ")
 
-  const descriptionCollapsed = !isDescriptionExpanded
+  const descriptionExpanded = descriptionExpandable && isDescriptionExpanded
+  const descriptionCollapsed = !descriptionExpanded
   const date = getDisplayDateBasedOnDuration(createdAt)
 
   const handleClick = () => {
@@ -152,19 +153,15 @@ export const BaseCommunityPost = ({
   }
 
   useEffect(() => {
-    if (isDescriptionExpanded) {
+    if (descriptionExpanded) {
       descriptionRef.current?.focus()
     }
-  }, [isDescriptionExpanded])
+  }, [descriptionExpanded])
 
   useEffect(() => {
     const descriptionElement = descriptionRef.current
 
-    if (
-      !descriptionExpandable ||
-      !descriptionElement ||
-      isDescriptionExpanded
-    ) {
+    if (!descriptionExpandable || !descriptionElement || descriptionExpanded) {
       setIsDescriptionOverflowing(false)
       return
     }
@@ -183,7 +180,7 @@ export const BaseCommunityPost = ({
     resizeObserver.observe(descriptionElement)
 
     return () => resizeObserver.disconnect()
-  }, [descriptionExpandable, isDescriptionExpanded, description])
+  }, [descriptionExpandable, descriptionExpanded, description])
 
   return (
     <div
@@ -318,15 +315,15 @@ export const BaseCommunityPost = ({
                   id={descriptionId}
                   content={description}
                   collapsed={descriptionCollapsed}
-                  tabIndex={isDescriptionExpanded ? -1 : undefined}
-                  className={cn(isDescriptionExpanded && focusRing())}
+                  tabIndex={descriptionExpanded ? -1 : undefined}
+                  className={cn(descriptionExpanded && focusRing())}
                 />
                 {descriptionExpandable &&
                   isDescriptionOverflowing &&
-                  !isDescriptionExpanded && (
+                  !descriptionExpanded && (
                     <ExpandDescriptionButton
                       controls={descriptionId}
-                      expanded={isDescriptionExpanded}
+                      expanded={descriptionExpanded}
                       onClick={handleToggleDescription}
                     />
                   )}

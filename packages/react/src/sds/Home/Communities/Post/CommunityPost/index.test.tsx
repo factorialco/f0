@@ -90,3 +90,23 @@ test("does not show description expansion controls when the description fits", (
 
   expect(screen.queryByRole("button", { name: "See more" })).toBeNull()
 })
+
+test("collapses the description when expansion is disabled after expanding", async () => {
+  mockDescriptionDimensions({ scrollHeight: 120, clientHeight: 100 })
+
+  const { rerender } = render(
+    <BaseCommunityPost {...defaultProps} descriptionExpandable />
+  )
+
+  const description = document.querySelector(".FactorialOneTextEditor")
+
+  await userEvent.click(await screen.findByRole("button", { name: "See more" }))
+  expect(description).not.toHaveClass("line-clamp-5")
+
+  rerender(
+    <BaseCommunityPost {...defaultProps} descriptionExpandable={false} />
+  )
+
+  expect(description).toHaveClass("line-clamp-5")
+  expect(screen.queryByRole("button", { name: "See more" })).toBeNull()
+})
