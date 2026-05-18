@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.1](https://github.com/factorialco/f0/compare/f0-react-v2.6.0...f0-react-v2.6.1) (2026-05-18)
+
+
+### Bug Fixes
+
+* **kanban:** optimize lane updates ([#4131](https://github.com/factorialco/f0/issues/4131)) ([1ff4e8a](https://github.com/factorialco/f0/commit/1ff4e8af7db85831360c598166f49d18cbf3a5d4))
+
 ## [2.6.0](https://github.com/factorialco/f0/compare/f0-react-v2.5.0...f0-react-v2.6.0) (2026-05-15)
 
 
