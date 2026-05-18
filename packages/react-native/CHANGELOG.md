@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.54.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.53.0...f0-react-native-v0.54.0) (2026-05-18)
+
+
+### Features
+
+* **react-native:** add F0WizardSteps component ([#4141](https://github.com/factorialco/f0/issues/4141)) ([a4f11e9](https://github.com/factorialco/f0/commit/a4f11e93a007c72cd7d521f34b440f0b141c12a1))
+
 ## [0.53.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.52.1...f0-react-native-v0.53.0) (2026-04-30)
 
 
