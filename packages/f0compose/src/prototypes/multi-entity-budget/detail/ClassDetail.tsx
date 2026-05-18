@@ -206,12 +206,12 @@ export function ClassDetail({
                 ...(movement
                   ? [
                       {
-                        label: "Status",
+                        label: "Payment status",
                         value: {
                           type: "status" as const,
                           label:
                             movement.paymentStatus === "spent"
-                              ? "Spent"
+                              ? "Paid"
                               : "Pending",
                           variant:
                             movement.paymentStatus === "spent"
@@ -269,7 +269,7 @@ export function ClassDetail({
                   onClick: () => openClassAction("delete-class"),
                 },
                 {
-                  label: "Edit group",
+                  label: "Edit",
                   icon: Pencil,
                   onClick: () => openClassAction("edit-class"),
                 },

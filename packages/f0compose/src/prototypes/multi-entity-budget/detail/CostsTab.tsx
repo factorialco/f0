@@ -7,10 +7,7 @@ import {
   F0Select,
 } from "@factorialco/f0-react"
 import { NumberInput, Switch } from "@factorialco/f0-react/dist/experimental"
-import {
-  ArrowRight,
-  Calculator,
-} from "@factorialco/f0-react/icons/app"
+import { Calculator } from "@factorialco/f0-react/icons/app"
 
 import type { Training, TrainingClass } from "@/fixtures"
 import {
@@ -22,7 +19,6 @@ import {
   trainingParticipants,
 } from "@/fixtures"
 import { useLegalEntityToggle } from "../_shared/legalEntityToggleContext"
-import { LegalEntityCostSidepanel } from "../MultiEntityBudget"
 
 type Props = { training: Training; klass?: TrainingClass }
 type PaymentStatus = "pending" | "paid" | ""
@@ -196,19 +192,19 @@ export function CostsTab({ training, klass }: Props) {
         <F0Heading as="h3" variant="heading-large" content="Costs" />
         <F0Text
           variant="description"
-          content="Track direct, indirect and salary costs for this group. Link to a budget to keep spending under control."
+          content="Track and manage all costs associated with this training group."
         />
       </div>
 
       <BudgetLinkBanner budgetId={budgetId} totalCost={totalCost} />
 
-      {/* Summary row */}
+      {/* Summary row: 3 cols — Total cost (colSpan 1) + Linked budget + Payment status (colSpan 2) */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <div className="flex flex-col gap-1 rounded-md border border-solid border-f1-border-secondary bg-f1-background p-4">
-          <F0Text variant="label" content="Total group cost" />
+          <F0Text variant="label" content="Total cost of the group" />
           <F0Text
             variant="description"
-            content="Sum of direct, indirect and salary costs."
+            content="Sum of Direct, Indirect and Salary costs"
           />
           <F0Heading
             as="h2"
@@ -217,33 +213,35 @@ export function CostsTab({ training, klass }: Props) {
           />
         </div>
 
-        <div className="flex flex-col gap-2 rounded-md border border-solid border-f1-border-secondary bg-f1-background p-4">
-          <F0Text variant="label" content="Linked budget" />
-          <F0Select<string>
-            label="Linked budget"
-            hideLabel
-            placeholder="Select a budget"
-            value={budgetId ?? ""}
-            onChange={(v: string) => setBudgetId(v || null)}
-            options={budgetOptions}
-          />
-        </div>
+        <div className="grid grid-cols-1 gap-4 rounded-md border border-solid border-f1-border-secondary bg-f1-background p-4 md:col-span-2 md:grid-cols-2">
+          <div className="flex flex-col gap-1">
+            <F0Text variant="label" content="Linked budget" />
+            <F0Select<string>
+              label="Linked budget"
+              hideLabel
+              placeholder="No budget linked"
+              value={budgetId ?? ""}
+              onChange={(v: string) => setBudgetId(v || null)}
+              options={budgetOptions}
+            />
+          </div>
 
-        <div className="flex flex-col gap-2 rounded-md border border-solid border-f1-border-secondary bg-f1-background p-4">
-          <F0Text variant="label" content="Payment status" />
-          <F0Select<PaymentStatus>
-            label="Payment status"
-            hideLabel
-            placeholder="—"
-            value={paymentStatus}
-            onChange={(v: PaymentStatus) => setPaymentStatus(v)}
-            disabled={!budgetId}
-            options={[
-              { value: "", label: "—" },
-              { value: "pending", label: "Pending" },
-              { value: "paid", label: "Paid" },
-            ]}
-          />
+          <div className="flex flex-col gap-1">
+            <F0Text variant="label" content="Payment status" />
+            <F0Select<PaymentStatus>
+              label="Payment status"
+              hideLabel
+              placeholder="—"
+              value={paymentStatus}
+              onChange={(v: PaymentStatus) => setPaymentStatus(v)}
+              disabled={!budgetId}
+              options={[
+                { value: "", label: "—" },
+                { value: "pending", label: "Pending" },
+                { value: "paid", label: "Paid" },
+              ]}
+            />
+          </div>
         </div>
       </div>
 
@@ -252,21 +250,21 @@ export function CostsTab({ training, klass }: Props) {
         <CostBreakdownCard
           emoji="💰"
           title="Direct cost"
-          description="Provider fees, materials, room rental and other invoiced expenses."
+          description="Training-related expenses, such as instructor fees, materials, venue, and logistics."
           value={directCost}
           onChange={setDirectCost}
         />
         <CostBreakdownCard
           emoji="🏢"
           title="Indirect cost"
-          description="Overhead allocated to this group (HR, facilities, equipment amortisation)."
+          description="General business expenses related to training, such as utilities and administrative fees."
           value={indirectCost}
           onChange={setIndirectCost}
         />
         <CostBreakdownCard
           emoji="📝"
-          title="Salary opportunity cost"
-          description="Payroll cost of participants and instructors during training hours."
+          title="Salary cost"
+          description="Cost of all employees' time spent on the course."
           value={salaryCost}
           onChange={setSalaryCost}
           action={
@@ -422,7 +420,37 @@ function CostsByLegalEntitySection({ klass }: { klass?: TrainingClass }) {
     ])
   )
 
-  const [openLeId, setOpenLeId] = useState<string | null>(null)
+  // Local edited values per LE (Direct / Indirect / Salary) so the grid is
+  // editable. Initial values come from the fixture breakdown.
+  const initialCosts: Record<
+    string,
+    { direct: number; indirect: number; salary: number }
+  > = Object.fromEntries(
+    les.map((le) => {
+      const b = breakdownMap.get(le.id)
+      return [
+        le.id,
+        {
+          direct: b ? Math.round(b.directCost) : 0,
+          indirect: b ? Math.round(b.indirectCost) : 0,
+          salary: b ? Math.round(b.salaryCost) : 0,
+        },
+      ]
+    })
+  )
+  const [costsByLe, setCostsByLe] = useState(initialCosts)
+  const [expandedLeId, setExpandedLeId] = useState<string | null>(null)
+
+  const setLeCost = (
+    leId: string,
+    field: "direct" | "indirect" | "salary",
+    value: number
+  ) => {
+    setCostsByLe((prev) => ({
+      ...prev,
+      [leId]: { ...(prev[leId] ?? { direct: 0, indirect: 0, salary: 0 }), [field]: value },
+    }))
+  }
 
   return (
     <section className="flex flex-col gap-3">
@@ -450,55 +478,100 @@ function CostsByLegalEntitySection({ klass }: { klass?: TrainingClass }) {
       {isOn && (
         <div className="flex flex-col gap-2">
           {les.map((le) => {
-            const breakdown = breakdownMap.get(le.id)
-            const leTotal = breakdown
-              ? breakdown.directCost +
-                breakdown.indirectCost +
-                breakdown.salaryCost
-              : 0
+            const c = costsByLe[le.id] ?? { direct: 0, indirect: 0, salary: 0 }
+            const leTotal = c.direct + c.indirect + c.salary
             const leParticipants = participants.filter(
               (p) => legalEntityForEmployee(p.employeeId)?.id === le.id
             )
+            const isExpanded = expandedLeId === le.id
             return (
-              <button
+              <div
                 key={le.id}
-                type="button"
-                onClick={() => setOpenLeId(le.id)}
-                className="flex items-center justify-between gap-3 rounded-md border border-solid border-f1-border-secondary bg-f1-background p-4 text-left hover:bg-f1-background-hover"
+                className="flex flex-col gap-3 rounded-md border border-solid border-f1-border-secondary bg-f1-background"
               >
-                <div className="flex items-center gap-3">
-                  <span aria-hidden className="text-xl">
-                    {flagFor(le.countryCode)}
-                  </span>
-                  <div className="flex flex-col gap-0.5">
-                    <F0Text variant="label" content={le.legalName} />
-                    <F0Text
-                      variant="small"
-                      content={`${leParticipants.length} ${leParticipants.length === 1 ? "participant" : "participants"}`}
-                    />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setExpandedLeId(isExpanded ? null : le.id)
+                  }
+                  className="flex items-center justify-between gap-3 p-4 text-left hover:bg-f1-background-hover"
+                  aria-expanded={isExpanded}
+                >
+                  <div className="flex items-center gap-3">
+                    <span aria-hidden className="text-xl">
+                      {flagFor(le.countryCode)}
+                    </span>
+                    <div className="flex flex-col gap-0.5">
+                      <F0Text variant="label" content={le.legalName} />
+                      <F0Text
+                        variant="description"
+                        content={`${le.countryCode} · ${leParticipants.length} ${leParticipants.length === 1 ? "participant" : "participants"}`}
+                      />
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <F0Text
-                    variant="label"
-                    content={formatMoney(leTotal, "EUR")}
-                  />
-                  <span className="text-f1-foreground-secondary">
-                    <ArrowRight />
-                  </span>
-                </div>
-              </button>
+                  <div className="flex items-center gap-2">
+                    <F0Text
+                      variant="label"
+                      content={formatMoney(leTotal, "EUR")}
+                    />
+                    <span
+                      aria-hidden
+                      className="text-f1-foreground-secondary"
+                    >
+                      {isExpanded ? "▴" : "▾"}
+                    </span>
+                  </div>
+                </button>
+                {isExpanded && (
+                  <div className="grid grid-cols-1 gap-3 px-4 pb-4 md:grid-cols-3">
+                    <div className="flex flex-col gap-1">
+                      <F0Text variant="label" content="Direct cost" />
+                      <NumberInput
+                        label="Direct cost"
+                        hideLabel
+                        value={c.direct}
+                        onChange={(v) =>
+                          setLeCost(le.id, "direct", v ?? 0)
+                        }
+                        step={50}
+                        locale="en-US"
+                        units="EUR"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <F0Text variant="label" content="Indirect cost" />
+                      <NumberInput
+                        label="Indirect cost"
+                        hideLabel
+                        value={c.indirect}
+                        onChange={(v) =>
+                          setLeCost(le.id, "indirect", v ?? 0)
+                        }
+                        step={50}
+                        locale="en-US"
+                        units="EUR"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <F0Text variant="label" content="Salary cost" />
+                      <NumberInput
+                        label="Salary cost"
+                        hideLabel
+                        value={c.salary}
+                        onChange={(v) =>
+                          setLeCost(le.id, "salary", v ?? 0)
+                        }
+                        step={50}
+                        locale="en-US"
+                        units="EUR"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
             )
           })}
         </div>
-      )}
-
-      {openLeId && (
-        <LegalEntityCostSidepanel
-          movement={movement}
-          legalEntityId={openLeId}
-          onClose={() => setOpenLeId(null)}
-        />
       )}
     </section>
   )

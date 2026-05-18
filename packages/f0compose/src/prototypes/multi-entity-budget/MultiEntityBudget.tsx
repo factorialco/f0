@@ -923,15 +923,7 @@ function DetailView({
   const isArchived = b.status === "closed"
 
   return (
-    <F0Box display="flex" flexDirection="column" gap="lg" padding="xl">
-      <button
-        type="button"
-        onClick={() => go(setSearch, { view: "list", budgetId: null })}
-        className="self-start text-sm text-f1-foreground-info hover:underline"
-      >
-        ← Back to budgets
-      </button>
-
+    <F0Box display="flex" flexDirection="column" gap="xl" padding="xl" paddingTop="lg">
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
           <F0Heading content={b.name} variant="heading-large" as="h1" />

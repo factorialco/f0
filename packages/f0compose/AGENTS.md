@@ -108,6 +108,53 @@ fix incremental.
 
 Siempre desde `en.json` upstream. Cero invención.
 
+### 4.bis. DETALLES UI (borders, spacing, tipografía, iconos)
+
+Paridad NO es solo "se parece". Es:
+
+- **Borders**: tipo (`default`/`secondary`), radius (`md`/`lg`), color
+  exacto. Cada card del Figma se replica con el mismo borde — nunca
+  "más o menos parecido".
+- **Spacing**: padding interior de cards (`md`/`lg`), gap entre
+  elementos (`xs`/`sm`/`md`/`lg`/`xl`). Comparar pixel-aware:
+  ¿el subtítulo está pegado al título (`xs`) o separado (`md`)?
+- **Tipografía**: `F0Heading` vs `F0Text variant="label"` vs
+  `variant="description"` vs `variant="body"`. NUNCA elegir por
+  intuición; identificar contra Figma (size + weight + color).
+- **Iconos**: identificar cuál icono concreto (`Building`, `Box`,
+  `ChevronDown`, etc.) — NO sustituir por emoji si Figma usa icono
+  vectorial. Color del icono (`secondary`/`tertiary`/`positive`).
+- **Estados**: collapsed vs expanded de un row. Por defecto el row
+  debe estar COMO LO MUESTRE FIGMA por defecto. Si Figma muestra
+  collapsed con `⌄`, el componente arranca collapsed.
+- **Inputs**: dentro de grids, mantener gap y columna iguales al
+  Figma. Sufijo currency dentro del input, no como label aparte.
+- **Highlights de Figma (border azul + "T Label")** son metadata del
+  editor — NUNCA replicar como border real. Solo indica que ese
+  elemento usa un text token.
+
+### 4.ter. SHELL Y LAYOUT (no romper la página)
+
+Errores recurrentes a NO cometer:
+
+- **Header pegado al top**: el contenido del prototipo NO empieza al ras
+  de la línea del top bar. Aplicar el padding de página upstream
+  (`paddingTop="lg"` o el wrapper canónico). Comparar con cualquier
+  página real de Factorial: siempre hay aire entre top bar y `ResourceHeader`.
+- **Bloques pegados entre sí**: el contenedor raíz del prototipo usa
+  `F0Box display="flex" flexDirection="column" gap="xl"` (o `lg` según
+  módulo). Nunca dejar `SectionHeader` + banner + tabs sin separación.
+- **"Back to X" inventado**: PROHIBIDO. Upstream NO tiene links/botones
+  "Back to budgets" / "Back to trainings". La navegación atrás es
+  SIEMPRE via **breadcrumbs** (`Training > Courses > Comm. course > Group`).
+  Cada segmento del breadcrumb es clickable y lleva a una sub-vista
+  REAL del MISMO prototipo (nunca a otro `/p/`).
+- **Breadcrumbs**: replicar la cadena upstream exacta. Si no existe el
+  segmento intermedio, NO inventarlo — significa que la pantalla no
+  está enganchada bien al árbol.
+- **Spacing entre `ResourceHeader` y primer bloque**: `gap="xl"` en el
+  contenedor padre. Nunca `gap="xs"` ni `gap` ausente.
+
 ### 5. COMMITS
 
 - Cuerpo del mensaje: líneas ≤ 100 caracteres.
