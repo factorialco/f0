@@ -12,6 +12,7 @@ import { Plus } from "@/icons/app"
 import { cn } from "@/lib/utils"
 
 import { LaneHeader } from "./components/LaneHeader"
+import { LaneSelectAllItemsBanner } from "./components/LaneSelectAllItemsBanner"
 import { LoadingSkeleton } from "./components/LoadingSkeleton"
 import { LaneProps } from "./types"
 
@@ -30,6 +31,8 @@ export function Lane<Record extends RecordType>({
   onPrimaryAction,
   onFooterAction,
   dropPlaceholderIndex,
+  selection,
+  selectAllItems,
 }: LaneProps<Record>) {
   // Create pagination info for infinite scroll
   const paginationInfo = {
@@ -57,7 +60,10 @@ export function Lane<Record extends RecordType>({
         variant={variant}
         count={total ?? items.length}
         onPrimaryAction={onPrimaryAction}
+        selection={selection}
       />
+
+      {selectAllItems && <LaneSelectAllItemsBanner config={selectAllItems} />}
 
       <div
         className={cn(

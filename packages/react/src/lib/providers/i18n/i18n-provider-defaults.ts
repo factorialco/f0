@@ -74,6 +74,8 @@ export const defaultTranslations = {
       allOnPage: "All {{count}} items on this page are selected",
       selectAllItems: "Select all {{total}} items",
       allItemsSelected: "All {{total}} items selected",
+      allLoadedInLane: "All {{count}} loaded items selected",
+      selectAllInLane: "Select all {{total}} in this lane",
     },
     noItemsSelected: "No items selected",
   },

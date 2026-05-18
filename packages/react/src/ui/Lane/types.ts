@@ -4,6 +4,26 @@ import type { IconType } from "@/components/F0Icon"
 import type { Variant } from "@/components/tags/F0TagStatus"
 import type { RecordType } from "@/hooks/datasource"
 
+export interface LaneSelection {
+  /** Required: callback fired when the header checkbox toggles. */
+  onSelectAll: (checked: boolean) => void
+  /** Required: visually-hidden accessible label for the checkbox. */
+  selectAllLabel: string
+  /** Whether the checkbox is checked (all loaded items in lane selected). */
+  selected?: boolean
+  /** Whether the checkbox is in indeterminate state (partial selection). */
+  indeterminate?: boolean
+}
+
+export interface LaneSelectAllItemsConfig {
+  onSelectAllItems: () => void
+  selectAllItemsLabel: string
+  loadedSelectionLabel: string
+  allItemsSelectedLabel?: string
+  allItemsSelected?: boolean
+  totalItems?: number
+}
+
 export interface LaneProps<Record extends RecordType> {
   /**
    * The title of the card
@@ -77,4 +97,15 @@ export interface LaneProps<Record extends RecordType> {
    * If undefined, no placeholder is shown.
    */
   dropPlaceholderIndex?: number
+
+  /**
+   * Per-lane select-all configuration. Presence enables the header checkbox.
+   * `onSelectAll` and `selectAllLabel` are required when provided.
+   */
+  selection?: LaneSelection
+  /**
+   * Secondary "select all items across pages" banner shown under the header.
+   * Only rendered when this object is provided.
+   */
+  selectAllItems?: LaneSelectAllItemsConfig
 }

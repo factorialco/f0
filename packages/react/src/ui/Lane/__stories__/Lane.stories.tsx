@@ -12,6 +12,7 @@ import { ArrowUp, Clock, Delete, Pencil, Person, Search } from "@/icons/app"
 import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
 import { useDroppableList } from "@/lib/dnd/hooks"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import type { LaneProps } from "../types"
 
@@ -511,6 +512,201 @@ export const TwoLanesDnD: Story = {
           }}
         />
       </DndProvider>
+    )
+  },
+}
+
+export const SelectableUnchecked: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Lane with a `selection` object passed in to enable the header checkbox. The checkbox is unchecked when no items in the lane are selected.",
+      },
+    },
+  },
+  args: {
+    title: "To do",
+    items: mockTasks,
+    getKey: (task: RecordType) => (task as MockTask).id,
+    selection: {
+      onSelectAll: fn(),
+      selectAllLabel: "Select all",
+      selected: false,
+      indeterminate: false,
+    },
+    renderCard: (task: RecordType) => (
+      <F0Card
+        title={(task as MockTask).title}
+        description={(task as MockTask).description}
+      />
+    ),
+  },
+}
+
+export const SelectableIndeterminate: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Lane header checkbox renders an indeterminate state when only some loaded items are selected.",
+      },
+    },
+  },
+  args: {
+    ...SelectableUnchecked.args,
+    selection: {
+      onSelectAll: fn(),
+      selectAllLabel: "Select all",
+      selected: false,
+      indeterminate: true,
+    },
+  },
+}
+
+export const SelectableChecked: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Lane header checkbox is checked when every loaded item in the lane is selected.",
+      },
+    },
+  },
+  args: {
+    ...SelectableUnchecked.args,
+    selection: {
+      onSelectAll: fn(),
+      selectAllLabel: "Select all",
+      selected: true,
+      indeterminate: false,
+    },
+  },
+}
+
+export const SelectableWithSelectAllBanner: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "When all loaded items are selected and more pages exist, a secondary banner offers a 'Select all N in this lane' CTA.",
+      },
+    },
+  },
+  args: {
+    ...SelectableUnchecked.args,
+    selection: {
+      onSelectAll: fn(),
+      selectAllLabel: "Select all",
+      selected: true,
+      indeterminate: false,
+    },
+    selectAllItems: {
+      onSelectAllItems: fn(),
+      selectAllItemsLabel: "Select all 200 in this lane",
+      loadedSelectionLabel: "All 25 loaded selected",
+    },
+  },
+}
+
+export const SelectableAllItemsSelected: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Steady-state banner when every item across every page of the lane is selected.",
+      },
+    },
+  },
+  args: {
+    ...SelectableUnchecked.args,
+    selection: {
+      onSelectAll: fn(),
+      selectAllLabel: "Select all",
+      selected: true,
+      indeterminate: false,
+    },
+    selectAllItems: {
+      onSelectAllItems: fn(),
+      selectAllItemsLabel: "Select all 200 in this lane",
+      loadedSelectionLabel: "All 25 loaded selected",
+      allItemsSelected: true,
+      allItemsSelectedLabel: "All 200 items selected",
+    },
+  },
+}
+
+export const SelectableSnapshot: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Chromatic snapshot covering all selectable visual states side-by-side.",
+      },
+    },
+    ...withSnapshot({}),
+  },
+  args: {
+    items: [],
+    getKey: () => "",
+    renderCard: () => null,
+  },
+  render: () => {
+    const renderCard = (task: RecordType) => (
+      <F0Card
+        title={(task as MockTask).title}
+        description={(task as MockTask).description}
+      />
+    )
+    const baseArgs = {
+      title: "To do",
+      items: mockTasks,
+      getKey: (task: RecordType) => (task as MockTask).id,
+      renderCard,
+    }
+    const baseSelection = {
+      onSelectAll: fn(),
+      selectAllLabel: "Select all",
+    }
+    return (
+      <div className="flex gap-2">
+        <Lane
+          {...baseArgs}
+          selection={{
+            ...baseSelection,
+            selected: false,
+            indeterminate: false,
+          }}
+        />
+        <Lane
+          {...baseArgs}
+          selection={{ ...baseSelection, selected: false, indeterminate: true }}
+        />
+        <Lane
+          {...baseArgs}
+          selection={{ ...baseSelection, selected: true, indeterminate: false }}
+        />
+        <Lane
+          {...baseArgs}
+          selection={{ ...baseSelection, selected: true, indeterminate: false }}
+          selectAllItems={{
+            onSelectAllItems: fn(),
+            selectAllItemsLabel: "Select all 200 in this lane",
+            loadedSelectionLabel: "All 25 loaded selected",
+          }}
+        />
+        <Lane
+          {...baseArgs}
+          selection={{ ...baseSelection, selected: true, indeterminate: false }}
+          selectAllItems={{
+            onSelectAllItems: fn(),
+            selectAllItemsLabel: "Select all 200 in this lane",
+            loadedSelectionLabel: "All 25 loaded selected",
+            allItemsSelected: true,
+            allItemsSelectedLabel: "All 200 items selected",
+          }}
+        />
+      </div>
     )
   },
 }

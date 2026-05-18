@@ -298,48 +298,66 @@ export function Kanban<TRecord extends RecordType>(
         viewportRef={viewportRef}
       >
         <div className="relative mb-2 flex h-full items-start gap-2">
-          {localLanes.map(
-            (lane: KanbanLaneAttributes<TRecord>, laneIndex: number) => {
-              const total = lane.total ?? lane.items.length
-              return (
-                <div
-                  key={lane.id ?? String(laneIndex)}
-                  className="relative shrink-0"
-                  data-testid={`lane-${lane.id ?? String(laneIndex)}`}
-                >
-                  <KanbanLane<TRecord>
-                    id={lane.id}
-                    getLaneResourceIndexById={
-                      lane.id
-                        ? (id) => getIndexById(lane.id as string, id)
-                        : undefined
-                    }
-                    onMove={onMove}
-                    title={lane.title}
-                    items={lane.items}
-                    getKey={(item, index) => getKey(item, index, lane.id)}
-                    renderCard={(item, index) => {
-                      const node = renderCard(item, index, total, lane.id)
-                      return node
-                    }}
-                    emptyState={lane.emptyState}
-                    loading={loading || lane.loading}
-                    variant={lane.variant}
-                    total={total}
-                    hasMore={lane.hasMore}
-                    loadingMore={lane.loadingMore}
-                    fetchMore={lane.fetchMore}
-                    onPrimaryAction={
-                      onCreate && lane.id ? () => onCreate(lane.id!) : undefined
-                    }
-                    onFooterAction={
-                      onCreate && lane.id ? () => onCreate(lane.id!) : undefined
-                    }
-                  />
-                </div>
-              )
-            }
-          )}
+          {(() => {
+            const propsLaneMap = new Map(lanes.map((l) => [l.id, l]))
+            return localLanes.map(
+              (lane: KanbanLaneAttributes<TRecord>, laneIndex: number) => {
+                const total = lane.total ?? lane.items.length
+                // Selection-related props are read out-of-band from the latest
+                // `lanes` prop because `localLanes` is cached based on item
+                // identity to support optimistic DnD updates. When a lane has
+                // no `id` we cannot look it up in the map, so we fall back to
+                // the `lane` itself (which already carries the latest props).
+                const propsLane =
+                  (lane.id ? propsLaneMap.get(lane.id) : undefined) ?? lane
+                const selection = propsLane.selection
+                const selectAllItems = propsLane.selectAllItems
+                return (
+                  <div
+                    key={lane.id ?? String(laneIndex)}
+                    className="relative shrink-0"
+                    data-testid={`lane-${lane.id ?? String(laneIndex)}`}
+                  >
+                    <KanbanLane<TRecord>
+                      id={lane.id}
+                      getLaneResourceIndexById={
+                        lane.id
+                          ? (id) => getIndexById(lane.id as string, id)
+                          : undefined
+                      }
+                      onMove={onMove}
+                      title={lane.title}
+                      items={lane.items}
+                      getKey={(item, index) => getKey(item, index, lane.id)}
+                      renderCard={(item, index) => {
+                        const node = renderCard(item, index, total, lane.id)
+                        return node
+                      }}
+                      emptyState={lane.emptyState}
+                      loading={loading || lane.loading}
+                      variant={lane.variant}
+                      total={total}
+                      hasMore={lane.hasMore}
+                      loadingMore={lane.loadingMore}
+                      fetchMore={lane.fetchMore}
+                      onPrimaryAction={
+                        onCreate && lane.id
+                          ? () => onCreate(lane.id!)
+                          : undefined
+                      }
+                      onFooterAction={
+                        onCreate && lane.id
+                          ? () => onCreate(lane.id!)
+                          : undefined
+                      }
+                      selection={selection}
+                      selectAllItems={selectAllItems}
+                    />
+                  </div>
+                )
+              }
+            )
+          })()}
         </div>
       </ScrollArea>
       {/* Horizontal edge zones (invisible during drag) */}

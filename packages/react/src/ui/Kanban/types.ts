@@ -2,6 +2,9 @@ import type { ReactNode } from "react"
 
 import type { Variant } from "@/components/tags/F0TagStatus"
 import type { RecordType } from "@/hooks/datasource"
+import type { LaneSelectAllItemsConfig, LaneSelection } from "@/ui/Lane/types"
+
+export type { LaneSelectAllItemsConfig, LaneSelection }
 
 export type KanbanLaneAttributes<TRecord extends RecordType> = {
   id?: string
@@ -21,6 +24,10 @@ export type KanbanLaneAttributes<TRecord extends RecordType> = {
   total?: number
   /** Future: filters that would be applied to the shared data source */
   filters?: Partial<Record<string, unknown>>
+  /** Per-lane select-all configuration. Presence enables the header checkbox. */
+  selection?: LaneSelection
+  /** Secondary "select all items across pages" banner shown under the header. */
+  selectAllItems?: LaneSelectAllItemsConfig
 }
 
 export interface KanbanProps<TRecord extends RecordType> {
