@@ -1385,6 +1385,7 @@ function GroupDetailView({
     <ClassDetail
       training={training}
       classId={classId}
+      movement={movement}
       onBackToList={backToDetail}
       onBackToTraining={backToDetail}
       onBackToClasses={backToDetail}
@@ -1746,7 +1747,7 @@ function GroupSidepanel({
 // when the user clicks a legal-entity row in the Cost tab. Mirrors the
 // GroupSidepanel layout (Cost + Participants tabs) but scoped to a single
 // legal entity.
-function LegalEntityCostSidepanel({
+export function LegalEntityCostSidepanel({
   movement,
   legalEntityId,
   onClose,
@@ -1764,10 +1765,6 @@ function LegalEntityCostSidepanel({
   const leTotal = breakdown
     ? breakdown.directCost + breakdown.indirectCost + breakdown.salaryCost
     : 0
-  const leParticipants = participantsForGroup(movement.groupId).filter(
-    (p) => legalEntityForEmployee(p.employeeId)?.id === legalEntityId
-  )
-
   return (
     <F0Dialog
       isOpen
@@ -1851,50 +1848,92 @@ function LegalEntityCostSidepanel({
         </F0Box>
       )}
       {tab === "participants" && (
-        <F0Box display="flex" flexDirection="column" paddingX="md">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-f1-border">
-                <th className="py-2 text-left">
-                  <F0Text content="Name" variant="small" />
-                </th>
-                <th className="py-2 text-right">
-                  <F0Text content="Hours completed" variant="small" />
-                </th>
-                <th className="py-2 text-right">
-                  <F0Text content="Salary cost" variant="small" />
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {leParticipants.map((p) => {
-                const hours = hoursCompletedForEmployee(
-                  p.employeeId,
-                  movement.groupId
-                )
-                const salary = salaryCostForEmployeeInGroup(
-                  p.employeeId,
-                  movement.groupId
-                )
-                return (
-                  <tr key={p.id} className="border-b border-f1-border">
-                    <td className="py-2">
-                      <F0Text content={p.employeeName} variant="small" />
-                    </td>
-                    <td className="py-2 text-right">
-                      <F0Text content={`${hours}h`} variant="small" />
-                    </td>
-                    <td className="py-2 text-right">
-                      <F0Text content={fmtEur(salary)} variant="small" />
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </F0Box>
+        <LegalEntityParticipantsTab
+          movement={movement}
+          legalEntityId={legalEntityId}
+        />
       )}
     </F0Dialog>
+  )
+}
+
+// Participants tab of the LegalEntityCostSidepanel — uses OneDataCollection
+// like the rest of the prototype, not raw HTML. Derives Hours completed and
+// Salary cost per participant from synthetic data on the Employee.
+function LegalEntityParticipantsTab({
+  movement,
+  legalEntityId,
+}: {
+  movement: TrainingBudgetMovement
+  legalEntityId: string
+}) {
+  const rows = participantsForGroup(movement.groupId)
+    .filter((p) => legalEntityForEmployee(p.employeeId)?.id === legalEntityId)
+    .map((p) => ({
+      id: p.id,
+      employeeId: p.employeeId,
+      employeeName: p.employeeName,
+      employeeAvatar: p.employeeAvatar,
+      hours: hoursCompletedForEmployee(p.employeeId, movement.groupId),
+      salary: salaryCostForEmployeeInGroup(p.employeeId, movement.groupId),
+    }))
+
+  const source = useDataCollectionSource({
+    filters: {},
+    dataAdapter: {
+      paginationType: "pages" as const,
+      perPage: 50,
+      fetchData: () => ({
+        type: "pages" as const,
+        records: rows,
+        total: rows.length,
+        perPage: 50,
+        currentPage: 1,
+        pagesCount: 1,
+      }),
+    },
+  })
+
+  return (
+    <F0Box display="flex" flexDirection="column" paddingX="md">
+      <OneDataCollection
+        source={source}
+        visualizations={[
+          {
+            type: "table" as const,
+            options: {
+              columns: [
+                {
+                  label: "Name",
+                  render: (r) => ({
+                    type: "person" as const,
+                    value: {
+                      firstName: r.employeeName.split(" ")[0] ?? "",
+                      lastName: r.employeeName.split(" ").slice(1).join(" "),
+                      src: r.employeeAvatar,
+                    },
+                  }),
+                },
+                {
+                  label: "Hours completed",
+                  render: (r) => ({
+                    type: "text" as const,
+                    value: `${r.hours}h`,
+                  }),
+                },
+                {
+                  label: "Salary cost",
+                  render: (r) => ({
+                    type: "text" as const,
+                    value: fmtEur(r.salary),
+                  }),
+                },
+              ],
+            },
+          },
+        ]}
+      />
+    </F0Box>
   )
 }
 

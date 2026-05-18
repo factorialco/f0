@@ -12,6 +12,7 @@ import {
   findEmployee,
   sessionsForClass,
   type Training,
+  type TrainingBudgetMovement,
   type TrainingSession,
 } from "@/fixtures"
 
@@ -26,6 +27,7 @@ import { PageContent } from "../_shared/PageContent"
 type Props = {
   training: Training
   classId: string
+  movement?: TrainingBudgetMovement
   onBackToList: () => void
   onBackToTraining: () => void
   onBackToClasses: () => void
@@ -68,6 +70,7 @@ function formatLongDate(iso: string | null): string {
 export function ClassDetail({
   training,
   classId,
+  movement,
   onBackToList,
   onBackToTraining,
   onBackToClasses: _onBackToClasses,
@@ -200,6 +203,24 @@ export function ClassDetail({
               title={klass.name}
               description={training.description}
               metadata={[
+                ...(movement
+                  ? [
+                      {
+                        label: "Status",
+                        value: {
+                          type: "status" as const,
+                          label:
+                            movement.paymentStatus === "spent"
+                              ? "Spent"
+                              : "Pending",
+                          variant:
+                            movement.paymentStatus === "spent"
+                              ? ("positive" as const)
+                              : ("warning" as const),
+                        },
+                      },
+                    ]
+                  : []),
                 {
                   label: "Start date",
                   value: {
@@ -248,7 +269,7 @@ export function ClassDetail({
                   onClick: () => openClassAction("delete-class"),
                 },
                 {
-                  label: "Edit",
+                  label: "Edit group",
                   icon: Pencil,
                   onClick: () => openClassAction("edit-class"),
                 },

@@ -1,7 +1,6 @@
 import { useState } from "react"
 import {
   F0Alert,
-  F0Box,
   F0Button,
   F0Heading,
   F0Text,
@@ -9,10 +8,8 @@ import {
 } from "@factorialco/f0-react"
 import { NumberInput, Switch } from "@factorialco/f0-react/dist/experimental"
 import {
-  ArrowDown,
   ArrowRight,
   Calculator,
-  ExternalLink,
 } from "@factorialco/f0-react/icons/app"
 
 import type { Training, TrainingClass } from "@/fixtures"
@@ -25,9 +22,21 @@ import {
   trainingParticipants,
 } from "@/fixtures"
 import { useLegalEntityToggle } from "../_shared/legalEntityToggleContext"
+import { LegalEntityCostSidepanel } from "../MultiEntityBudget"
 
 type Props = { training: Training; klass?: TrainingClass }
 type PaymentStatus = "pending" | "paid" | ""
+
+function flagFor(countryCode: string): string {
+  if (!countryCode || countryCode.length !== 2) return "🏢"
+  const A = 0x1f1e6
+  const a = "A".charCodeAt(0)
+  const cc = countryCode.toUpperCase()
+  return (
+    String.fromCodePoint(A + (cc.charCodeAt(0) - a)) +
+    String.fromCodePoint(A + (cc.charCodeAt(1) - a))
+  )
+}
 
 function formatMoney(n: number, currency = "EUR"): string {
   return n.toLocaleString("en-GB", {
@@ -413,7 +422,7 @@ function CostsByLegalEntitySection({ klass }: { klass?: TrainingClass }) {
     ])
   )
 
-  const [openLeIds, setOpenLeIds] = useState<Set<string>>(new Set())
+  const [openLeId, setOpenLeId] = useState<string | null>(null)
 
   return (
     <section className="flex flex-col gap-3">
@@ -441,7 +450,6 @@ function CostsByLegalEntitySection({ klass }: { klass?: TrainingClass }) {
       {isOn && (
         <div className="flex flex-col gap-2">
           {les.map((le) => {
-            const open = openLeIds.has(le.id)
             const breakdown = breakdownMap.get(le.id)
             const leTotal = breakdown
               ? breakdown.directCost +
@@ -452,76 +460,45 @@ function CostsByLegalEntitySection({ klass }: { klass?: TrainingClass }) {
               (p) => legalEntityForEmployee(p.employeeId)?.id === le.id
             )
             return (
-              <div
+              <button
                 key={le.id}
-                className="rounded-md border border-solid border-f1-border-secondary bg-f1-background"
+                type="button"
+                onClick={() => setOpenLeId(le.id)}
+                className="flex items-center justify-between gap-3 rounded-md border border-solid border-f1-border-secondary bg-f1-background p-4 text-left hover:bg-f1-background-hover"
               >
-                <div className="flex items-center justify-between p-4">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setOpenLeIds((prev) => {
-                        const next = new Set(prev)
-                        if (next.has(le.id)) next.delete(le.id)
-                        else next.add(le.id)
-                        return next
-                      })
-                    }
-                    className="flex flex-1 items-center gap-2 text-left"
-                  >
-                    <span className="text-f1-foreground-secondary">
-                      {open ? <ArrowDown /> : <ArrowRight />}
-                    </span>
-                    <div className="flex flex-col gap-0.5">
-                      <F0Text variant="label" content={le.legalName} />
-                      <F0Text
-                        variant="small"
-                        content={`${leParticipants.length} ${leParticipants.length === 1 ? "participant" : "participants"}`}
-                      />
-                    </div>
-                  </button>
-                  <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
+                  <span aria-hidden className="text-xl">
+                    {flagFor(le.countryCode)}
+                  </span>
+                  <div className="flex flex-col gap-0.5">
+                    <F0Text variant="label" content={le.legalName} />
                     <F0Text
-                      variant="label"
-                      content={formatMoney(leTotal, "EUR")}
+                      variant="small"
+                      content={`${leParticipants.length} ${leParticipants.length === 1 ? "participant" : "participants"}`}
                     />
-                    <ExternalLink />
                   </div>
                 </div>
-                {open && breakdown && (
-                  <F0Box
-                    display="flex"
-                    flexDirection="column"
-                    gap="xs"
-                    padding="md"
-                  >
-                    <div className="flex justify-between">
-                      <F0Text variant="small" content="Direct cost" />
-                      <F0Text
-                        variant="small"
-                        content={formatMoney(breakdown.directCost, "EUR")}
-                      />
-                    </div>
-                    <div className="flex justify-between">
-                      <F0Text variant="small" content="Indirect cost" />
-                      <F0Text
-                        variant="small"
-                        content={formatMoney(breakdown.indirectCost, "EUR")}
-                      />
-                    </div>
-                    <div className="flex justify-between">
-                      <F0Text variant="small" content="Salary cost" />
-                      <F0Text
-                        variant="small"
-                        content={formatMoney(breakdown.salaryCost, "EUR")}
-                      />
-                    </div>
-                  </F0Box>
-                )}
-              </div>
+                <div className="flex items-center gap-2">
+                  <F0Text
+                    variant="label"
+                    content={formatMoney(leTotal, "EUR")}
+                  />
+                  <span className="text-f1-foreground-secondary">
+                    <ArrowRight />
+                  </span>
+                </div>
+              </button>
             )
           })}
         </div>
+      )}
+
+      {openLeId && (
+        <LegalEntityCostSidepanel
+          movement={movement}
+          legalEntityId={openLeId}
+          onClose={() => setOpenLeId(null)}
+        />
       )}
     </section>
   )
