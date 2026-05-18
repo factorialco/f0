@@ -341,6 +341,7 @@ declare type ActionType = {
     disabled?: boolean;
     critical?: boolean;
     description?: string;
+    loading?: boolean;
 };
 
 export declare type actionType = {
@@ -531,12 +532,6 @@ declare type AiChatProviderProps = {
      */
     canvasEntities?: Record<string, CanvasEntityDefinition>;
     /**
-     * Available tool hints that the user can activate to provide intent context
-     * to the AI. Renders a selector button next to the send button.
-     * Only one tool hint can be active at a time.
-     */
-    toolHints?: AiChatToolHint[];
-    /**
      * Credits configuration. When provided, a credits button is shown in the chat header.
      * Groups fetchUsage, upgradePlanUrl, and company/plan display info.
      */
@@ -568,28 +563,6 @@ declare type AiChatProviderProps = {
      */
     runtimeFetch?: typeof fetch;
 } & Pick<CopilotKitProps, "agent" | "credentials" | "children" | "runtimeUrl" | "showDevConsole" | "threadId" | "headers">;
-
-/**
- * A tool hint that can be activated to prepend invisible context to the user's
- * message, telling the AI about the user's intent (e.g. "generate tables",
- * "data analysis"). Similar to Gemini's tool selector UI.
- *
- * Only one tool hint can be active at a time. It persists across messages
- * until the user explicitly removes it.
- */
-declare type AiChatToolHint = {
-    /** Unique identifier for this tool hint */
-    id: string;
-    /** Display label shown in the selector and chip */
-    label: string;
-    /** Optional icon shown in the selector and chip */
-    icon?: IconType;
-    /**
-     * Prompt text injected as invisible context before the user's message.
-     * The AI receives this but the user never sees it in the chat.
-     */
-    prompt: string;
-};
 
 declare type AiChatTrackingOptions = {
     onVisibility?: () => void;
@@ -3151,7 +3124,6 @@ declare const defaultTranslations: {
         readonly deleteChat: "Delete chat";
         readonly ask: "Ask One";
         readonly view: "View";
-        readonly tools: "Tools";
         readonly entityRef: {
             readonly candidate: {
                 readonly source: "Source";
@@ -3679,6 +3651,46 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
      * Falls back to sensible defaults when omitted.
      */
     numberConfig?: NumberCellConfig<R>;
+    /**
+     * Called after this cell's value changes. Use to compute derived values
+     * and update other cells in the same row.
+     *
+     * Works with every cell type (text, number, date, select, etc.).
+     *
+     * @example
+     * formula: ({ value, setCellValue }) => {
+     *   const hours = roleHoursMap[value as string]
+     *   if (hours != null) setCellValue("plannedHours", hours)
+     * }
+     */
+    formula?: (params: {
+        /** The new value of this cell. */
+        value: unknown;
+        /** The current row item (before this change is applied). */
+        item: R;
+        /** For select cells: the full record associated with the selected option. */
+        selectedItem?: RecordType;
+        /** Update another cell in the same row by column id. */
+        setCellValue: (columnId: string, value: unknown) => void;
+    }) => void;
+    /**
+     * Returns a hint to display as an icon with tooltip inside the cell.
+     * Use to warn the user when a value diverges from its formula-inferred value.
+     *
+     * Return `undefined` to hide the hint.
+     *
+     * @example
+     * cellHint: (item) => {
+     *   if (item._inferredSalary != null && item.salary !== item._inferredSalary) {
+     *     return { icon: AlertCircle, message: `Differs from catalog (${item._inferredSalary})` }
+     *   }
+     * }
+     */
+    cellHint?: (item: R) => {
+        icon: IconType;
+        message: string;
+        iconColor?: F0IconProps["color"];
+    } | undefined;
 };
 
 declare type EditableTableVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = Omit<TableVisualizationOptions<R, _Filters, Sortings, Summaries>, "columns"> & {
@@ -5803,7 +5815,7 @@ declare interface OmniButtonProps {
 export declare type OnBulkActionCallback<Record extends RecordType, Filters extends FiltersDefinition> = (...args: [
 action: BulkAction,
 ...Parameters<OnSelectItemsCallback<Record, Filters>>
-]) => void;
+]) => void | Promise<void>;
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -5872,6 +5884,46 @@ declare type OneDataCollectionProps<R extends RecordType, Filters extends Filter
     visualizations: ReadonlyArray<Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>>;
     onSelectItems?: OnSelectItemsCallback<R, Filters>;
     onBulkAction?: OnBulkActionCallback<R, Filters>;
+    /**
+     * Opt-in to auto-managed bulk-action status. When `true`, a `Promise`
+     * returned from `onBulkAction` drives the ActionBar through
+     * `loading → success → idle` (or `loading → error`) automatically.
+     *
+     * Opt-in is required because some consumers open modals from their bulk
+     * action handler whose promise resolves when the modal OPENS rather than
+     * when the user confirms — auto-managing those would flash a premature
+     * success. When `false` (default), async handlers keep today's
+     * fire-and-forget behavior. For those cases, use `bulkActionStatus` to
+     * drive status yourself from the modal's lifecycle.
+     * @default false
+     */
+    autoManageBulkActionStatus?: boolean;
+    /**
+     * Controlled status for the bulk-action ActionBar. Designed for multi-step
+     * flows (confirmation modals, server polling) where the component can't
+     * derive status from a single promise.
+     *
+     * - **`"idle"`** — transparent: F0's auto-manage handles immediate
+     *   (promise-returning) actions normally. Pass `"idle"` even when not
+     *   actively controlling; no need for a `status !== "idle" ? status : undefined`
+     *   conditional.
+     * - **`"loading"`** — consumer is performing an async operation (e.g. after
+     *   modal confirm). F0 disables actions and shows button-level spinners.
+     * - **`"success"`** — mutation resolved. F0 shows the checkmark, then after
+     *   1.5 s auto-clears selection and falls back to auto-manage. The consumer
+     *   does not need to set `"idle"` or clear selection manually.
+     * - **`"error"`** — mutation rejected. F0 shows the error state and wiggle
+     *   animation. Persists until the consumer sets a different status.
+     *   Note: selection change only auto-clears the internal (auto-managed)
+     *   error state — when using controlled mode the consumer must explicitly
+     *   set a new status to dismiss the error.
+     *
+     * When this prop is provided (even as `"idle"`), void-returning handlers
+     * will not auto-clear selection — F0 assumes the consumer has modal-gated
+     * actions and owns the selection lifecycle. Pair with
+     * `autoManageBulkActionStatus={true}` for mixed immediate + modal flows.
+     */
+    bulkActionStatus?: ActionBarStatus;
     emptyStates?: CustomEmptyStates;
     onTotalItemsChange?: (totalItems: number) => void;
     fullHeight?: boolean;
@@ -8136,6 +8188,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -8182,9 +8239,4 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

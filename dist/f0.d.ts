@@ -83,13 +83,12 @@ import { GroupGridProps as GroupGridProps_2 } from './groups/GroupGrid';
 import { GroupGridWidget as GroupGridWidget_2 } from './groups/GroupGrid';
 import { GroupLinearProps } from './groups/GroupLinear';
 import { GroupMasonryProps } from './groups/GroupMasonry';
-import { HourDistributionCellValue } from './types/hourDistribution';
+import { HourDistributionCellValue as HourDistributionCellValue_2 } from './types/hourDistribution';
 import { HTMLAttributeAnchorTarget } from 'react';
 import { HTMLAttributes } from 'react';
 import { IconCellValue } from './types/icon';
 import { ImgHTMLAttributes } from 'react';
 import { InFilterOptions } from './InFilter/types';
-import { InputProps } from '@copilotkit/react-ui';
 import { internalAvatarColors as internalAvatarColors_2 } from './f0';
 import { internalAvatarSizes as internalAvatarSizes_2 } from './f0';
 import { internalAvatarTypes as internalAvatarTypes_2 } from './f0';
@@ -121,6 +120,7 @@ import { RadarChartProps } from './RadarChart';
 import * as React_2 from 'react';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
+import { ReactPortal } from 'react';
 import { Ref } from 'react';
 import { RefAttributes } from 'react';
 import { RefObject } from 'react';
@@ -396,6 +396,7 @@ declare type ActionType_2 = {
     disabled?: boolean;
     critical?: boolean;
     description?: string;
+    loading?: boolean;
 };
 
 declare type ActionVariant = (typeof actionVariants)[number];
@@ -539,12 +540,6 @@ export declare type AiChatProviderProps = {
      * them here so canvas logic lives in one place.
      */
     canvasEntities?: Record<string, CanvasEntityDefinition>;
-    /**
-     * Available tool hints that the user can activate to provide intent context
-     * to the AI. Renders a selector button next to the send button.
-     * Only one tool hint can be active at a time.
-     */
-    toolHints?: AiChatToolHint[];
     /**
      * Credits configuration. When provided, a credits button is shown in the chat header.
      * Groups fetchUsage, upgradePlanUrl, and company/plan display info.
@@ -737,7 +732,7 @@ declare type AiChatProviderReturnValue = {
     pendingQuote: PendingQuote | null;
     /** Set the pending quote (pass null to clear). */
     setPendingQuote: React.Dispatch<React.SetStateAction<PendingQuote | null>>;
-} & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "canvasEntities" | "toolHints" | "credits" | "creditWarning" | "fileAttachments"> & {
+} & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "canvasEntities" | "credits" | "creditWarning" | "fileAttachments"> & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null;
     /** Open the canvas panel with the given content */
@@ -750,10 +745,6 @@ declare type AiChatProviderReturnValue = {
     openGame: (game: "pong") => void;
     /** Close the active mini-game overlay */
     closeGame: () => void;
-    /** The currently active tool hint, or null if none is selected */
-    activeToolHint: AiChatToolHint | null;
-    /** Set the active tool hint (pass null to clear) */
-    setActiveToolHint: React.Dispatch<React.SetStateAction<AiChatToolHint | null>>;
 };
 
 /**
@@ -775,7 +766,6 @@ declare interface AiChatState {
     entityRefs?: EntityRefs;
     canvasActions?: CanvasActions;
     canvasEntities?: Record<string, CanvasEntityDefinition>;
-    toolHints?: AiChatToolHint[];
     credits?: AiChatCredits;
     creditWarning?: AiChatCreditWarning;
     fileAttachments?: AiChatFileAttachmentConfig;
@@ -799,28 +789,6 @@ declare interface AiChatState {
      */
     runtimeFetch?: typeof fetch;
 }
-
-/**
- * A tool hint that can be activated to prepend invisible context to the user's
- * message, telling the AI about the user's intent (e.g. "generate tables",
- * "data analysis"). Similar to Gemini's tool selector UI.
- *
- * Only one tool hint can be active at a time. It persists across messages
- * until the user explicitly removes it.
- */
-export declare type AiChatToolHint = {
-    /** Unique identifier for this tool hint */
-    id: string;
-    /** Display label shown in the selector and chip */
-    label: string;
-    /** Optional icon shown in the selector and chip */
-    icon?: IconType;
-    /**
-     * Prompt text injected as invisible context before the user's message.
-     * The AI receives this but the user never sees it in the chat.
-     */
-    prompt: string;
-};
 
 declare type AiChatTrackingOptions = {
     onVisibility?: () => void;
@@ -873,6 +841,9 @@ export declare type AiInsightCardContent = {
     invertStatus?: boolean;
 };
 
+/** Assistant-flavoured `Message`. Same shape — alias for self-documentation. */
+declare type AIMessage_2 = Message_3;
+
 /**
  * Default AI chat translations — derived from the global defaultTranslations
  * to avoid manual duplication.
@@ -922,7 +893,6 @@ export declare const aiTranslations: {
         readonly deleteChat: "Delete chat";
         readonly ask: "Ask One";
         readonly view: "View";
-        readonly tools: "Tools";
         readonly entityRef: {
             readonly candidate: {
                 readonly source: "Source";
@@ -1024,6 +994,16 @@ export declare const aiTranslations: {
             };
         };
     };
+};
+
+declare type AlertAction = {
+    label: string;
+    onRequest: UpsellingButtonProps["onRequest"];
+    errorMessage: UpsellingButtonProps["errorMessage"];
+    successMessage: UpsellingButtonProps["successMessage"];
+    loadingState: UpsellingButtonProps["loadingState"];
+    nextSteps: UpsellingButtonProps["nextSteps"];
+    closeLabel: UpsellingButtonProps["closeLabel"];
 };
 
 export declare type AlertAvatarProps = VariantProps<typeof alertAvatarVariants> & {
@@ -1129,6 +1109,14 @@ export declare type AsyncOrSync<T> = T | ((signal: AbortSignal) => Promise<T>);
  * Use this variant when `defaultValuesParamsSchema` is provided.
  */
 declare type AsyncWithParams<T, TParams> = (params: TParams) => Promise<T>;
+
+export declare type AttachedFile = {
+    id: string;
+    file: File;
+    status: "uploading" | "uploaded" | "error";
+    uploadedFile?: UploadedFile;
+    errorMessage?: string;
+};
 
 /**
  * An item that can be passed in the `availableFormDefinitions` array.
@@ -2532,9 +2520,11 @@ export declare interface ChatDashboardRadarChartConfig extends ChatDashboardChar
 
 export declare const ChatSpinner: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
 
-declare type ChatTextareaProps = InputProps & {
-    submitLabel?: string;
-    creditWarning?: AiChatCreditWarning;
+export declare type ChatThread = {
+    id: string;
+    title: string;
+    createdAt: string;
+    updatedAt: string;
 };
 
 /**
@@ -3705,6 +3695,8 @@ declare type DateFilterOptions_2 = {
  */
 export declare type DateGranularity = "day" | "week" | "month" | "quarter" | "halfyear" | "year" | "range";
 
+export declare type DateGroup = "today" | "yesterday" | "thisMonth" | "older";
+
 export declare type DateNavigationOptions = {
     min?: Date;
     max?: Date;
@@ -4258,7 +4250,6 @@ export declare const defaultTranslations: {
         readonly deleteChat: "Delete chat";
         readonly ask: "Ask One";
         readonly view: "View";
-        readonly tools: "Tools";
         readonly entityRef: {
             readonly candidate: {
                 readonly source: "Source";
@@ -4775,6 +4766,13 @@ export declare type DropIntent = {
     type: "cancel";
 };
 
+export declare const DropOverlay: ({ visible, onFilesDropped }: DropOverlayProps) => JSX_2.Element;
+
+declare interface DropOverlayProps {
+    visible: boolean;
+    onFilesDropped: (files: File[]) => void;
+}
+
 export declare interface DurationFieldConfig {
     suffix?: string;
     max?: number;
@@ -4839,6 +4837,46 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
      * Falls back to sensible defaults when omitted.
      */
     numberConfig?: NumberCellConfig<R>;
+    /**
+     * Called after this cell's value changes. Use to compute derived values
+     * and update other cells in the same row.
+     *
+     * Works with every cell type (text, number, date, select, etc.).
+     *
+     * @example
+     * formula: ({ value, setCellValue }) => {
+     *   const hours = roleHoursMap[value as string]
+     *   if (hours != null) setCellValue("plannedHours", hours)
+     * }
+     */
+    formula?: (params: {
+        /** The new value of this cell. */
+        value: unknown;
+        /** The current row item (before this change is applied). */
+        item: R;
+        /** For select cells: the full record associated with the selected option. */
+        selectedItem?: RecordType;
+        /** Update another cell in the same row by column id. */
+        setCellValue: (columnId: string, value: unknown) => void;
+    }) => void;
+    /**
+     * Returns a hint to display as an icon with tooltip inside the cell.
+     * Use to warn the user when a value diverges from its formula-inferred value.
+     *
+     * Return `undefined` to hide the hint.
+     *
+     * @example
+     * cellHint: (item) => {
+     *   if (item._inferredSalary != null && item.salary !== item._inferredSalary) {
+     *     return { icon: AlertCircle, message: `Differs from catalog (${item._inferredSalary})` }
+     *   }
+     * }
+     */
+    cellHint?: (item: R) => {
+        icon: IconType;
+        message: string;
+        iconColor?: F0IconProps["color"];
+    } | undefined;
 };
 
 declare type EditableTableVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = Omit<TableVisualizationOptions<R, _Filters, Sortings, Summaries>, "columns"> & {
@@ -5125,11 +5163,176 @@ export declare interface F0AiAvailableFormDefinition<TParams extends Record<stri
 export declare const F0AiChat: () => JSX_2.Element | null;
 
 /**
+ * Headless chat header. Renders a top bar with title (or thread selector),
+ * credits popover, fullscreen toggle and close button. Has two visual
+ * variants:
+ * - with-history: title acts as a thread selector (clickable) — the host
+ *   wires `onOpenHistory` to mount its own history dialog.
+ * - legacy: title is static; a "new chat" button is shown when `hasMessages`.
+ *
+ * Decoupled from CopilotKit and `useAiChat()` — everything via props.
+ */
+export declare const F0AiChatHeader: ({ historyEnabled, title, currentThreadTitle, fullscreen, lockVisualizationMode, onToggleVisualizationMode, onClose, onNewChat, onOpenHistory, hasMessages, credits, }: F0AiChatHeaderProps) => JSX_2.Element;
+
+export declare type F0AiChatHeaderProps = {
+    /**
+     * When true, renders the with-history variant: the title acts as a thread
+     * selector that triggers `onOpenHistory`. When false (default), renders
+     * the legacy variant with `title` shown as a static heading.
+     */
+    historyEnabled?: boolean;
+    /** Static title for the legacy variant. Empty or undefined hides the heading. */
+    title?: string;
+    /**
+     * With-history variant: title of the currently loaded thread, or null for
+     * a brand-new conversation (renders the "New conversation" placeholder).
+     */
+    currentThreadTitle?: string | null;
+    /** Whether the chat is currently in fullscreen mode (controls expand/minimize icon). */
+    fullscreen?: boolean;
+    /** When true, hides the expand/minimize button and the history selector. */
+    lockVisualizationMode?: boolean;
+    /** Toggle fullscreen ↔ sidepanel. */
+    onToggleVisualizationMode?: () => void;
+    /** Close button (X) callback. */
+    onClose: () => void;
+    /**
+     * Legacy variant only: callback for the "new chat" button. Hidden when
+     * `hasMessages` is false (i.e. the thread is empty so a new chat would be
+     * a no-op).
+     */
+    onNewChat?: () => void;
+    /** With-history variant: callback fired when the user clicks the title. */
+    onOpenHistory?: () => void;
+    /** Legacy variant gate: only renders the "new chat" button when true. */
+    hasMessages?: boolean;
+    /** Credits configuration. When present, renders the credits popover button. */
+    credits?: AiChatCredits;
+};
+
+/**
+ * Headless chat-history dialog. Receives threads + handlers via props so
+ * it can be wired against any backend or mocked in stories. No CopilotKit
+ * or `useAiChat()` dependency.
+ */
+export declare const F0AiChatHistory: ({ onClose, onSelectThread, onNewChat, threads, isLoading, error, pinnedIds, onPinThread, onUnpinThread, onDeleteThread, }: F0AiChatHistoryProps) => ReactPortal;
+
+export declare type F0AiChatHistoryProps = {
+    /** Close the dialog (overlay click, ESC, or post-selection). */
+    onClose: () => void;
+    /** Called when the user picks a thread to load. */
+    onSelectThread: (threadId: string, title: string) => void;
+    /** Called when the user clicks "Start new chat". */
+    onNewChat: () => void;
+    /** Thread list (already fetched). */
+    threads: ChatThread[];
+    /** Whether the threads are still being fetched. */
+    isLoading: boolean;
+    /** Fetch error message, or null when no error. */
+    error: string | null;
+    /** Set of pinned thread IDs. */
+    pinnedIds: Set<string>;
+    /** Called when the user pins a thread. */
+    onPinThread: (id: string) => void;
+    /** Called when the user unpins a thread. */
+    onUnpinThread: (id: string) => void;
+    /** Called when the user deletes a thread (may be async). */
+    onDeleteThread: (id: string) => Promise<void> | void;
+};
+
+/**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, toolHints, credits, creditWarning, fileAttachments, onThumbsUp, onThumbsDown, onBeforeSendMessage, runtimeFetch, children, agent, tracking, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, creditWarning, fileAttachments, onThumbsUp, onThumbsDown, onBeforeSendMessage, runtimeFetch, children, agent, tracking, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
 
-export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, creditWarning, }: ChatTextareaProps) => JSX_2.Element;
+/**
+ * Headless chat composer.
+ *
+ * Owns local UI state (text, cursor, attached files, mention popover) and
+ * emits a structured payload via `onSubmit`. The consumer decides what to
+ * do with it (forward to CopilotKit, log it, mock it…). It carries no
+ * coupling to `useAiChat()` or CopilotKit — wrappers like F0AiChat
+ * provide the wiring.
+ */
+export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingQuestion, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, }: F0AiChatTextAreaProps) => JSX_2.Element;
+
+export declare type F0AiChatTextAreaProps = {
+    /** Emitted when the user submits. Awaited so the textarea can stay disabled. */
+    onSubmit: (payload: F0AiChatTextAreaSubmitPayload) => void | Promise<void>;
+    /** Called when the user clicks the stop button while a response is streaming. */
+    onStop?: () => void;
+    /** Whether a response is currently streaming. Switches the submit button to "stop". */
+    inProgress?: boolean;
+    /**
+     * Optional gate run before submission. Return `false` to abort the send
+     * (e.g. show a quota dialog). The textarea stays focused and the input
+     * is preserved.
+     */
+    onBeforeSubmit?: () => boolean | Promise<boolean>;
+    /** Rotating placeholders for the typewriter effect. Empty/single-entry skips the typewriter. */
+    placeholders?: string[];
+    /** Credit warning banner shown above the composer. */
+    creditWarning?: AiChatCreditWarning;
+    /**
+     * Clarifying question to render in place of the input. When non-null the
+     * panel takes over the composer surface and submission is blocked.
+     */
+    clarifyingQuestion?: ClarifyingQuestionState | null;
+    /** Pending context shown as a chip; prepended invisibly on submit. */
+    pendingContext?: PendingContext | null;
+    /** Called when the user dismisses pending context (or it gets consumed on submit). */
+    onPendingContextChange?: (context: PendingContext | null) => void;
+    /** Pending quote shown as a chip above the textarea. */
+    pendingQuote?: PendingQuote | null;
+    /** Called when the user dismisses the quote (or it gets consumed on submit). */
+    onPendingQuoteChange?: (quote: PendingQuote | null) => void;
+    /** File attachment configuration. When omitted, attachments are disabled. */
+    fileAttachments?: AiChatFileAttachmentConfig;
+    /** Async search used by the @-mention popover. When omitted, mentions are disabled. */
+    searchPersons?: (query: string) => Promise<PersonProfile[]>;
+    /**
+     * Registers a callback that lets external drop zones forward dropped
+     * files to this textarea's file-attachment pipeline. The textarea calls
+     * the registrar with the handler on mount and with `null` on unmount.
+     */
+    onProcessFilesRef?: (handler: ((files: File[]) => void) | null) => void;
+    /**
+     * Optional disclaimer text + link rendered below the textarea. Hidden on
+     * the welcome screen of the fullscreen layout to give the footer room.
+     */
+    disclaimer?: AiChatDisclaimer;
+    /**
+     * Optional footer (e.g. powered-by, legal copy) rendered below the
+     * textarea on the welcome screen.
+     */
+    footer?: ReactNode;
+    /**
+     * Whether the chat is currently in its welcome state (no messages yet).
+     * Controls footer visibility and welcome-screen-only layout tweaks.
+     */
+    isWelcomeScreen?: boolean;
+    /**
+     * When true, the composer adopts the fullscreen layout: the welcome
+     * footer is pushed to the bottom and the disclaimer is hidden so the
+     * footer is the only thing under the textarea.
+     */
+    fullscreen?: boolean;
+};
+
+/**
+ * Payload emitted by `F0AiChatTextArea` when the user submits.
+ *
+ * `text` already contains the inline markup the renderer expects:
+ * `<entity-ref>` tags for @mentions, `<reply-quote>` for the quoted
+ * fragment, and HTML-escaped user-typed text. The consumer decides how
+ * to wrap it (plain string vs multipart message) when forwarding to
+ * the agent.
+ */
+export declare type F0AiChatTextAreaSubmitPayload = {
+    text: string;
+    files: UploadedFile[];
+    context: PendingContext | null;
+};
 
 /**
  * Context value for the AI form registry
@@ -5312,6 +5515,58 @@ export declare class F0AiMask {
     private render;
 }
 
+export declare const F0AiMessagesContainer: (props: F0AiMessagesContainerProps) => JSX_2.Element;
+
+export declare type F0AiMessagesContainerProps = {
+    /** Optional override for the assistant bubble component. */
+    AssistantMessage?: MessageSlotComponent;
+    /** Optional override for the user bubble component. */
+    UserMessage?: MessageSlotComponent;
+    /** Called when the user triggers regeneration on an assistant message. */
+    onRegenerate?: (messageId: string) => void;
+    /** Called when the user copies an assistant message's content. */
+    onCopy?: (content: string) => void;
+    /** Pre-processed turns to render (assembled by the connected wrapper). */
+    turns: RenderableTurn[];
+    /** Show a skeleton in place of the turns while a thread is being fetched. */
+    isLoadingThread?: boolean;
+    /** Optional React node rendered inline at the end of the list (e.g. CopilotKit interrupt). */
+    interrupt?: ReactNode;
+    /** Greeting shown above the initial message in the welcome screen. */
+    greeting?: string;
+    /** Initial message(s) shown in the welcome screen, or a default if omitted. */
+    initialMessage?: string | string[];
+    /** Suggestions rendered as buttons under the welcome screen. */
+    welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
+    /** Click on a suggestion chip — host wires this to sendMessage(). */
+    onSuggestionClick?: (suggestion: WelcomeScreenSuggestion) => void;
+    /** Optional click on the One icon (factorial uses it for the pong easter egg). */
+    onWelcomeIconClick?: () => void;
+    /** Returns a React node for an assistant message's tool call, or null. */
+    renderToolCall?: F0AssistantMessageExtraProps["renderToolCall"];
+    /** Called when the user selects text and clicks Reply (user or assistant bubble). */
+    onReplyQuote?: (text: string) => void;
+    /** Called when an assistant message finishes generating — for analytics. */
+    onAssistantMessageRendered?: (message: Message_3) => void;
+    /** Disables auto-scrollIntoView on new user messages (fullscreen sets false). */
+    autoScrollUserIntoView?: boolean;
+    /**
+     * Renders the markdown content of user/assistant messages. The connected
+     * wrapper provides a CopilotKit + f0-markdown-renderers implementation;
+     * standalone consumers can omit it and a plain whitespace-preserving
+     * fallback is used.
+     */
+    renderMarkdown?: (content: string) => ReactNode;
+    /** When omitted, feedback (thumbs + modal) is hidden. */
+    feedback?: FeedbackConfig;
+    /** Pause turnMinHeight observer (e.g. while a clarifying panel is open). */
+    freezeLayout?: boolean;
+    /** Disable the top/bottom scroll shadows. */
+    noShadows?: boolean;
+    /** Passthrough children appended after the last turn (CopilotKit parity). */
+    children?: ReactNode;
+};
+
 /**
  * Information source attached to an assistant message.
  */
@@ -5343,6 +5598,53 @@ export declare type F0AiMessageSourcesProps = {
      */
     title?: string;
 };
+
+export declare const F0AiPong: ({ onClose }: F0AiPongProps) => JSX_2.Element;
+
+declare interface F0AiPongProps {
+    onClose: () => void;
+}
+
+export declare function F0AiProposalCard(props: F0AiProposalCardProps): JSX_2.Element;
+
+export declare namespace F0AiProposalCard {
+    var displayName: string;
+}
+
+export declare interface F0AiProposalCardActions {
+    /** Label for the primary action button. */
+    primaryActionLabel: string;
+    /** Optional icon shown before the primary action label. */
+    primaryActionIcon?: IconType;
+    /** Whether the action footer is visible. */
+    showActions?: true;
+    /** Called when the primary action is clicked. */
+    onPrimaryAction: () => void;
+}
+
+export declare interface F0AiProposalCardBaseProps extends DataAttributes_2 {
+    /** Module avatar shown in the card header. */
+    module?: ModuleId;
+    /** Header label describing the proposal type. */
+    heading: string;
+    /** Main proposal title. */
+    title: string;
+    /** Optional secondary metadata line. */
+    subtitle?: string;
+    /** Proposal details. Line breaks are preserved when expanded. */
+    description: string;
+    /** Label for the inline expansion control. */
+    seeMoreLabel: string;
+    /** Maximum number of characters shown before expansion. */
+    maxCollapsedDescriptionLength?: number;
+}
+
+export declare interface F0AiProposalCardHiddenActions {
+    /** Hide the action footer and omit action props. */
+    showActions: false;
+}
+
+export declare type F0AiProposalCardProps = F0AiProposalCardBaseProps & (F0AiProposalCardActions | F0AiProposalCardHiddenActions);
 
 /**
  * Compact inline table for small datasets shown directly in an AI chat
@@ -5498,6 +5800,26 @@ declare type F0ArrayFileConfig = F0BaseConfig & F0FileConfig & {
  */
 declare type F0ArraySelectConfig<T extends string | number = string, R extends Record<string, unknown> = Record<string, unknown>> = F0BaseConfig & F0SelectConfig<T, R> & {
     fieldType?: "select";
+};
+
+declare type F0AssistantMessageExtraProps = {
+    /**
+     * Returns a React node for the message's tool call, or null when there is
+     * nothing to render. The container's connected wrapper closes over the
+     * full message list to call CopilotKit's lazy tool renderer; standalone
+     * consumers can omit it.
+     */
+    renderToolCall?: (message: Message_3) => ReactNode | null;
+    /** Called when the user selects text in this message and clicks Reply. */
+    onReplyQuote?: (text: string) => void;
+    /** Called once the assistant message has finished generating — for analytics. */
+    onRendered?: (message: Message_3) => void;
+    /**
+     * Renders the assistant text content. The connected wrapper provides a
+     * markdown-aware implementation; standalone consumers can omit it and a
+     * plain whitespace-preserving fallback is used instead.
+     */
+    renderMarkdown?: (content: string) => ReactNode;
 };
 
 export declare function F0AuraVoiceAnimation({ size, state, color, colorShift, audioTrack, themeMode, className, ref, ...props }: F0AuraVoiceAnimationProps & ComponentProps<"div"> & VariantProps<typeof F0AuraVoiceAnimationVariants>): JSX_2.Element;
@@ -6056,6 +6378,32 @@ export declare type F0CanvasCardProps = {
     isActive: boolean;
     /** Optional content rendered below the card header (e.g. a data preview) */
     children?: React.ReactNode;
+};
+
+/**
+ * Entity-agnostic canvas panel that renders content alongside the chat sidebar.
+ *
+ * Looks up the entity definition from the `entities` prop using
+ * `content.type` and delegates rendering of body and header actions to the
+ * entity module. The panel shell handles animation, body scroll area, and
+ * refreshKey bookkeeping (auto-increments when `content` changes by identity).
+ *
+ * Headless: no CopilotKit or `useAiChat()` dependency — the host wires
+ * `content`, `onClose` and `entities` directly.
+ */
+export declare function F0CanvasPanel({ content, onClose, entities, }: F0CanvasPanelProps): ReactNode;
+
+export declare namespace F0CanvasPanel {
+    var displayName: string;
+}
+
+export declare type F0CanvasPanelProps = {
+    /** Current canvas content to render. When null, the panel collapses. */
+    content: CanvasContent | null;
+    /** Called when the user closes the canvas. */
+    onClose: () => void;
+    /** Canvas entity registry keyed by `CanvasContent["type"]`. */
+    entities?: Record<string, CanvasEntityDefinition<any>>;
 };
 
 export declare const F0Card: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0CardProps & RefAttributes<HTMLDivElement>> & {
@@ -9140,6 +9488,18 @@ export declare interface F0ZodType<T extends ZodTypeAny = ZodTypeAny> {
     _innerSchema: T;
 }
 
+export declare type FeedbackConfig = {
+    threadId: string;
+    onThumbsUp: (msg: AIMessage_2, ctx: {
+        threadId: string;
+        feedback: string;
+    }) => void;
+    onThumbsDown: (msg: AIMessage_2, ctx: {
+        threadId: string;
+        feedback: string;
+    }) => void;
+};
+
 /* Excluded from this release type: FieldItem */
 
 export declare function fieldsToSeconds(fields: DurationFields): number;
@@ -9881,6 +10241,25 @@ widgets?: ReactNode[];
 children?: ReactNode;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
+export declare interface HourDistributionCellValue {
+    dataPoints: HourDistributionDataPoint[];
+    /** Label for worked time in tooltips. Defaults to "Worked". */
+    workedLabel?: string;
+    /** Label for justified absence in tooltips. Defaults to "Justified absence". */
+    justifiedAbsenceLabel?: string;
+}
+
+export declare interface HourDistributionDataPoint {
+    date: string;
+    value: number;
+    /** When set, used for two-tone coloring and underworked (value < plannedValue) = orange. */
+    plannedValue?: number;
+    /** Justified absence minutes rendered as a neutral segment. Missing time without this remains transparent. */
+    justifiedAbsenceValue?: number;
+    /** Renders a full-height neutral bar for justified non-working days without a minute baseline. */
+    justifiedAbsenceFullDay?: boolean;
+}
+
 declare type I18nContextType = TranslationsType & {
     t: (key: TranslationKey, args?: Record<string, string | number>) => string;
 };
@@ -10474,6 +10853,34 @@ export declare interface Message {
     dateTime: string;
 }
 
+/**
+ * Loose message shape used by the headless container and its
+ * subcomponents. Mirrors the CopilotKit `Message`/`AIMessage` shape
+ * (which the bridge builds upstream) but is owned by f0 so the
+ * headless boundary doesn't import from `@copilotkit/shared`.
+ *
+ * Most fields are optional / wide on purpose — the headless renders
+ * what it finds and ignores the rest.
+ */
+declare type Message_3 = {
+    id?: string;
+    role?: string;
+    content?: unknown;
+    toolCalls?: Array<{
+        id: string;
+        type?: string;
+        function?: {
+            name: string;
+            arguments: string;
+        };
+    }>;
+    generativeUI?: () => unknown;
+    rawData?: unknown;
+    [key: string]: any;
+};
+
+declare type MessageSlotComponent = ComponentType<any>;
+
 declare type MetadataAction = {
     icon: IconType;
     label: string;
@@ -11023,7 +11430,7 @@ export declare type OnAddNewElementParams = {
 declare type OnBulkActionCallback<Record extends RecordType, Filters extends FiltersDefinition> = (...args: [
 action: BulkAction,
 ...Parameters<OnSelectItemsCallback<Record, Filters>>
-]) => void;
+]) => void | Promise<void>;
 
 declare type OnChangeQuestionParams = BaseQuestionOnChangeParams & ({
     type: "text" | "longText";
@@ -11430,6 +11837,14 @@ export declare interface PieComputation {
     limit?: number;
 }
 
+export declare function PongBall({ size, className, style }: PongBallProps): JSX_2.Element;
+
+declare interface PongBallProps {
+    size?: number;
+    className?: string;
+    style?: React.CSSProperties;
+}
+
 declare type PopupSize = "sm" | "md" | "lg";
 
 /** CSS position */
@@ -11827,6 +12242,55 @@ declare type RegularAction = BaseAction & {
  */
 declare type RelaxedNumericWithFormatter = Omit<NumericWithFormatter, "numericValue"> & {
     numericValue: Numeric;
+};
+
+/**
+ * Pre-processed turn ready to render. The bridge (F0AiChat/Connected*)
+ * assembles these by filtering CopilotKit bookkeeping, expanding AG-UI
+ * tool-call messages, and analysing role/stream state. The headless
+ * container iterates them as-is — no message-shape inspection.
+ *
+ * A turn renders as: leading user messages → optional Thinking section →
+ * assistant messages → optional inline live-thinking message → optional
+ * end-of-turn indicator → optional feedback footer.
+ */
+export declare type RenderableTurn = {
+    /** Messages rendered before the thinking section (typically the user message). */
+    userMessages: Message_3[];
+    /**
+     * Optional collapsible "thinking" header rendered between user and
+     * assistant blocks. Titles are pre-parsed upstream.
+     */
+    thinking?: {
+        titles: string[];
+        /**
+         * Optional message currently streaming below the collapsed group —
+         * rendered inline so the user can see the live thinking content.
+         */
+        liveMessage?: Message_3;
+    };
+    /** Messages rendered after the thinking section (assistant replies). */
+    assistantMessages: Message_3[];
+    /** True while the agent is still producing content for this turn. */
+    isInProgress: boolean;
+    /**
+     * Optional end-of-turn indicator:
+     * - `"thinking"`: agent is running but hasn't emitted any assistant output
+     *   yet (renders an action item titled "Thinking...").
+     * - `"activity"`: agent is streaming with some assistant output already
+     *   visible (renders an empty action item).
+     */
+    endIndicator?: "thinking" | "activity";
+    /**
+     * Optional feedback footer (thumbs + copy button). When omitted, the
+     * turn renders without feedback affordances.
+     */
+    feedback?: {
+        /** Concatenated assistant content for the copy button. */
+        content: string;
+        /** Reference message attached to feedback submissions. */
+        targetMessage: Message_3;
+    };
 };
 
 /**
@@ -13020,6 +13484,26 @@ declare const textVariants: (props?: ({
     className?: ClassValue;
 })) | undefined) => string;
 
+/** Props for the Thinking collapsible section. */
+export declare type ThinkingProps = {
+    /** Pre-parsed step titles to show inside the collapsed group. */
+    titles: string[];
+    /** Section heading (defaults to "Thoughts" from i18n). */
+    title?: string;
+};
+
+export declare interface ThreadActionHandlers {
+    onSelect: (threadId: string, title: string) => void;
+    onPin: (id: string) => void;
+    onUnpin: (id: string) => void;
+    onDelete: (id: string) => void;
+}
+
+export declare interface ThreadGroup {
+    key: DateGroup;
+    threads: ChatThread[];
+}
+
 export declare type TimelineRowStatus = (typeof timelineRowStatuses)[number];
 
 export declare const timelineRowStatuses: readonly ["completed", "in-progress", "not-started"];
@@ -13183,6 +13667,29 @@ declare type UpsellAction = BaseAction & {
     showConfirmation: boolean;
 };
 
+export declare const UpsellingAlert: WithDataTestIdReturnType_4<typeof _UpsellingAlert>;
+
+declare function _UpsellingAlert({ icon, title, description, action, }: UpsellingAlertProps): JSX_2.Element;
+
+export declare interface UpsellingAlertProps {
+    /**
+     * Optional icon displayed as an avatar on the left side of the alert.
+     */
+    icon?: IconType;
+    /**
+     * The title of the alert
+     */
+    title: string;
+    /**
+     * The description of the alert
+     */
+    description?: string;
+    /**
+     * The upselling action button configuration.
+     */
+    action: AlertAction;
+}
+
 export declare const UpsellingBanner: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<BaseBannerProps, "children" | "primaryAction" | "secondaryAction"> & {
 primaryAction?: DefaultAction | PromoteAction;
 secondaryAction?: DefaultAction | PromoteAction;
@@ -13277,6 +13784,15 @@ declare interface UpsellRequestResponseDialogProps {
     portalContainer?: HTMLElement | null;
 }
 
+/**
+ * Read the AiChat context. Returns an inert fallback when no provider
+ * is mounted — that case is intentional in `ApplicationFrame`, which
+ * renders chat-aware components in both the AI-enabled tree and the
+ * promotion-chat tree.
+ *
+ * Most consumers don't need to think about this — they're rendered
+ * under `<F0AiChatProvider>` and receive the real context.
+ */
 export declare function useAiChat(): AiChatProviderReturnValue;
 
 export declare function useAiChatTranslations(): AiChatTranslations;
@@ -13287,6 +13803,40 @@ export declare function useAiChatTranslations(): AiChatTranslations;
  * matching entity is configured.
  */
 export declare function useCanvasEntity(type: string | undefined): CanvasEntityDefinition<any> | undefined;
+
+/**
+ * Headless chat-history state manager. Pure UI logic — the caller injects
+ * `fetchThreads` and `deleteThread` callbacks so this hook never embeds
+ * URLs, auth headers or fetch wiring. Manages pinned threads in
+ * localStorage and the threads list (loading/error/data).
+ */
+export declare function useChatHistory({ enabled, fetchThreads: fetchThreadsCb, deleteThread: deleteThreadCb, }: UseChatHistoryOptions): UseChatHistoryReturn;
+
+declare type UseChatHistoryOptions = {
+    /** When true, fetches threads on mount. Default: `false`. */
+    enabled?: boolean;
+    /**
+     * Async callback that returns the list of threads. The host owns the
+     * URL/auth/fetch — this hook only calls the callback and manages state.
+     */
+    fetchThreads: () => Promise<ChatThread[]>;
+    /**
+     * Async callback that deletes a thread by id. Should throw or reject on
+     * failure; the hook will then re-fetch to restore consistency.
+     */
+    deleteThread: (id: string) => Promise<void>;
+};
+
+declare type UseChatHistoryReturn = {
+    threads: ChatThread[];
+    isLoading: boolean;
+    error: string | null;
+    refetch: () => void;
+    pinnedIds: Set<string>;
+    pinThread: (id: string) => void;
+    unpinThread: (id: string) => void;
+    deleteThread: (id: string) => Promise<void>;
+};
 
 /**
  * A core React hook that manages data fetching, state management, and pagination within the Collections ecosystem.
@@ -13697,7 +14247,21 @@ export declare interface User {
     imageUrl: string;
 }
 
+export declare type UserBinaryPart = {
+    type: "binary";
+    url: string;
+    filename: string;
+    mimeType: string;
+};
+
 export declare const useReducedMotion: () => boolean;
+
+export declare type UserReaction = "like" | "dislike";
+
+export declare type UserTextPart = {
+    type: "text";
+    text: string;
+};
 
 /**
  * Hook to convert a Zod schema with F0 configurations into a FormDefinitionItem array.
@@ -13904,7 +14468,7 @@ declare const valueDisplayRenderers: {
     readonly percentage: (args: PercentageCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element | null;
     readonly progressBar: (args: ProgressBarCellValue_2, _meta: ValueDisplayRendererContext_2) => JSX_2.Element | null;
     readonly barSeries: (args: BarSeriesCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
-    readonly hourDistribution: (args: HourDistributionCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly hourDistribution: (args: HourDistributionCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly company: (args: CompanyCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly team: (args: TeamCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly tag: (args: TagCellValue_2) => JSX_2.Element;
@@ -14082,6 +14646,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -14128,9 +14697,4 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

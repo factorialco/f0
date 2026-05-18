@@ -411,7 +411,6 @@ export declare const defaultTranslations: {
         readonly deleteChat: "Delete chat";
         readonly ask: "Ask One";
         readonly view: "View";
-        readonly tools: "Tools";
         readonly entityRef: {
             readonly candidate: {
                 readonly source: "Source";
@@ -796,6 +795,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -842,9 +846,4 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
