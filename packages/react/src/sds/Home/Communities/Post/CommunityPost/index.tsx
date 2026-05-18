@@ -157,6 +157,12 @@ export const BaseCommunityPost = ({
   }
 
   useEffect(() => {
+    if (descriptionExpanded) {
+      descriptionRef.current?.focus()
+    }
+  }, [descriptionExpanded])
+
+  useEffect(() => {
     if (!descriptionExpandable) setExpandedDescriptionKey(null)
   }, [descriptionExpandable])
 
@@ -317,6 +323,8 @@ export const BaseCommunityPost = ({
                   id={descriptionId}
                   content={description}
                   collapsed={descriptionCollapsed}
+                  tabIndex={descriptionExpanded ? -1 : undefined}
+                  className={cn(descriptionExpanded && focusRing())}
                 />
                 {descriptionExpandable &&
                   isDescriptionOverflowing &&

@@ -78,6 +78,7 @@ test("expands the description when enabled", async () => {
   await userEvent.click(await screen.findByRole("button", { name: "See more" }))
 
   expect(description).not.toHaveClass("line-clamp-5")
+  expect(description).toHaveFocus()
   expect(screen.queryByRole("button", { name: "See more" })).toBeNull()
   expect(onClick).not.toHaveBeenCalled()
 })

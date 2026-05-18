@@ -12,12 +12,14 @@ export type PostDescriptionProps = {
   content: HTMLString
   collapsed?: boolean
   id?: string
+  className?: string
+  tabIndex?: number
 }
 export const BasePostDescription = forwardRef<
   HTMLDivElement,
   PostDescriptionProps
 >(function BasePostDescription(
-  { content, collapsed, id }: PostDescriptionProps,
+  { content, collapsed, id, className, tabIndex }: PostDescriptionProps,
   ref
 ) {
   return (
@@ -25,9 +27,11 @@ export const BasePostDescription = forwardRef<
       ref={ref}
       id={id}
       content={content}
+      tabIndex={tabIndex}
       className={cn(
         "FactorialOneTextEditor",
-        collapsed && "line-clamp-5 break-words"
+        collapsed && "line-clamp-5 break-words",
+        className
       )}
     />
   )
