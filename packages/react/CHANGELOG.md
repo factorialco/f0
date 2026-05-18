@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.0](https://github.com/factorialco/f0/compare/f0-react-v2.6.2...f0-react-v2.7.0) (2026-05-18)
+
+
+### Features
+
+* **F0Form:** add autosubmit submit type with focus preservation ([#4159](https://github.com/factorialco/f0/issues/4159)) ([a1a15b1](https://github.com/factorialco/f0/commit/a1a15b1b25d7fb8aef3254083d19bb0b3f712d7b))
+
 ## [2.6.2](https://github.com/factorialco/f0/compare/f0-react-v2.6.1...f0-react-v2.6.2) (2026-05-18)
 
 
