@@ -449,6 +449,76 @@ export const WithPersonTags: Story = {
   },
 }
 
+export const WithStatusTags: Story = {
+  args: {
+    label: "Status",
+    placeholder: "Select a status",
+    onChange: fn(),
+    value: "pending",
+    options: [
+      {
+        value: "draft",
+        label: "Draft",
+        tag: { type: "status", text: "Draft", variant: "neutral" },
+      },
+      {
+        value: "pending",
+        label: "Pending",
+        tag: { type: "status", text: "Pending", variant: "warning" },
+      },
+      {
+        value: "approved",
+        label: "Approved",
+        tag: { type: "status", text: "Approved", variant: "positive" },
+      },
+      {
+        value: "rejected",
+        label: "Rejected",
+        tag: { type: "status", text: "Rejected", variant: "critical" },
+      },
+    ],
+  },
+}
+
+export const WithPersonAvatar: Story = {
+  args: {
+    label: "Select a reviewer",
+    placeholder: "Select a reviewer",
+    onChange: fn(),
+    value: "isabella",
+    options: [
+      {
+        value: "isabella",
+        label: "Isabella Tangari",
+        description: "Product Designer",
+        avatar: {
+          type: "person",
+          firstName: "Isabella",
+          lastName: "Tangari",
+        },
+      },
+      {
+        value: "saul",
+        label: "Saul Dominguez",
+        avatar: {
+          type: "person",
+          firstName: "Saul",
+          lastName: "Dominguez",
+        },
+      },
+      {
+        value: "marta",
+        label: "Marta Serrano",
+        avatar: {
+          type: "person",
+          firstName: "Marta",
+          lastName: "Serrano",
+        },
+      },
+    ],
+  },
+}
+
 export const WithPlaceholder: Story = {
   args: {
     label: "Select a theme",

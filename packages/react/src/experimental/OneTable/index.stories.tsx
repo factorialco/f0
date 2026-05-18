@@ -84,6 +84,31 @@ const sampleData = [
   },
 ]
 
+export const MinWidth: Story = {
+  render: () => (
+    <OneTable>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Name</TableHead>
+          <TableHead>Email</TableHead>
+          <TableHead minWidth={500}>Role (minWidth 500)</TableHead>
+          <TableHead>Manager</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {sampleData.map((row) => (
+          <TableRow key={row.id}>
+            <TableCell>{row.name}</TableCell>
+            <TableCell>{row.email}</TableCell>
+            <TableCell>{row.role}</TableCell>
+            <TableCell>{row.manager}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </OneTable>
+  ),
+}
+
 export const Default: Story = {
   render: () => (
     <OneTable>

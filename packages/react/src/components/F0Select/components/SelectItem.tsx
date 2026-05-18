@@ -4,6 +4,8 @@ import { OneEllipsis } from "@/lib/OneEllipsis"
 import { F0TagDot } from "@/components/tags/F0TagDot"
 import { F0TagPerson } from "@/components/tags/F0TagPerson"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
+import { F0TagStatus } from "@/components/tags/F0TagStatus"
+import type { StatusVariant } from "@/components/tags/F0TagStatus/types"
 import { SelectItem as SelectItemPrimitive } from "@/ui/Select"
 
 import { F0SelectItemObject } from "../types"
@@ -13,6 +15,29 @@ export const SelectItem = <T extends string, R>({
 }: {
   item: F0SelectItemObject<T, R>
 }) => {
+  const isStatusOnly =
+    item.tag &&
+    typeof item.tag !== "string" &&
+    item.tag.type === "status" &&
+    !item.avatar &&
+    !item.icon &&
+    !item.description
+
+  if (isStatusOnly) {
+    const tag = item.tag as {
+      type: "status"
+      text: string
+      variant: StatusVariant
+    }
+    return (
+      <SelectItemPrimitive value={String(item.value)} disabled={item.disabled}>
+        <div className="flex w-full items-center">
+          <F0TagStatus text={tag.text} variant={tag.variant} />
+        </div>
+      </SelectItemPrimitive>
+    )
+  }
+
   return (
     <SelectItemPrimitive value={String(item.value)} disabled={item.disabled}>
       <div
@@ -44,6 +69,8 @@ export const SelectItem = <T extends string, R>({
               <F0TagRaw text={item.tag} />
             ) : item.tag.type === "dot" ? (
               <F0TagDot {...item.tag} />
+            ) : item.tag.type === "status" ? (
+              <F0TagStatus text={item.tag.text} variant={item.tag.variant} />
             ) : (
               <F0TagPerson name={item.tag.name} src={item.tag.src} />
             )}

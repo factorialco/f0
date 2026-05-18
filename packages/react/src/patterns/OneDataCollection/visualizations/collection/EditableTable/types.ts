@@ -32,6 +32,13 @@ export type AddRowActionsResult =
 
 export type EditableTableVisualizationSettings = TableVisualizationSettings
 
+export type DateCellConfig = {
+  /** Earliest selectable date. Dates before this are disabled in the picker. */
+  minDate?: Date
+  /** Latest selectable date. Dates after this are disabled in the picker. */
+  maxDate?: Date
+}
+
 export type NumberCellConfig<R extends RecordType = RecordType> = {
   min?: number
   max?: number
@@ -125,6 +132,11 @@ export type EditableTableColumnDefinition<
    * Falls back to sensible defaults when omitted.
    */
   numberConfig?: NumberCellConfig<R>
+  /**
+   * Configuration for `"date"` cells. Accepts `minDate` / `maxDate` to
+   * restrict the selectable date range in the picker.
+   */
+  dateConfig?: DateCellConfig
 
   /**
    * Called after this cell's value changes. Use to compute derived values

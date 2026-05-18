@@ -298,6 +298,7 @@ const RowComponentInner = <
             href={itemHref}
             onClick={itemOnClick}
             width={column.width}
+            minWidth={column.minWidth}
             sticky={getStickyPosition(cellIndex)}
             loading={loading}
             nestedRowProps={{
