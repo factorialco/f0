@@ -78,7 +78,6 @@ test("expands the description when enabled", async () => {
   await userEvent.click(await screen.findByRole("button", { name: "See more" }))
 
   expect(description).not.toHaveClass("line-clamp-5")
-  expect(description).toHaveFocus()
   expect(screen.queryByRole("button", { name: "See more" })).toBeNull()
   expect(onClick).not.toHaveBeenCalled()
 })
@@ -91,7 +90,7 @@ test("does not show description expansion controls when the description fits", (
   expect(screen.queryByRole("button", { name: "See more" })).toBeNull()
 })
 
-test("collapses the description when expansion is disabled after expanding", async () => {
+test("resets expanded state when disabled, re-enabled, or reused for another post", async () => {
   mockDescriptionDimensions({ scrollHeight: 120, clientHeight: 100 })
 
   const { rerender } = render(
@@ -109,4 +108,24 @@ test("collapses the description when expansion is disabled after expanding", asy
 
   expect(description).toHaveClass("line-clamp-5")
   expect(screen.queryByRole("button", { name: "See more" })).toBeNull()
+
+  rerender(<BaseCommunityPost {...defaultProps} descriptionExpandable />)
+
+  expect(description).toHaveClass("line-clamp-5")
+  expect(screen.getByRole("button", { name: "See more" })).toBeInTheDocument()
+
+  await userEvent.click(await screen.findByRole("button", { name: "See more" }))
+  expect(description).not.toHaveClass("line-clamp-5")
+
+  rerender(
+    <BaseCommunityPost
+      {...defaultProps}
+      id="post-2"
+      description="<p>Another long post description</p>"
+      descriptionExpandable
+    />
+  )
+
+  expect(description).toHaveClass("line-clamp-5")
+  expect(screen.getByRole("button", { name: "See more" })).toBeInTheDocument()
 })

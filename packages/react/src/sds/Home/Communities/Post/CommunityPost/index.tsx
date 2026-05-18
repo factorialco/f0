@@ -123,14 +123,18 @@ export const BaseCommunityPost = ({
 }: CommunityPostProps) => {
   const descriptionId = useId()
   const descriptionRef = useRef<HTMLDivElement>(null)
-  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
+  const descriptionExpansionKey = `${id}:${description ?? ""}`
+  const [expandedDescriptionKey, setExpandedDescriptionKey] = useState<
+    string | null
+  >(null)
   const [isDescriptionOverflowing, setIsDescriptionOverflowing] =
     useState(false)
   const countersDisplay = [counters.views, counters.comments]
     .filter(Boolean)
     .join(" · ")
 
-  const descriptionExpanded = descriptionExpandable && isDescriptionExpanded
+  const descriptionExpanded =
+    descriptionExpandable && expandedDescriptionKey === descriptionExpansionKey
   const descriptionCollapsed = !descriptionExpanded
   const date = getDisplayDateBasedOnDuration(createdAt)
 
@@ -149,14 +153,12 @@ export const BaseCommunityPost = ({
   const handleToggleDescription = (event: React.MouseEvent<HTMLElement>) => {
     event.preventDefault()
     event.stopPropagation()
-    setIsDescriptionExpanded(true)
+    setExpandedDescriptionKey(descriptionExpansionKey)
   }
 
   useEffect(() => {
-    if (descriptionExpanded) {
-      descriptionRef.current?.focus()
-    }
-  }, [descriptionExpanded])
+    if (!descriptionExpandable) setExpandedDescriptionKey(null)
+  }, [descriptionExpandable])
 
   useEffect(() => {
     const descriptionElement = descriptionRef.current
@@ -315,8 +317,6 @@ export const BaseCommunityPost = ({
                   id={descriptionId}
                   content={description}
                   collapsed={descriptionCollapsed}
-                  tabIndex={descriptionExpanded ? -1 : undefined}
-                  className={cn(descriptionExpanded && focusRing())}
                 />
                 {descriptionExpandable &&
                   isDescriptionOverflowing &&
