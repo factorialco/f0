@@ -155,9 +155,9 @@ const F0Wizard = React.memo(function F0Wizard({
 
       {/* Footer: Back + Next/Submit buttons.
           Each button is wrapped in a flex-1 flex-row View because F0Button fullWidth uses
-          className="flex flex-1" internally (NativeWind), which collapses to 32px
+          className="flex flex-1" internally (Uniwind + Tailwind), which collapses to 32px
           inside a flex-row container without an explicit height. The View wrapper
-          provides the correct stretch behavior without relying on NativeWind. */}
+          provides the correct stretch behavior. */}
       <View className={wizardFooterVariants()}>
         <View className={wizardFooterButtonVariants()}>
           <F0Button

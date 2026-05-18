@@ -12,6 +12,8 @@ export const f0StepVariants = tv({
   base: "h-1 w-full overflow-hidden rounded-full",
   variants: {
     state: {
+      // active and completed share the same token intentionally —
+      // both represent "user has engaged with this step".
       active: "bg-f0-background-bold",
       completed: "bg-f0-background-bold",
       pending: "bg-f0-background-tertiary",
