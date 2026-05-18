@@ -22,6 +22,11 @@ import { useAiChat } from "../providers/AiChatStateProvider"
  *
  * Layout (container, disclaimer, footer, clarifying nav-hint) is owned
  * by F0AiChatTextArea so the connected wrapper stays purely about wiring.
+ *
+ * Boundary: this Connected* wrapper is one of the only places inside f0
+ * that calls CopilotKit hooks. Any new f0 component must receive its
+ * data via props from a Connected* wrapper — never read `useCopilot*`
+ * or `@copilotkit/*` types directly.
  */
 export const ConnectedChatInput = (props: InputProps) => {
   const {

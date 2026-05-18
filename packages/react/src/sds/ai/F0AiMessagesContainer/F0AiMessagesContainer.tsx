@@ -36,8 +36,6 @@ import { useMessageScroll } from "./useMessageScroll"
 type MessageSlotComponent = ComponentType<any>
 
 export type F0AiMessagesContainerProps = {
-  /** Optional override for the per-message renderer (rarely used). */
-  RenderMessage?: MessageSlotComponent
   /** Optional override for the assistant bubble component. */
   AssistantMessage?: MessageSlotComponent
   /** Optional override for the user bubble component. */
@@ -124,7 +122,6 @@ const Messages = ({
   freezeLayout = false,
   noShadows = false,
   children,
-  RenderMessage: RenderMessageProp,
   AssistantMessage: AssistantMessageProp,
   UserMessage: UserMessageProp,
   onRegenerate,
@@ -199,15 +196,6 @@ const Messages = ({
         ...baseExtraProps,
       }
 
-      if (RenderMessageProp) {
-        return (
-          <RenderMessageProp
-            key={`${turnIndex}-u-${index}`}
-            {...(messageProps as any)}
-          />
-        )
-      }
-
       return (
         <UserMessage
           key={`${turnIndex}-u-${index}`}
@@ -234,15 +222,6 @@ const Messages = ({
         onCopy,
         rawData: (message as any).rawData || {},
         ...baseExtraProps,
-      }
-
-      if (RenderMessageProp) {
-        return (
-          <RenderMessageProp
-            key={`${turnIndex}-a-${index}`}
-            {...(messageProps as any)}
-          />
-        )
       }
 
       return (

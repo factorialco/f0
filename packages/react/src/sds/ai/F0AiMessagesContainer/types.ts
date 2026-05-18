@@ -1,7 +1,8 @@
 /**
  * Loose message shape used by the headless container and its
- * subcomponents. Mirrors the CopilotKit `Message` / `AIMessage` shape
- * (which the connected wrapper builds upstream)
+ * subcomponents. Mirrors the CopilotKit `Message`/`AIMessage` shape
+ * (which the bridge builds upstream) but is owned by f0 so the
+ * headless boundary doesn't import from `@copilotkit/shared`.
  *
  * Most fields are optional / wide on purpose — the headless renders
  * what it finds and ignores the rest.
@@ -25,10 +26,10 @@ export type Message = {
 export type AIMessage = Message
 
 /**
- * Pre-processed turn ready to render. The connected wrapper assembles
- * these by filtering CopilotKit bookkeeping, expanding AG-UI tool-call
- * messages, and analysing role/stream state. The headless container
- * iterates them as-is — no message-shape inspection.
+ * Pre-processed turn ready to render. The bridge (F0AiChat/Connected*)
+ * assembles these by filtering CopilotKit bookkeeping, expanding AG-UI
+ * tool-call messages, and analysing role/stream state. The headless
+ * container iterates them as-is — no message-shape inspection.
  *
  * A turn renders as: leading user messages → optional Thinking section →
  * assistant messages → optional inline live-thinking message → optional

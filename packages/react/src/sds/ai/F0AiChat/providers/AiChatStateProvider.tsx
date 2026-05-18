@@ -29,66 +29,21 @@ import {
   WelcomeScreenSuggestion,
 } from "../types"
 import { DEFAULT_CHAT_WIDTH } from "../utils/constants"
-import {
-  readFromLocalStorage,
-  writeToLocalStorage,
-} from "../utils/local-storage"
+
+import { useInjectedFn } from "./useInjectedFn"
+import { usePersistedState } from "./usePersistedState"
+
 const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
 
 const CHAT_WIDTH_STORAGE_KEY = "ONE-ai-chat-width"
 const CHAT_OPEN_STORAGE_KEY = "ONE-ai-chat-open"
 const CHAT_VISUALIZATION_MODE_STORAGE_KEY = "ONE-ai-chat-visualization-mode"
 
-const getStoredChatWidth = (): number => {
-  if (typeof window === "undefined") return DEFAULT_CHAT_WIDTH
-  const stored = readFromLocalStorage<number | null>(
-    CHAT_WIDTH_STORAGE_KEY,
-    null
-  )
-  if (stored !== null && !isNaN(stored) && stored >= 300 && stored <= 712) {
-    return stored
-  }
-  return DEFAULT_CHAT_WIDTH
-}
+const CHAT_WIDTH_MIN = 300
+const CHAT_WIDTH_MAX = 712
 
-/**
- * Read the persisted open/closed state from localStorage.
- * Falls back to `fallback` when there's no stored value or it's malformed.
- * Because the AiChatStateProvider only mounts once `ai?.enabled === true`
- * (see ApplicationFrame), reading in the `useState` initializer naturally
- * handles a delayed activation of `ai.enabled`: as soon as the provider
- * mounts, the persisted state is applied.
- *
- * On first visit (no stored value), defaults to open so the chat is
- * discoverable. Subsequent visits respect the user's last choice, which is
- * persisted by the effect below.
- */
-const getStoredChatOpen = (fallback: boolean): boolean => {
-  if (typeof window === "undefined") return fallback
-  const stored = readFromLocalStorage<boolean | null>(
-    CHAT_OPEN_STORAGE_KEY,
-    null
-  )
-  if (typeof stored !== "boolean") return true
-  return stored
-}
-
-/**
- * Read the persisted visualization mode. Only accepts the stable user-facing
- * modes — "canvas" is transient and reverts to the previous mode on close,
- * so it is never persisted.
- */
-const getStoredVisualizationMode = (
-  fallback: VisualizationMode
-): VisualizationMode => {
-  if (typeof window === "undefined") return fallback
-  const stored = readFromLocalStorage<string | null>(
-    CHAT_VISUALIZATION_MODE_STORAGE_KEY,
-    null
-  )
-  if (stored === "sidepanel" || stored === "fullscreen") return stored
-  return fallback
-}
+const isPersistableVisualizationMode = (value: VisualizationMode): boolean =>
+  value === "sidepanel" || value === "fullscreen"
 
 export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   children,
@@ -118,24 +73,44 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
 }) => {
   const [footer, setFooter] = useState<ReactNode | undefined>(initialFooter)
   const [enabledInternal, setEnabledInternal] = useState(enabled)
-  // Restore open/closed state and visualization mode from localStorage when
-  // the provider mounts. Falls back to `defaultVisualizationMode` when no
-  // prior state is stored. Because this provider only mounts once the host
-  // app sets `ai.enabled === true`, a delayed activation still applies the
-  // persisted state correctly (the `useState` initializers run on mount,
-  // not on the first render of the outer tree).
+
+  // Persistence — these survive reloads. The provider only mounts once
+  // `ai.enabled === true`, so the initializers naturally pick up the
+  // stored values even when activation is delayed.
+  const [chatWidth, setChatWidth] = usePersistedState<number>(
+    CHAT_WIDTH_STORAGE_KEY,
+    DEFAULT_CHAT_WIDTH,
+    (v): v is number =>
+      typeof v === "number" &&
+      !isNaN(v) &&
+      v >= CHAT_WIDTH_MIN &&
+      v <= CHAT_WIDTH_MAX
+  )
+
+  // First visit: defaults to open so the chat is discoverable. Subsequent
+  // visits respect the user's last choice.
+  const [open, setOpen] = usePersistedState<boolean>(
+    CHAT_OPEN_STORAGE_KEY,
+    defaultVisualizationMode === "fullscreen",
+    (v): v is boolean => typeof v === "boolean"
+  )
+
+  // `canvas` is a transient overlay — only stable user-facing modes are
+  // persisted. We pass `shouldWrite` so the canvas mode never escapes
+  // into the stored value.
   const fallbackVisualizationMode: VisualizationMode =
     defaultVisualizationMode === "canvas"
       ? "sidepanel"
       : defaultVisualizationMode
-  const [open, setOpen] = useState(() =>
-    getStoredChatOpen(defaultVisualizationMode === "fullscreen")
-  )
-  const [mode, setMode] = useState<AiChatMode>("chat")
   const [visualizationMode, setVisualizationModeRaw] =
-    useState<VisualizationMode>(() =>
-      getStoredVisualizationMode(fallbackVisualizationMode)
+    usePersistedState<VisualizationMode>(
+      CHAT_VISUALIZATION_MODE_STORAGE_KEY,
+      fallbackVisualizationMode,
+      (v): v is VisualizationMode => v === "sidepanel" || v === "fullscreen",
+      isPersistableVisualizationMode
     )
+
+  const [mode, setMode] = useState<AiChatMode>("chat")
   // Derived from the initial visualizationMode so we don't re-read
   // localStorage. `useState`'s initializer runs only on mount, so this
   // captures the value at that moment.
@@ -153,8 +128,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [initialMessage, setInitialMessage] = useState<
     string | string[] | undefined
   >(initialInitialMessage)
-
-  const [chatWidth, setChatWidth] = useState(() => getStoredChatWidth())
 
   useEffect(() => {
     if (open) {
@@ -174,15 +147,18 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   // new mode until something else (closeCanvas, reload…) clears it.
   const setVisualizationMode = useCallback<
     React.Dispatch<React.SetStateAction<VisualizationMode>>
-  >((next) => {
-    setVisualizationModeRaw((prev) => {
-      const resolved = typeof next === "function" ? next(prev) : next
-      if (prev === "canvas" && resolved !== "canvas") {
-        setCanvasContent(null)
-      }
-      return resolved
-    })
-  }, [])
+  >(
+    (next) => {
+      setVisualizationModeRaw((prev) => {
+        const resolved = typeof next === "function" ? next(prev) : next
+        if (prev === "canvas" && resolved !== "canvas") {
+          setCanvasContent(null)
+        }
+        return resolved
+      })
+    },
+    [setVisualizationModeRaw]
+  )
 
   // Track the mode before canvas was opened so we can restore it on close
   const previousVisualizationModeRef = useRef<VisualizationMode>("sidepanel")
@@ -196,59 +172,18 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   )
   const [pendingQuote, setPendingQuote] = useState<PendingQuote | null>(null)
 
-  // Persist chat width to localStorage
-  useEffect(() => {
-    if (typeof window === "undefined") return
-    writeToLocalStorage(CHAT_WIDTH_STORAGE_KEY, chatWidth)
-  }, [chatWidth])
-
-  // Persist open/closed state so it survives reloads. Stored as a plain
-  // boolean; the provider's `useState` initializer reads it back on mount.
-  useEffect(() => {
-    if (typeof window === "undefined") return
-    writeToLocalStorage(CHAT_OPEN_STORAGE_KEY, open)
-  }, [open])
-
-  // Persist the visualization mode, but only for the stable user-facing
-  // modes. "canvas" is a transient overlay (restored to the previous mode
-  // via `closeCanvas`) and should never be the restored-on-reload mode.
-  useEffect(() => {
-    if (typeof window === "undefined") return
-    if (
-      visualizationMode === "sidepanel" ||
-      visualizationMode === "fullscreen"
-    ) {
-      writeToLocalStorage(
-        CHAT_VISUALIZATION_MODE_STORAGE_KEY,
-        visualizationMode
-      )
-    }
-  }, [visualizationMode])
-
-  // Store the reset function from CopilotKit
-  const clearFunctionRef = useRef<(() => void) | null>(null)
-  // Store the loadThread function from CopilotKit
-  const loadThreadFunctionRef = useRef<((threadId: string) => void) | null>(
-    null
-  )
-  // Store the sendMessage function from CopilotKit
-  const sendMessageFunctionRef = useRef<((message: Message) => void) | null>(
-    null
-  )
-  // Store the appendMessages function bridged from CopilotKit
-  const appendMessagesFunctionRef = useRef<
-    ((messages: AppendMessage[], persist: boolean) => void) | null
-  >(null)
-  // Atomically replaces messages with a new thread (no race with reset)
-  const replaceMessagesFunctionRef = useRef<
-    ((messages: AppendMessage[]) => void) | null
-  >(null)
-  // Callback that processes files dropped onto the chat. Registered by
-  // ChatTextarea (which owns the file-attachment state) so the chat-wide
-  // DropOverlay rendered in SidebarWindow can dispatch drops to it.
-  const processDroppedFilesFunctionRef = useRef<
-    ((files: File[]) => void) | null
-  >(null)
+  // Functions injected from CopilotKit via CopilotFunctionBridge. Each pair
+  // exposes [invoker, setter] — invoker is a stable callback that no-ops
+  // when nothing is registered; setter is what the bridge calls.
+  const [clear_raw, setClearFunction] = useInjectedFn<[]>()
+  const [loadThread_raw, setLoadThreadFunction] = useInjectedFn<[string]>()
+  const [sendMessage_raw, setSendMessageFunction] = useInjectedFn<[Message]>()
+  const [appendMessages_raw, setAppendMessagesFunction] =
+    useInjectedFn<[AppendMessage[], boolean]>()
+  const [replaceMessages_raw, setReplaceMessagesFunction] =
+    useInjectedFn<[AppendMessage[]]>()
+  const [processDroppedFiles, setProcessDroppedFilesFunction] =
+    useInjectedFn<[File[]]>()
 
   const [currentThreadTitle, setCurrentThreadTitle] = useState<string | null>(
     null
@@ -259,92 +194,43 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     setAgent(newAgent)
   }
 
-  const setClearFunction = (clearFn: (() => void) | null) => {
-    clearFunctionRef.current = clearFn
-  }
-
-  const setLoadThreadFunction = (
-    loadFn: ((threadId: string) => void) | null
-  ) => {
-    loadThreadFunctionRef.current = loadFn
-  }
-
-  const setSendMessageFunction = (
-    sendFn: ((message: Message) => void) | null
-  ) => {
-    sendMessageFunctionRef.current = sendFn
-  }
-
-  const setAppendMessagesFunction = (
-    fn: ((messages: AppendMessage[], persist: boolean) => void) | null
-  ) => {
-    appendMessagesFunctionRef.current = fn
-  }
-
-  const setReplaceMessagesFunction = (
-    fn: ((messages: AppendMessage[]) => void) | null
-  ) => {
-    replaceMessagesFunctionRef.current = fn
-  }
-
-  const setProcessDroppedFilesFunction = (
-    fn: ((files: File[]) => void) | null
-  ) => {
-    processDroppedFilesFunctionRef.current = fn
-  }
-
-  const processDroppedFiles = (files: File[]) => {
-    processDroppedFilesFunctionRef.current?.(files)
-  }
+  // Centralised "starting/loading a fresh thread" reset. Called from
+  // `clear`, `loadThread` and `clearAndAppend` — keeping it in one place
+  // prevents the bug where a new piece of per-thread UI state gets
+  // added but one caller forgets to reset it.
+  const resetForNewThread = useCallback(() => {
+    setCurrentThreadTitle(null)
+    setIsLoadingThread(false)
+    setPendingContext(null)
+    setPendingQuote(null)
+    setCanvasContent(null)
+    if (visualizationMode === "canvas") {
+      setVisualizationMode(previousVisualizationModeRef.current)
+    }
+  }, [visualizationMode, setVisualizationMode])
 
   const appendMessages = (
     messages: AppendMessage[],
     options?: { persist?: boolean }
   ) => {
-    appendMessagesFunctionRef.current?.(messages, options?.persist ?? true)
+    appendMessages_raw(messages, options?.persist ?? true)
   }
 
   const clearAndAppend = (messages: AppendMessage[]) => {
-    // Reset UI state for a fresh conversation
-    setCurrentThreadTitle(null)
-    setIsLoadingThread(false)
-    setPendingContext(null)
-    setPendingQuote(null)
-    setCanvasContent(null)
-    if (visualizationMode === "canvas") {
-      setVisualizationMode(previousVisualizationModeRef.current)
-    }
-    // Replace the current messages after resetting the related UI state
-    replaceMessagesFunctionRef.current?.(messages)
+    // Reset UI state for a fresh conversation, then replace messages.
+    resetForNewThread()
+    replaceMessages_raw(messages)
   }
 
   const clear = () => {
-    if (clearFunctionRef.current) {
-      clearFunctionRef.current()
-    }
-    setCurrentThreadTitle(null)
-    setIsLoadingThread(false)
-    setPendingContext(null)
-    setPendingQuote(null)
-    // Close canvas when starting a new conversation
-    setCanvasContent(null)
-    if (visualizationMode === "canvas") {
-      setVisualizationMode(previousVisualizationModeRef.current)
-    }
+    clear_raw()
+    resetForNewThread()
   }
 
   const loadThread = (threadId: string, title: string) => {
-    if (loadThreadFunctionRef.current) {
-      loadThreadFunctionRef.current(threadId)
-    }
+    loadThread_raw(threadId)
+    resetForNewThread()
     setCurrentThreadTitle(title)
-    setPendingContext(null)
-    setPendingQuote(null)
-    // Close canvas when loading a different thread
-    setCanvasContent(null)
-    if (visualizationMode === "canvas") {
-      setVisualizationMode(previousVisualizationModeRef.current)
-    }
   }
 
   const resetChatWidth = () => {
@@ -352,10 +238,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   }
 
   const sendMessage: AiChatProviderReturnValue["sendMessage"] = (message) => {
-    if (!sendMessageFunctionRef.current) {
-      return
-    }
-
     void (async () => {
       if (onBeforeSendMessage && (await onBeforeSendMessage()) === false) {
         return
@@ -375,7 +257,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
             }
           : message
 
-      sendMessageFunctionRef.current?.(messageToSend)
+      sendMessage_raw(messageToSend)
     })()
   }
 
@@ -514,86 +396,35 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   )
 }
 
-const noopFn = () => {}
-
+/**
+ * Read the AiChat context. **Throws if no provider is mounted.**
+ *
+ * Most consumers (`F0AiChat`, `Connected*`, entity refs, `F0OneSwitch`,
+ * `canvas/registry`, `F0AiFullscreenChat`, …) are always rendered under
+ * `AiChatStateProvider` and should use this hook.
+ *
+ * For the rare case where a component needs to read the chat state but
+ * may be rendered outside the provider (e.g. `ApplicationFrame`, which
+ * also runs in "no AI" mode), use `useOptionalAiChat()` instead and
+ * handle the `null` case explicitly.
+ */
 export function useAiChat(): AiChatProviderReturnValue {
   const context = useContext(AiChatStateContext)
-
   if (context === null) {
-    return {
-      enabled: false,
-      setEnabled: noopFn,
-      open: false,
-      setOpen: noopFn,
-      mode: "chat",
-      setMode: noopFn,
-      visualizationMode: "sidepanel",
-      setVisualizationMode: noopFn,
-      lockVisualizationMode: false,
-      historyEnabled: false,
-      shouldPlayEntranceAnimation: true,
-      setShouldPlayEntranceAnimation: noopFn,
-      agent: undefined,
-      tmp_setAgent: noopFn,
-      clear: noopFn,
-      setClearFunction: noopFn,
-      currentThreadTitle: null,
-      loadThread: noopFn,
-      setLoadThreadFunction: noopFn,
-      isLoadingThread: false,
-      setIsLoadingThread: noopFn,
-      initialMessage: undefined,
-      setInitialMessage: noopFn,
-      placeholders: [],
-      setPlaceholders: noopFn,
-      welcomeScreenSuggestions: [],
-      setWelcomeScreenSuggestions: noopFn,
-      onThumbsUp: noopFn,
-      onThumbsDown: noopFn,
-      sendMessage: noopFn,
-      setSendMessageFunction: noopFn,
-      appendMessages: noopFn,
-      setAppendMessagesFunction: noopFn,
-      clearAndAppend: noopFn,
-      setReplaceMessagesFunction: noopFn,
-      disclaimer: undefined,
-      resizable: false,
-      footer: undefined,
-      VoiceMode: undefined,
-      setFooter: noopFn,
-      chatWidth: DEFAULT_CHAT_WIDTH,
-      setChatWidth: noopFn,
-      resetChatWidth: noopFn,
-      tracking: undefined,
-      onBeforeSendMessage: undefined,
-      runtimeFetch: fetch,
-      entityRefs: undefined,
-      canvasActions: undefined,
-      canvasEntities: undefined,
-      credits: undefined,
-      employeeCredits: undefined,
-      creditWarning: undefined,
-      fileAttachments: undefined,
-      inProgress: false,
-      setInProgress: noopFn,
-      canvasContent: null,
-      openCanvas: noopFn,
-      closeCanvas: noopFn,
-      activeGame: null,
-      openGame: noopFn,
-      closeGame: noopFn,
-      clarifyingQuestion: null,
-      setClarifyingQuestion: noopFn,
-      fileDragOver: false,
-      setFileDragOver: noopFn,
-      processDroppedFiles: noopFn,
-      setProcessDroppedFilesFunction: noopFn,
-      pendingContext: null,
-      setPendingContext: noopFn,
-      pendingQuote: null,
-      setPendingQuote: noopFn,
-    }
+    throw new Error(
+      "useAiChat must be used within an AiChatStateProvider. " +
+        "Use useOptionalAiChat() if you need to read the chat state " +
+        "from a component that may render outside the provider."
+    )
   }
-
   return context
+}
+
+/**
+ * Read the AiChat context if a provider is mounted; otherwise return
+ * `null`. Use this from components that intentionally render in both
+ * "AI mounted" and "AI disabled" trees (e.g. `ApplicationFrame`).
+ */
+export function useOptionalAiChat(): AiChatProviderReturnValue | null {
+  return useContext(AiChatStateContext)
 }

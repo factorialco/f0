@@ -1,4 +1,4 @@
-import { useAiChat } from "../F0AiChat/providers/AiChatStateProvider"
+import { useCanvasEntities } from "../F0AiChat/providers/useCanvasEntities"
 import type { CanvasEntityDefinition } from "./types"
 
 /**
@@ -10,7 +10,7 @@ export function useCanvasEntity(
   type: string | undefined
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): CanvasEntityDefinition<any> | undefined {
-  const { canvasEntities } = useAiChat()
+  const canvasEntities = useCanvasEntities()
   if (!type || !canvasEntities) return undefined
   return canvasEntities[type]
 }

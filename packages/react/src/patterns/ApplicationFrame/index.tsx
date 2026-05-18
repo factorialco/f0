@@ -24,7 +24,7 @@ import {
   AiChatProviderProps,
 } from "@/sds/ai/F0AiChat"
 import { F0CanvasPanel } from "@/sds/ai/F0CanvasPanel"
-import { useAiChat } from "@/sds/ai/F0AiChat/providers/AiChatStateProvider"
+import { useOptionalAiChat } from "@/sds/ai/F0AiChat/providers/AiChatStateProvider"
 import { DEFAULT_CHAT_WIDTH } from "@/sds/ai/F0AiChat/utils/constants"
 
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
@@ -180,15 +180,16 @@ function ApplicationFrameContent({
   const { sidebarState, toggleSidebar, isSmallScreen, setForceFloat } =
     useSidebar()
   const shouldReduceMotion = useReducedMotion()
-  const {
-    open: isAiChatOpen,
-    visualizationMode,
-    canvasContent,
-    canvasEntities,
-    closeCanvas,
-    chatWidth,
-    resizable,
-  } = useAiChat()
+  // ApplicationFrame also renders without AI (when ai.enabled === false),
+  // so it reads the chat state optionally and falls back to inert values.
+  const aiChat = useOptionalAiChat()
+  const isAiChatOpen = aiChat?.open ?? false
+  const visualizationMode = aiChat?.visualizationMode ?? "sidepanel"
+  const canvasContent = aiChat?.canvasContent ?? null
+  const canvasEntities = aiChat?.canvasEntities
+  const closeCanvas = aiChat?.closeCanvas
+  const chatWidth = aiChat?.chatWidth ?? DEFAULT_CHAT_WIDTH
+  const resizable = aiChat?.resizable ?? false
   const isAiChatFullscreen = visualizationMode === "fullscreen"
   const isCanvasMode = visualizationMode === "canvas"
   const { open: isAiPromotionChatOpen } = useAiPromotionChat()
@@ -345,7 +346,7 @@ function ApplicationFrameContent({
                 >
                   <F0CanvasPanel
                     content={canvasContent}
-                    onClose={closeCanvas}
+                    onClose={closeCanvas ?? (() => {})}
                     entities={canvasEntities}
                   />
                 </div>

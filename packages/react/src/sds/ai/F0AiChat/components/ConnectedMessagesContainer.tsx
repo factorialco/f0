@@ -68,6 +68,11 @@ const RESPONSE_STOPPED_MARKER = "<!--response-stopped-->"
  * (filtering, expansion, turn grouping, thinking extraction, feedback
  * target selection, stop-marker detection) and forwards the result as
  * pre-processed turns. The headless container is purely presentational.
+ *
+ * Boundary: this Connected* wrapper is one of the only places inside f0
+ * that calls CopilotKit hooks. Any new f0 component must receive its
+ * data via props from a Connected* wrapper — never read `useCopilot*`
+ * or `@copilotkit/*` types directly.
  */
 export const ConnectedMessagesContainer = ({
   inProgress: inProgressProp,

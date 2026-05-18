@@ -20,6 +20,11 @@ type ConnectedChatHistoryProps = {
  * endpoints. Builds the fetch callbacks (URL + auth headers + runtime fetch)
  * here so the headless package stays a pure UI module with zero URL/auth
  * knowledge.
+ *
+ * Boundary: this Connected* wrapper is one of the only places inside f0
+ * that calls CopilotKit hooks. Any new f0 component must receive its
+ * data via props from a Connected* wrapper — never read `useCopilot*`
+ * or `@copilotkit/*` types directly.
  */
 export const ConnectedChatHistory = ({
   onClose,

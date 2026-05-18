@@ -16,6 +16,11 @@ import { ConnectedChatHistory } from "./ConnectedChatHistory"
  *
  * Accepts CopilotKit's `HeaderProps` to keep the slot contract intact;
  * the headless component itself never sees them.
+ *
+ * Boundary: this Connected* wrapper is one of the only places inside f0
+ * that calls CopilotKit hooks. Any new f0 component must receive its
+ * data via props from a Connected* wrapper — never read `useCopilot*`
+ * or `@copilotkit/*` types directly.
  */
 export const ConnectedChatHeader = (_props: HeaderProps) => {
   const { labels } = useChatContext()
