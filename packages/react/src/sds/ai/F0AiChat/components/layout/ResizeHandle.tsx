@@ -69,13 +69,13 @@ export const ResizeHandle = ({
   }, [isResizing, onResize, setIsResizing])
 
   return (
+    // z-10 so the handle — and its invisible hit-area extension — paints
+    // above the chat-content sibling (same flex row, later in DOM, no
+    // stacking context of its own). Without this, the `group-hover` never
+    // fires on the right side because the chat panel's edge captures the
+    // mouse events first.
     <div
-      className=// z-10 so the handle — and its invisible hit-area extension —
-      // paints above the chat-content sibling (same flex row, later
-      // in DOM, no stacking context of its own). Without this, the
-      // `group-hover` never fires on the right side because the chat
-      // panel's edge captures the mouse events first.
-      "group relative z-10 h-full flex-shrink-0 cursor-ew-resize w-1"
+      className="group relative z-10 h-full flex-shrink-0 cursor-ew-resize w-1"
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
     >
