@@ -75,7 +75,12 @@ test("expands the description when enabled", async () => {
   const description = document.querySelector(".FactorialOneTextEditor")
   expect(description).toHaveClass("line-clamp-5")
 
-  await userEvent.click(await screen.findByRole("button", { name: "See more" }))
+  const expandButton = await screen.findByRole("button", { name: "See more" })
+  const title = screen.getByText("Post title")
+  expect(expandButton).toHaveAccessibleDescription("Post title")
+  expect(expandButton).toHaveAttribute("aria-describedby", title.id)
+
+  await userEvent.click(expandButton)
 
   expect(description).not.toHaveClass("line-clamp-5")
   expect(description).toHaveFocus()

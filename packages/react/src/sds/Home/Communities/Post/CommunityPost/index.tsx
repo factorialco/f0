@@ -22,10 +22,12 @@ import { PostEvent, PostEventProps } from "../PostEvent"
 import { isVideo } from "./video"
 
 const ExpandDescriptionButton = ({
+  describedBy,
   controls,
   expanded,
   onClick,
 }: {
+  describedBy: string
   controls: string
   expanded: boolean
   onClick: (event: React.MouseEvent<HTMLElement>) => void
@@ -41,6 +43,7 @@ const ExpandDescriptionButton = ({
           focusRing()
         )}
         aria-controls={controls}
+        aria-describedby={describedBy}
         aria-expanded={expanded}
         onClick={onClick}
       >
@@ -121,12 +124,13 @@ export const BaseCommunityPost = ({
   noReactionsButton = false,
   descriptionExpandable = false,
 }: CommunityPostProps) => {
+  const titleId = useId()
   const descriptionId = useId()
   const descriptionRef = useRef<HTMLDivElement>(null)
-  const descriptionExpansionKey = `${id}:${description ?? ""}`
-  const [expandedDescriptionKey, setExpandedDescriptionKey] = useState<
-    string | null
-  >(null)
+  const [expandedDescription, setExpandedDescription] = useState<{
+    id: string
+    description: PostDescriptionProps["content"]
+  } | null>(null)
   const [isDescriptionOverflowing, setIsDescriptionOverflowing] =
     useState(false)
   const countersDisplay = [counters.views, counters.comments]
@@ -134,7 +138,9 @@ export const BaseCommunityPost = ({
     .join(" · ")
 
   const descriptionExpanded =
-    descriptionExpandable && expandedDescriptionKey === descriptionExpansionKey
+    descriptionExpandable &&
+    expandedDescription?.id === id &&
+    expandedDescription.description === description
   const descriptionCollapsed = !descriptionExpanded
   const date = getDisplayDateBasedOnDuration(createdAt)
 
@@ -150,10 +156,13 @@ export const BaseCommunityPost = ({
     ? `${author.firstName} ${author.lastName}`
     : undefined
 
-  const handleToggleDescription = (event: React.MouseEvent<HTMLElement>) => {
+  const handleExpandDescription = (event: React.MouseEvent<HTMLElement>) => {
     event.preventDefault()
     event.stopPropagation()
-    setExpandedDescriptionKey(descriptionExpansionKey)
+
+    if (!description) return
+
+    setExpandedDescription({ id, description })
   }
 
   useEffect(() => {
@@ -163,7 +172,7 @@ export const BaseCommunityPost = ({
   }, [descriptionExpanded])
 
   useEffect(() => {
-    if (!descriptionExpandable) setExpandedDescriptionKey(null)
+    if (!descriptionExpandable) setExpandedDescription(null)
   }, [descriptionExpandable])
 
   useEffect(() => {
@@ -309,6 +318,7 @@ export const BaseCommunityPost = ({
           </span>
           <div className="flex min-w-0 flex-col gap-1 text-f1-foreground">
             <p
+              id={titleId}
               className={cn(
                 "text-xl font-semibold",
                 "line-clamp-2 break-words"
@@ -330,9 +340,10 @@ export const BaseCommunityPost = ({
                   isDescriptionOverflowing &&
                   !descriptionExpanded && (
                     <ExpandDescriptionButton
+                      describedBy={titleId}
                       controls={descriptionId}
                       expanded={descriptionExpanded}
-                      onClick={handleToggleDescription}
+                      onClick={handleExpandDescription}
                     />
                   )}
               </>
