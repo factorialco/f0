@@ -396,35 +396,93 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   )
 }
 
-/**
- * Read the AiChat context. **Throws if no provider is mounted.**
- *
- * Most consumers (`F0AiChat`, `Connected*`, entity refs, `F0OneSwitch`,
- * `canvas/registry`, `F0AiFullscreenChat`, …) are always rendered under
- * `AiChatStateProvider` and should use this hook.
- *
- * For the rare case where a component needs to read the chat state but
- * may be rendered outside the provider (e.g. `ApplicationFrame`, which
- * also runs in "no AI" mode), use `useOptionalAiChat()` instead and
- * handle the `null` case explicitly.
- */
-export function useAiChat(): AiChatProviderReturnValue {
-  const context = useContext(AiChatStateContext)
-  if (context === null) {
-    throw new Error(
-      "useAiChat must be used within an AiChatStateProvider. " +
-        "Use useOptionalAiChat() if you need to read the chat state " +
-        "from a component that may render outside the provider."
-    )
-  }
-  return context
-}
+const noopFn = () => {}
 
 /**
- * Read the AiChat context if a provider is mounted; otherwise return
- * `null`. Use this from components that intentionally render in both
- * "AI mounted" and "AI disabled" trees (e.g. `ApplicationFrame`).
+ * Buckets used to build the no-provider fallback. ApplicationFrame
+ * renders chat-aware children (e.g. `AiChatPlaceholderReset`) inside
+ * both the AI-enabled tree and the promotion-chat tree — when the
+ * provider isn't mounted, `useAiChat()` must return a complete inert
+ * shape rather than throw.
+ *
+ * **Contract**: every field in `AiChatProviderReturnValue` must be
+ * classified by one of these sets. Unclassified keys fall through to
+ * `noopFn` — fine for the ~30 setter/action functions, but a foot-gun
+ * for state fields. When you add a non-function field to the provider,
+ * add its key to the correct bucket below.
  */
-export function useOptionalAiChat(): AiChatProviderReturnValue | null {
-  return useContext(AiChatStateContext)
+type ProviderKey = keyof AiChatProviderReturnValue
+
+const FALSE_KEYS = new Set<ProviderKey>([
+  "enabled",
+  "open",
+  "isLoadingThread",
+  "inProgress",
+  "fileDragOver",
+  "lockVisualizationMode",
+  "historyEnabled",
+  "resizable",
+])
+
+const NULL_KEYS = new Set<ProviderKey>([
+  "currentThreadTitle",
+  "canvasContent",
+  "clarifyingQuestion",
+  "pendingContext",
+  "pendingQuote",
+  "activeGame",
+])
+
+const UNDEFINED_KEYS = new Set<ProviderKey>([
+  "agent",
+  "initialMessage",
+  "disclaimer",
+  "footer",
+  "VoiceMode",
+  "tracking",
+  "onBeforeSendMessage",
+  "entityRefs",
+  "canvasActions",
+  "canvasEntities",
+  "credits",
+  "creditWarning",
+  "fileAttachments",
+  "onThumbsUp",
+  "onThumbsDown",
+])
+
+const REAL_VALUES: Partial<AiChatProviderReturnValue> = {
+  chatWidth: DEFAULT_CHAT_WIDTH,
+  runtimeFetch: fetch,
+  visualizationMode: "sidepanel",
+  mode: "chat",
+  shouldPlayEntranceAnimation: true,
+  placeholders: [],
+  welcomeScreenSuggestions: [],
+}
+
+const NO_PROVIDER_CONTEXT = new Proxy({} as AiChatProviderReturnValue, {
+  get(_, prop) {
+    if (typeof prop !== "string") return undefined
+    const key = prop as ProviderKey
+    if (key in REAL_VALUES) return REAL_VALUES[key]
+    if (NULL_KEYS.has(key)) return null
+    if (UNDEFINED_KEYS.has(key)) return undefined
+    if (FALSE_KEYS.has(key)) return false
+    // Setters, actions, anything else → noop.
+    return noopFn
+  },
+})
+
+/**
+ * Read the AiChat context. Returns an inert fallback when no provider
+ * is mounted — that case is intentional in `ApplicationFrame`, which
+ * renders chat-aware components in both the AI-enabled tree and the
+ * promotion-chat tree.
+ *
+ * Most consumers don't need to think about this — they're rendered
+ * under `<F0AiChatProvider>` and receive the real context.
+ */
+export function useAiChat(): AiChatProviderReturnValue {
+  return useContext(AiChatStateContext) ?? NO_PROVIDER_CONTEXT
 }
