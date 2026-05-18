@@ -6,13 +6,17 @@ import {
   Tabs,
 } from "@factorialco/f0-react/dist/experimental"
 import { Cross } from "@factorialco/f0-react/icons/app"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { useSearchParams } from "react-router-dom"
+
+import { jobs } from "@/fixtures"
 
 import type { PrototypeMeta } from "../types"
 import { CandidatesTab } from "./candidates/CandidatesTab"
 import { InternalOpportunitiesTab } from "./internal-opportunities/InternalOpportunitiesTab"
+import { JobDetailView } from "./jobs/JobDetailView"
 import { JobsTab } from "./jobs/JobsTab"
+import { OrganizationTab } from "./organization/OrganizationTab"
 import { CreateJobForm, type NewJob } from "./shared/CreateJobForm"
 import {
   jobsSubTabs,
@@ -54,7 +58,18 @@ const VALID_JOBS_SUB_TABS = new Set<string>(jobsSubTabs.map((t) => t.id))
 export default function Recruitment() {
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const view = searchParams.get("view") === "create-job" ? "create-job" : "list"
+  const rawView = searchParams.get("view")
+  const view =
+    rawView === "create-job"
+      ? "create-job"
+      : rawView === "job-detail"
+        ? "job-detail"
+        : "list"
+  const jobId = searchParams.get("id")
+  const selectedJob = useMemo(
+    () => (jobId ? jobs.find((j) => j.id === jobId) : undefined),
+    [jobId]
+  )
   const rawTab = searchParams.get("tab")
   const activeModuleTab: ModuleTabId =
     rawTab && VALID_MODULE_TABS.has(rawTab) ? (rawTab as ModuleTabId) : "jobs"
@@ -81,6 +96,8 @@ export default function Recruitment() {
   const goToCreateJob = () =>
     setSearchParams({ tab: "jobs", view: "create-job" })
   const goToList = () => setSearchParams({})
+  const goToJobDetail = (id: string) =>
+    setSearchParams({ view: "job-detail", id })
 
   // Wire each tab's `onClick` so the URL is the source of truth.
   // We don't pass `setActiveTabId` — Tabs keeps its own internal state
@@ -104,6 +121,13 @@ export default function Recruitment() {
     },
     [setSearchParams]
   )
+
+  // ---------------------------------------------------------------------
+  // Sub-screen: job detail / pipeline
+  // ---------------------------------------------------------------------
+  if (view === "job-detail" && selectedJob) {
+    return <JobDetailView job={selectedJob} onBack={goToList} />
+  }
 
   // ---------------------------------------------------------------------
   // Sub-screen: create job posting
@@ -186,14 +210,17 @@ export default function Recruitment() {
           <JobsTab
             activeSubTab={jobsSubTab}
             onCreateJob={goToCreateJob}
+            onJobClick={goToJobDetail}
           />
         )}
         {activeModuleTab === "candidates" && <CandidatesTab />}
+        {activeModuleTab === "organization" && <OrganizationTab />}
         {activeModuleTab === "internal-opportunities" && (
           <InternalOpportunitiesTab />
         )}
         {activeModuleTab !== "jobs" &&
           activeModuleTab !== "candidates" &&
+          activeModuleTab !== "organization" &&
           activeModuleTab !== "internal-opportunities" && (
             <F0Text
               content={`The "${

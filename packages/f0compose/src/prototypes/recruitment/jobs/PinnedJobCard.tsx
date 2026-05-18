@@ -16,16 +16,24 @@ import { jobStatusDotColor, statusText } from "./jobStatus"
  * Card shown in the "Pinned jobs" grid above the jobs table. Mirrors the
  * production layout (status dot + location + posted-time + funnel).
  */
-export function PinnedJobCard({ job }: { job: Job }) {
+export function PinnedJobCard({
+  job,
+  onClick,
+}: {
+  job: Job
+  onClick?: () => void
+}) {
   const candidateTags = job.candidates.map((c) => ({
     text: String(c.count),
     color: stageDotColor[c.color],
   }))
 
   return (
-    <F0Card
-      title={job.title}
-      otherActions={[{ label: "Unpin", icon: StarFilled, onClick: () => {} }]}
+    <div className="transition-shadow rounded-xl hover:shadow-md cursor-pointer">
+      <F0Card
+        title={job.title}
+        onClick={onClick}
+        otherActions={[{ label: "Unpin", icon: StarFilled, onClick: () => {} }]}
       metadata={[
         {
           icon: CheckCircle,
@@ -75,5 +83,6 @@ export function PinnedJobCard({ job }: { job: Job }) {
             },
       ]}
     />
+    </div>
   )
 }

@@ -83,3 +83,17 @@ export {
   type ExpenseAlert,
   type ExpenseGroup,
 } from "./expenses"
+export {
+  trainings,
+  trainingRequests,
+  trainingBudgets,
+  type Training,
+  type TrainingStatus,
+  type TrainingType,
+  type TrainingRequest,
+  type TrainingRequestStatus,
+  type TrainingBudget,
+  policies,
+  type Policy,
+  type PolicyVisibility,
+} from "./training"
