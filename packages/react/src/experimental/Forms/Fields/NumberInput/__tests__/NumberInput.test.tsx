@@ -181,5 +181,123 @@ describe("NumberInput", () => {
       expect(input).toHaveValue("17,")
       expect(onChange).toHaveBeenLastCalledWith(17)
     })
+
+    test("normalizes trailing separator on blur", async () => {
+      const onChange = vi.fn()
+      render(
+        <NumberInput
+          locale="en-US"
+          maxDecimals={2}
+          onChange={onChange}
+          label="Number Input"
+        />
+      )
+
+      const input = screen.getByRole("textbox")
+      await userEvent.type(input, "17.")
+      expect(input).toHaveValue("17.")
+
+      await userEvent.tab()
+      expect(input).toHaveValue("17")
+    })
+  })
+
+  describe("min/max clamp on blur", () => {
+    test("allows typing values below min during editing", async () => {
+      const onChange = vi.fn()
+      render(
+        <NumberInput
+          locale="en-US"
+          min={100}
+          onChange={onChange}
+          label="Number Input"
+        />
+      )
+
+      const input = screen.getByRole("textbox")
+      await userEvent.type(input, "5")
+
+      expect(input).toHaveValue("5")
+      expect(onChange).toHaveBeenLastCalledWith(5)
+    })
+
+    test("clamps value to min on blur", async () => {
+      const onChange = vi.fn()
+      render(
+        <NumberInput
+          locale="en-US"
+          min={100}
+          onChange={onChange}
+          label="Number Input"
+        />
+      )
+
+      const input = screen.getByRole("textbox")
+      await userEvent.type(input, "5")
+      expect(input).toHaveValue("5")
+
+      await userEvent.tab()
+      expect(input).toHaveValue("100")
+      expect(onChange).toHaveBeenLastCalledWith(100)
+    })
+
+    test("allows typing values above max during editing", async () => {
+      const onChange = vi.fn()
+      render(
+        <NumberInput
+          locale="en-US"
+          max={50}
+          onChange={onChange}
+          label="Number Input"
+        />
+      )
+
+      const input = screen.getByRole("textbox")
+      await userEvent.type(input, "999")
+
+      expect(input).toHaveValue("999")
+      expect(onChange).toHaveBeenLastCalledWith(999)
+    })
+
+    test("clamps value to max on blur", async () => {
+      const onChange = vi.fn()
+      render(
+        <NumberInput
+          locale="en-US"
+          max={50}
+          onChange={onChange}
+          label="Number Input"
+        />
+      )
+
+      const input = screen.getByRole("textbox")
+      await userEvent.type(input, "999")
+      expect(input).toHaveValue("999")
+
+      await userEvent.tab()
+      expect(input).toHaveValue("50")
+      expect(onChange).toHaveBeenLastCalledWith(50)
+    })
+
+    test("does not clamp values within bounds on blur", async () => {
+      const onChange = vi.fn()
+      render(
+        <NumberInput
+          locale="en-US"
+          min={10}
+          max={100}
+          onChange={onChange}
+          label="Number Input"
+        />
+      )
+
+      const input = screen.getByRole("textbox")
+      await userEvent.type(input, "50")
+      expect(input).toHaveValue("50")
+
+      await userEvent.tab()
+      expect(input).toHaveValue("50")
+      expect(onChange).toHaveBeenLastCalledWith(50)
+    })
   })
 })
