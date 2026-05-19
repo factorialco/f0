@@ -466,6 +466,7 @@ export const defaultTranslations = {
     loadingMore: "Loading...",
     applySelection: "Apply selection",
     create: "Create",
+    createWithValue: 'Create "{{value}}"',
     createEmptyMessage: "Try another search or create a new item",
   },
   numberInput: {

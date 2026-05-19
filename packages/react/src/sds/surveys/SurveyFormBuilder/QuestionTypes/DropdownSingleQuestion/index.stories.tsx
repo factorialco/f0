@@ -131,7 +131,6 @@ export const WithAllowCreate: Story = {
           elements={elements}
           onChange={setElements}
           datasets={datasetsWithOnCreate}
-          answering
         >
           <DropdownSingleQuestion {...args} {...question} />
         </SurveyFormBuilderProvider>

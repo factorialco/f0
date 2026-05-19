@@ -748,9 +748,14 @@ const F0SelectComponent = forwardRef(function Select<
     ? (value: string) => {
         const result = onCreate(value)
         if (result && typeof result.then === "function") {
-          result.then(() => {
-            setCurrentSearch(undefined)
-          })
+          result.then(
+            () => {
+              setCurrentSearch(undefined)
+            },
+            (err: unknown) => {
+              console.warn("[F0Select] onCreate failed:", err)
+            }
+          )
         } else {
           setCurrentSearch(undefined)
         }
@@ -758,28 +763,31 @@ const F0SelectComponent = forwardRef(function Select<
     : undefined
 
   const createLabel = currentSearch
-    ? `${i18n.select.create} "${currentSearch}"`
+    ? i18n.t("select.createWithValue", { value: currentSearch })
     : i18n.select.create
 
-  const emptyAction = handleCreate ? (
-    <div className="flex w-full">
-      <F0Button
-        variant="outline"
-        onClick={() => handleCreate(currentSearch ?? "")}
-        icon={Plus}
-        label={createLabel}
-      />
-    </div>
-  ) : undefined
+  const emptyAction =
+    handleCreate && currentSearch?.trim() ? (
+      <div className="flex w-full">
+        <F0Button
+          type="button"
+          variant="outline"
+          onClick={() => handleCreate(currentSearch.trim())}
+          icon={Plus}
+          label={createLabel}
+        />
+      </div>
+    ) : undefined
 
   const selectContent = (
     <SelectContent
       items={items}
       taller={!!source?.filters}
       emptyMessage={
-        onCreate
+        searchEmptyMessage ??
+        (onCreate && currentSearch?.trim()
           ? (i18n.select.createEmptyMessage ?? i18n.select.noResults)
-          : (searchEmptyMessage ?? i18n.select.noResults)
+          : i18n.select.noResults)
       }
       emptyAction={emptyAction}
       bottom={

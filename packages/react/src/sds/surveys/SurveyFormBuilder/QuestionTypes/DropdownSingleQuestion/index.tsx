@@ -1,5 +1,4 @@
 import type { F0SelectField } from "@/patterns/F0Form/fields/select/types"
-import type { F0SelectItemObject } from "@/components/F0Select/types"
 
 import { F0FormField } from "@/patterns/F0FormField"
 import { useI18n } from "@/lib/providers/i18n"
@@ -44,16 +43,19 @@ export const DropdownSingleQuestion = ({
   const handleCreate =
     answering && !isMulti && allowCreate && dataset.onCreate
       ? (value: string) => {
-          dataset.onCreate!(value).then((record) => {
-            const option = dataset.mapOptions(
-              record
-            ) as F0SelectItemObject<string>
-            onQuestionChange?.({
-              id: props.id,
-              type: "dropdown-single",
-              value: option.value,
-            })
-          })
+          return dataset.onCreate!(value).then(
+            (record) => {
+              const option = dataset.mapOptions(record)
+              onQuestionChange?.({
+                id: props.id,
+                type: "dropdown-single",
+                value: option.value,
+              })
+            },
+            (err: unknown) => {
+              console.warn("[SurveyFormBuilder] onCreate failed:", err)
+            }
+          )
         }
       : undefined
 

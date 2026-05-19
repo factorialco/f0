@@ -637,4 +637,130 @@ describe("Select", () => {
       expect(screen.queryByText("Carol")).not.toBeInTheDocument()
     })
   })
+
+  describe("onCreate", () => {
+    it("shows create button in empty state when search has text", async () => {
+      const user = userEvent.setup()
+      const handleCreate = vi.fn()
+
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          showSearchBox
+          onCreate={handleCreate}
+        />
+      )
+
+      await openSelect(user)
+
+      const searchInput = screen.getByRole("searchbox")
+      await user.type(searchInput, "nonexistent")
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", { name: /Create "nonexistent"/ })
+        ).toBeInTheDocument()
+      })
+    })
+
+    it("does not show create button when search is empty", async () => {
+      const user = userEvent.setup()
+      const handleCreate = vi.fn()
+
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={[]}
+          showSearchBox
+          onCreate={handleCreate}
+        />
+      )
+
+      await openSelect(user)
+
+      await waitFor(() => {
+        expect(
+          screen.queryByRole("button", { name: /Create/ })
+        ).not.toBeInTheDocument()
+      })
+    })
+
+    it("calls onCreate with search text when create button is clicked", async () => {
+      const user = userEvent.setup()
+      const handleCreate = vi.fn()
+
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          showSearchBox
+          onCreate={handleCreate}
+        />
+      )
+
+      await openSelect(user)
+
+      const searchInput = screen.getByRole("searchbox")
+      await user.type(searchInput, "new item")
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", { name: /Create "new item"/ })
+        ).toBeInTheDocument()
+      })
+
+      await user.click(
+        screen.getByRole("button", { name: /Create "new item"/ })
+      )
+
+      expect(handleCreate).toHaveBeenCalledWith("new item")
+    })
+
+    it("clears search after async onCreate resolves", async () => {
+      const user = userEvent.setup()
+      let resolveCreate: () => void
+      const handleCreate = vi.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveCreate = resolve
+          })
+      )
+
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          showSearchBox
+          onCreate={handleCreate}
+        />
+      )
+
+      await openSelect(user)
+
+      const searchInput = screen.getByRole("searchbox")
+      await user.type(searchInput, "new item")
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", { name: /Create "new item"/ })
+        ).toBeInTheDocument()
+      })
+
+      await user.click(
+        screen.getByRole("button", { name: /Create "new item"/ })
+      )
+
+      // Search should still show while promise is pending
+      expect(handleCreate).toHaveBeenCalledWith("new item")
+
+      // Resolve the promise
+      resolveCreate!()
+
+      // After resolution, search should be cleared
+      await waitFor(() => {
+        expect(searchInput).toHaveValue("")
+      })
+    })
+  })
 })

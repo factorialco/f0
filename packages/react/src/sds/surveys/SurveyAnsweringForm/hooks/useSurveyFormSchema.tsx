@@ -9,7 +9,6 @@ import type {
 import type { F0Field, F0FileField } from "@/patterns/F0Form/fields/types"
 import type { F0SectionConfig } from "@/patterns/F0Form/types"
 import type { TranslationKey } from "@/lib/providers/i18n/i18n-provider-defaults"
-import type { F0SelectItemObject } from "@/components/F0Select/types"
 
 import { f0FormField } from "@/patterns/F0Form/f0Schema"
 import { F0FormField } from "@/patterns/F0FormField"
@@ -417,12 +416,18 @@ function buildFieldForQuestion(
               ? {
                   ...field,
                   onCreate: (searchValue: string) => {
-                    dataset.onCreate!(searchValue).then((record) => {
-                      const option = dataset.mapOptions(
-                        record
-                      ) as F0SelectItemObject<string>
-                      ;(onChange as (value: unknown) => void)(option.value)
-                    })
+                    return dataset.onCreate!(searchValue).then(
+                      (record) => {
+                        const option = dataset.mapOptions(record)
+                        ;(onChange as (value: unknown) => void)(option.value)
+                      },
+                      (err: unknown) => {
+                        console.warn(
+                          "[SurveyAnsweringForm] onCreate failed:",
+                          err
+                        )
+                      }
+                    )
                   },
                 }
               : field
