@@ -41,7 +41,6 @@ import {
   Search,
   Sliders,
   Upload,
-  Download,
 } from "@factorialco/f0-react/icons/app"
 import { useMemo, useState } from "react"
 import type { ReactNode } from "react"
@@ -862,16 +861,9 @@ function DetailView({
   const exceedPct = total > 0 ? (committed * 100) / total : 0
   const isArchived = b.status === "closed"
 
-  const scopeLabel =
-    b.scope === "company"
-      ? "Company"
-      : b.scope === "department"
-        ? "Department"
-        : "Team"
-
-  // Status pill shown in the header. When the budget is archived/closed we
-  // surface "Archived" neutral; otherwise we surface the computed health
-  // (within budget / at risk / over budget) using the canonical labels.
+  // Status pill shown in the header next to the title. When the budget is
+  // archived/closed we surface "Archived" neutral; otherwise we surface the
+  // computed health (within budget / at risk / over budget).
   const headerStatus: {
     label: string
     text: string
@@ -884,34 +876,62 @@ function DetailView({
         ? { label: "Status", text: "Budget at risk", variant: "warning" }
         : { label: "Status", text: "Within budget", variant: "positive" }
 
+  // Lifecycle status (active / draft / closed) — distinct from the health
+  // pill above. Surfaced inside the metadata row as a dot-tag, matching the
+  // production Figma for the budget detail header.
+  const lifecycleLabel =
+    b.status === "active"
+      ? "Active"
+      : b.status === "draft"
+        ? "Draft"
+        : "Archived"
+  const lifecycleColor: "viridian" | "yellow" | "smoke" =
+    b.status === "active"
+      ? "viridian"
+      : b.status === "draft"
+        ? "yellow"
+        : "smoke"
+
+  // Number of distinct training groups currently allocated to this budget.
+  const groupsCount = new Set(movements.map((m) => m.groupId)).size
+
+  // Start date of the budget period. Falls back to Jan 1st of `year` when the
+  // fixture doesn't define it, so existing budgets keep rendering.
+  const startDateIso = b.startDate ?? `${b.year}-01-01`
+
   return (
     <F0Box display="flex" flexDirection="column" gap="lg" padding="xl">
       <ResourceHeader
-        title={b.name}
+        title={fmtEur(total)}
         description={b.description}
         status={headerStatus}
         metadata={[
-          { label: "Year", value: { type: "text", content: String(b.year) } },
-          { label: "Scope", value: { type: "text", content: scopeLabel } },
-          { label: "Applies to", value: { type: "text", content: b.scopeName } },
           {
-            label: "Owner",
-            value: { type: "text", content: b.ownerEmployeeName },
+            label: "Budget type",
+            value: { type: "dot-tag", label: "Training", color: "malibu" },
+          },
+          {
+            label: "Date",
+            value: { type: "text", content: fmtDate(startDateIso) },
+          },
+          {
+            label: "Status",
+            value: {
+              type: "dot-tag",
+              label: lifecycleLabel,
+              color: lifecycleColor,
+            },
+          },
+          {
+            label: "Groups",
+            value: { type: "text", content: String(groupsCount) },
           },
         ]}
         primaryAction={{
-          label: "Edit budget",
+          label: "Edit",
           icon: Pencil,
           onClick: () => setIsEditOpen(true),
         }}
-        secondaryActions={[
-          {
-            label: "Export",
-            icon: Download,
-            hideLabel: true,
-            onClick: () => {},
-          },
-        ]}
       />
 
       {isArchived && (

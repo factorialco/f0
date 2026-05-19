@@ -460,6 +460,10 @@ export type TrainingBudget = {
   // Optional human-readable description shown on the budget detail header.
   // Mirrors the `description` field upstream FinanceBudget exposes.
   description?: string
+  // Optional start date of the budget period (ISO yyyy-mm-dd). Shown in the
+  // detail header as the "Date" metadata. When absent, consumers fall back
+  // to Jan 1st of `year`.
+  startDate?: string
   // Optional: legal entity that owns this budget. Currency is derived from
   // the legal entity at creation time (mirrors `FinanceBudget.legalEntityId`
   // upstream). Pre-existing fixtures omit it; consumers that need the
@@ -484,6 +488,7 @@ export const trainingBudgets: TrainingBudget[] = [
     ownerEmployeeName: "Javier Molina",
     description:
       "The Training Budget 2026 represents the total financial resources your organization allocates during the year to support employee learning and development.",
+    startDate: "2026-04-01",
   },
   {
     id: "bud-002",
@@ -501,6 +506,7 @@ export const trainingBudgets: TrainingBudget[] = [
     ownerEmployeeName: "Laura Soler",
     description:
       "Engineering-specific training budget covering technical conferences, certifications and platform learning subscriptions for the engineering organization.",
+    startDate: "2026-01-15",
   },
   {
     id: "bud-003",
@@ -518,6 +524,7 @@ export const trainingBudgets: TrainingBudget[] = [
     ownerEmployeeName: "Ana García",
     description:
       "Budget for the People & Talent department, used to fund manager workshops, leadership coaching and HR certifications.",
+    startDate: "2026-02-01",
   },
   {
     id: "bud-004",
@@ -535,6 +542,7 @@ export const trainingBudgets: TrainingBudget[] = [
     ownerEmployeeName: "Bernat Puig",
     description:
       "Draft budget for the Retail operations team. Will fund in-store coaching programs and mandatory compliance refreshers for store staff.",
+    startDate: "2026-03-01",
   },
 ]
 
