@@ -12,6 +12,8 @@ import type {
   SortingsStateMultiple,
 } from "@/hooks/datasource"
 
+import { extractDisplayValue } from "@/patterns/OneDataCollection/utils/csvExport"
+
 import { downloadAsCsv, downloadAsExcel } from "../utils/downloadHelpers"
 
 // Mirrors the caps used by OneDataCollection's own `useExportAction` so the
@@ -47,6 +49,10 @@ type DownloadableSource = {
 export type DownloadableColumn = {
   id: string
   label: string
+  /** Optional renderer from the table visualization. When present, its output
+   *  is funneled through `extractDisplayValue` so typed cells (person, status,
+   *  tag, …) export as human-readable strings instead of raw objects. */
+  render?: (item: RecordType) => unknown
 }
 
 interface UseCollectionDownloadActionsOptions {
@@ -220,9 +226,23 @@ export function useCollectionDownloadActions({
         const headerLabels = exportColumns.map((c) => c.label)
         const rowKeys = exportColumns.map((c) => c.id)
 
+        // Pre-resolve each cell: when the column has a renderer, use it (and
+        // extract the display value) so typed cells like `{ type: "person",
+        // value: { firstName, lastName } }` come out as plain text. Otherwise
+        // fall back to the raw field lookup keyed by column id.
+        const transformedRows = records.map((record) => {
+          const row: Record<string, unknown> = {}
+          for (const col of exportColumns) {
+            row[col.id] = col.render
+              ? extractDisplayValue(col.render(record))
+              : record[col.id]
+          }
+          return row
+        })
+
         if (fmt === "excel")
-          downloadAsExcel(headerLabels, records, title, rowKeys)
-        else downloadAsCsv(headerLabels, records, title, rowKeys)
+          downloadAsExcel(headerLabels, transformedRows, title, rowKeys)
+        else downloadAsCsv(headerLabels, transformedRows, title, rowKeys)
       } finally {
         setIsExporting(false)
       }
