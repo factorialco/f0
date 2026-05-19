@@ -214,6 +214,15 @@ export function useDashboardCompute(
 
       inflightRef.current = { key: requestKey, promise, controller }
 
+      // Drop the inflight entry once the request settles so a retry with the
+      // same key isn't pinned to a failed promise. Key-guarded to avoid
+      // clobbering a newer in-flight request that replaced ours mid-flight.
+      promise.finally(() => {
+        if (inflightRef.current?.key === requestKey) {
+          inflightRef.current = null
+        }
+      })
+
       return promise.then(
         (res) => res.results[itemId] ?? { error: "No result for item" }
       )
