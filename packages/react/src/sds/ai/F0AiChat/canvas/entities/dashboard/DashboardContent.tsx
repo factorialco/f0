@@ -538,14 +538,13 @@ export function ChatDashboard({
 
         return fetchItem(itemId, filterValues, navigationFilterValues).then(
           (result) => {
-            // Update filter options + derived filter definitions from the
-            // response so the chips reflect the latest compute pass.
+            // Always re-sync chip definitions from the latest compute pass.
+            // The polled-ref flag (used by the initial polling effect) only
+            // signals "we have data" — it must NOT gate subsequent updates,
+            // or the drawer would freeze on the first response forever.
             const opts = getFilterOptions()
             const derived = getDerivedFilters()
-            if (
-              (opts || derived.filters || derived.navigationFilters) &&
-              !filterOptionsPolledRef.current
-            ) {
+            if (opts || derived.filters || derived.navigationFilters) {
               if (opts) setFilterOptions(opts)
               setDerivedFilters(derived)
               filterOptionsPolledRef.current = true
