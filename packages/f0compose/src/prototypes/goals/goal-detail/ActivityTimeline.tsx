@@ -1,4 +1,4 @@
-import { F0Box, F0Heading, F0Text, F0TimelineRow } from "@factorialco/f0-react"
+import { F0Avatar, F0Box, F0Heading, F0Text } from "@factorialco/f0-react"
 
 import { findEmployee, employees } from "@/fixtures"
 
@@ -8,22 +8,6 @@ type Props = {
   entries: GoalActivity[]
 }
 
-/**
- * "Activity" timeline shown under the Sub-goals widget. Renders each
- * goal-progress update as an `F0TimelineRow` (sds/TimeLine) so the
- * vertical guide line, status dot and connector logic come from the
- * design-system component instead of bespoke markup.
- *
- * Each row uses:
- *  - `status: "completed"` — green check dot anchored on the line
- *  - `title: "<author> updated goal progress"`
- *  - `description: <DD/MM/YYYY>`
- *  - `metadata`: author avatar + "Current <prev> → <new>" + optional Note
- */
-/**
- * Fallback activity entries shown when a goal has no real activity data.
- * Ensures the timeline always renders something meaningful in the prototype.
- */
 const fallbackEntries: GoalActivity[] = [
   {
     id: "act-fallback-1",
@@ -53,50 +37,77 @@ export function ActivityTimeline({ entries }: Props) {
   return (
     <F0Box display="flex" flexDirection="column" gap="lg">
       <F0Heading content="Activity" variant="heading" as="h3" />
-      <F0Box display="flex" flexDirection="column">
-        {displayEntries.map((entry, idx) => {
+      <F0Box display="flex" flexDirection="column" gap="xl">
+        {displayEntries.map((entry) => {
           const author = findEmployee(entry.authorId) ?? employees[0]
-          const firstName = author.preferredName ?? author.fullName.split(" ")[0]
+          const firstName =
+            author.preferredName ?? author.fullName.split(" ")[0]
           const lastName = author.fullName.split(" ").slice(-1).join(" ")
-          const isLast = idx === displayEntries.length - 1
 
           return (
-            <F0TimelineRow
-              key={entry.id}
-              status={entry.status ?? "completed"}
-              title={`${author.fullName} updated goal progress`}
-              description={formatDate(entry.date)}
-              isLast={isLast}
-              metadata={[
-                {
-                  label: "Author",
-                  hideLabel: true,
-                  value: {
-                    type: "avatar",
-                    variant: {
-                      type: "person",
-                      firstName,
-                      lastName,
-                      src: author.avatarUrl,
-                    },
-                    text: author.fullName,
-                  },
-                },
-                {
-                  label: "Current",
-                  value: {
-                    type: "text",
-                    content: `${formatNumber(entry.previousValue)} → ${formatNumber(entry.newValue)}`,
-                  },
-                },
-                entry.note
-                  ? {
-                      label: "Note",
-                      value: { type: "text", content: entry.note },
-                    }
-                  : undefined,
-              ]}
-            />
+            <F0Box key={entry.id} display="flex" gap="sm">
+              <F0Avatar
+                avatar={{
+                  type: "person",
+                  firstName,
+                  lastName,
+                  src: author.avatarUrl,
+                }}
+                size="md"
+              />
+              <F0Box display="flex" flexDirection="column" gap="xs" grow>
+                <F0Box display="flex" flexDirection="column">
+                  <F0Text
+                    content={`${author.fullName} updated goal progress`}
+                    variant="body"
+                  />
+                  <F0Text
+                    content={formatDate(entry.date)}
+                    variant="description"
+                  />
+                </F0Box>
+                <F0Box
+                  borderRadius="md"
+                  borderColor="default"
+                  border="default"
+                  overflow="hidden"
+                >
+                  <F0Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="between"
+                    padding="md"
+                  >
+                    <F0Text content="Current" variant="description" />
+                    <F0Box display="flex" alignItems="center" gap="xs">
+                      <F0Text
+                        content={`~~${formatNumber(entry.previousValue)}€~~`}
+                        variant="description"
+                      />
+                      <F0Text content="→" variant="description" />
+                      <F0Text
+                        content={`${formatNumber(entry.newValue)}€`}
+                        variant="body"
+                      />
+                    </F0Box>
+                  </F0Box>
+                  {entry.note && (
+                    <F0Box borderTop="default" borderColor="default" />
+                  )}
+                  {entry.note && (
+                    <F0Box
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="between"
+                      padding="md"
+                    >
+                      <F0Text content="Note" variant="description" />
+                      <F0Text content={entry.note} variant="body" />
+                    </F0Box>
+                  )}
+                </F0Box>
+              </F0Box>
+            </F0Box>
           )
         })}
       </F0Box>

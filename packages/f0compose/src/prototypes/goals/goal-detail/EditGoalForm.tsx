@@ -23,11 +23,13 @@ const editGoalSchema = z.object({
   status: f0FormField.select({
     label: "Status",
     options: [
-      { value: "not-started", label: "Not started" },
       { value: "on-track", label: "On track" },
       { value: "off-track", label: "Off track" },
+      { value: "at-risk", label: "At Risk" },
+      { value: "partial", label: "Partial" },
       { value: "achieved", label: "Achieved" },
-      { value: "cancelled", label: "Cancelled" },
+      { value: "missed", label: "Missed" },
+      { value: "cancelled", label: "Canceled" },
     ],
   }),
 

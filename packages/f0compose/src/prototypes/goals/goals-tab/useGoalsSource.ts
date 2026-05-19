@@ -12,22 +12,88 @@ import {
 } from "../shared/fixtures"
 import type { GoalRecord, GoalStatus } from "../shared/types"
 
-/** The logged-in user id used for "My goals" and "Created by me". */
-const CURRENT_USER = "emp-001"
-
 /**
- * Goals that need attention: cancelled, or not-started/on-track but
- * past their due date (simulated "today" = 2026-04-01).
+ * A row can be either a goal or a group header (employee/team).
+ * We use a discriminated union so columns can render both.
  */
-function needsAttention(g: GoalRecord): boolean {
-  if (g.status === "cancelled" || g.status === "off-track") return true
-  const today = new Date("2026-04-01")
-  const due = new Date(g.dueDate)
-  return (
-    (g.status === "not-started" || g.status === "on-track") &&
-    due < today &&
-    g.progress < 100
-  )
+export type GoalRow =
+  | (GoalRecord & { _rowType: "goal" })
+  | {
+      _rowType: "employee"
+      id: string
+      firstName: string
+      lastName: string
+      avatarUrl?: string
+      goalCount: number
+      progress: number
+    }
+  | {
+      _rowType: "team"
+      id: string
+      name: string
+      goalCount: number
+      progress: number
+    }
+
+function buildEmployeeRows(
+  companyId: CompanyId,
+  extraGoals: GoalRecord[]
+): GoalRow[] {
+  const allGoals = [...getGoalsByScope("all", companyId), ...extraGoals]
+  return employees
+    .map((emp) => {
+      const empGoals = allGoals.filter((g) => {
+        const a = g.assignee
+        if (a.type === "individual" && a.employeeId === emp.id) return true
+        if (a.type === "group" && a.employeeIds.includes(emp.id)) return true
+        return false
+      })
+      const progress =
+        empGoals.length > 0
+          ? Math.round(
+              empGoals.reduce((sum, g) => sum + g.progress, 0) / empGoals.length
+            )
+          : 0
+      return {
+        _rowType: "employee" as const,
+        id: emp.id,
+        firstName: emp.preferredName ?? emp.fullName.split(" ")[0],
+        lastName: emp.fullName.split(" ").slice(-1).join(" "),
+        avatarUrl: emp.avatarUrl,
+        goalCount: empGoals.length,
+        progress,
+      }
+    })
+    .filter((r) => r.goalCount > 0)
+}
+
+function buildTeamRows(
+  companyId: CompanyId,
+  extraGoals: GoalRecord[]
+): GoalRow[] {
+  const allGoals = [...getGoalsByScope("all", companyId), ...extraGoals]
+  return teams
+    .map((team) => {
+      const teamGoals = allGoals.filter((g) => {
+        const a = g.assignee
+        return a.type === "team" && a.teamId === team.id
+      })
+      const progress =
+        teamGoals.length > 0
+          ? Math.round(
+              teamGoals.reduce((sum, g) => sum + g.progress, 0) /
+                teamGoals.length
+            )
+          : 0
+      return {
+        _rowType: "team" as const,
+        id: team.id,
+        name: team.name,
+        goalCount: teamGoals.length,
+        progress,
+      }
+    })
+    .filter((r) => r.goalCount > 0)
 }
 
 export function useGoalsSource(
@@ -38,28 +104,43 @@ export function useGoalsSource(
   companyId: CompanyId
 ) {
   const counts = getGoalCounts(companyId)
+  const employeeCount = employees.filter((emp) => {
+    const allGoals = [...getGoalsByScope("all", companyId), ...extraGoals]
+    return allGoals.some((g) => {
+      const a = g.assignee
+      if (a.type === "individual" && a.employeeId === emp.id) return true
+      if (a.type === "group" && a.employeeIds.includes(emp.id)) return true
+      return false
+    })
+  }).length
+  const teamCount = teams.filter((team) => {
+    const allGoals = [...getGoalsByScope("all", companyId), ...extraGoals]
+    return allGoals.some((g) => {
+      const a = g.assignee
+      return a.type === "team" && a.teamId === team.id
+    })
+  }).length
 
-  // Extra preset counts (top-level goals only, before extraGoals)
-  const allTopLevel = getGoalsByScope("all", companyId)
-  const createdByMeCount = allTopLevel.filter(
-    (g) => g.ownerId === CURRENT_USER
-  ).length
-  const needsAttentionCount = allTopLevel.filter(needsAttention).length
-
-  return useDataCollectionSource<GoalRecord>(
+  return useDataCollectionSource<GoalRow>(
     {
       search: { enabled: true, sync: true },
+      navigationFilters: {
+        date: {
+          type: "date-navigator",
+          defaultValue: new Date("2026-01-01"),
+          granularity: ["year"],
+          defaultGranularity: "year",
+        },
+      },
       filters: {
         scope: {
           type: "in",
           label: "Scope",
           options: {
             options: [
-              { value: "team", label: "Team goals" },
               { value: "all", label: "All goals" },
-              { value: "mine", label: "My goals" },
-              { value: "created-by-me", label: "Created by me" },
-              { value: "needs-attention", label: "Needs attention" },
+              { value: "mine", label: "Employee" },
+              { value: "team", label: "Teams" },
             ],
           },
         },
@@ -68,11 +149,13 @@ export function useGoalsSource(
           label: "Status",
           options: {
             options: [
-              { value: "not-started", label: "Not started" },
               { value: "on-track", label: "On track" },
               { value: "off-track", label: "Off track" },
+              { value: "at-risk", label: "At Risk" },
+              { value: "partial", label: "Partial" },
               { value: "achieved", label: "Achieved" },
-              { value: "cancelled", label: "Cancelled" },
+              { value: "missed", label: "Missed" },
+              { value: "cancelled", label: "Canceled" },
             ],
           },
         },
@@ -132,32 +215,22 @@ export function useGoalsSource(
           },
         },
       },
-      currentFilters: { scope: ["team"] },
+      currentFilters: { scope: ["all"] },
       presets: [
-        {
-          label: "Team goals",
-          filter: { scope: ["team"] },
-          itemsCount: () => counts.team,
-        },
         {
           label: "All goals",
           filter: { scope: ["all"] },
           itemsCount: () => counts.all,
         },
         {
-          label: "My goals",
+          label: "Employee",
           filter: { scope: ["mine"] },
-          itemsCount: () => counts.mine,
+          itemsCount: () => employeeCount,
         },
         {
-          label: "Created by me",
-          filter: { scope: ["created-by-me"] },
-          itemsCount: () => createdByMeCount,
-        },
-        {
-          label: "Needs attention",
-          filter: { scope: ["needs-attention"] },
-          itemsCount: () => needsAttentionCount,
+          label: "Teams",
+          filter: { scope: ["team"] },
+          itemsCount: () => teamCount,
         },
       ],
       sortings: {
@@ -173,13 +246,71 @@ export function useGoalsSource(
           const term = (search ?? "").toLowerCase().trim()
           const scopeFilter = Array.isArray(filters?.scope)
             ? (filters.scope as string[])
-            : ["team"]
-          const activeScope = scopeFilter[0] as
-            | "team"
-            | "all"
-            | "mine"
-            | "created-by-me"
-            | "needs-attention"
+            : ["all"]
+          const activeScope = scopeFilter[0] as "team" | "all" | "mine"
+
+          // ─── Grouped views ───────────────────────────────────────
+          if (activeScope === "mine") {
+            let rows = buildEmployeeRows(companyId, extraGoals)
+            if (term) {
+              rows = rows.filter((r) => {
+                if (r._rowType !== "employee") return false
+                return `${r.firstName} ${r.lastName}`
+                  .toLowerCase()
+                  .includes(term)
+              })
+            }
+            const perPage = pagination?.perPage ?? 20
+            const currentPage =
+              pagination &&
+              "currentPage" in pagination &&
+              pagination.currentPage
+                ? pagination.currentPage
+                : 1
+            const total = rows.length
+            const pagesCount = Math.max(1, Math.ceil(total / perPage))
+            const start = (currentPage - 1) * perPage
+            const records = rows.slice(start, start + perPage)
+            return {
+              type: "pages" as const,
+              records,
+              total,
+              perPage,
+              currentPage,
+              pagesCount,
+            }
+          }
+
+          if (activeScope === "team") {
+            let rows = buildTeamRows(companyId, extraGoals)
+            if (term) {
+              rows = rows.filter((r) => {
+                if (r._rowType !== "team") return false
+                return r.name.toLowerCase().includes(term)
+              })
+            }
+            const perPage = pagination?.perPage ?? 20
+            const currentPage =
+              pagination &&
+              "currentPage" in pagination &&
+              pagination.currentPage
+                ? pagination.currentPage
+                : 1
+            const total = rows.length
+            const pagesCount = Math.max(1, Math.ceil(total / perPage))
+            const start = (currentPage - 1) * perPage
+            const records = rows.slice(start, start + perPage)
+            return {
+              type: "pages" as const,
+              records,
+              total,
+              perPage,
+              currentPage,
+              pagesCount,
+            }
+          }
+
+          // ─── All goals view ──────────────────────────────────────
           const statusFilter = Array.isArray(filters?.status)
             ? (filters.status as GoalStatus[])
             : []
@@ -194,38 +325,19 @@ export function useGoalsSource(
             ? (filters.assigneeEmployee as string[])
             : []
 
-          let goals: GoalRecord[]
-          if (activeScope === "created-by-me") {
-            goals = [
-              ...getGoalsByScope("all", companyId).filter(
-                (g) => g.ownerId === CURRENT_USER
-              ),
-              ...extraGoals.filter((g) => g.ownerId === CURRENT_USER),
-            ]
-          } else if (activeScope === "needs-attention") {
-            goals = [
-              ...getGoalsByScope("all", companyId).filter(needsAttention),
-              ...extraGoals.filter(needsAttention),
-            ]
-          } else {
-            goals = [
-              ...getGoalsByScope(activeScope, companyId),
-              ...extraGoals,
-            ]
-          }
+          let goals: GoalRecord[] = [
+            ...getGoalsByScope("all", companyId),
+            ...extraGoals,
+          ]
 
-          // Apply status filter
           if (statusFilter.length > 0) {
             goals = goals.filter((g) => statusFilter.includes(g.status))
           }
 
-          // Apply due date filter (goals due on or before selected date)
           if (dueDateFilter) {
             goals = goals.filter((g) => g.dueDate <= dueDateFilter)
           }
 
-          // Apply assignee filter. Top-level type narrows the assignee
-          // shape; the optional team/employee sub-filters narrow further.
           if (assigneeTypes.length > 0) {
             goals = goals.filter((g) => {
               const a = g.assignee
@@ -255,7 +367,6 @@ export function useGoalsSource(
             })
           }
 
-          // Apply search
           const filtered = goals.filter((g) =>
             term === "" ? true : g.title.toLowerCase().includes(term)
           )
@@ -277,13 +388,17 @@ export function useGoalsSource(
 
           const perPage = pagination?.perPage ?? 20
           const currentPage =
-            pagination && "currentPage" in pagination && pagination.currentPage
+            pagination &&
+            "currentPage" in pagination &&
+            pagination.currentPage
               ? pagination.currentPage
               : 1
           const total = sorted.length
           const pagesCount = Math.max(1, Math.ceil(total / perPage))
           const start = (currentPage - 1) * perPage
-          const records = sorted.slice(start, start + perPage)
+          const records: GoalRow[] = sorted
+            .slice(start, start + perPage)
+            .map((g) => ({ ...g, _rowType: "goal" as const }))
 
           return {
             type: "pages" as const,
@@ -295,17 +410,70 @@ export function useGoalsSource(
           }
         },
       },
-      itemsWithChildren: (item: GoalRecord) => item.childrenIds.length > 0,
-      childrenCount: ({ item }: { item: GoalRecord }) => item.childrenIds.length,
-      fetchChildren: async ({ item }: { item: GoalRecord }) => {
-        const children = getGoalChildren(item.id)
-        return {
-          records: children,
-          type: "basic" as const,
-        }
+      itemsWithChildren: (item: GoalRow) => {
+        if (item._rowType === "goal") return item.childrenIds.length > 0
+        return true
       },
-      selectable: (item: GoalRecord) => item.id,
-      itemOnClick: (item: GoalRecord) => () => onSelectGoal(item.id),
+      childrenCount: ({ item }: { item: GoalRow }) => {
+        if (item._rowType === "goal") return item.childrenIds.length
+        if (item._rowType === "employee") return item.goalCount
+        if (item._rowType === "team") return item.goalCount
+        return 0
+      },
+      fetchChildren: async ({ item }: { item: GoalRow }) => {
+        if (item._rowType === "goal") {
+          const children = getGoalChildren(item.id)
+          return {
+            records: children.map((g) => ({
+              ...g,
+              _rowType: "goal" as const,
+            })),
+            type: "basic" as const,
+          }
+        }
+        if (item._rowType === "employee") {
+          const allGoals = [
+            ...getGoalsByScope("all", companyId),
+            ...extraGoals,
+          ]
+          const empGoals = allGoals.filter((g) => {
+            const a = g.assignee
+            if (a.type === "individual" && a.employeeId === item.id) return true
+            if (a.type === "group" && a.employeeIds.includes(item.id))
+              return true
+            return false
+          })
+          return {
+            records: empGoals.map((g) => ({
+              ...g,
+              _rowType: "goal" as const,
+            })),
+            type: "basic" as const,
+          }
+        }
+        if (item._rowType === "team") {
+          const allGoals = [
+            ...getGoalsByScope("all", companyId),
+            ...extraGoals,
+          ]
+          const teamGoals = allGoals.filter((g) => {
+            const a = g.assignee
+            return a.type === "team" && a.teamId === item.id
+          })
+          return {
+            records: teamGoals.map((g) => ({
+              ...g,
+              _rowType: "goal" as const,
+            })),
+            type: "basic" as const,
+          }
+        }
+        return { records: [], type: "basic" as const }
+      },
+      selectable: (item: GoalRow) => item.id,
+      itemOnClick: (item: GoalRow) => () => {
+        if (item._rowType === "goal") onSelectGoal(item.id)
+      },
       primaryActions: () => ({
         label: "New goal",
         icon: Add,
@@ -326,17 +494,20 @@ export function useGoalsSource(
           },
         ],
       }),
-      itemActions: (item: GoalRecord) => [
-        {
-          label: "Update goal",
-          icon: Pencil,
-          onClick: () => onEditGoal(item.id),
-          type: "primary" as const,
-        },
-        { label: "View details", onClick: () => onSelectGoal(item.id) },
-        { type: "separator" as const },
-        { label: "Delete", onClick: () => {}, critical: true },
-      ],
+      itemActions: (item: GoalRow) => {
+        if (item._rowType !== "goal") return []
+        return [
+          {
+            label: "Update goal",
+            icon: Pencil,
+            onClick: () => onEditGoal(item.id),
+            type: "primary" as const,
+          },
+          { label: "View details", onClick: () => onSelectGoal(item.id) },
+          { type: "separator" as const },
+          { label: "Delete", onClick: () => {}, critical: true },
+        ]
+      },
     },
     [onCreateGoal, onSelectGoal, onEditGoal, extraGoals, companyId]
   )

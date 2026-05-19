@@ -132,7 +132,7 @@ export function CreateGoalForm({ onCreateGoal }: Props) {
           type: "individual",
           employeeId: formData.assignee ?? "emp-001",
         },
-        status: "not-started",
+        status: "on-track",
         measure: buildMeasure(formData),
         progress: 0,
         startDate: new Date().toISOString().split("T")[0],

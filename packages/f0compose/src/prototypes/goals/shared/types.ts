@@ -1,8 +1,10 @@
 export type GoalStatus =
-  | "not-started"
   | "on-track"
   | "off-track"
+  | "at-risk"
+  | "partial"
   | "achieved"
+  | "missed"
   | "cancelled"
 export type GoalScope = "team" | "all" | "mine"
 
@@ -35,4 +37,8 @@ export type GoalRecord = {
   childrenIds: string[]
   /** Which preset bucket this goal belongs to */
   scope: GoalScope
+  /** Incentive plans linked to this goal */
+  incentivePlans?: string[]
+  /** Action plans linked to this goal */
+  actionPlans?: string[]
 }

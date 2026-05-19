@@ -516,22 +516,117 @@ export default function <Slug>() {
 }
 ```
 
-## Step 6 — Composition: ONLY f0 components, NO bare HTML
+## Step 6 — Composition: ONLY f0 components, NO bare HTML (ZERO TOLERANCE)
 
-| Bad (HTML) | Good (f0) |
-|---|---|
-| `<div>` for layout | `F0Box display="flex|grid" gap padding ...` |
-| `<span>` `<p>` text | `F0Text content="..." variant="body|small|description|label|code|inverse"` |
-| `<h1>`–`<h4>` | `F0Heading content="..." variant="heading|heading-large" as="h1|h2|h3|h4|h5|h6"` |
-| `<button>` | `F0Button label="..." variant="default|outline|neutral|critical"` |
-| `<a>` | `F0Link` (or `<Link>` from react-router-dom for in-app nav) |
-| `<img>` (avatar) | `F0Avatar avatar={{ type: "person", firstName, lastName, src }} size="xs|sm|md"` |
-| `<svg>` icon | `F0Icon icon={IconComponent} size="xs|sm|md"` |
-| `<ul>` `<li>` lists | **OneDataCollection** with table or list visualization |
-| `<table>` | **OneDataCollection** |
-| Status pill | Tailwind `<span>` only as last resort — prefer `F0TagStatus` (`text`+`variant`) or compound cell `status`/`dotTag` |
+**This is the single most important rule in f0compose.** Prototypes are
+reference implementations that developers lift into production. Every bare
+`<div>` or `<span>` that ships teaches devs to bypass the design system.
 
-If you don't know which f0 component to use, search:
+### The rule
+
+**Every element in a prototype MUST be an f0 component.** There are NO
+exceptions, NO "just this once", NO "it's only a wrapper". If you can't
+find an f0 component for something, you're either looking in the wrong
+place or the design needs simplification.
+
+### The mapping (memorize this)
+
+| Bare HTML | f0 replacement | Notes |
+|---|---|---|
+| `<div>` for layout | `<F0Box display="flex\|grid" gap="..." padding="..." ...>` | F0Box covers ALL layout needs: flex, grid, gap, padding, margin, alignment, responsive breakpoints |
+| `<div>` as a container / wrapper | `<F0Box>` with no visual props | Even "invisible" wrappers MUST be F0Box |
+| `<div className="flex flex-col gap-4">` | `<F0Box display="flex" flexDirection="column" gap="md">` | Use F0Box typed props, NOT className for layout |
+| `<span>` / `<p>` for text | `<F0Text content="..." variant="body\|small\|description\|label\|code\|inverse" />` | ALL text goes through F0Text |
+| `<span>` for inline styled text | `<F0Text content="..." variant="..." />` inside an `<F0Box display="flex">` | For strikethrough / bold, use F0Text + Tailwind `className` on F0Text |
+| `<h1>`–`<h6>` | `<F0Heading content="..." variant="heading\|heading-large" as="h1\|h2\|h3\|h4\|h5\|h6" />` | |
+| `<button>` | `<F0Button label="..." variant="default\|outline\|neutral\|critical" />` | |
+| `<a>` | `<F0Link>` or `<Link>` from react-router-dom | |
+| `<img>` (avatar) | `<F0Avatar avatar={{ type: "person", firstName, lastName, src }} size="xs\|sm\|md" />` | |
+| `<svg>` icon | `<F0Icon icon={IconComponent} size="xs\|sm\|md" />` | |
+| `<ul>` / `<li>` / `<table>` | **OneDataCollection** | |
+| Status pill | `<F0TagStatus text="..." variant="..." />` | |
+| Separator / divider | `<F0Box borderColor="primary" borderWidth="top">` or `<F0Divider />` | Never `<div className="border-t ...">` |
+
+### Tailwind className: ONLY for properties F0Box doesn't expose
+
+F0Box exposes: `display`, `flexDirection`, `flexWrap`, `alignItems`,
+`justifyContent`, `gap`, `padding`, `paddingX`, `paddingY`, `grow`,
+`columns`, `background`, `border`, `borderColor`, `borderRadius`,
+`borderWidth`, `overflow`, responsive (`sm`, `md`, `lg`, `xl`).
+
+Use `className` on F0Box **only** for:
+- Width/height (`w-full`, `h-40`, `min-h-0`, `max-w-md`)
+- Position (`relative`, `absolute`, `sticky`)
+- Specific spacing that F0Box's `gap`/`padding` tokens don't cover
+- Text decoration on F0Text (`line-through`, `font-medium`)
+- Opacity, transitions, animations
+
+**Never** use `className` for: flex direction, gap, padding, alignment,
+background color, border color, border radius — those all have typed F0Box
+props.
+
+### The grep check (run in Step 12)
+
+```bash
+grep -rE "<(div|span|p|ul|ol|li|button|a |img|table|thead|tbody|tr|td|th|h[1-6]|section|article|nav|main|aside|header|footer|form|input|select|textarea|label)\b" src/prototypes/<slug>/
+```
+
+If this returns ANY match, the prototype is NOT done. Go back and replace
+every instance with f0 components.
+
+### Common patterns that WRONGLY use bare HTML
+
+❌ **Activity timeline with divs:**
+```tsx
+<div className="flex gap-3">
+  <F0Avatar ... />
+  <div className="flex flex-1 flex-col gap-2">
+    <span className="line-through">{old}</span>
+  </div>
+</div>
+```
+
+✅ **Correct — all F0Box + F0Text:**
+```tsx
+<F0Box display="flex" gap="sm">
+  <F0Avatar ... />
+  <F0Box display="flex" flexDirection="column" gap="xs" grow>
+    <F0Text content={old} variant="description" className="line-through" />
+  </F0Box>
+</F0Box>
+```
+
+❌ **Card-like bordered container:**
+```tsx
+<div className="overflow-hidden rounded-lg border border-solid border-f1-border">
+  <div className="flex items-center justify-between px-4 py-3">...</div>
+  <div className="border-t border-solid border-f1-border" />
+</div>
+```
+
+✅ **Correct — F0Box with border props:**
+```tsx
+<F0Box borderRadius="md" borderColor="primary" borderWidth="all" overflow="hidden">
+  <F0Box display="flex" alignItems="center" justifyContent="space-between" padding="md">...</F0Box>
+  <F0Box borderWidth="top" borderColor="primary" />
+</F0Box>
+```
+
+❌ **Inline number formatting with spans:**
+```tsx
+<span className="text-f1-foreground-secondary line-through">9.203.000€</span>
+<span className="text-f1-foreground-secondary">→</span>
+<span className="font-medium text-f1-foreground">10.000.000€</span>
+```
+
+✅ **Correct — F0Text:**
+```tsx
+<F0Text content="9.203.000€" variant="description" className="line-through" />
+<F0Text content="→" variant="description" />
+<F0Text content="10.000.000€" variant="body" className="font-medium" />
+```
+
+### If you don't know which f0 component to use, search:
 
 ```bash
 grep -rn "<DESCRIPTION>" packages/react/src/{components,patterns,kits}
@@ -980,7 +1075,7 @@ Both green. Plus visually:
 
 - Catalog shows the new card in the right category.
 - `/p/<slug>` renders without console errors.
-- No bare HTML in any file under `src/prototypes/<slug>/` (`grep -rE "<(div|span|p|ul|li|button|a |img|table|h[1-6])\b" src/prototypes/<slug>/` returns nothing).
+- No bare HTML in any file under `src/prototypes/<slug>/` (`grep -rE "<(div|span|p|ul|ol|li|button|a |img|table|thead|tbody|tr|td|th|h[1-6]|section|article|nav|main|aside|header|footer|form|input|select|textarea|label)\b" src/prototypes/<slug>/` returns nothing). **This is a hard gate — do NOT proceed until it passes.** If it returns matches, replace EVERY one with f0 components (F0Box, F0Text, F0Heading, etc.) before declaring the prototype done.
 - Cells in OneDataCollection display values (not blank) — if blank, the `render` returns the wrong shape (see §11).
 - **Sort, search, and pagination all behave for real**: click a sortable column header → row order changes; type in the search box → rows narrow; navigate to page 2 → the table shows different rows. If any of those don't change anything visible, the corresponding handling in `fetchData` is missing — go back to Step 7.
 
@@ -1061,7 +1156,7 @@ After generating, ask the user if they want an `impeccable audit` pass. `f0-desi
 
 ## Anti-patterns (immediate fails)
 
-- DON'T use bare HTML.
+- DON'T use bare HTML. **ZERO TOLERANCE.** Any `<div>`, `<span>`, `<p>`, `<ul>`, `<li>`, `<button>`, `<a>`, `<img>`, `<table>`, `<section>`, `<article>`, `<nav>`, `<header>`, `<footer>`, `<form>`, `<input>`, `<select>`, `<textarea>`, `<label>`, or `<h1>`–`<h6>` is a hard fail. Replace with f0 components per Step 6. This includes "structural" divs, "invisible" wrapper divs, and divs-as-separators. There is NO justified use of bare HTML in a prototype.
 - DON'T use `<ul>` / `<table>` / `<li>` — use OneDataCollection.
 - DON'T import or render `ApplicationFrame` or `Page` outside the framework's expected places.
 - DON'T render `<Tabs>` outside of `Page.header`.

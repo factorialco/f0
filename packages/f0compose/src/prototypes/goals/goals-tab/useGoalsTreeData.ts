@@ -10,21 +10,10 @@ export type TreeNode = {
 }
 
 export type GoalsTreeFilters = {
-  scope: "team" | "all" | "mine" | "created-by-me" | "needs-attention"
+  scope: "all" | "mine" | "team"
   search: string
   statuses: GoalStatus[]
   dueDate?: string
-}
-
-function needsAttention(g: GoalRecord): boolean {
-  if (g.status === "cancelled" || g.status === "off-track") return true
-  const today = new Date("2026-04-01")
-  const due = new Date(g.dueDate)
-  return (
-    (g.status === "not-started" || g.status === "on-track") &&
-    due < today &&
-    g.progress < 100
-  )
 }
 
 /**
@@ -61,16 +50,11 @@ export function useGoalsTreeData(
   const term = search.trim().toLowerCase()
 
   let roots: GoalRecord[]
-  if (scope === "created-by-me") {
+  if (scope === "mine") {
     roots = [
       ...getGoalsByScope("all", companyId),
       ...extraGoals.filter((g) => g.parentId === null),
     ].filter((g) => g.ownerId === CURRENT_USER)
-  } else if (scope === "needs-attention") {
-    roots = [
-      ...getGoalsByScope("all", companyId),
-      ...extraGoals.filter((g) => g.parentId === null),
-    ].filter(needsAttention)
   } else if (scope === "all") {
     roots = [
       ...getGoalsByScope("all", companyId),

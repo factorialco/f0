@@ -1,74 +1,70 @@
-import { F0Card, F0Text } from "@factorialco/f0-react"
+import { F0Box, F0Card, F0Text, type IconType } from "@factorialco/f0-react"
 import { Calendar, Group, Person, Target } from "@factorialco/f0-react/icons/app"
 
 import type { GoalAssignee, GoalRecord, GoalStatus } from "../shared/types"
 import type { TreeNode } from "./useGoalsTreeData"
 
-function statusLabel(s: GoalStatus): string {
-  switch (s) {
-    case "not-started":
-      return "Not started"
+function statusLabel(status: GoalStatus): string {
+  switch (status) {
     case "on-track":
       return "On track"
     case "off-track":
       return "Off track"
+    case "at-risk":
+      return "At Risk"
+    case "partial":
+      return "Partial"
     case "achieved":
       return "Achieved"
+    case "missed":
+      return "Missed"
     case "cancelled":
-      return "Cancelled"
+      return "Canceled"
   }
 }
 
 function statusVariant(
-  s: GoalStatus
-): "neutral" | "info" | "positive" | "critical" | "warning" {
-  switch (s) {
-    case "not-started":
-      return "neutral"
+  status: GoalStatus
+): "neutral" | "info" | "positive" | "critical" {
+  switch (status) {
     case "on-track":
       return "info"
     case "off-track":
-      return "warning"
+    case "at-risk":
+    case "missed":
+      return "critical"
+    case "partial":
+    case "cancelled":
+      return "neutral"
     case "achieved":
       return "positive"
-    case "cancelled":
-      return "critical"
   }
 }
 
-function describeAssigneeText(a: GoalAssignee): string {
-  switch (a.type) {
-    case "company":
-      return a.name
-    case "department":
-      return "Department"
-    case "team":
-      return "Team"
-    case "area":
-      return a.name
-    case "group":
-      return `${a.employeeIds.length} people`
-    case "individual":
-      return "Individual"
-  }
+function assigneeIcon(assignee: GoalAssignee): IconType {
+  if (assignee.type === "team" || assignee.type === "group") return Group
+  return Person
 }
 
-function assigneeIcon(a: GoalAssignee) {
-  switch (a.type) {
+function describeAssigneeText(assignee: GoalAssignee): string {
+  switch (assignee.type) {
     case "individual":
-      return Person
-    case "group":
+      return assignee.employeeId
     case "team":
-    case "department":
-    case "area":
-      return Group
+      return assignee.teamId
     case "company":
-      return Target
+      return assignee.name
+    case "area":
+      return assignee.name
+    case "department":
+      return assignee.departmentId
+    case "group":
+      return `${assignee.employeeIds.length} people`
   }
 }
 
 /**
- * One card per goal. Width is fixed so cards align across columns.
+ * Renders a single goal as a card with metadata.
  */
 function GoalCard({
   goal,
@@ -78,7 +74,7 @@ function GoalCard({
   onSelect: (id: string) => void
 }) {
   return (
-    <div className="w-[280px]">
+    <F0Box width="64">
       <F0Card
         title={goal.title}
         compact
@@ -135,7 +131,7 @@ function GoalCard({
           },
         ]}
       />
-    </div>
+    </F0Box>
   )
 }
 
@@ -143,9 +139,6 @@ function GoalCard({
  * Renders one branch of the tree: a parent card on the left and its
  * children stacked vertically on the right, separated by a connector
  * column drawn with SVG.
- *
- * The recursion is depth-first: each child is itself rendered by Branch
- * so arbitrary nesting works.
  */
 function Branch({
   node,
@@ -157,28 +150,30 @@ function Branch({
   const hasChildren = node.children.length > 0
 
   return (
-    <div className="flex items-stretch">
-      {/* Parent card column */}
-      <div className="flex flex-col justify-center">
+    <F0Box display="flex" alignItems="stretch">
+      <F0Box display="flex" flexDirection="column" justifyContent="center">
         <GoalCard goal={node.goal} onSelect={onSelect} />
-      </div>
+      </F0Box>
 
       {hasChildren && (
         <>
-          {/* Connector column */}
-          <div className="relative w-16 shrink-0">
+          <F0Box position="relative" width="16" shrink>
             <Connector count={node.children.length} />
-            {/* Children count badge centered on the connector */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-f1-background-secondary px-2 py-0.5">
+            <F0Box
+              position="absolute"
+              background="secondary"
+              borderRadius="full"
+              paddingX="sm"
+              paddingY="xs"
+            >
               <F0Text
                 content={String(node.children.length)}
                 variant="small"
               />
-            </div>
-          </div>
+            </F0Box>
+          </F0Box>
 
-          {/* Children column (each child is itself a branch) */}
-          <div className="flex flex-col gap-4">
+          <F0Box display="flex" flexDirection="column" gap="md">
             {node.children.map((child) => (
               <Branch
                 key={child.goal.id}
@@ -186,17 +181,15 @@ function Branch({
                 onSelect={onSelect}
               />
             ))}
-          </div>
+          </F0Box>
         </>
       )}
-    </div>
+    </F0Box>
   )
 }
 
 /**
- * SVG that draws an orthogonal connector from the left edge (parent
- * side) to N points distributed vertically on the right edge (one per
- * child). Stretches to fill the parent height.
+ * SVG connector from parent to children.
  */
 function Connector({ count }: { count: number }) {
   if (count === 0) return null
@@ -232,19 +225,19 @@ export function GoalsTreeView({
 }) {
   if (trees.length === 0) {
     return (
-      <div className="py-12 text-center">
+      <F0Box display="flex" justifyContent="center" paddingY="xl">
         <F0Text content="No goals match the current filters." variant="description" />
-      </div>
+      </F0Box>
     )
   }
 
   return (
-    <div className="overflow-auto pb-6">
-      <div className="flex flex-col gap-8">
+    <F0Box overflow="auto" paddingBottom="xl">
+      <F0Box display="flex" flexDirection="column" gap="xl">
         {trees.map((tree) => (
           <Branch key={tree.goal.id} node={tree} onSelect={onSelectGoal} />
         ))}
-      </div>
-    </div>
+      </F0Box>
+    </F0Box>
   )
 }

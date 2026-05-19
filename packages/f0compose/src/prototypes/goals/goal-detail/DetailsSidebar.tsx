@@ -58,7 +58,7 @@ export function DetailsSidebar({ goal, onSelectGoal }: Props) {
 
       <F0Box display="flex" flexDirection="column" gap="sm">
         <F0Text content="Progress over time" variant="label" />
-        <div className="h-40 w-full">
+        <F0Box height="18">
           <LineChart
             dataConfig={progressSeriesConfig}
             data={seriesData}
@@ -66,7 +66,7 @@ export function DetailsSidebar({ goal, onSelectGoal }: Props) {
             yAxis={{ hide: true }}
             lineType="linear"
           />
-        </div>
+        </F0Box>
       </F0Box>
 
       <F0Box display="flex" flexDirection="column" gap="sm">

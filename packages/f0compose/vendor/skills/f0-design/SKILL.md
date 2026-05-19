@@ -59,14 +59,34 @@ non-negotiable.
 - ALWAYS use `OneEmptyState` for empty lists. Never an empty `<ul>`.
 - Provide a clear primary action when applicable.
 
+### Components — STRICT f0 enforcement (zero bare HTML)
+
+**Every rendered element MUST be an f0 component.** No `<div>`, `<span>`,
+`<p>`, `<section>`, `<button>`, `<a>`, `<img>`, `<ul>`, `<li>`, `<table>`,
+`<h1>`–`<h6>`, `<form>`, `<input>`, or any other HTML tag.
+
+- Layout → `F0Box` (with typed props: `display`, `flexDirection`, `gap`, `padding`, `alignItems`, etc.)
+- Text → `F0Text` (with `content` string prop, `variant` for size/weight)
+- Headings → `F0Heading` (with `content`, `variant`, `as`)
+- Buttons → `F0Button`
+- Separators/dividers → `F0Box` with `borderWidth="top"` and `borderColor="primary"`
+- Avatars → `F0Avatar`
+- Icons → `F0Icon`
+- Lists/tables → `OneDataCollection`
+
+Tailwind `className` is allowed ONLY on f0 components, and ONLY for
+properties that F0Box doesn't expose (width, height, position, text-decoration,
+font-weight, transitions). Never use className for layout (flex, gap, padding,
+alignment) — use F0Box's typed props instead.
+
 ### Status badges
-- For `positive`/`warning`/`critical`/`info`/`neutral` semantics, use a
-  Tailwind `<span>` with `bg-f1-background-{semantic}` +
-  `text-f1-foreground-{semantic}`. The `Chip` component only supports
-  `default` and `selected` variants.
+- For `positive`/`warning`/`critical`/`info`/`neutral` semantics, use
+  `F0TagStatus` with `text` + `variant` props. The `Chip` component only
+  supports `default` and `selected` variants.
 
 ## Anti-patterns (combat AI slop)
 
+- **Bare HTML elements** — the #1 anti-pattern. ANY `<div>`, `<span>`, `<p>`, etc. is an immediate fail. Replace with f0 components.
 - Purple gradients in headers.
 - Centered everything.
 - Generic Inter at body size below 14px.
@@ -75,6 +95,7 @@ non-negotiable.
 - `text-gray-500` (use `text-f1-foreground-secondary`).
 - Decorative icons without semantic value.
 - Raw `<h1>` / `<p>` without `F0Heading` / `F0Text`.
+- Using `className` for flex/gap/padding/alignment instead of F0Box typed props.
 
 ## When in doubt
 

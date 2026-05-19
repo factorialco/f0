@@ -61,12 +61,10 @@ export default function Goals() {
     searchParams.get("mode") === "tree" ? "tree" : "table"
   const treeScope =
     (searchParams.get("scope") as
-      | "team"
       | "all"
       | "mine"
-      | "created-by-me"
-      | "needs-attention"
-      | null) ?? "team"
+      | "team"
+      | null) ?? "all"
 
   const setViewMode = (m: "table" | "tree") => {
     const next = new URLSearchParams(searchParams)
@@ -76,7 +74,7 @@ export default function Goals() {
   }
 
   const setTreeScope = (
-    s: "team" | "all" | "mine" | "created-by-me" | "needs-attention"
+    s: "all" | "mine" | "team"
   ) => {
     const next = new URLSearchParams(searchParams)
     next.set("scope", s)

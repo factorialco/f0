@@ -1,4 +1,4 @@
-import { F0Box, F0Icon, F0Text } from "@factorialco/f0-react"
+import { F0Box, F0Button, F0Text } from "@factorialco/f0-react"
 import { TwoColumnLayout } from "@factorialco/f0-react"
 import {
   OneDataCollection,
@@ -7,6 +7,7 @@ import {
   ResourceHeader,
 } from "@factorialco/f0-react/dist/experimental"
 import {
+  Add,
   ChevronDown,
   ChevronUp,
   Cross,
@@ -202,42 +203,71 @@ export function GoalDetail({
         }
       >
         <F0Box display="flex" flexDirection="column" gap="xl">
-          <div className="flex flex-col overflow-hidden rounded-xl border border-solid border-f1-border-secondary bg-f1-background">
-            <button
-              type="button"
+          <F0Box
+            display="flex"
+            flexDirection="column"
+            overflow="hidden"
+            borderRadius="xl"
+            borderColor="secondary"
+            border="default"
+            background="primary"
+          >
+            <F0Button
+              variant="neutral"
+              label={`Sub-goals (${goal.childrenIds.length})`}
+              icon={subGoalsExpanded ? ChevronUp : ChevronDown}
               onClick={() => setSubGoalsExpanded((v) => !v)}
-              aria-expanded={subGoalsExpanded}
-              className="flex items-center gap-2 p-3 text-left transition-colors hover:bg-f1-background-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-f1-border-selected"
-            >
-              <F0Icon icon={subGoalsExpanded ? ChevronUp : ChevronDown} size="sm" />
-              <F0Text
-                content={`Sub-goals (${goal.childrenIds.length})`}
-                variant="label"
-              />
-            </button>
+            />
             {subGoalsExpanded ? (
               <>
-                <div className="h-px w-full bg-f1-border-secondary" />
+                <F0Box borderTop="default" borderColor="secondary" />
                 {hasChildren ? (
-                  <div className="mt-3">
+                  <F0Box marginTop="md">
                     <OneDataCollection
                       source={subGoalsSource}
                       visualizations={[
                         { type: "table", options: { columns: subGoalsColumns } },
                       ]}
                     />
-                  </div>
+                  </F0Box>
                 ) : (
-                  <F0Box padding="md">
+                  <F0Box
+                    display="flex"
+                    flexDirection="column"
+                    alignItems="center"
+                    gap="sm"
+                    paddingY="xl"
+                  >
+                    <F0Box
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      background="secondary"
+                      borderRadius="full"
+                      width="12"
+                      height="12"
+                    >
+                      <F0Text content="🎯" variant="body" />
+                    </F0Box>
                     <F0Text
-                      content="No sub-goals yet."
+                      content="No sub-goals associated yet"
+                      variant="label"
+                    />
+                    <F0Text
+                      content="Create your first one or select existing to create subgoals"
                       variant="description"
+                    />
+                    <F0Button
+                      variant="default"
+                      label="Add subgoals"
+                      icon={Add}
+                      onClick={() => {}}
                     />
                   </F0Box>
                 )}
               </>
             ) : null}
-          </div>
+          </F0Box>
 
           <ActivityTimeline entries={activity} />
         </F0Box>
@@ -341,32 +371,40 @@ function formatDueDate(d: string): string {
 
 function statusLabel(status: GoalRecord["status"]): string {
   switch (status) {
-    case "not-started":
-      return "Pending"
     case "on-track":
       return "On track"
     case "off-track":
       return "Off track"
+    case "at-risk":
+      return "At Risk"
+    case "partial":
+      return "Partial"
     case "achieved":
       return "Achieved"
+    case "missed":
+      return "Missed"
     case "cancelled":
-      return "Cancelled"
+      return "Canceled"
   }
 }
 
 function statusVariant(
   status: GoalRecord["status"]
-): "neutral" | "info" | "positive" | "warning" | "critical" {
+): "neutral" | "info" | "positive" | "critical" {
   switch (status) {
-    case "not-started":
-      return "neutral"
     case "on-track":
       return "info"
     case "off-track":
-      return "warning"
+      return "critical"
+    case "at-risk":
+      return "critical"
+    case "partial":
+      return "neutral"
     case "achieved":
       return "positive"
-    case "cancelled":
+    case "missed":
       return "critical"
+    case "cancelled":
+      return "neutral"
   }
 }

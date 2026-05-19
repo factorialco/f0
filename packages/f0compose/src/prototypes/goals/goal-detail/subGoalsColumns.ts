@@ -3,16 +3,20 @@ import type { GoalRecord, GoalStatus } from "../shared/types"
 
 function statusLabel(status: GoalStatus): string {
   switch (status) {
-    case "not-started":
-      return "Pending"
     case "on-track":
       return "On track"
     case "off-track":
       return "Off track"
+    case "at-risk":
+      return "At Risk"
+    case "partial":
+      return "Partial"
     case "achieved":
       return "Achieved"
+    case "missed":
+      return "Missed"
     case "cancelled":
-      return "Cancelled"
+      return "Canceled"
   }
 }
 
@@ -20,16 +24,20 @@ function statusVariant(
   status: GoalStatus
 ): "neutral" | "info" | "positive" | "critical" {
   switch (status) {
-    case "not-started":
-      return "neutral"
     case "on-track":
       return "info"
     case "off-track":
-      return "warning"
+      return "critical"
+    case "at-risk":
+      return "critical"
+    case "partial":
+      return "neutral"
     case "achieved":
       return "positive"
-    case "cancelled":
+    case "missed":
       return "critical"
+    case "cancelled":
+      return "neutral"
   }
 }
 
