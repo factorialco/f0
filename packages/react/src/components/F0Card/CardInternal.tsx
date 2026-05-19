@@ -1,4 +1,4 @@
-import { type CSSProperties, type ReactNode, forwardRef, useRef } from "react"
+import { type ReactNode, forwardRef, useRef } from "react"
 
 import { F0Link } from "@/components/F0Link"
 import { Image } from "@/components/Utilities/Image"
@@ -250,17 +250,14 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
           link &&
             "focus-within:border-f1-border-hover focus-within:shadow-md hover:border-f1-border-hover hover:shadow-md",
           selected &&
-            "border-f1-border-selected bg-f1-background-selected-secondary",
-          alert &&
-            alert.visible !== false &&
-            !selected &&
-            "border-2 border-[var(--alert-border-color)]"
+            "border-f1-border-selected bg-f1-background-selected-secondary"
         )}
         style={
           alert && alert.visible !== false && !selected
-            ? ({
-                "--alert-border-color": alertBorderColor[alert.variant],
-              } as CSSProperties)
+            ? {
+                borderColor: alertBorderColor[alert.variant],
+                borderWidth: "2px",
+              }
             : undefined
         }
         onClick={onClick}
