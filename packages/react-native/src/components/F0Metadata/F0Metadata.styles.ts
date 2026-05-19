@@ -31,7 +31,7 @@ export const metadataLabelVariants = tv({
   variants: {
     orientation: {
       vertical: "",
-      horizontal: "w-28 shrink-0",
+      horizontal: "w-20 shrink-0",
     },
   },
   defaultVariants: {
