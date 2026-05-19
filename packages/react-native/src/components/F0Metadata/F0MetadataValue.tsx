@@ -12,11 +12,12 @@ import { F0Text } from "../primitives/F0Text"
 
 import type { MetadataItemValue } from "./F0Metadata.types"
 
-const { Warning, AlertCircle } = AppIcons
+const { Warning, AlertCircle, Calendar } = AppIcons
 
 const DATE_ICON_CONFIG = {
   warning: { icon: Warning, color: "warning" as const },
   critical: { icon: AlertCircle, color: "critical" as const },
+  calendar: { icon: Calendar, color: "secondary" as const },
 } as const
 
 /**
