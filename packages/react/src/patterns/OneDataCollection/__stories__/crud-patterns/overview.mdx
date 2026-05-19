@@ -1,0 +1,262 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+<Meta title="Data collection/CRUD patterns/Overview" />
+
+# Data collection / CRUD patterns
+
+## Introduction
+
+CRUD patterns describe the recommended UX for creating, opening, updating, and
+deleting records from a Data Collection. They are product patterns that consumers
+wire through collection actions, item actions, item click handlers, bulk actions,
+dialogs, wizards, or routes.
+
+Data Collection does not automatically choose a dialog or page for you. Use these
+patterns to choose the right container for the resource and task.
+
+## Scenario stories
+
+Open each pattern as a dedicated fullscreen Storybook scenario. Each scenario
+starts with dialogs closed and uses Data Collection as the interaction surface.
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Scenario</th>
+        <th className="text-left">What to test</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-create--default-dialog">
+            Create / Default dialog
+          </a>
+        </td>
+        <td>Collection primary action opens a default create dialog.</td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-create--wizard-dialog">
+            Create / Wizard dialog
+          </a>
+        </td>
+        <td>Collection primary action opens a wizard dialog.</td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-create--lightweight-create-actions">
+            Create / Lightweight create actions
+          </a>
+        </td>
+        <td>
+          Lightweight create exposes Save and close and Save and open resource.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-open-and-update--open-item-in-default-dialog">
+            Open and update / Default dialog
+          </a>
+        </td>
+        <td>Clicking an item opens the default dialog.</td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-open-and-update--right-position-dialog-for-table">
+            Open and update / Right-position dialog
+          </a>
+        </td>
+        <td>Table/List variation opens a right-position dialog.</td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--single-delete-confirmation">
+            Delete / Single confirmation
+          </a>
+        </td>
+        <td>Item delete action opens a confirmation dialog.</td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--bulk-delete-confirmation">
+            Delete / Bulk confirmation
+          </a>
+        </td>
+        <td>Selection and bulk action open a scoped confirmation dialog.</td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-complex-resource--open-as-page-with-breadcrumbs">
+            Complex resource / Page with breadcrumbs
+          </a>
+        </td>
+        <td>Clicking an item opens a resource page with breadcrumbs.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Pattern decision table
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Pattern</th>
+        <th className="text-left">Applies to</th>
+        <th className="text-left">When to use</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>Default dialog</code>
+        </td>
+        <td>All views</td>
+        <td>
+          Default container for create, open, and update flows that fit in a
+          focused overlay.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>Wizard dialog</code>
+        </td>
+        <td>All views</td>
+        <td>
+          Guided create or update flows with sequential steps or progressive
+          disclosure.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>Right-position dialog</code>
+        </td>
+        <td>Table and List only</td>
+        <td>
+          Alternative layout when keeping collection context visible helps the
+          user compare, review, or move between items. Use only on screens
+          <code>md</code> / <code>900px</code> and above.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>Page with breadcrumbs</code>
+        </td>
+        <td>All views</td>
+        <td>
+          Complex resources with tabs, steps, deep content, configuration, or
+          workflows that need page-level navigation.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>Confirmation dialog</code>
+        </td>
+        <td>Single and bulk destructive actions</td>
+        <td>
+          Delete or destructive flows where the user must understand the
+          affected resource or scope before confirming.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Create and update guidance
+
+Use a default dialog for standard create and update flows. Update should mirror
+create whenever possible: reuse the same form structure, field order, validation
+rules, and terminology when users edit the same information.
+
+Complex resources can use lightweight creation followed by richer update/details
+completion inside the resource. In lightweight create flows, use explicit CTAs:
+
+- <code>Save and close</code> creates the item and returns to the collection.
+- <code>Save and open resource</code> creates the item and opens the resource
+  page for completion.
+
+Choose the primary CTA based on the expected next step. Use Save and close as
+primary for fast or repeated creation. Use Save and open resource as primary when
+the resource is incomplete after creation.
+
+## Responsive behavior
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Container</th>
+        <th className="text-left">Responsive rule</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Default dialog</td>
+        <td>Works across screen sizes.</td>
+      </tr>
+      <tr>
+        <td>Right-position dialog</td>
+        <td>
+          Use only for Table and List at <code>md</code> / <code>900px</code>
+          and above. Below that, fall back to the default dialog.
+        </td>
+      </tr>
+      <tr>
+        <td>Wizard dialog</td>
+        <td>Do not provide a right-position variation.</td>
+      </tr>
+      <tr>
+        <td>Page with breadcrumbs</td>
+        <td>Remain a page across viewports.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Guidelines
+
+<DoDonts
+  do={{
+    description:
+      "Use the default dialog as the baseline for create, open, and update flows.",
+  }}
+  dont={{
+    description:
+      "Do not make right-position dialogs the default. They are only an alternative for Table and List.",
+  }}
+/>
+
+<DoDonts
+  do={{
+    description:
+      "Reuse create forms for update when the user edits the same fields.",
+  }}
+  dont={{
+    description:
+      "Do not force complex resources into a dialog when the user needs tabs, steps, or long-form configuration.",
+  }}
+/>
+
+<DoDonts
+  do={{
+    description:
+      "Offer both Save and close and Save and open resource for lightweight creation when both post-save paths are useful.",
+  }}
+  dont={{
+    description:
+      "Do not make users create a complex resource and then search for it manually when completion is the expected next step.",
+  }}
+/>
+
+## Related documentation
+
+- [Actions](/?path=/docs/patterns-data-collection-actions--documentation) for
+  collection actions, item actions, and bulk action wiring.
+- [Editable Table](/?path=/docs/patterns-data-collection-visualizations-editable-table--documentation)
+  for inline field-level updates.
+- [Visualizations](/?path=/docs/patterns-data-collection-visualizations--documentation)
+  for Table, List, Card, and Kanban view behavior.
