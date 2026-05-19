@@ -153,7 +153,7 @@ describe("ChatTextarea before-send hook", () => {
       <ChatTextarea
         submitLabel="Send"
         onSend={vi.fn()}
-        placeholder="Ask about documents"
+        placeholders={["Ask about documents"]}
       />
     )
 

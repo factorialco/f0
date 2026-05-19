@@ -22,7 +22,6 @@ export interface ChatTextareaProps extends Omit<InputProps, "onSend"> {
   submitLabel?: string
   creditWarning?: AiChatCreditWarning
   fileAttachments?: AiChatFileAttachmentConfig
-  placeholder?: string
   placeholders?: string[]
 }
 

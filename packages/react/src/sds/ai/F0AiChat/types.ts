@@ -316,12 +316,7 @@ export type AiChatProviderProps = {
    */
   fileAttachments?: AiChatFileAttachmentConfig
   /**
-   * Placeholder shown in the chat textarea when it is empty.
-   */
-  placeholder?: string
-  /**
    * Placeholders shown in the chat textarea. Multiple values rotate with the typewriter animation.
-   * Takes precedence over `placeholder` when provided.
    */
   placeholders?: string[]
   onThumbsUp?: (

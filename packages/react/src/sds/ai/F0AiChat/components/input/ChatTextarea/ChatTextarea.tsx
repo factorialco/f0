@@ -65,7 +65,6 @@ export const ChatTextarea = ({
   onStop,
   creditWarning,
   fileAttachments: fileAttachmentsProp,
-  placeholder,
   placeholders: placeholdersProp,
 }: ChatTextareaProps) => {
   const {
@@ -160,12 +159,11 @@ export const ChatTextarea = ({
 
   const resolvedPlaceholders = useMemo(() => {
     if (placeholdersProp !== undefined) return placeholdersProp
-    if (placeholder !== undefined) return [placeholder]
     return contextPlaceholders ?? []
-  }, [placeholder, placeholdersProp, contextPlaceholders])
+  }, [placeholdersProp, contextPlaceholders])
 
   const resolvedDefaultPlaceholder =
-    resolvedPlaceholders[0] ?? placeholder ?? translation.ai.inputPlaceholder
+    resolvedPlaceholders[0] ?? translation.ai.inputPlaceholder
   const uploadedFiles = attachedFiles.filter((f) => f.status === "uploaded")
   const isUploading = attachedFiles.some((f) => f.status === "uploading")
   const hasDataToSend = inputValue.trim().length > 0

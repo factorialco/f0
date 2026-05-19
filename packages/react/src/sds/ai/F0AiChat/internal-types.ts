@@ -41,7 +41,6 @@ export interface AiChatState {
   credits?: AiChatCredits
   creditWarning?: AiChatCreditWarning
   fileAttachments?: AiChatFileAttachmentConfig
-  placeholder?: string
   placeholders?: string[]
   setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>
   onThumbsUp?: (
@@ -262,7 +261,6 @@ export type AiChatProviderReturnValue = {
   | "credits"
   | "creditWarning"
   | "fileAttachments"
-  | "placeholder"
 > & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null
