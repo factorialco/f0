@@ -143,9 +143,10 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     WelcomeScreenSuggestion[]
   >(initialWelcomeScreenSuggestions)
   const i18n = useI18n()
+  const defaultPlaceholder = i18n.t("ai.inputPlaceholder")
   const [placeholders, setPlaceholders] = useState<string[]>(() => {
     if (initialPlaceholders !== undefined) return initialPlaceholders
-    return [i18n.t("ai.inputPlaceholder")]
+    return [defaultPlaceholder]
   })
 
   const [initialMessage, setInitialMessage] = useState<
@@ -166,8 +167,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
       return
     }
 
-    setPlaceholders([i18n.t("ai.inputPlaceholder")])
-  }, [i18n, initialPlaceholders])
+    setPlaceholders([defaultPlaceholder])
+  }, [defaultPlaceholder, initialPlaceholders])
 
   const [inProgress, setInProgressState] = useState(false)
   const setInProgress = useCallback((value: boolean) => {
