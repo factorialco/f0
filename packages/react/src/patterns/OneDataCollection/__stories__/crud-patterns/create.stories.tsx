@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { useRef, useState } from "react"
+import { useState } from "react"
 
-import { Add, ArrowRight, Save } from "@/icons/app"
+import { Add } from "@/icons/app"
 import { useF0Form } from "@/patterns/F0Form"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { F0Wizard } from "@/ui/F0Wizard"
@@ -13,10 +13,8 @@ import {
   createResourceDataAdapter,
   CrudPatternLayout,
   initialResources,
-  LightweightCreateFormF0,
   Resource,
   ResourceFormF0,
-  ResourcePage,
   tableVisualization,
   WizardStepAssignments,
   WizardStepBasic,
@@ -137,95 +135,10 @@ function WizardDialogScenario() {
   )
 }
 
-function LightweightCreateActionsScenario() {
-  const [resources, setResources] = useState(initialResources)
-  const [open, setOpen] = useState(false)
-  const [resourcePage, setResourcePage] = useState<Resource | null>(null)
-  const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
-  const actionRef = useRef<"close" | "open">("close")
-
-  const source = useDataCollectionSource({
-    dataAdapter: createResourceDataAdapter(resources),
-    primaryActions: () => ({
-      label: "Create payroll integration",
-      icon: Add,
-      onClick: () => setOpen(true),
-    }),
-  })
-
-  if (resourcePage) {
-    return (
-      <CrudPatternLayout>
-        <ResourcePage
-          resource={resourcePage}
-          onBack={() => setResourcePage(null)}
-          title="Complete payroll integration"
-        />
-      </CrudPatternLayout>
-    )
-  }
-
-  return (
-    <CrudPatternLayout>
-      <OneDataCollection
-        source={source}
-        visualizations={[tableVisualization]}
-      />
-      <F0Dialog
-        isOpen={open}
-        onClose={() => setOpen(false)}
-        title="Create payroll integration"
-        description="Use Save and open resource as primary when the created resource usually needs immediate completion."
-        primaryAction={{
-          label: "Save and open resource",
-          icon: ArrowRight,
-          onClick: () => {
-            actionRef.current = "open"
-            submit()
-          },
-          loading: isSubmitting && actionRef.current === "open",
-          disabled: hasErrors,
-        }}
-        secondaryAction={{
-          label: "Save and close",
-          icon: Save,
-          onClick: () => {
-            actionRef.current = "close"
-            submit()
-          },
-        }}
-      >
-        <LightweightCreateFormF0
-          key="lightweight-create"
-          formRef={formRef}
-          onSuccess={(data) => {
-            const created: Resource = {
-              id: `resource-${Date.now()}`,
-              name: data.provider,
-              owner: data.owner,
-              status: "Needs details",
-              summary: "Created with the minimum fields and ready for setup.",
-            }
-            setResources([created, ...resources])
-            setOpen(false)
-            if (actionRef.current === "open") {
-              setResourcePage(created)
-            }
-          }}
-        />
-      </F0Dialog>
-    </CrudPatternLayout>
-  )
-}
-
 export const DefaultDialog: Story = {
   render: () => <DefaultDialogScenario />,
 }
 
 export const WizardDialog: Story = {
   render: () => <WizardDialogScenario />,
-}
-
-export const LightweightCreateActions: Story = {
-  render: () => <LightweightCreateActionsScenario />,
 }

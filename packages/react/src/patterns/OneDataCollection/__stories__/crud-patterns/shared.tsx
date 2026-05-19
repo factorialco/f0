@@ -200,44 +200,6 @@ export function ResourceFormF0({
   return <F0Form formDefinition={formDefinition} formRef={formRef} />
 }
 
-export type LightweightFormData = {
-  provider: string
-  owner: string
-}
-
-export function LightweightCreateFormF0({
-  formRef,
-  onSuccess,
-}: {
-  formRef: MutableRefObject<F0FormRef | null>
-  onSuccess: (data: LightweightFormData) => void
-}) {
-  const schema = z.object({
-    provider: f0FormField.text({
-      label: "Provider",
-      placeholder: "e.g. Factorial Payroll",
-      minLength: 1,
-    }),
-    owner: f0FormField.text({
-      label: "Owner",
-      placeholder: "Team or person",
-    }),
-  })
-
-  const formDefinition = useF0FormDefinition({
-    name: "lightweight-create",
-    schema,
-    defaultValues: { provider: "Factorial Payroll", owner: "People Ops" },
-    onSubmit: async ({ data }) => {
-      onSuccess(data)
-      return { success: true }
-    },
-    submitConfig: { type: "default", hideSubmitButton: true },
-  })
-
-  return <F0Form formDefinition={formDefinition} formRef={formRef} />
-}
-
 export function WizardStepBasic() {
   const schema = z.object({
     planName: f0FormField.text({
