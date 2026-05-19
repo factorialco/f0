@@ -36,8 +36,20 @@ import type {
   FormatPreset,
 } from "./types"
 
+import { format } from "date-fns"
+
 import { useDashboardCompute, type ItemResult } from "./useDashboardCompute"
 import { SNAPSHOT_DATE_FILTER_KEY } from "./snapshot"
+
+// Format a Date (or ISO string) as a local-calendar `YYYY-MM-DD`.
+// `toISOString().slice(0, 10)` shifts the day for users in non-UTC zones —
+// a Tokyo user picking Nov 1 00:00 local would ship `2025-10-31`.
+const toLocalYmd = (d: Date | string | undefined): string => {
+  if (!d) return ""
+  const date = d instanceof Date ? d : new Date(d)
+  if (Number.isNaN(date.getTime())) return ""
+  return format(date, "yyyy-MM-dd")
+}
 
 // ---------------------------------------------------------------------------
 // Minimum item height per type
@@ -471,15 +483,8 @@ export function ChatDashboard({
               | undefined
             const range = dateValue?.value
             if (!range) continue
-            const toIso = (d: Date | string | undefined): string => {
-              if (!d) return ""
-              const date = d instanceof Date ? d : new Date(d)
-              if (Number.isNaN(date.getTime())) return ""
-              // YYYY-MM-DD — DATE comparison in DuckDB ignores time-of-day.
-              return date.toISOString().slice(0, 10)
-            }
-            const fromIso = toIso(range.from)
-            const toIsoStr = toIso(range.to)
+            const fromIso = toLocalYmd(range.from)
+            const toIsoStr = toLocalYmd(range.to)
             if (fromIso || toIsoStr) {
               navigationFilterValues[key] = [fromIso, toIsoStr]
             }
@@ -489,7 +494,7 @@ export function ChatDashboard({
             // render.
             if (key === SNAPSHOT_DATE_FILTER_KEY && fromIso) {
               const initial = config.snapshotDate
-                ? new Date(config.snapshotDate).toISOString().slice(0, 10)
+                ? toLocalYmd(config.snapshotDate)
                 : undefined
               if (initial !== fromIso) onSnapshotDateChange?.(fromIso)
             }
@@ -519,14 +524,8 @@ export function ChatDashboard({
               | { from?: Date | string; to?: Date | string }
               | undefined
             if (!range) continue
-            const toIso = (d: Date | string | undefined): string => {
-              if (!d) return ""
-              const date = d instanceof Date ? d : new Date(d)
-              if (Number.isNaN(date.getTime())) return ""
-              return date.toISOString().slice(0, 10)
-            }
-            const fromIso = toIso(range.from)
-            const toIsoStr = toIso(range.to)
+            const fromIso = toLocalYmd(range.from)
+            const toIsoStr = toLocalYmd(range.to)
             if (fromIso || toIsoStr) {
               filterValues[key] = [fromIso, toIsoStr]
             }
