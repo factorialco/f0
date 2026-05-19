@@ -11,7 +11,7 @@ import { MessagesContainer } from "./components/messages/MessagesContainer"
 import { useAiChat } from "./providers/AiChatStateProvider"
 
 const FullscreenChatInput = () => {
-  const { sendMessage, inProgress, creditWarning } = useAiChat()
+  const { inProgress, creditWarning } = useAiChat()
   const { stopGeneration, sendMessage: sendCopilotMessage } =
     useCopilotChatInternal()
 
@@ -21,8 +21,8 @@ const FullscreenChatInput = () => {
       return Promise.resolve(context.message)
     }
 
-    sendMessage(text)
     const message: Message = { id: "", role: "user", content: text }
+    sendCopilotMessage(message)
     return Promise.resolve(message)
   }
 

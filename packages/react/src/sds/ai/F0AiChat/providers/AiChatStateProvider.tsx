@@ -163,8 +163,11 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   useEffect(() => {
     if (initialPlaceholders !== undefined) {
       setPlaceholders(initialPlaceholders)
+      return
     }
-  }, [initialPlaceholders])
+
+    setPlaceholders([i18n.t("ai.inputPlaceholder")])
+  }, [i18n, initialPlaceholders])
 
   const [inProgress, setInProgressState] = useState(false)
   const setInProgress = useCallback((value: boolean) => {
