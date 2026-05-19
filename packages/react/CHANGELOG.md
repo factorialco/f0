@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.8.1](https://github.com/factorialco/f0/compare/f0-react-v2.8.0...f0-react-v2.8.1) (2026-05-19)
+
+
+### Bug Fixes
+
+* disable scroll lock for Select inside dialogs to prevent pointer-events stuck on body ([#4167](https://github.com/factorialco/f0/issues/4167)) ([748c47f](https://github.com/factorialco/f0/commit/748c47f2fa71a010a2b3be3a56b152e03172b5de))
+
 ## [2.8.0](https://github.com/factorialco/f0/compare/f0-react-v2.7.0...f0-react-v2.8.0) (2026-05-18)
 
 
