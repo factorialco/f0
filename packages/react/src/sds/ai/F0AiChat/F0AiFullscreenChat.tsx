@@ -1,20 +1,29 @@
+import { type Message } from "@copilotkit/shared"
 import { useCopilotChatInternal } from "@copilotkit/react-core"
 
 import { cn } from "@/lib/utils"
 
 import { useRegisteredActions } from "./actions"
 import { ChatTextarea } from "./components/input/ChatTextarea"
+import { type ChatTextareaOnSend } from "./components/input/ChatTextarea/types"
 import { CanvasPanel } from "./components/layout/CanvasPanel"
 import { MessagesContainer } from "./components/messages/MessagesContainer"
 import { useAiChat } from "./providers/AiChatStateProvider"
 
 const FullscreenChatInput = () => {
   const { sendMessage, inProgress, creditWarning } = useAiChat()
-  const { stopGeneration } = useCopilotChatInternal()
+  const { stopGeneration, sendMessage: sendCopilotMessage } =
+    useCopilotChatInternal()
 
-  const handleSend = async (text: string) => {
+  const handleSend: ChatTextareaOnSend = (text, context) => {
+    if (context) {
+      sendCopilotMessage(context.message)
+      return Promise.resolve(context.message)
+    }
+
     sendMessage(text)
-    return { id: "", role: "user" as const, content: text }
+    const message: Message = { id: "", role: "user", content: text }
+    return Promise.resolve(message)
   }
 
   const handleStop = () => {

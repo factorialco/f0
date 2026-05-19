@@ -105,6 +105,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   toolHints,
   credits,
   fileAttachments,
+  placeholder,
+  placeholders: initialPlaceholders,
   onThumbsDown,
   onThumbsUp,
   tracking,
@@ -142,9 +144,11 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     WelcomeScreenSuggestion[]
   >(initialWelcomeScreenSuggestions)
   const i18n = useI18n()
-  const [placeholders, setPlaceholders] = useState<string[]>([
-    i18n.t("ai.inputPlaceholder"),
-  ])
+  const [placeholders, setPlaceholders] = useState<string[]>(() => {
+    if (initialPlaceholders !== undefined) return initialPlaceholders
+    if (placeholder !== undefined) return [placeholder]
+    return [i18n.t("ai.inputPlaceholder")]
+  })
 
   const [initialMessage, setInitialMessage] = useState<
     string | string[] | undefined
@@ -157,6 +161,17 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
       tracking?.onVisibility?.()
     }
   }, [open])
+
+  useEffect(() => {
+    if (initialPlaceholders !== undefined) {
+      setPlaceholders(initialPlaceholders)
+      return
+    }
+
+    if (placeholder !== undefined) {
+      setPlaceholders([placeholder])
+    }
+  }, [placeholder, initialPlaceholders])
 
   const [inProgress, setInProgressState] = useState(false)
   const setInProgress = useCallback((value: boolean) => {
@@ -488,6 +503,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         toolHints,
         credits,
         fileAttachments,
+        placeholder,
         inProgress,
         setInProgress,
         canvasContent,
@@ -574,6 +590,7 @@ export function useAiChat(): AiChatProviderReturnValue {
       credits: undefined,
       creditWarning: undefined,
       fileAttachments: undefined,
+      placeholder: undefined,
       inProgress: false,
       setInProgress: noopFn,
       canvasContent: null,

@@ -1,3 +1,4 @@
+import { type Message } from "@copilotkit/shared"
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
@@ -63,15 +64,17 @@ export const ChatTextarea = ({
   onSend,
   onStop,
   creditWarning,
+  fileAttachments: fileAttachmentsProp,
+  placeholder,
+  placeholders: placeholdersProp,
 }: ChatTextareaProps) => {
   const {
-    placeholders,
+    placeholders: contextPlaceholders,
     entityRefs,
     toolHints,
     activeToolHint,
     setActiveToolHint,
-    fileAttachments,
-    sendMessage,
+    fileAttachments: contextFileAttachments,
     appendMessages,
     clarifyingQuestion,
     pendingContext,
@@ -91,6 +94,7 @@ export const ChatTextarea = ({
   const highlightRef = useRef<HTMLDivElement>(null)
 
   const isClarifying = clarifyingQuestion !== null
+  const resolvedFileAttachments = fileAttachmentsProp ?? contextFileAttachments
 
   const {
     attachedFiles,
@@ -104,7 +108,7 @@ export const ChatTextarea = ({
     handleRemoveFile,
     clearFiles,
     transientError,
-  } = useFileAttachments(fileAttachments)
+  } = useFileAttachments(resolvedFileAttachments)
 
   const mentions = useMentions({
     inputValue,
@@ -154,7 +158,14 @@ export const ChatTextarea = ({
     void onStop?.()
   }, [onStop, appendMessages, translation.ai.responseStopped])
 
-  const resolvedDefaultPlaceholder = translation.ai.inputPlaceholder
+  const resolvedPlaceholders = useMemo(() => {
+    if (placeholdersProp !== undefined) return placeholdersProp
+    if (placeholder !== undefined) return [placeholder]
+    return contextPlaceholders ?? []
+  }, [placeholder, placeholdersProp, contextPlaceholders])
+
+  const resolvedDefaultPlaceholder =
+    resolvedPlaceholders[0] ?? placeholder ?? translation.ai.inputPlaceholder
   const uploadedFiles = attachedFiles.filter((f) => f.status === "uploaded")
   const isUploading = attachedFiles.some((f) => f.status === "uploading")
   const hasDataToSend = inputValue.trim().length > 0
@@ -230,14 +241,19 @@ export const ChatTextarea = ({
         if (pendingContext) setPendingContext(null)
         if (pendingQuote) setPendingQuote(null)
 
-        sendMessage({
+        const message: Message = {
           id: crypto.randomUUID(),
           role: "user",
           content: contentParts,
+        }
+
+        void onSend(withQuote, {
+          message,
+          attachments: files,
         })
       } else {
         if (pendingQuote) setPendingQuote(null)
-        onSend(withQuote)
+        void onSend(withQuote)
       }
 
       setInputValue("")
@@ -269,7 +285,7 @@ export const ChatTextarea = ({
     }
   }
 
-  const multiplePlaceholders = (placeholders ?? []).length > 1
+  const multiplePlaceholders = resolvedPlaceholders.length > 1
 
   const highlightSegments = useMemo(() => {
     return buildHighlightSegments(inputValue, mentions.mentions, {
@@ -411,7 +427,7 @@ export const ChatTextarea = ({
                 highlightSegments={highlightSegments}
                 hasOverlay={hasOverlay}
                 multiplePlaceholders={multiplePlaceholders}
-                placeholders={placeholders ?? []}
+                placeholders={resolvedPlaceholders}
                 resolvedDefaultPlaceholder={resolvedDefaultPlaceholder}
                 inProgress={inProgress}
               />

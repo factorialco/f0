@@ -11,12 +11,18 @@ import {
 interface TextareaFieldMockProps {
   inputValue: string
   onInputChange: (value: string, cursorPosition: number) => void
+  resolvedDefaultPlaceholder: string
 }
 
 vi.mock("../TextareaField", () => ({
-  TextareaField: ({ inputValue, onInputChange }: TextareaFieldMockProps) => (
+  TextareaField: ({
+    inputValue,
+    onInputChange,
+    resolvedDefaultPlaceholder,
+  }: TextareaFieldMockProps) => (
     <>
       <textarea aria-label="Message" value={inputValue} readOnly />
+      <span>{resolvedDefaultPlaceholder}</span>
       <button
         type="button"
         onClick={() => onInputChange("Show me my time off", 19)}
@@ -90,5 +96,67 @@ describe("ChatTextarea before-send hook", () => {
     expect(screen.getByRole("textbox", { name: "Message" })).toHaveValue(
       "Show me my time off"
     )
+  })
+
+  it("passes uploaded attachments to onSend", async () => {
+    const uploadedFile = {
+      url: "https://example.com/report.pdf",
+      filename: "report.pdf",
+      mimetype: "application/pdf",
+    }
+    const onUploadFiles = vi.fn().mockResolvedValue([uploadedFile])
+    const onSend = vi.fn()
+    const user = userEvent.setup()
+    const file = new File(["report"], "report.pdf", {
+      type: "application/pdf",
+    })
+
+    render(
+      <ChatTextarea
+        submitLabel="Send"
+        onSend={onSend}
+        fileAttachments={{ onUploadFiles }}
+      />
+    )
+
+    const input = document.querySelector("input[type='file']")
+    expect(input).toBeInstanceOf(HTMLInputElement)
+    await user.upload(input as HTMLInputElement, file)
+    await waitFor(() => expect(onUploadFiles).toHaveBeenCalledWith([file]))
+    fireEvent.click(screen.getByRole("button", { name: "Fill message" }))
+    await user.click(screen.getByRole("button", { name: "Send" }))
+
+    await waitFor(() => expect(onSend).toHaveBeenCalledTimes(1))
+    expect(onSend).toHaveBeenCalledWith(
+      "Show me my time off",
+      expect.objectContaining({
+        attachments: [uploadedFile],
+        message: expect.objectContaining({
+          role: "user",
+          content: expect.arrayContaining([
+            {
+              type: "binary",
+              url: uploadedFile.url,
+              filename: uploadedFile.filename,
+              mimeType: uploadedFile.mimetype,
+            },
+            { type: "text", text: "Show me my time off" },
+          ]),
+        }),
+      })
+    )
+    expect(sendMessageMock).not.toHaveBeenCalled()
+  })
+
+  it("uses the custom placeholder", () => {
+    render(
+      <ChatTextarea
+        submitLabel="Send"
+        onSend={vi.fn()}
+        placeholder="Ask about documents"
+      />
+    )
+
+    expect(screen.getByText("Ask about documents")).toBeInTheDocument()
   })
 })

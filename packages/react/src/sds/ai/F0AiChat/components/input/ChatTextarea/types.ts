@@ -1,10 +1,29 @@
+import { type Message } from "@copilotkit/shared"
 import { type InputProps } from "@copilotkit/react-ui"
 
-import { type AiChatCreditWarning } from "../../../types"
+import {
+  type AiChatCreditWarning,
+  type AiChatFileAttachmentConfig,
+  type UploadedFile,
+} from "../../../types"
 
-export type ChatTextareaProps = InputProps & {
+export interface ChatTextareaSendContext {
+  message: Message
+  attachments: UploadedFile[]
+}
+
+export type ChatTextareaOnSend = (
+  text: string,
+  context?: ChatTextareaSendContext
+) => ReturnType<InputProps["onSend"]> | void
+
+export interface ChatTextareaProps extends Omit<InputProps, "onSend"> {
+  onSend: ChatTextareaOnSend
   submitLabel?: string
   creditWarning?: AiChatCreditWarning
+  fileAttachments?: AiChatFileAttachmentConfig
+  placeholder?: string
+  placeholders?: string[]
 }
 
 export type AttachedFile = {

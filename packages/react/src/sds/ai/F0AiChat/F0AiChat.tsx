@@ -38,6 +38,8 @@ const F0AiChatProviderComponent = ({
   credits,
   creditWarning,
   fileAttachments,
+  placeholder,
+  placeholders,
   onThumbsUp,
   onThumbsDown,
   onBeforeSendMessage,
@@ -72,6 +74,8 @@ const F0AiChatProviderComponent = ({
       credits={credits}
       creditWarning={creditWarning}
       fileAttachments={fileAttachments}
+      placeholder={placeholder}
+      placeholders={placeholders}
     >
       <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
     </AiChatStateProvider>

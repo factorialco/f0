@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils"
 import { filterNonRenderableMessages } from "../../internal-types"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { ChatTextarea } from "./ChatTextarea"
+import { type ChatTextareaOnSend } from "./ChatTextarea/types"
 
 export const ChatInput = (props: InputProps) => {
   const {
@@ -22,7 +23,7 @@ export const ChatInput = (props: InputProps) => {
     clarifyingQuestion,
   } = useAiChat()
   const translation = useI18n()
-  const { messages } = useCopilotChatInternal()
+  const { messages, sendMessage } = useCopilotChatInternal()
   const containerRef = useRef<HTMLDivElement>(null)
   const filteredMessages = useMemo(
     () => filterNonRenderableMessages(messages),
@@ -33,6 +34,15 @@ export const ChatInput = (props: InputProps) => {
   const fullscreenWelcome = fullscreen && isWelcomeScreen
 
   const isClarifying = clarifyingQuestion != null
+
+  const handleSend: ChatTextareaOnSend = (text, context) => {
+    if (context) {
+      sendMessage(context.message)
+      return Promise.resolve(context.message)
+    }
+
+    return props.onSend(text)
+  }
 
   useEffect(() => {
     const textarea = containerRef.current?.querySelector("textarea")
@@ -48,7 +58,11 @@ export const ChatInput = (props: InputProps) => {
       )}
     >
       <div className="w-full max-w-[712px]">
-        <ChatTextarea {...props} creditWarning={creditWarning} />
+        <ChatTextarea
+          {...props}
+          onSend={handleSend}
+          creditWarning={creditWarning}
+        />
       </div>
       <AnimatePresence mode="wait" initial={false}>
         {isClarifying ? (
