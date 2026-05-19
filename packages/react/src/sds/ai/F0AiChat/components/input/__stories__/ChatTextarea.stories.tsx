@@ -113,6 +113,50 @@ const ChatTextareaWrapper = ({ placeholders }: { placeholders?: string[] }) => {
   )
 }
 
+const StandaloneChatTextareaWrapper = ({
+  placeholders,
+}: {
+  placeholders?: string[]
+}) => {
+  const [messages, setMessages] = useState<string[]>([])
+
+  const handleSend = async (message: string) => {
+    setMessages((prev) => [...prev, `User: ${message}`])
+
+    return {
+      id: `message-${Date.now()}`,
+      role: "assistant" as const,
+      content: "",
+    }
+  }
+
+  return (
+    <div className="w-96 space-y-4">
+      <div className="bg-gray-50 h-32 overflow-y-auto rounded-lg border p-4">
+        {messages.length === 0 ? (
+          <p className="text-gray-500 text-sm">
+            The placeholder is passed directly to ChatTextarea.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {messages.map((msg, index) => (
+              <div key={index} className="text-sm">
+                <span className="font-medium">{msg}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <ChatTextarea
+        inProgress={false}
+        onSend={handleSend}
+        placeholders={placeholders}
+      />
+    </div>
+  )
+}
+
 const meta = {
   title: "AI/F0AiChat/Input/ChatTextarea",
   component: ChatTextareaWrapper,
@@ -142,6 +186,14 @@ export const WithPlaceholders: Story = {
 
 export const WithOnePlaceholder: Story = {
   render: () => <ChatTextareaWrapper placeholders={[PLACEHOLDERS[0]]} />,
+}
+
+export const WithDirectPlaceholders: Story = {
+  render: () => (
+    <StandaloneChatTextareaWrapper
+      placeholders={["Ask about documents, policies, or uploaded files…"]}
+    />
+  ),
 }
 
 const CreditWarningExample = () => {
