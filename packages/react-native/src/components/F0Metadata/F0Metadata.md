@@ -73,7 +73,7 @@ import { F0Metadata } from "@factorialco/f0-react-native"
 | `data-list`    | `data: string[]`                                                                                                                                  | Multiple `F0Text` items stacked |
 | `tag-list`     | `tags: string[]`                                                                                                                                  | `F0TagList` type="raw"          |
 | `dot-tag`      | `label: string`, `color: F0TagDotColor`                                                                                                           | `F0Tag.Dot`                     |
-| `date`         | `formattedDate: string`, `icon?: "warning"\|"critical"`                                                                                           | `F0Text` + optional `F0Icon`    |
+| `date`         | `formattedDate: string`, `icon?: "warning"\|"critical"\|"calendar"`                                                                               | `F0Text` + optional `F0Icon`    |
 | `progress-bar` | `value: number`, `max?`, `label?`                                                                                                                 | `F0Progress` (linear)           |
 
 ## Orientations
