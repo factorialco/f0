@@ -1,6 +1,7 @@
-import type { ReactNode } from "react"
+import type { MutableRefObject, ReactNode } from "react"
 
 import { ComponentProps } from "react"
+import { z } from "zod"
 
 import { StandardLayout } from "@/layouts/StandardLayout"
 import { F0Button } from "@/components/F0Button"
@@ -9,10 +10,12 @@ import { Breadcrumbs } from "@/experimental/Navigation/Header/Breadcrumbs"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
+import { f0FormField, F0Form, F0FormRef } from "@/patterns/F0Form"
 import { Page } from "@/patterns/Navigation/Page"
 import { Tabs, TabItem } from "@/patterns/Navigation/Tabs"
 import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
+import { useF0FormDefinition } from "@/patterns/F0WizardForm"
 import type { FiltersDefinition } from "@/patterns/OneFilterPicker"
 import type { GroupingDefinition, SortingsDefinition } from "@/hooks/datasource"
 
@@ -139,59 +142,150 @@ export function CrudPatternLayout({ children }: { children: ReactNode }) {
   )
 }
 
-export function ExampleField({
-  label,
-  value,
-}: {
-  label: string
-  value: string
-}) {
-  return (
-    <label className="flex flex-col gap-1 text-sm text-f1-foreground">
-      <span className="font-medium">{label}</span>
-      <input
-        className="rounded-md border border-solid border-f1-border-secondary bg-f1-background p-2 text-f1-foreground"
-        defaultValue={value}
-      />
-    </label>
-  )
+const STATUS_OPTIONS = [
+  { value: "Draft", label: "Draft" },
+  { value: "Complete", label: "Complete" },
+  { value: "Needs details", label: "Needs details" },
+]
+
+export type ResourceFormData = {
+  name: string
+  owner: string
+  status: string
 }
 
-export function ResourceForm({
-  resource = initialResources[0],
+export function ResourceFormF0({
+  resource,
   mode,
+  formRef,
+  onSuccess,
 }: {
   resource?: Resource
   mode: "create" | "update"
+  formRef: MutableRefObject<F0FormRef | null>
+  onSuccess: (data: ResourceFormData) => void
 }) {
-  return (
-    <div className="flex flex-col gap-4">
-      <p className="text-sm text-f1-foreground-secondary">
-        {mode === "create"
-          ? "Collect the fields needed to create the item in the collection."
-          : "Reuse the same fields and validation rules when the user edits the same information later."}
-      </p>
-      <ExampleField
-        label="Name"
-        value={mode === "create" ? "New resource" : resource.name}
-      />
-      <ExampleField label="Owner" value={resource.owner} />
-      <ExampleField label="Status" value={resource.status} />
-    </div>
-  )
+  const schema = z.object({
+    name: f0FormField.text({
+      label: "Name",
+      placeholder: "Resource name",
+      minLength: 1,
+    }),
+    owner: f0FormField.text({
+      label: "Owner",
+      placeholder: "Owner name",
+    }),
+    status: f0FormField.select({
+      label: "Status",
+      options: STATUS_OPTIONS,
+      placeholder: "Select status",
+    }),
+  })
+
+  const formDefinition = useF0FormDefinition({
+    name: `resource-${mode}`,
+    schema,
+    defaultValues: {
+      name: mode === "create" ? "" : (resource?.name ?? ""),
+      owner: resource?.owner ?? "",
+      status: resource?.status,
+    },
+    onSubmit: async ({ data }) => {
+      onSuccess(data as ResourceFormData)
+      return { success: true }
+    },
+    submitConfig: { type: "default", hideSubmitButton: true },
+  })
+
+  return <F0Form formDefinition={formDefinition} formRef={formRef} />
 }
 
-export function LightweightCreateForm() {
-  return (
-    <div className="flex flex-col gap-4">
-      <p className="text-sm text-f1-foreground-secondary">
-        Collect the minimum required fields, then let users decide whether to
-        return to the collection or continue into the full resource.
-      </p>
-      <ExampleField label="Provider" value="Factorial Payroll" />
-      <ExampleField label="Owner" value="People Ops" />
-    </div>
-  )
+export type LightweightFormData = {
+  provider: string
+  owner: string
+}
+
+export function LightweightCreateFormF0({
+  formRef,
+  onSuccess,
+}: {
+  formRef: MutableRefObject<F0FormRef | null>
+  onSuccess: (data: LightweightFormData) => void
+}) {
+  const schema = z.object({
+    provider: f0FormField.text({
+      label: "Provider",
+      placeholder: "e.g. Factorial Payroll",
+      minLength: 1,
+    }),
+    owner: f0FormField.text({
+      label: "Owner",
+      placeholder: "Team or person",
+    }),
+  })
+
+  const formDefinition = useF0FormDefinition({
+    name: "lightweight-create",
+    schema,
+    defaultValues: { provider: "Factorial Payroll", owner: "People Ops" },
+    onSubmit: async ({ data }) => {
+      onSuccess(data)
+      return { success: true }
+    },
+    submitConfig: { type: "default", hideSubmitButton: true },
+  })
+
+  return <F0Form formDefinition={formDefinition} formRef={formRef} />
+}
+
+export function WizardStepBasic() {
+  const schema = z.object({
+    planName: f0FormField.text({
+      label: "Plan name",
+      placeholder: "e.g. Engineering onboarding",
+      minLength: 1,
+    }),
+    description: f0FormField.textarea({
+      label: "Description",
+      helpText: "Brief explanation of the plan's purpose",
+      optional: true,
+      rows: 3,
+    }),
+  })
+
+  const formDefinition = useF0FormDefinition({
+    name: "wizard-step-basic",
+    schema,
+    defaultValues: { planName: "Onboarding plan", description: "" },
+    onSubmit: async () => ({ success: true }),
+    submitConfig: { type: "default", hideSubmitButton: true },
+  })
+
+  return <F0Form formDefinition={formDefinition} />
+}
+
+export function WizardStepAssignments() {
+  const schema = z.object({
+    team: f0FormField.text({
+      label: "Team",
+      placeholder: "e.g. People team",
+    }),
+    responsible: f0FormField.text({
+      label: "Responsible",
+      placeholder: "e.g. Marta Soler",
+      optional: true,
+    }),
+  })
+
+  const formDefinition = useF0FormDefinition({
+    name: "wizard-step-assignments",
+    schema,
+    defaultValues: { team: "People team", responsible: "" },
+    onSubmit: async () => ({ success: true }),
+    submitConfig: { type: "default", hideSubmitButton: true },
+  })
+
+  return <F0Form formDefinition={formDefinition} />
 }
 
 export function ResourceSummary({ resource }: { resource: Resource }) {
@@ -217,6 +311,31 @@ export function ResourceSummary({ resource }: { resource: Resource }) {
       </dl>
     </div>
   )
+}
+
+function ResourcePageForm({ resource }: { resource: Resource }) {
+  const schema = z.object({
+    owner: f0FormField.text({ label: "Owner", placeholder: "Owner name" }),
+    status: f0FormField.select({
+      label: "Status",
+      options: STATUS_OPTIONS,
+      placeholder: "Select status",
+    }),
+  })
+
+  const formDefinition = useF0FormDefinition({
+    name: "resource-page-form",
+    schema,
+    defaultValues: { owner: resource.owner, status: resource.status as string },
+    onSubmit: async () => ({ success: true }),
+    submitConfig: {
+      type: "action-bar",
+      label: "Save changes",
+      discardable: true,
+    },
+  })
+
+  return <F0Form formDefinition={formDefinition} />
 }
 
 export function ResourcePage({
@@ -271,9 +390,8 @@ export function ResourcePage({
           <p className="mt-2 text-sm text-f1-foreground-secondary">
             {resource.summary}
           </p>
-          <div className="mt-4 grid gap-3 md:grid-cols-2">
-            <ExampleField label="Owner" value={resource.owner} />
-            <ExampleField label="Status" value={resource.status} />
+          <div className="mt-4">
+            <ResourcePageForm resource={resource} />
           </div>
         </section>
       </div>

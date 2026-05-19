@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 
 import { Pencil, Save } from "@/icons/app"
+import { useF0Form } from "@/patterns/F0Form"
 import { F0Dialog } from "@/patterns/F0Dialog"
 
 import { useDataCollectionSource } from "../../hooks/useDataCollectionSource"
@@ -13,7 +14,7 @@ import {
   initialResources,
   listVisualization,
   Resource,
-  ResourceForm,
+  ResourceFormF0,
   ResourceSummary,
   tableVisualization,
 } from "./shared"
@@ -38,6 +39,7 @@ function ItemDialogScenario({
   const [selectedResource, setSelectedResource] = useState<Resource | null>(
     null
   )
+  const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
 
   const source = useDataCollectionSource({
     dataAdapter: createResourceDataAdapter(initialResources),
@@ -58,17 +60,38 @@ function ItemDialogScenario({
         }
         position={position}
         width="lg"
-        primaryAction={{
-          label: position === "right" ? "Save changes" : "Edit resource",
-          icon: position === "right" ? Save : Pencil,
-          onClick: () => setSelectedResource(null),
-        }}
+        primaryAction={
+          position === "right"
+            ? {
+                label: "Save changes",
+                icon: Save,
+                onClick: submit,
+                loading: isSubmitting,
+                disabled: hasErrors,
+              }
+            : {
+                label: "Edit resource",
+                icon: Pencil,
+                onClick: () => setSelectedResource(null),
+              }
+        }
         secondaryAction={{
           label: "Close",
           onClick: () => setSelectedResource(null),
         }}
       >
-        {selectedResource && <ResourceSummary resource={selectedResource} />}
+        {selectedResource &&
+          (position === "right" ? (
+            <ResourceFormF0
+              key={selectedResource.id}
+              mode="update"
+              resource={selectedResource}
+              formRef={formRef}
+              onSuccess={() => setSelectedResource(null)}
+            />
+          ) : (
+            <ResourceSummary resource={selectedResource} />
+          ))}
       </F0Dialog>
     </CrudPatternLayout>
   )
@@ -78,6 +101,7 @@ function UpdateWithSameFormScenario() {
   const [selectedResource, setSelectedResource] = useState<Resource | null>(
     null
   )
+  const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
 
   const source = useDataCollectionSource({
     dataAdapter: createResourceDataAdapter(initialResources),
@@ -105,14 +129,22 @@ function UpdateWithSameFormScenario() {
         primaryAction={{
           label: "Save changes",
           icon: Save,
-          onClick: () => setSelectedResource(null),
+          onClick: submit,
+          loading: isSubmitting,
+          disabled: hasErrors,
         }}
         secondaryAction={{
           label: "Cancel",
           onClick: () => setSelectedResource(null),
         }}
       >
-        <ResourceForm resource={selectedResource ?? undefined} mode="update" />
+        <ResourceFormF0
+          key={selectedResource?.id}
+          mode="update"
+          resource={selectedResource ?? undefined}
+          formRef={formRef}
+          onSuccess={() => setSelectedResource(null)}
+        />
       </F0Dialog>
     </CrudPatternLayout>
   )

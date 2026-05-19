@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 
 import { Add, ArrowRight, Save } from "@/icons/app"
+import { useF0Form } from "@/patterns/F0Form"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { F0Wizard } from "@/ui/F0Wizard"
 
@@ -11,13 +12,14 @@ import { OneDataCollection } from "../../index"
 import {
   createResourceDataAdapter,
   CrudPatternLayout,
-  ExampleField,
   initialResources,
-  LightweightCreateForm,
+  LightweightCreateFormF0,
   Resource,
-  ResourceForm,
+  ResourceFormF0,
   ResourcePage,
   tableVisualization,
+  WizardStepAssignments,
+  WizardStepBasic,
 } from "./shared"
 
 const meta = {
@@ -33,6 +35,7 @@ type Story = StoryObj<typeof meta>
 function DefaultDialogScenario() {
   const [resources, setResources] = useState(initialResources)
   const [open, setOpen] = useState(false)
+  const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
 
   const source = useDataCollectionSource({
     dataAdapter: createResourceDataAdapter(resources),
@@ -57,26 +60,33 @@ function DefaultDialogScenario() {
         primaryAction={{
           label: "Create resource",
           icon: Add,
-          onClick: () => {
-            setResources([
-              {
-                id: "resource-new",
-                name: "New resource",
-                owner: "People Ops",
-                status: "Draft",
-                summary: "Created from the default dialog.",
-              },
-              ...resources,
-            ])
-            setOpen(false)
-          },
+          onClick: submit,
+          loading: isSubmitting,
+          disabled: hasErrors,
         }}
         secondaryAction={{
           label: "Cancel",
           onClick: () => setOpen(false),
         }}
       >
-        <ResourceForm mode="create" />
+        <ResourceFormF0
+          key="create"
+          mode="create"
+          formRef={formRef}
+          onSuccess={(data) => {
+            setResources([
+              {
+                id: `resource-${Date.now()}`,
+                name: data.name,
+                owner: data.owner,
+                status: (data.status as Resource["status"]) ?? "Draft",
+                summary: "Created from the default dialog.",
+              },
+              ...resources,
+            ])
+            setOpen(false)
+          }}
+        />
       </F0Dialog>
     </CrudPatternLayout>
   )
@@ -113,26 +123,15 @@ function WizardDialogScenario() {
         ]}
         onSubmit={async () => setOpen(false)}
       >
-        {({ currentStep }) => (
-          <div className="flex flex-col gap-4">
-            <h3 className="text-lg font-semibold text-f1-foreground">
-              Step {currentStep + 1}
-            </h3>
-            <p className="text-sm text-f1-foreground-secondary">
-              The wizard keeps users focused on one step at a time.
+        {({ currentStep }) => {
+          if (currentStep === 0) return <WizardStepBasic />
+          if (currentStep === 1) return <WizardStepAssignments />
+          return (
+            <p className="text-f1-foreground-secondary">
+              Review the details above and click Create plan to finish.
             </p>
-            <ExampleField
-              label="Step input"
-              value={
-                currentStep === 0
-                  ? "Onboarding plan"
-                  : currentStep === 1
-                    ? "People team"
-                    : "Ready to create"
-              }
-            />
-          </div>
-        )}
+          )
+        }}
       </F0Wizard>
     </CrudPatternLayout>
   )
@@ -142,14 +141,8 @@ function LightweightCreateActionsScenario() {
   const [resources, setResources] = useState(initialResources)
   const [open, setOpen] = useState(false)
   const [resourcePage, setResourcePage] = useState<Resource | null>(null)
-
-  const createdResource: Resource = {
-    id: "payroll-integration",
-    name: "Factorial Payroll",
-    owner: "People Ops",
-    status: "Needs details",
-    summary: "Created with the minimum fields and ready for setup.",
-  }
+  const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
+  const actionRef = useRef<"close" | "open">("close")
 
   const source = useDataCollectionSource({
     dataAdapter: createResourceDataAdapter(resources),
@@ -187,21 +180,39 @@ function LightweightCreateActionsScenario() {
           label: "Save and open resource",
           icon: ArrowRight,
           onClick: () => {
-            setResources([createdResource, ...resources])
-            setOpen(false)
-            setResourcePage(createdResource)
+            actionRef.current = "open"
+            submit()
           },
+          loading: isSubmitting && actionRef.current === "open",
+          disabled: hasErrors,
         }}
         secondaryAction={{
           label: "Save and close",
           icon: Save,
           onClick: () => {
-            setResources([createdResource, ...resources])
-            setOpen(false)
+            actionRef.current = "close"
+            submit()
           },
         }}
       >
-        <LightweightCreateForm />
+        <LightweightCreateFormF0
+          key="lightweight-create"
+          formRef={formRef}
+          onSuccess={(data) => {
+            const created: Resource = {
+              id: `resource-${Date.now()}`,
+              name: data.provider,
+              owner: data.owner,
+              status: "Needs details",
+              summary: "Created with the minimum fields and ready for setup.",
+            }
+            setResources([created, ...resources])
+            setOpen(false)
+            if (actionRef.current === "open") {
+              setResourcePage(created)
+            }
+          }}
+        />
       </F0Dialog>
     </CrudPatternLayout>
   )
