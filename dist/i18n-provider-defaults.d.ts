@@ -187,6 +187,10 @@ export declare const defaultTranslations: {
         readonly availableFilters: "Available filters";
         readonly label: "Filters";
         readonly applyFilters: "Apply filters";
+        readonly resultsFor: {
+            readonly one: "{{count}} result for:";
+            readonly other: "{{count}} results for:";
+        };
         readonly applySelection: "Apply selection";
         readonly cancel: "Cancel";
         readonly failedToLoadOptions: "Failed to load options";
@@ -421,6 +425,11 @@ export declare const defaultTranslations: {
                 readonly source: "Source";
                 readonly applied: "Applied on";
             };
+            readonly requisition: {
+                readonly lineManager: "Line manager";
+                readonly reason: "Reason";
+                readonly status: "Status";
+            };
         };
         readonly credits: {
             readonly title: "Credits";
@@ -495,6 +504,7 @@ export declare const defaultTranslations: {
         readonly attachFile: "Attach file";
         readonly removeFile: "Remove";
         readonly fileUploadError: "Upload failed";
+        readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly dropFilesHere: "Drop your files here";
         readonly reply: "Reply";
         readonly removeQuote: "Remove quote";
@@ -544,6 +554,10 @@ export declare const defaultTranslations: {
         readonly funnel: "Funnel";
         readonly pieChart: "Pie";
         readonly table: "Table";
+        readonly emptyState: {
+            readonly title: "No data available";
+            readonly description: "Try a different date or fewer filters";
+        };
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -817,13 +831,8 @@ declare module "gridstack" {
 }
 
 
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
-        };
-    }
+declare namespace Calendar {
+    var displayName: string;
 }
 
 
@@ -832,6 +841,25 @@ declare module "@tiptap/core" {
         aiBlock: {
             insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
             executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -854,18 +882,4 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
-        };
-    }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

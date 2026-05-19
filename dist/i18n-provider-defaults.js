@@ -187,6 +187,10 @@ const e = {
     availableFilters: "Available filters",
     label: "Filters",
     applyFilters: "Apply filters",
+    resultsFor: {
+      one: "{{count}} result for:",
+      other: "{{count}} results for:"
+    },
     applySelection: "Apply selection",
     cancel: "Cancel",
     failedToLoadOptions: "Failed to load options",
@@ -420,6 +424,11 @@ const e = {
       candidate: {
         source: "Source",
         applied: "Applied on"
+      },
+      requisition: {
+        lineManager: "Line manager",
+        reason: "Reason",
+        status: "Status"
       }
     },
     credits: {
@@ -495,6 +504,7 @@ const e = {
     attachFile: "Attach file",
     removeFile: "Remove",
     fileUploadError: "Upload failed",
+    tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
     dropFilesHere: "Drop your files here",
     reply: "Reply",
     removeQuote: "Remove quote",
@@ -543,7 +553,11 @@ const e = {
     lineChart: "Line",
     funnel: "Funnel",
     pieChart: "Pie",
-    table: "Table"
+    table: "Table",
+    emptyState: {
+      title: "No data available",
+      description: "Try a different date or fewer filters"
+    }
   },
   select: {
     noResults: "No results found",

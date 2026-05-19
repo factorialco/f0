@@ -55,6 +55,7 @@ import { F0AvatarTeamProps as F0AvatarTeamProps_2 } from './F0AvatarTeam';
 import { F0DataChartProps as F0DataChartProps_2 } from './types';
 import { F0DialogInternalProps } from './internal-types';
 import { F0DurationInputProps as F0DurationInputProps_2 } from './types';
+import { F0FormDefinition as F0FormDefinition_2 } from './f0';
 import { F0FormDefinitionPerSection as F0FormDefinitionPerSection_2 } from './f0';
 import { F0FormDefinitionSingleSchema as F0FormDefinitionSingleSchema_2 } from './f0';
 import { F0GridStackProps as F0GridStackProps_2 } from './F0GridStack';
@@ -82,7 +83,7 @@ import { GroupGridProps as GroupGridProps_2 } from './groups/GroupGrid';
 import { GroupGridWidget as GroupGridWidget_2 } from './groups/GroupGrid';
 import { GroupLinearProps } from './groups/GroupLinear';
 import { GroupMasonryProps } from './groups/GroupMasonry';
-import { HourDistributionCellValue } from './types/hourDistribution';
+import { HourDistributionCellValue as HourDistributionCellValue_2 } from './types/hourDistribution';
 import { HTMLAttributeAnchorTarget } from 'react';
 import { HTMLAttributes } from 'react';
 import { IconCellValue } from './types/icon';
@@ -116,10 +117,10 @@ import { PopoverContentProps } from '@radix-ui/react-popover';
 import { ProgressBarCellValue } from './f0';
 import { ProgressBarCellValue as ProgressBarCellValue_2 } from './types/progressBar';
 import { Props as Props_2 } from './types';
+import { RadarChartProps } from './RadarChart';
 import * as React_2 from 'react';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
-import * as RechartsPrimitive from 'recharts';
 import { Ref } from 'react';
 import { RefAttributes } from 'react';
 import { RefObject } from 'react';
@@ -395,6 +396,7 @@ declare type ActionType_2 = {
     disabled?: boolean;
     critical?: boolean;
     description?: string;
+    loading?: boolean;
 };
 
 declare type ActionVariant = (typeof actionVariants)[number];
@@ -531,6 +533,14 @@ export declare type AiChatProviderProps = {
      */
     canvasActions?: CanvasActions;
     /**
+     * Canvas entity definitions keyed by `CanvasContent["type"]`. The canvas
+     * panel looks up the matching definition when `openCanvas` is called.
+     *
+     * F0AiChat ships without built-in canvas entities; the host app supplies
+     * them here so canvas logic lives in one place.
+     */
+    canvasEntities?: Record<string, CanvasEntityDefinition>;
+    /**
      * Available tool hints that the user can activate to provide intent context
      * to the AI. Renders a selector button next to the send button.
      * Only one tool hint can be active at a time.
@@ -559,6 +569,14 @@ export declare type AiChatProviderProps = {
         feedback: string;
     }) => void;
     tracking?: AiChatTrackingOptions;
+    /**
+     * Optional hook called before a user message is sent. Return false to block submission.
+     */
+    onBeforeSendMessage?: () => boolean | Promise<boolean>;
+    /**
+     * Optional fetch implementation for AI runtime requests owned by F0.
+     */
+    runtimeFetch?: typeof fetch;
 } & Pick<CopilotKitProps, "agent" | "credentials" | "children" | "runtimeUrl" | "showDevConsole" | "threadId" | "headers">;
 
 /**
@@ -590,6 +608,14 @@ declare type AiChatProviderReturnValue = {
         feedback: string;
     }) => void;
     tracking?: AiChatTrackingOptions;
+    /**
+     * Optional hook called before a user message is sent. Return false to block submission.
+     */
+    onBeforeSendMessage?: () => boolean | Promise<boolean>;
+    /**
+     * Fetch implementation for AI runtime requests owned by F0.
+     */
+    runtimeFetch: typeof fetch;
     /**
      * Clear/reset the chat conversation
      */
@@ -712,7 +738,7 @@ declare type AiChatProviderReturnValue = {
     pendingQuote: PendingQuote | null;
     /** Set the pending quote (pass null to clear). */
     setPendingQuote: React.Dispatch<React.SetStateAction<PendingQuote | null>>;
-} & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "toolHints" | "credits" | "creditWarning" | "fileAttachments"> & {
+} & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "canvasEntities" | "toolHints" | "credits" | "creditWarning" | "fileAttachments"> & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null;
     /** Open the canvas panel with the given content */
@@ -749,6 +775,7 @@ declare interface AiChatState {
     VoiceMode?: React.ComponentType;
     entityRefs?: EntityRefs;
     canvasActions?: CanvasActions;
+    canvasEntities?: Record<string, CanvasEntityDefinition>;
     toolHints?: AiChatToolHint[];
     credits?: AiChatCredits;
     creditWarning?: AiChatCreditWarning;
@@ -764,6 +791,14 @@ declare interface AiChatState {
         feedback: string;
     }) => void;
     tracking?: AiChatTrackingOptions;
+    /**
+     * Optional hook called before a user message is sent. Return false to block submission.
+     */
+    onBeforeSendMessage?: () => boolean | Promise<boolean>;
+    /**
+     * Optional fetch implementation for AI runtime requests owned by F0.
+     */
+    runtimeFetch?: typeof fetch;
 }
 
 /**
@@ -902,6 +937,11 @@ export declare const aiTranslations: {
                 readonly source: "Source";
                 readonly applied: "Applied on";
             };
+            readonly requisition: {
+                readonly lineManager: "Line manager";
+                readonly reason: "Reason";
+                readonly status: "Status";
+            };
         };
         readonly credits: {
             readonly title: "Credits";
@@ -976,6 +1016,7 @@ export declare const aiTranslations: {
         readonly attachFile: "Attach file";
         readonly removeFile: "Remove";
         readonly fileUploadError: "Upload failed";
+        readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly dropFilesHere: "Drop your files here";
         readonly reply: "Reply";
         readonly removeQuote: "Remove quote";
@@ -1017,6 +1058,16 @@ export declare const aiTranslations: {
             };
         };
     };
+};
+
+declare type AlertAction = {
+    label: string;
+    onRequest: UpsellingButtonProps["onRequest"];
+    errorMessage: UpsellingButtonProps["errorMessage"];
+    successMessage: UpsellingButtonProps["successMessage"];
+    loadingState: UpsellingButtonProps["loadingState"];
+    nextSteps: UpsellingButtonProps["nextSteps"];
+    closeLabel: UpsellingButtonProps["closeLabel"];
 };
 
 export declare type AlertAvatarProps = VariantProps<typeof alertAvatarVariants> & {
@@ -1518,6 +1569,15 @@ export declare type BigNumberProps = {
 };
 
 /**
+ * Person avatar data for the expert list
+ */
+export declare interface BookAMeetingCardAvatar {
+    firstName: string;
+    lastName: string;
+    src?: string;
+}
+
+/**
  * Base for boolean-specific conditions
  */
 declare interface BooleanRenderIfBase {
@@ -1550,6 +1610,7 @@ export declare type BorderWidthToken = "none" | "default" | "thick";
 declare type BoxVariantProps = VariantProps<typeof boxVariants>;
 
 declare const boxVariants: (props?: ({
+    zIndex?: "0" | "auto" | "10" | "20" | "50" | "40" | "30" | undefined;
     divider?: "x" | "y" | undefined;
     dividerColor?: "info" | "bold" | "default" | "secondary" | "critical" | "warning" | "positive" | "promote" | "selected" | "critical-bold" | "info-bold" | "warning-bold" | "positive-bold" | "selected-bold" | undefined;
     overflow?: "hidden" | "auto" | "scroll" | "visible" | undefined;
@@ -1600,6 +1661,10 @@ declare const boxVariants: (props?: ({
     paddingBottom?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
     paddingLeft?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
     paddingRight?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    top?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    right?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    bottom?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
+    left?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
     display?: "block" | "inline" | "flex" | "grid" | "inline-flex" | "none" | undefined;
     position?: "fixed" | "sticky" | "absolute" | "relative" | "static" | undefined;
 } & ({
@@ -1847,6 +1912,36 @@ export declare type CandidateProfile = {
  */
 export declare type CanvasActions = {
     dashboard?: DashboardCanvasActions;
+};
+
+/**
+ * Shared inline card rendered in the AI chat for any canvas entity.
+ * Shows a module avatar, title, description, and an Open/Close toggle button.
+ * When active, displays a focus ring and the button switches to "Close".
+ */
+export declare function CanvasCard({ module: cardModule, title, description, onOpen, showOpenButton, onClose, isActive, children, }: CanvasCardProps): JSX_2.Element;
+
+export declare namespace CanvasCard {
+    var displayName: string;
+}
+
+export declare type CanvasCardProps = {
+    /** Module avatar to display (e.g. "analytics", "surveys", "goals") */
+    module?: ModuleId;
+    /** Primary title */
+    title: string;
+    /** Secondary description line */
+    description: string;
+    /** Called when the user clicks the "Open" button */
+    onOpen: () => void;
+    /** Whether to show the "Open" button */
+    showOpenButton?: boolean;
+    /** Called when the user clicks the "Close" button (active state) */
+    onClose: () => void;
+    /** Whether this card's content is currently shown in the canvas */
+    isActive: boolean;
+    /** Optional content rendered below the card header (e.g. a data preview) */
+    children?: React.ReactNode;
 };
 
 /**
@@ -2238,21 +2333,6 @@ declare interface ChartComputation {
     limit?: number;
 }
 
-declare type ChartConfig_3 = Record<string, ChartConfig_4[keyof ChartConfig_4]>;
-
-declare type ChartConfig_4 = {
-    [k in string]: {
-        label?: React_2.ReactNode;
-        icon?: React_2.ComponentType;
-    } & ({
-        color?: string;
-        theme?: never;
-    } | {
-        color?: never;
-        theme: Record<keyof typeof THEMES, string>;
-    });
-};
-
 declare interface ChartConfigBase {
     /** Show the legend below the chart. @default true */
     showLegend?: boolean;
@@ -2265,20 +2345,6 @@ declare interface ChartConfigBase {
     /** Format category axis tick labels */
     categoryFormatter?: (value: string) => string;
 }
-
-declare const ChartContainer: React_2.ForwardRefExoticComponent<Omit<ChartContainerComponentProps, "ref"> & React_2.RefAttributes<HTMLDivElement>>;
-
-declare interface ChartContainerComponentProps extends React_2.ComponentProps<"div">, VariantProps<typeof variants> {
-    config: ChartConfig_4;
-    children: React_2.ComponentProps<typeof RechartsPrimitive.ResponsiveContainer>["children"];
-}
-
-declare type ChartItem<K extends ChartConfig_3> = {
-    label: string;
-    values: {
-        [key in keyof K]: number;
-    };
-};
 
 /**
  * Complete chart theme — everything a chart type needs to render correctly.
@@ -2386,7 +2452,7 @@ declare interface ChatDashboardColumn {
  * Contains fetchSpecs that describe how to obtain data server-side —
  * no raw data is included. Fully JSON-serializable.
  */
-declare interface ChatDashboardConfig {
+export declare interface ChatDashboardConfig {
     /** Dashboard title displayed in the canvas header and chat report card */
     title: string;
     /**
@@ -2696,7 +2762,7 @@ declare interface ClarifyingOption {
  * Navigation metadata (currentStepIndex, totalSteps) and callbacks live
  * here so the panel component stays a pure view of this state.
  */
-declare interface ClarifyingQuestionState {
+export declare interface ClarifyingQuestionState {
     /** The current step's data + interaction state */
     currentStep: ClarifyingStepState;
     /** Zero-based index of the current step */
@@ -2730,13 +2796,13 @@ declare interface ClarifyingQuestionState {
  * - "single": only one option can be selected (rendered as radio buttons)
  * - "multiple": multiple options can be selected (rendered as checkboxes)
  */
-declare type ClarifyingSelectionMode = "single" | "multiple";
+export declare type ClarifyingSelectionMode = "single" | "multiple";
 
 /**
  * Pure data describing a single clarifying question step.
  * This is what the AI backend sends — no UI state or callbacks.
  */
-declare interface ClarifyingStepData {
+export declare interface ClarifyingStepData {
     /** The question text displayed to the user */
     question: string;
     /** Available options the user can select from */
@@ -2761,6 +2827,10 @@ declare interface ClarifyingStepState extends ClarifyingStepData {
     /** Whether the custom answer is currently included in the submission */
     isCustomAnswerActive: boolean;
 }
+
+export declare function CloseCanvasButton({ onClick }: {
+    onClick: () => void;
+}): JSX_2.Element;
 
 declare type ColId = string;
 
@@ -3096,7 +3166,7 @@ export declare const Dashboard: WithDataTestIdReturnType_3<ComponentType<Dashboa
 /**
  * Callbacks for persisting dashboards externally (beyond chat history).
  */
-declare type DashboardCanvasActions = {
+export declare type DashboardCanvasActions = {
     /** Update an existing saved dashboard */
     save: (id: string, category: string, config: ChatDashboardConfig) => Promise<void>;
     /**
@@ -3127,6 +3197,7 @@ export declare type DashboardCanvasContent = CanvasContentBase & {
     apiConfig: {
         baseUrl: string;
         headers: Record<string, string>;
+        runtimeFetch?: typeof fetch;
     };
     /** Present when the dashboard is a pre-saved dashboard */
     savedDashboardId?: string;
@@ -3135,6 +3206,45 @@ export declare type DashboardCanvasContent = CanvasContentBase & {
     /** Description of the saved dashboard */
     savedDashboardDescription?: string;
     /** True when the agent has iterated on a saved dashboard but the user hasn't saved yet */
+    savedDashboardUnsaved?: boolean;
+};
+
+export declare function DashboardCanvasProvider({ content, children, }: {
+    content: DashboardCanvasContent;
+    children: ReactNode;
+}): ReactNode;
+
+/**
+ * Dashboard-specific card that wraps CanvasCard with config-store
+ * subscription logic. Re-renders when the user edits and saves
+ * the dashboard layout.
+ *
+ * All saved-dashboard state (id, category, unsaved) is passed through
+ * from the action arguments. The meta store overrides props after
+ * save/create operations so close/re-open preserves the latest state.
+ */
+export declare function DashboardCard({ config: originalConfig, apiConfig, savedDashboardId: propSavedId, savedDashboardCategory: propSavedCategory, savedDashboardDescription: propSavedDescription, savedDashboardUnsaved: propSavedUnsaved, }: DashboardCardProps): JSX_2.Element;
+
+export declare namespace DashboardCard {
+    var displayName: string;
+}
+
+export declare type DashboardCardProps = {
+    /** The original dashboard config from the agent */
+    config: ChatDashboardConfig;
+    /** API config for server-side dashboard computation */
+    apiConfig: {
+        baseUrl: string;
+        headers: Record<string, string>;
+        runtimeFetch?: typeof fetch;
+    };
+    /** Present when the dashboard is a pre-saved dashboard */
+    savedDashboardId?: string;
+    /** Category of the saved dashboard */
+    savedDashboardCategory?: string;
+    /** Description of the saved dashboard */
+    savedDashboardDescription?: string;
+    /** Whether the dashboard has unsaved changes */
     savedDashboardUnsaved?: boolean;
 };
 
@@ -3199,6 +3309,11 @@ export declare interface DashboardCollectionItem<Filters extends FiltersDefiniti
     visualizations: ReadonlyArray<any>;
 }
 
+export declare function DashboardContent({ content, refreshKey: _parentRefreshKey, }: {
+    content: DashboardCanvasContent;
+    refreshKey: number;
+}): ReactNode;
+
 declare interface DashboardFetchSpec {
     fetch: Array<{
         toolId: string;
@@ -3207,6 +3322,18 @@ declare interface DashboardFetchSpec {
     query: string | null;
     columnLabels?: Record<string, string>;
 }
+
+/**
+ * Canvas header for the dashboard entity. Layout, title, status tag,
+ * metadata strip, and the action row (export + close) are all delegated
+ * to `ResourceHeader`. The close button is just another `secondaryAction`
+ * with `hideLabel`, so the shared header component doesn't need to know
+ * about canvas-specific close affordances.
+ */
+export declare function DashboardHeader({ content, onClose, }: {
+    content: DashboardCanvasContent;
+    onClose: () => void;
+}): JSX_2.Element;
 
 /**
  * A single dashboard item. Discriminated on `type`.
@@ -3368,6 +3495,19 @@ declare type DataAttributes_2 = {
     [key: `data-${string}`]: string | undefined;
 };
 
+/**
+ * Resolves an `F0DataChartEmptyStateProps` config (i18n defaults + overrides
+ * + render-prop) into rendered output. Used internally by `F0DataChart` and
+ * reused by dashboard wrappers when data is absent.
+ */
+export declare const DataChartEmptyStateView: ({ chartType, emptyState, }: DataChartEmptyStateViewProps) => JSX_2.Element;
+
+declare interface DataChartEmptyStateViewProps {
+    /** The chart variant — drives the background skeleton illustration. */
+    chartType: F0DataChartProps["type"];
+    emptyState?: F0DataChartEmptyStateProps;
+}
+
 declare type DataCollectionBaseFetchOptions<Filters extends FiltersDefinition, NavigationFilters extends NavigationFiltersDefinition> = BaseFetchOptions<Filters> & DataCollectionExtendFetchOptions<NavigationFilters>;
 
 /**
@@ -3490,18 +3630,36 @@ export declare type DataCollectionStorageHandler<CurrentFiltersState extends Fil
 /**
  * Data download canvas content — renders a full data table with download options.
  */
-declare type DataDownloadCanvasContent = CanvasContentBase & {
+export declare type DataDownloadCanvasContent = CanvasContentBase & {
     type: "dataDownload";
     dataset: DataDownloadDataset;
     filename?: string;
     markdown?: string;
 };
 
+export declare function DataDownloadCard({ title: titleProp, dataset, filename, markdown, }: DataDownloadCardProps): JSX_2.Element;
+
+export declare namespace DataDownloadCard {
+    var displayName: string;
+}
+
+export declare type DataDownloadCardProps = {
+    title?: string;
+    dataset: DataDownloadDataset;
+    filename?: string;
+    markdown?: string;
+};
+
+export declare function DataDownloadContent({ content, }: {
+    content: DataDownloadCanvasContent;
+    refreshKey?: number;
+}): JSX_2.Element;
+
 /**
  * Inline dataset for client-side file generation (Excel / CSV).
  * Sent by the agent with the raw query results.
  */
-declare type DataDownloadDataset = {
+export declare type DataDownloadDataset = {
     /**
      * Column headers in display order.
      */
@@ -3526,6 +3684,16 @@ declare type DataDownloadDataset = {
      */
     columnLabels?: Record<string, string>;
 };
+
+export declare function DataDownloadHeader({ content, onClose, }: {
+    content: DataDownloadCanvasContent;
+    onClose: () => void;
+}): JSX_2.Element;
+
+export declare function DataDownloadProvider({ content, children, }: {
+    content: DataDownloadCanvasContent;
+    children: ReactNode;
+}): JSX_2.Element;
 
 /**
  * Represents an error that occurred during data fetching
@@ -4051,6 +4219,10 @@ export declare const defaultTranslations: {
         readonly availableFilters: "Available filters";
         readonly label: "Filters";
         readonly applyFilters: "Apply filters";
+        readonly resultsFor: {
+            readonly one: "{{count}} result for:";
+            readonly other: "{{count}} results for:";
+        };
         readonly applySelection: "Apply selection";
         readonly cancel: "Cancel";
         readonly failedToLoadOptions: "Failed to load options";
@@ -4285,6 +4457,11 @@ export declare const defaultTranslations: {
                 readonly source: "Source";
                 readonly applied: "Applied on";
             };
+            readonly requisition: {
+                readonly lineManager: "Line manager";
+                readonly reason: "Reason";
+                readonly status: "Status";
+            };
         };
         readonly credits: {
             readonly title: "Credits";
@@ -4359,6 +4536,7 @@ export declare const defaultTranslations: {
         readonly attachFile: "Attach file";
         readonly removeFile: "Remove";
         readonly fileUploadError: "Upload failed";
+        readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly dropFilesHere: "Drop your files here";
         readonly reply: "Reply";
         readonly removeQuote: "Remove quote";
@@ -4408,6 +4586,10 @@ export declare const defaultTranslations: {
         readonly funnel: "Funnel";
         readonly pieChart: "Pie";
         readonly table: "Table";
+        readonly emptyState: {
+            readonly title: "No data available";
+            readonly description: "Try a different date or fewer filters";
+        };
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -4877,6 +5059,46 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
      * Falls back to sensible defaults when omitted.
      */
     numberConfig?: NumberCellConfig<R>;
+    /**
+     * Called after this cell's value changes. Use to compute derived values
+     * and update other cells in the same row.
+     *
+     * Works with every cell type (text, number, date, select, etc.).
+     *
+     * @example
+     * formula: ({ value, setCellValue }) => {
+     *   const hours = roleHoursMap[value as string]
+     *   if (hours != null) setCellValue("plannedHours", hours)
+     * }
+     */
+    formula?: (params: {
+        /** The new value of this cell. */
+        value: unknown;
+        /** The current row item (before this change is applied). */
+        item: R;
+        /** For select cells: the full record associated with the selected option. */
+        selectedItem?: RecordType;
+        /** Update another cell in the same row by column id. */
+        setCellValue: (columnId: string, value: unknown) => void;
+    }) => void;
+    /**
+     * Returns a hint to display as an icon with tooltip inside the cell.
+     * Use to warn the user when a value diverges from its formula-inferred value.
+     *
+     * Return `undefined` to hide the hint.
+     *
+     * @example
+     * cellHint: (item) => {
+     *   if (item._inferredSalary != null && item.salary !== item._inferredSalary) {
+     *     return { icon: AlertCircle, message: `Differs from catalog (${item._inferredSalary})` }
+     *   }
+     * }
+     */
+    cellHint?: (item: R) => {
+        icon: IconType;
+        message: string;
+        iconColor?: F0IconProps["color"];
+    } | undefined;
 };
 
 declare type EditableTableVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = Omit<TableVisualizationOptions<R, _Filters, Sortings, Summaries>, "columns"> & {
@@ -4978,6 +5200,7 @@ export declare type EntityRefs = {
 export declare type EntityResolvers = {
     person?: (id: string) => Promise<PersonProfile>;
     candidate?: (id: string) => Promise<CandidateProfile>;
+    expense?: (id: string) => Promise<ExpenseProfile>;
     jobPosting?: (id: string) => Promise<JobPostingProfile>;
     requisition?: (id: string) => Promise<RequisitionProfile>;
     vacancy?: (id: string) => Promise<VacancyProfile>;
@@ -4998,6 +5221,7 @@ export declare type EntityResolvers = {
 export declare type EntityUrlBuilders = {
     person?: (id: string) => string;
     candidate?: (id: string) => string;
+    expense?: (id: string) => string;
     jobPosting?: (id: string) => string;
     requisition?: (id: string) => string;
     vacancy?: (id: string) => string;
@@ -5029,6 +5253,17 @@ declare type EventName = "datacollection.filter-change" | "datacollection.sortin
 declare type EventParams = Record<string, EventScalar | Array<EventScalar>>;
 
 declare type EventScalar = string | number | boolean | undefined | null;
+
+/**
+ * Profile data for an expense entity, resolved asynchronously
+ * and displayed in the entity reference hover card.
+ */
+export declare type ExpenseProfile = {
+    id: string | number;
+    description?: string;
+    amount?: string;
+    status?: string;
+};
 
 export declare const experimental: <T extends React.ComponentType<any>>(name: string, component: T) => T;
 
@@ -5152,7 +5387,7 @@ export declare const F0AiChat: () => JSX_2.Element | null;
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, toolHints, credits, creditWarning, fileAttachments, onThumbsUp, onThumbsDown, children, agent, tracking, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, toolHints, credits, creditWarning, fileAttachments, onThumbsUp, onThumbsDown, onBeforeSendMessage, runtimeFetch, children, agent, tracking, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
 
 export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, creditWarning, }: ChatTextareaProps) => JSX_2.Element;
 
@@ -5336,6 +5571,47 @@ export declare class F0AiMask {
     private setupGL;
     private render;
 }
+
+export declare function F0AiProposalCard(props: F0AiProposalCardProps): JSX_2.Element;
+
+export declare namespace F0AiProposalCard {
+    var displayName: string;
+}
+
+export declare interface F0AiProposalCardActions {
+    /** Label for the primary action button. */
+    primaryActionLabel: string;
+    /** Optional icon shown before the primary action label. */
+    primaryActionIcon?: IconType;
+    /** Whether the action footer is visible. */
+    showActions?: true;
+    /** Called when the primary action is clicked. */
+    onPrimaryAction: () => void;
+}
+
+export declare interface F0AiProposalCardBaseProps extends DataAttributes_2 {
+    /** Module avatar shown in the card header. */
+    module?: ModuleId;
+    /** Header label describing the proposal type. */
+    heading: string;
+    /** Main proposal title. */
+    title: string;
+    /** Optional secondary metadata line. */
+    subtitle?: string;
+    /** Proposal details. Line breaks are preserved when expanded. */
+    description: string;
+    /** Label for the inline expansion control. */
+    seeMoreLabel: string;
+    /** Maximum number of characters shown before expansion. */
+    maxCollapsedDescriptionLength?: number;
+}
+
+export declare interface F0AiProposalCardHiddenActions {
+    /** Hide the action footer and omit action props. */
+    showActions: false;
+}
+
+export declare type F0AiProposalCardProps = F0AiProposalCardBaseProps & (F0AiProposalCardActions | F0AiProposalCardHiddenActions);
 
 export declare const F0Alert: WithDataTestIdReturnType_3<({ title, description, action, link, icon, variant, onClose, }: F0AlertProps) => JSX_2.Element>;
 
@@ -5802,6 +6078,22 @@ displayName: string;
 Skeleton: () => JSX_2.Element;
 }>;
 
+export declare const F0BookAMeetingCard: ({ onAction, actionHref, }: F0BookAMeetingCardProps) => JSX_2.Element;
+
+/**
+ * Props for the F0BookAMeetingCard component
+ */
+export declare interface F0BookAMeetingCardProps {
+    /**
+     * Callback when the action button is clicked. Omit when using actionHref.
+     */
+    onAction?: () => void;
+    /**
+     * When set, the action button renders as a link to this URL.
+     */
+    actionHref?: string;
+}
+
 /**
  * Config for boolean fields - checkbox
  */
@@ -6206,7 +6498,7 @@ export declare interface F0DataChartBarSeries {
     color?: ChartColorToken;
 }
 
-declare interface F0DataChartBaseProps {
+declare interface F0DataChartBaseProps extends F0DataChartCommonProps {
     /** Labels for the category axis (one per data point) */
     categories: string[];
     /** Show the legend below the chart. @default true */
@@ -6221,6 +6513,39 @@ declare interface F0DataChartBaseProps {
     categoryFormatter?: (value: string) => string;
     /** Escape hatch: raw ECharts options merged (shallow) on top of the generated config */
     echartsOptions?: Partial<echarts_2.EChartsOption>;
+}
+
+/**
+ * Props shared by every `F0DataChart` variant.
+ */
+declare interface F0DataChartCommonProps {
+    /** Customize or opt out of the empty state shown when data is empty. */
+    emptyState?: F0DataChartEmptyStateProps;
+}
+
+/**
+ * Configuration for the empty state shown when a chart has no data.
+ *
+ * `F0DataChart` auto-detects empty data across all variants and renders a
+ * default empty state. Use this prop to customize the copy, fully replace
+ * the rendered UI via `render`, or skip detection via `disabled`.
+ */
+export declare interface F0DataChartEmptyStateProps {
+    /** Override the default headline. */
+    title?: string;
+    /** Override the default supporting copy. */
+    description?: string;
+    /**
+     * Render-prop escape hatch — when provided, replaces the entire empty
+     * state UI. Still gated by the empty-data detection.
+     */
+    render?: () => ReactNode;
+    /**
+     * Skip empty-data detection and render the chart as usual. Use when zero
+     * values are legitimate (e.g. a "0 errors per day" timeline).
+     * @default false
+     */
+    disabled?: boolean;
 }
 
 /**
@@ -6242,7 +6567,7 @@ export declare interface F0DataChartFunnelDataPoint {
  * Funnels do NOT use category/value axes — stage names come from the data
  * points themselves. This interface is separate from `F0DataChartBaseProps`.
  */
-export declare interface F0DataChartFunnelProps {
+export declare interface F0DataChartFunnelProps extends F0DataChartCommonProps {
     /** Chart type */
     type: "funnel";
     /** The funnel series to render */
@@ -6292,7 +6617,7 @@ export declare interface F0DataChartFunnelSeries {
  *
  * A single-value gauge indicator — no axes, no legend.
  */
-export declare interface F0DataChartGaugeProps {
+export declare interface F0DataChartGaugeProps extends F0DataChartCommonProps {
     /** Chart type */
     type: "gauge";
     /** Current value */
@@ -6320,7 +6645,7 @@ export declare interface F0DataChartGaugeProps {
  * Uses two category axes (x for columns, y for rows) and a visualMap for
  * value→color mapping.
  */
-export declare interface F0DataChartHeatmapProps {
+export declare interface F0DataChartHeatmapProps extends F0DataChartCommonProps {
     /** Chart type */
     type: "heatmap";
     /** Column labels (x-axis) */
@@ -6406,7 +6731,7 @@ export declare interface F0DataChartPieDataPoint {
  * Pies do NOT use category/value axes — segment names come from the data
  * points themselves. This interface is separate from `F0DataChartBaseProps`.
  */
-export declare interface F0DataChartPieProps {
+export declare interface F0DataChartPieProps extends F0DataChartCommonProps {
     /** Chart type */
     type: "pie";
     /** The pie series to render */
@@ -6460,7 +6785,7 @@ export declare interface F0DataChartRadarIndicator {
  *
  * Radar charts use a polar coordinate system — no cartesian axes.
  */
-export declare interface F0DataChartRadarProps {
+export declare interface F0DataChartRadarProps extends F0DataChartCommonProps {
     /** Chart type */
     type: "radar";
     /** Axes of the radar — defines the dimensions to compare */
@@ -6679,6 +7004,34 @@ export declare type F0DateTimeFieldConfig = F0BaseConfig & F0DateTimeConfig & {
     fieldType: "datetime";
 };
 
+export declare const F0DemoCard: ({ preview, moduleName, description, onAction, actionHref, }: F0DemoCardProps) => JSX_2.Element;
+
+/**
+ * Props for the F0DemoCard component
+ */
+export declare interface F0DemoCardProps {
+    /**
+     * Content for the preview area (embedded app preview, image, or custom content)
+     */
+    preview: ReactNode;
+    /**
+     * Main title below the preview (e.g. "See Projects in action")
+     */
+    moduleName: string;
+    /**
+     * Description text below the title
+     */
+    description: string;
+    /**
+     * Callback when the action button is clicked. Omit when using actionHref.
+     */
+    onAction?: () => void;
+    /**
+     * When set, the action button renders as a link to this URL (e.g. for copilot-driven cards).
+     */
+    actionHref?: string;
+}
+
 /**
  * @experimental This is an experimental component use it at your own risk
  */
@@ -6800,6 +7153,52 @@ export declare interface F0DurationInputProps {
 }
 
 export declare function F0EventCatcherProvider({ children, onEvent, enabled, catchEvents, }: EventCatcherProviderProps): JSX.Element;
+
+export declare const F0FAQCard: ({ headerIcon, items, defaultExpandedId, expandedId: controlledExpandedId, onExpandedChange, allowMultiple, }: F0FAQCardProps) => JSX_2.Element | null;
+
+/**
+ * Props for the F0FAQCard component
+ */
+export declare interface F0FAQCardProps {
+    /**
+     * Optional icon shown in the card header
+     * @default Question icon
+     */
+    headerIcon?: IconType;
+    /**
+     * Array of FAQ items to display
+     */
+    items: F0FAQItem[];
+    /**
+     * Initially expanded item ID (uncontrolled mode)
+     */
+    defaultExpandedId?: string;
+    /**
+     * Currently expanded item ID (controlled mode)
+     */
+    expandedId?: string;
+    /**
+     * Callback when an item is expanded/collapsed (controlled mode)
+     */
+    onExpandedChange?: (id: string | null) => void;
+    /**
+     * Whether multiple items can be expanded at once
+     * @default false
+     */
+    allowMultiple?: boolean;
+}
+
+/**
+ * A single FAQ item with question and answer
+ */
+export declare interface F0FAQItem {
+    /** Unique identifier for the FAQ item */
+    id: string;
+    /** The question text */
+    question: string;
+    /** The answer text */
+    answer: string;
+}
 
 /**
  * Union of all F0 field types used for rendering
@@ -6945,6 +7344,7 @@ export declare const F0Form: {
     <T extends F0PerSectionSchema>(props: F0FormPropsWithPerSectionSchema<T>): React.ReactElement;
     <TSchema extends F0FormSchema>(props: F0FormPropsWithSingleSchemaDefinition<TSchema>): React.ReactElement;
     <T extends F0PerSectionSchema>(props: F0FormPropsWithPerSectionDefinition<T>): React.ReactElement;
+    (props: F0FormPropsWithDefinition): React.ReactElement;
 };
 
 /**
@@ -6962,6 +7362,28 @@ declare interface F0FormActionBarSubmitConfig extends F0FormSubmitConfigBase {
     discardConfig?: F0FormDiscardConfig;
     /** Label shown in the action bar (defaults to i18n "forms.actionBar.unsavedChanges") */
     actionBarLabel?: string;
+}
+
+/**
+ * Submit configuration for autosubmit type.
+ *
+ * Automatically submits the form after the user stops editing for `delay` ms.
+ * Validation runs on every debounced submit attempt; invalid forms surface
+ * errors and skip `onSubmit` (handled by react-hook-form).
+ */
+declare interface F0FormAutosubmitConfig extends F0FormSubmitConfigBase {
+    /** Type of submit UI (debounced auto-submit) */
+    type: "autosubmit";
+    /**
+     * Delay in ms between the last change and the auto-submit.
+     * @default 800
+     */
+    delay?: number;
+    /**
+     * When true, hides the internal action bar (loading/success feedback).
+     * @default false
+     */
+    hideActionBar?: boolean;
 }
 
 /**
@@ -7078,7 +7500,7 @@ export declare interface F0FormDiscardConfig {
 }
 
 /**
- * When to trigger and display validation errors
+ * When to trigger and display validation errors (does not apply with autosubmit)
  * - "on-blur": Errors appear when the user leaves a field (default)
  * - "on-change": Errors appear as the user types (real-time validation)
  * - "on-submit": Errors only appear after attempting to submit the form
@@ -7419,6 +7841,33 @@ export declare type F0FormLikeComponent = React.ComponentType<F0FormCommonProps>
 export declare type F0FormProps<TSchema extends F0FormSchema | F0PerSectionSchema = F0FormSchema | F0PerSectionSchema> = TSchema extends F0FormSchema ? F0FormPropsWithSingleSchema<TSchema> | F0FormPropsWithSingleSchemaDefinition<TSchema> : TSchema extends F0PerSectionSchema ? F0FormPropsWithPerSectionSchema<TSchema> | F0FormPropsWithPerSectionDefinition<TSchema> : never;
 
 /**
+ * Props for F0Form when the formDefinition is a union (`F0FormDefinition`).
+ * This non-generic variant allows passing a definition whose exact schema
+ * branch is not statically known (e.g. stored in state or returned from a
+ * generic helper).
+ */
+declare interface F0FormPropsWithDefinition {
+    formDefinition: F0FormDefinition_2;
+    className?: string;
+    styling?: F0FormStylingConfig;
+    formRef?: React.MutableRefObject<F0FormRef | null>;
+    initialFiles?: InitialFile[];
+    /** Upload hook shared by all file fields in the form. */
+    useUpload?: UseFileUpload;
+    /**
+     * Callback that renders custom fields identified by `customFieldName`.
+     * When a field has `customFieldName`, this function is called instead of the inline `render`.
+     */
+    renderCustomField?: RenderCustomFieldFunction;
+    /**
+     * Whether async defaultValues are still being resolved.
+     * When true, the form renders with loading indicators inside each field
+     * instead of replacing the entire form with skeleton placeholders.
+     */
+    isLoading?: boolean;
+}
+
+/**
  * Props for F0Form using a formDefinition (per-section schema mode).
  * Form-related props are extracted from the definition; only rendering/integration
  * props are passed directly.
@@ -7693,7 +8142,7 @@ export declare interface F0FormStylingConfig {
 /**
  * Configuration for form submission behavior and appearance
  */
-export declare type F0FormSubmitConfig = F0FormDefaultSubmitConfig | F0FormActionBarSubmitConfig;
+export declare type F0FormSubmitConfig = F0FormDefaultSubmitConfig | F0FormActionBarSubmitConfig | F0FormAutosubmitConfig;
 
 /**
  * Base configuration shared by all submit types
@@ -7877,6 +8326,53 @@ export declare type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {
     stopPropagation?: boolean;
     href?: string;
 };
+
+export declare const F0MessageCreditsWarning: ({ actionHref, }: F0MessageCreditsWarningProps) => JSX_2.Element;
+
+/**
+ * Args for credits warning copilot action
+ */
+export declare interface F0MessageCreditsWarningArgs {
+    actionHref?: string;
+}
+
+/**
+ * Props for the F0MessageCreditsWarning component
+ */
+export declare interface F0MessageCreditsWarningProps {
+    /**
+     * Optional URL used by the action button.
+     */
+    actionHref?: string;
+}
+
+export declare const F0ModuleCard: ({ moduleName, description, onAction, actionHref, imageSrc, }: F0ModuleCardProps) => JSX_2.Element;
+
+/**
+ * Props for the F0ModuleCard component
+ */
+export declare interface F0ModuleCardProps {
+    /**
+     * Card title (e.g. "Projects")
+     */
+    moduleName: string;
+    /**
+     * Description text below the title
+     */
+    description: string;
+    /**
+     * Callback when the action button is clicked. Omit when using actionHref.
+     */
+    onAction?: () => void;
+    /**
+     * When set, the action button renders as a link to this URL.
+     */
+    actionHref?: string;
+    /**
+     * Optional image source for the avatar
+     */
+    imageSrc?: string;
+}
 
 /**
  * Configuration for a "more info" link displayed below the help text.
@@ -8071,6 +8567,110 @@ export declare const F0Provider: React.FC<{
     formComponent?: F0FormLikeComponent;
 }>;
 
+export declare const F0QuestionCardMultiStep: ({ steps, onComplete, onSkip, sendAsMessage, onSendMessage, }: F0QuestionCardMultiStepProps) => JSX_2.Element | null;
+
+/**
+ * Props for the F0QuestionCardMultiStep component
+ */
+export declare interface F0QuestionCardMultiStepProps {
+    /** Steps: each has question and options */
+    steps: F0QuestionCardStep[];
+    /** Called when user completes the last step with all selections (step index -> selected option ids) */
+    onComplete?: (selections: Record<number, string[]>) => void;
+    /** Called when user clicks Skip */
+    onSkip?: () => void;
+    /** When true, on last step Next sends selected labels via onSendMessage */
+    sendAsMessage?: boolean;
+    /** Called with joined selected labels when completing with sendAsMessage */
+    onSendMessage?: (message: string) => void;
+    /** Label for the Next button on the last step */
+    nextLabel?: string;
+    /** Label for the Skip button */
+    skipLabel?: string;
+}
+
+/**
+ * Option for the question (checkbox with label)
+ */
+export declare interface F0QuestionCardOption {
+    id: string;
+    label: string;
+}
+
+/**
+ * Props for the F0QuestionCard component (single-step, legacy)
+ */
+export declare interface F0QuestionCardProps {
+    /**
+     * Optional icon in the card header (used when title is set)
+     */
+    headerIcon?: IconType;
+    /**
+     * The question text shown above the options
+     */
+    question: string;
+    /**
+     * Checkbox options (id, label). User can select one or more.
+     */
+    options: F0QuestionCardOption[];
+    /**
+     * Selected option ids (controlled). Omit for uncontrolled.
+     */
+    selectedOptionIds?: string[];
+    /**
+     * Callback when selection changes (controlled)
+     */
+    onSelectionChange?: (selectedIds: string[]) => void;
+    /**
+     * Current step (1-based) for pagination display, e.g. "1/n"
+     */
+    currentStep?: number;
+    /**
+     * Total number of steps for pagination display
+     */
+    totalSteps?: number;
+    /**
+     * Callback when the previous (left arrow) pagination control is clicked
+     */
+    onPrev?: () => void;
+    /**
+     * Callback when Next button is clicked (primary action)
+     */
+    onNext: () => void;
+    /**
+     * Callback when Skip button is clicked
+     */
+    onSkip?: () => void;
+    /**
+     * When true, calling Next will invoke onNextWithSelection with the selected option labels
+     * so the parent can send them as a new user message (e.g. to trigger a new workflow turn).
+     */
+    sendAsMessage?: boolean;
+    /**
+     * Called when user clicks Next and sendAsMessage is true. Receives the selected option labels;
+     * the parent should send this as a new user chat message to trigger the next workflow turn.
+     */
+    onNextWithSelection?: (selectedLabels: string[]) => void;
+    /**
+     * Label for the Next button
+     * @default "Next"
+     */
+    nextLabel?: string;
+    /**
+     * Label for the Skip button
+     * @default "Skip"
+     */
+    skipLabel?: string;
+}
+
+/**
+ * One step in a multi-step question card
+ */
+export declare interface F0QuestionCardStep {
+    question: string;
+    options: F0QuestionCardOption[];
+}
+
 /**
  * F0 config options specific to rich text fields
  */
@@ -8168,6 +8768,14 @@ declare type F0SelectBaseProps<T extends string, R = unknown> = {
      * @default false
      */
     showPreview?: boolean;
+    /**
+     * When true, preserves selections when the dataset changes (search, filters,
+     * or sortings). Useful for picker components where the user searches and
+     * filters to find items to add to an existing selection.
+     *
+     * @default true
+     */
+    preserveSelectionOnDatasetChange?: boolean;
 } & WithDataTestIdProps;
 
 /**
@@ -8765,6 +9373,12 @@ export declare interface F0ZodType<T extends ZodTypeAny = ZodTypeAny> {
 
 /* Excluded from this release type: FieldItem */
 
+declare type FieldMeta = {
+    label: string;
+    fieldType?: string;
+    customFieldName?: string;
+};
+
 export declare function fieldsToSeconds(fields: DurationFields): number;
 
 /**
@@ -9086,12 +9700,51 @@ declare type FormatPreset = {
 /**
  * Form canvas content — renders an interactive F0Form in the canvas panel.
  */
-declare type FormCanvasContent = CanvasContentBase & {
+export declare type FormCanvasContent = CanvasContentBase & {
     type: "form";
     formName: string;
     formDescription?: string;
     formModule?: ModuleId;
 };
+
+/**
+ * Form-specific card rendered inline in the AI chat stream.
+ * Shows the active form name, description, and an Open/Close button
+ * that opens the form in the canvas panel.
+ * When field data is provided, displays a summary of field labels and values.
+ */
+export declare function FormCard({ formName, formDescription, module: formModule, cardTitle, cardDescription, fieldDescriptions, formValues, valueFormatter, }: FormCardProps): JSX_2.Element;
+
+export declare namespace FormCard {
+    var displayName: string;
+}
+
+export declare type FormCardProps = {
+    /** Unique name of the form in the registry */
+    formName: string;
+    /** Optional description shown on the card */
+    formDescription?: string;
+    /** Module avatar for the card */
+    module?: ModuleId;
+    /** Custom title override for the card (set by the AI via fillForm) */
+    cardTitle: string;
+    /** Custom description override for the card (set by the AI via fillForm) */
+    cardDescription: string;
+    /** Field label metadata from the form schema */
+    fieldDescriptions?: Record<string, FieldMeta>;
+    /** Current form values */
+    formValues?: Record<string, unknown>;
+    /**
+     * Optional callback to format a field value into a DetailsItemContent.
+     * Return `undefined` to fall back to built-in formatting.
+     */
+    valueFormatter?: FormCardValueFormatter;
+};
+
+declare type FormCardValueFormatter = (key: string, value: unknown, meta: {
+    fieldType?: string;
+    customFieldName?: string;
+}) => DetailsItemContent | DetailsItemContent[] | undefined;
 
 export declare interface FormCardValueFormatterEntry<T = unknown> {
     /** Scope to a specific form. Omit to apply to all forms. */
@@ -9109,6 +9762,17 @@ export declare interface FormCardValueFormatterEntry<T = unknown> {
 export declare function FormCardValueFormatterProvider({ children, }: {
     children: ReactNode;
 }): JSX_2.Element;
+
+/**
+ * Canvas panel content for forms.
+ * Propless — reads the active form from coagent shared state
+ * and delegates to VirtualFormContent for rendering.
+ */
+export declare function FormContent(): ReactNode;
+
+export declare namespace FormContent {
+    var displayName: string;
+}
 
 /* Excluded from this release type: FormDefinitionItem */
 
@@ -9148,6 +9812,13 @@ export declare interface FormFieldProps {
     /** Ref callback for the underlying input element */
     ref?: React.RefCallback<HTMLElement>;
 }
+
+export declare function FormHeader({ title, description, module, onClose, }: {
+    title: string;
+    description?: string;
+    module?: ModuleId;
+    onClose: () => void;
+}): JSX_2.Element;
 
 /** Fraction tokens for proportional widths */
 export declare type FractionToken = "1/2" | "1/3" | "2/3" | "1/4" | "2/4" | "3/4" | "1/5" | "2/5" | "3/5" | "4/5" | "1/6" | "5/6";
@@ -9267,12 +9938,6 @@ export declare const getAnimationVariants: (options?: AnimationVariantsOptions) 
         };
     };
 };
-
-/**
- * Look up a canvas entity definition by content type.
- * Returns `undefined` if the type is not configured.
- */
-export declare function getCanvasEntity(type: string): CanvasEntityDefinition<any> | undefined;
 
 /**
  * Get the pagination type of a data adapter
@@ -9459,8 +10124,14 @@ export declare type GroupRecord<RecordType> = {
  */
 export declare function hasF0Config(schema: ZodTypeAny): boolean;
 
-declare type HeaderSecondaryAction = SecondaryAction & {
+declare type HeaderSecondaryAction = HeaderSecondaryButtonAction | HeaderSecondaryDropdownAction;
+
+declare type HeaderSecondaryButtonAction = SecondaryAction & {
     hideLabel?: boolean;
+};
+
+declare type HeaderSecondaryDropdownAction = PrimaryDropdownAction<string> & {
+    variant?: "outline";
 };
 
 declare type HeadingTags = (typeof headingTags)[number];
@@ -9503,6 +10174,25 @@ export declare const HomeLayout: WithDataTestIdReturnType_2<ForwardRefExoticComp
 widgets?: ReactNode[];
 children?: ReactNode;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
+
+export declare interface HourDistributionCellValue {
+    dataPoints: HourDistributionDataPoint[];
+    /** Label for worked time in tooltips. Defaults to "Worked". */
+    workedLabel?: string;
+    /** Label for justified absence in tooltips. Defaults to "Justified absence". */
+    justifiedAbsenceLabel?: string;
+}
+
+export declare interface HourDistributionDataPoint {
+    date: string;
+    value: number;
+    /** When set, used for two-tone coloring and underworked (value < plannedValue) = orange. */
+    plannedValue?: number;
+    /** Justified absence minutes rendered as a neutral segment. Missing time without this remains transparent. */
+    justifiedAbsenceValue?: number;
+    /** Renders a full-height neutral bar for justified non-working days without a minute baseline. */
+    justifiedAbsenceFullDay?: boolean;
+}
 
 declare type I18nContextType = TranslationsType & {
     t: (key: TranslationKey, args?: Record<string, string | number>) => string;
@@ -9791,6 +10481,9 @@ declare interface InsertBeforeNotesTextEditorPageDocumentPatch {
     blocks: JSONContent[];
 }
 
+/** Position offsets */
+export declare type InsetToken = SpacingToken;
+
 declare const internalAvatarColors: readonly ["viridian", "malibu", "yellow", "purple", "lilac", "barbie", "smoke", "army", "flubber", "indigo", "camel"];
 
 declare type InternalAvatarProps = React_2.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> & {
@@ -9985,6 +10678,16 @@ export declare const linkVariants: readonly ["link", "unstyled", "mention"];
  */
 declare type ListCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, ListVisualizationOptions<Record, Filters, Sortings>>;
 
+/**
+ * External store for saved (user-edited) dashboard configs.
+ *
+ * This lives outside React's component tree so that `F0ChatReportCard`
+ * (rendered inside CopilotKit's message list) can subscribe to changes
+ * via `useSyncExternalStore` — which works regardless of whether the
+ * React context provider is an ancestor.
+ */
+declare type Listener = () => void;
+
 declare type ListPropertyDefinition<R, Sortings extends SortingsDefinition> = WithOptionalSorting_2<R, Sortings> & PropertyDefinition_2<R>;
 
 declare type ListVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition> = {
@@ -10093,6 +10796,18 @@ export declare interface Message {
     text: string;
     dateTime: string;
 }
+
+export declare const MessageSources: ({ sources }: MessageSourcesProps) => JSX_2.Element | null;
+
+/**
+ * Props for the F0MessageSources component
+ */
+export declare type MessageSourcesProps = {
+    /**
+     * Array of sources to display
+     */
+    sources: Source[];
+};
 
 declare type MetadataAction = {
     icon: IconType;
@@ -10643,7 +11358,7 @@ export declare type OnAddNewElementParams = {
 declare type OnBulkActionCallback<Record extends RecordType, Filters extends FiltersDefinition> = (...args: [
 action: BulkAction,
 ...Parameters<OnSelectItemsCallback<Record, Filters>>
-]) => void;
+]) => void | Promise<void>;
 
 declare type OnChangeQuestionParams = BaseQuestionOnChangeParams & ({
     type: "text" | "longText";
@@ -10832,6 +11547,8 @@ declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     onOpenChange?: (isOpen: boolean) => void;
     /** Display counter for the applied filters */
     displayCounter?: boolean;
+    /** Total number of items matching the current filters, displayed as "N results for:" prefix in the chips row */
+    resultCount?: number;
 };
 
 export declare type OneIconSize = (typeof oneIconSizes)[number];
@@ -10853,6 +11570,10 @@ export declare type OnSelectItemsCallback<R extends RecordType, Filters extends 
 }, clearSelectedItems: () => void, handleSelectAll?: (checked: boolean) => void) => void;
 
 declare type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
+
+export declare type OrchestratorThinkingResult = {
+    inGroup?: boolean;
+};
 
 /** Overflow values */
 export declare type OverflowToken = "visible" | "hidden" | "auto" | "scroll";
@@ -11064,14 +11785,11 @@ export declare const predefinedPresets: Record<string, DatePreset>;
 export declare type PresetDefinition<Filters extends FiltersDefinition> = {
     /** Display name for the preset */
     label: string;
-    /** Filter configuration to apply when this preset is selected */
-    filter: FiltersState<Filters>;
-    /**
-     * How the preset is applied when clicked:
-     * - 'replace' (default): Replace all current filters with preset's filter
-     * - 'additive': Merge preset's filter with current filters, preserving existing selections
+    /** Filter configuration to apply when this preset is selected.
+     * Clicking a preset replaces all current filters with this value.
+     * The preset shows as selected only when the current filters exactly match this value.
      */
-    mode?: "replace" | "additive";
+    filter: FiltersState<Filters>;
     /** Function to count the number of items that match the filter */
     itemsCount?: (filters: FiltersState<Filters>) => Promise<number | undefined> | number | undefined;
 };
@@ -11362,15 +12080,9 @@ declare type QuestionPropsToOmit = "onAction" | "onChange" | "onAddNewElement";
 
 export declare type QuestionType = "rating" | "select" | "multi-select" | "dropdown-single" | "dropdown-multi" | "text" | "longText" | "numeric" | "link" | "date" | "file" | "checkbox";
 
-export declare const RadarChart: <K extends ChartConfig_3>(props: RadarChartProps<K> & {
-    dataTestId?: string;
-} & {
-    ref?: ForwardedRef<HTMLDivElement>;
-}) => ReactElement | null;
-
-export declare const _RadarChart: <K extends ChartConfig_3>({ data, dataConfig, scaleMin, scaleMax, aspect, dataTestId, }: RadarChartProps<K> & {
-    dataTestId?: string;
-}, ref: ForwardedRef<HTMLDivElement>) => JSX_2.Element;
+export declare const RadarChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<RadarChartProps<ChartConfig_2> & {
+dataTestId?: string;
+} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 export declare interface RadarChartConfig {
     type: "radar";
@@ -11383,14 +12095,6 @@ export declare interface RadarChartConfig {
     /** Format the value displayed in labels and tooltip */
     valueFormatter?: (value: number) => string;
 }
-
-export declare type RadarChartProps<K extends ChartConfig_3> = {
-    dataConfig: K;
-    data: ChartItem<K>[];
-    scaleMin?: number;
-    scaleMax?: number;
-    aspect?: ComponentProps<typeof ChartContainer>["aspect"];
-};
 
 /**
  * Skeleton for radar chart content area.
@@ -11546,18 +12250,42 @@ declare interface ReplaceContentNotesTextEditorPageDocumentPatch {
     content: JSONContent[];
 }
 
-/**
- * Profile data for a requisition entity (ATS requisition), resolved asynchronously
- * and displayed in the entity reference hover card.
- */
 export declare type RequisitionProfile = {
     id: string | number;
     title: string;
     status?: string;
+    statusVariant?: StatusVariant;
     reason?: string;
+    location?: string;
+    lineManager?: {
+        firstName: string;
+        lastName: string;
+        avatarUrl?: string;
+    };
 };
 
 export declare type ResolvedRecordType<R> = R extends RecordType ? R : RecordType;
+
+/**
+ * Snapshot of a resolved step's answer — persisted alongside the tool args
+ * so the render can restore state without re-invoking the panel.
+ */
+export declare interface ResolvedStepAnswer {
+    /** The question text (matches the source step) */
+    question: string;
+    /** Selected option IDs at submit time */
+    selectedOptionIds: string[];
+    /** Custom free-text answer if provided */
+    customAnswer?: string;
+    /** True when the user explicitly skipped an optional step */
+    skipped?: boolean;
+    /**
+     * True when the user cancelled the flow before reaching this step.
+     * The step was therefore neither answered nor intentionally skipped —
+     * callers (e.g. the agent) should treat this as "no information".
+     */
+    cancelled?: boolean;
+}
 
 declare type ResourceHeaderProps = Props_4;
 
@@ -11565,6 +12293,11 @@ declare type ResourceHeaderProps = Props_4;
 export declare interface ResponsiveStyleProps {
     display?: DisplayToken;
     position?: PositionToken;
+    top?: InsetToken;
+    right?: InsetToken;
+    bottom?: InsetToken;
+    left?: InsetToken;
+    zIndex?: ZIndexToken;
     padding?: SpacingToken;
     paddingX?: SpacingToken;
     paddingY?: SpacingToken;
@@ -11698,6 +12431,13 @@ export declare type RowSpanToken = "1" | "2" | "3" | "4" | "5" | "6" | "full";
 
 /** Grid row count (1–6 + none) */
 export declare type RowsToken = "1" | "2" | "3" | "4" | "5" | "6" | "none";
+
+export declare const savedDashboardConfigStore: {
+    get(toolCallId: string): ChatDashboardConfig | undefined;
+    set(toolCallId: string, config: ChatDashboardConfig): void;
+    subscribe(listener: Listener): () => void;
+    getSnapshot(): number;
+};
 
 export declare type SearchFilterDefinition = BaseFilterDefinition<"search">;
 
@@ -11964,6 +12704,28 @@ export declare type SortingsStateMultiple = {
 }[];
 
 export declare type SortOrder = "asc" | "desc";
+
+/**
+ * Source object for message sources
+ */
+export declare type Source = {
+    /**
+     * Title of the source
+     */
+    title: string;
+    /**
+     * Optional link URL
+     */
+    link?: string;
+    /**
+     * Optional icon name (from @/icons/app)
+     */
+    icon?: string;
+    /**
+     * Whether to open link in new tab
+     */
+    targetBlank?: boolean;
+};
 
 /**
  * Token types for F0Box props.
@@ -12337,6 +13099,11 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
      * definitions, values are the display labels rendered in the spanning header row.
      */
     headerGroupLabels?: Record<string, string>;
+    /**
+     * Wraps the table in a rounded border container.
+     * Useful for embedding the table inside panels or detail views.
+     */
+    bordered?: boolean;
 };
 
 declare type TableVisualizationSettings = {
@@ -12623,11 +13390,6 @@ declare const textVariants: (props?: ({
     className?: ClassValue;
 })) | undefined) => string;
 
-declare const THEMES: {
-    readonly light: "";
-    readonly dark: ".dark";
-};
-
 export declare type TimelineRowStatus = (typeof timelineRowStatuses)[number];
 
 export declare const timelineRowStatuses: readonly ["completed", "in-progress", "not-started"];
@@ -12791,6 +13553,29 @@ declare type UpsellAction = BaseAction & {
     showConfirmation: boolean;
 };
 
+export declare const UpsellingAlert: WithDataTestIdReturnType_4<typeof _UpsellingAlert>;
+
+declare function _UpsellingAlert({ icon, title, description, action, }: UpsellingAlertProps): JSX_2.Element;
+
+export declare interface UpsellingAlertProps {
+    /**
+     * Optional icon displayed as an avatar on the left side of the alert.
+     */
+    icon?: IconType;
+    /**
+     * The title of the alert
+     */
+    title: string;
+    /**
+     * The description of the alert
+     */
+    description?: string;
+    /**
+     * The upselling action button configuration.
+     */
+    action: AlertAction;
+}
+
 export declare const UpsellingBanner: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<BaseBannerProps, "children" | "primaryAction" | "secondaryAction"> & {
 primaryAction?: DefaultAction | PromoteAction;
 secondaryAction?: DefaultAction | PromoteAction;
@@ -12888,6 +13673,13 @@ declare interface UpsellRequestResponseDialogProps {
 export declare function useAiChat(): AiChatProviderReturnValue;
 
 export declare function useAiChatTranslations(): AiChatTranslations;
+
+/**
+ * Hook returning the canvas entity definition for `type` from the registry
+ * supplied to `F0AiChatProvider.canvasEntities`. Returns `undefined` when no
+ * matching entity is configured.
+ */
+export declare function useCanvasEntity(type: string | undefined): CanvasEntityDefinition<any> | undefined;
 
 /**
  * A core React hook that manages data fetching, state management, and pagination within the Collections ecosystem.
@@ -13102,12 +13894,6 @@ export declare interface UseDataSourceItemNavigationReturn<R extends RecordType>
     /** URL of the previous loaded item (derived via `itemUrl`), or null if unavailable */
     previousItemUrl: string | null;
 }
-
-/**
- * Hook that invokes every configured copilot action factory.
- * Actions are declared in the `copilotActions` array in `registry.ts`.
- */
-export declare function useDefaultCopilotActions(): void;
 
 export declare function useDndEvents(handler: (e: {
     phase: "start" | "over" | "drop" | "cancel";
@@ -13357,18 +14143,6 @@ export declare const useGroups: <R extends RecordType>(groups: GroupRecord<R>[],
     setGroupOpen: (key: string, open: boolean) => void;
 };
 
-/**
- * Hook to register the message sources action.
- * Attaches information sources to the assistant's response to show where the AI got its information from.
- */
-export declare const useMessageSourcesAction: () => void;
-
-/**
- * Hook to register the orchestrator thinking action.
- * Displays the orchestrator's thinking process as a non-blocking UI element.
- */
-export declare const useOrchestratorThinkingAction: () => void;
-
 export declare const usePrivacyMode: () => {
     enabled: boolean;
     enable: () => void;
@@ -13421,7 +14195,7 @@ export declare function useSchemaDefinition(schema: F0FormSchema, sections?: Rec
  * Custom hook to manage selection state for items and groups in a data table
  * Supports single/multi selection, grouped data, pagination, and filtering
  */
-export declare function useSelectable<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>>({ data, paginationInfo, source, selectionMode, selectedState, onSelectItems, disableSelectAll, isSearchActive, allPagesSelection, resetOnPageChange, }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<R, Filters>;
+export declare function useSelectable<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>>({ data, paginationInfo, source, selectionMode, selectedState, onSelectItems, disableSelectAll, isSearchActive, allPagesSelection, resetOnPageChange, preserveSelectionOnDatasetChange, }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<R, Filters>;
 
 export declare type UseSelectableProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>> = {
     data: Data<R>;
@@ -13462,6 +14236,15 @@ export declare type UseSelectableProps<R extends RecordType, Filters extends Fil
      * across loadMore() calls regardless of this flag.
      */
     resetOnPageChange?: boolean;
+    /**
+     * When true, preserves selection when the dataset identity changes
+     * (filters, sortings, or search query). Useful for select/picker
+     * components where the user searches and filters to find items to
+     * add to an existing selection, not to view a different dataset.
+     *
+     * @default false
+     */
+    preserveSelectionOnDatasetChange?: boolean;
 };
 
 export declare type UseSelectableReturn<R extends RecordType, Filters extends FiltersDefinition> = {
@@ -13528,6 +14311,9 @@ export declare type UseSelectableReturn<R extends RecordType, Filters extends Fi
  */
 export declare function useSetFormCardValueFormatter(): SetFormCardValueFormatter;
 
+/** Read the tool call ID injected by AssistantMessage. */
+export declare const useToolCallId: () => string | undefined;
+
 export declare const useXRay: () => {
     enabled: boolean;
     filter: ComponentTypes[];
@@ -13577,7 +14363,7 @@ declare const valueDisplayRenderers: {
     readonly percentage: (args: PercentageCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element | null;
     readonly progressBar: (args: ProgressBarCellValue_2, _meta: ValueDisplayRendererContext_2) => JSX_2.Element | null;
     readonly barSeries: (args: BarSeriesCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
-    readonly hourDistribution: (args: HourDistributionCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly hourDistribution: (args: HourDistributionCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly company: (args: CompanyCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly team: (args: TeamCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly tag: (args: TagCellValue_2) => JSX_2.Element;
@@ -13597,16 +14383,6 @@ declare type ValueDisplayTableAlignment = "left" | "right";
 declare type ValueDisplayVisualizationType = "table" | "card" | "list" | (string & {});
 
 export declare type Variant = (typeof statuses)[number];
-
-declare const variants: (props?: ({
-    aspect?: "small" | "square" | "wide" | undefined;
-} & ({
-    class?: ClassValue;
-    className?: never;
-} | {
-    class?: never;
-    className?: ClassValue;
-})) | undefined) => string;
 
 export declare const VerticalBarChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig_2> & {
 label?: boolean;
@@ -13716,6 +14492,9 @@ declare interface WithTooltipDescription {
     description?: string;
 }
 
+/** z-index values */
+export declare type ZIndexToken = "auto" | "0" | "10" | "20" | "30" | "40" | "50";
+
 /**
  * Zod type names for type checking without instanceof
  * Using _def.typeName is more reliable across module boundaries than instanceof
@@ -13762,13 +14541,8 @@ declare module "gridstack" {
 }
 
 
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
-        };
-    }
+declare namespace Calendar {
+    var displayName: string;
 }
 
 
@@ -13777,6 +14551,25 @@ declare module "@tiptap/core" {
         aiBlock: {
             insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
             executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -13799,18 +14592,4 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
-        };
-    }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

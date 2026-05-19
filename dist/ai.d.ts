@@ -158,6 +158,14 @@ export declare type AiChatProviderProps = {
      */
     canvasActions?: CanvasActions;
     /**
+     * Canvas entity definitions keyed by `CanvasContent["type"]`. The canvas
+     * panel looks up the matching definition when `openCanvas` is called.
+     *
+     * F0AiChat ships without built-in canvas entities; the host app supplies
+     * them here so canvas logic lives in one place.
+     */
+    canvasEntities?: Record<string, CanvasEntityDefinition>;
+    /**
      * Available tool hints that the user can activate to provide intent context
      * to the AI. Renders a selector button next to the send button.
      * Only one tool hint can be active at a time.
@@ -186,6 +194,14 @@ export declare type AiChatProviderProps = {
         feedback: string;
     }) => void;
     tracking?: AiChatTrackingOptions;
+    /**
+     * Optional hook called before a user message is sent. Return false to block submission.
+     */
+    onBeforeSendMessage?: () => boolean | Promise<boolean>;
+    /**
+     * Optional fetch implementation for AI runtime requests owned by F0.
+     */
+    runtimeFetch?: typeof fetch;
 } & Pick<CopilotKitProps, "agent" | "credentials" | "children" | "runtimeUrl" | "showDevConsole" | "threadId" | "headers">;
 
 /**
@@ -217,6 +233,14 @@ declare type AiChatProviderReturnValue = {
         feedback: string;
     }) => void;
     tracking?: AiChatTrackingOptions;
+    /**
+     * Optional hook called before a user message is sent. Return false to block submission.
+     */
+    onBeforeSendMessage?: () => boolean | Promise<boolean>;
+    /**
+     * Fetch implementation for AI runtime requests owned by F0.
+     */
+    runtimeFetch: typeof fetch;
     /**
      * Clear/reset the chat conversation
      */
@@ -339,7 +363,7 @@ declare type AiChatProviderReturnValue = {
     pendingQuote: PendingQuote | null;
     /** Set the pending quote (pass null to clear). */
     setPendingQuote: React.Dispatch<React.SetStateAction<PendingQuote | null>>;
-} & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "toolHints" | "credits" | "creditWarning" | "fileAttachments"> & {
+} & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "canvasEntities" | "toolHints" | "credits" | "creditWarning" | "fileAttachments"> & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null;
     /** Open the canvas panel with the given content */
@@ -376,6 +400,7 @@ declare interface AiChatState {
     VoiceMode?: React.ComponentType;
     entityRefs?: EntityRefs;
     canvasActions?: CanvasActions;
+    canvasEntities?: Record<string, CanvasEntityDefinition>;
     toolHints?: AiChatToolHint[];
     credits?: AiChatCredits;
     creditWarning?: AiChatCreditWarning;
@@ -391,6 +416,14 @@ declare interface AiChatState {
         feedback: string;
     }) => void;
     tracking?: AiChatTrackingOptions;
+    /**
+     * Optional hook called before a user message is sent. Return false to block submission.
+     */
+    onBeforeSendMessage?: () => boolean | Promise<boolean>;
+    /**
+     * Optional fetch implementation for AI runtime requests owned by F0.
+     */
+    runtimeFetch?: typeof fetch;
 }
 
 /**
@@ -529,6 +562,11 @@ export declare const aiTranslations: {
                 readonly source: "Source";
                 readonly applied: "Applied on";
             };
+            readonly requisition: {
+                readonly lineManager: "Line manager";
+                readonly reason: "Reason";
+                readonly status: "Status";
+            };
         };
         readonly credits: {
             readonly title: "Credits";
@@ -603,6 +641,7 @@ export declare const aiTranslations: {
         readonly attachFile: "Attach file";
         readonly removeFile: "Remove";
         readonly fileUploadError: "Upload failed";
+        readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly dropFilesHere: "Drop your files here";
         readonly reply: "Reply";
         readonly removeQuote: "Remove quote";
@@ -830,6 +869,36 @@ export declare type CanvasActions = {
 };
 
 /**
+ * Shared inline card rendered in the AI chat for any canvas entity.
+ * Shows a module avatar, title, description, and an Open/Close toggle button.
+ * When active, displays a focus ring and the button switches to "Close".
+ */
+export declare function CanvasCard({ module: cardModule, title, description, onOpen, showOpenButton, onClose, isActive, children, }: CanvasCardProps): JSX_2.Element;
+
+export declare namespace CanvasCard {
+    var displayName: string;
+}
+
+export declare type CanvasCardProps = {
+    /** Module avatar to display (e.g. "analytics", "surveys", "goals") */
+    module?: ModuleId;
+    /** Primary title */
+    title: string;
+    /** Secondary description line */
+    description: string;
+    /** Called when the user clicks the "Open" button */
+    onOpen: () => void;
+    /** Whether to show the "Open" button */
+    showOpenButton?: boolean;
+    /** Called when the user clicks the "Close" button (active state) */
+    onClose: () => void;
+    /** Whether this card's content is currently shown in the canvas */
+    isActive: boolean;
+    /** Optional content rendered below the card header (e.g. a data preview) */
+    children?: React.ReactNode;
+};
+
+/**
  * Discriminated union for canvas panel content.
  * Add new entity types to this union as they are implemented.
  */
@@ -942,7 +1011,7 @@ declare interface ChatDashboardColumn {
  * Contains fetchSpecs that describe how to obtain data server-side —
  * no raw data is included. Fully JSON-serializable.
  */
-declare interface ChatDashboardConfig {
+export declare interface ChatDashboardConfig {
     /** Dashboard title displayed in the canvas header and chat report card */
     title: string;
     /**
@@ -1124,7 +1193,7 @@ declare interface ClarifyingOption {
  * Navigation metadata (currentStepIndex, totalSteps) and callbacks live
  * here so the panel component stays a pure view of this state.
  */
-declare interface ClarifyingQuestionState {
+export declare interface ClarifyingQuestionState {
     /** The current step's data + interaction state */
     currentStep: ClarifyingStepState;
     /** Zero-based index of the current step */
@@ -1158,13 +1227,13 @@ declare interface ClarifyingQuestionState {
  * - "single": only one option can be selected (rendered as radio buttons)
  * - "multiple": multiple options can be selected (rendered as checkboxes)
  */
-declare type ClarifyingSelectionMode = "single" | "multiple";
+export declare type ClarifyingSelectionMode = "single" | "multiple";
 
 /**
  * Pure data describing a single clarifying question step.
  * This is what the AI backend sends — no UI state or callbacks.
  */
-declare interface ClarifyingStepData {
+export declare interface ClarifyingStepData {
     /** The question text displayed to the user */
     question: string;
     /** Available options the user can select from */
@@ -1189,6 +1258,10 @@ declare interface ClarifyingStepState extends ClarifyingStepData {
     /** Whether the custom answer is currently included in the submission */
     isCustomAnswerActive: boolean;
 }
+
+export declare function CloseCanvasButton({ onClick }: {
+    onClick: () => void;
+}): JSX_2.Element;
 
 declare interface CollectionComputation {
     datasetId: string;
@@ -1226,7 +1299,7 @@ export declare type CSSRgbString = `rgb(${number}, ${number}, ${number})` | `rgb
 /**
  * Callbacks for persisting dashboards externally (beyond chat history).
  */
-declare type DashboardCanvasActions = {
+export declare type DashboardCanvasActions = {
     /** Update an existing saved dashboard */
     save: (id: string, category: string, config: ChatDashboardConfig) => Promise<void>;
     /**
@@ -1257,6 +1330,7 @@ export declare type DashboardCanvasContent = CanvasContentBase & {
     apiConfig: {
         baseUrl: string;
         headers: Record<string, string>;
+        runtimeFetch?: typeof fetch;
     };
     /** Present when the dashboard is a pre-saved dashboard */
     savedDashboardId?: string;
@@ -1268,6 +1342,50 @@ export declare type DashboardCanvasContent = CanvasContentBase & {
     savedDashboardUnsaved?: boolean;
 };
 
+export declare function DashboardCanvasProvider({ content, children, }: {
+    content: DashboardCanvasContent;
+    children: ReactNode;
+}): ReactNode;
+
+/**
+ * Dashboard-specific card that wraps CanvasCard with config-store
+ * subscription logic. Re-renders when the user edits and saves
+ * the dashboard layout.
+ *
+ * All saved-dashboard state (id, category, unsaved) is passed through
+ * from the action arguments. The meta store overrides props after
+ * save/create operations so close/re-open preserves the latest state.
+ */
+export declare function DashboardCard({ config: originalConfig, apiConfig, savedDashboardId: propSavedId, savedDashboardCategory: propSavedCategory, savedDashboardDescription: propSavedDescription, savedDashboardUnsaved: propSavedUnsaved, }: DashboardCardProps): JSX_2.Element;
+
+export declare namespace DashboardCard {
+    var displayName: string;
+}
+
+export declare type DashboardCardProps = {
+    /** The original dashboard config from the agent */
+    config: ChatDashboardConfig;
+    /** API config for server-side dashboard computation */
+    apiConfig: {
+        baseUrl: string;
+        headers: Record<string, string>;
+        runtimeFetch?: typeof fetch;
+    };
+    /** Present when the dashboard is a pre-saved dashboard */
+    savedDashboardId?: string;
+    /** Category of the saved dashboard */
+    savedDashboardCategory?: string;
+    /** Description of the saved dashboard */
+    savedDashboardDescription?: string;
+    /** Whether the dashboard has unsaved changes */
+    savedDashboardUnsaved?: boolean;
+};
+
+export declare function DashboardContent({ content, refreshKey: _parentRefreshKey, }: {
+    content: DashboardCanvasContent;
+    refreshKey: number;
+}): ReactNode;
+
 declare interface DashboardFetchSpec {
     fetch: Array<{
         toolId: string;
@@ -1276,6 +1394,18 @@ declare interface DashboardFetchSpec {
     query: string | null;
     columnLabels?: Record<string, string>;
 }
+
+/**
+ * Canvas header for the dashboard entity. Layout, title, status tag,
+ * metadata strip, and the action row (export + close) are all delegated
+ * to `ResourceHeader`. The close button is just another `secondaryAction`
+ * with `hideLabel`, so the shared header component doesn't need to know
+ * about canvas-specific close affordances.
+ */
+export declare function DashboardHeader({ content, onClose, }: {
+    content: DashboardCanvasContent;
+    onClose: () => void;
+}): JSX_2.Element;
 
 /**
  * Creator + last-edited metadata for a saved dashboard. Returned by
@@ -1313,21 +1443,43 @@ declare type DashboardMetadata = {
     lastEdited: Date | string;
 };
 
+declare type DataAttributes_2 = {
+    [key: `data-${string}`]: string | undefined;
+};
+
 /**
  * Data download canvas content — renders a full data table with download options.
  */
-declare type DataDownloadCanvasContent = CanvasContentBase & {
+export declare type DataDownloadCanvasContent = CanvasContentBase & {
     type: "dataDownload";
     dataset: DataDownloadDataset;
     filename?: string;
     markdown?: string;
 };
 
+export declare function DataDownloadCard({ title: titleProp, dataset, filename, markdown, }: DataDownloadCardProps): JSX_2.Element;
+
+export declare namespace DataDownloadCard {
+    var displayName: string;
+}
+
+export declare type DataDownloadCardProps = {
+    title?: string;
+    dataset: DataDownloadDataset;
+    filename?: string;
+    markdown?: string;
+};
+
+export declare function DataDownloadContent({ content, }: {
+    content: DataDownloadCanvasContent;
+    refreshKey?: number;
+}): JSX_2.Element;
+
 /**
  * Inline dataset for client-side file generation (Excel / CSV).
  * Sent by the agent with the raw query results.
  */
-declare type DataDownloadDataset = {
+export declare type DataDownloadDataset = {
     /**
      * Column headers in display order.
      */
@@ -1352,6 +1504,16 @@ declare type DataDownloadDataset = {
      */
     columnLabels?: Record<string, string>;
 };
+
+export declare function DataDownloadHeader({ content, onClose, }: {
+    content: DataDownloadCanvasContent;
+    onClose: () => void;
+}): JSX_2.Element;
+
+export declare function DataDownloadProvider({ content, children, }: {
+    content: DataDownloadCanvasContent;
+    children: ReactNode;
+}): JSX_2.Element;
 
 declare const DataList: ForwardRefExoticComponent<DataListProps & RefAttributes<HTMLUListElement>> & {
     Item: ForwardRefExoticComponent<ItemProps & RefAttributes<HTMLLIElement>>;
@@ -1563,6 +1725,10 @@ export declare const defaultTranslations: {
         readonly availableFilters: "Available filters";
         readonly label: "Filters";
         readonly applyFilters: "Apply filters";
+        readonly resultsFor: {
+            readonly one: "{{count}} result for:";
+            readonly other: "{{count}} results for:";
+        };
         readonly applySelection: "Apply selection";
         readonly cancel: "Cancel";
         readonly failedToLoadOptions: "Failed to load options";
@@ -1797,6 +1963,11 @@ export declare const defaultTranslations: {
                 readonly source: "Source";
                 readonly applied: "Applied on";
             };
+            readonly requisition: {
+                readonly lineManager: "Line manager";
+                readonly reason: "Reason";
+                readonly status: "Status";
+            };
         };
         readonly credits: {
             readonly title: "Credits";
@@ -1871,6 +2042,7 @@ export declare const defaultTranslations: {
         readonly attachFile: "Attach file";
         readonly removeFile: "Remove";
         readonly fileUploadError: "Upload failed";
+        readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly dropFilesHere: "Drop your files here";
         readonly reply: "Reply";
         readonly removeQuote: "Remove quote";
@@ -1920,6 +2092,10 @@ export declare const defaultTranslations: {
         readonly funnel: "Funnel";
         readonly pieChart: "Pie";
         readonly table: "Table";
+        readonly emptyState: {
+            readonly title: "No data available";
+            readonly description: "Try a different date or fewer filters";
+        };
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -2204,6 +2380,7 @@ export declare type EntityRefs = {
 export declare type EntityResolvers = {
     person?: (id: string) => Promise<PersonProfile>;
     candidate?: (id: string) => Promise<CandidateProfile>;
+    expense?: (id: string) => Promise<ExpenseProfile>;
     jobPosting?: (id: string) => Promise<JobPostingProfile>;
     requisition?: (id: string) => Promise<RequisitionProfile>;
     vacancy?: (id: string) => Promise<VacancyProfile>;
@@ -2224,9 +2401,21 @@ export declare type EntityResolvers = {
 export declare type EntityUrlBuilders = {
     person?: (id: string) => string;
     candidate?: (id: string) => string;
+    expense?: (id: string) => string;
     jobPosting?: (id: string) => string;
     requisition?: (id: string) => string;
     vacancy?: (id: string) => string;
+};
+
+/**
+ * Profile data for an expense entity, resolved asynchronously
+ * and displayed in the entity reference hover card.
+ */
+export declare type ExpenseProfile = {
+    id: string | number;
+    description?: string;
+    amount?: string;
+    status?: string;
 };
 
 export declare const F0ActionItem: ({ title, status, inGroup }: F0ActionItemProps) => JSX_2.Element;
@@ -2257,7 +2446,7 @@ export declare const F0AiChat: () => JSX_2.Element | null;
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, toolHints, credits, creditWarning, fileAttachments, onThumbsUp, onThumbsDown, children, agent, tracking, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, toolHints, credits, creditWarning, fileAttachments, onThumbsUp, onThumbsDown, onBeforeSendMessage, runtimeFetch, children, agent, tracking, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
 
 export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, creditWarning, }: ChatTextareaProps) => JSX_2.Element;
 
@@ -2309,6 +2498,47 @@ export declare class F0AiMask {
     private setupGL;
     private render;
 }
+
+export declare function F0AiProposalCard(props: F0AiProposalCardProps): JSX_2.Element;
+
+export declare namespace F0AiProposalCard {
+    var displayName: string;
+}
+
+export declare interface F0AiProposalCardActions {
+    /** Label for the primary action button. */
+    primaryActionLabel: string;
+    /** Optional icon shown before the primary action label. */
+    primaryActionIcon?: IconType;
+    /** Whether the action footer is visible. */
+    showActions?: true;
+    /** Called when the primary action is clicked. */
+    onPrimaryAction: () => void;
+}
+
+export declare interface F0AiProposalCardBaseProps extends DataAttributes_2 {
+    /** Module avatar shown in the card header. */
+    module?: ModuleId;
+    /** Header label describing the proposal type. */
+    heading: string;
+    /** Main proposal title. */
+    title: string;
+    /** Optional secondary metadata line. */
+    subtitle?: string;
+    /** Proposal details. Line breaks are preserved when expanded. */
+    description: string;
+    /** Label for the inline expansion control. */
+    seeMoreLabel: string;
+    /** Maximum number of characters shown before expansion. */
+    maxCollapsedDescriptionLength?: number;
+}
+
+export declare interface F0AiProposalCardHiddenActions {
+    /** Hide the action footer and omit action props. */
+    showActions: false;
+}
+
+export declare type F0AiProposalCardProps = F0AiProposalCardBaseProps & (F0AiProposalCardActions | F0AiProposalCardHiddenActions);
 
 export declare function F0AuraVoiceAnimation({ size, state, color, colorShift, audioTrack, themeMode, className, ref, ...props }: F0AuraVoiceAnimationProps & ComponentProps<"div"> & VariantProps<typeof F0AuraVoiceAnimationVariants>): JSX_2.Element;
 
@@ -2489,6 +2719,25 @@ declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<type
     color?: "default" | "currentColor" | `#${string}` | Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
 }
 
+export declare const F0MessageCreditsWarning: ({ actionHref, }: F0MessageCreditsWarningProps) => JSX_2.Element;
+
+/**
+ * Args for credits warning copilot action
+ */
+export declare interface F0MessageCreditsWarningArgs {
+    actionHref?: string;
+}
+
+/**
+ * Props for the F0MessageCreditsWarning component
+ */
+export declare interface F0MessageCreditsWarningProps {
+    /**
+     * Optional URL used by the action button.
+     */
+    actionHref?: string;
+}
+
 export declare const F0OneIcon: ForwardRefExoticComponent<Omit<F0OneIconProps, "ref"> & RefAttributes<SVGSVGElement>>;
 
 /**
@@ -2623,6 +2872,12 @@ declare interface F0TagStatusProps {
 
 declare const F0TagTeam: WithDataTestIdReturnType<ForwardRefExoticComponent<F0TagTeamProps & RefAttributes<HTMLDivElement>>>;
 
+declare type FieldMeta = {
+    label: string;
+    fieldType?: string;
+    customFieldName?: string;
+};
+
 declare type FileAvatarVariant = Extract<AvatarVariant, {
     type: "file";
 }>;
@@ -2655,12 +2910,51 @@ declare type FormatPreset = {
 /**
  * Form canvas content — renders an interactive F0Form in the canvas panel.
  */
-declare type FormCanvasContent = CanvasContentBase & {
+export declare type FormCanvasContent = CanvasContentBase & {
     type: "form";
     formName: string;
     formDescription?: string;
     formModule?: ModuleId;
 };
+
+/**
+ * Form-specific card rendered inline in the AI chat stream.
+ * Shows the active form name, description, and an Open/Close button
+ * that opens the form in the canvas panel.
+ * When field data is provided, displays a summary of field labels and values.
+ */
+export declare function FormCard({ formName, formDescription, module: formModule, cardTitle, cardDescription, fieldDescriptions, formValues, valueFormatter, }: FormCardProps): JSX_2.Element;
+
+export declare namespace FormCard {
+    var displayName: string;
+}
+
+export declare type FormCardProps = {
+    /** Unique name of the form in the registry */
+    formName: string;
+    /** Optional description shown on the card */
+    formDescription?: string;
+    /** Module avatar for the card */
+    module?: ModuleId;
+    /** Custom title override for the card (set by the AI via fillForm) */
+    cardTitle: string;
+    /** Custom description override for the card (set by the AI via fillForm) */
+    cardDescription: string;
+    /** Field label metadata from the form schema */
+    fieldDescriptions?: Record<string, FieldMeta>;
+    /** Current form values */
+    formValues?: Record<string, unknown>;
+    /**
+     * Optional callback to format a field value into a DetailsItemContent.
+     * Return `undefined` to fall back to built-in formatting.
+     */
+    valueFormatter?: FormCardValueFormatter;
+};
+
+declare type FormCardValueFormatter = (key: string, value: unknown, meta: {
+    fieldType?: string;
+    customFieldName?: string;
+}) => DetailsItemContent | DetailsItemContent[] | undefined;
 
 export declare interface FormCardValueFormatterEntry<T = unknown> {
     /** Scope to a specific form. Omit to apply to all forms. */
@@ -2679,6 +2973,24 @@ export declare function FormCardValueFormatterProvider({ children, }: {
     children: ReactNode;
 }): JSX_2.Element;
 
+/**
+ * Canvas panel content for forms.
+ * Propless — reads the active form from coagent shared state
+ * and delegates to VirtualFormContent for rendering.
+ */
+export declare function FormContent(): ReactNode;
+
+export declare namespace FormContent {
+    var displayName: string;
+}
+
+export declare function FormHeader({ title, description, module, onClose, }: {
+    title: string;
+    description?: string;
+    module?: ModuleId;
+    onClose: () => void;
+}): JSX_2.Element;
+
 declare interface GaugeComputation {
     datasetId: string;
     aggregation: AggregationType;
@@ -2687,12 +2999,6 @@ declare interface GaugeComputation {
     max?: number;
     name?: string;
 }
-
-/**
- * Look up a canvas entity definition by content type.
- * Returns `undefined` if the type is not configured.
- */
-export declare function getCanvasEntity(type: string): CanvasEntityDefinition<any> | undefined;
 
 declare interface HeatmapComputation {
     datasetId: string;
@@ -2759,6 +3065,16 @@ declare type Level = (typeof levels)[number];
 
 declare const levels: readonly ["info", "warning", "critical", "positive"];
 
+/**
+ * External store for saved (user-edited) dashboard configs.
+ *
+ * This lives outside React's component tree so that `F0ChatReportCard`
+ * (rendered inside CopilotKit's message list) can subscribe to changes
+ * via `useSyncExternalStore` — which works regardless of whether the
+ * React context provider is an ancestor.
+ */
+declare type Listener = () => void;
+
 export declare type MaskOptions = {
     /**
      * The width of the Mask element.
@@ -2813,6 +3129,18 @@ export declare type MaskOptions = {
      * Custom styles for wrapper and canvas elements.
      */
     styles?: Partial<CSSStyleDeclaration>;
+};
+
+export declare const MessageSources: ({ sources }: MessageSourcesProps) => JSX_2.Element | null;
+
+/**
+ * Props for the F0MessageSources component
+ */
+export declare type MessageSourcesProps = {
+    /**
+     * Array of sources to display
+     */
+    sources: Source[];
 };
 
 declare interface MetricComputation {
@@ -3030,6 +3358,10 @@ export declare type OneIconSize = (typeof oneIconSizes)[number];
 
 export declare const oneIconSizes: readonly ["xs", "sm", "md", "lg"];
 
+export declare type OrchestratorThinkingResult = {
+    inGroup?: boolean;
+};
+
 declare type PathsToStringProps<T> = T extends string ? [] : {
     [K in Extract<keyof T, string>]: [K, ...PathsToStringProps<T[K]>];
 }[Extract<keyof T, string>];
@@ -3130,24 +3462,79 @@ declare type RelaxedNumericWithFormatter = Omit<NumericWithFormatter, "numericVa
     numericValue: Numeric;
 };
 
-/**
- * Profile data for a requisition entity (ATS requisition), resolved asynchronously
- * and displayed in the entity reference hover card.
- */
 export declare type RequisitionProfile = {
     id: string | number;
     title: string;
     status?: string;
+    statusVariant?: StatusVariant;
     reason?: string;
+    location?: string;
+    lineManager?: {
+        firstName: string;
+        lastName: string;
+        avatarUrl?: string;
+    };
+};
+
+/**
+ * Snapshot of a resolved step's answer — persisted alongside the tool args
+ * so the render can restore state without re-invoking the panel.
+ */
+export declare interface ResolvedStepAnswer {
+    /** The question text (matches the source step) */
+    question: string;
+    /** Selected option IDs at submit time */
+    selectedOptionIds: string[];
+    /** Custom free-text answer if provided */
+    customAnswer?: string;
+    /** True when the user explicitly skipped an optional step */
+    skipped?: boolean;
+    /**
+     * True when the user cancelled the flow before reaching this step.
+     * The step was therefore neither answered nor intentionally skipped —
+     * callers (e.g. the agent) should treat this as "no information".
+     */
+    cancelled?: boolean;
+}
+
+export declare const savedDashboardConfigStore: {
+    get(toolCallId: string): ChatDashboardConfig | undefined;
+    set(toolCallId: string, config: ChatDashboardConfig): void;
+    subscribe(listener: Listener): () => void;
+    getSnapshot(): number;
 };
 
 declare type SetFormCardValueFormatter = <T = unknown>(entry: FormCardValueFormatterEntry<T>) => void;
+
+/**
+ * Source object for message sources
+ */
+export declare type Source = {
+    /**
+     * Title of the source
+     */
+    title: string;
+    /**
+     * Optional link URL
+     */
+    link?: string;
+    /**
+     * Optional icon name (from @/icons/app)
+     */
+    icon?: string;
+    /**
+     * Whether to open link in new tab
+     */
+    targetBlank?: boolean;
+};
 
 export declare type SparklineDataPoint = {
     value: number;
 };
 
 declare const statuses: readonly ["neutral", "info", "positive", "warning", "critical"];
+
+declare type StatusVariant = Variant;
 
 declare type TagDataType<T extends string> = Omit<Extract<TagVariant, {
     type: T;
@@ -3223,10 +3610,11 @@ export declare function useAiChat(): AiChatProviderReturnValue;
 export declare function useAiChatTranslations(): AiChatTranslations;
 
 /**
- * Hook that invokes every configured copilot action factory.
- * Actions are declared in the `copilotActions` array in `registry.ts`.
+ * Hook returning the canvas entity definition for `type` from the registry
+ * supplied to `F0AiChatProvider.canvasEntities`. Returns `undefined` when no
+ * matching entity is configured.
  */
-export declare function useDefaultCopilotActions(): void;
+export declare function useCanvasEntity(type: string | undefined): CanvasEntityDefinition<any> | undefined;
 
 /**
  * Returns a resolved formatter for the given `formName`.
@@ -3242,18 +3630,6 @@ export declare function useFormCardValueFormatter(formName: string): ((key: stri
 export declare function useI18n(): TranslationsType & {
     t: (key: TranslationKey, args?: Record<string, string | number>) => string;
 };
-
-/**
- * Hook to register the message sources action.
- * Attaches information sources to the assistant's response to show where the AI got its information from.
- */
-export declare const useMessageSourcesAction: () => void;
-
-/**
- * Hook to register the orchestrator thinking action.
- * Displays the orchestrator's thinking process as a non-blocking UI element.
- */
-export declare const useOrchestratorThinkingAction: () => void;
 
 /**
  * Returns a setter to register value formatters used by FormCard.
@@ -3275,6 +3651,9 @@ export declare const useOrchestratorThinkingAction: () => void;
  * ```
  */
 export declare function useSetFormCardValueFormatter(): SetFormCardValueFormatter;
+
+/** Read the tool call ID injected by AssistantMessage. */
+export declare const useToolCallId: () => string | undefined;
 
 /**
  * Profile data for a vacancy entity (ATS vacancy/position), resolved asynchronously
@@ -3361,13 +3740,8 @@ declare module "gridstack" {
 }
 
 
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
-        };
-    }
+declare namespace Calendar {
+    var displayName: string;
 }
 
 
@@ -3376,6 +3750,25 @@ declare module "@tiptap/core" {
         aiBlock: {
             insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
             executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -3398,18 +3791,4 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
-        };
-    }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }

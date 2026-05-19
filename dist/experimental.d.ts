@@ -82,10 +82,10 @@ import { ProgressBarCellValue } from './types/progressBar';
 import { ProgressBarCellValue as ProgressBarCellValue_2 } from './experimental';
 import { Props as Props_5 } from './types';
 import { PropsWithChildren } from 'react';
+import { RadarChartProps } from './RadarChart';
 import * as React_2 from 'react';
 import { ReactElement } from 'react';
 import { ReactNode } from 'react';
-import * as RechartsPrimitive from 'recharts';
 import { Ref } from 'react';
 import { RefAttributes } from 'react';
 import { RefObject } from 'react';
@@ -341,6 +341,7 @@ declare type ActionType = {
     disabled?: boolean;
     critical?: boolean;
     description?: string;
+    loading?: boolean;
 };
 
 export declare type actionType = {
@@ -523,6 +524,14 @@ declare type AiChatProviderProps = {
      */
     canvasActions?: CanvasActions;
     /**
+     * Canvas entity definitions keyed by `CanvasContent["type"]`. The canvas
+     * panel looks up the matching definition when `openCanvas` is called.
+     *
+     * F0AiChat ships without built-in canvas entities; the host app supplies
+     * them here so canvas logic lives in one place.
+     */
+    canvasEntities?: Record<string, CanvasEntityDefinition>;
+    /**
      * Available tool hints that the user can activate to provide intent context
      * to the AI. Renders a selector button next to the send button.
      * Only one tool hint can be active at a time.
@@ -551,6 +560,14 @@ declare type AiChatProviderProps = {
         feedback: string;
     }) => void;
     tracking?: AiChatTrackingOptions;
+    /**
+     * Optional hook called before a user message is sent. Return false to block submission.
+     */
+    onBeforeSendMessage?: () => boolean | Promise<boolean>;
+    /**
+     * Optional fetch implementation for AI runtime requests owned by F0.
+     */
+    runtimeFetch?: typeof fetch;
 } & Pick<CopilotKitProps, "agent" | "credentials" | "children" | "runtimeUrl" | "showDevConsole" | "threadId" | "headers">;
 
 /**
@@ -921,7 +938,7 @@ declare interface BaseChipProps extends VariantProps<typeof chipVariants> {
 
 declare type BaseColor = keyof typeof baseColors;
 
-export declare const BaseCommunityPost: ({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, }: CommunityPostProps) => JSX_2.Element;
+export declare const BaseCommunityPost: ({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, }: CommunityPostProps) => JSX_2.Element;
 
 /**
  * Base data adapter configuration for non-paginated collections
@@ -1379,6 +1396,57 @@ declare type CanvasActions = {
     dashboard?: DashboardCanvasActions;
 };
 
+/**
+ * Base shape shared by all canvas content types.
+ * Every entity adds its own fields on top of this.
+ */
+declare type CanvasContentBase = {
+    type: string;
+    title: string;
+    description?: string;
+    toolCallId?: string;
+};
+
+/**
+ * Contract for a canvas entity type.
+ *
+ * Each entity (dashboard, survey, goal, job-posting…) implements this
+ * interface and is added to the `canvasEntities` record in `registry.ts`.
+ *
+ * To add a new entity type:
+ * 1. Create a folder in `canvas/entities/<your-entity>/`
+ * 2. Define a type extending `CanvasContentBase` in `types.ts`
+ * 3. Implement and export `CanvasEntityDefinition` in `index.tsx`
+ * 4. Add the entity to the record in `canvas/registry.ts`
+ */
+declare type CanvasEntityDefinition<T extends CanvasContentBase = CanvasContentBase> = {
+    /** Must match the `type` discriminant on the content object */
+    type: T["type"];
+    /** Renders the main body of the canvas panel */
+    renderContent: (props: {
+        content: T;
+        refreshKey: number;
+    }) => ReactNode;
+    /** Renders the full header (title, actions, close button) */
+    renderHeader: (props: {
+        content: T;
+        onClose: () => void;
+    }) => ReactNode;
+    /**
+     * Optional wrapper providing entity-scoped context around
+     * both header and body (e.g. shared edit-mode state).
+     */
+    wrapper?: (props: {
+        content: T;
+        children: ReactNode;
+    }) => ReactNode;
+    /**
+     * When true the content area uses `overflow-hidden` instead of
+     * `overflow-auto`, letting the entity manage its own scrolling.
+     */
+    overflowHidden?: boolean;
+};
+
 declare type CardAvatarVariant = AvatarVariant | {
     type: "emoji";
     emoji: string;
@@ -1621,35 +1689,6 @@ declare interface ChartComputation {
     sortOrder?: "asc" | "desc";
     limit?: number;
 }
-
-declare type ChartConfig_3 = Record<string, ChartConfig_4[keyof ChartConfig_4]>;
-
-declare type ChartConfig_4 = {
-    [k in string]: {
-        label?: React_2.ReactNode;
-        icon?: React_2.ComponentType;
-    } & ({
-        color?: string;
-        theme?: never;
-    } | {
-        color?: never;
-        theme: Record<keyof typeof THEMES, string>;
-    });
-};
-
-declare const ChartContainer: React_2.ForwardRefExoticComponent<Omit<ChartContainerComponentProps, "ref"> & React_2.RefAttributes<HTMLDivElement>>;
-
-declare interface ChartContainerComponentProps extends React_2.ComponentProps<"div">, VariantProps<typeof variants_2> {
-    config: ChartConfig_4;
-    children: React_2.ComponentProps<typeof RechartsPrimitive.ResponsiveContainer>["children"];
-}
-
-declare type ChartItem<K extends ChartConfig_3> = {
-    label: string;
-    values: {
-        [key in keyof K]: number;
-    };
-};
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -2064,7 +2103,7 @@ values: {
 }) => void) | undefined;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
-export declare const CommunityPost: (({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, }: CommunityPostProps) => JSX_2.Element) & {
+export declare const CommunityPost: (({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, }: CommunityPostProps) => JSX_2.Element) & {
     Skeleton: ({ withEvent, withImage, }: CommunityPostSkeletonProps) => JSX_2.Element;
 };
 
@@ -2106,6 +2145,7 @@ export declare type CommunityPostProps = {
     onClick: (id: string) => void;
     noReactionsButton?: boolean;
     dropdownItems?: DropdownItem[];
+    descriptionExpandable?: boolean;
 };
 
 export declare const CommunityPostSkeleton: ({ withEvent, withImage, }: CommunityPostSkeletonProps) => JSX_2.Element;
@@ -2964,6 +3004,10 @@ declare const defaultTranslations: {
         readonly availableFilters: "Available filters";
         readonly label: "Filters";
         readonly applyFilters: "Apply filters";
+        readonly resultsFor: {
+            readonly one: "{{count}} result for:";
+            readonly other: "{{count}} results for:";
+        };
         readonly applySelection: "Apply selection";
         readonly cancel: "Cancel";
         readonly failedToLoadOptions: "Failed to load options";
@@ -3198,6 +3242,11 @@ declare const defaultTranslations: {
                 readonly source: "Source";
                 readonly applied: "Applied on";
             };
+            readonly requisition: {
+                readonly lineManager: "Line manager";
+                readonly reason: "Reason";
+                readonly status: "Status";
+            };
         };
         readonly credits: {
             readonly title: "Credits";
@@ -3272,6 +3321,7 @@ declare const defaultTranslations: {
         readonly attachFile: "Attach file";
         readonly removeFile: "Remove";
         readonly fileUploadError: "Upload failed";
+        readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly dropFilesHere: "Drop your files here";
         readonly reply: "Reply";
         readonly removeQuote: "Remove quote";
@@ -3321,6 +3371,10 @@ declare const defaultTranslations: {
         readonly funnel: "Funnel";
         readonly pieChart: "Pie";
         readonly table: "Table";
+        readonly emptyState: {
+            readonly title: "No data available";
+            readonly description: "Try a different date or fewer filters";
+        };
     };
     readonly select: {
         readonly noResults: "No results found";
@@ -3654,6 +3708,15 @@ declare type DropdownInternalProps = {
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
     label?: string;
+    /**
+     * Whether the dropdown trigger is disabled. When true, the menu cannot be
+     * opened via click, keyboard, or focus and the trigger receives
+     * `aria-disabled="true"`. When a custom trigger is provided via `children`,
+     * `disabled` is forwarded to it via `cloneElement` if it is a single React
+     * element; consumer-supplied `disabled` / `aria-disabled` always win.
+     * @default false
+     */
+    disabled?: boolean;
 } & DataAttributes_2;
 
 export declare type DropdownItem = DropdownItemObject | DropdownItemSeparator | DropdownItemLabel;
@@ -3728,6 +3791,46 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
      * Falls back to sensible defaults when omitted.
      */
     numberConfig?: NumberCellConfig<R>;
+    /**
+     * Called after this cell's value changes. Use to compute derived values
+     * and update other cells in the same row.
+     *
+     * Works with every cell type (text, number, date, select, etc.).
+     *
+     * @example
+     * formula: ({ value, setCellValue }) => {
+     *   const hours = roleHoursMap[value as string]
+     *   if (hours != null) setCellValue("plannedHours", hours)
+     * }
+     */
+    formula?: (params: {
+        /** The new value of this cell. */
+        value: unknown;
+        /** The current row item (before this change is applied). */
+        item: R;
+        /** For select cells: the full record associated with the selected option. */
+        selectedItem?: RecordType;
+        /** Update another cell in the same row by column id. */
+        setCellValue: (columnId: string, value: unknown) => void;
+    }) => void;
+    /**
+     * Returns a hint to display as an icon with tooltip inside the cell.
+     * Use to warn the user when a value diverges from its formula-inferred value.
+     *
+     * Return `undefined` to hide the hint.
+     *
+     * @example
+     * cellHint: (item) => {
+     *   if (item._inferredSalary != null && item.salary !== item._inferredSalary) {
+     *     return { icon: AlertCircle, message: `Differs from catalog (${item._inferredSalary})` }
+     *   }
+     * }
+     */
+    cellHint?: (item: R) => {
+        icon: IconType;
+        message: string;
+        iconColor?: F0IconProps["color"];
+    } | undefined;
 };
 
 declare type EditableTableVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = Omit<TableVisualizationOptions<R, _Filters, Sortings, Summaries>, "columns"> & {
@@ -3823,6 +3926,7 @@ declare type EntityRefs = {
 declare type EntityResolvers = {
     person?: (id: string) => Promise<PersonProfile>;
     candidate?: (id: string) => Promise<CandidateProfile>;
+    expense?: (id: string) => Promise<ExpenseProfile>;
     jobPosting?: (id: string) => Promise<JobPostingProfile>;
     requisition?: (id: string) => Promise<RequisitionProfile>;
     vacancy?: (id: string) => Promise<VacancyProfile>;
@@ -3911,6 +4015,7 @@ export declare type EntitySelectSubEntity = {
 declare type EntityUrlBuilders = {
     person?: (id: string) => string;
     candidate?: (id: string) => string;
+    expense?: (id: string) => string;
     jobPosting?: (id: string) => string;
     requisition?: (id: string) => string;
     vacancy?: (id: string) => string;
@@ -3922,6 +4027,17 @@ declare interface ErrorMessageProps {
     title: string;
     description: string;
 }
+
+/**
+ * Profile data for an expense entity, resolved asynchronously
+ * and displayed in the entity reference hover card.
+ */
+declare type ExpenseProfile = {
+    id: string | number;
+    description?: string;
+    amount?: string;
+    status?: string;
+};
 
 /**
  * Extracts the property keys from a record type.
@@ -4197,6 +4313,14 @@ declare type F0SelectBaseProps<T extends string, R = unknown> = {
      * @default false
      */
     showPreview?: boolean;
+    /**
+     * When true, preserves selections when the dataset changes (search, filters,
+     * or sortings). Useful for picker components where the user searches and
+     * filters to find items to add to an existing selection.
+     *
+     * @default true
+     */
+    preserveSelectionOnDatasetChange?: boolean;
 } & WithDataTestIdProps;
 
 declare type F0SelectItemObject<T, R = unknown> = {
@@ -4823,8 +4947,14 @@ declare type HeaderProps = {
     oneSwitchAutoOpen?: boolean;
 };
 
-declare type HeaderSecondaryAction = SecondaryAction & {
+declare type HeaderSecondaryAction = HeaderSecondaryButtonAction | HeaderSecondaryDropdownAction;
+
+declare type HeaderSecondaryButtonAction = SecondaryAction & {
     hideLabel?: boolean;
+};
+
+declare type HeaderSecondaryDropdownAction = PrimaryDropdownAction<string> & {
+    variant?: "outline";
 };
 
 declare interface HeatmapComputation {
@@ -5825,7 +5955,7 @@ declare interface OmniButtonProps {
 export declare type OnBulkActionCallback<Record extends RecordType, Filters extends FiltersDefinition> = (...args: [
 action: BulkAction,
 ...Parameters<OnSelectItemsCallback<Record, Filters>>
-]) => void;
+]) => void | Promise<void>;
 
 export declare type OnDataStateChangeCallback<Record extends RecordType> = (state: DataCollectionItemNavigationDataState<Record>) => void;
 
@@ -5896,6 +6026,46 @@ declare type OneDataCollectionProps<R extends RecordType, Filters extends Filter
     visualizations: ReadonlyArray<Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>>;
     onSelectItems?: OnSelectItemsCallback<R, Filters>;
     onBulkAction?: OnBulkActionCallback<R, Filters>;
+    /**
+     * Opt-in to auto-managed bulk-action status. When `true`, a `Promise`
+     * returned from `onBulkAction` drives the ActionBar through
+     * `loading → success → idle` (or `loading → error`) automatically.
+     *
+     * Opt-in is required because some consumers open modals from their bulk
+     * action handler whose promise resolves when the modal OPENS rather than
+     * when the user confirms — auto-managing those would flash a premature
+     * success. When `false` (default), async handlers keep today's
+     * fire-and-forget behavior. For those cases, use `bulkActionStatus` to
+     * drive status yourself from the modal's lifecycle.
+     * @default false
+     */
+    autoManageBulkActionStatus?: boolean;
+    /**
+     * Controlled status for the bulk-action ActionBar. Designed for multi-step
+     * flows (confirmation modals, server polling) where the component can't
+     * derive status from a single promise.
+     *
+     * - **`"idle"`** — transparent: F0's auto-manage handles immediate
+     *   (promise-returning) actions normally. Pass `"idle"` even when not
+     *   actively controlling; no need for a `status !== "idle" ? status : undefined`
+     *   conditional.
+     * - **`"loading"`** — consumer is performing an async operation (e.g. after
+     *   modal confirm). F0 disables actions and shows button-level spinners.
+     * - **`"success"`** — mutation resolved. F0 shows the checkmark, then after
+     *   1.5 s auto-clears selection and falls back to auto-manage. The consumer
+     *   does not need to set `"idle"` or clear selection manually.
+     * - **`"error"`** — mutation rejected. F0 shows the error state and wiggle
+     *   animation. Persists until the consumer sets a different status.
+     *   Note: selection change only auto-clears the internal (auto-managed)
+     *   error state — when using controlled mode the consumer must explicitly
+     *   set a new status to dismiss the error.
+     *
+     * When this prop is provided (even as `"idle"`), void-returning handlers
+     * will not auto-clear selection — F0 assumes the consumer has modal-gated
+     * actions and owns the selection lifecycle. Pair with
+     * `autoManageBulkActionStatus={true}` for mixed immediate + modal flows.
+     */
+    bulkActionStatus?: ActionBarStatus;
     emptyStates?: CustomEmptyStates;
     onTotalItemsChange?: (totalItems: number) => void;
     fullHeight?: boolean;
@@ -6012,6 +6182,8 @@ declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     onOpenChange?: (isOpen: boolean) => void;
     /** Display counter for the applied filters */
     displayCounter?: boolean;
+    /** Total number of items matching the current filters, displayed as "N results for:" prefix in the chips row */
+    resultCount?: number;
 };
 
 /**
@@ -6301,6 +6473,9 @@ declare interface PieComputation {
 declare type PostDescriptionProps = {
     content: HTMLString;
     collapsed?: boolean;
+    id?: string;
+    className?: string;
+    tabIndex?: number;
 };
 
 declare type PostEventProps = {
@@ -6319,14 +6494,11 @@ export declare const predefinedPresets: Record<string, DatePreset>;
 export declare type PresetDefinition<Filters extends FiltersDefinition> = {
     /** Display name for the preset */
     label: string;
-    /** Filter configuration to apply when this preset is selected */
-    filter: FiltersState<Filters>;
-    /**
-     * How the preset is applied when clicked:
-     * - 'replace' (default): Replace all current filters with preset's filter
-     * - 'additive': Merge preset's filter with current filters, preserving existing selections
+    /** Filter configuration to apply when this preset is selected.
+     * Clicking a preset replaces all current filters with this value.
+     * The preset shows as selected only when the current filters exactly match this value.
      */
-    mode?: "replace" | "additive";
+    filter: FiltersState<Filters>;
     /** Function to count the number of items that match the filter */
     itemsCount?: (filters: FiltersState<Filters>) => Promise<number | undefined> | number | undefined;
 };
@@ -6579,23 +6751,9 @@ declare type Pulse = (typeof pulses)[number];
 
 declare const pulses: readonly ["superNegative", "negative", "neutral", "positive", "superPositive"];
 
-export declare const RadarChart: <K extends ChartConfig_3>(props: RadarChartProps<K> & {
-    dataTestId?: string;
-} & {
-    ref?: ForwardedRef<HTMLDivElement>;
-}) => ReactElement | null;
-
-export declare const _RadarChart: <K extends ChartConfig_3>({ data, dataConfig, scaleMin, scaleMax, aspect, dataTestId, }: RadarChartProps<K> & {
-    dataTestId?: string;
-}, ref: ForwardedRef<HTMLDivElement>) => JSX_2.Element;
-
-export declare type RadarChartProps<K extends ChartConfig_3> = {
-    dataConfig: K;
-    data: ChartItem<K>[];
-    scaleMin?: number;
-    scaleMax?: number;
-    aspect?: ComponentProps<typeof ChartContainer>["aspect"];
-};
+export declare const RadarChart: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<RadarChartProps<ChartConfig_2> & {
+dataTestId?: string;
+} & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 declare interface RadarComputation {
     datasetId: string;
@@ -6683,15 +6841,18 @@ declare interface ReplaceContentNotesTextEditorPageDocumentPatch {
     content: JSONContent[];
 }
 
-/**
- * Profile data for a requisition entity (ATS requisition), resolved asynchronously
- * and displayed in the entity reference hover card.
- */
 declare type RequisitionProfile = {
     id: string | number;
     title: string;
     status?: string;
+    statusVariant?: StatusVariant;
     reason?: string;
+    location?: string;
+    lineManager?: {
+        firstName: string;
+        lastName: string;
+        avatarUrl?: string;
+    };
 };
 
 export declare type ResolvedRecordType<R> = R extends RecordType ? R : RecordType;
@@ -7328,6 +7489,11 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
      * definitions, values are the display labels rendered in the spanning header row.
      */
     headerGroupLabels?: Record<string, string>;
+    /**
+     * Wraps the table in a rounded border container.
+     * Useful for embedding the table inside panels or detail views.
+     */
+    bordered?: boolean;
 };
 
 declare type TableVisualizationSettings = {
@@ -7445,11 +7611,6 @@ maxHeight?: number;
 } & Pick<InputFieldProps<string>, "label" | "value" | "onChange" | "size" | "icon" | "onFocus" | "onBlur" | "onKeyDown" | "status" | "loading" | "maxLength" | "placeholder" | "required" | "error" | "hideLabel" | "hint" | "labelIcon" | "clearable" | "onClear"> & RefAttributes<HTMLTextAreaElement>>;
 
 export declare type TextareaProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error" | "size" | "loading" | "required" | "maxHeight">;
-
-declare const THEMES: {
-    readonly light: "";
-    readonly dark: ".dark";
-};
 
 export declare type TOCItem<Depth extends 1 | 2 | 3 | 4 = 1> = BaseTOCItem & {
     children?: NextDepth<Depth> extends never ? never : TOCItem<NextDepth<Depth>>[];
@@ -7909,16 +8070,6 @@ declare type Variant = (typeof statuses)[number];
 
 declare const variants: readonly ["ai", "critical", "positive", "info", "warning"];
 
-declare const variants_2: (props?: ({
-    aspect?: "small" | "square" | "wide" | undefined;
-} & ({
-    class?: ClassValue;
-    className?: never;
-} | {
-    class?: never;
-    className?: ClassValue;
-})) | undefined) => string;
-
 export declare interface Version {
     id: string;
     author: VersionAuthor;
@@ -8272,13 +8423,8 @@ declare module "gridstack" {
 }
 
 
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
-        };
-    }
+declare namespace Calendar {
+    var displayName: string;
 }
 
 
@@ -8287,6 +8433,25 @@ declare module "@tiptap/core" {
         aiBlock: {
             insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
             executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -8309,18 +8474,4 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
-        };
-    }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
