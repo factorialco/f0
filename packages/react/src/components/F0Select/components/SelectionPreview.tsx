@@ -26,9 +26,11 @@ const SCROLL_BOTTOM_MARGIN = 10
 function PreviewItem<T extends string>({
   item,
   onDeselect,
+  removeLabel,
 }: {
   item: F0SelectItemObject<T>
   onDeselect: (value: string) => void
+  removeLabel: string
 }) {
   return (
     <div className="flex w-fit max-w-full min-w-0 items-center justify-between gap-1.5 rounded-md border border-solid border-f1-border-secondary p-1">
@@ -48,7 +50,7 @@ function PreviewItem<T extends string>({
           "flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0",
           focusRing()
         )}
-        aria-label={`Remove ${item.label}`}
+        aria-label={removeLabel}
         type="button"
         tabIndex={0}
         onClick={(e) => {
@@ -128,6 +130,9 @@ export function SelectionPreview<T extends string>({
                   key={String(item.value)}
                   item={item}
                   onDeselect={onDeselect}
+                  removeLabel={i18n.t("actions.removeItem", {
+                    label: item.label,
+                  })}
                 />
               ))}
               {isLoadingMore && (

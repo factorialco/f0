@@ -16,6 +16,7 @@ import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { inputFieldStatus } from "@/ui/InputField"
 
 import { F0Select, selectSizes } from "../index"
+import type { F0SelectProps } from "../types"
 import {
   Employee,
   employeeNestedPaginatedSource,
@@ -313,7 +314,7 @@ const meta: Meta = {
       <div
         className="w-[330px]"
         onClick={() => {
-          console.log("click was received in elements below the select")
+          // decorator captures click events propagated from the select
         }}
       >
         <Story />
@@ -541,7 +542,6 @@ export const WithSearchBox: Story = {
           label="Select a theme"
           onChange={fn()}
           searchFn={(option, searchValue) => {
-            console.log("searchFn", option, searchValue)
             return (
               option.type === "separator" ||
               !searchValue ||
@@ -883,7 +883,7 @@ export const MultiplePaginated: Story = {
       avatar: item.avatar,
     }),
     onSelectItems: fn((selectionStatus) => {
-      console.log("selectionStatus", selectionStatus)
+      void selectionStatus
     }),
   },
 }
@@ -924,7 +924,7 @@ export const MultiplePaginatedWithPreview: Story = {
       avatar: item.avatar,
     }),
     onSelectItems: fn((selectionStatus) => {
-      console.log("selectionStatus", selectionStatus)
+      void selectionStatus
     }),
   },
 }
@@ -968,14 +968,14 @@ export const MultiplePaginatedAsList: Story = {
       avatar: item.avatar,
     }),
     onSelectItems: fn((selectionStatus) => {
-      console.log("selectionStatus", selectionStatus)
+      void selectionStatus
     }),
     hideLabel: true,
   },
   render: (args) => {
     return (
       <div className="flex h-[400px] flex-row w-[600px]">
-        <F0Select {...(args as any)} />
+        <F0Select {...(args as F0SelectProps<string>)} />
       </div>
     )
   },
@@ -990,7 +990,7 @@ export const AsList: Story = {
   render: (args) => {
     return (
       <div className="flex h-max w-[300px]">
-        <F0Select {...(args as any)} />
+        <F0Select {...(args as F0SelectProps<string>)} />
       </div>
     )
   },
