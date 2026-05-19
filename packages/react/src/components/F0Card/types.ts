@@ -3,6 +3,46 @@ import { valueDisplayRenderers } from "@/ui/value-display"
 
 import { CardPropertyType } from "./components/CardMetadata"
 
+export const cardAlertVariants = [
+  "info",
+  "warning",
+  "critical",
+  "positive",
+] as const
+
+export type CardAlertVariant = (typeof cardAlertVariants)[number]
+
+export interface CardAlertProps {
+  /**
+   * The visual variant of the alert, which determines the color scheme and default icon.
+   */
+  variant: CardAlertVariant
+  /**
+   * The title text displayed in the alert banner.
+   */
+  title: string
+  /**
+   * Optional custom icon. When omitted, defaults to the icon that best represents the variant.
+   */
+  icon?: IconType
+  /**
+   * Controls whether the alert is visible. Defaults to true.
+   * Use this together with onDismiss for controlled dismiss behaviour:
+   *   alert={{ ..., visible, dismissible: true, onDismiss: () => setVisible(false) }}
+   */
+  visible?: boolean
+  /**
+   * When true, renders a dismiss (×) button. The consumer controls visibility
+   * by passing or removing the alert prop in response to this callback.
+   */
+  dismissible?: boolean
+  /**
+   * Called when the dismiss (×) button is clicked.
+   * The consumer is responsible for hiding the alert (e.g. by setting visible: false).
+   */
+  onDismiss?: () => void
+}
+
 /**
  * Card metadata property renderers.
  * Each metadata item consists of an icon and a property with its data.
