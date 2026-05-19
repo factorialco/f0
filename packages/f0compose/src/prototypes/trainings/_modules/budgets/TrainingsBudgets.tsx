@@ -1,9 +1,11 @@
 import {
   F0Alert,
+  F0Avatar,
   F0Box,
   F0Button,
   F0Dialog,
   F0Heading,
+  F0Icon,
   F0Text,
   F0WizardForm,
   f0FormField,
@@ -19,6 +21,7 @@ import {
   OneDataCollection,
   Page,
   PageHeader,
+  ResourceHeader,
   Switch,
   Tabs,
   Textarea,
@@ -27,22 +30,37 @@ import {
 } from "@factorialco/f0-react/dist/experimental"
 import {
   Add,
-  ArrowRight,
+  ArrowDown,
   ChartLine,
   Delete,
   DollarBill,
   ExternalLink,
   InProgressTask,
+  Office,
   Pencil,
+  Search,
+  Sliders,
   Upload,
+  Download,
 } from "@factorialco/f0-react/icons/app"
 import { useMemo, useState } from "react"
+import type { ReactNode } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { z } from "zod"
 
 import {
+  breakdownByLegalEntityFor,
+  findLegalEntity,
+  findEmployee,
+  grossCostFromMovement,
+  hoursCompletedForEmployee,
+  legalEntities,
+  legalEntityCurrencyMap,
+  legalEntityForEmployee,
+  salaryCostForEmployeeInGroup,
   movementsForBudget,
   trainingBudgets,
+  trainingParticipants,
   trainings,
 } from "@/fixtures"
 import type {
@@ -134,6 +152,54 @@ const fmtDate = (iso: string | null) =>
         year: "numeric",
       })
     : "-"
+
+const fmtNumericDate = (iso: string | null) =>
+  iso
+    ? new Date(iso).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
+    : "-"
+
+const fmtFigmaEur = (n: number) =>
+  `${n.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })} €`
+
+function participantsForGroup(groupId: string) {
+  return trainingParticipants.filter((p) => p.classId === groupId)
+}
+
+function participantsForLegalEntity(
+  movement: TrainingBudgetMovement,
+  legalEntityId: string
+) {
+  return participantsForGroup(movement.groupId).filter(
+    (p) => legalEntityForEmployee(p.employeeId).id === legalEntityId
+  )
+}
+
+function participantsByLegalEntityForMovement(
+  movement: TrainingBudgetMovement
+): Array<{ legalEntityId: string; count: number }> {
+  const counts = new Map<string, number>()
+  for (const p of participantsForGroup(movement.groupId)) {
+    const le = legalEntityForEmployee(p.employeeId)
+    counts.set(le.id, (counts.get(le.id) ?? 0) + 1)
+  }
+  return Array.from(counts.entries()).map(([legalEntityId, count]) => ({
+    legalEntityId,
+    count,
+  }))
+}
+
+function legalEntitiesForMovement(movement: TrainingBudgetMovement) {
+  return participantsByLegalEntityForMovement(movement)
+    .map(({ legalEntityId }) => findLegalEntity(legalEntityId))
+    .filter((le): le is NonNullable<typeof le> => Boolean(le))
+}
 
 // ── URL routing ─────────────────────────────────────────────────────────────
 
@@ -265,11 +331,12 @@ function ListView({
   )
 
   return (
-    <OneDataCollection
-      id="trainings/budgets/v1"
-      storage={{ features: ["filters", "sortings", "search"] }}
-      source={source}
-      visualizations={[
+    <F0Box display="flex" flexDirection="column" gap="lg" padding="xl">
+      <OneDataCollection
+        id="trainings/budgets/v1"
+        storage={{ features: ["filters", "sortings", "search"] }}
+        source={source}
+        visualizations={[
         {
           type: "table",
           options: {
@@ -361,6 +428,7 @@ function ListView({
         },
       ]}
     />
+    </F0Box>
   )
 }
 
@@ -598,7 +666,7 @@ function AddTrainingGroupDialog({
 
 function DetailView({
   budgetId,
-  setSearch,
+  setSearch: _setSearch,
 }: {
   budgetId: string | null
   setSearch: ReturnType<typeof useSearchParams>[1]
@@ -607,11 +675,15 @@ function DetailView({
   const b = trainingBudgets.find((x) => x.id === budgetId)
   const [removeTarget, setRemoveTarget] =
     useState<TrainingBudgetMovement | null>(null)
-  const [isAddGroupOpen, setIsAddGroupOpen] = useState(false)
   const [isExportOpen, setIsExportOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
+  const [isAddGroupOpen, setIsAddGroupOpen] = useState(false)
   const [selectedMovement, setSelectedMovement] =
     useState<TrainingBudgetMovement | null>(null)
+  const [selectedLegalEntityCost, setSelectedLegalEntityCost] = useState<{
+    movement: TrainingBudgetMovement
+    legalEntityId: string
+  } | null>(null)
   const [extraMovements, setExtraMovements] = useState<
     TrainingBudgetMovement[]
   >([])
@@ -790,31 +862,57 @@ function DetailView({
   const exceedPct = total > 0 ? (committed * 100) / total : 0
   const isArchived = b.status === "closed"
 
+  const scopeLabel =
+    b.scope === "company"
+      ? "Company"
+      : b.scope === "department"
+        ? "Department"
+        : "Team"
+
+  // Status pill shown in the header. When the budget is archived/closed we
+  // surface "Archived" neutral; otherwise we surface the computed health
+  // (within budget / at risk / over budget) using the canonical labels.
+  const headerStatus: {
+    label: string
+    text: string
+    variant: "neutral" | "info" | "positive" | "warning" | "critical"
+  } = isArchived
+    ? { label: "Status", text: "Archived", variant: "neutral" }
+    : status === "over_budget"
+      ? { label: "Status", text: "Over budget", variant: "critical" }
+      : status === "budget_risk"
+        ? { label: "Status", text: "Budget at risk", variant: "warning" }
+        : { label: "Status", text: "Within budget", variant: "positive" }
+
   return (
     <F0Box display="flex" flexDirection="column" gap="lg" padding="xl">
-      <button
-        type="button"
-        onClick={() => go(setSearch, { view: "list", budgetId: null })}
-        className="self-start text-sm text-f1-foreground-info hover:underline"
-      >
-        ← Back to budgets
-      </button>
-
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <F0Heading content={b.name} variant="heading-large" as="h1" />
-          <F0Text
-            content={`${b.year} • ${b.scope === "company" ? "Company" : b.scope === "department" ? "Department" : "Team"} · ${b.scopeName} • Owner: ${b.ownerEmployeeName}`}
-            variant="small"
-          />
-        </div>
-        <F0Button
-          label="Edit budget"
-          icon={Pencil}
-          variant="outline"
-          onClick={() => setIsEditOpen(true)}
-        />
-      </div>
+      <ResourceHeader
+        title={b.name}
+        description={b.description}
+        status={headerStatus}
+        metadata={[
+          { label: "Year", value: { type: "text", content: String(b.year) } },
+          { label: "Scope", value: { type: "text", content: scopeLabel } },
+          { label: "Applies to", value: { type: "text", content: b.scopeName } },
+          {
+            label: "Owner",
+            value: { type: "text", content: b.ownerEmployeeName },
+          },
+        ]}
+        primaryAction={{
+          label: "Edit budget",
+          icon: Pencil,
+          onClick: () => setIsEditOpen(true),
+        }}
+        secondaryActions={[
+          {
+            label: "Export",
+            icon: Download,
+            hideLabel: true,
+            onClick: () => {},
+          },
+        ]}
+      />
 
       {isArchived && (
         <F0Alert
@@ -920,6 +1018,21 @@ function DetailView({
                   }),
                 },
                 {
+                  label: "Legal entities",
+                  id: "legalEntities",
+                  render: (item) => {
+                    const les = legalEntitiesForMovement(item)
+                    return {
+                      type: "tagList",
+                      value: {
+                        type: "raw",
+                        tags: les.map((le) => ({ text: le.legalName })),
+                        max: 1,
+                      },
+                    }
+                  },
+                },
+                {
                   label: "Participants",
                   id: "participants",
                   render: (item) => ({
@@ -994,95 +1107,529 @@ function DetailView({
       )}
 
       {selectedMovement && (
-        <F0Dialog
-          isOpen
+        <TrainingGroupCostSidepanel
+          movement={selectedMovement}
           onClose={() => setSelectedMovement(null)}
-          position="right"
-          width="md"
-          title={selectedMovement.groupName}
-          description={selectedMovement.trainingName}
-          primaryAction={{
-            label: "Go to Training group",
-            icon: ArrowRight,
-            onClick: () => {
-              const m = selectedMovement
-              setSelectedMovement(null)
-              goToTrainingGroup(m)
-            },
-          }}
-          secondaryAction={{
-            label: "Close",
-            onClick: () => setSelectedMovement(null),
-          }}
+        />
+      )}
+
+      {selectedLegalEntityCost && (
+        <LegalEntityCostSidepanel
+          movement={selectedLegalEntityCost.movement}
+          legalEntityId={selectedLegalEntityCost.legalEntityId}
+          onClose={() => setSelectedLegalEntityCost(null)}
+        />
+      )}
+    </F0Box>
+  )
+}
+
+function TrainingGroupCostSidepanel({
+  movement,
+  onClose,
+}: {
+  movement: TrainingBudgetMovement
+  onClose: () => void
+}) {
+  return (
+    <SidepanelFrame
+      title={movement.groupName}
+      description={movement.trainingName}
+      paymentStatus={movement.paymentStatus}
+      timeframe={`${fmtNumericDate(movement.startDate)}- ${fmtNumericDate(movement.endDate)}`}
+      activeTab="cost"
+      onTabChange={() => {}}
+      onClose={onClose}
+    >
+      <GroupSidepanelCostTab
+        movement={movement}
+      />
+    </SidepanelFrame>
+  )
+}
+
+function SidepanelFrame({
+  title,
+  description,
+  paymentStatus,
+  timeframe,
+  activeTab,
+  onTabChange,
+  onClose,
+  children,
+}: {
+  title: string
+  description: string
+  paymentStatus: TrainingBudgetMovement["paymentStatus"]
+  timeframe: string
+  activeTab: "cost" | "participants"
+  onTabChange: (tab: "cost" | "participants") => void
+  onClose: () => void
+  children: ReactNode
+}) {
+  const statusClass =
+    paymentStatus === "spent"
+      ? "bg-f1-background-positive text-f1-foreground-positive"
+      : "bg-f1-background-warning text-f1-foreground-warning"
+
+  return (
+    <div className="fixed inset-0 z-50 bg-f1-background-overlay">
+      <section
+        className="absolute right-0 top-0 flex h-[calc(100%-4px)] flex-col overflow-hidden rounded-2xl border border-f1-border-secondary bg-f1-background shadow-2xl"
+        style={{ width: 568 }}
+      >
+        <header className="flex flex-col gap-5 px-4 py-3">
+          <div className="flex h-8 items-center justify-end gap-2">
+            <button
+              type="button"
+              className="flex h-8 w-8 items-center justify-center rounded-xl border border-f1-border bg-f1-background shadow-sm"
+            >
+              <F0Text content="..." variant="label" />
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex h-8 w-8 items-center justify-center rounded-xl border border-f1-border bg-f1-background shadow-sm"
+            >
+              <F0Text content="×" variant="label" />
+            </button>
+          </div>
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-0.5">
+              <F0Text content={title} variant="label" />
+              <F0Text variant="description" content={description} />
+            </div>
+            <div className="flex items-center gap-3">
+              <div className={`rounded-xl px-2 py-1 ${statusClass}`}>
+                <F0Text
+                  content={`● ${paymentStatus === "spent" ? "Paid" : "Pending"}`}
+                  variant="small"
+                />
+              </div>
+              <div className="h-4 w-px bg-f1-border-secondary" />
+              <div className="flex items-center gap-1">
+                <F0Text content="Timeframe" variant="description" />
+                <F0Text content={timeframe} variant="body" />
+              </div>
+              <div className="h-4 w-px bg-f1-border-secondary" />
+            </div>
+          </div>
+        </header>
+        <nav className="border-b border-f1-border-secondary px-5">
+          <div className="flex h-14 items-end gap-3">
+            <button
+              type="button"
+              onClick={() => onTabChange("cost")}
+              className={`h-12 px-4 ${activeTab === "cost" ? "border-b border-f1-foreground bg-f1-background-secondary text-f1-foreground" : "text-f1-foreground-secondary"}`}
+            >
+              <F0Text content="Cost" variant="body" />
+            </button>
+            <button
+              type="button"
+              onClick={() => onTabChange("participants")}
+              className={`h-12 px-4 ${activeTab === "participants" ? "border-b border-f1-foreground bg-f1-background-secondary text-f1-foreground" : "text-f1-foreground-secondary"}`}
+            >
+              <F0Text content="Participants" variant="body" />
+            </button>
+          </div>
+        </nav>
+        <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
+      </section>
+    </div>
+  )
+}
+
+function GroupSidepanelCostTab({
+  movement,
+}: {
+  movement: TrainingBudgetMovement
+}) {
+  const [openLeId, setOpenLeId] = useState<string | null>(() => {
+    const first = legalEntitiesForMovement(movement)[0]
+    return first?.id ?? null
+  })
+  const les = legalEntitiesForMovement(movement)
+  const breakdownMap = new Map(
+    breakdownByLegalEntityFor(
+      movement,
+      participantsByLegalEntityForMovement(movement)
+    ).map((cost) => [cost.legalEntityId, cost])
+  )
+
+  return (
+    <div className="flex flex-col gap-8 px-5 py-8">
+      <div className="flex flex-col gap-3">
+        <F0Text content="Payment status" variant="label" />
+        <button
+          type="button"
+          className="flex h-10 items-center justify-between rounded-xl border border-f1-border bg-f1-background px-3 py-2 text-left"
         >
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1">
-              <F0Text content="Timeframe" variant="label" />
-              <F0Text
-                content={`${fmtDate(selectedMovement.startDate)} → ${fmtDate(selectedMovement.endDate)}`}
-                variant="body"
-              />
+          <F0Text
+            content={movement.paymentStatus === "spent" ? "Paid" : "Pending"}
+            variant="body"
+          />
+          <F0Icon icon={ArrowDown} size="sm" color="secondary" />
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-4">
+        <F0Text content="Total cost" variant="label" />
+        <div className="flex h-16 items-center justify-between gap-2 rounded-2xl border border-f1-border bg-f1-background p-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-f1-border-secondary bg-f1-background-secondary text-f1-foreground-secondary">
+              <F0Icon icon={Office} size="md" color="secondary" />
             </div>
-            <div className="flex flex-col gap-1">
-              <F0Text content="Group status" variant="label" />
+            <div className="flex flex-col gap-0.5">
+              <F0Text content="Total cost" variant="label" />
               <F0Text
-                content={GROUP_STATUS_LABEL[selectedMovement.groupStatus]}
-                variant="body"
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <F0Text content="Payment status" variant="label" />
-              <F0Text
-                content={PAYMENT_STATUS_LABEL[selectedMovement.paymentStatus]}
-                variant="body"
-              />
-            </div>
-            <div className="flex flex-col gap-2 rounded-md border border-f1-border bg-f1-background-secondary p-3">
-              <F0Text content="Cost breakdown" variant="label" />
-              <div className="flex justify-between">
-                <F0Text content="Direct cost" variant="small" />
-                <F0Text
-                  content={fmtEur(selectedMovement.directCost)}
-                  variant="small"
-                />
-              </div>
-              <div className="flex justify-between">
-                <F0Text content="Indirect cost" variant="small" />
-                <F0Text
-                  content={fmtEur(selectedMovement.indirectCost)}
-                  variant="small"
-                />
-              </div>
-              <div className="flex justify-between">
-                <F0Text content="Salary cost" variant="small" />
-                <F0Text
-                  content={fmtEur(selectedMovement.salaryCost)}
-                  variant="small"
-                />
-              </div>
-              <div className="flex justify-between border-t border-f1-border pt-2">
-                <F0Text content="Total cost" variant="label" />
-                <F0Text
-                  content={fmtEur(
-                    selectedMovement.directCost +
-                      selectedMovement.indirectCost +
-                      selectedMovement.salaryCost
-                  )}
-                  variant="label"
-                />
-              </div>
-            </div>
-            <div className="flex flex-col gap-1">
-              <F0Text content="Participants" variant="label" />
-              <F0Text
-                content={`${selectedMovement.participantsCount} participants`}
-                variant="body"
+                content={`${movement.participantsCount} participants`}
+                variant="description"
               />
             </div>
           </div>
-        </F0Dialog>
+          <div className="flex items-center gap-4">
+            <F0Text
+              content={fmtFigmaEur(grossCostFromMovement(movement))}
+              variant="label"
+            />
+            <F0Icon icon={ArrowDown} size="sm" color="secondary" />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-6 rounded-xl border border-f1-border-secondary bg-f1-background px-2 py-4">
+        <div className="flex items-center justify-between gap-4 rounded-2xl bg-f1-background px-8 py-6">
+          <div className="flex flex-col gap-0.5">
+            <F0Heading as="h3" variant="heading" content="Costs by legal entity" />
+            <F0Text
+              variant="description"
+              content="Track and manage all costs per legal entity"
+            />
+          </div>
+          <Switch title="Costs by legal entity" hideLabel checked />
+        </div>
+
+        <div className="flex flex-col gap-6 px-8">
+          <div className="flex flex-col gap-6">
+            {les.map((le) => {
+              const breakdown = breakdownMap.get(le.id)
+              const isOpen = openLeId === le.id
+              const total = breakdown
+                ? breakdown.directCost + breakdown.indirectCost + breakdown.salaryCost
+                : 0
+              const participantCount =
+                breakdown?.participantsCount ??
+                participantsForLegalEntity(movement, le.id).length
+              const prefix = le.countryCode === "ES" ? "" : `${le.countryCode} · `
+
+              return (
+                <div
+                  key={le.id}
+                  className="rounded-2xl border border-f1-border bg-f1-background p-6"
+                >
+                  <div className="flex w-full items-center justify-between gap-3 text-left">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-f1-border-secondary bg-f1-background-secondary text-f1-foreground-secondary">
+                        <F0Icon icon={Office} size="md" color="secondary" />
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <F0Heading as="h4" variant="heading" content={le.legalName} />
+                        <F0Text
+                          variant="description"
+                          content={`${prefix}${participantCount} participants`}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <F0Text content={fmtFigmaEur(total)} variant="label" />
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          setOpenLeId((current) =>
+                            current === le.id ? null : le.id
+                          )
+                        }}
+                        className="flex h-5 w-5 items-center justify-center text-f1-foreground-secondary"
+                      >
+                        <F0Icon
+                          icon={ArrowDown}
+                          size="sm"
+                          color="secondary"
+                        />
+                      </button>
+                    </div>
+                  </div>
+                  {isOpen && breakdown && (
+                    <div className="mt-8 flex gap-5">
+                        <LegalEntityInput
+                          label="Direct cost"
+                          value={breakdown.directCost}
+                        />
+                        <LegalEntityInput
+                          label="Indirect cost"
+                          value={breakdown.indirectCost}
+                        />
+                        <LegalEntityInput
+                          label="Salary cost"
+                          value={breakdown.salaryCost}
+                          plain
+                        />
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+
+          <div className="rounded-xl border border-f1-border-secondary bg-f1-background-secondary px-4 py-2">
+            <div className="flex flex-col gap-2">
+              {les.map((le) => {
+                const breakdown = breakdownMap.get(le.id)
+                const total = breakdown
+                  ? breakdown.directCost +
+                    breakdown.indirectCost +
+                    breakdown.salaryCost
+                  : 0
+                return (
+                  <div key={le.id} className="flex items-center justify-between">
+                    <F0Text content={le.legalName} variant="description" />
+                    <F0Text content={fmtFigmaEur(total)} variant="description" />
+                  </div>
+                )
+              })}
+            </div>
+            <div className="mt-4 flex items-center justify-between border-t border-f1-border-secondary pt-4">
+              <div className="flex flex-col gap-0.5">
+                <F0Text content="Total cost" variant="label" />
+                <F0Text
+                  content="Gross cost= Direct + Indirect + Salary "
+                  variant="description"
+                />
+              </div>
+              <F0Text
+                content={fmtFigmaEur(grossCostFromMovement(movement))}
+                variant="label"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function LegalEntityInput({
+  label,
+  value,
+  plain = false,
+}: {
+  label: string
+  value: number
+  plain?: boolean
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <F0Text content={label} variant="label" />
+      <div className="flex h-10 items-center rounded-xl border border-f1-border bg-f1-background-secondary px-3 py-2">
+        <F0Text content={plain ? String(value) : fmtFigmaEur(value)} variant="body" />
+      </div>
+    </div>
+  )
+}
+
+function LegalEntityCostSidepanel({
+  movement,
+  legalEntityId,
+  onClose,
+}: {
+  movement: TrainingBudgetMovement
+  legalEntityId: string
+  onClose: () => void
+}) {
+  const [tab, setTab] = useState<"cost" | "participants">("cost")
+  const le = findLegalEntity(legalEntityId)
+  const breakdown = breakdownByLegalEntityFor(
+    movement,
+    participantsByLegalEntityForMovement(movement)
+  ).find((cost) => cost.legalEntityId === legalEntityId)
+
+  return (
+    <SidepanelFrame
+      title={le?.legalName ?? legalEntityId}
+      description={movement.groupName}
+      paymentStatus={movement.paymentStatus}
+      timeframe={`${fmtNumericDate(movement.startDate)}- ${fmtNumericDate(movement.endDate)}`}
+      activeTab={tab}
+      onTabChange={setTab}
+      onClose={onClose}
+    >
+      {tab === "cost" ? (
+        <div className="px-5 py-4">
+          <LegalEntityCostBreakdown
+            direct={breakdown?.directCost ?? 0}
+            indirect={breakdown?.indirectCost ?? 0}
+            salary={breakdown?.salaryCost ?? 0}
+          />
+        </div>
+      ) : (
+        <LegalEntityParticipantsTab
+          movement={movement}
+          legalEntityId={legalEntityId}
+        />
       )}
-    </F0Box>
+    </SidepanelFrame>
+  )
+}
+
+function LegalEntityParticipantsTab({
+  movement,
+  legalEntityId,
+}: {
+  movement: TrainingBudgetMovement
+  legalEntityId: string
+}) {
+  const participants = participantsForLegalEntity(movement, legalEntityId)
+
+  return (
+    <div className="flex flex-col gap-5 pt-5">
+      <div className="flex items-center justify-between px-6">
+        <F0Button label="Filter" icon={InProgressTask} variant="outline" />
+        <div className="flex items-center gap-2">
+          <F0Button label="Search" icon={Search} variant="outline" hideLabel />
+          <F0Button label="Settings" icon={Sliders} variant="outline" hideLabel />
+          <F0Button label="More options" icon={Pencil} variant="outline" hideLabel />
+        </div>
+      </div>
+      <div className="overflow-hidden border-y border-f1-border-secondary">
+        <div className="flex min-h-10 items-center px-3">
+          <div className="w-11 shrink-0" />
+          <div className="flex-1 px-3 py-2.5">
+            <F0Text content="Name" variant="label" />
+          </div>
+          <div className="flex-1 px-3 py-2.5">
+            <F0Text content="Hours completed" variant="label" />
+          </div>
+          <div className="flex-1 px-3 py-2.5">
+            <F0Text content="Salary cost" variant="label" />
+          </div>
+        </div>
+        {participants.map((participant) => {
+          const employee = findEmployee(participant.employeeId)
+          const name = employee?.fullName ?? participant.employeeName
+          const [firstName, ...restName] = name.split(" ")
+          const hours = hoursCompletedForEmployee(
+            participant.employeeId,
+            movement.groupId
+          )
+          const salaryCost = salaryCostForEmployeeInGroup(
+            participant.employeeId,
+            movement.groupId
+          )
+
+          return (
+            <div
+              key={participant.id}
+              className="flex min-h-12 items-center border-t border-f1-border-secondary px-3"
+            >
+              <div className="flex w-11 shrink-0 justify-center">
+                <div className="h-5 w-5 rounded-md border border-f1-border bg-f1-background" />
+              </div>
+              <div className="flex flex-1 items-center gap-1 px-3 py-2.5">
+                <F0Avatar
+                  avatar={{
+                    type: "person",
+                    src: employee?.avatarUrl ?? participant.employeeAvatar,
+                    firstName,
+                    lastName: restName.join(" "),
+                  }}
+                  size="xs"
+                />
+                <F0Text content={name} variant="body" />
+              </div>
+              <div className="flex-1 px-3 py-3">
+                <F0Text content={`${hours}h`} variant="body" />
+              </div>
+              <div className="flex-1 px-3 py-3">
+                <F0Text content={fmtFigmaEur(salaryCost)} variant="body" />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function LegalEntityCostBreakdown({
+  direct,
+  indirect,
+  salary,
+}: {
+  direct: number
+  indirect: number
+  salary: number
+}) {
+  const total = direct + indirect + salary
+  return (
+    <div className="flex flex-col gap-4">
+      <F0Text content="Cost breakdown" variant="label" />
+      <div className="overflow-hidden rounded-xl border border-f1-border-secondary bg-f1-background">
+        <CostBreakdownRow
+          label="Direct cost"
+          description="Course fees, venue rentals, and training materials"
+          value={direct}
+          bordered
+        />
+        <CostBreakdownRow
+          label="Indirect cost"
+          description="Administrative overhead and support costs"
+          value={indirect}
+          bordered
+        />
+        <CostBreakdownRow
+          label="Salary cost"
+          description="Cost of employees' time spent in training"
+          value={salary}
+        />
+      </div>
+      <div className="border-t border-f1-border-secondary pt-4">
+        <div className="flex h-16 items-center justify-between rounded-xl border border-f1-border-secondary bg-f1-background px-4 py-2">
+          <div className="flex flex-col gap-0.5">
+            <F0Text content="Total cost" variant="label" />
+            <F0Text
+              content="Gross cost= Direct + Indirect + Salary"
+              variant="description"
+            />
+          </div>
+          <F0Text content={fmtFigmaEur(total)} variant="label" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CostBreakdownRow({
+  label,
+  description,
+  value,
+  bordered = false,
+}: {
+  label: string
+  description: string
+  value: number
+  bordered?: boolean
+}) {
+  return (
+    <div
+      className={`flex h-16 items-center justify-between px-4 py-2 ${bordered ? "border-b border-f1-border-secondary" : ""}`}
+    >
+      <div className="flex min-w-0 flex-col gap-0.5">
+        <F0Text content={label} variant="label" />
+        <F0Text content={description} variant="description" />
+      </div>
+      <F0Text content={fmtFigmaEur(value)} variant="body" />
+    </div>
   )
 }
 
@@ -1092,15 +1639,25 @@ function DetailView({
 //   2. Amount             — Set the total amount and timeframe for this budget.
 //   3. Allocation         — Select the training groups eligible to use this budget.
 
+const legalEntityOptions = legalEntities.map((le) => ({
+  value: le.id,
+  label: le.legalName,
+}))
+
 const basicDetailsSchema = z.object({
+  legalEntityId: f0FormField.multiSelect({
+    label: "Legal entity",
+    options: legalEntityOptions,
+    max: 1,
+  }),
   name: f0FormField.text({
-    label: "Title",
+    label: "Budget name",
     placeholder: "e.g. Engineering 2026",
   }),
   description: f0FormField.textarea({
-    label: "Description",
+    label: "Budget description",
     optional: true,
-    placeholder: "What is this budget for?",
+    placeholder: "Write budget description",
   }),
 })
 
@@ -1171,7 +1728,11 @@ const wizardSteps: F0WizardFormStep[] = [
 ]
 
 const wizardDefaults = {
-  basicDetails: { name: "", description: "" },
+  basicDetails: {
+    legalEntityId: [legalEntities[0]!.id],
+    name: "",
+    description: "",
+  },
   amounts: { amount: 10000 },
   allocation: { selectedTrainingClassIds: [] as string[] },
 }
@@ -1200,6 +1761,9 @@ function NewBudgetView({
         )
         const id = `bud-${Date.now()}`
         const total = amounts.amount ?? 0
+        const legalEntityId =
+          basicDetails.legalEntityId?.[0] ?? legalEntities[0]!.id
+        const currency = legalEntityCurrencyMap[legalEntityId] ?? "EUR"
         const newBudget: TrainingBudget = {
           id,
           name: basicDetails.name ?? "Untitled budget",
@@ -1210,12 +1774,13 @@ function NewBudgetView({
           spentAmount: 0,
           pendingAmount: allocated,
           remainingAmount: Math.max(0, total - allocated),
-          currency: "EUR",
+          currency,
           status: "active",
           scope: "company",
           scopeName: "All employees",
           ownerEmployeeId: "emp-001",
           ownerEmployeeName: "You",
+          legalEntityId,
         }
         trainingBudgets.unshift(newBudget)
         go(setSearch, { view: "detail", budgetId: id })
@@ -1250,6 +1815,11 @@ export default function TrainingsBudgets() {
   const navigate = useNavigate()
   const { view, budgetId, setSearch } = useView()
 
+  const currentBudget =
+    view === "detail" && budgetId
+      ? trainingBudgets.find((x) => x.id === budgetId)
+      : undefined
+
   return (
     <Page
       header={
@@ -1262,12 +1832,8 @@ export default function TrainingsBudgets() {
             }}
             breadcrumbs={
               view === "list"
-                ? [
-                    { id: "list", label: "Trainings", href: "/p/trainings" },
-                    { id: "budgets", label: "Budgets" },
-                  ]
+                ? [{ id: "budgets", label: "Budgets" }]
                 : [
-                    { id: "list", label: "Trainings", href: "/p/trainings" },
                     {
                       id: "budgets",
                       label: "Budgets",
@@ -1276,7 +1842,9 @@ export default function TrainingsBudgets() {
                     {
                       id: "current",
                       label:
-                        view === "new" ? "New training budget" : "Budget detail",
+                        view === "new"
+                          ? "New training budget"
+                          : (currentBudget?.name ?? "Budget detail"),
                     },
                   ]
             }

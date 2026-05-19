@@ -457,6 +457,9 @@ export type TrainingBudget = {
   scopeName: string
   ownerEmployeeId: string
   ownerEmployeeName: string
+  // Optional human-readable description shown on the budget detail header.
+  // Mirrors the `description` field upstream FinanceBudget exposes.
+  description?: string
   // Optional: legal entity that owns this budget. Currency is derived from
   // the legal entity at creation time (mirrors `FinanceBudget.legalEntityId`
   // upstream). Pre-existing fixtures omit it; consumers that need the
@@ -479,6 +482,8 @@ export const trainingBudgets: TrainingBudget[] = [
     scopeName: "All employees",
     ownerEmployeeId: "emp-001",
     ownerEmployeeName: "Javier Molina",
+    description:
+      "The Training Budget 2026 represents the total financial resources your organization allocates during the year to support employee learning and development.",
   },
   {
     id: "bud-002",
@@ -494,6 +499,8 @@ export const trainingBudgets: TrainingBudget[] = [
     scopeName: "Engineering",
     ownerEmployeeId: "emp-002",
     ownerEmployeeName: "Laura Soler",
+    description:
+      "Engineering-specific training budget covering technical conferences, certifications and platform learning subscriptions for the engineering organization.",
   },
   {
     id: "bud-003",
@@ -509,6 +516,8 @@ export const trainingBudgets: TrainingBudget[] = [
     scopeName: "People",
     ownerEmployeeId: "emp-003",
     ownerEmployeeName: "Ana García",
+    description:
+      "Budget for the People & Talent department, used to fund manager workshops, leadership coaching and HR certifications.",
   },
   {
     id: "bud-004",
@@ -524,6 +533,8 @@ export const trainingBudgets: TrainingBudget[] = [
     scopeName: "Retail",
     ownerEmployeeId: "emp-004",
     ownerEmployeeName: "Bernat Puig",
+    description:
+      "Draft budget for the Retail operations team. Will fund in-store coaching programs and mandatory compliance refreshers for store staff.",
   },
 ]
 
@@ -1241,20 +1252,40 @@ export function breakdownByLegalEntityFor(
   participantsByLegalEntity: Array<{ legalEntityId: string; count: number }>
 ): TrainingMovementLegalEntityCost[] {
   if (movement.costsByLegalEntity && movement.costsByLegalEntity.length > 0) {
-    // Honor the fixture; fill missing LEs with zeros so the UI can list them.
+    // Honor the fixture; split any remaining movement cost across missing LEs.
     const map = new Map(
       movement.costsByLegalEntity.map((c) => [c.legalEntityId, c])
     )
-    return participantsByLegalEntity.map(
-      ({ legalEntityId, count }) =>
-        map.get(legalEntityId) ?? {
-          legalEntityId,
-          participantsCount: count,
-          directCost: 0,
-          indirectCost: 0,
-          salaryCost: 0,
-        }
+    const missing = participantsByLegalEntity.filter(
+      ({ legalEntityId }) => !map.has(legalEntityId)
     )
+    const missingParticipants = missing.reduce((sum, p) => sum + p.count, 0)
+    const defined = movement.costsByLegalEntity.reduce(
+      (acc, cost) => ({
+        directCost: acc.directCost + cost.directCost,
+        indirectCost: acc.indirectCost + cost.indirectCost,
+        salaryCost: acc.salaryCost + cost.salaryCost,
+      }),
+      { directCost: 0, indirectCost: 0, salaryCost: 0 }
+    )
+    const remaining = {
+      directCost: Math.max(0, movement.directCost - defined.directCost),
+      indirectCost: Math.max(0, movement.indirectCost - defined.indirectCost),
+      salaryCost: Math.max(0, movement.salaryCost - defined.salaryCost),
+    }
+
+    return participantsByLegalEntity.map(({ legalEntityId, count }) => {
+      const fixtureCost = map.get(legalEntityId)
+      if (fixtureCost) return fixtureCost
+      const ratio = missingParticipants > 0 ? count / missingParticipants : 0
+      return {
+        legalEntityId,
+        participantsCount: count,
+        directCost: Math.round(remaining.directCost * ratio),
+        indirectCost: Math.round(remaining.indirectCost * ratio),
+        salaryCost: Math.round(remaining.salaryCost * ratio),
+      }
+    })
   }
   const total = participantsByLegalEntity.reduce((s, p) => s + p.count, 0)
   if (total === 0) {
@@ -1305,18 +1336,25 @@ export const trainingBudgetMovements: TrainingBudgetMovement[] = [
     salaryCost: 2450,
     costsByLegalEntity: [
       {
-        legalEntityId: "le-acme-iberia",
+        legalEntityId: "le-001",
         participantsCount: 1,
         directCost: 1240,
         indirectCost: 310,
         salaryCost: 517,
       },
       {
-        legalEntityId: "le-acme-france",
+        legalEntityId: "le-003",
+        participantsCount: 1,
+        directCost: 1600,
+        indirectCost: 300,
+        salaryCost: 583,
+      },
+      {
+        legalEntityId: "le-002",
         participantsCount: 2,
-        directCost: 5000,
-        indirectCost: 1000,
-        salaryCost: 1933,
+        directCost: 3400,
+        indirectCost: 700,
+        salaryCost: 1350,
       },
     ],
   },
