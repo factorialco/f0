@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.8.2](https://github.com/factorialco/f0/compare/f0-react-v2.8.1...f0-react-v2.8.2) (2026-05-19)
+
+
+### Bug Fixes
+
+* **F0AnalyticsDashboard:** restore Excel/CSV download for collection items ([#4171](https://github.com/factorialco/f0/issues/4171)) ([da0401f](https://github.com/factorialco/f0/commit/da0401feb6532cc6ce2a3037c0c5607dd55f54fc))
+
 ## [2.8.1](https://github.com/factorialco/f0/compare/f0-react-v2.8.0...f0-react-v2.8.1) (2026-05-19)
 
 
