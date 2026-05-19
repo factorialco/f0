@@ -62,11 +62,7 @@ const alertDefaultIcon: Record<CardAlertVariant, IconType> = {
  * The coloured header strip that sits above the card.
  * It has no background of its own — the outer container's bg shows through.
  *
- * Layout from Figma:
- *   border-radius: 12px 12px 0 0
- *   padding: 6px 12px 2px
- *   gap: 12px
- *   height: 32px (hug)
+ * Applied classes: pt-2 (8px) pb-1 (4px) px-3 (12px) gap-1 (4px), rounded-t-xl
  */
 function CardAlertHeader({
   variant,
