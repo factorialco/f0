@@ -539,6 +539,36 @@ describe("Select", () => {
     expect(handleApply).toHaveBeenCalledTimes(1)
   })
 
+  it("cancels staged changes without closing when cancel button is clicked", async () => {
+    const handleChange = vi.fn()
+    const handleApply = vi.fn()
+    const user = userEvent.setup()
+
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        multiple
+        options={mockOptions}
+        value={["option1", "option2"]}
+        onChange={handleChange}
+        onApply={handleApply}
+      />
+    )
+
+    await openSelect(user)
+    await user.click(screen.getByText("Option 2"))
+    await user.click(screen.getByRole("button", { name: "Cancel" }))
+
+    expect(screen.getByRole("listbox")).toBeInTheDocument()
+    expect(handleChange).not.toHaveBeenCalled()
+    expect(handleApply).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole("button", { name: "Apply selection" }))
+
+    expect(handleChange).not.toHaveBeenCalled()
+    expect(handleApply).toHaveBeenCalledTimes(1)
+  })
+
   describe("asList mode", () => {
     it("preserves selection after searching and clicking an item", async () => {
       const handleChange = vi.fn()

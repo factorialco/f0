@@ -707,6 +707,10 @@ const F0SelectComponent = forwardRef(function Select<
     debouncedHandleChangeOpenLocal(open)
   }
 
+  const handleCancel = useCallback(() => {
+    restoreCommittedSelection()
+  }, [restoreCommittedSelection])
+
   const handleApply = useCallback(() => {
     if (hasDeferredApply) {
       const nextCommittedSelection = cloneSelectedState(selectedState)
@@ -900,6 +904,8 @@ const F0SelectComponent = forwardRef(function Select<
             actions={actions}
             showApplyButton={showApplyButton}
             onApply={handleApply}
+            onCancel={handleCancel}
+            showCancelButton={hasDeferredApply}
           />
         ) : null
       }
