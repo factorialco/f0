@@ -174,9 +174,9 @@ export interface CardInternalProps {
   disableOverlayLink?: boolean
 
   /**
-   * Alert banner displayed above the card, wrapping the card visually.
+   * Alert banner displayed above the card with a coloured header strip and matching border.
    * Supports info, warning, critical, and positive variants with a default icon per variant.
-   * Optionally dismissible with a translateY + fade animation.
+   * Use `visible` + `onDismiss` for controlled dismiss behaviour.
    */
   alert?: CardAlertProps
 }
@@ -253,7 +253,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
             "border-f1-border-selected bg-f1-background-selected-secondary"
         )}
         style={
-          alert && alert.visible !== false
+          alert && alert.visible !== false && !selected
             ? {
                 borderColor: alertBorderColor[alert.variant],
                 borderWidth: "2px",
@@ -262,7 +262,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
         }
         onClick={onClick}
         data-testid="card"
-        ref={alert ? undefined : ref}
+        ref={alert && alert.visible !== false ? undefined : ref}
       >
         {link && !disableOverlayLink && (
           <F0Link
@@ -417,7 +417,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       </Card>
     )
 
-    if (alert) {
+    if (alert && alert.visible !== false) {
       return (
         <CardAlertWrapper ref={ref} alert={alert} fullHeight={fullHeight}>
           {cardBody}

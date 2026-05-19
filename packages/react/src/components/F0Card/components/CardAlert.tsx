@@ -21,10 +21,11 @@ const alertBgClass: Record<CardAlertVariant, string> = {
 }
 
 /**
- * Raw CSS color values for the card's 2px border — must match the alert bg token.
- * We use inline style because Tailwind has no border-f1-background-{variant} utility.
- * These values mirror the `background.{variant}.DEFAULT` token in core/src/tokens/colors.ts:
- *   hsl(var(--{variant}-50) / 0.1)
+ * Raw CSS color values for the card's 2px border — intentionally slightly stronger
+ * than the alert bg token (0.12 vs 0.10) to give the border enough visibility.
+ * These use the same base variable as `background.{variant}.DEFAULT` in colors.ts:
+ *   hsl(var(--{variant}-50) / 0.1) — bg token
+ *   hsl(var(--{variant}-50) / 0.12) — border (slightly more opaque)
  */
 export const alertBorderColor: Record<CardAlertVariant, string> = {
   info: "hsl(var(--info-50) / 0.12)",
@@ -165,3 +166,5 @@ export const CardAlertWrapper = forwardRef<
     </div>
   )
 })
+
+CardAlertWrapper.displayName = "CardAlertWrapper"

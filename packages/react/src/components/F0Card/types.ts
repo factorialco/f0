@@ -12,7 +12,7 @@ export const cardAlertVariants = [
 
 export type CardAlertVariant = (typeof cardAlertVariants)[number]
 
-export interface CardAlertProps {
+interface CardAlertBase {
   /**
    * The visual variant of the alert, which determines the color scheme and default icon.
    */
@@ -31,17 +31,24 @@ export interface CardAlertProps {
    *   alert={{ ..., visible, dismissible: true, onDismiss: () => setVisible(false) }}
    */
   visible?: boolean
-  /**
-   * When true, renders a dismiss (×) button. The consumer controls visibility
-   * by passing or removing the alert prop in response to this callback.
-   */
-  dismissible?: boolean
+}
+
+type CardAlertDismissible = CardAlertBase & {
+  /** Renders a dismiss (×) button. Requires onDismiss. */
+  dismissible: true
   /**
    * Called when the dismiss (×) button is clicked.
    * The consumer is responsible for hiding the alert (e.g. by setting visible: false).
    */
-  onDismiss?: () => void
+  onDismiss: () => void
 }
+
+type CardAlertNonDismissible = CardAlertBase & {
+  dismissible?: false
+  onDismiss?: never
+}
+
+export type CardAlertProps = CardAlertDismissible | CardAlertNonDismissible
 
 /**
  * Card metadata property renderers.
