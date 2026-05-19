@@ -927,11 +927,13 @@ function DetailView({
             value: { type: "text", content: String(groupsCount) },
           },
         ]}
-        primaryAction={{
-          label: "Edit",
-          icon: Pencil,
-          onClick: () => setIsEditOpen(true),
-        }}
+        secondaryActions={[
+          {
+            label: "Edit budget",
+            icon: Pencil,
+            onClick: () => setIsEditOpen(true),
+          },
+        ]}
       />
 
       {isArchived && (
