@@ -48,7 +48,11 @@ export default function TrainingsAxes() {
     setTarget(axisId ?? null)
     const ax = axes.find((x) => x.id === axisId)
     setDraft(ax?.name ?? "")
-    setMergeInto("")
+    // Pre-seed merge target with the first axis that's not the one being merged.
+    // Avoids an empty-string default that triggers Radix Select issues and shows
+    // the user a sensible option from the start.
+    const firstOther = axes.find((x) => x.id !== axisId)
+    setMergeInto(firstOther?.id ?? "")
   }
 
   const close = () => {

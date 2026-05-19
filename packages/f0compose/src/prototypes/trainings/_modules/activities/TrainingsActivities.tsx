@@ -136,11 +136,11 @@ function fmt(ts: string) {
 
 export default function TrainingsActivities() {
   const [tab, setTab] = useState<"all" | ActivityKind>("all")
-  const [employeeFilter, setEmployeeFilter] = useState<string>("")
+  const [employeeFilter, setEmployeeFilter] = useState<string>("__all")
   const all = useMemo(generateActivities, [])
   const filtered = all.filter((a) => {
     if (tab !== "all" && a.kind !== tab) return false
-    if (employeeFilter && a.actorId !== employeeFilter) return false
+    if (employeeFilter !== "__all" && a.actorId !== employeeFilter) return false
     return true
   })
 
@@ -180,7 +180,7 @@ export default function TrainingsActivities() {
             value={employeeFilter}
             onChange={(v: string) => setEmployeeFilter(v)}
             options={[
-              { value: "", label: "All employees" },
+              { value: "__all", label: "All employees" },
               ...employees.map((e) => ({ value: e.id, label: e.fullName })),
             ]}
           />

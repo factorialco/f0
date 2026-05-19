@@ -320,6 +320,9 @@ const defaultValues = {
     isMandatory: false,
     hasLearningPlatform: false,
     hasCourseValidity: false,
+    // Pre-seed conditional selects so they render with a real option the moment
+    // the gating flag is toggled on. Avoids empty-state Radix Select issues.
+    validFor: "1",
   },
   internalInfo: {
     year: new Date().getFullYear(),
@@ -327,6 +330,8 @@ const defaultValues = {
     fundaeSubsidized: false,
     subsidized: false,
     workflowStatus: false,
+    perfil: "Empresa Bonificada",
+    processId: trainingProcesses[0]?.id ?? "",
   },
   completion: {
     moduleCompletionEnabled: false,

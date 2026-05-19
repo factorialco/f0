@@ -45,7 +45,6 @@ const participantOptions = employees.map((e) => ({
 }))
 
 const budgetOptions = [
-  { value: "", label: "No budget linked" },
   { value: "bdg-l-d", label: "L&D 2026 (EUR)" },
   { value: "bdg-eng", label: "Engineering training (EUR)" },
   { value: "bdg-sales", label: "Sales enablement (EUR)" },
@@ -222,7 +221,7 @@ const defaultValues = {
   },
   sessions: {},
   costs: {
-    budgetId: "",
+    budgetId: "bdg-l-d",
   },
   attachments: {},
 }
