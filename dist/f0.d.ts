@@ -552,12 +552,7 @@ export declare type AiChatProviderProps = {
      */
     fileAttachments?: AiChatFileAttachmentConfig;
     /**
-     * Placeholder shown in the chat textarea when it is empty.
-     */
-    placeholder?: string;
-    /**
      * Placeholders shown in the chat textarea. Multiple values rotate with the typewriter animation.
-     * Takes precedence over `placeholder` when provided.
      */
     placeholders?: string[];
     onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
@@ -738,7 +733,7 @@ declare type AiChatProviderReturnValue = {
     pendingQuote: PendingQuote | null;
     /** Set the pending quote (pass null to clear). */
     setPendingQuote: React.Dispatch<React.SetStateAction<PendingQuote | null>>;
-} & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "toolHints" | "credits" | "creditWarning" | "fileAttachments" | "placeholder"> & {
+} & Pick<AiChatState, "greeting" | "agent" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "toolHints" | "credits" | "creditWarning" | "fileAttachments"> & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null;
     /** Open the canvas panel with the given content */
@@ -779,7 +774,6 @@ declare interface AiChatState {
     credits?: AiChatCredits;
     creditWarning?: AiChatCreditWarning;
     fileAttachments?: AiChatFileAttachmentConfig;
-    placeholder?: string;
     placeholders?: string[];
     setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>;
     onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
@@ -2570,7 +2564,6 @@ declare interface ChatTextareaProps extends Omit<InputProps, "onSend"> {
     submitLabel?: string;
     creditWarning?: AiChatCreditWarning;
     fileAttachments?: AiChatFileAttachmentConfig;
-    placeholder?: string;
     placeholders?: string[];
 }
 
@@ -5208,9 +5201,9 @@ export declare const F0AiChat: () => JSX_2.Element | null;
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, toolHints, credits, creditWarning, fileAttachments, placeholder, placeholders, onThumbsUp, onThumbsDown, onBeforeSendMessage, runtimeFetch, children, agent, tracking, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, toolHints, credits, creditWarning, fileAttachments, placeholders, onThumbsUp, onThumbsDown, onBeforeSendMessage, runtimeFetch, children, agent, tracking, ...copilotKitProps }: AiChatProviderProps) => JSX_2.Element;
 
-export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, creditWarning, fileAttachments: fileAttachmentsProp, placeholder, placeholders: placeholdersProp, }: ChatTextareaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ submitLabel, inProgress, onSend, onStop, creditWarning, fileAttachments: fileAttachmentsProp, placeholders: placeholdersProp, }: ChatTextareaProps) => JSX_2.Element;
 
 /**
  * Context value for the AI form registry
@@ -13840,9 +13833,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -13850,8 +13842,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }

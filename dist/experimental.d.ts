@@ -543,12 +543,7 @@ declare type AiChatProviderProps = {
      */
     fileAttachments?: AiChatFileAttachmentConfig;
     /**
-     * Placeholder shown in the chat textarea when it is empty.
-     */
-    placeholder?: string;
-    /**
      * Placeholders shown in the chat textarea. Multiple values rotate with the typewriter animation.
-     * Takes precedence over `placeholder` when provided.
      */
     placeholders?: string[];
     onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
@@ -8144,9 +8139,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -8154,8 +8148,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
