@@ -1,33 +1,62 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useMemo, useRef, useState } from "react"
 
-import { ButtonInternal } from "@/components/F0Button/internal"
-
 import { F0OneIcon } from "../../F0OneIcon"
 
 import { PongBall } from "../../F0AiPong"
-import { WelcomeScreenSuggestion } from "../../F0AiChat/types"
 import { type Message } from "../types"
 
-export type { WelcomeScreenSuggestion }
+// Streaming text effect — reveals chars in cascade so the greeting feels typed.
+const STREAM_CHAR_DURATION = 0.025
+const GREETING_START_DELAY = 0.4
+const STREAM_GAP = 0.15
 
-const MAX_SUGGESTIONS = 3
+const streamCharVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.2 } },
+}
 
-function pickRandomSuggestions(
-  list: WelcomeScreenSuggestion[],
-  amount: number = MAX_SUGGESTIONS
-): WelcomeScreenSuggestion[] {
-  const shuffled = [...list].sort(() => 0.5 - Math.random())
-  return shuffled.slice(0, amount)
+type StreamedTextProps = {
+  text: string
+  startDelay: number
+  className?: string
+}
+
+const StreamedText = ({ text, startDelay, className }: StreamedTextProps) => {
+  const containerVariants = useMemo(
+    () => ({
+      hidden: {},
+      visible: {
+        transition: {
+          staggerChildren: STREAM_CHAR_DURATION,
+          delayChildren: startDelay,
+        },
+      },
+    }),
+    [startDelay]
+  )
+
+  return (
+    <motion.p
+      className={className}
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      aria-label={text}
+    >
+      {[...text].map((char, index) => (
+        <motion.span key={index} variants={streamCharVariants} aria-hidden>
+          {char}
+        </motion.span>
+      ))}
+    </motion.p>
+  )
 }
 
 export type WelcomeScreenProps = {
   greeting?: string
   // todo make it string
   initialMessages?: Message[]
-  suggestions?: WelcomeScreenSuggestion[]
-  /** Click on a suggestion chip — the host wires this to sendMessage(). */
-  onSuggestionClick?: (suggestion: WelcomeScreenSuggestion) => void
   /** Optional click on the One icon (factorial uses it for the pong easter egg). */
   onIconClick?: () => void
 }
@@ -35,8 +64,6 @@ export type WelcomeScreenProps = {
 export const WelcomeScreen = ({
   greeting,
   initialMessages = [],
-  suggestions = [],
-  onSuggestionClick,
   onIconClick,
 }: WelcomeScreenProps) => {
   const [isHovered, setIsHovered] = useState(false)
@@ -50,11 +77,6 @@ export const WelcomeScreen = ({
     if (hoverTimeout.current) clearTimeout(hoverTimeout.current)
     setIsHovered(false)
   }, [])
-
-  const pickedSuggestions = useMemo(
-    () => pickRandomSuggestions(suggestions),
-    [suggestions]
-  )
 
   return (
     <AnimatePresence mode="popLayout">
@@ -103,60 +125,39 @@ export const WelcomeScreen = ({
             </div>
           </motion.div>
           {greeting && (
-            <motion.p
+            <StreamedText
+              text={greeting}
+              startDelay={GREETING_START_DELAY}
               className="text-2xl font-semibold leading-[28px] text-f1-foreground-tertiary"
-              initial={{ opacity: 0, filter: "blur(2px)", y: -8 }}
-              animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-              transition={{
-                duration: 0.2,
-                ease: "easeOut",
-                delay: 0.5,
-              }}
-            >
-              {greeting}
-            </motion.p>
+            />
           )}
-          {initialMessages.map((message) => (
-            <motion.p
-              className="text-2xl font-semibold leading-[28px] text-f1-foreground"
-              key={message.id}
-              initial={{ opacity: 0, filter: "blur(2px)", y: -8 }}
-              animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-              transition={{
-                duration: 0.2,
-                ease: "easeOut",
-                delay: 0.7,
-              }}
-            >
-              {typeof message.content === "string" ? message.content : ""}
-            </motion.p>
-          ))}
+          {initialMessages.map((message, msgIdx) => {
+            const content =
+              typeof message.content === "string" ? message.content : ""
+            const priorChars =
+              (greeting?.length ?? 0) +
+              initialMessages
+                .slice(0, msgIdx)
+                .reduce(
+                  (sum, m) =>
+                    sum +
+                    (typeof m.content === "string" ? m.content.length : 0),
+                  0
+                )
+            const startDelay =
+              GREETING_START_DELAY +
+              priorChars * STREAM_CHAR_DURATION +
+              STREAM_GAP * (msgIdx + (greeting ? 1 : 0))
+            return (
+              <StreamedText
+                key={message.id}
+                text={content}
+                startDelay={startDelay}
+                className="text-2xl font-semibold leading-[28px] text-f1-foreground"
+              />
+            )
+          })}
         </div>
-        {!!pickedSuggestions.length && (
-          <div className="flex flex-col items-start gap-[6px]">
-            {pickedSuggestions.map((suggestion, index) => (
-              <motion.div
-                className="w-full"
-                key={index}
-                initial={{ opacity: 0, filter: "blur(2px)", y: -8 }}
-                animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-                transition={{
-                  duration: 0.1,
-                  ease: "easeOut",
-                  delay: 0.9 + index * 0.1,
-                }}
-              >
-                <ButtonInternal
-                  variant="ghost"
-                  className="border border-solid border-f1-border-secondary shadow sm:border-none sm:shadow-none"
-                  label={suggestion.message}
-                  icon={suggestion.icon}
-                  onClick={() => onSuggestionClick?.(suggestion)}
-                />
-              </motion.div>
-            ))}
-          </div>
-        )}
       </motion.div>
     </AnimatePresence>
   )

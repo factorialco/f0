@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { BarGraph, Calendar, Lightbulb, Money } from "@/icons/app"
-
 import { F0AiMessagesContainer } from "../F0AiMessagesContainer"
 import { type AIMessage, type Message, type RenderableTurn } from "../types"
 
@@ -150,13 +148,6 @@ export const EmptyWelcome: Story = {
     turns: [],
     greeting: "Hello, John",
     initialMessage: "How can I help you today?",
-    welcomeScreenSuggestions: [
-      { icon: BarGraph, message: "Show me headcount by department" },
-      { icon: Money, message: "What is the average salary?" },
-      { icon: Calendar, message: "Who is on leave this week?" },
-      { icon: Lightbulb, message: "Find employees in Engineering" },
-    ],
-    onSuggestionClick: (s) => console.log("clicked suggestion", s),
   },
 }
 
@@ -235,6 +226,5 @@ export const Everything: Story = {
     turns: [completedTurn(), turnWithThinking(), turnStreamingLiveThinking()],
     feedback: noopFeedback,
     onReplyQuote: (text) => console.log("reply quote", text),
-    onSuggestionClick: (s) => console.log("suggestion", s),
   },
 }

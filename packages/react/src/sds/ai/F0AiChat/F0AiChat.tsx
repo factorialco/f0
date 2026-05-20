@@ -14,7 +14,6 @@ import { ConnectedChatInput } from "./components/ConnectedChatInput"
 import { ConnectedMessagesContainer } from "./components/ConnectedMessagesContainer"
 import { SidebarWindow } from "./components/layout/ChatWindow"
 import { CopilotFunctionBridge } from "./components/shared/CopilotFunctionBridge"
-import { F0AiFullscreenChatComponent } from "./F0AiFullscreenChat"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
 import { OrderedMessagePartsProvider } from "./providers/OrderedMessagePartsProvider"
 import { AiChatProviderProps, type WelcomeScreenSuggestion } from "./types"
@@ -149,14 +148,6 @@ const F0AiChatComponent = () => {
  * @experimental This is an experimental component use it at your own risk
  */
 export const F0AiChat = experimentalComponent("F0AiChat", F0AiChatComponent)
-
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-export const F0AiFullscreenChat = experimentalComponent(
-  "F0AiFullscreenChat",
-  F0AiFullscreenChatComponent
-)
 
 /**
  * @experimental This is an experimental component use it at your own risk

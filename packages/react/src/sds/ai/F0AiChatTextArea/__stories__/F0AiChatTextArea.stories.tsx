@@ -1,5 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-import { useState } from "react"
+import { useRef, useState } from "react"
 
 import { F0AiChatTextArea } from "../F0AiChatTextArea"
 import type { F0AiChatTextAreaSubmitPayload } from "../types"
@@ -163,9 +163,12 @@ const Wrapper = ({
     setSubmissions((prev) => [...prev, payload])
   }
 
+  const composerRef = useRef<HTMLDivElement>(null)
+
   return (
     <div className="flex flex-col gap-4 w-[640px]">
       <F0AiChatTextArea
+        ref={composerRef}
         onSubmit={handleSubmit}
         onStop={() => console.log("stop")}
         inProgress={inProgress}

@@ -1,5 +1,5 @@
 // Main components
-export { F0AiChat, F0AiChatProvider, F0AiFullscreenChat } from "./F0AiChat"
+export { F0AiChat, F0AiChatProvider } from "./F0AiChat"
 
 // Types
 export type {
@@ -28,6 +28,7 @@ export type {
   VacancyProfile,
   VisualizationMode,
   WelcomeScreenSuggestion,
+  WelcomeScreenSuggestionItem,
   AiChatTranslations,
   AiChatTranslationsProviderProps,
 } from "./types"

@@ -4,7 +4,7 @@ import {
   useLazyToolRenderer,
 } from "@copilotkit/react-core"
 import { Markdown, type MessagesProps } from "@copilotkit/react-ui"
-import { type AIMessage, type Message, randomId } from "@copilotkit/shared"
+import { type AIMessage, type Message } from "@copilotkit/shared"
 import { type ReactNode, useCallback, useEffect, useMemo } from "react"
 
 import {
@@ -84,7 +84,7 @@ export const ConnectedMessagesContainer = ({
   markdownTagRenderers,
   noShadows = false,
 }: ConnectedMessagesContainerProps) => {
-  const { messages, interrupt, isLoading, sendMessage } = useCopilotChat()
+  const { messages, interrupt, isLoading } = useCopilotChat()
   const { getOrderedParts, version: orderedPartsVersion } =
     useOrderedMessageParts()
   const { threadId } = useCopilotContext()
@@ -93,7 +93,6 @@ export const ConnectedMessagesContainer = ({
   const {
     greeting,
     initialMessage,
-    welcomeScreenSuggestions,
     isLoadingThread,
     setInProgress,
     clarifyingQuestion,
@@ -230,20 +229,6 @@ export const ConnectedMessagesContainer = ({
   }, [filteredMessages, inProgress])
 
   // ── Callbacks ──
-  const onSuggestionClick = useCallback<
-    NonNullable<F0AiMessagesContainerProps["onSuggestionClick"]>
-  >(
-    (suggestion) => {
-      tracking?.onWelcomeSuggestionClick?.(suggestion)
-      sendMessage({
-        id: randomId(),
-        role: "user",
-        content: suggestion.prompt || suggestion.message,
-      })
-    },
-    [sendMessage, tracking]
-  )
-
   const onWelcomeIconClick = useCallback(() => {
     openGame("pong")
   }, [openGame])
@@ -290,8 +275,6 @@ export const ConnectedMessagesContainer = ({
       interrupt={interrupt}
       greeting={greeting}
       initialMessage={initialMessage}
-      welcomeScreenSuggestions={welcomeScreenSuggestions}
-      onSuggestionClick={onSuggestionClick}
       onWelcomeIconClick={onWelcomeIconClick}
       renderToolCall={renderToolCall}
       onReplyQuote={onReplyQuote}

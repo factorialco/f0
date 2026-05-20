@@ -1,5 +1,6 @@
 import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { type InputProps } from "@copilotkit/react-ui"
+import { randomId } from "@copilotkit/shared"
 import { useCallback, useEffect, useMemo, useRef } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
@@ -13,6 +14,7 @@ import {
 
 import { filterNonRenderableMessages } from "../internal-types"
 import { useAiChat } from "../providers/AiChatStateProvider"
+import type { WelcomeScreenSuggestionItem } from "../types"
 
 /**
  * Internal wrapper that connects F0AiChatTextArea to the AiChat provider.
@@ -47,6 +49,8 @@ export const ConnectedChatInput = (props: InputProps) => {
     visualizationMode,
     isLoadingThread,
     creditWarning,
+    welcomeScreenSuggestions,
+    tracking,
   } = useAiChat()
   const translation = useI18n()
   const { messages } = useCopilotChatInternal()
@@ -100,6 +104,18 @@ export const ConnectedChatInput = (props: InputProps) => {
     [sendMessage, onSend]
   )
 
+  const handleSuggestionClick = useCallback(
+    (item: WelcomeScreenSuggestionItem) => {
+      tracking?.onWelcomeSuggestionClick?.(item)
+      sendMessage({
+        id: randomId(),
+        role: "user",
+        content: item.prompt || item.title,
+      })
+    },
+    [sendMessage, tracking]
+  )
+
   const handleStop = useCallback(() => {
     // Inject the stopped-indicator via appendMessages so the message list
     // gets JSON-sanitized before setMessages — setMessages directly fails
@@ -119,27 +135,28 @@ export const ConnectedChatInput = (props: InputProps) => {
   }, [onStop, appendMessages, translation.ai.responseStopped])
 
   return (
-    <div ref={containerRef}>
-      <F0AiChatTextArea
-        onSubmit={handleSubmit}
-        onStop={handleStop}
-        inProgress={inProgress}
-        onBeforeSubmit={onBeforeSendMessage}
-        placeholders={placeholders}
-        creditWarning={creditWarning}
-        clarifyingQuestion={clarifyingQuestion}
-        pendingContext={pendingContext}
-        onPendingContextChange={setPendingContext}
-        pendingQuote={pendingQuote}
-        onPendingQuoteChange={setPendingQuote}
-        fileAttachments={fileAttachments}
-        searchPersons={entityRefs?.resolvers?.searchPersons}
-        onProcessFilesRef={setProcessDroppedFilesFunction}
-        disclaimer={disclaimer}
-        footer={footer}
-        isWelcomeScreen={isWelcomeScreen}
-        fullscreen={fullscreen}
-      />
-    </div>
+    <F0AiChatTextArea
+      ref={containerRef}
+      onSubmit={handleSubmit}
+      onStop={handleStop}
+      inProgress={inProgress}
+      onBeforeSubmit={onBeforeSendMessage}
+      placeholders={placeholders}
+      creditWarning={creditWarning}
+      clarifyingQuestion={clarifyingQuestion}
+      pendingContext={pendingContext}
+      onPendingContextChange={setPendingContext}
+      pendingQuote={pendingQuote}
+      onPendingQuoteChange={setPendingQuote}
+      fileAttachments={fileAttachments}
+      searchPersons={entityRefs?.resolvers?.searchPersons}
+      onProcessFilesRef={setProcessDroppedFilesFunction}
+      disclaimer={disclaimer}
+      footer={footer}
+      isWelcomeScreen={isWelcomeScreen}
+      fullscreen={fullscreen}
+      welcomeScreenSuggestions={welcomeScreenSuggestions}
+      onSuggestionClick={handleSuggestionClick}
+    />
   )
 }

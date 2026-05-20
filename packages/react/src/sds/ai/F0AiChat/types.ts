@@ -205,7 +205,7 @@ export type AiChatFileAttachmentConfig = {
 export type AiChatTrackingOptions = {
   onVisibility?: () => void
   onClose?: () => void
-  onWelcomeSuggestionClick?: (suggestion: WelcomeScreenSuggestion) => void
+  onWelcomeSuggestionClick?: (item: WelcomeScreenSuggestionItem) => void
   onNewChat?: () => void
   onMessage?: (message: Message) => void
 }
@@ -322,12 +322,24 @@ export type AiChatProviderProps = {
 >
 
 /**
- * Welcome screen suggestion item
+ * A single sub-suggestion shown inside a welcome-screen group's popover.
+ * The `title` is the label users see; `prompt` is what gets sent to the AI
+ * when they click (falls back to `title` when omitted). They can diverge so
+ * you can show a short, scannable title while sending a fully-formed prompt.
+ */
+export type WelcomeScreenSuggestionItem = {
+  title: string
+  prompt?: string
+}
+
+/**
+ * A welcome-screen group rendered as an outline button in the welcome row.
+ * Clicking the group opens a popover listing its `items`.
  */
 export type WelcomeScreenSuggestion = {
   icon: IconType
-  message: string
-  prompt?: string
+  label: string
+  items: WelcomeScreenSuggestionItem[]
 }
 
 /**

@@ -1,6 +1,5 @@
-import type { ReactNode } from "react"
+import type { ReactNode, RefObject } from "react"
 
-import type { ClarifyingQuestionState } from "../F0ClarifyingPanel/types"
 import type {
   AiChatCreditWarning,
   AiChatDisclaimer,
@@ -9,7 +8,10 @@ import type {
   PendingQuote,
   PersonProfile,
   UploadedFile,
+  WelcomeScreenSuggestion,
+  WelcomeScreenSuggestionItem,
 } from "../F0AiChat/types"
+import type { ClarifyingQuestionState } from "../F0ClarifyingPanel/types"
 
 export type AttachedFile = {
   id: string
@@ -43,6 +45,7 @@ export type F0AiChatTextAreaSubmitPayload = {
 }
 
 export type F0AiChatTextAreaProps = {
+  ref: RefObject<HTMLDivElement>
   /** Emitted when the user submits. Awaited so the textarea can stay disabled. */
   onSubmit: (payload: F0AiChatTextAreaSubmitPayload) => void | Promise<void>
   /** Called when the user clicks the stop button while a response is streaming. */
@@ -108,6 +111,16 @@ export type F0AiChatTextAreaProps = {
    * Controls footer visibility and welcome-screen-only layout tweaks.
    */
   isWelcomeScreen?: boolean
+
+  /**
+   * Grouped suggestions rendered as outline buttons above the composer on
+   * the welcome screen. Clicking a group opens a single popover (above the
+   * row, left-aligned, spanning the composer width) with that group's items.
+   * Hovering an item previews its prompt in the textarea placeholder.
+   */
+  welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
+  /** Called when the user clicks a sub-suggestion. */
+  onSuggestionClick?: (item: WelcomeScreenSuggestionItem) => void
 
   /**
    * When true, the composer adopts the fullscreen layout: the welcome

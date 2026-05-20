@@ -9,8 +9,6 @@ import { Skeleton } from "@/ui/skeleton"
 
 import { F0ActionItem } from "../F0ActionItem"
 
-import { type WelcomeScreenSuggestion } from "../F0AiChat/types"
-
 import {
   AssistantMessage as F0AssistantMessage,
   type F0AssistantMessageExtraProps,
@@ -56,10 +54,6 @@ export type F0AiMessagesContainerProps = {
   greeting?: string
   /** Initial message(s) shown in the welcome screen, or a default if omitted. */
   initialMessage?: string | string[]
-  /** Suggestions rendered as buttons under the welcome screen. */
-  welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
-  /** Click on a suggestion chip — host wires this to sendMessage(). */
-  onSuggestionClick?: (suggestion: WelcomeScreenSuggestion) => void
   /** Optional click on the One icon (factorial uses it for the pong easter egg). */
   onWelcomeIconClick?: () => void
 
@@ -110,8 +104,6 @@ const Messages = ({
   interrupt,
   greeting,
   initialMessage,
-  welcomeScreenSuggestions = [],
-  onSuggestionClick,
   onWelcomeIconClick,
   renderToolCall,
   onReplyQuote,
@@ -310,7 +302,7 @@ const Messages = ({
         >
           <div
             ref={contentRef}
-            className="flex h-full flex-col items-center px-4 py-4"
+            className={cn("flex h-full flex-col items-center p-4")}
           >
             <div
               className={cn(
@@ -325,8 +317,6 @@ const Messages = ({
                 <WelcomeScreen
                   greeting={greeting}
                   initialMessages={resolvedInitialMessages}
-                  suggestions={welcomeScreenSuggestions}
-                  onSuggestionClick={onSuggestionClick}
                   onIconClick={onWelcomeIconClick}
                 />
               )}
@@ -365,7 +355,7 @@ const Messages = ({
           </div>
         </div>
 
-        {!noShadows && (
+        {!noShadows && !showWelcomeBlock && (
           <>
             <ScrollShadow position="top" key="shadow-top" />
             <ScrollShadow position="bottom" key="shadow-bottom" />

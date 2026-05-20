@@ -16,6 +16,8 @@ import { CreditWarningWrapper } from "./components/CreditWarningWrapper"
 import { MentionPopover } from "./components/MentionPopover"
 import { PendingQuoteChip } from "./components/PendingQuoteChip"
 import { TextareaField } from "./components/TextareaField"
+import { WelcomeScreenSuggestionsRow } from "./components/WelcomeScreenSuggestionsRow"
+import type { WelcomeScreenSuggestionItem } from "../F0AiChat/types"
 import { buildHighlightSegments } from "./highlight-utils"
 import { type F0AiChatTextAreaProps } from "./types"
 import { useFileAttachments } from "./useFileAttachments"
@@ -83,6 +85,9 @@ export const F0AiChatTextArea = ({
   footer,
   isWelcomeScreen = false,
   fullscreen = false,
+  welcomeScreenSuggestions,
+  onSuggestionClick,
+  ref,
 }: F0AiChatTextAreaProps) => {
   const fullscreenWelcome = fullscreen && isWelcomeScreen
   const translation = useI18n()
@@ -90,6 +95,8 @@ export const F0AiChatTextArea = ({
   const [inputValue, setInputValue] = useState("")
   const [cursorPosition, setCursorPosition] = useState(0)
   const [isPreSending, setIsPreSending] = useState(false)
+  const [hoveredSuggestion, setHoveredSuggestion] =
+    useState<WelcomeScreenSuggestionItem | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const highlightRef = useRef<HTMLDivElement>(null)
@@ -221,7 +228,15 @@ export const F0AiChatTextArea = ({
     }
   }
 
-  const multiplePlaceholders = (placeholders ?? []).length > 1
+  // Hovering a welcome suggestion replaces the rotating placeholders with the
+  // hovered item's prompt so the user can preview what's about to be sent.
+  const previewPlaceholder = hoveredSuggestion
+    ? (hoveredSuggestion.prompt ?? hoveredSuggestion.title)
+    : null
+  const effectivePlaceholders = previewPlaceholder
+    ? [previewPlaceholder]
+    : (placeholders ?? [])
+  const multiplePlaceholders = effectivePlaceholders.length > 1
 
   const highlightSegments = useMemo(() => {
     return buildHighlightSegments(inputValue, mentions.mentions, {
@@ -235,12 +250,26 @@ export const F0AiChatTextArea = ({
 
   return (
     <div
+      ref={ref}
       className={cn(
         "flex flex-col items-center gap-2 px-4 pb-3 pt-2",
-        fullscreenWelcome && "flex-1"
+        // Only grow to share space with the messages container when we're in
+        // the fullscreen welcome layout — that's where the "stick to the
+        // middle" centering trick relies on the textarea taking its half.
+        fullscreenWelcome && "flex-grow"
       )}
     >
-      <div className="w-full max-w-[712px]">
+      <div className="flex w-full max-w-[712px] flex-col gap-2">
+        {isWelcomeScreen &&
+          welcomeScreenSuggestions &&
+          welcomeScreenSuggestions.length > 0 &&
+          onSuggestionClick && (
+            <WelcomeScreenSuggestionsRow
+              suggestions={welcomeScreenSuggestions}
+              onItemClick={onSuggestionClick}
+              onItemHover={setHoveredSuggestion}
+            />
+          )}
         <CreditWarningWrapper creditWarning={creditWarning}>
           <motion.form
             aria-busy={inProgress}
@@ -370,7 +399,7 @@ export const F0AiChatTextArea = ({
                     highlightSegments={highlightSegments}
                     hasOverlay={hasOverlay}
                     multiplePlaceholders={multiplePlaceholders}
-                    placeholders={placeholders ?? []}
+                    placeholders={effectivePlaceholders}
                     resolvedDefaultPlaceholder={resolvedDefaultPlaceholder}
                     inProgress={inProgress}
                   />
@@ -451,7 +480,6 @@ export const F0AiChatTextArea = ({
             key="chat-footer"
             className={cn(
               "w-full py-4 mx-auto max-w-[712px]",
-              fullscreenWelcome && "mt-auto",
               fullscreen && "flex justify-center"
             )}
             initial={{ opacity: 0, height: 0, overflow: "hidden" }}
