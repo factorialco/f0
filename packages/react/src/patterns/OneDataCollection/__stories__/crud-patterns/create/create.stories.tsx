@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 
 import { Add } from "@/icons/app"
+import { F0Text } from "@/components/F0Text"
 import { useF0Form } from "@/patterns/F0Form"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { F0Wizard } from "@/ui/F0Wizard"
@@ -131,9 +132,10 @@ function WizardDialogScenario() {
           if (currentStep === 0) return <WizardStepBasic />
           if (currentStep === 1) return <WizardStepAssignments />
           return (
-            <p className="text-f1-foreground-secondary">
-              Review the details above and click Create plan to finish.
-            </p>
+            <F0Text
+              content="Review the details above and click Create plan to finish."
+              variant="description"
+            />
           )
         }}
       </F0Wizard>

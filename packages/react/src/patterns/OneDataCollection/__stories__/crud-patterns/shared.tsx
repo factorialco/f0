@@ -5,7 +5,15 @@ import { z } from "zod"
 
 import { StandardLayout } from "@/layouts/StandardLayout"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
-import { Add, Download, EllipsisHorizontal } from "@/icons/app"
+import {
+  Add,
+  Briefcase,
+  Download,
+  EllipsisHorizontal,
+  Person,
+  TextSize,
+} from "@/icons/app"
+import { F0Card } from "@/components/F0Card"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
 import { f0FormField, F0Form, F0FormRef } from "@/patterns/F0Form"
@@ -314,27 +322,54 @@ export function WizardStepAssignments() {
   return <F0Form formDefinition={formDefinition} />
 }
 
-export function ResourceSummary({ resource }: { resource: Resource }) {
+export function ResourceDetails({ resource }: { resource: Resource }) {
   return (
-    <div className="flex flex-col gap-3">
-      <div>
-        <h3 className="text-lg font-semibold text-f1-foreground">
-          {resource.name}
-        </h3>
-        <p className="text-sm text-f1-foreground-secondary">
-          {resource.summary}
-        </p>
-      </div>
-      <dl className="grid grid-cols-2 gap-3 text-sm">
-        <div>
-          <dt className="font-medium text-f1-foreground-secondary">Owner</dt>
-          <dd className="text-f1-foreground">{resource.owner}</dd>
-        </div>
-        <div>
-          <dt className="font-medium text-f1-foreground-secondary">Status</dt>
-          <dd className="text-f1-foreground">{resource.status}</dd>
-        </div>
-      </dl>
-    </div>
+    <>
+      <F0Card
+        title="Summary"
+        description={resource.summary}
+        metadata={[
+          {
+            icon: Person,
+            property: {
+              type: "text",
+              label: "Owner",
+              value: resource.owner,
+            },
+          },
+          {
+            icon: Briefcase,
+            property: {
+              type: "status",
+              label: "Status",
+              value: {
+                status:
+                  resource.status === "Complete"
+                    ? "positive"
+                    : resource.status === "Needs details"
+                      ? "warning"
+                      : "neutral",
+                label: resource.status,
+              },
+            },
+          },
+        ]}
+      />
+      <F0Card
+        title="Description"
+        metadata={[
+          {
+            icon: TextSize,
+            property: {
+              type: "text",
+              label: "Record type",
+              value: "Resource",
+            },
+          },
+        ]}
+      >
+        {resource.summary}
+      </F0Card>
+    </>
   )
 }

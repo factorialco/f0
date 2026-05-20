@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps, useState } from "react"
 
+import { F0Text } from "@/components/F0Text"
 import { StandardLayout } from "@/layouts/StandardLayout"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import { Download, Pencil } from "@/icons/app"
@@ -23,6 +24,7 @@ import {
   defaultCrudSecondaryActions,
   initialResources,
   Resource,
+  ResourceDetails,
   resourceFilters,
   tableVisualization,
 } from "../shared"
@@ -41,12 +43,6 @@ function statusVariant(status: Resource["status"]) {
   if (status === "Complete") return "positive"
   if (status === "Needs details") return "warning"
   return "neutral"
-}
-
-function ContentPlaceholder({ className = "h-64" }: { className?: string }) {
-  return (
-    <div className={`${className} rounded-lg bg-f1-background-secondary`} />
-  )
 }
 
 function DefaultDialogScenario() {
@@ -78,7 +74,7 @@ function DefaultDialogScenario() {
           onClick: () => setSelectedResource(null),
         }}
       >
-        {selectedResource && <ContentPlaceholder />}
+        {selectedResource && <ResourceDetails resource={selectedResource} />}
       </F0Dialog>
     </CrudPatternLayout>
   )
@@ -105,14 +101,13 @@ function OpenAsPageScenario() {
       >
         <Page
           header={
-            <PageHeader
-              module={CRUD_MODULE}
-              breadcrumbs={[{ id: resourcePage.id, label: resourcePage.name }]}
-            />
-          }
-        >
-          <div className="flex h-full flex-col">
-            <div className="shrink-0">
+            <>
+              <PageHeader
+                module={CRUD_MODULE}
+                breadcrumbs={[
+                  { id: resourcePage.id, label: resourcePage.name },
+                ]}
+              />
               <ResourceHeader
                 title={resourcePage.name}
                 description={resourcePage.summary}
@@ -138,12 +133,23 @@ function OpenAsPageScenario() {
                     onClick: () => {},
                   },
                 ]}
+                metadata={[
+                  {
+                    label: "Owner",
+                    value: { type: "text", content: resourcePage.owner },
+                  },
+                ]}
               />
-            </div>
-            <StandardLayout>
-              <ContentPlaceholder className="h-96" />
-            </StandardLayout>
-          </div>
+            </>
+          }
+        >
+          <StandardLayout>
+            <F0Text
+              content="The page variant uses the same production page shell as a deeper resource flow."
+              variant="description"
+            />
+            <ResourceDetails resource={resourcePage} />
+          </StandardLayout>
         </Page>
       </ApplicationFrame>
     )

@@ -59,15 +59,7 @@ function RightPositionDialogScenario({
 
   return (
     <CrudPatternLayout>
-      <div
-        className={
-          visualization.type === "list"
-            ? "[&>div>div:nth-child(2)]:px-4"
-            : undefined
-        }
-      >
-        <OneDataCollection source={source} visualizations={[visualization]} />
-      </div>
+      <OneDataCollection source={source} visualizations={[visualization]} />
       <F0Dialog
         isOpen={selectedResource !== null}
         onClose={() => setSelectedResource(null)}

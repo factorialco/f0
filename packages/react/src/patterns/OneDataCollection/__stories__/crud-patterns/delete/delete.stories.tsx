@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 
 import { Delete } from "@/icons/app"
+import { F0Text } from "@/components/F0Text"
 import { F0Dialog } from "@/patterns/F0Dialog"
 
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
@@ -69,10 +70,10 @@ function SingleDeleteScenario() {
           onClick: () => setSelectedResource(null),
         }}
       >
-        <p className="text-sm text-f1-foreground-secondary">
-          The confirmation names the item and explains the destructive outcome
-          before the user commits.
-        </p>
+        <F0Text
+          content="The confirmation names the item and explains the destructive outcome before the user commits."
+          variant="description"
+        />
       </F0Dialog>
     </CrudPatternLayout>
   )
@@ -126,10 +127,10 @@ function BulkDeleteScenario() {
           onClick: () => setOpen(false),
         }}
       >
-        <p className="text-sm text-f1-foreground-secondary">
-          Selected resources will be removed from the collection. This action
-          cannot be undone.
-        </p>
+        <F0Text
+          content="Selected resources will be removed from the collection. This action cannot be undone."
+          variant="description"
+        />
       </F0Dialog>
     </CrudPatternLayout>
   )
