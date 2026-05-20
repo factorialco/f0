@@ -971,24 +971,15 @@ function DetailView({
     () => movements.filter((movement) => Boolean(movement.costUpdateNotice)),
     [movements]
   )
-  const needsBudgetUpdate =
-    Boolean(b?.costUpdateNotice) && changedMovements.length > 0 && !budgetUpdateApplied
-  const changeSummary = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          changedMovements.map(
-            (movement) => movement.costUpdateNotice?.change ?? "Group changed"
-          )
-        )
-      ),
+  const changedMovementIds = useMemo(
+    () => new Set(changedMovements.map((movement) => movement.id)),
     [changedMovements]
   )
+  const needsBudgetUpdate =
+    Boolean(b?.costUpdateNotice) && changedMovements.length > 0 && !budgetUpdateApplied
   const budgetUpdateDescription = `${changedMovements.length} ${
     changedMovements.length === 1 ? "group has" : "groups have"
-  } changed since being added to this budget: ${changeSummary.join(
-    ", "
-  )}. Open a group to see the detailed changes.`
+  } changed since being added to this budget.`
 
   const goToTrainingGroup = (m: TrainingBudgetMovement) => {
     navigate(`/p/trainings?training=${m.trainingId}&class=${m.groupId}`)
@@ -1314,35 +1305,17 @@ function DetailView({
         </div>
 
         {needsBudgetUpdate && b.costUpdateNotice && (
-          <F0Box paddingX="lg">
-            <F0Box
-              display="flex"
-              alignItems="center"
-              justifyContent="between"
-              gap="md"
-              padding="md"
-              border="default"
-              borderColor="secondary"
-              borderRadius="lg"
-              background="warning"
-            >
-              <F0Box display="flex" flexDirection="column" gap="xs">
-                <F0Text
-                  variant="label"
-                  content={b.costUpdateNotice.title}
-                />
-                <F0Text
-                  variant="description"
-                  content={budgetUpdateDescription}
-                />
-              </F0Box>
-              <F0Button
-                label="Update budget"
-                variant="outline"
-                onClick={() => setBudgetUpdateApplied(true)}
-              />
-            </F0Box>
-          </F0Box>
+          <div className="px-6">
+            <F0Alert
+              variant="warning"
+              title="Budget needs update"
+              description={budgetUpdateDescription}
+              action={{
+                label: "Update budget",
+                onClick: () => setBudgetUpdateApplied(true),
+              }}
+            />
+          </div>
         )}
 
         <OneDataCollection
@@ -1354,6 +1327,10 @@ function DetailView({
             {
               type: "table",
               options: {
+                referenceRowType: (item) =>
+                  !item.isParent && changedMovementIds.has(item.id)
+                    ? "striped"
+                    : "none",
                 columns: [
                   {
                     label: "Training group",
