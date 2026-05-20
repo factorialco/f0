@@ -46,6 +46,20 @@ the task.
       </tr>
       <tr>
         <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-create--right-dialog">
+            Right dialog
+          </a>
+        </td>
+        <td>
+          Table flows where users should keep the collection visible while
+          filling the form.
+        </td>
+        <td>
+          Less focused than a centered dialog and narrower for dense forms.
+        </td>
+      </tr>
+      <tr>
+        <td>
           <a href="/?path=/story/patterns-data-collection-crud-patterns-create--wizard-dialog">
             Wizard dialog
           </a>
@@ -76,6 +90,10 @@ the task.
         <td>Default dialog</td>
       </tr>
       <tr>
+        <td>Does the user need to keep the table visible while creating?</td>
+        <td>Right dialog</td>
+      </tr>
+      <tr>
         <td>Does the flow require multiple stages or a review step?</td>
         <td>Wizard dialog</td>
       </tr>
@@ -100,6 +118,10 @@ action label so users immediately understand they are in the correct flow.
 When a wizard is needed, split the flow into steps that match a real decision
 model. Each step should have a distinct purpose. Do not turn a short single-form
 create flow into a wizard only to make it feel more structured.
+
+For table-heavy contexts, a right-position dialog can work as an alternative
+when people need to preserve list context while creating. Keep this as a table
+variant, not the default create pattern.
 
 ## Dos and don'ts
 
@@ -128,5 +150,6 @@ create flow into a wizard only to make it feel more structured.
 ## Related stories
 
 - [Default dialog](/?path=/story/patterns-data-collection-crud-patterns-create--default)
+- [Right dialog](/?path=/story/patterns-data-collection-crud-patterns-create--right-dialog)
 - [Wizard dialog](/?path=/story/patterns-data-collection-crud-patterns-create--wizard-dialog)
 - [CRUD patterns overview](/?path=/docs/patterns-data-collection-crud-patterns-overview--documentation)

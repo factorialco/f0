@@ -5,15 +5,7 @@ import { z } from "zod"
 
 import { StandardLayout } from "@/layouts/StandardLayout"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
-import {
-  Add,
-  Briefcase,
-  Download,
-  EllipsisHorizontal,
-  Person,
-  TextSize,
-} from "@/icons/app"
-import { F0Card } from "@/components/F0Card"
+import { Add, Download, EllipsisHorizontal } from "@/icons/app"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
 import { f0FormField, F0Form, F0FormRef } from "@/patterns/F0Form"
@@ -214,6 +206,16 @@ export function CrudPatternLayout({ children }: { children: ReactNode }) {
   )
 }
 
+export function CrudContentPlaceholder({
+  minHeight = "min-h-48",
+}: {
+  minHeight?: string
+}) {
+  return (
+    <div className={`${minHeight} rounded-xl bg-f1-background-secondary`} />
+  )
+}
+
 const STATUS_OPTIONS = [
   { value: "Draft", label: "Draft" },
   { value: "Complete", label: "Complete" },
@@ -320,56 +322,4 @@ export function WizardStepAssignments() {
   })
 
   return <F0Form formDefinition={formDefinition} />
-}
-
-export function ResourceDetails({ resource }: { resource: Resource }) {
-  return (
-    <>
-      <F0Card
-        title="Summary"
-        description={resource.summary}
-        metadata={[
-          {
-            icon: Person,
-            property: {
-              type: "text",
-              label: "Owner",
-              value: resource.owner,
-            },
-          },
-          {
-            icon: Briefcase,
-            property: {
-              type: "status",
-              label: "Status",
-              value: {
-                status:
-                  resource.status === "Complete"
-                    ? "positive"
-                    : resource.status === "Needs details"
-                      ? "warning"
-                      : "neutral",
-                label: resource.status,
-              },
-            },
-          },
-        ]}
-      />
-      <F0Card
-        title="Description"
-        metadata={[
-          {
-            icon: TextSize,
-            property: {
-              type: "text",
-              label: "Record type",
-              value: "Resource",
-            },
-          },
-        ]}
-      >
-        {resource.summary}
-      </F0Card>
-    </>
-  )
 }

@@ -95,6 +95,70 @@ function DefaultDialogScenario() {
   )
 }
 
+function RightDialogScenario() {
+  const [resources, setResources] = useState(initialResources)
+  const [open, setOpen] = useState(false)
+  const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
+
+  const source = useDataCollectionSource({
+    dataAdapter: createResourceDataAdapter(resources),
+    filters: resourceFilters,
+    primaryActions: () => ({
+      label: "Create resource",
+      icon: Add,
+      onClick: () => setOpen(true),
+    }),
+    secondaryActions: defaultCrudSecondaryActions(),
+  })
+
+  return (
+    <CrudPatternLayout>
+      <OneDataCollection
+        source={source}
+        visualizations={[tableVisualization]}
+      />
+      <F0Dialog
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        title="Create resource"
+        description="Right-position dialogs are an accepted Table variation when the collection context should remain visible."
+        position="right"
+        width="md"
+        primaryAction={{
+          label: "Create resource",
+          icon: Add,
+          onClick: submit,
+          loading: isSubmitting,
+          disabled: hasErrors,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          onClick: () => setOpen(false),
+        }}
+      >
+        <ResourceFormF0
+          key="create-right-dialog"
+          mode="create"
+          formRef={formRef}
+          onSuccess={(data) => {
+            setResources([
+              {
+                id: `resource-${Date.now()}`,
+                name: data.name,
+                owner: data.owner,
+                status: (data.status as Resource["status"]) ?? "Draft",
+                summary: "Created from the right-position dialog.",
+              },
+              ...resources,
+            ])
+            setOpen(false)
+          }}
+        />
+      </F0Dialog>
+    </CrudPatternLayout>
+  )
+}
+
 function WizardDialogScenario() {
   const [open, setOpen] = useState(false)
 
@@ -145,6 +209,10 @@ function WizardDialogScenario() {
 
 export const Default: Story = {
   render: () => <DefaultDialogScenario />,
+}
+
+export const RightDialog: Story = {
+  render: () => <RightDialogScenario />,
 }
 
 export const WizardDialog: Story = {
