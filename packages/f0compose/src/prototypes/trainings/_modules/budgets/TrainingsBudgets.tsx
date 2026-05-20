@@ -979,7 +979,7 @@ function DetailView({
     Boolean(b?.costUpdateNotice) && changedMovements.length > 0 && !budgetUpdateApplied
   const budgetUpdateDescription = `${changedMovements.length} ${
     changedMovements.length === 1 ? "group has" : "groups have"
-  } changed since being added to this budget.`
+  } changed since being added to this budget. Affected groups are marked in the table.`
 
   const goToTrainingGroup = (m: TrainingBudgetMovement) => {
     navigate(`/p/trainings?training=${m.trainingId}&class=${m.groupId}`)
@@ -1310,10 +1310,6 @@ function DetailView({
               variant="warning"
               title="Budget needs update"
               description={budgetUpdateDescription}
-              action={{
-                label: "Update budget",
-                onClick: () => setBudgetUpdateApplied(true),
-              }}
             />
           </div>
         )}

@@ -230,7 +230,7 @@ Scope checked:
 User-visible change:
 
 - Removed the budget-level "changed since last review" review dialog pattern.
-- Budget detail now shows a minimal `Budget needs update` warning above the groups table, with only the affected group count and `Update budget` action. Affected group rows show `Update needed` inside the existing training group name cell, avoiding both an extra column and a second table.
+- Budget detail now shows a minimal `Budget needs update` warning above the groups table without a global update action. Affected group rows show `Update needed` inside the existing training group name cell, avoiding both an extra column and a second table.
 - Training group Costs tab now shows `Update budget` only when that specific group changed after being added to the budget, with direct change and impact copy.
 - Opening the group sidepanel from the budget shows `Update budget` plus `What changed` details for participant, legal entity, or salary changes.
 
