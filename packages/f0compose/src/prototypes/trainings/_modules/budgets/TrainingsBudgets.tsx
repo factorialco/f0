@@ -87,6 +87,13 @@ export const meta: PrototypeMeta = {
 type View = "list" | "detail" | "new"
 type BudgetStatusKey = "within_budget" | "budget_risk" | "over_budget"
 type BudgetStatusColor = "viridian" | "yellow" | "radical"
+type BudgetUpdateRow = {
+  id: string
+  groupName: string
+  change: string
+  impact: string
+  movement: TrainingBudgetMovement
+}
 
 const STATUS_LABEL: Record<BudgetStatusKey, string> = {
   within_budget: "Within budget",
@@ -967,11 +974,50 @@ function DetailView({
       ),
     [movements, trainingParents]
   )
-  const changedMovements = movements.filter((movement) =>
-    Boolean(movement.costUpdateNotice)
+  const changedMovements = useMemo(
+    () => movements.filter((movement) => Boolean(movement.costUpdateNotice)),
+    [movements]
   )
   const needsBudgetUpdate =
     Boolean(b?.costUpdateNotice) && changedMovements.length > 0 && !budgetUpdateApplied
+  const budgetUpdateRows = useMemo<BudgetUpdateRow[]>(
+    () =>
+      changedMovements.map((movement) => ({
+        id: movement.id,
+        groupName: movement.groupName,
+        change: movement.costUpdateNotice?.change ?? "Group changed",
+        impact: movement.costUpdateNotice?.impact ?? "No total change",
+        movement,
+      })),
+    [changedMovements]
+  )
+  const budgetUpdateSource = useDataCollectionSource<BudgetUpdateRow>(
+    {
+      totalItemSummary: (totalItems) =>
+        `${totalItems} ${totalItems === 1 ? "group" : "groups"} changed`,
+      dataAdapter: {
+        paginationType: "pages",
+        perPage: 10,
+        fetchData: () => ({
+          type: "pages" as const,
+          records: budgetUpdateRows,
+          total: budgetUpdateRows.length,
+          perPage: 10,
+          currentPage: 1,
+          pagesCount: 1,
+        }),
+      },
+      itemOnClick: (row) => () => setSelectedMovement(row.movement),
+      itemActions: (row) => [
+        {
+          label: "Open group",
+          icon: ExternalLink,
+          onClick: () => setSelectedMovement(row.movement),
+        },
+      ],
+    },
+    [budgetUpdateRows]
+  )
 
   const goToTrainingGroup = (m: TrainingBudgetMovement) => {
     navigate(`/p/trainings?training=${m.trainingId}&class=${m.groupId}`)
@@ -1297,54 +1343,55 @@ function DetailView({
         </div>
 
         {needsBudgetUpdate && b.costUpdateNotice && (
-          <div className="px-6">
-            <F0Box
-              display="flex"
-              flexDirection="column"
-              gap="md"
-              padding="md"
-              border="default"
-              borderColor="secondary"
-              borderRadius="lg"
-            >
-              <F0Alert
-                variant="warning"
-                title={b.costUpdateNotice.title}
-                description="These groups changed after they were added to this budget. Review the changes below, then update the budget."
-                action={{
-                  label: "Update budget",
-                  onClick: () => setBudgetUpdateApplied(true),
-                }}
-              />
-              <F0Box display="flex" flexDirection="column" gap="xs">
-                {changedMovements.map((movement) => (
-                  <button
-                    key={movement.id}
-                    type="button"
-                    className="flex items-center justify-between gap-3 rounded-xl border border-solid border-f1-border bg-f1-background px-4 py-3 text-left hover:bg-f1-background-hover"
-                    onClick={() => setSelectedMovement(movement)}
-                  >
-                    <span className="flex min-w-0 flex-col gap-0.5">
-                      <span className="truncate text-[14px] font-medium leading-[20px] tracking-[-0.07px] text-f1-foreground">
-                        {movement.groupName}
-                      </span>
-                      <span className="truncate text-[14px] leading-[20px] tracking-[-0.07px] text-f1-foreground-secondary">
-                        {movement.costUpdateNotice?.change ?? "Group changed"}
-                      </span>
-                    </span>
-                    <span className="flex shrink-0 items-center gap-3">
-                      <span className="text-[14px] font-medium leading-[20px] tracking-[-0.07px] text-f1-foreground-warning">
-                        {movement.costUpdateNotice?.impact ?? "No total change"}
-                      </span>
-                      <span className="text-[14px] font-medium leading-[20px] tracking-[-0.07px] text-f1-foreground-secondary">
-                        Open group
-                      </span>
-                    </span>
-                  </button>
-                ))}
-              </F0Box>
-            </F0Box>
-          </div>
+          <F0Box paddingX="lg" display="flex" flexDirection="column" gap="md">
+            <F0Alert
+              variant="warning"
+              title={b.costUpdateNotice.title}
+              description="Review the affected groups below, then update the budget."
+              action={{
+                label: "Update budget",
+                onClick: () => setBudgetUpdateApplied(true),
+              }}
+            />
+            <OneDataCollection
+              id="trainings/budgets/update-preview/v1"
+              source={budgetUpdateSource}
+              visualizations={[
+                {
+                  type: "table",
+                  options: {
+                    columns: [
+                      {
+                        label: "Training group",
+                        id: "groupName",
+                        render: (row) => ({
+                          type: "text",
+                          value: row.groupName,
+                        }),
+                      },
+                      {
+                        label: "Change",
+                        id: "change",
+                        render: (row) => ({
+                          type: "text",
+                          value: row.change,
+                        }),
+                      },
+                      {
+                        label: "Impact",
+                        id: "impact",
+                        align: "right" as const,
+                        render: (row) => ({
+                          type: "text",
+                          value: row.impact,
+                        }),
+                      },
+                    ],
+                  },
+                },
+              ]}
+            />
+          </F0Box>
         )}
 
         <OneDataCollection
