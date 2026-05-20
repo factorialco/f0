@@ -5,15 +5,15 @@ import { describe, expect, test, vi } from "vitest"
 
 import { zeroRender as render } from "@/testing/test-utils"
 
-import Meta, { WithStep } from "../__stories__/NumberInput.stories"
-import { NumberInput } from "../index"
+import Meta, { WithStep } from "../__stories__/F0NumberInput.stories"
+import { F0NumberInput } from "../index"
 
 const WithStepStory = composeStory(WithStep, Meta)
 
-describe("NumberInput", () => {
+describe("F0NumberInput", () => {
   test("renders the input", () => {
     render(
-      <NumberInput
+      <F0NumberInput
         locale="es-ES"
         value={123.456}
         maxDecimals={2}
@@ -26,7 +26,7 @@ describe("NumberInput", () => {
 
   describe("when the value is null", () => {
     test("renders an empty input", () => {
-      render(<NumberInput locale="en-US" value={null} label="Number Input" />)
+      render(<F0NumberInput locale="en-US" value={null} label="Number Input" />)
       const input = screen.getByRole("textbox")
       expect(input).toHaveValue("")
     })
@@ -36,7 +36,7 @@ describe("NumberInput", () => {
     test("trigger the onChange callback with the number", async () => {
       const onChange = vi.fn()
       render(
-        <NumberInput
+        <F0NumberInput
           locale="en-US"
           maxDecimals={0}
           onChange={onChange}
@@ -56,7 +56,7 @@ describe("NumberInput", () => {
     test("onChange strips decimal values in integer mode", async () => {
       const onChange = vi.fn()
       render(
-        <NumberInput
+        <F0NumberInput
           locale="en-US"
           maxDecimals={0}
           onChange={onChange}
@@ -76,7 +76,7 @@ describe("NumberInput", () => {
     test("allows decimal values with dot separator", async () => {
       const onChange = vi.fn()
       render(
-        <NumberInput
+        <F0NumberInput
           locale="en-US"
           maxDecimals={2}
           onChange={onChange}
@@ -94,7 +94,7 @@ describe("NumberInput", () => {
     test("limits decimals to maxDecimals", async () => {
       const onChange = vi.fn()
       render(
-        <NumberInput
+        <F0NumberInput
           locale="en-US"
           maxDecimals={2}
           onChange={onChange}
@@ -149,7 +149,7 @@ describe("NumberInput", () => {
     test("preserves trailing dot while typing", async () => {
       const onChange = vi.fn()
       render(
-        <NumberInput
+        <F0NumberInput
           locale="en-US"
           maxDecimals={2}
           onChange={onChange}
@@ -167,7 +167,7 @@ describe("NumberInput", () => {
     test("preserves trailing comma while typing", async () => {
       const onChange = vi.fn()
       render(
-        <NumberInput
+        <F0NumberInput
           locale="es-ES"
           maxDecimals={2}
           onChange={onChange}

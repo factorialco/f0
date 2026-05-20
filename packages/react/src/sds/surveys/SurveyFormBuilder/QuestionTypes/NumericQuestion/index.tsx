@@ -1,5 +1,5 @@
 import { F0TextInput } from "@/experimental/Forms/Fields/Input"
-import { NumberInput } from "@/experimental/Forms/Fields/NumberInput"
+import { F0NumberInput } from "@/experimental/Forms/Fields/NumberInput"
 import { Numbers } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
@@ -44,7 +44,7 @@ export const NumericQuestion = ({
     <BaseQuestion {...baseQuestionComponentProps}>
       <div className="px-0.5">
         {answering ? (
-          <NumberInput
+          <F0NumberInput
             locale="en-US"
             size="md"
             value={value}

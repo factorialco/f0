@@ -4,12 +4,12 @@ import { useState } from "react"
 
 import { Placeholder } from "@/icons/app"
 
-import { NumberInput } from "../index"
+import { F0NumberInput } from "../index"
 
 const meta = {
-  render: (props) => <NumberInput key={JSON.stringify(props)} {...props} />,
-  title: "Input/Number",
-  component: NumberInput,
+  render: (props) => <F0NumberInput key={JSON.stringify(props)} {...props} />,
+  title: "Inputs/Number input",
+  component: F0NumberInput,
   tags: ["autodocs", "experimental"],
   args: {
     disabled: false,
@@ -37,7 +37,7 @@ const meta = {
       filterProps: (_: unknown, propName: string) => propName !== "key",
     },
   },
-} satisfies Meta<typeof NumberInput>
+} satisfies Meta<typeof F0NumberInput>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -48,7 +48,7 @@ export const Primary: Story = {
   },
   render: (props) => {
     const [value, setValue] = useState<number | null>(props.value ?? 1)
-    return <NumberInput {...props} value={value} onChange={setValue} />
+    return <F0NumberInput {...props} value={value} onChange={setValue} />
   },
 }
 
@@ -63,7 +63,7 @@ export const WithStep: Story = {
   render: (props) => {
     const [value, setValue] = useState<number | null>(props.value ?? 1)
     return (
-      <NumberInput
+      <F0NumberInput
         {...props}
         value={value}
         onChange={setValue}
