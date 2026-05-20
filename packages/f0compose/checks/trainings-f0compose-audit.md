@@ -218,6 +218,25 @@ risks are not small visual differences; they are systemic:
 ## Audit Status
 
 - Upstream route inventory: complete for top nav, list, course detail, group detail.
+
+## 2026-05-20 Delta: Group Changes Requiring Budget Update
+
+Scope checked:
+
+- `packages/f0compose/src/fixtures/trainings-extra.ts`
+- `packages/f0compose/src/prototypes/trainings/_modules/budgets/TrainingsBudgets.tsx`
+- `packages/f0compose/src/prototypes/trainings/detail/CostsTab.tsx`
+
+User-visible change:
+
+- Removed the budget-level "changed since last review" review dialog pattern.
+- Budget detail now shows an inline `Budget update` status per affected group row.
+- Training group Costs tab now shows `Update budget` only when that specific group changed after being added to the budget.
+- Opening the group sidepanel from the budget shows `Update budget` plus `What changed` details for participant, legal entity, or salary changes.
+
+Accepted limitation for this delta:
+
+- This keeps the existing raw layout around the Costs tab and budget sidepanel because replacing those surfaces with fully canonical upstream components is outside this focused feedback pass and already tracked above as broader non-compliance.
 - Local route inventory: complete at screen level.
 - f0compose compliance scan: complete at high-confidence issue level.
 - Element-by-element browser visual verification: not complete.

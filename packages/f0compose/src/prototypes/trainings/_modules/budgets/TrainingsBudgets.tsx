@@ -251,28 +251,6 @@ function legalEntitiesForMovement(movement: TrainingBudgetMovement) {
     .filter((le): le is NonNullable<typeof le> => Boolean(le))
 }
 
-type BudgetChangeRow = {
-  id: string
-  groupName: string
-  changeType: "participants" | "legal_entity" | "salary"
-  impactAmount: number | null
-}
-
-const BUDGET_CHANGE_LABEL: Record<BudgetChangeRow["changeType"], string> = {
-  participants: "Participants changed",
-  legal_entity: "Legal entity changed",
-  salary: "Salary data changed",
-}
-
-const BUDGET_CHANGE_VARIANT: Record<
-  BudgetChangeRow["changeType"],
-  "neutral" | "info" | "positive" | "warning" | "critical"
-> = {
-  participants: "neutral",
-  legal_entity: "neutral",
-  salary: "neutral",
-}
-
 // ── URL routing ─────────────────────────────────────────────────────────────
 
 function useView() {
@@ -916,8 +894,6 @@ function DetailView({
   const [isExportOpen, setIsExportOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isAddGroupOpen, setIsAddGroupOpen] = useState(false)
-  const [isChangesOpen, setIsChangesOpen] = useState(false)
-  const [reviewedChanges, setReviewedChanges] = useState(false)
   const [selectedMovement, setSelectedMovement] =
     useState<TrainingBudgetMovement | null>(null)
   const [extraMovements, setExtraMovements] = useState<
@@ -990,12 +966,6 @@ function DetailView({
       ),
     [movements, trainingParents]
   )
-  const changedMovements = movements.filter((movement) =>
-    Boolean(movement.costUpdateNotice)
-  )
-  const hasUnreviewedChanges =
-    Boolean(b?.costUpdateNotice) && changedMovements.length > 0 && !reviewedChanges
-
   const goToTrainingGroup = (m: TrainingBudgetMovement) => {
     navigate(`/p/trainings?training=${m.trainingId}&class=${m.groupId}`)
   }
@@ -1292,20 +1262,6 @@ function DetailView({
           </div>
         )}
 
-        {hasUnreviewedChanges && b.costUpdateNotice && (
-          <div className="px-6">
-            <F0Alert
-              variant="warning"
-              title={b.costUpdateNotice.title}
-              description={b.costUpdateNotice.description}
-              action={{
-                label: "Review changes",
-                onClick: () => setIsChangesOpen(true),
-              }}
-            />
-          </div>
-        )}
-
         {isOver && (
           <div className="px-6">
             <F0Alert
@@ -1458,6 +1414,21 @@ function DetailView({
                     },
                   },
                   {
+                    label: "Budget update",
+                    id: "budgetUpdate",
+                    width: 148,
+                    render: (item) =>
+                      item.isParent || !item.costUpdateNotice
+                        ? { type: "text", value: "" }
+                        : {
+                            type: "status",
+                            value: {
+                              status: "warning",
+                              label: "Update budget",
+                            },
+                          },
+                  },
+                  {
                     label: "Participants",
                     id: "participants",
                     render: (item) =>
@@ -1534,21 +1505,6 @@ function DetailView({
               label: "Cancel",
               onClick: () => setIsExportOpen(false),
             }}
-          />
-        )}
-
-        {isChangesOpen && (
-          <BudgetChangesDialog
-            movements={changedMovements}
-            onOpenGroup={(movement) => {
-              setSelectedMovement(movement)
-              setIsChangesOpen(false)
-            }}
-            onMarkReviewed={() => {
-              setReviewedChanges(true)
-              setIsChangesOpen(false)
-            }}
-            onClose={() => setIsChangesOpen(false)}
           />
         )}
 
@@ -1650,143 +1606,20 @@ function TrainingGroupCostSidepanel({
           onClick={onNext}
         />
       </div>
+      {movement.costUpdateNotice && (
+        <F0Box paddingX="md" paddingBottom="md">
+          <F0Alert
+            variant="warning"
+            title="Update budget"
+            description={`${movement.costUpdateNotice.description} Review the impact before updating the budget.`}
+          />
+        </F0Box>
+      )}
       {activeTab === "cost" ? (
         <GroupSidepanelCostTab movement={movement} />
       ) : (
         <GroupSidepanelParticipantsTab movement={movement} />
       )}
-    </F0Dialog>
-  )
-}
-
-function BudgetChangesDialog({
-  movements,
-  onOpenGroup,
-  onMarkReviewed,
-  onClose,
-}: {
-  movements: TrainingBudgetMovement[]
-  onOpenGroup: (movement: TrainingBudgetMovement) => void
-  onMarkReviewed: () => void
-  onClose: () => void
-}) {
-  const rows: BudgetChangeRow[] = movements.map((movement) => ({
-    id: movement.id,
-    groupName: movement.groupName,
-    changeType: movement.costUpdateNotice?.change?.includes("participant")
-      ? "participants"
-      : movement.costUpdateNotice?.change?.includes("Legal")
-        ? "legal_entity"
-        : "salary",
-    impactAmount:
-      movement.costUpdateNotice?.impact?.startsWith("+") &&
-      movement.costUpdateNotice.impact.includes("€")
-        ? Number(
-            movement.costUpdateNotice.impact
-              .replace("+", "")
-              .replace("€", "")
-              .replace(/,/g, "")
-              .trim()
-          )
-        : null,
-  }))
-
-  const source = useDataCollectionSource<BudgetChangeRow>(
-    {
-      totalItemSummary: (totalItems) =>
-        `${totalItems} ${totalItems === 1 ? "group" : "groups"} changed`,
-      dataAdapter: {
-        paginationType: "pages",
-        perPage: 20,
-        fetchData: () => ({
-          type: "pages" as const,
-          records: rows,
-          total: rows.length,
-          perPage: 20,
-          currentPage: 1,
-          pagesCount: 1,
-        }),
-      },
-      itemActions: (row) => {
-        const movement = movements.find((item) => item.id === row.id)
-        return movement
-          ? [
-              {
-                label: "Open group impact",
-                icon: ExternalLink,
-                onClick: () => onOpenGroup(movement),
-              },
-            ]
-          : []
-      },
-    },
-    [rows, movements]
-  )
-
-  return (
-    <F0Dialog
-      isOpen
-      onClose={onClose}
-      position="right"
-      width="md"
-      title="Changes since last review"
-      primaryAction={{
-        label: "Mark as reviewed",
-        onClick: onMarkReviewed,
-      }}
-      secondaryAction={{
-        label: "Close",
-        onClick: onClose,
-      }}
-      disableContentPadding
-    >
-      <F0Box padding="lg" display="flex" flexDirection="column" gap="xl">
-        <F0Text
-          variant="description"
-          content="These changes explain why the budget numbers moved since the last review. Current figures already include them."
-        />
-        <OneDataCollection
-          id="trainings/budgets/review-changes/v1"
-          source={source}
-          visualizations={[
-            {
-              type: "table",
-              options: {
-                columns: [
-                  {
-                    label: "Training group",
-                    id: "groupName",
-                    render: (row) => ({ type: "text", value: row.groupName }),
-                  },
-                  {
-                    label: "Change type",
-                    id: "changeType",
-                    render: (row) => ({
-                      type: "status",
-                      value: {
-                        status: BUDGET_CHANGE_VARIANT[row.changeType],
-                        label: BUDGET_CHANGE_LABEL[row.changeType],
-                      },
-                    }),
-                  },
-                  {
-                    label: "Impact",
-                    id: "impact",
-                    align: "right" as const,
-                    render: (row) => ({
-                      type: "text",
-                      value:
-                        row.impactAmount === null
-                          ? "No total change"
-                          : `+${fmtEurAmount(row.impactAmount)}`,
-                    }),
-                  },
-                ],
-              },
-            },
-          ]}
-        />
-      </F0Box>
     </F0Dialog>
   )
 }
@@ -1829,6 +1662,30 @@ function GroupSidepanelCostTab({
           <F0Icon icon={ArrowDown} size="sm" color="secondary" />
         </button>
       </div>
+
+      {movement.costUpdateNotice && (
+        <F0Box
+          padding="md"
+          border="default"
+          borderColor="secondary"
+          borderRadius="lg"
+          display="flex"
+          flexDirection="column"
+          gap="sm"
+        >
+          <F0Text variant="label" content="What changed" />
+          <F0Text
+            variant="description"
+            content={movement.costUpdateNotice.change ?? "Group changed"}
+          />
+          {movement.costUpdateNotice.details?.map((detail) => (
+            <F0Box key={detail} display="flex" gap="sm" alignItems="start">
+              <F0Text variant="description" content="•" />
+              <F0Text variant="description" content={detail} />
+            </F0Box>
+          ))}
+        </F0Box>
+      )}
 
       {/* Total cost grid — node 5033:79675 (header sticky + card) */}
       <div className="flex flex-col">

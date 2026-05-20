@@ -489,7 +489,7 @@ export type TrainingBudget = {
 export const trainingBudgets: TrainingBudget[] = [
   {
     id: "bud-training-live-costs",
-    name: "Training budget 2026 · Needs update",
+    name: "Training budget 2026",
     year: 2026,
     totalAmount: 50000,
     spentAmount: 0,
@@ -508,9 +508,9 @@ export const trainingBudgets: TrainingBudget[] = [
     legalEntityId: "le-factorial-spain",
     peopleCount: 17,
     costUpdateNotice: {
-      title: "Budget changed since last review",
+      title: "Training groups need budget update",
       description:
-        "3 training groups changed. Allocated amount increased by 4,800.00 €. These figures already include the latest participant and salary data.",
+        "3 training groups changed since they were added to this budget.",
     },
   },
   {
@@ -1418,9 +1418,9 @@ export const trainingBudgetMovements: TrainingBudgetMovement[] = [
     indirectCost: 1942.59,
     salaryCost: 288.41,
     costUpdateNotice: {
-      title: "Participant changes detected",
+      title: "Group changed",
       description:
-        "A participant was added since the last review. The budget already includes the latest participant and salary data.",
+        "A participant was added after this group was added to the budget.",
       change: "+1 participant",
       impact: "+420.00 €",
       currentStatus: "Included in current figures",
@@ -1468,9 +1468,9 @@ export const trainingBudgetMovements: TrainingBudgetMovement[] = [
     indirectCost: 1875.18,
     salaryCost: 625.82,
     costUpdateNotice: {
-      title: "Legal entity split changed",
+      title: "Group changed",
       description:
-        "One participant now belongs to a different legal entity. The budget split already reflects the current employee data.",
+        "One participant now belongs to a different legal entity than when this group was added to the budget.",
       change: "Legal entity split changed",
       impact: "No total change",
       currentStatus: "Split updated in current figures",
@@ -1525,9 +1525,9 @@ export const trainingBudgetMovements: TrainingBudgetMovement[] = [
     indirectCost: 1790.51,
     salaryCost: 1047.47,
     costUpdateNotice: {
-      title: "Salary data changed",
+      title: "Group changed",
       description:
-        "Contract or salary data changed for participants in this group. Salary cost has been recalculated in the current budget figures.",
+        "Contract or salary data changed after this group was added to the budget.",
       change: "Salary data changed",
       impact: "+1,047.00 €",
       currentStatus: "Included in current figures",

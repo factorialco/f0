@@ -144,9 +144,11 @@ function CostBreakdownCard({
 function BudgetLinkBanner({
   budgetId,
   totalCost,
+  movement,
 }: {
   budgetId: string | null
   totalCost: number
+  movement: (typeof trainingBudgetMovements)[number] | null
 }) {
   const goToBudgets = () => {
     window.location.href = budgetId
@@ -197,14 +199,14 @@ function BudgetLinkBanner({
     />
   )
 
-  if (budget.costUpdateNotice) {
+  if (movement?.costUpdateNotice) {
     return (
       <div className="flex flex-col gap-3">
         <F0Alert
           variant="warning"
-          title={budget.costUpdateNotice.title}
-          description="Review the budget changes before using this budget as final."
-          action={{ label: "Review budget", onClick: goToBudgets }}
+          title="Update budget"
+          description={`${movement.costUpdateNotice.description} Review the impact before updating the budget.`}
+          action={{ label: "Update budget", onClick: goToBudgets }}
         />
         {statusAlert}
       </div>
@@ -273,7 +275,11 @@ export function CostsTab({ training, klass }: Props) {
         />
       </div>
 
-      <BudgetLinkBanner budgetId={budgetId} totalCost={totalCost} />
+      <BudgetLinkBanner
+        budgetId={budgetId}
+        totalCost={totalCost}
+        movement={linkedMovement}
+      />
 
       {/* Summary row */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
