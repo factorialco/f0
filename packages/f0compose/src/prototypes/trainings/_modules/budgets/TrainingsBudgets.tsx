@@ -979,7 +979,7 @@ function DetailView({
     Boolean(b?.costUpdateNotice) && changedMovements.length > 0 && !budgetUpdateApplied
   const budgetUpdateDescription = `${changedMovements.length} ${
     changedMovements.length === 1 ? "group has" : "groups have"
-  } changed since being added to this budget. Affected groups are marked in the table.`
+  } changed after being added to this budget. Review the marked groups before updating.`
 
   const goToTrainingGroup = (m: TrainingBudgetMovement) => {
     navigate(`/p/trainings?training=${m.trainingId}&class=${m.groupId}`)
@@ -1342,7 +1342,7 @@ function DetailView({
                                 { type: "text", value: label },
                                 {
                                   type: "text",
-                                  value: "Update needed",
+                                  value: "Needs update",
                                   tone: "warning",
                                 },
                               ],
@@ -1637,21 +1637,11 @@ function TrainingGroupCostSidepanel({
           onClick={onNext}
         />
       </div>
-      {movement.costUpdateNotice && (
-        <F0Box paddingX="md" paddingBottom="md">
-          <F0Alert
-            variant="warning"
-            title="Update budget"
-            description={`${movement.costUpdateNotice.change ?? "Group changed"} · ${movement.costUpdateNotice.impact ?? "No total change"}`}
-            action={{
-              label: "Update budget",
-              onClick: onUpdateBudget,
-            }}
-          />
-        </F0Box>
-      )}
       {activeTab === "cost" ? (
-        <GroupSidepanelCostTab movement={movement} />
+        <GroupSidepanelCostTab
+          movement={movement}
+          onUpdateBudget={onUpdateBudget}
+        />
       ) : (
         <GroupSidepanelParticipantsTab movement={movement} />
       )}
@@ -1661,8 +1651,10 @@ function TrainingGroupCostSidepanel({
 
 function GroupSidepanelCostTab({
   movement,
+  onUpdateBudget,
 }: {
   movement: TrainingBudgetMovement
+  onUpdateBudget: () => void
 }) {
   const les = legalEntitiesForMovement(movement)
   const hasMultipleLEs = les.length > 1
@@ -1707,11 +1699,25 @@ function GroupSidepanelCostTab({
           display="flex"
           flexDirection="column"
           gap="sm"
+          background="warning"
         >
-          <F0Text variant="label" content="What changed" />
+          <F0Box display="flex" justifyContent="between" gap="md">
+            <F0Box display="flex" flexDirection="column" gap="xs">
+              <F0Text variant="label" content="Budget needs update" />
+              <F0Text
+                variant="description"
+                content={`${movement.costUpdateNotice.change ?? "Group changed"} · ${movement.costUpdateNotice.impact ?? "No total change"}`}
+              />
+            </F0Box>
+            <F0Button
+              label="Update budget"
+              variant="outline"
+              onClick={onUpdateBudget}
+            />
+          </F0Box>
           <F0Text
             variant="description"
-            content={movement.costUpdateNotice.change ?? "Group changed"}
+            content="Changes detected in this group:"
           />
           {movement.costUpdateNotice.details?.map((detail) => (
             <F0Box key={detail} display="flex" gap="sm" alignItems="start">
