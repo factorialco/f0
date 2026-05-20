@@ -87,13 +87,6 @@ export const meta: PrototypeMeta = {
 type View = "list" | "detail" | "new"
 type BudgetStatusKey = "within_budget" | "budget_risk" | "over_budget"
 type BudgetStatusColor = "viridian" | "yellow" | "radical"
-type BudgetUpdateRow = {
-  id: string
-  groupName: string
-  change: string
-  impact: string
-  movement: TrainingBudgetMovement
-}
 
 const STATUS_LABEL: Record<BudgetStatusKey, string> = {
   within_budget: "Within budget",
@@ -980,44 +973,22 @@ function DetailView({
   )
   const needsBudgetUpdate =
     Boolean(b?.costUpdateNotice) && changedMovements.length > 0 && !budgetUpdateApplied
-  const budgetUpdateRows = useMemo<BudgetUpdateRow[]>(
+  const changeSummary = useMemo(
     () =>
-      changedMovements.map((movement) => ({
-        id: movement.id,
-        groupName: movement.groupName,
-        change: movement.costUpdateNotice?.change ?? "Group changed",
-        impact: movement.costUpdateNotice?.impact ?? "No total change",
-        movement,
-      })),
+      Array.from(
+        new Set(
+          changedMovements.map(
+            (movement) => movement.costUpdateNotice?.change ?? "Group changed"
+          )
+        )
+      ),
     [changedMovements]
   )
-  const budgetUpdateSource = useDataCollectionSource<BudgetUpdateRow>(
-    {
-      totalItemSummary: (totalItems) =>
-        `${totalItems} ${totalItems === 1 ? "group" : "groups"} changed`,
-      dataAdapter: {
-        paginationType: "pages",
-        perPage: 10,
-        fetchData: () => ({
-          type: "pages" as const,
-          records: budgetUpdateRows,
-          total: budgetUpdateRows.length,
-          perPage: 10,
-          currentPage: 1,
-          pagesCount: 1,
-        }),
-      },
-      itemOnClick: (row) => () => setSelectedMovement(row.movement),
-      itemActions: (row) => [
-        {
-          label: "Open group",
-          icon: ExternalLink,
-          onClick: () => setSelectedMovement(row.movement),
-        },
-      ],
-    },
-    [budgetUpdateRows]
-  )
+  const budgetUpdateDescription = `${changedMovements.length} ${
+    changedMovements.length === 1 ? "group has" : "groups have"
+  } changed since being added to this budget: ${changeSummary.join(
+    ", "
+  )}. Open a group to see the detailed changes.`
 
   const goToTrainingGroup = (m: TrainingBudgetMovement) => {
     navigate(`/p/trainings?training=${m.trainingId}&class=${m.groupId}`)
@@ -1343,54 +1314,34 @@ function DetailView({
         </div>
 
         {needsBudgetUpdate && b.costUpdateNotice && (
-          <F0Box paddingX="lg" display="flex" flexDirection="column" gap="md">
-            <F0Alert
-              variant="warning"
-              title={b.costUpdateNotice.title}
-              description="Review the affected groups below, then update the budget."
-              action={{
-                label: "Update budget",
-                onClick: () => setBudgetUpdateApplied(true),
-              }}
-            />
-            <OneDataCollection
-              id="trainings/budgets/update-preview/v1"
-              source={budgetUpdateSource}
-              visualizations={[
-                {
-                  type: "table",
-                  options: {
-                    columns: [
-                      {
-                        label: "Training group",
-                        id: "groupName",
-                        render: (row) => ({
-                          type: "text",
-                          value: row.groupName,
-                        }),
-                      },
-                      {
-                        label: "Change",
-                        id: "change",
-                        render: (row) => ({
-                          type: "text",
-                          value: row.change,
-                        }),
-                      },
-                      {
-                        label: "Impact",
-                        id: "impact",
-                        align: "right" as const,
-                        render: (row) => ({
-                          type: "text",
-                          value: row.impact,
-                        }),
-                      },
-                    ],
-                  },
-                },
-              ]}
-            />
+          <F0Box paddingX="lg">
+            <F0Box
+              display="flex"
+              alignItems="center"
+              justifyContent="between"
+              gap="md"
+              padding="md"
+              border="default"
+              borderColor="secondary"
+              borderRadius="lg"
+              background="warning"
+            >
+              <F0Box display="flex" flexDirection="column" gap="xs">
+                <F0Text
+                  variant="label"
+                  content={b.costUpdateNotice.title}
+                />
+                <F0Text
+                  variant="description"
+                  content={budgetUpdateDescription}
+                />
+              </F0Box>
+              <F0Button
+                label="Update budget"
+                variant="outline"
+                onClick={() => setBudgetUpdateApplied(true)}
+              />
+            </F0Box>
           </F0Box>
         )}
 

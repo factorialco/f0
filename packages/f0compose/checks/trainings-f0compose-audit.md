@@ -230,7 +230,7 @@ Scope checked:
 User-visible change:
 
 - Removed the budget-level "changed since last review" review dialog pattern.
-- Budget detail now shows an inline page warning outside the groups table, followed by a compact `OneDataCollection` table for affected groups, their change, their impact, and row actions to open the group.
+- Budget detail now shows one inline warning notice integrated above the groups table, summarising affected group changes and exposing `Update budget` without adding a second table.
 - Training group Costs tab now shows `Update budget` only when that specific group changed after being added to the budget, with direct change and impact copy.
 - Opening the group sidepanel from the budget shows `Update budget` plus `What changed` details for participant, legal entity, or salary changes.
 
