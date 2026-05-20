@@ -402,6 +402,10 @@ export const defaultTranslations = {
         description: "Your company has run out of AI credits.",
         actionLabel: "Get credits",
       },
+      employeeMessageBanner: {
+        title: "This response requires credits",
+        description: "You have run out of your assigned AI credits.",
+      },
     },
     attachFile: "Attach file",
     removeFile: "Remove",

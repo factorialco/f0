@@ -83,6 +83,11 @@ export type {
   F0MessageCreditsWarningArgs,
   F0MessageCreditsWarningProps,
 } from "./actions/core/messageCreditsWarning"
+export { F0EmployeeCreditsWarning } from "./actions/core/employeeCreditsWarning"
+export type {
+  F0EmployeeCreditsWarningArgs,
+  F0EmployeeCreditsWarningProps,
+} from "./actions/core/employeeCreditsWarning"
 export type { OrchestratorThinkingResult } from "./actions/core/orchestratorThinking/types"
 
 // Clarifying question types (panel state is owned by useAiChat)
