@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.11.0](https://github.com/factorialco/f0/compare/f0-react-v2.10.0...f0-react-v2.11.0) (2026-05-20)
+
+
+### Features
+
+* add option creation in select from dataset question type ([#4100](https://github.com/factorialco/f0/issues/4100)) ([2c34b02](https://github.com/factorialco/f0/commit/2c34b029e8b549b162e6a52cbb2d166d2bcb7da9))
+
 ## [2.10.0](https://github.com/factorialco/f0/compare/f0-react-v2.9.0...f0-react-v2.10.0) (2026-05-20)
 
 
