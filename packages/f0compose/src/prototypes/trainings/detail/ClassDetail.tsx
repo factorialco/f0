@@ -68,7 +68,7 @@ export function ClassDetail({
   training,
   classId,
   onBackToList: _onBackToList,
-  onBackToTraining,
+  onBackToTraining: _onBackToTraining,
   onBackToClasses: _onBackToClasses,
 }: Props) {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -122,7 +122,7 @@ export function ClassDetail({
               {
                 id: training.id,
                 label: training.name,
-                onClick: onBackToTraining,
+                href: `/p/trainings?training=${training.id}`,
               },
               { id: "missing", label: "Class not found" },
             ]}
@@ -185,7 +185,7 @@ export function ClassDetail({
                 {
                   id: training.id,
                   label: training.name,
-                  onClick: onBackToTraining,
+                  href: `/p/trainings?training=${training.id}`,
                 },
                 { id: klass.id, label: klass.name },
               ]}

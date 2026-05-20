@@ -473,9 +473,67 @@ export type TrainingBudget = {
   // upstream). Pre-existing fixtures omit it; consumers that need the
   // currency-from-LE behavior should rely on this when present.
   legalEntityId?: string
+  // Optional unique people count for the budget summary. This can be lower than
+  // the sum of group participants when the same employee attends multiple groups.
+  peopleCount?: number
+  costUpdateNotice?: {
+    title: string
+    description: string
+    change?: string
+    currentStatus?: string
+    impact?: string
+    details?: string[]
+  }
 }
 
 export const trainingBudgets: TrainingBudget[] = [
+  {
+    id: "bud-training-live-costs",
+    name: "Training budget 2026 · Needs update",
+    year: 2026,
+    totalAmount: 50000,
+    spentAmount: 0,
+    pendingAmount: 30000,
+    remainingAmount: 20000,
+    currency: "EUR",
+    status: "active",
+    scope: "company",
+    scopeName: "All employees",
+    ownerEmployeeId: "emp-001",
+    ownerEmployeeName: "Javier Molina",
+    description:
+      "Exploration state: training group changes have been detected since costs were last saved.",
+    startDate: "2026-01-01",
+    endDate: "2026-12-31",
+    legalEntityId: "le-factorial-spain",
+    peopleCount: 17,
+    costUpdateNotice: {
+      title: "Budget changed since last review",
+      description:
+        "3 training groups changed. Allocated amount increased by 4,800.00 €. These figures already include the latest participant and salary data.",
+    },
+  },
+  {
+    id: "bud-training-2026",
+    name: "Training budget 2026",
+    year: 2026,
+    totalAmount: 50000,
+    spentAmount: 0,
+    pendingAmount: 30000,
+    remainingAmount: 20000,
+    currency: "EUR",
+    status: "active",
+    scope: "company",
+    scopeName: "All employees",
+    ownerEmployeeId: "emp-001",
+    ownerEmployeeName: "Javier Molina",
+    description:
+      "Training budget for Communication skills groups across Madrid, France and Italy.",
+    startDate: "2026-01-01",
+    endDate: "2026-12-31",
+    legalEntityId: "le-factorial-spain",
+    peopleCount: 17,
+  },
   {
     id: "bud-001",
     name: "Company-wide 2026",
@@ -1211,6 +1269,14 @@ export type TrainingBudgetMovement = {
   indirectCost: number
   salaryCost: number
   costsByLegalEntity?: TrainingMovementLegalEntityCost[]
+  costUpdateNotice?: {
+    title: string
+    description: string
+    change?: string
+    currentStatus?: string
+    impact?: string
+    details?: string[]
+  }
 }
 
 // Sum of direct+indirect+salary across LE breakdown (gross cost upstream).
@@ -1330,6 +1396,283 @@ export function breakdownByLegalEntityFor(
 }
 
 export const trainingBudgetMovements: TrainingBudgetMovement[] = [
+  // bud-training-live-costs — exploration state for automatic cost updates
+  {
+    id: "mov-live-costs-001",
+    budgetId: "bud-training-live-costs",
+    trainingId: "trn-communication-skills-2026",
+    trainingName: "Communication skills",
+    groupId: "cls-communication-madrid-morning",
+    groupName: "Madrid Group Morning Mayo 2026",
+    groupStatus: "completed",
+    startDate: "2026-03-26",
+    endDate: "2026-03-27",
+    amountCents: 1000000,
+    currency: "EUR",
+    trainingProvider: "Private",
+    trainingTeamId: "team-ppl",
+    trainingTeamName: "People",
+    paymentStatus: "pending",
+    participantsCount: 3,
+    directCost: 7769,
+    indirectCost: 1942.59,
+    salaryCost: 288.41,
+    costUpdateNotice: {
+      title: "Participant changes detected",
+      description:
+        "A participant was added since the last review. The budget already includes the latest participant and salary data.",
+      change: "+1 participant",
+      impact: "+420.00 €",
+      currentStatus: "Included in current figures",
+      details: [
+        "+1 participant since last review",
+        "Salary cost increased by 132.00 €",
+        "Cost per participant changed from 3,333.00 € to 2,605.00 €",
+      ],
+    },
+    costsByLegalEntity: [
+      {
+        legalEntityId: "le-factorial-spain",
+        participantsCount: 2,
+        directCost: 5179.33,
+        indirectCost: 1295.06,
+        salaryCost: 184.23,
+      },
+      {
+        legalEntityId: "le-casa-tarraee",
+        participantsCount: 1,
+        directCost: 2589.67,
+        indirectCost: 647.53,
+        salaryCost: 104.18,
+      },
+    ],
+  },
+  {
+    id: "mov-live-costs-002",
+    budgetId: "bud-training-live-costs",
+    trainingId: "trn-communication-skills-2026",
+    trainingName: "Communication skills",
+    groupId: "cls-communication-france-morning",
+    groupName: "France Group Morning Mayo 2026",
+    groupStatus: "completed",
+    startDate: "2026-03-26",
+    endDate: "2026-03-27",
+    amountCents: 1000000,
+    currency: "EUR",
+    trainingProvider: "Private",
+    trainingTeamId: "team-ppl",
+    trainingTeamName: "People",
+    paymentStatus: "pending",
+    participantsCount: 5,
+    directCost: 7499,
+    indirectCost: 1875.18,
+    salaryCost: 625.82,
+    costUpdateNotice: {
+      title: "Legal entity split changed",
+      description:
+        "One participant now belongs to a different legal entity. The budget split already reflects the current employee data.",
+      change: "Legal entity split changed",
+      impact: "No total change",
+      currentStatus: "Split updated in current figures",
+      details: [
+        "Northstar BCN added to this group",
+        "Acme France participant count changed from 3 to 2",
+        "Budget split now includes 3 legal entities",
+      ],
+    },
+    costsByLegalEntity: [
+      {
+        legalEntityId: "le-casa-tarraee",
+        participantsCount: 2,
+        directCost: 2999.6,
+        indirectCost: 750.07,
+        salaryCost: 240.45,
+      },
+      {
+        legalEntityId: "le-factorial-spain",
+        participantsCount: 2,
+        directCost: 2999.6,
+        indirectCost: 750.07,
+        salaryCost: 151.39,
+      },
+      {
+        legalEntityId: "le-bcn-casa-ee",
+        participantsCount: 1,
+        directCost: 1499.8,
+        indirectCost: 375.04,
+        salaryCost: 233.98,
+      },
+    ],
+  },
+  {
+    id: "mov-live-costs-003",
+    budgetId: "bud-training-live-costs",
+    trainingId: "trn-communication-skills-2026",
+    trainingName: "Communication skills",
+    groupId: "cls-communication-italy-morning",
+    groupName: "Italy Group Morning Mayo 2026",
+    groupStatus: "completed",
+    startDate: "2026-03-26",
+    endDate: "2026-03-27",
+    amountCents: 1000000,
+    currency: "EUR",
+    trainingProvider: "Private",
+    trainingTeamId: "team-ppl",
+    trainingTeamName: "People",
+    paymentStatus: "pending",
+    participantsCount: 10,
+    directCost: 7162.02,
+    indirectCost: 1790.51,
+    salaryCost: 1047.47,
+    costUpdateNotice: {
+      title: "Salary data changed",
+      description:
+        "Contract or salary data changed for participants in this group. Salary cost has been recalculated in the current budget figures.",
+      change: "Salary data changed",
+      impact: "+1,047.00 €",
+      currentStatus: "Included in current figures",
+      details: [
+        "Salary data changed for 2 participants",
+        "Salary cost increased from 878.00 € to 1,047.00 €",
+        "Cost per participant changed from 1,000.00 € to 1,105.00 €",
+      ],
+    },
+    costsByLegalEntity: [
+      {
+        legalEntityId: "le-bcn-casa-ee",
+        participantsCount: 5,
+        directCost: 3581.01,
+        indirectCost: 895.26,
+        salaryCost: 379.17,
+      },
+      {
+        legalEntityId: "le-factorial-spain",
+        participantsCount: 5,
+        directCost: 3581.01,
+        indirectCost: 895.25,
+        salaryCost: 668.3,
+      },
+    ],
+  },
+  // bud-training-2026 — Training budget 2026
+  {
+    id: "mov-training-2026-001",
+    budgetId: "bud-training-2026",
+    trainingId: "trn-communication-skills-2026",
+    trainingName: "Communication skills",
+    groupId: "cls-communication-madrid-morning",
+    groupName: "Madrid Group Morning Mayo 2026",
+    groupStatus: "completed",
+    startDate: "2026-03-26",
+    endDate: "2026-03-27",
+    amountCents: 1000000,
+    currency: "EUR",
+    trainingProvider: "Private",
+    trainingTeamId: "team-ppl",
+    trainingTeamName: "People",
+    paymentStatus: "pending",
+    participantsCount: 3,
+    directCost: 7769,
+    indirectCost: 1942.59,
+    salaryCost: 288.41,
+    costsByLegalEntity: [
+      {
+        legalEntityId: "le-factorial-spain",
+        participantsCount: 2,
+        directCost: 5179.33,
+        indirectCost: 1295.06,
+        salaryCost: 184.23,
+      },
+      {
+        legalEntityId: "le-casa-tarraee",
+        participantsCount: 1,
+        directCost: 2589.67,
+        indirectCost: 647.53,
+        salaryCost: 104.18,
+      },
+    ],
+  },
+  {
+    id: "mov-training-2026-002",
+    budgetId: "bud-training-2026",
+    trainingId: "trn-communication-skills-2026",
+    trainingName: "Communication skills",
+    groupId: "cls-communication-france-morning",
+    groupName: "France Group Morning Mayo 2026",
+    groupStatus: "completed",
+    startDate: "2026-03-26",
+    endDate: "2026-03-27",
+    amountCents: 1000000,
+    currency: "EUR",
+    trainingProvider: "Private",
+    trainingTeamId: "team-ppl",
+    trainingTeamName: "People",
+    paymentStatus: "pending",
+    participantsCount: 5,
+    directCost: 7499,
+    indirectCost: 1875.18,
+    salaryCost: 625.82,
+    costsByLegalEntity: [
+      {
+        legalEntityId: "le-casa-tarraee",
+        participantsCount: 2,
+        directCost: 2999.6,
+        indirectCost: 750.07,
+        salaryCost: 240.45,
+      },
+      {
+        legalEntityId: "le-factorial-spain",
+        participantsCount: 2,
+        directCost: 2999.6,
+        indirectCost: 750.07,
+        salaryCost: 151.39,
+      },
+      {
+        legalEntityId: "le-bcn-casa-ee",
+        participantsCount: 1,
+        directCost: 1499.8,
+        indirectCost: 375.04,
+        salaryCost: 233.98,
+      },
+    ],
+  },
+  {
+    id: "mov-training-2026-003",
+    budgetId: "bud-training-2026",
+    trainingId: "trn-communication-skills-2026",
+    trainingName: "Communication skills",
+    groupId: "cls-communication-italy-morning",
+    groupName: "Italy Group Morning Mayo 2026",
+    groupStatus: "completed",
+    startDate: "2026-03-26",
+    endDate: "2026-03-27",
+    amountCents: 1000000,
+    currency: "EUR",
+    trainingProvider: "Private",
+    trainingTeamId: "team-ppl",
+    trainingTeamName: "People",
+    paymentStatus: "pending",
+    participantsCount: 10,
+    directCost: 7162.02,
+    indirectCost: 1790.51,
+    salaryCost: 1047.47,
+    costsByLegalEntity: [
+      {
+        legalEntityId: "le-bcn-casa-ee",
+        participantsCount: 5,
+        directCost: 3581.01,
+        indirectCost: 895.26,
+        salaryCost: 379.17,
+      },
+      {
+        legalEntityId: "le-factorial-spain",
+        participantsCount: 5,
+        directCost: 3581.01,
+        indirectCost: 895.25,
+        salaryCost: 668.3,
+      },
+    ],
+  },
   // bud-001 — Company-wide 2026
   {
     id: "mov-001",

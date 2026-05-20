@@ -51,6 +51,7 @@ import {
   findEmployee,
   findTeam,
   grossCostFromMovement,
+  salaryCostForEmployeeInGroup,
   legalEntities,
   legalEntityCurrencyMap,
   legalEntityForEmployee,
@@ -63,6 +64,10 @@ import {
 
 import type { PrototypeMeta } from "../../../types"
 
+import {
+  setCostsByLegalEntityToggle,
+  useCostsByLegalEntityToggle,
+} from "../../costsByLegalEntityToggleStore"
 import { trainingsTopNav } from "../../topNav"
 
 export const meta: PrototypeMeta = {
@@ -95,7 +100,7 @@ const GROUP_STATUS_LABEL: Record<
 > = {
   planned: "Planned",
   ongoing: "Ongoing",
-  completed: "Completed",
+  completed: "Finished",
 }
 
 // F0TagStatus variant per group status (Figma: pill rellena, status-tag cell)
@@ -105,7 +110,7 @@ const GROUP_STATUS_VARIANT: Record<
 > = {
   planned: "info",
   ongoing: "positive",
-  completed: "neutral",
+  completed: "positive",
 }
 
 const PAYMENT_STATUS_LABEL: Record<
@@ -204,6 +209,14 @@ function participantsByLegalEntityForMovement(
     const le = legalEntityForEmployee(p.employeeId)
     counts.set(le.id, (counts.get(le.id) ?? 0) + 1)
   }
+
+  if (counts.size === 0 && movement.costsByLegalEntity) {
+    return movement.costsByLegalEntity.map((cost) => ({
+      legalEntityId: cost.legalEntityId,
+      count: cost.participantsCount,
+    }))
+  }
+
   return Array.from(counts.entries()).map(([legalEntityId, count]) => ({
     legalEntityId,
     count,
@@ -236,6 +249,28 @@ function legalEntitiesForMovement(movement: TrainingBudgetMovement) {
   return participantsByLegalEntityForMovement(movement)
     .map(({ legalEntityId }) => findLegalEntity(legalEntityId))
     .filter((le): le is NonNullable<typeof le> => Boolean(le))
+}
+
+type BudgetChangeRow = {
+  id: string
+  groupName: string
+  changeType: "participants" | "legal_entity" | "salary"
+  impactAmount: number | null
+}
+
+const BUDGET_CHANGE_LABEL: Record<BudgetChangeRow["changeType"], string> = {
+  participants: "Participants changed",
+  legal_entity: "Legal entity changed",
+  salary: "Salary data changed",
+}
+
+const BUDGET_CHANGE_VARIANT: Record<
+  BudgetChangeRow["changeType"],
+  "neutral" | "info" | "positive" | "warning" | "critical"
+> = {
+  participants: "neutral",
+  legal_entity: "neutral",
+  salary: "neutral",
 }
 
 // ── URL routing ─────────────────────────────────────────────────────────────
@@ -273,7 +308,24 @@ function classTotalCost(
   const direct = Number(k.cost ?? 0) || 0
   const indirect = Number(k.indirectCost ?? 0) || 0
   const salary = Number(k.salaryCost ?? 0) || 0
-  return { direct, indirect, salary, total: direct + indirect + salary }
+  const total = direct + indirect + salary
+  if (total > 0) return { direct, indirect, salary, total }
+
+  const participants = participantsForGroup(classId)
+  const fallbackSalary = participants.reduce(
+    (sum, participant) =>
+      sum + salaryCostForEmployeeInGroup(participant.employeeId, classId),
+    0
+  )
+  const fallbackDirect = Math.max(1200, participants.length * 650)
+  const fallbackIndirect = Math.round(fallbackDirect * 0.15 * 100) / 100
+  const roundedSalary = Math.round(fallbackSalary * 100) / 100
+  return {
+    direct: fallbackDirect,
+    indirect: fallbackIndirect,
+    salary: roundedSalary,
+    total: fallbackDirect + fallbackIndirect + roundedSalary,
+  }
 }
 
 function calculateAllocated(selectedTrainingClassIds: string[]): number {
@@ -864,6 +916,8 @@ function DetailView({
   const [isExportOpen, setIsExportOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isAddGroupOpen, setIsAddGroupOpen] = useState(false)
+  const [isChangesOpen, setIsChangesOpen] = useState(false)
+  const [reviewedChanges, setReviewedChanges] = useState(false)
   const [selectedMovement, setSelectedMovement] =
     useState<TrainingBudgetMovement | null>(null)
   const [extraMovements, setExtraMovements] = useState<
@@ -936,6 +990,11 @@ function DetailView({
       ),
     [movements, trainingParents]
   )
+  const changedMovements = movements.filter((movement) =>
+    Boolean(movement.costUpdateNotice)
+  )
+  const hasUnreviewedChanges =
+    Boolean(b?.costUpdateNotice) && changedMovements.length > 0 && !reviewedChanges
 
   const goToTrainingGroup = (m: TrainingBudgetMovement) => {
     navigate(`/p/trainings?training=${m.trainingId}&class=${m.groupId}`)
@@ -954,7 +1013,7 @@ function DetailView({
     {
       search: { enabled: true, sync: true },
       totalItemSummary: (totalItems) =>
-        `${totalItems} ${totalItems === 1 ? "person" : "people"}`,
+        `${b?.peopleCount ?? totalItems} ${(b?.peopleCount ?? totalItems) === 1 ? "person" : "people"}`,
       presets: [
         { label: "Pending", filter: { paymentStatus: ["pending"] } },
         { label: "Paid", filter: { paymentStatus: ["spent"] } },
@@ -1179,9 +1238,8 @@ function DetailView({
         ? "yellow"
         : "smoke"
 
-  // Number of distinct training groups currently allocated to this budget.
-  const groupsCount = new Set(movements.map((m) => m.groupId)).size
-
+  // Number of distinct trainings currently allocated to this budget.
+  const groupsCount = new Set(movements.map((m) => m.trainingId)).size
   // Start date of the budget period. Falls back to Jan 1st of `year` when the
   // fixture doesn't define it, so existing budgets keep rendering.
   const startDateIso = b.startDate ?? `${b.year}-01-01`
@@ -1230,6 +1288,20 @@ function DetailView({
               variant="warning"
               title="Archived budget"
               description="This budget is in read-only mode. Adding or removing groups is disabled unless the budget is reactivated."
+            />
+          </div>
+        )}
+
+        {hasUnreviewedChanges && b.costUpdateNotice && (
+          <div className="px-6">
+            <F0Alert
+              variant="warning"
+              title={b.costUpdateNotice.title}
+              description={b.costUpdateNotice.description}
+              action={{
+                label: "Review changes",
+                onClick: () => setIsChangesOpen(true),
+              }}
             />
           </div>
         )}
@@ -1326,6 +1398,25 @@ function DetailView({
                           },
                   },
                   {
+                    label: "Cost / participant",
+                    id: "costPerParticipant",
+                    align: "right" as const,
+                    width: 136,
+                    render: (item) => {
+                      if (item.isParent) return { type: "text", value: "" }
+                      const participantCount = participantCountForMovement(item)
+                      return {
+                        type: "text",
+                        value:
+                          participantCount > 0
+                            ? fmtEurCompact(
+                                grossCostFromMovement(item) / participantCount
+                              )
+                            : "-",
+                      }
+                    },
+                  },
+                  {
                     label: "Provider",
                     id: "provider",
                     render: (item) =>
@@ -1352,7 +1443,7 @@ function DetailView({
                   {
                     label: "Legal entities",
                     id: "legalEntities",
-                    width: 144,
+                    width: 180,
                     render: (item) => {
                       if (item.isParent) return { type: "text", value: "" }
                       const les = legalEntitiesForMovement(item)
@@ -1446,11 +1537,24 @@ function DetailView({
           />
         )}
 
+        {isChangesOpen && (
+          <BudgetChangesDialog
+            movements={changedMovements}
+            onOpenGroup={(movement) => {
+              setSelectedMovement(movement)
+              setIsChangesOpen(false)
+            }}
+            onMarkReviewed={() => {
+              setReviewedChanges(true)
+              setIsChangesOpen(false)
+            }}
+            onClose={() => setIsChangesOpen(false)}
+          />
+        )}
+
         {selectedMovement && (
           <TrainingGroupCostSidepanel
             movement={selectedMovement}
-            position={selectedMovementIndex + 1}
-            total={movementNavigation.length}
             hasPrevious={selectedMovementIndex > 0}
             hasNext={selectedMovementIndex < movementNavigation.length - 1}
             onPrevious={() => selectMovementAt(selectedMovementIndex - 1)}
@@ -1466,8 +1570,6 @@ function DetailView({
 
 function TrainingGroupCostSidepanel({
   movement,
-  position,
-  total,
   hasPrevious,
   hasNext,
   onPrevious,
@@ -1476,8 +1578,6 @@ function TrainingGroupCostSidepanel({
   onClose,
 }: {
   movement: TrainingBudgetMovement
-  position: number
-  total: number
   hasPrevious: boolean
   hasNext: boolean
   onPrevious: () => void
@@ -1550,17 +1650,143 @@ function TrainingGroupCostSidepanel({
           onClick={onNext}
         />
       </div>
-      <F0Box display="flex" justifyContent="end" paddingX="md" paddingY="sm">
-        <F0Text
-          variant="small"
-          content={`${position}/${total} · ${PAYMENT_STATUS_LABEL[movement.paymentStatus]} · ${fmtNumericDate(movement.startDate)}- ${fmtNumericDate(movement.endDate)}`}
-        />
-      </F0Box>
       {activeTab === "cost" ? (
         <GroupSidepanelCostTab movement={movement} />
       ) : (
         <GroupSidepanelParticipantsTab movement={movement} />
       )}
+    </F0Dialog>
+  )
+}
+
+function BudgetChangesDialog({
+  movements,
+  onOpenGroup,
+  onMarkReviewed,
+  onClose,
+}: {
+  movements: TrainingBudgetMovement[]
+  onOpenGroup: (movement: TrainingBudgetMovement) => void
+  onMarkReviewed: () => void
+  onClose: () => void
+}) {
+  const rows: BudgetChangeRow[] = movements.map((movement) => ({
+    id: movement.id,
+    groupName: movement.groupName,
+    changeType: movement.costUpdateNotice?.change?.includes("participant")
+      ? "participants"
+      : movement.costUpdateNotice?.change?.includes("Legal")
+        ? "legal_entity"
+        : "salary",
+    impactAmount:
+      movement.costUpdateNotice?.impact?.startsWith("+") &&
+      movement.costUpdateNotice.impact.includes("€")
+        ? Number(
+            movement.costUpdateNotice.impact
+              .replace("+", "")
+              .replace("€", "")
+              .replace(/,/g, "")
+              .trim()
+          )
+        : null,
+  }))
+
+  const source = useDataCollectionSource<BudgetChangeRow>(
+    {
+      totalItemSummary: (totalItems) =>
+        `${totalItems} ${totalItems === 1 ? "group" : "groups"} changed`,
+      dataAdapter: {
+        paginationType: "pages",
+        perPage: 20,
+        fetchData: () => ({
+          type: "pages" as const,
+          records: rows,
+          total: rows.length,
+          perPage: 20,
+          currentPage: 1,
+          pagesCount: 1,
+        }),
+      },
+      itemActions: (row) => {
+        const movement = movements.find((item) => item.id === row.id)
+        return movement
+          ? [
+              {
+                label: "Open group impact",
+                icon: ExternalLink,
+                onClick: () => onOpenGroup(movement),
+              },
+            ]
+          : []
+      },
+    },
+    [rows, movements]
+  )
+
+  return (
+    <F0Dialog
+      isOpen
+      onClose={onClose}
+      position="right"
+      width="md"
+      title="Changes since last review"
+      primaryAction={{
+        label: "Mark as reviewed",
+        onClick: onMarkReviewed,
+      }}
+      secondaryAction={{
+        label: "Close",
+        onClick: onClose,
+      }}
+      disableContentPadding
+    >
+      <F0Box padding="lg" display="flex" flexDirection="column" gap="xl">
+        <F0Text
+          variant="description"
+          content="These changes explain why the budget numbers moved since the last review. Current figures already include them."
+        />
+        <OneDataCollection
+          id="trainings/budgets/review-changes/v1"
+          source={source}
+          visualizations={[
+            {
+              type: "table",
+              options: {
+                columns: [
+                  {
+                    label: "Training group",
+                    id: "groupName",
+                    render: (row) => ({ type: "text", value: row.groupName }),
+                  },
+                  {
+                    label: "Change type",
+                    id: "changeType",
+                    render: (row) => ({
+                      type: "status",
+                      value: {
+                        status: BUDGET_CHANGE_VARIANT[row.changeType],
+                        label: BUDGET_CHANGE_LABEL[row.changeType],
+                      },
+                    }),
+                  },
+                  {
+                    label: "Impact",
+                    id: "impact",
+                    align: "right" as const,
+                    render: (row) => ({
+                      type: "text",
+                      value:
+                        row.impactAmount === null
+                          ? "No total change"
+                          : `+${fmtEurAmount(row.impactAmount)}`,
+                    }),
+                  },
+                ],
+              },
+            },
+          ]}
+        />
+      </F0Box>
     </F0Dialog>
   )
 }
@@ -1572,7 +1798,10 @@ function GroupSidepanelCostTab({
 }) {
   const les = legalEntitiesForMovement(movement)
   const hasMultipleLEs = les.length > 1
-  const [showByLegalEntity, setShowByLegalEntity] = useState(hasMultipleLEs)
+  const showByLegalEntity = useCostsByLegalEntityToggle(
+    movement.groupId,
+    hasMultipleLEs
+  )
   const [openLeId, setOpenLeId] = useState<string | null>(les[0]?.id ?? null)
 
   const breakdownMap = new Map(
@@ -1639,9 +1868,12 @@ function GroupSidepanelCostTab({
           </div>
           <Switch
             title="Costs by legal entity"
+            id={`budget-sidepanel-costs-by-legal-entity-${movement.id}`}
             hideLabel
             checked={showByLegalEntity}
-            onCheckedChange={setShowByLegalEntity}
+            onCheckedChange={(checked) =>
+              setCostsByLegalEntityToggle(movement.groupId, checked)
+            }
             disabled={!hasMultipleLEs}
           />
         </div>

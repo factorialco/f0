@@ -23,20 +23,38 @@ export type LegalEntity = {
 
 export const legalEntities: LegalEntity[] = [
   {
+    id: "le-factorial-spain",
+    legalName: "Factorial Spain",
+    countryCode: "ES",
+    currency: "EUR",
+  },
+  {
+    id: "le-casa-tarraee",
+    legalName: "Acme France",
+    countryCode: "FR",
+    currency: "EUR",
+  },
+  {
+    id: "le-bcn-casa-ee",
+    legalName: "Northstar BCN",
+    countryCode: "ES",
+    currency: "EUR",
+  },
+  {
     id: "le-001",
-    legalName: "Acme Iberia S.L",
+    legalName: "Luma Iberia",
     countryCode: "ES",
     currency: "EUR",
   },
   {
     id: "le-002",
-    legalName: "Acme France SAS",
+    legalName: "Cobalt France",
     countryCode: "FR",
     currency: "EUR",
   },
   {
     id: "le-003",
-    legalName: "Acme Portugal Lda",
+    legalName: "Atlas Portugal",
     countryCode: "PT",
     currency: "EUR",
   },
@@ -62,6 +80,17 @@ function hashCode(str: string): number {
 }
 
 export function legalEntityIdForEmployee(employeeId: string): string {
+  const explicitAssignments: Record<string, string> = {
+    "emp-008": "le-factorial-spain",
+    "emp-013": "le-factorial-spain",
+    "emp-014": "le-bcn-casa-ee",
+    "emp-017": "le-bcn-casa-ee",
+    "emp-015": "le-factorial-spain",
+    "emp-019": "le-factorial-spain",
+  }
+  const explicit = explicitAssignments[employeeId]
+  if (explicit) return explicit
+
   const idx = hashCode(employeeId) % legalEntities.length
   return legalEntities[idx]!.id
 }

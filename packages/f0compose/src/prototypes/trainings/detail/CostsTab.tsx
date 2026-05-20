@@ -19,15 +19,22 @@ import {
   Office,
 } from "@factorialco/f0-react/icons/app"
 
+import {
+  setCostsByLegalEntityToggle,
+  useCostsByLegalEntityToggle,
+} from "../costsByLegalEntityToggleStore"
 import type { Training, TrainingClass, TrainingParticipant } from "@/fixtures"
 import {
   breakdownByLegalEntityFor,
+  directCostFromMovement,
   findEmployee,
   findLegalEntity,
   findTeam,
   hoursCompletedForEmployee,
+  indirectCostFromMovement,
   legalEntities,
   legalEntityForEmployee,
+  salaryCostFromMovement,
   salaryCostForEmployeeInGroup,
   trainingBudgets,
   trainingBudgetMovements,
@@ -36,6 +43,53 @@ import {
 
 type Props = { training: Training; klass?: TrainingClass }
 type PaymentStatus = "pending" | "paid" | ""
+
+function participantsForMovement(movement: (typeof trainingBudgetMovements)[number]) {
+  return trainingParticipants.filter((p) => p.classId === movement.groupId)
+}
+
+function participantsByLegalEntityForMovement(
+  movement: (typeof trainingBudgetMovements)[number]
+): Array<{ legalEntityId: string; count: number }> {
+  const counts = new Map<string, number>()
+  for (const participant of participantsForMovement(movement)) {
+    const legalEntity = legalEntityForEmployee(participant.employeeId)
+    counts.set(legalEntity.id, (counts.get(legalEntity.id) ?? 0) + 1)
+  }
+
+  if (counts.size === 0 && movement.costsByLegalEntity?.length) {
+    return movement.costsByLegalEntity.map((cost) => ({
+      legalEntityId: cost.legalEntityId,
+      count: cost.participantsCount,
+    }))
+  }
+
+  return Array.from(counts.entries()).map(([legalEntityId, count]) => ({
+    legalEntityId,
+    count,
+  }))
+}
+
+function legalEntityBreakdownForMovement(
+  movement: (typeof trainingBudgetMovements)[number]
+) {
+  const participantsByLegalEntity = participantsByLegalEntityForMovement(movement)
+  const countsByLegalEntity = new Map(
+    participantsByLegalEntity.map(({ legalEntityId, count }) => [
+      legalEntityId,
+      count,
+    ])
+  )
+
+  return breakdownByLegalEntityFor(movement, participantsByLegalEntity).map(
+    (breakdown) => ({
+      ...breakdown,
+      participantsCount:
+        countsByLegalEntity.get(breakdown.legalEntityId) ??
+        breakdown.participantsCount,
+    })
+  )
+}
 
 function formatMoney(n: number, currency = "EUR"): string {
   return n.toLocaleString("en-GB", {
@@ -95,7 +149,9 @@ function BudgetLinkBanner({
   totalCost: number
 }) {
   const goToBudgets = () => {
-    window.location.href = "/p/trainings-budgets"
+    window.location.href = budgetId
+      ? `/p/trainings-budgets?view=detail&budgetId=${budgetId}`
+      : "/p/trainings-budgets"
   }
 
   if (trainingBudgets.length === 0) {
@@ -125,55 +181,70 @@ function BudgetLinkBanner({
 
   const available = budget.remainingAmount
   const isOverBudget = totalCost > available
-
-  if (!isOverBudget) {
-    return (
-      <F0Alert
-        variant="positive"
-        title={`Within ${budget.name} budget`}
-        description={`${formatMoney(available, budget.currency)} remaining after this group.`}
-        action={{ label: "View budget", onClick: goToBudgets }}
-      />
-    )
-  }
-
-  const overrun = totalCost - available
-  const overrunPct =
-    budget.totalAmount > 0
-      ? ((overrun / budget.totalAmount) * 100).toFixed(1)
-      : "0"
-
-  return (
+  const statusAlert = isOverBudget ? (
     <F0Alert
       variant="warning"
       title="Over budget"
-      description={`This group exceeds ${budget.name} by ${formatMoney(overrun, budget.currency)} (${overrunPct}% of total budget).`}
+      description={`This group exceeds ${budget.name} by ${formatMoney(totalCost - available, budget.currency)} (${budget.totalAmount > 0 ? (((totalCost - available) / budget.totalAmount) * 100).toFixed(1) : "0"}% of total budget).`}
+      action={{ label: "View budget", onClick: goToBudgets }}
+    />
+  ) : (
+    <F0Alert
+      variant="positive"
+      title={`Within ${budget.name}`}
+      description={`${formatMoney(available, budget.currency)} remaining after this group.`}
       action={{ label: "View budget", onClick: goToBudgets }}
     />
   )
+
+  if (budget.costUpdateNotice) {
+    return (
+      <div className="flex flex-col gap-3">
+        <F0Alert
+          variant="warning"
+          title={budget.costUpdateNotice.title}
+          description="Review the budget changes before using this budget as final."
+          action={{ label: "Review budget", onClick: goToBudgets }}
+        />
+        {statusAlert}
+      </div>
+    )
+  }
+
+  return statusAlert
 }
 
 export function CostsTab({ training, klass }: Props) {
   const currency = "EUR"
+  const linkedMovement =
+    (klass && trainingBudgetMovements.find((m) => m.groupId === klass.id)) ??
+    null
   const participants = klass?.participantCount ?? training.participantCount ?? 1
   const splitCount = Math.max(training.classes.length, 1)
-  const initialDirect = klass
-    ? Math.round(training.totalCost / splitCount)
-    : training.totalCost
-  const initialSalary = klass
-    ? Math.round(training.totalSalaryCost / splitCount)
-    : training.totalSalaryCost
+  const initialDirect = linkedMovement
+    ? directCostFromMovement(linkedMovement)
+    : klass
+      ? Math.round(training.totalCost / splitCount)
+      : training.totalCost
+  const initialIndirect = linkedMovement
+    ? indirectCostFromMovement(linkedMovement)
+    : Math.round(initialDirect * 0.15)
+  const initialSalary = linkedMovement
+    ? salaryCostFromMovement(linkedMovement)
+    : klass
+      ? Math.round(training.totalSalaryCost / splitCount)
+      : training.totalSalaryCost
   const initialSubsidy = klass
     ? Math.round(training.totalSubsidizedCost / splitCount)
     : training.totalSubsidizedCost
 
   const [directCost, setDirectCost] = useState(initialDirect)
-  const [indirectCost, setIndirectCost] = useState(
-    Math.round(initialDirect * 0.15)
-  )
+  const [indirectCost, setIndirectCost] = useState(initialIndirect)
   const [salaryCost, setSalaryCost] = useState(initialSalary)
   const [subsidizedCost, setSubsidizedCost] = useState(initialSubsidy)
-  const [budgetId, setBudgetId] = useState<string | null>("bud-001")
+  const [budgetId, setBudgetId] = useState<string | null>(
+    linkedMovement?.budgetId ?? "bud-001"
+  )
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>("pending")
   const [calculatorOpen, setCalculatorOpen] = useState(false)
   const [selectedLegalEntityId, setSelectedLegalEntityId] = useState<
@@ -336,7 +407,7 @@ export function CostsTab({ training, klass }: Props) {
       )}
 
       <CostsByLegalEntitySection
-        klass={klass}
+        movement={linkedMovement}
         selectedLegalEntityId={selectedLegalEntityId}
         onOpenLegalEntity={setSelectedLegalEntityId}
         onCloseLegalEntity={() => setSelectedLegalEntityId(null)}
@@ -384,45 +455,29 @@ export function CostsTab({ training, klass }: Props) {
 }
 
 function CostsByLegalEntitySection({
-  klass,
+  movement,
   selectedLegalEntityId,
   onOpenLegalEntity,
   onCloseLegalEntity,
 }: {
-  klass?: TrainingClass
+  movement: (typeof trainingBudgetMovements)[number] | null
   selectedLegalEntityId: string | null
   onOpenLegalEntity: (legalEntityId: string) => void
   onCloseLegalEntity: () => void
 }) {
-  const movement =
-    (klass && trainingBudgetMovements.find((m) => m.groupId === klass.id)) ??
-    trainingBudgetMovements[0]
   if (!movement) return null
 
-  const participants = trainingParticipants.filter(
-    (p) => p.classId === movement.groupId
-  )
-  const leIds = Array.from(
-    new Set(
-      participants
-        .map((p) => legalEntityForEmployee(p.employeeId)?.id)
-        .filter((id): id is string => Boolean(id))
-    )
-  )
+  const participants = participantsForMovement(movement)
+  const countsByLe = participantsByLegalEntityForMovement(movement)
+  const leIds = countsByLe.map(({ legalEntityId }) => legalEntityId)
   const les = leIds
     .map((id) => legalEntities.find((le) => le.id === id))
     .filter((le): le is NonNullable<typeof le> => Boolean(le))
   const canSplit = les.length > 1
-  const [isOn, setIsOn] = useState(canSplit)
+  const isOn = useCostsByLegalEntityToggle(movement.groupId, canSplit)
 
-  const countsByLe = leIds.map((legalEntityId) => ({
-    legalEntityId,
-    count: participants.filter(
-      (p) => legalEntityForEmployee(p.employeeId)?.id === legalEntityId
-    ).length,
-  }))
   const breakdownMap = new Map(
-    breakdownByLegalEntityFor(movement, countsByLe).map((b) => [
+    legalEntityBreakdownForMovement(movement).map((b) => [
       b.legalEntityId,
       b,
     ])
@@ -449,9 +504,12 @@ function CostsByLegalEntitySection({
         </div>
         <Switch
           title="Costs by legal entity"
+          id={`training-costs-by-legal-entity-${movement.id}`}
           hideLabel
           checked={isOn}
-          onCheckedChange={(v: boolean) => setIsOn(v)}
+          onCheckedChange={(v: boolean) =>
+            setCostsByLegalEntityToggle(movement.groupId, v)
+          }
           disabled={!canSplit}
         />
       </div>
@@ -466,6 +524,8 @@ function CostsByLegalEntitySection({
             const leParticipants = participants.filter(
               (p) => legalEntityForEmployee(p.employeeId)?.id === le.id
             )
+            const participantsCount =
+              breakdown?.participantsCount ?? leParticipants.length
             return (
               <button
                 type="button"
@@ -480,7 +540,7 @@ function CostsByLegalEntitySection({
                   <F0Text variant="label" content={le.legalName} />
                   <F0Text
                     variant="description"
-                    content={`${le.countryCode} · ${leParticipants.length} ${leParticipants.length === 1 ? "participant" : "participants"}`}
+                    content={`${le.countryCode} · ${participantsCount} ${participantsCount === 1 ? "participant" : "participants"}`}
                   />
                 </div>
                 <span className="whitespace-nowrap font-bold text-f1-foreground">
@@ -637,6 +697,7 @@ function LegalEntityCostsSidepanel({
         <LegalEntityParticipantsPanel
           classId={movement.groupId}
           participants={participants}
+          breakdown={breakdown}
         />
       )}
     </F0Dialog>
@@ -646,14 +707,23 @@ function LegalEntityCostsSidepanel({
 function LegalEntityParticipantsPanel({
   classId,
   participants,
+  breakdown,
 }: {
   classId: string
   participants: TrainingParticipant[]
+  breakdown: NonNullable<ReturnType<typeof breakdownByLegalEntityFor>[number]>
 }) {
+  const directAndIndirectPerParticipant =
+    participants.length > 0
+      ? (breakdown.directCost + breakdown.indirectCost) / participants.length
+      : 0
   const rows = participants.map((participant) => ({
     ...participant,
     hours: hoursCompletedForEmployee(participant.employeeId, classId),
     salary: salaryCostForEmployeeInGroup(participant.employeeId, classId),
+    employeeCost:
+      salaryCostForEmployeeInGroup(participant.employeeId, classId) +
+      directAndIndirectPerParticipant,
   }))
 
   const source = useDataCollectionSource<(typeof rows)[number]>(
@@ -725,7 +795,7 @@ function LegalEntityParticipantsPanel({
   return (
     <div className="flex w-full flex-col gap-5 px-5 py-4">
       <OneDataCollection
-        id={`finance/budget-training-group-participants-${classId}/v1`}
+        id={`finance/budget-training-group-participants-${classId}/v3`}
         source={source}
         visualizations={[
           {
@@ -771,6 +841,13 @@ function LegalEntityParticipantsPanel({
                   render: (participant) => ({
                     type: "text" as const,
                     value: formatMoney(participant.salary),
+                  }),
+                },
+                {
+                  label: "Employee cost",
+                  render: (participant) => ({
+                    type: "text" as const,
+                    value: formatMoney(participant.employeeCost),
                   }),
                 },
               ],

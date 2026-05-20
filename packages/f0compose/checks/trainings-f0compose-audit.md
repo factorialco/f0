@@ -241,8 +241,12 @@ section updated before the local check passes.
 - `packages/f0compose/src/prototypes/trainings/detail/NewFormWizard.tsx`
 - `packages/f0compose/src/prototypes/trainings/detail/ClassDetail.tsx`
 - `packages/f0compose/src/prototypes/trainings/detail/CostsTab.tsx`
+- `packages/f0compose/src/prototypes/trainings/costsByLegalEntityToggleStore.ts`
 - `packages/f0compose/src/prototypes/trainings/tabs.ts`
 - `packages/f0compose/src/prototypes/trainings/_modules/budgets/TrainingsBudgets.tsx`
+- `packages/f0compose/src/fixtures/trainings.ts`
+- `packages/f0compose/src/fixtures/trainings-extra.ts`
+- `packages/f0compose/src/fixtures/legal-entities.ts`
 
 ### Upstream Sources Checked
 
@@ -269,8 +273,12 @@ section updated before the local check passes.
 - `packages/f0compose/src/prototypes/trainings/detail/NewFormWizard.tsx`
 - `packages/f0compose/src/prototypes/trainings/detail/ClassDetail.tsx`
 - `packages/f0compose/src/prototypes/trainings/detail/CostsTab.tsx`
+- `packages/f0compose/src/prototypes/trainings/costsByLegalEntityToggleStore.ts`
 - `packages/f0compose/src/prototypes/trainings/tabs.ts`
 - `packages/f0compose/src/prototypes/trainings/_modules/budgets/TrainingsBudgets.tsx`
+- `packages/f0compose/src/fixtures/trainings.ts`
+- `packages/f0compose/src/fixtures/trainings-extra.ts`
+- `packages/f0compose/src/fixtures/legal-entities.ts`
 
 ### Local vs Upstream Diff
 
@@ -288,11 +296,29 @@ section updated before the local check passes.
   so the full Trainings static check can run through the prototype allowlist.
 - Session dialogs and budget dialogs are wired to real local state transitions;
   they are still prototype implementations, not direct upstream ports.
+- `packages/f0compose/src/fixtures/trainings-extra.ts` now includes the Figma
+  node `4998:70702` budget fixture: `Training budget 2026`, 50,000 total,
+  30,000 allocated, 0 spent, 20,000 available, 17 people, and the exact
+  Communication skills group rows from child node `5179:237203`.
+- `Training budget 2026` movements are now backed by real local training groups
+  in `fixtures/trainings.ts`, so `Go to Training group` opens a valid detail
+  URL for Madrid, France, and Italy.
+- Legal entities in the budget table, budget sidepanel, and group Costs detail
+  are derived from the employees assigned to each training group. The budget
+  breakdown keeps direct/indirect costs as prototype estimates, but salary cost
+  is validated against `salaryCostForEmployeeInGroup(employeeId, groupId)`.
+- `Training budget 2026 · Needs update` is an exploration state for reviewing
+  budget changes since last review. It uses `F0Alert` for the global warning,
+  `F0Dialog position="right"` for the review panel, and `OneDataCollection` to
+  list affected groups before the user marks the changes as reviewed.
 - Budget group sidepanel keeps `F0Dialog position="right"`. Header actions now
   use the standard dialog action slot only for `Go to Training group`; previous
   and next group controls are overlaid into the same top-level header action
   row because `F0DialogHeader` collapses more than two `otherActions` into the
   `...` dropdown.
+- `packages/f0compose/src/prototypes/trainings/costsByLegalEntityToggleStore.ts`
+  keeps the prototype-only `Costs by legal entity` toggle synced by training
+  group between the budget sidepanel and the group Costs tab.
 - Cost sidepanel visual parity remains blocked and must not be edited without a
   fresh Figma-scoped audit.
 
@@ -308,3 +334,6 @@ section updated before the local check passes.
 - Run `pnpm tsc --noEmit` before declaring the delta complete.
 - Browser-check `http://localhost:5174/p/trainings?training=trn-001` and any
   touched sub-view before declaring visual parity.
+- Browser-check `http://localhost:5174/p/trainings-budgets?view=detail&budgetId=bud-training-2026`.
+- Browser-check group detail costs URLs for `cls-communication-madrid-morning`,
+  `cls-communication-france-morning`, and `cls-communication-italy-morning`.
