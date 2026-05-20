@@ -26,6 +26,7 @@ import { ReactNode } from 'react';
 import { ReactPortal } from 'react';
 import { Ref } from 'react';
 import { RefAttributes } from 'react';
+import { RefObject } from 'react';
 import { RemoteAudioTrack } from 'livekit-client';
 import { SVGProps } from 'react';
 import * as SwitchPrimitive from '@radix-ui/react-switch';
@@ -419,7 +420,7 @@ declare interface AiChatState {
 declare type AiChatTrackingOptions = {
     onVisibility?: () => void;
     onClose?: () => void;
-    onWelcomeSuggestionClick?: (suggestion: WelcomeScreenSuggestion) => void;
+    onWelcomeSuggestionClick?: (item: WelcomeScreenSuggestionItem) => void;
     onNewChat?: () => void;
     onMessage?: (message: Message) => void;
 };
@@ -2327,9 +2328,10 @@ export declare const F0AiChatProvider: ({ enabled, greeting, initialMessage, wel
  * coupling to `useAiChat()` or CopilotKit — wrappers like F0AiChat
  * provide the wiring.
  */
-export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingQuestion, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, }: F0AiChatTextAreaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingQuestion, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
 export declare type F0AiChatTextAreaProps = {
+    ref: RefObject<HTMLDivElement>;
     /** Emitted when the user submits. Awaited so the textarea can stay disabled. */
     onSubmit: (payload: F0AiChatTextAreaSubmitPayload) => void | Promise<void>;
     /** Called when the user clicks the stop button while a response is streaming. */
@@ -2385,6 +2387,15 @@ export declare type F0AiChatTextAreaProps = {
      */
     isWelcomeScreen?: boolean;
     /**
+     * Grouped suggestions rendered as outline buttons above the composer on
+     * the welcome screen. Clicking a group opens a single popover (above the
+     * row, left-aligned, spanning the composer width) with that group's items.
+     * Hovering an item previews its prompt in the textarea placeholder.
+     */
+    welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
+    /** Called when the user clicks a sub-suggestion. */
+    onSuggestionClick?: (item: WelcomeScreenSuggestionItem) => void;
+    /**
      * When true, the composer adopts the fullscreen layout: the welcome
      * footer is pushed to the bottom and the disclaimer is hidden so the
      * footer is the only thing under the textarea.
@@ -2406,11 +2417,6 @@ export declare type F0AiChatTextAreaSubmitPayload = {
     files: UploadedFile[];
     context: PendingContext | null;
 };
-
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-export declare const F0AiFullscreenChat: () => JSX_2.Element | null;
 
 export declare const F0AiInsightCard: WithDataTestIdReturnType<ForwardRefExoticComponent<F0AiInsightCardPublicProps & RefAttributes<HTMLDivElement>> & {
 Skeleton: () => JSX_2.Element;
@@ -2477,10 +2483,6 @@ export declare type F0AiMessagesContainerProps = {
     greeting?: string;
     /** Initial message(s) shown in the welcome screen, or a default if omitted. */
     initialMessage?: string | string[];
-    /** Suggestions rendered as buttons under the welcome screen. */
-    welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
-    /** Click on a suggestion chip — host wires this to sendMessage(). */
-    onSuggestionClick?: (suggestion: WelcomeScreenSuggestion) => void;
     /** Optional click on the One icon (factorial uses it for the pong easter egg). */
     onWelcomeIconClick?: () => void;
     /** Returns a React node for an assistant message's tool call, or null. */
@@ -3890,11 +3892,23 @@ declare interface WeekdaysProps {
 }
 
 /**
- * Welcome screen suggestion item
+ * A welcome-screen group rendered as an outline button in the welcome row.
+ * Clicking the group opens a popover listing its `items`.
  */
 export declare type WelcomeScreenSuggestion = {
     icon: IconType;
-    message: string;
+    label: string;
+    items: WelcomeScreenSuggestionItem[];
+};
+
+/**
+ * A single sub-suggestion shown inside a welcome-screen group's popover.
+ * The `title` is the label users see; `prompt` is what gets sent to the AI
+ * when they click (falls back to `title` when omitted). They can diverge so
+ * you can show a short, scannable title while sending a fully-formed prompt.
+ */
+export declare type WelcomeScreenSuggestionItem = {
+    title: string;
     prompt?: string;
 };
 
@@ -3949,11 +3963,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -4000,4 +4009,9 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
