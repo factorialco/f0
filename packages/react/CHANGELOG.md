@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.9.0](https://github.com/factorialco/f0/compare/f0-react-v2.8.2...f0-react-v2.9.0) (2026-05-20)
+
+
+### Features
+
+* expose onApply and allow icon on tags ([#4134](https://github.com/factorialco/f0/issues/4134)) ([1cd5190](https://github.com/factorialco/f0/commit/1cd51905afb071240b90bf8e91df0673195da81b))
+
 ## [2.8.2](https://github.com/factorialco/f0/compare/f0-react-v2.8.1...f0-react-v2.8.2) (2026-05-19)
 
 
