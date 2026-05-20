@@ -138,6 +138,8 @@ export interface UseSnapshotManagerReturn<R extends RecordType> {
   navigationData: Data<R>
   /** PaginationInfo to pass to useDataSourceItemNavigation */
   navigationPaginationInfo: PaginationInfo | null
+  /** True when a snapshot is currently active (even if the source has unmounted). */
+  hasSnapshot: boolean
   /**
    * Call before goToNext/goToPrevious when navigating past the snapshot
    * boundary, so the snapshot expands when new page/loadMore data arrives.
@@ -196,7 +198,22 @@ export function useSnapshotManager<R extends RecordType>({
   useEffect(() => clearSnapshotResetTimeout, [clearSnapshotResetTimeout])
 
   useEffect(() => {
-    if (!dataState || effectiveSnapshotKey == null) {
+    if (!dataState) {
+      if (effectiveSnapshotKey != null && snapshotData != null) {
+        // Source unmounted while a session snapshot is active — keep it alive
+        // so consumers can continue navigating from the detail view.
+        return
+      }
+      pendingSnapshotReset.current = null
+      pendingSnapshotNavigation.current = null
+      clearSnapshotResetTimeout()
+      setSnapshotData(null)
+      previousSnapshotKey.current = effectiveSnapshotKey
+      handledResetSnapshotKey.current = resetSnapshotKey
+      return
+    }
+
+    if (effectiveSnapshotKey == null) {
       pendingSnapshotReset.current = null
       pendingSnapshotNavigation.current = null
       clearSnapshotResetTimeout()
@@ -396,6 +413,7 @@ export function useSnapshotManager<R extends RecordType>({
   return {
     navigationData,
     navigationPaginationInfo,
+    hasSnapshot: snapshotData !== null,
     startPendingNavigation,
     clearSnapshot,
     clearPendingNavigation,

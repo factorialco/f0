@@ -726,4 +726,114 @@ describe("useSnapshotManager", () => {
       expect(result.current.navigationData).toBeDefined()
     })
   })
+
+  // ── Source unmount during active session ───────────────────────────────────
+
+  describe("source unmount during active session", () => {
+    it("preserves snapshot when dataState becomes null while session is active", () => {
+      const records = [makeRecord(1), makeRecord(2), makeRecord(3)]
+
+      const { result, rerender } = zeroRenderHook(
+        (props: UseSnapshotManagerProps<TestRecord>) =>
+          useSnapshotManager(props),
+        {
+          initialProps: defaultProps({
+            dataState: makeDataState({ data: makeData(records) }),
+            effectiveSnapshotKey: "session-1",
+            dataStateVersion: 1,
+          }),
+        }
+      )
+
+      // Snapshot established
+      expect(result.current.navigationData.records).toHaveLength(3)
+      expect(result.current.hasSnapshot).toBe(true)
+
+      // Source unmounts — dataState becomes null
+      rerender(
+        defaultProps({
+          dataState: null,
+          effectiveSnapshotKey: "session-1",
+          dataStateVersion: 1,
+        })
+      )
+
+      // Snapshot preserved — consumer can still navigate
+      expect(result.current.navigationData.records).toHaveLength(3)
+      expect(result.current.navigationData.records[0].id).toBe(1)
+      expect(result.current.hasSnapshot).toBe(true)
+    })
+
+    it("clears snapshot when dataState is null and no session key is active", () => {
+      const records = [makeRecord(1), makeRecord(2)]
+
+      const { result, rerender } = zeroRenderHook(
+        (props: UseSnapshotManagerProps<TestRecord>) =>
+          useSnapshotManager(props),
+        {
+          initialProps: defaultProps({
+            dataState: makeDataState({ data: makeData(records) }),
+            effectiveSnapshotKey: "session-1",
+            dataStateVersion: 1,
+          }),
+        }
+      )
+
+      expect(result.current.hasSnapshot).toBe(true)
+
+      // Session ended AND source unmounts
+      rerender(
+        defaultProps({
+          dataState: null,
+          effectiveSnapshotKey: null,
+          dataStateVersion: 1,
+        })
+      )
+
+      expect(result.current.navigationData.records).toHaveLength(0)
+      expect(result.current.hasSnapshot).toBe(false)
+    })
+
+    it("resumes normally when source re-mounts with fresh data", () => {
+      const records = [makeRecord(1), makeRecord(2)]
+      const freshRecords = [makeRecord(1, "Updated"), makeRecord(2)]
+
+      const { result, rerender } = zeroRenderHook(
+        (props: UseSnapshotManagerProps<TestRecord>) =>
+          useSnapshotManager(props),
+        {
+          initialProps: defaultProps({
+            dataState: makeDataState({ data: makeData(records) }),
+            effectiveSnapshotKey: "session-1",
+            dataStateVersion: 1,
+          }),
+        }
+      )
+
+      // Source unmounts
+      rerender(
+        defaultProps({
+          dataState: null,
+          effectiveSnapshotKey: "session-1",
+          dataStateVersion: 1,
+        })
+      )
+
+      expect(result.current.hasSnapshot).toBe(true)
+
+      // Source re-mounts with fresh data (same IDs, updated records)
+      rerender(
+        defaultProps({
+          dataState: makeDataState({ data: makeData(freshRecords) }),
+          effectiveSnapshotKey: "session-1",
+          dataStateVersion: 2,
+        })
+      )
+
+      // Snapshot is still active and refreshes record objects from live data
+      expect(result.current.hasSnapshot).toBe(true)
+      expect(result.current.navigationData.records).toHaveLength(2)
+      expect(result.current.navigationData.records[0].name).toBe("Updated")
+    })
+  })
 })

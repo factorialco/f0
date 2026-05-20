@@ -123,6 +123,7 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
   const {
     navigationData,
     navigationPaginationInfo,
+    hasSnapshot,
     startPendingNavigation,
     clearSnapshot,
     clearPendingNavigation,
@@ -221,7 +222,7 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
       ...navigation,
       goToNext,
       goToPrevious,
-      isReady: dataState !== null,
+      isReady: dataState !== null || hasSnapshot,
       controls,
       openItem,
       closeItem,
@@ -232,6 +233,7 @@ export function useDataCollectionItemNavigation<R extends RecordType>({
     [
       navigation,
       dataState,
+      hasSnapshot,
       controls,
       goToNext,
       goToPrevious,
