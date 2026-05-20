@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
-import { ReactElement, useRef, useState } from "react"
+import { ReactElement, useContext, useRef, useState } from "react"
 
 import type { StatusVariant } from "@/components/tags/F0TagStatus"
 
@@ -21,6 +21,7 @@ import { Skeleton } from "@/ui/skeleton"
 import { Breadcrumbs, BreadcrumbsProps } from "../Breadcrumbs"
 import { FavoriteButton } from "../Favorites"
 import { ProductUpdates, ProductUpdatesProp } from "../ProductUpdates"
+import { PageHeaderNavigationContext } from "./PageHeaderNavigationContext"
 
 export type PageAction = {
   label: string
@@ -37,7 +38,7 @@ export type PageAction = {
     }
 )
 
-type NavigationProps = {
+export type NavigationProps = {
   previous?: {
     url: string
     title: string
@@ -123,6 +124,10 @@ export function PageHeader({
   oneSwitchAutoOpen,
 }: HeaderProps) {
   const { sidebarState, toggleSidebar } = useSidebar()
+  const contextNavigation = useContext(PageHeaderNavigationContext)
+  // Prop takes precedence over context so that existing consumers using the
+  // siblingsNavigation route-meta pattern are unaffected.
+  const effectiveNavigation = navigation ?? contextNavigation
 
   const breadcrumbsTree: typeof breadcrumbs = [
     {
@@ -232,33 +237,34 @@ export function PageHeader({
         )}
         {!embedded &&
           hasStatus &&
-          (navigation || hasActions || hasProductUpdates) && (
+          (effectiveNavigation || hasActions || hasProductUpdates) && (
             <div className="h-4 w-px bg-f1-border-secondary" />
           )}
-        {navigation && (
+        {effectiveNavigation && (
           <div className="flex items-center gap-3">
-            {navigation.counter && (
+            {effectiveNavigation.counter && (
               <span className="text-sm text-f1-foreground-secondary">
-                {navigation.counter.current}/{navigation.counter.total}
+                {effectiveNavigation.counter.current}/
+                {effectiveNavigation.counter.total}
               </span>
             )}
             <div className="flex items-center gap-2">
               <PageNavigationLink
                 icon={ChevronUp}
-                label={navigation.previous?.title || "Previous"}
-                href={navigation.previous?.url || ""}
-                disabled={!navigation.previous}
+                label={effectiveNavigation.previous?.title || "Previous"}
+                href={effectiveNavigation.previous?.url || ""}
+                disabled={!effectiveNavigation.previous}
               />
               <PageNavigationLink
                 icon={ChevronDown}
-                label={navigation.next?.title || "Next"}
-                href={navigation.next?.url || ""}
-                disabled={!navigation.next}
+                label={effectiveNavigation.next?.title || "Next"}
+                href={effectiveNavigation.next?.url || ""}
+                disabled={!effectiveNavigation.next}
               />
             </div>
           </div>
         )}
-        {navigation && hasActions && (
+        {effectiveNavigation && hasActions && (
           <div className="h-4 w-px bg-f1-border-secondary" />
         )}
         {(hasProductUpdates || hasActions) && (
@@ -345,3 +351,9 @@ function PageAction({ action }: { action: PageAction }): ReactElement {
     </Link>
   )
 }
+
+export {
+  PageHeaderNavigationContext,
+  PageHeaderNavigationProvider,
+  usePageHeaderNavigation,
+} from "./PageHeaderNavigationContext"
