@@ -410,7 +410,11 @@ export function ActionsMenu({
             />
           </DropdownMenuGroup>
         )}
-        {(showDuplicate || showDelete) && <DropdownMenuSeparator />}
+        {(showRequired ||
+          showMultiSelect ||
+          showAllowCreate ||
+          showQuestionType) &&
+          (showDuplicate || showDelete) && <DropdownMenuSeparator />}
         {(showDuplicate || showDelete) && (
           <DropdownMenuGroup>
             {showDuplicate && (
