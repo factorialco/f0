@@ -28,6 +28,8 @@ type PendingSnapshotNavigation = {
 type SnapshotData<R extends RecordType> = {
   data: Data<R>
   paginationInfo: DataCollectionItemNavigationDataState<R>["paginationInfo"]
+  /** Captured from source.itemUrl when the snapshot was taken. */
+  itemUrl?: (item: R) => string | undefined
 }
 
 // ─── Pure helpers (module-level, no side-effects) ────────────────────────────
@@ -121,6 +123,7 @@ const createSnapshot = <R extends RecordType>(
 ): SnapshotData<R> => ({
   data: createSnapshotData(state.data),
   paginationInfo: state.paginationInfo,
+  itemUrl: state.source.itemUrl,
 })
 
 // ─── Hook interface ───────────────────────────────────────────────────────────
@@ -140,6 +143,12 @@ export interface UseSnapshotManagerReturn<R extends RecordType> {
   navigationPaginationInfo: PaginationInfo | null
   /** True when a snapshot is currently active (even if the source has unmounted). */
   hasSnapshot: boolean
+  /**
+   * The itemUrl function captured when the snapshot was taken. Used as a
+   * fallback when dataState is null (collection unmounted) so that
+   * previousItemUrl/nextItemUrl remain non-null in controls.
+   */
+  snapshotItemUrl?: (item: R) => string | undefined
   /**
    * Call before goToNext/goToPrevious when navigating past the snapshot
    * boundary, so the snapshot expands when new page/loadMore data arrives.
@@ -414,6 +423,7 @@ export function useSnapshotManager<R extends RecordType>({
     navigationData,
     navigationPaginationInfo,
     hasSnapshot: snapshotData !== null,
+    snapshotItemUrl: snapshotData?.itemUrl,
     startPendingNavigation,
     clearSnapshot,
     clearPendingNavigation,

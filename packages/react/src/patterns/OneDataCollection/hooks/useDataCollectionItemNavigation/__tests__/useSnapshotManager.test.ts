@@ -836,4 +836,124 @@ describe("useSnapshotManager", () => {
       expect(result.current.navigationData.records[0].name).toBe("Updated")
     })
   })
+
+  // ── snapshotItemUrl ────────────────────────────────────────────────────────
+
+  describe("snapshotItemUrl", () => {
+    it("is undefined before a snapshot is created", () => {
+      const { result } = zeroRenderHook(
+        (props: UseSnapshotManagerProps<TestRecord>) =>
+          useSnapshotManager(props),
+        {
+          initialProps: defaultProps({
+            effectiveSnapshotKey: null,
+          }),
+        }
+      )
+
+      expect(result.current.snapshotItemUrl).toBeUndefined()
+    })
+
+    it("captures source.itemUrl when snapshot is first created", () => {
+      const itemUrl = (item: TestRecord) => `/items/${item.id}`
+      const { result } = zeroRenderHook(
+        (props: UseSnapshotManagerProps<TestRecord>) =>
+          useSnapshotManager(props),
+        {
+          initialProps: defaultProps({
+            dataState: makeDataState({ source: { itemUrl } }),
+            effectiveSnapshotKey: "session-1",
+            dataStateVersion: 1,
+          }),
+        }
+      )
+
+      expect(result.current.snapshotItemUrl).toBe(itemUrl)
+    })
+
+    it("preserves snapshotItemUrl when dataState becomes null", () => {
+      const itemUrl = (item: TestRecord) => `/items/${item.id}`
+      const records = [makeRecord(1), makeRecord(2), makeRecord(3)]
+
+      const { result, rerender } = zeroRenderHook(
+        (props: UseSnapshotManagerProps<TestRecord>) =>
+          useSnapshotManager(props),
+        {
+          initialProps: defaultProps({
+            dataState: makeDataState({
+              source: { itemUrl },
+              data: makeData(records),
+            }),
+            effectiveSnapshotKey: "session-1",
+            dataStateVersion: 1,
+          }),
+        }
+      )
+
+      expect(result.current.snapshotItemUrl).toBe(itemUrl)
+
+      // Source unmounts
+      rerender(
+        defaultProps({
+          dataState: null,
+          effectiveSnapshotKey: "session-1",
+          dataStateVersion: 1,
+        })
+      )
+
+      // itemUrl is still available from the frozen snapshot
+      expect(result.current.snapshotItemUrl).toBe(itemUrl)
+      expect(result.current.snapshotItemUrl?.(makeRecord(5))).toBe("/items/5")
+    })
+
+    it("clears snapshotItemUrl when snapshot is cleared and key is removed", () => {
+      const itemUrl = (item: TestRecord) => `/items/${item.id}`
+      const { result, rerender } = zeroRenderHook(
+        (props: UseSnapshotManagerProps<TestRecord>) =>
+          useSnapshotManager(props),
+        {
+          initialProps: defaultProps({
+            dataState: makeDataState({ source: { itemUrl } }),
+            effectiveSnapshotKey: "session-1",
+            dataStateVersion: 1,
+          }),
+        }
+      )
+
+      expect(result.current.snapshotItemUrl).toBe(itemUrl)
+
+      act(() => {
+        result.current.clearSnapshot()
+      })
+
+      // Session ended — clear key too (mirrors closeItem behaviour)
+      rerender(
+        defaultProps({
+          dataState: makeDataState({ source: { itemUrl } }),
+          effectiveSnapshotKey: null,
+          dataStateVersion: 1,
+        })
+      )
+
+      expect(result.current.snapshotItemUrl).toBeUndefined()
+    })
+
+    it("is undefined when source does not provide itemUrl", () => {
+      const { result } = zeroRenderHook(
+        (props: UseSnapshotManagerProps<TestRecord>) =>
+          useSnapshotManager(props),
+        {
+          initialProps: defaultProps({
+            dataState: makeDataState({
+              source: { idProvider: (item) => item.id },
+            }),
+            effectiveSnapshotKey: "session-1",
+            dataStateVersion: 1,
+          }),
+        }
+      )
+
+      expect(result.current.snapshotItemUrl).toBeUndefined()
+    })
+  })
 })
