@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.11.1](https://github.com/factorialco/f0/compare/f0-react-v2.11.0...f0-react-v2.11.1) (2026-05-20)
+
+
+### Bug Fixes
+
+* always center SurveyAnsweringForm elements vertically ([#4178](https://github.com/factorialco/f0/issues/4178)) ([edda8b7](https://github.com/factorialco/f0/commit/edda8b7682403e729cdce01e4d2ea8158a60b7d3))
+
 ## [2.11.0](https://github.com/factorialco/f0/compare/f0-react-v2.10.0...f0-react-v2.11.0) (2026-05-20)
 
 
