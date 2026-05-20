@@ -345,6 +345,14 @@ export const AllQuestions: Story = {
   },
 }
 
+export const AllQuestionsFewQuestions: Story = {
+  args: {
+    mode: "all-questions",
+    elements: sampleElements.slice(0, 2),
+    position: "fullscreen",
+  },
+}
+
 export const Stepped: Story = {
   args: {
     mode: "stepped",

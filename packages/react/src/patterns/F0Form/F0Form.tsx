@@ -1046,7 +1046,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       ref={formElementRef}
       onSubmit={onFormSubmit}
       className={cn(
-        "flex flex-1 flex-col w-full mx-auto",
+        "flex flex-col w-full mx-auto",
         FORM_MAX_WIDTH,
         className,
         styling?.showSectionsSidepanel && "p-2 [&>div:last-child]:pb-6"
