@@ -32,7 +32,7 @@ import {
 import { useSurveyFormBuilderContext } from "../../../Context"
 import { RatingOptionType } from "../../../lib"
 import { QuestionType } from "../../../types"
-import { HiddenActions } from "../types"
+import { HiddenAction, HiddenActions } from "../types"
 import { RATING_OPTIONS, useQuestionActions } from "./useQuestionActions"
 
 const ToggleItem = ({
@@ -324,16 +324,19 @@ export function ActionsMenu({
     canDelete: canDeleteQuestion,
   })
 
-  const showRequired = !disallowOptionalQuestions && !hiddenActions?.required
-  const showMultiSelect = !!currentDatasetKey && !hiddenActions?.multiSelect
+  const isHidden = (action: HiddenAction) =>
+    hiddenActions?.includes(action) ?? false
+
+  const showRequired = !disallowOptionalQuestions && !isHidden("required")
+  const showMultiSelect = !!currentDatasetKey && !isHidden("multiSelect")
   const showAllowCreate =
     !!currentDatasetKey &&
     datasetHasOnCreate &&
     questionType === "dropdown-single" &&
-    !hiddenActions?.allowCreate
-  const showQuestionType = !hiddenActions?.questionType
-  const showDuplicate = !hiddenActions?.duplicate
-  const showDelete = canDeleteQuestion && !hiddenActions?.delete
+    !isHidden("allowCreate")
+  const showQuestionType = !isHidden("questionType")
+  const showDuplicate = !isHidden("duplicate")
+  const showDelete = canDeleteQuestion && !isHidden("delete")
 
   // Hide the trigger entirely if no action is available.
   if (

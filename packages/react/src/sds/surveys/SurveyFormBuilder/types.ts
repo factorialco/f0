@@ -35,19 +35,20 @@ export type ElementType = QuestionType | "section"
  * Per-question control to hide individual entries from the question
  * actions menu (the "⋯" dropdown). Useful when a consumer wants to
  * lock down a subset of question editing without disabling the whole
- * question. All fields default to `false` (action visible).
+ * question.
  *
- * When every action is hidden, the actions menu trigger is not
- * rendered at all.
+ * When every available action is hidden, the actions menu trigger is
+ * not rendered at all.
  */
-export type HiddenActions = {
-  required?: boolean
-  multiSelect?: boolean
-  allowCreate?: boolean
-  questionType?: boolean
-  duplicate?: boolean
-  delete?: boolean
-}
+export type HiddenAction =
+  | "required"
+  | "multiSelect"
+  | "allowCreate"
+  | "questionType"
+  | "duplicate"
+  | "delete"
+
+export type HiddenActions = ReadonlyArray<HiddenAction>
 
 export type BaseQuestionOnChangeParams = {
   id: string

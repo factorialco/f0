@@ -1,6 +1,6 @@
-import { HiddenActions, QuestionType } from "../../types"
+import { HiddenAction, HiddenActions, QuestionType } from "../../types"
 
-export type { HiddenActions }
+export type { HiddenAction, HiddenActions }
 
 export type BaseQuestionProps = {
   id: string
