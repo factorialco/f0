@@ -859,7 +859,10 @@ export function F0AiFormRegistryProvider({
       // using the captured values so AI-filled data is not lost
       const virtualDef = availableFormDefinitions?.find((d) => d.name === name)
       if (virtualDef) {
-        const originalDefaults = resolveDefaultValues(virtualDef.defaultValues)
+        const originalDefaults =
+          typeof virtualDef.defaultValues === "function"
+            ? {}
+            : resolveDefaultValues(virtualDef.defaultValues)
         const mergedDefaults = { ...originalDefaults, ...currentValues }
         const { ref: virtualRef, dirtyFields } = createVirtualFormRef(
           virtualDef.schema,
@@ -1032,9 +1035,18 @@ export function F0AiFormRegistryProvider({
       // Skip if already registered as virtual
       if (existing?.virtual) continue
 
+      // Never invoke function-type defaultValues during virtual registration.
+      // They fire side effects (API calls) for ALL definitions, not just the active one.
+      // Functions are preserved as defDefaultValuesFn and resolved later:
+      // - With params: AI calls defaultValuesFn when the form becomes active
+      // - Without params: useAsyncDefaultValues resolves when the form renders
+      const initialValues =
+        typeof def.defaultValues === "function"
+          ? {}
+          : resolveDefaultValues(def.defaultValues)
       const { ref: virtualRef, dirtyFields } = createVirtualFormRef(
         def.schema,
-        resolveDefaultValues(def.defaultValues),
+        initialValues,
         def.onSubmit
       )
       const defDefaultValuesFn =

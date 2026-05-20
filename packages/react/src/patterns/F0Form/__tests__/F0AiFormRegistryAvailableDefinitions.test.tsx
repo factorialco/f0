@@ -1690,3 +1690,119 @@ describe("F0FormDefinition with defaultValuesFn threads through to registry entr
     })
   })
 })
+
+describe("availableFormDefinitions does not eagerly invoke defaultValues functions", () => {
+  const paramsSchema = z.object({ id: z.string() })
+
+  it("does not call async defaultValuesFn during virtual registration (with params schema)", async () => {
+    const asyncFn = vi.fn(async (_params: { id: string }) => ({
+      name: "resolved",
+      email: "r@e.com",
+    }))
+
+    const formDef: F0FormDefinitionSingleSchema<typeof simpleSchema> = {
+      _brand: "single",
+      name: "no-eager-call",
+      schema: simpleSchema,
+      defaultValuesParamsSchema: paramsSchema,
+      defaultValuesFn: asyncFn as (
+        params: Record<string, unknown>
+      ) => Promise<Record<string, unknown>>,
+      onSubmit: async () => ({ success: true }),
+    }
+
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider availableFormDefinitions={[formDef]}>
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("no-eager-call")).toBeDefined()
+    })
+
+    // The async function should NOT have been called during registration
+    expect(asyncFn).not.toHaveBeenCalled()
+
+    // Virtual ref should have empty initial values
+    const entry = capturedRegistry!.get("no-eager-call")!
+    expect(entry.ref.current!.getValues()).toEqual({})
+    expect(entry.defaultValuesFn).toBeDefined()
+  })
+
+  it("does not call async defaultValues function during registration (without params schema)", async () => {
+    const asyncFn = vi.fn(async () => ({
+      name: "fetched",
+      email: "f@e.com",
+    }))
+
+    const definition: F0AiAvailableFormDefinition = {
+      name: "no-eager-async",
+      schema: simpleSchema,
+      defaultValues: asyncFn,
+    }
+
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider availableFormDefinitions={[definition]}>
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("no-eager-async")).toBeDefined()
+    })
+
+    // The async function should NOT have been called during registration
+    expect(asyncFn).not.toHaveBeenCalled()
+    expect(
+      capturedRegistry!.get("no-eager-async")!.ref.current!.getValues()
+    ).toEqual({})
+  })
+
+  it("does not call sync defaultValues function during registration", async () => {
+    const syncFn = vi.fn((_params: Record<string, unknown>) => ({
+      name: "computed",
+      email: "c@e.com",
+    }))
+
+    const definition: F0AiAvailableFormDefinition = {
+      name: "no-eager-sync",
+      schema: simpleSchema,
+      defaultValues: syncFn,
+    }
+
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider availableFormDefinitions={[definition]}>
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("no-eager-sync")).toBeDefined()
+    })
+
+    // The sync function should NOT have been called during registration
+    expect(syncFn).not.toHaveBeenCalled()
+    expect(
+      capturedRegistry!.get("no-eager-sync")!.ref.current!.getValues()
+    ).toEqual({})
+  })
+})
