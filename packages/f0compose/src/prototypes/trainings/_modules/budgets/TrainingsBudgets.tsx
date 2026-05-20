@@ -1298,15 +1298,52 @@ function DetailView({
 
         {needsBudgetUpdate && b.costUpdateNotice && (
           <div className="px-6">
-            <F0Alert
-              variant="warning"
-              title={b.costUpdateNotice.title}
-              description={`${b.costUpdateNotice.description} Open a group to review what changed before updating the budget.`}
-              action={{
-                label: "Update budget",
-                onClick: () => setBudgetUpdateApplied(true),
-              }}
-            />
+            <F0Box
+              display="flex"
+              flexDirection="column"
+              gap="md"
+              padding="md"
+              border="default"
+              borderColor="secondary"
+              borderRadius="lg"
+            >
+              <F0Alert
+                variant="warning"
+                title={b.costUpdateNotice.title}
+                description="These groups changed after they were added to this budget. Review the changes below, then update the budget."
+                action={{
+                  label: "Update budget",
+                  onClick: () => setBudgetUpdateApplied(true),
+                }}
+              />
+              <F0Box display="flex" flexDirection="column" gap="xs">
+                {changedMovements.map((movement) => (
+                  <button
+                    key={movement.id}
+                    type="button"
+                    className="flex items-center justify-between gap-3 rounded-xl border border-solid border-f1-border bg-f1-background px-4 py-3 text-left hover:bg-f1-background-hover"
+                    onClick={() => setSelectedMovement(movement)}
+                  >
+                    <span className="flex min-w-0 flex-col gap-0.5">
+                      <span className="truncate text-[14px] font-medium leading-[20px] tracking-[-0.07px] text-f1-foreground">
+                        {movement.groupName}
+                      </span>
+                      <span className="truncate text-[14px] leading-[20px] tracking-[-0.07px] text-f1-foreground-secondary">
+                        {movement.costUpdateNotice?.change ?? "Group changed"}
+                      </span>
+                    </span>
+                    <span className="flex shrink-0 items-center gap-3">
+                      <span className="text-[14px] font-medium leading-[20px] tracking-[-0.07px] text-f1-foreground-warning">
+                        {movement.costUpdateNotice?.impact ?? "No total change"}
+                      </span>
+                      <span className="text-[14px] font-medium leading-[20px] tracking-[-0.07px] text-f1-foreground-secondary">
+                        Open group
+                      </span>
+                    </span>
+                  </button>
+                ))}
+              </F0Box>
+            </F0Box>
           </div>
         )}
 
@@ -1522,6 +1559,7 @@ function DetailView({
             onPrevious={() => selectMovementAt(selectedMovementIndex - 1)}
             onNext={() => selectMovementAt(selectedMovementIndex + 1)}
             onGoToGroup={() => goToTrainingGroup(selectedMovement)}
+            onUpdateBudget={() => setBudgetUpdateApplied(true)}
             onClose={() => setSelectedMovement(null)}
           />
         )}
@@ -1537,6 +1575,7 @@ function TrainingGroupCostSidepanel({
   onPrevious,
   onNext,
   onGoToGroup,
+  onUpdateBudget,
   onClose,
 }: {
   movement: TrainingBudgetMovement
@@ -1545,6 +1584,7 @@ function TrainingGroupCostSidepanel({
   onPrevious: () => void
   onNext: () => void
   onGoToGroup: () => void
+  onUpdateBudget: () => void
   onClose: () => void
 }) {
   const [activeTab, setActiveTab] = useState<"cost" | "participants">("cost")
@@ -1617,7 +1657,11 @@ function TrainingGroupCostSidepanel({
           <F0Alert
             variant="warning"
             title="Update budget"
-            description={`${movement.costUpdateNotice.description} Review the impact before updating the budget.`}
+            description={`${movement.costUpdateNotice.change ?? "Group changed"} · ${movement.costUpdateNotice.impact ?? "No total change"}`}
+            action={{
+              label: "Update budget",
+              onClick: onUpdateBudget,
+            }}
           />
         </F0Box>
       )}

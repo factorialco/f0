@@ -205,7 +205,7 @@ function BudgetLinkBanner({
         <F0Alert
           variant="warning"
           title="Update budget"
-          description={`${movement.costUpdateNotice.description} Review the impact before updating the budget.`}
+          description={`${movement.costUpdateNotice.change ?? "Group changed"} · ${movement.costUpdateNotice.impact ?? "No total change"}. This group changed after it was added to the budget.`}
           action={{ label: "Update budget", onClick: goToBudgets }}
         />
         {statusAlert}
