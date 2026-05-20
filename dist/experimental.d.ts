@@ -25,6 +25,7 @@ import { CompanyCellValue as CompanyCellValue_2 } from './experimental';
 import { CompanyItemProps } from './types';
 import { ComponentProps } from 'react';
 import { CompoundCellValue } from './types/compound';
+import { Context } from 'react';
 import { CopilotKitProps } from '@copilotkit/react-core';
 import { CountCellValue } from './types/count';
 import { CountryCellValue } from './types/country';
@@ -82,6 +83,7 @@ import { ProgressBarCellValue } from './types/progressBar';
 import { ProgressBarCellValue as ProgressBarCellValue_2 } from './experimental';
 import { Props as Props_5 } from './types';
 import { PropsWithChildren } from 'react';
+import { Provider } from 'react';
 import { RadarChartProps } from './RadarChart';
 import * as React_2 from 'react';
 import { ReactElement } from 'react';
@@ -5656,7 +5658,7 @@ declare type NavigationItem = Pick<LinkProps, "href" | "exactMatch" | "onClick">
     label: string;
 } & DataAttributes_2;
 
-declare type NavigationProps = {
+export declare type NavigationProps = {
     previous?: {
         url: string;
         title: string;
@@ -6370,6 +6372,25 @@ export declare type PageBasedPaginatedResponse<TRecord> = BasePaginatedResponse<
 };
 
 export declare function PageHeader({ module, statusTag, breadcrumbs, actions, embedded, navigation, productUpdates, favorites, oneSwitchTooltip, oneSwitchAutoOpen, }: HeaderProps): JSX_2.Element;
+
+export declare const PageHeaderNavigationContext: Context<NavigationProps | null>;
+
+/**
+ * Provider that lets a page component inject navigation data into PageHeader
+ * without needing to pass it down as a prop. PageHeader reads this context
+ * only when its own `navigation` prop is undefined, so the prop always wins.
+ *
+ * @example
+ * ```tsx
+ * const navProps = useItemNavigationPageHeader(controls, { ... })
+ * return (
+ *   <PageHeaderNavigationProvider value={navProps}>
+ *     <MyDetailPage />
+ *   </PageHeaderNavigationProvider>
+ * )
+ * ```
+ */
+export declare const PageHeaderNavigationProvider: Provider<NavigationProps | null>;
 
 declare interface PageProps {
     children?: React.ReactNode;
@@ -7993,6 +8014,44 @@ export declare const useInfiniteScrollPagination: (paginationInfo: PaginationInf
     loadingIndicatorRef: RefObject<HTMLTableCellElement>;
 };
 
+/**
+ * Converts `DataCollectionItemNavigationControls` into the `NavigationProps`
+ * shape that `PageHeader` accepts.
+ *
+ * URLs are read directly from `controls.previousItemUrl` / `controls.nextItemUrl`,
+ * which are already computed by the `itemUrl` prop on the data source. If those
+ * URLs are null (i.e. `itemUrl` was not configured), the corresponding link is
+ * omitted — the buttons will not render.
+ *
+ * @example
+ * ```tsx
+ * const { controls } = useDataCollectionItemNavigationRouteSync(itemNavigation, { routeId })
+ * const navProps = useItemNavigationPageHeader(controls, {
+ *   getItemTitle: (item) => item.name,
+ * })
+ * return (
+ *   <PageHeaderNavigationProvider value={navProps}>
+ *     <MyDetailPage />
+ *   </PageHeaderNavigationProvider>
+ * )
+ * ```
+ */
+export declare function useItemNavigationPageHeader<R extends RecordType>(controls: DataCollectionItemNavigationControls<R> | null, config?: UseItemNavigationPageHeaderConfig<R>): NavigationProps | null;
+
+declare interface UseItemNavigationPageHeaderConfig<R extends RecordType> {
+    /**
+     * Returns a human-readable title for a navigation link. Used as the
+     * accessible label on the prev/next buttons.
+     */
+    getItemTitle?: (item: R) => string;
+}
+
+/**
+ * Returns the navigation value injected by the nearest
+ * `PageHeaderNavigationProvider`, or null when no provider is present.
+ */
+export declare function usePageHeaderNavigation(): NavigationProps | null;
+
 export declare interface User {
     id: string;
     fullname: string;
@@ -8423,6 +8482,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -8469,9 +8533,4 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
