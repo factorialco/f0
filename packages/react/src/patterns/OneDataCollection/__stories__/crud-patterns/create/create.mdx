@@ -1,0 +1,132 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+import * as Stories from "./create.stories"
+
+<Meta of={Stories} />
+
+# Create pattern
+
+Create is the entry point for adding a new resource from a Data Collection. The
+collection toolbar should expose the action, and the chosen container should
+match the amount of guidance, structure, and time the user needs to complete
+the task.
+
+## When to use
+
+- Use a default dialog when the form is short, focused, and can be completed in
+  one pass.
+- Use a wizard dialog when creation requires multiple steps, staged decisions,
+  or review before submission.
+- Keep create actions at collection level instead of attaching them to a
+  specific row.
+- Preserve the collection context so users can return to the list after
+  creation.
+
+## Pattern options
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Container</th>
+        <th className="text-left">When to use</th>
+        <th className="text-left">Tradeoff</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-create--default">
+            Default dialog
+          </a>
+        </td>
+        <td>Standard create flows that fit in a compact overlay.</td>
+        <td>Less space for complex setup, long content, or review steps.</td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-create--wizard-dialog">
+            Wizard dialog
+          </a>
+        </td>
+        <td>
+          Guided setup with sequential steps, progressive disclosure, or staged
+          validation.
+        </td>
+        <td>Higher interaction cost for simple tasks.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Decision criteria
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Question</th>
+        <th className="text-left">Recommended pattern</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Can the user complete the task with a single focused form?</td>
+        <td>Default dialog</td>
+      </tr>
+      <tr>
+        <td>Does the flow require multiple stages or a review step?</td>
+        <td>Wizard dialog</td>
+      </tr>
+      <tr>
+        <td>Does the user need help understanding what comes next?</td>
+        <td>Wizard dialog</td>
+      </tr>
+      <tr>
+        <td>Is the task frequent and lightweight?</td>
+        <td>Default dialog</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Guidance
+
+Use one clear collection primary action for creation. Label it with the user
+goal, not the implementation detail. Keep the dialog title aligned with the
+action label so users immediately understand they are in the correct flow.
+
+When a wizard is needed, split the flow into steps that match a real decision
+model. Each step should have a distinct purpose. Do not turn a short single-form
+create flow into a wizard only to make it feel more structured.
+
+## Dos and don'ts
+
+<DoDonts
+  do={{
+    description:
+      "Use a default dialog for short create flows that users can finish quickly without leaving the collection.",
+  }}
+  dont={{
+    description:
+      "Do not send simple create flows into a multi-step wizard when one form would be clearer.",
+  }}
+/>
+
+<DoDonts
+  do={{
+    description:
+      "Use a wizard when the task benefits from progressive disclosure, staged validation, or an explicit review step.",
+  }}
+  dont={{
+    description:
+      "Do not hide a create action inside row-level interactions when it creates a new resource for the whole collection.",
+  }}
+/>
+
+## Related stories
+
+- [Default dialog](/?path=/story/patterns-data-collection-crud-patterns-create--default)
+- [Wizard dialog](/?path=/story/patterns-data-collection-crud-patterns-create--wizard-dialog)
+- [CRUD patterns overview](/?path=/docs/patterns-data-collection-crud-patterns-overview--documentation)

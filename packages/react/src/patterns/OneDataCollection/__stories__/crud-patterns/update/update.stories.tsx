@@ -6,21 +6,23 @@ import { Pencil, Save } from "@/icons/app"
 import { useF0Form } from "@/patterns/F0Form"
 import { F0Dialog } from "@/patterns/F0Dialog"
 
-import { useDataCollectionSource } from "../../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../../index"
+import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
+import { OneDataCollection } from "../../../index"
 import {
   createResourceDataAdapter,
   CrudPatternLayout,
+  defaultCrudPrimaryAction,
+  defaultCrudSecondaryActions,
   initialResources,
   listVisualization,
   Resource,
   ResourceFormF0,
-  ResourceSummary,
+  resourceFilters,
   tableVisualization,
-} from "./shared"
+} from "../shared"
 
 const meta = {
-  title: "Data collection/CRUD patterns/Open and update",
+  title: "Data collection/CRUD patterns/Update",
   parameters: {
     layout: "fullscreen",
   },
@@ -29,11 +31,9 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-function ItemDialogScenario({
-  position,
+function RightPositionDialogScenario({
   visualization = tableVisualization,
 }: {
-  position?: "right"
   visualization?: typeof tableVisualization | typeof listVisualization
 }) {
   const [selectedResource, setSelectedResource] = useState<Resource | null>(
@@ -43,55 +43,59 @@ function ItemDialogScenario({
 
   const source = useDataCollectionSource({
     dataAdapter: createResourceDataAdapter(initialResources),
+    filters: resourceFilters,
     itemOnClick: (item) => () => setSelectedResource(item),
+    itemActions: (item) => [
+      {
+        label: "Edit",
+        icon: Pencil,
+        type: "primary",
+        onClick: () => setSelectedResource(item),
+      },
+    ],
+    primaryActions: () => defaultCrudPrimaryAction(() => {}),
+    secondaryActions: defaultCrudSecondaryActions(),
   })
 
   return (
     <CrudPatternLayout>
-      <OneDataCollection source={source} visualizations={[visualization]} />
+      <div
+        className={
+          visualization.type === "list"
+            ? "[&>div>div:nth-child(2)]:px-4"
+            : undefined
+        }
+      >
+        <OneDataCollection source={source} visualizations={[visualization]} />
+      </div>
       <F0Dialog
         isOpen={selectedResource !== null}
         onClose={() => setSelectedResource(null)}
-        title={position === "right" ? "Edit resource" : "Resource details"}
-        description={
-          position === "right"
-            ? "Right-position dialogs are an accepted Table/List variation when context should stay visible."
-            : "The default item-opening pattern is a dialog."
-        }
-        position={position}
-        width="lg"
-        primaryAction={
-          position === "right"
-            ? {
-                label: "Save changes",
-                icon: Save,
-                onClick: submit,
-                loading: isSubmitting,
-                disabled: hasErrors,
-              }
-            : {
-                label: "Edit resource",
-                icon: Pencil,
-                onClick: () => setSelectedResource(null),
-              }
-        }
+        title="Edit resource"
+        description="Right-position dialogs are an accepted Table/List variation when context should stay visible."
+        position="right"
+        width="md"
+        primaryAction={{
+          label: "Save changes",
+          icon: Save,
+          onClick: submit,
+          loading: isSubmitting,
+          disabled: hasErrors,
+        }}
         secondaryAction={{
           label: "Close",
           onClick: () => setSelectedResource(null),
         }}
       >
-        {selectedResource &&
-          (position === "right" ? (
-            <ResourceFormF0
-              key={selectedResource.id}
-              mode="update"
-              resource={selectedResource}
-              formRef={formRef}
-              onSuccess={() => setSelectedResource(null)}
-            />
-          ) : (
-            <ResourceSummary resource={selectedResource} />
-          ))}
+        {selectedResource && (
+          <ResourceFormF0
+            key={selectedResource.id}
+            mode="update"
+            resource={selectedResource}
+            formRef={formRef}
+            onSuccess={() => setSelectedResource(null)}
+          />
+        )}
       </F0Dialog>
     </CrudPatternLayout>
   )
@@ -105,6 +109,7 @@ function UpdateWithSameFormScenario() {
 
   const source = useDataCollectionSource({
     dataAdapter: createResourceDataAdapter(initialResources),
+    filters: resourceFilters,
     itemActions: (item) => [
       {
         label: "Edit",
@@ -113,6 +118,8 @@ function UpdateWithSameFormScenario() {
         onClick: () => setSelectedResource(item),
       },
     ],
+    primaryActions: () => defaultCrudPrimaryAction(() => {}),
+    secondaryActions: defaultCrudSecondaryActions(),
   })
 
   return (
@@ -150,20 +157,16 @@ function UpdateWithSameFormScenario() {
   )
 }
 
-export const OpenItemInDefaultDialog: Story = {
-  render: () => <ItemDialogScenario />,
-}
-
-export const UpdateWithSameFormAsCreate: Story = {
+export const Default: Story = {
   render: () => <UpdateWithSameFormScenario />,
 }
 
 export const RightPositionDialogForTable: Story = {
-  render: () => <ItemDialogScenario position="right" />,
+  render: () => <RightPositionDialogScenario />,
 }
 
 export const RightPositionDialogForList: Story = {
   render: () => (
-    <ItemDialogScenario position="right" visualization={listVisualization} />
+    <RightPositionDialogScenario visualization={listVisualization} />
   ),
 }

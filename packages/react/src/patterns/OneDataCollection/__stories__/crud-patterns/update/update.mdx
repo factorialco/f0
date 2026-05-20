@@ -1,0 +1,131 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+import * as Stories from "./update.stories"
+
+<Meta of={Stories} />
+
+# Update pattern
+
+Update patterns define how a user edits an existing resource from a Data
+Collection. The update flow should usually mirror create so users do not need to
+relearn the form, field order, or terminology when editing the same data.
+
+## When to use
+
+- Use a default dialog when editing fits in a focused overlay.
+- Use a right-position dialog only for Table and List views when keeping the
+  collection visible improves comparison or navigation between items.
+- Reuse the same form structure as create whenever the user edits the same
+  information.
+- Avoid inventing a separate update-only layout without a strong UX reason.
+
+## Pattern options
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Container</th>
+        <th className="text-left">When to use</th>
+        <th className="text-left">Constraint</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--default">
+            Default dialog
+          </a>
+        </td>
+        <td>Baseline edit flow for most existing resources.</td>
+        <td>Best when context can temporarily shift away from the collection.</td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--right-position-dialog-for-table">
+            Right-position dialog
+          </a>
+        </td>
+        <td>
+          Table or List editing when users benefit from seeing the collection at
+          the same time.
+        </td>
+        <td>Use only on <code>md</code> / <code>900px</code> and above.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Decision criteria
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Question</th>
+        <th className="text-left">Recommended pattern</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Is this the standard edit path for a resource?</td>
+        <td>Default dialog</td>
+      </tr>
+      <tr>
+        <td>Does the user need to compare multiple rows while editing?</td>
+        <td>Right-position dialog</td>
+      </tr>
+      <tr>
+        <td>Is the current visualization Card or Kanban?</td>
+        <td>Default dialog</td>
+      </tr>
+      <tr>
+        <td>Would mobile or narrow screens make a side panel unreliable?</td>
+        <td>Default dialog</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Guidance
+
+Update should feel like create with existing values prefilled. Reusing the same
+form structure reduces cognitive load, improves predictability, and keeps
+validation and terminology aligned.
+
+The right-position dialog is an exception, not the default. Use it when the
+collection itself is part of the editing workflow, such as reviewing adjacent
+rows or moving through items while preserving context. Fall back to the default
+dialog below medium breakpoints.
+
+## Dos and don'ts
+
+<DoDonts
+  do={{
+    description:
+      "Reuse the create form for update when the user is editing the same information with the same rules.",
+  }}
+  dont={{
+    description:
+      "Do not create a different field order, terminology, or validation model for update unless the task is genuinely different.",
+  }}
+/>
+
+<DoDonts
+  do={{
+    description:
+      "Use a right-position dialog only when preserving collection context materially helps the editing task.",
+  }}
+  dont={{
+    description:
+      "Do not make right-position dialogs the default update pattern across all visualizations and breakpoints.",
+  }}
+/>
+
+## Related stories
+
+- [Default dialog](/?path=/story/patterns-data-collection-crud-patterns-update--default)
+- [Right-position dialog for table](/?path=/story/patterns-data-collection-crud-patterns-update--right-position-dialog-for-table)
+- [Right-position dialog for list](/?path=/story/patterns-data-collection-crud-patterns-update--right-position-dialog-for-list)
+- [CRUD patterns overview](/?path=/docs/patterns-data-collection-crud-patterns-overview--documentation)

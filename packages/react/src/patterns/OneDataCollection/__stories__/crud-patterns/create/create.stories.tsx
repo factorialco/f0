@@ -7,18 +7,20 @@ import { useF0Form } from "@/patterns/F0Form"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { F0Wizard } from "@/ui/F0Wizard"
 
-import { useDataCollectionSource } from "../../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../../index"
+import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
+import { OneDataCollection } from "../../../index"
 import {
   createResourceDataAdapter,
   CrudPatternLayout,
+  defaultCrudSecondaryActions,
   initialResources,
   Resource,
   ResourceFormF0,
+  resourceFilters,
   tableVisualization,
   WizardStepAssignments,
   WizardStepBasic,
-} from "./shared"
+} from "../shared"
 
 const meta = {
   title: "Data collection/CRUD patterns/Create",
@@ -37,11 +39,13 @@ function DefaultDialogScenario() {
 
   const source = useDataCollectionSource({
     dataAdapter: createResourceDataAdapter(resources),
+    filters: resourceFilters,
     primaryActions: () => ({
       label: "Create resource",
       icon: Add,
       onClick: () => setOpen(true),
     }),
+    secondaryActions: defaultCrudSecondaryActions(),
   })
 
   return (
@@ -95,11 +99,13 @@ function WizardDialogScenario() {
 
   const source = useDataCollectionSource({
     dataAdapter: createResourceDataAdapter(initialResources),
+    filters: resourceFilters,
     primaryActions: () => ({
       label: "Create guided resource",
       icon: Add,
       onClick: () => setOpen(true),
     }),
+    secondaryActions: defaultCrudSecondaryActions(),
   })
 
   return (
@@ -135,7 +141,7 @@ function WizardDialogScenario() {
   )
 }
 
-export const DefaultDialog: Story = {
+export const Default: Story = {
   render: () => <DefaultDialogScenario />,
 }
 

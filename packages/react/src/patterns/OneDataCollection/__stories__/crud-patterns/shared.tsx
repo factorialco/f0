@@ -4,10 +4,8 @@ import { ComponentProps } from "react"
 import { z } from "zod"
 
 import { StandardLayout } from "@/layouts/StandardLayout"
-import { F0Button } from "@/components/F0Button"
-import { ArrowLeft } from "@/icons/app"
-import { Breadcrumbs } from "@/experimental/Navigation/Header/Breadcrumbs"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
+import { Add, Download, EllipsisHorizontal } from "@/icons/app"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
 import { f0FormField, F0Form, F0FormRef } from "@/patterns/F0Form"
@@ -32,6 +30,32 @@ export type Resource = {
   owner: string
   status: ResourceStatus
   summary: string
+}
+
+export const resourceFilters = {
+  status: {
+    type: "in" as const,
+    label: "Status",
+    options: {
+      options: [
+        { value: "Draft", label: "Draft" },
+        { value: "Needs details", label: "Needs details" },
+        { value: "Complete", label: "Complete" },
+      ],
+    },
+  },
+  owner: {
+    type: "in" as const,
+    label: "Owner",
+    options: {
+      options: [
+        { value: "Alicia Keys", label: "Alicia Keys" },
+        { value: "Dani Moreno", label: "Dani Moreno" },
+        { value: "Marta Soler", label: "Marta Soler" },
+        { value: "Nora Park", label: "Nora Park" },
+      ],
+    },
+  },
 }
 
 export const initialResources: Resource[] = [
@@ -72,7 +96,7 @@ const CRUD_TABS: TabItem[] = [
   { label: "Settings", href: "/settings" },
 ]
 
-const CRUD_MODULE = {
+export const CRUD_MODULE = {
   id: "ats" as const,
   name: "Recruitment",
   href: "/recruitment",
@@ -116,7 +140,47 @@ export const listVisualization: CrudVisualization = {
 
 export function createResourceDataAdapter(resources: Resource[]) {
   return {
-    fetchData: () => Promise.resolve({ records: resources }),
+    fetchData: ({
+      filters,
+    }: {
+      filters: Partial<Record<keyof typeof resourceFilters, string[]>>
+    }) =>
+      Promise.resolve({
+        records: resources.filter((resource) => {
+          const matchesStatus =
+            !filters.status?.length || filters.status.includes(resource.status)
+          const matchesOwner =
+            !filters.owner?.length || filters.owner.includes(resource.owner)
+
+          return matchesStatus && matchesOwner
+        }),
+      }),
+  }
+}
+
+export function defaultCrudPrimaryAction(onClick: () => void) {
+  return {
+    label: "Create resource",
+    icon: Add,
+    onClick,
+  }
+}
+
+export function defaultCrudSecondaryActions() {
+  return {
+    expanded: 0 as const,
+    actions: () => [
+      {
+        label: "Export",
+        icon: Download,
+        onClick: () => {},
+      },
+      {
+        label: "More actions",
+        icon: EllipsisHorizontal,
+        onClick: () => {},
+      },
+    ],
   }
 }
 
@@ -271,92 +335,6 @@ export function ResourceSummary({ resource }: { resource: Resource }) {
           <dd className="text-f1-foreground">{resource.status}</dd>
         </div>
       </dl>
-    </div>
-  )
-}
-
-function ResourcePageForm({ resource }: { resource: Resource }) {
-  const schema = z.object({
-    owner: f0FormField.text({ label: "Owner", placeholder: "Owner name" }),
-    status: f0FormField.select({
-      label: "Status",
-      options: STATUS_OPTIONS,
-      placeholder: "Select status",
-    }),
-  })
-
-  const formDefinition = useF0FormDefinition({
-    name: "resource-page-form",
-    schema,
-    defaultValues: { owner: resource.owner, status: resource.status as string },
-    onSubmit: async () => ({ success: true }),
-    submitConfig: {
-      type: "action-bar",
-      label: "Save changes",
-      discardable: true,
-    },
-  })
-
-  return <F0Form formDefinition={formDefinition} />
-}
-
-export function ResourcePage({
-  resource,
-  onBack,
-  title = "Complete resource setup",
-}: {
-  resource: Resource
-  onBack: () => void
-  title?: string
-}) {
-  return (
-    <div className="flex flex-col gap-5">
-      <Breadcrumbs
-        breadcrumbs={[
-          { id: "settings", label: "Settings", href: "/settings" },
-          {
-            id: "resources",
-            label: "Resources",
-            href: "/settings/resources",
-          },
-          { id: resource.id, label: resource.name },
-        ]}
-      />
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-semibold text-f1-foreground">{title}</h2>
-          <p className="mt-1 text-sm text-f1-foreground-secondary">
-            Complex resources use page-level navigation when users need tabs,
-            steps, configuration, or long-form content.
-          </p>
-        </div>
-        <F0Button
-          label="Back to collection"
-          icon={ArrowLeft}
-          variant="outline"
-          onClick={onBack}
-        />
-      </div>
-      <div className="grid gap-4 md:grid-cols-[240px_1fr]">
-        <aside className="rounded-md border border-solid border-f1-border-secondary p-4">
-          <h3 className="font-semibold text-f1-foreground">Setup steps</h3>
-          <ol className="mt-3 flex list-decimal flex-col gap-2 pl-4 text-sm text-f1-foreground-secondary">
-            <li>Basic information</li>
-            <li>Provider credentials</li>
-            <li>Field mapping</li>
-            <li>Review and activate</li>
-          </ol>
-        </aside>
-        <section className="rounded-md border border-solid border-f1-border-secondary p-4">
-          <h3 className="font-semibold text-f1-foreground">{resource.name}</h3>
-          <p className="mt-2 text-sm text-f1-foreground-secondary">
-            {resource.summary}
-          </p>
-          <div className="mt-4">
-            <ResourcePageForm resource={resource} />
-          </div>
-        </section>
-      </div>
     </div>
   )
 }

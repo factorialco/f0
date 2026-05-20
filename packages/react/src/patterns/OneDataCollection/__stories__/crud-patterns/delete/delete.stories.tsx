@@ -5,15 +5,18 @@ import { useState } from "react"
 import { Delete } from "@/icons/app"
 import { F0Dialog } from "@/patterns/F0Dialog"
 
-import { useDataCollectionSource } from "../../hooks/useDataCollectionSource"
-import { OneDataCollection } from "../../index"
+import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
+import { OneDataCollection } from "../../../index"
 import {
   createResourceDataAdapter,
   CrudPatternLayout,
+  defaultCrudPrimaryAction,
+  defaultCrudSecondaryActions,
   initialResources,
   Resource,
+  resourceFilters,
   tableVisualization,
-} from "./shared"
+} from "../shared"
 
 const meta = {
   title: "Data collection/CRUD patterns/Delete",
@@ -32,6 +35,7 @@ function SingleDeleteScenario() {
 
   const source = useDataCollectionSource({
     dataAdapter: createResourceDataAdapter(initialResources),
+    filters: resourceFilters,
     itemActions: (item) => [
       {
         label: "Delete",
@@ -40,6 +44,8 @@ function SingleDeleteScenario() {
         onClick: () => setSelectedResource(item),
       },
     ],
+    primaryActions: () => defaultCrudPrimaryAction(() => {}),
+    secondaryActions: defaultCrudSecondaryActions(),
   })
 
   return (
@@ -78,6 +84,7 @@ function BulkDeleteScenario() {
 
   const source = useDataCollectionSource({
     dataAdapter: createResourceDataAdapter(initialResources),
+    filters: resourceFilters,
     selectable: (item) => item.id,
     bulkActions: () => ({
       primary: [
@@ -89,6 +96,8 @@ function BulkDeleteScenario() {
         },
       ],
     }),
+    primaryActions: () => defaultCrudPrimaryAction(() => {}),
+    secondaryActions: defaultCrudSecondaryActions(),
   })
 
   return (
@@ -126,10 +135,10 @@ function BulkDeleteScenario() {
   )
 }
 
-export const SingleDeleteConfirmation: Story = {
+export const SingleDelete: Story = {
   render: () => <SingleDeleteScenario />,
 }
 
-export const BulkDeleteConfirmation: Story = {
+export const BulkDelete: Story = {
   render: () => <BulkDeleteScenario />,
 }

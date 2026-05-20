@@ -1,0 +1,134 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+import * as Stories from "./read.stories"
+
+<Meta of={Stories} />
+
+# Read pattern
+
+Read patterns define how a user opens and inspects a resource from a Data
+Collection. The selected container should balance speed, context, and depth.
+Use the lightest pattern that still gives the resource enough room.
+
+## When to use
+
+- Use a default dialog for quick inspection and lightweight details.
+- Use a page with breadcrumbs when the resource needs persistent navigation,
+  deep structure, or a longer reading surface.
+- Keep item click behavior consistent within the same collection.
+- Reserve page navigation for resources that are meaningful enough to justify
+  their own destination.
+
+## Pattern options
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Container</th>
+        <th className="text-left">When to use</th>
+        <th className="text-left">Tradeoff</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--default">
+            Default dialog
+          </a>
+        </td>
+        <td>
+          Quick read flows with limited content and a short decision loop.
+        </td>
+        <td>Less room for tabs, dense layouts, or extended workflows.</td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--open-as-page-with-breadcrumbs">
+            Page with breadcrumbs
+          </a>
+        </td>
+        <td>
+          Detailed resources with hierarchy, navigation, or page-level actions.
+        </td>
+        <td>Higher navigation cost for quick lookups.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Decision criteria
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Question</th>
+        <th className="text-left">Recommended pattern</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Does the user only need a fast inspection flow?</td>
+        <td>Default dialog</td>
+      </tr>
+      <tr>
+        <td>Does the resource need breadcrumbs, tabs, or a page header?</td>
+        <td>Page with breadcrumbs</td>
+      </tr>
+      <tr>
+        <td>Will the user likely continue into editing or configuration?</td>
+        <td>Page with breadcrumbs</td>
+      </tr>
+      <tr>
+        <td>
+          Should the user remain anchored to the collection while reading?
+        </td>
+        <td>Default dialog</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Guidance
+
+The default dialog is the baseline read pattern because it keeps the interaction
+close to the collection and supports fast inspection. It is the right starting
+point until the resource becomes large enough to need its own information
+architecture.
+
+Move to a page when the resource is no longer just a quick read target. If the
+resource has sub-navigation, multiple action groups, or content that competes
+for vertical space, a page is more predictable than stretching a dialog beyond
+its intended scope.
+
+## Dos and don'ts
+
+<DoDonts
+  do={{
+    description:
+      "Use a default dialog as the first option for straightforward read flows that keep the user near the collection.",
+  }}
+  dont={{
+    description:
+      "Do not force complex resources into a dialog when the content needs page-level structure.",
+  }}
+/>
+
+<DoDonts
+  do={{
+    description:
+      "Use breadcrumbs and page framing when the resource needs a durable destination with navigation context.",
+  }}
+  dont={{
+    description:
+      "Do not mix dialog-based and page-based open behavior without a strong product reason.",
+  }}
+/>
+
+## Related stories
+
+- [Default dialog](/?path=/story/patterns-data-collection-crud-patterns-read--default)
+- [Page with breadcrumbs](/?path=/story/patterns-data-collection-crud-patterns-read--open-as-page-with-breadcrumbs)
+- [CRUD patterns overview](/?path=/docs/patterns-data-collection-crud-patterns-overview--documentation)
