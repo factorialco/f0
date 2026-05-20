@@ -1327,19 +1327,33 @@ function DetailView({
             {
               type: "table",
               options: {
-                referenceRowType: (item) =>
-                  !item.isParent && changedMovementIds.has(item.id)
-                    ? "striped"
-                    : "none",
                 columns: [
                   {
                     label: "Training group",
                     id: "groupName",
                     width: 283,
-                    render: (item) => ({
-                      type: "text",
-                      value: item.isParent ? item.trainingName : item.groupName,
-                    }),
+                    render: (item) => {
+                      const label = item.isParent
+                        ? item.trainingName
+                        : item.groupName
+
+                      return !item.isParent && changedMovementIds.has(item.id)
+                        ? {
+                            type: "compound",
+                            value: {
+                              separator: " · ",
+                              segments: [
+                                { type: "text", value: label },
+                                {
+                                  type: "text",
+                                  value: "Update needed",
+                                  tone: "warning",
+                                },
+                              ],
+                            },
+                          }
+                        : { type: "text", value: label }
+                    },
                   },
                   {
                     label: "Group status",
