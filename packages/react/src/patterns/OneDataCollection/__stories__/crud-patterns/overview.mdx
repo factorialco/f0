@@ -7,10 +7,10 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 ## Introduction
 
-CRUD patterns describe the recommended UX for creating, opening, updating, and
-deleting records from a Data Collection. They are product patterns that consumers
-wire through collection actions, item actions, item click handlers, bulk actions,
-dialogs, wizards, or routes.
+CRUD (**Create**, **Read**, **Update**, **Delete**) patterns describe the UX
+for interactions with records from a Data Collection. They are product patterns
+that consumers wire through collection actions, item actions, item click
+handlers, bulk actions, dialogs, wizards, or routes.
 
 Data Collection does not automatically choose a dialog or page for you. Use these
 patterns to choose the right container for the resource and task.
@@ -46,7 +46,7 @@ story-only layout or styling wrappers.
             Create / Default
           </a>
         </td>
-        <td>Collection primary action opens a default create dialog.</td>
+        <td>Collection primary action triggers a default create dialog.</td>
       </tr>
       <tr>
         <td>
@@ -54,7 +54,7 @@ story-only layout or styling wrappers.
             Create / Wizard dialog
           </a>
         </td>
-        <td>Collection primary action opens a wizard dialog.</td>
+        <td>Collection primary action triggers a wizard dialog.</td>
       </tr>
       <tr>
         <td>
@@ -66,11 +66,11 @@ story-only layout or styling wrappers.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--open-as-page-with-breadcrumbs">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--page-with-breadcrumbs">
             Read / Page with breadcrumbs
           </a>
         </td>
-        <td>Clicking an item opens a resource page with breadcrumbs.</td>
+        <td>Clicking an item routes to a resource page with breadcrumbs.</td>
       </tr>
       <tr>
         <td>
@@ -89,7 +89,7 @@ story-only layout or styling wrappers.
             Update / Right-position dialog
           </a>
         </td>
-        <td>Table/List variation opens a right-position dialog for editing.</td>
+        <td>Table/List variation uses a right-position dialog for editing.</td>
       </tr>
       <tr>
         <td>
@@ -97,7 +97,7 @@ story-only layout or styling wrappers.
             Delete / Single delete
           </a>
         </td>
-        <td>Item delete action opens a confirmation dialog.</td>
+        <td>Item delete action triggers a confirmation dialog.</td>
       </tr>
       <tr>
         <td>
@@ -105,7 +105,7 @@ story-only layout or styling wrappers.
             Delete / Bulk delete
           </a>
         </td>
-        <td>Selection and bulk action open a scoped confirmation dialog.</td>
+        <td>Selection and bulk action trigger a scoped confirmation dialog.</td>
       </tr>
     </tbody>
   </table>
@@ -129,7 +129,7 @@ story-only layout or styling wrappers.
         </td>
         <td>All views</td>
         <td>
-          Default container for create, open, and update flows that fit in a
+          Default container for create, read, and update flows that fit in a
           focused overlay.
         </td>
       </tr>

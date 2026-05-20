@@ -169,6 +169,6 @@ export const Default: Story = {
   render: () => <DefaultDialogScenario />,
 }
 
-export const OpenAsPageWithBreadcrumbs: Story = {
+export const PageWithBreadcrumbs: Story = {
   render: () => <OpenAsPageScenario />,
 }
