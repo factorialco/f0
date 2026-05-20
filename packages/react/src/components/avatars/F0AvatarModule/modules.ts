@@ -1,10 +1,9 @@
 import { IconType } from "@/components/F0Icon"
-import { CheckCircleLine } from "@/icons/app"
 import * as ModuleIcons from "@/icons/modules"
 
 export const modules = {
   "ai-reports": ModuleIcons.Reports,
-  ai_ticketing: CheckCircleLine,
+  ai_ticketing: ModuleIcons.Tasks,
   analytics: ModuleIcons.Reports,
   ats: ModuleIcons.Recruitment,
   benefits: ModuleIcons.Benefits,
