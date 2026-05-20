@@ -163,6 +163,29 @@ const preview: Preview = {
        * Introduction, How to contribute, Data test ID, Foundations, and Playground in specific order
        */
       storySort: (a, b) => {
+        const crudPatternsPrefix = "Data collection/CRUD patterns/"
+        const crudPatternsOrder = [
+          "Create",
+          "Read",
+          "Update",
+          "Delete",
+          "Overview",
+        ]
+
+        if (
+          a.title.startsWith(crudPatternsPrefix) &&
+          b.title.startsWith(crudPatternsPrefix)
+        ) {
+          const aSection = a.title.slice(crudPatternsPrefix.length)
+          const bSection = b.title.slice(crudPatternsPrefix.length)
+          const aCrudIndex = crudPatternsOrder.indexOf(aSection)
+          const bCrudIndex = crudPatternsOrder.indexOf(bSection)
+
+          if (aCrudIndex !== -1 && bCrudIndex !== -1) {
+            return aCrudIndex - bCrudIndex
+          }
+        }
+
         const topLevelOrder = [
           "introduction",
           "how-to-contribute",
