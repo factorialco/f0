@@ -263,6 +263,62 @@ export const WithMultipleSections: Story = {
   },
 }
 
+export const WithHiddenActions: Story = {
+  args: {
+    datasets: mockDatasets,
+    elements: [
+      {
+        type: "question",
+        question: {
+          id: "q-free-text",
+          title: "Free text question (full menu)",
+          description:
+            "No hiddenActions: the actions menu shows Required, Duplicate and Delete.",
+          type: "text" as const,
+        },
+      },
+      {
+        type: "question",
+        question: {
+          id: "q-locked-dataset",
+          title: "Vendor (fully locked menu)",
+          description:
+            "All actions hidden via hiddenActions → the ⋯ trigger is not rendered.",
+          type: "dropdown-single" as const,
+          datasetKey: "employees",
+          required: true,
+          hiddenActions: {
+            required: true,
+            multiSelect: true,
+            allowCreate: true,
+            questionType: true,
+            duplicate: true,
+            delete: true,
+          },
+        },
+      },
+      {
+        type: "question",
+        question: {
+          id: "q-partial-hide",
+          title: "Currency (only Required is editable)",
+          description:
+            "Only `required` stays visible; Duplicate and Delete are hidden.",
+          type: "dropdown-single" as const,
+          datasetKey: "teams",
+          hiddenActions: {
+            multiSelect: true,
+            allowCreate: true,
+            questionType: true,
+            duplicate: true,
+            delete: true,
+          },
+        },
+      },
+    ],
+  },
+}
+
 export const WithAllowCreate: Story = {
   args: {
     datasets: mockDatasets,
