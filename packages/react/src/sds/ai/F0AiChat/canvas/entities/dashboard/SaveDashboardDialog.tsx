@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 
-import { Input } from "@/experimental/Forms/Fields/Input"
+import { F0TextInput } from "@/experimental/Forms/Fields/Input"
 import { useI18n } from "@/lib/providers/i18n"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { Textarea } from "@/ui/textarea"
@@ -68,7 +68,7 @@ export function SaveDashboardDialog({
       }}
     >
       <div className="flex flex-col gap-4">
-        <Input
+        <F0TextInput
           autoFocus
           label={t("ai.dashboard.saveDialog.titleLabel")}
           value={title}

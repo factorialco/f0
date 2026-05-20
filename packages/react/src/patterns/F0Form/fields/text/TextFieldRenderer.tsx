@@ -1,6 +1,6 @@
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
-import { Input } from "@/experimental/Forms/Fields/Input"
+import { F0TextInput } from "@/experimental/Forms/Fields/Input"
 import { Link, Envelope } from "@/icons/app"
 import { IconType } from "@/components/F0Icon"
 import type { InputFieldStatus } from "@/ui/InputField/types"
@@ -45,7 +45,7 @@ export function TextFieldRenderer({
   const icon = DEFAULT_ICONS[inputType]
 
   return (
-    <Input
+    <F0TextInput
       {...formField}
       label={field.label}
       type={inputType}

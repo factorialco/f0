@@ -5,12 +5,12 @@ import { Placeholder } from "@/icons/app"
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { inputFieldStatus } from "@/ui/InputField"
 
-import { Input } from "../index"
+import { F0TextInput } from "../index"
 import { inputSizes } from "../types"
 
 const meta = {
-  component: Input,
-  title: "Input/Text",
+  component: F0TextInput,
+  title: "Inputs/Text input",
   tags: ["autodocs", "experimental"],
   args: {
     type: "text",
@@ -70,7 +70,7 @@ const meta = {
       </div>
     ),
   ],
-} satisfies Meta<typeof Input>
+} satisfies Meta<typeof F0TextInput>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -224,9 +224,13 @@ export const Snapshot: Story = {
           <section key={size}>
             <h4 className="mb-3 text-lg font-semibold">Size: {size}</h4>
             <div className="flex flex-col gap-4">
-              <Input size={size} label="Label text here" />
+              <F0TextInput size={size} label="Label text here" />
               {snapshotVariants.map((variant, index) => (
-                <Input key={`${size}-${index}`} size={size} {...variant} />
+                <F0TextInput
+                  key={`${size}-${index}`}
+                  size={size}
+                  {...variant}
+                />
               ))}
             </div>
           </section>

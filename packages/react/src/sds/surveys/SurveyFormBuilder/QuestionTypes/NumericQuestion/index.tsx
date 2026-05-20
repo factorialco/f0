@@ -1,4 +1,4 @@
-import { Input } from "@/experimental/Forms/Fields/Input"
+import { F0TextInput } from "@/experimental/Forms/Fields/Input"
 import { NumberInput } from "@/experimental/Forms/Fields/NumberInput"
 import { Numbers } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
@@ -58,7 +58,7 @@ export const NumericQuestion = ({
             icon={Numbers}
           />
         ) : (
-          <Input
+          <F0TextInput
             type="text"
             size="md"
             value={placeholder}
