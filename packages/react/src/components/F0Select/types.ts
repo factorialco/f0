@@ -29,6 +29,7 @@ export type { FiltersState, OnSelectItemsCallback, SelectedItemsState }
  * Base props shared across all F0Select variants
  */
 type F0SelectBaseProps<T extends string, R = unknown> = {
+  onApply?: () => void
   onChangeSelectedOption?: (
     option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined,
     checked: boolean
@@ -180,6 +181,7 @@ export type F0SelectTagProp =
   | string
   | { type: "dot"; text: string; color: NewColor }
   | { type: "person"; name: string; src?: string }
+  | { type: "icon"; text: string; icon: IconType }
 
 export type F0SelectItemObject<T, R = unknown> = {
   type?: "item"
