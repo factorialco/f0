@@ -575,7 +575,7 @@ exports[`F0Metadata Snapshots — value types Snapshot — date — calendar ico
         </RNSVGGroup>
       </RNSVGSvgView>
       <Text
-        className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground-secondary text-left"
+        className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-normal text-f0-foreground text-left"
       >
         May 14, 2026
       </Text>
