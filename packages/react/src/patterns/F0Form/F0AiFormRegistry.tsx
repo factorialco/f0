@@ -266,10 +266,37 @@ function toAvailableFormDefinition(
       | undefined
   }
 
+  // Preserve defaultValuesFn from useF0FormDefinition outputs.
+  // F0AiAvailableFormDefinition.defaultValues supports function values, so we
+  // assign the raw async fn there — downstream virtual-entry creation checks
+  // `typeof def.defaultValues === "function"` to derive defaultValuesFn on the entry.
+  let resolvedDefaultValues: F0AiAvailableFormDefinition["defaultValues"] =
+    flatDefaultValues
+  if (item.defaultValuesFn) {
+    if (item._brand === "per-section") {
+      // Wrap to flatten per-section output { sectionId: { ...fields } } → { ...fields }
+      const perSectionFn = item.defaultValuesFn as (
+        params: Record<string, unknown>
+      ) => Promise<Record<string, Record<string, unknown>>>
+      resolvedDefaultValues = async (params: Record<string, unknown>) => {
+        const result = await perSectionFn(params)
+        const flat: Record<string, unknown> = {}
+        for (const sectionValues of Object.values(result)) {
+          Object.assign(flat, sectionValues)
+        }
+        return flat
+      }
+    } else {
+      resolvedDefaultValues = item.defaultValuesFn as (
+        params: Record<string, unknown>
+      ) => Promise<Record<string, unknown>>
+    }
+  }
+
   return {
     name: item.name,
     schema,
-    defaultValues: flatDefaultValues,
+    defaultValues: resolvedDefaultValues,
     defaultValuesParamsSchema: item.defaultValuesParamsSchema,
     sections: item.sections as Record<string, F0SectionConfig> | undefined,
     onSubmit,
