@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.10.0](https://github.com/factorialco/f0/compare/f0-react-v2.9.0...f0-react-v2.10.0) (2026-05-20)
+
+
+### Features
+
+* **F0Card:** add alert prop with controlled visibility ([#4173](https://github.com/factorialco/f0/issues/4173)) ([093a2c1](https://github.com/factorialco/f0/commit/093a2c153e3080353a15c7da7a5bca61454d9162))
+
 ## [2.9.0](https://github.com/factorialco/f0/compare/f0-react-v2.8.2...f0-react-v2.9.0) (2026-05-20)
 
 
