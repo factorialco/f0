@@ -1544,3 +1544,149 @@ describe("defaultValuesParams lifecycle", () => {
     })
   })
 })
+
+describe("F0FormDefinition with defaultValuesFn threads through to registry entry", () => {
+  const mockRecords: Record<string, { name: string; email: string }> = {
+    "rec-1": { name: "Alice", email: "alice@example.com" },
+    "rec-2": { name: "Bob", email: "bob@example.com" },
+  }
+
+  const paramsSchema = z.object({ id: z.string() })
+
+  it("single-schema: entry.defaultValuesFn works when F0FormDefinition has defaultValuesFn + defaultValuesParamsSchema", async () => {
+    const asyncFn = vi.fn(
+      async (params: { id: string }) => mockRecords[params.id] ?? {}
+    )
+
+    const formDef: F0FormDefinitionSingleSchema<typeof simpleSchema> = {
+      _brand: "single",
+      name: "edit-record-single",
+      schema: simpleSchema,
+      defaultValuesParamsSchema: paramsSchema,
+      defaultValuesFn: asyncFn as (
+        params: Record<string, unknown>
+      ) => Promise<Record<string, unknown>>,
+      onSubmit: async () => ({ success: true }),
+    }
+
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider availableFormDefinitions={[formDef]}>
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("edit-record-single")).toBeDefined()
+    })
+
+    const entry = capturedRegistry!.get("edit-record-single")!
+    expect(entry.virtual).toBe(true)
+    expect(entry.defaultValuesFn).toBeDefined()
+    expect(entry.defaultValuesParamsSchema).toBe(paramsSchema)
+
+    // Call the entry's defaultValuesFn and verify it returns correct data
+    const result = await entry.defaultValuesFn!({ id: "rec-1" })
+    expect(result).toEqual({ name: "Alice", email: "alice@example.com" })
+
+    const result2 = await entry.defaultValuesFn!({ id: "rec-2" })
+    expect(result2).toEqual({ name: "Bob", email: "bob@example.com" })
+  })
+
+  it("per-section: entry.defaultValuesFn flattens per-section output to flat record", async () => {
+    const personalSchema = z.object({
+      firstName: z.string().min(1),
+    })
+    const workSchema = z.object({
+      role: z.enum(["engineer", "designer"]),
+    })
+    const perSectionSchema = { personal: personalSchema, work: workSchema }
+
+    const asyncFn = vi.fn(async (params: { id: string }) => {
+      if (params.id === "emp-1") {
+        return {
+          personal: { firstName: "Alice" },
+          work: { role: "engineer" },
+        }
+      }
+      return { personal: { firstName: "" }, work: { role: "designer" } }
+    })
+
+    const formDef: F0FormDefinitionPerSection<typeof perSectionSchema> = {
+      _brand: "per-section",
+      name: "edit-record-per-section",
+      schema: perSectionSchema,
+      defaultValuesParamsSchema: paramsSchema,
+      defaultValuesFn: asyncFn as (
+        params: Record<string, unknown>
+      ) => Promise<Record<string, unknown>>,
+      onSubmit: async () => ({ success: true }),
+    }
+
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider availableFormDefinitions={[formDef]}>
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("edit-record-per-section")).toBeDefined()
+    })
+
+    const entry = capturedRegistry!.get("edit-record-per-section")!
+    expect(entry.virtual).toBe(true)
+    expect(entry.defaultValuesFn).toBeDefined()
+    expect(entry.defaultValuesParamsSchema).toBe(paramsSchema)
+
+    // The per-section defaultValuesFn should flatten { sectionId: { ...fields } } → { ...fields }
+    const result = await entry.defaultValuesFn!({ id: "emp-1" })
+    expect(result).toEqual({ firstName: "Alice", role: "engineer" })
+
+    const result2 = await entry.defaultValuesFn!({ id: "emp-2" })
+    expect(result2).toEqual({ firstName: "", role: "designer" })
+  })
+
+  it("single-schema: entry.defaultValuesFn is undefined when no defaultValuesFn on definition", async () => {
+    const formDef: F0FormDefinitionSingleSchema<typeof simpleSchema> = {
+      _brand: "single",
+      name: "static-form",
+      schema: simpleSchema,
+      defaultValues: { name: "Static", email: "s@t.com" },
+      onSubmit: async () => ({ success: true }),
+    }
+
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider availableFormDefinitions={[formDef]}>
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("static-form")).toBeDefined()
+    })
+
+    const entry = capturedRegistry!.get("static-form")!
+    expect(entry.defaultValuesFn).toBeUndefined()
+    expect(entry.ref.current!.getValues()).toEqual({
+      name: "Static",
+      email: "s@t.com",
+    })
+  })
+})
