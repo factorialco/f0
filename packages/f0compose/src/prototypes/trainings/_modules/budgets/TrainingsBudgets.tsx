@@ -894,6 +894,7 @@ function DetailView({
   const [isExportOpen, setIsExportOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isAddGroupOpen, setIsAddGroupOpen] = useState(false)
+  const [budgetUpdateApplied, setBudgetUpdateApplied] = useState(false)
   const [selectedMovement, setSelectedMovement] =
     useState<TrainingBudgetMovement | null>(null)
   const [extraMovements, setExtraMovements] = useState<
@@ -966,6 +967,12 @@ function DetailView({
       ),
     [movements, trainingParents]
   )
+  const changedMovements = movements.filter((movement) =>
+    Boolean(movement.costUpdateNotice)
+  )
+  const needsBudgetUpdate =
+    Boolean(b?.costUpdateNotice) && changedMovements.length > 0 && !budgetUpdateApplied
+
   const goToTrainingGroup = (m: TrainingBudgetMovement) => {
     navigate(`/p/trainings?training=${m.trainingId}&class=${m.groupId}`)
   }
@@ -1289,6 +1296,20 @@ function DetailView({
           <AmountWidget label="Available" value={fmtEurAmount(available)} />
         </div>
 
+        {needsBudgetUpdate && b.costUpdateNotice && (
+          <div className="px-6">
+            <F0Alert
+              variant="warning"
+              title={b.costUpdateNotice.title}
+              description={`${b.costUpdateNotice.description} Open a group to review what changed before updating the budget.`}
+              action={{
+                label: "Update budget",
+                onClick: () => setBudgetUpdateApplied(true),
+              }}
+            />
+          </div>
+        )}
+
         <OneDataCollection
           key={movementsVersion}
           id="trainings/budgets/detail/v1"
@@ -1412,21 +1433,6 @@ function DetailView({
                         },
                       }
                     },
-                  },
-                  {
-                    label: "Budget update",
-                    id: "budgetUpdate",
-                    width: 148,
-                    render: (item) =>
-                      item.isParent || !item.costUpdateNotice
-                        ? { type: "text", value: "" }
-                        : {
-                            type: "status",
-                            value: {
-                              status: "warning",
-                              label: "Update budget",
-                            },
-                          },
                   },
                   {
                     label: "Participants",
