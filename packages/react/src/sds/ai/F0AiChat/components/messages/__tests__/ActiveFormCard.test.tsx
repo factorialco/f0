@@ -51,21 +51,21 @@ describe("ActiveFormCard", () => {
     expect(container.firstChild).toBeNull()
   })
 
-  it("renders nothing when form is not dirty", () => {
-    mockActiveForm = { ...baseForm, isDirty: false }
-
-    const { container } = render(<ActiveFormCard />)
-
-    expect(container.firstChild).toBeNull()
-  })
-
-  it("renders FormCard when form is dirty", () => {
-    mockActiveForm = { ...baseForm, isDirty: true }
+  it("renders FormCard when cardTitle and cardDescription are present", () => {
+    mockActiveForm = { ...baseForm }
 
     render(<ActiveFormCard />)
 
     expect(screen.getByText("Edit Employee")).toBeInTheDocument()
     expect(screen.getByText("Fill in the employee details")).toBeInTheDocument()
+  })
+
+  it("renders FormCard even when form is not dirty", () => {
+    mockActiveForm = { ...baseForm, isDirty: false }
+
+    render(<ActiveFormCard />)
+
+    expect(screen.getByText("Edit Employee")).toBeInTheDocument()
   })
 
   it("renders nothing when cardTitle is missing", () => {
