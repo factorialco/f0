@@ -14,7 +14,6 @@ import { AdminModals, type AdminAction } from "./AdminModals"
 import { AttachmentsTab } from "./AttachmentsTab"
 import { ClassesTab } from "./ClassesTab"
 import { ContentTab } from "./ContentTab"
-import { CostsTab } from "./CostsTab"
 import { DocumentsTab } from "./DocumentsTab"
 import { FormsTab } from "./FormsTab"
 import { FundaeTab } from "./FundaeTab"
@@ -30,7 +29,7 @@ type Props = {
   onBack: () => void
 }
 
-export function TrainingsDetail({ training, onBack }: Props) {
+export function TrainingsDetail({ training, onBack: _onBack }: Props) {
   const [searchParams, setSearchParams] = useSearchParams()
   const [adminAction, setAdminAction] = useState<AdminAction>(null)
 
@@ -71,11 +70,10 @@ export function TrainingsDetail({ training, onBack }: Props) {
         ]
       : []),
     {
-      label: "Settings",
+      label: "Course settings",
       icon: Settings,
       onClick: () => setAdminAction("settings"),
-      tooltip: "Settings",
-      hideLabel: true as const,
+      tooltip: "Course settings",
     },
     ...(!isDraft
       ? [
@@ -96,7 +94,7 @@ export function TrainingsDetail({ training, onBack }: Props) {
           <PageHeader
             module={{ id: "company_trainings", name: "Trainings", href: "/p/trainings" }}
             breadcrumbs={[
-              { id: "list", label: "Trainings", onClick: onBack },
+              { id: "courses", label: "Courses", href: "/p/trainings" },
               { id: training.id, label: training.name },
             ]}
           />
@@ -124,7 +122,7 @@ export function TrainingsDetail({ training, onBack }: Props) {
               ...(training.groupNames.length > 0
                 ? [
                     {
-                      label: "Groups",
+                      label: "Training groups",
                       value: {
                         type: "data-list" as const,
                         data: training.groupNames,
@@ -150,7 +148,7 @@ export function TrainingsDetail({ training, onBack }: Props) {
               ...(training.instructorAvatars.length > 0
                 ? [
                     {
-                      label: "Instructors",
+                      label: "Instructor(s)",
                       value: {
                         type: "list" as const,
                         variant: "person" as const,
@@ -196,7 +194,6 @@ export function TrainingsDetail({ training, onBack }: Props) {
         {activeTab === "participants" && <ParticipantsTab training={training} />}
         {activeTab === "attachments" && <AttachmentsTab training={training} />}
         {activeTab === "documents" && <DocumentsTab training={training} />}
-        {activeTab === "costs" && <CostsTab training={training} />}
         {activeTab === "surveys" && <FormsTab training={training} />}
         {activeTab === "fundae" && <FundaeTab training={training} />}
 

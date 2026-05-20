@@ -39,6 +39,63 @@ target newer than vendor.
   passed to a data component.
 - TypeScript strict. No `any`. No `as any`.
 
+## Mandatory pre-edit checklist for UI work
+
+Before ANY UI edit in f0compose, write this checklist in the chat and fill it
+with concrete values. If any line cannot be filled, do not edit; inspect the
+missing source or ask one short question.
+
+- **Scope**: exact screen, component, Figma node (if applicable), and user-visible
+  problem. Include what is NOT in scope.
+- **Source checked**: list the exact files/nodes/docs already checked, for example
+  `AGENTS.md`, `f0-prototype`, `f0-design`, `generated/registry.json`, Figma
+  node IDs + screenshot, upstream module files, and relevant stories/docs.
+- **Allowed files**: exact files that may be edited in this step.
+- **Forbidden changes**: exact things that must not be touched, especially parent
+  tabs, unrelated sidepanels, fixtures, framework files, and unrelated CTAs.
+- **Component/API decision**: name the F0/f0compose/upstream pattern being used.
+  If the behavior/API is unknown, stop and inspect stories/docs instead of
+  inventing UI.
+- **Verification**: commands and browser checks that will be run before replying.
+
+For replicated production modules such as trainings, this checklist is stricter:
+
+- Do not add, remove, or change a CTA/control until upstream confirms it exists
+  or does not exist.
+- Do not remove a CTA because it “seems useless”; fix its route/modal if upstream
+  has that CTA.
+- Do not touch the main tab body when the scope is a sidepanel, row, dialog, or
+  nested component.
+- Do not touch a sidepanel when the scope is the main tab body.
+- If a Figma node covers only one subcomponent, edit only that subcomponent.
+- For visual issues such as borders, verify computed CSS in the browser before
+  claiming parity.
+
+## Hard rules for Figma-to-code edits
+
+- NEVER implement from memory when Figma is open. Use the currently
+  selected Figma node with MCP first, then use `get_screenshot` for the
+  same node. If multiple nodes are selected, inspect each relevant node by
+  ID before editing.
+- NEVER substitute a different Figma node because it looks similar. The
+  selected node is the source of truth; if it is ambiguous, stop and ask.
+- Before using or composing F0 UI, load `f0-prototype` and `f0-design`,
+  read `generated/registry.json`, and read the relevant component stories
+  or local `packages/react/.skills/` docs. Do this before editing.
+- If Figma shows an F0/Data Collection pattern, use the existing F0
+  component/pattern API. Do not hand-roll tables, toolbars, filter menus,
+  settings menus, CTAs, popovers, or fake interaction with custom `div`s.
+- Every visible CTA/control must use the canonical F0 behavior for that
+  component. If the component behavior/API is unknown, stop and inspect the
+  stories/docs instead of inventing logic.
+- Do not hardcode Figma copy or values to make a wrong component look
+  right. Use the correct component and data source; if mock data is missing,
+  add it to `@/fixtures` or ask.
+- Pixel parity means matching the selected node's structure: wrapper,
+  borders, radii, spacing, header/body split, sticky areas, and default
+  state. Removing or adding containers is only allowed when the selected
+  Figma node proves it.
+
 ## Component quirks (the LLM forgets these)
 
 - **F0Heading / F0Text** take `content` (string), NOT children.

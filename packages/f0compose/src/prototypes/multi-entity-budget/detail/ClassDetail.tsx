@@ -1,3 +1,4 @@
+import { F0Box, F0Text } from "@factorialco/f0-react"
 import {
   Page,
   PageHeader,
@@ -64,7 +65,7 @@ export function ClassDetail({
   training,
   classId,
   movement,
-  onBackToList,
+  onBackToList: _onBackToList,
   onBackToTraining,
   onBackToClasses: _onBackToClasses,
 }: Props) {
@@ -115,7 +116,6 @@ export function ClassDetail({
               href: "/p/trainings",
             }}
             breadcrumbs={[
-              { id: "list", label: "Training", onClick: onBackToList },
               {
                 id: training.id,
                 label: training.name,
@@ -126,11 +126,12 @@ export function ClassDetail({
           />
         }
       >
-        <div className="p-6">
-          <p className="text-f1-foreground-secondary">
-            No class with id <code>{classId}</code> in this training.
-          </p>
-        </div>
+        <F0Box padding="xl">
+          <F0Text
+            variant="description"
+            content={`No class with id ${classId} in this training.`}
+          />
+        </F0Box>
       </Page>
     )
   }
@@ -178,7 +179,6 @@ export function ClassDetail({
                 href: "/p/trainings",
               }}
               breadcrumbs={[
-                { id: "list", label: "Training", onClick: onBackToList },
                 {
                   id: "courses",
                   label: "Courses",

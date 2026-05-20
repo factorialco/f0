@@ -12,7 +12,11 @@ import { Input, Textarea } from "@factorialco/f0-react/dist/experimental"
 import { useEffect, useState } from "react"
 
 import type { TrainingClass, TrainingSession } from "@/fixtures"
-import { attendancesForSession, type AttendanceStatus } from "@/fixtures"
+import {
+  attendancesForSession,
+  trainingSessions,
+  type AttendanceStatus,
+} from "@/fixtures"
 
 import { SessionWizard } from "./SessionWizard"
 
@@ -158,21 +162,28 @@ export function ClassModals({
     )
   }
 
+  const handlePrimaryAction = () => {
+    if (action === "cancel-session" && session) {
+      const index = trainingSessions.findIndex((item) => item.id === session.id)
+      if (index >= 0) trainingSessions.splice(index, 1)
+    }
+
+    onClose()
+  }
+
   const isCritical = action === "cancel-session" || action === "delete-class"
   const isWide = action === "attendance-sidepanel"
 
   return (
     <F0Dialog
-      open={action !== null}
-      onOpenChange={(o: boolean) => {
-        if (!o) onClose()
-      }}
+      isOpen={action !== null}
+      onClose={onClose}
       width={isWide ? "lg" : "md"}
       title={TITLES[action]}
       description={`${klass.name}${session ? ` · ${session.title}` : ""}`}
       primaryAction={{
         label: PRIMARY_LABEL[action],
-        onClick: onClose,
+        onClick: handlePrimaryAction,
         variant: isCritical ? "critical" : "default",
       }}
       secondaryAction={

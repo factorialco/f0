@@ -2,7 +2,6 @@ import {
   F0Alert,
   F0Box,
   F0Button,
-  F0Checkbox,
   F0Dialog,
   F0Heading,
   F0Text,
@@ -10,6 +9,9 @@ import {
 import {
   Input,
   NumberInput,
+  EntitySelect,
+  type EntityId,
+  type EntitySelectEntity,
   OneDataCollection,
   Page,
   PageHeader,
@@ -24,6 +26,7 @@ import {
   ArrowDown,
   ArrowRight,
   ChartLine,
+  ChevronUp,
   Delete,
   DollarBill,
   ExternalLink,
@@ -33,6 +36,12 @@ import {
 } from "@factorialco/f0-react/icons/app"
 import { useMemo, useState } from "react"
 import { useSearchParams } from "react-router-dom"
+
+import type {
+  Training,
+  TrainingBudget,
+  TrainingBudgetMovement,
+} from "@/fixtures"
 
 import {
   directCostFromMovement,
@@ -52,19 +61,15 @@ import {
   trainingParticipants,
   trainings,
 } from "@/fixtures"
-import type {
-  PaymentStatus,
-  Training,
-  TrainingBudget,
-  TrainingBudgetMovement,
-} from "@/fixtures"
+
 import type { PrototypeMeta } from "../types"
-import { ClassDetail } from "./detail/ClassDetail"
+
 import {
   LegalEntityToggleProvider,
   defaultToggleFor,
   useLegalEntityToggle,
 } from "./_shared/legalEntityToggleContext"
+import { ClassDetail } from "./detail/ClassDetail"
 
 export const meta: PrototypeMeta = {
   slug: "multi-entity-budget",
@@ -95,15 +100,33 @@ const PAYMENT_STATUS_LABEL: Record<
   string
 > = {
   pending: "Pending",
-  spent: "Paid",
+  spent: "Spent",
 }
 
-const PAYMENT_STATUS_COLOR: Record<
-  TrainingBudgetMovement["paymentStatus"],
-  "yellow" | "viridian"
+const GROUP_STATUS_LABEL: Record<
+  TrainingBudgetMovement["groupStatus"],
+  string
 > = {
-  pending: "yellow",
-  spent: "viridian",
+  planned: "Planned",
+  ongoing: "Ongoing",
+  completed: "Completed",
+}
+
+const GROUP_STATUS_VARIANT: Record<
+  TrainingBudgetMovement["groupStatus"],
+  "neutral" | "info" | "positive"
+> = {
+  planned: "neutral",
+  ongoing: "info",
+  completed: "positive",
+}
+
+const PAYMENT_STATUS_VARIANT: Record<
+  TrainingBudgetMovement["paymentStatus"],
+  "warning" | "positive"
+> = {
+  pending: "warning",
+  spent: "positive",
 }
 
 function calculateBudgetStatus(
@@ -444,8 +467,9 @@ function EditBudgetDialog({
     <F0Dialog
       isOpen
       onClose={onClose}
+      asBottomSheetInMobile={false}
       position="center"
-      width="md"
+      width="xl"
       title="Edit budget"
       description="Update the budget's basic information, amount, or archive status."
       primaryAction={{
@@ -466,7 +490,7 @@ function EditBudgetDialog({
       }}
       secondaryAction={{ label: "Cancel", onClick: onClose }}
     >
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-6">
         <Input
           label="Title"
           value={name}
@@ -487,7 +511,7 @@ function EditBudgetDialog({
           locale="en-US"
           disabled={archived}
         />
-        <div className="flex items-center justify-between rounded-md border border-f1-border bg-f1-background-secondary p-3">
+        <div className="border-f1-border bg-f1-background-secondary flex items-center justify-between rounded-md border p-3">
           <div className="flex flex-col gap-0.5">
             <F0Text
               variant="label"
@@ -535,7 +559,6 @@ function AddTrainingGroupDialog({
       for (const c of t.classes) {
         if (taken.has(c.id)) continue
         const cost = classTotalCost(t, c.id)
-        if (!cost) continue
         out.push({
           value: c.id,
           label: `${t.name} · ${c.name}`,
@@ -548,10 +571,50 @@ function AddTrainingGroupDialog({
   }, [currentMovements])
 
   const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [expandedElements, setExpandedElements] = useState<EntityId[]>([])
+  const [dropdownOpen, setDropdownOpen] = useState(false)
 
   const selectedOptions = allGroupOptions.filter((o) =>
     selectedIds.includes(o.value)
   )
+  const trainingEntities = useMemo<EntitySelectEntity[]>(() => {
+    const entities: EntitySelectEntity[] = []
+
+    for (const training of trainings) {
+      const subItems = allGroupOptions
+        .filter((option) => option.trainingId === training.id)
+        .map((option) => ({
+          subId: option.value,
+          subName: `${training.classes.find((c) => c.id === option.value)?.name ?? option.label} · ${fmtEur(option.cost)}`,
+          subSearchKeys: [option.label],
+        }))
+
+      if (subItems.length === 0) continue
+
+      entities.push({
+        id: training.id,
+        name: training.name,
+        searchKeys: [training.name],
+        expanded: expandedElements.includes(training.id),
+        subItems,
+      })
+    }
+
+    return entities
+  }, [allGroupOptions, expandedElements])
+  const selectedEntities = useMemo<EntitySelectEntity[]>(() => {
+    const entities: EntitySelectEntity[] = []
+
+    for (const entity of trainingEntities) {
+      const subItems = entity.subItems?.filter((subItem) =>
+        selectedIds.includes(String(subItem.subId))
+      )
+      if (!subItems || subItems.length === 0) continue
+      entities.push({ ...entity, subItems })
+    }
+
+    return entities
+  }, [selectedIds, trainingEntities])
   const selectedCost = selectedOptions.reduce((s, o) => s + o.cost, 0)
 
   // KPIs: Total budget, Allocated (current movements + selection), Available.
@@ -568,81 +631,77 @@ function AddTrainingGroupDialog({
       isOpen
       onClose={onClose}
       position="center"
-      width="md"
+      width="xl"
       title="Add group"
-      primaryAction={{
-        label: "Add",
-        disabled: selectedOptions.length === 0,
-        onClick: () => {
-          const movs: TrainingBudgetMovement[] = []
-          for (const opt of selectedOptions) {
-            const t = trainings.find((x) => x.id === opt.trainingId)
-            const c = t?.classes.find((x) => x.id === opt.value)
-            const cost = t && c ? classTotalCost(t, c.id) : null
-            if (!t || !c || !cost) continue
-            movs.push({
-              id: `mov-${Date.now()}-${c.id}`,
-              budgetId: budget.id,
-              trainingId: t.id,
-              trainingName: t.name,
-              groupId: c.id,
-              groupName: c.name,
-              groupStatus: "planned",
-              startDate: c.startDate,
-              endDate: c.endDate,
-              amountCents: Math.round(cost.total * 100),
-              currency: budget.currency,
-              trainingProvider:
-                t.type === "external"
-                  ? (t.externalProvider ?? "External")
-                  : "Internal",
-              trainingTeamId: "team-eng",
-              trainingTeamName: "Engineering",
-              paymentStatus: "pending",
-              participantsCount: c.participantCount,
-              directCost: cost.direct,
-              indirectCost: cost.indirect,
-              salaryCost: cost.salary,
-            })
-          }
-          onAdded(movs)
-          onClose()
-        },
-      }}
-      secondaryAction={{ label: "Cancel", onClick: onClose }}
+      primaryAction={
+        dropdownOpen
+          ? undefined
+          : {
+              label: "Add",
+              disabled: selectedOptions.length === 0,
+              onClick: () => {
+                const movs: TrainingBudgetMovement[] = []
+                for (const opt of selectedOptions) {
+                  const t = trainings.find((x) => x.id === opt.trainingId)
+                  const c = t?.classes.find((x) => x.id === opt.value)
+                  const cost = t && c ? classTotalCost(t, c.id) : null
+                  if (!t || !c || !cost) continue
+                  movs.push({
+                    id: `mov-${Date.now()}-${c.id}`,
+                    budgetId: budget.id,
+                    trainingId: t.id,
+                    trainingName: t.name,
+                    groupId: c.id,
+                    groupName: c.name,
+                    groupStatus: "planned",
+                    startDate: c.startDate,
+                    endDate: c.endDate,
+                    amountCents: Math.round(cost.total * 100),
+                    currency: budget.currency,
+                    trainingProvider:
+                      t.type === "external"
+                        ? (t.externalProvider ?? "External")
+                        : "Internal",
+                    trainingTeamId: "team-eng",
+                    trainingTeamName: "Engineering",
+                    paymentStatus: "pending",
+                    participantsCount: c.participantCount,
+                    directCost: cost.direct,
+                    indirectCost: cost.indirect,
+                    salaryCost: cost.salary,
+                  })
+                }
+                onAdded(movs)
+                onClose()
+              },
+            }
+      }
+      secondaryAction={
+        dropdownOpen ? undefined : { label: "Cancel", onClick: onClose }
+      }
     >
-      <div className="flex flex-col gap-4">
-        {/* KPIs row (frames 2 & 3) */}
-        <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-lg border border-f1-border bg-f1-background p-3">
-            <F0Text content="Total budget" variant="small" />
-            <F0Heading
-              as="h4"
-              variant="heading"
-              content={fmtEur(budget.totalAmount)}
+      <F0Box display="flex" flexDirection="column" gap="xl" minHeight="96">
+        {!dropdownOpen && (
+          <F0Box display="grid" columns="3" gap="sm">
+            <Widget
+              summaries={[
+                { label: "Total budget", value: fmtEur(budget.totalAmount) },
+              ]}
             />
-          </div>
-          <div className="rounded-lg border border-f1-border bg-f1-background p-3">
-            <F0Text content="Allocated" variant="small" />
-            <F0Heading
-              as="h4"
-              variant="heading"
-              content={fmtEur(allocatedAfter)}
+            <Widget
+              summaries={[
+                { label: "Allocated", value: fmtEur(allocatedAfter) },
+              ]}
             />
-          </div>
-          <div className="rounded-lg border border-f1-border bg-f1-background p-3">
-            <F0Text content="Available" variant="small" />
-            <F0Heading
-              as="h4"
-              variant="heading"
-              content={fmtEur(Math.max(available, 0))}
+            <Widget
+              summaries={[
+                { label: "Available", value: fmtEur(Math.max(available, 0)) },
+              ]}
             />
-          </div>
-        </div>
+          </F0Box>
+        )}
 
-        {/* Within / Outside budget alert (frame 3 has it always; frame 2
-            hides it because nothing is selected yet) */}
-        {selectedOptions.length > 0 && (
+        {selectedOptions.length > 0 && !dropdownOpen && (
           <F0Alert
             variant={isWithin ? "positive" : "warning"}
             title={isWithin ? "Within budget" : "Outside budget"}
@@ -654,53 +713,48 @@ function AddTrainingGroupDialog({
           />
         )}
 
-        {/* Training group selector */}
-        <div className="flex flex-col gap-2">
-          <F0Text content="Training group" variant="label" />
-          <div className="max-h-48 overflow-auto rounded-lg border border-f1-border bg-f1-background">
-            {allGroupOptions.map((option) => {
-              const selected = selectedIds.includes(option.value)
-              return (
-                <label
-                  key={option.value}
-                  className="flex cursor-pointer items-center justify-between gap-3 border-b border-f1-border px-3 py-2 last:border-b-0"
-                >
-                  <div className="flex flex-col gap-0.5">
-                    <F0Text content={option.label} variant="label" />
-                    <F0Text content={fmtEur(option.cost)} variant="small" />
-                  </div>
-                  <F0Checkbox
-                    title={option.label}
-                    hideLabel
-                    checked={selected}
-                    onCheckedChange={(checked) => {
-                      setSelectedIds((prev) =>
-                        checked === true
-                          ? [...prev, option.value]
-                          : prev.filter((id) => id !== option.value)
-                      )
-                    }}
-                  />
-                </label>
-              )
-            })}
-          </div>
-        </div>
+        {!dropdownOpen && <F0Box borderBottom="default" borderColor="info" />}
 
-        {/* Budget deductions info banner (icon + 2 lines) */}
-        <div className="flex items-start gap-3 rounded-lg border border-f1-border bg-f1-background-secondary p-3">
-          <span className="mt-0.5 text-f1-foreground-secondary">
-            <DollarBill />
-          </span>
-          <div className="flex flex-col gap-0.5">
-            <F0Text content="Budget deductions" variant="label" />
-            <F0Text
-              content="Direct, indirect, and salary costs of the selected training groups will be deducted from this budget."
-              variant="small"
-            />
-          </div>
-        </div>
-      </div>
+        <EntitySelect
+          label="Training group"
+          placeholder="e.g., January group"
+          entities={trainingEntities}
+          groups={[{ label: "All", value: "all" }]}
+          selectedGroup="all"
+          selectedEntities={selectedEntities}
+          selectedItemsCopy="trainings selected"
+          searchPlaceholder="Search"
+          selectAllLabel="Select all"
+          clearLabel="Clear"
+          selectedLabel="selected"
+          notFoundTitle="No trainings found"
+          notFoundSubtitle=""
+          hiddenAvatar
+          singleSelector={false}
+          width={600}
+          onOpenChange={setDropdownOpen}
+          onGroupChange={() => {}}
+          onItemExpandedChange={(id, expanded) => {
+            setExpandedElements((prev) =>
+              expanded ? [id, ...prev] : prev.filter((item) => item !== id)
+            )
+          }}
+          onSelect={(selection) => {
+            const ids = selection.flatMap((entity) =>
+              (entity.subItems ?? []).map((subItem) => String(subItem.subId))
+            )
+            setSelectedIds(ids)
+          }}
+        />
+
+        {!dropdownOpen && (
+          <F0Alert
+            variant="neutral"
+            title="Budget deductions"
+            description="Direct, indirect, and salary costs of the selected training groups will be deducted from this budget."
+          />
+        )}
+      </F0Box>
     </F0Dialog>
   )
 }
@@ -735,6 +789,15 @@ function DetailView({
     return [...base, ...extraMovements].filter((m) => !removedIds.has(m.id))
   }, [b, extraMovements, removedIds])
 
+  const selectedMovementIndex = selectedMovement
+    ? movements.findIndex((movement) => movement.id === selectedMovement.id)
+    : -1
+
+  const selectMovementAt = (index: number) => {
+    const movement = movements[index]
+    if (movement) setSelectedMovement(movement)
+  }
+
   const goToTrainingGroup = (m: TrainingBudgetMovement) => {
     go(setSearch, {
       view: "group",
@@ -747,7 +810,7 @@ function DetailView({
       search: { enabled: true, sync: true },
       presets: [
         { label: "Pending", filter: { paymentStatus: ["pending"] } },
-        { label: "Paid", filter: { paymentStatus: ["spent"] } },
+        { label: "Spent", filter: { paymentStatus: ["spent"] } },
       ],
       filters: {
         groupStatus: {
@@ -840,23 +903,25 @@ function DetailView({
           }
         },
       },
-      primaryActions: () => {
-        if (!b) return undefined
-        const isArchived = b.status === "closed"
-        return {
-          label: "Add training group",
-          icon: Add,
-          disabled: isArchived,
-          onClick: () => setIsAddGroupOpen(true),
-        }
-      },
-      secondaryActions: () => [
-        {
-          label: "Export budget",
-          icon: Upload,
-          onClick: () => setIsExportOpen(true),
+      secondaryActions: {
+        expanded: 1,
+        actions: () => {
+          if (!b) return []
+          const isArchived = b.status === "closed"
+          return [
+            {
+              label: "Add training group",
+              disabled: isArchived,
+              onClick: () => setIsAddGroupOpen(true),
+            },
+            {
+              label: "Export budget",
+              icon: Upload,
+              onClick: () => setIsExportOpen(true),
+            },
+          ]
         },
-      ],
+      },
       itemOnClick: (item) => () => setSelectedMovement(item),
       itemActions: (item: TrainingBudgetMovement) => [
         {
@@ -895,23 +960,29 @@ function DetailView({
   const pending = movements
     .filter((m) => m.paymentStatus === "pending")
     .reduce((s, m) => s + m.amountCents / 100, 0)
-  const allocated = spent + pending
-  const available = total - allocated
+  const committed = spent + pending
+  const available = total - committed
 
-  const { status } = calculateBudgetStatus(allocated, total)
+  const { status } = calculateBudgetStatus(committed, total)
   const isOver = status === "over_budget" && total > 0
   const isAtRisk = status === "budget_risk"
   const exceedAmount = isOver ? Math.abs(available) : 0
-  const exceedPct = total > 0 ? (allocated * 100) / total : 0
+  const exceedPct = total > 0 ? (committed * 100) / total : 0
   const isArchived = b.status === "closed"
 
   return (
-    <F0Box display="flex" flexDirection="column" gap="xl" padding="xl" paddingTop="lg">
+    <F0Box
+      display="flex"
+      flexDirection="column"
+      gap="xl"
+      padding="xl"
+      paddingTop="lg"
+    >
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
           <F0Heading content={b.name} variant="heading-large" as="h1" />
           <F0Text
-            content="Control how training costs are allocated across groups and legal entities."
+            content={`${b.year} • ${b.scope === "company" ? "Company" : b.scope === "department" ? "Department" : "Team"} · ${b.scopeName} • Owner: ${b.ownerEmployeeName}`}
             variant="small"
           />
         </div>
@@ -947,25 +1018,15 @@ function DetailView({
         />
       )}
 
-      <div className="flex flex-wrap items-center gap-2 text-sm text-f1-foreground-secondary">
-        <span className="inline-flex items-center gap-1 rounded-full bg-f1-background-positive px-2 py-1 text-f1-foreground-positive">
-          <span className="h-1.5 w-1.5 rounded-full bg-f1-foreground-positive" />
-          {STATUS_LABEL[status]}
-        </span>
-        <span>Type Training</span>
-        <span>Timeframe {b.year}</span>
-        <span>Groups {movements.length}</span>
-      </div>
-
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <AmountWidget label="Total budget" value={fmtEur(total)} />
-        <AmountWidget label="Allocated" value={fmtEur(allocated)} />
-        <AmountWidget label="Spent" value={fmtEur(spent)} />
         <AmountWidget
           label="Available"
           value={fmtEur(available)}
           emphasize={available < 0 ? "negative" : "positive"}
         />
+        <AmountWidget label="Committed" value={fmtEur(committed)} />
+        <AmountWidget label="Spent" value={fmtEur(spent)} />
+        <AmountWidget label="Total" value={fmtEur(total)} />
       </div>
 
       <OneDataCollection
@@ -978,19 +1039,38 @@ function DetailView({
             options: {
               columns: [
                 {
-                  label: "Training",
-                  id: "trainingName",
-                  render: (item) => ({
-                    type: "text",
-                    value: item.trainingName,
-                  }),
-                },
-                {
-                  label: "Group",
+                  label: "Training group",
                   id: "groupName",
                   render: (item) => ({
                     type: "text",
                     value: item.groupName,
+                  }),
+                },
+                {
+                  label: "Group status",
+                  id: "groupStatus",
+                  render: (item) => ({
+                    type: "status",
+                    value: {
+                      status: GROUP_STATUS_VARIANT[item.groupStatus],
+                      label: GROUP_STATUS_LABEL[item.groupStatus],
+                    },
+                  }),
+                },
+                {
+                  label: "Start date",
+                  id: "startDate",
+                  render: (item) => ({
+                    type: "text",
+                    value: fmtDate(item.startDate),
+                  }),
+                },
+                {
+                  label: "End date",
+                  id: "endDate",
+                  render: (item) => ({
+                    type: "text",
+                    value: fmtDate(item.endDate),
                   }),
                 },
                 {
@@ -1002,12 +1082,20 @@ function DetailView({
                   }),
                 },
                 {
+                  label: "Provider",
+                  id: "provider",
+                  render: (item) => ({
+                    type: "text",
+                    value: item.trainingProvider,
+                  }),
+                },
+                {
                   label: "Payment status",
                   id: "paymentStatus",
                   render: (item) => ({
-                    type: "dotTag",
+                    type: "status",
                     value: {
-                      color: PAYMENT_STATUS_COLOR[item.paymentStatus],
+                      status: PAYMENT_STATUS_VARIANT[item.paymentStatus],
                       label: PAYMENT_STATUS_LABEL[item.paymentStatus],
                     },
                   }),
@@ -1023,12 +1111,9 @@ function DetailView({
                     return {
                       type: "tagList",
                       value: {
-                        type: "dot",
-                        tags: les.map((le) => ({
-                          text: le.legalName,
-                          color: "indigo" as const,
-                        })),
-                        max: 2,
+                        type: "raw",
+                        tags: les.map((le) => ({ text: le.legalName })),
+                        max: 1,
                       },
                     }
                   },
@@ -1114,12 +1199,14 @@ function DetailView({
           budget={trainingBudgets.find(
             (b) => b.id === selectedMovement.budgetId
           )}
+          position={selectedMovementIndex + 1}
+          total={movements.length}
+          hasPrevious={selectedMovementIndex > 0}
+          hasNext={selectedMovementIndex < movements.length - 1}
+          onPrevious={() => selectMovementAt(selectedMovementIndex - 1)}
+          onNext={() => selectMovementAt(selectedMovementIndex + 1)}
           onClose={() => setSelectedMovement(null)}
-          onGoToGroup={() => {
-            const m = selectedMovement
-            setSelectedMovement(null)
-            goToTrainingGroup(m)
-          }}
+          onGoToTrainingGroup={() => goToTrainingGroup(selectedMovement)}
           onOpenLegalEntity={(le) => {
             setSelectedLegalEntityCost({
               movement: selectedMovement,
@@ -1182,7 +1269,11 @@ function NewBudgetView({
       onClose={() => go(setSearch, { view: "list", budgetId: null })}
       position="center"
       width="md"
-      primaryAction={{ label: "Create budget", icon: Add, onClick: createBudget }}
+      primaryAction={{
+        label: "Create budget",
+        icon: Add,
+        onClick: createBudget,
+      }}
       secondaryAction={{
         label: "Cancel",
         onClick: () => go(setSearch, { view: "list", budgetId: null }),
@@ -1249,7 +1340,7 @@ function GroupDetailView({
 
   if (!movement || !training || !classId) {
     return (
-      <div className="flex items-center justify-center p-12 text-f1-foreground-secondary">
+      <div className="text-f1-foreground-secondary flex items-center justify-center p-12">
         Training group not found.
       </div>
     )
@@ -1296,10 +1387,6 @@ function GroupSidepanelCostTab({
   const les = legalEntitiesForMovement(movement, budget)
   const canSplit = les.length > 1
   const isOn = canSplit && toggle.isOn(movement.id)
-  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>(
-    movement.paymentStatus
-  )
-  const [totalOpen, setTotalOpen] = useState(false)
   const totalCost = grossCostFromMovement(movement)
   const participants = participantsForGroup(movement.groupId)
   const leBreakdownMap = new Map(
@@ -1313,82 +1400,15 @@ function GroupSidepanelCostTab({
   )
 
   return (
-    <F0Box display="flex" flexDirection="column" gap="md" paddingX="md">
-      <div className="flex flex-wrap items-center gap-2 text-sm text-f1-foreground-secondary">
-        <span className="inline-flex items-center gap-1 rounded-full bg-f1-background-positive px-2 py-1 text-f1-foreground-positive">
-          <span className="h-1.5 w-1.5 rounded-full bg-f1-foreground-positive" />
-          {PAYMENT_STATUS_LABEL[paymentStatus]}
-        </span>
-        <span>
-          {fmtDate(movement.startDate)} - {fmtDate(movement.endDate)}
-        </span>
-      </div>
-
-      {/* Payment status */}
-      <div className="flex flex-col gap-2">
-        <F0Text content="Payment status" variant="label" />
-        <Select<PaymentStatus>
-          label="Payment status"
-          hideLabel
-          value={paymentStatus}
-          onChange={(v: PaymentStatus) => setPaymentStatus(v)}
-          options={[
-            { value: "pending", label: "Pending" },
-            { value: "spent", label: "Paid" },
-          ]}
-        />
-      </div>
-
-      {/* Total cost card */}
-      <div className="rounded-xl border border-f1-border bg-f1-background">
-        <button
-          type="button"
-          onClick={() => setTotalOpen((v) => !v)}
-          className="flex w-full items-center justify-between p-4"
-        >
-          <div className="flex flex-col items-start gap-0.5">
-            <F0Text content="Total cost" variant="label" />
-            <F0Text
-              content={`${participants.length} ${participants.length === 1 ? "participant" : "participants"}`}
-              variant="small"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <F0Heading content={fmtEur(totalCost)} variant="heading" as="h3" />
-            <span className="text-f1-foreground-secondary">
-              {totalOpen ? <ArrowDown /> : <ArrowRight />}
-            </span>
-          </div>
-        </button>
-        {totalOpen && (
-          <div className="flex flex-col gap-2 border-t border-f1-border p-4">
-            <div className="flex justify-between">
-              <F0Text content="Direct cost" variant="small" />
-              <F0Text
-                content={fmtEur(directCostFromMovement(movement))}
-                variant="small"
-              />
-            </div>
-            <div className="flex justify-between">
-              <F0Text content="Indirect cost" variant="small" />
-              <F0Text
-                content={fmtEur(indirectCostFromMovement(movement))}
-                variant="small"
-              />
-            </div>
-            <div className="flex justify-between">
-              <F0Text content="Salary cost" variant="small" />
-              <F0Text
-                content={fmtEur(salaryCostFromMovement(movement))}
-                variant="small"
-              />
-            </div>
-          </div>
-        )}
-      </div>
+    <F0Box display="flex" flexDirection="column" gap="lg" paddingX="md">
+      <CostBreakdownList
+        direct={directCostFromMovement(movement)}
+        indirect={indirectCostFromMovement(movement)}
+        salary={salaryCostFromMovement(movement)}
+      />
 
       {/* Costs by legal entity switch card */}
-      <div className="flex items-start justify-between gap-3 rounded-xl border border-f1-border bg-f1-background p-4">
+      <div className="border-f1-border bg-f1-background flex items-start justify-between gap-3 rounded-xl border p-4">
         <div className="flex flex-col gap-0.5">
           <F0Text content="Costs by legal entity" variant="label" />
           <F0Text
@@ -1422,7 +1442,7 @@ function GroupSidepanelCostTab({
             return (
               <div
                 key={le.id}
-                className="rounded-xl border border-f1-border bg-f1-background"
+                className="border-f1-border bg-f1-background rounded-xl border"
               >
                 <div className="flex items-center justify-between p-4">
                   <button
@@ -1450,7 +1470,9 @@ function GroupSidepanelCostTab({
                   </button>
                   <button
                     type="button"
-                    onClick={() => onOpenLegalEntity(le)}
+                    onClick={() => {
+                      onOpenLegalEntity(le)
+                    }}
                     className="flex items-center gap-2"
                   >
                     <F0Text content={fmtEur(leTotal)} variant="label" />
@@ -1460,7 +1482,7 @@ function GroupSidepanelCostTab({
                   </button>
                 </div>
                 {open && breakdown && (
-                  <div className="grid grid-cols-1 gap-3 border-t border-f1-border p-4 sm:grid-cols-3">
+                  <div className="border-f1-border grid grid-cols-1 gap-3 border-t p-4 sm:grid-cols-3">
                     <NumberInput
                       label="Direct cost"
                       value={breakdown.directCost}
@@ -1489,7 +1511,7 @@ function GroupSidepanelCostTab({
           })}
 
           {/* Footer summary card: per-LE totals + Total cost */}
-          <div className="mt-2 rounded-xl border border-f1-border bg-f1-background-secondary p-4">
+          <div className="border-f1-border bg-f1-background mt-2 rounded-xl border p-4">
             <F0Text content="Cost breakdown" variant="label" />
             <div className="mt-2 flex flex-col gap-1">
               {les.map((le) => {
@@ -1507,7 +1529,7 @@ function GroupSidepanelCostTab({
                 )
               })}
             </div>
-            <div className="mt-2 flex items-center justify-between border-t border-f1-border pt-2">
+            <div className="border-f1-border mt-2 flex items-center justify-between border-t pt-2">
               <div className="flex flex-col gap-0.5">
                 <F0Text content="Total cost" variant="label" />
                 <F0Text
@@ -1515,7 +1537,11 @@ function GroupSidepanelCostTab({
                   variant="small"
                 />
               </div>
-              <F0Heading as="h4" variant="heading" content={fmtEur(totalCost)} />
+              <F0Heading
+                as="h4"
+                variant="heading"
+                content={fmtEur(totalCost)}
+              />
             </div>
           </div>
         </div>
@@ -1584,17 +1610,91 @@ function GroupSidepanelParticipantsTab({
   )
 }
 
+function CostBreakdownList({
+  direct,
+  indirect,
+  salary,
+}: {
+  direct: number
+  indirect: number
+  salary: number
+}) {
+  const total = direct + indirect + salary
+
+  return (
+    <div className="flex flex-col gap-4">
+      <F0Text content="Cost breakdown" variant="label" />
+      <div className="border-f1-border-secondary bg-f1-background rounded-xl border">
+        <div className="border-f1-border-secondary flex min-h-16 items-center justify-between gap-3 border-b px-4 py-2">
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <F0Text content="Direct cost" variant="label" />
+            <F0Text
+              content="Course fees, venue rentals, and training materials"
+              variant="small"
+            />
+          </div>
+          <F0Text content={fmtEur(direct)} variant="label" />
+        </div>
+        <div className="border-f1-border-secondary flex min-h-16 items-center justify-between gap-3 border-b px-4 py-2">
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <F0Text content="Indirect cost" variant="label" />
+            <F0Text
+              content="Administrative overhead and support costs"
+              variant="small"
+            />
+          </div>
+          <F0Text content={fmtEur(indirect)} variant="label" />
+        </div>
+        <div className="flex min-h-16 items-center justify-between gap-3 px-4 py-2">
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <F0Text content="Salary cost" variant="label" />
+            <F0Text
+              content="Cost of employees' time spent in training"
+              variant="small"
+            />
+          </div>
+          <F0Text content={fmtEur(salary)} variant="label" />
+        </div>
+      </div>
+      <div className="border-f1-border-secondary border-t pt-4">
+        <div className="border-f1-border-secondary bg-f1-background flex min-h-16 items-center justify-between gap-3 rounded-xl border px-4 py-2">
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <F0Text content="Total cost" variant="label" />
+            <F0Text
+              content="Gross cost= Direct + Indirect + Salary"
+              variant="small"
+            />
+          </div>
+          <F0Text content={fmtEur(total)} variant="label" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function GroupSidepanel({
   movement,
   budget,
+  position,
+  total,
+  hasPrevious,
+  hasNext,
+  onPrevious,
+  onNext,
   onClose,
-  onGoToGroup,
+  onGoToTrainingGroup,
   onOpenLegalEntity,
 }: {
   movement: TrainingBudgetMovement
   budget: TrainingBudget | undefined
+  position: number
+  total: number
+  hasPrevious: boolean
+  hasNext: boolean
+  onPrevious: () => void
+  onNext: () => void
   onClose: () => void
-  onGoToGroup: () => void
+  onGoToTrainingGroup: () => void
   onOpenLegalEntity: (le: { id: string; legalName: string }) => void
 }) {
   const [tab, setTab] = useState<"cost" | "participants">("cost")
@@ -1606,6 +1706,30 @@ function GroupSidepanel({
       width="md"
       title={movement.groupName}
       description={movement.trainingName}
+      otherActions={[
+        {
+          label: "Go to Training group",
+          icon: ExternalLink,
+          onClick: onGoToTrainingGroup,
+        },
+      ]}
+      metadata={[
+        {
+          label: "Payment status",
+          value: {
+            type: "status" as const,
+            label: PAYMENT_STATUS_LABEL[movement.paymentStatus],
+            variant: PAYMENT_STATUS_VARIANT[movement.paymentStatus],
+          },
+        },
+        {
+          label: "Timeframe",
+          value: {
+            type: "text" as const,
+            content: `${fmtDate(movement.startDate)}- ${fmtDate(movement.endDate)}`,
+          },
+        },
+      ]}
       tabs={[
         { id: "cost", label: "Cost", onClick: () => setTab("cost") },
         {
@@ -1616,14 +1740,45 @@ function GroupSidepanel({
       ]}
       activeTabId={tab}
       setActiveTabId={(id: string) => setTab(id as "cost" | "participants")}
-      primaryAction={{
-        label: "Go to Training group",
-        icon: ArrowRight,
-        onClick: onGoToGroup,
-      }}
-      secondaryAction={{ label: "Close", onClick: onClose }}
       disableContentPadding
     >
+      <div
+        style={{
+          position: "fixed",
+          top: 25,
+          right: 129,
+          zIndex: 1000,
+          display: "flex",
+          alignItems: "center",
+          gap: 4,
+          pointerEvents: "auto",
+        }}
+      >
+        <F0Button
+          label="Previous group"
+          icon={ChevronUp}
+          hideLabel
+          variant="outline"
+          size="md"
+          disabled={!hasPrevious}
+          onClick={onPrevious}
+        />
+        <F0Button
+          label="Next group"
+          icon={ArrowDown}
+          hideLabel
+          variant="outline"
+          size="md"
+          disabled={!hasNext}
+          onClick={onNext}
+        />
+      </div>
+      <F0Box display="flex" justifyContent="end" paddingX="md" paddingY="sm">
+        <F0Text
+          variant="small"
+          content={`${position}/${total} · ${PAYMENT_STATUS_LABEL[movement.paymentStatus]} · ${fmtDate(movement.startDate)}- ${fmtDate(movement.endDate)}`}
+        />
+      </F0Box>
       {tab === "cost" && (
         <GroupSidepanelCostTab
           movement={movement}
@@ -1657,9 +1812,6 @@ export function LegalEntityCostSidepanel({
     movement,
     participantsByLegalEntityForMovement(movement)
   ).find((c) => c.legalEntityId === legalEntityId)
-  const leTotal = breakdown
-    ? breakdown.directCost + breakdown.indirectCost + breakdown.salaryCost
-    : 0
   return (
     <F0Dialog
       isOpen
@@ -1668,6 +1820,23 @@ export function LegalEntityCostSidepanel({
       width="md"
       title={le?.legalName ?? legalEntityId}
       description={movement.groupName}
+      metadata={[
+        {
+          label: "Payment status",
+          value: {
+            type: "status" as const,
+            label: PAYMENT_STATUS_LABEL[movement.paymentStatus],
+            variant: PAYMENT_STATUS_VARIANT[movement.paymentStatus],
+          },
+        },
+        {
+          label: "Timeframe",
+          value: {
+            type: "text" as const,
+            content: `${fmtDate(movement.startDate)}- ${fmtDate(movement.endDate)}`,
+          },
+        },
+      ]}
       tabs={[
         { id: "cost", label: "Cost", onClick: () => setTab("cost") },
         {
@@ -1678,68 +1847,15 @@ export function LegalEntityCostSidepanel({
       ]}
       activeTabId={tab}
       setActiveTabId={(id: string) => setTab(id as "cost" | "participants")}
-      secondaryAction={{ label: "Close", onClick: onClose }}
       disableContentPadding
     >
       {tab === "cost" && (
-        <F0Box display="flex" flexDirection="column" gap="md" paddingX="md">
-          <div className="flex flex-col gap-2">
-            <F0Text content="Cost breakdown" variant="label" />
-            <div className="rounded-lg border border-f1-border bg-f1-background">
-              <div className="flex items-start justify-between gap-3 p-3">
-                <div className="flex flex-col gap-0.5">
-                  <F0Text content="Direct cost" variant="label" />
-                  <F0Text
-                    content="Tuition, materials, instructor fees"
-                    variant="small"
-                  />
-                </div>
-                <F0Text
-                  content={fmtEur(breakdown?.directCost ?? 0)}
-                  variant="label"
-                />
-              </div>
-              <div className="flex items-start justify-between gap-3 border-t border-f1-border p-3">
-                <div className="flex flex-col gap-0.5">
-                  <F0Text content="Indirect cost" variant="label" />
-                  <F0Text
-                    content="Travel, lodging, per diem"
-                    variant="small"
-                  />
-                </div>
-                <F0Text
-                  content={fmtEur(breakdown?.indirectCost ?? 0)}
-                  variant="label"
-                />
-              </div>
-              <div className="flex items-start justify-between gap-3 border-t border-f1-border p-3">
-                <div className="flex flex-col gap-0.5">
-                  <F0Text content="Salary cost" variant="label" />
-                  <F0Text
-                    content="Hours spent in training x hourly rate"
-                    variant="small"
-                  />
-                </div>
-                <F0Text
-                  content={fmtEur(breakdown?.salaryCost ?? 0)}
-                  variant="label"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-lg border border-f1-border bg-f1-background-secondary p-3">
-            <div className="flex items-center justify-between">
-              <div className="flex flex-col gap-0.5">
-                <F0Text content="Total cost" variant="label" />
-                <F0Text
-                  content="Gross cost = Direct + Indirect + Salary"
-                  variant="small"
-                />
-              </div>
-              <F0Heading as="h4" variant="heading" content={fmtEur(leTotal)} />
-            </div>
-          </div>
+        <F0Box display="flex" flexDirection="column" gap="lg" paddingX="md">
+          <CostBreakdownList
+            direct={breakdown?.directCost ?? 0}
+            indirect={breakdown?.indirectCost ?? 0}
+            salary={breakdown?.salaryCost ?? 0}
+          />
         </F0Box>
       )}
       {tab === "participants" && (

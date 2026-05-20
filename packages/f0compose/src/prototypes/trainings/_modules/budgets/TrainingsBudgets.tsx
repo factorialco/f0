@@ -1,23 +1,18 @@
 import {
   F0Alert,
-  F0Avatar,
+  F0AvatarIcon,
   F0Box,
   F0Button,
   F0Dialog,
-  F0Heading,
   F0Icon,
   F0Text,
-  F0WizardForm,
-  f0FormField,
-  useF0FormDefinition,
-} from "@factorialco/f0-react"
-import type {
-  F0FormSubmitResult,
-  F0WizardFormStep,
 } from "@factorialco/f0-react"
 import {
   Input,
   NumberInput,
+  EntitySelect,
+  type EntityId,
+  type EntitySelectEntity,
   OneDataCollection,
   Page,
   PageHeader,
@@ -32,42 +27,42 @@ import {
   Add,
   ArrowDown,
   ChartLine,
+  ChevronUp,
   Delete,
   DollarBill,
   ExternalLink,
   InProgressTask,
   Office,
   Pencil,
-  Search,
-  Sliders,
   Upload,
 } from "@factorialco/f0-react/icons/app"
 import { useMemo, useState } from "react"
-import type { ReactNode } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
-import { z } from "zod"
 
-import {
-  breakdownByLegalEntityFor,
-  findLegalEntity,
-  findEmployee,
-  grossCostFromMovement,
-  hoursCompletedForEmployee,
-  legalEntities,
-  legalEntityCurrencyMap,
-  legalEntityForEmployee,
-  salaryCostForEmployeeInGroup,
-  movementsForBudget,
-  trainingBudgets,
-  trainingParticipants,
-  trainings,
-} from "@/fixtures"
 import type {
   Training,
   TrainingBudget,
   TrainingBudgetMovement,
 } from "@/fixtures"
+
+import {
+  breakdownByLegalEntityFor,
+  findLegalEntity,
+  findEmployee,
+  findTeam,
+  grossCostFromMovement,
+  legalEntities,
+  legalEntityCurrencyMap,
+  legalEntityForEmployee,
+  trainingBudgetMovements,
+  movementsForBudget,
+  trainingBudgets,
+  trainingParticipants,
+  trainings,
+} from "@/fixtures"
+
 import type { PrototypeMeta } from "../../../types"
+
 import { trainingsTopNav } from "../../topNav"
 
 export const meta: PrototypeMeta = {
@@ -94,20 +89,23 @@ const STATUS_LABEL: Record<BudgetStatusKey, string> = {
   over_budget: "Over budget",
 }
 
-const GROUP_STATUS_LABEL: Record<TrainingBudgetMovement["groupStatus"], string> =
-  {
-    planned: "Planned",
-    ongoing: "Ongoing",
-    completed: "Completed",
-  }
-
-const GROUP_STATUS_COLOR: Record<
+const GROUP_STATUS_LABEL: Record<
   TrainingBudgetMovement["groupStatus"],
-  "yellow" | "viridian" | "indigo"
+  string
 > = {
-  planned: "indigo",
-  ongoing: "yellow",
-  completed: "viridian",
+  planned: "Planned",
+  ongoing: "Ongoing",
+  completed: "Completed",
+}
+
+// F0TagStatus variant per group status (Figma: pill rellena, status-tag cell)
+const GROUP_STATUS_VARIANT: Record<
+  TrainingBudgetMovement["groupStatus"],
+  "neutral" | "info" | "positive" | "warning" | "critical"
+> = {
+  planned: "info",
+  ongoing: "positive",
+  completed: "neutral",
 }
 
 const PAYMENT_STATUS_LABEL: Record<
@@ -115,15 +113,15 @@ const PAYMENT_STATUS_LABEL: Record<
   string
 > = {
   pending: "Pending",
-  spent: "Spent",
+  spent: "Paid",
 }
 
-const PAYMENT_STATUS_COLOR: Record<
+const PAYMENT_STATUS_VARIANT: Record<
   TrainingBudgetMovement["paymentStatus"],
-  "yellow" | "viridian"
+  "neutral" | "info" | "positive" | "warning" | "critical"
 > = {
-  pending: "yellow",
-  spent: "viridian",
+  pending: "warning",
+  spent: "positive",
 }
 
 function calculateBudgetStatus(
@@ -142,6 +140,17 @@ const fmtEur = (n: number) =>
     currency: "EUR",
     maximumFractionDigits: 0,
   }).format(n)
+
+// KPI format: "50,000.00 €" (amount + space + symbol, 2 decimals)
+const fmtEurAmount = (n: number) =>
+  `${new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(n)} €`
+
+// Table cell format: "€10,000" (€ prefix, no decimals)
+const fmtEurCompact = (n: number) =>
+  `€${new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(n)}`
 
 const fmtDate = (iso: string | null) =>
   iso
@@ -171,6 +180,13 @@ function participantsForGroup(groupId: string) {
   return trainingParticipants.filter((p) => p.classId === groupId)
 }
 
+function participantCountForMovement(movement: TrainingBudgetMovement) {
+  const participants = participantsForGroup(movement.groupId)
+  return participants.length > 0
+    ? participants.length
+    : movement.participantsCount
+}
+
 function participantsForLegalEntity(
   movement: TrainingBudgetMovement,
   legalEntityId: string
@@ -192,6 +208,28 @@ function participantsByLegalEntityForMovement(
     legalEntityId,
     count,
   }))
+}
+
+function breakdownByLegalEntityWithRealParticipants(
+  movement: TrainingBudgetMovement
+) {
+  const participantsByLegalEntity =
+    participantsByLegalEntityForMovement(movement)
+  const countsByLegalEntity = new Map(
+    participantsByLegalEntity.map(({ legalEntityId, count }) => [
+      legalEntityId,
+      count,
+    ])
+  )
+
+  return breakdownByLegalEntityFor(movement, participantsByLegalEntity).map(
+    (breakdown) => ({
+      ...breakdown,
+      participantsCount:
+        countsByLegalEntity.get(breakdown.legalEntityId) ??
+        breakdown.participantsCount,
+    })
+  )
 }
 
 function legalEntitiesForMovement(movement: TrainingBudgetMovement) {
@@ -241,9 +279,7 @@ function classTotalCost(
 function calculateAllocated(selectedTrainingClassIds: string[]): number {
   let total = 0
   for (const id of selectedTrainingClassIds) {
-    const training = trainings.find((t) =>
-      t.classes.some((c) => c.id === id)
-    )
+    const training = trainings.find((t) => t.classes.some((c) => c.id === id))
     if (!training) continue
     total += classTotalCost(training, id).total
   }
@@ -336,126 +372,105 @@ function ListView({
         storage={{ features: ["filters", "sortings", "search"] }}
         source={source}
         visualizations={[
-        {
-          type: "table",
-          options: {
-            columns: [
-              {
-                label: "Name",
-                id: "name",
-                render: (item) => ({ type: "text", value: item.name }),
-              },
-              {
-                label: "Status",
-                id: "status",
-                render: (item) => {
-                  const { status, color } = calculateBudgetStatus(
-                    item.spentAmount + item.pendingAmount,
-                    item.totalAmount
-                  )
-                  return {
-                    type: "dotTag",
-                    value: { color, label: STATUS_LABEL[status] },
-                  }
+          {
+            type: "table",
+            options: {
+              columns: [
+                {
+                  label: "Name",
+                  id: "name",
+                  render: (item) => ({ type: "text", value: item.name }),
                 },
-              },
-              {
-                label: "Training total budget",
-                id: "totalBudget",
-                render: (item) => ({
-                  type: "text",
-                  value: fmtEur(item.totalAmount),
-                }),
-              },
-              {
-                label: "Available budget",
-                id: "availableBudget",
-                render: (item) => ({
-                  type: "text",
-                  value: fmtEur(item.remainingAmount),
-                }),
-              },
-            ],
+                {
+                  label: "Status",
+                  id: "status",
+                  render: (item) => {
+                    const { status, color } = calculateBudgetStatus(
+                      item.spentAmount + item.pendingAmount,
+                      item.totalAmount
+                    )
+                    return {
+                      type: "dotTag",
+                      value: { color, label: STATUS_LABEL[status] },
+                    }
+                  },
+                },
+                {
+                  label: "Training total budget",
+                  id: "totalBudget",
+                  render: (item) => ({
+                    type: "text",
+                    value: fmtEur(item.totalAmount),
+                  }),
+                },
+                {
+                  label: "Available budget",
+                  id: "availableBudget",
+                  render: (item) => ({
+                    type: "text",
+                    value: fmtEur(item.remainingAmount),
+                  }),
+                },
+              ],
+            },
           },
-        },
-        {
-          type: "card",
-          options: {
-            title: (item) => item.name,
-            cardProperties: [
-              {
-                label: "Status",
-                icon: ChartLine,
-                render: (item) => {
-                  const { status, color } = calculateBudgetStatus(
-                    item.spentAmount + item.pendingAmount,
-                    item.totalAmount
-                  )
-                  return {
-                    type: "dotTag",
-                    value: { color, label: STATUS_LABEL[status] },
-                  }
+          {
+            type: "card",
+            options: {
+              title: (item) => item.name,
+              cardProperties: [
+                {
+                  label: "Status",
+                  icon: ChartLine,
+                  render: (item) => {
+                    const { status, color } = calculateBudgetStatus(
+                      item.spentAmount + item.pendingAmount,
+                      item.totalAmount
+                    )
+                    return {
+                      type: "dotTag",
+                      value: { color, label: STATUS_LABEL[status] },
+                    }
+                  },
                 },
-              },
-              {
-                label: "Total budget",
-                icon: DollarBill,
-                render: (item) => ({
-                  type: "text",
-                  value: fmtEur(item.totalAmount),
-                }),
-              },
-              {
-                label: "Progress",
-                icon: InProgressTask,
-                render: (item) => {
-                  const used = item.spentAmount + item.pendingAmount
-                  const pct =
-                    item.totalAmount > 0 ? (used / item.totalAmount) * 100 : 0
-                  return {
-                    type: "progressBar",
-                    value: {
-                      value: Math.min(pct, 100),
-                      max: 100,
-                      label: `${Math.round(pct)}% allocated`,
-                    },
-                  }
+                {
+                  label: "Total budget",
+                  icon: DollarBill,
+                  render: (item) => ({
+                    type: "text",
+                    value: fmtEur(item.totalAmount),
+                  }),
                 },
-              },
-            ],
+                {
+                  label: "Progress",
+                  icon: InProgressTask,
+                  render: (item) => {
+                    const used = item.spentAmount + item.pendingAmount
+                    const pct =
+                      item.totalAmount > 0 ? (used / item.totalAmount) * 100 : 0
+                    return {
+                      type: "progressBar",
+                      value: {
+                        value: Math.min(pct, 100),
+                        max: 100,
+                        label: `${Math.round(pct)}% allocated`,
+                      },
+                    }
+                  },
+                },
+              ],
+            },
           },
-        },
-      ]}
-    />
+        ]}
+      />
     </F0Box>
   )
 }
 
 // ── DETAIL ──────────────────────────────────────────────────────────────────
 
-function AmountWidget({
-  label,
-  value,
-  emphasize,
-}: {
-  label: string
-  value: string
-  emphasize?: "negative" | "positive"
-}) {
-  const colorClass =
-    emphasize === "negative"
-      ? "text-f1-foreground-critical"
-      : emphasize === "positive"
-        ? "text-f1-foreground-positive"
-        : "text-f1-foreground"
-  return (
-    <Widget>
-      <div className="flex flex-col gap-2 p-1">
-        <F0Text content={label} variant="small" />
-        <span className={`text-2xl font-semibold ${colorClass}`}>{value}</span>
-      </div>
-    </Widget>
-  )
+function AmountWidget({ label, value }: { label: string; value: string }) {
+  return <Widget summaries={[{ label, value }]} />
 }
 
 function EditBudgetDialog({
@@ -465,26 +480,43 @@ function EditBudgetDialog({
   budget: TrainingBudget
   onClose: () => void
 }) {
-  // Local-state form — full F0Form integration would need useF0Form + a parent
-  // <F0Form>; we use plain inputs inside an F0Dialog for sandbox fidelity.
+  // Mirrors upstream `EditTrainingBudgetDialog` (modules/trainings/components/
+  // Budgets/EditTrainingBudgetDialog/index.tsx): a right-positioned F0Dialog
+  // (side panel) titled "Budget information", with Legal entity (disabled),
+  // Title, Description, Start/End date in the same row, Amount with currency
+  // unit, and an Archive block at the bottom. Labels match en.json keys
+  // budgets.forms.edit_training_budget.* and budgets.forms.edit_budget.*.
   const [name, setName] = useState(budget.name)
-  const [description, setDescription] = useState("")
+  const [description, setDescription] = useState(budget.description ?? "")
   const [amount, setAmount] = useState<number | null>(budget.totalAmount)
+  const [startDate, setStartDate] = useState<string>(
+    budget.startDate ?? `${budget.year}-01-01`
+  )
+  const [endDate, setEndDate] = useState<string>(
+    budget.endDate ?? `${budget.year}-12-31`
+  )
   const [archived, setArchived] = useState(budget.status === "closed")
+
+  const legalEntityLabel = budget.legalEntityId
+    ? (legalEntities.find((le) => le.id === budget.legalEntityId)?.legalName ??
+      "—")
+    : "—"
+
+  const isArchived = archived
+  const startAfterEnd = startDate && endDate && startDate > endDate
 
   return (
     <F0Dialog
       isOpen
       onClose={onClose}
-      position="center"
-      width="md"
-      title="Edit budget"
-      description="Update the budget's basic information, amount, or archive status."
+      position="right"
+      title="Budget information"
       primaryAction={{
         label: "Save",
+        disabled: !!startAfterEnd,
         onClick: () => {
-          // sandbox: persist locally so the UI reflects the change immediately
           budget.name = name || budget.name
+          budget.description = description || budget.description
           if (typeof amount === "number" && amount > 0) {
             budget.totalAmount = amount
             budget.remainingAmount = Math.max(
@@ -492,51 +524,92 @@ function EditBudgetDialog({
               amount - (budget.spentAmount + budget.pendingAmount)
             )
           }
+          budget.startDate = startDate
+          budget.endDate = endDate
           budget.status = archived ? "closed" : "active"
           onClose()
         },
       }}
       secondaryAction={{ label: "Cancel", onClick: onClose }}
     >
-      <div className="flex flex-col gap-4">
+      <F0Box display="flex" flexDirection="column" gap="lg">
+        <Input
+          label="Legal entity"
+          value={legalEntityLabel}
+          onChange={() => undefined}
+          disabled
+        />
         <Input
           label="Title"
           value={name}
           onChange={(v) => setName(v ?? "")}
-          disabled={archived}
+          placeholder="Enter the budget title"
+          disabled={isArchived}
         />
         <Textarea
           label="Description"
           value={description}
           onChange={(v) => setDescription(v ?? "")}
           rows={3}
-          disabled={archived}
+          placeholder="Write budget description"
+          disabled={isArchived}
         />
+        <F0Box display="flex" flexDirection="row" gap="md">
+          <Input
+            label="Start date"
+            type="date"
+            value={startDate}
+            onChange={(v) => setStartDate(v ?? "")}
+            disabled={isArchived}
+          />
+          <Input
+            label="End date"
+            type="date"
+            value={endDate}
+            onChange={(v) => setEndDate(v ?? "")}
+            disabled={isArchived}
+          />
+        </F0Box>
+        {startAfterEnd && (
+          <F0Text
+            variant="small"
+            content="Start date cannot be after end date"
+          />
+        )}
         <NumberInput
-          label="Amount (€)"
+          label="Amount"
           value={amount}
           onChange={(v) => setAmount(v)}
           locale="en-US"
-          disabled={archived}
+          units={budget.currency}
+          disabled={isArchived}
+          hint="This amount will decrease as training groups are assigned."
         />
-        <div className="flex items-center justify-between rounded-md border border-f1-border bg-f1-background-secondary p-3">
-          <div className="flex flex-col gap-0.5">
-            <F0Text
-              variant="label"
-              content={archived ? "Unarchive budget" : "Archive budget"}
-            />
+        <F0Box
+          display="flex"
+          flexDirection="row"
+          alignItems="center"
+          justifyContent="between"
+          padding="lg"
+          borderRadius="md"
+          gap="md"
+          border="default"
+          borderColor="secondary"
+        >
+          <F0Box display="flex" flexDirection="column" gap="xs">
+            <F0Text variant="label" content="Archive this budget" />
             <F0Text
               variant="small"
               content={
                 archived
-                  ? "Reactivate this budget so new training groups can be allocated to it."
-                  : "Archived budgets stop tracking new training spend. History is preserved."
+                  ? "This budget is currently archived. Restore it to enable employees to add further expenses"
+                  : "Archiving this budget will prevent employees from adding new training groups. You can still view its history."
               }
             />
-          </div>
+          </F0Box>
           <Switch checked={archived} onCheckedChange={setArchived} />
-        </div>
-      </div>
+        </F0Box>
+      </F0Box>
     </F0Dialog>
   )
 }
@@ -545,120 +618,234 @@ function AddTrainingGroupDialog({
   budget,
   onClose,
   onAdded,
+  currentMovements,
 }: {
   budget: TrainingBudget
   onClose: () => void
-  onAdded: (movement: TrainingBudgetMovement) => void
+  onAdded: (movements: TrainingBudgetMovement[]) => void
+  currentMovements: TrainingBudgetMovement[]
 }) {
-  const [trainingId, setTrainingId] = useState<string>(trainings[0]?.id ?? "")
-  const training = trainings.find((t) => t.id === trainingId) ?? trainings[0]
-  const firstClass = training?.classes[0]
-  const [classId, setClassId] = useState<string>(firstClass?.id ?? "")
+  const allGroupOptions = useMemo(() => {
+    const taken = new Set(currentMovements.map((movement) => movement.groupId))
+    const options: Array<{
+      value: string
+      label: string
+      trainingId: string
+      cost: number
+    }> = []
 
-  const klass = training?.classes.find((c) => c.id === classId)
-  const cost = training && klass ? classTotalCost(training, klass.id) : null
+    for (const training of trainings) {
+      for (const klass of training.classes) {
+        if (taken.has(klass.id)) continue
+        const cost = classTotalCost(training, klass.id)
+        options.push({
+          value: klass.id,
+          label: `${training.name} · ${klass.name}`,
+          trainingId: training.id,
+          cost: cost.total,
+        })
+      }
+    }
+
+    return options
+  }, [currentMovements])
+
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [expandedElements, setExpandedElements] = useState<EntityId[]>([])
+  const [selectedGroup, setSelectedGroup] = useState("all")
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+
+  const selectedOptions = allGroupOptions.filter((option) =>
+    selectedIds.includes(option.value)
+  )
+  const trainingEntities = useMemo<EntitySelectEntity[]>(() => {
+    const entities: EntitySelectEntity[] = []
+
+    for (const training of trainings) {
+      const subItems = allGroupOptions
+        .filter((option) => option.trainingId === training.id)
+        .map((option) => ({
+          subId: option.value,
+          subName: `${training.classes.find((klass) => klass.id === option.value)?.name ?? option.label} · ${fmtEur(option.cost)}`,
+          subSearchKeys: [option.label],
+        }))
+
+      if (subItems.length === 0) continue
+
+      entities.push({
+        id: training.id,
+        name: training.name,
+        searchKeys: [training.name],
+        expanded: expandedElements.includes(training.id),
+        subItems,
+      })
+    }
+
+    return entities
+  }, [allGroupOptions, expandedElements])
+  const selectedEntities = useMemo<EntitySelectEntity[]>(() => {
+    const entities: EntitySelectEntity[] = []
+
+    for (const entity of trainingEntities) {
+      const subItems = entity.subItems?.filter((subItem) =>
+        selectedIds.includes(String(subItem.subId))
+      )
+      if (!subItems || subItems.length === 0) continue
+      entities.push({ ...entity, subItems })
+    }
+
+    return entities
+  }, [selectedIds, trainingEntities])
+
+  const selectedCost = selectedOptions.reduce(
+    (sum, option) => sum + option.cost,
+    0
+  )
+  const allocatedNow = currentMovements.reduce(
+    (sum, movement) => sum + grossCostFromMovement(movement),
+    0
+  )
+  const allocatedAfter = allocatedNow + selectedCost
+  const available = budget.totalAmount - allocatedAfter
+  const isWithin = available >= 0
 
   return (
     <F0Dialog
       isOpen
       onClose={onClose}
       position="center"
-      width="md"
+      width="xl"
       title="Add training group"
       description="Add a training group so its costs are deducted from this budget."
-      primaryAction={{
-        label: "Add",
-        disabled: !training || !klass,
-        onClick: () => {
-          if (!training || !klass || !cost) return
-          const mov: TrainingBudgetMovement = {
-            id: `mov-${Date.now()}`,
-            budgetId: budget.id,
-            trainingId: training.id,
-            trainingName: training.name,
-            groupId: klass.id,
-            groupName: klass.name,
-            groupStatus: "planned",
-            startDate: klass.startDate,
-            endDate: klass.endDate,
-            amountCents: Math.round(cost.total * 100),
-            currency: budget.currency,
-            trainingProvider:
-              training.type === "external"
-                ? (training.externalProvider ?? "External")
-                : "Internal",
-            trainingTeamId: "team-eng",
-            trainingTeamName: "Engineering",
-            paymentStatus: "pending",
-            participantsCount: klass.participantCount,
-            directCost: cost.direct,
-            indirectCost: cost.indirect,
-            salaryCost: cost.salary,
-          }
-          onAdded(mov)
-          onClose()
-        },
-      }}
-      secondaryAction={{ label: "Cancel", onClick: onClose }}
+      primaryAction={
+        dropdownOpen
+          ? undefined
+          : {
+              label: "Add",
+              disabled: selectedOptions.length === 0,
+              onClick: () => {
+                const movements: TrainingBudgetMovement[] = []
+                for (const option of selectedOptions) {
+                  const training = trainings.find(
+                    (item) => item.id === option.trainingId
+                  )
+                  const klass = training?.classes.find(
+                    (item) => item.id === option.value
+                  )
+                  const cost =
+                    training && klass
+                      ? classTotalCost(training, klass.id)
+                      : null
+                  if (!training || !klass || !cost) continue
+                  movements.push({
+                    id: `mov-${Date.now()}-${klass.id}`,
+                    budgetId: budget.id,
+                    trainingId: training.id,
+                    trainingName: training.name,
+                    groupId: klass.id,
+                    groupName: klass.name,
+                    groupStatus: "planned",
+                    startDate: klass.startDate,
+                    endDate: klass.endDate,
+                    amountCents: Math.round(cost.total * 100),
+                    currency: budget.currency,
+                    trainingProvider:
+                      training.type === "external"
+                        ? (training.externalProvider ?? "External")
+                        : "Internal",
+                    trainingTeamId: "team-eng",
+                    trainingTeamName: "Engineering",
+                    paymentStatus: "pending",
+                    participantsCount: klass.participantCount,
+                    directCost: cost.direct,
+                    indirectCost: cost.indirect,
+                    salaryCost: cost.salary,
+                  })
+                }
+                onAdded(movements)
+                onClose()
+              },
+            }
+      }
+      secondaryAction={
+        dropdownOpen ? undefined : { label: "Cancel", onClick: onClose }
+      }
     >
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <F0Text variant="label" content="Training" />
-          <select
-            value={trainingId}
-            onChange={(e) => {
-              setTrainingId(e.target.value)
-              const t = trainings.find((x) => x.id === e.target.value)
-              setClassId(t?.classes[0]?.id ?? "")
-            }}
-            className="rounded-md border border-f1-border bg-f1-background px-3 py-2 text-sm text-f1-foreground"
-          >
-            {trainings.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <F0Text variant="label" content="Training group" />
-          <select
-            value={classId}
-            onChange={(e) => setClassId(e.target.value)}
-            className="rounded-md border border-f1-border bg-f1-background px-3 py-2 text-sm text-f1-foreground"
-            disabled={!training || training.classes.length === 0}
-          >
-            {(training?.classes ?? []).map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {cost && (
-          <div className="flex flex-col gap-1 rounded-md border border-f1-border bg-f1-background-secondary p-3">
-            <F0Text variant="label" content="Cost breakdown" />
-            <div className="flex justify-between">
-              <F0Text content="Direct cost" variant="small" />
-              <F0Text content={fmtEur(cost.direct)} variant="small" />
-            </div>
-            <div className="flex justify-between">
-              <F0Text content="Indirect cost" variant="small" />
-              <F0Text content={fmtEur(cost.indirect)} variant="small" />
-            </div>
-            <div className="flex justify-between">
-              <F0Text content="Salary cost" variant="small" />
-              <F0Text content={fmtEur(cost.salary)} variant="small" />
-            </div>
-            <div className="flex justify-between border-t border-f1-border pt-2">
-              <F0Text content="Total" variant="label" />
-              <F0Text content={fmtEur(cost.total)} variant="label" />
-            </div>
-          </div>
+      <F0Box display="flex" flexDirection="column" gap="xl" minHeight="96">
+        {!dropdownOpen && (
+          <F0Box display="grid" columns="3" gap="sm">
+            <Widget
+              summaries={[
+                { label: "Total budget", value: fmtEur(budget.totalAmount) },
+              ]}
+            />
+            <Widget
+              summaries={[
+                { label: "Allocated", value: fmtEur(allocatedAfter) },
+              ]}
+            />
+            <Widget
+              summaries={[
+                { label: "Available", value: fmtEur(Math.max(available, 0)) },
+              ]}
+            />
+          </F0Box>
         )}
-      </div>
+
+        {selectedOptions.length > 0 && !dropdownOpen && (
+          <F0Alert
+            variant={isWithin ? "positive" : "warning"}
+            title={isWithin ? "Within budget" : "Outside budget"}
+            description={
+              isWithin
+                ? `${fmtEur(available)} remaining after this addition.`
+                : `This selection exceeds the budget by ${fmtEur(-available)}.`
+            }
+          />
+        )}
+
+        {!dropdownOpen && <F0Box borderBottom="default" borderColor="info" />}
+
+        {allGroupOptions.length === 0 ? (
+          <F0Alert
+            variant="neutral"
+            title="No training groups available"
+            description="All eligible training groups are already assigned to this budget."
+          />
+        ) : (
+          <EntitySelect
+            label="Training group"
+            placeholder="e.g., January group"
+            entities={trainingEntities}
+            groups={[{ label: "All", value: "all" }]}
+            selectedGroup={selectedGroup}
+            selectedEntities={selectedEntities}
+            selectedItemsCopy="training groups selected"
+            searchPlaceholder="Search"
+            selectAllLabel="Select all"
+            clearLabel="Clear"
+            selectedLabel="selected"
+            notFoundTitle="No training groups found"
+            notFoundSubtitle=""
+            hiddenAvatar
+            singleSelector={false}
+            width={600}
+            onOpenChange={setDropdownOpen}
+            onGroupChange={(value) => setSelectedGroup(value ?? "all")}
+            onItemExpandedChange={(id, expanded) => {
+              setExpandedElements((prev) =>
+                expanded ? [id, ...prev] : prev.filter((item) => item !== id)
+              )
+            }}
+            onSelect={(selection) => {
+              const ids = selection.flatMap((entity) =>
+                (entity.subItems ?? []).map((subItem) => String(subItem.subId))
+              )
+              setSelectedIds(ids)
+            }}
+          />
+        )}
+      </F0Box>
     </F0Dialog>
   )
 }
@@ -679,10 +866,6 @@ function DetailView({
   const [isAddGroupOpen, setIsAddGroupOpen] = useState(false)
   const [selectedMovement, setSelectedMovement] =
     useState<TrainingBudgetMovement | null>(null)
-  const [selectedLegalEntityCost, setSelectedLegalEntityCost] = useState<{
-    movement: TrainingBudgetMovement
-    legalEntityId: string
-  } | null>(null)
   const [extraMovements, setExtraMovements] = useState<
     TrainingBudgetMovement[]
   >([])
@@ -693,17 +876,88 @@ function DetailView({
     const base = movementsForBudget(b.id)
     return [...base, ...extraMovements].filter((m) => !removedIds.has(m.id))
   }, [b, extraMovements, removedIds])
+  const movementsVersion = movements.map((movement) => movement.id).join("-")
+
+  // Group movements by trainingId so the table can render a nested structure:
+  // the parent row represents the training (with aggregated cost / participants
+  // / earliest date) and its children are the actual training groups.
+  type TrainingRow = TrainingBudgetMovement & { isParent?: boolean }
+
+  const trainingParents = useMemo<TrainingRow[]>(() => {
+    const byTraining = new Map<string, TrainingBudgetMovement[]>()
+    for (const m of movements) {
+      const arr = byTraining.get(m.trainingId) ?? []
+      arr.push(m)
+      byTraining.set(m.trainingId, arr)
+    }
+    const parents: TrainingRow[] = []
+    for (const [trainingId, list] of byTraining) {
+      const first = list[0]
+      const totalCents = list.reduce(
+        (s, m) => s + Math.round(grossCostFromMovement(m) * 100),
+        0
+      )
+      const participants = list.reduce(
+        (s, m) => s + participantCountForMovement(m),
+        0
+      )
+      const startDate =
+        list
+          .map((m) => m.startDate)
+          .filter((d): d is string => !!d)
+          .sort()[0] ?? null
+      const endDate =
+        list
+          .map((m) => m.endDate)
+          .filter((d): d is string => !!d)
+          .sort()
+          .slice(-1)[0] ?? null
+      parents.push({
+        ...first,
+        id: `trn:${trainingId}`,
+        isParent: true,
+        groupName: first.trainingName,
+        amountCents: totalCents,
+        participantsCount: participants,
+        startDate,
+        endDate,
+      })
+    }
+    return parents.sort((a, x) => a.trainingName.localeCompare(x.trainingName))
+  }, [movements])
+
+  const movementNavigation = useMemo(
+    () =>
+      trainingParents.flatMap((parent) =>
+        movements
+          .filter((m) => m.trainingId === parent.trainingId)
+          .slice()
+          .sort((a, x) => (a.startDate ?? "").localeCompare(x.startDate ?? ""))
+      ),
+    [movements, trainingParents]
+  )
 
   const goToTrainingGroup = (m: TrainingBudgetMovement) => {
-    navigate(`/p/trainings?training=${m.trainingId}&dtab=classes`)
+    navigate(`/p/trainings?training=${m.trainingId}&class=${m.groupId}`)
   }
 
-  const source = useDataCollectionSource<TrainingBudgetMovement>(
+  const selectedMovementIndex = selectedMovement
+    ? movementNavigation.findIndex((m) => m.id === selectedMovement.id)
+    : -1
+
+  const selectMovementAt = (index: number) => {
+    const movement = movementNavigation[index]
+    if (movement) setSelectedMovement(movement)
+  }
+
+  const source = useDataCollectionSource<TrainingRow>(
     {
       search: { enabled: true, sync: true },
+      totalItemSummary: (totalItems) =>
+        `${totalItems} ${totalItems === 1 ? "person" : "people"}`,
       presets: [
         { label: "Pending", filter: { paymentStatus: ["pending"] } },
-        { label: "Spent", filter: { paymentStatus: ["spent"] } },
+        { label: "Paid", filter: { paymentStatus: ["spent"] } },
       ],
       filters: {
         groupStatus: {
@@ -732,11 +986,25 @@ function DetailView({
           options: {
             options: [
               { label: "Pending", value: "pending" },
-              { label: "Spent", value: "spent" },
+              { label: "Paid", value: "spent" },
             ],
           },
         },
       },
+      itemsWithChildren: (item) =>
+        !!item.isParent &&
+        movements.some((m) => m.trainingId === item.trainingId),
+      childrenCount: ({ item }) =>
+        item.isParent
+          ? movements.filter((m) => m.trainingId === item.trainingId).length
+          : undefined,
+      fetchChildren: ({ item }) => ({
+        type: "basic" as const,
+        records: movements
+          .filter((m) => m.trainingId === item.trainingId)
+          .slice()
+          .sort((a, x) => (a.startDate ?? "").localeCompare(x.startDate ?? "")),
+      }),
       dataAdapter: {
         paginationType: "pages",
         perPage: 50,
@@ -752,29 +1020,35 @@ function DetailView({
             ? (filters.paymentStatus as string[])
             : []
 
-          let filtered = movements.filter((m) => {
-            if (
-              term !== "" &&
-              !m.groupName.toLowerCase().includes(term) &&
-              !m.trainingName.toLowerCase().includes(term)
+          // Match on parent rows. A parent matches when any of its
+          // children matches. The table will then expand to surface the
+          // child rows that triggered the match.
+          const parents = trainingParents.filter((p) => {
+            const children = movements.filter(
+              (m) => m.trainingId === p.trainingId
             )
-              return false
-            if (groupStatus.length > 0 && !groupStatus.includes(m.groupStatus))
-              return false
-            if (provider.length > 0 && !provider.includes(m.trainingProvider))
-              return false
-            if (
-              paymentStatus.length > 0 &&
-              !paymentStatus.includes(m.paymentStatus)
-            )
-              return false
-            return true
-          })
-
-          filtered = filtered.slice().sort((a, x) => {
-            const cmp = a.trainingName.localeCompare(x.trainingName)
-            if (cmp !== 0) return cmp
-            return (a.startDate ?? "").localeCompare(x.startDate ?? "")
+            const any = children.some((m) => {
+              if (
+                term !== "" &&
+                !m.groupName.toLowerCase().includes(term) &&
+                !m.trainingName.toLowerCase().includes(term)
+              )
+                return false
+              if (
+                groupStatus.length > 0 &&
+                !groupStatus.includes(m.groupStatus)
+              )
+                return false
+              if (provider.length > 0 && !provider.includes(m.trainingProvider))
+                return false
+              if (
+                paymentStatus.length > 0 &&
+                !paymentStatus.includes(m.paymentStatus)
+              )
+                return false
+              return true
+            })
+            return any
           })
 
           const perPage = pagination?.perPage ?? 50
@@ -782,10 +1056,10 @@ function DetailView({
             pagination && "currentPage" in pagination && pagination.currentPage
               ? pagination.currentPage
               : 1
-          const total = filtered.length
+          const total = parents.length
           const pagesCount = Math.max(1, Math.ceil(total / perPage))
           const start = (currentPage - 1) * perPage
-          const records = filtered.slice(start, start + perPage)
+          const records = parents.slice(start, start + perPage)
           return {
             type: "pages" as const,
             records,
@@ -796,39 +1070,52 @@ function DetailView({
           }
         },
       },
-      primaryActions: () => {
-        if (!b) return undefined
-        const isArchived = b.status === "closed"
-        return [
-          {
-            label: "Export budget",
-            icon: Upload,
-            onClick: () => setIsExportOpen(true),
-          },
-          {
-            label: "Add training group",
-            icon: Add,
-            disabled: isArchived,
-            onClick: () => setIsAddGroupOpen(true),
-          },
-        ]
+      secondaryActions: {
+        expanded: 1,
+        actions: () => {
+          if (!b) return undefined
+          const isArchived = b.status === "closed"
+          return [
+            {
+              label: "Add training group",
+              disabled: isArchived,
+              onClick: () => setIsAddGroupOpen(true),
+            },
+            {
+              label: "Export budget",
+              description: "Download a CSV with all budget movements",
+              icon: Upload,
+              onClick: () => setIsExportOpen(true),
+            },
+          ]
+        },
       },
-      itemOnClick: (item) => () => setSelectedMovement(item),
-      itemActions: (item: TrainingBudgetMovement) => [
-        {
-          label: "Go to Training group",
-          icon: ExternalLink,
-          onClick: () => goToTrainingGroup(item),
-        },
-        {
-          label: "Remove from budget",
-          icon: Delete,
-          critical: true as const,
-          onClick: () => setRemoveTarget(item),
-        },
-      ],
+      itemOnClick: (item) =>
+        item.isParent ? () => {} : () => setSelectedMovement(item),
+      itemActions: (item) =>
+        item.isParent
+          ? [
+              {
+                label: "Go to Training",
+                icon: ExternalLink,
+                onClick: () => goToTrainingGroup(item),
+              },
+            ]
+          : [
+              {
+                label: "Go to Training group",
+                icon: ExternalLink,
+                onClick: () => goToTrainingGroup(item),
+              },
+              {
+                label: "Remove from budget",
+                icon: Delete,
+                critical: true as const,
+                onClick: () => setRemoveTarget(item),
+              },
+            ],
     },
-    [movements, b]
+    [movements, trainingParents, b]
   )
 
   if (!b) {
@@ -847,10 +1134,10 @@ function DetailView({
   const total = b.totalAmount
   const spent = movements
     .filter((m) => m.paymentStatus === "spent")
-    .reduce((s, m) => s + m.amountCents / 100, 0)
+    .reduce((s, m) => s + grossCostFromMovement(m), 0)
   const pending = movements
     .filter((m) => m.paymentStatus === "pending")
-    .reduce((s, m) => s + m.amountCents / 100, 0)
+    .reduce((s, m) => s + grossCostFromMovement(m), 0)
   const committed = spent + pending
   const available = total - committed
 
@@ -900,364 +1187,381 @@ function DetailView({
   const startDateIso = b.startDate ?? `${b.year}-01-01`
 
   return (
-    <F0Box display="flex" flexDirection="column" gap="lg" padding="xl">
-      <ResourceHeader
-        title={fmtEur(total)}
-        description={b.description}
-        status={headerStatus}
-        metadata={[
-          {
-            label: "Budget type",
-            value: { type: "dot-tag", label: "Training", color: "malibu" },
-          },
-          {
-            label: "Date",
-            value: { type: "text", content: fmtDate(startDateIso) },
-          },
-          {
-            label: "Status",
-            value: {
-              type: "dot-tag",
-              label: lifecycleLabel,
-              color: lifecycleColor,
+    <div>
+      <F0Box display="flex" flexDirection="column" gap="xl">
+        <ResourceHeader
+          title={b.name}
+          description={b.description}
+          status={headerStatus}
+          metadata={[
+            {
+              label: "Budget type",
+              value: { type: "dot-tag", label: "Training", color: "malibu" },
             },
-          },
-          {
-            label: "Groups",
-            value: { type: "text", content: String(groupsCount) },
-          },
-        ]}
-        secondaryActions={[
-          {
-            label: "Edit budget",
-            icon: Pencil,
-            onClick: () => setIsEditOpen(true),
-          },
-        ]}
-      />
-
-      {isArchived && (
-        <F0Alert
-          variant="warning"
-          title="Archived budget"
-          description="This budget is in read-only mode. Adding or removing groups is disabled unless the budget is reactivated."
+            {
+              label: "Date",
+              value: { type: "text", content: fmtDate(startDateIso) },
+            },
+            {
+              label: "Status",
+              value: {
+                type: "dot-tag",
+                label: lifecycleLabel,
+                color: lifecycleColor,
+              },
+            },
+            {
+              label: "Groups",
+              value: { type: "text", content: String(groupsCount) },
+            },
+          ]}
+          secondaryActions={[
+            {
+              label: "Edit budget",
+              icon: Pencil,
+              onClick: () => setIsEditOpen(true),
+            },
+          ]}
         />
-      )}
 
-      {isOver && (
-        <F0Alert
-          variant="critical"
-          title="Over budget"
-          description={`Budget exceeded by ${fmtEur(exceedAmount)} (${exceedPct.toFixed(2)}%).`}
-        />
-      )}
+        {isArchived && (
+          <div className="px-6">
+            <F0Alert
+              variant="warning"
+              title="Archived budget"
+              description="This budget is in read-only mode. Adding or removing groups is disabled unless the budget is reactivated."
+            />
+          </div>
+        )}
 
-      {isAtRisk && !isOver && (
-        <F0Alert
-          variant="warning"
-          title="Budget at risk"
-          description="Budget is at risk. Less than 10% available."
-        />
-      )}
+        {isOver && (
+          <div className="px-6">
+            <F0Alert
+              variant="critical"
+              title="Over budget"
+              description={`Budget exceeded by ${fmtEur(exceedAmount)} (${exceedPct.toFixed(2)}%).`}
+            />
+          </div>
+        )}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <AmountWidget label="Available" value={fmtEur(available)}
-          emphasize={available < 0 ? "negative" : "positive"} />
-        <AmountWidget label="Committed" value={fmtEur(committed)} />
-        <AmountWidget label="Spent" value={fmtEur(spent)} />
-        <AmountWidget label="Total" value={fmtEur(total)} />
-      </div>
+        {isAtRisk && !isOver && (
+          <div className="px-6">
+            <F0Alert
+              variant="warning"
+              title="Budget at risk"
+              description="Budget is at risk. Less than 10% available."
+            />
+          </div>
+        )}
 
-      <OneDataCollection
-        id="trainings/budgets/detail/v1"
-        storage={{ features: ["filters", "sortings", "search"] }}
-        source={source}
-        visualizations={[
-          {
-            type: "table",
-            options: {
-              columns: [
-                {
-                  label: "Training group",
-                  id: "groupName",
-                  render: (item) => ({
-                    type: "text",
-                    value: item.groupName,
-                  }),
-                },
-                {
-                  label: "Group status",
-                  id: "groupStatus",
-                  render: (item) => ({
-                    type: "dotTag",
-                    value: {
-                      color: GROUP_STATUS_COLOR[item.groupStatus],
-                      label: GROUP_STATUS_LABEL[item.groupStatus],
-                    },
-                  }),
-                },
-                {
-                  label: "Start date",
-                  id: "startDate",
-                  render: (item) => ({
-                    type: "text",
-                    value: fmtDate(item.startDate),
-                  }),
-                },
-                {
-                  label: "End date",
-                  id: "endDate",
-                  render: (item) => ({
-                    type: "text",
-                    value: fmtDate(item.endDate),
-                  }),
-                },
-                {
-                  label: "Cost",
-                  id: "amount",
-                  render: (item) => ({
-                    type: "text",
-                    value: fmtEur(item.amountCents / 100),
-                  }),
-                },
-                {
-                  label: "Provider",
-                  id: "provider",
-                  render: (item) => ({
-                    type: "text",
-                    value: item.trainingProvider,
-                  }),
-                },
-                {
-                  label: "Payment status",
-                  id: "paymentStatus",
-                  render: (item) => ({
-                    type: "dotTag",
-                    value: {
-                      color: PAYMENT_STATUS_COLOR[item.paymentStatus],
-                      label: PAYMENT_STATUS_LABEL[item.paymentStatus],
-                    },
-                  }),
-                },
-                {
-                  label: "Legal entities",
-                  id: "legalEntities",
-                  render: (item) => {
-                    const les = legalEntitiesForMovement(item)
-                    return {
-                      type: "tagList",
-                      value: {
-                        type: "raw",
-                        tags: les.map((le) => ({ text: le.legalName })),
-                        max: 1,
-                      },
-                    }
+        <div className="mb-6 grid grid-cols-1 gap-4 px-6 sm:grid-cols-2 lg:grid-cols-4">
+          <AmountWidget label="Total budget" value={fmtEurAmount(total)} />
+          <AmountWidget label="Allocated" value={fmtEurAmount(committed)} />
+          <AmountWidget label="Spent" value={fmtEurAmount(spent)} />
+          <AmountWidget label="Available" value={fmtEurAmount(available)} />
+        </div>
+
+        <OneDataCollection
+          key={movementsVersion}
+          id="trainings/budgets/detail/v1"
+          storage={{ features: ["filters", "sortings", "search"] }}
+          source={source}
+          visualizations={[
+            {
+              type: "table",
+              options: {
+                columns: [
+                  {
+                    label: "Training group",
+                    id: "groupName",
+                    width: 283,
+                    render: (item) => ({
+                      type: "text",
+                      value: item.isParent ? item.trainingName : item.groupName,
+                    }),
                   },
-                },
-                {
-                  label: "Participants",
-                  id: "participants",
-                  render: (item) => ({
-                    type: "text",
-                    value: String(item.participantsCount),
-                  }),
-                },
-              ],
+                  {
+                    label: "Group status",
+                    id: "groupStatus",
+                    render: (item) =>
+                      item.isParent
+                        ? { type: "text", value: "" }
+                        : {
+                            type: "status",
+                            value: {
+                              status: GROUP_STATUS_VARIANT[item.groupStatus],
+                              label: GROUP_STATUS_LABEL[item.groupStatus],
+                            },
+                          },
+                  },
+                  {
+                    label: "Start date",
+                    id: "startDate",
+                    render: (item) =>
+                      item.isParent
+                        ? { type: "text", value: "" }
+                        : {
+                            type: "text",
+                            value: fmtNumericDate(item.startDate),
+                          },
+                  },
+                  {
+                    label: "End date",
+                    id: "endDate",
+                    render: (item) =>
+                      item.isParent
+                        ? { type: "text", value: "" }
+                        : { type: "text", value: fmtNumericDate(item.endDate) },
+                  },
+                  {
+                    label: "Cost",
+                    id: "amount",
+                    align: "right" as const,
+                    render: (item) =>
+                      item.isParent
+                        ? { type: "text", value: "" }
+                        : {
+                            type: "text",
+                            value: fmtEurCompact(grossCostFromMovement(item)),
+                          },
+                  },
+                  {
+                    label: "Provider",
+                    id: "provider",
+                    render: (item) =>
+                      item.isParent
+                        ? { type: "text", value: "" }
+                        : { type: "text", value: item.trainingProvider },
+                  },
+                  {
+                    label: "Payment status",
+                    id: "paymentStatus",
+                    width: 128,
+                    render: (item) =>
+                      item.isParent
+                        ? { type: "text", value: "" }
+                        : {
+                            type: "status",
+                            value: {
+                              status:
+                                PAYMENT_STATUS_VARIANT[item.paymentStatus],
+                              label: PAYMENT_STATUS_LABEL[item.paymentStatus],
+                            },
+                          },
+                  },
+                  {
+                    label: "Legal entities",
+                    id: "legalEntities",
+                    width: 144,
+                    render: (item) => {
+                      if (item.isParent) return { type: "text", value: "" }
+                      const les = legalEntitiesForMovement(item)
+                      return {
+                        type: "tagList",
+                        value: {
+                          type: "raw",
+                          tags: les.map((le) => ({ text: le.legalName })),
+                          max: 1,
+                        },
+                      }
+                    },
+                  },
+                  {
+                    label: "Participants",
+                    id: "participants",
+                    render: (item) =>
+                      item.isParent
+                        ? { type: "text", value: "" }
+                        : {
+                            type: "text",
+                            value: String(participantCountForMovement(item)),
+                          },
+                  },
+                ],
+              },
             },
-          },
-        ]}
-      />
-
-      {/* ── Modals ── */}
-
-      {isEditOpen && (
-        <EditBudgetDialog budget={b} onClose={() => setIsEditOpen(false)} />
-      )}
-
-      {isAddGroupOpen && (
-        <AddTrainingGroupDialog
-          budget={b}
-          onClose={() => setIsAddGroupOpen(false)}
-          onAdded={(mov) => setExtraMovements((prev) => [...prev, mov])}
+          ]}
         />
-      )}
 
-      {removeTarget && (
-        <F0Dialog
-          isOpen
-          onClose={() => setRemoveTarget(null)}
-          position="center"
-          width="md"
-          title="Remove from budget"
-          description={`${removeTarget.trainingName} · ${removeTarget.groupName} will no longer have its costs deducted from this budget.`}
-          primaryAction={{
-            label: "Remove",
-            variant: "critical",
-            onClick: () => {
-              setRemovedIds((prev) => {
-                const next = new Set(prev)
-                next.add(removeTarget.id)
-                return next
-              })
-              setRemoveTarget(null)
-            },
-          }}
-          secondaryAction={{
-            label: "Cancel",
-            onClick: () => setRemoveTarget(null),
-          }}
-        />
-      )}
+        {/* ── Modals ── */}
 
-      {isExportOpen && (
-        <F0Dialog
-          isOpen
-          onClose={() => setIsExportOpen(false)}
-          position="center"
-          width="md"
-          title="Export budget"
-          description="Export this budget and its training groups as a CSV file."
-          primaryAction={{
-            label: "Export",
-            onClick: () => setIsExportOpen(false),
-          }}
-          secondaryAction={{
-            label: "Cancel",
-            onClick: () => setIsExportOpen(false),
-          }}
-        />
-      )}
+        {isEditOpen && (
+          <EditBudgetDialog budget={b} onClose={() => setIsEditOpen(false)} />
+        )}
 
-      {selectedMovement && (
-        <TrainingGroupCostSidepanel
-          movement={selectedMovement}
-          onClose={() => setSelectedMovement(null)}
-        />
-      )}
+        {isAddGroupOpen && (
+          <AddTrainingGroupDialog
+            budget={b}
+            onClose={() => setIsAddGroupOpen(false)}
+            currentMovements={movements}
+            onAdded={(newMovements) =>
+              setExtraMovements((prev) => [...prev, ...newMovements])
+            }
+          />
+        )}
 
-      {selectedLegalEntityCost && (
-        <LegalEntityCostSidepanel
-          movement={selectedLegalEntityCost.movement}
-          legalEntityId={selectedLegalEntityCost.legalEntityId}
-          onClose={() => setSelectedLegalEntityCost(null)}
-        />
-      )}
-    </F0Box>
+        {removeTarget && (
+          <F0Dialog
+            isOpen
+            onClose={() => setRemoveTarget(null)}
+            position="center"
+            width="md"
+            title="Remove from budget"
+            description={`${removeTarget.trainingName} · ${removeTarget.groupName} will no longer have its costs deducted from this budget.`}
+            primaryAction={{
+              label: "Remove",
+              variant: "critical",
+              onClick: () => {
+                setRemovedIds((prev) => {
+                  const next = new Set(prev)
+                  next.add(removeTarget.id)
+                  return next
+                })
+                setRemoveTarget(null)
+              },
+            }}
+            secondaryAction={{
+              label: "Cancel",
+              onClick: () => setRemoveTarget(null),
+            }}
+          />
+        )}
+
+        {isExportOpen && (
+          <F0Dialog
+            isOpen
+            onClose={() => setIsExportOpen(false)}
+            position="center"
+            width="md"
+            title="Export budget"
+            description="Export this budget and its training groups as a CSV file."
+            primaryAction={{
+              label: "Export",
+              onClick: () => setIsExportOpen(false),
+            }}
+            secondaryAction={{
+              label: "Cancel",
+              onClick: () => setIsExportOpen(false),
+            }}
+          />
+        )}
+
+        {selectedMovement && (
+          <TrainingGroupCostSidepanel
+            movement={selectedMovement}
+            position={selectedMovementIndex + 1}
+            total={movementNavigation.length}
+            hasPrevious={selectedMovementIndex > 0}
+            hasNext={selectedMovementIndex < movementNavigation.length - 1}
+            onPrevious={() => selectMovementAt(selectedMovementIndex - 1)}
+            onNext={() => selectMovementAt(selectedMovementIndex + 1)}
+            onGoToGroup={() => goToTrainingGroup(selectedMovement)}
+            onClose={() => setSelectedMovement(null)}
+          />
+        )}
+      </F0Box>
+    </div>
   )
 }
 
 function TrainingGroupCostSidepanel({
   movement,
+  position,
+  total,
+  hasPrevious,
+  hasNext,
+  onPrevious,
+  onNext,
+  onGoToGroup,
   onClose,
 }: {
   movement: TrainingBudgetMovement
+  position: number
+  total: number
+  hasPrevious: boolean
+  hasNext: boolean
+  onPrevious: () => void
+  onNext: () => void
+  onGoToGroup: () => void
   onClose: () => void
 }) {
+  const [activeTab, setActiveTab] = useState<"cost" | "participants">("cost")
   return (
-    <SidepanelFrame
+    <F0Dialog
+      isOpen
+      onClose={onClose}
+      position="right"
+      width="md"
       title={movement.groupName}
       description={movement.trainingName}
-      paymentStatus={movement.paymentStatus}
-      timeframe={`${fmtNumericDate(movement.startDate)}- ${fmtNumericDate(movement.endDate)}`}
-      activeTab="cost"
-      onTabChange={() => {}}
-      onClose={onClose}
+      otherActions={[
+        {
+          label: "Go to Training group",
+          icon: ExternalLink,
+          onClick: onGoToGroup,
+        },
+      ]}
+      tabs={[
+        {
+          id: "cost",
+          label: "Cost",
+          onClick: () => setActiveTab("cost"),
+        },
+        {
+          id: "participants",
+          label: "Participants",
+          onClick: () => setActiveTab("participants"),
+        },
+      ]}
+      activeTabId={activeTab}
+      setActiveTabId={(id: string) =>
+        setActiveTab(id as "cost" | "participants")
+      }
+      disableContentPadding
     >
-      <GroupSidepanelCostTab
-        movement={movement}
-      />
-    </SidepanelFrame>
-  )
-}
-
-function SidepanelFrame({
-  title,
-  description,
-  paymentStatus,
-  timeframe,
-  activeTab,
-  onTabChange,
-  onClose,
-  children,
-}: {
-  title: string
-  description: string
-  paymentStatus: TrainingBudgetMovement["paymentStatus"]
-  timeframe: string
-  activeTab: "cost" | "participants"
-  onTabChange: (tab: "cost" | "participants") => void
-  onClose: () => void
-  children: ReactNode
-}) {
-  const statusClass =
-    paymentStatus === "spent"
-      ? "bg-f1-background-positive text-f1-foreground-positive"
-      : "bg-f1-background-warning text-f1-foreground-warning"
-
-  return (
-    <div className="fixed inset-0 z-50 bg-f1-background-overlay">
-      <section
-        className="absolute right-0 top-0 flex h-[calc(100%-4px)] flex-col overflow-hidden rounded-2xl border border-f1-border-secondary bg-f1-background shadow-2xl"
-        style={{ width: 568 }}
+      <div
+        style={{
+          position: "fixed",
+          top: 25,
+          right: 129,
+          zIndex: 1000,
+          display: "flex",
+          alignItems: "center",
+          gap: 4,
+          pointerEvents: "auto",
+        }}
       >
-        <header className="flex flex-col gap-5 px-4 py-3">
-          <div className="flex h-8 items-center justify-end gap-2">
-            <button
-              type="button"
-              className="flex h-8 w-8 items-center justify-center rounded-xl border border-f1-border bg-f1-background shadow-sm"
-            >
-              <F0Text content="..." variant="label" />
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex h-8 w-8 items-center justify-center rounded-xl border border-f1-border bg-f1-background shadow-sm"
-            >
-              <F0Text content="×" variant="label" />
-            </button>
-          </div>
-          <div className="flex flex-col gap-3">
-            <div className="flex flex-col gap-0.5">
-              <F0Text content={title} variant="label" />
-              <F0Text variant="description" content={description} />
-            </div>
-            <div className="flex items-center gap-3">
-              <div className={`rounded-xl px-2 py-1 ${statusClass}`}>
-                <F0Text
-                  content={`● ${paymentStatus === "spent" ? "Paid" : "Pending"}`}
-                  variant="small"
-                />
-              </div>
-              <div className="h-4 w-px bg-f1-border-secondary" />
-              <div className="flex items-center gap-1">
-                <F0Text content="Timeframe" variant="description" />
-                <F0Text content={timeframe} variant="body" />
-              </div>
-              <div className="h-4 w-px bg-f1-border-secondary" />
-            </div>
-          </div>
-        </header>
-        <nav className="border-b border-f1-border-secondary px-5">
-          <div className="flex h-14 items-end gap-3">
-            <button
-              type="button"
-              onClick={() => onTabChange("cost")}
-              className={`h-12 px-4 ${activeTab === "cost" ? "border-b border-f1-foreground bg-f1-background-secondary text-f1-foreground" : "text-f1-foreground-secondary"}`}
-            >
-              <F0Text content="Cost" variant="body" />
-            </button>
-            <button
-              type="button"
-              onClick={() => onTabChange("participants")}
-              className={`h-12 px-4 ${activeTab === "participants" ? "border-b border-f1-foreground bg-f1-background-secondary text-f1-foreground" : "text-f1-foreground-secondary"}`}
-            >
-              <F0Text content="Participants" variant="body" />
-            </button>
-          </div>
-        </nav>
-        <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
-      </section>
-    </div>
+        <F0Button
+          label="Previous group"
+          icon={ChevronUp}
+          hideLabel
+          variant="outline"
+          size="md"
+          disabled={!hasPrevious}
+          onClick={onPrevious}
+        />
+        <F0Button
+          label="Next group"
+          icon={ArrowDown}
+          hideLabel
+          variant="outline"
+          size="md"
+          disabled={!hasNext}
+          onClick={onNext}
+        />
+      </div>
+      <F0Box display="flex" justifyContent="end" paddingX="md" paddingY="sm">
+        <F0Text
+          variant="small"
+          content={`${position}/${total} · ${PAYMENT_STATUS_LABEL[movement.paymentStatus]} · ${fmtNumericDate(movement.startDate)}- ${fmtNumericDate(movement.endDate)}`}
+        />
+      </F0Box>
+      {activeTab === "cost" ? (
+        <GroupSidepanelCostTab movement={movement} />
+      ) : (
+        <GroupSidepanelParticipantsTab movement={movement} />
+      )}
+    </F0Dialog>
   )
 }
 
@@ -1266,146 +1570,171 @@ function GroupSidepanelCostTab({
 }: {
   movement: TrainingBudgetMovement
 }) {
-  const [openLeId, setOpenLeId] = useState<string | null>(() => {
-    const first = legalEntitiesForMovement(movement)[0]
-    return first?.id ?? null
-  })
   const les = legalEntitiesForMovement(movement)
+  const hasMultipleLEs = les.length > 1
+  const [showByLegalEntity, setShowByLegalEntity] = useState(hasMultipleLEs)
+  const [openLeId, setOpenLeId] = useState<string | null>(les[0]?.id ?? null)
+
   const breakdownMap = new Map(
-    breakdownByLegalEntityFor(
-      movement,
-      participantsByLegalEntityForMovement(movement)
-    ).map((cost) => [cost.legalEntityId, cost])
+    breakdownByLegalEntityWithRealParticipants(movement).map((cost) => [
+      cost.legalEntityId,
+      cost,
+    ])
   )
+  const grossCost = grossCostFromMovement(movement)
 
   return (
-    <div className="flex flex-col gap-8 px-5 py-8">
-      <div className="flex flex-col gap-3">
-        <F0Text content="Payment status" variant="label" />
+    <div className="flex flex-col gap-4 px-5 py-4">
+      {/* InputSelect Payment status — node 5033:79904 */}
+      <div className="flex flex-col gap-2">
+        <span className="text-f1-foreground-secondary text-[14px] leading-[20px] font-medium tracking-[-0.07px]">
+          Payment status
+        </span>
         <button
           type="button"
-          className="flex h-10 items-center justify-between rounded-xl border border-f1-border bg-f1-background px-3 py-2 text-left"
+          className="border-f1-border bg-f1-background flex h-10 items-center gap-2 rounded-xl border border-solid pr-2 pl-3"
         >
-          <F0Text
-            content={movement.paymentStatus === "spent" ? "Paid" : "Pending"}
-            variant="body"
-          />
+          <span className="text-f1-foreground flex-1 text-left text-[14px] leading-[20px] tracking-[-0.07px]">
+            {movement.paymentStatus === "spent" ? "Paid" : "Pending"}
+          </span>
           <F0Icon icon={ArrowDown} size="sm" color="secondary" />
         </button>
       </div>
 
-      <div className="flex flex-col gap-4">
-        <F0Text content="Total cost" variant="label" />
-        <div className="flex h-16 items-center justify-between gap-2 rounded-2xl border border-f1-border bg-f1-background p-3">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-f1-border-secondary bg-f1-background-secondary text-f1-foreground-secondary">
-              <F0Icon icon={Office} size="md" color="secondary" />
-            </div>
-            <div className="flex flex-col gap-0.5">
-              <F0Text content="Total cost" variant="label" />
-              <F0Text
-                content={`${movement.participantsCount} participants`}
-                variant="description"
-              />
-            </div>
+      {/* Total cost grid — node 5033:79675 (header sticky + card) */}
+      <div className="flex flex-col">
+        <div className="flex h-[50px] items-center py-3">
+          <span className="text-f1-foreground text-[14px] leading-[20px] font-semibold tracking-[-0.07px]">
+            Total cost
+          </span>
+        </div>
+        <div className="border-f1-border bg-f1-background flex h-16 items-center gap-2.5 overflow-hidden rounded-xl border border-solid p-3">
+          <F0AvatarIcon size="lg" icon={Office} />
+          <div className="flex min-w-0 flex-1 flex-col justify-center">
+            <span className="text-f1-foreground text-[14px] leading-[20px] font-medium tracking-[-0.07px]">
+              Total cost
+            </span>
+            <span className="text-f1-foreground-secondary text-[14px] leading-[20px] tracking-[-0.07px]">
+              {participantCountForMovement(movement)} participants
+            </span>
           </div>
-          <div className="flex items-center gap-4">
-            <F0Text
-              content={fmtFigmaEur(grossCostFromMovement(movement))}
-              variant="label"
-            />
-            <F0Icon icon={ArrowDown} size="sm" color="secondary" />
-          </div>
+          <span className="text-f1-foreground text-[14px] leading-[20px] font-bold tracking-[-0.07px]">
+            {fmtFigmaEur(grossCost)}
+          </span>
+          <F0Icon icon={ArrowDown} size="sm" color="secondary" />
         </div>
       </div>
 
-      <div className="flex flex-col gap-6 rounded-xl border border-f1-border-secondary bg-f1-background px-2 py-4">
-        <div className="flex items-center justify-between gap-4 rounded-2xl bg-f1-background px-8 py-6">
-          <div className="flex flex-col gap-0.5">
-            <F0Heading as="h3" variant="heading" content="Costs by legal entity" />
-            <F0Text
-              variant="description"
-              content="Track and manage all costs per legal entity"
-            />
+      {/* Costs by legal entity outer wrapper — node 5033:79687 */}
+      <div className="border-f1-border bg-f1-background flex flex-col gap-6 rounded-xl border border-solid px-2 py-4">
+        {/* Toggle row card — node 5033:79689 (NO border, bg white) */}
+        <div className="bg-f1-background flex items-center gap-2.5 overflow-hidden rounded-xl p-3">
+          <div className="flex min-w-0 flex-1 flex-col justify-center">
+            <span className="text-f1-foreground text-[14px] leading-[20px] font-medium tracking-[-0.07px]">
+              Costs by legal entity
+            </span>
+            <span className="text-f1-foreground-secondary text-[14px] leading-[20px] tracking-[-0.07px]">
+              Track and manage all costs per legal entity
+            </span>
           </div>
-          <Switch title="Costs by legal entity" hideLabel checked />
+          <Switch
+            title="Costs by legal entity"
+            hideLabel
+            checked={showByLegalEntity}
+            onCheckedChange={setShowByLegalEntity}
+            disabled={!hasMultipleLEs}
+          />
         </div>
 
-        <div className="flex flex-col gap-6 px-8">
-          <div className="flex flex-col gap-6">
+        {/* Inner cards wrapper — node 5033:79690 (px-4, gap-6) */}
+        {showByLegalEntity && hasMultipleLEs && (
+          <div className="flex flex-col gap-6 px-4">
             {les.map((le) => {
               const breakdown = breakdownMap.get(le.id)
               const isOpen = openLeId === le.id
               const total = breakdown
-                ? breakdown.directCost + breakdown.indirectCost + breakdown.salaryCost
+                ? breakdown.directCost +
+                  breakdown.indirectCost +
+                  breakdown.salaryCost
                 : 0
               const participantCount =
                 breakdown?.participantsCount ??
                 participantsForLegalEntity(movement, le.id).length
-              const prefix = le.countryCode === "ES" ? "" : `${le.countryCode} · `
+              const prefix =
+                le.countryCode === "ES" ? "" : `${le.countryCode} · `
 
-              return (
-                <div
-                  key={le.id}
-                  className="rounded-2xl border border-f1-border bg-f1-background p-6"
-                >
-                  <div className="flex w-full items-center justify-between gap-3 text-left">
-                    <div className="flex min-w-0 items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-f1-border-secondary bg-f1-background-secondary text-f1-foreground-secondary">
-                        <F0Icon icon={Office} size="md" color="secondary" />
+              if (isOpen && breakdown) {
+                // Expanded card — node 5033:79698 (gap-6 between header & inputs)
+                return (
+                  <div
+                    key={le.id}
+                    className="border-f1-border bg-f1-background flex flex-col gap-6 overflow-hidden rounded-xl border border-solid p-3"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setOpenLeId(null)}
+                      className="flex items-center gap-2.5 text-left"
+                    >
+                      <F0AvatarIcon size="lg" icon={Office} />
+                      <div className="flex h-10 min-w-0 flex-1 flex-col justify-center">
+                        <span className="text-f1-foreground text-[14px] leading-[20px] font-medium tracking-[-0.07px]">
+                          {le.legalName}
+                        </span>
+                        <span className="text-f1-foreground-secondary text-[14px] leading-[20px] tracking-[-0.07px]">
+                          {participantCount} participants
+                        </span>
                       </div>
-                      <div className="flex flex-col gap-0.5">
-                        <F0Heading as="h4" variant="heading" content={le.legalName} />
-                        <F0Text
-                          variant="description"
-                          content={`${prefix}${participantCount} participants`}
-                        />
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <F0Text content={fmtFigmaEur(total)} variant="label" />
-                      <button
-                        type="button"
-                        onClick={(event) => {
-                          event.stopPropagation()
-                          setOpenLeId((current) =>
-                            current === le.id ? null : le.id
-                          )
-                        }}
-                        className="flex h-5 w-5 items-center justify-center text-f1-foreground-secondary"
-                      >
-                        <F0Icon
-                          icon={ArrowDown}
-                          size="sm"
-                          color="secondary"
-                        />
-                      </button>
+                      <span className="text-f1-foreground text-[14px] leading-[20px] font-bold tracking-[-0.07px]">
+                        {fmtFigmaEur(total)}
+                      </span>
+                      <F0Icon icon={ChevronUp} size="sm" color="secondary" />
+                    </button>
+                    <div className="grid grid-cols-3 gap-2.5">
+                      <LegalEntityInput
+                        label="Direct cost"
+                        value={breakdown.directCost}
+                      />
+                      <LegalEntityInput
+                        label="Indirect cost"
+                        value={breakdown.indirectCost}
+                      />
+                      <LegalEntityInput
+                        label="Salary cost"
+                        value={breakdown.salaryCost}
+                      />
                     </div>
                   </div>
-                  {isOpen && breakdown && (
-                    <div className="mt-8 flex gap-5">
-                        <LegalEntityInput
-                          label="Direct cost"
-                          value={breakdown.directCost}
-                        />
-                        <LegalEntityInput
-                          label="Indirect cost"
-                          value={breakdown.indirectCost}
-                        />
-                        <LegalEntityInput
-                          label="Salary cost"
-                          value={breakdown.salaryCost}
-                          plain
-                        />
-                    </div>
-                  )}
-                </div>
+                )
+              }
+
+              // Collapsed card — node 5033:79691 (h-16)
+              return (
+                <button
+                  key={le.id}
+                  type="button"
+                  onClick={() => setOpenLeId(le.id)}
+                  className="border-f1-border bg-f1-background flex h-16 items-center gap-2.5 overflow-hidden rounded-xl border border-solid p-3 text-left"
+                >
+                  <F0AvatarIcon size="lg" icon={Office} />
+                  <div className="flex min-w-0 flex-1 flex-col justify-center">
+                    <span className="text-f1-foreground text-[14px] leading-[20px] font-medium tracking-[-0.07px]">
+                      {le.legalName}
+                    </span>
+                    <span className="text-f1-foreground-secondary text-[14px] leading-[20px] tracking-[-0.07px]">
+                      {prefix}
+                      {participantCount} participants
+                    </span>
+                  </div>
+                  <span className="text-f1-foreground text-[14px] leading-[20px] font-bold tracking-[-0.07px]">
+                    {fmtFigmaEur(total)}
+                  </span>
+                  <F0Icon icon={ArrowDown} size="sm" color="secondary" />
+                </button>
               )
             })}
-          </div>
 
-          <div className="rounded-xl border border-f1-border-secondary bg-f1-background-secondary px-4 py-2">
-            <div className="flex flex-col gap-2">
+            {/* Summary list item — node 5033:81077 */}
+            <div className="border-f1-border-secondary bg-f1-background-secondary flex flex-col gap-2 overflow-hidden rounded-xl border border-solid py-2 pr-3 pl-4">
               {les.map((le) => {
                 const breakdown = breakdownMap.get(le.id)
                 const total = breakdown
@@ -1414,243 +1743,126 @@ function GroupSidepanelCostTab({
                     breakdown.salaryCost
                   : 0
                 return (
-                  <div key={le.id} className="flex items-center justify-between">
-                    <F0Text content={le.legalName} variant="description" />
-                    <F0Text content={fmtFigmaEur(total)} variant="description" />
+                  <div
+                    key={le.id}
+                    className="flex items-center justify-between"
+                  >
+                    <span className="text-f1-foreground-secondary text-[14px] leading-[20px] tracking-[-0.07px]">
+                      {le.legalName}
+                    </span>
+                    <span className="text-f1-foreground-secondary text-[14px] leading-[20px] tracking-[-0.07px]">
+                      {fmtFigmaEur(total)}
+                    </span>
                   </div>
                 )
               })}
-            </div>
-            <div className="mt-4 flex items-center justify-between border-t border-f1-border-secondary pt-4">
-              <div className="flex flex-col gap-0.5">
-                <F0Text content="Total cost" variant="label" />
-                <F0Text
-                  content="Gross cost= Direct + Indirect + Salary "
-                  variant="description"
-                />
+              {/* Divider — node 5033:81086 */}
+              <div className="bg-f1-border-secondary h-px" />
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-f1-foreground text-[14px] leading-[20px] font-bold tracking-[-0.07px]">
+                    Total cost
+                  </span>
+                  <span className="text-f1-foreground-secondary text-[14px] leading-[20px] tracking-[-0.07px]">
+                    Gross cost= Direct + Indirect + Salary
+                  </span>
+                </div>
+                <span className="text-f1-foreground text-[14px] leading-[20px] font-bold tracking-[-0.07px]">
+                  {fmtFigmaEur(grossCost)}
+                </span>
               </div>
-              <F0Text
-                content={fmtFigmaEur(grossCostFromMovement(movement))}
-                variant="label"
-              />
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
+  )
+}
+
+function GroupSidepanelParticipantsTab({
+  movement,
+}: {
+  movement: TrainingBudgetMovement
+}) {
+  const participants = participantsForGroup(movement.groupId)
+  const rows = participants.map((participant) => {
+    const employee = findEmployee(participant.employeeId)
+    const team = employee?.teamId ? findTeam(employee.teamId) : undefined
+
+    return {
+      id: participant.id,
+      employeeName: participant.employeeName,
+      employeeAvatar: employee?.avatarUrl ?? participant.employeeAvatar,
+      teamName: team?.name ?? "-",
+    }
+  })
+  const source = useDataCollectionSource({
+    filters: {},
+    dataAdapter: {
+      paginationType: "pages" as const,
+      perPage: 50,
+      fetchData: () => ({
+        type: "pages" as const,
+        records: rows,
+        total: rows.length,
+        perPage: 50,
+        currentPage: 1,
+        pagesCount: 1,
+      }),
+    },
+  })
+
+  return (
+    <F0Box display="flex" flexDirection="column" paddingX="md">
+      <OneDataCollection
+        source={source}
+        visualizations={[
+          {
+            type: "table" as const,
+            options: {
+              columns: [
+                {
+                  label: "Name",
+                  render: (row) => ({
+                    type: "person" as const,
+                    value: {
+                      firstName: row.employeeName.split(" ")[0] ?? "",
+                      lastName: row.employeeName.split(" ").slice(1).join(" "),
+                      src: row.employeeAvatar,
+                    },
+                  }),
+                },
+                {
+                  label: "Team",
+                  render: (row) => row.teamName,
+                },
+              ],
+            },
+          },
+        ]}
+      />
+    </F0Box>
   )
 }
 
 function LegalEntityInput({
   label,
   value,
-  plain = false,
 }: {
   label: string
   value: number
   plain?: boolean
 }) {
   return (
-    <div className="flex flex-col gap-2">
-      <F0Text content={label} variant="label" />
-      <div className="flex h-10 items-center rounded-xl border border-f1-border bg-f1-background-secondary px-3 py-2">
-        <F0Text content={plain ? String(value) : fmtFigmaEur(value)} variant="body" />
+    <div className="flex flex-1 flex-col gap-2">
+      <span className="text-f1-foreground-secondary text-[14px] leading-[20px] font-medium tracking-[-0.07px]">
+        {label}
+      </span>
+      <div className="border-f1-border bg-f1-background-tertiary flex h-10 items-center rounded-xl border border-solid pr-2 pl-3">
+        <span className="text-f1-foreground flex-1 text-[14px] leading-[20px] tracking-[-0.07px]">
+          {fmtFigmaEur(value)}
+        </span>
       </div>
-    </div>
-  )
-}
-
-function LegalEntityCostSidepanel({
-  movement,
-  legalEntityId,
-  onClose,
-}: {
-  movement: TrainingBudgetMovement
-  legalEntityId: string
-  onClose: () => void
-}) {
-  const [tab, setTab] = useState<"cost" | "participants">("cost")
-  const le = findLegalEntity(legalEntityId)
-  const breakdown = breakdownByLegalEntityFor(
-    movement,
-    participantsByLegalEntityForMovement(movement)
-  ).find((cost) => cost.legalEntityId === legalEntityId)
-
-  return (
-    <SidepanelFrame
-      title={le?.legalName ?? legalEntityId}
-      description={movement.groupName}
-      paymentStatus={movement.paymentStatus}
-      timeframe={`${fmtNumericDate(movement.startDate)}- ${fmtNumericDate(movement.endDate)}`}
-      activeTab={tab}
-      onTabChange={setTab}
-      onClose={onClose}
-    >
-      {tab === "cost" ? (
-        <div className="px-5 py-4">
-          <LegalEntityCostBreakdown
-            direct={breakdown?.directCost ?? 0}
-            indirect={breakdown?.indirectCost ?? 0}
-            salary={breakdown?.salaryCost ?? 0}
-          />
-        </div>
-      ) : (
-        <LegalEntityParticipantsTab
-          movement={movement}
-          legalEntityId={legalEntityId}
-        />
-      )}
-    </SidepanelFrame>
-  )
-}
-
-function LegalEntityParticipantsTab({
-  movement,
-  legalEntityId,
-}: {
-  movement: TrainingBudgetMovement
-  legalEntityId: string
-}) {
-  const participants = participantsForLegalEntity(movement, legalEntityId)
-
-  return (
-    <div className="flex flex-col gap-5 pt-5">
-      <div className="flex items-center justify-between px-6">
-        <F0Button label="Filter" icon={InProgressTask} variant="outline" />
-        <div className="flex items-center gap-2">
-          <F0Button label="Search" icon={Search} variant="outline" hideLabel />
-          <F0Button label="Settings" icon={Sliders} variant="outline" hideLabel />
-          <F0Button label="More options" icon={Pencil} variant="outline" hideLabel />
-        </div>
-      </div>
-      <div className="overflow-hidden border-y border-f1-border-secondary">
-        <div className="flex min-h-10 items-center px-3">
-          <div className="w-11 shrink-0" />
-          <div className="flex-1 px-3 py-2.5">
-            <F0Text content="Name" variant="label" />
-          </div>
-          <div className="flex-1 px-3 py-2.5">
-            <F0Text content="Hours completed" variant="label" />
-          </div>
-          <div className="flex-1 px-3 py-2.5">
-            <F0Text content="Salary cost" variant="label" />
-          </div>
-        </div>
-        {participants.map((participant) => {
-          const employee = findEmployee(participant.employeeId)
-          const name = employee?.fullName ?? participant.employeeName
-          const [firstName, ...restName] = name.split(" ")
-          const hours = hoursCompletedForEmployee(
-            participant.employeeId,
-            movement.groupId
-          )
-          const salaryCost = salaryCostForEmployeeInGroup(
-            participant.employeeId,
-            movement.groupId
-          )
-
-          return (
-            <div
-              key={participant.id}
-              className="flex min-h-12 items-center border-t border-f1-border-secondary px-3"
-            >
-              <div className="flex w-11 shrink-0 justify-center">
-                <div className="h-5 w-5 rounded-md border border-f1-border bg-f1-background" />
-              </div>
-              <div className="flex flex-1 items-center gap-1 px-3 py-2.5">
-                <F0Avatar
-                  avatar={{
-                    type: "person",
-                    src: employee?.avatarUrl ?? participant.employeeAvatar,
-                    firstName,
-                    lastName: restName.join(" "),
-                  }}
-                  size="xs"
-                />
-                <F0Text content={name} variant="body" />
-              </div>
-              <div className="flex-1 px-3 py-3">
-                <F0Text content={`${hours}h`} variant="body" />
-              </div>
-              <div className="flex-1 px-3 py-3">
-                <F0Text content={fmtFigmaEur(salaryCost)} variant="body" />
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
-function LegalEntityCostBreakdown({
-  direct,
-  indirect,
-  salary,
-}: {
-  direct: number
-  indirect: number
-  salary: number
-}) {
-  const total = direct + indirect + salary
-  return (
-    <div className="flex flex-col gap-4">
-      <F0Text content="Cost breakdown" variant="label" />
-      <div className="overflow-hidden rounded-xl border border-f1-border-secondary bg-f1-background">
-        <CostBreakdownRow
-          label="Direct cost"
-          description="Course fees, venue rentals, and training materials"
-          value={direct}
-          bordered
-        />
-        <CostBreakdownRow
-          label="Indirect cost"
-          description="Administrative overhead and support costs"
-          value={indirect}
-          bordered
-        />
-        <CostBreakdownRow
-          label="Salary cost"
-          description="Cost of employees' time spent in training"
-          value={salary}
-        />
-      </div>
-      <div className="border-t border-f1-border-secondary pt-4">
-        <div className="flex h-16 items-center justify-between rounded-xl border border-f1-border-secondary bg-f1-background px-4 py-2">
-          <div className="flex flex-col gap-0.5">
-            <F0Text content="Total cost" variant="label" />
-            <F0Text
-              content="Gross cost= Direct + Indirect + Salary"
-              variant="description"
-            />
-          </div>
-          <F0Text content={fmtFigmaEur(total)} variant="label" />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function CostBreakdownRow({
-  label,
-  description,
-  value,
-  bordered = false,
-}: {
-  label: string
-  description: string
-  value: number
-  bordered?: boolean
-}) {
-  return (
-    <div
-      className={`flex h-16 items-center justify-between px-4 py-2 ${bordered ? "border-b border-f1-border-secondary" : ""}`}
-    >
-      <div className="flex min-w-0 flex-col gap-0.5">
-        <F0Text content={label} variant="label" />
-        <F0Text content={description} variant="description" />
-      </div>
-      <F0Text content={fmtFigmaEur(value)} variant="body" />
     </div>
   )
 }
@@ -1661,102 +1873,57 @@ function CostBreakdownRow({
 //   2. Amount             — Set the total amount and timeframe for this budget.
 //   3. Allocation         — Select the training groups eligible to use this budget.
 
-const legalEntityOptions = legalEntities.map((le) => ({
-  value: le.id,
-  label: le.legalName,
-}))
+type NewBudgetStep = "basic" | "amount" | "allocation"
 
-const basicDetailsSchema = z.object({
-  legalEntityId: f0FormField.multiSelect({
-    label: "Legal entity",
-    options: legalEntityOptions,
-    max: 1,
-  }),
-  name: f0FormField.text({
-    label: "Budget name",
-    placeholder: "e.g. Engineering 2026",
-  }),
-  description: f0FormField.textarea({
-    label: "Budget description",
-    optional: true,
-    placeholder: "Write budget description",
-  }),
-})
+const newBudgetStepOrder: NewBudgetStep[] = ["basic", "amount", "allocation"]
 
-const amountsSchema = z.object({
-  amount: f0FormField.number({
-    label: "Amount",
-    placeholder: "0",
-    min: 0,
-  }),
-  effectiveFrom: f0FormField.date({
-    label: "Start date",
-    row: "dates",
-  }),
-  effectiveUntil: f0FormField.date({
-    label: "End date",
-    optional: true,
-    row: "dates",
-  }),
-})
-
-const allocationSchema = z.object({
-  selectedTrainingClassIds: f0FormField.multiSelect({
-    label: "Training groups",
-    optional: true,
-    helpText:
-      "Direct, indirect, and salary costs of the selected training groups will be deducted from this budget.",
-    options: trainings.flatMap((t) =>
-      t.classes.map((c) => ({
-        value: c.id,
-        label: `${t.name} — ${c.name}`,
-      }))
-    ),
-  }),
-})
-
-const wizardSchema = {
-  basicDetails: basicDetailsSchema,
-  amounts: amountsSchema,
-  allocation: allocationSchema,
+const newBudgetStepLabel: Record<NewBudgetStep, string> = {
+  basic: "Basic information",
+  amount: "Amount",
+  allocation: "Allocation",
 }
 
-type WizardSchema = typeof wizardSchema
-
-const wizardSections = {
-  basicDetails: {
-    title: "Basic information",
-    description: "Define the essential details of your training budget.",
-  },
-  amounts: {
-    title: "Amount",
-    description: "Set the total amount and timeframe for this budget.",
-  },
-  allocation: {
-    title: "Allocation",
-    description:
-      "Select the training groups eligible to use this budget.",
-  },
+const newBudgetStepDescription: Record<NewBudgetStep, string> = {
+  basic: "Define the essential details of your training budget.",
+  amount: "Set the total amount and timeframe for this budget.",
+  allocation: "Select the training groups eligible to use this budget.",
 }
 
-const wizardSteps: F0WizardFormStep[] = [
-  { title: "Basic information", sectionIds: ["basicDetails"] },
-  { title: "Amount", sectionIds: ["amounts"] },
-  {
-    title: "Allocation",
-    sectionIds: ["allocation"],
-    nextLabel: "Submit",
-  },
-]
+function buildTrainingMovement(
+  budget: TrainingBudget,
+  trainingId: string,
+  classId: string
+): TrainingBudgetMovement | null {
+  const training = trainings.find((item) => item.id === trainingId)
+  const klass = training?.classes.find((item) => item.id === classId)
+  const cost = training && klass ? classTotalCost(training, klass.id) : null
 
-const wizardDefaults = {
-  basicDetails: {
-    legalEntityId: [legalEntities[0]!.id],
-    name: "",
-    description: "",
-  },
-  amounts: { amount: 10000 },
-  allocation: { selectedTrainingClassIds: [] as string[] },
+  if (!training || !klass || !cost) return null
+
+  return {
+    id: `mov-${Date.now()}-${klass.id}`,
+    budgetId: budget.id,
+    trainingId: training.id,
+    trainingName: training.name,
+    groupId: klass.id,
+    groupName: klass.name,
+    groupStatus: "planned",
+    startDate: klass.startDate,
+    endDate: klass.endDate,
+    amountCents: Math.round(cost.total * 100),
+    currency: budget.currency,
+    trainingProvider:
+      training.type === "external"
+        ? (training.externalProvider ?? "External")
+        : "Internal",
+    trainingTeamId: "team-eng",
+    trainingTeamName: "Engineering",
+    paymentStatus: "pending",
+    participantsCount: klass.participantCount,
+    directCost: cost.direct,
+    indirectCost: cost.indirect,
+    salaryCost: cost.salary,
+  }
 }
 
 function NewBudgetView({
@@ -1764,70 +1931,309 @@ function NewBudgetView({
 }: {
   setSearch: ReturnType<typeof useSearchParams>[1]
 }) {
-  const handleSubmit = useMemo(
-    () =>
-      async (arg: {
-        sectionId: keyof WizardSchema
-        data: unknown
-        fullData: {
-          basicDetails: z.infer<typeof basicDetailsSchema>
-          amounts: z.infer<typeof amountsSchema>
-          allocation: z.infer<typeof allocationSchema>
-        }
-      }): Promise<F0FormSubmitResult> => {
-        if (arg.sectionId !== "allocation") return { success: true }
+  const [step, setStep] = useState<NewBudgetStep>("basic")
+  const [legalEntityId, setLegalEntityId] = useState(legalEntities[0]!.id)
+  const [name, setName] = useState("")
+  const [description, setDescription] = useState("")
+  const [amount, setAmount] = useState<number | null>(10000)
+  const [effectiveFrom, setEffectiveFrom] = useState("2026-01-01")
+  const [effectiveUntil, setEffectiveUntil] = useState("2026-12-31")
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [expandedElements, setExpandedElements] = useState<EntityId[]>([])
+  const [selectedGroup, setSelectedGroup] = useState("all")
 
-        const { basicDetails, amounts, allocation } = arg.fullData
-        const allocated = calculateAllocated(
-          allocation.selectedTrainingClassIds ?? []
-        )
-        const id = `bud-${Date.now()}`
-        const total = amounts.amount ?? 0
-        const legalEntityId =
-          basicDetails.legalEntityId?.[0] ?? legalEntities[0]!.id
-        const currency = legalEntityCurrencyMap[legalEntityId] ?? "EUR"
-        const newBudget: TrainingBudget = {
-          id,
-          name: basicDetails.name ?? "Untitled budget",
-          year: amounts.effectiveFrom
-            ? new Date(amounts.effectiveFrom).getFullYear()
-            : new Date().getFullYear(),
-          totalAmount: total,
-          spentAmount: 0,
-          pendingAmount: allocated,
-          remainingAmount: Math.max(0, total - allocated),
-          currency,
-          status: "active",
-          scope: "company",
-          scopeName: "All employees",
-          ownerEmployeeId: "emp-001",
-          ownerEmployeeName: "You",
-          legalEntityId,
-        }
-        trainingBudgets.unshift(newBudget)
-        go(setSearch, { view: "detail", budgetId: id })
-        return { success: true }
-      },
-    [setSearch]
+  const allGroupOptions = useMemo(() => {
+    const options: Array<{
+      value: string
+      label: string
+      trainingId: string
+      cost: number
+    }> = []
+
+    for (const training of trainings) {
+      for (const klass of training.classes) {
+        const cost = classTotalCost(training, klass.id)
+        options.push({
+          value: klass.id,
+          label: `${training.name} · ${klass.name}`,
+          trainingId: training.id,
+          cost: cost.total,
+        })
+      }
+    }
+
+    return options
+  }, [])
+
+  const trainingEntities = useMemo<EntitySelectEntity[]>(() => {
+    const entities: EntitySelectEntity[] = []
+
+    for (const training of trainings) {
+      const subItems = allGroupOptions
+        .filter((option) => option.trainingId === training.id)
+        .map((option) => ({
+          subId: option.value,
+          subName: `${training.classes.find((klass) => klass.id === option.value)?.name ?? option.label} · ${fmtEur(option.cost)}`,
+          subSearchKeys: [option.label],
+        }))
+
+      if (subItems.length === 0) continue
+
+      entities.push({
+        id: training.id,
+        name: training.name,
+        searchKeys: [training.name],
+        expanded: expandedElements.includes(training.id),
+        subItems,
+      })
+    }
+
+    return entities
+  }, [allGroupOptions, expandedElements])
+
+  const selectedEntities = useMemo<EntitySelectEntity[]>(() => {
+    const entities: EntitySelectEntity[] = []
+
+    for (const entity of trainingEntities) {
+      const subItems = entity.subItems?.filter((subItem) =>
+        selectedIds.includes(String(subItem.subId))
+      )
+      if (!subItems || subItems.length === 0) continue
+      entities.push({ ...entity, subItems })
+    }
+
+    return entities
+  }, [selectedIds, trainingEntities])
+
+  const selectedOptions = allGroupOptions.filter((option) =>
+    selectedIds.includes(option.value)
   )
+  const allocated = calculateAllocated(selectedIds)
+  const total = amount ?? 0
+  const canContinue =
+    step === "basic"
+      ? name.trim().length > 0 && legalEntityId.length > 0
+      : step === "amount"
+        ? total > 0 && effectiveFrom.length > 0
+        : true
+  const currentStepIndex = newBudgetStepOrder.indexOf(step)
+  const close = () => go(setSearch, { view: "list", budgetId: null })
 
-  const formDefinition = useF0FormDefinition({
-    name: "new-trainings-budget-wizard",
-    schema: wizardSchema,
-    sections: wizardSections,
-    defaultValues: wizardDefaults,
-    onSubmit: handleSubmit,
-  })
+  const submit = () => {
+    const id = `bud-${Date.now()}`
+    const currency = legalEntityCurrencyMap[legalEntityId] ?? "EUR"
+    const newBudget: TrainingBudget = {
+      id,
+      name: name.trim() || "Untitled budget",
+      description,
+      year: effectiveFrom
+        ? new Date(effectiveFrom).getFullYear()
+        : new Date().getFullYear(),
+      startDate: effectiveFrom,
+      endDate: effectiveUntil || undefined,
+      totalAmount: total,
+      spentAmount: 0,
+      pendingAmount: allocated,
+      remainingAmount: Math.max(0, total - allocated),
+      currency,
+      status: "active",
+      scope: "company",
+      scopeName: "All employees",
+      ownerEmployeeId: "emp-001",
+      ownerEmployeeName: "You",
+      legalEntityId,
+    }
+
+    trainingBudgets.unshift(newBudget)
+
+    for (const option of selectedOptions) {
+      const movement = buildTrainingMovement(
+        newBudget,
+        option.trainingId,
+        option.value
+      )
+      if (movement) {
+        trainingBudgetMovements.push(movement)
+      }
+    }
+
+    go(setSearch, { view: "detail", budgetId: id })
+  }
+
+  const primaryAction =
+    step === "allocation"
+      ? { label: "Submit", onClick: submit }
+      : {
+          label: "Continue",
+          disabled: !canContinue,
+          onClick: () => setStep(newBudgetStepOrder[currentStepIndex + 1]!),
+        }
 
   return (
-    <F0WizardForm
+    <F0Dialog
       isOpen
+      onClose={close}
+      position="center"
+      width="md"
       title="New training budget"
-      formDefinition={formDefinition}
-      steps={wizardSteps}
-      onClose={() => go(setSearch, { view: "list", budgetId: null })}
-      autoCloseOnLastStepSubmit
-    />
+      primaryAction={primaryAction}
+      secondaryAction={
+        step === "basic"
+          ? { label: "Cancel", onClick: close }
+          : {
+              label: "Previous",
+              onClick: () => setStep(newBudgetStepOrder[currentStepIndex - 1]!),
+            }
+      }
+    >
+      <F0Box display="flex" flexDirection="column" gap="lg">
+        <F0Box display="grid" columns="3" gap="sm">
+          {newBudgetStepOrder.map((item, index) => (
+            <F0Box
+              key={item}
+              display="flex"
+              flexDirection="column"
+              gap="xs"
+              padding="sm"
+              borderRadius="md"
+              background={item === step ? "selected" : "secondary"}
+            >
+              <F0Text
+                variant="label"
+                content={`${index + 1}. ${newBudgetStepLabel[item]}`}
+              />
+            </F0Box>
+          ))}
+        </F0Box>
+
+        <F0Box display="flex" flexDirection="column" gap="xs">
+          <F0Text variant="label" content={newBudgetStepLabel[step]} />
+          <F0Text variant="small" content={newBudgetStepDescription[step]} />
+        </F0Box>
+
+        {step === "basic" && (
+          <F0Box display="flex" flexDirection="column" gap="md">
+            <EntitySelect
+              label="Legal entity"
+              placeholder="Select legal entity"
+              entities={legalEntities.map((entity) => ({
+                id: entity.id,
+                name: entity.legalName,
+                searchKeys: [entity.legalName],
+              }))}
+              selectedEntities={[
+                {
+                  id: legalEntityId,
+                  name:
+                    legalEntities.find((entity) => entity.id === legalEntityId)
+                      ?.legalName ?? "Legal entity",
+                },
+              ]}
+              groups={[{ label: "All", value: "all" }]}
+              selectedGroup="all"
+              selectedItemsCopy="legal entity selected"
+              searchPlaceholder="Search"
+              selectAllLabel="Select all"
+              clearLabel="Clear"
+              selectedLabel="selected"
+              notFoundTitle="No legal entities found"
+              notFoundSubtitle=""
+              hiddenAvatar
+              singleSelector
+              width={600}
+              onGroupChange={() => undefined}
+              onItemExpandedChange={() => undefined}
+              onSelect={(selection) => {
+                if (selection && !Array.isArray(selection)) {
+                  setLegalEntityId(String(selection.id))
+                }
+              }}
+            />
+            <Input
+              label="Budget name"
+              value={name}
+              onChange={(value) => setName(value ?? "")}
+              placeholder="e.g. Engineering 2026"
+            />
+            <Textarea
+              label="Budget description"
+              value={description}
+              onChange={(value) => setDescription(value ?? "")}
+              placeholder="Write budget description"
+              rows={3}
+            />
+          </F0Box>
+        )}
+
+        {step === "amount" && (
+          <F0Box display="flex" flexDirection="column" gap="md">
+            <NumberInput
+              label="Amount"
+              value={amount}
+              onChange={(value) => setAmount(value)}
+              locale="en-US"
+              units={legalEntityCurrencyMap[legalEntityId] ?? "EUR"}
+            />
+            <F0Box display="flex" flexDirection="row" gap="md">
+              <Input
+                label="Start date"
+                type="date"
+                value={effectiveFrom}
+                onChange={(value) => setEffectiveFrom(value ?? "")}
+              />
+              <Input
+                label="End date"
+                type="date"
+                value={effectiveUntil}
+                onChange={(value) => setEffectiveUntil(value ?? "")}
+              />
+            </F0Box>
+          </F0Box>
+        )}
+
+        {step === "allocation" && (
+          <F0Box display="flex" flexDirection="column" gap="md">
+            <EntitySelect
+              label="Training groups"
+              placeholder="Select training groups"
+              entities={trainingEntities}
+              groups={[{ label: "All", value: "all" }]}
+              selectedGroup={selectedGroup}
+              selectedEntities={selectedEntities}
+              selectedItemsCopy="training groups selected"
+              searchPlaceholder="Search"
+              selectAllLabel="Select all"
+              clearLabel="Clear"
+              selectedLabel="selected"
+              notFoundTitle="No training groups found"
+              notFoundSubtitle=""
+              hiddenAvatar
+              singleSelector={false}
+              width={600}
+              onGroupChange={(value) => setSelectedGroup(value ?? "all")}
+              onItemExpandedChange={(id, expanded) => {
+                setExpandedElements((prev) =>
+                  expanded ? [id, ...prev] : prev.filter((item) => item !== id)
+                )
+              }}
+              onSelect={(selection) => {
+                const ids = selection.flatMap((entity) =>
+                  (entity.subItems ?? []).map((subItem) =>
+                    String(subItem.subId)
+                  )
+                )
+                setSelectedIds(ids)
+              }}
+            />
+            <F0Alert
+              variant="neutral"
+              title="Budget deductions"
+              description={`Selected groups allocate ${fmtEur(allocated)}. ${fmtEur(Math.max(total - allocated, 0))} remains available.`}
+            />
+          </F0Box>
+        )}
+      </F0Box>
+    </F0Dialog>
   )
 }
 

@@ -2,25 +2,35 @@ import { useState } from "react"
 import {
   F0Alert,
   F0Button,
+  F0Box,
+  F0Dialog,
   F0Heading,
+  F0Icon,
   F0Text,
-  F0Select,
+  type IconType,
 } from "@factorialco/f0-react"
-import { NumberInput, Switch } from "@factorialco/f0-react/dist/experimental"
 import {
-  Briefcase,
-  Building,
+  NumberInput,
+  OneDataCollection,
+  Switch,
+  useDataCollectionSource,
+} from "@factorialco/f0-react/dist/experimental"
+import {
   Calculator,
+  ChevronRight,
   DollarBill,
+  Office,
   Receipt,
 } from "@factorialco/f0-react/icons/app"
-import type { IconType } from "@factorialco/f0-react"
 
 import type { Training, TrainingClass } from "@/fixtures"
 import {
   breakdownByLegalEntityFor,
+  findLegalEntity,
+  hoursCompletedForEmployee,
   legalEntities,
   legalEntityForEmployee,
+  salaryCostForEmployeeInGroup,
   trainingBudgets,
   trainingBudgetMovements,
   trainingParticipants,
@@ -28,17 +38,18 @@ import {
 import { useLegalEntityToggle } from "../_shared/legalEntityToggleContext"
 
 type Props = { training: Training; klass?: TrainingClass }
-type PaymentStatus = "pending" | "paid" | ""
 
-function flagFor(countryCode: string): string {
-  if (!countryCode || countryCode.length !== 2) return "🏢"
-  const A = 0x1f1e6
-  const a = "A".charCodeAt(0)
-  const cc = countryCode.toUpperCase()
-  return (
-    String.fromCodePoint(A + (cc.charCodeAt(0) - a)) +
-    String.fromCodePoint(A + (cc.charCodeAt(1) - a))
-  )
+const PAYMENT_STATUS_LABEL: Record<string, string> = {
+  pending: "Pending",
+  spent: "Paid",
+}
+
+const PAYMENT_STATUS_VARIANT: Record<
+  string,
+  "neutral" | "info" | "positive" | "warning" | "critical"
+> = {
+  pending: "warning",
+  spent: "positive",
 }
 
 function formatMoney(n: number, currency = "EUR"): string {
@@ -49,8 +60,18 @@ function formatMoney(n: number, currency = "EUR"): string {
   })
 }
 
+function formatDate(iso: string | null): string {
+  return iso
+    ? new Date(iso).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+    : "-"
+}
+
 function CostBreakdownCard({
-  icon: Icon,
+  icon,
   title,
   description,
   value,
@@ -65,15 +86,15 @@ function CostBreakdownCard({
   action?: React.ReactNode
 }) {
   return (
-    <div className="flex flex-col gap-2 rounded-md border border-solid border-f1-border-secondary bg-f1-background p-4">
-      <div className="flex items-center gap-2">
-        <span className="text-f1-foreground-secondary">
-          <Icon />
-        </span>
-        <F0Heading as="h4" variant="heading" content={title} />
+    <div className="flex min-w-0 flex-1 flex-col gap-2.5 rounded-2xl border border-solid border-f1-border-secondary bg-f1-background p-4">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-f1-border-secondary bg-f1-background-secondary text-xl">
+        <F0Icon icon={icon} size="md" color="secondary" />
       </div>
-      <F0Text variant="description" content={description} />
-      <div className="mt-auto flex items-center gap-2 pt-2">
+      <div className="flex flex-col gap-0">
+        <F0Text variant="label" content={title} />
+        <F0Text variant="description" content={description} />
+      </div>
+      <div className="mt-auto flex h-10 items-center gap-2">
         <div className="flex-1">
           <NumberInput
             label="Amount"
@@ -99,7 +120,9 @@ function BudgetLinkBanner({
   totalCost: number
 }) {
   const goToBudgets = () => {
-    window.location.href = "/p/trainings-budgets"
+    window.location.href = budgetId
+      ? `/p/multi-entity-budget?view=detail&budgetId=${budgetId}`
+      : "/p/multi-entity-budget"
   }
 
   if (trainingBudgets.length === 0) {
@@ -177,83 +200,23 @@ export function CostsTab({ training, klass }: Props) {
   )
   const [salaryCost, setSalaryCost] = useState(initialSalary)
   const [subsidizedCost, setSubsidizedCost] = useState(initialSubsidy)
-  const [budgetId, setBudgetId] = useState<string | null>("bud-001")
-  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>("pending")
   const [calculatorOpen, setCalculatorOpen] = useState(false)
+  const [selectedLegalEntityId, setSelectedLegalEntityId] = useState<
+    string | null
+  >(null)
 
   const totalCost = directCost + indirectCost + salaryCost
   const netCost = Math.max(0, totalCost - subsidizedCost)
   const perParticipant = Math.round(netCost / Math.max(participants, 1))
-
-  const budgetOptions = [
-    { value: "", label: "No budget linked" },
-    ...trainingBudgets.map((b) => ({
-      value: b.id,
-      label: `${b.name} (${b.currency})`,
-    })),
-  ]
+  const linkedMovement = klass
+    ? trainingBudgetMovements.find((movement) => movement.groupId === klass.id)
+    : trainingBudgetMovements.find((movement) => movement.trainingId === training.id)
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <F0Heading as="h3" variant="heading-large" content="Costs" />
-        <F0Text
-          variant="description"
-          content="Track and manage all costs associated with this training group."
-        />
-      </div>
+      <BudgetLinkBanner budgetId={linkedMovement?.budgetId ?? null} totalCost={totalCost} />
 
-      <BudgetLinkBanner budgetId={budgetId} totalCost={totalCost} />
-
-      {/* Summary row: 3 cols — Total cost (colSpan 1) + Linked budget + Payment status (colSpan 2) */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="flex flex-col gap-1 rounded-md border border-solid border-f1-border-secondary bg-f1-background p-4">
-          <F0Text variant="label" content="Total cost of the group" />
-          <F0Text
-            variant="description"
-            content="Sum of Direct, Indirect and Salary costs"
-          />
-          <F0Heading
-            as="h2"
-            variant="heading-large"
-            content={formatMoney(totalCost, currency)}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 rounded-md border border-solid border-f1-border-secondary bg-f1-background p-4 md:col-span-2 md:grid-cols-2">
-          <div className="flex flex-col gap-1">
-            <F0Text variant="label" content="Linked budget" />
-            <F0Select<string>
-              label="Linked budget"
-              hideLabel
-              placeholder="No budget linked"
-              value={budgetId ?? ""}
-              onChange={(v: string) => setBudgetId(v || null)}
-              options={budgetOptions}
-            />
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <F0Text variant="label" content="Payment status" />
-            <F0Select<PaymentStatus>
-              label="Payment status"
-              hideLabel
-              placeholder="—"
-              value={paymentStatus}
-              onChange={(v: PaymentStatus) => setPaymentStatus(v)}
-              disabled={!budgetId}
-              options={[
-                { value: "", label: "—" },
-                { value: "pending", label: "Pending" },
-                { value: "paid", label: "Paid" },
-              ]}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Three cost breakdown cards */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="flex gap-4">
         <CostBreakdownCard
           icon={DollarBill}
           title="Direct cost"
@@ -262,14 +225,14 @@ export function CostsTab({ training, klass }: Props) {
           onChange={setDirectCost}
         />
         <CostBreakdownCard
-          icon={Building}
+          icon={Office}
           title="Indirect cost"
           description="General business expenses related to training, such as utilities and administrative fees."
           value={indirectCost}
           onChange={setIndirectCost}
         />
         <CostBreakdownCard
-          icon={Briefcase}
+          icon={Receipt}
           title="Salary cost"
           description="Cost of all employees' time spent on the course."
           value={salaryCost}
@@ -338,7 +301,12 @@ export function CostsTab({ training, klass }: Props) {
         </div>
       )}
 
-      <CostsByLegalEntitySection klass={klass} />
+      <CostsByLegalEntitySection
+        klass={klass}
+        selectedLegalEntityId={selectedLegalEntityId}
+        onOpenLegalEntity={setSelectedLegalEntityId}
+        onCloseLegalEntity={() => setSelectedLegalEntityId(null)}
+      />
 
       {/* Other costs */}
       <section className="flex flex-col gap-3">
@@ -385,10 +353,20 @@ export function CostsTab({ training, klass }: Props) {
 // Sticks to the GROUP page (Costs tab). Reads the per-movement toggle from
 // the shared context so the GroupSidepanel and this page stay in sync.
 
-function CostsByLegalEntitySection({ klass }: { klass?: TrainingClass }) {
+function CostsByLegalEntitySection({
+  klass,
+  selectedLegalEntityId,
+  onOpenLegalEntity,
+  onCloseLegalEntity,
+}: {
+  klass?: TrainingClass
+  selectedLegalEntityId: string | null
+  onOpenLegalEntity: (legalEntityId: string) => void
+  onCloseLegalEntity: () => void
+}) {
   const toggleCtx = useLegalEntityToggle()
   // Find the movement bound to this group (klass.id === movement.groupId).
-  // For prototypes we fall back to the first movement of bud-001 if there is
+  // For prototypes we fall back to the first movement if there is
   // no class context, so the section still renders in training-level views.
   const movement =
     (klass && trainingBudgetMovements.find((m) => m.groupId === klass.id)) ??
@@ -445,33 +423,21 @@ function CostsByLegalEntitySection({ klass }: { klass?: TrainingClass }) {
       ]
     })
   )
-  const [costsByLe, setCostsByLe] = useState(initialCosts)
-  const [expandedLeId, setExpandedLeId] = useState<string | null>(null)
-
-  const setLeCost = (
-    leId: string,
-    field: "direct" | "indirect" | "salary",
-    value: number
-  ) => {
-    setCostsByLe((prev) => ({
-      ...prev,
-      [leId]: { ...(prev[leId] ?? { direct: 0, indirect: 0, salary: 0 }), [field]: value },
-    }))
-  }
+  const [costsByLe] = useState(initialCosts)
+  const [sidepanelTab, setSidepanelTab] = useState<"cost" | "participants">("cost")
+  const selectedBreakdown = selectedLegalEntityId
+    ? breakdownMap.get(selectedLegalEntityId)
+    : undefined
+  const selectedLe = selectedLegalEntityId
+    ? findLegalEntity(selectedLegalEntityId)
+    : undefined
 
   return (
-    <section className="flex flex-col gap-3">
-      <div className="flex items-start justify-between gap-3 rounded-md border border-solid border-f1-border-secondary bg-f1-background p-4">
-        <div className="flex flex-col gap-1">
-          <F0Heading
-            as="h3"
-            variant="heading"
-            content="Costs by legal entity"
-          />
-          <F0Text
-            variant="description"
-            content="Track and manage all costs per legal entity"
-          />
+    <section className="flex flex-col gap-4 rounded-xl border border-solid border-f1-border-secondary bg-f1-background p-4">
+      <div className="flex items-center justify-between gap-3 rounded-2xl bg-f1-background p-3">
+        <div className="flex flex-col gap-0">
+          <F0Text variant="label" content="Costs by legal entity" />
+          <F0Text variant="description" content="Track and manage all costs per legal entity" />
         </div>
         <Switch
           title="Costs by legal entity"
@@ -483,103 +449,210 @@ function CostsByLegalEntitySection({ klass }: { klass?: TrainingClass }) {
       </div>
 
       {isOn && (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3">
           {les.map((le) => {
             const c = costsByLe[le.id] ?? { direct: 0, indirect: 0, salary: 0 }
             const leTotal = c.direct + c.indirect + c.salary
             const leParticipants = participants.filter(
               (p) => legalEntityForEmployee(p.employeeId)?.id === le.id
             )
-            const isExpanded = expandedLeId === le.id
             return (
-              <div
+              <button
+                type="button"
                 key={le.id}
-                className="flex flex-col gap-3 rounded-md border border-solid border-f1-border-secondary bg-f1-background"
+                onClick={() => onOpenLegalEntity(le.id)}
+                className="flex h-16 items-center gap-3 rounded-2xl border border-solid border-f1-border bg-f1-background p-3 text-left hover:bg-f1-background-hover"
               >
-                <button
-                  type="button"
-                  onClick={() =>
-                    setExpandedLeId(isExpanded ? null : le.id)
-                  }
-                  className="flex items-center justify-between gap-3 p-4 text-left hover:bg-f1-background-hover"
-                  aria-expanded={isExpanded}
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-f1-border-secondary bg-f1-background-secondary text-f1-foreground-secondary">
+                  <Office />
+                </span>
+                <div className="flex min-w-0 flex-1 flex-col gap-0">
+                  <F0Text variant="label" content={le.legalName} />
+                  <F0Text
+                    variant="description"
+                    content={`${le.countryCode} · ${leParticipants.length} ${leParticipants.length === 1 ? "participant" : "participants"}`}
+                  />
+                </div>
+                <span className="whitespace-nowrap font-bold text-f1-foreground">
+                  {formatMoney(leTotal, "EUR")}
+                </span>
+                <span
+                  aria-hidden
+                  className="flex h-5 w-5 shrink-0 items-center justify-center text-f1-foreground-secondary"
                 >
-                  <div className="flex items-center gap-3">
-                    <span aria-hidden className="text-xl">
-                      {flagFor(le.countryCode)}
-                    </span>
-                    <div className="flex flex-col gap-0.5">
-                      <F0Text variant="label" content={le.legalName} />
-                      <F0Text
-                        variant="description"
-                        content={`${le.countryCode} · ${leParticipants.length} ${leParticipants.length === 1 ? "participant" : "participants"}`}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <F0Text
-                      variant="label"
-                      content={formatMoney(leTotal, "EUR")}
-                    />
-                    <span
-                      aria-hidden
-                      className="text-f1-foreground-secondary"
-                    >
-                      {isExpanded ? "▴" : "▾"}
-                    </span>
-                  </div>
-                </button>
-                {isExpanded && (
-                  <div className="grid grid-cols-1 gap-3 px-4 pb-4 md:grid-cols-3">
-                    <div className="flex flex-col gap-1">
-                      <F0Text variant="label" content="Direct cost" />
-                      <NumberInput
-                        label="Direct cost"
-                        hideLabel
-                        value={c.direct}
-                        onChange={(v) =>
-                          setLeCost(le.id, "direct", v ?? 0)
-                        }
-                        step={50}
-                        locale="en-US"
-                        units="EUR"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <F0Text variant="label" content="Indirect cost" />
-                      <NumberInput
-                        label="Indirect cost"
-                        hideLabel
-                        value={c.indirect}
-                        onChange={(v) =>
-                          setLeCost(le.id, "indirect", v ?? 0)
-                        }
-                        step={50}
-                        locale="en-US"
-                        units="EUR"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <F0Text variant="label" content="Salary cost" />
-                      <NumberInput
-                        label="Salary cost"
-                        hideLabel
-                        value={c.salary}
-                        onChange={(v) =>
-                          setLeCost(le.id, "salary", v ?? 0)
-                        }
-                        step={50}
-                        locale="en-US"
-                        units="EUR"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
+                  <ChevronRight />
+                </span>
+              </button>
             )
           })}
         </div>
       )}
+
+      {selectedLegalEntityId && selectedLe && (
+        <F0Dialog
+          isOpen
+          onClose={onCloseLegalEntity}
+          position="right"
+          width="md"
+          title={selectedLe.legalName}
+          description={movement.groupName}
+          metadata={[
+            {
+              label: "Payment status",
+              value: {
+                type: "status" as const,
+                label: PAYMENT_STATUS_LABEL[movement.paymentStatus],
+                variant: PAYMENT_STATUS_VARIANT[movement.paymentStatus],
+              },
+            },
+            {
+              label: "Timeframe",
+              value: {
+                type: "text" as const,
+                content: `${formatDate(movement.startDate)}- ${formatDate(movement.endDate)}`,
+              },
+            },
+          ]}
+          tabs={[
+            { id: "cost", label: "Cost", onClick: () => setSidepanelTab("cost") },
+            {
+              id: "participants",
+              label: "Participants",
+              onClick: () => setSidepanelTab("participants"),
+            },
+          ]}
+          activeTabId={sidepanelTab}
+          setActiveTabId={(id: string) =>
+            setSidepanelTab(id as "cost" | "participants")
+          }
+          disableContentPadding
+        >
+          {sidepanelTab === "cost" && (
+            <F0Box display="flex" flexDirection="column" gap="lg" paddingX="md">
+              <CostBreakdownList
+                direct={selectedBreakdown?.directCost ?? 0}
+                indirect={selectedBreakdown?.indirectCost ?? 0}
+                salary={selectedBreakdown?.salaryCost ?? 0}
+              />
+            </F0Box>
+          )}
+          {sidepanelTab === "participants" && (
+            <LegalEntityParticipantsTab
+              movement={movement}
+              legalEntityId={selectedLegalEntityId}
+            />
+          )}
+        </F0Dialog>
+      )}
     </section>
+  )
+}
+
+function LegalEntityParticipantsTab({
+  movement,
+  legalEntityId,
+}: {
+  movement: NonNullable<typeof trainingBudgetMovements[number]>
+  legalEntityId: string
+}) {
+  const rows = trainingParticipants
+    .filter(
+      (participant) =>
+        participant.classId === movement.groupId &&
+        legalEntityForEmployee(participant.employeeId)?.id === legalEntityId
+    )
+    .map((participant) => ({
+      id: participant.id,
+      employeeName: participant.employeeName,
+      employeeAvatar: participant.employeeAvatar,
+      hours: hoursCompletedForEmployee(participant.employeeId, movement.groupId),
+      salary: salaryCostForEmployeeInGroup(participant.employeeId, movement.groupId),
+    }))
+
+  const source = useDataCollectionSource({
+    filters: {},
+    dataAdapter: {
+      paginationType: "pages" as const,
+      perPage: 50,
+      fetchData: () => ({
+        type: "pages" as const,
+        records: rows,
+        total: rows.length,
+        perPage: 50,
+        currentPage: 1,
+        pagesCount: 1,
+      }),
+    },
+  })
+
+  return (
+    <F0Box display="flex" flexDirection="column" paddingX="md">
+      <OneDataCollection
+        source={source}
+        visualizations={[
+          {
+            type: "table" as const,
+            options: {
+              columns: [
+                {
+                  label: "Name",
+                  render: (row) => ({
+                    type: "person" as const,
+                    value: {
+                      firstName: row.employeeName.split(" ")[0] ?? "",
+                      lastName: row.employeeName.split(" ").slice(1).join(" "),
+                      src: row.employeeAvatar,
+                    },
+                  }),
+                },
+                {
+                  label: "Hours completed",
+                  render: (row) => `${row.hours}h`,
+                },
+                {
+                  label: "Salary cost",
+                  render: (row) => formatMoney(row.salary),
+                },
+              ],
+            },
+          },
+        ]}
+      />
+    </F0Box>
+  )
+}
+
+function CostBreakdownList({
+  direct,
+  indirect,
+  salary,
+}: {
+  direct: number
+  indirect: number
+  salary: number
+}) {
+  const total = direct + indirect + salary
+  return (
+    <div className="flex flex-col gap-3 rounded-xl border border-f1-border bg-f1-background p-4">
+      <F0Text content="Cost breakdown" variant="label" />
+      <div className="flex flex-col gap-2">
+        <CostBreakdownRow label="Direct cost" value={direct} />
+        <CostBreakdownRow label="Indirect cost" value={indirect} />
+        <CostBreakdownRow label="Salary cost" value={salary} />
+      </div>
+      <div className="flex items-center justify-between border-t border-f1-border-secondary pt-3">
+        <F0Text content="Total cost" variant="label" />
+        <F0Heading as="h4" variant="heading" content={formatMoney(total)} />
+      </div>
+    </div>
+  )
+}
+
+function CostBreakdownRow({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex items-center justify-between">
+      <F0Text content={label} variant="small" />
+      <F0Text content={formatMoney(value)} variant="small" />
+    </div>
   )
 }

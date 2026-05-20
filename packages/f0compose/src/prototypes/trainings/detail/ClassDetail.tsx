@@ -4,7 +4,6 @@ import {
   ResourceHeader,
   Tabs,
 } from "@factorialco/f0-react/dist/experimental"
-import { Pencil } from "@factorialco/f0-react/icons/app"
 import { useState } from "react"
 import { useSearchParams } from "react-router-dom"
 
@@ -68,7 +67,7 @@ function formatLongDate(iso: string | null): string {
 export function ClassDetail({
   training,
   classId,
-  onBackToList,
+  onBackToList: _onBackToList,
   onBackToTraining,
   onBackToClasses: _onBackToClasses,
 }: Props) {
@@ -119,7 +118,7 @@ export function ClassDetail({
               href: "/p/trainings",
             }}
             breadcrumbs={[
-              { id: "list", label: "Training", onClick: onBackToList },
+              { id: "courses", label: "Courses", href: "/p/trainings" },
               {
                 id: training.id,
                 label: training.name,
@@ -182,7 +181,7 @@ export function ClassDetail({
                 href: "/p/trainings",
               }}
               breadcrumbs={[
-                { id: "list", label: "Training", onClick: onBackToList },
+                { id: "courses", label: "Courses", href: "/p/trainings" },
                 {
                   id: training.id,
                   label: training.name,
@@ -236,17 +235,6 @@ export function ClassDetail({
                       },
                     ]
                   : []),
-              ]}
-              secondaryActions={[
-                {
-                  label: "Delete",
-                  onClick: () => openClassAction("delete-class"),
-                },
-                {
-                  label: "Edit",
-                  icon: Pencil,
-                  onClick: () => openClassAction("edit-class"),
-                },
               ]}
             />
             <Tabs key={activeTab} tabs={tabsWithNav} activeTabId={activeTab} />
