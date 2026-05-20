@@ -189,20 +189,11 @@ function VirtualFormContent() {
   const entry = formName ? registry?.get(formName) : undefined
   const ref = entry?.ref.current
   const currentValues = activeForm?.formValues ?? {}
-  // Prefer params from the registry entry (written by the host-app form
-  // actions) as the canonical source; fall back to coagent state for the
-  // brief window before sync.
-  const defaultValuesParams =
-    entry?.defaultValuesParams ?? activeForm?.defaultValuesParams
 
   // Keep refs so callbacks always capture the latest values without
   // changing identity (which would cause useF0FormDefinition to recompute).
   const entryRef = useRef(entry)
   entryRef.current = entry
-  const defaultValuesParamsRef = useRef(defaultValuesParams)
-  defaultValuesParamsRef.current = defaultValuesParams
-  const currentValuesRef = useRef(currentValues)
-  currentValuesRef.current = currentValues
   const registryRef = useRef(registry)
   registryRef.current = registry
   const formNameRef = useRef(formName)
@@ -237,63 +228,6 @@ function VirtualFormContent() {
     })
   }, [formRef])
 
-  const resolvedDefaultValues = useCallback(() => {
-    const e = entryRef.current
-    const name = formNameRef.current
-    const params = defaultValuesParamsRef.current
-
-    // If defaults were already resolved on a previous mount with the same
-    // params, skip re-fetching. This prevents a slow async call when the
-    // canvas closes and reopens. Reset happens on submit via resetFillVersion.
-    const paramsKey = params ? JSON.stringify(params) : null
-    if (
-      name &&
-      registryRef.current?.hasDefaultValuesEverResolved?.(name, paramsKey)
-    ) {
-      return Promise.resolve(
-        e?.ref.current?.getValues() ?? currentValuesRef.current
-      )
-    }
-
-    if (e?.defaultValuesFn && params) {
-      // Validate params against the schema before calling — if the params
-      // don't satisfy the declared schema, fall through to currentValues.
-      if (e.defaultValuesParamsSchema) {
-        const result = e.defaultValuesParamsSchema.safeParse(params)
-        if (!result.success) {
-          return Promise.resolve(currentValuesRef.current)
-        }
-      }
-      // Capture AI-set values before async resolution — form.reset() after
-      // defaults load would otherwise overwrite them.
-      const virtualValues = e.ref.current?.getValues() ?? {}
-      const fallbackValues = { ...virtualValues }
-      const dirty = e.dirtyFields ?? new Set<string>()
-      // Signal that async resolution is in progress — any concurrent
-      // fillForm calls will be queued until resolution completes.
-      if (name) registryRef.current?.markDefaultValuesResolving?.(name)
-      return e
-        .defaultValuesFn(params)
-        .then((values) => {
-          // Merge AI-filled fields on top of resolved defaults so
-          // F0Form's reset() preserves values set by fillForm.
-          const merged = { ...values }
-          for (const field of dirty) {
-            if (field in virtualValues) {
-              merged[field] = virtualValues[field]
-            }
-          }
-          return merged
-        })
-        .catch(() => fallbackValues)
-        .finally(() => {
-          if (name)
-            registryRef.current?.markDefaultValuesResolved?.(name, paramsKey)
-        })
-    }
-    return Promise.resolve(currentValuesRef.current)
-  }, [])
-
   const onSubmit = useCallback(
     async ({ data }: { data: Record<string, unknown> }) => {
       setIsSubmitting(true)
@@ -311,7 +245,7 @@ function VirtualFormContent() {
   const formDefinition = useF0FormDefinition({
     name: formName || "form",
     schema: entry?.schema ?? FALLBACK_SCHEMA,
-    defaultValues: resolvedDefaultValues,
+    defaultValues: currentValues,
     sections: entry?.sections,
     steps: entry?.steps,
     module: entry?.module,

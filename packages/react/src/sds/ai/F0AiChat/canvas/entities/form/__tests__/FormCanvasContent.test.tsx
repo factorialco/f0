@@ -620,37 +620,11 @@ describe("FormCanvasContent", () => {
   })
 
   // ==========================================================================
-  // resolvedDefaultValues — defaultValuesFn + defaultValuesParams
+  // defaultValues — passes currentValues synchronously
   // ==========================================================================
 
-  describe("resolvedDefaultValues with defaultValuesParams", () => {
-    it("calls defaultValuesFn with params when both are available", async () => {
-      const defaultValuesFn = vi.fn().mockResolvedValue({
-        name: "Resolved Name",
-        email: "resolved@test.com",
-      })
-      mockRegistryEntry = makeEntry({
-        defaultValuesFn,
-        defaultValuesParams: { employeeId: "123" },
-      })
-      mockCoAgentState = {
-        activeForm: {
-          formName: "test-form",
-          formValues: { name: "", email: "" },
-          defaultValuesParams: { employeeId: "123" },
-        },
-      }
-      render(<FormContent />)
-
-      const result = await capturedFormDefinition.defaultValues()
-      expect(defaultValuesFn).toHaveBeenCalledWith({ employeeId: "123" })
-      expect(result).toEqual({
-        name: "Resolved Name",
-        email: "resolved@test.com",
-      })
-    })
-
-    it("falls back to currentValues when no defaultValuesFn", async () => {
+  describe("defaultValues from coagent state", () => {
+    it("passes formValues from coagent state as defaultValues", () => {
       mockRegistryEntry = makeEntry()
       mockCoAgentState = {
         activeForm: {
@@ -660,37 +634,20 @@ describe("FormCanvasContent", () => {
       }
       render(<FormContent />)
 
-      const result = await capturedFormDefinition.defaultValues()
-      expect(result).toEqual({ name: "John", email: "john@test.com" })
-    })
-
-    it("falls back to currentValues when defaultValuesFn exists but no params", async () => {
-      const defaultValuesFn = vi.fn().mockResolvedValue({
-        name: "Should Not Resolve",
+      expect(capturedFormDefinition.defaultValues).toEqual({
+        name: "John",
+        email: "john@test.com",
       })
-      mockRegistryEntry = makeEntry({ defaultValuesFn })
-      mockCoAgentState = {
-        activeForm: {
-          formName: "test-form",
-          formValues: { name: "John", email: "john@test.com" },
-        },
-      }
-      render(<FormContent />)
-
-      const result = await capturedFormDefinition.defaultValues()
-      expect(defaultValuesFn).not.toHaveBeenCalled()
-      expect(result).toEqual({ name: "John", email: "john@test.com" })
     })
 
-    it("always returns a thenable to prevent TypeError in useAsyncDefaultValues", () => {
+    it("defaults to empty object when no formValues", () => {
       mockRegistryEntry = makeEntry()
       mockCoAgentState = {
-        activeForm: { formName: "test-form", formValues: {} },
+        activeForm: { formName: "test-form" },
       }
       render(<FormContent />)
 
-      const result = capturedFormDefinition.defaultValues()
-      expect(typeof result.then).toBe("function")
+      expect(capturedFormDefinition.defaultValues).toEqual({})
     })
   })
 
@@ -736,259 +693,6 @@ describe("FormCanvasContent", () => {
         { name: "John", email: "john@test.com" },
         { shouldDirty: true, shouldValidate: false }
       )
-    })
-  })
-
-  // ==========================================================================
-  // Slow async defaultValues — AI-filled dirty fields survive resolution
-  // ==========================================================================
-
-  describe("slow async defaultValues preserve AI-filled dirty fields", () => {
-    it("merges AI-filled dirty fields on top of resolved defaults (2s delay)", async () => {
-      vi.useFakeTimers()
-      let resolveFn!: (v: Record<string, unknown>) => void
-      const defaultValuesFn = vi.fn(
-        () =>
-          new Promise<Record<string, unknown>>((resolve) => {
-            resolveFn = resolve
-          })
-      )
-      // Simulate AI having filled "name" before defaults resolve
-      const dirtyFields = new Set(["name"])
-      mockFormRef.current.getValues.mockReturnValue({
-        name: "AI Filled Name",
-        email: "",
-      })
-      mockRegistryEntry = makeEntry({
-        defaultValuesFn,
-        defaultValuesParams: { employeeId: "42" },
-        dirtyFields,
-      })
-      mockCoAgentState = {
-        activeForm: {
-          formName: "test-form",
-          formValues: { name: "AI Filled Name", email: "" },
-          defaultValuesParams: { employeeId: "42" },
-        },
-      }
-      render(<FormContent />)
-
-      // Trigger the async defaultValues callback
-      const resultPromise = capturedFormDefinition.defaultValues()
-
-      // Verify resolving was signaled
-      expect(mockMarkDefaultValuesResolving).toHaveBeenCalledWith("test-form")
-
-      // Simulate 2 seconds passing, then resolve with server defaults
-      await vi.advanceTimersByTimeAsync(2000)
-      resolveFn({
-        name: "Server Default Name",
-        email: "server@default.com",
-      })
-
-      const result = await resultPromise
-
-      // AI-filled "name" survives; server "email" is used since it wasn't dirty
-      expect(result).toEqual({
-        name: "AI Filled Name",
-        email: "server@default.com",
-      })
-      expect(mockMarkDefaultValuesResolved).toHaveBeenCalledWith(
-        "test-form",
-        '{"employeeId":"42"}'
-      )
-      vi.useRealTimers()
-    })
-
-    it("uses all server defaults when no dirty fields exist", async () => {
-      vi.useFakeTimers()
-      let resolveFn!: (v: Record<string, unknown>) => void
-      const defaultValuesFn = vi.fn(
-        () =>
-          new Promise<Record<string, unknown>>((resolve) => {
-            resolveFn = resolve
-          })
-      )
-      mockFormRef.current.getValues.mockReturnValue({
-        name: "",
-        email: "",
-      })
-      mockRegistryEntry = makeEntry({
-        defaultValuesFn,
-        defaultValuesParams: { employeeId: "42" },
-        // No dirtyFields → empty set
-      })
-      mockCoAgentState = {
-        activeForm: {
-          formName: "test-form",
-          formValues: { name: "", email: "" },
-          defaultValuesParams: { employeeId: "42" },
-        },
-      }
-      render(<FormContent />)
-
-      const resultPromise = capturedFormDefinition.defaultValues()
-
-      await vi.advanceTimersByTimeAsync(2000)
-      resolveFn({
-        name: "Server Name",
-        email: "server@test.com",
-      })
-
-      const result = await resultPromise
-
-      // No dirty fields → all server defaults are used
-      expect(result).toEqual({
-        name: "Server Name",
-        email: "server@test.com",
-      })
-      vi.useRealTimers()
-    })
-
-    it("preserves multiple AI-filled fields when defaults resolve", async () => {
-      vi.useFakeTimers()
-      let resolveFn!: (v: Record<string, unknown>) => void
-      const defaultValuesFn = vi.fn(
-        () =>
-          new Promise<Record<string, unknown>>((resolve) => {
-            resolveFn = resolve
-          })
-      )
-      const dirtyFields = new Set(["name", "email"])
-      mockFormRef.current.getValues.mockReturnValue({
-        name: "AI Name",
-        email: "ai@filled.com",
-      })
-      mockRegistryEntry = makeEntry({
-        defaultValuesFn,
-        defaultValuesParams: { employeeId: "42" },
-        dirtyFields,
-      })
-      mockCoAgentState = {
-        activeForm: {
-          formName: "test-form",
-          formValues: { name: "AI Name", email: "ai@filled.com" },
-          defaultValuesParams: { employeeId: "42" },
-        },
-      }
-      render(<FormContent />)
-
-      const resultPromise = capturedFormDefinition.defaultValues()
-
-      await vi.advanceTimersByTimeAsync(2000)
-      resolveFn({
-        name: "Server Name",
-        email: "server@test.com",
-      })
-
-      const result = await resultPromise
-
-      // Both AI-filled fields survive
-      expect(result).toEqual({
-        name: "AI Name",
-        email: "ai@filled.com",
-      })
-      vi.useRealTimers()
-    })
-
-    it("calls markDefaultValuesResolving before the async call starts", async () => {
-      const defaultValuesFn = vi.fn().mockResolvedValue({ name: "Default" })
-      mockRegistryEntry = makeEntry({
-        defaultValuesFn,
-        defaultValuesParams: { id: "1" },
-      })
-      mockCoAgentState = {
-        activeForm: {
-          formName: "test-form",
-          formValues: {},
-          defaultValuesParams: { id: "1" },
-        },
-      }
-      render(<FormContent />)
-
-      // Kick off async resolution and wait for it to complete
-      await capturedFormDefinition.defaultValues()
-
-      // Both have been called — resolving was signaled before resolved
-      expect(mockMarkDefaultValuesResolving).toHaveBeenCalledWith("test-form")
-      expect(mockMarkDefaultValuesResolved).toHaveBeenCalledWith(
-        "test-form",
-        '{"id":"1"}'
-      )
-      expect(mockMarkDefaultValuesResolving).toHaveBeenCalledBefore(
-        mockMarkDefaultValuesResolved
-      )
-    })
-  })
-
-  // ==========================================================================
-  // Close and reopen — defaults should NOT re-resolve
-  // ==========================================================================
-
-  describe("skips re-resolving defaults on canvas reopen", () => {
-    it("returns current values instead of calling defaultValuesFn when defaults were already resolved", async () => {
-      const defaultValuesFn = vi.fn().mockResolvedValue({
-        name: "Server Name",
-        email: "server@test.com",
-      })
-      mockFormRef.current.getValues.mockReturnValue({
-        name: "AI Filled",
-        email: "ai@test.com",
-      })
-      // Defaults were resolved on the first open
-      mockHasDefaultValuesEverResolved.mockReturnValue(true)
-      mockRegistryEntry = makeEntry({
-        defaultValuesFn,
-        defaultValuesParams: { employeeId: "42" },
-      })
-      mockCoAgentState = {
-        activeForm: {
-          formName: "test-form",
-          formValues: { name: "AI Filled", email: "ai@test.com" },
-          defaultValuesParams: { employeeId: "42" },
-        },
-      }
-      render(<FormContent />)
-
-      const result = await capturedFormDefinition.defaultValues()
-
-      // defaultValuesFn should NOT be called again
-      expect(defaultValuesFn).not.toHaveBeenCalled()
-      // Should return current virtual ref values
-      expect(result).toEqual({
-        name: "AI Filled",
-        email: "ai@test.com",
-      })
-    })
-
-    it("still resolves defaults on first open when defaults have never been resolved", async () => {
-      const defaultValuesFn = vi.fn().mockResolvedValue({
-        name: "Server Name",
-        email: "server@test.com",
-      })
-      mockFormRef.current.getValues.mockReturnValue({})
-      mockHasDefaultValuesEverResolved.mockReturnValue(false)
-      mockRegistryEntry = makeEntry({
-        defaultValuesFn,
-        defaultValuesParams: { employeeId: "42" },
-      })
-      mockCoAgentState = {
-        activeForm: {
-          formName: "test-form",
-          formValues: {},
-          defaultValuesParams: { employeeId: "42" },
-        },
-      }
-      render(<FormContent />)
-
-      const result = await capturedFormDefinition.defaultValues()
-
-      // defaultValuesFn IS called on first open
-      expect(defaultValuesFn).toHaveBeenCalledWith({ employeeId: "42" })
-      expect(result).toEqual({
-        name: "Server Name",
-        email: "server@test.com",
-      })
     })
   })
 })
