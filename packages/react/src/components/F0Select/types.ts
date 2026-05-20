@@ -44,6 +44,8 @@ type F0SelectBaseProps<T extends string, R = unknown> = {
   searchEmptyMessage?: string
   className?: string
   actions?: Action[]
+  /** Callback to create a new item from the current search text. When provided, a "+ Create" button is shown in the empty state of the dropdown. */
+  onCreate?: (value: string) => Promise<void> | void
   /** Container element to render the portal content into */
   portalContainer?: HTMLElement | null
   /**

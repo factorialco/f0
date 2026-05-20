@@ -1,6 +1,6 @@
 import type { UseFileUpload } from "@/patterns/F0Form/fields/file/types"
 import type { IconType } from "@/components/F0Icon/F0Icon"
-import type { F0SelectItemProps } from "@/components/F0Select/types"
+import type { F0SelectItemObject } from "@/components/F0Select/types"
 import type { DataSourceDefinition, RecordType } from "@/hooks/datasource"
 
 import type { CheckboxQuestionProps } from "./QuestionTypes/CheckboxQuestion"
@@ -94,7 +94,8 @@ export type SurveyDataset = {
   icon?: IconType
   placeholder?: string
   dataSource: DataSourceDefinition
-  mapOptions: (item: RecordType) => F0SelectItemProps<string, RecordType>
+  mapOptions: (item: RecordType) => F0SelectItemObject<string, RecordType>
+  onCreate?: (value: string) => Promise<RecordType>
 }
 
 export type SurveyDatasets = Record<string, SurveyDataset>
@@ -126,6 +127,7 @@ type OnChangeQuestionParams = BaseQuestionOnChangeParams &
         datasetKey?: string
         showSearchBox?: boolean
         searchBoxPlaceholder?: string
+        allowCreate?: boolean
       }
     | {
         type: "dropdown-multi"

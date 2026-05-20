@@ -1244,6 +1244,29 @@ export const WithCustomTrigger: Story = {
   ),
 }
 
+export const WithOnCreate: Story = {
+  args: {
+    label: "Select Employee",
+    placeholder: "Search employees...",
+    showSearchBox: true,
+    onChange: fn(),
+    source: employeeNonPaginatedSource,
+    mapOptions: (item: Employee) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+      description: `${item.jobTitle} · ${item.departmentName}`,
+    }),
+    onCreate: (_value: string) => {
+      return new Promise<void>((resolve) => {
+        setTimeout(() => {
+          resolve()
+        }, 500)
+      })
+    },
+  },
+}
+
 export const Snapshot: Story = {
   parameters: withSkipA11y(withSnapshot({})),
   args: {

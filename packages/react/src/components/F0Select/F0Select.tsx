@@ -14,6 +14,8 @@ import {
 import { useDebounceCallback } from "usehooks-ts"
 
 import { F0DialogContext } from "@/patterns/F0Dialog"
+import { F0Button } from "@/components/F0Button"
+import { Plus } from "@/icons/app"
 import {
   BaseFetchOptions,
   BaseResponse,
@@ -109,6 +111,7 @@ const F0SelectComponent = forwardRef(function Select<
     searchEmptyMessage,
     size = "sm",
     actions,
+    onCreate,
     source,
     label,
     icon,
@@ -893,11 +896,52 @@ const F0SelectComponent = forwardRef(function Select<
         as: asList ? ("list" as const) : undefined,
       } as const)
 
+  const handleCreate = onCreate
+    ? (value: string) => {
+        const result = onCreate(value)
+        if (result && typeof result.then === "function") {
+          result.then(
+            () => {
+              setCurrentSearch(undefined)
+            },
+            (err: unknown) => {
+              console.warn("[F0Select] onCreate failed:", err)
+            }
+          )
+        } else {
+          setCurrentSearch(undefined)
+        }
+      }
+    : undefined
+
+  const createLabel = currentSearch
+    ? i18n.t("select.createWithValue", { value: currentSearch })
+    : i18n.select.create
+
+  const emptyAction =
+    handleCreate && currentSearch?.trim() ? (
+      <div className="flex w-full">
+        <F0Button
+          type="button"
+          variant="outline"
+          onClick={() => handleCreate(currentSearch.trim())}
+          icon={Plus}
+          label={createLabel}
+        />
+      </div>
+    ) : undefined
+
   const selectContent = (
     <SelectContent
       items={items}
       taller={!!source?.filters}
-      emptyMessage={searchEmptyMessage ?? i18n.select.noResults}
+      emptyMessage={
+        searchEmptyMessage ??
+        (onCreate && currentSearch?.trim()
+          ? (i18n.select.createEmptyMessage ?? i18n.select.noResults)
+          : i18n.select.noResults)
+      }
+      emptyAction={emptyAction}
       bottom={
         !isFiltersOpen ? (
           <SelectBottomActions

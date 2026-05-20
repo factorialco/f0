@@ -11,6 +11,7 @@ import {
   Ellipsis,
   Hub,
   LayersFront,
+  Plus,
 } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -304,11 +305,14 @@ export function ActionsMenu({
     currentRatingType,
     currentDatasetKey,
     isMultiSelectEnabled,
+    isAllowCreateEnabled,
+    datasetHasOnCreate,
     disallowOptionalQuestions,
     handleChangeRequired,
     handleSelectQuestionType,
     handleSelectRatingType,
     handleToggleMultiSelect,
+    handleToggleAllowCreate,
     handleDuplicate,
     handleDelete,
   } = useQuestionActions({
@@ -353,6 +357,18 @@ export function ActionsMenu({
             />
           </DropdownMenuGroup>
         )}
+        {!!currentDatasetKey &&
+          datasetHasOnCreate &&
+          questionType === "dropdown-single" && (
+            <DropdownMenuGroup>
+              <ToggleItem
+                label={t("surveyFormBuilder.labels.allowCreate")}
+                icon={Plus}
+                checked={isAllowCreateEnabled}
+                onChange={handleToggleAllowCreate}
+              />
+            </DropdownMenuGroup>
+          )}
         <DropdownMenuGroup>
           <QuestionTypeMenuItem
             label={t("surveyFormBuilder.labels.questionType")}

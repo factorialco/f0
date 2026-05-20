@@ -262,3 +262,44 @@ export const WithMultipleSections: Story = {
     ],
   },
 }
+
+export const WithAllowCreate: Story = {
+  args: {
+    datasets: mockDatasets,
+    elements: [
+      {
+        type: "question",
+        question: {
+          id: "q-team-single",
+          title: "Select your team",
+          description:
+            "The teams dataset has onCreate, so the 'Allow creation' toggle will appear in the actions menu.",
+          type: "dropdown-single" as const,
+          datasetKey: "teams",
+          allowCreate: true,
+        },
+      },
+      {
+        type: "question",
+        question: {
+          id: "q-team-multi",
+          title: "Select teams you collaborate with",
+          description: "Multi-select does not support creation.",
+          type: "dropdown-multi" as const,
+          datasetKey: "teams",
+        },
+      },
+      {
+        type: "question",
+        question: {
+          id: "q-employee",
+          title: "Select reviewer (no creation)",
+          description:
+            "The employees dataset does not have onCreate, so no toggle appears.",
+          type: "dropdown-single" as const,
+          datasetKey: "employees",
+        },
+      },
+    ],
+  },
+}
