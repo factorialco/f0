@@ -3,10 +3,7 @@ import type { IconType } from "@/components/F0Icon/F0Icon"
 import type { F0SelectItemObject } from "@/components/F0Select/types"
 import type { DataSourceDefinition, RecordType } from "@/hooks/datasource"
 
-import type { HiddenActions } from "./QuestionTypes/BaseQuestion/types"
 import type { CheckboxQuestionProps } from "./QuestionTypes/CheckboxQuestion"
-
-export type { HiddenActions }
 import type { DateQuestionProps } from "./QuestionTypes/DateQuestion"
 import type { DropdownMultiQuestionProps } from "./QuestionTypes/DropdownMultiQuestion/types"
 import type { DropdownSingleQuestionProps } from "./QuestionTypes/DropdownSingleQuestion/types"
@@ -33,6 +30,24 @@ export type QuestionType =
   | "checkbox"
 
 export type ElementType = QuestionType | "section"
+
+/**
+ * Per-question control to hide individual entries from the question
+ * actions menu (the "⋯" dropdown). Useful when a consumer wants to
+ * lock down a subset of question editing without disabling the whole
+ * question. All fields default to `false` (action visible).
+ *
+ * When every action is hidden, the actions menu trigger is not
+ * rendered at all.
+ */
+export type HiddenActions = {
+  required?: boolean
+  multiSelect?: boolean
+  allowCreate?: boolean
+  questionType?: boolean
+  duplicate?: boolean
+  delete?: boolean
+}
 
 export type BaseQuestionOnChangeParams = {
   id: string

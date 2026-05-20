@@ -273,7 +273,7 @@ export const WithHiddenActions: Story = {
           id: "q-free-text",
           title: "Free text question (full menu)",
           description:
-            "No hiddenActions: the actions menu shows Required, Duplicate and Delete.",
+            "No hiddenActions: the actions menu shows every entry available for this question type (Required, Question type, Duplicate, Delete).",
           type: "text" as const,
         },
       },
