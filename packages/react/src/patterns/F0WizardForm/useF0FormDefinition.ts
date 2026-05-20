@@ -175,7 +175,7 @@ function useAsyncDefaultValues<T>(
   const [resolved, setResolved] = useState<T | undefined>(
     isAsync ? undefined : (defaultValues as T | undefined)
   )
-  const [isLoading, setIsLoading] = useState(isAsync)
+  const [isLoading, setIsLoading] = useState(isAsync && !hasParamsSchema)
 
   // Keep a ref to the function to avoid re-running the effect on every render
   const asyncFnRef = useRef(defaultValues)
@@ -183,17 +183,18 @@ function useAsyncDefaultValues<T>(
 
   useEffect(() => {
     if (typeof asyncFnRef.current !== "function") return
+    // When a params schema is declared, the function requires typed params
+    // that aren't available at mount time — resolution is delegated to the
+    // consumer (e.g. canvas layer) which calls with actual validated params.
+    if (hasParamsSchema) return
 
     const controller = new AbortController()
     setIsLoading(true)
 
-    // When defaultValuesParamsSchema is present, the function is (params) => Promise<T>.
-    // At mount time we call it with empty params.
-    // Otherwise it's the legacy (signal) => Promise<T>.
     const fn = asyncFnRef.current
-    const promise = hasParamsSchema
-      ? (fn as (params: Record<string, unknown>) => Promise<T>)({})
-      : (fn as (signal: AbortSignal) => Promise<T>)(controller.signal)
+    const promise = (fn as (signal: AbortSignal) => Promise<T>)(
+      controller.signal
+    )
 
     promise
       .then((data) => {

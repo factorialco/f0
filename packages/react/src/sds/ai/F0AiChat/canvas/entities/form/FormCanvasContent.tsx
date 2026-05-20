@@ -256,6 +256,14 @@ function VirtualFormContent() {
     }
 
     if (e?.defaultValuesFn && params) {
+      // Validate params against the schema before calling — if the params
+      // don't satisfy the declared schema, fall through to currentValues.
+      if (e.defaultValuesParamsSchema) {
+        const result = e.defaultValuesParamsSchema.safeParse(params)
+        if (!result.success) {
+          return Promise.resolve(currentValuesRef.current)
+        }
+      }
       // Capture AI-set values before async resolution — form.reset() after
       // defaults load would otherwise overwrite them.
       const virtualValues = e.ref.current?.getValues() ?? {}
