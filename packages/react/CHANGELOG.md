@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.12.0](https://github.com/factorialco/f0/compare/f0-react-v2.11.1...f0-react-v2.12.0) (2026-05-20)
+
+
+### Features
+
+* **react:** allow hiding individual question actions in SurveyFormBuilder ([#4186](https://github.com/factorialco/f0/issues/4186)) ([fff84f2](https://github.com/factorialco/f0/commit/fff84f293c8f6aef84519f060bd02d4d688f10fc))
+
 ## [2.11.1](https://github.com/factorialco/f0/compare/f0-react-v2.11.0...f0-react-v2.11.1) (2026-05-20)
 
 
