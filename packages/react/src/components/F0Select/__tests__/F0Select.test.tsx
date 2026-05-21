@@ -449,9 +449,8 @@ describe("Select", () => {
     })
   })
 
-  it("does not call onChange when onApply is passed", async () => {
+  it("defers onChange until apply when withApplySelection is enabled", async () => {
     const handleChange = vi.fn()
-    const handleApply = vi.fn()
     const user = userEvent.setup()
 
     render(
@@ -461,7 +460,7 @@ describe("Select", () => {
         options={mockOptions}
         value={[]}
         onChange={handleChange}
-        onApply={handleApply}
+        withApplySelection
       />
     )
 
@@ -469,12 +468,11 @@ describe("Select", () => {
     await user.click(screen.getByText("Option 1"))
 
     expect(handleChange).not.toHaveBeenCalled()
-    expect(handleApply).not.toHaveBeenCalled()
 
     await user.click(screen.getByRole("button", { name: "Apply selection" }))
 
     await waitFor(() => {
-      expect(handleApply).toHaveBeenCalledWith(
+      expect(handleChange).toHaveBeenCalledWith(
         ["option1"],
         [
           {
@@ -492,52 +490,11 @@ describe("Select", () => {
         ]
       )
     })
-    expect(handleChange).not.toHaveBeenCalled()
+    expect(handleChange).toHaveBeenCalledTimes(1)
   })
 
-  it("returns confirmed selection through onApply without onChange", async () => {
-    const handleApply = vi.fn()
-    const user = userEvent.setup()
-
-    render(
-      <F0Select
-        {...defaultSelectProps}
-        multiple
-        options={mockOptions}
-        value={[]}
-        onChange={undefined}
-        onApply={handleApply}
-      />
-    )
-
-    await openSelect(user)
-    await user.click(screen.getByText("Option 1"))
-    await user.click(screen.getByRole("button", { name: "Apply selection" }))
-
-    await waitFor(() => {
-      expect(handleApply).toHaveBeenCalledWith(
-        ["option1"],
-        [
-          {
-            id: "option1",
-            name: "Option 1",
-            description: "Description 1",
-          },
-        ],
-        [
-          expect.objectContaining({
-            label: "Option 1",
-            value: "option1",
-            description: "Description 1",
-          }),
-        ]
-      )
-    })
-  })
-
-  it("cancels staged multi-select changes on outside click when onApply is passed", async () => {
+  it("cancels staged multi-select changes on outside click when withApplySelection is enabled", async () => {
     const handleChange = vi.fn()
-    const handleApply = vi.fn()
     const user = userEvent.setup()
 
     render(
@@ -549,7 +506,7 @@ describe("Select", () => {
           options={mockOptions}
           value={["option1", "option2"]}
           onChange={handleChange}
-          onApply={handleApply}
+          withApplySelection
         />
       </div>
     )
@@ -563,30 +520,27 @@ describe("Select", () => {
     })
 
     expect(handleChange).not.toHaveBeenCalled()
-    expect(handleApply).not.toHaveBeenCalled()
 
     await openSelect(user)
     await user.click(screen.getByText("Option 3"))
     await user.click(screen.getByRole("button", { name: "Apply selection" }))
 
     await waitFor(() => {
-      expect(handleApply).toHaveBeenCalledTimes(1)
+      expect(handleChange).toHaveBeenCalledTimes(1)
     })
 
-    expect(handleApply.mock.calls[0]?.[0]).toEqual(
+    expect(handleChange.mock.calls[0]?.[0]).toEqual(
       expect.arrayContaining(["option1", "option2", "option3"])
     )
-    expect(handleApply).toHaveBeenCalledWith(
+    expect(handleChange).toHaveBeenCalledWith(
       expect.arrayContaining(["option1", "option2", "option3"]),
       expect.any(Array),
       expect.any(Array)
     )
-    expect(handleChange).not.toHaveBeenCalled()
   })
 
   it("cancels staged changes without closing when cancel button is clicked", async () => {
     const handleChange = vi.fn()
-    const handleApply = vi.fn()
     const user = userEvent.setup()
 
     render(
@@ -596,7 +550,7 @@ describe("Select", () => {
         options={mockOptions}
         value={["option1", "option2"]}
         onChange={handleChange}
-        onApply={handleApply}
+        withApplySelection
       />
     )
 
@@ -606,12 +560,10 @@ describe("Select", () => {
 
     expect(screen.getByRole("listbox")).toBeInTheDocument()
     expect(handleChange).not.toHaveBeenCalled()
-    expect(handleApply).not.toHaveBeenCalled()
 
     await user.click(screen.getByRole("button", { name: "Apply selection" }))
 
-    expect(handleChange).not.toHaveBeenCalled()
-    expect(handleApply).toHaveBeenCalledWith(
+    expect(handleChange).toHaveBeenCalledWith(
       ["option1", "option2"],
       [
         {

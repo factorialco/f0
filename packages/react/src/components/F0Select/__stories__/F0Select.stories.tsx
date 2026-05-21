@@ -178,9 +178,9 @@ const meta: Meta = {
       description:
         "Function to handle the change event. Returns the value of the selected option, and the item object if it exists",
     },
-    onApply: {
+    withApplySelection: {
       description:
-        "Optional callback for the multi-select apply button. When provided, selection changes are staged until Apply is clicked, and the confirmed selection is returned as `(value, originalItems, options)` without triggering `onChange`. Clicking outside cancels the staged changes.",
+        "When true in multi-select mode, selection changes are staged until Apply is clicked. Clicking Apply confirms the selection through `onChange`, while clicking outside or Cancel discards the staged changes.",
     },
     actions: {
       description:
@@ -1001,9 +1001,10 @@ export const MultiplePaginatedWithApply: Story = {
       label: item.label,
       avatar: item.avatar,
     }),
-    onApply: fn((selectionStatus) => {
-      console.log("Applied selectionStatus", selectionStatus)
+    onChange: fn((selectionStatus) => {
+      console.log("selectionStatus", selectionStatus)
     }),
+    withApplySelection: true,
   },
 }
 
@@ -1022,7 +1023,7 @@ export const MultipleWithApply: Story = {
       avatar: item.avatar,
       description: `${item.jobTitle} · ${item.departmentName}`,
     }),
-    onApply: fn(),
+    withApplySelection: true,
   },
 }
 

@@ -95,7 +95,7 @@ const F0SelectComponent = forwardRef(function Select<
   {
     placeholder,
     onChange,
-    onApply,
+    withApplySelection = false,
     onChangeSelectedOption,
     value,
     options = [],
@@ -390,11 +390,17 @@ const F0SelectComponent = forwardRef(function Select<
 
   const getSelectedStateKey = useCallback(
     (state: SelectedItemsState<ActualRecordType>): string => {
-      const itemsKeys = Array.from(state.items.entries())
+      const relevantItems = Array.from(state.items.entries()).filter(
+        ([, item]) => (state.allSelected ? true : item.checked)
+      )
+      const itemsKeys = relevantItems
         .map(([id, item]) => `${id}:${item.checked}`)
         .sort()
         .join(",")
-      const groupsKeys = Array.from(state.groups.entries())
+      const relevantGroups = Array.from(state.groups.entries()).filter(
+        ([, group]) => (state.allSelected ? true : group.checked)
+      )
+      const groupsKeys = relevantGroups
         .map(([id, group]) => `${id}:${group.checked}`)
         .sort()
         .join(",")
@@ -461,7 +467,7 @@ const F0SelectComponent = forwardRef(function Select<
   }
   // Show apply button when in multiple selection, and not rendered as a list
   const showApplyButton = multiple && !asList
-  const hasDeferredApply = !!(onApply && showApplyButton)
+  const hasDeferredApply = !!(withApplySelection && showApplyButton)
 
   // Track whether the user has interacted with the selection
   const hasUserInteracted = useRef(false)
@@ -704,19 +710,24 @@ const F0SelectComponent = forwardRef(function Select<
     if (hasDeferredApply) {
       const nextCommittedSelection = cloneSelectedState(selectedState)
       const { values, originalItems, options } = getMultiSelectionPayload()
-
       if (
         getSelectedStateKey(nextCommittedSelection) !==
         getSelectedStateKey(committedSelectionRef.current)
       ) {
         committedSelectionRef.current = nextCommittedSelection
+        ;(
+          onChange as
+            | ((
+                value: T[],
+                originalItems: ResolvedRecordType<R>[],
+                options: F0SelectItemObject<T, ResolvedRecordType<R>>[]
+              ) => void)
+            | undefined
+        )?.(values, originalItems, options)
       }
-
-      onApply?.(values, originalItems, options)
 
       isApplyingRef.current = true
     }
-
     handleChangeOpenLocal(false)
   }, [
     cloneSelectedState,
@@ -724,7 +735,7 @@ const F0SelectComponent = forwardRef(function Select<
     getMultiSelectionPayload,
     handleChangeOpenLocal,
     hasDeferredApply,
-    onApply,
+    onChange,
     selectedState,
   ])
 
