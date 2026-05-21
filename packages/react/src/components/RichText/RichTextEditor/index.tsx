@@ -3,6 +3,7 @@ import { Editor, EditorContent, useEditor } from "@tiptap/react"
 import { AnimatePresence, motion } from "motion/react"
 import {
   forwardRef,
+  useContext,
   useEffect,
   useId,
   useImperativeHandle,
@@ -24,6 +25,7 @@ import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 
 import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"
+import { F0DialogContext } from "@/patterns/F0Dialog"
 
 import "../index.css"
 import { Skeleton } from "@/ui/skeleton"
@@ -121,6 +123,7 @@ const RichTextEditorComponent = forwardRef<
   ref
 ) {
   const i18n = useI18n()
+  const dialogContext = useContext(F0DialogContext)
   const editorId = useId()
 
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -467,14 +470,18 @@ const RichTextEditorComponent = forwardRef<
     </FocusScope>
   )
 
-  return isFullscreen ? (
-    ReactDOM.createPortal(
+  if (isFullscreen) {
+    const fullscreenContainer = dialogContext.portalContainer ?? document.body
+
+    return ReactDOM.createPortal(
       <DataTestIdWrapper dataTestId={dataTestId}>
         {editorContent}
       </DataTestIdWrapper>,
-      document.body
+      fullscreenContainer
     )
-  ) : (
+  }
+
+  return (
     <DataTestIdWrapper dataTestId={dataTestId}>
       {editorContent}
     </DataTestIdWrapper>
