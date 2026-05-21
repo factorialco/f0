@@ -163,7 +163,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
   }, [sections, sectionIds, showSectionsSidepanel, handleSectionClick])
 
   const content = (
-    <div className={cn("flex w-full flex-col max-w-content", className)}>
+    <div className={cn("flex w-full flex-col max-w-content p-4", className)}>
       {sectionIds.map((sectionId, index) => {
         const sectionSchema = schema[sectionId]
         const sectionConfig = sections?.[sectionId]
@@ -1044,9 +1044,10 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       ref={formElementRef}
       onSubmit={onFormSubmit}
       className={cn(
-        "flex flex-col w-full mx-auto max-w-content",
+        "flex flex-col w-full mx-auto max-w-content p-4",
         className,
-        styling?.showSectionsSidepanel && "p-2 [&>div:last-child]:pb-6"
+        styling?.showSectionsSidepanel &&
+          "py-2 pl-0 pr-4 [&>div:last-child]:pb-6"
       )}
     >
       {/* Render definition items with switch grouping */}
