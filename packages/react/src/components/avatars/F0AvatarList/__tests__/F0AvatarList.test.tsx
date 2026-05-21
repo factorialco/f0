@@ -11,18 +11,18 @@ describe("F0AvatarList", () => {
       <F0AvatarList
         type="person"
         avatars={[
-          { firstName: "Hellen", lastName: "Fernández" },
-          { firstName: "Nik", lastName: "Lopin" },
-          { firstName: "Danilo", lastName: "Pereira" },
+          { firstName: "Ada", lastName: "Lovelace" },
+          { firstName: "Alan", lastName: "Turing" },
+          { firstName: "Grace", lastName: "Hopper" },
         ]}
         max={3}
         noTooltip
       />
     )
 
-    expect(screen.getByText("HF")).toBeInTheDocument()
-    expect(screen.getByText("NL")).toBeInTheDocument()
-    expect(screen.getByText("DP")).toBeInTheDocument()
+    expect(screen.getByText("AL")).toBeInTheDocument()
+    expect(screen.getByText("AT")).toBeInTheDocument()
+    expect(screen.getByText("GH")).toBeInTheDocument()
     expect(screen.queryByText(/^\+\d+$/)).not.toBeInTheDocument()
   })
 
@@ -31,11 +31,11 @@ describe("F0AvatarList", () => {
       <F0AvatarList
         type="person"
         avatars={[
-          { firstName: "Hellen", lastName: "Fernández" },
-          { firstName: "Nik", lastName: "Lopin" },
-          { firstName: "Danilo", lastName: "Pereira" },
-          { firstName: "Sara", lastName: "Doe" },
-          { firstName: "Ana", lastName: "García" },
+          { firstName: "Ada", lastName: "Lovelace" },
+          { firstName: "Alan", lastName: "Turing" },
+          { firstName: "Grace", lastName: "Hopper" },
+          { firstName: "Marie", lastName: "Curie" },
+          { firstName: "Lionel", lastName: "Messi" },
         ]}
         max={3}
         noTooltip
@@ -50,8 +50,8 @@ describe("F0AvatarList", () => {
       <F0AvatarList
         type="person"
         avatars={[
-          { firstName: "Hellen", lastName: "Fernández" },
-          { firstName: "Nik", lastName: "Lopin" },
+          { firstName: "Ada", lastName: "Lovelace" },
+          { firstName: "Alan", lastName: "Turing" },
         ]}
         max={2}
         remainingCount={7}
@@ -68,18 +68,18 @@ describe("F0AvatarList", () => {
       <F0AvatarList
         type="person"
         avatars={[
-          { firstName: "Hellen", lastName: "Fernández" },
-          { firstName: "Nik", lastName: "Lopin" },
-          { firstName: "Danilo", lastName: "Pereira" },
+          { firstName: "Ada", lastName: "Lovelace" },
+          { firstName: "Alan", lastName: "Turing" },
+          { firstName: "Grace", lastName: "Hopper" },
           {
-            firstName: "Sara",
-            lastName: "Doe",
-            tooltipDescription: "sara.doe@factorial.co",
+            firstName: "Marie",
+            lastName: "Curie",
+            tooltipDescription: "marie.curie@example.com",
           },
           {
-            firstName: "Ana",
-            lastName: "García",
-            tooltipDescription: "ana.garcia@factorial.co",
+            firstName: "Lionel",
+            lastName: "Messi",
+            tooltipDescription: "lionel.messi@example.com",
           },
         ]}
         max={3}
@@ -89,8 +89,10 @@ describe("F0AvatarList", () => {
 
     await user.hover(screen.getByText("+2"))
 
-    expect(await screen.findByText("sara.doe@factorial.co")).toBeInTheDocument()
-    expect(screen.getByText("ana.garcia@factorial.co")).toBeInTheDocument()
+    expect(
+      await screen.findByText("marie.curie@example.com")
+    ).toBeInTheDocument()
+    expect(screen.getByText("lionel.messi@example.com")).toBeInTheDocument()
   })
 
   it("does not render tooltip content when noTooltip is true", () => {
@@ -99,9 +101,9 @@ describe("F0AvatarList", () => {
         type="person"
         avatars={[
           {
-            firstName: "Hellen",
-            lastName: "Fernández",
-            tooltipDescription: "hellen.fernandez@factorial.co",
+            firstName: "Ada",
+            lastName: "Lovelace",
+            tooltipDescription: "ada.lovelace@example.com",
           },
         ]}
         max={1}
@@ -112,7 +114,7 @@ describe("F0AvatarList", () => {
     // With noTooltip, the avatar is rendered without a Tooltip wrapper, so
     // the description text should never appear in the DOM.
     expect(
-      screen.queryByText("hellen.fernandez@factorial.co")
+      screen.queryByText("ada.lovelace@example.com")
     ).not.toBeInTheDocument()
   })
 })

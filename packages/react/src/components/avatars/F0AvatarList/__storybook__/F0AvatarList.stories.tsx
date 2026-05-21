@@ -253,11 +253,11 @@ export const WithRemainingCount: Story = {
 }
 
 const personEmails = [
-  "nik.lopin@factorial.co",
-  "josepjaume.rey@factorial.co",
-  "saul.dominguez@factorial.co",
-  "dani.moreno@factorial.co",
-  "hellen.fernandez@factorial.co",
+  "lionel.messi@example.com",
+  "ada.lovelace@example.com",
+  "marie.curie@example.com",
+  "alan.turing@example.com",
+  "grace.hopper@example.com",
 ]
 
 function getDummyPeopleWithDescriptions(count: number) {
