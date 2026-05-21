@@ -46,6 +46,7 @@ export type InputInternalProps<T extends string> = Pick<
 
 const InputInternal = <T extends string = string>({
   type,
+  onPressEnter,
   ...props
 }: InputInternalProps<T>) => {
   const [showPassword, setShowPassword] = useState(false)
@@ -79,7 +80,7 @@ const InputInternal = <T extends string = string>({
       onChange={(value) => props.onChange?.(value as T)}
       onKeyDown={(event) => {
         if (event.key === "Enter") {
-          props.onPressEnter?.()
+          onPressEnter?.()
         }
       }}
       icon={localIcon}
