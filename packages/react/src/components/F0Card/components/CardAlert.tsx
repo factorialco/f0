@@ -58,6 +58,21 @@ const alertDefaultIcon: Record<CardAlertVariant, IconType> = {
   positive: CheckCircle,
 }
 
+function CloseButton({ onClose }: { onClose: () => void }) {
+  const { actions } = useI18n()
+  return (
+    <F0Button
+      icon={Cross}
+      label={actions.close}
+      hideLabel
+      variant="ghost"
+      size="md"
+      onClick={onClose}
+      type="button"
+    />
+  )
+}
+
 /**
  * The coloured header strip that sits above the card.
  * It has no background of its own — the outer container's bg shows through.
@@ -72,7 +87,6 @@ function CardAlertHeader({
   onDismiss,
   action,
 }: CardAlertProps) {
-  const { actions } = useI18n()
   const alertRole =
     variant === "critical" || variant === "warning" ? "alert" : "status"
 
@@ -108,17 +122,7 @@ function CardAlertHeader({
           type="button"
         />
       ) : (
-        dismissible && (
-          <F0Button
-            icon={Cross}
-            label={actions.close}
-            hideLabel
-            variant="ghost"
-            size="md"
-            onClick={onDismiss}
-            type="button"
-          />
-        )
+        dismissible && onDismiss && <CloseButton onClose={onDismiss} />
       )}
     </div>
   )

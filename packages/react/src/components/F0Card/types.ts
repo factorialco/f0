@@ -60,7 +60,7 @@ export interface CardAlertAction {
 type CardAlertWithAction = CardAlertBase & {
   dismissible?: never
   onDismiss?: never
-  /** Optional action button rendered in the alert header. Mutually exclusive with `dismissible`. */
+  /** Action button rendered in the alert header. Mutually exclusive with `dismissible`. */
   action: CardAlertAction
 }
 
