@@ -1,6 +1,6 @@
 import { d as o, l as r, k as e, F as t, a as n, C as i, b as d, m as C, n as F, e as l, h as m, I as u, g as h, c as A, i as D, u as c, j as v, f as I } from "./useDataCollectionSource-wrCnQUwi.js";
 import { defaultTranslations as b } from "./i18n-provider-defaults.js";
-import { A as p, C as P, c as S, D as T, a as w, b as x, e as H, f as M, g as V, h as k, p as j, l as y, r as O, m as q, n as z, i as B, F as E, d as L, M as W, k as G, j as J, q as K, o as N, s as Q, u as R } from "./F0AiProposalCard-DzQmXmpC.js";
+import { A as p, C as P, c as S, D as T, a as w, b as x, e as H, f as M, g as V, h as k, p as j, l as y, r as O, m as q, n as z, i as B, F as E, d as L, M as W, k as G, j as J, q as K, o as N, s as Q, u as R } from "./F0AiProposalCard-DONsnNdC.js";
 export {
   p as AiChatTranslationsProvider,
   o as CanvasCard,
