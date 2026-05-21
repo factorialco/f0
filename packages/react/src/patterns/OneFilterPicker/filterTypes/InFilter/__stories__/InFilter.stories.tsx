@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useEffect, useState } from "react"
 
-import { F0SearchInput } from "@/experimental/Forms/Fields/F1SearchBox"
+import { F0SearchInput } from "@/components/F0SearchInput"
 import {
   generateMockUsers,
   MockUser,

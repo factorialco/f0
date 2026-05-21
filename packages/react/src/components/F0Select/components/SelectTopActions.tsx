@@ -12,7 +12,7 @@ import {
 } from "@/hooks/datasource"
 import { useI18n } from "@/lib/providers/i18n"
 
-import { F0SearchInput } from "@/experimental/Forms/Fields/F1SearchBox"
+import { F0SearchInput } from "@/components/F0SearchInput"
 import { ActiveFiltersChips } from "./ActiveFiltersChips"
 
 interface SelectTopActionsProps<

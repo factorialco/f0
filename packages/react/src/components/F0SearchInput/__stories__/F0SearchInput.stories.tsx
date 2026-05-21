@@ -4,7 +4,7 @@ import { F0SearchInput } from "../index"
 
 const meta = {
   component: F0SearchInput,
-  title: "Components/Inputs/Search input",
+  title: "Inputs/Search input",
   parameters: {
     layout: "centered",
     docs: {

@@ -8,7 +8,7 @@ import {
 } from "react"
 
 import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
-import { F0SearchInput } from "@/experimental/Forms/Fields/F1SearchBox"
+import { F0SearchInput } from "@/components/F0SearchInput"
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 
 import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
