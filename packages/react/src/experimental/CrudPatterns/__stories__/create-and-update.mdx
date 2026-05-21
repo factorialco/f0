@@ -1,4 +1,4 @@
-import { Meta } from "@storybook/addon-docs/blocks"
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 <Meta title="CRUD patterns/Create & Update" />
@@ -68,13 +68,38 @@ Use the
 [Decisions](/?path=/docs/experimental-crud-patterns-decisions--documentation)
 page for the full decision tree. A quick summary:
 
-| Situation | Container |
-|---|---|
-| Few fields, no branching, no background context needed | Centered overlay |
-| Few fields, user benefits from seeing the collection | Side panel |
-| Many fields with branching or validation gates | Wizard |
-| Complex resource with multiple sections or tabs | Dedicated page |
-| Single field, trivial validation, repetitive flow | Inline edit |
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Container</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Few fields, no branching, no background context needed</td>
+        <td>Centered overlay</td>
+      </tr>
+      <tr>
+        <td>Few fields, user benefits from seeing the collection</td>
+        <td>Side panel</td>
+      </tr>
+      <tr>
+        <td>Many fields with branching or validation gates</td>
+        <td>Wizard</td>
+      </tr>
+      <tr>
+        <td>Complex resource with multiple sections or tabs</td>
+        <td>Dedicated page</td>
+      </tr>
+      <tr>
+        <td>Single field, trivial validation, repetitive flow</td>
+        <td>Inline edit</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
 
 ---
 

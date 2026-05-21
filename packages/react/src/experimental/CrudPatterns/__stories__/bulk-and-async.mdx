@@ -15,13 +15,44 @@ worked.
 
 A bulk action is not "a single action repeated N times". The differences:
 
-| Aspect | Single | Bulk |
-|---|---|---|
-| Scope clarity | Obvious (one item) | Ambiguous (page? all results?) |
-| Failure mode | Binary (success/fail) | Partial (some succeed, some fail) |
-| Confirmation need | Depends on severity | Always, regardless of severity |
-| Duration | Usually instant | Often async |
-| Feedback granularity | One result | Aggregate + per-item detail |
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Aspect</th>
+        <th className="text-left">Single</th>
+        <th className="text-left">Bulk</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Scope clarity</td>
+        <td>Obvious (one item)</td>
+        <td>Ambiguous (page? all results?)</td>
+      </tr>
+      <tr>
+        <td>Failure mode</td>
+        <td>Binary (success/fail)</td>
+        <td>Partial (some succeed, some fail)</td>
+      </tr>
+      <tr>
+        <td>Confirmation need</td>
+        <td>Depends on severity</td>
+        <td>Always, regardless of severity</td>
+      </tr>
+      <tr>
+        <td>Duration</td>
+        <td>Usually instant</td>
+        <td>Often async</td>
+      </tr>
+      <tr>
+        <td>Feedback granularity</td>
+        <td>One result</td>
+        <td>Aggregate + per-item detail</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
 
 ---
 

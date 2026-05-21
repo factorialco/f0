@@ -1,4 +1,4 @@
-import { Meta } from "@storybook/addon-docs/blocks"
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 <Meta title="CRUD patterns/New surfaces" />
@@ -15,14 +15,42 @@ framework for making decisions from first principles.
 
 Answer these questions about the new surface:
 
-| Question | Why it matters |
-|---|---|
-| What is the item density? (items per screen) | Determines affordance reveal strategy (Principle 10) |
-| Is the surface touch-first, pointer-first, or hybrid? | Hover is not available on touch |
-| Do items have a natural "open" gesture? (click, tap, expand) | Determines how Read is triggered |
-| Is there a spatial metaphor? (position = meaning) | Affects where Create anchors and how bulk selection works |
-| Can items overlap or occlude each other? | May prevent inline actions entirely |
-| Is the surface paginated or infinite? | Affects bulk selection scope patterns |
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Question</th>
+        <th className="text-left">Why it matters</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>What is the item density? (items per screen)</td>
+        <td>Determines affordance reveal strategy (Principle 10)</td>
+      </tr>
+      <tr>
+        <td>Is the surface touch-first, pointer-first, or hybrid?</td>
+        <td>Hover is not available on touch</td>
+      </tr>
+      <tr>
+        <td>Do items have a natural "open" gesture? (click, tap, expand)</td>
+        <td>Determines how Read is triggered</td>
+      </tr>
+      <tr>
+        <td>Is there a spatial metaphor? (position = meaning)</td>
+        <td>Affects where Create anchors and how bulk selection works</td>
+      </tr>
+      <tr>
+        <td>Can items overlap or occlude each other?</td>
+        <td>May prevent inline actions entirely</td>
+      </tr>
+      <tr>
+        <td>Is the surface paginated or infinite?</td>
+        <td>Affects bulk selection scope patterns</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
 
 ---
 
@@ -90,12 +118,34 @@ The container decision is independent of the surface. The same rules apply:
 
 Every surface needs a way to open a read view. Decide:
 
-| Surface characteristic | Read trigger |
-|---|---|
-| Items are clickable regions (cards, nodes, markers) | Click/tap the item |
-| Items are rows/lines (table, list, timeline entries) | Click the row |
-| Items overlap or are small (map pins, dense graph nodes) | Click to select → popover with "Open" |
-| Items are editable in-place (cells, inline fields) | Explicit "View" action (not click — that's edit) |
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Surface characteristic</th>
+        <th className="text-left">Read trigger</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Items are clickable regions (cards, nodes, markers)</td>
+        <td>Click/tap the item</td>
+      </tr>
+      <tr>
+        <td>Items are rows/lines (table, list, timeline entries)</td>
+        <td>Click the row</td>
+      </tr>
+      <tr>
+        <td>Items overlap or are small (map pins, dense graph nodes)</td>
+        <td>Click to select → popover with "Open"</td>
+      </tr>
+      <tr>
+        <td>Items are editable in-place (cells, inline fields)</td>
+        <td>Explicit "View" action (not click — that's edit)</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
 
 The key conflict to avoid: **click-to-read vs. click-to-edit**. If the surface is
 editable, these two gestures must be disambiguated. The safest solution is an
@@ -139,11 +189,60 @@ to verify nothing was missed.
 
 ## Common novel surfaces — quick guidance
 
-| Surface | Create anchor | Read trigger | Item actions | Bulk mechanism |
-|---|---|---|---|---|
-| Map | Floating button or toolbar | Click marker → popover | Popover actions | Lasso select + bar |
-| Graph/network | Toolbar or right-click canvas | Click node | Node popover or context menu | Multi-select (shift+click or lasso) + bar |
-| Timeline | Click empty slot (scoped to time) | Click entry | Entry popover | Range select + bar |
-| Calendar | Click empty cell (scoped to date) | Click event | Event popover | Multi-select + bar |
-| Tree/hierarchy | Toolbar or node context menu | Click node to expand/open | Node inline or context menu | Checkbox per node + bar |
-| Kanban (reference) | Lane "Add" button (scoped to state) | Click card | Card read overlay | Checkbox select + bar |
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Surface</th>
+        <th className="text-left">Create anchor</th>
+        <th className="text-left">Read trigger</th>
+        <th className="text-left">Item actions</th>
+        <th className="text-left">Bulk mechanism</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Map</td>
+        <td>Floating button or toolbar</td>
+        <td>Click marker → popover</td>
+        <td>Popover actions</td>
+        <td>Lasso select + bar</td>
+      </tr>
+      <tr>
+        <td>Graph/network</td>
+        <td>Toolbar or right-click canvas</td>
+        <td>Click node</td>
+        <td>Node popover or context menu</td>
+        <td>Multi-select (shift+click or lasso) + bar</td>
+      </tr>
+      <tr>
+        <td>Timeline</td>
+        <td>Click empty slot (scoped to time)</td>
+        <td>Click entry</td>
+        <td>Entry popover</td>
+        <td>Range select + bar</td>
+      </tr>
+      <tr>
+        <td>Calendar</td>
+        <td>Click empty cell (scoped to date)</td>
+        <td>Click event</td>
+        <td>Event popover</td>
+        <td>Multi-select + bar</td>
+      </tr>
+      <tr>
+        <td>Tree/hierarchy</td>
+        <td>Toolbar or node context menu</td>
+        <td>Click node to expand/open</td>
+        <td>Node inline or context menu</td>
+        <td>Checkbox per node + bar</td>
+      </tr>
+      <tr>
+        <td>Kanban (reference)</td>
+        <td>Lane "Add" button (scoped to state)</td>
+        <td>Click card</td>
+        <td>Card read overlay</td>
+        <td>Checkbox select + bar</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
