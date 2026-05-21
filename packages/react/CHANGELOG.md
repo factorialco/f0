@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.14.4](https://github.com/factorialco/f0/compare/f0-react-v2.14.3...f0-react-v2.14.4) (2026-05-21)
+
+
+### Bug Fixes
+
+* reset to default button behavior in data collection ([#4213](https://github.com/factorialco/f0/issues/4213)) ([8783bd2](https://github.com/factorialco/f0/commit/8783bd28103ed6be06d2c1698d60218a28da3c66))
+
 ## [2.14.3](https://github.com/factorialco/f0/compare/f0-react-v2.14.2...f0-react-v2.14.3) (2026-05-21)
 
 
