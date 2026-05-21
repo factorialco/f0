@@ -46,7 +46,6 @@ const DEFAULT_NODE_SEP = 40
 const DEFAULT_ROOT_SEP = 80
 
 interface UseLayoutEngineOptions {
-  direction?: LayoutDirection
   nodeWidth?: number
   nodeHeight?: number
   rankSep?: number
@@ -71,7 +70,6 @@ interface UseLayoutEngineOptions {
 export function useLayoutEngine(
   options?: UseLayoutEngineOptions
 ): LayoutEngine {
-  const direction = options?.direction ?? "TB"
   const nodeWidth = options?.nodeWidth ?? DEFAULT_NODE_WIDTH
   const nodeHeight = options?.nodeHeight ?? DEFAULT_NODE_HEIGHT
   const rankSep = options?.rankSep ?? DEFAULT_RANK_SEP
@@ -97,7 +95,7 @@ export function useLayoutEngine(
         )
       },
     }),
-    [direction, nodeWidth, nodeHeight, rankSep, nodeSep, rootSep]
+    [nodeWidth, nodeHeight, rankSep, nodeSep, rootSep]
   )
 }
 
@@ -170,7 +168,9 @@ function computeTreeLayout(
 
   // Cross axis = sibling spread (X for TB/BT, Y for LR/RL)
   // Main axis  = depth         (Y for TB/BT, X for LR/RL)
-  const mainStep = nodeHeight + rankSep // distance between rank centers
+  const mainSize = isHorizontal ? nodeWidth : nodeHeight
+  const crossSize = isHorizontal ? nodeHeight : nodeWidth
+  const mainStep = mainSize + rankSep // distance between rank centers
   const subtreeGap = nodeSep * 2 // gap between subtrees of different parents
 
   type LayoutPos = { cross: number; depth: number }
@@ -186,9 +186,9 @@ function computeTreeLayout(
     const children = childrenMap.get(nodeId) ?? []
 
     if (children.length === 0) {
-      const center = crossStart + nodeWidth / 2
+      const center = crossStart + crossSize / 2
       positions.set(nodeId, { cross: center, depth })
-      return { crossEnd: crossStart + nodeWidth, centerCross: center }
+      return { crossEnd: crossStart + crossSize, centerCross: center }
     }
 
     let cursor = crossStart
@@ -211,8 +211,8 @@ function computeTreeLayout(
     // Guarantee the parent doesn't visually overflow its subtree.
     // If the children span is narrower than the parent itself (single
     // child), expand the subtree to fit the parent centered.
-    const parentLeft = center - nodeWidth / 2
-    const parentRight = center + nodeWidth / 2
+    const parentLeft = center - crossSize / 2
+    const parentRight = center + crossSize / 2
     let actualEnd = subtreeEnd
     if (parentLeft < crossStart) {
       const shift = crossStart - parentLeft
@@ -260,8 +260,8 @@ function computeTreeLayout(
     const walk = (nodeId: string) => {
       const pos = positions.get(nodeId)
       if (pos) {
-        const left = pos.cross - nodeWidth / 2
-        const right = pos.cross + nodeWidth / 2
+        const left = pos.cross - crossSize / 2
+        const right = pos.cross + crossSize / 2
         if (left < minCross) minCross = left
         if (right > maxCross) maxCross = right
       }
@@ -308,9 +308,9 @@ function computeTreeLayout(
     const cross = pos?.cross ?? 0
     const depth = pos?.depth ?? 0
 
-    let mainCenter = depth * mainStep + nodeHeight / 2
+    let mainCenter = depth * mainStep + mainSize / 2
     if (flipMain) {
-      mainCenter = (maxDepth - depth) * mainStep + nodeHeight / 2
+      mainCenter = (maxDepth - depth) * mainStep + mainSize / 2
     }
 
     const centerX = isHorizontal ? mainCenter : cross

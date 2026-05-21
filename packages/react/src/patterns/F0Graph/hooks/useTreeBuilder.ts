@@ -139,6 +139,16 @@ function buildTree<T>(nodes: GraphNode<T>[]): TreeBuilderResult<T> {
     detectCycles(root)
   }
 
+  // Step 4b: Catch any remaining nodes never reached from a root.
+  //          Pure cycles with no `parentId === null` entry (e.g. A→B→C→A) leave
+  //          `roots` empty, so the previous loop never visits them. Iterate
+  //          every node still unvisited to flag those cycles too.
+  for (const treeNode of nodeMap.values()) {
+    if (!visited.has(treeNode.id)) {
+      detectCycles(treeNode)
+    }
+  }
+
   // Step 5: Compute depths via BFS
   function setDepths(node: TreeNode<T>, depth: number): void {
     node.depth = depth

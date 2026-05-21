@@ -24,8 +24,8 @@ import {
   memo,
 } from "react"
 
-import { cn } from "@/lib/utils"
 import { useI18n } from "@/lib/providers/i18n"
+import { cn } from "@/lib/utils"
 
 import type {
   F0GraphNodeTagType,
@@ -935,7 +935,6 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     (nodeHeightProp ?? 56) + (tagsAffectLayout ? TAG_ROW_HEIGHT : 0)
 
   const builtInEngine = useLayoutEngine({
-    direction,
     nodeWidth: nodeWidthProp,
     nodeHeight: effectiveNodeHeight,
   })
