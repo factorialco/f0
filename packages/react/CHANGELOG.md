@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.14.0](https://github.com/factorialco/f0/compare/f0-react-v2.13.1...f0-react-v2.14.0) (2026-05-21)
+
+
+### Features
+
+* **F0AiChat/dashboard:** forward per-column info as header tooltip ([#4154](https://github.com/factorialco/f0/issues/4154)) ([2d8f5d4](https://github.com/factorialco/f0/commit/2d8f5d40c99caaa6c3acd8b85e9efcd9201dafb6))
+
 ## [2.13.1](https://github.com/factorialco/f0/compare/f0-react-v2.13.0...f0-react-v2.13.1) (2026-05-21)
 
 
