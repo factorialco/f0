@@ -70,6 +70,7 @@ function CardAlertHeader({
   icon,
   dismissible = false,
   onDismiss,
+  action,
 }: CardAlertProps) {
   const { actions } = useI18n()
   const alertRole =
@@ -97,16 +98,27 @@ function CardAlertHeader({
         {title}
       </span>
 
-      {dismissible && (
+      {action ? (
         <F0Button
-          icon={Cross}
-          label={actions.close}
-          hideLabel
-          variant="ghost"
-          size="md"
-          onClick={onDismiss}
+          label={action.label}
+          variant="outline"
+          size="sm"
+          onClick={action.onClick}
+          disabled={action.disabled}
           type="button"
         />
+      ) : (
+        dismissible && (
+          <F0Button
+            icon={Cross}
+            label={actions.close}
+            hideLabel
+            variant="ghost"
+            size="md"
+            onClick={onDismiss}
+            type="button"
+          />
+        )
       )}
     </div>
   )

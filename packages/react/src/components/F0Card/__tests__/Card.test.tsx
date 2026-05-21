@@ -285,5 +285,73 @@ describe("F0Card Component", () => {
       await user.click(screen.getByRole("button", { name: /close/i }))
       expect(onDismiss).toHaveBeenCalledTimes(1)
     })
+
+    it("renders action button when action is provided", () => {
+      const onClick = vi.fn()
+      render(
+        <F0Card
+          title="Card"
+          alert={{
+            variant: "info",
+            title: "Info alert",
+            action: { label: "Retry", onClick },
+          }}
+        />
+      )
+
+      expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument()
+    })
+
+    it("calls action.onClick when the action button is clicked", async () => {
+      const user = userEvent.setup()
+      const onClick = vi.fn()
+
+      render(
+        <F0Card
+          title="Card"
+          alert={{
+            variant: "warning",
+            title: "Warning alert",
+            action: { label: "Fix it", onClick },
+          }}
+        />
+      )
+
+      await user.click(screen.getByRole("button", { name: "Fix it" }))
+      expect(onClick).toHaveBeenCalledTimes(1)
+    })
+
+    it("does not render dismiss button when action is provided", () => {
+      const onClick = vi.fn()
+      render(
+        <F0Card
+          title="Card"
+          alert={{
+            variant: "info",
+            title: "Info alert",
+            action: { label: "Act", onClick },
+          }}
+        />
+      )
+
+      expect(
+        screen.queryByRole("button", { name: /close/i })
+      ).not.toBeInTheDocument()
+    })
+
+    it("renders a disabled action button when action.disabled is true", () => {
+      render(
+        <F0Card
+          title="Card"
+          alert={{
+            variant: "info",
+            title: "Info alert",
+            action: { label: "Disabled", onClick: vi.fn(), disabled: true },
+          }}
+        />
+      )
+
+      expect(screen.getByRole("button", { name: "Disabled" })).toBeDisabled()
+    })
   })
 })

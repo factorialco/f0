@@ -702,6 +702,39 @@ export const WithDismissibleAlert: Story = {
   },
 }
 
+export const WithAlertAction: Story = {
+  render: (args) => {
+    const [actioned, setActioned] = useState(false)
+    return (
+      <div className="flex flex-col gap-3">
+        <F0Card
+          {...args}
+          alert={{
+            variant: "warning",
+            title: "Contract requires attention",
+            action: {
+              label: actioned ? "Done" : "Review",
+              onClick: () => setActioned(true),
+              disabled: actioned,
+            },
+          }}
+        />
+        {actioned && (
+          <button
+            className="self-start text-sm text-f1-foreground-secondary underline"
+            onClick={() => setActioned(false)}
+          >
+            Reset action
+          </button>
+        )}
+      </div>
+    )
+  },
+  args: {
+    ...Default.args,
+  },
+}
+
 export const AlertVariants: Story = {
   parameters: {
     docs: {
@@ -753,6 +786,14 @@ export const Snapshot: Story = {
       <F0Card
         {...Default.args}
         alert={{ variant: "positive", title: "Positive alert" }}
+      />
+      <F0Card
+        {...Default.args}
+        alert={{
+          variant: "warning",
+          title: "Contract requires attention",
+          action: { label: "Review", onClick: () => {} },
+        }}
       />
     </div>
   ),
