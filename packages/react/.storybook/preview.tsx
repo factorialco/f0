@@ -210,6 +210,19 @@ const preview: Preview = {
           return isAFoundation ? -1 : 1
         }
 
+        const graphOrder = [
+          "Graph/F0Graph",
+          "Graph/F0GraphNode",
+          "Graph/F0GraphEdge",
+          "Graph/F0GraphControls",
+        ]
+        const aGraphIndex = graphOrder.indexOf(a.title)
+        const bGraphIndex = graphOrder.indexOf(b.title)
+        if (aGraphIndex !== -1 && bGraphIndex !== -1)
+          return aGraphIndex - bGraphIndex
+        if (aGraphIndex !== -1) return -1
+        if (bGraphIndex !== -1) return 1
+
         return a.title.localeCompare(b.title)
       },
     },

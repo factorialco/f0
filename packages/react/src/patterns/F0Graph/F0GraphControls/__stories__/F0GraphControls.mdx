@@ -1,0 +1,90 @@
+import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
+
+import * as Stories from "./F0GraphControls.stories"
+
+<Meta of={Stories} />
+
+# F0GraphControls
+
+A floating toolbar that provides zoom and viewport controls for the graph
+canvas, plus an optional "Find me" shortcut for centering on the current
+user's node and a metadata-visibility popover for toggling node tag
+types.
+
+---
+
+# Overview
+
+F0GraphControls is rendered automatically by `<F0Graph>` when
+`showControls={true}`. It can also be used standalone for custom graph
+implementations that need a consistent control surface.
+
+The story below renders `<F0Graph>` with every available control
+enabled — Find me, fit-to-view, and the metadata-visibility popover —
+so the toolbar is shown in its fully-loaded state.
+
+<Canvas of={Stories.Default} />
+<Controls of={Stories.Default} />
+
+---
+
+# Behavior
+
+- **Find me** — appears when `onFocusUser` is provided. Pass
+  `currentUserNodeId` to `<F0Graph>` to enable this button automatically.
+- **Fit to view** — always rendered.
+- **Metadata visibility** — appears when `tagTypes.length > 0` and
+  `onToggleTagType` is provided. The popover lists each tag type with a
+  toggle switch bound to `visibleTagTypes`. If `tagTypes` is empty (or
+  omitted), or `onToggleTagType` is not provided, the metadata popover
+  button is hidden.
+
+---
+
+# Props
+
+| Prop              | Type                                          | Default | Description                                                                                                          |
+| ----------------- | --------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------- |
+| `onZoomIn`        | `() => void`                                  | —       | Callback for zoom-in button                                                                                          |
+| `onZoomOut`       | `() => void`                                  | —       | Callback for zoom-out button                                                                                         |
+| `onFitView`       | `() => void`                                  | —       | Callback for fit-to-view button                                                                                      |
+| `onFocusUser`     | `() => void`                                  | —       | Callback for the Find me button. Button is hidden if omitted.                                                        |
+| `tagTypes`        | `ReadonlyArray<F0GraphNodeTagType>`           | —       | Tag types to expose in the metadata-visibility popover. When omitted (or empty), the popover button is not rendered. |
+| `visibleTagTypes` | `ReadonlySet<F0GraphNodeTagType>`             | —       | Currently visible tag types (set form). Required when `tagTypes` is set.                                             |
+| `onToggleTagType` | `(type: F0GraphNodeTagType) => void`          | —       | Callback when the user toggles a tag type in the popover.                                                            |
+| `tagTypeLabels`   | `Partial<Record<F0GraphNodeTagType, string>>` | —       | Friendly labels per tag type for the popover.                                                                        |
+| `labels`          | `F0GraphControlLabels`                        | —       | Override default English labels for controls (`zoomIn`, `zoomOut`, `fitView`, `findMe`, `metadataSettings`).         |
+
+### F0GraphControlLabels
+
+| Key                | Type     | Description                                                    |
+| ------------------ | -------- | -------------------------------------------------------------- |
+| `zoomIn`           | `string` | Label for zoom-in button                                       |
+| `zoomOut`          | `string` | Label for zoom-out button                                      |
+| `fitView`          | `string` | Label for fit-to-view button                                   |
+| `findMe`           | `string` | Label for the Find me button                                   |
+| `metadataSettings` | `string` | Aria label for the metadata-visibility popover trigger button. |
+
+---
+
+# Usage
+
+Most consumers never render `F0GraphControls` directly — pass
+`showControls` (and optionally `currentUserNodeId`) to `<F0Graph>`
+instead. Use standalone only when building a custom graph canvas
+that needs the same control toolbar.
+
+```tsx
+import { F0GraphControls } from "@factorialco/f0-react"
+
+function Example() {
+  return (
+    <F0GraphControls
+      onZoomIn={handleZoomIn}
+      onZoomOut={handleZoomOut}
+      onFitView={handleFitView}
+      onFocusUser={handleFocusUser}
+    />
+  )
+}
+```

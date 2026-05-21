@@ -1,0 +1,86 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+
+import * as Stories from "./F0GraphEdge.stories"
+
+<Meta of={Stories} />
+
+# F0GraphEdge
+
+The default edge connector between nodes in F0Graph. Adapts its visual
+treatment based on the relationship context (highlighted, dimmed, or
+default).
+
+---
+
+# Overview
+
+F0GraphEdge is used internally by `<F0Graph>` for all edges
+unless a custom `renderEdge` is provided. It renders a smooth
+SVG path that stays visually quiet so nodes remain the primary
+focus.
+
+> When using `<F0Graph>`, you do NOT need to wrap with `ReactFlowProvider` — `F0Graph` mounts its own. The Storybook stories below use `ReactFlowProvider` only to render `F0GraphEdge` in isolation.
+
+<Canvas of={Stories.Status} />
+
+---
+
+# Variants
+
+All four variants shown side by side in the `Status` canvas above.
+
+## Default
+
+Standard low-contrast connector. Used for most parent–child
+relationships.
+
+## Hover
+
+Mid-contrast connector used when an interactive edge is hovered. Only
+applied to edges that opt in to interactivity via `onEdgeClick` or
+`onEdgeHover`.
+
+## Highlighted
+
+Accent-colored edge drawn when the connected node is selected
+or hovered. Draws attention to the specific relationship.
+
+## Dimmed
+
+Reduced-opacity edge used to de-emphasize non-relevant
+relationships during selection or search.
+
+---
+
+# Props
+
+| Prop          | Type                                                | Default        | Description                                   |
+| ------------- | --------------------------------------------------- | -------------- | --------------------------------------------- |
+| `type`        | `"smoothstep" \| "straight" \| "bezier"`            | `"smoothstep"` | Edge path rendering algorithm                 |
+| `variant`     | `"default" \| "hover" \| "highlighted" \| "dimmed"` | `"default"`    | Visual treatment                              |
+| `strokeWidth` | `number`                                            | —              | Stroke width (adjusts with zoom when omitted) |
+
+---
+
+# Usage
+
+Most consumers never render `F0GraphEdge` directly — F0Graph
+handles edge rendering internally. Use `renderEdge` on
+`<F0Graph>` only when the relationship itself carries semantic
+meaning (e.g. dotted-line managers, team color coding).
+
+```tsx
+import { F0Graph, F0GraphEdge } from "@factorialco/f0-react"
+
+function Example() {
+  return (
+    <F0Graph
+      nodes={nodes}
+      renderNode={renderNode}
+      renderEdge={(edge, variant) => <F0GraphEdge variant={variant} />}
+    />
+  )
+}
+```
+
+> `renderEdge` receives the edge and its variant only — `F0Graph` computes the path. To customize geometry directly, drop down to xyflow's edge API.
