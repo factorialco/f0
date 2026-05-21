@@ -130,7 +130,7 @@ export type FormDefinitionItem = FieldItem | RowDefinition | SectionDefinition
 // ============================================================================
 
 /**
- * When to trigger and display validation errors
+ * When to trigger and display validation errors (does not apply with autosubmit)
  * - "on-blur": Errors appear when the user leaves a field (default)
  * - "on-change": Errors appear as the user types (real-time validation)
  * - "on-submit": Errors only appear after attempting to submit the form
@@ -216,11 +216,34 @@ interface F0FormActionBarSubmitConfig extends F0FormSubmitConfigBase {
 }
 
 /**
+ * Submit configuration for autosubmit type.
+ *
+ * Automatically submits the form after the user stops editing for `delay` ms.
+ * Validation runs on every debounced submit attempt; invalid forms surface
+ * errors and skip `onSubmit` (handled by react-hook-form).
+ */
+interface F0FormAutosubmitConfig extends F0FormSubmitConfigBase {
+  /** Type of submit UI (debounced auto-submit) */
+  type: "autosubmit"
+  /**
+   * Delay in ms between the last change and the auto-submit.
+   * @default 800
+   */
+  delay?: number
+  /**
+   * When true, hides the internal action bar (loading/success feedback).
+   * @default false
+   */
+  hideActionBar?: boolean
+}
+
+/**
  * Configuration for form submission behavior and appearance
  */
 export type F0FormSubmitConfig =
   | F0FormDefaultSubmitConfig
   | F0FormActionBarSubmitConfig
+  | F0FormAutosubmitConfig
 
 /**
  * Styling configuration for the form layout and appearance

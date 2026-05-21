@@ -69,14 +69,37 @@ export function CollectionItem<Filters extends FiltersDefinition>({
     order?: string[]
   }>()
 
-  // Columns as declared by the dashboard item. Stable w.r.t. user
-  // interactions — only re-computes when the item's schema changes.
-  const downloadableColumns = useMemo(
-    () =>
-      (item as unknown as { columns?: { id: string; label: string }[] })
-        .columns ?? [],
-    [item]
-  )
+  // Derive the column schema for the download from the item's table
+  // visualization (id/label/render). Collection items don't declare a separate
+  // `columns` list — the table viz is the source of truth, mirroring
+  // OneDataCollection's own `extractColumns` flow.
+  const downloadableColumns = useMemo(() => {
+    const tableViz = item.visualizations?.find(
+      (v) => (v as { type?: string })?.type === "table"
+    ) as
+      | {
+          options?: {
+            columns?: Array<{
+              id?: string
+              label?: string
+              render?: (item: RecordType) => unknown
+            }>
+          }
+        }
+      | undefined
+
+    return (tableViz?.options?.columns ?? [])
+      .filter(
+        (
+          c
+        ): c is {
+          id: string
+          label: string
+          render?: (i: RecordType) => unknown
+        } => typeof c?.id === "string" && typeof c?.label === "string"
+      )
+      .map((c) => ({ id: c.id, label: c.label, render: c.render }))
+  }, [item])
 
   const downloadActions = useCollectionDownloadActions({
     source: source as unknown as Parameters<

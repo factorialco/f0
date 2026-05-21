@@ -163,6 +163,31 @@ describe("Select", () => {
     expect(screen.getByText("Search options")).toBeInTheDocument()
   })
 
+  it("renders icon tags with text", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={[
+          {
+            value: "icon-tag-option",
+            label: "Icon tag option",
+            tag: {
+              type: "icon",
+              text: "System",
+              icon: Search,
+            },
+          },
+        ]}
+        onChange={() => {}}
+      />
+    )
+
+    await openSelect(user)
+
+    expect(screen.getByText("System")).toBeInTheDocument()
+  })
+
   it("filters options based on search input", async () => {
     const user = userEvent.setup()
     render(
@@ -424,6 +449,126 @@ describe("Select", () => {
     })
   })
 
+  it("defers onChange until apply when onApply is passed", async () => {
+    const handleChange = vi.fn()
+    const handleApply = vi.fn()
+    const user = userEvent.setup()
+
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        multiple
+        options={mockOptions}
+        value={[]}
+        onChange={handleChange}
+        onApply={handleApply}
+      />
+    )
+
+    await openSelect(user)
+    await user.click(screen.getByText("Option 1"))
+
+    expect(handleChange).not.toHaveBeenCalled()
+    expect(handleApply).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole("button", { name: "Apply selection" }))
+
+    await waitFor(() => {
+      expect(handleChange).toHaveBeenCalledWith(
+        ["option1"],
+        [
+          {
+            id: "option1",
+            name: "Option 1",
+            description: "Description 1",
+          },
+        ],
+        [
+          expect.objectContaining({
+            label: "Option 1",
+            value: "option1",
+            description: "Description 1",
+          }),
+        ]
+      )
+    })
+    expect(handleApply).toHaveBeenCalledTimes(1)
+  })
+
+  it("cancels staged multi-select changes on outside click when onApply is passed", async () => {
+    const handleChange = vi.fn()
+    const handleApply = vi.fn()
+    const user = userEvent.setup()
+
+    render(
+      <div>
+        <button type="button">Outside</button>
+        <F0Select
+          {...defaultSelectProps}
+          multiple
+          options={mockOptions}
+          value={["option1", "option2"]}
+          onChange={handleChange}
+          onApply={handleApply}
+        />
+      </div>
+    )
+
+    await openSelect(user)
+    await user.click(screen.getByText("Option 2"))
+    fireEvent.pointerDown(document.body)
+
+    await waitFor(() => {
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+    })
+
+    expect(handleChange).not.toHaveBeenCalled()
+    expect(handleApply).not.toHaveBeenCalled()
+
+    await openSelect(user)
+    await user.click(screen.getByText("Option 3"))
+    await user.click(screen.getByRole("button", { name: "Apply selection" }))
+
+    await waitFor(() => {
+      expect(handleChange).toHaveBeenCalledTimes(1)
+    })
+
+    expect(handleChange.mock.calls[0]?.[0]).toEqual(
+      expect.arrayContaining(["option1", "option2", "option3"])
+    )
+    expect(handleApply).toHaveBeenCalledTimes(1)
+  })
+
+  it("cancels staged changes without closing when cancel button is clicked", async () => {
+    const handleChange = vi.fn()
+    const handleApply = vi.fn()
+    const user = userEvent.setup()
+
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        multiple
+        options={mockOptions}
+        value={["option1", "option2"]}
+        onChange={handleChange}
+        onApply={handleApply}
+      />
+    )
+
+    await openSelect(user)
+    await user.click(screen.getByText("Option 2"))
+    await user.click(screen.getByRole("button", { name: "Cancel" }))
+
+    expect(screen.getByRole("listbox")).toBeInTheDocument()
+    expect(handleChange).not.toHaveBeenCalled()
+    expect(handleApply).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole("button", { name: "Apply selection" }))
+
+    expect(handleChange).not.toHaveBeenCalled()
+    expect(handleApply).toHaveBeenCalledTimes(1)
+  })
+
   describe("asList mode", () => {
     it("preserves selection after searching and clicking an item", async () => {
       const handleChange = vi.fn()
@@ -635,6 +780,132 @@ describe("Select", () => {
       expect(screen.getByText("Bob")).toBeInTheDocument()
       // The other group remains collapsed
       expect(screen.queryByText("Carol")).not.toBeInTheDocument()
+    })
+  })
+
+  describe("onCreate", () => {
+    it("shows create button in empty state when search has text", async () => {
+      const user = userEvent.setup()
+      const handleCreate = vi.fn()
+
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          showSearchBox
+          onCreate={handleCreate}
+        />
+      )
+
+      await openSelect(user)
+
+      const searchInput = screen.getByRole("searchbox")
+      await user.type(searchInput, "nonexistent")
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", { name: /Create "nonexistent"/ })
+        ).toBeInTheDocument()
+      })
+    })
+
+    it("does not show create button when search is empty", async () => {
+      const user = userEvent.setup()
+      const handleCreate = vi.fn()
+
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={[]}
+          showSearchBox
+          onCreate={handleCreate}
+        />
+      )
+
+      await openSelect(user)
+
+      await waitFor(() => {
+        expect(
+          screen.queryByRole("button", { name: /Create/ })
+        ).not.toBeInTheDocument()
+      })
+    })
+
+    it("calls onCreate with search text when create button is clicked", async () => {
+      const user = userEvent.setup()
+      const handleCreate = vi.fn()
+
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          showSearchBox
+          onCreate={handleCreate}
+        />
+      )
+
+      await openSelect(user)
+
+      const searchInput = screen.getByRole("searchbox")
+      await user.type(searchInput, "new item")
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", { name: /Create "new item"/ })
+        ).toBeInTheDocument()
+      })
+
+      await user.click(
+        screen.getByRole("button", { name: /Create "new item"/ })
+      )
+
+      expect(handleCreate).toHaveBeenCalledWith("new item")
+    })
+
+    it("clears search after async onCreate resolves", async () => {
+      const user = userEvent.setup()
+      let resolveCreate: () => void
+      const handleCreate = vi.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveCreate = resolve
+          })
+      )
+
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          showSearchBox
+          onCreate={handleCreate}
+        />
+      )
+
+      await openSelect(user)
+
+      const searchInput = screen.getByRole("searchbox")
+      await user.type(searchInput, "new item")
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", { name: /Create "new item"/ })
+        ).toBeInTheDocument()
+      })
+
+      await user.click(
+        screen.getByRole("button", { name: /Create "new item"/ })
+      )
+
+      // Search should still show while promise is pending
+      expect(handleCreate).toHaveBeenCalledWith("new item")
+
+      // Resolve the promise
+      resolveCreate!()
+
+      // After resolution, search should be cleared
+      await waitFor(() => {
+        expect(searchInput).toHaveValue("")
+      })
     })
   })
 })

@@ -1,5 +1,89 @@
 # Changelog
 
+## [2.12.0](https://github.com/factorialco/f0/compare/f0-react-v2.11.1...f0-react-v2.12.0) (2026-05-20)
+
+
+### Features
+
+* **react:** allow hiding individual question actions in SurveyFormBuilder ([#4186](https://github.com/factorialco/f0/issues/4186)) ([fff84f2](https://github.com/factorialco/f0/commit/fff84f293c8f6aef84519f060bd02d4d688f10fc))
+
+## [2.11.1](https://github.com/factorialco/f0/compare/f0-react-v2.11.0...f0-react-v2.11.1) (2026-05-20)
+
+
+### Bug Fixes
+
+* always center SurveyAnsweringForm elements vertically ([#4178](https://github.com/factorialco/f0/issues/4178)) ([edda8b7](https://github.com/factorialco/f0/commit/edda8b7682403e729cdce01e4d2ea8158a60b7d3))
+
+## [2.11.0](https://github.com/factorialco/f0/compare/f0-react-v2.10.0...f0-react-v2.11.0) (2026-05-20)
+
+
+### Features
+
+* add option creation in select from dataset question type ([#4100](https://github.com/factorialco/f0/issues/4100)) ([2c34b02](https://github.com/factorialco/f0/commit/2c34b029e8b549b162e6a52cbb2d166d2bcb7da9))
+
+## [2.10.0](https://github.com/factorialco/f0/compare/f0-react-v2.9.0...f0-react-v2.10.0) (2026-05-20)
+
+
+### Features
+
+* **F0Card:** add alert prop with controlled visibility ([#4173](https://github.com/factorialco/f0/issues/4173)) ([093a2c1](https://github.com/factorialco/f0/commit/093a2c153e3080353a15c7da7a5bca61454d9162))
+
+## [2.9.0](https://github.com/factorialco/f0/compare/f0-react-v2.8.2...f0-react-v2.9.0) (2026-05-20)
+
+
+### Features
+
+* expose onApply and allow icon on tags ([#4134](https://github.com/factorialco/f0/issues/4134)) ([1cd5190](https://github.com/factorialco/f0/commit/1cd51905afb071240b90bf8e91df0673195da81b))
+
+## [2.8.2](https://github.com/factorialco/f0/compare/f0-react-v2.8.1...f0-react-v2.8.2) (2026-05-19)
+
+
+### Bug Fixes
+
+* **F0AnalyticsDashboard:** restore Excel/CSV download for collection items ([#4171](https://github.com/factorialco/f0/issues/4171)) ([da0401f](https://github.com/factorialco/f0/commit/da0401feb6532cc6ce2a3037c0c5607dd55f54fc))
+
+## [2.8.1](https://github.com/factorialco/f0/compare/f0-react-v2.8.0...f0-react-v2.8.1) (2026-05-19)
+
+
+### Bug Fixes
+
+* disable scroll lock for Select inside dialogs to prevent pointer-events stuck on body ([#4167](https://github.com/factorialco/f0/issues/4167)) ([748c47f](https://github.com/factorialco/f0/commit/748c47f2fa71a010a2b3be3a56b152e03172b5de))
+
+## [2.8.0](https://github.com/factorialco/f0/compare/f0-react-v2.7.0...f0-react-v2.8.0) (2026-05-18)
+
+
+### Features
+
+* **community:** make post descriptions expandable ([#4152](https://github.com/factorialco/f0/issues/4152)) ([5441a19](https://github.com/factorialco/f0/commit/5441a197cb1dc6790eb07c764e1057f8f50f26e2))
+
+## [2.7.0](https://github.com/factorialco/f0/compare/f0-react-v2.6.2...f0-react-v2.7.0) (2026-05-18)
+
+
+### Features
+
+* **F0Form:** add autosubmit submit type with focus preservation ([#4159](https://github.com/factorialco/f0/issues/4159)) ([a1a15b1](https://github.com/factorialco/f0/commit/a1a15b1b25d7fb8aef3254083d19bb0b3f712d7b))
+
+## [2.6.2](https://github.com/factorialco/f0/compare/f0-react-v2.6.1...f0-react-v2.6.2) (2026-05-18)
+
+
+### Bug Fixes
+
+* **ai:** render custom placeholder when placeholders array has single element ([#4156](https://github.com/factorialco/f0/issues/4156)) ([007852a](https://github.com/factorialco/f0/commit/007852af3b01627a2b289bfa5f164d4797287ae6))
+
+## [2.6.1](https://github.com/factorialco/f0/compare/f0-react-v2.6.0...f0-react-v2.6.1) (2026-05-18)
+
+
+### Bug Fixes
+
+* **kanban:** optimize lane updates ([#4131](https://github.com/factorialco/f0/issues/4131)) ([1ff4e8a](https://github.com/factorialco/f0/commit/1ff4e8af7db85831360c598166f49d18cbf3a5d4))
+
+## [2.6.0](https://github.com/factorialco/f0/compare/f0-react-v2.5.0...f0-react-v2.6.0) (2026-05-15)
+
+
+### Features
+
+* **OneDataCollection:** add loading/success/error status for bulk actions ([#4037](https://github.com/factorialco/f0/issues/4037)) ([64e0d35](https://github.com/factorialco/f0/commit/64e0d355b79f9c4a1cf78dece99c7e319060b8ca))
+
 ## [2.5.0](https://github.com/factorialco/f0/compare/f0-react-v2.4.1...f0-react-v2.5.0) (2026-05-15)
 
 
