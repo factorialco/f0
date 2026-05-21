@@ -3,7 +3,10 @@ import {
   DatePickerPopupProps,
   DatePickerValue as DatePickerPopupValue,
 } from "@/ui/DatePickerPopup"
-import { INPUTFIELD_SIZES, InputFieldProps } from "@/ui/InputField/InputField"
+import {
+  INPUTFIELD_SIZES,
+  InputFieldProps,
+} from "@/components/InputField/InputField"
 
 import { InputFieldInheritedProps } from "./types.internal"
 

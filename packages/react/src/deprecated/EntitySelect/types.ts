@@ -1,6 +1,6 @@
 import { PopoverProps } from "@radix-ui/react-popover"
 
-import { InputFieldProps } from "@/ui/InputField"
+import { InputFieldProps } from "@/components/InputField"
 
 import { Action } from "@/components/F0Select/components/SelectBottomActions"
 

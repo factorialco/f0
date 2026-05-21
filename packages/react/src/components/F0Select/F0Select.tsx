@@ -35,9 +35,9 @@ import { useI18n } from "@/lib/providers/i18n"
 import { toArray } from "@/lib/toArray"
 import { cn } from "@/lib/utils"
 import { GroupHeader } from "@/ui/GroupHeader/index"
-import { InputField } from "@/ui/InputField"
-import { InputMessages } from "@/ui/InputField/components/InputMessages"
-import { Label } from "@/ui/InputField/components/Label"
+import { InputField } from "@/components/InputField"
+import { InputMessages } from "@/components/InputField/components/InputMessages"
+import { Label } from "@/components/InputField/components/Label"
 import {
   SelectContent,
   Select as SelectPrimitive,

@@ -2,7 +2,7 @@ import type { ControllerRenderProps, FieldValues } from "react-hook-form"
 
 import { useId } from "react"
 
-import { InputMessages } from "@/ui/InputField/components/InputMessages"
+import { InputMessages } from "@/components/InputField/components/InputMessages"
 
 import type { F0FormFieldProps } from "./types"
 

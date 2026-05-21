@@ -1,6 +1,6 @@
 import type { InitialFile } from "@/patterns/F0Form/fields/file/types"
 import type { F0Field, F0FileField } from "@/patterns/F0Form/fields/types"
-import type { InputFieldStatus } from "@/ui/InputField/types"
+import type { InputFieldStatus } from "@/components/InputField/types"
 
 /**
  * Standalone form field props — decoupled from react-hook-form.

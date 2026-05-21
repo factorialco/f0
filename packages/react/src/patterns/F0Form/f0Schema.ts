@@ -6,7 +6,7 @@ import type {
   DurationInputSize,
   DurationUnit,
 } from "@/components/F0DurationInput/types"
-import type { InputFieldStatus } from "@/ui/InputField/types"
+import type { InputFieldStatus } from "@/components/InputField/types"
 
 import type { F0CardSelectConfig } from "./fields/cardSelect/types"
 import type { F0CheckboxConfig } from "./fields/checkbox/types"

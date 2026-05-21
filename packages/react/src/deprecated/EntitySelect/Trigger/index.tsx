@@ -3,7 +3,7 @@ import { useMemo } from "react"
 import { Arrow } from "@/components/F0Select/components/Arrow"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn } from "@/lib/utils"
-import { InputField, InputFieldProps } from "@/ui/InputField"
+import { InputField, InputFieldProps } from "@/components/InputField"
 
 import {
   EntitySelectEntity,

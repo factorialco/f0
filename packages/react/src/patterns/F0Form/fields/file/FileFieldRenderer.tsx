@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
-import type { InputFieldStatusType } from "@/ui/InputField/types"
+import type { InputFieldStatusType } from "@/components/InputField/types"
 
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { F0Icon } from "@/components/F0Icon"
