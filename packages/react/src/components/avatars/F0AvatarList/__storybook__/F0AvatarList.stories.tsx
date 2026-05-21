@@ -252,6 +252,77 @@ export const WithRemainingCount: Story = {
   },
 }
 
+const personEmails = [
+  "nik.lopin@factorial.co",
+  "josepjaume.rey@factorial.co",
+  "saul.dominguez@factorial.co",
+  "dani.moreno@factorial.co",
+  "hellen.fernandez@factorial.co",
+]
+
+function getDummyPeopleWithDescriptions(count: number) {
+  return getDummyAvatars(count, "person").map((avatar, index) => ({
+    ...avatar,
+    tooltipDescription: personEmails[index % personEmails.length],
+  }))
+}
+
+/**
+ * Avatars can carry a `tooltipDescription` (e.g. an email or role) that is
+ * rendered as the secondary line of the per-avatar tooltip. Hover any avatar
+ * to see the description.
+ */
+export const WithTooltipDescription: Story = {
+  args: {
+    ...Default.args,
+    type: "person",
+    avatars: getDummyPeopleWithDescriptions(3),
+  },
+}
+
+/**
+ * When `tooltipDescription` is present on overflowed avatars, the `+N` hover
+ * popover renders the description as a secondary line under each name.
+ * Default `tooltipScroll="vertical"` caps the popover height and scrolls.
+ */
+export const OverflowPopoverWithDescriptions: Story = {
+  args: {
+    ...Default.args,
+    type: "person",
+    avatars: getDummyPeopleWithDescriptions(15),
+    max: 3,
+  },
+}
+
+/**
+ * `tooltipScroll="none"` removes the popover height cap and lets it grow with
+ * its content. Useful for short lists where scrolling is unnecessary.
+ */
+export const OverflowPopoverNoScroll: Story = {
+  args: {
+    ...Default.args,
+    type: "person",
+    avatars: getDummyPeopleWithDescriptions(6),
+    max: 3,
+    tooltipScroll: "none",
+  },
+}
+
+/**
+ * `tooltipDescriptionFontColor` applies a custom CSS color to the text inside
+ * the `+N` overflow popover (both names and descriptions). Accepts any CSS
+ * color including design tokens (e.g. `"var(--f1-foreground-secondary)"`).
+ */
+export const OverflowPopoverCustomFontColor: Story = {
+  args: {
+    ...Default.args,
+    type: "person",
+    avatars: getDummyPeopleWithDescriptions(8),
+    max: 3,
+    tooltipDescriptionFontColor: "var(--f1-foreground-secondary)",
+  },
+}
+
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: () => (

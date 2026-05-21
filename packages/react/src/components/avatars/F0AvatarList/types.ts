@@ -22,8 +22,7 @@ export type F0AvatarListExtras = {
 export type F0AvatarListPropsAvatars =
   | {
       type: "person"
-      avatars: // Allow to have more properties in the avatar variant
-      (Omit<PersonAvatarVariant, "type"> &
+      avatars: (Omit<PersonAvatarVariant, "type"> & // Allow to have more properties in the avatar variant
         F0AvatarListExtras &
         Record<string, unknown>)[]
     }
@@ -84,4 +83,21 @@ export type F0AvatarListProps = {
    * @default "compact"
    */
   layout?: "fill" | "compact"
+
+  /**
+   * Controls the scroll behavior of the `+N` overflow popover that lists
+   * collapsed avatars (including their `tooltipDescription` entries).
+   * - `"vertical"` (default): caps the popover height and scrolls vertically.
+   * - `"none"`: lets the popover grow to fit all entries.
+   * @default "vertical"
+   */
+  tooltipScroll?: "vertical" | "none"
+
+  /**
+   * Optional CSS color applied to the text inside the `+N` overflow popover
+   * (names and `tooltipDescription` lines). Accepts any CSS color string,
+   * including design tokens (e.g. `"var(--f1-foreground-secondary)"`). When
+   * omitted, text inherits the surrounding foreground color.
+   */
+  tooltipDescriptionFontColor?: string
 } & F0AvatarListPropsAvatars
