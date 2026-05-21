@@ -18,8 +18,6 @@ For numeric data use [F0NumberInput](?path=/docs/components-inputs-number-input-
 
 <Canvas of={Stories.Primary} />
 
-`F0TextInput` renders an `F0InputField` and inherits all of its chrome (label, hint, status, sizes, clearable, max length, leading icon, hide-label, transparent, autofill). See [F0InputField > Anatomy](?path=/docs/components-primitives-f0inputfield--documentation) for the visual reference.
-
 <Controls of={Stories.Primary} />
 
 ---
@@ -46,8 +44,6 @@ For numeric data use [F0NumberInput](?path=/docs/components-inputs-number-input-
 
 ## Behavior
 
-What `F0TextInput` adds on top of F0InputField.
-
 ### Type
 
 `type` accepts every native HTML input type **except `"number"`**, which is intentionally blocked at the type level — for numeric data use `F0NumberInput`. Common values: `"text"` (default), `"email"`, `"password"`, `"url"`, `"tel"`.
@@ -60,7 +56,7 @@ When `type="password"`:
 
 - A lock icon replaces any `icon` prop.
 - A trailing eye-toggle button appears, with i18n labels ("Show password" / "Hide password"), to flip between masked and visible text.
-- The toggle is built on top of `F0InputField`'s `buttonToggle`, which becomes private here — consumers cannot override it while in password mode.
+- The `buttonToggle` prop becomes private — consumers cannot override the eye toggle while in password mode.
 
 <Canvas of={Stories.Password} />
 
@@ -72,7 +68,7 @@ When `type="password"`:
 
 ## Props
 
-`F0TextInput` accepts the entire [F0InputField](?path=/docs/components-primitives-f0inputfield--documentation) prop set, minus `buttonToggle` (private when `type="password"`). The text-specific additions are listed below.
+The text-specific props are listed below. All other props (label, hint, status, error, size, clearable, maxLength, icon, hideLabel, autocomplete, transparent, loading, value, onChange, onBlur, name, required, disabled, autoFocus) come from [F0InputField](?path=/docs/components-primitives-f0inputfield--documentation).
 
 ### Text behavior
 
@@ -113,7 +109,3 @@ When `type="password"`:
     </tbody>
   </table>
 </Unstyled>
-
-### Inherited from F0InputField
-
-For the full list (label, hint, status, error, size, clearable, maxLength, icon, hideLabel, autocomplete, transparent, loading, value, onChange, onBlur, name, required, disabled, autoFocus) see [F0InputField > Props](?path=/docs/components-primitives-f0inputfield--documentation).

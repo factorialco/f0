@@ -6,9 +6,7 @@ import * as Stories from "./F0NumberInput.stories"
 
 # F0NumberInput
 
-`F0NumberInput` is the writable numeric field for forms — a single-line input where the user types a number, with locale-aware formatting, optional min/max clamping, an optional stepper, and an optional units suffix.
-
-It shares the chrome conventions (sizes, focus ring, status colors, label/hint/error wiring) of every F0 writable input — see [F0InputField](?path=/docs/components-primitives-f0inputfield--documentation) for the chrome reference.
+`F0NumberInput` is the writable numeric field for forms — a single-line input where the user types a number, with locale-aware formatting, optional min/max clamping, an optional stepper, and an optional units suffix. It builds on [F0InputField](?path=/docs/components-primitives-f0inputfield--documentation) and adds numeric value model, locale handling, decimals, min/max clamping, stepper and units.
 
 ---
 
@@ -21,7 +19,7 @@ It shares the chrome conventions (sizes, focus ring, status colors, label/hint/e
 - **Input area**: where the user types. Optionally accompanied by a stepper and/or a units suffix.
 - **Units suffix** _(optional)_: read-only label rendered at the end of the input (e.g. `EUR`, `%`, `kg`) when `units` is set.
 - **Stepper arrows** _(optional)_: increment/decrement buttons rendered when `step` is set; respect `min`/`max`.
-- **Label, hint, status message**: chrome inherited from [F0InputField](?path=/docs/components-primitives-f0inputfield--documentation).
+- **Label, hint, status message**: standard input chrome.
 
 <Controls of={Stories.Primary} />
 

@@ -16,8 +16,6 @@ import * as Stories from "./F0TextAreaInput.stories"
 
 <Canvas of={Stories.Default} />
 
-`F0TextAreaInput` renders an `F0InputField` and inherits all of its chrome (label, hint, status, sizes, clearable, max length, leading icon, hide-label). See [F0InputField > Anatomy](?path=/docs/components-primitives-f0inputfield--documentation) for the visual reference.
-
 <Controls of={Stories.Default} />
 
 ---
@@ -40,8 +38,6 @@ import * as Stories from "./F0TextAreaInput.stories"
 
 ## Behavior
 
-What `F0TextAreaInput` adds on top of F0InputField.
-
 ### Auto-grow
 
 The textarea grows in height as the user types, never forcing the user to scroll inside a tiny box. It starts at `rows` lines tall (defaults to 2) and expands until it hits `maxHeight` (in pixels), at which point an inner scrollbar appears.
@@ -58,7 +54,7 @@ The textarea grows in height as the user types, never forcing the user to scroll
 
 ## Props
 
-`F0TextAreaInput` accepts the entire [F0InputField](?path=/docs/components-primitives-f0inputfield--documentation) prop set. The textarea-specific additions are listed below.
+The textarea-specific props are listed below. All other props (label, hint, status, error, size, clearable, maxLength, icon, hideLabel, value, onChange, onBlur, onFocus, name, required, disabled, loading, placeholder) come from [F0InputField](?path=/docs/components-primitives-f0inputfield--documentation).
 
 ### Textarea behavior
 
@@ -108,7 +104,3 @@ The textarea grows in height as the user types, never forcing the user to scroll
     </tbody>
   </table>
 </Unstyled>
-
-### Inherited from F0InputField
-
-For the full list (label, hint, status, error, size, clearable, maxLength, icon, hideLabel, value, onChange, onBlur, onFocus, name, required, disabled, loading, placeholder) see [F0InputField > Props](?path=/docs/components-primitives-f0inputfield--documentation).
