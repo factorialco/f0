@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-core",
-  "version": "1.50.3",
+  "version": "1.51.0",
   "description": "Core tokens and utilities for F0 Design System",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
