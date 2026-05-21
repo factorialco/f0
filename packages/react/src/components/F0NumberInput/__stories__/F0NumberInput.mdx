@@ -42,7 +42,7 @@ It shares the chrome conventions (sizes, focus ring, status colors, label/hint/e
 - The value is free-form text (names, codes, IDs that may include letters). Use [F0TextInput](?path=/docs/components-inputs-text-input--documentation).
 - The value is a duration in hours/minutes. Use [F0DurationInput](?path=/docs/components-inputs-duration-input--documentation).
 - The value is one of a small, discrete set of numbers (e.g. a 1–5 rating). Use a selector with the available options instead.
-- The value is a phone number, postal code, or credit card. Use [F0TextInput](?path=/docs/components-inputs-text-input--documentation) with the relevant `autocomplete` and `inputMode`.
+- The value is an identifier that happens to look numeric (phone, postal code, credit card). These are formatted strings, not quantities — leading zeros, spaces and country variants matter, and locale-aware formatting would corrupt them. Use [F0TextInput](?path=/docs/components-inputs-text-input--documentation) with the right `autocomplete` and `inputMode`.
 
 ---
 
