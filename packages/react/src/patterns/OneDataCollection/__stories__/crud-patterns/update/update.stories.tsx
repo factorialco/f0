@@ -498,25 +498,25 @@ function EditableTableInlineUpdateScenario() {
   )
 }
 
-export const Default: Story = {
+export const TableUpdateDialog: Story = {
   render: () => <UpdateWithSameFormScenario />,
 }
 
-export const RightPositionDialogForTable: Story = {
+export const TableUpdateRightDialog: Story = {
   render: () => <RightPositionDialogScenario />,
 }
 
-export const RightPositionDialogForList: Story = {
+export const ListUpdateRightDialog: Story = {
   render: () => (
     <RightPositionDialogScenario visualization={listVisualization} />
   ),
 }
 
-export const BulkUpdate: Story = {
+export const TableBulkUpdate: Story = {
   render: () => <BulkUpdateScenario />,
 }
 
-export const CardActionsUpdate: Story = {
+export const CardUpdateFromReadDialog: Story = {
   render: () => <CardActionsUpdateScenario />,
 }
 
@@ -524,6 +524,6 @@ export const KanbanBulkUpdate: Story = {
   render: () => <KanbanBulkUpdateScenario />,
 }
 
-export const EditableTableInlineUpdate: Story = {
+export const EditableTableUpdateInline: Story = {
   render: () => <EditableTableInlineUpdateScenario />,
 }

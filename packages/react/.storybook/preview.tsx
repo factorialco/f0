@@ -176,7 +176,7 @@ const preview: Preview = {
             "Data collection",
             [
               "CRUD patterns",
-              ["Overview", "Create", "Read", "Update", "Delete"],
+              ["Overview", "By view", "Create", "Read", "Update", "Delete"],
             ],
           ],
           "Kits",

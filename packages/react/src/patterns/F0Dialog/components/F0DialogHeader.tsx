@@ -6,6 +6,7 @@ import {
 import { BreadcrumbItem } from "@/experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbItem"
 import { Tabs } from "@/patterns/Navigation/Tabs"
 import CrossIcon from "@/icons/app/Cross"
+import { Ellipsis } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { BreadcrumbList } from "@/ui/breadcrumb"
@@ -59,7 +60,7 @@ export const F0DialogHeader = ({
       )
     }
 
-    return <DropdownInternal items={otherActions} />
+    return <DropdownInternal items={otherActions} icon={Ellipsis} />
   }
 
   const Module = () => {

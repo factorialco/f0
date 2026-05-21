@@ -163,7 +163,7 @@ export const kanbanSourceLanes = [
   { id: "complete", filters: { status: ["Complete"] } },
 ]
 
-const kanbanLaneStatus: Record<string, Resource["status"]> = {
+export const kanbanLaneStatus: Record<string, Resource["status"]> = {
   draft: "Draft",
   "needs-details": "Needs details",
   complete: "Complete",

@@ -16,6 +16,7 @@ import {
   defaultCrudSecondaryActions,
   editableTableVisualization,
   initialResources,
+  kanbanLaneStatus,
   kanbanSourceLanes,
   kanbanVisualization,
   Resource,
@@ -235,18 +236,12 @@ function KanbanLaneCreateScenario() {
             options: {
               ...kanbanVisualization.options,
               onCreate: (laneId) => {
-                const laneStatus: Record<string, Resource["status"]> = {
-                  draft: "Draft",
-                  "needs-details": "Needs details",
-                  complete: "Complete",
-                }
-
                 setResources([
                   {
                     id: `resource-${Date.now()}`,
-                    name: `New ${laneStatus[laneId] ?? "Draft"} resource`,
+                    name: `New ${kanbanLaneStatus[laneId] ?? "Draft"} resource`,
                     owner: "Alicia Keys",
-                    status: laneStatus[laneId] ?? "Draft",
+                    status: kanbanLaneStatus[laneId] ?? "Draft",
                     summary:
                       "Created from the lane where the resource belongs.",
                   },
@@ -312,22 +307,22 @@ function EditableTableAddRowScenario() {
   )
 }
 
-export const Default: Story = {
+export const TableCreateDialog: Story = {
   render: () => <DefaultDialogScenario />,
 }
 
-export const RightDialog: Story = {
+export const TableCreateRightDialog: Story = {
   render: () => <RightDialogScenario />,
 }
 
-export const WizardDialog: Story = {
+export const CreateWizardDialog: Story = {
   render: () => <WizardDialogScenario />,
 }
 
-export const KanbanLaneCreate: Story = {
+export const KanbanCreateLane: Story = {
   render: () => <KanbanLaneCreateScenario />,
 }
 
-export const EditableTableAddRow: Story = {
+export const EditableTableCreateRow: Story = {
   render: () => <EditableTableAddRowScenario />,
 }

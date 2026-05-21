@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
 
-import { Delete } from "@/icons/app"
+import { Delete, Files } from "@/icons/app"
 import { F0Text } from "@/components/F0Text"
 import { F0Dialog } from "@/patterns/F0Dialog"
 
@@ -11,6 +11,7 @@ import { OneDataCollection } from "../../../index"
 import {
   cardVisualization,
   createResourceDataAdapter,
+  CrudContentPlaceholder,
   CrudPatternLayout,
   defaultCrudPrimaryAction,
   defaultCrudSecondaryActions,
@@ -140,13 +141,9 @@ function TableBulkDeleteScenario() {
   )
 }
 
-function VisualizationDeleteScenario({
-  visualization,
-  description,
+function EditableTableDeleteScenario({
   actionType = "primary",
 }: {
-  visualization: typeof cardVisualization | typeof editableTableVisualization
-  description: string
   actionType?: "primary" | "secondary" | "other"
 }) {
   const [selectedResource, setSelectedResource] = useState<Resource | null>(
@@ -171,7 +168,10 @@ function VisualizationDeleteScenario({
 
   return (
     <CrudPatternLayout>
-      <OneDataCollection source={source} visualizations={[visualization]} />
+      <OneDataCollection
+        source={source}
+        visualizations={[editableTableVisualization]}
+      />
       <F0Dialog
         isOpen={selectedResource !== null}
         onClose={() => setSelectedResource(null)}
@@ -187,13 +187,13 @@ function VisualizationDeleteScenario({
           onClick: () => setSelectedResource(null),
         }}
       >
-        <F0Text content={description} variant="description" />
+        <CrudContentPlaceholder minHeight="min-h-24" />
       </F0Dialog>
     </CrudPatternLayout>
   )
 }
 
-function CardDeleteFromDialogScenario() {
+function CardDeleteScenario() {
   const [previewedResource, setPreviewedResource] = useState<Resource | null>(
     null
   )
@@ -204,6 +204,15 @@ function CardDeleteFromDialogScenario() {
   const source = useDataCollectionSource({
     dataAdapter: createResourceDataAdapter(initialResources),
     filters: resourceFilters,
+    itemActions: (item) => [
+      {
+        label: "Delete",
+        icon: Delete,
+        critical: true,
+        type: "other",
+        onClick: () => setSelectedResource(item),
+      },
+    ],
     itemOnClick: (item) => () => setPreviewedResource(item),
     primaryActions: () => defaultCrudPrimaryAction(() => {}),
     secondaryActions: defaultCrudSecondaryActions(),
@@ -216,10 +225,15 @@ function CardDeleteFromDialogScenario() {
         isOpen={previewedResource !== null}
         onClose={() => setPreviewedResource(null)}
         title="Resource details"
-        description="When the card itself does not expose an ellipsis, delete can live in the dialog header ellipsis instead."
+        description="Delete stays inside the ellipsis in both the card and the opened dialog, so the destructive action remains consistent."
         otherActions={
           previewedResource
             ? [
+                {
+                  label: "Duplicate",
+                  icon: Files,
+                  onClick: () => {},
+                },
                 {
                   label: "Delete",
                   icon: Delete,
@@ -241,12 +255,7 @@ function CardDeleteFromDialogScenario() {
           onClick: () => setPreviewedResource(null),
         }}
       >
-        {previewedResource && (
-          <F0Text
-            content="The read dialog keeps the resource context visible and exposes delete from the header ellipsis."
-            variant="description"
-          />
-        )}
+        {previewedResource && <CrudContentPlaceholder minHeight="min-h-56" />}
       </F0Dialog>
       <F0Dialog
         isOpen={selectedResource !== null}
@@ -263,10 +272,7 @@ function CardDeleteFromDialogScenario() {
           onClick: () => setSelectedResource(null),
         }}
       >
-        <F0Text
-          content="The confirmation names the item and explains the destructive outcome before the user commits."
-          variant="description"
-        />
+        <CrudContentPlaceholder minHeight="min-h-24" />
       </F0Dialog>
     </CrudPatternLayout>
   )
@@ -321,47 +327,28 @@ function KanbanBulkDeleteScenario() {
           onClick: () => setOpen(false),
         }}
       >
-        <F0Text
-          content="Selected Kanban cards will be removed. Use bulk delete only when selected cards remain visible and reviewable across lanes."
-          variant="description"
-        />
+        <CrudContentPlaceholder minHeight="min-h-24" />
       </F0Dialog>
     </CrudPatternLayout>
   )
 }
 
-export const TableSingleDelete: Story = {
+export const TableDeleteSingle: Story = {
   render: () => <TableSingleDeleteScenario />,
 }
 
-export const TableBulkDelete: Story = {
+export const TableDeleteBulk: Story = {
   render: () => <TableBulkDeleteScenario />,
 }
 
 export const CardDelete: Story = {
-  render: () => (
-    <VisualizationDeleteScenario
-      visualization={cardVisualization}
-      actionType="other"
-      description="Card delete uses the card ellipsis. Card click remains reserved for read behavior."
-    />
-  ),
+  render: () => <CardDeleteScenario />,
 }
 
-export const CardDeleteFromDialog: Story = {
-  render: () => <CardDeleteFromDialogScenario />,
+export const EditableTableDeleteRowAction: Story = {
+  render: () => <EditableTableDeleteScenario actionType="secondary" />,
 }
 
-export const EditableTableDelete: Story = {
-  render: () => (
-    <VisualizationDeleteScenario
-      visualization={editableTableVisualization}
-      actionType="secondary"
-      description="Editable Table delete uses the row actions dropdown, not a prominent editable-cell interaction."
-    />
-  ),
-}
-
-export const KanbanBulkDelete: Story = {
+export const KanbanDeleteBulk: Story = {
   render: () => <KanbanBulkDeleteScenario />,
 }

@@ -4,7 +4,7 @@ import { ComponentProps, useState } from "react"
 
 import { StandardLayout } from "@/layouts/StandardLayout"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
-import { ChevronRight, Download, Pencil } from "@/icons/app"
+import { ChevronRight, Download, Files, Pencil } from "@/icons/app"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
 import { F0Dialog } from "@/patterns/F0Dialog"
@@ -213,7 +213,7 @@ function OpenAsPageScenario({
     itemActions: (item) => [
       {
         label: "Duplicate",
-        icon: Pencil,
+        icon: Files,
         type: "primary",
         onClick: () => {},
       },
@@ -292,29 +292,29 @@ function RightDialogToPageScenario() {
   )
 }
 
-export const Default: Story = {
+export const TableReadDialog: Story = {
   render: () => <DefaultDialogScenario />,
 }
 
-export const RightDialogToPage: Story = {
+export const TableReadRightDialogToPage: Story = {
   render: () => <RightDialogToPageScenario />,
 }
 
-export const TableToPage: Story = {
+export const TableReadPage: Story = {
   render: () => <OpenAsPageScenario />,
 }
 
-export const ListToPage: Story = {
+export const ListReadPage: Story = {
   render: () => <OpenAsPageScenario visualization={listVisualization} />,
 }
 
-export const CardToDialog: Story = {
+export const CardReadDialog: Story = {
   render: () => (
     <VisualizationDialogScenario visualization={cardVisualization} />
   ),
 }
 
-export const KanbanCardToDialog: Story = {
+export const KanbanReadDialog: Story = {
   render: () => (
     <VisualizationDialogScenario
       visualization={kanbanVisualization}
