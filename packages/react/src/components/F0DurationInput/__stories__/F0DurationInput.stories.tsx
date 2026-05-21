@@ -9,7 +9,7 @@ import { durationInputSizes } from "../types"
 
 const meta = {
   component: F0DurationInput,
-  tags: ["stable"],
+  tags: ["stable", "!autodocs"],
   title: "Inputs/Duration input",
   parameters: {
     layout: "centered",

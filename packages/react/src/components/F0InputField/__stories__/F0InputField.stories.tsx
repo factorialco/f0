@@ -92,7 +92,7 @@ const meta = {
       control: "text",
     },
   },
-  tags: ["stable"],
+  tags: ["stable", "!autodocs"],
 } satisfies Meta<typeof F0InputField>
 
 export default meta

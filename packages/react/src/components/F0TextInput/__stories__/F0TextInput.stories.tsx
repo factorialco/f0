@@ -11,7 +11,7 @@ import { inputSizes } from "../types"
 const meta = {
   component: F0TextInput,
   title: "Inputs/Text input",
-  tags: ["stable"],
+  tags: ["stable", "!autodocs"],
   args: {
     type: "text",
     disabled: false,

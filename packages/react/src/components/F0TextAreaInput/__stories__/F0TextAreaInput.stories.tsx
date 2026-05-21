@@ -9,7 +9,7 @@ import { F0TextAreaInput } from "../index"
 const meta = {
   title: "Inputs/Text area input",
   component: F0TextAreaInput,
-  tags: ["stable"],
+  tags: ["stable", "!autodocs"],
   args: {
     disabled: false,
     placeholder: "Placeholder text here",
