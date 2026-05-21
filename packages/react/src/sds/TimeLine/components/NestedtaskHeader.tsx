@@ -92,9 +92,6 @@ export const NestedtaskHeader = ({
                   : "hsl(var(--warning-50))"
               }
               className="h-1.5 w-20"
-              aria-valuemin={0}
-              aria-valuemax={taskCount}
-              aria-valuenow={completedCount}
             />
             <span className="text-sm font-medium text-f1-foreground whitespace-nowrap">
               {completedCount}/{taskCount}

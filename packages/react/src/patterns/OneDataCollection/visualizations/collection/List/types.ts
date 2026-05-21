@@ -23,7 +23,6 @@ export type ItemTitleAction = {
   label: string
   onClick?: () => void
   href?: string
-  target?: React.HTMLAttributeAnchorTarget
   critical?: boolean
 }
 

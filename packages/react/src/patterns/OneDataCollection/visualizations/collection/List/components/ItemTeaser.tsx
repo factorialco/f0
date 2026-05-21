@@ -56,7 +56,6 @@ export const ItemTeaser = ({
                       size="sm"
                       onClick={singleTitleAction.onClick}
                       href={singleTitleAction.href}
-                      target={singleTitleAction.target}
                     />
                   ) : (
                     <DropdownInternal

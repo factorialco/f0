@@ -24,7 +24,7 @@ type MetadataItemValue =
   | { type: "text"; content: string }
   | { type: "avatar"; variant: AvatarVariant; text: string }
   | { type: "status"; label: string; variant: StatusVariant }
-  | ({ type: "list" } & (
+  | ({ type: "list"; max?: number } & (
       | {
           variant: "person"
           avatars: (

@@ -305,6 +305,7 @@ export const OverflowPopoverNoScroll: Story = {
     avatars: getDummyPeopleWithDescriptions(6),
     max: 3,
     tooltipScroll: "none",
+    tooltipDescriptionFontColor: "var(--f1-foreground-secondary)",
   },
 }
 
