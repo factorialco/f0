@@ -117,8 +117,8 @@ const F0AmountCalculator = forwardRef<HTMLDivElement, F0AmountCalculatorProps>(
       >
         <div
           className={cn(
-            "inline-flex items-center rounded-md border border-solid border-f1-border",
-            "h-8 overflow-hidden bg-f1-background",
+            "inline-flex items-center gap-1.5 rounded-xs border border-solid border-f1-border",
+            "h-8 bg-f1-background px-2",
             disabled && "pointer-events-none opacity-50"
           )}
         >
@@ -134,15 +134,15 @@ const F0AmountCalculator = forwardRef<HTMLDivElement, F0AmountCalculatorProps>(
             disabled={disabled}
             aria-label={ariaLabel}
             className={cn(
-              "h-full w-16 border-none bg-transparent px-2 text-sm outline-none",
+              "h-full w-14 border-none bg-transparent text-sm outline-none",
               "text-f1-foreground placeholder:text-f1-foreground-secondary",
               focusRing()
             )}
           />
           <span
             className={cn(
-              "flex h-full items-center border-l border-solid border-f1-border px-2 text-sm",
-              "bg-f1-background-secondary text-f1-foreground-secondary"
+              "inline-flex items-center rounded-xs border border-solid border-f1-border px-1.5 py-0.5 text-xs font-medium",
+              "bg-f1-background text-f1-foreground"
             )}
           >
             {units}
