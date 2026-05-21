@@ -735,6 +735,20 @@ export const WithAlertAction: Story = {
   },
 }
 
+export const WithAlertActionHref: Story = {
+  args: {
+    ...Default.args,
+    alert: {
+      variant: "info",
+      title: "New policy available",
+      action: {
+        label: "View",
+        href: "/policies",
+      },
+    },
+  },
+}
+
 export const AlertVariants: Story = {
   parameters: {
     docs: {
@@ -793,6 +807,14 @@ export const Snapshot: Story = {
           variant: "warning",
           title: "Contract requires attention",
           action: { label: "Review", onClick: () => {} },
+        }}
+      />
+      <F0Card
+        {...Default.args}
+        alert={{
+          variant: "info",
+          title: "New policy available",
+          action: { label: "View", href: "/policies" },
         }}
       />
     </div>

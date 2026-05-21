@@ -77,7 +77,7 @@ function CloseButton({ onClose }: { onClose: () => void }) {
  * The coloured header strip that sits above the card.
  * It has no background of its own — the outer container's bg shows through.
  *
- * Applied classes: pt-2 (8px) pb-1 (4px) px-3 (12px) gap-1 (4px), rounded-t-xl
+ * Applied classes: py-1.5 (6px) px-3 (12px) gap-1 (4px), rounded-t-xl
  */
 function CardAlertHeader({
   variant,
@@ -93,7 +93,7 @@ function CardAlertHeader({
   return (
     <div
       role={alertRole}
-      className="flex items-center gap-1 rounded-t-xl px-3 pb-1 pt-2"
+      className="flex items-center gap-1 rounded-t-xl px-3 py-1.5"
     >
       <div className="flex h-5 w-5 shrink-0 items-center justify-center">
         <F0Icon
@@ -117,7 +117,9 @@ function CardAlertHeader({
           label={action.label}
           variant="outline"
           size="sm"
-          onClick={action.onClick}
+          {...(action.href
+            ? { href: action.href }
+            : { onClick: action.onClick })}
           disabled={action.disabled}
           type="button"
         />

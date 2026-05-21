@@ -47,15 +47,25 @@ type CardAlertDismissible = CardAlertBase & {
 /**
  * An optional action button rendered in the alert header.
  * Mutually exclusive with `dismissible` — only one can be shown at a time.
+ * Supply either `onClick` (handler) or `href` (navigation link), not both.
  */
-export interface CardAlertAction {
+export type CardAlertAction = {
   /** Label text for the action button. */
   label: string
-  /** Called when the action button is clicked. */
-  onClick: () => void
   /** Whether the action button is disabled. */
   disabled?: boolean
-}
+} & (
+  | {
+      /** Called when the action button is clicked. */
+      onClick: () => void
+      href?: never
+    }
+  | {
+      /** URL to navigate to when the action button is clicked. */
+      href: string
+      onClick?: never
+    }
+)
 
 type CardAlertWithAction = CardAlertBase & {
   dismissible?: never

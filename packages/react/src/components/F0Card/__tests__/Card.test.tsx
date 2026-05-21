@@ -353,5 +353,39 @@ describe("F0Card Component", () => {
 
       expect(screen.getByRole("button", { name: "Disabled" })).toBeDisabled()
     })
+
+    it("renders action as a link when action.href is provided", () => {
+      render(
+        <F0Card
+          title="Card"
+          alert={{
+            variant: "info",
+            title: "Info alert",
+            action: { label: "View", href: "/policies" },
+          }}
+        />
+      )
+
+      const link = screen.getByRole("link", { name: "View" })
+      expect(link).toBeInTheDocument()
+      expect(link).toHaveAttribute("href", "/policies")
+    })
+
+    it("does not render a button when action.href is provided", () => {
+      render(
+        <F0Card
+          title="Card"
+          alert={{
+            variant: "info",
+            title: "Info alert",
+            action: { label: "View", href: "/policies" },
+          }}
+        />
+      )
+
+      expect(
+        screen.queryByRole("button", { name: "View" })
+      ).not.toBeInTheDocument()
+    })
   })
 })
