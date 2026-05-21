@@ -7,13 +7,14 @@ import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { InputField, INPUTFIELD_SIZES } from "../"
 
 const meta = {
-  title: "InputField",
+  title: "Inputs/InputField",
   component: InputField,
   parameters: {
     docs: {
       description: {
         component: [
-          "The `InputField` component is a wrapper around any `input` that allows us to share code and behavior between different input types.",
+          "`InputField` is the shared building block that every writable F0 input renders inside — the visual chrome (label, status, icon, append tag, clear button, hint, error). `F0TextInput`, `F0NumberInput`, `F0SearchInput`, `F0TextAreaInput`, and `F0DurationInput` are all composed on top of it.",
+          "Use the dedicated `F0*Input` components in product code; reach for `InputField` directly only when building a brand-new input type inside the design system",
         ]
           .map((text) => `<p>${text}.</p>`)
           .join(""),
@@ -103,7 +104,7 @@ const meta = {
       control: "text",
     },
   },
-  tags: ["autodocs", "internal"],
+  tags: ["autodocs", "experimental"],
 } satisfies Meta<typeof InputField>
 
 export default meta
