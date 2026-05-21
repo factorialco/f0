@@ -4,7 +4,7 @@ import {
   motion,
   MotionConfig,
 } from "motion/react"
-import { useId, useRef, useState } from "react"
+import { type KeyboardEvent, useId, useRef, useState } from "react"
 import { useOnClickOutside } from "usehooks-ts"
 
 import { F0Icon } from "@/components/F0Icon"
@@ -36,9 +36,6 @@ export const Search = ({ value, onChange, loading = false }: SearchProps) => {
   const handleClear = () => {
     onChange(undefined)
     setOpen(false)
-    if (inputRef?.current) {
-      inputRef.current.value = ""
-    }
   }
 
   useOnClickOutside(ref, () => {
@@ -54,7 +51,7 @@ export const Search = ({ value, onChange, loading = false }: SearchProps) => {
     }
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (!open) {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault()
@@ -105,7 +102,7 @@ export const Search = ({ value, onChange, loading = false }: SearchProps) => {
                     layout
                     ref={inputRef}
                     type="text"
-                    value={value}
+                    value={value ?? ""}
                     placeholder={i18n.actions.search}
                     onChange={(e) => onChange(e.target.value)}
                     className="h-full w-full appearance-none rounded border-none bg-f1-background py-2 pl-7 text-base text-f1-foreground"
@@ -126,6 +123,7 @@ export const Search = ({ value, onChange, loading = false }: SearchProps) => {
                     }}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault()
                         handleClear()
                       }
                     }}
@@ -182,6 +180,7 @@ export const Search = ({ value, onChange, loading = false }: SearchProps) => {
                         }}
                         onKeyDown={(e) => {
                           if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault()
                             handleClear()
                           }
                         }}
