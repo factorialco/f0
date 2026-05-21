@@ -22,7 +22,6 @@ import {
   memo,
 } from "react"
 
-import { Search } from "@/components/Search"
 import { cn } from "@/lib/utils"
 
 import type {
@@ -59,12 +58,13 @@ import { type EdgeVariant, type F0GraphEdgeProps } from "./F0GraphEdge"
 import { F0GraphEdgeBase } from "./F0GraphEdge/F0GraphEdge"
 import { F0GraphSearch, useGraphSearch, type Searchable } from "./F0GraphSearch"
 import { useDeferredMerge } from "./hooks/useDeferredMerge"
-import "./F0Graph.css"
 import { useGraphZoomLevel } from "./hooks/useGraphZoomLevel"
+import "./F0Graph.css"
 import { useLayoutEngine } from "./hooks/useLayoutEngine"
 import { useLazyTree } from "./hooks/useLazyTree"
 import { useTreeBuilder } from "./hooks/useTreeBuilder"
 import { ClickSpark } from "./internal/ClickSpark"
+import { Search } from "./internal/Search"
 
 // Singleton empty set used as a stable default for `highlightedNodes`.
 // A fresh Set per render would invalidate the selection context and
