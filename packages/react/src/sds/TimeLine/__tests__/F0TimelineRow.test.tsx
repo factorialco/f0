@@ -440,6 +440,54 @@ describe("F0TimelineRow", () => {
       )
       expect(screen.getByText("Only content")).toBeInTheDocument()
     })
+
+    describe("when collapsible is false", () => {
+      const {
+        expanded: _expanded,
+        onExpandToggle: _onExpandToggle,
+        ...nonCollapsibleBase
+      } = nestedtaskProps
+
+      it("does not render an expand toggle button", () => {
+        render(<F0TimelineRow {...nonCollapsibleBase} collapsible={false} />)
+        // No element should expose the aria-expanded state since there is
+        // no toggle to control collapse.
+        expect(
+          screen.queryByRole("button", { expanded: false })
+        ).not.toBeInTheDocument()
+        expect(
+          screen.queryByRole("button", { expanded: true })
+        ).not.toBeInTheDocument()
+      })
+
+      it("always renders the items (no expand required)", () => {
+        render(<F0TimelineRow {...nonCollapsibleBase} collapsible={false} />)
+        expect(
+          screen.getByText("Hellen (hellen@factorial.co)")
+        ).toBeInTheDocument()
+        expect(
+          screen.getByText("Danilo (danilo@gmail.com)")
+        ).toBeInTheDocument()
+      })
+
+      it("always renders custom content when provided", () => {
+        const { items: _items, ...rest } = nonCollapsibleBase
+        render(
+          <F0TimelineRow
+            {...rest}
+            collapsible={false}
+            content={<div>Non-collapsible content</div>}
+          />
+        )
+        expect(screen.getByText("Non-collapsible content")).toBeInTheDocument()
+      })
+
+      it("still renders the title and description", () => {
+        render(<F0TimelineRow {...nonCollapsibleBase} collapsible={false} />)
+        expect(screen.getByText("Sign document")).toBeInTheDocument()
+        expect(screen.getByText("Estimated on 14/04/2026")).toBeInTheDocument()
+      })
+    })
   })
 
   describe("multitask with nestedtask items", () => {
