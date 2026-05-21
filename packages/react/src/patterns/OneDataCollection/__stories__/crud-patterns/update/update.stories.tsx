@@ -11,6 +11,7 @@ import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../../../index"
 import {
   createResourceDataAdapter,
+  CrudContentPlaceholder,
   CrudPatternLayout,
   defaultCrudPrimaryAction,
   defaultCrudSecondaryActions,
@@ -19,6 +20,7 @@ import {
   Resource,
   ResourceFormF0,
   resourceFilters,
+  type CrudVisualization,
   tableVisualization,
 } from "../shared"
 
@@ -35,23 +37,31 @@ type Story = StoryObj<typeof meta>
 function RightPositionDialogScenario({
   visualization = tableVisualization,
 }: {
-  visualization?: typeof tableVisualization | typeof listVisualization
+  visualization?: CrudVisualization
 }) {
+  const [previewedResource, setPreviewedResource] = useState<Resource | null>(
+    null
+  )
   const [selectedResource, setSelectedResource] = useState<Resource | null>(
     null
   )
   const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
 
+  const openUpdateDialog = (item: Resource) => {
+    setPreviewedResource(null)
+    setSelectedResource(item)
+  }
+
   const source = useDataCollectionSource({
     dataAdapter: createResourceDataAdapter(initialResources),
     filters: resourceFilters,
-    itemOnClick: (item) => () => setSelectedResource(item),
+    itemOnClick: (item) => () => setPreviewedResource(item),
     itemActions: (item) => [
       {
-        label: "Update",
+        label: "Edit",
         icon: Pencil,
         type: "primary",
-        onClick: () => setSelectedResource(item),
+        onClick: () => openUpdateDialog(item),
       },
     ],
     primaryActions: () => defaultCrudPrimaryAction(() => {}),
@@ -61,6 +71,40 @@ function RightPositionDialogScenario({
   return (
     <CrudPatternLayout>
       <OneDataCollection source={source} visualizations={[visualization]} />
+      <F0Dialog
+        isOpen={previewedResource !== null}
+        onClose={() => setPreviewedResource(null)}
+        title="Resource details"
+        description="Open a reduced view in a right dialog while keeping update as an explicit action."
+        position="right"
+        width="md"
+        disableContentPadding
+        otherActions={
+          previewedResource
+            ? [
+                {
+                  label: "Edit",
+                  icon: Pencil,
+                  onClick: () => openUpdateDialog(previewedResource),
+                },
+              ]
+            : undefined
+        }
+        primaryAction={{
+          label: "Primary Action",
+          onClick: () => {},
+        }}
+        secondaryAction={{
+          label: "Close",
+          onClick: () => setPreviewedResource(null),
+        }}
+      >
+        {previewedResource && (
+          <div className="flex h-full flex-col p-4">
+            <CrudContentPlaceholder minHeight="h-[calc(95dvh-12.5rem)]" />
+          </div>
+        )}
+      </F0Dialog>
       <F0Dialog
         isOpen={selectedResource !== null}
         onClose={() => setSelectedResource(null)}
@@ -95,20 +139,29 @@ function RightPositionDialogScenario({
 }
 
 function UpdateWithSameFormScenario() {
+  const [previewedResource, setPreviewedResource] = useState<Resource | null>(
+    null
+  )
   const [selectedResource, setSelectedResource] = useState<Resource | null>(
     null
   )
   const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
 
+  const openUpdateDialog = (item: Resource) => {
+    setPreviewedResource(null)
+    setSelectedResource(item)
+  }
+
   const source = useDataCollectionSource({
     dataAdapter: createResourceDataAdapter(initialResources),
     filters: resourceFilters,
+    itemOnClick: (item) => () => setPreviewedResource(item),
     itemActions: (item) => [
       {
-        label: "Update",
+        label: "Edit",
         icon: Pencil,
         type: "primary",
-        onClick: () => setSelectedResource(item),
+        onClick: () => openUpdateDialog(item),
       },
     ],
     primaryActions: () => defaultCrudPrimaryAction(() => {}),
@@ -121,6 +174,33 @@ function UpdateWithSameFormScenario() {
         source={source}
         visualizations={[tableVisualization]}
       />
+      <F0Dialog
+        isOpen={previewedResource !== null}
+        onClose={() => setPreviewedResource(null)}
+        title="Resource details"
+        description="Open the default read dialog first, then move into update from the header action."
+        otherActions={
+          previewedResource
+            ? [
+                {
+                  label: "Edit",
+                  icon: Pencil,
+                  onClick: () => openUpdateDialog(previewedResource),
+                },
+              ]
+            : undefined
+        }
+        primaryAction={{
+          label: "Primary Action",
+          onClick: () => {},
+        }}
+        secondaryAction={{
+          label: "Close",
+          onClick: () => setPreviewedResource(null),
+        }}
+      >
+        {previewedResource && <CrudContentPlaceholder minHeight="min-h-56" />}
+      </F0Dialog>
       <F0Dialog
         isOpen={selectedResource !== null}
         onClose={() => setSelectedResource(null)}
@@ -205,7 +285,7 @@ function BulkUpdateScenario() {
         title={`Update ${selectedCount || "selected"} resources?`}
         description="Bulk update actions should confirm the affected scope before applying shared changes."
         primaryAction={{
-          label: "Update selected resources",
+          label: "Edit selected resources",
           icon: Save,
           onClick: () => setOpen(false),
         }}
@@ -215,7 +295,7 @@ function BulkUpdateScenario() {
         }}
       >
         <F0Text
-          content="Use bulk update only in table view, where selection is explicit through checkboxes and the user can verify the affected rows before confirming."
+          content="Use bulk update only when the visualization provides explicit selection, so the user can verify the affected items before confirming."
           variant="description"
         />
       </F0Dialog>

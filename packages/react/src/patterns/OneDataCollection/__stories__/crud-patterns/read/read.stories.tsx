@@ -23,8 +23,10 @@ import {
   defaultCrudPrimaryAction,
   defaultCrudSecondaryActions,
   initialResources,
+  listVisualization,
   Resource,
   resourceFilters,
+  type CrudVisualization,
   tableVisualization,
 } from "../shared"
 
@@ -73,7 +75,7 @@ function ResourcePageView({ resourcePage }: { resourcePage: Resource }) {
               }}
               secondaryActions={[
                 {
-                  label: "Update",
+                  label: "Edit",
                   icon: Pencil,
                   onClick: () => {},
                 },
@@ -135,6 +137,10 @@ function DefaultDialogScenario() {
         title="Resource details"
         description="The default read pattern opens the item in a dialog."
         primaryAction={{
+          label: "Primary Action",
+          onClick: () => {},
+        }}
+        secondaryAction={{
           label: "Close",
           onClick: () => setSelectedResource(null),
         }}
@@ -145,7 +151,11 @@ function DefaultDialogScenario() {
   )
 }
 
-function OpenAsPageScenario() {
+function OpenAsPageScenario({
+  visualization = tableVisualization,
+}: {
+  visualization?: CrudVisualization
+}) {
   const [resourcePage, setResourcePage] = useState<Resource | null>(null)
 
   const openResourcePage = (item: Resource) => () => setResourcePage(item)
@@ -180,10 +190,7 @@ function OpenAsPageScenario() {
 
   return (
     <CrudPatternLayout>
-      <OneDataCollection
-        source={source}
-        visualizations={[tableVisualization]}
-      />
+      <OneDataCollection source={source} visualizations={[visualization]} />
     </CrudPatternLayout>
   )
 }
@@ -229,14 +236,7 @@ function RightDialogToPageScenario() {
         width="md"
         disableContentPadding
         primaryAction={{
-          label: "Close",
-          onClick: () => {
-            setSurface("collection")
-            setSelectedResource(null)
-          },
-        }}
-        secondaryAction={{
-          label: "View details",
+          label: "Open Details",
           onClick: () => setSurface("page"),
         }}
       >
@@ -254,6 +254,10 @@ export const RightDialogToPage: Story = {
   render: () => <RightDialogToPageScenario />,
 }
 
-export const Page: Story = {
+export const TableToPage: Story = {
   render: () => <OpenAsPageScenario />,
+}
+
+export const ListToPage: Story = {
+  render: () => <OpenAsPageScenario visualization={listVisualization} />,
 }

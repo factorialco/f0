@@ -20,8 +20,10 @@ layout.
 - Use a default dialog for quick inspection and lightweight details.
 - Use a right dialog to page flow when the resource starts with a reduced view
   but may expand into a full destination.
-- Use a page when the resource needs persistent navigation,
-  deep structure, or a longer reading surface.
+- Use a table to page flow when dense tabular scanning still needs a dedicated
+  destination for deeper reading.
+- Use a list to page flow when list-style browsing should open a dedicated
+  destination with more structure and actions.
 - Keep item click behavior consistent within the same collection.
 - Reserve page navigation for resources that are meaningful enough to justify
   their own destination.
@@ -65,14 +67,30 @@ layout.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--page">
-            Page
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--table-to-page">
+            Table to Page
           </a>
         </td>
         <td>
-          Detailed resources with hierarchy, navigation, or page-level actions.
+          Detailed resources with hierarchy, navigation, or page-level actions
+          that start from a table row.
         </td>
         <td>Higher navigation cost for quick lookups.</td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--list-to-page">
+            List to Page
+          </a>
+        </td>
+        <td>
+          Detailed resources discovered through a list view, where the teaser
+          structure helps users browse before opening the full page.
+        </td>
+        <td>
+          Adds navigation cost and is less efficient than staying in the list
+          for lightweight inspection.
+        </td>
       </tr>
     </tbody>
   </table>
@@ -102,11 +120,11 @@ layout.
       </tr>
       <tr>
         <td>Does the resource need breadcrumbs, tabs, or a page header?</td>
-        <td>Page</td>
+        <td>Table to Page or List to Page</td>
       </tr>
       <tr>
         <td>Will the user likely continue into editing or configuration?</td>
-        <td>Page</td>
+        <td>Table to Page or List to Page</td>
       </tr>
       <tr>
         <td>
@@ -130,10 +148,15 @@ collection, but the resource still deserves a full page for deeper reading,
 follow-up actions, or page-level navigation. The right dialog should be a
 reduced view, not a compressed version of the full page.
 
-Move to a page when the resource is no longer just a quick read target. If the
-resource has sub-navigation, multiple action groups, or content that competes
-for vertical space, a page is more predictable than stretching a dialog beyond
-its intended scope.
+Move to a table to page or list to page pattern when the resource is no longer
+just a quick read target. If the resource has sub-navigation, multiple action
+groups, or content that competes for vertical space, a page is more predictable
+than stretching a dialog beyond its intended scope.
+
+Choose table to page when people start from dense, comparison-oriented rows and
+need a direct chevron action that routes into a full destination. Choose list
+to page when the collection already uses list teasers and the browsing model is
+closer to scanning summaries than comparing columns.
 
 ## Dos and don'ts
 
@@ -174,5 +197,6 @@ its intended scope.
 
 - [Default dialog](/?path=/story/patterns-data-collection-crud-patterns-read--default)
 - [Right dialog to page](/?path=/story/patterns-data-collection-crud-patterns-read--right-dialog-to-page)
-- [Page](/?path=/story/patterns-data-collection-crud-patterns-read--page)
+- [Table to Page](/?path=/story/patterns-data-collection-crud-patterns-read--table-to-page)
+- [List to Page](/?path=/story/patterns-data-collection-crud-patterns-read--list-to-page)
 - [CRUD patterns overview](/?path=/docs/patterns-data-collection-crud-patterns-overview--documentation)

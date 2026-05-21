@@ -16,8 +16,8 @@ relearn the form, field order, or terminology when updating the same data.
 - Use a default dialog when updating fits in a focused overlay.
 - Use a right-position dialog only for Table and List views when keeping the
   collection visible improves comparison or navigation between items.
-- Use bulk update only in Table view, where checkboxes make selection scope
-  explicit.
+- Use bulk update when the current visualization provides explicit
+  multi-selection and users can review the affected items before confirming.
 - Reuse the same form structure as create whenever the user updates the same
   information.
 - Avoid inventing a separate update-only layout without a strong UX reason.
@@ -65,10 +65,10 @@ relearn the form, field order, or terminology when updating the same data.
             Bulk update
           </a>
         </td>
-        <td>Updating a selected set of rows from table bulk actions.</td>
+        <td>Updating a selected set of items from bulk actions.</td>
         <td>
-          Table-only pattern because row selection currently depends on
-          checkboxes.
+          Use only when selection scope is explicit in the current
+          visualization.
         </td>
       </tr>
     </tbody>
@@ -95,8 +95,8 @@ relearn the form, field order, or terminology when updating the same data.
         <td>Right-position dialog</td>
       </tr>
       <tr>
-        <td>Is the user updating several selected rows at once?</td>
-        <td>Bulk update in Table view</td>
+        <td>Is the user updating several selected items at once?</td>
+        <td>Bulk update</td>
       </tr>
       <tr>
         <td>Is the current visualization Card or Kanban?</td>
@@ -121,10 +121,10 @@ collection itself is part of the update workflow, such as reviewing adjacent
 rows or moving through items while preserving context. Fall back to the default
 dialog below medium breakpoints.
 
-Bulk update follows the same selection pattern as bulk delete. It is currently
-available only in Table view because that is the only visualization with
-checkbox-based selection, so users can clearly review which rows are included
-before they confirm the change.
+Bulk update follows the same selection pattern as bulk delete. Use it only when
+the visualization makes selection scope explicit, such as checkbox-based
+selection, so users can clearly review which items are included before they
+confirm the change.
 
 ## Dos and don'ts
 
@@ -157,7 +157,7 @@ before they confirm the change.
   }}
   dont={{
     description:
-      "Do not expose bulk update in visualizations without checkbox-based row selection.",
+      "Do not expose bulk update when the selected scope is ambiguous or hard to verify.",
   }}
 />
 
