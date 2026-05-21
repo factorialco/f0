@@ -33,7 +33,7 @@ export const WithBaseAmount: Story = {
   args: {
     value: 10,
     units: "%",
-    baseAmount: 0,
+    baseAmount: 300,
     currency: "€",
   },
 }
