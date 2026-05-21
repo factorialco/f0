@@ -31,6 +31,7 @@ import type {
   ChatDashboardChartItem,
   ChatDashboardCollectionItem,
   ChatDashboardConfig,
+  ChatDashboardFilterDefinition,
   ChatDashboardItem,
   ChatDashboardMetricItem,
   FormatPreset,
@@ -38,7 +39,11 @@ import type {
 
 import { format } from "date-fns"
 
-import { useDashboardCompute, type ItemResult } from "./useDashboardCompute"
+import {
+  useDashboardCompute,
+  type DashboardFilterOptions,
+  type ItemResult,
+} from "./useDashboardCompute"
 import { SNAPSHOT_DATE_FILTER_KEY } from "./snapshot"
 
 // Format a Date (or ISO string) as a local-calendar `YYYY-MM-DD`.
@@ -106,6 +111,94 @@ export function isSingleCollectionDashboard(
   config: Pick<ChatDashboardConfig, "items">
 ): boolean {
   return config.items.length === 1 && config.items[0]?.type === "collection"
+}
+
+/**
+ * Build the F0 `FiltersDefinition` map for the dashboard's Filter drawer
+ * from the compute response's derived filter specs and option bounds.
+ *
+ * `date` filters are open-domain (no precomputed distinct values or
+ * min/max), so they render even when `filterOptions[key]` is absent —
+ * only `in` and `numericRange` require their per-key options to be
+ * present. Returns `undefined` when there are no specs to render or
+ * every spec was skipped.
+ */
+export function buildFilterDefinitions(
+  filterSpecs: Record<string, ChatDashboardFilterDefinition> | undefined,
+  filterOptions: DashboardFilterOptions | undefined
+): FiltersDefinition | undefined {
+  if (!filterSpecs || Object.keys(filterSpecs).length === 0) return undefined
+
+  const result: Record<
+    string,
+    | {
+        type: "in"
+        label: string
+        options: { options: Array<{ value: string; label: string }> }
+      }
+    | {
+        type: "number"
+        label: string
+        options: {
+          min: number
+          max: number
+          modes: ReadonlyArray<"range" | "single">
+        }
+      }
+    | {
+        type: "date"
+        label: string
+        options: { mode: "range" }
+      }
+  > = {}
+
+  for (const [key, spec] of Object.entries(filterSpecs)) {
+    // `date` filters use F0's open-domain DateFilter — no precomputed
+    // distinct/min-max options are emitted, so render before the options
+    // guard below.
+    if (spec.type === "date") {
+      result[key] = {
+        type: "date",
+        label: spec.label,
+        options: { mode: "range" },
+      }
+      continue
+    }
+
+    // Every other type needs its options to render.
+    const options = filterOptions?.[key]
+    if (options === undefined) continue
+
+    if (spec.type === "numericRange") {
+      if (Array.isArray(options)) continue
+      if (options.min === options.max) continue
+      result[key] = {
+        type: "number",
+        label: spec.label,
+        options: {
+          min: options.min,
+          max: options.max,
+          modes: ["range"],
+        },
+      }
+      continue
+    }
+
+    if (spec.type === "in") {
+      if (!Array.isArray(options) || options.length === 0) continue
+      result[key] = {
+        type: "in",
+        label: spec.label,
+        options: {
+          options: options.map((v) => ({ value: v, label: v })),
+        },
+      }
+    }
+  }
+
+  if (Object.keys(result).length === 0) return undefined
+
+  return result as FiltersDefinition
 }
 
 // ---------------------------------------------------------------------------
@@ -304,81 +397,10 @@ export function ChatDashboard({
   // the skeleton up until the response lands.
   const filtersLoading = !filterOptions && !derivedFilters.filters
 
-  const filterDefinitions = useMemo(() => {
-    const filterSpecs = derivedFilters.filters
-    if (!filterSpecs || Object.keys(filterSpecs).length === 0) return undefined
-    if (!filterOptions) return undefined
-
-    const result: Record<
-      string,
-      | {
-          type: "in"
-          label: string
-          options: { options: Array<{ value: string; label: string }> }
-        }
-      | {
-          type: "number"
-          label: string
-          options: {
-            min: number
-            max: number
-            modes: ReadonlyArray<"range" | "single">
-          }
-        }
-      | {
-          type: "date"
-          label: string
-          options: { mode: "range" }
-        }
-    > = {}
-
-    for (const [key, spec] of Object.entries(filterSpecs)) {
-      // `date` filters use F0's open-domain DateFilter — no precomputed
-      // distinct/min-max options are emitted, so don't require a matching
-      // filterOptions entry. Every other type needs its options to render.
-      const options = filterOptions[key]
-      if (spec.type !== "date" && options === undefined) continue
-
-      if (spec.type === "numericRange") {
-        if (Array.isArray(options)) continue
-        if (options.min === options.max) continue
-        result[key] = {
-          type: "number",
-          label: spec.label,
-          options: {
-            min: options.min,
-            max: options.max,
-            modes: ["range"],
-          },
-        }
-        continue
-      }
-
-      if (spec.type === "date") {
-        result[key] = {
-          type: "date",
-          label: spec.label,
-          options: { mode: "range" },
-        }
-        continue
-      }
-
-      if (spec.type === "in") {
-        if (!Array.isArray(options) || options.length === 0) continue
-        result[key] = {
-          type: "in",
-          label: spec.label,
-          options: {
-            options: options.map((v) => ({ value: v, label: v })),
-          },
-        }
-      }
-    }
-
-    if (Object.keys(result).length === 0) return undefined
-
-    return result as FiltersDefinition
-  }, [derivedFilters.filters, filterOptions])
+  const filterDefinitions = useMemo(
+    () => buildFilterDefinitions(derivedFilters.filters, filterOptions),
+    [derivedFilters.filters, filterOptions]
+  )
 
   /**
    * Build the F0AnalyticsDashboard `navigationFilters` prop from the
