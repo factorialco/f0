@@ -41,7 +41,6 @@ For numeric data use [F0NumberInput](?path=/docs/components-inputs-number-input-
 - The value is a duration in hours/minutes. Use [F0DurationInput](?path=/docs/components-inputs-duration-input--documentation).
 - The value is a search query. Use [F0SearchInput](?path=/docs/components-inputs-search-input--documentation).
 - The value is multi-line. Use F0TextAreaInput.
-- The user uploads a file. Use the dedicated upload component. (`type="file"` is accepted as an escape-hatch but does not provide drag-and-drop, validation or preview.)
 
 ---
 
@@ -51,7 +50,9 @@ What `F0TextInput` adds on top of F0InputField.
 
 ### Type
 
-`type` accepts every native HTML input type **except `"number"`**, which is intentionally blocked at the type level — for numeric data use `F0NumberInput`. Common values: `"text"` (default), `"email"`, `"password"`, `"url"`, `"tel"`, `"file"`.
+`type` accepts every native HTML input type **except `"number"`**, which is intentionally blocked at the type level — for numeric data use `F0NumberInput`. Common values: `"text"` (default), `"email"`, `"password"`, `"url"`, `"tel"`.
+
+`type="file"` is technically accepted but does not provide drag-and-drop, validation or preview — use the dedicated upload component for file uploads.
 
 ### Password mode
 
