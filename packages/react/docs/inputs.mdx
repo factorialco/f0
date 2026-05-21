@@ -1,0 +1,72 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+
+<Meta title="Inputs/Overview" />
+
+# Inputs
+
+The **Inputs** group collects every F0 component whose primary interaction is
+**typing inside a box**. They share the same visual chrome — provided by the
+[`InputField`](?path=/docs/inputs-inputfield--docs) building block — and the
+same suffix convention: `F0*Input`.
+
+If the user **types**, it lives here. If the user **selects** or
+**uploads**, it lives elsewhere — see the [vocabulary](#vocabulary) below.
+
+## When to use what
+
+| Component                                                                    | Use it for                                                                   |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| [`F0TextInput`](?path=/docs/inputs-text-input--docs)                         | A single line of free text (names, titles, emails, passwords).               |
+| [`F0NumberInput`](?path=/docs/inputs-number-input--docs)                     | A typed number with locale-aware formatting (counts, amounts, percentages).  |
+| [`F0SearchInput`](?path=/docs/inputs-search-input--docs)                     | A search box — pre-wired with the search icon, debouncing, and a threshold.  |
+| [`F0TextAreaInput`](?path=/docs/inputs-text-area-input--docs)                | Multi-line free text (descriptions, notes, comments).                        |
+| [`F0DurationInput`](?path=/docs/inputs-duration-input--docs)                 | A typed duration (hours / minutes / seconds).                                |
+| [`InputField`](?path=/docs/inputs-inputfield--docs)                          | Building block — only used to compose new inputs inside the design system.   |
+
+## Vocabulary
+
+The F0 design system distinguishes three families of form controls. The name
+of the component tells you which family it belongs to:
+
+- **Inputs** — the user **types** inside a box. Names always end with the
+  `Input` suffix (`F0TextInput`, `F0NumberInput`, `F0SearchInput`,
+  `F0TextAreaInput`, `F0DurationInput`). All of them live in this group.
+- **Selectors** — the user **picks one (or several) options** from a known
+  set, without typing. Examples: `F0Select`, `F0Checkbox`, `F0ButtonToggleGroup`,
+  `F0DatePicker`, the `Switch`, sliders, steppers.
+- **Uploads** — the user **provides a file**. Examples: file pickers and
+  drag-and-drop zones.
+
+When in doubt, ask: "does the user type into a box?". If yes, it is an
+Input.
+
+## Anatomy
+
+Every input is composed on top of [`InputField`](?path=/docs/inputs-inputfield--docs),
+which provides the shared visual chrome:
+
+- **Label** (with optional icon and required marker)
+- **Box** with the actual `<input>` / `<textarea>` element
+- **Optional leading icon**
+- **Optional clear button**
+- **Optional append tag** (units, currency, etc.)
+- **Status row** — hint, error, warning, info
+- **Loading state**
+
+Reach for `InputField` directly only when you are building a brand-new
+input type inside the design system. In product code, always use the
+dedicated `F0*Input` component.
+
+## Migration note
+
+The text inputs were renamed in this release to align with the vocabulary
+above. The previous names continue to work as `@deprecated` aliases and
+will be removed in a future major:
+
+| Before          | After               |
+| --------------- | ------------------- |
+| `Input`         | `F0TextInput`       |
+| `NumberInput`   | `F0NumberInput`     |
+| `Textarea`      | `F0TextAreaInput`   |
+| `F1SearchBox`   | `F0SearchInput`     |
+| `F0DurationInput` | `F0DurationInput` (unchanged) |
