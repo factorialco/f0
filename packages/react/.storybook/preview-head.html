@@ -131,8 +131,23 @@
     filter: none !important;
     outline: rgba(0, 0, 0, 0.1) 1px solid !important;
     border-radius: 10px;
-    overflow: hidden;
     background: #fff;
+  }
+
+  .sb-unstyled tbody:not(.docs-story tbody) > tr:first-child > td:first-child {
+    border-top-left-radius: 10px;
+  }
+
+  .sb-unstyled tbody:not(.docs-story tbody) > tr:first-child > td:last-child {
+    border-top-right-radius: 10px;
+  }
+
+  .sb-unstyled tbody:not(.docs-story tbody) > tr:last-child > td:first-child {
+    border-bottom-left-radius: 10px;
+  }
+
+  .sb-unstyled tbody:not(.docs-story tbody) > tr:last-child > td:last-child {
+    border-bottom-right-radius: 10px;
   }
 
   .sb-unstyled tbody > tr:nth-child(even) > td:not(.docs-story td),
