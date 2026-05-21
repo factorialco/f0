@@ -219,7 +219,8 @@ export function ClockInControls({
                           <div aria-label="Select break type">
                             <F0Button
                               label={labels.break}
-                              variant="neutral"
+                              variant="outline"
+                              size="lg"
                               icon={SolidPause}
                               hideLabel
                             />
@@ -229,9 +230,9 @@ export function ClockInControls({
                         <F0Button
                           onClick={handleClickBreakButton}
                           label={labels.break}
-                          variant="neutral"
+                          variant="outline"
+                          size="lg"
                           icon={SolidPause}
-                          hideLabel
                         />
                       )}
                     </>
@@ -239,7 +240,8 @@ export function ClockInControls({
                   <F0Button
                     onClick={onClockOut}
                     label={labels.clockOut}
-                    variant="neutral"
+                    variant="outline"
+                    size="lg"
                     icon={SolidStop}
                   />
                 </>
@@ -247,16 +249,17 @@ export function ClockInControls({
               {status === "break" && (
                 <>
                   <F0Button
-                    onClick={onClockOut}
-                    label={labels.clockOut}
-                    variant="neutral"
-                    icon={SolidStop}
-                    hideLabel
-                  />
-                  <F0Button
                     onClick={onClockIn}
                     label={labels.resume}
                     icon={SolidPlay}
+                    size="lg"
+                  />
+                  <F0Button
+                    onClick={onClockOut}
+                    label={labels.clockOut}
+                    variant="outline"
+                    size="lg"
+                    icon={SolidStop}
                   />
                 </>
               )}
