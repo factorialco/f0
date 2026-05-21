@@ -178,6 +178,10 @@ const meta: Meta = {
       description:
         "Function to handle the change event. Returns the value of the selected option, and the item object if it exists",
     },
+    onApply: {
+      description:
+        "Optional callback for the multi-select apply button. When provided, selection changes are staged until Apply is clicked, and clicking outside cancels the staged changes.",
+    },
     actions: {
       description:
         "<p>List of action buttons that will be displayed at the bottom of the select dropdown. Each action should have a label, onClick handler, optional icon, and variant.</p>" +
@@ -444,6 +448,45 @@ export const WithPersonTags: Story = {
         label: "Inactive",
         icon: Appearance,
         tag: "Disabled",
+      },
+    ],
+  },
+}
+
+export const WithIconTags: Story = {
+  args: {
+    label: "Select a theme",
+    placeholder: "Select a theme",
+    onChange: fn(),
+    options: [
+      {
+        value: "light",
+        label: "Light",
+        description: "Bright workspace theme",
+        tag: {
+          type: "icon",
+          text: "Light",
+          icon: Circle,
+        },
+      },
+      {
+        value: "dark",
+        label: "Dark",
+        description: "Low-light interface theme",
+        tag: {
+          type: "icon",
+          text: "Dark",
+          icon: Appearance,
+        },
+      },
+      {
+        value: "system",
+        label: "System",
+        tag: {
+          type: "icon",
+          text: "System",
+          icon: Desktop,
+        },
       },
     ],
   },
@@ -929,6 +972,61 @@ export const MultiplePaginatedWithPreview: Story = {
   },
 }
 
+export const MultiplePaginatedWithApply: Story = {
+  args: {
+    label: "Select Team Members",
+    placeholder: "Search employees...",
+    multiple: true,
+    value: ["3", "42", "500", "1200"],
+    defaultItem: (() => {
+      const ids = [42, 500, 1200]
+      return ids
+        .map((id) => {
+          const emp = getEmployeeById(id)
+          return emp
+            ? {
+                value: emp.value,
+                label: emp.label,
+                avatar: emp.avatar,
+              }
+            : null
+        })
+        .filter(Boolean)
+    })(),
+    clearable: true,
+    showSearchBox: true,
+    source: employeeNestedPaginatedSource,
+    mapOptions: (item: Employee) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+    }),
+    onApply: fn(),
+    onSelectItems: fn((selectionStatus) => {
+      console.log("selectionStatus", selectionStatus)
+    }),
+  },
+}
+
+export const MultipleWithApply: Story = {
+  args: {
+    label: "Select Team Members",
+    placeholder: "Search employees...",
+    multiple: true,
+    value: ["2", "5"],
+    clearable: true,
+    showSearchBox: true,
+    source: employeeNonPaginatedSource,
+    mapOptions: (item: Employee) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+      description: `${item.jobTitle} · ${item.departmentName}`,
+    }),
+    onApply: fn(),
+  },
+}
+
 /**
  * Multiple selection with paginated data (2,847 employees).
  * Use `defaultItem` to provide labels for pre-selected values not in the first page.
@@ -1144,6 +1242,29 @@ export const WithCustomTrigger: Story = {
       </div>
     </F0Select>
   ),
+}
+
+export const WithOnCreate: Story = {
+  args: {
+    label: "Select Employee",
+    placeholder: "Search employees...",
+    showSearchBox: true,
+    onChange: fn(),
+    source: employeeNonPaginatedSource,
+    mapOptions: (item: Employee) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+      description: `${item.jobTitle} · ${item.departmentName}`,
+    }),
+    onCreate: (_value: string) => {
+      return new Promise<void>((resolve) => {
+        setTimeout(() => {
+          resolve()
+        }, 500)
+      })
+    },
+  },
 }
 
 export const Snapshot: Story = {

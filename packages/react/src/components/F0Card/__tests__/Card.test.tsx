@@ -226,4 +226,87 @@ describe("F0Card Component", () => {
       expect(screen.getByRole("tooltip")).toHaveTextContent("Job title")
     })
   })
+
+  describe("alert prop", () => {
+    it("renders the alert banner when alert is provided", () => {
+      render(
+        <F0Card
+          title="Card with alert"
+          alert={{ variant: "warning", title: "Watch out!" }}
+        />
+      )
+
+      expect(screen.getByText("Watch out!")).toBeInTheDocument()
+    })
+
+    it("renders alert banner for each variant", () => {
+      const variants = ["info", "warning", "critical", "positive"] as const
+
+      variants.forEach((variant) => {
+        const { unmount } = render(
+          <F0Card title="Card" alert={{ variant, title: `${variant} alert` }} />
+        )
+        expect(screen.getByText(`${variant} alert`)).toBeInTheDocument()
+        unmount()
+      })
+    })
+
+    it("does not render the alert banner when visible is false", () => {
+      render(
+        <F0Card
+          title="Card"
+          alert={{ variant: "info", title: "Hidden alert", visible: false }}
+        />
+      )
+
+      expect(screen.queryByText("Hidden alert")).not.toBeInTheDocument()
+    })
+
+    it("renders alert without dismiss button when dismissible is not set", () => {
+      render(
+        <F0Card title="Card" alert={{ variant: "info", title: "Info alert" }} />
+      )
+
+      expect(
+        screen.queryByRole("button", { name: /close/i })
+      ).not.toBeInTheDocument()
+    })
+
+    it("renders dismiss button when dismissible is true", () => {
+      const onDismiss = vi.fn()
+      render(
+        <F0Card
+          title="Card"
+          alert={{
+            variant: "info",
+            title: "Dismissible alert",
+            dismissible: true,
+            onDismiss,
+          }}
+        />
+      )
+
+      expect(screen.getByRole("button", { name: /close/i })).toBeInTheDocument()
+    })
+
+    it("calls onDismiss when the dismiss button is clicked", async () => {
+      const user = userEvent.setup()
+      const onDismiss = vi.fn()
+
+      render(
+        <F0Card
+          title="Card"
+          alert={{
+            variant: "critical",
+            title: "Critical alert",
+            dismissible: true,
+            onDismiss,
+          }}
+        />
+      )
+
+      await user.click(screen.getByRole("button", { name: /close/i }))
+      expect(onDismiss).toHaveBeenCalledTimes(1)
+    })
+  })
 })

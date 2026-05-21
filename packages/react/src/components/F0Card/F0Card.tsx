@@ -21,6 +21,8 @@ export type F0CardProps = Omit<CardInternalProps, (typeof privateProps)[number]>
 
 export { cardImageAspectRatios, cardImageFits, cardImageSizes }
 export type { CardImageAspectRatio, CardImageFit, CardImageSize }
+export { cardAlertVariants } from "./types"
+export type { CardAlertProps, CardAlertVariant } from "./types"
 
 const F0CardBase = forwardRef<HTMLDivElement, F0CardProps>((props, ref) => {
   const publicProps = privateProps.reduce((acc, key) => {

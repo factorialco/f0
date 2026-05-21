@@ -49,8 +49,8 @@ For **MDX documentation** (the Docs tab), use the global `factorial-f0-component
 
 ```
 src/
-  components/    — all public F0 components
-  experimental/  — legacy only, do NOT add new components here
+  components/    — stable public F0 components only (promoted by Foundations team)
+  experimental/  — ALL new components start here; never add directly to components/
   hooks/         — public exported hooks
   icons/         — generated icons (do not edit manually)
   layout/        — page layout components
@@ -58,6 +58,16 @@ src/
   sds/           — satellite design systems (non-core components)
   ui/            — primitive wrappers (Radix, shadcn/ui); not re-exported publicly
 ```
+
+### New component workflow
+
+**Every new component must start in `experimental/`**, regardless of how complete it feels.
+Only a member of the **Foundations team** can promote a component from `experimental/` to `components/` (stable).
+
+1. Create component in `experimental/<Category>/F0ComponentName/`
+2. Export from `experimental/<Category>/exports.ts`
+3. Story title: `"Components/F0ComponentName"` (no `Experimental/` prefix in sidebar)
+4. Foundations team reviews and promotes to `components/` when ready — use the `f0-experimental-component-migration` skill
 
 Each component follows this structure:
 
