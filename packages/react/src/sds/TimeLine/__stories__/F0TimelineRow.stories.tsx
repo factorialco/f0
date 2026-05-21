@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useMemo, useState } from "react"
 
-import { F0Button } from "@/components/F0Button"
 import { EyeVisible } from "@/icons/app"
 import Check from "@/icons/app/Check"
 import Clock from "@/icons/app/Clock"
@@ -1339,11 +1338,7 @@ const SIGNATURE_ROWS: SignatureRow[] = [
     fileName: "Offer letter.pdf",
     fileType: "pdf",
     fileUrl: "https://example.com/offer-letter.pdf",
-    assignees: [
-      { ...james, signed: true },
-      { ...hellen, signed: true },
-      danilo,
-    ],
+    assignees: [{ ...james, signed: true }, danilo],
     statusLabel: "1 pending",
     statusVariant: "warning",
   },
@@ -1390,17 +1385,14 @@ const SignatureCollection = () => {
                   url: item.fileUrl,
                 },
               },
-              titleActions: (
-                <F0Button
-                  icon={EyeVisible}
-                  label="View file"
-                  hideLabel
-                  variant="ghost"
-                  size="sm"
-                  href={item.fileUrl}
-                  target="_blank"
-                />
-              ),
+              titleActions: [
+                {
+                  icon: EyeVisible,
+                  label: "View file",
+                  href: item.fileUrl,
+                  target: "_blank",
+                },
+              ],
             }),
             fields: [
               {

@@ -63,6 +63,13 @@ export const F0AvatarList = ({
   return (
     <OverflowList
       max={max}
+      // When `max` is provided, treat it as the exact visible count rather
+      // than a soft cap: setting `min` equal to `max` prevents OverflowList's
+      // container-width heuristics from collapsing avatars below `max` when
+      // the cluster is rendered inside narrow columns (e.g. OneDataCollection
+      // list fields). Without this, a configured `max: 3` could still render
+      // as `1 avatar + "+N"` if the column was tight.
+      min={max}
       items={avatars.map((avatar) => ({ type, ...avatar }) as AvatarVariant)}
       gap={gap}
       itemsWidth={itemWidth}
