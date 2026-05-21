@@ -1,6 +1,6 @@
 import { ControllerRenderProps, FieldError, FieldValues } from "react-hook-form"
 
-import type { InputFieldStatus } from "@/components/InputField/types"
+import type { InputFieldStatus } from "@/components/F0InputField/types"
 
 import type { InitialFile } from "./file/types"
 import type { F0Field } from "./types"

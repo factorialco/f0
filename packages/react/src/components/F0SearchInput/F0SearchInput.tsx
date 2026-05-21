@@ -9,7 +9,7 @@ import {
 import { Search } from "@/icons/app"
 import { experimentalComponent } from "@/lib/experimental"
 import { Input } from "@/ui/input"
-import { InputFieldProps } from "@/components/InputField/InputField"
+import { InputFieldProps } from "@/components/F0InputField/F0InputField"
 
 export type F0SearchInputProps = {
   value?: string

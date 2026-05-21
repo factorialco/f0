@@ -6,7 +6,7 @@ import {
 import {
   INPUTFIELD_SIZES,
   InputFieldProps,
-} from "@/components/InputField/InputField"
+} from "@/components/F0InputField/F0InputField"
 
 import { InputFieldInheritedProps } from "./types.internal"
 

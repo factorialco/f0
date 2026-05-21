@@ -13,7 +13,7 @@ import type {
 } from "@/hooks/datasource"
 
 import { WithDataTestIdProps } from "@/lib/data-testid"
-import { INPUTFIELD_SIZES, InputFieldProps } from "@/components/InputField"
+import { INPUTFIELD_SIZES, InputFieldProps } from "@/components/F0InputField"
 
 import { Action } from "./components/SelectBottomActions"
 

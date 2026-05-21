@@ -1,24 +1,24 @@
 import { Meta } from "@storybook/addon-docs/blocks"
 
-<Meta title="Primitives/InputField" />
+<Meta title="Primitives/F0InputField" />
 
-# InputField
+# F0InputField
 
-`InputField` is a wrapper component that enhances native HTML `<input>` or
+`F0InputField` is a wrapper component that enhances native HTML `<input>` or
 `<textarea>` elements with a consistent style and additional features. It
 provides a structured way to display labels, icons, error messages, character
 counters, and more.
 
 ## When to use
 
-Use `InputField` whenever you need to capture text input from a user. It's
+Use `F0InputField` whenever you need to capture text input from a user. It's
 designed to be composed with standard `input` or `textarea` elements, inheriting
 their basic functionality while adding a layer of design consistency and
 extended features from the F0 design system.
 
 ## Anatomy
 
-The `InputField` is composed of several parts:
+The `F0InputField` is composed of several parts:
 
 - **Label**: Text to describe the input's purpose.
 - **Input area**: The area where the user types. This is where the child
@@ -33,12 +33,12 @@ The `InputField` is composed of several parts:
 
 ## Usage
 
-To use `InputField`, you need to pass an `<input>` or `<textarea>` element as
-`children`. `InputField` will then clone this element and add the necessary
+To use `F0InputField`, you need to pass an `<input>` or `<textarea>` element as
+`children`. `F0InputField` will then clone this element and add the necessary
 props to it.
 
 ```tsx
-import { InputField } from "./InputField"
+import { F0InputField } from "./F0InputField"
 import { Input } from "../input"
 import { useState } from "react"
 
@@ -46,21 +46,21 @@ const MyComponent = () => {
   const [value, setValue] = useState("")
 
   return (
-    <InputField
+    <F0InputField
       label="Email"
       value={value}
       onChange={setValue}
       placeholder="your@email.com"
     >
       <Input />
-    </InputField>
+    </F0InputField>
   )
 }
 ```
 
 ## Props
 
-`InputField` accepts a variety of props to customize its behavior and
+`F0InputField` accepts a variety of props to customize its behavior and
 appearance.
 
 ### General Props
@@ -123,10 +123,10 @@ appearance.
 
 ## Composition
 
-The `InputField` is designed to be composed with other components. The
+The `F0InputField` is designed to be composed with other components. The
 `children` prop is the key to this composition. You can pass any component that
 accepts `value`, `onChange`, `onFocus`, `onBlur`, `disabled`, and `readonly`
-props. The `InputField` will automatically provide them.
+props. The `F0InputField` will automatically provide them.
 
 This is especially useful for creating more complex and specialized input
 components while maintaining a consistent appearance.

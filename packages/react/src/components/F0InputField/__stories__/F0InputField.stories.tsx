@@ -4,18 +4,18 @@ import * as icons from "@/icons/app"
 import { Placeholder, Search } from "@/icons/app"
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { InputField, INPUTFIELD_SIZES } from "../"
+import { F0InputField, INPUTFIELD_SIZES } from "../"
 
 const meta = {
-  title: "Primitives/InputField",
-  component: InputField,
+  title: "Primitives/F0InputField",
+  component: F0InputField,
   parameters: {
     docs: {
       description: {
         component: [
-          "`InputField` is the shared **primitive** that every writable F0 input is composed on top of. It provides the visual chrome (label, status, icon, append tag, clear button, hint, error, loading) and the keyboard/a11y behaviour that the design system guarantees across every input",
+          "`F0InputField` is the shared **primitive** that every writable F0 input is composed on top of. It provides the visual chrome (label, status, icon, append tag, clear button, hint, error, loading) and the keyboard/a11y behaviour that the design system guarantees across every input",
           "**Audience.** This page is for design-system contributors building a new type of input (for example `F0PercentageInput`, `F0CurrencyInput`, `F0PhoneInput`). In product code, always reach for the dedicated `F0*Input` component documented under the `Inputs/` group",
-          "**Contract.** Any new writable input added to the design system must be composed on top of `InputField` — never reimplement the chrome from scratch. This is how we keep visual and behavioural consistency across the whole input family",
+          "**Contract.** Any new writable input added to the design system must be composed on top of `F0InputField` — never reimplement the chrome from scratch. This is how we keep visual and behavioural consistency across the whole input family",
         ]
           .map((text) => `<p>${text}.</p>`)
           .join(""),
@@ -106,7 +106,7 @@ const meta = {
     },
   },
   tags: ["autodocs", "experimental"],
-} satisfies Meta<typeof InputField>
+} satisfies Meta<typeof F0InputField>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -365,13 +365,17 @@ export const Snapshot: Story = {
           <section key={size}>
             <h4 className="mb-3 text-lg font-semibold">Size: {size}</h4>
             <div className="flex flex-col gap-4">
-              <InputField
+              <F0InputField
                 size={size}
                 label="Label text here"
                 children={<input type="text" className="w-full" />}
               />
               {snapshotVariants.map((variant, index) => (
-                <InputField key={`${size}-${index}`} size={size} {...variant} />
+                <F0InputField
+                  key={`${size}-${index}`}
+                  size={size}
+                  {...variant}
+                />
               ))}
             </div>
           </section>

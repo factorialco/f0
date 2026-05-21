@@ -8,7 +8,7 @@ import {
 import { EyeInvisible, EyeVisible, LockLocked } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Input as ShadcnInput } from "@/ui/input"
-import { InputFieldProps } from "@/components/InputField"
+import { InputFieldProps } from "@/components/F0InputField"
 
 export type InputInternalProps<T extends string> = Pick<
   ComponentProps<typeof ShadcnInput>,

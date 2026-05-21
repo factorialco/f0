@@ -13,7 +13,7 @@ import { SelectedItemsDetailedStatus } from "@/hooks/datasource/types/selection.
 import { Appearance, Circle, Desktop, Placeholder, Plus } from "@/icons/app"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
-import { inputFieldStatus } from "@/components/InputField"
+import { inputFieldStatus } from "@/components/F0InputField"
 
 import { F0Select, selectSizes } from "../index"
 import {

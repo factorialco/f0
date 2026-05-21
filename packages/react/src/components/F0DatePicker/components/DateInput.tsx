@@ -10,7 +10,7 @@ import { isActiveDate } from "@/components/OneCalendar/utils"
 import { Calendar } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Input } from "@/ui/input"
-import { InputFieldProps } from "@/components/InputField/InputField"
+import { InputFieldProps } from "@/components/F0InputField/F0InputField"
 
 import { DatePickerValue } from "../types"
 import { InputFieldInheritedProps } from "../types.internal"

@@ -683,7 +683,7 @@ describe("F0FormField", () => {
 
       render(<F0FormField field={field} value="" onChange={onChange} />)
 
-      // InputField renders placeholder as visible text, not as HTML attribute
+      // F0InputField renders placeholder as visible text, not as HTML attribute
       const input = screen.getByLabelText("Email") as HTMLInputElement
       expect(input).toBeInTheDocument()
     })

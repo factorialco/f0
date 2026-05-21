@@ -7,7 +7,7 @@ import {
 } from "react"
 
 import { cn } from "../lib/utils"
-import { InputField, InputFieldProps } from "./InputField"
+import { F0InputField, InputFieldProps } from "../components/F0InputField"
 
 export type TextareaProps = Omit<
   TextareaHTMLAttributes<HTMLTextAreaElement>,
@@ -98,7 +98,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     })
 
     return (
-      <InputField
+      <F0InputField
         label={label}
         labelIcon={labelIcon}
         icon={icon}
@@ -129,7 +129,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           disabled={disabled}
           required={required}
         />
-      </InputField>
+      </F0InputField>
     )
   }
 )

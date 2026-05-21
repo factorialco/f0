@@ -3,7 +3,7 @@ import { useMemo } from "react"
 import { Arrow } from "@/components/F0Select/components/Arrow"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn } from "@/lib/utils"
-import { InputField, InputFieldProps } from "@/components/InputField"
+import { F0InputField, InputFieldProps } from "@/components/F0InputField"
 
 import {
   EntitySelectEntity,
@@ -94,7 +94,7 @@ export const Trigger = ({
     flattenedList.length === 1 ? flattenedList[0].subItem.subName : undefined
 
   return (
-    <InputField
+    <F0InputField
       onClickContent={onClickContent}
       role="combobox"
       label={label}
@@ -161,6 +161,6 @@ export const Trigger = ({
               : `${flattenedList.length} ${selected}`}
         </OneEllipsis>
       </span>
-    </InputField>
+    </F0InputField>
   )
 }

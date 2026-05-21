@@ -11,7 +11,7 @@ import {
   FormItem,
   FormMessage,
 } from "@/ui/form"
-import { InputMessages } from "@/components/InputField/components/InputMessages"
+import { InputMessages } from "@/components/F0InputField/components/InputMessages"
 
 import type { RenderCustomFieldSelectConfig } from "../types"
 import type { F0Field } from "./types"

@@ -35,9 +35,9 @@ import { useI18n } from "@/lib/providers/i18n"
 import { toArray } from "@/lib/toArray"
 import { cn } from "@/lib/utils"
 import { GroupHeader } from "@/ui/GroupHeader/index"
-import { InputField } from "@/components/InputField"
-import { InputMessages } from "@/components/InputField/components/InputMessages"
-import { Label } from "@/components/InputField/components/Label"
+import { F0InputField } from "@/components/F0InputField"
+import { InputMessages } from "@/components/F0InputField/components/InputMessages"
+import { Label } from "@/components/F0InputField/components/Label"
 import {
   SelectContent,
   Select as SelectPrimitive,
@@ -1062,7 +1062,7 @@ const F0SelectComponent = forwardRef(function Select<
               {children}
             </div>
           ) : (
-            <InputField
+            <F0InputField
               label={label}
               error={error}
               required={required}
@@ -1142,7 +1142,7 @@ const F0SelectComponent = forwardRef(function Select<
                   />
                 )}
               </button>
-            </InputField>
+            </F0InputField>
           )}
         </SelectTrigger>
         {openLocal && selectContent}
