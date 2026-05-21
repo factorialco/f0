@@ -99,7 +99,7 @@ Defaults to `["hours", "minutes"]` when `units` is omitted or empty.
 #### When NOT to use
 
 - The value is a **point in time** (date, time of day, datetime). Use a date or time picker instead.
-- The value is a **single dimension-less number** (count, percentage). Use [F0NumberInput](?path=/docs/components-inputs-numberinput--documentation).
+- The value is a **single dimension-less number** (count, percentage). Use [F0NumberInput](?path=/docs/components-inputs-number-input--documentation).
 - You need to express ranges (`from / to`). Compose two date pickers or a range picker.
 
 ---
@@ -139,7 +139,7 @@ Each unit accepts an optional config via `fields={{ [unit]: { ... } }}`:
 
 ### Status messages
 
-Pass `status={{ type, message }}` to colour the border and render a message below the field. The same precedence rules as [InputField](?path=/docs/components-primitives-inputfield--documentation) apply: `error` > `warning` > `info`.
+Pass `status={{ type, message }}` to colour the border and render a message below the field. The same precedence rules as [F0InputField](?path=/docs/components-primitives-f0inputfield--documentation) apply: `error` > `warning` > `info`.
 
 <Canvas of={Stories.WithError} />
 

@@ -20,7 +20,7 @@ It shares the chrome conventions (sizes, focus ring, disabled and loading states
 
 - **Search icon**: `Search` icon rendered on the left. Not configurable — every search input shares the same affordance.
 - **Input area**: native `<input type="search">` with `role="searchbox"`.
-- **Placeholder**: rendered inside the input. Also used as the accessible name (the visible label is hidden because search fields are self-explanatory).
+- **Placeholder**: rendered inside the input. `F0SearchInput` does not expose a `label` prop — `placeholder` doubles as the accessible name (falls back to `"Search"` when omitted).
 - **Clear button**: optional (`clearable`), rendered only while the value is non-empty.
 
 `F0SearchInput` defaults to `size="sm"` — the only F0 input that does so, because search fields most often live in compact toolbars. Override with `size="md"` for primary search surfaces (command palette, top-of-page search).
@@ -113,7 +113,7 @@ When `clearable` is `true` and the value is non-empty, a clear button is rendere
           <code>string</code>
         </td>
         <td>
-          Visible placeholder and accessible name. Defaults to{" "}
+          Visible placeholder. Also used as the accessible name; falls back to{" "}
           <code>"Search"</code> when omitted.
         </td>
       </tr>
