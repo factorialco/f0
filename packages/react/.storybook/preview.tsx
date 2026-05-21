@@ -184,6 +184,13 @@ const preview: Preview = {
         const aIndex = topLevelOrder.indexOf(aId)
         const bIndex = topLevelOrder.indexOf(bId)
 
+        // Within the same top-level group, pin Components/Primitives first.
+        if (aIndex !== -1 && bIndex !== -1 && aIndex === bIndex) {
+          const isAPrimitive = a.id.startsWith("components-primitives")
+          const isBPrimitive = b.id.startsWith("components-primitives")
+          if (isAPrimitive !== isBPrimitive) return isAPrimitive ? -1 : 1
+        }
+
         if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex
         if (aIndex !== -1) return -1
         if (bIndex !== -1) return 1
@@ -211,7 +218,9 @@ const preview: Preview = {
         }
 
         // Within Components/, surface Primitives/ before anything else so
-        // contributors see the building blocks first.
+        // contributors see the building blocks first. (Top-level pin above
+        // already handles the common case; this is a fallback for titles
+        // that did not match topLevelOrder.)
         const isAComponentsPrimitive =
           a.title.startsWith("Components/Primitives") ||
           a.id.startsWith("components-primitives")
