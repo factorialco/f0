@@ -908,4 +908,53 @@ describe("Select", () => {
       })
     })
   })
+
+  describe("controlled value sync", () => {
+    // Regression test for https://github.com/factorialco/f0/pull/4134
+    // After PR #4134 refactored F0Select to use `useSelectable`'s `localValue` /
+    // `committedSelectionRef`, programmatic resets of the `value` prop from the
+    // parent stopped being reflected in the displayed selection: the previous
+    // value remained "stuck" in the trigger because the internal
+    // `updateLocalSelectedState` merge in useSelectable was additive and never
+    // unchecked items that disappeared from the external state.
+    it("reflects an externally reset `value` prop after the user has clicked another option", async () => {
+      const user = userEvent.setup()
+
+      const { rerender } = render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          value="option1"
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("Option 1")).toBeInTheDocument()
+      })
+
+      // User picks Option 2 (simulates a transient selection inside a form).
+      await openSelect(user)
+      await user.click(screen.getByText("Option 2"))
+
+      await waitFor(() => {
+        expect(screen.getByText("Option 2")).toBeInTheDocument()
+      })
+
+      // Parent programmatically resets the value (e.g. cross-field rule
+      // forcing recurrence back to a default option). The trigger must
+      // reflect the new value, not stay stuck on the user's previous pick.
+      rerender(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          value="option3"
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("Option 3")).toBeInTheDocument()
+      })
+      expect(screen.queryByText("Option 2")).not.toBeInTheDocument()
+    })
+  })
 })
