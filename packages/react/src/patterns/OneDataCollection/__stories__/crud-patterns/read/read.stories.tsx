@@ -4,7 +4,7 @@ import { ComponentProps, useState } from "react"
 
 import { StandardLayout } from "@/layouts/StandardLayout"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
-import { Download, Pencil } from "@/icons/app"
+import { ChevronRight, Download, Pencil } from "@/icons/app"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
 import { F0Dialog } from "@/patterns/F0Dialog"
@@ -148,10 +148,28 @@ function DefaultDialogScenario() {
 function OpenAsPageScenario() {
   const [resourcePage, setResourcePage] = useState<Resource | null>(null)
 
+  const openResourcePage = (item: Resource) => () => setResourcePage(item)
+
   const source = useDataCollectionSource({
     dataAdapter: createResourceDataAdapter(initialResources),
     filters: resourceFilters,
-    itemOnClick: (item) => () => setResourcePage(item),
+    itemOnClick: openResourcePage,
+    itemActions: (item) => [
+      {
+        label: "Duplicate",
+        icon: Pencil,
+        type: "primary",
+        onClick: () => {},
+      },
+      {
+        label: "Open",
+        icon: ChevronRight,
+        type: "primary",
+        hideLabel: true,
+        hideInMobileDropdown: true,
+        onClick: openResourcePage(item),
+      },
+    ],
     primaryActions: () => defaultCrudPrimaryAction(() => {}),
     secondaryActions: defaultCrudSecondaryActions(),
   })

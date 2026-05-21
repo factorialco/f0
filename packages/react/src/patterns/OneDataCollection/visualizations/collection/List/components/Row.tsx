@@ -88,6 +88,7 @@ export const Row = <
   const itemDef = itemDefinition(item)
 
   const {
+    hasMobileItemActions,
     primaryItemActions,
     dropdownItemActions,
     mobileDropdownItemActions,
@@ -168,18 +169,20 @@ export const Row = <
             />
           </ItemActionsRowContainer>
 
-          <ItemActionsMobile
-            className="absolute -right-px bottom-0 top-0 z-20 items-center justify-end gap-2 py-2 pl-20 pr-3 md:hidden"
-            items={mobileDropdownItemActions}
-            onOpenChange={handleDropDownOpenChange}
-          />
+          {hasMobileItemActions && (
+            <ItemActionsMobile
+              className="absolute -right-px bottom-0 top-0 z-20 items-center justify-end gap-2 py-2 pl-20 pr-3 md:hidden"
+              items={mobileDropdownItemActions}
+              onOpenChange={handleDropDownOpenChange}
+            />
+          )}
         </>
       )}
       {source.selectable && id !== undefined && (
         <div
           className={cn(
             "pointer-events-auto absolute right-3 top-3 flex h-8 w-8 items-center justify-center md:hidden",
-            source.itemActions && "right-12"
+            hasMobileItemActions && "right-12"
           )}
         >
           <F0Checkbox
