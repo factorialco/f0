@@ -1595,7 +1595,7 @@ export const CustomField: Story = {
         console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
         return { success: true }
       },
-      submitConfig: { label: "Create Task", icon: null },
+      submitConfig: { label: "Create Task" },
     })
 
     const renderCustomField = useCallback((props: RenderCustomFieldProps) => {
@@ -1723,7 +1723,7 @@ export const SelectWithCustomFieldName: Story = {
         console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
         return { success: true }
       },
-      submitConfig: { label: "Save", icon: null },
+      submitConfig: { label: "Save" },
     })
 
     const renderCustomField = useCallback(
@@ -1916,7 +1916,7 @@ export const VisualDesignExample: Story = {
         console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
         return { success: true }
       },
-      submitConfig: { label: "Create Survey", icon: null },
+      submitConfig: { label: "Create Survey" },
     })
 
     return (
