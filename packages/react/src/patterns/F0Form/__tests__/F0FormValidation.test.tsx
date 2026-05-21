@@ -608,6 +608,7 @@ describe("F0Form datetime field validation", () => {
         defaultValues={{
           scheduledAt: new Date("2026-01-01T09:00:00"),
         }}
+        errorTriggerMode="on-blur"
         onSubmit={async () => ({ success: true })}
       />
     )
@@ -682,6 +683,7 @@ describe("F0Form datetime field validation", () => {
         defaultValues={{
           scheduledAt: new Date("2026-06-15T12:00:00"),
         }}
+        errorTriggerMode="on-blur"
         onSubmit={async () => ({ success: true })}
       />
     )

@@ -121,7 +121,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
     onSubmit,
     submitConfig,
     className,
-    errorTriggerMode = "on-blur",
+    errorTriggerMode = "on-submit",
     styling,
     initialFiles,
     isLoadingInitialFiles,
@@ -511,7 +511,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     onSubmit,
     submitConfig,
     className,
-    errorTriggerMode = "on-blur",
+    errorTriggerMode = "on-submit",
     styling,
     formRef,
     isLoading: isFormLoading,
@@ -1085,10 +1085,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             return (
               <div
                 key={groupedItem.item.field.id}
-                className={cn(
-                  fieldGapClass,
-                  "empty:hidden [&>span.hidden]:hidden"
-                )}
+                className={cn(fieldGapClass, "has-[>span.hidden]:hidden")}
               >
                 {fieldContent}
               </div>

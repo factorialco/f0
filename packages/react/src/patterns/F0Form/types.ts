@@ -131,9 +131,9 @@ export type FormDefinitionItem = FieldItem | RowDefinition | SectionDefinition
 
 /**
  * When to trigger and display validation errors (does not apply with autosubmit)
- * - "on-blur": Errors appear when the user leaves a field (default)
+ * - "on-blur": Errors appear when the user leaves a field
  * - "on-change": Errors appear as the user types (real-time validation)
- * - "on-submit": Errors only appear after attempting to submit the form
+ * - "on-submit": Errors only appear after attempting to submit the form (default)
  */
 export type F0FormErrorTriggerMode = "on-blur" | "on-change" | "on-submit"
 
