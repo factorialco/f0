@@ -3,6 +3,7 @@ import {
   F0AvatarIcon,
   F0Box,
   F0Button,
+  F0Card,
   F0Dialog,
   F0Icon,
   F0Text,
@@ -69,6 +70,11 @@ import {
   useCostsByLegalEntityToggle,
 } from "../../costsByLegalEntityToggleStore"
 import { trainingsTopNav } from "../../topNav"
+import {
+  markCostsUpdated,
+  useTriggeredChangedMovementIds,
+  useUpdatedMovementIds,
+} from "../../updatedCostsStore"
 
 export const meta: PrototypeMeta = {
   slug: "trainings-budgets",
@@ -894,7 +900,10 @@ function DetailView({
   const [isExportOpen, setIsExportOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isAddGroupOpen, setIsAddGroupOpen] = useState(false)
-  const [budgetUpdateApplied, setBudgetUpdateApplied] = useState(false)
+  const updatedMovementIds = useUpdatedMovementIds()
+  const triggeredChangedMovementIds = useTriggeredChangedMovementIds()
+  const [isChangedCostsReviewOpen, setIsChangedCostsReviewOpen] =
+    useState(false)
   const [selectedMovement, setSelectedMovement] =
     useState<TrainingBudgetMovement | null>(null)
   const [extraMovements, setExtraMovements] = useState<
@@ -968,18 +977,26 @@ function DetailView({
     [movements, trainingParents]
   )
   const changedMovements = useMemo(
-    () => movements.filter((movement) => Boolean(movement.costUpdateNotice)),
-    [movements]
+    () =>
+      movements.filter(
+        (movement) =>
+          (Boolean(movement.costUpdateNotice) ||
+            triggeredChangedMovementIds.has(movement.id)) &&
+          !updatedMovementIds.has(movement.id)
+      ),
+    [movements, triggeredChangedMovementIds, updatedMovementIds]
   )
-  const changedMovementIds = useMemo(
-    () => new Set(changedMovements.map((movement) => movement.id)),
-    [changedMovements]
-  )
-  const needsBudgetUpdate =
-    Boolean(b?.costUpdateNotice) && changedMovements.length > 0 && !budgetUpdateApplied
-  const budgetUpdateDescription = `${changedMovements.length} ${
-    changedMovements.length === 1 ? "group has" : "groups have"
-  } changed after being added to this budget. Review the marked groups before updating.`
+  const changedCostsSummary =
+    changedMovements.length === 0
+      ? ""
+      : `${changedMovements.length} ${
+          changedMovements.length === 1 ? "training group has" : "training groups have"
+        } changes that can affect this budget's cost figures. Review the affected groups before updating costs.`
+  const openChangedCostsReview = () => setIsChangedCostsReviewOpen(true)
+  const updateChangedCosts = () => {
+    markCostsUpdated(changedMovements.map((movement) => movement.id))
+    setIsChangedCostsReviewOpen(false)
+  }
 
   const goToTrainingGroup = (m: TrainingBudgetMovement) => {
     navigate(`/p/trainings?training=${m.trainingId}&class=${m.groupId}`)
@@ -1063,7 +1080,6 @@ function DetailView({
           const paymentStatus = Array.isArray(filters?.paymentStatus)
             ? (filters.paymentStatus as string[])
             : []
-
           // Match on parent rows. A parent matches when any of its
           // children matches. The table will then expand to surface the
           // child rows that triggered the match.
@@ -1304,12 +1320,13 @@ function DetailView({
           <AmountWidget label="Available" value={fmtEurAmount(available)} />
         </div>
 
-        {needsBudgetUpdate && b.costUpdateNotice && (
+        {changedMovements.length > 0 && (
           <div className="px-6">
             <F0Alert
               variant="warning"
-              title="Budget needs update"
-              description={budgetUpdateDescription}
+              title="Costs changed"
+              description={changedCostsSummary}
+              action={{ label: "Review groups", onClick: openChangedCostsReview }}
             />
           </div>
         )}
@@ -1328,28 +1345,10 @@ function DetailView({
                     label: "Training group",
                     id: "groupName",
                     width: 283,
-                    render: (item) => {
-                      const label = item.isParent
-                        ? item.trainingName
-                        : item.groupName
-
-                      return !item.isParent && changedMovementIds.has(item.id)
-                        ? {
-                            type: "compound",
-                            value: {
-                              separator: " · ",
-                              segments: [
-                                { type: "text", value: label },
-                                {
-                                  type: "text",
-                                  value: "Needs update",
-                                  tone: "warning",
-                                },
-                              ],
-                            },
-                          }
-                        : { type: "text", value: label }
-                    },
+                    render: (item) => ({
+                      type: "text",
+                      value: item.isParent ? item.trainingName : item.groupName,
+                    }),
                   },
                   {
                     label: "Group status",
@@ -1536,15 +1535,29 @@ function DetailView({
           />
         )}
 
+        {isChangedCostsReviewOpen && (
+          <ChangedCostsReviewSidepanel
+            movements={changedMovements}
+            onOpenMovement={(movement) => {
+              setSelectedMovement(movement)
+              setIsChangedCostsReviewOpen(false)
+            }}
+            onUpdateCosts={updateChangedCosts}
+            onClose={() => setIsChangedCostsReviewOpen(false)}
+          />
+        )}
+
         {selectedMovement && (
           <TrainingGroupCostSidepanel
             movement={selectedMovement}
+            costsChanged={changedMovements.some(
+              (movement) => movement.id === selectedMovement.id
+            )}
             hasPrevious={selectedMovementIndex > 0}
             hasNext={selectedMovementIndex < movementNavigation.length - 1}
             onPrevious={() => selectMovementAt(selectedMovementIndex - 1)}
             onNext={() => selectMovementAt(selectedMovementIndex + 1)}
             onGoToGroup={() => goToTrainingGroup(selectedMovement)}
-            onUpdateBudget={() => setBudgetUpdateApplied(true)}
             onClose={() => setSelectedMovement(null)}
           />
         )}
@@ -1555,21 +1568,21 @@ function DetailView({
 
 function TrainingGroupCostSidepanel({
   movement,
+  costsChanged,
   hasPrevious,
   hasNext,
   onPrevious,
   onNext,
   onGoToGroup,
-  onUpdateBudget,
   onClose,
 }: {
   movement: TrainingBudgetMovement
+  costsChanged: boolean
   hasPrevious: boolean
   hasNext: boolean
   onPrevious: () => void
   onNext: () => void
   onGoToGroup: () => void
-  onUpdateBudget: () => void
   onClose: () => void
 }) {
   const [activeTab, setActiveTab] = useState<"cost" | "participants">("cost")
@@ -1640,7 +1653,7 @@ function TrainingGroupCostSidepanel({
       {activeTab === "cost" ? (
         <GroupSidepanelCostTab
           movement={movement}
-          onUpdateBudget={onUpdateBudget}
+          costsChanged={costsChanged}
         />
       ) : (
         <GroupSidepanelParticipantsTab movement={movement} />
@@ -1649,12 +1662,50 @@ function TrainingGroupCostSidepanel({
   )
 }
 
+function ChangedCostsReviewSidepanel({
+  movements,
+  onOpenMovement,
+  onUpdateCosts,
+  onClose,
+}: {
+  movements: TrainingBudgetMovement[]
+  onOpenMovement: (movement: TrainingBudgetMovement) => void
+  onUpdateCosts: () => void
+  onClose: () => void
+}) {
+  return (
+    <F0Dialog
+      isOpen
+      onClose={onClose}
+      position="right"
+      width="md"
+      title={`${movements.length} groups with cost changes`}
+      description="These groups have changes that can affect the budget's cost figures. Update costs once you have reviewed the list."
+      primaryAction={{ label: "Update costs", onClick: onUpdateCosts }}
+      secondaryAction={{ label: "Cancel", onClick: onClose }}
+      disableContentPadding
+    >
+      <F0Box display="flex" flexDirection="column" gap="md" padding="lg">
+        {movements.map((movement) => (
+          <F0Card
+            key={movement.id}
+            compact
+            title={movement.groupName}
+            description={movement.trainingName}
+            onClick={() => onOpenMovement(movement)}
+          />
+        ))}
+      </F0Box>
+    </F0Dialog>
+  )
+}
+
 function GroupSidepanelCostTab({
   movement,
-  onUpdateBudget,
+  costsChanged,
 }: {
   movement: TrainingBudgetMovement
-  onUpdateBudget: () => void
+  costsChanged: boolean
 }) {
   const les = legalEntitiesForMovement(movement)
   const hasMultipleLEs = les.length > 1
@@ -1674,6 +1725,14 @@ function GroupSidepanelCostTab({
 
   return (
     <div className="flex flex-col gap-4 px-5 py-4">
+      {costsChanged && (
+        <F0Alert
+          variant="warning"
+          title="Costs changed"
+          description="This group's costs changed since they were last updated. Review the cost figures before updating costs."
+        />
+      )}
+
       {/* InputSelect Payment status — node 5033:79904 */}
       <div className="flex flex-col gap-2">
         <span className="text-f1-foreground-secondary text-[14px] leading-[20px] font-medium tracking-[-0.07px]">
@@ -1689,44 +1748,6 @@ function GroupSidepanelCostTab({
           <F0Icon icon={ArrowDown} size="sm" color="secondary" />
         </button>
       </div>
-
-      {movement.costUpdateNotice && (
-        <F0Box
-          padding="md"
-          border="default"
-          borderColor="secondary"
-          borderRadius="lg"
-          display="flex"
-          flexDirection="column"
-          gap="sm"
-          background="warning"
-        >
-          <F0Box display="flex" justifyContent="between" gap="md">
-            <F0Box display="flex" flexDirection="column" gap="xs">
-              <F0Text variant="label" content="Budget needs update" />
-              <F0Text
-                variant="description"
-                content={`${movement.costUpdateNotice.change ?? "Group changed"} · ${movement.costUpdateNotice.impact ?? "No total change"}`}
-              />
-            </F0Box>
-            <F0Button
-              label="Update budget"
-              variant="outline"
-              onClick={onUpdateBudget}
-            />
-          </F0Box>
-          <F0Text
-            variant="description"
-            content="Changes detected in this group:"
-          />
-          {movement.costUpdateNotice.details?.map((detail) => (
-            <F0Box key={detail} display="flex" gap="sm" alignItems="start">
-              <F0Text variant="description" content="•" />
-              <F0Text variant="description" content={detail} />
-            </F0Box>
-          ))}
-        </F0Box>
-      )}
 
       {/* Total cost grid — node 5033:79675 (header sticky + card) */}
       <div className="flex flex-col">

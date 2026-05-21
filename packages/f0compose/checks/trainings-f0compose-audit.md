@@ -256,12 +256,14 @@ section updated before the local check passes.
 - `packages/f0compose/src/prototypes/trainings/detail/TrainingsDetail.tsx`
 - `packages/f0compose/src/prototypes/trainings/NewTrainingWizard.tsx`
 - `packages/f0compose/src/prototypes/trainings/detail/class/ParticipantsTab.tsx`
+- `packages/f0compose/src/prototypes/trainings/detail/ParticipantActionModal.tsx`
 - `packages/f0compose/src/prototypes/trainings/detail/ClassModals.tsx`
 - `packages/f0compose/src/prototypes/trainings/detail/NewClassWizard.tsx`
 - `packages/f0compose/src/prototypes/trainings/detail/NewFormWizard.tsx`
 - `packages/f0compose/src/prototypes/trainings/detail/ClassDetail.tsx`
 - `packages/f0compose/src/prototypes/trainings/detail/CostsTab.tsx`
 - `packages/f0compose/src/prototypes/trainings/costsByLegalEntityToggleStore.ts`
+- `packages/f0compose/src/prototypes/trainings/updatedCostsStore.ts`
 - `packages/f0compose/src/prototypes/trainings/tabs.ts`
 - `packages/f0compose/src/prototypes/trainings/_modules/budgets/TrainingsBudgets.tsx`
 - `packages/f0compose/src/fixtures/trainings.ts`
@@ -288,12 +290,14 @@ section updated before the local check passes.
 - `packages/f0compose/src/prototypes/trainings/detail/TrainingsDetail.tsx`
 - `packages/f0compose/src/prototypes/trainings/NewTrainingWizard.tsx`
 - `packages/f0compose/src/prototypes/trainings/detail/class/ParticipantsTab.tsx`
+- `packages/f0compose/src/prototypes/trainings/detail/ParticipantActionModal.tsx`
 - `packages/f0compose/src/prototypes/trainings/detail/ClassModals.tsx`
 - `packages/f0compose/src/prototypes/trainings/detail/NewClassWizard.tsx`
 - `packages/f0compose/src/prototypes/trainings/detail/NewFormWizard.tsx`
 - `packages/f0compose/src/prototypes/trainings/detail/ClassDetail.tsx`
 - `packages/f0compose/src/prototypes/trainings/detail/CostsTab.tsx`
 - `packages/f0compose/src/prototypes/trainings/costsByLegalEntityToggleStore.ts`
+- `packages/f0compose/src/prototypes/trainings/updatedCostsStore.ts`
 - `packages/f0compose/src/prototypes/trainings/tabs.ts`
 - `packages/f0compose/src/prototypes/trainings/_modules/budgets/TrainingsBudgets.tsx`
 - `packages/f0compose/src/fixtures/trainings.ts`
@@ -327,10 +331,19 @@ section updated before the local check passes.
   are derived from the employees assigned to each training group. The budget
   breakdown keeps direct/indirect costs as prototype estimates, but salary cost
   is validated against `salaryCostForEmployeeInGroup(employeeId, groupId)`.
-- `Training budget 2026 · Needs update` is an exploration state for reviewing
-  budget changes since last review. It uses `F0Alert` for the global warning,
-  `F0Dialog position="right"` for the review panel, and `OneDataCollection` to
-  list affected groups before the user marks the changes as reviewed.
+- `Training budget 2026` now treats update warnings as cost-scoped, not
+  budget-scoped. The budget detail page shows a global `F0Alert` about changed
+  costs, the review sidepanel lists affected training groups without claiming a
+  specific change type, and `Update costs` resolves the remaining affected
+  groups in one general action.
+- `packages/f0compose/src/prototypes/trainings/updatedCostsStore.ts` keeps the
+  prototype-only cost update state synced between the group Costs tab and the
+  budget detail. Updating one group from its Costs tab removes that group from
+  the budget detail review count.
+- Cost-affecting prototype interactions now mark the linked training group as
+  changed: editing group costs, recalculating salary cost, changing budget or
+  payment status, adding participants, and deleting participants. The shared
+  store is prototype-only and mirrors the future backend signal.
 - Budget group sidepanel keeps `F0Dialog position="right"`. Header actions now
   use the standard dialog action slot only for `Go to Training group`; previous
   and next group controls are overlaid into the same top-level header action

@@ -476,14 +476,6 @@ export type TrainingBudget = {
   // Optional unique people count for the budget summary. This can be lower than
   // the sum of group participants when the same employee attends multiple groups.
   peopleCount?: number
-  costUpdateNotice?: {
-    title: string
-    description: string
-    change?: string
-    currentStatus?: string
-    impact?: string
-    details?: string[]
-  }
 }
 
 export const trainingBudgets: TrainingBudget[] = [
@@ -507,11 +499,6 @@ export const trainingBudgets: TrainingBudget[] = [
     endDate: "2026-12-31",
     legalEntityId: "le-factorial-spain",
     peopleCount: 17,
-    costUpdateNotice: {
-      title: "Training groups need budget update",
-      description:
-        "3 training groups changed since they were added to this budget.",
-    },
   },
   {
     id: "bud-training-2026",

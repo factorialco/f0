@@ -15,6 +15,7 @@ type Props = {
   participantName: string | null
   count: number
   onClose: () => void
+  onConfirm?: () => void
 }
 
 const TITLE: Record<ParticipantAction, string> = {
@@ -53,6 +54,7 @@ export function ParticipantActionModal({
   participantName,
   count,
   onClose,
+  onConfirm,
 }: Props) {
   const [dueDate, setDueDate] = useState("")
   const [employeeQuery, setEmployeeQuery] = useState("")
@@ -80,7 +82,7 @@ export function ParticipantActionModal({
       description={DESCRIPTION[action]}
       primaryAction={{
         label: action === "delete" ? "Remove" : "Confirm",
-        onClick: onClose,
+        onClick: onConfirm ?? onClose,
         variant: action === "delete" ? "critical" : "default",
       }}
       secondaryAction={{ label: "Cancel", onClick: onClose }}

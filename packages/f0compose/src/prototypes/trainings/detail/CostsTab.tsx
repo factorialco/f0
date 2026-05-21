@@ -23,6 +23,12 @@ import {
   setCostsByLegalEntityToggle,
   useCostsByLegalEntityToggle,
 } from "../costsByLegalEntityToggleStore"
+import {
+  markCostsChanged,
+  markCostsUpdated,
+  useTriggeredChangedMovementIds,
+  useUpdatedMovementIds,
+} from "../updatedCostsStore"
 import type { Training, TrainingClass, TrainingParticipant } from "@/fixtures"
 import {
   breakdownByLegalEntityFor,
@@ -150,6 +156,8 @@ function BudgetLinkBanner({
   totalCost: number
   movement: (typeof trainingBudgetMovements)[number] | null
 }) {
+  const updatedMovementIds = useUpdatedMovementIds()
+  const triggeredChangedMovementIds = useTriggeredChangedMovementIds()
   const goToBudgets = () => {
     window.location.href = budgetId
       ? `/p/trainings-budgets?view=detail&budgetId=${budgetId}`
@@ -199,14 +207,18 @@ function BudgetLinkBanner({
     />
   )
 
-  if (movement?.costUpdateNotice) {
+  if (
+    movement &&
+    (movement.costUpdateNotice || triggeredChangedMovementIds.has(movement.id)) &&
+    !updatedMovementIds.has(movement.id)
+  ) {
     return (
       <div className="flex flex-col gap-3">
         <F0Alert
           variant="warning"
-          title="Update budget"
-          description={`${movement.costUpdateNotice.change ?? "Group changed"} · ${movement.costUpdateNotice.impact ?? "No total change"}. This group changed after it was added to the budget.`}
-          action={{ label: "Update budget", onClick: goToBudgets }}
+          title="Costs changed"
+          description="This group's costs have changed. Update costs to refresh the figures shown here."
+          action={{ label: "Update costs", onClick: () => markCostsUpdated([movement.id]) }}
         />
         {statusAlert}
       </div>
@@ -256,6 +268,7 @@ export function CostsTab({ training, klass }: Props) {
   const totalCost = directCost + indirectCost + salaryCost
   const netCost = Math.max(0, totalCost - subsidizedCost)
   const perParticipant = Math.round(netCost / Math.max(participants, 1))
+  const markLinkedCostsChanged = () => markCostsChanged(linkedMovement?.id)
 
   const budgetOptions = [
     { value: "", label: "No budget linked" },
@@ -303,7 +316,10 @@ export function CostsTab({ training, klass }: Props) {
             hideLabel
             placeholder="Select a budget"
             value={budgetId ?? ""}
-            onChange={(v: string) => setBudgetId(v || null)}
+            onChange={(v: string) => {
+              setBudgetId(v || null)
+              markLinkedCostsChanged()
+            }}
             options={budgetOptions}
           />
         </div>
@@ -315,7 +331,10 @@ export function CostsTab({ training, klass }: Props) {
             hideLabel
             placeholder="—"
             value={paymentStatus}
-            onChange={(v: PaymentStatus) => setPaymentStatus(v)}
+            onChange={(v: PaymentStatus) => {
+              setPaymentStatus(v)
+              markLinkedCostsChanged()
+            }}
             disabled={!budgetId}
             options={[
               { value: "", label: "—" },
@@ -333,21 +352,30 @@ export function CostsTab({ training, klass }: Props) {
           title="Direct cost"
           description="Provider fees, materials, room rental and other invoiced expenses."
           value={directCost}
-          onChange={setDirectCost}
+          onChange={(value) => {
+            setDirectCost(value)
+            markLinkedCostsChanged()
+          }}
         />
         <CostBreakdownCard
           emoji="🏢"
           title="Indirect cost"
           description="Overhead allocated to this group (HR, facilities, equipment amortisation)."
           value={indirectCost}
-          onChange={setIndirectCost}
+          onChange={(value) => {
+            setIndirectCost(value)
+            markLinkedCostsChanged()
+          }}
         />
         <CostBreakdownCard
           emoji="📝"
           title="Salary opportunity cost"
           description="Payroll cost of participants and instructors during training hours."
           value={salaryCost}
-          onChange={setSalaryCost}
+          onChange={(value) => {
+            setSalaryCost(value)
+            markLinkedCostsChanged()
+          }}
           action={
             <F0Button
               label="Calculate"
@@ -400,6 +428,7 @@ export function CostsTab({ training, klass }: Props) {
               label="Apply"
               onClick={() => {
                 setSalaryCost(28 * participants * training.totalDuration)
+                markLinkedCostsChanged()
                 setCalculatorOpen(false)
               }}
             />
@@ -444,7 +473,10 @@ export function CostsTab({ training, klass }: Props) {
               label="Subsidised amount"
               hideLabel
               value={subsidizedCost}
-              onChange={(v) => setSubsidizedCost(v ?? 0)}
+              onChange={(v) => {
+                setSubsidizedCost(v ?? 0)
+                markLinkedCostsChanged()
+              }}
               step={50}
               locale="en-US"
               units="EUR"
