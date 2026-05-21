@@ -159,7 +159,7 @@ const preview: Preview = {
     },
     options: {
       /*
-       * Sort all the components and experimental stories in an aplhabetical order, but keep
+       * Sort all the components and experimental stories in an alphabetical order, but keep
        * Introduction, How to contribute, Data test ID, Foundations, and Playground in specific order
        */
       storySort: {
