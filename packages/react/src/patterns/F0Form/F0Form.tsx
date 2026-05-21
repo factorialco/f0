@@ -40,7 +40,7 @@ import { RowRenderer } from "./components/RowRenderer"
 import { SectionRenderer } from "./components/SectionRenderer"
 import { SwitchGroupRenderer } from "./components/SwitchGroupRenderer"
 import { createConditionalResolver } from "./conditionalResolver"
-import { FORM_MAX_WIDTH, SECTION_MARGIN } from "./constants"
+import { SECTION_MARGIN } from "./constants"
 import { F0FormContext, generateAnchorId } from "./context"
 import { useF0AiFormRegistry } from "./F0AiFormRegistry"
 import { CardSelectDepsContext } from "./fields/cardSelect/CardSelectDepsContext"
@@ -163,7 +163,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
   }, [sections, sectionIds, showSectionsSidepanel, handleSectionClick])
 
   const content = (
-    <div className={cn("flex w-full flex-col", FORM_MAX_WIDTH, className)}>
+    <div className={cn("flex w-full flex-col max-w-content", className)}>
       {sectionIds.map((sectionId, index) => {
         const sectionSchema = schema[sectionId]
         const sectionConfig = sections?.[sectionId]
@@ -1046,8 +1046,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       ref={formElementRef}
       onSubmit={onFormSubmit}
       className={cn(
-        "flex flex-col w-full mx-auto",
-        FORM_MAX_WIDTH,
+        "flex flex-col w-full mx-auto max-w-content",
         className,
         styling?.showSectionsSidepanel && "p-2 [&>div:last-child]:pb-6"
       )}
