@@ -23,7 +23,7 @@ const F0AmountCalculator = forwardRef<HTMLDivElement, F0AmountCalculatorProps>(
       baseAmount,
       currency,
       label = "Amount calculator",
-      locale = "de-DE",
+      locale,
       maxDecimals = 2,
       units = "%",
       ...props

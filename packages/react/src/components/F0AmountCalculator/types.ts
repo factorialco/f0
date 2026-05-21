@@ -12,6 +12,6 @@ export type F0AmountCalculatorProps = Omit<
     currency?: string
     /** Accessible label for the input (visually hidden). Default: "Amount calculator" */
     label?: string
-    /** Locale for number formatting. Default: "de-DE" */
-    locale?: string
+    /** Locale for number formatting (e.g. "en-US", "de-DE", "es-ES"). Required. */
+    locale: string
   }

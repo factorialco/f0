@@ -10,6 +10,7 @@ const meta = {
   component: F0AmountCalculator,
   tags: ["stable", "autodocs"],
   parameters: { layout: "centered" },
+  args: { locale: "de-DE" },
 } satisfies Meta<typeof F0AmountCalculator>
 
 export default meta
@@ -68,6 +69,7 @@ export const Controlled: Story = {
         <F0AmountCalculator
           value={percentage}
           onChange={setPercentage}
+          locale="de-DE"
           units="%"
           baseAmount={baseAmount}
           currency="€"
@@ -81,11 +83,17 @@ export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: () => (
     <div className="flex flex-col gap-4">
-      <F0AmountCalculator placeholder="0,0" units="%" />
-      <F0AmountCalculator value={15} units="%" />
-      <F0AmountCalculator value={10} units="%" baseAmount={300} currency="€" />
-      <F0AmountCalculator value={25} units="%" disabled />
-      <F0AmountCalculator placeholder="0,0" units="€" />
+      <F0AmountCalculator locale="de-DE" placeholder="0,0" units="%" />
+      <F0AmountCalculator locale="de-DE" value={15} units="%" />
+      <F0AmountCalculator
+        locale="de-DE"
+        value={10}
+        units="%"
+        baseAmount={300}
+        currency="€"
+      />
+      <F0AmountCalculator locale="de-DE" value={25} units="%" disabled />
+      <F0AmountCalculator locale="de-DE" placeholder="0,0" units="€" />
     </div>
   ),
 }

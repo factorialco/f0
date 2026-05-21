@@ -1,2 +1,2 @@
-export { F0AmountCalculator } from "./F0AmountCalculator"
-export type { F0AmountCalculatorProps } from "./types"
+export * from "./F0AmountCalculator"
+export * from "./types"
