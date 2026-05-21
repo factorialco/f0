@@ -3,7 +3,6 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from "react"
 
@@ -46,14 +45,31 @@ import {
 } from "./useDashboardCompute"
 import { SNAPSHOT_DATE_FILTER_KEY } from "./snapshot"
 
+const YMD_RE = /^\d{4}-\d{2}-\d{2}$/
+
 // Format a Date (or ISO string) as a local-calendar `YYYY-MM-DD`.
 // `toISOString().slice(0, 10)` shifts the day for users in non-UTC zones —
-// a Tokyo user picking Nov 1 00:00 local would ship `2025-10-31`.
+// a Tokyo user picking Nov 1 00:00 local would ship `2025-10-31`. A
+// `YYYY-MM-DD` string is already a local calendar date — passed through
+// verbatim to avoid round-tripping through `new Date(d)`, which JS parses
+// as UTC and would shift the day for users in negative timezones.
 const toLocalYmd = (d: Date | string | undefined): string => {
   if (!d) return ""
+  if (typeof d === "string" && YMD_RE.test(d)) return d
   const date = d instanceof Date ? d : new Date(d)
   if (Number.isNaN(date.getTime())) return ""
   return format(date, "yyyy-MM-dd")
+}
+
+// Parse a `YYYY-MM-DD` string as a local-midnight `Date`.
+// `new Date("YYYY-MM-DD")` is spec'd to parse as UTC midnight, which renders
+// as the previous calendar day for users in negative timezones. Splitting
+// the components and using the multi-arg `Date` constructor keeps the day
+// stable in the user's local calendar.
+const parseLocalYmd = (d: string | undefined): Date | undefined => {
+  if (!d || !YMD_RE.test(d)) return undefined
+  const [y, m, day] = d.split("-").map(Number)
+  return new Date(y, m - 1, day)
 }
 
 // ---------------------------------------------------------------------------
@@ -342,7 +358,7 @@ export function ChatDashboard({
   exportFilename,
   onSnapshotDateChange,
 }: ChatDashboardProps) {
-  const { fetchItem, getFilterOptions, getDerivedFilters } =
+  const { fetchItem, getFilterOptions, getDerivedFilters, getHasResponse } =
     useDashboardCompute(config, apiConfig, refreshKey)
 
   // Filter definitions + options from the first compute response.
@@ -369,33 +385,41 @@ export function ChatDashboard({
   // renders with an undefined value and crashes inside DateNavigation.
   const [filterRevision, setFilterRevision] = useState(0)
 
-  const filterOptionsPolledRef = useRef(false)
+  // Bumped once the first compute response for the current `refreshKey`
+  // lands — drives both the polling-loop stop condition and the filter-bar
+  // skeleton, so a response with zero filters still flips loading off.
+  const [firstResponseReceived, setFirstResponseReceived] = useState(false)
 
   // Reset polling flag when refreshKey changes so filter options are re-polled
   useEffect(() => {
-    filterOptionsPolledRef.current = false
+    setFirstResponseReceived(false)
   }, [refreshKey])
 
   useEffect(() => {
-    if (filterOptionsPolledRef.current) return
+    if (firstResponseReceived) return
     const interval = setInterval(() => {
+      if (!getHasResponse()) return
       const opts = getFilterOptions()
       const derived = getDerivedFilters()
-      if (opts || derived.filters || derived.navigationFilters) {
-        if (opts) setFilterOptions(opts)
-        setDerivedFilters(derived)
-        setFilterRevision((n) => n + 1)
-        filterOptionsPolledRef.current = true
-        clearInterval(interval)
-      }
+      if (opts) setFilterOptions(opts)
+      setDerivedFilters(derived)
+      setFilterRevision((n) => n + 1)
+      setFirstResponseReceived(true)
+      clearInterval(interval)
     }, 100)
     return () => clearInterval(interval)
-  }, [getFilterOptions, getDerivedFilters, refreshKey])
+  }, [
+    getHasResponse,
+    getFilterOptions,
+    getDerivedFilters,
+    firstResponseReceived,
+  ])
 
-  // Filter bar skeleton while the first compute response is in flight: we
-  // don't know yet whether the dataset will produce any filters, so we keep
-  // the skeleton up until the response lands.
-  const filtersLoading = !filterOptions && !derivedFilters.filters
+  // Filter bar skeleton while the first compute response is in flight. Gated
+  // on the explicit "response received" signal so a dataset that yields zero
+  // filters still flips loading off (instead of spinning forever waiting for
+  // filterOptions/filters that will never arrive).
+  const filtersLoading = !firstResponseReceived
 
   const filterDefinitions = useMemo(
     () => buildFilterDefinitions(derivedFilters.filters, filterOptions),
@@ -438,9 +462,9 @@ export function ChatDashboard({
       // to make that vanishingly unlikely.
       result[SNAPSHOT_DATE_FILTER_KEY] = {
         type: "date-navigator",
-        defaultValue: config.snapshotDate
-          ? new Date(config.snapshotDate)
-          : today,
+        // `parseLocalYmd` constructs a local-midnight Date so the picker
+        // pill renders the persisted calendar day in the user's timezone.
+        defaultValue: parseLocalYmd(config.snapshotDate) ?? today,
         granularity: "day",
       }
     }
@@ -561,16 +585,17 @@ export function ChatDashboard({
         return fetchItem(itemId, filterValues, navigationFilterValues).then(
           (result) => {
             // Always re-sync chip definitions from the latest compute pass.
-            // The polled-ref flag (used by the initial polling effect) only
-            // signals "we have data" — it must NOT gate subsequent updates,
-            // or the drawer would freeze on the first response forever.
+            // The `firstResponseReceived` flag (used by the initial polling
+            // effect) only signals "we have data" — it must NOT gate
+            // subsequent updates, or the drawer would freeze on the first
+            // response forever.
             const opts = getFilterOptions()
             const derived = getDerivedFilters()
             if (opts || derived.filters || derived.navigationFilters) {
               if (opts) setFilterOptions(opts)
               setDerivedFilters(derived)
-              filterOptionsPolledRef.current = true
             }
+            setFirstResponseReceived(true)
             return result
           }
         )

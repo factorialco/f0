@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react"
+import { useCallback, useEffect, useRef } from "react"
 
 import type {
   ChatDashboardConfig,
@@ -95,6 +95,13 @@ export function useDashboardCompute(
     filters?: Record<string, ChatDashboardFilterDefinition>
     navigationFilters?: Record<string, ChatDashboardNavigationFilterDefinition>
   }
+  /**
+   * True once the first compute response for the current `refreshKey` has
+   * been received. Lets callers distinguish "still loading" from "loaded
+   * but the dataset yielded no filters" — without this, a zero-filter
+   * dataset would pin filter-bar loading state on indefinitely.
+   */
+  getHasResponse: () => boolean
 } {
   // Track the in-flight request so concurrent fetchItem calls share it
   const inflightRef = useRef<{
@@ -105,6 +112,13 @@ export function useDashboardCompute(
 
   // Cache last response for filter options
   const lastResponseRef = useRef<ComputeResponse | undefined>()
+
+  // Drop the cached response when the caller forces a refresh so
+  // `getHasResponse()` reverts to false until the new request lands —
+  // otherwise the polling loop would treat the stale response as ready.
+  useEffect(() => {
+    lastResponseRef.current = undefined
+  }, [refreshKey])
 
   // Stable refs
   const configRef = useRef(config)
@@ -243,5 +257,10 @@ export function useDashboardCompute(
     []
   )
 
-  return { fetchItem, getFilterOptions, getDerivedFilters }
+  const getHasResponse = useCallback(
+    () => lastResponseRef.current !== undefined,
+    []
+  )
+
+  return { fetchItem, getFilterOptions, getDerivedFilters, getHasResponse }
 }
