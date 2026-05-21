@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { F1SearchBox } from "./index"
+import { F0SearchInput } from "../index"
 
 const meta = {
-  component: F1SearchBox,
-  title: "Input/Search",
+  component: F0SearchInput,
+  title: "Inputs/Search input",
   parameters: {
     layout: "centered",
     docs: {
@@ -40,7 +40,7 @@ const meta = {
       </div>
     ),
   ],
-} satisfies Meta<typeof F1SearchBox>
+} satisfies Meta<typeof F0SearchInput>
 
 export default meta
 type Story = StoryObj<typeof meta>

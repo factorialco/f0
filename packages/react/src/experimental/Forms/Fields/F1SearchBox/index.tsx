@@ -1,126 +1,17 @@
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-} from "react"
+export * from "./F0SearchInput"
 
-import { experimentalComponent } from "@/lib/experimental"
-import { Input } from "@/ui/input"
-import { InputFieldProps } from "@/ui/InputField/InputField"
-
-import { Search } from "../../../../icons/app"
-
-type F1SearchBoxProps = {
-  value?: string
-  threshold?: number
-  debounceTime?: number
-  autoFocus?: boolean
-} & Pick<
-  InputFieldProps<string>,
-  | "size"
-  | "loading"
-  | "clearable"
-  | "placeholder"
-  | "disabled"
-  | "onBlur"
-  | "onFocus"
-  | "onChange"
-  | "name"
->
-
-const _F1SearchBox = forwardRef<HTMLInputElement, F1SearchBoxProps>(
-  (
-    {
-      value,
-      threshold = 0,
-      onChange,
-      onBlur,
-      onFocus,
-      size = "sm",
-      debounceTime = 0,
-      clearable = false,
-      ...props
-    },
-    ref
-  ) => {
-    const input = useRef<HTMLInputElement>(null)
-
-    const interval = useRef<NodeJS.Timeout | null>(null)
-
-    useImperativeHandle(ref, () => input.current as HTMLInputElement)
-
-    useEffect(() => {
-      if (!props.autoFocus) {
-        if (interval.current) {
-          clearInterval(interval.current)
-        }
-        return
-      }
-
-      interval.current = setInterval(() => {
-        input.current?.focus()
-      }, 50)
-
-      return () => {
-        if (interval.current) {
-          clearInterval(interval.current)
-        }
-      }
-    }, [props.autoFocus])
-
-    const valueToEmitRef = useRef<string | undefined>(undefined)
-
-    const onChangeLocal = useCallback(
-      (value: string) => {
-        if (
-          onChange &&
-          // It should emit the change when the user clears the field
-          (value.length >= threshold || value.length === 0)
-        ) {
-          // Debounces the onChange callback
-          if (valueToEmitRef.current === undefined) {
-            setTimeout(() => {
-              if (valueToEmitRef.current !== undefined) {
-                onChange(valueToEmitRef.current)
-                input.current?.focus()
-              }
-              valueToEmitRef.current = undefined
-            }, debounceTime)
-          }
-          valueToEmitRef.current = value
-        }
-      },
-      [onChange, threshold, debounceTime]
-    )
-
-    return (
-      <Input
-        key="search-input"
-        ref={input}
-        type="search"
-        tabIndex={-1}
-        icon={Search}
-        value={value}
-        label={props.placeholder ?? "Search"}
-        hideLabel
-        placeholder={props.placeholder}
-        disabled={props.disabled}
-        onChange={onChangeLocal}
-        role="searchbox"
-        size={size}
-        autoFocus={props.autoFocus}
-        clearable={clearable}
-        onBlur={onBlur}
-        onFocus={onFocus}
-        name={props.name}
-      />
-    )
-  }
-)
+import { F0SearchInput } from "./F0SearchInput"
+export type { F0SearchInputProps } from "./F0SearchInput"
 
 /**
- * @experimental This is an experimental component use it at your own risk
+ * @deprecated Renamed to `F0SearchInput` to match the F0 input vocabulary
+ * (any component where the user types in a box has the `Input` suffix and
+ * lives under the `Inputs/` group). The `F1` prefix was also legacy. Will
+ * be removed once consumers have migrated.
+ *
+ *   - import { F1SearchBox } from "@factorialco/f0-react"
+ *   + import { F0SearchInput } from "@factorialco/f0-react"
+ *
+ * @removeIn 2.0.0
  */
-export const F1SearchBox = experimentalComponent("F1SearchBox", _F1SearchBox)
+export const F1SearchBox = F0SearchInput

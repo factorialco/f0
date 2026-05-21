@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { OneEllipsis } from "@/lib/OneEllipsis"
-import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
+import { F0SearchInput } from "@/experimental/Forms/Fields/F1SearchBox"
 import { ScrollArea } from "@/ui/scrollarea"
 import { Spinner } from "@/ui/Spinner"
 import { RecordType } from "@/hooks/datasource"
@@ -296,7 +296,7 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
     >
       {showSearch && (
         <div className="rounded-tr-xl p-2">
-          <F1SearchBox
+          <F0SearchInput
             placeholder={i18n.filters.inFilter.searchPlaceholder}
             value={searchTerm}
             onChange={setSearchTerm}
