@@ -112,6 +112,13 @@ export type CrudVisualization = Visualization<
   GroupingDefinition<Resource>
 >
 
+type CrudCardVisualization = Extract<CrudVisualization, { type: "card" }>
+type CrudKanbanVisualization = Extract<CrudVisualization, { type: "kanban" }>
+type CrudEditableTableVisualization = Extract<
+  CrudVisualization,
+  { type: "editableTable" }
+>
+
 export const tableVisualization: CrudVisualization = {
   type: "table",
   options: {
@@ -135,6 +142,76 @@ export const listVisualization: CrudVisualization = {
       { label: "Owner", render: (item) => item.owner },
       { label: "Status", render: (item) => item.status },
     ],
+  },
+}
+
+export const cardVisualization: CrudCardVisualization = {
+  type: "card",
+  options: {
+    title: (item) => item.name,
+    description: (item) => item.summary,
+    cardProperties: [
+      { label: "Owner", render: (item) => item.owner },
+      { label: "Status", render: (item) => item.status },
+    ],
+  },
+}
+
+export const kanbanSourceLanes = [
+  { id: "draft", filters: { status: ["Draft"] } },
+  { id: "needs-details", filters: { status: ["Needs details"] } },
+  { id: "complete", filters: { status: ["Complete"] } },
+]
+
+export const kanbanVisualization: CrudKanbanVisualization = {
+  type: "kanban",
+  options: {
+    lanes: [
+      { id: "draft", title: "Draft", variant: "neutral" },
+      { id: "needs-details", title: "Needs details", variant: "warning" },
+      { id: "complete", title: "Complete", variant: "positive" },
+    ],
+    title: (item) => item.name,
+    description: (item) => item.summary,
+    metadata: (item) => [
+      {
+        icon: Add,
+        property: { type: "text", label: "Owner", value: item.owner },
+      },
+    ],
+  },
+}
+
+export const editableTableVisualization: CrudEditableTableVisualization = {
+  type: "editableTable",
+  options: {
+    columns: [
+      {
+        id: "name",
+        label: "Name",
+        render: (item) => item.name,
+        editType: () => "text",
+      },
+      {
+        id: "owner",
+        label: "Owner",
+        render: (item) => item.owner,
+        editType: () => "text",
+      },
+      {
+        id: "status",
+        label: "Status",
+        render: (item) => item.status,
+        editType: () => "display-only",
+      },
+      {
+        id: "summary",
+        label: "Summary",
+        render: (item) => item.summary,
+        editType: () => "text",
+      },
+    ],
+    onCellChange: async () => {},
   },
 }
 

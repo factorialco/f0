@@ -14,6 +14,9 @@ step must make the scope and consequence explicit before the user commits.
 
 - Use a confirmation dialog for single destructive actions.
 - Use a scoped confirmation dialog for bulk destructive actions.
+- Keep delete available as an explicit item or bulk action in every
+  visualization. **Recommended** placement changes by view, but confirmation
+  rules do not.
 - Name the affected resource or selection in the title whenever possible.
 - Explain irreversible consequences in the body when data loss is involved.
 
@@ -31,8 +34,8 @@ step must make the scope and consequence explicit before the user commits.
     <tbody>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--single-delete">
-            Single delete
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--table-single-delete">
+            Table single delete
           </a>
         </td>
         <td>Deleting one resource from row-level actions.</td>
@@ -40,12 +43,48 @@ step must make the scope and consequence explicit before the user commits.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--bulk-delete">
-            Bulk delete
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--table-bulk-delete">
+            Table bulk delete
           </a>
         </td>
         <td>Deleting a selected set of resources from bulk actions.</td>
         <td>The selected scope, count, and irreversible effect.</td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--card-delete">
+            Card delete
+          </a>
+        </td>
+        <td>Deleting one resource from the Card ellipsis.</td>
+        <td>The card resource name and destructive outcome.</td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--card-delete-from-dialog">
+            Card delete from dialog
+          </a>
+        </td>
+        <td>Deleting one resource from the read dialog header ellipsis.</td>
+        <td>The dialog resource name and destructive outcome.</td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--kanban-bulk-delete">
+            Kanban bulk delete
+          </a>
+        </td>
+        <td>Deleting selected Kanban cards from bulk actions.</td>
+        <td>The selected card count and irreversible effect.</td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--editable-table-delete">
+            Editable Table delete
+          </a>
+        </td>
+        <td>Deleting one resource from the row actions dropdown.</td>
+        <td>The row resource name and destructive outcome.</td>
       </tr>
     </tbody>
   </table>
@@ -78,6 +117,23 @@ step must make the scope and consequence explicit before the user commits.
         <td>Is the action destructive enough to need explicit confirmation?</td>
         <td>Use a confirmation dialog before executing the action</td>
       </tr>
+      <tr>
+        <td>Are selected Kanban cards being deleted together?</td>
+        <td>
+          Use Kanban bulk delete confirmation when selected scope is visible
+        </td>
+      </tr>
+      <tr>
+        <td>Is the current visualization Card?</td>
+        <td>
+          Use the card ellipsis, or the read dialog destructive action if no
+          ellipsis exists
+        </td>
+      </tr>
+      <tr>
+        <td>Is the current visualization Editable Table?</td>
+        <td>Use the row actions dropdown with confirmation</td>
+      </tr>
     </tbody>
   </table>
 </Unstyled>
@@ -91,6 +147,20 @@ the wrong scope is higher.
 
 Keep the confirmation concise. The goal is not to repeat the entire item
 details, but to state enough context to prevent accidental deletion.
+
+Table, List, Card, Kanban, and Editable Table all follow the same delete rule:
+the user must confirm the affected item or selected scope before the destructive
+change runs. In Card views, use the card ellipsis because card click is a read
+affordance. If a product implementation does not expose an ellipsis, put delete
+inside the read dialog as a destructive outline action instead. In Kanban views,
+use selected-card bulk delete because Kanban supports selection but does not
+currently expose per-card item actions. Moving cards should only update state,
+never destroy data. In Editable Table, use the row actions dropdown and keep
+delete separate from editable cell interactions.
+
+Using the read dialog header ellipsis is the fallback Card pattern when the card
+surface itself does not expose the action menu. This keeps delete inside the
+`F0Dialog` API and avoids inventing a custom destructive footer action.
 
 ## Dos and don'ts
 
@@ -118,6 +188,10 @@ details, but to state enough context to prevent accidental deletion.
 
 ## Related stories
 
-- [Single delete](/?path=/story/patterns-data-collection-crud-patterns-delete--single-delete)
-- [Bulk delete](/?path=/story/patterns-data-collection-crud-patterns-delete--bulk-delete)
+- [Table single delete](/?path=/story/patterns-data-collection-crud-patterns-delete--table-single-delete)
+- [Table bulk delete](/?path=/story/patterns-data-collection-crud-patterns-delete--table-bulk-delete)
+- [Card delete](/?path=/story/patterns-data-collection-crud-patterns-delete--card-delete)
+- [Card delete from dialog](/?path=/story/patterns-data-collection-crud-patterns-delete--card-delete-from-dialog)
+- [Editable Table delete](/?path=/story/patterns-data-collection-crud-patterns-delete--editable-table-delete)
+- [Kanban bulk delete](/?path=/story/patterns-data-collection-crud-patterns-delete--kanban-bulk-delete)
 - [CRUD patterns overview](/?path=/docs/patterns-data-collection-crud-patterns-overview--documentation)

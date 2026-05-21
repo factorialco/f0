@@ -18,6 +18,12 @@ relearn the form, field order, or terminology when updating the same data.
   collection visible improves comparison or navigation between items.
 - Use bulk update when the current visualization provides explicit
   multi-selection and users can review the affected items before confirming.
+- Use Card click for read first and expose Edit at the top of the read dialog.
+  **Recommended** when card click is already the read affordance.
+- Use Kanban drag/move for state updates and Kanban bulk update when selected
+  cards make scope explicit. **Recommended** for board workflows.
+- Use Editable Table inline cell editing for visible field-level updates.
+  **Recommended** when the user is changing values already shown in the table.
 - Reuse the same form structure as create whenever the user updates the same
   information.
 - Avoid inventing a separate update-only layout without a strong UX reason.
@@ -71,6 +77,41 @@ relearn the form, field order, or terminology when updating the same data.
           visualization.
         </td>
       </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--card-actions-update">
+            Card actions update
+          </a>
+        </td>
+        <td>
+          <strong>Recommended</strong> when card click opens read first and Edit
+          is exposed from the read dialog.
+        </td>
+        <td>Do not add a card-level Edit CTA by default.</td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--kanban-bulk-update">
+            Kanban bulk update
+          </a>
+        </td>
+        <td>
+          <strong>Recommended</strong> when selected cards are explicit across
+          lanes.
+        </td>
+        <td>Do not use if selected scope is hard to verify.</td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--editable-table-inline-update">
+            Editable Table inline update
+          </a>
+        </td>
+        <td>
+          <strong>Recommended</strong> for visible field-level updates.
+        </td>
+        <td>Use a dialog instead for full-resource or multi-step edits.</td>
+      </tr>
     </tbody>
   </table>
 </Unstyled>
@@ -99,8 +140,16 @@ relearn the form, field order, or terminology when updating the same data.
         <td>Bulk update</td>
       </tr>
       <tr>
-        <td>Is the current visualization Card or Kanban?</td>
-        <td>Default dialog</td>
+        <td>Does the visualization make the selected scope explicit?</td>
+        <td>Bulk update</td>
+      </tr>
+      <tr>
+        <td>Is selection ambiguous, transient, or hard to verify?</td>
+        <td>Default dialog or item-level update</td>
+      </tr>
+      <tr>
+        <td>Is the user changing a visible Editable Table cell?</td>
+        <td>Editable Table inline update</td>
       </tr>
       <tr>
         <td>Would mobile or narrow screens make a side panel unreliable?</td>
@@ -125,6 +174,16 @@ Bulk update follows the same selection pattern as bulk delete. Use it only when
 the visualization makes selection scope explicit, such as checkbox-based
 selection, so users can clearly review which items are included before they
 confirm the change.
+
+Checkbox-based selection is the clearest current example, but the rule is the
+explicitness of the selected scope, not the Table visualization itself. Kanban
+bulk update is **Recommended** when selected cards remain visible across lanes
+and the action bar confirms the affected scope.
+
+Card update should preserve the default read-first behavior: clicking the card
+opens the read dialog, and the read dialog exposes Edit at the top. Editable
+Table update should use inline cell editing for visible field-level changes and
+reserve dialogs for full-resource updates.
 
 ## Dos and don'ts
 
@@ -167,4 +226,7 @@ confirm the change.
 - [Bulk update](/?path=/story/patterns-data-collection-crud-patterns-update--bulk-update)
 - [Right-position dialog for table](/?path=/story/patterns-data-collection-crud-patterns-update--right-position-dialog-for-table)
 - [Right-position dialog for list](/?path=/story/patterns-data-collection-crud-patterns-update--right-position-dialog-for-list)
+- [Card actions update](/?path=/story/patterns-data-collection-crud-patterns-update--card-actions-update)
+- [Kanban bulk update](/?path=/story/patterns-data-collection-crud-patterns-update--kanban-bulk-update)
+- [Editable Table inline update](/?path=/story/patterns-data-collection-crud-patterns-update--editable-table-inline-update)
 - [CRUD patterns overview](/?path=/docs/patterns-data-collection-crud-patterns-overview--documentation)

@@ -24,6 +24,12 @@ layout.
   destination for deeper reading.
 - Use a list to page flow when list-style browsing should open a dedicated
   destination with more structure and actions.
+- Use card click to dialog/page for Card views. **Recommended** because the card
+  is already an object-level surface.
+- Use Kanban card click to dialog/page for Kanban views. **Recommended** because
+  click reads the card while drag/move updates state.
+- In Editable Table, avoid row-click read behavior when it competes with inline
+  editing. Use an explicit action when read needs to coexist with editable cells.
 - Keep item click behavior consistent within the same collection.
 - Reserve page navigation for resources that are meaningful enough to justify
   their own destination.
@@ -92,6 +98,33 @@ layout.
           for lightweight inspection.
         </td>
       </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--card-to-dialog">
+            Card to dialog
+          </a>
+        </td>
+        <td>
+          <strong>Recommended</strong> for quick object inspection from a Card
+          view.
+        </td>
+        <td>
+          Requires edit/delete to remain explicit actions, not hidden behind the
+          same click.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--kanban-card-to-dialog">
+            Kanban card to dialog
+          </a>
+        </td>
+        <td>
+          <strong>Recommended</strong> for quick inspection while preserving the
+          board context.
+        </td>
+        <td>Must not conflict with drag/move interactions.</td>
+      </tr>
     </tbody>
   </table>
 </Unstyled>
@@ -132,6 +165,14 @@ layout.
         </td>
         <td>Default dialog</td>
       </tr>
+      <tr>
+        <td>Is the current visualization Card or Kanban?</td>
+        <td>Card/Kanban card to dialog, or to page for deep resources</td>
+      </tr>
+      <tr>
+        <td>Is the current visualization Editable Table?</td>
+        <td>Explicit read action when row click would conflict with editing</td>
+      </tr>
     </tbody>
   </table>
 </Unstyled>
@@ -148,6 +189,13 @@ collection, but the resource still deserves a full page for deeper reading,
 follow-up actions, or page-level navigation. The right dialog should be a
 reduced view, not a compressed version of the full page.
 
+This dialog-to-page behavior is portable. Any compatible default dialog or
+right-position read dialog can expose **Open Details** as the primary action when
+the dialog is intentionally a reduced preview and the resource has a durable
+full-page destination. Do not duplicate this copy in every story; use it as the
+decision logic for Table, List, Card, or Kanban when the resource needs deeper
+page structure.
+
 Move to a table to page or list to page pattern when the resource is no longer
 just a quick read target. If the resource has sub-navigation, multiple action
 groups, or content that competes for vertical space, a page is more predictable
@@ -157,6 +205,15 @@ Choose table to page when people start from dense, comparison-oriented rows and
 need a direct chevron action that routes into a full destination. Choose list
 to page when the collection already uses list teasers and the browsing model is
 closer to scanning summaries than comparing columns.
+
+For Card and Kanban, the item surface itself is a strong read affordance, so
+card click to dialog is **Recommended** for quick inspection. Keep update and
+delete as explicit actions so read, edit, drag, and destructive behavior do not
+compete for the same click target.
+
+For Editable Table, inline editing has priority. Avoid making every row click a
+read transition if users also need to focus and edit cells. Use an explicit item
+action for read when both behaviors must coexist.
 
 ## Dos and don'ts
 
@@ -199,4 +256,6 @@ closer to scanning summaries than comparing columns.
 - [Right dialog to page](/?path=/story/patterns-data-collection-crud-patterns-read--right-dialog-to-page)
 - [Table to Page](/?path=/story/patterns-data-collection-crud-patterns-read--table-to-page)
 - [List to Page](/?path=/story/patterns-data-collection-crud-patterns-read--list-to-page)
+- [Card to dialog](/?path=/story/patterns-data-collection-crud-patterns-read--card-to-dialog)
+- [Kanban card to dialog](/?path=/story/patterns-data-collection-crud-patterns-read--kanban-card-to-dialog)
 - [CRUD patterns overview](/?path=/docs/patterns-data-collection-crud-patterns-overview--documentation)

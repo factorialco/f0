@@ -14,7 +14,10 @@ import {
   createResourceDataAdapter,
   CrudPatternLayout,
   defaultCrudSecondaryActions,
+  editableTableVisualization,
   initialResources,
+  kanbanSourceLanes,
+  kanbanVisualization,
   Resource,
   ResourceFormF0,
   resourceFilters,
@@ -207,6 +210,108 @@ function WizardDialogScenario() {
   )
 }
 
+function KanbanLaneCreateScenario() {
+  const [resources, setResources] = useState(initialResources)
+
+  const source = useDataCollectionSource({
+    dataAdapter: createResourceDataAdapter(resources),
+    filters: resourceFilters,
+    lanes: kanbanSourceLanes,
+    primaryActions: () => ({
+      label: "Create resource",
+      icon: Add,
+      onClick: () => {},
+    }),
+    secondaryActions: defaultCrudSecondaryActions(),
+  })
+
+  return (
+    <CrudPatternLayout>
+      <OneDataCollection
+        source={source}
+        visualizations={[
+          {
+            ...kanbanVisualization,
+            options: {
+              ...kanbanVisualization.options,
+              onCreate: (laneId) => {
+                const laneStatus: Record<string, Resource["status"]> = {
+                  draft: "Draft",
+                  "needs-details": "Needs details",
+                  complete: "Complete",
+                }
+
+                setResources([
+                  {
+                    id: `resource-${Date.now()}`,
+                    name: `New ${laneStatus[laneId] ?? "Draft"} resource`,
+                    owner: "Alicia Keys",
+                    status: laneStatus[laneId] ?? "Draft",
+                    summary:
+                      "Created from the lane where the resource belongs.",
+                  },
+                  ...resources,
+                ])
+              },
+            },
+          },
+        ]}
+      />
+    </CrudPatternLayout>
+  )
+}
+
+function EditableTableAddRowScenario() {
+  const [resources, setResources] = useState(initialResources)
+
+  const source = useDataCollectionSource({
+    dataAdapter: createResourceDataAdapter(resources),
+    filters: resourceFilters,
+    secondaryActions: defaultCrudSecondaryActions(),
+  })
+
+  return (
+    <CrudPatternLayout>
+      <OneDataCollection
+        source={source}
+        visualizations={[
+          {
+            ...editableTableVisualization,
+            options: {
+              ...editableTableVisualization.options,
+              onCellChange: async (updatedResource) => {
+                setResources((currentResources) =>
+                  currentResources.map((resource) =>
+                    resource.id === updatedResource.id
+                      ? updatedResource
+                      : resource
+                  )
+                )
+              },
+              addRowActions: () => ({
+                label: "Add row",
+                onClick: () => {
+                  setResources([
+                    ...resources,
+                    {
+                      id: `resource-${Date.now()}`,
+                      name: "New row resource",
+                      owner: "Alicia Keys",
+                      status: "Draft",
+                      summary:
+                        "Created inline because the resource is lightweight.",
+                    },
+                  ])
+                },
+              }),
+            },
+          },
+        ]}
+      />
+    </CrudPatternLayout>
+  )
+}
+
 export const Default: Story = {
   render: () => <DefaultDialogScenario />,
 }
@@ -217,4 +322,12 @@ export const RightDialog: Story = {
 
 export const WizardDialog: Story = {
   render: () => <WizardDialogScenario />,
+}
+
+export const KanbanLaneCreate: Story = {
+  render: () => <KanbanLaneCreateScenario />,
+}
+
+export const EditableTableAddRow: Story = {
+  render: () => <EditableTableAddRowScenario />,
 }

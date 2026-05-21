@@ -18,6 +18,10 @@ the task.
   one pass.
 - Use a wizard dialog when creation requires multiple steps, staged decisions,
   or review before submission.
+- Use Kanban lane create when the new resource should start in a specific lane
+  or workflow state. **Recommended** for scoped Kanban creation.
+- Use Editable Table add-row actions for lightweight rows that can be created
+  inline. **Recommended** only when the row does not need a full setup form.
 - Keep create actions at collection level instead of attaching them to a
   specific row.
 - Preserve the collection context so users can return to the list after
@@ -70,6 +74,30 @@ the task.
         </td>
         <td>Higher interaction cost for simple tasks.</td>
       </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-create--kanban-lane-create">
+            Kanban lane create
+          </a>
+        </td>
+        <td>
+          <strong>Recommended</strong> when the lane defines the new resource's
+          initial state.
+        </td>
+        <td>Not enough when creation needs a full setup or review flow.</td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-create--editable-table-add-row">
+            Editable Table add row
+          </a>
+        </td>
+        <td>
+          <strong>Recommended</strong> for lightweight row creation with
+          sensible defaults.
+        </td>
+        <td>Too weak for complex resources or required setup steps.</td>
+      </tr>
     </tbody>
   </table>
 </Unstyled>
@@ -105,6 +133,14 @@ the task.
         <td>Is the task frequent and lightweight?</td>
         <td>Default dialog</td>
       </tr>
+      <tr>
+        <td>Does the new Kanban item belong directly in one lane?</td>
+        <td>Kanban lane create</td>
+      </tr>
+      <tr>
+        <td>Can the user create the resource as a simple editable row?</td>
+        <td>Editable Table add row</td>
+      </tr>
     </tbody>
   </table>
 </Unstyled>
@@ -122,6 +158,11 @@ create flow into a wizard only to make it feel more structured.
 For table-heavy contexts, a right-position dialog can work as an alternative
 when people need to preserve list context while creating. Keep this as a table
 variant, not the default create pattern.
+
+For Kanban, lane create is **Recommended** when the lane is meaningful input:
+the user is not only creating a resource, they are creating it in a known state.
+For Editable Table, add-row is **Recommended** only for lightweight records that
+can be created with defaults and refined inline.
 
 ## Dos and don'ts
 
@@ -152,4 +193,6 @@ variant, not the default create pattern.
 - [Default dialog](/?path=/story/patterns-data-collection-crud-patterns-create--default)
 - [Right dialog](/?path=/story/patterns-data-collection-crud-patterns-create--right-dialog)
 - [Wizard dialog](/?path=/story/patterns-data-collection-crud-patterns-create--wizard-dialog)
+- [Kanban lane create](/?path=/story/patterns-data-collection-crud-patterns-create--kanban-lane-create)
+- [Editable Table add row](/?path=/story/patterns-data-collection-crud-patterns-create--editable-table-add-row)
 - [CRUD patterns overview](/?path=/docs/patterns-data-collection-crud-patterns-overview--documentation)

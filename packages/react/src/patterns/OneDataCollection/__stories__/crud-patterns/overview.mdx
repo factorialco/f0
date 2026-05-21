@@ -69,6 +69,27 @@ collection components in the same way production flows should.
       </tr>
       <tr>
         <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-create--kanban-lane-create">
+            Create / Kanban lane create
+          </a>
+        </td>
+        <td>
+          Lane create action creates a resource already scoped to the selected
+          workflow state.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-create--editable-table-add-row">
+            Create / Editable Table add row
+          </a>
+        </td>
+        <td>
+          Inline add-row action creates a lightweight row directly in the table.
+        </td>
+      </tr>
+      <tr>
+        <td>
           <a href="/?path=/story/patterns-data-collection-crud-patterns-read--default">
             Read / Default
           </a>
@@ -108,6 +129,22 @@ collection components in the same way production flows should.
       </tr>
       <tr>
         <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--card-to-dialog">
+            Read / Card to dialog
+          </a>
+        </td>
+        <td>Clicking the card opens a focused read dialog.</td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--kanban-card-to-dialog">
+            Read / Kanban card to dialog
+          </a>
+        </td>
+        <td>Clicking a Kanban card opens a focused read dialog.</td>
+      </tr>
+      <tr>
+        <td>
           <a href="/?path=/story/patterns-data-collection-crud-patterns-update--default">
             Update / Default
           </a>
@@ -138,6 +175,17 @@ collection components in the same way production flows should.
       </tr>
       <tr>
         <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--card-actions-update">
+            Update / Card actions update
+          </a>
+        </td>
+        <td>
+          Card primary action opens the update flow without overloading card
+          click behavior.
+        </td>
+      </tr>
+      <tr>
+        <td>
           <a href="/?path=/story/patterns-data-collection-crud-patterns-update--bulk-update">
             Update / Bulk update
           </a>
@@ -149,19 +197,204 @@ collection components in the same way production flows should.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--single-delete">
-            Delete / Single delete
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--kanban-bulk-update">
+            Update / Kanban bulk update
+          </a>
+        </td>
+        <td>
+          Selected Kanban cards use the bulk action bar when scope is explicit.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--editable-table-inline-update">
+            Update / Editable Table inline update
+          </a>
+        </td>
+        <td>Editable cells update fields directly without opening a form.</td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--table-single-delete">
+            Delete / Table single delete
           </a>
         </td>
         <td>Item delete action triggers a confirmation dialog.</td>
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--bulk-delete">
-            Delete / Bulk delete
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--table-bulk-delete">
+            Delete / Table bulk delete
           </a>
         </td>
         <td>Selection and bulk action trigger a scoped confirmation dialog.</td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--card-delete">
+            Delete / Card delete
+          </a>
+        </td>
+        <td>Card item action triggers a confirmation dialog.</td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--card-delete-from-dialog">
+            Delete / Card delete from dialog
+          </a>
+        </td>
+        <td>Read dialog header ellipsis triggers a confirmation dialog.</td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--kanban-bulk-delete">
+            Delete / Kanban bulk delete
+          </a>
+        </td>
+        <td>
+          Selected Kanban cards use a scoped destructive confirmation dialog.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--editable-table-delete">
+            Delete / Editable Table delete
+          </a>
+        </td>
+        <td>
+          Editable Table row dropdown action triggers a confirmation dialog.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## CRUD by visualization
+
+CRUD patterns are operation-first. The visualization changes the affordance, not
+the rule. Use the **Recommended** pattern in each cell as the starting point, and
+only move to an alternative when the resource or task needs it.
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Visualization</th>
+        <th className="text-left">Create</th>
+        <th className="text-left">Read</th>
+        <th className="text-left">Update</th>
+        <th className="text-left">Bulk update</th>
+        <th className="text-left">Delete</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Table</td>
+        <td>
+          <strong>Recommended:</strong> collection primary action. Use a
+          right-position dialog when visible rows help the create task.
+        </td>
+        <td>
+          <strong>Recommended:</strong> row click or chevron to dialog/page,
+          depending on content depth.
+        </td>
+        <td>
+          <strong>Recommended:</strong> default dialog. Use right-position
+          dialog when comparing rows helps.
+        </td>
+        <td>
+          <strong>Recommended:</strong> when checkbox selection makes scope
+          clear.
+        </td>
+        <td>
+          <strong>Recommended:</strong> item or bulk action with confirmation.
+        </td>
+      </tr>
+      <tr>
+        <td>List</td>
+        <td>
+          <strong>Recommended:</strong> collection primary action.
+        </td>
+        <td>
+          <strong>Recommended:</strong> item click to dialog/page when the
+          teaser is only a summary.
+        </td>
+        <td>
+          <strong>Recommended:</strong> default dialog. Use right-position
+          dialog only when the list context remains useful.
+        </td>
+        <td>
+          <strong>Recommended only if:</strong> selected items are explicit and
+          reviewable.
+        </td>
+        <td>
+          <strong>Recommended:</strong> item or bulk action with confirmation.
+        </td>
+      </tr>
+      <tr>
+        <td>Card</td>
+        <td>
+          <strong>Recommended:</strong> collection primary action.
+        </td>
+        <td>
+          <strong>Recommended:</strong> card click to dialog/page because the
+          whole card represents one resource.
+        </td>
+        <td>
+          <strong>Recommended:</strong> card click opens read first; edit is an
+          explicit action in the read dialog.
+        </td>
+        <td>
+          <strong>Recommended only if:</strong> selected cards are visibly
+          selected and the action bar confirms scope.
+        </td>
+        <td>
+          <strong>Recommended:</strong> card ellipsis with confirmation. If no
+          ellipsis is available, put delete in the read dialog header ellipsis.
+        </td>
+      </tr>
+      <tr>
+        <td>Kanban</td>
+        <td>
+          <strong>Recommended:</strong> lane create when the resource belongs to
+          a specific state; collection primary action for unscoped create.
+        </td>
+        <td>
+          <strong>Recommended:</strong> card click to dialog/page.
+        </td>
+        <td>
+          <strong>Recommended:</strong> drag/move for state updates; explicit
+          edit action/dialog for full-resource updates.
+        </td>
+        <td>
+          <strong>Recommended:</strong> selected cards plus bulk action bar when
+          scope is explicit across lanes.
+        </td>
+        <td>
+          <strong>Recommended:</strong> selected-card bulk action with
+          confirmation.
+        </td>
+      </tr>
+      <tr>
+        <td>Editable Table</td>
+        <td>
+          <strong>Recommended:</strong> add-row action for lightweight rows;
+          collection primary action for full-resource creation.
+        </td>
+        <td>
+          <strong>Recommended:</strong> avoid row-click read if it competes with
+          editable cells; use explicit item action when needed.
+        </td>
+        <td>
+          <strong>Recommended:</strong> inline cell edit for visible field-level
+          updates; dialog for full-resource updates.
+        </td>
+        <td>
+          <strong>Recommended:</strong> when row selection makes scope explicit.
+        </td>
+        <td>
+          <strong>Recommended:</strong> row actions dropdown with confirmation.
+        </td>
       </tr>
     </tbody>
   </table>
@@ -279,12 +512,22 @@ fit a focused overlay. A right dialog can also work as a preview step when the
 resource has a meaningful full-page destination, but it does not have to route
 to a page in every case.
 
+The dialog-to-page behavior is portable. Any compatible default dialog or
+right-position read dialog can use <strong>Open Details</strong> as its primary
+action when the dialog is intentionally a reduced preview and the resource has a
+durable full-page destination. This logic applies across Table, List, Card, and
+Kanban when the target page provides deeper structure.
+
 Move to a table to page or list to page pattern when the resource needs
 persistent navigation, deeper structure, page-level actions, or a durable
 destination beyond a quick inspection flow.
 
 Use bulk update when the visualization provides clear multi-selection
 affordances and users need to apply one change to a selected set of items.
+Bulk actions are not Table-only. Table checkboxes are the clearest example, but
+Card, Kanban, List, or Editable Table can use bulk update when selected items
+remain visible, countable, and reviewable before confirmation. If the scope is
+ambiguous, use item-level update or a default dialog instead.
 
 ## Responsive behavior
 

@@ -16,6 +16,7 @@ import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../../../index"
 import {
+  cardVisualization,
   createResourceDataAdapter,
   CRUD_MODULE,
   CrudContentPlaceholder,
@@ -23,6 +24,8 @@ import {
   defaultCrudPrimaryAction,
   defaultCrudSecondaryActions,
   initialResources,
+  kanbanSourceLanes,
+  kanbanVisualization,
   listVisualization,
   Resource,
   resourceFilters,
@@ -151,6 +154,49 @@ function DefaultDialogScenario() {
   )
 }
 
+function VisualizationDialogScenario({
+  visualization,
+  withLanes = false,
+}: {
+  visualization: CrudVisualization
+  withLanes?: boolean
+}) {
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(
+    null
+  )
+
+  const source = useDataCollectionSource({
+    dataAdapter: createResourceDataAdapter(initialResources),
+    filters: resourceFilters,
+    lanes: withLanes ? kanbanSourceLanes : undefined,
+    itemOnClick: (item) => () => setSelectedResource(item),
+    primaryActions: () => defaultCrudPrimaryAction(() => {}),
+    secondaryActions: defaultCrudSecondaryActions(),
+  })
+
+  return (
+    <CrudPatternLayout>
+      <OneDataCollection source={source} visualizations={[visualization]} />
+      <F0Dialog
+        isOpen={selectedResource !== null}
+        onClose={() => setSelectedResource(null)}
+        title="Resource details"
+        description="The item surface opens a focused read dialog. Use a page instead when the resource needs durable navigation."
+        primaryAction={{
+          label: "Primary Action",
+          onClick: () => {},
+        }}
+        secondaryAction={{
+          label: "Close",
+          onClick: () => setSelectedResource(null),
+        }}
+      >
+        {selectedResource && <CrudContentPlaceholder minHeight="min-h-56" />}
+      </F0Dialog>
+    </CrudPatternLayout>
+  )
+}
+
 function OpenAsPageScenario({
   visualization = tableVisualization,
 }: {
@@ -260,4 +306,19 @@ export const TableToPage: Story = {
 
 export const ListToPage: Story = {
   render: () => <OpenAsPageScenario visualization={listVisualization} />,
+}
+
+export const CardToDialog: Story = {
+  render: () => (
+    <VisualizationDialogScenario visualization={cardVisualization} />
+  ),
+}
+
+export const KanbanCardToDialog: Story = {
+  render: () => (
+    <VisualizationDialogScenario
+      visualization={kanbanVisualization}
+      withLanes
+    />
+  ),
 }

@@ -9,11 +9,15 @@ import { F0Dialog } from "@/patterns/F0Dialog"
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../../../index"
 import {
+  cardVisualization,
   createResourceDataAdapter,
   CrudPatternLayout,
   defaultCrudPrimaryAction,
   defaultCrudSecondaryActions,
+  editableTableVisualization,
   initialResources,
+  kanbanSourceLanes,
+  kanbanVisualization,
   Resource,
   resourceFilters,
   tableVisualization,
@@ -29,7 +33,7 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-function SingleDeleteScenario() {
+function TableSingleDeleteScenario() {
   const [selectedResource, setSelectedResource] = useState<Resource | null>(
     null
   )
@@ -79,7 +83,7 @@ function SingleDeleteScenario() {
   )
 }
 
-function BulkDeleteScenario() {
+function TableBulkDeleteScenario() {
   const [selectedCount, setSelectedCount] = useState(0)
   const [open, setOpen] = useState(false)
 
@@ -136,10 +140,228 @@ function BulkDeleteScenario() {
   )
 }
 
-export const SingleDelete: Story = {
-  render: () => <SingleDeleteScenario />,
+function VisualizationDeleteScenario({
+  visualization,
+  description,
+  actionType = "primary",
+}: {
+  visualization: typeof cardVisualization | typeof editableTableVisualization
+  description: string
+  actionType?: "primary" | "secondary" | "other"
+}) {
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(
+    null
+  )
+
+  const source = useDataCollectionSource({
+    dataAdapter: createResourceDataAdapter(initialResources),
+    filters: resourceFilters,
+    itemActions: (item) => [
+      {
+        label: "Delete",
+        icon: Delete,
+        critical: true,
+        type: actionType,
+        onClick: () => setSelectedResource(item),
+      },
+    ],
+    primaryActions: () => defaultCrudPrimaryAction(() => {}),
+    secondaryActions: defaultCrudSecondaryActions(),
+  })
+
+  return (
+    <CrudPatternLayout>
+      <OneDataCollection source={source} visualizations={[visualization]} />
+      <F0Dialog
+        isOpen={selectedResource !== null}
+        onClose={() => setSelectedResource(null)}
+        title={`Delete ${selectedResource?.name ?? "resource"}?`}
+        description="This action cannot be undone."
+        primaryAction={{
+          label: "Delete resource",
+          icon: Delete,
+          onClick: () => setSelectedResource(null),
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          onClick: () => setSelectedResource(null),
+        }}
+      >
+        <F0Text content={description} variant="description" />
+      </F0Dialog>
+    </CrudPatternLayout>
+  )
 }
 
-export const BulkDelete: Story = {
-  render: () => <BulkDeleteScenario />,
+function CardDeleteFromDialogScenario() {
+  const [previewedResource, setPreviewedResource] = useState<Resource | null>(
+    null
+  )
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(
+    null
+  )
+
+  const source = useDataCollectionSource({
+    dataAdapter: createResourceDataAdapter(initialResources),
+    filters: resourceFilters,
+    itemOnClick: (item) => () => setPreviewedResource(item),
+    primaryActions: () => defaultCrudPrimaryAction(() => {}),
+    secondaryActions: defaultCrudSecondaryActions(),
+  })
+
+  return (
+    <CrudPatternLayout>
+      <OneDataCollection source={source} visualizations={[cardVisualization]} />
+      <F0Dialog
+        isOpen={previewedResource !== null}
+        onClose={() => setPreviewedResource(null)}
+        title="Resource details"
+        description="When the card itself does not expose an ellipsis, delete can live in the dialog header ellipsis instead."
+        otherActions={
+          previewedResource
+            ? [
+                {
+                  label: "Delete",
+                  icon: Delete,
+                  critical: true,
+                  onClick: () => {
+                    setSelectedResource(previewedResource)
+                    setPreviewedResource(null)
+                  },
+                },
+              ]
+            : undefined
+        }
+        primaryAction={{
+          label: "Primary Action",
+          onClick: () => {},
+        }}
+        secondaryAction={{
+          label: "Close",
+          onClick: () => setPreviewedResource(null),
+        }}
+      >
+        {previewedResource && (
+          <F0Text
+            content="The read dialog keeps the resource context visible and exposes delete from the header ellipsis."
+            variant="description"
+          />
+        )}
+      </F0Dialog>
+      <F0Dialog
+        isOpen={selectedResource !== null}
+        onClose={() => setSelectedResource(null)}
+        title={`Delete ${selectedResource?.name ?? "resource"}?`}
+        description="This action cannot be undone."
+        primaryAction={{
+          label: "Delete resource",
+          icon: Delete,
+          onClick: () => setSelectedResource(null),
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          onClick: () => setSelectedResource(null),
+        }}
+      >
+        <F0Text
+          content="The confirmation names the item and explains the destructive outcome before the user commits."
+          variant="description"
+        />
+      </F0Dialog>
+    </CrudPatternLayout>
+  )
+}
+
+function KanbanBulkDeleteScenario() {
+  const [selectedCount, setSelectedCount] = useState(0)
+  const [open, setOpen] = useState(false)
+
+  const source = useDataCollectionSource({
+    dataAdapter: createResourceDataAdapter(initialResources),
+    filters: resourceFilters,
+    lanes: kanbanSourceLanes,
+    selectable: (item) => item.id,
+    bulkActions: () => ({
+      primary: [
+        {
+          label: "Delete",
+          icon: Delete,
+          id: "delete",
+          critical: true,
+        },
+      ],
+    }),
+    primaryActions: () => defaultCrudPrimaryAction(() => {}),
+    secondaryActions: defaultCrudSecondaryActions(),
+  })
+
+  return (
+    <CrudPatternLayout>
+      <OneDataCollection
+        source={source}
+        onSelectItems={({ selectedCount }) => setSelectedCount(selectedCount)}
+        onBulkAction={(_action, { selectedCount }) => {
+          setSelectedCount(selectedCount)
+          setOpen(true)
+        }}
+        visualizations={[kanbanVisualization]}
+      />
+      <F0Dialog
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        title={`Delete ${selectedCount || "selected"} kanban cards?`}
+        description="Bulk destructive actions must state the selected scope before confirmation."
+        primaryAction={{
+          label: "Delete selected cards",
+          icon: Delete,
+          onClick: () => setOpen(false),
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          onClick: () => setOpen(false),
+        }}
+      >
+        <F0Text
+          content="Selected Kanban cards will be removed. Use bulk delete only when selected cards remain visible and reviewable across lanes."
+          variant="description"
+        />
+      </F0Dialog>
+    </CrudPatternLayout>
+  )
+}
+
+export const TableSingleDelete: Story = {
+  render: () => <TableSingleDeleteScenario />,
+}
+
+export const TableBulkDelete: Story = {
+  render: () => <TableBulkDeleteScenario />,
+}
+
+export const CardDelete: Story = {
+  render: () => (
+    <VisualizationDeleteScenario
+      visualization={cardVisualization}
+      actionType="other"
+      description="Card delete uses the card ellipsis. Card click remains reserved for read behavior."
+    />
+  ),
+}
+
+export const CardDeleteFromDialog: Story = {
+  render: () => <CardDeleteFromDialogScenario />,
+}
+
+export const EditableTableDelete: Story = {
+  render: () => (
+    <VisualizationDeleteScenario
+      visualization={editableTableVisualization}
+      actionType="secondary"
+      description="Editable Table delete uses the row actions dropdown, not a prominent editable-cell interaction."
+    />
+  ),
+}
+
+export const KanbanBulkDelete: Story = {
+  render: () => <KanbanBulkDeleteScenario />,
 }

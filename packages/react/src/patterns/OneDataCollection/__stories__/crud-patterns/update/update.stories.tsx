@@ -10,12 +10,16 @@ import { F0Dialog } from "@/patterns/F0Dialog"
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../../../index"
 import {
+  cardVisualization,
   createResourceDataAdapter,
   CrudContentPlaceholder,
   CrudPatternLayout,
   defaultCrudPrimaryAction,
   defaultCrudSecondaryActions,
+  editableTableVisualization,
   initialResources,
+  kanbanSourceLanes,
+  kanbanVisualization,
   listVisualization,
   Resource,
   ResourceFormF0,
@@ -303,6 +307,197 @@ function BulkUpdateScenario() {
   )
 }
 
+function CardActionsUpdateScenario() {
+  const [previewedResource, setPreviewedResource] = useState<Resource | null>(
+    null
+  )
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(
+    null
+  )
+  const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
+
+  const openUpdateDialog = (item: Resource) => {
+    setPreviewedResource(null)
+    setSelectedResource(item)
+  }
+
+  const source = useDataCollectionSource({
+    dataAdapter: createResourceDataAdapter(initialResources),
+    filters: resourceFilters,
+    itemOnClick: (item) => () => setPreviewedResource(item),
+    primaryActions: () => defaultCrudPrimaryAction(() => {}),
+    secondaryActions: defaultCrudSecondaryActions(),
+  })
+
+  return (
+    <CrudPatternLayout>
+      <OneDataCollection source={source} visualizations={[cardVisualization]} />
+      <F0Dialog
+        isOpen={previewedResource !== null}
+        onClose={() => setPreviewedResource(null)}
+        title="Resource details"
+        description="Card click opens the read dialog first. Edit remains an explicit action at the top of the dialog."
+        otherActions={
+          previewedResource
+            ? [
+                {
+                  label: "Edit",
+                  icon: Pencil,
+                  onClick: () => openUpdateDialog(previewedResource),
+                },
+              ]
+            : undefined
+        }
+        primaryAction={{
+          label: "Primary Action",
+          onClick: () => {},
+        }}
+        secondaryAction={{
+          label: "Close",
+          onClick: () => setPreviewedResource(null),
+        }}
+      >
+        {previewedResource && <CrudContentPlaceholder minHeight="min-h-56" />}
+      </F0Dialog>
+      <F0Dialog
+        isOpen={selectedResource !== null}
+        onClose={() => setSelectedResource(null)}
+        title="Update resource"
+        description="Card update uses the default update dialog after the user chooses Edit from the read dialog or card actions."
+        primaryAction={{
+          label: "Save changes",
+          icon: Save,
+          onClick: submit,
+          loading: isSubmitting,
+          disabled: hasErrors,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          onClick: () => setSelectedResource(null),
+        }}
+      >
+        <ResourceFormF0
+          key={selectedResource?.id}
+          mode="update"
+          resource={selectedResource ?? undefined}
+          formRef={formRef}
+          onSuccess={() => setSelectedResource(null)}
+        />
+      </F0Dialog>
+    </CrudPatternLayout>
+  )
+}
+
+function KanbanBulkUpdateScenario() {
+  const [selectedCount, setSelectedCount] = useState(0)
+  const [open, setOpen] = useState(false)
+
+  const source = useDataCollectionSource({
+    dataAdapter: createResourceDataAdapter(initialResources),
+    filters: resourceFilters,
+    lanes: kanbanSourceLanes,
+    selectable: (item) => item.id,
+    bulkActions: () => ({
+      secondary: [
+        {
+          label: "Second",
+          id: "second",
+        },
+        {
+          label: "Third",
+          id: "third",
+        },
+        {
+          label: "Fourth action",
+          id: "fourth-action",
+        },
+        {
+          label: "Fifth action",
+          id: "fifth-action",
+        },
+      ],
+      primary: [
+        {
+          label: "Primary Action",
+          id: "primary-action",
+        },
+      ],
+    }),
+    primaryActions: () => defaultCrudPrimaryAction(() => {}),
+    secondaryActions: defaultCrudSecondaryActions(),
+  })
+
+  return (
+    <CrudPatternLayout>
+      <OneDataCollection
+        source={source}
+        onSelectItems={({ selectedCount }) => setSelectedCount(selectedCount)}
+        onBulkAction={(_action, { selectedCount }) => {
+          setSelectedCount(selectedCount)
+          setOpen(true)
+        }}
+        visualizations={[kanbanVisualization]}
+      />
+      <F0Dialog
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        title={`Update ${selectedCount || "selected"} kanban cards?`}
+        description="Kanban bulk update is recommended when selected cards stay visibly selected and the action bar confirms the affected scope."
+        primaryAction={{
+          label: "Update selected cards",
+          icon: Save,
+          onClick: () => setOpen(false),
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          onClick: () => setOpen(false),
+        }}
+      >
+        <F0Text
+          content="Bulk update is not table-only. The requirement is explicit, reviewable selection scope before applying one update to multiple records."
+          variant="description"
+        />
+      </F0Dialog>
+    </CrudPatternLayout>
+  )
+}
+
+function EditableTableInlineUpdateScenario() {
+  const [resources, setResources] = useState(initialResources)
+
+  const source = useDataCollectionSource({
+    dataAdapter: createResourceDataAdapter(resources),
+    filters: resourceFilters,
+    primaryActions: () => defaultCrudPrimaryAction(() => {}),
+    secondaryActions: defaultCrudSecondaryActions(),
+  })
+
+  return (
+    <CrudPatternLayout>
+      <OneDataCollection
+        source={source}
+        visualizations={[
+          {
+            ...editableTableVisualization,
+            options: {
+              ...editableTableVisualization.options,
+              onCellChange: async (updatedResource) => {
+                setResources((currentResources) =>
+                  currentResources.map((resource) =>
+                    resource.id === updatedResource.id
+                      ? updatedResource
+                      : resource
+                  )
+                )
+              },
+            },
+          },
+        ]}
+      />
+    </CrudPatternLayout>
+  )
+}
+
 export const Default: Story = {
   render: () => <UpdateWithSameFormScenario />,
 }
@@ -319,4 +514,16 @@ export const RightPositionDialogForList: Story = {
 
 export const BulkUpdate: Story = {
   render: () => <BulkUpdateScenario />,
+}
+
+export const CardActionsUpdate: Story = {
+  render: () => <CardActionsUpdateScenario />,
+}
+
+export const KanbanBulkUpdate: Story = {
+  render: () => <KanbanBulkUpdateScenario />,
+}
+
+export const EditableTableInlineUpdate: Story = {
+  render: () => <EditableTableInlineUpdateScenario />,
 }
