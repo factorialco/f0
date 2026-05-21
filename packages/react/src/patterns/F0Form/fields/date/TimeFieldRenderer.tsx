@@ -3,7 +3,7 @@ import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
 import type { InputFieldStatus } from "@/ui/InputField/types"
 
-import { F0TextInput } from "@/experimental/Forms/Fields/Input"
+import { F0TextInput } from "@/components/F0TextInput"
 import { Clock } from "@/icons/app"
 
 import type { ResolvedTimeField } from "./types"

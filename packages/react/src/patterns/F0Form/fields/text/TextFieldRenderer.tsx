@@ -1,6 +1,6 @@
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
-import { F0TextInput } from "@/experimental/Forms/Fields/Input"
+import { F0TextInput } from "@/components/F0TextInput"
 import { Link, Envelope } from "@/icons/app"
 import { IconType } from "@/components/F0Icon"
 import type { InputFieldStatus } from "@/ui/InputField/types"

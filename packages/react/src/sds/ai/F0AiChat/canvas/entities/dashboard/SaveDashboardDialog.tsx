@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 
-import { F0TextInput } from "@/experimental/Forms/Fields/Input"
+import { F0TextInput } from "@/components/F0TextInput"
 import { useI18n } from "@/lib/providers/i18n"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { Textarea } from "@/ui/textarea"

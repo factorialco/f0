@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 
-import { InputInternal } from "@/experimental/Forms/Fields/Input/internal"
+import { InputInternal } from "@/components/F0TextInput/internal"
 import { Equal, EqualApproximately } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 

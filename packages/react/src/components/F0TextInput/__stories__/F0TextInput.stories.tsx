@@ -10,7 +10,7 @@ import { inputSizes } from "../types"
 
 const meta = {
   component: F0TextInput,
-  title: "Components/Inputs/Text input",
+  title: "Inputs/Text input",
   tags: ["autodocs", "experimental"],
   args: {
     type: "text",
