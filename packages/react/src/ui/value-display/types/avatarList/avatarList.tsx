@@ -31,13 +31,6 @@ type AvatarListValue = {
    * @default "vertical"
    */
   tooltipScroll?: "vertical" | "none"
-  /**
-   * Optional CSS color applied to the text inside the `+N` overflow popover
-   * (names and `tooltipDescription` lines). Accepts any CSS color string,
-   * including design tokens (e.g. `"var(--f1-foreground-secondary)"`). When
-   * omitted, text inherits the surrounding foreground color.
-   */
-  tooltipDescriptionFontColor?: string
 } & (
   | {
       type?: "person"
@@ -74,7 +67,6 @@ export const AvatarListCell = (
           size: "xs" as const,
           max: args.max,
           tooltipScroll: args.tooltipScroll,
-          tooltipDescriptionFontColor: args.tooltipDescriptionFontColor,
         } as F0AvatarListProps)}
       />
     </div>

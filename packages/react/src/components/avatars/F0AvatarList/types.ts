@@ -92,12 +92,4 @@ export type F0AvatarListProps = {
    * @default "vertical"
    */
   tooltipScroll?: "vertical" | "none"
-
-  /**
-   * Optional CSS color applied to the text inside the `+N` overflow popover
-   * (names and `tooltipDescription` lines). Accepts any CSS color string,
-   * including design tokens (e.g. `"var(--f1-foreground-secondary)"`). When
-   * omitted, text inherits the surrounding foreground color.
-   */
-  tooltipDescriptionFontColor?: string
 } & F0AvatarListPropsAvatars

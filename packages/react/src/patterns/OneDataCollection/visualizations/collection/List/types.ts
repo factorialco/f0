@@ -1,5 +1,6 @@
 import { AvatarVariant } from "@/components/avatars/F0Avatar"
 import { IconType } from "@/components/F0Icon"
+import { NavTarget } from "@/ui/Action"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { RecordType, SortingKey, SortingsDefinition } from "@/hooks/datasource"
 
@@ -22,9 +23,18 @@ export type ItemTitleAction = {
   icon: IconType
   label: string
   onClick?: () => void
-  href?: string
   critical?: boolean
-}
+} & (
+  | {
+      href: string
+      /** Anchor `target` (e.g. `"_blank"`). Only valid when `href` is set. */
+      target?: NavTarget
+    }
+  | {
+      href?: never
+      target?: never
+    }
+)
 
 export type ItemDefinition = {
   title: string

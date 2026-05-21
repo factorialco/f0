@@ -305,22 +305,6 @@ export const OverflowPopoverNoScroll: Story = {
     avatars: getDummyPeopleWithDescriptions(6),
     max: 3,
     tooltipScroll: "none",
-    tooltipDescriptionFontColor: "var(--f1-foreground-secondary)",
-  },
-}
-
-/**
- * `tooltipDescriptionFontColor` applies a custom CSS color to the text inside
- * the `+N` overflow popover (both names and descriptions). Accepts any CSS
- * color including design tokens (e.g. `"var(--f1-foreground-secondary)"`).
- */
-export const OverflowPopoverCustomFontColor: Story = {
-  args: {
-    ...Default.args,
-    type: "person",
-    avatars: getDummyPeopleWithDescriptions(8),
-    max: 3,
-    tooltipDescriptionFontColor: "var(--f1-foreground-secondary)",
   },
 }
 

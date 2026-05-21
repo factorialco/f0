@@ -32,6 +32,7 @@ export const ItemTeaser = ({
       critical: action.critical,
       onClick: action.onClick,
       href: action.href,
+      target: action.target,
     })
   )
 
@@ -55,7 +56,12 @@ export const ItemTeaser = ({
                       variant="ghost"
                       size="sm"
                       onClick={singleTitleAction.onClick}
-                      href={singleTitleAction.href}
+                      {...(singleTitleAction.href
+                        ? {
+                            href: singleTitleAction.href,
+                            target: singleTitleAction.target,
+                          }
+                        : {})}
                     />
                   ) : (
                     <DropdownInternal

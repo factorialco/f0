@@ -95,10 +95,11 @@ export const OverflowPopoverNoScroll: Story = {
 }
 
 /**
- * `tooltipDescriptionFontColor` applies a custom CSS color (token or raw
- * value) to the text inside the `+N` overflow popover.
+ * Several entries with descriptions, all rendered in the popover. Descriptions
+ * inherit the popover's inverse foreground with reduced opacity for clear
+ * hierarchy.
  */
-export const OverflowPopoverCustomFontColor: Story = {
+export const OverflowPopoverManyDescriptions: Story = {
   args: {
     item: { ...mockItem, avatarList: avatarListWithDescriptions },
     property: {
@@ -112,7 +113,6 @@ export const OverflowPopoverCustomFontColor: Story = {
               index === 0 ? "john.doe@factorial.co" : "josep.rey@factorial.co",
           })),
           max: 1,
-          tooltipDescriptionFontColor: "var(--f1-foreground-secondary)",
         },
       }),
     },

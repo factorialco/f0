@@ -144,6 +144,21 @@ export const TableCollection = <
 
   const { settings } = useDataCollectionSettings()
 
+  // `headerless` only applies to non-selectable tables. The select-all
+  // checkbox and the "all pages selection" banner live inside <TableHeader>,
+  // so hiding the header would silently break selection. When the source is
+  // selectable we force the header back on and warn in development.
+  const effectiveHeaderless = headerless && !source.selectable
+  if (
+    process.env.NODE_ENV !== "production" &&
+    headerless &&
+    source.selectable
+  ) {
+    console.warn(
+      "[OneDataCollection] `headerless` is ignored when the source is `selectable`: the select-all checkbox and the all-pages selection banner live in the header."
+    )
+  }
+
   // Sorted and hidden columns
   const { columns } = useColumns(
     originalColumns,
@@ -396,7 +411,7 @@ export const TableCollection = <
           )}
         >
           <OneTable loading={isLoading}>
-            {!headerless && (
+            {!effectiveHeaderless && (
               <TableHeader sticky={true}>
                 {headerGroups ? (
                   <TableRow>

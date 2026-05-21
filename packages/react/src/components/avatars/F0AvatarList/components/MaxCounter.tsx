@@ -8,7 +8,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
 import { ScrollArea, ScrollBar } from "@/ui/scrollarea"
 
 import { AvatarVariant, AvatarVariants, F0Avatar } from "../../F0Avatar"
-import { type AvatarListSize } from "../types"
+import { type AvatarListSize, type F0AvatarListExtras } from "../types"
 import { getAvatarDisplayName } from "../utils"
 
 const sizeVariants = cva({
@@ -46,7 +46,7 @@ type Props = {
   count: number
   size?: AvatarListSize
   type?: (typeof internalAvatarTypes)[number]
-  list?: Omit<AvatarVariant, "type">[]
+  list?: (Omit<AvatarVariant, "type"> & F0AvatarListExtras)[]
   avatarType?: AvatarVariants
   /**
    * Controls the popover content scroll behavior.
@@ -57,12 +57,6 @@ type Props = {
    * @default "vertical"
    */
   tooltipScroll?: "vertical" | "none"
-  /**
-   * Optional CSS color (token or raw value) applied to the popover text
-   * (names and `tooltipDescription` lines). When omitted, the popover
-   * inherits the surrounding foreground color.
-   */
-  tooltipDescriptionFontColor?: string
 }
 
 export const MaxCounter = ({
@@ -72,7 +66,6 @@ export const MaxCounter = ({
   list,
   avatarType = "person",
   tooltipScroll = "vertical",
-  tooltipDescriptionFontColor,
 }: Props) => {
   const counter = (
     <div
@@ -94,7 +87,7 @@ export const MaxCounter = ({
   const isVertical = tooltipScroll === "vertical"
 
   const items = list.map((avatar, index) => {
-    const description = getTooltipDescription(avatar)
+    const description = avatar.tooltipDescription
     return (
       <div
         key={index}
@@ -121,11 +114,8 @@ export const MaxCounter = ({
           {description && (
             <div
               className={cn(
-                "text-sm",
-                isVertical ? "truncate" : "whitespace-nowrap",
-                tooltipDescriptionFontColor
-                  ? "text-current opacity-70"
-                  : "text-f1-foreground-secondary"
+                "text-sm text-current opacity-70",
+                isVertical ? "truncate" : "whitespace-nowrap"
               )}
             >
               {description}
@@ -136,19 +126,12 @@ export const MaxCounter = ({
     )
   })
 
-  const containerStyle = tooltipDescriptionFontColor
-    ? { color: tooltipDescriptionFontColor }
-    : undefined
-
   return (
     <HoverCard>
       <HoverCardTrigger asChild>{counter}</HoverCardTrigger>
       <HoverCardContent side="top" className={cn(!isVertical && "w-auto")}>
         {isVertical ? (
-          <ScrollArea
-            className="[*[data-state=visible]_div]:bg-f1-background flex max-h-[172px] flex-col"
-            style={containerStyle}
-          >
+          <ScrollArea className="[*[data-state=visible]_div]:bg-f1-background flex max-h-[172px] flex-col">
             {items}
             <ScrollBar
               orientation="vertical"
@@ -156,16 +139,9 @@ export const MaxCounter = ({
             />
           </ScrollArea>
         ) : (
-          <div className="flex flex-col py-1" style={containerStyle}>
-            {items}
-          </div>
+          <div className="flex flex-col py-1">{items}</div>
         )}
       </HoverCardContent>
     </HoverCard>
   )
-}
-
-function getTooltipDescription(avatar: unknown): string | undefined {
-  const value = (avatar as { tooltipDescription?: unknown })?.tooltipDescription
-  return typeof value === "string" && value.length > 0 ? value : undefined
 }

@@ -1215,7 +1215,6 @@ const SignatureCollection = () => {
                   value: {
                     max: 2,
                     tooltipScroll: "none",
-                    tooltipDescriptionFontColor: "white",
                     avatarList: item.assignees.map((a) => ({
                       type: "person" as const,
                       firstName: a.name.split(" ")[0] ?? a.name,

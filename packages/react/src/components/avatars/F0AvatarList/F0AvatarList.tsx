@@ -5,7 +5,12 @@ import { OverflowList } from "@/ui/OverflowList"
 
 import { AvatarVariant, F0Avatar } from "../F0Avatar"
 import { MaxCounter } from "./components/MaxCounter"
-import { AvatarListSize, avatarListSizes, F0AvatarListProps } from "./types"
+import {
+  AvatarListSize,
+  avatarListSizes,
+  F0AvatarListExtras,
+  F0AvatarListProps,
+} from "./types"
 import { getAvatarDisplayName } from "./utils"
 
 const CLIP_MASK: Record<"base" | "rounded", Record<AvatarListSize, string>> = {
@@ -29,7 +34,6 @@ export const F0AvatarList = ({
   remainingCount: initialRemainingCount,
   max,
   tooltipScroll,
-  tooltipDescriptionFontColor,
 }: F0AvatarListProps) => {
   // Check legacy size
   if (size && !avatarListSizes.includes(size)) {
@@ -76,6 +80,8 @@ export const F0AvatarList = ({
       className="flex items-center"
       renderListItem={(avatar, index) => {
         const displayName = getAvatarDisplayName(type, avatar)
+        const extras = avatar as Partial<F0AvatarListExtras>
+        const description = extras.tooltipDescription
 
         const hasBadge = Boolean((avatar as { badge?: unknown }).badge)
         const clippedAvatar = (
@@ -102,10 +108,7 @@ export const F0AvatarList = ({
             {noTooltip ? (
               clippedAvatar
             ) : (
-              <Tooltip
-                label={displayName}
-                description={getTooltipDescription(avatar)}
-              >
+              <Tooltip label={displayName} description={description}>
                 {clippedAvatar}
               </Tooltip>
             )}
@@ -125,7 +128,6 @@ export const F0AvatarList = ({
             type={type === "person" ? "rounded" : "base"}
             avatarType={type}
             tooltipScroll={tooltipScroll}
-            tooltipDescriptionFontColor={tooltipDescriptionFontColor}
             list={
               initialRemainingCount
                 ? undefined
@@ -140,8 +142,3 @@ export const F0AvatarList = ({
 }
 
 F0AvatarList.displayName = "AvatarList"
-
-function getTooltipDescription(avatar: unknown): string | undefined {
-  const value = (avatar as { tooltipDescription?: unknown })?.tooltipDescription
-  return typeof value === "string" && value.length > 0 ? value : undefined
-}
