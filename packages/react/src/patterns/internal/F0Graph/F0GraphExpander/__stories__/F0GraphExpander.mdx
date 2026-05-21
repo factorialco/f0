@@ -1,0 +1,45 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+
+<Meta title="Graph/F0GraphExpander" />
+
+# F0GraphExpander
+
+Internal expand/collapse control rendered under graph nodes with children.
+
+> Internal component note: this control is part of the F0Graph pattern and is not exported from the package root.
+
+---
+
+# Behavior
+
+- Shows child count (caps display at `+99`)
+- Toggles `aria-expanded` for assistive tech
+- Supports keyboard interaction through the underlying button
+- Supports a loading pulse while lazy children are fetched
+
+---
+
+# Props
+
+| Prop        | Type         | Default          | Description                         |
+| ----------- | ------------ | ---------------- | ----------------------------------- |
+| `size`      | `number`     | `24`             | Pixel size for the circular trigger |
+| `count`     | `number`     | —                | Child count to display              |
+| `expanded`  | `boolean`    | —                | Current expansion state             |
+| `onClick`   | `() => void` | —                | Toggle handler                      |
+| `tabIndex`  | `number`     | —                | Keyboard tab index override         |
+| `ariaLabel` | `string`     | graph i18n label | Accessible label override           |
+| `loading`   | `boolean`    | `false`          | Shows pulsing loading state         |
+
+---
+
+# Usage
+
+```tsx
+<F0GraphExpander
+  count={12}
+  expanded={expanded}
+  loading={isLoadingChildren}
+  onClick={onToggleExpand}
+/>
+```

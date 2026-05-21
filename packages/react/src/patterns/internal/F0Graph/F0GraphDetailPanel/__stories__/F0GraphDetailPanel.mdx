@@ -1,0 +1,74 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+
+<Meta title="Graph/F0GraphDetailPanel" />
+
+# F0GraphDetailPanel
+
+Internal panel chrome used by F0Graph for selected-node details.
+
+> Internal component note: this panel is part of the F0Graph pattern and is not exported from the package root.
+
+---
+
+# Variants
+
+## Default
+
+Header with icon/title/description, optional alert, optional menu, and optional footer actions.
+
+## Resource
+
+Consumer-rendered `header` plus responsive action row (1 action full width, 2 split buttons, 3+ with overflow menu).
+
+---
+
+# Props
+
+## Shared
+
+| Prop           | Type         | Default          | Description                                   |
+| -------------- | ------------ | ---------------- | --------------------------------------------- |
+| `open`         | `boolean`    | —                | Whether the panel is open                     |
+| `initialWidth` | `number`     | `384`            | Initial width in pixels                       |
+| `graphId`      | `string`     | `"default"`      | Key scope for persisted width in localStorage |
+| `onClose`      | `() => void` | —                | Close handler (button or Escape)              |
+| `ariaLabel`    | `string`     | graph i18n label | Landmark label for screen readers             |
+| `className`    | `string`     | —                | Optional class override on panel root         |
+| `children`     | `ReactNode`  | —                | Body content below the header area            |
+
+## Default variant
+
+| Prop          | Type             | Default     | Description                    |
+| ------------- | ---------------- | ----------- | ------------------------------ |
+| `variant`     | `"default"`      | `"default"` | Header layout mode             |
+| `icon`        | `IconType`       | —           | Optional icon next to title    |
+| `title`       | `string`         | —           | Header title                   |
+| `description` | `string`         | —           | Header description             |
+| `alert`       | `F0AlertProps`   | —           | Optional inline alert          |
+| `action`      | `ActionConfig`   | —           | Optional primary header action |
+| `menuActions` | `DropdownItem[]` | —           | Optional overflow menu items   |
+| `footer`      | `ActionConfig[]` | —           | Footer action row              |
+
+## Resource variant
+
+| Prop      | Type             | Default | Description                 |
+| --------- | ---------------- | ------- | --------------------------- |
+| `variant` | `"resource"`     | —       | Resource header mode        |
+| `header`  | `ReactNode`      | —       | Fully custom header content |
+| `actions` | `ActionConfig[]` | —       | Action row under the header |
+
+---
+
+# Usage
+
+```tsx
+<F0GraphDetailPanel
+  open={isOpen}
+  graphId="employees-org-chart"
+  onClose={() => setIsOpen(false)}
+  title="Sofia Reyes"
+  description="Chief Executive Officer"
+>
+  <EmployeeDetails />
+</F0GraphDetailPanel>
+```
