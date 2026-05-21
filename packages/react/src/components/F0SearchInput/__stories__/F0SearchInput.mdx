@@ -10,6 +10,8 @@ import * as Stories from "./F0SearchInput.stories"
 
 Use it wherever the user types a query that filters or searches a list, table, or dataset. For free-form text entry use [F0TextInput](?path=/docs/components-inputs-text-input--documentation).
 
+It shares the chrome conventions (sizes, focus ring, disabled and loading states) of every F0 writable input — see [F0InputField](?path=/docs/components-primitives-f0inputfield--documentation) for the chrome reference.
+
 ---
 
 ## Overview
@@ -23,43 +25,9 @@ Use it wherever the user types a query that filters or searches a list, table, o
 - **Placeholder**: rendered inside the input. Also used as the accessible name (the visible label is hidden because search fields are self-explanatory).
 - **Clear button**: optional (`clearable`), rendered only while the value is non-empty.
 
+`F0SearchInput` defaults to `size="sm"` — the only F0 input that does so, because search fields most often live in compact toolbars. Override with `size="md"` for primary search surfaces (command palette, top-of-page search).
+
 <Controls of={Stories.Default} />
-
-### Variants
-
-#### Sizes
-
-<Canvas of={Stories.Default} />
-
-<Unstyled>
-  <table>
-    <thead>
-      <tr>
-        <th>Size</th>
-        <th>Height</th>
-        <th>When to use</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>
-          <code>sm</code>
-        </td>
-        <td>32px (default)</td>
-        <td>Dense layouts, inline filters, table toolbars, sidebars.</td>
-      </tr>
-      <tr>
-        <td>
-          <code>md</code>
-        </td>
-        <td>40px</td>
-        <td>Primary search surfaces (command palette, top-of-page search).</td>
-      </tr>
-    </tbody>
-  </table>
-</Unstyled>
-
-Defaults to `"sm"` — the opposite of every other F0 input. Search fields most often appear in compact toolbars, so the small size matches the typical use case.
 
 ---
 
