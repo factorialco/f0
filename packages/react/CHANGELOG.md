@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.13.1](https://github.com/factorialco/f0/compare/f0-react-v2.13.0...f0-react-v2.13.1) (2026-05-21)
+
+
+### Bug Fixes
+
+* **avatar:** match ticketing icon to tasks ([#4183](https://github.com/factorialco/f0/issues/4183)) ([aaeffe7](https://github.com/factorialco/f0/commit/aaeffe7ec2a16545505442f998512abc78f073af))
+
 ## [2.13.0](https://github.com/factorialco/f0/compare/f0-react-v2.12.0...f0-react-v2.13.0) (2026-05-21)
 
 
