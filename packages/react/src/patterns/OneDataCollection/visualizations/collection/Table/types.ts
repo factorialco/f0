@@ -145,7 +145,12 @@ export type TableVisualizationOptions<
    * the data and the header would be redundant.
    *
    * Note: when `headerless` is enabled, sorting and column hiding/reordering
-   * controls (which live in the header) become inaccessible.
+   * controls (which live in the header) become inaccessible. Bulk-selection
+   * affordances tied to the header — the select-all checkbox and the
+   * "select all items across pages" banner shown when `selectable` is
+   * combined with `allPagesSelection` — are also suppressed. Avoid
+   * combining `headerless` with those features, or provide an alternative
+   * way to trigger selection.
    * @default false
    */
   headerless?: boolean

@@ -41,7 +41,7 @@ export const ItemTeaser = ({
       <div className="flex flex-1 flex-col gap-0.5">
         <header>
           <h3>
-            <div className="flex min-w-0 items-center gap-1">
+            <span className="flex min-w-0 items-center gap-1">
               <OneEllipsis className="text-base font-medium text-f1-foreground">
                 {title}
               </OneEllipsis>
@@ -67,7 +67,7 @@ export const ItemTeaser = ({
                   )}
                 </span>
               )}
-            </div>
+            </span>
           </h3>
         </header>
         <aside>

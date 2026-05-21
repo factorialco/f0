@@ -97,11 +97,15 @@ const ItemContent: FC<{ content: DetailsItemContent }> = ({ content }) => (
         <F0AvatarList {...content.avatarList} />
       </li>
     )}
-    {content.type === "file" && (
-      <li className="list-none px-1.5 py-1">
-        <FileItem {...content} />
-      </li>
-    )}
+    {content.type === "file" &&
+      (() => {
+        const { type: _type, ...fileProps } = content
+        return (
+          <li className="list-none px-1.5 py-1">
+            <FileItem {...fileProps} />
+          </li>
+        )
+      })()}
   </>
 )
 
