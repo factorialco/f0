@@ -144,7 +144,7 @@ What `F0DurationInput` guarantees when used as a controlled input.
 
 A11y wiring is not visually demonstrable. It includes: `role="group"` on the container with `aria-label` derived from `label` or `ariaLabel`, per-segment `aria-label` (overridable via `fields[unit].ariaLabel`), `inputMode="numeric"`, `aria-disabled`, `aria-readonly`, and `aria-invalid` propagation. A `console.warn` fires in development when neither `label` nor `ariaLabel` is provided.
 
-### Value model: seconds in, seconds out
+### Value model
 
 `value` and `onChange` always work in **seconds**. The component converts to and from visible segments internally:
 
@@ -154,7 +154,7 @@ A11y wiring is not visually demonstrable. It includes: `role="group"` on the con
 
 Segments that are **not visible** do not contribute to the emitted value. With `units={["hours", "minutes"]}`, the seconds component is dropped — `5430` becomes `5400` (`1h 30min`) on the next normalisation.
 
-### Rollover on blur
+### Rollover
 
 While typing, the input keeps raw values visible so the user can see what they entered. On blur, it normalises into the visible units:
 
@@ -162,7 +162,7 @@ While typing, the input keeps raw values visible so the user can see what they e
 - On blur, the input recomputes from total seconds and displays `1h 15min`.
 - If hours are not visible, `75min` stays as `75min`.
 
-### Per-field configuration
+### Per-field config
 
 Each unit accepts an optional config via `fields={{ [unit]: { ... } }}`:
 
@@ -180,12 +180,6 @@ Pass `status={{ type, message }}` to colour the border and render a message belo
 ### Custom suffixes
 
 <Canvas of={Stories.CustomSuffixes} />
-
-### Disabled and readonly
-
-<Canvas of={Stories.Disabled} />
-
-`disabled` removes the segments from the tab order and prevents editing. `readonly` keeps the value visible and focusable but blocks edits; the container drops the focus ring.
 
 ---
 
