@@ -141,6 +141,20 @@ const inputFieldStatusVariants = cva({
   ],
 })
 
+/**
+ * @internal Design system primitive. Do NOT use in product code.
+ *
+ * `InputField` is the shared chrome (label, status, icon, append, clear,
+ * loading, focus/hover/disabled styles, a11y wiring) used by every writable
+ * F0 input. It is intentionally not exported from `@factorialco/f0-react`.
+ *
+ * Product code must use the dedicated `F0*Input` components instead:
+ *   - F0TextInput, F0NumberInput, F0SearchInput, F0TextAreaInput,
+ *     F0DurationInput, F0DatePicker, F0Select, ...
+ *
+ * Use `InputField` only when you are adding a new input type to the design
+ * system itself (e.g. F0CurrencyInput, F0PhoneInput, F0PercentageInput).
+ */
 export type InputFieldProps<T> = {
   autoFocus?: boolean
   label: string
