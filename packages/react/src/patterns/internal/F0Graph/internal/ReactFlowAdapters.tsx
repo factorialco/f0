@@ -41,6 +41,21 @@ import {
 } from "../contexts"
 import { F0GraphExpander } from "../F0GraphExpander"
 
+function areStringArraysEqual(
+  previous?: readonly string[],
+  next?: readonly string[]
+) {
+  if (previous === next) return true
+  if (!previous || !next) return previous === next
+  if (previous.length !== next.length) return false
+
+  for (let index = 0; index < previous.length; index += 1) {
+    if (previous[index] !== next[index]) return false
+  }
+
+  return true
+}
+
 // ─── Shared types ──────────────────────────────────────────────
 
 export interface GraphNodeData extends Record<string, unknown> {
@@ -196,10 +211,10 @@ export const F0GraphNodeWrapper = memo(
     if (prevData.ariaSetSize !== nextData.ariaSetSize) return false
     if (prevData.ariaPosInSet !== nextData.ariaPosInSet) return false
     if (
-      (prevData.visibleChildIds?.join(",") ?? "") !==
-      (nextData.visibleChildIds?.join(",") ?? "")
-    )
+      !areStringArraysEqual(prevData.visibleChildIds, nextData.visibleChildIds)
+    ) {
       return false
+    }
     if (prev.positionAbsoluteX !== next.positionAbsoluteX) return false
     if (prev.positionAbsoluteY !== next.positionAbsoluteY) return false
     return true
@@ -240,7 +255,7 @@ function F0GraphExpanderWrapperInner({ data, id }: NodeProps<ExpanderRFNode>) {
         role="button"
         tabIndex={isFocused ? 0 : -1}
         aria-label={ariaLabel}
-        aria-expanded={false}
+        aria-expanded={expanded}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault()
@@ -275,6 +290,7 @@ export const F0GraphExpanderWrapper = memo(
     if (prevData.parentId !== nextData.parentId) return false
     if (prevData.count !== nextData.count) return false
     if (prevData.parentWidth !== nextData.parentWidth) return false
+    if (prevData.parentName !== nextData.parentName) return false
     if (prev.positionAbsoluteX !== next.positionAbsoluteX) return false
     if (prev.positionAbsoluteY !== next.positionAbsoluteY) return false
     return true
@@ -359,6 +375,7 @@ export const F0GraphCollapserWrapper = memo(
     if (prevData.parentId !== nextData.parentId) return false
     if (prevData.parentWidth !== nextData.parentWidth) return false
     if (prevData.collapseLabel !== nextData.collapseLabel) return false
+    if (prevData.parentName !== nextData.parentName) return false
     if (prev.positionAbsoluteX !== next.positionAbsoluteX) return false
     if (prev.positionAbsoluteY !== next.positionAbsoluteY) return false
     return true

@@ -66,4 +66,24 @@ describe("F0GraphControls", () => {
       expect(button).toHaveAttribute("aria-label")
     })
   })
+
+  it("opens and closes the metadata popover from the trigger button", async () => {
+    render(
+      <F0GraphControls
+        tagTypes={["person"]}
+        visibleTagTypes={new Set(["person"])}
+        onToggleTagType={vi.fn()}
+      />
+    )
+
+    const metadataButton = screen.getByLabelText("Metadata settings")
+
+    expect(screen.queryByText("People")).not.toBeInTheDocument()
+
+    await userEvent.click(metadataButton)
+    expect(screen.getByText("People")).toBeInTheDocument()
+
+    await userEvent.click(metadataButton)
+    expect(screen.queryByText("People")).not.toBeInTheDocument()
+  })
 })

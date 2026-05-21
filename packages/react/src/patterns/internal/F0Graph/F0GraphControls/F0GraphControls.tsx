@@ -84,7 +84,6 @@ export const F0GraphControls = forwardRef<HTMLDivElement, F0GraphControlsProps>(
                 icon={Sliders}
                 hideLabel
                 pressed={tagPopoverOpen}
-                onClick={() => setTagPopoverOpen((o) => !o)}
               />
             </PopoverTrigger>
             <PopoverContent

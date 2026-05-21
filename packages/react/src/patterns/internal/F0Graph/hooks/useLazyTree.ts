@@ -48,10 +48,15 @@ export function useLazyTree<T>(
   const prevRootIdsRef = useRef<Set<string>>(
     new Set(rootNodes.map((n) => n.id))
   )
+  const prevRootByIdRef = useRef<Map<string, GraphNode<T>>>(
+    new Map(rootNodes.map((n) => [n.id, n]))
+  )
 
   useEffect(() => {
     const rootIds = new Set(rootNodes.map((n) => n.id))
+    const rootById = new Map(rootNodes.map((n) => [n.id, n]))
     const prev = prevRootIdsRef.current
+    const prevById = prevRootByIdRef.current
     let changed = rootIds.size !== prev.size
     if (!changed) {
       for (const id of rootIds) {
@@ -59,10 +64,16 @@ export function useLazyTree<T>(
           changed = true
           break
         }
+        // Reconcile root object updates even when ids remain stable.
+        if (prevById.get(id) !== rootById.get(id)) {
+          changed = true
+          break
+        }
       }
     }
     if (changed) {
       prevRootIdsRef.current = rootIds
+      prevRootByIdRef.current = rootById
       setAllNodes((prev) => {
         const nonRootNodes = prev.filter(
           (n) => n.parentId !== null && !rootIds.has(n.id)
@@ -76,7 +87,9 @@ export function useLazyTree<T>(
     async (nodeId: string): Promise<GraphNode<T>[]> => {
       // Already loaded — return cached children synchronously from `allNodes`.
       if (loadedParents.current.has(nodeId)) {
-        return allNodesRef.current.filter((n) => n.parentId === nodeId)
+        return allNodesRef.current.filter(
+          (n) => n.parentId === nodeId || n.parentIds?.includes(nodeId)
+        )
       }
 
       setLoadingNodes((prev) => {
