@@ -1,0 +1,149 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+<Meta title="CRUD patterns/New surfaces" />
+
+# Applying CRUD Patterns to New Surfaces
+
+When designing a CRUD experience for a surface type that doesn't exist yet —
+timeline, map, graph, calendar, tree, or anything novel — use this page as a
+framework for making decisions from first principles.
+
+---
+
+## Step 1: Characterize the surface
+
+Answer these questions about the new surface:
+
+| Question | Why it matters |
+|---|---|
+| What is the item density? (items per screen) | Determines affordance reveal strategy (Principle 10) |
+| Is the surface touch-first, pointer-first, or hybrid? | Hover is not available on touch |
+| Do items have a natural "open" gesture? (click, tap, expand) | Determines how Read is triggered |
+| Is there a spatial metaphor? (position = meaning) | Affects where Create anchors and how bulk selection works |
+| Can items overlap or occlude each other? | May prevent inline actions entirely |
+| Is the surface paginated or infinite? | Affects bulk selection scope patterns |
+
+---
+
+## Step 2: Map the action hierarchy
+
+Regardless of surface type, the hierarchy stays the same:
+
+1. **Collection-level primary** — identify the single dominant intent. Place it in
+   the surface's "frame" (toolbar, header, floating button, sidebar — wherever the
+   surface's chrome lives).
+
+2. **Item-level actions** — decide the reveal strategy based on density:
+   - High density (many items visible): hover or long-press to reveal
+   - Low density (few items, large): persistent affordances on/near the item
+   - Occluding surfaces (map markers, overlapping nodes): actions in a popover on select
+
+3. **Bulk actions** — decide how selection works:
+   - If items are discrete and countable: checkbox selection + bar
+   - If items are spatial (regions, ranges): lasso/range selection + bar
+   - If selection is hard to visualize: consider whether bulk is appropriate at all
+
+<DoDonts
+  do={{
+    description:
+      "Always provide a collection-level frame for the primary action, even on unconventional surfaces (a floating action button on a map, a toolbar on a graph).",
+  }}
+  dont={{
+    description:
+      "Do not skip the action hierarchy just because the surface is novel — the principles still apply.",
+  }}
+/>
+
+---
+
+## Step 3: Choose containers
+
+The container decision is independent of the surface. The same rules apply:
+
+- Centered overlay for self-contained operations
+- Side panel when the surface context matters during editing
+- Dedicated page for deep resources
+- Inline edit only if the surface supports in-place focus without ambiguity
+
+**Special considerations for novel surfaces:**
+- If the surface is spatial (map, graph), side panels often work better than
+  centered overlays because the user wants to see how their edit affects the layout.
+- If the surface is temporal (timeline, calendar), confirm that "Create" has a
+  clear temporal anchor (which date? which slot?) — scoped creation is almost
+  always appropriate here.
+
+<DoDonts
+  do={{
+    description:
+      "On spatial surfaces, prefer side panels over centered overlays so users see how edits affect the layout in real time.",
+  }}
+  dont={{
+    description:
+      "Do not invent a new container type for every novel surface. The existing container vocabulary covers nearly all cases.",
+  }}
+/>
+
+---
+
+## Step 4: Define the Read trigger
+
+Every surface needs a way to open a read view. Decide:
+
+| Surface characteristic | Read trigger |
+|---|---|
+| Items are clickable regions (cards, nodes, markers) | Click/tap the item |
+| Items are rows/lines (table, list, timeline entries) | Click the row |
+| Items overlap or are small (map pins, dense graph nodes) | Click to select → popover with "Open" |
+| Items are editable in-place (cells, inline fields) | Explicit "View" action (not click — that's edit) |
+
+The key conflict to avoid: **click-to-read vs. click-to-edit**. If the surface is
+editable, these two gestures must be disambiguated. The safest solution is an
+explicit "View details" item action.
+
+---
+
+## Step 5: Handle destructive actions
+
+Destructive patterns are surface-agnostic. Regardless of how novel the surface is:
+
+- Delete lives in overflow (always)
+- Confirmation names the target
+- Bulk delete requires visible scope
+
+The only surface-specific decision: **where does the overflow menu live?**
+- On item hover/select: popover or context menu
+- On a detail view: header overflow
+- In bulk: the bar's overflow section
+
+<DoDonts
+  do={{
+    description:
+      "Default to overflow for destructive actions on novel surfaces. If context justifies surfacing them, keep confirmation and destructive styling.",
+  }}
+  dont={{
+    description:
+      "Do not surface a \"Delete\" button on map markers, graph nodes, or timeline items without deliberate justification and confirmation.",
+  }}
+/>
+
+---
+
+## Step 6: Validate against the checklist
+
+Once you have made decisions for all four CRUD operations on the new surface, run
+through the [Checklist](/?path=/docs/experimental-crud-patterns-checklist--documentation)
+to verify nothing was missed.
+
+---
+
+## Common novel surfaces — quick guidance
+
+| Surface | Create anchor | Read trigger | Item actions | Bulk mechanism |
+|---|---|---|---|---|
+| Map | Floating button or toolbar | Click marker → popover | Popover actions | Lasso select + bar |
+| Graph/network | Toolbar or right-click canvas | Click node | Node popover or context menu | Multi-select (shift+click or lasso) + bar |
+| Timeline | Click empty slot (scoped to time) | Click entry | Entry popover | Range select + bar |
+| Calendar | Click empty cell (scoped to date) | Click event | Event popover | Multi-select + bar |
+| Tree/hierarchy | Toolbar or node context menu | Click node to expand/open | Node inline or context menu | Checkbox per node + bar |
+| Kanban (reference) | Lane "Add" button (scoped to state) | Click card | Card read overlay | Checkbox select + bar |

@@ -1,0 +1,139 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+<Meta title="CRUD patterns/Create & Update" />
+
+# Create & Update
+
+Create and Update are treated together because they share the same core
+interaction: the user fills a form and submits it. The differences between them
+are minimal and well-defined.
+
+---
+
+## Create lives at the collection level
+
+Creation is always anchored to the **collection's frame** — its header, toolbar,
+or empty state. Never to a specific item.
+
+This is true even for scoped creation:
+- A board lane with an "Add" action is still collection-level — the lane _is_ a sub-collection.
+- An editable grid with "Add row" is collection-level — the grid _is_ the collection.
+
+The primary action of the collection is almost always "Create". Its label should
+be a verb-noun pair: "Add employee", "Create report", "New expense".
+
+<DoDonts
+  do={{
+    description:
+      "Wire Create as the collection's primary action — one button, top-level, labeled with a verb.",
+  }}
+  dont={{
+    description:
+      "Do not place Create on individual items, rows, or detail views.",
+  }}
+/>
+
+---
+
+## Update mirrors Create
+
+The update form should be **the same form** as the create form, parametrized by
+mode. This means:
+
+- Same fields, same order, same grouping
+- Same validation rules
+- Same container shape (if Create uses a centered overlay, Update uses one too)
+- Differences are explicit and minimal: pre-filled values, locked fields, audit metadata
+
+When users learn to create something, they have already learned to edit it.
+Divergence between the two is a memory tax.
+
+<DoDonts
+  do={{
+    description:
+      "Reuse the create form for update. Share field order, validation, and container.",
+  }}
+  dont={{
+    description:
+      "Do not build a separate update form with different field order or a different container without strong justification.",
+  }}
+/>
+
+---
+
+## Choosing the container for Create / Update
+
+Use the
+[Decisions](/?path=/docs/experimental-crud-patterns-decisions--documentation)
+page for the full decision tree. A quick summary:
+
+| Situation | Container |
+|---|---|
+| Few fields, no branching, no background context needed | Centered overlay |
+| Few fields, user benefits from seeing the collection | Side panel |
+| Many fields with branching or validation gates | Wizard |
+| Complex resource with multiple sections or tabs | Dedicated page |
+| Single field, trivial validation, repetitive flow | Inline edit |
+
+---
+
+## The "read-first" update pattern
+
+For surfaces where items are content-rich (cards, boards), the user typically
+opens a **read view first**, and the Edit affordance is exposed inside it.
+
+Flow: **Item click → Read overlay → Edit action → Update form**
+
+This prevents accidental edits and gives the user context before mutating.
+
+<DoDonts
+  do={{
+    description:
+      "Use read-first update for content-rich items where users benefit from reviewing before editing.",
+  }}
+  dont={{
+    description:
+      "Do not force read-first on dense tabular data — users already have context from the row.",
+  }}
+/>
+
+---
+
+## Scoped creation
+
+Some collection layouts support **scoped creation** — creating a new item that is
+pre-assigned to a specific state or category:
+
+- **Board lanes**: "Add to this lane" creates an item already in that workflow state.
+- **Grouped views**: Creating from within a group pre-fills the group's attribute.
+- **Filtered views**: Creating from a filtered collection may pre-fill the active filter values.
+
+Scoped creation reduces form friction by eliminating fields the user has already
+implicitly chosen.
+
+---
+
+## Inline creation (editable surfaces)
+
+For surfaces whose purpose is rapid data entry, creation can be **inline**:
+
+- An "Add row" action appends a blank row that the user fills in-place.
+- Validation is per-cell or per-row, with immediate error feedback.
+- No container opens — the collection _is_ the form.
+
+This is appropriate only when:
+- The item has few fields (up to 5-7 visible columns)
+- Fields are simple (text, numbers, dropdowns)
+- The user is likely creating many items in sequence
+
+<DoDonts
+  do={{
+    description:
+      "Use inline creation for editable surfaces where rapid sequential data entry is the primary use case.",
+  }}
+  dont={{
+    description:
+      "Do not use inline creation when the item requires complex fields (rich text, file uploads, nested objects).",
+  }}
+/>
