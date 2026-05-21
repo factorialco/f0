@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.13.0](https://github.com/factorialco/f0/compare/f0-react-v2.12.0...f0-react-v2.13.0) (2026-05-21)
+
+
+### Features
+
+* **f0:** add F0SegmentedControl experimental component ([#4102](https://github.com/factorialco/f0/issues/4102)) ([17218e6](https://github.com/factorialco/f0/commit/17218e676bd0456ac45a3c14683f188fbf1db40a))
+
 ## [2.12.0](https://github.com/factorialco/f0/compare/f0-react-v2.11.1...f0-react-v2.12.0) (2026-05-20)
 
 
