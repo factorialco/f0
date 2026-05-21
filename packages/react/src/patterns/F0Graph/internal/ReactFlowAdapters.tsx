@@ -8,7 +8,8 @@ import { type ReactNode, memo } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { Minimize } from "@/icons/app"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
+import { useI18n } from "@/lib/providers/i18n"
 
 import type { F0GraphNodeRenderContext } from "../F0Graph"
 import type { GraphNodeState, GraphNodeVariant } from "../F0GraphNode"
@@ -214,6 +215,7 @@ function F0GraphExpanderWrapperInner({ data, id }: NodeProps<ExpanderRFNode>) {
   const actionsCtx = useF0GraphActionsInternal()
   const focusCtx = useF0GraphFocusInternal()
   const renderCfg = useF0GraphRenderConfigInternal()
+  const i18n = useI18n()
   if (!zoomCtx || !expandCtx || !actionsCtx) return null
 
   const { count, parentId, parentWidth, parentName } = data as ExpanderNodeData
@@ -229,8 +231,13 @@ function F0GraphExpanderWrapperInner({ data, id }: NodeProps<ExpanderRFNode>) {
     : undefined
 
   const ariaLabel = parentName
-    ? `Expand ${parentName}, ${count} ${count === 1 ? "child" : "children"}`
-    : `Expand ${count} items`
+    ? i18n.t(
+        count === 1
+          ? "graph.expander.expandWithParentSingular"
+          : "graph.expander.expandWithParentPlural",
+        { parent: parentName, count }
+      )
+    : i18n.t("graph.expander.expand", { count })
 
   return (
     <>
@@ -247,7 +254,10 @@ function F0GraphExpanderWrapperInner({ data, id }: NodeProps<ExpanderRFNode>) {
             actionsCtx.toggleExpand(parentId)
           }
         }}
-        className="pointer-events-auto flex items-start justify-center outline-none"
+        className={cn(
+          "pointer-events-auto flex items-start justify-center",
+          focusRing()
+        )}
         style={{ width: parentWidth, height: 80 }}
       >
         <F0GraphExpander
@@ -290,6 +300,7 @@ function F0GraphCollapserWrapperInner({
   const zoomCtx = useF0GraphZoomInternal()
   const actionsCtx = useF0GraphActionsInternal()
   const focusCtx = useF0GraphFocusInternal()
+  const i18n = useI18n()
   if (!zoomCtx || !actionsCtx) return null
 
   const { parentId, parentWidth, collapseLabel, parentName } =
@@ -305,8 +316,8 @@ function F0GraphCollapserWrapperInner({
     : undefined
 
   const ariaLabel = parentName
-    ? `Collapse ${parentName}`
-    : (collapseLabel ?? "Collapse children")
+    ? i18n.t("graph.expander.collapseWithParent", { parent: parentName })
+    : (collapseLabel ?? i18n.graph.expander.collapseDefault)
 
   return (
     <>
@@ -323,7 +334,10 @@ function F0GraphCollapserWrapperInner({
             actionsCtx.toggleExpand(parentId)
           }
         }}
-        className="group pointer-events-auto flex items-start justify-center pt-2 outline-none"
+        className={cn(
+          "group pointer-events-auto flex items-start justify-center pt-2",
+          focusRing()
+        )}
         style={{ width: parentWidth, height: 80 }}
       >
         <div

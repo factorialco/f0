@@ -7,19 +7,7 @@ import { Add, FitView, Minus, SearchPerson, Sliders } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
-import type { F0GraphNodeTagType } from "../F0GraphNode"
 import type { F0GraphControlsProps } from "./types"
-
-const DEFAULT_TAG_TYPE_LABELS: Record<F0GraphNodeTagType, string> = {
-  person: "People",
-  team: "Teams",
-  company: "Companies",
-  status: "Statuses",
-  alert: "Alerts",
-  balance: "Balances",
-  dot: "Tags",
-  raw: "Tags",
-}
 
 export const F0GraphControls = forwardRef<HTMLDivElement, F0GraphControlsProps>(
   (
@@ -93,7 +81,8 @@ export const F0GraphControls = forwardRef<HTMLDivElement, F0GraphControlsProps>(
               <div className="flex flex-col gap-1">
                 {tagTypes!.map((type) => {
                   const label =
-                    tagTypeLabels?.[type] ?? DEFAULT_TAG_TYPE_LABELS[type]
+                    tagTypeLabels?.[type] ??
+                    i18n.graph.controls.tagTypeLabels[type]
                   const checked = visibleTagTypes?.has(type) ?? false
                   return (
                     <label

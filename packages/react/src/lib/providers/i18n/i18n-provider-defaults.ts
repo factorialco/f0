@@ -677,6 +677,8 @@ export const defaultTranslations = {
     },
   },
   graph: {
+    canvas: "Graph canvas",
+    view: "Graph view",
     controls: {
       findMe: "Find me",
       fitToView: "Fit to view",
@@ -684,6 +686,16 @@ export const defaultTranslations = {
       zoomOut: "Zoom out",
       navigation: "Graph navigation",
       metadataSettings: "Metadata visibility",
+      tagTypeLabels: {
+        person: "People",
+        team: "Teams",
+        company: "Companies",
+        status: "Statuses",
+        alert: "Alerts",
+        balance: "Balances",
+        dot: "Tags",
+        raw: "Tags",
+      },
     },
     search: {
       noResults: "No results",
@@ -696,6 +708,10 @@ export const defaultTranslations = {
     expander: {
       collapse: "Collapse {{count}} items",
       expand: "Expand {{count}} items",
+      expandWithParentSingular: "Expand {{parent}}, {{count}} child",
+      expandWithParentPlural: "Expand {{parent}}, {{count}} children",
+      collapseWithParent: "Collapse {{parent}}",
+      collapseDefault: "Collapse children",
     },
   },
   wizard: {

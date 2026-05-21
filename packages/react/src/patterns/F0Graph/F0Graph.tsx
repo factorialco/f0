@@ -25,6 +25,7 @@ import {
 } from "react"
 
 import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/providers/i18n"
 
 import type {
   F0GraphNodeTagType,
@@ -549,6 +550,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     currentUserNodeId,
   } = props
 
+  const i18n = useI18n()
   const reactFlow = useReactFlow()
 
   // ── Viewport zoom (tracked via onViewportChange to avoid useViewport re-render churn) ──
@@ -1849,7 +1851,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
                   <div
                     ref={canvasRef}
                     tabIndex={0}
-                    aria-label={controlLabels?.graphCanvas ?? "Graph canvas"}
+                    aria-label={controlLabels?.graphCanvas ?? i18n.graph.canvas}
                     onKeyDown={handleCanvasKeyDown}
                     data-zoom-level={zoomLevel}
                     className={cn(
@@ -1862,7 +1864,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
                     <div
                       ref={containerRef}
                       role="tree"
-                      aria-label={controlLabels?.graphView ?? "Graph view"}
+                      aria-label={controlLabels?.graphView ?? i18n.graph.view}
                       onKeyDown={handleTreeKeyDown}
                       onPointerDown={(e) => {
                         pointerDownRef.current = {
