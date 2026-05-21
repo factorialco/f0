@@ -449,7 +449,7 @@ describe("Select", () => {
     })
   })
 
-  it("defers onChange until apply when onApply is passed", async () => {
+  it("does not call onChange when onApply is passed", async () => {
     const handleChange = vi.fn()
     const handleApply = vi.fn()
     const user = userEvent.setup()
@@ -474,7 +474,7 @@ describe("Select", () => {
     await user.click(screen.getByRole("button", { name: "Apply selection" }))
 
     await waitFor(() => {
-      expect(handleChange).toHaveBeenCalledWith(
+      expect(handleApply).toHaveBeenCalledWith(
         ["option1"],
         [
           {
@@ -492,7 +492,47 @@ describe("Select", () => {
         ]
       )
     })
-    expect(handleApply).toHaveBeenCalledTimes(1)
+    expect(handleChange).not.toHaveBeenCalled()
+  })
+
+  it("returns confirmed selection through onApply without onChange", async () => {
+    const handleApply = vi.fn()
+    const user = userEvent.setup()
+
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        multiple
+        options={mockOptions}
+        value={[]}
+        onChange={undefined}
+        onApply={handleApply}
+      />
+    )
+
+    await openSelect(user)
+    await user.click(screen.getByText("Option 1"))
+    await user.click(screen.getByRole("button", { name: "Apply selection" }))
+
+    await waitFor(() => {
+      expect(handleApply).toHaveBeenCalledWith(
+        ["option1"],
+        [
+          {
+            id: "option1",
+            name: "Option 1",
+            description: "Description 1",
+          },
+        ],
+        [
+          expect.objectContaining({
+            label: "Option 1",
+            value: "option1",
+            description: "Description 1",
+          }),
+        ]
+      )
+    })
   })
 
   it("cancels staged multi-select changes on outside click when onApply is passed", async () => {
@@ -530,13 +570,18 @@ describe("Select", () => {
     await user.click(screen.getByRole("button", { name: "Apply selection" }))
 
     await waitFor(() => {
-      expect(handleChange).toHaveBeenCalledTimes(1)
+      expect(handleApply).toHaveBeenCalledTimes(1)
     })
 
-    expect(handleChange.mock.calls[0]?.[0]).toEqual(
+    expect(handleApply.mock.calls[0]?.[0]).toEqual(
       expect.arrayContaining(["option1", "option2", "option3"])
     )
-    expect(handleApply).toHaveBeenCalledTimes(1)
+    expect(handleApply).toHaveBeenCalledWith(
+      expect.arrayContaining(["option1", "option2", "option3"]),
+      expect.any(Array),
+      expect.any(Array)
+    )
+    expect(handleChange).not.toHaveBeenCalled()
   })
 
   it("cancels staged changes without closing when cancel button is clicked", async () => {
@@ -566,7 +611,32 @@ describe("Select", () => {
     await user.click(screen.getByRole("button", { name: "Apply selection" }))
 
     expect(handleChange).not.toHaveBeenCalled()
-    expect(handleApply).toHaveBeenCalledTimes(1)
+    expect(handleApply).toHaveBeenCalledWith(
+      ["option1", "option2"],
+      [
+        {
+          id: "option1",
+          name: "Option 1",
+          description: "Description 1",
+        },
+        {
+          id: "option2",
+          name: "Option 2",
+          description: "Description 2",
+        },
+      ],
+      [
+        expect.objectContaining({
+          label: "Option 1",
+          value: "option1",
+          description: "Description 1",
+        }),
+        expect.objectContaining({
+          label: "Option 2",
+          value: "option2",
+        }),
+      ]
+    )
   })
 
   describe("asList mode", () => {

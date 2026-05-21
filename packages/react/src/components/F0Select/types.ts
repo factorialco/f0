@@ -29,7 +29,11 @@ export type { FiltersState, OnSelectItemsCallback, SelectedItemsState }
  * Base props shared across all F0Select variants
  */
 type F0SelectBaseProps<T extends string, R = unknown> = {
-  onApply?: () => void
+  onApply?: (
+    value: T[],
+    originalItems: ResolvedRecordType<R>[],
+    options: F0SelectItemObject<T, ResolvedRecordType<R>>[]
+  ) => void
   onChangeSelectedOption?: (
     option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined,
     checked: boolean

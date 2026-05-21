@@ -688,20 +688,6 @@ const F0SelectComponent = forwardRef(function Select<
     }
   }, [clearSelection, handleSelectAllWithTracking, handleSelectItemChange])
 
-  const emitCurrentSelection = useCallback(() => {
-    const { values, originalItems, options } = getMultiSelectionPayload()
-
-    ;(
-      onChange as
-        | ((
-            value: T[],
-            originalItems: ResolvedRecordType<R>[],
-            options: F0SelectItemObject<T, ResolvedRecordType<R>>[]
-          ) => void)
-        | undefined
-    )?.(values, originalItems, options)
-  }, [getMultiSelectionPayload, onChange])
-
   const handleChangeOpenLocal = (open: boolean) => {
     if (!open && hasDeferredApply && !isApplyingRef.current) {
       restoreCommittedSelection()
@@ -717,24 +703,25 @@ const F0SelectComponent = forwardRef(function Select<
   const handleApply = useCallback(() => {
     if (hasDeferredApply) {
       const nextCommittedSelection = cloneSelectedState(selectedState)
+      const { values, originalItems, options } = getMultiSelectionPayload()
 
       if (
         getSelectedStateKey(nextCommittedSelection) !==
         getSelectedStateKey(committedSelectionRef.current)
       ) {
         committedSelectionRef.current = nextCommittedSelection
-        emitCurrentSelection()
       }
 
-      onApply?.()
+      onApply?.(values, originalItems, options)
+
       isApplyingRef.current = true
     }
 
     handleChangeOpenLocal(false)
   }, [
     cloneSelectedState,
-    emitCurrentSelection,
     getSelectedStateKey,
+    getMultiSelectionPayload,
     handleChangeOpenLocal,
     hasDeferredApply,
     onApply,

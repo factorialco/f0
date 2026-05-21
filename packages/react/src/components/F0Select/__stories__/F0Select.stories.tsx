@@ -180,7 +180,7 @@ const meta: Meta = {
     },
     onApply: {
       description:
-        "Optional callback for the multi-select apply button. When provided, selection changes are staged until Apply is clicked, and clicking outside cancels the staged changes.",
+        "Optional callback for the multi-select apply button. When provided, selection changes are staged until Apply is clicked, and the confirmed selection is returned as `(value, originalItems, options)` without triggering `onChange`. Clicking outside cancels the staged changes.",
     },
     actions: {
       description:
@@ -1001,9 +1001,8 @@ export const MultiplePaginatedWithApply: Story = {
       label: item.label,
       avatar: item.avatar,
     }),
-    onApply: fn(),
-    onSelectItems: fn((selectionStatus) => {
-      console.log("selectionStatus", selectionStatus)
+    onApply: fn((selectionStatus) => {
+      console.log("Applied selectionStatus", selectionStatus)
     }),
   },
 }
