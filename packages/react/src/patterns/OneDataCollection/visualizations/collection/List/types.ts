@@ -1,3 +1,5 @@
+import { ReactNode } from "react"
+
 import { AvatarVariant } from "@/components/avatars/F0Avatar"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { RecordType, SortingKey, SortingsDefinition } from "@/hooks/datasource"
@@ -15,6 +17,12 @@ export type ItemDefinition = {
   title: string
   description?: string[]
   avatar?: AvatarVariant
+  /**
+   * Optional inline content rendered immediately after the title (e.g. an
+   * icon-only action button that targets the title's underlying resource).
+   * Stays on the same line as the title.
+   */
+  titleActions?: ReactNode
 }
 
 export type ListPropertyDefinition<

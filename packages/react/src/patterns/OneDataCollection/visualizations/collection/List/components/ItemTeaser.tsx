@@ -1,3 +1,5 @@
+import { ReactNode } from "react"
+
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 
@@ -5,18 +7,31 @@ export type ItemTeaserProps = {
   title: string
   avatar?: AvatarVariant
   description?: string[]
+  titleActions?: ReactNode
 }
 
-export const ItemTeaser = ({ title, avatar, description }: ItemTeaserProps) => {
+export const ItemTeaser = ({
+  title,
+  avatar,
+  description,
+  titleActions,
+}: ItemTeaserProps) => {
   return (
     <article className="flex w-[calc(100%-72px)] min-w-40 flex-col items-start gap-3 md:w-full md:flex-row md:items-center md:gap-2">
       {avatar && <F0Avatar avatar={avatar} size="md" />}
       <div className="flex flex-1 flex-col gap-0.5">
         <header>
           <h3>
-            <OneEllipsis className="text-base font-medium text-f1-foreground">
-              {title}
-            </OneEllipsis>
+            <div className="flex min-w-0 items-center gap-1">
+              <OneEllipsis className="text-base font-medium text-f1-foreground">
+                {title}
+              </OneEllipsis>
+              {titleActions && (
+                <span className="pointer-events-auto relative z-10 inline-flex shrink-0 items-center">
+                  {titleActions}
+                </span>
+              )}
+            </div>
           </h3>
         </header>
         <aside>

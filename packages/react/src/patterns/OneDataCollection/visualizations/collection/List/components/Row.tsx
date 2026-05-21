@@ -136,6 +136,7 @@ export const Row = <
           title={itemDef.title}
           avatar={itemDef.avatar}
           description={itemDef.description}
+          titleActions={itemDef.titleActions}
         />
       </div>
       <div className="flex flex-col items-start md:flex-row md:items-center [&>div]:justify-end">
