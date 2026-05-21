@@ -437,6 +437,7 @@ export const TableCollection = <
                         align="right"
                         className={borderClass}
                         width={columns[entry.columnIndices[0]].width}
+                        minWidth={columns[entry.columnIndices[0]].minWidth}
                         key={`header-ungrouped-${entry.columnIndices[0]}`}
                         sticky={getStickyPosition(entry.columnIndices[0])}
                       >
