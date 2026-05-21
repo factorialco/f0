@@ -2,6 +2,7 @@ import { motion } from "motion/react"
 import { forwardRef, useState } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
+import { useReducedMotion } from "@/lib/a11y"
 import { EmojiImage } from "@/lib/emojis"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useTextFormatEnforcer } from "@/lib/text"
@@ -53,6 +54,7 @@ const ButtonInternal = forwardRef<
 
   const [loading, setLoading] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
+  const reducedMotion = useReducedMotion()
 
   const handleClick = async (
     event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement, MouseEvent>
@@ -64,6 +66,9 @@ const ButtonInternal = forwardRef<
 
       try {
         await result
+      } catch {
+        // Errors from onClick are the caller's responsibility; we only ensure
+        // the loading state is cleared via the finally block below.
       } finally {
         setLoading(false)
       }
@@ -146,15 +151,15 @@ const ButtonInternal = forwardRef<
                 }}
                 transition={{
                   rotate: {
-                    duration: 0.5,
+                    duration: reducedMotion ? 0 : 0.5,
                     ease: [0.77, 0, 0.13, 1.52],
                   },
                   scale: {
-                    duration: 0.4,
+                    duration: reducedMotion ? 0 : 0.4,
                     ease: [0.65, 0, 0.35, 1],
                   },
                   filter: {
-                    duration: 0.4,
+                    duration: reducedMotion ? 0 : 0.4,
                     ease: [0.65, 0, 0.35, 1],
                   },
                 }}
@@ -183,7 +188,7 @@ const ButtonInternal = forwardRef<
             <span className="sr-only">{buttonLabel}</span>
           )}
           {append}{" "}
-          {counterValue && (
+          {counterValue !== undefined && (
             <Counter value={counterValue} size="sm" type="selected" />
           )}
         </div>

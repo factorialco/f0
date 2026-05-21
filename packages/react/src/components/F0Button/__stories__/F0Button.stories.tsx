@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import React from "react"
-import { expect, within } from "storybook/test"
+import { useState } from "react"
+import { expect, fn, within } from "storybook/test"
 
 import { Add, Archive, Delete, Save } from "@/icons/app"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
@@ -9,6 +9,7 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { navTargets } from "@/ui/Action"
 
 import { F0Button } from "../F0Button"
+import { buttonSizes, buttonVariants } from "../types"
 
 const meta = {
   title: "Button/Button",
@@ -33,30 +34,19 @@ const meta = {
   tags: ["stable", "!autodocs"],
   args: {
     variant: "default",
-    onClick: () => {
-      console.log("Button clicked")
-      //fn()
-    },
+    onClick: fn(),
     label: "Click me",
     size: "md",
   },
   argTypes: {
     variant: {
       control: "select",
-      options: [
-        "default",
-        "critical",
-        "neutral",
-        "ghost",
-        "outline",
-        "promote",
-        "outlinePromote",
-      ],
+      options: buttonVariants,
       description: "Visual style variant of the button.",
     },
     size: {
       control: "select",
-      options: ["sm", "md", "lg"],
+      options: buttonSizes,
       description:
         "Sets the button size. 'lg' for mobile, 'md' for desktop, 'sm' for compact/secondary actions.",
     },
@@ -397,7 +387,7 @@ export const States: Story = {
   tags: ["no-sidebar"],
   parameters: withSnapshot({}),
   render: (args) => {
-    const [asyncLoading, setAsyncLoading] = React.useState(false)
+    const [asyncLoading, setAsyncLoading] = useState(false)
     return (
       <div className="flex gap-2">
         <F0Button {...args} label="Disabled" disabled />
@@ -420,7 +410,7 @@ export const States: Story = {
 
 export const AsyncLoading: Story = {
   render: (args) => {
-    const [asyncLoading, setAsyncLoading] = React.useState(false)
+    const [asyncLoading, setAsyncLoading] = useState(false)
     return (
       <F0Button
         {...args}
@@ -446,4 +436,8 @@ export const WithDataTestId: Story = {
     const canvas = within(canvasElement)
     await expect(canvas.getByTestId("my-test-button")).toBeInTheDocument()
   },
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
 }
