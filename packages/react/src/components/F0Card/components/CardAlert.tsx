@@ -113,24 +113,15 @@ function CardAlertHeader({
       </span>
 
       {action ? (
-        "href" in action ? (
-          <F0Button
-            label={action.label}
-            variant="outline"
-            size="sm"
-            href={action.href}
-            disabled={action.disabled}
-          />
-        ) : (
-          <F0Button
-            label={action.label}
-            variant="outline"
-            size="sm"
-            onClick={action.onClick}
-            disabled={action.disabled}
-            type="button"
-          />
-        )
+        <F0Button
+          label={action.label}
+          variant="outline"
+          size="sm"
+          disabled={action.disabled}
+          {...("href" in action
+            ? { href: action.href }
+            : { onClick: action.onClick, type: "button" as const })}
+        />
       ) : (
         dismissible && onDismiss && <CloseButton onClose={onDismiss} />
       )}

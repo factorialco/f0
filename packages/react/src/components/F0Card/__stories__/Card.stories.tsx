@@ -721,6 +721,7 @@ export const WithAlertAction: Story = {
         />
         {actioned && (
           <button
+            type="button"
             className="self-start text-sm text-f1-foreground-secondary underline"
             onClick={() => setActioned(false)}
           >
