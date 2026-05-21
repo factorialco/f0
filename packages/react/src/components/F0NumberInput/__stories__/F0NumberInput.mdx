@@ -58,7 +58,7 @@ The value is `number | null`. `null` means the field is empty.
 - `value={null}` → input is empty.
 - `onChange` fires with `number | null`. Consumers should treat `null` as "user cleared the field".
 
-### Locale-aware formatting
+### Locale
 
 `locale` is required. The decimal separator follows the locale:
 
@@ -68,7 +68,7 @@ The value is `number | null`. `null` means the field is empty.
 
 Grouping (thousand separators) is intentionally **disabled** while editing — typing `1234` should not jump to `1,234` and break the cursor.
 
-### Decimal control
+### Decimals
 
 `maxDecimals` caps the number of decimal digits the user can type. Invalid keystrokes are blocked at `onBeforeInput` (the character never appears).
 
@@ -76,7 +76,7 @@ Grouping (thousand separators) is intentionally **disabled** while editing — t
 - `maxDecimals={2}` → up to two decimals; further decimal keystrokes are blocked.
 - Unset → unlimited decimals.
 
-### Min / max clamping
+### Min and max
 
 If the parsed value falls outside `[min, max]`, it is clamped to the boundary before `onChange` fires.
 
@@ -85,7 +85,7 @@ If the parsed value falls outside `[min, max]`, it is clamped to the boundary be
 
 When clamping is a no-op (the value is already in range), the **raw input is preserved** — typing `"17."` stays as `"17."` instead of collapsing to `"17"`, so the user can keep typing decimals.
 
-### Auto-generated hint
+### Auto hint
 
 When `min` and/or `max` are set and `hint` is not explicitly provided, F0NumberInput renders a localized hint:
 

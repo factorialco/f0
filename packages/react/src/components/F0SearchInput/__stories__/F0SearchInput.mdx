@@ -77,15 +77,9 @@ A11y wiring: `type="search"`, `role="searchbox"`, the visible label is hidden an
 
 ### Clearable
 
-When `clearable` is `true` and the value is non-empty, a clear button is rendered. Clicking it fires `onChange("")` and refocuses the input.
+When `clearable` is `true` and the value is non-empty, a clear button is rendered. Clicking it fires `onChange("")` and refocuses the input. The clear button is hidden while `disabled`.
 
 <Canvas of={Stories.Clearable} />
-
-### Disabled
-
-<Canvas of={Stories.Disabled} />
-
-`disabled` removes the input from the tab order and prevents editing. The clear button is hidden.
 
 ---
 
