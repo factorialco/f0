@@ -18,10 +18,10 @@ It shares the chrome conventions (sizes, focus ring, status colors, label/hint/e
 
 <Canvas of={Stories.Primary} />
 
-- **Input area**: native `<input type="text">` with `inputMode="decimal"` (or `"numeric"` when `maxDecimals={0}`) so mobile keyboards show the right keypad. The visible type is `text` because `type="number"` is intentionally avoided — it breaks locale-aware formatting and clamps invisibly.
-- **Units suffix**: optional `units` string rendered as a tag at the end of the input (e.g. `EUR`, `%`, `kg`).
-- **Stepper arrows**: optional, rendered when `step` is set. Up/down buttons that respect `min`/`max`.
-- **Label / hint / error**: standard F0InputField chrome.
+- **Input area**: where the user types. Optionally accompanied by a stepper and/or a units suffix.
+- **Units suffix** _(optional)_: read-only label rendered at the end of the input (e.g. `EUR`, `%`, `kg`) when `units` is set.
+- **Stepper arrows** _(optional)_: increment/decrement buttons rendered when `step` is set; respect `min`/`max`.
+- **Label, hint, status message**: chrome inherited from [F0InputField](?path=/docs/components-primitives-f0inputfield--documentation).
 
 <Controls of={Stories.Primary} />
 
@@ -55,6 +55,10 @@ The value is `number | null`. `null` means the field is empty.
 - `value={42}` → input shows the formatted number for the current `locale`.
 - `value={null}` → input is empty.
 - `onChange` fires with `number | null`. Consumers should treat `null` as "user cleared the field".
+
+### Input mode
+
+`F0NumberInput` renders a native `<input type="text">` with `inputMode="decimal"` (or `"numeric"` when `maxDecimals={0}`), so mobile keyboards show the right keypad without the pitfalls of `type="number"` — no stripped leading zeros, no broken locale separators, and no browser-native steppers competing with the F0 stepper.
 
 ### Locale
 
