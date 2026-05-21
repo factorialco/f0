@@ -1,4 +1,3 @@
-import * as Popover from "@radix-ui/react-popover"
 import {
   type KeyboardEvent,
   useCallback,
@@ -11,6 +10,7 @@ import {
 import { Input as F0Input } from "@/experimental/Forms/Fields/Input"
 import { Search as SearchIcon } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import { Popover, PopoverAnchor, PopoverContent } from "@/ui/popover"
 
 import type { SearchResult } from "./types"
 
@@ -173,8 +173,8 @@ export const F0GraphSearch = ({
   }
 
   return (
-    <Popover.Root open={showResults}>
-      <Popover.Anchor asChild>
+    <Popover open={showResults}>
+      <PopoverAnchor asChild>
         <div
           ref={anchorRef}
           onKeyDown={handleKeyDown}
@@ -200,36 +200,35 @@ export const F0GraphSearch = ({
             clearable
           />
         </div>
-      </Popover.Anchor>
-      <Popover.Portal>
-        <Popover.Content
-          align="start"
-          side="bottom"
-          sideOffset={4}
-          onOpenAutoFocus={(event) => event.preventDefault()}
-          onCloseAutoFocus={(event) => event.preventDefault()}
-          onInteractOutside={() => setPopoverOpen(false)}
-          style={{
-            width: INPUT_WIDTH,
-            zIndex: Z_INDEX,
-            background: "transparent",
-          }}
-        >
-          <F0GraphSearchResultsList
-            results={results}
-            pending={pending}
-            activeIndex={activeIndex}
-            hoverIndex={hoverIndex}
-            showActiveOutline={showActiveOutline}
-            listboxId={listboxId}
-            noResultsLabel={effectiveNoResultsLabel}
-            activeResultRef={activeResultRef}
-            onHover={setHoverIndex}
-            onHoverEnd={() => setHoverIndex(null)}
-            onSelect={handleSelect}
-          />
-        </Popover.Content>
-      </Popover.Portal>
-    </Popover.Root>
+      </PopoverAnchor>
+      <PopoverContent
+        align="start"
+        side="bottom"
+        sideOffset={4}
+        onOpenAutoFocus={(event) => event.preventDefault()}
+        onCloseAutoFocus={(event) => event.preventDefault()}
+        onInteractOutside={() => setPopoverOpen(false)}
+        className="w-[240px] rounded-none border-0 bg-transparent p-0 shadow-none"
+        style={{
+          width: INPUT_WIDTH,
+          zIndex: Z_INDEX,
+          background: "transparent",
+        }}
+      >
+        <F0GraphSearchResultsList
+          results={results}
+          pending={pending}
+          activeIndex={activeIndex}
+          hoverIndex={hoverIndex}
+          showActiveOutline={showActiveOutline}
+          listboxId={listboxId}
+          noResultsLabel={effectiveNoResultsLabel}
+          activeResultRef={activeResultRef}
+          onHover={setHoverIndex}
+          onHoverEnd={() => setHoverIndex(null)}
+          onSelect={handleSelect}
+        />
+      </PopoverContent>
+    </Popover>
   )
 }
