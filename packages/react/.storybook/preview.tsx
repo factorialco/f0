@@ -168,6 +168,7 @@ const preview: Preview = {
           "how-to-contribute",
           "ai-configuration",
           "foundations",
+          "primitives",
           "components",
           "patterns",
           "kits",

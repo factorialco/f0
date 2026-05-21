@@ -7,14 +7,15 @@ import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { InputField, INPUTFIELD_SIZES } from "../"
 
 const meta = {
-  title: "Inputs/InputField",
+  title: "Primitives/InputField",
   component: InputField,
   parameters: {
     docs: {
       description: {
         component: [
-          "`InputField` is the shared building block that every writable F0 input renders inside — the visual chrome (label, status, icon, append tag, clear button, hint, error). `F0TextInput`, `F0NumberInput`, `F0SearchInput`, `F0TextAreaInput`, and `F0DurationInput` are all composed on top of it.",
-          "Use the dedicated `F0*Input` components in product code; reach for `InputField` directly only when building a brand-new input type inside the design system",
+          "`InputField` is the shared **primitive** that every writable F0 input is composed on top of. It provides the visual chrome (label, status, icon, append tag, clear button, hint, error, loading) and the keyboard/a11y behaviour that the design system guarantees across every input",
+          "**Audience.** This page is for design-system contributors building a new type of input (for example `F0PercentageInput`, `F0CurrencyInput`, `F0PhoneInput`). In product code, always reach for the dedicated `F0*Input` component documented under the `Inputs/` group",
+          "**Contract.** Any new writable input added to the design system must be composed on top of `InputField` — never reimplement the chrome from scratch. This is how we keep visual and behavioural consistency across the whole input family",
         ]
           .map((text) => `<p>${text}.</p>`)
           .join(""),
