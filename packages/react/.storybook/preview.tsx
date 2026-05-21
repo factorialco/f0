@@ -212,8 +212,12 @@ const preview: Preview = {
 
         // Within Components/, surface Primitives/ before anything else so
         // contributors see the building blocks first.
-        const isAComponentsPrimitive = a.title.startsWith("Components/Primitives")
-        const isBComponentsPrimitive = b.title.startsWith("Components/Primitives")
+        const isAComponentsPrimitive =
+          a.title.startsWith("Components/Primitives") ||
+          a.id.startsWith("components-primitives")
+        const isBComponentsPrimitive =
+          b.title.startsWith("Components/Primitives") ||
+          b.id.startsWith("components-primitives")
         if (isAComponentsPrimitive !== isBComponentsPrimitive) {
           return isAComponentsPrimitive ? -1 : 1
         }
