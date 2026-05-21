@@ -8,8 +8,8 @@ import { type ReactNode, memo } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { Minimize } from "@/icons/app"
-import { cn, focusRing } from "@/lib/utils"
 import { useI18n } from "@/lib/providers/i18n"
+import { cn, focusRing } from "@/lib/utils"
 
 import type { F0GraphNodeRenderContext } from "../F0Graph"
 import type { GraphNodeState, GraphNodeVariant } from "../F0GraphNode"
@@ -247,7 +247,7 @@ function F0GraphExpanderWrapperInner({ data, id }: NodeProps<ExpanderRFNode>) {
         role="button"
         tabIndex={isFocused ? 0 : -1}
         aria-label={ariaLabel}
-        aria-expanded={false}
+        aria-expanded={expanded}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault()

@@ -227,9 +227,11 @@ function ResizeHandle({
     (e: ReactPointerEvent<HTMLDivElement>) => {
       if (!draggingRef.current) return
       draggingRef.current = false
-      // Persist the current width. The last pointerMove already set the
-      // visual width via onResize; pointerUp only needs to commit it.
-      onResizeEnd(width)
+      // Persist the final width derived from the last pointer position.
+      // Reading `width` from props would be stale here — it reflects the
+      // value at the time this callback was created, not the in-flight
+      // resize value that handlePointerMove pushed via onResize.
+      onResizeEnd(computeWidth(e.clientX))
       // Check if pointer is still over the handle
       const rect = (e.target as HTMLElement).getBoundingClientRect()
       const cx = e.clientX || 0
@@ -243,7 +245,7 @@ function ResizeHandle({
         setHovered(false)
       }
     },
-    [width, onResizeEnd]
+    [onResizeEnd, computeWidth]
   )
 
   const handleKeyDown = useCallback(
