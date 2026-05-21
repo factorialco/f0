@@ -89,7 +89,7 @@ export const NestedtaskHeader = ({
               color={
                 status === "completed"
                   ? "hsl(var(--positive-50))"
-                  : "hsl(var(--neutral-100))"
+                  : "hsl(var(--warning-50))"
               }
               className="h-1.5 w-20"
               aria-valuemin={0}

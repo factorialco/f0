@@ -3,13 +3,16 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useMemo, useState } from "react"
 
 import { EyeVisible } from "@/icons/app"
+import Briefcase from "@/icons/app/Briefcase"
+import Calendar from "@/icons/app/Calendar"
 import Check from "@/icons/app/Check"
 import Clock from "@/icons/app/Clock"
 import Comment from "@/icons/app/Comment"
 import Cross from "@/icons/app/Cross"
 import FileSigned from "@/icons/app/FileSigned"
+import Laptop from "@/icons/app/Laptop"
 import Marker from "@/icons/app/Marker"
-import Pencil from "@/icons/app/Pencil"
+import Plane from "@/icons/app/Plane"
 import Question from "@/icons/app/Question"
 import ThumbsUp from "@/icons/app/ThumbsUp"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
@@ -863,68 +866,19 @@ const NestedtaskInProgressDemo = () => {
   const [expanded, setExpanded] = useState(true)
 
   return (
-    <div className="w-full">
+    <div className="w-full max-w-[720px]">
       <F0TimelineRow
         status="in-progress"
         icon={FileSigned}
-        title="Sign document"
-        description="Estimated on 14/04/2026"
-        taskCount={2}
-        completedCount={0}
+        title="Sign documents"
+        description="Sent on 14/04/2026"
+        taskCount={SIGNATURE_ROWS.length}
+        completedCount={
+          SIGNATURE_ROWS.filter((r) => r.statusVariant === "positive").length
+        }
         expanded={expanded}
-        onExpandToggle={() => setExpanded(!expanded)}
-        metadata={[
-          {
-            label: "",
-            hideLabel: true,
-            value: {
-              type: "list",
-              variant: "person",
-              avatars: [
-                {
-                  type: "person",
-                  firstName: "Hellen",
-                  lastName: "the HR",
-                },
-              ],
-            },
-          },
-          {
-            label: "",
-            actions: [
-              {
-                label: "View",
-                icon: EyeVisible,
-                onClick: () => {},
-              },
-            ],
-            value: {
-              type: "avatar",
-              variant: {
-                type: "file",
-                file: {
-                  name: "Demo notes.pdf",
-                  type: "application/pdf",
-                },
-              },
-              text: "Demo notes",
-            },
-          },
-        ]}
-        items={[
-          {
-            status: "in-progress",
-            icon: Clock,
-            title: "Hellen the HR (hellen@factorial.co)",
-            description: "Pending",
-          },
-          {
-            status: "in-progress",
-            icon: Clock,
-            title: "Danilo Pereira (danilo@gmail.com)",
-            description: "Pending",
-          },
-        ]}
+        onExpandToggle={() => setExpanded((v) => !v)}
+        content={<SignatureCollection />}
         isLast
       />
     </div>
@@ -943,69 +897,15 @@ const NestedtaskCompletedDemo = () => {
   const [expanded, setExpanded] = useState(false)
 
   return (
-    <div className="w-full">
+    <div className="w-full max-w-[720px]">
       <F0TimelineRow
         status="completed"
         icon={FileSigned}
-        title="Sign document"
+        title="Sign documents"
         description="Completed on 14/04/2026 06:08"
-        taskCount={2}
-        completedCount={2}
         expanded={expanded}
-        onExpandToggle={() => setExpanded(!expanded)}
-        metadata={[
-          {
-            label: "",
-            hideLabel: true,
-            value: {
-              type: "list",
-              variant: "person",
-              avatars: [
-                {
-                  type: "person",
-                  firstName: "Hellen",
-                  lastName: "the HR",
-                  badge: { type: "positive", icon: Check },
-                },
-              ],
-            },
-          },
-          {
-            label: "",
-            actions: [
-              {
-                label: "View",
-                icon: EyeVisible,
-                onClick: () => {},
-              },
-            ],
-            value: {
-              type: "avatar",
-              variant: {
-                type: "file",
-                file: {
-                  name: "Demo notes.pdf",
-                  type: "application/pdf",
-                },
-              },
-              text: "Demo notes",
-            },
-          },
-        ]}
-        items={[
-          {
-            status: "completed",
-            icon: Check,
-            title: "Hellen the HR (hellen@factorial.co)",
-            description: "Signed",
-          },
-          {
-            status: "completed",
-            icon: Check,
-            title: "Danilo Pereira (danilo@gmail.com)",
-            description: "Signed",
-          },
-        ]}
+        onExpandToggle={() => setExpanded((v) => !v)}
+        content={<SignatureCollection />}
         isLast
       />
     </div>
@@ -1023,8 +923,8 @@ const NestedtaskTimelineDemo = () => {
     <div className="w-full">
       <F0TimelineRow
         status="in-progress"
-        icon={FileSigned}
-        title="Sign document"
+        icon={Calendar}
+        title="Schedule onboarding sessions"
         description="Estimated on 14/04/2026"
         taskCount={2}
         completedCount={0}
@@ -1060,11 +960,11 @@ const NestedtaskTimelineDemo = () => {
               variant: {
                 type: "file",
                 file: {
-                  name: "Demo notes.pdf",
+                  name: "Onboarding plan.pdf",
                   type: "application/pdf",
                 },
               },
-              text: "Demo notes",
+              text: "Onboarding plan",
             },
           },
         ]}
@@ -1072,13 +972,13 @@ const NestedtaskTimelineDemo = () => {
           {
             status: "in-progress",
             icon: Clock,
-            title: "Hellen the HR (hellen@factorial.co)",
+            title: "Welcome call with People team",
             description: "Pending",
           },
           {
             status: "in-progress",
             icon: Clock,
-            title: "Danilo Pereira (danilo@gmail.com)",
+            title: "Intro session with hiring manager",
             description: "Pending",
           },
         ]}
@@ -1086,7 +986,7 @@ const NestedtaskTimelineDemo = () => {
       <F0TimelineRow
         status="not-started"
         icon={ThumbsUp}
-        title="Manual review"
+        title="Manager approval"
         description="Estimated on 19/04/2026"
         metadata={[
           {
@@ -1118,8 +1018,8 @@ export const NestedtaskTimeline: Story = {
 export const NestedtaskNotStarted: Story = {
   args: {
     status: "not-started",
-    icon: FileSigned,
-    title: "Sign document",
+    icon: Laptop,
+    title: "Order laptop",
     description: "Estimated on 14/04/2026",
     taskCount: 0,
     expanded: false,
@@ -1143,100 +1043,12 @@ export const NestedtaskNotStarted: Story = {
       },
     ],
     primaryAction: {
-      label: "Request signature",
-      icon: FileSigned,
+      label: "Request equipment",
+      icon: Laptop,
       onClick: () => {},
     },
     isLast: true,
   },
-}
-
-const NestedtaskInProgressWithActionsDemo = () => {
-  const [expanded, setExpanded] = useState(true)
-
-  return (
-    <div className="w-full">
-      <F0TimelineRow
-        status="in-progress"
-        icon={FileSigned}
-        title="Sign document"
-        description="Estimated on 14/04/2026"
-        taskCount={2}
-        completedCount={0}
-        expanded={expanded}
-        onExpandToggle={() => setExpanded(!expanded)}
-        metadata={[
-          {
-            label: "",
-            hideLabel: true,
-            value: {
-              type: "list",
-              variant: "person",
-              avatars: [
-                {
-                  type: "person",
-                  firstName: "Hellen",
-                  lastName: "the HR",
-                },
-              ],
-            },
-          },
-          {
-            label: "",
-            actions: [
-              {
-                label: "View",
-                icon: EyeVisible,
-                onClick: () => {},
-              },
-            ],
-            value: {
-              type: "avatar",
-              variant: {
-                type: "file",
-                file: {
-                  name: "Demo notes.pdf",
-                  type: "application/pdf",
-                },
-              },
-              text: "Demo notes",
-            },
-          },
-        ]}
-        items={[
-          {
-            status: "in-progress",
-            icon: Clock,
-            title: "Hellen the HR (hellen@factorial.co)",
-            description: "Pending",
-          },
-          {
-            status: "in-progress",
-            icon: Clock,
-            title: "Danilo Pereira (danilo@gmail.com)",
-            description: "Pending",
-          },
-        ]}
-        secondaryActions={[
-          {
-            label: "Edit signature",
-            icon: Pencil,
-            onClick: () => {},
-          },
-          {
-            label: "Cancel signature",
-            icon: Cross,
-            onClick: () => {},
-          },
-        ]}
-        isLast
-      />
-    </div>
-  )
-}
-
-export const NestedtaskInProgressWithActions: Story = {
-  render: () => <NestedtaskInProgressWithActionsDemo />,
 }
 
 function MultitaskWithNestedtaskDemo() {
@@ -1259,30 +1071,31 @@ function MultitaskWithNestedtaskDemo() {
           },
           {
             status: "in-progress",
-            icon: FileSigned,
-            title: "Sign document",
-            description: "Laptop agreement",
+            icon: Plane,
+            title: "Book travel",
+            description: "Kickoff trip to Barcelona HQ",
             taskCount: 2,
             completedCount: 1,
             expanded: nestedtaskExpanded,
             onExpandToggle: () => setNestedtaskExpanded((v) => !v),
             items: [
               {
-                status: "in-progress",
-                icon: Clock,
-                title: "Hellen the HR (hellen@factorial.co)",
-                description: "Pending",
-              },
-              {
                 status: "completed",
                 icon: Check,
-                title: "Danilo Pereira (danilo@gmail.com)",
-                description: "Signed",
+                title: "Book flights",
+                description: "Confirmed",
+              },
+              {
+                status: "in-progress",
+                icon: Clock,
+                title: "Reserve hotel",
+                description: "Pending approval",
               },
             ],
           },
           {
             status: "not-started",
+            icon: Briefcase,
             title: "Final review",
           },
         ]}
