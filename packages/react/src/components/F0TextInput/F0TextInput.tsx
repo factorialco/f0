@@ -1,4 +1,4 @@
-import { experimentalComponent } from "@/lib/experimental"
+import { forwardRef } from "react"
 
 import { InputInternal, type InputInternalProps } from "./internal"
 
@@ -9,21 +9,26 @@ export type F0TextInputProps<T extends string> = Omit<
   (typeof privateProps)[number]
 >
 
-const _F0TextInput = <T extends string>(props: F0TextInputProps<T>) => {
+const _F0TextInput = forwardRef(function F0TextInput<T extends string>(
+  props: F0TextInputProps<T>,
+  ref: React.ForwardedRef<HTMLInputElement>
+) {
   const publicProps = privateProps.reduce((acc, key) => {
     const { [key]: _, ...rest } = acc
     return rest
   }, props as InputInternalProps<string>)
 
-  return <InputInternal {...publicProps} />
-}
+  return <InputInternal {...publicProps} ref={ref} />
+})
+
+_F0TextInput.displayName = "F0TextInput"
 
 /**
- * @experimental This is an experimental component, use it at your own risk.
- *
  * F0TextInput is the writable text field for forms — a box where the user
- * types text, numbers (as text), passwords, emails, etc. It is the canonical
- * "text input" of F0. For numeric or duration data prefer F0NumberInput or
- * F0DurationInput respectively.
+ * types text, passwords, emails, etc. It is the canonical "text input" of
+ * F0. For numeric data use F0NumberInput; for durations use F0DurationInput;
+ * for queries use F0SearchInput.
  */
-export const F0TextInput = experimentalComponent("F0TextInput", _F0TextInput)
+export const F0TextInput = _F0TextInput as <T extends string>(
+  props: F0TextInputProps<T> & { ref?: React.ForwardedRef<HTMLInputElement> }
+) => React.ReactElement

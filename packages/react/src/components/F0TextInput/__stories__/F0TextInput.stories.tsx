@@ -11,7 +11,7 @@ import { inputSizes } from "../types"
 const meta = {
   component: F0TextInput,
   title: "Inputs/Text input",
-  tags: ["autodocs", "experimental"],
+  tags: ["stable"],
   args: {
     type: "text",
     disabled: false,
@@ -56,13 +56,7 @@ const meta = {
       defaultValue: false,
     },
   },
-  parameters: {
-    docs: {
-      description: {
-        component: "A text input field",
-      },
-    },
-  },
+  parameters: {},
   decorators: [
     (Story) => (
       <div className="max-w-96">
