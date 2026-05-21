@@ -194,25 +194,25 @@ What `F0InputField` guarantees when the [API contract](#api-contract) is satisfi
 
 A11y wiring is not visually demonstrable. It includes: `aria-busy`, `aria-disabled`, `aria-controls`, `aria-expanded`, label association via `id`, `aria-live`-polite status region, autofill detection, and `aria-label="Clear"` on the clear button (override via `onClear`).
 
-### Status precedence: `error` wins over `hint`
+### Status precedence
 
 When both `hint` and `status={{ type: "error", ... }}` are provided, the error message replaces the hint and the critical border colour wins. The legacy boolean `error` prop behaves the same way.
 
 <Canvas of={Stories.StatusPrecedence} />
 
-### Composition with a `textarea`
+### Composition with textarea
 
 The cloned `children` element can be a `<textarea>` instead of an `<input>`. Sizing, status and autofill detection work identically; the chrome adapts to the multi-line surface.
 
 <Canvas of={Stories.WithATextarea} />
 
-### Character counter and truncation
+### Character counter
 
 The example below sets `maxLength={10}` and a `value` of `"long text should be truncated"` (29 characters). On mount, `F0InputField` substrings the value to 10 characters; the counter renders `10/10` next to the label.
 
 <Canvas of={Stories.WithMaxLength} />
 
-### Autofill detection
+### Autofill
 
 Browsers do not fire `change` events on autofill, which would leave the floating placeholder visible on top of the autofilled value. `F0InputField` listens to the WebKit `animationstart` event and polls `:-webkit-autofill` / `:autofill` to hide the placeholder until the autofill state clears.
 
@@ -220,7 +220,7 @@ Browsers do not fire `change` events on autofill, which would leave the floating
 
 ## Props
 
-### General props
+### General
 
 <Unstyled>
   <table>
@@ -383,7 +383,7 @@ Browsers do not fire `change` events on autofill, which would leave the floating
   </table>
 </Unstyled>
 
-### State props
+### State
 
 <Unstyled>
   <table>
@@ -443,7 +443,7 @@ Browsers do not fire `change` events on autofill, which would leave the floating
   </table>
 </Unstyled>
 
-### Label props
+### Label
 
 <Unstyled>
   <table>
@@ -487,7 +487,7 @@ Browsers do not fire `change` events on autofill, which would leave the floating
   </table>
 </Unstyled>
 
-### Behavior props
+### Behavior
 
 <Unstyled>
   <table>
@@ -582,7 +582,7 @@ Browsers do not fire `change` events on autofill, which would leave the floating
   </table>
 </Unstyled>
 
-### Character counter props
+### Counter
 
 <Unstyled>
   <table>
@@ -640,7 +640,7 @@ Browsers do not fire `change` events on autofill, which would leave the floating
   </table>
 </Unstyled>
 
-### Click handler props
+### Click handler
 
 <Unstyled>
   <table>
