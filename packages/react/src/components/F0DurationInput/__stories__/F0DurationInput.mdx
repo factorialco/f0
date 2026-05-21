@@ -8,7 +8,7 @@ import * as Stories from "./F0DurationInput.stories"
 
 `F0DurationInput` is a compound input for entering time durations. It renders one editable numeric segment per visible unit (days, hours, minutes, seconds) inside a single bordered container, and exposes the total as **seconds** through a controlled `value` / `onChange` pair.
 
-Use it in product code wherever a user must type a duration. It shares chrome conventions (label, status, sizes, disabled, readonly) with [InputField](?path=/docs/components-primitives-inputfield--documentation), but is not a wrapper of it — it ships its own container so the segments can share a single focus ring.
+Use it in product code wherever a user must type a duration. It shares chrome conventions (label, status, sizes, disabled, readonly) with [F0InputField](?path=/docs/components-primitives-f0inputfield--documentation), but is not a wrapper of it — it ships its own container so the segments can share a single focus ring.
 
 ---
 
@@ -25,41 +25,7 @@ Use it in product code wherever a user must type a duration. It shares chrome co
 
 <Controls of={Stories.Default} />
 
-### Variants
-
-#### Sizes
-
-<Canvas of={Stories.SmallSize} />
-
-<Unstyled>
-  <table>
-    <thead>
-      <tr>
-        <th>Size</th>
-        <th>Height</th>
-        <th>When to use</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>
-          <code>sm</code>
-        </td>
-        <td>32px</td>
-        <td>Dense layouts, inline filters, table cells.</td>
-      </tr>
-      <tr>
-        <td>
-          <code>md</code>
-        </td>
-        <td>40px (default)</td>
-        <td>Forms and primary input surfaces.</td>
-      </tr>
-    </tbody>
-  </table>
-</Unstyled>
-
-#### Unit selection
+### Unit selection
 
 Pass `units` to control which segments are rendered. The order is always
 `days → hours → minutes → seconds`, regardless of the array order.
