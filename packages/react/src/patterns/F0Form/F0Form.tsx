@@ -15,7 +15,7 @@ import { ActionBarStatus, F0ActionBarRef } from "@/components/F0ActionBar"
 import { F0Button } from "@/components/F0Button"
 import { F0TableOfContent } from "@/experimental/Navigation/F0TableOfContent"
 import { TOCItem } from "@/experimental/Navigation/F0TableOfContent/types"
-import { Delete, Save } from "@/icons/app"
+import { Delete } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
 import { Form as FormProvider } from "@/ui/form"
@@ -531,10 +531,8 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const isAutosubmit = submitConfig?.type === "autosubmit"
 
   // Resolve submit button configuration with defaults
-  // icon: undefined = use default, null = no icon, IconType = custom icon
   const submitLabel = submitConfig?.label ?? "Submit"
-  const submitIcon =
-    submitConfig?.icon === null ? undefined : (submitConfig?.icon ?? Save)
+  const submitIcon = submitConfig?.icon ?? undefined
 
   // Extract type-specific props
   // Show submit button by default unless explicitly hidden, using action-bar, or autosubmit
@@ -1120,7 +1118,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
 
       {/* Default submit button */}
       {!isActionBar && showSubmitButton && (
-        <div className="mt-4">
+        <div className="mt-4 flex justify-end">
           <F0Button
             type="submit"
             label={submitLabel}

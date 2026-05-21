@@ -144,12 +144,10 @@ interface F0FormSubmitConfigBase {
   /** Custom label for the submit button */
   label?: string
   /**
-   * Custom icon for the submit button
-   * - undefined: uses default Save icon
-   * - null: no icon shown
-   * - IconType: custom icon
+   * Custom icon for the submit button.
+   * No icon is shown by default.
    */
-  icon?: IconType | null
+  icon?: IconType
   /** Label shown in the action bar while submitting (defaults to i18n "forms.actionBar.saving") */
   savingMessage?: string
   /**
@@ -449,12 +447,10 @@ export interface F0PerSectionSubmitConfig {
   /** Custom label for the submit button (per section) */
   label?: string
   /**
-   * Custom icon for the submit button
-   * - undefined: uses default Save icon
-   * - null: no icon shown
-   * - IconType: custom icon
+   * Custom icon for the submit button.
+   * No icon is shown by default.
    */
-  icon?: IconType | null
+  icon?: IconType
   /**
    * When true, the submit button is only visible once the section has unsaved changes.
    * @default false
