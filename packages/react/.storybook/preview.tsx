@@ -210,6 +210,14 @@ const preview: Preview = {
           return isAFoundation ? -1 : 1
         }
 
+        // Within Components/, surface Primitives/ before anything else so
+        // contributors see the building blocks first.
+        const isAComponentsPrimitive = a.title.startsWith("Components/Primitives")
+        const isBComponentsPrimitive = b.title.startsWith("Components/Primitives")
+        if (isAComponentsPrimitive !== isBComponentsPrimitive) {
+          return isAComponentsPrimitive ? -1 : 1
+        }
+
         return a.title.localeCompare(b.title)
       },
     },
