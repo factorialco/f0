@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.14.3](https://github.com/factorialco/f0/compare/f0-react-v2.14.2...f0-react-v2.14.3) (2026-05-21)
+
+
+### Bug Fixes
+
+* **Metadata:** add key to Fragment wrapper in metadata items map ([#4209](https://github.com/factorialco/f0/issues/4209)) ([12c1800](https://github.com/factorialco/f0/commit/12c1800236f9dea11989ffdec71a70864ad96321))
+
 ## [2.14.2](https://github.com/factorialco/f0/compare/f0-react-v2.14.1...f0-react-v2.14.2) (2026-05-21)
 
 
