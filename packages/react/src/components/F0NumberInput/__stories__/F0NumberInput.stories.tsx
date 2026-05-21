@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 
 import { Placeholder } from "@/icons/app"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0NumberInput } from "../index"
 
@@ -10,7 +11,7 @@ const meta = {
   render: (props) => <F0NumberInput key={JSON.stringify(props)} {...props} />,
   title: "Inputs/Number input",
   component: F0NumberInput,
-  tags: ["autodocs", "experimental"],
+  tags: ["stable"],
   args: {
     disabled: false,
     placeholder: "Placeholder text here",
@@ -135,4 +136,51 @@ export const WithUnits: Story = {
     label: "Insert amount",
     units: "EUR",
   },
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  args: {
+    label: "Snapshot",
+  },
+  render: () => (
+    <div className="flex flex-col gap-6 p-4">
+      <section className="flex flex-col gap-3">
+        <h3 className="text-sm font-semibold">Sizes</h3>
+        <F0NumberInput locale="en-US" label="Small" size="sm" value={42} />
+        <F0NumberInput
+          locale="en-US"
+          label="Medium (default)"
+          size="md"
+          value={42}
+        />
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h3 className="text-sm font-semibold">States</h3>
+        <F0NumberInput locale="en-US" label="Default" value={42} />
+        <F0NumberInput locale="en-US" label="Disabled" disabled value={42} />
+        <F0NumberInput
+          locale="en-US"
+          label="With units"
+          value={42}
+          units="EUR"
+        />
+        <F0NumberInput
+          locale="en-US"
+          label="With stepper"
+          value={3}
+          step={1}
+          min={0}
+          max={10}
+        />
+        <F0NumberInput
+          locale="en-US"
+          label="With error"
+          value={42}
+          error="Error message"
+        />
+      </section>
+    </div>
+  ),
 }
