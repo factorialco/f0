@@ -163,6 +163,12 @@ export const kanbanSourceLanes = [
   { id: "complete", filters: { status: ["Complete"] } },
 ]
 
+const kanbanLaneStatus: Record<string, Resource["status"]> = {
+  draft: "Draft",
+  "needs-details": "Needs details",
+  complete: "Complete",
+}
+
 export const kanbanVisualization: CrudKanbanVisualization = {
   type: "kanban",
   options: {
@@ -179,6 +185,10 @@ export const kanbanVisualization: CrudKanbanVisualization = {
         property: { type: "text", label: "Owner", value: item.owner },
       },
     ],
+    onMove: async (_fromLaneId, toLaneId, sourceRecord) => ({
+      ...sourceRecord,
+      status: kanbanLaneStatus[toLaneId] ?? sourceRecord.status,
+    }),
   },
 }
 
