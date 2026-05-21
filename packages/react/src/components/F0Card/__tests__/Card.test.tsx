@@ -82,6 +82,29 @@ describe("F0Card Component", () => {
     expect(handleSelect).toHaveBeenCalledWith(true)
   })
 
+  it("does not call onClick when the card selection checkbox is clicked", async () => {
+    const user = userEvent.setup()
+    const handleClick = vi.fn()
+    const handleSelect = vi.fn()
+
+    render(
+      <F0Card
+        title="Selectable Card"
+        selectable={true}
+        onClick={handleClick}
+        onSelect={handleSelect}
+      />
+    )
+
+    const card = screen.getByTestId("card")
+    await user.hover(card)
+
+    await user.click(screen.getByRole("checkbox"))
+
+    expect(handleSelect).toHaveBeenCalledWith(true)
+    expect(handleClick).not.toHaveBeenCalled()
+  })
+
   it("handles dropdown actions", async () => {
     const user = userEvent.setup()
     const handleOption = vi.fn()

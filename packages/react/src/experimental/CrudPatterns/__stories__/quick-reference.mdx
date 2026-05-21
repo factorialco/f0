@@ -1,0 +1,165 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
+
+<Meta title="CRUD patterns/Quick reference" />
+
+# Quick Reference
+
+A single-page cheat sheet for CRUD pattern decisions. No prose — just the tables
+and trees. For rationale, see the linked pages.
+
+---
+
+## Action placement
+
+```
+Who is the subject?
+
+  Collection ────────► Collection-level
+    ├─ Dominant intent  ► Primary (one button, top-right)
+    ├─ Supporting       ► Secondary (max 2 expanded + overflow)
+    └─ Rare/destructive ► Overflow (ellipsis)
+
+  One item ──────────► Item-level
+    ├─ Most-likely-next ► Primary tier
+    ├─ Supporting       ► Secondary tier
+    └─ Rare/destructive ► Overflow tier (always)
+
+  Selection ─────────► Bulk
+    ├─ Common           ► Bulk bar primary (max 2)
+    └─ Rare/destructive ► Bulk bar overflow
+```
+
+---
+
+## Container selection (Create / Update)
+
+```
+Branching or validation gates?          ► Wizard
+Need to see collection while editing?   ► Side panel
+Deep resource, 30+ fields, tabs?        ► Dedicated page
+Single field, trivial, repetitive?      ► Inline edit
+Otherwise?                              ► Centered overlay (default)
+```
+
+---
+
+## Container selection (Read)
+
+```
+URL must be shareable / deep-linkable?  ► Dedicated page
+Multi-section, tabbed, deep?            ► Dedicated page
+Most reads shallow, some need depth?    ► Detail-then-escalate
+Need background context?                ► Side panel
+Otherwise?                              ► Centered overlay (default)
+```
+
+---
+
+## Delete pattern
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Pattern</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>One item, irreversible</td>
+        <td>Confirmation naming the item</td>
+      </tr>
+      <tr>
+        <td>Many items, visible on screen</td>
+        <td>Bulk bar + confirmation with count</td>
+      </tr>
+      <tr>
+        <td>Many items, spans pages</td>
+        <td>Bulk bar + scope banner + confirmation with predicate</td>
+      </tr>
+      <tr>
+        <td>Reversible (fast undo)</td>
+        <td>Optimistic + undo affordance, no confirmation</td>
+      </tr>
+      <tr>
+        <td>Irreversible + cross-user</td>
+        <td>Confirmation + typed resource name</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+---
+
+## Inline vs. container
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Signal</th>
+        <th className="text-left">Inline</th>
+        <th className="text-left">Container</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Fields changed</td><td>1</td><td>2+</td></tr>
+      <tr><td>Cross-field validation</td><td>No</td><td>Yes</td></tr>
+      <tr><td>Complex picker needed</td><td>No</td><td>Yes</td></tr>
+      <tr><td>Sequential multi-item edits</td><td>Yes</td><td>No</td></tr>
+      <tr><td>Field dependencies</td><td>No</td><td>Yes</td></tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+---
+
+## Centered vs. side panel
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Signal</th>
+        <th className="text-left">Centered</th>
+        <th className="text-left">Side panel</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Need background context</td><td>No</td><td>Yes</td></tr>
+      <tr><td>Sequential editing</td><td>No</td><td>Yes</td></tr>
+      <tr><td>Self-contained decision</td><td>Yes</td><td>No</td></tr>
+      <tr><td>Narrow viewport</td><td>Yes (fallback)</td><td>Not viable</td></tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+---
+
+## Async feedback location
+
+```
+< 1s              ► Button spinner only
+1–5s              ► Button spinner + disable submit
+> 5s, single item ► Container-level (block + progress)
+Bulk              ► Bar-level (aggregate + per-item errors)
+Background        ► Toast (only acceptable global feedback case)
+```
+
+---
+
+## Critical action checklist
+
+An action is **critical** if ANY of these are true:
+
+- Cannot be reversed in-product
+- Deletes or unlinks user-visible content
+- Side effects on other users
+- Triggers external effects (emails, payments, integrations)
+- Affects compliance/audit/legal
+- Name contains: delete, remove, revoke, cancel, destroy
+
+**Critical actions should:** default to overflow (surfacing is acceptable when
+context justifies it), always require confirmation, use destructive styling on
+the affordance if surfaced and at the confirmation step.
