@@ -1,6 +1,13 @@
-import { forwardRef, useEffect, useState, type ChangeEvent } from "react"
+import {
+  forwardRef,
+  useCallback,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FocusEvent,
+} from "react"
 
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 
 import type { F0AmountCalculatorProps } from "./types"
 
@@ -10,7 +17,7 @@ function formatNumber(
   maxDecimals: number
 ): string {
   return new Intl.NumberFormat(locale, {
-    minimumFractionDigits: 1,
+    minimumFractionDigits: maxDecimals,
     maximumFractionDigits: maxDecimals,
     useGrouping: false,
   }).format(value)
@@ -44,55 +51,92 @@ const F0AmountCalculator = forwardRef<HTMLDivElement, F0AmountCalculatorProps>(
       maxDecimals = 2,
       baseAmount,
       currency,
+      ariaLabel,
+      id,
+      ...dataAttributes
     },
     ref
   ) => {
     const [inputValue, setInputValue] = useState(() =>
       value != null ? formatNumber(value, locale, maxDecimals) : ""
     )
+    const isFocused = useRef(false)
 
-    useEffect(() => {
-      if (value != null) {
-        setInputValue(formatNumber(value, locale, maxDecimals))
-      } else {
-        setInputValue("")
-      }
-    }, [value, locale, maxDecimals])
+    const handleChange = useCallback(
+      (e: ChangeEvent<HTMLInputElement>) => {
+        const raw = e.target.value
+        setInputValue(raw)
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-      const raw = e.target.value
-      setInputValue(raw)
+        if (raw === "") {
+          onChange?.(null)
+          return
+        }
 
-      if (raw === "") {
-        onChange?.(null)
-        return
-      }
+        const parsed = parseLocaleNumber(raw, locale)
+        if (parsed != null) {
+          onChange?.(parsed)
+        }
+      },
+      [locale, onChange]
+    )
 
-      const parsed = parseLocaleNumber(raw, locale)
-      if (parsed != null) {
-        onChange?.(parsed)
-      }
+    const handleFocus = useCallback(() => {
+      isFocused.current = true
+    }, [])
+
+    const handleBlur = useCallback(
+      (e: FocusEvent<HTMLInputElement>) => {
+        isFocused.current = false
+        const raw = e.target.value
+        if (raw === "") {
+          setInputValue("")
+          return
+        }
+        const parsed = parseLocaleNumber(raw, locale)
+        if (parsed != null) {
+          setInputValue(formatNumber(parsed, locale, maxDecimals))
+        }
+      },
+      [locale, maxDecimals]
+    )
+
+    // Only sync from external value changes when not focused
+    const lastExternalValue = useRef(value)
+    if (value !== lastExternalValue.current && !isFocused.current) {
+      lastExternalValue.current = value
+      setInputValue(
+        value != null ? formatNumber(value, locale, maxDecimals) : ""
+      )
     }
 
     return (
-      <div ref={ref} className={cn("inline-flex items-center gap-2")}>
+      <div
+        ref={ref}
+        className={cn("inline-flex items-center gap-2")}
+        {...dataAttributes}
+      >
         <div
           className={cn(
-            "inline-flex items-center rounded-lg border border-solid border-f1-border",
+            "inline-flex items-center rounded-md border border-solid border-f1-border",
             "h-8 overflow-hidden bg-f1-background",
             disabled && "pointer-events-none opacity-50"
           )}
         >
           <input
+            id={id}
             type="text"
             inputMode="decimal"
             value={inputValue}
             onChange={handleChange}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
             placeholder={placeholder}
             disabled={disabled}
+            aria-label={ariaLabel}
             className={cn(
               "h-full w-16 border-none bg-transparent px-2 text-sm outline-none",
-              "text-f1-foreground placeholder:text-f1-foreground-secondary"
+              "text-f1-foreground placeholder:text-f1-foreground-secondary",
+              focusRing()
             )}
           />
           <span
@@ -106,6 +150,7 @@ const F0AmountCalculator = forwardRef<HTMLDivElement, F0AmountCalculatorProps>(
         </div>
         {baseAmount != null && (
           <span className="text-sm text-f1-foreground-secondary">
+            {/* TODO: i18n — use translation key when available */}
             of {formatNumber(baseAmount, locale, maxDecimals)}
             {currency ? ` ${currency}` : ""}
           </span>

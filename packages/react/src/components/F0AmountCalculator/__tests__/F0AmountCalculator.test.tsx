@@ -1,4 +1,5 @@
-import { render, screen, fireEvent } from "@testing-library/react"
+import { screen, zeroRender as render } from "@/testing/test-utils"
+import { fireEvent } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
 import { F0AmountCalculator } from "../F0AmountCalculator"
@@ -21,7 +22,7 @@ describe("F0AmountCalculator", () => {
 
   it("displays formatted value with comma", () => {
     render(<F0AmountCalculator value={15} />)
-    expect(screen.getByDisplayValue("15,0")).toBeInTheDocument()
+    expect(screen.getByDisplayValue("15,00")).toBeInTheDocument()
   })
 
   it("calls onChange when input changes", () => {
@@ -58,5 +59,22 @@ describe("F0AmountCalculator", () => {
   it("is disabled when disabled prop is true", () => {
     render(<F0AmountCalculator disabled />)
     expect(screen.getByRole("textbox")).toBeDisabled()
+  })
+
+  it("applies aria-label when provided", () => {
+    render(<F0AmountCalculator ariaLabel="Percentage input" />)
+    expect(screen.getByLabelText("Percentage input")).toBeInTheDocument()
+  })
+
+  it("formats value on blur", () => {
+    const onChange = vi.fn()
+    render(<F0AmountCalculator onChange={onChange} />)
+
+    const input = screen.getByRole("textbox")
+    fireEvent.focus(input)
+    fireEvent.change(input, { target: { value: "5" } })
+    fireEvent.blur(input)
+
+    expect(input).toHaveValue("5,00")
   })
 })

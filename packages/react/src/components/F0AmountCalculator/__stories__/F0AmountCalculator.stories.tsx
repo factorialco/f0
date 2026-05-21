@@ -1,16 +1,19 @@
 import { useState } from "react"
-import type { Meta, StoryObj } from "@storybook/react"
+import type { Meta, StoryObj } from "@storybook/react-vite"
+
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0AmountCalculator } from "../F0AmountCalculator"
 
-const meta: Meta<typeof F0AmountCalculator> = {
+const meta = {
   title: "Amount Calculator",
   component: F0AmountCalculator,
-  tags: ["autodocs"],
-}
+  tags: ["stable", "autodocs"],
+  parameters: { layout: "centered" },
+} satisfies Meta<typeof F0AmountCalculator>
 
 export default meta
-type Story = StoryObj<typeof F0AmountCalculator>
+type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
@@ -72,4 +75,17 @@ export const Controlled: Story = {
       </div>
     )
   },
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <F0AmountCalculator placeholder="0,0" units="%" />
+      <F0AmountCalculator value={15} units="%" />
+      <F0AmountCalculator value={10} units="%" baseAmount={300} currency="€" />
+      <F0AmountCalculator value={25} units="%" disabled />
+      <F0AmountCalculator placeholder="0,0" units="€" />
+    </div>
+  ),
 }

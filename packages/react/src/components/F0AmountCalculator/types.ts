@@ -1,4 +1,6 @@
-export type F0AmountCalculatorProps = {
+import type { DataAttributes } from "@/global.types"
+
+export interface F0AmountCalculatorProps extends DataAttributes {
   /** Current numeric value (the percentage or unit value entered) */
   value?: number | null
   /** Callback when value changes */
@@ -13,8 +15,12 @@ export type F0AmountCalculatorProps = {
   locale?: string
   /** Maximum decimal places allowed */
   maxDecimals?: number
-  /** Base amount to display as context (e.g. "of 0,00 €"). Defaults to 0. Only shown when provided or in popover mode. */
+  /** Base amount to display as context. Only rendered when explicitly provided. */
   baseAmount?: number | null
   /** Currency or suffix for the base amount (e.g. "€", "USD"). Shown after the base amount. */
   currency?: string
+  /** Accessible label for the input (used as aria-label) */
+  ariaLabel?: string
+  /** HTML id for the input element */
+  id?: string
 }
