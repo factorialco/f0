@@ -1495,3 +1495,117 @@ export const DynamicUnitsPerRow: Story = {
     )
   },
 }
+
+/**
+ * Shows a select column whose options carry a `status` tag. The cell trigger
+ * renders the matching status pill (instead of plain text), and each option in
+ * the dropdown is shown with its pill — a "pill picker" UX.
+ */
+export const EditableTableWithStatusPillSelect: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Select column where each option carries a `tag: { type: 'status' }`. The closed cell trigger renders a status pill (matching what a non-editable `type: 'status'` cell would show), and the dropdown options show pills too.",
+      },
+    },
+  },
+  render: () => {
+    type RequestStatus = "draft" | "pending" | "approved" | "rejected"
+
+    const STATUS_LABEL: Record<RequestStatus, string> = {
+      draft: "Draft",
+      pending: "Pending",
+      approved: "Approved",
+      rejected: "Rejected",
+    }
+    const STATUS_VARIANT: Record<
+      RequestStatus,
+      "neutral" | "warning" | "positive" | "critical"
+    > = {
+      draft: "neutral",
+      pending: "warning",
+      approved: "positive",
+      rejected: "critical",
+    }
+    const STATUS_VALUES: RequestStatus[] = [
+      "draft",
+      "pending",
+      "approved",
+      "rejected",
+    ]
+
+    const initialItems = [
+      { id: "r-1", index: 0, name: "Headcount #1", status: "draft" },
+      { id: "r-2", index: 1, name: "Headcount #2", status: "pending" },
+      { id: "r-3", index: 2, name: "Headcount #3", status: "approved" },
+      { id: "r-4", index: 3, name: "Headcount #4", status: "rejected" },
+    ] as unknown as MockUser[]
+
+    const { dataAdapter, onCellChange } = useEditableTableData(initialItems)
+
+    return (
+      <ExampleComponent
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              columns: [
+                {
+                  label: "Name",
+                  id: "name",
+                  editType: () => "text" as const,
+                  render: (item: MockUser) => item.name,
+                },
+                {
+                  label: "Status",
+                  id: "status",
+                  width: 200,
+                  editType: () => "select" as const,
+                  render: (item: MockUser) => {
+                    const status = item.status as RequestStatus
+                    return {
+                      type: "status" as const,
+                      value: {
+                        label: STATUS_LABEL[status],
+                        status: STATUS_VARIANT[status],
+                      },
+                    }
+                  },
+                  selectConfig: {
+                    placeholder: "Status",
+                    showSearchBox: false,
+                    options: STATUS_VALUES.map((id) => ({
+                      value: id,
+                      label: STATUS_LABEL[id],
+                      tag: {
+                        type: "status" as const,
+                        text: STATUS_LABEL[id],
+                        variant: STATUS_VARIANT[id],
+                      },
+                    })),
+                    defaultItem: (item: MockUser) => {
+                      const status = item.status as RequestStatus
+                      return {
+                        value: status,
+                        label: STATUS_LABEL[status],
+                        tag: {
+                          type: "status" as const,
+                          text: STATUS_LABEL[status],
+                          variant: STATUS_VARIANT[status],
+                        },
+                      }
+                    },
+                  },
+                },
+              ],
+              onCellChange,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        id="editable-table-status-pill-select/v1"
+      />
+    )
+  },
+}
