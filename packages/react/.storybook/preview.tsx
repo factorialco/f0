@@ -159,8 +159,8 @@ const preview: Preview = {
     },
     options: {
       /*
-       * Sort all the components and experimental stories in an alphabetical order, but keep
-       * Introduction, How to contribute, Data test ID, Foundations, and Playground in specific order
+       * Sort stories alphabetically by default, but keep the documented top-level sections
+       * and nested Foundations/CRUD patterns groups in the specific order defined below.
        */
       storySort: {
         method: "alphabetical",
