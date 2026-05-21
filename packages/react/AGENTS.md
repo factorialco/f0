@@ -85,22 +85,6 @@ F0Example/
 
 ## Component Architecture
 
-### Reuse-First UI Discovery
-
-Before creating a new component, composing a new product UI, or adding custom layout/styling for a use case, first prove that an existing F0 component or pattern cannot cover it.
-
-1. Use the Storybook MCP docs tools from the root `AGENTS.md` to discover candidates (`list-all-documentation`, then `get-documentation` for likely matches).
-2. Check both components and patterns: stable components, `OneDataCollection` visualizations/actions, rich text/file components, form fields, dialogs, navigation, and existing experimental components.
-3. If the use case can be built from existing public F0 APIs, do not create a generic F0 component. Provide a product/SDS implementation example instead, or implement it in the consuming Factorial monorepo when that is the user's target.
-4. Ask for clarification before adding a new component when the intent is ambiguous: is this a product-specific composition, an SDS component owned by a team, or an approved generic F0 component?
-5. If it is product/team-specific, ask which team or SDS owns it and place it under `src/sds/<team-or-domain>/` only when the user confirms this repo is the right place. SDS means Satellite Design System: team/domain-owned components built from public F0 APIs, not part of the generic F0 design system contract.
-6. If design has approved a generic reusable component, choose a generic name based on the pattern, not the first product use case. Avoid names like `F0SignatureRequestList` unless the reusable primitive is truly about signature requests.
-7. If an existing component almost fits a generic need, prefer extending that component or adding a documented variant/prop/story so all consumers benefit.
-8. Only create a new generic component when the gap is a distinct reusable pattern that cannot be solved by extending an existing public F0 API and the user confirms it is intended for F0.
-9. Do not build product-specific UI by assembling internal primitives, raw `@/ui/` components, or large custom Tailwind layouts when an F0 component/pattern exists or can be extended.
-
-When reporting back, name the components/patterns considered, the chosen path, the target location (`factorial` consumer app, `src/sds/...`, or generic F0), and any missing F0 capability that should be added instead of worked around locally.
-
 ### Naming
 
 - Public components must start with `F0` (e.g., `F0Button`)

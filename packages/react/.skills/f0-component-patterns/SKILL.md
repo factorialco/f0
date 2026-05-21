@@ -30,9 +30,8 @@ Load this skill when you need to:
 ## Key Rules
 
 1. **Always check `packages/react/AGENTS.md` first** — it has the concise rules. This skill provides the detailed "how".
-2. **Run reuse-first discovery before building UI** — follow `packages/react/AGENTS.md` → Reuse-First UI Discovery. Use Storybook MCP docs to find existing components/patterns, clarify whether the target is product code, SDS, or generic F0, and only create a new generic component after explicit confirmation.
-3. **Never import Radix directly** — use `@/ui/` wrappers.
-4. **Never use `any`** — find the proper type.
-5. **New components must start with `F0`** prefix.
-6. **Tests use `zeroRender`** aliased as `render`, never `@testing-library/react`'s `render`.
-7. **All public exported components must expose a `dataTestId` prop** — either via the `withDataTestId` HOC (most components) or via the inline `DataTestIdWrapper` + `WithDataTestIdProps` pattern (generic components, discriminated union components, portal components). The key check: does the exported component accept `dataTestId` in its props? See `references/component-architecture.md` for patterns, composition order, and the decision table.
+2. **Never import Radix directly** — use `@/ui/` wrappers.
+3. **Never use `any`** — find the proper type.
+4. **New components must start with `F0`** prefix.
+5. **Tests use `zeroRender`** aliased as `render`, never `@testing-library/react`'s `render`.
+6. **All public exported components must expose a `dataTestId` prop** — either via the `withDataTestId` HOC (most components) or via the inline `DataTestIdWrapper` + `WithDataTestIdProps` pattern (generic components, discriminated union components, portal components). The key check: does the exported component accept `dataTestId` in its props? See `references/component-architecture.md` for patterns, composition order, and the decision table.
