@@ -48,7 +48,7 @@ layout.
     <tbody>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--default">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-dialog">
             Default dialog
           </a>
         </td>
@@ -59,7 +59,7 @@ layout.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--right-dialog-to-page">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-right-dialog-to-page">
             Right dialog to page
           </a>
         </td>
@@ -73,7 +73,7 @@ layout.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--table-to-page">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-page">
             Table to Page
           </a>
         </td>
@@ -85,7 +85,7 @@ layout.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--list-to-page">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--list-read-page">
             List to Page
           </a>
         </td>
@@ -100,7 +100,7 @@ layout.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--card-to-dialog">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--card-read-dialog">
             Card to dialog
           </a>
         </td>
@@ -109,13 +109,13 @@ layout.
           view.
         </td>
         <td>
-          Requires edit/delete to remain explicit actions, not hidden behind the
-          same click.
+          Requires edit to remain explicit and delete/destructive actions to
+          stay in the ellipsis, not hidden behind the same click.
         </td>
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--kanban-card-to-dialog">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--kanban-read-dialog">
             Kanban card to dialog
           </a>
         </td>
@@ -208,8 +208,10 @@ closer to scanning summaries than comparing columns.
 
 For Card and Kanban, the item surface itself is a strong read affordance, so
 card click to dialog is **Recommended** for quick inspection. Keep update and
-delete as explicit actions so read, edit, drag, and destructive behavior do not
-compete for the same click target.
+destructive actions separate so read, edit, drag, and delete behavior do not
+compete for the same click target. In dialog headers, critical actions such as
+delete stay in the ellipsis menu even when there are only one or two header
+actions.
 
 For Editable Table, inline editing has priority. Avoid making every row click a
 read transition if users also need to focus and edit cells. Use an explicit item
@@ -252,10 +254,10 @@ action for read when both behaviors must coexist.
 
 ## Related stories
 
-- [Default dialog](/?path=/story/patterns-data-collection-crud-patterns-read--default)
-- [Right dialog to page](/?path=/story/patterns-data-collection-crud-patterns-read--right-dialog-to-page)
-- [Table to Page](/?path=/story/patterns-data-collection-crud-patterns-read--table-to-page)
-- [List to Page](/?path=/story/patterns-data-collection-crud-patterns-read--list-to-page)
-- [Card to dialog](/?path=/story/patterns-data-collection-crud-patterns-read--card-to-dialog)
-- [Kanban card to dialog](/?path=/story/patterns-data-collection-crud-patterns-read--kanban-card-to-dialog)
+- [Default dialog](/?path=/story/patterns-data-collection-crud-patterns-read--table-read-dialog)
+- [Right dialog to page](/?path=/story/patterns-data-collection-crud-patterns-read--table-read-right-dialog-to-page)
+- [Table to Page](/?path=/story/patterns-data-collection-crud-patterns-read--table-read-page)
+- [List to Page](/?path=/story/patterns-data-collection-crud-patterns-read--list-read-page)
+- [Card to dialog](/?path=/story/patterns-data-collection-crud-patterns-read--card-read-dialog)
+- [Kanban card to dialog](/?path=/story/patterns-data-collection-crud-patterns-read--kanban-read-dialog)
 - [CRUD patterns overview](/?path=/docs/patterns-data-collection-crud-patterns-overview--documentation)

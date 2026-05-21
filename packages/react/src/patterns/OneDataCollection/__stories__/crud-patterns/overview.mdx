@@ -26,10 +26,24 @@ The linked stories open as fullscreen scenarios and use Data Collection as the
 interaction surface. They combine F0 layouts, headers, dialogs, wizards, and
 collection components in the same way production flows should.
 
+These stories assume the user has create, update, and delete permissions.
+Production flows should hide or disable each action when the user lacks the
+corresponding permission.
+
 - [Create documentation](/?path=/docs/patterns-data-collection-crud-patterns-create--documentation)
 - [Read documentation](/?path=/docs/patterns-data-collection-crud-patterns-read--documentation)
 - [Update documentation](/?path=/docs/patterns-data-collection-crud-patterns-update--documentation)
 - [Delete documentation](/?path=/docs/patterns-data-collection-crud-patterns-delete--documentation)
+
+Use the operation stories below to inspect one pattern decision at a time. Use
+the by-view stories when you need to validate how create, read, update, and
+delete coexist in the same collection surface.
+
+- [Table CRUD](/?path=/story/patterns-data-collection-crud-patterns-by-view--table)
+- [List CRUD](/?path=/story/patterns-data-collection-crud-patterns-by-view--list)
+- [Card CRUD](/?path=/story/patterns-data-collection-crud-patterns-by-view--card)
+- [Kanban CRUD](/?path=/story/patterns-data-collection-crud-patterns-by-view--kanban)
+- [Editable Table CRUD](/?path=/story/patterns-data-collection-crud-patterns-by-view--editable-table)
 
 <Unstyled>
   <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
@@ -42,7 +56,7 @@ collection components in the same way production flows should.
     <tbody>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-create--default">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-create--table-create-dialog">
             Create / Default
           </a>
         </td>
@@ -50,7 +64,7 @@ collection components in the same way production flows should.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-create--right-dialog">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-create--table-create-right-dialog">
             Create / Right dialog
           </a>
         </td>
@@ -61,7 +75,7 @@ collection components in the same way production flows should.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-create--wizard-dialog">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-create--create-wizard-dialog">
             Create / Wizard dialog
           </a>
         </td>
@@ -69,7 +83,7 @@ collection components in the same way production flows should.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-create--kanban-lane-create">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-create--kanban-create-lane">
             Create / Kanban lane create
           </a>
         </td>
@@ -80,7 +94,7 @@ collection components in the same way production flows should.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-create--editable-table-add-row">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-create--editable-table-create-row">
             Create / Editable Table add row
           </a>
         </td>
@@ -90,7 +104,7 @@ collection components in the same way production flows should.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--default">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-dialog">
             Read / Default
           </a>
         </td>
@@ -98,7 +112,7 @@ collection components in the same way production flows should.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--right-dialog-to-page">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-right-dialog-to-page">
             Read / Right dialog to page
           </a>
         </td>
@@ -109,7 +123,7 @@ collection components in the same way production flows should.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--table-to-page">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-page">
             Read / Table to Page
           </a>
         </td>
@@ -119,7 +133,7 @@ collection components in the same way production flows should.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--list-to-page">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--list-read-page">
             Read / List to Page
           </a>
         </td>
@@ -129,7 +143,7 @@ collection components in the same way production flows should.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--card-to-dialog">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--card-read-dialog">
             Read / Card to dialog
           </a>
         </td>
@@ -137,7 +151,7 @@ collection components in the same way production flows should.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--kanban-card-to-dialog">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--kanban-read-dialog">
             Read / Kanban card to dialog
           </a>
         </td>
@@ -145,7 +159,7 @@ collection components in the same way production flows should.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--default">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--table-update-dialog">
             Update / Default
           </a>
         </td>
@@ -156,7 +170,7 @@ collection components in the same way production flows should.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--right-position-dialog-for-table">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--table-update-right-dialog">
             Update / Right-position dialog for table
           </a>
         </td>
@@ -164,7 +178,7 @@ collection components in the same way production flows should.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--right-position-dialog-for-list">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--list-update-right-dialog">
             Update / Right-position dialog for list
           </a>
         </td>
@@ -175,7 +189,7 @@ collection components in the same way production flows should.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--card-actions-update">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--card-update-from-read-dialog">
             Update / Card actions update
           </a>
         </td>
@@ -186,7 +200,7 @@ collection components in the same way production flows should.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--bulk-update">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--table-bulk-update">
             Update / Bulk update
           </a>
         </td>
@@ -207,7 +221,7 @@ collection components in the same way production flows should.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--editable-table-inline-update">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--editable-table-update-inline">
             Update / Editable Table inline update
           </a>
         </td>
@@ -215,7 +229,7 @@ collection components in the same way production flows should.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--table-single-delete">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--table-delete-single">
             Delete / Table single delete
           </a>
         </td>
@@ -223,7 +237,7 @@ collection components in the same way production flows should.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--table-bulk-delete">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--table-delete-bulk">
             Delete / Table bulk delete
           </a>
         </td>
@@ -239,15 +253,7 @@ collection components in the same way production flows should.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--card-delete-from-dialog">
-            Delete / Card delete from dialog
-          </a>
-        </td>
-        <td>Read dialog header ellipsis triggers a confirmation dialog.</td>
-      </tr>
-      <tr>
-        <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--kanban-bulk-delete">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--kanban-delete-bulk">
             Delete / Kanban bulk delete
           </a>
         </td>
@@ -257,7 +263,7 @@ collection components in the same way production flows should.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--editable-table-delete">
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-delete--editable-table-delete-row-action">
             Delete / Editable Table delete
           </a>
         </td>
@@ -349,8 +355,9 @@ only move to an alternative when the resource or task needs it.
           selected and the action bar confirms scope.
         </td>
         <td>
-          <strong>Recommended:</strong> card ellipsis with confirmation. If no
-          ellipsis is available, put delete in the read dialog header ellipsis.
+          <strong>Recommended:</strong> card ellipsis with confirmation. In
+          opened dialogs, critical delete actions stay in the header ellipsis
+          even when paired with only one other action.
         </td>
       </tr>
       <tr>
@@ -399,6 +406,12 @@ only move to an alternative when the resource or task needs it.
     </tbody>
   </table>
 </Unstyled>
+
+Kanban cards support drag, click-to-read, and selection at the same time. Drag
+updates lane and state, click opens the read dialog, and selection drives bulk
+actions. These three interactions must not interfere with each other: the card
+click target stays whole, the drag handle is the card itself, and the selection
+checkbox stops propagation so toggling it never opens the card.
 
 ## Pattern decision table
 
@@ -513,7 +526,7 @@ resource has a meaningful full-page destination, but it does not have to route
 to a page in every case.
 
 The dialog-to-page behavior is portable. Any compatible default dialog or
-right-position read dialog can use <strong>Open Details</strong> as its primary
+right-position read dialog can use **Open Details** as its primary
 action when the dialog is intentionally a reduced preview and the resource has a
 durable full-page destination. This logic applies across Table, List, Card, and
 Kanban when the target page provides deeper structure.
