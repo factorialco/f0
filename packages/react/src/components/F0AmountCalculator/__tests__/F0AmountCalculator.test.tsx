@@ -1,5 +1,5 @@
 import { screen, zeroRender as render } from "@/testing/test-utils"
-import { fireEvent } from "@testing-library/react"
+import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
 import { F0AmountCalculator } from "../F0AmountCalculator"
@@ -28,26 +28,28 @@ describe("F0AmountCalculator", () => {
     expect(input).toHaveValue("15")
   })
 
-  it("calls onChange when input changes", () => {
+  it("calls onChange when input changes", async () => {
+    const user = userEvent.setup()
     const onChange = vi.fn()
     render(<F0AmountCalculator {...defaultProps} onChange={onChange} />)
 
     const input = screen.getByRole("textbox")
-    fireEvent.change(input, { target: { value: "10" } })
+    await user.type(input, "10")
 
-    expect(onChange).toHaveBeenCalledWith(10)
+    expect(onChange).toHaveBeenLastCalledWith(10)
   })
 
-  it("calls onChange with null when input is cleared", () => {
+  it("calls onChange with null when input is cleared", async () => {
+    const user = userEvent.setup()
     const onChange = vi.fn()
     render(
       <F0AmountCalculator {...defaultProps} value={10} onChange={onChange} />
     )
 
     const input = screen.getByRole("textbox")
-    fireEvent.change(input, { target: { value: "" } })
+    await user.clear(input)
 
-    expect(onChange).toHaveBeenCalledWith(null)
+    expect(onChange).toHaveBeenLastCalledWith(null)
   })
 
   it("renders base amount with currency when provided", () => {
