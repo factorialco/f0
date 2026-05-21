@@ -1,6 +1,6 @@
 import { forwardRef } from "react"
 
-import { NumberInput } from "@/experimental/Forms/Fields/NumberInput/NumberInput"
+import { NumberInput } from "@/experimental/Forms/Fields/NumberInput"
 import { cn } from "@/lib/utils"
 
 import type { F0AmountCalculatorProps } from "./types"
