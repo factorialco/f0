@@ -162,78 +162,30 @@ const preview: Preview = {
        * Sort all the components and experimental stories in an aplhabetical order, but keep
        * Introduction, How to contribute, Data test ID, Foundations, and Playground in specific order
        */
-      storySort: (a, b) => {
-        const crudPatternsPrefix = "Data collection/CRUD patterns/"
-        const crudPatternsOrder = [
-          "Create",
-          "Read",
-          "Update",
-          "Delete",
-          "Overview",
-        ]
-
-        if (
-          a.title.startsWith(crudPatternsPrefix) &&
-          b.title.startsWith(crudPatternsPrefix)
-        ) {
-          const aSection = a.title.slice(crudPatternsPrefix.length)
-          const bSection = b.title.slice(crudPatternsPrefix.length)
-          const aCrudIndex = crudPatternsOrder.indexOf(aSection)
-          const bCrudIndex = crudPatternsOrder.indexOf(bSection)
-
-          if (aCrudIndex !== -1 && bCrudIndex !== -1) {
-            return aCrudIndex - bCrudIndex
-          }
-        }
-
-        const topLevelOrder = [
-          "introduction",
-          "how-to-contribute",
-          "ai-configuration",
-          "foundations",
-          "components",
-          "patterns",
-          "kits",
-          "layouts",
-          "library",
-          "experimental",
-          "examples",
-          "internal",
-        ]
-
-        const aId = a.id.split("-")?.[0].toLowerCase()
-        const bId = b.id.split("-")?.[0].toLowerCase()
-
-        const aIndex = topLevelOrder.indexOf(aId)
-        const bIndex = topLevelOrder.indexOf(bId)
-
-        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex
-        if (aIndex !== -1) return -1
-        if (bIndex !== -1) return 1
-
-        const isAFoundation = aId.startsWith("foundations/")
-        const isBFoundation = bId.startsWith("foundations/")
-
-        if (isAFoundation || isBFoundation) {
-          if (isAFoundation && isBFoundation) {
-            const foundationOrder = [
-              "colors",
-              "typography",
-              "spacing",
-              "borders",
-              "shadows",
-              "icons",
-            ]
-            const aFoundationIndex = foundationOrder.indexOf(aId.split("/")[1])
-            const bFoundationIndex = foundationOrder.indexOf(bId.split("/")[1])
-            if (aFoundationIndex !== -1 && bFoundationIndex !== -1) {
-              return aFoundationIndex - bFoundationIndex
-            }
-          }
-          return isAFoundation ? -1 : 1
-        }
-
-        return a.title.localeCompare(b.title)
+      storySort: {
+        method: "alphabetical",
+        order: [
+          "Introduction",
+          "How to contribute",
+          "AI configuration",
+          "Foundations",
+          ["Colors", "Typography", "Spacing", "Borders", "Shadows", "Icons"],
+          "Components",
+          "Patterns",
+          [
+            "Data collection",
+            [
+              "CRUD patterns",
+              ["Overview", "Create", "Read", "Update", "Delete"],
+            ],
+          ],
+          "Kits",
+          "Layouts",
+          "Library",
+          "Experimental",
+          "Examples",
+          "Internal",
+        ],
       },
     },
     darkMode: {

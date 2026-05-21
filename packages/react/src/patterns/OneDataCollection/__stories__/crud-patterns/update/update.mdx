@@ -7,16 +7,18 @@ import * as Stories from "./update.stories"
 
 # Update pattern
 
-Update patterns define how a user edits an existing resource from a Data
+Update patterns define how a user updates an existing resource from a Data
 Collection. The update flow should usually mirror create so users do not need to
-relearn the form, field order, or terminology when editing the same data.
+relearn the form, field order, or terminology when updating the same data.
 
 ## When to use
 
-- Use a default dialog when editing fits in a focused overlay.
+- Use a default dialog when updating fits in a focused overlay.
 - Use a right-position dialog only for Table and List views when keeping the
   collection visible improves comparison or navigation between items.
-- Reuse the same form structure as create whenever the user edits the same
+- Use bulk update only in Table view, where checkboxes make selection scope
+  explicit.
+- Reuse the same form structure as create whenever the user updates the same
   information.
 - Avoid inventing a separate update-only layout without a strong UX reason.
 
@@ -38,7 +40,7 @@ relearn the form, field order, or terminology when editing the same data.
             Default dialog
           </a>
         </td>
-        <td>Baseline edit flow for most existing resources.</td>
+        <td>Baseline update flow for most existing resources.</td>
         <td>
           Best when context can temporarily shift away from the collection.
         </td>
@@ -57,6 +59,18 @@ relearn the form, field order, or terminology when editing the same data.
           Use only on <code>md</code> / <code>900px</code> and above.
         </td>
       </tr>
+      <tr>
+        <td>
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--bulk-update">
+            Bulk update
+          </a>
+        </td>
+        <td>Updating a selected set of rows from table bulk actions.</td>
+        <td>
+          Table-only pattern because row selection currently depends on
+          checkboxes.
+        </td>
+      </tr>
     </tbody>
   </table>
 </Unstyled>
@@ -73,12 +87,16 @@ relearn the form, field order, or terminology when editing the same data.
     </thead>
     <tbody>
       <tr>
-        <td>Is this the standard edit path for a resource?</td>
+        <td>Is this the standard update path for a resource?</td>
         <td>Default dialog</td>
       </tr>
       <tr>
-        <td>Does the user need to compare multiple rows while editing?</td>
+        <td>Does the user need to compare multiple rows while updating?</td>
         <td>Right-position dialog</td>
+      </tr>
+      <tr>
+        <td>Is the user updating several selected rows at once?</td>
+        <td>Bulk update in Table view</td>
       </tr>
       <tr>
         <td>Is the current visualization Card or Kanban?</td>
@@ -99,16 +117,21 @@ form structure reduces cognitive load, improves predictability, and keeps
 validation and terminology aligned.
 
 The right-position dialog is an exception, not the default. Use it when the
-collection itself is part of the editing workflow, such as reviewing adjacent
+collection itself is part of the update workflow, such as reviewing adjacent
 rows or moving through items while preserving context. Fall back to the default
 dialog below medium breakpoints.
+
+Bulk update follows the same selection pattern as bulk delete. It is currently
+available only in Table view because that is the only visualization with
+checkbox-based selection, so users can clearly review which rows are included
+before they confirm the change.
 
 ## Dos and don'ts
 
 <DoDonts
   do={{
     description:
-      "Reuse the create form for update when the user is editing the same information with the same rules.",
+      "Reuse the create form for update when the user is updating the same information with the same rules.",
   }}
   dont={{
     description:
@@ -119,7 +142,7 @@ dialog below medium breakpoints.
 <DoDonts
   do={{
     description:
-      "Use a right-position dialog only when preserving collection context materially helps the editing task.",
+      "Use a right-position dialog only when preserving collection context materially helps the update task.",
   }}
   dont={{
     description:
@@ -127,9 +150,21 @@ dialog below medium breakpoints.
   }}
 />
 
+<DoDonts
+  do={{
+    description:
+      "Use the same bulk selection and confirmation pattern as bulk delete when applying one update to multiple rows.",
+  }}
+  dont={{
+    description:
+      "Do not expose bulk update in visualizations without checkbox-based row selection.",
+  }}
+/>
+
 ## Related stories
 
 - [Default dialog](/?path=/story/patterns-data-collection-crud-patterns-update--default)
+- [Bulk update](/?path=/story/patterns-data-collection-crud-patterns-update--bulk-update)
 - [Right-position dialog for table](/?path=/story/patterns-data-collection-crud-patterns-update--right-position-dialog-for-table)
 - [Right-position dialog for list](/?path=/story/patterns-data-collection-crud-patterns-update--right-position-dialog-for-list)
 - [CRUD patterns overview](/?path=/docs/patterns-data-collection-crud-patterns-overview--documentation)

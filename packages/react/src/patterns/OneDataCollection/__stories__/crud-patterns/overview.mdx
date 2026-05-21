@@ -66,11 +66,11 @@ story-only layout or styling wrappers.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--page-with-breadcrumbs">
-            Read / Page with breadcrumbs
+          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--page">
+            Read / Page
           </a>
         </td>
-        <td>Clicking an item routes to a resource page with breadcrumbs.</td>
+        <td>Clicking an item routes to a resource page.</td>
       </tr>
       <tr>
         <td>
@@ -156,7 +156,7 @@ story-only layout or styling wrappers.
       </tr>
       <tr>
         <td>
-          <code>Page with breadcrumbs</code>
+          <code>Page</code>
         </td>
         <td>All views</td>
         <td>
@@ -182,12 +182,12 @@ story-only layout or styling wrappers.
 
 Use a default dialog for standard create, read, and update flows. Update should
 mirror create whenever possible: reuse the same form structure, field order,
-validation rules, and terminology when users edit the same information.
+validation rules, and terminology when users update the same information.
 
 Use the default dialog as the baseline read pattern when the user needs a quick
-inspection flow. Move to a page with breadcrumbs when the resource becomes
+inspection flow. Move to a page when the resource becomes
 complex enough to need persistent navigation, deeper configuration, or a longer
-editing surface.
+update surface.
 
 ## Responsive behavior
 
@@ -216,7 +216,7 @@ editing surface.
         <td>Do not provide a right-position variation.</td>
       </tr>
       <tr>
-        <td>Page with breadcrumbs</td>
+        <td>Page</td>
         <td>Remain a page across viewports.</td>
       </tr>
     </tbody>
@@ -239,7 +239,7 @@ editing surface.
 <DoDonts
   do={{
     description:
-      "Reuse create forms for update when the user edits the same fields.",
+      "Reuse create forms for update when the user updates the same fields.",
   }}
   dont={{
     description:
@@ -250,7 +250,7 @@ editing surface.
 <DoDonts
   do={{
     description:
-      "Use a page with breadcrumbs when a resource needs persistent navigation, deeper structure, or a full-page edit surface.",
+      "Use a page when a resource needs persistent navigation, deeper structure, or a full-page update surface.",
   }}
   dont={{
     description:
