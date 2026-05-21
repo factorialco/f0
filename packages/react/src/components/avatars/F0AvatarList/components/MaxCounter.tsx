@@ -79,22 +79,32 @@ export const MaxCounter = ({
       <HoverCardTrigger asChild>{counter}</HoverCardTrigger>
       <HoverCardContent side="top">
         <ScrollArea className="[*[data-state=visible]_div]:bg-f1-background flex max-h-[172px] flex-col">
-          {list.map((avatar, index) => (
-            <div
-              key={index}
-              className="flex w-[180px] min-w-0 items-center gap-1.5 px-2 py-1 [&:first-child]:pt-2 [&:last-child]:pb-2"
-            >
-              <div className="h-6 w-6 shrink-0">
-                <F0Avatar
-                  avatar={{ type: avatarType, ...avatar } as AvatarVariant}
-                  size="sm"
-                />
+          {list.map((avatar, index) => {
+            const description = getTooltipDescription(avatar)
+            return (
+              <div
+                key={index}
+                className="flex w-[220px] min-w-0 items-center gap-1.5 px-2 py-1 [&:first-child]:pt-2 [&:last-child]:pb-2"
+              >
+                <div className="h-6 w-6 shrink-0">
+                  <F0Avatar
+                    avatar={{ type: avatarType, ...avatar } as AvatarVariant}
+                    size="sm"
+                  />
+                </div>
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <div className="truncate font-semibold">
+                    {getAvatarDisplayName(avatarType, avatar)}
+                  </div>
+                  {description && (
+                    <div className="truncate text-sm text-f1-foreground-secondary">
+                      {description}
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="min-w-0 flex-1 truncate font-semibold">
-                {getAvatarDisplayName(avatarType, avatar)}
-              </div>
-            </div>
-          ))}
+            )
+          })}
           <ScrollBar
             orientation="vertical"
             className="[&_div]:bg-f1-background"
@@ -103,4 +113,9 @@ export const MaxCounter = ({
       </HoverCardContent>
     </HoverCard>
   )
+}
+
+function getTooltipDescription(avatar: unknown): string | undefined {
+  const value = (avatar as { tooltipDescription?: unknown })?.tooltipDescription
+  return typeof value === "string" && value.length > 0 ? value : undefined
 }

@@ -54,7 +54,6 @@ export * from "./F0Icon"
 export * from "./F0Link"
 export * from "./F0Select"
 export * from "./F0Text"
-export * from "../sds/F0InfoCard"
 export * from "../sds/TimeLine"
 /**
  * @deprecated OneFilterPicker has moved to @/patterns/OneFilterPicker. Import from there instead.

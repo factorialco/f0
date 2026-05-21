@@ -68,11 +68,12 @@ export const F0AvatarList = ({
       renderListItem={(avatar, index) => {
         const displayName = getAvatarDisplayName(type, avatar)
 
+        const hasBadge = Boolean((avatar as { badge?: unknown }).badge)
         const clippedAvatar = (
           <div
             className="flex h-fit w-fit shrink-0 items-center justify-center"
             style={
-              index !== avatars.length - 1
+              index !== avatars.length - 1 && !hasBadge
                 ? {
                     clipPath:
                       CLIP_MASK[type === "person" ? "rounded" : "base"][size],
@@ -92,7 +93,12 @@ export const F0AvatarList = ({
             {noTooltip ? (
               clippedAvatar
             ) : (
-              <Tooltip label={displayName}>{clippedAvatar}</Tooltip>
+              <Tooltip
+                label={displayName}
+                description={getTooltipDescription(avatar)}
+              >
+                {clippedAvatar}
+              </Tooltip>
             )}
           </div>
         )
@@ -123,3 +129,8 @@ export const F0AvatarList = ({
 }
 
 F0AvatarList.displayName = "AvatarList"
+
+function getTooltipDescription(avatar: unknown): string | undefined {
+  const value = (avatar as { tooltipDescription?: unknown })?.tooltipDescription
+  return typeof value === "string" && value.length > 0 ? value : undefined
+}
