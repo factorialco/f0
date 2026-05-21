@@ -18,6 +18,7 @@
   "main": "dist/f0.js",
   "typings": "dist/f0.d.ts",
   "scripts": {
+    "predev": "pnpm run storybook:install-browsers",
     "dev": "storybook dev -p 6006",
     "dev:docs": "DOCS_MODE=true pnpm run dev",
     "dev:sync": "pnpm build:prepare && tsx scripts/dev-sync.ts",
@@ -40,6 +41,7 @@
     "generate-module-icons": "npx @svgr/cli --out-dir src/icons/modules node_modules/@factorialco/f0-core/assets/icons/modules",
     "generate-ai-icons": "npx @svgr/cli --out-dir src/icons/ai node_modules/@factorialco/f0-core/assets/icons/ai",
     "build-storybook": "storybook build",
+    "storybook:install-browsers": "playwright install chromium",
     "build-api": "pnpm --dir api install --ignore-workspace && pnpm --dir api run build",
     "serve-storybook": "http-server storybook-static",
     "test-storybook": "test-storybook --testTimeout=60000",

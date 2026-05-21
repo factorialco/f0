@@ -10,7 +10,7 @@ export const ItemActionsRowContainer = ({
   className?: string
 }) => {
   return (
-    <aside
+    <div
       className={cn(
         "absolute bottom-0 right-0 top-0 z-20 hidden items-center justify-end gap-2 py-2 pl-20 pr-3 opacity-0 transition-all group-hover:opacity-100 md:flex",
         "bg-gradient-to-l from-[#F5F6F8] from-0% dark:from-[#192231]",
@@ -21,6 +21,6 @@ export const ItemActionsRowContainer = ({
       )}
     >
       {children}
-    </aside>
+    </div>
   )
 }

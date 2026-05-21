@@ -21,7 +21,7 @@ export const ItemActionsRow = ({
   handleDropDownOpenChange,
 }: ItemActionsRowProps) => {
   return (
-    <aside
+    <div
       className={cn(
         "pointer-events-auto items-center justify-end gap-2 md:flex",
         className
@@ -42,6 +42,6 @@ export const ItemActionsRow = ({
         items={dropdownItemActions}
         onOpenChange={handleDropDownOpenChange}
       />
-    </aside>
+    </div>
   )
 }
