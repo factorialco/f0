@@ -878,6 +878,7 @@ function mapCollectionItem(
             id: col.id,
             sorting: col.id,
             ...(col.width ? { width: col.width } : {}),
+            ...(col.info ? { info: col.info } : {}),
             render: (row: RecordType) => {
               const value = row[col.id]
               if (value == null) return "-"
