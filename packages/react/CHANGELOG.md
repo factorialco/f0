@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.14.2](https://github.com/factorialco/f0/compare/f0-react-v2.14.1...f0-react-v2.14.2) (2026-05-21)
+
+
+### Bug Fixes
+
+* **F0Select:** reflect external value resets in single-selection mode ([#4210](https://github.com/factorialco/f0/issues/4210)) ([110e924](https://github.com/factorialco/f0/commit/110e9244da5cf52d6e617d9c10528329933ae79d))
+
 ## [2.14.1](https://github.com/factorialco/f0/compare/f0-react-v2.14.0...f0-react-v2.14.1) (2026-05-21)
 
 
