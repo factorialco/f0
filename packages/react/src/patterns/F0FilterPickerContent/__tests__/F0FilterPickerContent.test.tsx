@@ -208,6 +208,32 @@ describe("F0FilterPickerContent", () => {
         location: ["nyc"],
       })
     })
+
+    it("clears all selected filters before applying", async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+
+      render(
+        <F0FilterPickerContent
+          filters={definition}
+          value={{ department: ["engineering"], location: ["nyc"] }}
+          onChange={onChange}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("Engineering")).toBeInTheDocument()
+      })
+
+      await user.click(screen.getByRole("button", { name: /clear filters/i }))
+      await user.click(screen.getByRole("button", { name: /apply/i }))
+
+      expect(onChange).toHaveBeenCalledWith({
+        department: [],
+        location: [],
+        search: "",
+      })
+    })
   })
 
   describe("Pre-selected Values", () => {
@@ -375,6 +401,32 @@ describe("F0FilterPickerContent", () => {
       // Now onChange should be called
       expect(onChange).toHaveBeenCalledWith({
         department: ["engineering"],
+      })
+    })
+
+    it("calls onChange immediately when clearing all filters", async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+
+      render(
+        <F0FilterPickerContent
+          filters={definition}
+          value={{ department: ["engineering"], location: ["nyc"] }}
+          onChange={onChange}
+          showApplyButton={false}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("Engineering")).toBeInTheDocument()
+      })
+
+      await user.click(screen.getByRole("button", { name: /clear filters/i }))
+
+      expect(onChange).toHaveBeenCalledWith({
+        department: [],
+        location: [],
+        search: "",
       })
     })
   })
