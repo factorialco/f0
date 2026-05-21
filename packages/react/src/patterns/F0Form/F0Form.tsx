@@ -163,7 +163,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
   }, [sections, sectionIds, showSectionsSidepanel, handleSectionClick])
 
   const content = (
-    <div className={cn("flex w-full flex-col max-w-content p-4", className)}>
+    <div className={cn("flex w-full flex-col max-w-content", className)}>
       {sectionIds.map((sectionId, index) => {
         const sectionSchema = schema[sectionId]
         const sectionConfig = sections?.[sectionId]
@@ -212,12 +212,12 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
           />
         </div>
         <div className="sticky bottom-0 top-0 w-px bg-f1-border-secondary" />
-        {content}
+        <div className="flex w-full justify-center px-4 py-2">{content}</div>
       </div>
     )
   }
 
-  return content
+  return <div className="flex justify-center p-4">{content}</div>
 }
 
 /**
@@ -1044,10 +1044,9 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       ref={formElementRef}
       onSubmit={onFormSubmit}
       className={cn(
-        "flex flex-col w-full mx-auto max-w-content p-4",
+        "flex flex-col w-full mx-auto max-w-content",
         className,
-        styling?.showSectionsSidepanel &&
-          "py-2 pl-0 pr-4 [&>div:last-child]:pb-6"
+        styling?.showSectionsSidepanel && "[&>div:last-child]:pb-6"
       )}
     >
       {/* Render definition items with switch grouping */}
@@ -1150,10 +1149,12 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             <div className="sticky bottom-0 top-0 mr-4 w-px bg-f1-border-secondary" />
 
             {/* Form content - centered in available space */}
-            {formContent}
+            <div className="flex w-full justify-center px-4 py-2">
+              {formContent}
+            </div>
           </div>
         ) : (
-          formContent
+          <div className="flex justify-center p-4">{formContent}</div>
         )}
 
         {!hideActionBar && (
