@@ -7,11 +7,13 @@ import {
   useReactFlow,
   type Node as RFNode,
   type Edge as RFEdge,
+  type EdgeProps as RFEdgeProps,
   type NodeTypes,
   type EdgeTypes,
   type Viewport,
 } from "@xyflow/react"
 import {
+  type KeyboardEvent,
   type ReactNode,
   useCallback,
   useEffect,
@@ -48,6 +50,7 @@ import {
   F0GraphActionsContext,
   F0GraphRenderConfigContext,
   F0GraphFocusContext,
+  useF0GraphRenderConfigInternal,
 } from "./contexts"
 import { F0GraphControls } from "./F0GraphControls"
 import {
@@ -118,7 +121,7 @@ export interface F0GraphProps<T = unknown> {
    */
   renderNode: (node: GraphNode<T>, ctx: F0GraphNodeRenderContext) => ReactNode
   /** Optional callback to render custom edges. Receives the edge and its variant (`"default" | "highlighted" | "dimmed"`). Falls back to default edge rendering when omitted. */
-  renderEdge?: (edge: GraphEdge, variant: EdgeVariant) => React.ReactNode | null
+  renderEdge?: (edge: GraphEdge, variant: EdgeVariant) => ReactNode | null
 
   // ---- Zoom ----
   zoomPreset?: ZoomPreset
@@ -426,9 +429,6 @@ export interface F0GraphNodeRenderContext {
 }
 
 // ─── Custom Edge Wrapper (supports renderEdge override via context) ────────
-import type { EdgeProps as RFEdgeProps } from "@xyflow/react"
-
-import { useF0GraphRenderConfigInternal } from "./contexts"
 import {
   F0GraphNodeWrapper,
   F0GraphExpanderWrapper,
@@ -1445,7 +1445,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
   }, [nodeMap])
 
   const handleTreeKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
+    (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.stopPropagation()
         clearSelection()
@@ -1583,7 +1583,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
 
   // ── Canvas keyboard handler (pan/zoom when no node is focused) ──
   const handleCanvasKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
+    (e: KeyboardEvent) => {
       // Only handle when the canvas wrapper itself has focus
       if (e.target !== e.currentTarget) return
 

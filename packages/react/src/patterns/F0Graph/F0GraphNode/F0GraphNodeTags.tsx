@@ -1,3 +1,5 @@
+import type { ComponentProps } from "react"
+
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
 import { Tag, type TagVariant } from "@/components/tags/F0Tag/F0Tag"
 import { BaseTag } from "@/components/tags/internal/BaseTag"
@@ -108,7 +110,7 @@ export function F0GraphNodeTags({ tags, labels }: F0GraphNodeTagsProps) {
 function buildAvatarListProps(
   type: AvatarTagType,
   items: TagVariant[]
-): React.ComponentProps<typeof F0AvatarList> {
+): ComponentProps<typeof F0AvatarList> {
   if (type === "person") {
     return {
       type: "person",

@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback, type ReactNode } from "react"
+import { useRef, useEffect, useCallback, type MouseEvent, type ReactNode } from "react"
 
 interface ClickSparkProps {
   sparkColor?: string
@@ -176,7 +176,7 @@ export function ClickSpark({
     }
   }, [sparkSize, sparkRadius, duration, easeFunc, extraScale])
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = (e: MouseEvent) => {
     const target = e.target as HTMLElement
     if (target.closest("[data-no-spark]")) return
 

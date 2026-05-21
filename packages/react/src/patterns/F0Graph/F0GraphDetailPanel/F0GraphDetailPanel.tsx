@@ -1,7 +1,9 @@
 import { FocusScope } from "@radix-ui/react-focus-scope"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import {
+  type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent as ReactMouseEvent,
+  type PointerEvent as ReactPointerEvent,
   type ReactNode,
   useCallback,
   useEffect,
@@ -192,7 +194,7 @@ function ResizeHandle({
   }, [clearHoverTimer])
 
   const handlePointerDown = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
+    (e: ReactPointerEvent<HTMLDivElement>) => {
       e.preventDefault()
       draggingRef.current = true
       startXRef.current = e.clientX
@@ -214,7 +216,7 @@ function ResizeHandle({
   )
 
   const handlePointerMove = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
+    (e: ReactPointerEvent<HTMLDivElement>) => {
       if (!draggingRef.current) return
       onResize(computeWidth(e.clientX))
     },
@@ -222,7 +224,7 @@ function ResizeHandle({
   )
 
   const handlePointerUp = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
+    (e: ReactPointerEvent<HTMLDivElement>) => {
       if (!draggingRef.current) return
       draggingRef.current = false
       // Persist the current width. The last pointerMove already set the
@@ -245,7 +247,7 @@ function ResizeHandle({
   )
 
   const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLDivElement>) => {
+    (e: ReactKeyboardEvent<HTMLDivElement>) => {
       let delta = 0
       const step = e.shiftKey ? KEYBOARD_STEP_LARGE : KEYBOARD_STEP
       if (e.key === "ArrowLeft") {

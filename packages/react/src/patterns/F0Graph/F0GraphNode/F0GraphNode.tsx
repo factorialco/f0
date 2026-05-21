@@ -2,6 +2,7 @@ import { NodeToolbar, Position } from "@xyflow/react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import {
   type KeyboardEvent,
+  type MutableRefObject,
   forwardRef,
   useCallback,
   useEffect,
@@ -62,7 +63,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
         if (typeof ref === "function") {
           ref(el)
         } else if (ref) {
-          ;(ref as React.MutableRefObject<HTMLDivElement | null>).current = el
+          ;(ref as MutableRefObject<HTMLDivElement | null>).current = el
         }
         // Register with focus system
         nodeRef?.(el)
