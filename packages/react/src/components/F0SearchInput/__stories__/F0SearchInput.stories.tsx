@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+
 import { F0SearchInput } from "../index"
 
 const meta = {
@@ -7,14 +9,8 @@ const meta = {
   title: "Inputs/Search input",
   parameters: {
     layout: "centered",
-    docs: {
-      description: {
-        component:
-          "This components provides the input search themed. Input can debouced to avoid several requests",
-      },
-    },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["stable"],
   args: {
     placeholder: "",
   },
@@ -103,4 +99,25 @@ export const WithDebounce: Story = {
     debounceTime: 3000,
     onChange: (value) => console.log("Debounced change:", value),
   },
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  render: () => (
+    <div className="flex flex-col gap-6 p-4">
+      <section className="flex flex-col gap-3">
+        <h3 className="text-sm font-semibold">Sizes</h3>
+        <F0SearchInput placeholder="Small (default)" size="sm" />
+        <F0SearchInput placeholder="Medium" size="md" />
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h3 className="text-sm font-semibold">States</h3>
+        <F0SearchInput placeholder="Default" />
+        <F0SearchInput placeholder="Disabled" disabled />
+        <F0SearchInput placeholder="Clearable" clearable value="query" />
+        <F0SearchInput placeholder="Loading" loading />
+      </section>
+    </div>
+  ),
 }

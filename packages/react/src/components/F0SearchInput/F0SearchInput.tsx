@@ -7,7 +7,6 @@ import {
 } from "react"
 
 import { Search } from "@/icons/app"
-import { experimentalComponent } from "@/lib/experimental"
 import { Input } from "@/ui/input"
 import { InputFieldProps } from "@/components/F0InputField/F0InputField"
 
@@ -29,7 +28,7 @@ export type F0SearchInputProps = {
   | "name"
 >
 
-const _F0SearchInput = forwardRef<HTMLInputElement, F0SearchInputProps>(
+const F0SearchInput = forwardRef<HTMLInputElement, F0SearchInputProps>(
   (
     {
       value,
@@ -120,13 +119,10 @@ const _F0SearchInput = forwardRef<HTMLInputElement, F0SearchInputProps>(
 )
 
 /**
- * @experimental This is an experimental component, use it at your own risk.
- *
  * F0SearchInput is the writable search field — a single-line text input
  * pre-configured with a search icon, `role="searchbox"`, debouncing, and
  * an optional minimum-length threshold before emitting changes.
  */
-export const F0SearchInput = experimentalComponent(
-  "F0SearchInput",
-  _F0SearchInput
-)
+F0SearchInput.displayName = "F0SearchInput"
+
+export { F0SearchInput }
