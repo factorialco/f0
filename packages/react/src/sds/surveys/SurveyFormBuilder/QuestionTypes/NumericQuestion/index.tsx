@@ -1,5 +1,5 @@
 import { F0TextInput } from "@/components/F0TextInput"
-import { F0NumberInput } from "@/experimental/Forms/Fields/NumberInput"
+import { F0NumberInput } from "@/components/F0NumberInput"
 import { Numbers } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
