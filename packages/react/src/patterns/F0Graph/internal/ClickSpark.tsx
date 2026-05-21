@@ -1,4 +1,10 @@
-import { useRef, useEffect, useCallback, type MouseEvent, type ReactNode } from "react"
+import {
+  useRef,
+  useEffect,
+  useCallback,
+  type MouseEvent,
+  type ReactNode,
+} from "react"
 
 interface ClickSparkProps {
   sparkColor?: string
