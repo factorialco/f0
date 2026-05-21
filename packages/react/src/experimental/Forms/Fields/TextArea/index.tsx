@@ -1,46 +1,24 @@
-export * from "@/ui/textarea"
-import { ComponentProps } from "react"
+export * from "./F0TextAreaInput"
 
-import { experimentalComponent } from "@/lib/experimental"
-import { Textarea as ShadcnTextarea } from "@/ui/textarea"
-
-import { Component } from "../../../../lib/component/component"
-
-export type TextareaProps = Pick<
-  ComponentProps<typeof ShadcnTextarea>,
-  | "disabled"
-  | "onChange"
-  | "value"
-  | "placeholder"
-  | "rows"
-  | "cols"
-  | "label"
-  | "labelIcon"
-  | "icon"
-  | "hideLabel"
-  | "maxLength"
-  | "clearable"
-  | "onBlur"
-  | "onFocus"
-  | "name"
-  | "status"
-  | "hint"
-  | "error"
-  | "size"
-  | "loading"
-  | "required"
-  | "maxHeight"
->
-
-const _Textarea: React.FC<TextareaProps> = Component(
-  {
-    name: "Textarea",
-    type: "form",
-  },
-  ShadcnTextarea
-)
+import { F0TextAreaInput } from "./F0TextAreaInput"
+export type { F0TextAreaInputProps } from "./F0TextAreaInput"
 
 /**
- * @experimental This is an experimental component use it at your own risk
+ * @deprecated Renamed to `F0TextAreaInput` to match the F0 input vocabulary
+ * (any component where the user types in a box has the `Input` suffix and
+ * lives under the `Inputs/` group). Will be removed once consumers have
+ * migrated.
+ *
+ *   - import { Textarea } from "@factorialco/f0-react"
+ *   + import { F0TextAreaInput } from "@factorialco/f0-react"
+ *
+ * @removeIn 2.0.0
  */
-export const Textarea = experimentalComponent("Textarea", _Textarea)
+export const Textarea = F0TextAreaInput
+
+/**
+ * @deprecated Renamed to `F0TextAreaInputProps`. See the `Textarea`
+ * deprecation note.
+ * @removeIn 2.0.0
+ */
+export type TextareaProps = import("./F0TextAreaInput").F0TextAreaInputProps
