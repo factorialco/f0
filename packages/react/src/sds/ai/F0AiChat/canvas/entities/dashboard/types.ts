@@ -219,6 +219,13 @@ export type ChatDashboardNavigationFilterDefinition = {
   datasetId: string
   granularities: ChatDashboardDateNavigationGranularity[]
   defaultGranularity?: ChatDashboardDateNavigationGranularity
+  /**
+   * ISO date (YYYY-MM-DD) injected by the agent server. When present, the
+   * navigator clamps forward navigation at this date. Agent defaults this to
+   * today; only forecast / planned-events dashboards omit it (via
+   * `allowFuture: true` on the agent side).
+   */
+  maxDate?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -402,4 +409,9 @@ export type DashboardCanvasActions = {
    * instead of showing a placeholder.
    */
   getMetadata?: (id: string) => Promise<DashboardMetadata | void>
+  /**
+   * URL the save dialog's "Find in AI Reports" info banner links to.
+   * The banner is hidden when this is omitted.
+   */
+  aiReportsHref?: string
 }

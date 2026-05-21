@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 
+import { F0Alert } from "@/components/F0Alert"
+import { ChevronRight } from "@/icons/app"
 import { Input } from "@/experimental/Forms/Fields/Input"
 import { useI18n } from "@/lib/providers/i18n"
 import { F0Dialog } from "@/patterns/F0Dialog"
@@ -11,6 +13,12 @@ type SaveDashboardDialogProps = {
   onSave: (title: string, description: string) => Promise<void>
   defaultTitle: string
   defaultDescription?: string
+  /**
+   * When provided, an info banner inside the dialog links to the host
+   * app's AI Reports listing so the user knows where the saved dashboard
+   * will appear. Hidden when omitted.
+   */
+  aiReportsHref?: string
 }
 
 export function SaveDashboardDialog({
@@ -19,6 +27,7 @@ export function SaveDashboardDialog({
   onSave,
   defaultTitle,
   defaultDescription = "",
+  aiReportsHref,
 }: SaveDashboardDialogProps) {
   const { t } = useI18n()
   const [title, setTitle] = useState(defaultTitle)
@@ -84,6 +93,21 @@ export function SaveDashboardDialog({
           size="md"
           rows={10}
         />
+        {aiReportsHref && (
+          <F0Alert
+            variant="info"
+            title={t("ai.dashboard.saveDialog.findInAiReports")}
+            description=""
+            action={{
+              label: t("ai.dashboard.saveDialog.aiReportsLink"),
+              icon: ChevronRight,
+              hideLabel: true,
+              onClick: () => {
+                window.open(aiReportsHref, "_blank", "noopener,noreferrer")
+              },
+            }}
+          />
+        )}
       </div>
     </F0Dialog>
   )

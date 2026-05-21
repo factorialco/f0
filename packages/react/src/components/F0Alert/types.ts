@@ -16,6 +16,8 @@ export interface F0AlertProps {
   action?: {
     label: string
     disabled?: boolean
+    icon?: IconType
+    hideLabel?: boolean
     onClick: () => void
   }
   link?: {

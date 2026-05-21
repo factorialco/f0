@@ -325,6 +325,7 @@ export function ChatDashboard({
         ...(spec.defaultGranularity
           ? { defaultGranularity: spec.defaultGranularity }
           : {}),
+        ...(spec.maxDate ? { max: new Date(spec.maxDate) } : {}),
       }
     }
     return Object.keys(result).length > 0 ? result : undefined
@@ -676,6 +677,7 @@ export function DashboardContent({
           defaultDescription={
             content.savedDashboardDescription ?? content.config.description
           }
+          aiReportsHref={canvasActions?.dashboard?.aiReportsHref}
         />
       )}
     </div>
