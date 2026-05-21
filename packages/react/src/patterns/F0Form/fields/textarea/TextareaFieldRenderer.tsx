@@ -2,7 +2,7 @@ import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
 import type { InputFieldStatus } from "@/ui/InputField/types"
 
-import { F0TextAreaInput } from "@/experimental/Forms/Fields/TextArea"
+import { F0TextAreaInput } from "@/components/F0TextAreaInput"
 
 import type { ResolvedField } from "../types"
 import type { F0TextareaField } from "./types"

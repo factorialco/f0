@@ -5,7 +5,7 @@ import { Placeholder } from "@/icons/app"
 import { F0TextAreaInput } from "../index"
 
 const meta = {
-  title: "Components/Inputs/Text area input",
+  title: "Inputs/Text area input",
   component: F0TextAreaInput,
   tags: ["autodocs", "experimental"],
   args: {
