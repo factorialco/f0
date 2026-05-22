@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react"
+import { fireEvent, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import "@testing-library/jest-dom/vitest"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -185,6 +185,74 @@ describe("Select", () => {
     await openSelect(user)
 
     expect(screen.getByText("System")).toBeInTheDocument()
+  })
+
+  it("renders selected status tags as pills in the trigger", async () => {
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={[
+          {
+            value: "approved",
+            label: "Approved",
+            tag: {
+              type: "status",
+              text: "Approved",
+              variant: "positive",
+            },
+          },
+        ]}
+        value="approved"
+      />
+    )
+
+    const combobox = screen.getByRole("combobox")
+    const selectedLabel = within(combobox).getByText("Approved")
+
+    await waitFor(() => {
+      expect(selectedLabel.closest(".bg-f1-background-positive")).toBeTruthy()
+    })
+  })
+
+  it("renders status-only options without duplicating the label", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={[
+          {
+            value: "draft",
+            label: "Draft",
+            tag: {
+              type: "status",
+              text: "Draft",
+              variant: "neutral",
+            },
+          },
+          {
+            value: "approved",
+            label: "Approved",
+            tag: {
+              type: "status",
+              text: "Approved",
+              variant: "positive",
+            },
+          },
+        ]}
+        onChange={() => {}}
+      />
+    )
+
+    await openSelect(user)
+
+    const approvedOption = screen.getByRole("option", { name: "Approved" })
+
+    expect(within(approvedOption).getAllByText("Approved")).toHaveLength(1)
+    expect(
+      within(approvedOption)
+        .getByText("Approved")
+        .closest(".bg-f1-background-positive")
+    ).toBeTruthy()
   })
 
   it("filters options based on search input", async () => {
