@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.16.3](https://github.com/factorialco/f0/compare/f0-react-v2.16.2...f0-react-v2.16.3) (2026-05-22)
+
+
+### Bug Fixes
+
+* **F0Select:** prevent double onChange emit on async datasources ([#4223](https://github.com/factorialco/f0/issues/4223)) ([5958f8c](https://github.com/factorialco/f0/commit/5958f8caed66d1f46c59e1d39e8e11cac8a45a9d))
+
 ## [2.16.2](https://github.com/factorialco/f0/compare/f0-react-v2.16.1...f0-react-v2.16.2) (2026-05-22)
 
 
