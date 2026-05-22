@@ -65,6 +65,7 @@ only affected the visible page.
 explicit through a **selection-scope banner**.
 
 Banner pattern:
+
 > "25 items on this page are selected. **Select all 1,432 items matching your filters.**"
 
 This banner appears after the user checks the "select all on page" affordance,
@@ -78,7 +79,7 @@ deliberate click.
   }}
   dont={{
     description:
-      "Do not silently select all results when the user checks the page-level \"select all\" — that's a different scope.",
+      'Do not silently select all results when the user checks the page-level "select all" — that\'s a different scope.',
   }}
 />
 
@@ -90,6 +91,7 @@ For large datasets, representing selection as "an array of IDs" breaks down. The
 correct abstraction is a **predicate**: "all items matching the current filter."
 
 Bulk action handlers must accept either:
+
 - A list of specific item identifiers, OR
 - A predicate (the active filter state + "all selected" flag)
 
@@ -103,12 +105,14 @@ enables bulk actions on millions of records without enumerating them client-side
 The floating bar that appears when items are selected:
 
 **Anatomy:**
+
 1. **Counter** — "N selected" (must reflect actual scope: page or all)
 2. **Primary actions** — up to two buttons (the most common bulk operations)
 3. **Overflow** — additional or destructive bulk actions
 4. **Cancel** — clears selection, always visible, always immediate
 
 **Behavior:**
+
 - Appears when one or more items are selected
 - Floats at the bottom (or top) of the viewport, sticky
 - Disappears when selection is cleared or action completes (unless keepSelection is desired)
@@ -216,6 +220,6 @@ Partial success is the common case for bulk operations. Design for it:
   }}
   dont={{
     description:
-      "Do not report only \"Some items failed\" — show the count and let users inspect details.",
+      'Do not report only "Some items failed" — show the count and let users inspect details.',
   }}
 />

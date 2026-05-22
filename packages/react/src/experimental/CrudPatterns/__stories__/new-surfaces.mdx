@@ -95,6 +95,7 @@ The container decision is independent of the surface. The same rules apply:
 - Inline edit only if the surface supports in-place focus without ambiguity
 
 **Special considerations for novel surfaces:**
+
 - If the surface is spatial (map, graph), side panels often work better than
   centered overlays because the user wants to see how their edit affects the layout.
 - If the surface is temporal (timeline, calendar), confirm that "Create" has a
@@ -162,6 +163,7 @@ Destructive patterns are surface-agnostic. Regardless of how novel the surface i
 - Bulk delete requires visible scope
 
 The only surface-specific decision: **where does the overflow menu live?**
+
 - On item hover/select: popover or context menu
 - On a detail view: header overflow
 - In bulk: the bar's overflow section
@@ -173,7 +175,7 @@ The only surface-specific decision: **where does the overflow menu live?**
   }}
   dont={{
     description:
-      "Do not surface a \"Delete\" button on map markers, graph nodes, or timeline items without deliberate justification and confirmation.",
+      'Do not surface a "Delete" button on map markers, graph nodes, or timeline items without deliberate justification and confirmation.',
   }}
 />
 
