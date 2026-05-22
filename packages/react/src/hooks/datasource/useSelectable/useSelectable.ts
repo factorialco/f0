@@ -401,8 +401,15 @@ export function useSelectable<
               // Single-select: external `checked` wins over stale local state.
               ...(isMultiSelection ? {} : { checked: itemState.checked }),
             })
-          } else if (!isMultiSelection) {
+          } else if (
+            !isMultiSelection &&
+            existingItem.checked !== itemState.checked
+          ) {
             // Single-select: external `checked` wins over stale local state.
+            // Only clone when actually flipping; otherwise the entry stored
+            // in loop 1 already has the right shape and keeping the same
+            // reference avoids spurious re-renders / re-emits in consumers
+            // that compare `selectedState` deeply.
             mergedItems.set(itemStateId, {
               ...existingItem,
               checked: itemState.checked,

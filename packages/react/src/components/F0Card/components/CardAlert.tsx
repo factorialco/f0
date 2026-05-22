@@ -58,11 +58,26 @@ const alertDefaultIcon: Record<CardAlertVariant, IconType> = {
   positive: CheckCircle,
 }
 
+function CloseButton({ onClose }: { onClose: () => void }) {
+  const { actions } = useI18n()
+  return (
+    <F0Button
+      icon={Cross}
+      label={actions.close}
+      hideLabel
+      variant="ghost"
+      size="md"
+      onClick={onClose}
+      type="button"
+    />
+  )
+}
+
 /**
  * The coloured header strip that sits above the card.
  * It has no background of its own — the outer container's bg shows through.
  *
- * Applied classes: pt-2 (8px) pb-1 (4px) px-3 (12px) gap-1 (4px), rounded-t-xl
+ * Applied classes: py-1.5 (6px) px-3 (12px) gap-1 (4px), rounded-t-xl
  */
 function CardAlertHeader({
   variant,
@@ -70,15 +85,15 @@ function CardAlertHeader({
   icon,
   dismissible = false,
   onDismiss,
+  action,
 }: CardAlertProps) {
-  const { actions } = useI18n()
   const alertRole =
     variant === "critical" || variant === "warning" ? "alert" : "status"
 
   return (
     <div
       role={alertRole}
-      className="flex items-center gap-1 rounded-t-xl px-3 pb-1 pt-2"
+      className="flex items-center gap-1 rounded-t-xl px-3 py-1.5"
     >
       <div className="flex h-5 w-5 shrink-0 items-center justify-center">
         <F0Icon
@@ -97,16 +112,18 @@ function CardAlertHeader({
         {title}
       </span>
 
-      {dismissible && (
+      {action ? (
         <F0Button
-          icon={Cross}
-          label={actions.close}
-          hideLabel
-          variant="ghost"
-          size="md"
-          onClick={onDismiss}
-          type="button"
+          label={action.label}
+          variant="outline"
+          size="sm"
+          disabled={action.disabled}
+          {...("href" in action
+            ? { href: action.href }
+            : { onClick: action.onClick, type: "button" as const })}
         />
+      ) : (
+        dismissible && onDismiss && <CloseButton onClose={onDismiss} />
       )}
     </div>
   )
