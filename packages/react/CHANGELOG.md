@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.16.0](https://github.com/factorialco/f0/compare/f0-react-v2.15.1...f0-react-v2.16.0) (2026-05-22)
+
+
+### Features
+
+* **F0Card:** add optional action prop to CardAlert ([#4211](https://github.com/factorialco/f0/issues/4211)) ([aeb6fa9](https://github.com/factorialco/f0/commit/aeb6fa97cae396d3fa5b1d6bdeefd2497cf38b95))
+
 ## [2.15.1](https://github.com/factorialco/f0/compare/f0-react-v2.15.0...f0-react-v2.15.1) (2026-05-22)
 
 
