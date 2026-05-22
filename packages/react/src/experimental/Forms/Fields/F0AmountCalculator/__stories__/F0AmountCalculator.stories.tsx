@@ -9,7 +9,7 @@ import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
 import { F0AmountCalculator } from "../F0AmountCalculator"
 
 const meta = {
-  title: "AmountCalculator",
+  title: "Components/F0AmountCalculator",
   component: F0AmountCalculator,
   tags: ["autodocs", "stable"],
   parameters: {

@@ -134,6 +134,7 @@ export const F0AmountCalculator = forwardRef<
     hint,
     error,
     status,
+    hideLabel = false,
     ...numberInputProps
   },
   ref
@@ -141,17 +142,25 @@ export const F0AmountCalculator = forwardRef<
   const resolvedStatus = resolveStatus(hint, error, status)
   const hasExtraContent = Boolean(extraContent)
 
-  // Shared inner NumberInput — when extraContent is present we take ownership
-  // of label/hint/error so the flex row height stays fixed.
-  // hint="" (after spread) overrides the internal localHint that
-  // NumberInputInternal derives from min/max, preventing it from adding height.
+  // When extraContent is present we own the label/messages row so the flex
+  // row height stays stable. We still pass a type-only status (no message) to
+  // the inner NumberInput so error/warning border styling is preserved.
+  const innerStatusTypeOnly = resolvedStatus
+    ? { type: resolvedStatus.type }
+    : undefined
+
+  // In popover mode or when the caller passes hideLabel the inner input's own
+  // label must be hidden — the outer FieldLabel or the form layout owns it.
+  const shouldHideInnerLabel =
+    hideLabel || popover !== undefined || hasExtraContent
+
   const innerInput = hasExtraContent ? (
     <NumberInput
       ref={ref}
       label={label ?? ""}
       hideLabel
       error={undefined}
-      status={undefined}
+      status={innerStatusTypeOnly as typeof status}
       {...numberInputProps}
       hint=""
     />
@@ -159,9 +168,10 @@ export const F0AmountCalculator = forwardRef<
     <NumberInput
       ref={ref}
       label={label}
-      hint={hint}
-      error={error}
-      status={status}
+      hideLabel={shouldHideInnerLabel}
+      hint={hideLabel ? "" : hint}
+      error={hideLabel ? undefined : error}
+      status={hideLabel ? (innerStatusTypeOnly as typeof status) : status}
       {...numberInputProps}
     />
   )
@@ -191,11 +201,13 @@ export const F0AmountCalculator = forwardRef<
           className={cn("w-auto min-w-72 rounded-2xl p-4")}
         >
           <div className="flex flex-col">
-            {label && <FieldLabel label={label} />}
+            {!hideLabel && label && <FieldLabel label={label} />}
             <CalculatorRow extraContent={extraContent} inputWidth={inputWidth}>
               {innerInput}
             </CalculatorRow>
-            {resolvedStatus && <InputMessages status={resolvedStatus} />}
+            {!hideLabel && resolvedStatus && (
+              <InputMessages status={resolvedStatus} />
+            )}
           </div>
         </PopoverContent>
       </Popover>
@@ -209,11 +221,13 @@ export const F0AmountCalculator = forwardRef<
 
   return (
     <div className="flex flex-col">
-      {label && <FieldLabel label={label} />}
+      {!hideLabel && label && <FieldLabel label={label} />}
       <CalculatorRow extraContent={extraContent} inputWidth={inputWidth}>
         {innerInput}
       </CalculatorRow>
-      {resolvedStatus && <InputMessages status={resolvedStatus} />}
+      {!hideLabel && resolvedStatus && (
+        <InputMessages status={resolvedStatus} />
+      )}
     </div>
   )
 })

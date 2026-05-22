@@ -1,7 +1,7 @@
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 import type { AriaAttributes } from "react"
 
-import { F0AmountCalculator } from "@/components/F0AmountCalculator"
+import { F0AmountCalculator } from "@/experimental/Forms/Fields/F0AmountCalculator"
 import type { InputFieldStatus } from "@/ui/InputField/types"
 
 import type { F0AmountCalculatorField } from "./types"
@@ -43,6 +43,11 @@ export function AmountCalculatorFieldRenderer({
       aria-describedby={ariaDescribedBy}
       aria-invalid={ariaInvalid}
       label={field.label}
+      // F0Form renders the outer label and messages itself — hide them inside
+      // the component so they are not duplicated in the form layout.
+      hideLabel
+      hint=""
+      error={undefined}
       value={value}
       onChange={(nextValue) => formField.onChange(nextValue)}
       onBlur={formField.onBlur}

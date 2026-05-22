@@ -1,4 +1,4 @@
-import { ReactNode } from "react"
+import { AriaAttributes, ReactNode } from "react"
 
 import { IconType } from "@/components/F0Icon"
 import { NumberInputProps } from "@/experimental/Forms/Fields/NumberInput"
@@ -37,15 +37,22 @@ export interface F0AmountCalculatorPopoverConfig {
 /**
  * Shared base props for F0AmountCalculator.
  */
-interface F0AmountCalculatorBaseProps extends Omit<
-  NumberInputProps,
-  "hideLabel"
-> {
+interface F0AmountCalculatorBaseProps extends NumberInputProps {
   /**
    * HTML id forwarded to the underlying input element.
    * Used by F0Form to associate labels and ARIA attributes.
    */
   id?: string
+  /**
+   * ARIA attribute linking this input to an external description element.
+   * Injected by F0Form's FormControl.
+   */
+  "aria-describedby"?: string
+  /**
+   * ARIA attribute indicating whether the input has a validation error.
+   * Injected by F0Form's FormControl.
+   */
+  "aria-invalid"?: AriaAttributes["aria-invalid"]
   /**
    * Optional content rendered to the right of the input (e.g. "of 300,00 €").
    * Controlled entirely by the consuming component.
