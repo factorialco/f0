@@ -32,6 +32,14 @@ export interface F0AmountCalculatorPopoverConfig {
    * Called when the popover's open state changes.
    */
   onOpenChange?: (open: boolean) => void
+  /**
+   * Label rendered on the trigger button.
+   * When omitted the button is icon-only (accessible label from the field's
+   * `label` prop is used as `aria-label` via `hideLabel`).
+   * When provided the text is shown next to the icon regardless of the
+   * field-level `hideLabel` prop.
+   */
+  triggerLabel?: string
 }
 
 /**

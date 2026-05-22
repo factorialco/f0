@@ -219,6 +219,36 @@ export const AsPopoverWithCustomIcon: Story = {
   ],
 }
 
+export const AsPopoverWithTriggerLabel: Story = {
+  name: "Popover — trigger label",
+  args: {
+    label: "Salary",
+    units: "€",
+    inputWidth: "160px",
+    hideLabel: true,
+    popover: { triggerLabel: "Salary" },
+  },
+  decorators: [
+    (Story, { args }) => {
+      const [value, setValue] = useState<number | null>(null)
+      return (
+        <div className="flex items-center gap-2">
+          <Story
+            args={{
+              ...args,
+              value,
+              onChange: setValue as unknown as typeof args.onChange,
+            }}
+          />
+          <span className="text-f1-foreground-secondary text-sm">
+            {value != null ? `${value} €` : "—"}
+          </span>
+        </div>
+      )
+    },
+  ],
+}
+
 export const AsPopoverControlled: Story = {
   name: "Popover — controlled open state",
   args: {

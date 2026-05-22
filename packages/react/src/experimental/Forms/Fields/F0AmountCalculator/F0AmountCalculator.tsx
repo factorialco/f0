@@ -183,6 +183,7 @@ export const F0AmountCalculator = forwardRef<
       align = "start",
       open,
       onOpenChange,
+      triggerLabel,
     } = popover
 
     return (
@@ -191,8 +192,8 @@ export const F0AmountCalculator = forwardRef<
           <F0Button
             variant="outline"
             icon={TriggerIcon}
-            hideLabel
-            label={label ?? "Open amount calculator"}
+            hideLabel={!triggerLabel}
+            label={triggerLabel ?? label ?? "Open amount calculator"}
           />
         </PopoverTrigger>
         <PopoverContent
