@@ -60,17 +60,20 @@ A modal, content-focused surface anchored in the viewport center. The **baseline
 container** for Create, Update, and Confirm.
 
 **Anatomy:**
+
 - Title bar (resource name + operation verb)
 - Body (form fields or content)
 - Footer: one primary action + one cancel
 - Optional: overflow trigger in the title bar for secondary/critical actions
 
 **Use when:**
+
 - The decision is self-contained
 - The user does not need to reference background content
 - The form has up to ~10 simple fields
 
 **Don't use when:**
+
 - The user needs to compare against the collection underneath
 - The form exceeds the viewport height comfortably
 
@@ -93,15 +96,18 @@ A persistent overlay anchored to one edge of the viewport (typically the right),
 leaving the collection visible underneath.
 
 **Anatomy:**
+
 - Title bar with close affordance
 - Scrollable body
 - Sticky footer with primary action + cancel
 
 **Use when:**
+
 - The user benefits from seeing the collection while editing (comparison, sequential editing)
 - The operation is moderate complexity but context-dependent
 
 **Don't use when:**
+
 - The viewport is narrow — below a threshold, fall back to centered overlay or full screen
 - The operation is trivially simple (use inline) or deeply complex (use a page)
 
@@ -127,17 +133,20 @@ sheet.
 A sequence of validated steps with explicit progress and back/next navigation.
 
 **Anatomy:**
+
 - Step indicator (progress bar, numbered steps, or breadcrumbs)
 - Current-step content area
 - Footer: Back / Next / Submit + persistent Cancel
 - Optional: step-level validation gating (Next disabled until valid)
 
 **Use when:**
+
 - The flow branches based on early choices (step 1 determines which step 2 appears)
 - Steps have heavy validation that must pass before proceeding
 - The cognitive load of presenting all fields at once is too high
 
 **Don't use when:**
+
 - There is no branching and no validation gates — a wizard becomes bureaucratic theatre
 - The "steps" are just visual sections of one form — use a scrollable container instead
 
@@ -160,17 +169,20 @@ A full route, deep-linkable and refreshable, hosting the full content of a singl
 item.
 
 **Anatomy:**
+
 - Page header (title + primary/secondary actions)
 - Body (often tabbed or multi-section)
 - Back-affordance to the originating collection
 - URL that can be shared and bookmarked
 
 **Use when:**
+
 - The item has multiple sub-views (activity, files, permissions, comments)
 - The item is shared via URL
 - The item supports more than ~30 fields or deep nested content
 
 **Don't use when:**
+
 - The item is simple enough to understand in an overlay
 - The user flow is "glance and return" rather than "deep dive"
 
@@ -192,17 +204,20 @@ item.
 Editing happens directly in the cell, row, or item — no container opens.
 
 **Anatomy:**
+
 - Field becomes editable on focus (click or keyboard)
 - Commits on blur, Enter, or explicit save
 - Shows per-field error state on validation failure
 - Optional: revert on Escape
 
 **Use when:**
+
 - The edit is a single field with trivial or local validation
 - Users edit in flow across many items in succession
 - The collection's primary purpose is data maintenance
 
 **Don't use when:**
+
 - Fields have cross-validation or dependencies on each other
 - The field requires a complex picker, calendar, or sub-flow
 - Accidental edits would be costly (no undo mechanism)
@@ -227,15 +242,18 @@ view, and exposes an explicit affordance — "Open full view" — that escalates
 the dedicated page.
 
 **Anatomy:**
+
 - Light surface: summary content + key actions + one prominent "Open full" affordance
 - Heavy surface: the dedicated page (reachable from the light surface)
 
 **Use when:**
+
 - Most reads are shallow (users glance and return) but a minority need the full page
 - The content has both a "preview shape" and a "deep shape"
 - You want to offer progressive disclosure without forcing a page load
 
 **Don't use when:**
+
 - The resource is always simple enough for the light surface alone
 - The resource always needs the full page (skip the light surface)
 
@@ -246,7 +264,7 @@ the dedicated page.
   }}
   dont={{
     description:
-      "Do not treat the light surface as a \"preview\" that always requires escalation — if the overlay is sufficient, stop there.",
+      'Do not treat the light surface as a "preview" that always requires escalation — if the overlay is sufficient, stop there.',
   }}
 />
 
@@ -258,17 +276,20 @@ A small, centered overlay whose only job is to make the user **reconsider** an
 action.
 
 **Anatomy:**
+
 - Title: names the resource and scope ("Delete 14 invoices?")
 - Body: one sentence on consequence and reversibility
 - Primary action: confirm, styled critically (destructive color)
 - Secondary action: cancel (the default keyboard target / focus)
 
 **Always use for:**
+
 - Anything irreversible at the system level
 - Anything with cross-user side effects
 - Bulk destructive operations regardless of undo availability
 
 **Never use for:**
+
 - Reversible actions with fast undo (toast-based undo is sufficient)
 - Read operations
 - Non-destructive state changes
@@ -276,7 +297,7 @@ action.
 <DoDonts
   do={{
     description:
-      "Name the target and count in the confirmation title: \"Delete 3 reports?\" not \"Are you sure?\"",
+      'Name the target and count in the confirmation title: "Delete 3 reports?" not "Are you sure?"',
   }}
   dont={{
     description:
