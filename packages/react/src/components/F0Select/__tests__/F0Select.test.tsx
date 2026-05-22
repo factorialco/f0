@@ -988,4 +988,101 @@ describe("Select", () => {
       expect(screen.queryByText("Option 2")).not.toBeInTheDocument()
     })
   })
+
+  describe("onChange emit is debounced against spurious re-fires", () => {
+    // Regression for the F0Select double-emit observed in the
+    // BankAccountTypeSelectorWizardStepF0 flow:
+    //
+    // With an async datasource (`useGraphqlDataSource`-style), clicking a
+    // single-select option fired `onChange` once on the click, and then a
+    // second time once the async `records` finished resolving / the
+    // `selectedState` items were re-cloned by `updateLocalSelectedState`.
+    // Consumers that toggle state on every onChange call ended up flipping
+    // back to a stale value.
+    //
+    // The contract we enforce here: a single user click on a single-select
+    // F0Select with an async datasource must call `onChange` exactly once
+    // with that value, even after async data resolution settles.
+    it("single-select async datasource: a single click emits onChange exactly once", async () => {
+      const handleChange = vi.fn()
+      const user = userEvent.setup()
+
+      let resolveFetch: (() => void) | undefined
+      const source = createDataSourceDefinition<RecordType>({
+        dataAdapter: {
+          paginationType: "infinite-scroll",
+          fetchData: async () => {
+            // Defer the first resolution to simulate an async backend
+            // (GraphQL roundtrip). The click below should NOT wait for this.
+            await new Promise<void>((resolve) => {
+              resolveFetch = resolve
+            })
+            return {
+              type: "infinite-scroll" as const,
+              cursor: "100",
+              perPage: 100,
+              hasMore: false,
+              records: [
+                { id: "1", name: "Alice" },
+                { id: "2", name: "Bob" },
+              ],
+              total: 2,
+            }
+          },
+        },
+      })
+
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          source={source}
+          mapOptions={(item: RecordType) => ({
+            value: item.id as string,
+            label: item.name as string,
+          })}
+          onChange={handleChange}
+          asList
+          showSearchBox
+        />
+      )
+
+      // Wait until the datasource's fetchData effect has run and exposed the
+      // resolver, then resolve so the options render. Calling resolveFetch
+      // synchronously after render races with the useEffect that triggers it.
+      await waitFor(() => {
+        expect(resolveFetch).toBeDefined()
+      })
+      resolveFetch!()
+
+      await waitFor(() => {
+        expect(screen.getAllByText("Alice").length).toBeGreaterThanOrEqual(1)
+      })
+
+      // Pick "Alice".
+      await user.click(screen.getAllByText("Alice")[0])
+
+      await waitFor(() => {
+        expect(handleChange).toHaveBeenCalledWith(
+          "1",
+          expect.objectContaining({ id: "1", name: "Alice" }),
+          expect.objectContaining({ value: "1", label: "Alice" })
+        )
+      })
+
+      // Give async effects (record resolution, deep-compare effects, item
+      // reference population) time to settle, then assert the emit count
+      // stays at exactly one. Note: a `waitFor`-based check is not suitable
+      // here because `waitFor` returns on the first passing assertion and
+      // therefore cannot prove "stays stable over a window" — a regression
+      // that produces a second emit a few ms later would slip through. We
+      // wait an explicit window (100ms is generous w.r.t. the < ~16ms render
+      // cycle that would carry the duplicate emit) and then assert.
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      const callsForOne = handleChange.mock.calls.filter(
+        (call: unknown[]) => call[0] === "1"
+      )
+      expect(callsForOne).toHaveLength(1)
+    })
+  })
 })
