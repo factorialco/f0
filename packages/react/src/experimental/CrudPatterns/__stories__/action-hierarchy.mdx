@@ -1,0 +1,205 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+<Meta title="CRUD patterns/Action hierarchy" />
+
+# Action hierarchy
+
+Actions are organized in a strict hierarchy based on **who or what the action
+operates on** and **how often it is used**. This hierarchy determines placement,
+visibility, and affordance strength.
+
+---
+
+## The three scopes
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Scope</th>
+        <th className="text-left">Subject</th>
+        <th className="text-left">Example</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Collection-level</td>
+        <td>The collection itself or a new item to be added to it</td>
+        <td>Create, Import, Export, Configure columns</td>
+      </tr>
+      <tr>
+        <td>Item-level</td>
+        <td>One specific item in the collection</td>
+        <td>Edit, Duplicate, Archive, Delete</td>
+      </tr>
+      <tr>
+        <td>Bulk</td>
+        <td>A user-defined subset of items</td>
+        <td>Bulk delete, Bulk reassign, Bulk export</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+---
+
+## Collection-level actions
+
+### Primary action
+
+The single, dominant call-to-action mounted on the collection's frame. Almost
+always "Create". There is only one.
+
+- Placed in the most prominent position (typically top-right of the collection header).
+- If multiple creation flows exist (e.g., "Create manually" vs. "Import from file"),
+  collapse into a split button: one default action + a chevron revealing alternatives.
+- Label must be a verb: "Add employee", "Create report" — never just a noun.
+
+### Secondary actions
+
+Supporting operations on the collection: import, export, share, refresh, configure.
+
+- Cap visible (expanded) secondary actions at **two**. Anything beyond goes into overflow.
+- Secondary actions can optionally hide their label and show icon-only when expanded
+  (useful for density).
+- Group related actions with separators in the overflow menu.
+
+### Overflow ("More options")
+
+Rarely-used collection actions and anything that doesn't warrant a permanent slot.
+
+- Always represented by an ellipsis icon trigger.
+- Critical collection actions (e.g., "Delete all") live here, never in primary or secondary.
+
+<DoDonts
+  do={{
+    description:
+      "Keep exactly one primary action per collection. If you have two, one should be secondary.",
+  }}
+  dont={{
+    description:
+      "Do not show more than two expanded secondary actions — the toolbar becomes noisy and the hierarchy flattens.",
+  }}
+/>
+
+---
+
+## Item-level actions
+
+Actions that operate on a single item. They have three internal tiers that
+control how they render depending on the visualization's density:
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Tier</th>
+        <th className="text-left">What goes here</th>
+        <th className="text-left">Rendering</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Primary</td>
+        <td>The most-likely-next action (Edit, Open)</td>
+        <td>
+          Persistent button on low-density surfaces; hover-revealed on dense ones
+        </td>
+      </tr>
+      <tr>
+        <td>Secondary</td>
+        <td>Supporting alternatives (Duplicate, Move)</td>
+        <td>
+          Grouped with primary on spacious surfaces; in dropdown on dense ones
+        </td>
+      </tr>
+      <tr>
+        <td>Overflow / Other</td>
+        <td>Rare and all destructive actions</td>
+        <td>Always inside the ellipsis dropdown menu</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Conditional item actions
+
+Not every item supports every action. Item actions can be defined as a function
+of the item itself — returning different sets (or nothing at all) depending on
+the item's state, permissions, or type.
+
+### Navigation as an action
+
+Clicking an item to navigate to its detail view is itself an action. It can be
+expressed as a URL (enabling right-click, open in new tab) or as a click handler.
+This "implicit primary action" is separate from the explicit item actions menu.
+
+<DoDonts
+  do={{
+    description:
+      "Default to placing destructive item actions in overflow. If the context justifies surfacing them, keep confirmation and destructive styling.",
+  }}
+  dont={{
+    description:
+      "Do not show item actions for items where the action is not applicable — return nothing instead of a disabled action.",
+  }}
+/>
+
+---
+
+## Bulk actions
+
+Actions that operate on a user-defined selection of items. They surface in a
+**floating action bar** that appears when one or more items are selected.
+
+### Bulk action bar anatomy
+
+1. **Counter** — "N selected" reflecting current scope (page or all results).
+2. **Primary bulk actions** — up to two buttons in the bar.
+3. **Secondary bulk actions** — overflow menu in the bar.
+4. **Cancel / clear** — always present, always immediate.
+
+### Selection-scope banner
+
+When the dataset spans multiple pages, a banner clarifies the scope:
+"You selected 25 items on this page. **Select all 1,432 matching items.**"
+
+This prevents the most dangerous bulk UX failure: the user thinks they selected
+everything but only affected one page.
+
+<DoDonts
+  do={{
+    description:
+      "Always show a counter in the bulk bar that reflects the exact scope — page-only or all-results.",
+  }}
+  dont={{
+    description:
+      "Do not allow bulk destructive actions without making the selection scope visible and reviewable.",
+  }}
+/>
+
+---
+
+## Placement decision tree
+
+When placing a new action, ask: **"Who is the subject?"**
+
+```
+The collection itself ──────► Collection-level
+  ├─ Single dominant intent  ► Primary
+  ├─ Supporting alternative  ► Secondary (expanded if frequent)
+  └─ Rare / destructive      ► Overflow
+
+One specific item ──────────► Item-level
+  ├─ Most-likely-next        ► Primary tier
+  ├─ Supporting              ► Secondary tier
+  └─ Rare / destructive      ► Overflow tier
+
+A user-defined subset ──────► Bulk
+  ├─ Common bulk operation   ► Bulk primary (in bar)
+  └─ Less common / dangerous ► Bulk overflow (in bar menu)
+```
+
+If you cannot place an action with this tree, the action is poorly defined.
+Sharpen the verb.

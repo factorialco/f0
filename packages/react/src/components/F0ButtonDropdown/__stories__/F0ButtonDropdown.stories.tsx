@@ -100,7 +100,6 @@ type Story = StoryObj<typeof meta>
 
 // Basic Variants
 export const Default: Story = {
-  tags: ["no-sidebar"],
   args: {
     variant: "default",
     items: [

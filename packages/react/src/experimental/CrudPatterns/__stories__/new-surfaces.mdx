@@ -1,0 +1,248 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+<Meta title="CRUD patterns/New surfaces" />
+
+# Applying CRUD Patterns to New Surfaces
+
+When designing a CRUD experience for a surface type that doesn't exist yet —
+timeline, map, graph, calendar, tree, or anything novel — use this page as a
+framework for making decisions from first principles.
+
+---
+
+## Step 1: Characterize the surface
+
+Answer these questions about the new surface:
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Question</th>
+        <th className="text-left">Why it matters</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>What is the item density? (items per screen)</td>
+        <td>Determines affordance reveal strategy (Principle 10)</td>
+      </tr>
+      <tr>
+        <td>Is the surface touch-first, pointer-first, or hybrid?</td>
+        <td>Hover is not available on touch</td>
+      </tr>
+      <tr>
+        <td>Do items have a natural "open" gesture? (click, tap, expand)</td>
+        <td>Determines how Read is triggered</td>
+      </tr>
+      <tr>
+        <td>Is there a spatial metaphor? (position = meaning)</td>
+        <td>Affects where Create anchors and how bulk selection works</td>
+      </tr>
+      <tr>
+        <td>Can items overlap or occlude each other?</td>
+        <td>May prevent inline actions entirely</td>
+      </tr>
+      <tr>
+        <td>Is the surface paginated or infinite?</td>
+        <td>Affects bulk selection scope patterns</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+---
+
+## Step 2: Map the action hierarchy
+
+Regardless of surface type, the hierarchy stays the same:
+
+1. **Collection-level primary** — identify the single dominant intent. Place it in
+   the surface's "frame" (toolbar, header, floating button, sidebar — wherever the
+   surface's chrome lives).
+
+2. **Item-level actions** — decide the reveal strategy based on density:
+   - High density (many items visible): hover or long-press to reveal
+   - Low density (few items, large): persistent affordances on/near the item
+   - Occluding surfaces (map markers, overlapping nodes): actions in a popover on select
+
+3. **Bulk actions** — decide how selection works:
+   - If items are discrete and countable: checkbox selection + bar
+   - If items are spatial (regions, ranges): lasso/range selection + bar
+   - If selection is hard to visualize: consider whether bulk is appropriate at all
+
+<DoDonts
+  do={{
+    description:
+      "Always provide a collection-level frame for the primary action, even on unconventional surfaces (a floating action button on a map, a toolbar on a graph).",
+  }}
+  dont={{
+    description:
+      "Do not skip the action hierarchy just because the surface is novel — the principles still apply.",
+  }}
+/>
+
+---
+
+## Step 3: Choose containers
+
+The container decision is independent of the surface. The same rules apply:
+
+- Centered overlay for self-contained operations
+- Side panel when the surface context matters during editing
+- Dedicated page for deep resources
+- Inline edit only if the surface supports in-place focus without ambiguity
+
+**Special considerations for novel surfaces:**
+- If the surface is spatial (map, graph), side panels often work better than
+  centered overlays because the user wants to see how their edit affects the layout.
+- If the surface is temporal (timeline, calendar), confirm that "Create" has a
+  clear temporal anchor (which date? which slot?) — scoped creation is almost
+  always appropriate here.
+
+<DoDonts
+  do={{
+    description:
+      "On spatial surfaces, prefer side panels over centered overlays so users see how edits affect the layout in real time.",
+  }}
+  dont={{
+    description:
+      "Do not invent a new container type for every novel surface. The existing container vocabulary covers nearly all cases.",
+  }}
+/>
+
+---
+
+## Step 4: Define the Read trigger
+
+Every surface needs a way to open a read view. Decide:
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Surface characteristic</th>
+        <th className="text-left">Read trigger</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Items are clickable regions (cards, nodes, markers)</td>
+        <td>Click/tap the item</td>
+      </tr>
+      <tr>
+        <td>Items are rows/lines (table, list, timeline entries)</td>
+        <td>Click the row</td>
+      </tr>
+      <tr>
+        <td>Items overlap or are small (map pins, dense graph nodes)</td>
+        <td>Click to select → popover with "Open"</td>
+      </tr>
+      <tr>
+        <td>Items are editable in-place (cells, inline fields)</td>
+        <td>Explicit "View" action (not click — that's edit)</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+The key conflict to avoid: **click-to-read vs. click-to-edit**. If the surface is
+editable, these two gestures must be disambiguated. The safest solution is an
+explicit "View details" item action.
+
+---
+
+## Step 5: Handle destructive actions
+
+Destructive patterns are surface-agnostic. Regardless of how novel the surface is:
+
+- Delete lives in overflow (always)
+- Confirmation names the target
+- Bulk delete requires visible scope
+
+The only surface-specific decision: **where does the overflow menu live?**
+- On item hover/select: popover or context menu
+- On a detail view: header overflow
+- In bulk: the bar's overflow section
+
+<DoDonts
+  do={{
+    description:
+      "Default to overflow for destructive actions on novel surfaces. If context justifies surfacing them, keep confirmation and destructive styling.",
+  }}
+  dont={{
+    description:
+      "Do not surface a \"Delete\" button on map markers, graph nodes, or timeline items without deliberate justification and confirmation.",
+  }}
+/>
+
+---
+
+## Step 6: Validate against the checklist
+
+Once you have made decisions for all four CRUD operations on the new surface, run
+through the [Checklist](/?path=/docs/experimental-crud-patterns-checklist--documentation)
+to verify nothing was missed.
+
+---
+
+## Common novel surfaces — quick guidance
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Surface</th>
+        <th className="text-left">Create anchor</th>
+        <th className="text-left">Read trigger</th>
+        <th className="text-left">Item actions</th>
+        <th className="text-left">Bulk mechanism</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Map</td>
+        <td>Floating button or toolbar</td>
+        <td>Click marker → popover</td>
+        <td>Popover actions</td>
+        <td>Lasso select + bar</td>
+      </tr>
+      <tr>
+        <td>Graph/network</td>
+        <td>Toolbar or right-click canvas</td>
+        <td>Click node</td>
+        <td>Node popover or context menu</td>
+        <td>Multi-select (shift+click or lasso) + bar</td>
+      </tr>
+      <tr>
+        <td>Timeline</td>
+        <td>Click empty slot (scoped to time)</td>
+        <td>Click entry</td>
+        <td>Entry popover</td>
+        <td>Range select + bar</td>
+      </tr>
+      <tr>
+        <td>Calendar</td>
+        <td>Click empty cell (scoped to date)</td>
+        <td>Click event</td>
+        <td>Event popover</td>
+        <td>Multi-select + bar</td>
+      </tr>
+      <tr>
+        <td>Tree/hierarchy</td>
+        <td>Toolbar or node context menu</td>
+        <td>Click node to expand/open</td>
+        <td>Node inline or context menu</td>
+        <td>Checkbox per node + bar</td>
+      </tr>
+      <tr>
+        <td>Kanban (reference)</td>
+        <td>Lane "Add" button (scoped to state)</td>
+        <td>Click card</td>
+        <td>Card read overlay</td>
+        <td>Checkbox select + bar</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>

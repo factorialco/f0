@@ -131,9 +131,9 @@ export type FormDefinitionItem = FieldItem | RowDefinition | SectionDefinition
 
 /**
  * When to trigger and display validation errors (does not apply with autosubmit)
- * - "on-blur": Errors appear when the user leaves a field (default)
+ * - "on-blur": Errors appear when the user leaves a field
  * - "on-change": Errors appear as the user types (real-time validation)
- * - "on-submit": Errors only appear after attempting to submit the form
+ * - "on-submit": Errors only appear after attempting to submit the form (default)
  */
 export type F0FormErrorTriggerMode = "on-blur" | "on-change" | "on-submit"
 
@@ -144,12 +144,10 @@ interface F0FormSubmitConfigBase {
   /** Custom label for the submit button */
   label?: string
   /**
-   * Custom icon for the submit button
-   * - undefined: uses default Save icon
-   * - null: no icon shown
-   * - IconType: custom icon
+   * Custom icon for the submit button.
+   * No icon is shown by default.
    */
-  icon?: IconType | null
+  icon?: IconType
   /** Label shown in the action bar while submitting (defaults to i18n "forms.actionBar.saving") */
   savingMessage?: string
   /**
@@ -449,12 +447,10 @@ export interface F0PerSectionSubmitConfig {
   /** Custom label for the submit button (per section) */
   label?: string
   /**
-   * Custom icon for the submit button
-   * - undefined: uses default Save icon
-   * - null: no icon shown
-   * - IconType: custom icon
+   * Custom icon for the submit button.
+   * No icon is shown by default.
    */
-  icon?: IconType | null
+  icon?: IconType
   /**
    * When true, the submit button is only visible once the section has unsaved changes.
    * @default false
