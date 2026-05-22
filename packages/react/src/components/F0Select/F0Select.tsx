@@ -473,6 +473,16 @@ const F0SelectComponent = forwardRef(function Select<
   const hasUserInteracted = useRef(false)
   const isFirstRender = useRef(true)
 
+  // Track the last value emitted via onChange to avoid spurious re-emits when
+  // the effect deps change but the selected value did not. Without this guard,
+  // async datasources (records resolving after the click), or downstream
+  // clones of `selectedState` items, can re-fire the emit effect with the
+  // same logical selection.
+  const lastEmittedSingleRef = useRef<{ value: string | undefined } | null>(
+    null
+  )
+  const lastEmittedMultiRef = useRef<string | null>(null)
+
   const onItemCheckChange = useCallback(
     (value: string, checked: boolean) => {
       // Prevent deselection in single select mode when not clearable
@@ -621,6 +631,14 @@ const F0SelectComponent = forwardRef(function Select<
       // Use Set to ensure unique values and prevent duplicates
       setLocalValue(Array.from(new Set(values.map(String))))
 
+      // Guard: only emit when the set of selected values actually changes.
+      // Sort + join to compare order-independently with a stable key.
+      const valuesKey = values.map(String).sort().join("\u0000")
+      if (lastEmittedMultiRef.current === valuesKey) {
+        return
+      }
+      lastEmittedMultiRef.current = valuesKey
+
       if (!hasDeferredApply) {
         onChange?.(values, originalItems, options)
       }
@@ -644,6 +662,19 @@ const F0SelectComponent = forwardRef(function Select<
 
       // Sync localValue with actual selection state (as string for internal comparison)
       setLocalValue(value !== undefined ? [String(value)] : [])
+
+      // Guard: only emit when the selected value identity actually changes.
+      // Without this, async datasources (record resolving after a click) or
+      // unrelated `source`/`selectedState` content changes can re-fire the
+      // effect with the same selection and produce duplicate onChange calls.
+      const valueKey = value === undefined ? undefined : String(value)
+      if (
+        lastEmittedSingleRef.current !== null &&
+        lastEmittedSingleRef.current.value === valueKey
+      ) {
+        return
+      }
+      lastEmittedSingleRef.current = { value: valueKey }
 
       if (!hasDeferredApply) {
         onChange?.(value as T, originalItem, option)
