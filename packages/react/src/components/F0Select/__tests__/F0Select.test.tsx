@@ -1046,8 +1046,13 @@ describe("Select", () => {
         />
       )
 
-      // Resolve the initial fetch so the options render.
-      resolveFetch?.()
+      // Wait until the datasource's fetchData effect has run and exposed the
+      // resolver, then resolve so the options render. Calling resolveFetch
+      // synchronously after render races with the useEffect that triggers it.
+      await waitFor(() => {
+        expect(resolveFetch).toBeDefined()
+      })
+      resolveFetch!()
 
       await waitFor(() => {
         expect(screen.getAllByText("Alice").length).toBeGreaterThanOrEqual(1)
@@ -1065,9 +1070,14 @@ describe("Select", () => {
       })
 
       // Give async effects (record resolution, deep-compare effects, item
-      // reference population) time to settle. The selection has not changed,
-      // so onChange must not fire again.
-      await new Promise((resolve) => setTimeout(resolve, 50))
+      // reference population) time to settle, then assert the emit count
+      // stays at exactly one. Note: a `waitFor`-based check is not suitable
+      // here because `waitFor` returns on the first passing assertion and
+      // therefore cannot prove "stays stable over a window" — a regression
+      // that produces a second emit a few ms later would slip through. We
+      // wait an explicit window (100ms is generous w.r.t. the < ~16ms render
+      // cycle that would carry the duplicate emit) and then assert.
+      await new Promise((resolve) => setTimeout(resolve, 100))
 
       const callsForOne = handleChange.mock.calls.filter(
         (call: unknown[]) => call[0] === "1"

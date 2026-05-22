@@ -637,9 +637,11 @@ const F0SelectComponent = forwardRef(function Select<
       if (lastEmittedMultiRef.current === valuesKey) {
         return
       }
-      lastEmittedMultiRef.current = valuesKey
 
       if (!hasDeferredApply) {
+        // Only commit to the ref what we actually emit, so a later transition
+        // from deferred-apply back to immediate-emit isn't suppressed.
+        lastEmittedMultiRef.current = valuesKey
         onChange?.(values, originalItems, options)
       }
     } else {
@@ -674,9 +676,11 @@ const F0SelectComponent = forwardRef(function Select<
       ) {
         return
       }
-      lastEmittedSingleRef.current = { value: valueKey }
 
       if (!hasDeferredApply) {
+        // Only commit to the ref what we actually emit, so a later transition
+        // from deferred-apply back to immediate-emit isn't suppressed.
+        lastEmittedSingleRef.current = { value: valueKey }
         onChange?.(value as T, originalItem, option)
       }
     }
