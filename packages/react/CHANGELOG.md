@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.17.0](https://github.com/factorialco/f0/compare/f0-react-v2.16.3...f0-react-v2.17.0) (2026-05-22)
+
+
+### Features
+
+* add min/max constraints to editable table date cell ([#4205](https://github.com/factorialco/f0/issues/4205)) ([3271274](https://github.com/factorialco/f0/commit/32712746f54f062cb363532bd8e176ed792af49e))
+
 ## [2.16.3](https://github.com/factorialco/f0/compare/f0-react-v2.16.2...f0-react-v2.16.3) (2026-05-22)
 
 
