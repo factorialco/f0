@@ -37,7 +37,7 @@ export interface F0AmountCalculatorPopoverConfig {
 /**
  * Shared base props for F0AmountCalculator.
  */
-interface F0AmountCalculatorBaseProps extends NumberInputProps {
+export interface F0AmountCalculatorBaseProps extends NumberInputProps {
   /**
    * HTML id forwarded to the underlying input element.
    * Used by F0Form to associate labels and ARIA attributes.
