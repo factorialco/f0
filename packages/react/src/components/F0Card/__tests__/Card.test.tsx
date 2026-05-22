@@ -82,6 +82,29 @@ describe("F0Card Component", () => {
     expect(handleSelect).toHaveBeenCalledWith(true)
   })
 
+  it("does not call onClick when the card selection checkbox is clicked", async () => {
+    const user = userEvent.setup()
+    const handleClick = vi.fn()
+    const handleSelect = vi.fn()
+
+    render(
+      <F0Card
+        title="Selectable Card"
+        selectable={true}
+        onClick={handleClick}
+        onSelect={handleSelect}
+      />
+    )
+
+    const card = screen.getByTestId("card")
+    await user.hover(card)
+
+    await user.click(screen.getByRole("checkbox"))
+
+    expect(handleSelect).toHaveBeenCalledWith(true)
+    expect(handleClick).not.toHaveBeenCalled()
+  })
+
   it("handles dropdown actions", async () => {
     const user = userEvent.setup()
     const handleOption = vi.fn()
@@ -284,6 +307,108 @@ describe("F0Card Component", () => {
 
       await user.click(screen.getByRole("button", { name: /close/i }))
       expect(onDismiss).toHaveBeenCalledTimes(1)
+    })
+
+    it("renders action button when action is provided", () => {
+      const onClick = vi.fn()
+      render(
+        <F0Card
+          title="Card"
+          alert={{
+            variant: "info",
+            title: "Info alert",
+            action: { label: "Retry", onClick },
+          }}
+        />
+      )
+
+      expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument()
+    })
+
+    it("calls action.onClick when the action button is clicked", async () => {
+      const user = userEvent.setup()
+      const onClick = vi.fn()
+
+      render(
+        <F0Card
+          title="Card"
+          alert={{
+            variant: "warning",
+            title: "Warning alert",
+            action: { label: "Fix it", onClick },
+          }}
+        />
+      )
+
+      await user.click(screen.getByRole("button", { name: "Fix it" }))
+      expect(onClick).toHaveBeenCalledTimes(1)
+    })
+
+    it("does not render dismiss button when action is provided", () => {
+      const onClick = vi.fn()
+      render(
+        <F0Card
+          title="Card"
+          alert={{
+            variant: "info",
+            title: "Info alert",
+            action: { label: "Act", onClick },
+          }}
+        />
+      )
+
+      expect(
+        screen.queryByRole("button", { name: /close/i })
+      ).not.toBeInTheDocument()
+    })
+
+    it("renders a disabled action button when action.disabled is true", () => {
+      render(
+        <F0Card
+          title="Card"
+          alert={{
+            variant: "info",
+            title: "Info alert",
+            action: { label: "Disabled", onClick: vi.fn(), disabled: true },
+          }}
+        />
+      )
+
+      expect(screen.getByRole("button", { name: "Disabled" })).toBeDisabled()
+    })
+
+    it("renders action as a link when action.href is provided", () => {
+      render(
+        <F0Card
+          title="Card"
+          alert={{
+            variant: "info",
+            title: "Info alert",
+            action: { label: "View", href: "/policies" },
+          }}
+        />
+      )
+
+      const link = screen.getByRole("link", { name: "View" })
+      expect(link).toBeInTheDocument()
+      expect(link).toHaveAttribute("href", "/policies")
+    })
+
+    it("does not render a button when action.href is provided", () => {
+      render(
+        <F0Card
+          title="Card"
+          alert={{
+            variant: "info",
+            title: "Info alert",
+            action: { label: "View", href: "/policies" },
+          }}
+        />
+      )
+
+      expect(
+        screen.queryByRole("button", { name: "View" })
+      ).not.toBeInTheDocument()
     })
   })
 })

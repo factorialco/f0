@@ -668,6 +668,23 @@ const F0SelectComponent = forwardRef(function Select<
     100
   )
 
+  // Cancel any pending debounced state update on unmount. usehooks-ts'
+  // `useDebounceCallback` has a known bug where its internal unmount cleanup
+  // cancels a different lodash.debounce instance than the one invoked by
+  // callers, so pending trailing-edge timers can fire after the test's jsdom
+  // window is torn down (causing `ReferenceError: window is not defined`
+  // inside react-dom). We track the latest wrapper via a ref and only cancel
+  // on true unmount so we don't drop in-flight timers between renders.
+  const debouncedHandleChangeOpenLocalRef = useRef(
+    debouncedHandleChangeOpenLocal
+  )
+  debouncedHandleChangeOpenLocalRef.current = debouncedHandleChangeOpenLocal
+  useEffect(() => {
+    return () => {
+      debouncedHandleChangeOpenLocalRef.current.cancel()
+    }
+  }, [])
+
   const restoreCommittedSelection = useCallback(() => {
     const committedSelection = committedSelectionRef.current
 

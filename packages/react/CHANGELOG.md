@@ -1,5 +1,47 @@
 # Changelog
 
+## [2.16.0](https://github.com/factorialco/f0/compare/f0-react-v2.15.1...f0-react-v2.16.0) (2026-05-22)
+
+
+### Features
+
+* **F0Card:** add optional action prop to CardAlert ([#4211](https://github.com/factorialco/f0/issues/4211)) ([aeb6fa9](https://github.com/factorialco/f0/commit/aeb6fa97cae396d3fa5b1d6bdeefd2497cf38b95))
+
+## [2.15.1](https://github.com/factorialco/f0/compare/f0-react-v2.15.0...f0-react-v2.15.1) (2026-05-22)
+
+
+### Bug Fixes
+
+* **react:** fix formatting in CrudPatterns MDX documentation files ([#4219](https://github.com/factorialco/f0/issues/4219)) ([1786065](https://github.com/factorialco/f0/commit/17860659444c52656a9bf2ba191c863a343b9fcb))
+
+## [2.15.0](https://github.com/factorialco/f0/compare/f0-react-v2.14.5...f0-react-v2.15.0) (2026-05-22)
+
+
+### Features
+
+* **F0Graph:** add F0Graph pattern (runtime) ([#4196](https://github.com/factorialco/f0/issues/4196)) ([779d155](https://github.com/factorialco/f0/commit/779d155003da0ddc6730a832b780b076c4d2cda5))
+
+## [2.14.5](https://github.com/factorialco/f0/compare/f0-react-v2.14.4...f0-react-v2.14.5) (2026-05-21)
+
+
+### Bug Fixes
+
+* Update icons in MultitaskHeader for consistency and design ([#4140](https://github.com/factorialco/f0/issues/4140)) ([0be4c84](https://github.com/factorialco/f0/commit/0be4c84db2956749b748972a962418954c69a7df))
+
+## [2.14.4](https://github.com/factorialco/f0/compare/f0-react-v2.14.3...f0-react-v2.14.4) (2026-05-21)
+
+
+### Bug Fixes
+
+* reset to default button behavior in data collection ([#4213](https://github.com/factorialco/f0/issues/4213)) ([8783bd2](https://github.com/factorialco/f0/commit/8783bd28103ed6be06d2c1698d60218a28da3c66))
+
+## [2.14.3](https://github.com/factorialco/f0/compare/f0-react-v2.14.2...f0-react-v2.14.3) (2026-05-21)
+
+
+### Bug Fixes
+
+* **Metadata:** add key to Fragment wrapper in metadata items map ([#4209](https://github.com/factorialco/f0/issues/4209)) ([12c1800](https://github.com/factorialco/f0/commit/12c1800236f9dea11989ffdec71a70864ad96321))
+
 ## [2.14.2](https://github.com/factorialco/f0/compare/f0-react-v2.14.1...f0-react-v2.14.2) (2026-05-21)
 
 
