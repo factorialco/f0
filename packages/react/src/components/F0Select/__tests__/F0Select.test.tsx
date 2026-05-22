@@ -4,7 +4,6 @@ import "@testing-library/jest-dom/vitest"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { createDataSourceDefinition, type RecordType } from "@/hooks/datasource"
-
 import { zeroRender as render } from "@/testing/test-utils"
 
 import type { F0SelectItemProps } from "../types"
@@ -561,11 +560,12 @@ describe("Select", () => {
     expect(screen.getByRole("listbox")).toBeInTheDocument()
     expect(handleChange).not.toHaveBeenCalled()
 
+    await user.click(screen.getByText("Option 3"))
     await user.click(screen.getByRole("button", { name: "Apply selection" }))
 
     expect(handleChange).toHaveBeenCalledWith(
-      ["option1", "option2"],
-      [
+      expect.arrayContaining(["option1", "option2", "option3"]),
+      expect.arrayContaining([
         {
           id: "option1",
           name: "Option 1",
@@ -576,8 +576,13 @@ describe("Select", () => {
           name: "Option 2",
           description: "Description 2",
         },
-      ],
-      [
+        {
+          id: "option3",
+          name: "Option 3",
+          description: "Description 3",
+        },
+      ]),
+      expect.arrayContaining([
         expect.objectContaining({
           label: "Option 1",
           value: "option1",
@@ -587,7 +592,11 @@ describe("Select", () => {
           label: "Option 2",
           value: "option2",
         }),
-      ]
+        expect.objectContaining({
+          label: "Option 3",
+          value: "option3",
+        }),
+      ])
     )
   })
 
