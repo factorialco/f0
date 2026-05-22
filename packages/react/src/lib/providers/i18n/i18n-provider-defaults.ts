@@ -385,6 +385,11 @@ export const defaultTranslations = {
       retry: "Retry",
       dataExplanation: "Where does this data come from?",
     },
+    dashboardDatasetFailure: {
+      title: "This dashboard is no longer valid",
+      description:
+        "We're sorry. Please contact support or ask One to generate a dashboard from scratch.",
+    },
     pong: {
       title: "Pong",
       youWin: "You win!",

@@ -24,6 +24,9 @@ import type {
 
 import { F0AnalyticsDashboard } from "@/patterns/F0AnalyticsDashboard/F0AnalyticsDashboard"
 
+import { OneEmptyState } from "@/components/OneEmptyState"
+import { useI18n } from "@/lib/providers/i18n"
+
 import type {
   ChatDashboardChartConfig,
   ChatDashboardChartItem,
@@ -35,6 +38,8 @@ import type {
 } from "./types"
 
 import { useDashboardCompute, type ItemResult } from "./useDashboardCompute"
+import type { DashboardRepairFailure } from "./useDashboardCompute"
+import { readItemDatasetId } from "./useDashboardCompute"
 
 // ---------------------------------------------------------------------------
 // Minimum item height per type
@@ -209,6 +214,15 @@ export interface ChatDashboardProps {
   onLayoutChange?: (layout: DashboardItemLayout[]) => void
   onExportReady?: (exportFn: (() => Promise<void>) | undefined) => void
   exportFilename?: string
+  /**
+   * Invoked once when the agent's `/compute` response carries a self-healed
+   * recipe. Wrappers should swap `config.fetchSpecs` and trigger persistence
+   * via the canvas save callback so future opens skip the repair round-trip.
+   */
+  onRepairedSpecs?: (
+    repairedSpecs: ChatDashboardConfig["fetchSpecs"],
+    repairFailures: DashboardRepairFailure[] | undefined
+  ) => void
 }
 
 /**
@@ -228,16 +242,22 @@ export function ChatDashboard({
   onTransformChart,
   onExportReady,
   exportFilename,
+  onRepairedSpecs,
 }: ChatDashboardProps) {
-  const { fetchItem, getFilterOptions } = useDashboardCompute(
-    config,
-    apiConfig,
-    refreshKey
-  )
+  const { fetchItem, getFilterOptions, getDatasetFailures } =
+    useDashboardCompute(config, apiConfig, refreshKey, onRepairedSpecs)
+  const translations = useI18n()
 
   // Filter options from the first compute response
   const [filterOptions, setFilterOptions] = useState<
     Record<string, string[]> | undefined
+  >()
+
+  // Dataset-level failures surfaced by the agent's self-heal pass. When set,
+  // affected items are stripped from the grid (the banner above carries the
+  // error context so the per-item card would be redundant noise).
+  const [datasetFailures, setDatasetFailures] = useState<
+    Record<string, { reason: string; message: string }> | undefined
   >()
 
   // Update filter options when they become available
@@ -246,6 +266,7 @@ export function ChatDashboard({
   // Reset polling flag when refreshKey changes so filter options are re-polled
   useEffect(() => {
     filterOptionsPolledRef.current = false
+    setDatasetFailures(undefined)
   }, [refreshKey])
 
   useEffect(() => {
@@ -386,43 +407,96 @@ export function ChatDashboard({
               setFilterOptions(opts)
               filterOptionsPolledRef.current = true
             }
+            // Refresh dataset failures map regardless of polling state — the
+            // server can flip a previously failing dataset to healthy after a
+            // refetch and we want the banner / hidden items to update.
+            //
+            // NOTE: This is the only path that publishes the failures map to
+            // state. We piggy-back on `fetchItem` resolutions instead of
+            // polling because polling cannot distinguish "no response yet"
+            // from "response with zero failures" (both return `undefined`).
+            // If a future refactor introduces lazy / virtualized item mounts
+            // where some items never call `fetchData`, surface failures
+            // through a dedicated subscription on `useDashboardCompute`
+            // instead — otherwise the banner will silently stop appearing.
+            setDatasetFailures(getDatasetFailures())
             return result
           }
         )
       }
     },
-    [fetchItem, getFilterOptions, navigationFilterKeys]
+    [fetchItem, getFilterOptions, getDatasetFailures, navigationFilterKeys]
   )
 
   const items: DashboardItem<FiltersDefinition>[] = useMemo(
     () =>
-      config.items.map((item) => {
-        switch (item.type) {
-          case "chart":
-            return mapChartItem(item, makeFetchData(item.id))
-          case "metric":
-            return mapMetricItem(item, makeFetchData(item.id))
-          case "collection":
-            return mapCollectionItem(item, makeFetchData(item.id))
-        }
-      }),
-    [config.items, makeFetchData]
+      config.items
+        .filter((item) => {
+          if (!datasetFailures) return true
+          const datasetId = readItemDatasetId(item)
+          // Items without a resolvable datasetId (malformed / legacy) are
+          // kept so they can render their own per-item state rather than
+          // disappearing silently from the grid.
+          if (!datasetId) return true
+          return !(datasetId in datasetFailures)
+        })
+        .map((item) => {
+          switch (item.type) {
+            case "chart":
+              return mapChartItem(item, makeFetchData(item.id))
+            case "metric":
+              return mapMetricItem(item, makeFetchData(item.id))
+            case "collection":
+              return mapCollectionItem(item, makeFetchData(item.id))
+          }
+        }),
+    [config.items, datasetFailures, makeFetchData]
+  )
+
+  // Stable list of failed datasets for the banner above the grid. Each
+  // entry renders its own `OneEmptyState` so the user can see exactly which
+  // section is missing rather than one combined message.
+  const failedDatasetEntries = useMemo(
+    () =>
+      datasetFailures
+        ? Object.entries(datasetFailures).map(([datasetId, failure]) => ({
+            datasetId,
+            ...failure,
+          }))
+        : [],
+    [datasetFailures]
   )
 
   return (
-    <F0AnalyticsDashboard
-      key={refreshKey}
-      filters={filterDefinitions}
-      filtersLoading={filtersLoading}
-      navigationFilters={dashboardNavigationFilters}
-      items={items}
-      editMode={editMode}
-      onLayoutChange={onLayoutChange}
-      onTransformChart={onTransformChart}
-      onExportReady={onExportReady}
-      exportFilename={exportFilename}
-      resetKey={resetKey}
-    />
+    <div className="flex flex-col gap-4">
+      {failedDatasetEntries.length > 0 && (
+        <div className="flex flex-col gap-2">
+          {failedDatasetEntries.map((entry) => (
+            <OneEmptyState
+              key={entry.datasetId}
+              variant="critical"
+              title={translations.t("ai.dashboardDatasetFailure.title")}
+              description={translations.t(
+                "ai.dashboardDatasetFailure.description"
+              )}
+            />
+          ))}
+        </div>
+      )}
+      <F0AnalyticsDashboard
+        key={refreshKey}
+        filters={filterDefinitions}
+        filtersLoading={filtersLoading}
+        navigationFilters={dashboardNavigationFilters}
+        items={items}
+        editMode={editMode}
+        onLayoutChange={onLayoutChange}
+        onTransformChart={onTransformChart}
+        onExportReady={onExportReady}
+        exportFilename={exportFilename}
+        resetKey={resetKey}
+      />
+    </div>
   )
 }
 
@@ -434,7 +508,6 @@ ChatDashboard.displayName = "ChatDashboard"
 
 import { F0ActionBar } from "@/components/F0ActionBar"
 import { Save } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
 
 import type { DashboardCanvasContent } from "../../../types"
 
@@ -533,6 +606,76 @@ export function DashboardContent({
   // reference, which correctly bumps this key and triggers a real refetch.
   const dataRefreshKey = useMemo(() => Date.now(), [content.config.fetchSpecs])
 
+  // Self-heal persistence: when /compute returns a repaired recipe, swap the
+  // canvas config and (for already-saved dashboards) call the external save
+  // callback so the repaired recipe is persisted. Guarded by a ref so a single
+  // logical repair never triggers a save more than once even if multiple
+  // in-flight fetchItem calls share the same response.
+  const repairAppliedRef = useRef<string | null>(null)
+  // Reset the dedupe gate when the underlying recipe changes (new agent turn,
+  // user reopen, etc.) so a subsequent compute can apply a new repair.
+  useEffect(() => {
+    repairAppliedRef.current = null
+  }, [content.config.fetchSpecs, content.savedDashboardId])
+
+  const handleRepairedSpecs = useCallback(
+    (
+      repairedSpecs: ChatDashboardConfig["fetchSpecs"],
+      _repairFailures: DashboardRepairFailure[] | undefined
+    ) => {
+      const dedupeKey = `${content.savedDashboardId ?? "unsaved"}:${content.toolCallId ?? ""}`
+      if (repairAppliedRef.current === dedupeKey) return
+      repairAppliedRef.current = dedupeKey
+
+      const updatedConfig: ChatDashboardConfig = {
+        ...content.config,
+        fetchSpecs: repairedSpecs,
+      }
+
+      // Swap the canvas config so the next compute uses the healed recipe.
+      // savedDashboardUnsaved stays false because this is a server-side fix,
+      // not a user edit — there is nothing for the user to "save" manually.
+      openCanvas({ ...content, config: updatedConfig })
+
+      // Persist to chat history (best-effort) so re-opening from history also
+      // sees the healed recipe.
+      void saveConfigToHistory({
+        ...updatedConfig,
+        ...(content.savedDashboardId
+          ? {
+              savedDashboardId: content.savedDashboardId,
+              savedDashboardCategory: content.savedDashboardCategory,
+              savedDashboardDescription: content.savedDashboardDescription,
+              savedDashboardUnsaved: false,
+            }
+          : {}),
+      })
+
+      // For saved dashboards, also persist to the external store via the
+      // canvas action so future opens skip the repair round-trip entirely.
+      if (
+        content.savedDashboardId &&
+        content.savedDashboardCategory &&
+        canvasActions?.dashboard?.save
+      ) {
+        void canvasActions.dashboard
+          .save(
+            content.savedDashboardId,
+            content.savedDashboardCategory,
+            updatedConfig
+          )
+          .catch((err) => {
+            // eslint-disable-next-line no-console
+            console.warn(
+              "[Dashboard] Failed to persist self-healed recipe externally",
+              err
+            )
+          })
+      }
+    },
+    [canvasActions, content, openCanvas, saveConfigToHistory]
+  )
+
   return (
     <div className="flex h-full flex-col">
       {/*
@@ -565,6 +708,7 @@ export function DashboardContent({
           }}
           onExportReady={registerExport}
           exportFilename={content.title}
+          onRepairedSpecs={handleRepairedSpecs}
         />
       </div>
       {/* State A: New dashboard with canvasActions — always-visible Save bar */}
@@ -703,7 +847,10 @@ function mapChartItem(
     type: "chart",
     chart: toDashboardChartConfig(item.chart),
     fetchData: (filters: FiltersState<FiltersDefinition>) =>
-      fetchData(filters).then((r) => r.chart ?? { categories: [], series: [] }),
+      fetchData(filters).then((r) => {
+        if (r.error) throw new Error(r.error)
+        return r.chart ?? { categories: [], series: [] }
+      }),
   }
 }
 
@@ -737,7 +884,10 @@ function mapMetricItem(
     format: item.format,
     decimals: item.decimals,
     fetchData: (filters: FiltersState<FiltersDefinition>) =>
-      fetchData(filters).then((r) => r.metric ?? { value: 0 }),
+      fetchData(filters).then((r) => {
+        if (r.error) throw new Error(r.error)
+        return r.metric ?? { value: 0 }
+      }),
   }
 }
 
@@ -804,6 +954,7 @@ function mapCollectionItem(
       // Eagerly fetch data, then paginate client-side from the result
       let cachedRows: RecordType[] | null = null
       const dataPromise = fetchData(filters).then((r) => {
+        if (r.error) throw new Error(r.error)
         cachedRows = (r.collection?.rows ?? []) as RecordType[]
         return cachedRows
       })
