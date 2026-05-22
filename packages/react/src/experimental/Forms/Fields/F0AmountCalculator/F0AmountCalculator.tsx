@@ -89,7 +89,7 @@ function CalculatorRow({
  *
  * - **Inline** (`popover` omitted): renders a `NumberInput` with an optional
  *   `extraContent` slot to the right (e.g. "of 300,00 €").
- * - **Popover** (`popover={{}}`): renders a ghost icon-button (Calculator by
+ * - **Popover** (`popover={{}}`): renders an outline icon-button (Calculator by
  *   default, overridable via `popover.icon`) that opens a Radix Popover
  *   containing the calculator input.
  *

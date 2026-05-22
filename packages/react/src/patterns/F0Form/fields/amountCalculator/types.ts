@@ -39,8 +39,6 @@ export interface F0AmountCalculatorConfig {
    * Note: in F0Form this is a static string, not a ReactNode.
    */
   extraContent?: string
-  /** Whether the field is readonly */
-  readonly?: boolean
 }
 
 export type F0AmountCalculatorField = F0BaseField &

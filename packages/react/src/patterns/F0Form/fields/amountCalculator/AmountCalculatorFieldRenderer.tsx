@@ -24,6 +24,7 @@ export function AmountCalculatorFieldRenderer({
   field,
   formField,
   error,
+  loading,
   status,
   id,
   "aria-describedby": ariaDescribedBy,
@@ -62,6 +63,7 @@ export function AmountCalculatorFieldRenderer({
       clearable={field.clearable}
       status={resolvedStatus}
       disabled={field.disabled}
+      loading={loading}
       size={FORM_SIZE}
     />
   )

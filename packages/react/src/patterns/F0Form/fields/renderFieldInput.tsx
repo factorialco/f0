@@ -97,8 +97,8 @@ export function renderFieldInput({
         <AmountCalculatorFieldRenderer
           field={{ ...field, disabled: isDisabled }}
           formField={formField}
-          error={hasError}
           status={visualStatus}
+          {...errorAndLoadingProps}
         />
       )
     case "duration":

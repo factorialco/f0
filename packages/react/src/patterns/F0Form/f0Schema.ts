@@ -315,8 +315,6 @@ export type F0AmountCalculatorFieldConfig = F0BaseConfig & {
    * Contextual text rendered to the right of the input (e.g. "of 300,00 €").
    */
   extraContent?: string
-  /** Whether the field is readonly */
-  readonly?: boolean
 }
 
 /**

@@ -11,7 +11,7 @@ import { F0AmountCalculator } from "../F0AmountCalculator"
 const meta = {
   title: "Components/F0AmountCalculator",
   component: F0AmountCalculator,
-  tags: ["autodocs", "stable"],
+  tags: ["autodocs", "experimental"],
   parameters: {
     docs: {
       description: {
