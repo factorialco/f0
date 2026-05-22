@@ -47,14 +47,14 @@ export const ChatInput = (props: InputProps) => {
         fullscreenWelcome && "flex-1"
       )}
     >
-      <div className="w-full max-w-[712px]">
+      <div className="max-w-content w-full">
         <ChatTextarea {...props} creditWarning={creditWarning} />
       </div>
       <AnimatePresence mode="wait" initial={false}>
         {isClarifying ? (
           <motion.div
             key="clarifying-nav-hint"
-            className="flex w-full max-w-[712px] flex-row flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm font-medium text-f1-foreground-tertiary"
+            className="max-w-content flex w-full flex-row flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm font-medium text-f1-foreground-tertiary"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -80,7 +80,7 @@ export const ChatInput = (props: InputProps) => {
           !fullscreenWelcome && (
             <motion.div
               key="chat-disclaimer"
-              className="flex w-full max-w-[712px] flex-row items-center justify-center gap-1"
+              className="max-w-content flex w-full flex-row items-center justify-center gap-1"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -109,7 +109,7 @@ export const ChatInput = (props: InputProps) => {
           <motion.div
             key="chat-footer"
             className={cn(
-              "w-full py-4 mx-auto max-w-[712px]",
+              "w-full py-4 mx-auto max-w-content",
               fullscreenWelcome && "mt-auto",
               fullscreen && "flex justify-center"
             )}

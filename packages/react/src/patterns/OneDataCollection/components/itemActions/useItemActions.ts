@@ -44,6 +44,7 @@ type UseItemActionProps<
 
 export type UseItemActions = {
   hasItemActions: boolean
+  hasMobileItemActions: boolean
   primaryItemActions: Exclude<ActionDefinition, DropdownItemSeparator>[]
   dropdownItemActions: DropdownItem[]
   mobileDropdownItemActions: DropdownItem[]
@@ -79,6 +80,7 @@ export const useItemActions = <
   if (!source.itemActions) {
     return {
       hasItemActions: false,
+      hasMobileItemActions: false,
       primaryItemActions: [],
       dropdownItemActions: [],
       mobileDropdownItemActions: [],
@@ -89,6 +91,10 @@ export const useItemActions = <
   }
 
   const itemActions = filterItemActions(source.itemActions, item)
+  const mobileItemActions = itemActions.filter(
+    (action) =>
+      action.type === "separator" || action.hideInMobileDropdown !== true
+  )
 
   // gets the primary item actions (max 2)
   const primaryItemActions = itemActions
@@ -106,14 +112,12 @@ export const useItemActions = <
     )
   )
 
-  // mobile dropdown includes primary actions
-  const mobileDropdownItemActions = actionsToDropdownItems([
-    ...primaryItemActions,
-    ...itemActions.filter(
-      (action) =>
-        action.type === "separator" || !primaryItemActions.includes(action)
-    ),
-  ])
+  // mobile shows the remaining actions only inside the ellipsis menu
+  const mobileDropdownItemActions = actionsToDropdownItems(mobileItemActions)
+
+  const hasMobileItemActions = mobileDropdownItemActions.some(
+    (action) => action.type !== "separator"
+  )
 
   const handleDropDownOpenChange = (open: boolean) => {
     // When the dropdown is closed, we wait 100ms before closing it to avoid losing the reference element to position the dropdown
@@ -135,6 +139,7 @@ export const useItemActions = <
 
   return {
     hasItemActions: itemActions.length > 0,
+    hasMobileItemActions,
     primaryItemActions,
     dropdownItemActions,
     mobileDropdownItemActions,

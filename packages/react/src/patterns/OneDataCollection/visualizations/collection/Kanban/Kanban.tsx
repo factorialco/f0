@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 
 import type {
   CardMetadata,
@@ -30,6 +30,22 @@ import type {
 
 import { ItemActionsDefinition } from "../../../item-actions"
 import { KanbanCollectionProps } from "./types"
+
+const toCardMetadata = (
+  items: ReadonlyArray<{
+    icon: IconType
+    property: CardMetadataProperty
+  }>
+): CardMetadata[] =>
+  items.map(({ icon, property }) =>
+    property.type === "file" ? { property } : { icon, property }
+  )
+
+const isInfiniteScrollPaginationInfo = (
+  paginationInfo: PaginationInfo | undefined | null
+): paginationInfo is InfiniteScrollPaginatedResponse<unknown> => {
+  return Boolean(paginationInfo && paginationInfo.type === "infinite-scroll")
+}
 
 export const KanbanCollection = <
   R extends RecordType,
@@ -81,67 +97,145 @@ export const KanbanCollection = <
 
   const idProvider = source.idProvider
 
-  const lanesSignature = useMemo(() => {
-    return JSON.stringify(
-      Object.values(lanesHooks).map((laneHook) => laneHook.data)
-    )
-  }, [lanesHooks])
-
   const laneItems = useMemo(() => {
     return lanes.map((lane) => ({
       ...lane,
       items: lanesHooks[lane.id]?.data?.records || [],
     }))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lanesSignature])
+  }, [lanes, lanesHooks])
 
-  const toCardMetadata = (
-    items: ReadonlyArray<{
-      icon: IconType
-      property: CardMetadataProperty
-    }>
-  ): CardMetadata[] =>
-    items.map(({ icon, property }) =>
-      property.type === "file" ? { property } : { icon, property }
-    )
+  // Fine-grained reorder only when no sort order is applied
+  const allowReorder = source.currentSortings === null
 
-  const isInfiniteScrollPaginationInfo = (
-    paginationInfo: PaginationInfo | undefined | null
-  ): paginationInfo is InfiniteScrollPaginatedResponse<unknown> => {
-    return Boolean(paginationInfo && paginationInfo.type === "infinite-scroll")
-  }
-
-  const kanbanProps: KanbanProps<R> = {
-    lanes: laneItems.map((l) => {
-      const laneData = lanesHooks[l.id]
-      const totalItems = laneData?.paginationInfo?.total
-
-      const hasMore =
-        isInfiniteScrollPaginationInfo(laneData?.paginationInfo) &&
-        laneData?.paginationInfo?.hasMore
+  // Aggregated totals/loading. A lane that has not yet reported counts as
+  // still initial-loading so we do not flash false while lanes are mounting.
+  const { totalItemsAggregated, isInitialLoadingAggregated } = useMemo(() => {
+    const hooks = Object.values(lanesHooks)
+    const allLanesReported = hooks.length === lanes.length
+    if (hooks.length === 0 || !allLanesReported) {
       return {
-        id: l.id,
-        title: l.title,
-        items: l.items,
-        variant: l.variant,
-        total: totalItems,
-        hasMore: hasMore,
-        loading: laneData?.isLoading || false,
-        loadingMore: laneData?.isLoadingMore || false,
-        fetchMore: hasMore ? () => laneData.loadMore() : undefined,
+        totalItemsAggregated: undefined,
+        isInitialLoadingAggregated: true,
       }
-    }),
-    loading: Object.values(lanesHooks).some(
-      (laneHook) => laneHook.isInitialLoading
-    ),
-    getKey: (item, index) => {
+    }
+    let total = 0
+    let initialLoading = false
+    for (const lane of hooks) {
+      const laneTotal = lane.paginationInfo?.total ?? lane.data.records.length
+      total += typeof laneTotal === "number" ? laneTotal : 0
+      if (lane.isInitialLoading) initialLoading = true
+    }
+    return {
+      totalItemsAggregated: total,
+      isInitialLoadingAggregated: initialLoading,
+    }
+  }, [lanesHooks, lanes.length])
+
+  // Used for kanbanProps.loading: empty hooks → not loading (preserves
+  // pre-refactor behavior; isInitialLoadingAggregated keeps `true` fallback
+  // because onLoadData consumers depend on it).
+  const kanbanLoading = useMemo(
+    () => Object.values(lanesHooks).some((h) => h.isInitialLoading),
+    [lanesHooks]
+  )
+
+  useEffect(() => {
+    onLoadData({
+      totalItems: totalItemsAggregated,
+      filters: source.currentFilters,
+      search: source.currentSearch,
+      isInitialLoading: isInitialLoadingAggregated,
+      data: Object.values(lanesHooks).flatMap((l) => l.data.records),
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- rerun when totals, loading, records, filters or search change
+  }, [
+    totalItemsAggregated,
+    isInitialLoadingAggregated,
+    lanesHooks,
+    source.currentFilters,
+    source.currentSearch,
+  ])
+
+  // Build index maps per lane when needed
+  const laneIndexMaps = useMemo(() => {
+    const maps = new Map<string, Map<string, number>>()
+    laneItems.forEach((lane) => {
+      const map = new Map<string, number>()
+      lane.items.forEach((item, index) => {
+        const rawId = idProvider
+          ? idProvider(item as R, index)
+          : ((item as unknown as { id?: string | number })?.id ?? index)
+        const itemId = String(rawId)
+        map.set(itemId, index)
+      })
+      maps.set(lane.id, map)
+    })
+    return maps
+  }, [laneItems, idProvider])
+
+  /**
+   * Selection
+   */
+
+  const lanesDef = useMemo(() => {
+    return lanes.map((lane) => ({
+      id: lane.id,
+      data: lanesHooks[lane.id]?.data || {
+        type: "flat",
+        records: [],
+        groups: [],
+      },
+      paginationInfo: lanesHooks[lane.id]?.paginationInfo || null,
+    }))
+  }, [lanes, lanesHooks])
+
+  const { lanesSelectProvider, lanesUseSelectable } = useSelectableLanes<
+    R,
+    Filters,
+    Sortings,
+    Summaries,
+    NavigationFilters,
+    Grouping
+  >(lanesDef, source, (selectItemsStatus, clearCallback) => {
+    onSelectItems?.(selectItemsStatus, clearCallback)
+  })
+
+  const kanbanLanes = useMemo(
+    () =>
+      laneItems.map((l) => {
+        const laneData = lanesHooks[l.id]
+        const totalItems = laneData?.paginationInfo?.total
+        const hasMore =
+          isInfiniteScrollPaginationInfo(laneData?.paginationInfo) &&
+          laneData?.paginationInfo?.hasMore
+        return {
+          id: l.id,
+          title: l.title,
+          items: l.items,
+          variant: l.variant,
+          total: totalItems,
+          hasMore,
+          loading: laneData?.isLoading || false,
+          loadingMore: laneData?.isLoadingMore || false,
+          fetchMore: hasMore ? () => laneData.loadMore() : undefined,
+        }
+      }),
+    [laneItems, lanesHooks] // laneItems → items; lanesHooks → pagination/loading/fetchMore per lane
+  )
+
+  const getKey = useCallback<NonNullable<KanbanProps<R>["getKey"]>>(
+    (item, index) => {
       if (idProvider) return String(idProvider(item, index))
       const fallbackId = (item as unknown as { id?: string | number })?.id
       return fallbackId !== undefined && fallbackId !== null
         ? String(fallbackId)
         : String(index)
     },
-    renderCard: (item, index, total, laneId) => {
+    [idProvider]
+  )
+
+  const renderCard = useCallback<NonNullable<KanbanProps<R>["renderCard"]>>(
+    (item, index, total, laneId) => {
       const dragId = String(
         idProvider
           ? idProvider(item, index)
@@ -196,93 +290,44 @@ export const KanbanCollection = <
         />
       )
     },
-    onCreate: onCreate,
-  }
+    [
+      idProvider,
+      source.selectable,
+      source.itemUrl,
+      source.itemOnClick,
+      lanesUseSelectable,
+      allowReorder,
+      title,
+      description,
+      avatar,
+      onMove,
+      optionsMetadata,
+    ]
+  )
 
-  // Report aggregated totals/loading so header total updates
-  const totalItemsAggregated = useMemo(() => {
-    const hooks = Object.values(lanesHooks)
-    if (hooks.length === 0) return undefined
-    // Sum totals from lanes that expose paginationInfo.total; fallback to records length
-    return hooks.reduce((acc, lane) => {
-      const laneTotal = lane.paginationInfo?.total ?? lane.data.records.length
-      return acc + (typeof laneTotal === "number" ? laneTotal : 0)
-    }, 0)
-  }, [lanesHooks])
-
-  const isInitialLoadingAggregated = useMemo(() => {
-    const hooks = Object.values(lanesHooks)
-    if (hooks.length === 0) return true
-    // Consider initial loading if any lane is still in initial loading
-    return hooks.some((lane) => lane.isInitialLoading)
-  }, [lanesHooks])
-
-  useEffect(() => {
-    onLoadData({
-      totalItems: totalItemsAggregated,
-      filters: source.currentFilters,
-      search: source.currentSearch,
-      isInitialLoading: isInitialLoadingAggregated,
-      data: Object.values(lanesHooks).flatMap((l) => l.data.records),
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- follow Table/List behavior: rerun when totals or loading change
-  }, [totalItemsAggregated, isInitialLoadingAggregated])
-
-  // Fine-grained reorder only when no sort order is applied
-  const allowReorder = source.currentSortings === null
-
-  // Build index maps per lane when needed
-  const laneIndexMaps = useMemo(() => {
-    const maps = new Map<string, Map<string, number>>()
-    laneItems.forEach((lane) => {
-      const map = new Map<string, number>()
-      lane.items.forEach((item, index) => {
-        const rawId = idProvider
-          ? idProvider(item as R, index)
-          : ((item as unknown as { id?: string | number })?.id ?? index)
-        const itemId = String(rawId)
-        map.set(itemId, index)
-      })
-      maps.set(lane.id, map)
-    })
-    return maps
-  }, [laneItems, idProvider])
-
-  kanbanProps.dnd = {
-    instanceId: instanceId,
-    getIndexById: (laneId: string, id: string) => {
-      const idx = laneIndexMaps.get(laneId)?.get(id) ?? -1
-      return allowReorder ? idx : -1
-    },
-    onMove: onMove,
-  }
-
-  /**
-   * Selection
-   */
-
-  const lanesDef = useMemo(() => {
-    return lanes.map((lane) => ({
-      id: lane.id,
-      data: lanesHooks[lane.id]?.data || {
-        type: "flat",
-        records: [],
-        groups: [],
+  const dnd = useMemo<NonNullable<KanbanProps<R>["dnd"]>>(
+    () => ({
+      instanceId,
+      getIndexById: (laneId: string, id: string) => {
+        const idx = laneIndexMaps.get(laneId)?.get(id) ?? -1
+        return allowReorder ? idx : -1
       },
-      paginationInfo: lanesHooks[lane.id]?.paginationInfo || null,
-    }))
-  }, [lanes, lanesHooks])
+      onMove,
+    }),
+    [instanceId, laneIndexMaps, allowReorder, onMove]
+  )
 
-  const { lanesSelectProvider, lanesUseSelectable } = useSelectableLanes<
-    R,
-    Filters,
-    Sortings,
-    Summaries,
-    NavigationFilters,
-    Grouping
-  >(lanesDef, source, (selectItemsStatus, clearCallback) => {
-    onSelectItems?.(selectItemsStatus, clearCallback)
-  })
+  const kanbanProps = useMemo<KanbanProps<R>>(
+    () => ({
+      lanes: kanbanLanes,
+      loading: kanbanLoading,
+      getKey,
+      renderCard,
+      onCreate,
+      dnd,
+    }),
+    [kanbanLanes, kanbanLoading, getKey, renderCard, onCreate, dnd]
+  )
 
   return (
     <>

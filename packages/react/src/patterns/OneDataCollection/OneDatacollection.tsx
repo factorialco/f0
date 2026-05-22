@@ -37,7 +37,12 @@ import {
   getSecondaryActions,
   MAX_EXPANDED_ACTIONS,
 } from "./actions"
-import { ActionBar, ActionBarItem } from "./components/ActionBar"
+import {
+  ActionBar,
+  type ActionBarItem,
+  type ActionBarStatus,
+  type F0ActionBarRef,
+} from "./components/ActionBar"
 import { CollectionActions } from "./components/CollectionActions/CollectionActions"
 import { NavigationFilters as NavigationFiltersComponent } from "./components/NavigationFilters"
 import { Search } from "./components/Search"
@@ -58,6 +63,8 @@ import { useDataCollectionSettings } from "./Settings/SettingsProvider"
 import { SummariesDefinition } from "./summary"
 import { useEventEmitter } from "./useEventEmitter"
 import { VisualizationRenderer } from "./visualizations/collection"
+
+const SUCCESS_DISMISS_MS = 1500
 
 /**
  * A component that renders a collection of data with filtering and visualization capabilities.
@@ -112,6 +119,46 @@ export type OneDataCollectionProps<
   >
   onSelectItems?: OnSelectItemsCallback<R, Filters>
   onBulkAction?: OnBulkActionCallback<R, Filters>
+  /**
+   * Opt-in to auto-managed bulk-action status. When `true`, a `Promise`
+   * returned from `onBulkAction` drives the ActionBar through
+   * `loading → success → idle` (or `loading → error`) automatically.
+   *
+   * Opt-in is required because some consumers open modals from their bulk
+   * action handler whose promise resolves when the modal OPENS rather than
+   * when the user confirms — auto-managing those would flash a premature
+   * success. When `false` (default), async handlers keep today's
+   * fire-and-forget behavior. For those cases, use `bulkActionStatus` to
+   * drive status yourself from the modal's lifecycle.
+   * @default false
+   */
+  autoManageBulkActionStatus?: boolean
+  /**
+   * Controlled status for the bulk-action ActionBar. Designed for multi-step
+   * flows (confirmation modals, server polling) where the component can't
+   * derive status from a single promise.
+   *
+   * - **`"idle"`** — transparent: F0's auto-manage handles immediate
+   *   (promise-returning) actions normally. Pass `"idle"` even when not
+   *   actively controlling; no need for a `status !== "idle" ? status : undefined`
+   *   conditional.
+   * - **`"loading"`** — consumer is performing an async operation (e.g. after
+   *   modal confirm). F0 disables actions and shows button-level spinners.
+   * - **`"success"`** — mutation resolved. F0 shows the checkmark, then after
+   *   1.5 s auto-clears selection and falls back to auto-manage. The consumer
+   *   does not need to set `"idle"` or clear selection manually.
+   * - **`"error"`** — mutation rejected. F0 shows the error state and wiggle
+   *   animation. Persists until the consumer sets a different status.
+   *   Note: selection change only auto-clears the internal (auto-managed)
+   *   error state — when using controlled mode the consumer must explicitly
+   *   set a new status to dismiss the error.
+   *
+   * When this prop is provided (even as `"idle"`), void-returning handlers
+   * will not auto-clear selection — F0 assumes the consumer has modal-gated
+   * actions and owns the selection lifecycle. Pair with
+   * `autoManageBulkActionStatus={true}` for mixed immediate + modal flows.
+   */
+  bulkActionStatus?: ActionBarStatus
   emptyStates?: CustomEmptyStates
   onTotalItemsChange?: (totalItems: number) => void
   fullHeight?: boolean
@@ -168,6 +215,8 @@ const OneDataCollectionComp = <
   visualizations,
   onSelectItems,
   onBulkAction,
+  autoManageBulkActionStatus = false,
+  bulkActionStatus: controlledBulkActionStatus,
   onStateChange,
   emptyStates,
   fullHeight,
@@ -417,6 +466,102 @@ const OneDataCollectionComp = <
 
   const [isAllItemsSelected, setIsAllItemsSelected] = useState(false)
 
+  // ── Bulk-action status resolution ────────────────────────────────────────
+  // Two status sources: internal (auto-managed via promise) and controlled
+  // (consumer-driven via bulkActionStatus prop).
+  // Controlled wins unless it is "idle" or a "success" F0 already dismissed.
+  // Consumers never need to reset back to "idle" after success — F0 handles
+  // the auto-dismiss timer and marks the controlled success as done internally.
+  // isControlledModeActiveRef: ref copy for stale-closure safety in onClick
+  // handlers captured inside onSelectItemsLocal.
+
+  const [internalBulkActionStatus, setInternalBulkActionStatus] =
+    useState<ActionBarStatus>("idle")
+  // State (not ref) so setting it always triggers a re-render, even when
+  // internalBulkActionStatus is already "idle" (no-op bailout otherwise).
+  const [controlledSuccessDismissed, setControlledSuccessDismissed] =
+    useState(false)
+
+  const actionBarRef = useRef<F0ActionBarRef>(null)
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // isControlledModeActive: true when controlled status is non-idle and not
+  // an already-dismissed success. Drives the auto-manage bail-out in onClick.
+  // Repeated for resolvedBulkActionStatus and isControlledModeActive — helper
+  // keeps the condition in one place.
+  const isControlledStatusActive = (dismissed: boolean) =>
+    controlledBulkActionStatus !== undefined &&
+    controlledBulkActionStatus !== "idle" &&
+    !(controlledBulkActionStatus === "success" && dismissed)
+
+  const resolvedBulkActionStatus = isControlledStatusActive(
+    controlledSuccessDismissed
+  )
+    ? controlledBulkActionStatus
+    : internalBulkActionStatus
+
+  const isControlledModeActive = isControlledStatusActive(
+    controlledSuccessDismissed
+  )
+  const isControlledModeActiveRef = useRef(false)
+  isControlledModeActiveRef.current = isControlledModeActive
+
+  // Prop presence alone signals modal-gated actions — void handlers must not
+  // auto-clear selection regardless of the current value.
+  const hasControlledBulkActionStatus = controlledBulkActionStatus !== undefined
+
+  // Shared dismiss helper: collapse bar + clear selection atomically so React
+  // batches the state updates into one render, preventing a flash of idle
+  // content (stale action buttons) between clearSelectedItems() and the status
+  // reset.
+  const scheduleDismiss = useCallback(
+    (onDismiss: () => void, hideBar = true) => {
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current)
+      }
+      successTimerRef.current = setTimeout(() => {
+        if (hideBar) setShowActionBar(false)
+        onDismiss()
+        successTimerRef.current = null
+      }, SUCCESS_DISMISS_MS)
+    },
+    // setShowActionBar is a stable setState ref — safe to omit from deps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  )
+
+  useEffect(() => {
+    return () => {
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current)
+      }
+    }
+  }, [])
+
+  // Initialize to undefined (not the current prop value) so that a component
+  // mounted with bulkActionStatus="success" is treated as a fresh transition
+  // and schedules the dismiss timer on first render.
+  const prevControlledStatusRef = useRef<ActionBarStatus | undefined>(undefined)
+  useEffect(() => {
+    const prev = prevControlledStatusRef.current
+    prevControlledStatusRef.current = controlledBulkActionStatus
+
+    if (controlledBulkActionStatus === "success" && prev !== "success") {
+      setControlledSuccessDismissed(false)
+      scheduleDismiss(() => {
+        clearSelectedItemsFunc?.()
+        setControlledSuccessDismissed(true)
+      })
+    } else if (prev === "success" && controlledBulkActionStatus !== "success") {
+      // Consumer transitioned away from "success" before the timer fired.
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current)
+        successTimerRef.current = null
+      }
+      setControlledSuccessDismissed(false)
+    }
+  }, [controlledBulkActionStatus, clearSelectedItemsFunc, scheduleDismiss])
+  // ─────────────────────────────────────────────────────────────────────────
+
   const i18n = useI18n()
 
   const totalItemSummaryFn = useMemo(() => {
@@ -443,6 +588,14 @@ const OneDataCollectionComp = <
       !!selectedItems.allSelected ||
         selectedItems.itemsStatus.some((item) => item.checked)
     )
+
+    /**
+     * Any selection change after an error clears the error so the bar doesn't
+     * persist a stale failure state across user actions. Loading/success
+     * transitions are owned by the bulk-action click handler and must not be
+     * interrupted here.
+     */
+    setInternalBulkActionStatus((prev) => (prev === "error" ? "idle" : prev))
 
     /**
      * Selected items count
@@ -473,10 +626,52 @@ const OneDataCollectionComp = <
       return {
         ...bulkAction,
         onClick: () => {
-          onBulkAction?.(bulkAction.id, selectedItems, clearSelectedItems)
-          if (!bulkAction.keepSelection) {
-            clearSelectedItems()
+          const result = onBulkAction?.(
+            bulkAction.id,
+            selectedItems,
+            clearSelectedItems
+          )
+          const isPromise =
+            autoManageBulkActionStatus &&
+            result !== undefined &&
+            typeof (result as Promise<void>)?.then === "function"
+
+          if (!isPromise) {
+            // Sync path (or opt-out). Preserve today's fire-and-forget
+            // behavior: ignore any returned promise, clear selection now.
+            // Skip if the bulkActionStatus prop is wired up at all — the
+            // consumer has modal-gated actions and owns the selection
+            // lifecycle (void return = modal opened, not action completed).
+            if (!bulkAction.keepSelection && !hasControlledBulkActionStatus) {
+              clearSelectedItems()
+            }
+            return
           }
+
+          // Read from ref — not the closure-captured const — so this always
+          // reflects the prop value at click time, not at closure-creation time.
+          if (isControlledModeActiveRef.current) {
+            return
+          }
+
+          setInternalBulkActionStatus("loading")
+          ;(result as Promise<void>).then(
+            () => {
+              setInternalBulkActionStatus("success")
+              // Always wipe on success — prevents already-processed items from
+              // mixing with new selections made during loading.
+              scheduleDismiss(() => {
+                if (!bulkAction.keepSelection) {
+                  clearSelectedItems()
+                }
+                setInternalBulkActionStatus("idle")
+              }, !bulkAction.keepSelection)
+            },
+            () => {
+              setInternalBulkActionStatus("error")
+              actionBarRef.current?.wiggle({ errorHighlight: true })
+            }
+          )
         },
       }
     }
@@ -802,6 +997,7 @@ const OneDataCollectionComp = <
                   onGroupingChange={setCurrentGrouping}
                   sortings={sortings}
                   currentSortings={currentSortings}
+                  defaultSortings={defaultSortings.current}
                   onSortingsChange={setCurrentSortings}
                 />
               )}
@@ -858,7 +1054,13 @@ const OneDataCollectionComp = <
         <>
           {bulkActions && (
             <ActionBar
-              isOpen={showActionBar}
+              ref={actionBarRef}
+              isOpen={
+                showActionBar ||
+                resolvedBulkActionStatus === "loading" ||
+                resolvedBulkActionStatus === "success"
+              }
+              status={resolvedBulkActionStatus}
               selectedNumber={selectedItemsCount}
               primaryActions={
                 bulkActionsGroups && "primary" in bulkActionsGroups

@@ -40,6 +40,7 @@ export const BaseQuestion = ({
   required,
   locked: questionLocked,
   type: questionType,
+  hiddenActions,
 }: BaseQuestionProps) => {
   const {
     onQuestionChange,
@@ -194,6 +195,7 @@ export const BaseQuestion = ({
                 canDeleteQuestion={
                   !isWithinSection || !isSingleQuestionInSection
                 }
+                hiddenActions={hiddenActions}
               />
             </div>
           )}

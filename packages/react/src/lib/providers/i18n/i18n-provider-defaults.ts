@@ -465,6 +465,9 @@ export const defaultTranslations = {
     noResults: "No results found",
     loadingMore: "Loading...",
     applySelection: "Apply selection",
+    create: "Create",
+    createWithValue: 'Create "{{value}}"',
+    createEmptyMessage: "Try another search or create a new item",
   },
   numberInput: {
     between: "It should be between {{min}} and {{max}}",
@@ -540,6 +543,7 @@ export const defaultTranslations = {
       sectionDescriptionPlaceholder: "Describe the section in a few words",
       required: "Required",
       allowMultiSelection: "Allow multi-selection",
+      allowCreate: "Allow creation",
       singleSelection: "Single selection",
       multiSelection: "Multi selection",
       questionType: "Question type",
@@ -670,6 +674,44 @@ export const defaultTranslations = {
       checkbox: {
         mustBeChecked: "This option must be selected",
       },
+    },
+  },
+  graph: {
+    canvas: "Graph canvas",
+    view: "Graph view",
+    controls: {
+      findMe: "Find me",
+      fitToView: "Fit to view",
+      zoomIn: "Zoom in",
+      zoomOut: "Zoom out",
+      navigation: "Graph navigation",
+      metadataSettings: "Metadata visibility",
+      tagTypeLabels: {
+        person: "People",
+        team: "Teams",
+        company: "Companies",
+        status: "Statuses",
+        alert: "Alerts",
+        balance: "Balances",
+        dot: "Tags",
+        raw: "Tags",
+      },
+    },
+    search: {
+      noResults: "No results",
+    },
+    detailPanel: {
+      details: "Details",
+      moreActions: "More actions",
+      resize: "Resize detail panel",
+    },
+    expander: {
+      collapse: "Collapse {{count}} items",
+      expand: "Expand {{count}} items",
+      expandWithParentSingular: "Expand {{parent}}, {{count}} child",
+      expandWithParentPlural: "Expand {{parent}}, {{count}} children",
+      collapseWithParent: "Collapse {{parent}}",
+      collapseDefault: "Collapse children",
     },
   },
   wizard: {
