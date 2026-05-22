@@ -4,7 +4,6 @@ import "@testing-library/jest-dom/vitest"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { createDataSourceDefinition, type RecordType } from "@/hooks/datasource"
-
 import { zeroRender as render } from "@/testing/test-utils"
 
 import type { F0SelectItemProps } from "../types"
@@ -449,9 +448,8 @@ describe("Select", () => {
     })
   })
 
-  it("defers onChange until apply when onApply is passed", async () => {
+  it("defers onChange until apply when withApplySelection is enabled", async () => {
     const handleChange = vi.fn()
-    const handleApply = vi.fn()
     const user = userEvent.setup()
 
     render(
@@ -461,7 +459,7 @@ describe("Select", () => {
         options={mockOptions}
         value={[]}
         onChange={handleChange}
-        onApply={handleApply}
+        withApplySelection
       />
     )
 
@@ -469,7 +467,6 @@ describe("Select", () => {
     await user.click(screen.getByText("Option 1"))
 
     expect(handleChange).not.toHaveBeenCalled()
-    expect(handleApply).not.toHaveBeenCalled()
 
     await user.click(screen.getByRole("button", { name: "Apply selection" }))
 
@@ -492,12 +489,11 @@ describe("Select", () => {
         ]
       )
     })
-    expect(handleApply).toHaveBeenCalledTimes(1)
+    expect(handleChange).toHaveBeenCalledTimes(1)
   })
 
-  it("cancels staged multi-select changes on outside click when onApply is passed", async () => {
+  it("cancels staged multi-select changes on outside click when withApplySelection is enabled", async () => {
     const handleChange = vi.fn()
-    const handleApply = vi.fn()
     const user = userEvent.setup()
 
     render(
@@ -509,7 +505,7 @@ describe("Select", () => {
           options={mockOptions}
           value={["option1", "option2"]}
           onChange={handleChange}
-          onApply={handleApply}
+          withApplySelection
         />
       </div>
     )
@@ -523,7 +519,6 @@ describe("Select", () => {
     })
 
     expect(handleChange).not.toHaveBeenCalled()
-    expect(handleApply).not.toHaveBeenCalled()
 
     await openSelect(user)
     await user.click(screen.getByText("Option 3"))
@@ -536,12 +531,15 @@ describe("Select", () => {
     expect(handleChange.mock.calls[0]?.[0]).toEqual(
       expect.arrayContaining(["option1", "option2", "option3"])
     )
-    expect(handleApply).toHaveBeenCalledTimes(1)
+    expect(handleChange).toHaveBeenCalledWith(
+      expect.arrayContaining(["option1", "option2", "option3"]),
+      expect.any(Array),
+      expect.any(Array)
+    )
   })
 
   it("cancels staged changes without closing when cancel button is clicked", async () => {
     const handleChange = vi.fn()
-    const handleApply = vi.fn()
     const user = userEvent.setup()
 
     render(
@@ -551,7 +549,7 @@ describe("Select", () => {
         options={mockOptions}
         value={["option1", "option2"]}
         onChange={handleChange}
-        onApply={handleApply}
+        withApplySelection
       />
     )
 
@@ -561,12 +559,45 @@ describe("Select", () => {
 
     expect(screen.getByRole("listbox")).toBeInTheDocument()
     expect(handleChange).not.toHaveBeenCalled()
-    expect(handleApply).not.toHaveBeenCalled()
 
+    await user.click(screen.getByText("Option 3"))
     await user.click(screen.getByRole("button", { name: "Apply selection" }))
 
-    expect(handleChange).not.toHaveBeenCalled()
-    expect(handleApply).toHaveBeenCalledTimes(1)
+    expect(handleChange).toHaveBeenCalledWith(
+      expect.arrayContaining(["option1", "option2", "option3"]),
+      expect.arrayContaining([
+        {
+          id: "option1",
+          name: "Option 1",
+          description: "Description 1",
+        },
+        {
+          id: "option2",
+          name: "Option 2",
+          description: "Description 2",
+        },
+        {
+          id: "option3",
+          name: "Option 3",
+          description: "Description 3",
+        },
+      ]),
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: "Option 1",
+          value: "option1",
+          description: "Description 1",
+        }),
+        expect.objectContaining({
+          label: "Option 2",
+          value: "option2",
+        }),
+        expect.objectContaining({
+          label: "Option 3",
+          value: "option3",
+        }),
+      ])
+    )
   })
 
   describe("asList mode", () => {
