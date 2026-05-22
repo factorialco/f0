@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.16.1](https://github.com/factorialco/f0/compare/f0-react-v2.16.0...f0-react-v2.16.1) (2026-05-22)
+
+
+### Bug Fixes
+
+* onApply as independant function ([#4207](https://github.com/factorialco/f0/issues/4207)) ([49b1302](https://github.com/factorialco/f0/commit/49b1302c4d504b463fb6995d1b8d834578098c95))
+
 ## [2.16.0](https://github.com/factorialco/f0/compare/f0-react-v2.15.1...f0-react-v2.16.0) (2026-05-22)
 
 
