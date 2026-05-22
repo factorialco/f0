@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.16.2](https://github.com/factorialco/f0/compare/f0-react-v2.16.1...f0-react-v2.16.2) (2026-05-22)
+
+
+### Bug Fixes
+
+* **F0Button:** show Documentation page in sidebar for F0Button and F0ButtonDropdown ([#4143](https://github.com/factorialco/f0/issues/4143)) ([873cb10](https://github.com/factorialco/f0/commit/873cb10c7916e2e090368a375e3ce8c7ef450b68))
+
 ## [2.16.1](https://github.com/factorialco/f0/compare/f0-react-v2.16.0...f0-react-v2.16.1) (2026-05-22)
 
 
