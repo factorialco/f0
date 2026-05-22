@@ -99,6 +99,10 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 // Basic Variants
+// Note: do NOT add `tags: ["no-sidebar"]` to the primary (first exported)
+// story. Storybook propagates the primary story's tags to the MDX
+// `--documentation` entry, which would hide the entire Documentation page
+// from the sidebar. Hide secondary variants instead.
 export const Default: Story = {
   args: {
     variant: "default",
