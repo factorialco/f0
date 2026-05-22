@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.15.1](https://github.com/factorialco/f0/compare/f0-react-v2.15.0...f0-react-v2.15.1) (2026-05-22)
+
+
+### Bug Fixes
+
+* **react:** fix formatting in CrudPatterns MDX documentation files ([#4219](https://github.com/factorialco/f0/issues/4219)) ([1786065](https://github.com/factorialco/f0/commit/17860659444c52656a9bf2ba191c863a343b9fcb))
+
+## [2.15.0](https://github.com/factorialco/f0/compare/f0-react-v2.14.5...f0-react-v2.15.0) (2026-05-22)
+
+
+### Features
+
+* **F0Graph:** add F0Graph pattern (runtime) ([#4196](https://github.com/factorialco/f0/issues/4196)) ([779d155](https://github.com/factorialco/f0/commit/779d155003da0ddc6730a832b780b076c4d2cda5))
+
 ## [2.14.5](https://github.com/factorialco/f0/compare/f0-react-v2.14.4...f0-react-v2.14.5) (2026-05-21)
 
 

@@ -40,7 +40,7 @@ Start
   }}
   dont={{
     description:
-      "Do not choose a side panel or wizard because they \"look nicer\" — each carries UX cost that must be justified.",
+      'Do not choose a side panel or wizard because they "look nicer" — each carries UX cost that must be justified.',
   }}
 />
 
@@ -93,7 +93,9 @@ Start
       </tr>
       <tr>
         <td>Reversible within seconds</td>
-        <td>Optimistic execution + visible undo affordance — no confirmation</td>
+        <td>
+          Optimistic execution + visible undo affordance — no confirmation
+        </td>
       </tr>
       <tr>
         <td>Irreversible AND cross-user impact</td>
@@ -145,6 +147,7 @@ Check any that apply. If **any** box is checked, treat the action as critical:
 - The action's name contains "delete", "remove", "revoke", "cancel", or "destroy"
 
 **Critical actions should:**
+
 - Default to overflow — surfacing outside overflow is acceptable when the context
   and resource justify it (e.g., deletion is a core frequent workflow)
 - Always require a confirmation overlay (regardless of placement)

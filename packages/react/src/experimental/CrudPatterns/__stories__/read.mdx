@@ -67,7 +67,7 @@ deliberately.
 <DoDonts
   do={{
     description:
-      "Expose a clear \"Open full view\" affordance in the light surface so users can escalate when needed.",
+      'Expose a clear "Open full view" affordance in the light surface so users can escalate when needed.',
   }}
   dont={{
     description:
@@ -82,6 +82,7 @@ deliberately.
 The trigger for read and the container it opens into depend on the surface:
 
 **Dense surfaces (tabular data):**
+
 - Item click or row click opens a read overlay or navigates to a page.
 - Hover-revealed actions may include an explicit "View" action, but clicking the
   row itself is the primary read affordance.
@@ -89,18 +90,20 @@ The trigger for read and the container it opens into depend on the surface:
   with cell focus for editing.
 
 **Sparse surfaces (cards, list items):**
+
 - Item click opens a read overlay.
 - The card/item body itself is the read affordance.
 - Edit and other actions are exposed _inside_ the read view, not on the card surface.
 
 **Board/kanban surfaces:**
+
 - Card click opens a read overlay (typically centered).
 - The overlay serves as a hub: read the item, then edit, delete, or reassign from within.
 
 <DoDonts
   do={{
     description:
-      "On editable surfaces, avoid row-click for read — it conflicts with cell selection. Use an explicit \"View\" item action instead.",
+      'On editable surfaces, avoid row-click for read — it conflicts with cell selection. Use an explicit "View" item action instead.',
   }}
   dont={{
     description:

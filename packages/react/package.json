@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "2.14.5",
+  "version": "2.15.1",
   "private": false,
   "files": [
     "assets",
@@ -176,6 +176,7 @@
     "@vitest/browser-playwright": "^4.0.15",
     "@vitest/coverage-v8": "^4.0.15",
     "@vitest/ui": "4.0.15",
+    "@xyflow/react": "^12",
     "autoprefixer": "^10.4.21",
     "axe-playwright": "^2.1.0",
     "chalk": "^5.4.1",
@@ -240,6 +241,7 @@
     "@radix-ui/react-toggle-group": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.0.7",
     "@tailwindcss/container-queries": "^0.1.1",
+    "@xyflow/react": "^12",
     "canvas-confetti": "^1.9.3",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
