@@ -147,9 +147,10 @@ Provides buttons for common operations related to the current view.
 
 ### With AI Dashboard Launch
 
-Mark an action with `kind: "ai"` to render it as the branded `AIButton`. Use an
-icon from `@/icons/ai` (`ChartLine` for analytics/dashboard launchers, `One` for
-generic "open AI chat" entry points). The tooltip is auto-derived from `label`.
+Set `variant: "ai"` on an action to render it with the branded AI styling
+(`ActionButtonVariant` from `@/ui/Action`). Pair it with an icon from
+`@/icons/ai` — `ChartLine` for analytics/dashboard launchers, `One` for generic
+"open AI chat" entry points. The tooltip is auto-derived from `label`.
 
 <div
   className="header-container"

@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 
 import { F0AiChatProvider } from "@/sds/ai/F0AiChat"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { ChartLine } from "../../../../icons/ai"
 import { EllipsisHorizontal, Settings } from "../../../../icons/app"
@@ -115,7 +116,7 @@ export const WithAIDashboardLaunch: Story = {
         href: "/trainings/settings",
       },
       {
-        kind: "ai",
+        variant: "ai",
         label: "Learn how your employees complete trainings",
         icon: ChartLine,
         onClick: () => {
@@ -442,5 +443,29 @@ export const WithOneSwitchTooltipAlwaysVisible: Story = {
     module: defaultModule,
     oneSwitchTooltip: { whenEnabled: "Ask me anything" },
     oneSwitchAutoOpen: true,
+  },
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  args: {
+    module: {
+      name: "Trainings",
+      href: "/trainings",
+      id: "company_trainings" as const,
+    },
+    actions: [
+      {
+        label: "Settings",
+        icon: Settings,
+        href: "/trainings/settings",
+      },
+      {
+        variant: "ai",
+        label: "Learn how your employees complete trainings",
+        icon: ChartLine,
+        onClick: () => {},
+      },
+    ],
   },
 }
