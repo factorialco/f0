@@ -1,14 +1,14 @@
-import { o as $a, B as Ba, p as Wa, q as Ma, r as Pt, s as Re, t as ja, v as h, w as q, x as ge, u as le, T as Va, y as Ga, z as Ha, R as Ua, A as Ka, E as ne, G as qa, H as vt, J as ot, K as je, L as ke, M as Ya, N as Za, O as W, Q as Ja, S as Xa, U as Oe, V as pn, W as Qa, X as er, Y as j, Z as yt, _ as D, $ as be, a0 as tr, a1 as nr, a2 as ar, a3 as rr, a4 as lr, a5 as Se, a6 as gn, a7 as sr, a8 as ve, a9 as De, aa as ir, ab as wt, g as bn, ac as Ce, ad as or, ae as xn, af as ae, ag as R, ah as vn, ai as cr, aj as yn, ak as dr, al as Nt, am as he, an as ee, ao as ur, ap as fr, aq as mr, ar as hr, as as pe, at as Ke, au as pr, av as gr, aw as br, ax as xr, ay as qe, az as wn, aA as vr, aB as yr, aC as wr, aD as Ve, aE as Nr, aF as Cr, aG as Ir, aH as kr, aI as Sr, aJ as Ar, aK as Fr, aL as Lr, aM as Tr, aN as _r, aO as Nn, aP as ct, aQ as dt, aR as Cn, aS as Dr, aT as Er, aU as Or, aV as zr, aW as Ye, aX as Ct, aY as In, aZ as Pr, a_ as kn, a$ as Rr, b0 as $r, b1 as Br, b2 as Ie, b3 as Wr, b4 as $e, b5 as Rt, b6 as ut, b7 as Mr, b8 as jr, b9 as Vr, ba as Sn, bb as Gr, bc as An, bd as It, be as Hr, bf as Ur, bg as kt, bh as Kr, a as qr, c as Yr, bi as Fn, bj as Zr, n as Jr, F as Xr, bk as Ln, bl as Tn, bm as Qr, bn as el, bo as tl, bp as nl, bq as al, br as rl, bs as ll, bt as sl, bu as il, bv as fe, bw as St, bx as At, by as Ft, bz as _n, bA as Lt, bB as Dn, bC as ol, bD as cl, bE as dl, bF as ul, bG as fl, bH as ml, bI as hl, bJ as pl, bK as gl, bL as bl, bM as $t, bN as Bt, bO as Wt, bP as xl, bQ as vl, bR as yl, bS as wl, bT as En, bU as Nl, bV as Cl } from "./F0CanvasPanel-Dcphs8nK.js";
-import { c1 as zd, c0 as Pd, cd as Rd, bW as $d, bX as Bd, ce as Wd, bY as Md, b$ as jd, c9 as Vd, ca as Gd, bZ as Hd, c3 as Ud, c2 as Kd, cb as qd, cc as Yd, c8 as Zd, c5 as Jd, c7 as Xd, c4 as Qd, b_ as eu, c6 as tu } from "./F0CanvasPanel-Dcphs8nK.js";
+import { o as Ba, B as $a, p as Wa, q as Ma, r as Pt, s as Re, t as ja, v as h, w as q, x as ge, u as le, T as Va, y as Ga, z as Ha, R as Ua, A as Ka, E as ne, G as qa, H as vt, J as ot, K as je, L as ke, M as Ya, N as Za, O as W, Q as Ja, S as Xa, U as Oe, V as pn, W as Qa, X as er, Y as j, Z as yt, _ as D, $ as be, a0 as tr, a1 as nr, a2 as ar, a3 as rr, a4 as lr, a5 as Se, a6 as gn, a7 as sr, a8 as ve, a9 as De, aa as ir, ab as wt, g as bn, ac as Ce, ad as or, ae as xn, af as ae, ag as R, ah as vn, ai as cr, aj as yn, ak as dr, al as Nt, am as he, an as ee, ao as ur, ap as fr, aq as mr, ar as hr, as as pe, at as Ke, au as pr, av as gr, aw as br, ax as xr, ay as qe, az as wn, aA as vr, aB as yr, aC as wr, aD as Ve, aE as Nr, aF as Cr, aG as Ir, aH as kr, aI as Sr, aJ as Ar, aK as Fr, aL as Lr, aM as Tr, aN as _r, aO as Nn, aP as ct, aQ as dt, aR as Cn, aS as Dr, aT as Er, aU as Or, aV as zr, aW as Ye, aX as Ct, aY as In, aZ as Pr, a_ as kn, a$ as Rr, b0 as Br, b1 as $r, b2 as Ie, b3 as Wr, b4 as Be, b5 as Rt, b6 as ut, b7 as Mr, b8 as jr, b9 as Vr, ba as Sn, bb as Gr, bc as An, bd as It, be as Hr, bf as Ur, bg as kt, bh as Kr, a as qr, c as Yr, bi as Fn, bj as Zr, n as Jr, F as Xr, bk as Ln, bl as Tn, bm as Qr, bn as el, bo as tl, bp as nl, bq as al, br as rl, bs as ll, bt as sl, bu as il, bv as fe, bw as St, bx as At, by as Ft, bz as _n, bA as Lt, bB as Dn, bC as ol, bD as cl, bE as dl, bF as ul, bG as fl, bH as ml, bI as hl, bJ as pl, bK as gl, bL as bl, bM as Bt, bN as $t, bO as Wt, bP as xl, bQ as vl, bR as yl, bS as wl, bT as En, bU as Nl, bV as Cl } from "./F0CanvasPanel-B7YPRQbN.js";
+import { c1 as zd, c0 as Pd, cd as Rd, bW as Bd, bX as $d, ce as Wd, bY as Md, b$ as jd, c9 as Vd, ca as Gd, bZ as Hd, c3 as Ud, c2 as Kd, cb as qd, cc as Yd, c8 as Zd, c5 as Jd, c7 as Xd, c4 as Qd, b_ as eu, c6 as tu } from "./F0CanvasPanel-B7YPRQbN.js";
 import { jsx as e, jsxs as o, Fragment as U } from "react/jsx-runtime";
 import * as Ee from "react";
 import ie, { forwardRef as E, useRef as H, useTransition as Il, useState as T, useLayoutEffect as On, useId as ft, useContext as Ze, createContext as Tt, useEffect as V, useCallback as Q, useMemo as Y, memo as zn, Fragment as kl, isValidElement as Sl, cloneElement as Pn, Children as Rn } from "react";
-import { C as Al, P as Fl, T as Ll, a as Tl, R as $n, I as Bn, g as Wn, c as _l, b as Mn, F as mt, f as Dl, M as El, d as Ol, e as Mt, h as jn, u as zl, i as Vn, S as Pl, A as Rl, B as $l, L as Bl, j as Wl, V as Ml, k as jl, l as jt, m as Vl, n as Gl, O as Hl } from "./index-DeksmI8h.js";
-import { s as au, t as ru, q as lu, J as su, v as iu, D as ou, a8 as cu, H as du, r as uu, X as fu, ae as mu, Y as hu, Z as pu, w as gu, aa as bu, ab as xu, a9 as vu, ac as yu, N as wu, _ as Nu, a5 as Cu, a7 as Iu, x as ku, z as Su, E as Au, U as Fu, ad as Lu, W as Tu, Q as _u, y as Du, G as Eu, o as Ou, p as zu, a0 as Pu, a1 as Ru, a6 as $u, K as Bu, a2 as Wu, a3 as Mu, $ as ju, a4 as Vu } from "./index-DeksmI8h.js";
-const Ul = $a("Search", [
+import { C as Al, P as Fl, T as Ll, a as Tl, R as Bn, I as $n, g as Wn, c as _l, b as Mn, F as mt, f as Dl, M as El, d as Ol, e as Mt, h as jn, u as zl, i as Vn, S as Pl, A as Rl, B as Bl, L as $l, j as Wl, V as Ml, k as jl, l as jt, m as Vl, n as Gl, O as Hl } from "./index-m_sRvPaT.js";
+import { s as au, t as ru, q as lu, J as su, v as iu, D as ou, a8 as cu, H as du, r as uu, X as fu, ae as mu, Y as hu, Z as pu, w as gu, aa as bu, ab as xu, a9 as vu, ac as yu, N as wu, _ as Nu, a5 as Cu, a7 as Iu, x as ku, z as Su, E as Au, U as Fu, ad as Lu, W as Tu, Q as _u, y as Du, G as Eu, o as Ou, p as zu, a0 as Pu, a1 as Ru, a6 as Bu, K as $u, a2 as Wu, a3 as Mu, $ as ju, a4 as Vu } from "./index-m_sRvPaT.js";
+const Ul = Ba("Search", [
   ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }],
   ["path", { d: "m21 21-4.3-4.3", key: "1qie3q" }]
-]), Gn = E(({ className: t, items: n }, a) => /* @__PURE__ */ e(Ba, { ref: a, className: t, children: /* @__PURE__ */ o("div", { className: "flex items-center", children: [
+]), Gn = E(({ className: t, items: n }, a) => /* @__PURE__ */ e($a, { ref: a, className: t, children: /* @__PURE__ */ o("div", { className: "flex items-center", children: [
   /* @__PURE__ */ e(Wa, {}),
   /* @__PURE__ */ e(Ma, { items: n, children: /* @__PURE__ */ e("button", { className: "rounded-sm px-1.5 py-0.5 font-medium text-f1-foreground no-underline transition-colors hover:bg-f1-background-secondary", children: "..." }) })
 ] }) }));
@@ -1220,7 +1220,7 @@ const ms = () => {
       onAnimationComplete: () => {
         a && r(!1);
       },
-      children: /* @__PURE__ */ e("div", { className: "bg-f1-special-page shadow xs:rounded-xl h-full w-full", children: /* @__PURE__ */ e(
+      children: /* @__PURE__ */ e("div", { className: "border border-solid border-f1-border-secondary bg-f1-special-page shadow xs:rounded-xl h-full w-full", children: /* @__PURE__ */ e(
         q.div,
         {
           className: "relative flex h-full w-full flex-col overflow-x-hidden ",
@@ -2152,7 +2152,7 @@ const Jt = ({
   disabled: I = !1,
   hiddenAvatar: C = !1
 }) => {
-  const A = ie.useRef(null), B = Y(
+  const A = ie.useRef(null), $ = Y(
     () => t ? n.reduce(
       (F, Z) => F + (Z.subItems?.length ?? 0),
       0
@@ -2248,7 +2248,7 @@ const Jt = ({
       z
     ]
   ), se = Y(() => t ? n.flatMap((F) => {
-    const Z = Be(
+    const Z = $e(
       p ?? [],
       F.id
     );
@@ -2282,7 +2282,7 @@ const Jt = ({
       subAvatar: F.avatar,
       subSearchKeys: F.searchKeys
     }
-  })), [t, n, p]), $ = Q(
+  })), [t, n, p]), B = Q(
     (F) => {
       if (F.index === 0 && L)
         return /* @__PURE__ */ e(
@@ -2303,7 +2303,7 @@ const Jt = ({
           subItems: J.subItems,
           expanded: J.expanded,
           searchKeys: J.subSearchKeys
-        }, me = Be(
+        }, me = $e(
           p,
           te.id
         ), xe = (te?.subItems ?? []).filter(
@@ -2333,9 +2333,9 @@ const Jt = ({
           }
         );
       }
-      let de = !!Be(p, J.subId);
+      let de = !!$e(p, J.subId);
       if (!de) {
-        const te = Be(
+        const te = $e(
           p,
           X.id
         );
@@ -2470,7 +2470,7 @@ const Jt = ({
             ),
             children: [
               y && /* @__PURE__ */ e("div", { className: "flex h-full w-full flex-row items-center justify-center", children: /* @__PURE__ */ e(xn, {}) }),
-              !y && !B && /* @__PURE__ */ o(
+              !y && !$ && /* @__PURE__ */ o(
                 "div",
                 {
                   className: "absolute flex w-full flex-col items-center justify-center gap-0.5 p-5",
@@ -2483,7 +2483,7 @@ const Jt = ({
                   ]
                 }
               ),
-              !y && (!!B || L) && /* @__PURE__ */ e("div", { className: "h-full", children: t ? /* @__PURE__ */ e(
+              !y && (!!$ || L) && /* @__PURE__ */ e("div", { className: "h-full", children: t ? /* @__PURE__ */ e(
                 ht,
                 {
                   height: rt,
@@ -2493,7 +2493,7 @@ const Jt = ({
                     const Z = L ? F - 1 : F;
                     return se[Z]?.parent === null ? Ts : lt;
                   },
-                  renderer: $,
+                  renderer: B,
                   ref: A
                 }
               ) : /* @__PURE__ */ e(
@@ -2515,7 +2515,7 @@ const Jt = ({
             onSelectAll: u,
             onClear: f,
             singleSelector: z,
-            totalFilteredEntities: B,
+            totalFilteredEntities: $,
             allVisibleSelected: Fe,
             anyVisibleSelected: at,
             selectAllLabel: w,
@@ -2527,7 +2527,7 @@ const Jt = ({
       ]
     }
   );
-}, Be = (t, n) => t.find((a) => a.id === n), Ds = (t, n) => t.find((a) => a.value === n)?.groupType === "team", Es = ({
+}, $e = (t, n) => t.find((a) => a.id === n), Ds = (t, n) => t.find((a) => a.value === n)?.groupType === "team", Es = ({
   entity: t,
   onRemove: n,
   disabled: a = !1,
@@ -2816,26 +2816,26 @@ const Jt = ({
       return;
     const A = new Set(
       (C.subItems ?? []).map((k) => k.subId)
-    ), B = /* @__PURE__ */ new Set([C.id]);
+    ), $ = /* @__PURE__ */ new Set([C.id]);
     l.forEach((k) => {
       k.id !== C.id && (k.subItems ?? []).some(
         (re) => A.has(re.subId)
-      ) && B.add(k.id);
+      ) && $.add(k.id);
     });
     const x = [...I];
     function N(k) {
       const G = x.findIndex((re) => re.id === k.id);
       G >= 0 ? x[G] = k : x.push(k);
     }
-    B.forEach((k) => {
-      const G = l.find(($) => $.id === k);
+    $.forEach((k) => {
+      const G = l.find((B) => B.id === k);
       if (!G) return;
       const re = G.subItems?.filter(
-        ($) => A.has($.subId)
-      ) ?? [], se = x.findIndex(($) => $.id === k);
+        (B) => A.has(B.subId)
+      ) ?? [], se = x.findIndex((B) => B.id === k);
       if (se >= 0) {
-        const $ = x[se].subItems ?? [], Fe = new Set($.map((Le) => Le.subId)), at = [
-          ...$,
+        const B = x[se].subItems ?? [], Fe = new Set(B.map((Le) => Le.subId)), at = [
+          ...B,
           ...re.filter((Le) => !Fe.has(Le.subId))
         ];
         N({
@@ -2853,7 +2853,7 @@ const Jt = ({
     if (t.singleSelector)
       t.onSelect({ ...y, subItems: [{ ...I }] }), a(!1);
     else {
-      const C = t.selectedEntities ?? [], A = new Set(C.map((N) => N.id)), B = new Map(
+      const C = t.selectedEntities ?? [], A = new Set(C.map((N) => N.id)), $ = new Map(
         C.map((N) => [N.id, N.subItems ?? []])
       );
       A.add(y.id), t.entities.forEach((N) => {
@@ -2864,17 +2864,17 @@ const Jt = ({
       const x = [];
       t.entities.forEach((N) => {
         if (A.has(N.id)) {
-          let G = [...B.get(N.id) ?? []];
+          let G = [...$.get(N.id) ?? []];
           N.subItems?.some(
-            ($) => $.subId === I.subId
+            (B) => B.subId === I.subId
           ) && (G.some(
             (Fe) => Fe.subId === I.subId
           ) || G.push(I));
           const se = new Set(
-            (N.subItems ?? []).map(($) => $.subId)
+            (N.subItems ?? []).map((B) => B.subId)
           );
           G = G.filter(
-            ($) => se.has($.subId)
+            (B) => se.has(B.subId)
           ), x.push({
             ...N,
             subItems: G
@@ -2896,12 +2896,12 @@ const Jt = ({
       );
       if (!A)
         return;
-      const B = new Set(
+      const $ = new Set(
         (A.subItems ?? []).map((x) => x.subId)
       );
       for (const x of C) {
         const N = (x.subItems ?? []).filter(
-          (k) => !B.has(k.subId)
+          (k) => !$.has(k.subId)
         );
         N.length > 0 && I.push({
           ...x,
@@ -2917,15 +2917,15 @@ const Jt = ({
       t.onSelect(null);
       return;
     }
-    const C = t.selectedEntities ?? [], A = I.subId, B = [];
+    const C = t.selectedEntities ?? [], A = I.subId, $ = [];
     for (const x of C) {
       const N = x.subItems?.filter((k) => k.subId !== A) ?? [];
-      N.length > 0 && B.push({
+      N.length > 0 && $.push({
         ...x,
         subItems: N
       });
     }
-    t.onSelect(B);
+    t.onSelect($);
   }
   function P() {
     if (t.singleSelector) {
@@ -2937,16 +2937,16 @@ const Jt = ({
     if (u) {
       const C = new Set(
         l.flatMap(
-          (A) => (A.subItems ?? []).map((B) => B.subId)
+          (A) => (A.subItems ?? []).map(($) => $.subId)
         )
       );
       for (const A of y) {
-        const B = (A.subItems ?? []).filter(
+        const $ = (A.subItems ?? []).filter(
           (x) => !C.has(x.subId)
         );
-        B.length > 0 && I.push({
+        $.length > 0 && I.push({
           ...A,
-          subItems: B
+          subItems: $
         });
       }
     } else {
@@ -2993,7 +2993,7 @@ const Jt = ({
     }
     if (u && !t.applySearchToGroup) {
       const I = t.entities.map((C) => {
-        const A = Rs(C, d), B = C.subItems?.map((x) => ({
+        const A = Rs(C, d), $ = C.subItems?.map((x) => ({
           ...x,
           score: He(
             d,
@@ -3003,8 +3003,8 @@ const Jt = ({
         return {
           ...C,
           score: A,
-          expanded: C.expanded ?? (B?.length ?? 0) > 0,
-          subItems: B
+          expanded: C.expanded ?? ($?.length ?? 0) > 0,
+          subItems: $
         };
       }).filter((C) => C.score < 1 / 0).sort((C, A) => C.score - A.score);
       s(I);
@@ -3202,7 +3202,7 @@ const ta = ge({
     variant: "default",
     size: "default"
   }
-}), $s = Ee.forwardRef(({ className: t, variant: n, size: a, ...r }, l) => /* @__PURE__ */ e(
+}), Bs = Ee.forwardRef(({ className: t, variant: n, size: a, ...r }, l) => /* @__PURE__ */ e(
   Nn,
   {
     ref: l,
@@ -3210,12 +3210,12 @@ const ta = ge({
     ...r
   }
 ));
-$s.displayName = Nn.displayName;
+Bs.displayName = Nn.displayName;
 const na = Ee.createContext({
   size: "default",
   variant: "default"
 }), aa = Ee.forwardRef(({ className: t, variant: n, size: a, children: r, ...l }, s) => /* @__PURE__ */ e(
-  $n,
+  Bn,
   {
     ref: s,
     className: h("flex items-center justify-center gap-1.5", t),
@@ -3223,11 +3223,11 @@ const na = Ee.createContext({
     children: /* @__PURE__ */ e(na.Provider, { value: { variant: n, size: a }, children: r })
   }
 ));
-aa.displayName = $n.displayName;
+aa.displayName = Bn.displayName;
 const ra = Ee.forwardRef(({ className: t, children: n, variant: a, size: r, ...l }, s) => {
   const i = Ee.useContext(na);
   return /* @__PURE__ */ e(
-    Bn,
+    $n,
     {
       ref: s,
       className: h(
@@ -3242,8 +3242,8 @@ const ra = Ee.forwardRef(({ className: t, children: n, variant: a, size: r, ...l
     }
   );
 });
-ra.displayName = Bn.displayName;
-const Bs = ({
+ra.displayName = $n.displayName;
+const $s = ({
   id: t,
   createdAt: n,
   title: a,
@@ -3305,7 +3305,7 @@ const Bs = ({
   ] })
 ] }), Et = R(
   "ActivityItem",
-  ee(Bs, Ws)
+  ee($s, Ws)
 ), la = ({
   title: t,
   children: n
@@ -3626,7 +3626,7 @@ function ei({
       "aria-label": Rr(t),
       prepend: /* @__PURE__ */ e(Ct, { emoji: t, size: "md" }),
       children: /* @__PURE__ */ e(
-        $r,
+        Br,
         {
           value: c,
           spinTiming: {
@@ -3671,7 +3671,7 @@ function ti({ items: t, onInteraction: n, locale: a, action: r }) {
 }
 const ni = R("Reactions", ti), sa = E(function({ content: n, collapsed: a, id: r, className: l, tabIndex: s }, i) {
   return /* @__PURE__ */ e(
-    Br,
+    $r,
     {
       ref: i,
       id: r,
@@ -3921,7 +3921,7 @@ const ai = () => /* @__PURE__ */ o("div", { className: "flex flex-col justify-ar
 }) => {
   const S = ft(), P = ft(), M = H(null), [O, _] = T(null), [L, K] = T(!1), z = [f.views, f.comments].filter(Boolean).join(" · "), y = w && O?.id === t && O.description === s, I = !y, C = Wn(r), A = () => {
     i(t);
-  }, B = (k) => {
+  }, $ = (k) => {
     k.stopPropagation();
   }, x = n ? `${n.firstName} ${n.lastName}` : void 0, N = (k) => {
     k.preventDefault(), k.stopPropagation(), s && _({ id: t, description: s });
@@ -3952,7 +3952,7 @@ const ai = () => /* @__PURE__ */ o("div", { className: "flex flex-col justify-ar
       id: `community-post-${t}`,
       children: [
         /* @__PURE__ */ e("div", { className: "hidden md:block", children: n ? /* @__PURE__ */ e(
-          $e,
+          Be,
           {
             href: n.url || "#",
             title: x,
@@ -3973,7 +3973,7 @@ const ai = () => /* @__PURE__ */ o("div", { className: "flex flex-col justify-ar
               /* @__PURE__ */ o("div", { className: "flex min-w-0 flex-1 flex-row flex-wrap items-center gap-1", children: [
                 n ? /* @__PURE__ */ o(U, { children: [
                   /* @__PURE__ */ e(
-                    $e,
+                    Be,
                     {
                       href: n.url,
                       className: "block md:hidden",
@@ -3991,7 +3991,7 @@ const ai = () => /* @__PURE__ */ o("div", { className: "flex flex-col justify-ar
                     }
                   ),
                   /* @__PURE__ */ e(
-                    $e,
+                    Be,
                     {
                       href: n.url,
                       title: x,
@@ -4012,7 +4012,7 @@ const ai = () => /* @__PURE__ */ o("div", { className: "flex flex-col justify-ar
                   }
                 ),
                 /* @__PURE__ */ e(
-                  $e,
+                  Be,
                   {
                     onClick: a.onClick,
                     title: a.title,
@@ -4105,7 +4105,7 @@ const ai = () => /* @__PURE__ */ o("div", { className: "flex flex-col justify-ar
             {
               controls: !0,
               className: "aspect-video h-full w-full bg-f1-background-secondary object-cover",
-              onClick: B,
+              onClick: $,
               children: /* @__PURE__ */ e("source", { src: c })
             }
           ) : /* @__PURE__ */ o(U, { children: [
@@ -4693,7 +4693,7 @@ function zi({
 }) {
   const s = r?.enabled ? qr : l?.enabled ? ys : kl, i = r?.enabled ? r : l?.enabled ? l : void 0;
   return /* @__PURE__ */ e(s, { ...i, children: /* @__PURE__ */ e(
-    Bi,
+    $i,
     {
       ai: r,
       aiPromotion: l,
@@ -4722,7 +4722,7 @@ const Jc = R(
 function Ri(t, n, a) {
   return !n && t ? a === "hidden" : n && !t ? a !== "hidden" : !1;
 }
-function $i(t, n) {
+function Bi(t, n) {
   const { sidebarState: a, toggleSidebar: r } = Ae(), l = H(t);
   V(() => {
     n && Ri(
@@ -4732,7 +4732,7 @@ function $i(t, n) {
     ) && r({ isInvokedByUser: !1 }), l.current = t;
   }, [t, n, a, r]);
 }
-function Bi({
+function $i({
   ai: t,
   aiPromotion: n,
   children: a,
@@ -4757,14 +4757,14 @@ function Bi({
   const I = S || z || K, C = Y(() => L ? { duration: 0.15, ease: "easeOut" } : K ? { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] } : { duration: 0 }, [L, K]), A = ot(
     `(max-width: ${je.xl}px)`,
     { initializeWithValue: !0 }
-  ), B = ot(`(max-width: ${je.md}px)`, {
+  ), $ = ot(`(max-width: ${je.md}px)`, {
     initializeWithValue: !0
   });
   return V(() => {
     d(u);
   }, [u, d]), V(() => {
     d(M);
-  }, [M, d]), $i(u, A), /* @__PURE__ */ e(
+  }, [M, d]), Bi(u, A), /* @__PURE__ */ e(
     El,
     {
       reducedMotion: f ? "always" : "never",
@@ -4811,7 +4811,7 @@ function Bi({
             {
               className: "relative min-w-0 flex-1",
               animate: {
-                paddingRight: u && !B ? O : 0
+                paddingRight: u && !$ ? O : 0
               },
               transition: { paddingRight: Ei },
               children: [
@@ -4848,9 +4848,9 @@ function Bi({
                       // mode) so the canvas card's right-side shadow paints
                       // over the chat surface instead of being clipped by it.
                       "pointer-events-none flex justify-end",
-                      B ? "fixed inset-0 z-[50]" : "absolute bottom-0 left-0 top-0 z-[21]"
+                      $ ? "fixed inset-0 z-[50]" : "absolute bottom-0 left-0 top-0 z-[21]"
                     ),
-                    style: B ? void 0 : { right: O },
+                    style: $ ? void 0 : { right: O },
                     children: /* @__PURE__ */ e(
                       Jr,
                       {
@@ -4867,7 +4867,7 @@ function Bi({
                     className: h(
                       "pointer-events-none",
                       "[&_.copilotKitSidebarContentWrapper]:relative [&_.copilotKitSidebarContentWrapper]:h-full [&_.copilotKitSidebarContentWrapper]:w-full",
-                      B ? "fixed inset-0 z-[30]" : h(
+                      $ ? "fixed inset-0 z-[30]" : h(
                         "absolute right-0 top-0 bottom-0",
                         // In canvas mode the chat wrapper must sit above
                         // the CanvasPanel (z-[15]) so the ResizeHandle's
@@ -4880,7 +4880,7 @@ function Bi({
                       )
                     ),
                     animate: {
-                      width: B || S ? "100%" : O
+                      width: $ || S ? "100%" : O
                     },
                     transition: C,
                     onAnimationComplete: () => {
@@ -5052,7 +5052,10 @@ function ka({ children: t, header: n, embedded: a = !1 }) {
   return /* @__PURE__ */ o(
     "div",
     {
-      className: `flex min-h-full w-full flex-col overflow-hidden ${a ? "" : "xs:rounded-xl"} bg-f1-special-page`,
+      className: h(
+        "flex min-h-full w-full flex-col overflow-hidden bg-f1-special-page ring-1 ring-inset ring-f1-border-secondary",
+        !a && "xs:rounded-xl"
+      ),
       children: [
         n && /* @__PURE__ */ e("div", { className: "flex flex-col", children: n }),
         /* @__PURE__ */ e("div", { className: "isolate flex w-full flex-1 flex-col overflow-auto [&>*]:flex-1", children: t })
@@ -5767,7 +5770,7 @@ function Xi({
       c,
       f
     ]
-  ), A = "flex flex-col gap-3", B = Y(() => n.map((x) => /* @__PURE__ */ e(
+  ), A = "flex flex-col gap-3", $ = Y(() => n.map((x) => /* @__PURE__ */ e(
     st,
     {
       category: x,
@@ -5820,7 +5823,7 @@ function Xi({
               "mt-3 flex w-full flex-col gap-3 bg-transparent px-3 [&_li]:list-none"
             ),
             ref: r,
-            children: f ? /* @__PURE__ */ e("div", { className: A, children: B }) : /* @__PURE__ */ e(
+            children: f ? /* @__PURE__ */ e("div", { className: A, children: $ }) : /* @__PURE__ */ e(
               Mt,
               {
                 axis: "y",
@@ -5828,7 +5831,7 @@ function Xi({
                 onReorder: a,
                 layoutScroll: !0,
                 className: A,
-                children: B
+                children: $
               }
             )
           }
@@ -6488,7 +6491,7 @@ const lo = ({
     {
       ref: a,
       ...n,
-      chart: /* @__PURE__ */ e($l, { yAxis: { hide: !0 }, ...n.chart })
+      chart: /* @__PURE__ */ e(Bl, { yAxis: { hide: !0 }, ...n.chart })
     }
   );
 }), Co = R(
@@ -6502,7 +6505,7 @@ const lo = ({
         {
           ref: a,
           ...n,
-          chart: /* @__PURE__ */ e(Bl, { yAxis: { hide: !0 }, ...n.chart })
+          chart: /* @__PURE__ */ e($l, { yAxis: { hide: !0 }, ...n.chart })
         }
       );
     }
@@ -6880,15 +6883,15 @@ const lo = ({
 }, Ro = {
   "line-chart": "min-h-48",
   "bar-chart": "min-h-64"
-}, $o = {
+}, Bo = {
   "line-chart": "from-f1-background-accent",
   "bar-chart": "from-f1-background-promote"
-}, Bo = {
+}, $o = {
   "line-chart": "default",
   "bar-chart": "promote"
 }, Wo = E(
   function({ title: n, content: a, buttonLabel: r, buttonIcon: l, buttonAction: s, type: i }, c) {
-    const d = Po[i], f = Ro[i], u = $o[i], m = Bo[i];
+    const d = Po[i], f = Ro[i], u = Bo[i], m = $o[i];
     return /* @__PURE__ */ o(
       St,
       {
@@ -7552,24 +7555,24 @@ function kd({
     trackedMinutes: t,
     remainingMinutes: n,
     canSeeRemainingTime: v
-  }), z = O === "clocked-out", y = m?.map(($) => ({
-    value: $.id,
-    label: $.duration ? `${$.name} · ${$.duration}` : $.name,
-    description: $.description,
-    tag: $.isPaid ? r.paid : r.unpaid
+  }), z = O === "clocked-out", y = m?.map((B) => ({
+    value: B.id,
+    label: B.duration ? `${B.name} · ${B.duration}` : B.name,
+    description: B.description,
+    tag: B.isPaid ? r.paid : r.unpaid
   })) ?? [], [I, C] = T(!1), A = () => {
     if (y.length > 1)
       I || C(!0);
     else {
-      const $ = y?.[0]?.value;
-      u?.($);
+      const B = y?.[0]?.value;
+      u?.(B);
     }
-  }, B = ($) => {
-    p?.($), C(!1), u?.($);
-  }, x = z && s.length && !c && i, N = s.find(($) => $.id === l), k = s.map(($) => ({
-    value: $.id,
-    label: $.name,
-    icon: $.icon
+  }, $ = (B) => {
+    p?.(B), C(!1), u?.(B);
+  }, x = z && s.length && !c && i, N = s.find((B) => B.id === l), k = s.map((B) => ({
+    value: B.id,
+    label: B.name,
+    icon: B.icon
   })), G = O === "break", [re, se] = T(!1);
   return /* @__PURE__ */ e("div", { className: "@container", children: /* @__PURE__ */ o("div", { className: "flex-grow flex-col", children: [
     /* @__PURE__ */ o("div", { className: "flex flex-col-reverse items-center gap-2 @xs:flex-row", children: [
@@ -7613,7 +7616,7 @@ function kd({
             {
               onClick: d,
               label: r.clockIn,
-              icon: $t
+              icon: Bt
             }
           ) }),
           O === "clocked-in" && /* @__PURE__ */ o(U, { children: [
@@ -7624,7 +7627,7 @@ function kd({
                 hideLabel: !0,
                 value: "",
                 options: y,
-                onChange: B,
+                onChange: $,
                 open: I,
                 onOpenChange: C,
                 children: /* @__PURE__ */ e("div", { "aria-label": "Select break type", children: /* @__PURE__ */ e(
@@ -7632,7 +7635,7 @@ function kd({
                   {
                     label: r.break,
                     variant: "neutral",
-                    icon: Bt,
+                    icon: $t,
                     hideLabel: !0
                   }
                 ) })
@@ -7643,7 +7646,7 @@ function kd({
                 onClick: A,
                 label: r.break,
                 variant: "neutral",
-                icon: Bt,
+                icon: $t,
                 hideLabel: !0
               }
             ) }),
@@ -7673,7 +7676,7 @@ function kd({
               {
                 onClick: d,
                 label: r.resume,
-                icon: $t
+                icon: Bt
               }
             )
           ] })
@@ -8054,12 +8057,12 @@ export {
   du as F0ActionBar,
   uu as F0AiBanner,
   In as F0AvatarModule,
-  $d as F0ButtonToggle,
+  Bd as F0ButtonToggle,
   jc as F0Callout,
   Mc as F0SegmentedControl,
   fu as F0TableOfContent,
   Vc as F0VersionHistory,
-  Bd as F1SearchBox,
+  $d as F1SearchBox,
   mu as FILE_TYPES,
   Wd as FileItem,
   Kc as HighlightBanner,
@@ -8095,7 +8098,7 @@ export {
   Au as RadarChart,
   ni as Reactions,
   Fu as ResourceHeader,
-  Br as RichTextDisplay,
+  $r as RichTextDisplay,
   Lu as RichTextEditor,
   Dd as ScrollArea,
   rd as SearchBar,
@@ -8144,9 +8147,9 @@ export {
   Xd as getGranularitySimpleDefinition,
   Qd as granularityDefinitions,
   eu as modules,
-  $u as predefinedPresets,
+  Bu as predefinedPresets,
   tu as rangeSeparator,
-  Bu as selectSizes,
+  $u as selectSizes,
   Je as useAiPromotionChat,
   Wu as useDataCollectionData,
   Mu as useDataCollectionSource,
