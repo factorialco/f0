@@ -335,7 +335,6 @@ export const defaultTranslations = {
     },
     credits: {
       title: "Credits",
-      companyCredits: "Company credits",
       employeeCredits: "Your credits",
       creditsLeft: "{{total}} left",
       monthlyCredits: "Monthly credits",
