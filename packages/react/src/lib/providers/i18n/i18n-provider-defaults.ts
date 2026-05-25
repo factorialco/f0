@@ -327,10 +327,17 @@ export const defaultTranslations = {
         source: "Source",
         applied: "Applied on",
       },
+      jobPosting: {
+        status: "Status",
+        publishedAt: "Published on",
+      },
       requisition: {
         lineManager: "Line manager",
-        reason: "Reason",
         status: "Status",
+      },
+      vacancy: {
+        status: "Status",
+        deadline: "Deadline",
       },
     },
     credits: {

@@ -1,33 +1,11 @@
-import { describe, expect, it, vi, beforeEach } from "vitest"
+import { describe, expect, it } from "vitest"
 import "@testing-library/jest-dom/vitest"
 
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
-// Mock the registry so we control which renderers are available
-vi.mock("../entityRefRegistry", () => {
-  return {
-    getEntityRefRenderer: vi.fn(),
-  }
-})
-
-import { getEntityRefRenderer } from "../entityRefRegistry"
 import { EntityRef, extractText } from "../EntityRef"
 
 describe("EntityRef", () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    // Register a mock renderer for "person"
-    const MockPerson = ({ id, label }: { id: string; label: string }) => (
-      <span data-testid="mock-person">{`${label} (${id})`}</span>
-    )
-    ;(getEntityRefRenderer as ReturnType<typeof vi.fn>).mockImplementation(
-      (type: string) => {
-        if (type === "person") return MockPerson
-        return undefined
-      }
-    )
-  })
-
   it("renders children as plain text when id is missing", () => {
     render(<EntityRef type="person">Ana García</EntityRef>)
     expect(screen.getByText("Ana García")).toBeInTheDocument()
@@ -38,24 +16,25 @@ describe("EntityRef", () => {
     expect(screen.getByText("Ana García")).toBeInTheDocument()
   })
 
-  it("renders children as plain text for an unregistered type", () => {
+  it("renders label as plain text for an unregistered type", () => {
     render(
       <EntityRef type="unknown" id="1">
         Unknown Entity
       </EntityRef>
     )
     expect(screen.getByText("Unknown Entity")).toBeInTheDocument()
+    expect(screen.queryByRole("button")).not.toBeInTheDocument()
   })
 
-  it("dispatches to the registered renderer for a known type", () => {
+  it("renders label as plain text for a known type without a resolver", () => {
+    // No AiChatStateProvider wrapping ⇒ no resolvers configured
     render(
       <EntityRef type="person" id="42">
         Ana García
       </EntityRef>
     )
-    expect(screen.getByTestId("mock-person")).toHaveTextContent(
-      "Ana García (42)"
-    )
+    expect(screen.getByText("Ana García")).toBeInTheDocument()
+    expect(screen.queryByRole("button")).not.toBeInTheDocument()
   })
 })
 
