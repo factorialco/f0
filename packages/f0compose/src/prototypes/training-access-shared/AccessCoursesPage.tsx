@@ -117,7 +117,7 @@ export function AccessCoursesPage({
               tabs={trainingsTopNav.map((tab) => ({
                 id: tab.id,
                 label: tab.label,
-                onClick: () => navigate(tab.id === "trainings" ? baseHref : tab.href),
+                onClick: () => navigate(baseHref),
               }))}
               activeTabId="trainings"
             />
