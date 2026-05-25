@@ -223,7 +223,7 @@ export function CreditsPopover() {
               </>
             )}
           </div>
-          {credits.upgradePlanUrl && (
+          {credits.upgradePlanUrl && showCompanySection && (
             <div className="flex items-center justify-between border-0 border-t border-solid border-f1-border-secondary p-3">
               <span>{i18n.t("ai.credits.needMoreCredits")}</span>
               <F0Button

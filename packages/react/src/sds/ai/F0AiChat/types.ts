@@ -192,7 +192,7 @@ export type AiChatCredits = {
   companyLogoUrl?: string
   /** Plan name displayed below the company name (e.g. "Free plan", "Enterprise"). */
   planName?: string
-  /** Whether the user can view company-level credits. When false, the company credits section is hidden. Defaults to true for backward compatibility. */
+  /** Whether the user can view company-level credits. When false, the company credits section AND the upgrade plan CTA are hidden. Defaults to true for backward compatibility. */
   canViewCompanyCredits?: boolean
 }
 

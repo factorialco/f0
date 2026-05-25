@@ -96,6 +96,41 @@ describe("CreditsPopover", () => {
     expect(screen.getByText("70 left")).toBeInTheDocument()
   })
 
+  it("hides the upgrade plan CTA when canViewCompanyCredits is false", async () => {
+    mockCredits = makeCredits(
+      {
+        canViewCompanyCredits: false,
+        upgradePlanUrl: "https://example.com/upgrade",
+      },
+      { used: 250, total: 1000, employeeUsed: 30, employeeTotal: 100 }
+    )
+
+    render(<CreditsPopover />)
+    await openPopover()
+
+    await waitFor(() => {
+      expect(screen.getByText("Your credits")).toBeInTheDocument()
+    })
+    expect(screen.queryByText("Need more credits?")).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("link", { name: /upgrade/i })
+    ).not.toBeInTheDocument()
+  })
+
+  it("shows the upgrade plan CTA when canViewCompanyCredits is true (default)", async () => {
+    mockCredits = makeCredits(
+      { upgradePlanUrl: "https://example.com/upgrade" },
+      { used: 250, total: 1000 }
+    )
+
+    render(<CreditsPopover />)
+    await openPopover()
+
+    await waitFor(() => {
+      expect(screen.getByText("Need more credits?")).toBeInTheDocument()
+    })
+  })
+
   it("shows company section by default (canViewCompanyCredits omitted)", async () => {
     mockCredits = makeCredits({}, { used: 100, total: 500 })
 
