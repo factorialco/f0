@@ -1,10 +1,10 @@
-import type { ReactElement, ReactNode } from "react"
+import type { ReactElement } from "react"
 
-import { fireEvent, render as rtlRender } from "@testing-library/react"
+import { fireEvent } from "@testing-library/react"
 import { ReactFlowProvider } from "@xyflow/react"
 import { describe, expect, it, vi } from "vitest"
 
-import { TestProviders, screen } from "@/testing/test-utils"
+import { screen, zeroRender } from "@/testing/test-utils"
 
 import { F0GraphNode } from "../F0GraphNode"
 
@@ -14,13 +14,17 @@ const personAvatar = {
   lastName: "Ic",
 } as const
 
-const Wrapper = ({ children }: { children: ReactNode }) => (
-  <TestProviders>
-    <ReactFlowProvider>{children}</ReactFlowProvider>
-  </TestProviders>
-)
-
-const render = (ui: ReactElement) => rtlRender(ui, { wrapper: Wrapper })
+// F0GraphNode reads from the React Flow store, so every render must be
+// scoped to a ReactFlowProvider. We keep using zeroRender for the
+// design-system providers (i18n, l10n, etc.) and wrap the UI inline,
+// also re-wrapping when callers use `rerender(...)` so the provider
+// survives the second render.
+const render = (ui: ReactElement) => {
+  const result = zeroRender(<ReactFlowProvider>{ui}</ReactFlowProvider>)
+  const wrappedRerender: typeof result.rerender = (nextUi) =>
+    result.rerender(<ReactFlowProvider>{nextUi}</ReactFlowProvider>)
+  return { ...result, rerender: wrappedRerender }
+}
 
 describe("F0GraphNode", () => {
   it("renders with default props", () => {
