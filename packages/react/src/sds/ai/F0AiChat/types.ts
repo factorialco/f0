@@ -171,6 +171,8 @@ export type AiChatToolHint = {
 export type CreditsUsage = {
   used: number
   total: number
+  employeeUsed?: number
+  employeeTotal?: number
 }
 
 /**
@@ -190,6 +192,8 @@ export type AiChatCredits = {
   companyLogoUrl?: string
   /** Plan name displayed below the company name (e.g. "Free plan", "Enterprise"). */
   planName?: string
+  /** Whether the user has permission to view company-level credits. When false, only employee credits are shown. */
+  canManageOne?: boolean
 }
 
 /**

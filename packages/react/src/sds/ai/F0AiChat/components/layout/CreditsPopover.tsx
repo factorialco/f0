@@ -46,11 +46,20 @@ export function CreditsPopover() {
 
   if (!credits) return null
 
-  const percentage = data
+  const companyPercentage = data
     ? Math.min(100, Math.round((data.used / data.total) * 100))
     : 0
 
+  const employeePercentage = data?.employeeTotal
+    ? Math.min(
+        100,
+        Math.round(((data.employeeUsed ?? 0) / data.employeeTotal) * 100)
+      )
+    : 0
+
   const hasHeader = credits.companyName
+  const hasEmployeeCredits = data?.employeeTotal !== undefined
+  const canViewCompanyCredits = credits.canManageOne !== false
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
@@ -114,47 +123,101 @@ export function CreditsPopover() {
             )}
             {!loading && !error && data && (
               <>
-                <div className="flex justify-between">
-                  <span className="text-base font-medium text-f1-foreground">
-                    {i18n.t("ai.credits.title")}
-                  </span>
-                  <span className="font-medium text-f1-foreground-secondary">
-                    {i18n.t("ai.credits.creditsLeft", {
-                      total: Math.max(
-                        0,
-                        data.total - data.used
-                      ).toLocaleString(),
-                    })}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="relative h-2 w-full overflow-hidden rounded-full bg-f1-background-secondary">
-                    <motion.div
-                      className="h-full rounded-full"
-                      style={{
-                        width: `${percentage}%`,
-                        backgroundImage:
-                          "linear-gradient(90deg, #E55619, #A1ADE5, #E51943, #E55619)",
-                        backgroundSize: "300% 100%",
-                      }}
-                      animate={{
-                        backgroundPosition: ["0% 0%", "100% 0%"],
-                      }}
-                      transition={{
-                        duration: 4,
-                        ease: "linear",
-                        repeat: Infinity,
-                        repeatType: "reverse",
-                      }}
-                    />
+                {hasEmployeeCredits && data.employeeTotal !== undefined && (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex justify-between">
+                      <span className="text-base font-medium text-f1-foreground">
+                        {i18n.t("ai.credits.employeeCredits")}
+                      </span>
+                      <span className="font-medium text-f1-foreground-secondary">
+                        {i18n.t("ai.credits.creditsLeft", {
+                          total: Math.max(
+                            0,
+                            data.employeeTotal - (data.employeeUsed ?? 0)
+                          ).toLocaleString(),
+                        })}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="relative h-2 w-full overflow-hidden rounded-full bg-f1-background-secondary">
+                        <motion.div
+                          className="h-full rounded-full"
+                          style={{
+                            width: `${employeePercentage}%`,
+                            backgroundImage:
+                              "linear-gradient(90deg, #E55619, #A1ADE5, #E51943, #E55619)",
+                            backgroundSize: "300% 100%",
+                          }}
+                          animate={{
+                            backgroundPosition: ["0% 0%", "100% 0%"],
+                          }}
+                          transition={{
+                            duration: 4,
+                            ease: "linear",
+                            repeat: Infinity,
+                            repeatType: "reverse",
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-2 w-2 rounded-full bg-f1-border" />
+                      <span className="text-sm tabular-nums text-f1-foreground-secondary">
+                        {i18n.t("ai.credits.monthlyCredits")}
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="h-2 w-2 rounded-full bg-f1-border" />
-                  <span className="text-sm tabular-nums text-f1-foreground-secondary">
-                    {i18n.t("ai.credits.monthlyCredits")}
-                  </span>
-                </div>
+                )}
+                {canViewCompanyCredits && (
+                  <>
+                    {hasEmployeeCredits && (
+                      <div className="border-t border-f1-border-secondary" />
+                    )}
+                    <div className="flex flex-col gap-2">
+                      <div className="flex justify-between">
+                        <span className="text-base font-medium text-f1-foreground">
+                          {i18n.t("ai.credits.title")}
+                        </span>
+                        <span className="font-medium text-f1-foreground-secondary">
+                          {i18n.t("ai.credits.creditsLeft", {
+                            total: Math.max(
+                              0,
+                              data.total - data.used
+                            ).toLocaleString(),
+                          })}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="relative h-2 w-full overflow-hidden rounded-full bg-f1-background-secondary">
+                          <motion.div
+                            className="h-full rounded-full"
+                            style={{
+                              width: `${companyPercentage}%`,
+                              backgroundImage:
+                                "linear-gradient(90deg, #E55619, #A1ADE5, #E51943, #E55619)",
+                              backgroundSize: "300% 100%",
+                            }}
+                            animate={{
+                              backgroundPosition: ["0% 0%", "100% 0%"],
+                            }}
+                            transition={{
+                              duration: 4,
+                              ease: "linear",
+                              repeat: Infinity,
+                              repeatType: "reverse",
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <div className="h-2 w-2 rounded-full bg-f1-border" />
+                        <span className="text-sm tabular-nums text-f1-foreground-secondary">
+                          {i18n.t("ai.credits.monthlyCredits")}
+                        </span>
+                      </div>
+                    </div>
+                  </>
+                )}
               </>
             )}
           </div>
