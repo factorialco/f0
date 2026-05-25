@@ -423,7 +423,6 @@ const meta: Meta<typeof ApplicationFrame> = {
       },
       credits: {
         fetchUsage: mockFetchCreditsUsage,
-        upgradePlanUrl: "https://example.com/upgrade",
         companyName: "Factorial",
         companyLogoUrl: "/avatars/factorial.png",
         planName: "Free plan",
@@ -969,7 +968,6 @@ export const FullscreenWithActions: Story = {
       },
       credits: {
         fetchUsage: mockFetchCreditsUsage,
-        upgradePlanUrl: "https://example.com/upgrade",
         companyName: "Factorial",
         companyLogoUrl: "/avatars/factorial.png",
         planName: "Free plan",

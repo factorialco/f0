@@ -335,13 +335,10 @@ export const defaultTranslations = {
     },
     credits: {
       title: "Credits",
-      companyCredits: "Company credits",
       employeeCredits: "Your credits",
       creditsLeft: "{{total}} left",
       monthlyCredits: "Monthly credits",
       creditsError: "Could not load credits",
-      upgradePlan: "Upgrade",
-      needMoreCredits: "Need more credits?",
     },
     reportCard: {
       reportLabel: "Report",
