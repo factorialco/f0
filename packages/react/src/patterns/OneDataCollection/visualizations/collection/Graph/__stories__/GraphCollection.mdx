@@ -1,0 +1,295 @@
+import { Canvas, Controls, Meta, Unstyled } from "@storybook/addon-docs/blocks"
+
+import * as Stories from "./GraphCollection.stories"
+
+<Meta of={Stories} />
+
+# Graph (OneDataCollection)
+
+Phase 1 Graph visualization for `<OneDataCollection>`. Renders a record set
+as an interactive tree or DAG using the F0Graph runtime, with adapters for
+parent linkage, optional explicit edges, and a custom `renderNode`. Use it
+for org charts, dependency trees, navigable hierarchies, and small DAGs
+where the consumer owns the node UI.
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+## When to use
+
+- **Hierarchies** — org charts, file trees, category trees, anything with a
+  single-parent linkage.
+- **Small DAGs** — when a record has multiple parents, declare them via
+  `nodeAdapter` returning `{ parentId, parentIds }`.
+- **Lazy expansion** — large trees where children are fetched on demand;
+  pair `loadChildren` with `paginationType: "infinite-scroll"` so the lazy
+  flag survives `useSelectable` filtering.
+
+Pick a different visualization (Card / Kanban / Table) when records are
+_flat_ with no parent linkage, or when grouping / column-level sorting is
+the primary affordance — Phase 1 Graph does not implement either.
+
+## API
+
+### `GraphVisualizationOptions<R>`
+
+<Unstyled>
+  <table>
+    <thead>
+      <tr>
+        <th>Field</th>
+        <th>Type</th>
+        <th>Required</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>nodeAdapter</code>
+        </td>
+        <td>
+          <code>
+            (record: R) =&gt; &#123; parentId, parentIds?, childrenCount?,
+            childrenLoaded? &#125;
+          </code>
+        </td>
+        <td>Yes</td>
+        <td>
+          Maps a record to its parent linkage. <code>parentIds</code> opts the
+          node into DAG mode.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>edgeAdapter</code>
+        </td>
+        <td>
+          <code>(record: R) =&gt; ExplicitEdge[]</code>
+        </td>
+        <td>No</td>
+        <td>
+          Adds explicit edges on top of parent-derived edges. Cycle-closing
+          edges are dropped.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>renderNode</code>
+        </td>
+        <td>
+          <code>(record, ctx, extras) =&gt; ReactNode</code>
+        </td>
+        <td>Yes</td>
+        <td>
+          Consumer-owned node UI. <code>extras.actions</code> carries the
+          dropdown built from <code>source.itemActions</code>.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>loadChildren</code>
+        </td>
+        <td>
+          <code>(nodeId, &#123; signal &#125;) =&gt; Promise&lt;R[]&gt;</code>
+        </td>
+        <td>No</td>
+        <td>
+          Lazy loader. <strong>Requires</strong> a paginated source. Honor the
+          abort signal.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>graphId</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>No</td>
+        <td>
+          Defaults to <code>React.useId()</code>. Set it explicitly to persist
+          per-instance F0Graph state across mounts.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>graphProps</code>
+        </td>
+        <td>
+          <code>Omit&lt;F0GraphProps, …&gt;</code>
+        </td>
+        <td>No</td>
+        <td>
+          Passthrough to F0Graph. Selection, search, <code>nodes</code>,{" "}
+          <code>edges</code>, <code>loadChildren</code>, <code>renderNode</code>{" "}
+          are reserved.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### `GraphRenderNodeExtras`
+
+<Unstyled>
+  <table>
+    <thead>
+      <tr>
+        <th>Field</th>
+        <th>Type</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>actions</code>
+        </td>
+        <td>
+          <code>ReactNode | undefined</code>
+        </td>
+        <td>
+          Pre-built actions dropdown when <code>source.itemActions</code>{" "}
+          returns ≥1 action. Spread into{" "}
+          <code>&lt;F0GraphNode actions=&#123;extras.actions&#125; /&gt;</code>.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Patterns
+
+### Hierarchy adapter (single parent)
+
+<Canvas of={Stories.Default} />
+
+```tsx
+const visualization = {
+  type: "graph",
+  options: {
+    nodeAdapter: (person) => ({ parentId: person.managerId }),
+    renderNode: (person, ctx) => (
+      <F0GraphNode {...ctx} title={person.name} subtitle={person.role} />
+    ),
+  },
+}
+```
+
+### Hard removal via filters
+
+<Canvas of={Stories.HardRemovalFilter} />
+
+Records excluded by the active filter are dropped from the projection along
+with every edge incident on them — no orphan promotion. Phase 1 ships hard
+removal only; if you need "dim instead of drop" semantics, surface the
+filter through the F0Graph search input (which uses dim) rather than the
+DataCollection filter.
+
+### Item actions without a detail panel
+
+<Canvas of={Stories.WithItemActionsNoPanel} />
+
+```tsx
+const visualization = {
+  type: "graph",
+  options: {
+    nodeAdapter: (item) => ({ parentId: item.managerId }),
+    renderNode: (item, ctx, extras) => (
+      <F0GraphNode {...ctx} title={item.name} actions={extras.actions} />
+    ),
+  },
+}
+// On the source:
+const source = useDataCollectionSource({
+  dataAdapter,
+  itemActions: (item) => [{ label: "Edit", icon: Pencil, onClick: … }],
+})
+```
+
+### Selection bridge
+
+<Canvas of={Stories.Selectable} />
+
+`source.selectable` opts the graph into multi-select. Lazy-loaded ids are
+covered by the bridge because Graph forces `allPagesSelection: true` when
+`loadChildren` is set.
+
+### Lazy expansion
+
+<Canvas of={Stories.LazyMode} />
+
+```tsx
+const source = useDataCollectionSource({
+  dataAdapter: {
+    paginationType: "infinite-scroll",
+    perPage: 10,
+    fetchData: async () => ({ records: roots /* … */ }),
+  },
+})
+
+const visualization = {
+  type: "graph",
+  options: {
+    nodeAdapter: (record) => ({
+      parentId: record.parentId,
+      childrenCount: record.descendants,
+    }),
+    loadChildren: async (nodeId, { signal }) => {
+      const res = await fetch(`/api/nodes/${nodeId}/children`, { signal })
+      return res.json()
+    },
+    renderNode: (record, ctx) => <F0GraphNode {...ctx} title={record.name} />,
+  },
+}
+```
+
+### Cycle handling
+
+<Canvas of={Stories.Cycle} />
+
+`projectGraph` drops cycle-closing edges and emits a single `console.warn`
+per unique cycle signature. Re-renders with the same cycles do not re-warn.
+
+### Two simultaneous mounts
+
+<Canvas of={Stories.TwoInstances} />
+
+Each `<OneDataCollection>` falls back to `React.useId()` for `graphId`, so
+multiple mounts on the same page never collide on persisted F0Graph state.
+
+## Phase 1 limitations
+
+These map directly to `PLAN.md §9 Acceptance criteria`:
+
+- **No detail panel** — `detailPanel` is intentionally absent from the
+  Phase 1 public surface. Surface details via `extras.actions` or a custom
+  side-panel for now; the detail panel + dim semantics land in Phase 2.
+- **No grouping** — declaring `grouping` on the source while the graph
+  visualization is active throws at the GraphCollection boundary.
+- **Eager requires no pagination** — `paginationType` must be
+  `"no-pagination"` unless `loadChildren` is set.
+- **Lazy requires pagination** — `loadChildren` requires
+  `paginationType: "infinite-scroll"`.
+- **Hard removal only** — filtered-out records disappear; no dim mode.
+- **Single-instance state** — when stacking two graphs on the same page,
+  either let both fall back to `useId()` (auto-isolated) or assign distinct
+  `graphId` values.
+
+## Acceptance criteria
+
+The stories above exercise every Phase 1 acceptance check in
+`Graph/PLAN.md §9`:
+
+- `Default` — eager projection + render-node pipeline.
+- `HardRemovalFilter` — hard-removal semantics on the source filter.
+- `WithItemActionsNoPanel` — `extras.actions` slot when item actions exist.
+- `Selectable` — multi-select bridge over `source.selectable`.
+- `Cycle` — cycle detection + single warn + acyclic projection.
+- `LazyMode` — `loadChildren` + `AbortSignal` per-node cancellation.
+- `TwoInstances` — `useId()`-based `graphId` isolation.
+- `Snapshot` — deterministic visual regression baseline.
