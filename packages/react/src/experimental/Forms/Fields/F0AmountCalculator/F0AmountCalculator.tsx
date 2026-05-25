@@ -199,7 +199,9 @@ export const F0AmountCalculator = forwardRef<
         <PopoverContent
           side={side}
           align={align}
-          className={cn("w-auto min-w-[220px] rounded-xl p-3")}
+          className={cn(
+            "w-auto min-w-[220px] rounded-xl border-f1-border-secondary p-3"
+          )}
         >
           <div className="flex flex-col">
             {!hideLabel && label && <FieldLabel label={label} />}
