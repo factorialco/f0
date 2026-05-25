@@ -71,18 +71,45 @@ describe("useTreeBuilder", () => {
   })
 
   it("cycle detection works — cycles broken, reported in cycles", () => {
-    // Create a cycle: 2 -> 3 -> 2
+    // Real cycle: 2 -> 3 -> 2 (each points to the other as parent), plus a
+    // valid root "1" so we can verify roots are preserved alongside the
+    // broken cycle.
     const nodes: GraphNode<string>[] = [
       { id: "1", parentId: null, data: "root" },
-      { id: "2", parentId: "1", data: "a" },
+      { id: "2", parentId: "3", data: "a" },
       { id: "3", parentId: "2", data: "b" },
     ]
 
-    // Manually create a more complex scenario where we have indirect cycles
-    // For now, verify the cycle detection infrastructure works
     const { result } = renderTreeBuilder(nodes)
-    expect(result.current.cycles).toHaveLength(0)
-    expect(result.current.roots).toHaveLength(1)
+
+    // At least one cycle participant must be reported.
+    expect(result.current.cycles.length).toBeGreaterThan(0)
+    // Reported cycle IDs should all belong to the cycle participants.
+    for (const id of result.current.cycles) {
+      expect(["2", "3"]).toContain(id)
+    }
+    // Real root must still appear.
+    expect(result.current.roots.map((r) => r.id)).toContain("1")
+    // Every node still appears in the map.
+    expect(result.current.nodeMap.size).toBe(3)
+  })
+
+  it("longer cycle (3-node loop) detected and broken", () => {
+    // Cycle: 2 -> 3 -> 4 -> 2
+    const nodes: GraphNode<string>[] = [
+      { id: "1", parentId: null, data: "root" },
+      { id: "2", parentId: "4", data: "a" },
+      { id: "3", parentId: "2", data: "b" },
+      { id: "4", parentId: "3", data: "c" },
+    ]
+
+    const { result } = renderTreeBuilder(nodes)
+
+    expect(result.current.cycles.length).toBeGreaterThan(0)
+    for (const id of result.current.cycles) {
+      expect(["2", "3", "4"]).toContain(id)
+    }
+    expect(result.current.roots.map((r) => r.id)).toContain("1")
   })
 
   it("self-referencing node handled", () => {
