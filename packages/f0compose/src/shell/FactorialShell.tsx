@@ -29,15 +29,17 @@ import { aiChatConfig } from "./aiChatConfig"
 export function FactorialShell({
   activeModule,
   children,
+  sidebar,
 }: {
   activeModule: ModuleId | null
   children: React.ReactNode
+  sidebar?: React.ReactNode
 }) {
   return (
     <F0AiFormRegistryProvider>
       <ApplicationFrame
         ai={aiChatConfig}
-        sidebar={<FactorialSidebar activeModule={activeModule} />}
+        sidebar={sidebar ?? <FactorialSidebar activeModule={activeModule} />}
       >
         {children}
       </ApplicationFrame>

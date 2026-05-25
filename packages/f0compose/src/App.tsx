@@ -22,12 +22,10 @@ export function App() {
 
   let currentPath = "/__module/home"
   if (location.pathname.startsWith("/p/")) {
-    const slug = location.pathname.slice(3)
+    const slug = location.pathname.slice(3).split("/")[0]
     const entry = prototypeRegistry[slug]
     if (entry) {
-      // If the module has a direct prototype link, use the /p/ path
-      // so the sidebar item highlights correctly.
-      currentPath = `/p/${slug}`
+      currentPath = location.pathname
     }
   }
 

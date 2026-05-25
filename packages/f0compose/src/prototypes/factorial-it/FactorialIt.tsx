@@ -1,47 +1,22 @@
-import { F0Box, F0Heading, StandardLayout } from "@factorialco/f0-react"
-import {
-  Page,
-  PageHeader,
-} from "@factorialco/f0-react/dist/experimental"
-import { useState } from "react"
+import { useEffect } from "react"
+import { Navigate, Route, Routes } from "react-router-dom"
+import { useAiChat } from "@factorialco/f0-react"
 
 import type { PrototypeMeta } from "../types"
+import { ItSidebar } from "./ItSidebar"
+import { CompliancePage } from "./pages/CompliancePage"
+import { DevicesPage } from "./pages/DevicesPage"
+import { DiscoverPage } from "./pages/DiscoverPage"
+import { EmployeesPage } from "./pages/EmployeesPage"
+import { HomePage } from "./pages/HomePage"
+import { InboxPage } from "./pages/InboxPage"
+import { MarketplacePage } from "./pages/MarketplacePage"
+import { SecurityPage } from "./pages/SecurityPage"
+import { SettingsPage } from "./pages/SettingsPage"
+import { SaasManagementPage } from "./pages/SaasManagementPage"
+import { TicketsPage } from "./pages/TicketsPage"
 
-type ItAsset = {
-  id: string
-  name: string
-  type: "laptop" | "monitor" | "keyboard" | "mouse" | "headset"
-  status: "active" | "archived" | "maintenance"
-  assignedTo: string | null
-  purchaseDate: string
-}
-
-const seedAssets: ItAsset[] = [
-  {
-    id: "it-001",
-    name: "MacBook Pro 16 M3",
-    type: "laptop",
-    status: "active",
-    assignedTo: "Samuel",
-    purchaseDate: "2024-01-15",
-  },
-  {
-    id: "it-002",
-    name: "Dell U2724D Monitor",
-    type: "monitor",
-    status: "active",
-    assignedTo: "Samuel",
-    purchaseDate: "2024-01-20",
-  },
-  {
-    id: "it-003",
-    name: "Magic Keyboard",
-    type: "keyboard",
-    status: "active",
-    assignedTo: null,
-    purchaseDate: "2023-06-10",
-  },
-]
+export { ItSidebar as sidebar }
 
 export const meta: PrototypeMeta = {
   slug: "factorial-it",
@@ -55,103 +30,36 @@ export const meta: PrototypeMeta = {
   createdAt: "2026-05-21",
 }
 
-export default function FactorialIt() {
-  const [assets] = useState<ItAsset[]>(seedAssets)
+const IT_PLACEHOLDERS = [
+  "Ask about device status, licenses, or open tickets...",
+  "Approve requests, assign devices, or renew a license...",
+  "Which devices are missing security patches?",
+  "Create an onboarding plan for a new employee...",
+  "Show me software licenses approaching their renewal date...",
+]
 
-  const stats = {
-    total: assets.length,
-    active: assets.filter((a) => a.status === "active").length,
-    assigned: assets.filter((a) => a.assignedTo !== null).length,
-  }
+export default function FactorialIt() {
+  const { setPlaceholders } = useAiChat()
+
+  useEffect(() => {
+    setPlaceholders(IT_PLACEHOLDERS)
+    return () => setPlaceholders([])
+  }, [setPlaceholders])
 
   return (
-    <Page
-      header={
-        <PageHeader
-          module={{
-            id: "documents",
-            name: "Factorial IT",
-            href: "/p/factorial-it",
-          }}
-          actions={[]}
-        />
-      }
-    >
-      <StandardLayout>
-        <F0Box display="flex" flexDirection="column" gap="2xl">
-          <F0Box display="flex" flexDirection="column" gap="md">
-            <F0Heading content="Asset Overview" variant="heading-large" as="h2" />
-            <F0Box display="grid" columns="1" gap="md" lg={{ columns: "3" }}>
-              <F0Box
-                display="flex"
-                flexDirection="column"
-                gap="sm"
-                padding="md"
-                border="default"
-                borderRadius="md"
-              >
-                <F0Heading
-                  content="Total Assets"
-                  variant="heading"
-                  as="h3"
-                />
-                <p>{stats.total}</p>
-              </F0Box>
-              <F0Box
-                display="flex"
-                flexDirection="column"
-                gap="sm"
-                padding="md"
-                border="default"
-                borderRadius="md"
-              >
-                <F0Heading content="Active" variant="heading" as="h3" />
-                <p>{stats.active}</p>
-              </F0Box>
-              <F0Box
-                display="flex"
-                flexDirection="column"
-                gap="sm"
-                padding="md"
-                border="default"
-                borderRadius="md"
-              >
-                <F0Heading content="Assigned" variant="heading" as="h3" />
-                <p>{stats.assigned}</p>
-              </F0Box>
-            </F0Box>
-          </F0Box>
-
-          <F0Box display="flex" flexDirection="column" gap="md">
-            <F0Heading content="Assets" variant="heading-large" as="h2" />
-            <F0Box display="flex" flexDirection="column" gap="sm">
-              {assets.map((asset) => (
-                <F0Box
-                  key={asset.id}
-                  display="flex"
-                  justifyContent="between"
-                  padding="md"
-                  border="default"
-                  borderRadius="md"
-                >
-                  <F0Box display="flex" flexDirection="column" gap="xs">
-                    <F0Heading as="h4" content={asset.name} />
-                    <p>{asset.type} • {asset.status}</p>
-                  </F0Box>
-                  <F0Box
-                    display="flex"
-                    flexDirection="column"
-                    gap="xs"
-                  >
-                    <p style={{ textAlign: "right" }}>{asset.assignedTo || "Unassigned"}</p>
-                    <p style={{ textAlign: "right" }}>{asset.purchaseDate}</p>
-                  </F0Box>
-                </F0Box>
-              ))}
-            </F0Box>
-          </F0Box>
-        </F0Box>
-      </StandardLayout>
-    </Page>
+    <Routes>
+      <Route index element={<Navigate to="/p/factorial-it/home" replace />} />
+      <Route path="home" element={<HomePage />} />
+      <Route path="inbox" element={<InboxPage />} />
+      <Route path="discover" element={<DiscoverPage />} />
+      <Route path="tickets" element={<TicketsPage />} />
+      <Route path="devices" element={<DevicesPage />} />
+      <Route path="employees" element={<EmployeesPage />} />
+      <Route path="security" element={<SecurityPage />} />
+      <Route path="compliance" element={<CompliancePage />} />
+      <Route path="saas-management" element={<SaasManagementPage />} />
+      <Route path="marketplace" element={<MarketplacePage />} />
+      <Route path="settings" element={<SettingsPage />} />
+    </Routes>
   )
 }

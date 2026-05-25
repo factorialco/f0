@@ -17,6 +17,7 @@ const modules = import.meta.glob("./*/*.tsx", { eager: true }) as Record<
 export type PrototypeRegistryEntry = {
   component: React.ComponentType
   meta: PrototypeMeta
+  sidebar?: React.ComponentType
 }
 
 export const prototypeRegistry: Record<string, PrototypeRegistryEntry> =
@@ -29,7 +30,10 @@ export const prototypeRegistry: Record<string, PrototypeRegistryEntry> =
           "meta" in mod &&
           "default" in mod
       )
-      .map((mod) => [mod.meta.slug, { component: mod.default, meta: mod.meta }])
+      .map((mod) => [
+        mod.meta.slug,
+        { component: mod.default, meta: mod.meta, sidebar: mod.sidebar },
+      ])
   )
 
 export const allPrototypes: PrototypeMeta[] = Object.values(

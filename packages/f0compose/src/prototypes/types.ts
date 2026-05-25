@@ -34,9 +34,11 @@ export type PrototypeMeta = {
 
 /**
  * Each prototype module exports `meta` and a default React component.
+ * Optionally exports a `sidebar` component to replace the global shell sidebar.
  * The framework reads them via `import.meta.glob` in registry.ts.
  */
 export type PrototypeModule = {
   default: React.ComponentType
   meta: PrototypeMeta
+  sidebar?: React.ComponentType
 }
