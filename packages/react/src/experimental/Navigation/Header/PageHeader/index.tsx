@@ -15,6 +15,7 @@ import { ChevronDown, ChevronLeft, ChevronUp, Menu } from "@/icons/app"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
 import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
+import { AIButton, AIButtonProps } from "@/sds/ai/AIButton"
 import { F0OneSwitch } from "@/sds/ai/F0OneSwitch"
 import { Skeleton } from "@/ui/skeleton"
 
@@ -25,6 +26,7 @@ import { ProductUpdates, ProductUpdatesProp } from "../ProductUpdates"
 export type PageAction = {
   label: string
   icon: IconType
+  kind?: "default" | "ai"
 } & (
   | {
       href: string
@@ -295,6 +297,18 @@ export function PageHeader({
 function PageAction({ action }: { action: PageAction }): ReactElement {
   const ref = useRef<HTMLAnchorElement>(null)
   const [isOpen, setIsOpen] = useState(false)
+
+  if (action.kind === "ai" && "onClick" in action) {
+    return (
+      <AIButton
+        size="md"
+        label={action.label}
+        icon={action.icon as AIButtonProps["icon"]}
+        hideLabel
+        onClick={action.onClick}
+      />
+    )
+  }
 
   if ("actions" in action) {
     return (

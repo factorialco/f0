@@ -4,6 +4,7 @@ import { useState } from "react"
 
 import { F0AiChatProvider } from "@/sds/ai/F0AiChat"
 
+import { ChartLine } from "../../../../icons/ai"
 import { EllipsisHorizontal, Settings } from "../../../../icons/app"
 import { PageHeader } from "./index"
 
@@ -97,6 +98,36 @@ export const WithActions: Story = {
   args: {
     module: defaultModule,
     actions: defaultActions,
+  },
+}
+
+export const WithAIDashboardLaunch: Story = {
+  args: {
+    module: {
+      name: "Trainings",
+      href: "/trainings",
+      id: "company_trainings" as const,
+    },
+    actions: [
+      {
+        label: "Settings",
+        icon: Settings,
+        href: "/trainings/settings",
+      },
+      {
+        kind: "ai",
+        label: "Learn how your employees complete trainings",
+        icon: ChartLine,
+        onClick: () => {
+          // In product code this calls
+          // `useOpenDashboardAction().openDashboard("trainings")`,
+          // which opens One and renders the dashboard inline via the
+          // `displayDashboard` tool call.
+          // eslint-disable-next-line no-alert
+          alert("openDashboard('trainings')")
+        },
+      },
+    ],
   },
 }
 
