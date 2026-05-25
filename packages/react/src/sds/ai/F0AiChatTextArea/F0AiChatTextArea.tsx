@@ -259,7 +259,7 @@ export const F0AiChatTextArea = ({
         fullscreenWelcome && "flex-grow"
       )}
     >
-      <div className="flex w-full max-w-[712px] flex-col gap-2">
+      <div className="flex w-full max-w-content flex-col gap-2">
         {isWelcomeScreen &&
           welcomeScreenSuggestions &&
           welcomeScreenSuggestions.length > 0 &&
@@ -426,7 +426,7 @@ export const F0AiChatTextArea = ({
         {isClarifying ? (
           <motion.div
             key="clarifying-nav-hint"
-            className="flex w-full max-w-[712px] flex-row flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm font-medium text-f1-foreground-tertiary"
+            className="flex w-full max-w-content flex-row flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm font-medium text-f1-foreground-tertiary"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -450,7 +450,7 @@ export const F0AiChatTextArea = ({
           !fullscreenWelcome && (
             <motion.div
               key="chat-disclaimer"
-              className="flex w-full max-w-[712px] flex-row items-center justify-center gap-1"
+              className="flex w-full max-w-content flex-row items-center justify-center gap-1"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -479,7 +479,7 @@ export const F0AiChatTextArea = ({
           <motion.div
             key="chat-footer"
             className={cn(
-              "w-full py-4 mx-auto max-w-[712px]",
+              "w-full py-4 mx-auto max-w-content",
               fullscreen && "flex justify-center"
             )}
             initial={{ opacity: 0, height: 0, overflow: "hidden" }}
