@@ -23,6 +23,7 @@ import type {
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { useSelectable } from "@/hooks/datasource/useSelectable/useSelectable"
+import { useI18n } from "@/lib/providers/i18n"
 import { useIsDev } from "@/lib/providers/user-platafform"
 
 import {
@@ -53,6 +54,9 @@ export const LAZY_REQUIRES_PAGINATION_MESSAGE =
 export const GROUPING_NOT_SUPPORTED_MESSAGE =
   "Graph visualization does not support `grouping`. Remove `source.currentGrouping` or switch to a different visualization."
 
+export const GROUPING_NOT_SUPPORTED_FALLBACK_MESSAGE =
+  "Graph visualization is unavailable for grouped data. Remove grouping to continue."
+
 /**
  * Build a dropdown trigger from `source.itemActions(record)` for use in
  * `F0GraphNode.actions`. Returns `null` when there are no actions to render.
@@ -61,7 +65,8 @@ export const GROUPING_NOT_SUPPORTED_MESSAGE =
  */
 function buildItemActionsSlot<R extends RecordType>(
   record: R,
-  itemActions: ItemActionsDefinition<R> | undefined
+  itemActions: ItemActionsDefinition<R> | undefined,
+  actionsLabel: string
 ): ReactNode {
   if (!itemActions) return null
   const actions = filterItemActions(itemActions, record)
@@ -81,7 +86,7 @@ function buildItemActionsSlot<R extends RecordType>(
         size="sm"
         variant="ghost"
         icon={EllipsisHorizontal}
-        label="Actions"
+        label={actionsLabel}
         hideLabel
       />
     </Dropdown>
@@ -117,11 +122,14 @@ export const GraphCollection = <
   Grouping
 >) => {
   const isDev = useIsDev()
+  const i18n = useI18n()
   const autoGraphId = useId()
   const graphId = graphIdProp ?? autoGraphId
 
   // Guard 1: grouping is unsupported (mirror Kanban).
   if (source.currentGrouping && isDev) {
+    // eslint-disable-next-line no-console
+    console.error(GROUPING_NOT_SUPPORTED_MESSAGE)
     throw new Error(GROUPING_NOT_SUPPORTED_MESSAGE)
   }
 
@@ -152,6 +160,25 @@ export const GraphCollection = <
       onLoadError(error)
     },
   })
+
+  const hasUnsupportedDataShape =
+    data?.type !== undefined && data.type !== "flat"
+  const hasGroupingMisuse =
+    Boolean(source.currentGrouping) || hasUnsupportedDataShape
+
+  const groupingMisuseWarnedRef = useRef<string>("")
+  useEffect(() => {
+    if (!hasGroupingMisuse) return
+
+    const signature = `${source.currentGrouping ? "grouping" : "non-flat"}:${data?.type ?? "unknown"}`
+    if (groupingMisuseWarnedRef.current === signature) return
+    groupingMisuseWarnedRef.current = signature
+
+    // eslint-disable-next-line no-console
+    console.error(
+      `Graph visualization cannot render grouped/non-flat data (${data?.type ?? "unknown"}). ${GROUPING_NOT_SUPPORTED_MESSAGE}`
+    )
+  }, [hasGroupingMisuse, source.currentGrouping, data?.type])
 
   const records = useMemo<ReadonlyArray<Record>>(() => {
     if (!data) return []
@@ -350,7 +377,8 @@ export const GraphCollection = <
     (node: GraphNode<Record>, ctx: F0GraphNodeRenderContext): ReactNode => {
       const actionsSlot = buildItemActionsSlot<Record>(
         node.data,
-        source.itemActions as ItemActionsDefinition<Record> | undefined
+        source.itemActions as ItemActionsDefinition<Record> | undefined,
+        i18n.collections.actions.actions
       )
       // PLAN §3 deviation flagged to user: signature extends consumer's
       // renderNode with a third `extras` arg carrying { actions } so the
@@ -358,7 +386,7 @@ export const GraphCollection = <
       // GraphCollection inspecting/cloning the returned ReactNode.
       return renderNode(node.data, ctx, { actions: actionsSlot })
     },
-    [renderNode, source.itemActions]
+    [renderNode, source.itemActions, i18n.collections.actions.actions]
   )
 
   /**
@@ -432,6 +460,16 @@ export const GraphCollection = <
     return (
       <div className="flex h-full min-h-0 flex-1 items-center justify-center">
         <div aria-label="Loading graph" role="status" />
+      </div>
+    )
+  }
+
+  if (hasGroupingMisuse) {
+    return (
+      <div className="flex h-full min-h-0 flex-1 items-center justify-center px-4 text-center">
+        <p className="text-sm text-f1-foreground-secondary" role="alert">
+          {GROUPING_NOT_SUPPORTED_FALLBACK_MESSAGE}
+        </p>
       </div>
     )
   }
