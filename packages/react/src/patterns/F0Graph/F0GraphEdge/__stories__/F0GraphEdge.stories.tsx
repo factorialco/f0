@@ -88,7 +88,7 @@ const meta = {
 } satisfies Meta<typeof F0GraphEdge>
 
 export default meta
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<typeof F0GraphEdge>
 
 /**
  * All four edge variants rendered side by side in a single canvas so they

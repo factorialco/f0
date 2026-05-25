@@ -23,7 +23,7 @@ import { F0GraphNode } from "../F0GraphNode"
 
 const meta = {
   title: "Graph/F0Graph",
-  component: F0Graph,
+  component: F0Graph<Employee>,
   tags: ["stable"],
   decorators: [
     (Story) => (
@@ -87,7 +87,7 @@ const meta = {
 } satisfies Meta<F0GraphProps<Employee>>
 
 export default meta
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<F0GraphProps<Employee>>
 
 // ─── Sample data ───────────────────────────────────────────────
 interface Team {
