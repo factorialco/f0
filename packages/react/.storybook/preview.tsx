@@ -159,71 +159,52 @@ const preview: Preview = {
     },
     options: {
       /*
-       * Sort all the components and experimental stories in an aplhabetical order, but keep
-       * Introduction, How to contribute, Data test ID, Foundations, and Playground in specific order
+       * Sort stories alphabetically by default, but keep the documented top-level sections
+       * and nested Foundations/CRUD patterns groups in the specific order defined below.
        */
-      storySort: (a, b) => {
-        const topLevelOrder = [
-          "introduction",
-          "how-to-contribute",
-          "ai-configuration",
-          "foundations",
-          "components",
-          "patterns",
-          "kits",
-          "layouts",
-          "library",
-          "experimental",
-          "examples",
-          "internal",
-        ]
-
-        const aId = a.id.split("-")?.[0].toLowerCase()
-        const bId = b.id.split("-")?.[0].toLowerCase()
-
-        const aIndex = topLevelOrder.indexOf(aId)
-        const bIndex = topLevelOrder.indexOf(bId)
-
-        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex
-        if (aIndex !== -1) return -1
-        if (bIndex !== -1) return 1
-
-        const isAFoundation = aId.startsWith("foundations/")
-        const isBFoundation = bId.startsWith("foundations/")
-
-        if (isAFoundation || isBFoundation) {
-          if (isAFoundation && isBFoundation) {
-            const foundationOrder = [
-              "colors",
-              "typography",
-              "spacing",
-              "borders",
-              "shadows",
-              "icons",
-            ]
-            const aFoundationIndex = foundationOrder.indexOf(aId.split("/")[1])
-            const bFoundationIndex = foundationOrder.indexOf(bId.split("/")[1])
-            if (aFoundationIndex !== -1 && bFoundationIndex !== -1) {
-              return aFoundationIndex - bFoundationIndex
-            }
-          }
-          return isAFoundation ? -1 : 1
-        }
-
-        const graphOrder = [
-          "Graph/F0Graph",
-          "Graph/F0GraphNode",
-          "Graph/F0GraphEdge",
-          "Graph/F0GraphControls",
-        ]
-        const aGraphIndex = graphOrder.indexOf(a.title)
-        const bGraphIndex = graphOrder.indexOf(b.title)
-        if (aGraphIndex !== -1 && bGraphIndex !== -1)
-          return aGraphIndex - bGraphIndex
-        if (aGraphIndex !== -1) return -1
-        if (bGraphIndex !== -1) return 1
-
-        return a.title.localeCompare(b.title)
+      storySort: {
+        method: "alphabetical",
+        order: [
+          "Introduction",
+          "How to contribute",
+          "AI configuration",
+          "Foundations",
+          ["Colors", "Typography", "Spacing", "Borders", "Shadows", "Icons"],
+          "Components",
+          "Patterns",
+          [
+            "Data collection",
+            [
+              "CRUD patterns",
+              ["Overview", "By view", "Create", "Read", "Update", "Delete"],
+            ],
+          ],
+          "Graph",
+          ["F0Graph", "F0GraphNode", "F0GraphEdge", "F0GraphControls"],
+          "Kits",
+          "Layouts",
+          "Library",
+          "Experimental",
+          [
+            "CRUD patterns",
+            [
+              "Overview",
+              "Principles",
+              "Action hierarchy",
+              "Containers",
+              "Create & Update",
+              "Read",
+              "Delete & destructive",
+              "Bulk & async",
+              "Decisions",
+              "Quick reference",
+              "Checklist",
+              "New surfaces",
+            ],
+          ],
+          "Examples",
+          "Internal",
+        ],
       },
     },
     darkMode: {

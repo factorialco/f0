@@ -62,7 +62,7 @@ const _DataChartEmptyState = forwardRef<
         aria-hidden
         className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-50 [&_*]:animate-none"
       >
-        <div className="h-full max-h-[360px] w-full max-w-[720px]">
+        <div className="max-w-content h-full max-h-[360px] w-full">
           {skeletonByType[chartType]()}
         </div>
       </div>
