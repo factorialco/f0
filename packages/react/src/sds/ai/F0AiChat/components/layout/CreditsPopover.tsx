@@ -5,7 +5,6 @@ import { F0AvatarCompany } from "@/components/avatars/F0AvatarCompany"
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { Sliders, Upsell } from "@/icons/app"
-import { useReducedMotion } from "@/lib/a11y"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
@@ -14,76 +13,9 @@ import type { CreditsUsage } from "../../types"
 
 import { useAiChat } from "../../providers/AiChatStateProvider"
 
-const CREDITS_GRADIENT =
-  "linear-gradient(90deg, #E55619, #A1ADE5, #E51943, #E55619)"
-
-type CreditsSectionProps = {
-  label: string
-  used: number
-  total: number
-  monthlyLabel: string
-  creditsLeftLabel: string
-  reduceMotion: boolean
-}
-
-function CreditsSection({
-  label,
-  used,
-  total,
-  monthlyLabel,
-  creditsLeftLabel,
-  reduceMotion,
-}: CreditsSectionProps) {
-  const percentage =
-    total > 0 ? Math.min(100, Math.round((used / total) * 100)) : 0
-
-  return (
-    <div className="flex flex-col gap-2">
-      <div className="flex justify-between">
-        <span className="text-base font-medium text-f1-foreground">
-          {label}
-        </span>
-        <span className="font-medium text-f1-foreground-secondary">
-          {creditsLeftLabel}
-        </span>
-      </div>
-      <div className="flex items-center gap-2">
-        <div className="relative h-2 w-full overflow-hidden rounded-full bg-f1-background-secondary">
-          <motion.div
-            className="h-full rounded-full"
-            style={{
-              width: `${percentage}%`,
-              backgroundImage: CREDITS_GRADIENT,
-              backgroundSize: "300% 100%",
-            }}
-            animate={
-              reduceMotion
-                ? undefined
-                : { backgroundPosition: ["0% 0%", "100% 0%"] }
-            }
-            transition={{
-              duration: reduceMotion ? 0 : 4,
-              ease: "linear",
-              repeat: reduceMotion ? 0 : Infinity,
-              repeatType: "reverse",
-            }}
-          />
-        </div>
-      </div>
-      <div className="flex items-center gap-1.5">
-        <div className="h-2 w-2 rounded-full bg-f1-border" />
-        <span className="text-sm tabular-nums text-f1-foreground-secondary">
-          {monthlyLabel}
-        </span>
-      </div>
-    </div>
-  )
-}
-
 export function CreditsPopover() {
   const { credits } = useAiChat()
   const i18n = useI18n()
-  const reduceMotion = useReducedMotion()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
@@ -114,10 +46,11 @@ export function CreditsPopover() {
 
   if (!credits) return null
 
-  const hasHeader = credits.companyName
-  const showCompanySection = credits.canViewCompanyCredits !== false
+  const percentage = data
+    ? Math.min(100, Math.round((data.used / data.total) * 100))
+    : 0
 
-  const monthlyLabel = i18n.t("ai.credits.monthlyCredits")
+  const hasHeader = credits.companyName
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
@@ -162,11 +95,7 @@ export function CreditsPopover() {
         <div className="flex flex-col rounded border border-solid border-f1-border-secondary">
           <div className="flex flex-col gap-2 p-3">
             {loading && (
-              <div
-                className="flex flex-col gap-2"
-                aria-busy="true"
-                aria-live="polite"
-              >
+              <div className="flex flex-col gap-2">
                 <div className="flex justify-between">
                   <div className="h-5 w-16 animate-pulse rounded bg-f1-background-secondary" />
                   <div className="h-5 w-20 animate-pulse rounded bg-f1-background-secondary" />
@@ -185,25 +114,51 @@ export function CreditsPopover() {
             )}
             {!loading && !error && data && (
               <>
-                {showCompanySection && (
-                  <CreditsSection
-                    label={i18n.t("ai.credits.companyCredits")}
-                    used={data.used}
-                    total={data.total}
-                    monthlyLabel={monthlyLabel}
-                    creditsLeftLabel={i18n.t("ai.credits.creditsLeft", {
+                <div className="flex justify-between">
+                  <span className="text-base font-medium text-f1-foreground">
+                    {i18n.t("ai.credits.title")}
+                  </span>
+                  <span className="font-medium text-f1-foreground-secondary">
+                    {i18n.t("ai.credits.creditsLeft", {
                       total: Math.max(
                         0,
                         data.total - data.used
                       ).toLocaleString(),
                     })}
-                    reduceMotion={reduceMotion}
-                  />
-                )}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="relative h-2 w-full overflow-hidden rounded-full bg-f1-background-secondary">
+                    <motion.div
+                      className="h-full rounded-full"
+                      style={{
+                        width: `${percentage}%`,
+                        backgroundImage:
+                          "linear-gradient(90deg, #E55619, #A1ADE5, #E51943, #E55619)",
+                        backgroundSize: "300% 100%",
+                      }}
+                      animate={{
+                        backgroundPosition: ["0% 0%", "100% 0%"],
+                      }}
+                      transition={{
+                        duration: 4,
+                        ease: "linear",
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="h-2 w-2 rounded-full bg-f1-border" />
+                  <span className="text-sm tabular-nums text-f1-foreground-secondary">
+                    {i18n.t("ai.credits.monthlyCredits")}
+                  </span>
+                </div>
               </>
             )}
           </div>
-          {credits.upgradePlanUrl && showCompanySection && (
+          {credits.upgradePlanUrl && (
             <div className="flex items-center justify-between border-0 border-t border-solid border-f1-border-secondary p-3">
               <span>{i18n.t("ai.credits.needMoreCredits")}</span>
               <F0Button
