@@ -1,5 +1,13 @@
 import { useState } from "react"
-import { F0Dialog } from "@factorialco/f0-react"
+import {
+  F0BigNumber,
+  F0Box,
+  F0Button,
+  F0Card,
+  F0Dialog,
+  F0Heading,
+  F0Text,
+} from "@factorialco/f0-react"
 import {
   OneDataCollection,
   Page,
@@ -10,21 +18,28 @@ import {
 import {
   Add,
   ArrowRight,
+  Check,
   Delete,
   Download,
   EyeInvisible,
   EyeVisible,
   LayersFront,
+  Money,
   Upload,
 } from "@factorialco/f0-react/icons/app"
-import { useNavigate, useSearchParams } from "react-router-dom"
+import { useSearchParams } from "react-router-dom"
 
 import {
   competencies,
   employees,
+  insightsAggregates,
   trainingAxes,
+  trainingBudgets,
+  trainingRequests,
   trainings,
   type Training,
+  type TrainingBudget,
+  type TrainingRequest,
 } from "@/fixtures"
 import { applySort } from "@/lib/applySort"
 
@@ -37,6 +52,7 @@ import { SurveyTemplatesTab } from "../trainings/list/SurveyTemplatesTab"
 import { trainingsTopNav } from "../trainings/topNav"
 
 type AccessRole = "admin" | "editor" | "viewer"
+type TopTabId = "trainings" | "requests" | "budgets" | "insights"
 type ListTabId = "courses" | "categories" | "axes" | "survey_templates"
 
 type TrainingsListAction =
@@ -55,6 +71,12 @@ type SimpleDialog = {
   critical?: boolean
 }
 
+type InsightsExportDialog = {
+  title: string
+  description: string
+  primaryLabel: string
+}
+
 const listTabs: { id: ListTabId; label: string }[] = [
   { id: "courses", label: "All courses" },
   { id: "categories", label: "Tags" },
@@ -63,6 +85,32 @@ const listTabs: { id: ListTabId; label: string }[] = [
 ]
 
 const VALID_LIST_TABS = new Set<string>(listTabs.map((tab) => tab.id))
+const VALID_TOP_TABS = new Set<string>(trainingsTopNav.map((tab) => tab.id))
+
+const formatCurrency = (amount: number) =>
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(amount)
+
+const bigCurrency = (amount: number) => ({
+  value: amount,
+  units: "€",
+  unitsPosition: "prepend" as const,
+})
+
+const bigPercentage = (amount: number) => ({
+  value: amount,
+  units: "%",
+})
+
+const formatDate = (date: string) =>
+  new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(date))
 
 function getRows(trainingIds?: Set<string>) {
   if (!trainingIds) return trainings
@@ -78,17 +126,27 @@ export function AccessCoursesPage({
   role: AccessRole
   trainingIds?: Set<string>
 }) {
-  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [showNewTraining, setShowNewTraining] = useState(false)
 
+  const rawTopTab = searchParams.get("ttab")
+  const activeTopTab: TopTabId = rawTopTab && VALID_TOP_TABS.has(rawTopTab)
+    ? (rawTopTab as TopTabId)
+    : "trainings"
   const rawListTab = searchParams.get("ltab")
   const activeListTab: ListTabId = rawListTab && VALID_LIST_TABS.has(rawListTab)
     ? (rawListTab as ListTabId)
     : "courses"
 
+  const setTopTab = (id: string) => {
+    const next = new URLSearchParams()
+    if (id !== "trainings") next.set("ttab", id)
+    setSearchParams(next)
+  }
+
   const setListTab = (id: string) => {
     const next = new URLSearchParams()
+    if (activeTopTab !== "trainings") next.set("ttab", activeTopTab)
     next.set("ltab", id)
     setSearchParams(next)
   }
@@ -117,24 +175,26 @@ export function AccessCoursesPage({
               tabs={trainingsTopNav.map((tab) => ({
                 id: tab.id,
                 label: tab.label,
-                onClick: () => navigate(baseHref),
+                onClick: () => setTopTab(tab.id),
               }))}
-              activeTabId="trainings"
+              activeTabId={activeTopTab}
             />
-            <Tabs
-              tabs={listTabs.map((tab) => ({
-                id: tab.id,
-                label: tab.label,
-                onClick: () => setListTab(tab.id),
-              }))}
-              activeTabId={activeListTab}
-              secondary
-            />
+            {activeTopTab === "trainings" && (
+              <Tabs
+                tabs={listTabs.map((tab) => ({
+                  id: tab.id,
+                  label: tab.label,
+                  onClick: () => setListTab(tab.id),
+                }))}
+                activeTabId={activeListTab}
+                secondary
+              />
+            )}
           </>
         }
       >
         <PageContent>
-          {activeListTab === "courses" && (
+          {activeTopTab === "trainings" && activeListTab === "courses" && (
             <AccessCoursesList
               baseHref={baseHref}
               role={role}
@@ -143,9 +203,14 @@ export function AccessCoursesPage({
               onSelect={goToDetail}
             />
           )}
-          {activeListTab === "categories" && <CategoriesTab />}
-          {activeListTab === "axes" && <AxesTab />}
-          {activeListTab === "survey_templates" && <SurveyTemplatesTab />}
+          {activeTopTab === "trainings" && activeListTab === "categories" && <CategoriesTab />}
+          {activeTopTab === "trainings" && activeListTab === "axes" && <AxesTab />}
+          {activeTopTab === "trainings" && activeListTab === "survey_templates" && <SurveyTemplatesTab />}
+          {activeTopTab === "requests" && (
+            <AccessRequestsList role={role} trainingIds={trainingIds} />
+          )}
+          {activeTopTab === "budgets" && <AccessBudgetsList role={role} />}
+          {activeTopTab === "insights" && <AccessInsights role={role} />}
         </PageContent>
       </Page>
 
@@ -157,6 +222,639 @@ export function AccessCoursesPage({
         />
       )}
     </>
+  )
+}
+
+function AccessRequestsList({
+  role,
+  trainingIds,
+}: {
+  role: AccessRole
+  trainingIds?: Set<string>
+}) {
+  const [dialog, setDialog] = useState<SimpleDialog | null>(null)
+  const rows = trainingIds
+    ? trainingRequests.filter((request) =>
+        request.trainingId ? trainingIds.has(request.trainingId) : role === "admin"
+      )
+    : trainingRequests
+  const source = useAccessRequestsSource(rows, role, (action, request) => {
+    if (action === "approve") {
+      setDialog({
+        title: "Approve request",
+        description: `Approve ${request.trainingName} for ${request.authorEmployeeName}.`,
+        primaryLabel: "Approve",
+      })
+      return
+    }
+    if (action === "reject") {
+      setDialog({
+        title: "Reject request",
+        description: `Reject ${request.trainingName} for ${request.authorEmployeeName}.`,
+        primaryLabel: "Reject",
+        critical: true,
+      })
+      return
+    }
+    setDialog({
+      title: "Request detail",
+      description: `${request.authorEmployeeName} requested ${request.trainingName}. Need: ${request.trainingNeed}`,
+      primaryLabel: "Close",
+    })
+  })
+
+  return (
+    <F0Box display="flex" flexDirection="column" gap="xl">
+      <F0Box display="flex" flexDirection="column" gap="xs">
+        <F0Heading content="Requests" variant="heading-large" as="h1" />
+        <F0Text
+          content={
+            role === "admin"
+              ? "Review employee requests and decide whether training should be approved."
+              : "Training requests linked to courses you can access. Decisions stay read-only for this role."
+          }
+          variant="body"
+        />
+      </F0Box>
+      <F0Box display="grid" columns="4" gap="md">
+        <F0BigNumber label="Total" value={rows.length} />
+        <F0BigNumber
+          label="Pending"
+          value={rows.filter((request) => request.status === "pending").length}
+        />
+        <F0BigNumber
+          label="Approved"
+          value={rows.filter((request) => request.status === "approved").length}
+        />
+        <F0BigNumber
+          label="Estimated cost"
+          value={bigCurrency(rows.reduce((total, request) => total + request.cost, 0))}
+        />
+      </F0Box>
+      <OneDataCollection
+        id={`training-access-${role}/requests/v1`}
+        source={source}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              columns: [
+                {
+                  label: "Employee",
+                  sorting: "employee",
+                  render: (request) => ({ type: "text", value: request.authorEmployeeName }),
+                },
+                {
+                  label: "Training",
+                  sorting: "training",
+                  render: (request) => ({ type: "text", value: request.trainingName }),
+                },
+                {
+                  label: "Status",
+                  render: (request) => ({
+                    type: "status",
+                    value: {
+                      status: requestStatusVariant(request.status),
+                      label: requestStatusLabel(request.status),
+                    },
+                  }),
+                },
+                {
+                  label: "Cost",
+                  sorting: "cost",
+                  render: (request) => formatCurrency(request.cost),
+                },
+                {
+                  label: "Schedule",
+                  render: (request) => ({
+                    type: "text",
+                    value: `${formatDate(request.startDate)} - ${formatDate(request.endDate)}`,
+                  }),
+                },
+                {
+                  label: "Reviewer",
+                  render: (request) => ({
+                    type: "text",
+                    value: request.reviewerEmployeeName ?? "Not assigned",
+                  }),
+                },
+              ],
+            },
+          },
+        ]}
+      />
+      {dialog && (
+        <F0Dialog
+          isOpen={true}
+          onClose={() => setDialog(null)}
+          position="center"
+          width="md"
+          title={dialog.title}
+          description={dialog.description}
+          primaryAction={{
+            label: dialog.primaryLabel,
+            variant: dialog.critical ? "critical" : "default",
+            onClick: () => setDialog(null),
+          }}
+          secondaryAction={{
+            label: dialog.cancelLabel ?? "Cancel",
+            onClick: () => setDialog(null),
+          }}
+        />
+      )}
+    </F0Box>
+  )
+}
+
+function AccessBudgetsList({ role }: { role: AccessRole }) {
+  const [dialog, setDialog] = useState<SimpleDialog | null>(null)
+  const source = useAccessBudgetsSource(trainingBudgets, role, (action, budget) => {
+    if (action === "new") {
+      setDialog({
+        title: "New training budget",
+        description: "Create a new budget for training spend. This prototype keeps the form as a modal confirmation.",
+        primaryLabel: "Create budget",
+      })
+      return
+    }
+    if (action === "archive") {
+      setDialog({
+        title: "Archive budget",
+        description: `Archive ${budget.name}? Historical spend remains accessible in Insights.`,
+        primaryLabel: "Archive",
+        critical: true,
+      })
+      return
+    }
+    setDialog({
+      title: budget.name,
+      description: `${budget.scopeName}: ${formatCurrency(budget.spentAmount)} spent, ${formatCurrency(budget.pendingAmount)} pending, ${formatCurrency(budget.remainingAmount)} remaining.`,
+      primaryLabel: "Close",
+    })
+  })
+
+  return (
+    <F0Box display="flex" flexDirection="column" gap="xl">
+      <F0Box display="flex" flexDirection="column" gap="xs">
+        <F0Heading content="Budgets" variant="heading-large" as="h1" />
+        <F0Text
+          content={
+            role === "admin"
+              ? "Track training budget allocation, spend, pending approvals and remaining funds."
+              : "Read-only budget visibility for the trainings you can access."
+          }
+          variant="body"
+        />
+      </F0Box>
+      <F0Box display="grid" columns="4" gap="md">
+        <F0BigNumber
+          label="Total budget"
+          value={bigCurrency(trainingBudgets.reduce((total, budget) => total + budget.totalAmount, 0))}
+        />
+        <F0BigNumber
+          label="Spent"
+          value={bigCurrency(trainingBudgets.reduce((total, budget) => total + budget.spentAmount, 0))}
+        />
+        <F0BigNumber
+          label="Pending"
+          value={bigCurrency(trainingBudgets.reduce((total, budget) => total + budget.pendingAmount, 0))}
+        />
+        <F0BigNumber
+          label="Remaining"
+          value={bigCurrency(trainingBudgets.reduce((total, budget) => total + budget.remainingAmount, 0))}
+        />
+      </F0Box>
+      <OneDataCollection
+        id={`training-access-${role}/budgets/v1`}
+        source={source}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              columns: [
+                {
+                  label: "Budget",
+                  sorting: "name",
+                  render: (budget) => ({ type: "text", value: budget.name }),
+                },
+                {
+                  label: "Year",
+                  sorting: "year",
+                  render: (budget) => ({ type: "number", value: budget.year }),
+                },
+                {
+                  label: "Scope",
+                  render: (budget) => ({ type: "text", value: budget.scopeName }),
+                },
+                {
+                  label: "Total",
+                  sorting: "total",
+                  render: (budget) => formatCurrency(budget.totalAmount),
+                },
+                {
+                  label: "Spent",
+                  sorting: "spent",
+                  render: (budget) => formatCurrency(budget.spentAmount),
+                },
+                {
+                  label: "Pending",
+                  render: (budget) => formatCurrency(budget.pendingAmount),
+                },
+                {
+                  label: "Remaining",
+                  render: (budget) => formatCurrency(budget.remainingAmount),
+                },
+                {
+                  label: "Status",
+                  render: (budget) => ({
+                    type: "status",
+                    value: {
+                      status: budgetStatusVariant(budget.status),
+                      label: budgetStatusLabel(budget.status),
+                    },
+                  }),
+                },
+                {
+                  label: "Owner",
+                  render: (budget) => ({ type: "text", value: budget.ownerEmployeeName }),
+                },
+              ],
+            },
+          },
+        ]}
+      />
+      {dialog && (
+        <F0Dialog
+          isOpen={true}
+          onClose={() => setDialog(null)}
+          position="center"
+          width="md"
+          title={dialog.title}
+          description={dialog.description}
+          primaryAction={{
+            label: dialog.primaryLabel,
+            variant: dialog.critical ? "critical" : "default",
+            onClick: () => setDialog(null),
+          }}
+          secondaryAction={{
+            label: dialog.cancelLabel ?? "Cancel",
+            onClick: () => setDialog(null),
+          }}
+        />
+      )}
+    </F0Box>
+  )
+}
+
+function AccessInsights({ role }: { role: AccessRole }) {
+  const [dialog, setDialog] = useState<InsightsExportDialog | null>(null)
+  const aggregates = insightsAggregates
+  const maxMonthly = Math.max(...aggregates.monthlyParticipants.map((item) => item.value))
+  const maxCost = Math.max(...aggregates.costByCategory.map((item) => item.value))
+  const maxDepartment = Math.max(...aggregates.participantsByDepartment.map((item) => item.value))
+  const maxHours = Math.max(...aggregates.hoursByMonth.map((item) => item.value))
+
+  return (
+    <F0Box display="flex" flexDirection="column" gap="xl">
+      <F0Box display="flex" justifyContent="between" alignItems="start" gap="md">
+        <F0Box display="flex" flexDirection="column" gap="xs">
+          <F0Heading content="Insights" variant="heading-large" as="h1" />
+          <F0Text
+            content="Overview of training activity, completion and spend for the current period."
+            variant="body"
+          />
+        </F0Box>
+        {role === "admin" && (
+          <F0Button
+            label="Export report"
+            icon={Download}
+            variant="outline"
+            onClick={() =>
+              setDialog({
+                title: "Export insights report",
+                description: "Export the current insights dashboard with charts, department breakdown and completion data.",
+                primaryLabel: "Export report",
+              })
+            }
+          />
+        )}
+      </F0Box>
+      <F0Box display="grid" columns="4" gap="md">
+        <F0BigNumber label="Trainings" value={aggregates.trainingsCount} />
+        <F0BigNumber label="Participants" value={aggregates.participantsTotal} />
+        <F0BigNumber label="Completion rate" value={bigPercentage(aggregates.completionRatePct)} />
+        <F0BigNumber label="Total cost" value={bigCurrency(aggregates.totalCost)} />
+      </F0Box>
+      <F0Box display="grid" columns="2" gap="md">
+        <InsightBars
+          title="Participants by month"
+          rows={aggregates.monthlyParticipants}
+          max={maxMonthly}
+        />
+        <InsightBars
+          title="Hours of training by month"
+          rows={aggregates.hoursByMonth}
+          max={maxHours}
+          format={(value) => `${value} h`}
+        />
+        <InsightBars
+          title="Cost by category"
+          rows={aggregates.costByCategory}
+          max={maxCost}
+          format={formatCurrency}
+        />
+        <InsightBars
+          title="Participants by department"
+          rows={aggregates.participantsByDepartment}
+          max={maxDepartment}
+        />
+      </F0Box>
+      <F0Card title="Completion breakdown">
+        <F0Box display="grid" columns="4" gap="md" padding="md">
+          <F0BigNumber label="Completed" value={aggregates.participantsCompleted} />
+          <F0BigNumber label="In progress" value={aggregates.participantsInProgress} />
+          <F0BigNumber label="Expired" value={aggregates.participantsExpired} />
+          <F0BigNumber label="Not started" value={aggregates.participantsNotStarted} />
+        </F0Box>
+      </F0Card>
+      {dialog && (
+        <F0Dialog
+          isOpen={true}
+          onClose={() => setDialog(null)}
+          position="center"
+          width="md"
+          title={dialog.title}
+          description={dialog.description}
+          primaryAction={{ label: dialog.primaryLabel, onClick: () => setDialog(null) }}
+          secondaryAction={{ label: "Cancel", onClick: () => setDialog(null) }}
+        />
+      )}
+    </F0Box>
+  )
+}
+
+function InsightBars({
+  title,
+  rows,
+  max,
+  format = String,
+}: {
+  title: string
+  rows: { name?: string; month?: string; value: number }[]
+  max: number
+  format?: (value: number) => string
+}) {
+  return (
+    <F0Card title={title}>
+      <F0Box display="flex" flexDirection="column" gap="sm" padding="md">
+        {rows.map((row) => {
+          const label = row.name ?? row.month ?? "-"
+          const width = max === 0 ? 0 : Math.round((row.value / max) * 100)
+          return (
+            <F0Box key={label} display="flex" flexDirection="column" gap="xs">
+              <F0Box display="flex" justifyContent="between" gap="sm">
+                <F0Text content={label} variant="small" />
+                <F0Text content={format(row.value)} variant="small" />
+              </F0Box>
+              <F0Text content={`${width}% of peak`} variant="small" />
+            </F0Box>
+          )
+        })}
+      </F0Box>
+    </F0Card>
+  )
+}
+
+function requestStatusLabel(status: TrainingRequest["status"]) {
+  if (status === "pending") return "Pending"
+  if (status === "approved") return "Approved"
+  if (status === "rejected") return "Rejected"
+  if (status === "in_review") return "In review"
+  return "Cancelled"
+}
+
+function requestStatusVariant(status: TrainingRequest["status"]) {
+  if (status === "approved") return "positive" as const
+  if (status === "pending" || status === "in_review") return "warning" as const
+  if (status === "rejected") return "critical" as const
+  return "neutral" as const
+}
+
+function budgetStatusLabel(status: TrainingBudget["status"]) {
+  if (status === "active") return "Active"
+  if (status === "exceeded") return "Exceeded"
+  if (status === "draft") return "Draft"
+  return "Closed"
+}
+
+function budgetStatusVariant(status: TrainingBudget["status"]) {
+  if (status === "active") return "positive" as const
+  if (status === "exceeded") return "critical" as const
+  if (status === "draft") return "neutral" as const
+  return "info" as const
+}
+
+function useAccessRequestsSource(
+  rows: TrainingRequest[],
+  role: AccessRole,
+  onAction: (action: "open" | "approve" | "reject", request: TrainingRequest) => void
+) {
+  return useDataCollectionSource<TrainingRequest>(
+    {
+      search: { enabled: true, sync: true },
+      filters: {
+        status: {
+          type: "in",
+          label: "Status",
+          options: {
+            options: [
+              { value: "pending", label: "Pending" },
+              { value: "in_review", label: "In review" },
+              { value: "approved", label: "Approved" },
+              { value: "rejected", label: "Rejected" },
+            ],
+          },
+        },
+      },
+      presets: [
+        { label: "Pending", filter: { status: ["pending"] } },
+        { label: "In review", filter: { status: ["in_review"] } },
+      ],
+      sortings: {
+        employee: { label: "Employee" },
+        training: { label: "Training" },
+        cost: { label: "Cost" },
+      },
+      dataAdapter: {
+        paginationType: "pages",
+        perPage: 20,
+        fetchData: ({ filters, search, sortings, pagination }) => {
+          const statusFilter = Array.isArray(filters?.status)
+            ? (filters.status as string[])
+            : []
+          const term = (search ?? "").toLowerCase().trim()
+          const filtered = rows
+            .filter((request) =>
+              statusFilter.length === 0 ? true : statusFilter.includes(request.status)
+            )
+            .filter((request) =>
+              term === ""
+                ? true
+                : `${request.authorEmployeeName} ${request.trainingName} ${request.providerName ?? ""}`
+                    .toLowerCase()
+                    .includes(term)
+            )
+          const sorted = applySort(filtered, sortings, (request, field) => {
+            if (field === "employee") return request.authorEmployeeName.toLowerCase()
+            if (field === "training") return request.trainingName.toLowerCase()
+            if (field === "cost") return request.cost
+            return null
+          })
+          const perPage = pagination?.perPage ?? 20
+          const currentPage =
+            pagination && "currentPage" in pagination && pagination.currentPage
+              ? pagination.currentPage
+              : 1
+          const total = sorted.length
+          const pagesCount = Math.max(1, Math.ceil(total / perPage))
+          const start = (currentPage - 1) * perPage
+          return {
+            type: "pages" as const,
+            records: sorted.slice(start, start + perPage),
+            total,
+            perPage,
+            currentPage,
+            pagesCount,
+          }
+        },
+      },
+      itemActions: (request) => [
+        { label: "Open", icon: ArrowRight, onClick: () => onAction("open", request) },
+        ...(role === "admin" && request.status !== "approved"
+          ? [
+              {
+                label: "Approve",
+                icon: Check,
+                onClick: () => onAction("approve", request),
+              },
+            ]
+          : []),
+        ...(role === "admin" && request.status !== "rejected"
+          ? [
+              {
+                label: "Reject",
+                icon: Delete,
+                onClick: () => onAction("reject", request),
+                critical: true,
+              },
+            ]
+          : []),
+      ],
+    },
+    [rows, role, onAction]
+  )
+}
+
+function useAccessBudgetsSource(
+  rows: TrainingBudget[],
+  role: AccessRole,
+  onAction: (action: "open" | "new" | "archive", budget: TrainingBudget) => void
+) {
+  return useDataCollectionSource<TrainingBudget>(
+    {
+      search: { enabled: true, sync: true },
+      filters: {
+        status: {
+          type: "in",
+          label: "Status",
+          options: {
+            options: [
+              { value: "active", label: "Active" },
+              { value: "exceeded", label: "Exceeded" },
+              { value: "draft", label: "Draft" },
+              { value: "closed", label: "Closed" },
+            ],
+          },
+        },
+      },
+      presets: [
+        { label: "Active", filter: { status: ["active"] } },
+        { label: "Exceeded", filter: { status: ["exceeded"] } },
+      ],
+      sortings: {
+        name: { label: "Name" },
+        year: { label: "Year" },
+        total: { label: "Total" },
+        spent: { label: "Spent" },
+      },
+      dataAdapter: {
+        paginationType: "pages",
+        perPage: 20,
+        fetchData: ({ filters, search, sortings, pagination }) => {
+          const statusFilter = Array.isArray(filters?.status)
+            ? (filters.status as string[])
+            : []
+          const term = (search ?? "").toLowerCase().trim()
+          const filtered = rows
+            .filter((budget) =>
+              statusFilter.length === 0 ? true : statusFilter.includes(budget.status)
+            )
+            .filter((budget) =>
+              term === ""
+                ? true
+                : `${budget.name} ${budget.scopeName} ${budget.ownerEmployeeName}`
+                    .toLowerCase()
+                    .includes(term)
+            )
+          const sorted = applySort(filtered, sortings, (budget, field) => {
+            if (field === "name") return budget.name.toLowerCase()
+            if (field === "year") return budget.year
+            if (field === "total") return budget.totalAmount
+            if (field === "spent") return budget.spentAmount
+            return null
+          })
+          const perPage = pagination?.perPage ?? 20
+          const currentPage =
+            pagination && "currentPage" in pagination && pagination.currentPage
+              ? pagination.currentPage
+              : 1
+          const total = sorted.length
+          const pagesCount = Math.max(1, Math.ceil(total / perPage))
+          const start = (currentPage - 1) * perPage
+          return {
+            type: "pages" as const,
+            records: sorted.slice(start, start + perPage),
+            total,
+            perPage,
+            currentPage,
+            pagesCount,
+          }
+        },
+      },
+      ...(role === "admin"
+        ? {
+            primaryActions: () => ({
+              label: "New budget",
+              icon: Money,
+              onClick: () => onAction("new", rows[0]),
+            }),
+          }
+        : {}),
+      itemActions: (budget) => [
+        { label: "Open", icon: ArrowRight, onClick: () => onAction("open", budget) },
+        ...(role === "admin" && budget.status !== "closed"
+          ? [
+              {
+                label: "Archive",
+                icon: EyeInvisible,
+                onClick: () => onAction("archive", budget),
+                critical: true,
+              },
+            ]
+          : []),
+      ],
+    },
+    [rows, role, onAction]
   )
 }
 

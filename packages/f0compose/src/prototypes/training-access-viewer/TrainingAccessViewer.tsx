@@ -39,7 +39,7 @@ export const meta: PrototypeMeta = {
 }
 
 const BASE_HREF = "/p/training-access-viewer"
-const VIEWER_TRAINING_IDS = new Set(["trn-002", "trn-004"])
+const VIEWER_TRAINING_IDS = new Set(["trn-002", "trn-003", "trn-004"])
 const viewerTrainings = trainings.filter((item) => VIEWER_TRAINING_IDS.has(item.id))
 const VALID_TABS = new Set<string>(detailTabs.map((tab) => tab.id))
 
