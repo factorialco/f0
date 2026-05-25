@@ -39,7 +39,7 @@ Concretely, after this work a consumer can write:
 - **No new graph primitives.** Anything not exposed by `F0Graph`/`F0GraphNode`/`F0GraphEdge` today is out of scope. If the view needs it, the gap is recorded in §10 or §1.6.
 - **No data-fetching changes.** The view consumes whatever `dataAdapter` already produces — same paginated/grouped contract every other visualization uses. No new adapter type.
 - **No grouping support in v1.** Graph topology IS the grouping. `source.currentGrouping` is rejected with a dev-only throw, matching the precedent set by Kanban (`Grouping is not supported in Kanban yet`).
-- **No multi-select bulk-actions in v1.** Selection is mirrored to F0Graph but only `"single"` selectionMode is wired to `OneDataCollection`'s `onSelectItems`. Multi-select is a follow-up.
+- **No bulk-actions footer integration in v1.** Multi-select IS wired to `OneDataCollection`'s `onSelectItems` (both eager and lazy children — see §4.4), but the cross-visualization "select all" affordance and the bulk-actions footer placement on a spatial canvas need UX design and ship separately (see §10).
 - **No editing.** Read-only view. Item-actions menu is supported through the per-node detail panel handoff (and as a fallback through `F0GraphNode.actions`), but inline editing (à la `editableTable`) is out of scope.
 - **No infinite scroll / pagination UI.** Graphs are inherently spatial, not paginated. We fetch the full first page; lazy-loading children is delegated to F0Graph's `rootNodes` + `loadChildren` (see §4).
 
@@ -50,7 +50,7 @@ Concretely, after this work a consumer can write:
 The questions originally tracked in §7 are settled. The plan below reflects these answers — they are reproduced here so reviewers can see the rationale in one place.
 
 - **Q1 — Pagination handling (eager mode).** Eager mode **requires** `source.paginationType === "no-pagination"`. Lazy mode (via `loadChildren`) is permitted on paginated sources — the first page is consumed as roots and `loadChildren` resolves children on demand. **Dev-only invariant:** if `loadChildren` is provided AND `paginationType !== "no-pagination"`, that is the only valid combination; if `loadChildren` is provided AND `paginationType === "no-pagination"`, throw (`"Graph visualization: loadChildren requires a paginated source. Remove loadChildren, or set paginationType to a paginated value."`). If `loadChildren` is absent AND the source is paginated, throw (`"Graph visualization in eager mode requires a non-paginated source. Either set paginationType: 'no-pagination' on the source, or provide a loadChildren option to use lazy mode."`). Both checks run in `GraphCollection` immediately after `useDataCollectionData` is wired so consumers see the error on first render. No silent multi-page fetches, no `maxRecords` option.
-- **Q2 — Selection bridge fidelity.** v1 ships `selectionMode="single"` only. Selection state lives on the `source` via `useSelectable` (see `packages/react/src/hooks/datasource/useSelectable/useSelectable.ts`), so selection survives view switches automatically — no per-visualization mirror. Multi-select on a spatial canvas is deferred to a dedicated follow-up (see §10) because "select all" semantics and the bulk-actions footer placement need UX design first.
+- **Q2 — Selection bridge fidelity.** v1 forwards `source.selectable` directly to F0Graph (`"single"` or `"multiple"`); when `source.selectable` is omitted, F0Graph receives `"none"`. Selection state lives on the `source` via `useSelectable` (see `packages/react/src/hooks/datasource/useSelectable/useSelectable.ts`), so selection survives view switches automatically — no per-visualization mirror. In **lazy mode** `GraphCollection` opts into `allPagesSelection: true` on `useSelectable` so lazy-loaded ids surface in the `onSelectItems` payload's `selectedIds` (the default filters payload ids to current-page records, which drops lazy children). The cross-visualization "select all" UX on a spatial canvas is still deferred (see §10) — that's a footer/affordance question, not a selection-bridge question.
 - **Q3 — Icon choice.** Use the existing `Graph` glyph from `@/icons/app` (`packages/react/src/icons/app/Graph.tsx`). Verified present. If design later produces a dedicated tree/hierarchy variant we swap (see §10).
 - **Q4 — Performance budget.** No published envelope ships in Phase 1. Phase 2 includes a perf smoke test against 1k and 2k node mocks; the supported envelope is published with that PR.
 - **Q5 — Filter behavior (Phase 1 hard removal; Phase 2 dim).** F0Graph's existing `state="dimmed"` prop is purely visual in the `dot` zoom variant and is indistinguishable from `default` in `compact`/`detail`. There is no `dimmedNodes` prop on F0Graph today. **Phase 1 ships hard removal:** records that do not match the active per-view filter are omitted from `nodes`, and any edges incident on a removed node are omitted from `edges`. No orphan promotion; subtree of a removed parent is also removed (consistent with hard removal). **Phase 2 ships dim** once the upstream F0Graph PR (see §1.6) adds a real `dimmedNodes?: Set<string>` prop that styles `dot`/`compact`/`detail` and incident edges; `GraphCollection` will switch to passing the filtered-out IDs through that prop, preserving tree structure.
@@ -201,8 +201,17 @@ export type GraphVisualizationOptions<
    * Lazy mode. When provided, only the first page of `data.records` is
    * projected as roots; children are resolved on demand. Requires a
    * paginated source (see §1.5 Q1).
+   *
+   * `opts.signal` is aborted if the user collapses the node before
+   * resolution, the component unmounts, or another `loadChildren` call
+   * starts for the same `nodeId`. Consumers SHOULD forward it to `fetch`
+   * (or their underlying request layer) so the in-flight request is
+   * cancelled, not just ignored.
    */
-  loadChildren?: (nodeId: string) => Promise<ReadonlyArray<R>>
+  loadChildren?: (
+    nodeId: string,
+    opts: { signal: AbortSignal }
+  ) => Promise<ReadonlyArray<R>>
 
   /**
    * Escape hatch for everything F0Graph exposes that this view does NOT own.
@@ -321,11 +330,12 @@ No breaking changes to existing public types. The `Visualization` union grows by
 
 ### 4.4 Selection bridge
 
-- F0Graph `selectionMode="single"` (v1 default).
+- F0Graph `selectionMode` is forwarded from `source.selectable` (`"single"` or `"multiple"`); when `source.selectable` is omitted, F0Graph receives `"none"`.
 - Selection lives on the `source` via `useSelectable` — not on this visualization. Switching from Table → Graph → Table preserves the selected IDs automatically.
 - F0Graph `onNodeSelect(nodeId, selected)` → `GraphCollection` calls `handleSelectItemChange` from `useSelectable`, passing **the loaded record as `fallbackItem`** so lazy-loaded nodes (which never entered `data.records`) still attach the record to the selection event. This mirrors the pattern Table and Card already use.
   - **Rule:** GraphCollection MUST pass the loaded record as `fallbackItem` for both eager and lazy children. Never pass just an ID.
-- Multi-select is gated behind a follow-up (see §10).
+- **Lazy mode opts into `allPagesSelection: true`.** `useSelectable` filters the `onSelectItems` payload's `selectedIds` to current-page records by default. In lazy mode that silently drops lazy-loaded ids from the consumer payload (the F0Graph `selectedNodes` Set still reflects them). `GraphCollection` therefore passes `allPagesSelection: true` to `useSelectable` whenever `loadChildren` is provided, so lazy ids surface end-to-end. Eager mode keeps the default behavior so source-level `allPagesSelection` semantics are honored when set by the consumer.
+- The cross-visualization "select all" UX on a spatial canvas is still deferred — see §10.
 
 ### 4.5 Item-actions bridge
 
@@ -353,7 +363,7 @@ No breaking changes to existing public types. The `Visualization` union grows by
 | `packages/react/src/patterns/OneDataCollection/visualizations/collection/Graph/types.ts`                      | `GraphCollectionProps`, `GraphVisualizationOptions`, `GraphNodeAdapter`, `GraphEdgeAdapter`, `GraphDetailPanel`. Re-exports `F0GraphDetailPanelProps`. |
 | `packages/react/src/patterns/OneDataCollection/visualizations/collection/Graph/projectGraph.ts`               | Pure projection helper. Heavily unit-tested. Returns `{ nodes, edges, cycles }`.                                                                       |
 | `packages/react/src/patterns/OneDataCollection/visualizations/collection/Graph/projectGraph.spec.ts`          | Vitest specs for the projection helper.                                                                                                                |
-| `packages/react/src/patterns/OneDataCollection/visualizations/collection/Graph/Graph.spec.tsx`                | RTL specs for the visualization adapter.                                                                                                               |
+| `packages/react/src/patterns/OneDataCollection/visualizations/collection/Graph/__tests__/*.test.tsx`          | RTL specs for the visualization adapter, split per concern (selection, lazy abort, identity warning, defaultSelectedItems bridge, etc.).               |
 | `packages/react/src/patterns/OneDataCollection/visualizations/collection/Graph/__stories__/Graph.stories.tsx` | Stories — basic tree, DAG, lazy, detail panel.                                                                                                         |
 | `packages/react/src/patterns/OneDataCollection/visualizations/collection/Graph/__stories__/mockData.ts`       | Mock org chart used by the stories and specs.                                                                                                          |
 
@@ -402,15 +412,16 @@ No breaking changes to existing public types. The `Visualization` union grows by
 - Returns `cycles: string[]` when adapter output forms a cycle; offending edges are dropped from output.
 - Hard removal: given a matched-id set that excludes some records, the excluded records and any edges incident on them are omitted.
 
-### 6.3 Component tests (`Graph.spec.tsx`)
+### 6.3 Component tests (`__tests__/*.test.tsx`)
 
 - Renders nodes for each record returned by the source.
 - `onNodeSelect` from F0Graph calls `handleSelectItemChange` with the matching record as `fallbackItem`.
-- **Lazy + selectAll inheritance.** Select-all-everything in Table → switch to Graph → expand a lazy-loaded child → that child renders selected. Click to deselect → switch back to Table → that one row is unselected.
+- **Lazy selection round-trip.** Selecting a lazy-loaded child surfaces its id in both the F0Graph `selectedNodes` Set AND the `onSelectItems` payload's `selectedIds` (covered by `selection.test.tsx`; relies on the `allPagesSelection: true` lazy-mode opt-in from §4.4).
+- **defaultSelectedItems bridge.** Source pre-declares all records selected → F0Graph receives them as `selectedNodes` (covered by `defaultSelectedItemsBridge.test.tsx`). Full select-all-everything → expand-lazy inheritance round-trip is a Phase 3 OneDataCollection integration test.
 - **Cycle warning.** `nodeAdapter` produces a cycle → exactly one `console.warn` per render listing the cycle IDs; offending edges absent from output.
-- **AbortController.** Expand a lazy node → unmount before `loadChildren` resolves → the abort signal fires and the resolved value is dropped without warning.
+- **AbortController forwarding.** `wrappedLoadChildren` passes an `opts.signal` to the consumer; a fresh call for the same nodeId aborts the previous signal; unmount aborts every in-flight signal so consumers can observe abortion mid-flight (covered by `lazyAbort.test.tsx`).
 - **graphId default isolation.** Two `<OneDataCollection>` instances mounted simultaneously with no explicit `graphId` get different `useId()`-generated IDs; resizing the detail panel on one does NOT affect the other.
-- **Dev-mode identity warning.** Fires when `nodeAdapter` is inlined (not memoized) across renders; does not fire when it is stable.
+- **Dev-mode identity warning.** Inlined `nodeAdapter` across 6+ renders within 1s → exactly ONE `console.warn` per offending prop. Memoized adapters across many renders → no warn. Production builds (`useIsDev: () => false`) → no warn regardless of identity churn (covered by `stableIdentityWarning.test.tsx`).
 - **Hard removal filter.** Apply a per-view filter that excludes a parent → the parent's edges to its children are not rendered.
 - `onLoadError` is called when the source errors.
 - Throws on `source.currentGrouping !== null` in dev mode (uses `useIsDev` mock).
@@ -446,23 +457,23 @@ All resolved questions are tracked in §1.5; what remains is a watchlist of resi
 ### Phase 1 — Skeleton, projection, hard-removal filter (PR #1)
 
 - Land everything in §5 with `Graph.tsx` rendering F0Graph from `projectGraph()` output.
-- `nodeAdapter` + default edge derivation only. No `edgeAdapter`, no `loadChildren`, no `detailPanel` (item-actions still wired via `F0GraphNode.actions`).
-- `selectionMode="single"` wired to `useSelectable` with `fallbackItem`.
+- `nodeAdapter` + default edge derivation + optional `edgeAdapter` (Phase 1 ships both — `edgeAdapter` is a thin passthrough with no extra cost).
+- No `detailPanel` yet (item-actions still wired via `F0GraphNode.actions`).
+- Lazy mode (`loadChildren`) shipped as part of Phase 1 with full abort semantics: per-node `AbortController`, signal forwarded to the consumer loader via `opts.signal`, aborted on (a) a fresh call for the same nodeId and (b) unmount.
+- Selection wired to `useSelectable` with `fallbackItem`, multi-select end-to-end (both `single` and `multiple` modes forwarded from `source.selectable`). Lazy mode opts into `allPagesSelection: true` so lazy ids surface in `onSelectItems` (see §4.4).
 - Memoized `nodes`/`edges` arrays (per §4.3).
 - Enforce both pagination-mode guards (§4.1) — throw with the exact dev messages.
 - Cycle detection + `console.warn` (per §4.3).
 - Hard-removal filter implementation in `projectGraph`.
-- Search pipe-through into F0Graph (per §4.3) if the source has an active search input.
+- Search pipe-through into F0Graph (per §4.3) — prefers `source.debouncedCurrentSearch` over `source.currentSearch` to avoid layout thrash on each keystroke.
 - Register entry in `collectionViewRegistry` using `Graph` from `@/icons/app`. Update `Visualization` union.
 - Stories: **Basic**, **Empty**, **LoadingThenLoaded**, **HardRemovalFilter**, **WithItemActionsNoPanel**.
-- Tests: full `projectGraph.spec.ts`; `Graph.spec.tsx` covering render, selection (incl. `fallbackItem`), both pagination-guard throws, cycle warning, hard removal, search pipe-through.
-- **Status: unblocked.** No external sign-offs remain.
+- Tests: full `projectGraph.spec.ts`; component tests under `__tests__/` covering render, selection (incl. `fallbackItem` and lazy id round-trip), both pagination-guard throws, cycle warning, hard removal, search pipe-through, abort signal forwarding (per-nodeId + unmount), and the dev-mode identity warning (one-per-prop, prod gate).
+- **Status: shipped.** No external sign-offs remain.
 
-### Phase 2 — Detail panel, lazy mode, dim (PR #2)
+### Phase 2 — Detail panel, DAG, dim (PR #2)
 
 - Add `detailPanel` option with `menuActions` bridge.
-- Add `loadChildren` option (lazy mode) with per-node `AbortController`.
-- Add `edgeAdapter` option.
 - Add `parentIds` (DAG) support.
 - **Switch filter behavior from hard removal to dim** by consuming the upstream F0Graph `dimmedNodes` prop (per §1.6). Update `projectGraph` to pass non-matching IDs through instead of omitting them. Update `HardRemovalFilter` story → `DimmedFilter`.
 - Stories: **WithDetailPanel**, **DAG**, **Lazy**, **WithVisualizationSwitcher**, **DimmedFilter**.
@@ -502,7 +513,7 @@ Each phase is independently shippable. Phase 1 covers ~70% of the consumer use c
 
 | Item                                                              | Why deferred                                                                                                                                                                        |
 | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Multi-select bridge to bulk-actions footer                        | Needs UX design — "select all" semantics on a spatial canvas are non-obvious.                                                                                                       |
+| Cross-visualization "select all" UX on a spatial canvas           | Multi-select is already wired in Phase 1; what's deferred is the bulk-actions footer placement and the "select all" affordance on a zoomable canvas — those need UX design first.   |
 | Inline editing inside nodes (graph-equivalent of `editableTable`) | F0Graph nodes are renderer-driven; F0 needs an editing primitive first.                                                                                                             |
 | Viewport persistence across hard refreshes                        | `OneDataCollection`'s settings persistence layer doesn't currently store viewport coordinates; F0Graph itself only persists detail-panel width. Possible follow-up, separate scope. |
 | Export-to-PNG / share-link                                        | F0Graph doesn't expose a canvas snapshot API; would need a new F0Graph prop.                                                                                                        |
@@ -516,11 +527,11 @@ Each phase is independently shippable. Phase 1 covers ~70% of the consumer use c
 
 ## 11. Risks summary
 
-| Risk                                                     | Likelihood | Impact | Mitigation                                                                                                                                                            |
-| -------------------------------------------------------- | ---------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Large graphs (>2k nodes) janky                           | Med        | Med    | Phase-2 perf smoke; publish envelope. F0Graph's existing 700-node snap threshold already degrades gracefully.                                                         |
-| Selection model mismatch confuses existing consumers     | Med        | Med    | Single-select only in v1; multi-select tracked as §10 follow-up. Lazy `fallbackItem` rule documented in §4.4.                                                         |
-| TypeScript instantiation depth from 6th union variant    | Low        | Med    | Mirror existing registry cast pattern (`as VisualizacionTypeDefinition<...>`) per Q6. No new tech debt.                                                               |
-| Generic `Graph` icon stays in place longer than expected | Low        | Low    | Swap is a one-line registry edit when design ships a dedicated glyph. Follow-up tracked in §10.                                                                       |
-| Upstream F0Graph `dimmedNodes` PR slips                  | Med        | Low    | Phase 1 still ships with hard removal; only Phase 2 dim UX is delayed. No code in this repo blocks.                                                                   |
-| Parent route in `factorial` forces remount on back-nav   | Low        | Med    | Verify before Phase 1 ships (per §2.3 caveat). If it does, fix the route, not this view. Viewport persistence across hard refreshes is explicitly out of scope (§10). |
+| Risk                                                     | Likelihood | Impact | Mitigation                                                                                                                                                                                                                |
+| -------------------------------------------------------- | ---------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Large graphs (>2k nodes) janky                           | Med        | Med    | Phase-2 perf smoke; publish envelope. F0Graph's existing 700-node snap threshold already degrades gracefully.                                                                                                             |
+| Select-all on a spatial canvas confuses consumers        | Med        | Med    | Multi-select bridge is fully wired in Phase 1 (eager + lazy round-trip via `allPagesSelection: true`); the canvas-level "select all" affordance and bulk-actions footer placement ship later as a UX-led follow-up (§10). |
+| TypeScript instantiation depth from 6th union variant    | Low        | Med    | Mirror existing registry cast pattern (`as VisualizacionTypeDefinition<...>`) per Q6. No new tech debt.                                                                                                                   |
+| Generic `Graph` icon stays in place longer than expected | Low        | Low    | Swap is a one-line registry edit when design ships a dedicated glyph. Follow-up tracked in §10.                                                                                                                           |
+| Upstream F0Graph `dimmedNodes` PR slips                  | Med        | Low    | Phase 1 still ships with hard removal; only Phase 2 dim UX is delayed. No code in this repo blocks.                                                                                                                       |
+| Parent route in `factorial` forces remount on back-nav   | Low        | Med    | Verify before Phase 1 ships (per §2.3 caveat). If it does, fix the route, not this view. Viewport persistence across hard refreshes is explicitly out of scope (§10).                                                     |
