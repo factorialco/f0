@@ -12,7 +12,7 @@ readable from a small team to a full company.
 
 ---
 
-# Overview
+## Overview
 
 F0GraphNode is the recommended building block for
 `renderNode`. Spread the render context (`ctx`) and provide
@@ -34,7 +34,7 @@ renderNode={(node, ctx) => (
 
 ---
 
-# Variants
+## Variants
 
 Three zoom levels — `detail`, `compact`, and `dot` — keep the canvas
 readable as the tree scales.
@@ -48,7 +48,7 @@ readable as the tree scales.
 
 <Canvas of={Stories.ZoomLevels} />
 
-## Tag rows
+### Tag rows
 
 In `detail` variant, tags are rendered from `tags` as a wrapped row below
 the pill. Tags are auto-grouped by `type`: a single tag of a type renders
@@ -62,7 +62,7 @@ Use `visibleTagTypes` to filter which tag types are rendered and
 
 ---
 
-# States
+## States
 
 Nodes cycle through visual states based on interaction
 context:
@@ -76,7 +76,7 @@ context:
 
 ---
 
-# Props
+## Props
 
 | Prop              | Type                                                   | Default     | Description                                                                                                                                   |
 | ----------------- | ------------------------------------------------------ | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -105,9 +105,9 @@ context:
 
 ---
 
-# Usage
+## Usage
 
-## Basic node
+### Basic node
 
 ```tsx
 <F0GraphNode
@@ -117,7 +117,7 @@ context:
 />
 ```
 
-## Floating toolbar (selected detail nodes)
+### Floating toolbar (selected detail nodes)
 
 When a node is `state="selected"` and rendered in the `detail` variant,
 the `actions` slot is rendered as a floating
@@ -144,7 +144,7 @@ in a custom canvas), wrap it in `ReactFlowProvider`.
 />
 ```
 
-## Expanded node with children
+### Expanded node with children
 
 The expanded state is shown alongside the other interaction states in
 [States](#states).

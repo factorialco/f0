@@ -13,7 +13,7 @@ types.
 
 ---
 
-# Overview
+## Overview
 
 F0GraphControls is rendered automatically by `<F0Graph>` when
 `showControls={true}`. It can also be used standalone for custom graph
@@ -28,7 +28,7 @@ so the toolbar is shown in its fully-loaded state.
 
 ---
 
-# Behavior
+## Behavior
 
 - **Find me** — appears when `onFocusUser` is provided. Pass
   `currentUserNodeId` to `<F0Graph>` to enable this button automatically.
@@ -41,7 +41,7 @@ so the toolbar is shown in its fully-loaded state.
 
 ---
 
-# Props
+## Props
 
 | Prop              | Type                                          | Default | Description                                                                                                          |
 | ----------------- | --------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------- |
@@ -55,7 +55,7 @@ so the toolbar is shown in its fully-loaded state.
 | `tagTypeLabels`   | `Partial<Record<F0GraphNodeTagType, string>>` | —       | Friendly labels per tag type for the popover.                                                                        |
 | `labels`          | `F0GraphControlLabels`                        | —       | Override default English labels for controls (`zoomIn`, `zoomOut`, `fitView`, `findMe`, `metadataSettings`).         |
 
-### F0GraphControlLabels
+#### F0GraphControlLabels
 
 | Key                | Type     | Description                                                    |
 | ------------------ | -------- | -------------------------------------------------------------- |
@@ -67,7 +67,7 @@ so the toolbar is shown in its fully-loaded state.
 
 ---
 
-# Usage
+## Usage
 
 Most consumers never render `F0GraphControls` directly — pass
 `showControls` (and optionally `currentUserNodeId`) to `<F0Graph>`

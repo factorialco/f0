@@ -12,7 +12,7 @@ charts, team structures, project trees, account hierarchies —
 with built-in zoom, search, selection, and detail-panel
 interactions.
 
-# Quickstart
+## Quickstart
 
 Start with `nodes` plus a `renderNode` callback. `F0Graph` handles layout,
 zoom, panning, and expansion while you provide node content.
@@ -50,7 +50,7 @@ export function Example() {
 }
 ```
 
-# Story Map
+## Story Map
 
 | Story                | What it shows                                               |
 | -------------------- | ----------------------------------------------------------- |
@@ -67,9 +67,9 @@ export function Example() {
 
 ---
 
-# Overview
+## Overview
 
-## Purpose
+### Purpose
 
 - Reveal the **shape** of a hierarchy at a glance: who reports to whom, what
   belongs to what, how a tree is balanced
@@ -81,7 +81,7 @@ export function Example() {
 A Graph is not a list with indentation. Use it when the **relationships
 between items** carry as much meaning as the items themselves.
 
-## Anatomy
+### Anatomy
 
 <Canvas of={F0GraphStories.Tree} />
 <Controls of={F0GraphStories.Tree} />
@@ -100,29 +100,29 @@ A Graph is composed of:
 
 ---
 
-# Variants
+## Variants
 
-## Zoom-aware node rendering
+### Zoom-aware node rendering
 
 Nodes adapt to the user's current zoom level so the canvas stays
 readable from a 10-node team to a 500-node company. F0Graph
 passes a `variant` to `renderNode` and the default node responds
 accordingly:
 
-### Default
+#### Default
 
 Full pill with avatar, name, and subtitle. Use at normal reading
 distance.
 
 <Canvas of={F0GraphStories.Tree} />
 
-### Compact
+#### Compact
 
 Avatar + initials only. Use when the tree no longer fits in the
 viewport but identity still matters. Reach this variant by zooming out,
 or by tuning `zoomThresholds` / `zoomPreset`.
 
-### Dot
+#### Dot
 
 Single dot per node. Use to show **shape** of very large trees
 (100+ nodes) where individual identity is secondary to structure.
@@ -134,9 +134,9 @@ The thresholds between variants are configurable via
 
 ---
 
-# Behaviors
+## Behaviors
 
-## Loading the tree
+### Loading the tree
 
 Two modes, mutually exclusive:
 
@@ -148,18 +148,18 @@ Two modes, mutually exclusive:
 
 <Canvas of={F0GraphStories.Lazy} />
 
-## Expand and collapse
+### Expand and collapse
 
 Every node with `childrenCount > 0` shows an expander. Use
 `defaultExpandDepth` to set how deep the tree opens on first render, or
 `defaultExpandedNodes` / `expandedNodes` for explicit control.
 
-## Selection
+### Selection
 
 Single, multi, or none — set via `selectionMode`. Selection is
 decoupled from focus and from the detail panel.
 
-## Search
+### Search
 
 Two flavors:
 
@@ -172,7 +172,7 @@ Two flavors:
 
 <Canvas of={F0GraphStories.WithSearch} />
 
-## Detail panel
+### Detail panel
 
 When `detailPanel` is provided, clicking a node opens a right-side panel
 and centers the node in the remaining canvas space. The same
@@ -186,9 +186,9 @@ panel powers two layouts:
 
 ---
 
-# Guidelines
+## Guidelines
 
-## When to use
+### When to use
 
 <DoDonts
   do={{
@@ -211,7 +211,7 @@ panel powers two layouts:
   }}
 />
 
-## Content best practices
+### Content best practices
 
 - **Node labels are scannable.** Keep titles to 2–4 words, no punctuation.
   Subtitles add one line of context (role, status, count) — never a
@@ -226,9 +226,9 @@ panel powers two layouts:
 - **Empty states matter.** A single root with no children is still a tree —
   render it; don't fall back to a list.
 
-## Design best practices
+### Design best practices
 
-### Pick the right default zoom
+#### Pick the right default zoom
 
 Land users on the variant that matches their task:
 
@@ -237,26 +237,26 @@ Land users on the variant that matches their task:
 - **Surveying the whole company** (100+ nodes) — start in `dot` and let
   users zoom in
 
-### Reserve the detail panel for inspection
+#### Reserve the detail panel for inspection
 
 The panel is for **reading and acting on a single node**. If a
 click should navigate away, link the node directly — don't open
 a panel only to put a "Go to page" button inside it.
 
-### One primary action per panel
+#### One primary action per panel
 
 Match the rest of F0: one primary button, one secondary,
 everything else in the overflow menu. The action row collapses
 gracefully when only a primary is provided.
 
-### Keep edges quiet
+#### Keep edges quiet
 
 Default edges are intentionally low-contrast so the eye reads
 nodes first. Only override `renderEdge` when the relationship
 itself carries meaning (e.g. dotted = dotted-line manager,
 color = team).
 
-## Accessibility
+### Accessibility
 
 - The canvas is keyboard-navigable: arrow keys move focus between nodes,
   `Enter` opens the detail panel, `Space` toggles expansion
@@ -267,7 +267,7 @@ color = team).
 - Override the default English control labels via `controlLabels` for
   localized experiences
 
-## Performance
+### Performance
 
 - For trees over ~200 nodes, prefer the **lazy tree** mode — F0Graph keeps
   only mounted subtrees in the React tree
@@ -276,11 +276,11 @@ color = team).
 
 ---
 
-# Props
+## Props
 
 All public props on `<F0Graph>`, grouped by behavior.
 
-## Layout & Display
+### Layout & Display
 
 | Prop           | Type           | Default              | Description                                                        |
 | -------------- | -------------- | -------------------- | ------------------------------------------------------------------ |
@@ -289,7 +289,7 @@ All public props on `<F0Graph>`, grouped by behavior.
 | `nodeHeight`   | `number`       | `56`                 | Layout sizing hint passed to the built-in layout engine.           |
 | `layoutEngine` | `LayoutEngine` | built-in tree engine | Custom layout engine. Overrides the built-in layout when provided. |
 
-## Zoom
+### Zoom
 
 | Prop                   | Type                                                         | Default                   | Description                                                               |
 | ---------------------- | ------------------------------------------------------------ | ------------------------- | ------------------------------------------------------------------------- |
@@ -302,21 +302,21 @@ All public props on `<F0Graph>`, grouped by behavior.
 | `onViewportChange`     | `(viewport: { x: number; y: number; zoom: number }) => void` | —                         | Fired on viewport pan and zoom updates.                                   |
 | `onVisibleNodesChange` | `(count: number) => void`                                    | —                         | Fired when the visible node count changes.                                |
 
-## Data (full tree)
+### Data (full tree)
 
 | Prop    | Type             | Default           | Description                                                                      |
 | ------- | ---------------- | ----------------- | -------------------------------------------------------------------------------- |
 | `nodes` | `GraphNode<T>[]` | —                 | Full tree node list rendered upfront.                                            |
 | `edges` | `GraphEdge[]`    | derived from tree | Explicit edges. When omitted, edges are derived from parent-child relationships. |
 
-## Data (lazy tree)
+### Data (lazy tree)
 
 | Prop           | Type                                          | Default | Description                                          |
 | -------------- | --------------------------------------------- | ------- | ---------------------------------------------------- |
 | `rootNodes`    | `GraphNode<T>[]`                              | —       | Root nodes for lazy mode.                            |
 | `loadChildren` | `(nodeId: string) => Promise<GraphNode<T>[]>` | —       | Async callback to load children when a node expands. |
 
-## Data (staged loading)
+### Data (staged loading)
 
 | Prop                     | Type                                                                           | Default | Description                                                                              |
 | ------------------------ | ------------------------------------------------------------------------------ | ------- | ---------------------------------------------------------------------------------------- |
@@ -324,14 +324,14 @@ All public props on `<F0Graph>`, grouped by behavior.
 | `onDeferredLoadComplete` | `() => void`                                                                   | —       | Fired once when deferred nodes merge successfully.                                       |
 | `onDeferredLoadError`    | `(error: Error) => void`                                                       | —       | Fired when deferred loading fails.                                                       |
 
-## Rendering
+### Rendering
 
 | Prop         | Type                                                                 | Default                | Description                                    |
 | ------------ | -------------------------------------------------------------------- | ---------------------- | ---------------------------------------------- |
 | `renderNode` | `(node: GraphNode<T>, ctx: F0GraphNodeRenderContext) => ReactNode`   | **required**           | Callback that renders each node.               |
 | `renderEdge` | `(edge: GraphEdge, variant: EdgeVariant) => React.ReactNode \| null` | default edge rendering | Optional custom edge renderer by edge variant. |
 
-## Expand/collapse
+### Expand/collapse
 
 | Prop                    | Type                                          | Default             | Description                                                                                      |
 | ----------------------- | --------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------ |
@@ -341,7 +341,7 @@ All public props on `<F0Graph>`, grouped by behavior.
 | `onExpandToggle`        | `(nodeId: string, expanded: boolean) => void` | —                   | Fired when a node is expanded or collapsed.                                                      |
 | `onExpandedNodesChange` | `(next: Set<string>) => void`                 | —                   | Fired with the complete expanded set on every expand/collapse change.                            |
 
-## Selection
+### Selection
 
 | Prop                    | Type                                          | Default            | Description                                                     |
 | ----------------------- | --------------------------------------------- | ------------------ | --------------------------------------------------------------- |
@@ -350,14 +350,14 @@ All public props on `<F0Graph>`, grouped by behavior.
 | `onNodeSelect`          | `(nodeId: string, selected: boolean) => void` | —                  | Fired when a node selection toggles.                            |
 | `onSelectedNodesChange` | `(next: Set<string>) => void`                 | —                  | Fired with the complete selected set on every selection change. |
 
-## Navigation
+### Navigation
 
 | Prop               | Type          | Default   | Description                                                       |
 | ------------------ | ------------- | --------- | ----------------------------------------------------------------- |
 | `focusedNode`      | `string`      | —         | Imperatively focuses and fits the viewport to a specific node ID. |
 | `highlightedNodes` | `Set<string>` | empty set | Node IDs rendered with highlighted edge/node variants.            |
 
-## Search
+### Search
 
 | Prop                   | Type                                   | Default | Description                                                                                                  |
 | ---------------------- | -------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------ |
@@ -367,13 +367,13 @@ All public props on `<F0Graph>`, grouped by behavior.
 | `searchable`           | `Searchable<T>`                        | —       | Declarative search config with built-in indexing, result selection, ancestor expansion, and fly-to behavior. |
 | `onSearchResultSelect` | `(id: string) => void`                 | —       | Optional callback fired when a search result is selected.                                                    |
 
-## Canvas actions
+### Canvas actions
 
 | Prop            | Type        | Default | Description                                                            |
 | --------------- | ----------- | ------- | ---------------------------------------------------------------------- |
 | `canvasActions` | `ReactNode` | —       | Optional action buttons rendered below the search input on the canvas. |
 
-## Detail panel
+### Detail panel
 
 | Prop                   | Type                                                                                                   | Default     | Description                                                                |
 | ---------------------- | ------------------------------------------------------------------------------------------------------ | ----------- | -------------------------------------------------------------------------- |
@@ -382,7 +382,7 @@ All public props on `<F0Graph>`, grouped by behavior.
 | `detailPanelWidth`     | `number`                                                                                               | `384`       | Initial detail panel width in pixels.                                      |
 | `graphId`              | `string`                                                                                               | `"default"` | Stable ID used to scope persisted detail panel width in localStorage.      |
 
-## Controls
+### Controls
 
 | Prop                | Type                                                                                                                                                                       | Default          | Description                                                                     |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- | ------------------------------------------------------------------------------- |
@@ -390,7 +390,7 @@ All public props on `<F0Graph>`, grouped by behavior.
 | `currentUserNodeId` | `string`                                                                                                                                                                   | —                | Node ID used by the optional "Find me" control.                                 |
 | `controlLabels`     | `{ zoomIn?: string; zoomOut?: string; fitView?: string; findMe?: string; collapseChildren?: string; metadataSettings?: string; graphCanvas?: string; graphView?: string }` | English defaults | Optional label overrides for graph controls and ARIA labels.                    |
 
-## Tag metadata
+### Tag metadata
 
 | Prop                      | Type                                                | Default                  | Description                                                                                                 |
 | ------------------------- | --------------------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------- |
