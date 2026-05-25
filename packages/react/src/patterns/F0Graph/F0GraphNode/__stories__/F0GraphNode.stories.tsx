@@ -341,11 +341,7 @@ function ToolbarDemo() {
 }
 
 export const WithToolbar: Story = {
-  render: () => (
-    <ReactFlowProvider>
-      <ToolbarDemo />
-    </ReactFlowProvider>
-  ),
+  render: () => <ToolbarDemo />,
   parameters: {
     docs: {
       description: {
