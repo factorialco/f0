@@ -103,7 +103,7 @@ export function F0CanvasPanel({
             ease: [0, 0, 0.1, 1],
           }}
         >
-          <div className="flex h-full flex-col bg-f1-special-page p-0 md:rounded-l-lg md:py-1 md:pl-1">
+          <div className="flex h-full flex-col bg-f1-special-page p-0 md:rounded-l-lg md:py-1 md:pl-1 border border-solid border-f1-border-secondary border-r-0">
             <motion.div
               className={cn(
                 // overflow-hidden only on the inner card (where rounded

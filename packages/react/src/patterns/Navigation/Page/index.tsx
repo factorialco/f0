@@ -6,13 +6,15 @@ interface PageProps {
 
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
+import { cn } from "@/lib/utils"
 
 function _Page({ children, header, embedded = false }: PageProps) {
   return (
     <div
-      className={`flex min-h-full w-full flex-col overflow-hidden ${
-        embedded ? "" : "xs:rounded-xl"
-      } bg-f1-special-page`}
+      className={cn(
+        "flex min-h-full w-full flex-col overflow-hidden bg-f1-special-page ring-1 ring-inset ring-f1-border-secondary",
+        !embedded && "xs:rounded-xl"
+      )}
     >
       {header && <div className="flex flex-col">{header}</div>}
       <div className="isolate flex w-full flex-1 flex-col overflow-auto [&>*]:flex-1">

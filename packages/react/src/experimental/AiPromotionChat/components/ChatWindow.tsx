@@ -39,7 +39,7 @@ export const SidebarWindow = ({ children }: WindowProps) => {
             }
           }}
         >
-          <div className="bg-f1-special-page shadow xs:rounded-xl h-full w-full">
+          <div className="border border-solid border-f1-border-secondary bg-f1-special-page shadow xs:rounded-xl h-full w-full">
             <motion.div
               className="relative flex h-full w-full flex-col overflow-x-hidden "
               initial={{ opacity: 0 }}

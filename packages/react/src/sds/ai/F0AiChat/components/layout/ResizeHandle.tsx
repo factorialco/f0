@@ -2,32 +2,18 @@ import { useCallback, useEffect, useRef } from "react"
 
 import { cn } from "@/lib/utils"
 
-/**
- * Resize handle between the canvas panel (when present) and the chat panel.
- *
- * Visual goals:
- * - In the default chat-only layout, the handle is a 4-pixel hit strip with
- *   a rounded indicator that lights up on hover / while dragging.
- * - In canvas mode (`narrow=true`), the layout slot collapses to a thin
- *   1-pixel vertical rule so canvas and chat look visually flush with a
- *   hairline divider between them.
- *
- * Both modes use an invisible hit-area extension (`absolute -inset-x-1`) so
- * the user never has to precisely target a 1-pixel line: the mouse grabs
- * the handle anywhere within ~9-12 pixels. The visible line is positioned
- * absolutely and centered, letting it grow from 1px to 4px on hover without
- * reflowing the surrounding canvas/chat layout.
- */
 export const ResizeHandle = ({
   onResize,
   onReset,
   isResizing,
   setIsResizing,
+  isCanvasMode,
 }: {
   onResize: (deltaX: number) => void
   onReset: () => void
   isResizing: boolean
   setIsResizing: (value: boolean) => void
+  isCanvasMode?: boolean
 }) => {
   const startXRef = useRef(0)
 
@@ -75,7 +61,11 @@ export const ResizeHandle = ({
     // fires on the right side because the chat panel's edge captures the
     // mouse events first.
     <div
-      className="group relative z-10 h-full flex-shrink-0 cursor-ew-resize w-1"
+      className={cn(
+        "group relative z-10 h-full flex-shrink-0 cursor-ew-resize w-1",
+        isCanvasMode &&
+          "border border-solid border-x-0 border-f1-border-secondary bg-f1-special-page"
+      )}
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
     >

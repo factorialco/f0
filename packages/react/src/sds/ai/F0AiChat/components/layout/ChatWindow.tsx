@@ -135,12 +135,14 @@ export const SidebarWindow = ({ children }: WindowProps) => {
               onReset={resetChatWidth}
               isResizing={isResizing}
               setIsResizing={setIsResizing}
+              isCanvasMode={isCanvasMode}
             />
           )}
           <div
             aria-hidden={!open}
             className={cn(
-              "relative flex h-full w-full flex-col overflow-hidden bg-f1-special-page",
+              "relative flex h-full w-full flex-col overflow-hidden bg-f1-special-page border border-solid border-f1-border-secondary",
+              isCanvasMode && "border-l-transparent",
               // In canvas mode the chat sits flush against the canvas with
               // only the ResizeHandle (1px) between them. Dropping the left
               // border avoids stacking canvas-border + handle + chat-border
