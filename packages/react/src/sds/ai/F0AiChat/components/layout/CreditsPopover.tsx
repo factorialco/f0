@@ -115,9 +115,7 @@ export function CreditsPopover() {
   if (!credits) return null
 
   const hasHeader = credits.companyName
-  const showEmployeeSection = data?.employeeTotal !== undefined
   const showCompanySection = credits.canViewCompanyCredits !== false
-  const showDivider = showEmployeeSection && showCompanySection
 
   const monthlyLabel = i18n.t("ai.credits.monthlyCredits")
 
@@ -187,24 +185,6 @@ export function CreditsPopover() {
             )}
             {!loading && !error && data && (
               <>
-                {showEmployeeSection && (
-                  <CreditsSection
-                    label={i18n.t("ai.credits.employeeCredits")}
-                    used={data.employeeUsed ?? 0}
-                    total={data.employeeTotal ?? 0}
-                    monthlyLabel={monthlyLabel}
-                    creditsLeftLabel={i18n.t("ai.credits.creditsLeft", {
-                      total: Math.max(
-                        0,
-                        (data.employeeTotal ?? 0) - (data.employeeUsed ?? 0)
-                      ).toLocaleString(),
-                    })}
-                    reduceMotion={reduceMotion}
-                  />
-                )}
-                {showDivider && (
-                  <div className="border-t border-f1-border-secondary" />
-                )}
                 {showCompanySection && (
                   <CreditsSection
                     label={i18n.t("ai.credits.companyCredits")}

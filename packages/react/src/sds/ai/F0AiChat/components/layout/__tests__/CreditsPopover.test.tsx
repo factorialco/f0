@@ -50,7 +50,7 @@ describe("CreditsPopover", () => {
     expect(container.firstChild).toBeNull()
   })
 
-  it("shows only company credits when no employee cap is set", async () => {
+  it("shows the company credits section", async () => {
     mockCredits = makeCredits({}, { used: 250, total: 1000 })
 
     render(<CreditsPopover />)
@@ -59,41 +59,23 @@ describe("CreditsPopover", () => {
     await waitFor(() => {
       expect(screen.getByText("Company credits")).toBeInTheDocument()
     })
-    expect(screen.queryByText("Your credits")).not.toBeInTheDocument()
     expect(screen.getByText("750 left")).toBeInTheDocument()
   })
 
-  it("shows both employee and company sections when employee cap is set", async () => {
-    mockCredits = makeCredits(
-      {},
-      { used: 250, total: 1000, employeeUsed: 30, employeeTotal: 100 }
-    )
-
-    render(<CreditsPopover />)
-    await openPopover()
-
-    await waitFor(() => {
-      expect(screen.getByText("Your credits")).toBeInTheDocument()
-    })
-    expect(screen.getByText("Company credits")).toBeInTheDocument()
-    expect(screen.getByText("70 left")).toBeInTheDocument()
-    expect(screen.getByText("750 left")).toBeInTheDocument()
-  })
-
-  it("hides company section when canViewCompanyCredits is false", async () => {
+  it("hides the company section when canViewCompanyCredits is false", async () => {
     mockCredits = makeCredits(
       { canViewCompanyCredits: false },
-      { used: 250, total: 1000, employeeUsed: 30, employeeTotal: 100 }
+      { used: 250, total: 1000 }
     )
 
     render(<CreditsPopover />)
     await openPopover()
 
+    // Trigger renders; opening fires fetch; section should not appear.
     await waitFor(() => {
-      expect(screen.getByText("Your credits")).toBeInTheDocument()
+      expect(mockCredits!.fetchUsage).toHaveBeenCalled()
     })
     expect(screen.queryByText("Company credits")).not.toBeInTheDocument()
-    expect(screen.getByText("70 left")).toBeInTheDocument()
   })
 
   it("hides the upgrade plan CTA when canViewCompanyCredits is false", async () => {
@@ -102,14 +84,14 @@ describe("CreditsPopover", () => {
         canViewCompanyCredits: false,
         upgradePlanUrl: "https://example.com/upgrade",
       },
-      { used: 250, total: 1000, employeeUsed: 30, employeeTotal: 100 }
+      { used: 250, total: 1000 }
     )
 
     render(<CreditsPopover />)
     await openPopover()
 
     await waitFor(() => {
-      expect(screen.getByText("Your credits")).toBeInTheDocument()
+      expect(mockCredits!.fetchUsage).toHaveBeenCalled()
     })
     expect(screen.queryByText("Need more credits?")).not.toBeInTheDocument()
     expect(
@@ -131,7 +113,7 @@ describe("CreditsPopover", () => {
     })
   })
 
-  it("shows company section by default (canViewCompanyCredits omitted)", async () => {
+  it("shows the company section by default (canViewCompanyCredits omitted)", async () => {
     mockCredits = makeCredits({}, { used: 100, total: 500 })
 
     render(<CreditsPopover />)
@@ -142,7 +124,7 @@ describe("CreditsPopover", () => {
     })
   })
 
-  it("shows error state when fetchUsage rejects", async () => {
+  it("shows the error state when fetchUsage rejects", async () => {
     mockCredits = makeCredits({
       fetchUsage: vi.fn().mockRejectedValue(new Error("boom")),
     })
@@ -155,18 +137,14 @@ describe("CreditsPopover", () => {
     })
   })
 
-  it("clamps creditsLeft at 0 when employee usage exceeds total", async () => {
-    mockCredits = makeCredits(
-      {},
-      { used: 0, total: 100, employeeUsed: 200, employeeTotal: 100 }
-    )
+  it("clamps creditsLeft at 0 when company usage exceeds total", async () => {
+    mockCredits = makeCredits({}, { used: 200, total: 100 })
 
     render(<CreditsPopover />)
     await openPopover()
 
     await waitFor(() => {
-      expect(screen.getByText("Your credits")).toBeInTheDocument()
+      expect(screen.getByText("0 left")).toBeInTheDocument()
     })
-    expect(screen.getAllByText("0 left").length).toBeGreaterThan(0)
   })
 })

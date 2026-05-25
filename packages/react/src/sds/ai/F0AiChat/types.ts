@@ -171,8 +171,6 @@ export type AiChatToolHint = {
 export type CreditsUsage = {
   used: number
   total: number
-  employeeUsed?: number
-  employeeTotal?: number
 }
 
 /**
