@@ -7,13 +7,14 @@ import { GraphCollection } from "../Graph"
 
 import { createEagerSource, stubRenderNode, type TestPerson } from "./_helpers"
 
-// Warning is gated on `useIsDev()`; the default test provider returns false,
-// so we force-enable dev mode for this suite.
+// `isDev` flag is controlled per test by re-mocking the provider through
+// vi.doMock + dynamic import. Default is dev=true.
+let isDevReturn = true
 vi.mock("@/lib/providers/user-platafform", async () => {
   const actual = await vi.importActual<
     typeof import("@/lib/providers/user-platafform")
   >("@/lib/providers/user-platafform")
-  return { ...actual, useIsDev: () => true }
+  return { ...actual, useIsDev: () => isDevReturn }
 })
 
 vi.mock("@/patterns/F0Graph", async () => {
@@ -27,21 +28,48 @@ vi.mock("@/patterns/F0Graph", async () => {
   }
 })
 
-const nodeAdapter = (r: TestPerson) => ({ parentId: r.parentId })
+const records: TestPerson[] = [
+  { id: "a", name: "A", parentId: null },
+  { id: "b", name: "B", parentId: "a" },
+]
 
-const orderedRecords: TestPerson[] = [
-  { id: "a", name: "A", parentId: null },
-  { id: "b", name: "B", parentId: "a" },
-]
-const reorderedRecords: TestPerson[] = [
-  { id: "b", name: "B", parentId: "a" },
-  { id: "a", name: "A", parentId: null },
-]
+const renderWithFreshAdapter = (
+  source: ReturnType<typeof createEagerSource>
+) => {
+  // Inlined adapter: identity changes every render.
+  return zeroRender(
+    <GraphCollection
+      source={source}
+      nodeAdapter={(r: TestPerson) => ({ parentId: r.parentId })}
+      renderNode={stubRenderNode}
+      onSelectItems={vi.fn()}
+      onLoadData={vi.fn()}
+      onLoadError={vi.fn()}
+    />
+  )
+}
+
+const rerenderWithFreshAdapter = (
+  rerender: (ui: React.ReactElement) => void,
+  source: ReturnType<typeof createEagerSource>
+) => {
+  rerender(
+    <GraphCollection
+      source={source}
+      nodeAdapter={(r: TestPerson) => ({ parentId: r.parentId })}
+      renderNode={stubRenderNode}
+      onSelectItems={vi.fn()}
+      onLoadData={vi.fn()}
+      onLoadError={vi.fn()}
+    />
+  )
+}
 
 describe("GraphCollection stable identity warning", () => {
   let warnSpy: ReturnType<typeof vi.spyOn>
 
   beforeEach(() => {
+    isDevReturn = true
     warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {})
   })
 
@@ -49,95 +77,76 @@ describe("GraphCollection stable identity warning", () => {
     warnSpy.mockRestore()
   })
 
-  // NOTE: PLAN §4.3 describes detecting nodeAdapter identity change. The
-  // implemented heuristic is simpler — it warns when a record key shifts
-  // index between renders. These tests assert the implemented behavior.
-
-  it("does not warn when record keys keep their index across renders", async () => {
-    const source = createEagerSource(orderedRecords)
-    const { rerender } = zeroRender(
-      <GraphCollection
-        source={source}
-        nodeAdapter={nodeAdapter}
-        renderNode={stubRenderNode}
-        onSelectItems={vi.fn()}
-        onLoadData={vi.fn()}
-        onLoadError={vi.fn()}
-      />
-    )
-
+  it("warns exactly once when an inlined nodeAdapter changes identity 6+ times within 1s", async () => {
+    const source = createEagerSource(records)
+    const { rerender } = renderWithFreshAdapter(source)
     await waitFor(() => {
-      // Wait for data fetch to settle.
       expect(source.dataAdapter.fetchData).toBeDefined()
     })
 
-    rerender(
-      <GraphCollection
-        source={createEagerSource(orderedRecords)}
-        nodeAdapter={nodeAdapter}
-        renderNode={stubRenderNode}
-        onSelectItems={vi.fn()}
-        onLoadData={vi.fn()}
-        onLoadError={vi.fn()}
-      />
-    )
-
+    // 5 additional rerenders → 6 total identity values within the 1s window.
+    for (let i = 0; i < 6; i++) {
+      rerenderWithFreshAdapter(rerender, source)
+    }
     // Allow effects to flush.
     await new Promise((r) => setTimeout(r, 0))
 
-    const movedWarnings = warnSpy.mock.calls.filter((c) =>
-      String(c[0]).includes("moved from index")
+    const adapterWarnings = warnSpy.mock.calls.filter((c) =>
+      String(c[0]).includes("`nodeAdapter` identity changed")
     )
-    expect(movedWarnings).toHaveLength(0)
+    expect(adapterWarnings).toHaveLength(1)
+    expect(String(adapterWarnings[0][0])).toContain(
+      "Wrap it in `useCallback`/`useMemo`"
+    )
   })
 
-  it("warns when a record key moves to a different index between renders", async () => {
-    const source1 = createEagerSource(orderedRecords)
-    const { rerender } = zeroRender(
+  it("does not warn when adapters are memoized across many renders", async () => {
+    const source = createEagerSource(records)
+    const stableAdapter = (r: TestPerson) => ({ parentId: r.parentId })
+    const stableRender = stubRenderNode
+
+    const ui = (
       <GraphCollection
-        source={source1}
-        nodeAdapter={nodeAdapter}
-        renderNode={stubRenderNode}
+        source={source}
+        nodeAdapter={stableAdapter}
+        renderNode={stableRender}
         onSelectItems={vi.fn()}
         onLoadData={vi.fn()}
         onLoadError={vi.fn()}
       />
     )
-
+    const { rerender } = zeroRender(ui)
     await waitFor(() => {
-      expect(source1.dataAdapter.fetchData).toBeDefined()
+      expect(source.dataAdapter.fetchData).toBeDefined()
     })
 
-    // Re-render with reordered records to trigger the index-shift warning.
-    // The source's data is reloaded; we wait until records reach the
-    // collection by polling for the warning.
-    const source2 = createEagerSource(reorderedRecords)
-    rerender(
-      <GraphCollection
-        source={source2}
-        nodeAdapter={nodeAdapter}
-        renderNode={stubRenderNode}
-        onSelectItems={vi.fn()}
-        onLoadData={vi.fn()}
-        onLoadError={vi.fn()}
-      />
-    )
+    for (let i = 0; i < 10; i++) {
+      rerender(ui)
+    }
+    await new Promise((r) => setTimeout(r, 0))
 
+    const identityWarnings = warnSpy.mock.calls.filter((c) =>
+      String(c[0]).includes("identity changed")
+    )
+    expect(identityWarnings).toHaveLength(0)
+  })
+
+  it("does not warn in production builds even with inlined adapters", async () => {
+    isDevReturn = false
+    const source = createEagerSource(records)
+    const { rerender } = renderWithFreshAdapter(source)
     await waitFor(() => {
-      const movedWarnings = warnSpy.mock.calls.filter((c) =>
-        String(c[0]).includes("moved from index")
-      )
-      expect(movedWarnings.length).toBeGreaterThan(0)
+      expect(source.dataAdapter.fetchData).toBeDefined()
     })
 
-    const message = String(
-      warnSpy.mock.calls.find((c) =>
-        String(c[0]).includes("moved from index")
-      )?.[0]
+    for (let i = 0; i < 10; i++) {
+      rerenderWithFreshAdapter(rerender, source)
+    }
+    await new Promise((r) => setTimeout(r, 0))
+
+    const identityWarnings = warnSpy.mock.calls.filter((c) =>
+      String(c[0]).includes("identity changed")
     )
-    expect(message).toContain("Graph visualization: record key")
-    expect(message).toContain(
-      "Provide a stable `source.selectable` (idProvider)"
-    )
+    expect(identityWarnings).toHaveLength(0)
   })
 })

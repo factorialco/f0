@@ -148,7 +148,9 @@ describe("GraphCollection selection bridge", () => {
       name: "Lazy child",
       parentId: "root",
     }
-    const loadChildren = vi.fn(async (_nodeId: string) => [childRecord])
+    const loadChildren = vi.fn(
+      async (_nodeId: string, _opts: { signal: AbortSignal }) => [childRecord]
+    )
 
     zeroRender(
       <GraphCollection
@@ -180,24 +182,27 @@ describe("GraphCollection selection bridge", () => {
     const children = await wrappedLoad("root")
     expect(children).toHaveLength(1)
     expect(children[0].id).toBe("lazy-1")
-    expect(loadChildren).toHaveBeenCalledWith("root")
+    expect(loadChildren).toHaveBeenCalledTimes(1)
+    expect(loadChildren.mock.calls[0][0]).toBe("root")
+    expect(loadChildren.mock.calls[0][1].signal).toBeInstanceOf(AbortSignal)
 
     // Selecting the lazy child must resolve the record from `lazyRecordsRef`
-    // even though it never entered the eager projection. The Graph adapter's
-    // responsibility is the visual bridge: the lazy id must surface in the
-    // `selectedNodes` Set that F0Graph receives on re-render. `onSelectItems`
-    // must also fire so consumers know selection changed.
-    //
-    // TODO(Phase 2): full propagation of lazy ids into the consumer payload
-    // (`selectionStatus.selectedIds`) requires `source.allPagesSelection: true`
-    // — `useSelectable` filters `selectedIds` to current-page records by
-    // default. Cover end-to-end propagation once Graph either defaults
-    // `allPagesSelection` to true or documents the requirement.
+    // even though it never entered the eager projection. GraphCollection
+    // forces `allPagesSelection: true` in lazy mode so the lazy id surfaces
+    // in both the F0Graph `selectedNodes` Set AND the `onSelectItems`
+    // payload's `selectedIds`.
     ;(props.onNodeSelect as (id: string, sel: boolean) => void)("lazy-1", true)
 
     await waitFor(() => {
       expect(onSelectItems).toHaveBeenCalled()
     })
+
+    const lastCall =
+      onSelectItems.mock.calls[onSelectItems.mock.calls.length - 1]
+    const status = lastCall[0] as {
+      selectedIds: ReadonlyArray<string | number>
+    }
+    expect(status.selectedIds.map(String)).toContain("lazy-1")
 
     await waitFor(() => {
       const updated = lastF0GraphProps()

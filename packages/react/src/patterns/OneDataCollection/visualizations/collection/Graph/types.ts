@@ -128,9 +128,22 @@ export type GraphVisualizationOptions<
    * - Returned records pass through `nodeAdapter` and inherit selection state
    *   via the standard projection (`source.selectable` / `item.id` / index).
    * - GraphCollection wraps the loader with an internal AbortController per
-   *   nodeId: results that resolve after unmount are dropped silently.
+   *   nodeId: results that resolve after unmount are dropped silently. The
+   *   controller's `signal` is forwarded as `opts.signal` so the consumer can
+   *   cancel the underlying request (e.g. pass it to `fetch`).
    */
-  loadChildren?: (nodeId: string) => Promise<ReadonlyArray<R>>
+  loadChildren?: (
+    nodeId: string,
+    opts: {
+      /**
+       * Aborted if the user collapses the node before resolution or the
+       * component unmounts. Consumers SHOULD forward this to `fetch` (or
+       * their underlying request layer) so cancelled loads release network
+       * resources instead of resolving into a dropped result.
+       */
+      signal: AbortSignal
+    }
+  ) => Promise<ReadonlyArray<R>>
 
   /**
    * Escape hatch for everything F0Graph exposes that this view does NOT own.

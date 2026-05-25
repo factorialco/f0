@@ -28,7 +28,7 @@ const records: TestPerson[] = [
   { id: "3", name: "Child B", parentId: "1" },
 ]
 
-describe("GraphCollection select-all inheritance", () => {
+describe("GraphCollection defaultSelectedItems bridge", () => {
   beforeEach(() => {
     f0GraphMock.mockClear()
   })
@@ -39,11 +39,10 @@ describe("GraphCollection select-all inheritance", () => {
   // the source already declares everything as selected via `defaultSelectedItems`,
   // GraphCollection surfaces those ids to F0Graph as `selectedNodes`.
   //
-  // TODO(Phase 1 follow-up): cover the full select-all → lazy-child inheritance
-  // flow by mounting OneDataCollection with both a Table and a Graph
-  // visualization, clicking select-all in the toolbar, expanding a graph
-  // node, and asserting the newly loaded children render as checked. That
-  // test belongs at the OneDataCollection integration level.
+  // TODO(Phase 3): integration test at OneDataCollection level for
+  // cross-visualization select-all — mount OneDataCollection with both a
+  // Table and a Graph visualization, click select-all in the toolbar, expand
+  // a graph node, and assert the newly loaded children render as checked.
 
   it("surfaces source.defaultSelectedItems as F0Graph selectedNodes", async () => {
     const items = new Map<

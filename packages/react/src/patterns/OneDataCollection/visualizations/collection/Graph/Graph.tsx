@@ -170,44 +170,66 @@ export const GraphCollection = <
   }, [paginationInfo?.total, records])
 
   /**
-   * Stable identity (dev-only): warn once when the same record key appears at
-   * a different array index between renders. Re-keying causes F0Graph to
-   * remount node DOM and lose expand/selection state. (PLAN §4.3.)
+   * Dev-only stable-identity warning (PLAN §4.3). If `nodeAdapter`,
+   * `edgeAdapter`, or `renderNode` changes identity 6+ times within 1 second
+   * of mount, fire ONE `console.warn` per prop so consumers notice they
+   * forgot to `useCallback`/`useMemo` before it surfaces as a perf bug.
+   * Production builds skip the check entirely.
    */
-  const previousIdentityRef = useRef<Map<string, number>>(new Map())
+  const identityCountsRef = useRef<
+    Map<
+      string,
+      { count: number; first: number; prev: unknown; warned: boolean }
+    >
+  >(new Map())
   useEffect(() => {
     if (!isDev) return
-    const idProvider = source.idProvider
-    const current = new Map<string, number>()
-    records.forEach((record, index) => {
-      const key = getRecordKey(
-        record,
-        index,
-        idProvider as unknown as
-          | ((item: Record, index: number) => string | number)
-          | undefined
-      )
-      current.set(key, index)
-    })
-    const previous = previousIdentityRef.current
-    if (previous.size > 0) {
-      for (const [key, index] of current) {
-        const prev = previous.get(key)
-        if (prev !== undefined && prev !== index) {
-          // eslint-disable-next-line no-console
-          console.warn(
-            `Graph visualization: record key "${key}" moved from index ${prev} to ${index}. ` +
-              "Provide a stable `source.selectable` (idProvider) so F0Graph can preserve node identity across renders."
-          )
-          break
-        }
+    const entries: Array<[string, unknown]> = [
+      ["nodeAdapter", nodeAdapter],
+      ["edgeAdapter", edgeAdapter],
+      ["renderNode", renderNode],
+    ]
+    const now = Date.now()
+    const tracked = identityCountsRef.current
+    for (const [name, value] of entries) {
+      if (value === undefined) continue
+      const entry = tracked.get(name)
+      if (!entry) {
+        tracked.set(name, {
+          count: 1,
+          first: now,
+          prev: value,
+          warned: false,
+        })
+        continue
+      }
+      if (entry.prev === value) continue
+      // Reset the window if more than 1s has elapsed since the first change.
+      if (now - entry.first > 1000) {
+        entry.count = 1
+        entry.first = now
+        entry.prev = value
+        entry.warned = false
+        continue
+      }
+      entry.count += 1
+      entry.prev = value
+      if (entry.count >= 6 && !entry.warned) {
+        entry.warned = true
+        // eslint-disable-next-line no-console
+        console.warn(
+          `Graph visualization: \`${name}\` identity changed ${entry.count} times within 1s. ` +
+            "Wrap it in `useCallback`/`useMemo` so F0Graph can keep node identity stable across renders."
+        )
       }
     }
-    previousIdentityRef.current = current
-  }, [records, isDev, source.idProvider])
+  }, [nodeAdapter, edgeAdapter, renderNode, isDev])
 
   // Project records → F0Graph topology. matchedIds left undefined in Phase 1
-  // (no usePerVisualizationFilters integration yet).
+  // (no usePerVisualizationFilters integration yet). Adapters and idProvider
+  // are included as deps so a deliberate identity change (e.g. a new
+  // edgeAdapter) re-projects; consumers are expected to memoize per PLAN §4.3
+  // — the dev-mode identity warning above flags missed memoization.
   const projection = useMemo(() => {
     return projectGraph<Record>({
       records,
@@ -217,8 +239,7 @@ export const GraphCollection = <
         | ((item: Record, index: number) => string | number)
         | undefined,
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- adapters are consumer-supplied; re-run on records only
-  }, [records])
+  }, [records, nodeAdapter, edgeAdapter, source.idProvider])
 
   const cycleWarnedRef = useRef<string>("")
   useEffect(() => {
@@ -233,10 +254,29 @@ export const GraphCollection = <
     )
   }, [projection.cycles, isDev])
 
+  const duplicateWarnedRef = useRef<string>("")
+  useEffect(() => {
+    if (!isDev) return
+    if (projection.duplicates.length === 0) return
+    const signature = projection.duplicates.slice().sort().join("|")
+    if (signature === duplicateWarnedRef.current) return
+    duplicateWarnedRef.current = signature
+    // eslint-disable-next-line no-console
+    console.warn(
+      `Graph visualization: duplicate record keys dropped from projection: ${projection.duplicates.join(", ")}. ` +
+        "Records must produce unique ids via `source.idProvider`/`item.id`; duplicates after the first occurrence are skipped."
+    )
+  }, [projection.duplicates, isDev])
+
   /**
    * Selection bridge — F0Graph emits string ids, DataCollection expects the
    * full record (PLAN §4.4). Lookup is by projected node id so it works even
    * when `source.selectable` is omitted (we fall back to `item.id`/index).
+   *
+   * Lazy mode forces `allPagesSelection: true` because ids returned by
+   * `loadChildren` never enter `data.records`; without this flag,
+   * `useSelectable` filters `selectedIds` to the current page and drops every
+   * lazy id from the `onSelectItems` payload silently.
    */
   const { selectedItems, handleSelectItemChange } = useSelectable<
     Record,
@@ -250,13 +290,14 @@ export const GraphCollection = <
     onSelectItems,
     selectionMode: "multi",
     selectedState: source.defaultSelectedItems,
+    allPagesSelection: isLazyMode ? true : undefined,
   })
 
   /**
-   * Lazy record cache — records returned by `loadChildren` never enter
-   * `projection.nodes`, so we stash them here so the selection bridge can
-   * resolve their record back from a node id when the user toggles selection
-   * on a lazy-loaded node.
+   * Monotonic cache of records returned by `loadChildren` — never evicted in
+   * Phase 1; revisit if memory becomes a concern under deeply nested lazy
+   * graphs. The selection bridge needs this so it can resolve a lazy id back
+   * to its record when the user toggles selection on a lazy-loaded node.
    */
   const lazyRecordsRef = useRef<Map<string, Record>>(new Map())
 
@@ -274,14 +315,25 @@ export const GraphCollection = <
     return ids
   }, [selectedItems])
 
+  const missingSelectionWarnedRef = useRef<Set<string>>(new Set())
   const handleNodeSelect = useCallback(
     (nodeId: string, selected: boolean) => {
       const record =
         recordById.get(nodeId) ?? lazyRecordsRef.current.get(nodeId)
-      if (!record) return
+      if (!record) {
+        if (isDev && !missingSelectionWarnedRef.current.has(nodeId)) {
+          missingSelectionWarnedRef.current.add(nodeId)
+          // eslint-disable-next-line no-console
+          console.warn(
+            `Graph visualization: ignored selection toggle for node "${nodeId}" because no matching record was found. ` +
+              "This usually means the node was projected from a lazy load that has since been collapsed."
+          )
+        }
+        return
+      }
       handleSelectItemChange(record, selected)
     },
-    [recordById, handleSelectItemChange]
+    [recordById, handleSelectItemChange, isDev]
   )
 
   /**
@@ -312,9 +364,12 @@ export const GraphCollection = <
   /**
    * Lazy loader wrapper — per-node AbortController, single in-flight loader
    * per nodeId. On unmount, every controller is aborted; results that arrive
-   * after the abort are dropped silently. Records that survive are projected
-   * with the same `nodeAdapter` + `getRecordKey` pipeline as the eager path
-   * and cached in `lazyRecordsRef` for the selection bridge.
+   * after the abort are dropped silently. The controller's `signal` is also
+   * forwarded to the consumer's `loadChildren` so the underlying request
+   * (e.g. `fetch`) can be cancelled at the network layer. Records that
+   * survive are projected with the same `nodeAdapter` + `getRecordKey`
+   * pipeline as the eager path and cached in `lazyRecordsRef` for the
+   * selection bridge.
    */
   const abortControllersRef = useRef<Map<string, AbortController>>(new Map())
   const idProviderForLazy = source.idProvider as unknown as
@@ -329,7 +384,9 @@ export const GraphCollection = <
       const controller = new AbortController()
       abortControllersRef.current.set(nodeId, controller)
       try {
-        const children = await loadChildren(nodeId)
+        const children = await loadChildren(nodeId, {
+          signal: controller.signal,
+        })
         if (controller.signal.aborted) return []
         const projected: GraphNode<Record>[] = []
         children.forEach((child, index) => {
@@ -391,7 +448,9 @@ export const GraphCollection = <
           selectionMode={source.selectable ? "multi" : "none"}
           selectedNodes={selectedNodes}
           onNodeSelect={handleNodeSelect}
-          searchValue={source.currentSearch}
+          searchValue={
+            source.debouncedCurrentSearch ?? source.currentSearch ?? undefined
+          }
           onSearchChange={handleSearchChange}
         />
       ) : (
@@ -404,7 +463,9 @@ export const GraphCollection = <
           selectionMode={source.selectable ? "multi" : "none"}
           selectedNodes={selectedNodes}
           onNodeSelect={handleNodeSelect}
-          searchValue={source.currentSearch}
+          searchValue={
+            source.debouncedCurrentSearch ?? source.currentSearch ?? undefined
+          }
           onSearchChange={handleSearchChange}
         />
       )}

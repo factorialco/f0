@@ -45,7 +45,7 @@ describe("GraphCollection lazy loader abort behavior", () => {
     f0GraphMock.mockClear()
   })
 
-  it("aborts the prior in-flight loader when called again for the same nodeId", async () => {
+  it("forwards an AbortSignal to the consumer loader and aborts the prior in-flight loader for the same nodeId", async () => {
     let firstSignal: AbortSignal | undefined
     let secondSignal: AbortSignal | undefined
     let resolveFirst!: (v: TestPerson[]) => void
@@ -54,15 +54,15 @@ describe("GraphCollection lazy loader abort behavior", () => {
     const loadChildren = vi.fn(
       async (
         _nodeId: string,
-        opts?: { signal?: AbortSignal }
+        opts: { signal: AbortSignal }
       ): Promise<TestPerson[]> => {
         if (loadChildren.mock.calls.length === 1) {
-          firstSignal = opts?.signal
+          firstSignal = opts.signal
           return new Promise((r) => {
             resolveFirst = r
           })
         }
-        secondSignal = opts?.signal
+        secondSignal = opts.signal
         return new Promise((r) => {
           resolveSecond = r
         })
@@ -74,7 +74,7 @@ describe("GraphCollection lazy loader abort behavior", () => {
         source={createPaginatedSource(rootRecords)}
         nodeAdapter={nodeAdapter}
         renderNode={stubRenderNode}
-        loadChildren={loadChildren as never}
+        loadChildren={loadChildren}
         onSelectItems={vi.fn()}
         onLoadData={vi.fn()}
         onLoadError={vi.fn()}
@@ -89,16 +89,10 @@ describe("GraphCollection lazy loader abort behavior", () => {
     })
 
     const wrapped = getWrappedLoadChildren()
-    // First call starts; do NOT await — we need to launch the second while
-    // the first is still in-flight.
+    // Launch first load and second load while the first is still in-flight.
     void wrapped("root")
     void wrapped("root")
 
-    // Each user call into the wrapper produces exactly one consumer-loadChildren
-    // call; the wrapper's own AbortController is internal — the consumer's
-    // `loadChildren` may or may not receive a signal depending on signature,
-    // but the wrapper must abort the prior controller before issuing the
-    // second underlying call.
     expect(loadChildren).toHaveBeenCalledTimes(2)
 
     // Settle the pending promises so vitest doesn't complain about
@@ -106,15 +100,13 @@ describe("GraphCollection lazy loader abort behavior", () => {
     resolveFirst([])
     resolveSecond([])
 
-    // Either the consumer received the wrapper's signal (loadChildren
-    // signature: (nodeId, { signal })) and it must be aborted, or the
-    // wrapper opted to drop results internally — both behaviors satisfy
-    // the contract. We assert at least the second underlying call ran.
-    // If signals were forwarded, the first must now be aborted.
-    if (firstSignal) {
-      expect(firstSignal.aborted).toBe(true)
-    }
-    expect(secondSignal?.aborted ?? false).toBe(false)
+    // The wrapper forwards its internal AbortController's signal as
+    // `opts.signal`. When a second load starts for the same nodeId, the
+    // first signal must be aborted.
+    expect(firstSignal).toBeDefined()
+    expect(firstSignal!.aborted).toBe(true)
+    expect(secondSignal).toBeDefined()
+    expect(secondSignal!.aborted).toBe(false)
   })
 
   it("aborts every in-flight loader on unmount", async () => {
@@ -122,9 +114,9 @@ describe("GraphCollection lazy loader abort behavior", () => {
     const loadChildren = vi.fn(
       async (
         _nodeId: string,
-        opts?: { signal?: AbortSignal }
+        opts: { signal: AbortSignal }
       ): Promise<TestPerson[]> => {
-        capturedSignal = opts?.signal
+        capturedSignal = opts.signal
         return new Promise(() => {
           /* never resolves */
         })
@@ -136,7 +128,7 @@ describe("GraphCollection lazy loader abort behavior", () => {
         source={createPaginatedSource(rootRecords)}
         nodeAdapter={nodeAdapter}
         renderNode={stubRenderNode}
-        loadChildren={loadChildren as never}
+        loadChildren={loadChildren}
         onSelectItems={vi.fn()}
         onLoadData={vi.fn()}
         onLoadError={vi.fn()}
@@ -156,13 +148,60 @@ describe("GraphCollection lazy loader abort behavior", () => {
 
     unmount()
 
-    // The wrapper aborts its internal controller on unmount. If it forwards
-    // the signal to the consumer, that signal is now aborted.
-    if (capturedSignal) {
-      expect(capturedSignal.aborted).toBe(true)
-    }
-    // Either way, the wrapper guards against late results — covered by the
-    // `if (controller.signal.aborted) return []` check in `wrappedLoadChildren`.
+    // The wrapper aborts its internal controller on unmount and forwards the
+    // signal to the consumer, so the consumer can cancel its underlying
+    // request (e.g. via fetch's `signal` option).
+    expect(capturedSignal).toBeDefined()
+    expect(capturedSignal!.aborted).toBe(true)
+  })
+
+  it("lets the consumer loader observe abortion mid-flight via the forwarded signal", async () => {
+    let observed: { abortedBeforeResolve: boolean } | undefined
+    const loadChildren = vi.fn(
+      async (
+        _nodeId: string,
+        opts: { signal: AbortSignal }
+      ): Promise<TestPerson[]> => {
+        // Simulate a consumer awaiting a network request that observes
+        // cancellation via the signal.
+        await new Promise<void>((resolve) => {
+          opts.signal.addEventListener("abort", () => {
+            observed = { abortedBeforeResolve: true }
+            resolve()
+          })
+        })
+        return []
+      }
+    )
+
+    const { unmount } = zeroRender(
+      <GraphCollection
+        source={createPaginatedSource(rootRecords)}
+        nodeAdapter={nodeAdapter}
+        renderNode={stubRenderNode}
+        loadChildren={loadChildren}
+        onSelectItems={vi.fn()}
+        onLoadData={vi.fn()}
+        onLoadError={vi.fn()}
+      />
+    )
+
+    await waitFor(() => {
+      const props = f0GraphMock.mock.calls[
+        f0GraphMock.mock.calls.length - 1
+      ][0] as unknown as { rootNodes?: unknown[] }
+      expect(Array.isArray(props.rootNodes)).toBe(true)
+    })
+
+    const wrapped = getWrappedLoadChildren()
+    void wrapped("root")
+    expect(loadChildren).toHaveBeenCalledTimes(1)
+
+    unmount()
+
+    await waitFor(() => {
+      expect(observed?.abortedBeforeResolve).toBe(true)
+    })
   })
 
   // TODO(Phase 1 follow-up): F0Graph collapsing a node should also abort any
