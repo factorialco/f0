@@ -81,7 +81,8 @@ const MODALITY_ICON: Record<Modality, typeof Office> = {
 
 function formatLongDate(iso: string | null): string {
   if (!iso) return "-"
-  const date = new Date(iso)
+  const [year, month, day] = iso.split("-").map(Number)
+  const date = year && month && day ? new Date(year, month - 1, day) : new Date(iso)
   if (Number.isNaN(date.getTime())) return iso
   return date.toLocaleDateString("en-US", {
     day: "numeric",

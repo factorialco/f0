@@ -8,7 +8,7 @@ import {
   useDataCollectionSource,
 } from "@factorialco/f0-react/dist/experimental"
 import { Link } from "@factorialco/f0-react/icons/app"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useSearchParams } from "react-router-dom"
 
 import { type Training, findTraining, trainings } from "@/fixtures"
@@ -59,6 +59,13 @@ function getTotalDuration(training: Training) {
 export default function TrainingAccessViewer() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [isCopyLinkCopied, setIsCopyLinkCopied] = useState(false)
+  const copyTooltipTimeoutRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (copyTooltipTimeoutRef.current) window.clearTimeout(copyTooltipTimeoutRef.current)
+    }
+  }, [])
   const trainingId = searchParams.get("training")
   const rawTab = searchParams.get("dtab")
   const classId = searchParams.get("class")
@@ -91,8 +98,12 @@ export default function TrainingAccessViewer() {
 
   const handleCopyLink = () => {
     setIsCopyLinkCopied(true)
-    void navigator.clipboard?.writeText(window.location.href).catch(() => {})
-    window.setTimeout(() => setIsCopyLinkCopied(false), 4000)
+    void navigator.clipboard?.writeText(window.location.href)?.catch(() => {})
+    if (copyTooltipTimeoutRef.current) window.clearTimeout(copyTooltipTimeoutRef.current)
+    copyTooltipTimeoutRef.current = window.setTimeout(() => {
+      setIsCopyLinkCopied(false)
+      copyTooltipTimeoutRef.current = null
+    }, 4000)
   }
 
   if (classId) {
@@ -243,7 +254,6 @@ function LinkCopiedTooltip() {
     <div
       role="status"
       className="fixed right-6 top-28 z-[9999] rounded-md bg-f1-background-inverse px-3 py-2 shadow-lg"
-      style={{ position: "fixed", right: 24, top: 112, zIndex: 9999 }}
     >
       <F0Text content="Link copied" variant="inverse" />
     </div>

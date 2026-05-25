@@ -389,6 +389,13 @@ export default function TrainingAccessAdmin() {
   const [isPeopleListOpen, setIsPeopleListOpen] = useState(false)
   const [notice, setNotice] = useState<Notice | null>(null)
   const [isCopyLinkCopied, setIsCopyLinkCopied] = useState(false)
+  const copyTooltipTimeoutRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (copyTooltipTimeoutRef.current) window.clearTimeout(copyTooltipTimeoutRef.current)
+    }
+  }, [])
 
   const trainingId = searchParams.get("training")
   const requestedTraining = trainingId ? findTraining(trainingId) : undefined
@@ -415,8 +422,12 @@ export default function TrainingAccessAdmin() {
 
   const handleCopyLink = () => {
     setIsCopyLinkCopied(true)
-    void navigator.clipboard?.writeText(window.location.href).catch(() => {})
-    window.setTimeout(() => setIsCopyLinkCopied(false), 4000)
+    void navigator.clipboard?.writeText(window.location.href)?.catch(() => {})
+    if (copyTooltipTimeoutRef.current) window.clearTimeout(copyTooltipTimeoutRef.current)
+    copyTooltipTimeoutRef.current = window.setTimeout(() => {
+      setIsCopyLinkCopied(false)
+      copyTooltipTimeoutRef.current = null
+    }, 4000)
   }
 
   const secondaryActions = [
@@ -748,7 +759,6 @@ function LinkCopiedTooltip() {
     <div
       role="status"
       className="fixed right-6 top-28 z-[9999] rounded-md bg-f1-background-inverse px-3 py-2 shadow-lg"
-      style={{ position: "fixed", right: 24, top: 112, zIndex: 9999 }}
     >
       <F0Text content="Link copied" variant="inverse" />
     </div>
@@ -1091,24 +1101,17 @@ function PeopleSearchResults({
         candidates.map((candidate) => {
           const selected = selectedEmployeeIds.includes(candidate.value)
           return (
-            <div
+            <button
               key={candidate.value}
-              role="button"
-              tabIndex={0}
+              type="button"
               className={`flex w-full items-center justify-between rounded-md border-0 bg-transparent p-2 text-left hover:bg-f1-background-hover ${
                 selected ? "bg-f1-background-selected" : ""
               }`}
               onClick={() => onSelect(candidate.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault()
-                  onSelect(candidate.value)
-                }
-              }}
             >
               <PersonCell employee={candidate.employee} supportingText={candidate.employee.email} />
               {selected && <F0Text content="Selected" variant="description" />}
-            </div>
+            </button>
           )
         })
       ) : (
