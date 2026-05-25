@@ -101,7 +101,7 @@ export const AssistantMessage = ({
         {message && content && (
           <div
             ref={contentRef}
-            className="w-fit max-w-full [&>div]:flex [&>div]:flex-col [&>div]:gap-1"
+            className="w-full max-w-full [&>div]:flex [&>div]:flex-col [&>div]:gap-1"
           >
             {(renderMarkdown ?? defaultMarkdownFallback)(content)}
           </div>

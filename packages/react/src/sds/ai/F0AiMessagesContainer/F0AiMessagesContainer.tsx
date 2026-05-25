@@ -161,9 +161,6 @@ const Messages = ({
 
   const renderTurn = (turn: RenderableTurn, turnIndex: number) => {
     const isLastTurn = turnIndex === turns.length - 1
-    const liveMessage = turn.thinking?.liveMessage
-    const totalMessagesInTurn =
-      turn.userMessages.length + turn.assistantMessages.length
 
     const baseExtraProps: F0AssistantMessageExtraProps &
       F0UserMessageExtraProps = {
@@ -198,9 +195,7 @@ const Messages = ({
 
     const renderAssistantMessage = (message: Message, index: number) => {
       const isCurrentMessage =
-        isLastTurn &&
-        index === turn.assistantMessages.length - 1 &&
-        !liveMessage
+        isLastTurn && index === turn.assistantMessages.length - 1
       const flatIndex = turn.userMessages.length + index
 
       const messageProps = {
@@ -241,33 +236,15 @@ const Messages = ({
         {turn.userMessages.map((message, index) =>
           renderUserMessage(message, index)
         )}
-        {turn.thinking && (
+        {turn.thinking && turn.thinking.titles.length > 0 && (
           <Thinking
             titles={turn.thinking.titles}
             title={translations.ai.thoughtsGroupTitle}
+            inProgress={turn.thinking.inProgress}
           />
         )}
         {turn.assistantMessages.map((message, index) =>
           renderAssistantMessage(message, index)
-        )}
-        {liveMessage && (
-          <AssistantMessage
-            key={`thinking-live-${turnIndex}`}
-            {...({
-              message: liveMessage,
-              inProgress: turn.isInProgress,
-              index: totalMessagesInTurn,
-              isCurrentMessage: true,
-              AssistantMessage,
-              UserMessage,
-              onRegenerate,
-              onCopy,
-              rawData: (liveMessage as any).rawData || {},
-              ...baseExtraProps,
-              isGenerating: true,
-              isLoading: !liveMessage.content,
-            } as any)}
-          />
         )}
         {turn.endIndicator === "thinking" && (
           <F0ActionItem title={translations.ai.thinking} status="executing" />

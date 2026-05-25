@@ -156,23 +156,18 @@ export const ConnectedMessagesContainer = ({
       const isLastTurn = turnIndex === rawTurns.length - 1
       const { thinkingGroup, restMessages } = extractThinkingGroup(turnMessages)
 
-      // Thinking section: collapsed group of past steps + (optional) the live
-      // streaming step rendered inline below it.
-      const liveThinkingMessage =
-        thinkingGroup && isLastTurn && !turnIsComplete && !showActivityIndicator
-          ? thinkingGroup[thinkingGroup.length - 1]
+      // Thinking section: always renders the collapsible whenever there are
+      // any thinking steps in the turn. While the turn is still streaming the
+      // collapsible defaults open and the last item renders as `executing`;
+      // once the turn completes the collapsible auto-collapses and every item
+      // renders as `completed`.
+      const thinking =
+        thinkingGroup && thinkingGroup.length > 0
+          ? {
+              titles: collectThinkingTitles(thinkingGroup),
+              inProgress: !turnIsComplete,
+            }
           : undefined
-      const thinkingForCollapsedGroup =
-        thinkingGroup && !(isLastTurn && !turnIsComplete)
-          ? thinkingGroup
-          : undefined
-
-      const thinking = thinkingForCollapsedGroup
-        ? {
-            titles: collectThinkingTitles(thinkingForCollapsedGroup),
-            liveMessage: liveThinkingMessage,
-          }
-        : undefined
 
       // Split rest messages into user vs assistant blocks. convertMessagesToTurns
       // groups messages so each turn starts with user messages and is followed

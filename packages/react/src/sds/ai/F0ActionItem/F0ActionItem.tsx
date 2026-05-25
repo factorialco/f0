@@ -10,33 +10,35 @@ import { F0ActionItemProps } from "./types"
 export const F0ActionItem = ({ title, status, inGroup }: F0ActionItemProps) => {
   return (
     <div className="flex w-full items-start gap-1 text-f1-foreground-secondary">
-      {status === "inProgress" && (
-        <div className="-mt-[2px] *:block">
+      <div className="flex h-6 w-6 shrink-0 items-center justify-start">
+        {status === "inProgress" && (
           <F0Icon
             state="animate"
             size={inGroup ? "md" : "lg"}
             icon={DottedCircle}
           />
-        </div>
-      )}
-      {status === "executing" && (
-        <div className="-mt-[2px] grid h-6 w-6 shrink-0 items-center justify-items-center">
-          <ChatSpinner />
-        </div>
-      )}
-      {status === "completed" && (
-        <div className="*:block">
+        )}
+        {status === "executing" && (
+          <div className="flex h-5 w-5 shrink-0 items-center justify-center">
+            <ChatSpinner />
+          </div>
+        )}
+        {status === "completed" && (
           <F0Icon
             color="secondary"
             state="animate"
             size={inGroup ? "md" : "lg"}
             icon={OutlineCircle}
           />
-        </div>
-      )}
-      <p className={cn("text-pretty", status === "executing" && "shine-text")}>
-        {title}
-      </p>
+        )}
+      </div>
+      <div className="min-h-6 flex items-center">
+        <p
+          className={cn("text-pretty", status === "executing" && "shine-text")}
+        >
+          {title}
+        </p>
+      </div>
     </div>
   )
 }

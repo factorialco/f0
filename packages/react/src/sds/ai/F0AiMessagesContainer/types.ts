@@ -45,10 +45,13 @@ export type RenderableTurn = {
   thinking?: {
     titles: string[]
     /**
-     * Optional message currently streaming below the collapsed group —
-     * rendered inline so the user can see the live thinking content.
+     * Whether this turn is still streaming. The collapsible stays locked
+     * open while true (no chevron, no toggle) and auto-collapses on the
+     * transition to false. Drives the per-item status: previous titles
+     * are always `completed`; the last title is `executing` while true
+     * and `completed` once false.
      */
-    liveMessage?: Message
+    inProgress?: boolean
   }
   /** Messages rendered after the thinking section (assistant replies). */
   assistantMessages: Message[]
@@ -80,4 +83,10 @@ export type ThinkingProps = {
   titles: string[]
   /** Section heading (defaults to "Thoughts" from i18n). */
   title?: string
+  /**
+   * Whether the turn is still streaming. Locks the collapsible open (no
+   * chevron, no user toggle) while true and auto-collapses on the
+   * transition to false. After that, the user can toggle freely.
+   */
+  inProgress?: boolean
 }

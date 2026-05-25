@@ -9,36 +9,72 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/ui/collapsible"
+import { cn } from "@/lib/utils"
 
 interface CollapsibleMessageProps {
   icon: IconType
   title: string
   children: ReactNode
+  /** Controlled open state. When set, the parent owns the open state. */
+  open?: boolean
+  /** Initial open state when uncontrolled. */
+  defaultOpen?: boolean
+  /** Fires on user toggle. Required when `open` is provided. */
+  onOpenChange?: (open: boolean) => void
+  /**
+   * When true, the chevron is hidden and the trigger does not toggle —
+   * the section stays open regardless of user clicks. The parent must
+   * keep `open` true while locked.
+   */
+  lockOpen?: boolean
 }
 
 export const CollapsibleMessage = ({
   icon,
   title,
   children,
+  open,
+  defaultOpen = false,
+  onOpenChange,
+  lockOpen = false,
 }: CollapsibleMessageProps) => {
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen)
   const shouldReduceMotion = useReducedMotion()
+  const isControlled = open !== undefined
+  const isExpanded = isControlled ? open : uncontrolledOpen
+  const handleOpenChange = (next: boolean) => {
+    if (lockOpen) return
+    if (!isControlled) setUncontrolledOpen(next)
+    onOpenChange?.(next)
+  }
 
   return (
     <Collapsible
       className="mb-1 w-full"
       open={isExpanded}
-      onOpenChange={setIsExpanded}
+      onOpenChange={handleOpenChange}
     >
-      <CollapsibleTrigger className="flex w-full items-center text-base text-f1-foreground-secondary transition-colors duration-150 hover:text-f1-foreground [&[data-state=open]>svg]:rotate-90">
-        <span className="mr-2 *:block">
+      <CollapsibleTrigger
+        disabled={lockOpen}
+        className={cn(
+          "gap-1",
+          lockOpen
+            ? "flex w-full items-center text-base text-f1-foreground-secondary"
+            : "flex w-full items-center text-base text-f1-foreground-secondary transition-colors duration-150 hover:text-f1-foreground [&[data-state=open]>svg]:rotate-90"
+        )}
+      >
+        <span className="flex items-center justify-start h-6 w-6">
           <F0Icon icon={icon} className="block" />
         </span>
-        <span className="mr-[2px]">{title}</span>
-        <F0Icon
-          icon={ChevronRight}
-          className="h-4 w-4 transition-transform duration-200"
-        />
+        <div className="min-h-6 flex items-center">
+          <span>{title}</span>
+        </div>
+        {!lockOpen && (
+          <F0Icon
+            icon={ChevronRight}
+            // className="h-6 w-6 transition-transform duration-200"
+          />
+        )}
       </CollapsibleTrigger>
       <CollapsibleContent forceMount className="data-[state=open]:mt-3">
         <motion.div

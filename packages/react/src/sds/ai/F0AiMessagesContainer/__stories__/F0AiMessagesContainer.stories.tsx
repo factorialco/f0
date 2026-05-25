@@ -81,8 +81,12 @@ const turnStreamingActivityIndicator = (): RenderableTurn => ({
 const turnStreamingLiveThinking = (): RenderableTurn => ({
   userMessages: [userMessage("u4", "Build me a salary report by department")],
   thinking: {
-    titles: ["Fetching department list", "Aggregating payroll by department"],
-    liveMessage: assistantMessage("live", ""),
+    titles: [
+      "Fetching department list",
+      "Aggregating payroll by department",
+      "Generating salary report",
+    ],
+    inProgress: true,
   },
   assistantMessages: [],
   isInProgress: true,
