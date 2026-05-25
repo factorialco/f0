@@ -5,18 +5,13 @@ import {
   F0ButtonDropdown,
   F0Dialog,
   F0Select,
-  F0Heading,
   F0Text,
-  TwoColumnLayout,
 } from "@factorialco/f0-react"
 import {
-  OneDataCollection,
   Page,
   PageHeader,
   ResourceHeader,
   Tabs,
-  Tooltip,
-  useDataCollectionSource,
 } from "@factorialco/f0-react/dist/experimental"
 import {
   Check,
@@ -29,11 +24,11 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useSearchParams } from "react-router-dom"
 
-import { competencies, employees, findTraining, trainings } from "@/fixtures"
+import { employees, findTraining, trainings } from "@/fixtures"
 import type { Employee } from "@/fixtures/types"
 import type { Training } from "@/fixtures"
-import { applySort } from "@/lib/applySort"
 
+import { AccessCoursesPage } from "../training-access-shared/AccessCoursesPage"
 import { AttachmentsTab } from "../trainings/detail/AttachmentsTab"
 import { AdminCourseModals, type AdminAction } from "../training-access-shared/AdminCourseModals"
 import { EditableClassDetail } from "../training-access-shared/EditableClassDetail"
@@ -42,6 +37,7 @@ import { ContentTab } from "../trainings/detail/ContentTab"
 import { DocumentsTab } from "../trainings/detail/DocumentsTab"
 import { FormsTab } from "../trainings/detail/FormsTab"
 import { FundaeTab } from "../trainings/detail/FundaeTab"
+import { OverviewTab } from "../trainings/detail/OverviewTab"
 import { ParticipantsTab } from "../trainings/detail/ParticipantsTab"
 import { PageContent } from "../trainings/_shared/PageContent"
 import { type DetailTabId, detailTabs } from "../trainings/tabs"
@@ -143,239 +139,6 @@ function roleLabel(role: DirectAccessRole) {
   if (role === "author") return "Owner"
   if (role === "editor") return "Can edit"
   return "Can view"
-}
-
-function formatMoney(amount: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "EUR",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }).format(amount)
-}
-
-function formatScore(value: number | null | undefined): string {
-  if (value == null) return "-"
-  return value.toFixed(1)
-}
-
-function OverviewSection({
-  label,
-  children,
-}: {
-  label: string
-  children: React.ReactNode
-}) {
-  return (
-    <F0Box display="flex" flexDirection="column" gap="sm">
-      <F0Text content={label} variant="label" />
-      {children}
-    </F0Box>
-  )
-}
-
-function OverviewTag({ label }: { label: string }) {
-  return (
-    <span className="inline-flex items-center rounded-md bg-f1-background-secondary px-2 py-0.5 text-sm text-f1-foreground-secondary">
-      {label}
-    </span>
-  )
-}
-
-function CostWithTooltip({
-  label,
-  amount,
-  tooltip,
-}: {
-  label: string
-  amount: number
-  tooltip: string
-}) {
-  return (
-    <F0Box display="flex" flexDirection="column" gap="sm">
-      <F0Box display="flex" flexDirection="row" alignItems="center" gap="sm">
-        <F0Text content={label} variant="label" />
-        <Tooltip label={tooltip}>
-          <span
-            className="inline-flex h-4 w-4 items-center justify-center rounded-full text-xs text-f1-foreground-secondary"
-            aria-label={tooltip}
-          >
-            i
-          </span>
-        </Tooltip>
-      </F0Box>
-      <F0Text content={formatMoney(amount)} variant="body" />
-    </F0Box>
-  )
-}
-
-function AdminTrainingOverview({ training }: { training: Training }) {
-  const trainingCompetencies = training.competencyIds?.length
-    ? competencies.filter((competency) => training.competencyIds?.includes(competency.id))
-    : []
-  const isSpanishCompany = training.countryHint === "es"
-  const isFrenchCompany = training.countryHint === "fr"
-  const subsidyText = training.fundaeSubsidized && isSpanishCompany
-    ? "Subsidized by FUNDAE"
-    : training.subsidized && !isSpanishCompany
-      ? "Subsidized"
-      : "Non-subsidized"
-
-  const mainContent = (
-    <F0Box display="flex" flexDirection="column" gap="xl">
-      <F0Box display="flex" flexDirection="row" gap="xl" flexWrap="wrap">
-        <F0Box display="flex" flexDirection="column" gap="sm">
-          <F0Text content="Course satisfaction" variant="label" />
-          <F0Heading
-            content={formatScore(training.scoreSatisfaction)}
-            as="h3"
-            variant="heading"
-          />
-        </F0Box>
-        <F0Box display="flex" flexDirection="column" gap="sm">
-          <F0Text content="Course effectiveness" variant="label" />
-          <F0Heading
-            content={formatScore(training.scoreEffectiveness)}
-            as="h3"
-            variant="heading"
-          />
-        </F0Box>
-        <F0Box display="flex" flexDirection="column" gap="sm">
-          <F0Text content="Knowledge test" variant="label" />
-          <F0Heading
-            content={formatScore(training.scoreKnowledge)}
-            as="h3"
-            variant="heading"
-          />
-        </F0Box>
-      </F0Box>
-
-      <OverviewSection label="Competencies">
-        {trainingCompetencies.length > 0 ? (
-          <F0Box display="flex" flexDirection="row" flexWrap="wrap" gap="sm">
-            {trainingCompetencies.map((competency) => (
-              <OverviewTag key={competency.id} label={competency.name} />
-            ))}
-          </F0Box>
-        ) : null}
-      </OverviewSection>
-
-      <OverviewSection label="Objectives">
-        <F0Text content={training.objectives || ""} variant="body" />
-      </OverviewSection>
-
-      <OverviewSection label="Description">
-        <F0Text content={training.description || ""} variant="body" />
-      </OverviewSection>
-
-      {training.validFor && (
-        <OverviewSection label="Course validity">
-          <F0Text
-            content={training.validFor === 1 ? "1 year" : `${training.validFor} years`}
-            variant="body"
-          />
-        </OverviewSection>
-      )}
-
-      {training.learningPlatformLink && (
-        <OverviewSection label="Learning platform">
-          <a
-            href={training.learningPlatformLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-f1-foreground-info underline"
-          >
-            {training.learningPlatformLink}
-          </a>
-        </OverviewSection>
-      )}
-    </F0Box>
-  )
-
-  const sideContent = (
-    <F0Box display="flex" flexDirection="column" gap="xl" paddingLeft="xl">
-      {training.thumbnail && (
-        <div className="flex max-h-[140px] max-w-[360px] items-center justify-center overflow-hidden rounded-md">
-          <img
-            src={training.thumbnail}
-            alt={training.name}
-            className="h-auto max-h-full w-auto max-w-full object-contain"
-          />
-        </div>
-      )}
-
-      <OverviewSection label="Subsidy">
-        <F0Text content={subsidyText} variant="body" />
-      </OverviewSection>
-
-      <OverviewSection label="Workflow">
-        <F0Text
-          content={training.processId ? training.workflowName || "" : "Not linked to Workflows"}
-          variant="body"
-        />
-      </OverviewSection>
-
-      <OverviewSection label="Internal code">
-        <F0Text content={training.code ?? "-"} variant="body" />
-      </OverviewSection>
-
-      {training.type === "external" && training.externalProvider && (
-        <OverviewSection label="Provider">
-          <F0Text content={training.externalProvider} variant="body" />
-        </OverviewSection>
-      )}
-
-      <OverviewSection label="Tags">
-        {training.categories.length > 0 ? (
-          <F0Box display="flex" flexDirection="row" flexWrap="wrap" gap="sm">
-            {training.categories.map((category) => (
-              <OverviewTag key={category.id} label={category.name} />
-            ))}
-          </F0Box>
-        ) : (
-          <F0Text content="-" variant="body" />
-        )}
-      </OverviewSection>
-
-      {isFrenchCompany && training.axes && training.axes.length > 0 && (
-        <OverviewSection label="Axes">
-          <F0Box display="flex" flexDirection="row" flexWrap="wrap" gap="sm">
-            {training.axes.map((axis) => (
-              <OverviewTag key={axis.id} label={axis.name} />
-            ))}
-          </F0Box>
-        </OverviewSection>
-      )}
-
-      <CostWithTooltip
-        label="Total cost"
-        amount={training.totalCost}
-        tooltip="Sum of direct and indirect cost of all the groups"
-      />
-
-      <CostWithTooltip
-        label="Total salary cost"
-        amount={training.totalSalaryCost}
-        tooltip="Sum of the salary cost of all the groups"
-      />
-
-      <CostWithTooltip
-        label="Subsidiary cost"
-        amount={training.totalSubsidizedCost}
-        tooltip="Sum of the subsidized cost of all the groups"
-      />
-
-      <OverviewSection label="Creation year">
-        <F0Text content={String(training.year)} variant="body" />
-      </OverviewSection>
-    </F0Box>
-  )
-
-  return (
-    <F0Box padding="xl">
-      <TwoColumnLayout sideContent={sideContent}>{mainContent}</TwoColumnLayout>
-    </F0Box>
-  )
 }
 
 export default function TrainingAccessAdmin() {
@@ -537,7 +300,7 @@ export default function TrainingAccessAdmin() {
   ]
 
   if (!selectedTraining) {
-    return <AdminCoursesList baseHref={BASE_HREF} />
+    return <AccessCoursesPage baseHref={BASE_HREF} role="admin" />
   }
 
   if (classId) {
@@ -711,7 +474,7 @@ export default function TrainingAccessAdmin() {
         }
       >
         <PageContent>
-          {activeTab === "overview" && <AdminTrainingOverview training={training} />}
+          {activeTab === "overview" && <OverviewTab training={training} />}
           {activeTab === "content" && <ContentTab training={training} />}
           {activeTab === "groups" && <EditableClassesTab training={training} />}
           {activeTab === "participants" && <ParticipantsTab training={training} />}
@@ -762,146 +525,6 @@ function LinkCopiedTooltip() {
     >
       <F0Text content="Link copied" variant="inverse" />
     </div>
-  )
-}
-
-function AdminCoursesList({ baseHref }: { baseHref: string }) {
-  const source = useDataCollectionSource<Training>(
-    {
-      search: { enabled: true, sync: true },
-      presets: [{ label: "All courses", filter: {} }],
-      filters: {
-        status: {
-          type: "in",
-          label: "Status",
-          options: {
-            options: [
-              { value: "active", label: "Published" },
-              { value: "draft", label: "Draft" },
-            ],
-          },
-        },
-      },
-      sortings: {
-        name: { label: "Name" },
-        year: { label: "Year" },
-      },
-      dataAdapter: {
-        paginationType: "pages",
-        perPage: 20,
-        fetchData: ({ filters, search, sortings, pagination }) => {
-          const statusFilter = Array.isArray(filters?.status)
-            ? (filters.status as string[])
-            : []
-          const term = (search ?? "").toLowerCase().trim()
-          const filtered = trainings
-            .filter((training) =>
-              statusFilter.length === 0
-                ? true
-                : statusFilter.includes(training.status)
-            )
-            .filter((training) =>
-              term === "" ? true : training.name.toLowerCase().includes(term)
-            )
-          const sorted = applySort(filtered, sortings, (training, field) => {
-            if (field === "name") return training.name.toLowerCase()
-            if (field === "year") return training.year
-            return null
-          })
-          const perPage = pagination?.perPage ?? 20
-          const currentPage =
-            pagination && "currentPage" in pagination && pagination.currentPage
-              ? pagination.currentPage
-              : 1
-          const total = sorted.length
-          const pagesCount = Math.max(1, Math.ceil(total / perPage))
-          const start = (currentPage - 1) * perPage
-
-          return {
-            type: "pages" as const,
-            records: sorted.slice(start, start + perPage),
-            total,
-            perPage,
-            currentPage,
-            pagesCount,
-          }
-        },
-      },
-      itemUrl: (training) => `${baseHref}?training=${training.id}`,
-    },
-    [baseHref]
-  )
-
-  return (
-    <Page
-      header={
-        <>
-          <PageHeader
-            module={{ id: "company_trainings", name: "Trainings", href: baseHref }}
-            breadcrumbs={[{ id: "courses", label: "Courses" }]}
-          />
-          <ResourceHeader
-            title="Courses"
-            description="All courses you can manage as a training admin."
-            metadata={[
-              {
-                label: "Access",
-                value: { type: "status", label: "Admin", variant: "positive" },
-              },
-            ]}
-          />
-        </>
-      }
-    >
-      <PageContent>
-        <OneDataCollection
-          id="training-access-admin/courses/v1"
-          source={source}
-          visualizations={[
-            {
-              type: "table",
-              options: {
-                frozenColumns: 1,
-                columns: [
-                  {
-                    label: "Name",
-                    sorting: "name",
-                    render: (training) => ({
-                      type: "text" as const,
-                      value: training.name,
-                    }),
-                  },
-                  {
-                    label: "Status",
-                    render: (training) => ({
-                      type: "status" as const,
-                      value: {
-                        status: training.status === "active" ? "positive" : "neutral",
-                        label: training.status === "active" ? "Published" : "Draft",
-                      },
-                    }),
-                  },
-                  {
-                    label: "Participants",
-                    render: (training) => ({
-                      type: "number" as const,
-                      value: training.participantCount,
-                    }),
-                  },
-                  {
-                    label: "Groups",
-                    render: (training) => ({
-                      type: "text" as const,
-                      value: String(training.classes.length),
-                    }),
-                  },
-                ],
-              },
-            },
-          ]}
-        />
-      </PageContent>
-    </Page>
   )
 }
 
