@@ -2268,7 +2268,7 @@ export declare interface F0ActionItemProps {
     /**
      * The title text displayed next to the status icon
      */
-    title: string;
+    title?: string;
     /**
      * Current status of the action item
      */
@@ -4020,11 +4020,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -4071,6 +4066,11 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
 
 
