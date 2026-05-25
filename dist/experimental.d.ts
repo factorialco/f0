@@ -6437,7 +6437,7 @@ declare namespace _Page {
 export declare type PageAction = {
     label: string;
     icon: IconType;
-    kind?: "default" | "ai";
+    variant?: ActionButtonVariant;
 } & ({
     href: string;
 } | {
