@@ -166,35 +166,34 @@ export type AiChatToolHint = {
 }
 
 /**
- * Credits usage data returned by the host app.
- *
- * Represents the logged-in employee's personal monthly allocation usage.
- * Returned by `AiChatCredits.fetchUsage`.
+ * Credits usage data returned by the host app
  */
 export type CreditsUsage = {
-  /** Credits the employee has consumed in the current period. */
   used: number
-  /** Employee's monthly allocation (the cap). */
   total: number
+  employeeUsed?: number
+  employeeTotal?: number
 }
 
 /**
  * Credits configuration for the AI chat.
+ * Groups all credits-related props into a single object.
  *
- * When provided, a credits button is shown in the chat header. The host app
- * is responsible for only providing `credits` when the logged-in employee has
- * a monthly allocation configured. When no allocation is configured, pass
- * `credits: undefined` and the trigger + popover will be hidden entirely.
+ * When provided, a credits button is shown in the chat header.
  */
 export type AiChatCredits = {
   /** Async function to fetch credits usage. Called each time the popover opens. */
   fetchUsage: () => Promise<CreditsUsage>
+  /** URL to the plan upgrade page. When provided, a link is shown in the popover. */
+  upgradePlanUrl?: string
   /** Company name displayed in the popover header. */
   companyName?: string
   /** Company logo URL displayed in the popover header. */
   companyLogoUrl?: string
   /** Plan name displayed below the company name (e.g. "Free plan", "Enterprise"). */
   planName?: string
+  /** Whether the user can view company-level credits. When false, the company credits section AND the upgrade plan CTA are hidden. Defaults to true for backward compatibility. */
+  canViewCompanyCredits?: boolean
 }
 
 /**
@@ -316,7 +315,7 @@ export type AiChatProviderProps = {
   toolHints?: AiChatToolHint[]
   /**
    * Credits configuration. When provided, a credits button is shown in the chat header.
-   * Groups fetchUsage and company/plan display info.
+   * Groups fetchUsage, upgradePlanUrl, and company/plan display info.
    */
   credits?: AiChatCredits
   /**

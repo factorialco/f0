@@ -2,8 +2,9 @@ import { motion } from "motion/react"
 import { useCallback, useState } from "react"
 
 import { F0AvatarCompany } from "@/components/avatars/F0AvatarCompany"
+import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { Sliders } from "@/icons/app"
+import { Sliders, Upsell } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
@@ -79,13 +80,6 @@ function CreditsSection({
   )
 }
 
-/**
- * Renders the per-employee credits widget in the chat header.
- *
- * The host app gates visibility by passing `credits` only when the logged-in
- * employee has a monthly allocation configured. When `credits` is undefined,
- * the trigger button and popover are not rendered at all.
- */
 export function CreditsPopover() {
   const { credits } = useAiChat()
   const i18n = useI18n()
@@ -121,6 +115,10 @@ export function CreditsPopover() {
   if (!credits) return null
 
   const hasHeader = credits.companyName
+  const showEmployeeSection = data?.employeeTotal !== undefined
+  const showCompanySection = credits.canViewCompanyCredits !== false
+  const showDivider = showEmployeeSection && showCompanySection
+
   const monthlyLabel = i18n.t("ai.credits.monthlyCredits")
 
   return (
@@ -188,18 +186,54 @@ export function CreditsPopover() {
               </span>
             )}
             {!loading && !error && data && (
-              <CreditsSection
-                label={i18n.t("ai.credits.employeeCredits")}
-                used={data.used}
-                total={data.total}
-                monthlyLabel={monthlyLabel}
-                creditsLeftLabel={i18n.t("ai.credits.creditsLeft", {
-                  total: Math.max(0, data.total - data.used).toLocaleString(),
-                })}
-                reduceMotion={reduceMotion}
-              />
+              <>
+                {showEmployeeSection && (
+                  <CreditsSection
+                    label={i18n.t("ai.credits.employeeCredits")}
+                    used={data.employeeUsed ?? 0}
+                    total={data.employeeTotal ?? 0}
+                    monthlyLabel={monthlyLabel}
+                    creditsLeftLabel={i18n.t("ai.credits.creditsLeft", {
+                      total: Math.max(
+                        0,
+                        (data.employeeTotal ?? 0) - (data.employeeUsed ?? 0)
+                      ).toLocaleString(),
+                    })}
+                    reduceMotion={reduceMotion}
+                  />
+                )}
+                {showDivider && (
+                  <div className="border-t border-f1-border-secondary" />
+                )}
+                {showCompanySection && (
+                  <CreditsSection
+                    label={i18n.t("ai.credits.companyCredits")}
+                    used={data.used}
+                    total={data.total}
+                    monthlyLabel={monthlyLabel}
+                    creditsLeftLabel={i18n.t("ai.credits.creditsLeft", {
+                      total: Math.max(
+                        0,
+                        data.total - data.used
+                      ).toLocaleString(),
+                    })}
+                    reduceMotion={reduceMotion}
+                  />
+                )}
+              </>
             )}
           </div>
+          {credits.upgradePlanUrl && showCompanySection && (
+            <div className="flex items-center justify-between border-0 border-t border-solid border-f1-border-secondary p-3">
+              <span>{i18n.t("ai.credits.needMoreCredits")}</span>
+              <F0Button
+                variant="outlinePromote"
+                href={credits.upgradePlanUrl}
+                label={i18n.t("ai.credits.upgradePlan")}
+                icon={Upsell}
+              />
+            </div>
+          )}
         </div>
       </PopoverContent>
     </Popover>
