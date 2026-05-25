@@ -301,6 +301,7 @@ declare type ActionDefinition = DropdownItemSeparator | (Pick<DropdownItemObject
     enabled?: boolean;
     type?: "primary" | "secondary" | "other";
     hideLabel?: boolean;
+    hideInMobileDropdown?: boolean;
 });
 
 export declare type ActionItemStatus = (typeof actionItemStatuses)[number];
@@ -1475,6 +1476,7 @@ declare type BaseQuestionProps = {
     children: React.ReactNode;
     required?: boolean;
     locked?: boolean;
+    hiddenActions?: HiddenActions;
 };
 
 declare type BaseQuestionPropsForOtherQuestionComponents = Omit<BaseQuestionProps, "children" | "onChange">;
@@ -1909,6 +1911,77 @@ export declare type CanvasEntityDefinition<T extends CanvasContentBase = CanvasC
     overflowHidden?: boolean;
 };
 
+/**
+ * An optional action button rendered in the alert header.
+ * Mutually exclusive with `dismissible` — only one can be shown at a time.
+ * Supply either `onClick` (handler) or `href` (navigation link), not both.
+ */
+export declare type CardAlertAction = {
+    /** Label text for the action button. */
+    label: string;
+    /** Whether the action button is disabled. */
+    disabled?: boolean;
+} & ({
+    /** Called when the action button is clicked. */
+    onClick: () => void;
+    href?: never;
+} | {
+    /** URL to navigate to when the action button is clicked. */
+    href: string;
+    onClick?: never;
+});
+
+declare interface CardAlertBase {
+    /**
+     * The visual variant of the alert, which determines the color scheme and default icon.
+     */
+    variant: CardAlertVariant;
+    /**
+     * The title text displayed in the alert banner.
+     */
+    title: string;
+    /**
+     * Optional custom icon. When omitted, defaults to the icon that best represents the variant.
+     */
+    icon?: IconType;
+    /**
+     * Controls whether the alert is visible. Defaults to true.
+     * Use this together with onDismiss for controlled dismiss behaviour:
+     *   alert={{ ..., visible, dismissible: true, onDismiss: () => setVisible(false) }}
+     */
+    visible?: boolean;
+}
+
+declare type CardAlertDismissible = CardAlertBase & {
+    /** Renders a dismiss (×) button. Requires onDismiss. */
+    dismissible: true;
+    /**
+     * Called when the dismiss (×) button is clicked.
+     * The consumer is responsible for hiding the alert (e.g. by setting visible: false).
+     */
+    onDismiss: () => void;
+    action?: never;
+};
+
+declare type CardAlertNonDismissible = CardAlertBase & {
+    dismissible?: false;
+    onDismiss?: never;
+    action?: never;
+};
+
+export declare type CardAlertProps = CardAlertDismissible | CardAlertWithAction | CardAlertNonDismissible;
+
+export declare type CardAlertVariant = (typeof cardAlertVariants)[number];
+
+export declare const cardAlertVariants: readonly ["info", "warning", "critical", "positive"];
+
+declare type CardAlertWithAction = CardAlertBase & {
+    dismissible?: never;
+    onDismiss?: never;
+    /** Action button rendered in the alert header. Mutually exclusive with `dismissible`. */
+    action: CardAlertAction;
+};
+
 declare type CardAvatarVariant = AvatarVariant | {
     type: "emoji";
     emoji: string;
@@ -2033,6 +2106,12 @@ declare interface CardInternalProps {
      * can manage drag-and-drop while still allowing click navigation via onClick
      */
     disableOverlayLink?: boolean;
+    /**
+     * Alert banner displayed above the card with a coloured header strip and matching border.
+     * Supports info, warning, critical, and positive variants with a default icon per variant.
+     * Use `visible` + `onDismiss` for controlled dismiss behaviour.
+     */
+    alert?: CardAlertProps;
 }
 
 declare type CardInternalProps_2 = F0AiInsightCardProps & {
@@ -2353,6 +2432,12 @@ export declare interface ChatDashboardColumn {
     label: string;
     /** Optional fixed width in pixels */
     width?: number;
+    /**
+     * Optional header tooltip explaining what the column represents — formula
+     * or aggregation if derived, source if direct. Forwarded to the underlying
+     * table column's `info` prop. Omit when the label is self-explanatory.
+     */
+    info?: string;
 }
 
 /**
@@ -3673,6 +3758,13 @@ export declare const DataTestIdWrapper: ({ dataTestId, children, }: WithDataTest
     children: ReactNode;
 }) => ReactNode;
 
+declare type DateCellConfig = {
+    /** Earliest selectable date. Dates before this are disabled in the picker. */
+    minDate?: Date;
+    /** Latest selectable date. Dates after this are disabled in the picker. */
+    maxDate?: Date;
+};
+
 /**
  * All valid renderIf conditions for date fields
  */
@@ -4368,6 +4460,9 @@ export declare const defaultTranslations: {
         readonly noResults: "No results found";
         readonly loadingMore: "Loading...";
         readonly applySelection: "Apply selection";
+        readonly create: "Create";
+        readonly createWithValue: "Create \"{{value}}\"";
+        readonly createEmptyMessage: "Try another search or create a new item";
     };
     readonly numberInput: {
         readonly between: "It should be between {{min}} and {{max}}";
@@ -4443,6 +4538,7 @@ export declare const defaultTranslations: {
             readonly sectionDescriptionPlaceholder: "Describe the section in a few words";
             readonly required: "Required";
             readonly allowMultiSelection: "Allow multi-selection";
+            readonly allowCreate: "Allow creation";
             readonly singleSelection: "Single selection";
             readonly multiSelection: "Multi selection";
             readonly questionType: "Question type";
@@ -4570,6 +4666,44 @@ export declare const defaultTranslations: {
             readonly checkbox: {
                 readonly mustBeChecked: "This option must be selected";
             };
+        };
+    };
+    readonly graph: {
+        readonly canvas: "Graph canvas";
+        readonly view: "Graph view";
+        readonly controls: {
+            readonly findMe: "Find me";
+            readonly fitToView: "Fit to view";
+            readonly zoomIn: "Zoom in";
+            readonly zoomOut: "Zoom out";
+            readonly navigation: "Graph navigation";
+            readonly metadataSettings: "Metadata visibility";
+            readonly tagTypeLabels: {
+                readonly person: "People";
+                readonly team: "Teams";
+                readonly company: "Companies";
+                readonly status: "Statuses";
+                readonly alert: "Alerts";
+                readonly balance: "Balances";
+                readonly dot: "Tags";
+                readonly raw: "Tags";
+            };
+        };
+        readonly search: {
+            readonly noResults: "No results";
+        };
+        readonly detailPanel: {
+            readonly details: "Details";
+            readonly moreActions: "More actions";
+            readonly resize: "Resize detail panel";
+        };
+        readonly expander: {
+            readonly collapse: "Collapse {{count}} items";
+            readonly expand: "Expand {{count}} items";
+            readonly expandWithParentSingular: "Expand {{parent}}, {{count}} child";
+            readonly expandWithParentPlural: "Expand {{parent}}, {{count}} children";
+            readonly collapseWithParent: "Collapse {{parent}}";
+            readonly collapseDefault: "Collapse children";
         };
     };
     readonly wizard: {
@@ -4746,6 +4880,7 @@ declare type DropdownSingleQuestionProps = BaseQuestionPropsForOtherQuestionComp
     value?: string | null;
     showSearchBox?: boolean;
     searchBoxPlaceholder?: string;
+    allowCreate?: boolean;
 };
 
 export declare type DropIntent = {
@@ -4837,6 +4972,11 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
      * Falls back to sensible defaults when omitted.
      */
     numberConfig?: NumberCellConfig<R>;
+    /**
+     * Configuration for `"date"` cells. Accepts `minDate` / `maxDate` to
+     * restrict the selectable date range in the picker.
+     */
+    dateConfig?: DateCellConfig;
     /**
      * Called after this cell's value changes. Use to compute derived values
      * and update other cells in the same row.
@@ -7660,9 +7800,9 @@ export declare interface F0FormDiscardConfig {
 
 /**
  * When to trigger and display validation errors (does not apply with autosubmit)
- * - "on-blur": Errors appear when the user leaves a field (default)
+ * - "on-blur": Errors appear when the user leaves a field
  * - "on-change": Errors appear as the user types (real-time validation)
- * - "on-submit": Errors only appear after attempting to submit the form
+ * - "on-submit": Errors only appear after attempting to submit the form (default)
  */
 export declare type F0FormErrorTriggerMode = "on-blur" | "on-change" | "on-submit";
 
@@ -8310,12 +8450,10 @@ declare interface F0FormSubmitConfigBase {
     /** Custom label for the submit button */
     label?: string;
     /**
-     * Custom icon for the submit button
-     * - undefined: uses default Save icon
-     * - null: no icon shown
-     * - IconType: custom icon
+     * Custom icon for the submit button.
+     * No icon is shown by default.
      */
-    icon?: IconType | null;
+    icon?: IconType;
     /** Label shown in the action bar while submitting (defaults to i18n "forms.actionBar.saving") */
     savingMessage?: string;
     /**
@@ -8663,12 +8801,10 @@ export declare interface F0PerSectionSubmitConfig {
     /** Custom label for the submit button (per section) */
     label?: string;
     /**
-     * Custom icon for the submit button
-     * - undefined: uses default Save icon
-     * - null: no icon shown
-     * - IconType: custom icon
+     * Custom icon for the submit button.
+     * No icon is shown by default.
      */
-    icon?: IconType | null;
+    icon?: IconType;
     /**
      * When true, the submit button is only visible once the section has unsaved changes.
      * @default false
@@ -8884,6 +9020,7 @@ export declare const F0Select: <T extends string = string, R = unknown>(props: F
  * Base props shared across all F0Select variants
  */
 declare type F0SelectBaseProps<T extends string, R = unknown> = {
+    withApplySelection?: boolean;
     onChangeSelectedOption?: (option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined, checked: boolean) => void;
     children?: React.ReactNode;
     open?: boolean;
@@ -8895,6 +9032,8 @@ declare type F0SelectBaseProps<T extends string, R = unknown> = {
     searchEmptyMessage?: string;
     className?: string;
     actions?: Action_2[];
+    /** Callback to create a new item from the current search text. When provided, a "+ Create" button is shown in the empty state of the dropdown. */
+    onCreate?: (value: string) => Promise<void> | void;
     /** Container element to render the portal content into */
     portalContainer?: HTMLElement | null;
     /**
@@ -8946,6 +9085,8 @@ declare interface F0SelectConfigBase {
     searchBoxPlaceholder?: string;
     /** Icon displayed on the left side of the select input */
     icon?: IconType;
+    /** Callback to create a new item from the search text. Shows a "+ Create" button in the empty state of the dropdown. */
+    onCreate?: (value: string) => Promise<void> | void;
 }
 
 /**
@@ -9076,6 +9217,10 @@ export declare type F0SelectTagProp = string | {
     type: "person";
     name: string;
     src?: string;
+} | {
+    type: "icon";
+    text: string;
+    icon: IconType;
 };
 
 /**
@@ -10258,6 +10403,19 @@ export declare interface HeatmapComputation {
 }
 
 export declare type heightType = "xxs" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "full" | "auto";
+
+/**
+ * Per-question control to hide individual entries from the question
+ * actions menu (the "⋯" dropdown). Useful when a consumer wants to
+ * lock down a subset of question editing without disabling the whole
+ * question.
+ *
+ * When every available action is hidden, the actions menu trigger is
+ * not rendered at all.
+ */
+export declare type HiddenAction = "required" | "multiSelect" | "allowCreate" | "questionType" | "duplicate" | "delete";
+
+export declare type HiddenActions = ReadonlyArray<HiddenAction>;
 
 export declare const HomeLayout: WithDataTestIdReturnType_2<ForwardRefExoticComponent<Omit<{
 widgets?: ReactNode[];
@@ -11479,6 +11637,7 @@ declare type OnChangeQuestionParams = BaseQuestionOnChangeParams & ({
     datasetKey?: string;
     showSearchBox?: boolean;
     searchBoxPlaceholder?: string;
+    allowCreate?: boolean;
 } | {
     type: "dropdown-multi";
     value?: string[] | null;
@@ -13030,7 +13189,8 @@ export declare type SurveyDataset = {
     icon?: IconType;
     placeholder?: string;
     dataSource: DataSourceDefinition;
-    mapOptions: (item: RecordType) => F0SelectItemProps<string, RecordType>;
+    mapOptions: (item: RecordType) => F0SelectItemObject<string, RecordType>;
+    onCreate?: (value: string) => Promise<RecordType>;
 };
 
 export declare type SurveyDatasets = Record<string, SurveyDataset>;
@@ -14681,6 +14841,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -14730,6 +14895,16 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
+declare namespace F0GraphNodeWrapperInner {
+    var displayName: string;
+}
+
+
+declare namespace F0GraphExpanderWrapperInner {
+    var displayName: string;
+}
+
+
+declare namespace F0GraphCollapserWrapperInner {
     var displayName: string;
 }

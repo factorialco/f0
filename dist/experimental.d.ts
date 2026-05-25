@@ -39,6 +39,7 @@ import { DotTagCellValue as DotTagCellValue_2 } from './experimental';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { Editor } from '@tiptap/react';
 import { EmployeeItemProps } from './types';
+import { F0SegmentedControlProps as F0SegmentedControlProps_2 } from './types';
 import { F0SelectProps as F0SelectProps_2 } from './types';
 import { F0TagBalanceProps as F0TagBalanceProps_2 } from './types';
 import { F0TagCompanyProps } from './types';
@@ -255,6 +256,7 @@ export declare type ActionDefinition = DropdownItemSeparator | (Pick<DropdownIte
     enabled?: boolean;
     type?: "primary" | "secondary" | "other";
     hideLabel?: boolean;
+    hideInMobileDropdown?: boolean;
 });
 
 declare type ActionLinkProps = ActionBaseProps & {
@@ -910,7 +912,7 @@ declare interface BaseChipProps extends VariantProps<typeof chipVariants> {
 
 declare type BaseColor = keyof typeof baseColors;
 
-export declare const BaseCommunityPost: ({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, }: CommunityPostProps) => JSX_2.Element;
+export declare const BaseCommunityPost: ({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, }: CommunityPostProps) => JSX_2.Element;
 
 /**
  * Base data adapter configuration for non-paginated collections
@@ -1283,6 +1285,14 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
 declare type ButtonSize = (typeof buttonSizes)[number];
 
 declare const buttonSizes: readonly ["sm", "md", "lg"];
+
+export declare type ButtonToggleSize = (typeof buttonToggleSizes)[number];
+
+export declare const buttonToggleSizes: readonly ["sm", "md", "lg"];
+
+export declare type ButtonToggleVariant = (typeof buttonToggleVariants)[number];
+
+export declare const buttonToggleVariants: readonly ["compact", "expanded"];
 
 declare type ButtonType = (typeof buttonTypes)[number];
 
@@ -1695,6 +1705,12 @@ declare interface ChatDashboardColumn {
     label: string;
     /** Optional fixed width in pixels */
     width?: number;
+    /**
+     * Optional header tooltip explaining what the column represents — formula
+     * or aggregation if derived, source if direct. Forwarded to the underlying
+     * table column's `info` prop. Omit when the label is self-explanatory.
+     */
+    info?: string;
 }
 
 /**
@@ -2068,7 +2084,7 @@ values: {
 }) => void) | undefined;
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
-export declare const CommunityPost: (({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, }: CommunityPostProps) => JSX_2.Element) & {
+export declare const CommunityPost: (({ id, author, group, createdAt, title, description, onClick, mediaUrl, event, counters, reactions, inLabel, comment, actions, dropdownItems, noReactionsButton, descriptionExpandable, }: CommunityPostProps) => JSX_2.Element) & {
     Skeleton: ({ withEvent, withImage, }: CommunityPostSkeletonProps) => JSX_2.Element;
 };
 
@@ -2110,6 +2126,7 @@ export declare type CommunityPostProps = {
     onClick: (id: string) => void;
     noReactionsButton?: boolean;
     dropdownItems?: DropdownItem[];
+    descriptionExpandable?: boolean;
 };
 
 export declare const CommunityPostSkeleton: ({ withEvent, withImage, }: CommunityPostSkeletonProps) => JSX_2.Element;
@@ -2585,6 +2602,13 @@ export declare type DataSourceDefinition<R extends RecordType = RecordType, Filt
         item: R;
         pagination?: ChildrenPaginationInfo;
     }) => number | undefined;
+};
+
+declare type DateCellConfig = {
+    /** Earliest selectable date. Dates before this are disabled in the picker. */
+    minDate?: Date;
+    /** Latest selectable date. Dates after this are disabled in the picker. */
+    maxDate?: Date;
 };
 
 export declare type DateFilterDefinition = BaseFilterDefinition<"date"> & {
@@ -3242,6 +3266,9 @@ declare const defaultTranslations: {
         readonly noResults: "No results found";
         readonly loadingMore: "Loading...";
         readonly applySelection: "Apply selection";
+        readonly create: "Create";
+        readonly createWithValue: "Create \"{{value}}\"";
+        readonly createEmptyMessage: "Try another search or create a new item";
     };
     readonly numberInput: {
         readonly between: "It should be between {{min}} and {{max}}";
@@ -3317,6 +3344,7 @@ declare const defaultTranslations: {
             readonly sectionDescriptionPlaceholder: "Describe the section in a few words";
             readonly required: "Required";
             readonly allowMultiSelection: "Allow multi-selection";
+            readonly allowCreate: "Allow creation";
             readonly singleSelection: "Single selection";
             readonly multiSelection: "Multi selection";
             readonly questionType: "Question type";
@@ -3444,6 +3472,44 @@ declare const defaultTranslations: {
             readonly checkbox: {
                 readonly mustBeChecked: "This option must be selected";
             };
+        };
+    };
+    readonly graph: {
+        readonly canvas: "Graph canvas";
+        readonly view: "Graph view";
+        readonly controls: {
+            readonly findMe: "Find me";
+            readonly fitToView: "Fit to view";
+            readonly zoomIn: "Zoom in";
+            readonly zoomOut: "Zoom out";
+            readonly navigation: "Graph navigation";
+            readonly metadataSettings: "Metadata visibility";
+            readonly tagTypeLabels: {
+                readonly person: "People";
+                readonly team: "Teams";
+                readonly company: "Companies";
+                readonly status: "Statuses";
+                readonly alert: "Alerts";
+                readonly balance: "Balances";
+                readonly dot: "Tags";
+                readonly raw: "Tags";
+            };
+        };
+        readonly search: {
+            readonly noResults: "No results";
+        };
+        readonly detailPanel: {
+            readonly details: "Details";
+            readonly moreActions: "More actions";
+            readonly resize: "Resize detail panel";
+        };
+        readonly expander: {
+            readonly collapse: "Collapse {{count}} items";
+            readonly expand: "Expand {{count}} items";
+            readonly expandWithParentSingular: "Expand {{parent}}, {{count}} child";
+            readonly expandWithParentPlural: "Expand {{parent}}, {{count}} children";
+            readonly collapseWithParent: "Collapse {{parent}}";
+            readonly collapseDefault: "Collapse children";
         };
     };
     readonly wizard: {
@@ -3607,7 +3673,7 @@ declare const DropdownMenuItem: React_2.ForwardRefExoticComponent<Omit<DropdownM
     inset?: boolean;
 } & React_2.RefAttributes<HTMLDivElement>>;
 
-declare type DropdownProps = Omit<DropdownInternalProps, (typeof privateProps_4)[number]> & {
+declare type DropdownProps = Omit<DropdownInternalProps, (typeof privateProps_5)[number]> & {
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
 } & WithDataTestIdProps;
@@ -3651,6 +3717,11 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
      * Falls back to sensible defaults when omitted.
      */
     numberConfig?: NumberCellConfig<R>;
+    /**
+     * Configuration for `"date"` cells. Accepts `minDate` / `maxDate` to
+     * restrict the selectable date range in the picker.
+     */
+    dateConfig?: DateCellConfig;
     /**
      * Called after this cell's value changes. Use to compute derived values
      * and update other cells in the same row.
@@ -4132,6 +4203,55 @@ declare type F0ButtonProps = Omit<ButtonInternalProps, (typeof privateProps)[num
     variant?: Exclude<ButtonInternalProps["variant"], "ai">;
 };
 
+export declare const F0ButtonToggle: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0ButtonToggleProps & RefAttributes<HTMLButtonElement>>>;
+
+declare type F0ButtonToggleInternalProps = {
+    /**
+     * The accessible label for the button.
+     */
+    label: string | [string, string];
+    /**
+     * Whether the button is disabled.
+     */
+    disabled?: boolean;
+    /**
+     * The icon to display in the button. Can be a single icon or an array of two icons the first for the non-selected state and the second for the selected state.
+     */
+    icon: IconType | [IconType, IconType];
+    /**
+     * The size of the button.
+     * @default "md"
+     */
+    size?: ButtonToggleSize;
+    /**
+     * The variant of the button.
+     * @default "compact"
+     * "compact" - The button will only show the icon.
+     * "expanded" - The button will show the icon and the label.
+     */
+    variant?: ButtonToggleVariant;
+    /**
+     * @private
+     * Whether to show a border around the button toggle.
+     */
+    withBorder?: boolean;
+    /**
+     * @private
+     * Additional CSS class names to apply to the button root.
+     */
+    className?: string;
+} & ({
+    selected: boolean;
+    onSelectedChange: (selected: boolean) => void;
+    defaultSelected?: undefined;
+} | {
+    defaultSelected?: boolean;
+    selected?: undefined;
+    onSelectedChange?: undefined;
+});
+
+export declare type F0ButtonToggleProps = Omit<F0ButtonToggleInternalProps, (typeof privateProps_2)[number]>;
+
 export declare const F0Callout: ForwardRefExoticComponent<Omit<CalloutInternalProps & RefAttributes<HTMLDivElement> & WithDataTestIdProps_2, "ref"> & RefAttributes<HTMLDivElement>> & Pick<ForwardRefExoticComponent<CalloutInternalProps & RefAttributes<HTMLDivElement>>, never> & {
     Skeleton: ({ compact, variant }: CalloutSkeletonProps) => JSX_2.Element;
 };
@@ -4146,9 +4266,59 @@ declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<type
 }
 
 /**
+ * @experimental This is an experimental component, use it at your own risk.
+ */
+export declare const F0SegmentedControl: {
+    ({ items, value, onChange, disabled, fullWidth, ariaLabel, ariaLabelledBy, }: F0SegmentedControlProps_2): JSX_2.Element;
+    displayName: string;
+};
+
+export declare interface F0SegmentedControlItem {
+    /** Unique value for this segment */
+    value: string;
+    /** Label displayed inside the segment */
+    label: string;
+    /** Optional icon shown before the label */
+    icon?: IconType;
+    /** Whether this specific segment is disabled */
+    disabled?: boolean;
+}
+
+export declare interface F0SegmentedControlProps {
+    /** The list of segments to render */
+    items: F0SegmentedControlItem[];
+    /** Currently selected value */
+    value?: string;
+    /** Callback fired when the selected segment changes */
+    onChange?: (value: string) => void;
+    /**
+     * Whether the control is disabled entirely.
+     * @default false
+     */
+    disabled?: boolean;
+    /**
+     * Whether the control should expand to fill the container width.
+     * @default false
+     */
+    fullWidth?: boolean;
+    /**
+     * Accessible name for the segmented control. The underlying ToggleGroup
+     * (single mode) renders as a `radiogroup`, which requires a name.
+     * Provide either `ariaLabel` or `ariaLabelledBy`.
+     */
+    ariaLabel?: string;
+    /**
+     * ID of an element that labels the segmented control. Use instead of
+     * `ariaLabel` when a visible label already exists in the DOM.
+     */
+    ariaLabelledBy?: string;
+}
+
+/**
  * Base props shared across all F0Select variants
  */
 declare type F0SelectBaseProps<T extends string, R = unknown> = {
+    withApplySelection?: boolean;
     onChangeSelectedOption?: (option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined, checked: boolean) => void;
     children?: React.ReactNode;
     open?: boolean;
@@ -4160,6 +4330,8 @@ declare type F0SelectBaseProps<T extends string, R = unknown> = {
     searchEmptyMessage?: string;
     className?: string;
     actions?: Action[];
+    /** Callback to create a new item from the current search text. When provided, a "+ Create" button is shown in the empty state of the dropdown. */
+    onCreate?: (value: string) => Promise<void> | void;
     /** Container element to render the portal content into */
     portalContainer?: HTMLElement | null;
     /**
@@ -4269,6 +4441,10 @@ export declare type F0SelectTagProp = string | {
     type: "person";
     name: string;
     src?: string;
+} | {
+    type: "icon";
+    text: string;
+    icon: IconType;
 };
 
 /**
@@ -5085,7 +5261,7 @@ declare type InputInternalProps<T extends string> = Pick<ComponentProps<typeof I
     onPressEnter?: () => void;
 };
 
-export declare type InputProps<T extends string> = Omit<InputInternalProps<T>, (typeof privateProps_2)[number]>;
+export declare type InputProps<T extends string> = Omit<InputInternalProps<T>, (typeof privateProps_3)[number]>;
 
 declare interface InsertAfterNotesTextEditorPageDocumentPatch {
     type: "insert_after";
@@ -5678,7 +5854,7 @@ declare type NumberInputInternalProps = Omit<InputInternalProps<string>, "value"
     units?: string;
 };
 
-export declare type NumberInputProps = Omit<NumberInputInternalProps, (typeof privateProps_3)[number]>;
+export declare type NumberInputProps = Omit<NumberInputInternalProps, (typeof privateProps_4)[number]>;
 
 declare type Numeric = NumericValue | number | undefined | null;
 
@@ -5847,7 +6023,7 @@ export declare interface OneCalendarInternalProps {
     weekStartsOn?: WeekStartsOn;
 }
 
-export declare type OneCalendarProps = Omit<OneCalendarInternalProps, (typeof privateProps_5)[number]>;
+export declare type OneCalendarProps = Omit<OneCalendarInternalProps, (typeof privateProps_6)[number]>;
 
 export declare const OneDataCollection: OneDataCollectionGeneric;
 
@@ -6329,6 +6505,9 @@ declare interface PieComputation {
 declare type PostDescriptionProps = {
     content: HTMLString;
     collapsed?: boolean;
+    id?: string;
+    className?: string;
+    tabIndex?: number;
 };
 
 declare type PostEventProps = {
@@ -6409,15 +6588,17 @@ export declare const PrivateBox: FC<PropsWithChildren>;
 
 declare const privateProps: readonly ["append", "className", "pressed", "compact", "noTitle", "noAutoTooltip", "style"];
 
-declare const privateProps_2: readonly ["buttonToggle"];
+declare const privateProps_2: readonly ["withBorder"];
 
 declare const privateProps_3: readonly ["buttonToggle"];
 
-declare const privateProps_4: readonly [];
+declare const privateProps_4: readonly ["buttonToggle"];
 
-declare const privateProps_5: readonly ["compact"];
+declare const privateProps_5: readonly [];
 
-declare const privateProps_6: readonly ["delay"];
+declare const privateProps_6: readonly ["compact"];
+
+declare const privateProps_7: readonly ["delay"];
 
 declare type ProductUpdate = {
     title: string;
@@ -7627,7 +7808,7 @@ declare type TooltipInternalProps = {
     description: string;
 });
 
-export declare type TooltipProps = Omit<TooltipInternalProps, (typeof privateProps_6)[number]>;
+export declare type TooltipProps = Omit<TooltipInternalProps, (typeof privateProps_7)[number]>;
 
 declare interface TopLevelAppendNotesTextEditorPageDocumentPatch {
     type: "top_level_append";
@@ -8200,6 +8381,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -8249,6 +8435,16 @@ declare module "@tiptap/core" {
 }
 
 
-declare namespace Calendar {
+declare namespace F0GraphNodeWrapperInner {
+    var displayName: string;
+}
+
+
+declare namespace F0GraphExpanderWrapperInner {
+    var displayName: string;
+}
+
+
+declare namespace F0GraphCollapserWrapperInner {
     var displayName: string;
 }
