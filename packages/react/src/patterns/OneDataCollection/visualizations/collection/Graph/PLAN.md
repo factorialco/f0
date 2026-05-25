@@ -446,7 +446,7 @@ No breaking changes to existing public types. The `Visualization` union grows by
 All resolved questions are tracked in §1.5; what remains is a watchlist of residual risks that affect Phase 2/3 sequencing, not Phase 1 entry. See §11 for severity ratings.
 
 - **Performance envelope unverified.** Phase 2 perf smoke against 1k/2k node mocks publishes the supported limit. Until then, no formal envelope is advertised. F0Graph's existing `LARGE_GRAPH_SNAP_THRESHOLD = 700` already governs animation snapping, so degradation is graceful.
-- **Multi-select UX deferred.** v1 ships `selectionMode="single"`. The selection bridge is structured so adding `multi` later is purely additive — no v1 API change is required to unlock it.
+- **Multi-select UX still needs consumer polish.** Phase 1 ships `selectionMode="multi"` end-to-end via `useSelectable`, but bulk-action affordances on a spatial canvas remain a consumer-level UX problem. The bridge is in place; the toolbar design can iterate separately.
 - **Graph icon is a generic glyph.** `@/icons/app/Graph` ships now; if design produces a dedicated tree/hierarchy variant, the swap is a one-line registry edit (see §10).
 - **Phase 2 blocked on upstream F0Graph PR for `dimmedNodes`.** Phase 1 ships fine without it (hard removal).
 
@@ -458,16 +458,16 @@ All resolved questions are tracked in §1.5; what remains is a watchlist of resi
 
 - Land everything in §5 with `Graph.tsx` rendering F0Graph from `projectGraph()` output.
 - `nodeAdapter` + default edge derivation + optional `edgeAdapter` (Phase 1 ships both — `edgeAdapter` is a thin passthrough with no extra cost).
-- No `detailPanel` yet (item-actions still wired via `F0GraphNode.actions`).
+- No `detailPanel` in the public API yet (item-actions still wired via `F0GraphNode.actions`).
 - Lazy mode (`loadChildren`) shipped as part of Phase 1 with full abort semantics: per-node `AbortController`, signal forwarded to the consumer loader via `opts.signal`, aborted on (a) a fresh call for the same nodeId and (b) unmount.
-- Selection wired to `useSelectable` with `fallbackItem`, multi-select end-to-end (both `single` and `multiple` modes forwarded from `source.selectable`). Lazy mode opts into `allPagesSelection: true` so lazy ids surface in `onSelectItems` (see §4.4).
+- Selection wired to `useSelectable` with `fallbackItem`, multi-select end-to-end (`selectionMode: "multi"` when `source.selectable` is present). Lazy mode opts into `allPagesSelection: true` so lazy ids surface in `onSelectItems` (see §4.4).
 - Memoized `nodes`/`edges` arrays (per §4.3).
 - Enforce both pagination-mode guards (§4.1) — throw with the exact dev messages.
 - Cycle detection + `console.warn` (per §4.3).
 - Hard-removal filter implementation in `projectGraph`.
 - Search pipe-through into F0Graph (per §4.3) — prefers `source.debouncedCurrentSearch` over `source.currentSearch` to avoid layout thrash on each keystroke.
 - Register entry in `collectionViewRegistry` using `Graph` from `@/icons/app`. Update `Visualization` union.
-- Stories: **Basic**, **Empty**, **LoadingThenLoaded**, **HardRemovalFilter**, **WithItemActionsNoPanel**.
+- Stories: **Default**, **RecordSubsetReprojects**, **WithItemActionsNoPanel**, **Selectable**, **Cycle**, **LazyMode**, **TwoInstances**, **Snapshot**.
 - Tests: full `projectGraph.spec.ts`; component tests under `__tests__/` covering render, selection (incl. `fallbackItem` and lazy id round-trip), both pagination-guard throws, cycle warning, hard removal, search pipe-through, abort signal forwarding (per-nodeId + unmount), and the dev-mode identity warning (one-per-prop, prod gate).
 - **Status: shipped.** No external sign-offs remain.
 

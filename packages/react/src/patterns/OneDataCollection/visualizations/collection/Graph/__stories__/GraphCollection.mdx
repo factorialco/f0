@@ -68,12 +68,16 @@ the primary affordance — Phase 1 Graph does not implement either.
           <code>edgeAdapter</code>
         </td>
         <td>
-          <code>(record: R) =&gt; ExplicitEdge[]</code>
+          <code>
+            (records: ReadonlyArray&lt;R&gt;) =&gt;
+            ReadonlyArray&lt;GraphEdge&gt;
+          </code>
         </td>
         <td>No</td>
         <td>
-          Adds explicit edges on top of parent-derived edges. Cycle-closing
-          edges are dropped.
+          Optional. Receives the full record array and returns explicit edges,
+          bypassing the implicit <code>parentId</code>/<code>parentIds</code>
+          projection. Cycle-closing edges are dropped.
         </td>
       </tr>
       <tr>
@@ -182,7 +186,7 @@ const visualization = {
 
 ### Hard removal via filters
 
-<Canvas of={Stories.HardRemovalFilter} />
+<Canvas of={Stories.RecordSubsetReprojects} />
 
 Records excluded by the active filter are dropped from the projection along
 with every edge incident on them — no orphan promotion. Phase 1 ships hard
@@ -286,7 +290,7 @@ The stories above exercise every Phase 1 acceptance check in
 `Graph/PLAN.md §9`:
 
 - `Default` — eager projection + render-node pipeline.
-- `HardRemovalFilter` — hard-removal semantics on the source filter.
+- `RecordSubsetReprojects` — hard-removal semantics when the source supplies a reduced record set.
 - `WithItemActionsNoPanel` — `extras.actions` slot when item actions exist.
 - `Selectable` — multi-select bridge over `source.selectable`.
 - `Cycle` — cycle detection + single warn + acyclic projection.

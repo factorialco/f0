@@ -145,7 +145,7 @@ export const Default: Story = {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Story: HardRemovalFilter                                                   */
+/* Story: RecordSubsetReprojects                                              */
 /* -------------------------------------------------------------------------- */
 
 /**
@@ -155,12 +155,12 @@ export const Default: Story = {
  * promotion. The toggle button proves the projection re-renders cleanly when
  * the source filter set changes.
  */
-export const HardRemovalFilter: Story = {
+export const RecordSubsetReprojects: Story = {
   parameters: {
     docs: {
       description: {
         story:
-          "Phase 1 ships hard removal. Records excluded by the active filter are dropped from the projection along with every edge incident on them. The toggle button flips between full org and Engineering-hidden.",
+          "When a subset of records reaches GraphCollection, the projection re-runs and entire subtrees disappear with no orphan promotion. This story toggles between the full org and an Engineering-hidden subset; in a real consumer that reduced array would normally come from the source filter pipeline.",
       },
     },
   },
@@ -444,15 +444,14 @@ export const LazyMode: Story = {
 /**
  * Two simultaneous mounts — neither passes an explicit `graphId`, so
  * GraphCollection falls back to `React.useId()`. The two instances therefore
- * receive unique stable ids and never collide on persisted state
- * (detail-panel width, etc.).
+ * receive unique stable ids and never collide on per-graph persisted state.
  */
 export const TwoInstances: Story = {
   parameters: {
     docs: {
       description: {
         story:
-          "Two `<OneDataCollection>` instances mounted side-by-side with no explicit `graphId`. Each instance gets a stable `React.useId()` so persisted state (e.g. detail-panel width) does not bleed across mounts.",
+          "Two `<OneDataCollection>` instances mounted side-by-side with no explicit `graphId`. Each instance gets a stable `React.useId()`-derived id, so any per-graph persisted state stays isolated with no key collisions across mounts.",
       },
     },
   },
@@ -516,18 +515,19 @@ export const TwoInstances: Story = {
 
 /**
  * Deterministic grid for Chromatic. No async, fixed-seed avatars, no
- * sidebar. Combines Default + HardRemovalFilter + WithItemActionsNoPanel +
- * Cycle in a single shot so visual regression catches projection changes
- * across the most stable Phase 1 surfaces.
+ * sidebar. Combines Default + RecordSubsetReprojects +
+ * WithItemActionsNoPanel + Selectable + Cycle in a single shot so visual
+ * regression catches projection changes across the most stable Phase 1
+ * surfaces.
  */
 export const Snapshot: Story = {
   tags: ["no-sidebar"],
   parameters: withSkipA11y(
     withSnapshot({
-      layout: "fullscreen",
       docs: {
         description: {
-          story: "Chromatic snapshot grid combining four deterministic states.",
+          story:
+            "Chromatic snapshot grid combining five deterministic Phase 1 states.",
         },
       },
     })
@@ -552,16 +552,28 @@ export const Snapshot: Story = {
         },
         itemActions: orgItemActions,
       })
+      const selectableSource: typeof eagerSource =
+        useDataCollectionSource<OrgPerson>({
+          dataAdapter: {
+            fetchData: async () => ({ records: orgChart }),
+          },
+          selectable: (item) => item.id,
+          defaultSelectedItems: {
+            allSelected: false,
+            items: new Map([
+              [orgChart[0].id, { id: orgChart[0].id, checked: true }],
+              [orgChart[2].id, { id: orgChart[2].id, checked: true }],
+            ]),
+            groups: new Map(),
+          },
+        })
       const cycleSource = useDataCollectionSource<OrgPerson>({
         dataAdapter: {
           fetchData: async () => ({ records: cyclicChart }),
         },
       })
 
-      const tile = (
-        title: string,
-        source: ReturnType<typeof useDataCollectionSource<OrgPerson>>
-      ) => (
+      const tile = (title: string, source: typeof eagerSource) => (
         <div className="flex h-full min-h-0 flex-col rounded-md border border-f1-border">
           <div className="border-b border-f1-border bg-f1-background-secondary px-3 py-1 text-f1-foreground">
             {title}
@@ -586,10 +598,31 @@ export const Snapshot: Story = {
       )
 
       return (
-        <div className="grid h-screen w-screen grid-cols-2 grid-rows-2 gap-2 p-2">
+        <div className="grid h-screen w-screen grid-cols-2 grid-rows-3 gap-2 p-2">
           {tile("Default", eagerSource)}
-          {tile("HardRemovalFilter", filteredSource)}
+          {tile("RecordSubsetReprojects", filteredSource)}
           {tile("WithItemActionsNoPanel", actionsSource)}
+          <div className="flex h-full min-h-0 flex-col rounded-md border border-f1-border">
+            <div className="border-b border-f1-border bg-f1-background-secondary px-3 py-1 text-f1-foreground">
+              Selectable
+            </div>
+            <div className="min-h-0 flex-1">
+              <OneDataCollection
+                source={selectableSource}
+                visualizations={[
+                  {
+                    type: "graph",
+                    options: {
+                      nodeAdapter: (record) => ({
+                        parentId: record.managerId,
+                      }),
+                      renderNode: renderOrgNode,
+                    },
+                  },
+                ]}
+              />
+            </div>
+          </div>
           {tile("Cycle", cycleSource)}
         </div>
       )
