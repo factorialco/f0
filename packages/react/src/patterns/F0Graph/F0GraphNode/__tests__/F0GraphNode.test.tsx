@@ -215,7 +215,7 @@ describe("F0GraphNode", () => {
     expect(getPill().className).toContain("ring-2")
 
     rerender(<F0GraphNode variant="dot" state="highlighted" />)
-    expect(getAvatarRingTarget().className).toContain("ring-1")
+    expect(getAvatarRingTarget().className).toContain("ring-2")
 
     rerender(<F0GraphNode variant="dot" state="dimmed" />)
     expect(getPill().className).toContain("opacity-40")
