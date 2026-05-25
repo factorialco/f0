@@ -175,6 +175,52 @@ describe("EditableCellRenderer", () => {
       expect(onCellChange).toHaveBeenCalled()
     })
 
+    it("triggers column formula and updates other cells via setCellValue", async () => {
+      const user = userEvent.setup()
+      const onCellChange = vi.fn().mockResolvedValue(undefined)
+      const formula = vi.fn(
+        ({
+          value,
+          setCellValue,
+        }: {
+          value: unknown
+          setCellValue: (columnId: string, value: unknown) => void
+        }) => {
+          if (value === "Admin") {
+            setCellValue("email", "admin@example.com")
+          }
+        }
+      )
+
+      render(
+        <EditableRowProvider item={testItem} onCellChange={onCellChange}>
+          <EditableCellRenderer
+            column={createEditableColumn({ formula })}
+            item={testItem}
+            cellIndex={0}
+          >
+            <span>Fallback</span>
+          </EditableCellRenderer>
+        </EditableRowProvider>
+      )
+
+      const input = screen.getByRole("textbox")
+      await user.clear(input)
+      await user.type(input, "Admin")
+
+      expect(formula).toHaveBeenCalled()
+      // The last call should have value "Admin" and trigger setCellValue
+      const lastCall = formula.mock.calls[formula.mock.calls.length - 1][0]
+      expect(lastCall.value).toBe("Admin")
+
+      // onCellChange should have been called for both the name AND the email columns
+      const emailCall = onCellChange.mock.calls.find(
+        (call: unknown[]) =>
+          (call[0] as TestRecord).email === "admin@example.com"
+      )
+      expect(emailCall).toBeDefined()
+    })
+
     it("stops click propagation to prevent row navigation", async () => {
       const user = userEvent.setup()
       const parentClickHandler = vi.fn()

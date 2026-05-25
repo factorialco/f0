@@ -119,8 +119,11 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 // Basic Variants
+// Note: do NOT add `tags: ["no-sidebar"]` to the primary (first exported)
+// story. Storybook propagates the primary story's tags to the MDX
+// `--documentation` entry, which would hide the entire Documentation page
+// from the sidebar. Hide secondary variants instead.
 export const Default: Story = {
-  tags: ["no-sidebar"],
   args: {
     variant: "default",
     label: "Default Button",
@@ -136,7 +139,6 @@ export const Default: Story = {
 
 // Basic Variants
 export const WithHref: Story = {
-  tags: ["no-sidebar"],
   parameters: {
     docs: {
       description: {
@@ -159,9 +161,121 @@ export const WithHref: Story = {
   },
 }
 
-export const Variants: Story = {
+export const Snapshot: Story = {
   tags: ["no-sidebar"],
   parameters: withSnapshot({}),
+  render: (args) => (
+    <div className="flex flex-col gap-8">
+      <div>
+        <div style={{ fontWeight: 600, marginBottom: 8 }}>Variants</div>
+        <div className="flex gap-2">
+          <F0Button {...args} variant="default" label="Default" />
+          <F0Button {...args} variant="outline" label="Outline" />
+          <F0Button {...args} variant="neutral" label="Neutral" />
+          <F0Button {...args} variant="ghost" label="Ghost" />
+          <F0Button {...args} variant="critical" label="Critical" />
+          <F0Button {...args} variant="promote" label="Promote" />
+        </div>
+      </div>
+      <div>
+        <div style={{ fontWeight: 600, marginBottom: 8 }}>With icon</div>
+        <div className="flex gap-2">
+          <F0Button {...args} variant="default" label="Default" icon={Add} />
+          <F0Button {...args} variant="outline" label="Outline" icon={Add} />
+          <F0Button
+            {...args}
+            variant="neutral"
+            label="Neutral"
+            icon={Archive}
+          />
+          <F0Button {...args} variant="ghost" label="Ghost" icon={Save} />
+          <F0Button
+            {...args}
+            variant="critical"
+            label="Critical"
+            icon={Delete}
+          />
+          <F0Button {...args} variant="promote" label="Promote" icon={Add} />
+        </div>
+      </div>
+      <div>
+        <div style={{ fontWeight: 600, marginBottom: 8 }}>Only icon</div>
+        <div className="flex gap-2">
+          <F0Button
+            {...args}
+            variant="default"
+            label="Default"
+            icon={Add}
+            hideLabel
+          />
+          <F0Button
+            {...args}
+            variant="outline"
+            label="Outline"
+            icon={Add}
+            hideLabel
+          />
+          <F0Button
+            {...args}
+            variant="neutral"
+            label="Neutral"
+            icon={Archive}
+            hideLabel
+          />
+          <F0Button
+            {...args}
+            variant="ghost"
+            label="Ghost"
+            icon={Save}
+            hideLabel
+          />
+          <F0Button
+            {...args}
+            variant="critical"
+            label="Critical"
+            icon={Delete}
+            hideLabel
+          />
+          <F0Button
+            {...args}
+            variant="promote"
+            label="Promote"
+            icon={Add}
+            hideLabel
+          />
+        </div>
+      </div>
+      <div>
+        <div style={{ fontWeight: 600, marginBottom: 8 }}>Only emoji</div>
+        <div className="flex gap-2">
+          <F0Button {...args} emoji="🥰" label="Emoji" variant="neutral" />
+        </div>
+      </div>
+      <div>
+        <div style={{ fontWeight: 600, marginBottom: 8 }}>Sizes</div>
+        <div className="flex items-center gap-4">
+          <F0Button {...args} size="lg" label="Large" />
+          <F0Button {...args} size="md" label="Medium" />
+          <F0Button {...args} size="sm" label="Small" />
+        </div>
+      </div>
+      <div>
+        <div style={{ fontWeight: 600, marginBottom: 8 }}>States</div>
+        <div className="flex gap-2">
+          <F0Button {...args} label="Default" />
+          <F0Button {...args} label="Disabled" disabled />
+          <F0Button {...args} label="Loading" loading />
+        </div>
+      </div>
+    </div>
+  ),
+}
+
+// MDX helpers — hidden from sidebar, referenced by F0Button.mdx via <Canvas of={...} />.
+// Not opted-in to Chromatic (see Snapshot above for the consolidated capture).
+
+export const Variants: Story = {
+  tags: ["no-sidebar"],
   render: (args) => (
     <div className="flex gap-2">
       <F0Button {...args} variant="default" label="Default" />
@@ -176,7 +290,6 @@ export const Variants: Story = {
 
 export const IconVariants: Story = {
   tags: ["no-sidebar"],
-  parameters: withSnapshot({}),
   render: (args) => (
     <div className="flex flex-col gap-6">
       <div>
@@ -234,7 +347,7 @@ export const IconVariants: Story = {
           <F0Button
             {...args}
             variant="critical"
-            label="Critical "
+            label="Critical"
             icon={Delete}
             hideLabel
           />
@@ -257,10 +370,8 @@ export const IconVariants: Story = {
   ),
 }
 
-// Size Variants
 export const Sizes: Story = {
   tags: ["no-sidebar"],
-  parameters: withSnapshot({}),
   render: (args) => (
     <div className="flex items-center gap-4">
       <F0Button {...args} size="lg" label="Large" tooltip="Large button" />
@@ -270,15 +381,39 @@ export const Sizes: Story = {
   ),
 }
 
+export const States: Story = {
+  tags: ["no-sidebar"],
+  render: (args) => {
+    const [asyncLoading, setAsyncLoading] = React.useState(false)
+    return (
+      <div className="flex gap-2">
+        <F0Button {...args} label="Disabled" disabled />
+        <F0Button {...args} label="Loading" loading />
+        <F0Button
+          {...args}
+          label={asyncLoading ? "Saving..." : "Async Loading"}
+          loading={asyncLoading}
+          onClick={async () => {
+            setAsyncLoading(true)
+            await new Promise((resolve) => setTimeout(resolve, 1500))
+            setAsyncLoading(false)
+            alert("Async action completed!")
+          }}
+        />
+      </div>
+    )
+  },
+}
+
 export const Ellipsis: Story = {
-  parameters: withSnapshot({
+  parameters: {
     docs: {
       description: {
         story:
           "A button that will truncate the label if it is too long, to allow for better readability and usability.",
       },
     },
-  }),
+  },
   render: (args) => (
     <div
       className="flex max-w-[120px] flex-col items-center gap-4 p-3"
@@ -374,7 +509,6 @@ export const AsyncAction: Story = {
 }
 
 export const IconButtonGroup: Story = {
-  parameters: withSnapshot({}),
   render: () => (
     <div className="flex items-center gap-2">
       <F0Button variant="ghost" icon={Add} hideLabel label="Add" />
@@ -390,31 +524,6 @@ export const OnlyEmoji: Story = {
     label: "Emoji",
     variant: "neutral",
     hideLabel: true,
-  },
-}
-
-export const States: Story = {
-  tags: ["no-sidebar"],
-  parameters: withSnapshot({}),
-  render: (args) => {
-    const [asyncLoading, setAsyncLoading] = React.useState(false)
-    return (
-      <div className="flex gap-2">
-        <F0Button {...args} label="Disabled" disabled />
-        <F0Button {...args} label="Loading" loading />
-        <F0Button
-          {...args}
-          label={asyncLoading ? "Saving..." : "Async Loading"}
-          loading={asyncLoading}
-          onClick={async () => {
-            setAsyncLoading(true)
-            await new Promise((resolve) => setTimeout(resolve, 1500))
-            setAsyncLoading(false)
-            alert("Async action completed!")
-          }}
-        />
-      </div>
-    )
   },
 }
 

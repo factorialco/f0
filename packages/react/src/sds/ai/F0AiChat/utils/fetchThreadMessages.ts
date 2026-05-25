@@ -193,9 +193,10 @@ export async function fetchThreadMessages(
   baseUrl: string,
   headers: Record<string, string>,
   threadId: string,
-  actions?: Record<string, ActionWithRender>
+  actions?: Record<string, ActionWithRender>,
+  runtimeFetch: typeof fetch = fetch
 ): Promise<Message[]> {
-  const response = await fetch(
+  const response = await runtimeFetch(
     `${baseUrl}/chat-history/threads/${threadId}/messages`,
     {
       credentials: "include",

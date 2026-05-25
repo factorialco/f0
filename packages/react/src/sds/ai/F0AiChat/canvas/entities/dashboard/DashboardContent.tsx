@@ -191,7 +191,11 @@ const COLLECTION_PER_PAGE = 20
 
 export interface ChatDashboardProps {
   config: ChatDashboardConfig
-  apiConfig: { baseUrl: string; headers: Record<string, string> }
+  apiConfig: {
+    baseUrl: string
+    headers: Record<string, string>
+    runtimeFetch?: typeof fetch
+  }
   refreshKey?: number
   /** Incrementing counter that forces the grid to reset to initial layout */
   resetKey?: number
@@ -874,6 +878,7 @@ function mapCollectionItem(
             id: col.id,
             sorting: col.id,
             ...(col.width ? { width: col.width } : {}),
+            ...(col.info ? { info: col.info } : {}),
             render: (row: RecordType) => {
               const value = row[col.id]
               if (value == null) return "-"

@@ -80,6 +80,15 @@ export type UseSelectableProps<
    * across loadMore() calls regardless of this flag.
    */
   resetOnPageChange?: boolean
+  /**
+   * When true, preserves selection when the dataset identity changes
+   * (filters, sortings, or search query). Useful for select/picker
+   * components where the user searches and filters to find items to
+   * add to an existing selection, not to view a different dataset.
+   *
+   * @default false
+   */
+  preserveSelectionOnDatasetChange?: boolean
 }
 
 export type SelectionMeta<R extends RecordType> = {

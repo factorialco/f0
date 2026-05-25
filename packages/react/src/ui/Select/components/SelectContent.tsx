@@ -13,6 +13,7 @@ import {
 
 import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
+import { F0DialogContext } from "@/patterns/F0Dialog"
 import { ScrollArea } from "@/ui/scrollarea"
 import { Spinner } from "@/ui/Spinner"
 
@@ -33,6 +34,7 @@ type SelectItemProps = ComponentPropsWithoutRef<
   bottom?: ReactNode
   right?: ReactNode
   emptyMessage?: string
+  emptyAction?: ReactNode
   showLoadingIndicator?: boolean
 } & (
     | {
@@ -81,6 +83,7 @@ const SelectContent = forwardRef<
       position = "popper",
       taller = false,
       emptyMessage,
+      emptyAction,
       onScrollBottom,
       onScrollTop,
       isLoadingMore,
@@ -94,6 +97,22 @@ const SelectContent = forwardRef<
     },
     ref
   ) => {
+    // If inside a dialog and no portalContainer is provided, use the dialog's container
+    // only for center/fullscreen dialogs (which have focus trap).
+    // For side panels (left/right), render in body to prevent clipping.
+    const dialogContext = useContext(F0DialogContext)
+    const shouldUseDialogContainer =
+      dialogContext.portalContainer &&
+      (dialogContext.position === "center" ||
+        dialogContext.position === "fullscreen")
+
+    const effectivePortalContainer =
+      portalContainer !== undefined
+        ? portalContainer
+        : shouldUseDialogContainer
+          ? dialogContext.portalContainer
+          : undefined
+
     // ----------- Virtual list -----------
     // The scrollable element for your list
     const parentRef = useRef(null)
@@ -173,8 +192,13 @@ const SelectContent = forwardRef<
     const virtualItems = virtualizer.getVirtualItems()
 
     const viewportContent = isEmpty ? (
-      <div className="flex h-full w-full items-center justify-center p-2">
+      <div className="flex h-full w-full flex-col items-center justify-center p-2">
         <p className="text-center">{emptyMessage || "-"}</p>
+        {emptyAction && (
+          <div className="mt-2 w-full border-0 border-t border-solid border-f1-border-secondary pt-2">
+            {emptyAction}
+          </div>
+        )}
       </div>
     ) : isVirtual ? (
       <div
@@ -225,7 +249,7 @@ const SelectContent = forwardRef<
       <SelectPrimitive.Content
         ref={ref}
         asChild={asChild}
-        disableScrollLock={asList}
+        disableScrollLock={asList || !!effectivePortalContainer}
         className={cn(
           "relative z-50 text-f1-foreground",
           asList
@@ -356,14 +380,14 @@ const SelectContent = forwardRef<
     return asList ? (
       content
     ) : (
-      <SelectPrimitive.Portal container={portalContainer}>
+      <SelectPrimitive.Portal container={effectivePortalContainer}>
         <>
           {/*
             Overlay to prevent clicks from propagating.
             Only render when NOT using a custom portal container to avoid
             conflicts with modal focus management.
           */}
-          {open && !portalContainer && (
+          {open && !effectivePortalContainer && (
             <div
               className="pointer-events-auto fixed inset-0 z-40"
               onClick={(e) => {

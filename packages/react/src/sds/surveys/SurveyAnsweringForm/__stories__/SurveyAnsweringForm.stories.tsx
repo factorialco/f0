@@ -345,6 +345,14 @@ export const AllQuestions: Story = {
   },
 }
 
+export const AllQuestionsFewQuestions: Story = {
+  args: {
+    mode: "all-questions",
+    elements: sampleElements.slice(0, 2),
+    position: "fullscreen",
+  },
+}
+
 export const Stepped: Story = {
   args: {
     mode: "stepped",
@@ -514,4 +522,35 @@ export const InlineLoading: Story = {
       />
     </div>
   ),
+}
+
+export const WithAllowCreate: Story = {
+  args: {
+    mode: "all-questions",
+    title: "Team Assignment",
+    elements: [
+      {
+        type: "question",
+        question: {
+          id: "q-team",
+          title: "Select your team",
+          description:
+            "Search for a team or create a new one if it doesn't exist.",
+          type: "dropdown-single" as const,
+          datasetKey: "teams",
+          allowCreate: true,
+        },
+      },
+      {
+        type: "question",
+        question: {
+          id: "q-teams-collab",
+          title: "Teams you collaborate with",
+          description: "Multi-select without creation.",
+          type: "dropdown-multi" as const,
+          datasetKey: "teams",
+        },
+      },
+    ],
+  },
 }

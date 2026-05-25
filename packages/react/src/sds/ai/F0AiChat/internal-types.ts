@@ -1,7 +1,7 @@
 import { type AIMessage, type Message } from "@copilotkit/shared"
 
 import { type ClarifyingQuestionState } from "./actions/core/clarifyingQuestion/types"
-import { type CanvasActions } from "./canvas/types"
+import { type CanvasActions, type CanvasEntityDefinition } from "./canvas/types"
 import {
   type AiChatDisclaimer,
   type AiChatMode,
@@ -37,6 +37,7 @@ export interface AiChatState {
   VoiceMode?: React.ComponentType
   entityRefs?: EntityRefs
   canvasActions?: CanvasActions
+  canvasEntities?: Record<string, CanvasEntityDefinition>
   toolHints?: AiChatToolHint[]
   credits?: AiChatCredits
   creditWarning?: AiChatCreditWarning
@@ -52,6 +53,14 @@ export interface AiChatState {
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
   tracking?: AiChatTrackingOptions
+  /**
+   * Optional hook called before a user message is sent. Return false to block submission.
+   */
+  onBeforeSendMessage?: () => boolean | Promise<boolean>
+  /**
+   * Optional fetch implementation for AI runtime requests owned by F0.
+   */
+  runtimeFetch?: typeof fetch
 }
 
 /**
@@ -87,6 +96,14 @@ export type AiChatProviderReturnValue = {
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
   tracking?: AiChatTrackingOptions
+  /**
+   * Optional hook called before a user message is sent. Return false to block submission.
+   */
+  onBeforeSendMessage?: () => boolean | Promise<boolean>
+  /**
+   * Fetch implementation for AI runtime requests owned by F0.
+   */
+  runtimeFetch: typeof fetch
   /**
    * Clear/reset the chat conversation
    */
@@ -241,6 +258,7 @@ export type AiChatProviderReturnValue = {
   | "resizable"
   | "entityRefs"
   | "canvasActions"
+  | "canvasEntities"
   | "toolHints"
   | "credits"
   | "creditWarning"
