@@ -69,12 +69,7 @@ export const CollapsibleMessage = ({
         <div className="min-h-6 flex items-center">
           <span>{title}</span>
         </div>
-        {!lockOpen && (
-          <F0Icon
-            icon={ChevronRight}
-            // className="h-6 w-6 transition-transform duration-200"
-          />
-        )}
+        {!lockOpen && <F0Icon icon={ChevronRight} />}
       </CollapsibleTrigger>
       <CollapsibleContent forceMount className="data-[state=open]:mt-3">
         <motion.div

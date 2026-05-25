@@ -41,7 +41,7 @@ export const Thinking = ({ titles, title, inProgress }: ThinkingProps) => {
       onOpenChange={setIsOpen}
       lockOpen={inProgress}
     >
-      <div className="flex flex-col gap-3 pb-6">
+      <div className="flex flex-col gap-3 pb-4">
         {titles.map((stepTitle, index) => (
           <div key={index} className="relative">
             <F0ActionItem
