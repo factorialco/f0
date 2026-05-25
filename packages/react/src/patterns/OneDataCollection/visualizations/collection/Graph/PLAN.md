@@ -10,6 +10,7 @@ Base SHA: `efa9795a3decf2627bbe248f5f2421ec876a900a`
 ## 1. Goal & non-goals
 
 ### Goal
+
 Add a first-class `type: "graph"` visualization to `OneDataCollection` that renders the collection's records as an interactive tree/DAG using the existing `F0Graph` runtime, so that any consumer with an already-defined `DataCollectionSource` can opt into a graph view without leaving the collection abstraction (filters, search, presets, settings, persistence, item-actions, selection).
 
 Concretely, after this work a consumer can write:
@@ -33,6 +34,7 @@ Concretely, after this work a consumer can write:
 …and the visualization picker shows a Graph entry, switching to it loads the same `source`, projects records into `GraphNode<R>[]`, and renders an interactive F0Graph wired into the collection's selection, item-actions, search, and persistence.
 
 ### Non-goals
+
 - **No new layout engines.** We use F0Graph's built-in tree layout. DAG layout via custom `layoutEngine` is a consumer escape hatch, not something this view ships.
 - **No new graph primitives.** Anything not exposed by `F0Graph`/`F0GraphNode`/`F0GraphEdge` today is out of scope. If the view needs it, the gap is recorded in §10 or §1.6.
 - **No data-fetching changes.** The view consumes whatever `dataAdapter` already produces — same paginated/grouped contract every other visualization uses. No new adapter type.
@@ -84,6 +86,7 @@ flowchart TD
 ```
 
 ### 2.2 Component layering
+
 - **`GraphCollection`** (new): visualization adapter. Bridges `DataCollectionSource` ↔ `F0GraphProps`. Mirrors the structure of `ListCollection`/`KanbanCollection`. Owns filtering, memoization of `nodes`/`edges`, the selection bridge, the lazy-mode `AbortController`, and cycle warnings.
 - **`F0Graph`** (existing, **untouched in this work**): generic interactive graph runtime under `patterns/F0Graph`. We are a consumer of its public API only. (Phase 2 depends on a separate upstream PR adding `dimmedNodes`; see §1.6.)
 - **`projectGraph`** (new pure helper): `(records, options) => { nodes: GraphNode<R>[]; edges: GraphEdge[]; cycles: string[] }`. Pure function, fully unit-testable, no React.
@@ -92,18 +95,18 @@ flowchart TD
 
 ### 2.3 State ownership
 
-| State                                   | Owner                                         |
-| --------------------------------------- | --------------------------------------------- |
-| `records` / pagination                  | `useDataCollectionData(source)` (unchanged)   |
-| Selection (`selectedNodes`)             | `useSelectable` on the `source` — survives view switches |
-| `expandedNodes`                         | F0Graph (uncontrolled by default; opt-in controlled prop) |
-| `focusedNode`                           | F0Graph (uncontrolled)                        |
-| Viewport (zoom + pan)                   | F0Graph internal React Flow state. **NOT persisted across hard refreshes.** Preserved during in-app back-navigation only because the page component stays mounted. |
-| Detail-panel open node                  | Derived from F0Graph selection                |
-| Detail-panel width                      | F0Graph, persisted to `localStorage` under `f0graph:detailPanelWidth:${graphId}` |
-| `graphId`                               | Consumer-supplied via `options.graphId`; defaults to `React.useId()` generated inside `GraphCollection` |
-| Visualization picker / view switcher    | `OneDataCollection` settings (unchanged)      |
-| Per-view filter overrides               | `usePerVisualizationFilters` (unchanged)      |
+| State                                | Owner                                                                                                                                                              |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `records` / pagination               | `useDataCollectionData(source)` (unchanged)                                                                                                                        |
+| Selection (`selectedNodes`)          | `useSelectable` on the `source` — survives view switches                                                                                                           |
+| `expandedNodes`                      | F0Graph (uncontrolled by default; opt-in controlled prop)                                                                                                          |
+| `focusedNode`                        | F0Graph (uncontrolled)                                                                                                                                             |
+| Viewport (zoom + pan)                | F0Graph internal React Flow state. **NOT persisted across hard refreshes.** Preserved during in-app back-navigation only because the page component stays mounted. |
+| Detail-panel open node               | Derived from F0Graph selection                                                                                                                                     |
+| Detail-panel width                   | F0Graph, persisted to `localStorage` under `f0graph:detailPanelWidth:${graphId}`                                                                                   |
+| `graphId`                            | Consumer-supplied via `options.graphId`; defaults to `React.useId()` generated inside `GraphCollection`                                                            |
+| Visualization picker / view switcher | `OneDataCollection` settings (unchanged)                                                                                                                           |
+| Per-view filter overrides            | `usePerVisualizationFilters` (unchanged)                                                                                                                           |
 
 **Back-navigation viewport caveat.** F0Graph viewport survives in-app back-nav only if the parent route does not force remount. Builder MUST verify the parent route in `factorial` does not aggressively swap `key={...}` and does not sit behind a Suspense boundary that throws on back-nav. If it does, viewport resets on every back-nav and the fix is in the route, not in this view.
 
@@ -281,6 +284,7 @@ No breaking changes to existing public types. The `Visualization` union grows by
   > `Graph visualization in eager mode requires a non-paginated source. Either set paginationType: 'no-pagination' on the source, or provide a loadChildren option to use lazy mode.`
 
   This is a hard fail-fast — no silent multi-page fetches, no `loadMore` loops, no `maxRecords` knob. The guard runs in `GraphCollection` immediately after `useDataCollectionData` is wired so consumers see the error on first render.
+
 - The complementary guard (`loadChildren` provided AND source non-paginated) also throws in dev — see §1.5 Q1.
 - `useDataCollectionData(source)` returns the full record set in a single response (guaranteed by the non-pagination requirement above).
 - All returned `records` are projected to `GraphNode<R>[]` via `nodeAdapter`.
@@ -301,6 +305,7 @@ No breaking changes to existing public types. The `Visualization` union grows by
 - Records loaded this way **bypass** the `DataCollectionSource`'s store. They are NOT added to `data.records`. This is intentional — collection state stays flat and predictable; F0Graph owns the tree.
 
 ### 4.3 Projection rules
+
 - **Identity.** `node.id` is stamped by `GraphCollection` using the same `getKey` helper Kanban uses ([`Kanban.tsx:226`](../Kanban/Kanban.tsx#L226)) — a three-step fallback: `source.idProvider(item, index)` → record's natural `.id` → array index, always coerced to `string`. `idProvider` is optional; consumers do not need to coerce. `nodeAdapter` does NOT return an `id`. Consider lifting `getKey` to a shared util under `OneDataCollection/utils/` during Phase 1 if it does not already live there; if it does, reference the path.
 - `node.data = record` (full record preserved, opaque to F0Graph).
 - If two records resolve to the same `id` via `getKey`, throw in dev (`useIsDev`); warn in prod.
@@ -318,7 +323,7 @@ No breaking changes to existing public types. The `Visualization` union grows by
 
 - F0Graph `selectionMode="single"` (v1 default).
 - Selection lives on the `source` via `useSelectable` — not on this visualization. Switching from Table → Graph → Table preserves the selected IDs automatically.
-- F0Graph `onNodeSelect(nodeId, selected)` →  `GraphCollection` calls `handleSelectItemChange` from `useSelectable`, passing **the loaded record as `fallbackItem`** so lazy-loaded nodes (which never entered `data.records`) still attach the record to the selection event. This mirrors the pattern Table and Card already use.
+- F0Graph `onNodeSelect(nodeId, selected)` → `GraphCollection` calls `handleSelectItemChange` from `useSelectable`, passing **the loaded record as `fallbackItem`** so lazy-loaded nodes (which never entered `data.records`) still attach the record to the selection event. This mirrors the pattern Table and Card already use.
   - **Rule:** GraphCollection MUST pass the loaded record as `fallbackItem` for both eager and lazy children. Never pass just an ID.
 - Multi-select is gated behind a follow-up (see §10).
 
@@ -328,6 +333,7 @@ No breaking changes to existing public types. The `Visualization` union grows by
 - **Fallback when no `detailPanel` is provided.** `GraphCollection` still surfaces the source's `itemActions` via `F0GraphNode.actions` for each node, so item-actions are reachable from the graph even without a panel. This makes `detailPanel` purely about additional content, not a gate on actions.
 
 ### 4.6 Loading and error states
+
 - Initial load: render F0Graph wrapped in an opacity-50 + `aria-busy` shell (matches list/table pattern).
 - Error: bubble through `onLoadError` (existing callback) — no in-view error UI; the collection chrome shows the error toast.
 
@@ -339,28 +345,29 @@ No breaking changes to existing public types. The `Visualization` union grows by
 
 ### New files (under the new `Graph/` directory)
 
-| Path | Purpose |
-| --- | --- |
-| `packages/react/src/patterns/OneDataCollection/visualizations/collection/Graph/PLAN.md` | This document. |
-| `packages/react/src/patterns/OneDataCollection/visualizations/collection/Graph/index.tsx` | Public barrel — `export * from "./Graph"` and `export * from "./types"`. |
-| `packages/react/src/patterns/OneDataCollection/visualizations/collection/Graph/Graph.tsx` | `GraphCollection` component. Owns hooks, selection bridge, F0Graph wiring, memoization, abort. |
-| `packages/react/src/patterns/OneDataCollection/visualizations/collection/Graph/types.ts` | `GraphCollectionProps`, `GraphVisualizationOptions`, `GraphNodeAdapter`, `GraphEdgeAdapter`, `GraphDetailPanel`. Re-exports `F0GraphDetailPanelProps`. |
-| `packages/react/src/patterns/OneDataCollection/visualizations/collection/Graph/projectGraph.ts` | Pure projection helper. Heavily unit-tested. Returns `{ nodes, edges, cycles }`. |
-| `packages/react/src/patterns/OneDataCollection/visualizations/collection/Graph/projectGraph.spec.ts` | Vitest specs for the projection helper. |
-| `packages/react/src/patterns/OneDataCollection/visualizations/collection/Graph/Graph.spec.tsx` | RTL specs for the visualization adapter. |
-| `packages/react/src/patterns/OneDataCollection/visualizations/collection/Graph/__stories__/Graph.stories.tsx` | Stories — basic tree, DAG, lazy, detail panel. |
-| `packages/react/src/patterns/OneDataCollection/visualizations/collection/Graph/__stories__/mockData.ts` | Mock org chart used by the stories and specs. |
+| Path                                                                                                          | Purpose                                                                                                                                                |
+| ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `packages/react/src/patterns/OneDataCollection/visualizations/collection/Graph/PLAN.md`                       | This document.                                                                                                                                         |
+| `packages/react/src/patterns/OneDataCollection/visualizations/collection/Graph/index.tsx`                     | Public barrel — `export * from "./Graph"` and `export * from "./types"`.                                                                               |
+| `packages/react/src/patterns/OneDataCollection/visualizations/collection/Graph/Graph.tsx`                     | `GraphCollection` component. Owns hooks, selection bridge, F0Graph wiring, memoization, abort.                                                         |
+| `packages/react/src/patterns/OneDataCollection/visualizations/collection/Graph/types.ts`                      | `GraphCollectionProps`, `GraphVisualizationOptions`, `GraphNodeAdapter`, `GraphEdgeAdapter`, `GraphDetailPanel`. Re-exports `F0GraphDetailPanelProps`. |
+| `packages/react/src/patterns/OneDataCollection/visualizations/collection/Graph/projectGraph.ts`               | Pure projection helper. Heavily unit-tested. Returns `{ nodes, edges, cycles }`.                                                                       |
+| `packages/react/src/patterns/OneDataCollection/visualizations/collection/Graph/projectGraph.spec.ts`          | Vitest specs for the projection helper.                                                                                                                |
+| `packages/react/src/patterns/OneDataCollection/visualizations/collection/Graph/Graph.spec.tsx`                | RTL specs for the visualization adapter.                                                                                                               |
+| `packages/react/src/patterns/OneDataCollection/visualizations/collection/Graph/__stories__/Graph.stories.tsx` | Stories — basic tree, DAG, lazy, detail panel.                                                                                                         |
+| `packages/react/src/patterns/OneDataCollection/visualizations/collection/Graph/__stories__/mockData.ts`       | Mock org chart used by the stories and specs.                                                                                                          |
 
 ### Edited files
 
-| Path | Change |
-| --- | --- |
-| `packages/react/src/patterns/OneDataCollection/visualizations/collection/types.ts` | Add `graph` variant to the `Visualization` union. Import `GraphVisualizationOptions`. |
-| `packages/react/src/patterns/OneDataCollection/visualizations/collection/collectionViewRegistry.tsx` | Register `graph` entry; import `GraphCollection`, `GraphCollectionProps`, and the `Graph` icon. |
-| `packages/react/src/patterns/OneDataCollection/visualizations/collection/index.tsx` | `export * from "./Graph"` so types are reachable from the collection barrel. |
-| `packages/react/src/patterns/OneDataCollection/exports.ts` | **No edit needed** — verified at [`exports.ts`](../../../exports.ts). Matches the Kanban/List precedent: `KanbanVisualizationOptions` is not re-exported by name today (the public re-export chain only exposes `Visualization`, `CustomVisualizationProps`, and `VisualizationFilterOverrides` from `./visualizations/collection/types`). `GraphVisualizationOptions` is reachable structurally through the `Visualization` union, which is enough for consumers writing `visualizations={[{ type: "graph", options: {...} }]}`. If a future ask wants `import type { GraphVisualizationOptions }` by name, add an explicit `export type { GraphVisualizationOptions } from "./visualizations/collection/Graph"` in `exports.ts` then — out of scope for parity. |
+| Path                                                                                                 | Change                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/react/src/patterns/OneDataCollection/visualizations/collection/types.ts`                   | Add `graph` variant to the `Visualization` union. Import `GraphVisualizationOptions`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `packages/react/src/patterns/OneDataCollection/visualizations/collection/collectionViewRegistry.tsx` | Register `graph` entry; import `GraphCollection`, `GraphCollectionProps`, and the `Graph` icon.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `packages/react/src/patterns/OneDataCollection/visualizations/collection/index.tsx`                  | `export * from "./Graph"` so types are reachable from the collection barrel.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `packages/react/src/patterns/OneDataCollection/exports.ts`                                           | **No edit needed** — verified at [`exports.ts`](../../../exports.ts). Matches the Kanban/List precedent: `KanbanVisualizationOptions` is not re-exported by name today (the public re-export chain only exposes `Visualization`, `CustomVisualizationProps`, and `VisualizationFilterOverrides` from `./visualizations/collection/types`). `GraphVisualizationOptions` is reachable structurally through the `Visualization` union, which is enough for consumers writing `visualizations={[{ type: "graph", options: {...} }]}`. If a future ask wants `import type { GraphVisualizationOptions }` by name, add an explicit `export type { GraphVisualizationOptions } from "./visualizations/collection/Graph"` in `exports.ts` then — out of scope for parity. |
 
 ### Files explicitly NOT edited
+
 - Everything under `packages/react/src/patterns/F0Graph/*` — F0Graph is consumed as-is in this work. The Phase 2 `dimmedNodes` capability lands in a separate upstream PR (see §1.6).
 - `OneDatacollection.tsx`, `Settings/*`, `hooks/useDataCollectionData/*`, `navigationFilters/*` — view is additive only.
 
@@ -370,20 +377,21 @@ No breaking changes to existing public types. The `Visualization` union grows by
 
 ### 6.1 Stories (`__stories__/Graph.stories.tsx`)
 
-| Story | What it shows |
-| --- | --- |
-| **Basic** | 10-node org chart with default expand depth = 2. |
-| **WithDetailPanel** | Click a node → panel opens with name, role, item-actions via `menuActions`. |
-| **WithItemActionsNoPanel** | No `detailPanel` provided; item-actions still reachable via `F0GraphNode.actions`. |
-| **DAG** | Records with `parentIds: string[]` rendering a small DAG. |
-| **Lazy** | Only roots in the source; `loadChildren` resolves to a mocked async batch with a 400ms delay. |
-| **WithVisualizationSwitcher** | Same source rendered as both Table and Graph, with the picker; selection survives the switch. |
-| **Empty** | Source returns zero records → F0Graph renders nothing; collection chrome shows the existing empty state. |
-| **LoadingThenLoaded** | Source initially pending → opacity-50 graph, then settles. |
-| **HardRemovalFilter** | Filter narrows the set; non-matching nodes and their edges disappear; subtree removed (Phase 1). |
-| **GroupingWarning** (dev story, `parameters.controls: { disable: true }`) | Source with `grouping` set → dev throw is shown in console; verifies guard. |
+| Story                                                                     | What it shows                                                                                            |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **Basic**                                                                 | 10-node org chart with default expand depth = 2.                                                         |
+| **WithDetailPanel**                                                       | Click a node → panel opens with name, role, item-actions via `menuActions`.                              |
+| **WithItemActionsNoPanel**                                                | No `detailPanel` provided; item-actions still reachable via `F0GraphNode.actions`.                       |
+| **DAG**                                                                   | Records with `parentIds: string[]` rendering a small DAG.                                                |
+| **Lazy**                                                                  | Only roots in the source; `loadChildren` resolves to a mocked async batch with a 400ms delay.            |
+| **WithVisualizationSwitcher**                                             | Same source rendered as both Table and Graph, with the picker; selection survives the switch.            |
+| **Empty**                                                                 | Source returns zero records → F0Graph renders nothing; collection chrome shows the existing empty state. |
+| **LoadingThenLoaded**                                                     | Source initially pending → opacity-50 graph, then settles.                                               |
+| **HardRemovalFilter**                                                     | Filter narrows the set; non-matching nodes and their edges disappear; subtree removed (Phase 1).         |
+| **GroupingWarning** (dev story, `parameters.controls: { disable: true }`) | Source with `grouping` set → dev throw is shown in console; verifies guard.                              |
 
 ### 6.2 Unit tests (`projectGraph.spec.ts`)
+
 - Projects flat records into nodes preserving `data`.
 - Stamps `node.id` via the shared `getKey` helper (three-step fallback: `idProvider` → `item.id` → `index`, coerced to `string`) — never from `nodeAdapter`.
 - Derives parent→child edges from `parentId`.
@@ -395,6 +403,7 @@ No breaking changes to existing public types. The `Visualization` union grows by
 - Hard removal: given a matched-id set that excludes some records, the excluded records and any edges incident on them are omitted.
 
 ### 6.3 Component tests (`Graph.spec.tsx`)
+
 - Renders nodes for each record returned by the source.
 - `onNodeSelect` from F0Graph calls `handleSelectItemChange` with the matching record as `fallbackItem`.
 - **Lazy + selectAll inheritance.** Select-all-everything in Table → switch to Graph → expand a lazy-loaded child → that child renders selected. Click to deselect → switch back to Table → that one row is unselected.
@@ -411,9 +420,11 @@ No breaking changes to existing public types. The `Visualization` union grows by
 - Lazy mode: expanding a node invokes `loadChildren(nodeId)` and renders the returned records.
 
 ### 6.4 Visual regression
+
 - Chromatic snapshots for each story above (handled by existing pipeline — no config change).
 
 ### 6.5 What we do NOT test
+
 - F0Graph's own internals (zoom, layout math, detail-panel width persistence) — already covered by F0Graph's own suite.
 - Cross-visualization switching state preservation — covered by existing `OneDataCollection` integration tests; one new case is added under those tests in Phase 3 (see §8).
 
@@ -433,6 +444,7 @@ All resolved questions are tracked in §1.5; what remains is a watchlist of resi
 ## 8. 3-phase delivery
 
 ### Phase 1 — Skeleton, projection, hard-removal filter (PR #1)
+
 - Land everything in §5 with `Graph.tsx` rendering F0Graph from `projectGraph()` output.
 - `nodeAdapter` + default edge derivation only. No `edgeAdapter`, no `loadChildren`, no `detailPanel` (item-actions still wired via `F0GraphNode.actions`).
 - `selectionMode="single"` wired to `useSelectable` with `fallbackItem`.
@@ -447,6 +459,7 @@ All resolved questions are tracked in §1.5; what remains is a watchlist of resi
 - **Status: unblocked.** No external sign-offs remain.
 
 ### Phase 2 — Detail panel, lazy mode, dim (PR #2)
+
 - Add `detailPanel` option with `menuActions` bridge.
 - Add `loadChildren` option (lazy mode) with per-node `AbortController`.
 - Add `edgeAdapter` option.
@@ -457,6 +470,7 @@ All resolved questions are tracked in §1.5; what remains is a watchlist of resi
 - Perf smoke test answering Q4.
 
 ### Phase 3 — Polish & integration (PR #3)
+
 - Per-visualization settings entry in `Settings/` if any user-controllable knob emerges (likely `defaultExpandDepth` exposed via `graphProps`).
 - Add an integration test in `OneDataCollection/__tests__/` covering switch Table↔Graph with state preservation (selection + viewport-during-back-nav caveat from §2.3).
 - Update visualization selector tooltip copy / i18n keys.
@@ -486,27 +500,27 @@ Each phase is independently shippable. Phase 1 covers ~70% of the consumer use c
 
 ## 10. Out-of-scope follow-ups
 
-| Item | Why deferred |
-| --- | --- |
-| Multi-select bridge to bulk-actions footer | Needs UX design — "select all" semantics on a spatial canvas are non-obvious. |
-| Inline editing inside nodes (graph-equivalent of `editableTable`) | F0Graph nodes are renderer-driven; F0 needs an editing primitive first. |
-| Viewport persistence across hard refreshes | `OneDataCollection`'s settings persistence layer doesn't currently store viewport coordinates; F0Graph itself only persists detail-panel width. Possible follow-up, separate scope. |
-| Export-to-PNG / share-link | F0Graph doesn't expose a canvas snapshot API; would need a new F0Graph prop. |
-| Grouping support (treat group key as virtual parent) | Conflates two parent dimensions; non-trivial UX. |
-| Infinite-scroll-style streaming nodes | F0Graph has `deferredNodes` — viable but adds two more state machines to reason about. Schedule after lazy mode lands. |
-| Per-edge styling/labeling presets | Covered today by `graphProps.renderEdge`; hold a dedicated convenience API for a real consumer ask. |
-| Dedicated `useGraphLayout` for non-OneDataCollection consumers | If a second consumer of `projectGraph()` appears, hoist it under `patterns/F0Graph/hooks/`. |
-| Dedicated tree/hierarchy glyph from design | We ship with the existing `Graph` icon as the registry glyph. Swap is a one-line change in the registry entry once design produces a dedicated variant. |
+| Item                                                              | Why deferred                                                                                                                                                                        |
+| ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Multi-select bridge to bulk-actions footer                        | Needs UX design — "select all" semantics on a spatial canvas are non-obvious.                                                                                                       |
+| Inline editing inside nodes (graph-equivalent of `editableTable`) | F0Graph nodes are renderer-driven; F0 needs an editing primitive first.                                                                                                             |
+| Viewport persistence across hard refreshes                        | `OneDataCollection`'s settings persistence layer doesn't currently store viewport coordinates; F0Graph itself only persists detail-panel width. Possible follow-up, separate scope. |
+| Export-to-PNG / share-link                                        | F0Graph doesn't expose a canvas snapshot API; would need a new F0Graph prop.                                                                                                        |
+| Grouping support (treat group key as virtual parent)              | Conflates two parent dimensions; non-trivial UX.                                                                                                                                    |
+| Infinite-scroll-style streaming nodes                             | F0Graph has `deferredNodes` — viable but adds two more state machines to reason about. Schedule after lazy mode lands.                                                              |
+| Per-edge styling/labeling presets                                 | Covered today by `graphProps.renderEdge`; hold a dedicated convenience API for a real consumer ask.                                                                                 |
+| Dedicated `useGraphLayout` for non-OneDataCollection consumers    | If a second consumer of `projectGraph()` appears, hoist it under `patterns/F0Graph/hooks/`.                                                                                         |
+| Dedicated tree/hierarchy glyph from design                        | We ship with the existing `Graph` icon as the registry glyph. Swap is a one-line change in the registry entry once design produces a dedicated variant.                             |
 
 ---
 
 ## 11. Risks summary
 
-| Risk | Likelihood | Impact | Mitigation |
-| --- | --- | --- | --- |
-| Large graphs (>2k nodes) janky | Med | Med | Phase-2 perf smoke; publish envelope. F0Graph's existing 700-node snap threshold already degrades gracefully. |
-| Selection model mismatch confuses existing consumers | Med | Med | Single-select only in v1; multi-select tracked as §10 follow-up. Lazy `fallbackItem` rule documented in §4.4. |
-| TypeScript instantiation depth from 6th union variant | Low | Med | Mirror existing registry cast pattern (`as VisualizacionTypeDefinition<...>`) per Q6. No new tech debt. |
-| Generic `Graph` icon stays in place longer than expected | Low | Low | Swap is a one-line registry edit when design ships a dedicated glyph. Follow-up tracked in §10. |
-| Upstream F0Graph `dimmedNodes` PR slips | Med | Low | Phase 1 still ships with hard removal; only Phase 2 dim UX is delayed. No code in this repo blocks. |
-| Parent route in `factorial` forces remount on back-nav | Low | Med | Verify before Phase 1 ships (per §2.3 caveat). If it does, fix the route, not this view. Viewport persistence across hard refreshes is explicitly out of scope (§10). |
+| Risk                                                     | Likelihood | Impact | Mitigation                                                                                                                                                            |
+| -------------------------------------------------------- | ---------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Large graphs (>2k nodes) janky                           | Med        | Med    | Phase-2 perf smoke; publish envelope. F0Graph's existing 700-node snap threshold already degrades gracefully.                                                         |
+| Selection model mismatch confuses existing consumers     | Med        | Med    | Single-select only in v1; multi-select tracked as §10 follow-up. Lazy `fallbackItem` rule documented in §4.4.                                                         |
+| TypeScript instantiation depth from 6th union variant    | Low        | Med    | Mirror existing registry cast pattern (`as VisualizacionTypeDefinition<...>`) per Q6. No new tech debt.                                                               |
+| Generic `Graph` icon stays in place longer than expected | Low        | Low    | Swap is a one-line registry edit when design ships a dedicated glyph. Follow-up tracked in §10.                                                                       |
+| Upstream F0Graph `dimmedNodes` PR slips                  | Med        | Low    | Phase 1 still ships with hard removal; only Phase 2 dim UX is delayed. No code in this repo blocks.                                                                   |
+| Parent route in `factorial` forces remount on back-nav   | Low        | Med    | Verify before Phase 1 ships (per §2.3 caveat). If it does, fix the route, not this view. Viewport persistence across hard refreshes is explicitly out of scope (§10). |

@@ -15,6 +15,7 @@ import type {
 } from "../../types"
 import type { CardVisualizationOptions } from "./Card"
 import type { EditableTableVisualizationOptions } from "./EditableTable"
+import type { GraphVisualizationOptions } from "./Graph"
 import type { KanbanVisualizationOptions } from "./Kanban"
 import type { TableVisualizationOptions } from "./Table"
 
@@ -92,6 +93,12 @@ export type Visualization<
       type: "list"
       /** Configuration options for list visualization */
       options: ListVisualizationOptions<R, Filters, Sortings>
+    } & VisualizationFilterOverrides<Filters>)
+  | ({
+      /** Graph-based visualization type */
+      type: "graph"
+      /** Configuration options for graph visualization */
+      options: GraphVisualizationOptions<R, Filters, Sortings>
     } & VisualizationFilterOverrides<Filters>)
   | ({
       /** Human-readable label for the visualization */
