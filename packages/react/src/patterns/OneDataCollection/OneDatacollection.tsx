@@ -997,6 +997,7 @@ const OneDataCollectionComp = <
                   onGroupingChange={setCurrentGrouping}
                   sortings={sortings}
                   currentSortings={currentSortings}
+                  defaultSortings={defaultSortings.current}
                   onSortingsChange={setCurrentSortings}
                 />
               )}
