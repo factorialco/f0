@@ -81,7 +81,7 @@ function EdgeStory({
 const meta = {
   component: F0GraphEdge,
   title: "Graph/F0GraphEdge",
-  tags: ["stable"],
+  tags: ["stable", "!autodocs"],
   parameters: {
     layout: "centered",
   },
