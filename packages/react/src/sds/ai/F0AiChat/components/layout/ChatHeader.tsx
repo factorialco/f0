@@ -21,6 +21,7 @@ import { filterNonRenderableMessages } from "../../internal-types"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { ChatHistoryDialog } from "../history/ChatHistoryDialog"
 import { CreditsPopover } from "./CreditsPopover"
+import { EmployeeCreditsPopover } from "./EmployeeCreditsPopover"
 
 export const ChatHeader = (props: HeaderProps) => {
   const { historyEnabled } = useAiChat()
@@ -97,7 +98,7 @@ const ChatHeaderWithHistory = (props: HeaderProps) => {
           )}
         </div>
         <motion.div className="flex shrink-0 items-center" {...props}>
-          <CreditsPopover />
+          <CreditsPopoverPicker />
           {!lockVisualizationMode && !isSmallScreen && (
             <ButtonInternal
               variant="ghost"
@@ -215,4 +216,16 @@ const ChatHeaderLegacy = (props: HeaderProps) => {
       </motion.div>
     </header>
   )
+}
+
+/**
+ * Picks the right credits popover to render based on which prop the host
+ * provided. `employeeCredits` (employee-only) takes precedence; otherwise
+ * falls back to the classic `credits` popover.
+ */
+const CreditsPopoverPicker = () => {
+  const { employeeCredits, credits } = useAiChat()
+  if (employeeCredits) return <EmployeeCreditsPopover />
+  if (credits) return <CreditsPopover />
+  return null
 }
