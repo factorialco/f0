@@ -44,13 +44,13 @@ import type { GraphCollectionProps } from "./types"
  * (`loadChildren` provided) requires the inverse, because paginated sources
  * are the contract that signals "the dataset is fetched in slices".
  */
-const EAGER_REQUIRES_NO_PAGINATION_MESSAGE =
+export const EAGER_REQUIRES_NO_PAGINATION_MESSAGE =
   'Graph visualization in eager mode requires a non-paginated data source (paginationType: "no-pagination" or omitted). Either set paginationType: "no-pagination" on the source, or provide a `loadChildren` option to use lazy mode.'
 
-const LAZY_REQUIRES_PAGINATION_MESSAGE =
+export const LAZY_REQUIRES_PAGINATION_MESSAGE =
   'Graph visualization: `loadChildren` requires a paginated data source (paginationType: "pages" or "infinite-scroll"). Either remove `loadChildren` to use eager mode, or switch the source to a paginated adapter.'
 
-const GROUPING_NOT_SUPPORTED_MESSAGE =
+export const GROUPING_NOT_SUPPORTED_MESSAGE =
   "Graph visualization does not support `grouping`. Remove `source.currentGrouping` or switch to a different visualization."
 
 /**
