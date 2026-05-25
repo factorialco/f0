@@ -11,47 +11,13 @@ import {
   Person as PersonIcon,
 } from "@/icons/app"
 import { getDisplayDateBasedOnDuration } from "@/lib/date"
-import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { withSkeleton } from "@/lib/skeleton"
-import { cn, focusRing } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
-import { useEffect, useId, useRef, useState } from "react"
 
 import { PostDescription, PostDescriptionProps } from "../PostDescription"
 import { PostEvent, PostEventProps } from "../PostEvent"
 import { isVideo } from "./video"
-
-const ExpandDescriptionButton = ({
-  describedBy,
-  controls,
-  expanded,
-  onClick,
-}: {
-  describedBy: string
-  controls: string
-  expanded: boolean
-  onClick: (event: React.MouseEvent<HTMLElement>) => void
-}) => {
-  const i18n = useI18n()
-
-  return (
-    <div className="text-base text-f1-foreground">
-      <button
-        type="button"
-        className={cn(
-          "inline cursor-pointer rounded-none border-0 bg-transparent p-0 text-base text-f1-foreground underline underline-offset-2 hover:text-f1-foreground-secondary",
-          focusRing()
-        )}
-        aria-controls={controls}
-        aria-describedby={describedBy}
-        aria-expanded={expanded}
-        onClick={onClick}
-      >
-        {i18n.actions.seeMore}
-      </button>
-    </div>
-  )
-}
 
 export type CommunityPostAction = {
   label?: string
@@ -101,8 +67,6 @@ export type CommunityPostProps = {
   noReactionsButton?: boolean
 
   dropdownItems?: DropdownItem[]
-
-  descriptionExpandable?: boolean
 }
 
 export const BaseCommunityPost = ({
@@ -122,26 +86,12 @@ export const BaseCommunityPost = ({
   actions,
   dropdownItems,
   noReactionsButton = false,
-  descriptionExpandable = false,
 }: CommunityPostProps) => {
-  const titleId = useId()
-  const descriptionId = useId()
-  const descriptionRef = useRef<HTMLDivElement>(null)
-  const [expandedDescription, setExpandedDescription] = useState<{
-    id: string
-    description: PostDescriptionProps["content"]
-  } | null>(null)
-  const [isDescriptionOverflowing, setIsDescriptionOverflowing] =
-    useState(false)
   const countersDisplay = [counters.views, counters.comments]
     .filter(Boolean)
     .join(" · ")
 
-  const descriptionExpanded =
-    descriptionExpandable &&
-    expandedDescription?.id === id &&
-    expandedDescription.description === description
-  const descriptionCollapsed = !descriptionExpanded
+  const collapsed = true
   const date = getDisplayDateBasedOnDuration(createdAt)
 
   const handleClick = () => {
@@ -155,49 +105,6 @@ export const BaseCommunityPost = ({
   const authorFullName = author
     ? `${author.firstName} ${author.lastName}`
     : undefined
-
-  const handleExpandDescription = (event: React.MouseEvent<HTMLElement>) => {
-    event.preventDefault()
-    event.stopPropagation()
-
-    if (!description) return
-
-    setExpandedDescription({ id, description })
-  }
-
-  useEffect(() => {
-    if (descriptionExpanded) {
-      descriptionRef.current?.focus()
-    }
-  }, [descriptionExpanded])
-
-  useEffect(() => {
-    if (!descriptionExpandable) setExpandedDescription(null)
-  }, [descriptionExpandable])
-
-  useEffect(() => {
-    const descriptionElement = descriptionRef.current
-
-    if (!descriptionExpandable || !descriptionElement || descriptionExpanded) {
-      setIsDescriptionOverflowing(false)
-      return
-    }
-
-    const updateDescriptionOverflow = () => {
-      setIsDescriptionOverflowing(
-        descriptionElement.scrollHeight > descriptionElement.clientHeight
-      )
-    }
-
-    updateDescriptionOverflow()
-
-    if (typeof ResizeObserver === "undefined") return
-
-    const resizeObserver = new ResizeObserver(updateDescriptionOverflow)
-    resizeObserver.observe(descriptionElement)
-
-    return () => resizeObserver.disconnect()
-  }, [descriptionExpandable, descriptionExpanded, description])
 
   return (
     <div
@@ -318,35 +225,15 @@ export const BaseCommunityPost = ({
           </span>
           <div className="flex min-w-0 flex-col gap-1 text-f1-foreground">
             <p
-              id={titleId}
               className={cn(
                 "text-xl font-semibold",
-                "line-clamp-2 break-words"
+                collapsed && "line-clamp-2 break-words"
               )}
             >
               {title}
             </p>
             {description && (
-              <>
-                <PostDescription
-                  ref={descriptionRef}
-                  id={descriptionId}
-                  content={description}
-                  collapsed={descriptionCollapsed}
-                  tabIndex={descriptionExpanded ? -1 : undefined}
-                  className={cn(descriptionExpanded && focusRing())}
-                />
-                {descriptionExpandable &&
-                  isDescriptionOverflowing &&
-                  !descriptionExpanded && (
-                    <ExpandDescriptionButton
-                      describedBy={titleId}
-                      controls={descriptionId}
-                      expanded={descriptionExpanded}
-                      onClick={handleExpandDescription}
-                    />
-                  )}
-              </>
+              <PostDescription content={description} collapsed={collapsed} />
             )}
           </div>
         </div>

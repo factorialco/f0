@@ -12,7 +12,16 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-const htmlContent = `<p><a href="https://cdn.memegenerator.es/imagenes/memes/full/32/48/32486607.jpg" class="mention" data-id="3" rel="noopener noreferrer" target="_blank">@Xavier Val Parejo</a> and <a href="https://cdn.memegenerator.es/imagenes/memes/full/32/48/32486607.jpg" class="mention" data-id="2" rel="noopener noreferrer" target="_blank">@Jacob Bamio Cordero</a> are trying to get fit so...</p>
+const htmlContent = `<p>
+  <a href="https://cdn.memegenerator.es/imagenes/memes/full/32/48/32486607.jpg" class="mention" data-id="3" rel="noopener noreferrer" target="_blank">
+    @Xavier Val Parejo
+  </a>
+  and
+  <a href="https://cdn.memegenerator.es/imagenes/memes/full/32/48/32486607.jpg" class="mention" data-id="2" rel="noopener noreferrer" target="_blank">
+    @Jacob Bamio Cordero
+  </a>
+  are trying to get fit so...
+</p>
 <p></p>
 <p>
   🌍 <strong>How to Register to Gympass?</strong>
@@ -46,10 +55,13 @@ const htmlContent = `<p><a href="https://cdn.memegenerator.es/imagenes/memes/ful
     </p>
   </li>
   <li>
-    <p><a href="https://cdn.memegenerator.es/imagenes/memes/full/32/48/32486607.jpg" class="mention" data-id="1" rel="noopener noreferrer" target="_blank">@Raúl Sigüenza Sánchez</a> (legacy mention markup, class only)</p>
-  </li>
-  <li>
-    <p><a href="https://cdn.memegenerator.es/imagenes/memes/full/32/48/32486607.jpg" class="mention bg-f1-background-secondary hover:bg-f1-background-secondary-hover !px-1.5 font-medium text-f1-foreground rounded-xs no-underline transition-colors focus:outline focus:outline-1 focus:outline-offset-1 focus:outline-f1-border-selected-bold" data-id="1" data-type="mention" rel="noopener noreferrer" target="_blank">@Raúl Sigüenza Sánchez</a> (new mention markup, recipe classes + data-type, matches Tiptap output)</p>
+    <p>
+      <mark>
+        <a href="https://cdn.memegenerator.es/imagenes/memes/full/32/48/32486607.jpg" class="mention" data-id="1" rel="noopener noreferrer" target="_blank">
+          @Raúl Sigüenza Sánchez
+        </a>
+      </mark>
+    </p>
   </li>
 </ul>
 <hr>

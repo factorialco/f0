@@ -37,17 +37,9 @@ const FormField = <
 }: ControllerProps<TFieldValues, TName>) => {
   const { formState } = useFormContext()
 
-  // Honor an explicit `disabled` prop from the caller; otherwise fall back
-  // to disabling while the form is submitting. This lets callers (e.g.
-  // F0Form's autosubmit mode) opt out of the submitting-disabled behavior
-  // by passing `disabled={false}` explicitly — otherwise the active input
-  // would be blurred mid-typing during a silent autosave.
   return (
     <FormFieldContext.Provider value={{ name: props.name }}>
-      <Controller
-        {...props}
-        disabled={props.disabled ?? formState.isSubmitting}
-      />
+      <Controller {...props} disabled={formState.isSubmitting} />
     </FormFieldContext.Provider>
   )
 }

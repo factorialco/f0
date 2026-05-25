@@ -1,9 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 
-import {
-  convertBackendMessage,
-  fetchThreadMessages,
-} from "../fetchThreadMessages"
+import { convertBackendMessage } from "../fetchThreadMessages"
 
 describe("convertBackendMessage", () => {
   it("converts a simple user text message", () => {
@@ -320,35 +317,5 @@ describe("convertBackendMessage", () => {
         mimeType: "application/pdf",
       },
     ])
-  })
-})
-
-describe("fetchThreadMessages", () => {
-  it("uses the provided runtime fetch", async () => {
-    const runtimeFetch = vi.fn().mockResolvedValue(
-      new Response(
-        JSON.stringify({
-          messages: [{ id: "msg_1", role: "user", content: "Hello" }],
-        }),
-        { status: 200 }
-      )
-    )
-
-    const messages = await fetchThreadMessages(
-      "https://api.example.com/copilotkit",
-      { "X-Test": "true" },
-      "thread-1",
-      undefined,
-      runtimeFetch
-    )
-
-    expect(runtimeFetch).toHaveBeenCalledWith(
-      "https://api.example.com/copilotkit/chat-history/threads/thread-1/messages",
-      {
-        credentials: "include",
-        headers: { "X-Test": "true" },
-      }
-    )
-    expect(messages).toEqual([{ id: "msg_1", role: "user", content: "Hello" }])
   })
 })

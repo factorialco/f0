@@ -44,8 +44,6 @@ export const SelectItem = <T extends string, R>({
               <F0TagRaw text={item.tag} />
             ) : item.tag.type === "dot" ? (
               <F0TagDot {...item.tag} />
-            ) : item.tag.type === "icon" ? (
-              <F0TagRaw text={item.tag.text} icon={item.tag.icon} />
             ) : (
               <F0TagPerson name={item.tag.name} src={item.tag.src} />
             )}

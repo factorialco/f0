@@ -180,7 +180,6 @@ const RowComponentInner = <
 
   const {
     hasItemActions,
-    hasMobileItemActions,
     primaryItemActions,
     dropdownItemActions,
     mobileDropdownItemActions,
@@ -223,8 +222,7 @@ const RowComponentInner = <
   const cellRenderedClass = CellRenderer
     ? cn(
         "h-[48px] p-0 align-middle last:pr-0",
-        !tableWithChildren &&
-          (fromVisualization === "editableTable" ? "first:pl-3" : "first:pl-0")
+        !tableWithChildren && "first:pl-0"
       )
     : undefined
 
@@ -360,23 +358,21 @@ const RowComponentInner = <
               </ItemActionsRowContainer>
             </td>
             {/** Mobile item actions */}
-            {hasMobileItemActions && (
-              <TableCell
-                key={`table-cell-${groupIndex}-${index}-actions`}
-                width={68}
-                sticky={{
-                  right: 0,
-                }}
-                href={itemHref}
-                className="table-cell md:hidden"
-                loading={loading}
-              >
-                <ItemActionsMobile
-                  items={mobileDropdownItemActions}
-                  onOpenChange={handleDropDownOpenChange}
-                />
-              </TableCell>
-            )}
+            <TableCell
+              key={`table-cell-${groupIndex}-${index}-actions`}
+              width={68}
+              sticky={{
+                right: 0,
+              }}
+              href={itemHref}
+              className="table-cell md:hidden"
+              loading={loading}
+            >
+              <ItemActionsMobile
+                items={mobileDropdownItemActions}
+                onOpenChange={handleDropDownOpenChange}
+              />
+            </TableCell>
           </>
         ))}
     </TableRow>

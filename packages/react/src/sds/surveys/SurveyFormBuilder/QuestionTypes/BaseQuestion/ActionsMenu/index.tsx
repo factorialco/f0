@@ -11,7 +11,6 @@ import {
   Ellipsis,
   Hub,
   LayersFront,
-  Plus,
 } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -32,7 +31,6 @@ import {
 import { useSurveyFormBuilderContext } from "../../../Context"
 import { RatingOptionType } from "../../../lib"
 import { QuestionType } from "../../../types"
-import { HiddenAction, HiddenActions } from "../types"
 import { RATING_OPTIONS, useQuestionActions } from "./useQuestionActions"
 
 const ToggleItem = ({
@@ -287,7 +285,6 @@ type ActionsMenuProps = {
   questionId: string
   questionType: QuestionType
   canDeleteQuestion?: boolean
-  hiddenActions?: HiddenActions
 }
 
 export function ActionsMenu({
@@ -296,7 +293,6 @@ export function ActionsMenu({
   questionId,
   questionType,
   canDeleteQuestion = true,
-  hiddenActions,
 }: ActionsMenuProps) {
   const { t } = useI18n()
 
@@ -308,14 +304,11 @@ export function ActionsMenu({
     currentRatingType,
     currentDatasetKey,
     isMultiSelectEnabled,
-    isAllowCreateEnabled,
-    datasetHasOnCreate,
     disallowOptionalQuestions,
     handleChangeRequired,
     handleSelectQuestionType,
     handleSelectRatingType,
     handleToggleMultiSelect,
-    handleToggleAllowCreate,
     handleDuplicate,
     handleDelete,
   } = useQuestionActions({
@@ -323,32 +316,6 @@ export function ActionsMenu({
     questionType,
     canDelete: canDeleteQuestion,
   })
-
-  const isHidden = (action: HiddenAction) =>
-    hiddenActions?.includes(action) ?? false
-
-  const showRequired = !disallowOptionalQuestions && !isHidden("required")
-  const showMultiSelect = !!currentDatasetKey && !isHidden("multiSelect")
-  const showAllowCreate =
-    !!currentDatasetKey &&
-    datasetHasOnCreate &&
-    questionType === "dropdown-single" &&
-    !isHidden("allowCreate")
-  const showQuestionType = !isHidden("questionType")
-  const showDuplicate = !isHidden("duplicate")
-  const showDelete = canDeleteQuestion && !isHidden("delete")
-
-  // Hide the trigger entirely if no action is available.
-  if (
-    !showRequired &&
-    !showMultiSelect &&
-    !showAllowCreate &&
-    !showQuestionType &&
-    !showDuplicate &&
-    !showDelete
-  ) {
-    return null
-  }
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -366,7 +333,7 @@ export function ActionsMenu({
         <DropdownMenuLabel className="p-4 pb-2 font-medium text-f1-foreground-secondary">
           {t("surveyFormBuilder.labels.questionOptions")}
         </DropdownMenuLabel>
-        {showRequired && (
+        {!disallowOptionalQuestions && (
           <DropdownMenuGroup>
             <ToggleItem
               label={t("surveyFormBuilder.labels.required")}
@@ -376,7 +343,7 @@ export function ActionsMenu({
             />
           </DropdownMenuGroup>
         )}
-        {showMultiSelect && (
+        {!!currentDatasetKey && (
           <DropdownMenuGroup>
             <ToggleItem
               label={t("surveyFormBuilder.labels.allowMultiSelection")}
@@ -386,54 +353,34 @@ export function ActionsMenu({
             />
           </DropdownMenuGroup>
         )}
-        {showAllowCreate && (
-          <DropdownMenuGroup>
-            <ToggleItem
-              label={t("surveyFormBuilder.labels.allowCreate")}
-              icon={Plus}
-              checked={isAllowCreateEnabled}
-              onChange={handleToggleAllowCreate}
+        <DropdownMenuGroup>
+          <QuestionTypeMenuItem
+            label={t("surveyFormBuilder.labels.questionType")}
+            value={questionType}
+            currentDatasetKey={currentDatasetKey}
+            questionTypes={questionTypes}
+            currentRatingType={currentRatingType}
+            isQuestionTypeAllowed={isQuestionTypeAllowed}
+            onSelectQuestionType={handleSelectQuestionType}
+            onSelectRatingType={handleSelectRatingType}
+          />
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <SimpleItem
+            label={t("surveyFormBuilder.actions.duplicateQuestion")}
+            icon={LayersFront}
+            onClick={handleDuplicate}
+          />
+          {canDeleteQuestion && (
+            <SimpleItem
+              label={t("surveyFormBuilder.actions.deleteQuestion")}
+              icon={Delete}
+              onClick={handleDelete}
+              critical
             />
-          </DropdownMenuGroup>
-        )}
-        {showQuestionType && (
-          <DropdownMenuGroup>
-            <QuestionTypeMenuItem
-              label={t("surveyFormBuilder.labels.questionType")}
-              value={questionType}
-              currentDatasetKey={currentDatasetKey}
-              questionTypes={questionTypes}
-              currentRatingType={currentRatingType}
-              isQuestionTypeAllowed={isQuestionTypeAllowed}
-              onSelectQuestionType={handleSelectQuestionType}
-              onSelectRatingType={handleSelectRatingType}
-            />
-          </DropdownMenuGroup>
-        )}
-        {(showRequired ||
-          showMultiSelect ||
-          showAllowCreate ||
-          showQuestionType) &&
-          (showDuplicate || showDelete) && <DropdownMenuSeparator />}
-        {(showDuplicate || showDelete) && (
-          <DropdownMenuGroup>
-            {showDuplicate && (
-              <SimpleItem
-                label={t("surveyFormBuilder.actions.duplicateQuestion")}
-                icon={LayersFront}
-                onClick={handleDuplicate}
-              />
-            )}
-            {showDelete && (
-              <SimpleItem
-                label={t("surveyFormBuilder.actions.deleteQuestion")}
-                icon={Delete}
-                onClick={handleDelete}
-                critical
-              />
-            )}
-          </DropdownMenuGroup>
-        )}
+          )}
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   )

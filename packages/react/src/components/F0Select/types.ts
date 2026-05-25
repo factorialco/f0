@@ -29,7 +29,6 @@ export type { FiltersState, OnSelectItemsCallback, SelectedItemsState }
  * Base props shared across all F0Select variants
  */
 type F0SelectBaseProps<T extends string, R = unknown> = {
-  withApplySelection?: boolean
   onChangeSelectedOption?: (
     option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined,
     checked: boolean
@@ -44,8 +43,6 @@ type F0SelectBaseProps<T extends string, R = unknown> = {
   searchEmptyMessage?: string
   className?: string
   actions?: Action[]
-  /** Callback to create a new item from the current search text. When provided, a "+ Create" button is shown in the empty state of the dropdown. */
-  onCreate?: (value: string) => Promise<void> | void
   /** Container element to render the portal content into */
   portalContainer?: HTMLElement | null
   /**
@@ -59,14 +56,6 @@ type F0SelectBaseProps<T extends string, R = unknown> = {
    * @default false
    */
   showPreview?: boolean
-  /**
-   * When true, preserves selections when the dataset changes (search, filters,
-   * or sortings). Useful for picker components where the user searches and
-   * filters to find items to add to an existing selection.
-   *
-   * @default true
-   */
-  preserveSelectionOnDatasetChange?: boolean
 } & WithDataTestIdProps
 
 /**
@@ -183,7 +172,6 @@ export type F0SelectTagProp =
   | string
   | { type: "dot"; text: string; color: NewColor }
   | { type: "person"; name: string; src?: string }
-  | { type: "icon"; text: string; icon: IconType }
 
 export type F0SelectItemObject<T, R = unknown> = {
   type?: "item"

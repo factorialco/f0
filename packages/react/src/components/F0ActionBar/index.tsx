@@ -30,7 +30,6 @@ type ActionType = {
   disabled?: boolean
   critical?: boolean
   description?: string
-  loading?: boolean
 }
 
 export type ActionBarGroup = {
@@ -309,10 +308,6 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
       [props.primaryActions]
     )
 
-    const hasLoadingAction = primaryActions.some((g) =>
-      g.items.some((i) => i.loading)
-    )
-
     /**
      * Transforms the normalized primary actions into a format suitable for dropdown components.
      * Each action group and its items are mapped to the expected dropdown item structure.
@@ -420,8 +415,7 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
                         ;(action as ActionType)?.onClick?.()
                       }}
                       size="lg"
-                      disabled={isInteractionDisabled || hasLoadingAction}
-                      loading={hasLoadingAction}
+                      disabled={isInteractionDisabled}
                     />
                   ) : (
                     <F0Button
@@ -431,9 +425,7 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
                       disabled={
                         isInteractionDisabled || singlePrimaryAction.disabled
                       }
-                      loading={
-                        singlePrimaryAction.loading ?? status === "loading"
-                      }
+                      loading={status === "loading"}
                       size="lg"
                     />
                   )}
@@ -470,8 +462,7 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
                           const action = getActionByValue(value)
                           ;(action as ActionType)?.onClick?.()
                         }}
-                        disabled={isInteractionDisabled || hasLoadingAction}
-                        loading={hasLoadingAction}
+                        disabled={isInteractionDisabled}
                       />
                     </>
                   ) : (
@@ -482,9 +473,7 @@ const _F0ActionBar = forwardRef<F0ActionBarRef, F0ActionBarProps>(
                       disabled={
                         isInteractionDisabled || singlePrimaryAction.disabled
                       }
-                      loading={
-                        singlePrimaryAction.loading ?? status === "loading"
-                      }
+                      loading={status === "loading"}
                     />
                   )}
                 </Fragment>

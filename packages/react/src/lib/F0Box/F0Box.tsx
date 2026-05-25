@@ -13,14 +13,12 @@ import {
   flexDefaults,
   flexVariants,
   gridVariants,
-  insetVariants,
   marginDefaults,
   marginVariants,
   overflowDefaults,
   overflowVariants,
   paddingDefaults,
   paddingVariants,
-  zIndexVariants,
 } from "./utils"
 import {
   resolveResponsiveClasses,
@@ -32,7 +30,6 @@ const boxVariants = cva({
   base: "",
   variants: {
     ...displayVariants,
-    ...insetVariants,
     ...paddingVariants,
     ...marginVariants,
     ...flexVariants,
@@ -42,7 +39,6 @@ const boxVariants = cva({
     ...borderVariants,
     ...overflowVariants,
     ...dividerVariants,
-    ...zIndexVariants,
   },
   defaultVariants: {
     ...paddingDefaults,
@@ -80,11 +76,6 @@ export const F0Box = forwardRef<HTMLDivElement, F0BoxProps>(
       // Display & Position
       display,
       position,
-      top,
-      right,
-      bottom,
-      left,
-      zIndex,
       // Padding
       padding,
       paddingX,
@@ -179,11 +170,6 @@ export const F0Box = forwardRef<HTMLDivElement, F0BoxProps>(
           boxVariants({
             display,
             position,
-            top,
-            right,
-            bottom,
-            left,
-            zIndex,
             padding,
             paddingX,
             paddingY,

@@ -1,6 +1,5 @@
-import type { Config } from "tailwindcss"
-
 import { baseConfig } from "@factorialco/f0-core/tailwind"
+import type { Config } from "tailwindcss"
 
 export default {
   ...baseConfig,
@@ -16,10 +15,6 @@ export default {
     ...baseConfig.theme,
     extend: {
       ...baseConfig.theme?.extend,
-      maxWidth: {
-        ...baseConfig.theme?.extend?.maxWidth,
-        content: "712px",
-      },
       keyframes: {
         ...baseConfig.theme?.extend?.keyframes,
         "rotate-gradient": {

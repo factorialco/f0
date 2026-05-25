@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { useDeepCompareMemoize } from "use-deep-compare-effect"
+import { useCallback, useEffect, useMemo, useState } from "react"
 
 import {
   DataError,
@@ -42,10 +41,7 @@ type LaneProviderProps<
   >
   lane: Lane<Filters>
   onError?: (error: DataError) => void
-  onHookUpdate?: (
-    laneId: string | symbol,
-    value: UseDataCollectionData<R>
-  ) => void
+  onHookUpdate?: (value: UseDataCollectionData<R>) => void
 }
 
 const LaneProvider = <
@@ -102,7 +98,7 @@ const LaneProvider = <
   } = hook
 
   useEffect(() => {
-    onHookUpdate?.(lane.id, {
+    onHookUpdate?.({
       data,
       search,
       setSearch,
@@ -132,7 +128,6 @@ const LaneProvider = <
     hookMergedFilters,
     summaries,
     onHookUpdate,
-    lane.id,
   ])
 
   return null
@@ -169,71 +164,48 @@ export function useDataCollectionLanesData<
     Record<string | symbol, UseDataCollectionData<R>>
   >({})
 
-  const pendingLaneUpdatesRef = useRef<
-    Record<string | symbol, UseDataCollectionData<R>>
-  >({})
-  const flushScheduledRef = useRef(false)
-  // Initialized to false; the mount effect sets it to true. This prevents
-  // StrictMode's mount → cleanup → remount cycle from leaving the ref in a
-  // permanently-false state and silently dropping queued updates.
-  const isMountedRef = useRef(false)
-
-  useEffect(() => {
-    isMountedRef.current = true
-    return () => {
-      isMountedRef.current = false
-    }
-  }, [])
-
-  // Stable wrapper around `options.onError` so passing it down to LaneProvider
-  // does not invalidate the lanesProvider memo when the caller's callback
-  // identity changes.
-  const onErrorRef = useRef(options.onError)
-  useEffect(() => {
-    onErrorRef.current = options.onError
-  })
-  const stableOnError = useCallback((error: DataError) => {
-    onErrorRef.current?.(error)
-  }, [])
-
   const handleHookUpdate = useCallback(
     (laneId: string | symbol, value: UseDataCollectionData<R>) => {
-      pendingLaneUpdatesRef.current[laneId] = value
-      if (flushScheduledRef.current) return
-      flushScheduledRef.current = true
-      queueMicrotask(() => {
-        const pending = pendingLaneUpdatesRef.current
-        pendingLaneUpdatesRef.current = {}
-        flushScheduledRef.current = false
-        if (!isMountedRef.current) return
-        setLanesHooks((prev) => ({ ...prev, ...pending }))
-      })
+      setLanesHooks((prev) => ({ ...prev, [laneId]: value }))
     },
     []
   )
 
-  // Plain-data fields are deep-compared so the memo only rebuilds when
-  // content actually changes. Function/adapter fields fall back to reference
-  // equality — callers must stabilize them (useDataSource already does this
-  // for dataAdapter).
-  const lanesProviderDeps = {
-    lanes,
-    currentFilters: source.currentFilters,
-    currentNavigationFilters: source.currentNavigationFilters,
-    currentSortings: source.currentSortings,
-    currentGrouping: source.currentGrouping,
-    currentSearch: source.currentSearch,
-    grouping: source.grouping,
-    summaries: source.summaries,
-    dataAdapter: source.dataAdapter,
-    itemPreFilter: source.itemPreFilter,
-  }
+  const lanesSignature = useMemo(() => JSON.stringify(lanes), [lanes])
+  const currentFiltersSignature = useMemo(
+    () => JSON.stringify(source.currentFilters),
+    [source.currentFilters]
+  )
+  const currentNavigationFiltersSignature = useMemo(
+    () => JSON.stringify(source.currentNavigationFilters),
+    [source.currentNavigationFilters]
+  )
+  const currentSortingsSignature = useMemo(
+    () => JSON.stringify(source.currentSortings),
+    [source.currentSortings]
+  )
+  const currentGroupingSignature = useMemo(
+    () => JSON.stringify(source.currentGrouping),
+    [source.currentGrouping]
+  )
+  const currentSearchSignature = useMemo(
+    () => JSON.stringify(source.currentSearch),
+    [source.currentSearch]
+  )
+  const groupingSignature = useMemo(
+    () => JSON.stringify(source.grouping),
+    [source.grouping]
+  )
 
-  const lanesProviderDepsMemoized = useDeepCompareMemoize(lanesProviderDeps)
+  // Track dataAdapter changes to force refetch when cache updates
+  const dataAdapterSignature = useMemo(
+    () => JSON.stringify(source.dataAdapter),
+    [source.dataAdapter]
+  )
 
   const lanesProvider = useMemo(
-    () =>
-      (lanes || []).map((lane) => (
+    () => {
+      return (lanes || []).map((lane) => (
         <LaneProvider<
           R,
           Filters,
@@ -242,15 +214,27 @@ export function useDataCollectionLanesData<
           NavigationFilters,
           Grouping
         >
-          key={String(lane.id)}
+          key={lane.id}
           lane={lane}
-          onError={stableOnError}
+          onError={options.onError}
           source={source}
-          onHookUpdate={handleHookUpdate}
-        />
-      )),
+          onHookUpdate={(value) => handleHookUpdate(lane.id, value)}
+        ></LaneProvider>
+      ))
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [lanesProviderDepsMemoized]
+    [
+      // TODO check why source ref is updated always
+      lanesSignature,
+      handleHookUpdate,
+      currentFiltersSignature,
+      currentNavigationFiltersSignature,
+      currentSortingsSignature,
+      currentGroupingSignature,
+      currentSearchSignature,
+      groupingSignature,
+      dataAdapterSignature, // Include dataAdapter to detect cache updates
+    ]
   )
 
   return {

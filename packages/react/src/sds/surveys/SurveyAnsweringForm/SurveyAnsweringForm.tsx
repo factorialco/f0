@@ -3,15 +3,15 @@ import { useCallback, useRef, useState, useMemo } from "react"
 import type { DialogPosition } from "@/patterns/F0Dialog/types"
 import type { F0FormSubmitResult } from "@/patterns/F0Form/types"
 
-import { OneEmptyState } from "@/components/OneEmptyState"
-import { ArrowLeft, ArrowRight, Maximize, Minimize } from "@/icons/app"
 import { F0Box } from "@/lib/F0Box"
-import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { F0Form } from "@/patterns/F0Form/F0Form"
 import { useF0Form } from "@/patterns/F0Form/useF0Form"
 import { ResourceHeader } from "@/patterns/ResourceHeader"
+import { OneEmptyState } from "@/components/OneEmptyState"
+import { ArrowLeft, ArrowRight, Maximize, Minimize } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
+import { cn } from "@/lib/utils"
 import { ProgressBarCell } from "@/ui/value-display/types/progressBar"
 
 import type {
@@ -277,6 +277,9 @@ function SurveyAnsweringFormDialog({
 
   const showSectionHeader =
     isStepped && !!stepper.currentQuestion?.sectionTitle && !loading
+
+  const shouldCenterContent = (!hasQuestions && !loading) || isStepped
+
   const disableContentPadding =
     position === "center" || position === "fullscreen"
 
@@ -301,8 +304,9 @@ function SurveyAnsweringFormDialog({
       >
         <div
           className={cn(
-            "relative flex h-full min-h-full flex-col @container",
-            isStepped && !isFullscreen && "min-h-[600px]"
+            "relative flex min-h-full flex-col @container",
+            isStepped && !isFullscreen && "min-h-[600px]",
+            shouldCenterContent && "h-full"
           )}
         >
           {showTableOfContent && (
@@ -319,7 +323,10 @@ function SurveyAnsweringFormDialog({
           )}
           <div
             className={cn(
-              "mx-auto flex w-full flex-1 justify-center flex-col @lg:w-[750px] max-w-full pt-0",
+              "mx-auto flex w-full flex-col @lg:w-[750px] max-w-full",
+              mode === "all-questions" && !shouldCenterContent
+                ? "justify-start"
+                : "flex-1 justify-center",
               disableContentPadding && "px-4 py-12"
             )}
           >

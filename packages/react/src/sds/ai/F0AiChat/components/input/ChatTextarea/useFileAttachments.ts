@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
 
@@ -6,16 +6,10 @@ import { type AiChatFileAttachmentConfig } from "../../../types"
 import { type AttachedFile } from "./types"
 import { filterByMimeType } from "./file-utils"
 
-const TRANSIENT_ERROR_MS = 4000
-
 export function useFileAttachments(
   fileAttachments: AiChatFileAttachmentConfig | undefined
 ) {
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([])
-  const [transientError, setTransientError] = useState<string | null>(null)
-  const transientErrorTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  )
   const fileInputRef = useRef<HTMLInputElement>(null)
   const translation = useI18n()
 
@@ -32,47 +26,17 @@ export function useFileAttachments(
   const isAtMaxFiles =
     maxFiles !== undefined && attachedFiles.length >= maxFiles
 
-  const showTransientError = useCallback((message: string) => {
-    if (transientErrorTimeoutRef.current) {
-      clearTimeout(transientErrorTimeoutRef.current)
-    }
-    setTransientError(message)
-    transientErrorTimeoutRef.current = setTimeout(() => {
-      setTransientError(null)
-      transientErrorTimeoutRef.current = null
-    }, TRANSIENT_ERROR_MS)
-  }, [])
-
-  useEffect(
-    () => () => {
-      if (transientErrorTimeoutRef.current) {
-        clearTimeout(transientErrorTimeoutRef.current)
-      }
-    },
-    []
-  )
-
   const processFiles = useCallback(
     async (rawFiles: File[]) => {
       if (rawFiles.length === 0 || !onUploadFiles) return
 
-      const files = filterByMimeType(rawFiles, allowedMimeTypes)
+      let files = filterByMimeType(rawFiles, allowedMimeTypes)
       if (files.length === 0) return
 
-      // Reject the whole batch when it would exceed the cap — surfacing a
-      // transient banner is friendlier than silently truncating the user's
-      // selection.
-      if (
-        maxFiles !== undefined &&
-        attachedFiles.length + files.length > maxFiles
-      ) {
-        showTransientError(
-          translation.ai.tooManyFilesError.replace(
-            "{{maxFiles}}",
-            String(maxFiles)
-          )
-        )
-        return
+      if (maxFiles !== undefined) {
+        const remaining = maxFiles - attachedFiles.length
+        if (remaining <= 0) return
+        files = files.slice(0, remaining)
       }
 
       const newAttached: AttachedFile[] = files.map((file) => ({
@@ -118,15 +82,7 @@ export function useFileAttachments(
         )
       }
     },
-    [
-      onUploadFiles,
-      maxFiles,
-      attachedFiles.length,
-      allowedMimeTypes,
-      translation.ai.tooManyFilesError,
-      translation.ai.fileUploadError,
-      showTransientError,
-    ]
+    [onUploadFiles, maxFiles, attachedFiles.length, allowedMimeTypes]
   )
 
   const handleFileSelect = useCallback(
@@ -151,11 +107,9 @@ export function useFileAttachments(
     onUploadFiles,
     acceptValue,
     isAtMaxFiles,
-    maxFiles,
     processFiles,
     handleFileSelect,
     handleRemoveFile,
     clearFiles,
-    transientError,
   }
 }

@@ -178,10 +178,6 @@ const meta: Meta = {
       description:
         "Function to handle the change event. Returns the value of the selected option, and the item object if it exists",
     },
-    withApplySelection: {
-      description:
-        "When true in multi-select mode, selection changes are staged until Apply is clicked. Clicking Apply confirms the selection through `onChange`, while clicking outside or Cancel discards the staged changes.",
-    },
     actions: {
       description:
         "<p>List of action buttons that will be displayed at the bottom of the select dropdown. Each action should have a label, onClick handler, optional icon, and variant.</p>" +
@@ -448,45 +444,6 @@ export const WithPersonTags: Story = {
         label: "Inactive",
         icon: Appearance,
         tag: "Disabled",
-      },
-    ],
-  },
-}
-
-export const WithIconTags: Story = {
-  args: {
-    label: "Select a theme",
-    placeholder: "Select a theme",
-    onChange: fn(),
-    options: [
-      {
-        value: "light",
-        label: "Light",
-        description: "Bright workspace theme",
-        tag: {
-          type: "icon",
-          text: "Light",
-          icon: Circle,
-        },
-      },
-      {
-        value: "dark",
-        label: "Dark",
-        description: "Low-light interface theme",
-        tag: {
-          type: "icon",
-          text: "Dark",
-          icon: Appearance,
-        },
-      },
-      {
-        value: "system",
-        label: "System",
-        tag: {
-          type: "icon",
-          text: "System",
-          icon: Desktop,
-        },
       },
     ],
   },
@@ -972,61 +929,6 @@ export const MultiplePaginatedWithPreview: Story = {
   },
 }
 
-export const MultiplePaginatedWithApply: Story = {
-  args: {
-    label: "Select Team Members",
-    placeholder: "Search employees...",
-    multiple: true,
-    value: ["3", "42", "500", "1200"],
-    defaultItem: (() => {
-      const ids = [42, 500, 1200]
-      return ids
-        .map((id) => {
-          const emp = getEmployeeById(id)
-          return emp
-            ? {
-                value: emp.value,
-                label: emp.label,
-                avatar: emp.avatar,
-              }
-            : null
-        })
-        .filter(Boolean)
-    })(),
-    clearable: true,
-    showSearchBox: true,
-    source: employeeNestedPaginatedSource,
-    mapOptions: (item: Employee) => ({
-      value: item.value,
-      label: item.label,
-      avatar: item.avatar,
-    }),
-    onChange: fn((selectionStatus) => {
-      console.log("selectionStatus", selectionStatus)
-    }),
-    withApplySelection: true,
-  },
-}
-
-export const MultipleWithApply: Story = {
-  args: {
-    label: "Select Team Members",
-    placeholder: "Search employees...",
-    multiple: true,
-    value: ["2", "5"],
-    clearable: true,
-    showSearchBox: true,
-    source: employeeNonPaginatedSource,
-    mapOptions: (item: Employee) => ({
-      value: item.value,
-      label: item.label,
-      avatar: item.avatar,
-      description: `${item.jobTitle} · ${item.departmentName}`,
-    }),
-    withApplySelection: true,
-  },
-}
-
 /**
  * Multiple selection with paginated data (2,847 employees).
  * Use `defaultItem` to provide labels for pre-selected values not in the first page.
@@ -1123,65 +1025,6 @@ export const MultipleManualSelectionOnly: Story = {
 }
 
 /**
- * Multi-select with preserved selections (default behavior).
- *
- * Selections persist across search and filter changes — the normal
- * selector workflow. Try this:
- * 1. Select a few employees
- * 2. Type in the search box to filter
- * 3. Select another employee from the filtered results
- * 4. Clear the search — all selections are still there
- * 5. Use a filter (e.g. department) — selections still preserved
- */
-export const MultiplePreserveSelections: Story = {
-  args: {
-    label: "Preserve Selections (default)",
-    placeholder: "Search employees...",
-    multiple: true,
-    clearable: true,
-    showSearchBox: true,
-    source: employeeNestedPaginatedSource,
-    mapOptions: (item: Employee) => ({
-      value: item.value,
-      label: item.label,
-      avatar: item.avatar,
-      description: `${item.jobTitle} · ${item.departmentName}`,
-    }),
-    onSelectItems: fn((selectionStatus) => {
-      console.log("selectionStatus", selectionStatus)
-    }),
-  },
-}
-
-/**
- * Multi-select that clears selections on dataset changes.
- *
- * When `preserveSelectionOnDatasetChange` is false, selections are
- * cleared whenever the user searches, filters, or sorts. Try the
- * same workflow as above — selections will be lost on each change.
- */
-export const MultipleClearSelectionsOnDatasetChange: Story = {
-  args: {
-    label: "Clear Selections on change",
-    placeholder: "Search employees...",
-    multiple: true,
-    clearable: true,
-    showSearchBox: true,
-    preserveSelectionOnDatasetChange: false,
-    source: employeeNestedPaginatedSource,
-    mapOptions: (item: Employee) => ({
-      value: item.value,
-      label: item.label,
-      avatar: item.avatar,
-      description: `${item.jobTitle} · ${item.departmentName}`,
-    }),
-    onSelectItems: fn((selectionStatus) => {
-      console.log("selectionStatus", selectionStatus)
-    }),
-  },
-}
-
-/**
  * Single select with paginated data and filters.
  * Use `defaultItem` to provide label for pre-selected value not in the first page.
  * Filter by department, office, or legal entity to narrow down results.
@@ -1242,29 +1085,6 @@ export const WithCustomTrigger: Story = {
       </div>
     </F0Select>
   ),
-}
-
-export const WithOnCreate: Story = {
-  args: {
-    label: "Select Employee",
-    placeholder: "Search employees...",
-    showSearchBox: true,
-    onChange: fn(),
-    source: employeeNonPaginatedSource,
-    mapOptions: (item: Employee) => ({
-      value: item.value,
-      label: item.label,
-      avatar: item.avatar,
-      description: `${item.jobTitle} · ${item.departmentName}`,
-    }),
-    onCreate: (_value: string) => {
-      return new Promise<void>((resolve) => {
-        setTimeout(() => {
-          resolve()
-        }, 500)
-      })
-    },
-  },
 }
 
 export const Snapshot: Story = {

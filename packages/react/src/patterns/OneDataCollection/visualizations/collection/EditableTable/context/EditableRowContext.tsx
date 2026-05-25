@@ -10,7 +10,6 @@ import {
 } from "react"
 
 import type { RecordType } from "@/hooks/datasource"
-
 import { useI18n } from "@/lib/providers/i18n"
 
 type EditableRowContextValue<R extends RecordType> = {
@@ -22,8 +21,6 @@ type EditableRowContextValue<R extends RecordType> = {
   cellLoading: Record<string, boolean>
   /** Update a single field and notify the parent via onCellChange */
   handleCellChange: (columnId: string, value: unknown) => void
-  /** Apply multiple field updates at once, then call onCellChange once */
-  batchCellChanges: (updates: Record<string, unknown>) => void
 }
 
 // React's createContext does not support per-usage generics.
@@ -63,7 +60,6 @@ export function EditableRowProvider<R extends RecordType>({
   const handleCellChange = useCallback(
     (columnId: string, value: unknown) => {
       const updatedItem = { ...localItemRef.current, [columnId]: value } as R
-      localItemRef.current = updatedItem
 
       setLocalItem(updatedItem)
 
@@ -99,75 +95,9 @@ export function EditableRowProvider<R extends RecordType>({
     [onCellChange, t]
   )
 
-  const batchCellChanges = useCallback(
-    (updates: Record<string, unknown>) => {
-      const columnIds = Object.keys(updates)
-      if (columnIds.length === 0) return
-
-      const updatedItem = { ...localItemRef.current, ...updates } as R
-      localItemRef.current = updatedItem
-
-      setLocalItem(updatedItem)
-
-      setCellErrors((prev) => {
-        const next = { ...prev }
-        let changed = false
-        for (const id of columnIds) {
-          if (id in next) {
-            delete next[id]
-            changed = true
-          }
-        }
-        return changed ? next : prev
-      })
-
-      const loadingOn: Record<string, boolean> = {}
-      for (const id of columnIds) {
-        loadingOn[id] = true
-      }
-      setCellLoading((prev) => ({ ...prev, ...loadingOn }))
-
-      onCellChange(updatedItem)
-        .then((errors) => {
-          if (errors && Object.keys(errors).length > 0) {
-            setCellErrors((prev) => ({ ...prev, ...errors }))
-          }
-        })
-        .catch((error: unknown) => {
-          const msg =
-            error instanceof Error
-              ? error.message
-              : t("collections.editableTable.errors.saveFailed")
-          setCellErrors((prev) => {
-            const next = { ...prev }
-            for (const id of columnIds) {
-              next[id] = msg
-            }
-            return next
-          })
-        })
-        .finally(() => {
-          setCellLoading((prev) => {
-            const next = { ...prev }
-            for (const id of columnIds) {
-              next[id] = false
-            }
-            return next
-          })
-        })
-    },
-    [onCellChange, t]
-  )
-
   return (
     <EditableRowContext.Provider
-      value={{
-        localItem,
-        cellErrors,
-        cellLoading,
-        handleCellChange,
-        batchCellChanges,
-      }}
+      value={{ localItem, cellErrors, cellLoading, handleCellChange }}
     >
       {children}
     </EditableRowContext.Provider>

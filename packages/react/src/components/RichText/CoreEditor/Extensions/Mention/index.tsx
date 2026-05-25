@@ -1,14 +1,7 @@
 import Mention from "@tiptap/extension-mention"
 
-import { mentionFocusableClasses } from "@/lib/recipes"
-import { cn } from "@/lib/utils"
 import { createSuggestionConfig } from "./suggestion"
 import { MentionedUser, MentionsConfig } from "./types"
-
-// Legacy class kept for backward compatibility with already-stored content
-// and for any external CSS still targeting `a.mention`. New content emitted
-// by the editor carries both the legacy class and the shared recipe classes.
-const LEGACY_MENTION_CLASS = "mention"
 
 const CustomMention = Mention.extend({
   addAttributes() {
@@ -33,7 +26,7 @@ export const createMentionExtensions = (
   return [
     CustomMention.configure({
       HTMLAttributes: {
-        class: LEGACY_MENTION_CLASS,
+        class: "mention",
       },
       renderHTML({ options, node }) {
         return [
@@ -42,13 +35,12 @@ export const createMentionExtensions = (
             onclick:
               "if(this.closest('.ProseMirror')?.getAttribute('contenteditable') === 'true') { event.preventDefault(); }",
             href: node.attrs.href || "#",
-            class: cn(options.HTMLAttributes.class, mentionFocusableClasses),
+            class: options.HTMLAttributes.class,
             "data-id": node.attrs.id,
-            "data-type": "mention",
             rel: "noopener noreferrer",
             target: "_blank",
           },
-          `${options.suggestion.char ?? "@"}${node.attrs.label}`,
+          `${node.attrs.label}`,
         ]
       },
       suggestion: createSuggestionConfig(

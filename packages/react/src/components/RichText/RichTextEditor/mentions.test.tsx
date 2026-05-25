@@ -112,7 +112,7 @@ describe("RichTextEditor mentions", () => {
         (node) => node.textContent
       )
 
-      expect(mentionLabels).toEqual(["@Alice", "@Bob", "@Alice", "@Dave"])
+      expect(mentionLabels).toEqual(["Alice", "Bob", "Alice", "Dave"])
       expect(editor.querySelectorAll("p").length).toBeGreaterThanOrEqual(2)
     })
   })

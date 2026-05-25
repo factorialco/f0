@@ -59,10 +59,6 @@ const getStoredChatWidth = (): number => {
  * (see ApplicationFrame), reading in the `useState` initializer naturally
  * handles a delayed activation of `ai.enabled`: as soon as the provider
  * mounts, the persisted state is applied.
- *
- * On first visit (no stored value), defaults to open so the chat is
- * discoverable. Subsequent visits respect the user's last choice, which is
- * persisted by the effect below.
  */
 const getStoredChatOpen = (fallback: boolean): boolean => {
   if (typeof window === "undefined") return fallback
@@ -70,7 +66,7 @@ const getStoredChatOpen = (fallback: boolean): boolean => {
     CHAT_OPEN_STORAGE_KEY,
     null
   )
-  if (typeof stored !== "boolean") return true
+  if (typeof stored !== "boolean") return fallback
   return stored
 }
 
@@ -106,15 +102,12 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   VoiceMode,
   entityRefs,
   canvasActions,
-  canvasEntities,
   toolHints,
   credits,
   fileAttachments,
   onThumbsDown,
   onThumbsUp,
   tracking,
-  onBeforeSendMessage,
-  runtimeFetch = fetch,
   ...rest
 }) => {
   const [footer, setFooter] = useState<ReactNode | undefined>(initialFooter)
@@ -356,32 +349,26 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     setChatWidth(DEFAULT_CHAT_WIDTH)
   }
 
-  const sendMessage: AiChatProviderReturnValue["sendMessage"] = (message) => {
+  const sendMessage = (message: string | Message) => {
     if (!sendMessageFunctionRef.current) {
       return
     }
 
-    void (async () => {
-      if (onBeforeSendMessage && (await onBeforeSendMessage()) === false) {
-        return
-      }
+    // Ensure chat is open when sending a message
+    if (!open) {
+      setOpen(true)
+    }
 
-      // Ensure chat is open when sending a message
-      if (!open) {
-        setOpen(true)
-      }
+    const messageToSend: Message =
+      typeof message === "string"
+        ? {
+            id: randomId(),
+            role: "user",
+            content: message,
+          }
+        : message
 
-      const messageToSend: Message =
-        typeof message === "string"
-          ? {
-              id: randomId(),
-              role: "user",
-              content: message,
-            }
-          : message
-
-      sendMessageFunctionRef.current?.(messageToSend)
-    })()
+    sendMessageFunctionRef.current?.(messageToSend)
   }
 
   useEffect(() => {
@@ -486,11 +473,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setChatWidth,
         resetChatWidth,
         tracking,
-        onBeforeSendMessage,
-        runtimeFetch,
         entityRefs,
         canvasActions,
-        canvasEntities,
         toolHints,
         credits,
         fileAttachments,
@@ -572,11 +556,8 @@ export function useAiChat(): AiChatProviderReturnValue {
       setChatWidth: noopFn,
       resetChatWidth: noopFn,
       tracking: undefined,
-      onBeforeSendMessage: undefined,
-      runtimeFetch: fetch,
       entityRefs: undefined,
       canvasActions: undefined,
-      canvasEntities: undefined,
       toolHints: undefined,
       credits: undefined,
       creditWarning: undefined,

@@ -93,19 +93,6 @@ const ClarifyingQuestionContent = ({
   const canProceed =
     hasSelection || (isCustomAnswerActive && hasCustomText) || optional === true
 
-  // In single-select mode, auto-advance on selection when this is not the
-  // last step — avoids requiring an explicit "Next" click. Only advance when
-  // the toggle results in a selection (not a deselect).
-  const handleToggleOption = (optionId: string) => {
-    const isDeselecting =
-      mode === "single" && selectedOptionIds.includes(optionId)
-    toggleOption(optionId)
-    if (mode === "single" && !isFinalStep && !isDeselecting) {
-      // Defer confirm() until after toggleOption's synchronous work completes.
-      Promise.resolve().then(confirm)
-    }
-  }
-
   const confirmButtonLabel = isFinalStep
     ? translation.ai.clarifyingQuestion.submit
     : translation.ai.clarifyingQuestion.next
@@ -156,7 +143,6 @@ const ClarifyingQuestionContent = ({
               canProceed={canProceed}
               onBack={back}
               onNext={confirm}
-              onCancel={cancel}
             />
 
             <OptionsList
@@ -171,7 +157,8 @@ const ClarifyingQuestionContent = ({
               isCustomAnswerActive={isCustomAnswerActive}
               canProceed={canProceed}
               customInputRef={customInputRef}
-              onToggleOption={handleToggleOption}
+              autoFocus
+              onToggleOption={toggleOption}
               onActivateCustom={handleActivateCustom}
               onChangeCustomText={setCustomAnswerText}
               onToggleCustomActive={setCustomAnswerActive}

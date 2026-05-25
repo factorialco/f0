@@ -10,7 +10,3 @@ export type {
   WithDataTestIdPropsOf,
   WithDataTestIdReturnType,
 } from "./lib/data-testid"
-export type {
-  HourDistributionCellValue,
-  HourDistributionDataPoint,
-} from "./ui/value-display/types/hourDistribution"

@@ -2,10 +2,9 @@ import type { RecordType, SortingsDefinition } from "@/hooks/datasource"
 
 import type { SummariesDefinition } from "../../../../summary"
 import type { CellRendererProps } from "../../Table/types"
-import type { EditableTableColumnDefinition } from "../types"
-
 import { editableCellMap } from "../consts"
 import { useEditableRow } from "../context/EditableRowContext"
+import type { EditableTableColumnDefinition } from "../types"
 import { NonEditableCell } from "./cells/status/NonEditableCell"
 
 /**
@@ -51,13 +50,7 @@ export function EditableCellRenderer<
     return <>{children}</>
   }
 
-  const {
-    localItem,
-    cellErrors,
-    cellLoading,
-    handleCellChange,
-    batchCellChanges,
-  } = editableCtx
+  const { localItem, cellErrors, cellLoading, handleCellChange } = editableCtx
   const editableColumn = column as EditableTableColumnDefinition<
     R,
     Sortings,
@@ -68,32 +61,9 @@ export function EditableCellRenderer<
 
   const hasId = editableColumn.id !== undefined
 
-  const onChange = (
-    value: string | null,
-    context?: { selectedItem?: RecordType }
-  ) => {
+  const onChange = (value: string | null) => {
     if (editableColumn.id !== undefined) {
-      const formula = editableColumn.formula
-
-      if (formula) {
-        const formulaUpdates: Record<string, unknown> = {}
-
-        formula({
-          value,
-          item: localItem,
-          selectedItem: context?.selectedItem,
-          setCellValue: (columnId, nextValue) => {
-            formulaUpdates[columnId] = nextValue
-          },
-        })
-
-        batchCellChanges({
-          [editableColumn.id]: value,
-          ...formulaUpdates,
-        })
-      } else {
-        handleCellChange(editableColumn.id, value)
-      }
+      handleCellChange(editableColumn.id, value)
     }
   }
 
@@ -125,7 +95,6 @@ export function EditableCellRenderer<
             isLastColumn={isLastColumn}
             loading={loading}
             onChange={onChange}
-            hint={editableColumn.cellHint?.(localItem)}
           />
         </div>
       )

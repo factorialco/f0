@@ -10,7 +10,7 @@ import { F0Heading } from "../index"
 const meta = {
   component: F0Heading,
   title: "Heading",
-  tags: ["!autodocs", "stable"],
+  tags: ["autodocs", "stable"],
   argTypes: {
     variant: {
       options: ["heading", "heading-large"],
@@ -54,7 +54,6 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
-  tags: ["!dev"],
   args: {
     variant: "heading",
     content: "This is a heading",
@@ -74,7 +73,6 @@ export const WithDataTestId: Story = {
 }
 
 export const Variants: Story = {
-  tags: ["!dev"],
   args: {
     content: "",
   },
@@ -104,7 +102,6 @@ export const HeadingAlignment: Story = {
 }
 
 export const HeadingEllipsis: Story = {
-  tags: ["!dev"],
   parameters: {
     chromatic: { disableSnapshot: true },
   },
@@ -124,7 +121,6 @@ export const HeadingEllipsis: Story = {
 }
 
 export const Snapshot: Story = {
-  tags: ["!dev"],
   parameters: withSnapshot({}),
   args: {
     content: "",

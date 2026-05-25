@@ -1,6 +1,5 @@
 import { cva } from "cva"
 
-import { mentionClasses } from "@/lib/recipes"
 import { cn } from "@/lib/utils"
 
 const baseButton =
@@ -60,7 +59,10 @@ export const actionVariants = cva({
         "text-f1-foreground underline decoration-f1-border-hover decoration-1 underline-offset-[5px] visited:text-f1-foreground hover:text-f1-foreground hover:decoration-f1-border-bold active:text-f1-foreground"
       ),
       unstyled: cn(baseLink, "text-inherit no-underline"),
-      mention: cn(baseLink, mentionClasses),
+      mention: cn(
+        baseLink,
+        "bg-f1-background-accent !px-1.5 font-medium text-f1-foreground-accent"
+      ),
       selected: cn(
         baseButton,
         "bg-f1-background-selected text-f1-icon-selected shadow-none hover:bg-f1-background-selected-hover hover:text-f1-icon-selected-hover hover:shadow-[0_2px_6px_-1px_rgba(13,22,37,.04),inset_0_-2px_4px_rgba(13,22,37,.04)]",
@@ -187,7 +189,7 @@ export const iconVariants = cva({
     {
       variant: "mention",
       mode: "default",
-      class: "[&_svg:not([data-has-color])]:text-f1-icon",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon-accent",
     },
     {
       variant: "unstyled",
@@ -240,6 +242,11 @@ export const iconVariants = cva({
       variant: "unstyled",
       mode: "only",
       class: "[&_svg:not([data-has-color])]:text-f1-icon",
+    },
+    {
+      variant: "mention",
+      mode: "default",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon-accent",
     },
     {
       variant: "ai",

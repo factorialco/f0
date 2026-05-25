@@ -8,7 +8,6 @@ export type DropdownSingleQuestionOnChangeParams =
     datasetKey?: string
     showSearchBox?: boolean
     searchBoxPlaceholder?: string
-    allowCreate?: boolean
   }
 
 export type DropdownSingleQuestionProps =
@@ -18,5 +17,4 @@ export type DropdownSingleQuestionProps =
     value?: string | null
     showSearchBox?: boolean
     searchBoxPlaceholder?: string
-    allowCreate?: boolean
   }

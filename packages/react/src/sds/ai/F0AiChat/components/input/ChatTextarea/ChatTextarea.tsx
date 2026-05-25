@@ -1,7 +1,6 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
-import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -79,13 +78,11 @@ export const ChatTextarea = ({
     pendingQuote,
     setPendingQuote,
     setProcessDroppedFilesFunction,
-    onBeforeSendMessage,
   } = useAiChat()
   const translation = useI18n()
   const shouldReduceMotion = useReducedMotion()
   const [inputValue, setInputValue] = useState("")
   const [cursorPosition, setCursorPosition] = useState(0)
-  const [isPreSending, setIsPreSending] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const highlightRef = useRef<HTMLDivElement>(null)
@@ -98,12 +95,10 @@ export const ChatTextarea = ({
     onUploadFiles,
     acceptValue,
     isAtMaxFiles,
-    maxFiles,
     processFiles,
     handleFileSelect,
     handleRemoveFile,
     clearFiles,
-    transientError,
   } = useFileAttachments(fileAttachments)
 
   const mentions = useMentions({
@@ -159,7 +154,7 @@ export const ChatTextarea = ({
   const isUploading = attachedFiles.some((f) => f.status === "uploading")
   const hasDataToSend = inputValue.trim().length > 0
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     // When clarifying, form submit is a no-op — the panel handles its own confirm
@@ -168,19 +163,7 @@ export const ChatTextarea = ({
     mentions.close()
     if (inProgress) {
       handleStop()
-    } else if (hasDataToSend && !isUploading && !isPreSending) {
-      if (onBeforeSendMessage) {
-        setIsPreSending(true)
-        try {
-          if ((await onBeforeSendMessage()) === false) {
-            textareaRef.current?.focus()
-            return
-          }
-        } finally {
-          setIsPreSending(false)
-        }
-      }
-
+    } else if (hasDataToSend && !isUploading) {
       const transformed = mentions.transformMentions(inputValue.trim())
       // Escape markdown/HTML in the user's own text so `*hola*` stays literal
       // and only features we control (quote blockquote, @mentions, tool
@@ -358,38 +341,6 @@ export const ChatTextarea = ({
                 />
               )}
 
-              <AnimatePresence initial={false}>
-                {transientError && (
-                  <motion.div
-                    key="transient-error"
-                    role="alert"
-                    aria-live="polite"
-                    className="p-1"
-                    initial={{ opacity: 0, y: -4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -4 }}
-                    transition={{
-                      duration: shouldReduceMotion ? 0 : 0.2,
-                      ease: "easeOut",
-                    }}
-                  >
-                    <div
-                      className={cn(
-                        "flex w-full flex-row items-center gap-2 rounded-md p-2 pr-3",
-                        "bg-f1-background-critical text-f1-foreground"
-                      )}
-                    >
-                      <div className="h-6 w-6 flex-shrink-0">
-                        <F0AvatarAlert type="critical" size="sm" />
-                      </div>
-                      <p className="font-medium text-f1-foreground-critical">
-                        {transientError}
-                      </p>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
               <AttachedFilesList
                 attachedFiles={attachedFiles}
                 isUploading={isUploading}
@@ -419,7 +370,6 @@ export const ChatTextarea = ({
               <ActionBar
                 onUploadFiles={onUploadFiles}
                 isAtMaxFiles={isAtMaxFiles}
-                maxFiles={maxFiles}
                 acceptValue={acceptValue}
                 fileInputRef={fileInputRef}
                 handleFileSelect={handleFileSelect}
@@ -429,7 +379,6 @@ export const ChatTextarea = ({
                 inProgress={inProgress}
                 hasDataToSend={hasDataToSend}
                 isUploading={isUploading}
-                isPreSending={isPreSending}
                 submitLabel={submitLabel}
               />
             </motion.div>

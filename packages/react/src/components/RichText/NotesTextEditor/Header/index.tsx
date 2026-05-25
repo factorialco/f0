@@ -4,10 +4,7 @@ import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { OneEllipsis } from "@/lib/OneEllipsis"
-import {
-  HeaderSecondaryAction,
-  isSecondaryDropdownAction,
-} from "@/experimental/Information/Headers/BaseHeader"
+import { HeaderSecondaryAction } from "@/experimental/Information/Headers/BaseHeader"
 import {
   Metadata,
   MetadataItem,
@@ -98,33 +95,18 @@ const Header = ({
           {metadata && metadata.length > 0 && <Metadata items={metadata} />}
           <div className="flex flex-shrink-0 flex-row items-center gap-2">
             {hasOtherActions && <Dropdown items={visibleOtherActions} />}
-            {visibleSecondaryActions.map((action, index) =>
-              isSecondaryDropdownAction(action) ? (
-                <F0ButtonDropdown
-                  key={index}
-                  items={action.items}
-                  onClick={action.onClick}
-                  variant={action.variant ?? "outline"}
-                  value={action.value}
-                  size="md"
-                  disabled={action.disabled}
-                  tooltip={action.tooltip}
-                  loading={action.loading}
-                />
-              ) : (
-                <F0Button
-                  key={index}
-                  onClick={action.onClick}
-                  variant={action.variant || "outline"}
-                  label={action.label}
-                  icon={action.icon}
-                  hideLabel={action.hideLabel}
-                  disabled={action.disabled}
-                  tooltip={action.tooltip}
-                  loading={action.loading}
-                />
-              )
-            )}
+            {visibleSecondaryActions.map((action, index) => (
+              <F0Button
+                key={index}
+                onClick={action.onClick}
+                variant={action.variant || "outline"}
+                label={action.label}
+                icon={action.icon}
+                hideLabel={action.hideLabel}
+                disabled={action.disabled}
+                tooltip={action.tooltip}
+              />
+            ))}
             {isPrimaryActionVisible &&
               (hasSecondaryActions || hasOtherActions) && (
                 <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />

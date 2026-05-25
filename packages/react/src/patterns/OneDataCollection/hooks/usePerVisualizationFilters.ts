@@ -21,12 +21,6 @@ type UsePerVisualizationFiltersArgs<Filters extends FiltersDefinition> = {
   >
   visualizations: ReadonlyArray<VisualizationWithFilterOverrides<Filters>>
   currentVisualization: number
-  /**
-   * Identity of the underlying storage scope (typically the collection `id`).
-   * Used to reset hydration locks so a re-mount-free collection swap reapplies
-   * the new scope's persisted filters instead of being stuck on the first one.
-   */
-  storageKey?: string
 }
 
 type UsePerVisualizationFiltersResult<Filters extends FiltersDefinition> = {
@@ -41,8 +35,13 @@ type UsePerVisualizationFiltersResult<Filters extends FiltersDefinition> = {
   hasPerVisualizationFilters: boolean
 }
 
-const isPlainObject = (v: unknown): v is Record<string, unknown> =>
-  typeof v === "object" && v !== null && !Array.isArray(v)
+const hasAnyVisualizationFilters = <Filters extends FiltersDefinition>(
+  visualizations: ReadonlyArray<VisualizationWithFilterOverrides<Filters>>
+): boolean => {
+  return visualizations.some(
+    (viz) => viz.filters !== undefined || viz.presets !== undefined
+  )
+}
 
 // Index-based key (visualization type can repeat)
 const getVisualizationKey = (index: number): string => String(index)
@@ -72,42 +71,9 @@ const getDefaultFiltersForVisualization = <Filters extends FiltersDefinition>(
 }
 
 /**
- * Filter keys a viz may own; falls back to the source schema. Returns null
- * when no schema is known (caller should preserve the entry as-is).
- */
-const getOwnedFilterKeys = <Filters extends FiltersDefinition>(
-  vizIndex: number,
-  visualizations: ReadonlyArray<VisualizationWithFilterOverrides<Filters>>,
-  sourceFilters: Filters | undefined
-): Set<string> | null => {
-  const viz = visualizations[vizIndex]
-  if (viz?.filters) return new Set(Object.keys(viz.filters))
-  if (sourceFilters) return new Set(Object.keys(sourceFilters))
-  return null
-}
-
-/** Drop keys a viz does not own from a stored entry. */
-const sanitizeStoredEntryForViz = <Filters extends FiltersDefinition>(
-  vizIndex: number,
-  entry: FiltersState<Filters>,
-  visualizations: ReadonlyArray<VisualizationWithFilterOverrides<Filters>>,
-  sourceFilters: Filters | undefined
-): FiltersState<Filters> => {
-  if (!isPlainObject(entry)) return {} as FiltersState<Filters>
-  const allowed = getOwnedFilterKeys(vizIndex, visualizations, sourceFilters)
-  if (!allowed) return entry
-  const sanitized: Record<string, unknown> = {}
-  for (const [key, value] of Object.entries(entry as Record<string, unknown>)) {
-    if (allowed.has(key)) sanitized[key] = value
-  }
-  return sanitized as FiltersState<Filters>
-}
-
-/**
- * Manages independent filter state per visualization. Per-viz scoping is on
- * whenever `visualizations.length > 1`: each viz gets its own currentFilters
- * slot in storage, and switching viz saves the previous viz's filters and
- * restores the new viz's.
+ * Manages independent filter state per visualization.
+ * Pass-through when no visualization declares overrides. Otherwise each
+ * view gets its own currentFilters, and switching saves/restores state.
  */
 export const usePerVisualizationFilters = <Filters extends FiltersDefinition>({
   sourceFilters,
@@ -116,12 +82,10 @@ export const usePerVisualizationFilters = <Filters extends FiltersDefinition>({
   sourceSetCurrentFilters,
   visualizations,
   currentVisualization,
-  storageKey,
 }: UsePerVisualizationFiltersArgs<Filters>): UsePerVisualizationFiltersResult<Filters> => {
-  const hasPerVisualization = visualizations.length > 1
-
-  const hasAnyOverrides = visualizations.some(
-    (viz) => viz.filters !== undefined || viz.presets !== undefined
+  const hasOverrides = useMemo(
+    () => hasAnyVisualizationFilters(visualizations),
+    [visualizations]
   )
 
   const [visualizationFiltersMap, setVisualizationFiltersMap] = useState<
@@ -142,33 +106,8 @@ export const usePerVisualizationFilters = <Filters extends FiltersDefinition>({
   const prevSourceFiltersRef =
     useRef<FiltersState<Filters>>(sourceCurrentFilters)
 
-  // Always-current refs for use inside callbacks with stable identity
-  // (e.g. setAllVisualizationFilters runs after storage hydration on every
-  // scope reset and must see the latest schema, not the captured one).
-  const visualizationsRef = useRef(visualizations)
-  visualizationsRef.current = visualizations
-
-  const sourceFiltersRef = useRef(sourceFilters)
-  sourceFiltersRef.current = sourceFilters
-
-  // Storage scope reset: when the underlying storage key (e.g. collection id)
-  // changes, useDataCollectionStorage will rehydrate with a different blob.
-  // Reset hydration locks and clear the persisted map so setAllVisualizationFilters
-  // accepts the next payload instead of being stuck on the previous scope.
-  useLayoutEffect(() => {
-    initializedRef.current = false
-    appliedInitRef.current = false
-    pendingFiltersRef.current = null
-    prevVisualizationRef.current = currentVisualization
-    prevSourceFiltersRef.current = sourceCurrentFilters
-    setVisualizationFiltersMap((prev) =>
-      Object.keys(prev).length > 0 ? {} : prev
-    )
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: only react to storage scope changes
-  }, [storageKey])
-
   // Synchronous transition detection
-  if (hasPerVisualization && appliedInitRef.current) {
+  if (hasOverrides && appliedInitRef.current) {
     const prevKey = getVisualizationKey(prevVisualizationRef.current)
     const nextKey = getVisualizationKey(currentVisualization)
 
@@ -196,7 +135,7 @@ export const usePerVisualizationFilters = <Filters extends FiltersDefinition>({
   // One-shot: apply stored filters for the active viz after storage restoration.
   // Uses layout effect to avoid stale closure over currentVisualization.
   useLayoutEffect(() => {
-    if (!hasPerVisualization) return
+    if (!hasOverrides) return
     if (!initializedRef.current) return
     if (appliedInitRef.current) return
 
@@ -212,12 +151,12 @@ export const usePerVisualizationFilters = <Filters extends FiltersDefinition>({
     )
     appliedInitRef.current = true
     // eslint-disable-next-line react-hooks/exhaustive-deps -- One-shot initialization after storage restore
-  }, [hasPerVisualization, currentVisualization, visualizationFiltersMap])
+  }, [hasOverrides, currentVisualization, visualizationFiltersMap])
 
   // Save previous viz's filters, restore new viz's filters on switch.
   // Layout effect ensures filters apply before paint (no stale frame for children).
   useLayoutEffect(() => {
-    if (!hasPerVisualization) return
+    if (!hasOverrides) return
 
     if (initializedRef.current && !appliedInitRef.current) {
       // Skip storage-driven viz changes (init effect hasn't run yet)
@@ -248,10 +187,10 @@ export const usePerVisualizationFilters = <Filters extends FiltersDefinition>({
 
     prevVisualizationRef.current = currentVisualization
     // eslint-disable-next-line react-hooks/exhaustive-deps -- Only react to visualization changes
-  }, [currentVisualization, hasPerVisualization])
+  }, [currentVisualization, hasOverrides])
 
   const effectiveFilters = useMemo(() => {
-    if (!hasAnyOverrides) return sourceFilters
+    if (!hasOverrides) return sourceFilters
 
     const viz = visualizations[currentVisualization]
     if (viz?.filters) {
@@ -259,12 +198,12 @@ export const usePerVisualizationFilters = <Filters extends FiltersDefinition>({
     }
 
     return sourceFilters
-  }, [hasAnyOverrides, sourceFilters, visualizations, currentVisualization])
+  }, [hasOverrides, sourceFilters, visualizations, currentVisualization])
 
   // Viz presets replace source presets entirely.
   // If only filters overridden, source presets filtered to matching keys.
   const effectivePresets = useMemo(() => {
-    if (!hasAnyOverrides) return sourcePresets
+    if (!hasOverrides) return sourcePresets
 
     const viz = visualizations[currentVisualization]
     const vizPresets = viz?.presets
@@ -287,165 +226,43 @@ export const usePerVisualizationFilters = <Filters extends FiltersDefinition>({
 
     return sourcePresets
   }, [
-    hasPerVisualization,
+    hasOverrides,
     sourcePresets,
     visualizations,
     currentVisualization,
     effectiveFilters,
-    hasAnyOverrides,
   ])
 
   const allVisualizationFilters = useMemo(() => {
-    if (!hasPerVisualization) return {}
+    if (!hasOverrides) return {}
 
     const currentKey = getVisualizationKey(currentVisualization)
-    if (currentKey in visualizationFiltersMap) return visualizationFiltersMap
-
-    // Don't auto-seed mid-transition: sourceCurrentFilters is still the previous viz's value.
-    if (prevVisualizationRef.current !== currentVisualization) {
-      return visualizationFiltersMap
+    return {
+      ...visualizationFiltersMap,
+      [currentKey]: sourceCurrentFilters,
     }
-
-    return { ...visualizationFiltersMap, [currentKey]: sourceCurrentFilters }
   }, [
-    hasPerVisualization,
+    hasOverrides,
     visualizationFiltersMap,
     currentVisualization,
     sourceCurrentFilters,
   ])
 
-  // Mirror "bypass" source-filter changes into the persisted map for the
-  // active viz. Without this, updates that arrive through paths other than
-  // the wrapped `setCurrentFilters` (e.g. controlled `currentFilters` prop
-  // sync inside useDataSource, direct external `dataSource.setCurrentFilters`
-  // calls) would never reach `visualizationFiltersMap` once the slot was
-  // populated, leaving storage and `onStateChange.visualizationFilters`
-  // stale for the active viz.
-  //
-  // Detection uses a deep-compare baseline tracked per-visualization. On a
-  // viz switch we re-establish the baseline without mirroring (the
-  // transition layout effect is responsible for that frame). On subsequent
-  // renders within the same viz, a deep change in `sourceCurrentFilters`
-  // signals an external bypass write and is reflected into the map.
-  const sourceTrackerRef = useRef<{ viz: number; json: string }>({
-    viz: currentVisualization,
-    json: JSON.stringify(sourceCurrentFilters),
-  })
-
-  useLayoutEffect(() => {
-    if (!hasPerVisualization) return
-    if (!appliedInitRef.current) return
-
-    const tracker = sourceTrackerRef.current
-
-    // Viz changed: re-baseline and let the transition effect own this frame.
-    if (tracker.viz !== currentVisualization) {
-      sourceTrackerRef.current = {
-        viz: currentVisualization,
-        json: JSON.stringify(sourceCurrentFilters),
-      }
-      return
-    }
-
-    const json = JSON.stringify(sourceCurrentFilters)
-    if (json === tracker.json) return
-    tracker.json = json
-
-    const currentKey = getVisualizationKey(currentVisualization)
-    setVisualizationFiltersMap((prev) => {
-      const existing = prev[currentKey]
-      if (existing === sourceCurrentFilters) return prev
-      if (existing !== undefined && JSON.stringify(existing) === json) {
-        return prev
-      }
-      return { ...prev, [currentKey]: sourceCurrentFilters }
-    })
-  }, [hasPerVisualization, currentVisualization, sourceCurrentFilters])
-
-  // Mirror stable filter changes into the persisted map for the active viz.
-  const setCurrentFilters: React.Dispatch<
-    React.SetStateAction<FiltersState<Filters>>
-  > = useCallback(
-    (updater) => {
-      if (!hasPerVisualization) {
-        sourceSetCurrentFilters(updater)
-        return
-      }
-
-      const currentKey = getVisualizationKey(currentVisualization)
-
-      if (typeof updater === "function") {
-        const fnUpdater = updater as (
-          prev: FiltersState<Filters>
-        ) => FiltersState<Filters>
-        sourceSetCurrentFilters((prev) => {
-          const next = fnUpdater(prev)
-          setVisualizationFiltersMap((mapPrev) => {
-            if (mapPrev[currentKey] === next) return mapPrev
-            return { ...mapPrev, [currentKey]: next }
-          })
-          return next
-        })
-      } else {
-        sourceSetCurrentFilters(updater)
-        setVisualizationFiltersMap((mapPrev) => {
-          if (mapPrev[currentKey] === updater) return mapPrev
-          return { ...mapPrev, [currentKey]: updater }
-        })
-      }
-    },
-    [hasPerVisualization, sourceSetCurrentFilters, currentVisualization]
-  )
-
-  // Restore from storage. Runs every time storage hydrates (the storageKey
-  // reset effect clears `initializedRef` when the scope changes), but ignores
-  // repeated calls within the same scope.
-  //
-  // `visualizations` and `sourceFilters` are read through refs because the
-  // callback identity is stable but it can fire mid-session after a scope
-  // reset, when the captured-at-mount values would be stale.
+  // Restore from storage; no-op after first call
   const setAllVisualizationFilters = useCallback(
     (states: Record<string, FiltersState<Filters>>) => {
       if (initializedRef.current) return
       initializedRef.current = true
 
-      const currentVisualizations = visualizationsRef.current
-      const currentSourceFilters = sourceFiltersRef.current
-
-      const safeStates = isPlainObject(states as unknown)
-        ? (states as unknown as Record<string, unknown>)
-        : {}
-      const sanitized: Record<string, FiltersState<Filters>> = {}
-      for (const [key, entry] of Object.entries(safeStates)) {
-        const safeEntry = isPlainObject(entry)
-          ? (entry as FiltersState<Filters>)
-          : ({} as FiltersState<Filters>)
-        const idx = Number(key)
-        if (
-          Number.isInteger(idx) &&
-          idx >= 0 &&
-          idx < currentVisualizations.length
-        ) {
-          sanitized[key] = sanitizeStoredEntryForViz(
-            idx,
-            safeEntry,
-            currentVisualizations,
-            currentSourceFilters
-          )
-        } else {
-          sanitized[key] = safeEntry
-        }
-      }
-
-      setVisualizationFiltersMap(sanitized)
+      setVisualizationFiltersMap(states)
     },
     []
   )
 
-  if (!hasPerVisualization) {
+  if (!hasOverrides) {
     return {
-      effectiveFilters,
-      effectivePresets,
+      effectiveFilters: sourceFilters,
+      effectivePresets: sourcePresets,
       currentFilters: sourceCurrentFilters,
       setCurrentFilters: sourceSetCurrentFilters,
       allVisualizationFilters: {},
@@ -460,7 +277,7 @@ export const usePerVisualizationFilters = <Filters extends FiltersDefinition>({
     effectiveFilters,
     effectivePresets,
     currentFilters: activeCurrentFilters,
-    setCurrentFilters,
+    setCurrentFilters: sourceSetCurrentFilters,
     allVisualizationFilters,
     setAllVisualizationFilters,
     hasPerVisualizationFilters: true,

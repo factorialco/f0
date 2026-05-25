@@ -44,7 +44,6 @@ type ComputeResponse = {
 type ApiConfig = {
   baseUrl: string
   headers: Record<string, string>
-  runtimeFetch?: typeof fetch
 }
 
 // ---------------------------------------------------------------------------
@@ -109,7 +108,6 @@ export function useDashboardCompute(
       const controller = new AbortController()
       const cfg = configRef.current
       const api = apiConfigRef.current
-      const runtimeFetch = api.runtimeFetch ?? fetch
 
       // Convert filterValues to string[]
       const stringFilterValues: Record<string, string[]> = {}
@@ -136,7 +134,7 @@ export function useDashboardCompute(
           : undefined,
       }
 
-      const promise = runtimeFetch(`${api.baseUrl}/dashboard/compute`, {
+      const promise = fetch(`${api.baseUrl}/dashboard/compute`, {
         method: "POST",
         credentials: "include",
         headers: {

@@ -40,7 +40,6 @@ export function useSelectable<
   isSearchActive = false,
   allPagesSelection,
   resetOnPageChange = true,
-  preserveSelectionOnDatasetChange = false,
 }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<
   R,
   Filters
@@ -345,18 +344,7 @@ export function useSelectable<
   )
 
   /**
-   * Merges external selected state with local state, preserving user selections.
-   *
-   * In multi-selection mode, the merge is additive: items already checked locally
-   * are preserved when the external `selectedState` arrives (needed for
-   * paginated/infinite-scroll selections that span pages not yet known to the
-   * controlling parent).
-   *
-   * In single-selection mode, the external `selectedState` is treated as the full
-   * source of truth: items that were checked locally but are no longer present in
-   * the new external state are unchecked. This guarantees that programmatic
-   * updates from the controlling selection source are reflected in the displayed
-   * selection.
+   * Merges external selected state with local state, preserving user selections
    */
   const updateLocalSelectedState = useCallback(
     (selectedState: SelectedItemsState<R> | undefined) => {
@@ -368,17 +356,8 @@ export function useSelectable<
           SelectedItemState<R>
         >()
 
-        const newItemIds = new Set(newSelectedState.items?.keys() || [])
-
         for (const [id, itemState] of current.items?.entries() || []) {
-          if (!isMultiSelection && !newItemIds.has(id) && itemState.checked) {
-            // Single-select: external state is source of truth.
-            // Item is no longer checked externally, so uncheck it locally.
-            // Only clone when actually flipping to avoid unnecessary refs.
-            mergedItems.set(id, { ...itemState, checked: false })
-          } else {
-            mergedItems.set(id, itemState)
-          }
+          mergedItems.set(id, itemState)
         }
 
         for (const [
@@ -398,21 +377,6 @@ export function useSelectable<
             mergedItems.set(itemStateId, {
               ...existingItem,
               item,
-              // Single-select: external `checked` wins over stale local state.
-              ...(isMultiSelection ? {} : { checked: itemState.checked }),
-            })
-          } else if (
-            !isMultiSelection &&
-            existingItem.checked !== itemState.checked
-          ) {
-            // Single-select: external `checked` wins over stale local state.
-            // Only clone when actually flipping; otherwise the entry stored
-            // in loop 1 already has the right shape and keeping the same
-            // reference avoids spurious re-renders / re-emits in consumers
-            // that compare `selectedState` deeply.
-            mergedItems.set(itemStateId, {
-              ...existingItem,
-              checked: itemState.checked,
             })
           }
         }
@@ -446,13 +410,7 @@ export function useSelectable<
         }
       })
     },
-    [
-      data.records,
-      getSelectable,
-      allSelectedCheck,
-      getItemById,
-      isMultiSelection,
-    ]
+    [data.records, getSelectable, allSelectedCheck, getItemById]
   )
 
   // Selection Handlers (Internal)
@@ -767,10 +725,7 @@ export function useSelectable<
       // When disableSelectAll is true, maintain the selection even when the
       // dataset changes because the user is manually selecting items and
       // expects them to persist across soft reloads.
-      // When preserveSelectionOnDatasetChange is true, never clear on dataset
-      // changes — used by selectors where search/filter is for finding items
-      // to add to an existing selection.
-      if (!disableSelectAll && !preserveSelectionOnDatasetChange) {
+      if (!disableSelectAll) {
         // Mark that we're clearing due to a dataset-identity change to prevent
         // the data-sync effect from restoring selections.
         justClearedByDatasetChange.current = true
@@ -786,7 +741,6 @@ export function useSelectable<
     debouncedCurrentSearch,
     clearSelectedItems,
     disableSelectAll,
-    preserveSelectionOnDatasetChange,
   ])
 
   // Clear selections when page changes, unless the user has triggered

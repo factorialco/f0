@@ -6,7 +6,7 @@ import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { IconType } from "@/components/F0Icon"
 import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
 
-import type { CanvasActions, CanvasEntityDefinition } from "./canvas/types"
+import type { CanvasActions } from "./canvas/types"
 import type { ChatDashboardConfig } from "./canvas/entities/dashboard/types"
 import type { DataDownloadDataset } from "./actions/core/dataDownload/types"
 export type { PersonProfile } from "./components/markdownRenderers/entityRef/entities/person/types"
@@ -100,11 +100,7 @@ export type CanvasContentBase = {
 export type DashboardCanvasContent = CanvasContentBase & {
   type: "dashboard"
   config: ChatDashboardConfig
-  apiConfig: {
-    baseUrl: string
-    headers: Record<string, string>
-    runtimeFetch?: typeof fetch
-  }
+  apiConfig: { baseUrl: string; headers: Record<string, string> }
   /** Present when the dashboard is a pre-saved dashboard */
   savedDashboardId?: string
   /** Category of the saved dashboard */
@@ -296,14 +292,6 @@ export type AiChatProviderProps = {
    */
   canvasActions?: CanvasActions
   /**
-   * Canvas entity definitions keyed by `CanvasContent["type"]`. The canvas
-   * panel looks up the matching definition when `openCanvas` is called.
-   *
-   * F0AiChat ships without built-in canvas entities; the host app supplies
-   * them here so canvas logic lives in one place.
-   */
-  canvasEntities?: Record<string, CanvasEntityDefinition>
-  /**
    * Available tool hints that the user can activate to provide intent context
    * to the AI. Renders a selector button next to the send button.
    * Only one tool hint can be active at a time.
@@ -332,14 +320,6 @@ export type AiChatProviderProps = {
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
   tracking?: AiChatTrackingOptions
-  /**
-   * Optional hook called before a user message is sent. Return false to block submission.
-   */
-  onBeforeSendMessage?: () => boolean | Promise<boolean>
-  /**
-   * Optional fetch implementation for AI runtime requests owned by F0.
-   */
-  runtimeFetch?: typeof fetch
 } & Pick<
   CopilotKitProps,
   | "agent"

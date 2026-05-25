@@ -116,9 +116,5 @@ export const mockDatasets: SurveyDatasets = {
       value: String(item.id),
       label: String(item.name),
     }),
-    onCreate: (value: string) => {
-      const id = value.toLowerCase().replace(/\s+/g, "-")
-      return Promise.resolve({ id, name: value })
-    },
   },
 }

@@ -82,30 +82,6 @@ export const RESPONSIVE_SAFELIST = [
   "lg:static", "lg:relative", "lg:absolute", "lg:fixed", "lg:sticky",
   "xl:static", "xl:relative", "xl:absolute", "xl:fixed", "xl:sticky",
 
-  // ===================== INSET (none=0, xs=1, sm=2, md=3, lg=4, xl=6, 2xl=8, 3xl=10, 4xl=12, 5xl=16) =====================
-  "sm:top-0", "sm:top-1", "sm:top-2", "sm:top-3", "sm:top-4", "sm:top-6", "sm:top-8", "sm:top-10", "sm:top-12", "sm:top-16",
-  "sm:right-0", "sm:right-1", "sm:right-2", "sm:right-3", "sm:right-4", "sm:right-6", "sm:right-8", "sm:right-10", "sm:right-12", "sm:right-16",
-  "sm:bottom-0", "sm:bottom-1", "sm:bottom-2", "sm:bottom-3", "sm:bottom-4", "sm:bottom-6", "sm:bottom-8", "sm:bottom-10", "sm:bottom-12", "sm:bottom-16",
-  "sm:left-0", "sm:left-1", "sm:left-2", "sm:left-3", "sm:left-4", "sm:left-6", "sm:left-8", "sm:left-10", "sm:left-12", "sm:left-16",
-  "md:top-0", "md:top-1", "md:top-2", "md:top-3", "md:top-4", "md:top-6", "md:top-8", "md:top-10", "md:top-12", "md:top-16",
-  "md:right-0", "md:right-1", "md:right-2", "md:right-3", "md:right-4", "md:right-6", "md:right-8", "md:right-10", "md:right-12", "md:right-16",
-  "md:bottom-0", "md:bottom-1", "md:bottom-2", "md:bottom-3", "md:bottom-4", "md:bottom-6", "md:bottom-8", "md:bottom-10", "md:bottom-12", "md:bottom-16",
-  "md:left-0", "md:left-1", "md:left-2", "md:left-3", "md:left-4", "md:left-6", "md:left-8", "md:left-10", "md:left-12", "md:left-16",
-  "lg:top-0", "lg:top-1", "lg:top-2", "lg:top-3", "lg:top-4", "lg:top-6", "lg:top-8", "lg:top-10", "lg:top-12", "lg:top-16",
-  "lg:right-0", "lg:right-1", "lg:right-2", "lg:right-3", "lg:right-4", "lg:right-6", "lg:right-8", "lg:right-10", "lg:right-12", "lg:right-16",
-  "lg:bottom-0", "lg:bottom-1", "lg:bottom-2", "lg:bottom-3", "lg:bottom-4", "lg:bottom-6", "lg:bottom-8", "lg:bottom-10", "lg:bottom-12", "lg:bottom-16",
-  "lg:left-0", "lg:left-1", "lg:left-2", "lg:left-3", "lg:left-4", "lg:left-6", "lg:left-8", "lg:left-10", "lg:left-12", "lg:left-16",
-  "xl:top-0", "xl:top-1", "xl:top-2", "xl:top-3", "xl:top-4", "xl:top-6", "xl:top-8", "xl:top-10", "xl:top-12", "xl:top-16",
-  "xl:right-0", "xl:right-1", "xl:right-2", "xl:right-3", "xl:right-4", "xl:right-6", "xl:right-8", "xl:right-10", "xl:right-12", "xl:right-16",
-  "xl:bottom-0", "xl:bottom-1", "xl:bottom-2", "xl:bottom-3", "xl:bottom-4", "xl:bottom-6", "xl:bottom-8", "xl:bottom-10", "xl:bottom-12", "xl:bottom-16",
-  "xl:left-0", "xl:left-1", "xl:left-2", "xl:left-3", "xl:left-4", "xl:left-6", "xl:left-8", "xl:left-10", "xl:left-12", "xl:left-16",
-
-  // ===================== Z-INDEX =====================
-  "sm:z-auto", "sm:z-0", "sm:z-10", "sm:z-20", "sm:z-30", "sm:z-40", "sm:z-50",
-  "md:z-auto", "md:z-0", "md:z-10", "md:z-20", "md:z-30", "md:z-40", "md:z-50",
-  "lg:z-auto", "lg:z-0", "lg:z-10", "lg:z-20", "lg:z-30", "lg:z-40", "lg:z-50",
-  "xl:z-auto", "xl:z-0", "xl:z-10", "xl:z-20", "xl:z-30", "xl:z-40", "xl:z-50",
-
   // ===================== GAP (none=gap-0, xs=gap-0.5, sm=gap-sm, md=gap-md, lg=gap-lg, xl=gap-xl, 2xl=gap-6, 3xl=gap-8, 4xl=gap-10, 5xl=gap-12) =====================
   "sm:gap-0", "sm:gap-0.5", "sm:gap-1", "sm:gap-2", "sm:gap-3", "sm:gap-4", "sm:gap-6", "sm:gap-8", "sm:gap-10", "sm:gap-12",
   "md:gap-0", "md:gap-0.5", "md:gap-1", "md:gap-2", "md:gap-3", "md:gap-4", "md:gap-6", "md:gap-8", "md:gap-10", "md:gap-12",

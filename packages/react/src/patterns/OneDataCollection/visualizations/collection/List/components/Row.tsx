@@ -84,12 +84,10 @@ export const Row = <
 
   const itemHref = source.itemUrl ? source.itemUrl(item) : undefined
   const itemOnClick = source.itemOnClick ? source.itemOnClick(item) : undefined
-  const isClickable = !!itemHref || !!itemOnClick
   const id = source.selectable ? source.selectable(item) : undefined
   const itemDef = itemDefinition(item)
 
   const {
-    hasMobileItemActions,
     primaryItemActions,
     dropdownItemActions,
     mobileDropdownItemActions,
@@ -101,7 +99,6 @@ export const Row = <
     <div
       className={cn(
         "relative flex min-h-[64px] w-full flex-col justify-between gap-4 p-3 transition-colors md:flex-row md:p-2 md:pl-3 md:pr-4",
-        isClickable && "cursor-pointer",
         "group after:absolute after:inset-y-0 after:-right-px after:z-10 after:hidden after:h-full after:w-10 after:bg-gradient-to-r after:from-transparent after:via-f1-background after:via-75% after:to-f1-background after:transition-all after:content-[''] hover:after:via-[#F5F6F8] hover:after:to-[#F5F6F8] dark:hover:after:via-[#192231] dark:hover:after:to-[#192231] md:after:block hover:md:bg-f1-background-hover"
       )}
     >
@@ -171,20 +168,18 @@ export const Row = <
             />
           </ItemActionsRowContainer>
 
-          {hasMobileItemActions && (
-            <ItemActionsMobile
-              className="absolute -right-px bottom-0 top-0 z-20 items-center justify-end gap-2 py-2 pl-20 pr-3 md:hidden"
-              items={mobileDropdownItemActions}
-              onOpenChange={handleDropDownOpenChange}
-            />
-          )}
+          <ItemActionsMobile
+            className="absolute -right-px bottom-0 top-0 z-20 items-center justify-end gap-2 py-2 pl-20 pr-3 md:hidden"
+            items={mobileDropdownItemActions}
+            onOpenChange={handleDropDownOpenChange}
+          />
         </>
       )}
       {source.selectable && id !== undefined && (
         <div
           className={cn(
             "pointer-events-auto absolute right-3 top-3 flex h-8 w-8 items-center justify-center md:hidden",
-            hasMobileItemActions && "right-12"
+            source.itemActions && "right-12"
           )}
         >
           <F0Checkbox

@@ -99,21 +99,3 @@ export const betweenSpacing: ThemeConfig["spacing"] = {
   lg: relativeSpacing[3],
   xl: relativeSpacing[4],
 }
-
-/**
- * Standard height scale for interactive components (buttons, inputs, segmented controls, etc.)
- *
- * | Size | Height | Tailwind |
- * |------|--------|---------|
- * | sm   | 24px   | h-6     |
- * | md   | 32px   | h-8     |
- * | lg   | 40px   | h-10    |
- *
- * Derived from `buttonSizeVariants` in `packages/react/src/ui/Action/variants.ts`.
- * Use this as the reference when building any new interactive component.
- */
-export const interactiveHeights = {
-  sm: absoluteSpacing[6], // 24px
-  md: absoluteSpacing[8], // 32px
-  lg: absoluteSpacing[10], // 40px
-} as const

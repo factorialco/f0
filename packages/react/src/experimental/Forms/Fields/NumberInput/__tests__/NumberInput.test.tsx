@@ -144,42 +144,4 @@ describe("NumberInput", () => {
       expect(input).toHaveValue("1")
     })
   })
-
-  describe("trailing decimal separator preservation", () => {
-    test("preserves trailing dot while typing", async () => {
-      const onChange = vi.fn()
-      render(
-        <NumberInput
-          locale="en-US"
-          maxDecimals={2}
-          onChange={onChange}
-          label="Number Input"
-        />
-      )
-
-      const input = screen.getByRole("textbox")
-      await userEvent.type(input, "17.")
-
-      expect(input).toHaveValue("17.")
-      expect(onChange).toHaveBeenLastCalledWith(17)
-    })
-
-    test("preserves trailing comma while typing", async () => {
-      const onChange = vi.fn()
-      render(
-        <NumberInput
-          locale="es-ES"
-          maxDecimals={2}
-          onChange={onChange}
-          label="Number Input"
-        />
-      )
-
-      const input = screen.getByRole("textbox")
-      await userEvent.type(input, "17,")
-
-      expect(input).toHaveValue("17,")
-      expect(onChange).toHaveBeenLastCalledWith(17)
-    })
-  })
 })

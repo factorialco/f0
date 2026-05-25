@@ -95,24 +95,20 @@ export const NumberInputInternal = forwardRef<
       return
     }
 
-    const clampedValue = Math.max(
+    /**
+     * Reformat the number to the correct format
+     */
+    const finalValue = Math.max(
       min ?? -Infinity,
       Math.min(max ?? Infinity, parsedValue)
     )
 
-    // When clamping didn't change the value, preserve the user's raw input
-    // (e.g. "17." stays as "17." instead of being reformatted to "17").
-    if (clampedValue === parsedValue) {
-      setFieldValue(extractedData.formattedValue)
-      onChange?.(parsedValue)
-      return
-    }
-
-    const clampedData = extractNumber(clampedValue.toString(), {
+    const finalExtractedData = extractNumber(finalValue.toString(), {
       maxDecimals,
     })
-    setFieldValue(clampedData?.formattedValue ?? "")
-    onChange?.(clampedData?.value ?? null)
+    setFieldValue(finalExtractedData?.formattedValue ?? "")
+
+    onChange?.(finalExtractedData?.value ?? null)
   }
 
   const handleStep = (type: "increase" | "decrease") => () => {

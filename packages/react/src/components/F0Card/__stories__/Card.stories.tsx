@@ -28,11 +28,9 @@ import { Switch } from "@/ui/switch"
 import { Text } from "@/ui/Text"
 
 import {
-  cardAlertVariants,
   cardImageFits,
   cardImageSizes,
   F0Card,
-  type CardAlertVariant,
   type CardImageFit,
   type CardImageSize,
 } from "../F0Card"
@@ -106,7 +104,7 @@ const meta = {
       },
     },
     ...dataTestIdArgs,
-  } as never,
+  },
   args: {
     imageFit: "fit-width",
     imageSize: "sm",
@@ -661,118 +659,6 @@ export const ImageFitOptions: StoryObj<
   },
 }
 
-export const WithAlert: Story = {
-  args: {
-    ...Default.args,
-    alert: {
-      variant: "warning",
-      title: "This record has pending changes",
-    },
-  },
-}
-
-export const WithDismissibleAlert: Story = {
-  render: (args) => {
-    const [visible, setVisible] = useState(true)
-    return (
-      <div className="flex flex-col gap-3">
-        <F0Card
-          {...args}
-          alert={{
-            variant: "critical",
-            title: "Contract expires soon",
-            dismissible: true,
-            visible,
-            onDismiss: () => setVisible(false),
-          }}
-        />
-        {!visible && (
-          <button
-            className="self-start text-sm text-f1-foreground-secondary underline"
-            onClick={() => setVisible(true)}
-          >
-            Restore alert
-          </button>
-        )}
-      </div>
-    )
-  },
-  args: {
-    ...Default.args,
-  },
-}
-
-export const WithAlertAction: Story = {
-  render: (args) => {
-    const [actioned, setActioned] = useState(false)
-    return (
-      <div className="flex flex-col gap-3">
-        <F0Card
-          {...args}
-          alert={{
-            variant: "warning",
-            title: "Contract requires attention",
-            action: {
-              label: actioned ? "Done" : "Review",
-              onClick: () => setActioned(true),
-              disabled: actioned,
-            },
-          }}
-        />
-        {actioned && (
-          <button
-            type="button"
-            className="self-start text-sm text-f1-foreground-secondary underline"
-            onClick={() => setActioned(false)}
-          >
-            Reset action
-          </button>
-        )}
-      </div>
-    )
-  },
-  args: {
-    ...Default.args,
-  },
-}
-
-export const WithAlertActionHref: Story = {
-  args: {
-    ...Default.args,
-    alert: {
-      variant: "info",
-      title: "New policy available",
-      action: {
-        label: "View",
-        href: "/policies",
-      },
-    },
-  },
-}
-
-export const AlertVariants: Story = {
-  parameters: {
-    docs: {
-      story: { inline: false, height: "1400px" },
-    },
-    noMetaLayout: true,
-  },
-  render: () => (
-    <div className="mx-auto flex max-w-[372px] flex-col gap-4 p-4">
-      {(cardAlertVariants as readonly CardAlertVariant[]).map((variant) => (
-        <F0Card
-          key={variant}
-          {...Default.args}
-          alert={{
-            variant,
-            title: `${variant.charAt(0).toUpperCase()}${variant.slice(1)} alert`,
-          }}
-        />
-      ))}
-    </div>
-  ),
-}
-
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: () => (
@@ -786,38 +672,6 @@ export const Snapshot: Story = {
       <F0Card {...WithImage.args} />
       <F0Card {...WithProgressBar.args} />
       <F0Card {...WithProgressBarCustomColor.args} />
-      <F0Card
-        {...Default.args}
-        alert={{ variant: "info", title: "Info alert" }}
-      />
-      <F0Card
-        {...Default.args}
-        alert={{ variant: "warning", title: "Warning alert" }}
-      />
-      <F0Card
-        {...Default.args}
-        alert={{ variant: "critical", title: "Critical alert" }}
-      />
-      <F0Card
-        {...Default.args}
-        alert={{ variant: "positive", title: "Positive alert" }}
-      />
-      <F0Card
-        {...Default.args}
-        alert={{
-          variant: "warning",
-          title: "Contract requires attention",
-          action: { label: "Review", onClick: () => {} },
-        }}
-      />
-      <F0Card
-        {...Default.args}
-        alert={{
-          variant: "info",
-          title: "New policy available",
-          action: { label: "View", href: "/policies" },
-        }}
-      />
     </div>
   ),
 }

@@ -10,7 +10,6 @@ import { ToolHintSelector } from "../ToolHintSelector"
 interface ActionBarProps {
   onUploadFiles: ((files: File[]) => Promise<unknown>) | undefined
   isAtMaxFiles: boolean
-  maxFiles: number | undefined
   acceptValue: string | undefined
   fileInputRef: RefObject<HTMLInputElement>
   handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void
@@ -20,14 +19,12 @@ interface ActionBarProps {
   inProgress?: boolean
   hasDataToSend: boolean
   isUploading: boolean
-  isPreSending?: boolean
   submitLabel?: string
 }
 
 export const ActionBar = ({
   onUploadFiles,
   isAtMaxFiles,
-  maxFiles,
   acceptValue,
   fileInputRef,
   handleFileSelect,
@@ -37,7 +34,6 @@ export const ActionBar = ({
   inProgress,
   hasDataToSend,
   isUploading,
-  isPreSending,
   submitLabel,
 }: ActionBarProps) => {
   const translation = useI18n()
@@ -63,10 +59,7 @@ export const ActionBar = ({
             <input
               ref={fileInputRef}
               type="file"
-              // Native picker only honors a binary "single vs multiple"
-              // selection — no per-N cap. We still validate the count in JS.
-              multiple={maxFiles !== 1}
-              disabled={isAtMaxFiles}
+              multiple
               accept={acceptValue}
               className="hidden"
               onChange={handleFileSelect}
@@ -93,12 +86,8 @@ export const ActionBar = ({
         ) : (
           <ButtonInternal
             type="submit"
-            disabled={!hasDataToSend || isUploading || isPreSending}
-            variant={
-              hasDataToSend && !isUploading && !isPreSending
-                ? "default"
-                : "neutral"
-            }
+            disabled={!hasDataToSend || isUploading}
+            variant={hasDataToSend && !isUploading ? "default" : "neutral"}
             label={submitLabel || translation.ai.sendMessage}
             icon={submitLabel ? undefined : ArrowUp}
             hideLabel={!submitLabel}

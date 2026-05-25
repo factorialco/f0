@@ -112,19 +112,15 @@ export const useColumns = <
   )
 
   useEffect(() => {
-    if (allowHiding) {
+    if (allowHiding && settings?.hidden !== undefined) {
       setColsHidden(getMergedHidden())
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when the settings change
   }, [JSON.stringify(settings?.hidden), allowHiding])
 
   useEffect(() => {
-    if (allowSorting) {
-      setColsOrder(
-        settings?.order !== undefined
-          ? settings.order
-          : getColsOrderFromDefinition(originalColumns)
-      )
+    if (allowSorting && settings?.order !== undefined) {
+      setColsOrder(settings.order)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we don't want to re-run this effect when the settings change
   }, [JSON.stringify(settings?.order), allowSorting])

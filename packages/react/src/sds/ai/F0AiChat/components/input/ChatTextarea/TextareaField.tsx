@@ -96,9 +96,7 @@ export const TextareaField = ({
             "overflow-hidden text-ellipsis whitespace-nowrap"
           )}
         >
-          {placeholders.length === 1
-            ? placeholders[0]
-            : resolvedDefaultPlaceholder}
+          {resolvedDefaultPlaceholder}
         </p>
       )}
       <textarea

@@ -42,7 +42,7 @@ const _OneApprovalHistory: FC<OneApprovalHistoryProps> = ({ steps }) => {
             </div>
           ))}
         </div>
-        <div className="flex w-full flex-col rounded-xl border border-solid border-f1-border">
+        <div className="flex w-full flex-col rounded-xl border border-solid border-f1-border-secondary">
           {steps.map((step, index) => (
             <>
               <ApprovalStep

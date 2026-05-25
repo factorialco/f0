@@ -130,10 +130,10 @@ export type FormDefinitionItem = FieldItem | RowDefinition | SectionDefinition
 // ============================================================================
 
 /**
- * When to trigger and display validation errors (does not apply with autosubmit)
- * - "on-blur": Errors appear when the user leaves a field
+ * When to trigger and display validation errors
+ * - "on-blur": Errors appear when the user leaves a field (default)
  * - "on-change": Errors appear as the user types (real-time validation)
- * - "on-submit": Errors only appear after attempting to submit the form (default)
+ * - "on-submit": Errors only appear after attempting to submit the form
  */
 export type F0FormErrorTriggerMode = "on-blur" | "on-change" | "on-submit"
 
@@ -144,10 +144,12 @@ interface F0FormSubmitConfigBase {
   /** Custom label for the submit button */
   label?: string
   /**
-   * Custom icon for the submit button.
-   * No icon is shown by default.
+   * Custom icon for the submit button
+   * - undefined: uses default Save icon
+   * - null: no icon shown
+   * - IconType: custom icon
    */
-  icon?: IconType
+  icon?: IconType | null
   /** Label shown in the action bar while submitting (defaults to i18n "forms.actionBar.saving") */
   savingMessage?: string
   /**
@@ -214,34 +216,11 @@ interface F0FormActionBarSubmitConfig extends F0FormSubmitConfigBase {
 }
 
 /**
- * Submit configuration for autosubmit type.
- *
- * Automatically submits the form after the user stops editing for `delay` ms.
- * Validation runs on every debounced submit attempt; invalid forms surface
- * errors and skip `onSubmit` (handled by react-hook-form).
- */
-interface F0FormAutosubmitConfig extends F0FormSubmitConfigBase {
-  /** Type of submit UI (debounced auto-submit) */
-  type: "autosubmit"
-  /**
-   * Delay in ms between the last change and the auto-submit.
-   * @default 800
-   */
-  delay?: number
-  /**
-   * When true, hides the internal action bar (loading/success feedback).
-   * @default false
-   */
-  hideActionBar?: boolean
-}
-
-/**
  * Configuration for form submission behavior and appearance
  */
 export type F0FormSubmitConfig =
   | F0FormDefaultSubmitConfig
   | F0FormActionBarSubmitConfig
-  | F0FormAutosubmitConfig
 
 /**
  * Styling configuration for the form layout and appearance
@@ -447,10 +426,12 @@ export interface F0PerSectionSubmitConfig {
   /** Custom label for the submit button (per section) */
   label?: string
   /**
-   * Custom icon for the submit button.
-   * No icon is shown by default.
+   * Custom icon for the submit button
+   * - undefined: uses default Save icon
+   * - null: no icon shown
+   * - IconType: custom icon
    */
-  icon?: IconType
+  icon?: IconType | null
   /**
    * When true, the submit button is only visible once the section has unsaved changes.
    * @default false
@@ -567,33 +548,6 @@ export interface F0FormPropsWithPerSectionDefinition<
   T extends F0PerSectionSchema,
 > {
   formDefinition: import("@/patterns/F0WizardForm/types").F0FormDefinitionPerSection<T>
-  className?: string
-  styling?: F0FormStylingConfig
-  formRef?: React.MutableRefObject<F0FormRef | null>
-  initialFiles?: InitialFile[]
-  /** Upload hook shared by all file fields in the form. */
-  useUpload?: UseFileUpload
-  /**
-   * Callback that renders custom fields identified by `customFieldName`.
-   * When a field has `customFieldName`, this function is called instead of the inline `render`.
-   */
-  renderCustomField?: RenderCustomFieldFunction
-  /**
-   * Whether async defaultValues are still being resolved.
-   * When true, the form renders with loading indicators inside each field
-   * instead of replacing the entire form with skeleton placeholders.
-   */
-  isLoading?: boolean
-}
-
-/**
- * Props for F0Form when the formDefinition is a union (`F0FormDefinition`).
- * This non-generic variant allows passing a definition whose exact schema
- * branch is not statically known (e.g. stored in state or returned from a
- * generic helper).
- */
-export interface F0FormPropsWithDefinition {
-  formDefinition: import("@/patterns/F0WizardForm/types").F0FormDefinition
   className?: string
   styling?: F0FormStylingConfig
   formRef?: React.MutableRefObject<F0FormRef | null>

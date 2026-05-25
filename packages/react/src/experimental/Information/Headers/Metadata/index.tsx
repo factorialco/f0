@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
-import { Fragment, memo, useState } from "react"
+import { memo, useState } from "react"
 
 import {
   AvatarVariant,
@@ -281,12 +281,15 @@ const _Metadata = memo(function Metadata({ items }: MetadataProps) {
   return (
     <div className="flex flex-col items-start gap-x-3 gap-y-0 md:flex-row md:flex-wrap md:items-center">
       {cleanedItems.map((item, index) => (
-        <Fragment key={`metadata-item-${index}`}>
-          <MetadataItem item={item} />
+        <>
+          <MetadataItem key={`item-${index}`} item={item} />
           {index < cleanedItems.length - 1 && (
-            <div className="hidden h-4 w-[1px] bg-f1-border md:block" />
+            <div
+              key={`separator-${index}`}
+              className="hidden h-4 w-[1px] bg-f1-border md:block"
+            />
           )}
-        </Fragment>
+        </>
       ))}
     </div>
   )

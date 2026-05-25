@@ -1,4 +1,4 @@
-import List from "@/icons/app/List"
+import Multitask from "@/icons/app/Multitask"
 import { GroupHeader } from "@/ui/GroupHeader/GroupHeader"
 
 import type { F0TimelineRowMultitaskProps } from "../types"
@@ -16,7 +16,7 @@ export const MultitaskHeader = ({
 
   return (
     <>
-      <F0AvatarIcon icon={List} size="sm" />
+      <F0AvatarIcon icon={Multitask} size="sm" />
       <div className="flex flex-1 items-center justify-between">
         <GroupHeader
           label={`${taskCount} ${title}`}

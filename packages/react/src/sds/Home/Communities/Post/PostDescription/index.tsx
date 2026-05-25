@@ -1,5 +1,3 @@
-import { forwardRef } from "react"
-
 import { RichTextDisplay } from "@/components/RichText/RichTextDisplay"
 import { Skeleton } from "@/ui/skeleton"
 
@@ -11,33 +9,21 @@ type HTMLString = string
 export type PostDescriptionProps = {
   content: HTMLString
   collapsed?: boolean
-  id?: string
-  className?: string
-  tabIndex?: number
 }
-export const BasePostDescription = forwardRef<
-  HTMLDivElement,
-  PostDescriptionProps
->(function BasePostDescription(
-  { content, collapsed, id, className, tabIndex }: PostDescriptionProps,
-  ref
-) {
+export const BasePostDescription = ({
+  content,
+  collapsed,
+}: PostDescriptionProps) => {
   return (
     <RichTextDisplay
-      ref={ref}
-      id={id}
       content={content}
-      tabIndex={tabIndex}
       className={cn(
         "FactorialOneTextEditor",
-        collapsed && "line-clamp-5 break-words",
-        className
+        collapsed && "line-clamp-5 break-words"
       )}
     />
   )
-})
-
-BasePostDescription.displayName = "BasePostDescription"
+}
 
 export const PostDescriptionSkeleton = () => (
   <div className="flex flex-col justify-around gap-3 py-2">

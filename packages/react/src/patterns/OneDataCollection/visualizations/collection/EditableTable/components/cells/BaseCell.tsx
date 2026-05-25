@@ -1,13 +1,6 @@
 import { ReactNode } from "react"
 
-import { F0Icon, type IconType, type F0IconProps } from "@/components/F0Icon"
-import { cn, focusRing } from "@/lib/utils"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/ui/tooltip"
+import { cn } from "@/lib/utils"
 
 import { ErrorTooltip } from "./ErrorTooltip"
 
@@ -25,7 +18,6 @@ export function BaseCell({
   isActive = false,
   borderOnHover = true,
   error,
-  hint,
   children,
 }: {
   readonly?: boolean
@@ -33,7 +25,6 @@ export function BaseCell({
   cursor?: "text" | "pointer" | "default" | "not-allowed"
   isActive?: boolean
   error?: string
-  hint?: { icon: IconType; message: string; iconColor?: F0IconProps["color"] }
   borderOnHover?: boolean
   children: ReactNode
 }) {
@@ -54,35 +45,7 @@ export function BaseCell({
         readonly && "bg-f1-background-secondary"
       )}
     >
-      <ErrorTooltip message={error}>
-        {hint && !error && (
-          <TooltipProvider delayDuration={100}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  aria-label={hint.message}
-                  className={cn(
-                    "pointer-events-auto flex shrink-0 cursor-pointer items-center rounded px-1",
-                    focusRing()
-                  )}
-                >
-                  <F0Icon icon={hint.icon} size="md" color={hint.iconColor} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent
-                side="top"
-                className="border-black/10 max-w-64 cursor-default text-f1-foreground shadow-md"
-              >
-                <span className="text-sm font-medium text-f1-foreground">
-                  {hint.message}
-                </span>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
-        <div className="min-w-0 flex-1">{children}</div>
-      </ErrorTooltip>
+      <ErrorTooltip message={error}>{children}</ErrorTooltip>
     </div>
   )
 }

@@ -879,60 +879,6 @@ export const WithSelectableAndBulkActions: Story = {
   ),
 }
 
-export const WithAsyncBulkActions: Story = {
-  render: () => {
-    const paginatedMockUsers = generateMockUsers(10)
-
-    const mockVisualizations = getMockVisualizations({ frozenColumns: 0 })
-
-    const source = useDataCollectionSource({
-      filters,
-      sortings,
-      selectable: (item) => item.id,
-      bulkActions: () => ({
-        primary: [
-          {
-            label: "Archive",
-            icon: CheckCircle,
-            id: "archive-all",
-          },
-          {
-            label: "Delete",
-            icon: Delete,
-            id: "delete-all",
-            critical: true,
-          },
-        ],
-        secondary: [
-          {
-            label: "Export",
-            id: "export-all",
-          },
-        ],
-      }),
-      dataAdapter: createDataAdapter({
-        data: paginatedMockUsers,
-        delay: 500,
-        paginationType: "pages",
-      }),
-    })
-
-    return (
-      <OneDataCollection
-        source={source}
-        autoManageBulkActionStatus
-        onBulkAction={async (action) => {
-          await new Promise((resolve) => setTimeout(resolve, 1500))
-          if (action === "delete-all") {
-            throw new Error("Simulated failure")
-          }
-        }}
-        visualizations={[mockVisualizations.table]}
-      />
-    )
-  },
-}
-
 export const WithPageOnlySelection: Story = {
   render: () => {
     const paginatedMockUsers = generateMockUsers(50)

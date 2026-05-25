@@ -13,7 +13,6 @@ import type {
   FlexDirectionToken,
   FlexWrapToken,
   GapToken,
-  InsetToken,
   JustifyContentToken,
   MarginToken,
   OverflowToken,
@@ -22,7 +21,6 @@ import type {
   RowsToken,
   SizeToken,
   SpacingToken,
-  ZIndexToken,
 } from "../types"
 
 import { backgroundVariants } from "./background"
@@ -32,11 +30,9 @@ import { displayVariants } from "./display"
 import { dividerVariants } from "./divider"
 import { flexVariants } from "./flex"
 import { gridVariants } from "./grid"
-import { insetVariants } from "./inset"
 import { marginVariants } from "./margin"
 import { overflowVariants } from "./overflow"
 import { paddingVariants } from "./padding"
-import { zIndexVariants } from "./zIndex"
 
 /** Supported breakpoints */
 export type Breakpoint = "sm" | "md" | "lg" | "xl"
@@ -45,11 +41,6 @@ export type Breakpoint = "sm" | "md" | "lg" | "xl"
 export interface ResponsiveStyleProps {
   display?: DisplayToken
   position?: PositionToken
-  top?: InsetToken
-  right?: InsetToken
-  bottom?: InsetToken
-  left?: InsetToken
-  zIndex?: ZIndexToken
   // Padding
   padding?: SpacingToken
   paddingX?: SpacingToken
@@ -118,7 +109,6 @@ export interface ResponsiveStyleProps {
  */
 const variantMap: Record<string, Record<string, string>> = {
   ...displayVariants,
-  ...insetVariants,
   ...paddingVariants,
   ...marginVariants,
   ...flexVariants,
@@ -128,7 +118,6 @@ const variantMap: Record<string, Record<string, string>> = {
   ...borderVariants,
   ...overflowVariants,
   ...dividerVariants,
-  ...zIndexVariants,
 }
 
 /**

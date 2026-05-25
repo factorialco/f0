@@ -20,14 +20,10 @@ import {
   type CardSecondaryAction,
   type CardSecondaryLink,
 } from "./components/CardActions"
-import { CardAlertWrapper, alertBorderColor } from "./components/CardAlert"
 import { CardAvatar, type CardAvatarVariant } from "./components/CardAvatar"
 import { CardMetadata } from "./components/CardMetadata"
 import { CardOptions } from "./components/CardOptions"
-import {
-  type CardAlertProps,
-  type CardMetadata as CardMetadataType,
-} from "./types"
+import { type CardMetadata as CardMetadataType } from "./types"
 
 export const cardImageFits = [
   "contain", // Show entire image, no crop
@@ -172,13 +168,6 @@ export interface CardInternalProps {
    * can manage drag-and-drop while still allowing click navigation via onClick
    */
   disableOverlayLink?: boolean
-
-  /**
-   * Alert banner displayed above the card with a coloured header strip and matching border.
-   * Supports info, warning, critical, and positive variants with a default icon per variant.
-   * Use `visible` + `onDismiss` for controlled dismiss behaviour.
-   */
-  alert?: CardAlertProps
 }
 
 const imageFitClassMap: Record<CardImageFit, string> = {
@@ -221,7 +210,6 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       forceVerticalMetadata = false,
       fullHeight = false,
       disableOverlayLink = false,
-      alert,
     },
     ref
   ) {
@@ -235,10 +223,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       e.preventDefault()
       e.stopPropagation()
     }
-
-    // The card body — extracted so it can be placed inside either the plain root
-    // or the alert wrapper without duplication.
-    const cardBody = (
+    return (
       <Card
         className={cn(
           "group relative bg-f1-background shadow-none transition-all",
@@ -252,17 +237,9 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
           selected &&
             "border-f1-border-selected bg-f1-background-selected-secondary"
         )}
-        style={
-          alert && alert.visible !== false && !selected
-            ? {
-                borderColor: alertBorderColor[alert.variant],
-                borderWidth: "2px",
-              }
-            : undefined
-        }
         onClick={onClick}
         data-testid="card"
-        ref={alert && alert.visible !== false ? undefined : ref}
+        ref={ref}
       >
         {link && !disableOverlayLink && (
           <F0Link
@@ -416,16 +393,6 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
         />
       </Card>
     )
-
-    if (alert && alert.visible !== false) {
-      return (
-        <CardAlertWrapper ref={ref} alert={alert} fullHeight={fullHeight}>
-          {cardBody}
-        </CardAlertWrapper>
-      )
-    }
-
-    return cardBody
   }
 )
 

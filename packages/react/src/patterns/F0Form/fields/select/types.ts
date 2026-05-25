@@ -66,8 +66,6 @@ interface F0SelectConfigBase {
   searchBoxPlaceholder?: string
   /** Icon displayed on the left side of the select input */
   icon?: IconType
-  /** Callback to create a new item from the search text. Shows a "+ Create" button in the empty state of the dropdown. */
-  onCreate?: (value: string) => Promise<void> | void
 }
 
 /**

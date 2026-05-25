@@ -132,12 +132,6 @@ export type TableVisualizationOptions<
    * definitions, values are the display labels rendered in the spanning header row.
    */
   headerGroupLabels?: Record<string, string>
-
-  /**
-   * Wraps the table in a rounded border container.
-   * Useful for embedding the table inside panels or detail views.
-   */
-  bordered?: boolean
 }
 
 export type TableCollectionProps<

@@ -18,7 +18,7 @@ exports[`F0Step Snapshot - middle step active 1`] = `
     className="flex-1 rounded-full"
   >
     <View
-      className="h-1 w-full overflow-hidden rounded-full bg-f0-background-bold"
+      className="h-1 w-full overflow-hidden rounded-full bg-f0-background-selected-bold"
     />
   </View>
   <View
@@ -60,7 +60,7 @@ exports[`F0StepSegment Snapshot - step states 1`] = `
     className="flex-1 rounded-full"
   >
     <View
-      className="h-1 w-full overflow-hidden rounded-full bg-f0-background-bold"
+      className="h-1 w-full overflow-hidden rounded-full bg-f0-background-selected-bold"
     />
   </View>
   <View

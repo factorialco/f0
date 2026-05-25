@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useEffect, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Select } from "@/components/F0Select"
@@ -33,14 +33,20 @@ export const SortingSelector = <Sortings extends SortingsDefinition>({
     })),
   ]
 
-  const displaySortings = useMemo(
-    () =>
-      currentSortings ?? {
-        field: EmptySortingValue as SortingKey<Sortings>,
-        order: "asc" as const,
-      },
-    [currentSortings]
-  )
+  const [localSortings, setLocalSortings] =
+    useState<SortingsState<Sortings>>(currentSortings)
+
+  useEffect(() => {
+    if (!currentSortings) {
+      setLocalSortings({
+        field: EmptySortingValue,
+        order: "asc",
+      })
+    } else {
+      setLocalSortings(currentSortings)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- we are deep comparing the currentSortings
+  }, [JSON.stringify(currentSortings)])
 
   const handleChange = (sorting: SortingsState<Sortings>) => {
     if (!sorting || sorting.field === EmptySortingValue) {
@@ -55,30 +61,29 @@ export const SortingSelector = <Sortings extends SortingsDefinition>({
       <div className="flex items-end gap-2">
         <div className="shrink grow [&_button]:h-8 [&_button]:rounded">
           <F0Select
-            key={displaySortings.field as string}
             label={i18n.collections.sorting.sortBy}
             options={sortingOptions}
-            value={displaySortings.field as string}
+            value={localSortings?.field as string}
             onChange={(value) => {
               handleChange({
                 field: value as SortingKey<Sortings>,
-                order: displaySortings.order ?? "asc",
+                order: localSortings?.order ?? "asc",
               })
             }}
           />
         </div>
 
-        {displaySortings.field !== EmptySortingValue && (
+        {localSortings?.field !== EmptySortingValue && (
           <div>
             <F0Button
               hideLabel
               label={i18n.collections.sorting.toggleDirection}
               variant="outline"
-              icon={displaySortings.order === "asc" ? Ascending : Descending}
+              icon={localSortings?.order === "asc" ? Ascending : Descending}
               onClick={() =>
                 handleChange({
-                  field: displaySortings.field as SortingKey<Sortings>,
-                  order: displaySortings.order === "asc" ? "desc" : "asc",
+                  field: localSortings?.field as SortingKey<Sortings>,
+                  order: localSortings?.order === "asc" ? "desc" : "asc",
                 })
               }
             />

@@ -457,7 +457,7 @@ describe("Presets - Chip Visibility", () => {
     expect(engineeringPreset).toHaveClass("bg-f1-background-selected-secondary")
   })
 
-  it("shows all chips when manual filters are added on top of preset (preset deselects)", async () => {
+  it("shows chips for manual filters added on top of preset", async () => {
     const onChange = vi.fn()
     const presets = [
       {
@@ -467,7 +467,6 @@ describe("Presets - Chip Visibility", () => {
     ]
 
     // Render with preset filter + manual filter
-    // With exact match, the preset is NOT selected because of the extra "search" key
     render(
       <OneFilterPicker
         filters={definition}
@@ -477,19 +476,18 @@ describe("Presets - Chip Visibility", () => {
       />
     )
 
-    // Wait for async chip labels to load
+    // Wait for async chip label to load, then verify search chip is visible
     await waitFor(() => {
-      // Both chips SHOULD be visible (preset is deselected due to extra keys)
       expect(screen.getByText(/search:/i)).toBeInTheDocument()
-      expect(screen.getByText(/department:/i)).toBeInTheDocument()
     })
 
-    // Preset should NOT be shown as selected (extra keys = not exact match)
+    // Department chip should NOT be visible (covered by preset)
+    expect(screen.queryByText(/department:/i)).not.toBeInTheDocument()
+
+    // Preset should still be shown as selected
     const engineeringPreset =
       getVisibleByText("Engineering Only").closest("label")
-    expect(engineeringPreset).not.toHaveClass(
-      "bg-f1-background-selected-secondary"
-    )
+    expect(engineeringPreset).toHaveClass("bg-f1-background-selected-secondary")
   })
 
   it("shows chips when preset value is modified", async () => {

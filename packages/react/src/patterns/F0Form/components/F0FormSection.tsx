@@ -3,6 +3,7 @@ import { DefaultValues, Path, useForm } from "react-hook-form"
 import { z } from "zod"
 
 import { F0Button } from "@/components/F0Button"
+import { Save } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
 import { SectionHeader } from "@/patterns/SectionHeader"
@@ -117,7 +118,8 @@ export function F0FormSection<TSchema extends F0FormSchema>({
   const definition = useSchemaDefinition(schema)
 
   const submitLabel = submitConfig?.label ?? "Submit"
-  const submitIcon = submitConfig?.icon ?? undefined
+  const submitIcon =
+    submitConfig?.icon === null ? undefined : (submitConfig?.icon ?? Save)
   const showSubmitWhenDirty = submitConfig?.showSubmitWhenDirty ?? false
   const hideSubmitButton = submitConfig?.hideSubmitButton ?? false
 
@@ -366,7 +368,7 @@ export function F0FormSection<TSchema extends F0FormSchema>({
           )}
 
           {!hideSubmitButton && (!showSubmitWhenDirty || isDirty) && (
-            <div className="mt-4 flex justify-end">
+            <div className="mt-4">
               <F0Button
                 type="submit"
                 label={submitLabel}

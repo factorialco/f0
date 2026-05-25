@@ -14,8 +14,6 @@ import {
 import { useDebounceCallback } from "usehooks-ts"
 
 import { F0DialogContext } from "@/patterns/F0Dialog"
-import { F0Button } from "@/components/F0Button"
-import { Plus } from "@/icons/app"
 import {
   BaseFetchOptions,
   BaseResponse,
@@ -95,7 +93,6 @@ const F0SelectComponent = forwardRef(function Select<
   {
     placeholder,
     onChange,
-    withApplySelection = false,
     onChangeSelectedOption,
     value,
     options = [],
@@ -111,7 +108,6 @@ const F0SelectComponent = forwardRef(function Select<
     searchEmptyMessage,
     size = "sm",
     actions,
-    onCreate,
     source,
     label,
     icon,
@@ -127,7 +123,6 @@ const F0SelectComponent = forwardRef(function Select<
     portalContainer,
     asList = false,
     showPreview = false,
-    preserveSelectionOnDatasetChange = true,
     dataTestId,
     ...props
   }: F0SelectProps<T, R>,
@@ -159,7 +154,6 @@ const F0SelectComponent = forwardRef(function Select<
   type ActualRecordType = ResolvedRecordType<R>
 
   const [openLocal, setOpenLocal] = useState(open)
-  const isApplyingRef = useRef(false)
 
   const defaultItems = useMemo(
     () =>
@@ -372,53 +366,7 @@ const F0SelectComponent = forwardRef(function Select<
     isSearchActive: !!currentSearch,
     allPagesSelection: true,
     resetOnPageChange: false,
-    preserveSelectionOnDatasetChange,
   })
-
-  const cloneSelectedState = useCallback(
-    (
-      state: SelectedItemsState<ActualRecordType>
-    ): SelectedItemsState<ActualRecordType> => {
-      return {
-        allSelected: state.allSelected,
-        items: new Map(state.items),
-        groups: new Map(state.groups),
-      }
-    },
-    []
-  )
-
-  const getSelectedStateKey = useCallback(
-    (state: SelectedItemsState<ActualRecordType>): string => {
-      const relevantItems = Array.from(state.items.entries()).filter(
-        ([, item]) => (state.allSelected ? true : item.checked)
-      )
-      const itemsKeys = relevantItems
-        .map(([id, item]) => `${id}:${item.checked}`)
-        .sort()
-        .join(",")
-      const relevantGroups = Array.from(state.groups.entries()).filter(
-        ([, group]) => (state.allSelected ? true : group.checked)
-      )
-      const groupsKeys = relevantGroups
-        .map(([id, group]) => `${id}:${group.checked}`)
-        .sort()
-        .join(",")
-
-      return `${state.allSelected}|${itemsKeys}|${groupsKeys}`
-    },
-    []
-  )
-
-  const committedSelectionRef = useRef(
-    initialSelectedState
-      ? cloneSelectedState(initialSelectedState)
-      : {
-          allSelected: false,
-          items: new Map(),
-          groups: new Map(),
-        }
-  )
 
   /**
    * Get display items for the selection preview.
@@ -465,23 +413,10 @@ const F0SelectComponent = forwardRef(function Select<
     setCurrentSearch(value)
     onSearchChange?.(value)
   }
-  // Show apply button when in multiple selection, and not rendered as a list
-  const showApplyButton = multiple && !asList
-  const hasDeferredApply = !!(withApplySelection && showApplyButton)
 
   // Track whether the user has interacted with the selection
   const hasUserInteracted = useRef(false)
   const isFirstRender = useRef(true)
-
-  // Track the last value emitted via onChange to avoid spurious re-emits when
-  // the effect deps change but the selected value did not. Without this guard,
-  // async datasources (records resolving after the click), or downstream
-  // clones of `selectedState` items, can re-fire the emit effect with the
-  // same logical selection.
-  const lastEmittedSingleRef = useRef<{ value: string | undefined } | null>(
-    null
-  )
-  const lastEmittedMultiRef = useRef<string | null>(null)
 
   const onItemCheckChange = useCallback(
     (value: string, checked: boolean) => {
@@ -503,13 +438,10 @@ const F0SelectComponent = forwardRef(function Select<
         } else {
           selectedItemsCache.current.delete(String(value))
         }
-        if (!hasDeferredApply) {
-          onChangeSelectedOption?.(item.option, checked)
-        }
+        onChangeSelectedOption?.(item.option, checked)
       }
     },
     [
-      hasDeferredApply,
       onChangeSelectedOption,
       itemsByValue,
       handleSelectItemChange,
@@ -527,57 +459,6 @@ const F0SelectComponent = forwardRef(function Select<
     },
     [handleSelectAllItems]
   )
-
-  const getMultiSelectionPayload = useCallback(() => {
-    const checkedItems = Array.from(selectedState.items.values() || []).filter(
-      (item) => item.checked
-    )
-
-    const extractOriginalItem = (
-      record: ActualRecordType | undefined
-    ): ResolvedRecordType<R> | undefined => {
-      if (!record) return undefined
-      if (source) {
-        return record as unknown as ResolvedRecordType<R>
-      }
-
-      const option = record as unknown as F0SelectItemObject<
-        T,
-        ResolvedRecordType<R>
-      >
-      return option.item
-    }
-
-    const records = checkedItems
-      .map((item) => item.item)
-      .filter(
-        (item): item is WithGroupId<ResolvedRecordType<R>> => item !== undefined
-      )
-    const originalItems = records
-      .map(extractOriginalItem)
-      .filter((item): item is ResolvedRecordType<R> => item !== undefined)
-    const options = records.map((item) => {
-      return optionMapper(item) as F0SelectItemObject<T, ResolvedRecordType<R>>
-    })
-    // Use original option values to preserve the type (number vs string)
-    // Only use stringfied id as fallback if option is not available
-    const values = checkedItems.map((item) => {
-      if (item.item) {
-        const option = optionMapper(item.item as ActualRecordType)
-        return option.type !== "separator"
-          ? (option.value as T)
-          : (String(item.id) as T)
-      }
-
-      return String(item.id) as T
-    })
-
-    return {
-      values,
-      originalItems,
-      options,
-    }
-  }, [optionMapper, selectedState.items, source])
 
   /**
    * Emit the value change. The type depends on the multiple prop and selectionMode.
@@ -602,6 +483,10 @@ const F0SelectComponent = forwardRef(function Select<
       setCurrentSearch(undefined)
     }
 
+    const checkedItems = Array.from(selectedState.items.values() || []).filter(
+      (item) => item.checked
+    )
+
     // Helper to extract the original item from a record
     // For static options: the record IS the option, and option.item contains the original data
     // For datasource: the record is the original data, optionMapper creates the option
@@ -624,30 +509,41 @@ const F0SelectComponent = forwardRef(function Select<
     // TypeScript cannot infer the type of the onChange callback when it has generics,
     // so we need to cast it to the correct type
     if (multiple) {
-      const { values, originalItems, options } = getMultiSelectionPayload()
+      const records = checkedItems
+        .map((item) => item.item)
+        .filter(
+          (item): item is WithGroupId<ResolvedRecordType<R>> =>
+            item !== undefined
+        )
+      const originalItems = records
+        .map(extractOriginalItem)
+        .filter((item): item is ResolvedRecordType<R> => item !== undefined)
+      const options = records.map((item) => {
+        return optionMapper(item) as F0SelectItemObject<
+          T,
+          ResolvedRecordType<R>
+        >
+      })
+
+      // Use original option values to preserve the type (number vs string)
+      // Only use stringified id as fallback if option is not available
+      const values = checkedItems.map((item) => {
+        if (item.item) {
+          const option = optionMapper(item.item as ActualRecordType)
+          return option.type !== "separator"
+            ? (option.value as T)
+            : (String(item.id) as T)
+        }
+        return String(item.id) as T
+      })
 
       // Sync localValue with actual selection state (as strings for internal comparison)
       // This ensures the preview shows correct items after deselection
       // Use Set to ensure unique values and prevent duplicates
       setLocalValue(Array.from(new Set(values.map(String))))
 
-      // Guard: only emit when the set of selected values actually changes.
-      // Sort + join to compare order-independently with a stable key.
-      const valuesKey = values.map(String).sort().join("\u0000")
-      if (lastEmittedMultiRef.current === valuesKey) {
-        return
-      }
-
-      if (!hasDeferredApply) {
-        // Only commit to the ref what we actually emit, so a later transition
-        // from deferred-apply back to immediate-emit isn't suppressed.
-        lastEmittedMultiRef.current = valuesKey
-        onChange?.(values, originalItems, options)
-      }
+      onChange?.(values, originalItems, options)
     } else {
-      const checkedItems = Array.from(
-        selectedState.items.values() || []
-      ).filter((item) => item.checked)
       const selectedItem = checkedItems[0]
       const record = selectedItem?.item as ActualRecordType | undefined
       const originalItem = extractOriginalItem(record)
@@ -665,131 +561,28 @@ const F0SelectComponent = forwardRef(function Select<
       // Sync localValue with actual selection state (as string for internal comparison)
       setLocalValue(value !== undefined ? [String(value)] : [])
 
-      // Guard: only emit when the selected value identity actually changes.
-      // Without this, async datasources (record resolving after a click) or
-      // unrelated `source`/`selectedState` content changes can re-fire the
-      // effect with the same selection and produce duplicate onChange calls.
-      const valueKey = value === undefined ? undefined : String(value)
-      if (
-        lastEmittedSingleRef.current !== null &&
-        lastEmittedSingleRef.current.value === valueKey
-      ) {
-        return
-      }
-
-      if (!hasDeferredApply) {
-        // Only commit to the ref what we actually emit, so a later transition
-        // from deferred-apply back to immediate-emit isn't suppressed.
-        lastEmittedSingleRef.current = { value: valueKey }
-        onChange?.(value as T, originalItem, option)
-      }
+      onChange?.(value as T, originalItem, option)
     }
-  }, [
-    getMultiSelectionPayload,
-    hasDeferredApply,
-    optionMapper,
-    selectedState,
-    source,
-  ])
+  }, [selectedState])
 
   const debouncedHandleChangeOpenLocal = useDebounceCallback(
     (open: boolean) => {
       onOpenChange?.(open)
       setOpenLocal(open)
-      if (!open) {
-        isApplyingRef.current = false
-      }
     },
     100
   )
 
-  // Cancel any pending debounced state update on unmount. usehooks-ts'
-  // `useDebounceCallback` has a known bug where its internal unmount cleanup
-  // cancels a different lodash.debounce instance than the one invoked by
-  // callers, so pending trailing-edge timers can fire after the test's jsdom
-  // window is torn down (causing `ReferenceError: window is not defined`
-  // inside react-dom). We track the latest wrapper via a ref and only cancel
-  // on true unmount so we don't drop in-flight timers between renders.
-  const debouncedHandleChangeOpenLocalRef = useRef(
-    debouncedHandleChangeOpenLocal
-  )
-  debouncedHandleChangeOpenLocalRef.current = debouncedHandleChangeOpenLocal
-  useEffect(() => {
-    return () => {
-      debouncedHandleChangeOpenLocalRef.current.cancel()
-    }
-  }, [])
-
-  const restoreCommittedSelection = useCallback(() => {
-    const committedSelection = committedSelectionRef.current
-
-    clearSelection()
-
-    if (committedSelection.allSelected) {
-      handleSelectAllWithTracking(true)
-
-      for (const itemState of committedSelection.items.values()) {
-        if (!itemState.checked) {
-          handleSelectItemChange(itemState.item ?? itemState.id, false)
-        }
-      }
-
-      return
-    }
-
-    const committedItems = Array.from(committedSelection.items.values()).filter(
-      (itemState) => itemState.checked
-    )
-
-    for (const itemState of committedItems) {
-      handleSelectItemChange(itemState.item ?? itemState.id, true)
-    }
-  }, [clearSelection, handleSelectAllWithTracking, handleSelectItemChange])
-
   const handleChangeOpenLocal = (open: boolean) => {
-    if (!open && hasDeferredApply && !isApplyingRef.current) {
-      restoreCommittedSelection()
-    }
-
     debouncedHandleChangeOpenLocal(open)
   }
 
-  const handleCancel = useCallback(() => {
-    restoreCommittedSelection()
-  }, [restoreCommittedSelection])
+  // Show apply button when in multiple selection, and not rendered as a list
+  const showApplyButton = multiple && !asList
 
   const handleApply = useCallback(() => {
-    if (hasDeferredApply) {
-      const nextCommittedSelection = cloneSelectedState(selectedState)
-      const { values, originalItems, options } = getMultiSelectionPayload()
-      if (
-        getSelectedStateKey(nextCommittedSelection) !==
-        getSelectedStateKey(committedSelectionRef.current)
-      ) {
-        committedSelectionRef.current = nextCommittedSelection
-        ;(
-          onChange as
-            | ((
-                value: T[],
-                originalItems: ResolvedRecordType<R>[],
-                options: F0SelectItemObject<T, ResolvedRecordType<R>>[]
-              ) => void)
-            | undefined
-        )?.(values, originalItems, options)
-      }
-
-      isApplyingRef.current = true
-    }
     handleChangeOpenLocal(false)
-  }, [
-    cloneSelectedState,
-    getSelectedStateKey,
-    getMultiSelectionPayload,
-    handleChangeOpenLocal,
-    hasDeferredApply,
-    onChange,
-    selectedState,
-  ])
+  }, [])
 
   // Track when filters panel is open to hide bottom actions
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
@@ -801,17 +594,13 @@ const F0SelectComponent = forwardRef(function Select<
     const curr = JSON.stringify(localSource.currentFilters)
     if (prev !== curr) {
       previousFiltersRef.current = localSource.currentFilters
-      if (!disableSelectAll && !preserveSelectionOnDatasetChange) {
+      if (!disableSelectAll) {
         selectedItemsCache.current.clear()
         setLocalValue([])
         hasUserInteracted.current = true
       }
     }
-  }, [
-    localSource.currentFilters,
-    disableSelectAll,
-    preserveSelectionOnDatasetChange,
-  ])
+  }, [localSource.currentFilters, disableSelectAll])
 
   const collapsible = localSource.grouping?.collapsible ?? false
   const defaultOpenGroups = localSource.grouping?.defaultOpenGroups
@@ -946,60 +735,17 @@ const F0SelectComponent = forwardRef(function Select<
         as: asList ? ("list" as const) : undefined,
       } as const)
 
-  const handleCreate = onCreate
-    ? (value: string) => {
-        const result = onCreate(value)
-        if (result && typeof result.then === "function") {
-          result.then(
-            () => {
-              setCurrentSearch(undefined)
-            },
-            (err: unknown) => {
-              console.warn("[F0Select] onCreate failed:", err)
-            }
-          )
-        } else {
-          setCurrentSearch(undefined)
-        }
-      }
-    : undefined
-
-  const createLabel = currentSearch
-    ? i18n.t("select.createWithValue", { value: currentSearch })
-    : i18n.select.create
-
-  const emptyAction =
-    handleCreate && currentSearch?.trim() ? (
-      <div className="flex w-full">
-        <F0Button
-          type="button"
-          variant="outline"
-          onClick={() => handleCreate(currentSearch.trim())}
-          icon={Plus}
-          label={createLabel}
-        />
-      </div>
-    ) : undefined
-
   const selectContent = (
     <SelectContent
       items={items}
       taller={!!source?.filters}
-      emptyMessage={
-        searchEmptyMessage ??
-        (onCreate && currentSearch?.trim()
-          ? (i18n.select.createEmptyMessage ?? i18n.select.noResults)
-          : i18n.select.noResults)
-      }
-      emptyAction={emptyAction}
+      emptyMessage={searchEmptyMessage ?? i18n.select.noResults}
       bottom={
         !isFiltersOpen ? (
           <SelectBottomActions
             actions={actions}
             showApplyButton={showApplyButton}
             onApply={handleApply}
-            onCancel={handleCancel}
-            showCancelButton={hasDeferredApply}
           />
         ) : null
       }

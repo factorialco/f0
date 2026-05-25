@@ -68,14 +68,14 @@ function _CardSelectableContainer<T extends CardSelectableValue>(
       <div
         role={groupRole}
         aria-label={label}
-        className="rounded-xl border border-solid border-f1-border overflow-hidden"
+        className="rounded-xl border border-solid border-f1-border-secondary overflow-hidden"
       >
         {items.map((item, index) => (
           <div
             key={String(item.value)}
             className={cn(
               index !== items.length - 1 &&
-                "border-0 border-b border-solid border-f1-border"
+                "border-0 border-b border-solid border-f1-border-secondary"
             )}
           >
             <CardSelectable

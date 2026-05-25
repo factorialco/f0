@@ -11,7 +11,6 @@ export type ActionDefinition =
       enabled?: boolean
       type?: "primary" | "secondary" | "other"
       hideLabel?: boolean
-      hideInMobileDropdown?: boolean
     })
 
 export type ItemActionsDefinition<T extends RecordType> = (

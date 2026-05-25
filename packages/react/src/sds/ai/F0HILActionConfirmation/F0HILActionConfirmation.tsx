@@ -16,16 +16,16 @@ export const F0HILActionConfirmation = ({
       <div className="flex gap-2">
         <F0Button
           type="button"
-          variant="default"
-          size="md"
+          variant="outline"
+          size="sm"
           icon={Check}
           onClick={onConfirm}
           label={confirmationText}
         />
         <F0Button
           type="button"
-          variant="outline"
-          size="md"
+          variant="ghost"
+          size="sm"
           onClick={onCancel}
           label={cancelText}
         />

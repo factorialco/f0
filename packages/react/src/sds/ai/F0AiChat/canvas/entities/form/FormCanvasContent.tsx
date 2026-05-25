@@ -189,9 +189,8 @@ function VirtualFormContent() {
   const entry = formName ? registry?.get(formName) : undefined
   const ref = entry?.ref.current
   const currentValues = activeForm?.formValues ?? {}
-  // Prefer params from the registry entry (written by the host-app form
-  // actions) as the canonical source; fall back to coagent state for the
-  // brief window before sync.
+  // Prefer params from the registry entry (written by useF0AiFormActions) as the
+  // canonical source; fall back to coagent state for the brief window before sync.
   const defaultValuesParams =
     entry?.defaultValuesParams ?? activeForm?.defaultValuesParams
 

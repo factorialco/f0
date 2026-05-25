@@ -1595,7 +1595,7 @@ export const CustomField: Story = {
         console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
         return { success: true }
       },
-      submitConfig: { label: "Create Task" },
+      submitConfig: { label: "Create Task", icon: null },
     })
 
     const renderCustomField = useCallback((props: RenderCustomFieldProps) => {
@@ -1723,7 +1723,7 @@ export const SelectWithCustomFieldName: Story = {
         console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
         return { success: true }
       },
-      submitConfig: { label: "Save" },
+      submitConfig: { label: "Save", icon: null },
     })
 
     const renderCustomField = useCallback(
@@ -1916,7 +1916,7 @@ export const VisualDesignExample: Story = {
         console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
         return { success: true }
       },
-      submitConfig: { label: "Create Survey" },
+      submitConfig: { label: "Create Survey", icon: null },
     })
 
     return (
@@ -2044,101 +2044,6 @@ export const WithActionBarAndDiscard: Story = {
         <F0Form formDefinition={formDefinition} />
         <p className="mt-4 text-sm text-f1-foreground-secondary">
           Modify any field to see the action bar with Save and Discard buttons
-        </p>
-      </div>
-    )
-  },
-}
-
-/**
- * Form with `type: "autosubmit"` — the form is auto-submitted after the user
- * stops editing for the configured `delay` (default 800ms).
- *
- * The internal action bar surfaces the Saving → Saved feedback so the user
- * knows their changes were persisted. No explicit submit button is rendered.
- */
-export const Autosubmit: Story = {
-  render() {
-    const formSchema = z.object({
-      title: f0FormField.text({
-        label: "Title",
-        placeholder: "Enter a title",
-        minLength: 2,
-      }),
-      description: f0FormField.textarea({
-        label: "Description",
-        placeholder: "Tell us more",
-        optional: true,
-        rows: 3,
-      }),
-    })
-
-    const formDefinition = useF0FormDefinition({
-      errorTriggerMode: "on-submit",
-      name: "autosubmit-example",
-      schema: formSchema,
-      submitConfig: {
-        type: "autosubmit",
-      },
-      defaultValues: {
-        title: "My note",
-        description: "",
-      },
-      onSubmit: async ({ data }) => {
-        await sleep(600)
-        console.info(`Autosaved: ${JSON.stringify(data, null, 2)}`)
-        return { success: true, message: "Saved" }
-      },
-    })
-
-    return (
-      <div className="max-w-lg">
-        <F0Form formDefinition={formDefinition} />
-        <p className="mt-4 text-sm text-f1-foreground-secondary">
-          Edit any field — the form auto-submits 800ms after you stop typing.
-          Watch the action bar show Saving → Saved.
-        </p>
-      </div>
-    )
-  },
-}
-
-/**
- * Autosubmit with a custom `delay` and `hideActionBar: true` for a fully
- * silent autosave. Use this when the parent component provides its own
- * persistence feedback (e.g. a toast or status indicator).
- */
-export const AutosubmitCustomDelay: Story = {
-  render() {
-    const formSchema = z.object({
-      query: f0FormField.text({
-        label: "Search query",
-        placeholder: "Type to search",
-      }),
-    })
-
-    const formDefinition = useF0FormDefinition({
-      name: "autosubmit-custom-delay-example",
-      schema: formSchema,
-      submitConfig: {
-        type: "autosubmit",
-        delay: 1500,
-        hideActionBar: true,
-      },
-      defaultValues: { query: "" },
-      onSubmit: async ({ data }) => {
-        await sleep(300)
-        console.info(`Autosaved (silent): ${JSON.stringify(data, null, 2)}`)
-        return { success: true }
-      },
-    })
-
-    return (
-      <div className="max-w-lg">
-        <F0Form formDefinition={formDefinition} />
-        <p className="mt-4 text-sm text-f1-foreground-secondary">
-          Silent autosave after 1500ms with no action bar feedback. Check the
-          console to see the submitted values.
         </p>
       </div>
     )
@@ -2474,7 +2379,6 @@ export const FormInDialog: Story = {
             label: "Cancel",
             onClick: () => setOpen(false),
           }}
-          disableContentPadding
         >
           <F0Form formDefinition={formDefinition} formRef={formRef} />
         </F0Dialog>

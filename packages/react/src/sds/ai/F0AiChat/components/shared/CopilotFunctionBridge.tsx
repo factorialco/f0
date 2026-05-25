@@ -64,7 +64,6 @@ export const CopilotFunctionBridge = () => {
     setSendMessageFunction,
     setAppendMessagesFunction,
     setReplaceMessagesFunction,
-    runtimeFetch,
   } = useAiChat()
   const { reset, messages, setMessages, sendMessage, threadId } =
     useCopilotChatInternal()
@@ -98,8 +97,7 @@ export const CopilotFunctionBridge = () => {
         copilotApiConfig.chatApiEndpoint,
         copilotApiConfig.headers,
         threadId,
-        actions as Record<string, { render?: (...args: any[]) => any }>,
-        runtimeFetch
+        actions as Record<string, { render?: (...args: any[]) => any }>
       )
         .then(
           (msgs) => setMessages(msgs),
@@ -117,7 +115,6 @@ export const CopilotFunctionBridge = () => {
     setIsLoadingThread,
     copilotApiConfig,
     actions,
-    runtimeFetch,
   ])
 
   // Send message
@@ -158,7 +155,7 @@ export const CopilotFunctionBridge = () => {
       const currentThreadId = threadIdRef.current
       const persistable = filterPersistableMessages(hydrated)
       if (currentThreadId && persistable.length > 0) {
-        void runtimeFetch(
+        void fetch(
           `${copilotApiConfig.chatApiEndpoint}/chat-history/threads/${currentThreadId}/messages`,
           {
             method: "POST",
@@ -175,7 +172,7 @@ export const CopilotFunctionBridge = () => {
     return () => {
       setAppendMessagesFunction(null)
     }
-  }, [setAppendMessagesFunction, setMessages, copilotApiConfig, runtimeFetch])
+  }, [setAppendMessagesFunction, setMessages, copilotApiConfig])
 
   // Replace messages (clear + append atomically)
   // Unlike calling reset() then setMessages(), this does a single
@@ -194,7 +191,7 @@ export const CopilotFunctionBridge = () => {
       const currentThreadId = threadIdRef.current
       const persistable = filterPersistableMessages(hydrated)
       if (currentThreadId && persistable.length > 0) {
-        void runtimeFetch(
+        void fetch(
           `${copilotApiConfig.chatApiEndpoint}/chat-history/threads/${currentThreadId}/messages`,
           {
             method: "POST",
@@ -211,13 +208,7 @@ export const CopilotFunctionBridge = () => {
     return () => {
       setReplaceMessagesFunction(null)
     }
-  }, [
-    setReplaceMessagesFunction,
-    setMessages,
-    setThreadId,
-    copilotApiConfig,
-    runtimeFetch,
-  ])
+  }, [setReplaceMessagesFunction, setMessages, setThreadId, copilotApiConfig])
 
   return null
 }

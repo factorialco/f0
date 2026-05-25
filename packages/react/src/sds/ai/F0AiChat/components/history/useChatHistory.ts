@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from "react"
 
 import { useCopilotContext } from "@copilotkit/react-core"
 
-import { useAiChat } from "../../providers/AiChatStateProvider"
 import {
   readFromLocalStorage,
   writeToLocalStorage,
@@ -53,7 +52,6 @@ export function useChatHistory({
   enabled = false,
 }: { enabled?: boolean } = {}): UseChatHistoryReturn {
   const { copilotApiConfig } = useCopilotContext()
-  const { runtimeFetch } = useAiChat()
   const baseUrl = copilotApiConfig.chatApiEndpoint
 
   const [threads, setThreads] = useState<ChatThread[]>([])
@@ -66,7 +64,7 @@ export function useChatHistory({
     setError(null)
 
     try {
-      const response = await runtimeFetch(`${baseUrl}/chat-history/threads`, {
+      const response = await fetch(`${baseUrl}/chat-history/threads`, {
         credentials: "include",
         headers: {
           ...copilotApiConfig.headers,
@@ -87,7 +85,7 @@ export function useChatHistory({
     } finally {
       setIsLoading(false)
     }
-  }, [baseUrl, copilotApiConfig.headers, runtimeFetch])
+  }, [baseUrl, copilotApiConfig.headers])
 
   useEffect(() => {
     if (enabled) {
@@ -116,16 +114,13 @@ export function useChatHistory({
   const deleteThread = useCallback(
     async (id: string) => {
       try {
-        const response = await runtimeFetch(
-          `${baseUrl}/chat-history/threads/${id}`,
-          {
-            method: "DELETE",
-            credentials: "include",
-            headers: {
-              ...copilotApiConfig.headers,
-            },
-          }
-        )
+        const response = await fetch(`${baseUrl}/chat-history/threads/${id}`, {
+          method: "DELETE",
+          credentials: "include",
+          headers: {
+            ...copilotApiConfig.headers,
+          },
+        })
 
         if (!response.ok && response.status !== 204) {
           throw new Error(`Failed to delete thread: ${response.status}`)
@@ -147,7 +142,7 @@ export function useChatHistory({
         void fetchThreads()
       }
     },
-    [baseUrl, copilotApiConfig.headers, fetchThreads, runtimeFetch]
+    [baseUrl, copilotApiConfig.headers, fetchThreads]
   )
 
   return {

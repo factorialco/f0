@@ -29,7 +29,6 @@ import { F0StepShowcase } from "../../components/F0StepShowcase"
 import { F0TabsShowcase } from "../../components/F0TabsShowcase"
 import { F0TagShowcase } from "../../components/F0TagShowcase"
 import { F0TextShowcase } from "../../components/F0TextShowcase/F0TextShowcase"
-import { F0WizardShowcase } from "../../components/F0WizardShowcase"
 import { OneChipShowcase } from "../../components/OneChipShowcase"
 import { OnePresetShowcase } from "../../components/OnePresetShowcase"
 import { PageHeaderShowcase } from "../../components/PageHeaderShowcase"
@@ -71,7 +70,6 @@ type ComponentType =
   | "onepreset"
   | "pageheader"
   | "pressablefeedback"
-  | "f0wizard"
   | "tag"
 
 const componentOptions = [
@@ -95,7 +93,6 @@ const componentOptions = [
   { value: "f0link" as ComponentType, label: "F0Link" },
   { value: "f0progress" as ComponentType, label: "F0Progress" },
   { value: "f0step" as ComponentType, label: "F0Step" },
-  { value: "f0wizard" as ComponentType, label: "F0Wizard" },
   { value: "f0preset" as ComponentType, label: "F0Preset" },
   { value: "f0image" as ComponentType, label: "F0Image" },
   { value: "f0metadata" as ComponentType, label: "F0Metadata" },
@@ -166,8 +163,6 @@ export default function ComponentsShowcase() {
         return <F0ProgressShowcase />
       case "f0step":
         return <F0StepShowcase />
-      case "f0wizard":
-        return <F0WizardShowcase />
       case "f0preset":
         return <F0PresetShowcase />
       case "f0image":
@@ -196,7 +191,7 @@ export default function ComponentsShowcase() {
   }
 
   return (
-    <SafeAreaView className="bg-f0-background flex-1" edges={["top", "bottom"]}>
+    <SafeAreaView className="flex-1 bg-f0-background" edges={["top", "bottom"]}>
       <View
         className="flex-1"
         style={{ backgroundColor: asString(f0Background) }}
@@ -227,7 +222,9 @@ export default function ComponentsShowcase() {
           </View>
         </View>
 
-        <View style={{ flex: 1, minHeight: 0 }}>{renderComponent()}</View>
+        <View className="flex-1" style={{ minHeight: 0 }}>
+          {renderComponent()}
+        </View>
       </View>
     </SafeAreaView>
   )

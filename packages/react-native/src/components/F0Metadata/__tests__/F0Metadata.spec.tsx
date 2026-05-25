@@ -147,17 +147,6 @@ describe("F0Metadata", () => {
         },
       },
       {
-        name: "date — calendar icon",
-        item: {
-          label: "Created",
-          value: {
-            type: "date",
-            formattedDate: "May 14, 2026",
-            icon: "calendar",
-          },
-        },
-      },
-      {
         name: "progress-bar",
         item: {
           label: "Progress",

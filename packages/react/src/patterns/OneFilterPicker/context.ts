@@ -20,8 +20,6 @@ export type FiltersContextType<Definition extends FiltersDefinition> = {
   emitPresetClick: (filters: FiltersState<Definition>) => void
   mode?: FiltersMode
   displayCounter?: boolean
-  /** Total number of items matching the current filters, displayed as "N results for:" prefix in the chips row */
-  resultCount?: number
 }
 
 export const FiltersContext = createContext<
@@ -39,5 +37,4 @@ export const FiltersContext = createContext<
   emitPresetClick: () => {},
   mode: "default",
   displayCounter: false,
-  resultCount: undefined,
 })

@@ -343,7 +343,7 @@ const Messages = ({
                 showWelcomeBlock && !isLoadingThread
                   ? "flex flex-1"
                   : "flex flex-col gap-6",
-                "w-full max-w-content"
+                "w-full max-w-[712px]"
               )}
             >
               {isLoadingThread && <MessagesSkeleton />}
@@ -413,7 +413,7 @@ const Messages = ({
 }
 
 const MessagesSkeleton = () => (
-  <div className="max-w-content flex h-full w-full flex-col gap-6">
+  <div className="flex h-full w-full max-w-[712px] flex-col gap-6">
     <div className="flex flex-col gap-2">
       <div className="flex justify-end">
         <Skeleton className="h-12 w-2/5 rounded-full" />

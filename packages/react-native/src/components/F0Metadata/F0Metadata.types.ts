@@ -28,11 +28,7 @@ export type MetadataItemValue =
   | { type: "data-list"; data: string[] }
   | { type: "tag-list"; tags: string[] }
   | { type: "dot-tag"; label: string; color: F0TagDotColor }
-  | {
-      type: "date"
-      formattedDate: string
-      icon?: "warning" | "critical" | "calendar"
-    }
+  | { type: "date"; formattedDate: string; icon?: "warning" | "critical" }
   | {
       type: "progress-bar"
       value: number

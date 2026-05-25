@@ -142,8 +142,6 @@ const F0OneIconComponent = (
                   duration: 1.8,
                   ease: [0.65, 0, 0.35, 1],
                   times: [0, 0.99, 0.9999, 1],
-                  repeat: spin ? Infinity : 0,
-                  repeatDelay: 2,
                 },
                 "--scale": {
                   duration: hover ? 0.6 : 0.35,
@@ -162,8 +160,6 @@ const F0OneIconComponent = (
                   duration: 1.8,
                   ease: [0.65, 0, 0.35, 1],
                   times: [0, 0.5, 1],
-                  repeat: spin ? Infinity : 0,
-                  repeatDelay: 2,
                 },
               }}
               style={

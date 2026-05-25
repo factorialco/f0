@@ -318,9 +318,7 @@ It returns an object with the following properties:
 - `id: string`: The id of the action. This is used to identify the action in the
   `onBulkAction` callback.
 - `keepSelection?: boolean`: If true, the selection will not be cleared after
-  the action is performed. Use for actions where the user may want to act again
-  after completion (e.g. "Download CSV"). For modal-gated actions, use
-  `bulkActionStatus` instead — it handles selection clearing automatically.
+  the action is performed (false by default)
 
 ### onBulkAction
 
@@ -333,101 +331,7 @@ The callback receives the following parameters:
 - `selectedItems`: The items selected by the user. Check the `onSelectItems`
   callback for more information about the structure of the object.
 
-It may return `void` (synchronous fire-and-forget) or `Promise<void>` — see
-[Async bulk actions with status feedback](#async-bulk-actions-with-status-feedback).
-
 <Canvas
   of={DataCollectionStories.WithSelectableAndBulkActions}
-  meta={DataCollectionStories}
-/>
-
-### Async bulk actions with status feedback
-
-When your handler does real async work (server call, batch update), opt in
-with `autoManageBulkActionStatus` and return a `Promise`. The action bar then
-drives a loading → success → idle (or loading → error) status machine
-automatically:
-
-- While the promise is pending, the action button itself shows a spinner and
-  becomes disabled, along with all other primary and secondary action buttons,
-  to prevent overlapping clicks. With a single primary action the spinner
-  appears inside the button; with multiple primary actions it appears on the
-  dropdown trigger. The bar-level status area is kept clear during loading so
-  the spinner is never shown twice.
-  (Secondary actions rendered in the overflow dropdown on mobile are not yet
-  disabled — tracked for a future improvement to `F0ActionBar`.)
-- On resolve, the bar flips to `success` for ~1.5 seconds (checkmark) before
-  returning to `idle`. Selection is cleared on resolve unless the action has
-  `keepSelection: true`.
-- On reject, the bar flips to `error`: the container wiggles, the error icon
-  stays until the next selection change, and the selection is preserved so the
-  user can retry.
-
-```tsx
-<OneDataCollection
-  autoManageBulkActionStatus
-  onBulkAction={async (action) => {
-    await api.run(action)
-  }}
-/>
-```
-
-Opt-in is required because handlers that **open a modal** typically resolve
-when the modal opens rather than when the user confirms — auto-managing those
-would flash a premature success. Without the flag, sync and async handlers
-both keep today's fire-and-forget behavior (selection clears immediately, no
-status transitions).
-
-For flows that can't be modelled as a single promise (confirmation dialogs,
-server polling, multi-step wizards), combine `autoManageBulkActionStatus` with
-the controlled `bulkActionStatus` prop. The two props work together:
-
-- **Immediate actions** (return `Promise`) — F0 auto-manages status normally
-  whenever `bulkActionStatus` is `"idle"`.
-- **Modal-gated actions** (return `void`) — F0 keeps the selection alive and
-  defers to your status transitions. You drive `"loading"` → `"success"` or
-  `"error"` from your modal confirm handler; F0 auto-clears selection and
-  resets to idle after ~1.5 s on success.
-
-```tsx
-const [status, setStatus] = useState<ActionBarStatus>("idle")
-
-<OneDataCollection
-  autoManageBulkActionStatus
-  bulkActionStatus={status}
-  onBulkAction={(action, selectedItems) => {
-    if (action === "delete") {
-      // Immediate — return Promise, F0 auto-manages
-      return api.delete(selectedItems)
-    }
-    // Modal-gated — return void, F0 keeps selection
-    openConfirmModal({
-      onConfirm: async () => {
-        setStatus("loading")
-        try {
-          await api.reject(selectedItems)
-          setStatus("success")
-          // No timer, no clearSelection needed — F0 handles both
-        } catch {
-          setStatus("error")
-        }
-      },
-    })
-  }}
-/>
-```
-
-When `bulkActionStatus` is provided, void-returning handlers never auto-clear
-selection regardless of the current value — F0 treats the prop's presence as
-a signal that some actions have modal lifecycles.
-
-In **auto-managed mode**, `"error"` persists until the user changes their
-selection (which resets it to `"idle"`), allowing them to retry. In
-**controlled mode**, selection changes only reset the internal state — the
-controlled `"error"` prop remains active until the consumer explicitly sets a
-different value.
-
-<Canvas
-  of={DataCollectionStories.WithAsyncBulkActions}
   meta={DataCollectionStories}
 />

@@ -342,7 +342,6 @@ export const getMockVisualizations = (options?: {
     applyLongText?: boolean
     longColumnLabels?: boolean
     referenceRows?: boolean
-    bordered?: boolean
   }
   cache?: MockDataCache<MockUser>
 }): Record<
@@ -363,7 +362,6 @@ export const getMockVisualizations = (options?: {
       options: {
         allowColumnHiding: options?.table?.allowColumnHiding,
         allowColumnReordering: options?.table?.allowColumnReordering,
-        bordered: options?.table?.bordered,
         frozenColumns:
           options?.table?.frozenColumns ?? options?.frozenColumns ?? 0,
         referenceRowType: options?.table?.referenceRows

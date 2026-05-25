@@ -2,6 +2,7 @@ import { useCopilotChatInternal } from "@copilotkit/react-core"
 
 import { cn } from "@/lib/utils"
 
+import { useRegisteredActions } from "./actions"
 import { ChatTextarea } from "./components/input/ChatTextarea"
 import { CanvasPanel } from "./components/layout/CanvasPanel"
 import { MessagesContainer } from "./components/messages/MessagesContainer"
@@ -36,6 +37,8 @@ export const F0AiFullscreenChatComponent = () => {
   const { enabled, canvasContent, visualizationMode } = useAiChat()
 
   const isCanvasMode = visualizationMode === "canvas"
+
+  useRegisteredActions()
 
   if (!enabled) {
     return null

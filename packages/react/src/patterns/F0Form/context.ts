@@ -1,7 +1,7 @@
 import { createContext, useContext } from "react"
 
 import type { InitialFile, UseFileUpload } from "./fields/file/types"
-import type { F0FormSubmitConfig, RenderCustomFieldFunction } from "./types"
+import type { RenderCustomFieldFunction } from "./types"
 
 interface F0FormContextValue {
   /** Form name used for anchor links */
@@ -16,10 +16,6 @@ interface F0FormContextValue {
   isLoading?: boolean
   /** Default upload hook shared across all file fields */
   useUpload?: UseFileUpload
-  /**
-   * Submit configuration for the form.
-   */
-  submitConfig?: F0FormSubmitConfig
 }
 
 export const F0FormContext = createContext<F0FormContextValue | null>(null)

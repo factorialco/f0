@@ -88,7 +88,6 @@ export function CardOptions({
             checked={selected}
             onCheckedChange={onSelect}
             hideLabel
-            stopPropagation
           />
         </div>
       )}

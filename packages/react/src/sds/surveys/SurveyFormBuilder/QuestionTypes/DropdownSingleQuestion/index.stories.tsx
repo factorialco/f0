@@ -38,16 +38,6 @@ const datasets: SurveyDatasets = {
   },
 }
 
-const datasetsWithOnCreate: SurveyDatasets = {
-  people: {
-    ...datasets.people,
-    onCreate: (value: string) => {
-      const id = value.toLowerCase().replace(/\s+/g, "-")
-      return Promise.resolve({ id, name: value })
-    },
-  },
-}
-
 const meta: Meta<typeof DropdownSingleQuestion> = {
   title: "Surveys/SurveyFormBuilder/DropdownSingleQuestion",
   component: DropdownSingleQuestion,
@@ -111,39 +101,6 @@ export const WithSearchBoxExplicit: Story = {
     datasetKey: "people",
     showSearchBox: true,
     searchBoxPlaceholder: "Search vendors...",
-    value: null,
-  },
-}
-
-export const WithAllowCreate: Story = {
-  parameters: withSkipA11y({}),
-  render: (args) => {
-    const [elements, setElements] = useState<SurveyFormBuilderElement[]>([
-      { type: "question" as const, question: args },
-    ])
-
-    const question =
-      elements[0] && "question" in elements[0] ? elements[0].question : {}
-
-    return (
-      <div className="max-w-[750px]">
-        <SurveyFormBuilderProvider
-          elements={elements}
-          onChange={setElements}
-          datasets={datasetsWithOnCreate}
-        >
-          <DropdownSingleQuestion {...args} {...question} />
-        </SurveyFormBuilderProvider>
-      </div>
-    )
-  },
-  args: {
-    id: "question-4",
-    title: "Select your team",
-    description: "Search for a team or create a new one",
-    type: "dropdown-single",
-    datasetKey: "people",
-    allowCreate: true,
     value: null,
   },
 }

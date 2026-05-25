@@ -121,7 +121,7 @@ describe("SelectCell", () => {
     await user.click(screen.getByText("Developer"))
 
     expect(onChange).toHaveBeenCalledTimes(1)
-    expect(onChange).toHaveBeenCalledWith("dev", { selectedItem: undefined })
+    expect(onChange).toHaveBeenCalledWith("dev")
   })
 
   it("does not call onChange when selecting the same value", async () => {

@@ -1,25 +1,9 @@
 /* Main styles */
-
-/*
- * Legacy mention chip styling.
- *
- * New mentions emitted by the Tiptap Mention extension carry the shared
- * `mentionFocusableClasses` recipe directly on the `<a>` element, so they
- * style themselves without needing CSS rules here. This block only exists
- * to keep historical content (stored as `<a class="mention">…</a>` without
- * the recipe classes) visually consistent with the new output.
- *
- * Keep these rules in sync with `lib/recipes/mention.ts` if the visual
- * treatment changes. If a migration ever rewrites stored content to include
- * the recipe classes (or to use `data-type="mention"` exclusively), this
- * block can be removed.
- */
-.rich-text-editor-container a.mention:not([data-type="mention"]),
-.rich-text-display-container a.mention:not([data-type="mention"]) {
-  @apply bg-f1-background-secondary hover:bg-f1-background-secondary-hover text-f1-foreground rounded-xs !px-1.5 font-medium no-underline transition-colors;
+.mention {
+  @apply bg-f1-background-accent rounded-xs px-1.5 py-0.5 font-medium;
 }
-.rich-text-editor-container a.mention:not([data-type="mention"]):focus,
-.rich-text-display-container a.mention:not([data-type="mention"]):focus {
+
+.mention:focus {
   @apply outline-f1-border-selected-bold outline outline-1 outline-offset-1;
 }
 
@@ -103,9 +87,9 @@
   @apply m-0 mb-2.5 list-decimal;
 }
 
-.rich-text-editor-container a:not([data-type="mention"]):not(.mention),
-.rich-text-display-container a:not([data-type="mention"]):not(.mention) {
-  @apply text-f1-foreground decoration-f1-border-hover hover:decoration-f1-border-bold cursor-pointer font-medium underline decoration-1 underline-offset-[5px];
+.rich-text-editor-container a,
+.rich-text-display-container a {
+  @apply text-f1-foreground-accent cursor-pointer font-medium no-underline;
 }
 
 .rich-text-editor-container strong,
