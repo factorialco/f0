@@ -157,25 +157,23 @@ describe("F0GraphSearch keyboard", () => {
       />
     )
 
-    // ArrowDown → first result highlighted
+    // ArrowDown → first result highlighted (index 0 → result "1")
     await user.keyboard("{ArrowDown}")
 
-    // ArrowDown → second result
+    // ArrowDown → second result (index 1 → result "2")
     await user.keyboard("{ArrowDown}")
 
-    // ArrowUp → back to first result
+    // ArrowUp → back to first result (index 0 → result "1")
     await user.keyboard("{ArrowUp}")
 
-    // Enter → select first result
+    // Enter → select the currently highlighted result.
     await user.keyboard("{Enter}")
 
-    // The selected result should be "2" (after Down→Down→Up we're at index 1→2→1,
-    // but activeOutline starts false, so: first Down sets outline on index 0,
-    // second Down moves to index 1, Up moves to index 0 again)
+    // After Down→Down→Up, the highlight lands on index 0 (result "1").
     expect(onSelect).toHaveBeenCalledWith("1")
   })
 
-  it("no-match state shows 'No results' in the portal", async () => {
+  it("no-match state — combobox opens and no results are highlighted", async () => {
     const { userEvent } = await import("@testing-library/user-event")
     const user = userEvent.setup()
     const onChange = vi.fn()
@@ -202,20 +200,28 @@ describe("F0GraphSearch keyboard", () => {
       />
     )
 
-    // "No results" is rendered inside a Radix Popover Portal.
-    // Since portals render to document.body, we query via document directly.
-    const noResultsEl = document.body.querySelector("[role='listbox']")
-    if (noResultsEl) {
-      // If the popover rendered (it should since hasQuery && hasContent),
-      // check for the no-results text
-      const text = noResultsEl.textContent
-      expect(text).toContain("No results")
-    } else {
-      // Radix Portal may not render in jsdom — this is a known limitation.
-      // The "No results" message is present in the component code and
-      // renders when results=[] and hasQuery=true and popover is open.
-      // Skip assertion with documentation.
-    }
+    // The component contract for the no-match state is deterministic at the
+    // combobox level (the Radix Popover Portal is unreliable under JSDOM):
+    //   1. The combobox stays expanded so the user sees feedback.
+    //   2. No option is highlighted (aria-activedescendant must be empty).
+    //   3. ArrowDown / Enter are no-ops because there is nothing to select.
+    const combobox = screen.getByRole("combobox")
+    expect(combobox.getAttribute("aria-expanded")).toBe("true")
+    expect(combobox.getAttribute("aria-activedescendant")).toBeNull()
+
+    const onSelectSpy = vi.fn()
+    rerender(
+      <F0GraphSearch
+        value="zzz"
+        onChange={onChange}
+        results={[]}
+        hasQuery={true}
+        onSelect={onSelectSpy}
+      />
+    )
+    await user.keyboard("{ArrowDown}")
+    await user.keyboard("{Enter}")
+    expect(onSelectSpy).not.toHaveBeenCalled()
   })
 
   it("empty query state — combobox indicates closed", () => {
