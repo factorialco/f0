@@ -61,7 +61,7 @@ function EdgeStory({
             onEdgeClick: () => {},
             onEdgeHover: () => {},
           }
-        : null),
+        : {}),
     },
   ]
 
@@ -88,7 +88,7 @@ const meta = {
 } satisfies Meta<typeof F0GraphEdge>
 
 export default meta
-type Story = StoryObj<typeof F0GraphEdge>
+type Story = StoryObj<typeof meta>
 
 /**
  * All four edge variants rendered side by side in a single canvas so they

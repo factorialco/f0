@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+
 import type { GraphNode } from "../../types"
 
 import { F0Graph, type F0GraphNodeRenderContext } from "../../F0Graph"
@@ -47,7 +49,7 @@ const meta = {
 } satisfies Meta<typeof F0GraphControls>
 
 export default meta
-type Story = StoryObj<typeof F0GraphControls>
+type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   parameters: {
@@ -58,6 +60,25 @@ export const Default: Story = {
       },
     },
   },
+  render: () => (
+    <div style={{ width: 480, height: 320 }} className="bg-f1-background">
+      <F0Graph
+        nodes={NODES}
+        edges={[]}
+        renderNode={renderPerson}
+        defaultExpandDepth={1}
+        showControls
+        currentUserNodeId="a"
+        nodeTagTypes={["person", "team", "status"]}
+        defaultVisibleTagTypes={["person", "team", "status"]}
+      />
+    </div>
+  ),
+}
+
+export const Snapshot: Story = {
+  tags: ["no-sidebar"],
+  parameters: withSnapshot({}),
   render: () => (
     <div style={{ width: 480, height: 320 }} className="bg-f1-background">
       <F0Graph

@@ -19,7 +19,7 @@ unless a custom `renderEdge` is provided. It renders a smooth
 SVG path that stays visually quiet so nodes remain the primary
 focus.
 
-> When using `<F0Graph>`, you do NOT need to wrap with `ReactFlowProvider` — `F0Graph` mounts its own. The Storybook stories below use `ReactFlowProvider` only to render `F0GraphEdge` in isolation.
+> When using `<F0Graph>`, you do NOT need to wrap with `ReactFlowProvider` — `F0Graph` mounts its own. The Storybook stories below render `F0GraphEdge` indirectly by mounting a small `<F0Graph>` per variant so each edge appears in its real context.
 
 <Canvas of={Stories.Status} />
 

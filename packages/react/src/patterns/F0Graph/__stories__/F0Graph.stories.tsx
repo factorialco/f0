@@ -87,7 +87,7 @@ const meta = {
 } satisfies Meta<F0GraphProps<Employee>>
 
 export default meta
-type Story = StoryObj<F0GraphProps<Employee>>
+type Story = StoryObj<typeof meta>
 
 // ─── Sample data ───────────────────────────────────────────────
 interface Team {

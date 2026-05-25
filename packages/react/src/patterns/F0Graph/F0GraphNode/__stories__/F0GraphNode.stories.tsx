@@ -44,7 +44,7 @@ const meta = {
 } satisfies Meta<typeof F0GraphNode>
 
 export default meta
-type Story = StoryObj<typeof F0GraphNode>
+type Story = StoryObj<typeof meta>
 
 const personAvatar = {
   type: "person",

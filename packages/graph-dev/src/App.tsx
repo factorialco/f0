@@ -334,13 +334,6 @@ export function App() {
   const renderCountRef = useRef(0)
   renderCountRef.current++
 
-  const renderNodeWithCount = useCallback(
-    (node: GraphNode<Employee>, zoomLevel: ZoomLevel) => {
-      return renderEmployee(node, zoomLevel)
-    },
-    []
-  )
-
   const toggleDarkMode = () => {
     setDarkMode((prev) => {
       const next = !prev
