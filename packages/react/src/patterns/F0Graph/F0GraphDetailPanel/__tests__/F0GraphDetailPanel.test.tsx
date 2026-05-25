@@ -1,5 +1,14 @@
 import { act, fireEvent, screen } from "@testing-library/react"
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest"
 
 import { zeroRender as render } from "@/testing/test-utils"
 
@@ -28,8 +37,6 @@ class JsonDomPointerEvent extends MouseEvent {
     this.tiltY = params.tiltY ?? 0
   }
 }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-;(globalThis as Record<string, unknown>).PointerEvent = JsonDomPointerEvent
 
 // ─── localStorage mock ───────────────────────────────────────────
 
@@ -54,7 +61,41 @@ const localStorageMock = (() => {
   }
 })()
 
-Object.defineProperty(window, "localStorage", { value: localStorageMock })
+// ─── Global setup / teardown ─────────────────────────────────────
+// We stash the original PointerEvent + localStorage so this file doesn't
+// leak side effects into sibling test files when they share a worker.
+
+const ORIGINAL_POINTER_EVENT = (globalThis as Record<string, unknown>)
+  .PointerEvent
+const ORIGINAL_LOCAL_STORAGE_DESCRIPTOR = Object.getOwnPropertyDescriptor(
+  window,
+  "localStorage"
+)
+
+beforeAll(() => {
+  vi.stubGlobal("PointerEvent", JsonDomPointerEvent)
+  Object.defineProperty(window, "localStorage", {
+    configurable: true,
+    value: localStorageMock,
+  })
+})
+
+afterAll(() => {
+  vi.unstubAllGlobals()
+  if (ORIGINAL_POINTER_EVENT === undefined) {
+    delete (globalThis as Record<string, unknown>).PointerEvent
+  }
+  if (ORIGINAL_LOCAL_STORAGE_DESCRIPTOR) {
+    Object.defineProperty(
+      window,
+      "localStorage",
+      ORIGINAL_LOCAL_STORAGE_DESCRIPTOR
+    )
+  } else {
+    // No prior descriptor — best-effort cleanup.
+    delete (window as unknown as Record<string, unknown>).localStorage
+  }
+})
 
 // ─── Helpers ─────────────────────────────────────────────────────
 
