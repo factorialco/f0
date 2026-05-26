@@ -89,7 +89,6 @@ export const F0AiChatTextArea = ({
   onSuggestionClick,
   ref,
 }: F0AiChatTextAreaProps) => {
-  const fullscreenWelcome = fullscreen && isWelcomeScreen
   const translation = useI18n()
   const shouldReduceMotion = useReducedMotion()
   const [inputValue, setInputValue] = useState("")
@@ -249,16 +248,7 @@ export const F0AiChatTextArea = ({
     mentions.mentions.length > 0 || mentions.inlineCompletion !== null
 
   return (
-    <div
-      ref={ref}
-      className={cn(
-        "flex flex-col items-center gap-2 px-4 pb-3 pt-2",
-        // Only grow to share space with the messages container when we're in
-        // the fullscreen welcome layout — that's where the "stick to the
-        // middle" centering trick relies on the textarea taking its half.
-        fullscreenWelcome && "flex-grow"
-      )}
-    >
+    <div ref={ref} className="flex flex-col items-center gap-2 px-4 pb-3 pt-2">
       <div className="flex w-full max-w-content flex-col gap-2">
         {isWelcomeScreen &&
           welcomeScreenSuggestions &&
@@ -446,8 +436,7 @@ export const F0AiChatTextArea = ({
             </span>
           </motion.div>
         ) : (
-          disclaimer?.text &&
-          !fullscreenWelcome && (
+          disclaimer?.text && (
             <motion.div
               key="chat-disclaimer"
               className="flex w-full max-w-content flex-row items-center justify-center gap-1"

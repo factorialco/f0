@@ -22,3 +22,61 @@
     background-position: -200% 0;
   }
 }
+
+@keyframes globe-spin-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+.globe-spin-enter {
+  animation: globe-spin-enter 0.5s cubic-bezier(0.33, 1, 0.68, 1) both;
+}
+
+/* Subtle "thinking" breath. Plays after the entrance finishes (0.5s delay)
+   and loops forever. Amplitude is small (~3.5%) so it reads as life, not noise. */
+@keyframes globe-spin-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.035);
+  }
+}
+
+.globe-spin-breathe {
+  animation: globe-spin-breathe 3.6s ease-in-out 0.5s infinite;
+}
+
+/* Soft "AI thinking" halo. Cycles between the two brand colors of the globe
+   so the glow feels coherent with what's spinning inside, not stuck on. */
+@keyframes globe-spin-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 2px rgba(255, 90, 30, 0.35))
+      drop-shadow(0 0 6px rgba(255, 90, 30, 0.18));
+  }
+  50% {
+    filter: drop-shadow(0 0 3px rgba(180, 150, 230, 0.45))
+      drop-shadow(0 0 8px rgba(180, 150, 230, 0.22));
+  }
+}
+
+.globe-spin-glow {
+  animation: globe-spin-glow 3.6s ease-in-out 0.5s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .globe-spin-breathe,
+  .globe-spin-glow {
+    animation: none;
+  }
+}

@@ -266,7 +266,7 @@ export const FormWithAiChat: Story = {
           agent="one-workflow"
           credentials="include"
           showDevConsole={false}
-          greeting="Hello! I can help you fill out the employee form. Ask me to describe it, fill fields, or submit."
+          initialMessage="Help me fill out the employee form"
         >
           <AutoOpenChat>
             <ApplicationFrame
@@ -852,7 +852,7 @@ export const AvailableForms: Story = {
           agent="one-workflow"
           credentials="include"
           showDevConsole={false}
-          greeting="Hello! I can help you with forms. I can fill, describe, and submit any of the available forms. Try asking me to fill a time-off request or the new employee form."
+          initialMessage="What form do you want to fill out?"
         >
           <AutoOpenChat>
             <ApplicationFrame
@@ -1115,7 +1115,7 @@ export const FormWithDefaultValuesParams: Story = {
           agent="one-workflow"
           credentials="include"
           showDevConsole={false}
-          greeting="Hello! I can open an aircraft edit form pre-populated with its current data. Try: 'Edit aircraft ac-1' or 'Open the edit form for the A350'."
+          initialMessage="Which aircraft do you want to edit?"
         >
           <AutoOpenChat>
             <ApplicationFrame

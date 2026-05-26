@@ -215,7 +215,6 @@ export type AiChatTrackingOptions = {
  */
 export type AiChatProviderProps = {
   enabled?: boolean
-  greeting?: string
   initialMessage?: string | string[]
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
   disclaimer?: AiChatDisclaimer

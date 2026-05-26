@@ -26,7 +26,6 @@ import {
  * Internal state for the AiChat provider
  */
 export interface AiChatState {
-  greeting?: string
   enabled: boolean
   agent?: string
   initialMessage?: string | string[]
@@ -255,7 +254,6 @@ export type AiChatProviderReturnValue = {
   setPendingQuote: React.Dispatch<React.SetStateAction<PendingQuote | null>>
 } & Pick<
   AiChatState,
-  | "greeting"
   | "agent"
   | "disclaimer"
   | "resizable"

@@ -91,7 +91,6 @@ export const ConnectedMessagesContainer = ({
   const lazyToolRendered = useLazyToolRenderer()
 
   const {
-    greeting,
     initialMessage,
     isLoadingThread,
     setInProgress,
@@ -99,7 +98,6 @@ export const ConnectedMessagesContainer = ({
     visualizationMode,
     tracking,
     setPendingQuote,
-    openGame,
     onThumbsUp,
     onThumbsDown,
   } = useAiChat()
@@ -225,10 +223,6 @@ export const ConnectedMessagesContainer = ({
   }, [filteredMessages, inProgress])
 
   // ── Callbacks ──
-  const onWelcomeIconClick = useCallback(() => {
-    openGame("pong")
-  }, [openGame])
-
   const onReplyQuote = useCallback(
     (text: string) => {
       setPendingQuote({ text })
@@ -269,9 +263,7 @@ export const ConnectedMessagesContainer = ({
       turns={turns}
       isLoadingThread={isLoadingThread}
       interrupt={interrupt}
-      greeting={greeting}
       initialMessage={initialMessage}
-      onWelcomeIconClick={onWelcomeIconClick}
       renderToolCall={renderToolCall}
       onReplyQuote={onReplyQuote}
       onAssistantMessageRendered={onAssistantMessageRendered}

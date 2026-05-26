@@ -10,9 +10,6 @@ import { ChatSpinner } from "./components/ChatSpinner"
 import "./styles.css"
 import { F0ActionItemProps } from "./types"
 
-// Opacity-only swap. Animating `scale` on the wrapper applies a
-// `transform: scale(...)` that competes with ChatSpinner's own
-// `transform: rotate(...)` inside `motion.svg` and freezes the spin.
 const ICON_MOTION = {
   initial: { opacity: 0 },
   animate: { opacity: 1 },
