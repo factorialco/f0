@@ -9,12 +9,17 @@ import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
-import type { EmployeeCreditsUsage } from "../../types"
-
-import { useAiChat } from "../../providers/AiChatStateProvider"
+import type {
+  AiChatEmployeeCredits,
+  EmployeeCreditsUsage,
+} from "../../F0AiChat/types"
 
 const CREDITS_GRADIENT =
   "linear-gradient(90deg, #E55619, #A1ADE5, #E51943, #E55619)"
+
+type EmployeeCreditsPopoverProps = {
+  employeeCredits?: AiChatEmployeeCredits
+}
 
 /**
  * Employee-only credits popover.
@@ -23,12 +28,16 @@ const CREDITS_GRADIENT =
  * Mutually exclusive with the classic {@link CreditsPopover}: when both
  * `credits` and `employeeCredits` are provided, this one wins.
  *
+ * Headless — takes `employeeCredits` as a prop. The Connected* wrapper
+ * (ConnectedChatHeader) reads the value from `useAiChat()` and forwards it.
+ *
  * No company-level section, no upgrade CTA — just the logged-in employee's
  * monthly allocation. Hosts opt in by passing `employeeCredits` only for
  * employees who have a per-employee monthly allocation configured.
  */
-export function EmployeeCreditsPopover() {
-  const { employeeCredits } = useAiChat()
+export function EmployeeCreditsPopover({
+  employeeCredits,
+}: EmployeeCreditsPopoverProps) {
   const i18n = useI18n()
   const reduceMotion = useReducedMotion()
   const [open, setOpen] = useState(false)

@@ -36,6 +36,7 @@ export const ConnectedChatHeader = (_props: HeaderProps) => {
     lockVisualizationMode,
     tracking,
     credits,
+    employeeCredits,
   } = useAiChat()
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
   const fullscreen = visualizationMode === "fullscreen"
@@ -97,6 +98,7 @@ export const ConnectedChatHeader = (_props: HeaderProps) => {
         onOpenHistory={() => setIsHistoryOpen(true)}
         hasMessages={hasMessages}
         credits={credits}
+        employeeCredits={employeeCredits}
       />
       {isHistoryOpen && historyEnabled && (
         <ConnectedChatHistory

@@ -1,4 +1,4 @@
-import type { AiChatCredits } from "../F0AiChat/types"
+import type { AiChatCredits, AiChatEmployeeCredits } from "../F0AiChat/types"
 
 export type F0AiChatHeaderProps = {
   /**
@@ -41,4 +41,11 @@ export type F0AiChatHeaderProps = {
 
   /** Credits configuration. When present, renders the credits popover button. */
   credits?: AiChatCredits
+
+  /**
+   * Employee-level credits configuration. When present, an employee-only
+   * popover is rendered **instead of** the classic one (mutually exclusive
+   * with `credits`). Hosts opt in per-employee.
+   */
+  employeeCredits?: AiChatEmployeeCredits
 }

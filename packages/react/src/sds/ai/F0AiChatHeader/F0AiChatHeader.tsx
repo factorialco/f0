@@ -15,7 +15,24 @@ import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
 
 import { CreditsPopover } from "./components/CreditsPopover"
+import { EmployeeCreditsPopover } from "./components/EmployeeCreditsPopover"
 import type { F0AiChatHeaderProps } from "./types"
+
+/**
+ * Picks the right credits popover to render based on which prop the host
+ * provided. `employeeCredits` (employee-only) takes precedence; otherwise
+ * falls back to the classic `credits` popover. Renders nothing when neither
+ * is set.
+ */
+const CreditsPopoverPicker = ({
+  credits,
+  employeeCredits,
+}: Pick<F0AiChatHeaderProps, "credits" | "employeeCredits">) => {
+  if (employeeCredits)
+    return <EmployeeCreditsPopover employeeCredits={employeeCredits} />
+  if (credits) return <CreditsPopover credits={credits} />
+  return null
+}
 
 /**
  * Headless chat header. Renders a top bar with title (or thread selector),
@@ -39,6 +56,7 @@ export const F0AiChatHeader = ({
   onOpenHistory,
   hasMessages = false,
   credits,
+  employeeCredits,
 }: F0AiChatHeaderProps) => {
   const translations = useI18n()
   const isSmallScreen = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
@@ -97,7 +115,10 @@ export const F0AiChatHeader = ({
           animate={{ opacity: 1 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
         >
-          <CreditsPopover credits={credits} />
+          <CreditsPopoverPicker
+            credits={credits}
+            employeeCredits={employeeCredits}
+          />
           {expandButton}
           {closeButton}
         </motion.div>
@@ -125,7 +146,10 @@ export const F0AiChatHeader = ({
             onClick={onNewChat}
           />
         )}
-        <CreditsPopover credits={credits} />
+        <CreditsPopoverPicker
+          credits={credits}
+          employeeCredits={employeeCredits}
+        />
         {expandButton}
         {closeButton}
       </motion.div>
