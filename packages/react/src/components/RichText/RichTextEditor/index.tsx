@@ -470,7 +470,7 @@ const RichTextEditorComponent = forwardRef<
     </FocusScope>
   )
 
-  if (isFullscreen && !dialogContext.portalContainer) {
+  if (isFullscreen && !dialogContext.open) {
     return ReactDOM.createPortal(
       <DataTestIdWrapper dataTestId={dataTestId}>
         {editorContent}

@@ -39,6 +39,7 @@ test("keeps side dialog open when toggling fullscreen", async () => {
       onClose={onClose}
     >
       <RichTextEditor
+        dataTestId="rich-text-editor"
         title="Title"
         placeholder="Placeholder..."
         onChange={vi.fn()}
@@ -51,8 +52,12 @@ test("keeps side dialog open when toggling fullscreen", async () => {
   )
 
   const dialog = screen.getByRole("dialog")
-  const fullscreenEditor = dialog.querySelector(".rich-text-editor-container")
+  const richTextEditor = screen.getByTestId("rich-text-editor")
+  const fullscreenEditor = richTextEditor.querySelector(
+    ".rich-text-editor-container"
+  )
 
+  expect(dialog).toContainElement(richTextEditor)
   expect(fullscreenEditor).toBeTruthy()
   expect(fullscreenEditor).toHaveClass("fixed")
   expect(fullscreenEditor).not.toHaveClass("absolute")
