@@ -59,21 +59,23 @@ export function FilterPickerInternal<Filters extends FiltersDefinition>({
           </div>
         )}
       </div>
-      <div className="flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary p-2">
-        {onClear && (
-          <F0Button
-            onClick={onClear}
-            label={i18n.collections.emptyStates.noResults.clearFilters}
-            variant="outline"
-          />
-        )}
-        {showApplyButton && (
-          <F0Button
-            onClick={onApply}
-            label={applyButtonLabel ?? i18n.filters.applyFilters}
-          />
-        )}
-      </div>
+      {showApplyButton || onClear ? (
+        <div className="flex items-center justify-end gap-2 border border-solid border-transparent border-t-f1-border-secondary p-2">
+          {onClear && (
+            <F0Button
+              onClick={onClear}
+              label={i18n.collections.emptyStates.noResults.clearFilters}
+              variant="outline"
+            />
+          )}
+          {showApplyButton && (
+            <F0Button
+              onClick={onApply}
+              label={applyButtonLabel ?? i18n.filters.applyFilters}
+            />
+          )}
+        </div>
+      ) : null}
     </div>
   )
 }
