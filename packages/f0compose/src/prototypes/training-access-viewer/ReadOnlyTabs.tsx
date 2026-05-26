@@ -1,11 +1,11 @@
-import { F0Alert, F0Box, F0Card, F0Heading, F0Select, F0Text } from "@factorialco/f0-react"
+import { F0Alert, F0Box, F0Button, F0Card, F0Heading, F0Select, F0Text } from "@factorialco/f0-react"
 import {
   OneDataCollection,
   SectionHeader,
   useDataCollectionSource,
   type GroupingDefinition,
 } from "@factorialco/f0-react/dist/experimental"
-import { File as FileIcon, Link as LinkIcon } from "@factorialco/f0-react/icons/app"
+import { Add, Download, File as FileIcon, Link as LinkIcon } from "@factorialco/f0-react/icons/app"
 import { useMemo, useState } from "react"
 
 import {
@@ -342,6 +342,12 @@ export function ReadOnlyClassesTab({
           }
         },
       },
+      primaryActions: () => ({
+        label: "New group",
+        icon: Add,
+        disabled: true,
+        description: "Only admins can create training groups.",
+      }),
     },
     [training.id]
   )
@@ -523,6 +529,12 @@ function useParticipantsSource(
           }
         },
       },
+      primaryActions: () => ({
+        label: "Add participants",
+        icon: Add,
+        disabled: true,
+        description: "Only admins can manage participants.",
+      }),
     },
     [training.id, rows]
   )
@@ -765,6 +777,23 @@ function useFilesSource(training: Training, allFiles: TrainingFile[]) {
           }
         },
       },
+      primaryActions: () => ({
+        label: "Upload",
+        icon: Add,
+        disabled: true,
+        description: "Only admins can manage materials and documents.",
+      }),
+      secondaryActions: {
+        expanded: 1,
+        actions: () => [
+          {
+            label: "New link",
+            icon: LinkIcon,
+            disabled: true,
+            description: "Only admins can manage materials and documents.",
+          },
+        ],
+      },
     },
     [training.id, allFiles]
   )
@@ -978,6 +1007,12 @@ function useFormsSource(
           }
         },
       },
+      primaryActions: () => ({
+        label: "New survey",
+        icon: Add,
+        disabled: true,
+        description: "Only admins can create surveys.",
+      }),
       itemOnClick: (item) => () => setSelectedTemplate(item.template),
     },
     [training.id, allForms, setSelectedTemplate]
@@ -1023,12 +1058,24 @@ function ReadOnlyFundaeDashboard({ training }: TrainingTabProps) {
         separator="bottom"
         title="Finalise training group (Fundae)"
         description="Review the Fundae data prepared for the selected training group."
-        link={{
-          href: "https://empresas.fundae.es/Lanzadera",
-          label: "Open Fundae portal",
-        }}
       />
       <F0Box display="flex" flexDirection="column" gap="2xl">
+        <F0Box display="flex" gap="sm">
+          <F0Button
+            label="Open Fundae portal"
+            icon={LinkIcon}
+            disabled
+            variant="outline"
+            size="sm"
+          />
+          <F0Button
+            label="Export XML"
+            icon={Download}
+            disabled
+            variant="outline"
+            size="sm"
+          />
+        </F0Box>
         <F0Box maxWidth="md">
           <F0Select
             label="Training group"
@@ -1040,8 +1087,8 @@ function ReadOnlyFundaeDashboard({ training }: TrainingTabProps) {
         </F0Box>
         <F0Alert
           variant="info"
-          title="Can view access is read-only"
-          description="You can inspect Fundae setup and participant data, but exporting XML or editing costs requires edit access."
+          title="Shared access is read-only here"
+          description="You can inspect Fundae setup and participant data, but exporting XML or editing costs requires admin access."
         />
         <F0Card title="Group details">
           <F0Box display="grid" columns="2" gap="lg" padding="lg">

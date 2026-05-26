@@ -79,6 +79,25 @@ What remains to close Admin is not a new UI surface. It is confirming the exact 
 - Instructor-only people can still be selected, because adding direct training access is meaningful.
 - Direct collaborator + instructor remains one row in the access list with instructor context in secondary text.
 
+## Role-specific course access
+
+- The course list in `training-access-editor` and `training-access-viewer` is
+  filtered by the effective training permission. Users should only see courses
+  they can access through `Owner`, direct `Can edit`, direct `Can view`, or
+  instructor-derived access according to the prototype role.
+- `Can edit` keeps course-content editing available, but operational/admin
+  actions are not executable unless the user is an admin. This includes creating
+  courses, importing/exporting training data, creating groups, adding
+  participants, creating sessions, uploading materials or documents, creating
+  surveys, exporting Fundae data, opening the Fundae portal from this flow, and
+  adding/editing costs.
+- `Can view` is read-only. It can navigate, search, filter, open allowed detail
+  pages, and preview existing survey content, but it cannot execute mutations.
+- Admin-only and operational CTAs in `Can edit` and `Can view` should remain
+  visible but disabled, with copy explaining that admin access is required. Do
+  not hide them silently unless the upstream product intentionally hides that
+  surface for the role.
+
 ## Admin UI decisions
 
 - `Share` is the primary header action for published trainings.

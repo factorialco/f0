@@ -7,7 +7,7 @@ import {
   Tabs,
   useDataCollectionSource,
 } from "@factorialco/f0-react/dist/experimental"
-import { DottedCircle, Laptop, Office } from "@factorialco/f0-react/icons/app"
+import { Add, DottedCircle, Laptop, Office } from "@factorialco/f0-react/icons/app"
 import { useMemo, useState } from "react"
 import { useSearchParams } from "react-router-dom"
 
@@ -31,6 +31,10 @@ type Props = {
   classId: string
   baseHref: string
   trainingHref: string
+  access?: {
+    label: "Can edit" | "Can view"
+    variant: "warning" | "info"
+  }
 }
 
 type ClassTabId = "sessions" | "participants" | "materials" | "documents" | "costs"
@@ -142,6 +146,7 @@ export function ReadOnlyClassDetail({
   classId,
   baseHref,
   trainingHref,
+  access = { label: "Can view", variant: "info" },
 }: Props) {
   const [searchParams, setSearchParams] = useSearchParams()
   const klass = training.classes.find((item) => item.id === classId)
@@ -233,7 +238,11 @@ export function ReadOnlyClassDetail({
             metadata={[
               {
                 label: "Access",
-                value: { type: "status", label: "Can view", variant: "info" },
+                value: {
+                  type: "status",
+                  label: access.label,
+                  variant: access.variant,
+                },
               },
               {
                 label: "Start date",
@@ -330,6 +339,12 @@ function ReadOnlySessionsTab({ klass }: { klass: TrainingClass }) {
           return { records: sorted, totalCount: sorted.length }
         },
       },
+      primaryActions: () => ({
+        label: "New session",
+        icon: Add,
+        disabled: true,
+        description: "Only admins can create sessions.",
+      }),
     },
     [klass.id]
   )
@@ -452,6 +467,12 @@ function ReadOnlyClassParticipantsTab({ klass }: { klass: TrainingClass }) {
           return { records: filtered, totalCount: filtered.length }
         },
       },
+      primaryActions: () => ({
+        label: "Add participants",
+        icon: Add,
+        disabled: true,
+        description: "Only admins can manage participants.",
+      }),
     },
     [rows]
   )
@@ -466,7 +487,7 @@ function ReadOnlyClassParticipantsTab({ klass }: { klass: TrainingClass }) {
         />
         <F0Text
           variant="description"
-          content="People enrolled in this group. Can view access is read-only."
+          content="People enrolled in this group. Shared access is read-only for participant management."
         />
       </F0Box>
       <OneDataCollection
@@ -636,6 +657,22 @@ function ReadOnlyClassMaterialsTab({ training }: { training: Training }) {
         />
       </F0Box>
       <F0Box display="flex" gap="sm">
+        <F0Button
+          label="Upload"
+          icon={Add}
+          disabled
+          variant="default"
+          size="sm"
+        />
+        <F0Button
+          label="New link"
+          icon={Add}
+          disabled
+          variant="outline"
+          size="sm"
+        />
+      </F0Box>
+      <F0Box display="flex" gap="sm">
         <FilterButton active={filter === "all"} label="All" onClick={() => setFilter("all")} />
         <FilterButton active={filter === "file"} label="Files" onClick={() => setFilter("file")} />
         <FilterButton active={filter === "link"} label="Links" onClick={() => setFilter("link")} />
@@ -714,6 +751,15 @@ function ReadOnlyClassDocumentsTab({
           variant="description"
         />
       </F0Box>
+      <F0Box display="flex" gap="sm">
+        <F0Button
+          label="Upload document"
+          icon={Add}
+          disabled
+          variant="default"
+          size="sm"
+        />
+      </F0Box>
       {certificates.length === 0 ? (
         <F0Alert
           variant="info"
@@ -765,7 +811,16 @@ function ReadOnlyClassCostsTab({
         <F0Heading as="h3" variant="heading-large" content="Costs" />
         <F0Text
           variant="description"
-          content="Can view access can inspect costs but cannot edit budget values."
+          content="Shared access can inspect costs but cannot edit budget values."
+        />
+      </F0Box>
+      <F0Box display="flex" gap="sm">
+        <F0Button
+          label="Add cost"
+          icon={Add}
+          disabled
+          variant="default"
+          size="sm"
         />
       </F0Box>
       <F0Box display="grid" columns="3" gap="md">

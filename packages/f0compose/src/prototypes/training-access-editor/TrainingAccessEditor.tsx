@@ -12,16 +12,18 @@ import { useSearchParams } from "react-router-dom"
 import { type Training, findTraining, trainings } from "@/fixtures"
 
 import { AccessCoursesPage } from "../training-access-shared/AccessCoursesPage"
-import { AttachmentsTab } from "../trainings/detail/AttachmentsTab"
-import { EditableClassDetail } from "../training-access-shared/EditableClassDetail"
-import { EditableClassesTab } from "../training-access-shared/EditableClassesTab"
 import { ContentTab } from "../trainings/detail/ContentTab"
-import { DocumentsTab } from "../trainings/detail/DocumentsTab"
-import { FormsTab } from "../trainings/detail/FormsTab"
-import { FundaeTab } from "../trainings/detail/FundaeTab"
 import { OverviewTab } from "../trainings/detail/OverviewTab"
-import { ParticipantsTab } from "../trainings/detail/ParticipantsTab"
 import { PageContent } from "../trainings/_shared/PageContent"
+import { ReadOnlyClassDetail } from "../training-access-viewer/ReadOnlyClassDetail"
+import {
+  ReadOnlyAttachmentsTab,
+  ReadOnlyClassesTab,
+  ReadOnlyDocumentsTab,
+  ReadOnlyFormsTab,
+  ReadOnlyFundaeTab,
+  ReadOnlyParticipantsTab,
+} from "../training-access-viewer/ReadOnlyTabs"
 import { type DetailTabId, detailTabs } from "../trainings/tabs"
 import type { PrototypeMeta } from "../types"
 
@@ -123,11 +125,12 @@ export default function TrainingAccessEditor() {
 
   if (classId) {
     return (
-      <EditableClassDetail
+      <ReadOnlyClassDetail
         training={training}
         classId={classId}
         baseHref={BASE_HREF}
         trainingHref={trainingHref}
+        access={{ label: "Can edit", variant: "warning" }}
       />
     )
   }
@@ -245,12 +248,18 @@ export default function TrainingAccessEditor() {
         <PageContent>
           {activeTab === "overview" && <OverviewTab training={training} />}
           {activeTab === "content" && <ContentTab training={training} />}
-          {activeTab === "groups" && <EditableClassesTab training={training} />}
-          {activeTab === "participants" && <ParticipantsTab training={training} />}
-          {activeTab === "attachments" && <AttachmentsTab training={training} />}
-          {activeTab === "documents" && <DocumentsTab training={training} />}
-          {activeTab === "surveys" && <FormsTab training={training} />}
-          {activeTab === "fundae" && <FundaeTab training={training} />}
+          {activeTab === "groups" && (
+            <ReadOnlyClassesTab training={training} baseHref={BASE_HREF} />
+          )}
+          {activeTab === "participants" && (
+            <ReadOnlyParticipantsTab training={training} />
+          )}
+          {activeTab === "attachments" && (
+            <ReadOnlyAttachmentsTab training={training} />
+          )}
+          {activeTab === "documents" && <ReadOnlyDocumentsTab training={training} />}
+          {activeTab === "surveys" && <ReadOnlyFormsTab training={training} />}
+          {activeTab === "fundae" && <ReadOnlyFundaeTab training={training} />}
         </PageContent>
       </Page>
       {copyTooltipPosition && <LinkCopiedTooltip position={copyTooltipPosition} />}

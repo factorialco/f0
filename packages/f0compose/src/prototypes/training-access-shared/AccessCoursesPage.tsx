@@ -565,36 +565,56 @@ function useAccessTrainingsSource(
         },
       },
       itemUrl: (item) => `${baseHref}?training=${item.id}`,
+      primaryActions: () => ({
+        label: "New course",
+        icon: Add,
+        ...(role === "admin"
+          ? { onClick: onAdd }
+          : {
+              disabled: true,
+              description: "Only admins can create courses.",
+            }),
+      }),
+      secondaryActions: {
+        expanded: 0,
+        actions: () => [
+          {
+            label: "Export",
+            description:
+              role === "admin"
+                ? "Download trainings as CSV"
+                : "Only admins can export training data.",
+            icon: Upload,
+            ...(role === "admin"
+              ? { onClick: () => onAction({ kind: "export" as const }) }
+              : { disabled: true }),
+          },
+          {
+            label: "Import",
+            description:
+              role === "admin"
+                ? "Import trainings from CSV"
+                : "Only admins can import trainings.",
+            icon: Download,
+            ...(role === "admin"
+              ? { onClick: () => onAction({ kind: "import" as const }) }
+              : { disabled: true }),
+          },
+          {
+            label: "Import courses",
+            description:
+              role === "admin"
+                ? "Bulk-import courses from a provider"
+                : "Only admins can import courses.",
+            icon: Download,
+            ...(role === "admin"
+              ? { onClick: () => onAction({ kind: "import-courses" as const }) }
+              : { disabled: true }),
+          },
+        ],
+      },
       ...(role === "admin"
         ? {
-            primaryActions: () => ({
-              label: "New course",
-              icon: Add,
-              onClick: onAdd,
-            }),
-            secondaryActions: {
-              expanded: 0,
-              actions: () => [
-                {
-                  label: "Export",
-                  description: "Download trainings as CSV",
-                  icon: Upload,
-                  onClick: () => onAction({ kind: "export" }),
-                },
-                {
-                  label: "Import",
-                  description: "Import trainings from CSV",
-                  icon: Download,
-                  onClick: () => onAction({ kind: "import" }),
-                },
-                {
-                  label: "Import courses",
-                  description: "Bulk-import courses from a provider",
-                  icon: Download,
-                  onClick: () => onAction({ kind: "import-courses" }),
-                },
-              ],
-            },
             selectable: (item: Training) => item.id,
             bulkActions: () => ({
               primary: [
