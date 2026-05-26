@@ -1,17 +1,20 @@
 import { type AIMessage, type Message } from "@copilotkit/shared"
 
-import { type ClarifyingQuestionState } from "./actions/core/clarifyingQuestion/types"
-import { type CanvasActions, type CanvasEntityDefinition } from "./canvas/types"
+import { type ClarifyingQuestionState } from "../F0ClarifyingPanel/types"
+import {
+  type CanvasActions,
+  type CanvasEntityDefinition,
+} from "../canvas/types"
 import {
   type AiChatDisclaimer,
   type AiChatMode,
   type AiChatFileAttachmentConfig,
   type AiChatTrackingOptions,
-  type AiChatToolHint,
   type AppendMessage,
   type CanvasContent,
   type AiChatCredits,
   type AiChatCreditWarning,
+  type AiChatEmployeeCredits,
   type EntityRefs,
   type PendingContext,
   type PendingQuote,
@@ -38,8 +41,8 @@ export interface AiChatState {
   entityRefs?: EntityRefs
   canvasActions?: CanvasActions
   canvasEntities?: Record<string, CanvasEntityDefinition>
-  toolHints?: AiChatToolHint[]
   credits?: AiChatCredits
+  employeeCredits?: AiChatEmployeeCredits
   creditWarning?: AiChatCreditWarning
   fileAttachments?: AiChatFileAttachmentConfig
   placeholders?: string[]
@@ -259,8 +262,8 @@ export type AiChatProviderReturnValue = {
   | "entityRefs"
   | "canvasActions"
   | "canvasEntities"
-  | "toolHints"
   | "credits"
+  | "employeeCredits"
   | "creditWarning"
   | "fileAttachments"
 > & {
@@ -276,12 +279,6 @@ export type AiChatProviderReturnValue = {
     openGame: (game: "pong") => void
     /** Close the active mini-game overlay */
     closeGame: () => void
-    /** The currently active tool hint, or null if none is selected */
-    activeToolHint: AiChatToolHint | null
-    /** Set the active tool hint (pass null to clear) */
-    setActiveToolHint: React.Dispatch<
-      React.SetStateAction<AiChatToolHint | null>
-    >
   }
 
 /**

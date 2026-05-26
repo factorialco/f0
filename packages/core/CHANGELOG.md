@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.51.1](https://github.com/factorialco/f0/compare/f0-core-v1.51.0...f0-core-v1.51.1) (2026-05-21)
+
+
+### Bug Fixes
+
+* Update icons in MultitaskHeader for consistency and design ([#4140](https://github.com/factorialco/f0/issues/4140)) ([0be4c84](https://github.com/factorialco/f0/commit/0be4c84db2956749b748972a962418954c69a7df))
+
+## [1.51.0](https://github.com/factorialco/f0/compare/f0-core-v1.50.3...f0-core-v1.51.0) (2026-05-21)
+
+
+### Features
+
+* **f0:** add F0SegmentedControl experimental component ([#4102](https://github.com/factorialco/f0/issues/4102)) ([17218e6](https://github.com/factorialco/f0/commit/17218e676bd0456ac45a3c14683f188fbf1db40a))
+
 ## [1.50.3](https://github.com/factorialco/f0/compare/f0-core-v1.50.2...f0-core-v1.50.3) (2026-05-15)
 
 

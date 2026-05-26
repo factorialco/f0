@@ -5,7 +5,7 @@ import { expect, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
-import { Lightbulb } from "@/icons/app"
+import { ChartVerticalBars, Lightbulb, Pencil, Search } from "@/icons/app"
 import ArrowRight from "@/icons/app/ArrowRight"
 import ExternalLink from "@/icons/app/ExternalLink"
 import Marketplace from "@/icons/app/Marketplace"
@@ -317,6 +317,16 @@ const mockFetchCreditsUsage = () =>
   })
 
 /**
+ * Mock fetchEmployeeCreditsUsage — same shape as above but used by the
+ * employee-only popover. Smaller monthly allocation to reflect the
+ * per-employee variant.
+ */
+const mockFetchEmployeeCreditsUsage = () =>
+  new Promise<{ used: number; total: number }>((resolve) => {
+    setTimeout(() => resolve({ used: 50, total: 250 }), 500)
+  })
+
+/**
  * Mock file upload handler for Storybook.
  * Simulates a 1-second upload and returns metadata with a fake URL.
  */
@@ -428,6 +438,96 @@ const meta: Meta<typeof ApplicationFrame> = {
         companyLogoUrl: "/avatars/factorial.png",
         planName: "Free plan",
       },
+      // When both are set the employee-only popover wins (see
+      // CreditsPopoverPicker in F0AiChatHeader). The classic `credits` above
+      // stays as a documented fallback for hosts that haven't opted into
+      // per-employee allocations.
+      employeeCredits: {
+        fetchUsage: mockFetchEmployeeCreditsUsage,
+        companyName: "Factorial",
+        companyLogoUrl: "/avatars/factorial.png",
+        planName: "Free plan",
+      },
+      welcomeScreenSuggestions: [
+        {
+          icon: ChartVerticalBars,
+          label: "Analyze",
+          items: [
+            {
+              title: "April leave and overtime summary",
+              prompt:
+                "Give me a detailed breakdown of leave taken and overtime worked across the company in April, grouped by department.",
+            },
+            {
+              title: "Current gross salary by employee",
+              prompt:
+                "List the current gross salary of every active employee, sorted from highest to lowest.",
+            },
+            {
+              title: "Report on starters and leavers",
+              prompt:
+                "Show me a report of starters and leavers in the last quarter, with start/end dates and roles.",
+            },
+            {
+              title: "Headcount evolution by department",
+              prompt:
+                "Plot headcount evolution by department over the last twelve months and highlight the fastest-growing teams.",
+            },
+            {
+              title: "Absence trends across teams",
+              prompt:
+                "Compare absence rates across teams over the last six months and call out any anomalies.",
+            },
+          ],
+        },
+        {
+          icon: Search,
+          label: "Find",
+          items: [
+            {
+              title: "Who's out of office this week?",
+              prompt:
+                "List every employee on time-off, sick leave, or other absence between today and the end of the week.",
+            },
+            {
+              title: "Engineers based in Barcelona",
+              prompt:
+                "Find all employees in the Engineering department whose office location is Barcelona.",
+            },
+            {
+              title: "Open positions in Sales",
+              prompt:
+                "Show every open job posting in the Sales department, including hiring manager and target start date.",
+            },
+            {
+              title: "Documents shared with me",
+              prompt:
+                "List documents shared with me in the last 30 days, sorted by most recent activity.",
+            },
+          ],
+        },
+        {
+          icon: Pencil,
+          label: "Create",
+          items: [
+            {
+              title: "Draft a job description for a Senior Backend role",
+              prompt:
+                "Draft a job description for a Senior Backend Engineer focused on distributed systems, with responsibilities, requirements, and a short company pitch.",
+            },
+            {
+              title: "Compose an offboarding email template",
+              prompt:
+                "Compose an offboarding email template that thanks the employee, lists return-of-equipment steps, and links to the HR exit form.",
+            },
+            {
+              title: "Outline an onboarding checklist for new hires",
+              prompt:
+                "Outline a one-week onboarding checklist for new hires that covers IT setup, meetings to schedule, and key documents to read.",
+            },
+          ],
+        },
+      ],
       fileAttachments: {
         onUploadFiles: mockUploadFiles,
         maxFiles: 5,
@@ -484,307 +584,6 @@ export default meta
 
 type Story = StoryObj<typeof ApplicationFrame>
 
-const mockExpensesDashboardConfig = {
-  title: "Expenses dashboard",
-  description:
-    "Overview of company expenses by status, category and type with the monthly spending trend for the current period.",
-  savedDashboardId: "dash-expenses-001",
-  savedDashboardCategory: "trainings",
-  savedDashboardDescription:
-    "Overview of all company expenses by status, category and type with monthly trend.",
-  fetchSpecs: {
-    expenses: {
-      fetch: [
-        {
-          toolId: "fetchExpenses",
-          args: {
-            ids: null,
-            employeeIds: null,
-            status: [
-              "pending",
-              "approved",
-              "rejected",
-              "changes_requested",
-              "in_payroll",
-              "sent_to_pay",
-              "paid",
-              "reversed",
-            ],
-            from: null,
-            to: null,
-            categories: null,
-            search: null,
-            spendingAlertType: null,
-            pendingApproval: null,
-            expenseType: null,
-          },
-        },
-      ],
-      query:
-        "SELECT\n  CAST(SUBSTR(expensable_effectiveOn, 1, 10) AS DATE) AS expense_date,\n  expensable_status AS status,\n  owner_fullName AS employee,\n  expense_merchantName AS merchant,\n  expense_categoryName AS category,\n  CASE\n    WHEN expense_id IS NOT NULL THEN 'Expense'\n    WHEN mileage_id IS NOT NULL THEN 'Mileage'\n    WHEN perDiem_id IS NOT NULL THEN 'Per diem'\n    ELSE 'Other'\n  END AS expense_type,\n  expensable_currency AS currency,\n  expensable_amount AS amount_total,\n  CASE WHEN expensable_status = 'pending' THEN expensable_amount END AS amount_pending,\n  CASE WHEN expensable_status = 'approved' THEN expensable_amount END AS amount_approved,\n  CASE WHEN expensable_status = 'paid' THEN expensable_amount END AS amount_paid\nFROM fetchexpenses\nWHERE expensable_status <> 'draft'",
-      columnTransforms: {
-        amount_total: {
-          type: "currency",
-          fromCents: true,
-          currencyColumn: "currency",
-        },
-      },
-    },
-  },
-  items: [
-    {
-      id: "m_total",
-      title: "Total",
-      description: "Importe total de expenses en el periodo seleccionado.",
-      explanation:
-        "Suma del **importe total** de todos los expenses (expense/mileage/per diem) dentro del **periodo** seleccionado.",
-      type: "metric",
-      format: { type: "currency", currency: "EUR" },
-      decimals: 2,
-      computation: {
-        datasetId: "expenses",
-        aggregation: "sum",
-        column: "amount_total",
-      },
-      itemHeight: 144,
-    },
-    {
-      id: "m_pendiente",
-      title: "Pendiente",
-      description: "Importe total en estado pendiente.",
-      explanation:
-        "Suma del **importe** de los expenses cuyo **estado** es **pending**, dentro del periodo seleccionado.",
-      type: "metric",
-      format: { type: "currency", currency: "EUR" },
-      decimals: 2,
-      computation: {
-        datasetId: "expenses",
-        aggregation: "sum",
-        column: "amount_pending",
-      },
-      itemHeight: 144,
-    },
-    {
-      id: "m_aprobado",
-      title: "Aprobado",
-      description: "Importe total en estado aprobado.",
-      explanation:
-        "Suma del **importe** de los expenses cuyo **estado** es **approved**, dentro del periodo seleccionado.",
-      type: "metric",
-      format: { type: "currency", currency: "EUR" },
-      decimals: 2,
-      computation: {
-        datasetId: "expenses",
-        aggregation: "sum",
-        column: "amount_approved",
-      },
-      itemHeight: 144,
-    },
-    {
-      id: "m_pagado",
-      title: "Pagado",
-      description: "Importe total pagado.",
-      explanation:
-        "Suma del **importe** de los expenses cuyo **estado** es **paid**, dentro del periodo seleccionado.",
-      type: "metric",
-      format: { type: "currency", currency: "EUR" },
-      decimals: 2,
-      computation: {
-        datasetId: "expenses",
-        aggregation: "sum",
-        column: "amount_paid",
-      },
-      itemHeight: 144,
-    },
-    {
-      id: "c_trend",
-      title: "Gastos por mes",
-      description: "Evolución mensual del gasto total.",
-      explanation:
-        "Suma mensual del **importe total** (todos los tipos) según la **fecha del gasto**.",
-      type: "chart",
-      chart: {
-        type: "line",
-        lineType: "smooth",
-        valueFormat: { type: "currency", currency: "EUR" },
-        datasetId: "expenses",
-        xAxis: "expense_date",
-        yAxis: "amount_total",
-        aggregation: "sum",
-      },
-      itemHeight: 336,
-    },
-    {
-      id: "c_estado",
-      title: "Gasto por estado",
-      description: "Distribución del gasto total por estado.",
-      explanation: "Suma del **importe total** agrupado por **estado**.",
-      itemHeight: 432,
-      type: "chart",
-      chart: {
-        type: "bar",
-        orientation: "horizontal",
-        stacked: false,
-        valueFormat: { type: "currency", currency: "EUR" },
-        datasetId: "expenses",
-        xAxis: "status",
-        yAxis: "amount_total",
-        aggregation: "sum",
-        sortBy: "value",
-        sortOrder: "desc",
-      },
-    },
-    {
-      id: "c_categoria",
-      title: "Top categorías",
-      description: "Categorías con mayor gasto total.",
-      explanation: "Top 15 **categorías** por suma del **importe total**.",
-      itemHeight: 528,
-      type: "chart",
-      chart: {
-        type: "bar",
-        orientation: "horizontal",
-        stacked: false,
-        valueFormat: { type: "currency", currency: "EUR" },
-        datasetId: "expenses",
-        xAxis: "category",
-        yAxis: "amount_total",
-        aggregation: "sum",
-        sortBy: "value",
-        sortOrder: "desc",
-        limit: 15,
-      },
-    },
-    {
-      id: "c_tipo",
-      title: "Gasto por tipo",
-      description: "Distribución por tipo (expense, mileage, per diem).",
-      explanation:
-        "Suma del **importe total** agrupado por **tipo** de expense.",
-      type: "chart",
-      chart: {
-        type: "pie",
-        innerRadius: 0.55,
-        showPercentage: true,
-        valueFormat: { type: "currency", currency: "EUR" },
-        datasetId: "expenses",
-        nameColumn: "expense_type",
-        valueColumn: "amount_total",
-        aggregation: "sum",
-        sortBy: "value",
-        sortOrder: "desc",
-      },
-      itemHeight: 336,
-    },
-    {
-      id: "t_detalle",
-      title: "Detalle de expenses",
-      description: "Listado detallado de expenses filtrable.",
-      explanation:
-        "Tabla de detalle con **fecha**, **empleado**, **estado**, **tipo**, **categoría**, **comercio** e **importe**. Se actualiza con los filtros del dashboard.",
-      itemHeight: 720,
-      type: "collection",
-      columns: [
-        { id: "expense_date", label: "Fecha", width: 120 },
-        { id: "employee", label: "Empleado", width: 220 },
-        { id: "status", label: "Estado", width: 120 },
-        { id: "expense_type", label: "Tipo", width: 110 },
-        { id: "category", label: "Categoría", width: 160 },
-        { id: "merchant", label: "Comercio", width: 220 },
-        { id: "amount_total", label: "Importe total (€)", width: 140 },
-      ],
-      computation: {
-        datasetId: "expenses",
-        sortBy: "expense_date",
-        sortOrder: "desc",
-      },
-    },
-  ],
-  filters: {
-    estado: {
-      type: "in",
-      label: "Estado",
-      column: "status",
-      datasetId: "expenses",
-    },
-    empleado: {
-      type: "in",
-      label: "Empleado",
-      column: "employee",
-      datasetId: "expenses",
-    },
-    categoria: {
-      type: "in",
-      label: "Categoría",
-      column: "category",
-      datasetId: "expenses",
-    },
-  },
-  navigationFilters: {
-    periodo: {
-      type: "dateNavigation",
-      label: "Periodo",
-      column: "expense_date",
-      datasetId: "expenses",
-      granularities: ["month", "quarter", "year", "range"],
-      defaultGranularity: "month",
-    },
-  },
-}
-
-const ExpensesDashboardButton = () => {
-  const { clear, setOpen, appendMessages, setPendingContext } = useAiChat()
-
-  const handleClick = () => {
-    clear()
-    setOpen(true)
-
-    // Store the dashboard config as pending context.
-    // It will be sent as a separate text part in the user's first message.
-    setPendingContext({
-      label: "Expenses dashboard",
-      context: JSON.stringify(mockExpensesDashboardConfig),
-    })
-
-    // Inject a client-only assistant message with the dashboard toolCall
-    // so the card renders in the chat (with Open/Close, auto-open canvas, etc).
-    // persist: false avoids creating a backend thread.
-    // Deferred so clear() finishes first.
-    setTimeout(() => {
-      appendMessages(
-        [
-          {
-            role: "assistant",
-            content: "Here is the expenses dashboard:",
-            toolCalls: [
-              {
-                id: crypto.randomUUID(),
-                function: {
-                  name: "displayDashboard",
-                  arguments: JSON.stringify({
-                    ...mockExpensesDashboardConfig,
-                    savedDashboardUnsaved: false,
-                  }),
-                },
-              },
-            ],
-          },
-        ],
-        { persist: false }
-      )
-    }, 0)
-  }
-
-  return (
-    <F0Button
-      label="Open Expenses Dashboard"
-      onClick={handleClick}
-      icon={Lightbulb}
-      variant="outline"
-    />
-  )
-}
-
 const DefaultStoryComponent = (
   args: ComponentProps<typeof ApplicationFrame>
 ) => {
@@ -794,13 +593,7 @@ const DefaultStoryComponent = (
       aiPromotion={args.aiPromotion}
       sidebar={<Sidebar {...SidebarStories.default.args} />}
     >
-      <div className="flex w-full flex-col gap-2">
-        <Page {...PageStories.Default.args}>
-          <div className="p-5">
-            <ExpensesDashboardButton />
-          </div>
-        </Page>
-      </div>
+      <Page {...PageStories.Default.args} />
     </ApplicationFrame>
   )
 }
@@ -974,6 +767,96 @@ export const FullscreenWithActions: Story = {
         companyLogoUrl: "/avatars/factorial.png",
         planName: "Free plan",
       },
+      // When both are set the employee-only popover wins (see
+      // CreditsPopoverPicker in F0AiChatHeader). The classic `credits` above
+      // stays as a documented fallback for hosts that haven't opted into
+      // per-employee allocations.
+      employeeCredits: {
+        fetchUsage: mockFetchEmployeeCreditsUsage,
+        companyName: "Factorial",
+        companyLogoUrl: "/avatars/factorial.png",
+        planName: "Free plan",
+      },
+      welcomeScreenSuggestions: [
+        {
+          icon: ChartVerticalBars,
+          label: "Analyze",
+          items: [
+            {
+              title: "April leave and overtime summary",
+              prompt:
+                "Give me a detailed breakdown of leave taken and overtime worked across the company in April, grouped by department.",
+            },
+            {
+              title: "Current gross salary by employee",
+              prompt:
+                "List the current gross salary of every active employee, sorted from highest to lowest.",
+            },
+            {
+              title: "Report on starters and leavers",
+              prompt:
+                "Show me a report of starters and leavers in the last quarter, with start/end dates and roles.",
+            },
+            {
+              title: "Headcount evolution by department",
+              prompt:
+                "Plot headcount evolution by department over the last twelve months and highlight the fastest-growing teams.",
+            },
+            {
+              title: "Absence trends across teams",
+              prompt:
+                "Compare absence rates across teams over the last six months and call out any anomalies.",
+            },
+          ],
+        },
+        {
+          icon: Search,
+          label: "Find",
+          items: [
+            {
+              title: "Who's out of office this week?",
+              prompt:
+                "List every employee on time-off, sick leave, or other absence between today and the end of the week.",
+            },
+            {
+              title: "Engineers based in Barcelona",
+              prompt:
+                "Find all employees in the Engineering department whose office location is Barcelona.",
+            },
+            {
+              title: "Open positions in Sales",
+              prompt:
+                "Show every open job posting in the Sales department, including hiring manager and target start date.",
+            },
+            {
+              title: "Documents shared with me",
+              prompt:
+                "List documents shared with me in the last 30 days, sorted by most recent activity.",
+            },
+          ],
+        },
+        {
+          icon: Pencil,
+          label: "Create",
+          items: [
+            {
+              title: "Draft a job description for a Senior Backend role",
+              prompt:
+                "Draft a job description for a Senior Backend Engineer focused on distributed systems, with responsibilities, requirements, and a short company pitch.",
+            },
+            {
+              title: "Compose an offboarding email template",
+              prompt:
+                "Compose an offboarding email template that thanks the employee, lists return-of-equipment steps, and links to the HR exit form.",
+            },
+            {
+              title: "Outline an onboarding checklist for new hires",
+              prompt:
+                "Outline a one-week onboarding checklist for new hires that covers IT setup, meetings to schedule, and key documents to read.",
+            },
+          ],
+        },
+      ],
       fileAttachments: {
         onUploadFiles: mockUploadFiles,
         maxFiles: 5,
@@ -982,6 +865,33 @@ export const FullscreenWithActions: Story = {
         text: "One works within your permissions.",
         link: "/permissions",
         linkText: "See more",
+      },
+    },
+  },
+}
+
+/**
+ * Demonstrates the employee-only credits popover. Hosts opt in by passing
+ * `employeeCredits` to the AI provider; when both `credits` and
+ * `employeeCredits` are set, the employee variant wins. Here we only set
+ * `employeeCredits` so the focus stays on that variant.
+ */
+export const WithEmployeeCredits: Story = {
+  render: (args) => <DefaultStoryComponent {...args} />,
+  args: {
+    ai: {
+      runtimeUrl: "https://mastra.local.factorial.dev/copilotkit",
+      agent: "one-workflow",
+      credentials: "include",
+      showDevConsole: false,
+      enabled: true,
+      resizable: true,
+      greeting: "Hello, John",
+      employeeCredits: {
+        fetchUsage: mockFetchEmployeeCreditsUsage,
+        companyName: "Factorial",
+        companyLogoUrl: "/avatars/factorial.png",
+        planName: "Free plan",
       },
     },
   },

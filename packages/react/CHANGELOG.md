@@ -1,5 +1,138 @@
 # Changelog
 
+## [2.19.1](https://github.com/factorialco/f0/compare/f0-react-v2.19.0...f0-react-v2.19.1) (2026-05-26)
+
+
+### Bug Fixes
+
+* **RichTextEditor:** keep fullscreen inside dialogs ([#4218](https://github.com/factorialco/f0/issues/4218)) ([4866d39](https://github.com/factorialco/f0/commit/4866d390cbe1d57f09cd6667b919f4f840f676e1))
+
+## [2.19.0](https://github.com/factorialco/f0/compare/f0-react-v2.18.0...f0-react-v2.19.0) (2026-05-26)
+
+
+### Features
+
+* cancel selected filters ([#4202](https://github.com/factorialco/f0/issues/4202)) ([c1b0652](https://github.com/factorialco/f0/commit/c1b0652bbd3ae33af9971baab5182e8a80d03e68))
+
+## [2.18.0](https://github.com/factorialco/f0/compare/f0-react-v2.17.0...f0-react-v2.18.0) (2026-05-26)
+
+
+### Features
+
+* **F0AiChat:** add opt-in EmployeeCreditsPopover via employeeCredits prop ([#4231](https://github.com/factorialco/f0/issues/4231)) ([0662e48](https://github.com/factorialco/f0/commit/0662e4885cc80dd80b3adc64c4a36793e2f7d69a))
+
+## [2.17.0](https://github.com/factorialco/f0/compare/f0-react-v2.16.3...f0-react-v2.17.0) (2026-05-22)
+
+
+### Features
+
+* add min/max constraints to editable table date cell ([#4205](https://github.com/factorialco/f0/issues/4205)) ([3271274](https://github.com/factorialco/f0/commit/32712746f54f062cb363532bd8e176ed792af49e))
+
+## [2.16.3](https://github.com/factorialco/f0/compare/f0-react-v2.16.2...f0-react-v2.16.3) (2026-05-22)
+
+
+### Bug Fixes
+
+* **F0Select:** prevent double onChange emit on async datasources ([#4223](https://github.com/factorialco/f0/issues/4223)) ([5958f8c](https://github.com/factorialco/f0/commit/5958f8caed66d1f46c59e1d39e8e11cac8a45a9d))
+
+## [2.16.2](https://github.com/factorialco/f0/compare/f0-react-v2.16.1...f0-react-v2.16.2) (2026-05-22)
+
+
+### Bug Fixes
+
+* **F0Button:** show Documentation page in sidebar for F0Button and F0ButtonDropdown ([#4143](https://github.com/factorialco/f0/issues/4143)) ([873cb10](https://github.com/factorialco/f0/commit/873cb10c7916e2e090368a375e3ce8c7ef450b68))
+
+## [2.16.1](https://github.com/factorialco/f0/compare/f0-react-v2.16.0...f0-react-v2.16.1) (2026-05-22)
+
+
+### Bug Fixes
+
+* onApply as independant function ([#4207](https://github.com/factorialco/f0/issues/4207)) ([49b1302](https://github.com/factorialco/f0/commit/49b1302c4d504b463fb6995d1b8d834578098c95))
+
+## [2.16.0](https://github.com/factorialco/f0/compare/f0-react-v2.15.1...f0-react-v2.16.0) (2026-05-22)
+
+
+### Features
+
+* **F0Card:** add optional action prop to CardAlert ([#4211](https://github.com/factorialco/f0/issues/4211)) ([aeb6fa9](https://github.com/factorialco/f0/commit/aeb6fa97cae396d3fa5b1d6bdeefd2497cf38b95))
+
+## [2.15.1](https://github.com/factorialco/f0/compare/f0-react-v2.15.0...f0-react-v2.15.1) (2026-05-22)
+
+
+### Bug Fixes
+
+* **react:** fix formatting in CrudPatterns MDX documentation files ([#4219](https://github.com/factorialco/f0/issues/4219)) ([1786065](https://github.com/factorialco/f0/commit/17860659444c52656a9bf2ba191c863a343b9fcb))
+
+## [2.15.0](https://github.com/factorialco/f0/compare/f0-react-v2.14.5...f0-react-v2.15.0) (2026-05-22)
+
+
+### Features
+
+* **F0Graph:** add F0Graph pattern (runtime) ([#4196](https://github.com/factorialco/f0/issues/4196)) ([779d155](https://github.com/factorialco/f0/commit/779d155003da0ddc6730a832b780b076c4d2cda5))
+
+## [2.14.5](https://github.com/factorialco/f0/compare/f0-react-v2.14.4...f0-react-v2.14.5) (2026-05-21)
+
+
+### Bug Fixes
+
+* Update icons in MultitaskHeader for consistency and design ([#4140](https://github.com/factorialco/f0/issues/4140)) ([0be4c84](https://github.com/factorialco/f0/commit/0be4c84db2956749b748972a962418954c69a7df))
+
+## [2.14.4](https://github.com/factorialco/f0/compare/f0-react-v2.14.3...f0-react-v2.14.4) (2026-05-21)
+
+
+### Bug Fixes
+
+* reset to default button behavior in data collection ([#4213](https://github.com/factorialco/f0/issues/4213)) ([8783bd2](https://github.com/factorialco/f0/commit/8783bd28103ed6be06d2c1698d60218a28da3c66))
+
+## [2.14.3](https://github.com/factorialco/f0/compare/f0-react-v2.14.2...f0-react-v2.14.3) (2026-05-21)
+
+
+### Bug Fixes
+
+* **Metadata:** add key to Fragment wrapper in metadata items map ([#4209](https://github.com/factorialco/f0/issues/4209)) ([12c1800](https://github.com/factorialco/f0/commit/12c1800236f9dea11989ffdec71a70864ad96321))
+
+## [2.14.2](https://github.com/factorialco/f0/compare/f0-react-v2.14.1...f0-react-v2.14.2) (2026-05-21)
+
+
+### Bug Fixes
+
+* **F0Select:** reflect external value resets in single-selection mode ([#4210](https://github.com/factorialco/f0/issues/4210)) ([110e924](https://github.com/factorialco/f0/commit/110e9244da5cf52d6e617d9c10528329933ae79d))
+
+## [2.14.1](https://github.com/factorialco/f0/compare/f0-react-v2.14.0...f0-react-v2.14.1) (2026-05-21)
+
+
+### Bug Fixes
+
+* some adjustments to F0 forms ([#4194](https://github.com/factorialco/f0/issues/4194)) ([801cb2c](https://github.com/factorialco/f0/commit/801cb2ceba25b9d9129127eebd1a00acfb6abb2b))
+
+## [2.14.0](https://github.com/factorialco/f0/compare/f0-react-v2.13.1...f0-react-v2.14.0) (2026-05-21)
+
+
+### Features
+
+* **F0AiChat/dashboard:** forward per-column info as header tooltip ([#4154](https://github.com/factorialco/f0/issues/4154)) ([2d8f5d4](https://github.com/factorialco/f0/commit/2d8f5d40c99caaa6c3acd8b85e9efcd9201dafb6))
+
+## [2.13.1](https://github.com/factorialco/f0/compare/f0-react-v2.13.0...f0-react-v2.13.1) (2026-05-21)
+
+
+### Bug Fixes
+
+* **avatar:** match ticketing icon to tasks ([#4183](https://github.com/factorialco/f0/issues/4183)) ([aaeffe7](https://github.com/factorialco/f0/commit/aaeffe7ec2a16545505442f998512abc78f073af))
+
+## [2.13.0](https://github.com/factorialco/f0/compare/f0-react-v2.12.0...f0-react-v2.13.0) (2026-05-21)
+
+
+### Features
+
+* **f0:** add F0SegmentedControl experimental component ([#4102](https://github.com/factorialco/f0/issues/4102)) ([17218e6](https://github.com/factorialco/f0/commit/17218e676bd0456ac45a3c14683f188fbf1db40a))
+
+## [2.12.0](https://github.com/factorialco/f0/compare/f0-react-v2.11.1...f0-react-v2.12.0) (2026-05-20)
+
+
+### Features
+
+* **react:** allow hiding individual question actions in SurveyFormBuilder ([#4186](https://github.com/factorialco/f0/issues/4186)) ([fff84f2](https://github.com/factorialco/f0/commit/fff84f293c8f6aef84519f060bd02d4d688f10fc))
+
 ## [2.11.1](https://github.com/factorialco/f0/compare/f0-react-v2.11.0...f0-react-v2.11.1) (2026-05-20)
 
 

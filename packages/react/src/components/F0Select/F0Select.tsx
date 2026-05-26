@@ -95,7 +95,7 @@ const F0SelectComponent = forwardRef(function Select<
   {
     placeholder,
     onChange,
-    onApply,
+    withApplySelection = false,
     onChangeSelectedOption,
     value,
     options = [],
@@ -390,11 +390,17 @@ const F0SelectComponent = forwardRef(function Select<
 
   const getSelectedStateKey = useCallback(
     (state: SelectedItemsState<ActualRecordType>): string => {
-      const itemsKeys = Array.from(state.items.entries())
+      const relevantItems = Array.from(state.items.entries()).filter(
+        ([, item]) => (state.allSelected ? true : item.checked)
+      )
+      const itemsKeys = relevantItems
         .map(([id, item]) => `${id}:${item.checked}`)
         .sort()
         .join(",")
-      const groupsKeys = Array.from(state.groups.entries())
+      const relevantGroups = Array.from(state.groups.entries()).filter(
+        ([, group]) => (state.allSelected ? true : group.checked)
+      )
+      const groupsKeys = relevantGroups
         .map(([id, group]) => `${id}:${group.checked}`)
         .sort()
         .join(",")
@@ -461,11 +467,21 @@ const F0SelectComponent = forwardRef(function Select<
   }
   // Show apply button when in multiple selection, and not rendered as a list
   const showApplyButton = multiple && !asList
-  const hasDeferredApply = !!(onApply && showApplyButton)
+  const hasDeferredApply = !!(withApplySelection && showApplyButton)
 
   // Track whether the user has interacted with the selection
   const hasUserInteracted = useRef(false)
   const isFirstRender = useRef(true)
+
+  // Track the last value emitted via onChange to avoid spurious re-emits when
+  // the effect deps change but the selected value did not. Without this guard,
+  // async datasources (records resolving after the click), or downstream
+  // clones of `selectedState` items, can re-fire the emit effect with the
+  // same logical selection.
+  const lastEmittedSingleRef = useRef<{ value: string | undefined } | null>(
+    null
+  )
+  const lastEmittedMultiRef = useRef<string | null>(null)
 
   const onItemCheckChange = useCallback(
     (value: string, checked: boolean) => {
@@ -615,7 +631,17 @@ const F0SelectComponent = forwardRef(function Select<
       // Use Set to ensure unique values and prevent duplicates
       setLocalValue(Array.from(new Set(values.map(String))))
 
+      // Guard: only emit when the set of selected values actually changes.
+      // Sort + join to compare order-independently with a stable key.
+      const valuesKey = values.map(String).sort().join("\u0000")
+      if (lastEmittedMultiRef.current === valuesKey) {
+        return
+      }
+
       if (!hasDeferredApply) {
+        // Only commit to the ref what we actually emit, so a later transition
+        // from deferred-apply back to immediate-emit isn't suppressed.
+        lastEmittedMultiRef.current = valuesKey
         onChange?.(values, originalItems, options)
       }
     } else {
@@ -639,7 +665,22 @@ const F0SelectComponent = forwardRef(function Select<
       // Sync localValue with actual selection state (as string for internal comparison)
       setLocalValue(value !== undefined ? [String(value)] : [])
 
+      // Guard: only emit when the selected value identity actually changes.
+      // Without this, async datasources (record resolving after a click) or
+      // unrelated `source`/`selectedState` content changes can re-fire the
+      // effect with the same selection and produce duplicate onChange calls.
+      const valueKey = value === undefined ? undefined : String(value)
+      if (
+        lastEmittedSingleRef.current !== null &&
+        lastEmittedSingleRef.current.value === valueKey
+      ) {
+        return
+      }
+
       if (!hasDeferredApply) {
+        // Only commit to the ref what we actually emit, so a later transition
+        // from deferred-apply back to immediate-emit isn't suppressed.
+        lastEmittedSingleRef.current = { value: valueKey }
         onChange?.(value as T, originalItem, option)
       }
     }
@@ -661,6 +702,23 @@ const F0SelectComponent = forwardRef(function Select<
     },
     100
   )
+
+  // Cancel any pending debounced state update on unmount. usehooks-ts'
+  // `useDebounceCallback` has a known bug where its internal unmount cleanup
+  // cancels a different lodash.debounce instance than the one invoked by
+  // callers, so pending trailing-edge timers can fire after the test's jsdom
+  // window is torn down (causing `ReferenceError: window is not defined`
+  // inside react-dom). We track the latest wrapper via a ref and only cancel
+  // on true unmount so we don't drop in-flight timers between renders.
+  const debouncedHandleChangeOpenLocalRef = useRef(
+    debouncedHandleChangeOpenLocal
+  )
+  debouncedHandleChangeOpenLocalRef.current = debouncedHandleChangeOpenLocal
+  useEffect(() => {
+    return () => {
+      debouncedHandleChangeOpenLocalRef.current.cancel()
+    }
+  }, [])
 
   const restoreCommittedSelection = useCallback(() => {
     const committedSelection = committedSelectionRef.current
@@ -688,20 +746,6 @@ const F0SelectComponent = forwardRef(function Select<
     }
   }, [clearSelection, handleSelectAllWithTracking, handleSelectItemChange])
 
-  const emitCurrentSelection = useCallback(() => {
-    const { values, originalItems, options } = getMultiSelectionPayload()
-
-    ;(
-      onChange as
-        | ((
-            value: T[],
-            originalItems: ResolvedRecordType<R>[],
-            options: F0SelectItemObject<T, ResolvedRecordType<R>>[]
-          ) => void)
-        | undefined
-    )?.(values, originalItems, options)
-  }, [getMultiSelectionPayload, onChange])
-
   const handleChangeOpenLocal = (open: boolean) => {
     if (!open && hasDeferredApply && !isApplyingRef.current) {
       restoreCommittedSelection()
@@ -717,27 +761,33 @@ const F0SelectComponent = forwardRef(function Select<
   const handleApply = useCallback(() => {
     if (hasDeferredApply) {
       const nextCommittedSelection = cloneSelectedState(selectedState)
-
+      const { values, originalItems, options } = getMultiSelectionPayload()
       if (
         getSelectedStateKey(nextCommittedSelection) !==
         getSelectedStateKey(committedSelectionRef.current)
       ) {
         committedSelectionRef.current = nextCommittedSelection
-        emitCurrentSelection()
+        ;(
+          onChange as
+            | ((
+                value: T[],
+                originalItems: ResolvedRecordType<R>[],
+                options: F0SelectItemObject<T, ResolvedRecordType<R>>[]
+              ) => void)
+            | undefined
+        )?.(values, originalItems, options)
       }
 
-      onApply?.()
       isApplyingRef.current = true
     }
-
     handleChangeOpenLocal(false)
   }, [
     cloneSelectedState,
-    emitCurrentSelection,
     getSelectedStateKey,
+    getMultiSelectionPayload,
     handleChangeOpenLocal,
     hasDeferredApply,
-    onApply,
+    onChange,
     selectedState,
   ])
 

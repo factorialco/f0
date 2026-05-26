@@ -5,7 +5,7 @@ export interface F0ActionItemProps {
   /**
    * The title text displayed next to the status icon
    */
-  title: string
+  title?: string
   /**
    * Current status of the action item
    */

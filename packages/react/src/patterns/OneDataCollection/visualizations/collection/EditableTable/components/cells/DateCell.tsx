@@ -23,6 +23,8 @@ export function DateCell<R extends RecordType>({
   onChange,
   hint,
 }: EditableCellProps<R>) {
+  const dateConfig = editableColumn.dateConfig
+
   const datePickerValue = useMemo<DatePickerValue | undefined>(() => {
     if (!value) return undefined
     const date = parseISO(value)
@@ -63,6 +65,8 @@ export function DateCell<R extends RecordType>({
           value={datePickerValue}
           onChange={handleChange}
           loading={loading}
+          minDate={dateConfig?.minDate}
+          maxDate={dateConfig?.maxDate}
         />
       </div>
     </BaseCell>

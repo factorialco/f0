@@ -608,6 +608,7 @@ describe("F0Form datetime field validation", () => {
         defaultValues={{
           scheduledAt: new Date("2026-01-01T09:00:00"),
         }}
+        errorTriggerMode="on-blur"
         onSubmit={async () => ({ success: true })}
       />
     )
@@ -682,6 +683,7 @@ describe("F0Form datetime field validation", () => {
         defaultValues={{
           scheduledAt: new Date("2026-06-15T12:00:00"),
         }}
+        errorTriggerMode="on-blur"
         onSubmit={async () => ({ success: true })}
       />
     )
@@ -692,6 +694,85 @@ describe("F0Form datetime field validation", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Must be before 2021")).toBeInTheDocument()
+    })
+  })
+})
+
+describe("F0Form default errorTriggerMode on-submit", () => {
+  it("does not show validation errors on blur when errorTriggerMode is omitted (single-schema)", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    const formSchema = z.object({
+      name: f0FormField(z.string().min(1, "Name is required"), {
+        label: "Name",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="default-trigger-single"
+        schema={formSchema}
+        defaultValues={{ name: "" }}
+        onSubmit={onSubmit}
+      />
+    )
+
+    // Focus and blur the field without filling it
+    const input = screen.getByLabelText("Name")
+    await user.click(input)
+    await user.tab()
+
+    // Error should NOT appear on blur (default is on-submit)
+    expect(screen.queryByText("Name is required")).not.toBeInTheDocument()
+
+    // Submit the form
+    const submitButton = screen.getByText("Submit")
+    await user.click(submitButton)
+
+    // Error should appear after submit
+    await waitFor(() => {
+      expect(screen.getByText("Name is required")).toBeInTheDocument()
+    })
+  })
+
+  it("does not show validation errors on blur when errorTriggerMode is omitted (per-section)", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    const perSectionSchema = {
+      details: z.object({
+        title: f0FormField(z.string().min(1, "Title is required"), {
+          label: "Title",
+        }),
+      }),
+    }
+
+    render(
+      <F0Form
+        name="default-trigger-per-section"
+        schema={perSectionSchema}
+        sections={{ details: { title: "Details" } }}
+        defaultValues={{ details: { title: "" } }}
+        onSubmit={onSubmit}
+      />
+    )
+
+    // Focus and blur the field without filling it
+    const input = screen.getByLabelText("Title")
+    await user.click(input)
+    await user.tab()
+
+    // Error should NOT appear on blur (default is on-submit)
+    expect(screen.queryByText("Title is required")).not.toBeInTheDocument()
+
+    // Submit the form
+    const submitButton = screen.getByText("Submit")
+    await user.click(submitButton)
+
+    // Error should appear after submit
+    await waitFor(() => {
+      expect(screen.getByText("Title is required")).toBeInTheDocument()
     })
   })
 })

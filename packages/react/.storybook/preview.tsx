@@ -159,79 +159,51 @@ const preview: Preview = {
     },
     options: {
       /*
-       * Sort all the components and experimental stories in an aplhabetical order, but keep
-       * Introduction, How to contribute, Data test ID, Foundations, and Playground in specific order
+       * Sort stories alphabetically by default, but keep the documented top-level sections
+       * and nested Foundations/CRUD patterns groups in the specific order defined below.
        */
-      storySort: (a, b) => {
-        const topLevelOrder = [
-          "introduction",
-          "how-to-contribute",
-          "ai-configuration",
-          "foundations",
-          "components",
-          "patterns",
-          "kits",
-          "layouts",
-          "library",
-          "experimental",
-          "examples",
-          "internal",
-        ]
-
-        const aId = a.id.split("-")?.[0].toLowerCase()
-        const bId = b.id.split("-")?.[0].toLowerCase()
-
-        const aIndex = topLevelOrder.indexOf(aId)
-        const bIndex = topLevelOrder.indexOf(bId)
-
-        // Within the same top-level group, pin Components/Primitives first.
-        if (aIndex !== -1 && bIndex !== -1 && aIndex === bIndex) {
-          const isAPrimitive = a.id.startsWith("components-primitives")
-          const isBPrimitive = b.id.startsWith("components-primitives")
-          if (isAPrimitive !== isBPrimitive) return isAPrimitive ? -1 : 1
-        }
-
-        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex
-        if (aIndex !== -1) return -1
-        if (bIndex !== -1) return 1
-
-        const isAFoundation = aId.startsWith("foundations/")
-        const isBFoundation = bId.startsWith("foundations/")
-
-        if (isAFoundation || isBFoundation) {
-          if (isAFoundation && isBFoundation) {
-            const foundationOrder = [
-              "colors",
-              "typography",
-              "spacing",
-              "borders",
-              "shadows",
-              "icons",
-            ]
-            const aFoundationIndex = foundationOrder.indexOf(aId.split("/")[1])
-            const bFoundationIndex = foundationOrder.indexOf(bId.split("/")[1])
-            if (aFoundationIndex !== -1 && bFoundationIndex !== -1) {
-              return aFoundationIndex - bFoundationIndex
-            }
-          }
-          return isAFoundation ? -1 : 1
-        }
-
-        // Within Components/, surface Primitives/ before anything else so
-        // contributors see the building blocks first. (Top-level pin above
-        // already handles the common case; this is a fallback for titles
-        // that did not match topLevelOrder.)
-        const isAComponentsPrimitive =
-          a.title.startsWith("Components/Primitives") ||
-          a.id.startsWith("components-primitives")
-        const isBComponentsPrimitive =
-          b.title.startsWith("Components/Primitives") ||
-          b.id.startsWith("components-primitives")
-        if (isAComponentsPrimitive !== isBComponentsPrimitive) {
-          return isAComponentsPrimitive ? -1 : 1
-        }
-
-        return a.title.localeCompare(b.title)
+      storySort: {
+        method: "alphabetical",
+        order: [
+          "Introduction",
+          "How to contribute",
+          "AI configuration",
+          "Foundations",
+          ["Colors", "Typography", "Spacing", "Borders", "Shadows", "Icons"],
+          "Components",
+          ["Primitives", "Inputs"],
+          "Patterns",
+          [
+            "Data collection",
+            [
+              "CRUD patterns",
+              ["Overview", "By view", "Create", "Read", "Update", "Delete"],
+            ],
+          ],
+          "Kits",
+          "Layouts",
+          "Library",
+          "Experimental",
+          [
+            "CRUD patterns",
+            [
+              "Overview",
+              "Principles",
+              "Action hierarchy",
+              "Containers",
+              "Create & Update",
+              "Read",
+              "Delete & destructive",
+              "Bulk & async",
+              "Decisions",
+              "Quick reference",
+              "Checklist",
+              "New surfaces",
+            ],
+          ],
+          "Examples",
+          "Internal",
+        ],
       },
     },
     darkMode: {
