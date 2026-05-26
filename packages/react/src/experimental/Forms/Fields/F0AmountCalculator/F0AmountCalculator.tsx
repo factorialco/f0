@@ -263,7 +263,7 @@ export const F0AmountCalculator = forwardRef<
             {showApplyButton && (
               <div className="mt-2 flex justify-end">
                 <F0Button
-                  variant="critical"
+                  variant="default"
                   icon={ApplyIcon}
                   label={applyLabel}
                   onClick={handleApply}
