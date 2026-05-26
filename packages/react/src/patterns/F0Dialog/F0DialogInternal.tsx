@@ -194,6 +194,9 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
             position,
           })}
           className={contentClassName}
+          onFocusOutside={
+            isSidePosition ? (e) => e.preventDefault() : undefined
+          }
           onOpenAutoFocus={(e) => e.preventDefault()}
           container={containerProp}
         >
