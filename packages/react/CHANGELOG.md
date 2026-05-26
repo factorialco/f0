@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.18.0](https://github.com/factorialco/f0/compare/f0-react-v2.17.0...f0-react-v2.18.0) (2026-05-26)
+
+
+### Features
+
+* **F0AiChat:** add opt-in EmployeeCreditsPopover via employeeCredits prop ([#4231](https://github.com/factorialco/f0/issues/4231)) ([0662e48](https://github.com/factorialco/f0/commit/0662e4885cc80dd80b3adc64c4a36793e2f7d69a))
+
 ## [2.17.0](https://github.com/factorialco/f0/compare/f0-react-v2.16.3...f0-react-v2.17.0) (2026-05-22)
 
 
