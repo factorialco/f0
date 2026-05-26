@@ -1,5 +1,7 @@
 import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { FeatureGrid } from "~/docs/components/FeatureGrid"
+import { Table, List, Masonry, Kanban, Pencil } from "@/icons/app"
 
 <Meta title="Data collection/CRUD patterns/Overview" />
 
@@ -30,20 +32,65 @@ These stories assume the user has create, update, and delete permissions.
 Production flows should hide or disable each action when the user lacks the
 corresponding permission.
 
-- <a target="_parent" href="/?path=/docs/patterns-data-collection-crud-patterns-create--documentation">Create documentation</a>
-- <a target="_parent" href="/?path=/docs/patterns-data-collection-crud-patterns-read--documentation">Read documentation</a>
-- <a target="_parent" href="/?path=/docs/patterns-data-collection-crud-patterns-update--documentation">Update documentation</a>
-- <a target="_parent" href="/?path=/docs/patterns-data-collection-crud-patterns-delete--documentation">Delete documentation</a>
+- <a
+    target="_parent"
+    href="/?path=/docs/patterns-data-collection-crud-patterns-create--documentation"
+  >
+    Create documentation
+  </a>
+- <a
+    target="_parent"
+    href="/?path=/docs/patterns-data-collection-crud-patterns-read--documentation"
+  >
+    Read documentation
+  </a>
+- <a
+    target="_parent"
+    href="/?path=/docs/patterns-data-collection-crud-patterns-update--documentation"
+  >
+    Update documentation
+  </a>
+- <a
+    target="_parent"
+    href="/?path=/docs/patterns-data-collection-crud-patterns-delete--documentation"
+  >
+    Delete documentation
+  </a>
 
 Use the operation stories below to inspect one pattern decision at a time. Use
 the by-view stories when you need to validate how create, read, update, and
 delete coexist in the same collection surface.
 
-- <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-by-view--table">Table CRUD</a>
-- <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-by-view--list">List CRUD</a>
-- <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-by-view--card">Card CRUD</a>
-- <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-by-view--kanban">Kanban CRUD</a>
-- <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-by-view--editable-table">Editable Table CRUD</a>
+- <a
+    target="_parent"
+    href="/?path=/story/patterns-data-collection-crud-patterns-by-view--table"
+  >
+    Table CRUD
+  </a>
+- <a
+    target="_parent"
+    href="/?path=/story/patterns-data-collection-crud-patterns-by-view--list"
+  >
+    List CRUD
+  </a>
+- <a
+    target="_parent"
+    href="/?path=/story/patterns-data-collection-crud-patterns-by-view--card"
+  >
+    Card CRUD
+  </a>
+- <a
+    target="_parent"
+    href="/?path=/story/patterns-data-collection-crud-patterns-by-view--kanban"
+  >
+    Kanban CRUD
+  </a>
+- <a
+    target="_parent"
+    href="/?path=/story/patterns-data-collection-crud-patterns-by-view--editable-table"
+  >
+    Editable Table CRUD
+  </a>
 
 <Unstyled>
   <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
@@ -56,7 +103,10 @@ delete coexist in the same collection surface.
     <tbody>
       <tr>
         <td>
-          <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-create--table-create-dialog">
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-create--table-create-dialog"
+          >
             Create / Default
           </a>
         </td>
@@ -64,7 +114,10 @@ delete coexist in the same collection surface.
       </tr>
       <tr>
         <td>
-          <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-create--table-create-right-dialog">
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-create--table-create-right-dialog"
+          >
             Create / Right dialog
           </a>
         </td>
@@ -75,7 +128,10 @@ delete coexist in the same collection surface.
       </tr>
       <tr>
         <td>
-          <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-create--create-wizard-dialog">
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-create--create-wizard-dialog"
+          >
             Create / Wizard dialog
           </a>
         </td>
@@ -83,7 +139,10 @@ delete coexist in the same collection surface.
       </tr>
       <tr>
         <td>
-          <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-create--kanban-create-lane">
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-create--kanban-create-lane"
+          >
             Create / Kanban lane create
           </a>
         </td>
@@ -94,7 +153,10 @@ delete coexist in the same collection surface.
       </tr>
       <tr>
         <td>
-          <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-create--editable-table-create-row">
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-create--editable-table-create-row"
+          >
             Create / Editable Table add row
           </a>
         </td>
@@ -104,7 +166,10 @@ delete coexist in the same collection surface.
       </tr>
       <tr>
         <td>
-          <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-dialog">
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-dialog"
+          >
             Read / Default
           </a>
         </td>
@@ -112,7 +177,10 @@ delete coexist in the same collection surface.
       </tr>
       <tr>
         <td>
-          <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-right-dialog-to-page">
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-right-dialog-to-page"
+          >
             Read / Right dialog to page
           </a>
         </td>
@@ -123,7 +191,10 @@ delete coexist in the same collection surface.
       </tr>
       <tr>
         <td>
-          <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-page">
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-page"
+          >
             Read / Table to Page
           </a>
         </td>
@@ -133,7 +204,10 @@ delete coexist in the same collection surface.
       </tr>
       <tr>
         <td>
-          <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-read--list-read-page">
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--list-read-page"
+          >
             Read / List to Page
           </a>
         </td>
@@ -143,7 +217,10 @@ delete coexist in the same collection surface.
       </tr>
       <tr>
         <td>
-          <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-read--card-read-dialog">
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--card-read-dialog"
+          >
             Read / Card to dialog
           </a>
         </td>
@@ -151,7 +228,10 @@ delete coexist in the same collection surface.
       </tr>
       <tr>
         <td>
-          <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-read--kanban-read-dialog">
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--kanban-read-dialog"
+          >
             Read / Kanban card to dialog
           </a>
         </td>
@@ -159,7 +239,10 @@ delete coexist in the same collection surface.
       </tr>
       <tr>
         <td>
-          <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-update--table-update-dialog">
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-update--table-update-dialog"
+          >
             Update / Default
           </a>
         </td>
@@ -170,7 +253,10 @@ delete coexist in the same collection surface.
       </tr>
       <tr>
         <td>
-          <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-update--table-update-right-dialog">
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-update--table-update-right-dialog"
+          >
             Update / Right-position dialog for table
           </a>
         </td>
@@ -178,7 +264,10 @@ delete coexist in the same collection surface.
       </tr>
       <tr>
         <td>
-          <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-update--list-update-right-dialog">
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-update--list-update-right-dialog"
+          >
             Update / Right-position dialog for list
           </a>
         </td>
@@ -189,7 +278,10 @@ delete coexist in the same collection surface.
       </tr>
       <tr>
         <td>
-          <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-update--card-update-from-read-dialog">
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-update--card-update-from-read-dialog"
+          >
             Update / Card actions update
           </a>
         </td>
@@ -200,7 +292,10 @@ delete coexist in the same collection surface.
       </tr>
       <tr>
         <td>
-          <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-update--table-bulk-update">
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-update--table-bulk-update"
+          >
             Update / Bulk update
           </a>
         </td>
@@ -211,7 +306,10 @@ delete coexist in the same collection surface.
       </tr>
       <tr>
         <td>
-          <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-update--kanban-bulk-update">
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-update--kanban-bulk-update"
+          >
             Update / Kanban bulk update
           </a>
         </td>
@@ -221,7 +319,10 @@ delete coexist in the same collection surface.
       </tr>
       <tr>
         <td>
-          <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-update--editable-table-update-inline">
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-update--editable-table-update-inline"
+          >
             Update / Editable Table inline update
           </a>
         </td>
@@ -229,7 +330,10 @@ delete coexist in the same collection surface.
       </tr>
       <tr>
         <td>
-          <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-delete--table-delete-single">
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-delete--table-delete-single"
+          >
             Delete / Table single delete
           </a>
         </td>
@@ -237,7 +341,10 @@ delete coexist in the same collection surface.
       </tr>
       <tr>
         <td>
-          <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-delete--table-delete-bulk">
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-delete--table-delete-bulk"
+          >
             Delete / Table bulk delete
           </a>
         </td>
@@ -245,7 +352,10 @@ delete coexist in the same collection surface.
       </tr>
       <tr>
         <td>
-          <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-delete--card-delete">
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-delete--card-delete"
+          >
             Delete / Card delete
           </a>
         </td>
@@ -253,7 +363,10 @@ delete coexist in the same collection surface.
       </tr>
       <tr>
         <td>
-          <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-delete--kanban-delete-bulk">
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-delete--kanban-delete-bulk"
+          >
             Delete / Kanban bulk delete
           </a>
         </td>
@@ -263,7 +376,10 @@ delete coexist in the same collection surface.
       </tr>
       <tr>
         <td>
-          <a target="_parent" href="/?path=/story/patterns-data-collection-crud-patterns-delete--editable-table-delete-row-action">
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-delete--editable-table-delete-row-action"
+          >
             Delete / Editable Table delete
           </a>
         </td>
@@ -280,6 +396,48 @@ delete coexist in the same collection surface.
 CRUD patterns are operation-first. The visualization changes the affordance, not
 the rule. Use the **Recommended** pattern in each cell as the starting point, and
 only move to an alternative when the resource or task needs it.
+
+<Unstyled>
+  <FeatureGrid
+    features={[
+      {
+        icon: Table,
+        title: "Table",
+        description:
+          "Row click or chevron drives read. Primary action creates. Checkbox selection enables bulk update and delete. Right-position dialog keeps rows visible when context matters.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--table",
+      },
+      {
+        icon: List,
+        title: "List",
+        description:
+          "Item click drives read when the teaser is a summary. Primary action creates. Bulk update only when selected items are explicit and reviewable.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--list",
+      },
+      {
+        icon: Masonry,
+        title: "Card",
+        description:
+          "Card click drives read first — edit is an explicit action inside the read dialog. Primary action creates. Ellipsis menu deletes with confirmation.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--card",
+      },
+      {
+        icon: Kanban,
+        title: "Kanban",
+        description:
+          "Drag updates lane state. Card click drives read. Lane create scopes new items to a workflow state. Bulk actions apply across lanes when selected cards are explicit.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--kanban",
+      },
+      {
+        icon: Pencil,
+        title: "Editable Table",
+        description:
+          "Inline cell edit handles field-level updates. Add-row creates lightweight records. Full-resource creation and deletion use dialogs and row actions.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--editable-table",
+      },
+    ]}
+  />
+</Unstyled>
 
 <Unstyled>
   <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
@@ -626,13 +784,38 @@ ambiguous, use item-level update or a default dialog instead.
 
 ## Related documentation
 
-- <a target="_parent" href="/?path=/docs/patterns-data-collection-actions--documentation">Actions</a> for
-  collection actions, item actions, and bulk action wiring.
-- <a target="_parent" href="/?path=/docs/patterns-data-collection-visualizations-editable-table--documentation">Editable Table</a>
+- <a
+    target="_parent"
+    href="/?path=/docs/patterns-data-collection-actions--documentation"
+  >
+    Actions
+  </a>
+  for collection actions, item actions, and bulk action wiring.
+- <a
+    target="_parent"
+    href="/?path=/docs/patterns-data-collection-visualizations-editable-table--documentation"
+  >
+    Editable Table
+  </a>
   for inline field-level updates.
-- <a target="_parent" href="/?path=/docs/patterns-data-collection-visualizations--documentation">Visualizations</a>
+- <a
+    target="_parent"
+    href="/?path=/docs/patterns-data-collection-visualizations--documentation"
+  >
+    Visualizations
+  </a>
   for Table, List, Card, and Kanban view behavior.
-- <a target="_parent" href="/?path=/docs/experimental-crud-patterns-principles--documentation">Agnostic CRUD principles</a> —
-  the product-agnostic theory behind these patterns.
-- <a target="_parent" href="/?path=/docs/experimental-crud-patterns-checklist--documentation">CRUD pre-ship checklist</a> —
-  verify your implementation before shipping.
+- <a
+    target="_parent"
+    href="/?path=/docs/experimental-crud-patterns-principles--documentation"
+  >
+    Agnostic CRUD principles
+  </a>
+  — the product-agnostic theory behind these patterns.
+- <a
+    target="_parent"
+    href="/?path=/docs/experimental-crud-patterns-checklist--documentation"
+  >
+    CRUD pre-ship checklist
+  </a>
+  — verify your implementation before shipping.
