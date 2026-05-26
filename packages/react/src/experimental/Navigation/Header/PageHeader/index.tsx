@@ -148,7 +148,7 @@ export function PageHeader({
   return (
     <div
       className={cn(
-        "flex items-center justify-between px-5 py-4 xs:px-6",
+        "flex items-center justify-between px-page py-4",
         embedded ? "h-12" : "h-16"
       )}
     >
