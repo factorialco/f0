@@ -249,7 +249,7 @@ export const F0AmountCalculator = forwardRef<
           side={side}
           align={align}
           className={cn(
-            "w-auto min-w-[220px] rounded-xl border-f1-border-secondary p-3"
+            "w-auto min-w-[220px] rounded-xl border-[hsl(var(--neutral-10))] p-3"
           )}
         >
           <div className="flex flex-col">
