@@ -39,9 +39,14 @@ export const meta: PrototypeMeta = {
 }
 
 const BASE_HREF = "/p/training-access-viewer"
-const VIEWER_TRAINING_IDS = new Set(["trn-002", "trn-003", "trn-004"])
+const VIEWER_TRAINING_IDS = new Set(["trn-002", "trn-004"])
 const viewerTrainings = trainings.filter((item) => VIEWER_TRAINING_IDS.has(item.id))
 const VALID_TABS = new Set<string>(detailTabs.map((tab) => tab.id))
+
+type TooltipPosition = {
+  top: number
+  left: number
+}
 
 function getTotalDuration(training: Training) {
   const totalMinutes = training.totalDuration * 60
@@ -52,7 +57,7 @@ function getTotalDuration(training: Training) {
 
 export default function TrainingAccessViewer() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const [isCopyLinkCopied, setIsCopyLinkCopied] = useState(false)
+  const [copyTooltipPosition, setCopyTooltipPosition] = useState<TooltipPosition | null>(null)
   const copyTooltipTimeoutRef = useRef<number | null>(null)
 
   useEffect(() => {
@@ -97,11 +102,23 @@ export default function TrainingAccessViewer() {
   }))
 
   const handleCopyLink = () => {
-    setIsCopyLinkCopied(true)
+    const button = Array.from(
+      document.querySelectorAll<HTMLElement>(
+        '[aria-label="Copy link"], [title="Copy link"]'
+      )
+    ).find((item) => {
+      const buttonRect = item.getBoundingClientRect()
+      return buttonRect.width > 0 && buttonRect.height > 0
+    })
+    const rect = button?.getBoundingClientRect()
+    setCopyTooltipPosition({
+      top: (rect?.bottom ?? 96) + 8,
+      left: (rect?.left ?? window.innerWidth - 72) + (rect?.width ?? 40) / 2,
+    })
     void navigator.clipboard?.writeText(window.location.href)?.catch(() => {})
     if (copyTooltipTimeoutRef.current) window.clearTimeout(copyTooltipTimeoutRef.current)
     copyTooltipTimeoutRef.current = window.setTimeout(() => {
-      setIsCopyLinkCopied(false)
+      setCopyTooltipPosition(null)
       copyTooltipTimeoutRef.current = null
     }, 4000)
   }
@@ -244,16 +261,17 @@ export default function TrainingAccessViewer() {
           {activeTab === "fundae" && <ReadOnlyFundaeTab training={training} />}
         </PageContent>
       </Page>
-      {isCopyLinkCopied && <LinkCopiedTooltip />}
+      {copyTooltipPosition && <LinkCopiedTooltip position={copyTooltipPosition} />}
     </>
   )
 }
 
-function LinkCopiedTooltip() {
+function LinkCopiedTooltip({ position }: { position: TooltipPosition }) {
   return (
+    // F0Box cannot express the required fixed offsets/z-index for this copied-state tooltip.
     <div
-      role="status"
-      className="fixed right-6 top-28 z-[9999] rounded-md bg-f1-background-inverse px-3 py-2 shadow-lg"
+      className="fixed z-[9999] -translate-x-1/2 rounded-md bg-f1-background-inverse px-3 py-2 shadow-lg"
+      style={{ left: position.left, top: position.top }}
     >
       <F0Text content="Link copied" variant="inverse" />
     </div>

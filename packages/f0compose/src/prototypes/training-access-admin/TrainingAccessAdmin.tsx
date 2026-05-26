@@ -16,6 +16,7 @@ import {
 import {
   Check,
   Delete,
+  Filter,
   Link,
   PersonPlus,
   Reset,
@@ -24,7 +25,15 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useSearchParams } from "react-router-dom"
 
-import { employees, findTraining, trainings } from "@/fixtures"
+import {
+  departments,
+  employees,
+  findTraining,
+  legalEntities,
+  legalEntityIdForEmployee,
+  teams,
+  trainings,
+} from "@/fixtures"
 import type { Employee } from "@/fixtures/types"
 import type { Training } from "@/fixtures"
 
@@ -69,6 +78,20 @@ type AccessRowModel = DirectAccess & {
   source: AccessSource
 }
 
+type Notice = {
+  tone: "positive" | "warning"
+  message: string
+}
+
+type PeopleFilterKey = "workplace" | "team" | "department" | "legalEntity"
+
+type PeopleFilters = Record<PeopleFilterKey, string[]>
+
+type TooltipPosition = {
+  top: number
+  left: number
+}
+
 type PersonOption = {
   value: string
   label: string
@@ -82,13 +105,19 @@ type PersonOption = {
   disabled?: boolean
 }
 
-type Notice = {
-  tone: "positive" | "warning"
-  message: string
-}
-
 type CandidateOption = PersonOption & {
   employee: Employee
+}
+
+type PeopleFilterOption = {
+  value: string
+  label: string
+}
+
+type PeopleFilterConfig = {
+  key: PeopleFilterKey
+  label: string
+  options: PeopleFilterOption[]
 }
 
 const BASE_HREF = "/p/training-access-admin"
@@ -116,6 +145,70 @@ const personOptions: PersonOption[] = employees
     description: employee.role,
     avatar: employeeAvatar(employee),
   }))
+
+const emptyPeopleFilters: PeopleFilters = {
+  workplace: [],
+  team: [],
+  department: [],
+  legalEntity: [],
+}
+
+const peopleFilterConfigs: PeopleFilterConfig[] = [
+  {
+    key: "workplace",
+    label: "Workplace",
+    options: Array.from(new Set(employees.map((employee) => employee.location))).map(
+      (location) => ({ value: location, label: location })
+    ),
+  },
+  {
+    key: "team",
+    label: "Team",
+    options: teams.map((team) => ({ value: team.id, label: team.name })),
+  },
+  {
+    key: "department",
+    label: "Department",
+    options: departments.map((department) => ({
+      value: department.id,
+      label: department.name,
+    })),
+  },
+  {
+    key: "legalEntity",
+    label: "Legal entity",
+    options: legalEntities.map((legalEntity) => ({
+      value: legalEntity.id,
+      label: legalEntity.legalName,
+    })),
+  },
+]
+
+function activeFiltersCount(filters: PeopleFilters) {
+  return Object.values(filters).reduce((total, values) => total + values.length, 0)
+}
+
+function employeeMatchesFilters(employee: Employee, filters: PeopleFilters) {
+  if (filters.workplace.length > 0 && !filters.workplace.includes(employee.location)) {
+    return false
+  }
+  if (filters.team.length > 0 && !filters.team.includes(employee.teamId)) {
+    return false
+  }
+  if (
+    filters.department.length > 0 &&
+    !filters.department.includes(employee.departmentId)
+  ) {
+    return false
+  }
+  if (
+    filters.legalEntity.length > 0 &&
+    !filters.legalEntity.includes(legalEntityIdForEmployee(employee.id))
+  ) {
+    return false
+  }
+  return true
+}
 
 function employeeAvatar(employee: Employee) {
   const [firstName = employee.fullName, ...lastNameParts] = employee.fullName.split(" ")
@@ -149,9 +242,11 @@ export default function TrainingAccessAdmin() {
   const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<string[]>([])
   const [selectedRole, setSelectedRole] = useState<EditableRole>("editor")
   const [personSearch, setPersonSearch] = useState("")
+  const [peopleFilters, setPeopleFilters] = useState<PeopleFilters>(emptyPeopleFilters)
+  const [isPeopleFiltersOpen, setIsPeopleFiltersOpen] = useState(false)
   const [isPeopleListOpen, setIsPeopleListOpen] = useState(false)
   const [notice, setNotice] = useState<Notice | null>(null)
-  const [isCopyLinkCopied, setIsCopyLinkCopied] = useState(false)
+  const [copyTooltipPosition, setCopyTooltipPosition] = useState<TooltipPosition | null>(null)
   const copyTooltipTimeoutRef = useRef<number | null>(null)
 
   useEffect(() => {
@@ -184,11 +279,23 @@ export default function TrainingAccessAdmin() {
   }
 
   const handleCopyLink = () => {
-    setIsCopyLinkCopied(true)
+    const button = Array.from(
+      document.querySelectorAll<HTMLElement>(
+        '[aria-label="Copy link"], [title="Copy link"]'
+      )
+    ).find((item) => {
+      const buttonRect = item.getBoundingClientRect()
+      return buttonRect.width > 0 && buttonRect.height > 0
+    })
+    const rect = button?.getBoundingClientRect()
+    setCopyTooltipPosition({
+      top: (rect?.bottom ?? 96) + 8,
+      left: (rect?.left ?? window.innerWidth - 72) + (rect?.width ?? 40) / 2,
+    })
     void navigator.clipboard?.writeText(window.location.href)?.catch(() => {})
     if (copyTooltipTimeoutRef.current) window.clearTimeout(copyTooltipTimeoutRef.current)
     copyTooltipTimeoutRef.current = window.setTimeout(() => {
-      setIsCopyLinkCopied(false)
+      setCopyTooltipPosition(null)
       copyTooltipTimeoutRef.current = null
     }, 4000)
   }
@@ -203,13 +310,13 @@ export default function TrainingAccessAdmin() {
     },
     ...(!isDraft
       ? [
-          {
-            label: "Copy link",
-            icon: Link,
-            onClick: handleCopyLink,
-            tooltip: "Copy link",
-            hideLabel: true as const,
-          },
+            {
+              label: "Copy link",
+              icon: Link,
+              onClick: handleCopyLink,
+              tooltip: "Copy link",
+              hideLabel: true as const,
+            },
         ]
       : []),
   ]
@@ -254,18 +361,17 @@ export default function TrainingAccessAdmin() {
     }))
     .filter((option) => {
       const term = personSearch.toLowerCase().trim()
+      if (!employeeMatchesFilters(option.employee, peopleFilters)) return false
       if (term === "") return true
-      return `${option.employee.fullName} ${option.employee.email}`
+      return `${option.employee.fullName} ${option.employee.email} ${option.employee.role}`
         .toLowerCase()
         .includes(term)
     })
     .slice(0, 12)
 
   const handlePersonSearchChange = (value: string | undefined) => {
-    const nextSearch = value ?? ""
-    setPersonSearch(nextSearch)
+    setPersonSearch(value ?? "")
     setIsPeopleListOpen(true)
-
   }
 
   const handleSelectedEmployeeChange = (employeeId: string) => {
@@ -281,6 +387,20 @@ export default function TrainingAccessAdmin() {
   const handleSelectedEmployeeRemove = (employeeId: string) => {
     setSelectedEmployeeIds((current) => current.filter((id) => id !== employeeId))
   }
+
+  const handlePeopleFilterToggle = (filterKey: PeopleFilterKey, value: string) => {
+    setPeopleFilters((current) => {
+      const values = current[filterKey]
+      return {
+        ...current,
+        [filterKey]: values.includes(value)
+          ? values.filter((item) => item !== value)
+          : [...values, value],
+      }
+    })
+  }
+
+  const handlePeopleFiltersClear = () => setPeopleFilters(emptyPeopleFilters)
 
   const instructorIdSet = useMemo(() => new Set(derivedInstructorIds), [])
   const peopleWithAccess: AccessRowModel[] = [
@@ -333,6 +453,8 @@ export default function TrainingAccessAdmin() {
     ])
     setSelectedEmployeeIds([])
     setPersonSearch("")
+    setPeopleFilters(emptyPeopleFilters)
+    setIsPeopleFiltersOpen(false)
     setIsPeopleListOpen(false)
     setNotice({
       tone: "positive",
@@ -492,7 +614,9 @@ export default function TrainingAccessAdmin() {
         notice={notice}
         candidateOptions={candidateOptions}
         isPeopleListOpen={isPeopleListOpen}
+        isPeopleFiltersOpen={isPeopleFiltersOpen}
         personSearch={personSearch}
+        peopleFilters={peopleFilters}
         selectedEmployeeIds={selectedEmployeeIds}
         selectedRole={selectedRole}
         onClose={() => setIsShareOpen(false)}
@@ -501,6 +625,9 @@ export default function TrainingAccessAdmin() {
         onRemoveAccess={handleRemoveAccess}
         onPersonSearchChange={handlePersonSearchChange}
         onPeopleListOpenChange={setIsPeopleListOpen}
+        onPeopleFiltersOpenChange={setIsPeopleFiltersOpen}
+        onPeopleFilterToggle={handlePeopleFilterToggle}
+        onPeopleFiltersClear={handlePeopleFiltersClear}
         onSelectedEmployeeRemove={handleSelectedEmployeeRemove}
         onSelectedEmployeeChange={handleSelectedEmployeeChange}
         onSelectedRoleChange={setSelectedRole}
@@ -512,16 +639,17 @@ export default function TrainingAccessAdmin() {
         onClose={() => setAdminAction(null)}
       />
 
-      {isCopyLinkCopied && <LinkCopiedTooltip />}
+      {copyTooltipPosition && <LinkCopiedTooltip position={copyTooltipPosition} />}
     </>
   )
 }
 
-function LinkCopiedTooltip() {
+function LinkCopiedTooltip({ position }: { position: TooltipPosition }) {
   return (
+    // F0Box cannot express the required fixed offsets/z-index for this copied-state tooltip.
     <div
-      role="status"
-      className="fixed right-6 top-28 z-[9999] rounded-md bg-f1-background-inverse px-3 py-2 shadow-lg"
+      className="fixed z-[9999] -translate-x-1/2 rounded-md bg-f1-background-inverse px-3 py-2 shadow-lg"
+      style={{ left: position.left, top: position.top }}
     >
       <F0Text content="Link copied" variant="inverse" />
     </div>
@@ -535,7 +663,9 @@ function ShareTrainingDialog({
   notice,
   candidateOptions,
   isPeopleListOpen,
+  isPeopleFiltersOpen,
   personSearch,
+  peopleFilters,
   selectedEmployeeIds,
   selectedRole,
   onClose,
@@ -544,6 +674,9 @@ function ShareTrainingDialog({
   onRemoveAccess,
   onPersonSearchChange,
   onPeopleListOpenChange,
+  onPeopleFiltersOpenChange,
+  onPeopleFilterToggle,
+  onPeopleFiltersClear,
   onSelectedEmployeeRemove,
   onSelectedEmployeeChange,
   onSelectedRoleChange,
@@ -554,7 +687,9 @@ function ShareTrainingDialog({
   notice: Notice | null
   candidateOptions: CandidateOption[]
   isPeopleListOpen: boolean
+  isPeopleFiltersOpen: boolean
   personSearch: string
+  peopleFilters: PeopleFilters
   selectedEmployeeIds: string[]
   selectedRole: EditableRole
   onClose: () => void
@@ -563,6 +698,9 @@ function ShareTrainingDialog({
   onRemoveAccess: (employeeId: string) => void
   onPersonSearchChange: (value: string | undefined) => void
   onPeopleListOpenChange: (isOpen: boolean) => void
+  onPeopleFiltersOpenChange: (isOpen: boolean) => void
+  onPeopleFilterToggle: (filterKey: PeopleFilterKey, value: string) => void
+  onPeopleFiltersClear: () => void
   onSelectedEmployeeRemove: (employeeId: string) => void
   onSelectedEmployeeChange: (employeeId: string) => void
   onSelectedRoleChange: (role: EditableRole) => void
@@ -576,11 +714,12 @@ function ShareTrainingDialog({
       const target = event.target
       if (target instanceof Node && searchAreaRef.current?.contains(target)) return
       onPeopleListOpenChange(false)
+      onPeopleFiltersOpenChange(false)
     }
 
     document.addEventListener("pointerdown", handlePointerDown)
     return () => document.removeEventListener("pointerdown", handlePointerDown)
-  }, [isPeopleListOpen, onPeopleListOpenChange])
+  }, [isPeopleListOpen, onPeopleFiltersOpenChange, onPeopleListOpenChange])
 
   return (
     <F0Dialog
@@ -599,16 +738,31 @@ function ShareTrainingDialog({
                 <PeopleSearchInput
                   selectedEmployeeIds={selectedEmployeeIds}
                   searchValue={personSearch}
+                  filtersCount={activeFiltersCount(peopleFilters)}
                   onSearchChange={onPersonSearchChange}
                   onRemove={onSelectedEmployeeRemove}
+                  onToggleFilters={() => {
+                    onPeopleListOpenChange(true)
+                    onPeopleFiltersOpenChange(!isPeopleFiltersOpen)
+                  }}
                 />
               </F0Box>
               {isPeopleListOpen && (
-                <PeopleSearchResults
+                <PeopleSelectorPopover
                   candidates={candidateOptions}
+                  filters={peopleFilters}
+                  showFilters={isPeopleFiltersOpen}
                   selectedEmployeeIds={selectedEmployeeIds}
                   onSelect={(employeeId) => {
                     onSelectedEmployeeChange(employeeId)
+                  }}
+                  onToggleFilter={(filterKey, value) => {
+                    onPeopleFilterToggle(filterKey, value)
+                    onPeopleFiltersOpenChange(false)
+                  }}
+                  onClearFilters={() => {
+                    onPeopleFiltersClear()
+                    onPeopleFiltersOpenChange(false)
                   }}
                 />
               )}
@@ -657,90 +811,179 @@ function ShareTrainingDialog({
 function PeopleSearchInput({
   selectedEmployeeIds,
   searchValue,
+  filtersCount,
   onSearchChange,
   onRemove,
+  onToggleFilters,
 }: {
   selectedEmployeeIds: string[]
   searchValue: string
+  filtersCount: number
   onSearchChange: (value: string | undefined) => void
   onRemove: (employeeId: string) => void
+  onToggleFilters: () => void
 }) {
   return (
     <F0Box display="flex" flexDirection="column" gap="xs">
       <F0Text content="Add people" variant="label" />
-      <div className="flex min-h-8 w-full flex-wrap items-center gap-1 rounded-md border border-solid border-f1-border-secondary bg-f1-background px-2 py-1 focus-within:border-f1-border-selected">
-        {selectedEmployeeIds.length > 0 && (
-          <div className="flex max-h-24 flex-wrap gap-1 overflow-y-auto">
-            {selectedEmployeeIds.map((employeeId) => {
-              const employee = findEmployee(employeeId)
-              return (
-                <div
-                  key={employeeId}
-                  className="flex w-fit items-center gap-1 rounded-md border border-solid border-f1-border-secondary bg-f1-background-secondary px-2 py-1 text-sm text-f1-foreground"
-                >
-                  <span>{employee.email}</span>
-                  <button
-                    type="button"
-                    className="border-0 bg-transparent p-0 text-f1-foreground-secondary"
-                    aria-label={`Remove ${employee.fullName}`}
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      onRemove(employeeId)
-                    }}
+      {/* The production EmployeeSelectorV2 trigger is not available in f0compose. */}
+      <div className="flex min-h-8 w-full items-start gap-1 rounded-md border border-solid border-f1-border-secondary bg-f1-background px-2 py-1 focus-within:border-f1-border-selected">
+        <div className="flex flex-1 flex-wrap items-center gap-1">
+          {selectedEmployeeIds.length > 0 && (
+            <div className="flex max-h-24 flex-wrap gap-1 overflow-y-auto">
+              {selectedEmployeeIds.map((employeeId) => {
+                const employee = findEmployee(employeeId)
+                return (
+                  <div
+                    key={employeeId}
+                    className="flex w-fit items-center gap-1 rounded-md border border-solid border-f1-border-secondary bg-f1-background-secondary px-2 py-1 text-sm text-f1-foreground"
                   >
-                    x
-                  </button>
-                </div>
-              )
-            })}
-          </div>
-        )}
-        <input
-          aria-label="Add people"
-          className="min-w-28 flex-1 border-0 bg-transparent p-1 text-sm text-f1-foreground outline-none placeholder:text-f1-foreground-secondary"
-          value={searchValue}
-          onChange={(event) => onSearchChange(event.target.value)}
-          placeholder={selectedEmployeeIds.length === 0 ? "Search by name or email" : ""}
-        />
+                    <span>{employee.email}</span>
+                    <button
+                      type="button"
+                      className="border-0 bg-transparent p-0 text-f1-foreground-secondary"
+                      aria-label={`Remove ${employee.fullName}`}
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        onRemove(employeeId)
+                      }}
+                    >
+                      x
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+          <input
+            aria-label="Add people"
+            className="min-w-28 flex-1 border-0 bg-transparent p-1 text-sm text-f1-foreground outline-none placeholder:text-f1-foreground-secondary"
+            value={searchValue}
+            onChange={(event) => onSearchChange(event.target.value)}
+            placeholder={selectedEmployeeIds.length === 0 ? "Search by name or email" : ""}
+          />
+        </div>
+        <button
+          type="button"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-solid border-f1-border-secondary bg-f1-background text-f1-icon hover:bg-f1-background-hover"
+          aria-label={filtersCount > 0 ? `${filtersCount} filters active` : "Open filters"}
+          onClick={(event) => {
+            event.stopPropagation()
+            onToggleFilters()
+          }}
+        >
+          <Filter />
+        </button>
       </div>
     </F0Box>
   )
 }
 
-function PeopleSearchResults({
+function PeopleSelectorPopover({
   candidates,
+  filters,
+  showFilters,
   selectedEmployeeIds,
   onSelect,
+  onToggleFilter,
+  onClearFilters,
 }: {
   candidates: CandidateOption[]
+  filters: PeopleFilters
+  showFilters: boolean
   selectedEmployeeIds: string[]
   onSelect: (employeeId: string) => void
+  onToggleFilter: (filterKey: PeopleFilterKey, value: string) => void
+  onClearFilters: () => void
 }) {
+  const selectedCount = activeFiltersCount(filters)
+  const [activeFilterKey, setActiveFilterKey] = useState<PeopleFilterKey>("workplace")
+  const activeFilter = peopleFilterConfigs.find((config) => config.key === activeFilterKey)
+
   return (
-    <div
-      className="absolute left-0 right-0 top-full z-10 mt-1 flex max-h-72 flex-col gap-0 overflow-y-auto rounded-md border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-lg"
-    >
-      {candidates.length > 0 ? (
-        candidates.map((candidate) => {
-          const selected = selectedEmployeeIds.includes(candidate.value)
-          return (
-            <button
-              key={candidate.value}
-              type="button"
-              className={`flex w-full items-center justify-between rounded-md border-0 bg-transparent p-2 text-left hover:bg-f1-background-hover ${
-                selected ? "bg-f1-background-selected" : ""
-              }`}
-              onClick={() => onSelect(candidate.value)}
-            >
-              <PersonCell employee={candidate.employee} supportingText={candidate.employee.email} />
-              {selected && <F0Text content="Selected" variant="description" />}
-            </button>
-          )
-        })
+    // F0Box cannot express the top-full placement needed by this selector popover.
+    <div className="isolate absolute left-0 right-0 top-full z-50 mt-1 max-h-80 overflow-hidden rounded-md border border-solid border-f1-border-secondary bg-f1-background shadow-lg">
+      <div className="flex items-center justify-between border-0 border-b border-solid border-f1-border-secondary px-3 py-2">
+        <F0Text
+          content={showFilters ? "Filters" : `${selectedEmployeeIds.length} selected`}
+          variant={showFilters ? "label" : "description"}
+        />
+        {showFilters && selectedCount > 0 && (
+          <F0Button label="Clear" variant="neutral" size="sm" onClick={onClearFilters} />
+        )}
+      </div>
+      {showFilters ? (
+        <div className="flex max-h-72 overflow-hidden">
+          <div className="w-32 shrink-0 border-0 border-r border-solid border-f1-border-secondary p-1">
+            {peopleFilterConfigs.map((config) => {
+              const count = filters[config.key].length
+              const selected = config.key === activeFilterKey
+              return (
+                <button
+                  key={config.key}
+                  type="button"
+                  className={`flex w-full items-center justify-between rounded-md border-0 px-2 py-2 text-left text-sm ${
+                    selected
+                      ? "bg-f1-background-selected text-f1-foreground"
+                      : "bg-transparent text-f1-foreground-secondary hover:bg-f1-background-hover"
+                  }`}
+                  onClick={() => setActiveFilterKey(config.key)}
+                >
+                  <span>{config.label}</span>
+                  {count > 0 && <span>{count}</span>}
+                </button>
+              )
+            })}
+          </div>
+          <div className="max-h-72 flex-1 overflow-y-auto p-1">
+            {activeFilter?.options.map((option) => {
+              const selected = filters[activeFilter.key].includes(option.value)
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={`flex w-full items-center justify-between rounded-md border-0 px-2 py-2 text-left text-sm ${
+                    selected
+                      ? "bg-f1-background-selected text-f1-foreground"
+                      : "bg-transparent text-f1-foreground hover:bg-f1-background-hover"
+                  }`}
+                  onClick={() => onToggleFilter(activeFilter.key, option.value)}
+                >
+                  <span>{option.label}</span>
+                  {selected && <F0Text content="Selected" variant="description" />}
+                </button>
+              )
+            })}
+          </div>
+        </div>
       ) : (
-        <F0Box padding="sm">
-          <F0Text content="No people found" variant="description" />
-        </F0Box>
+        <div className="max-h-72 overflow-y-auto p-1">
+          {candidates.length > 0 ? (
+            candidates.map((candidate) => {
+              const selected = selectedEmployeeIds.includes(candidate.value)
+              return (
+                <button
+                  key={candidate.value}
+                  type="button"
+                  className={`flex w-full items-center justify-between rounded-md border-0 bg-transparent p-2 text-left hover:bg-f1-background-hover ${
+                    selected ? "bg-f1-background-selected" : ""
+                  }`}
+                  onClick={() => onSelect(candidate.value)}
+                >
+                  <PersonCell
+                    employee={candidate.employee}
+                    supportingText={candidate.employee.email}
+                  />
+                  {selected && <F0Text content="Selected" variant="description" />}
+                </button>
+              )
+            })
+          ) : (
+            <F0Box padding="sm">
+              <F0Text content="No people found" variant="description" />
+            </F0Box>
+          )}
+        </div>
       )}
     </div>
   )

@@ -1,4 +1,4 @@
-import { F0Alert, F0Box, F0Card, F0Heading, F0Text } from "@factorialco/f0-react"
+import { F0Alert, F0Box, F0Button, F0Card, F0Heading, F0Text } from "@factorialco/f0-react"
 import {
   OneDataCollection,
   Page,
@@ -676,17 +676,12 @@ function FilterButton({
   onClick: () => void
 }) {
   return (
-    <button
-      type="button"
+    <F0Button
+      label={label}
       onClick={onClick}
-      className={`rounded-md border border-solid px-3 py-1.5 text-sm font-medium transition-colors ${
-        active
-          ? "border-f1-border-bold bg-f1-background-bold text-f1-foreground-bold"
-          : "border-f1-border-secondary bg-f1-background text-f1-foreground"
-      }`}
-    >
-      {label}
-    </button>
+      variant={active ? "default" : "outline"}
+      size="sm"
+    />
   )
 }
 
