@@ -107,6 +107,8 @@ export const GraphCollection = <
   edgeAdapter,
   renderNode,
   loadChildren,
+  onLoadChildrenError,
+  rootSelector,
   graphProps,
   source,
   onSelectItems,
@@ -185,6 +187,25 @@ export const GraphCollection = <
     return data.type === "flat" ? data.records : []
   }, [data])
 
+  // Apply the (intentionally unmemoized-deps) rootSelector to narrow the
+  // record set before projection. In lazy mode this picks the rows that
+  // become F0Graph's `rootNodes`; in eager mode it's equivalent to filtering
+  // the source upstream of GraphCollection. We deliberately hold the
+  // selector via a ref so identity churn on the function never re-runs the
+  // expensive projection — the contract on `GraphVisualizationOptions`
+  // requires the selector to be referentially stable.
+  const rootSelectorRef = useRef(rootSelector)
+  useEffect(() => {
+    rootSelectorRef.current = rootSelector
+  }, [rootSelector])
+
+  const selectedRecords = useMemo<ReadonlyArray<Record>>(() => {
+    const select = rootSelectorRef.current
+    if (!select) return records
+    const next = select(records)
+    return next === records ? records : next
+  }, [records])
+
   useEffect(() => {
     onLoadData({
       totalItems: paginationInfo?.total || records.length,
@@ -259,14 +280,15 @@ export const GraphCollection = <
   // — the dev-mode identity warning above flags missed memoization.
   const projection = useMemo(() => {
     return projectGraph<Record>({
-      records,
+      records: selectedRecords,
       nodeAdapter,
       edgeAdapter,
       idProvider: source.idProvider as unknown as
         | ((item: Record, index: number) => string | number)
         | undefined,
+      strictDuplicates: isDev,
     })
-  }, [records, nodeAdapter, edgeAdapter, source.idProvider])
+  }, [selectedRecords, nodeAdapter, edgeAdapter, source.idProvider, isDev])
 
   const cycleWarnedRef = useRef<string>("")
   useEffect(() => {
@@ -321,10 +343,13 @@ export const GraphCollection = <
   })
 
   /**
-   * Monotonic cache of records returned by `loadChildren` — never evicted in
-   * Phase 1; revisit if memory becomes a concern under deeply nested lazy
-   * graphs. The selection bridge needs this so it can resolve a lazy id back
-   * to its record when the user toggles selection on a lazy-loaded node.
+   * Monotonic cache of records returned by `loadChildren`. We deliberately do
+   * NOT evict on collapse because F0Graph's `useLazyTree` keeps its own copy
+   * of loaded children across collapse/re-expand cycles, so re-expanding a
+   * collapsed node does NOT call `loadChildren` again — evicting here would
+   * silently break selection on previously-loaded lazy descendants. The cache
+   * grows monotonically per mount and is reclaimed on unmount with the
+   * component.
    */
   const lazyRecordsRef = useRef<Map<string, Record>>(new Map())
 
@@ -358,9 +383,19 @@ export const GraphCollection = <
         }
         return
       }
+      // Honour per-record selectability — `source.selectable(record)` returning
+      // `undefined` means "this record may not be selected". F0Graph has no
+      // `unselectableNodes` API so the visual checkbox may still flicker on
+      // click, but useSelectable never observes the change.
+      if (
+        source.selectable !== undefined &&
+        source.selectable(record) === undefined
+      ) {
+        return
+      }
       handleSelectItemChange(record, selected)
     },
-    [recordById, handleSelectItemChange, isDev]
+    [recordById, handleSelectItemChange, isDev, source]
   )
 
   /**
@@ -438,6 +473,23 @@ export const GraphCollection = <
           projected.push(node)
         })
         return projected
+      } catch (err) {
+        // Aborts are intentional collapses/unmounts — never surfaced.
+        const isAbort =
+          controller.signal.aborted ||
+          (err instanceof DOMException && err.name === "AbortError") ||
+          (err instanceof Error && err.name === "AbortError")
+        if (isAbort) return []
+        if (onLoadChildrenError) {
+          onLoadChildrenError(err, nodeId)
+        } else {
+          // eslint-disable-next-line no-console
+          console.error(
+            `Graph visualization: \`loadChildren\` rejected for node "${nodeId}".`,
+            err
+          )
+        }
+        return []
       } finally {
         const current = abortControllersRef.current.get(nodeId)
         if (current === controller) {
@@ -445,7 +497,7 @@ export const GraphCollection = <
         }
       }
     },
-    [loadChildren, nodeAdapter, idProviderForLazy]
+    [loadChildren, nodeAdapter, idProviderForLazy, onLoadChildrenError]
   )
 
   useEffect(() => {
@@ -474,37 +526,35 @@ export const GraphCollection = <
     )
   }
 
+  // Props shared between the lazy and eager F0Graph branches. The branches
+  // only differ in the data inlet (`rootNodes` + `loadChildren` vs
+  // `nodes` + `edges`); everything else flows through here so consumers can't
+  // accidentally desync the two code paths.
+  const commonGraphProps = {
+    ...graphProps,
+    graphId,
+    renderNode: renderNodeWrapped,
+    selectionMode: (source.selectable ? "multi" : "none") as "multi" | "none",
+    selectedNodes,
+    onNodeSelect: handleNodeSelect,
+    searchValue:
+      source.debouncedCurrentSearch ?? source.currentSearch ?? undefined,
+    onSearchChange: handleSearchChange,
+  }
+
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col">
+    <div className="flex h-full min-h-[400px] flex-1 flex-col">
       {isLazyMode ? (
         <F0Graph<Record>
-          {...graphProps}
-          graphId={graphId}
+          {...commonGraphProps}
           rootNodes={projection.nodes as GraphNode<Record>[]}
           loadChildren={wrappedLoadChildren}
-          renderNode={renderNodeWrapped}
-          selectionMode={source.selectable ? "multi" : "none"}
-          selectedNodes={selectedNodes}
-          onNodeSelect={handleNodeSelect}
-          searchValue={
-            source.debouncedCurrentSearch ?? source.currentSearch ?? undefined
-          }
-          onSearchChange={handleSearchChange}
         />
       ) : (
         <F0Graph<Record>
-          {...graphProps}
-          graphId={graphId}
+          {...commonGraphProps}
           nodes={projection.nodes as GraphNode<Record>[]}
           edges={projection.edges as GraphEdge[]}
-          renderNode={renderNodeWrapped}
-          selectionMode={source.selectable ? "multi" : "none"}
-          selectedNodes={selectedNodes}
-          onNodeSelect={handleNodeSelect}
-          searchValue={
-            source.debouncedCurrentSearch ?? source.currentSearch ?? undefined
-          }
-          onSearchChange={handleSearchChange}
         />
       )}
     </div>
