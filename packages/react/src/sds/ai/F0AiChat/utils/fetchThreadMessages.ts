@@ -1,5 +1,7 @@
 import { type Message } from "@copilotkit/shared"
 
+import { extractVisionAttachments } from "./visionAttachments"
+
 /**
  * Shape of a single message returned by
  * GET /copilotkit/chat-history/threads/:threadId/messages
@@ -97,7 +99,16 @@ export function convertBackendMessage(
     if (part.type === "text") {
       if (part.text) {
         if (role === "user") {
-          userParts.push({ type: "text", text: part.text })
+          // Backend wraps image attachments in `<vision_attachments>` blocks
+          // inside the user's text part. Split them back into binary parts
+          // + clean text so the UI sees the same shape as the live flow.
+          const { text, binaryParts } = extractVisionAttachments(part.text)
+          for (const bp of binaryParts) {
+            userParts.push(bp)
+          }
+          if (text.length > 0) {
+            userParts.push({ type: "text", text })
+          }
         } else {
           messages.push({
             id: `${id}_t${partIndex}`,

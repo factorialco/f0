@@ -23,7 +23,7 @@ import {
   F0AiChatProvider,
   AiChatProviderProps,
 } from "@/sds/ai/F0AiChat"
-import { CanvasPanel } from "@/sds/ai/F0AiChat/components/layout/CanvasPanel"
+import { F0CanvasPanel } from "@/sds/ai/F0CanvasPanel"
 import { useAiChat } from "@/sds/ai/F0AiChat/providers/AiChatStateProvider"
 import { DEFAULT_CHAT_WIDTH } from "@/sds/ai/F0AiChat/utils/constants"
 
@@ -184,6 +184,8 @@ function ApplicationFrameContent({
     open: isAiChatOpen,
     visualizationMode,
     canvasContent,
+    canvasEntities,
+    closeCanvas,
     chatWidth,
     resizable,
   } = useAiChat()
@@ -341,7 +343,11 @@ function ApplicationFrameContent({
                     isSmallViewport ? undefined : { right: reservedChatWidth }
                   }
                 >
-                  <CanvasPanel />
+                  <F0CanvasPanel
+                    content={canvasContent}
+                    onClose={closeCanvas}
+                    entities={canvasEntities}
+                  />
                 </div>
               )}
 

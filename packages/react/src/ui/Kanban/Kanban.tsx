@@ -292,7 +292,7 @@ export function Kanban<TRecord extends RecordType>(
   }
 
   return (
-    <div className={cn("relative h-full w-full px-4", className)}>
+    <div className={cn("relative h-full w-full px-6", className)}>
       <ScrollArea
         className={"relative h-full w-full [&>div>div]:h-full"}
         viewportRef={viewportRef}

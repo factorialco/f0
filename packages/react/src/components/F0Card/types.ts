@@ -41,14 +41,49 @@ type CardAlertDismissible = CardAlertBase & {
    * The consumer is responsible for hiding the alert (e.g. by setting visible: false).
    */
   onDismiss: () => void
+  action?: never
+}
+
+/**
+ * An optional action button rendered in the alert header.
+ * Mutually exclusive with `dismissible` — only one can be shown at a time.
+ * Supply either `onClick` (handler) or `href` (navigation link), not both.
+ */
+export type CardAlertAction = {
+  /** Label text for the action button. */
+  label: string
+  /** Whether the action button is disabled. */
+  disabled?: boolean
+} & (
+  | {
+      /** Called when the action button is clicked. */
+      onClick: () => void
+      href?: never
+    }
+  | {
+      /** URL to navigate to when the action button is clicked. */
+      href: string
+      onClick?: never
+    }
+)
+
+type CardAlertWithAction = CardAlertBase & {
+  dismissible?: never
+  onDismiss?: never
+  /** Action button rendered in the alert header. Mutually exclusive with `dismissible`. */
+  action: CardAlertAction
 }
 
 type CardAlertNonDismissible = CardAlertBase & {
   dismissible?: false
   onDismiss?: never
+  action?: never
 }
 
-export type CardAlertProps = CardAlertDismissible | CardAlertNonDismissible
+export type CardAlertProps =
+  | CardAlertDismissible
+  | CardAlertWithAction
+  | CardAlertNonDismissible
 
 /**
  * Card metadata property renderers.

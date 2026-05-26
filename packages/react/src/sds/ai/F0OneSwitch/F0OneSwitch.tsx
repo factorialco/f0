@@ -11,7 +11,7 @@ import {
   TooltipTrigger,
 } from "@/ui/tooltip"
 
-import { useAiChat } from "../F0AiChat/providers/AiChatStateProvider"
+import { useAiChatToggle } from "../F0AiChat/providers/useAiChatToggle"
 import { F0OneIcon } from "../F0OneIcon"
 import { F0OneSwitchProps } from "./types"
 
@@ -23,7 +23,7 @@ export const F0OneSwitch = ({
   autoOpen = false,
   onToggle,
 }: F0OneSwitchProps) => {
-  const { enabled, setOpen, open } = useAiChat()
+  const { enabled, setOpen, open } = useAiChatToggle()
   const translations = useI18n()
   const [isHover, setIsHover] = useState(false)
   const [tooltipOpen, setTooltipOpen] = useState(false)

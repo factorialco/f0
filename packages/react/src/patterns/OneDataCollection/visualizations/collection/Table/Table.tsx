@@ -34,6 +34,11 @@ import { useDataCollectionSettings } from "@/patterns/OneDataCollection/Settings
 import { GroupHeader } from "@/ui/GroupHeader/index"
 import { Skeleton } from "@/ui/skeleton.tsx"
 
+import type {
+  TableCustomizationProps,
+  TableVisualizationOptions,
+} from "./types"
+
 import { PrimaryActionItemDefinition } from "../../../actions"
 import { useDataCollectionData } from "../../../hooks/useDataCollectionData"
 import { useInfiniteScrollPagination } from "../../../hooks/useInfiniteScrollPagination"
@@ -47,10 +52,6 @@ import { Row } from "./components/Row"
 import { useColumns } from "./hooks/useColums"
 import { groupBorderClass, useHeaderGroups } from "./hooks/useHeaderGroups"
 import { NestedDataProvider } from "./providers/NestedProvider"
-import type {
-  TableCustomizationProps,
-  TableVisualizationOptions,
-} from "./types"
 import { useSticky } from "./useSticky"
 export * from "./settings/SettingsRenderer"
 
@@ -425,7 +426,7 @@ export const TableCollection = <
                           "hover:after:bg-transparent"
                         )}
                       >
-                        <div className="ml-1.5 flex w-full items-center justify-start" />
+                        <div className="ml-3.5 flex w-full items-center justify-start" />
                       </TableHead>
                     )}
                     {headerGroups.map((entry, entryIndex) => {
@@ -494,7 +495,7 @@ export const TableCollection = <
                           : undefined
                       }
                     >
-                      <div className="ml-1.5 flex w-full items-center justify-start">
+                      <div className="ml-3.5 flex w-full items-center justify-start">
                         <F0Checkbox
                           checked={isAllSelected}
                           indeterminate={hasSelection && !isAllSelected}

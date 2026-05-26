@@ -1,0 +1,156 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+<Meta title="CRUD patterns/Delete & destructive" />
+
+# Delete & Destructive Actions
+
+Destructive actions are the highest-risk operations in any CRUD system. The
+patterns here apply to deletion, archival, revocation, and any state change that
+cannot be trivially undone.
+
+---
+
+## Always confirm, always name
+
+Every destructive action requires a **confirmation overlay**. The confirmation
+must tell the user three things:
+
+1. **What** is being affected (resource name or description)
+2. **How much** (count, if bulk)
+3. **Whether** it can be undone
+
+Good: _"Delete report 'Q4 Revenue'? This cannot be undone."_
+Good: _"Remove 14 employees from this team? They will lose access immediately."_
+Bad: _"Are you sure?"_
+Bad: _"This action cannot be undone. Continue?"_
+
+<DoDonts
+  do={{
+    description:
+      "Name the resource and scope in the confirmation: what, how many, and whether reversible.",
+  }}
+  dont={{
+    description:
+      "Do not use generic confirmations. They train users to click through without reading.",
+  }}
+/>
+
+---
+
+## Critical actions hide by default (recommended, not enforced)
+
+The **recommended default** is to place destructive actions in the **overflow
+menu** (ellipsis) rather than in a header slot, footer slot, or visible button
+row.
+
+The reasoning: muscle memory pointing at a consistently-placed button should not
+delete data. The extra click into overflow is usually worth the safety it provides.
+
+However, this is a **recommendation, not a hard rule**. Some contexts and resources
+justify surfacing a destructive action more prominently:
+
+- The resource is lightweight and deletion is a core, frequent workflow (e.g.,
+  removing items from a draft list)
+- The context makes the action unambiguous (e.g., a "Remove" button on a
+  selected-items chip)
+- The destructive action is the primary purpose of the surface (e.g., a
+  "clean up duplicates" view)
+
+When surfacing a destructive action outside of overflow, you must still:
+
+- Keep the confirmation overlay (always)
+- Use critical/destructive styling on the affordance so it is visually distinct
+- Ensure it cannot be confused with a non-destructive action nearby
+
+<DoDonts
+  do={{
+    description:
+      "Default to placing critical actions in overflow. If you surface them, ensure confirmation and destructive styling are still present.",
+  }}
+  dont={{
+    description:
+      "Do not surface destructive actions without justification — the default is overflow, and deviations should be deliberate.",
+  }}
+/>
+
+---
+
+## Single-item delete
+
+Flow: **Item overflow → Delete → Confirmation overlay → Confirm**
+
+- The Delete action lives in the item's overflow (ellipsis) menu.
+- It is marked as critical (destructive styling in the menu).
+- Clicking it opens a confirmation overlay that names the specific item.
+- The confirm button uses destructive styling; cancel is the default focus.
+
+---
+
+## Bulk delete
+
+Flow: **Select items → Bulk bar appears → Delete action → Confirmation overlay → Confirm**
+
+- Delete appears in the bulk action bar (either as a primary bulk action if
+  deletion is a core workflow, or in the bar's overflow if it's rare).
+- The confirmation names the **count and scope**: "Delete 14 invoices?" not just "Delete selected?".
+- If cross-page selection is active, the confirmation must reflect the full scope:
+  "Delete all 1,432 invoices matching the current filter?"
+
+<DoDonts
+  do={{
+    description:
+      "In bulk delete confirmations, show the exact count. If all-pages selection is active, say so explicitly.",
+  }}
+  dont={{
+    description:
+      'Do not say "Delete selected items" without naming the count — the user cannot verify scope.',
+  }}
+/>
+
+---
+
+## Delete from read views
+
+When a read overlay or detail page is open, Delete is accessed from the **view's
+overflow menu** — not from a visible button in the header or footer.
+
+Even if the read view's header has only one action in overflow (Delete), it stays
+there. This prevents the "I meant to click Edit but hit Delete" failure mode.
+
+---
+
+## Beyond deletion: other destructive actions
+
+The same patterns apply to any action meeting the critical checklist:
+
+- **Archive** — less severe than delete but still data-affecting. Confirm with scope.
+- **Revoke access** — side effects on other users. Confirm and name who is affected.
+- **Cancel / terminate** — external side effects (emails, payments). Confirm with
+  consequence description.
+- **Permanent state transitions** — moving something to a state it cannot return
+  from. Confirm with explicit irreversibility statement.
+
+---
+
+## When NOT to confirm
+
+Not every removal needs a confirmation overlay:
+
+- **Reversible within seconds** (undo via toast): skip the overlay, show an undo affordance.
+- **Removing from a list without deleting** (unassign, remove from group): may not
+  need confirmation if the item still exists elsewhere and is easily re-added.
+- **Draft/unsaved content**: if nothing has been persisted, dismissing without
+  confirmation is acceptable (though a "discard changes?" prompt may be warranted
+  for large edits).
+
+<DoDonts
+  do={{
+    description:
+      "Skip the confirmation overlay only when the action is trivially reversible with an immediately-visible undo.",
+  }}
+  dont={{
+    description:
+      "Do not skip confirmation for actions that affect other users, trigger external effects, or cannot be undone within the product.",
+  }}
+/>

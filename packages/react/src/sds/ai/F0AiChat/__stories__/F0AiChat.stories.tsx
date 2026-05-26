@@ -1,7 +1,7 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect } from "react"
 
-import { Lightbulb, ThumbsDown, ThumbsUp } from "@/icons/app"
+import { ChartVerticalBars, Pencil, Search } from "@/icons/app"
 
 import { F0AiChat, F0AiChatProvider, useAiChat } from ".."
 
@@ -11,21 +11,82 @@ const AiChatWrapper = ({ children }: { children: React.ReactElement }) => {
   useEffect(() => {
     setWelcomeScreenSuggestions([
       {
-        icon: Lightbulb,
-        message: "Hello, how can I help you today?",
-        prompt: "Hello, how can I help you today?",
+        icon: ChartVerticalBars,
+        label: "Analyze",
+        items: [
+          {
+            title: "April leave and overtime summary",
+            prompt:
+              "Give me a detailed breakdown of leave taken and overtime worked across the company in April, grouped by department.",
+          },
+          {
+            title: "Current gross salary by employee",
+            prompt:
+              "List the current gross salary of every active employee, sorted from highest to lowest.",
+          },
+          {
+            title: "Report on starters and leavers",
+            prompt:
+              "Show me a report of starters and leavers in the last quarter, with start/end dates and roles.",
+          },
+          {
+            title: "Headcount evolution by department",
+            prompt:
+              "Plot headcount evolution by department over the last twelve months and highlight the fastest-growing teams.",
+          },
+          {
+            title: "Absence trends across teams",
+            prompt:
+              "Compare absence rates across teams over the last six months and call out any anomalies.",
+          },
+        ],
       },
       {
-        icon: ThumbsUp,
-        message: "Share feedback",
-        prompt:
-          "Share feedback and help shape One with your feedback in the next message (optional)",
+        icon: Search,
+        label: "Find",
+        items: [
+          {
+            title: "Who's out of office this week?",
+            prompt:
+              "List every employee on time-off, sick leave, or other absence between today and the end of the week.",
+          },
+          {
+            title: "Engineers based in Barcelona",
+            prompt:
+              "Find all employees in the Engineering department whose office location is Barcelona.",
+          },
+          {
+            title: "Open positions in Sales",
+            prompt:
+              "Show every open job posting in the Sales department, including hiring manager and target start date.",
+          },
+          {
+            title: "Documents shared with me",
+            prompt:
+              "List documents shared with me in the last 30 days, sorted by most recent activity.",
+          },
+        ],
       },
       {
-        icon: ThumbsDown,
-        message: "Very long message to test the layout of the suggestions list",
-        prompt:
-          "Very long message to test the layout of the suggestions list and help shape One with your feedback in the next message (optional)",
+        icon: Pencil,
+        label: "Create",
+        items: [
+          {
+            title: "Draft a job description for a Senior Backend role",
+            prompt:
+              "Draft a job description for a Senior Backend Engineer focused on distributed systems, with responsibilities, requirements, and a short company pitch.",
+          },
+          {
+            title: "Compose an offboarding email template",
+            prompt:
+              "Compose an offboarding email template that thanks the employee, lists return-of-equipment steps, and links to the HR exit form.",
+          },
+          {
+            title: "Outline an onboarding checklist for new hires",
+            prompt:
+              "Outline a one-week onboarding checklist for new hires that covers IT setup, meetings to schedule, and key documents to read.",
+          },
+        ],
       },
     ])
   }, [setWelcomeScreenSuggestions])

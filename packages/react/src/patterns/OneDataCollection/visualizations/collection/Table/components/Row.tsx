@@ -180,6 +180,7 @@ const RowComponentInner = <
 
   const {
     hasItemActions,
+    hasMobileItemActions,
     primaryItemActions,
     dropdownItemActions,
     mobileDropdownItemActions,
@@ -255,7 +256,7 @@ const RowComponentInner = <
           referenceRowType={referenceRowType}
         >
           {id !== undefined && (
-            <div className="pointer-events-auto ml-1.5 flex h-full items-center justify-start">
+            <div className="pointer-events-auto ml-3.5 flex h-full items-center justify-start">
               <Checkbox
                 checked={selectedItems.has(id)}
                 onCheckedChange={onCheckedChange}
@@ -359,21 +360,23 @@ const RowComponentInner = <
               </ItemActionsRowContainer>
             </td>
             {/** Mobile item actions */}
-            <TableCell
-              key={`table-cell-${groupIndex}-${index}-actions`}
-              width={68}
-              sticky={{
-                right: 0,
-              }}
-              href={itemHref}
-              className="table-cell md:hidden"
-              loading={loading}
-            >
-              <ItemActionsMobile
-                items={mobileDropdownItemActions}
-                onOpenChange={handleDropDownOpenChange}
-              />
-            </TableCell>
+            {hasMobileItemActions && (
+              <TableCell
+                key={`table-cell-${groupIndex}-${index}-actions`}
+                width={68}
+                sticky={{
+                  right: 0,
+                }}
+                href={itemHref}
+                className="table-cell md:hidden"
+                loading={loading}
+              >
+                <ItemActionsMobile
+                  items={mobileDropdownItemActions}
+                  onOpenChange={handleDropDownOpenChange}
+                />
+              </TableCell>
+            )}
           </>
         ))}
     </TableRow>
