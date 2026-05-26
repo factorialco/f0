@@ -26,8 +26,8 @@ function resolveStatus(
       message: typeof error === "string" ? error : undefined,
     }
   }
-  if (status) return status
   if (hint) return { type: "default", message: hint }
+  if (status) return status
   return undefined
 }
 

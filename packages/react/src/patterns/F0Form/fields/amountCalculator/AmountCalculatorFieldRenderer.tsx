@@ -30,9 +30,11 @@ export function AmountCalculatorFieldRenderer({
   "aria-describedby": ariaDescribedBy,
   "aria-invalid": ariaInvalid,
 }: AmountCalculatorFieldRendererProps) {
+  const normalizedValue =
+    formField.value != null ? Number(formField.value) : undefined
   const value =
-    typeof formField.value === "number" && Number.isFinite(formField.value)
-      ? formField.value
+    normalizedValue != null && Number.isFinite(normalizedValue)
+      ? normalizedValue
       : null
 
   const resolvedStatus =

@@ -116,6 +116,23 @@ describe("F0AmountCalculator", () => {
       ).toBeInTheDocument()
     })
 
+    test("gives hint precedence over status message", () => {
+      render(
+        <F0AmountCalculator
+          label="Discount"
+          locale="en-US"
+          hint="Prefer this hint"
+          status={{ type: "warning", message: "Do not show this status" }}
+          onChange={vi.fn()}
+        />
+      )
+
+      expect(screen.getByText("Prefer this hint")).toBeInTheDocument()
+      expect(
+        screen.queryByText("Do not show this status")
+      ).not.toBeInTheDocument()
+    })
+
     test("disables the input when disabled prop is set", () => {
       render(
         <F0AmountCalculator

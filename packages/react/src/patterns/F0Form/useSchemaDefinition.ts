@@ -123,6 +123,8 @@ function configToF0Field(
 
     case "amountCalculator": {
       const { min, max, isInteger } = extractNumberConstraints(schema)
+      const amountCalculatorClearable =
+        "clearable" in config ? config.clearable : clearable
       return {
         ...baseProps,
         type: "amountCalculator",
@@ -135,8 +137,7 @@ function configToF0Field(
         inputWidth: "inputWidth" in config ? config.inputWidth : undefined,
         extraContent:
           "extraContent" in config ? config.extraContent : undefined,
-        clearable,
-        readonly: "readonly" in config ? config.readonly : undefined,
+        clearable: amountCalculatorClearable,
         renderIf: config.renderIf,
       } as F0Field
     }
