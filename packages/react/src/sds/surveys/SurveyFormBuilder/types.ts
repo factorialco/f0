@@ -1,6 +1,6 @@
 import type { UseFileUpload } from "@/patterns/F0Form/fields/file/types"
 import type { IconType } from "@/components/F0Icon/F0Icon"
-import type { F0SelectItemProps } from "@/components/F0Select/types"
+import type { F0SelectItemObject } from "@/components/F0Select/types"
 import type { DataSourceDefinition, RecordType } from "@/hooks/datasource"
 
 import type { CheckboxQuestionProps } from "./QuestionTypes/CheckboxQuestion"
@@ -30,6 +30,25 @@ export type QuestionType =
   | "checkbox"
 
 export type ElementType = QuestionType | "section"
+
+/**
+ * Per-question control to hide individual entries from the question
+ * actions menu (the "⋯" dropdown). Useful when a consumer wants to
+ * lock down a subset of question editing without disabling the whole
+ * question.
+ *
+ * When every available action is hidden, the actions menu trigger is
+ * not rendered at all.
+ */
+export type HiddenAction =
+  | "required"
+  | "multiSelect"
+  | "allowCreate"
+  | "questionType"
+  | "duplicate"
+  | "delete"
+
+export type HiddenActions = ReadonlyArray<HiddenAction>
 
 export type BaseQuestionOnChangeParams = {
   id: string
@@ -94,7 +113,8 @@ export type SurveyDataset = {
   icon?: IconType
   placeholder?: string
   dataSource: DataSourceDefinition
-  mapOptions: (item: RecordType) => F0SelectItemProps<string, RecordType>
+  mapOptions: (item: RecordType) => F0SelectItemObject<string, RecordType>
+  onCreate?: (value: string) => Promise<RecordType>
 }
 
 export type SurveyDatasets = Record<string, SurveyDataset>
@@ -126,6 +146,7 @@ type OnChangeQuestionParams = BaseQuestionOnChangeParams &
         datasetKey?: string
         showSearchBox?: boolean
         searchBoxPlaceholder?: string
+        allowCreate?: boolean
       }
     | {
         type: "dropdown-multi"

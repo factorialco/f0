@@ -232,6 +232,12 @@ export interface ChatDashboardColumn {
   label: string
   /** Optional fixed width in pixels */
   width?: number
+  /**
+   * Optional header tooltip explaining what the column represents — formula
+   * or aggregation if derived, source if direct. Forwarded to the underlying
+   * table column's `info` prop. Omit when the label is self-explanatory.
+   */
+  info?: string
 }
 
 // ---------------------------------------------------------------------------

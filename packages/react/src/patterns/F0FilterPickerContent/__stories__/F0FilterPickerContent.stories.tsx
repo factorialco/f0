@@ -176,14 +176,6 @@ const WithoutApplyButtonComponent = () => {
         onChange={setFilters}
         showApplyButton={false}
       />
-      <div className="mt-4 flex justify-end">
-        <button
-          className="rounded-lg bg-f1-background-secondary px-4 py-2 text-sm"
-          onClick={() => setFilters({})}
-        >
-          Clear All
-        </button>
-      </div>
       <div className="mt-4">
         <p className="mb-1 text-xs font-medium text-f1-foreground-secondary">
           Current Filters (updates in real-time):
@@ -416,14 +408,6 @@ const ComplexFiltersWithoutApplyButtonComponent = () => {
         onChange={handleChange}
         showApplyButton={false}
       />
-      <div className="mt-4 flex justify-end">
-        <button
-          className="rounded-lg bg-f1-background-secondary px-4 py-2 text-sm"
-          onClick={() => setFilters({})}
-        >
-          Clear All
-        </button>
-      </div>
       <div className="mt-4">
         <p className="mb-1 text-xs font-medium text-f1-foreground-secondary">
           Current Filters (updates in real-time):

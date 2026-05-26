@@ -178,9 +178,9 @@ const meta: Meta = {
       description:
         "Function to handle the change event. Returns the value of the selected option, and the item object if it exists",
     },
-    onApply: {
+    withApplySelection: {
       description:
-        "Optional callback for the multi-select apply button. When provided, selection changes are staged until Apply is clicked, and clicking outside cancels the staged changes.",
+        "When true in multi-select mode, selection changes are staged until Apply is clicked. Clicking Apply confirms the selection through `onChange`, while clicking outside or Cancel discards the staged changes.",
     },
     actions: {
       description:
@@ -1001,10 +1001,10 @@ export const MultiplePaginatedWithApply: Story = {
       label: item.label,
       avatar: item.avatar,
     }),
-    onApply: fn(),
-    onSelectItems: fn((selectionStatus) => {
+    onChange: fn((selectionStatus) => {
       console.log("selectionStatus", selectionStatus)
     }),
+    withApplySelection: true,
   },
 }
 
@@ -1023,7 +1023,7 @@ export const MultipleWithApply: Story = {
       avatar: item.avatar,
       description: `${item.jobTitle} · ${item.departmentName}`,
     }),
-    onApply: fn(),
+    withApplySelection: true,
   },
 }
 
@@ -1242,6 +1242,29 @@ export const WithCustomTrigger: Story = {
       </div>
     </F0Select>
   ),
+}
+
+export const WithOnCreate: Story = {
+  args: {
+    label: "Select Employee",
+    placeholder: "Search employees...",
+    showSearchBox: true,
+    onChange: fn(),
+    source: employeeNonPaginatedSource,
+    mapOptions: (item: Employee) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+      description: `${item.jobTitle} · ${item.departmentName}`,
+    }),
+    onCreate: (_value: string) => {
+      return new Promise<void>((resolve) => {
+        setTimeout(() => {
+          resolve()
+        }, 500)
+      })
+    },
+  },
 }
 
 export const Snapshot: Story = {

@@ -1,4 +1,6 @@
-import { QuestionType } from "../../types"
+import { HiddenAction, HiddenActions, QuestionType } from "../../types"
+
+export type { HiddenAction, HiddenActions }
 
 export type BaseQuestionProps = {
   id: string
@@ -8,6 +10,7 @@ export type BaseQuestionProps = {
   children: React.ReactNode
   required?: boolean
   locked?: boolean
+  hiddenActions?: HiddenActions
 }
 
 export type BaseQuestionPropsForOtherQuestionComponents = Omit<

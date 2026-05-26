@@ -1069,6 +1069,79 @@ export const EditableTableWithDateCell: Story = {
   },
 }
 
+export const EditableTableWithDateCellMinMax: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Editable date cells constrained with `dateConfig.minDate` / `dateConfig.maxDate`. Dates outside the range are disabled in the picker.",
+      },
+    },
+  },
+  render: () => {
+    const { dataAdapter, onCellChange } = useEditableTableData()
+
+    const baseOptions = (
+      getMockVisualizations().editableTable as Extract<
+        ReturnType<typeof getMockVisualizations>["editableTable"],
+        { type: "editableTable" }
+      >
+    ).options
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const oneYearOut = new Date(today)
+    oneYearOut.setFullYear(oneYearOut.getFullYear() + 1)
+
+    return (
+      <ExampleComponent
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...baseOptions,
+              columns: [
+                {
+                  label: "Name",
+                  render: (item: MockUser) => ({
+                    type: "person" as const,
+                    value: {
+                      firstName: item.name.split(" ")[0],
+                      lastName: item.name.split(" ")[1],
+                    },
+                  }),
+                  id: "name",
+                },
+                {
+                  label: "Start date (no past dates)",
+                  id: "startDate",
+                  render: (item: MockUser) =>
+                    format(item.joinedAt, "yyyy-MM-dd"),
+                  editType: () => "date" as const,
+                  inputPlaceholder: "DD/MM/YYYY",
+                  dateConfig: { minDate: today },
+                },
+                {
+                  label: "End date (today → +1y)",
+                  id: "endDate",
+                  render: (item: MockUser) =>
+                    format(item.joinedAt, "yyyy-MM-dd"),
+                  editType: () => "date" as const,
+                  inputPlaceholder: "DD/MM/YYYY",
+                  dateConfig: { minDate: today, maxDate: oneYearOut },
+                },
+              ],
+              onCellChange,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        id="editable-table-date-min-max/v1"
+      />
+    )
+  },
+}
+
 export const TableAndEditableTable: Story = {
   parameters: {
     docs: {
