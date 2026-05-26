@@ -1,7 +1,7 @@
 import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 import { FeatureGrid } from "~/docs/components/FeatureGrid"
-import { Table, List, Masonry, Kanban, Pencil } from "@/icons/app"
+import { Add, EyeVisible, Pencil, Delete } from "@/icons/app"
 
 <Meta title="Data collection/CRUD patterns/Overview" />
 
@@ -401,39 +401,32 @@ only move to an alternative when the resource or task needs it.
   <FeatureGrid
     features={[
       {
-        icon: Table,
-        title: "Table",
+        icon: Add,
+        title: "Create",
         description:
-          "Row click or chevron drives read. Primary action creates. Checkbox selection enables bulk update and delete. Right-position dialog keeps rows visible when context matters.",
-        href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--table",
+          "Always triggered by the collection primary action. Use a dialog for most cases, a right-position dialog when keeping the collection visible helps, or a wizard for multi-step flows.",
+        href: "/?path=/docs/patterns-data-collection-crud-patterns-create--documentation",
       },
       {
-        icon: List,
-        title: "List",
+        icon: EyeVisible,
+        title: "Read",
         description:
-          "Item click drives read when the teaser is a summary. Primary action creates. Bulk update only when selected items are explicit and reviewable.",
-        href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--list",
-      },
-      {
-        icon: Masonry,
-        title: "Card",
-        description:
-          "Card click drives read first — edit is an explicit action inside the read dialog. Primary action creates. Ellipsis menu deletes with confirmation.",
-        href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--card",
-      },
-      {
-        icon: Kanban,
-        title: "Kanban",
-        description:
-          "Drag updates lane state. Card click drives read. Lane create scopes new items to a workflow state. Bulk actions apply across lanes when selected cards are explicit.",
-        href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--kanban",
+          "Triggered by clicking a row, list item, or card. Opens a dialog for contained resources or navigates to a page when the resource needs a durable destination.",
+        href: "/?path=/docs/patterns-data-collection-crud-patterns-read--documentation",
       },
       {
         icon: Pencil,
-        title: "Editable Table",
+        title: "Update",
         description:
-          "Inline cell edit handles field-level updates. Add-row creates lightweight records. Full-resource creation and deletion use dialogs and row actions.",
-        href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--editable-table",
+          "Always an explicit action — never triggered by a click that could mean read. Use a dialog for full-resource edits or inline cells in Editable Table for field-level changes.",
+        href: "/?path=/docs/patterns-data-collection-crud-patterns-update--documentation",
+      },
+      {
+        icon: Delete,
+        title: "Delete",
+        description:
+          "Always requires a confirmation step. Scoped to the selected item or selection. Never placed as a primary action — lives in item actions, bulk actions, or the read dialog header.",
+        href: "/?path=/docs/patterns-data-collection-crud-patterns-delete--documentation",
       },
     ]}
   />
