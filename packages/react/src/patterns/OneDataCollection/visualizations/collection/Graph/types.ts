@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 
 import type {
+  F0GraphDetailPanelProps,
   F0GraphNodeRenderContext,
   F0GraphProps,
   GraphEdge,
@@ -179,6 +180,38 @@ export type GraphVisualizationOptions<
    * NOT diff `rootSelector` between projections.
    */
   rootSelector?: (records: ReadonlyArray<R>) => ReadonlyArray<R>
+
+  /**
+   * Optional. Builds the detail-panel props shown when the user opens a node.
+   * Receives the original record (not the projected graph node) so consumers
+   * can reuse domain selectors. GraphCollection forwards the return value to
+   * F0Graph; the `open`, `onClose`, `width`, and `ariaLabel` props are owned
+   * by F0Graph and the panel chrome and are not configurable here.
+   */
+  detailPanel?: (
+    record: R
+  ) => Omit<F0GraphDetailPanelProps, "open" | "onClose" | "width" | "ariaLabel">
+
+  /**
+   * Optional. Accessible label forwarded to F0Graph's detail panel. Defaults
+   * to the F0Graph built-in label when omitted.
+   */
+  detailPanelAriaLabel?: string
+
+  /**
+   * Optional. Derives the set of node ids that should render in the
+   * `highlighted` state. Returning an empty collection clears all highlights;
+   * any non-empty result automatically dims every other node and edge (the
+   * auto-dim behavior lives in F0Graph itself, so consumer-supplied edge
+   * variants still win when explicitly set via `renderEdge` data).
+   *
+   * Receives the current materialized record set — the same list F0Graph
+   * renders — so callers can derive highlights from any record field
+   * (search matches, server-tagged ids, etc.) without juggling lazy chunks.
+   */
+  highlightedNodes?: (
+    records: readonly R[]
+  ) => ReadonlyArray<string> | ReadonlySet<string>
 
   /**
    * Escape hatch for everything F0Graph exposes that this view does NOT own.
