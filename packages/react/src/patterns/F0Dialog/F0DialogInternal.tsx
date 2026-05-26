@@ -187,16 +187,13 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
         modal={position === "center" || position === "fullscreen"}
       >
         <DialogContent
-          contentRef={setContentRef}
+          ref={setContentRef}
           withTranslateAnimation={!isSidePosition}
           wrapperClassName={dialogWrapperClassName({
             variant,
             position,
           })}
           className={contentClassName}
-          onFocusOutside={
-            isSidePosition ? (e) => e.preventDefault() : undefined
-          }
           onOpenAutoFocus={(e) => e.preventDefault()}
           container={containerProp}
         >

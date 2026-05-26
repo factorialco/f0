@@ -27,7 +27,7 @@ test("calls onFullscreenChange callback when fullscreen mode changes", async () 
   expect(onFullscreenChange).toHaveBeenCalledWith(false)
 })
 
-test("keeps fullscreen editor inside side dialog", async () => {
+test("keeps side dialog open when toggling fullscreen", async () => {
   const onClose = vi.fn()
 
   render(
@@ -50,13 +50,11 @@ test("keeps fullscreen editor inside side dialog", async () => {
     await screen.findByRole("button", { name: "Toggle fullscreen mode" })
   )
 
-  const dialogPanel = screen.getByRole("dialog").firstElementChild
-  const fullscreenEditor = dialogPanel?.querySelector(
-    ".rich-text-editor-container"
-  )
+  const dialog = screen.getByRole("dialog")
+  const fullscreenEditor = dialog.querySelector(".rich-text-editor-container")
 
   expect(fullscreenEditor).toBeTruthy()
-  expect(fullscreenEditor).toHaveClass("absolute")
-  expect(fullscreenEditor).not.toHaveClass("fixed")
+  expect(fullscreenEditor).toHaveClass("fixed")
+  expect(fullscreenEditor).not.toHaveClass("absolute")
   expect(onClose).not.toHaveBeenCalled()
 })

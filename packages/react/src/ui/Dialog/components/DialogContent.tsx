@@ -1,7 +1,7 @@
 "use client"
 
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { forwardRef, type Ref, useEffect, useState } from "react"
+import { forwardRef, useEffect, useState } from "react"
 
 import { cn } from "../../../lib/utils"
 import { DialogOverlay } from "./DialogOverlay"
@@ -13,7 +13,6 @@ export const DialogContent = forwardRef<
     wrapperClassName?: string
     withTranslateAnimation?: boolean
     container?: HTMLElement | null
-    contentRef?: Ref<HTMLDivElement>
   }
 >(
   (
@@ -23,7 +22,6 @@ export const DialogContent = forwardRef<
       children,
       withTranslateAnimation = true,
       container: propContainer,
-      contentRef,
       ...props
     },
     ref
@@ -55,7 +53,6 @@ export const DialogContent = forwardRef<
           {...props}
         >
           <div
-            ref={contentRef}
             className={cn(
               "relative flex w-[90%] flex-col rounded-xl bg-f1-background shadow-lg",
               "pointer-events-auto",
