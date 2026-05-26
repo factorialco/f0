@@ -271,10 +271,6 @@ export const WithItemActionsNoPanel: Story = {
  * underlying record (via the same `idProvider`/`item.id`/index fallback used
  * for projection) and forwards it to `useSelectable`. Selection state lives
  * on the source so view-switches preserve the checkmarks.
- *
- * Note: Phase 1 omits `detailPanel` from the public surface; this story
- * replaces the original "WithDetailPanel" spec entry because the panel
- * cannot be wired without an unreleased prop.
  */
 export const Selectable: Story = {
   parameters: {
@@ -315,6 +311,135 @@ export const Selectable: Story = {
       )
     }
     return <SelectableExample />
+  },
+}
+
+/* -------------------------------------------------------------------------- */
+/* Story: Cycle                                                               */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Detail panel — `detailPanel` returns the variant + slot config for the
+ * built-in F0Graph side panel. GraphCollection wires the panel chrome
+ * (open/close, width persistence, focus management) and forwards the
+ * resolved record to the consumer's callback, so the same record-typed
+ * derivations used in `renderNode` apply here.
+ */
+export const WithDetailPanel: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Selecting a node opens F0Graph's side panel; GraphCollection resolves the node id to its record and forwards it to `detailPanel(record)`. The returned shape mirrors `F0GraphDetailPanelProps` minus the chrome-owned fields (`open`, `onClose`, `width`, `ariaLabel`).",
+      },
+    },
+  },
+  render: () => {
+    const DetailPanelExample = () => {
+      const source = useDataCollectionSource<OrgPerson>({
+        dataAdapter: {
+          fetchData: async () => ({ records: orgChart }),
+        },
+      })
+
+      return (
+        <div className="h-[600px] w-full">
+          <OneDataCollection
+            source={source}
+            visualizations={[
+              {
+                type: "graph",
+                options: {
+                  nodeAdapter: (record) => ({ parentId: record.managerId }),
+                  renderNode: renderOrgNode,
+                  detailPanel: (record) => ({
+                    variant: "default",
+                    title: record.name,
+                    description: `${record.role} · ${record.team}`,
+                  }),
+                  detailPanelAriaLabel: "Org member details",
+                },
+              },
+            ]}
+          />
+        </div>
+      )
+    }
+    return <DetailPanelExample />
+  },
+}
+
+/* -------------------------------------------------------------------------- */
+/* Story: WithHighlight                                                       */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Highlighting + auto-dim — `highlightedNodes` receives the materialized
+ * record array and returns the ids that should render in the `highlighted`
+ * state. F0Graph automatically dims every other node and edge while the
+ * highlight set is non-empty (clearing the set restores full opacity).
+ *
+ * This story uses a free-text input to derive highlights from a name/team
+ * substring match — the common "search the graph" pattern. With an empty
+ * query the function returns an empty array, so dimming clears.
+ */
+export const WithHighlight: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`highlightedNodes` returns the ids that should render highlighted; F0Graph auto-dims the rest. Type into the search input to highlight matching members by name or team — clear it to restore full opacity.",
+      },
+    },
+  },
+  render: () => {
+    const HighlightExample = () => {
+      const [query, setQuery] = useState("Engineering")
+      const source = useDataCollectionSource<OrgPerson>({
+        dataAdapter: {
+          fetchData: async () => ({ records: orgChart }),
+        },
+      })
+
+      return (
+        <div className="flex h-[640px] w-full flex-col gap-2 p-2">
+          <input
+            aria-label="Highlight by name or team"
+            className="w-64 self-start rounded-md border border-f1-border bg-f1-background px-3 py-1 text-f1-foreground"
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Highlight by name or team…"
+            type="search"
+            value={query}
+          />
+          <div className="min-h-0 flex-1">
+            <OneDataCollection
+              source={source}
+              visualizations={[
+                {
+                  type: "graph",
+                  options: {
+                    nodeAdapter: (record) => ({ parentId: record.managerId }),
+                    renderNode: renderOrgNode,
+                    highlightedNodes: (records) => {
+                      const q = query.trim().toLowerCase()
+                      if (!q) return []
+                      return records
+                        .filter(
+                          (r) =>
+                            r.name.toLowerCase().includes(q) ||
+                            r.team.toLowerCase().includes(q)
+                        )
+                        .map((r) => r.id)
+                    },
+                  },
+                },
+              ]}
+            />
+          </div>
+        </div>
+      )
+    }
+    return <HighlightExample />
   },
 }
 

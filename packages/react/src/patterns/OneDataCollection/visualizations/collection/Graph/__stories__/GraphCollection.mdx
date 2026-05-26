@@ -133,6 +133,54 @@ the primary affordance — Phase 1 Graph does not implement either.
           are reserved.
         </td>
       </tr>
+      <tr>
+        <td>
+          <code>detailPanel</code>
+        </td>
+        <td>
+          <code>
+            (record: R) =&gt; Omit&lt;F0GraphDetailPanelProps,
+            "open"|"onClose"|"width"|"ariaLabel"&gt;
+          </code>
+        </td>
+        <td>No</td>
+        <td>
+          Opens F0Graph's built-in side panel for the selected node.
+          GraphCollection resolves the node id to its record and forwards it;
+          the chrome-owned props (<code>open</code>, <code>onClose</code>,{" "}
+          <code>width</code>, <code>ariaLabel</code>) stay reserved.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>detailPanelAriaLabel</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>No</td>
+        <td>
+          Accessible label for the detail panel landmark. Falls back to the
+          F0Graph default when omitted.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>highlightedNodes</code>
+        </td>
+        <td>
+          <code>
+            (records: readonly R[]) =&gt; ReadonlyArray&lt;string&gt; |
+            ReadonlySet&lt;string&gt;
+          </code>
+        </td>
+        <td>No</td>
+        <td>
+          Derives the highlighted node id set from the current materialized
+          records. A non-empty result auto-dims every other node and edge; empty
+          clears the dimming.
+        </td>
+      </tr>
     </tbody>
   </table>
 </Unstyled>
@@ -289,20 +337,38 @@ per unique cycle signature. Re-renders with the same cycles do not re-warn.
 Each `<OneDataCollection>` falls back to `React.useId()` for `graphId`, so
 multiple mounts on the same page never collide on persisted F0Graph state.
 
+### Detail panel
+
+<Canvas of={Stories.WithDetailPanel} />
+
+`detailPanel` opts into F0Graph's built-in side panel. GraphCollection
+resolves the selected node id to its record (eager projection or lazy
+buffer) and forwards it to your callback; the chrome-owned props
+(`open`, `onClose`, `width`, `ariaLabel`) stay reserved and are wired
+by F0Graph itself.
+
+### Highlighting & search dimming
+
+<Canvas of={Stories.WithHighlight} />
+
+`highlightedNodes` receives the current record array and returns the ids
+that should render in the `highlighted` state. Any non-empty result
+auto-dims every other node and edge — the common "search the graph"
+pattern. Returning an empty array (or never providing the prop) keeps
+every node at full opacity.
+
 ## Phase 1 limitations
 
 These map directly to `PLAN.md §9 Acceptance criteria`:
 
-- **No detail panel** — `detailPanel` is intentionally absent from the
-  Phase 1 public surface. Surface details via `extras.actions` or a custom
-  side-panel for now; the detail panel + dim semantics land in Phase 2.
 - **No grouping** — declaring `grouping` on the source while the graph
   visualization is active throws at the GraphCollection boundary.
 - **Eager requires no pagination** — `paginationType` must be
   `"no-pagination"` unless `loadChildren` is set.
 - **Lazy requires pagination** — `loadChildren` requires
   `paginationType: "infinite-scroll"`.
-- **Hard removal only** — filtered-out records disappear; no dim mode.
+- **Hard removal only** — filtered-out records disappear; no soft-hide
+  dim mode (separate from `highlightedNodes` auto-dim).
 - **Single-instance state** — when stacking two graphs on the same page,
   either let both fall back to `useId()` (auto-isolated) or assign distinct
   `graphId` values.
@@ -319,4 +385,6 @@ The stories above exercise every Phase 1 acceptance check in
 - `Cycle` — cycle detection + single warn + acyclic projection.
 - `LazyMode` — `loadChildren` + `AbortSignal` per-node cancellation.
 - `TwoInstances` — `useId()`-based `graphId` isolation.
+- `WithDetailPanel` — `detailPanel` adapter resolving node id to record.
+- `WithHighlight` — `highlightedNodes` + F0Graph auto-dim.
 - `Snapshot` — deterministic visual regression baseline.
