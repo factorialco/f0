@@ -63,7 +63,11 @@ export type GraphRenderNodeExtras = {
 /**
  * Subset of F0GraphProps that GraphCollection delegates to consumers. Excludes
  * fields that GraphCollection owns (data, selection, search) or that depend on
- * Phase 2+ features (loadChildren, detailPanel, dimmedNodes).
+ * follow-up features (detailPanel, dimmedNodes).
+ *
+ * `loadChildren` is owned by GraphCollection (the wrapper installs a per-node
+ * AbortController and folds errors into `options.onLoadError`); consumers
+ * supply the raw loader via `GraphVisualizationOptions.loadChildren` instead.
  */
 export type GraphGraphPropsPassthrough<R extends RecordType> = Omit<
   F0GraphProps<R>,
@@ -144,6 +148,37 @@ export type GraphVisualizationOptions<
       signal: AbortSignal
     }
   ) => Promise<ReadonlyArray<R>>
+
+  /**
+   * Optional. Invoked when a `loadChildren` rejection escapes the wrapper
+   * (i.e. anything other than the per-node `AbortError` that the abort
+   * controller fires). Default is `console.error`. Use this hook to surface
+   * load failures to a toaster, telemetry sink, or in-product error banner.
+   *
+   * Distinct from `CollectionProps.onLoadError`, which fires for the
+   * top-level page/data fetch — this one is scoped to lazy child loads.
+   *
+   * Aborts are intentionally silent — the user collapsed the node or the
+   * component unmounted; surfacing those as errors would be noise.
+   */
+  onLoadChildrenError?: (error: unknown, nodeId: string) => void
+
+  /**
+   * Optional. Narrows the record set down to "root candidates" before the
+   * projection runs.
+   *
+   * In **eager** mode this is equivalent to filtering `records` upstream of
+   * `projectGraph`: roots are whatever's left whose `parentId` doesn't
+   * resolve to a member of the same set. In **lazy** mode it acts on the
+   * first page of records only — useful when the paginated source returns
+   * roots interleaved with children (e.g. a flat search result set) and you
+   * need to project only the parent rows as `rootNodes`.
+   *
+   * The function MUST be referentially stable across renders (memoize it
+   * with the consumer's deps) — GraphCollection holds a single ref and does
+   * NOT diff `rootSelector` between projections.
+   */
+  rootSelector?: (records: ReadonlyArray<R>) => ReadonlyArray<R>
 
   /**
    * Escape hatch for everything F0Graph exposes that this view does NOT own.
