@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.19.0](https://github.com/factorialco/f0/compare/f0-react-v2.18.0...f0-react-v2.19.0) (2026-05-26)
+
+
+### Features
+
+* cancel selected filters ([#4202](https://github.com/factorialco/f0/issues/4202)) ([c1b0652](https://github.com/factorialco/f0/commit/c1b0652bbd3ae33af9971baab5182e8a80d03e68))
+
 ## [2.18.0](https://github.com/factorialco/f0/compare/f0-react-v2.17.0...f0-react-v2.18.0) (2026-05-26)
 
 
