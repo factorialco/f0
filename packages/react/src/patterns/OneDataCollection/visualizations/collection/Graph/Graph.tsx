@@ -12,6 +12,7 @@ import { F0Button } from "@/components/F0Button"
 import { EllipsisHorizontal } from "@/icons/app"
 import {
   F0Graph,
+  type F0GraphDetailPanelProps,
   type F0GraphNodeRenderContext,
   type GraphEdge,
   type GraphNode,
@@ -109,6 +110,9 @@ export const GraphCollection = <
   loadChildren,
   onLoadChildrenError,
   rootSelector,
+  detailPanel,
+  detailPanelAriaLabel,
+  highlightedNodes,
   graphProps,
   source,
   onSelectItems,
@@ -408,6 +412,62 @@ export const GraphCollection = <
     [source]
   )
 
+  /**
+   * Detail-panel adapter — F0Graph hands us the projected `GraphNode`, the
+   * consumer's `detailPanel` callback takes the original record. We look up
+   * the record by node id (eager projection first, lazy cache as fallback)
+   * and forward the call. Misses are warned ONCE per id in dev — typically
+   * means the panel opened on a node whose record was evicted (lazy node
+   * collapsed before the panel rendered). F0Graph's contract requires the
+   * adapter to always return valid panel props once registered, so a miss
+   * falls back to a minimal placeholder panel rather than throwing.
+   */
+  const missingDetailPanelWarnedRef = useRef<Set<string>>(new Set())
+  const detailPanelAdapter = useCallback(
+    (
+      node: GraphNode<Record>
+    ): Omit<
+      F0GraphDetailPanelProps,
+      "open" | "onClose" | "width" | "ariaLabel"
+    > => {
+      const record =
+        recordById.get(node.id) ?? lazyRecordsRef.current.get(node.id)
+      if (!record) {
+        if (isDev && !missingDetailPanelWarnedRef.current.has(node.id)) {
+          missingDetailPanelWarnedRef.current.add(node.id)
+          // eslint-disable-next-line no-console
+          console.warn(
+            `Graph visualization: detail-panel opened for node "${node.id}" but no matching record was found. ` +
+              "This usually means the node was projected from a lazy load that has since been collapsed."
+          )
+        }
+        return { variant: "default", title: node.id } as Omit<
+          F0GraphDetailPanelProps,
+          "open" | "onClose" | "width" | "ariaLabel"
+        >
+      }
+      // detailPanel is guaranteed defined when this adapter is registered.
+      return detailPanel!(record)
+    },
+    [detailPanel, recordById, isDev]
+  )
+
+  /**
+   * Highlight bridge — consumer returns either an array or set of ids; we
+   * normalize to `Set<string>` once per `records` change so F0Graph's
+   * auto-dim path can do O(1) membership checks. Empty/undefined → empty
+   * Set, which F0Graph treats as "no highlight, render everything default".
+   */
+  const highlightSet = useMemo<Set<string>>(() => {
+    if (!highlightedNodes) return new Set<string>()
+    const result = highlightedNodes(records)
+    if (result instanceof Set) {
+      // Defensive copy: avoid leaking the consumer's mutable set into F0Graph.
+      return new Set(result)
+    }
+    return new Set(result)
+  }, [highlightedNodes, records])
+
   const renderNodeWrapped = useCallback(
     (node: GraphNode<Record>, ctx: F0GraphNodeRenderContext): ReactNode => {
       const actionsSlot = buildItemActionsSlot<Record>(
@@ -540,6 +600,11 @@ export const GraphCollection = <
     searchValue:
       source.debouncedCurrentSearch ?? source.currentSearch ?? undefined,
     onSearchChange: handleSearchChange,
+    ...(detailPanel ? { detailPanel: detailPanelAdapter } : {}),
+    ...(detailPanelAriaLabel !== undefined ? { detailPanelAriaLabel } : {}),
+    ...(highlightedNodes !== undefined
+      ? { highlightedNodes: highlightSet }
+      : {}),
   }
 
   return (
