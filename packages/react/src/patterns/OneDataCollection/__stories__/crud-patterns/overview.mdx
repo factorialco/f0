@@ -32,30 +32,40 @@ These stories assume the user has create, update, and delete permissions.
 Production flows should hide or disable each action when the user lacks the
 corresponding permission.
 
-- <a
-    target="_parent"
-    href="/?path=/docs/patterns-data-collection-crud-patterns-create--documentation"
-  >
-    Create documentation
-  </a>
-- <a
-    target="_parent"
-    href="/?path=/docs/patterns-data-collection-crud-patterns-read--documentation"
-  >
-    Read documentation
-  </a>
-- <a
-    target="_parent"
-    href="/?path=/docs/patterns-data-collection-crud-patterns-update--documentation"
-  >
-    Update documentation
-  </a>
-- <a
-    target="_parent"
-    href="/?path=/docs/patterns-data-collection-crud-patterns-delete--documentation"
-  >
-    Delete documentation
-  </a>
+<Unstyled>
+  <FeatureGrid
+    features={[
+      {
+        icon: Add,
+        title: "Create",
+        description:
+          "Always triggered by the collection primary action. Use a dialog for most cases, a right-position dialog when keeping the collection visible helps, or a wizard for multi-step flows.",
+        href: "/?path=/docs/patterns-data-collection-crud-patterns-create--documentation",
+      },
+      {
+        icon: EyeVisible,
+        title: "Read",
+        description:
+          "Triggered by clicking a row, list item, or card. Opens a dialog for contained resources or navigates to a page when the resource needs a durable destination.",
+        href: "/?path=/docs/patterns-data-collection-crud-patterns-read--documentation",
+      },
+      {
+        icon: Pencil,
+        title: "Update",
+        description:
+          "Always an explicit action — never triggered by a click that could mean read. Use a dialog for full-resource edits or inline cells in Editable Table for field-level changes.",
+        href: "/?path=/docs/patterns-data-collection-crud-patterns-update--documentation",
+      },
+      {
+        icon: Delete,
+        title: "Delete",
+        description:
+          "Always requires a confirmation step. Scoped to the selected item or selection. Never placed as a primary action — lives in item actions, bulk actions, or the read dialog header.",
+        href: "/?path=/docs/patterns-data-collection-crud-patterns-delete--documentation",
+      },
+    ]}
+  />
+</Unstyled>
 
 Use the operation stories below to inspect one pattern decision at a time. Use
 the by-view stories when you need to validate how create, read, update, and
@@ -396,41 +406,6 @@ delete coexist in the same collection surface.
 CRUD patterns are operation-first. The visualization changes the affordance, not
 the rule. Use the **Recommended** pattern in each cell as the starting point, and
 only move to an alternative when the resource or task needs it.
-
-<Unstyled>
-  <FeatureGrid
-    features={[
-      {
-        icon: Add,
-        title: "Create",
-        description:
-          "Always triggered by the collection primary action. Use a dialog for most cases, a right-position dialog when keeping the collection visible helps, or a wizard for multi-step flows.",
-        href: "/?path=/docs/patterns-data-collection-crud-patterns-create--documentation",
-      },
-      {
-        icon: EyeVisible,
-        title: "Read",
-        description:
-          "Triggered by clicking a row, list item, or card. Opens a dialog for contained resources or navigates to a page when the resource needs a durable destination.",
-        href: "/?path=/docs/patterns-data-collection-crud-patterns-read--documentation",
-      },
-      {
-        icon: Pencil,
-        title: "Update",
-        description:
-          "Always an explicit action — never triggered by a click that could mean read. Use a dialog for full-resource edits or inline cells in Editable Table for field-level changes.",
-        href: "/?path=/docs/patterns-data-collection-crud-patterns-update--documentation",
-      },
-      {
-        icon: Delete,
-        title: "Delete",
-        description:
-          "Always requires a confirmation step. Scoped to the selected item or selection. Never placed as a primary action — lives in item actions, bulk actions, or the read dialog header.",
-        href: "/?path=/docs/patterns-data-collection-crud-patterns-delete--documentation",
-      },
-    ]}
-  />
-</Unstyled>
 
 <Unstyled>
   <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
