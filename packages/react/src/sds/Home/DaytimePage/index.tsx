@@ -1,16 +1,16 @@
 import { cva, type VariantProps } from "cva"
 import { ComponentProps } from "react"
 
-import { F0OneSwitch } from "@/sds/ai/F0OneSwitch"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0AvatarPulse } from "@/components/avatars/F0AvatarPulse"
 import { F0Button } from "@/components/F0Button"
 import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch"
-import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
 import Menu from "@/icons/app/Menu"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
+import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
+import { F0OneSwitch } from "@/sds/ai/F0OneSwitch"
 
 const daytimePageVariants = cva({
   base: "pointer-events-none absolute inset-0 h-screen max-h-[1000px] opacity-[0.08]",
@@ -62,7 +62,7 @@ function _DaytimePage({
       <div className={daytimePageVariants({ period })} />
       {header && (
         <div className="flex flex-row items-center justify-between pr-6 @container">
-          <div className="flex flex-row items-center gap-2 px-5 py-4 @5xl:px-6">
+          <div className="@5xl:px-page flex flex-row items-center gap-2 px-5 py-4">
             {(isSmallScreen || sidebarState === "hidden") && (
               <F0Button
                 variant="ghost"

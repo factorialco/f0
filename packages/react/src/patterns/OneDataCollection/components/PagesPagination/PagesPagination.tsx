@@ -19,7 +19,10 @@ export const PagesPagination = ({
 
   return (
     <div
-      className={cn("flex w-full items-center justify-between px-6", className)}
+      className={cn(
+        "flex w-full items-center justify-between px-page",
+        className
+      )}
     >
       <span className="shrink-0 text-f1-foreground-secondary">
         {paginationInfo.total > 0 &&

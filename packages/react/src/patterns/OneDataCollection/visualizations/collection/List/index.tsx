@@ -175,7 +175,7 @@ export const ListCollection = <
     <div
       className={cn(
         "flex max-h-full min-h-0 flex-1 flex-col gap-4 py-2",
-        !tmpFullWidth && "px-6",
+        !tmpFullWidth && "px-page",
         tmpFullWidth && "px-0"
       )}
     >

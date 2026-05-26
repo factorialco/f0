@@ -68,7 +68,7 @@ const CardGrid = ({
   tmpFullWidth?: boolean
 }) => {
   return (
-    <div className={cn("@container", tmpFullWidth ? "px-0" : "px-6")}>
+    <div className={cn("@container", tmpFullWidth ? "px-0" : "px-page")}>
       <div
         className={cn(
           "grid grid-cols-1 gap-4",
@@ -467,7 +467,7 @@ export const CardCollection = <
                       onSelectChange={(checked) =>
                         handleSelectGroupChange(group, checked)
                       }
-                      className="px-6 pb-2 pt-4"
+                      className="px-page pb-2 pt-4"
                     />
                     <AnimatePresence>
                       {(!collapsible || openGroups[group.key]) && (
