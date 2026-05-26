@@ -36,6 +36,7 @@ const F0AiChatProviderComponent = ({
   canvasEntities,
   toolHints,
   credits,
+  employeeCredits,
   creditWarning,
   fileAttachments,
   onThumbsUp,
@@ -71,6 +72,7 @@ const F0AiChatProviderComponent = ({
       canvasEntities={canvasEntities}
       toolHints={toolHints}
       credits={credits}
+      employeeCredits={employeeCredits}
       creditWarning={creditWarning}
       fileAttachments={fileAttachments}
     >

@@ -12,6 +12,7 @@ import {
   type CanvasContent,
   type AiChatCredits,
   type AiChatCreditWarning,
+  type AiChatEmployeeCredits,
   type EntityRefs,
   type PendingContext,
   type PendingQuote,
@@ -40,6 +41,7 @@ export interface AiChatState {
   canvasEntities?: Record<string, CanvasEntityDefinition>
   toolHints?: AiChatToolHint[]
   credits?: AiChatCredits
+  employeeCredits?: AiChatEmployeeCredits
   creditWarning?: AiChatCreditWarning
   fileAttachments?: AiChatFileAttachmentConfig
   placeholders?: string[]
@@ -261,6 +263,7 @@ export type AiChatProviderReturnValue = {
   | "canvasEntities"
   | "toolHints"
   | "credits"
+  | "employeeCredits"
   | "creditWarning"
   | "fileAttachments"
 > & {
