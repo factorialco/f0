@@ -241,8 +241,9 @@ Browsers do not fire `change` events on autofill, which would leave the floating
           <code>string</code>
         </td>
         <td>
-          The text for the label. <strong>Required</strong> if{" "}
-          <code>placeholder</code> is not provided.
+          The text for the label. <strong>Always required</strong> for a11y (use{" "}
+          <code>hideLabel</code> to visually hide it without removing it from
+          the accessibility tree).
         </td>
         <td>
           <code>undefined</code>
@@ -255,10 +256,7 @@ Browsers do not fire `change` events on autofill, which would leave the floating
         <td>
           <code>string</code>
         </td>
-        <td>
-          The placeholder text. <strong>Required</strong> if <code>label</code>{" "}
-          is not provided.
-        </td>
+        <td>The placeholder text. Optional.</td>
         <td>
           <code>undefined</code>
         </td>
