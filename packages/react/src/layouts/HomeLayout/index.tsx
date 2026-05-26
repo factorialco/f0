@@ -50,7 +50,7 @@ export const HomeLayout = forwardRef<HTMLDivElement, Props>(function HomeLayout(
         </div>
 
         {/* Larger screen content */}
-        <div className="hidden grid-cols-3 gap-5 px-6 pb-6 pt-2 @5xl:grid">
+        <div className="px-page hidden grid-cols-3 gap-5 pb-6 pt-2 @5xl:grid">
           <div className="col-span-3 flex flex-row gap-5 *:flex-1">
             {arrayWidgets.slice(0, 3)}
           </div>

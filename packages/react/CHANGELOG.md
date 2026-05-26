@@ -1,5 +1,26 @@
 # Changelog
 
+## [2.20.0](https://github.com/factorialco/f0/compare/f0-react-v2.19.1...f0-react-v2.20.0) (2026-05-26)
+
+
+### Features
+
+* **F0AiChat:** extract canvas primitives and ClarifyingPanel; drop legacy compositions ([#4132](https://github.com/factorialco/f0/issues/4132)) ([38e6486](https://github.com/factorialco/f0/commit/38e648639a14f4c726147da1ae696837323ff208))
+* **PageHeader:** support AI-kind actions ([#4235](https://github.com/factorialco/f0/issues/4235)) ([b2cb371](https://github.com/factorialco/f0/commit/b2cb371fff11e2670ee9efc3c72292d5c4e9d3b5))
+
+
+### Bug Fixes
+
+* adjust horizontal paddings in data collection ([#4240](https://github.com/factorialco/f0/issues/4240)) ([aefb009](https://github.com/factorialco/f0/commit/aefb0091feafebba885a654cd00c0b4d11310490))
+* **ApplicationFrame:** showcase employeeCredits in stories ([#4239](https://github.com/factorialco/f0/issues/4239)) ([5ebce9e](https://github.com/factorialco/f0/commit/5ebce9e16031fde171d5526062d55cf2c2561380))
+
+## [2.19.1](https://github.com/factorialco/f0/compare/f0-react-v2.19.0...f0-react-v2.19.1) (2026-05-26)
+
+
+### Bug Fixes
+
+* **RichTextEditor:** keep fullscreen inside dialogs ([#4218](https://github.com/factorialco/f0/issues/4218)) ([4866d39](https://github.com/factorialco/f0/commit/4866d390cbe1d57f09cd6667b919f4f840f676e1))
+
 ## [2.19.0](https://github.com/factorialco/f0/compare/f0-react-v2.18.0...f0-react-v2.19.0) (2026-05-26)
 
 

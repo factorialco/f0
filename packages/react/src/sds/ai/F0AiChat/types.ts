@@ -1,14 +1,28 @@
 import { CopilotKitProps } from "@copilotkit/react-core"
 import { type AIMessage, type Message } from "@copilotkit/shared"
 
-import type { ModuleId } from "@/components/avatars/F0AvatarModule"
-
 import { IconType } from "@/components/F0Icon"
 import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
 
-import type { CanvasActions, CanvasEntityDefinition } from "./canvas/types"
-import type { ChatDashboardConfig } from "./canvas/entities/dashboard/types"
-import type { DataDownloadDataset } from "./actions/core/dataDownload/types"
+import type {
+  CanvasActions,
+  CanvasContent,
+  CanvasContentBase,
+  CanvasEntityDefinition,
+  DashboardCanvasContent,
+  DataDownloadCanvasContent,
+  FormCanvasContent,
+} from "../canvas/types"
+
+// Re-export canvas content types for backwards-compatible public API
+export type {
+  CanvasContent,
+  CanvasContentBase,
+  DashboardCanvasContent,
+  DataDownloadCanvasContent,
+  FormCanvasContent,
+}
+
 export type { PersonProfile } from "./components/markdownRenderers/entityRef/entities/person/types"
 export type { CandidateProfile } from "./components/markdownRenderers/entityRef/entities/candidate/types"
 export type { JobPostingProfile } from "./components/markdownRenderers/entityRef/entities/jobPosting/types"
@@ -81,88 +95,6 @@ export type PendingContext = {
 export type PendingQuote = {
   /** Plain-text selection (markdown stripped by the browser's toString()). */
   text: string
-}
-
-/**
- * Base shape shared by all canvas content types.
- * Every entity adds its own fields on top of this.
- */
-export type CanvasContentBase = {
-  type: string
-  title: string
-  description?: string
-  toolCallId?: string
-}
-
-/**
- * Dashboard canvas content — renders an analytics dashboard.
- */
-export type DashboardCanvasContent = CanvasContentBase & {
-  type: "dashboard"
-  config: ChatDashboardConfig
-  apiConfig: {
-    baseUrl: string
-    headers: Record<string, string>
-    runtimeFetch?: typeof fetch
-  }
-  /** Present when the dashboard is a pre-saved dashboard */
-  savedDashboardId?: string
-  /** Category of the saved dashboard */
-  savedDashboardCategory?: string
-  /** Description of the saved dashboard */
-  savedDashboardDescription?: string
-  /** True when the agent has iterated on a saved dashboard but the user hasn't saved yet */
-  savedDashboardUnsaved?: boolean
-}
-
-/**
- * Form canvas content — renders an interactive F0Form in the canvas panel.
- */
-export type FormCanvasContent = CanvasContentBase & {
-  type: "form"
-  formName: string
-  formDescription?: string
-  formModule?: ModuleId
-}
-/**
- * Data download canvas content — renders a full data table with download options.
- */
-export type DataDownloadCanvasContent = CanvasContentBase & {
-  type: "dataDownload"
-  dataset: DataDownloadDataset
-  filename?: string
-  markdown?: string
-}
-
-/**
- * Discriminated union for canvas panel content.
- * Add new entity types to this union as they are implemented.
- */
-export type CanvasContent =
-  | DashboardCanvasContent
-  | FormCanvasContent
-  | DataDownloadCanvasContent
-
-/**
- * A tool hint that can be activated to prepend invisible context to the user's
- * message, telling the AI about the user's intent (e.g. "generate tables",
- * "data analysis"). Similar to Gemini's tool selector UI.
- *
- * Only one tool hint can be active at a time. It persists across messages
- * until the user explicitly removes it.
- */
-export type AiChatToolHint = {
-  /** Unique identifier for this tool hint */
-  id: string
-  /** Display label shown in the selector and chip */
-  label: string
-  /** Optional icon shown in the selector and chip */
-  icon?: IconType
-  /**
-   * Prompt text injected as invisible context before the user's message.
-   * The AI receives this but the user never sees it in the chat.
-   */
-  prompt: string
 }
 
 /**
@@ -273,7 +205,7 @@ export type AiChatFileAttachmentConfig = {
 export type AiChatTrackingOptions = {
   onVisibility?: () => void
   onClose?: () => void
-  onWelcomeSuggestionClick?: (suggestion: WelcomeScreenSuggestion) => void
+  onWelcomeSuggestionClick?: (item: WelcomeScreenSuggestionItem) => void
   onNewChat?: () => void
   onMessage?: (message: Message) => void
 }
@@ -338,12 +270,6 @@ export type AiChatProviderProps = {
    */
   canvasEntities?: Record<string, CanvasEntityDefinition>
   /**
-   * Available tool hints that the user can activate to provide intent context
-   * to the AI. Renders a selector button next to the send button.
-   * Only one tool hint can be active at a time.
-   */
-  toolHints?: AiChatToolHint[]
-  /**
    * Credits configuration. When provided, a credits button is shown in the chat header.
    * Groups fetchUsage, upgradePlanUrl, and company/plan display info.
    */
@@ -396,12 +322,24 @@ export type AiChatProviderProps = {
 >
 
 /**
- * Welcome screen suggestion item
+ * A single sub-suggestion shown inside a welcome-screen group's popover.
+ * The `title` is the label users see; `prompt` is what gets sent to the AI
+ * when they click (falls back to `title` when omitted). They can diverge so
+ * you can show a short, scannable title while sending a fully-formed prompt.
+ */
+export type WelcomeScreenSuggestionItem = {
+  title: string
+  prompt?: string
+}
+
+/**
+ * A welcome-screen group rendered as an outline button in the welcome row.
+ * Clicking the group opens a popover listing its `items`.
  */
 export type WelcomeScreenSuggestion = {
   icon: IconType
-  message: string
-  prompt?: string
+  label: string
+  items: WelcomeScreenSuggestionItem[]
 }
 
 /**

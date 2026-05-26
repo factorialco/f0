@@ -1,3 +1,4 @@
+import { useCopilotChatInternal } from "@copilotkit/react-core"
 import { type WindowProps } from "@copilotkit/react-ui"
 import { breakpoints } from "@factorialco/f0-core"
 import { AnimatePresence, motion } from "motion/react"
@@ -6,10 +7,11 @@ import { useMediaQuery } from "usehooks-ts"
 
 import { cn } from "@/lib/utils"
 
+import { filterNonRenderableMessages } from "../../internal-types"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { MAX_CHAT_WIDTH, MIN_CHAT_WIDTH } from "../../utils/constants"
-import { DropOverlay } from "../input/ChatTextarea/DropOverlay"
-import { PongGame } from "../PongGame"
+import { DropOverlay } from "../../../F0AiChatTextArea"
+import { F0AiPong } from "../../../F0AiPong"
 import { ResizeHandle } from "./ResizeHandle"
 
 export const SidebarWindow = ({ children }: WindowProps) => {
@@ -28,7 +30,14 @@ export const SidebarWindow = ({ children }: WindowProps) => {
     processDroppedFiles,
     activeGame,
     closeGame,
+    isLoadingThread,
   } = useAiChat()
+  const { messages } = useCopilotChatInternal()
+  const filteredMessages = useMemo(
+    () => filterNonRenderableMessages(messages),
+    [messages]
+  )
+  const isWelcomeScreen = filteredMessages.length === 0 && !isLoadingThread
   const isCanvasMode = visualizationMode === "canvas"
 
   const dragCounterRef = useRef(0)
@@ -126,18 +135,19 @@ export const SidebarWindow = ({ children }: WindowProps) => {
               onReset={resetChatWidth}
               isResizing={isResizing}
               setIsResizing={setIsResizing}
-              narrow={isCanvasMode}
+              isCanvasMode={isCanvasMode}
             />
           )}
           <div
             aria-hidden={!open}
             className={cn(
-              "relative flex h-full w-full flex-col overflow-hidden border border-solid border-f1-border-secondary bg-f1-special-page",
+              "relative flex h-full w-full flex-col overflow-hidden bg-f1-special-page border border-solid border-f1-border-secondary",
+              isCanvasMode && "border-l-transparent",
               // In canvas mode the chat sits flush against the canvas with
               // only the ResizeHandle (1px) between them. Dropping the left
               // border avoids stacking canvas-border + handle + chat-border
               // = 3px of visual separation; the handle is the single seam.
-              isCanvasMode ? "xs:rounded-r-xl border-l-0" : "xs:rounded-xl"
+              isCanvasMode ? "xs:rounded-r-xl" : "xs:rounded-xl"
             )}
             onDragEnter={handleDragEnter}
             onDragOver={handleDragOver}
@@ -145,7 +155,25 @@ export const SidebarWindow = ({ children }: WindowProps) => {
             onDrop={handleDrop}
           >
             <motion.div
-              className="relative flex h-full w-full flex-col overflow-hidden"
+              className={cn(
+                "relative flex h-full w-full flex-col overflow-hidden",
+                // Fullscreen welcome: only the chat content (Messages + Input,
+                // wrapped by copilotkit's `.copilotKitChat`) should center —
+                // the Header is its sibling and stays pinned to the top.
+                //
+                // The trick: split the remaining height 50/50 between the
+                // messages section and the textarea section by giving both
+                // direct children `flex-1`. The welcome content uses
+                // `justify-end` inside the messages section so it hugs the
+                // bottom of its half, while the textarea sits at the top of
+                // its half by default. Result: they "stick" at the midpoint,
+                // giving the visual impression of a centered block.
+                fullscreen &&
+                  isWelcomeScreen && [
+                    "[&_.copilotKitChat]:flex-1",
+                    "[&_.copilotKitChat>div]:flex-1",
+                  ]
+              )}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -167,7 +195,7 @@ export const SidebarWindow = ({ children }: WindowProps) => {
                 }}
               />
             )}
-            {activeGame === "pong" && <PongGame onClose={closeGame} />}
+            {activeGame === "pong" && <F0AiPong onClose={closeGame} />}
           </div>
         </motion.div>
       )}
