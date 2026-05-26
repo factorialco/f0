@@ -1,6 +1,11 @@
-import { useCallback, useRef } from "react"
+import { useCallback, useEffect, useRef } from "react"
 
-import type { ChatDashboardConfig } from "./types"
+import type {
+  ChatDashboardConfig,
+  ChatDashboardFilterDefinition,
+  ChatDashboardNavigationFilterDefinition,
+} from "./types"
+import { SNAPSHOT_DATE_FILTER_KEY } from "./snapshot"
 
 // ---------------------------------------------------------------------------
 // Types
@@ -36,9 +41,26 @@ export type ItemResult = {
   error?: string
 }
 
+/**
+ * Filter options per filter id:
+ * - `in` filters → array of distinct string values
+ * - `numericRange` filters → `{ min, max }` bounds
+ */
+export type DashboardFilterOptions = Record<
+  string,
+  string[] | { min: number; max: number }
+>
+
 type ComputeResponse = {
   results: Record<string, ItemResult>
-  filterOptions?: Record<string, string[]>
+  filterOptions?: DashboardFilterOptions
+  /**
+   * Filter definitions derived deterministically by the compute layer from
+   * the SQL types of columns shared across dashboard datasets. The agent no
+   * longer authors these — they live exclusively on the compute response.
+   */
+  filters?: Record<string, ChatDashboardFilterDefinition>
+  navigationFilters?: Record<string, ChatDashboardNavigationFilterDefinition>
 }
 
 type ApiConfig = {
@@ -68,7 +90,18 @@ export function useDashboardCompute(
     filterValues: Record<string, unknown[]>,
     navigationFilterValues?: Record<string, string[]>
   ) => Promise<ItemResult>
-  getFilterOptions: () => Record<string, string[]> | undefined
+  getFilterOptions: () => DashboardFilterOptions | undefined
+  getDerivedFilters: () => {
+    filters?: Record<string, ChatDashboardFilterDefinition>
+    navigationFilters?: Record<string, ChatDashboardNavigationFilterDefinition>
+  }
+  /**
+   * True once the first compute response for the current `refreshKey` has
+   * been received. Lets callers distinguish "still loading" from "loaded
+   * but the dataset yielded no filters" — without this, a zero-filter
+   * dataset would pin filter-bar loading state on indefinitely.
+   */
+  getHasResponse: () => boolean
 } {
   // Track the in-flight request so concurrent fetchItem calls share it
   const inflightRef = useRef<{
@@ -79,6 +112,13 @@ export function useDashboardCompute(
 
   // Cache last response for filter options
   const lastResponseRef = useRef<ComputeResponse | undefined>()
+
+  // Drop the cached response when the caller forces a refresh so
+  // `getHasResponse()` reverts to false until the new request lands —
+  // otherwise the polling loop would treat the stale response as ready.
+  useEffect(() => {
+    lastResponseRef.current = undefined
+  }, [refreshKey])
 
   // Stable refs
   const configRef = useRef(config)
@@ -119,21 +159,52 @@ export function useDashboardCompute(
         }
       }
 
-      const hasNavValues =
-        navigationFilterValues && Object.keys(navigationFilterValues).length > 0
+      // Snapshot dashboards surface a synthetic `__snapshotDate` navigator
+      // pill. Strip it from `navigationFilterValues` and promote its value
+      // to the top-level `snapshotDate` field so the backend can rewrite
+      // per-tool args (e.g. `tenureDateBefore` on `fetchEmployees`). Fall
+      // back to the agent-supplied `cfg.snapshotDate` when the picker hasn't
+      // been touched.
+      let effectiveSnapshotDate: string | undefined = cfg.snapshotDate
+      let cleanedNavValues: Record<string, string[]> | undefined =
+        navigationFilterValues
+      if (
+        cfg.snapshot &&
+        navigationFilterValues &&
+        SNAPSHOT_DATE_FILTER_KEY in navigationFilterValues
+      ) {
+        const pillValue = navigationFilterValues[SNAPSHOT_DATE_FILTER_KEY]
+        if (Array.isArray(pillValue) && pillValue[0]) {
+          effectiveSnapshotDate = pillValue[0]
+        }
+        const { [SNAPSHOT_DATE_FILTER_KEY]: _stripped, ...rest } =
+          navigationFilterValues
+        cleanedNavValues = rest
+      }
 
+      const hasNavValues =
+        cleanedNavValues && Object.keys(cleanedNavValues).length > 0
+
+      // Filter definitions are derived server-side from dataset column types;
+      // the request only carries the user's active values, keyed by the
+      // stable filter ids the compute response returns. `snapshot` and
+      // `dateNavigatorColumn` shape which filters the compute layer derives,
+      // so they travel with every request when set.
       const body = {
         fetchSpecs: cfg.fetchSpecs,
         items: cfg.items,
-        filters: cfg.filters,
         filterValues:
           Object.keys(stringFilterValues).length > 0
             ? stringFilterValues
             : undefined,
-        navigationFilters: cfg.navigationFilters,
-        navigationFilterValues: hasNavValues
-          ? navigationFilterValues
-          : undefined,
+        navigationFilterValues: hasNavValues ? cleanedNavValues : undefined,
+        ...(cfg.snapshot ? { snapshot: true } : {}),
+        ...(cfg.snapshot && effectiveSnapshotDate
+          ? { snapshotDate: effectiveSnapshotDate }
+          : {}),
+        ...(cfg.dateNavigatorColumn
+          ? { dateNavigatorColumn: cfg.dateNavigatorColumn }
+          : {}),
       }
 
       const promise = runtimeFetch(`${api.baseUrl}/dashboard/compute`, {
@@ -157,6 +228,15 @@ export function useDashboardCompute(
 
       inflightRef.current = { key: requestKey, promise, controller }
 
+      // Drop the inflight entry once the request settles so a retry with the
+      // same key isn't pinned to a failed promise. Key-guarded to avoid
+      // clobbering a newer in-flight request that replaced ours mid-flight.
+      promise.finally(() => {
+        if (inflightRef.current?.key === requestKey) {
+          inflightRef.current = null
+        }
+      })
+
       return promise.then(
         (res) => res.results[itemId] ?? { error: "No result for item" }
       )
@@ -169,5 +249,18 @@ export function useDashboardCompute(
     []
   )
 
-  return { fetchItem, getFilterOptions }
+  const getDerivedFilters = useCallback(
+    () => ({
+      filters: lastResponseRef.current?.filters,
+      navigationFilters: lastResponseRef.current?.navigationFilters,
+    }),
+    []
+  )
+
+  const getHasResponse = useCallback(
+    () => lastResponseRef.current !== undefined,
+    []
+  )
+
+  return { fetchItem, getFilterOptions, getDerivedFilters, getHasResponse }
 }

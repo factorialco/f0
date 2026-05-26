@@ -3,7 +3,6 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from "react"
 
@@ -24,17 +23,54 @@ import type {
 
 import { F0AnalyticsDashboard } from "@/patterns/F0AnalyticsDashboard/F0AnalyticsDashboard"
 
+import type { NumberFilterValue } from "@/patterns/OneFilterPicker/filterTypes/NumberFilter/NumberFilter"
+
 import type {
   ChatDashboardChartConfig,
   ChatDashboardChartItem,
   ChatDashboardCollectionItem,
   ChatDashboardConfig,
+  ChatDashboardFilterDefinition,
   ChatDashboardItem,
   ChatDashboardMetricItem,
   FormatPreset,
 } from "./types"
 
-import { useDashboardCompute, type ItemResult } from "./useDashboardCompute"
+import { format } from "date-fns"
+
+import {
+  useDashboardCompute,
+  type DashboardFilterOptions,
+  type ItemResult,
+} from "./useDashboardCompute"
+import { SNAPSHOT_DATE_FILTER_KEY } from "./snapshot"
+
+const YMD_RE = /^\d{4}-\d{2}-\d{2}$/
+
+// Format a Date (or ISO string) as a local-calendar `YYYY-MM-DD`.
+// `toISOString().slice(0, 10)` shifts the day for users in non-UTC zones —
+// a Tokyo user picking Nov 1 00:00 local would ship `2025-10-31`. A
+// `YYYY-MM-DD` string is already a local calendar date — passed through
+// verbatim to avoid round-tripping through `new Date(d)`, which JS parses
+// as UTC and would shift the day for users in negative timezones.
+const toLocalYmd = (d: Date | string | undefined): string => {
+  if (!d) return ""
+  if (typeof d === "string" && YMD_RE.test(d)) return d
+  const date = d instanceof Date ? d : new Date(d)
+  if (Number.isNaN(date.getTime())) return ""
+  return format(date, "yyyy-MM-dd")
+}
+
+// Parse a `YYYY-MM-DD` string as a local-midnight `Date`.
+// `new Date("YYYY-MM-DD")` is spec'd to parse as UTC midnight, which renders
+// as the previous calendar day for users in negative timezones. Splitting
+// the components and using the multi-arg `Date` constructor keeps the day
+// stable in the user's local calendar.
+const parseLocalYmd = (d: string | undefined): Date | undefined => {
+  if (!d || !YMD_RE.test(d)) return undefined
+  const [y, m, day] = d.split("-").map(Number)
+  return new Date(y, m - 1, day)
+}
 
 // ---------------------------------------------------------------------------
 // Minimum item height per type
@@ -91,6 +127,94 @@ export function isSingleCollectionDashboard(
   config: Pick<ChatDashboardConfig, "items">
 ): boolean {
   return config.items.length === 1 && config.items[0]?.type === "collection"
+}
+
+/**
+ * Build the F0 `FiltersDefinition` map for the dashboard's Filter drawer
+ * from the compute response's derived filter specs and option bounds.
+ *
+ * `date` filters are open-domain (no precomputed distinct values or
+ * min/max), so they render even when `filterOptions[key]` is absent —
+ * only `in` and `numericRange` require their per-key options to be
+ * present. Returns `undefined` when there are no specs to render or
+ * every spec was skipped.
+ */
+export function buildFilterDefinitions(
+  filterSpecs: Record<string, ChatDashboardFilterDefinition> | undefined,
+  filterOptions: DashboardFilterOptions | undefined
+): FiltersDefinition | undefined {
+  if (!filterSpecs || Object.keys(filterSpecs).length === 0) return undefined
+
+  const result: Record<
+    string,
+    | {
+        type: "in"
+        label: string
+        options: { options: Array<{ value: string; label: string }> }
+      }
+    | {
+        type: "number"
+        label: string
+        options: {
+          min: number
+          max: number
+          modes: ReadonlyArray<"range" | "single">
+        }
+      }
+    | {
+        type: "date"
+        label: string
+        options: { mode: "range" }
+      }
+  > = {}
+
+  for (const [key, spec] of Object.entries(filterSpecs)) {
+    // `date` filters use F0's open-domain DateFilter — no precomputed
+    // distinct/min-max options are emitted, so render before the options
+    // guard below.
+    if (spec.type === "date") {
+      result[key] = {
+        type: "date",
+        label: spec.label,
+        options: { mode: "range" },
+      }
+      continue
+    }
+
+    // Every other type needs its options to render.
+    const options = filterOptions?.[key]
+    if (options === undefined) continue
+
+    if (spec.type === "numericRange") {
+      if (Array.isArray(options)) continue
+      if (options.min === options.max) continue
+      result[key] = {
+        type: "number",
+        label: spec.label,
+        options: {
+          min: options.min,
+          max: options.max,
+          modes: ["range"],
+        },
+      }
+      continue
+    }
+
+    if (spec.type === "in") {
+      if (!Array.isArray(options) || options.length === 0) continue
+      result[key] = {
+        type: "in",
+        label: spec.label,
+        options: {
+          options: options.map((v) => ({ value: v, label: v })),
+        },
+      }
+    }
+  }
+
+  if (Object.keys(result).length === 0) return undefined
+
+  return result as FiltersDefinition
 }
 
 // ---------------------------------------------------------------------------
@@ -209,6 +333,10 @@ export interface ChatDashboardProps {
   onLayoutChange?: (layout: DashboardItemLayout[]) => void
   onExportReady?: (exportFn: (() => Promise<void>) | undefined) => void
   exportFilename?: string
+  /** Called when the user edits the snapshot date pill. Receives an ISO-8601
+   * string. Wired by the canvas wrapper to stage `pendingSnapshotDate` so
+   * `handleSave` can persist the edited value. */
+  onSnapshotDateChange?: (isoDate: string) => void
 }
 
 /**
@@ -228,116 +356,158 @@ export function ChatDashboard({
   onTransformChart,
   onExportReady,
   exportFilename,
+  onSnapshotDateChange,
 }: ChatDashboardProps) {
-  const { fetchItem, getFilterOptions } = useDashboardCompute(
-    config,
-    apiConfig,
-    refreshKey
-  )
+  const { fetchItem, getFilterOptions, getDerivedFilters, getHasResponse } =
+    useDashboardCompute(config, apiConfig, refreshKey)
 
-  // Filter options from the first compute response
+  // Filter definitions + options from the first compute response.
+  // Filters are derived server-side (no longer authored by the agent), so the
+  // initial render has no filter chips until the first /dashboard/compute
+  // response lands — we poll briefly to surface them, then stop.
+  // - `in` filters → array of distinct string values
+  // - `numericRange` filters → `{ min, max }` bounds for the range picker
   const [filterOptions, setFilterOptions] = useState<
-    Record<string, string[]> | undefined
+    Record<string, string[] | { min: number; max: number }> | undefined
   >()
+  const [derivedFilters, setDerivedFilters] = useState<{
+    filters?: Record<string, import("./types").ChatDashboardFilterDefinition>
+    navigationFilters?: Record<
+      string,
+      import("./types").ChatDashboardNavigationFilterDefinition
+    >
+  }>({})
 
-  // Update filter options when they become available
-  const filterOptionsPolledRef = useRef(false)
+  // Bumped once when the first compute response lands. F0AnalyticsDashboard
+  // captures `navigationFilters` into its internal state only on mount
+  // (initialNavState `useMemo` with empty deps), so when filters arrive
+  // asynchronously we have to force a remount — otherwise the date navigator
+  // renders with an undefined value and crashes inside DateNavigation.
+  const [filterRevision, setFilterRevision] = useState(0)
+
+  // Bumped once the first compute response for the current `refreshKey`
+  // lands — drives both the polling-loop stop condition and the filter-bar
+  // skeleton, so a response with zero filters still flips loading off.
+  const [firstResponseReceived, setFirstResponseReceived] = useState(false)
 
   // Reset polling flag when refreshKey changes so filter options are re-polled
   useEffect(() => {
-    filterOptionsPolledRef.current = false
+    setFirstResponseReceived(false)
   }, [refreshKey])
 
   useEffect(() => {
-    if (filterOptionsPolledRef.current) return
-    // Poll briefly for filter options from the initial request
+    if (firstResponseReceived) return
     const interval = setInterval(() => {
+      if (!getHasResponse()) return
       const opts = getFilterOptions()
-      if (opts) {
-        setFilterOptions(opts)
-        filterOptionsPolledRef.current = true
-        clearInterval(interval)
-      }
+      const derived = getDerivedFilters()
+      if (opts) setFilterOptions(opts)
+      setDerivedFilters(derived)
+      setFilterRevision((n) => n + 1)
+      setFirstResponseReceived(true)
+      clearInterval(interval)
     }, 100)
     return () => clearInterval(interval)
-  }, [getFilterOptions, refreshKey])
+  }, [
+    getHasResponse,
+    getFilterOptions,
+    getDerivedFilters,
+    firstResponseReceived,
+  ])
 
-  // True when the agent declared filters in the config but their options
-  // (and therefore the FiltersDefinition we pass to F0AnalyticsDashboard) are
-  // still being computed. The dashboard will render a filter bar skeleton in
-  // that window so the layout matches the eventual rendered state.
-  const filtersLoading =
-    !!config.filters && Object.keys(config.filters).length > 0 && !filterOptions
+  // Filter bar skeleton while the first compute response is in flight. Gated
+  // on the explicit "response received" signal so a dataset that yields zero
+  // filters still flips loading off (instead of spinning forever waiting for
+  // filterOptions/filters that will never arrive).
+  const filtersLoading = !firstResponseReceived
 
-  const filterDefinitions = useMemo(() => {
-    const filterSpecs = config.filters
-    if (!filterSpecs || Object.keys(filterSpecs).length === 0) return undefined
-    if (!filterOptions) return undefined
-
-    const result: Record<
-      string,
-      {
-        type: "in"
-        label: string
-        options: { options: Array<{ value: string; label: string }> }
-      }
-    > = {}
-
-    for (const [key, spec] of Object.entries(filterSpecs)) {
-      const options = filterOptions[key] ?? []
-      if (options.length === 0) continue
-      result[key] = {
-        type: "in",
-        label: spec.label,
-        options: {
-          options: options.map((v) => ({ value: v, label: v })),
-        },
-      }
-    }
-
-    if (Object.keys(result).length === 0) return undefined
-
-    return result as FiltersDefinition
-  }, [config.filters, filterOptions])
+  const filterDefinitions = useMemo(
+    () => buildFilterDefinitions(derivedFilters.filters, filterOptions),
+    [derivedFilters.filters, filterOptions]
+  )
 
   /**
-   * Build the F0AnalyticsDashboard `navigationFilters` prop from the agent's
-   * config. The agent declares `{ type: "dateNavigation", column, datasetId,
-   * granularities, defaultGranularity? }` but F0's slot expects
-   * `{ type: "date-navigator", defaultValue, granularity, defaultGranularity? }`
-   * — we strip `column` and `datasetId` (those are agent-side metadata used
-   * by the compute SQL builder) and supply `defaultValue: new Date()` so the
-   * navigator initializes to the current period at the chosen granularity.
+   * Build the F0AnalyticsDashboard `navigationFilters` prop from the
+   * compute response's derived navigation filters. The backend ships
+   * `{ type: "dateNavigation", column, datasetId, granularities,
+   * defaultGranularity? }` but F0's slot expects `{ type: "date-navigator",
+   * defaultValue, granularity, defaultGranularity? }` — we strip `column`
+   * and `datasetId` (server-side metadata used only by the compute SQL
+   * builder) and supply `defaultValue: new Date()` so the navigator
+   * initializes to the current period at the chosen granularity.
    */
   const dashboardNavigationFilters = useMemo<
     NavigationFiltersDefinition | undefined
   >(() => {
-    const navSpecs = config.navigationFilters
-    if (!navSpecs || Object.keys(navSpecs).length === 0) return undefined
+    const navSpecs = derivedFilters.navigationFilters
     const today = new Date()
     const result: NavigationFiltersDefinition = {}
-    for (const [key, spec] of Object.entries(navSpecs)) {
-      if (spec.type !== "dateNavigation") continue
-      result[key] = {
+    if (navSpecs) {
+      for (const [key, spec] of Object.entries(navSpecs)) {
+        if (spec.type !== "dateNavigation") continue
+        result[key] = {
+          type: "date-navigator",
+          defaultValue: today,
+          granularity: spec.granularities,
+          ...(spec.defaultGranularity
+            ? { defaultGranularity: spec.defaultGranularity }
+            : {}),
+        }
+      }
+    }
+    if (config.snapshot === true) {
+      // Snapshot dashboards expose a single-day date pill keyed to
+      // `config.snapshotDate` (defaulting to today). The key collides with
+      // any column literally named `__snapshotDate` — kept synthetic-looking
+      // to make that vanishingly unlikely.
+      result[SNAPSHOT_DATE_FILTER_KEY] = {
         type: "date-navigator",
-        defaultValue: today,
-        granularity: spec.granularities,
-        ...(spec.defaultGranularity
-          ? { defaultGranularity: spec.defaultGranularity }
-          : {}),
+        // `parseLocalYmd` constructs a local-midnight Date so the picker
+        // pill renders the persisted calendar day in the user's timezone.
+        defaultValue: parseLocalYmd(config.snapshotDate) ?? today,
+        granularity: "day",
       }
     }
     return Object.keys(result).length > 0 ? result : undefined
-  }, [config.navigationFilters])
+  }, [derivedFilters.navigationFilters, config.snapshot, config.snapshotDate])
 
   // Set of keys belonging to navigation filters — used to split the merged
   // filters object that F0AnalyticsDashboard passes to fetchData into the two
   // separate compute payloads (`filterValues` for `in` filters,
   // `navigationFilterValues` for the date navigator).
-  const navigationFilterKeys = useMemo(
-    () => new Set(Object.keys(config.navigationFilters ?? {})),
-    [config.navigationFilters]
-  )
+  const navigationFilterKeys = useMemo(() => {
+    const keys = new Set(Object.keys(derivedFilters.navigationFilters ?? {}))
+    if (config.snapshot === true) keys.add(SNAPSHOT_DATE_FILTER_KEY)
+    return keys
+  }, [derivedFilters.navigationFilters, config.snapshot])
+
+  // Set of keys whose backing filter is `numericRange` — their state ships as
+  // `NumberFilterValue` and must be flattened into `[min, max]` strings before
+  // hitting the compute payload.
+  const numericRangeFilterKeys = useMemo(() => {
+    const keys = new Set<string>()
+    const specs = derivedFilters.filters
+    if (specs) {
+      for (const [key, spec] of Object.entries(specs)) {
+        if (spec.type === "numericRange") keys.add(key)
+      }
+    }
+    return keys
+  }, [derivedFilters.filters])
+
+  // Set of keys whose backing filter is `date` — their state ships as F0's
+  // `DateRange { from, to? }` and must be flattened into `[fromISO, toISO]`
+  // strings, mirroring the date-navigator pill flatten path.
+  const dateFilterKeys = useMemo(() => {
+    const keys = new Set<string>()
+    const specs = derivedFilters.filters
+    if (specs) {
+      for (const [key, spec] of Object.entries(specs)) {
+        if (spec.type === "date") keys.add(key)
+      }
+    }
+    return keys
+  }, [derivedFilters.filters])
 
   // Create fetchData functions that call the batch compute endpoint
   const makeFetchData = useCallback(
@@ -359,17 +529,51 @@ export function ChatDashboard({
               | undefined
             const range = dateValue?.value
             if (!range) continue
-            const toIso = (d: Date | string | undefined): string => {
-              if (!d) return ""
-              const date = d instanceof Date ? d : new Date(d)
-              if (Number.isNaN(date.getTime())) return ""
-              // YYYY-MM-DD — DATE comparison in DuckDB ignores time-of-day.
-              return date.toISOString().slice(0, 10)
-            }
-            const fromIso = toIso(range.from)
-            const toIsoStr = toIso(range.to)
+            const fromIso = toLocalYmd(range.from)
+            const toIsoStr = toLocalYmd(range.to)
             if (fromIso || toIsoStr) {
               navigationFilterValues[key] = [fromIso, toIsoStr]
+            }
+            // Surface user edits to the snapshot pill so the canvas wrapper
+            // can stage the new value for persistence on save. Skip the
+            // initial value to avoid marking the dashboard dirty on first
+            // render.
+            if (key === SNAPSHOT_DATE_FILTER_KEY && fromIso) {
+              const initial = config.snapshotDate
+                ? toLocalYmd(config.snapshotDate)
+                : undefined
+              if (initial !== fromIso) onSnapshotDateChange?.(fromIso)
+            }
+            continue
+          }
+          if (numericRangeFilterKeys.has(key)) {
+            const nfv = value as NumberFilterValue
+            if (!nfv) continue
+            const from = nfv.mode === "range" ? nfv.from?.value : nfv.value
+            const to = nfv.mode === "range" ? nfv.to?.value : nfv.value
+            const fromStr =
+              typeof from === "number" && Number.isFinite(from)
+                ? String(from)
+                : ""
+            const toStr =
+              typeof to === "number" && Number.isFinite(to) ? String(to) : ""
+            if (fromStr || toStr) {
+              filterValues[key] = [fromStr, toStr]
+            }
+            continue
+          }
+          if (dateFilterKeys.has(key)) {
+            // F0 DateFilter value shape (range mode): `{ from: Date, to?: Date }`.
+            // Flatten to `[fromISO, toISO]` for the backend, mirroring the
+            // date-navigator pill so the SQL builder can reuse one helper.
+            const range = value as
+              | { from?: Date | string; to?: Date | string }
+              | undefined
+            if (!range) continue
+            const fromIso = toLocalYmd(range.from)
+            const toIsoStr = toLocalYmd(range.to)
+            if (fromIso || toIsoStr) {
+              filterValues[key] = [fromIso, toIsoStr]
             }
             continue
           }
@@ -380,18 +584,33 @@ export function ChatDashboard({
 
         return fetchItem(itemId, filterValues, navigationFilterValues).then(
           (result) => {
-            // Update filter options from the response
+            // Always re-sync chip definitions from the latest compute pass.
+            // The `firstResponseReceived` flag (used by the initial polling
+            // effect) only signals "we have data" — it must NOT gate
+            // subsequent updates, or the drawer would freeze on the first
+            // response forever.
             const opts = getFilterOptions()
-            if (opts && !filterOptionsPolledRef.current) {
-              setFilterOptions(opts)
-              filterOptionsPolledRef.current = true
+            const derived = getDerivedFilters()
+            if (opts || derived.filters || derived.navigationFilters) {
+              if (opts) setFilterOptions(opts)
+              setDerivedFilters(derived)
             }
+            setFirstResponseReceived(true)
             return result
           }
         )
       }
     },
-    [fetchItem, getFilterOptions, navigationFilterKeys]
+    [
+      dateFilterKeys,
+      fetchItem,
+      getFilterOptions,
+      getDerivedFilters,
+      navigationFilterKeys,
+      numericRangeFilterKeys,
+      onSnapshotDateChange,
+      config.snapshotDate,
+    ]
   )
 
   const items: DashboardItem<FiltersDefinition>[] = useMemo(
@@ -411,7 +630,7 @@ export function ChatDashboard({
 
   return (
     <F0AnalyticsDashboard
-      key={refreshKey}
+      key={`${refreshKey}:${filterRevision}`}
       filters={filterDefinitions}
       filtersLoading={filtersLoading}
       navigationFilters={dashboardNavigationFilters}
@@ -459,6 +678,7 @@ export function DashboardContent({
     handleDiscard,
     transformItem,
     saveConfigToHistory,
+    setPendingSnapshotDate,
     registerExport,
   } = useDashboardCanvas()
   const { canvasActions, openCanvas } = useAiChat()
@@ -565,6 +785,7 @@ export function DashboardContent({
           }}
           onExportReady={registerExport}
           exportFilename={content.title}
+          onSnapshotDateChange={setPendingSnapshotDate}
         />
       </div>
       {/* State A: New dashboard with canvasActions — always-visible Save bar */}
