@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.19.1](https://github.com/factorialco/f0/compare/f0-react-v2.19.0...f0-react-v2.19.1) (2026-05-26)
+
+
+### Bug Fixes
+
+* **RichTextEditor:** keep fullscreen inside dialogs ([#4218](https://github.com/factorialco/f0/issues/4218)) ([4866d39](https://github.com/factorialco/f0/commit/4866d390cbe1d57f09cd6667b919f4f840f676e1))
+
 ## [2.19.0](https://github.com/factorialco/f0/compare/f0-react-v2.18.0...f0-react-v2.19.0) (2026-05-26)
 
 
