@@ -50,8 +50,13 @@ test("keeps fullscreen editor inside side dialog", async () => {
     await screen.findByRole("button", { name: "Toggle fullscreen mode" })
   )
 
-  expect(
-    screen.getByRole("dialog").querySelector(".rich-text-editor-container")
-  ).toBeTruthy()
+  const dialogPanel = screen.getByRole("dialog").firstElementChild
+  const fullscreenEditor = dialogPanel?.querySelector(
+    ".rich-text-editor-container"
+  )
+
+  expect(fullscreenEditor).toBeTruthy()
+  expect(fullscreenEditor).toHaveClass("absolute")
+  expect(fullscreenEditor).not.toHaveClass("fixed")
   expect(onClose).not.toHaveBeenCalled()
 })

@@ -187,7 +187,7 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
         modal={position === "center" || position === "fullscreen"}
       >
         <DialogContent
-          ref={setContentRef}
+          contentRef={setContentRef}
           withTranslateAnimation={!isSidePosition}
           wrapperClassName={dialogWrapperClassName({
             variant,

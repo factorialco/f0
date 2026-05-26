@@ -279,6 +279,8 @@ const RichTextEditorComponent = forwardRef<
 
   if (!editor) return null
 
+  const isInsideDialog = Boolean(dialogContext.portalContainer)
+
   const editorContent = (
     <FocusScope trapped={false}>
       <div
@@ -289,7 +291,7 @@ const RichTextEditorComponent = forwardRef<
           "rich-text-editor-container pointer-events-auto flex flex-col",
           disabled ? "bg-f1-background-tertiary" : "bg-f1-background",
           isFullscreen
-            ? "fixed inset-0 z-50"
+            ? cn(isInsideDialog ? "absolute" : "fixed", "inset-0 z-50")
             : [
                 "relative w-full rounded-xl border border-solid",
                 error || errorProp
@@ -299,7 +301,12 @@ const RichTextEditorComponent = forwardRef<
         )}
       >
         {isFullscreen && (
-          <div className="pointer-events-none fixed inset-0 z-40" />
+          <div
+            className={cn(
+              "pointer-events-none inset-0 z-40",
+              isInsideDialog ? "absolute" : "fixed"
+            )}
+          />
         )}
 
         <Head
