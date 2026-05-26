@@ -317,6 +317,16 @@ const mockFetchCreditsUsage = () =>
   })
 
 /**
+ * Mock fetchEmployeeCreditsUsage — same shape as above but used by the
+ * employee-only popover. Smaller monthly allocation to reflect the
+ * per-employee variant.
+ */
+const mockFetchEmployeeCreditsUsage = () =>
+  new Promise<{ used: number; total: number }>((resolve) => {
+    setTimeout(() => resolve({ used: 50, total: 250 }), 500)
+  })
+
+/**
  * Mock file upload handler for Storybook.
  * Simulates a 1-second upload and returns metadata with a fake URL.
  */
@@ -424,6 +434,16 @@ const meta: Meta<typeof ApplicationFrame> = {
       credits: {
         fetchUsage: mockFetchCreditsUsage,
         upgradePlanUrl: "https://example.com/upgrade",
+        companyName: "Factorial",
+        companyLogoUrl: "/avatars/factorial.png",
+        planName: "Free plan",
+      },
+      // When both are set the employee-only popover wins (see
+      // CreditsPopoverPicker in F0AiChatHeader). The classic `credits` above
+      // stays as a documented fallback for hosts that haven't opted into
+      // per-employee allocations.
+      employeeCredits: {
+        fetchUsage: mockFetchEmployeeCreditsUsage,
         companyName: "Factorial",
         companyLogoUrl: "/avatars/factorial.png",
         planName: "Free plan",
@@ -747,6 +767,16 @@ export const FullscreenWithActions: Story = {
         companyLogoUrl: "/avatars/factorial.png",
         planName: "Free plan",
       },
+      // When both are set the employee-only popover wins (see
+      // CreditsPopoverPicker in F0AiChatHeader). The classic `credits` above
+      // stays as a documented fallback for hosts that haven't opted into
+      // per-employee allocations.
+      employeeCredits: {
+        fetchUsage: mockFetchEmployeeCreditsUsage,
+        companyName: "Factorial",
+        companyLogoUrl: "/avatars/factorial.png",
+        planName: "Free plan",
+      },
       welcomeScreenSuggestions: [
         {
           icon: ChartVerticalBars,
@@ -835,6 +865,33 @@ export const FullscreenWithActions: Story = {
         text: "One works within your permissions.",
         link: "/permissions",
         linkText: "See more",
+      },
+    },
+  },
+}
+
+/**
+ * Demonstrates the employee-only credits popover. Hosts opt in by passing
+ * `employeeCredits` to the AI provider; when both `credits` and
+ * `employeeCredits` are set, the employee variant wins. Here we only set
+ * `employeeCredits` so the focus stays on that variant.
+ */
+export const WithEmployeeCredits: Story = {
+  render: (args) => <DefaultStoryComponent {...args} />,
+  args: {
+    ai: {
+      runtimeUrl: "https://mastra.local.factorial.dev/copilotkit",
+      agent: "one-workflow",
+      credentials: "include",
+      showDevConsole: false,
+      enabled: true,
+      resizable: true,
+      greeting: "Hello, John",
+      employeeCredits: {
+        fetchUsage: mockFetchEmployeeCreditsUsage,
+        companyName: "Factorial",
+        companyLogoUrl: "/avatars/factorial.png",
+        planName: "Free plan",
       },
     },
   },
