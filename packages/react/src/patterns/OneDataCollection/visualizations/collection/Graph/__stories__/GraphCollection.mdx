@@ -166,6 +166,29 @@ the primary affordance — Phase 1 Graph does not implement either.
   </table>
 </Unstyled>
 
+## Sizing
+
+The Graph visualization fills its parent container. To prevent layout
+collapse when the page chrome is short, it ships with a built-in
+`min-h-[400px]` floor so the graph stays usable even when wrapped in a
+container with no explicit height.
+
+For full-viewport layouts (e.g., a dedicated page), pair
+`OneDataCollection`'s `fullHeight` prop with a flex column whose height
+subtracts your app chrome:
+
+```tsx
+<div className="flex h-[calc(100vh-160px)] min-h-[480px] flex-col">
+  <OneDataCollection source={source} visualizations={[graphViz]} fullHeight />
+</div>
+```
+
+- Use `calc(100vh - <chrome>px)` so the graph absorbs all leftover space.
+- Keep `min-h-[…]` higher than the built-in `400px` floor if you want a
+  taller minimum on narrow viewports.
+- Without `fullHeight`, the visualization measures its natural height and
+  still honors the `min-h-[400px]` default.
+
 ## Patterns
 
 ### Hierarchy adapter (single parent)
