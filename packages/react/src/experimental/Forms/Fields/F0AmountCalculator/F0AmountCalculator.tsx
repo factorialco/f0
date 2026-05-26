@@ -1,9 +1,9 @@
-import { CSSProperties, forwardRef } from "react"
+import { CSSProperties, forwardRef, useEffect, useMemo, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { NumberInput } from "@/experimental/Forms/Fields/NumberInput"
-import { Calculator } from "@/icons/app"
+import { Calculator, Check } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { InputMessages } from "@/ui/InputField/components/InputMessages"
 import { InputFieldStatus } from "@/ui/InputField/types"
@@ -135,12 +135,46 @@ export const F0AmountCalculator = forwardRef<
     error,
     status,
     hideLabel = false,
+    value,
+    onChange: onValueChange,
     ...numberInputProps
   },
   ref
 ) {
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
+  const [draftValue, setDraftValue] = useState<number | null>(
+    value != null ? value : null
+  )
+
   const resolvedStatus = resolveStatus(hint, error, status)
   const hasExtraContent = Boolean(extraContent)
+  const isDeferredPopover = popover?.commitMode === "deferred"
+
+  const isPopoverControlled = popover?.open !== undefined
+  const popoverOpen = isPopoverControlled
+    ? Boolean(popover?.open)
+    : uncontrolledOpen
+
+  const handlePopoverOpenChange = (open: boolean) => {
+    if (!isPopoverControlled) {
+      setUncontrolledOpen(open)
+    }
+    popover?.onOpenChange?.(open)
+  }
+
+  useEffect(() => {
+    if (!isDeferredPopover || !popoverOpen) return
+    setDraftValue(value != null ? value : null)
+  }, [isDeferredPopover, popoverOpen, value])
+
+  const inputValue = isDeferredPopover ? draftValue : value
+  const inputOnChange = useMemo(
+    () =>
+      isDeferredPopover
+        ? (nextValue: number | null) => setDraftValue(nextValue)
+        : onValueChange,
+    [isDeferredPopover, onValueChange]
+  )
 
   // When extraContent is present we own the label/messages row so the flex
   // row height stays stable. We still pass a type-only status (no message) to
@@ -161,6 +195,8 @@ export const F0AmountCalculator = forwardRef<
       hideLabel
       error={undefined}
       status={innerStatusTypeOnly as typeof status}
+      value={inputValue}
+      onChange={inputOnChange}
       {...numberInputProps}
       hint=""
     />
@@ -172,6 +208,8 @@ export const F0AmountCalculator = forwardRef<
       hint={hideLabel ? "" : hint}
       error={hideLabel ? undefined : error}
       status={hideLabel ? (innerStatusTypeOnly as typeof status) : status}
+      value={inputValue}
+      onChange={inputOnChange}
       {...numberInputProps}
     />
   )
@@ -181,13 +219,24 @@ export const F0AmountCalculator = forwardRef<
       icon: TriggerIcon = Calculator as IconType,
       side = "bottom",
       align = "start",
-      open,
-      onOpenChange,
       triggerLabel,
+      apply,
     } = popover
 
+    const showApplyButton = isDeferredPopover
+    const applyLabel = apply?.label ?? "Apply"
+    const ApplyIcon = apply?.icon ?? Check
+    const closeOnApply = apply?.closeOnApply ?? true
+
+    const handleApply = () => {
+      onValueChange?.(draftValue)
+      if (closeOnApply) {
+        handlePopoverOpenChange(false)
+      }
+    }
+
     return (
-      <Popover open={open} onOpenChange={onOpenChange}>
+      <Popover open={popoverOpen} onOpenChange={handlePopoverOpenChange}>
         <PopoverTrigger asChild>
           <F0Button
             variant="outline"
@@ -210,6 +259,16 @@ export const F0AmountCalculator = forwardRef<
             </CalculatorRow>
             {!hideLabel && resolvedStatus && (
               <InputMessages status={resolvedStatus} />
+            )}
+            {showApplyButton && (
+              <div className="mt-2 flex justify-end">
+                <F0Button
+                  variant="critical"
+                  icon={ApplyIcon}
+                  label={applyLabel}
+                  onClick={handleApply}
+                />
+              </div>
             )}
           </div>
         </PopoverContent>

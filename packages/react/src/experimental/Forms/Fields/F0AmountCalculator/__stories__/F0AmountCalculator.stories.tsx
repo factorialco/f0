@@ -18,7 +18,7 @@ const meta = {
         component: [
           "The `F0AmountCalculator` is a numeric input component that supports two rendering modes: <strong>inline</strong> (a standard form field) and <strong>popover</strong> (a floating panel triggered by an icon button).",
           'In inline mode, an optional <code>extraContent</code> slot renders contextual text to the right of the input (e.g. "of 300,00 €"). When <code>extraContent</code> is present, labels, hints, and errors are hoisted outside the flex row so the row height stays fixed.',
-          "In popover mode, an outline icon button (default: Calculator) opens a Radix popover containing the input. The trigger icon, placement, and open/close state are all configurable via the <code>popover</code> prop.",
+          "In popover mode, an outline icon button (default: Calculator) opens a Radix popover containing the input. The trigger icon/label, placement, open/close state, and optional deferred Apply flow are configurable via the <code>popover</code> prop.",
           'The <code>inputWidth</code> prop controls the width of the inner input element. Omit it (or set <code>"auto"</code>) to let it shrink-wrap its content.',
         ]
           .map((text) => `<p>${text}</p>`)
@@ -86,7 +86,7 @@ const meta = {
         type: {
           summary: "F0AmountCalculatorPopoverConfig | undefined",
           detail:
-            "{ icon?: IconType; side?: 'top'|'bottom'|'left'|'right'; align?: 'start'|'center'|'end'; open?: boolean; onOpenChange?: (open: boolean) => void }",
+            "{ icon?: IconType; side?: 'top'|'bottom'|'left'|'right'; align?: 'start'|'center'|'end'; open?: boolean; onOpenChange?: (open: boolean) => void; triggerLabel?: string; commitMode?: 'immediate'|'deferred'; apply?: { label?: string; icon?: IconType; closeOnApply?: boolean } }",
         },
       },
     },
@@ -272,6 +272,40 @@ export const AsPopoverControlled: Story = {
           />
           <span className="text-f1-foreground-secondary text-sm">
             {value != null ? `${value}%` : "—"}
+          </span>
+        </div>
+      )
+    },
+  ],
+}
+
+export const AsPopoverDeferredApply: Story = {
+  name: "Popover — deferred apply",
+  args: {
+    label: "Discount",
+    units: "%",
+    extraContent: "of 300,00 €",
+    inputWidth: "160px",
+    popover: {
+      triggerLabel: "Discount",
+      commitMode: "deferred",
+      apply: { label: "Apply" },
+    },
+  },
+  decorators: [
+    (Story, { args }) => {
+      const [value, setValue] = useState<number | null>(null)
+      return (
+        <div className="flex items-center gap-2">
+          <Story
+            args={{
+              ...args,
+              value,
+              onChange: setValue as unknown as typeof args.onChange,
+            }}
+          />
+          <span className="text-f1-foreground-secondary text-sm">
+            Committed: {value != null ? `${value}%` : "—"}
           </span>
         </div>
       )

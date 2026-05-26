@@ -231,6 +231,58 @@ describe("F0AmountCalculator", () => {
       expect(onChange).toHaveBeenLastCalledWith(50)
     })
 
+    test("deferred commit mode calls onChange only when Apply is clicked", async () => {
+      const onChange = vi.fn()
+      render(
+        <F0AmountCalculator
+          label="Discount"
+          locale="en-US"
+          units="%"
+          popover={{ commitMode: "deferred" }}
+          onChange={onChange}
+        />
+      )
+
+      const trigger = screen.getByRole("button", { name: "Discount" })
+      await userEvent.click(trigger)
+
+      const input = await screen.findByRole("textbox")
+      await userEvent.type(input, "50")
+
+      expect(onChange).not.toHaveBeenCalled()
+
+      await userEvent.click(screen.getByRole("button", { name: "Apply" }))
+
+      expect(onChange).toHaveBeenLastCalledWith(50)
+      await waitFor(() => {
+        expect(screen.queryByRole("textbox")).not.toBeInTheDocument()
+      })
+    })
+
+    test("deferred commit mode keeps popover open when closeOnApply is false", async () => {
+      const onChange = vi.fn()
+      render(
+        <F0AmountCalculator
+          label="Discount"
+          locale="en-US"
+          units="%"
+          popover={{ commitMode: "deferred", apply: { closeOnApply: false } }}
+          onChange={onChange}
+        />
+      )
+
+      const trigger = screen.getByRole("button", { name: "Discount" })
+      await userEvent.click(trigger)
+
+      const input = await screen.findByRole("textbox")
+      await userEvent.type(input, "50")
+
+      await userEvent.click(screen.getByRole("button", { name: "Apply" }))
+
+      expect(onChange).toHaveBeenLastCalledWith(50)
+      expect(screen.getByRole("textbox")).toBeInTheDocument()
+    })
+
     test("controlled open state: respects popover.open=false", () => {
       render(
         <F0AmountCalculator

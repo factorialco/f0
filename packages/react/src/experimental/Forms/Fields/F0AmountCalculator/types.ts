@@ -40,6 +40,35 @@ export interface F0AmountCalculatorPopoverConfig {
    * field-level `hideLabel` prop.
    */
   triggerLabel?: string
+  /**
+   * Value commit behavior for popover mode.
+   * - `"immediate"` (default): calls `onChange` on every input change.
+   * - `"deferred"`: keeps edits local and commits only when Apply is clicked.
+   */
+  commitMode?: "immediate" | "deferred"
+  /**
+   * Optional Apply button configuration.
+   *
+   * When omitted and `commitMode` is `"deferred"`, an Apply button is still
+   * rendered with default values.
+   */
+  apply?: {
+    /**
+     * Visible label of the Apply button.
+     * @default "Apply"
+     */
+    label?: string
+    /**
+     * Icon shown in the Apply button.
+     * @default Check
+     */
+    icon?: IconType
+    /**
+     * Whether to close the popover after Apply is clicked.
+     * @default true
+     */
+    closeOnApply?: boolean
+  }
 }
 
 /**
