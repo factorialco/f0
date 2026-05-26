@@ -1,6 +1,8 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useMemo } from "react"
 
+import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
+
 import {
   F0Card,
   type CardImageAspectRatio,
@@ -11,20 +13,18 @@ import { CardAvatarVariant } from "@/components/F0Card/components/CardAvatar"
 import { cardPropertyRenderers } from "@/components/F0Card/components/CardMetadata"
 import { CardMetadata, CardMetadataProperty } from "@/components/F0Card/types"
 import { IconType } from "@/components/F0Icon"
-import { useDataCollectionData } from "@/patterns/OneDataCollection/hooks/useDataCollectionData"
-import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
-import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { GroupingDefinition, RecordType } from "@/hooks/datasource"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { getAnimationVariants, useGroups } from "@/hooks/datasource/useGroups"
 import { useSelectable } from "@/hooks/datasource/useSelectable/useSelectable"
 import { Placeholder } from "@/icons/app"
 import { cn } from "@/lib/utils"
+import { useDataCollectionData } from "@/patterns/OneDataCollection/hooks/useDataCollectionData"
+import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
+import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/Card"
 import { GroupHeader } from "@/ui/GroupHeader/GroupHeader"
 import { Skeleton } from "@/ui/skeleton"
-
-import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 
 import { PagesPagination } from "../../../components/PagesPagination"
 import { ItemActionsDefinition } from "../../../item-actions"
@@ -68,7 +68,7 @@ const CardGrid = ({
   tmpFullWidth?: boolean
 }) => {
   return (
-    <div className={cn("@container", tmpFullWidth ? "px-0" : "px-4")}>
+    <div className={cn("@container", tmpFullWidth ? "px-0" : "px-6")}>
       <div
         className={cn(
           "grid grid-cols-1 gap-4",
@@ -467,7 +467,7 @@ export const CardCollection = <
                       onSelectChange={(checked) =>
                         handleSelectGroupChange(group, checked)
                       }
-                      className="px-4 pb-2 pt-4"
+                      className="px-6 pb-2 pt-4"
                     />
                     <AnimatePresence>
                       {(!collapsible || openGroups[group.key]) && (
