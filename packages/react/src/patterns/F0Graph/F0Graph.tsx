@@ -1151,6 +1151,19 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
       const isInteractive = Boolean(edge.onEdgeClick || edge.onEdgeHover)
       const isHovered = isInteractive && edge.id === hoveredEdgeId
       const baseData = edge.data as Record<string, unknown> | undefined
+      const consumerVariant = baseData?.variant as EdgeVariant | undefined
+      // When any highlights are active, dim edges whose endpoints are both
+      // outside the highlighted set. Selection/hover/consumer-provided
+      // variants always win — only the default fallback gets demoted to
+      // `dimmed`.
+      const hasActiveHighlights = highlightedNodes.size > 0
+      const isEndpointHighlighted =
+        hasActiveHighlights &&
+        (highlightedNodes.has(edge.source) || highlightedNodes.has(edge.target))
+      const shouldAutoDim =
+        hasActiveHighlights &&
+        !isEndpointHighlighted &&
+        consumerVariant === undefined
       return {
         id: edge.id,
         source: edge.source,
@@ -1159,9 +1172,15 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
         data: {
           ...baseData,
           graphEdge: edge,
-          // Interactive edges shift to the `hover` variant on pointer-enter.
-          // Consumer-provided `variant` in edge.data still wins when not hovered.
-          ...(isHovered ? { variant: "hover" as const } : null),
+          // Variant priority (highest wins): hover (transient) >
+          // consumer-provided > auto-dim (when highlights are active and
+          // neither endpoint is highlighted) > default (resolved by
+          // F0GraphEdgeWrapper).
+          ...(isHovered
+            ? { variant: "hover" as const }
+            : shouldAutoDim
+              ? { variant: "dimmed" as const }
+              : null),
           showDot:
             !edge.target.startsWith("expander-") &&
             !edge.source.startsWith("expander-") &&
@@ -1169,7 +1188,13 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
         },
       }
     })
-  }, [visibleEdges, visibleTreeNodes, expandedNodes, hoveredEdgeId])
+  }, [
+    visibleEdges,
+    visibleTreeNodes,
+    expandedNodes,
+    hoveredEdgeId,
+    highlightedNodes,
+  ])
 
   // ── Expand / collapse (stable via ref pattern to avoid context cascade) ──
   const expandedNodesRef = useRef(expandedNodes)
