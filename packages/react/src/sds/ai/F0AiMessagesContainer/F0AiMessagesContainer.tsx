@@ -241,6 +241,7 @@ const Messages = ({
             titles={turn.thinking.titles}
             title={translations.ai.thoughtsGroupTitle}
             inProgress={turn.thinking.inProgress}
+            isWriting={turn.thinking.isWriting}
           />
         )}
         {turn.assistantMessages.map((message, index) =>

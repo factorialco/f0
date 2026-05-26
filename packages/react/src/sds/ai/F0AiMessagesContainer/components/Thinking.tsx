@@ -9,7 +9,12 @@ import { CollapsibleMessage } from "./CollapsibleMessage"
 
 import { ThinkingProps } from "../types"
 
-export const Thinking = ({ titles, title, inProgress }: ThinkingProps) => {
+export const Thinking = ({
+  titles,
+  title,
+  inProgress,
+  isWriting,
+}: ThinkingProps) => {
   const translations = useI18n()
   // Force-open while the turn is in progress. Once `inProgress` flips to
   // false, auto-collapse once; the user can then toggle freely.
@@ -29,7 +34,7 @@ export const Thinking = ({ titles, title, inProgress }: ThinkingProps) => {
     : (title ?? translations.ai.thoughtsGroupTitle)
   const lastIndex = titles.length - 1
   const itemStatus = (index: number): "executing" | "completed" => {
-    if (!inProgress) return "completed"
+    if (!inProgress || isWriting) return "completed"
     return index === lastIndex ? "executing" : "completed"
   }
 
@@ -52,7 +57,7 @@ export const Thinking = ({ titles, title, inProgress }: ThinkingProps) => {
             {index < titles.length - 1 && (
               <div
                 aria-hidden
-                className="absolute -bottom-3 left-2 ml-px top-6 w-px bg-f1-border-secondary rounded"
+                className="absolute -bottom-3 left-2 ml-px top-5 w-px bg-f1-border-secondary rounded"
               />
             )}
           </div>

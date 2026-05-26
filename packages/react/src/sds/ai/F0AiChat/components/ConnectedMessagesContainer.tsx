@@ -166,6 +166,7 @@ export const ConnectedMessagesContainer = ({
           ? {
               titles: collectThinkingTitles(thinkingGroup),
               inProgress: !turnIsComplete,
+              isWriting: showActivityIndicator,
             }
           : undefined
 

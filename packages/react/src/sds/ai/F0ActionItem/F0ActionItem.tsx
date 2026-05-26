@@ -28,11 +28,12 @@ export const F0ActionItem = ({ title, status, inGroup }: F0ActionItemProps) => {
 
   return (
     <div className="flex w-full items-start gap-1 text-f1-foreground-secondary">
-      <div className="flex h-6 w-6 shrink-0 items-center justify-start">
+      <div className="flex h-5 w-6 shrink-0 items-center justify-start">
         <AnimatePresence mode="wait">
           {status === "inProgress" && (
             <motion.div
               key="inProgress"
+              className="flex h-5 w-5 shrink-0 items-center justify-center"
               {...ICON_MOTION}
               transition={transition}
             >
@@ -52,6 +53,7 @@ export const F0ActionItem = ({ title, status, inGroup }: F0ActionItemProps) => {
             <motion.div
               key="completed"
               {...ICON_MOTION}
+              className="flex h-5 w-5 shrink-0 items-center justify-center"
               transition={transition}
             >
               <F0Icon
@@ -65,16 +67,14 @@ export const F0ActionItem = ({ title, status, inGroup }: F0ActionItemProps) => {
         </AnimatePresence>
       </div>
       {title && (
-        <div className="min-h-6 flex items-center">
-          <p
-            className={cn(
-              "text-pretty",
-              status === "executing" && "shine-text"
-            )}
-          >
-            {title}
-          </p>
-        </div>
+        <p
+          className={cn(
+            "text-pretty leading-5",
+            status === "executing" && "shine-text"
+          )}
+        >
+          {title}
+        </p>
       )}
     </div>
   )
