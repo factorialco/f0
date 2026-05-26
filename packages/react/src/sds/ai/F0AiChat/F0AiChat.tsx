@@ -6,18 +6,17 @@ import Cross from "@/icons/app/Cross"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 
-import { ChatInput } from "./components/input/ChatInput"
-import { ChatHeader } from "./components/layout/ChatHeader"
+import { AssistantMessage } from "../F0AiMessagesContainer/components/AssistantMessage"
+import { UserMessage } from "../F0AiMessagesContainer/components/UserMessage"
+
+import { ConnectedChatHeader } from "./components/ConnectedChatHeader"
+import { ConnectedChatInput } from "./components/ConnectedChatInput"
+import { ConnectedMessagesContainer } from "./components/ConnectedMessagesContainer"
 import { SidebarWindow } from "./components/layout/ChatWindow"
-import { AssistantMessage } from "./components/messages/AssistantMessage"
-import { MessagesContainer } from "./components/messages/MessagesContainer"
-import { UserMessage } from "./components/messages/UserMessage"
-import { WelcomeScreenSuggestion } from "./components/messages/WelcomeScreen"
 import { CopilotFunctionBridge } from "./components/shared/CopilotFunctionBridge"
-import { F0AiFullscreenChatComponent } from "./F0AiFullscreenChat"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
 import { OrderedMessagePartsProvider } from "./providers/OrderedMessagePartsProvider"
-import { AiChatProviderProps } from "./types"
+import { AiChatProviderProps, type WelcomeScreenSuggestion } from "./types"
 
 const F0AiChatProviderComponent = ({
   enabled = false,
@@ -34,7 +33,6 @@ const F0AiChatProviderComponent = ({
   entityRefs,
   canvasActions,
   canvasEntities,
-  toolHints,
   credits,
   employeeCredits,
   creditWarning,
@@ -70,7 +68,6 @@ const F0AiChatProviderComponent = ({
       entityRefs={entityRefs}
       canvasActions={canvasActions}
       canvasEntities={canvasEntities}
-      toolHints={toolHints}
       credits={credits}
       employeeCredits={employeeCredits}
       creditWarning={creditWarning}
@@ -135,12 +132,12 @@ const F0AiChatComponent = () => {
         setOpen(isOpen)
       }}
       Window={SidebarWindow}
-      Header={ChatHeader}
-      Messages={MessagesContainer}
+      Header={ConnectedChatHeader}
+      Messages={ConnectedMessagesContainer}
       Button={() => {
         return null // hide CopilotKit's default chat button
       }}
-      Input={ChatInput}
+      Input={ConnectedChatInput}
       UserMessage={UserMessage}
       AssistantMessage={AssistantMessage}
     />
@@ -151,14 +148,6 @@ const F0AiChatComponent = () => {
  * @experimental This is an experimental component use it at your own risk
  */
 export const F0AiChat = experimentalComponent("F0AiChat", F0AiChatComponent)
-
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-export const F0AiFullscreenChat = experimentalComponent(
-  "F0AiFullscreenChat",
-  F0AiFullscreenChatComponent
-)
 
 /**
  * @experimental This is an experimental component use it at your own risk
