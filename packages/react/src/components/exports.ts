@@ -33,6 +33,10 @@ export * from "./F0Alert"
  */
 export * from "../patterns/F0Dialog"
 export * from "./F0DurationInput"
+export * from "./F0NumberInput"
+export * from "./F0SearchInput"
+export * from "./F0TextAreaInput"
+export * from "./F0TextInput"
 /**
  * @deprecated F0FilterPickerContent has moved to @/patterns/F0FilterPickerContent. Import from there instead.
  */
