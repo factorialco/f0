@@ -2,6 +2,7 @@ import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import { Fragment, forwardRef, useMemo } from "react"
 
 import { withDataTestId } from "@/lib/data-testid"
+import { experimentalComponent } from "@/lib/experimental"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"
 
@@ -75,5 +76,8 @@ F0AccordionBase.displayName = "F0Accordion"
  * @experimental This is an experimental component, use it at your own risk.
  */
 export const F0Accordion = withDataTestId(
-  withSkeleton(F0AccordionBase, F0AccordionSkeleton)
+  experimentalComponent(
+    "F0Accordion",
+    withSkeleton(F0AccordionBase, F0AccordionSkeleton)
+  )
 )

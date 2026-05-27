@@ -148,3 +148,33 @@ export const Skeleton: Story = {
   parameters: withSnapshot({}),
   render: () => <F0Accordion.Skeleton items={3} />,
 }
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <F0Accordion items={baseItems} />
+      <F0Accordion
+        items={baseItems.map((item, index) => ({
+          ...item,
+          defaultOpen: index === 0,
+          actions: [
+            {
+              type: "segmentedControl",
+              ariaLabel: `Relevance for ${item.title}`,
+              items: relevanceSegments,
+              value: "required",
+              onChange: () => {},
+            },
+            {
+              type: "dropdown",
+              ariaLabel: `More actions for ${item.title}`,
+              items: dropdownItems,
+            },
+          ],
+        }))}
+      />
+      <F0Accordion.Skeleton items={3} />
+    </div>
+  ),
+}
