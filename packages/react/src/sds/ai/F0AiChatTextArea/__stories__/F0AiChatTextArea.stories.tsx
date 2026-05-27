@@ -4,6 +4,7 @@ import { useRef, useState } from "react"
 import { F0AiChatTextArea } from "../F0AiChatTextArea"
 import type { F0AiChatTextAreaSubmitPayload } from "../types"
 
+import { F0ClarifyingPanel } from "../../F0ClarifyingPanel"
 import type { ClarifyingQuestionState } from "../../F0ClarifyingPanel/types"
 import type {
   AiChatCreditWarning,
@@ -174,7 +175,11 @@ const Wrapper = ({
         inProgress={inProgress}
         placeholders={placeholders}
         creditWarning={creditWarning}
-        clarifyingQuestion={clarifyingQuestion}
+        clarifyingUI={
+          clarifyingQuestion ? (
+            <F0ClarifyingPanel clarifyingQuestion={clarifyingQuestion} />
+          ) : undefined
+        }
         pendingContext={pendingContext}
         onPendingContextChange={setPendingContext}
         pendingQuote={pendingQuote}

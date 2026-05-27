@@ -38,27 +38,6 @@ export type {
   AiChatTranslationsProviderProps,
 } from "./types"
 
-// Utilities for runtime adapters (factorial / mock / any consumer) that
-// need to convert a flat `F0Message[]` to `RenderableTurn[]` or expand a
-// streaming assistant message into ordered parts.
-export {
-  expandFromOrderedParts,
-  legacyExpansion,
-  type OrderedPart,
-} from "./utils/expand-message-parts"
-export {
-  analyzeTurn,
-  convertMessagesToTurns,
-  extractThinkingGroup,
-  type Turn,
-} from "./utils/turnUtils"
-export {
-  filterCoagentPlaceholders,
-  filterNonRenderableMessages,
-  isAgentStateMessage,
-  isCoagentPlaceholder,
-} from "./internal-types"
-
 // Tool-call context (host actions need it to identify their own tool call)
 export { useToolCallId } from "../F0AiMessagesContainer"
 

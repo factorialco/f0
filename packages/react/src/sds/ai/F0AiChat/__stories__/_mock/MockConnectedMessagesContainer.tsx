@@ -6,16 +6,16 @@ import {
 } from "../../../F0AiMessagesContainer"
 import { type FeedbackConfig } from "../../../F0AiMessagesContainer/components/feedback/FeedbackProvider"
 import { type Message as F0ContainerMessage } from "../../../F0AiMessagesContainer/types"
-import { filterNonRenderableMessages } from "../../internal-types"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { type F0AIMessage, type F0Message } from "../../types"
+
+import { useMockAiChatRuntime } from "./MockAiChatRuntime"
 import {
   analyzeTurn,
   convertMessagesToTurns,
   extractThinkingGroup,
-} from "../../utils/turnUtils"
-
-import { useMockAiChatRuntime } from "./MockAiChatRuntime"
+  filterNonRenderableMessages,
+} from "./turn-utils"
 
 function parseThinkingTitle(argsJson: string): string {
   try {
@@ -53,10 +53,10 @@ export const MockConnectedMessagesContainer = ({
   noShadows?: boolean
   children?: ReactNode
 }) => {
-  const { messages, inProgress } = useMockAiChatRuntime()
+  const { messages, inProgress, isLoadingThread } = useMockAiChatRuntime()
   const {
     initialMessage,
-    clarifyingQuestion,
+    isClarifying,
     visualizationMode,
     openGame,
     onThumbsUp,
@@ -158,8 +158,9 @@ export const MockConnectedMessagesContainer = ({
       turns={turns}
       initialMessage={initialMessage}
       onWelcomeClick={onWelcomeClick}
+      isLoadingThread={isLoadingThread}
       autoScrollUserIntoView={visualizationMode !== "fullscreen"}
-      freezeLayout={clarifyingQuestion != null}
+      freezeLayout={isClarifying}
       noShadows={noShadows}
       feedback={feedback}
     >

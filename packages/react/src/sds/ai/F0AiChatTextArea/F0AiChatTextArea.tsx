@@ -8,8 +8,6 @@ import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
-import { F0ClarifyingPanel } from "../F0ClarifyingPanel"
-
 import { ActionBar } from "./components/ActionBar"
 import { AttachedFilesList } from "./components/AttachedFilesList"
 import { CreditWarningWrapper } from "./components/CreditWarningWrapper"
@@ -22,17 +20,6 @@ import { buildHighlightSegments } from "./highlight-utils"
 import { type F0AiChatTextAreaProps } from "./types"
 import { useFileAttachments } from "./useFileAttachments"
 import { useMentions } from "./useMentions"
-
-const HTML_ESCAPES: Record<string, string> = {
-  "&": "&amp;",
-  "<": "&lt;",
-  ">": "&gt;",
-  '"': "&quot;",
-  "'": "&#39;",
-}
-
-/** Escape HTML entities so the quoted selection can't inject markup. */
-const escapeHtml = (s: string) => s.replace(/[&<>"']/g, (c) => HTML_ESCAPES[c])
 
 /** Markdown syntax characters that would otherwise trigger formatting. */
 const MD_SPECIAL = /[\\`*_{}[\]()#+\-.!|~>]/g
@@ -73,7 +60,7 @@ export const F0AiChatTextArea = ({
   onBeforeSubmit,
   placeholders,
   creditWarning,
-  clarifyingQuestion = null,
+  clarifyingUI,
   pendingContext = null,
   onPendingContextChange,
   pendingQuote = null,
@@ -100,7 +87,7 @@ export const F0AiChatTextArea = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const highlightRef = useRef<HTMLDivElement>(null)
 
-  const isClarifying = clarifyingQuestion !== null
+  const isClarifying = clarifyingUI != null
 
   const {
     attachedFiles,
@@ -173,29 +160,23 @@ export const F0AiChatTextArea = ({
 
       const transformed = mentions.transformMentions(inputValue.trim())
       // Escape markdown/HTML in the user's own text so `*hola*` stays literal
-      // and only features we control (quote blockquote, @mentions) produce
-      // rich rendering in the bubble.
+      // and only features we control (@mentions) produce rich rendering.
       const safeUserText = escapeUserText(transformed)
-
-      // When replying to a selected fragment, prepend the quote as a
-      // dedicated `<reply-quote>` tag. The renderer strips this tag from
-      // the bubble content and renders the quote above the bubble.
-      const withQuote = pendingQuote
-        ? `<reply-quote>${escapeHtml(pendingQuote.text).replace(/\n/g, "<br/>")}</reply-quote>${safeUserText}`
-        : safeUserText
 
       const files = uploadedFiles.flatMap((f) =>
         f.uploadedFile ? [f.uploadedFile] : []
       )
 
       const consumedContext = pendingContext
+      const consumedQuote = pendingQuote
       if (consumedContext) onPendingContextChange?.(null)
-      if (pendingQuote) onPendingQuoteChange?.(null)
+      if (consumedQuote) onPendingQuoteChange?.(null)
 
       await onSubmit({
-        text: withQuote,
+        text: safeUserText,
         files,
         context: consumedContext,
+        quote: consumedQuote,
       })
 
       setInputValue("")
@@ -313,10 +294,7 @@ export const F0AiChatTextArea = ({
 
             <AnimatePresence initial={false}>
               {isClarifying ? (
-                <F0ClarifyingPanel
-                  key="clarifying"
-                  clarifyingQuestion={clarifyingQuestion}
-                />
+                <div key="clarifying">{clarifyingUI}</div>
               ) : (
                 <motion.div
                   key="input"

@@ -22,7 +22,7 @@ export const SidebarWindow = ({ children }: { children?: ReactNode }) => {
     setChatWidth,
     resetChatWidth,
     fileAttachments,
-    clarifyingQuestion,
+    isClarifying,
     fileDragOver,
     setFileDragOver,
     processDroppedFiles,
@@ -32,8 +32,7 @@ export const SidebarWindow = ({ children }: { children?: ReactNode }) => {
   const isCanvasMode = visualizationMode === "canvas"
 
   const dragCounterRef = useRef(0)
-  const canDrop =
-    fileAttachments?.onUploadFiles != null && clarifyingQuestion === null
+  const canDrop = fileAttachments?.onUploadFiles != null && !isClarifying
 
   const handleDragEnter = useCallback(
     (e: React.DragEvent) => {

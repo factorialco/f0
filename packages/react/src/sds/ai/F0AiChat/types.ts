@@ -33,9 +33,14 @@ export type F0Message = {
   toolCalls?: F0ToolCall[]
   toolCallId?: string
   createdAt?: string
-  agentName?: string
   generativeUI?: () => unknown
   rawData?: unknown
+  /**
+   * Reply quote text attached to the message by the composer. Rendered
+   * as a block above the user bubble. Adapters (factorial / mock) own
+   * the wire encoding; F0 only reads this structured field.
+   */
+  replyQuote?: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any
 }

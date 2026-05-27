@@ -127,26 +127,16 @@ const Messages = ({
   const AssistantMessage = AssistantMessageProp ?? F0AssistantMessage
   const UserMessage = UserMessageProp ?? F0UserMessage
 
-  const initialMessages = useMemo(
-    () => makeInitialMessages(initialMessage),
-    [initialMessage]
-  )
-  const resolvedInitialMessages = useMemo(
-    () =>
-      initialMessages.length > 0
-        ? initialMessages
-        : makeInitialMessages(translations.ai.defaultInitialMessage),
-    [initialMessages, translations.ai.defaultInitialMessage]
-  )
-
-  const welcomeMessages = useMemo(
-    () =>
-      resolvedInitialMessages
-        .map((m) => (typeof m.content === "string" ? m.content : ""))
-        .filter((s) => s.length > 0),
-    [resolvedInitialMessages]
-  )
-  const showWelcomeBlock = turns.length === 0 && welcomeMessages.length > 0
+  const welcomeMessages = useMemo(() => {
+    const source = initialMessage ?? translations.ai.defaultInitialMessage
+    const arr = Array.isArray(source) ? source : [source]
+    return arr.filter((s): s is string => typeof s === "string" && s.length > 0)
+  }, [initialMessage, translations.ai.defaultInitialMessage])
+  // Welcome screen is mutually exclusive with the thread-loading skeleton:
+  // when a thread is in-flight we render `MessagesSkeleton` instead of the
+  // welcome, even though `messages` is momentarily empty.
+  const showWelcomeBlock =
+    !isLoadingThread && turns.length === 0 && welcomeMessages.length > 0
 
   // Scroll state
   const viewportRef = useRef<HTMLDivElement>(null)
@@ -288,14 +278,12 @@ const Messages = ({
           >
             <div
               className={cn(
-                showWelcomeBlock && !isLoadingThread
-                  ? "flex flex-1"
-                  : "flex flex-col gap-6",
+                showWelcomeBlock ? "flex flex-1" : "flex flex-col gap-6",
                 "w-full max-w-content"
               )}
             >
               {isLoadingThread && <MessagesSkeleton />}
-              {!isLoadingThread && showWelcomeBlock && (
+              {showWelcomeBlock && (
                 <WelcomeScreen
                   messages={welcomeMessages}
                   onClick={onWelcomeClick}
@@ -368,13 +356,3 @@ const MessagesSkeleton = () => (
     </div>
   </div>
 )
-
-function makeInitialMessages(initial?: string | string[]): Message[] {
-  if (!initial) return []
-  const arr = Array.isArray(initial) ? initial : [initial]
-  return arr.map((message) => ({
-    id: message,
-    role: "assistant",
-    content: message,
-  }))
-}

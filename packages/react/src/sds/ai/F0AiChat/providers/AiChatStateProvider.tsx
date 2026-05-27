@@ -15,8 +15,6 @@ import {
 
 import { useI18n } from "@/lib/providers/i18n"
 
-import type { ClarifyingQuestionState } from "../../F0ClarifyingPanel/types"
-
 import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
 import {
   type AiChatMode,
@@ -148,8 +146,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
 
   const previousVisualizationModeRef = useRef<VisualizationMode>("sidepanel")
 
-  const [clarifyingQuestion, setClarifyingQuestion] =
-    useState<ClarifyingQuestionState | null>(null)
+  const [isClarifying, setIsClarifying] = useState(false)
 
   const [fileDragOver, setFileDragOver] = useState(false)
   const [pendingContext, setPendingContext] = useState<PendingContext | null>(
@@ -171,10 +168,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     },
     []
   )
-
-  const tmp_setAgent = (newAgent?: string) => {
-    setAgent(newAgent)
-  }
 
   const resetChatWidth = () => {
     setChatWidth(DEFAULT_CHAT_WIDTH)
@@ -245,7 +238,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         shouldPlayEntranceAnimation,
         setShouldPlayEntranceAnimation,
         agent,
-        tmp_setAgent,
+        setAgent,
         initialMessage,
         setInitialMessage,
         chatHeader,
@@ -276,8 +269,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         activeGame,
         openGame,
         closeGame,
-        clarifyingQuestion,
-        setClarifyingQuestion,
+        isClarifying,
+        setIsClarifying,
         fileDragOver,
         setFileDragOver,
         processDroppedFiles,
@@ -309,11 +302,11 @@ const FALSE_KEYS = new Set<ProviderKey>([
   "lockVisualizationMode",
   "historyEnabled",
   "resizable",
+  "isClarifying",
 ])
 
 const NULL_KEYS = new Set<ProviderKey>([
   "canvasContent",
-  "clarifyingQuestion",
   "pendingContext",
   "pendingQuote",
   "activeGame",

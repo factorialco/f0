@@ -1,4 +1,3 @@
-import { type ClarifyingQuestionState } from "../F0ClarifyingPanel/types"
 import {
   type CanvasActions,
   type CanvasEntityDefinition,
@@ -14,7 +13,6 @@ import {
   type AiChatEmployeeCredits,
   type EntityRefs,
   type F0AIMessage,
-  type F0Message,
   type PendingContext,
   type PendingQuote,
   type VisualizationMode,
@@ -73,7 +71,7 @@ export type AiChatProviderReturnValue = {
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
   shouldPlayEntranceAnimation: boolean
   setShouldPlayEntranceAnimation: React.Dispatch<React.SetStateAction<boolean>>
-  tmp_setAgent: (agent?: string) => void
+  setAgent: React.Dispatch<React.SetStateAction<string | undefined>>
   placeholders: string[]
   setPlaceholders: React.Dispatch<React.SetStateAction<string[]>>
   initialMessage?: string | string[]
@@ -135,12 +133,14 @@ export type AiChatProviderReturnValue = {
    * Set the footer content. Use this to update the footer from outside the provider (e.g. per page/route).
    */
   setFooter: React.Dispatch<React.SetStateAction<React.ReactNode | undefined>>
-  /** The current clarifying question shown in the textarea, or null if none */
-  clarifyingQuestion: ClarifyingQuestionState | null
-  /** Set the current clarifying question (or null to dismiss) */
-  setClarifyingQuestion: React.Dispatch<
-    React.SetStateAction<ClarifyingQuestionState | null>
-  >
+  /**
+   * True while a clarifying flow is active. F0 uses this flag to freeze
+   * layout / disable file drop / hide disclaimer. The actual panel state
+   * is owned by the host (factorial); F0 only sees the boolean.
+   */
+  isClarifying: boolean
+  /** Set the clarifying flag. */
+  setIsClarifying: React.Dispatch<React.SetStateAction<boolean>>
   /**
    * Whether files are currently being dragged over the chat window.
    * Set by the ChatWindow drag listeners and read by the DropOverlay
@@ -201,55 +201,3 @@ export type AiChatProviderReturnValue = {
     /** Close the active mini-game overlay */
     closeGame: () => void
   }
-
-/**
- * Helper function to check if a message is an agent state message
- */
-export function isAgentStateMessage(message: F0Message): boolean {
-  return message.role === "assistant" && message.agentName !== undefined
-}
-
-/**
- * Check whether a message is a coagent-state-render placeholder injected by
- * CopilotKit v1.51+.  These assistant messages are used by
- * `useCoAgentStateRender` to render inline state UI (e.g. FormCard).
- */
-export function isCoagentPlaceholder(message: F0Message): boolean {
-  return (
-    (message as F0Message & { name?: string }).name === "coagent-state-render"
-  )
-}
-
-/**
- * Filter coagent-state-render placeholder messages from an array.
- * Used for message-count checks (welcome screen, empty state) where
- * these placeholder messages should not count.
- */
-export function filterCoagentPlaceholders(messages: F0Message[]): F0Message[] {
-  return messages.filter((m) => !isCoagentPlaceholder(m))
-}
-
-/**
- * Check whether a message is a tool-result message (role: "tool").
- *
- * These are CopilotKit-style bookkeeping messages that carry the
- * stringified return value of frontend tool handlers (e.g. the JSON
- * response from `approveMutation`'s `respond()` callback). They must
- * never be rendered in the chat UI.
- */
-function isToolResultMessage(message: F0Message): boolean {
-  return message.role === "tool"
-}
-
-/**
- * Filter out all messages that should never be rendered in the chat UI:
- * - coagent-state-render placeholders (CopilotKit internal)
- * - tool-result messages (role: "tool") carrying frontend tool handler output
- */
-export function filterNonRenderableMessages(
-  messages: F0Message[]
-): F0Message[] {
-  return messages.filter(
-    (m) => !isCoagentPlaceholder(m) && !isToolResultMessage(m)
-  )
-}

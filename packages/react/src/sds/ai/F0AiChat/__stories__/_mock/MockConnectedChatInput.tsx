@@ -2,7 +2,6 @@ import { useCallback, useMemo, useRef } from "react"
 
 import { F0AiChatTextArea } from "../../../F0AiChatTextArea"
 import { type F0AiChatTextAreaSubmitPayload } from "../../../F0AiChatTextArea/types"
-import { filterNonRenderableMessages } from "../../internal-types"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import type {
   WelcomeScreenSuggestion,
@@ -10,6 +9,7 @@ import type {
 } from "../../types"
 
 import { useMockAiChatRuntime } from "./MockAiChatRuntime"
+import { filterNonRenderableMessages } from "./turn-utils"
 
 /**
  * Storybook-only Connected chat input. Bridges `F0AiChatTextArea` to the
@@ -22,7 +22,6 @@ export const MockConnectedChatInput = () => {
     placeholders,
     entityRefs,
     fileAttachments,
-    clarifyingQuestion,
     pendingContext,
     setPendingContext,
     pendingQuote,
@@ -45,8 +44,8 @@ export const MockConnectedChatInput = () => {
   const fullscreen = visualizationMode === "fullscreen"
 
   const handleSubmit = useCallback(
-    ({ text }: F0AiChatTextAreaSubmitPayload) => {
-      sendMessage(text)
+    ({ text, quote }: F0AiChatTextAreaSubmitPayload) => {
+      sendMessage(text, { replyQuote: quote?.text })
     },
     [sendMessage]
   )
@@ -67,7 +66,6 @@ export const MockConnectedChatInput = () => {
       inProgress={inProgress}
       placeholders={placeholders}
       creditWarning={creditWarning}
-      clarifyingQuestion={clarifyingQuestion}
       pendingContext={pendingContext}
       onPendingContextChange={setPendingContext}
       pendingQuote={pendingQuote}
