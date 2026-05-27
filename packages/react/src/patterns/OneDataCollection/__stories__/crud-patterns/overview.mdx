@@ -24,7 +24,7 @@ expand on individual operations, views, and edge cases.
 ## Pattern decision table
 
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Pattern</th>
@@ -101,6 +101,12 @@ density, not pattern type. Most flows use `md`. Use `sm` for the **Dialog to
 page** preview — it is intentionally compact since the full page is the
 durable destination — and `lg` or `xl` for content-dense forms or wizards.
 
+**A note on forms in dialogs.** When rendering a form container (for example,
+`ResourceFormF0`) directly inside `F0Dialog`, set
+`#sym:disableContentPadding` on the dialog. Form components already include
+their own internal spacing, so disabling dialog padding avoids double spacing
+and keeps create/update layouts consistent.
+
 ## Container anatomy
 
 Each named pattern is a specific configuration of `F0Dialog`. The differences
@@ -113,9 +119,9 @@ component.
       <img
         src={containerDefaultDialog}
         alt="Default dialog centered over a Data Collection, showing a Create resource form."
-        className="block w-full rounded-lg border border-solid border-f1-border dark:border-f1-border-secondary"
+        className="border-f1-border dark:border-f1-border-secondary block w-full rounded-lg border border-solid"
       />
-      <figcaption className="mt-2 text-sm text-f1-foreground-secondary">
+      <figcaption className="text-f1-foreground-secondary mt-2 text-sm">
         <strong>Default dialog</strong> — <code>position="center"</code>,
         <code>width="md"</code>. Baseline container for create, read, and
         update.
@@ -125,9 +131,9 @@ component.
       <img
         src={containerRightDialog}
         alt="Right dialog anchored to the right edge of the viewport, with the Data Collection visible on the left."
-        className="block w-full rounded-lg border border-solid border-f1-border dark:border-f1-border-secondary"
+        className="border-f1-border dark:border-f1-border-secondary block w-full rounded-lg border border-solid"
       />
-      <figcaption className="mt-2 text-sm text-f1-foreground-secondary">
+      <figcaption className="text-f1-foreground-secondary mt-2 text-sm">
         <strong>Right dialog</strong> — <code>position="right"</code>,
         <code>width="md"</code> (or <code>"sm"</code> for Dialog to page). Keeps
         the collection visible alongside the form.
@@ -137,9 +143,9 @@ component.
       <img
         src={containerWizardDialog}
         alt="Wizard dialog with a numbered step sidebar (General information, Assignments, Review) and a Continue action."
-        className="block w-full rounded-lg border border-solid border-f1-border dark:border-f1-border-secondary"
+        className="border-f1-border dark:border-f1-border-secondary block w-full rounded-lg border border-solid"
       />
-      <figcaption className="mt-2 text-sm text-f1-foreground-secondary">
+      <figcaption className="text-f1-foreground-secondary mt-2 text-sm">
         <strong>Wizard dialog</strong> — <code>position="center"</code>,
         <code>width="lg"</code>, with a step sidebar. Guides sequential create
         flows.
@@ -149,9 +155,9 @@ component.
       <img
         src={containerConfirmationDialog}
         alt="Small centered confirmation dialog asking to delete a resource, with Cancel and a destructive Delete action."
-        className="block w-full rounded-lg border border-solid border-f1-border dark:border-f1-border-secondary"
+        className="border-f1-border dark:border-f1-border-secondary block w-full rounded-lg border border-solid"
       />
-      <figcaption className="mt-2 text-sm text-f1-foreground-secondary">
+      <figcaption className="text-f1-foreground-secondary mt-2 text-sm">
         <strong>Confirmation dialog</strong> — <code>position="center"</code>,
         <code>width="sm"</code>, with a destructive primary action. Used for
         delete and other destructive flows.
@@ -221,7 +227,7 @@ a right dialog when keeping the collection visible helps, or a wizard for
 multi-step flows.
 
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Scenario</th>
@@ -302,7 +308,7 @@ Triggered by clicking a row, list item, or card. Opens a dialog for contained
 resources or navigates to a page when the resource needs a durable destination.
 
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Scenario</th>
@@ -394,7 +400,7 @@ a dialog for full-resource edits or inline cells in Editable Table for
 field-level changes.
 
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Scenario</th>
@@ -504,7 +510,7 @@ Never placed as a primary action — lives in item actions, bulk actions, or the
 read dialog header.
 
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Scenario</th>
@@ -613,7 +619,7 @@ doesn't.
 ## Responsive behavior
 
 <Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
     <thead>
       <tr>
         <th className="text-left">Container</th>
@@ -695,7 +701,7 @@ doesn't.
 ## Related documentation
 
 <Unstyled>
-  <ul className="mb-8 ml-6 list-disc dark:text-f1-foreground-inverse/80">
+  <ul className="dark:text-f1-foreground-inverse/80 mb-8 ml-6 list-disc">
     <li>
       <a
         target="_parent"

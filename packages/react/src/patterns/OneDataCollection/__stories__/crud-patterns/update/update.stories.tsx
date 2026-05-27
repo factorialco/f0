@@ -4,8 +4,8 @@ import { useState } from "react"
 
 import { F0Text } from "@/components/F0Text"
 import { Pencil, Save } from "@/icons/app"
-import { useF0Form } from "@/patterns/F0Form"
 import { F0Dialog } from "@/patterns/F0Dialog"
+import { useF0Form } from "@/patterns/F0Form"
 
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../../../index"
@@ -127,6 +127,7 @@ function RightPositionDialogScenario({
           label: "Close",
           onClick: () => setSelectedResource(null),
         }}
+        disableContentPadding
       >
         {selectedResource && (
           <ResourceFormF0
@@ -221,6 +222,7 @@ function UpdateWithSameFormScenario() {
           label: "Cancel",
           onClick: () => setSelectedResource(null),
         }}
+        disableContentPadding
       >
         <ResourceFormF0
           key={selectedResource?.id}
@@ -375,6 +377,7 @@ function CardActionsUpdateScenario() {
           label: "Cancel",
           onClick: () => setSelectedResource(null),
         }}
+        disableContentPadding
       >
         <ResourceFormF0
           key={selectedResource?.id}
