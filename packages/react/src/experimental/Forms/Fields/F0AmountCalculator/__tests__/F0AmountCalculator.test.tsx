@@ -300,6 +300,25 @@ describe("F0AmountCalculator", () => {
       expect(screen.getByRole("textbox")).toBeInTheDocument()
     })
 
+    test("does not open popover when disabled", async () => {
+      render(
+        <F0AmountCalculator
+          label="Discount"
+          locale="en-US"
+          popover={{}}
+          disabled
+          onChange={vi.fn()}
+        />
+      )
+
+      const trigger = screen.getByRole("button", { name: "Discount" })
+      expect(trigger).toBeDisabled()
+
+      await userEvent.click(trigger)
+
+      expect(screen.queryByRole("textbox")).not.toBeInTheDocument()
+    })
+
     test("shows status message in popover mode and hides NumberInput duplicate message", async () => {
       render(
         <F0AmountCalculator

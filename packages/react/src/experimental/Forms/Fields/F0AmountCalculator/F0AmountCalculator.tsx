@@ -1,10 +1,22 @@
-import { CSSProperties, forwardRef, useEffect, useMemo, useState } from "react"
+import {
+  CSSProperties,
+  type ReactNode,
+  forwardRef,
+  useEffect,
+  useId,
+  useMemo,
+  useState,
+} from "react"
+import { useControllableState } from "@radix-ui/react-use-controllable-state"
 
 import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { NumberInput } from "@/experimental/Forms/Fields/NumberInput"
 import { Calculator, Check } from "@/icons/app"
+import { experimentalComponent } from "@/lib/experimental"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { Label } from "@/ui/InputField/components/Label"
 import { InputMessages } from "@/ui/InputField/components/InputMessages"
 import { InputFieldStatus } from "@/ui/InputField/types"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
@@ -34,11 +46,22 @@ function resolveStatus(
 /**
  * Renders the label row matching NumberInput's own label styling.
  */
-function FieldLabel({ label }: { label: string }) {
+function FieldLabel({
+  label,
+  htmlFor,
+  disabled,
+}: {
+  label: string
+  htmlFor: string
+  disabled?: boolean
+}) {
   return (
-    <span className="text-md mb-2 flex font-medium text-f1-foreground-secondary">
-      {label}
-    </span>
+    <Label
+      label={label}
+      htmlFor={htmlFor}
+      disabled={disabled}
+      className="mb-2"
+    />
   )
 }
 
@@ -60,8 +83,8 @@ function CalculatorRow({
   extraContent,
   inputWidth,
 }: {
-  children: React.ReactNode
-  extraContent?: React.ReactNode
+  children: ReactNode
+  extraContent?: ReactNode
   inputWidth?: string
 }) {
   const isAutoWidth = !inputWidth || inputWidth === "auto"
@@ -122,7 +145,7 @@ function CalculatorRow({
  * />
  * ```
  */
-export const F0AmountCalculator = forwardRef<
+const _F0AmountCalculator = forwardRef<
   HTMLInputElement,
   F0AmountCalculatorProps
 >(function F0AmountCalculator(
@@ -130,6 +153,7 @@ export const F0AmountCalculator = forwardRef<
     popover,
     extraContent,
     inputWidth,
+    id,
     label,
     hint,
     error,
@@ -141,10 +165,19 @@ export const F0AmountCalculator = forwardRef<
   },
   ref
 ) {
-  const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
+  const i18n = useI18n()
+  const generatedInputId = useId()
+
+  const [popoverOpen, setPopoverOpen] = useControllableState({
+    prop: popover?.open,
+    defaultProp: false,
+    onChange: popover?.onOpenChange,
+  })
   const [draftValue, setDraftValue] = useState<number | null>(
     value != null ? value : null
   )
+
+  const inputId = id ?? generatedInputId
 
   const resolvedStatus = resolveStatus(hint, error, status)
   const hasExtraContent = Boolean(extraContent)
@@ -152,17 +185,18 @@ export const F0AmountCalculator = forwardRef<
   const usesExternalMessages = popover !== undefined || hasExtraContent
   const shouldRenderOuterLabel = !hideLabel && label != null
   const shouldRenderOuterMessages = !hideLabel && resolvedStatus != null
-
-  const isPopoverControlled = popover?.open !== undefined
-  const popoverOpen = isPopoverControlled
-    ? Boolean(popover?.open)
-    : uncontrolledOpen
+  const isTriggerDisabled = Boolean(
+    numberInputProps.disabled ||
+    numberInputProps.readonly ||
+    numberInputProps.loading
+  )
 
   const handlePopoverOpenChange = (open: boolean) => {
-    if (!isPopoverControlled) {
-      setUncontrolledOpen(open)
+    if (open && isTriggerDisabled) {
+      return
     }
-    popover?.onOpenChange?.(open)
+
+    setPopoverOpen(open)
   }
 
   useEffect(() => {
@@ -191,6 +225,7 @@ export const F0AmountCalculator = forwardRef<
   const innerInput = (
     <NumberInput
       ref={ref}
+      id={inputId}
       label={usesExternalMessages ? (label ?? "") : label}
       hideLabel={hideLabel || usesExternalMessages}
       hint={hideLabel || usesExternalMessages ? "" : hint}
@@ -216,7 +251,7 @@ export const F0AmountCalculator = forwardRef<
     } = popover
 
     const showApplyButton = isDeferredPopover
-    const applyLabel = apply?.label ?? "Apply"
+    const applyLabel = apply?.label ?? i18n.actions.apply
     const ApplyIcon = apply?.icon ?? Check
     const closeOnApply = apply?.closeOnApply ?? true
 
@@ -233,8 +268,9 @@ export const F0AmountCalculator = forwardRef<
           <F0Button
             variant="outline"
             icon={TriggerIcon}
+            disabled={isTriggerDisabled}
             hideLabel={!triggerLabel}
-            label={triggerLabel ?? label ?? "Open amount calculator"}
+            label={triggerLabel ?? label}
           />
         </PopoverTrigger>
         <PopoverContent
@@ -245,7 +281,13 @@ export const F0AmountCalculator = forwardRef<
           )}
         >
           <div className="flex flex-col">
-            {shouldRenderOuterLabel ? <FieldLabel label={label} /> : null}
+            {shouldRenderOuterLabel ? (
+              <FieldLabel
+                label={label}
+                htmlFor={inputId}
+                disabled={isTriggerDisabled}
+              />
+            ) : null}
             <CalculatorRow extraContent={extraContent} inputWidth={inputWidth}>
               {innerInput}
             </CalculatorRow>
@@ -275,7 +317,13 @@ export const F0AmountCalculator = forwardRef<
 
   return (
     <div className="flex flex-col">
-      {shouldRenderOuterLabel ? <FieldLabel label={label} /> : null}
+      {shouldRenderOuterLabel ? (
+        <FieldLabel
+          label={label}
+          htmlFor={inputId}
+          disabled={isTriggerDisabled}
+        />
+      ) : null}
       <CalculatorRow extraContent={extraContent} inputWidth={inputWidth}>
         {innerInput}
       </CalculatorRow>
@@ -286,4 +334,9 @@ export const F0AmountCalculator = forwardRef<
   )
 })
 
-F0AmountCalculator.displayName = "F0AmountCalculator"
+_F0AmountCalculator.displayName = "F0AmountCalculator"
+
+export const F0AmountCalculator = experimentalComponent(
+  "F0AmountCalculator",
+  _F0AmountCalculator
+)

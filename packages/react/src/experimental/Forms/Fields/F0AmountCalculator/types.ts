@@ -76,8 +76,10 @@ export interface F0AmountCalculatorPopoverConfig {
  */
 export interface F0AmountCalculatorBaseProps extends NumberInputProps {
   /**
-   * HTML id forwarded to the underlying input element.
-   * Used by F0Form to associate labels and ARIA attributes.
+   * HTML id forwarded to the underlying input element when supported by the
+   * current input primitive.
+   *
+   * In F0Form this is used to align external labels and ARIA attributes.
    */
   id?: string
   /**
