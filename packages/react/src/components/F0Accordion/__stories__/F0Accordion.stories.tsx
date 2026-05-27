@@ -41,7 +41,7 @@ const dropdownItems = [
 ]
 
 const meta = {
-  title: "Components/F0Accordion",
+  title: "F0Accordion",
   component: F0Accordion,
   tags: ["autodocs", "experimental"],
   args: {
