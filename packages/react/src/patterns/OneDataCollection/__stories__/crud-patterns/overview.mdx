@@ -43,12 +43,13 @@ expand on individual operations, views, and edge cases.
       </tr>
       <tr>
         <td>Right dialog</td>
-        <td>Create, Update (Table/List)</td>
+        <td>Create, Read (Table/List), Update (Table/List)</td>
         <td>
           Alternative container when keeping the collection visible helps the
-          user preserve context. Used for create flows and for update in Table
-          or List. Use only on screens <code>md</code> / <code>900px</code> and
-          above; below that, fall back to the default dialog.
+          user preserve context. Used for create flows and for read or update in
+          Table or List. Use only on screens <code>md</code> /{" "}
+          <code>900px</code> and above; below that, fall back to the default
+          dialog.
         </td>
       </tr>
       <tr>
@@ -589,13 +590,15 @@ right dialog is an alternative for Table and List update when keeping the
 collection visible materially helps (comparing nearby items, staying anchored to
 context).
 
-Read can stay in a dialog when the resource is lightweight. The **Dialog to
-page** flow uses a right dialog as a preview that opens a full page when the
-resource has a durable destination, tabs, deeper structure, or page-level
-actions — any compatible default or right dialog can use **Open Details** as its
-primary action. Bulk update is valid across visualizations whenever
-multi-selection scope is visible, countable, and reviewable; if scope is
-ambiguous, use item-level update instead.
+Read can stay in a dialog when the resource is lightweight. In Table and List,
+a right dialog is also valid when keeping the collection visible helps the user
+scan or compare adjacent items. The **Dialog to page** flow uses a right dialog
+as a preview that opens a full page when the resource has a durable
+destination, tabs, deeper structure, or page-level actions — any compatible
+default or right dialog can use **Open Details** as its primary action. Bulk
+update is valid across visualizations whenever multi-selection scope is
+visible, countable, and reviewable; if scope is ambiguous, use item-level
+update instead.
 
 Kanban cards support drag, click-to-read, and selection simultaneously. Drag
 updates lane and state, click opens the read dialog, and the selection checkbox
@@ -606,9 +609,10 @@ stops propagation so toggling it never opens the card.
 Each view follows the Pattern decision table; these are the cases where it
 doesn't.
 
-- **Table:** right dialog when row comparison helps the task.
-- **List:** right dialog only when list context remains useful while
-  editing.
+- **Table:** right dialog for read or update when row comparison or scanning
+  helps the task.
+- **List:** right dialog for read or update only when list context remains
+  useful while reading or editing.
 - **Card:** click opens read first; edit is an explicit action inside the read
   dialog.
 - **Kanban:** lane create for state-scoped resources; drag for state updates;
