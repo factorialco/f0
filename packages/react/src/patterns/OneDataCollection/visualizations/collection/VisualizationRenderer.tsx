@@ -21,6 +21,57 @@ import {
 import { Visualization } from "./types"
 
 /**
+ * Returns the effective data source for a visualization.
+ *
+ * If the visualization entry carries its own `source` override, that source is
+ * returned; otherwise the collection's top-level `source` is used.
+ *
+ * The override branch is type-narrowed via the presence of a `source` property
+ * on the union — no type assertions required.
+ */
+export const getEffectiveSource = <
+  R extends RecordType,
+  Filters extends FiltersDefinition,
+  Sortings extends SortingsDefinition,
+  Summaries extends SummariesDefinition,
+  ItemActions extends ItemActionsDefinition<R>,
+  NavigationFilters extends NavigationFiltersDefinition,
+  Grouping extends GroupingDefinition<R>,
+>(
+  visualization: Visualization<
+    R,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  >,
+  source: DataCollectionSource<
+    R,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  >
+): DataCollectionSource<
+  R,
+  Filters,
+  Sortings,
+  Summaries,
+  ItemActions,
+  NavigationFilters,
+  Grouping
+> => {
+  if ("source" in visualization && visualization.source) {
+    return visualization.source
+  }
+  return source
+}
+
+/**
  * A component that renders the selected visualization for a collection.
  * Handles switching between different visualization types (table, card, or custom view)
  * and passes appropriate props to the specific visualization component.
@@ -75,9 +126,11 @@ export const VisualizationRenderer = <
   clearSelectedItems?: () => void
   tmpFullWidth?: boolean
 }): JSX.Element => {
+  const effectiveSource = getEffectiveSource(visualization, source)
+
   if (visualization.type === "custom") {
     return visualization.component({
-      source,
+      source: effectiveSource,
       onLoadData,
       onLoadError,
       onSelectItems,
@@ -104,7 +157,7 @@ export const VisualizationRenderer = <
   }
 
   return visualizationType.render({
-    source,
+    source: effectiveSource,
     ...visualization.options,
     onSelectItems,
     onLoadData,
