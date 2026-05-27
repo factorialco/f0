@@ -1,3 +1,9 @@
+/* Bundle React Flow's base stylesheet so consumers of @factorialco/f0-react
+ * don't need to add a separate `import "@xyflow/react/dist/style.css"` in
+ * their app entry. Without these styles F0Graph mounts but renders with
+ * zero size. */
+@import "@xyflow/react/dist/style.css";
+
 /* Cursor overrides for F0Graph.
  * React Flow uses BEM class names (e.g. .react-flow__pane) which contain
  * double underscores that Tailwind's arbitrary-variant syntax converts to

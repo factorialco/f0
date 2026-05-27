@@ -123,12 +123,18 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
   const isExpanded = expandedNodes.has(id)
   const isSelected = selectedNodes.has(id)
   const isHighlighted = highlightedNodes.has(id)
+  // When any highlights are active, non-highlighted, non-selected nodes
+  // render in the `dimmed` state so the search/highlight target stays
+  // visually prominent. Selection always wins.
+  const hasActiveHighlights = highlightedNodes.size > 0
 
   const nodeState: GraphNodeState = isSelected
     ? "selected"
     : isHighlighted
       ? "highlighted"
-      : "default"
+      : hasActiveHighlights
+        ? "dimmed"
+        : "default"
 
   const variant: GraphNodeVariant =
     zoomLevel === "dot" ? "dot" : zoomLevel === "compact" ? "compact" : "detail"

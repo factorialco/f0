@@ -13,6 +13,8 @@ import {
   TEAMS_MOCK,
 } from "@/mocks"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary.ts"
+import type { F0GraphNodeRenderContext } from "@/patterns/F0Graph"
+import { F0GraphNode } from "@/patterns/F0Graph/F0GraphNode"
 export { generateMockUsers, type MockUser }
 
 import {
@@ -953,6 +955,39 @@ export const getMockVisualizations = (options?: {
               return sourceRecord
             }
           : undefined,
+      },
+    },
+    graph: {
+      type: "graph",
+      options: {
+        nodeAdapter: (_item) => ({
+          parentId: null,
+        }),
+        renderNode: (item, ctx: F0GraphNodeRenderContext) => {
+          const [firstName = "", lastName = ""] = item.name.split(" ")
+
+          return (
+            <F0GraphNode
+              variant={ctx.variant}
+              state={ctx.state}
+              expanded={ctx.expanded}
+              hasChildren={ctx.hasChildren}
+              childrenCount={ctx.childrenCount}
+              level={ctx.level}
+              tabIndex={ctx.tabIndex}
+              setSize={ctx.setSize}
+              posInSet={ctx.posInSet}
+              nodeId={ctx.nodeId}
+              ariaOwns={ctx.ariaOwns}
+              onExpandToggle={ctx.onExpandToggle}
+              onClick={ctx.onClick}
+              nodeRef={ctx.nodeRef}
+              avatar={{ type: "person", firstName, lastName }}
+              title={item.name}
+              subtitle={item.role}
+            />
+          )
+        },
       },
     },
   }) as const

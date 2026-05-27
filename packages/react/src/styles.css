@@ -1,6 +1,7 @@
 @import "./reset.css";
 @import "../assets/fonts/style.css";
 @import "@factorialco/f0-core/base.css";
+@import "@xyflow/react/dist/style.css";
 
 @property --gradient-angle {
   syntax: "<angle>";

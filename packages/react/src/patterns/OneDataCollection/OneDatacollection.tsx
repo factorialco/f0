@@ -233,6 +233,32 @@ const OneDataCollectionComp = <
   NavigationFilters,
   Grouping
 >): JSX.Element => {
+  const [currentVisualization, setCurrentVisualization] = useState(0)
+
+  // ── Per-visualization source override ────────────────────────────────────
+  // A visualization entry may carry its own `source` — when present, chrome
+  // (filters, search, presets, CSV export, bulk-action bar) routes through
+  // that source instead of the top-level one. The renderer also picks up
+  // the override via `getEffectiveSource`.
+  const currentViz = visualizations[currentVisualization]
+  const overrideSource =
+    currentViz && "source" in currentViz ? currentViz.source : undefined
+  const hasOverrideSource = overrideSource !== undefined
+  const chromeSource = overrideSource ?? source
+
+  // Dev-only warning so consumers can spot mis-wired overrides during local
+  // development. The override source is opt-in and not necessarily a bug —
+  // the warning just flags that chrome is decoupled from the top-level source.
+  useEffect(() => {
+    if (hasOverrideSource && process.env.NODE_ENV !== "production") {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[OneDataCollection] Visualization "${currentViz?.type}" provides its own \`source\` override. Filter bar, search, presets, CSV export and the bulk-action bar are wired to this override source — not the top-level \`source\` prop.`
+      )
+    }
+    // currentViz?.type is stable per visualization index; deps cover the change.
+  }, [hasOverrideSource, currentViz?.type])
+
   const {
     // Filters
     filters,
@@ -262,19 +288,9 @@ const OneDataCollectionComp = <
     currentSortings,
     setCurrentSortings,
     sortings,
-  } = source
+  } = chromeSource
 
-  const [currentVisualization, setCurrentVisualization] = useState(0)
-
-  const {
-    effectiveFilters,
-    effectivePresets,
-    currentFilters: activeCurrentFilters,
-    setCurrentFilters: activeSetCurrentFilters,
-    allVisualizationFilters,
-    setAllVisualizationFilters,
-    hasPerVisualizationFilters,
-  } = usePerVisualizationFilters({
+  const perVizFilters = usePerVisualizationFilters({
     sourceFilters: filters,
     sourcePresets: presets,
     sourceCurrentFilters: currentFilters,
@@ -284,8 +300,30 @@ const OneDataCollectionComp = <
     storageKey: id,
   })
 
+  // When override-source is active, bypass per-viz filter machinery — the
+  // override source owns its own filter state and chrome drives it directly.
+  const effectiveFilters = hasOverrideSource
+    ? filters
+    : perVizFilters.effectiveFilters
+  const effectivePresets = hasOverrideSource
+    ? presets
+    : perVizFilters.effectivePresets
+  const activeCurrentFilters = hasOverrideSource
+    ? currentFilters
+    : perVizFilters.currentFilters
+  const activeSetCurrentFilters = hasOverrideSource
+    ? setCurrentFilters
+    : perVizFilters.setCurrentFilters
+  const allVisualizationFilters = perVizFilters.allVisualizationFilters
+  const setAllVisualizationFilters = perVizFilters.setAllVisualizationFilters
+  const hasPerVisualizationFilters = hasOverrideSource
+    ? false
+    : perVizFilters.hasPerVisualizationFilters
+
   // Patched source with per-viz currentFilters to avoid stale filters during transitions
   const effectiveSource = useMemo(() => {
+    // Override source already owns its filter state — no patching needed.
+    if (hasOverrideSource) return chromeSource
     if (!hasPerVisualizationFilters) return source
     return {
       ...source,
@@ -294,6 +332,8 @@ const OneDataCollectionComp = <
     }
   }, [
     source,
+    chromeSource,
+    hasOverrideSource,
     hasPerVisualizationFilters,
     activeCurrentFilters,
     activeSetCurrentFilters,
@@ -612,8 +652,8 @@ const OneDataCollectionComp = <
     /**
      * Bulk actions for the action bar
      */
-    const bulkActions = source.bulkActions
-      ? source.bulkActions(selectedItems)
+    const bulkActions = chromeSource.bulkActions
+      ? chromeSource.bulkActions(selectedItems)
       : undefined
 
     const mapBulkActions = (
@@ -757,7 +797,7 @@ const OneDataCollectionComp = <
     activeCurrentFilters,
     currentSearch,
     currentNavigationFilters,
-    source.dataAdapter,
+    chromeSource.dataAdapter,
   ])
 
   const showTotalItemSummary = useMemo(() => {
@@ -1078,7 +1118,7 @@ const OneDataCollectionComp = <
                   : undefined
               }
               onUnselect={() => clearSelectedItemsFunc?.()}
-              allPagesSelection={!!source.allPagesSelection}
+              allPagesSelection={!!chromeSource.allPagesSelection}
               isAllItemsSelected={isAllItemsSelected}
               totalItems={totalItems}
             />
