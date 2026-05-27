@@ -127,7 +127,7 @@ function RightDialogScenario() {
         isOpen={open}
         onClose={() => setOpen(false)}
         title="Create resource"
-        description="Right-position dialogs are an accepted Table variation when the collection context should remain visible."
+        description="Right Dialog is an accepted Table variation when the collection context should remain visible."
         position="right"
         width="md"
         primaryAction={{
@@ -154,7 +154,7 @@ function RightDialogScenario() {
                 name: data.name,
                 owner: data.owner,
                 status: (data.status as Resource["status"]) ?? "Draft",
-                summary: "Created from the right-position dialog.",
+                summary: "Created from the Right Dialog.",
               },
               ...resources,
             ])
@@ -400,7 +400,7 @@ function ListCreateRightDialogScenario() {
         isOpen={open}
         onClose={() => setOpen(false)}
         title="Create resource"
-        description="Right-position dialogs are an accepted List variation when the collection context should remain visible."
+        description="Right Dialog is an accepted List variation when the collection context should remain visible."
         position="right"
         width="md"
         primaryAction={{
@@ -426,7 +426,7 @@ function ListCreateRightDialogScenario() {
                 name: data.name,
                 owner: data.owner,
                 status: (data.status as Resource["status"]) ?? "Draft",
-                summary: "Created from the right-position dialog.",
+                summary: "Created from the Right Dialog.",
               },
               ...resources,
             ])

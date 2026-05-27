@@ -79,7 +79,7 @@ function RightPositionDialogScenario({
         isOpen={previewedResource !== null}
         onClose={() => setPreviewedResource(null)}
         title="Resource details"
-        description="Open a reduced view in a right dialog while keeping update as an explicit action."
+        description="Open a reduced view in a Right Dialog while keeping update as an explicit action."
         position="right"
         width="md"
         disableContentPadding
@@ -113,7 +113,7 @@ function RightPositionDialogScenario({
         isOpen={selectedResource !== null}
         onClose={() => setSelectedResource(null)}
         title="Update resource"
-        description="Right-position dialogs are an accepted Table/List variation when context should stay visible."
+        description="Right Dialog is an accepted Table/List variation when context should stay visible."
         position="right"
         width="md"
         primaryAction={{
