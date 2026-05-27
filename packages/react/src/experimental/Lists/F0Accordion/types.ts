@@ -1,5 +1,6 @@
 import { F0SegmentedControlItem } from "@/experimental/Actions/F0SegmentedControl/types"
 import { DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { DataAttributes } from "@/global.types"
 import { WithDataTestIdProps } from "@/lib/data-testid"
 
 export interface F0AccordionItemSegmentedControlAction {
@@ -30,7 +31,7 @@ export interface F0AccordionItem {
   defaultOpen?: boolean
 }
 
-export interface F0AccordionProps extends WithDataTestIdProps {
+export interface F0AccordionProps extends WithDataTestIdProps, DataAttributes {
   items: F0AccordionItem[]
   value?: string[]
   defaultValue?: string[]

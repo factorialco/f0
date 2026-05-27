@@ -127,7 +127,7 @@ export const WithSegmentedControlAndDropdown: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const triggers = canvas.getAllByRole("button", {
-      name: /Expand item|Collapse item/,
+      name: /^Expand |^Collapse /,
     })
     expect(triggers.length).toBe(baseItems.length)
   },

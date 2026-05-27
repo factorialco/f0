@@ -26,7 +26,7 @@ const items: F0AccordionItem[] = [
 ]
 
 const getTrigger = (label: string) =>
-  screen.getAllByRole("button", { name: /Expand item|Collapse item/ })[
+  screen.getAllByRole("button", { name: /^Expand |^Collapse / })[
     items.findIndex((i) => i.title === label)
   ]
 
@@ -41,7 +41,7 @@ describe("F0Accordion", () => {
   it("starts with all items collapsed by default", () => {
     render(<F0Accordion items={items} />)
     const triggers = screen.getAllByRole("button", {
-      name: /Expand item|Collapse item/,
+      name: /^Expand |^Collapse /,
     })
     triggers.forEach((trigger) =>
       expect(trigger).toHaveAttribute("aria-expanded", "false")
@@ -141,5 +141,36 @@ describe("F0Accordion", () => {
   it("renders the skeleton variant", () => {
     render(<F0Accordion.Skeleton items={3} />)
     expect(screen.getAllByTestId("skeleton").length).toBeGreaterThan(0)
+  })
+
+  it("renders a dropdown action and does not toggle the item when interacted with", async () => {
+    render(
+      <F0Accordion
+        items={[
+          {
+            id: "one",
+            title: "Item One",
+            description: "Description one",
+            actions: [
+              {
+                type: "dropdown",
+                ariaLabel: "More actions for Item One",
+                items: [{ label: "Edit", onClick: vi.fn() }],
+              },
+            ],
+          },
+        ]}
+      />
+    )
+    const accordionTrigger = screen.getByRole("button", {
+      name: "Expand Item One",
+    })
+    expect(accordionTrigger).toHaveAttribute("aria-expanded", "false")
+    const dropdownTrigger = screen.getByRole("button", {
+      name: "More actions for Item One",
+    })
+    await userEvent.click(dropdownTrigger)
+    expect(await screen.findByText("Edit")).toBeInTheDocument()
+    expect(accordionTrigger).toHaveAttribute("aria-expanded", "false")
   })
 })

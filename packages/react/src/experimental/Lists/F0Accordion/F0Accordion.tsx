@@ -19,7 +19,7 @@ export type {
 
 const F0AccordionBase = forwardRef<HTMLDivElement, F0AccordionProps>(
   (props, ref) => {
-    const { items, value, defaultValue, onValueChange } = props
+    const { items, value, defaultValue, onValueChange, ...rest } = props
 
     const computedDefault = useMemo(() => {
       if (defaultValue !== undefined) return defaultValue
@@ -44,6 +44,7 @@ const F0AccordionBase = forwardRef<HTMLDivElement, F0AccordionProps>(
     return (
       <div
         ref={ref}
+        {...rest}
         className={cn(
           "flex flex-col rounded-md border border-solid border-f1-border-secondary",
           "overflow-hidden bg-f1-background"

@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { F0Button } from "@/components/F0Button"
 import { ChevronDown, ChevronUp } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
+import { useI18n } from "@/lib/providers/i18n"
 import {
   Collapsible,
   CollapsibleContent,
@@ -25,7 +26,8 @@ export const AccordionItem = ({
   onOpenChange,
 }: AccordionItemProps) => {
   const shouldReduceMotion = useReducedMotion()
-  const triggerLabel = open ? "Collapse item" : "Expand item"
+  const i18n = useI18n()
+  const triggerLabel = `${open ? i18n.actions.collapse : i18n.actions.expand} ${item.title}`
 
   return (
     <Collapsible open={open} onOpenChange={onOpenChange} asChild>
