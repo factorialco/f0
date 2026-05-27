@@ -335,9 +335,6 @@ const _F0AmountCalculator = forwardRef<
 
 _F0AmountCalculator.displayName = "F0AmountCalculator"
 
-/**
- * @experimental This is an experimental component use it at your own risk
- */
 export const F0AmountCalculator = experimentalComponent(
   "F0AmountCalculator",
   _F0AmountCalculator
