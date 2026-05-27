@@ -18,10 +18,59 @@ interactions with records from a Data Collection. Use them to decide whether an
 interaction should stay in the current surface, open a dialog, guide the user
 through a wizard, or navigate to a dedicated page.
 
-The **Pattern decision table** below is the canonical reference. Later sections
-expand on individual operations, views, and edge cases.
+## CRUD by view
+
+Open a fullscreen scenario that shows create, read, update, and delete
+coexisting inside one view. Use these to validate how the four operations
+behave together in real product surfaces. Editable Table is a specialized
+Table mode for field-level updates; most Table rules still apply.
+
+<Unstyled>
+  <FeatureGrid
+    features={[
+      {
+        icon: Table,
+        title: "Table",
+        description:
+          "Dense, structured data with comparable columns. Best when users scan rows, sort, filter, and act on many records at once.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--table",
+      },
+      {
+        icon: List,
+        title: "List",
+        description:
+          "Linear records with a short teaser per item. Best when each row needs more than a cell can carry but still belongs in a flat sequence.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--list",
+      },
+      {
+        icon: CardPin,
+        title: "Card",
+        description:
+          "Resources that read as a whole — the card itself represents the record. Best for visual or summary-driven content where each item invites a click.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--card",
+      },
+      {
+        icon: Kanban,
+        title: "Kanban",
+        description:
+          "Records that move through workflow states. Best when state transitions matter and users update progress by dragging across lanes.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--kanban",
+      },
+      {
+        icon: Pencil,
+        title: "Editable Table",
+        description:
+          "Field-level updates that should happen in place. Best for spreadsheet-like flows where opening a form for every edit would slow users down.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--editable-table",
+      },
+    ]}
+  />
+</Unstyled>
 
 ## Pattern decision table
+
+The Pattern decision table below is the canonical reference. Later sections
+expand on individual operations, views, and edge cases.
 
 <Unstyled>
   <table className="mb-4 w-full dark:text-f1-foreground-inverse/80">
@@ -156,55 +205,6 @@ drag) live on each view's own documentation page.
       </figcaption>
     </figure>
   </div>
-</Unstyled>
-
-## CRUD by view
-
-Open a fullscreen scenario that shows create, read, update, and delete
-coexisting inside one view. Use these to validate how the four operations
-behave together in real product surfaces. Editable Table is a specialized
-Table mode for field-level updates; most Table rules still apply.
-
-<Unstyled>
-  <FeatureGrid
-    features={[
-      {
-        icon: Table,
-        title: "Table",
-        description:
-          "Dense, structured data with comparable columns. Best when users scan rows, sort, filter, and act on many records at once.",
-        href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--table",
-      },
-      {
-        icon: List,
-        title: "List",
-        description:
-          "Linear records with a short teaser per item. Best when each row needs more than a cell can carry but still belongs in a flat sequence.",
-        href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--list",
-      },
-      {
-        icon: CardPin,
-        title: "Card",
-        description:
-          "Resources that read as a whole — the card itself represents the record. Best for visual or summary-driven content where each item invites a click.",
-        href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--card",
-      },
-      {
-        icon: Kanban,
-        title: "Kanban",
-        description:
-          "Records that move through workflow states. Best when state transitions matter and users update progress by dragging across lanes.",
-        href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--kanban",
-      },
-      {
-        icon: Pencil,
-        title: "Editable Table",
-        description:
-          "Field-level updates that should happen in place. Best for spreadsheet-like flows where opening a form for every edit would slow users down.",
-        href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--editable-table",
-      },
-    ]}
-  />
 </Unstyled>
 
 ## Operation scenarios
