@@ -28,7 +28,6 @@ export * from "./Forms/exports"
 export * from "./Information/exports"
 export * from "./Lists/DetailsItem"
 export * from "./Lists/DetailsItemsList"
-export * from "./Lists/F0Accordion"
 export * from "./Lists/OnePersonListItem"
 export * from "./Navigation/exports"
 /**
