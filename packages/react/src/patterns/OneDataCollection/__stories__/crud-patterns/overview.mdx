@@ -341,7 +341,7 @@ to a page when the resource needs a durable destination.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-dialog"
           >
-            Default
+            Table Read — Default
           </a>
         </td>
         <td>Clicking an item opens the Default Dialog.</td>
@@ -352,7 +352,7 @@ to a page when the resource needs a durable destination.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-right-dialog-to-page"
           >
-            Dialog to Page
+            Table Read — Dialog to Page
           </a>
         </td>
         <td>
@@ -433,7 +433,7 @@ field-level changes.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-update--table-update-dialog"
           >
-            Default
+            Table Update — Default
           </a>
         </td>
         <td>
@@ -681,6 +681,17 @@ How each view applies the Pattern decision table by default.
   dont={{
     description:
       "Do not treat Right Dialog read flows as previews by default when the resource can be fully understood inside a dialog.",
+  }}
+/>
+
+<DoDonts
+  do={{
+    description:
+      "Use one of the existing views — Table, List, Card, Kanban, or Editable Table — for any new Data Collection surface.",
+  }}
+  dont={{
+    description:
+      "Do not introduce a new type of view. The view catalog is closed; new visualizations must go through the Foundations team.",
   }}
 />
 
