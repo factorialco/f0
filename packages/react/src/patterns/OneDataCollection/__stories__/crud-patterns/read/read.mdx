@@ -17,12 +17,12 @@ layout.
 
 ## When to use
 
-- Use a default dialog for quick inspection and lightweight details.
-- Use a right dialog to page flow when the resource starts with a reduced view
+- Use a Default Dialog for quick inspection and lightweight details.
+- Use a Dialog to Page flow when the resource starts with a reduced view
   but may expand into a full destination.
-- Use a table to page flow when dense tabular scanning still needs a dedicated
+- Use a Table to Page flow when dense tabular scanning still needs a dedicated
   destination for deeper reading.
-- Use a list to page flow when list-style browsing should open a dedicated
+- Use a List to Page flow when list-style browsing should open a dedicated
   destination with more structure and actions.
 - Use card click to dialog/page for Card views. **Recommended** because the card
   is already an object-level surface.
@@ -48,8 +48,11 @@ layout.
     <tbody>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-dialog">
-            Default dialog
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-dialog"
+          >
+            Default Dialog
           </a>
         </td>
         <td>
@@ -59,8 +62,11 @@ layout.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-right-dialog-to-page">
-            Right dialog to page
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-right-dialog-to-page"
+          >
+            Dialog to Page
           </a>
         </td>
         <td>
@@ -73,7 +79,10 @@ layout.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-page">
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-page"
+          >
             Table to Page
           </a>
         </td>
@@ -85,7 +94,10 @@ layout.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--list-read-page">
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--list-read-page"
+          >
             List to Page
           </a>
         </td>
@@ -100,8 +112,11 @@ layout.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--card-read-dialog">
-            Card to dialog
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--card-read-dialog"
+          >
+            Card to Dialog
           </a>
         </td>
         <td>
@@ -115,8 +130,11 @@ layout.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-read--kanban-read-dialog">
-            Kanban card to dialog
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--kanban-read-dialog"
+          >
+            Kanban Card to Dialog
           </a>
         </td>
         <td>
@@ -142,14 +160,14 @@ layout.
     <tbody>
       <tr>
         <td>Does the user only need a fast inspection flow?</td>
-        <td>Default dialog</td>
+        <td>Default Dialog</td>
       </tr>
       <tr>
         <td>
           Does the user need a quick preview before deciding to open the full
           page?
         </td>
-        <td>Right dialog to page</td>
+        <td>Dialog to Page</td>
       </tr>
       <tr>
         <td>Does the resource need breadcrumbs, tabs, or a page header?</td>
@@ -163,11 +181,11 @@ layout.
         <td>
           Should the user remain anchored to the collection while reading?
         </td>
-        <td>Default dialog</td>
+        <td>Default Dialog</td>
       </tr>
       <tr>
         <td>Is the current visualization Card or Kanban?</td>
-        <td>Card/Kanban card to dialog, or to page for deep resources</td>
+        <td>Card/Kanban Card to Dialog, or to page for deep resources</td>
       </tr>
       <tr>
         <td>Is the current visualization Editable Table?</td>
@@ -179,29 +197,29 @@ layout.
 
 ## Guidance
 
-The default dialog is the baseline read pattern because it keeps the interaction
+The Default Dialog is the baseline read pattern because it keeps the interaction
 close to the collection and supports fast inspection. It is the right starting
 point until the resource becomes large enough to need its own information
 architecture.
 
-Use a right dialog to page flow when the first step should stay anchored to the
+Use a Dialog to Page flow when the first step should stay anchored to the
 collection, but the resource still deserves a full page for deeper reading,
-follow-up actions, or page-level navigation. The right dialog should be a
+follow-up actions, or page-level navigation. The Right Dialog should be a
 reduced view, not a compressed version of the full page.
 
-This dialog-to-page behavior is portable. Any compatible default dialog or
+This dialog-to-page behavior is portable. Any compatible Default Dialog or
 right-position read dialog can expose **Open Details** as the primary action when
 the dialog is intentionally a reduced preview and the resource has a durable
 full-page destination. Do not duplicate this copy in every story; use it as the
 decision logic for Table, List, Card, or Kanban when the resource needs deeper
 page structure.
 
-Move to a table to page or list to page pattern when the resource is no longer
+Move to a Table to Page or List to Page pattern when the resource is no longer
 just a quick read target. If the resource has sub-navigation, multiple action
 groups, or content that competes for vertical space, a page is more predictable
 than stretching a dialog beyond its intended scope.
 
-Choose table to page when people start from dense, comparison-oriented rows and
+Choose Table to Page when people start from dense, comparison-oriented rows and
 need a direct chevron action that routes into a full destination. Choose list
 to page when the collection already uses list teasers and the browsing model is
 closer to scanning summaries than comparing columns.
@@ -222,7 +240,7 @@ action for read when both behaviors must coexist.
 <DoDonts
   do={{
     description:
-      "Use a default dialog as the first option for straightforward read flows that keep the user near the collection.",
+      "Use a Default Dialog as the first option for straightforward read flows that keep the user near the collection.",
   }}
   dont={{
     description:
@@ -233,11 +251,11 @@ action for read when both behaviors must coexist.
 <DoDonts
   do={{
     description:
-      "Use a right dialog to page flow when a lightweight preview helps users decide whether they need the full resource destination.",
+      "Use a Dialog to Page flow when a lightweight preview helps users decide whether they need the full resource destination.",
   }}
   dont={{
     description:
-      "Do not duplicate the entire page inside the right dialog. Keep the first step intentionally reduced.",
+      "Do not duplicate the entire page inside the Right Dialog. Keep the first step intentionally reduced.",
   }}
 />
 
@@ -254,11 +272,51 @@ action for read when both behaviors must coexist.
 
 ## Related stories
 
-- [Default dialog](/?path=/story/patterns-data-collection-crud-patterns-read--table-read-dialog)
-- [Right dialog to page](/?path=/story/patterns-data-collection-crud-patterns-read--table-read-right-dialog-to-page)
-- [Table to Page](/?path=/story/patterns-data-collection-crud-patterns-read--table-read-page)
-- [List to Page](/?path=/story/patterns-data-collection-crud-patterns-read--list-read-page)
-- [Card to dialog](/?path=/story/patterns-data-collection-crud-patterns-read--card-read-dialog)
-- [Kanban card to dialog](/?path=/story/patterns-data-collection-crud-patterns-read--kanban-read-dialog)
-- [CRUD patterns overview](/?path=/docs/patterns-data-collection-crud-patterns-overview--documentation)
-- [Agnostic: Read principles](/?path=/docs/experimental-crud-patterns-read--documentation)
+- <a
+    target="_parent"
+    href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-dialog"
+  >
+    Default Dialog
+  </a>
+- <a
+    target="_parent"
+    href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-right-dialog-to-page"
+  >
+    Dialog to Page
+  </a>
+- <a
+    target="_parent"
+    href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-page"
+  >
+    Table to Page
+  </a>
+- <a
+    target="_parent"
+    href="/?path=/story/patterns-data-collection-crud-patterns-read--list-read-page"
+  >
+    List to Page
+  </a>
+- <a
+    target="_parent"
+    href="/?path=/story/patterns-data-collection-crud-patterns-read--card-read-dialog"
+  >
+    Card to Dialog
+  </a>
+- <a
+    target="_parent"
+    href="/?path=/story/patterns-data-collection-crud-patterns-read--kanban-read-dialog"
+  >
+    Kanban Card to Dialog
+  </a>
+- <a
+    target="_parent"
+    href="/?path=/docs/patterns-data-collection-crud-patterns-overview--documentation"
+  >
+    CRUD patterns overview
+  </a>
+- <a
+    target="_parent"
+    href="/?path=/docs/experimental-crud-patterns-read--documentation"
+  >
+    Agnostic: Read principles
+  </a>

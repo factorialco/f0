@@ -444,7 +444,6 @@ export const TableCollection = <
                         key="actions"
                         width="fit"
                         sticky={{ right: 0 }}
-                        className="border-0 border-l-[1px] border-solid border-f1-border-secondary"
                       >
                         <span className="sr-only">
                           {i18n.collections.actions.actions}
@@ -521,7 +520,7 @@ export const TableCollection = <
                           headerGroups && "[&>div:first-child]:hidden",
                           isLastInGroup && groupBorderClass,
                           fromVisualization === "editableTable" &&
-                            index !== columns.length - 1 &&
+                            (index !== columns.length - 1 || showItemActions) &&
                             "border-0 border-r-[1px] border-solid border-f1-border-secondary"
                         ) || undefined
                       }
@@ -540,12 +539,7 @@ export const TableCollection = <
                 })}
                 {showItemActions &&
                   (isEditableTable ? (
-                    <TableHead
-                      key="actions"
-                      width="fit"
-                      sticky={{ right: 0 }}
-                      className="border-0 border-l-[1px] border-solid border-f1-border-secondary"
-                    >
+                    <TableHead key="actions" width="fit" sticky={{ right: 0 }}>
                       <span className="sr-only">
                         {i18n.collections.actions.actions}
                       </span>
@@ -826,6 +820,12 @@ export const TableCollection = <
                           firstCell={cellIndex === 0}
                           width={column.width}
                           sticky={getStickyPosition(cellIndex)}
+                          className={cn(
+                            isEditableTable &&
+                              (cellIndex !== columns.length - 1 ||
+                                showItemActions) &&
+                              "border-0 border-r-[1px] border-solid border-f1-border-secondary"
+                          )}
                         >
                           {cellIndex === 0 &&
                           !source.selectable &&
@@ -887,7 +887,6 @@ export const TableCollection = <
                           <TableCell
                             key="summary-actions"
                             sticky={{ right: 0 }}
-                            className="border-0 border-l-[1px] border-solid border-f1-border-secondary"
                           >
                             {""}
                           </TableCell>

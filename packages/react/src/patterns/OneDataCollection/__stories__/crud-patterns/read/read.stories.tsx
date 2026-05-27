@@ -277,9 +277,9 @@ function RightDialogToPageScenario() {
           setSelectedResource(null)
         }}
         title="Resource details"
-        description="Open a reduced view in a right dialog, then continue to the full page when deeper exploration is needed."
+        description="Open a reduced view in a Right Dialog, then continue to the full page when deeper exploration is needed."
         position="right"
-        width="md"
+        width="sm"
         disableContentPadding
         primaryAction={{
           label: "Open Details",
