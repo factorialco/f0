@@ -3,5 +3,6 @@
 /packages/react/src/experimental/
 /packages/react/src/kits/
 /packages/react/src/ai/ @factorialco/platform-ai-building-blocks
+/packages/react/src/sds/ai/ @factorialco/platform-ai-building-blocks
 /packages/react/src/sds/UpsellingKit/ @factorialco/product-growth
 /packages/react/src/sds/UpsellingKit/ai/ @factorialco/product-growth @factorialco/platform-ai-building-blocks
