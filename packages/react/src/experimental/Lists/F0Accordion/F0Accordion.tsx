@@ -1,13 +1,26 @@
 import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import { Fragment, forwardRef, useMemo } from "react"
 
+import { withDataTestId } from "@/lib/data-testid"
+import { withSkeleton } from "@/lib/skeleton"
 import { cn } from "@/lib/utils"
 
 import { AccordionItem } from "./components/AccordionItem"
+import { F0AccordionSkeleton } from "./F0AccordionSkeleton"
 import { F0AccordionProps } from "./types"
 
-export const F0Accordion = forwardRef<HTMLDivElement, F0AccordionProps>(
-  ({ items, value, defaultValue, onValueChange }, ref) => {
+export type {
+  F0AccordionItem,
+  F0AccordionItemAction,
+  F0AccordionItemDropdownAction,
+  F0AccordionItemSegmentedControlAction,
+  F0AccordionProps,
+} from "./types"
+
+const F0AccordionBase = forwardRef<HTMLDivElement, F0AccordionProps>(
+  (props, ref) => {
+    const { items, value, defaultValue, onValueChange } = props
+
     const computedDefault = useMemo(() => {
       if (defaultValue !== undefined) return defaultValue
       return items.filter((item) => item.defaultOpen).map((item) => item.id)
@@ -55,4 +68,11 @@ export const F0Accordion = forwardRef<HTMLDivElement, F0AccordionProps>(
   }
 )
 
-F0Accordion.displayName = "F0Accordion"
+F0AccordionBase.displayName = "F0Accordion"
+
+/**
+ * @experimental This is an experimental component, use it at your own risk.
+ */
+export const F0Accordion = withDataTestId(
+  withSkeleton(F0AccordionBase, F0AccordionSkeleton)
+)

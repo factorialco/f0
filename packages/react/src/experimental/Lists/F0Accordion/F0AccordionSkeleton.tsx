@@ -1,7 +1,7 @@
 import { Skeleton } from "@/ui/skeleton"
 import { cn } from "@/lib/utils"
 
-interface F0AccordionSkeletonProps {
+export interface F0AccordionSkeletonProps {
   items?: number
 }
 
