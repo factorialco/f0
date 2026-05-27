@@ -36,10 +36,6 @@
   }
 }
 
-.globe-spin-enter {
-  animation: globe-spin-enter 0.5s cubic-bezier(0.33, 1, 0.68, 1) both;
-}
-
 /* Subtle "thinking" breath. Plays after the entrance finishes (0.5s delay)
    and loops forever. Amplitude is small (~3.5%) so it reads as life, not noise. */
 @keyframes globe-spin-breathe {
@@ -52,12 +48,18 @@
   }
 }
 
-.globe-spin-breathe {
-  animation: globe-spin-breathe 3.6s ease-in-out 0.5s infinite;
+/* Both animations live in one class because the `animation` shorthand resets
+   all `animation-*` properties: applying `.globe-spin-enter` and
+   `.globe-spin-breathe` separately would have the second one wipe out the
+   first. Comma-separated values let both run on the same element. */
+.globe-spin-anim {
+  animation:
+    globe-spin-enter 0.5s cubic-bezier(0.33, 1, 0.68, 1) both,
+    globe-spin-breathe 3.6s ease-in-out 0.5s infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .globe-spin-breathe {
+  .globe-spin-anim {
     animation: none;
   }
 }

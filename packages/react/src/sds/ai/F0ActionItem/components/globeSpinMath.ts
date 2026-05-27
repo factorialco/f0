@@ -131,10 +131,14 @@ function colorFor(t: number): string {
   return COLOR_LUT[i]
 }
 
+// Hoist the sorted size list out of the hot path. `getLatFactor` runs once
+// per frame; computing this on every call was a small but avoidable cost.
+const LAT_FACTOR_SIZES = Object.keys(LAT_FACTORS)
+  .map(Number)
+  .sort((a, b) => a - b)
+
 function getLatFactor(size: number): number {
-  const sizes = Object.keys(LAT_FACTORS)
-    .map(Number)
-    .sort((a, b) => a - b)
+  const sizes = LAT_FACTOR_SIZES
   if (size <= sizes[0]) return LAT_FACTORS[sizes[0]]
   if (size >= sizes[sizes.length - 1])
     return LAT_FACTORS[sizes[sizes.length - 1]]

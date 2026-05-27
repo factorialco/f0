@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, type KeyboardEvent } from "react"
+
+import { cn } from "@/lib/utils"
 
 const CHAR_IN_MS = 35
 const CHAR_OUT_MS = 22
@@ -8,7 +10,7 @@ const END_DELAY_MS = 220
 
 type Phase = "starting" | "writing" | "holding" | "erasing"
 
-export type WelcomeScreenProps = {
+export interface WelcomeScreenProps {
   /** One or more phrases. With more than one, they rotate in an infinite loop. */
   messages: string[]
   /**
@@ -24,6 +26,17 @@ export const WelcomeScreen = ({ messages, onClick }: WelcomeScreenProps) => {
   const [chars, setChars] = useState(0)
   const [phase, setPhase] = useState<Phase>("starting")
   const current = messages[index] ?? ""
+
+  // Recover from external mutations of `messages` (e.g. host swapping in a
+  // shorter array). Without this, an out-of-range `index` would render a
+  // blank phrase for one full cycle and `(i + 1) % 0` would yield NaN.
+  useEffect(() => {
+    if (messages.length > 0 && index >= messages.length) {
+      setIndex(0)
+      setChars(0)
+      setPhase("starting")
+    }
+  }, [messages.length, index])
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined
@@ -55,12 +68,9 @@ export const WelcomeScreen = ({ messages, onClick }: WelcomeScreenProps) => {
     }
   }, [phase, chars, current.length, messages.length])
 
-  // Pulse arrives just after the full phrase becomes visible.
-  const pulseDelay = (START_DELAY_MS + current.length * CHAR_IN_MS) / 1000
-
   const interactive = !!onClick
   const handleKeyDown = interactive
-    ? (e: React.KeyboardEvent<HTMLParagraphElement>) => {
+    ? (e: KeyboardEvent<HTMLParagraphElement>) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault()
           onClick?.()
@@ -76,13 +86,16 @@ export const WelcomeScreen = ({ messages, onClick }: WelcomeScreenProps) => {
         tabIndex={interactive ? 0 : undefined}
         onClick={onClick}
         onKeyDown={handleKeyDown}
-        className={
-          "bg-gradient-to-r from-[#E55619] to-[#A1ADE5] bg-clip-text text-center text-2xl font-semibold leading-[28px] text-transparent" +
-          (interactive
-            ? " cursor-pointer transition-transform duration-200 hover:scale-[1.02] focus-visible:scale-[1.02] focus-visible:outline-none motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:focus-visible:scale-100"
-            : "")
-        }
-        style={{ animationDelay: `${pulseDelay}s`, minHeight: 28 }}
+        className={cn(
+          "bg-gradient-to-r from-[#E55619] to-[#A1ADE5] bg-clip-text text-center text-2xl font-semibold leading-[28px] text-transparent",
+          interactive &&
+            cn(
+              "cursor-pointer transition-transform duration-200",
+              "hover:scale-[1.02] focus-visible:scale-[1.02]",
+              "motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:focus-visible:scale-100"
+            )
+        )}
+        style={{ minHeight: 28 }}
         aria-label={current}
       >
         {current.slice(0, chars)}

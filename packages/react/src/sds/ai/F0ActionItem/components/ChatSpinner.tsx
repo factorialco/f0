@@ -15,7 +15,7 @@ import {
   SPIN_MS,
 } from "./globeSpinMath"
 
-type ChatSpinnerProps = {
+export interface ChatSpinnerProps {
   size?: number
   className?: string
   style?: CSSProperties
@@ -177,7 +177,7 @@ const ChatSpinnerComponent = (
       ref={setRefs}
       role="progressbar"
       aria-label="Loading"
-      className={cn("shrink-0 globe-spin-enter globe-spin-breathe", className)}
+      className={cn("shrink-0 globe-spin-anim", className)}
       style={{ width: size, height: size, ...style }}
     >
       <svg
@@ -200,3 +200,4 @@ const ChatSpinnerComponent = (
 export const ChatSpinner = forwardRef<HTMLDivElement, ChatSpinnerProps>(
   ChatSpinnerComponent
 )
+ChatSpinner.displayName = "ChatSpinner"

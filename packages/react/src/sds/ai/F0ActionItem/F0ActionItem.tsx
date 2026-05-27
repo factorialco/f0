@@ -23,10 +23,10 @@ export const F0ActionItem = ({ title, status, inGroup }: F0ActionItemProps) => {
     ease: [0.33, 1, 0.68, 1] as const,
   }
 
-  const inProgress = !!(status == "inProgress")
-  const executing = !!(status == "executing")
-  const completed = !!(status == "completed")
-  const writing = !!(status == "writing")
+  const inProgress = status === "inProgress"
+  const executing = status === "executing"
+  const completed = status === "completed"
+  const writing = status === "writing"
 
   return (
     <div className="flex w-full items-start gap-1 text-f1-foreground-secondary">
