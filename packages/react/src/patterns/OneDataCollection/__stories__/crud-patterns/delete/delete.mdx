@@ -12,8 +12,8 @@ step must make the scope and consequence explicit before the user commits.
 
 ## When to use
 
-- Use a confirmation dialog for single destructive actions.
-- Use a scoped confirmation dialog for bulk destructive actions.
+- Use a Confirmation Dialog for single destructive actions.
+- Use a scoped Confirmation Dialog for bulk destructive actions.
 - Keep delete available as an explicit item or bulk action in every
   visualization. **Recommended** placement changes by view, but confirmation
   rules do not.
@@ -41,7 +41,7 @@ step must make the scope and consequence explicit before the user commits.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-delete--table-delete-single"
           >
-            Table single delete
+            Table Single Delete
           </a>
         </td>
         <td>Deleting one resource from row-level actions.</td>
@@ -53,7 +53,7 @@ step must make the scope and consequence explicit before the user commits.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-delete--table-delete-bulk"
           >
-            Table bulk delete
+            Table Bulk Delete
           </a>
         </td>
         <td>Deleting a selected set of resources from bulk actions.</td>
@@ -65,7 +65,7 @@ step must make the scope and consequence explicit before the user commits.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-delete--card-delete"
           >
-            Card delete
+            Card Delete
           </a>
         </td>
         <td>Deleting one resource from the Card ellipsis.</td>
@@ -77,7 +77,7 @@ step must make the scope and consequence explicit before the user commits.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-delete--kanban-delete-bulk"
           >
-            Kanban bulk delete
+            Kanban Bulk Delete
           </a>
         </td>
         <td>Deleting selected Kanban cards from bulk actions.</td>
@@ -89,7 +89,7 @@ step must make the scope and consequence explicit before the user commits.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-delete--editable-table-delete-row-action"
           >
-            Editable Table delete
+            Editable Table Delete
           </a>
         </td>
         <td>Deleting one resource from the row actions dropdown.</td>
@@ -116,7 +116,7 @@ step must make the scope and consequence explicit before the user commits.
       </tr>
       <tr>
         <td>Is the user acting on a selection or bulk state?</td>
-        <td>Bulk delete confirmation</td>
+        <td>Bulk Delete confirmation</td>
       </tr>
       <tr>
         <td>Can the resource be restored later?</td>
@@ -124,12 +124,12 @@ step must make the scope and consequence explicit before the user commits.
       </tr>
       <tr>
         <td>Is the action destructive enough to need explicit confirmation?</td>
-        <td>Use a confirmation dialog before executing the action</td>
+        <td>Use a Confirmation Dialog before executing the action</td>
       </tr>
       <tr>
         <td>Are selected Kanban cards being deleted together?</td>
         <td>
-          Use Kanban bulk delete confirmation when selected scope is visible
+          Use Kanban Bulk Delete confirmation when selected scope is visible
         </td>
       </tr>
       <tr>
@@ -164,7 +164,7 @@ affordance.
 In Card views, use the ellipsis because card click is a read affordance. Keep
 delete in the ellipsis in both the card and the opened dialog, so the destructive
 action stays consistent and separate from read. In Kanban views, use
-selected-card bulk delete for destructive actions across multiple cards. Per-card
+selected-card Bulk Delete for destructive actions across multiple cards. Per-card
 destructive actions may also be added via the card ellipsis, mirroring the Card
 view rule so delete stays in the ellipsis. Moving cards updates state, never
 destroys data. In Editable Table, use the row actions dropdown and keep
@@ -200,31 +200,31 @@ delete separate from editable cell interactions.
     target="_parent"
     href="/?path=/story/patterns-data-collection-crud-patterns-delete--table-delete-single"
   >
-    Table single delete
+    Table Single Delete
   </a>
 - <a
     target="_parent"
     href="/?path=/story/patterns-data-collection-crud-patterns-delete--table-delete-bulk"
   >
-    Table bulk delete
+    Table Bulk Delete
   </a>
 - <a
     target="_parent"
     href="/?path=/story/patterns-data-collection-crud-patterns-delete--card-delete"
   >
-    Card delete
+    Card Delete
   </a>
 - <a
     target="_parent"
     href="/?path=/story/patterns-data-collection-crud-patterns-delete--editable-table-delete-row-action"
   >
-    Editable Table delete
+    Editable Table Delete
   </a>
 - <a
     target="_parent"
     href="/?path=/story/patterns-data-collection-crud-patterns-delete--kanban-delete-bulk"
   >
-    Kanban bulk delete
+    Kanban Bulk Delete
   </a>
 - <a
     target="_parent"
