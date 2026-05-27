@@ -1,4 +1,4 @@
-import type { Plugin } from "vite"
+import type { Plugin } from "vite";
 
 /**
  * Allowlist resolver for prototype files. Hard-constrains imports under
@@ -24,28 +24,30 @@ const ALLOWED_BARE = new Set([
   // Zod is the schema language used by F0Form (`f0FormField` wraps a Zod
   // schema). Prototypes that build co-created forms need it directly.
   "zod",
-])
+  // ReactFlow for interactive node/edge diagrams (decision trees, workflows).
+  "@xyflow/react",
+]);
 
 export function allowlistPlugin(): Plugin {
   return {
     name: "f0compose:allowlist",
     enforce: "pre",
     resolveId(source, importer) {
-      if (!importer) return null
+      if (!importer) return null;
       // Only police prototype files.
-      if (!importer.includes("/src/prototypes/")) return null
+      if (!importer.includes("/src/prototypes/")) return null;
       // Vite/HMR internals.
-      if (source.startsWith("/@") || source.startsWith("\0")) return null
+      if (source.startsWith("/@") || source.startsWith("\0")) return null;
       // Relative + absolute paths within the project.
-      if (source.startsWith(".") || source.startsWith("/")) return null
+      if (source.startsWith(".") || source.startsWith("/")) return null;
       // The @/ alias is allowed (e.g., @/fixtures, @/lib, @/shell).
       // We allow ALL @/ subpaths because Vite's alias is internal to the
       // app; the static check is more granular.
-      if (source.startsWith("@/")) return null
+      if (source.startsWith("@/")) return null;
       // Anything in the bare allowlist or its sub-paths (e.g., f0-react/icons/app).
-      if (ALLOWED_BARE.has(source)) return null
+      if (ALLOWED_BARE.has(source)) return null;
       for (const allowed of ALLOWED_BARE) {
-        if (source.startsWith(allowed + "/")) return null
+        if (source.startsWith(allowed + "/")) return null;
       }
       throw new Error(
         `[f0compose] Blocked import: "${source}" in ${importer}.\n` +
@@ -54,8 +56,8 @@ export function allowlistPlugin(): Plugin {
           `    - @/fixtures, @/lib, @/prototypes (path alias)\n` +
           `    - relative paths\n` +
           `  Use the equivalent f0 component instead. ` +
-          `Read packages/f0compose/generated/registry.json for what's available.`
-      )
+          `Read packages/f0compose/generated/registry.json for what's available.`,
+      );
     },
-  }
+  };
 }
