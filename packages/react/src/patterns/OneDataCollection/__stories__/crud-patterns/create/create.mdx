@@ -1,5 +1,7 @@
 import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { FeatureGrid } from "~/docs/components/FeatureGrid"
+import { Table, List, Kanban, Pencil, Add } from "@/icons/app"
 
 import * as Stories from "./create.stories"
 
@@ -11,6 +13,62 @@ Create is the entry point for adding a new resource from a Data Collection. The
 collection toolbar should expose the action, and the chosen container should
 match the amount of guidance, structure, and time the user needs to complete
 the task.
+
+## Examples
+
+<Unstyled>
+  <FeatureGrid
+    features={[
+      {
+        icon: Table,
+        title: "Table — Default",
+        description:
+          "Collection primary action triggers a default create dialog.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-create--table-create-dialog",
+      },
+      {
+        icon: Table,
+        title: "Table — Right Dialog",
+        description:
+          "Collection primary action opens a Right Dialog to keep the collection visible while creating.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-create--table-create-right-dialog",
+      },
+      {
+        icon: List,
+        title: "List — Default",
+        description: "List primary action triggers a default create dialog.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-create--list-create-dialog",
+      },
+      {
+        icon: List,
+        title: "List — Right Dialog",
+        description:
+          "List primary action opens a Right Dialog to keep the list visible while creating.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-create--list-create-right-dialog",
+      },
+      {
+        icon: Add,
+        title: "Wizard Dialog",
+        description: "Collection primary action triggers a Wizard Dialog.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-create--create-wizard-dialog",
+      },
+      {
+        icon: Kanban,
+        title: "Kanban Lane",
+        description:
+          "Lane create action creates a resource already scoped to the selected workflow state.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-create--kanban-create-lane",
+      },
+      {
+        icon: Pencil,
+        title: "Editable Table Add Row",
+        description:
+          "Inline add-row action creates a lightweight row directly in the table.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-create--editable-table-create-row",
+      },
+    ]}
+  />
+</Unstyled>
 
 ## When to use
 
@@ -203,38 +261,8 @@ can be created with defaults and refined inline.
   }}
 />
 
-## Related stories
+## Related documentation
 
-- <a
-    target="_parent"
-    href="/?path=/story/patterns-data-collection-crud-patterns-create--table-create-dialog"
-  >
-    Default Dialog
-  </a>
-- <a
-    target="_parent"
-    href="/?path=/story/patterns-data-collection-crud-patterns-create--table-create-right-dialog"
-  >
-    Right Dialog
-  </a>
-- <a
-    target="_parent"
-    href="/?path=/story/patterns-data-collection-crud-patterns-create--create-wizard-dialog"
-  >
-    Wizard Dialog
-  </a>
-- <a
-    target="_parent"
-    href="/?path=/story/patterns-data-collection-crud-patterns-create--kanban-create-lane"
-  >
-    Kanban Lane Create
-  </a>
-- <a
-    target="_parent"
-    href="/?path=/story/patterns-data-collection-crud-patterns-create--editable-table-create-row"
-  >
-    Editable Table Add Row
-  </a>
 - <a
     target="_parent"
     href="/?path=/docs/patterns-data-collection-crud-patterns-overview--documentation"

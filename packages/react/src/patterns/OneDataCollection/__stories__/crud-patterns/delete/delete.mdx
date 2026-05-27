@@ -1,5 +1,7 @@
 import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { FeatureGrid } from "~/docs/components/FeatureGrid"
+import { Table, CardPin, Kanban, Pencil } from "@/icons/app"
 
 import * as Stories from "./delete.stories"
 
@@ -9,6 +11,48 @@ import * as Stories from "./delete.stories"
 
 Delete patterns cover destructive actions in a Data Collection. The confirmation
 step must make the scope and consequence explicit before the user commits.
+
+## Examples
+
+<Unstyled>
+  <FeatureGrid
+    features={[
+      {
+        icon: Table,
+        title: "Table Single",
+        description: "Item delete action triggers a Confirmation Dialog.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-delete--table-delete-single",
+      },
+      {
+        icon: Table,
+        title: "Table Bulk",
+        description:
+          "Selection and bulk action trigger a scoped Confirmation Dialog.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-delete--table-delete-bulk",
+      },
+      {
+        icon: CardPin,
+        title: "Card",
+        description: "Card item action triggers a Confirmation Dialog.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-delete--card-delete",
+      },
+      {
+        icon: Kanban,
+        title: "Kanban Bulk",
+        description:
+          "Selected Kanban cards use a scoped destructive Confirmation Dialog.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-delete--kanban-delete-bulk",
+      },
+      {
+        icon: Pencil,
+        title: "Editable Table",
+        description:
+          "Editable Table row dropdown action triggers a Confirmation Dialog.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-delete--editable-table-delete-row-action",
+      },
+    ]}
+  />
+</Unstyled>
 
 ## When to use
 
@@ -194,38 +238,8 @@ delete separate from editable cell interactions.
   }}
 />
 
-## Related stories
+## Related documentation
 
-- <a
-    target="_parent"
-    href="/?path=/story/patterns-data-collection-crud-patterns-delete--table-delete-single"
-  >
-    Table Single Delete
-  </a>
-- <a
-    target="_parent"
-    href="/?path=/story/patterns-data-collection-crud-patterns-delete--table-delete-bulk"
-  >
-    Table Bulk Delete
-  </a>
-- <a
-    target="_parent"
-    href="/?path=/story/patterns-data-collection-crud-patterns-delete--card-delete"
-  >
-    Card Delete
-  </a>
-- <a
-    target="_parent"
-    href="/?path=/story/patterns-data-collection-crud-patterns-delete--editable-table-delete-row-action"
-  >
-    Editable Table Delete
-  </a>
-- <a
-    target="_parent"
-    href="/?path=/story/patterns-data-collection-crud-patterns-delete--kanban-delete-bulk"
-  >
-    Kanban Bulk Delete
-  </a>
 - <a
     target="_parent"
     href="/?path=/docs/patterns-data-collection-crud-patterns-overview--documentation"

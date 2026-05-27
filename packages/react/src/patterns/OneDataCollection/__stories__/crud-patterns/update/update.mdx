@@ -1,5 +1,7 @@
 import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { FeatureGrid } from "~/docs/components/FeatureGrid"
+import { Table, List, CardPin, Kanban, Pencil } from "@/icons/app"
 
 import * as Stories from "./update.stories"
 
@@ -10,6 +12,63 @@ import * as Stories from "./update.stories"
 Update patterns define how a user updates an existing resource from a Data
 Collection. The update flow should usually mirror create so users do not need to
 relearn the form, field order, or terminology when updating the same data.
+
+## Examples
+
+<Unstyled>
+  <FeatureGrid
+    features={[
+      {
+        icon: Table,
+        title: "Table — Default",
+        description:
+          "Reuse the same form structure as create whenever possible.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-update--table-update-dialog",
+      },
+      {
+        icon: Table,
+        title: "Table — Right Dialog",
+        description: "Table variation uses a Right Dialog for editing.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-update--table-update-right-dialog",
+      },
+      {
+        icon: List,
+        title: "List — Right Dialog",
+        description:
+          "List variation keeps the collection visible while editing from the current selection.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-update--list-update-right-dialog",
+      },
+      {
+        icon: Table,
+        title: "Table Bulk",
+        description:
+          "Multi-selection plus a bulk action apply one update flow to the current selection.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-update--table-bulk-update",
+      },
+      {
+        icon: CardPin,
+        title: "Card Actions",
+        description:
+          "Card edit is available from a card item action (ellipsis menu) and from inside the read dialog.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-update--card-update-from-read-dialog",
+      },
+      {
+        icon: Kanban,
+        title: "Kanban Bulk",
+        description:
+          "Selected Kanban cards use the bulk action bar when scope is explicit.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-update--kanban-bulk-update",
+      },
+      {
+        icon: Pencil,
+        title: "Editable Table Inline",
+        description:
+          "Editable cells update fields directly without opening a form.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-update--editable-table-update-inline",
+      },
+    ]}
+  />
+</Unstyled>
 
 ## When to use
 
@@ -238,50 +297,8 @@ reserve dialogs for full-resource updates.
   }}
 />
 
-## Related stories
+## Related documentation
 
-- <a
-    target="_parent"
-    href="/?path=/story/patterns-data-collection-crud-patterns-update--table-update-dialog"
-  >
-    Default Dialog
-  </a>
-- <a
-    target="_parent"
-    href="/?path=/story/patterns-data-collection-crud-patterns-update--table-bulk-update"
-  >
-    Bulk Update
-  </a>
-- <a
-    target="_parent"
-    href="/?path=/story/patterns-data-collection-crud-patterns-update--table-update-right-dialog"
-  >
-    Right Dialog for Table
-  </a>
-- <a
-    target="_parent"
-    href="/?path=/story/patterns-data-collection-crud-patterns-update--list-update-right-dialog"
-  >
-    Right Dialog for List
-  </a>
-- <a
-    target="_parent"
-    href="/?path=/story/patterns-data-collection-crud-patterns-update--card-update-from-read-dialog"
-  >
-    Card Actions Update
-  </a>
-- <a
-    target="_parent"
-    href="/?path=/story/patterns-data-collection-crud-patterns-update--kanban-bulk-update"
-  >
-    Kanban Bulk Update
-  </a>
-- <a
-    target="_parent"
-    href="/?path=/story/patterns-data-collection-crud-patterns-update--editable-table-update-inline"
-  >
-    Editable Table Inline Update
-  </a>
 - <a
     target="_parent"
     href="/?path=/docs/patterns-data-collection-crud-patterns-overview--documentation"
