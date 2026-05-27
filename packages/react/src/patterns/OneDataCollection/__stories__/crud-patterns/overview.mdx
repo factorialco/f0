@@ -24,94 +24,86 @@ expand on individual operations, views, and edge cases.
 ## Pattern decision table
 
 <Unstyled>
-  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
+  <table className="mb-4 w-full dark:text-f1-foreground-inverse/80">
     <thead>
       <tr>
+        <th className="text-left">User intent / need</th>
+        <th className="text-left">View</th>
+        <th className="text-left">Operations</th>
         <th className="text-left">Pattern</th>
-        <th className="text-left">Used for</th>
-        <th className="text-left">When to use</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td>Default dialog</td>
+        <td>Default focused container for a CRUD form or read</td>
         <td>All views</td>
-        <td>
-          Default container for create, read, and update flows that fit in a
-          focused overlay.
-        </td>
+        <td>Create, Read, Update</td>
+        <td>Default Dialog</td>
       </tr>
       <tr>
-        <td>Right dialog</td>
+        <td>User benefits from keeping the collection visible</td>
         <td>Table, List</td>
-        <td>
-          Alternative container when keeping the collection visible helps the
-          user preserve context. Use only on screens <code>md</code> /{" "}
-          <code>900px</code> and above; below that, fall back to the default
-          dialog.
-        </td>
+        <td>Create, Read, Update</td>
+        <td>Right Dialog</td>
       </tr>
       <tr>
-        <td>Wizard dialog</td>
+        <td>User needs sequential guidance through a long flow</td>
+        <td>All views</td>
         <td>Create</td>
-        <td>
-          Guided create flows with sequential steps or progressive disclosure.
-        </td>
+        <td>Wizard Dialog</td>
       </tr>
       <tr>
-        <td>Dialog to page</td>
+        <td>
+          User benefits from a preview of a complex resource that can lead to a
+          page
+        </td>
+        <td>Table, List</td>
         <td>Read</td>
-        <td>
-          Read flows that start with a lightweight preview and can continue to a
-          full destination when the resource benefits from page-level structure.
-        </td>
+        <td>Dialog to Page</td>
       </tr>
       <tr>
+        <td>Resource needs persistent navigation, tabs, or deeper structure</td>
+        <td>Table, List</td>
+        <td>Read</td>
         <td>Table to Page / List to Page</td>
-        <td>Read</td>
-        <td>
-          Complex resources with tabs, steps, deep content, configuration, or
-          workflows that need page-level navigation.
-        </td>
       </tr>
       <tr>
-        <td>Bulk update</td>
+        <td>
+          User updates several items at once with explicit selection scope
+        </td>
+        <td>All views</td>
         <td>Update</td>
-        <td>
-          Shared updates for a selected set of items when the visualization
-          provides clear multi-selection affordances.
-        </td>
+        <td>Bulk Update</td>
       </tr>
       <tr>
-        <td>Confirmation dialog</td>
+        <td>User must confirm a destructive action and its scope</td>
+        <td>All views</td>
         <td>Delete</td>
-        <td>
-          Delete or destructive flows where the user must understand the
-          affected resource or scope before confirming.
-        </td>
+        <td>Confirmation Dialog</td>
       </tr>
     </tbody>
   </table>
 </Unstyled>
 
-**A note on width.** Dialog containers (Default dialog, Right dialog, Wizard
-dialog) are all backed by the same `F0Dialog` primitive with a configurable
-`width` prop accepting `sm`, `md`, `lg`, or `xl`. Pick width based on content
-density, not pattern type. Most flows use `md`. Use `sm` for the **Dialog to
-page** preview — it is intentionally compact since the full page is the
-durable destination — and `lg` or `xl` for content-dense forms or wizards.
+**Default Dialog**, **Right Dialog**, **Wizard Dialog**, and **Confirmation
+Dialog** are dialog containers. **Dialog to Page**, **Table to Page / List to
+Page**, and **Bulk Update** are flows built on top of those containers.
 
-**A note on forms in dialogs.** When rendering a form container (for example,
-`ResourceFormF0`) directly inside `F0Dialog`, set
-`#sym:disableContentPadding` on the dialog. Form components already include
-their own internal spacing, so disabling dialog padding avoids double spacing
-and keeps create/update layouts consistent.
+**A note on width.** Dialog containers are all backed by the same `F0Dialog`
+primitive with a configurable `width` prop accepting `sm`, `md`, `lg`, or
+`xl`. Default Dialog uses `md`. Wizard Dialog typically uses `md`; reach for
+`lg` only when step content truly requires it. Confirmation Dialog uses `sm`.
+Dialog to Page typically uses `sm` since the full page is the durable
+destination. Stay between `sm` and `md` for CRUD flows — avoid `lg` unless
+content density requires it, and avoid `xl`.
 
 ## Container anatomy
 
 Each named pattern is a specific configuration of `F0Dialog`. The differences
 are in `position`, `width`, and the actions inside — not in the underlying
-component.
+component. Container anatomy covers dialog containers only. Non-dialog
+patterns (Table to Page / List to Page, Editable Table inline edits, Kanban
+drag) live on each view's own documentation page.
 
 <Unstyled>
   <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -119,10 +111,10 @@ component.
       <img
         src={containerDefaultDialog}
         alt="Default dialog centered over a Data Collection, showing a Create resource form."
-        className="border-f1-border dark:border-f1-border-secondary block w-full rounded-lg border border-solid"
+        className="block w-full rounded-lg border border-solid border-f1-border dark:border-f1-border-secondary"
       />
-      <figcaption className="text-f1-foreground-secondary mt-2 text-sm">
-        <strong>Default dialog</strong> — <code>position="center"</code>,
+      <figcaption className="mt-2 text-sm text-f1-foreground-secondary">
+        <strong>Default Dialog</strong> — <code>position="center"</code>,
         <code>width="md"</code>. Baseline container for create, read, and
         update.
       </figcaption>
@@ -131,34 +123,34 @@ component.
       <img
         src={containerRightDialog}
         alt="Right dialog anchored to the right edge of the viewport, with the Data Collection visible on the left."
-        className="border-f1-border dark:border-f1-border-secondary block w-full rounded-lg border border-solid"
+        className="block w-full rounded-lg border border-solid border-f1-border dark:border-f1-border-secondary"
       />
-      <figcaption className="text-f1-foreground-secondary mt-2 text-sm">
-        <strong>Right dialog</strong> — <code>position="right"</code>,
-        <code>width="md"</code> (or <code>"sm"</code> for Dialog to page). Keeps
-        the collection visible alongside the form.
+      <figcaption className="mt-2 text-sm text-f1-foreground-secondary">
+        <strong>Right Dialog</strong> — <code>position="right"</code>,
+        <code>width="md"</code>. Keeps the collection visible alongside the
+        form.
       </figcaption>
     </figure>
     <figure className="m-0">
       <img
         src={containerWizardDialog}
         alt="Wizard dialog with a numbered step sidebar (General information, Assignments, Review) and a Continue action."
-        className="border-f1-border dark:border-f1-border-secondary block w-full rounded-lg border border-solid"
+        className="block w-full rounded-lg border border-solid border-f1-border dark:border-f1-border-secondary"
       />
-      <figcaption className="text-f1-foreground-secondary mt-2 text-sm">
-        <strong>Wizard dialog</strong> — <code>position="center"</code>,
-        <code>width="lg"</code>, with a step sidebar. Guides sequential create
-        flows.
+      <figcaption className="mt-2 text-sm text-f1-foreground-secondary">
+        <strong>Wizard Dialog</strong> — <code>position="center"</code>,
+        <code>width="md"</code> by default, with a step sidebar. Reach for
+        <code>width="lg"</code> only when step content truly requires it.
       </figcaption>
     </figure>
     <figure className="m-0">
       <img
         src={containerConfirmationDialog}
         alt="Small centered confirmation dialog asking to delete a resource, with Cancel and a destructive Delete action."
-        className="border-f1-border dark:border-f1-border-secondary block w-full rounded-lg border border-solid"
+        className="block w-full rounded-lg border border-solid border-f1-border dark:border-f1-border-secondary"
       />
-      <figcaption className="text-f1-foreground-secondary mt-2 text-sm">
-        <strong>Confirmation dialog</strong> — <code>position="center"</code>,
+      <figcaption className="mt-2 text-sm text-f1-foreground-secondary">
+        <strong>Confirmation Dialog</strong> — <code>position="center"</code>,
         <code>width="sm"</code>, with a destructive primary action. Used for
         delete and other destructive flows.
       </figcaption>
@@ -170,7 +162,8 @@ component.
 
 Open a fullscreen scenario that shows create, read, update, and delete
 coexisting inside one view. Use these to validate how the four operations
-behave together in real product surfaces.
+behave together in real product surfaces. Editable Table is a specialized
+Table mode for field-level updates; most Table rules still apply.
 
 <Unstyled>
   <FeatureGrid
@@ -223,11 +216,11 @@ each action accordingly.
 ### Create
 
 Always triggered by the collection primary action. Use a dialog for most cases,
-a right dialog when keeping the collection visible helps, or a wizard for
+a Right Dialog when keeping the collection visible helps, or a wizard for
 multi-step flows.
 
 <Unstyled>
-  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
     <thead>
       <tr>
         <th className="text-left">Scenario</th>
@@ -241,7 +234,7 @@ multi-step flows.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-create--table-create-dialog"
           >
-            Default
+            Table Create — Default
           </a>
         </td>
         <td>Collection primary action triggers a default create dialog.</td>
@@ -252,12 +245,37 @@ multi-step flows.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-create--table-create-right-dialog"
           >
-            Right dialog
+            Table Create — Right Dialog
           </a>
         </td>
         <td>
-          Collection primary action opens a right dialog to keep the collection
+          Collection primary action opens a Right Dialog to keep the collection
           visible while creating.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-create--list-create-dialog"
+          >
+            List Create — Default
+          </a>
+        </td>
+        <td>List primary action triggers a default create dialog.</td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-create--list-create-right-dialog"
+          >
+            List Create — Right Dialog
+          </a>
+        </td>
+        <td>
+          List primary action opens a Right Dialog to keep the list visible
+          while creating.
         </td>
       </tr>
       <tr>
@@ -266,10 +284,10 @@ multi-step flows.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-create--create-wizard-dialog"
           >
-            Wizard dialog
+            Wizard Dialog
           </a>
         </td>
-        <td>Collection primary action triggers a wizard dialog.</td>
+        <td>Collection primary action triggers a Wizard Dialog.</td>
       </tr>
       <tr>
         <td>
@@ -277,7 +295,7 @@ multi-step flows.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-create--kanban-create-lane"
           >
-            Kanban lane create
+            Kanban Lane Create
           </a>
         </td>
         <td>
@@ -291,7 +309,7 @@ multi-step flows.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-create--editable-table-create-row"
           >
-            Editable Table add row
+            Editable Table Add Row
           </a>
         </td>
         <td>
@@ -305,10 +323,11 @@ multi-step flows.
 ### Read
 
 Triggered by clicking a row, list item, or card. Opens a dialog for contained
-resources or navigates to a page when the resource needs a durable destination.
+resources, a Right Dialog when collection context helps scanning, or navigates
+to a page when the resource needs a durable destination.
 
 <Unstyled>
-  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
     <thead>
       <tr>
         <th className="text-left">Scenario</th>
@@ -325,7 +344,7 @@ resources or navigates to a page when the resource needs a durable destination.
             Default
           </a>
         </td>
-        <td>Clicking an item opens the default dialog.</td>
+        <td>Clicking an item opens the Default Dialog.</td>
       </tr>
       <tr>
         <td>
@@ -333,11 +352,11 @@ resources or navigates to a page when the resource needs a durable destination.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-right-dialog-to-page"
           >
-            Dialog to page
+            Dialog to Page
           </a>
         </td>
         <td>
-          Clicking an item opens a reduced right dialog that can lead to a full
+          Clicking an item opens a reduced Right Dialog that can lead to a full
           page when the resource needs a durable destination.
         </td>
       </tr>
@@ -373,7 +392,7 @@ resources or navigates to a page when the resource needs a durable destination.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-read--card-read-dialog"
           >
-            Card to dialog
+            Card to Dialog
           </a>
         </td>
         <td>Clicking the card opens a focused read dialog.</td>
@@ -384,7 +403,7 @@ resources or navigates to a page when the resource needs a durable destination.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-read--kanban-read-dialog"
           >
-            Kanban card to dialog
+            Kanban Card to Dialog
           </a>
         </td>
         <td>Clicking a Kanban card opens a focused read dialog.</td>
@@ -400,7 +419,7 @@ a dialog for full-resource edits or inline cells in Editable Table for
 field-level changes.
 
 <Unstyled>
-  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
     <thead>
       <tr>
         <th className="text-left">Scenario</th>
@@ -428,10 +447,10 @@ field-level changes.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-update--table-update-right-dialog"
           >
-            Right dialog for table
+            Right Dialog for Table
           </a>
         </td>
-        <td>Table variation uses a right dialog for editing.</td>
+        <td>Table variation uses a Right Dialog for editing.</td>
       </tr>
       <tr>
         <td>
@@ -439,7 +458,7 @@ field-level changes.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-update--list-update-right-dialog"
           >
-            Right dialog for list
+            Right Dialog for List
           </a>
         </td>
         <td>
@@ -453,12 +472,12 @@ field-level changes.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-update--card-update-from-read-dialog"
           >
-            Card actions update
+            Card Actions Update
           </a>
         </td>
         <td>
-          Card primary action opens the update flow without overloading card
-          click behavior.
+          Card edit is available from a card item action (ellipsis menu) and
+          from inside the read dialog. Both are valid.
         </td>
       </tr>
       <tr>
@@ -467,7 +486,7 @@ field-level changes.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-update--table-bulk-update"
           >
-            Bulk update
+            Bulk Update
           </a>
         </td>
         <td>
@@ -481,7 +500,7 @@ field-level changes.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-update--kanban-bulk-update"
           >
-            Kanban bulk update
+            Kanban Bulk Update
           </a>
         </td>
         <td>
@@ -494,7 +513,7 @@ field-level changes.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-update--editable-table-update-inline"
           >
-            Editable Table inline update
+            Editable Table Inline Update
           </a>
         </td>
         <td>Editable cells update fields directly without opening a form.</td>
@@ -510,7 +529,7 @@ Never placed as a primary action — lives in item actions, bulk actions, or the
 read dialog header.
 
 <Unstyled>
-  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
     <thead>
       <tr>
         <th className="text-left">Scenario</th>
@@ -524,10 +543,10 @@ read dialog header.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-delete--table-delete-single"
           >
-            Table single delete
+            Table Single Delete
           </a>
         </td>
-        <td>Item delete action triggers a confirmation dialog.</td>
+        <td>Item delete action triggers a Confirmation Dialog.</td>
       </tr>
       <tr>
         <td>
@@ -535,10 +554,10 @@ read dialog header.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-delete--table-delete-bulk"
           >
-            Table bulk delete
+            Table Bulk Delete
           </a>
         </td>
-        <td>Selection and bulk action trigger a scoped confirmation dialog.</td>
+        <td>Selection and bulk action trigger a scoped Confirmation Dialog.</td>
       </tr>
       <tr>
         <td>
@@ -546,10 +565,10 @@ read dialog header.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-delete--card-delete"
           >
-            Card delete
+            Card Delete
           </a>
         </td>
-        <td>Card item action triggers a confirmation dialog.</td>
+        <td>Card item action triggers a Confirmation Dialog.</td>
       </tr>
       <tr>
         <td>
@@ -557,11 +576,11 @@ read dialog header.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-delete--kanban-delete-bulk"
           >
-            Kanban bulk delete
+            Kanban Bulk Delete
           </a>
         </td>
         <td>
-          Selected Kanban cards use a scoped destructive confirmation dialog.
+          Selected Kanban cards use a scoped destructive Confirmation Dialog.
         </td>
       </tr>
       <tr>
@@ -570,11 +589,11 @@ read dialog header.
             target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-delete--editable-table-delete-row-action"
           >
-            Editable Table delete
+            Editable Table Delete
           </a>
         </td>
         <td>
-          Editable Table row dropdown action triggers a confirmation dialog.
+          Editable Table row dropdown action triggers a Confirmation Dialog.
         </td>
       </tr>
     </tbody>
@@ -583,88 +602,52 @@ read dialog header.
 
 ## Pattern boundaries
 
-Use a default dialog as the baseline for create, read, and update. Update should
-mirror create — same form structure, field order, validation, and terminology. A
-right dialog is an alternative for Table and List update when keeping the
-collection visible materially helps (comparing nearby items, staying anchored to
-context).
+Use a Default Dialog as the baseline for create, read, and update. Update
+should mirror create — same form structure, field order, validation, and
+terminology.
 
-Read can stay in a dialog when the resource is lightweight. In Table and List,
-a right dialog is also valid when keeping the collection visible helps the user
-scan or compare adjacent items. The **Dialog to page** flow uses a right dialog
-as a preview that opens a full page when the resource has a durable
-destination, tabs, deeper structure, or page-level actions — any compatible
-default or right dialog can use **Open Details** as its primary action. Bulk
-update is valid across visualizations whenever multi-selection scope is
+In Table and List, a Right Dialog is a valid alternative for create, read, or
+update when keeping the collection visible materially helps (comparing nearby
+items, scanning adjacent rows, staying anchored to context). This is the only
+place outside the Pattern decision table that states the rule — keep it here
+when reasoning about new flows.
+
+The **Dialog to Page** flow uses a Right Dialog as a preview that opens a full
+page when the resource has a durable destination, tabs, deeper structure, or
+page-level actions. Any compatible Default or Right Dialog can use **Open
+Details** as its primary action.
+
+Bulk Update is valid across visualizations whenever multi-selection scope is
 visible, countable, and reviewable; if scope is ambiguous, use item-level
 update instead.
 
-Kanban cards support drag, click-to-read, and selection simultaneously. Drag
-updates lane and state, click opens the read dialog, and the selection checkbox
-stops propagation so toggling it never opens the card.
+## View behaviors
 
-## View-specific exceptions
+How each view applies the Pattern decision table by default.
 
-Each view follows the Pattern decision table; these are the cases where it
-doesn't.
-
-- **Table:** right dialog for read or update when row comparison or scanning
-  helps the task.
-- **List:** right dialog for read or update only when list context remains
-  useful while reading or editing.
+- **Table:** Right Dialog for read or update when row comparison helps the
+  task.
+- **List:** Right Dialog for read or update when list context remains useful
+  while reading or editing.
 - **Card:** click opens read first; edit is an explicit action inside the read
-  dialog.
+  dialog or from a card item action (ellipsis menu).
 - **Kanban:** lane create for state-scoped resources; drag for state updates;
-  bulk action bar for cross-lane scope.
+  bulk action bar for cross-lane scope. Kanban cards support drag,
+  click-to-read, and selection simultaneously — drag updates lane and state,
+  click opens the read dialog, and the selection checkbox stops propagation
+  so toggling it never opens the card.
 - **Editable Table:** inline cell edit for field-level updates; add-row for
   lightweight new rows; row dropdown for delete.
-
-## Responsive behavior
-
-<Unstyled>
-  <table className="dark:text-f1-foreground-inverse/80 mb-8 w-full">
-    <thead>
-      <tr>
-        <th className="text-left">Container</th>
-        <th className="text-left">Responsive rule</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Default dialog</td>
-        <td>Works across screen sizes.</td>
-      </tr>
-      <tr>
-        <td>Right dialog</td>
-        <td>
-          Use only for Table and List at <code>md</code> / <code>900px</code>
-          and above. Below that, fall back to the default dialog.
-        </td>
-      </tr>
-      <tr>
-        <td>Wizard dialog</td>
-        <td>
-          Use when the task needs staged guidance rather than a single form.
-        </td>
-      </tr>
-      <tr>
-        <td>Table to Page / List to Page</td>
-        <td>Remain a page across viewports.</td>
-      </tr>
-    </tbody>
-  </table>
-</Unstyled>
 
 ## Guidelines
 
 <DoDonts
   do={{
     description:
-      "Use the default dialog as the baseline for create, read, and update flows.",
+      "Use the Default Dialog as the baseline for create, read, and update flows.",
   }}
   dont={{
-    description:
-      "Do not make right dialogs the default. They are only an alternative for Table and List.",
+    description: "Do not make Right Dialogs the default container.",
   }}
 />
 
@@ -682,11 +665,11 @@ doesn't.
 <DoDonts
   do={{
     description:
-      "Use bulk update when the chosen visualization makes multi-selection scope clear to the user.",
+      "Use Bulk Update when the chosen visualization makes multi-selection scope clear to the user.",
   }}
   dont={{
     description:
-      "Do not expose bulk update where the selection scope is ambiguous or hard to verify.",
+      "Do not expose Bulk Update where the selection scope is ambiguous or hard to verify.",
   }}
 />
 
@@ -697,14 +680,14 @@ doesn't.
   }}
   dont={{
     description:
-      "Do not treat right-dialog read flows as previews by default when the resource can be fully understood inside a dialog.",
+      "Do not treat Right Dialog read flows as previews by default when the resource can be fully understood inside a dialog.",
   }}
 />
 
 ## Related documentation
 
 <Unstyled>
-  <ul className="dark:text-f1-foreground-inverse/80 mb-8 ml-6 list-disc">
+  <ul className="mb-8 ml-6 list-disc dark:text-f1-foreground-inverse/80">
     <li>
       <a
         target="_parent"
