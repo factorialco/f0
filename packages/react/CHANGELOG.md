@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.21.0](https://github.com/factorialco/f0/compare/f0-react-v2.20.1...f0-react-v2.21.0) (2026-05-27)
+
+
+### Features
+
+* **F0AiChat:** typewriter welcome + fullscreen parity; new ChatSpinner ([#4243](https://github.com/factorialco/f0/issues/4243)) ([6ad84c3](https://github.com/factorialco/f0/commit/6ad84c38b2697c3cdd8229909fb576dd368050f8))
+
 ## [2.20.1](https://github.com/factorialco/f0/compare/f0-react-v2.20.0...f0-react-v2.20.1) (2026-05-27)
 
 
