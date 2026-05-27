@@ -23,11 +23,16 @@ export const F0ActionItem = ({ title, status, inGroup }: F0ActionItemProps) => {
     ease: [0.33, 1, 0.68, 1] as const,
   }
 
+  const inProgress = !!(status == "inProgress")
+  const executing = !!(status == "executing")
+  const completed = !!(status == "completed")
+  const writing = !!(status == "writing")
+
   return (
     <div className="flex w-full items-start gap-1 text-f1-foreground-secondary">
       <div className="flex h-5 w-6 shrink-0 items-center justify-start">
         <AnimatePresence mode="wait">
-          {status === "inProgress" && (
+          {inProgress && (
             <motion.div
               key="inProgress"
               className="flex h-5 w-5 shrink-0 items-center justify-center"
@@ -41,12 +46,12 @@ export const F0ActionItem = ({ title, status, inGroup }: F0ActionItemProps) => {
               />
             </motion.div>
           )}
-          {status === "executing" && (
+          {(executing || writing) && (
             <div className="flex h-5 w-5 shrink-0 items-center justify-center">
-              <ChatSpinner />
+              <ChatSpinner variant={executing ? "default" : "continuous"} />
             </div>
           )}
-          {status === "completed" && (
+          {completed && (
             <motion.div
               key="completed"
               {...ICON_MOTION}
@@ -67,7 +72,7 @@ export const F0ActionItem = ({ title, status, inGroup }: F0ActionItemProps) => {
         <p
           className={cn(
             "text-pretty leading-5",
-            status === "executing" && "shine-text"
+            (executing || writing) && "shine-text"
           )}
         >
           {title}

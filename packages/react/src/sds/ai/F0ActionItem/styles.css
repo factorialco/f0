@@ -2,16 +2,16 @@
   background: linear-gradient(
     90deg,
     #888 0%,
-    #888 33%,
-    #aaa 50%,
-    #888 66%,
+    #888 35%,
+    #f5f5f5 50%,
+    #888 65%,
     #888 100%
   );
   background-size: 200% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: shine 1.5s ease-in-out infinite;
+  animation: shine 3s ease-in-out infinite;
 }
 
 @keyframes shine {
@@ -56,27 +56,8 @@
   animation: globe-spin-breathe 3.6s ease-in-out 0.5s infinite;
 }
 
-/* Soft "AI thinking" halo. Cycles between the two brand colors of the globe
-   so the glow feels coherent with what's spinning inside, not stuck on. */
-@keyframes globe-spin-glow {
-  0%,
-  100% {
-    filter: drop-shadow(0 0 2px rgba(255, 90, 30, 0.35))
-      drop-shadow(0 0 6px rgba(255, 90, 30, 0.18));
-  }
-  50% {
-    filter: drop-shadow(0 0 3px rgba(180, 150, 230, 0.45))
-      drop-shadow(0 0 8px rgba(180, 150, 230, 0.22));
-  }
-}
-
-.globe-spin-glow {
-  animation: globe-spin-glow 3.6s ease-in-out 0.5s infinite;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .globe-spin-breathe,
-  .globe-spin-glow {
+  .globe-spin-breathe {
     animation: none;
   }
 }

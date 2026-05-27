@@ -251,9 +251,7 @@ const Messages = ({
         {turn.endIndicator === "thinking" && (
           <F0ActionItem title={translations.ai.thinking} status="executing" />
         )}
-        {turn.endIndicator === "activity" && (
-          <F0ActionItem title="" status="executing" />
-        )}
+        {turn.endIndicator === "activity" && <F0ActionItem status="writing" />}
         {turn.feedback && (
           <TurnFeedback
             content={turn.feedback.content}
