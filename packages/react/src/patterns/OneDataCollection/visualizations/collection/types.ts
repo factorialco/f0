@@ -43,6 +43,84 @@ export type VisualizationFilterOverrides<Filters extends FiltersDefinition> = {
 }
 
 /**
+ * Optional per-visualization data source override.
+ *
+ * When provided on a visualization, this completely replaces the collection's
+ * top-level `source` while that visualization is active. The collection's
+ * filter bar, search input, presets, CSV export, and bulk-action bar all
+ * route to the override source instead.
+ *
+ * Mutually exclusive with `filters` / `presets` at the type level — a
+ * visualization entry chooses one branch or the other. The filter branch
+ * derives its rows from the top-level `source`; the source-override branch
+ * supplies its own rows and is therefore incompatible with per-viz filter
+ * overrides (those would have no source to apply against).
+ *
+ * @template R - The type of records produced by the override source
+ * @template Filters - The filters definition the override source advertises
+ * @template Sortings - The sortings definition the override source advertises
+ * @template Summaries - The summaries definition the override source advertises
+ * @template ItemActions - The item actions definition the override source advertises
+ * @template NavigationFilters - The navigation filters definition the override source advertises
+ * @template Grouping - The grouping definition the override source advertises
+ */
+export type VisualizationSourceOverride<
+  R extends RecordType,
+  Filters extends FiltersDefinition,
+  Sortings extends SortingsDefinition,
+  Summaries extends SummariesDefinition,
+  ItemActions extends ItemActionsDefinition<R>,
+  NavigationFilters extends NavigationFiltersDefinition,
+  Grouping extends GroupingDefinition<R>,
+> = {
+  /** Per-visualization data source override. When set, the collection chrome
+   *  (filter bar, search, presets, CSV export, bulk-action bar) routes to
+   *  this source while the visualization is active. */
+  source: DataCollectionSource<
+    R,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping
+  >
+}
+
+/**
+ * Per-visualization overrides — mutually exclusive union of:
+ *
+ *  - The **filter branch**: optional per-viz `filters` / `presets` that derive
+ *    rows from the collection's top-level `source`. `source` is forbidden on
+ *    this branch.
+ *  - The **source-override branch**: a full per-viz `source` that replaces the
+ *    top-level source while the viz is active. `filters` / `presets` are
+ *    forbidden on this branch because they would have no source to apply
+ *    against.
+ *
+ * Mutex is enforced at the type level via `never`, not at runtime.
+ */
+export type VisualizationOverrides<
+  R extends RecordType,
+  Filters extends FiltersDefinition,
+  Sortings extends SortingsDefinition,
+  Summaries extends SummariesDefinition,
+  ItemActions extends ItemActionsDefinition<R>,
+  NavigationFilters extends NavigationFiltersDefinition,
+  Grouping extends GroupingDefinition<R>,
+> =
+  | VisualizationFilterOverrides<Filters>
+  | (VisualizationSourceOverride<
+      R,
+      Filters,
+      Sortings,
+      Summaries,
+      ItemActions,
+      NavigationFilters,
+      Grouping
+    > & { filters?: never; presets?: never })
+
+/**
  * Represents a visualization configuration for displaying collection data.
  * Supports different visualization types (card, table, or custom) with their respective options.
  *
@@ -64,19 +142,43 @@ export type Visualization<
       type: "card"
       /** Configuration options for card visualization */
       options: CardVisualizationOptions<R, Filters, Sortings>
-    } & VisualizationFilterOverrides<Filters>)
+    } & VisualizationOverrides<
+      R,
+      Filters,
+      Sortings,
+      Summaries,
+      ItemActions,
+      NavigationFilters,
+      Grouping
+    >)
   | ({
       /** Kanban-based visualization type */
       type: "kanban"
       /** Configuration options for kanban visualization */
       options: KanbanVisualizationOptions<R, Filters, Sortings>
-    } & VisualizationFilterOverrides<Filters>)
+    } & VisualizationOverrides<
+      R,
+      Filters,
+      Sortings,
+      Summaries,
+      ItemActions,
+      NavigationFilters,
+      Grouping
+    >)
   | ({
       /** Table-based visualization type */
       type: "table"
       /** Configuration options for table visualization */
       options: TableVisualizationOptions<R, Filters, Sortings, Summaries>
-    } & VisualizationFilterOverrides<Filters>)
+    } & VisualizationOverrides<
+      R,
+      Filters,
+      Sortings,
+      Summaries,
+      ItemActions,
+      NavigationFilters,
+      Grouping
+    >)
   | ({
       /** Editable table-based visualization type */
       type: "editableTable"
@@ -87,19 +189,43 @@ export type Visualization<
         Sortings,
         Summaries
       >
-    } & VisualizationFilterOverrides<Filters>)
+    } & VisualizationOverrides<
+      R,
+      Filters,
+      Sortings,
+      Summaries,
+      ItemActions,
+      NavigationFilters,
+      Grouping
+    >)
   | ({
       /** List-based visualization type */
       type: "list"
       /** Configuration options for list visualization */
       options: ListVisualizationOptions<R, Filters, Sortings>
-    } & VisualizationFilterOverrides<Filters>)
+    } & VisualizationOverrides<
+      R,
+      Filters,
+      Sortings,
+      Summaries,
+      ItemActions,
+      NavigationFilters,
+      Grouping
+    >)
   | ({
       /** Graph-based visualization type */
       type: "graph"
       /** Configuration options for graph visualization */
       options: GraphVisualizationOptions<R, Filters, Sortings>
-    } & VisualizationFilterOverrides<Filters>)
+    } & VisualizationOverrides<
+      R,
+      Filters,
+      Sortings,
+      Summaries,
+      ItemActions,
+      NavigationFilters,
+      Grouping
+    >)
   | ({
       /** Human-readable label for the visualization */
       label: string
