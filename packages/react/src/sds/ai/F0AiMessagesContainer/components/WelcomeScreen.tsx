@@ -11,9 +11,15 @@ type Phase = "starting" | "writing" | "holding" | "erasing"
 export type WelcomeScreenProps = {
   /** One or more phrases. With more than one, they rotate in an infinite loop. */
   messages: string[]
+  /**
+   * Optional click handler on the phrase itself. When set, the phrase becomes
+   * keyboard-activatable (Enter / Space) and gets a subtle hover hint. Used by
+   * `F0AiChat` to wire the pong easter egg.
+   */
+  onClick?: () => void
 }
 
-export const WelcomeScreen = ({ messages }: WelcomeScreenProps) => {
+export const WelcomeScreen = ({ messages, onClick }: WelcomeScreenProps) => {
   const [index, setIndex] = useState(0)
   const [chars, setChars] = useState(0)
   const [phase, setPhase] = useState<Phase>("starting")
@@ -52,11 +58,30 @@ export const WelcomeScreen = ({ messages }: WelcomeScreenProps) => {
   // Pulse arrives just after the full phrase becomes visible.
   const pulseDelay = (START_DELAY_MS + current.length * CHAR_IN_MS) / 1000
 
+  const interactive = !!onClick
+  const handleKeyDown = interactive
+    ? (e: React.KeyboardEvent<HTMLParagraphElement>) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault()
+          onClick?.()
+        }
+      }
+    : undefined
+
   return (
     <div className="flex w-full flex-1 items-center justify-center px-4">
       <p
         key={index}
-        className="bg-gradient-to-r from-[#E55619] to-[#A1ADE5] bg-clip-text text-center text-2xl font-semibold leading-[28px] text-transparent"
+        role={interactive ? "button" : undefined}
+        tabIndex={interactive ? 0 : undefined}
+        onClick={onClick}
+        onKeyDown={handleKeyDown}
+        className={
+          "bg-gradient-to-r from-[#E55619] to-[#A1ADE5] bg-clip-text text-center text-2xl font-semibold leading-[28px] text-transparent" +
+          (interactive
+            ? " cursor-pointer transition-transform duration-200 hover:scale-[1.02] focus-visible:scale-[1.02] focus-visible:outline-none motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:focus-visible:scale-100"
+            : "")
+        }
         style={{ animationDelay: `${pulseDelay}s`, minHeight: 28 }}
         aria-label={current}
       >

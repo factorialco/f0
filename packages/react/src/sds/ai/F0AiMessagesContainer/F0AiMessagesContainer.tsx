@@ -53,6 +53,9 @@ export type F0AiMessagesContainerProps = {
   /** Welcome phrase shown centered when the chat is empty. Falls back to
    *  `translations.ai.defaultInitialMessage` if omitted. */
   initialMessage?: string | string[]
+  /** Called when the user clicks the welcome phrase (used by F0AiChat to open
+   *  the pong easter egg). When omitted the phrase is non-interactive. */
+  onWelcomeClick?: () => void
 
   /** Returns a React node for an assistant message's tool call, or null. */
   renderToolCall?: F0AssistantMessageExtraProps["renderToolCall"]
@@ -100,6 +103,7 @@ const Messages = ({
   isLoadingThread = false,
   interrupt,
   initialMessage,
+  onWelcomeClick,
   renderToolCall,
   onReplyQuote,
   onAssistantMessageRendered,
@@ -291,7 +295,10 @@ const Messages = ({
             >
               {isLoadingThread && <MessagesSkeleton />}
               {!isLoadingThread && showWelcomeBlock && (
-                <WelcomeScreen messages={welcomeMessages} />
+                <WelcomeScreen
+                  messages={welcomeMessages}
+                  onClick={onWelcomeClick}
+                />
               )}
               {!isLoadingThread &&
                 turns.map((turn, turnIndex) => renderTurn(turn, turnIndex))}

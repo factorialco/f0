@@ -98,6 +98,7 @@ export const ConnectedMessagesContainer = ({
     visualizationMode,
     tracking,
     setPendingQuote,
+    openGame,
     onThumbsUp,
     onThumbsDown,
   } = useAiChat()
@@ -223,6 +224,12 @@ export const ConnectedMessagesContainer = ({
   }, [filteredMessages, inProgress])
 
   // ── Callbacks ──
+  // Welcome phrase click → pong easter egg. Replaces the previous F0OneIcon
+  // entry point that the simplified welcome screen no longer renders.
+  const onWelcomeClick = useCallback(() => {
+    openGame("pong")
+  }, [openGame])
+
   const onReplyQuote = useCallback(
     (text: string) => {
       setPendingQuote({ text })
@@ -264,6 +271,7 @@ export const ConnectedMessagesContainer = ({
       isLoadingThread={isLoadingThread}
       interrupt={interrupt}
       initialMessage={initialMessage}
+      onWelcomeClick={onWelcomeClick}
       renderToolCall={renderToolCall}
       onReplyQuote={onReplyQuote}
       onAssistantMessageRendered={onAssistantMessageRendered}

@@ -202,10 +202,22 @@ export type AiChatFileAttachmentConfig = {
   maxFiles?: number
 }
 
+/**
+ * Payload for `tracking.onWelcomeSuggestionClick`. Carries everything an
+ * analytics layer (e.g. Amplitude) needs to attribute the click: the picked
+ * sub-item, its parent group, and the resolved prompt that was actually sent.
+ */
+export type WelcomeSuggestionClickEvent = {
+  item: WelcomeScreenSuggestionItem
+  group: WelcomeScreenSuggestion
+  /** Prompt actually sent to the AI — `item.prompt` falling back to `item.title`. */
+  prompt: string
+}
+
 export type AiChatTrackingOptions = {
   onVisibility?: () => void
   onClose?: () => void
-  onWelcomeSuggestionClick?: (item: WelcomeScreenSuggestionItem) => void
+  onWelcomeSuggestionClick?: (event: WelcomeSuggestionClickEvent) => void
   onNewChat?: () => void
   onMessage?: (message: Message) => void
 }
