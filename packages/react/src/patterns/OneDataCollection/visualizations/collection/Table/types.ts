@@ -138,23 +138,6 @@ export type TableVisualizationOptions<
    * Useful for embedding the table inside panels or detail views.
    */
   bordered?: boolean
-
-  /**
-   * Hide the column header row entirely. Useful when the table is embedded
-   * inside a card or callout where the surrounding context already explains
-   * the data and the header would be redundant.
-   *
-   * Only honored when the source is **not** `selectable`: the select-all
-   * checkbox and the "select all items across pages" banner live in the
-   * header, so a headerless selectable table would silently lose those
-   * controls. When `selectable` is true the table falls back to rendering
-   * the header (a development warning is logged).
-   *
-   * Sorting and column hiding/reordering controls also live in the header
-   * and become inaccessible when `headerless` is enabled.
-   * @default false
-   */
-  headerless?: boolean
 }
 
 export type TableCollectionProps<
