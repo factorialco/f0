@@ -64,13 +64,13 @@ function CalculatorRow({
   extraContent?: React.ReactNode
   inputWidth?: string
 }) {
+  const isAutoWidth = !inputWidth || inputWidth === "auto"
+
   return (
     <div className="flex items-center gap-3">
       <div
         style={inputWidthStyle(inputWidth)}
-        className={cn(
-          !inputWidth || inputWidth === "auto" ? "w-auto" : undefined
-        )}
+        className={cn(isAutoWidth ? "w-auto" : undefined)}
       >
         {children}
       </div>
@@ -149,6 +149,9 @@ export const F0AmountCalculator = forwardRef<
   const resolvedStatus = resolveStatus(hint, error, status)
   const hasExtraContent = Boolean(extraContent)
   const isDeferredPopover = popover?.commitMode === "deferred"
+  const usesExternalMessages = popover !== undefined || hasExtraContent
+  const shouldRenderOuterLabel = !hideLabel && label != null
+  const shouldRenderOuterMessages = !hideLabel && resolvedStatus != null
 
   const isPopoverControlled = popover?.open !== undefined
   const popoverOpen = isPopoverControlled
@@ -183,31 +186,20 @@ export const F0AmountCalculator = forwardRef<
     ? { type: resolvedStatus.type }
     : undefined
 
-  // In popover mode or when the caller passes hideLabel the inner input's own
-  // label must be hidden — the outer FieldLabel or the form layout owns it.
-  const shouldHideInnerLabel =
-    hideLabel || popover !== undefined || hasExtraContent
-
-  const innerInput = hasExtraContent ? (
+  // In popover mode and in inline+extraContent mode we own the message row,
+  // so the inner NumberInput must not render its own text messages.
+  const innerInput = (
     <NumberInput
       ref={ref}
-      label={label ?? ""}
-      hideLabel
-      error={undefined}
-      status={innerStatusTypeOnly as typeof status}
-      value={inputValue}
-      onChange={inputOnChange}
-      {...numberInputProps}
-      hint=""
-    />
-  ) : (
-    <NumberInput
-      ref={ref}
-      label={label}
-      hideLabel={shouldHideInnerLabel}
-      hint={hideLabel ? "" : hint}
-      error={hideLabel ? undefined : error}
-      status={hideLabel ? (innerStatusTypeOnly as typeof status) : status}
+      label={usesExternalMessages ? (label ?? "") : label}
+      hideLabel={hideLabel || usesExternalMessages}
+      hint={hideLabel || usesExternalMessages ? "" : hint}
+      error={hideLabel || usesExternalMessages ? undefined : error}
+      status={
+        hideLabel || usesExternalMessages
+          ? (innerStatusTypeOnly as typeof status)
+          : status
+      }
       value={inputValue}
       onChange={inputOnChange}
       {...numberInputProps}
@@ -253,13 +245,13 @@ export const F0AmountCalculator = forwardRef<
           )}
         >
           <div className="flex flex-col">
-            {!hideLabel && label && <FieldLabel label={label} />}
+            {shouldRenderOuterLabel ? <FieldLabel label={label} /> : null}
             <CalculatorRow extraContent={extraContent} inputWidth={inputWidth}>
               {innerInput}
             </CalculatorRow>
-            {!hideLabel && resolvedStatus && (
+            {shouldRenderOuterMessages ? (
               <InputMessages status={resolvedStatus} />
-            )}
+            ) : null}
             {showApplyButton && (
               <div className="mt-2 flex justify-end">
                 <F0Button
@@ -283,13 +275,13 @@ export const F0AmountCalculator = forwardRef<
 
   return (
     <div className="flex flex-col">
-      {!hideLabel && label && <FieldLabel label={label} />}
+      {shouldRenderOuterLabel ? <FieldLabel label={label} /> : null}
       <CalculatorRow extraContent={extraContent} inputWidth={inputWidth}>
         {innerInput}
       </CalculatorRow>
-      {!hideLabel && resolvedStatus && (
+      {shouldRenderOuterMessages ? (
         <InputMessages status={resolvedStatus} />
-      )}
+      ) : null}
     </div>
   )
 })

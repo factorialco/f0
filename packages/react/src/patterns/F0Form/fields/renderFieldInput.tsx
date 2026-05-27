@@ -13,7 +13,6 @@ import { DateTimeFieldRenderer } from "./date/DateTimeFieldRenderer"
 import { TimeFieldRenderer } from "./date/TimeFieldRenderer"
 import { DateRangeFieldRenderer } from "./daterange/DateRangeFieldRenderer"
 import { DurationFieldRenderer } from "./duration/DurationFieldRenderer"
-import { AmountCalculatorFieldRenderer } from "./amountCalculator/AmountCalculatorFieldRenderer"
 import { FileFieldRenderer } from "./file/FileFieldRenderer"
 import { NumberFieldRenderer } from "./number/NumberFieldRenderer"
 import { RichTextFieldRenderer } from "./richtext/RichTextFieldRenderer"
@@ -90,15 +89,6 @@ export function renderFieldInput({
           formField={formField}
           {...errorAndLoadingProps}
           status={visualStatus}
-        />
-      )
-    case "amountCalculator":
-      return (
-        <AmountCalculatorFieldRenderer
-          field={{ ...field, disabled: isDisabled }}
-          formField={formField}
-          status={visualStatus}
-          {...errorAndLoadingProps}
         />
       )
     case "duration":

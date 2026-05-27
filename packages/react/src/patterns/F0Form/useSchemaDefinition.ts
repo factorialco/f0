@@ -121,27 +121,6 @@ function configToF0Field(
         renderIf: config.renderIf,
       } as F0Field
 
-    case "amountCalculator": {
-      const { min, max, isInteger } = extractNumberConstraints(schema)
-      const amountCalculatorClearable =
-        "clearable" in config ? config.clearable : clearable
-      return {
-        ...baseProps,
-        type: "amountCalculator",
-        step: "step" in config ? config.step : undefined,
-        min,
-        max,
-        maxDecimals: isInteger ? 0 : undefined,
-        units: "units" in config ? config.units : undefined,
-        locale: "locale" in config ? config.locale : undefined,
-        inputWidth: "inputWidth" in config ? config.inputWidth : undefined,
-        extraContent:
-          "extraContent" in config ? config.extraContent : undefined,
-        clearable: amountCalculatorClearable,
-        renderIf: config.renderIf,
-      } as F0Field
-    }
-
     case "textarea": {
       const { maxLength } = extractTextareaConstraints(schema)
       return {

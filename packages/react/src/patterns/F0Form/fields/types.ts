@@ -143,7 +143,6 @@ export type ResolvedField<T extends F0BaseField> = Omit<T, "disabled"> & {
 export type FieldType =
   | "text"
   | "number"
-  | "amountCalculator"
   | "duration"
   | "textarea"
   | "select"
@@ -164,10 +163,6 @@ export type FieldType =
 
 export type { F0TextConfig, F0TextField } from "./text/types"
 export type { F0NumberConfig, F0NumberField } from "./number/types"
-export type {
-  F0AmountCalculatorConfig,
-  F0AmountCalculatorField,
-} from "./amountCalculator/types"
 export type { F0DurationConfig, F0DurationField } from "./duration/types"
 export type { F0TextareaConfig, F0TextareaField } from "./textarea/types"
 export type { F0SelectConfig, F0SelectField } from "./select/types"
@@ -222,7 +217,6 @@ import type { F0CustomField } from "./custom/types"
 import type { F0DateField, F0TimeField, F0DateTimeField } from "./date/types"
 import type { F0DateRangeField } from "./daterange/types"
 import type { F0DurationField } from "./duration/types"
-import type { F0AmountCalculatorField } from "./amountCalculator/types"
 import type { F0FileField } from "./file/types"
 import type { F0NumberField } from "./number/types"
 import type { F0RichTextField } from "./richtext/types"
@@ -238,7 +232,6 @@ import type { F0TextareaField } from "./textarea/types"
 export type F0Field =
   | F0TextField
   | F0NumberField
-  | F0AmountCalculatorField
   | F0DurationField
   | F0TextareaField
   | F0SelectField

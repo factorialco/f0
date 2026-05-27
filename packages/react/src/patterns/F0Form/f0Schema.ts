@@ -76,7 +76,6 @@ export function unwrapToZodObject<T extends z.ZodRawShape>(
 export type F0FieldType =
   | "text"
   | "number"
-  | "amountCalculator"
   | "percentage"
   | "money"
   | "duration"
@@ -294,30 +293,6 @@ export type F0DurationFieldConfig = F0BaseConfig & {
 }
 
 /**
- * Config for amountCalculator fields (stores numeric value)
- */
-export type F0AmountCalculatorFieldConfig = F0BaseConfig & {
-  fieldType: "amountCalculator"
-  /** Units suffix shown inside the input (e.g. "%", "€") */
-  units?: string
-  /** Step value for the number input */
-  step?: number
-  /** Locale for number formatting (e.g. "en-US") */
-  locale?: string
-  /** Whether the field can be cleared */
-  clearable?: boolean
-  /**
-   * CSS width of the inner input element.
-   * "auto" (default) shrinks to content.
-   */
-  inputWidth?: string
-  /**
-   * Contextual text rendered to the right of the input (e.g. "of 300,00 €").
-   */
-  extraContent?: string
-}
-
-/**
  * Config for number fields - select (for selecting numeric values)
  * @typeParam R - Record type for data source (when using source instead of options)
  */
@@ -339,7 +314,6 @@ export type F0NumberFieldConfig<
   | F0NumberMoneyConfig
   | F0NumberSelectConfig<R>
   | F0DurationFieldConfig
-  | F0AmountCalculatorFieldConfig
 
 /**
  * Config for boolean fields - checkbox
@@ -1179,43 +1153,6 @@ export namespace f0FormField {
     return f0FormField(
       schema as never,
       { ...config, fieldType: "duration" } as never
-    )
-  }
-
-  // ---- amountCalculator ----------------------------------------------------
-
-  /** @internal */
-  type AmountCalculatorConfig = Omit<
-    F0AmountCalculatorFieldConfig,
-    "fieldType"
-  > & {
-    optional?: boolean
-    min?: number
-    max?: number
-    isInt?: boolean
-  }
-
-  export function amountCalculator(
-    config: AmountCalculatorConfig & { optional: true }
-  ): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>
-  export function amountCalculator(
-    config: AmountCalculatorConfig & { optional?: false | undefined }
-  ): z.ZodNumber & F0ZodType<z.ZodNumber>
-  export function amountCalculator({
-    optional,
-    min,
-    max,
-    isInt,
-    ...config
-  }: AmountCalculatorConfig) {
-    let schema = z.number()
-    if (isInt) schema = schema.int()
-    if (min !== undefined) schema = schema.min(min)
-    if (max !== undefined) schema = schema.max(max)
-    const finalSchema = optional ? schema.optional() : schema
-    return f0FormField(
-      finalSchema as never,
-      { ...config, fieldType: "amountCalculator" } as never
     )
   }
 

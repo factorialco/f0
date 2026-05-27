@@ -10,6 +10,12 @@ import { I18nProvider, defaultTranslations } from "@/lib/providers/i18n"
 
 A numeric input that supports two rendering modes: **inline** as a standard form field, or **popover** as a floating panel triggered by an icon button. Ideal for amount, percentage, or any numeric value that benefits from inline context (e.g. "of 300,00 €").
 
+## Positioning
+
+- Use `F0AmountCalculator` in bespoke product surfaces where you need **inline contextual amount text** (value + "of X") or **popover editing**.
+- In `F0Form`, prefer regular `number` / `percentage` fields for consistency, and use `helpText` for supportive text under the input.
+- Do not use `F0AmountCalculator` only to display a plain percentage input with no contextual right-side content.
+
 ## Anatomy
 
 <Canvas of={Stories.Default} />
@@ -132,10 +138,12 @@ Pass `popover={{}}` to activate popover mode with all defaults (Calculator icon,
 - Use popover mode on dense surfaces (table cells, compact rows) where showing the input inline would break the layout
 - Use `extraContent` to provide units or contextual values directly next to the input (e.g. `"of 300,00 €"`)
 - Use `inputWidth` to keep the input compact and prevent it from stretching across the available width
+- In `F0Form`, keep using `number` / `percentage` and put contextual explanation in `helpText`
 
 **When not to use**
 
 - For simple number inputs without context — use `NumberInput` directly
+- In `F0Form` when you only need below-input explanatory text — use field `helpText`
 - As a primary CTA button — the popover trigger is an icon button for revealing an input, not a general action trigger
 - For inputs that require rich formatting (currency symbols, thousands separators configured per locale) without passing `locale` — always pass a locale
 

@@ -16,9 +16,10 @@ const meta = {
     docs: {
       description: {
         component: [
-          "The `F0AmountCalculator` is a numeric input component that supports two rendering modes: <strong>inline</strong> (a standard form field) and <strong>popover</strong> (a floating panel triggered by an icon button).",
-          'In inline mode, an optional <code>extraContent</code> slot renders contextual text to the right of the input (e.g. "of 300,00 €"). When <code>extraContent</code> is present, labels, hints, and errors are hoisted outside the flex row so the row height stays fixed.',
-          "In popover mode, an outline icon button (default: Calculator) opens a Radix popover containing the input. The trigger icon/label, placement, open/close state, and optional deferred Apply flow are configurable via the <code>popover</code> prop.",
+          'The `F0AmountCalculator` is a focused numeric input for <strong>inline amount context</strong> (for example: value + "of 300,00 €") and optional <strong>popover editing</strong> in dense UIs.',
+          "In inline mode, an optional <code>extraContent</code> slot renders contextual text to the right of the input. When <code>extraContent</code> is present, labels, hints, and errors are hoisted outside the flex row so the row height stays stable.",
+          "In popover mode, an outline icon button (default: Calculator) opens a Radix popover containing the same input. The trigger icon/label, placement, open/close state, and optional deferred Apply flow are configurable via the <code>popover</code> prop.",
+          "Scope guidance: this component is intended for bespoke product surfaces that need inline context or popover behavior. In F0Form flows, prefer standard numeric/percentage fields and use <code>helpText</code> for extra explanatory copy.",
           'The <code>inputWidth</code> prop controls the width of the inner input element. Omit it (or set <code>"auto"</code>) to let it shrink-wrap its content.',
         ]
           .map((text) => `<p>${text}</p>`)
@@ -74,7 +75,7 @@ const meta = {
     },
     extraContent: {
       description:
-        'Node rendered to the right of the input — typically contextual text like `"of 300,00 €"`. Controlled entirely by the consuming component.',
+        'Node rendered to the right of the input — typically contextual text like `"of 300,00 €"`. This is the primary value of `F0AmountCalculator` versus a plain number field.',
       control: { type: "text" },
       table: { type: { summary: "ReactNode" } },
     },

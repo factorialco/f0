@@ -300,6 +300,31 @@ describe("F0AmountCalculator", () => {
       expect(screen.getByRole("textbox")).toBeInTheDocument()
     })
 
+    test("shows status message in popover mode and hides NumberInput duplicate message", async () => {
+      render(
+        <F0AmountCalculator
+          label="Discount"
+          locale="en-US"
+          popover={{}}
+          status={{ type: "warning", message: "Value is outside normal range" }}
+          onChange={vi.fn()}
+        />
+      )
+
+      const trigger = screen.getByRole("button", { name: "Discount" })
+      await userEvent.click(trigger)
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("Value is outside normal range")
+        ).toBeInTheDocument()
+      })
+
+      expect(screen.getAllByText("Value is outside normal range")).toHaveLength(
+        1
+      )
+    })
+
     test("controlled open state: respects popover.open=false", () => {
       render(
         <F0AmountCalculator
