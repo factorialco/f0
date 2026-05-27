@@ -550,14 +550,14 @@ export const DoDontDoCase: Story = {
   args: {
     // props that illustrate the "do" scenario
   },
-}
+};
 
 export const DoDontDontCase: Story = {
   tags: ["no-sidebar"],
   args: {
     // props that illustrate the "don't" scenario
   },
-}
+};
 ```
 
 ```mdx
@@ -639,7 +639,7 @@ export const Default: Story = {
   render: ({ onClose, ...args }) => (
     <F0ComponentName {...args} onClose={onClose ? fn() : undefined} />
   ),
-}
+};
 ```
 
 This pattern lets the Controls panel show a simple toggle for the optional callback, while the component receives a real `fn()` (from `@storybook/test`) or `undefined` depending on the toggle state.
