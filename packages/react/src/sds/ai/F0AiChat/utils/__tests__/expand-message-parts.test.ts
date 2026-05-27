@@ -1,13 +1,13 @@
-import { type Message } from "@copilotkit/shared"
 import { describe, expect, it } from "vitest"
 
-import { type OrderedPart } from "../../providers/OrderedMessagePartsProvider"
+import { type F0Message } from "../../types"
 import {
   expandFromOrderedParts,
   legacyExpansion,
+  type OrderedPart,
 } from "../expand-message-parts"
 
-const baseMsg = (id: string): Message => ({
+const baseMsg = (id: string): F0Message => ({
   id,
   role: "assistant" as const,
   content: "",
@@ -49,7 +49,7 @@ describe("expandFromOrderedParts", () => {
     const expanded = expandFromOrderedParts(baseMsg("msg-1"), parts)
 
     expect(expanded).toHaveLength(1)
-    const toolMsg = expanded[0] as Message & {
+    const toolMsg = expanded[0] as F0Message & {
       toolCalls?: {
         id: string
         type: string
@@ -137,7 +137,7 @@ describe("expandFromOrderedParts", () => {
 
 describe("legacyExpansion", () => {
   it("passes plain text messages through unchanged", () => {
-    const msg: Message = {
+    const msg: F0Message = {
       id: "msg-text",
       role: "assistant",
       content: "Just text, no tools.",
@@ -157,7 +157,7 @@ describe("legacyExpansion", () => {
           function: { name: "downloadData", arguments: "{}" },
         },
       ],
-    } as unknown as Message
+    } as unknown as F0Message
 
     expect(legacyExpansion(msg)).toEqual([msg])
   })
@@ -179,7 +179,7 @@ describe("legacyExpansion", () => {
           function: { name: "downloadData", arguments: "{}" },
         },
       ],
-    } as unknown as Message
+    } as unknown as F0Message
 
     const expanded = legacyExpansion(msg)
 
@@ -208,7 +208,7 @@ describe("legacyExpansion", () => {
           function: { name: "b", arguments: "{}" },
         },
       ],
-    } as unknown as Message
+    } as unknown as F0Message
 
     const expanded = legacyExpansion(msg)
     expect(expanded.map((m) => m.id)).toEqual([

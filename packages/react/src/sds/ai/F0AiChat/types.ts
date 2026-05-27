@@ -1,6 +1,3 @@
-import { CopilotKitProps } from "@copilotkit/react-core"
-import { type AIMessage, type Message } from "@copilotkit/shared"
-
 import { IconType } from "@/components/F0Icon"
 import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
 
@@ -13,6 +10,38 @@ import type {
   DataDownloadCanvasContent,
   FormCanvasContent,
 } from "../canvas/types"
+
+/**
+ * Loose message shape used inside f0. Mirrors the CopilotKit `Message`
+ * shape so adapters (factorial, mock runtime) can map back and forth
+ * with no field rename, but is owned by f0 — nothing in `src/` imports
+ * from `@copilotkit/*` anymore.
+ */
+export type F0ToolCall = {
+  id: string
+  type?: "function"
+  function: {
+    name: string
+    arguments: string
+  }
+}
+
+export type F0Message = {
+  id: string
+  role: "user" | "assistant" | "system" | "tool"
+  content?: unknown
+  toolCalls?: F0ToolCall[]
+  toolCallId?: string
+  createdAt?: string
+  agentName?: string
+  generativeUI?: () => unknown
+  rawData?: unknown
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any
+}
+
+/** Assistant-flavoured `F0Message`. Same shape — alias kept for clarity. */
+export type F0AIMessage = F0Message
 
 // Re-export canvas content types for backwards-compatible public API
 export type {
@@ -219,7 +248,7 @@ export type AiChatTrackingOptions = {
   onClose?: () => void
   onWelcomeSuggestionClick?: (event: WelcomeSuggestionClickEvent) => void
   onNewChat?: () => void
-  onMessage?: (message: Message) => void
+  onMessage?: (message: F0Message) => void
 }
 
 /**
@@ -227,6 +256,11 @@ export type AiChatTrackingOptions = {
  */
 export type AiChatProviderProps = {
   enabled?: boolean
+  /**
+   * Greeting phrase(s) shown by the welcome screen when the chat is empty.
+   * A single string renders once; an array rotates through phrases. Purely
+   * UI config — does not affect runtime behavior.
+   */
   initialMessage?: string | string[]
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
   disclaimer?: AiChatDisclaimer
@@ -305,32 +339,32 @@ export type AiChatProviderProps = {
    */
   fileAttachments?: AiChatFileAttachmentConfig
   onThumbsUp?: (
-    message: AIMessage,
+    message: F0AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
   onThumbsDown?: (
-    message: AIMessage,
+    message: F0AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
   tracking?: AiChatTrackingOptions
   /**
-   * Optional hook called before a user message is sent. Return false to block submission.
+   * Optional name of the AI agent. Forwarded to the host runtime adapter
+   * (mock in stories, CopilotKit in factorial) — f0 itself only stores it.
    */
-  onBeforeSendMessage?: () => boolean | Promise<boolean>
+  agent?: string
   /**
-   * Optional fetch implementation for AI runtime requests owned by F0.
+   * Slot elements rendered inside `<F0AiChat />`. Host apps (factorial in
+   * production, the mock runtime in stories) provide their own connected
+   * wrappers — f0 ships only the shell. Passing slots here makes them
+   * available to any `<F0AiChat />` mounted under this provider (used by
+   * `ApplicationFrame`, which renders the chat itself).
    */
-  runtimeFetch?: typeof fetch
-} & Pick<
-  CopilotKitProps,
-  | "agent"
-  | "credentials"
-  | "children"
-  | "runtimeUrl"
-  | "showDevConsole"
-  | "threadId"
-  | "headers"
->
+  chatHeader?: React.ReactNode
+  chatMessages?: React.ReactNode
+  chatInput?: React.ReactNode
+  /** Children rendered inside the provider. */
+  children?: React.ReactNode
+}
 
 /**
  * A single sub-suggestion shown inside a welcome-screen group's popover.

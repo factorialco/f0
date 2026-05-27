@@ -1,11 +1,11 @@
-import { Message } from "@copilotkit/shared"
 import { describe, expect, it } from "vitest"
 
+import { type F0Message } from "../../types"
 import { convertMessagesToTurns, extractThinkingGroup } from "../turnUtils"
 
 describe("convertMessagesToTurn", () => {
   it("every user message creates new turn", () => {
-    const onlyUserMessages: Message[] = [
+    const onlyUserMessages: F0Message[] = [
       {
         id: "1",
         role: "user",
@@ -23,7 +23,7 @@ describe("convertMessagesToTurn", () => {
   })
 
   it("includes all assistant messages between two user messages to the first turn", () => {
-    const messages: Message[] = [
+    const messages: F0Message[] = [
       {
         id: "1",
         role: "user",
@@ -58,7 +58,7 @@ describe("convertMessagesToTurn", () => {
   })
 
   it("groups thinking tool calls into an array", () => {
-    const messages: Message[] = [
+    const messages: F0Message[] = [
       {
         id: "1",
         role: "user",
@@ -95,7 +95,7 @@ describe("convertMessagesToTurn", () => {
   })
 
   it("merges all thinking tool calls into a single group per turn", () => {
-    const messages: Message[] = [
+    const messages: F0Message[] = [
       {
         id: "1",
         role: "user",
@@ -133,7 +133,7 @@ describe("convertMessagesToTurn", () => {
   })
 
   it("does not group other tool calls", () => {
-    const messages: Message[] = [
+    const messages: F0Message[] = [
       {
         id: "1",
         role: "user",
@@ -173,7 +173,7 @@ describe("convertMessagesToTurn", () => {
   })
 
   it("deduplicates consecutive thinking messages with identical tool call args", () => {
-    const messages: Message[] = [
+    const messages: F0Message[] = [
       {
         id: "1",
         role: "user",
@@ -188,12 +188,12 @@ describe("convertMessagesToTurn", () => {
     const turns = convertMessagesToTurns(messages)
     expect(turns[0]).toHaveLength(2)
 
-    const thinkingGroup = turns[0][1] as Message[]
+    const thinkingGroup = turns[0][1] as F0Message[]
     expect(thinkingGroup).toHaveLength(2)
   })
 
   it("groups thinking messages with empty content but different arguments (real CopilotKit shape)", () => {
-    const messages: Message[] = [
+    const messages: F0Message[] = [
       {
         id: "1",
         role: "user",
@@ -206,12 +206,12 @@ describe("convertMessagesToTurn", () => {
     const turns = convertMessagesToTurns(messages)
     expect(turns[0]).toHaveLength(2)
 
-    const thinkingGroup = turns[0][1] as Message[]
+    const thinkingGroup = turns[0][1] as F0Message[]
     expect(thinkingGroup).toHaveLength(3)
   })
 
   it("deduplicates action thinking messages with identical arguments", () => {
-    const messages: Message[] = [
+    const messages: F0Message[] = [
       {
         id: "1",
         role: "user",
@@ -223,13 +223,13 @@ describe("convertMessagesToTurn", () => {
     ]
     const turns = convertMessagesToTurns(messages)
 
-    const thinkingGroup = turns[0][1] as Message[]
+    const thinkingGroup = turns[0][1] as F0Message[]
     expect(thinkingGroup).toHaveLength(2)
   })
 
   it("hoists thinking group above text when thinking arrives after text in multi-run turns", () => {
     // Simulates: Run1 produces text, Run2 produces thinking + text (same turn, no new user message)
-    const messages: Message[] = [
+    const messages: F0Message[] = [
       {
         id: "1",
         role: "user",
@@ -258,7 +258,7 @@ describe("convertMessagesToTurn", () => {
   })
 
   it("hoists agentState message above thinking tool calls if agentState comes between thinking calls", () => {
-    const messages: Message[] = [
+    const messages: F0Message[] = [
       {
         id: "1",
         role: "user",
@@ -298,7 +298,7 @@ describe("convertMessagesToTurn", () => {
   })
 
   it("does not crash when first message is not a user message", () => {
-    const messages: Message[] = [
+    const messages: F0Message[] = [
       {
         id: "1",
         role: "assistant",
@@ -311,7 +311,7 @@ describe("convertMessagesToTurn", () => {
   })
 
   it("treats message with both text content and thinking tool calls as a regular message", () => {
-    const messages: Message[] = [
+    const messages: F0Message[] = [
       {
         id: "1",
         role: "user",
@@ -345,7 +345,7 @@ describe("convertMessagesToTurn", () => {
 
 describe("extractThinkingGroup", () => {
   it("extracts the thinking group from a turn", () => {
-    const thinkingMessages: Message[] = [
+    const thinkingMessages: F0Message[] = [
       createThinkingMessage(),
       createThinkingMessage(),
     ]
@@ -385,15 +385,15 @@ describe("extractThinkingGroup", () => {
     const { restMessages } = extractThinkingGroup(turn)
 
     expect(restMessages).toHaveLength(3)
-    expect((restMessages[0] as Message).content).toBe("Hello")
-    expect((restMessages[1] as Message).content).toBe("First")
-    expect((restMessages[2] as Message).content).toBe("Second")
+    expect((restMessages[0] as F0Message).content).toBe("Hello")
+    expect((restMessages[1] as F0Message).content).toBe("First")
+    expect((restMessages[2] as F0Message).content).toBe("Second")
   })
 })
 
 const createToolCallMessage = (
   name: string | undefined = "toolName"
-): Message => {
+): F0Message => {
   return {
     id: crypto.randomUUID(),
     role: "assistant",
@@ -415,7 +415,7 @@ const createToolCallMessage = (
  * Create a thinking message matching the v1.51+ AG-UI model:
  * content is empty (no text), tool call arguments carry the thinking text.
  */
-const createThinkingMessage = (thinkingText?: string): Message => ({
+const createThinkingMessage = (thinkingText?: string): F0Message => ({
   id: crypto.randomUUID(),
   role: "assistant",
   content: "",
@@ -437,7 +437,7 @@ const createThinkingMessage = (thinkingText?: string): Message => ({
  * Realistic CopilotKit action-execution message shape:
  * content is undefined, preamble text lives in toolCalls arguments.
  */
-const createActionThinkingMessage = (preamble: string): Message => ({
+const createActionThinkingMessage = (preamble: string): F0Message => ({
   id: crypto.randomUUID(),
   role: "assistant",
   content: undefined as unknown as string,

@@ -21,6 +21,19 @@ import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 
 import { F0AiChatProvider, useAiChat } from ".."
 
+import {
+  MockAiChatRuntimeProvider,
+  MockConnectedChatHeader,
+  MockConnectedChatInput,
+  MockConnectedMessagesContainer,
+} from "./_mock"
+
+const mockChatSlots = {
+  chatHeader: <MockConnectedChatHeader />,
+  chatMessages: <MockConnectedMessagesContainer />,
+  chatInput: <MockConnectedChatInput />,
+}
+
 const meta = {
   title: "AI/F0AiFormTools",
   parameters: {
@@ -262,22 +275,21 @@ export const FormWithAiChat: Story = {
       <F0AiFormRegistryProvider>
         <F0AiChatProvider
           enabled
-          runtimeUrl="https://mastra.local.factorial.dev/copilotkit"
-          agent="one-workflow"
-          credentials="include"
-          showDevConsole={false}
           initialMessage="Help me fill out the employee form"
+          {...mockChatSlots}
         >
-          <AutoOpenChat>
-            <ApplicationFrame
-              {...applicationFrameProps}
-              sidebar={<Sidebar {...SidebarStories.default.args} />}
-            >
-              <Page header={<PageHeader module={storyModule} />}>
-                <FormWithAiDemo />
-              </Page>
-            </ApplicationFrame>
-          </AutoOpenChat>
+          <MockAiChatRuntimeProvider>
+            <AutoOpenChat>
+              <ApplicationFrame
+                {...applicationFrameProps}
+                sidebar={<Sidebar {...SidebarStories.default.args} />}
+              >
+                <Page header={<PageHeader module={storyModule} />}>
+                  <FormWithAiDemo />
+                </Page>
+              </ApplicationFrame>
+            </AutoOpenChat>
+          </MockAiChatRuntimeProvider>
         </F0AiChatProvider>
       </F0AiFormRegistryProvider>
     )
@@ -848,55 +860,54 @@ export const AvailableForms: Story = {
       >
         <F0AiChatProvider
           enabled
-          runtimeUrl="https://mastra.local.factorial.dev/copilotkit"
-          agent="one-workflow"
-          credentials="include"
-          showDevConsole={false}
           initialMessage="What form do you want to fill out?"
+          {...mockChatSlots}
         >
-          <AutoOpenChat>
-            <ApplicationFrame
-              {...applicationFrameProps}
-              sidebar={<Sidebar {...SidebarStories.default.args} />}
-            >
-              <Page header={<PageHeader module={storyModule} />}>
-                <div className="mx-auto h-screen overflow-hidden p-8">
-                  <h1 className="font-bold mb-2 text-2xl text-f1-foreground">
-                    AI Form Tools
-                  </h1>
-                  <p className="mb-4 text-sm text-f1-foreground-secondary">
-                    No forms are rendered on this page. The AI can fill, read,
-                    submit, and present forms dynamically using{" "}
-                    <code className="rounded bg-f1-background-tertiary px-1 py-0.5 text-xs">
-                      availableFormDefinitions
-                    </code>
-                    .
-                  </p>
-                  <ul className="list-disc space-y-2 pl-6 text-sm text-f1-foreground-secondary">
-                    <li>
-                      <strong>time-off-request</strong> — Employee name, leave
-                      type, start/end dates, and optional reason
-                    </li>
-                    <li>
-                      <strong>expense-report</strong> — Description, amount,
-                      category, date, and optional notes
-                    </li>
-                    <li>
-                      <strong>quick-contact</strong> — Simple form, best as a
-                      dialog
-                    </li>
-                    <li>
-                      <strong>new-employee</strong> — Multi-section form with
-                      wizard steps
-                    </li>
-                  </ul>
-                  <p className="mt-4 text-sm text-f1-foreground-secondary">
-                    Open the AI chat and try interacting with these forms.
-                  </p>
-                </div>
-              </Page>
-            </ApplicationFrame>
-          </AutoOpenChat>
+          <MockAiChatRuntimeProvider>
+            <AutoOpenChat>
+              <ApplicationFrame
+                {...applicationFrameProps}
+                sidebar={<Sidebar {...SidebarStories.default.args} />}
+              >
+                <Page header={<PageHeader module={storyModule} />}>
+                  <div className="mx-auto h-screen overflow-hidden p-8">
+                    <h1 className="font-bold mb-2 text-2xl text-f1-foreground">
+                      AI Form Tools
+                    </h1>
+                    <p className="mb-4 text-sm text-f1-foreground-secondary">
+                      No forms are rendered on this page. The AI can fill, read,
+                      submit, and present forms dynamically using{" "}
+                      <code className="rounded bg-f1-background-tertiary px-1 py-0.5 text-xs">
+                        availableFormDefinitions
+                      </code>
+                      .
+                    </p>
+                    <ul className="list-disc space-y-2 pl-6 text-sm text-f1-foreground-secondary">
+                      <li>
+                        <strong>time-off-request</strong> — Employee name, leave
+                        type, start/end dates, and optional reason
+                      </li>
+                      <li>
+                        <strong>expense-report</strong> — Description, amount,
+                        category, date, and optional notes
+                      </li>
+                      <li>
+                        <strong>quick-contact</strong> — Simple form, best as a
+                        dialog
+                      </li>
+                      <li>
+                        <strong>new-employee</strong> — Multi-section form with
+                        wizard steps
+                      </li>
+                    </ul>
+                    <p className="mt-4 text-sm text-f1-foreground-secondary">
+                      Open the AI chat and try interacting with these forms.
+                    </p>
+                  </div>
+                </Page>
+              </ApplicationFrame>
+            </AutoOpenChat>
+          </MockAiChatRuntimeProvider>
         </F0AiChatProvider>
       </F0AiFormRegistryProvider>
     )
@@ -1111,62 +1122,64 @@ export const FormWithDefaultValuesParams: Story = {
       >
         <F0AiChatProvider
           enabled
-          runtimeUrl="https://mastra.local.factorial.dev/copilotkit"
-          agent="one-workflow"
-          credentials="include"
-          showDevConsole={false}
           initialMessage="Which aircraft do you want to edit?"
+          {...mockChatSlots}
         >
-          <AutoOpenChat>
-            <ApplicationFrame
-              {...applicationFrameProps}
-              sidebar={<Sidebar {...SidebarStories.default.args} />}
-            >
-              <Page header={<PageHeader module={storyModule} />}>
-                <div className="mx-auto h-screen overflow-hidden p-8">
-                  <h1 className="font-bold mb-2 text-2xl text-f1-foreground">
-                    Fleet Management (defaultValuesParamsSchema)
-                  </h1>
-                  <p className="mb-4 text-sm text-f1-foreground-secondary">
-                    The AI form uses{" "}
-                    <code className="rounded bg-f1-background-tertiary px-1 py-0.5 text-xs">
-                      defaultValuesParamsSchema
-                    </code>{" "}
-                    to receive an aircraft id and pre-populate the edit form
-                    with its current data.
-                  </p>
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b text-left text-f1-foreground-secondary">
-                        <th className="pb-2 pr-4">ID</th>
-                        <th className="pb-2 pr-4">Registration</th>
-                        <th className="pb-2 pr-4">Manufacturer</th>
-                        <th className="pb-2 pr-4">Model</th>
-                        <th className="pb-2">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {mockAircraft.map((ac) => (
-                        <tr key={ac.id} className="border-b text-f1-foreground">
-                          <td className="font-mono py-2 pr-4 text-xs text-f1-foreground-secondary">
-                            {ac.id}
-                          </td>
-                          <td className="py-2 pr-4">{ac.registration}</td>
-                          <td className="py-2 pr-4">{ac.manufacturer}</td>
-                          <td className="py-2 pr-4">{ac.model}</td>
-                          <td className="py-2">{ac.status}</td>
+          <MockAiChatRuntimeProvider>
+            <AutoOpenChat>
+              <ApplicationFrame
+                {...applicationFrameProps}
+                sidebar={<Sidebar {...SidebarStories.default.args} />}
+              >
+                <Page header={<PageHeader module={storyModule} />}>
+                  <div className="mx-auto h-screen overflow-hidden p-8">
+                    <h1 className="font-bold mb-2 text-2xl text-f1-foreground">
+                      Fleet Management (defaultValuesParamsSchema)
+                    </h1>
+                    <p className="mb-4 text-sm text-f1-foreground-secondary">
+                      The AI form uses{" "}
+                      <code className="rounded bg-f1-background-tertiary px-1 py-0.5 text-xs">
+                        defaultValuesParamsSchema
+                      </code>{" "}
+                      to receive an aircraft id and pre-populate the edit form
+                      with its current data.
+                    </p>
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b text-left text-f1-foreground-secondary">
+                          <th className="pb-2 pr-4">ID</th>
+                          <th className="pb-2 pr-4">Registration</th>
+                          <th className="pb-2 pr-4">Manufacturer</th>
+                          <th className="pb-2 pr-4">Model</th>
+                          <th className="pb-2">Status</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <p className="mt-6 text-sm text-f1-foreground-secondary">
-                    Open the AI chat and ask it to edit one of the aircraft
-                    above.
-                  </p>
-                </div>
-              </Page>
-            </ApplicationFrame>
-          </AutoOpenChat>
+                      </thead>
+                      <tbody>
+                        {mockAircraft.map((ac) => (
+                          <tr
+                            key={ac.id}
+                            className="border-b text-f1-foreground"
+                          >
+                            <td className="font-mono py-2 pr-4 text-xs text-f1-foreground-secondary">
+                              {ac.id}
+                            </td>
+                            <td className="py-2 pr-4">{ac.registration}</td>
+                            <td className="py-2 pr-4">{ac.manufacturer}</td>
+                            <td className="py-2 pr-4">{ac.model}</td>
+                            <td className="py-2">{ac.status}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <p className="mt-6 text-sm text-f1-foreground-secondary">
+                      Open the AI chat and ask it to edit one of the aircraft
+                      above.
+                    </p>
+                  </div>
+                </Page>
+              </ApplicationFrame>
+            </AutoOpenChat>
+          </MockAiChatRuntimeProvider>
         </F0AiChatProvider>
       </F0AiFormRegistryProvider>
     )

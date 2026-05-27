@@ -1,4 +1,4 @@
-import { type Message } from "@copilotkit/shared"
+import { type F0Message } from "../types"
 import { describe, expect, it } from "vitest"
 
 import {
@@ -8,36 +8,36 @@ import {
   isCoagentPlaceholder,
 } from "../internal-types"
 
-/* ---------- helpers to build minimal Message objects ---------- */
+/* ---------- helpers to build minimal F0Message objects ---------- */
 
-function userMsg(id: string, content: string): Message {
-  return { id, role: "user", content } as Message
+function userMsg(id: string, content: string): F0Message {
+  return { id, role: "user", content } as F0Message
 }
 
-function assistantMsg(id: string, content: string): Message {
-  return { id, role: "assistant", content } as Message
+function assistantMsg(id: string, content: string): F0Message {
+  return { id, role: "assistant", content } as F0Message
 }
 
-function toolResultMsg(id: string): Message {
-  return { id, role: "tool", content: '{"ok":true}' } as Message
+function toolResultMsg(id: string): F0Message {
+  return { id, role: "tool", content: '{"ok":true}' } as F0Message
 }
 
-function coagentPlaceholder(id: string): Message {
+function coagentPlaceholder(id: string): F0Message {
   return {
     id,
     role: "assistant",
     content: "",
     name: "coagent-state-render",
-  } as unknown as Message
+  } as unknown as F0Message
 }
 
-function agentStateMsg(id: string, agentName: string): Message {
+function agentStateMsg(id: string, agentName: string): F0Message {
   return {
     id,
     role: "assistant",
     content: "",
     agentName,
-  } as Message
+  } as F0Message
 }
 
 /* ---------- isAgentStateMessage ---------- */

@@ -1,5 +1,5 @@
 // Main components
-export { F0AiChat, F0AiChatProvider } from "./F0AiChat"
+export { F0AiChat, type F0AiChatProps, F0AiChatProvider } from "./F0AiChat"
 
 // Types
 export type {
@@ -17,6 +17,9 @@ export type {
   CreditsUsage,
   DashboardCanvasContent,
   DataDownloadCanvasContent,
+  F0AIMessage,
+  F0Message,
+  F0ToolCall,
   FormCanvasContent,
   EntityResolvers,
   EntityUrlBuilders,
@@ -29,9 +32,32 @@ export type {
   VisualizationMode,
   WelcomeScreenSuggestion,
   WelcomeScreenSuggestionItem,
+  WelcomeSuggestionClickEvent,
+  AiChatTrackingOptions,
   AiChatTranslations,
   AiChatTranslationsProviderProps,
 } from "./types"
+
+// Utilities for runtime adapters (factorial / mock / any consumer) that
+// need to convert a flat `F0Message[]` to `RenderableTurn[]` or expand a
+// streaming assistant message into ordered parts.
+export {
+  expandFromOrderedParts,
+  legacyExpansion,
+  type OrderedPart,
+} from "./utils/expand-message-parts"
+export {
+  analyzeTurn,
+  convertMessagesToTurns,
+  extractThinkingGroup,
+  type Turn,
+} from "./utils/turnUtils"
+export {
+  filterCoagentPlaceholders,
+  filterNonRenderableMessages,
+  isAgentStateMessage,
+  isCoagentPlaceholder,
+} from "./internal-types"
 
 // Tool-call context (host actions need it to identify their own tool call)
 export { useToolCallId } from "../F0AiMessagesContainer"

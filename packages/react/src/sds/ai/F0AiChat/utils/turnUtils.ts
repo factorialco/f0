@@ -1,8 +1,7 @@
-import { type Message } from "@copilotkit/shared"
-
 import { isAgentStateMessage } from "../internal-types"
+import { type F0Message } from "../types"
 
-export type Turn = Array<Message | Array<Message>>
+export type Turn = Array<F0Message | Array<F0Message>>
 
 export function analyzeTurn(
   turnMessages: Turn,
@@ -32,13 +31,13 @@ export function analyzeTurn(
   return { isLastTurn, turnIsComplete, showActivityIndicator }
 }
 
-export function convertMessagesToTurns(messages: Message[]): Turn[] {
+export function convertMessagesToTurns(messages: F0Message[]): Turn[] {
   if (messages.length === 0) {
     return []
   }
 
   const turns: Turn[] = []
-  let thinkingGroup: Message[] | null = null
+  let thinkingGroup: F0Message[] | null = null
 
   for (const [i, message] of messages.entries()) {
     if (message.role === "user") {
@@ -48,8 +47,6 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
     }
 
     // Guard: if no user message has been seen yet, create an implicit turn.
-    // This can happen in v1.51+ when reset() does not abort the running agent
-    // and a stale assistant placeholder is the first message in the array.
     if (turns.length === 0) {
       turns.push([])
       thinkingGroup = null
@@ -79,7 +76,6 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
       } else {
         thinkingGroup = [message]
         // Always insert thinking group right after the user message (index 1)
-        // so it appears above any text messages from earlier runs in the same turn
         if (currentTurn.length > 1) {
           currentTurn.splice(1, 0, thinkingGroup)
         } else {
@@ -96,11 +92,11 @@ export function convertMessagesToTurns(messages: Message[]): Turn[] {
 }
 
 export function extractThinkingGroup(turnMessages: Turn): {
-  thinkingGroup: Message[] | null
-  restMessages: Array<Message | Array<Message>>
+  thinkingGroup: F0Message[] | null
+  restMessages: Array<F0Message | Array<F0Message>>
 } {
   const thinkingGroup = turnMessages.find((m) => Array.isArray(m)) as
-    | Message[]
+    | F0Message[]
     | undefined
   const restMessages = turnMessages.filter((m) => !Array.isArray(m))
   return {
@@ -109,10 +105,7 @@ export function extractThinkingGroup(turnMessages: Turn): {
   }
 }
 
-function isThinkingMessage(message: Message): boolean {
-  // A thinking message is an assistant message with orchestratorThinking
-  // tool calls and no text content. Messages with both content and thinking
-  // toolCalls are treated as regular messages.
+function isThinkingMessage(message: F0Message): boolean {
   return (
     message.role === "assistant" &&
     !message.content &&
@@ -124,18 +117,19 @@ function isThinkingMessage(message: Message): boolean {
 }
 
 /**
- * Dedup key for thinking messages.
- *
- * CopilotKit action-execution messages have empty/undefined `content` — the
- * actual preamble text lives in `toolCalls[0].function.arguments`.
- * Fall back to `content` for backwards compatibility with any call-site that
- * sets it directly, then to `id` as a last resort.
+ * Dedup key for thinking messages. Action-execution messages have
+ * empty/undefined `content` — the actual preamble text lives in
+ * `toolCalls[0].function.arguments`. Fall back to `content`, then `id`.
  */
-function getThinkingKey(message: Message): string {
+function getThinkingKey(message: F0Message): string {
   const tc = (
     message as {
       toolCalls?: { function: { name: string; arguments: string } }[]
     }
   ).toolCalls?.find((c) => c.function.name === "orchestratorThinking")
-  return tc?.function.arguments || message.content || message.id
+  return (
+    tc?.function.arguments ||
+    (typeof message.content === "string" ? message.content : "") ||
+    message.id
+  )
 }
