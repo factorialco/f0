@@ -1,3 +1,4 @@
+import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import {
   CSSProperties,
   type ReactNode,
@@ -7,7 +8,6 @@ import {
   useMemo,
   useState,
 } from "react"
-import { useControllableState } from "@radix-ui/react-use-controllable-state"
 
 import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
@@ -16,8 +16,8 @@ import { Calculator, Check } from "@/icons/app"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { Label } from "@/ui/InputField/components/Label"
 import { InputMessages } from "@/ui/InputField/components/InputMessages"
+import { Label } from "@/ui/InputField/components/Label"
 import { InputFieldStatus } from "@/ui/InputField/types"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
@@ -335,6 +335,9 @@ const _F0AmountCalculator = forwardRef<
 
 _F0AmountCalculator.displayName = "F0AmountCalculator"
 
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
 export const F0AmountCalculator = experimentalComponent(
   "F0AmountCalculator",
   _F0AmountCalculator
