@@ -184,7 +184,8 @@ const _F0AmountCalculator = forwardRef<
   const isDeferredPopover = popover?.commitMode === "deferred"
   const usesExternalMessages = popover !== undefined || hasExtraContent
   const shouldRenderOuterLabel = !hideLabel && label != null
-  const shouldRenderOuterMessages = !hideLabel && resolvedStatus != null
+  const shouldRenderOuterMessages =
+    usesExternalMessages && resolvedStatus != null
   const isTriggerDisabled = Boolean(
     numberInputProps.disabled ||
     numberInputProps.readonly ||
@@ -228,12 +229,10 @@ const _F0AmountCalculator = forwardRef<
       id={inputId}
       label={usesExternalMessages ? (label ?? "") : label}
       hideLabel={hideLabel || usesExternalMessages}
-      hint={hideLabel || usesExternalMessages ? "" : hint}
-      error={hideLabel || usesExternalMessages ? undefined : error}
+      hint={usesExternalMessages ? "" : hint}
+      error={usesExternalMessages ? undefined : error}
       status={
-        hideLabel || usesExternalMessages
-          ? (innerStatusTypeOnly as typeof status)
-          : status
+        usesExternalMessages ? (innerStatusTypeOnly as typeof status) : status
       }
       value={inputValue}
       onChange={inputOnChange}
@@ -277,7 +276,7 @@ const _F0AmountCalculator = forwardRef<
           side={side}
           align={align}
           className={cn(
-            "w-auto min-w-[220px] rounded-xl border-[hsl(var(--neutral-10))] p-3"
+            "w-auto min-w-[220px] rounded-xl border border-solid border-f1-border-secondary p-3"
           )}
         >
           <div className="flex flex-col">

@@ -179,7 +179,8 @@ export const AsPopover: Story = {
             args={{
               ...args,
               value,
-              onChange: setValue as unknown as typeof args.onChange,
+              onChange: ((nextValue: number | null) =>
+                setValue(nextValue)) as typeof args.onChange,
             }}
           />
           <span className="text-f1-foreground-secondary text-sm">
@@ -208,7 +209,8 @@ export const AsPopoverWithCustomIcon: Story = {
             args={{
               ...args,
               value,
-              onChange: setValue as unknown as typeof args.onChange,
+              onChange: ((nextValue: number | null) =>
+                setValue(nextValue)) as typeof args.onChange,
             }}
           />
           <span className="text-f1-foreground-secondary text-sm">
@@ -238,7 +240,8 @@ export const AsPopoverWithTriggerLabel: Story = {
             args={{
               ...args,
               value,
-              onChange: setValue as unknown as typeof args.onChange,
+              onChange: ((nextValue: number | null) =>
+                setValue(nextValue)) as typeof args.onChange,
             }}
           />
           <span className="text-f1-foreground-secondary text-sm">
@@ -267,7 +270,8 @@ export const AsPopoverControlled: Story = {
             args={{
               ...args,
               value,
-              onChange: setValue as unknown as typeof args.onChange,
+              onChange: ((nextValue: number | null) =>
+                setValue(nextValue)) as typeof args.onChange,
               popover: { open, onOpenChange: setOpen },
             }}
           />
@@ -302,7 +306,8 @@ export const AsPopoverDeferredApply: Story = {
             args={{
               ...args,
               value,
-              onChange: setValue as unknown as typeof args.onChange,
+              onChange: ((nextValue: number | null) =>
+                setValue(nextValue)) as typeof args.onChange,
             }}
           />
           <span className="text-f1-foreground-secondary text-sm">
