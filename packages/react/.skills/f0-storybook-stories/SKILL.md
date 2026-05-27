@@ -19,9 +19,9 @@ Creates `.stories.tsx` files for F0 components. For MDX docs (the Docs tab), use
 ### Imports
 
 ```tsx
-import type { Meta, StoryObj } from "@storybook/react-vite";
-import { fn, expect, within } from "storybook/test";
-import { withSnapshot, withSkipA11y } from "@/lib/storybook-utils/parameters";
+import type { Meta, StoryObj } from "@storybook/react-vite"
+import { fn, expect, within } from "storybook/test"
+import { withSnapshot, withSkipA11y } from "@/lib/storybook-utils/parameters"
 // Icons: "@/icons/app" | "@/icons/modules" | "@/icons/ai"
 ```
 
@@ -35,10 +35,10 @@ const meta = {
   component: F0Example,
   tags: ["stable", "!autodocs"], // or "experimental" | "internal" | "deprecated". Always include "!autodocs" when a manual MDX page exists.
   // ...
-} satisfies Meta<typeof F0Example>;
+} satisfies Meta<typeof F0Example>
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 ```
 
 ### Snapshots are OFF by default
@@ -48,7 +48,7 @@ Chromatic snapshots are globally disabled. Every story that should be captured m
 ```tsx
 export const Snapshot: Story = {
   parameters: withSnapshot({}), // opt in
-};
+}
 // With a11y skip: withSkipA11y(withSnapshot({}))
 ```
 
@@ -92,12 +92,12 @@ Omitting `args` causes a TypeScript error when the meta has required props.
 export const Variants: Story = {
   tags: ["!dev"],
   render: () => <div>...</div>,
-};
+}
 
 // CORRECT — provide required args even if render ignores them
 export const Variants: Story = {
   tags: ["!dev"],
   args: { items: [], onClick: () => {} }, // satisfy required props from Meta
   render: () => <div>...</div>,
-};
+}
 ```
