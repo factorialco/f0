@@ -1,7 +1,7 @@
 * @factorialco/foundations
 /packages/react-native/ @factorialco/mobile
-/packages/react/src/experimental/
-/packages/react/src/kits/
+/packages/react/src/experimental/ @factorialco/dev
+/packages/react/src/kits/ @factorialco/dev
 /packages/react/src/ai/ @factorialco/platform-ai-building-blocks
 /packages/react/src/sds/ai/ @factorialco/platform-ai-building-blocks
 /packages/react/src/sds/UpsellingKit/ @factorialco/product-growth
