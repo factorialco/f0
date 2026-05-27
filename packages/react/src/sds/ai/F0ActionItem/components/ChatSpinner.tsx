@@ -1,161 +1,203 @@
-import type { SVGProps } from "react"
+import type { CSSProperties, Ref } from "react"
 
-import { motion } from "motion/react"
-import { Ref, forwardRef, useId } from "react"
+import { forwardRef, useEffect, useMemo, useRef } from "react"
 
-const pieces = [
-  {
-    id: "bottom",
-    delay: 2.6,
-    transformOrigin: "center 89%",
-    rotateAxis: "1, 0, 0",
-    path: "M15.9939 24.8399C19.6511 24.8399 23.2335 26.0603 26.0525 28.4219C23.2335 30.7072 19.651 32.001 15.9939 32.001C12.1849 32.0009 8.67993 30.6307 5.93728 28.4219C8.75621 26.1365 12.3369 24.84 15.9939 24.8399Z",
-  },
-  {
-    id: "right",
-    delay: 2.4,
-    transformOrigin: "88.5% center",
-    rotateAxis: "0, 1, 0",
-    path: "M28.4236 5.94142C30.7088 8.76031 32.0046 12.3412 32.0047 15.9981C32.0047 19.6551 30.7851 23.2376 28.4236 26.0567C26.1382 23.2376 24.8435 19.6552 24.8435 15.9981C24.8436 12.1889 26.2147 8.6841 28.4236 5.94142Z",
-  },
-  {
-    id: "top",
-    delay: 2,
-    transformOrigin: "center 11%",
-    rotateAxis: "1, 0, 0",
-    path: "M15.9939 1.33514e-05C19.6511 1.37386e-05 23.2335 1.22043 26.0525 3.58204C23.2335 5.86737 19.651 7.16115 15.9939 7.16115C12.1849 7.16103 8.67993 5.79089 5.93728 3.58204C8.75621 1.29671 12.3369 0.000125175 15.9939 1.33514e-05Z",
-  },
-  {
-    id: "left",
-    delay: 2.2,
-    transformOrigin: "11% center",
-    rotateAxis: "0, 1, 0",
-    path: "M3.57986 5.94142C5.86509 8.76031 7.1608 12.3412 7.16092 15.9981C7.16092 19.6551 5.94136 23.2376 3.57986 26.0567C1.29443 23.2376 -0.000215909 19.6552 -0.00021553 15.9981C-0.000100728 12.1889 1.37091 8.6841 3.57986 5.94142Z",
-  },
-]
+import { cn } from "@/lib/utils"
+
+import type { GlobeSpinState } from "./globeSpinMath"
+import {
+  buildFrameInto,
+  createGlobeSpinState,
+  easeInOutCubic,
+  PAUSE_MS,
+  PRECESSION_MS,
+  QUAD_POOL_SIZE,
+  SPIN_MS,
+} from "./globeSpinMath"
+
+export interface ChatSpinnerProps {
+  size?: number
+  className?: string
+  style?: CSSProperties
+  /**
+   * "default" → spins 2 rotations, pauses, repeats.
+   * "continuous" → 2 rotations forward, then 2 backward, no pause. Used for
+   * "writing"-style activity where the indicator should never rest.
+   */
+  variant?: "default" | "continuous"
+}
 
 const ChatSpinnerComponent = (
-  svgProps: SVGProps<SVGSVGElement>,
-  ref: Ref<SVGSVGElement>
+  { size = 20, className, style, variant = "default" }: ChatSpinnerProps,
+  ref: Ref<HTMLDivElement>
 ) => {
-  const clipPathId = useId()
-  const {
-    onAnimationStart: _onAnimationStart,
-    onAnimationEnd: _onAnimationEnd,
-    onDragStart: _onDragStart,
-    onDragEnd: _onDragEnd,
-    onDrag: _onDrag,
-    ...safeSvgProps
-  } = svgProps
+  const wrapperRef = useRef<HTMLDivElement | null>(null)
+  const svgRef = useRef<SVGSVGElement | null>(null)
+  // Pool — created lazily once per instance, reused across all frames.
+  const stateRef = useRef<GlobeSpinState | null>(null)
+  if (stateRef.current === null) stateRef.current = createGlobeSpinState()
+
+  // Stable placeholder array for the JSX: one <polygon> per pool slot. We pay
+  // the React mount cost ONCE; per-frame updates go straight to the DOM.
+  const placeholders = useMemo(() => new Array(QUAD_POOL_SIZE).fill(0), [])
+
+  const setRefs = (el: HTMLDivElement | null) => {
+    wrapperRef.current = el
+    if (!ref) return
+    if (typeof ref === "function") ref(el)
+    else (ref as { current: HTMLDivElement | null }).current = el
+  }
+
+  useEffect(() => {
+    const svg = svgRef.current
+    const wrapper = wrapperRef.current
+    if (!svg || !wrapper) return
+
+    const polys = svg.querySelectorAll(
+      "polygon"
+    ) as NodeListOf<SVGPolygonElement>
+    const state = stateRef.current!
+
+    let rafId: number | null = null
+    let start = 0
+    let mount = 0
+    let pauseStart = 0
+    let pausedAt: number | null = null
+    let phase: "spin" | "pause" = "spin"
+    let visible = true
+    let everTicked = false
+
+    const paint = (count: number) => {
+      const quads = state.quads
+      for (let i = 0; i < polys.length; i++) {
+        const p = polys[i]
+        if (i < count) {
+          const q = quads[i]
+          p.setAttribute("points", q.points)
+          p.setAttribute("fill", q.color)
+          if (p.hasAttribute("display")) p.removeAttribute("display")
+        } else if (!p.hasAttribute("display")) {
+          p.setAttribute("display", "none")
+        }
+      }
+    }
+
+    const tick = (now: number) => {
+      if (!everTicked) {
+        start = now
+        mount = now
+        everTicked = true
+      }
+
+      let progress = 0
+      let applyEase = true
+
+      if (variant === "continuous") {
+        const cycleMs = SPIN_MS * 2
+        const p = ((now - start) % cycleMs) / cycleMs
+        progress = p < 0.5 ? p * 2 : (1 - p) * 2
+        applyEase = false
+      } else if (phase === "spin") {
+        progress = Math.min((now - start) / SPIN_MS, 1)
+        if (progress >= 1) {
+          progress = 0
+          phase = "pause"
+          pauseStart = now
+        }
+      } else {
+        progress = 0
+        if (now - pauseStart >= PAUSE_MS) {
+          phase = "spin"
+          start = now
+        }
+      }
+
+      const axisPhase = ((now - mount) / PRECESSION_MS) % 1
+      const angleProgress = applyEase ? easeInOutCubic(progress) : progress
+      const count = buildFrameInto(state, angleProgress, size, axisPhase)
+      paint(count)
+
+      rafId = requestAnimationFrame(tick)
+    }
+
+    const startLoop = () => {
+      if (rafId !== null) return
+      rafId = requestAnimationFrame(tick)
+    }
+    const stopLoop = () => {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId)
+        rafId = null
+      }
+    }
+
+    // Initial paint so the spinner shows static geometry before the first
+    // RAF tick fires (eliminates a flash of empty SVG on mount).
+    paint(buildFrameInto(state, 0, size, 0))
+
+    // Pause the animation while off-screen. On resume, shift the time origin
+    // forward by the elapsed gap so the spinner picks up where it left off
+    // instead of jumping to "current time".
+    let observer: IntersectionObserver | null = null
+    if (typeof IntersectionObserver !== "undefined") {
+      observer = new IntersectionObserver(
+        (entries) => {
+          const isVisible = entries[0]?.isIntersecting ?? true
+          if (isVisible === visible) return
+          visible = isVisible
+          if (isVisible) {
+            if (pausedAt !== null && everTicked) {
+              const gap = performance.now() - pausedAt
+              start += gap
+              mount += gap
+              pauseStart += gap
+            }
+            pausedAt = null
+            startLoop()
+          } else {
+            pausedAt = performance.now()
+            stopLoop()
+          }
+        },
+        { threshold: 0 }
+      )
+      observer.observe(wrapper)
+    }
+
+    startLoop()
+
+    return () => {
+      stopLoop()
+      observer?.disconnect()
+    }
+  }, [size, variant])
 
   return (
-    <div className="h-4 w-4 shrink-0">
-      <motion.svg
+    <div
+      ref={setRefs}
+      role="progressbar"
+      aria-label="Loading"
+      className={cn("shrink-0 globe-spin-anim", className)}
+      style={{ width: size, height: size, ...style }}
+    >
+      <svg
+        ref={svgRef}
         width="100%"
         height="100%"
-        viewBox="0 0 32 32"
+        viewBox={`0 0 ${size} ${size}`}
         xmlns="http://www.w3.org/2000/svg"
-        ref={ref}
-        initial={{
-          rotate: "0deg",
-          opacity: 0,
-          scale: 0.8,
-          filter: "blur(4px)",
-        }}
-        animate={{
-          "--gradient-angle": ["0deg", "360deg"],
-          rotate: "360deg",
-          opacity: 1,
-          scale: 1,
-          filter: "blur(0px)",
-        }}
-        transition={{
-          "--gradient-angle": {
-            duration: 3,
-            ease: "linear",
-            repeat: Infinity,
-          },
-          rotate: {
-            duration: 2,
-            ease: [0.76, 0, 0.24, 1],
-            repeat: Infinity,
-          },
-          opacity: {
-            duration: 0.5,
-            ease: [0.33, 1, 0.68, 1],
-          },
-          scale: {
-            duration: 0.5,
-            ease: [0.25, 0.46, 0.45, 1.94],
-          },
-          filter: {
-            duration: 0.5,
-            ease: [0.33, 1, 0.68, 1],
-          },
-        }}
-        style={
-          {
-            "--gradient-angle": "0deg",
-            ...safeSvgProps.style,
-          } as React.CSSProperties
-        }
-        {...(({ style: _style, ...rest }) => rest)(safeSvgProps)}
+        shapeRendering="geometricPrecision"
+        style={{ display: "block", overflow: "visible" }}
       >
-        <defs>
-          <clipPath id={`${clipPathId}-circle`}>
-            <circle cx="16" cy="16" r="16" />
-          </clipPath>
-          {pieces.map((piece) => (
-            <clipPath key={piece.id} id={`${clipPathId}-${piece.id}`}>
-              <path d={piece.path} />
-            </clipPath>
-          ))}
-        </defs>
-
-        <g clipPath={`url(#${clipPathId}-circle)`}>
-          {pieces.map((piece) => (
-            <motion.foreignObject
-              key={piece.id}
-              x="0"
-              y="0"
-              width="32"
-              height="32"
-              clipPath={`url(#${clipPathId}-${piece.id})`}
-              animate={{
-                "--scale": [1, 8, 1],
-              }}
-              transition={{
-                "--scale": {
-                  duration: 2,
-                  ease: [0.85, 0, 0.15, 1],
-                  repeat: Infinity,
-                  delay: 1,
-                },
-              }}
-              style={
-                {
-                  "--scale": 1,
-                  transform: `scale(var(--scale))`,
-                  transformOrigin: piece.transformOrigin,
-                  willChange: "transform",
-                } as React.CSSProperties
-              }
-            >
-              <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  background: `conic-gradient(from var(--gradient-angle) at 50% 50%, #E55619 0%, #A1ADE5 33%, #E51943 66%, #E55619 100%)`,
-                }}
-              />
-            </motion.foreignObject>
-          ))}
-        </g>
-      </motion.svg>
+        {placeholders.map((_, i) => (
+          <polygon key={i} stroke="none" display="none" />
+        ))}
+      </svg>
     </div>
   )
 }
 
-export const ChatSpinner = forwardRef<SVGSVGElement, SVGProps<SVGSVGElement>>(
+export const ChatSpinner = forwardRef<HTMLDivElement, ChatSpinnerProps>(
   ChatSpinnerComponent
 )
+ChatSpinner.displayName = "ChatSpinner"

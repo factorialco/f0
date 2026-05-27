@@ -50,12 +50,12 @@ export type F0AiMessagesContainerProps = {
   /** Optional React node rendered inline at the end of the list (e.g. CopilotKit interrupt). */
   interrupt?: ReactNode
 
-  /** Greeting shown above the initial message in the welcome screen. */
-  greeting?: string
-  /** Initial message(s) shown in the welcome screen, or a default if omitted. */
+  /** Welcome phrase shown centered when the chat is empty. Falls back to
+   *  `translations.ai.defaultInitialMessage` if omitted. */
   initialMessage?: string | string[]
-  /** Optional click on the One icon (factorial uses it for the pong easter egg). */
-  onWelcomeIconClick?: () => void
+  /** Called when the user clicks the welcome phrase (used by F0AiChat to open
+   *  the pong easter egg). When omitted the phrase is non-interactive. */
+  onWelcomeClick?: () => void
 
   /** Returns a React node for an assistant message's tool call, or null. */
   renderToolCall?: F0AssistantMessageExtraProps["renderToolCall"]
@@ -102,9 +102,8 @@ const Messages = ({
   turns,
   isLoadingThread = false,
   interrupt,
-  greeting,
   initialMessage,
-  onWelcomeIconClick,
+  onWelcomeClick,
   renderToolCall,
   onReplyQuote,
   onAssistantMessageRendered,
@@ -140,8 +139,14 @@ const Messages = ({
     [initialMessages, translations.ai.defaultInitialMessage]
   )
 
-  const showWelcomeBlock =
-    turns.length === 0 && (greeting || resolvedInitialMessages.length > 0)
+  const welcomeMessages = useMemo(
+    () =>
+      resolvedInitialMessages
+        .map((m) => (typeof m.content === "string" ? m.content : ""))
+        .filter((s) => s.length > 0),
+    [resolvedInitialMessages]
+  )
+  const showWelcomeBlock = turns.length === 0 && welcomeMessages.length > 0
 
   // Scroll state
   const viewportRef = useRef<HTMLDivElement>(null)
@@ -250,9 +255,7 @@ const Messages = ({
         {turn.endIndicator === "thinking" && (
           <F0ActionItem title={translations.ai.thinking} status="executing" />
         )}
-        {turn.endIndicator === "activity" && (
-          <F0ActionItem title="" status="executing" />
-        )}
+        {turn.endIndicator === "activity" && <F0ActionItem status="writing" />}
         {turn.feedback && (
           <TurnFeedback
             content={turn.feedback.content}
@@ -294,9 +297,8 @@ const Messages = ({
               {isLoadingThread && <MessagesSkeleton />}
               {!isLoadingThread && showWelcomeBlock && (
                 <WelcomeScreen
-                  greeting={greeting}
-                  initialMessages={resolvedInitialMessages}
-                  onIconClick={onWelcomeIconClick}
+                  messages={welcomeMessages}
+                  onClick={onWelcomeClick}
                 />
               )}
               {!isLoadingThread &&

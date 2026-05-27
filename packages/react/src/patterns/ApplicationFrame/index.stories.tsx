@@ -359,7 +359,13 @@ const meta: Meta<typeof ApplicationFrame> = {
       showDevConsole: false,
       enabled: true,
       resizable: true,
-      greeting: "Hello, John",
+      initialMessage: [
+        "Operational work, automated by One",
+        "Ask anything about your company",
+        "Skip the boring part of your job",
+        "Ask anything about your people, policies, or payroll",
+        "Turn months of data into a one-line answer",
+      ],
       canvasActions: {
         dashboard: {
           save: async (id, category, config) => {
@@ -737,7 +743,13 @@ export const FullscreenWithActions: Story = {
       showDevConsole: false,
       enabled: true,
       resizable: true,
-      greeting: "Hello, John",
+      initialMessage: [
+        "Operational work, automated by One",
+        "Ask anything about your company",
+        "Skip the boring part of your job",
+        "Ask anything about your people, policies, or payroll",
+        "Turn months of data into a one-line answer",
+      ],
       defaultVisualizationMode: "fullscreen",
       lockVisualizationMode: true,
       footer: <QuickActions />,
@@ -886,7 +898,13 @@ export const WithEmployeeCredits: Story = {
       showDevConsole: false,
       enabled: true,
       resizable: true,
-      greeting: "Hello, John",
+      initialMessage: [
+        "Operational work, automated by One",
+        "Ask anything about your company",
+        "Skip the boring part of your job",
+        "Ask anything about your people, policies, or payroll",
+        "Turn months of data into a one-line answer",
+      ],
       employeeCredits: {
         fetchUsage: mockFetchEmployeeCreditsUsage,
         companyName: "Factorial",

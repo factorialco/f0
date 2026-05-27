@@ -150,8 +150,7 @@ export const LoadingThread: Story = {
 export const EmptyWelcome: Story = {
   args: {
     turns: [],
-    greeting: "Hello, John",
-    initialMessage: "How can I help you today?",
+    initialMessage: "Ask anything about your company",
   },
 }
 

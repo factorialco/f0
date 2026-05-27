@@ -280,7 +280,7 @@ export const defaultTranslations = {
     stopAnswerGeneration: "Stop generating",
     responseStopped: "You stopped this response",
     sendMessage: "Send message",
-    thoughtsGroupTitle: "Reflection",
+    thoughtsGroupTitle: "Reasoning",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
     feedbackModal: {

@@ -25,7 +25,7 @@ const meta: Meta<typeof DaytimePage> = {
           credentials: "include",
           showDevConsole: false,
           enabled: true,
-          greeting: "Hello, John",
+          initialMessage: "Ask anything about your company",
         }}
       >
         <Story />

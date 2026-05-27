@@ -116,7 +116,13 @@ const meta = {
             agent="one-workflow"
             credentials="include"
             showDevConsole={false}
-            greeting="Hello, John"
+            initialMessage={[
+              "Operational work, automated by One",
+              "Ask anything about your company",
+              "Skip the boring part of your job",
+              "Ask anything about your people, policies, or payroll",
+              "Turn months of data into a one-line answer",
+            ]}
             disclaimer={{
               text: "One works within your permissions.",
               link: "/permissions",
@@ -209,7 +215,7 @@ export const WithFooter: Story = {
             agent="one-workflow"
             credentials="include"
             showDevConsole={false}
-            greeting="Hello, John"
+            initialMessage="Ask anything about your company"
             disclaimer={{
               text: "One works within your permissions.",
               link: "/permissions",

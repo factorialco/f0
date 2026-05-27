@@ -14,7 +14,10 @@ import {
 
 import { filterNonRenderableMessages } from "../internal-types"
 import { useAiChat } from "../providers/AiChatStateProvider"
-import type { WelcomeScreenSuggestionItem } from "../types"
+import type {
+  WelcomeScreenSuggestion,
+  WelcomeScreenSuggestionItem,
+} from "../types"
 
 /**
  * Internal wrapper that connects F0AiChatTextArea to the AiChat provider.
@@ -105,12 +108,13 @@ export const ConnectedChatInput = (props: InputProps) => {
   )
 
   const handleSuggestionClick = useCallback(
-    (item: WelcomeScreenSuggestionItem) => {
-      tracking?.onWelcomeSuggestionClick?.(item)
+    (item: WelcomeScreenSuggestionItem, group: WelcomeScreenSuggestion) => {
+      const prompt = item.prompt || item.title
+      tracking?.onWelcomeSuggestionClick?.({ item, group, prompt })
       sendMessage({
         id: randomId(),
         role: "user",
-        content: item.prompt || item.title,
+        content: prompt,
       })
     },
     [sendMessage, tracking]
