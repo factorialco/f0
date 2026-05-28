@@ -28,7 +28,10 @@ export const AccordionItem = ({
 }: AccordionItemProps) => {
   const shouldReduceMotion = useReducedMotion()
   const i18n = useI18n()
-  const triggerLabel = `${open ? i18n.actions.collapse : i18n.actions.expand} ${item.title}`
+  const triggerLabel = i18n.t(
+    open ? "actions.collapseItem" : "actions.expandItem",
+    { title: item.title }
+  )
   const hasActions = !!item.actions && item.actions.length > 0
 
   return (
