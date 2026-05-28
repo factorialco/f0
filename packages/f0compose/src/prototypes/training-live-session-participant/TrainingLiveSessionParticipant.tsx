@@ -4961,9 +4961,9 @@ function SessionRoomScreen({
             <F0ButtonToggle label={["Turn microphone on", "Turn microphone off"]} icon={[MicrophoneNegative, Microphone]} selected={microphoneEnabled} onSelectedChange={setMicrophoneEnabled} />
             <F0ButtonToggle label={["Turn camera on", "Turn camera off"]} icon={[VideoRecorderNegative, VideoRecorder]} selected={cameraEnabled} onSelectedChange={setCameraEnabled} />
             <F0Box height="4" width="0.5" background="secondary" />
-            <F0Button label={activePanel === "chat" ? "Close chat" : "Open chat"} hideLabel icon={Comment} variant="outline" onClick={() => togglePanel("chat")} />
+            <F0ButtonToggle label={["Open chat", "Close chat"]} icon={[Comment, Comment]} selected={activePanel === "chat"} onSelectedChange={() => togglePanel("chat")} />
             {isInstructor ? (
-              <F0Button label={activePanel === "notes" ? "Close notes" : "Open notes"} hideLabel icon={BookOpen} variant="outline" onClick={() => togglePanel("notes")} />
+              <F0ButtonToggle label={["Open notes", "Close notes"]} icon={[BookOpen, BookOpen]} selected={activePanel === "notes"} onSelectedChange={() => togglePanel("notes")} />
             ) : null}
             <F0Button label="Settings" hideLabel icon={Settings} variant="outline" onClick={() => setSettingsOpen(true)} />
             {isInstructor ? (
@@ -4977,7 +4977,7 @@ function SessionRoomScreen({
           </F0BoxWithClassName>
         </F0BoxWithClassName>
         {activePanel ? (
-          <F0BoxWithClassName style={{ width: activePanelWidth, minWidth: activePanelWidth, overflow: "hidden" }}>
+          <F0BoxWithClassName background="primary" border="default" borderColor="secondary" borderRadius="xl" style={{ width: activePanelWidth, minWidth: activePanelWidth, overflow: "hidden" }}>
             {activePanel === "chat" ? <LiveSessionChatDrawer /> : <LiveSessionNotesDrawer />}
           </F0BoxWithClassName>
         ) : null}
