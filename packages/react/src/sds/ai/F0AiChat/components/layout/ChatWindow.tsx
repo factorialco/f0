@@ -1,6 +1,6 @@
-import { type WindowProps } from "@copilotkit/react-ui"
 import { breakpoints } from "@factorialco/f0-core"
 import { AnimatePresence, motion } from "motion/react"
+import type { ReactNode } from "react"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
@@ -12,7 +12,7 @@ import { DropOverlay } from "../../../F0AiChatTextArea"
 import { F0AiPong } from "../../../F0AiPong"
 import { ResizeHandle } from "./ResizeHandle"
 
-export const SidebarWindow = ({ children }: WindowProps) => {
+export const SidebarWindow = ({ children }: { children?: ReactNode }) => {
   const {
     open,
     visualizationMode,
@@ -22,7 +22,7 @@ export const SidebarWindow = ({ children }: WindowProps) => {
     setChatWidth,
     resetChatWidth,
     fileAttachments,
-    clarifyingQuestion,
+    isClarifying,
     fileDragOver,
     setFileDragOver,
     processDroppedFiles,
@@ -32,8 +32,7 @@ export const SidebarWindow = ({ children }: WindowProps) => {
   const isCanvasMode = visualizationMode === "canvas"
 
   const dragCounterRef = useRef(0)
-  const canDrop =
-    fileAttachments?.onUploadFiles != null && clarifyingQuestion === null
+  const canDrop = fileAttachments?.onUploadFiles != null && !isClarifying
 
   const handleDragEnter = useCallback(
     (e: React.DragEvent) => {

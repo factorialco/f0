@@ -13,7 +13,7 @@ const meta: Meta<typeof F0OneSwitch> = {
   tags: ["autodocs"],
   decorators: [
     (Story) => (
-      <F0AiChatProvider enabled runtimeUrl="https://example.com">
+      <F0AiChatProvider enabled>
         <Story />
       </F0AiChatProvider>
     ),

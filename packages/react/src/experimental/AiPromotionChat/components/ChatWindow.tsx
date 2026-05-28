@@ -1,10 +1,10 @@
-import { type WindowProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
+import type { ReactNode } from "react"
 
 import { useAutoClear } from "../hooks/useAutoClear"
 import { useAiPromotionChat } from "../providers/AiPromotionChatStateProvider"
 
-export const SidebarWindow = ({ children }: WindowProps) => {
+export const SidebarWindow = ({ children }: { children?: ReactNode }) => {
   const {
     open,
     shouldPlayEntranceAnimation,
