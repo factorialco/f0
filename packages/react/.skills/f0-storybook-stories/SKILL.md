@@ -43,7 +43,14 @@ type Story = StoryObj<typeof meta>
 
 ### Snapshots are OFF by default
 
-Chromatic snapshots are globally disabled. Every story that should be captured must opt in:
+**Why**: Chromatic charges per snapshot and visual-diff reviews get noisy when
+the same component produces many captures. The policy is **one consolidated
+snapshot per component** — a single image that shows every meaningful variant
+in a flex layout — so a visual change produces exactly one diff to review.
+
+**Rule**: every component has exactly **one** story exported as `Snapshot`
+that opts in with `withSnapshot({})`. Do **not** scatter `withSnapshot()`
+across multiple stories; consolidate all variants into the `Snapshot` story.
 
 ```tsx
 export const Snapshot: Story = {
@@ -68,6 +75,14 @@ export const Snapshot: Story = {
 > **Promotion and deprecation:** when a component is promoted from `experimental/` to stable, change the tag from `"experimental"` to `"stable"`. When deprecating, change to `"deprecated"` and add `@deprecated` + `@removeIn` + `@migration` JSDoc tags on the export. See the `f0-component-promotion` skill and the [Deprecation & Removal policy](/?path=/docs/docs-development-release-and-versioning--docs).
 
 > **Note:** Storybook applies `tags: ["autodocs"]` globally via `.storybook/preview.tsx`. To opt out of autodocs when a manual MDX page exists, add `"!autodocs"` to the meta tags. Removing `"autodocs"` alone is not enough.
+
+### Manual MDX requires a visible first story
+
+When a component has a manual MDX file (`F0Example.mdx` with `<Meta of={Stories} />`), Storybook attaches the MDX docs entry to the **first exported story** and inherits its tags onto the docs entry.
+
+**Consequence**: if the first exported story has `tags: ["no-sidebar"]`, the Documentation page also gets `no-sidebar` and disappears from the sidebar — the MDX is still served but unreachable through navigation.
+
+**Rule**: with manual MDX, the **first exported story must NOT include `no-sidebar`**. Conventionally that first story is `Default`, and it must remain visible in the sidebar. Hidden helper stories (`no-sidebar`) referenced by `<Canvas of={...} />` come after.
 
 ### ArgTypes for union props
 
