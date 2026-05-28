@@ -188,4 +188,42 @@ describe("F0Accordion", () => {
     await waitFor(() => expect(onClick).toHaveBeenCalledTimes(1))
     expect(accordionTrigger).toHaveAttribute("aria-expanded", "false")
   })
+
+  it("toggles the item when clicking the title (no actions)", async () => {
+    render(<F0Accordion items={items} />)
+    await userEvent.click(screen.getByText("Item One"))
+    expect(getTrigger("Item One")).toHaveAttribute("aria-expanded", "true")
+    await userEvent.click(screen.getByText("Item One"))
+    expect(getTrigger("Item One")).toHaveAttribute("aria-expanded", "false")
+  })
+
+  it("toggles the item when clicking the title (with actions)", async () => {
+    render(
+      <F0Accordion
+        items={[
+          {
+            id: "one",
+            title: "Item One",
+            description: "Description one",
+            actions: [
+              {
+                type: "segmentedControl",
+                ariaLabel: "Relevance for Item One",
+                items: [
+                  { value: "required", label: "Required" },
+                  { value: "important", label: "Important" },
+                ],
+                value: "required",
+                onChange: () => {},
+              },
+            ],
+          },
+        ]}
+      />
+    )
+    const chevron = screen.getByRole("button", { name: "Expand Item One" })
+    expect(chevron).toHaveAttribute("aria-expanded", "false")
+    await userEvent.click(screen.getByText("Item One"))
+    expect(chevron).toHaveAttribute("aria-expanded", "true")
+  })
 })

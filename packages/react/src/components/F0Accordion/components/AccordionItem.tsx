@@ -4,6 +4,7 @@ import { F0Button } from "@/components/F0Button"
 import { ChevronDown, ChevronUp } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
+import { cn, focusRing } from "@/lib/utils"
 import {
   Collapsible,
   CollapsibleContent,
@@ -28,26 +29,41 @@ export const AccordionItem = ({
   const shouldReduceMotion = useReducedMotion()
   const i18n = useI18n()
   const triggerLabel = `${open ? i18n.actions.collapse : i18n.actions.expand} ${item.title}`
+  const hasActions = !!item.actions && item.actions.length > 0
 
   return (
     <Collapsible open={open} onOpenChange={onOpenChange} asChild>
       <div className="flex flex-col">
-        <div className="flex items-center gap-2 px-4 py-3">
-          <p className="flex-1 truncate font-medium text-f1-foreground">
-            {item.title}
-          </p>
-          {item.actions && item.actions.length > 0 && (
-            <AccordionActions actions={item.actions} />
-          )}
+        <div className="flex items-center">
           <CollapsibleTrigger asChild>
-            <F0Button
-              variant="outline"
-              size="sm"
-              icon={open ? ChevronUp : ChevronDown}
-              label={triggerLabel}
-              hideLabel
-            />
+            <button
+              type="button"
+              className={cn(
+                "flex flex-1 min-w-0 items-center py-3 pl-4 pr-2 text-left",
+                focusRing()
+              )}
+            >
+              <p className="flex-1 truncate font-medium text-f1-foreground">
+                {item.title}
+              </p>
+            </button>
           </CollapsibleTrigger>
+          {hasActions && (
+            <div className="flex items-center gap-2 px-2 py-3">
+              <AccordionActions actions={item.actions!} />
+            </div>
+          )}
+          <div className={cn("flex items-center py-3 pl-2 pr-4")}>
+            <CollapsibleTrigger asChild>
+              <F0Button
+                variant="outline"
+                size="sm"
+                icon={open ? ChevronUp : ChevronDown}
+                label={triggerLabel}
+                hideLabel
+              />
+            </CollapsibleTrigger>
+          </div>
         </div>
         <AnimatePresence initial={false}>
           {open && (
