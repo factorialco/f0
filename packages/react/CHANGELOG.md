@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.24.0](https://github.com/factorialco/f0/compare/f0-react-v2.23.0...f0-react-v2.24.0) (2026-05-28)
+
+
+### Features
+
+* **react:** nestedtask content slot, avatar-list tooltip descriptions, DetailsItem file ([#4138](https://github.com/factorialco/f0/issues/4138)) ([3de1dfe](https://github.com/factorialco/f0/commit/3de1dfe85c9cb44f63f492f1e313ed6534be8e3b))
+
 ## [2.23.0](https://github.com/factorialco/f0/compare/f0-react-v2.22.0...f0-react-v2.23.0) (2026-05-28)
 
 
