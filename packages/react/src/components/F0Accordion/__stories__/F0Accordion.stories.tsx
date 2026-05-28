@@ -43,7 +43,7 @@ const dropdownItems = [
 const meta = {
   title: "F0Accordion",
   component: F0Accordion,
-  tags: ["autodocs", "experimental"],
+  tags: ["experimental"],
   args: {
     items: baseItems,
   },
@@ -52,9 +52,12 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {}
+export const Default: Story = {
+  tags: ["!dev"],
+}
 
 export const DefaultOpen: Story = {
+  tags: ["!dev"],
   args: {
     items: baseItems.map((item, index) => ({
       ...item,
@@ -87,6 +90,7 @@ const WithSegmentedControlExample = () => {
 }
 
 export const WithSegmentedControl: Story = {
+  tags: ["!dev"],
   render: () => <WithSegmentedControlExample />,
 }
 
@@ -120,6 +124,7 @@ const WithSegmentedControlAndDropdownExample = () => {
 }
 
 export const WithSegmentedControlAndDropdown: Story = {
+  tags: ["!dev"],
   render: () => <WithSegmentedControlAndDropdownExample />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
@@ -138,14 +143,17 @@ const ControlledExample = () => {
 }
 
 export const Controlled: Story = {
+  tags: ["!dev"],
   render: () => <ControlledExample />,
 }
 
 export const Skeleton: Story = {
+  tags: ["!dev"],
   render: () => <F0Accordion.Skeleton items={3} />,
 }
 
 export const Snapshot: Story = {
+  tags: ["!dev"],
   parameters: withSnapshot({}),
   render: () => (
     <div className="flex flex-col gap-4">
