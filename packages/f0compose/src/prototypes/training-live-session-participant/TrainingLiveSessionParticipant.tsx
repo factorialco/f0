@@ -4977,7 +4977,7 @@ function SessionRoomScreen({
           </F0BoxWithClassName>
         </F0BoxWithClassName>
         {activePanel ? (
-          <F0BoxWithClassName background="primary" border="default" borderColor="secondary" borderRadius="xl" style={{ width: activePanelWidth, minWidth: activePanelWidth, overflow: "hidden" }}>
+          <F0BoxWithClassName background="primary" border="default" borderColor="secondary" borderRadius="xl" style={{ width: activePanelWidth, minWidth: activePanelWidth, height: "calc(100vh - 184px)", alignSelf: "flex-start", overflow: "hidden" }}>
             {activePanel === "chat" ? <LiveSessionChatDrawer /> : <LiveSessionNotesDrawer />}
           </F0BoxWithClassName>
         ) : null}
