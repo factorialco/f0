@@ -181,6 +181,7 @@ const WIZARD_HEIGHT = 720
 const WIZARD_BODY_HEIGHT = WIZARD_HEIGHT - 64
 const LIVE_SESSION_COMPACT_PANEL_WIDTH = 420
 const LIVE_SESSION_NOTES_PANEL_WIDTH = 612
+const LIVE_SESSION_CONTROLS_SPACE = 88
 type SortingsState = { field: string; order: "asc" | "desc" }[]
 type FetchOptions = {
   filters?: Record<string, unknown>
@@ -4769,19 +4770,20 @@ function RoomSettingsDialog(props: { isOpen: boolean; onClose: () => void }) {
 
 function LiveSessionChatDrawer() {
   return (
-    <F0Card title="Chat">
-      <F0BoxWithClassName display="flex" flexDirection="column" style={{ height: 626 }}>
-        <F0Box display="flex" alignItems="center" justifyContent="center" grow padding="lg">
-          <F0Text content="No messages yet" variant="description" />
-        </F0Box>
-        <F0Box display="flex" alignItems="center" gap="sm" padding="md" borderTop="default" borderColor="secondary">
-          <F0BoxWithClassName grow background="secondary" borderRadius="lg" padding="md" style={{ minWidth: 0 }}>
-            <F0Text content="Write a message" variant="description" />
-          </F0BoxWithClassName>
-          <F0Button label="Send" variant="outline" onClick={() => undefined} />
-        </F0Box>
-      </F0BoxWithClassName>
-    </F0Card>
+    <F0BoxWithClassName background="primary" border="default" borderColor="secondary" borderRadius="xl" display="flex" flexDirection="column" height="full" style={{ overflow: "hidden" }}>
+      <F0Box padding="lg">
+        <F0Heading content="Chat" variant="heading" as="h3" />
+      </F0Box>
+      <F0Box display="flex" alignItems="center" justifyContent="center" grow padding="lg">
+        <F0Text content="No messages yet" variant="description" />
+      </F0Box>
+      <F0Box display="flex" alignItems="center" gap="sm" padding="md" borderTop="default" borderColor="secondary">
+        <F0BoxWithClassName grow background="secondary" borderRadius="lg" padding="md" style={{ minWidth: 0 }}>
+          <F0Text content="Write a message" variant="description" />
+        </F0BoxWithClassName>
+        <F0Button label="Send" variant="outline" onClick={() => undefined} />
+      </F0Box>
+    </F0BoxWithClassName>
   )
 }
 
@@ -4948,7 +4950,7 @@ function SessionRoomScreen({
   const activePanelStyle: CSSProperties = {
     width: activePanelWidth,
     minWidth: activePanelWidth,
-    height: activePanel === "notes" ? "calc(100vh - 184px)" : "100%",
+    height: `calc(100% - ${LIVE_SESSION_CONTROLS_SPACE}px)`,
     alignSelf: "flex-start",
     overflow: "hidden",
   }
@@ -4985,7 +4987,7 @@ function SessionRoomScreen({
         </F0BoxWithClassName>
         {activePanel ? (
           activePanel === "chat" ? (
-            <F0BoxWithClassName style={{ width: activePanelWidth, minWidth: activePanelWidth }}>
+            <F0BoxWithClassName style={activePanelStyle}>
               <LiveSessionChatDrawer />
             </F0BoxWithClassName>
           ) : (
