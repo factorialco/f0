@@ -52,12 +52,9 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {
-  parameters: withSnapshot({}),
-}
+export const Default: Story = {}
 
 export const DefaultOpen: Story = {
-  parameters: withSnapshot({}),
   args: {
     items: baseItems.map((item, index) => ({
       ...item,
@@ -145,7 +142,6 @@ export const Controlled: Story = {
 }
 
 export const Skeleton: Story = {
-  parameters: withSnapshot({}),
   render: () => <F0Accordion.Skeleton items={3} />,
 }
 
