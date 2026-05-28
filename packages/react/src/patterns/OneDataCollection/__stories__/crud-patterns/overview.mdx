@@ -63,6 +63,13 @@ Table mode for field-level updates; most Table rules still apply.
           "Field-level updates that should happen in place. Best for spreadsheet-like flows where opening a form for every edit would slow users down.",
         href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--editable-table",
       },
+      {
+        icon: Table,
+        title: "Page",
+        description:
+          "Clicking a row or item routes directly to the resource page — no dialog preview. Best when the resource is always read on its own page because of persistent navigation, tabs, deeper structure, or page-level actions.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-read--table-read-page",
+      },
     ]}
   />
 </Unstyled>
@@ -351,6 +358,20 @@ to a page when the resource needs a durable destination.
         <td>
           <a
             target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-right-dialog"
+          >
+            Table Read — Right Dialog
+          </a>
+        </td>
+        <td>
+          Clicking a row opens a Right Dialog while the collection stays
+          visible.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
             href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-right-dialog-to-page"
           >
             Table Read — Dialog to Page
@@ -372,6 +393,20 @@ to a page when the resource needs a durable destination.
         </td>
         <td>
           Clicking a table row or chevron action routes to a resource page.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--list-read-right-dialog"
+          >
+            List Read — Right Dialog
+          </a>
+        </td>
+        <td>
+          Clicking a list item opens a Right Dialog while the list stays
+          visible.
         </td>
       </tr>
       <tr>

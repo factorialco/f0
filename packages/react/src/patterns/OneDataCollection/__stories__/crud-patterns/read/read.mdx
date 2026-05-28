@@ -30,6 +30,13 @@ layout.
       },
       {
         icon: Table,
+        title: "Table — Right Dialog",
+        description:
+          "Clicking a row opens a Right Dialog so the user can read the resource while keeping the collection visible.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-read--table-read-right-dialog",
+      },
+      {
+        icon: Table,
         title: "Table — Dialog to Page",
         description:
           "Clicking an item opens a reduced Right Dialog that can lead to a full page when the resource needs a durable destination.",
@@ -41,6 +48,13 @@ layout.
         description:
           "Clicking a table row or chevron action routes to a resource page.",
         href: "/?path=/story/patterns-data-collection-crud-patterns-read--table-read-page",
+      },
+      {
+        icon: List,
+        title: "List — Right Dialog",
+        description:
+          "Clicking a list item opens a Right Dialog so the user can read the resource while keeping the list visible.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-read--list-read-right-dialog",
       },
       {
         icon: List,
@@ -68,6 +82,8 @@ layout.
 ## When to use
 
 - Use a Default Dialog for quick inspection and lightweight details.
+- Use a Right Dialog for Table or List reads when keeping the collection visible
+  helps comparison or row-by-row scanning.
 - Use a Dialog to Page flow when the resource starts with a reduced view
   but may expand into a full destination.
 - Use a Table to Page flow when dense tabular scanning still needs a dedicated
@@ -109,6 +125,24 @@ layout.
           Quick read flows with limited content and a short decision loop.
         </td>
         <td>Less room for tabs, dense layouts, or extended workflows.</td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-right-dialog"
+          >
+            Right Dialog
+          </a>
+        </td>
+        <td>
+          Table or List reads where keeping the collection visible helps
+          comparison or scanning.
+        </td>
+        <td>
+          Less focused than a centered dialog; resource must fit comfortably in
+          the right rail.
+        </td>
       </tr>
       <tr>
         <td>
@@ -213,6 +247,10 @@ layout.
         <td>Default Dialog</td>
       </tr>
       <tr>
+        <td>Does reading benefit from keeping nearby rows or items visible?</td>
+        <td>Right Dialog</td>
+      </tr>
+      <tr>
         <td>
           Does the user need a quick preview before deciding to open the full
           page?
@@ -251,6 +289,12 @@ The Default Dialog is the baseline read pattern because it keeps the interaction
 close to the collection and supports fast inspection. It is the right starting
 point until the resource becomes large enough to need its own information
 architecture.
+
+Use a Right Dialog as the final read destination when the resource fits the
+right rail and the user benefits from seeing the collection alongside, for
+example to compare nearby rows in a Table or scan adjacent items in a List.
+Promote to a Dialog to Page flow only when the resource has a durable full-page
+destination.
 
 Use a Dialog to Page flow when the first step should stay anchored to the
 collection, but the resource still deserves a full page for deeper reading,
