@@ -4984,9 +4984,15 @@ function SessionRoomScreen({
           </F0BoxWithClassName>
         </F0BoxWithClassName>
         {activePanel ? (
-          <F0BoxWithClassName background="primary" border="default" borderColor="secondary" borderRadius="xl" style={activePanelStyle}>
-            {activePanel === "chat" ? <LiveSessionChatDrawer /> : <LiveSessionNotesDrawer />}
-          </F0BoxWithClassName>
+          activePanel === "chat" ? (
+            <F0BoxWithClassName style={{ width: activePanelWidth, minWidth: activePanelWidth }}>
+              <LiveSessionChatDrawer />
+            </F0BoxWithClassName>
+          ) : (
+            <F0BoxWithClassName background="primary" border="default" borderColor="secondary" borderRadius="xl" style={activePanelStyle}>
+              <LiveSessionNotesDrawer />
+            </F0BoxWithClassName>
+          )
         ) : null}
       </F0BoxWithClassName>
       <RoomSettingsDialog isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
