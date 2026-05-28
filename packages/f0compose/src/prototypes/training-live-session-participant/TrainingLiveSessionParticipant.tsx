@@ -4959,30 +4959,12 @@ function SessionRoomScreen({
   return (
     <FullscreenCallSurface>
       <CallTopBar course={course} groupName={groupName} session={session} />
-      <F0BoxWithClassName display="flex" gap="lg" grow style={{ minHeight: 0, position: "relative" }}>
-        <F0BoxWithClassName display="flex" flexDirection="column" gap="lg" grow style={{ minWidth: 0, paddingBottom: 88, position: "relative" }}>
+      <F0BoxWithClassName display="flex" gap="lg" grow style={{ minHeight: 0, paddingBottom: 88, position: "relative" }}>
+        <F0BoxWithClassName display="flex" flexDirection="column" gap="lg" grow style={{ minWidth: 0 }}>
           <F0BoxWithClassName display="grid" gap="md" grow width="full" style={{ minHeight: 0, gridTemplateColumns: `repeat(${grid.columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${grid.rows}, minmax(0, 1fr))` }}>
             {liveParticipants.map((participant, index) => (
               <LiveParticipantTile key={participant.id} participant={participant} isSpeaking={index === 0} isMuted={index !== 0 && index % 3 !== 0} />
             ))}
-          </F0BoxWithClassName>
-          <F0BoxWithClassName display="flex" justifyContent="center" alignItems="center" gap="md" background="primary" borderRadius="xl" padding="lg" style={{ position: "absolute", left: "50%", bottom: 16, transform: "translateX(-50%)", zIndex: 51 }}>
-            <F0ButtonToggle label={["Turn microphone on", "Turn microphone off"]} icon={[MicrophoneNegative, Microphone]} selected={microphoneEnabled} onSelectedChange={setMicrophoneEnabled} />
-            <F0ButtonToggle label={["Turn camera on", "Turn camera off"]} icon={[VideoRecorderNegative, VideoRecorder]} selected={cameraEnabled} onSelectedChange={setCameraEnabled} />
-            <F0Box height="4" width="0.5" background="secondary" />
-            <F0ButtonToggle label={["Open chat", "Close chat"]} icon={[Comment, Comment]} selected={activePanel === "chat"} onSelectedChange={() => togglePanel("chat")} />
-            {isInstructor ? (
-              <F0ButtonToggle label={["Open notes", "Close notes"]} icon={[BookOpen, BookOpen]} selected={activePanel === "notes"} onSelectedChange={() => togglePanel("notes")} />
-            ) : null}
-            <F0Button label="Settings" hideLabel icon={Settings} variant="outline" onClick={() => setSettingsOpen(true)} />
-            {isInstructor ? (
-              <>
-                <F0Button label="Exit" variant="outline" onClick={onExit} />
-                <F0Button label="End session" icon={SolidStop} variant="critical" onClick={() => setEndSessionOpen(true)} />
-              </>
-            ) : (
-              <F0Button label="Exit" variant="critical" onClick={onExit} />
-            )}
           </F0BoxWithClassName>
         </F0BoxWithClassName>
         {activePanel ? (
@@ -4996,6 +4978,24 @@ function SessionRoomScreen({
             </F0BoxWithClassName>
           )
         ) : null}
+        <F0BoxWithClassName display="flex" justifyContent="center" alignItems="center" gap="md" background="primary" borderRadius="xl" padding="lg" style={{ position: "absolute", left: "50%", bottom: 16, transform: "translateX(-50%)", zIndex: 51 }}>
+          <F0ButtonToggle label={["Turn microphone on", "Turn microphone off"]} icon={[MicrophoneNegative, Microphone]} selected={microphoneEnabled} onSelectedChange={setMicrophoneEnabled} />
+          <F0ButtonToggle label={["Turn camera on", "Turn camera off"]} icon={[VideoRecorderNegative, VideoRecorder]} selected={cameraEnabled} onSelectedChange={setCameraEnabled} />
+          <F0Box height="4" width="0.5" background="secondary" />
+          <F0ButtonToggle label={["Open chat", "Close chat"]} icon={[Comment, Comment]} selected={activePanel === "chat"} onSelectedChange={() => togglePanel("chat")} />
+          {isInstructor ? (
+            <F0ButtonToggle label={["Open notes", "Close notes"]} icon={[BookOpen, BookOpen]} selected={activePanel === "notes"} onSelectedChange={() => togglePanel("notes")} />
+          ) : null}
+          <F0Button label="Settings" hideLabel icon={Settings} variant="outline" onClick={() => setSettingsOpen(true)} />
+          {isInstructor ? (
+            <>
+              <F0Button label="Exit" variant="outline" onClick={onExit} />
+              <F0Button label="End session" icon={SolidStop} variant="critical" onClick={() => setEndSessionOpen(true)} />
+            </>
+          ) : (
+            <F0Button label="Exit" variant="critical" onClick={onExit} />
+          )}
+        </F0BoxWithClassName>
       </F0BoxWithClassName>
       <RoomSettingsDialog isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <EndSessionDialog isOpen={endSessionOpen} onClose={() => setEndSessionOpen(false)} onEnd={onEndSession ?? onExit} />
