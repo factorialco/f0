@@ -181,7 +181,6 @@ const WIZARD_HEIGHT = 720
 const WIZARD_BODY_HEIGHT = WIZARD_HEIGHT - 64
 const LIVE_SESSION_COMPACT_PANEL_WIDTH = 420
 const LIVE_SESSION_NOTES_PANEL_WIDTH = 612
-const LIVE_SESSION_CONTROLS_SPACE = 88
 type SortingsState = { field: string; order: "asc" | "desc" }[]
 type FetchOptions = {
   filters?: Record<string, unknown>
@@ -4950,7 +4949,7 @@ function SessionRoomScreen({
   const activePanelStyle: CSSProperties = {
     width: activePanelWidth,
     minWidth: activePanelWidth,
-    height: `calc(100% - ${LIVE_SESSION_CONTROLS_SPACE}px)`,
+    height: "100%",
     alignSelf: "flex-start",
     overflow: "hidden",
   }
