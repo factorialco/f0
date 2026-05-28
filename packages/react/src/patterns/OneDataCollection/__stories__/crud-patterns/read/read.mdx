@@ -1,5 +1,7 @@
 import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { FeatureGrid } from "~/docs/components/FeatureGrid"
+import { Table, List, CardPin, Kanban } from "@/icons/app"
 
 import * as Stories from "./read.stories"
 
@@ -14,6 +16,54 @@ Use the lightest pattern that still gives the resource enough room.
 The stories use a neutral grey content placeholder on purpose, so the example
 focuses on the container pattern rather than implying a specific internal page
 layout.
+
+## Examples
+
+<Unstyled>
+  <FeatureGrid
+    features={[
+      {
+        icon: Table,
+        title: "Table — Default",
+        description: "Clicking an item opens the Default Dialog.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-read--table-read-dialog",
+      },
+      {
+        icon: Table,
+        title: "Table — Dialog to Page",
+        description:
+          "Clicking an item opens a reduced Right Dialog that can lead to a full page when the resource needs a durable destination.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-read--table-read-right-dialog-to-page",
+      },
+      {
+        icon: Table,
+        title: "Table to Page",
+        description:
+          "Clicking a table row or chevron action routes to a resource page.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-read--table-read-page",
+      },
+      {
+        icon: List,
+        title: "List to Page",
+        description:
+          "Clicking a list item or chevron action routes to a resource page.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-read--list-read-page",
+      },
+      {
+        icon: CardPin,
+        title: "Card to Dialog",
+        description: "Clicking the card opens a focused read dialog.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-read--card-read-dialog",
+      },
+      {
+        icon: Kanban,
+        title: "Kanban Card to Dialog",
+        description: "Clicking a Kanban card opens a focused read dialog.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-read--kanban-read-dialog",
+      },
+    ]}
+  />
+</Unstyled>
 
 ## When to use
 
@@ -270,44 +320,8 @@ action for read when both behaviors must coexist.
   }}
 />
 
-## Related stories
+## Related documentation
 
-- <a
-    target="_parent"
-    href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-dialog"
-  >
-    Default Dialog
-  </a>
-- <a
-    target="_parent"
-    href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-right-dialog-to-page"
-  >
-    Dialog to Page
-  </a>
-- <a
-    target="_parent"
-    href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-page"
-  >
-    Table to Page
-  </a>
-- <a
-    target="_parent"
-    href="/?path=/story/patterns-data-collection-crud-patterns-read--list-read-page"
-  >
-    List to Page
-  </a>
-- <a
-    target="_parent"
-    href="/?path=/story/patterns-data-collection-crud-patterns-read--card-read-dialog"
-  >
-    Card to Dialog
-  </a>
-- <a
-    target="_parent"
-    href="/?path=/story/patterns-data-collection-crud-patterns-read--kanban-read-dialog"
-  >
-    Kanban Card to Dialog
-  </a>
 - <a
     target="_parent"
     href="/?path=/docs/patterns-data-collection-crud-patterns-overview--documentation"
