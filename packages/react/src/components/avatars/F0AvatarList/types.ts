@@ -10,27 +10,45 @@ export const avatarListSizes = ["xs", "sm", "md"] as const
 
 export type AvatarListSize = (typeof avatarListSizes)[number]
 
+/**
+ * Optional extras every avatar entry may carry regardless of `type`.
+ * `tooltipDescription` is rendered as the tooltip's secondary line via the
+ * underlying `Tooltip` `description` slot (use it for emails, roles, etc.).
+ */
+export type F0AvatarListExtras = {
+  tooltipDescription?: string
+}
+
 export type F0AvatarListPropsAvatars =
   | {
       type: "person"
-      avatars: // Allow to have more properties in the avatar variant
-      (Omit<PersonAvatarVariant, "type"> & Record<string, unknown>)[]
+      avatars: (Omit<PersonAvatarVariant, "type"> & // Allow to have more properties in the avatar variant
+        F0AvatarListExtras &
+        Record<string, unknown>)[]
     }
   | {
       type: "team"
-      avatars: (Omit<TeamAvatarVariant, "type"> & Record<string, unknown>)[]
+      avatars: (Omit<TeamAvatarVariant, "type"> &
+        F0AvatarListExtras &
+        Record<string, unknown>)[]
     }
   | {
       type: "company"
-      avatars: (Omit<CompanyAvatarVariant, "type"> & Record<string, unknown>)[]
+      avatars: (Omit<CompanyAvatarVariant, "type"> &
+        F0AvatarListExtras &
+        Record<string, unknown>)[]
     }
   | {
       type: "flag"
-      avatars: (Omit<FlagAvatarVariant, "type"> & Record<string, unknown>)[]
+      avatars: (Omit<FlagAvatarVariant, "type"> &
+        F0AvatarListExtras &
+        Record<string, unknown>)[]
     }
   | {
       type: "file"
-      avatars: (Omit<FileAvatarVariant, "type"> & Record<string, unknown>)[]
+      avatars: (Omit<FileAvatarVariant, "type"> &
+        F0AvatarListExtras &
+        Record<string, unknown>)[]
     }
 
 // Discriminated union that enforces type consistency
@@ -65,4 +83,13 @@ export type F0AvatarListProps = {
    * @default "compact"
    */
   layout?: "fill" | "compact"
+
+  /**
+   * Controls the scroll behavior of the `+N` overflow popover that lists
+   * collapsed avatars (including their `tooltipDescription` entries).
+   * - `"vertical"` (default): caps the popover height and scrolls vertically.
+   * - `"none"`: lets the popover grow to fit all entries.
+   * @default "vertical"
+   */
+  tooltipScroll?: "vertical" | "none"
 } & F0AvatarListPropsAvatars
