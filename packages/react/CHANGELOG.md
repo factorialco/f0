@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.22.0](https://github.com/factorialco/f0/compare/f0-react-v2.21.0...f0-react-v2.22.0) (2026-05-28)
+
+
+### Features
+
+* **F0Alert:** make description prop optional ([#4163](https://github.com/factorialco/f0/issues/4163)) ([d5abc3b](https://github.com/factorialco/f0/commit/d5abc3be3068d9ac0bd23b157e9eb5f28d601e2b))
+
 ## [2.21.0](https://github.com/factorialco/f0/compare/f0-react-v2.20.1...f0-react-v2.21.0) (2026-05-27)
 
 
