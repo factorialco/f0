@@ -180,7 +180,7 @@ export const UserMessage = ({
       {hasVisibleText && (
         <div
           ref={bubbleRef}
-          className="w-fit max-w-[90%] self-end whitespace-pre-wrap rounded-2xl border border-solid border-f1-border-secondary bg-f1-background-tertiary px-4 py-3 [&>div]:flex [&>div]:flex-col [&>div]:gap-1"
+          className="w-fit max-w-[90%] self-end whitespace-pre-wrap rounded-xl bg-f1-background-tertiary px-4 py-3 [&>div]:flex [&>div]:flex-col [&>div]:gap-1"
         >
           {(renderMarkdown ?? defaultMarkdownFallback)(content)}
         </div>
