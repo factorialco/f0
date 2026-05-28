@@ -179,7 +179,7 @@ type WizardDialogSize = "training" | "group"
 
 const WIZARD_HEIGHT = 720
 const WIZARD_BODY_HEIGHT = WIZARD_HEIGHT - 64
-const LIVE_SESSION_COMPACT_PANEL_WIDTH = 360
+const LIVE_SESSION_COMPACT_PANEL_WIDTH = 420
 const LIVE_SESSION_NOTES_PANEL_WIDTH = 612
 type SortingsState = { field: string; order: "asc" | "desc" }[]
 type FetchOptions = {
@@ -4775,9 +4775,9 @@ function LiveSessionChatDrawer() {
           <F0Text content="No messages yet" variant="description" />
         </F0Box>
         <F0Box display="flex" alignItems="center" gap="sm" padding="md" borderTop="default" borderColor="secondary">
-          <F0Box grow background="secondary" borderRadius="lg" padding="md">
+          <F0BoxWithClassName grow background="secondary" borderRadius="lg" padding="md" style={{ minWidth: 0 }}>
             <F0Text content="Write a message" variant="description" />
-          </F0Box>
+          </F0BoxWithClassName>
           <F0Button label="Send" variant="outline" onClick={() => undefined} />
         </F0Box>
       </F0BoxWithClassName>
