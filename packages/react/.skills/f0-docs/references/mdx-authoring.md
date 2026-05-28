@@ -550,14 +550,14 @@ export const DoDontDoCase: Story = {
   args: {
     // props that illustrate the "do" scenario
   },
-};
+}
 
 export const DoDontDontCase: Story = {
   tags: ["no-sidebar"],
   args: {
     // props that illustrate the "don't" scenario
   },
-};
+}
 ```
 
 ```mdx
@@ -639,7 +639,7 @@ export const Default: Story = {
   render: ({ onClose, ...args }) => (
     <F0ComponentName {...args} onClose={onClose ? fn() : undefined} />
   ),
-};
+}
 ```
 
 This pattern lets the Controls panel show a simple toggle for the optional callback, while the component receives a real `fn()` (from `@storybook/test`) or `undefined` depending on the toggle state.
@@ -689,11 +689,11 @@ export const Default: Story = {
 
 **Tag reference:**
 
-| Tag            | Applied to           | Effect                                                                                |
-| -------------- | -------------------- | ------------------------------------------------------------------------------------- |
-| `"!autodocs"`  | Meta in stories file | Disables the auto-generated docs tab. Required when adding a manual MDX in this repo. |
-| `"no-sidebar"` | Story export or Meta | Hides the entry from the sidebar. Use on stories embedded only via `<Canvas>` in MDX. |
-| `"autodocs"`   | Meta in stories file | Auto-generates a docs tab. This is set globally — use `"!autodocs"` to opt out.       |
+| Tag            | Applied to              | Effect                                                                                                                                                                                                                   |
+| -------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `"!autodocs"`  | Meta in stories file    | Disables the auto-generated docs tab. Required when adding a manual MDX in this repo.                                                                                                                                    |
+| `"no-sidebar"` | Secondary story exports | Hides the entry from the sidebar. Use on stories embedded only via `<Canvas>` in MDX. **Never apply to the first exported (primary) story** — it propagates to the MDX `--documentation` entry and hides the whole page. |
+| `"autodocs"`   | Meta in stories file    | Auto-generates a docs tab. This is set globally — use `"!autodocs"` to opt out.                                                                                                                                          |
 
 ### Phase 4: Verify sidebar
 

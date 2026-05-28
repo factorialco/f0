@@ -91,7 +91,6 @@ export const ConnectedMessagesContainer = ({
   const lazyToolRendered = useLazyToolRenderer()
 
   const {
-    greeting,
     initialMessage,
     isLoadingThread,
     setInProgress,
@@ -225,7 +224,9 @@ export const ConnectedMessagesContainer = ({
   }, [filteredMessages, inProgress])
 
   // ── Callbacks ──
-  const onWelcomeIconClick = useCallback(() => {
+  // Welcome phrase click → pong easter egg. Replaces the previous F0OneIcon
+  // entry point that the simplified welcome screen no longer renders.
+  const onWelcomeClick = useCallback(() => {
     openGame("pong")
   }, [openGame])
 
@@ -269,9 +270,8 @@ export const ConnectedMessagesContainer = ({
       turns={turns}
       isLoadingThread={isLoadingThread}
       interrupt={interrupt}
-      greeting={greeting}
       initialMessage={initialMessage}
-      onWelcomeIconClick={onWelcomeIconClick}
+      onWelcomeClick={onWelcomeClick}
       renderToolCall={renderToolCall}
       onReplyQuote={onReplyQuote}
       onAssistantMessageRendered={onAssistantMessageRendered}

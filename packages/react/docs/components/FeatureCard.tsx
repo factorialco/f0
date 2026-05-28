@@ -23,7 +23,7 @@ export function FeatureCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <a href={href} className="block h-full p-6 no-underline">
+      <a href={href} target="_parent" className="block h-full p-6 no-underline">
         <div className="mb-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-f1-background-secondary dark:bg-f1-background-tertiary">
             <F0Icon

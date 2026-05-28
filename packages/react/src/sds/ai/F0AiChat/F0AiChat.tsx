@@ -20,7 +20,6 @@ import { AiChatProviderProps, type WelcomeScreenSuggestion } from "./types"
 
 const F0AiChatProviderComponent = ({
   enabled = false,
-  greeting,
   initialMessage,
   welcomeScreenSuggestions,
   disclaimer,
@@ -49,7 +48,6 @@ const F0AiChatProviderComponent = ({
   return (
     <AiChatStateProvider
       enabled={enabled}
-      greeting={greeting}
       initialMessage={initialMessage}
       onThumbsUp={onThumbsUp}
       onThumbsDown={onThumbsDown}

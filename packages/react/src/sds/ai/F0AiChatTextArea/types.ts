@@ -119,8 +119,12 @@ export type F0AiChatTextAreaProps = {
    * Hovering an item previews its prompt in the textarea placeholder.
    */
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
-  /** Called when the user clicks a sub-suggestion. */
-  onSuggestionClick?: (item: WelcomeScreenSuggestionItem) => void
+  /** Called when the user clicks a sub-suggestion. Receives the picked
+   *  `item` and its parent `group` (the outline-button entry). */
+  onSuggestionClick?: (
+    item: WelcomeScreenSuggestionItem,
+    group: WelcomeScreenSuggestion
+  ) => void
 
   /**
    * When true, the composer adopts the fullscreen layout: the welcome
