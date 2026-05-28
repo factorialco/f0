@@ -189,6 +189,38 @@ describe("F0Accordion", () => {
     expect(accordionTrigger).toHaveAttribute("aria-expanded", "false")
   })
 
+  it("does not open the dropdown menu when the action is disabled", async () => {
+    const onClick = vi.fn()
+    render(
+      <F0Accordion
+        items={[
+          {
+            id: "one",
+            title: "Item One",
+            description: "Description one",
+            actions: [
+              {
+                type: "dropdown",
+                ariaLabel: "More actions for Item One",
+                items: [{ label: "Edit", onClick }],
+                disabled: true,
+              },
+            ],
+          },
+        ]}
+      />
+    )
+    const dropdownTrigger = screen.getByRole("button", {
+      name: "More actions for Item One",
+    })
+    expect(dropdownTrigger).toHaveAttribute("aria-disabled", "true")
+    await userEvent.click(dropdownTrigger)
+    expect(
+      screen.queryByRole("menuitem", { name: /Edit/ })
+    ).not.toBeInTheDocument()
+    expect(onClick).not.toHaveBeenCalled()
+  })
+
   it("toggles the item when clicking the title (no actions)", async () => {
     render(<F0Accordion items={items} />)
     await userEvent.click(screen.getByText("Item One"))

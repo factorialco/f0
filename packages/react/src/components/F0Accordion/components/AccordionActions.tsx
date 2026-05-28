@@ -27,7 +27,11 @@ export const AccordionActions = ({ actions }: AccordionActionsProps) => {
             )
           case "dropdown":
             return (
-              <Dropdown key={index} items={action.items}>
+              <Dropdown
+                key={index}
+                items={action.items}
+                disabled={action.disabled}
+              >
                 <F0Button
                   variant="outline"
                   size="sm"
