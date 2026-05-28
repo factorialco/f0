@@ -43,7 +43,9 @@ export const F0DialogHeader = ({
   const Actions = () => {
     if (!otherActionItems.length || !otherActions) return null
 
-    if (otherActionItems.length <= 2) {
+    const hasCriticalAction = otherActionItems.some((action) => action.critical)
+
+    if (otherActionItems.length <= 2 && !hasCriticalAction) {
       return (
         <div className="flex flex-row gap-2">
           {otherActionItems.map((action) => (
