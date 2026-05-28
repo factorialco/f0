@@ -139,6 +139,8 @@ const config: StorybookConfig = {
       "@copilotkit/react-core",
       "@copilotkit/react-ui",
       "@copilotkit/shared",
+      "@xyflow/react",
+      "@dagrejs/dagre",
     ]
 
     return config
