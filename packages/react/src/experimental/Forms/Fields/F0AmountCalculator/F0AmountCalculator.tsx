@@ -82,15 +82,17 @@ function CalculatorRow({
   children,
   extraContent,
   inputWidth,
+  trailingAction,
 }: {
   children: ReactNode
   extraContent?: ReactNode
   inputWidth?: string
+  trailingAction?: ReactNode
 }) {
   const isAutoWidth = !inputWidth || inputWidth === "auto"
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex flex-wrap items-center gap-3">
       <div
         style={inputWidthStyle(inputWidth)}
         className={cn(isAutoWidth ? "w-auto" : undefined)}
@@ -102,6 +104,7 @@ function CalculatorRow({
           {extraContent}
         </span>
       )}
+      {trailingAction}
     </div>
   )
 }
@@ -253,6 +256,8 @@ const _F0AmountCalculator = forwardRef<
     const applyLabel = apply?.label ?? i18n.actions.apply
     const ApplyIcon = apply?.icon ?? Check
     const closeOnApply = apply?.closeOnApply ?? true
+    const applyLayout = apply?.layout ?? "block"
+    const showInlineApplyButton = showApplyButton && applyLayout === "inline"
 
     const handleApply = () => {
       onValueChange?.(draftValue)
@@ -287,13 +292,26 @@ const _F0AmountCalculator = forwardRef<
                 disabled={isTriggerDisabled}
               />
             ) : null}
-            <CalculatorRow extraContent={extraContent} inputWidth={inputWidth}>
+            <CalculatorRow
+              extraContent={extraContent}
+              inputWidth={inputWidth}
+              trailingAction={
+                showInlineApplyButton ? (
+                  <F0Button
+                    variant="default"
+                    icon={ApplyIcon}
+                    label={applyLabel}
+                    onClick={handleApply}
+                  />
+                ) : undefined
+              }
+            >
               {innerInput}
             </CalculatorRow>
             {shouldRenderOuterMessages ? (
               <InputMessages status={resolvedStatus} />
             ) : null}
-            {showApplyButton && (
+            {showApplyButton && !showInlineApplyButton && (
               <div className="mt-2 flex justify-end">
                 <F0Button
                   variant="default"

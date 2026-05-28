@@ -87,7 +87,7 @@ const meta = {
         type: {
           summary: "F0AmountCalculatorPopoverConfig | undefined",
           detail:
-            "{ icon?: IconType; side?: 'top'|'bottom'|'left'|'right'; align?: 'start'|'center'|'end'; open?: boolean; onOpenChange?: (open: boolean) => void; triggerLabel?: string; commitMode?: 'immediate'|'deferred'; apply?: { label?: string; icon?: IconType; closeOnApply?: boolean } }",
+            "{ icon?: IconType; side?: 'top'|'bottom'|'left'|'right'; align?: 'start'|'center'|'end'; open?: boolean; onOpenChange?: (open: boolean) => void; triggerLabel?: string; commitMode?: 'immediate'|'deferred'; apply?: { label?: string; icon?: IconType; closeOnApply?: boolean; layout?: 'block'|'inline' } }",
         },
       },
     },
@@ -425,6 +425,41 @@ export const InlineWithStep: Story = {
     extraContent: "of 300,00 €",
     inputWidth: "160px",
   },
+}
+
+export const AsPopoverDeferredApplyInline: Story = {
+  name: "Popover — deferred apply (inline)",
+  args: {
+    label: "Discount",
+    units: "%",
+    extraContent: "of 300,00 €",
+    inputWidth: "160px",
+    popover: {
+      triggerLabel: "Discount",
+      commitMode: "deferred",
+      apply: { label: "Apply", layout: "inline" },
+    },
+  },
+  decorators: [
+    (Story, { args }) => {
+      const [value, setValue] = useState<number | null>(null)
+      return (
+        <div className="flex items-center gap-2">
+          <Story
+            args={{
+              ...args,
+              value,
+              onChange: ((nextValue: number | null) =>
+                setValue(nextValue)) as typeof args.onChange,
+            }}
+          />
+          <span className="text-f1-foreground-secondary text-sm">
+            Committed: {value != null ? `${value}%` : "—"}
+          </span>
+        </div>
+      )
+    },
+  ],
 }
 
 // ─── Disabled ────────────────────────────────────────────────────────────────

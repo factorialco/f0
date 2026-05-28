@@ -300,6 +300,40 @@ describe("F0AmountCalculator", () => {
       expect(screen.getByRole("textbox")).toBeInTheDocument()
     })
 
+    test("deferred apply inline layout renders Apply in same row and commits value", async () => {
+      const onChange = vi.fn()
+      render(
+        <F0AmountCalculator
+          label="Discount"
+          locale="en-US"
+          units="%"
+          extraContent="of 300,00 €"
+          popover={{
+            commitMode: "deferred",
+            apply: { layout: "inline", label: "Apply" },
+          }}
+          onChange={onChange}
+        />
+      )
+
+      const trigger = screen.getByRole("button", { name: "Discount" })
+      await userEvent.click(trigger)
+
+      const input = await screen.findByRole("textbox")
+      const extraContent = await screen.findByText("of 300,00 €")
+      const applyButton = screen.getByRole("button", { name: "Apply" })
+
+      await userEvent.type(input, "50")
+      expect(onChange).not.toHaveBeenCalled()
+
+      const inlineRow = input.closest("div.flex.flex-wrap.items-center.gap-3")
+      expect(inlineRow).toContainElement(extraContent)
+      expect(inlineRow).toContainElement(applyButton)
+
+      await userEvent.click(applyButton)
+      expect(onChange).toHaveBeenLastCalledWith(50)
+    })
+
     test("does not open popover when disabled", async () => {
       render(
         <F0AmountCalculator

@@ -71,6 +71,15 @@ If you need an icon-only trigger while preserving accessibility, pass `hideLabel
 
 <Canvas of={Stories.AsPopoverControlled} />
 
+In deferred commit mode (`popover.commitMode = "deferred"`), you can choose where the Apply action renders:
+
+- `popover.apply.layout = "block"` (default): dedicated action row below the input
+- `popover.apply.layout = "inline"`: Apply button on the same row as input/context
+
+<Canvas of={Stories.AsPopoverDeferredApply} />
+
+<Canvas of={Stories.AsPopoverDeferredApplyInline} />
+
 ### States
 
 <Canvas of={Stories.States} />

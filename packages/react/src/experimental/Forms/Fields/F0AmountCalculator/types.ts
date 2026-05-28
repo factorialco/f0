@@ -68,6 +68,12 @@ export interface F0AmountCalculatorPopoverConfig {
      * @default true
      */
     closeOnApply?: boolean
+    /**
+     * Apply button placement in deferred popover mode.
+     * - `"block"` (default): renders on a dedicated row below the input
+     * - `"inline"`: renders on the same row as input/extra content
+     */
+    layout?: "block" | "inline"
   }
 }
 
