@@ -264,7 +264,9 @@ function RightDialogScenario({
       <F0Dialog
         isOpen={selectedResource !== null}
         onClose={() => setSelectedResource(null)}
+        title="Resource details"
         description="Open details in a Right Dialog so the user can read the resource while keeping the collection visible."
+        position="right"
         width="sm"
         disableContentPadding
         secondaryAction={{
