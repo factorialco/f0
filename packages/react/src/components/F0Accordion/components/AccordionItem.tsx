@@ -43,9 +43,9 @@ export const AccordionItem = ({
                 focusRing()
               )}
             >
-              <p className="flex-1 truncate font-medium text-f1-foreground">
+              <span className="flex-1 truncate font-medium text-f1-foreground">
                 {item.title}
-              </p>
+              </span>
             </button>
           </CollapsibleTrigger>
           {hasActions && (
