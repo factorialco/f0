@@ -12,6 +12,7 @@ import {
   F0FormField,
   F0Heading,
   F0Icon,
+  NotesTextEditor,
   F0Select,
   F0TagRaw,
   F0TagStatus,
@@ -4784,23 +4785,18 @@ function LiveSessionChatDrawer() {
 
 function LiveSessionNotesDrawer() {
   return (
-    <F0Card title="Notes">
-      <F0BoxWithClassName display="flex" flexDirection="column" style={{ height: 626 }}>
-        <F0Box display="flex" flexDirection="column" gap="lg" grow padding="lg">
-          <F0Box display="flex" flexDirection="column" gap="xs">
-            <F0Text content="Private instructor notes" variant="label" />
-            <F0Text content="Capture points to follow up after the session." variant="description" />
-          </F0Box>
-          <F0Box display="flex" flexDirection="column" gap="md" padding="lg" border="default" borderColor="secondary" borderRadius="lg" grow>
-            <F0Text content="Add notes during the live session." variant="description" />
-            <F0Box display="flex" flexDirection="column" gap="sm">
-              <F0Text content="Attendance questions" variant="body" />
-              <F0Text content="Mention which participants need follow-up from the training team." variant="description" />
-            </F0Box>
-          </F0Box>
-        </F0Box>
-      </F0BoxWithClassName>
-    </F0Card>
+    <F0BoxWithClassName display="flex" flexDirection="column" height="full" padding="lg" style={{ cursor: "text", minHeight: 0 }}>
+      <NotesTextEditor
+        titlePlaceholder="Training session notes"
+        placeholder="Start getting your notes directly with all markdown options"
+        initialEditorState={{
+          title: "Noviembre - Diciembre",
+          content: "",
+        }}
+        metadata={[{ label: "Notes", value: { type: "status", label: "Private", variant: "neutral" } }]}
+        onChange={() => undefined}
+      />
+    </F0BoxWithClassName>
   )
 }
 
