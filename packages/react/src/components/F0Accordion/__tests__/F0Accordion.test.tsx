@@ -2,7 +2,7 @@ import { userEvent } from "@testing-library/user-event"
 import { useState } from "react"
 import { describe, expect, it, vi } from "vitest"
 
-import { zeroRender as render, screen } from "@/testing/test-utils"
+import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
 import { F0Accordion } from "../index"
 import { F0AccordionItem } from "../types"
@@ -143,7 +143,19 @@ describe("F0Accordion", () => {
     expect(screen.getAllByTestId("skeleton").length).toBeGreaterThan(0)
   })
 
+  it("closes an open item when its trigger is clicked again", async () => {
+    const onValueChange = vi.fn()
+    render(<F0Accordion items={items} onValueChange={onValueChange} />)
+    await userEvent.click(getTrigger("Item One"))
+    expect(getTrigger("Item One")).toHaveAttribute("aria-expanded", "true")
+    expect(onValueChange).toHaveBeenLastCalledWith(["one"])
+    await userEvent.click(getTrigger("Item One"))
+    expect(getTrigger("Item One")).toHaveAttribute("aria-expanded", "false")
+    expect(onValueChange).toHaveBeenLastCalledWith([])
+  })
+
   it("renders a dropdown action and does not toggle the item when interacted with", async () => {
+    const onClick = vi.fn()
     render(
       <F0Accordion
         items={[
@@ -155,7 +167,7 @@ describe("F0Accordion", () => {
               {
                 type: "dropdown",
                 ariaLabel: "More actions for Item One",
-                items: [{ label: "Edit", onClick: vi.fn() }],
+                items: [{ label: "Edit", onClick }],
               },
             ],
           },
@@ -170,7 +182,10 @@ describe("F0Accordion", () => {
       name: "More actions for Item One",
     })
     await userEvent.click(dropdownTrigger)
-    expect(await screen.findByText("Edit")).toBeInTheDocument()
+    const editItem = await screen.findByRole("menuitem", { name: /Edit/ })
+    expect(editItem).toBeInTheDocument()
+    await userEvent.click(editItem)
+    await waitFor(() => expect(onClick).toHaveBeenCalledTimes(1))
     expect(accordionTrigger).toHaveAttribute("aria-expanded", "false")
   })
 })
