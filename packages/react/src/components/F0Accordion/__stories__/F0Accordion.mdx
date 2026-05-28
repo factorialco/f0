@@ -101,14 +101,14 @@ A collapsible container that organizes related content into independent sections
           <code>Closed</code>
         </td>
         <td>Default state. Content hidden, only header visible.</td>
-        <td>Chevron pointing right.</td>
+        <td>Chevron pointing down.</td>
       </tr>
       <tr>
         <td>
           <code>Open</code>
         </td>
         <td>Content revealed below the header.</td>
-        <td>Chevron pointing down, content animates in.</td>
+        <td>Chevron pointing up, content animates in.</td>
       </tr>
       <tr>
         <td>
@@ -173,7 +173,7 @@ A collapsible container that organizes related content into independent sections
 ## Accessibility
 
 - Each trigger is a native button with `aria-expanded` reflecting the open state.
-- Only the chevron is interactive in the header, avoiding nested buttons when actions are present.
+- The header has two toggle targets: the title text and the chevron button. Any actions placed between them remain inert for toggle so they can be operated without expanding or collapsing the row.
 - Animations honour the user's reduced-motion preference.
 
 <Unstyled>
