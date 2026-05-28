@@ -1168,7 +1168,13 @@ const SignatureCollection = () => {
   const source = useDataCollectionSource<SignatureRow>(
     {
       dataAdapter,
+      itemUrl: (item) => item.fileUrl,
       itemActions: (item) => [
+        {
+          label: "View document",
+          icon: EyeVisible,
+          onClick: () => window.open(item.fileUrl, "_blank"),
+        },
         {
           label: "Cancel request",
           icon: Cross,
@@ -1198,14 +1204,6 @@ const SignatureCollection = () => {
                   url: item.fileUrl,
                 },
               },
-              titleActions: [
-                {
-                  icon: EyeVisible,
-                  label: "View file",
-                  href: item.fileUrl,
-                  target: "_blank",
-                },
-              ],
             }),
             fields: [
               {
