@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.23.0](https://github.com/factorialco/f0/compare/f0-react-v2.22.0...f0-react-v2.23.0) (2026-05-28)
+
+
+### Features
+
+* **F0AiChat:** remove CopilotKit dependency, F0 becomes 100% headless ([#4252](https://github.com/factorialco/f0/issues/4252)) ([e562427](https://github.com/factorialco/f0/commit/e56242742acba7947a099ff75dfd3f97bd0ac3cb))
+
 ## [2.22.0](https://github.com/factorialco/f0/compare/f0-react-v2.21.0...f0-react-v2.22.0) (2026-05-28)
 
 
