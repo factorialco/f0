@@ -4945,6 +4945,13 @@ function SessionRoomScreen({
   const liveParticipants = groupParticipants.slice(0, 10)
   const grid = getCallGrid(liveParticipants.length)
   const activePanelWidth = activePanel === "notes" ? LIVE_SESSION_NOTES_PANEL_WIDTH : LIVE_SESSION_COMPACT_PANEL_WIDTH
+  const activePanelStyle: CSSProperties = {
+    width: activePanelWidth,
+    minWidth: activePanelWidth,
+    height: activePanel === "notes" ? "calc(100vh - 184px)" : "100%",
+    alignSelf: "flex-start",
+    overflow: "hidden",
+  }
   const togglePanel = (panel: Exclude<LiveSessionPanelId, null>) => setActivePanel((current) => current === panel ? null : panel)
 
   return (
@@ -4977,7 +4984,7 @@ function SessionRoomScreen({
           </F0BoxWithClassName>
         </F0BoxWithClassName>
         {activePanel ? (
-          <F0BoxWithClassName background="primary" border="default" borderColor="secondary" borderRadius="xl" style={{ width: activePanelWidth, minWidth: activePanelWidth, height: "calc(100vh - 184px)", alignSelf: "flex-start", overflow: "hidden" }}>
+          <F0BoxWithClassName background="primary" border="default" borderColor="secondary" borderRadius="xl" style={activePanelStyle}>
             {activePanel === "chat" ? <LiveSessionChatDrawer /> : <LiveSessionNotesDrawer />}
           </F0BoxWithClassName>
         ) : null}
