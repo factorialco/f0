@@ -65,6 +65,10 @@ A numeric input that supports two rendering modes: **inline** as a standard form
 
 Pass `popover={{}}` to activate popover mode with all defaults (Calculator icon, `bottom`/`start` placement, uncontrolled). Use `popover.icon` to swap the trigger icon, and `popover.open` + `popover.onOpenChange` for controlled open state.
 
+If you need an icon-only trigger while preserving accessibility, pass `hideLabel` and keep `label` defined. The label stays as the accessible name for the trigger button.
+
+<Canvas of={Stories.AsPopoverIconOnlyA11y} />
+
 <Canvas of={Stories.AsPopoverControlled} />
 
 ### States

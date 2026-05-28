@@ -99,6 +99,15 @@ const meta = {
         defaultValue: { summary: "false" },
       },
     },
+    hideLabel: {
+      description:
+        "Hides the visible field label while keeping the `label` prop for accessibility. In popover mode with no `triggerLabel`, this produces an icon-only trigger named by `label`.",
+      control: { type: "boolean" },
+      table: {
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
     error: {
       description:
         "Error state. Pass `true` for a generic error or a string for a message.",
@@ -246,6 +255,37 @@ export const AsPopoverWithTriggerLabel: Story = {
           />
           <span className="text-f1-foreground-secondary text-sm">
             {value != null ? `${value} €` : "—"}
+          </span>
+        </div>
+      )
+    },
+  ],
+}
+
+export const AsPopoverIconOnlyA11y: Story = {
+  name: "Popover — icon only (a11y label)",
+  args: {
+    label: "Discount",
+    hideLabel: true,
+    units: "%",
+    inputWidth: "160px",
+    popover: {},
+  },
+  decorators: [
+    (Story, { args }) => {
+      const [value, setValue] = useState<number | null>(null)
+      return (
+        <div className="flex items-center gap-2">
+          <Story
+            args={{
+              ...args,
+              value,
+              onChange: ((nextValue: number | null) =>
+                setValue(nextValue)) as typeof args.onChange,
+            }}
+          />
+          <span className="text-f1-foreground-secondary text-sm">
+            {value != null ? `${value}%` : "—"}
           </span>
         </div>
       )
