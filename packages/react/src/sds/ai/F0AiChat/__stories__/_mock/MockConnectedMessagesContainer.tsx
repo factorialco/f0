@@ -61,6 +61,7 @@ export const MockConnectedMessagesContainer = ({
     openGame,
     onThumbsUp,
     onThumbsDown,
+    setPendingQuote,
   } = useAiChat()
 
   const filteredMessages = useMemo(
@@ -141,6 +142,13 @@ export const MockConnectedMessagesContainer = ({
     openGame("pong")
   }, [openGame])
 
+  const onReplyQuote = useCallback(
+    (text: string) => {
+      setPendingQuote({ text })
+    },
+    [setPendingQuote]
+  )
+
   // Wire the feedback modal. The thread id is fake (mock runtime has no
   // real threading) but stable enough for the modal's plumbing.
   const feedback = useMemo<FeedbackConfig | undefined>(() => {
@@ -158,6 +166,7 @@ export const MockConnectedMessagesContainer = ({
       turns={turns}
       initialMessage={initialMessage}
       onWelcomeClick={onWelcomeClick}
+      onReplyQuote={onReplyQuote}
       isLoadingThread={isLoadingThread}
       autoScrollUserIntoView={visualizationMode !== "fullscreen"}
       freezeLayout={isClarifying}

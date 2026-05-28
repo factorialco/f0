@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { useReducedMotion } from "@/lib/a11y"
@@ -8,6 +8,7 @@ import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
+import { useAiChat } from "../F0AiChat/providers/AiChatStateProvider"
 import { ActionBar } from "./components/ActionBar"
 import { AttachedFilesList } from "./components/AttachedFilesList"
 import { CreditWarningWrapper } from "./components/CreditWarningWrapper"
@@ -15,7 +16,10 @@ import { MentionPopover } from "./components/MentionPopover"
 import { PendingQuoteChip } from "./components/PendingQuoteChip"
 import { TextareaField } from "./components/TextareaField"
 import { WelcomeScreenSuggestionsRow } from "./components/WelcomeScreenSuggestionsRow"
-import type { WelcomeScreenSuggestionItem } from "../F0AiChat/types"
+import type {
+  WelcomeScreenSuggestion,
+  WelcomeScreenSuggestionItem,
+} from "../F0AiChat/types"
 import { buildHighlightSegments } from "./highlight-utils"
 import { type F0AiChatTextAreaProps } from "./types"
 import { useFileAttachments } from "./useFileAttachments"
@@ -88,6 +92,23 @@ export const F0AiChatTextArea = ({
   const highlightRef = useRef<HTMLDivElement>(null)
 
   const isClarifying = clarifyingUI != null
+
+  // Fire `tracking.onWelcomeSuggestionClick` from inside the textarea so
+  // hosts only need to wire the `onSuggestionClick` business action.
+  // When the textarea is rendered outside an `F0AiChatProvider` the
+  // tracking ref resolves to a no-op via the provider fallback.
+  const { tracking } = useAiChat()
+  const handleSuggestionClick = useCallback(
+    (item: WelcomeScreenSuggestionItem, group: WelcomeScreenSuggestion) => {
+      tracking?.onWelcomeSuggestionClick?.({
+        item,
+        group,
+        prompt: item.prompt || item.title,
+      })
+      onSuggestionClick?.(item, group)
+    },
+    [tracking, onSuggestionClick]
+  )
 
   const {
     attachedFiles,
@@ -237,7 +258,7 @@ export const F0AiChatTextArea = ({
           onSuggestionClick && (
             <WelcomeScreenSuggestionsRow
               suggestions={welcomeScreenSuggestions}
-              onItemClick={onSuggestionClick}
+              onItemClick={handleSuggestionClick}
               onItemHover={setHoveredSuggestion}
             />
           )}
