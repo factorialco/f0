@@ -179,6 +179,8 @@ type WizardDialogSize = "training" | "group"
 
 const WIZARD_HEIGHT = 720
 const WIZARD_BODY_HEIGHT = WIZARD_HEIGHT - 64
+const LIVE_SESSION_COMPACT_PANEL_WIDTH = 360
+const LIVE_SESSION_NOTES_PANEL_WIDTH = 612
 type SortingsState = { field: string; order: "asc" | "desc" }[]
 type FetchOptions = {
   filters?: Record<string, unknown>
@@ -4942,19 +4944,20 @@ function SessionRoomScreen({
   const isInstructor = role === "instructor"
   const liveParticipants = groupParticipants.slice(0, 10)
   const grid = getCallGrid(liveParticipants.length)
+  const activePanelWidth = activePanel === "notes" ? LIVE_SESSION_NOTES_PANEL_WIDTH : LIVE_SESSION_COMPACT_PANEL_WIDTH
   const togglePanel = (panel: Exclude<LiveSessionPanelId, null>) => setActivePanel((current) => current === panel ? null : panel)
 
   return (
     <FullscreenCallSurface>
       <CallTopBar course={course} groupName={groupName} session={session} />
-      <F0BoxWithClassName display="flex" gap="lg" grow style={{ minHeight: 0 }}>
-        <F0BoxWithClassName display="flex" flexDirection="column" gap="lg" grow style={{ minWidth: 0 }}>
+      <F0BoxWithClassName display="flex" gap="lg" grow style={{ minHeight: 0, position: "relative" }}>
+        <F0BoxWithClassName display="flex" flexDirection="column" gap="lg" grow style={{ minWidth: 0, paddingBottom: 88 }}>
           <F0BoxWithClassName display="grid" gap="md" grow width="full" style={{ minHeight: 0, gridTemplateColumns: `repeat(${grid.columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${grid.rows}, minmax(0, 1fr))` }}>
             {liveParticipants.map((participant, index) => (
               <LiveParticipantTile key={participant.id} participant={participant} isSpeaking={index === 0} isMuted={index !== 0 && index % 3 !== 0} />
             ))}
           </F0BoxWithClassName>
-          <F0Box display="flex" justifyContent="center" alignItems="center" gap="md" background="primary" borderRadius="xl" padding="lg">
+          <F0BoxWithClassName display="flex" justifyContent="center" alignItems="center" gap="md" background="primary" borderRadius="xl" padding="lg" style={{ position: "fixed", left: "50%", bottom: 28, transform: "translateX(-50%)", zIndex: 51 }}>
             <F0ButtonToggle label={["Turn microphone on", "Turn microphone off"]} icon={[MicrophoneNegative, Microphone]} selected={microphoneEnabled} onSelectedChange={setMicrophoneEnabled} />
             <F0ButtonToggle label={["Turn camera on", "Turn camera off"]} icon={[VideoRecorderNegative, VideoRecorder]} selected={cameraEnabled} onSelectedChange={setCameraEnabled} />
             <F0Box height="4" width="0.5" background="secondary" />
@@ -4971,10 +4974,10 @@ function SessionRoomScreen({
             ) : (
               <F0Button label="Exit" variant="critical" onClick={onExit} />
             )}
-          </F0Box>
+          </F0BoxWithClassName>
         </F0BoxWithClassName>
         {activePanel ? (
-          <F0BoxWithClassName style={{ width: 612, minWidth: 612, overflow: "hidden" }}>
+          <F0BoxWithClassName style={{ width: activePanelWidth, minWidth: activePanelWidth, overflow: "hidden" }}>
             {activePanel === "chat" ? <LiveSessionChatDrawer /> : <LiveSessionNotesDrawer />}
           </F0BoxWithClassName>
         ) : null}
