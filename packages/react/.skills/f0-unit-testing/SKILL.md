@@ -35,3 +35,7 @@ pnpm vitest:ci       # run once (CI)
 ## Coverage Target
 
 80% minimum. Test behavior, not implementation details.
+
+## Promotion evidence
+
+Vitest unit test results count as evidence for **Phase 4 (Real use)** of the F0 component lifecycle. When promoting a component from `experimental/` to stable, attach the latest `pnpm vitest:ci` output to the promotion issue. See the `f0-component-promotion` skill.

@@ -42,27 +42,39 @@ Load the relevant skill before starting work:
 - **f0-experimental-component-migration** — Promoting components from `experimental/` to stable. Load when migrating.
 - **f0-pr** — Create PRs with correct title format, PR template body, and gh CLI workflow. Load when opening a pull request.
 - **f0-ai-config-hygiene** — Audits AI config files for instruction duplication. Load when modifying `AGENTS.md`, `copilot-instructions.md`, or any skill file.
+- **f0-component-contribution** — Phases 1–3 of the lifecycle: proposal, triage, design, build in `experimental/`. Load when starting a new component.
+- **f0-component-promotion** — Phases 4–5: validating real-world adoption and promoting `experimental/` → `components/`. Load when promoting (Foundations only).
 
 For **MDX documentation** (the Docs tab), use the global `factorial-f0-component-documentation` skill — separate conventions from story files.
 
 ## Folder Organization
 
+> **Where does a new artifact go?** See the canonical [Where it goes](../docs/where-it-goes.mdx) page. It is the single source of truth — do not duplicate placement rules here.
+
 ```
 src/
-  components/    — stable public F0 components only (promoted by Foundations team)
-  experimental/  — ALL new components start here; never add directly to components/
+  components/    — stable public F0 components (promoted by Foundations)
+    _primitives/ — DS primitives: shared chrome reused by ≥2 public components. Not exported.
+  experimental/  — ALL new artifacts start here, organized by destination (components/, patterns/, layouts/, kits/, sds/, hooks/, _primitives/)
+  patterns/      — stable compositions of F0 components
+  layouts/       — stable page-level layouts
+  kits/          — stable groupings of components around a functional area (charts, social…). See admission criteria in Where it goes.
+  sds/           — stable satellite design systems with their own visual identity (one, upselling). See admission criteria in Where it goes.
   hooks/         — public exported hooks
   icons/         — generated icons (do not edit manually)
-  layout/        — page layout components
   lib/           — internal utilities and providers
-  sds/           — satellite design systems (non-core components)
-  ui/            — primitive wrappers (Radix, shadcn/ui); not re-exported publicly
+  deprecated/    — legacy components scheduled for removal
+  ui/            — third-party primitive wrappers (Radix, shadcn). Not part of F0 public API, not re-exported. Sidebar group: "UI Wrappers" (hidden in published Storybook).
 ```
+
+The current organization of legacy folders (`src/ui/`, `src/experimental/`, `src/sds/`, `src/kits/`) is tracked in `INVENTORY.md` files inside each directory. Those are decision maps for ongoing reclassification, not instructions for automatic moves.
 
 ### New component workflow
 
 **Every new component must start in `experimental/`**, regardless of how complete it feels.
 Only a member of the **Foundations team** can promote a component from `experimental/` to `components/` (stable).
+
+The full lifecycle (proposal → triage → design → build → promotion → deprecation) is defined in the [Definition of Done](../docs/definition-of-done.mdx) and the [Component Maturity model](../docs/components-maturity.mdx). Use the `f0-component-contribution` skill when building, and the `f0-component-promotion` skill when promoting.
 
 1. Create component in `experimental/<Category>/F0ComponentName/`
 2. Export from `experimental/<Category>/exports.ts`
@@ -87,9 +99,14 @@ F0Example/
 
 ### Naming
 
-- Public components must start with `F0` (e.g., `F0Button`)
-- Old `F1`, `One`, or unprefixed names: rename when touched
-- Rule does not apply to subcomponents or private internals
+See the [Where it goes](../docs/where-it-goes.mdx) Naming section for the full ruleset. Summary:
+
+- Public components: `F0<Name>` (e.g., `F0Button`).
+- Primitives: `F0<Name>` even though not exported. Location and JSDoc `@internal` mark them as primitives, not the name.
+- Hooks: `use<Name>`.
+- UI Wrappers (`src/ui/`): lowercase or as inherited from the wrapped library.
+- Legacy `F1` / `One` / unprefixed names: rename when touched, unless it would break an in-flight stabilization PR (defer to promotion time).
+- Subcomponents and private internals: naming is free.
 
 ### Index Exports
 
@@ -122,6 +139,21 @@ Never import Radix or third-party primitives directly. Always use `@/ui/` wrappe
 - `'use client'` directive only when necessary
 - Components in `components/` must be exported in `exports.ts`
 - `src/ui/` components must **not** be re-exported publicly
+
+### Deprecation
+
+To deprecate a component or prop, add JSDoc tags above the export:
+
+```ts
+/**
+ * @deprecated Use F0NewComponent instead.
+ * @removeIn 2.0.0
+ * @migration https://github.com/factorialco/factorial-one/blob/main/packages/react/docs/migrations/f0-old-to-new.md
+ */
+export const F0OldComponent = ...
+```
+
+All three tags are required. Removal happens no earlier than 1 quarter (≥90 days) after deprecation. See the [Deprecation & Removal policy](../docs/development/release-and-versioning.mdx).
 
 ## Component Props
 

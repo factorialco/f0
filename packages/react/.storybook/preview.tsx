@@ -160,17 +160,27 @@ const preview: Preview = {
     options: {
       /*
        * Sort stories alphabetically by default, but keep the documented top-level sections
-       * and nested Foundations/CRUD patterns groups in the specific order defined below.
+       * and nested Foundations/CRUD patterns/Lifecycle groups in the specific order defined below.
+       * Inside `Lifecycle/`, the order follows the actual workflow
+       * (contribute → DoD → maturity → review → release).
        */
       storySort: {
         method: "alphabetical",
         order: [
           "Introduction",
-          "How to contribute",
+          "Lifecycle",
+          [
+            "How to contribute",
+            "Definition of done",
+            "Components maturity",
+            "Design review",
+            "Release and versioning",
+          ],
           "AI configuration",
           "Foundations",
           ["Colors", "Typography", "Spacing", "Borders", "Shadows", "Icons"],
           "Components",
+          ["Primitives", "Inputs"],
           "Patterns",
           [
             "Data collection",

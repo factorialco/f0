@@ -1,0 +1,106 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+
+<Meta title="Lifecycle/Design Review" />
+
+# Design Review
+
+A design review is a synchronous (or asynchronous) checkpoint between the proposer and the Foundations design team, held in **Phase 2** of the lifecycle (see [Definition of Done](/?path=/docs/lifecycle-definition-of-done--docs)).
+
+It is **not** a code review and **not** a quality gate — those happen in Phase 3 via the `f0-quality-gate` skill. The design review focuses on the **subjective and systemic** decisions that automation cannot check.
+
+> **Design Review is NOT the place to evaluate whether the component should exist at all.** That decision is made earlier — in Phase 0 (self-evaluation by the contributor with help from Claude) and Phase 1 (Foundations triage). By the time a component reaches Design Review, the question is "is this design correct?", not "should we build this?". See the [Component Contribution skill](https://github.com/factorialco/factorial-one/blob/main/packages/react/.skills/f0-component-contribution/SKILL.md) for the evaluation flow.
+
+---
+
+## When it's required
+
+- Every **new** component (Phase 2).
+- Every change to a **stable** component that affects its API, visual design, or behavior.
+- Optional for changes to experimental components (the owning team can iterate freely).
+
+---
+
+## Who attends
+
+- **Proposer** — presents the problem, design, and proposed API.
+- **At least one Foundations designer** — owns approval.
+- **Optional:** an a11y specialist for components with complex interactions.
+
+Async review (PR comments on a Figma + API spec) is acceptable for small changes.
+
+---
+
+## The 10-category checklist
+
+Every reviewer evaluates these categories. Any blocking comment must be resolved before the review is approved.
+
+### 1. Problem clarity
+
+- Is the problem this component solves clearly stated?
+- Is there evidence of recurring need across teams?
+
+### 2. System fit (consistency check)
+
+> The "should this exist?" question was already answered in Phase 0/1. Here we verify the design respects the system.
+
+- Is the component coherent with similar F0 components (naming, behavior, visual language)?
+- If new, does it share patterns with existing components (e.g., consistent slot API, prop conventions)?
+- Final placement confirmed: core F0 (`components/`) or SDS (`sds/<area>/`)? See the [Where it goes](/?path=/docs/lifecycle-where-it-goes--docs) page for the placement rules.
+
+### 3. API design
+
+- Are prop names clear, functional, and consistent with F0 conventions (e.g., `onlyIcon`, not `hideLabel`)?
+- Are mutually exclusive props expressed as discriminated unions?
+- Are sensible defaults provided?
+
+### 4. Composition
+
+- Does the component compose with existing F0 layouts, dialogs, forms?
+- Are slots used where flexibility is needed?
+
+### 5. Variants and density
+
+- Are variants minimal and meaningful (no decorative options)?
+- Are size, density, and spacing tokens used (not hard-coded)?
+
+### 6. Visual design
+
+- Uses F0 design tokens (`f1-foreground`, `f1-background`, etc.) — no hex colors.
+- Dark mode renders correctly.
+- Iconography uses F0 icons.
+
+### 7. Accessibility
+
+- Keyboard navigation defined for all interactive elements.
+- ARIA roles and labels are correct.
+- Focus order and `focusRing()` applied.
+- Reduced-motion variant exists for animations.
+
+### 8. Internationalization
+
+- All user-facing strings go through `useI18n()`.
+- Pluralization (`one` / `other`) handled where relevant.
+- Layout works in RTL languages.
+
+### 9. States and edge cases
+
+- Loading, error, empty, and disabled states are designed.
+- Skeleton variant exists if the component is data-driven.
+- Long content (overflow, truncation) is handled.
+
+### 10. Documentation plan
+
+- MDX target tier (Acceptable / Good / Gold) is declared.
+- At least 3 example stories planned (default, edge case, full configuration).
+
+---
+
+## Output
+
+A design review ends with one of:
+
+- **Approved** — proceed to Phase 3 (Build).
+- **Approved with comments** — proceed; address comments in build.
+- **Needs revision** — address blocking comments and re-review.
+
+The decision is recorded as a comment on the original [Component proposal issue](https://github.com/factorialco/factorial-one/issues/new?template=component-proposal.yml).

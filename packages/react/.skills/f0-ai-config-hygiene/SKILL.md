@@ -29,14 +29,19 @@ Load this skill when:
 This is the authoritative table of what each file owns. A rule belongs in exactly one file.
 Other files that reference the same topic must **link** to the owner, not restate the content.
 
-| Layer | File                              | Owns                                                                                                                                 |
-| ----- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| 1     | `AGENTS.md` (root)                | Monorepo structure, key principles (TypeScript strict, pnpm, English), factorial-skills bootstrap                                    |
-| 1     | `.github/copilot-instructions.md` | Thin Copilot Chat / completion entry point only. Everything else defers to root AGENTS.md.                                           |
-| 2     | `packages/react/AGENTS.md`        | **All** F0 React component conventions: naming, folder structure, props, context, TypeScript, testing, styling, i18n, a11y, commands |
-| 3     | `.skills/*/SKILL.md`              | On-demand workflow orchestration and key-rules summary for a specific task. References AGENTS.md, never restates its rules.          |
-| 3     | `.skills/*/references/*.md`       | Detailed code examples, patterns, and templates that expand on AGENTS.md rules with implementation detail                            |
-| 3     | `.agents/skills/*/SKILL.md`       | External community skills. Treat as read-only; don't add F0-specific rules to them.                                                  |
+| Layer | File                                              | Owns                                                                                                                                 |
+| ----- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| 1     | `AGENTS.md` (root)                                | Monorepo structure, key principles (TypeScript strict, pnpm, English), factorial-skills bootstrap                                    |
+| 1     | `.github/copilot-instructions.md`                 | Thin Copilot Chat / completion entry point only. Everything else defers to root AGENTS.md.                                           |
+| 2     | `packages/react/AGENTS.md`                        | **All** F0 React component conventions: naming, folder structure, props, context, TypeScript, testing, styling, i18n, a11y, commands |
+| 2     | `packages/react/docs/definition-of-done.mdx`      | The lifecycle contract: phases, exit criteria, maturity levels, promotion gates                                                      |
+| 2     | `packages/react/docs/components-maturity.mdx`     | What each maturity level (`experimental`, `stable`, `deprecated`) means; clarification that `internal` is not a level                |
+| 2     | `packages/react/docs/design-review.mdx`           | The 10-category design review checklist used in Phase 2                                                                              |
+| 2     | `packages/react/docs/contributions.mdx`           | Human entry-point for "I want to…" — links to all the contracts above                                                                |
+| 2     | `packages/react/docs/development/release-and-versioning.mdx` | Versioning, alpha/release flow, and the **Deprecation & Removal policy**                                                  |
+| 3     | `.skills/*/SKILL.md`                              | On-demand workflow orchestration and key-rules summary for a specific task. References AGENTS.md, never restates its rules.          |
+| 3     | `.skills/*/references/*.md`                       | Detailed code examples, patterns, and templates that expand on AGENTS.md rules with implementation detail                            |
+| 3     | `.agents/skills/*/SKILL.md`                       | External community skills. Treat as read-only; don't add F0-specific rules to them.                                                  |
 
 ## Audit Workflow
 
@@ -156,6 +161,17 @@ from root `AGENTS.md`. Since GitHub Copilot coding agent reads `AGENTS.md` nativ
 The three skip conditions (`user asks to skip`, `docs-only change`, `auto-generated files`) appear
 in both `packages/react/AGENTS.md` and `f0-quality-gate/SKILL.md`. The canonical list lives in
 AGENTS.md; the skill should reference it rather than duplicate it.
+
+### Pattern E — Lifecycle rules drifting from the contract
+
+The `definition-of-done.mdx` is the contract for the F0 component lifecycle (phases, exit criteria,
+maturity levels). Skills like `f0-component-contribution`, `f0-component-promotion`, and
+`f0-experimental-component-migration` are operational playbooks that **execute** the contract.
+
+When a phase exit criterion (e.g., "≥3 product teams adopted") is restated in a skill, the skill
+becomes a maintenance liability — if the contract changes, every skill must be updated. The fix:
+have the skill reference the contract section (e.g., `"see definition-of-done.mdx Phase 4"`)
+rather than restating the criterion.
 
 ## Fix Guidance
 

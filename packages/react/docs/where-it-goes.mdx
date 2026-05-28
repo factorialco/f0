@@ -1,0 +1,130 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+
+<Meta title="Lifecycle/Where it goes" />
+
+# Where it goes
+
+> Canonical placement rules for any new artifact in F0. If you are adding a component, pattern, layout, hook, primitive, kit or satellite system — this page tells you where it goes and why.
+
+This is the **single source of truth** for placement decisions. AGENTS files link to this page rather than duplicating the rules.
+
+---
+
+## The routing table
+
+| You have…                                              | Born in (experimental)                          | Promotes to                              | Naming   | Exported from `f0.ts` | Initial story tag |
+| ------------------------------------------------------ | ----------------------------------------------- | ---------------------------------------- | -------- | --------------------- | ----------------- |
+| A new component (atomic, generic)                      | `src/experimental/components/F0X/`              | `src/components/F0X/`                    | `F0X`    | yes                   | `experimental`    |
+| A new composition of public F0 components              | `src/experimental/patterns/F0X/`                | `src/patterns/F0X/`                      | `F0X`    | yes                   | `experimental`    |
+| A new page-level layout                                | `src/experimental/layouts/F0X/`                 | `src/layouts/F0X/`                       | `F0X`    | yes                   | `experimental`    |
+| A new generic hook                                     | `src/experimental/hooks/useX/`                  | `src/hooks/useX.ts`                      | `useX`   | yes                   | `experimental`    |
+| Shared chrome used by ≥2 public F0 components          | `src/experimental/_primitives/F0X/`             | `src/components/_primitives/F0X/`        | `F0X`    | **no**                | `experimental`    |
+| A grouping of components for a general functional area | `src/experimental/kits/<area>/`                 | `src/kits/<area>/`                       | `F0X`    | yes                   | `experimental`    |
+| A satellite system with its own visual identity        | `src/experimental/sds/<name>/`                  | `src/sds/<name>/`                        | `F0X`    | yes                   | `experimental`    |
+| A direct wrapper over a third-party primitive          | `src/ui/x.tsx` (does not follow lifecycle)      | stays in `src/ui/`                       | lowercase| no                    | `internal` (technical) |
+| A legacy `One*` component being phased out             | `src/deprecated/<Name>/` when touched           | n/a                                      | as is    | yes with `@deprecated`| `deprecated`      |
+
+Rules that apply to every row:
+
+- Everything that follows the lifecycle is **born in `experimental/`**. There is no "this looks ready, I'll put it straight into `components/`".
+- Only the **Foundations team** can promote from `experimental/` to a final location.
+- Promotion = `git mv` + tag change + remove `experimentalComponent()` wrapper.
+
+---
+
+## What is a **Primitive**?
+
+A DS primitive is shared chrome reused by **two or more public F0 components**.
+
+- Lives in `src/components/_primitives/F0X/`.
+- Has a Storybook page under `Components/Primitives/<Name>` so DS contributors can find and reuse it.
+- Is **not** re-exported from `src/f0.ts` — only reachable via `@/components/_primitives/F0X`.
+- Carries JSDoc `@internal` with the list of public consumers.
+- MDX opens with: *"Internal primitive. Part of the F0 design system, not part of the public API."*
+- Follows the same maturity model as any other component (`experimental` / `stable` / `deprecated`).
+
+**Creation rule:** only add a primitive when used by **≥2 public consumers** and its chrome is non-trivial. Otherwise inline the styles into the single consumer.
+
+**Naming exception:** primitives use the `F0` prefix even though they are not public API. The prefix signals "owned by F0", regardless of export status. What marks them as primitives is their location, their JSDoc `@internal`, and the MDX callout — not the name.
+
+---
+
+## What is a **Kit**?
+
+A kit is a **grouping of components for a general functional area** (charts, social, dates, files…). It uses the core F0 tokens — no own visual identity.
+
+**Admission criteria** — **all** must be true:
+
+1. Uses the core F0 tokens (no own visual identity).
+2. Reusable by **≥2 different products** (not only by the team that proposed it).
+3. Groups components around a **general functional domain**, not around a single product.
+4. A kit **cannot contain new atomic components**. If a kit needs a new atomic component, that component goes to `components/` (generic). The kit only composes / groups existing components.
+
+If an entry does not meet the criteria, it belongs in `components/`, in `sds/<name>/`, or in the product monolith.
+
+---
+
+## What is an **SDS** (satellite design system)?
+
+An SDS is a **system with its own visual identity** that lives next to the core F0 (own tokens, colors, typography, or branding).
+
+**Admission criteria** — **all** must be true:
+
+1. Has its own tokens, colors or typography differentiated from core F0 (own visual identity / branding).
+2. Has an identifiable owner team with product/area identity.
+3. Used across the Factorial product (not a single product feature).
+4. "Only my product uses it" does **not** qualify it for SDS.
+
+Today valid SDS examples: `sds/one/` (Factorial One — AI brand), `sds/upselling/` (Growth — upselling brand).
+
+If an entry does not meet the criteria, it belongs in `components/`, in `kits/<area>/`, or in the product monolith.
+
+---
+
+## SDS vs Kit — quick decision
+
+| Question                                                                  | If yes…  | If no…   |
+| ------------------------------------------------------------------------- | -------- | -------- |
+| Does it have its own tokens / colors / typography differentiated from F0? | SDS      | Kit candidate |
+| Is it grouping things for a general functional domain (charts, social…)?  | Kit      | Not a kit |
+| Is it used by ≥2 products?                                                | Continue | Not in F0 |
+
+If none of the above fit — the artifact does not belong in F0. Put it in the product monolith.
+
+---
+
+## Gatekeeping
+
+To keep the system honest:
+
+- **Foundations team is the only approver** for new entries under `sds/` or `kits/`. An experimental cannot promote into them autonomously.
+- **PR template asks**: *"Why can't this live in your product monolith?"* — forces a justification.
+- **Inventories** (`src/sds/INVENTORY.md`, `src/kits/INVENTORY.md`, `src/ui/INVENTORY.md`, `src/experimental/INVENTORY.md`) record every entry's classification. Anything `MISCATEGORIZED` is a candidate for cleanup.
+
+---
+
+## Naming
+
+- Public components: `F0<Name>` (e.g., `F0Button`).
+- Primitives: `F0<Name>` (even though not exported — see Primitives section above).
+- Hooks: `use<Name>`.
+- UI Wrappers (`src/ui/`): lowercase or as inherited from the wrapped library.
+- Legacy `F1` / `One` / unprefixed names: rename when touched, unless the rename would break an in-flight stabilization PR (defer to promotion time).
+- Subcomponents and private internals (inside a component folder): naming is free.
+
+---
+
+## How a component is born
+
+```
+1. You have an idea or a need.
+2. Find this page. Pick the row that matches.
+3. Create the folder under src/experimental/<bucket>/.
+4. Tag the story `experimental`.
+5. Wrap the export with experimentalComponent().
+6. Build, test, document.
+7. Wait for real-world adoption.
+8. Foundations promotes: git mv, tag → `stable`, drop wrapper.
+```
+
+If a step does not apply to your case, you are probably in the wrong row. Reread the table.
