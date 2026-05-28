@@ -39,9 +39,15 @@ export const NumberInputInternal = forwardRef<
     value != null ? formatValue(value, locale, maxDecimals) : ""
   )
 
+  const {
+    onBlur: externalOnBlur,
+    onPressEnter: externalOnPressEnter,
+    ...restProps
+  } = props
+
   const localHint = useMemo(() => {
-    if (props.hint !== undefined) {
-      return props.hint
+    if (restProps.hint !== undefined) {
+      return restProps.hint
     }
     if (min != null && max != null) {
       return i18n.t("numberInput.between", { min, max })
@@ -54,7 +60,7 @@ export const NumberInputInternal = forwardRef<
     }
     return undefined
     // eslint-disable-next-line react-hooks/exhaustive-deps -- We don't need to re-render when the i18n changes
-  }, [min, max, props.hint])
+  }, [min, max, restProps.hint])
 
   const handleBeforeInput = useCallback(
     (e: React.FormEvent<HTMLInputElement>) => {
@@ -80,40 +86,53 @@ export const NumberInputInternal = forwardRef<
 
   const handleChange = (value: string) => {
     const extractedData = extractNumber(value, { maxDecimals })
-    if (!extractedData) {
-      return
-    }
+    if (!extractedData) return
 
     const { value: parsedValue } = extractedData
 
-    /**
-     * Apply min and max constraints
-     */
     if (parsedValue === null) {
       setFieldValue("")
       onChange?.(null)
       return
     }
 
+    // Preserve raw input during typing. Min/max constraints are applied
+    // on blur/enter so the user can type intermediate values freely.
+    setFieldValue(extractedData.formattedValue)
+    onChange?.(parsedValue)
+  }
+
+  // Clamp and reformat when the user commits (blur or Enter).
+  // Normalizes trailing separators (e.g. "17." → "17") and enforces min/max.
+  const commitValue = useCallback(() => {
+    const extractedData = extractNumber(fieldValue, { maxDecimals })
+    if (extractedData?.value == null) return
+
     const clampedValue = Math.max(
       min ?? -Infinity,
-      Math.min(max ?? Infinity, parsedValue)
+      Math.min(max ?? Infinity, extractedData.value)
     )
 
-    // When clamping didn't change the value, preserve the user's raw input
-    // (e.g. "17." stays as "17." instead of being reformatted to "17").
-    if (clampedValue === parsedValue) {
-      setFieldValue(extractedData.formattedValue)
-      onChange?.(parsedValue)
-      return
+    setFieldValue(formatValue(clampedValue, locale, maxDecimals))
+    if (clampedValue !== extractedData.value) {
+      onChange?.(clampedValue)
     }
+  }, [fieldValue, maxDecimals, min, max, onChange, locale])
 
-    const clampedData = extractNumber(clampedValue.toString(), {
-      maxDecimals,
-    })
-    setFieldValue(clampedData?.formattedValue ?? "")
-    onChange?.(clampedData?.value ?? null)
-  }
+  const handleBlur = useCallback(() => {
+    commitValue()
+    externalOnBlur?.()
+  }, [commitValue, externalOnBlur])
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter") {
+        commitValue()
+        externalOnPressEnter?.()
+      }
+    },
+    [commitValue, externalOnPressEnter]
+  )
 
   const handleStep = (type: "increase" | "decrease") => () => {
     if (!step) return
@@ -147,7 +166,9 @@ export const NumberInputInternal = forwardRef<
         value={fieldValue}
         inputMode={maxDecimals === 0 ? "numeric" : "decimal"}
         onChange={handleChange}
-        {...props}
+        {...restProps}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
         onBeforeInput={handleBeforeInput}
         hint={localHint}
         appendTag={units}
@@ -155,7 +176,7 @@ export const NumberInputInternal = forwardRef<
           step ? (
             <Arrows
               step={step}
-              disabled={props.disabled}
+              disabled={restProps.disabled}
               onClickArrow={handleStep}
             />
           ) : undefined
