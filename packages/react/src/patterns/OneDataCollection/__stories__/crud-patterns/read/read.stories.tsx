@@ -264,9 +264,7 @@ function RightDialogScenario({
       <F0Dialog
         isOpen={selectedResource !== null}
         onClose={() => setSelectedResource(null)}
-        title="Resource details"
-        description="Open a reduced view in a Right Dialog, then continue to the full page when deeper exploration is needed."
-        position="right"
+        description="Open details in a Right Dialog so the user can read the resource while keeping the collection visible."
         width="sm"
         disableContentPadding
         secondaryAction={{
