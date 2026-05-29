@@ -5230,6 +5230,13 @@ function SessionCalendarBlock() {
 
 function SessionAttendanceTab({ isEnded }: { isEnded: boolean }) {
   const rows = isEnded ? sessionAttendance : sessionAttendance.map((row) => ({ ...row, attendance: "Pending" as const, completedHours: `0h/${row.completedHours.split("/")[1] ?? "20h"}` }))
+  const attendanceFilterOptions = isEnded
+    ? [
+        { value: "Attended", label: "Attended" },
+        { value: "Partially attended", label: "Partially attended" },
+        { value: "Not attended", label: "Not attended" },
+      ]
+    : [{ value: "Pending", label: "Pending" }]
   const source = useDataCollectionSource<SessionAttendanceRow>(
     {
       search: { enabled: true, sync: true },
@@ -5238,11 +5245,7 @@ function SessionAttendanceTab({ isEnded }: { isEnded: boolean }) {
           type: "in",
           label: "Attendance",
           options: {
-            options: [
-              { value: "Attended", label: "Attended" },
-              { value: "Not attended", label: "Not attended" },
-              { value: "Pending", label: "Pending" },
-            ],
+            options: attendanceFilterOptions,
           },
         },
       },
@@ -5259,6 +5262,10 @@ function SessionAttendanceTab({ isEnded }: { isEnded: boolean }) {
           return paginateRecords(sorted, pagination, 10)
         },
       },
+      secondaryActions: () =>
+        isEnded
+          ? [{ label: "Download connectivity log", icon: Download, onClick: () => undefined }]
+          : [],
       selectable: (row) => row.id,
       bulkActions: () => ({
         primary: [
