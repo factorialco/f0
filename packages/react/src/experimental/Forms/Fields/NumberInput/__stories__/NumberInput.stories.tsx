@@ -180,10 +180,13 @@ export const InlineWithContext: Story = {
 export const AsPopover: Story = {
   args: {
     label: "Discount",
+    hideLabel: true,
     units: "%",
     extraContent: "of 300,00 €",
     inputWidth: "160px",
-    popover: {},
+    popover: {
+      triggerLabel: "Discount",
+    },
   },
   render: (props) => {
     const [value, setValue] = useState<number | null>(null)
@@ -201,6 +204,7 @@ export const AsPopover: Story = {
 export const AsPopoverDeferredApply: Story = {
   args: {
     label: "Discount",
+    hideLabel: true,
     units: "%",
     extraContent: "of 300,00 €",
     inputWidth: "160px",
@@ -226,6 +230,7 @@ export const AsPopoverDeferredApply: Story = {
 export const AsPopoverDeferredApplyInline: Story = {
   args: {
     label: "Discount",
+    hideLabel: true,
     units: "%",
     extraContent: "of 300,00 €",
     inputWidth: "160px",
