@@ -43,7 +43,6 @@ export interface NumberInputPopoverConfig {
     label?: string
     icon?: IconType
     closeOnApply?: boolean
-    layout?: "block" | "inline"
   }
 }
 
@@ -357,11 +356,12 @@ export const NumberInputInternal = forwardRef<
     } = popover
 
     const showApplyButton = isDeferredPopover
+
     const applyLabel = apply?.label ?? i18n.actions.apply
+
     const ApplyIcon = apply?.icon ?? Check
+
     const closeOnApply = apply?.closeOnApply ?? true
-    const applyLayout = apply?.layout ?? "block"
-    const showInlineApplyButton = showApplyButton && applyLayout === "inline"
 
     const handleApply = () => {
       onChange?.(draftValue)
@@ -400,7 +400,7 @@ export const NumberInputInternal = forwardRef<
               extraContent={extraContent}
               inputWidth={inputWidth}
               trailingAction={
-                showInlineApplyButton ? (
+                showApplyButton ? (
                   <F0Button
                     variant="default"
                     icon={ApplyIcon}
@@ -414,16 +414,6 @@ export const NumberInputInternal = forwardRef<
             </NumberRow>
             {shouldRenderOuterMessages ? (
               <InputMessages status={resolvedStatus} />
-            ) : null}
-            {showApplyButton && !showInlineApplyButton ? (
-              <div className="mt-2 flex justify-end">
-                <F0Button
-                  variant="default"
-                  icon={ApplyIcon}
-                  label={applyLabel}
-                  onClick={handleApply}
-                />
-              </div>
             ) : null}
           </div>
         </PopoverContent>

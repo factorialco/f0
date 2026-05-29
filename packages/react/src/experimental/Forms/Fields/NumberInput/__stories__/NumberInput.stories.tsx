@@ -58,7 +58,7 @@ const meta = {
         type: {
           summary: "NumberInputPopoverConfig | undefined",
           detail:
-            "{ icon?: IconType; side?: 'top'|'bottom'|'left'|'right'; align?: 'start'|'center'|'end'; open?: boolean; onOpenChange?: (open: boolean) => void; triggerLabel?: string; commitMode?: 'immediate'|'deferred'; apply?: { label?: string; icon?: IconType; closeOnApply?: boolean; layout?: 'block'|'inline' } }",
+            "{ icon?: IconType; side?: 'top'|'bottom'|'left'|'right'; align?: 'start'|'center'|'end'; open?: boolean; onOpenChange?: (open: boolean) => void; triggerLabel?: string; commitMode?: 'immediate'|'deferred'; apply?: { label?: string; icon?: IconType; closeOnApply?: boolean } }",
         },
       },
     },
@@ -171,9 +171,10 @@ export const WithUnits: Story = {
 export const InlineWithContext: Story = {
   args: {
     label: "Discount",
+    placeholder: "0",
     units: "%",
     extraContent: "of 300,00 €",
-    inputWidth: "160px",
+    inputWidth: "100px",
   },
 }
 
@@ -181,9 +182,10 @@ export const AsPopover: Story = {
   args: {
     label: "Discount",
     hideLabel: true,
+    placeholder: "0",
     units: "%",
     extraContent: "of 300,00 €",
-    inputWidth: "160px",
+    inputWidth: "100px",
     popover: {
       triggerLabel: "Discount",
     },
@@ -205,39 +207,14 @@ export const AsPopoverDeferredApply: Story = {
   args: {
     label: "Discount",
     hideLabel: true,
+    placeholder: "0",
     units: "%",
     extraContent: "of 300,00 €",
-    inputWidth: "160px",
+    inputWidth: "100px",
     popover: {
       triggerLabel: "Discount",
       commitMode: "deferred",
       apply: { label: "Apply" },
-    },
-  },
-  render: (props) => {
-    const [value, setValue] = useState<number | null>(null)
-    return (
-      <div className="flex items-center gap-2">
-        <NumberInput {...props} value={value} onChange={setValue} />
-        <span className="text-f1-foreground-secondary text-sm">
-          Committed: {value != null ? `${value}%` : "—"}
-        </span>
-      </div>
-    )
-  },
-}
-
-export const AsPopoverDeferredApplyInline: Story = {
-  args: {
-    label: "Discount",
-    hideLabel: true,
-    units: "%",
-    extraContent: "of 300,00 €",
-    inputWidth: "160px",
-    popover: {
-      triggerLabel: "Discount",
-      commitMode: "deferred",
-      apply: { label: "Apply", layout: "inline" },
     },
   },
   render: (props) => {
