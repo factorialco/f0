@@ -9,11 +9,12 @@ import { BaseCell } from "../BaseCell"
 export function DisabledCell<R extends RecordType>({
   editableColumn,
   item,
+  hint,
 }: EditableCellProps<R>) {
   const i18n = useI18n()
 
   return (
-    <BaseCell borderOnHover={false}>
+    <BaseCell borderOnHover={false} hint={hint}>
       <div
         className={cn(
           editableColumn.align === "right" ? "justify-end" : "",
