@@ -72,7 +72,7 @@ jobs:
           {
             "framework": "vite",
             "installCommand": "pnpm install --frozen-lockfile",
-            "buildCommand": "pnpm --filter @factorialco/f0compose build",
+            "buildCommand": "pnpm --filter @factorialco/f0-core build && pnpm --filter @factorialco/f0compose build",
             "outputDirectory": "packages/f0compose/dist",
             "rewrites": [
               {
