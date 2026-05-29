@@ -67,5 +67,11 @@ target newer than vendor.
   `tsconfig.json`.
 - Don't touch `src/shell/`, `src/catalog/`, `src/lib/` — those are
   framework code.
+- Don't re-add `<React.StrictMode>` to `src/main.tsx`. It was
+  intentionally removed because experimental f0-react components
+  (selectors, OneDataCollection lanes, F0AiChat) re-enter setState
+  during dev's double-invocation and crash localhost with "Maximum
+  update depth exceeded". Vercel prod is unaffected. Re-enable only
+  after upstream f0-react has been audited for strict-mode safety.
 - Don't modify components in `packages/react/src/`.
 - Don't end the turn without the local URL.
