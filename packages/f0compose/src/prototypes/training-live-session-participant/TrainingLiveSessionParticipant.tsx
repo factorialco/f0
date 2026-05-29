@@ -280,12 +280,12 @@ type GroupSessionRow = {
   liveDurationSeconds?: number
   type: "self-paced" | "scheduled"
   modality: "Virtual" | "On-site" | "Hybrid"
-  liveState: "live" | "waiting"
+  liveState: "completed" | "live" | "waiting"
 }
 type SessionAttendanceRow = {
   id: string
   name: string
-  attendance: "Attended" | "Not attended" | "Pending"
+  attendance: "Attended" | "Partially attended" | "Not attended" | "Pending"
   completedHours: string
 }
 type GroupParticipantRow = {
@@ -761,10 +761,7 @@ const exactCourses: ExactCourse[] = trainings.slice(0, 3).map((training, index) 
     campus: index < 8,
     provider: index < 8 ? "Factorial campus" : "Internal",
     duration: index === 0 ? "10h 0m" : index === 1 ? "6h 30m" : "4h 0m",
-    groups:
-      index === 0
-        ? ["Edición - enero 2025", "Edición - noviembre 2025"]
-        : ["Default group"],
+    groups: index === 0 ? ["Edición 2026", "Edición 2026 - Grupo B"] : ["Default group"],
     competencies:
       index === 0
         ? ["Gestión de cumplimiento."]
@@ -835,17 +832,17 @@ const initialBudgets: BudgetRow[] = [
     availableBudget: -7980.4,
     committedBudget: 7980.4,
     spentBudget: 7980.4,
-    effectiveDate: "1 Jan 2025 - 31 Dec 2025",
+    effectiveDate: "1 Jan 2026 - 31 Dec 2026",
     trainingGroups: 2,
     movements: [
       {
         id: "movement-qc-1",
         trainingId: "7",
         trainingName: "Fundamentos de la gestión de calidad con ISO 9001",
-        groupName: "Edición - noviembre 2025",
+        groupName: "Edición 2026 - Grupo B",
         groupStatus: "finished",
-        startDate: "11/01/2025",
-        endDate: "11/30/2025",
+        startDate: "01/01/2026",
+        endDate: "12/31/2026",
         cost: 3990.2,
         provider: "Private",
         paymentStatus: "paid",
@@ -858,10 +855,10 @@ const initialBudgets: BudgetRow[] = [
         id: "movement-qc-2",
         trainingId: "7",
         trainingName: "Fundamentos de la gestión de calidad con ISO 9001",
-        groupName: "Edición - enero 2025",
+        groupName: "Edición 2026",
         groupStatus: "finished",
-        startDate: "01/01/2025",
-        endDate: "01/31/2025",
+        startDate: "01/01/2026",
+        endDate: "12/31/2026",
         cost: 3990.2,
         provider: "Private",
         paymentStatus: "paid",
@@ -942,7 +939,7 @@ const initialBudgets: BudgetRow[] = [
     availableBudget: 0,
     committedBudget: 12000,
     spentBudget: 12000,
-    effectiveDate: "1 Jan 2025",
+    effectiveDate: "1 Jan 2026",
     trainingGroups: 0,
     movements: [],
   },
@@ -951,21 +948,32 @@ const initialBudgets: BudgetRow[] = [
 const groupSessions: GroupSessionRow[] = [
   {
     id: "session-1",
-    name: "Noviembre - Diciembre",
-    date: "Live now · 2 Jan - 31 Jan, 20h 0m",
+    name: "Fundamentos ISO 9001",
+    date: "15 Jun 2026, 10:00 - 11:00",
     statusLabel: "Live",
-    scheduleLabel: "2 Jan - 31 Jan, 20h 0m",
+    scheduleLabel: "15 Jun 2026, 10:00 - 11:00",
     liveDurationSeconds: 18 * 60 + 23,
     type: "scheduled",
     modality: "Virtual",
     liveState: "live",
   },
   {
+    id: "session-3",
+    name: "Introducción a ISO 9001",
+    date: "10 Jun 2026, 10:00 - 11:00",
+    statusLabel: "Ended",
+    scheduleLabel: "10 Jun 2026, 10:00 - 11:00",
+    liveDurationSeconds: 60 * 60,
+    type: "scheduled",
+    modality: "Virtual",
+    liveState: "completed",
+  },
+  {
     id: "session-2",
-    name: "Instructor-led Q&A",
-    date: "Starts in 12 min · 11:30 - 12:30",
-    statusLabel: "Starts in 12 min",
-    scheduleLabel: "11:30 - 12:30",
+    name: "Q&A final",
+    date: "15 Jun 2026, 11:30 - 12:30",
+    statusLabel: "Starts soon",
+    scheduleLabel: "15 Jun 2026, 11:30 - 12:30",
     type: "scheduled",
     modality: "Virtual",
     liveState: "waiting",
@@ -980,9 +988,17 @@ const getNextSession = (endedSessionIds: string[] = []) =>
   groupSessions.find((session) => session.liveState === "waiting" && !endedSessionIds.includes(session.id)) ??
   null
 const getSessionCalendarDescription = (session: GroupSessionRow) =>
-  session.liveState === "live" ? "Live now" : session.scheduleLabel
+  session.liveState === "live"
+    ? "Live now"
+    : session.liveState === "completed"
+      ? "Ended"
+      : session.scheduleLabel
 const getSessionCalendarDate = (session: GroupSessionRow) =>
-  session.liveState === "live" ? new Date(2026, 0, 2) : new Date(2026, 0, 2, 11, 30)
+  session.liveState === "completed"
+    ? new Date(2026, 5, 10, 10)
+    : session.liveState === "live"
+      ? new Date(2026, 5, 15, 10)
+      : new Date(2026, 5, 15, 11, 30)
 
 const myTrainingModules: CourseModuleRow[] = [
   { id: "module-1", title: "Introduction and learning objectives", blocks: 3, status: "completed" },
@@ -1002,18 +1018,18 @@ const myTrainingCertificates: MyCertificateRow[] = [
 
 const sessionAttendance: SessionAttendanceRow[] = [
   { id: "att-1", name: "Calvino Collins", attendance: "Attended", completedHours: "20h/20h" },
-  { id: "att-2", name: "Clara Castillo", attendance: "Attended", completedHours: "20h/20h" },
+  { id: "att-2", name: "Clara Castillo", attendance: "Partially attended", completedHours: "18h/20h" },
   { id: "att-3", name: "Cristóbal Cárdenas", attendance: "Attended", completedHours: "20h/20h" },
-  { id: "att-4", name: "Emilia Estrada", attendance: "Attended", completedHours: "20h/20h" },
+  { id: "att-4", name: "Emilia Estrada", attendance: "Not attended", completedHours: "0h/20h" },
   { id: "att-5", name: "Hellen Howard", attendance: "Attended", completedHours: "20h/20h" },
-  { id: "att-6", name: "Margarita Márquez", attendance: "Attended", completedHours: "20h/20h" },
+  { id: "att-6", name: "Margarita Márquez", attendance: "Partially attended", completedHours: "12h/20h" },
   { id: "att-7", name: "Natalia Navarro", attendance: "Attended", completedHours: "20h/20h" },
-  { id: "att-8", name: "Nicolás Núñez", attendance: "Attended", completedHours: "20h/20h" },
+  { id: "att-8", name: "Nicolás Núñez", attendance: "Not attended", completedHours: "0h/20h" },
   { id: "att-9", name: "Noé Navarro", attendance: "Attended", completedHours: "20h/20h" },
-  { id: "att-10", name: "Nora Nieto", attendance: "Attended", completedHours: "20h/20h" },
+  { id: "att-10", name: "Nora Nieto", attendance: "Not attended", completedHours: "0h/20h" },
   { id: "att-11", name: "Scott Santos", attendance: "Attended", completedHours: "20h/20h" },
-  { id: "att-12", name: "Samantha Suárez", attendance: "Attended", completedHours: "20h/20h" },
-  { id: "att-13", name: "Susana Stanley", attendance: "Attended", completedHours: "20h/20h" },
+  { id: "att-12", name: "Samantha Suárez", attendance: "Partially attended", completedHours: "16h/20h" },
+  { id: "att-13", name: "Susana Stanley", attendance: "Partially attended", completedHours: "10h/20h" },
 ]
 
 const groupParticipants: GroupParticipantRow[] = [
@@ -1650,7 +1666,7 @@ function TrainingLiveSessionsExperience({ role }: { role: LiveSessionRole }) {
   const [requests, setRequests] = useState<RequestRow[]>(initialRequests)
   const [budgets, setBudgets] = useState<BudgetRow[]>(initialBudgets)
   const [pendingListAction, setPendingListAction] = useState<PendingListAction | null>(null)
-  const [endedSessionIds, setEndedSessionIds] = useState<string[]>([])
+  const [endedSessionIds, setEndedSessionIds] = useState<string[]>(["session-3"])
 
   const activeTab = getValidParam(searchParams.get("tab"), VALID_TABS, "courses") as MainTabId
   const activeSubTab = getValidParam(
@@ -2123,7 +2139,7 @@ function NewTrainingGroupWizardDialog({
   const [values, setValues] = useState<Record<string, unknown>>({
     className: "Edición - febrero 2026",
     sessionType: "self-paced",
-    sessionName: "Noviembre - Diciembre",
+    sessionName: "Fundamentos ISO 9001",
     modality: "virtual",
     employees: [],
     budget: "budget-2",
@@ -4395,8 +4411,14 @@ function SessionSidepanel({
               </F0BoxWithClassName>
             </F0BoxWithClassName>
           <F0BoxWithClassName paddingTop="lg" paddingLeft="md" paddingRight="md" overflowY="auto" grow>
-            <SessionSidepanelTabs activeTab={visibleTab} tabs={tabs} />
-            <F0BoxWithClassName style={{ paddingTop: 40 }}>
+            <Tabs
+              key={visibleTab}
+              tabs={tabs
+                .filter((tab) => tab.disabled !== true)
+                .map((tab) => ({ id: tab.id, label: tab.label, onClick: tab.onClick }))}
+              activeTabId={visibleTab}
+            />
+            <F0BoxWithClassName style={{ paddingTop: 32 }}>
               {visibleTab === "details" ? <SessionDetailsTab session={session} role={role} isEnded={isEnded} onJoinSession={onJoinSession} /> : null}
               {visibleTab === "attendance" ? <SessionAttendanceTab isEnded={isEnded} /> : null}
               {visibleTab === "transcript" ? <SessionTranscriptTab session={session} /> : null}
@@ -4404,35 +4426,6 @@ function SessionSidepanel({
           </F0BoxWithClassName>
         </F0Box>
       </F0BoxWithClassName>
-    </F0BoxWithClassName>
-  )
-}
-
-function SessionSidepanelTabs({ activeTab, tabs }: { activeTab: SessionSidepanelTabId; tabs: { id: string; label: string; disabled?: boolean; onClick: () => void }[] }) {
-  return (
-    <F0BoxWithClassName borderBottom="default" borderColor="secondary" display="flex" style={{ height: 64, gap: 16 }}>
-      {tabs.map((tab) => (
-        <F0BoxWithClassName
-          key={tab.id}
-          role="button"
-          aria-label={tab.label}
-          aria-disabled={tab.disabled === true}
-          tabIndex={tab.disabled === true ? -1 : 0}
-          onClick={tab.onClick}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          borderRadius="md"
-          background={tab.id === activeTab ? "secondary" : "transparent"}
-          className={tab.disabled === true ? "opacity-50" : undefined}
-          style={{ height: 32, padding: "0 12px", cursor: tab.disabled === true ? "not-allowed" : "pointer", position: "relative" }}
-        >
-          <F0Text content={tab.label} variant="body" />
-          {tab.id === activeTab ? (
-            <F0BoxWithClassName background="inverse" style={{ position: "absolute", left: 0, right: 0, bottom: -17, height: 1 }} />
-          ) : null}
-        </F0BoxWithClassName>
-      ))}
     </F0BoxWithClassName>
   )
 }
@@ -4448,7 +4441,7 @@ function SessionFormDialog({
 }) {
   const [values, setValues] = useState<Record<string, unknown>>({
     sessionType: "scheduled",
-    sessionName: "Noviembre - Diciembre",
+    sessionName: "Fundamentos ISO 9001",
     modality: "hybrid",
     onlineSession: "factorial",
     frequency: "none",
@@ -4894,7 +4887,7 @@ function LiveSessionNotesDrawer() {
         titlePlaceholder="Training session notes"
         placeholder="Start getting your notes directly with all markdown options"
         initialEditorState={{
-          title: "Noviembre - Diciembre",
+          title: "Fundamentos ISO 9001",
           content: "",
         }}
         metadata={[{ label: "Notes", value: { type: "status", label: "Private", variant: "neutral" } }]}
@@ -6561,6 +6554,7 @@ function requestStatusValue(status: RequestRow["status"]) {
 
 function attendanceStatusValue(status: SessionAttendanceRow["attendance"]) {
   if (status === "Attended") return { label: "Attended", status: "positive" as const }
+  if (status === "Partially attended") return { label: "Partially attended", status: "warning" as const }
   if (status === "Not attended") return { label: "Not attended", status: "critical" as const }
   return { label: "Pending", status: "warning" as const }
 }
