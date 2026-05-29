@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.25.0](https://github.com/factorialco/f0/compare/f0-react-v2.24.0...f0-react-v2.25.0) (2026-05-29)
+
+
+### Features
+
+* expand specific parent rows in nested table by default ([#4206](https://github.com/factorialco/f0/issues/4206)) ([021f138](https://github.com/factorialco/f0/commit/021f138f65a32840b803252d4c2c233ed8280f60))
+
 ## [2.24.0](https://github.com/factorialco/f0/compare/f0-react-v2.23.0...f0-react-v2.24.0) (2026-05-28)
 
 
