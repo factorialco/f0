@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.26.1](https://github.com/factorialco/f0/compare/f0-react-v2.26.0...f0-react-v2.26.1) (2026-05-29)
+
+
+### Bug Fixes
+
+* **EditableTable:** forward cellHint in display-only and disabled cells ([#4266](https://github.com/factorialco/f0/issues/4266)) ([7cbcdd6](https://github.com/factorialco/f0/commit/7cbcdd6086eabb4043c2be77a89394bdb8df18e9))
+
 ## [2.26.0](https://github.com/factorialco/f0/compare/f0-react-v2.25.0...f0-react-v2.26.0) (2026-05-29)
 
 
