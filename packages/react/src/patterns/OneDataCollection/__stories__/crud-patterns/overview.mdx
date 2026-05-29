@@ -79,6 +79,11 @@ Table mode for field-level updates; most Table rules still apply.
 The Pattern decision table below is the canonical reference. Later sections
 expand on individual operations, views, and edge cases.
 
+For Read on Table and List, routing to a page is the default — it is the most
+common Read interaction observed across the product. Dialog-based reads are
+reserved for cases where the resource is small enough to be fully understood
+in a dialog and no durable page destination exists.
+
 <Unstyled>
   <table className="mb-4 w-full dark:text-f1-foreground-inverse/80">
     <thead>
@@ -110,7 +115,16 @@ expand on individual operations, views, and edge cases.
       </tr>
       <tr>
         <td>
-          User benefits from a preview of a complex resource that can lead to a
+          <strong>Default Read destination</strong> — resource has, or warrants,
+          a durable page with persistent navigation, tabs, or page-level actions
+        </td>
+        <td>Table, List</td>
+        <td>Read</td>
+        <td>Table to Page / List to Page</td>
+      </tr>
+      <tr>
+        <td>
+          User benefits from a reduced preview before committing to the full
           page
         </td>
         <td>Table, List</td>
@@ -118,10 +132,13 @@ expand on individual operations, views, and edge cases.
         <td>Dialog to Page</td>
       </tr>
       <tr>
-        <td>Resource needs persistent navigation, tabs, or deeper structure</td>
+        <td>
+          Lightweight inspection only — resource is small, fits a centered
+          dialog, and has no durable page destination
+        </td>
         <td>Table, List</td>
         <td>Read</td>
-        <td>Table to Page / List to Page</td>
+        <td>Default Dialog (Read fallback)</td>
       </tr>
       <tr>
         <td>
@@ -330,9 +347,10 @@ multi-step flows.
 
 ### Read
 
-Triggered by clicking a row, list item, or card. Opens a dialog for contained
-resources, a Right Dialog when collection context helps scanning, or navigates
-to a page when the resource needs a durable destination.
+Triggered by clicking a row, list item, or card. By default, Table and List
+reads route to a page; dialog-based reads are reserved for lightweight
+inspection when the resource has no durable page destination. Card and Kanban
+reads open a focused dialog because the card surface is already object-level.
 
 <Unstyled>
   <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
@@ -347,25 +365,28 @@ to a page when the resource needs a durable destination.
         <td>
           <a
             target="_parent"
-            href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-dialog"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-page"
           >
-            Table Read — Default
+            Table to Page
           </a>
         </td>
-        <td>Clicking an item opens the Default Dialog.</td>
+        <td>
+          Clicking a table row or chevron action routes to a resource page.
+          Default Read pattern for Table.
+        </td>
       </tr>
       <tr>
         <td>
           <a
             target="_parent"
-            href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-right-dialog"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--list-read-page"
           >
-            Table Read — Right Dialog
+            List to Page
           </a>
         </td>
         <td>
-          Clicking a row opens a Right Dialog while the collection stays
-          visible.
+          Clicking a list item or chevron action routes to a resource page.
+          Default Read pattern for List.
         </td>
       </tr>
       <tr>
@@ -386,13 +407,14 @@ to a page when the resource needs a durable destination.
         <td>
           <a
             target="_parent"
-            href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-page"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-right-dialog"
           >
-            Table to Page
+            Table Read — Right Dialog
           </a>
         </td>
         <td>
-          Clicking a table row or chevron action routes to a resource page.
+          Clicking a row opens a Right Dialog while the collection stays
+          visible. Use when row comparison helps the task.
         </td>
       </tr>
       <tr>
@@ -406,20 +428,21 @@ to a page when the resource needs a durable destination.
         </td>
         <td>
           Clicking a list item opens a Right Dialog while the list stays
-          visible.
+          visible. Use when list context helps scanning.
         </td>
       </tr>
       <tr>
         <td>
           <a
             target="_parent"
-            href="/?path=/story/patterns-data-collection-crud-patterns-read--list-read-page"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-dialog"
           >
-            List to Page
+            Table Read — Default
           </a>
         </td>
         <td>
-          Clicking a list item or chevron action routes to a resource page.
+          Clicking an item opens the Default Dialog. Reserved for lightweight
+          inspection when no page destination exists.
         </td>
       </tr>
       <tr>
@@ -661,10 +684,12 @@ update instead.
 
 How each view applies the Pattern decision table by default.
 
-- **Table:** Right Dialog for read or update when row comparison helps the
-  task.
-- **List:** Right Dialog for read or update when list context remains useful
-  while reading or editing.
+- **Table:** route to a page by default for read. Right Dialog only when row
+  comparison materially helps the task. Default Dialog only when the resource
+  is small and no page destination exists.
+- **List:** route to a page by default for read. Right Dialog only when list
+  context remains useful while reading. Default Dialog only when the resource
+  is small and no page destination exists.
 - **Card:** click opens read first; edit is an explicit action inside the read
   dialog or from a card item action (ellipsis menu).
 - **Kanban:** lane create for state-scoped resources; drag for state updates;
@@ -680,10 +705,21 @@ How each view applies the Pattern decision table by default.
 <DoDonts
   do={{
     description:
-      "Use the Default Dialog as the baseline for create, read, and update flows.",
+      "Use the Default Dialog as the baseline for create and update flows.",
   }}
   dont={{
     description: "Do not make Right Dialogs the default container.",
+  }}
+/>
+
+<DoDonts
+  do={{
+    description:
+      "Use a page as the default Read destination on Table and List, especially when the resource has its own URL, tabs, or page-level actions.",
+  }}
+  dont={{
+    description:
+      "Do not default to a Default Dialog for Read when a page destination exists or could reasonably be built.",
   }}
 />
 
