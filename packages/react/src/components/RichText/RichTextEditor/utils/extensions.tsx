@@ -6,6 +6,7 @@ import {
   LinkExtension,
   MentionedUser,
   MentionsConfig,
+  PasteSanitizer,
   PersistSelection,
   StarterKitExtension,
   TaskListExtension,
@@ -38,6 +39,7 @@ const ExtensionsConfiguration = ({
 }: ExtensionsConfigurationProps) => {
   return [
     StarterKitExtension,
+    PasteSanitizer,
     UnderlineExtension,
     TextStyleExtension,
     ColorExtension,
