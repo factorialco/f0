@@ -288,12 +288,12 @@ export const NumberInputInternal = forwardRef<
 
   const handleStep = (type: "increase" | "decrease") => () => {
     if (!step) return
-    if (value == null) {
+    if (inputValue == null) {
       const initialValue = step
       return handleChange(formatValue(initialValue, locale, maxDecimals))
     }
 
-    const newValue = type === "increase" ? value + step : value - step
+    const newValue = type === "increase" ? inputValue + step : inputValue - step
     if ((min != null && newValue < min) || (max != null && newValue > max)) {
       return
     }
