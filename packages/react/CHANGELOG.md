@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.27.0](https://github.com/factorialco/f0/compare/f0-react-v2.26.1...f0-react-v2.27.0) (2026-05-29)
+
+
+### Features
+
+* **NumberInput:** consolidate F0AmountCalculator — add inline context and popover modes ([#4229](https://github.com/factorialco/f0/issues/4229)) ([9a49b33](https://github.com/factorialco/f0/commit/9a49b3371f4ac1743dfd55a4a7255e8597589a0f))
+
 ## [2.26.1](https://github.com/factorialco/f0/compare/f0-react-v2.26.0...f0-react-v2.26.1) (2026-05-29)
 
 
