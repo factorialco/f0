@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.26.0](https://github.com/factorialco/f0/compare/f0-react-v2.25.0...f0-react-v2.26.0) (2026-05-29)
+
+
+### Features
+
+* **F0Accordion:** add accordion list component ([#4250](https://github.com/factorialco/f0/issues/4250)) ([0e2e8c0](https://github.com/factorialco/f0/commit/0e2e8c0458bd7d04eb3521eaa421d1b4da18cb4f))
+
 ## [2.25.0](https://github.com/factorialco/f0/compare/f0-react-v2.24.0...f0-react-v2.25.0) (2026-05-29)
 
 
