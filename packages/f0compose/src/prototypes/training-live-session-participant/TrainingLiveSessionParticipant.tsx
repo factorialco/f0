@@ -999,6 +999,12 @@ const getSessionCalendarDate = (session: GroupSessionRow) =>
     : session.liveState === "live"
       ? new Date(2026, 5, 15, 10)
       : new Date(2026, 5, 15, 11, 30)
+const getSessionStatus = (session: GroupSessionRow) =>
+  session.liveState === "live"
+    ? { label: "Started", status: "warning" as const }
+    : session.liveState === "completed"
+      ? { label: "Completed", status: "positive" as const }
+      : { label: "Not started", status: "neutral" as const }
 
 const myTrainingModules: CourseModuleRow[] = [
   { id: "module-1", title: "Introduction and learning objectives", blocks: 3, status: "completed" },
@@ -1590,7 +1596,7 @@ function ParticipantMyTrainingSessionsTab({ onOpenSession }: { onOpenSession: (s
     { id: "name", label: "Name", sorting: "name", render: (session: GroupSessionRow) => ({ type: "text" as const, value: session.name }) },
     { id: "date", label: "Date", sorting: "startsAt", render: (session: GroupSessionRow) => ({ type: "text" as const, value: session.date }) },
     { id: "location", label: "Location", render: (session: GroupSessionRow) => session.modality === "Virtual" ? "-" : session.modality },
-    { id: "status", label: "Status", render: (session: GroupSessionRow) => ({ type: "status" as const, value: { label: session.liveState === "live" ? "Started" : "Not started", status: session.liveState === "live" ? "warning" : "neutral" } }) },
+    { id: "status", label: "Status", render: (session: GroupSessionRow) => ({ type: "status" as const, value: getSessionStatus(session) }) },
   ] } }]} />
 }
 
@@ -1622,7 +1628,7 @@ function ParticipantSessionSidepanel({ session, course, onClose, onJoinSession }
               <F0Box gap="xs">
                 <F0Text content="Status" variant="label" />
                 <F0Box display="flex" justifyContent="start">
-                  <F0TagStatus text={session.liveState === "live" ? "Started" : "Not started"} variant={session.liveState === "live" ? "warning" : "neutral"} />
+                  <F0TagStatus text={getSessionStatus(session).label} variant={getSessionStatus(session).status} />
                 </F0Box>
               </F0Box>
               <F0Box display="grid" columns="2" gap="xl">
