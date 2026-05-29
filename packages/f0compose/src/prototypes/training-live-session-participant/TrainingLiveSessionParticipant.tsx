@@ -20,6 +20,7 @@ import {
   StandardLayout,
   TwoColumnLayout,
   type F0Field,
+  type IconType,
 } from "@factorialco/f0-react"
 import {
   CalendarEvent,
@@ -30,6 +31,8 @@ import {
   ResourceHeader,
   SectionHeader,
   Tabs,
+  ToggleGroup,
+  ToggleGroupItem,
   Widget,
   useDataCollectionSource,
 } from "@factorialco/f0-react/dist/experimental"
@@ -212,6 +215,8 @@ type ExactCourse = Omit<Training, "categories" | "objectives" | "totalCost"> & {
 
 type NewCourseValues = Record<string, unknown>
 type RenderableField = Exclude<F0Field, { type: "file" }>
+type SessionModalityValue = "hybrid" | "virtual" | "onsite"
+type OnlineSessionValue = "factorial" | "external"
 type CategoryRow = { id: string; name: string }
 type SurveyTemplateRow = {
   id: string
@@ -600,6 +605,82 @@ const createSessionModalFields = {
   meetingLink: { id: "meetingLink", type: "text", label: "Meeting link" },
   location: { id: "location", type: "text", label: "Location" },
 } satisfies Record<string, RenderableField>
+
+const sessionModalityOptions: Array<{
+  value: SessionModalityValue
+  label: string
+  description: string
+  icon: IconType
+}> = [
+  { value: "virtual", label: "Virtual", description: "Online only", icon: VideoRecorder },
+  { value: "hybrid", label: "Hybrid", description: "Online + location", icon: Laptop },
+  { value: "onsite", label: "On-site", description: "Physical location", icon: People },
+]
+
+const onlineSessionOptions: Array<{
+  value: OnlineSessionValue
+  label: string
+  description: string
+  icon: IconType
+}> = [
+  { value: "factorial", label: "Factorial live room", description: "Built-in room", icon: VideoRecorder },
+  { value: "external", label: "External meeting link", description: "Paste a meeting URL", icon: ExternalLink },
+]
+
+function SessionToggleField({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <F0Box display="flex" flexDirection="column" gap="sm">
+      <F0Text content={label} variant="label" />
+      {children}
+    </F0Box>
+  )
+}
+
+function SessionOptionGroup<TValue extends string>({
+  value,
+  options,
+  onChange,
+  columns,
+}: {
+  value: TValue
+  options: Array<{ value: TValue; label: string; description: string; icon: IconType }>
+  onChange: (value: TValue) => void
+  columns: "2" | "3"
+}) {
+  return (
+    <ToggleGroup
+      type="single"
+      value={value}
+      onValueChange={(nextValue) => {
+        if (nextValue) onChange(nextValue as TValue)
+      }}
+      className={columns === "2" ? "grid w-full grid-cols-2 gap-2" : "grid w-full grid-cols-3 gap-2"}
+    >
+      {options.map((option) => {
+        const selected = option.value === value
+
+        return (
+          <ToggleGroupItem
+            key={option.value}
+            value={option.value}
+            className={selected
+              ? "h-auto justify-between gap-2 rounded-md border border-solid border-f1-border-selected bg-f1-background-selected-secondary px-3 py-2 text-f1-foreground-selected shadow-none data-[state=on]:bg-f1-background-selected-secondary data-[state=on]:text-f1-foreground-selected focus-visible:outline-none"
+              : "h-auto justify-between gap-2 rounded-md border border-solid border-f1-border-secondary bg-f1-background px-3 py-2 text-f1-foreground hover:border-f1-border-hover hover:bg-f1-background-hover focus-visible:outline-none"}
+          >
+            <F0Box display="flex" alignItems="center" gap="sm">
+              <F0Icon icon={option.icon} size="sm" color="currentColor" />
+              <F0Box display="flex" flexDirection="column" gap="none">
+                <F0Text content={option.label} variant="body" />
+                <F0Text content={option.description} variant="small" />
+              </F0Box>
+            </F0Box>
+            {selected ? <F0Icon icon={CheckCircle} size="sm" color="currentColor" /> : null}
+          </ToggleGroupItem>
+        )
+      })}
+    </ToggleGroup>
+  )
+}
 
 const exportFields: RenderableField[] = [
   { id: "filename", type: "text", label: "Name" },
@@ -4369,6 +4450,7 @@ function SessionFormDialog({
     sessionType: "scheduled",
     sessionName: "Noviembre - Diciembre",
     modality: "hybrid",
+    onlineSession: "factorial",
     frequency: "none",
     instructors: [],
     durationHours: 0,
@@ -4380,6 +4462,10 @@ function SessionFormDialog({
   })
 
   if (!mode) return null
+
+  const hasOnlineSession = values.modality === "virtual" || values.modality === "hybrid"
+  const hasPhysicalLocation = values.modality === "hybrid" || values.modality === "onsite"
+  const usesExternalMeetingLink = hasOnlineSession && values.onlineSession === "external"
 
   return (
     <F0BoxWithClassName
@@ -4423,13 +4509,28 @@ function SessionFormDialog({
               <F0FormField field={createSessionModalFields.hours} value={values.durationHours} onChange={(value) => setValues((current) => ({ ...current, durationHours: value }))} />
               <F0FormField field={createSessionModalFields.minutes} value={values.durationMinutes} onChange={(value) => setValues((current) => ({ ...current, durationMinutes: value }))} />
             </F0Box>
-            <F0FormField field={createSessionModalFields.modality} value={values.modality} onChange={(value) => setValues((current) => ({ ...current, modality: value }))} />
+            <SessionToggleField label="Modality">
+              <SessionOptionGroup
+                options={sessionModalityOptions}
+                value={values.modality as SessionModalityValue}
+                onChange={(value) => setValues((current) => ({ ...current, modality: value, onlineSession: value === "onsite" ? "factorial" : current.onlineSession }))}
+                columns="3"
+              />
+            </SessionToggleField>
+            {hasPhysicalLocation ? <F0FormField field={createSessionModalFields.location} value={values.location} onChange={(value) => setValues((current) => ({ ...current, location: value }))} /> : null}
+            {hasOnlineSession ? (
+              <SessionToggleField label="Online access">
+                <SessionOptionGroup
+                  options={onlineSessionOptions}
+                  value={values.onlineSession as OnlineSessionValue}
+                  onChange={(value) => setValues((current) => ({ ...current, onlineSession: value }))}
+                  columns="2"
+                />
+              </SessionToggleField>
+            ) : null}
+            {usesExternalMeetingLink ? <F0FormField field={createSessionModalFields.meetingLink} value={values.meetingLink} onChange={(value) => setValues((current) => ({ ...current, meetingLink: value }))} /> : null}
             <F0FormField field={createSessionModalFields.instructors} value={values.instructors} onChange={(value) => setValues((current) => ({ ...current, instructors: value }))} />
             <F0FormField field={createSessionModalFields.frequency} value={values.frequency} onChange={(value) => setValues((current) => ({ ...current, frequency: value }))} />
-            <F0Box display="grid" columns="2" gap="md">
-              <F0FormField field={createSessionModalFields.meetingLink} value={values.meetingLink} onChange={(value) => setValues((current) => ({ ...current, meetingLink: value }))} />
-              <F0FormField field={createSessionModalFields.location} value={values.location} onChange={(value) => setValues((current) => ({ ...current, location: value }))} />
-            </F0Box>
             <SessionReminderBlock />
             <SessionCalendarBlock />
           </F0Box>
@@ -5086,7 +5187,7 @@ function SessionReminderBlock() {
 
 function SessionCalendarBlock() {
   return (
-    <F0Box display="flex" flexDirection="column" gap="xs">
+    <F0Box display="flex" flexDirection="column" gap="sm">
       <F0Box
         display="flex"
         justifyContent="between"
