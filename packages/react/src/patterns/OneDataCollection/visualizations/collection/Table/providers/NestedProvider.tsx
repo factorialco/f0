@@ -16,6 +16,8 @@ interface NestedDataContextValue<R extends RecordType> {
   /** Persisted expansion state so rows stay open across parent re-renders (e.g. GraphQL refetch) */
   expandedRowIds: Record<string, boolean>
   setRowExpanded: (rowId: string, expanded: boolean) => void
+  /** Item ids that start expanded on first render */
+  defaultExpandedIds?: Array<string | number>
 }
 
 const NestedDataContext = createContext<
@@ -24,8 +26,10 @@ const NestedDataContext = createContext<
 
 export const NestedDataProvider = <R extends RecordType>({
   children,
+  defaultExpandedIds,
 }: {
   children: ReactNode
+  defaultExpandedIds?: Array<string | number>
 }) => {
   const [fetchedData, setFetchedData] = useState<
     Record<string, ChildrenResponse<R>>
@@ -51,12 +55,7 @@ export const NestedDataProvider = <R extends RecordType>({
   }, [])
 
   const setRowExpanded = useCallback((rowId: string, expanded: boolean) => {
-    setExpandedRowIdsState((prev) => {
-      if (expanded) return { ...prev, [rowId]: true }
-      const next = { ...prev }
-      delete next[rowId]
-      return next
-    })
+    setExpandedRowIdsState((prev) => ({ ...prev, [rowId]: expanded }))
   }, [])
 
   return (
@@ -68,6 +67,7 @@ export const NestedDataProvider = <R extends RecordType>({
           clearFetchedData,
           expandedRowIds,
           setRowExpanded,
+          defaultExpandedIds,
         } as NestedDataContextValue<RecordType>
       }
     >
