@@ -249,7 +249,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
     const cardBody = (
       <Card
         className={cn(
-          "group relative bg-f1-background shadow-none transition-all",
+          "group relative border-f1-border-secondary bg-f1-background shadow-none transition-all",
           compact && "p-3",
           fullHeight && "h-full",
           (selectable || (otherActions && otherActions.length > 0)) &&
@@ -287,7 +287,9 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
         {image && (
           <div
             className={cn(
-              "relative -mx-3 -mt-3 mb-4 rounded-md",
+              // pointer-events-none lets clicks on the image fall through to the
+              // full-card overlay link; interactive overlay controls re-enable them.
+              "pointer-events-none relative -mx-3 -mt-3 mb-4 rounded-md",
               imageAspectRatio === "video"
                 ? "aspect-video"
                 : imageSizeClassMap[imageSize],

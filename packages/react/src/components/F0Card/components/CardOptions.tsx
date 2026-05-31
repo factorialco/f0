@@ -2,10 +2,11 @@ import { useState } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Checkbox } from "@/components/F0Checkbox"
+import { F0Icon } from "@/components/F0Icon"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { Bookmark, BookmarkFilled, Ellipsis } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 
 import { type CardBookmark } from "../types"
 
@@ -63,13 +64,20 @@ export function CardOptions({
     return null
   }
 
+  // When the bookmark is the only control it carries its own circular chrome,
+  // so the shared translucent container is skipped to keep it visually clean.
+  const onlyBookmark = !!bookmark && !hasOtherActions && !selectable
+
   return (
     <div
       className={cn(
         "flex flex-row gap-1 opacity-100 transition-opacity delay-150 duration-150 focus-within:delay-0 group-hover:delay-0 sm:opacity-0 focus-within:sm:opacity-100 group-hover:sm:opacity-100 [&>div]:z-[1]",
-        (isOpen || selected || !!bookmark) && "delay-0 sm:opacity-100",
+        (isOpen || selected || bookmark?.bookmarked) &&
+          "delay-0 sm:opacity-100",
+        overlay && "pointer-events-auto absolute right-2 top-2",
         overlay &&
-          "absolute right-2 top-2 rounded-sm bg-f1-background/60 p-1 shadow-md backdrop-blur-sm"
+          !onlyBookmark &&
+          "rounded-sm bg-f1-background/60 p-1 shadow-md backdrop-blur-sm"
       )}
     >
       {hasOtherActions && (
@@ -101,22 +109,26 @@ export function CardOptions({
         </div>
       )}
       {bookmark && (
-        <div className="flex items-center justify-center">
-          <ButtonInternal
-            label={bookmark.label ?? title ?? ""}
+        <button
+          type="button"
+          aria-label={bookmark.label ?? title}
+          aria-pressed={bookmark.bookmarked}
+          data-testid="card-bookmark-toggle"
+          className={cn(
+            "flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-solid border-f1-border bg-f1-background p-0",
+            focusRing()
+          )}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            bookmark.onBookmarkChange(!bookmark.bookmarked)
+          }}
+        >
+          <F0Icon
             icon={bookmark.bookmarked ? BookmarkFilled : Bookmark}
-            variant="ghost"
             size="sm"
-            hideLabel
-            pressed={bookmark.bookmarked}
-            compact
-            data-testid="card-bookmark-toggle"
-            onClick={(e) => {
-              e.stopPropagation()
-              bookmark.onBookmarkChange(!bookmark.bookmarked)
-            }}
           />
-        </div>
+        </button>
       )}
     </div>
   )
