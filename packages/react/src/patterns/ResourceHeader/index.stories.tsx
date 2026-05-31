@@ -529,6 +529,26 @@ export const TeamHeader: Story = {
   },
 }
 
+export const WithContentBelowTitle: Story = {
+  tags: ["!dev"],
+  args: {
+    title: 'MacBook Pro 14" M5',
+    showBottomBorder: true,
+    belowTitle: (
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-f1-foreground-secondary">
+        <span>Laptops</span>
+        <span>
+          Brand <span className="font-semibold text-f1-foreground">Apple</span>
+        </span>
+        <span>24h delivery</span>
+        <span>
+          SKU <span className="font-semibold text-f1-foreground">000017</span>
+        </span>
+      </div>
+    ),
+  },
+}
+
 export const WithLongDescription: Story = {
   tags: ["!dev"],
   args: {
