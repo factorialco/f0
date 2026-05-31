@@ -109,26 +109,28 @@ export function CardOptions({
         </div>
       )}
       {bookmark && (
-        <button
-          type="button"
-          aria-label={bookmark.label ?? title}
-          aria-pressed={bookmark.bookmarked}
-          data-testid="card-bookmark-toggle"
-          className={cn(
-            "flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-solid border-f1-border bg-f1-background p-0",
-            focusRing()
-          )}
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            bookmark.onBookmarkChange(!bookmark.bookmarked)
-          }}
-        >
-          <F0Icon
-            icon={bookmark.bookmarked ? BookmarkFilled : Bookmark}
-            size="sm"
-          />
-        </button>
+        <div className="flex items-center justify-center">
+          <button
+            type="button"
+            aria-label={bookmark.label ?? title ?? translations.actions.save}
+            aria-pressed={bookmark.bookmarked}
+            data-testid="card-bookmark-toggle"
+            className={cn(
+              "flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-solid border-f1-border bg-f1-background p-0",
+              focusRing()
+            )}
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              bookmark.onBookmarkChange(!bookmark.bookmarked)
+            }}
+          >
+            <F0Icon
+              icon={bookmark.bookmarked ? BookmarkFilled : Bookmark}
+              size="sm"
+            />
+          </button>
+        </div>
       )}
     </div>
   )

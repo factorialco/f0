@@ -105,6 +105,15 @@ const meta = {
         defaultValue: { summary: "sm" },
       },
     },
+    subtleBorder: {
+      control: "boolean",
+      description:
+        "Use a softer/lighter border (`border-f1-border-secondary`). Opt-in so " +
+        "existing cards keep the default `border-f1-border`.",
+      table: {
+        defaultValue: { summary: "false" },
+      },
+    },
     bookmark: {
       control: false,
       description:

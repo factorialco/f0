@@ -175,6 +175,13 @@ export interface CardInternalProps {
   fullHeight?: boolean
 
   /**
+   * Use a softer/lighter border (`border-f1-border-secondary`) instead of the default
+   * `border-f1-border`. Opt-in so existing cards keep their current appearance.
+   * @default false
+   */
+  subtleBorder?: boolean
+
+  /**
    * When true, disables the full-card overlay link so parent components
    * can manage drag-and-drop while still allowing click navigation via onClick
    */
@@ -223,6 +230,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       otherActions,
       bookmark,
       selectable = false,
+      subtleBorder = false,
       selected = false,
       onSelect,
       onClick,
@@ -249,7 +257,8 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
     const cardBody = (
       <Card
         className={cn(
-          "group relative border-f1-border-secondary bg-f1-background shadow-none transition-all",
+          "group relative bg-f1-background shadow-none transition-all",
+          subtleBorder && "border-f1-border-secondary",
           compact && "p-3",
           fullHeight && "h-full",
           (selectable || (otherActions && otherActions.length > 0)) &&
