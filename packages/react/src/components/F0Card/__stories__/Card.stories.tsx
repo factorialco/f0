@@ -287,6 +287,45 @@ export const Selectable: Story = {
   },
 }
 
+export const Bookmarkable: Story = {
+  args: {
+    ...Default.args,
+  },
+  render: (args) => {
+    const [bookmarked, setBookmarked] = useState(false)
+    return (
+      <F0Card
+        {...args}
+        bookmark={{
+          bookmarked,
+          onBookmarkChange: setBookmarked,
+          label: "Save",
+        }}
+      />
+    )
+  },
+}
+
+export const BookmarkableWithImage: Story = {
+  args: {
+    ...Default.args,
+    image: image,
+  },
+  render: (args) => {
+    const [bookmarked, setBookmarked] = useState(false)
+    return (
+      <F0Card
+        {...args}
+        bookmark={{
+          bookmarked,
+          onBookmarkChange: setBookmarked,
+          label: "Save",
+        }}
+      />
+    )
+  },
+}
+
 export const WithChildren: Story = {
   args: {
     title: "Card with children",

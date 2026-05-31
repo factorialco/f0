@@ -26,6 +26,7 @@ import { CardMetadata } from "./components/CardMetadata"
 import { CardOptions } from "./components/CardOptions"
 import {
   type CardAlertProps,
+  type CardBookmark,
   type CardMetadata as CardMetadataType,
 } from "./types"
 
@@ -137,6 +138,12 @@ export interface CardInternalProps {
   otherActions?: DropdownItem[]
 
   /**
+   * Bookmark (save) toggle rendered as an icon button in the card's options overlay.
+   * Shows an outline bookmark when not bookmarked and a filled one when bookmarked.
+   */
+  bookmark?: CardBookmark
+
+  /**
    * Whether the card is selectable
    */
   selectable?: boolean
@@ -214,6 +221,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       primaryAction,
       secondaryActions,
       otherActions,
+      bookmark,
       selectable = false,
       selected = false,
       onSelect,
@@ -321,6 +329,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
               selectable={selectable}
               selected={selected}
               onSelect={onSelect}
+              bookmark={bookmark}
               title={title}
               overlay
             />
@@ -383,6 +392,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
                 selectable={selectable}
                 selected={selected}
                 onSelect={onSelect}
+                bookmark={bookmark}
                 title={title}
               />
             )}
