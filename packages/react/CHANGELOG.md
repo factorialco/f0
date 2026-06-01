@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.28.2](https://github.com/factorialco/f0/compare/f0-react-v2.28.1...f0-react-v2.28.2) (2026-06-01)
+
+
+### Bug Fixes
+
+* **RichText:** normalize NBSPs in pasted content to prevent mid-word breaks ([#4269](https://github.com/factorialco/f0/issues/4269)) ([0006d9c](https://github.com/factorialco/f0/commit/0006d9c6e7850393a55be0d0ce737a3ef8975ae2))
+
 ## [2.28.1](https://github.com/factorialco/f0/compare/f0-react-v2.28.0...f0-react-v2.28.1) (2026-06-01)
 
 
