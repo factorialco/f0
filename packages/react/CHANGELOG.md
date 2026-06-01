@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.29.0](https://github.com/factorialco/f0/compare/f0-react-v2.28.2...f0-react-v2.29.0) (2026-06-01)
+
+
+### Features
+
+* **F0Card:** add a bookmark (save) toggle overlay ([#4273](https://github.com/factorialco/f0/issues/4273)) ([d65ad0c](https://github.com/factorialco/f0/commit/d65ad0cc22b2340b9ce5982db2ecacfbe3dc20b7))
+
 ## [2.28.2](https://github.com/factorialco/f0/compare/f0-react-v2.28.1...f0-react-v2.28.2) (2026-06-01)
 
 
