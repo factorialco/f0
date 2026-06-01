@@ -117,7 +117,7 @@ export function BaseHeader({
   }
 
   return (
-    <div className="resource-header flex flex-col gap-3 px-6 pb-5 pt-3">
+    <div className="resource-header px-page flex flex-col gap-3 pb-5 pt-3">
       <div
         className={cn(
           "flex flex-col items-start justify-start gap-4 md:flex-row",

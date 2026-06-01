@@ -12,7 +12,7 @@ export type AlertVariant = (typeof alertVariantOptions)[number]
 
 export interface F0AlertProps {
   title: string
-  description: string
+  description?: string
   action?: {
     label: string
     disabled?: boolean

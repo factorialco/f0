@@ -286,6 +286,11 @@ const meta = {
     overflow: { control: "select", options: overflowOptions },
     overflowX: { control: "select", options: overflowOptions },
     overflowY: { control: "select", options: overflowOptions },
+    // Shadow
+    boxShadow: {
+      control: "select",
+      options: [undefined, "none", "md", "lg", "xl"],
+    },
     // Divider
     divider: { control: "select", options: [undefined, "x", "y"] },
     dividerColor: { control: "select", options: borderColorOptions },
@@ -2744,6 +2749,36 @@ export const TokenReference: Story = {
                 {b.px}
               </span>
             </F0Box>
+          </F0Box>
+        ))}
+      </F0Box>
+    </F0Box>
+  ),
+}
+
+// ─── Shadow ──────────────────────────────────────────────────────
+
+export const Shadow: Story = {
+  render: () => (
+    <F0Box display="flex" flexDirection="column" gap="xl">
+      <Label subtitle="boxShadow applies elevation using core shadow tokens">
+        Shadow tokens
+      </Label>
+
+      <F0Box display="flex" gap="xl" flexWrap="wrap" alignItems="end">
+        {(["none", "md", "lg", "xl"] as const).map((s) => (
+          <F0Box
+            key={s}
+            width="32"
+            height="24"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            background="primary"
+            borderRadius="md"
+            boxShadow={s}
+          >
+            <span className="text-sm font-semibold">{s}</span>
           </F0Box>
         ))}
       </F0Box>

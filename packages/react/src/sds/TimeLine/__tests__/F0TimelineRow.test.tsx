@@ -407,6 +407,87 @@ describe("F0TimelineRow", () => {
       const title = screen.getByText("Sign document")
       expect(title.className).not.toContain("line-through")
     })
+
+    it("renders custom content instead of items when content is provided", () => {
+      render(
+        <F0TimelineRow
+          {...nestedtaskProps}
+          expanded
+          content={<div>Custom panel content</div>}
+        />
+      )
+      expect(screen.getByText("Custom panel content")).toBeInTheDocument()
+      expect(
+        screen.queryByText("Hellen (hellen@factorial.co)")
+      ).not.toBeInTheDocument()
+    })
+
+    it("does not render custom content when collapsed", () => {
+      render(
+        <F0TimelineRow
+          {...nestedtaskProps}
+          expanded={false}
+          content={<div>Custom panel content</div>}
+        />
+      )
+      expect(screen.queryByText("Custom panel content")).not.toBeInTheDocument()
+    })
+
+    it("renders without items when only content is provided", () => {
+      const { items: _items, ...rest } = nestedtaskProps
+      render(
+        <F0TimelineRow {...rest} expanded content={<div>Only content</div>} />
+      )
+      expect(screen.getByText("Only content")).toBeInTheDocument()
+    })
+
+    describe("when collapsible is false", () => {
+      const {
+        expanded: _expanded,
+        onExpandToggle: _onExpandToggle,
+        ...nonCollapsibleBase
+      } = nestedtaskProps
+
+      it("does not render an expand toggle button", () => {
+        render(<F0TimelineRow {...nonCollapsibleBase} collapsible={false} />)
+        // No element should expose the aria-expanded state since there is
+        // no toggle to control collapse.
+        expect(
+          screen.queryByRole("button", { expanded: false })
+        ).not.toBeInTheDocument()
+        expect(
+          screen.queryByRole("button", { expanded: true })
+        ).not.toBeInTheDocument()
+      })
+
+      it("always renders the items (no expand required)", () => {
+        render(<F0TimelineRow {...nonCollapsibleBase} collapsible={false} />)
+        expect(
+          screen.getByText("Hellen (hellen@factorial.co)")
+        ).toBeInTheDocument()
+        expect(
+          screen.getByText("Danilo (danilo@gmail.com)")
+        ).toBeInTheDocument()
+      })
+
+      it("always renders custom content when provided", () => {
+        const { items: _items, ...rest } = nonCollapsibleBase
+        render(
+          <F0TimelineRow
+            {...rest}
+            collapsible={false}
+            content={<div>Non-collapsible content</div>}
+          />
+        )
+        expect(screen.getByText("Non-collapsible content")).toBeInTheDocument()
+      })
+
+      it("still renders the title and description", () => {
+        render(<F0TimelineRow {...nonCollapsibleBase} collapsible={false} />)
+        expect(screen.getByText("Sign document")).toBeInTheDocument()
+        expect(screen.getByText("Estimated on 14/04/2026")).toBeInTheDocument()
+      })
+    })
   })
 
   describe("multitask with nestedtask items", () => {

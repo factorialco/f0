@@ -1,5 +1,5 @@
 // Main components
-export { F0AiChat, F0AiChatProvider } from "./F0AiChat"
+export { F0AiChat, type F0AiChatProps, F0AiChatProvider } from "./F0AiChat"
 
 // Types
 export type {
@@ -17,6 +17,9 @@ export type {
   CreditsUsage,
   DashboardCanvasContent,
   DataDownloadCanvasContent,
+  F0AIMessage,
+  F0Message,
+  F0ToolCall,
   FormCanvasContent,
   EntityResolvers,
   EntityUrlBuilders,
@@ -29,6 +32,8 @@ export type {
   VisualizationMode,
   WelcomeScreenSuggestion,
   WelcomeScreenSuggestionItem,
+  WelcomeSuggestionClickEvent,
+  AiChatTrackingOptions,
   AiChatTranslations,
   AiChatTranslationsProviderProps,
 } from "./types"

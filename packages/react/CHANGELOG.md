@@ -1,5 +1,89 @@
 # Changelog
 
+## [2.28.0](https://github.com/factorialco/f0/compare/f0-react-v2.27.0...f0-react-v2.28.0) (2026-06-01)
+
+
+### Features
+
+* **F0Box:** add boxShadow prop with token-based elevation ([#4264](https://github.com/factorialco/f0/issues/4264)) ([7504508](https://github.com/factorialco/f0/commit/75045088839ebdf2d23724a31a00ca4c361b73d0))
+
+## [2.27.0](https://github.com/factorialco/f0/compare/f0-react-v2.26.1...f0-react-v2.27.0) (2026-05-29)
+
+
+### Features
+
+* **NumberInput:** consolidate F0AmountCalculator — add inline context and popover modes ([#4229](https://github.com/factorialco/f0/issues/4229)) ([9a49b33](https://github.com/factorialco/f0/commit/9a49b3371f4ac1743dfd55a4a7255e8597589a0f))
+
+## [2.26.1](https://github.com/factorialco/f0/compare/f0-react-v2.26.0...f0-react-v2.26.1) (2026-05-29)
+
+
+### Bug Fixes
+
+* **EditableTable:** forward cellHint in display-only and disabled cells ([#4266](https://github.com/factorialco/f0/issues/4266)) ([7cbcdd6](https://github.com/factorialco/f0/commit/7cbcdd6086eabb4043c2be77a89394bdb8df18e9))
+
+## [2.26.0](https://github.com/factorialco/f0/compare/f0-react-v2.25.0...f0-react-v2.26.0) (2026-05-29)
+
+
+### Features
+
+* **F0Accordion:** add accordion list component ([#4250](https://github.com/factorialco/f0/issues/4250)) ([0e2e8c0](https://github.com/factorialco/f0/commit/0e2e8c0458bd7d04eb3521eaa421d1b4da18cb4f))
+
+## [2.25.0](https://github.com/factorialco/f0/compare/f0-react-v2.24.0...f0-react-v2.25.0) (2026-05-29)
+
+
+### Features
+
+* expand specific parent rows in nested table by default ([#4206](https://github.com/factorialco/f0/issues/4206)) ([021f138](https://github.com/factorialco/f0/commit/021f138f65a32840b803252d4c2c233ed8280f60))
+
+## [2.24.0](https://github.com/factorialco/f0/compare/f0-react-v2.23.0...f0-react-v2.24.0) (2026-05-28)
+
+
+### Features
+
+* **react:** nestedtask content slot, avatar-list tooltip descriptions, DetailsItem file ([#4138](https://github.com/factorialco/f0/issues/4138)) ([3de1dfe](https://github.com/factorialco/f0/commit/3de1dfe85c9cb44f63f492f1e313ed6534be8e3b))
+
+## [2.23.0](https://github.com/factorialco/f0/compare/f0-react-v2.22.0...f0-react-v2.23.0) (2026-05-28)
+
+
+### Features
+
+* **F0AiChat:** remove CopilotKit dependency, F0 becomes 100% headless ([#4252](https://github.com/factorialco/f0/issues/4252)) ([e562427](https://github.com/factorialco/f0/commit/e56242742acba7947a099ff75dfd3f97bd0ac3cb))
+
+## [2.22.0](https://github.com/factorialco/f0/compare/f0-react-v2.21.0...f0-react-v2.22.0) (2026-05-28)
+
+
+### Features
+
+* **F0Alert:** make description prop optional ([#4163](https://github.com/factorialco/f0/issues/4163)) ([d5abc3b](https://github.com/factorialco/f0/commit/d5abc3be3068d9ac0bd23b157e9eb5f28d601e2b))
+
+## [2.21.0](https://github.com/factorialco/f0/compare/f0-react-v2.20.1...f0-react-v2.21.0) (2026-05-27)
+
+
+### Features
+
+* **F0AiChat:** typewriter welcome + fullscreen parity; new ChatSpinner ([#4243](https://github.com/factorialco/f0/issues/4243)) ([6ad84c3](https://github.com/factorialco/f0/commit/6ad84c38b2697c3cdd8229909fb576dd368050f8))
+
+## [2.20.1](https://github.com/factorialco/f0/compare/f0-react-v2.20.0...f0-react-v2.20.1) (2026-05-27)
+
+
+### Bug Fixes
+
+* preserve default values fn in available form definition conversion ([#4179](https://github.com/factorialco/f0/issues/4179)) ([0f1f69b](https://github.com/factorialco/f0/commit/0f1f69b5b5ff5b216ccb1a5dd0eb1963a7f78479))
+
+## [2.20.0](https://github.com/factorialco/f0/compare/f0-react-v2.19.1...f0-react-v2.20.0) (2026-05-26)
+
+
+### Features
+
+* **F0AiChat:** extract canvas primitives and ClarifyingPanel; drop legacy compositions ([#4132](https://github.com/factorialco/f0/issues/4132)) ([38e6486](https://github.com/factorialco/f0/commit/38e648639a14f4c726147da1ae696837323ff208))
+* **PageHeader:** support AI-kind actions ([#4235](https://github.com/factorialco/f0/issues/4235)) ([b2cb371](https://github.com/factorialco/f0/commit/b2cb371fff11e2670ee9efc3c72292d5c4e9d3b5))
+
+
+### Bug Fixes
+
+* adjust horizontal paddings in data collection ([#4240](https://github.com/factorialco/f0/issues/4240)) ([aefb009](https://github.com/factorialco/f0/commit/aefb0091feafebba885a654cd00c0b4d11310490))
+* **ApplicationFrame:** showcase employeeCredits in stories ([#4239](https://github.com/factorialco/f0/issues/4239)) ([5ebce9e](https://github.com/factorialco/f0/commit/5ebce9e16031fde171d5526062d55cf2c2561380))
+
 ## [2.19.1](https://github.com/factorialco/f0/compare/f0-react-v2.19.0...f0-react-v2.19.1) (2026-05-26)
 
 

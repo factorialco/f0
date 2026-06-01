@@ -1,5 +1,7 @@
 import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { FeatureGrid } from "~/docs/components/FeatureGrid"
+import { Table, List, CardPin, Kanban, Pencil } from "@/icons/app"
 
 import * as Stories from "./update.stories"
 
@@ -11,16 +13,73 @@ Update patterns define how a user updates an existing resource from a Data
 Collection. The update flow should usually mirror create so users do not need to
 relearn the form, field order, or terminology when updating the same data.
 
+## Examples
+
+<Unstyled>
+  <FeatureGrid
+    features={[
+      {
+        icon: Table,
+        title: "Table — Default",
+        description:
+          "Reuse the same form structure as create whenever possible.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-update--table-update-dialog",
+      },
+      {
+        icon: Table,
+        title: "Table — Right Dialog",
+        description: "Table variation uses a Right Dialog for editing.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-update--table-update-right-dialog",
+      },
+      {
+        icon: List,
+        title: "List — Right Dialog",
+        description:
+          "List variation keeps the collection visible while editing from the current selection.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-update--list-update-right-dialog",
+      },
+      {
+        icon: Table,
+        title: "Table — Bulk",
+        description:
+          "Multi-selection plus a bulk action apply one update flow to the current selection.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-update--table-bulk-update",
+      },
+      {
+        icon: CardPin,
+        title: "Card — Actions",
+        description:
+          "Card edit is available from a card item action (ellipsis menu) and from inside the read dialog.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-update--card-update-from-read-dialog",
+      },
+      {
+        icon: Kanban,
+        title: "Kanban — Bulk",
+        description:
+          "Selected Kanban cards use the bulk action bar when scope is explicit.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-update--kanban-bulk-update",
+      },
+      {
+        icon: Pencil,
+        title: "Editable Table — Inline",
+        description:
+          "Editable cells update fields directly without opening a form.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-update--editable-table-update-inline",
+      },
+    ]}
+  />
+</Unstyled>
+
 ## When to use
 
-- Use a default dialog when updating fits in a focused overlay.
-- Use a right-position dialog only for Table and List views when keeping the
+- Use a Default Dialog when updating fits in a focused overlay.
+- Use a Right Dialog only for Table and List views when keeping the
   collection visible improves comparison or navigation between items.
-- Use bulk update when the current visualization provides explicit
+- Use Bulk Update when the current visualization provides explicit
   multi-selection and users can review the affected items before confirming.
 - Use Card click for read first and expose Edit at the top of the read dialog.
   **Recommended** when card click is already the read affordance.
-- Use Kanban drag/move for state updates and Kanban bulk update when selected
+- Use Kanban drag/move for state updates and Kanban Bulk Update when selected
   cards make scope explicit. **Recommended** for board workflows.
 - Use Editable Table inline cell editing for visible field-level updates.
   **Recommended** when the user is changing values already shown in the table.
@@ -42,8 +101,11 @@ relearn the form, field order, or terminology when updating the same data.
     <tbody>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--table-update-dialog">
-            Default dialog
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-update--table-update-dialog"
+          >
+            Default Dialog
           </a>
         </td>
         <td>Baseline update flow for most existing resources.</td>
@@ -53,8 +115,11 @@ relearn the form, field order, or terminology when updating the same data.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--table-update-right-dialog">
-            Right-position dialog
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-update--table-update-right-dialog"
+          >
+            Right Dialog
           </a>
         </td>
         <td>
@@ -67,8 +132,11 @@ relearn the form, field order, or terminology when updating the same data.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--table-bulk-update">
-            Bulk update
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-update--table-bulk-update"
+          >
+            Bulk Update
           </a>
         </td>
         <td>Updating a selected set of items from bulk actions.</td>
@@ -79,8 +147,11 @@ relearn the form, field order, or terminology when updating the same data.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--card-update-from-read-dialog">
-            Card actions update
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-update--card-update-from-read-dialog"
+          >
+            Card Actions Update
           </a>
         </td>
         <td>
@@ -91,8 +162,11 @@ relearn the form, field order, or terminology when updating the same data.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--kanban-bulk-update">
-            Kanban bulk update
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-update--kanban-bulk-update"
+          >
+            Kanban Bulk Update
           </a>
         </td>
         <td>
@@ -103,8 +177,11 @@ relearn the form, field order, or terminology when updating the same data.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-update--editable-table-update-inline">
-            Editable Table inline update
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-update--editable-table-update-inline"
+          >
+            Editable Table Inline Update
           </a>
         </td>
         <td>
@@ -129,31 +206,31 @@ relearn the form, field order, or terminology when updating the same data.
     <tbody>
       <tr>
         <td>Is this the standard update path for a resource?</td>
-        <td>Default dialog</td>
+        <td>Default Dialog</td>
       </tr>
       <tr>
         <td>Does the user need to compare multiple rows while updating?</td>
-        <td>Right-position dialog</td>
+        <td>Right Dialog</td>
       </tr>
       <tr>
         <td>Is the user updating several selected items at once?</td>
-        <td>Bulk update</td>
+        <td>Bulk Update</td>
       </tr>
       <tr>
         <td>Does the visualization make the selected scope explicit?</td>
-        <td>Bulk update</td>
+        <td>Bulk Update</td>
       </tr>
       <tr>
         <td>Is selection ambiguous, transient, or hard to verify?</td>
-        <td>Default dialog or item-level update</td>
+        <td>Default Dialog or item-level update</td>
       </tr>
       <tr>
         <td>Is the user changing a visible Editable Table cell?</td>
-        <td>Editable Table inline update</td>
+        <td>Editable Table Inline Update</td>
       </tr>
       <tr>
         <td>Would mobile or narrow screens make a side panel unreliable?</td>
-        <td>Default dialog</td>
+        <td>Default Dialog</td>
       </tr>
     </tbody>
   </table>
@@ -165,19 +242,19 @@ Update should feel like create with existing values prefilled. Reusing the same
 form structure reduces cognitive load, improves predictability, and keeps
 validation and terminology aligned.
 
-The right-position dialog is an exception, not the default. Use it when the
+The Right Dialog is an exception, not the default. Use it when the
 collection itself is part of the update workflow, such as reviewing adjacent
 rows or moving through items while preserving context. Fall back to the default
 dialog below medium breakpoints.
 
-Bulk update follows the same selection pattern as bulk delete. Use it only when
+Bulk Update follows the same selection pattern as Bulk Delete. Use it only when
 the visualization makes selection scope explicit, such as checkbox-based
 selection, so users can clearly review which items are included before they
 confirm the change.
 
 Checkbox-based selection is the clearest current example, but the rule is the
 explicitness of the selected scope, not the Table visualization itself. Kanban
-bulk update is **Recommended** when selected cards remain visible across lanes
+Bulk Update is **Recommended** when selected cards remain visible across lanes
 and the action bar confirms the affected scope.
 
 Card update should preserve the default read-first behavior: clicking the card
@@ -201,7 +278,7 @@ reserve dialogs for full-resource updates.
 <DoDonts
   do={{
     description:
-      "Use a right-position dialog only when preserving collection context materially helps the update task.",
+      "Use a Right Dialog only when preserving collection context materially helps the update task.",
   }}
   dont={{
     description:
@@ -212,22 +289,25 @@ reserve dialogs for full-resource updates.
 <DoDonts
   do={{
     description:
-      "Use the same bulk selection and confirmation pattern as bulk delete when applying one update to multiple rows.",
+      "Use the same bulk selection and confirmation pattern as Bulk Delete when applying one update to multiple rows.",
   }}
   dont={{
     description:
-      "Do not expose bulk update when the selected scope is ambiguous or hard to verify.",
+      "Do not expose Bulk Update when the selected scope is ambiguous or hard to verify.",
   }}
 />
 
-## Related stories
+## Related documentation
 
-- [Default dialog](/?path=/story/patterns-data-collection-crud-patterns-update--table-update-dialog)
-- [Bulk update](/?path=/story/patterns-data-collection-crud-patterns-update--table-bulk-update)
-- [Right-position dialog for table](/?path=/story/patterns-data-collection-crud-patterns-update--table-update-right-dialog)
-- [Right-position dialog for list](/?path=/story/patterns-data-collection-crud-patterns-update--list-update-right-dialog)
-- [Card actions update](/?path=/story/patterns-data-collection-crud-patterns-update--card-update-from-read-dialog)
-- [Kanban bulk update](/?path=/story/patterns-data-collection-crud-patterns-update--kanban-bulk-update)
-- [Editable Table inline update](/?path=/story/patterns-data-collection-crud-patterns-update--editable-table-update-inline)
-- [CRUD patterns overview](/?path=/docs/patterns-data-collection-crud-patterns-overview--documentation)
-- [Agnostic: Create & Update principles](/?path=/docs/experimental-crud-patterns-create-update--documentation)
+- <a
+    target="_parent"
+    href="/?path=/docs/patterns-data-collection-crud-patterns-overview--documentation"
+  >
+    CRUD patterns overview
+  </a>
+- <a
+    target="_parent"
+    href="/?path=/docs/experimental-crud-patterns-create-update--documentation"
+  >
+    Agnostic: Create & Update principles
+  </a>

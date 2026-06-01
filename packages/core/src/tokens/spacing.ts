@@ -100,6 +100,14 @@ export const betweenSpacing: ThemeConfig["spacing"] = {
   xl: relativeSpacing[4],
 }
 
+/*
+ * Semantic page-level horizontal padding.
+ * Used by page headers, data collections, layouts, and tab navigation.
+ */
+export const pageSpacing: ThemeConfig["spacing"] = {
+  page: absoluteSpacing[6], // 24px
+}
+
 /**
  * Standard height scale for interactive components (buttons, inputs, segmented controls, etc.)
  *

@@ -18,6 +18,7 @@ import { TOCItem } from "@/experimental/Navigation/F0TableOfContent/types"
 import { Delete } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
+import { useAsyncDefaultValues } from "@/patterns/F0WizardForm/useF0FormDefinition"
 import { Form as FormProvider } from "@/ui/form"
 
 import type {
@@ -404,6 +405,11 @@ function F0FormFromSingleDefinition<TSchema extends F0FormSchema>({
 }: F0FormPropsWithSingleSchemaDefinition<TSchema> & { isLoading?: boolean }) {
   const def = formDefinition as F0FormDefinitionSingleSchema<TSchema>
 
+  const { resolved: resolvedDefaults, isLoading: isLoadingDefaults } =
+    useAsyncDefaultValues<Partial<z.infer<TSchema>>>(
+      def.asyncDefaultValues ?? def.defaultValues
+    )
+
   const adaptedOnSubmit = useCallback(
     (
       data: z.infer<TSchema>
@@ -419,7 +425,7 @@ function F0FormFromSingleDefinition<TSchema extends F0FormSchema>({
       module={def.module}
       schema={def.schema}
       sections={def.sections}
-      defaultValues={def.defaultValues}
+      defaultValues={resolvedDefaults}
       onSubmit={adaptedOnSubmit}
       submitConfig={def.submitConfig}
       errorTriggerMode={def.errorTriggerMode}
@@ -430,7 +436,7 @@ function F0FormFromSingleDefinition<TSchema extends F0FormSchema>({
       isLoadingInitialFiles={def.isLoadingInitialFiles}
       renderCustomField={renderCustomField}
       useUpload={useUpload}
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingDefaults}
       defaultValuesParamsSchema={def.defaultValuesParamsSchema}
       defaultValuesFn={def.defaultValuesFn}
     />
@@ -449,8 +455,13 @@ function F0FormFromPerSectionDefinition<T extends F0PerSectionSchema>({
 }: F0FormPropsWithPerSectionDefinition<T> & { isLoading?: boolean }) {
   const def = formDefinition as F0FormDefinitionPerSection<T>
 
+  const { resolved: resolvedDefaults, isLoading: isLoadingDefaults } =
+    useAsyncDefaultValues<{ [K in keyof T]?: Partial<z.infer<T[K]>> }>(
+      def.asyncDefaultValues ?? def.defaultValues
+    )
+
   const fullDataRef = useRef<Record<string, unknown>>(
-    def.defaultValues ? { ...def.defaultValues } : {}
+    resolvedDefaults ? { ...resolvedDefaults } : {}
   )
 
   const adaptedOnSubmit = useCallback(
@@ -479,7 +490,7 @@ function F0FormFromPerSectionDefinition<T extends F0PerSectionSchema>({
       name={def.name}
       schema={def.schema}
       sections={def.sections}
-      defaultValues={def.defaultValues}
+      defaultValues={resolvedDefaults}
       onSubmit={
         adaptedOnSubmit as F0FormPropsWithPerSectionSchema<T>["onSubmit"]
       }
@@ -492,7 +503,7 @@ function F0FormFromPerSectionDefinition<T extends F0PerSectionSchema>({
       isLoadingInitialFiles={def.isLoadingInitialFiles}
       renderCustomField={renderCustomField}
       useUpload={useUpload}
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingDefaults}
     />
   )
 }
