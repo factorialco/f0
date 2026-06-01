@@ -13,7 +13,6 @@ interface ActionBarProps {
   handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void
   inProgress?: boolean
   hasDataToSend: boolean
-  isUploading: boolean
   isPreSending?: boolean
 }
 
@@ -26,7 +25,6 @@ export const ActionBar = ({
   handleFileSelect,
   inProgress,
   hasDataToSend,
-  isUploading,
   isPreSending,
 }: ActionBarProps) => {
   const translation = useI18n()
@@ -75,12 +73,10 @@ export const ActionBar = ({
         ) : (
           <ButtonInternal
             type="submit"
-            disabled={!hasDataToSend || isUploading || isPreSending}
-            variant={
-              hasDataToSend && !isUploading && !isPreSending
-                ? "default"
-                : "neutral"
-            }
+            // Stays enabled while an attachment uploads so the click queues the
+            // send (fired once the upload finishes) instead of being a no-op.
+            disabled={!hasDataToSend || isPreSending}
+            variant={hasDataToSend && !isPreSending ? "default" : "neutral"}
             label={translation.ai.sendMessage}
             icon={ArrowUp}
             hideLabel

@@ -372,6 +372,8 @@ export const defaultTranslations = {
     attachFile: "Attach file",
     removeFile: "Remove",
     fileUploadError: "Upload failed",
+    fileUploadBlockedSubmit:
+      "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.",
     tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
     dropFilesHere: "Drop your files here",
     reply: "Reply",
