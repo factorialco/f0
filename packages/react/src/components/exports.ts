@@ -53,6 +53,7 @@ export * from "./F0Heading"
 export * from "./F0Icon"
 export * from "./F0Link"
 export * from "./F0Select"
+export * from "./F0Slider"
 export * from "./F0Text"
 export * from "../sds/TimeLine"
 /**
