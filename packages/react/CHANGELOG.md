@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.28.1](https://github.com/factorialco/f0/compare/f0-react-v2.28.0...f0-react-v2.28.1) (2026-06-01)
+
+
+### Bug Fixes
+
+* **F0AiChat:** prevent file attachments from being silently dropped ([#4277](https://github.com/factorialco/f0/issues/4277)) ([42c1d4b](https://github.com/factorialco/f0/commit/42c1d4b57cd48ca02964561b82d2c11188bab71e))
+
 ## [2.28.0](https://github.com/factorialco/f0/compare/f0-react-v2.27.0...f0-react-v2.28.0) (2026-06-01)
 
 
