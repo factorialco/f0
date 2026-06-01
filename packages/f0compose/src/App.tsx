@@ -59,6 +59,12 @@ export function App() {
     </F0Provider>
   )
 
+  // Only mount CopilotKit when the AI chat is actually enabled. Otherwise it
+  // tries to reach the agent runtime on load and surfaces a "Failed to fetch"
+  // toast in environments without an agent (previews, public demos). No
+  // prototype uses the copilot hooks, so skipping the provider is safe.
+  if (!aiChatConfig.enabled) return inner
+
   return (
     <CopilotKit runtimeUrl={aiChatConfig.runtimeUrl} agent={aiChatConfig.agent}>
       {inner}

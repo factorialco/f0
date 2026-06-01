@@ -284,7 +284,7 @@ type GroupSessionRow = {
 type SessionAttendanceRow = {
   id: string
   name: string
-  attendance: "Attended" | "Partially attended" | "Not attended" | "Pending"
+  attendance: "Attended" | "Not attended" | "Pending"
   completedHours: string
 }
 type GroupParticipantRow = {
@@ -1020,20 +1020,24 @@ const myTrainingCertificates: MyCertificateRow[] = [
   { id: "certificate-1", name: "ISO 9001 completion certificate.pdf", type: "Certificate", updatedAt: "31 Jan 2026" },
 ]
 
+// A live session lasts ~1h (this one runs 10:00–11:00). Rule: whoever joined the
+// live room counts as "Attended", with the time they were present out of 60 min.
+// Someone who never joined is "Not attended" (0m). The instructor can still
+// override any row from the end-session modal or the Attendance tab.
 const sessionAttendance: SessionAttendanceRow[] = [
-  { id: "att-1", name: "Calvino Collins", attendance: "Attended", completedHours: "20h/20h" },
-  { id: "att-2", name: "Clara Castillo", attendance: "Partially attended", completedHours: "18h/20h" },
-  { id: "att-3", name: "Cristóbal Cárdenas", attendance: "Attended", completedHours: "20h/20h" },
-  { id: "att-4", name: "Emilia Estrada", attendance: "Not attended", completedHours: "0h/20h" },
-  { id: "att-5", name: "Hellen Howard", attendance: "Attended", completedHours: "20h/20h" },
-  { id: "att-6", name: "Margarita Márquez", attendance: "Partially attended", completedHours: "12h/20h" },
-  { id: "att-7", name: "Natalia Navarro", attendance: "Attended", completedHours: "20h/20h" },
-  { id: "att-8", name: "Nicolás Núñez", attendance: "Not attended", completedHours: "0h/20h" },
-  { id: "att-9", name: "Noé Navarro", attendance: "Attended", completedHours: "20h/20h" },
-  { id: "att-10", name: "Nora Nieto", attendance: "Not attended", completedHours: "0h/20h" },
-  { id: "att-11", name: "Scott Santos", attendance: "Attended", completedHours: "20h/20h" },
-  { id: "att-12", name: "Samantha Suárez", attendance: "Partially attended", completedHours: "16h/20h" },
-  { id: "att-13", name: "Susana Stanley", attendance: "Partially attended", completedHours: "10h/20h" },
+  { id: "att-1", name: "Calvino Collins", attendance: "Attended", completedHours: "60m/60m" },
+  { id: "att-2", name: "Clara Castillo", attendance: "Attended", completedHours: "41m/60m" },
+  { id: "att-3", name: "Cristóbal Cárdenas", attendance: "Attended", completedHours: "58m/60m" },
+  { id: "att-4", name: "Emilia Estrada", attendance: "Not attended", completedHours: "0m/60m" },
+  { id: "att-5", name: "Hellen Howard", attendance: "Attended", completedHours: "60m/60m" },
+  { id: "att-6", name: "Margarita Márquez", attendance: "Attended", completedHours: "33m/60m" },
+  { id: "att-7", name: "Natalia Navarro", attendance: "Attended", completedHours: "57m/60m" },
+  { id: "att-8", name: "Nicolás Núñez", attendance: "Not attended", completedHours: "0m/60m" },
+  { id: "att-9", name: "Noé Navarro", attendance: "Attended", completedHours: "60m/60m" },
+  { id: "att-10", name: "Nora Nieto", attendance: "Not attended", completedHours: "0m/60m" },
+  { id: "att-11", name: "Scott Santos", attendance: "Attended", completedHours: "59m/60m" },
+  { id: "att-12", name: "Samantha Suárez", attendance: "Attended", completedHours: "38m/60m" },
+  { id: "att-13", name: "Susana Stanley", attendance: "Attended", completedHours: "9m/60m" },
 ]
 
 const groupParticipants: GroupParticipantRow[] = [
@@ -4424,7 +4428,7 @@ function SessionSidepanel({
             />
             <F0BoxWithClassName style={{ paddingTop: 32 }}>
               {visibleTab === "details" ? <SessionDetailsTab session={session} role={role} isEnded={isEnded} onJoinSession={onJoinSession} /> : null}
-              {visibleTab === "attendance" ? <SessionAttendanceTab isEnded={isEnded} /> : null}
+              {visibleTab === "attendance" ? <SessionAttendanceTable isEnded={isEnded} /> : null}
               {visibleTab === "transcript" ? <SessionTranscriptTab session={session} /> : null}
             </F0BoxWithClassName>
           </F0BoxWithClassName>
@@ -4653,11 +4657,11 @@ function SessionDetailsTab({ session, role, isEnded, onJoinSession }: { session:
           <SessionField label="Modality" value={session.modality} icon={Computer} />
         </F0Box>
         <F0Box display="grid" columns="2" gap="5xl">
-          <SessionField label="Date" value="2 Jan 2025 -" />
-          <SessionField label="Hour" value="20h" />
+          <SessionField label="Date" value={session.date.split(", ")[0] ?? session.date} />
+          <SessionField label="Hour" value={session.date.split(", ")[1] ?? session.scheduleLabel} />
         </F0Box>
         <F0Box display="grid" columns="2" gap="5xl">
-          <SessionField label="Location" value="-" />
+          <SessionField label="Location" value={session.modality === "On-site" || session.modality === "Hybrid" ? "Aula 2 · Sede Barcelona" : "-"} />
           <SessionJoinField role={role} disabled={startDisabled || isEnded} isEnded={isEnded} onJoinSession={onJoinSession} />
         </F0Box>
         {isEnded ? (
@@ -4889,17 +4893,19 @@ function LiveSessionNotesDrawer() {
   )
 }
 
-function EndSessionDialog({ isOpen, onClose, onEnd }: { isOpen: boolean; onClose: () => void; onEnd: () => void }) {
+function EndSessionModal({ isOpen, onClose, onEnd }: { isOpen: boolean; onClose: () => void; onEnd: () => void }) {
   return (
     <F0Dialog
       isOpen={isOpen}
       onClose={onClose}
       title="End session"
-      description="Participants will leave the live session and return to the training group."
-      width="sm"
-      primaryAction={{ label: "End session", icon: SolidStop, onClick: onEnd }}
+      description="Everyone who joined the live room is set as attended. Select participants and adjust the attendance if needed, then end the session. You can also edit it later from the Attendance tab."
+      width="xl"
+      primaryAction={{ label: "End session", onClick: onEnd }}
       secondaryAction={{ label: "Cancel", onClick: onClose }}
-    />
+    >
+      <SessionAttendanceTable isEnded variant="modal" />
+    </F0Dialog>
   )
 }
 
@@ -5083,7 +5089,7 @@ function SessionRoomScreen({
         </F0BoxWithClassName>
       </F0BoxWithClassName>
       <RoomSettingsDialog isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
-      <EndSessionDialog isOpen={endSessionOpen} onClose={() => setEndSessionOpen(false)} onEnd={onEndSession ?? onExit} />
+      <EndSessionModal isOpen={endSessionOpen} onClose={() => setEndSessionOpen(false)} onEnd={onEndSession ?? onExit} />
     </FullscreenCallSurface>
   )
 }
@@ -5214,12 +5220,15 @@ function SessionCalendarBlock() {
   )
 }
 
-function SessionAttendanceTab({ isEnded }: { isEnded: boolean }) {
-  const rows = isEnded ? sessionAttendance : sessionAttendance.map((row) => ({ ...row, attendance: "Pending" as const, completedHours: `0h/${row.completedHours.split("/")[1] ?? "20h"}` }))
+function SessionAttendanceTable({ isEnded, variant = "tab" }: { isEnded: boolean; variant?: "tab" | "modal" }) {
+  const [rows, setRows] = useState<SessionAttendanceRow[]>(() =>
+    isEnded
+      ? sessionAttendance.map((row) => ({ ...row }))
+      : sessionAttendance.map((row) => ({ ...row, attendance: "Pending" as const, completedHours: `0m/${row.completedHours.split("/")[1] ?? "60m"}` }))
+  )
   const attendanceFilterOptions = isEnded
     ? [
         { value: "Attended", label: "Attended" },
-        { value: "Partially attended", label: "Partially attended" },
         { value: "Not attended", label: "Not attended" },
       ]
     : [{ value: "Pending", label: "Pending" }]
@@ -5235,17 +5244,15 @@ function SessionAttendanceTab({ isEnded }: { isEnded: boolean }) {
           },
         },
       },
-      sortings: { name: { label: "Name" } },
       dataAdapter: {
         paginationType: "pages",
         perPage: 10,
-        fetchData: ({ filters, search, sortings = [], pagination }: FetchOptions) => {
+        fetchData: ({ filters, search, pagination }: FetchOptions) => {
           const term = (search ?? "").toLowerCase().trim()
           const filtered = rows
             .filter((row) => matchArray(filters?.attendance, row.attendance))
             .filter((row) => term === "" || row.name.toLowerCase().includes(term))
-          const sorted = applySort(filtered, sortings, (row, field) => field === "name" ? row.name.toLowerCase() : null)
-          return paginateRecords(sorted, pagination, 10)
+          return paginateRecords(filtered, pagination, 10)
         },
       },
       secondaryActions: () =>
@@ -5255,30 +5262,47 @@ function SessionAttendanceTab({ isEnded }: { isEnded: boolean }) {
       selectable: (row) => row.id,
       bulkActions: () => ({
         primary: [
-          { id: "completed", label: "Completed", icon: CheckCircle },
-          { id: "started", label: "Started", icon: InProgressTask },
-          { id: "absent", label: "Absent", icon: Cross, critical: true },
+          { id: "attended", label: "Mark as attended", icon: CheckCircle },
+          { id: "not-attended", label: "Mark as not attended", icon: Cross, critical: true },
         ],
       }),
       totalItemSummary: (total: number) => `${total} participants`,
     },
-    [isEnded]
+    [isEnded, rows]
   )
 
   return (
-    <F0BoxWithClassName className="ml-4 mt-4 w-[574px]">
+    <F0BoxWithClassName className={variant === "modal" ? "w-full" : "ml-4 mt-4 w-[574px]"}>
       <OneDataCollection
-        id={`${prototypeSlug}/session-attendance/v1`}
+        id={`${prototypeSlug}/session-attendance/${variant}/v1`}
         storage={false}
         source={source}
+        onBulkAction={(action, selectedItems, clearSelected) => {
+          if (action === "attended" || action === "not-attended") {
+            const ids = new Set(selectedItems.selectedIds.map(String))
+            const nextAttendance: SessionAttendanceRow["attendance"] =
+              action === "attended" ? "Attended" : "Not attended"
+            setRows((current) =>
+              current.map((row) => (ids.has(row.id) ? { ...row, attendance: nextAttendance } : row))
+            )
+          }
+          clearSelected()
+        }}
         visualizations={[
           {
             type: "table",
             options: {
               columns: [
-                { id: "name", label: "Name", sorting: "name", render: (row: SessionAttendanceRow) => personValue(row.name) },
+                { id: "name", label: "Name", render: (row: SessionAttendanceRow) => personValue(row.name) },
                 { id: "attendance", label: "Attendance", render: (row: SessionAttendanceRow) => ({ type: "status" as const, value: attendanceStatusValue(row.attendance) }) },
-                { id: "completedHours", label: "Hours completed", render: (row: SessionAttendanceRow) => row.completedHours },
+                {
+                  id: "completedHours",
+                  label: "Time attended",
+                  render: (row: SessionAttendanceRow) =>
+                    isLowAttendance(row)
+                      ? { type: "alertTag" as const, value: { label: row.completedHours, level: "warning" as const } }
+                      : row.completedHours,
+                },
               ],
             },
           },
@@ -6551,9 +6575,21 @@ function requestStatusValue(status: RequestRow["status"]) {
   return { label: "Pending review", status: "warning" as const }
 }
 
+// Ratio of time attended from a "Xm/Ym" string (e.g. "9m/60m" → 0.15).
+const LOW_ATTENDANCE_THRESHOLD = 0.15
+function attendanceRatio(completedHours: string): number {
+  const [present, total] = completedHours
+    .split("/")
+    .map((part) => Number(part.replace(/[^\d.]/g, "")) || 0)
+  return total > 0 ? present / total : 0
+}
+function isLowAttendance(row: SessionAttendanceRow): boolean {
+  const ratio = attendanceRatio(row.completedHours)
+  return row.attendance === "Attended" && ratio > 0 && ratio <= LOW_ATTENDANCE_THRESHOLD
+}
+
 function attendanceStatusValue(status: SessionAttendanceRow["attendance"]) {
   if (status === "Attended") return { label: "Attended", status: "positive" as const }
-  if (status === "Partially attended") return { label: "Partially attended", status: "warning" as const }
   if (status === "Not attended") return { label: "Not attended", status: "critical" as const }
   return { label: "Pending", status: "warning" as const }
 }
