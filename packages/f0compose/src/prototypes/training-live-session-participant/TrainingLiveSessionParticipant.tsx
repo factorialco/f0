@@ -573,6 +573,7 @@ const createSessionModalFields = {
   endsAt: { id: "endsAt", type: "text", label: "Ends at", placeholder: "11:00" },
   hours: { id: "durationHours", type: "number", label: "Hours", min: 0, maxDecimals: 0 },
   minutes: { id: "durationMinutes", type: "number", label: "Minutes", min: 0, max: 59, maxDecimals: 0 },
+  minimumAttendance: { id: "minimumAttendance", type: "number", label: "Minimum attendance", min: 1, max: 100, maxDecimals: 0, units: "%", placeholder: "e.g. 75" },
   modality: {
     id: "modality",
     type: "select",
@@ -4453,8 +4454,9 @@ function SessionFormDialog({
     modality: "hybrid",
     frequency: "none",
     instructors: [],
-    durationHours: 0,
+    durationHours: 1,
     durationMinutes: 0,
+    minimumAttendance: 1,
     meetingLink: DEFAULT_FACTORIAL_LIVE_ROOM,
     location: "",
     calendarInvites: false,
@@ -4465,6 +4467,16 @@ function SessionFormDialog({
 
   const hasOnlineSession = values.modality === "virtual" || values.modality === "hybrid"
   const hasPhysicalLocation = values.modality === "hybrid" || values.modality === "onsite"
+  const sessionDurationMin =
+    (Number(values.durationHours) || 0) * 60 + (Number(values.durationMinutes) || 0)
+  const minAttendancePct = Number(values.minimumAttendance) || 0
+  const minAttendanceMin = Math.round((minAttendancePct / 100) * sessionDurationMin)
+  const minAttendanceHint =
+    minAttendancePct <= 1
+      ? "1% means just joining the session counts. Raise it to require more."
+      : sessionDurationMin > 0
+        ? `Must stay ≈ ${minAttendanceMin} min of this ${sessionDurationMin}-min session.`
+        : "Set the duration to see the equivalent in minutes."
 
   return (
     <F0BoxWithClassName
@@ -4507,6 +4519,12 @@ function SessionFormDialog({
             <F0Box display="grid" columns="2" gap="md">
               <F0FormField field={createSessionModalFields.hours} value={values.durationHours} onChange={(value) => setValues((current) => ({ ...current, durationHours: value }))} />
               <F0FormField field={createSessionModalFields.minutes} value={values.durationMinutes} onChange={(value) => setValues((current) => ({ ...current, durationMinutes: value }))} />
+            </F0Box>
+            <F0Box display="flex" flexDirection="column" gap="xs">
+              <F0BoxWithClassName className="w-48">
+                <F0FormField field={createSessionModalFields.minimumAttendance} value={values.minimumAttendance} onChange={(value) => setValues((current) => ({ ...current, minimumAttendance: value }))} />
+              </F0BoxWithClassName>
+              <F0Text variant="description" content={minAttendanceHint} />
             </F0Box>
             <SessionToggleField label="Modality">
               <SessionOptionGroup
@@ -4662,6 +4680,9 @@ function SessionDetailsTab({ session, role, isEnded, onJoinSession }: { session:
         </F0Box>
         <F0Box display="grid" columns="2" gap="5xl">
           <SessionField label="Location" value={session.modality === "On-site" || session.modality === "Hybrid" ? "Aula 2 · Sede Barcelona" : "-"} />
+          <SessionField label="Minimum attendance" value={COMPLETION_THRESHOLD_PCT <= 1 ? "1% (just joining)" : `${COMPLETION_THRESHOLD_PCT}% (${thresholdMinutes(COMPLETION_THRESHOLD_PCT, SESSION_DURATION_MIN)} min)`} />
+        </F0Box>
+        <F0Box display="grid" columns="2" gap="5xl">
           <SessionJoinField role={role} disabled={startDisabled || isEnded} isEnded={isEnded} onJoinSession={onJoinSession} />
         </F0Box>
         {isEnded ? (
@@ -5223,7 +5244,9 @@ function SessionCalendarBlock() {
 function SessionAttendanceTable({ isEnded, variant = "tab" }: { isEnded: boolean; variant?: "tab" | "modal" }) {
   const [rows, setRows] = useState<SessionAttendanceRow[]>(() =>
     isEnded
-      ? sessionAttendance.map((row) => ({ ...row }))
+      ? // Default each status from the session's minimum-attendance threshold
+        // (present >= required → Attended). The instructor can override below.
+        sessionAttendance.map((row) => ({ ...row, attendance: attendanceFromThreshold(row.completedHours) }))
       : sessionAttendance.map((row) => ({ ...row, attendance: "Pending" as const, completedHours: `0m/${row.completedHours.split("/")[1] ?? "60m"}` }))
   )
   const attendanceFilterOptions = isEnded
@@ -5295,14 +5318,7 @@ function SessionAttendanceTable({ isEnded, variant = "tab" }: { isEnded: boolean
               columns: [
                 { id: "name", label: "Name", render: (row: SessionAttendanceRow) => personValue(row.name) },
                 { id: "attendance", label: "Attendance", render: (row: SessionAttendanceRow) => ({ type: "status" as const, value: attendanceStatusValue(row.attendance) }) },
-                {
-                  id: "completedHours",
-                  label: "Time attended",
-                  render: (row: SessionAttendanceRow) =>
-                    isLowAttendance(row)
-                      ? { type: "alertTag" as const, value: { label: row.completedHours, level: "warning" as const } }
-                      : row.completedHours,
-                },
+                { id: "completedHours", label: "Time attended", render: (row: SessionAttendanceRow) => row.completedHours },
               ],
             },
           },
@@ -6575,17 +6591,24 @@ function requestStatusValue(status: RequestRow["status"]) {
   return { label: "Pending review", status: "warning" as const }
 }
 
-// Ratio of time attended from a "Xm/Ym" string (e.g. "9m/60m" → 0.15).
-const LOW_ATTENDANCE_THRESHOLD = 0.15
-function attendanceRatio(completedHours: string): number {
-  const [present, total] = completedHours
-    .split("/")
-    .map((part) => Number(part.replace(/[^\d.]/g, "")) || 0)
-  return total > 0 ? present / total : 0
+// Minimum attendance set when the session is created. Default is 0 → joining the
+// session is enough (joined = attended). The instructor can raise it to require a
+// share of the session (RFC: completion_threshold_percentage). Frozen at creation.
+const SESSION_DURATION_MIN = 60
+const COMPLETION_THRESHOLD_PCT = 1
+const thresholdMinutes = (pct: number, durationMin: number) =>
+  Math.round((pct / 100) * durationMin)
+
+// Parse the present minutes from a "Xm/Ym" string (e.g. "41m/60m" → 41).
+function presentMinutes(completedHours: string): number {
+  return Number((completedHours.split("/")[0] ?? "").replace(/[^\d.]/g, "")) || 0
 }
-function isLowAttendance(row: SessionAttendanceRow): boolean {
-  const ratio = attendanceRatio(row.completedHours)
-  return row.attendance === "Attended" && ratio > 0 && ratio <= LOW_ATTENDANCE_THRESHOLD
+// You must have joined (present > 0) and met the minimum. With the default 0% the
+// minimum is 0 min, so any join counts as attended.
+function attendanceFromThreshold(completedHours: string): "Attended" | "Not attended" {
+  const required = thresholdMinutes(COMPLETION_THRESHOLD_PCT, SESSION_DURATION_MIN)
+  const present = presentMinutes(completedHours)
+  return present > 0 && present >= required ? "Attended" : "Not attended"
 }
 
 function attendanceStatusValue(status: SessionAttendanceRow["attendance"]) {
