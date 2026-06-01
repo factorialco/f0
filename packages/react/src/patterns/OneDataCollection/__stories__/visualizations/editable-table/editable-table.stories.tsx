@@ -6,6 +6,7 @@ import { action } from "storybook/actions"
 import { createDataSourceDefinition, RecordType } from "@/hooks/datasource"
 import { Delete, Pencil } from "@/icons/app"
 import { ROLES_MOCK } from "@/mocks"
+import type { StatusVariant } from "@/components/tags/F0TagStatus/types"
 
 import { OneDataCollection } from "../../.."
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
@@ -1519,10 +1520,7 @@ export const EditableTableWithStatusPillSelect: Story = {
       approved: "Approved",
       rejected: "Rejected",
     }
-    const STATUS_VARIANT: Record<
-      RequestStatus,
-      "neutral" | "warning" | "positive" | "critical"
-    > = {
+    const STATUS_VARIANT: Record<RequestStatus, StatusVariant> = {
       draft: "neutral",
       pending: "warning",
       approved: "positive",
@@ -1535,12 +1533,10 @@ export const EditableTableWithStatusPillSelect: Story = {
       "rejected",
     ]
 
-    const initialItems = [
-      { id: "r-1", index: 0, name: "Headcount #1", status: "draft" },
-      { id: "r-2", index: 1, name: "Headcount #2", status: "pending" },
-      { id: "r-3", index: 2, name: "Headcount #3", status: "approved" },
-      { id: "r-4", index: 3, name: "Headcount #4", status: "rejected" },
-    ] as unknown as MockUser[]
+    const initialItems = generateMockUsers(4).map((user, index) => ({
+      ...user,
+      status: STATUS_VALUES[index],
+    }))
 
     const { dataAdapter, onCellChange } = useEditableTableData(initialItems)
 

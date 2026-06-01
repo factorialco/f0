@@ -168,7 +168,7 @@ const meta: Meta = {
         "  label: string\n" +
         "  description?: string\n" +
         "  avatar?: AvatarVariant\n" +
-        "  tag?: string | { type: 'dot'; text: string; color: NewColor } | { type: 'person'; name: string; src?: string }\n" +
+        "  tag?: string | { type: 'dot'; text: string; color: NewColor } | { type: 'person'; name: string; src?: string } | { type: 'status'; text: string; variant: StatusVariant }\n" +
         "  icon?: IconType\n" +
         "  item?: unknown\n" +
         "  disabled?: boolean\n" +

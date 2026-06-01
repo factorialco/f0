@@ -52,6 +52,7 @@ import type {
   F0SelectProps,
   ResolvedRecordType,
 } from "./types"
+import type { StatusVariant } from "@/components/tags/F0TagStatus/types"
 
 import { Arrow } from "./components/Arrow"
 import { SelectAll } from "./components/SelectAll"
@@ -70,6 +71,19 @@ const defaultSearchFn = (
     option.type === "separator" ||
     !search ||
     option.label.toLowerCase().includes(search.toLowerCase())
+  )
+}
+
+const isStatusTagOption = <T extends string, R>(
+  option: F0SelectItemProps<T, R>
+): option is F0SelectItemObject<T, R> & {
+  tag: { type: "status"; text: string; variant: StatusVariant }
+} => {
+  return (
+    option.type !== "separator" &&
+    option.tag !== undefined &&
+    typeof option.tag !== "string" &&
+    option.tag.type === "status"
   )
 }
 
@@ -822,42 +836,68 @@ const F0SelectComponent = forwardRef(function Select<
 
   const getItems = useCallback(
     (
-      records: WithGroupId<ActualRecordType>[] | ActualRecordType[]
+      records: WithGroupId<ActualRecordType>[] | ActualRecordType[],
+      seenStatusVariants: Set<StatusVariant>
     ): VirtualItem[] => {
-      return records.map((option, index) => {
-        const mappedOption = optionMapper(option)
-        return mappedOption.type === "separator"
-          ? {
-              height: 1,
-              key: `separator-${index}`,
-              type: "separator",
-              item: (
-                <SelectSeparator
-                  key={`separator-${index}`}
-                  className="mb-1 mt-2"
-                />
-              ),
+      const items: VirtualItem[] = []
+      for (let index = 0; index < records.length; index += 1) {
+        const record = records[index]
+        const mappedOption = optionMapper(record)
+        const statusVariant = isStatusTagOption(mappedOption)
+          ? mappedOption.tag.variant
+          : undefined
+
+        if (statusVariant !== undefined) {
+          if (seenStatusVariants.has(statusVariant)) {
+            if (process.env.NODE_ENV !== "production") {
+              throw new Error(
+                `[F0Select] Only one option per status variant is allowed. Duplicate variant "${statusVariant}" will be filtered out in production.`
+              )
             }
-          : {
-              height: mappedOption.description ? 64 : 32,
-              key: `item-${mappedOption.value}`,
-              type: "item",
-              item: (
-                <SelectItem
-                  key={String(mappedOption.value)}
-                  item={mappedOption}
-                />
-              ),
-              // Convert to string to ensure consistent comparison with selectedItemsValues
-              // which also converts to strings (line 623)
-              value: String(mappedOption.value),
-            }
-      })
+            continue
+          }
+
+          seenStatusVariants.add(statusVariant)
+        }
+
+        items.push(
+          mappedOption.type === "separator"
+            ? {
+                height: 1,
+                key: `separator-${index}`,
+                type: "separator",
+                item: (
+                  <SelectSeparator
+                    key={`separator-${index}`}
+                    className="mb-1 mt-2"
+                  />
+                ),
+              }
+            : {
+                height: mappedOption.description ? 64 : 32,
+                key: `item-${mappedOption.value}`,
+                type: "item",
+                item: (
+                  <SelectItem
+                    key={String(mappedOption.value)}
+                    item={mappedOption}
+                  />
+                ),
+                // Convert to string to ensure consistent comparison with selectedItemsValues
+                // which also converts to strings (line 623)
+                value: String(mappedOption.value),
+              }
+        )
+      }
+
+      return items
     },
     [optionMapper]
   )
 
   const items: VirtualItem[] = useMemo(() => {
+    const seenStatusVariants = new Set<StatusVariant>()
+
     if (data.type === "grouped") {
       const items: VirtualItem[] = []
       data.groups.map((group) => {
@@ -881,7 +921,7 @@ const F0SelectComponent = forwardRef(function Select<
         })
         if (!collapsible || openGroups[group.key]) {
           items.push(
-            ...getItems(group.records).map((vi) => ({
+            ...getItems(group.records, seenStatusVariants).map((vi) => ({
               ...vi,
               key: `${group.key}:${vi.key}`,
               item: collapsible ? (
@@ -895,7 +935,7 @@ const F0SelectComponent = forwardRef(function Select<
       })
       return items
     }
-    return getItems(data.records)
+    return getItems(data.records, seenStatusVariants)
   }, [
     data.records,
     data.type,
