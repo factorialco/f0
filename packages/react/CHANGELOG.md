@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.28.0](https://github.com/factorialco/f0/compare/f0-react-v2.27.0...f0-react-v2.28.0) (2026-06-01)
+
+
+### Features
+
+* **F0Box:** add boxShadow prop with token-based elevation ([#4264](https://github.com/factorialco/f0/issues/4264)) ([7504508](https://github.com/factorialco/f0/commit/75045088839ebdf2d23724a31a00ca4c361b73d0))
+
 ## [2.27.0](https://github.com/factorialco/f0/compare/f0-react-v2.26.1...f0-react-v2.27.0) (2026-05-29)
 
 
