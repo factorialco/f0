@@ -216,7 +216,6 @@ type ExactCourse = Omit<Training, "categories" | "objectives" | "totalCost"> & {
 type NewCourseValues = Record<string, unknown>
 type RenderableField = Exclude<F0Field, { type: "file" }>
 type SessionModalityValue = "hybrid" | "virtual" | "onsite"
-type OnlineSessionValue = "factorial" | "external"
 type CategoryRow = { id: string; name: string }
 type SurveyTemplateRow = {
   id: string
@@ -602,9 +601,18 @@ const createSessionModalFields = {
     label: "Frequency",
     options: [{ value: "none", label: "Does not repeat" }],
   },
-  meetingLink: { id: "meetingLink", type: "text", label: "Meeting link" },
+  meetingLink: {
+    id: "meetingLink",
+    type: "text",
+    label: "Meeting link",
+    helpText: "Factorial sets up a live room for this session. Edit the link to use another provider.",
+  },
   location: { id: "location", type: "text", label: "Location" },
 } satisfies Record<string, RenderableField>
+
+// Pre-filled Factorial live-room link for online/hybrid sessions; editable.
+const DEFAULT_FACTORIAL_LIVE_ROOM =
+  "https://app.factorialhr.com/live/r/iso-9001-edicion-2026"
 
 const sessionModalityOptions: Array<{
   value: SessionModalityValue
@@ -615,16 +623,6 @@ const sessionModalityOptions: Array<{
   { value: "virtual", label: "Virtual", description: "Online only", icon: VideoRecorder },
   { value: "hybrid", label: "Hybrid", description: "Online + location", icon: Laptop },
   { value: "onsite", label: "On-site", description: "Physical location", icon: People },
-]
-
-const onlineSessionOptions: Array<{
-  value: OnlineSessionValue
-  label: string
-  description: string
-  icon: IconType
-}> = [
-  { value: "factorial", label: "Factorial live room", description: "Built-in room", icon: VideoRecorder },
-  { value: "external", label: "External meeting link", description: "Paste a meeting URL", icon: ExternalLink },
 ]
 
 function SessionToggleField({ label, children }: { label: string; children: ReactNode }) {
@@ -4449,12 +4447,11 @@ function SessionFormDialog({
     sessionType: "scheduled",
     sessionName: "Fundamentos ISO 9001",
     modality: "hybrid",
-    onlineSession: "factorial",
     frequency: "none",
     instructors: [],
     durationHours: 0,
     durationMinutes: 0,
-    meetingLink: "",
+    meetingLink: DEFAULT_FACTORIAL_LIVE_ROOM,
     location: "",
     calendarInvites: false,
     reminders: false,
@@ -4464,7 +4461,6 @@ function SessionFormDialog({
 
   const hasOnlineSession = values.modality === "virtual" || values.modality === "hybrid"
   const hasPhysicalLocation = values.modality === "hybrid" || values.modality === "onsite"
-  const usesExternalMeetingLink = hasOnlineSession && values.onlineSession === "external"
 
   return (
     <F0BoxWithClassName
@@ -4512,22 +4508,12 @@ function SessionFormDialog({
               <SessionOptionGroup
                 options={sessionModalityOptions}
                 value={values.modality as SessionModalityValue}
-                onChange={(value) => setValues((current) => ({ ...current, modality: value, onlineSession: value === "onsite" ? "factorial" : current.onlineSession }))}
+                onChange={(value) => setValues((current) => ({ ...current, modality: value }))}
                 columns="3"
               />
             </SessionToggleField>
             {hasPhysicalLocation ? <F0FormField field={createSessionModalFields.location} value={values.location} onChange={(value) => setValues((current) => ({ ...current, location: value }))} /> : null}
-            {hasOnlineSession ? (
-              <SessionToggleField label="Online access">
-                <SessionOptionGroup
-                  options={onlineSessionOptions}
-                  value={values.onlineSession as OnlineSessionValue}
-                  onChange={(value) => setValues((current) => ({ ...current, onlineSession: value }))}
-                  columns="2"
-                />
-              </SessionToggleField>
-            ) : null}
-            {usesExternalMeetingLink ? <F0FormField field={createSessionModalFields.meetingLink} value={values.meetingLink} onChange={(value) => setValues((current) => ({ ...current, meetingLink: value }))} /> : null}
+            {hasOnlineSession ? <F0FormField field={createSessionModalFields.meetingLink} value={values.meetingLink} onChange={(value) => setValues((current) => ({ ...current, meetingLink: value }))} /> : null}
             <F0FormField field={createSessionModalFields.instructors} value={values.instructors} onChange={(value) => setValues((current) => ({ ...current, instructors: value }))} />
             <F0FormField field={createSessionModalFields.frequency} value={values.frequency} onChange={(value) => setValues((current) => ({ ...current, frequency: value }))} />
             <SessionReminderBlock />
