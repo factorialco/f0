@@ -20,8 +20,9 @@ Run after completing **any** of:
 **Skip when:**
 
 - The user explicitly says to skip checks
-- The change is documentation-only (`.md`, `.mdx` files, comments)
 - The change is icon generation or other auto-generated files
+
+> **Note:** `.mdx` files are NOT skip candidates — they go through `oxfmt` formatting and must pass `format:check`.
 
 ---
 
@@ -51,7 +52,22 @@ If there are no changed files under `packages/react/src/`, skip the quality gate
 
 Run these sequentially in the main agent. If a step fails, attempt auto-fix before proceeding. If auto-fix fails, record the failure and continue to the next step — do not abort the whole gate.
 
-### 1a. TypeScript
+### 1a. Format
+
+**Always run first — applies to all file types including `.tsx`, `.ts`, and `.mdx`.**
+
+```bash
+pnpm format
+pnpm format:check
+```
+
+Run `format` to auto-fix all formatting issues, then `format:check` to confirm nothing remains.
+
+- `format` uses `oxfmt` which reformats the entire `src/` directory — this is safe to run always
+- Key rules enforced: no semicolons, double quotes, 2-space indent, trailing commas (ES5)
+- On `format:check` failure after `format`: record as **blocking**, continue
+
+### 1b. TypeScript
 
 ```bash
 pnpm tsc --noEmit
@@ -61,7 +77,7 @@ pnpm tsc --noEmit
 - After fix, re-run `pnpm tsc --noEmit` to confirm
 - If still failing: record as **blocking**, continue
 
-### 1b. Lint
+### 1c. Lint
 
 ```bash
 pnpm lint-fix
@@ -73,7 +89,7 @@ Run `lint-fix` first to auto-resolve fixable violations, then `lint` to catch an
 - If `lint` still reports errors after `lint-fix`: record as **blocking**, continue
 - Auto-fixed violations: record count for the summary
 
-### 1c. Tests
+### 1d. Tests
 
 Run only tests for changed files to keep this fast:
 
@@ -192,10 +208,11 @@ If no issues found in a category, write "None".
 **Prompt to pass:**
 
 ```
-You are a Storybook reviewer for the F0 React component library.
+You are a Storybook and documentation reviewer for the F0 React component library.
 
 Load the `f0-storybook-stories` skill from `.skills/f0-storybook-stories/SKILL.md`.
 Load the `f0-storybook-testing` skill from `.skills/f0-storybook-testing/SKILL.md`.
+Load the `f0-docs` skill from `.skills/f0-docs/SKILL.md`.
 
 Review the following changed files. For each changed component, read the component
 source and its corresponding `__stories__/` directory and verify:
@@ -207,18 +224,31 @@ source and its corresponding `__stories__/` directory and verify:
 4. A `Snapshot` story exists with `parameters: withSnapshot({})`
 5. ArgTypes for union props reference the component's const arrays
 
-### Documentation coverage checks (new behavior)
-6. Every new prop added in this diff has a corresponding story or argType that demonstrates it
-7. Every new variant or state (e.g., new size, color, loading state, error state) is represented
-   in at least one story — and ideally in the Snapshot story so it is visually captured
-8. If a prop was removed or renamed, any story referencing the old prop name is updated
-9. Interactive components with new interactions have at least one `play` function story
-   covering the new interaction
+### MDX documentation checks
+6. An MDX file (`__stories__/*.mdx`) exists for every changed component
+   - If the component is NEW and has no MDX: this is BLOCKING — report it as
+     "New component F0X has no MDX documentation — load f0-docs skill to create it"
+   - If the component ALREADY EXISTS but has no MDX: report as SUGGESTION
+7. Every new prop added in this diff is documented in the MDX anatomy or props table
+   - If a new prop has no MDX coverage: BLOCKING
+8. Every new variant or state added in this diff is covered by the MDX (variants table or examples)
+   - If a new variant has no MDX coverage: BLOCKING
+9. The MDX `<Canvas of={Stories.X} />` references all reference stories that exist
+   - If a Canvas references a non-existent story: BLOCKING
+
+### Story coverage checks (new behavior)
+10. Every new prop added in this diff has a corresponding story or argType that demonstrates it
+11. Every new variant or state (e.g., new size, color, loading state, error state) is represented
+    in at least one story — and ideally in the Snapshot story so it is visually captured
+12. If a prop was removed or renamed, any story referencing the old prop name is updated
+13. Interactive components with new interactions have at least one `play` function story
+    covering the new interaction
 
 For each issue found, classify it as:
 - BLOCKING: required by F0 conventions (missing story file, missing Snapshot story,
-  new prop/variant with zero story coverage)
-- SUGGESTION: improvement (incomplete argTypes, new interaction without play function)
+  new component with no MDX, new prop/variant with no MDX coverage)
+- SUGGESTION: improvement (incomplete argTypes, new interaction without play function,
+  existing component missing MDX)
 
 Changed files:
 {changed file list}
@@ -324,6 +354,7 @@ Always present the summary, even when everything passes. Format:
 Quality Gate Results
 ────────────────────────────────────────────
 Phase 1 (Commands)
+  Format:      PASS | FAIL
   TypeScript:  PASS | FAIL
   Lint:        PASS ({n} auto-fixed) | FAIL
   Tests:       PASS ({n} passed) | FAIL ({failing test names})
@@ -371,6 +402,7 @@ Quality gate passed. All checks green.
 
 | Phase         | Tool           | Command / Agent                                       |
 | ------------- | -------------- | ----------------------------------------------------- |
+| Format        | Bash           | `pnpm format && pnpm format:check`                    |
 | TypeScript    | Bash           | `pnpm tsc --noEmit`                                   |
 | Lint          | Bash           | `pnpm lint-fix && pnpm lint`                          |
 | Tests         | Bash           | `pnpm vitest:ci`                                      |

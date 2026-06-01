@@ -82,6 +82,11 @@ export const useDataCollectionStorage = <
       return
     }
 
+    // Reset readiness while a new hydration is in flight so the write effect
+    // cannot schedule a debounced write under the new key using stale provider
+    // values left over from the previous key/inactive state.
+    setStorageReady(false)
+
     storageProvider.get(key!).then((status) => {
       Object.entries(featureProviders).forEach(
         ([featureName, featureProvider]) => {
@@ -157,13 +162,27 @@ export const useDataCollectionStorage = <
 
   /** Saves the settings in storage when the settings change */
   useEffect(() => {
+    // Do not schedule any write before hydration completes or when storage is
+    // disabled. Without this gate, a pre-hydration snapshot (e.g. a partial
+    // visualizationFilters map containing only the default visualization)
+    // can be debounced and later flushed, overwriting the previously persisted
+    // multi-key map because the default storage handler replaces the whole key.
+    if (!active || !storageReady) return
+
     debouncedSetFeatures(featureProviders)
+
+    // Cancel any pending write when deps change or on unmount so a stale
+    // snapshot scheduled by a previous render cannot land after a newer one.
+    return () => {
+      debouncedSetFeatures.cancel()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- This is intentional
   }, [
     key,
     storageFeatures,
     storageProvider,
     storageReady,
+    active,
     serializedFeatureValues,
   ])
 

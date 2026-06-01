@@ -3,8 +3,9 @@ import { InputProps } from "@copilotkit/react-ui"
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect, useMemo, useRef } from "react"
 
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import { Link } from "@/lib/linkHandler"
+import { OneEllipsis } from "@/lib/OneEllipsis"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { filterNonRenderableMessages } from "../../internal-types"
@@ -18,7 +19,9 @@ export const ChatInput = (props: InputProps) => {
     visualizationMode,
     isLoadingThread,
     creditWarning,
+    clarifyingQuestion,
   } = useAiChat()
+  const translation = useI18n()
   const { messages } = useCopilotChatInternal()
   const containerRef = useRef<HTMLDivElement>(null)
   const filteredMessages = useMemo(
@@ -29,6 +32,8 @@ export const ChatInput = (props: InputProps) => {
   const fullscreen = visualizationMode === "fullscreen"
   const fullscreenWelcome = fullscreen && isWelcomeScreen
 
+  const isClarifying = clarifyingQuestion != null
+
   useEffect(() => {
     const textarea = containerRef.current?.querySelector("textarea")
     textarea?.focus()
@@ -38,43 +43,67 @@ export const ChatInput = (props: InputProps) => {
     <div
       ref={containerRef}
       className={cn(
-        "flex flex-col items-center gap-2 px-4 pb-4 pt-2",
+        "flex flex-col items-center gap-2 px-4 pb-3 pt-2",
         fullscreenWelcome && "flex-1"
       )}
     >
-      <motion.div
-        layout="position"
-        className="w-full max-w-[712px]"
-        transition={{
-          layout: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] },
-        }}
-      >
+      <div className="w-full max-w-[712px]">
         <ChatTextarea {...props} creditWarning={creditWarning} />
-      </motion.div>
-      {disclaimer?.text && (
-        <motion.div
-          layout="position"
-          className="flex w-full max-w-[712px] flex-row items-center justify-center gap-1"
-          transition={{
-            layout: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] },
-          }}
-        >
-          <OneEllipsis className="text-sm font-medium text-f1-foreground-tertiary">
-            {disclaimer.text}
-          </OneEllipsis>
-
-          {disclaimer.link && disclaimer.linkText && (
-            <Link
-              href={disclaimer.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-shrink-0 text-sm font-medium text-f1-foreground-tertiary"
+      </div>
+      <AnimatePresence mode="wait" initial={false}>
+        {isClarifying ? (
+          <motion.div
+            key="clarifying-nav-hint"
+            className="flex w-full max-w-[712px] flex-row flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm font-medium text-f1-foreground-tertiary"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+          >
+            <span>
+              <kbd className="font-sans">↑↓</kbd>{" "}
+              {translation.ai.clarifyingQuestion.navHint.navigate}
+            </span>
+            <span>
+              <kbd className="font-sans">Enter</kbd>{" "}
+              {translation.ai.clarifyingQuestion.navHint.select}
+            </span>
+            {/* Cancel is always available — not gated on the step being
+                optional — so the Esc hint is unconditional. */}
+            <span>
+              <kbd className="font-sans">Esc</kbd>{" "}
+              {translation.ai.clarifyingQuestion.navHint.cancel}
+            </span>
+          </motion.div>
+        ) : (
+          disclaimer?.text &&
+          !fullscreenWelcome && (
+            <motion.div
+              key="chat-disclaimer"
+              className="flex w-full max-w-[712px] flex-row items-center justify-center gap-1"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
             >
-              {disclaimer.linkText}
-            </Link>
-          )}
-        </motion.div>
-      )}
+              <OneEllipsis className="text-sm font-medium text-f1-foreground-tertiary">
+                {disclaimer.text}
+              </OneEllipsis>
+
+              {disclaimer.link && disclaimer.linkText && (
+                <Link
+                  href={disclaimer.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0 text-sm font-medium text-f1-foreground-tertiary"
+                >
+                  {disclaimer.linkText}
+                </Link>
+              )}
+            </motion.div>
+          )
+        )}
+      </AnimatePresence>
       <AnimatePresence>
         {footer && isWelcomeScreen && (
           <motion.div

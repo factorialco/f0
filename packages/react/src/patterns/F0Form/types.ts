@@ -130,7 +130,7 @@ export type FormDefinitionItem = FieldItem | RowDefinition | SectionDefinition
 // ============================================================================
 
 /**
- * When to trigger and display validation errors
+ * When to trigger and display validation errors (does not apply with autosubmit)
  * - "on-blur": Errors appear when the user leaves a field (default)
  * - "on-change": Errors appear as the user types (real-time validation)
  * - "on-submit": Errors only appear after attempting to submit the form
@@ -216,11 +216,34 @@ interface F0FormActionBarSubmitConfig extends F0FormSubmitConfigBase {
 }
 
 /**
+ * Submit configuration for autosubmit type.
+ *
+ * Automatically submits the form after the user stops editing for `delay` ms.
+ * Validation runs on every debounced submit attempt; invalid forms surface
+ * errors and skip `onSubmit` (handled by react-hook-form).
+ */
+interface F0FormAutosubmitConfig extends F0FormSubmitConfigBase {
+  /** Type of submit UI (debounced auto-submit) */
+  type: "autosubmit"
+  /**
+   * Delay in ms between the last change and the auto-submit.
+   * @default 800
+   */
+  delay?: number
+  /**
+   * When true, hides the internal action bar (loading/success feedback).
+   * @default false
+   */
+  hideActionBar?: boolean
+}
+
+/**
  * Configuration for form submission behavior and appearance
  */
 export type F0FormSubmitConfig =
   | F0FormDefaultSubmitConfig
   | F0FormActionBarSubmitConfig
+  | F0FormAutosubmitConfig
 
 /**
  * Styling configuration for the form layout and appearance
@@ -384,6 +407,11 @@ export interface F0FormPropsWithSingleSchema<TSchema extends F0FormSchema> {
    */
   initialFiles?: InitialFile[]
   /**
+   * Whether async `initialFiles` are still being resolved.
+   * When true, file fields show a skeleton until the files arrive.
+   */
+  isLoadingInitialFiles?: boolean
+  /**
    * Upload hook shared by all file fields in the form.
    * Called once per file to obtain an independent upload instance.
    */
@@ -491,6 +519,11 @@ export interface F0FormPropsWithPerSectionSchema<T extends F0PerSectionSchema> {
    */
   initialFiles?: InitialFile[]
   /**
+   * Whether async `initialFiles` are still being resolved.
+   * When true, file fields show a skeleton until the files arrive.
+   */
+  isLoadingInitialFiles?: boolean
+  /**
    * Upload hook shared by all file fields in the form.
    */
   useUpload?: UseFileUpload
@@ -558,6 +591,33 @@ export interface F0FormPropsWithPerSectionDefinition<
 }
 
 /**
+ * Props for F0Form when the formDefinition is a union (`F0FormDefinition`).
+ * This non-generic variant allows passing a definition whose exact schema
+ * branch is not statically known (e.g. stored in state or returned from a
+ * generic helper).
+ */
+export interface F0FormPropsWithDefinition {
+  formDefinition: import("@/patterns/F0WizardForm/types").F0FormDefinition
+  className?: string
+  styling?: F0FormStylingConfig
+  formRef?: React.MutableRefObject<F0FormRef | null>
+  initialFiles?: InitialFile[]
+  /** Upload hook shared by all file fields in the form. */
+  useUpload?: UseFileUpload
+  /**
+   * Callback that renders custom fields identified by `customFieldName`.
+   * When a field has `customFieldName`, this function is called instead of the inline `render`.
+   */
+  renderCustomField?: RenderCustomFieldFunction
+  /**
+   * Whether async defaultValues are still being resolved.
+   * When true, the form renders with loading indicators inside each field
+   * instead of replacing the entire form with skeleton placeholders.
+   */
+  isLoading?: boolean
+}
+
+/**
  * Union of all F0Form prop variants.
  * The component detects the mode based on whether `schema` is a single Zod schema
  * or a record of schemas keyed by section ID, or whether a `formDefinition` is provided.
@@ -592,3 +652,33 @@ export type F0FormSubmitResult =
       /** Field-specific error messages */
       errors?: Record<string, string>
     }
+
+/**
+ * Common props shared across all F0Form variants (formDefinition-based).
+ * Used as the constraint for `F0FormLikeComponent`.
+ */
+export interface F0FormCommonProps {
+  formDefinition:
+    | import("@/patterns/F0WizardForm/types").F0FormDefinitionSingleSchema<F0FormSchema>
+    | import("@/patterns/F0WizardForm/types").F0FormDefinitionPerSection<F0PerSectionSchema>
+  className?: string
+  styling?: F0FormStylingConfig
+  formRef?: React.MutableRefObject<F0FormRef | null>
+  initialFiles?: InitialFile[]
+  useUpload?: UseFileUpload
+  renderCustomField?: RenderCustomFieldFunction
+  isLoading?: boolean
+}
+
+/**
+ * Component type for F0Form-like wrappers (e.g. FactorialF0Form).
+ *
+ * Because F0Form uses overloaded/generic signatures, neither F0Form
+ * nor FactorialF0Form can be directly assigned to this type.
+ * Cast the component when passing it:
+ *
+ * ```tsx
+ * <F0Provider formComponent={FactorialF0Form as F0FormLikeComponent} />
+ * ```
+ */
+export type F0FormLikeComponent = React.ComponentType<F0FormCommonProps>

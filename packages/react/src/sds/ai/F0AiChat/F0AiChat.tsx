@@ -1,9 +1,11 @@
 import { CopilotKit, CopilotKitProps } from "@copilotkit/react-core"
 import { CopilotSidebar } from "@copilotkit/react-ui"
 
+import { ButtonInternal } from "@/components/F0Button/internal"
+import Cross from "@/icons/app/Cross"
 import { experimentalComponent } from "@/lib/experimental"
+import { useI18n } from "@/lib/providers/i18n"
 
-import { useRegisteredActions } from "./actions"
 import { ChatInput } from "./components/input/ChatInput"
 import { ChatHeader } from "./components/layout/ChatHeader"
 import { SidebarWindow } from "./components/layout/ChatWindow"
@@ -30,12 +32,16 @@ const F0AiChatProviderComponent = ({
   footer,
   VoiceMode,
   entityRefs,
+  canvasActions,
+  canvasEntities,
   toolHints,
   credits,
   creditWarning,
   fileAttachments,
   onThumbsUp,
   onThumbsDown,
+  onBeforeSendMessage,
+  runtimeFetch,
   children,
   agent,
   tracking,
@@ -48,6 +54,8 @@ const F0AiChatProviderComponent = ({
       initialMessage={initialMessage}
       onThumbsUp={onThumbsUp}
       onThumbsDown={onThumbsDown}
+      onBeforeSendMessage={onBeforeSendMessage}
+      runtimeFetch={runtimeFetch}
       agent={agent}
       welcomeScreenSuggestions={welcomeScreenSuggestions}
       disclaimer={disclaimer}
@@ -59,6 +67,8 @@ const F0AiChatProviderComponent = ({
       VoiceMode={VoiceMode}
       tracking={tracking}
       entityRefs={entityRefs}
+      canvasActions={canvasActions}
+      canvasEntities={canvasEntities}
       toolHints={toolHints}
       credits={credits}
       creditWarning={creditWarning}
@@ -86,9 +96,8 @@ const AiChatKitWrapper = ({
 }
 
 const F0AiChatComponent = () => {
-  const { enabled, open, setOpen, mode, VoiceMode } = useAiChat()
-
-  useRegisteredActions()
+  const { enabled, open, setOpen, mode, VoiceMode, tracking } = useAiChat()
+  const translations = useI18n()
 
   if (!enabled) {
     return null
@@ -98,6 +107,18 @@ const F0AiChatComponent = () => {
     return (
       <SidebarWindow clickOutsideToClose hitEscapeToClose shortcut="">
         <div className="flex h-full w-full flex-col">
+          <div className="absolute right-3 top-3 z-20">
+            <ButtonInternal
+              variant="ghost"
+              hideLabel
+              label={translations.ai.closeChat}
+              icon={Cross}
+              onClick={() => {
+                setOpen(false)
+                tracking?.onClose?.()
+              }}
+            />
+          </div>
           <VoiceMode />
         </div>
       </SidebarWindow>

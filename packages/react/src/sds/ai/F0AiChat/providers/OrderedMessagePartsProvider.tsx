@@ -130,18 +130,26 @@ export const OrderedMessagePartsProvider = ({
         event: TextMessageContentEvent
         textMessageBuffer: string
       }) => {
-        // textMessageBuffer is the accumulated text for the current open
-        // text message. We mutate the latest text part in place rather than
-        // appending — text deltas accumulate into the same segment.
+        // AG-UI's defaultApplyEvents invokes this subscriber BEFORE
+        // appending the current delta to the stored message content, so
+        // `textMessageBuffer` contains the text accumulated up to but
+        // not including `event.delta`. We must combine both to capture
+        // the full running text — otherwise the very last streamed
+        // delta is never stored (no later content event arrives to
+        // carry it in its buffer, and the end event does not refresh
+        // the text), producing trailing 1–2 character truncation in
+        // the rendered assistant message.
         const messageId = event.messageId ?? openTextMessageIdRef.current
         if (!messageId) return
+        const delta = event.delta ?? ""
+        const nextText = textMessageBuffer + delta
         const parts = getParts(messageId)
         const last = parts[parts.length - 1]
         if (last && last.kind === "text") {
-          last.text = textMessageBuffer
+          last.text = nextText
         } else {
           // Defensive: missed the start event, open a new text part.
-          parts.push({ kind: "text", text: textMessageBuffer })
+          parts.push({ kind: "text", text: nextText })
           openTextMessageIdRef.current = messageId
         }
         bump()

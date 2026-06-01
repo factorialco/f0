@@ -38,14 +38,12 @@ export function Table({
   return (
     <div className="group/table relative flex flex-col gap-2 rounded-md border border-solid border-f1-border-secondary">
       <div className="flex items-center justify-between gap-3 border-0 border-b border-solid border-f1-border-secondary px-3 py-2">
-        {title && (
-          <OneEllipsis
-            tag="h2"
-            className="text-base font-medium capitalize text-f1-foreground"
-          >
-            {title}
-          </OneEllipsis>
-        )}
+        <OneEllipsis
+          tag="h2"
+          className="text-base font-medium capitalize text-f1-foreground"
+        >
+          {title ?? translation.ai.reportCard.tableLabel}
+        </OneEllipsis>
         <Dropdown
           icon={Download}
           size="md"

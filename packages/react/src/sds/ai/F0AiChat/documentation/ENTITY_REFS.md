@@ -18,7 +18,9 @@ markdownRenderers/
 │   └── entities/
 │       ├── person/                        # "person" renderer
 │       ├── candidate/                     # "candidate" renderer
-│       └── jobPosting/                    # "job-posting" renderer
+│       ├── jobPosting/                    # "job-posting" renderer
+│       ├── vacancy/                       # "vacancy" renderer
+│       └── requisition/                # "requisition" renderer
 ```
 
 Guide location: `documentation/ENTITY_REFS.md` (this file).

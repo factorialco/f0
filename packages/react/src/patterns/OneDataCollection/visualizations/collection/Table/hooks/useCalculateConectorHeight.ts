@@ -8,11 +8,19 @@ import { NestedVariant } from "@/hooks/datasource/types/nested.typings"
 
 import { subscribeToScroll } from "../lib/scroll"
 
-export const useCalculateConectorHeight = (
-  nestedVariant: NestedVariant,
-  withHasMore: boolean,
+interface Props {
+  nestedVariant: NestedVariant
+  withHasMore: boolean
+  withAddRowActions: boolean
   isSticky?: boolean
-) => {
+}
+
+export const useCalculateConectorHeight = ({
+  nestedVariant,
+  withHasMore,
+  withAddRowActions,
+  isSticky,
+}: Props) => {
   const [firstRow, setFirstRow] = useState<HTMLTableRowElement | null>(null)
   const [lastRow, setLastRow] = useState<HTMLTableRowElement | null>(null)
   const [calculatedHeight, setCalculatedHeight] = useState(0)
@@ -78,6 +86,18 @@ export const useCalculateConectorHeight = (
       return withHasMore && nestedVariant === "basic" ? BUTTON_PADDING : 0
     }
 
+    const hasAddRowHeight = () => {
+      if (withAddRowActions) {
+        if (withHasMore && nestedVariant === "basic") {
+          return -BUTTON_PADDING
+        }
+
+        return 0
+      }
+
+      return 0
+    }
+
     const calculateHeight = () => {
       const lastRowHeight =
         nestedVariant === "basic"
@@ -85,7 +105,11 @@ export const useCalculateConectorHeight = (
           : heightForLastDetailedRow()
 
       const height =
-        lastRowHeight - firstRowTop() + previousRowHeight() + hasMoreHeight()
+        lastRowHeight -
+        firstRowTop() +
+        previousRowHeight() +
+        hasMoreHeight() +
+        hasAddRowHeight()
 
       // When the parent row is sticky and children scroll above it,
       // reduce the connector height by the amount the first child

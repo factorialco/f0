@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { z, type ZodType } from "zod"
 
 import type { ModuleId } from "@/components/avatars/F0AvatarModule"
+import type { InitialFile } from "@/patterns/F0Form/fields/file/types"
 import type {
   F0FormErrorTriggerMode,
   F0FormSubmitConfig,
@@ -57,6 +58,12 @@ interface UseF0FormDefinitionSingleSchemaInputBase<
   ) => Promise<F0FormSubmitResult> | F0FormSubmitResult
   submitConfig?: F0FormSubmitConfig
   errorTriggerMode?: F0FormErrorTriggerMode
+  /**
+   * Pre-existing file metadata for file fields.
+   * Accepts a static array or an async function `(signal: AbortSignal) => Promise<InitialFile[]>`
+   * that resolves the list at mount time.
+   */
+  initialFiles?: AsyncOrSync<InitialFile[]>
   /** Wizard steps — when present, F0WizardForm uses these instead of auto-deriving from sections */
   steps?: F0WizardFormStep[]
 }
@@ -101,6 +108,12 @@ interface UseF0FormDefinitionPerSectionInputBase<T extends F0PerSectionSchema> {
   ) => Promise<F0FormSubmitResult> | F0FormSubmitResult
   submitConfig?: F0PerSectionSubmitConfig
   errorTriggerMode?: F0FormErrorTriggerMode
+  /**
+   * Pre-existing file metadata for file fields.
+   * Accepts a static array or an async function `(signal: AbortSignal) => Promise<InitialFile[]>`
+   * that resolves the list at mount time.
+   */
+  initialFiles?: AsyncOrSync<InitialFile[]>
   /** Wizard steps — when present, F0WizardForm uses these instead of auto-deriving from sections */
   steps?: F0WizardFormStep[]
 }
@@ -265,6 +278,7 @@ export function useF0FormDefinition(
     module,
   } = input
 
+  const initialFiles = "initialFiles" in input ? input.initialFiles : undefined
   const steps = "steps" in input ? input.steps : undefined
 
   // Store the raw function for the AI registry to call with actual params
@@ -281,6 +295,9 @@ export function useF0FormDefinition(
     hasParamsSchema
   )
 
+  const { resolved: resolvedInitialFiles, isLoading: isLoadingInitialFiles } =
+    useAsyncDefaultValues<InitialFile[]>(initialFiles, false)
+
   return useMemo(() => {
     const brand = isZodSchema(schema) ? "single" : "per-section"
     return {
@@ -293,9 +310,11 @@ export function useF0FormDefinition(
       onSubmit,
       submitConfig,
       errorTriggerMode,
-      isLoading,
+      isLoading: isLoading || isLoadingInitialFiles,
       defaultValuesParamsSchema,
       defaultValuesFn,
+      initialFiles: resolvedInitialFiles,
+      isLoadingInitialFiles,
       steps,
       _brand: brand,
     } as
@@ -315,6 +334,8 @@ export function useF0FormDefinition(
     isLoading,
     defaultValuesParamsSchema,
     defaultValuesFn,
+    resolvedInitialFiles,
+    isLoadingInitialFiles,
     steps,
   ])
 }

@@ -6,11 +6,15 @@ import type { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { IconType } from "@/components/F0Icon"
 import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
 
+import type { CanvasActions, CanvasEntityDefinition } from "./canvas/types"
 import type { ChatDashboardConfig } from "./canvas/entities/dashboard/types"
 import type { DataDownloadDataset } from "./actions/core/dataDownload/types"
 export type { PersonProfile } from "./components/markdownRenderers/entityRef/entities/person/types"
 export type { CandidateProfile } from "./components/markdownRenderers/entityRef/entities/candidate/types"
 export type { JobPostingProfile } from "./components/markdownRenderers/entityRef/entities/jobPosting/types"
+export type { RequisitionProfile } from "./components/markdownRenderers/entityRef/entities/requisition/types"
+export type { VacancyProfile } from "./components/markdownRenderers/entityRef/entities/vacancy/types"
+export type { ExpenseProfile } from "./components/markdownRenderers/entityRef/entities/expense/types"
 export type {
   EntityResolvers,
   EntityUrlBuilders,
@@ -20,9 +24,12 @@ import type { EntityRefs } from "./components/markdownRenderers/entityRef/types"
 
 /**
  * A tool call to inject via appendMessages.
- * IDs are generated internally — callers only provide the function payload.
+ * IDs are generated internally unless `id` is provided.
+ * When pairing with a tool-result message, provide the same `id`
+ * in both the tool call and the tool-result's `toolCallId`.
  */
 export type AppendToolCall = {
+  id?: string
   function: {
     name: string
     arguments: string
@@ -34,10 +41,46 @@ export type AppendToolCall = {
  * IDs are generated internally — callers only provide role, content, and
  * optional tool calls.
  */
-export type AppendMessage = {
-  role: "user" | "assistant"
-  content: string
-  toolCalls?: AppendToolCall[]
+export type AppendMessage =
+  | {
+      role: "user" | "assistant"
+      content: string
+      toolCalls?: AppendToolCall[]
+    }
+  | {
+      /** Tool result message — pairs with a toolCall from a previous assistant message */
+      role: "tool"
+      content: string
+      /**
+       * ID of the paired tool call. Must equal the corresponding assistant
+       * message's `toolCalls[i].id` — supply `AppendToolCall.id` on that call
+       * and pass the same value here so the messages are correctly paired.
+       */
+      toolCallId: string
+    }
+
+/**
+ * Pre-loaded context shown as an empty state in the chat.
+ * The `context` string is prepended to the user's first message
+ * as `<pending-context>...</pending-context>` so the agent receives it.
+ * The conversation is not created until the user actually sends a message.
+ */
+export type PendingContext = {
+  /** Human-readable label shown in the empty state (e.g. "Expenses dashboard") */
+  label: string
+  /** Full context string prepended invisibly to the first user message */
+  context: string
+}
+
+/**
+ * Quoted fragment the user is replying to. Shown as a chip above the
+ * textarea and, on submit, rendered as a markdown blockquote at the top of
+ * the resulting user message. The blockquote alone is enough context — the
+ * conversation thread tells the agent what it refers to.
+ */
+export type PendingQuote = {
+  /** Plain-text selection (markdown stripped by the browser's toString()). */
+  text: string
 }
 
 /**
@@ -57,7 +100,19 @@ export type CanvasContentBase = {
 export type DashboardCanvasContent = CanvasContentBase & {
   type: "dashboard"
   config: ChatDashboardConfig
-  apiConfig: { baseUrl: string; headers: Record<string, string> }
+  apiConfig: {
+    baseUrl: string
+    headers: Record<string, string>
+    runtimeFetch?: typeof fetch
+  }
+  /** Present when the dashboard is a pre-saved dashboard */
+  savedDashboardId?: string
+  /** Category of the saved dashboard */
+  savedDashboardCategory?: string
+  /** Description of the saved dashboard */
+  savedDashboardDescription?: string
+  /** True when the agent has iterated on a saved dashboard but the user hasn't saved yet */
+  savedDashboardUnsaved?: boolean
 }
 
 /**
@@ -236,6 +291,19 @@ export type AiChatProviderProps = {
    */
   entityRefs?: EntityRefs
   /**
+   * Canvas action callbacks grouped by entity type.
+   * Provides save/create functions for persisting canvas entities externally.
+   */
+  canvasActions?: CanvasActions
+  /**
+   * Canvas entity definitions keyed by `CanvasContent["type"]`. The canvas
+   * panel looks up the matching definition when `openCanvas` is called.
+   *
+   * F0AiChat ships without built-in canvas entities; the host app supplies
+   * them here so canvas logic lives in one place.
+   */
+  canvasEntities?: Record<string, CanvasEntityDefinition>
+  /**
    * Available tool hints that the user can activate to provide intent context
    * to the AI. Renders a selector button next to the send button.
    * Only one tool hint can be active at a time.
@@ -264,6 +332,14 @@ export type AiChatProviderProps = {
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
   tracking?: AiChatTrackingOptions
+  /**
+   * Optional hook called before a user message is sent. Return false to block submission.
+   */
+  onBeforeSendMessage?: () => boolean | Promise<boolean>
+  /**
+   * Optional fetch implementation for AI runtime requests owned by F0.
+   */
+  runtimeFetch?: typeof fetch
 } & Pick<
   CopilotKitProps,
   | "agent"

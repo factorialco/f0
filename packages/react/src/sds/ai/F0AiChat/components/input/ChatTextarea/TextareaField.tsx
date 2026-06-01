@@ -48,7 +48,7 @@ export const TextareaField = ({
           "min-h-[20px] max-h-[240px]",
           "whitespace-pre-wrap break-words",
           "text-[16px] sm:text-[14px] leading-[20px] font-normal text-f1-foreground",
-          "mt-3 px-3"
+          "my-3 px-3"
         )}
       >
         {inputValue.endsWith("\n") ? inputValue + "_" : inputValue}
@@ -63,7 +63,7 @@ export const TextareaField = ({
             "min-h-[20px] max-h-[240px]",
             "whitespace-pre-wrap break-words",
             "text-[16px] sm:text-[14px] leading-[20px] font-normal text-f1-foreground",
-            "mt-3 px-3",
+            "my-3 px-3",
             "overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           )}
         >
@@ -96,7 +96,9 @@ export const TextareaField = ({
             "overflow-hidden text-ellipsis whitespace-nowrap"
           )}
         >
-          {resolvedDefaultPlaceholder}
+          {placeholders.length === 1
+            ? placeholders[0]
+            : resolvedDefaultPlaceholder}
         </p>
       )}
       <textarea

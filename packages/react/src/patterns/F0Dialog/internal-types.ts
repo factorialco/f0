@@ -10,6 +10,7 @@ import {
   F0DialogPrimaryAction,
   F0DialogPrimaryActionItem,
   F0DialogSecondaryAction,
+  F0DialogSecondaryActionItem,
 } from "./types"
 
 export type F0DialogHeaderProps = {
@@ -58,7 +59,7 @@ export type F0DialogInternalProps = {
   width?: DialogWidth
   // Actions to render in the footer
   primaryAction?: F0DialogPrimaryAction | F0DialogPrimaryActionItem[]
-  secondaryAction?: F0DialogSecondaryAction
+  secondaryAction?: F0DialogSecondaryAction | F0DialogSecondaryActionItem[]
   // Title of the dialog
   title?: string
   // Description of the dialog

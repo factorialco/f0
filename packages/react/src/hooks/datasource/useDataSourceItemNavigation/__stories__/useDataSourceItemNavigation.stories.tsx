@@ -1,5 +1,8 @@
-import { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { useMemo } from "react"
+
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import {
   createDataSourceDefinition,
@@ -40,7 +43,7 @@ const itemFilters = {
 
 type ItemFilters = typeof itemFilters
 
-const meta: Meta = {
+const meta = {
   title: "Datasource/useDataSourceItemNavigation",
   parameters: {
     a11y: { skipCi: true },
@@ -52,7 +55,7 @@ const meta: Meta = {
     },
   },
   tags: ["experimental", "!autodocs"],
-}
+} satisfies Meta
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -469,4 +472,14 @@ const InfiniteScrollDemo = () => {
 
 export const InfiniteScroll: Story = {
   render: () => <InfiniteScrollDemo />,
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  render: () => (
+    <div className="flex gap-6">
+      <PageBasedDemo />
+      <InfiniteScrollDemo />
+    </div>
+  ),
 }

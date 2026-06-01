@@ -325,6 +325,43 @@ export const WithMultiplePrimaryActions: Story = {
   },
 }
 
+export const WithMultipleSecondaryActions: Story = {
+  args: {
+    isOpen: true,
+    onClose: () => {},
+    title: "Document Review",
+    description: "Review the document details and choose an action.",
+    primaryAction: {
+      label: "Approve",
+      icon: CheckDoubleIcon,
+      onClick: () => {},
+    },
+    secondaryAction: [
+      {
+        value: "reject",
+        label: "Reject",
+        icon: CrossIcon,
+        onClick: () => console.log("Reject clicked"),
+      },
+      {
+        value: "request-changes",
+        label: "Request changes",
+        icon: PencilIcon,
+        onClick: () => console.log("Request changes clicked"),
+      },
+    ],
+    children: <ExampleList itemsCount={3} />,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "When `secondaryAction` receives an array of actions, it renders a `F0ButtonDropdown` (outline variant) allowing the user to select between multiple secondary actions. The first item is the default action.",
+      },
+    },
+  },
+}
+
 export const WithModule: Story = {
   args: {
     ...Default.args,

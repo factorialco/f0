@@ -4,7 +4,7 @@ import { type ReactNode, useEffect, useRef, useState } from "react"
 import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
 
-import { getCanvasEntity } from "../../canvas"
+import { useCanvasEntity } from "../../canvas/registry"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 
 /**
@@ -32,7 +32,7 @@ export function CanvasPanel(): ReactNode {
     prevCanvasContentRef.current = canvasContent
   }, [canvasContent])
 
-  const entity = canvasContent ? getCanvasEntity(canvasContent.type) : undefined
+  const entity = useCanvasEntity(canvasContent?.type)
 
   const renderInner = (): ReactNode => {
     if (!canvasContent || !entity) return null
@@ -72,9 +72,12 @@ export function CanvasPanel(): ReactNode {
       {canvasContent && (
         <motion.div
           className={cn(
+            // No overflow on the outer wrappers so the inner card's
+            // box-shadow can escape rightward onto the chat. Setting any
+            // overflow-y here would force overflow-x to `auto` (CSS spec)
+            // and clip the shadow.
             "pointer-events-auto flex h-full flex-col",
-            "overflow-hidden",
-            "py-1 dark:bg-f1-background"
+            "md:py-1 dark:bg-f1-background p-0"
           )}
           initial={{ opacity: 0, width: 0 }}
           animate={{ opacity: 1, width: "100%" }}
@@ -84,21 +87,29 @@ export function CanvasPanel(): ReactNode {
             ease: [0, 0, 0.1, 1],
           }}
         >
-          <motion.div
-            className={cn(
-              "flex h-full w-full flex-col overflow-hidden",
-              "bg-f1-special-page",
-              "md:rounded-lg md:border md:border-solid border-f1-border-secondary rounded-none border-none"
-            )}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{
-              delay: shouldReduceMotion ? 0 : 0.15,
-              duration: shouldReduceMotion ? 0 : 0.2,
-            }}
-          >
-            {renderInner()}
-          </motion.div>
+          <div className="flex h-full flex-col border border-r-0 border-solid border-f1-border-secondary bg-f1-special-page p-0 md:rounded-l-lg md:py-1 md:pl-1">
+            <motion.div
+              className={cn(
+                // overflow-hidden only on the inner card (where rounded
+                // corners clip content); the outer wrappers stay
+                // unconstrained so the shadow can paint past the seam.
+                "flex h-full w-full flex-col overflow-hidden",
+                "bg-f1-background",
+                // Directional shadow biased rightward so depth falls onto
+                // the adjacent chat surface.
+                "md:shadow-md shadow-none",
+                "rounded-none border-none md:rounded-md md:border md:border-solid border-f1-border-secondary"
+              )}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{
+                delay: shouldReduceMotion ? 0 : 0.15,
+                duration: shouldReduceMotion ? 0 : 0.2,
+              }}
+            >
+              {renderInner()}
+            </motion.div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

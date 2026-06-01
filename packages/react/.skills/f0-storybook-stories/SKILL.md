@@ -80,3 +80,24 @@ argTypes: {
   },
 }
 ```
+
+### Render-only stories must include `args`
+
+Stories that use a custom `render` function without inheriting args from the meta
+**must** include an explicit `args` property to satisfy the `Story` type constraint.
+Omitting `args` causes a TypeScript error when the meta has required props.
+
+```tsx
+// WRONG — TS error: Property 'args' is missing
+export const Variants: Story = {
+  tags: ["!dev"],
+  render: () => <div>...</div>,
+}
+
+// CORRECT — provide required args even if render ignores them
+export const Variants: Story = {
+  tags: ["!dev"],
+  args: { items: [], onClick: () => {} }, // satisfy required props from Meta
+  render: () => <div>...</div>,
+}
+```

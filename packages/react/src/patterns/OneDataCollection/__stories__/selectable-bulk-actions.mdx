@@ -107,8 +107,10 @@ By default, the selection state is scoped to the current page only. This means:
 - `selectedCount` and `totalKnownItemsCount` are based on current page only
 - Useful for bulk actions that should only affect the current page
 
-If you need to maintain selection across all pages (like the backend manages the
-selection), you can set `allPagesSelection: true` in your data source:
+If you need selections that can span every page (to support a "Select all
+N items" Gmail-style CTA), set `allPagesSelection: true` in your data
+source. This enables the CTA; once the user clicks it, the selection
+persists across pagination.
 
 ```tsx
 const { source } = useDataCollectionSource({
@@ -119,9 +121,11 @@ const { source } = useDataCollectionSource({
 })
 ```
 
-When `allPagesSelection` is enabled, the ActionBar will show a "Select all N items"
-link after selecting all items on the current page, following the Gmail-style pattern
-for cross-page selection.
+When `allPagesSelection` is enabled, a banner row appears directly below the column
+headers as soon as at least one row is selected. The banner shows the current selection
+count. If more items exist beyond what is currently selected, it also offers a
+"Select all N items" button, following the Gmail-style pattern for cross-page selection.
+The column headers remain fully visible at all times.
 
 **Page-only selection (default behavior):**
 
@@ -137,15 +141,31 @@ for cross-page selection.
 
 **All-pages selection (`allPagesSelection: true`):**
 
-- Navigate to page 1, select 2 items
-- Navigate to page 2 → previous selections are maintained
-- Select 3 items on page 2
-- All 5 items (2 from page 1 + 3 from page 2) are selected
-- When all items on a page are selected, a "Select all N items" banner appears
-- You need to manage the full selection state in your backend
+- Per-row selections are scoped to the current page the same way as the default mode:
+  navigating to a new page clears manually-ticked rows.
+- When any row is selected, a banner appears below the column headers (headers remain
+  visible). The banner shows the current selection count and, as long as there are more
+  total items than currently selected, a "Select all N items" button.
+- Clicking "Select all N items" promotes the selection across every page — after that,
+  your selection persists through pagination and includes items you have not yet seen.
+  You can still deselect individual rows from this state; the banner updates accordingly.
+- You need to manage the full selection state in your backend.
 
 <Canvas
   of={DataCollectionStories.WithCrossPageSelection}
+  meta={DataCollectionStories}
+/>
+
+**Infinite-scroll selection:**
+
+In infinite-scroll mode, manual row selections persist across `loadMore` calls.
+New rows that arrive when the user scrolls down appear unchecked — no existing
+selection is ever cleared. The example below combines infinite-scroll with
+`allPagesSelection: true` so the Gmail-style "Select all N items" banner appears
+once every loaded row is checked.
+
+<Canvas
+  of={DataCollectionStories.WithInfiniteScrollSelection}
   meta={DataCollectionStories}
 />
 
@@ -298,7 +318,9 @@ It returns an object with the following properties:
 - `id: string`: The id of the action. This is used to identify the action in the
   `onBulkAction` callback.
 - `keepSelection?: boolean`: If true, the selection will not be cleared after
-  the action is performed (false by default)
+  the action is performed. Use for actions where the user may want to act again
+  after completion (e.g. "Download CSV"). For modal-gated actions, use
+  `bulkActionStatus` instead — it handles selection clearing automatically.
 
 ### onBulkAction
 
@@ -311,7 +333,101 @@ The callback receives the following parameters:
 - `selectedItems`: The items selected by the user. Check the `onSelectItems`
   callback for more information about the structure of the object.
 
+It may return `void` (synchronous fire-and-forget) or `Promise<void>` — see
+[Async bulk actions with status feedback](#async-bulk-actions-with-status-feedback).
+
 <Canvas
   of={DataCollectionStories.WithSelectableAndBulkActions}
+  meta={DataCollectionStories}
+/>
+
+### Async bulk actions with status feedback
+
+When your handler does real async work (server call, batch update), opt in
+with `autoManageBulkActionStatus` and return a `Promise`. The action bar then
+drives a loading → success → idle (or loading → error) status machine
+automatically:
+
+- While the promise is pending, the action button itself shows a spinner and
+  becomes disabled, along with all other primary and secondary action buttons,
+  to prevent overlapping clicks. With a single primary action the spinner
+  appears inside the button; with multiple primary actions it appears on the
+  dropdown trigger. The bar-level status area is kept clear during loading so
+  the spinner is never shown twice.
+  (Secondary actions rendered in the overflow dropdown on mobile are not yet
+  disabled — tracked for a future improvement to `F0ActionBar`.)
+- On resolve, the bar flips to `success` for ~1.5 seconds (checkmark) before
+  returning to `idle`. Selection is cleared on resolve unless the action has
+  `keepSelection: true`.
+- On reject, the bar flips to `error`: the container wiggles, the error icon
+  stays until the next selection change, and the selection is preserved so the
+  user can retry.
+
+```tsx
+<OneDataCollection
+  autoManageBulkActionStatus
+  onBulkAction={async (action) => {
+    await api.run(action)
+  }}
+/>
+```
+
+Opt-in is required because handlers that **open a modal** typically resolve
+when the modal opens rather than when the user confirms — auto-managing those
+would flash a premature success. Without the flag, sync and async handlers
+both keep today's fire-and-forget behavior (selection clears immediately, no
+status transitions).
+
+For flows that can't be modelled as a single promise (confirmation dialogs,
+server polling, multi-step wizards), combine `autoManageBulkActionStatus` with
+the controlled `bulkActionStatus` prop. The two props work together:
+
+- **Immediate actions** (return `Promise`) — F0 auto-manages status normally
+  whenever `bulkActionStatus` is `"idle"`.
+- **Modal-gated actions** (return `void`) — F0 keeps the selection alive and
+  defers to your status transitions. You drive `"loading"` → `"success"` or
+  `"error"` from your modal confirm handler; F0 auto-clears selection and
+  resets to idle after ~1.5 s on success.
+
+```tsx
+const [status, setStatus] = useState<ActionBarStatus>("idle")
+
+<OneDataCollection
+  autoManageBulkActionStatus
+  bulkActionStatus={status}
+  onBulkAction={(action, selectedItems) => {
+    if (action === "delete") {
+      // Immediate — return Promise, F0 auto-manages
+      return api.delete(selectedItems)
+    }
+    // Modal-gated — return void, F0 keeps selection
+    openConfirmModal({
+      onConfirm: async () => {
+        setStatus("loading")
+        try {
+          await api.reject(selectedItems)
+          setStatus("success")
+          // No timer, no clearSelection needed — F0 handles both
+        } catch {
+          setStatus("error")
+        }
+      },
+    })
+  }}
+/>
+```
+
+When `bulkActionStatus` is provided, void-returning handlers never auto-clear
+selection regardless of the current value — F0 treats the prop's presence as
+a signal that some actions have modal lifecycles.
+
+In **auto-managed mode**, `"error"` persists until the user changes their
+selection (which resets it to `"idle"`), allowing them to retry. In
+**controlled mode**, selection changes only reset the internal state — the
+controlled `"error"` prop remains active until the consumer explicitly sets a
+different value.
+
+<Canvas
+  of={DataCollectionStories.WithAsyncBulkActions}
   meta={DataCollectionStories}
 />

@@ -1,4 +1,4 @@
-import { motion } from "motion/react"
+import { AnimatePresence, motion } from "motion/react"
 import { useRef } from "react"
 
 import { useReducedMotion } from "@/lib/a11y"
@@ -10,34 +10,34 @@ import { ConfirmFooter } from "./ConfirmFooter"
 import { OptionsList } from "./OptionsList"
 import { StepHeader } from "./StepHeader"
 
-// ---------------------------------------------------------------------------
-// Interfaces
-// ---------------------------------------------------------------------------
+// One easing / duration shared by every animation in the panel.
+const EASE = "easeOut" as const
+const DURATION = 0.3
 
 interface ClarifyingQuestionPanelProps {
   clarifyingQuestion: ClarifyingQuestionState
 }
 
-// ---------------------------------------------------------------------------
-// Public entry point
-// ---------------------------------------------------------------------------
-
 /**
  * Animated wrapper that mounts/unmounts the clarifying question panel.
- * Handles the height + opacity transition via Framer Motion.
+ *
+ * Uses Motion's native `height: "auto"` support — it measures the
+ * content internally, so the same transition covers the initial
+ * appearance, step changes with a different number of options, and
+ * dismissal. No manual ResizeObserver.
  */
 export const ClarifyingQuestionPanel = ({
   clarifyingQuestion,
 }: ClarifyingQuestionPanelProps) => {
   const shouldReduceMotion = useReducedMotion()
-  const animationDuration = shouldReduceMotion ? 0 : 0.25
+  const duration = shouldReduceMotion ? 0 : DURATION
 
   return (
     <motion.div
       initial={{ height: 0, opacity: 0 }}
       animate={{ height: "auto", opacity: 1 }}
       exit={{ height: 0, opacity: 0 }}
-      transition={{ duration: animationDuration, ease: "easeInOut" }}
+      transition={{ duration, ease: EASE }}
       className="overflow-hidden"
     >
       <ClarifyingQuestionContent clarifyingQuestion={clarifyingQuestion} />
@@ -45,20 +45,19 @@ export const ClarifyingQuestionPanel = ({
   )
 }
 
-// ---------------------------------------------------------------------------
-// ClarifyingQuestionContent — orchestrates state and composes sub-components
-// ---------------------------------------------------------------------------
-
 const ClarifyingQuestionContent = ({
   clarifyingQuestion,
 }: ClarifyingQuestionPanelProps) => {
   const translation = useI18n()
+  const shouldReduceMotion = useReducedMotion()
   const {
     currentStep,
     currentStepIndex,
     totalSteps,
     toggleOption,
     confirm,
+    skip,
+    cancel,
     back,
     setCustomAnswerText,
     setCustomAnswerActive,
@@ -94,9 +93,27 @@ const ClarifyingQuestionContent = ({
   const canProceed =
     hasSelection || (isCustomAnswerActive && hasCustomText) || optional === true
 
+  // In single-select mode, auto-advance on selection when this is not the
+  // last step — avoids requiring an explicit "Next" click. Only advance when
+  // the toggle results in a selection (not a deselect).
+  const handleToggleOption = (optionId: string) => {
+    const isDeselecting =
+      mode === "single" && selectedOptionIds.includes(optionId)
+    toggleOption(optionId)
+    if (mode === "single" && !isFinalStep && !isDeselecting) {
+      // Defer confirm() until after toggleOption's synchronous work completes.
+      Promise.resolve().then(confirm)
+    }
+  }
+
   const confirmButtonLabel = isFinalStep
     ? translation.ai.clarifyingQuestion.submit
     : translation.ai.clarifyingQuestion.next
+
+  const showSkip =
+    optional === true &&
+    !hasSelection &&
+    !(isCustomAnswerActive && hasCustomText)
 
   const handleActivateCustom = () => {
     activateCustomAnswer()
@@ -105,44 +122,71 @@ const ClarifyingQuestionContent = ({
     })
   }
 
-  return (
-    <div className="flex flex-col">
-      <div className="flex flex-col gap-4 pt-4">
-        <StepHeader
-          question={question}
-          stepLabel={stepLabel}
-          isFirstStep={isFirstStep}
-          isFinalStep={isFinalStep}
-          canProceed={canProceed}
-          onBack={back}
-          onNext={confirm}
-        />
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    // Escape always cancels the whole flow — this is independent of
+    // `optional`, which only controls whether the current step can be
+    // individually skipped (via the Skip button or the skip handler).
+    // Cancelling closes the panel and marks the tool call as
+    // resolved-but-not-completed, regardless of which step we're on.
+    if (e.key === "Escape") {
+      e.preventDefault()
+      cancel()
+    }
+  }
 
-        <OptionsList
-          mode={mode}
-          question={question}
-          options={options}
-          selectedOptionIds={selectedOptionIds}
-          allowCustomAnswer={allowCustomAnswer}
-          hasSelection={hasSelection}
-          hasCustomText={hasCustomText}
-          customAnswerText={customAnswerText}
-          isCustomAnswerActive={isCustomAnswerActive}
-          canProceed={canProceed}
-          customInputRef={customInputRef}
-          onToggleOption={toggleOption}
-          onActivateCustom={handleActivateCustom}
-          onChangeCustomText={setCustomAnswerText}
-          onToggleCustomActive={setCustomAnswerActive}
-          onConfirm={confirm}
-        />
+  const fadeDuration = shouldReduceMotion ? 0 : DURATION / 2
+
+  return (
+    <div className="flex flex-col" onKeyDown={handleKeyDown}>
+      <div className="flex flex-col gap-3 pt-3">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={currentStepIndex}
+            className="flex flex-col gap-3"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: fadeDuration, ease: EASE }}
+          >
+            <StepHeader
+              question={question}
+              stepLabel={stepLabel}
+              isFirstStep={isFirstStep}
+              isFinalStep={isFinalStep}
+              canProceed={canProceed}
+              onBack={back}
+              onNext={confirm}
+              onCancel={cancel}
+            />
+
+            <OptionsList
+              mode={mode}
+              question={question}
+              options={options}
+              selectedOptionIds={selectedOptionIds}
+              allowCustomAnswer={allowCustomAnswer}
+              hasSelection={hasSelection}
+              hasCustomText={hasCustomText}
+              customAnswerText={customAnswerText}
+              isCustomAnswerActive={isCustomAnswerActive}
+              canProceed={canProceed}
+              customInputRef={customInputRef}
+              onToggleOption={handleToggleOption}
+              onActivateCustom={handleActivateCustom}
+              onChangeCustomText={setCustomAnswerText}
+              onToggleCustomActive={setCustomAnswerActive}
+              onConfirm={confirm}
+            />
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       <ConfirmFooter
         canProceed={canProceed}
         label={confirmButtonLabel}
         onConfirm={confirm}
-        isFinalStep={isFinalStep}
+        onSkip={skip}
+        showSkip={showSkip}
       />
     </div>
   )

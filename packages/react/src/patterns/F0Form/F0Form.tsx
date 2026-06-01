@@ -25,6 +25,7 @@ import type {
   F0FormPropsWithPerSectionDefinition,
   F0FormPropsWithSingleSchema,
   F0FormPropsWithSingleSchemaDefinition,
+  F0FormPropsWithDefinition,
   F0FormRef,
   F0FormSchema,
   F0FormSubmitResult,
@@ -51,6 +52,12 @@ import {
 import { useErrorNavigation } from "./useErrorNavigation"
 import { useSchemaDefinition } from "./useSchemaDefinition"
 import { createZodErrorMap } from "./zodErrorMap"
+
+/**
+ * Default debounce delay (ms) for `submitConfig: { type: "autosubmit" }`
+ * before the form is silently submitted after the user stops editing.
+ */
+const DEFAULT_AUTOSUBMIT_DELAY_MS = 800
 
 /**
  * Flatten RHF FieldErrors into a dot-path → message map.
@@ -117,6 +124,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
     errorTriggerMode = "on-blur",
     styling,
     initialFiles,
+    isLoadingInitialFiles,
     renderCustomField,
     isLoading: isFormLoading,
     useUpload,
@@ -182,6 +190,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
               submitConfig={perSectionSubmitConfig}
               errorTriggerMode={errorTriggerMode}
               initialFiles={initialFiles}
+              isLoadingInitialFiles={isLoadingInitialFiles}
               renderCustomField={renderCustomField}
               isLoading={isFormLoading}
               useUpload={useUpload}
@@ -195,14 +204,14 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
   if (showSectionsSidepanel && tocItems.length > 0) {
     return (
       <div className="flex w-full overflow-scroll">
-        <div className="sticky top-0 h-fit shrink-0 self-start pt-2 mr-4">
+        <div className="sticky top-0 mr-4 h-fit shrink-0 self-start pt-2">
           <F0TableOfContent
             items={tocItems}
             activeItem={activeSection}
             scrollable={false}
           />
         </div>
-        <div className="w-px sticky top-0 bottom-0 bg-f1-border-secondary" />
+        <div className="sticky bottom-0 top-0 w-px bg-f1-border-secondary" />
         {content}
       </div>
     )
@@ -253,6 +262,7 @@ type AnyF0FormProps =
   | F0FormPropsWithPerSectionSchema<F0PerSectionSchema>
   | F0FormPropsWithSingleSchemaDefinition<F0FormSchema>
   | F0FormPropsWithPerSectionDefinition<F0PerSectionSchema>
+  | F0FormPropsWithDefinition
 
 function hasFormDefinition(
   props: AnyF0FormProps
@@ -416,7 +426,8 @@ function F0FormFromSingleDefinition<TSchema extends F0FormSchema>({
       className={className}
       styling={styling}
       formRef={formRef}
-      initialFiles={initialFiles}
+      initialFiles={def.initialFiles ?? initialFiles}
+      isLoadingInitialFiles={def.isLoadingInitialFiles}
       renderCustomField={renderCustomField}
       useUpload={useUpload}
       isLoading={isLoading}
@@ -477,7 +488,8 @@ function F0FormFromPerSectionDefinition<T extends F0PerSectionSchema>({
       className={className}
       styling={styling}
       formRef={formRef}
-      initialFiles={initialFiles}
+      initialFiles={def.initialFiles ?? initialFiles}
+      isLoadingInitialFiles={def.isLoadingInitialFiles}
       renderCustomField={renderCustomField}
       useUpload={useUpload}
       isLoading={isLoading}
@@ -516,6 +528,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
 
   // Resolve submit type from config
   const isActionBar = submitConfig?.type === "action-bar"
+  const isAutosubmit = submitConfig?.type === "autosubmit"
 
   // Resolve submit button configuration with defaults
   // icon: undefined = use default, null = no icon, IconType = custom icon
@@ -524,12 +537,13 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     submitConfig?.icon === null ? undefined : (submitConfig?.icon ?? Save)
 
   // Extract type-specific props
-  // Show submit button by default unless explicitly hidden or using action-bar
+  // Show submit button by default unless explicitly hidden, using action-bar, or autosubmit
   const hideSubmitButton =
-    submitConfig?.type !== "action-bar" && submitConfig?.hideSubmitButton
+    (submitConfig?.type === "default" || submitConfig?.type === undefined) &&
+    !!submitConfig?.hideSubmitButton
   const hideActionBar =
     submitConfig?.type !== "action-bar" && !!submitConfig?.hideActionBar
-  const showSubmitButton = !isActionBar && !hideSubmitButton
+  const showSubmitButton = !isActionBar && !isAutosubmit && !hideSubmitButton
   const discardableChanges =
     submitConfig?.type === "action-bar" && submitConfig?.discardable
 
@@ -641,7 +655,24 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     useState<ActionBarStatus>("idle")
   const [successMessage, setSuccessMessage] = useState<string | undefined>()
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const autosubmitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const actionBarRef = useRef<F0ActionBarRef | null>(null)
+
+  /**
+   * Snapshot of the focused input element + caret position taken before a
+   * non-button submit (Enter key or autosubmit debounce). Restored after the
+   * submit settles so the user's typing flow is not interrupted by RHF's
+   * `isSubmitting` toggling `disabled` on the focused control.
+   *
+   * Button-click submits intentionally do NOT populate this snapshot — the
+   * user clicked away on purpose, focus should follow.
+   */
+  const focusSnapshotRef = useRef<{
+    element: HTMLElement
+    selectionStart: number | null
+    selectionEnd: number | null
+  } | null>(null)
+  const formElementRef = useRef<HTMLFormElement | null>(null)
 
   // Error navigation and auto-focus
   const {
@@ -656,7 +687,6 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   })
 
   const resolvedActionBarLabel = (() => {
-    if (hasErrors) return undefined
     if (actionBarStatus === "loading") return actionBarSavingLabel
     if (actionBarStatus === "success")
       return successMessage ?? forms.actionBar.saved
@@ -713,8 +743,112 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       if (successTimerRef.current) {
         clearTimeout(successTimerRef.current)
       }
+      if (autosubmitTimerRef.current) {
+        clearTimeout(autosubmitTimerRef.current)
+      }
     }
   }, [])
+
+  // Stable ref to the submit handler so the autosubmit effect doesn't need
+  // to re-subscribe whenever `handleSubmit` is re-created on each render.
+  const handleSubmitForAutosubmitRef = useRef(handleSubmit)
+  handleSubmitForAutosubmitRef.current = handleSubmit
+
+  /**
+   * Capture the currently-focused element + caret position if it lives inside
+   * the form. The snapshot is consumed by the restore effect below once the
+   * in-flight submit settles. If no input is focused inside the form, no
+   * snapshot is taken — focus restoration is a no-op.
+   */
+  const snapshotFocus = useCallback(() => {
+    const active = document.activeElement
+    if (!(active instanceof HTMLElement)) return
+    if (!formElementRef.current?.contains(active)) return
+
+    const hasSelection =
+      active instanceof HTMLInputElement ||
+      active instanceof HTMLTextAreaElement
+
+    const selectionStart = hasSelection ? active.selectionStart : null
+    const selectionEnd = hasSelection ? active.selectionEnd : null
+
+    focusSnapshotRef.current = {
+      element: active,
+      selectionStart,
+      selectionEnd,
+    }
+  }, [])
+
+  /**
+   * After a non-button submit settles (isSubmitting flips true → false),
+   * restore the focused input + caret position so the user's typing flow
+   * survives RHF's transient `disabled` flip on Controllers.
+   */
+  const wasSubmittingRef = useRef(form.formState.isSubmitting)
+  useEffect(() => {
+    const wasSubmitting = wasSubmittingRef.current
+    wasSubmittingRef.current = isSubmitting
+    if (!wasSubmitting || isSubmitting) return
+
+    const snapshot = focusSnapshotRef.current
+    focusSnapshotRef.current = null
+    if (!snapshot) return
+    if (!snapshot.element.isConnected) return
+    if (document.activeElement === snapshot.element) return
+
+    snapshot.element.focus()
+    if (
+      snapshot.selectionStart !== null &&
+      snapshot.selectionEnd !== null &&
+      (snapshot.element instanceof HTMLInputElement ||
+        snapshot.element instanceof HTMLTextAreaElement)
+    ) {
+      try {
+        snapshot.element.setSelectionRange(
+          snapshot.selectionStart,
+          snapshot.selectionEnd
+        )
+      } catch {
+        // Some input types (e.g. type="number") throw on setSelectionRange.
+        // Ignore — the focus call above is the important part.
+      }
+    }
+  }, [isSubmitting])
+
+  // Autosubmit: debounced auto-submit when fields change.
+  // `form.handleSubmit` runs validation; invalid forms surface errors and skip onSubmit.
+  const autosubmitDelay =
+    submitConfig?.type === "autosubmit"
+      ? (submitConfig.delay ?? DEFAULT_AUTOSUBMIT_DELAY_MS)
+      : DEFAULT_AUTOSUBMIT_DELAY_MS
+
+  useEffect(() => {
+    if (!isAutosubmit) return
+
+    const subscription = form.watch(() => {
+      if (!form.formState.isDirty) return
+      if (form.formState.isSubmitting) return
+
+      if (autosubmitTimerRef.current) {
+        clearTimeout(autosubmitTimerRef.current)
+      }
+      autosubmitTimerRef.current = setTimeout(() => {
+        autosubmitTimerRef.current = null
+        snapshotFocus()
+        form.handleSubmit((data) =>
+          handleSubmitForAutosubmitRef.current(data)
+        )()
+      }, autosubmitDelay)
+    })
+
+    return () => {
+      subscription.unsubscribe()
+      if (autosubmitTimerRef.current) {
+        clearTimeout(autosubmitTimerRef.current)
+        autosubmitTimerRef.current = null
+      }
+    }
+  }, [isAutosubmit, autosubmitDelay, form, snapshotFocus])
 
   // Handle discard action
   const handleDiscard = () => {
@@ -874,23 +1008,43 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     () => ({
       formName: name,
       initialFiles: props.initialFiles,
+      isLoadingInitialFiles: props.isLoadingInitialFiles,
       renderCustomField: props.renderCustomField,
       isLoading: isFormLoading,
       useUpload,
+      submitConfig,
     }),
     [
       name,
       props.initialFiles,
+      props.isLoadingInitialFiles,
       props.renderCustomField,
       isFormLoading,
       useUpload,
+      submitConfig,
     ]
   )
 
   // Form content component to avoid repetition
+  const submitHandler = form.handleSubmit(handleSubmit)
+  const onFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    // Snapshot focus when the submit was triggered by something other than
+    // a real button activation (Enter inside an input, programmatic submit,
+    // autosubmit debounce).
+    const active = document.activeElement
+    const isButtonActivation =
+      active instanceof HTMLElement &&
+      (active.tagName === "BUTTON" ||
+        (active.tagName === "INPUT" &&
+          (active as HTMLInputElement).type === "submit"))
+    if (!isButtonActivation) snapshotFocus()
+    submitHandler(event)
+  }
+
   const formContent = (
     <form
-      onSubmit={form.handleSubmit(handleSubmit)}
+      ref={formElementRef}
+      onSubmit={onFormSubmit}
       className={cn(
         "flex flex-1 flex-col w-full mx-auto",
         FORM_MAX_WIDTH,
@@ -932,7 +1086,10 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             return (
               <div
                 key={groupedItem.item.field.id}
-                className={cn(fieldGapClass, "empty:hidden")}
+                className={cn(
+                  fieldGapClass,
+                  "empty:hidden [&>span.hidden]:hidden"
+                )}
               >
                 {fieldContent}
               </div>
@@ -995,7 +1152,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             </div>
 
             {/* Separator */}
-            <div className="w-px sticky top-0 bottom-0 bg-f1-border-secondary mr-4" />
+            <div className="sticky bottom-0 top-0 mr-4 w-px bg-f1-border-secondary" />
 
             {/* Form content - centered in available space */}
             {formContent}
@@ -1020,7 +1177,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             discardIcon={discardIcon}
             issuesOneLabel={forms.actionBar.issues.one}
             issuesOtherLabel={forms.actionBar.issues.other}
-            onSubmit={form.handleSubmit(handleSubmit)}
+            onSubmit={() => submitHandler()}
             onDiscard={handleDiscard}
             goToPreviousError={goToPreviousError}
             goToNextError={goToNextError}

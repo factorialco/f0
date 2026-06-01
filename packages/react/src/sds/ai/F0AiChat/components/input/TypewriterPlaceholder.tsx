@@ -148,16 +148,7 @@ export const TypewriterPlaceholder = ({
         >
           {displayedPlaceholder}
           {isTyping && !shouldReduceMotion && (
-            <motion.span
-              animate={{ opacity: [1, 0] }}
-              transition={{
-                duration: 0.8,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            >
-              |
-            </motion.span>
+            <span className="f0-chat-cursor-blink">|</span>
           )}
         </div>
       </motion.div>

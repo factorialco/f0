@@ -24,6 +24,36 @@ describe("F0Tabs", () => {
     expect(toJSON()).toMatchSnapshot()
   })
 
+  it("Snapshot - full width", () => {
+    const { toJSON } = render(<F0Tabs tabs={tabs} fullWidth />)
+    expect(toJSON()).toMatchSnapshot()
+  })
+
+  it("Snapshot - separator inset content", () => {
+    const { toJSON } = render(<F0Tabs tabs={tabs} separatorInset="content" />)
+    expect(toJSON()).toMatchSnapshot()
+  })
+
+  it("Snapshot - separator width container", () => {
+    const { toJSON } = render(<F0Tabs tabs={tabs} separatorWidth="container" />)
+    expect(toJSON()).toMatchSnapshot()
+  })
+
+  it("Snapshot - globally disabled", () => {
+    const { toJSON } = render(<F0Tabs tabs={tabs} disabled />)
+    expect(toJSON()).toMatchSnapshot()
+  })
+
+  it("Snapshot - tab disabled", () => {
+    const tabsWithDisabled = [
+      { id: "overview", label: "Overview" },
+      { id: "courses", label: "Courses", disabled: true },
+      { id: "categories", label: "Categories" },
+    ]
+    const { toJSON } = render(<F0Tabs tabs={tabsWithDisabled} />)
+    expect(toJSON()).toMatchSnapshot()
+  })
+
   it("Snapshot - single tab", () => {
     const { toJSON } = render(
       <F0Tabs tabs={[{ id: "only", label: "Overview" }]} />
@@ -75,9 +105,63 @@ describe("F0Tabs", () => {
     expect(setActiveTabId).toHaveBeenCalledWith("overview")
   })
 
+  it("does not call setActiveTabId or tab onPress when globally disabled", () => {
+    const setActiveTabId = jest.fn()
+    const onPress = jest.fn()
+    const tabsWithPress = [
+      { id: "overview", label: "Overview" },
+      { id: "courses", label: "Courses", onPress },
+    ]
+    render(
+      <F0Tabs
+        tabs={tabsWithPress}
+        activeTabId="overview"
+        setActiveTabId={setActiveTabId}
+        disabled
+      />
+    )
+
+    fireEvent.press(screen.getByText("Courses"))
+    expect(onPress).not.toHaveBeenCalled()
+    expect(setActiveTabId).not.toHaveBeenCalled()
+  })
+
+  it("does not call callbacks for a disabled tab", () => {
+    const setActiveTabId = jest.fn()
+    const disabledOnPress = jest.fn()
+    const enabledOnPress = jest.fn()
+    const tabsWithDisabled = [
+      { id: "overview", label: "Overview", onPress: enabledOnPress },
+      {
+        id: "courses",
+        label: "Courses",
+        onPress: disabledOnPress,
+        disabled: true,
+      },
+    ]
+    render(
+      <F0Tabs
+        tabs={tabsWithDisabled}
+        activeTabId="overview"
+        setActiveTabId={setActiveTabId}
+      />
+    )
+
+    fireEvent.press(screen.getByText("Courses"))
+
+    expect(disabledOnPress).not.toHaveBeenCalled()
+    expect(setActiveTabId).not.toHaveBeenCalled()
+
+    fireEvent.press(screen.getByText("Overview"))
+    expect(enabledOnPress).toHaveBeenCalledTimes(1)
+    expect(setActiveTabId).toHaveBeenCalledWith("overview")
+  })
+
   it("sets accessibilityRole tablist on the container", () => {
     render(<F0Tabs tabs={tabs} />)
-    const container = screen.UNSAFE_getByProps({ accessibilityRole: "tablist" })
+    const container = screen.UNSAFE_getByProps({
+      accessibilityRole: "tablist",
+    })
     expect(container).toBeDefined()
   })
 
@@ -97,5 +181,36 @@ describe("F0Tabs", () => {
     render(<F0Tabs tabs={tabs} activeTabId="courses" />)
     const inactiveTab = screen.getByRole("tab", { name: "Overview" })
     expect(inactiveTab.props.accessibilityState?.selected).toBe(false)
+  })
+
+  it("sets accessibilityState.disabled for globally disabled tabs", () => {
+    render(<F0Tabs tabs={tabs} disabled />)
+
+    const overviewTab = screen.getByRole("tab", { name: "Overview" })
+    const coursesTab = screen.getByRole("tab", { name: "Courses" })
+
+    expect(overviewTab.props.accessibilityState?.disabled).toBe(true)
+    expect(coursesTab.props.accessibilityState?.disabled).toBe(true)
+  })
+
+  it("sets accessibilityState.disabled for individually disabled tabs", () => {
+    const tabsWithDisabled = [
+      { id: "overview", label: "Overview" },
+      { id: "courses", label: "Courses", disabled: true },
+    ]
+
+    render(<F0Tabs tabs={tabsWithDisabled} activeTabId="overview" />)
+
+    const overviewTab = screen.getByRole("tab", { name: "Overview" })
+    const coursesTab = screen.getByRole("tab", { name: "Courses" })
+
+    expect(overviewTab.props.accessibilityState).toMatchObject({
+      selected: true,
+      disabled: false,
+    })
+    expect(coursesTab.props.accessibilityState).toMatchObject({
+      selected: false,
+      disabled: true,
+    })
   })
 })

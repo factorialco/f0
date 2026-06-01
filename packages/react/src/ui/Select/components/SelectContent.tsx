@@ -13,6 +13,7 @@ import {
 
 import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
+import { F0DialogContext } from "@/patterns/F0Dialog"
 import { ScrollArea } from "@/ui/scrollarea"
 import { Spinner } from "@/ui/Spinner"
 
@@ -94,6 +95,22 @@ const SelectContent = forwardRef<
     },
     ref
   ) => {
+    // If inside a dialog and no portalContainer is provided, use the dialog's container
+    // only for center/fullscreen dialogs (which have focus trap).
+    // For side panels (left/right), render in body to prevent clipping.
+    const dialogContext = useContext(F0DialogContext)
+    const shouldUseDialogContainer =
+      dialogContext.portalContainer &&
+      (dialogContext.position === "center" ||
+        dialogContext.position === "fullscreen")
+
+    const effectivePortalContainer =
+      portalContainer !== undefined
+        ? portalContainer
+        : shouldUseDialogContainer
+          ? dialogContext.portalContainer
+          : undefined
+
     // ----------- Virtual list -----------
     // The scrollable element for your list
     const parentRef = useRef(null)
@@ -101,7 +118,9 @@ const SelectContent = forwardRef<
 
     const isEmpty = useMemo(() => {
       if (isVirtual) {
-        return items.filter((item) => item.value).length === 0
+        return items.every(
+          (item) => !item.value && item.type !== "group-header"
+        )
       }
       return !children
     }, [isVirtual, items, children])
@@ -137,7 +156,12 @@ const SelectContent = forwardRef<
       count: items?.length || 0,
       getScrollElement: () => parentRef.current,
       estimateSize: (i: number) => items?.[i]?.height || 0,
+      getItemKey: (i: number) => items?.[i]?.key ?? i,
       overscan: 5,
+      // Round measured heights to whole pixels. Sub-pixel values from
+      // getBoundingClientRect() accumulate into translateY drift that is
+      // visible as jitter while scrolling up.
+      measureElement: (el) => Math.round(el.getBoundingClientRect().height),
       // If the content is a list, we need to check if the animation is enabled
       enabled: asList || prefersReducedMotion || animationStarted,
     })
@@ -151,8 +175,8 @@ const SelectContent = forwardRef<
     }, [open])
 
     useEffect(() => {
-      // Measure the items when the animation is finished
-      // Skip measurement when asList is true to prevent layout shifts from tooltips
+      // Measure the items when the animation is finished.
+      // Skip measurement when asList is true to prevent layout shifts from tooltips.
       if (!asList) {
         virtualizer.measure()
       }
@@ -218,7 +242,7 @@ const SelectContent = forwardRef<
       <SelectPrimitive.Content
         ref={ref}
         asChild={asChild}
-        disableScrollLock={asList}
+        disableScrollLock={asList || !!effectivePortalContainer}
         className={cn(
           "relative z-50 text-f1-foreground",
           asList
@@ -349,14 +373,14 @@ const SelectContent = forwardRef<
     return asList ? (
       content
     ) : (
-      <SelectPrimitive.Portal container={portalContainer}>
+      <SelectPrimitive.Portal container={effectivePortalContainer}>
         <>
           {/*
             Overlay to prevent clicks from propagating.
             Only render when NOT using a custom portal container to avoid
             conflicts with modal focus management.
           */}
-          {open && !portalContainer && (
+          {open && !effectivePortalContainer && (
             <div
               className="pointer-events-auto fixed inset-0 z-40"
               onClick={(e) => {

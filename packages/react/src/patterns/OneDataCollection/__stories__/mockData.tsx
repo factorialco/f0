@@ -342,6 +342,7 @@ export const getMockVisualizations = (options?: {
     applyLongText?: boolean
     longColumnLabels?: boolean
     referenceRows?: boolean
+    bordered?: boolean
   }
   cache?: MockDataCache<MockUser>
 }): Record<
@@ -362,6 +363,7 @@ export const getMockVisualizations = (options?: {
       options: {
         allowColumnHiding: options?.table?.allowColumnHiding,
         allowColumnReordering: options?.table?.allowColumnReordering,
+        bordered: options?.table?.bordered,
         frozenColumns:
           options?.table?.frozenColumns ?? options?.frozenColumns ?? 0,
         referenceRowType: options?.table?.referenceRows
@@ -623,6 +625,14 @@ export const getMockVisualizations = (options?: {
             // No-op handler when cache is not available
           }
         })(),
+        addRowActions: () => ({
+          label: "Add row",
+          onClick: () => console.log("Add row clicked"),
+        }),
+        addNestedRowActions: (parent) => ({
+          label: "Add child",
+          onClick: () => console.log("Add child clicked", parent),
+        }),
       },
     } as Visualization<
       MockUser,

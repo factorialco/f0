@@ -1,29 +1,27 @@
 import { useCoAgent } from "@copilotkit/react-core"
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ComponentType,
-  type ReactNode,
-} from "react"
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { z } from "zod"
 
 import type { ModuleId } from "@/components/avatars/F0AvatarModule"
-import type {
-  F0FormSchema,
-  F0FormPropsWithSingleSchemaDefinition,
-} from "@/patterns/F0Form/types"
+import type { F0FormSchema, F0FormLikeComponent } from "@/patterns/F0Form/types"
 import type { F0FormDefinitionSingleSchema } from "@/patterns/F0WizardForm/types"
 
 import { useAiChat } from "@/ai"
 import { F0Button } from "@/components/F0Button"
 import { CheckCircleAnimated } from "@/icons/animated"
+import { useFormComponent } from "@/lib/providers/f0"
 import { cn } from "@/lib/utils"
 import { useF0AiFormRegistry } from "@/patterns/F0Form/F0AiFormRegistry"
 import { F0Form } from "@/patterns/F0Form/F0Form"
 import { useF0Form } from "@/patterns/F0Form/useF0Form"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm/useF0FormDefinition"
+
+function useCanvasFormComponent(): F0FormLikeComponent {
+  const FormComponent = useFormComponent()
+  // Bypass F0Form's distributive conditional generic — F0Form internally
+  // casts to AnyF0FormProps, so this narrowed alias is safe.
+  return (FormComponent ?? F0Form) as F0FormLikeComponent
+}
 
 interface CoAgentFormState {
   activeForm?: {
@@ -31,16 +29,11 @@ interface CoAgentFormState {
     description?: string
     module?: ModuleId
     formValues?: Record<string, unknown>
+    defaultValuesParams?: Record<string, unknown>
   } | null
 }
 
 const FALLBACK_SCHEMA = z.object({}) as unknown as F0FormSchema
-
-// Bypass F0Form's distributive conditional generic — F0Form internally
-// casts to AnyF0FormProps, so this narrowed alias is safe.
-const F0CanvasForm = F0Form as unknown as ComponentType<
-  F0FormPropsWithSingleSchemaDefinition<F0FormSchema>
->
 
 // ---------- Submit success overlay ----------
 
@@ -67,18 +60,23 @@ function WizardCanvasContent({
   formDefinition,
   formRef,
   isSubmitting,
+  hasErrors,
   onSubmit,
 }: {
   formDefinition: F0FormDefinitionSingleSchema<F0FormSchema>
   formRef: ReturnType<typeof useF0Form>["formRef"]
   isSubmitting: boolean
+  hasErrors: boolean
   onSubmit: () => void
 }) {
+  const errorTriggerMode = formDefinition.errorTriggerMode ?? "on-blur"
+  const CanvasForm = useCanvasFormComponent()
+
   return (
     <div className="flex h-full flex-col">
       <div className="relative min-h-0 flex-1 overflow-hidden [&>div]:h-full">
         {isSubmitting && <SubmitSuccessOverlay />}
-        <F0CanvasForm
+        <CanvasForm
           formDefinition={formDefinition}
           styling={{
             showSectionsSidepanel: true,
@@ -94,6 +92,7 @@ function WizardCanvasContent({
           <F0Button
             variant="default"
             onClick={onSubmit}
+            disabled={hasErrors && errorTriggerMode !== "on-submit"}
             label={formDefinition.submitConfig?.label ?? "Submit"}
           />
         </div>
@@ -108,13 +107,17 @@ function PlainFormContent({
   formDefinition,
   formRef,
   isSubmitting,
+  hasErrors,
   onSubmit,
 }: {
   formDefinition: F0FormDefinitionSingleSchema<F0FormSchema>
   formRef: ReturnType<typeof useF0Form>["formRef"]
   isSubmitting: boolean
+  hasErrors: boolean
   onSubmit: () => void
 }) {
+  const errorTriggerMode = formDefinition.errorTriggerMode ?? "on-blur"
+  const CanvasForm = useCanvasFormComponent()
   const showSectionsSidepanel = !!(
     formDefinition.sections && Object.keys(formDefinition.sections).length > 2
   )
@@ -130,7 +133,7 @@ function PlainFormContent({
         )}
       >
         {isSubmitting && <SubmitSuccessOverlay />}
-        <F0CanvasForm
+        <CanvasForm
           formDefinition={formDefinition}
           formRef={formRef}
           styling={{ showSectionsSidepanel }}
@@ -144,6 +147,7 @@ function PlainFormContent({
           <F0Button
             variant="default"
             onClick={onSubmit}
+            disabled={hasErrors && errorTriggerMode !== "on-submit"}
             label={formDefinition.submitConfig?.label ?? "Submit"}
           />
         </div>
@@ -164,7 +168,7 @@ function PlainFormContent({
  * Previous/Next/Submit navigation.
  */
 function VirtualFormContent() {
-  const { formRef } = useF0Form()
+  const { formRef, hasErrors } = useF0Form()
   const { agent: agentName, closeCanvas } = useAiChat()
   const registry = useF0AiFormRegistry()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -185,19 +189,121 @@ function VirtualFormContent() {
   const entry = formName ? registry?.get(formName) : undefined
   const ref = entry?.ref.current
   const currentValues = activeForm?.formValues ?? {}
+  // Prefer params from the registry entry (written by the host-app form
+  // actions) as the canonical source; fall back to coagent state for the
+  // brief window before sync.
+  const defaultValuesParams =
+    entry?.defaultValuesParams ?? activeForm?.defaultValuesParams
 
+  // Keep refs so callbacks always capture the latest values without
+  // changing identity (which would cause useF0FormDefinition to recompute).
+  const entryRef = useRef(entry)
+  entryRef.current = entry
+  const defaultValuesParamsRef = useRef(defaultValuesParams)
+  defaultValuesParamsRef.current = defaultValuesParams
+  const currentValuesRef = useRef(currentValues)
+  currentValuesRef.current = currentValues
+  const registryRef = useRef(registry)
+  registryRef.current = registry
+  const formNameRef = useRef(formName)
+  formNameRef.current = formName
+  const closeCanvasRef = useRef(closeCanvas)
+  closeCanvasRef.current = closeCanvas
+
+  // Only apply values once when the canvas first opens for this form.
+  // After the initial population, the rendered F0Form manages its own state and
+  // AI fills go through fillForm → ref.setValues() directly.
+  // Re-applying formValues continuously from coagent state would cause a loop:
+  // form renders → rebuildDescriptions → coagent sync → setValues → re-render.
+  const initializedFormRef = useRef("")
   useEffect(() => {
-    ref?.setValues(currentValues, { shouldDirty: true, shouldValidate: false })
-  }, [formName, JSON.stringify(currentValues)])
+    if (!ref || !formName) return
+    if (initializedFormRef.current === formName) return
+    initializedFormRef.current = formName
+    // If the AI has already filled values on the virtual ref (fillVersion > 0),
+    // use the virtual ref values (which include AI-filled fields) rather than
+    // the coagent formValues snapshot (which may still reflect original defaults).
+    const valuesToApply = registry?.getFillVersion?.(formName)
+      ? (entry?.ref.current?.getValues() ?? currentValues)
+      : currentValues
+    const existing = ref.getValues()
+    if (JSON.stringify(existing) === JSON.stringify(valuesToApply)) return
+    ref.setValues(valuesToApply, { shouldDirty: true, shouldValidate: false })
+  }, [ref, formName, JSON.stringify(currentValues)])
 
   const handleSubmit = useCallback(() => {
-    formRef.current?.submit()
+    formRef.current?.submit().catch(() => {
+      // Validation errors are displayed by the form
+    })
   }, [formRef])
+
+  const resolvedDefaultValues = useCallback(() => {
+    const e = entryRef.current
+    const name = formNameRef.current
+    const params = defaultValuesParamsRef.current
+
+    // If defaults were already resolved on a previous mount with the same
+    // params, skip re-fetching. This prevents a slow async call when the
+    // canvas closes and reopens. Reset happens on submit via resetFillVersion.
+    const paramsKey = params ? JSON.stringify(params) : null
+    if (
+      name &&
+      registryRef.current?.hasDefaultValuesEverResolved?.(name, paramsKey)
+    ) {
+      return Promise.resolve(
+        e?.ref.current?.getValues() ?? currentValuesRef.current
+      )
+    }
+
+    if (e?.defaultValuesFn && params) {
+      // Capture AI-set values before async resolution — form.reset() after
+      // defaults load would otherwise overwrite them.
+      const virtualValues = e.ref.current?.getValues() ?? {}
+      const fallbackValues = { ...virtualValues }
+      const dirty = e.dirtyFields ?? new Set<string>()
+      // Signal that async resolution is in progress — any concurrent
+      // fillForm calls will be queued until resolution completes.
+      if (name) registryRef.current?.markDefaultValuesResolving?.(name)
+      return e
+        .defaultValuesFn(params)
+        .then((values) => {
+          // Merge AI-filled fields on top of resolved defaults so
+          // F0Form's reset() preserves values set by fillForm.
+          const merged = { ...values }
+          for (const field of dirty) {
+            if (field in virtualValues) {
+              merged[field] = virtualValues[field]
+            }
+          }
+          return merged
+        })
+        .catch(() => fallbackValues)
+        .finally(() => {
+          if (name)
+            registryRef.current?.markDefaultValuesResolved?.(name, paramsKey)
+        })
+    }
+    return Promise.resolve(currentValuesRef.current)
+  }, [])
+
+  const onSubmit = useCallback(
+    async ({ data }: { data: Record<string, unknown> }) => {
+      setIsSubmitting(true)
+      await entryRef.current?.onSubmit?.(data)
+      closeTimerRef.current = setTimeout(() => {
+        registryRef.current?.resetFillVersion(formNameRef.current)
+        registryRef.current?.clearActiveForm()
+        closeCanvasRef.current()
+      }, 1500)
+      return { success: true }
+    },
+    []
+  )
 
   const formDefinition = useF0FormDefinition({
     name: formName || "form",
     schema: entry?.schema ?? FALLBACK_SCHEMA,
-    defaultValues: currentValues,
+    defaultValues: resolvedDefaultValues,
     sections: entry?.sections,
     steps: entry?.steps,
     module: entry?.module,
@@ -209,16 +315,7 @@ function VirtualFormContent() {
       hideActionBar: true,
       ...(entry?.submitConfig?.label && { label: entry.submitConfig.label }),
     },
-    onSubmit: async ({ data }) => {
-      setIsSubmitting(true)
-      await entry?.onSubmit?.(data as Record<string, unknown>)
-      closeTimerRef.current = setTimeout(() => {
-        registry?.resetFillVersion(formName)
-        registry?.clearActiveForm()
-        closeCanvas()
-      }, 1500)
-      return { success: true }
-    },
+    onSubmit,
   })
 
   if (!activeForm || !entry) return null
@@ -229,6 +326,7 @@ function VirtualFormContent() {
         formDefinition={formDefinition}
         formRef={formRef}
         isSubmitting={isSubmitting}
+        hasErrors={hasErrors}
         onSubmit={handleSubmit}
       />
     )
@@ -239,6 +337,7 @@ function VirtualFormContent() {
       formDefinition={formDefinition}
       formRef={formRef}
       isSubmitting={isSubmitting}
+      hasErrors={hasErrors}
       onSubmit={handleSubmit}
     />
   )

@@ -1,5 +1,3 @@
-import { F0Icon } from "@/components/F0Icon/F0Icon"
-import { Check } from "@/icons/app"
 import { cn } from "@/lib/utils"
 
 interface RadioIndicatorProps {
@@ -8,15 +6,15 @@ interface RadioIndicatorProps {
 
 export const RadioIndicator = ({ isSelected }: RadioIndicatorProps) => {
   return (
-    <span
+    <div
       className={cn(
-        "flex h-5 w-5 m-0.5 shrink-0 items-center justify-center rounded-full transition-colors",
+        "flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-colors",
         isSelected
           ? "bg-f1-background-selected-bold"
-          : "border-2 border-solid border-f1-border"
+          : "border-2 border-solid border-f1-border bg-f1-background"
       )}
     >
-      {isSelected && <F0Icon icon={Check} size="sm" color="inverse" />}
-    </span>
+      {isSelected && <div className="h-2 w-2 rounded-full bg-f1-background" />}
+    </div>
   )
 }

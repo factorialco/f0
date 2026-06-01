@@ -12,6 +12,7 @@ import { cardPropertyRenderers } from "@/components/F0Card/components/CardMetada
 import { CardMetadata, CardMetadataProperty } from "@/components/F0Card/types"
 import { IconType } from "@/components/F0Icon"
 import { useDataCollectionData } from "@/patterns/OneDataCollection/hooks/useDataCollectionData"
+import { usePublishDataState } from "@/patterns/OneDataCollection/hooks/usePublishDataState"
 import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { GroupingDefinition, RecordType } from "@/hooks/datasource"
@@ -337,6 +338,7 @@ export const CardCollection = <
   onSelectItems,
   onLoadData,
   onLoadError,
+  onDataStateChange,
   tmpFullWidth,
 }: CollectionProps<
   Record,
@@ -363,25 +365,44 @@ export const CardCollection = <
     return source.dataAdapter
   }, [source.dataAdapter])
 
-  const { data, paginationInfo, setPage, isInitialLoading } =
-    useDataCollectionData<
-      Record,
-      Filters,
-      Sortings,
-      Summaries,
-      NavigationFilters,
-      Grouping
-    >(
-      {
-        ...source,
-        dataAdapter: overridenDataAdapter,
+  const {
+    data,
+    paginationInfo,
+    setPage,
+    isInitialLoading,
+    loadMore,
+    isLoadingMore,
+  } = useDataCollectionData<
+    Record,
+    Filters,
+    Sortings,
+    Summaries,
+    NavigationFilters,
+    Grouping
+  >(
+    {
+      ...source,
+      dataAdapter: overridenDataAdapter,
+    },
+    {
+      onError: (error) => {
+        onLoadError(error)
       },
-      {
-        onError: (error) => {
-          onLoadError(error)
-        },
-      }
-    )
+    }
+  )
+
+  const { isLoading } = source
+
+  usePublishDataState({
+    source,
+    data,
+    paginationInfo,
+    setPage,
+    loadMore,
+    isLoading,
+    isLoadingMore,
+    onDataStateChange,
+  })
 
   useEffect(() => {
     onLoadData({

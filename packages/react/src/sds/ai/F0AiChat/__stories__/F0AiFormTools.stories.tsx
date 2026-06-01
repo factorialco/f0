@@ -575,6 +575,21 @@ const presentableFormSchema = z.object({
     rows: 3,
     helpText: "Internal notes visible only to HR",
   }),
+  welcomeMessage: f0FormField(
+    z.object({
+      value: z.string().optional(),
+      mentionIds: z.array(z.number()).optional(),
+    }),
+    {
+      label: "Welcome Message",
+      section: "additional",
+      fieldType: "richtext",
+      placeholder: "Write a welcome message for the new employee...",
+      height: "sm",
+      plainHtmlMode: true,
+      helpText: "Rich text welcome message sent on the first day",
+    }
+  ),
   termsAccepted: f0FormField(z.boolean(), {
     label: "Accepts Terms & Conditions",
     section: "additional",
@@ -761,6 +776,7 @@ const presentableFormDefinitions: F0AiAvailableFormDefinition[] = [
       emergencyContactName: undefined,
       emergencyContactPhone: undefined,
       notes: undefined,
+      welcomeMessage: { value: "" },
       termsAccepted: false,
     },
     sections: {
@@ -876,6 +892,276 @@ export const AvailableForms: Story = {
                   </ul>
                   <p className="mt-4 text-sm text-f1-foreground-secondary">
                     Open the AI chat and try interacting with these forms.
+                  </p>
+                </div>
+              </Page>
+            </ApplicationFrame>
+          </AutoOpenChat>
+        </F0AiChatProvider>
+      </F0AiFormRegistryProvider>
+    )
+  },
+}
+
+// =============================================================================
+// Story: FormWithDefaultValuesParams — edit an existing aircraft record by id
+// =============================================================================
+
+// Mock "database" of aircraft the AI can edit
+const mockAircraft = [
+  {
+    id: "ac-1",
+    registration: "EC-LVL",
+    manufacturer: "airbus" as const,
+    model: "A320",
+    status: "active" as const,
+    capacity: 180,
+    rangeKm: 6150,
+    firstFlight: new Date("2012-05-10"),
+    maintenanceDue: new Date("2026-08-15"),
+    activeRoute: true,
+    notes: "Assigned to short-haul Mediterranean routes",
+  },
+  {
+    id: "ac-2",
+    registration: "EC-MXV",
+    manufacturer: "boeing" as const,
+    model: "737 MAX 8",
+    status: "maintenance" as const,
+    capacity: 162,
+    rangeKm: 6570,
+    firstFlight: new Date("2019-11-03"),
+    maintenanceDue: new Date("2026-05-20"),
+    activeRoute: false,
+    notes: "Scheduled engine inspection",
+  },
+  {
+    id: "ac-3",
+    registration: "EC-NQK",
+    manufacturer: "airbus" as const,
+    model: "A350-900",
+    status: "active" as const,
+    capacity: 369,
+    rangeKm: 15000,
+    firstFlight: new Date("2021-03-22"),
+    maintenanceDue: new Date("2027-01-10"),
+    activeRoute: true,
+    notes: "Long-haul intercontinental fleet",
+  },
+]
+
+const editAircraftSchema = z.object({
+  registration: f0FormField(z.string().min(1), {
+    label: "Registration",
+    placeholder: "e.g. EC-LVL",
+    section: "identity",
+    helpText: "Official ICAO aircraft registration code",
+  }),
+  manufacturer: f0FormField(
+    z.enum(["airbus", "boeing", "embraer", "bombardier", "other"]),
+    {
+      label: "Manufacturer",
+      section: "identity",
+      options: [
+        { value: "airbus", label: "Airbus" },
+        { value: "boeing", label: "Boeing" },
+        { value: "embraer", label: "Embraer" },
+        { value: "bombardier", label: "Bombardier" },
+        { value: "other", label: "Other" },
+      ],
+    }
+  ),
+  model: f0FormField(z.string().min(1), {
+    label: "Model",
+    placeholder: "e.g. A320",
+    section: "identity",
+    helpText: "Aircraft model designation",
+  }),
+  status: f0FormField(z.enum(["active", "maintenance", "retired"]), {
+    label: "Status",
+    section: "operations",
+    options: [
+      { value: "active", label: "Active" },
+      { value: "maintenance", label: "In Maintenance" },
+      { value: "retired", label: "Retired" },
+    ],
+  }),
+  capacity: f0FormField(z.number().int().min(1), {
+    label: "Passenger Capacity",
+    section: "specs",
+    placeholder: "e.g. 180",
+    helpText: "Maximum number of passengers",
+  }),
+  rangeKm: f0FormField(z.number().int().min(0), {
+    label: "Range (km)",
+    section: "specs",
+    placeholder: "e.g. 6150",
+    helpText: "Maximum flight range in kilometres",
+  }),
+  firstFlight: f0FormField(z.date(), {
+    label: "First Flight Date",
+    section: "specs",
+    granularities: ["day"],
+    helpText: "Date of the aircraft's maiden flight",
+  }),
+  maintenanceDue: f0FormField(z.date(), {
+    label: "Next Maintenance Due",
+    section: "operations",
+    granularities: ["day"],
+    helpText: "Scheduled date for the next maintenance check",
+  }),
+  activeRoute: f0FormField(z.boolean(), {
+    label: "On Active Route",
+    section: "operations",
+    fieldType: "switch",
+    helpText: "Enable if the aircraft is currently assigned to a route",
+  }),
+  notes: f0FormField(z.string().optional(), {
+    label: "Notes",
+    section: "additional",
+    fieldType: "textarea",
+    placeholder: "Any additional notes...",
+    rows: 3,
+    helpText: "Internal operational notes",
+  }),
+})
+
+const editAircraftFormDefinition: F0AiAvailableFormDefinition = {
+  name: "edit-aircraft",
+  title: "Edit Aircraft",
+  description: "Update an existing aircraft record",
+  module: "employees",
+  schema: editAircraftSchema,
+  defaultValuesParamsSchema: z.object({
+    id: z
+      .string()
+      .describe(
+        "Aircraft id. Available aircraft: ac-1 (EC-LVL, Airbus A320), ac-2 (EC-MXV, Boeing 737 MAX 8), ac-3 (EC-NQK, Airbus A350-900)"
+      ),
+  }),
+  defaultValues: async (params: Record<string, unknown>) => {
+    console.log("Received defaultValuesParams:", params)
+    const id = params.id as string
+    const aircraft = mockAircraft.find((a) => a.id === id)
+    // Simulate a slow API fetch (2 seconds)
+    await sleep(2000)
+    if (!aircraft) {
+      return {
+        registration: "",
+        manufacturer: undefined,
+        model: "",
+        status: undefined,
+        capacity: undefined,
+        rangeKm: undefined,
+        firstFlight: undefined,
+        maintenanceDue: undefined,
+        activeRoute: false,
+        notes: "",
+      }
+    }
+    return {
+      registration: aircraft.registration,
+      manufacturer: aircraft.manufacturer,
+      model: aircraft.model,
+      status: aircraft.status,
+      capacity: aircraft.capacity,
+      rangeKm: aircraft.rangeKm,
+      firstFlight: aircraft.firstFlight,
+      maintenanceDue: aircraft.maintenanceDue,
+      activeRoute: aircraft.activeRoute,
+      notes: aircraft.notes,
+    }
+  },
+  sections: {
+    identity: {
+      title: "Identity",
+      description: "Registration and manufacturer",
+    },
+    specs: { title: "Specifications", description: "Capacity and range" },
+    operations: { title: "Operations", description: "Status and scheduling" },
+    additional: { title: "Additional", description: "Internal notes" },
+  },
+  onSubmit: async (values) => {
+    await sleep(1500)
+    // eslint-disable-next-line no-console
+    console.info("Aircraft updated:", JSON.stringify(values, null, 2))
+  },
+  submitConfig: { label: "Save Changes" },
+}
+
+const availableFormDefinitions = [editAircraftFormDefinition]
+
+/**
+ * Demonstrates `defaultValuesParamsSchema`: the AI asks for an aircraft id,
+ * looks it up in the mock fleet, and pre-populates the edit form with that
+ * aircraft's current data.
+ *
+ * Three aircraft are available: `ac-1`, `ac-2`, `ac-3`.
+ *
+ * Try prompts like:
+ * - "Edit aircraft ac-1"
+ * - "Open the edit form for the A350"
+ * - "Set ac-2 status to active"
+ */
+export const FormWithDefaultValuesParams: Story = {
+  render() {
+    return (
+      <F0AiFormRegistryProvider
+        availableFormDefinitions={availableFormDefinitions}
+      >
+        <F0AiChatProvider
+          enabled
+          runtimeUrl="https://mastra.local.factorial.dev/copilotkit"
+          agent="one-workflow"
+          credentials="include"
+          showDevConsole={false}
+          greeting="Hello! I can open an aircraft edit form pre-populated with its current data. Try: 'Edit aircraft ac-1' or 'Open the edit form for the A350'."
+        >
+          <AutoOpenChat>
+            <ApplicationFrame
+              {...applicationFrameProps}
+              sidebar={<Sidebar {...SidebarStories.default.args} />}
+            >
+              <Page header={<PageHeader module={storyModule} />}>
+                <div className="mx-auto h-screen overflow-hidden p-8">
+                  <h1 className="font-bold mb-2 text-2xl text-f1-foreground">
+                    Fleet Management (defaultValuesParamsSchema)
+                  </h1>
+                  <p className="mb-4 text-sm text-f1-foreground-secondary">
+                    The AI form uses{" "}
+                    <code className="rounded bg-f1-background-tertiary px-1 py-0.5 text-xs">
+                      defaultValuesParamsSchema
+                    </code>{" "}
+                    to receive an aircraft id and pre-populate the edit form
+                    with its current data.
+                  </p>
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b text-left text-f1-foreground-secondary">
+                        <th className="pb-2 pr-4">ID</th>
+                        <th className="pb-2 pr-4">Registration</th>
+                        <th className="pb-2 pr-4">Manufacturer</th>
+                        <th className="pb-2 pr-4">Model</th>
+                        <th className="pb-2">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {mockAircraft.map((ac) => (
+                        <tr key={ac.id} className="border-b text-f1-foreground">
+                          <td className="font-mono py-2 pr-4 text-xs text-f1-foreground-secondary">
+                            {ac.id}
+                          </td>
+                          <td className="py-2 pr-4">{ac.registration}</td>
+                          <td className="py-2 pr-4">{ac.manufacturer}</td>
+                          <td className="py-2 pr-4">{ac.model}</td>
+                          <td className="py-2">{ac.status}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <p className="mt-6 text-sm text-f1-foreground-secondary">
+                    Open the AI chat and ask it to edit one of the aircraft
+                    above.
                   </p>
                 </div>
               </Page>

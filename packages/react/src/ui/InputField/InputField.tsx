@@ -58,8 +58,8 @@ const inputFieldVariants = cva({
       false: "flex-none",
     },
     size: {
-      sm: "rounded-[10px]",
-      md: "rounded-[12px]",
+      sm: "rounded",
+      md: "rounded-md",
     },
   },
   compoundVariants: [

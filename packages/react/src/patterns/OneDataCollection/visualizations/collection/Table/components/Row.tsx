@@ -57,6 +57,7 @@ export type RowProps<
   index: number
   groupIndex: number
   onCheckedChange: (checked: boolean) => void
+  onItemCheckedChange?: (item: R, checked: boolean) => void
   selectedItems: Map<string | number, R>
   columns: ReadonlyArray<TableColumnDefinition<R, Sortings, Summaries>>
   frozenColumnsLeft: number
@@ -125,6 +126,7 @@ const RowComponentInner = <
     source,
     item,
     onCheckedChange,
+    onItemCheckedChange,
     selectedItems,
     columns,
     frozenColumnsLeft,
@@ -195,6 +197,7 @@ const RowComponentInner = <
         source={source}
         item={item}
         onCheckedChange={onCheckedChange}
+        onItemCheckedChange={onItemCheckedChange}
         selectedItems={selectedItems}
         columns={columns}
         frozenColumnsLeft={frozenColumnsLeft}
@@ -219,7 +222,8 @@ const RowComponentInner = <
   const cellRenderedClass = CellRenderer
     ? cn(
         "h-[48px] p-0 align-middle last:pr-0",
-        !tableWithChildren && "first:pl-0"
+        !tableWithChildren &&
+          (fromVisualization === "editableTable" ? "first:pl-3" : "first:pl-0")
       )
     : undefined
 
@@ -327,7 +331,22 @@ const RowComponentInner = <
       {hasItemActions &&
         !loading &&
         !nestedRowProps?.onLoadMoreChildren &&
-        !nestedRowProps?.onAddRow && (
+        !nestedRowProps?.onAddRow &&
+        (fromVisualization === "editableTable" ? (
+          <TableCell
+            key={`table-cell-${groupIndex}-${index}-actions`}
+            sticky={{ right: 0 }}
+            referenceRowType={referenceRowType}
+            className="border-0 border-b-[1px] border-l-[1px] border-solid border-f1-border-secondary bg-f1-background !px-3 align-middle"
+          >
+            <ItemActionsRow
+              className="flex flex-nowrap justify-center"
+              primaryItemActions={primaryItemActions}
+              dropdownItemActions={dropdownItemActions}
+              handleDropDownOpenChange={handleDropDownOpenChange}
+            />
+          </TableCell>
+        ) : (
           <>
             {/** Desktop item actions adds a sticky column to the table to not overflow when the table is scrolled horizontally*/}
             <td className="sticky right-0 top-0 z-10 hidden md:table-cell">
@@ -356,7 +375,7 @@ const RowComponentInner = <
               />
             </TableCell>
           </>
-        )}
+        ))}
     </TableRow>
   )
 }

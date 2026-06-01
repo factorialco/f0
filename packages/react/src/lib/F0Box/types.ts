@@ -198,6 +198,7 @@ export type BorderRadiusToken =
   | "lg"
   | "xl"
   | "2xl"
+  | "3xl"
   | "full"
 
 /** Divider direction */
@@ -293,6 +294,12 @@ export type PositionToken =
   | "absolute"
   | "fixed"
   | "sticky"
+
+/** Position offsets */
+export type InsetToken = SpacingToken
+
+/** z-index values */
+export type ZIndexToken = "auto" | "0" | "10" | "20" | "30" | "40" | "50"
 
 /** Border style */
 export type BorderStyleToken = "solid" | "dashed" | "dotted" | "double" | "none"

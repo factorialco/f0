@@ -33,12 +33,19 @@ export interface BarSeriesDataPoint {
   label: string
   value: number
   secondaryValue?: number
+  neutralValue?: number
+  neutralFullHeight?: boolean
 }
 
 export interface BarSeriesCellValue {
   dataPoints: BarSeriesDataPoint[]
   formatLabel?: (label: string) => string
   formatValue?: (value: number) => string
+  formatTooltip?: (args: {
+    point: BarSeriesDataPoint
+    formattedLabel: string
+    formattedValue: string
+  }) => string
   /** Optional max for scale; if not set, derived from data. */
   scaleMax?: number
 }
@@ -56,22 +63,38 @@ function BarWithTooltip({
   scaleMax,
   formatLabel,
   formatValue,
+  formatTooltip,
 }: {
   point: BarSeriesDataPoint
   scaleMax: number
   formatLabel: (label: string) => string
   formatValue: (value: number) => string
+  formatTooltip?: BarSeriesCellValue["formatTooltip"]
 }) {
-  const { label, value, secondaryValue } = point
+  const { label, value, secondaryValue, neutralValue, neutralFullHeight } =
+    point
   const formattedLabel = formatLabel(label)
   const valueStr = formatValue(value)
-  const tooltipLabel = `${formattedLabel} – ${valueStr}`
+  const tooltipLabel =
+    formatTooltip?.({ point, formattedLabel, formattedValue: valueStr }) ??
+    `${formattedLabel} – ${valueStr}`
 
-  const isUnder = secondaryValue != null && value < secondaryValue
+  const neutralSegmentValue = Math.max(neutralValue ?? 0, 0)
+  const coveredValue = value + neutralSegmentValue
+  const isUnder = secondaryValue != null && coveredValue < secondaryValue
   const isOver = secondaryValue != null && value > secondaryValue
 
   const heightValuePx =
     scaleMax > 0 ? Math.round(CHART_HEIGHT_PX * (value / scaleMax)) : 0
+  const heightNeutralPxRaw = neutralFullHeight
+    ? CHART_HEIGHT_PX
+    : scaleMax > 0
+      ? Math.round(CHART_HEIGHT_PX * (neutralSegmentValue / scaleMax))
+      : 0
+  const heightNeutralPx = Math.min(
+    heightNeutralPxRaw,
+    CHART_HEIGHT_PX - heightValuePx
+  )
   const heightPlannedPx =
     secondaryValue != null && scaleMax > 0 && !isUnder
       ? Math.round(
@@ -82,7 +105,7 @@ function BarWithTooltip({
     ? Math.round(CHART_HEIGHT_PX * ((value - (secondaryValue ?? 0)) / scaleMax))
     : 0
 
-  const isEmpty = value === 0
+  const isEmpty = value === 0 && heightNeutralPx === 0
 
   return (
     <TooltipProvider delayDuration={100} disableHoverableContent>
@@ -111,15 +134,38 @@ function BarWithTooltip({
                   minHeight: EMPTY_BAR_BORDER_HEIGHT_PX,
                 }}
               />
-            ) : isUnder ? (
+            ) : neutralFullHeight ? (
               <div
+                className="rounded-sm bg-f1-border-secondary"
                 style={{
                   width: BAR_WIDTH_PX,
-                  height: heightValuePx,
-                  backgroundColor: getColor(COLOR_UNDER),
-                  borderRadius: 2,
+                  height: CHART_HEIGHT_PX,
+                  minHeight: CHART_HEIGHT_PX,
                 }}
               />
+            ) : isUnder ? (
+              <>
+                {heightValuePx > 0 && (
+                  <div
+                    style={{
+                      width: BAR_WIDTH_PX,
+                      height: heightValuePx,
+                      backgroundColor: getColor(COLOR_UNDER),
+                      borderRadius: heightNeutralPx > 0 ? "2px 2px 0 0" : 2,
+                    }}
+                  />
+                )}
+                {heightNeutralPx > 0 && (
+                  <div
+                    className="bg-f1-border-secondary"
+                    style={{
+                      width: BAR_WIDTH_PX,
+                      height: heightNeutralPx,
+                      borderRadius: heightValuePx > 0 ? "0 0 2px 2px" : 2,
+                    }}
+                  />
+                )}
+              </>
             ) : isOver && heightOvertimePx > 0 ? (
               <>
                 <div
@@ -140,14 +186,28 @@ function BarWithTooltip({
                 />
               </>
             ) : (
-              <div
-                style={{
-                  width: BAR_WIDTH_PX,
-                  height: heightValuePx,
-                  backgroundColor: getColor(COLOR_PLANNED, LIGHTER_OPACITY),
-                  borderRadius: 2,
-                }}
-              />
+              <>
+                {heightValuePx > 0 && (
+                  <div
+                    style={{
+                      width: BAR_WIDTH_PX,
+                      height: heightValuePx,
+                      backgroundColor: getColor(COLOR_PLANNED, LIGHTER_OPACITY),
+                      borderRadius: heightNeutralPx > 0 ? "2px 2px 0 0" : 2,
+                    }}
+                  />
+                )}
+                {heightNeutralPx > 0 && (
+                  <div
+                    className="bg-f1-border-secondary"
+                    style={{
+                      width: BAR_WIDTH_PX,
+                      height: heightNeutralPx,
+                      borderRadius: heightValuePx > 0 ? "0 0 2px 2px" : 2,
+                    }}
+                  />
+                )}
+              </>
             )}
           </div>
         </TooltipTrigger>
@@ -187,7 +247,12 @@ export const BarSeriesCell = (
   const formatValue = args.formatValue ?? defaultFormatValue
 
   const maxFromData = Math.max(
-    ...dataPoints.map((p) => Math.max(p.value, p.secondaryValue ?? 0)),
+    ...dataPoints.map((p) =>
+      Math.max(
+        p.value + Math.max(p.neutralValue ?? 0, 0),
+        p.secondaryValue ?? 0
+      )
+    ),
     0
   )
   const scaleMax = args.scaleMax ?? Math.max(maxFromData, 1)
@@ -214,6 +279,7 @@ export const BarSeriesCell = (
             scaleMax={scaleMax}
             formatLabel={formatLabel}
             formatValue={formatValue}
+            formatTooltip={args.formatTooltip}
           />
         </div>
       ))}

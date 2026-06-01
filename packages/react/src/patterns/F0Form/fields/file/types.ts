@@ -144,6 +144,26 @@ export interface InitialFile {
 }
 
 // ============================================================================
+// File Entry (in-flight or pre-existing)
+// ============================================================================
+
+/**
+ * Metadata for a file that has been selected, uploaded, or pre-existing
+ */
+export interface FileEntry {
+  /** Unique key for React list rendering */
+  key: string
+  /** The File object — present for new uploads, absent for pre-existing files */
+  file?: File
+  /** Pre-existing file metadata — present when seeded from `initialFiles` */
+  initialFile?: InitialFile
+  /** The form value returned after successful upload, or from initialFile */
+  value?: string
+  /** Error message if upload failed */
+  error?: string
+}
+
+// ============================================================================
 // File Field Config and Type
 // ============================================================================
 
@@ -164,6 +184,8 @@ export interface F0FileConfig {
   maxSizeMB?: number
   /** Allow multiple file uploads (form value becomes `string[]`) */
   multiple?: boolean
+  /** Maximum number of files allowed (only relevant when multiple is true) */
+  maxFiles?: number
   /** Helper text shown in the dropzone area */
   description?: string
   /**
@@ -188,6 +210,8 @@ export type F0FileField = F0BaseField & {
   maxSizeMB?: number
   /** Allow multiple files */
   multiple?: boolean
+  /** Maximum number of files allowed (only relevant when multiple is true) */
+  maxFiles?: number
   /** Dropzone description text */
   description?: string
   /**
@@ -199,26 +223,14 @@ export type F0FileField = F0BaseField & {
   renderIf?: FileFieldRenderIf
 }
 
-/**
- * Metadata for a file that has been selected, uploaded, or pre-existing
- */
-export interface FileEntry {
-  /** Unique key for React list rendering */
-  key: string
-  /** The File object — present for new uploads, absent for pre-existing files */
-  file?: File
-  /** Pre-existing file metadata — present when seeded from `initialFiles` */
-  initialFile?: InitialFile
-  /** The form value returned after successful upload, or from initialFile */
-  value?: string
-  /** Error message if upload failed */
-  error?: string
-}
+// ============================================================================
+// Component Props
+// ============================================================================
 
 /**
- * Props for the FileUploadItem component
+ * Props for the FileAttachment component
  */
-export interface FileUploadItemProps {
+export interface FileAttachmentProps {
   /** The file entry (new upload or pre-existing) */
   entry: FileEntry
   /** Consumer-provided upload hook — only needed for new uploads */
@@ -231,6 +243,16 @@ export interface FileUploadItemProps {
   onError: (error: string) => void
   /** Whether the field is disabled */
   disabled?: boolean
+  /** Additional class names — internal use only, for layout adjustments in grouped lists */
+  className?: string
+  /**
+   * Controls border-radius based on position in a grouped list.
+   * - "single": full radius (standalone, default)
+   * - "top": top corners rounded, bottom flat
+   * - "middle": all corners flat
+   * - "bottom": bottom corners rounded, top flat
+   */
+  position?: "single" | "top" | "middle" | "bottom"
   /** i18n strings */
   translations: {
     remove: string

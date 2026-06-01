@@ -92,3 +92,62 @@ export const Snapshot: Story = {
     />
   ),
 }
+
+// ---------------------------------------------------------------------------
+// Empty-state coverage
+// ---------------------------------------------------------------------------
+
+const emptyItems: DashboardItem<typeof dashboardFilters>[] = [
+  {
+    id: "empty-bar",
+    title: "Importe por mes",
+    description: "Evolución del gasto total por mes.",
+    type: "chart",
+    colSpan: 6,
+    x: 0,
+    y: 0,
+    rowSpan: 6,
+    chart: { type: "bar" },
+    fetchData: async () => ({ categories: [], series: [] }),
+  },
+  {
+    id: "empty-line",
+    title: "Importe por estado",
+    description: "Gasto total por estado.",
+    type: "chart",
+    colSpan: 6,
+    x: 6,
+    y: 0,
+    rowSpan: 6,
+    chart: { type: "line" },
+    fetchData: async () => ({ categories: [], series: [] }),
+  },
+  {
+    id: "empty-horizontal",
+    title: "Top empleados",
+    description: "Empleados con más gasto total.",
+    type: "chart",
+    colSpan: 12,
+    x: 0,
+    y: 6,
+    rowSpan: 6,
+    chart: { type: "bar", orientation: "horizontal" },
+    fetchData: async () => ({ categories: [], series: [] }),
+  },
+]
+
+/**
+ * Mirrors the bug case in the screenshot: every chart returns no data.
+ * Each tile shows a faded skeleton of its chart variant with the default
+ * "No data available" / "Try a different date or fewer filters" message —
+ * instead of bare axes.
+ */
+export const EmptyDashboard: Story = {
+  render: () => (
+    <F0AnalyticsDashboard
+      filters={dashboardFilters}
+      presets={dashboardPresets}
+      items={emptyItems}
+    />
+  ),
+}

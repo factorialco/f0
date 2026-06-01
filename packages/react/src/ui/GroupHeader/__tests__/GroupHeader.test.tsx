@@ -1,5 +1,7 @@
-import { fireEvent, render, screen } from "@testing-library/react"
+import { fireEvent, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
+
+import { zeroRender as render } from "@/testing/test-utils"
 
 import { GroupHeader } from "../GroupHeader"
 
@@ -17,11 +19,9 @@ describe("GroupHeader", () => {
 
     render(<GroupHeader label={labelPromise} itemCount={countPromise} />)
 
-    // Initially shows skeletons
     const skeletons = screen.getAllByTestId("skeleton")
     expect(skeletons).toHaveLength(2)
 
-    // Wait for promises to resolve and verify content
     await vi.waitFor(() => {
       expect(screen.queryAllByTestId("skeleton")).toHaveLength(0)
     })
@@ -78,9 +78,68 @@ describe("GroupHeader", () => {
     const countPromise = Promise.resolve(undefined)
     render(<GroupHeader label="Test Group" itemCount={countPromise} />)
 
-    // Wait for promise to resolve
     await vi.waitFor(() => {
       expect(screen.queryByRole("status")).not.toBeInTheDocument()
     })
+  })
+
+  it("renders chevron after label by default (trailing)", () => {
+    render(
+      <GroupHeader
+        label="Test Group"
+        itemCount={5}
+        showOpenChange
+        open={false}
+      />
+    )
+
+    const label = screen.getByText("Test Group")
+    const chevron = screen.getByTestId("group-header-chevron")
+    expect(
+      label.compareDocumentPosition(chevron) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+  })
+
+  it("renders chevron before label when chevronPosition is leading", () => {
+    render(
+      <GroupHeader
+        label="Test Group"
+        itemCount={5}
+        showOpenChange
+        open={false}
+        chevronPosition="leading"
+      />
+    )
+
+    const label = screen.getByText("Test Group")
+    const chevron = screen.getByTestId("group-header-chevron")
+    expect(
+      label.compareDocumentPosition(chevron) & Node.DOCUMENT_POSITION_PRECEDING
+    ).toBeTruthy()
+  })
+
+  it("supports keyboard activation with Enter and Space", () => {
+    const onOpenChange = vi.fn()
+
+    render(
+      <GroupHeader
+        label="Test Group"
+        itemCount={5}
+        open={false}
+        onOpenChange={onOpenChange}
+        showOpenChange
+      />
+    )
+
+    const header = screen
+      .getByText("Test Group")
+      .closest("[role='button']") as HTMLElement
+
+    fireEvent.keyDown(header, { key: "Enter" })
+    expect(onOpenChange).toHaveBeenCalledWith(true)
+
+    onOpenChange.mockClear()
+    fireEvent.keyDown(header, { key: " " })
+    expect(onOpenChange).toHaveBeenCalledTimes(1)
   })
 })

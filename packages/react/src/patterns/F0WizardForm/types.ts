@@ -1,6 +1,7 @@
 import { z, ZodRawShape, ZodEffects, type ZodType } from "zod"
 
 import type { ModuleId } from "@/components/avatars/F0AvatarModule"
+import type { InitialFile } from "@/patterns/F0Form/fields/file/types"
 import type {
   F0FormErrorTriggerMode,
   F0FormSubmitConfig,
@@ -83,6 +84,10 @@ export interface F0FormDefinitionSingleSchema<TSchema extends F0FormSchema> {
   defaultValuesFn?: (
     params: Record<string, unknown>
   ) => Promise<Partial<z.infer<TSchema>>>
+  /** Pre-existing file metadata for file fields — resolved before the form renders */
+  initialFiles?: InitialFile[]
+  /** Whether async initialFiles are still being resolved */
+  isLoadingInitialFiles?: boolean
   /** Wizard steps — when present, F0WizardForm uses these instead of auto-deriving from sections */
   steps?: F0WizardFormStep[]
 }
@@ -111,6 +116,10 @@ export interface F0FormDefinitionPerSection<T extends F0PerSectionSchema> {
   defaultValuesFn?: (
     params: Record<string, unknown>
   ) => Promise<{ [K in keyof T]?: Partial<z.infer<T[K]>> }>
+  /** Pre-existing file metadata for file fields — resolved before the form renders */
+  initialFiles?: InitialFile[]
+  /** Whether async initialFiles are still being resolved */
+  isLoadingInitialFiles?: boolean
   /** Wizard steps — when present, F0WizardForm uses these instead of auto-deriving from sections */
   steps?: F0WizardFormStep[]
 }

@@ -30,7 +30,7 @@ const meta = {
       },
     },
   },
-  tags: ["autodocs", "stable"],
+  tags: ["stable", "!autodocs"],
   args: {
     variant: "default",
     onClick: () => {
@@ -120,6 +120,7 @@ type Story = StoryObj<typeof meta>
 
 // Basic Variants
 export const Default: Story = {
+  tags: ["no-sidebar"],
   args: {
     variant: "default",
     label: "Default Button",
@@ -135,6 +136,7 @@ export const Default: Story = {
 
 // Basic Variants
 export const WithHref: Story = {
+  tags: ["no-sidebar"],
   parameters: {
     docs: {
       description: {
@@ -158,6 +160,7 @@ export const WithHref: Story = {
 }
 
 export const Variants: Story = {
+  tags: ["no-sidebar"],
   parameters: withSnapshot({}),
   render: (args) => (
     <div className="flex gap-2">
@@ -172,6 +175,7 @@ export const Variants: Story = {
 }
 
 export const IconVariants: Story = {
+  tags: ["no-sidebar"],
   parameters: withSnapshot({}),
   render: (args) => (
     <div className="flex flex-col gap-6">
@@ -255,6 +259,7 @@ export const IconVariants: Story = {
 
 // Size Variants
 export const Sizes: Story = {
+  tags: ["no-sidebar"],
   parameters: withSnapshot({}),
   render: (args) => (
     <div className="flex items-center gap-4">
@@ -353,6 +358,7 @@ export const Loading: Story = {
 
 // Interactive Examples
 export const AsyncAction: Story = {
+  tags: ["no-sidebar"],
   args: {
     label: "Save Changes",
     icon: Save,
@@ -388,6 +394,7 @@ export const OnlyEmoji: Story = {
 }
 
 export const States: Story = {
+  tags: ["no-sidebar"],
   parameters: withSnapshot({}),
   render: (args) => {
     const [asyncLoading, setAsyncLoading] = React.useState(false)

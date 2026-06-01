@@ -17,7 +17,7 @@ import {
   ChartVerticalBars,
   Table as TableIcon,
 } from "@/icons/app"
-import { F0DataChart } from "@/kits/F0DataChart"
+import { DataChartEmptyStateView, F0DataChart } from "@/kits/F0DataChart"
 import {
   BarChartSkeleton,
   FunnelChartSkeleton,
@@ -435,8 +435,8 @@ export function ChartItem<Filters extends FiltersDefinition>({
     [actions, downloadActions]
   )
 
-  const effectiveError =
-    error ?? (!isLoading && !data ? new Error("No data available") : undefined)
+  // No fabricated error when data is absent — `F0DataChart` (or the explicit
+  // fallback below for `!data`) renders a proper empty state instead.
 
   // Determine which chart type options are available for this chart
   const currentOrientation =
@@ -506,7 +506,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
       description={item.description}
       explanation={item.explanation}
       isLoading={isLoading}
-      error={effectiveError}
+      error={error}
       onRetry={retry}
       skeleton={chartSkeleton(item.chart)}
       actions={allActions}
@@ -517,8 +517,8 @@ export function ChartItem<Filters extends FiltersDefinition>({
       isFullscreen={isFullscreen}
       onFullscreenChange={onFullscreenChange}
     >
-      {data &&
-        (viewMode === "table" ? (
+      {data ? (
+        viewMode === "table" ? (
           <ChartTableView config={item.chart} data={data} />
         ) : (
           <div ref={chartContainerRef} className="h-full w-full px-4 py-3">
@@ -526,7 +526,12 @@ export function ChartItem<Filters extends FiltersDefinition>({
               {...buildChartProps(item as DashboardChartItem, data)}
             />
           </div>
-        ))}
+        )
+      ) : !isLoading ? (
+        <div className="h-full w-full px-4 py-3">
+          <DataChartEmptyStateView chartType={item.chart.type} />
+        </div>
+      ) : null}
     </DashboardItem>
   )
 }

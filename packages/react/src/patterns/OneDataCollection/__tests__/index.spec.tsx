@@ -1,7 +1,8 @@
 import { act, screen, waitFor, within } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 import { LayoutGrid } from "lucide-react"
-import { describe, expect, test, vi } from "vitest"
+import { useEffect, useState } from "react"
+import { beforeAll, describe, expect, test, vi } from "vitest"
 import { Observable } from "zen-observable-ts"
 
 import type { FiltersDefinition } from "@/patterns/OneFilterPicker"
@@ -25,7 +26,10 @@ import {
 } from "@/testing/test-utils"
 
 import { useDataCollectionData } from "../hooks/useDataCollectionData/useDataCollectionData"
+import { useDataCollectionItemNavigation } from "../hooks/useDataCollectionItemNavigation"
+import { getDataCollectionItemNavigationDataStateSetter } from "../hooks/useDataCollectionItemNavigation/internal"
 import {
+  DataCollectionPaginatedFetchOptions,
   DataCollectionSource,
   useDataCollectionSource,
 } from "../hooks/useDataCollectionSource"
@@ -47,6 +51,780 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
     {children}
   </I18nProvider>
 )
+
+class MockIntersectionObserver implements IntersectionObserver {
+  readonly root = null
+  readonly rootMargin = ""
+  readonly thresholds = []
+
+  disconnect = vi.fn()
+  observe = vi.fn()
+  takeRecords = vi.fn(() => [])
+  unobserve = vi.fn()
+}
+
+beforeAll(() => {
+  vi.stubGlobal("IntersectionObserver", MockIntersectionObserver)
+})
+
+type ItemNavigationPerson = {
+  id: number
+  name: string
+}
+
+type ItemNavigationFetchResult = {
+  records: ItemNavigationPerson[]
+  total: number
+  perPage: number
+  type: "infinite-scroll"
+  cursor: string | null
+  hasMore: boolean
+}
+
+type ItemNavigationFetchData = (
+  options: DataCollectionPaginatedFetchOptions<
+    FiltersDefinition,
+    NavigationFiltersDefinition
+  >
+) => ItemNavigationFetchResult | Promise<ItemNavigationFetchResult>
+
+const itemNavigationColumns = [
+  { label: "Name", render: (item: ItemNavigationPerson) => item.name },
+]
+
+const itemNavigationPeople: ItemNavigationPerson[] = [
+  { id: 1, name: "Ada" },
+  { id: 2, name: "Bert" },
+  { id: 3, name: "Cleo" },
+  { id: 4, name: "Dora" },
+  { id: 5, name: "Eli" },
+]
+
+const ItemNavigationStatus = ({
+  fetchData,
+  defaultActiveItemId = 1,
+  snapshotMode,
+  snapshotKey,
+}: {
+  fetchData: ItemNavigationFetchData
+  defaultActiveItemId?: number
+  snapshotMode?: "live" | "session" | "manual"
+  snapshotKey?: string
+}) => {
+  const itemNavigation = useDataCollectionItemNavigation<ItemNavigationPerson>({
+    defaultActiveItemId,
+    snapshotMode,
+    snapshotKey,
+    idProvider: (item) => item.id,
+  })
+  const dataSource = useDataCollectionSource<ItemNavigationPerson>(
+    {
+      dataAdapter: {
+        paginationType: "infinite-scroll",
+        perPage: 2,
+        fetchData,
+      },
+      itemUrl: (item) => `/people/${item.id}`,
+      itemOnClick: (item) => () => itemNavigation.setActiveItemId(item.id),
+    },
+    [fetchData]
+  )
+
+  return (
+    <>
+      <div data-testid="active-name">
+        {itemNavigation.activeItem?.name ?? "none"}
+      </div>
+      <div data-testid="absolute-index">
+        {itemNavigation.absoluteIndex ?? "none"}
+      </div>
+      <div data-testid="loaded-count">{itemNavigation.loadedItemsCount}</div>
+      <div data-testid="controls-current-index">
+        {itemNavigation.controls?.currentIndex ?? "none"}
+      </div>
+      <div data-testid="controls-total-count">
+        {itemNavigation.controls?.totalCount ?? "none"}
+      </div>
+      <div data-testid="next-url">{itemNavigation.nextItemUrl ?? "none"}</div>
+      <div data-testid="controls-active-url">
+        {itemNavigation.controls?.activeItemUrl ?? "none"}
+      </div>
+      <div data-testid="is-navigating">
+        {String(itemNavigation.isNavigating)}
+      </div>
+      <div data-testid="ready">{String(itemNavigation.isReady)}</div>
+      <button type="button" onClick={itemNavigation.goToNext}>
+        Next item
+      </button>
+      <button type="button" onClick={itemNavigation.goToPrevious}>
+        Previous item
+      </button>
+      <button type="button" onClick={() => itemNavigation.openItem(3)}>
+        Select Cleo
+      </button>
+      <button type="button" onClick={itemNavigation.resetSnapshot}>
+        Reset snapshot
+      </button>
+      <button type="button" onClick={itemNavigation.closeItem}>
+        Close item
+      </button>
+      <OneDataCollection
+        source={dataSource}
+        storage={false}
+        itemNavigation={itemNavigation}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              columns: itemNavigationColumns,
+            },
+          },
+        ]}
+      />
+    </>
+  )
+}
+
+const ItemNavigationPageStatus = () => {
+  const [records, setRecords] = useState(itemNavigationPeople)
+  const itemNavigation = useDataCollectionItemNavigation<ItemNavigationPerson>({
+    defaultActiveItemId: 2,
+    snapshotMode: "session",
+    idProvider: (item) => item.id,
+  })
+
+  const dataSource = useDataCollectionSource<ItemNavigationPerson>(
+    {
+      dataAdapter: {
+        paginationType: "pages",
+        perPage: 2,
+        fetchData: ({ pagination }) => {
+          const currentPage = pagination.currentPage ?? 1
+          const start = (currentPage - 1) * 2
+          return {
+            records: records.slice(start, start + 2),
+            total: records.length,
+            perPage: 2,
+            type: "pages" as const,
+            currentPage,
+            pagesCount: Math.ceil(records.length / 2),
+          }
+        },
+      },
+    },
+    [records]
+  )
+
+  return (
+    <>
+      <div data-testid="active-name">
+        {itemNavigation.activeItem?.name ?? "none"}
+      </div>
+      <div data-testid="active-index">{itemNavigation.activeIndex}</div>
+      <div data-testid="absolute-index">
+        {itemNavigation.absoluteIndex ?? "none"}
+      </div>
+      <div data-testid="loaded-count">{itemNavigation.loadedItemsCount}</div>
+      <button type="button" onClick={itemNavigation.goToNext}>
+        Next item
+      </button>
+      <button
+        type="button"
+        onClick={() =>
+          setRecords((currentRecords) =>
+            currentRecords.map((record) =>
+              record.id === 3 ? { ...record, name: "Cleo updated" } : record
+            )
+          )
+        }
+      >
+        Update active
+      </button>
+      <OneDataCollection
+        source={dataSource}
+        storage={false}
+        itemNavigation={itemNavigation}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              columns: itemNavigationColumns,
+            },
+          },
+        ]}
+      />
+    </>
+  )
+}
+
+const ItemNavigationAsyncPageStatus = () => {
+  const itemNavigation = useDataCollectionItemNavigation<ItemNavigationPerson>({
+    defaultActiveItemId: 2,
+    snapshotMode: "session",
+    idProvider: (item) => item.id,
+  })
+
+  const dataSource = useDataCollectionSource<ItemNavigationPerson>({
+    dataAdapter: {
+      paginationType: "pages",
+      perPage: 2,
+      fetchData: async ({ pagination }) => {
+        await new Promise((resolve) => setTimeout(resolve, 10))
+        const currentPage = pagination.currentPage ?? 1
+        const start = (currentPage - 1) * 2
+
+        return {
+          records: itemNavigationPeople.slice(start, start + 2),
+          total: itemNavigationPeople.length,
+          perPage: 2,
+          type: "pages" as const,
+          currentPage,
+          pagesCount: Math.ceil(itemNavigationPeople.length / 2),
+        }
+      },
+    },
+  })
+
+  return (
+    <>
+      <div data-testid="active-name">
+        {itemNavigation.activeItem?.name ?? "none"}
+      </div>
+      <div data-testid="controls-ready">
+        {String(itemNavigation.controls !== null)}
+      </div>
+      <div data-testid="controls-current-index">
+        {itemNavigation.controls?.currentIndex ?? "none"}
+      </div>
+      <button type="button" onClick={itemNavigation.goToNext}>
+        Next item
+      </button>
+      <button type="button" onClick={itemNavigation.goToPrevious}>
+        Previous item
+      </button>
+      <OneDataCollection
+        source={dataSource}
+        storage={false}
+        itemNavigation={itemNavigation}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              columns: itemNavigationColumns,
+            },
+          },
+        ]}
+      />
+    </>
+  )
+}
+
+const ItemNavigationRecordRefreshStatus = () => {
+  const [records, setRecords] = useState(itemNavigationPeople.slice(0, 3))
+  const itemNavigation = useDataCollectionItemNavigation<ItemNavigationPerson>({
+    defaultActiveItemId: 3,
+    snapshotMode: "session",
+    idProvider: (item) => item.id,
+  })
+
+  const dataSource = useDataCollectionSource<ItemNavigationPerson>(
+    {
+      dataAdapter: {
+        fetchData: () => ({ records }),
+      },
+    },
+    [records]
+  )
+
+  return (
+    <>
+      <div data-testid="active-name">
+        {itemNavigation.activeItem?.name ?? "none"}
+      </div>
+      <button
+        type="button"
+        onClick={() =>
+          setRecords((currentRecords) =>
+            currentRecords.map((record) =>
+              record.id === 3 ? { ...record, name: "Cleo updated" } : record
+            )
+          )
+        }
+      >
+        Update active
+      </button>
+      <OneDataCollection
+        source={dataSource}
+        storage={false}
+        itemNavigation={itemNavigation}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              columns: itemNavigationColumns,
+            },
+          },
+        ]}
+      />
+    </>
+  )
+}
+
+const ItemNavigationSnapshotStatus = () => {
+  const [snapshotKey, setSnapshotKey] = useState("first")
+  const [records, setRecords] = useState(itemNavigationPeople.slice(0, 3))
+
+  const fetchData: ItemNavigationFetchData = () => ({
+    records,
+    total: records.length,
+    perPage: records.length || 1,
+    type: "infinite-scroll" as const,
+    cursor: null,
+    hasMore: false,
+  })
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setRecords(itemNavigationPeople.slice(0, 2))}
+      >
+        Remove active
+      </button>
+      <button type="button" onClick={() => setSnapshotKey("second")}>
+        New snapshot
+      </button>
+      <ItemNavigationStatus
+        fetchData={fetchData}
+        defaultActiveItemId={3}
+        snapshotKey={snapshotKey}
+      />
+    </>
+  )
+}
+
+const ItemNavigationSessionSnapshotStatus = () => {
+  const [records, setRecords] = useState(itemNavigationPeople.slice(0, 3))
+
+  const fetchData: ItemNavigationFetchData = () => ({
+    records,
+    total: records.length,
+    perPage: records.length || 1,
+    type: "infinite-scroll" as const,
+    cursor: null,
+    hasMore: false,
+  })
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setRecords(itemNavigationPeople.slice(0, 2))}
+      >
+        Remove active
+      </button>
+      <ItemNavigationStatus
+        fetchData={fetchData}
+        defaultActiveItemId={3}
+        snapshotMode="session"
+      />
+    </>
+  )
+}
+
+const ItemNavigationBackgroundGrowthStatus = ({
+  snapshotMode,
+}: {
+  snapshotMode: "manual" | "session"
+}) => {
+  const [records, setRecords] = useState(itemNavigationPeople.slice(0, 3))
+
+  const fetchData: ItemNavigationFetchData = () => ({
+    records,
+    total: records.length,
+    perPage: records.length || 1,
+    type: "infinite-scroll" as const,
+    cursor: null,
+    hasMore: false,
+  })
+
+  return (
+    <>
+      <button type="button" onClick={() => setRecords(itemNavigationPeople)}>
+        Add background records
+      </button>
+      <ItemNavigationStatus
+        fetchData={fetchData}
+        defaultActiveItemId={2}
+        snapshotMode={snapshotMode}
+        snapshotKey={snapshotMode === "manual" ? "stable" : undefined}
+      />
+    </>
+  )
+}
+
+const ItemNavigationLiveSnapshotStatus = () => {
+  const [records, setRecords] = useState(itemNavigationPeople.slice(0, 3))
+
+  const fetchData: ItemNavigationFetchData = () => ({
+    records,
+    total: records.length,
+    perPage: records.length || 1,
+    type: "infinite-scroll" as const,
+    cursor: null,
+    hasMore: false,
+  })
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setRecords(itemNavigationPeople.slice(0, 2))}
+      >
+        Remove active
+      </button>
+      <ItemNavigationStatus
+        fetchData={fetchData}
+        defaultActiveItemId={3}
+        snapshotMode="live"
+      />
+    </>
+  )
+}
+
+const ItemNavigationLoadingSnapshotStatus = () => {
+  const [snapshotKey, setSnapshotKey] = useState("first")
+  const [records, setRecords] = useState(itemNavigationPeople.slice(0, 3))
+  const [loading, setLoading] = useState(false)
+
+  const itemNavigation = useDataCollectionItemNavigation<ItemNavigationPerson>({
+    defaultActiveItemId: 3,
+    snapshotKey,
+    idProvider: (item) => item.id,
+  })
+  const setItemNavigationDataState =
+    getDataCollectionItemNavigationDataStateSetter(itemNavigation)
+
+  useEffect(() => {
+    if (!loading) return
+
+    setItemNavigationDataState?.({
+      source: {},
+      data: {
+        type: "flat",
+        records: records.map((record) => ({
+          ...record,
+          [GROUP_ID_SYMBOL]: undefined,
+        })),
+        groups: [],
+      },
+      paginationInfo: null,
+      setPage: () => {},
+      loadMore: () => {},
+      isLoading: true,
+      isLoadingMore: false,
+    })
+  }, [loading, records, setItemNavigationDataState])
+
+  return (
+    <>
+      <div data-testid="active-name">
+        {itemNavigation.activeItem?.name ?? "none"}
+      </div>
+      <div data-testid="loaded-count">{itemNavigation.loadedItemsCount}</div>
+      <button
+        type="button"
+        onClick={() => {
+          setItemNavigationDataState?.({
+            source: {},
+            data: {
+              type: "flat",
+              records: records.map((record) => ({
+                ...record,
+                [GROUP_ID_SYMBOL]: undefined,
+              })),
+              groups: [],
+            },
+            paginationInfo: null,
+            setPage: () => {},
+            loadMore: () => {},
+            isLoading: loading,
+            isLoadingMore: false,
+          })
+        }}
+      >
+        Register state
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          setLoading(true)
+        }}
+      >
+        Start loading
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          setLoading(true)
+          setSnapshotKey("second")
+        }}
+      >
+        Start loading and change snapshot key
+      </button>
+      <button type="button" onClick={() => setSnapshotKey("second")}>
+        Change snapshot key
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          setRecords(itemNavigationPeople.slice(0, 2))
+          setLoading(false)
+        }}
+      >
+        Finish with smaller data
+      </button>
+    </>
+  )
+}
+
+const ItemNavigationPaginationFreezeStatus = () => {
+  const [records, setRecords] = useState(itemNavigationPeople.slice(0, 5))
+  const itemNavigation = useDataCollectionItemNavigation<ItemNavigationPerson>({
+    defaultActiveItemId: 5,
+    snapshotMode: "session",
+    idProvider: (item) => item.id,
+  })
+
+  const fetchData: ItemNavigationFetchData = ({ pagination }) => {
+    const cursor = pagination.cursor ? Number(pagination.cursor) : 0
+    const pageRecords = records.slice(cursor, cursor + 5)
+    const nextCursor = cursor + pageRecords.length
+
+    return {
+      records: pageRecords,
+      total: records.length,
+      perPage: 5,
+      type: "infinite-scroll" as const,
+      cursor: nextCursor < records.length ? String(nextCursor) : null,
+      hasMore: nextCursor < records.length,
+    }
+  }
+
+  const dataSource = useDataCollectionSource<ItemNavigationPerson>(
+    {
+      dataAdapter: {
+        paginationType: "infinite-scroll",
+        perPage: 5,
+        fetchData,
+      },
+    },
+    [records]
+  )
+
+  return (
+    <>
+      <div data-testid="active-name">
+        {itemNavigation.activeItem?.name ?? "none"}
+      </div>
+      <div data-testid="can-go-next">{String(itemNavigation.hasNext)}</div>
+      <div data-testid="controls-total-count">
+        {itemNavigation.controls?.totalCount ?? "none"}
+      </div>
+      <button
+        type="button"
+        onClick={() => {
+          setRecords(itemNavigationPeople.slice(0, 3))
+        }}
+      >
+        Remove live records
+      </button>
+      <OneDataCollection
+        source={dataSource}
+        storage={false}
+        itemNavigation={itemNavigation}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              columns: itemNavigationColumns,
+            },
+          },
+        ]}
+      />
+    </>
+  )
+}
+
+const ItemNavigationFailedLoadMoreStatus = () => {
+  const [shouldFail, setShouldFail] = useState(false)
+  const fetchData = vi.fn<ItemNavigationFetchData>(async ({ pagination }) => {
+    const cursor = pagination.cursor ? Number(pagination.cursor) : 0
+
+    if (shouldFail && cursor > 0) {
+      throw new Error("Failed to load more")
+    }
+
+    const pageRecords = itemNavigationPeople.slice(cursor, cursor + 2)
+    const nextCursor = cursor + pageRecords.length
+
+    return {
+      records: pageRecords,
+      total: itemNavigationPeople.length,
+      perPage: 2,
+      type: "infinite-scroll" as const,
+      cursor:
+        nextCursor < itemNavigationPeople.length ? String(nextCursor) : null,
+      hasMore: nextCursor < itemNavigationPeople.length,
+    }
+  })
+
+  return (
+    <>
+      <button type="button" onClick={() => setShouldFail(true)}>
+        Make load more fail
+      </button>
+      <ItemNavigationStatus
+        fetchData={fetchData}
+        defaultActiveItemId={2}
+        snapshotMode="session"
+      />
+    </>
+  )
+}
+
+const UnsupportedItemNavigationVisualizationStatus = () => {
+  const itemNavigation = useDataCollectionItemNavigation<ItemNavigationPerson>({
+    defaultActiveItemId: 1,
+    idProvider: (item) => item.id,
+  })
+
+  const dataSource = useDataCollectionSource<ItemNavigationPerson>({
+    dataAdapter: {
+      fetchData: () => ({ records: itemNavigationPeople.slice(0, 2) }),
+    },
+  })
+
+  return (
+    <>
+      <div data-testid="ready">{String(itemNavigation.isReady)}</div>
+      <OneDataCollection
+        source={dataSource}
+        storage={false}
+        itemNavigation={itemNavigation}
+        visualizations={[
+          {
+            type: "custom",
+            label: "Custom",
+            icon: LayoutGrid,
+            component: ({ source }) => {
+              const { data } = useDataCollectionData<
+                ItemNavigationPerson,
+                FiltersDefinition,
+                SortingsDefinition,
+                SummariesDefinition,
+                NavigationFiltersDefinition,
+                GroupingDefinition<ItemNavigationPerson>
+              >(source)
+
+              return (
+                <div>
+                  {data.records.map((record) => (
+                    <div key={record.id}>{record.name}</div>
+                  ))}
+                </div>
+              )
+            },
+          },
+        ]}
+      />
+    </>
+  )
+}
+
+const CustomItemNavigationVisualizationStatus = () => {
+  const itemNavigation = useDataCollectionItemNavigation<ItemNavigationPerson>({
+    defaultActiveItemId: 1,
+    idProvider: (item) => item.id,
+  })
+
+  const dataSource = useDataCollectionSource<ItemNavigationPerson>({
+    dataAdapter: {
+      fetchData: () => ({ records: itemNavigationPeople.slice(0, 2) }),
+    },
+  })
+
+  return (
+    <>
+      <div data-testid="ready">{String(itemNavigation.isReady)}</div>
+      <div data-testid="active-name">
+        {itemNavigation.activeItem?.name ?? "none"}
+      </div>
+      <OneDataCollection
+        source={dataSource}
+        storage={false}
+        itemNavigation={itemNavigation}
+        visualizations={[
+          {
+            type: "custom",
+            label: "Custom",
+            icon: LayoutGrid,
+            component: ({ source, onDataStateChange }) => {
+              const {
+                data,
+                paginationInfo,
+                setPage,
+                isLoading,
+                isLoadingMore,
+                loadMore,
+              } = useDataCollectionData<
+                ItemNavigationPerson,
+                FiltersDefinition,
+                SortingsDefinition,
+                SummariesDefinition,
+                NavigationFiltersDefinition,
+                GroupingDefinition<ItemNavigationPerson>
+              >(source)
+
+              useEffect(() => {
+                onDataStateChange?.({
+                  source: {
+                    idProvider: source.idProvider,
+                    itemUrl: source.itemUrl,
+                  },
+                  data,
+                  paginationInfo,
+                  setPage,
+                  loadMore,
+                  isLoading,
+                  isLoadingMore,
+                })
+              }, [
+                data,
+                paginationInfo,
+                setPage,
+                loadMore,
+                isLoading,
+                isLoadingMore,
+                source.idProvider,
+                source.itemUrl,
+                onDataStateChange,
+              ])
+
+              return (
+                <div>
+                  {data.records.map((record) => (
+                    <div key={record.id}>{record.name}</div>
+                  ))}
+                </div>
+              )
+            },
+          },
+        ]}
+      />
+    </>
+  )
+}
 
 describe("Collections", () => {
   test("renders with basic search filter", async () => {
@@ -313,6 +1091,413 @@ describe("Collections", () => {
     )
 
     expect(result.current).toBeDefined()
+  })
+
+  test("connects item navigation to the active collection data without extra fetching", async () => {
+    const fetchData = vi.fn<ItemNavigationFetchData>(({ pagination }) => {
+      const cursor = pagination.cursor ? Number(pagination.cursor) : 0
+      const records = itemNavigationPeople.slice(cursor, cursor + 2)
+      const nextCursor = cursor + records.length
+
+      return {
+        records,
+        total: itemNavigationPeople.length,
+        perPage: 2,
+        type: "infinite-scroll" as const,
+        cursor:
+          nextCursor < itemNavigationPeople.length ? String(nextCursor) : null,
+        hasMore: nextCursor < itemNavigationPeople.length,
+      }
+    })
+
+    render(
+      <TestWrapper>
+        <ItemNavigationStatus fetchData={fetchData} />
+      </TestWrapper>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Ada")
+    })
+
+    expect(screen.getByTestId("ready")).toHaveTextContent("true")
+    expect(screen.getByTestId("absolute-index")).toHaveTextContent("0")
+    expect(screen.getByTestId("loaded-count")).toHaveTextContent("2")
+    expect(screen.getByTestId("controls-current-index")).toHaveTextContent("0")
+    expect(screen.getByTestId("controls-total-count")).toHaveTextContent("5")
+    expect(screen.getByTestId("controls-active-url")).toHaveTextContent(
+      "/people/1"
+    )
+    expect(screen.getByTestId("next-url")).toHaveTextContent("/people/2")
+    expect(fetchData).toHaveBeenCalledTimes(1)
+  })
+
+  test("loads the next infinite-scroll page when navigating past loaded records", async () => {
+    const fetchData = vi.fn<ItemNavigationFetchData>(({ pagination }) => {
+      const cursor = pagination.cursor ? Number(pagination.cursor) : 0
+      const records = itemNavigationPeople.slice(cursor, cursor + 2)
+      const nextCursor = cursor + records.length
+
+      return {
+        records,
+        total: itemNavigationPeople.length,
+        perPage: 2,
+        type: "infinite-scroll" as const,
+        cursor:
+          nextCursor < itemNavigationPeople.length ? String(nextCursor) : null,
+        hasMore: nextCursor < itemNavigationPeople.length,
+      }
+    })
+
+    render(
+      <TestWrapper>
+        <ItemNavigationStatus fetchData={fetchData} />
+      </TestWrapper>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Ada")
+    })
+
+    await userEvent.click(screen.getByRole("button", { name: "Next item" }))
+    expect(screen.getByTestId("active-name")).toHaveTextContent("Bert")
+
+    await userEvent.click(screen.getByRole("button", { name: "Next item" }))
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Cleo")
+    })
+
+    expect(screen.getByTestId("absolute-index")).toHaveTextContent("2")
+    expect(screen.getByTestId("loaded-count")).toHaveTextContent("4")
+    expect(fetchData).toHaveBeenCalledTimes(2)
+  })
+
+  test("replaces session snapshot when page-based navigation loads another page", async () => {
+    render(
+      <TestWrapper>
+        <ItemNavigationPageStatus />
+      </TestWrapper>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Bert")
+    })
+
+    await userEvent.click(screen.getByRole("button", { name: "Next item" }))
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Cleo")
+    })
+
+    expect(screen.getByTestId("active-index")).toHaveTextContent("0")
+    expect(screen.getByTestId("absolute-index")).toHaveTextContent("2")
+    expect(screen.getByTestId("loaded-count")).toHaveTextContent("2")
+  })
+
+  test("keeps controls while async page-based navigation loads boundary pages", async () => {
+    render(
+      <TestWrapper>
+        <ItemNavigationAsyncPageStatus />
+      </TestWrapper>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Bert")
+    })
+
+    await userEvent.click(screen.getByRole("button", { name: "Next item" }))
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Cleo")
+    })
+
+    expect(screen.getByTestId("controls-ready")).toHaveTextContent("true")
+    expect(screen.getByTestId("controls-current-index")).toHaveTextContent("2")
+
+    await userEvent.click(screen.getByRole("button", { name: "Previous item" }))
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Bert")
+    })
+
+    expect(screen.getByTestId("controls-ready")).toHaveTextContent("true")
+    expect(screen.getByTestId("controls-current-index")).toHaveTextContent("1")
+  })
+
+  test("refreshes same-id snapshot records after refetch", async () => {
+    render(
+      <TestWrapper>
+        <ItemNavigationRecordRefreshStatus />
+      </TestWrapper>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Cleo")
+    })
+
+    await userEvent.click(screen.getByRole("button", { name: "Update active" }))
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent(
+        "Cleo updated"
+      )
+    })
+  })
+
+  test("keeps snapshot navigation stable until the snapshot key changes", async () => {
+    render(
+      <TestWrapper>
+        <ItemNavigationSnapshotStatus />
+      </TestWrapper>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Cleo")
+    })
+
+    await userEvent.click(screen.getByRole("button", { name: "Remove active" }))
+
+    await waitFor(() => {
+      expect(screen.getByText("Bert")).toBeInTheDocument()
+    })
+
+    expect(screen.getByTestId("active-name")).toHaveTextContent("Cleo")
+    expect(screen.getByTestId("loaded-count")).toHaveTextContent("3")
+
+    await userEvent.click(screen.getByRole("button", { name: "New snapshot" }))
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("none")
+    })
+
+    expect(screen.getByTestId("loaded-count")).toHaveTextContent("2")
+  })
+
+  test("keeps session snapshots stable until resetSnapshot is called", async () => {
+    render(
+      <TestWrapper>
+        <ItemNavigationSessionSnapshotStatus />
+      </TestWrapper>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Cleo")
+    })
+
+    await userEvent.click(screen.getByRole("button", { name: "Select Cleo" }))
+    await userEvent.click(screen.getByRole("button", { name: "Remove active" }))
+
+    await waitFor(() => {
+      expect(screen.getByText("Bert")).toBeInTheDocument()
+    })
+
+    expect(screen.getByTestId("active-name")).toHaveTextContent("Cleo")
+    expect(screen.getByTestId("loaded-count")).toHaveTextContent("3")
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Reset snapshot" })
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("none")
+    })
+    expect(screen.getByTestId("loaded-count")).toHaveTextContent("2")
+  })
+
+  test.each(["manual", "session"] as const)(
+    "does not grow %s snapshots from background collection growth",
+    async (snapshotMode) => {
+      render(
+        <TestWrapper>
+          <ItemNavigationBackgroundGrowthStatus snapshotMode={snapshotMode} />
+        </TestWrapper>
+      )
+
+      await waitFor(() => {
+        expect(screen.getByTestId("active-name")).toHaveTextContent("Bert")
+      })
+
+      expect(screen.getByTestId("loaded-count")).toHaveTextContent("3")
+      expect(screen.getByTestId("controls-total-count")).toHaveTextContent("3")
+
+      await userEvent.click(
+        screen.getByRole("button", { name: "Add background records" })
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("Eli")).toBeInTheDocument()
+      })
+
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Bert")
+      expect(screen.getByTestId("loaded-count")).toHaveTextContent("3")
+      expect(screen.getByTestId("controls-total-count")).toHaveTextContent("3")
+    }
+  )
+
+  test("keeps frozen snapshot pagination metadata after live data shrinks", async () => {
+    render(
+      <TestWrapper>
+        <ItemNavigationPaginationFreezeStatus />
+      </TestWrapper>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Eli")
+    })
+
+    expect(screen.getByTestId("controls-total-count")).toHaveTextContent("5")
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Remove live records" })
+    )
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Eli")).toHaveLength(1)
+    })
+
+    expect(screen.getByTestId("active-name")).toHaveTextContent("Eli")
+    expect(screen.getByTestId("can-go-next")).toHaveTextContent("false")
+    expect(screen.getByTestId("controls-total-count")).toHaveTextContent("5")
+  })
+
+  test("clears pending session navigation after a failed loadMore", async () => {
+    render(
+      <TestWrapper>
+        <ItemNavigationFailedLoadMoreStatus />
+      </TestWrapper>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Bert")
+    })
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Make load more fail" })
+    )
+    await userEvent.click(screen.getByRole("button", { name: "Next item" }))
+
+    await waitFor(() => {
+      expect(screen.getByTestId("is-navigating")).toHaveTextContent("false")
+    })
+
+    expect(screen.getByTestId("active-name")).toHaveTextContent("Bert")
+    expect(screen.getByTestId("loaded-count")).toHaveTextContent("2")
+  })
+
+  test("follows live collection data when snapshot mode is live", async () => {
+    render(
+      <TestWrapper>
+        <ItemNavigationLiveSnapshotStatus />
+      </TestWrapper>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Cleo")
+    })
+
+    await userEvent.click(screen.getByRole("button", { name: "Remove active" }))
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("none")
+    })
+    expect(screen.getByTestId("loaded-count")).toHaveTextContent("2")
+  })
+
+  test("closeItem clears active item and controls", async () => {
+    const fetchData = vi.fn<ItemNavigationFetchData>(() => ({
+      records: itemNavigationPeople.slice(0, 3),
+      total: 3,
+      perPage: 3,
+      type: "infinite-scroll" as const,
+      cursor: null,
+      hasMore: false,
+    }))
+
+    render(
+      <TestWrapper>
+        <ItemNavigationStatus fetchData={fetchData} />
+      </TestWrapper>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Ada")
+    })
+
+    await userEvent.click(screen.getByRole("button", { name: "Close item" }))
+
+    expect(screen.getByTestId("active-name")).toHaveTextContent("none")
+    expect(screen.getByTestId("controls-current-index")).toHaveTextContent(
+      "none"
+    )
+  })
+
+  test("resets snapshot with fresh data when snapshot key changes during loading", async () => {
+    render(
+      <TestWrapper>
+        <ItemNavigationLoadingSnapshotStatus />
+      </TestWrapper>
+    )
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Register state" })
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("Cleo")
+    })
+
+    await userEvent.click(
+      screen.getByRole("button", {
+        name: "Start loading and change snapshot key",
+      })
+    )
+    expect(screen.getByTestId("loaded-count")).toHaveTextContent("3")
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Finish with smaller data" })
+    )
+    await userEvent.click(
+      screen.getByRole("button", { name: "Register state" })
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId("active-name")).toHaveTextContent("none")
+    })
+
+    expect(screen.getByTestId("loaded-count")).toHaveTextContent("2")
+  })
+
+  test("does not register item navigation for unsupported visualizations", async () => {
+    render(
+      <TestWrapper>
+        <UnsupportedItemNavigationVisualizationStatus />
+      </TestWrapper>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText("Ada")).toBeInTheDocument()
+    })
+
+    expect(screen.getByTestId("ready")).toHaveTextContent("false")
+  })
+
+  test("registers item navigation data state from custom visualizations", async () => {
+    render(
+      <TestWrapper>
+        <CustomItemNavigationVisualizationStatus />
+      </TestWrapper>
+    )
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Ada").length).toBeGreaterThan(0)
+    })
+
+    await waitFor(() => {
+      expect(screen.getByTestId("ready")).toHaveTextContent("true")
+    })
+
+    expect(screen.getByTestId("active-name")).toHaveTextContent("Ada")
   })
 
   test("renders with custom visualization", async () => {

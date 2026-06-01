@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
-import { ReactElement, useRef, useState } from "react"
+import { ReactElement, useContext, useRef, useState } from "react"
 
 import type { StatusVariant } from "@/components/tags/F0TagStatus"
 
@@ -8,19 +8,20 @@ import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { IconType } from "@/components/F0Icon"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
-import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
 import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { ChevronDown, ChevronLeft, ChevronUp, Menu } from "@/icons/app"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
+import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
 import { F0OneSwitch } from "@/sds/ai/F0OneSwitch"
 import { Skeleton } from "@/ui/skeleton"
 
 import { Breadcrumbs, BreadcrumbsProps } from "../Breadcrumbs"
 import { FavoriteButton } from "../Favorites"
 import { ProductUpdates, ProductUpdatesProp } from "../ProductUpdates"
+import { PageHeaderNavigationContext } from "./PageHeaderNavigationContext"
 
 export type PageAction = {
   label: string
@@ -30,11 +31,14 @@ export type PageAction = {
       href: string
     }
   | {
+      onClick: () => void
+    }
+  | {
       actions: Array<{ label: string; href: string }>
     }
 )
 
-type NavigationProps = {
+export type NavigationProps = {
   previous?: {
     url: string
     title: string
@@ -120,6 +124,10 @@ export function PageHeader({
   oneSwitchAutoOpen,
 }: HeaderProps) {
   const { sidebarState, toggleSidebar } = useSidebar()
+  const contextNavigation = useContext(PageHeaderNavigationContext)
+  // Prop takes precedence over context so that existing consumers using the
+  // siblingsNavigation route-meta pattern are unaffected.
+  const effectiveNavigation = navigation ?? contextNavigation
 
   const breadcrumbsTree: typeof breadcrumbs = [
     {
@@ -131,13 +139,14 @@ export function PageHeader({
     ...breadcrumbs,
   ]
   const hasStatus = statusTag && Object.keys(statusTag).length !== 0
-  const hasNavigation = breadcrumbs.length > 0
+  const hasNavigation = embedded && breadcrumbs.length > 0
   const hasActions = !embedded && actions.length > 0
   const hasProductUpdates = !embedded && !!productUpdates?.isVisible
   const lastBreadcrumb = breadcrumbsTree[breadcrumbsTree.length - 1]
-  const parentBreadcrumb = hasNavigation
-    ? breadcrumbsTree[breadcrumbsTree.length - 2]
-    : null
+  const nav =
+    "navigation" in window ? (window as Record<string, any>).navigation : null
+  const canGoBack =
+    embedded && (nav ? !!nav.canGoBack : window.history.length > 1)
 
   return (
     <div
@@ -169,26 +178,21 @@ export function PageHeader({
         <div
           className={cn(
             "flex flex-grow items-center gap-2",
-            embedded && hasNavigation && "justify-center"
+            canGoBack && "justify-center"
           )}
         >
-          {embedded &&
-            hasNavigation &&
-            parentBreadcrumb &&
-            !("loading" in parentBreadcrumb) && (
-              <div className="absolute left-4">
-                <Link href={parentBreadcrumb.href}>
-                  <F0Button
-                    variant="ghost"
-                    hideLabel
-                    label="Back"
-                    icon={ChevronLeft}
-                    onClick={(e) => e.preventDefault()}
-                  />
-                </Link>
-              </div>
-            )}
-          {embedded && hasNavigation ? (
+          {embedded && canGoBack && (
+            <div className="absolute left-4">
+              <F0Button
+                variant="ghost"
+                hideLabel
+                label="Back"
+                icon={ChevronLeft}
+                onClick={() => window.history.back()}
+              />
+            </div>
+          )}
+          {canGoBack || hasNavigation ? (
             <div className="text-lg font-semibold text-f1-foreground">
               {"loading" in lastBreadcrumb ? (
                 <Skeleton className="h-4 w-24" />
@@ -233,33 +237,34 @@ export function PageHeader({
         )}
         {!embedded &&
           hasStatus &&
-          (navigation || hasActions || hasProductUpdates) && (
+          (effectiveNavigation || hasActions || hasProductUpdates) && (
             <div className="h-4 w-px bg-f1-border-secondary" />
           )}
-        {navigation && (
+        {effectiveNavigation && (
           <div className="flex items-center gap-3">
-            {navigation.counter && (
+            {effectiveNavigation.counter && (
               <span className="text-sm text-f1-foreground-secondary">
-                {navigation.counter.current}/{navigation.counter.total}
+                {effectiveNavigation.counter.current}/
+                {effectiveNavigation.counter.total}
               </span>
             )}
             <div className="flex items-center gap-2">
               <PageNavigationLink
                 icon={ChevronUp}
-                label={navigation.previous?.title || "Previous"}
-                href={navigation.previous?.url || ""}
-                disabled={!navigation.previous}
+                label={effectiveNavigation.previous?.title || "Previous"}
+                href={effectiveNavigation.previous?.url || ""}
+                disabled={!effectiveNavigation.previous}
               />
               <PageNavigationLink
                 icon={ChevronDown}
-                label={navigation.next?.title || "Next"}
-                href={navigation.next?.url || ""}
-                disabled={!navigation.next}
+                label={effectiveNavigation.next?.title || "Next"}
+                href={effectiveNavigation.next?.url || ""}
+                disabled={!effectiveNavigation.next}
               />
             </div>
           </div>
         )}
-        {navigation && hasActions && (
+        {effectiveNavigation && hasActions && (
           <div className="h-4 w-px bg-f1-border-secondary" />
         )}
         {(hasProductUpdates || hasActions) && (
@@ -312,6 +317,19 @@ function PageAction({ action }: { action: PageAction }): ReactElement {
     )
   }
 
+  if ("onClick" in action) {
+    return (
+      <F0Button
+        size="md"
+        variant="outline"
+        label={action.label}
+        icon={action.icon}
+        hideLabel
+        onClick={action.onClick}
+      />
+    )
+  }
+
   return (
     <Link
       href={action.href}
@@ -333,3 +351,9 @@ function PageAction({ action }: { action: PageAction }): ReactElement {
     </Link>
   )
 }
+
+export {
+  PageHeaderNavigationContext,
+  PageHeaderNavigationProvider,
+  usePageHeaderNavigation,
+} from "./PageHeaderNavigationContext"

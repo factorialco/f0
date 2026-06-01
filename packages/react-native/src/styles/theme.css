@@ -238,7 +238,8 @@
   --radius-md: 0.75rem;
   --radius-lg: 0.875rem;
   --radius-xl: 1rem;
-  --radius-2xl: 1.5rem;
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.5rem;
   --radius-full: 9999px;
 
   /* F0 Semantic Colors - References to variant-defined values */
@@ -273,6 +274,7 @@
     --f0-background-accent-bold-hover
   );
   --color-f0-background-promote: var(--f0-background-promote);
+  --color-f0-background-promote-bold: var(--f0-background-promote-bold);
   --color-f0-background-promote-hover: var(--f0-background-promote-hover);
   --color-f0-background-critical: var(--f0-background-critical);
   --color-f0-background-critical-bold: var(--f0-background-critical-bold);
@@ -387,6 +389,7 @@
       --f0-background-accent-bold: hsl(348, 80%, 50%);
       --f0-background-accent-bold-hover: hsl(348, 80%, 42%);
       --f0-background-promote: hsla(38, 92%, 54%, 0.3);
+      --f0-background-promote-bold: hsl(38, 92%, 54%);
       --f0-background-promote-hover: hsla(38, 92%, 54%, 0.4);
       --f0-background-critical: hsla(5, 100%, 65%, 0.1);
       --f0-background-critical-bold: hsl(4, 61%, 49%);
@@ -481,6 +484,7 @@
       --f0-background-accent-bold: hsl(348, 80%, 42%);
       --f0-background-accent-bold-hover: hsl(348, 80%, 50%);
       --f0-background-promote: hsla(38, 79%, 45%, 0.3);
+      --f0-background-promote-bold: hsl(38, 79%, 45%);
       --f0-background-promote-hover: hsla(38, 79%, 45%, 0.4);
       --f0-background-critical: hsla(4, 61%, 49%, 0.1);
       --f0-background-critical-bold: hsl(4, 61%, 49%);

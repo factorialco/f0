@@ -469,7 +469,7 @@ export const MainContent: React.FC<MainContentProps> = ({
               options={groups}
               value={selectedGroup}
               className={cn(
-                "h-8 rounded-[10px] bg-transparent py-[5px]",
+                "h-8 rounded bg-transparent py-[5px]",
                 selectedGroup === "all" ? "text-f1-foreground-secondary" : ""
               )}
             />

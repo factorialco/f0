@@ -158,6 +158,11 @@ Primitive docs should include:
 
 ## Formatting
 
+Run formatter after every code change in `packages/react-native`.
+
+- Required loop: edit -> `pnpm format <changed-paths>` -> continue editing.
+- If path list is inconvenient, run `pnpm format` for full default scope.
+
 ### Markdown code blocks with JSX
 
 Always add `<!-- prettier-ignore -->` on the line before any ` ```tsx ` fence that contains JSX. Without this, `oxfmt` inserts semicolons before JSX expressions due to ASI protection (`"semi": false`). Pure import/variable-only blocks don't need it.

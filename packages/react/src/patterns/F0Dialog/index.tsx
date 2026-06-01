@@ -15,6 +15,7 @@ export type {
   F0DialogPrimaryAction,
   F0DialogPrimaryActionItem,
   F0DialogSecondaryAction,
+  F0DialogSecondaryActionItem,
 } from "./types"
 
 /**

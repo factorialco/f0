@@ -3,6 +3,7 @@ import { useEffect } from "react"
 
 import { useDataCollectionData } from "@/patterns/OneDataCollection/hooks/useDataCollectionData"
 import { useInfiniteScrollPagination } from "@/patterns/OneDataCollection/hooks/useInfiniteScrollPagination"
+import { usePublishDataState } from "@/patterns/OneDataCollection/hooks/usePublishDataState"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import {
   isInfiniteScrollPagination,
@@ -62,6 +63,7 @@ export const ListCollection = <
   onSelectItems,
   onLoadData,
   onLoadError,
+  onDataStateChange,
   tmpFullWidth,
 }: ListCollectionProps<
   Record,
@@ -104,6 +106,17 @@ export const ListCollection = <
   }, [paginationInfo?.total, data.records])
 
   const { isLoading } = source
+
+  usePublishDataState({
+    source,
+    data,
+    paginationInfo,
+    setPage,
+    loadMore,
+    isLoading,
+    isLoadingMore,
+    onDataStateChange,
+  })
 
   // Infinite scroll pagination
   const { loadingIndicatorRef } = useInfiniteScrollPagination(

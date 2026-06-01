@@ -763,3 +763,584 @@ export function inferFieldType(
  * Extract the inferred type from an F0 form schema
  */
 export type InferF0FormValues<T extends z.ZodObject<z.ZodRawShape>> = z.infer<T>
+
+// ============================================================================
+// f0FormField shortcut helpers
+// ============================================================================
+
+/**
+ * Shortcut helpers for common field types.
+ * These merge with the `f0FormField` function via TypeScript declaration merging,
+ * eliminating the need to manually create Zod schemas for the most common cases.
+ *
+ * @example
+ * // Instead of:
+ * name: f0FormField(z.string(), { label: "Name" })
+ * // Write:
+ * name: f0FormField.text({ label: "Name" })
+ *
+ * // Optional fields:
+ * nickname: f0FormField.text({ label: "Nickname", optional: true })
+ */
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace f0FormField {
+  // ---- text ----------------------------------------------------------------
+
+  /** @internal */
+  type TextConfig = Omit<F0StringTextConfig, "fieldType"> & {
+    optional?: boolean
+    minLength?: number
+    maxLength?: number
+  }
+
+  export function text(
+    config: TextConfig & { optional: true }
+  ): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>
+  export function text(
+    config: TextConfig & { optional?: false | undefined }
+  ): z.ZodString & F0ZodType<z.ZodString>
+  export function text({
+    optional,
+    minLength,
+    maxLength,
+    ...config
+  }: TextConfig) {
+    let schema = z.string()
+    const effectiveMin = !optional && minLength === undefined ? 1 : minLength
+    if (effectiveMin !== undefined) schema = schema.min(effectiveMin)
+    if (maxLength !== undefined) schema = schema.max(maxLength)
+    const finalSchema = optional ? schema.optional() : schema
+    return f0FormField(finalSchema as never, config as never)
+  }
+
+  // ---- email ---------------------------------------------------------------
+
+  /** @internal */
+  type EmailConfig = Omit<F0StringTextConfig, "fieldType"> & {
+    optional?: boolean
+  }
+
+  export function email(
+    config: EmailConfig & { optional: true }
+  ): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>
+  export function email(
+    config: EmailConfig & { optional?: false | undefined }
+  ): z.ZodString & F0ZodType<z.ZodString>
+  export function email({ optional, ...config }: EmailConfig) {
+    const schema = optional ? z.string().email().optional() : z.string().email()
+    return f0FormField(schema as never, config as never)
+  }
+
+  // ---- textarea ------------------------------------------------------------
+
+  /** @internal */
+  type TextareaConfig = Omit<F0StringTextareaConfig, "fieldType"> & {
+    optional?: boolean
+  }
+
+  export function textarea(
+    config: TextareaConfig & { optional: true }
+  ): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>
+  export function textarea(
+    config: TextareaConfig & { optional?: false | undefined }
+  ): z.ZodString & F0ZodType<z.ZodString>
+  export function textarea({ optional, ...config }: TextareaConfig) {
+    const schema = optional ? z.string().optional() : z.string().min(1)
+    return f0FormField(
+      schema as never,
+      { ...config, fieldType: "textarea" } as never
+    )
+  }
+
+  // ---- number --------------------------------------------------------------
+
+  /** @internal */
+  type NumberConfig = Omit<F0NumberInputConfig, "fieldType"> & {
+    optional?: boolean
+    min?: number
+    max?: number
+    isInt?: boolean
+  }
+
+  export function number(
+    config: NumberConfig & { optional: true }
+  ): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>
+  export function number(
+    config: NumberConfig & { optional?: false | undefined }
+  ): z.ZodNumber & F0ZodType<z.ZodNumber>
+  export function number({
+    optional,
+    min,
+    max,
+    isInt,
+    ...config
+  }: NumberConfig) {
+    let schema = z.number()
+    if (isInt) schema = schema.int()
+    if (min !== undefined) schema = schema.min(min)
+    if (max !== undefined) schema = schema.max(max)
+    const finalSchema = optional ? schema.optional() : schema
+    return f0FormField(finalSchema as never, config as never)
+  }
+
+  // ---- switch (boolean default) -------------------------------------------
+
+  /** @internal */
+  type SwitchConfig = Omit<F0BooleanSwitchConfig, "fieldType"> & {
+    optional?: boolean
+  }
+
+  export function boolean(
+    config: SwitchConfig & { optional: true }
+  ): z.ZodBoolean & F0ZodType<z.ZodBoolean>
+  export function boolean(
+    config: SwitchConfig & { optional?: false | undefined }
+  ): z.ZodLiteral<true> & F0ZodType<z.ZodLiteral<true>>
+  export function boolean({ optional, ...config }: SwitchConfig) {
+    const schema = optional ? z.boolean() : z.literal(true as const)
+    return f0FormField(
+      schema as never,
+      { ...config, fieldType: "switch" } as never
+    )
+  }
+
+  // ---- checkbox ------------------------------------------------------------
+
+  /** @internal */
+  type CheckboxConfig = Omit<F0BooleanCheckboxConfig, "fieldType"> & {
+    optional?: boolean
+  }
+
+  export function checkbox(
+    config: CheckboxConfig & { optional: true }
+  ): z.ZodBoolean & F0ZodType<z.ZodBoolean>
+  export function checkbox(
+    config: CheckboxConfig & { optional?: false | undefined }
+  ): z.ZodLiteral<true> & F0ZodType<z.ZodLiteral<true>>
+  export function checkbox({ optional, ...config }: CheckboxConfig) {
+    const schema = optional ? z.boolean() : z.literal(true as const)
+    return f0FormField(
+      schema as never,
+      { ...config, fieldType: "checkbox" } as never
+    )
+  }
+
+  // ---- date ----------------------------------------------------------------
+
+  /** @internal */
+  type DateConfig = Omit<F0DateFieldConfig, "fieldType"> & {
+    optional?: boolean
+  }
+
+  export function date(
+    config: DateConfig & { optional: true }
+  ): z.ZodOptional<z.ZodDate> & F0ZodType<z.ZodOptional<z.ZodDate>>
+  export function date(
+    config: DateConfig & { optional?: false | undefined }
+  ): z.ZodDate & F0ZodType<z.ZodDate>
+  export function date({ optional, ...config }: DateConfig) {
+    const schema = optional ? z.date().optional() : z.date()
+    return f0FormField(schema as never, config as never)
+  }
+
+  // ---- url -----------------------------------------------------------------
+
+  /** @internal */
+  type UrlConfig = Omit<F0StringTextConfig, "fieldType"> & {
+    optional?: boolean
+  }
+
+  export function url(
+    config: UrlConfig & { optional: true }
+  ): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>
+  export function url(
+    config: UrlConfig & { optional?: false | undefined }
+  ): z.ZodString & F0ZodType<z.ZodString>
+  export function url({ optional, ...config }: UrlConfig) {
+    const schema = optional ? z.string().url().optional() : z.string().url()
+    return f0FormField(schema as never, config as never)
+  }
+
+  // ---- money ---------------------------------------------------------------
+
+  /** @internal */
+  type MoneyConfig = Omit<F0NumberMoneyConfig, "fieldType"> & {
+    optional?: boolean
+  }
+
+  export function money(
+    config: MoneyConfig & { optional: true }
+  ): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>
+  export function money(
+    config: MoneyConfig & { optional?: false | undefined }
+  ): z.ZodNumber & F0ZodType<z.ZodNumber>
+  export function money({ optional, ...config }: MoneyConfig) {
+    const schema = optional ? z.number().optional() : z.number()
+    return f0FormField(
+      schema as never,
+      { ...config, fieldType: "money" } as never
+    )
+  }
+
+  // ---- percentage ----------------------------------------------------------
+
+  /** @internal */
+  type PercentageConfig = Omit<F0NumberInputConfig, "fieldType"> & {
+    optional?: boolean
+    min?: number
+    max?: number
+  }
+
+  export function percentage(
+    config: PercentageConfig & { optional: true }
+  ): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>
+  export function percentage(
+    config: PercentageConfig & { optional?: false | undefined }
+  ): z.ZodNumber & F0ZodType<z.ZodNumber>
+  export function percentage({
+    optional,
+    min,
+    max,
+    ...config
+  }: PercentageConfig) {
+    let schema = z.number()
+    if (min !== undefined) schema = schema.min(min)
+    if (max !== undefined) schema = schema.max(max)
+    const finalSchema = optional ? schema.optional() : schema
+    return f0FormField(
+      finalSchema as never,
+      { ...config, fieldType: "percentage" } as never
+    )
+  }
+
+  // ---- cardSelect ----------------------------------------------------------
+
+  /** @internal */
+  type CardSelectConfig<V extends string = string> = Omit<
+    F0StringCardSelectConfig,
+    "fieldType" | "options"
+  > & {
+    options: Array<{ value: V } & Record<string, unknown>>
+    optional?: boolean
+  }
+
+  export function cardSelect<const V extends string>(
+    config: CardSelectConfig<V> & { optional: true }
+  ): z.ZodOptional<z.ZodEnum<[V, ...V[]]>> &
+    F0ZodType<z.ZodOptional<z.ZodEnum<[V, ...V[]]>>>
+  export function cardSelect<const V extends string>(
+    config: CardSelectConfig<V> & { optional?: false | undefined }
+  ): z.ZodEnum<[V, ...V[]]> & F0ZodType<z.ZodEnum<[V, ...V[]]>>
+  export function cardSelect<const V extends string>(
+    config: CardSelectConfig<V>
+  ) {
+    if (config.options.length === 0) {
+      throw new Error(
+        "f0FormField.cardSelect requires at least one option to build a Zod enum"
+      )
+    }
+    const { optional, ...rest } = config
+    const values = rest.options.map((o) => o.value) as [V, ...V[]]
+    const schema = optional ? z.enum(values).optional() : z.enum(values)
+    return f0FormField(
+      schema as never,
+      { ...rest, fieldType: "cardSelect" } as never
+    ) as never
+  }
+
+  // ---- file ----------------------------------------------------------------
+
+  /** @internal */
+  type FileConfig = Omit<F0StringFileConfig, "fieldType" | "multiple"> & {
+    optional?: boolean
+  }
+
+  export function file(
+    config: FileConfig & { optional: true }
+  ): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>
+  export function file(
+    config: FileConfig & { optional?: false | undefined }
+  ): z.ZodString & F0ZodType<z.ZodString>
+  export function file({ optional, ...config }: FileConfig) {
+    const schema = optional ? z.string().optional() : z.string().min(1)
+    return f0FormField(
+      schema as never,
+      { ...config, fieldType: "file", multiple: false } as never
+    ) as never
+  }
+
+  // ---- multiFile -----------------------------------------------------------
+
+  /** @internal */
+  type MultiFileConfig = Omit<F0ArrayFileConfig, "fieldType" | "multiple"> & {
+    optional?: boolean
+  }
+
+  export function multiFile(
+    config: MultiFileConfig & { optional: true }
+  ): z.ZodOptional<z.ZodArray<z.ZodString>> &
+    F0ZodType<z.ZodOptional<z.ZodArray<z.ZodString>>>
+  export function multiFile(
+    config: MultiFileConfig & { optional?: false | undefined }
+  ): z.ZodArray<z.ZodString> & F0ZodType<z.ZodArray<z.ZodString>>
+  export function multiFile({ optional, ...config }: MultiFileConfig) {
+    const schema = optional
+      ? z.array(z.string()).optional()
+      : z.array(z.string()).min(1)
+    return f0FormField(
+      schema as never,
+      { ...config, fieldType: "file", multiple: true } as never
+    ) as never
+  }
+
+  // ---- time ----------------------------------------------------------------
+
+  /** @internal */
+  type TimeConfig = Omit<F0TimeFieldConfig, "fieldType"> & {
+    optional?: boolean
+  }
+
+  export function time(
+    config: TimeConfig & { optional: true }
+  ): z.ZodOptional<z.ZodDate> & F0ZodType<z.ZodOptional<z.ZodDate>>
+  export function time(
+    config: TimeConfig & { optional?: false | undefined }
+  ): z.ZodDate & F0ZodType<z.ZodDate>
+  export function time({ optional, ...config }: TimeConfig) {
+    const schema = optional ? z.date().optional() : z.date()
+    return f0FormField(
+      schema as never,
+      { ...config, fieldType: "time" } as never
+    )
+  }
+
+  // ---- datetime ------------------------------------------------------------
+
+  /** @internal */
+  type DateTimeConfig = Omit<F0DateTimeFieldConfig, "fieldType"> & {
+    optional?: boolean
+  }
+
+  export function datetime(
+    config: DateTimeConfig & { optional: true }
+  ): z.ZodOptional<z.ZodDate> & F0ZodType<z.ZodOptional<z.ZodDate>>
+  export function datetime(
+    config: DateTimeConfig & { optional?: false | undefined }
+  ): z.ZodDate & F0ZodType<z.ZodDate>
+  export function datetime({ optional, ...config }: DateTimeConfig) {
+    const schema = optional ? z.date().optional() : z.date()
+    return f0FormField(
+      schema as never,
+      { ...config, fieldType: "datetime" } as never
+    )
+  }
+
+  // ---- duration ------------------------------------------------------------
+
+  /** @internal */
+  type DurationConfig = Omit<F0DurationFieldConfig, "fieldType"> & {
+    optional?: boolean
+  }
+
+  export function duration(
+    config: DurationConfig & { optional: true }
+  ): z.ZodOptional<z.ZodNumber> & F0ZodType<z.ZodOptional<z.ZodNumber>>
+  export function duration(
+    config: DurationConfig & { optional?: false | undefined }
+  ): z.ZodNumber & F0ZodType<z.ZodNumber>
+  export function duration({ optional, ...config }: DurationConfig) {
+    const schema = optional ? z.number().optional() : z.number()
+    return f0FormField(
+      schema as never,
+      { ...config, fieldType: "duration" } as never
+    )
+  }
+
+  // ---- dateRange -----------------------------------------------------------
+
+  /** @internal */
+  type DateRangeObjectSchema = z.ZodObject<{ from: z.ZodDate; to: z.ZodDate }>
+  /** @internal */
+  type DateRangeConfig = Omit<F0DateRangeFieldConfig, "fieldType"> & {
+    optional?: boolean
+  }
+
+  export function dateRange(
+    config: DateRangeConfig & { optional: true }
+  ): z.ZodOptional<DateRangeObjectSchema> &
+    F0ZodType<z.ZodOptional<DateRangeObjectSchema>>
+  export function dateRange(
+    config: DateRangeConfig & { optional?: false | undefined }
+  ): DateRangeObjectSchema & F0ZodType<DateRangeObjectSchema>
+  export function dateRange({ optional, ...config }: DateRangeConfig) {
+    const baseSchema = z.object({ from: z.date(), to: z.date() })
+    const schema = optional ? baseSchema.optional() : baseSchema
+    return f0FormField(
+      schema as never,
+      { ...config, fieldType: "daterange" } as never
+    )
+  }
+
+  // ---- richText ------------------------------------------------------------
+
+  /** @internal */
+  type RichTextObjectSchema = z.ZodObject<{
+    value: z.ZodString
+    mentionIds: z.ZodOptional<z.ZodArray<z.ZodString>>
+  }>
+  /** @internal */
+  type RichTextConfig = Omit<F0RichTextFieldConfig, "fieldType"> & {
+    optional?: boolean
+  }
+
+  export function richText(
+    config: RichTextConfig & { optional: true }
+  ): z.ZodOptional<RichTextObjectSchema> &
+    F0ZodType<z.ZodOptional<RichTextObjectSchema>>
+  export function richText(
+    config: RichTextConfig & { optional?: false | undefined }
+  ): RichTextObjectSchema & F0ZodType<RichTextObjectSchema>
+  export function richText({ optional, ...config }: RichTextConfig) {
+    const base = z.object({
+      value: z.string(),
+      mentionIds: z.array(z.string()).optional(),
+    })
+    const schema = optional ? base.optional() : base
+    return f0FormField(
+      schema as never,
+      { ...config, fieldType: "richtext" } as never
+    )
+  }
+
+  // ---- select (string values) ----------------------------------------------
+
+  /** @internal */
+  type SelectConfig<
+    R extends Record<string, unknown> = Record<string, unknown>,
+  > = Omit<F0StringSelectConfig<R>, "fieldType"> & { optional?: boolean }
+
+  // With typed options → z.enum inferred from option values
+  export function select<
+    const V extends string,
+    R extends Record<string, unknown> = Record<string, unknown>,
+  >(
+    config: SelectConfig<R> & {
+      options: Array<{ value: V } & Record<string, unknown>>
+      optional: true
+    }
+  ): z.ZodOptional<z.ZodEnum<[V, ...V[]]>> &
+    F0ZodType<z.ZodOptional<z.ZodEnum<[V, ...V[]]>>>
+  export function select<
+    const V extends string,
+    R extends Record<string, unknown> = Record<string, unknown>,
+  >(
+    config: SelectConfig<R> & {
+      options: Array<{ value: V } & Record<string, unknown>>
+      optional?: false | undefined
+    }
+  ): z.ZodEnum<[V, ...V[]]> & F0ZodType<z.ZodEnum<[V, ...V[]]>>
+  // Without options → z.string()
+  export function select<
+    R extends Record<string, unknown> = Record<string, unknown>,
+  >(
+    config: SelectConfig<R> & { optional: true }
+  ): z.ZodOptional<z.ZodString> & F0ZodType<z.ZodOptional<z.ZodString>>
+  export function select<
+    R extends Record<string, unknown> = Record<string, unknown>,
+  >(
+    config: SelectConfig<R> & { optional?: false | undefined }
+  ): z.ZodString & F0ZodType<z.ZodString>
+  export function select(config: unknown) {
+    if (typeof config !== "object" || config === null) {
+      throw new TypeError("f0FormField.select requires a config object")
+    }
+    const cfg = config as Record<string, unknown>
+    const { optional, ...rest } = cfg
+    const opts = Array.isArray(cfg.options) ? cfg.options : undefined
+    if (opts && opts.length > 0) {
+      const values = opts
+        .filter(
+          (o): o is { value: string } =>
+            typeof o === "object" &&
+            o !== null &&
+            "value" in o &&
+            typeof (o as { value: unknown }).value === "string"
+        )
+        .map((o) => o.value) as [string, ...string[]]
+      if (values.length > 0) {
+        const schema = optional ? z.enum(values).optional() : z.enum(values)
+        return f0FormField(schema as never, rest as never)
+      }
+    }
+    const schema = optional ? z.string().optional() : z.string()
+    return f0FormField(schema as never, rest as never)
+  }
+
+  // ---- multiSelect ---------------------------------------------------------
+
+  /** @internal */
+  type MultiSelectConfig<
+    V extends string | number = string,
+    R extends Record<string, unknown> = Record<string, unknown>,
+  > = Omit<F0ArraySelectConfig<V, R>, "fieldType"> & { optional?: boolean }
+
+  // With typed options → z.array(z.enum(...)).min(1) inferred from option values
+  export function multiSelect<const V extends string>(
+    config: Omit<MultiSelectConfig<string>, "options"> & {
+      options: Array<{ value: V } & Record<string, unknown>>
+      optional: true
+    }
+  ): z.ZodOptional<z.ZodArray<z.ZodEnum<[V, ...V[]]>>> &
+    F0ZodType<z.ZodOptional<z.ZodArray<z.ZodEnum<[V, ...V[]]>>>>
+  export function multiSelect<const V extends string>(
+    config: Omit<MultiSelectConfig<string>, "options"> & {
+      options: Array<{ value: V } & Record<string, unknown>>
+      optional?: false | undefined
+    }
+  ): z.ZodArray<z.ZodEnum<[V, ...V[]]>> &
+    F0ZodType<z.ZodArray<z.ZodEnum<[V, ...V[]]>>>
+  // Without options → z.array(z.string()).min(1)
+  export function multiSelect<
+    V extends string | number = string,
+    R extends Record<string, unknown> = Record<string, unknown>,
+  >(
+    config: MultiSelectConfig<V, R> & { optional: true }
+  ): z.ZodOptional<z.ZodArray<z.ZodString>> &
+    F0ZodType<z.ZodOptional<z.ZodArray<z.ZodString>>>
+  export function multiSelect<
+    V extends string | number = string,
+    R extends Record<string, unknown> = Record<string, unknown>,
+  >(
+    config: MultiSelectConfig<V, R> & { optional?: false | undefined }
+  ): z.ZodArray<z.ZodString> & F0ZodType<z.ZodArray<z.ZodString>>
+  export function multiSelect(config: unknown) {
+    if (typeof config !== "object" || config === null) {
+      throw new TypeError("f0FormField.multiSelect requires a config object")
+    }
+    const cfg = config as Record<string, unknown>
+    const { optional, ...rest } = cfg
+    const opts = Array.isArray(cfg.options) ? cfg.options : undefined
+    if (opts && opts.length > 0) {
+      const values = opts
+        .filter(
+          (o): o is { value: string } =>
+            typeof o === "object" &&
+            o !== null &&
+            "value" in o &&
+            typeof (o as { value: unknown }).value === "string"
+        )
+        .map((o) => o.value) as [string, ...string[]]
+      if (values.length > 0) {
+        const base = z.array(z.enum(values)).min(1)
+        const schema = optional ? base.optional() : base
+        return f0FormField(
+          schema as never,
+          { ...rest, multiple: true } as never
+        )
+      }
+    }
+    const base = z.array(z.string()).min(1)
+    const schema = optional ? base.optional() : base
+    return f0FormField(schema as never, { ...rest, multiple: true } as never)
+  }
+}

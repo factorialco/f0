@@ -1,6 +1,7 @@
 import { type AIMessage, type Message } from "@copilotkit/shared"
 
 import { type ClarifyingQuestionState } from "./actions/core/clarifyingQuestion/types"
+import { type CanvasActions, type CanvasEntityDefinition } from "./canvas/types"
 import {
   type AiChatDisclaimer,
   type AiChatMode,
@@ -12,6 +13,8 @@ import {
   type AiChatCredits,
   type AiChatCreditWarning,
   type EntityRefs,
+  type PendingContext,
+  type PendingQuote,
   type VisualizationMode,
   WelcomeScreenSuggestion,
 } from "./types"
@@ -33,6 +36,8 @@ export interface AiChatState {
   footer?: React.ReactNode
   VoiceMode?: React.ComponentType
   entityRefs?: EntityRefs
+  canvasActions?: CanvasActions
+  canvasEntities?: Record<string, CanvasEntityDefinition>
   toolHints?: AiChatToolHint[]
   credits?: AiChatCredits
   creditWarning?: AiChatCreditWarning
@@ -48,6 +53,14 @@ export interface AiChatState {
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
   tracking?: AiChatTrackingOptions
+  /**
+   * Optional hook called before a user message is sent. Return false to block submission.
+   */
+  onBeforeSendMessage?: () => boolean | Promise<boolean>
+  /**
+   * Optional fetch implementation for AI runtime requests owned by F0.
+   */
+  runtimeFetch?: typeof fetch
 }
 
 /**
@@ -83,6 +96,14 @@ export type AiChatProviderReturnValue = {
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
   tracking?: AiChatTrackingOptions
+  /**
+   * Optional hook called before a user message is sent. Return false to block submission.
+   */
+  onBeforeSendMessage?: () => boolean | Promise<boolean>
+  /**
+   * Fetch implementation for AI runtime requests owned by F0.
+   */
+  runtimeFetch: typeof fetch
   /**
    * Clear/reset the chat conversation
    */
@@ -123,11 +144,18 @@ export type AiChatProviderReturnValue = {
    * Append messages to the current conversation.
    * Useful for injecting pre-built assistant responses (e.g. dashboards)
    * from outside the chat. IDs are generated internally.
+   *
+   * @param options.persist - Whether to persist messages to the backend thread.
+   *   Defaults to `true`. Pass `false` for client-only display messages that
+   *   should not create or modify a backend thread (e.g. seed messages).
    */
-  appendMessages: (messages: AppendMessage[]) => void
+  appendMessages: (
+    messages: AppendMessage[],
+    options?: { persist?: boolean }
+  ) => void
   /** @internal */
   setAppendMessagesFunction: (
-    fn: ((messages: AppendMessage[]) => void) | null
+    fn: ((messages: AppendMessage[], persist: boolean) => void) | null
   ) => void
   /**
    * Atomically clear the conversation and inject new messages.
@@ -199,6 +227,29 @@ export type AiChatProviderReturnValue = {
   fileDragOver: boolean
   /** @internal Set the file drag-over state */
   setFileDragOver: React.Dispatch<React.SetStateAction<boolean>>
+  /**
+   * Process files that were dropped onto the chat. Delegates to the
+   * `processFiles` callback registered by `ChatTextarea`'s file-attachment
+   * hook. Used by the chat-wide DropOverlay rendered in `SidebarWindow`.
+   */
+  processDroppedFiles: (files: File[]) => void
+  /** @internal Registers the processFiles callback owned by ChatTextarea */
+  setProcessDroppedFilesFunction: (fn: ((files: File[]) => void) | null) => void
+  /**
+   * Pre-loaded context shown as an empty state in the chat.
+   * Prepended to the first user message as `<pending-context>`.
+   */
+  pendingContext: PendingContext | null
+  /** Set pending context (pass null to clear) */
+  setPendingContext: React.Dispatch<React.SetStateAction<PendingContext | null>>
+  /**
+   * Quoted fragment the user is replying to. Rendered as a chip above the
+   * textarea and, on submit, prepended as a markdown blockquote to the user's
+   * message (plus an invisible `<quote-context>` tag for the agent).
+   */
+  pendingQuote: PendingQuote | null
+  /** Set the pending quote (pass null to clear). */
+  setPendingQuote: React.Dispatch<React.SetStateAction<PendingQuote | null>>
 } & Pick<
   AiChatState,
   | "greeting"
@@ -206,6 +257,8 @@ export type AiChatProviderReturnValue = {
   | "disclaimer"
   | "resizable"
   | "entityRefs"
+  | "canvasActions"
+  | "canvasEntities"
   | "toolHints"
   | "credits"
   | "creditWarning"
@@ -217,6 +270,12 @@ export type AiChatProviderReturnValue = {
     openCanvas: (content: CanvasContent) => void
     /** Close the canvas panel and restore the previous visualization mode */
     closeCanvas: () => void
+    /** The currently active mini-game (easter egg), or null */
+    activeGame: "pong" | null
+    /** Launch a mini-game overlay */
+    openGame: (game: "pong") => void
+    /** Close the active mini-game overlay */
+    closeGame: () => void
     /** The currently active tool hint, or null if none is selected */
     activeToolHint: AiChatToolHint | null
     /** Set the active tool hint (pass null to clear) */

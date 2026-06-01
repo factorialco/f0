@@ -107,7 +107,7 @@ function renderTOCItem(
       {showPlaceholderBefore && (
         <div
           className={cn(
-            "pointer-events-none h-10 rounded-[10px] border-2 border-dashed border-f1-border-secondary bg-f1-background-hover/40",
+            "pointer-events-none h-10 rounded border-2 border-dashed border-f1-border-secondary bg-f1-background-hover/40",
             isFirstItem ? "mt-0" : "mt-0.5",
             "mb-0.5"
           )}
@@ -198,7 +198,7 @@ function renderTOCItem(
       )}
       {/* Placeholder after item — instant, pointer-events-none to avoid layout thrashing */}
       {showPlaceholderAfter && (
-        <div className="pointer-events-none my-0.5 h-10 rounded-[10px] border-2 border-dashed border-f1-border-secondary bg-f1-background-hover/40" />
+        <div className="pointer-events-none my-0.5 h-10 rounded border-2 border-dashed border-f1-border-secondary bg-f1-background-hover/40" />
       )}
     </>
   )

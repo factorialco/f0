@@ -1,3 +1,4 @@
+import type { IconType, F0IconProps } from "@/components/F0Icon"
 import type {
   F0SelectItemObject,
   F0SelectItemProps,
@@ -31,13 +32,18 @@ export type AddRowActionsResult =
 
 export type EditableTableVisualizationSettings = TableVisualizationSettings
 
-export type NumberCellConfig = {
+export type NumberCellConfig<R extends RecordType = RecordType> = {
   min?: number
   max?: number
   step?: number
   maxDecimals?: number
   locale?: string
-  units?: string
+  /**
+   * Unit label displayed next to the number input.
+   * Can be a static string (e.g. `"h"`) or a function that receives the
+   * current row item to return a per-row unit (e.g. `(item) => item.type === "role" ? "h" : "u"`).
+   */
+  units?: string | ((item: R) => string | undefined)
   unitsPosition?: "before" | "after"
 }
 
@@ -118,7 +124,51 @@ export type EditableTableColumnDefinition<
    * stepping (`step`), formatting (`maxDecimals`, `locale`), and units.
    * Falls back to sensible defaults when omitted.
    */
-  numberConfig?: NumberCellConfig
+  numberConfig?: NumberCellConfig<R>
+
+  /**
+   * Called after this cell's value changes. Use to compute derived values
+   * and update other cells in the same row.
+   *
+   * Works with every cell type (text, number, date, select, etc.).
+   *
+   * @example
+   * formula: ({ value, setCellValue }) => {
+   *   const hours = roleHoursMap[value as string]
+   *   if (hours != null) setCellValue("plannedHours", hours)
+   * }
+   */
+  formula?: (params: {
+    /** The new value of this cell. */
+    value: unknown
+    /** The current row item (before this change is applied). */
+    item: R
+    /** For select cells: the full record associated with the selected option. */
+    selectedItem?: RecordType
+    /** Update another cell in the same row by column id. */
+    setCellValue: (columnId: string, value: unknown) => void
+  }) => void
+
+  /**
+   * Returns a hint to display as an icon with tooltip inside the cell.
+   * Use to warn the user when a value diverges from its formula-inferred value.
+   *
+   * Return `undefined` to hide the hint.
+   *
+   * @example
+   * cellHint: (item) => {
+   *   if (item._inferredSalary != null && item.salary !== item._inferredSalary) {
+   *     return { icon: AlertCircle, message: `Differs from catalog (${item._inferredSalary})` }
+   *   }
+   * }
+   */
+  cellHint?: (item: R) =>
+    | {
+        icon: IconType
+        message: string
+        iconColor?: F0IconProps["color"]
+      }
+    | undefined
 }
 
 export type EditableTableVisualizationOptions<

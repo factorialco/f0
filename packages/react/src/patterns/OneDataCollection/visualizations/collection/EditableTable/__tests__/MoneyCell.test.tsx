@@ -13,18 +13,20 @@ vi.mock("../components/cells/NumberCell", () => ({
   },
 }))
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const baseColumn = {
   id: "amount",
   label: "Amount",
   cell: () => null,
-} as const
+  render: () => null,
+} as any
 
 const baseProps = {
   editableColumn: { ...baseColumn },
   value: "100",
   onChange: vi.fn(),
   item: { id: "1" },
-} as const
+}
 
 describe("MoneyCell", () => {
   it("defaults units to $ when numberConfig has no units", () => {
@@ -137,5 +139,42 @@ describe("MoneyCell", () => {
     expect(passedProps.error).toBe("required")
     expect(passedProps.loading).toBe(true)
     expect(passedProps.onChange).toBe(onChange)
+  })
+
+  it("resolves units from a function based on the item", () => {
+    render(
+      <MoneyCell
+        {...baseProps}
+        item={{ id: "1", currency: "€" }}
+        editableColumn={{
+          ...baseColumn,
+          numberConfig: {
+            units: (item: { id: string; currency: string }) => item.currency,
+          },
+        }}
+      />
+    )
+
+    const passedProps = numberCellProps.mock.lastCall?.[0]
+    expect(passedProps.editableColumn.numberConfig.units).toBe("€")
+  })
+
+  it("resolves unitsPosition from locale when units is a function returning a currency code", () => {
+    render(
+      <MoneyCell
+        {...baseProps}
+        item={{ id: "1", currency: "USD" }}
+        editableColumn={{
+          ...baseColumn,
+          numberConfig: {
+            units: (item: { id: string; currency: string }) => item.currency,
+          },
+        }}
+      />
+    )
+
+    const passedProps = numberCellProps.mock.lastCall?.[0]
+    expect(passedProps.editableColumn.numberConfig.units).toBe("$")
+    expect(passedProps.editableColumn.numberConfig.unitsPosition).toBe("before")
   })
 })

@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.54.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.53.0...f0-react-native-v0.54.0) (2026-05-18)
+
+
+### Features
+
+* **react-native:** add F0WizardSteps component ([#4141](https://github.com/factorialco/f0/issues/4141)) ([a4f11e9](https://github.com/factorialco/f0/commit/a4f11e93a007c72cd7d521f34b440f0b141c12a1))
+
+## [0.53.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.52.1...f0-react-native-v0.53.0) (2026-04-30)
+
+
+### Features
+
+* **F0Tabs:** make tab id type generic ([a0f43e9](https://github.com/factorialco/f0/commit/a0f43e920f34c71866cc0d8254ce3a58bc4f2794))
+
+## [0.52.1](https://github.com/factorialco/f0/compare/f0-react-native-v0.52.0...f0-react-native-v0.52.1) (2026-04-24)
+
+
+### Bug Fixes
+
+* **core:** align border radius tokens with Figma design system ([#3805](https://github.com/factorialco/f0/issues/3805)) ([63e20e1](https://github.com/factorialco/f0/commit/63e20e1b72c87b0a033dd903a7211138515fcfb1))
+
+## [0.52.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.51.0...f0-react-native-v0.52.0) (2026-04-21)
+
+
+### Features
+
+* **F0Button:** changes to F0Button and added new icons ([#3969](https://github.com/factorialco/f0/issues/3969)) ([15d9e88](https://github.com/factorialco/f0/commit/15d9e88f90f74a94adfb93d36cb263fc42427aa2))
+
+## [0.51.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.50.0...f0-react-native-v0.51.0) (2026-04-16)
+
+
+### Features
+
+* **F0Tabs:** improvements and changes ([#3948](https://github.com/factorialco/f0/issues/3948)) ([488dfff](https://github.com/factorialco/f0/commit/488dfff3db73b2aa2888fec0dfcc5eeea7a1fd1f))
+
 ## [0.50.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.49.1...f0-react-native-v0.50.0) (2026-04-15)
 
 

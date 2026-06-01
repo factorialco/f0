@@ -35,8 +35,23 @@
   @apply m-0 mb-2 list-decimal;
 }
 
-.notes-text-editor a {
-  @apply cursor-pointer font-medium text-f1-foreground-accent no-underline;
+.notes-text-editor a:not([data-type="mention"]):not(.mention) {
+  @apply text-f1-foreground decoration-f1-border-hover hover:decoration-f1-border-bold cursor-pointer font-medium underline decoration-1 underline-offset-[5px];
+}
+/*
+ * Legacy mention chip styling.
+ *
+ * New mentions emitted by the Tiptap Mention extension carry the shared
+ * `mentionFocusableClasses` recipe directly. This block only styles
+ * historical `<a class="mention">` content that does not have the recipe
+ * classes. Keep in sync with `lib/recipes/mention.ts` until a content
+ * migration removes the need for this fallback.
+ */
+.notes-text-editor a.mention:not([data-type="mention"]) {
+  @apply bg-f1-background-secondary hover:bg-f1-background-secondary-hover text-f1-foreground rounded-xs !px-1.5 font-medium no-underline transition-colors;
+}
+.notes-text-editor a.mention:not([data-type="mention"]):focus {
+  @apply outline-f1-border-selected-bold outline outline-1 outline-offset-1;
 }
 
 .notes-text-editor strong {

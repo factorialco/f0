@@ -1,6 +1,6 @@
 import { F0Button } from "@/components/F0Button"
+import { ChevronLeft, ChevronRight, Cross } from "@/icons/app"
 import { OneEllipsis } from "@/lib/OneEllipsis"
-import { ChevronLeft, ChevronRight } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
 interface StepHeaderProps {
@@ -11,6 +11,7 @@ interface StepHeaderProps {
   canProceed: boolean
   onBack: () => void
   onNext: () => void
+  onCancel: () => void
 }
 
 export const StepHeader = ({
@@ -21,13 +22,14 @@ export const StepHeader = ({
   canProceed,
   onBack,
   onNext,
+  onCancel,
 }: StepHeaderProps) => {
   const translation = useI18n()
 
   return (
-    <div className="flex items-start gap-2 px-4">
+    <div className="flex items-start gap-0.5 pl-4 pr-3">
       <OneEllipsis
-        className="min-w-0 flex-1 text-base font-medium text-f1-foreground"
+        className="min-w-0 flex-1 text-lg font-semibold text-f1-foreground"
         lines={3}
       >
         {question}
@@ -44,7 +46,7 @@ export const StepHeader = ({
             hideLabel
             icon={ChevronLeft}
           />
-          <span className="text-sm text-f1-foreground-secondary">
+          <span className="text-sm font-semibold text-f1-foreground-tertiary">
             {stepLabel}
           </span>
           <F0Button
@@ -58,6 +60,14 @@ export const StepHeader = ({
           />
         </div>
       )}
+      <F0Button
+        variant="ghost"
+        size="sm"
+        onClick={onCancel}
+        label={translation.actions.cancel}
+        hideLabel
+        icon={Cross}
+      />
     </div>
   )
 }

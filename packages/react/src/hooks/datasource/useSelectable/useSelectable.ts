@@ -40,6 +40,7 @@ export function useSelectable<
   isSearchActive = false,
   allPagesSelection,
   resetOnPageChange = true,
+  preserveSelectionOnDatasetChange = false,
 }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<
   R,
   Filters
@@ -75,10 +76,13 @@ export function useSelectable<
   const hasInitialized = useRef(false)
   const isInitialMount = useRef(true)
   const previousFilters = useRef(source.currentFilters)
+  const previousSortings = useRef(source.currentSortings)
+  const debouncedCurrentSearch = source.debouncedCurrentSearch
+  const previousSearch = useRef(debouncedCurrentSearch)
   const previousDataRecordsKey = useRef<string>("")
   const previousSelectionState = useRef<string>("")
   const isAllSelectedRef = useRef(false)
-  const justClearedByFilterChange = useRef(false)
+  const justClearedByDatasetChange = useRef(false)
   const previousPageIdentifierRef = useRef<string | number | null | undefined>(
     undefined
   )
@@ -420,12 +424,18 @@ export function useSelectable<
     (
       itemId: SelectionId | readonly SelectionId[],
       checked: boolean,
-      onlyIfNotPreviousState: boolean = false
+      onlyIfNotPreviousState: boolean = false,
+      fallbackItem?: R | readonly R[]
     ) => {
       const itemIds = (Array.isArray(itemId) ? itemId : [itemId]).slice(
         0,
         isMultiSelection ? undefined : 1
       )
+      const fallbackItems = Array.isArray(fallbackItem)
+        ? fallbackItem
+        : fallbackItem !== undefined
+          ? [fallbackItem]
+          : []
 
       setLocalSelectedState((current) => {
         // Single selection: replace previous selection entirely
@@ -441,8 +451,13 @@ export function useSelectable<
 
           updated++
           const existingItem = current.items?.get(id)?.item
+          const matchingFallbackItem = fallbackItems.find((item) => {
+            const fallbackId = getSelectable?.(item)
+            return fallbackId !== undefined && fallbackId === id
+          })
           const item =
             existingItem ??
+            matchingFallbackItem ??
             data.records.find((record) => {
               const recordId = getSelectable?.(record)
               return recordId !== undefined && recordId === id
@@ -513,7 +528,7 @@ export function useSelectable<
       if (isRecordItem(itemOrId, getSelectable !== undefined)) {
         const id = getSelectable?.(itemOrId)
         if (id !== undefined) {
-          handleSelectItemChangeInternal(id, checked)
+          handleSelectItemChangeInternal(id, checked, false, itemOrId)
         }
         return
       }
@@ -686,34 +701,67 @@ export function useSelectable<
     updateLocalSelectedState(selectedState)
   }, [selectedState, getSelectedStateKey, updateLocalSelectedState])
 
-  // Clear selections when filters change (only when selectAll is enabled)
+  // Clear selections when the dataset identity changes (filters, sortings, or
+  // search query). This applies to ALL pagination types. For infinite-scroll,
+  // the page-change effect skips cursor advances so this effect is the only
+  // mechanism that clears on a true dataset reset caused by sortings/search.
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false
       previousFilters.current = source.currentFilters
+      previousSortings.current = source.currentSortings
+      previousSearch.current = debouncedCurrentSearch
       return
     }
 
-    // Deep comparison of filters to detect changes
-    const currentFiltersKey = JSON.stringify(source.currentFilters)
-    const previousFiltersKey = JSON.stringify(previousFilters.current)
+    const filtersChanged =
+      JSON.stringify(source.currentFilters) !==
+      JSON.stringify(previousFilters.current)
+    const sortingsChanged =
+      JSON.stringify(source.currentSortings) !==
+      JSON.stringify(previousSortings.current)
+    const searchChanged = debouncedCurrentSearch !== previousSearch.current
 
-    if (currentFiltersKey !== previousFiltersKey) {
-      // When disableSelectAll is true, maintain the selection even when filters change
-      // because the user is manually selecting items and expects them to persist
-      if (!disableSelectAll) {
-        // Mark that we're clearing due to filter change to prevent data sync from restoring selections
-        justClearedByFilterChange.current = true
+    if (filtersChanged || sortingsChanged || searchChanged) {
+      // When disableSelectAll is true, maintain the selection even when the
+      // dataset changes because the user is manually selecting items and
+      // expects them to persist across soft reloads.
+      // When preserveSelectionOnDatasetChange is true, never clear on dataset
+      // changes — used by selectors where search/filter is for finding items
+      // to add to an existing selection.
+      if (!disableSelectAll && !preserveSelectionOnDatasetChange) {
+        // Mark that we're clearing due to a dataset-identity change to prevent
+        // the data-sync effect from restoring selections.
+        justClearedByDatasetChange.current = true
         clearSelectedItems()
       }
       previousFilters.current = source.currentFilters
+      previousSortings.current = source.currentSortings
+      previousSearch.current = debouncedCurrentSearch
     }
-  }, [source.currentFilters, clearSelectedItems, disableSelectAll])
+  }, [
+    source.currentFilters,
+    source.currentSortings,
+    debouncedCurrentSearch,
+    clearSelectedItems,
+    disableSelectAll,
+    preserveSelectionOnDatasetChange,
+  ])
 
   // Clear selections when page changes, unless the user has triggered
-  // "select all items" (allSelectedCheck) or resetOnPageChange is disabled
+  // "select all items" (allSelectedCheck) or resetOnPageChange is disabled.
+  // NOTE: infinite-scroll pagination advances the cursor on every loadMore(),
+  // but the list is cumulative — previously-selected rows remain valid and the
+  // user has not navigated away. We never clear for infinite-scroll; the
+  // dataset-identity effect above handles the case where the dataset truly resets.
   useEffect(() => {
     if (!resetOnPageChange) return
+
+    // Infinite-scroll loadMore is not a page navigation — skip.
+    if (paginationInfo?.type === "infinite-scroll") {
+      previousPageIdentifierRef.current = currentPageIdentifier
+      return
+    }
 
     const previousPageIdentifier = previousPageIdentifierRef.current
 
@@ -734,6 +782,7 @@ export function useSelectable<
     allSelectedCheck,
     clearSelectedItems,
     resetOnPageChange,
+    paginationInfo?.type,
   ])
 
   // Store isAllSelected in ref to avoid circular dependencies
@@ -757,9 +806,9 @@ export function useSelectable<
     }
     previousDataRecordsKey.current = currentKey
 
-    // If we just cleared due to filter change, don't restore selections
-    if (justClearedByFilterChange.current) {
-      justClearedByFilterChange.current = false
+    // If we just cleared due to a dataset-identity change, don't restore selections
+    if (justClearedByDatasetChange.current) {
+      justClearedByDatasetChange.current = false
       return
     }
 

@@ -5,22 +5,28 @@ import { useL10n } from "@/lib/providers/l10n"
 
 import type { EditableCellProps } from "."
 
+import { resolveUnits } from "./hooks/useNumberCellLayout"
 import { NumberCell } from "./NumberCell"
 
-const isUnitBeforeNumber = (
+const resolveCurrencyInfo = (
   locale: string,
   currency: string = "USD"
-): boolean => {
+): { symbol: string; before: boolean } | undefined => {
   try {
     const parts = new Intl.NumberFormat(locale, {
       style: "currency",
       currency,
     }).formatToParts(1)
+    const currencyPart = parts.find((p) => p.type === "currency")
     const currencyIndex = parts.findIndex((p) => p.type === "currency")
     const integerIndex = parts.findIndex((p) => p.type === "integer")
-    return currencyIndex < integerIndex
+
+    return {
+      symbol: currencyPart?.value ?? currency,
+      before: currencyIndex < integerIndex,
+    }
   } catch {
-    return false
+    return undefined
   }
 }
 
@@ -29,15 +35,23 @@ export function MoneyCell<R extends RecordType>(props: EditableCellProps<R>) {
   const config = props.editableColumn.numberConfig
   const locale = config?.locale ?? contextLocale
 
-  const unitsBefore = useMemo(
+  const resolvedUnits = resolveUnits(config, props.item)
+
+  const currencyInfo = useMemo(
     () =>
-      config?.units
-        ? config.unitsPosition
-          ? config.unitsPosition === "before"
-          : isUnitBeforeNumber(locale, config.units)
-        : false,
-    [locale, config?.units]
+      resolvedUnits ? resolveCurrencyInfo(locale, resolvedUnits) : undefined,
+    [locale, resolvedUnits]
   )
+
+  const unitsBefore = useMemo(() => {
+    if (!resolvedUnits) return false
+
+    if (config?.unitsPosition) {
+      return config.unitsPosition === "before"
+    }
+
+    return currencyInfo?.before ?? false
+  }, [resolvedUnits, config?.unitsPosition, currencyInfo])
 
   return (
     <NumberCell
@@ -46,7 +60,7 @@ export function MoneyCell<R extends RecordType>(props: EditableCellProps<R>) {
         ...props.editableColumn,
         numberConfig: {
           ...config,
-          units: config?.units ?? "$",
+          units: currencyInfo?.symbol ?? resolvedUnits ?? "$",
           unitsPosition: unitsBefore ? "before" : "after",
         },
       }}

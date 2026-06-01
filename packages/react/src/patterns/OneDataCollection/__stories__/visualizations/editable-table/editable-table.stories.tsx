@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from "react"
 import { action } from "storybook/actions"
 
 import { createDataSourceDefinition, RecordType } from "@/hooks/datasource"
+import { Delete, Pencil } from "@/icons/app"
 import { ROLES_MOCK } from "@/mocks"
 
 import { OneDataCollection } from "../../.."
@@ -94,6 +95,38 @@ export const BasicEditableTable: Story = {
         ]}
         dataAdapter={dataAdapter}
         id="editable-table-basic/v1"
+      />
+    )
+  },
+}
+
+export const EditableTableWithSelectableRows: Story = {
+  render: () => {
+    const mockVisualizations = getMockVisualizations({
+      table: {
+        nestedRecords: true,
+      },
+    })
+    const { dataAdapter, onCellChange } = useEditableTableData()
+    return (
+      <ExampleComponent
+        selectable={() => ""}
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...(
+                mockVisualizations.editableTable as Extract<
+                  typeof mockVisualizations.editableTable,
+                  { type: "editableTable" }
+                >
+              ).options,
+              onCellChange,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        id="editable-table-selectable/v1"
       />
     )
   },
@@ -1075,6 +1108,316 @@ export const TableAndEditableTable: Story = {
         ]}
         dataAdapter={dataAdapter}
         id="table-and-editable/v1"
+      />
+    )
+  },
+}
+
+export const EditableTableWithItemActions: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Editable table with item actions rendered in a dedicated, always-visible column. Up to two primary actions appear as buttons, with remaining actions in a dropdown menu. This differs from the regular table where actions appear on hover.",
+      },
+    },
+  },
+  render: () => {
+    const mockVisualizations = getMockVisualizations()
+    const { dataAdapter, onCellChange } = useEditableTableData()
+
+    const baseOptions = (
+      mockVisualizations.editableTable as Extract<
+        typeof mockVisualizations.editableTable,
+        { type: "editableTable" }
+      >
+    ).options
+
+    const source = useDataCollectionSource({
+      dataAdapter,
+      itemActions: (item) => [
+        {
+          label: "Edit",
+          icon: Pencil,
+          onClick: () => action("edit")(`Editing ${item.name}`),
+          type: "primary" as const,
+        },
+        {
+          label: "Delete",
+          icon: Delete,
+          onClick: () => action("delete")(`Deleting ${item.name}`),
+          type: "primary" as const,
+          critical: true,
+        },
+      ],
+    })
+
+    return (
+      <OneDataCollection
+        source={source}
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...baseOptions,
+              onCellChange,
+            },
+          },
+        ]}
+        id="editable-table-item-actions/v1"
+      />
+    )
+  },
+}
+
+export const EditableTableWithIconOnlyActions: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Editable table with icon-only action buttons using `hideLabel`. The label is still used for the tooltip and accessibility, but only the icon is rendered in the button.",
+      },
+    },
+  },
+  render: () => {
+    const mockVisualizations = getMockVisualizations()
+    const { dataAdapter, onCellChange } = useEditableTableData()
+
+    const baseOptions = (
+      mockVisualizations.editableTable as Extract<
+        typeof mockVisualizations.editableTable,
+        { type: "editableTable" }
+      >
+    ).options
+
+    const source = useDataCollectionSource({
+      dataAdapter,
+      itemActions: (item) => [
+        {
+          label: "Edit",
+          icon: Pencil,
+          onClick: () => action("edit")(`Editing ${item.name}`),
+          type: "primary" as const,
+          hideLabel: true,
+        },
+        {
+          label: "Delete",
+          icon: Delete,
+          onClick: () => action("delete")(`Deleting ${item.name}`),
+          type: "primary" as const,
+          critical: true,
+          hideLabel: true,
+        },
+      ],
+    })
+
+    return (
+      <OneDataCollection
+        source={source}
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...baseOptions,
+              onCellChange,
+            },
+          },
+        ]}
+        id="editable-table-icon-only-actions/v1"
+      />
+    )
+  },
+}
+
+/**
+ * Demonstrates dynamic per-row units via `numberConfig.units` as a function.
+ * Roles show "h" (hours), simple items show "u" (units).
+ */
+export const DynamicUnitsPerRow: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Shows numberConfig.units as a per-row function with nested rows. Parent phases show "h" (hours), child tasks show "u" (units) and child roles show "h" (hours).',
+      },
+    },
+  },
+  render: () => {
+    type LineItem = RecordType & {
+      name: string
+      email: string
+      department: (typeof import("@/mocks").DEPARTMENTS_MOCK)[number]
+      itemType: "phase" | "task" | "role"
+      quantity: number
+      children?: LineItem[]
+    }
+
+    const makeItem = (
+      overrides: Pick<LineItem, "id" | "name" | "itemType" | "quantity"> & {
+        children?: LineItem[]
+      }
+    ): LineItem => ({
+      index: 0,
+      email: "",
+      department: "Engineering",
+      ...overrides,
+    })
+
+    const initialItems: LineItem[] = [
+      makeItem({
+        id: "phase-1",
+        name: "Design phase",
+        itemType: "phase",
+        quantity: 40,
+        children: [
+          makeItem({
+            id: "task-1",
+            name: "Wireframes",
+            itemType: "task",
+            quantity: 16,
+          }),
+          makeItem({
+            id: "role-1",
+            name: "Senior Designer",
+            itemType: "role",
+            quantity: 24,
+          }),
+        ],
+      }),
+      makeItem({
+        id: "phase-2",
+        name: "Development phase",
+        itemType: "phase",
+        quantity: 120,
+        children: [
+          makeItem({
+            id: "task-2",
+            name: "Computers",
+            itemType: "task",
+            quantity: 80,
+          }),
+          makeItem({
+            id: "role-2",
+            name: "Senior Developer",
+            itemType: "role",
+            quantity: 40,
+          }),
+        ],
+      }),
+      makeItem({
+        id: "phase-3",
+        name: "QA phase",
+        itemType: "phase",
+        quantity: 30,
+      }),
+    ]
+
+    const [items, setItems] = useState<LineItem[]>(initialItems)
+    const itemsRef = useRef(items)
+    itemsRef.current = items
+
+    const onCellChange = async (updatedItem: LineItem) => {
+      action("onCellChange")(updatedItem)
+      setItems((prev) =>
+        prev.map((i) => (i.id === updatedItem.id ? updatedItem : i))
+      )
+    }
+
+    const dataAdapter = useMemo(() => {
+      const adapter = createDataAdapter({
+        data: items,
+        paginationType: "pages",
+        perPage: 10,
+      })
+      adapter.fetchData = (fetchOptions: unknown) => {
+        const currentAdapter = createDataAdapter({
+          data: itemsRef.current,
+          paginationType: "pages",
+          perPage: 10,
+        })
+        return currentAdapter.fetchData(fetchOptions as never)
+      }
+      return adapter
+    }, [items])
+
+    const source = useDataCollectionSource<
+      LineItem,
+      Record<string, never>,
+      never,
+      never,
+      never,
+      never,
+      never
+    >({
+      dataAdapter,
+      itemsWithChildren: (item) => !!item?.children?.length,
+      childrenCount: ({ item }) => item?.children?.length,
+      fetchChildren: async ({ item }) => {
+        await new Promise((resolve) => setTimeout(resolve, 300))
+        return item.children
+          ? {
+              records: item.children,
+              type: "basic" as const,
+              paginationInfo: {
+                cursor: "",
+                total: item.children.length,
+                perPage: 10,
+                currentPage: 1,
+                pagesCount: 1,
+                hasMore: false,
+              },
+            }
+          : { records: [] }
+      },
+    })
+
+    return (
+      <OneDataCollection
+        source={source}
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              columns: [
+                {
+                  label: "Name",
+                  id: "name",
+                  width: 250,
+                  editType: () => "text" as const,
+                  render: (item: LineItem) => item.name,
+                },
+                {
+                  label: "Type",
+                  id: "itemType",
+                  editType: () => "display-only" as const,
+                  render: (item: LineItem) => item.itemType,
+                },
+                {
+                  label: "Quantity",
+                  id: "quantity",
+                  align: "right" as const,
+                  editType: (item: LineItem) =>
+                    item.itemType === "phase"
+                      ? ("disabled" as const)
+                      : ("number" as const),
+                  numberConfig: {
+                    min: 0,
+                    units: (item: LineItem) =>
+                      item.itemType === "role" || item.itemType === "phase"
+                        ? "h"
+                        : "u",
+                  },
+                  render: (item: LineItem) =>
+                    item.quantity !== undefined
+                      ? `${item.quantity} ${item.itemType === "role" || item.itemType === "phase" ? "h" : "u"}`
+                      : "",
+                },
+              ],
+              onCellChange,
+            },
+          },
+        ]}
+        id="editable-table-dynamic-units/v1"
       />
     )
   },

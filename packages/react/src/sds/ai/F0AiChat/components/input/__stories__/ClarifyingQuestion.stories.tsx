@@ -8,9 +8,43 @@ import type {
 } from "../../../actions/core/clarifyingQuestion/types"
 
 import { F0AiChatProvider, useAiChat } from "../../.."
-import { buildSummaryMessage } from "../../../actions/core/clarifyingQuestion/buildSummaryMessage"
 import { markdownRenderers } from "../../markdownRenderers"
 import { ChatTextarea } from "../ChatTextarea"
+
+// Inlined for story purposes. The real implementation lives in the host app
+// (factorial) alongside its clarifyingQuestion action.
+type StepSummaryInput = {
+  question: string
+  options: Array<{ id: string; label: string }>
+  selectionMode?: ClarifyingSelectionMode
+  selectedIds: string[]
+  customText: string
+  isCustomActive: boolean
+}
+const buildSummaryMessage = (
+  steps: StepSummaryInput[],
+  translations: { custom: string; skipped: string }
+): string => {
+  const parts: string[] = []
+  for (const step of steps) {
+    const labels = step.options
+      .filter(({ id }) => step.selectedIds.includes(id))
+      .map(({ label }) => label)
+    const isSingle = (step.selectionMode ?? "single") === "single"
+    const includeCustom = isSingle
+      ? step.selectedIds.length === 0 && step.customText.trim().length > 0
+      : step.isCustomActive && step.customText.trim().length > 0
+    if (includeCustom) {
+      labels.push(`(${translations.custom}) ${step.customText.trim()}`)
+    }
+    if (labels.length > 0) {
+      parts.push(`**${step.question}**\n${labels.join("\n")}`)
+    } else {
+      parts.push(`**${step.question}**\n(${translations.skipped})`)
+    }
+  }
+  return parts.join("\n\n\n")
+}
 
 // ---------------------------------------------------------------------------
 // Shared option sets
@@ -173,6 +207,29 @@ function useClarifyingQuestionStory(steps: StoryStep[]) {
     }
   }, [stepIndex, steps, interactions, setClarifyingQuestion])
 
+  const skip = useCallback(() => {
+    if (!currentStep.optional) return
+    updateInteraction({
+      selectedIds: [],
+      customText: "",
+      isCustomActive: false,
+    })
+    if (stepIndex < steps.length - 1) {
+      setStepIndex(stepIndex + 1)
+    } else {
+      setMessages((prev) => [...prev, "(skipped)"])
+      setClarifyingQuestion(null)
+      setStepIndex(0)
+      setInteractions({})
+    }
+  }, [
+    currentStep.optional,
+    stepIndex,
+    steps.length,
+    updateInteraction,
+    setClarifyingQuestion,
+  ])
+
   const back = useCallback(() => {
     if (stepIndex > 0) {
       setStepIndex(stepIndex - 1)
@@ -196,6 +253,8 @@ function useClarifyingQuestionStory(steps: StoryStep[]) {
       totalSteps: steps.length,
       toggleOption,
       confirm,
+      skip,
+      cancel: () => setClarifyingQuestion(null),
       back,
       setCustomAnswerText,
       setCustomAnswerActive,
@@ -209,6 +268,7 @@ function useClarifyingQuestionStory(steps: StoryStep[]) {
     steps.length,
     toggleOption,
     confirm,
+    skip,
     back,
     setCustomAnswerText,
     setCustomAnswerActive,
@@ -350,6 +410,31 @@ const ClarifyingCustomAnswerSingleExample = () => {
   )
 }
 
+const ClarifyingOptionalSkipExample = () => {
+  const steps = useMemo<StoryStep[]>(
+    () => [
+      {
+        question: "Any specific employee group to include? (optional)",
+        options: [
+          { id: "engineering", label: "Engineering" },
+          { id: "sales", label: "Sales" },
+          { id: "marketing", label: "Marketing" },
+        ],
+        selectionMode: "single",
+        optional: true,
+      },
+    ],
+    []
+  )
+  const { messages } = useClarifyingQuestionStory(steps)
+  return (
+    <StoryShell
+      description="Optional step — the Skip button appears in the footer and pressing Esc also skips."
+      messages={messages}
+    />
+  )
+}
+
 const ClarifyingCustomAnswerMultipleExample = () => {
   const steps = useMemo<StoryStep[]>(
     () => [
@@ -415,4 +500,9 @@ export const CustomAnswerSingle: Story = {
 export const CustomAnswerMultiple: Story = {
   name: "Custom Answer — Multiple",
   render: () => <ClarifyingCustomAnswerMultipleExample />,
+}
+
+export const OptionalWithSkip: Story = {
+  name: "Optional — Skip",
+  render: () => <ClarifyingOptionalSkipExample />,
 }

@@ -49,6 +49,7 @@ export const VisualizationRenderer = <
   onSelectItems,
   onLoadData,
   onLoadError,
+  onDataStateChange,
   tmpFullWidth,
 }: {
   visualization: Visualization<
@@ -72,6 +73,16 @@ export const VisualizationRenderer = <
   onSelectItems: OnSelectItemsCallback<R, Filters>
   onLoadData: OnLoadDataCallback<R, Filters>
   onLoadError: OnLoadErrorCallback
+  onDataStateChange?: CollectionProps<
+    R,
+    Filters,
+    Sortings,
+    Summaries,
+    ItemActions,
+    NavigationFilters,
+    Grouping,
+    object
+  >["onDataStateChange"]
   clearSelectedItems?: () => void
   tmpFullWidth?: boolean
 }): JSX.Element => {
@@ -81,6 +92,7 @@ export const VisualizationRenderer = <
       onLoadData,
       onLoadError,
       onSelectItems,
+      onDataStateChange,
     })
   }
 
@@ -109,6 +121,7 @@ export const VisualizationRenderer = <
     onSelectItems,
     onLoadData,
     onLoadError,
+    onDataStateChange,
     tmpFullWidth,
   })
 }

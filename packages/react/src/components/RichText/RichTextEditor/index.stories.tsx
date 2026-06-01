@@ -22,7 +22,7 @@ const meta = {
     onChange: {
       control: false,
       description:
-        "Callback function triggered when editor content changes. Receives an object with { value: string | null, mentionIds?: number[] }",
+        "Callback function triggered when editor content changes. Receives an object with { value: string | null, mentionIds?: string[] }",
       required: true,
     },
     initialEditorState: {
@@ -149,17 +149,17 @@ const enhancementOptions: EnhancementOption[] = [
 
 const users = [
   {
-    id: 1,
+    id: "1",
     label: "Raúl Sigüenza Sánchez",
     href: "/avatars/person01.jpg",
   },
   {
-    id: 2,
+    id: "2",
     label: "Jacob Bamio Cordero",
     href: "/avatars/person02.jpg",
   },
   {
-    id: 3,
+    id: "3",
     label: "Xavier Val Parejo",
     href: "/avatars/person03.jpg",
   },

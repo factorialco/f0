@@ -91,13 +91,51 @@ export const SmallRange: Story = {
   },
 }
 
-export const WithEmojiOptions = {
+export const WithEmojiOptions: Story = {
   // TODO: Fix a11y issues
   parameters: withSkipA11y({}),
   args: {
     id: "question-4",
     title: "Satisfaction level",
     description: "Rate from 1 to 10",
+    value: 0,
+    options: [
+      { value: 1, label: "😠" },
+      { value: 2, label: "😐" },
+      { value: 3, label: "😊" },
+      { value: 4, label: "😍" },
+      { value: 5, label: "🤩" },
+    ],
+  },
+}
+
+export const WithEmojiOptionsDisabled: Story = {
+  // TODO: Fix a11y issues
+  parameters: withSkipA11y({}),
+  render: (args) => {
+    const [elements, setElements] = useState<SurveyFormBuilderElement[]>([
+      { type: "question" as const, question: args as QuestionElement },
+    ])
+
+    const question =
+      elements[0] && "question" in elements[0] ? elements[0].question : {}
+
+    return (
+      <div className="max-w-[750px]">
+        <SurveyFormBuilderProvider
+          elements={elements}
+          onChange={setElements}
+          disabled
+        >
+          <RatingQuestion {...args} {...question} />
+        </SurveyFormBuilderProvider>
+      </div>
+    )
+  },
+  args: {
+    id: "question-5",
+    title: "Satisfaction level",
+    description: "Rate from 1 to 5",
     value: 0,
     options: [
       { value: 1, label: "😠" },

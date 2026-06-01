@@ -1,7 +1,6 @@
 import { useMemo } from "react"
 
 import { F0Button } from "@/components/F0Button"
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import {
   Dropdown,
   type DropdownItem as DropdownItemType,
@@ -9,11 +8,14 @@ import {
 import { EllipsisHorizontal } from "@/icons/app"
 import Delete from "@/icons/app/Delete"
 import PushPin from "@/icons/app/PushPin"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 
-import type { ChatThread } from "../useChatHistory"
 import type { ThreadActionHandlers } from "../types"
+import type { ChatThread } from "../useChatHistory"
+
+import { formatThreadDate } from "../utils"
 
 interface ThreadItemProps extends ThreadActionHandlers {
   thread: ChatThread
@@ -46,6 +48,15 @@ export function ThreadItem({
     [isPinned, thread.id, onPin, onUnpin, onDelete]
   )
 
+  const formattedDate = useMemo(
+    () =>
+      formatThreadDate(thread.updatedAt, {
+        today: translations.ai.today,
+        yesterday: translations.ai.yesterday,
+      }),
+    [thread.updatedAt, translations.ai.today, translations.ai.yesterday]
+  )
+
   return (
     <div
       className={cn(
@@ -62,14 +73,23 @@ export function ThreadItem({
       }}
     >
       <div
-        className="flex w-full items-center gap-2"
+        className="flex w-full min-w-0 items-center gap-1"
         onClick={() => onSelect(thread.id, thread.title)}
       >
         <OneEllipsis lines={1} className="text-left font-medium">
           {thread.title}
         </OneEllipsis>
+        <span className="shrink-0 font-medium text-f1-foreground-tertiary">
+          {`- ${formattedDate}`}
+        </span>
       </div>
-      <div className="flex items-center">
+      <div
+        className={cn(
+          "flex items-center opacity-0 transition-opacity duration-150",
+          "group-hover:opacity-100 focus-within:opacity-100",
+          "has-[[aria-expanded=true]]:opacity-100"
+        )}
+      >
         <Dropdown items={dropdownItems}>
           <F0Button
             icon={EllipsisHorizontal}

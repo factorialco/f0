@@ -12,20 +12,43 @@ import { fetchThreadMessages } from "../../utils/fetchThreadMessages"
 /**
  * Convert AppendMessage (user-facing, no IDs) to CopilotKit Message
  * (with generated IDs for message and each tool call).
+ *
+ * For tool-result messages (`role: "tool"`), the caller must provide
+ * the `toolCallId` that links back to the assistant's tool call.
  */
 function toMessage(input: AppendMessage): Message {
+  if (input.role === "tool") {
+    return {
+      id: randomId(),
+      role: "tool",
+      content: input.content,
+      toolCallId: input.toolCallId,
+    } as Message
+  }
+
   return {
     id: randomId(),
     role: input.role,
     content: input.content,
     ...(input.toolCalls && {
       toolCalls: input.toolCalls.map((tc) => ({
-        id: randomId(),
+        id: tc.id ?? randomId(),
         type: "function" as const,
         function: tc.function,
       })),
     }),
   }
+}
+
+/**
+ * Filter messages that can be persisted to the backend.
+ * The backend only accepts `user` and `assistant` roles.
+ * Tool-result messages (`role: "tool"`) are CopilotKit client-side
+ * bookkeeping — the backend already has tool invocation data from
+ * the assistant message's `toolCalls`.
+ */
+function filterPersistableMessages(messages: Message[]): Message[] {
+  return messages.filter((m) => m.role === "user" || m.role === "assistant")
 }
 
 /**
@@ -41,6 +64,7 @@ export const CopilotFunctionBridge = () => {
     setSendMessageFunction,
     setAppendMessagesFunction,
     setReplaceMessagesFunction,
+    runtimeFetch,
   } = useAiChat()
   const { reset, messages, setMessages, sendMessage, threadId } =
     useCopilotChatInternal()
@@ -74,7 +98,8 @@ export const CopilotFunctionBridge = () => {
         copilotApiConfig.chatApiEndpoint,
         copilotApiConfig.headers,
         threadId,
-        actions as Record<string, { render?: (...args: any[]) => any }>
+        actions as Record<string, { render?: (...args: any[]) => any }>,
+        runtimeFetch
       )
         .then(
           (msgs) => setMessages(msgs),
@@ -92,6 +117,7 @@ export const CopilotFunctionBridge = () => {
     setIsLoadingThread,
     copilotApiConfig,
     actions,
+    runtimeFetch,
   ])
 
   // Send message
@@ -114,7 +140,7 @@ export const CopilotFunctionBridge = () => {
   // Messages are also persisted to the backend thread (fire-and-forget) so
   // the agent can see them and they appear when loading chat history.
   useEffect(() => {
-    setAppendMessagesFunction((appendMessages) => {
+    setAppendMessagesFunction((appendMessages, persist) => {
       // Generate IDs for CopilotKit and convert to Message[]
       const hydrated = appendMessages.map(toMessage)
 
@@ -127,11 +153,12 @@ export const CopilotFunctionBridge = () => {
         setMessages([...serializable, ...hydrated])
       }
 
-      // Persist to backend thread (best-effort)
-      // Send the hydrated messages so the backend gets the same IDs
+      // Persist to backend thread (best-effort, unless persist=false)
+      if (!persist) return
       const currentThreadId = threadIdRef.current
-      if (currentThreadId) {
-        void fetch(
+      const persistable = filterPersistableMessages(hydrated)
+      if (currentThreadId && persistable.length > 0) {
+        void runtimeFetch(
           `${copilotApiConfig.chatApiEndpoint}/chat-history/threads/${currentThreadId}/messages`,
           {
             method: "POST",
@@ -140,7 +167,7 @@ export const CopilotFunctionBridge = () => {
               ...(copilotApiConfig.headers as Record<string, string>),
             },
             credentials: "include",
-            body: JSON.stringify({ messages: hydrated }),
+            body: JSON.stringify({ messages: persistable }),
           }
         )
       }
@@ -148,7 +175,7 @@ export const CopilotFunctionBridge = () => {
     return () => {
       setAppendMessagesFunction(null)
     }
-  }, [setAppendMessagesFunction, setMessages, copilotApiConfig])
+  }, [setAppendMessagesFunction, setMessages, copilotApiConfig, runtimeFetch])
 
   // Replace messages (clear + append atomically)
   // Unlike calling reset() then setMessages(), this does a single
@@ -163,10 +190,11 @@ export const CopilotFunctionBridge = () => {
       // The threadId will be changed lazily on the next user interaction.
       setMessages(hydrated)
 
-      // Persist to the current thread
+      // Persist to the current thread (filter out tool-result messages)
       const currentThreadId = threadIdRef.current
-      if (currentThreadId) {
-        void fetch(
+      const persistable = filterPersistableMessages(hydrated)
+      if (currentThreadId && persistable.length > 0) {
+        void runtimeFetch(
           `${copilotApiConfig.chatApiEndpoint}/chat-history/threads/${currentThreadId}/messages`,
           {
             method: "POST",
@@ -175,7 +203,7 @@ export const CopilotFunctionBridge = () => {
               ...(copilotApiConfig.headers as Record<string, string>),
             },
             credentials: "include",
-            body: JSON.stringify({ messages: hydrated }),
+            body: JSON.stringify({ messages: persistable }),
           }
         )
       }
@@ -183,7 +211,13 @@ export const CopilotFunctionBridge = () => {
     return () => {
       setReplaceMessagesFunction(null)
     }
-  }, [setReplaceMessagesFunction, setMessages, setThreadId, copilotApiConfig])
+  }, [
+    setReplaceMessagesFunction,
+    setMessages,
+    setThreadId,
+    copilotApiConfig,
+    runtimeFetch,
+  ])
 
   return null
 }

@@ -189,6 +189,7 @@ const positionOptions = [
   "fixed",
   "sticky",
 ]
+const zIndexOptions = [undefined, "auto", "0", "10", "20", "30", "40", "50"]
 
 // ─── Meta ────────────────────────────────────────────────────────
 
@@ -202,6 +203,11 @@ const meta = {
       options: ["block", "flex", "inline", "inline-flex", "grid", "none"],
     },
     position: { control: "select", options: positionOptions },
+    top: { control: "select", options: spacingOptions },
+    right: { control: "select", options: spacingOptions },
+    bottom: { control: "select", options: spacingOptions },
+    left: { control: "select", options: spacingOptions },
+    zIndex: { control: "select", options: zIndexOptions },
     // Padding
     padding: { control: "select", options: spacingOptions },
     paddingX: { control: "select", options: spacingOptions },
@@ -442,11 +448,15 @@ export const Position: Story = {
         </span>
         <F0Box
           position="absolute"
+          top="xl"
+          right="xl"
+          zIndex="10"
           padding="md"
           background="info"
           borderRadius="sm"
         >
-          position=&quot;absolute&quot; (top-left by default)
+          position=&quot;absolute&quot; top=&quot;xl&quot; right=&quot;xl&quot;
+          zIndex=&quot;10&quot;
         </F0Box>
       </F0Box>
 
@@ -469,6 +479,153 @@ export const Position: Story = {
       >
         position=&quot;sticky&quot; — sticks on scroll (try in a scrollable
         container)
+      </F0Box>
+    </F0Box>
+  ),
+}
+
+export const InsetCorners: Story = {
+  render: () => (
+    <F0Box display="flex" flexDirection="column" gap="lg">
+      <Label subtitle="Use a relative parent and absolute children to anchor items to each corner">
+        Inset corners
+      </Label>
+
+      <div className="h-[200px] w-[800px] max-w-full rounded-xl bg-f1-background-tertiary p-6">
+        <F0Box
+          position="relative"
+          width="full"
+          height="full"
+          border="default"
+          borderRadius="md"
+        >
+          <F0Box
+            position="absolute"
+            top="none"
+            left="none"
+            padding="sm"
+            background="info"
+            borderRadius="sm"
+          >
+            top=&quot;none&quot; left=&quot;none&quot;
+          </F0Box>
+          <F0Box
+            position="absolute"
+            top="none"
+            right="none"
+            padding="sm"
+            background="warning"
+            borderRadius="sm"
+          >
+            top=&quot;none&quot; right=&quot;none&quot;
+          </F0Box>
+          <F0Box
+            position="absolute"
+            bottom="none"
+            left="none"
+            padding="sm"
+            background="positive"
+            borderRadius="sm"
+          >
+            bottom=&quot;none&quot; left=&quot;none&quot;
+          </F0Box>
+          <F0Box
+            position="absolute"
+            right="none"
+            bottom="none"
+            padding="sm"
+            background="promote"
+            borderRadius="sm"
+          >
+            right=&quot;none&quot; bottom=&quot;none&quot;
+          </F0Box>
+        </F0Box>
+      </div>
+
+      <F0Box display="grid" columns="2" gap="md">
+        <div className="h-[150px] rounded-xl bg-f1-background-tertiary p-6">
+          <F0Box
+            position="relative"
+            width="full"
+            height="full"
+            border="default"
+            borderRadius="md"
+          >
+            <F0Box
+              position="absolute"
+              top="none"
+              left="lg"
+              padding="sm"
+              background="info"
+              borderRadius="sm"
+            >
+              top=&quot;none&quot; left=&quot;lg&quot;
+            </F0Box>
+          </F0Box>
+        </div>
+
+        <div className="h-[150px] rounded-xl bg-f1-background-tertiary p-6">
+          <F0Box
+            position="relative"
+            width="full"
+            height="full"
+            border="default"
+            borderRadius="md"
+          >
+            <F0Box
+              position="absolute"
+              top="lg"
+              left="none"
+              padding="sm"
+              background="info"
+              borderRadius="sm"
+            >
+              top=&quot;lg&quot; left=&quot;none&quot;
+            </F0Box>
+          </F0Box>
+        </div>
+
+        <div className="h-[150px] rounded-xl bg-f1-background-tertiary p-6">
+          <F0Box
+            position="relative"
+            width="full"
+            height="full"
+            border="default"
+            borderRadius="md"
+          >
+            <F0Box
+              position="absolute"
+              bottom="none"
+              right="lg"
+              padding="sm"
+              background="info"
+              borderRadius="sm"
+            >
+              bottom=&quot;none&quot; right=&quot;lg&quot;
+            </F0Box>
+          </F0Box>
+        </div>
+
+        <div className="h-[150px] rounded-xl bg-f1-background-tertiary p-6">
+          <F0Box
+            position="relative"
+            width="full"
+            height="full"
+            border="default"
+            borderRadius="md"
+          >
+            <F0Box
+              position="absolute"
+              bottom="lg"
+              right="none"
+              padding="sm"
+              background="info"
+              borderRadius="sm"
+            >
+              bottom=&quot;lg&quot; right=&quot;none&quot;
+            </F0Box>
+          </F0Box>
+        </div>
       </F0Box>
     </F0Box>
   ),
@@ -1471,7 +1628,18 @@ export const BorderRadius: Story = {
 
       <F0Box display="flex" gap="md" flexWrap="wrap" alignItems="end">
         {(
-          ["none", "2xs", "xs", "sm", "md", "lg", "xl", "2xl", "full"] as const
+          [
+            "none",
+            "2xs",
+            "xs",
+            "sm",
+            "md",
+            "lg",
+            "xl",
+            "2xl",
+            "3xl",
+            "full",
+          ] as const
         ).map((r) => (
           <F0Box
             key={r}

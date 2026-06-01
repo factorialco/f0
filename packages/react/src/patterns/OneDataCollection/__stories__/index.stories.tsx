@@ -879,6 +879,60 @@ export const WithSelectableAndBulkActions: Story = {
   ),
 }
 
+export const WithAsyncBulkActions: Story = {
+  render: () => {
+    const paginatedMockUsers = generateMockUsers(10)
+
+    const mockVisualizations = getMockVisualizations({ frozenColumns: 0 })
+
+    const source = useDataCollectionSource({
+      filters,
+      sortings,
+      selectable: (item) => item.id,
+      bulkActions: () => ({
+        primary: [
+          {
+            label: "Archive",
+            icon: CheckCircle,
+            id: "archive-all",
+          },
+          {
+            label: "Delete",
+            icon: Delete,
+            id: "delete-all",
+            critical: true,
+          },
+        ],
+        secondary: [
+          {
+            label: "Export",
+            id: "export-all",
+          },
+        ],
+      }),
+      dataAdapter: createDataAdapter({
+        data: paginatedMockUsers,
+        delay: 500,
+        paginationType: "pages",
+      }),
+    })
+
+    return (
+      <OneDataCollection
+        source={source}
+        autoManageBulkActionStatus
+        onBulkAction={async (action) => {
+          await new Promise((resolve) => setTimeout(resolve, 1500))
+          if (action === "delete-all") {
+            throw new Error("Simulated failure")
+          }
+        }}
+        visualizations={[mockVisualizations.table]}
+      />
+    )
+  },
+}
+
 export const WithPageOnlySelection: Story = {
   render: () => {
     const paginatedMockUsers = generateMockUsers(50)
@@ -933,6 +987,40 @@ export const WithCrossPageSelection: Story = {
           ],
         })}
       />
+    )
+  },
+}
+
+export const WithInfiniteScrollSelection: Story = {
+  render: () => {
+    const paginatedMockUsers = generateMockUsers(50)
+
+    return (
+      <div className="h-[500px] overflow-auto">
+        <ExampleComponent
+          selectable={(item) => item.id}
+          allPagesSelection={true}
+          // Infinite-scroll + Gmail-style select-all: manual selections persist
+          // across loadMore, and the "Select all N items" banner appears once
+          // every loaded row is checked.
+          dataAdapter={createDataAdapter({
+            data: paginatedMockUsers,
+            delay: 500,
+            paginationType: "infinite-scroll",
+            perPage: 10,
+          })}
+          bulkActions={({ selectedCount }) => ({
+            primary: [
+              {
+                label: `Delete ${selectedCount} item${selectedCount > 1 ? "s" : ""}`,
+                icon: Delete,
+                id: "delete-selected",
+                critical: true,
+              },
+            ],
+          })}
+        />
+      </div>
     )
   },
 }
@@ -1672,6 +1760,104 @@ export const TableColumnProperties: Story = {
                   label: "Next Review",
                   render: (item) => item.nextReview,
                   sorting: "nextReview",
+                },
+              ],
+            },
+          },
+        ]}
+      />
+    )
+  },
+}
+
+export const LongColumnLabels: Story = {
+  render: () => {
+    const dataSource = useDataCollectionSource({
+      dataAdapter: createDataAdapter({ data: mockUsers, delay: 300 }),
+    })
+
+    return (
+      <OneDataCollection
+        source={dataSource}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              columns: [
+                {
+                  label: "Full Name",
+                  render: (item) => item.name,
+                  width: 120,
+                },
+                {
+                  label: "Annual Gross Compensation (Before Tax)",
+                  render: (item) => `$${(item.salary ?? 0).toLocaleString()}`,
+                  width: 120,
+                },
+                {
+                  label: "Primary Organizational Department",
+                  render: (item) => item.department,
+                  width: 120,
+                },
+                {
+                  label: "Current Employment Role And Position Title",
+                  render: (item) => item.role,
+                  width: 120,
+                },
+                {
+                  label: "Corporate Electronic Mail Address",
+                  render: (item) => item.email,
+                  width: 150,
+                },
+              ],
+            },
+          },
+        ]}
+      />
+    )
+  },
+}
+
+export const LongColumnLabelsWithInfo: Story = {
+  render: () => {
+    const dataSource = useDataCollectionSource({
+      dataAdapter: createDataAdapter({ data: mockUsers, delay: 300 }),
+    })
+
+    return (
+      <OneDataCollection
+        source={dataSource}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              columns: [
+                {
+                  label: "Full Name",
+                  render: (item) => item.name,
+                  width: 120,
+                },
+                {
+                  label: "Annual Gross Compensation (Before Tax)",
+                  render: (item) => `$${(item.salary ?? 0).toLocaleString()}`,
+                  width: 120,
+                  info: "Total yearly salary before any tax withholdings or benefit deductions are applied",
+                },
+                {
+                  label: "Primary Organizational Department",
+                  render: (item) => item.department,
+                  width: 120,
+                  info: "The business unit this employee is assigned to",
+                },
+                {
+                  label: "Current Employment Role And Position Title",
+                  render: (item) => item.role,
+                  width: 120,
+                },
+                {
+                  label: "Corporate Electronic Mail Address",
+                  render: (item) => item.email,
+                  width: 150,
                 },
               ],
             },
