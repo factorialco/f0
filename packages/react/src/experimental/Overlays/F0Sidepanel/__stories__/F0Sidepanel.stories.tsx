@@ -67,11 +67,6 @@ const meta: Meta<typeof Demo> = {
       description: "Show a bottom border on the header.",
       control: { type: "boolean" },
     },
-    shadow: {
-      description: "Render with the elevation shadow.",
-      control: { type: "boolean" },
-      table: { defaultValue: { summary: "true" } },
-    },
     title: {
       description:
         "Header title. Renders centered as a bold label when a string, or as-is when a ReactNode. Omit (or pass null) to use the title-less Figma layout.",
@@ -308,11 +303,11 @@ export const Extended: Story = {
   },
 }
 
-export const NoShadow: Story = {
+export const NoOverlay: Story = {
   args: {
     width: "wide",
-    title: "Flush variant",
-    shadow: false,
+    title: "No backdrop",
+    overlay: false,
     headerBorder: true,
     children: <ExampleBody />,
   },
@@ -320,7 +315,25 @@ export const NoShadow: Story = {
     docs: {
       description: {
         story:
-          "Use `shadow={false}` for embedded or flush placements where the surrounding chrome already provides separation.",
+          "Use `overlay={false}` to hide the dimmed backdrop while keeping the panel modal. The user still can't reach the page underneath — outside-click and Escape still close the panel.",
+      },
+    },
+  },
+}
+
+export const Floating: Story = {
+  args: {
+    width: "wide",
+    title: "Floating panel",
+    allowBackgroundInteraction: true,
+    headerBorder: true,
+    children: <ExampleBody />,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Use `allowBackgroundInteraction` for an inspector/utility panel that coexists with the page. No overlay, no modal focus trap — the user can scroll, click, and type behind the panel.",
       },
     },
   },

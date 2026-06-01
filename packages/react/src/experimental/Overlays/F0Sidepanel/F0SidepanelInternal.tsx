@@ -31,7 +31,6 @@ export const F0SidepanelInternal = ({
   locked = false,
   allowBackgroundInteraction = false,
   headerBorder = false,
-  shadow = true,
   options,
   navigation,
   children,
@@ -75,7 +74,6 @@ export const F0SidepanelInternal = ({
       <SheetContent
         side={side}
         withOverlay={overlay && !allowBackgroundInteraction}
-        withShadow={shadow}
         className={cn(widthClasses[width], "rounded-none")}
         onOpenAutoFocus={(event) => event.preventDefault()}
         onInteractOutside={(event) => {

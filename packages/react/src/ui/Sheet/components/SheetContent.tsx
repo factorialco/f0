@@ -24,7 +24,6 @@ export interface SheetContentProps extends React.ComponentPropsWithoutRef<
 > {
   side?: SheetSide
   withOverlay?: boolean
-  withShadow?: boolean
   container?: HTMLElement | null
 }
 
@@ -36,7 +35,6 @@ export const SheetContent = forwardRef<
     {
       side = "right",
       withOverlay = true,
-      withShadow = true,
       container,
       className,
       children,
@@ -49,8 +47,7 @@ export const SheetContent = forwardRef<
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
-          "fixed z-50 flex flex-col gap-0 border-solid border-f1-border bg-f1-background text-f1-foreground transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-200 data-[state=open]:duration-300",
-          withShadow && "shadow-lg",
+          "fixed z-50 flex flex-col gap-0 border-solid border-f1-border bg-f1-background text-f1-foreground shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-200 data-[state=open]:duration-300",
           sideClasses[side],
           className
         )}

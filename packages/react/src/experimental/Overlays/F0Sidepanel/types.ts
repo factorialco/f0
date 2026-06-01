@@ -60,8 +60,6 @@ export interface F0SidepanelProps {
   allowBackgroundInteraction?: boolean
   /** Show a bottom border on the header. Default false. */
   headerBorder?: boolean
-  /** Render with the elevation shadow. Default true. */
-  shadow?: boolean
   /** Legacy actions menu rendered as a kebab dropdown on the right of the header. */
   options?: SidepanelOption[]
   /** Page-stepping navigation (previous/next + counter). */
