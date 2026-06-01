@@ -1,0 +1,486 @@
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as Stories from "./F0Accordion.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+<Meta of={Stories} />
+
+# F0Accordion
+
+A collapsible container that organizes related content into independent sections. Each item expands and collapses on its own and can host contextual actions in its header.
+
+---
+
+# Overview
+
+## Purpose
+
+- Reveal dense content on demand, reducing visual noise and cognitive load.
+- Let users decide which sections they need to inspect.
+- Group related blocks of information without forcing a fixed reading order.
+- Provide a slot for per-item actions (segmented controls, dropdown menus) without nesting interactive controls.
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Element</th>
+        <th className="text-left">Description</th>
+        <th className="text-left">Required</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>Container</code>
+        </td>
+        <td>Wraps the full list of accordion items.</td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td>
+          <code>Item</code>
+        </td>
+        <td>One collapsible section with header and content.</td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td>
+          <code>Trigger</code>
+        </td>
+        <td>Chevron button that toggles the item open/closed.</td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td>
+          <code>Title</code>
+        </td>
+        <td>Short label that identifies the section.</td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td>
+          <code>Actions</code>
+        </td>
+        <td>
+          Optional slot in the header for a segmented control and/or a dropdown
+          menu.
+        </td>
+        <td>No</td>
+      </tr>
+      <tr>
+        <td>
+          <code>Content</code>
+        </td>
+        <td>Body revealed when the item is expanded.</td>
+        <td>Yes</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## States
+
+<Canvas of={Stories.DefaultOpen} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">State</th>
+        <th className="text-left">Description</th>
+        <th className="text-left">Visual Indicator</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>Closed</code>
+        </td>
+        <td>Default state. Content hidden, only header visible.</td>
+        <td>Chevron pointing down.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>Open</code>
+        </td>
+        <td>Content revealed below the header.</td>
+        <td>Chevron pointing up, content animates in.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>Loading</code>
+        </td>
+        <td>Placeholder while the items are being fetched.</td>
+        <td>
+          Render via <code>F0Accordion.Skeleton</code>.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+---
+
+# Guidelines
+
+## Design Best Practices
+
+### When to use
+
+- Long pages where related content can be grouped into self-contained sections (settings, profile details, FAQs).
+- Forms split into optional steps the user can review independently.
+- Lists of records where each entry has secondary detail the user may want to inspect.
+
+### When NOT to use
+
+- The page has only one or two short sections. Use a card or plain section instead.
+- The content is critical for the task and must always be visible. Do not hide it behind a collapse.
+- The component is meant for navigation. Use Tabs or a sidebar instead.
+
+### How to use
+
+- Allow multiple items open at the same time. Each item is independent and not mutually exclusive.
+- Use `defaultOpen` on individual items, or `defaultValue` / `value` on the root component, to control which sections start expanded.
+- Keep the header free of nested buttons. Use the `actions` slot for in-row controls.
+
+## Content Best Practices
+
+- Keep titles short and descriptive so the user can scan headers without expanding them.
+- Avoid repeating the title inside the body content.
+- Do not nest accordions inside accordions.
+
+<DoDonts
+  do={{
+    description:
+      "Use clear titles that describe the hidden content so users can decide whether to expand the section.",
+  }}
+  dont={{
+    description:
+      "Nest accordions inside other accordions or hide critical content the user always needs to see.",
+  }}
+/>
+
+## Layout
+
+- The component fills 100% of its parent width.
+- Open and close animations respect `prefers-reduced-motion`.
+- Header height is fixed; only the content area grows on expand.
+
+## Accessibility
+
+- Each trigger is a native button with `aria-expanded` reflecting the open state.
+- The header has two toggle targets: the title text and the chevron button. Any actions placed between them remain inert for toggle so they can be operated without expanding or collapsing the row.
+- Animations honour the user's reduced-motion preference.
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Key</th>
+        <th className="text-left">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <kbd>Enter</kbd> / <kbd>Space</kbd>
+        </td>
+        <td>Toggle the focused item.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Tab</kbd>
+        </td>
+        <td>Move focus to the next interactive element (trigger or action).</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Shift</kbd> + <kbd>Tab</kbd>
+        </td>
+        <td>Move focus to the previous interactive element.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+---
+
+# Code
+
+## Import
+
+```tsx
+import { F0Accordion } from "@factorialco/f0-react"
+```
+
+## Props
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+### F0Accordion props
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Prop</th>
+        <th className="text-left">Type</th>
+        <th className="text-left">Default</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>items</code> <span className="text-red-500">*</span>
+        </td>
+        <td>
+          <code>F0AccordionItem[]</code>
+        </td>
+        <td>-</td>
+        <td>List of items to render.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>value</code>
+        </td>
+        <td>
+          <code>string[]</code>
+        </td>
+        <td>-</td>
+        <td>Controlled list of open item ids.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>defaultValue</code>
+        </td>
+        <td>
+          <code>string[]</code>
+        </td>
+        <td>-</td>
+        <td>Uncontrolled initial list of open item ids.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>onValueChange</code>
+        </td>
+        <td>
+          <code>(openIds: string[]) =&gt; void</code>
+        </td>
+        <td>-</td>
+        <td>Called whenever the open items change.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### F0AccordionItem
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Prop</th>
+        <th className="text-left">Type</th>
+        <th className="text-left">Default</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>id</code> <span className="text-red-500">*</span>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>-</td>
+        <td>Unique identifier used for controlled state.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>title</code> <span className="text-red-500">*</span>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>-</td>
+        <td>Header label.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>description</code> <span className="text-red-500">*</span>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>-</td>
+        <td>Body shown when the item is expanded.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>actions</code>
+        </td>
+        <td>
+          <code>F0AccordionItemAction[]</code>
+        </td>
+        <td>-</td>
+        <td>Optional in-header actions (segmented control and/or dropdown).</td>
+      </tr>
+      <tr>
+        <td>
+          <code>defaultOpen</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>Whether the item is open on first render (uncontrolled).</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### F0AccordionItemAction
+
+A discriminated union with two variants, both keyed on the `type` field.
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">type</th>
+        <th className="text-left">Shape</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>"segmentedControl"</code>
+        </td>
+        <td>
+          <code>{`{ ariaLabel, items, value?, onChange?, disabled? }`}</code>
+        </td>
+        <td>Renders an F0SegmentedControl inside the header.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>"dropdown"</code>
+        </td>
+        <td>
+          <code>{`{ ariaLabel, items, disabled? }`}</code>
+        </td>
+        <td>Renders an icon-only dropdown trigger inside the header.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+---
+
+# Examples
+
+## Basic
+
+<Canvas of={Stories.Default} />
+
+```tsx
+<F0Accordion
+  items={[
+    {
+      id: "prototyping",
+      title: "Prototyping",
+      description: "Ability to present and defend design decisions clearly...",
+    },
+  ]}
+/>
+```
+
+## Default open
+
+<Canvas of={Stories.DefaultOpen} />
+
+```tsx
+<F0Accordion
+  items={items.map((item, index) => ({
+    ...item,
+    defaultOpen: index === 0,
+  }))}
+/>
+```
+
+## Controlled
+
+<Canvas of={Stories.Controlled} />
+
+```tsx
+const [openIds, setOpenIds] = useState<string[]>(["user-research"])
+
+return <F0Accordion items={items} value={openIds} onValueChange={setOpenIds} />
+```
+
+## With segmented control
+
+<Canvas of={Stories.WithSegmentedControl} />
+
+```tsx
+<F0Accordion
+  items={items.map((item) => ({
+    ...item,
+    actions: [
+      {
+        type: "segmentedControl",
+        ariaLabel: `Relevance for ${item.title}`,
+        items: relevanceSegments,
+        value: relevance[item.id],
+        onChange: (next) =>
+          setRelevance((prev) => ({ ...prev, [item.id]: next })),
+      },
+    ],
+  }))}
+/>
+```
+
+## With segmented control and dropdown
+
+<Canvas of={Stories.WithSegmentedControlAndDropdown} />
+
+```tsx
+<F0Accordion
+  items={items.map((item) => ({
+    ...item,
+    actions: [
+      {
+        type: "segmentedControl",
+        ariaLabel: `Relevance for ${item.title}`,
+        items: relevanceSegments,
+        value: relevance[item.id],
+        onChange: (next) =>
+          setRelevance((prev) => ({ ...prev, [item.id]: next })),
+      },
+      {
+        type: "dropdown",
+        ariaLabel: `More actions for ${item.title}`,
+        items: dropdownItems,
+      },
+    ],
+  }))}
+/>
+```
+
+## Loading
+
+<Canvas of={Stories.Skeleton} />
+
+```tsx
+<F0Accordion.Skeleton items={3} />
+```

@@ -1,0 +1,820 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { FeatureGrid } from "~/docs/components/FeatureGrid"
+import { Table, List, CardPin, Kanban, Pencil } from "@/icons/app"
+import containerDefaultDialog from "./assets/container-default-dialog.png"
+import containerRightDialog from "./assets/container-right-dialog.png"
+import containerWizardDialog from "./assets/container-wizard-dialog.png"
+import containerConfirmationDialog from "./assets/container-confirmation-dialog.png"
+
+<Meta title="Data collection/CRUD patterns/Overview" />
+
+# Data collection / CRUD patterns
+
+## Introduction
+
+**CRUD** (Create, Read, Update, Delete) patterns describe the UX for
+interactions with records from a Data Collection. Use them to decide whether an
+interaction should stay in the current surface, open a dialog, guide the user
+through a wizard, or navigate to a dedicated page.
+
+## CRUD by view
+
+Open a fullscreen scenario that shows create, read, update, and delete
+coexisting inside one view. Use these to validate how the four operations
+behave together in real product surfaces. Editable Table is a specialized
+Table mode for field-level updates; most Table rules still apply.
+
+<Unstyled>
+  <FeatureGrid
+    features={[
+      {
+        icon: Table,
+        title: "Table",
+        description:
+          "Dense, structured data with comparable columns. Best when users scan rows, sort, filter, and act on many records at once.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--table",
+      },
+      {
+        icon: List,
+        title: "List",
+        description:
+          "Linear records with a short teaser per item. Best when each row needs more than a cell can carry but still belongs in a flat sequence.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--list",
+      },
+      {
+        icon: CardPin,
+        title: "Card",
+        description:
+          "Resources that read as a whole — the card itself represents the record. Best for visual or summary-driven content where each item invites a click.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--card",
+      },
+      {
+        icon: Kanban,
+        title: "Kanban",
+        description:
+          "Records that move through workflow states. Best when state transitions matter and users update progress by dragging across lanes.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--kanban",
+      },
+      {
+        icon: Pencil,
+        title: "Editable Table",
+        description:
+          "Field-level updates that should happen in place. Best for spreadsheet-like flows where opening a form for every edit would slow users down.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-by-view--editable-table",
+      },
+      {
+        icon: Table,
+        title: "Page",
+        description:
+          "Clicking a row or item routes directly to the resource page — no dialog preview. Best when the resource is always read on its own page because of persistent navigation, tabs, deeper structure, or page-level actions.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-read--table-read-page",
+      },
+    ]}
+  />
+</Unstyled>
+
+## Pattern decision table
+
+The Pattern decision table below is the canonical reference. Later sections
+expand on individual operations, views, and edge cases.
+
+For Read on Table and List, routing to a page is the default — it is the most
+common Read interaction observed across the product. Dialog-based reads are
+reserved for cases where the resource is small enough to be fully understood
+in a dialog and no durable page destination exists.
+
+<Unstyled>
+  <table className="mb-4 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">User intent / need</th>
+        <th className="text-left">View</th>
+        <th className="text-left">Operations</th>
+        <th className="text-left">Pattern</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Default focused container for a CRUD form or read</td>
+        <td>All views</td>
+        <td>Create, Read, Update</td>
+        <td>Default Dialog</td>
+      </tr>
+      <tr>
+        <td>User benefits from keeping the collection visible</td>
+        <td>Table, List</td>
+        <td>Create, Read, Update</td>
+        <td>Right Dialog</td>
+      </tr>
+      <tr>
+        <td>User needs sequential guidance through a long flow</td>
+        <td>All views</td>
+        <td>Create</td>
+        <td>Wizard Dialog</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Default Read destination</strong> — resource has, or warrants,
+          a durable page with persistent navigation, tabs, or page-level actions
+        </td>
+        <td>Table, List</td>
+        <td>Read</td>
+        <td>Table to Page / List to Page</td>
+      </tr>
+      <tr>
+        <td>
+          User benefits from a reduced preview before committing to the full
+          page
+        </td>
+        <td>Table, List</td>
+        <td>Read</td>
+        <td>Dialog to Page</td>
+      </tr>
+      <tr>
+        <td>
+          Lightweight inspection only — resource is small, fits a centered
+          dialog, and has no durable page destination
+        </td>
+        <td>Table, List</td>
+        <td>Read</td>
+        <td>Default Dialog (Read fallback)</td>
+      </tr>
+      <tr>
+        <td>
+          User updates several items at once with explicit selection scope
+        </td>
+        <td>All views</td>
+        <td>Update</td>
+        <td>Bulk Update</td>
+      </tr>
+      <tr>
+        <td>User must confirm a destructive action and its scope</td>
+        <td>All views</td>
+        <td>Delete</td>
+        <td>Confirmation Dialog</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**Default Dialog**, **Right Dialog**, **Wizard Dialog**, and **Confirmation
+Dialog** are dialog containers. **Dialog to Page**, **Table to Page / List to
+Page**, and **Bulk Update** are flows built on top of those containers.
+
+**A note on width.** Dialog containers are all backed by the same `F0Dialog`
+primitive with a configurable `width` prop accepting `sm`, `md`, `lg`, or
+`xl`. Default Dialog uses `md`. Wizard Dialog typically uses `md`; reach for
+`lg` only when step content truly requires it. Confirmation Dialog uses `sm`.
+Dialog to Page typically uses `sm` since the full page is the durable
+destination. Stay between `sm` and `md` for CRUD flows — avoid `lg` unless
+content density requires it, and avoid `xl`.
+
+## Container anatomy
+
+Each named pattern is a specific configuration of `F0Dialog`. The differences
+are in `position`, `width`, and the actions inside — not in the underlying
+component. Container anatomy covers dialog containers only. Non-dialog
+patterns (Table to Page / List to Page, Editable Table inline edits, Kanban
+drag) live on each view's own documentation page.
+
+<Unstyled>
+  <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+    <figure className="m-0">
+      <img
+        src={containerDefaultDialog}
+        alt="Default dialog centered over a Data Collection, showing a Create resource form."
+        className="block w-full rounded-lg border border-solid border-f1-border dark:border-f1-border-secondary"
+      />
+      <figcaption className="mt-2 text-sm text-f1-foreground-secondary">
+        <strong>Default Dialog</strong> — <code>position="center"</code>,
+        <code>width="md"</code>. Baseline container for create, read, and
+        update.
+      </figcaption>
+    </figure>
+    <figure className="m-0">
+      <img
+        src={containerRightDialog}
+        alt="Right dialog anchored to the right edge of the viewport, with the Data Collection visible on the left."
+        className="block w-full rounded-lg border border-solid border-f1-border dark:border-f1-border-secondary"
+      />
+      <figcaption className="mt-2 text-sm text-f1-foreground-secondary">
+        <strong>Right Dialog</strong> — <code>position="right"</code>,
+        <code>width="md"</code>. Keeps the collection visible alongside the
+        form.
+      </figcaption>
+    </figure>
+    <figure className="m-0">
+      <img
+        src={containerWizardDialog}
+        alt="Wizard dialog with a numbered step sidebar (General information, Assignments, Review) and a Continue action."
+        className="block w-full rounded-lg border border-solid border-f1-border dark:border-f1-border-secondary"
+      />
+      <figcaption className="mt-2 text-sm text-f1-foreground-secondary">
+        <strong>Wizard Dialog</strong> — <code>position="center"</code>,
+        <code>width="md"</code> by default, with a step sidebar. Reach for
+        <code>width="lg"</code> only when step content truly requires it.
+      </figcaption>
+    </figure>
+    <figure className="m-0">
+      <img
+        src={containerConfirmationDialog}
+        alt="Small centered confirmation dialog asking to delete a resource, with Cancel and a destructive Delete action."
+        className="block w-full rounded-lg border border-solid border-f1-border dark:border-f1-border-secondary"
+      />
+      <figcaption className="mt-2 text-sm text-f1-foreground-secondary">
+        <strong>Confirmation Dialog</strong> — <code>position="center"</code>,
+        <code>width="sm"</code>, with a destructive primary action. Used for
+        delete and other destructive flows.
+      </figcaption>
+    </figure>
+  </div>
+</Unstyled>
+
+## Operation scenarios
+
+Each operation has its own set of scenarios. Use them to see one pattern
+decision in isolation. These scenarios assume the user has create, update, and
+delete permissions; production flows should hide or disable each action
+accordingly.
+
+### Create
+
+Always triggered by the collection primary action. Use a dialog for most cases,
+a Right Dialog when keeping the collection visible helps, or a wizard for
+multi-step flows.
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Scenario</th>
+        <th className="text-left">What to test</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-create--table-create-dialog"
+          >
+            Table Create — Default
+          </a>
+        </td>
+        <td>Collection primary action triggers a default create dialog.</td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-create--table-create-right-dialog"
+          >
+            Table Create — Right Dialog
+          </a>
+        </td>
+        <td>
+          Collection primary action opens a Right Dialog to keep the collection
+          visible while creating.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-create--list-create-dialog"
+          >
+            List Create — Default
+          </a>
+        </td>
+        <td>List primary action triggers a default create dialog.</td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-create--list-create-right-dialog"
+          >
+            List Create — Right Dialog
+          </a>
+        </td>
+        <td>
+          List primary action opens a Right Dialog to keep the list visible
+          while creating.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-create--create-wizard-dialog"
+          >
+            Create — Wizard Dialog
+          </a>
+        </td>
+        <td>Collection primary action triggers a Wizard Dialog.</td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-create--kanban-create-lane"
+          >
+            Kanban Lane Create
+          </a>
+        </td>
+        <td>
+          Lane create action creates a resource already scoped to the selected
+          workflow state.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-create--editable-table-create-row"
+          >
+            Editable Table Add Row
+          </a>
+        </td>
+        <td>
+          Inline add-row action creates a lightweight row directly in the table.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Read
+
+Triggered by clicking a row, list item, or card. By default, Table and List
+reads route to a page; dialog-based reads are reserved for lightweight
+inspection when the resource has no durable page destination. Card and Kanban
+reads open a focused dialog because the card surface is already object-level.
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Scenario</th>
+        <th className="text-left">What to test</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-page"
+          >
+            Table to Page
+          </a>
+        </td>
+        <td>
+          Clicking a table row or chevron action routes to a resource page.
+          Default Read pattern for Table.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--list-read-page"
+          >
+            List to Page
+          </a>
+        </td>
+        <td>
+          Clicking a list item or chevron action routes to a resource page.
+          Default Read pattern for List.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-right-dialog-to-page"
+          >
+            Table Read — Dialog to Page
+          </a>
+        </td>
+        <td>
+          Clicking an item opens a reduced Right Dialog that can lead to a full
+          page when the resource needs a durable destination.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-right-dialog"
+          >
+            Table Read — Right Dialog
+          </a>
+        </td>
+        <td>
+          Clicking a row opens a Right Dialog while the collection stays
+          visible. Use when row comparison helps the task.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--list-read-right-dialog"
+          >
+            List Read — Right Dialog
+          </a>
+        </td>
+        <td>
+          Clicking a list item opens a Right Dialog while the list stays
+          visible. Use when list context helps scanning.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-dialog"
+          >
+            Table Read — Default
+          </a>
+        </td>
+        <td>
+          Clicking an item opens the Default Dialog. Reserved for lightweight
+          inspection when no page destination exists.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--card-read-dialog"
+          >
+            Card to Dialog
+          </a>
+        </td>
+        <td>Clicking the card opens a focused read dialog.</td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--kanban-read-dialog"
+          >
+            Kanban Card to Dialog
+          </a>
+        </td>
+        <td>Clicking a Kanban card opens a focused read dialog.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Update
+
+Always an explicit action — never triggered by a click that could mean read. Use
+a dialog for full-resource edits or inline cells in Editable Table for
+field-level changes.
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Scenario</th>
+        <th className="text-left">What to test</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-update--table-update-dialog"
+          >
+            Table Update — Default
+          </a>
+        </td>
+        <td>
+          Update should reuse the same form structure as create whenever
+          possible.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-update--table-update-right-dialog"
+          >
+            Right Dialog for Table
+          </a>
+        </td>
+        <td>Table variation uses a Right Dialog for editing.</td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-update--list-update-right-dialog"
+          >
+            Right Dialog for List
+          </a>
+        </td>
+        <td>
+          List variation keeps the collection visible while editing from the
+          current selection.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-update--card-update-from-read-dialog"
+          >
+            Card Actions Update
+          </a>
+        </td>
+        <td>
+          Card edit is available from a card item action (ellipsis menu) and
+          from inside the read dialog. Both are valid.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-update--table-bulk-update"
+          >
+            Bulk Update
+          </a>
+        </td>
+        <td>
+          Multi-selection plus a bulk action apply one update flow to the
+          current selection.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-update--kanban-bulk-update"
+          >
+            Kanban Bulk Update
+          </a>
+        </td>
+        <td>
+          Selected Kanban cards use the bulk action bar when scope is explicit.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-update--editable-table-update-inline"
+          >
+            Editable Table Inline Update
+          </a>
+        </td>
+        <td>Editable cells update fields directly without opening a form.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Delete
+
+Always requires a confirmation step. Scoped to the selected item or selection.
+Never placed as a primary action — lives in item actions, bulk actions, or the
+read dialog header.
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Scenario</th>
+        <th className="text-left">What to test</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-delete--table-delete-single"
+          >
+            Table Single Delete
+          </a>
+        </td>
+        <td>Item delete action triggers a Confirmation Dialog.</td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-delete--table-delete-bulk"
+          >
+            Table Bulk Delete
+          </a>
+        </td>
+        <td>Selection and bulk action trigger a scoped Confirmation Dialog.</td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-delete--card-delete"
+          >
+            Card Delete
+          </a>
+        </td>
+        <td>Card item action triggers a Confirmation Dialog.</td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-delete--kanban-delete-bulk"
+          >
+            Kanban Bulk Delete
+          </a>
+        </td>
+        <td>
+          Selected Kanban cards use a scoped destructive Confirmation Dialog.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-delete--editable-table-delete-row-action"
+          >
+            Editable Table Delete
+          </a>
+        </td>
+        <td>
+          Editable Table row dropdown action triggers a Confirmation Dialog.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Pattern boundaries
+
+Use a Default Dialog as the baseline for create, read, and update. Update
+should mirror create — same form structure, field order, validation, and
+terminology.
+
+In Table and List, a Right Dialog is a valid alternative for create, read, or
+update when keeping the collection visible materially helps (comparing nearby
+items, scanning adjacent rows, staying anchored to context). This is the only
+place outside the Pattern decision table that states the rule — keep it here
+when reasoning about new flows.
+
+The **Dialog to Page** flow uses a Right Dialog as a preview that opens a full
+page when the resource has a durable destination, tabs, deeper structure, or
+page-level actions. Any compatible Default or Right Dialog can use **Open
+Details** as its primary action.
+
+Bulk Update is valid across visualizations whenever multi-selection scope is
+visible, countable, and reviewable; if scope is ambiguous, use item-level
+update instead.
+
+## View behaviors
+
+How each view applies the Pattern decision table by default.
+
+- **Table:** route to a page by default for read. Right Dialog only when row
+  comparison materially helps the task. Default Dialog only when the resource
+  is small and no page destination exists.
+- **List:** route to a page by default for read. Right Dialog only when list
+  context remains useful while reading. Default Dialog only when the resource
+  is small and no page destination exists.
+- **Card:** click opens read first; edit is an explicit action inside the read
+  dialog or from a card item action (ellipsis menu).
+- **Kanban:** lane create for state-scoped resources; drag for state updates;
+  bulk action bar for cross-lane scope. Kanban cards support drag,
+  click-to-read, and selection simultaneously — drag updates lane and state,
+  click opens the read dialog, and the selection checkbox stops propagation
+  so toggling it never opens the card.
+- **Editable Table:** inline cell edit for field-level updates; add-row for
+  lightweight new rows; row dropdown for delete.
+
+## Guidelines
+
+<DoDonts
+  do={{
+    description:
+      "Use the Default Dialog as the baseline for create and update flows.",
+  }}
+  dont={{
+    description: "Do not make Right Dialogs the default container.",
+  }}
+/>
+
+<DoDonts
+  do={{
+    description:
+      "Use a page as the default Read destination on Table and List, especially when the resource has its own URL, tabs, or page-level actions.",
+  }}
+  dont={{
+    description:
+      "Do not default to a Default Dialog for Read when a page destination exists or could reasonably be built.",
+  }}
+/>
+
+<DoDonts
+  do={{
+    description:
+      "Reuse create forms for update when the user updates the same fields.",
+  }}
+  dont={{
+    description:
+      "Do not force complex resources into a dialog when the user needs tabs, steps, or long-form configuration.",
+  }}
+/>
+
+<DoDonts
+  do={{
+    description:
+      "Use Bulk Update when the chosen visualization makes multi-selection scope clear to the user.",
+  }}
+  dont={{
+    description:
+      "Do not expose Bulk Update where the selection scope is ambiguous or hard to verify.",
+  }}
+/>
+
+<DoDonts
+  do={{
+    description:
+      "Use a page when a resource needs persistent navigation, deeper structure, or a durable destination beyond a quick read.",
+  }}
+  dont={{
+    description:
+      "Do not treat Right Dialog read flows as previews by default when the resource can be fully understood inside a dialog.",
+  }}
+/>
+
+<DoDonts
+  do={{
+    description:
+      "Use one of the existing views — Table, List, Card, Kanban, or Editable Table — for any new Data Collection surface.",
+  }}
+  dont={{
+    description:
+      "Do not introduce a new type of view. The view catalog is closed; new visualizations must go through the Foundations team.",
+  }}
+/>
+
+## Related documentation
+
+<Unstyled>
+  <ul className="mb-8 ml-6 list-disc dark:text-f1-foreground-inverse/80">
+    <li>
+      <a
+        target="_parent"
+        href="/?path=/docs/patterns-data-collection-actions--documentation"
+      >
+        Actions
+      </a>{" "}
+      for collection actions, item actions, and bulk action wiring.
+    </li>
+    <li>
+      <a
+        target="_parent"
+        href="/?path=/docs/patterns-data-collection-visualizations-editable-table--documentation"
+      >
+        Editable Table
+      </a>{" "}
+      for inline field-level updates.
+    </li>
+    <li>
+      <a
+        target="_parent"
+        href="/?path=/docs/patterns-data-collection-visualizations--documentation"
+      >
+        Visualizations
+      </a>{" "}
+      for Table, List, Card, and Kanban view behavior.
+    </li>
+    <li>
+      <a
+        target="_parent"
+        href="/?path=/docs/experimental-crud-patterns-principles--documentation"
+      >
+        Agnostic CRUD principles
+      </a>{" "}
+      — the product-agnostic theory behind these patterns.
+    </li>
+    <li>
+      <a
+        target="_parent"
+        href="/?path=/docs/experimental-crud-patterns-checklist--documentation"
+      >
+        CRUD pre-ship checklist
+      </a>{" "}
+      — verify your implementation before shipping.
+    </li>
+  </ul>
+</Unstyled>

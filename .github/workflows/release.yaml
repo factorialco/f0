@@ -5,6 +5,8 @@ on:
     branches:
       - main
 
+  workflow_dispatch: # Allows manual triggering
+
 jobs:
   release-please:
     name: "Release library(s)"

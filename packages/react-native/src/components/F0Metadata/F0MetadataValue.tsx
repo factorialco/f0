@@ -12,11 +12,24 @@ import { F0Text } from "../primitives/F0Text"
 
 import type { MetadataItemValue } from "./F0Metadata.types"
 
-const { Warning, AlertCircle } = AppIcons
+const { Warning, AlertCircle, Calendar } = AppIcons
 
 const DATE_ICON_CONFIG = {
-  warning: { icon: Warning, color: "warning" as const },
-  critical: { icon: AlertCircle, color: "critical" as const },
+  warning: {
+    icon: Warning,
+    color: "warning" as const,
+    textColor: "warning" as const,
+  },
+  critical: {
+    icon: AlertCircle,
+    color: "critical" as const,
+    textColor: "critical" as const,
+  },
+  calendar: {
+    icon: Calendar,
+    color: "secondary" as const,
+    textColor: "default" as const,
+  },
 } as const
 
 /**
@@ -117,11 +130,11 @@ export function F0MetadataValue({ value }: { value: MetadataItemValue }) {
       if (!value.icon) {
         return <F0Text variant="body-sm-default">{value.formattedDate}</F0Text>
       }
-      const { icon, color } = DATE_ICON_CONFIG[value.icon]
+      const { icon, color, textColor } = DATE_ICON_CONFIG[value.icon]
       return (
         <View className="flex-row items-center gap-0.5">
           <F0Icon icon={icon} color={color} size="sm" />
-          <F0Text variant="body-sm-default" color={color}>
+          <F0Text variant="body-sm-default" color={textColor}>
             {value.formattedDate}
           </F0Text>
         </View>

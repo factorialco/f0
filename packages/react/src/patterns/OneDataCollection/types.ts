@@ -52,7 +52,7 @@ export type OnBulkActionCallback<
     action: BulkAction,
     ...Parameters<OnSelectItemsCallback<Record, Filters>>,
   ]
-) => void
+) => void | Promise<void>
 
 export type OnLoadDataCallback<
   Record extends RecordType,

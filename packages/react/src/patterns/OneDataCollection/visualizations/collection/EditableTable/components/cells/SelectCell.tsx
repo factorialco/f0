@@ -1,10 +1,10 @@
 import { useState } from "react"
 
 import { F0Select } from "@/components/F0Select"
-import { renderProperty } from "@/patterns/OneDataCollection/property-render"
 import { RecordType } from "@/hooks/datasource/types/records.typings"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
+import { renderProperty } from "@/patterns/OneDataCollection/property-render"
 
 import { EditableCellProps } from "."
 import { BaseCell } from "./BaseCell"
@@ -18,6 +18,7 @@ export function SelectCell<R extends RecordType>({
   loading,
   onChange,
   item,
+  hint,
 }: EditableCellProps<R>) {
   const i18n = useI18n()
   const [isOpen, setIsOpen] = useState(false)
@@ -40,10 +41,10 @@ export function SelectCell<R extends RecordType>({
     label: editableColumn.label,
     hideLabel: true as const,
     value: value || undefined,
-    onChange: (val: string | undefined) => {
+    onChange: (val: string | undefined, originalItem?: RecordType) => {
       const newVal = val ?? ""
       if (newVal !== value) {
-        onChange(newVal)
+        onChange(newVal, { selectedItem: originalItem })
       }
     },
     loading,
@@ -60,7 +61,7 @@ export function SelectCell<R extends RecordType>({
     : ({} as const)
 
   return (
-    <BaseCell error={error} isActive={isOpen}>
+    <BaseCell error={error} isActive={isOpen} hint={hint}>
       <div
         className={cn(
           "flex w-full min-w-0 h-full",

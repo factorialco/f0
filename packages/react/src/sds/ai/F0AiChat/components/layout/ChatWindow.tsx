@@ -1,6 +1,6 @@
-import { type WindowProps } from "@copilotkit/react-ui"
 import { breakpoints } from "@factorialco/f0-core"
 import { AnimatePresence, motion } from "motion/react"
+import type { ReactNode } from "react"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
@@ -8,11 +8,11 @@ import { cn } from "@/lib/utils"
 
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { MAX_CHAT_WIDTH, MIN_CHAT_WIDTH } from "../../utils/constants"
-import { DropOverlay } from "../input/ChatTextarea/DropOverlay"
-import { PongGame } from "../PongGame"
+import { DropOverlay } from "../../../F0AiChatTextArea"
+import { F0AiPong } from "../../../F0AiPong"
 import { ResizeHandle } from "./ResizeHandle"
 
-export const SidebarWindow = ({ children }: WindowProps) => {
+export const SidebarWindow = ({ children }: { children?: ReactNode }) => {
   const {
     open,
     visualizationMode,
@@ -22,7 +22,7 @@ export const SidebarWindow = ({ children }: WindowProps) => {
     setChatWidth,
     resetChatWidth,
     fileAttachments,
-    clarifyingQuestion,
+    isClarifying,
     fileDragOver,
     setFileDragOver,
     processDroppedFiles,
@@ -32,8 +32,7 @@ export const SidebarWindow = ({ children }: WindowProps) => {
   const isCanvasMode = visualizationMode === "canvas"
 
   const dragCounterRef = useRef(0)
-  const canDrop =
-    fileAttachments?.onUploadFiles != null && clarifyingQuestion === null
+  const canDrop = fileAttachments?.onUploadFiles != null && !isClarifying
 
   const handleDragEnter = useCallback(
     (e: React.DragEvent) => {
@@ -126,18 +125,19 @@ export const SidebarWindow = ({ children }: WindowProps) => {
               onReset={resetChatWidth}
               isResizing={isResizing}
               setIsResizing={setIsResizing}
-              narrow={isCanvasMode}
+              isCanvasMode={isCanvasMode}
             />
           )}
           <div
             aria-hidden={!open}
             className={cn(
-              "relative flex h-full w-full flex-col overflow-hidden border border-solid border-f1-border-secondary bg-f1-special-page",
+              "relative flex h-full w-full flex-col overflow-hidden bg-f1-special-page border border-solid border-f1-border-secondary",
+              isCanvasMode && "border-l-transparent",
               // In canvas mode the chat sits flush against the canvas with
               // only the ResizeHandle (1px) between them. Dropping the left
               // border avoids stacking canvas-border + handle + chat-border
               // = 3px of visual separation; the handle is the single seam.
-              isCanvasMode ? "xs:rounded-r-xl border-l-0" : "xs:rounded-xl"
+              isCanvasMode ? "xs:rounded-r-xl" : "xs:rounded-xl"
             )}
             onDragEnter={handleDragEnter}
             onDragOver={handleDragOver}
@@ -167,7 +167,7 @@ export const SidebarWindow = ({ children }: WindowProps) => {
                 }}
               />
             )}
-            {activeGame === "pong" && <PongGame onClose={closeGame} />}
+            {activeGame === "pong" && <F0AiPong onClose={closeGame} />}
           </div>
         </motion.div>
       )}

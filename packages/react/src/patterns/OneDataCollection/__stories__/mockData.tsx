@@ -342,6 +342,7 @@ export const getMockVisualizations = (options?: {
     applyLongText?: boolean
     longColumnLabels?: boolean
     referenceRows?: boolean
+    bordered?: boolean
   }
   cache?: MockDataCache<MockUser>
 }): Record<
@@ -362,6 +363,7 @@ export const getMockVisualizations = (options?: {
       options: {
         allowColumnHiding: options?.table?.allowColumnHiding,
         allowColumnReordering: options?.table?.allowColumnReordering,
+        bordered: options?.table?.bordered,
         frozenColumns:
           options?.table?.frozenColumns ?? options?.frozenColumns ?? 0,
         referenceRowType: options?.table?.referenceRows
@@ -1324,6 +1326,7 @@ export const ExampleComponent = ({
   tmpFullWidth,
   nestedRecords = false,
   nestedRecordsType = "basic",
+  defaultExpandedIds,
   csvExport,
 }: {
   useObservable?: boolean
@@ -1380,6 +1383,7 @@ export const ExampleComponent = ({
   tmpFullWidth?: boolean
   nestedRecords?: boolean
   nestedRecordsType?: "basic" | "detailed" | "mixed"
+  defaultExpandedIds?: Array<string | number>
   csvExport?: boolean | { filename?: string }
 }) => {
   // Create a cache instance to simulate Apollo cache behavior
@@ -1515,6 +1519,7 @@ export const ExampleComponent = ({
             }
           : { records: [] }
       },
+      defaultExpandedIds,
       lanes: [
         { id: "eng", filters: { department: ["Engineering"] } },
         { id: "prod", filters: { department: ["Product"] } },
