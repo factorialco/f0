@@ -67,6 +67,12 @@ const meta: Meta<typeof Demo> = {
       description: "Show a bottom border on the header.",
       control: { type: "boolean" },
     },
+    loading: {
+      description:
+        "Replace the header title and navigation controls with skeleton placeholders while data is loading. Close button and options menu stay functional.",
+      control: { type: "boolean" },
+      table: { defaultValue: { summary: "false" } },
+    },
     title: {
       description:
         "Header title. Renders centered as a bold label when a string, or as-is when a ReactNode. Omit (or pass null) to use the title-less Figma layout.",
@@ -300,6 +306,29 @@ export const Extended: Story = {
     width: "extended",
     title: "Extended (95% viewport)",
     children: <ExampleBody />,
+  },
+}
+
+export const Loading: Story = {
+  args: {
+    width: "wide",
+    loading: true,
+    headerBorder: true,
+    children: (
+      <p className="text-sm text-f1-foreground-secondary">
+        `loading={"{true}"}` only affects the header (title + navigation
+        skeletons). Render your own body content here — or your own body-level
+        skeleton — while data is loading.
+      </p>
+    ),
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Use `loading={true}` to swap the header title and navigation chevrons with skeleton placeholders while data is loading. The close button and options menu stay functional. Body and footer are unchanged — manage their loading state yourself.",
+      },
+    },
   },
 }
 

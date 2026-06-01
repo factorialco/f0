@@ -250,6 +250,40 @@ describe("F0Sidepanel", () => {
     })
   })
 
+  describe("loading", () => {
+    it("renders skeleton placeholders for the title and navigation when loading", () => {
+      render(
+        <F0Sidepanel open onClose={() => {}} title="Resource" loading>
+          <p>Inside</p>
+        </F0Sidepanel>
+      )
+
+      expect(screen.getByTestId("sidepanel-title-skeleton")).toBeInTheDocument()
+      expect(
+        screen.getByTestId("sidepanel-navigation-skeleton")
+      ).toBeInTheDocument()
+
+      // Real title text should not render while loading.
+      expect(screen.queryByText("Resource")).not.toBeInTheDocument()
+    })
+
+    it("keeps the close button functional while loading", async () => {
+      const onClose = vi.fn()
+
+      render(
+        <F0Sidepanel open onClose={onClose} title="Resource" loading>
+          <p>Inside</p>
+        </F0Sidepanel>
+      )
+
+      await userEvent.click(screen.getByRole("button", { name: /close/i }))
+
+      await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1), {
+        timeout: 500,
+      })
+    })
+  })
+
   describe("title", () => {
     it("renders a string title", () => {
       render(

@@ -60,6 +60,12 @@ export interface F0SidepanelProps {
   allowBackgroundInteraction?: boolean
   /** Show a bottom border on the header. Default false. */
   headerBorder?: boolean
+  /**
+   * When true, replaces the header title and navigation controls with skeleton
+   * placeholders. The close button and options menu stay functional. Body and
+   * footer are unchanged — manage their loading state yourself. Default false.
+   */
+  loading?: boolean
   /** Legacy actions menu rendered as a kebab dropdown on the right of the header. */
   options?: SidepanelOption[]
   /** Page-stepping navigation (previous/next + counter). */

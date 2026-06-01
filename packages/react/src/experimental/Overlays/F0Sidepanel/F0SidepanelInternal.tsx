@@ -31,6 +31,7 @@ export const F0SidepanelInternal = ({
   locked = false,
   allowBackgroundInteraction = false,
   headerBorder = false,
+  loading = false,
   options,
   navigation,
   children,
@@ -96,6 +97,7 @@ export const F0SidepanelInternal = ({
           navigation={navigation}
           options={options}
           headerBorder={headerBorder}
+          loading={loading}
         />
 
         <div

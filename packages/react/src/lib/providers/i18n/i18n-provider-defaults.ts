@@ -68,6 +68,7 @@ export const defaultTranslations = {
     selectAll: "Select all",
     selectAllItems: "Select all {{total}} items",
     apply: "Apply",
+    loading: "Loading",
   },
   status: {
     selected: {

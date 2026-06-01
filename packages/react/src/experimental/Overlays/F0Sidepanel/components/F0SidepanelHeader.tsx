@@ -4,8 +4,10 @@ import { ReactNode } from "react"
 import { F0Button } from "@/components/F0Button"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { Cross, EllipsisHorizontal } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { SheetTitle } from "@/ui/Sheet/sheet"
+import { Skeleton } from "@/ui/skeleton"
 
 import { SidepanelNavigation, SidepanelOption } from "../types"
 import { F0SidepanelNavigation } from "./F0SidepanelNavigation"
@@ -17,6 +19,7 @@ interface Props {
   navigation?: SidepanelNavigation
   options?: SidepanelOption[]
   headerBorder?: boolean
+  loading?: boolean
 }
 
 const toDropdownItems = (options: SidepanelOption[]): DropdownItem[] =>
@@ -30,6 +33,19 @@ const toDropdownItems = (options: SidepanelOption[]): DropdownItem[] =>
     critical: option.critical,
   }))
 
+const NavigationSkeleton = () => (
+  <div
+    className="flex items-center gap-3"
+    data-testid="sidepanel-navigation-skeleton"
+  >
+    <Skeleton className="h-4 w-8" />
+    <div className="flex items-center gap-2">
+      <Skeleton className="h-8 w-8 rounded-[8px]" />
+      <Skeleton className="h-8 w-8 rounded-[8px]" />
+    </div>
+  </div>
+)
+
 export const F0SidepanelHeader = ({
   title,
   closeLabel = "Close",
@@ -37,7 +53,9 @@ export const F0SidepanelHeader = ({
   navigation,
   options,
   headerBorder = false,
+  loading = false,
 }: Props) => {
+  const i18n = useI18n()
   const hasOptions = options && options.length > 0
   const hasRight = !!navigation || hasOptions
   const hasVisibleTitle = title !== undefined && title !== null
@@ -59,7 +77,17 @@ export const F0SidepanelHeader = ({
         onClick={onCloseClick}
       />
 
-      {hasVisibleTitle ? (
+      {loading ? (
+        <div
+          className="flex flex-1 items-center justify-center px-2"
+          data-testid="sidepanel-title-skeleton"
+        >
+          <VisuallyHidden.Root>
+            <SheetTitle>{i18n.actions.loading}</SheetTitle>
+          </VisuallyHidden.Root>
+          <Skeleton className="h-5 w-32" />
+        </div>
+      ) : hasVisibleTitle ? (
         <div className="flex flex-1 items-center justify-center px-2">
           {typeof title === "string" ? (
             <SheetTitle className="truncate text-base font-semibold text-f1-foreground">
@@ -79,9 +107,13 @@ export const F0SidepanelHeader = ({
         </VisuallyHidden.Root>
       )}
 
-      {hasRight ? (
+      {loading || hasRight ? (
         <div className="flex items-center gap-3">
-          {navigation && <F0SidepanelNavigation navigation={navigation} />}
+          {loading ? (
+            <NavigationSkeleton />
+          ) : (
+            navigation && <F0SidepanelNavigation navigation={navigation} />
+          )}
           {hasOptions && (
             <Dropdown items={toDropdownItems(options)}>
               <F0Button
