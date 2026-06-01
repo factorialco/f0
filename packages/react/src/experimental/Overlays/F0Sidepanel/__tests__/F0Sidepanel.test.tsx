@@ -57,6 +57,36 @@ describe("F0Sidepanel", () => {
       })
     })
 
+    it("cancels the pending onClose if the parent re-opens the panel before the exit animation fires", async () => {
+      const onClose = vi.fn()
+
+      const { rerender } = render(
+        <F0Sidepanel open onClose={onClose} title="Resource">
+          <p>Inside</p>
+        </F0Sidepanel>
+      )
+
+      await userEvent.click(screen.getByRole("button", { name: /close/i }))
+
+      // Parent closes (e.g. from onCloseClicked) and immediately re-opens,
+      // simulating a quick toggle within the 200ms exit-animation window.
+      rerender(
+        <F0Sidepanel open={false} onClose={onClose} title="Resource">
+          <p>Inside</p>
+        </F0Sidepanel>
+      )
+      rerender(
+        <F0Sidepanel open onClose={onClose} title="Resource">
+          <p>Inside</p>
+        </F0Sidepanel>
+      )
+
+      // Wait past the original exit window — onClose must not fire because the
+      // pending timeout was cleared on re-open.
+      await new Promise((resolve) => setTimeout(resolve, 300))
+      expect(onClose).not.toHaveBeenCalled()
+    })
+
     it("fires onClose on Escape (not locked)", async () => {
       const onClose = vi.fn()
 

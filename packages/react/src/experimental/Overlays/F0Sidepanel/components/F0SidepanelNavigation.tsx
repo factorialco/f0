@@ -1,5 +1,6 @@
 import { F0Button } from "@/components/F0Button"
 import { ChevronDown, ChevronUp } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 
 import { NavigationStep, SidepanelNavigation } from "../types"
 
@@ -12,6 +13,7 @@ const hasUrl = (
 ): step is NavigationStep & { url: string } => "url" in step
 
 export const F0SidepanelNavigation = ({ navigation }: Props) => {
+  const i18n = useI18n()
   const { previous, next, counter } = navigation
 
   return (
@@ -26,7 +28,7 @@ export const F0SidepanelNavigation = ({ navigation }: Props) => {
           size="sm"
           variant="outline"
           icon={ChevronUp}
-          label={previous?.title ?? "Previous"}
+          label={previous?.title || i18n.navigation.previous}
           hideLabel
           disabled={!previous}
           {...(previous && hasUrl(previous)
@@ -37,7 +39,7 @@ export const F0SidepanelNavigation = ({ navigation }: Props) => {
           size="sm"
           variant="outline"
           icon={ChevronDown}
-          label={next?.title ?? "Next"}
+          label={next?.title || i18n.navigation.next}
           hideLabel
           disabled={!next}
           {...(next && hasUrl(next)

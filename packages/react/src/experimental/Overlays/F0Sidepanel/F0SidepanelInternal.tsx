@@ -39,6 +39,12 @@ export const F0SidepanelInternal = ({
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
+    // If the parent re-opens us before the exit-animation timeout has fired,
+    // cancel the pending onClose so it doesn't run while the panel is visible.
+    if (open && closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current)
+      closeTimeoutRef.current = null
+    }
     setIsOpen(open)
   }, [open])
 
