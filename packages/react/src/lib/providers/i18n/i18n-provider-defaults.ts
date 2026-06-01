@@ -46,7 +46,9 @@ export const defaultTranslations = {
     paste: "Paste",
     close: "Close",
     collapse: "Collapse",
+    collapseItem: "Collapse {{title}}",
     expand: "Expand",
+    expandItem: "Expand {{title}}",
     showAll: "Show all",
     showLess: "Show less",
     seeMore: "See more",
@@ -65,6 +67,7 @@ export const defaultTranslations = {
     toggleDropdownMenu: "Toggle dropdown menu",
     selectAll: "Select all",
     selectAllItems: "Select all {{total}} items",
+    apply: "Apply",
   },
   status: {
     selected: {
@@ -280,16 +283,9 @@ export const defaultTranslations = {
     stopAnswerGeneration: "Stop generating",
     responseStopped: "You stopped this response",
     sendMessage: "Send message",
-    thoughtsGroupTitle: "Reflection",
+    thoughtsGroupTitle: "Reasoning",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
-    closeDashboard: "Close dashboard",
-    unsavedChanges: "Unsaved changes",
-    saveChanges: "Save changes",
-    discardChanges: "Discard",
-    saveAsChanges: "Save as",
-    exportTable: "Download table",
-    generatedTableFilename: "OneGeneratedTable",
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
@@ -302,8 +298,6 @@ export const defaultTranslations = {
         placeholder: "Share what didn’t work",
       },
     },
-    dataDownloadPreview:
-      "Preview {{shown}} of {{total}} rows — download the Excel to see all data.",
     expandChat: "Expand chat",
     collapseChat: "Collapse chat",
     chatHistory: "Chat history",
@@ -321,7 +315,6 @@ export const defaultTranslations = {
     deleteChat: "Delete chat",
     ask: "Ask One",
     view: "View",
-    tools: "Tools",
     entityRef: {
       candidate: {
         source: "Source",
@@ -335,6 +328,7 @@ export const defaultTranslations = {
     },
     credits: {
       title: "Credits",
+      employeeCredits: "Your credits",
       creditsLeft: "{{total}} left",
       monthlyCredits: "Monthly credits",
       creditsError: "Could not load credits",
@@ -342,42 +336,22 @@ export const defaultTranslations = {
       needMoreCredits: "Need more credits?",
     },
     reportCard: {
-      reportLabel: "Report",
       tableLabel: "Table",
       openButton: "Open",
     },
     formCard: {
       moreFields: "Open to see all fields",
     },
-    dashboard: {
-      save: "Save",
-      saveToAnalytics: "Save the dashboard in Analytics",
-      saveTableToAnalytics: "Save the table in Analytics",
-      saveAs: "Save as",
-      saveDialog: {
-        title: "Save dashboard",
-        titleLabel: "Title",
-        descriptionLabel: "Description",
-        descriptionPlaceholder: "Add a description (optional)",
-        save: "Save",
-        cancel: "Cancel",
-      },
-      status: {
-        saved: "Saved",
-        draft: "Draft",
-        unsaved: "Unsaved",
-      },
-      statusLabel: "Status",
-      lastEdited: "Last edited",
-      createdBy: "Created by",
+    aiTable: {
+      title: "Table",
+      downloadExcel: "Download Excel",
+      downloadCsv: "Download CSV",
     },
     dataDownload: {
       title: "Download",
       download: "Download {{format}}",
       exportDashboard: "Export dashboard as {{format}}",
-      export: "Export",
       exporting: "Exporting…",
-      rows: "{{amount}} rows",
     },
     dashboardItem: {
       chartType: "Chart type",
@@ -397,11 +371,6 @@ export const defaultTranslations = {
       soft: "You're running low on AI credits.",
       getCredits: "Get credits",
       dismiss: "Dismiss",
-      messageBanner: {
-        title: "This response requires credits",
-        description: "Your company has run out of AI credits.",
-        actionLabel: "Get credits",
-      },
     },
     attachFile: "Attach file",
     removeFile: "Remove",
@@ -465,6 +434,9 @@ export const defaultTranslations = {
     noResults: "No results found",
     loadingMore: "Loading...",
     applySelection: "Apply selection",
+    create: "Create",
+    createWithValue: 'Create "{{value}}"',
+    createEmptyMessage: "Try another search or create a new item",
   },
   numberInput: {
     between: "It should be between {{min}} and {{max}}",
@@ -540,6 +512,7 @@ export const defaultTranslations = {
       sectionDescriptionPlaceholder: "Describe the section in a few words",
       required: "Required",
       allowMultiSelection: "Allow multi-selection",
+      allowCreate: "Allow creation",
       singleSelection: "Single selection",
       multiSelection: "Multi selection",
       questionType: "Question type",
@@ -616,8 +589,6 @@ export const defaultTranslations = {
     },
   },
   forms: {
-    yes: "Yes",
-    no: "No",
     actionBar: {
       unsavedChanges: "You have changes pending to be saved",
       saving: "Saving...",
@@ -670,6 +641,44 @@ export const defaultTranslations = {
       checkbox: {
         mustBeChecked: "This option must be selected",
       },
+    },
+  },
+  graph: {
+    canvas: "Graph canvas",
+    view: "Graph view",
+    controls: {
+      findMe: "Find me",
+      fitToView: "Fit to view",
+      zoomIn: "Zoom in",
+      zoomOut: "Zoom out",
+      navigation: "Graph navigation",
+      metadataSettings: "Metadata visibility",
+      tagTypeLabels: {
+        person: "People",
+        team: "Teams",
+        company: "Companies",
+        status: "Statuses",
+        alert: "Alerts",
+        balance: "Balances",
+        dot: "Tags",
+        raw: "Tags",
+      },
+    },
+    search: {
+      noResults: "No results",
+    },
+    detailPanel: {
+      details: "Details",
+      moreActions: "More actions",
+      resize: "Resize detail panel",
+    },
+    expander: {
+      collapse: "Collapse {{count}} items",
+      expand: "Expand {{count}} items",
+      expandWithParentSingular: "Expand {{parent}}, {{count}} child",
+      expandWithParentPlural: "Expand {{parent}}, {{count}} children",
+      collapseWithParent: "Collapse {{parent}}",
+      collapseDefault: "Collapse children",
     },
   },
   wizard: {

@@ -32,6 +32,13 @@ export type AddRowActionsResult =
 
 export type EditableTableVisualizationSettings = TableVisualizationSettings
 
+export type DateCellConfig = {
+  /** Earliest selectable date. Dates before this are disabled in the picker. */
+  minDate?: Date
+  /** Latest selectable date. Dates after this are disabled in the picker. */
+  maxDate?: Date
+}
+
 export type NumberCellConfig<R extends RecordType = RecordType> = {
   min?: number
   max?: number
@@ -127,6 +134,12 @@ export type EditableTableColumnDefinition<
   numberConfig?: NumberCellConfig<R>
 
   /**
+   * Configuration for `"date"` cells. Accepts `minDate` / `maxDate` to
+   * restrict the selectable date range in the picker.
+   */
+  dateConfig?: DateCellConfig
+
+  /**
    * Called after this cell's value changes. Use to compute derived values
    * and update other cells in the same row.
    *
@@ -151,7 +164,11 @@ export type EditableTableColumnDefinition<
 
   /**
    * Returns a hint to display as an icon with tooltip inside the cell.
-   * Use to warn the user when a value diverges from its formula-inferred value.
+   * Use to warn the user when a value diverges from its formula-inferred value,
+   * or to provide extra context for non-editable / disabled cells (e.g. why a
+   * value was inferred, who a row is backfilling, why editing is locked).
+   *
+   * Supported by all `editType` values, including `display-only` and `disabled`.
    *
    * Return `undefined` to hide the hint.
    *

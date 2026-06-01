@@ -967,7 +967,7 @@ const OneDataCollectionComp = <
       }}
     >
       {showTopToolbar && (
-        <div className="border-f1-border-primary flex gap-4 px-4">
+        <div className="border-f1-border-primary px-page flex gap-4">
           {totalItemSummaryPosition === "top" && (
             <TotalItemsSummary
               isReady={!showTotalItemSummarySkeleton}
@@ -988,7 +988,7 @@ const OneDataCollectionComp = <
       {showBottomToolbar && (
         <div
           className={cn(
-            "flex flex-row gap-4 px-4",
+            "flex flex-row gap-4 px-page",
             fullHeight && "max-h-full",
             tmpFullWidth && "px-0"
           )}
@@ -1033,6 +1033,7 @@ const OneDataCollectionComp = <
                   onGroupingChange={setCurrentGrouping}
                   sortings={sortings}
                   currentSortings={currentSortings}
+                  defaultSortings={defaultSortings.current}
                   onSortingsChange={setCurrentSortings}
                 />
               )}

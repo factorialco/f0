@@ -1326,6 +1326,7 @@ export const ExampleComponent = ({
   tmpFullWidth,
   nestedRecords = false,
   nestedRecordsType = "basic",
+  defaultExpandedIds,
   csvExport,
 }: {
   useObservable?: boolean
@@ -1382,6 +1383,7 @@ export const ExampleComponent = ({
   tmpFullWidth?: boolean
   nestedRecords?: boolean
   nestedRecordsType?: "basic" | "detailed" | "mixed"
+  defaultExpandedIds?: Array<string | number>
   csvExport?: boolean | { filename?: string }
 }) => {
   // Create a cache instance to simulate Apollo cache behavior
@@ -1517,6 +1519,7 @@ export const ExampleComponent = ({
             }
           : { records: [] }
       },
+      defaultExpandedIds,
       lanes: [
         { id: "eng", filters: { department: ["Engineering"] } },
         { id: "prod", filters: { department: ["Product"] } },

@@ -180,6 +180,7 @@ const RowComponentInner = <
 
   const {
     hasItemActions,
+    hasMobileItemActions,
     primaryItemActions,
     dropdownItemActions,
     mobileDropdownItemActions,
@@ -255,7 +256,7 @@ const RowComponentInner = <
           referenceRowType={referenceRowType}
         >
           {id !== undefined && (
-            <div className="pointer-events-auto ml-1.5 flex h-full items-center justify-start">
+            <div className="pointer-events-auto ml-3.5 flex h-full items-center justify-start">
               <Checkbox
                 checked={selectedItems.has(id)}
                 onCheckedChange={onCheckedChange}
@@ -337,7 +338,7 @@ const RowComponentInner = <
             key={`table-cell-${groupIndex}-${index}-actions`}
             sticky={{ right: 0 }}
             referenceRowType={referenceRowType}
-            className="border-0 border-b-[1px] border-l-[1px] border-solid border-f1-border-secondary bg-f1-background !px-3 align-middle"
+            className="bg-f1-background !px-3 align-middle"
           >
             <ItemActionsRow
               className="flex flex-nowrap justify-center"
@@ -359,21 +360,23 @@ const RowComponentInner = <
               </ItemActionsRowContainer>
             </td>
             {/** Mobile item actions */}
-            <TableCell
-              key={`table-cell-${groupIndex}-${index}-actions`}
-              width={68}
-              sticky={{
-                right: 0,
-              }}
-              href={itemHref}
-              className="table-cell md:hidden"
-              loading={loading}
-            >
-              <ItemActionsMobile
-                items={mobileDropdownItemActions}
-                onOpenChange={handleDropDownOpenChange}
-              />
-            </TableCell>
+            {hasMobileItemActions && (
+              <TableCell
+                key={`table-cell-${groupIndex}-${index}-actions`}
+                width={68}
+                sticky={{
+                  right: 0,
+                }}
+                href={itemHref}
+                className="table-cell md:hidden"
+                loading={loading}
+              >
+                <ItemActionsMobile
+                  items={mobileDropdownItemActions}
+                  onOpenChange={handleDropDownOpenChange}
+                />
+              </TableCell>
+            )}
           </>
         ))}
     </TableRow>

@@ -15,9 +15,10 @@ import { ActionBarStatus, F0ActionBarRef } from "@/components/F0ActionBar"
 import { F0Button } from "@/components/F0Button"
 import { F0TableOfContent } from "@/experimental/Navigation/F0TableOfContent"
 import { TOCItem } from "@/experimental/Navigation/F0TableOfContent/types"
-import { Delete, Save } from "@/icons/app"
+import { Delete } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
+import { useAsyncDefaultValues } from "@/patterns/F0WizardForm/useF0FormDefinition"
 import { Form as FormProvider } from "@/ui/form"
 
 import type {
@@ -40,7 +41,7 @@ import { RowRenderer } from "./components/RowRenderer"
 import { SectionRenderer } from "./components/SectionRenderer"
 import { SwitchGroupRenderer } from "./components/SwitchGroupRenderer"
 import { createConditionalResolver } from "./conditionalResolver"
-import { FORM_MAX_WIDTH, SECTION_MARGIN } from "./constants"
+import { SECTION_MARGIN } from "./constants"
 import { F0FormContext, generateAnchorId } from "./context"
 import { useF0AiFormRegistry } from "./F0AiFormRegistry"
 import { CardSelectDepsContext } from "./fields/cardSelect/CardSelectDepsContext"
@@ -121,7 +122,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
     onSubmit,
     submitConfig,
     className,
-    errorTriggerMode = "on-blur",
+    errorTriggerMode = "on-submit",
     styling,
     initialFiles,
     isLoadingInitialFiles,
@@ -163,7 +164,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
   }, [sections, sectionIds, showSectionsSidepanel, handleSectionClick])
 
   const content = (
-    <div className={cn("flex w-full flex-col", FORM_MAX_WIDTH, className)}>
+    <div className={cn("flex w-full flex-col max-w-content", className)}>
       {sectionIds.map((sectionId, index) => {
         const sectionSchema = schema[sectionId]
         const sectionConfig = sections?.[sectionId]
@@ -212,12 +213,12 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
           />
         </div>
         <div className="sticky bottom-0 top-0 w-px bg-f1-border-secondary" />
-        {content}
+        <div className="flex w-full justify-center px-4 py-2">{content}</div>
       </div>
     )
   }
 
-  return content
+  return <div className="flex justify-center p-4">{content}</div>
 }
 
 /**
@@ -404,6 +405,11 @@ function F0FormFromSingleDefinition<TSchema extends F0FormSchema>({
 }: F0FormPropsWithSingleSchemaDefinition<TSchema> & { isLoading?: boolean }) {
   const def = formDefinition as F0FormDefinitionSingleSchema<TSchema>
 
+  const { resolved: resolvedDefaults, isLoading: isLoadingDefaults } =
+    useAsyncDefaultValues<Partial<z.infer<TSchema>>>(
+      def.asyncDefaultValues ?? def.defaultValues
+    )
+
   const adaptedOnSubmit = useCallback(
     (
       data: z.infer<TSchema>
@@ -419,7 +425,7 @@ function F0FormFromSingleDefinition<TSchema extends F0FormSchema>({
       module={def.module}
       schema={def.schema}
       sections={def.sections}
-      defaultValues={def.defaultValues}
+      defaultValues={resolvedDefaults}
       onSubmit={adaptedOnSubmit}
       submitConfig={def.submitConfig}
       errorTriggerMode={def.errorTriggerMode}
@@ -430,7 +436,7 @@ function F0FormFromSingleDefinition<TSchema extends F0FormSchema>({
       isLoadingInitialFiles={def.isLoadingInitialFiles}
       renderCustomField={renderCustomField}
       useUpload={useUpload}
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingDefaults}
       defaultValuesParamsSchema={def.defaultValuesParamsSchema}
       defaultValuesFn={def.defaultValuesFn}
     />
@@ -449,8 +455,13 @@ function F0FormFromPerSectionDefinition<T extends F0PerSectionSchema>({
 }: F0FormPropsWithPerSectionDefinition<T> & { isLoading?: boolean }) {
   const def = formDefinition as F0FormDefinitionPerSection<T>
 
+  const { resolved: resolvedDefaults, isLoading: isLoadingDefaults } =
+    useAsyncDefaultValues<{ [K in keyof T]?: Partial<z.infer<T[K]>> }>(
+      def.asyncDefaultValues ?? def.defaultValues
+    )
+
   const fullDataRef = useRef<Record<string, unknown>>(
-    def.defaultValues ? { ...def.defaultValues } : {}
+    resolvedDefaults ? { ...resolvedDefaults } : {}
   )
 
   const adaptedOnSubmit = useCallback(
@@ -479,7 +490,7 @@ function F0FormFromPerSectionDefinition<T extends F0PerSectionSchema>({
       name={def.name}
       schema={def.schema}
       sections={def.sections}
-      defaultValues={def.defaultValues}
+      defaultValues={resolvedDefaults}
       onSubmit={
         adaptedOnSubmit as F0FormPropsWithPerSectionSchema<T>["onSubmit"]
       }
@@ -492,7 +503,7 @@ function F0FormFromPerSectionDefinition<T extends F0PerSectionSchema>({
       isLoadingInitialFiles={def.isLoadingInitialFiles}
       renderCustomField={renderCustomField}
       useUpload={useUpload}
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingDefaults}
     />
   )
 }
@@ -511,7 +522,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     onSubmit,
     submitConfig,
     className,
-    errorTriggerMode = "on-blur",
+    errorTriggerMode = "on-submit",
     styling,
     formRef,
     isLoading: isFormLoading,
@@ -531,10 +542,8 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const isAutosubmit = submitConfig?.type === "autosubmit"
 
   // Resolve submit button configuration with defaults
-  // icon: undefined = use default, null = no icon, IconType = custom icon
   const submitLabel = submitConfig?.label ?? "Submit"
-  const submitIcon =
-    submitConfig?.icon === null ? undefined : (submitConfig?.icon ?? Save)
+  const submitIcon = submitConfig?.icon ?? undefined
 
   // Extract type-specific props
   // Show submit button by default unless explicitly hidden, using action-bar, or autosubmit
@@ -1046,10 +1055,9 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       ref={formElementRef}
       onSubmit={onFormSubmit}
       className={cn(
-        "flex flex-1 flex-col w-full mx-auto",
-        FORM_MAX_WIDTH,
+        "flex flex-col w-full mx-auto max-w-content",
         className,
-        styling?.showSectionsSidepanel && "p-2 [&>div:last-child]:pb-6"
+        styling?.showSectionsSidepanel && "[&>div:last-child]:pb-6"
       )}
     >
       {/* Render definition items with switch grouping */}
@@ -1086,10 +1094,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             return (
               <div
                 key={groupedItem.item.field.id}
-                className={cn(
-                  fieldGapClass,
-                  "empty:hidden [&>span.hidden]:hidden"
-                )}
+                className={cn(fieldGapClass, "has-[>span.hidden]:hidden")}
               >
                 {fieldContent}
               </div>
@@ -1124,7 +1129,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
 
       {/* Default submit button */}
       {!isActionBar && showSubmitButton && (
-        <div className="mt-4">
+        <div className="mt-4 flex justify-end">
           <F0Button
             type="submit"
             label={submitLabel}
@@ -1155,10 +1160,12 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             <div className="sticky bottom-0 top-0 mr-4 w-px bg-f1-border-secondary" />
 
             {/* Form content - centered in available space */}
-            {formContent}
+            <div className="flex w-full justify-center px-4 py-2">
+              {formContent}
+            </div>
           </div>
         ) : (
-          formContent
+          <div className="flex justify-center p-4">{formContent}</div>
         )}
 
         {!hideActionBar && (

@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
-import { Fragment, useEffect, useMemo, useState } from "react"
+import { Fragment, ReactNode, useEffect, useMemo, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
@@ -34,6 +34,11 @@ import { useDataCollectionSettings } from "@/patterns/OneDataCollection/Settings
 import { GroupHeader } from "@/ui/GroupHeader/index"
 import { Skeleton } from "@/ui/skeleton.tsx"
 
+import type {
+  TableCustomizationProps,
+  TableVisualizationOptions,
+} from "./types"
+
 import { PrimaryActionItemDefinition } from "../../../actions"
 import { useDataCollectionData } from "../../../hooks/useDataCollectionData"
 import { useInfiniteScrollPagination } from "../../../hooks/useInfiniteScrollPagination"
@@ -48,10 +53,6 @@ import { Row } from "./components/Row"
 import { useColumns } from "./hooks/useColums"
 import { groupBorderClass, useHeaderGroups } from "./hooks/useHeaderGroups"
 import { NestedDataProvider } from "./providers/NestedProvider"
-import type {
-  TableCustomizationProps,
-  TableVisualizationOptions,
-} from "./types"
 import { useSticky } from "./useSticky"
 export * from "./settings/SettingsRenderer"
 
@@ -396,7 +397,13 @@ export const TableCollection = <
       ? i18n.status.selected.singular
       : i18n.status.selected.plural
 
-  const TableWrapper = tableWithChildren ? NestedDataProvider : Fragment
+  const TableWrapper = tableWithChildren
+    ? ({ children }: { children: ReactNode }) => (
+        <NestedDataProvider defaultExpandedIds={source.defaultExpandedIds}>
+          {children}
+        </NestedDataProvider>
+      )
+    : Fragment
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
@@ -421,7 +428,7 @@ export const TableCollection = <
                         "hover:after:bg-transparent"
                       )}
                     >
-                      <div className="ml-1.5 flex w-full items-center justify-start" />
+                      <div className="ml-3.5 flex w-full items-center justify-start" />
                     </TableHead>
                   )}
                   {headerGroups.map((entry, entryIndex) => {
@@ -456,7 +463,6 @@ export const TableCollection = <
                         key="actions"
                         width="fit"
                         sticky={{ right: 0 }}
-                        className="border-0 border-l-[1px] border-solid border-f1-border-secondary"
                       >
                         <span className="sr-only">
                           {i18n.collections.actions.actions}
@@ -490,7 +496,7 @@ export const TableCollection = <
                         : undefined
                     }
                   >
-                    <div className="ml-1.5 flex w-full items-center justify-start">
+                    <div className="ml-3.5 flex w-full items-center justify-start">
                       <F0Checkbox
                         checked={isAllSelected}
                         indeterminate={hasSelection && !isAllSelected}
@@ -533,7 +539,7 @@ export const TableCollection = <
                           headerGroups && "[&>div:first-child]:hidden",
                           isLastInGroup && groupBorderClass,
                           fromVisualization === "editableTable" &&
-                            index !== columns.length - 1 &&
+                            (index !== columns.length - 1 || showItemActions) &&
                             "border-0 border-r-[1px] border-solid border-f1-border-secondary"
                         ) || undefined
                       }
@@ -552,12 +558,7 @@ export const TableCollection = <
                 })}
                 {showItemActions &&
                   (isEditableTable ? (
-                    <TableHead
-                      key="actions"
-                      width="fit"
-                      sticky={{ right: 0 }}
-                      className="border-0 border-l-[1px] border-solid border-f1-border-secondary"
-                    >
+                    <TableHead key="actions" width="fit" sticky={{ right: 0 }}>
                       <span className="sr-only">
                         {i18n.collections.actions.actions}
                       </span>
@@ -838,6 +839,12 @@ export const TableCollection = <
                           firstCell={cellIndex === 0}
                           width={column.width}
                           sticky={getStickyPosition(cellIndex)}
+                          className={cn(
+                            isEditableTable &&
+                              (cellIndex !== columns.length - 1 ||
+                                showItemActions) &&
+                              "border-0 border-r-[1px] border-solid border-f1-border-secondary"
+                          )}
                         >
                           {cellIndex === 0 &&
                           !source.selectable &&
@@ -899,7 +906,6 @@ export const TableCollection = <
                           <TableCell
                             key="summary-actions"
                             sticky={{ right: 0 }}
-                            className="border-0 border-l-[1px] border-solid border-f1-border-secondary"
                           >
                             {""}
                           </TableCell>

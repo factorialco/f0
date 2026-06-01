@@ -1,10 +1,8 @@
 import { AnimatePresence, motion } from "motion/react"
 import { useEffect } from "react"
 
-import { useDataCollectionData } from "@/patterns/OneDataCollection/hooks/useDataCollectionData"
-import { useInfiniteScrollPagination } from "@/patterns/OneDataCollection/hooks/useInfiniteScrollPagination"
-import { usePublishDataState } from "@/patterns/OneDataCollection/hooks/usePublishDataState"
-import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
+import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
+
 import {
   isInfiniteScrollPagination,
   RecordType,
@@ -14,9 +12,11 @@ import {
 import { useGroups } from "@/hooks/datasource/useGroups"
 import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
 import { cn } from "@/lib/utils"
+import { useDataCollectionData } from "@/patterns/OneDataCollection/hooks/useDataCollectionData"
+import { useInfiniteScrollPagination } from "@/patterns/OneDataCollection/hooks/useInfiniteScrollPagination"
+import { usePublishDataState } from "@/patterns/OneDataCollection/hooks/usePublishDataState"
+import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import { GroupHeader } from "@/ui/GroupHeader/GroupHeader"
-
-import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 
 import { PagesPagination } from "../../../components/PagesPagination"
 import { ItemActionsDefinition } from "../../../item-actions"
@@ -188,6 +188,7 @@ export const ListCollection = <
     <div
       className={cn(
         "flex max-h-full min-h-0 flex-1 flex-col gap-4 py-2",
+        !tmpFullWidth && "px-page",
         tmpFullWidth && "px-0"
       )}
     >

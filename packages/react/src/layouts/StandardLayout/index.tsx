@@ -14,7 +14,7 @@ export interface StandardLayoutProps extends VariantProps<
 }
 
 const layoutVariants = cva({
-  base: "relative flex min-h-full w-full flex-1 flex-col gap-4 place-self-center overflow-y-auto px-6 py-5",
+  base: "relative flex min-h-full w-full flex-1 flex-col gap-4 place-self-center overflow-y-auto px-page py-5",
   variants: {
     variant: {
       narrow: "max-w-screen-lg",

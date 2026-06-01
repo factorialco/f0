@@ -16,6 +16,7 @@ import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
 import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
 import { F0OneSwitch } from "@/sds/ai/F0OneSwitch"
+import { ActionButtonVariant } from "@/ui/Action"
 import { Skeleton } from "@/ui/skeleton"
 
 import { Breadcrumbs, BreadcrumbsProps } from "../Breadcrumbs"
@@ -26,6 +27,7 @@ import { PageHeaderNavigationContext } from "./PageHeaderNavigationContext"
 export type PageAction = {
   label: string
   icon: IconType
+  variant?: ActionButtonVariant
 } & (
   | {
       href: string
@@ -151,7 +153,7 @@ export function PageHeader({
   return (
     <div
       className={cn(
-        "flex items-center justify-between px-5 py-4 xs:px-6",
+        "flex items-center justify-between px-page py-4",
         embedded ? "h-12" : "h-16"
       )}
     >
@@ -301,13 +303,14 @@ export function PageHeader({
 function PageAction({ action }: { action: PageAction }): ReactElement {
   const ref = useRef<HTMLAnchorElement>(null)
   const [isOpen, setIsOpen] = useState(false)
+  const variant = action.variant ?? "outline"
 
   if ("actions" in action) {
     return (
       <Dropdown items={action.actions} open={isOpen} onOpenChange={setIsOpen}>
         <ButtonInternal
           size="md"
-          variant="outline"
+          variant={variant}
           label={action.label}
           icon={action.icon}
           hideLabel
@@ -319,9 +322,9 @@ function PageAction({ action }: { action: PageAction }): ReactElement {
 
   if ("onClick" in action) {
     return (
-      <F0Button
+      <ButtonInternal
         size="md"
-        variant="outline"
+        variant={variant}
         label={action.label}
         icon={action.icon}
         hideLabel
@@ -337,9 +340,9 @@ function PageAction({ action }: { action: PageAction }): ReactElement {
       aria-label={action.label}
       ref={ref}
     >
-      <F0Button
+      <ButtonInternal
         size="md"
-        variant="outline"
+        variant={variant}
         label={action.label}
         icon={action.icon}
         hideLabel

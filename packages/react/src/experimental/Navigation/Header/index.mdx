@@ -145,6 +145,23 @@ Provides buttons for common operations related to the current view.
   <Canvas of={PageHeaderStories.WithActions} />
 </div>
 
+### With AI Dashboard Launch
+
+Set `variant: "ai"` on an action to render it with the branded AI styling
+(`ActionButtonVariant` from `@/ui/Action`). Pair it with an icon from
+`@/icons/ai` — `ChartLine` for analytics/dashboard launchers, `One` for generic
+"open AI chat" entry points. The tooltip is auto-derived from `label`.
+
+<div
+  className="header-container"
+  style={{
+    maxHeight: "180px",
+    width: "100%",
+  }}
+>
+  <Canvas of={PageHeaderStories.WithAIDashboardLaunch} />
+</div>
+
 ### With Navigation
 
 Enables moving between related items, such as sequential records.

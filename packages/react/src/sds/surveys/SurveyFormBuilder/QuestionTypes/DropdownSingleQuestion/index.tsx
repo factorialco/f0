@@ -35,6 +35,29 @@ export const DropdownSingleQuestion = ({
 
   const isMulti = props.type === "dropdown-multi"
   const showSearchBox = showSearchBoxProp ?? true
+  const allowCreate =
+    props.type === "dropdown-single"
+      ? (props as DropdownSingleQuestionProps).allowCreate
+      : undefined
+
+  const handleCreate =
+    answering && !isMulti && allowCreate && dataset.onCreate
+      ? (value: string) => {
+          return dataset.onCreate!(value).then(
+            (record) => {
+              const option = dataset.mapOptions(record)
+              onQuestionChange?.({
+                id: props.id,
+                type: "dropdown-single",
+                value: option.value,
+              })
+            },
+            (err: unknown) => {
+              console.warn("[SurveyFormBuilder] onCreate failed:", err)
+            }
+          )
+        }
+      : undefined
 
   const field: F0SelectField = {
     id: props.id,
@@ -49,6 +72,7 @@ export const DropdownSingleQuestion = ({
     multiple: isMulti,
     showSearchBox,
     searchBoxPlaceholder,
+    onCreate: handleCreate,
   }
 
   return (

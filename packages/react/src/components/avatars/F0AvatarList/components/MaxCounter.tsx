@@ -8,7 +8,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
 import { ScrollArea, ScrollBar } from "@/ui/scrollarea"
 
 import { AvatarVariant, AvatarVariants, F0Avatar } from "../../F0Avatar"
-import { type AvatarListSize } from "../types"
+import { type AvatarListSize, type F0AvatarListExtras } from "../types"
 import { getAvatarDisplayName } from "../utils"
 
 const sizeVariants = cva({
@@ -46,8 +46,17 @@ type Props = {
   count: number
   size?: AvatarListSize
   type?: (typeof internalAvatarTypes)[number]
-  list?: Omit<AvatarVariant, "type">[]
+  list?: (Omit<AvatarVariant, "type"> & F0AvatarListExtras)[]
   avatarType?: AvatarVariants
+  /**
+   * Controls the popover content scroll behavior.
+   * - `"vertical"` (default): caps the popover height at ~172px and scrolls
+   *   vertically when the list overflows. Matches the historical behavior.
+   * - `"none"`: removes the height cap and lets the popover grow with its
+   *   content.
+   * @default "vertical"
+   */
+  tooltipScroll?: "vertical" | "none"
 }
 
 export const MaxCounter = ({
@@ -56,6 +65,7 @@ export const MaxCounter = ({
   type,
   list,
   avatarType = "person",
+  tooltipScroll = "vertical",
 }: Props) => {
   const counter = (
     <div
@@ -74,32 +84,63 @@ export const MaxCounter = ({
 
   if (!list?.length) return counter
 
+  const isVertical = tooltipScroll === "vertical"
+
+  const items = list.map((avatar, index) => {
+    const description = avatar.tooltipDescription
+    return (
+      <div
+        key={index}
+        className={cn(
+          "flex items-center gap-1.5 px-2 py-1 [&:first-child]:pt-2 [&:last-child]:pb-2",
+          isVertical && "w-[180px] min-w-0"
+        )}
+      >
+        <div className="h-6 w-6 shrink-0">
+          <F0Avatar
+            avatar={{ type: avatarType, ...avatar } as AvatarVariant}
+            size="sm"
+          />
+        </div>
+        <div className={cn("flex flex-col", isVertical && "min-w-0 flex-1")}>
+          <div
+            className={cn(
+              "font-semibold",
+              isVertical ? "truncate" : "whitespace-nowrap"
+            )}
+          >
+            {getAvatarDisplayName(avatarType, avatar)}
+          </div>
+          {description && (
+            <div
+              className={cn(
+                "text-sm text-current opacity-70",
+                isVertical ? "truncate" : "whitespace-nowrap"
+              )}
+            >
+              {description}
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  })
+
   return (
     <HoverCard>
       <HoverCardTrigger asChild>{counter}</HoverCardTrigger>
-      <HoverCardContent side="top">
-        <ScrollArea className="[*[data-state=visible]_div]:bg-f1-background flex max-h-[172px] flex-col">
-          {list.map((avatar, index) => (
-            <div
-              key={index}
-              className="flex w-[180px] min-w-0 items-center gap-1.5 px-2 py-1 [&:first-child]:pt-2 [&:last-child]:pb-2"
-            >
-              <div className="h-6 w-6 shrink-0">
-                <F0Avatar
-                  avatar={{ type: avatarType, ...avatar } as AvatarVariant}
-                  size="sm"
-                />
-              </div>
-              <div className="min-w-0 flex-1 truncate font-semibold">
-                {getAvatarDisplayName(avatarType, avatar)}
-              </div>
-            </div>
-          ))}
-          <ScrollBar
-            orientation="vertical"
-            className="[&_div]:bg-f1-background"
-          />
-        </ScrollArea>
+      <HoverCardContent side="top" className={cn(!isVertical && "w-auto")}>
+        {isVertical ? (
+          <ScrollArea className="[*[data-state=visible]_div]:bg-f1-background flex max-h-[172px] flex-col">
+            {items}
+            <ScrollBar
+              orientation="vertical"
+              className="[&_div]:bg-f1-background"
+            />
+          </ScrollArea>
+        ) : (
+          <div className="flex flex-col py-1">{items}</div>
+        )}
       </HoverCardContent>
     </HoverCard>
   )

@@ -1,0 +1,280 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+<Meta title="CRUD patterns/Decisions" />
+
+# Decisions
+
+Heuristics for picking between patterns. When in doubt, return to
+
+<a
+  target="_parent"
+  href="/?path=/docs/experimental-crud-patterns-principles--documentation"
+>
+  Principles
+</a>
+.
+
+---
+
+## Which container for Create or Update?
+
+```
+Start
+ │
+ ├─ Does the flow branch on early answers?
+ │   (different steps for different choices)          ── yes ──► Wizard
+ │
+ ├─ Are there validation gates that must pass
+ │   before later steps can be filled?                ── yes ──► Wizard
+ │
+ ├─ Does the user need to see the collection
+ │   while editing (compare, edit sequentially)?      ── yes ──► Side panel
+ │
+ ├─ Does the item have multiple sub-views,
+ │   deep linking, or >~30 fields?                    ── yes ──► Dedicated page
+ │
+ ├─ Is the edit a single field with trivial
+ │   validation, used in flow across many items?      ── yes ──► Inline edit
+ │
+ └─ Otherwise                                         ─────────► Centered overlay
+```
+
+<DoDonts
+  do={{
+    description:
+      "Start with centered overlay as the default. Escalate only when a specific condition above is met.",
+  }}
+  dont={{
+    description:
+      'Do not choose a side panel or wizard because they "look nicer" — each carries UX cost that must be justified.',
+  }}
+/>
+
+---
+
+## Which surface for Read?
+
+```
+Start
+ │
+ ├─ Does the URL need to be shareable / bookmarkable? ── yes ──► Dedicated page
+ │
+ ├─ Is the content deep, multi-section, or tabbed?    ── yes ──► Dedicated page
+ │
+ ├─ Are most reads shallow but some need depth?       ── yes ──► Detail-then-escalate
+ │     (light surface + "Open full view")
+ │
+ ├─ Does the user benefit from background context?    ── yes ──► Side panel
+ │
+ └─ Otherwise                                         ─────────► Centered overlay
+```
+
+---
+
+## Single vs. Bulk Delete
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Pattern</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>One item, irreversible</td>
+        <td>Confirmation overlay naming the item</td>
+      </tr>
+      <tr>
+        <td>Many items, all visible on screen</td>
+        <td>Bulk bar + confirmation naming the count</td>
+      </tr>
+      <tr>
+        <td>Many items, scope spans pages</td>
+        <td>
+          Bulk bar + scope banner + confirmation naming the predicate ("all
+          1,432 matching items")
+        </td>
+      </tr>
+      <tr>
+        <td>Reversible within seconds</td>
+        <td>
+          Optimistic execution + visible undo affordance — no confirmation
+        </td>
+      </tr>
+      <tr>
+        <td>Irreversible AND cross-user impact</td>
+        <td>
+          Confirmation overlay + typed confirmation (user types resource name)
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+---
+
+## Where does this action go?
+
+```
+Question: "Who is the subject of this action?"
+
+  The collection itself ──────► Collection-level
+    ├─ Single dominant intent   ► Primary
+    ├─ Supporting alternative   ► Secondary (expanded if frequent)
+    └─ Rare / destructive       ► Overflow
+
+  One specific item ──────────► Item-level
+    ├─ Most-likely-next         ► Primary tier
+    ├─ Supporting               ► Secondary tier
+    └─ Rare / destructive       ► Overflow tier
+
+  A user-defined subset ──────► Bulk
+    ├─ Common bulk operation    ► Bulk primary (in bar)
+    └─ Less common / dangerous  ► Bulk overflow (in bar menu)
+```
+
+If you cannot place an action with this tree, the action is poorly defined.
+Sharpen the verb.
+
+---
+
+## Should this action be critical?
+
+Check any that apply. If **any** box is checked, treat the action as critical:
+
+- The change cannot be reversed within the product
+- The change cannot be reversed within a reasonable time window even with admin help
+- The change deletes or unlinks user-visible content
+- The change has side effects on users other than the one performing it
+- The change triggers external side effects (emails, payments, integrations)
+- The change affects compliance, audit, or legal posture
+- The action's name contains "delete", "remove", "revoke", "cancel", or "destroy"
+
+**Critical actions should:**
+
+- Default to overflow — surfacing outside overflow is acceptable when the context
+  and resource justify it (e.g., deletion is a core frequent workflow)
+- Always require a confirmation overlay (regardless of placement)
+- Use destructive styling on the affordance itself if surfaced, and always at the
+  confirmation step
+
+---
+
+## Should this be inline or a container?
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Question</th>
+        <th className="text-left">Inline</th>
+        <th className="text-left">Container</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>How many fields change at once?</td>
+        <td>1</td>
+        <td>2+</td>
+      </tr>
+      <tr>
+        <td>Cross-field validation?</td>
+        <td>No</td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td>Field requires a complex picker or sub-flow?</td>
+        <td>No</td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td>User edits many items in succession?</td>
+        <td>Yes</td>
+        <td>No</td>
+      </tr>
+      <tr>
+        <td>Fields depend on each other (show/hide, defaults)?</td>
+        <td>No</td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td>Mistake recovery: easy to undo?</td>
+        <td>Yes</td>
+        <td>Either</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+Inline when most answers fall in the "Inline" column. Container otherwise. Mixed
+answers mean the field may be doing too much — consider splitting.
+
+---
+
+## Centered or edge-anchored?
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Question</th>
+        <th className="text-left">Centered</th>
+        <th className="text-left">Edge-anchored (side panel)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>User benefits from seeing the collection?</td>
+        <td>No</td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td>User may edit multiple items in sequence?</td>
+        <td>No</td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td>Decision is self-contained / modal?</td>
+        <td>Yes</td>
+        <td>No</td>
+      </tr>
+      <tr>
+        <td>Viewport is narrow (mobile)?</td>
+        <td>Yes (fallback)</td>
+        <td>Not viable</td>
+      </tr>
+      <tr>
+        <td>Form is short and bounded?</td>
+        <td>Yes</td>
+        <td>Either</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+<DoDonts
+  do={{
+    description:
+      "Default to centered overlay. Use a side panel only when background context or sequential editing justify it.",
+  }}
+  dont={{
+    description:
+      "Do not use side panels below ~900px viewport width — degrade gracefully to centered or full-screen.",
+  }}
+/>
+
+---
+
+## Async feedback location
+
+```
+Work duration < 1s ──────────────► Action-level only (button spinner)
+Work duration 1-5s ──────────────► Action-level + disable submit
+Work duration > 5s, single item ─► Container-level (block input, show progress)
+Bulk operation ──────────────────► Bar-level (aggregate progress, per-item errors)
+Background work, no user waiting ► Toast / notification (the only case where
+                                    global feedback is acceptable)
+```

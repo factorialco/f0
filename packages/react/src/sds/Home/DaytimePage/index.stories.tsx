@@ -20,12 +20,8 @@ const meta: Meta<typeof DaytimePage> = {
       <ApplicationFrame
         sidebar={null}
         ai={{
-          runtimeUrl: "https://mastra.local.factorial.dev/copilotkit",
-          agent: "one-workflow",
-          credentials: "include",
-          showDevConsole: false,
           enabled: true,
-          greeting: "Hello, John",
+          initialMessage: "Ask anything about your company",
         }}
       >
         <Story />
