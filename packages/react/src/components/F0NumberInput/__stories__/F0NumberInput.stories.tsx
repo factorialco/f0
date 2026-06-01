@@ -194,7 +194,7 @@ export const AsPopover: Story = {
     const [value, setValue] = useState<number | null>(null)
     return (
       <div className="flex items-center gap-2">
-        <NumberInput {...props} value={value} onChange={setValue} />
+        <F0NumberInput {...props} value={value} onChange={setValue} />
         <span className="text-f1-foreground-secondary text-sm">
           {value != null ? `${value}%` : "—"}
         </span>
@@ -221,7 +221,7 @@ export const AsPopoverDeferredApply: Story = {
     const [value, setValue] = useState<number | null>(null)
     return (
       <div className="flex items-center gap-2">
-        <NumberInput {...props} value={value} onChange={setValue} />
+        <F0NumberInput {...props} value={value} onChange={setValue} />
         <span className="text-f1-foreground-secondary text-sm">
           Committed: {value != null ? `${value}%` : "—"}
         </span>

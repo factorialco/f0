@@ -148,7 +148,7 @@ describe("F0NumberInput", () => {
   describe("inline extraContent mode", () => {
     test("renders extraContent to the right of the input", () => {
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           units="%"
@@ -161,7 +161,7 @@ describe("F0NumberInput", () => {
 
     test("hoists the label outside the row when extraContent is present", () => {
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           units="%"
@@ -176,7 +176,7 @@ describe("F0NumberInput", () => {
 
     test("renders hint outside the row when extraContent is present", () => {
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           units="%"
@@ -192,7 +192,7 @@ describe("F0NumberInput", () => {
   describe("popover mode", () => {
     test("renders a trigger button instead of a visible input", () => {
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           popover={{}}
@@ -205,7 +205,7 @@ describe("F0NumberInput", () => {
 
     test("uses the label as the accessible name of the trigger button", () => {
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           popover={{}}
@@ -219,7 +219,7 @@ describe("F0NumberInput", () => {
 
     test("opens the popover and shows the input when trigger is clicked", async () => {
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           units="%"
@@ -238,7 +238,7 @@ describe("F0NumberInput", () => {
     test("calls onChange when user types inside the popover input", async () => {
       const onChange = vi.fn()
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           units="%"
@@ -258,7 +258,7 @@ describe("F0NumberInput", () => {
     test("deferred commit mode calls onChange only when Apply is clicked", async () => {
       const onChange = vi.fn()
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           units="%"
@@ -286,7 +286,7 @@ describe("F0NumberInput", () => {
     test("deferred commit mode keeps popover open when closeOnApply is false", async () => {
       const onChange = vi.fn()
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           units="%"
@@ -309,7 +309,7 @@ describe("F0NumberInput", () => {
 
     test("does not open popover when disabled", async () => {
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           popover={{}}
@@ -328,7 +328,7 @@ describe("F0NumberInput", () => {
 
     test("shows status message in popover mode and hides NumberInput duplicate", async () => {
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           popover={{}}
@@ -353,7 +353,7 @@ describe("F0NumberInput", () => {
 
     test("controlled open state: respects popover.open=false", () => {
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           popover={{ open: false, onOpenChange: vi.fn() }}
@@ -365,7 +365,7 @@ describe("F0NumberInput", () => {
 
     test("controlled open state: respects popover.open=true", async () => {
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           popover={{ open: true, onOpenChange: vi.fn() }}
@@ -380,7 +380,7 @@ describe("F0NumberInput", () => {
     test("calls onOpenChange when trigger is clicked", async () => {
       const onOpenChange = vi.fn()
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           popover={{ open: false, onOpenChange }}
