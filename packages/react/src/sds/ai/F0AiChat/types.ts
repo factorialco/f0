@@ -399,6 +399,13 @@ export type AiChatDisclaimer = {
   text: string
   link?: string
   linkText?: string
+  /**
+   * Optional click handler on the disclaimer text. When set, the text becomes
+   * keyboard-activatable (Enter / Space) and gets a subtle hover hint. Used by
+   * the host to wire easter eggs (e.g. the pong game) without coupling f0 to
+   * any specific behaviour.
+   */
+  onClick?: () => void
 }
 
 /**

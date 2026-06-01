@@ -475,9 +475,32 @@ export const F0AiChatTextArea = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15, ease: "easeOut" }}
             >
-              <OneEllipsis className="text-sm font-medium text-f1-foreground-tertiary">
-                {disclaimer.text}
-              </OneEllipsis>
+              {disclaimer.onClick ? (
+                <button
+                  type="button"
+                  onClick={disclaimer.onClick}
+                  className={cn(
+                    "group min-w-0 cursor-pointer bg-transparent p-0 text-inherit",
+                    "transition-transform duration-700 ease-out",
+                    "hover:scale-[1.02] focus-visible:scale-[1.02]",
+                    "motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:focus-visible:scale-100"
+                  )}
+                >
+                  <OneEllipsis
+                    className={cn(
+                      "text-sm font-medium text-f1-foreground-tertiary transition-colors duration-700 ease-out",
+                      "group-hover:bg-gradient-to-r group-hover:from-[#E55619] group-hover:to-[#A1ADE5] group-hover:bg-clip-text group-hover:text-transparent",
+                      "group-focus-visible:bg-gradient-to-r group-focus-visible:from-[#E55619] group-focus-visible:to-[#A1ADE5] group-focus-visible:bg-clip-text group-focus-visible:text-transparent"
+                    )}
+                  >
+                    {disclaimer.text}
+                  </OneEllipsis>
+                </button>
+              ) : (
+                <OneEllipsis className="text-sm font-medium text-f1-foreground-tertiary">
+                  {disclaimer.text}
+                </OneEllipsis>
+              )}
 
               {disclaimer.link && disclaimer.linkText && (
                 <Link
