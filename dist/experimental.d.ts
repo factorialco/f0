@@ -1,4 +1,3 @@
-import { AIMessage } from '@copilotkit/shared';
 import { AlertAvatarProps as AlertAvatarProps_2 } from './F0AvatarAlert';
 import { AlertTagCellValue } from './types/alertTag';
 import { AlertTagCellValue as AlertTagCellValue_2 } from './experimental';
@@ -26,7 +25,6 @@ import { CompanyItemProps } from './types';
 import { ComponentProps } from 'react';
 import { CompoundCellValue } from './types/compound';
 import { Context } from 'react';
-import { CopilotKitProps } from '@copilotkit/react-core';
 import { CountCellValue } from './types/count';
 import { CountryCellValue } from './types/country';
 import { DateCellValue } from './types/date';
@@ -40,6 +38,7 @@ import { DotTagCellValue as DotTagCellValue_2 } from './experimental';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { Editor } from '@tiptap/react';
 import { EmployeeItemProps } from './types';
+import { F0SegmentedControlProps as F0SegmentedControlProps_2 } from './types';
 import { F0SelectProps as F0SelectProps_2 } from './types';
 import { F0TagBalanceProps as F0TagBalanceProps_2 } from './types';
 import { F0TagCompanyProps } from './types';
@@ -68,7 +67,6 @@ import { LineChartConfig } from './experimental';
 import { LineChartProps } from './experimental';
 import { LineChartPropsBase } from './utils/types';
 import { LongTextCellValue } from './types/longText';
-import { Message as Message_2 } from '@copilotkit/shared';
 import { NumberCellValue } from './types/number';
 import { NumberCellValue as NumberCellValue_2 } from './experimental';
 import { NumberFilterOptions } from './NumberFilter/NumberFilter';
@@ -257,6 +255,7 @@ export declare type ActionDefinition = DropdownItemSeparator | (Pick<DropdownIte
     enabled?: boolean;
     type?: "primary" | "secondary" | "other";
     hideLabel?: boolean;
+    hideInMobileDropdown?: boolean;
 });
 
 declare type ActionLinkProps = ActionBaseProps & {
@@ -464,6 +463,29 @@ declare type AiChatDisclaimer = {
     linkText?: string;
 };
 
+/**
+ * Employee credits configuration for the AI chat.
+ *
+ * Independent from `credits` (the classic company-level popover).
+ * When provided, a separate, employee-only credits popover trigger is shown
+ * in the chat header **instead of** the classic one — the host opts into
+ * this mode by passing `employeeCredits` only for employees who have a
+ * per-employee monthly allocation configured.
+ *
+ * Hosts that don't use per-employee allocations should keep using `credits`
+ * and leave `employeeCredits` undefined; behavior is unchanged.
+ */
+declare type AiChatEmployeeCredits = {
+    /** Async function to fetch the employee's credits usage. Called each time the popover opens. */
+    fetchUsage: () => Promise<EmployeeCreditsUsage>;
+    /** Company name displayed in the popover header. */
+    companyName?: string;
+    /** Company logo URL displayed in the popover header. */
+    companyLogoUrl?: string;
+    /** Plan name displayed below the company name (e.g. "Free plan", "Enterprise"). */
+    planName?: string;
+};
+
 declare type AiChatFileAttachmentConfig = {
     onUploadFiles: (files: File[]) => Promise<UploadedFile[]>;
     allowedMimeTypes?: string | string[];
@@ -479,7 +501,11 @@ declare type AiChatFileAttachmentConfig = {
  */
 declare type AiChatProviderProps = {
     enabled?: boolean;
-    greeting?: string;
+    /**
+     * Greeting phrase(s) shown by the welcome screen when the chat is empty.
+     * A single string renders once; an array rotates through phrases. Purely
+     * UI config — does not affect runtime behavior.
+     */
     initialMessage?: string | string[];
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
     disclaimer?: AiChatDisclaimer;
@@ -534,16 +560,20 @@ declare type AiChatProviderProps = {
      */
     canvasEntities?: Record<string, CanvasEntityDefinition>;
     /**
-     * Available tool hints that the user can activate to provide intent context
-     * to the AI. Renders a selector button next to the send button.
-     * Only one tool hint can be active at a time.
-     */
-    toolHints?: AiChatToolHint[];
-    /**
      * Credits configuration. When provided, a credits button is shown in the chat header.
      * Groups fetchUsage, upgradePlanUrl, and company/plan display info.
      */
     credits?: AiChatCredits;
+    /**
+     * Employee-only credits configuration. When provided, replaces the classic
+     * `credits` popover trigger with a simpler employee-only popover that shows
+     * just the logged-in employee's monthly allocation. Hosts opt in by passing
+     * this only when an employee has a configured per-employee allocation.
+     *
+     * Takes precedence over `credits` — when both are provided, only the
+     * employee-only popover is rendered.
+     */
+    employeeCredits?: AiChatEmployeeCredits;
     /**
      * Credit warning configuration. When provided, shows a warning banner above the chat textarea.
      * Groups severity level and action callbacks.
@@ -553,53 +583,40 @@ declare type AiChatProviderProps = {
      * File attachment configuration. When provided, enables file uploads in the chat.
      */
     fileAttachments?: AiChatFileAttachmentConfig;
-    onThumbsUp?: (message: AIMessage, { threadId, feedback }: {
+    onThumbsUp?: (message: F0AIMessage, { threadId, feedback }: {
         threadId: string;
         feedback: string;
     }) => void;
-    onThumbsDown?: (message: AIMessage, { threadId, feedback }: {
+    onThumbsDown?: (message: F0AIMessage, { threadId, feedback }: {
         threadId: string;
         feedback: string;
     }) => void;
     tracking?: AiChatTrackingOptions;
     /**
-     * Optional hook called before a user message is sent. Return false to block submission.
+     * Optional name of the AI agent. Forwarded to the host runtime adapter
+     * (mock in stories, CopilotKit in factorial) — f0 itself only stores it.
      */
-    onBeforeSendMessage?: () => boolean | Promise<boolean>;
+    agent?: string;
     /**
-     * Optional fetch implementation for AI runtime requests owned by F0.
+     * Slot elements rendered inside `<F0AiChat />`. Host apps (factorial in
+     * production, the mock runtime in stories) provide their own connected
+     * wrappers — f0 ships only the shell. Passing slots here makes them
+     * available to any `<F0AiChat />` mounted under this provider (used by
+     * `ApplicationFrame`, which renders the chat itself).
      */
-    runtimeFetch?: typeof fetch;
-} & Pick<CopilotKitProps, "agent" | "credentials" | "children" | "runtimeUrl" | "showDevConsole" | "threadId" | "headers">;
-
-/**
- * A tool hint that can be activated to prepend invisible context to the user's
- * message, telling the AI about the user's intent (e.g. "generate tables",
- * "data analysis"). Similar to Gemini's tool selector UI.
- *
- * Only one tool hint can be active at a time. It persists across messages
- * until the user explicitly removes it.
- */
-declare type AiChatToolHint = {
-    /** Unique identifier for this tool hint */
-    id: string;
-    /** Display label shown in the selector and chip */
-    label: string;
-    /** Optional icon shown in the selector and chip */
-    icon?: IconType;
-    /**
-     * Prompt text injected as invisible context before the user's message.
-     * The AI receives this but the user never sees it in the chat.
-     */
-    prompt: string;
+    chatHeader?: React.ReactNode;
+    chatMessages?: React.ReactNode;
+    chatInput?: React.ReactNode;
+    /** Children rendered inside the provider. */
+    children?: React.ReactNode;
 };
 
 declare type AiChatTrackingOptions = {
     onVisibility?: () => void;
     onClose?: () => void;
-    onWelcomeSuggestionClick?: (suggestion: WelcomeScreenSuggestion) => void;
+    onWelcomeSuggestionClick?: (event: WelcomeSuggestionClickEvent) => void;
     onNewChat?: () => void;
-    onMessage?: (message: Message_2) => void;
+    onMessage?: (message: F0Message) => void;
 };
 
 /**
@@ -1314,6 +1331,14 @@ declare type ButtonSize = (typeof buttonSizes)[number];
 
 declare const buttonSizes: readonly ["sm", "md", "lg"];
 
+export declare type ButtonToggleSize = (typeof buttonToggleSizes)[number];
+
+export declare const buttonToggleSizes: readonly ["sm", "md", "lg"];
+
+export declare type ButtonToggleVariant = (typeof buttonToggleVariants)[number];
+
+export declare const buttonToggleVariants: readonly ["compact", "expanded"];
+
 declare type ButtonType = (typeof buttonTypes)[number];
 
 declare const buttonTypes: readonly ["button", "submit", "reset"];
@@ -1413,13 +1438,7 @@ declare type CanvasContentBase = {
  * Contract for a canvas entity type.
  *
  * Each entity (dashboard, survey, goal, job-posting…) implements this
- * interface and is added to the `canvasEntities` record in `registry.ts`.
- *
- * To add a new entity type:
- * 1. Create a folder in `canvas/entities/<your-entity>/`
- * 2. Define a type extending `CanvasContentBase` in `types.ts`
- * 3. Implement and export `CanvasEntityDefinition` in `index.tsx`
- * 4. Add the entity to the record in `canvas/registry.ts`
+ * interface and is added to the `canvasEntities` record passed to F0AiChat.
  */
 declare type CanvasEntityDefinition<T extends CanvasContentBase = CanvasContentBase> = {
     /** Must match the `type` discriminant on the content object */
@@ -1731,6 +1750,12 @@ declare interface ChatDashboardColumn {
     label: string;
     /** Optional fixed width in pixels */
     width?: number;
+    /**
+     * Optional header tooltip explaining what the column represents — formula
+     * or aggregation if derived, source if direct. Forwarded to the underlying
+     * table column's `info` prop. Omit when the label is self-explanatory.
+     */
+    info?: string;
 }
 
 /**
@@ -2689,9 +2714,23 @@ export declare type DataSourceDefinition<R extends RecordType = RecordType, Filt
         item: R;
         pagination?: ChildrenPaginationInfo;
     }) => number | undefined;
+    /**
+     * Item ids that start expanded on first render. Rows matched here have
+     * their children fetched eagerly. Only rows whose `item.id` is in this
+     * list are auto-expanded — nested descendants are not, unless their own id
+     * is also included. Defaults to none.
+     */
+    defaultExpandedIds?: Array<string | number>;
 };
 
 declare type DataSourceItemId = string | number | symbol;
+
+declare type DateCellConfig = {
+    /** Earliest selectable date. Dates before this are disabled in the picker. */
+    minDate?: Date;
+    /** Latest selectable date. Dates after this are disabled in the picker. */
+    maxDate?: Date;
+};
 
 export declare type DateFilterDefinition = BaseFilterDefinition<"date"> & {
     options?: DateFilterOptions_2;
@@ -2965,7 +3004,9 @@ declare const defaultTranslations: {
         readonly paste: "Paste";
         readonly close: "Close";
         readonly collapse: "Collapse";
+        readonly collapseItem: "Collapse {{title}}";
         readonly expand: "Expand";
+        readonly expandItem: "Expand {{title}}";
         readonly showAll: "Show all";
         readonly showLess: "Show less";
         readonly seeMore: "See more";
@@ -2984,6 +3025,7 @@ declare const defaultTranslations: {
         readonly toggleDropdownMenu: "Toggle dropdown menu";
         readonly selectAll: "Select all";
         readonly selectAllItems: "Select all {{total}} items";
+        readonly apply: "Apply";
     };
     readonly status: {
         readonly selected: {
@@ -3198,16 +3240,9 @@ declare const defaultTranslations: {
         readonly stopAnswerGeneration: "Stop generating";
         readonly responseStopped: "You stopped this response";
         readonly sendMessage: "Send message";
-        readonly thoughtsGroupTitle: "Reflection";
+        readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
         readonly thinking: "Thinking...";
-        readonly closeDashboard: "Close dashboard";
-        readonly unsavedChanges: "Unsaved changes";
-        readonly saveChanges: "Save changes";
-        readonly discardChanges: "Discard";
-        readonly saveAsChanges: "Save as";
-        readonly exportTable: "Download table";
-        readonly generatedTableFilename: "OneGeneratedTable";
         readonly feedbackModal: {
             readonly positive: {
                 readonly title: "What did you like about this response?";
@@ -3220,7 +3255,6 @@ declare const defaultTranslations: {
                 readonly placeholder: "Share what didn’t work";
             };
         };
-        readonly dataDownloadPreview: "Preview {{shown}} of {{total}} rows — download the Excel to see all data.";
         readonly expandChat: "Expand chat";
         readonly collapseChat: "Collapse chat";
         readonly chatHistory: "Chat history";
@@ -3238,7 +3272,6 @@ declare const defaultTranslations: {
         readonly deleteChat: "Delete chat";
         readonly ask: "Ask One";
         readonly view: "View";
-        readonly tools: "Tools";
         readonly entityRef: {
             readonly candidate: {
                 readonly source: "Source";
@@ -3252,6 +3285,7 @@ declare const defaultTranslations: {
         };
         readonly credits: {
             readonly title: "Credits";
+            readonly employeeCredits: "Your credits";
             readonly creditsLeft: "{{total}} left";
             readonly monthlyCredits: "Monthly credits";
             readonly creditsError: "Could not load credits";
@@ -3259,42 +3293,22 @@ declare const defaultTranslations: {
             readonly needMoreCredits: "Need more credits?";
         };
         readonly reportCard: {
-            readonly reportLabel: "Report";
             readonly tableLabel: "Table";
             readonly openButton: "Open";
         };
         readonly formCard: {
             readonly moreFields: "Open to see all fields";
         };
-        readonly dashboard: {
-            readonly save: "Save";
-            readonly saveToAnalytics: "Save the dashboard in Analytics";
-            readonly saveTableToAnalytics: "Save the table in Analytics";
-            readonly saveAs: "Save as";
-            readonly saveDialog: {
-                readonly title: "Save dashboard";
-                readonly titleLabel: "Title";
-                readonly descriptionLabel: "Description";
-                readonly descriptionPlaceholder: "Add a description (optional)";
-                readonly save: "Save";
-                readonly cancel: "Cancel";
-            };
-            readonly status: {
-                readonly saved: "Saved";
-                readonly draft: "Draft";
-                readonly unsaved: "Unsaved";
-            };
-            readonly statusLabel: "Status";
-            readonly lastEdited: "Last edited";
-            readonly createdBy: "Created by";
+        readonly aiTable: {
+            readonly title: "Table";
+            readonly downloadExcel: "Download Excel";
+            readonly downloadCsv: "Download CSV";
         };
         readonly dataDownload: {
             readonly title: "Download";
             readonly download: "Download {{format}}";
             readonly exportDashboard: "Export dashboard as {{format}}";
-            readonly export: "Export";
             readonly exporting: "Exporting…";
-            readonly rows: "{{amount}} rows";
         };
         readonly dashboardItem: {
             readonly chartType: "Chart type";
@@ -3314,11 +3328,6 @@ declare const defaultTranslations: {
             readonly soft: "You're running low on AI credits.";
             readonly getCredits: "Get credits";
             readonly dismiss: "Dismiss";
-            readonly messageBanner: {
-                readonly title: "This response requires credits";
-                readonly description: "Your company has run out of AI credits.";
-                readonly actionLabel: "Get credits";
-            };
         };
         readonly attachFile: "Attach file";
         readonly removeFile: "Remove";
@@ -3382,6 +3391,9 @@ declare const defaultTranslations: {
         readonly noResults: "No results found";
         readonly loadingMore: "Loading...";
         readonly applySelection: "Apply selection";
+        readonly create: "Create";
+        readonly createWithValue: "Create \"{{value}}\"";
+        readonly createEmptyMessage: "Try another search or create a new item";
     };
     readonly numberInput: {
         readonly between: "It should be between {{min}} and {{max}}";
@@ -3457,6 +3469,7 @@ declare const defaultTranslations: {
             readonly sectionDescriptionPlaceholder: "Describe the section in a few words";
             readonly required: "Required";
             readonly allowMultiSelection: "Allow multi-selection";
+            readonly allowCreate: "Allow creation";
             readonly singleSelection: "Single selection";
             readonly multiSelection: "Multi selection";
             readonly questionType: "Question type";
@@ -3532,8 +3545,6 @@ declare const defaultTranslations: {
         };
     };
     readonly forms: {
-        readonly yes: "Yes";
-        readonly no: "No";
         readonly actionBar: {
             readonly unsavedChanges: "You have changes pending to be saved";
             readonly saving: "Saving...";
@@ -3588,6 +3599,44 @@ declare const defaultTranslations: {
             };
         };
     };
+    readonly graph: {
+        readonly canvas: "Graph canvas";
+        readonly view: "Graph view";
+        readonly controls: {
+            readonly findMe: "Find me";
+            readonly fitToView: "Fit to view";
+            readonly zoomIn: "Zoom in";
+            readonly zoomOut: "Zoom out";
+            readonly navigation: "Graph navigation";
+            readonly metadataSettings: "Metadata visibility";
+            readonly tagTypeLabels: {
+                readonly person: "People";
+                readonly team: "Teams";
+                readonly company: "Companies";
+                readonly status: "Statuses";
+                readonly alert: "Alerts";
+                readonly balance: "Balances";
+                readonly dot: "Tags";
+                readonly raw: "Tags";
+            };
+        };
+        readonly search: {
+            readonly noResults: "No results";
+        };
+        readonly detailPanel: {
+            readonly details: "Details";
+            readonly moreActions: "More actions";
+            readonly resize: "Resize detail panel";
+        };
+        readonly expander: {
+            readonly collapse: "Collapse {{count}} items";
+            readonly expand: "Expand {{count}} items";
+            readonly expandWithParentSingular: "Expand {{parent}}, {{count}} child";
+            readonly expandWithParentPlural: "Expand {{parent}}, {{count}} children";
+            readonly collapseWithParent: "Collapse {{parent}}";
+            readonly collapseDefault: "Collapse children";
+        };
+    };
     readonly wizard: {
         readonly previous: "Previous";
         readonly next: "Continue";
@@ -3634,7 +3683,9 @@ export declare type DetailsItemContent = (ComponentProps<typeof DataList.Item> &
 }[TagType_2] | {
     type: "avatar-list";
     avatarList: F0AvatarListProps;
-};
+} | (ComponentProps<typeof FileItem> & {
+    type: "file";
+});
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -3749,7 +3800,7 @@ declare const DropdownMenuItem: React_2.ForwardRefExoticComponent<Omit<DropdownM
     inset?: boolean;
 } & React_2.RefAttributes<HTMLDivElement>>;
 
-declare type DropdownProps = Omit<DropdownInternalProps, (typeof privateProps_4)[number]> & {
+declare type DropdownProps = Omit<DropdownInternalProps, (typeof privateProps_5)[number]> & {
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
 } & WithDataTestIdProps;
@@ -3794,6 +3845,11 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
      */
     numberConfig?: NumberCellConfig<R>;
     /**
+     * Configuration for `"date"` cells. Accepts `minDate` / `maxDate` to
+     * restrict the selectable date range in the picker.
+     */
+    dateConfig?: DateCellConfig;
+    /**
      * Called after this cell's value changes. Use to compute derived values
      * and update other cells in the same row.
      *
@@ -3817,7 +3873,11 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
     }) => void;
     /**
      * Returns a hint to display as an icon with tooltip inside the cell.
-     * Use to warn the user when a value diverges from its formula-inferred value.
+     * Use to warn the user when a value diverges from its formula-inferred value,
+     * or to provide extra context for non-editable / disabled cells (e.g. why a
+     * value was inferred, who a row is backfilling, why editing is locked).
+     *
+     * Supported by all `editType` values, including `display-only` and `disabled`.
      *
      * Return `undefined` to hide the hint.
      *
@@ -3870,6 +3930,17 @@ declare type EditableTableVisualizationSettings = TableVisualizationSettings;
 export declare type editorStateType = {
     html: string;
     json: JSONContent | null;
+};
+
+/**
+ * Employee credits usage data returned by the host app.
+ *
+ * Represents the logged-in employee's personal monthly allocation,
+ * independent of any company-wide pool.
+ */
+declare type EmployeeCreditsUsage = {
+    used: number;
+    total: number;
 };
 
 declare type EmptyState = {
@@ -4104,6 +4175,9 @@ export declare const F0AiBanner: ForwardRefExoticComponent<Omit<AiBannerInternal
 
 export declare type F0AiBannerProps = AiBannerInternalProps;
 
+/** Assistant-flavoured `F0Message`. Same shape — alias kept for clarity. */
+declare type F0AIMessage = F0Message;
+
 declare const F0AvatarAlert: WithDataTestIdReturnType_5<({ type, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: AlertAvatarProps_2) => JSX_2.Element>;
 
 declare type F0AvatarCompanyProps = {
@@ -4136,6 +4210,15 @@ declare type F0AvatarIconProps = {
     state?: F0IconProps["state"];
 } & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>;
 
+/**
+ * Optional extras every avatar entry may carry regardless of `type`.
+ * `tooltipDescription` is rendered as the tooltip's secondary line via the
+ * underlying `Tooltip` `description` slot (use it for emails, roles, etc.).
+ */
+declare type F0AvatarListExtras = {
+    tooltipDescription?: string;
+};
+
 declare type F0AvatarListProps = {
     /**
      * The size of the avatars in the list.
@@ -4163,23 +4246,32 @@ declare type F0AvatarListProps = {
      * @default "compact"
      */
     layout?: "fill" | "compact";
+    /**
+     * Controls the scroll behavior of the `+N` overflow popover that lists
+     * collapsed avatars (including their `tooltipDescription` entries).
+     * - `"vertical"` (default): caps the popover height and scrolls vertically.
+     * - `"none"`: lets the popover grow to fit all entries.
+     * @default "vertical"
+     */
+    tooltipScroll?: "vertical" | "none";
 } & F0AvatarListPropsAvatars;
 
 declare type F0AvatarListPropsAvatars = {
     type: "person";
-    avatars: (Omit<PersonAvatarVariant, "type"> & Record<string, unknown>)[];
+    avatars: (Omit<PersonAvatarVariant, "type"> & // Allow to have more properties in the avatar variant
+    F0AvatarListExtras & Record<string, unknown>)[];
 } | {
     type: "team";
-    avatars: (Omit<TeamAvatarVariant, "type"> & Record<string, unknown>)[];
+    avatars: (Omit<TeamAvatarVariant, "type"> & F0AvatarListExtras & Record<string, unknown>)[];
 } | {
     type: "company";
-    avatars: (Omit<CompanyAvatarVariant, "type"> & Record<string, unknown>)[];
+    avatars: (Omit<CompanyAvatarVariant, "type"> & F0AvatarListExtras & Record<string, unknown>)[];
 } | {
     type: "flag";
-    avatars: (Omit<FlagAvatarVariant, "type"> & Record<string, unknown>)[];
+    avatars: (Omit<FlagAvatarVariant, "type"> & F0AvatarListExtras & Record<string, unknown>)[];
 } | {
     type: "file";
-    avatars: (Omit<FileAvatarVariant, "type"> & Record<string, unknown>)[];
+    avatars: (Omit<FileAvatarVariant, "type"> & F0AvatarListExtras & Record<string, unknown>)[];
 };
 
 export declare const F0AvatarModule: WithDataTestIdReturnType_5<typeof F0AvatarModule_2>;
@@ -4274,6 +4366,55 @@ declare type F0ButtonProps = Omit<ButtonInternalProps, (typeof privateProps)[num
     variant?: Exclude<ButtonInternalProps["variant"], "ai">;
 };
 
+export declare const F0ButtonToggle: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0ButtonToggleProps & RefAttributes<HTMLButtonElement>>>;
+
+declare type F0ButtonToggleInternalProps = {
+    /**
+     * The accessible label for the button.
+     */
+    label: string | [string, string];
+    /**
+     * Whether the button is disabled.
+     */
+    disabled?: boolean;
+    /**
+     * The icon to display in the button. Can be a single icon or an array of two icons the first for the non-selected state and the second for the selected state.
+     */
+    icon: IconType | [IconType, IconType];
+    /**
+     * The size of the button.
+     * @default "md"
+     */
+    size?: ButtonToggleSize;
+    /**
+     * The variant of the button.
+     * @default "compact"
+     * "compact" - The button will only show the icon.
+     * "expanded" - The button will show the icon and the label.
+     */
+    variant?: ButtonToggleVariant;
+    /**
+     * @private
+     * Whether to show a border around the button toggle.
+     */
+    withBorder?: boolean;
+    /**
+     * @private
+     * Additional CSS class names to apply to the button root.
+     */
+    className?: string;
+} & ({
+    selected: boolean;
+    onSelectedChange: (selected: boolean) => void;
+    defaultSelected?: undefined;
+} | {
+    defaultSelected?: boolean;
+    selected?: undefined;
+    onSelectedChange?: undefined;
+});
+
+export declare type F0ButtonToggleProps = Omit<F0ButtonToggleInternalProps, (typeof privateProps_2)[number]>;
+
 export declare const F0Callout: ForwardRefExoticComponent<Omit<CalloutInternalProps & RefAttributes<HTMLDivElement> & WithDataTestIdProps_2, "ref"> & RefAttributes<HTMLDivElement>> & Pick<ForwardRefExoticComponent<CalloutInternalProps & RefAttributes<HTMLDivElement>>, never> & {
     Skeleton: ({ compact, variant }: CalloutSkeletonProps) => JSX_2.Element;
 };
@@ -4287,10 +4428,78 @@ declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<type
     color?: "default" | "currentColor" | `#${string}` | Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
 }
 
+declare type F0Message = {
+    id: string;
+    role: "user" | "assistant" | "system" | "tool";
+    content?: unknown;
+    toolCalls?: F0ToolCall[];
+    toolCallId?: string;
+    createdAt?: string;
+    generativeUI?: () => unknown;
+    rawData?: unknown;
+    /**
+     * Reply quote text attached to the message by the composer. Rendered
+     * as a block above the user bubble. Adapters (factorial / mock) own
+     * the wire encoding; F0 only reads this structured field.
+     */
+    replyQuote?: string;
+    [key: string]: any;
+};
+
+/**
+ * @experimental This is an experimental component, use it at your own risk.
+ */
+export declare const F0SegmentedControl: {
+    ({ items, value, onChange, disabled, fullWidth, ariaLabel, ariaLabelledBy, }: F0SegmentedControlProps_2): JSX_2.Element;
+    displayName: string;
+};
+
+export declare interface F0SegmentedControlItem {
+    /** Unique value for this segment */
+    value: string;
+    /** Label displayed inside the segment */
+    label: string;
+    /** Optional icon shown before the label */
+    icon?: IconType;
+    /** Whether this specific segment is disabled */
+    disabled?: boolean;
+}
+
+export declare interface F0SegmentedControlProps {
+    /** The list of segments to render */
+    items: F0SegmentedControlItem[];
+    /** Currently selected value */
+    value?: string;
+    /** Callback fired when the selected segment changes */
+    onChange?: (value: string) => void;
+    /**
+     * Whether the control is disabled entirely.
+     * @default false
+     */
+    disabled?: boolean;
+    /**
+     * Whether the control should expand to fill the container width.
+     * @default false
+     */
+    fullWidth?: boolean;
+    /**
+     * Accessible name for the segmented control. The underlying ToggleGroup
+     * (single mode) renders as a `radiogroup`, which requires a name.
+     * Provide either `ariaLabel` or `ariaLabelledBy`.
+     */
+    ariaLabel?: string;
+    /**
+     * ID of an element that labels the segmented control. Use instead of
+     * `ariaLabel` when a visible label already exists in the DOM.
+     */
+    ariaLabelledBy?: string;
+}
+
 /**
  * Base props shared across all F0Select variants
  */
 declare type F0SelectBaseProps<T extends string, R = unknown> = {
+    withApplySelection?: boolean;
     onChangeSelectedOption?: (option: F0SelectItemObject<T, ResolvedRecordType<R>> | undefined, checked: boolean) => void;
     children?: React.ReactNode;
     open?: boolean;
@@ -4302,6 +4511,8 @@ declare type F0SelectBaseProps<T extends string, R = unknown> = {
     searchEmptyMessage?: string;
     className?: string;
     actions?: Action[];
+    /** Callback to create a new item from the current search text. When provided, a "+ Create" button is shown in the empty state of the dropdown. */
+    onCreate?: (value: string) => Promise<void> | void;
     /** Container element to render the portal content into */
     portalContainer?: HTMLElement | null;
     /**
@@ -4411,6 +4622,10 @@ export declare type F0SelectTagProp = string | {
     type: "person";
     name: string;
     src?: string;
+} | {
+    type: "icon";
+    text: string;
+    icon: IconType;
 };
 
 /**
@@ -4512,6 +4727,21 @@ declare interface F0TagStatusProps {
 }
 
 declare const F0TagTeam: WithDataTestIdReturnType_5<ForwardRefExoticComponent<F0TagTeamProps & RefAttributes<HTMLDivElement>>>;
+
+/**
+ * Loose message shape used inside f0. Mirrors the CopilotKit `Message`
+ * shape so adapters (factorial, mock runtime) can map back and forth
+ * with no field rename, but is owned by f0 — nothing in `src/` imports
+ * from `@copilotkit/*` anymore.
+ */
+declare type F0ToolCall = {
+    id: string;
+    type?: "function";
+    function: {
+        name: string;
+        arguments: string;
+    };
+};
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -5137,6 +5367,7 @@ declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLA
 declare const INPUTFIELD_SIZES: readonly ["sm", "md"];
 
 declare type InputFieldProps<T> = {
+    id?: string;
     autoFocus?: boolean;
     label: string;
     placeholder?: string;
@@ -5222,12 +5453,12 @@ declare const inputFieldStatus: readonly ["default", "warning", "info", "error"]
 
 declare type InputFieldStatusType = (typeof inputFieldStatus)[number];
 
-declare type InputInternalProps<T extends string> = Pick<ComponentProps<typeof Input_2>, "ref"> & Pick<InputFieldProps<T>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur"> & {
+declare type InputInternalProps<T extends string> = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<T>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly"> & {
     type?: Exclude<HTMLInputTypeAttribute, "number">;
     onPressEnter?: () => void;
 };
 
-export declare type InputProps<T extends string> = Omit<InputInternalProps<T>, (typeof privateProps_2)[number]>;
+export declare type InputProps<T extends string> = Omit<InputInternalProps<T>, (typeof privateProps_3)[number]>;
 
 declare interface InsertAfterNotesTextEditorPageDocumentPatch {
     type: "insert_after";
@@ -5463,6 +5694,7 @@ declare type MetadataItemValue = {
     variant: StatusVariant;
 } | ({
     type: "list";
+    max?: number;
 } & ({
     variant: "person";
     avatars: (PersonAvatarVariant | (PersonAvatarVariant & Record<string, unknown>))[];
@@ -5818,9 +6050,27 @@ declare type NumberInputInternalProps = Omit<InputInternalProps<string>, "value"
     maxDecimals?: number;
     onChange?: (value: number | null) => void;
     units?: string;
+    extraContent?: ReactNode;
+    inputWidth?: string;
+    popover?: NumberInputPopoverConfig;
 };
 
-export declare type NumberInputProps = Omit<NumberInputInternalProps, (typeof privateProps_3)[number]>;
+export declare interface NumberInputPopoverConfig {
+    icon?: IconType;
+    side?: "top" | "bottom" | "left" | "right";
+    align?: "start" | "center" | "end";
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    triggerLabel?: string;
+    commitMode?: "immediate" | "deferred";
+    apply?: {
+        label?: string;
+        icon?: IconType;
+        closeOnApply?: boolean;
+    };
+}
+
+export declare type NumberInputProps = Omit<NumberInputInternalProps, (typeof privateProps_4)[number]>;
 
 declare type Numeric = NumericValue | number | undefined | null;
 
@@ -5991,7 +6241,7 @@ export declare interface OneCalendarInternalProps {
     weekStartsOn?: WeekStartsOn;
 }
 
-export declare type OneCalendarProps = Omit<OneCalendarInternalProps, (typeof privateProps_5)[number]>;
+export declare type OneCalendarProps = Omit<OneCalendarInternalProps, (typeof privateProps_6)[number]>;
 
 export declare const OneDataCollection: OneDataCollectionGeneric;
 
@@ -6337,6 +6587,7 @@ declare namespace _Page {
 export declare type PageAction = {
     label: string;
     icon: IconType;
+    variant?: ActionButtonVariant;
 } & ({
     href: string;
 } | {
@@ -6577,15 +6828,17 @@ export declare const PrivateBox: FC<PropsWithChildren>;
 
 declare const privateProps: readonly ["append", "className", "pressed", "compact", "noTitle", "noAutoTooltip", "style"];
 
-declare const privateProps_2: readonly ["buttonToggle"];
+declare const privateProps_2: readonly ["withBorder"];
 
 declare const privateProps_3: readonly ["buttonToggle"];
 
-declare const privateProps_4: readonly [];
+declare const privateProps_4: readonly ["buttonToggle"];
 
-declare const privateProps_5: readonly ["compact"];
+declare const privateProps_5: readonly [];
 
-declare const privateProps_6: readonly ["delay"];
+declare const privateProps_6: readonly ["compact"];
+
+declare const privateProps_7: readonly ["delay"];
 
 declare type ProductUpdate = {
     title: string;
@@ -7795,7 +8048,7 @@ declare type TooltipInternalProps = {
     description: string;
 });
 
-export declare type TooltipProps = Omit<TooltipInternalProps, (typeof privateProps_6)[number]>;
+export declare type TooltipProps = Omit<TooltipInternalProps, (typeof privateProps_7)[number]>;
 
 declare interface TopLevelAppendNotesTextEditorPageDocumentPatch {
     type: "top_level_append";
@@ -8277,12 +8530,36 @@ export declare const WeekStartDay: {
 export declare type WeekStartsOn = (typeof WeekStartDay)[keyof typeof WeekStartDay];
 
 /**
- * Welcome screen suggestion item
+ * A welcome-screen group rendered as an outline button in the welcome row.
+ * Clicking the group opens a popover listing its `items`.
  */
 declare type WelcomeScreenSuggestion = {
     icon: IconType;
-    message: string;
+    label: string;
+    items: WelcomeScreenSuggestionItem[];
+};
+
+/**
+ * A single sub-suggestion shown inside a welcome-screen group's popover.
+ * The `title` is the label users see; `prompt` is what gets sent to the AI
+ * when they click (falls back to `title` when omitted). They can diverge so
+ * you can show a short, scannable title while sending a fully-formed prompt.
+ */
+declare type WelcomeScreenSuggestionItem = {
+    title: string;
     prompt?: string;
+};
+
+/**
+ * Payload for `tracking.onWelcomeSuggestionClick`. Carries everything an
+ * analytics layer (e.g. Amplitude) needs to attribute the click: the picked
+ * sub-item, its parent group, and the resolved prompt that was actually sent.
+ */
+declare type WelcomeSuggestionClickEvent = {
+    item: WelcomeScreenSuggestionItem;
+    group: WelcomeScreenSuggestion;
+    /** Prompt actually sent to the AI — `item.prompt` falling back to `item.title`. */
+    prompt: string;
 };
 
 /**
@@ -8482,11 +8759,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -8533,4 +8805,24 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
+declare namespace F0GraphNodeWrapperInner {
+    var displayName: string;
+}
+
+
+declare namespace F0GraphExpanderWrapperInner {
+    var displayName: string;
+}
+
+
+declare namespace F0GraphCollapserWrapperInner {
+    var displayName: string;
 }
