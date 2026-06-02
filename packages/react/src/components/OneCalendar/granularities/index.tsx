@@ -10,7 +10,7 @@ import { yearGranularity } from "./year"
 export * from "./consts"
 export * from "./types"
 
-export const granularityDefinitions: Record<string, GranularityDefinition> = {
+export const granularityDefinitions = {
   day: dayGranularity,
   week: weekGranularity,
   month: monthGranularity,
@@ -18,7 +18,7 @@ export const granularityDefinitions: Record<string, GranularityDefinition> = {
   halfyear: halfyearGranularity,
   year: yearGranularity,
   range: rangeGranularity,
-} as const
+} as const satisfies Record<string, GranularityDefinition>
 
 export type GranularityDefinitionKey = keyof typeof granularityDefinitions
 
