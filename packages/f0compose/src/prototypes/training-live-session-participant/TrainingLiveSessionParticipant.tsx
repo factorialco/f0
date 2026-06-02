@@ -1806,7 +1806,9 @@ function TrainingLiveSessionsExperience({ role }: { role: LiveSessionRole }) {
     const groupParams = { view: "group-detail", course: selectedCourse.id, group: groupName, gtab: "sessions", session: session.id, stab: "details" }
     const endSession = () => {
       setEndedSessionIds((currentIds) => currentIds.includes(session.id) ? currentIds : [...currentIds, session.id])
-      setSearchParams({ ...groupParams, stab: "attendance" })
+      // Leave the live room and land on the group's Sessions; the attendance
+      // review modal opens there (endReview flag), not over the live room.
+      setSearchParams({ view: "group-detail", course: selectedCourse.id, group: groupName, gtab: "sessions", endReview: session.id })
     }
     if (view === "session-waiting-room" && role === "participant") {
       return <SessionWaitingRoomScreen course={selectedCourse} groupName={groupName} session={session} onExit={() => setSearchParams(groupParams)} />
@@ -4176,6 +4178,12 @@ function TrainingGroupDetail({ course, groupName, role, endedSessionIds, onToast
     setSearchParams({ view: "group-detail", course: course.id, group: groupName, gtab: "sessions", session: sessionId, stab: "details" })
   }
 
+  // Set by ending a session in the live room: show the attendance-review modal
+  // here, on the screen after the session, then clear it on confirm.
+  const showEndReview = Boolean(searchParams.get("endReview"))
+  const closeEndReview = () =>
+    setSearchParams({ view: "group-detail", course: course.id, group: groupName, gtab: "sessions" })
+
   return (
     <Page
       header={
@@ -4245,6 +4253,7 @@ function TrainingGroupDetail({ course, groupName, role, endedSessionIds, onToast
               onToast("draft")
             }}
           />
+          <EndSessionModal isOpen={showEndReview} onClose={closeEndReview} onConfirm={closeEndReview} />
           <TrainingActionDialog
             detail={activeDialog ? getGroupActionDetail(activeDialog, groupName) : null}
             onClose={() => setActiveDialog(null)}
@@ -4914,18 +4923,48 @@ function LiveSessionNotesDrawer() {
   )
 }
 
-function EndSessionModal({ isOpen, onClose, onEnd }: { isOpen: boolean; onClose: () => void; onEnd: () => void }) {
+function EndSessionModal({ isOpen, onClose, onConfirm }: { isOpen: boolean; onClose: () => void; onConfirm: () => void }) {
+  // "quita la x": F0Dialog always renders a close (X) and exposes no prop to
+  // hide it, so we hide it for this dialog only. The action is "Confirm attendance".
+  useEffect(() => {
+    if (!isOpen) return
+    let attempts = 0
+    const tick = () => {
+      let hidden = false
+      document.querySelectorAll('[role="dialog"]').forEach((dialog) => {
+        if (!/Review attendance/.test(dialog.textContent ?? "")) return
+        dialog
+          .querySelectorAll<HTMLElement>('button[aria-label="Close"]')
+          .forEach((button) => {
+            button.style.opacity = "0"
+            button.style.pointerEvents = "none"
+            hidden = true
+          })
+      })
+      attempts += 1
+      if (hidden || attempts > 20) window.clearInterval(id)
+    }
+    const id = window.setInterval(tick, 50)
+    tick()
+    return () => window.clearInterval(id)
+  }, [isOpen])
+
+  const rows = sessionAttendance.map((row) => ({ ...row, attendance: attendanceFromThreshold(row.completedHours) }))
+  const attendedCount = rows.filter((row) => row.attendance === "Attended").length
+
   return (
     <F0Dialog
       isOpen={isOpen}
       onClose={onClose}
-      title="End session"
-      description="Everyone who joined the live room is set as attended. Select participants and adjust the attendance if needed, then end the session. You can also edit it later from the Attendance tab."
+      title="Review attendance"
+      description="The session has ended. Everyone who joined is set as attended — change anyone if needed, then confirm. You can also edit it later from the Attendance tab."
       width="xl"
-      primaryAction={{ label: "End session", onClick: onEnd }}
-      secondaryAction={{ label: "Cancel", onClick: onClose }}
+      primaryAction={{ label: "Confirm attendance", onClick: onConfirm }}
     >
-      <SessionAttendanceTable isEnded variant="modal" />
+      <F0Box display="flex" flexDirection="column" gap="sm">
+        <F0Text variant="description" content={`${attendedCount} of ${rows.length} attended`} />
+        <SessionAttendanceTable isEnded variant="modal" />
+      </F0Box>
     </F0Dialog>
   )
 }
@@ -5053,7 +5092,6 @@ function SessionRoomScreen({
   const [microphoneEnabled, setMicrophoneEnabled] = useState(true)
   const [cameraEnabled, setCameraEnabled] = useState(true)
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const [endSessionOpen, setEndSessionOpen] = useState(false)
   const [activePanel, setActivePanel] = useState<LiveSessionPanelId>(null)
   const isInstructor = role === "instructor"
   const liveParticipants = groupParticipants.slice(0, 10)
@@ -5102,7 +5140,7 @@ function SessionRoomScreen({
           {isInstructor ? (
             <>
               <F0Button label="Exit" variant="outline" onClick={onExit} />
-              <F0Button label="End session" icon={SolidStop} variant="critical" onClick={() => setEndSessionOpen(true)} />
+              <F0Button label="End session" icon={SolidStop} variant="critical" onClick={onEndSession} />
             </>
           ) : (
             <F0Button label="Exit" variant="critical" onClick={onExit} />
@@ -5110,7 +5148,6 @@ function SessionRoomScreen({
         </F0BoxWithClassName>
       </F0BoxWithClassName>
       <RoomSettingsDialog isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
-      <EndSessionModal isOpen={endSessionOpen} onClose={() => setEndSessionOpen(false)} onEnd={onEndSession ?? onExit} />
     </FullscreenCallSurface>
   )
 }
@@ -5249,6 +5286,7 @@ function SessionAttendanceTable({ isEnded, variant = "tab" }: { isEnded: boolean
         sessionAttendance.map((row) => ({ ...row, attendance: attendanceFromThreshold(row.completedHours) }))
       : sessionAttendance.map((row) => ({ ...row, attendance: "Pending" as const, completedHours: `0m/${row.completedHours.split("/")[1] ?? "60m"}` }))
   )
+  const isModal = variant === "modal"
   const attendanceFilterOptions = isEnded
     ? [
         { value: "Attended", label: "Attended" },
@@ -5278,52 +5316,95 @@ function SessionAttendanceTable({ isEnded, variant = "tab" }: { isEnded: boolean
           return paginateRecords(filtered, pagination, 10)
         },
       },
+      // The end-session modal edits per row via an inline status dropdown
+      // (editableTable), so it has no multi-select / bulk. The Attendance tab
+      // keeps multi-select + bulk actions.
       secondaryActions: () =>
-        isEnded
+        !isModal && isEnded
           ? [{ label: "Download connectivity log", icon: Download, onClick: () => undefined }]
           : [],
-      selectable: (row) => row.id,
-      bulkActions: () => ({
-        primary: [
-          { id: "attended", label: "Mark as attended", icon: CheckCircle },
-          { id: "not-attended", label: "Mark as not attended", icon: Cross, critical: true },
-        ],
-      }),
+      selectable: isModal ? undefined : (row: SessionAttendanceRow) => row.id,
+      bulkActions: isModal
+        ? undefined
+        : () => ({
+            primary: [
+              { id: "attended", label: "Mark as attended", icon: CheckCircle },
+              { id: "not-attended", label: "Mark as not attended", icon: Cross, critical: true },
+            ],
+          }),
       totalItemSummary: (total: number) => `${total} participants`,
     },
     [isEnded, rows]
   )
 
+  const setRowAttendance = async (updatedItem: SessionAttendanceRow) => {
+    setRows((current) =>
+      current.map((row) => (row.id === updatedItem.id ? { ...row, attendance: updatedItem.attendance } : row))
+    )
+  }
+
   return (
-    <F0BoxWithClassName className={variant === "modal" ? "w-full" : "ml-4 mt-4 w-[574px]"}>
-      <OneDataCollection
-        id={`${prototypeSlug}/session-attendance/${variant}/v1`}
-        storage={false}
-        source={source}
-        onBulkAction={(action, selectedItems, clearSelected) => {
-          if (action === "attended" || action === "not-attended") {
-            const ids = new Set(selectedItems.selectedIds.map(String))
-            const nextAttendance: SessionAttendanceRow["attendance"] =
-              action === "attended" ? "Attended" : "Not attended"
-            setRows((current) =>
-              current.map((row) => (ids.has(row.id) ? { ...row, attendance: nextAttendance } : row))
-            )
-          }
-          clearSelected()
-        }}
-        visualizations={[
-          {
-            type: "table",
-            options: {
-              columns: [
-                { id: "name", label: "Name", render: (row: SessionAttendanceRow) => personValue(row.name) },
-                { id: "attendance", label: "Attendance", render: (row: SessionAttendanceRow) => ({ type: "status" as const, value: attendanceStatusValue(row.attendance) }) },
-                { id: "completedHours", label: "Time attended", render: (row: SessionAttendanceRow) => row.completedHours },
-              ],
+    <F0BoxWithClassName className={isModal ? "w-full px-6 pb-2" : "ml-4 mt-4 w-[574px]"}>
+      {isModal ? (
+        <OneDataCollection
+          id={`${prototypeSlug}/session-attendance/modal/v1`}
+          storage={false}
+          source={source}
+          visualizations={[
+            {
+              type: "editableTable",
+              options: {
+                columns: [
+                  { id: "name", label: "Name", editType: () => "display-only" as const, render: (row: SessionAttendanceRow) => personValue(row.name) },
+                  {
+                    id: "attendance",
+                    label: "Attendance",
+                    editType: () => "select" as const,
+                    selectConfig: {
+                      options: [
+                        { value: "Attended", label: "Attended" },
+                        { value: "Not attended", label: "Not attended" },
+                      ],
+                    },
+                    render: (row: SessionAttendanceRow) => row.attendance,
+                  },
+                  { id: "completedHours", label: "Time attended", editType: () => "display-only" as const, render: (row: SessionAttendanceRow) => row.completedHours },
+                ],
+                onCellChange: setRowAttendance,
+              },
             },
-          },
-        ]}
-      />
+          ]}
+        />
+      ) : (
+        <OneDataCollection
+          id={`${prototypeSlug}/session-attendance/tab/v1`}
+          storage={false}
+          source={source}
+          onBulkAction={(action, selectedItems, clearSelected) => {
+            if (action === "attended" || action === "not-attended") {
+              const ids = new Set(selectedItems.selectedIds.map(String))
+              const nextAttendance: SessionAttendanceRow["attendance"] =
+                action === "attended" ? "Attended" : "Not attended"
+              setRows((current) =>
+                current.map((row) => (ids.has(row.id) ? { ...row, attendance: nextAttendance } : row))
+              )
+            }
+            clearSelected()
+          }}
+          visualizations={[
+            {
+              type: "table",
+              options: {
+                columns: [
+                  { id: "name", label: "Name", render: (row: SessionAttendanceRow) => personValue(row.name) },
+                  { id: "attendance", label: "Attendance", render: (row: SessionAttendanceRow) => ({ type: "status" as const, value: attendanceStatusValue(row.attendance) }) },
+                  { id: "completedHours", label: "Time attended", render: (row: SessionAttendanceRow) => row.completedHours },
+                ],
+              },
+            },
+          ]}
+        />
+      )}
     </F0BoxWithClassName>
   )
 }
