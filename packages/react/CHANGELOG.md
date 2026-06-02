@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.31.0](https://github.com/factorialco/f0/compare/f0-react-v2.30.2...f0-react-v2.31.0) (2026-06-02)
+
+
+### Features
+
+* editable table status pill select ([#4200](https://github.com/factorialco/f0/issues/4200)) ([0adf37e](https://github.com/factorialco/f0/commit/0adf37e97957c0a9d262f6809a7401718d164720))
+
 ## [2.30.2](https://github.com/factorialco/f0/compare/f0-react-v2.30.1...f0-react-v2.30.2) (2026-06-02)
 
 
