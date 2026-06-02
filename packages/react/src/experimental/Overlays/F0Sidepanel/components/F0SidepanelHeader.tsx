@@ -121,7 +121,7 @@ export const F0SidepanelHeader = ({
                 size="sm"
                 variant="outline"
                 icon={EllipsisHorizontal}
-                label="More actions"
+                label={i18n.graph.detailPanel.moreActions}
                 hideLabel
               />
             </Dropdown>
