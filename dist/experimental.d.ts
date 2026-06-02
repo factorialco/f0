@@ -4573,6 +4573,10 @@ export declare type F0SelectTagProp = string | {
     type: "icon";
     text: string;
     icon: IconType;
+} | {
+    type: "status";
+    text: string;
+    variant: StatusVariant;
 };
 
 /**
