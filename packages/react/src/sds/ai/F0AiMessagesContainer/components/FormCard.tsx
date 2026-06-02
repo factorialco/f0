@@ -242,7 +242,7 @@ export function FormCard({
 
   return (
     <F0CanvasCard
-      avatar={{ type: "module", module: formModule }}
+      avatar={formModule ? { type: "module", module: formModule } : undefined}
       title={title}
       description={description}
       isActive={isActive}
