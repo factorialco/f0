@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.30.1](https://github.com/factorialco/f0/compare/f0-react-v2.30.0...f0-react-v2.30.1) (2026-06-02)
+
+
+### Bug Fixes
+
+* granularityDefinitions type ([#4286](https://github.com/factorialco/f0/issues/4286)) ([c8986c2](https://github.com/factorialco/f0/commit/c8986c21ef63ede7c81d17935854cd2c654ad11e))
+
 ## [2.30.0](https://github.com/factorialco/f0/compare/f0-react-v2.29.0...f0-react-v2.30.0) (2026-06-02)
 
 
