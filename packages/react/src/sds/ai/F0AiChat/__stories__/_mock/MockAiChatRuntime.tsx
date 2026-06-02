@@ -42,6 +42,8 @@ export type MockAiChatRuntime = {
   appendRawMessages: (
     messages: (Omit<F0Message, "id"> & { id?: string })[]
   ) => void
+  /** Swaps the scripted assistant responses and restarts from the first turn. */
+  setScript: (script: string[]) => void
   clear: () => void
 
   // ── Chat history ────────────────────────────────────────────────
@@ -240,12 +242,18 @@ export type MockAiChatRuntimeProviderProps = {
    * state.
    */
   seedThreads?: ChatThread[]
+  /**
+   * Optional scripted assistant responses used in order, one per text reply.
+   * Falls back to a random phrase when the script is exhausted or absent.
+   */
+  script?: string[]
 }
 
 export const MockAiChatRuntimeProvider = ({
   children,
   seedMessages,
   seedThreads,
+  script,
 }: MockAiChatRuntimeProviderProps) => {
   const [messages, setMessages] = useState<F0Message[]>(seedMessages ?? [])
   const [inProgress, setInProgress] = useState(false)
@@ -261,6 +269,8 @@ export const MockAiChatRuntimeProvider = ({
   )
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([])
   const intervalsRef = useRef<ReturnType<typeof setInterval>[]>([])
+  const scriptRef = useRef<string[]>(script ?? [])
+  const scriptTurnRef = useRef(0)
 
   // Allow late-arriving seed messages (story decorators that prefill async).
   useEffect(() => {
@@ -338,7 +348,8 @@ export const MockAiChatRuntimeProvider = ({
 
   const streamAssistantResponse = useCallback(() => {
     const thinkingSteps = pickRandomThinkingSteps(3)
-    const response = pickRandomResponse()
+    const response =
+      scriptRef.current[scriptTurnRef.current++] ?? pickRandomResponse()
     const thinkingId = nextId()
     const assistantId = nextId()
 
@@ -448,12 +459,18 @@ export const MockAiChatRuntimeProvider = ({
     []
   )
 
+  const setScript = useCallback<MockAiChatRuntime["setScript"]>((next) => {
+    scriptRef.current = next
+    scriptTurnRef.current = 0
+  }, [])
+
   const clear = useCallback(() => {
     clearTimers()
     setMessages([])
     setInProgress(false)
     setCurrentThreadTitle(null)
     setIsLoadingThread(false)
+    scriptTurnRef.current = 0
   }, [clearTimers])
 
   // ── Chat history ────────────────────────────────────────────────
@@ -529,6 +546,7 @@ export const MockAiChatRuntimeProvider = ({
         sendMessageWithThinkingOnly,
         appendMessages,
         appendRawMessages,
+        setScript,
         clear,
         currentThreadTitle,
         isLoadingThread,

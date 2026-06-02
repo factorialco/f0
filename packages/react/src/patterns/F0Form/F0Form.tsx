@@ -132,6 +132,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
   } = props
 
   const showSectionsSidepanel = styling?.showSectionsSidepanel ?? false
+  const noPadding = styling?.noPadding ?? false
 
   const sectionIds = useMemo(() => Object.keys(schema), [schema])
 
@@ -218,7 +219,13 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
     )
   }
 
-  return <div className="flex justify-center p-4">{content}</div>
+  return (
+    <div
+      className={noPadding ? "flex justify-center" : "flex justify-center p-4"}
+    >
+      {content}
+    </div>
+  )
 }
 
 /**
@@ -536,6 +543,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
 
   // Resolve styling configuration
   const showSectionsSidepanel = styling?.showSectionsSidepanel ?? false
+  const noPadding = styling?.noPadding ?? false
 
   // Resolve submit type from config
   const isActionBar = submitConfig?.type === "action-bar"
@@ -1165,7 +1173,13 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             </div>
           </div>
         ) : (
-          <div className="flex justify-center p-4">{formContent}</div>
+          <div
+            className={
+              noPadding ? "flex justify-center" : "flex justify-center p-4"
+            }
+          >
+            {formContent}
+          </div>
         )}
 
         {!hideActionBar && (

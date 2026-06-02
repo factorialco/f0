@@ -1,8 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { z } from "zod"
+
 import {
   ComponentProps,
+  createContext,
+  type ReactNode,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -11,8 +16,19 @@ import {
 
 import { StandardLayout } from "@/layouts/StandardLayout"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
-import { Add, ArrowLeft, Files, Pencil, Sparkles } from "@/icons/app"
+import {
+  Add,
+  Delete,
+  ExternalLink,
+  Files,
+  LayersFront,
+  Pencil,
+  Settings,
+  SolidPlay,
+  Sparkles,
+} from "@/icons/app"
 import { F0Card } from "@/components/F0Card"
+import { LoadingEnhanceOverlay } from "@/components/RichText/RichTextEditor/Enhance/LoadingEnhance"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { Page as NavigationPage } from "@/patterns/Navigation/Page"
@@ -34,7 +50,26 @@ import { filterNonRenderableMessages } from "@/sds/ai/F0AiChat/__stories__/_mock
 import { F0AiChatTextArea } from "@/sds/ai/F0AiChatTextArea"
 import type { F0AiChatTextAreaSubmitPayload } from "@/sds/ai/F0AiChatTextArea/types"
 import { F0ClarifyingPanel } from "@/sds/ai/F0ClarifyingPanel/F0ClarifyingPanel"
-import type { ClarifyingQuestionState } from "@/sds/ai/F0ClarifyingPanel/types"
+import { f0FormField, F0Form } from "@/patterns/F0Form"
+import type { F0SectionConfig } from "@/patterns/F0Form"
+import { useF0FormDefinition } from "@/patterns/F0WizardForm"
+import { SurveyAnsweringForm } from "@/sds/surveys/SurveyAnsweringForm"
+import { mockDatasets } from "@/sds/surveys/__stories__/mocks"
+
+import {
+  cardVisualization,
+  emptyDataAdapter,
+  employeeTableVisualization,
+  filledDataAdapter,
+  MOCK_EMPLOYEES,
+  resourceFilters,
+  resourceSortings,
+  tableVisualization,
+} from "./mockData"
+import { SURVEY_DEFAULT_VALUES, SURVEY_ELEMENTS } from "./survey-mocks"
+import { TAB_CONFIGS } from "./tab-configs"
+import type { ClarifyingStep, TabConfig } from "./tab-configs"
+import { useClarifyingState } from "./useClarifyingState"
 
 /**
  * Co-creation patterns — "Creation with AI".
@@ -66,15 +101,6 @@ type Story = StoryObj<typeof meta>
 
 type Phase = "collection" | "chat" | "split"
 
-type ResourceStatus = "Draft" | "Complete" | "Needs details"
-
-type Resource = {
-  id: string
-  name: string
-  owner: string
-  status: ResourceStatus
-}
-
 const COCREATION_MODULE = {
   id: "ats" as const,
   name: "Co-creation",
@@ -100,208 +126,166 @@ const resetAiChatPersistence = () => {
 const EXCHANGES_BEFORE_SPLIT = 2
 
 // ---------------------------------------------------------------------------
-// Clarifying question — shown after the first AI reply completes.
+// Tab-config context — shares the live active tab (and its config) between
+// `FlowContent` and `CreationChatInput`, which are siblings rendered by the
+// ApplicationFrame (the chat input is passed via the `ai` prop, so it can't
+// receive the active tab as a prop). Lives inside MockAiChatRuntimeProvider so
+// it can keep the runtime's scripted responses in sync with the active tab.
 // ---------------------------------------------------------------------------
 
-const CREATION_CLARIFYING_STEPS = [
-  {
-    question: "What kind of resource would you like to create?",
-    options: [
-      { id: "onboarding", label: "Onboarding plan" },
-      { id: "review", label: "Performance review cycle" },
-      { id: "process", label: "Process documentation" },
-      { id: "checklist", label: "Checklist" },
-    ],
-    selectionMode: "single" as const,
-  },
-]
-
-const REFINEMENT_CLARIFYING_STEPS = [
-  {
-    question: "What would you like to adjust?",
-    options: [
-      { id: "timeline", label: "Adjust the timeline" },
-      { id: "sections", label: "Add more sections" },
-      { id: "tone", label: "Change the tone" },
-      { id: "details", label: "Add more details" },
-    ],
-    selectionMode: "single" as const,
-  },
-]
-
-/** Maps user-turn index to the clarifying steps that should appear after that turn's AI reply. */
-const CLARIFYING_STEPS_BY_TURN: Record<number, ClarifyingStep[]> = {
-  1: CREATION_CLARIFYING_STEPS,
-  [EXCHANGES_BEFORE_SPLIT + 1]: REFINEMENT_CLARIFYING_STEPS,
+type TabConfigContextValue = {
+  activeTabId: string
+  setActiveTabId: (id: string) => void
+  tabConfig: TabConfig
 }
 
-type ClarifyingStep = (typeof CREATION_CLARIFYING_STEPS)[number]
+const TabConfigContext = createContext<TabConfigContextValue | null>(null)
 
-interface StepInteraction {
-  selectedIds: string[]
+function useTabConfig(): TabConfigContextValue {
+  const ctx = useContext(TabConfigContext)
+  if (!ctx) {
+    throw new Error("useTabConfig must be used inside <TabConfigProvider>")
+  }
+  return ctx
 }
 
-const EMPTY_INTERACTION: StepInteraction = { selectedIds: [] }
+function TabConfigProvider({
+  initialTabId = "tasks",
+  children,
+}: {
+  initialTabId?: string
+  children: ReactNode
+}) {
+  const [activeTabId, setActiveTabId] = useState(initialTabId)
+  const tabConfig = TAB_CONFIGS[activeTabId] ?? TAB_CONFIGS.tasks
+  const { setScript } = useMockAiChatRuntime()
 
-function useClarifyingState(
-  steps: ClarifyingStep[],
-  callbacks: { onResolve: (label: string) => void; onDismiss: () => void }
-) {
-  const [stepIndex, setStepIndex] = useState(0)
-  const [interactions, setInteractions] = useState<
-    Record<string, StepInteraction>
-  >({})
+  // Keep the runtime's scripted responses in sync with the active tab.
+  useEffect(() => {
+    setScript(tabConfig.script)
+  }, [tabConfig, setScript])
 
-  const currentStep = steps[stepIndex]
-  const interaction = currentStep
-    ? (interactions[currentStep.question] ?? EMPTY_INTERACTION)
-    : EMPTY_INTERACTION
-
-  const toggleOption = useCallback(
-    (optionId: string) => {
-      if (!currentStep) return
-      setInteractions((prev) => ({
-        ...prev,
-        [currentStep.question]: { selectedIds: [optionId] },
-      }))
-    },
-    [currentStep]
+  return (
+    <TabConfigContext.Provider
+      value={{ activeTabId, setActiveTabId, tabConfig }}
+    >
+      {children}
+    </TabConfigContext.Provider>
   )
-
-  const confirm = useCallback(() => {
-    if (!currentStep) return
-    if (stepIndex < steps.length - 1) {
-      setStepIndex(stepIndex + 1)
-    } else {
-      const selected = currentStep.options.find((o) =>
-        interaction.selectedIds.includes(o.id)
-      )
-      callbacks.onResolve(selected?.label ?? interaction.selectedIds[0] ?? "")
-    }
-  }, [currentStep, stepIndex, steps.length, interaction, callbacks])
-
-  const cancel = useCallback(() => {
-    callbacks.onDismiss()
-  }, [callbacks])
-
-  const back = useCallback(() => {
-    if (stepIndex > 0) setStepIndex(stepIndex - 1)
-  }, [stepIndex])
-
-  const state: ClarifyingQuestionState | null = currentStep
-    ? {
-        currentStep: {
-          question: currentStep.question,
-          options: currentStep.options,
-          selectionMode: currentStep.selectionMode,
-          selectedOptionIds: interaction.selectedIds,
-          isCustomAnswerActive: false,
-        },
-        currentStepIndex: stepIndex,
-        totalSteps: steps.length,
-        toggleOption,
-        confirm,
-        skip: cancel,
-        cancel,
-        back,
-        setCustomAnswerText: () => {},
-        setCustomAnswerActive: () => {},
-        activateCustomAnswer: () => {},
-      }
-    : null
-
-  return { clarifyingState: state }
 }
 
-const resourceFilters = {
-  status: {
-    type: "in" as const,
-    label: "Status",
-    options: {
+function SurveySettingsForm() {
+  const formSchema = z.object({
+    title: f0FormField.text({
+      label: "Title",
+      section: "basic",
+      placeholder: "Enter survey title",
+    }),
+    description: f0FormField.textarea({
+      label: "Description",
+      section: "basic",
+      optional: true,
+      rows: 3,
+    }),
+    participants: f0FormField.select({
+      label: "Select participants",
+      section: "participants",
       options: [
-        { value: "Draft", label: "Draft" },
-        { value: "Needs details", label: "Needs details" },
-        { value: "Complete", label: "Complete" },
+        { value: "all", label: "All employees" },
+        { value: "department", label: "By department" },
+        { value: "custom", label: "Custom selection" },
       ],
-    },
-  },
-  owner: {
-    type: "in" as const,
-    label: "Owner",
-    options: {
+      placeholder: "Select participants",
+    }),
+    publishOn: f0FormField.date({
+      label: "Publish on",
+      section: "schedule",
+      row: "schedule-dates",
+      optional: true,
+    }),
+    endsAt: f0FormField.date({
+      label: "Ends at",
+      section: "schedule",
+      row: "schedule-dates",
+      optional: true,
+    }),
+    recurrence: f0FormField.select({
+      label: "Recurrence",
+      section: "schedule",
       options: [
-        { value: "Alicia Keys", label: "Alicia Keys" },
-        { value: "Dani Moreno", label: "Dani Moreno" },
-        { value: "Marta Soler", label: "Marta Soler" },
-        { value: "Nora Park", label: "Nora Park" },
+        { value: "none", label: "Does not repeat" },
+        { value: "weekly", label: "Weekly" },
+        { value: "monthly", label: "Monthly" },
+        { value: "quarterly", label: "Quarterly" },
       ],
+    }),
+    managerVisibility: f0FormField.boolean({
+      label: "Add visibility permissions to managers and team leads",
+      helpText:
+        "Grant access to managers and team leads so they can view results for their own teams once responses are available.",
+      section: "visibility",
+      optional: true,
+    }),
+    anonymousAnswers: f0FormField.boolean({
+      label: "Anonymous answers",
+      section: "visibility",
+      optional: true,
+    }),
+    editors: f0FormField.select({
+      label: "Select editors",
+      section: "editors",
+      options: [
+        { value: "none", label: "None" },
+        { value: "admins", label: "Administrators only" },
+        { value: "custom", label: "Custom selection" },
+      ],
+      placeholder: "Select editors",
+    }),
+  })
+
+  const sections: Record<string, F0SectionConfig> = {
+    basic: { title: "Basic Information" },
+    participants: {
+      title: "Participants",
+      description: "Choose who will receive this survey",
+      action: { label: "Manage groups", icon: ExternalLink, href: "#groups" },
     },
-  },
-}
+    schedule: { title: "Schedule" },
+    visibility: {
+      title: "Visibility & Privacy",
+      description:
+        "Configure the visibility and privacy settings for this survey",
+      action: {
+        label: "Privacy settings",
+        icon: Settings,
+        onClick: () => {},
+      },
+    },
+    editors: { title: "Editors" },
+  }
 
-const resourceSortings = {
-  name: { label: "Name" },
-  owner: { label: "Owner" },
-  status: { label: "Status" },
-} as const
+  const formDefinition = useF0FormDefinition({
+    name: "survey-settings",
+    schema: formSchema,
+    sections,
+    defaultValues: {
+      title: "Employee engagement survey",
+      description:
+        "A 10-question pulse check covering motivation, clarity, and team dynamics.",
+      participants: undefined,
+      publishOn: undefined,
+      endsAt: undefined,
+      recurrence: "none",
+      managerVisibility: false,
+      anonymousAnswers: true,
+      editors: "admins",
+    },
+    onSubmit: async () => ({ success: true }),
+  })
 
-// Returning an empty `records` array is what triggers OneDataCollection's
-// built-in default "no-data" empty state.
-const emptyDataAdapter = {
-  fetchData: () => Promise.resolve({ records: [] as Resource[] }),
-}
-
-const MOCK_RESOURCES: Resource[] = [
-  {
-    id: "1",
-    name: "Engineering onboarding plan",
-    owner: "Alicia Keys",
-    status: "Draft",
-  },
-  {
-    id: "2",
-    name: "Q3 performance review cycle",
-    owner: "Dani Moreno",
-    status: "Complete",
-  },
-  {
-    id: "3",
-    name: "Product roadmap 2026",
-    owner: "Marta Soler",
-    status: "Needs details",
-  },
-  {
-    id: "4",
-    name: "Offboarding checklist",
-    owner: "Nora Park",
-    status: "Draft",
-  },
-]
-
-const filledDataAdapter = {
-  fetchData: () => Promise.resolve({ records: MOCK_RESOURCES }),
-}
-
-const tableVisualization = {
-  type: "table" as const,
-  options: {
-    columns: [
-      { label: "Name", render: (item: Resource) => item.name },
-      { label: "Owner", render: (item: Resource) => item.owner },
-      { label: "Status", render: (item: Resource) => item.status },
-    ],
-  },
-}
-
-const cardVisualization = {
-  type: "card" as const,
-  options: {
-    title: (item: Resource) => item.name,
-    description: (item: Resource) => item.owner,
-    cardProperties: [
-      { label: "Status", render: (item: Resource) => item.status },
-    ],
-  },
+  return (
+    <F0Form formDefinition={formDefinition} styling={{ noPadding: true }} />
+  )
 }
 
 /**
@@ -336,8 +320,16 @@ function CreationChatInput() {
   const isWelcomeScreen = filteredMessages.length === 0
   const fullscreen = visualizationMode === "fullscreen"
 
+  const { tabConfig } = useTabConfig()
+
   const userTurns = messages.filter((m) => m.role === "user").length
-  const currentClarifyingSteps = CLARIFYING_STEPS_BY_TURN[userTurns] ?? null
+  // Maps user-turn index to the tab-specific clarifying steps shown after that
+  // turn's AI reply: creation after the first turn, refinement after split.
+  const clarifyingStepsByTurn: Record<number, ClarifyingStep[]> = {
+    1: tabConfig.clarifying.creation,
+    [EXCHANGES_BEFORE_SPLIT + 1]: tabConfig.clarifying.refinement,
+  }
+  const currentClarifyingSteps = clarifyingStepsByTurn[userTurns] ?? null
   const [dismissedAtTurn, setDismissedAtTurn] = useState<number | null>(null)
   const shouldShowClarifying =
     !inProgress &&
@@ -360,7 +352,7 @@ function CreationChatInput() {
   )
 
   const { clarifyingState } = useClarifyingState(
-    currentClarifyingSteps ?? CREATION_CLARIFYING_STEPS,
+    currentClarifyingSteps ?? tabConfig.clarifying.creation,
     callbacks
   )
 
@@ -419,43 +411,6 @@ function CreationChatInput() {
   )
 }
 
-/** The AI-generated draft shown in the central panel of the split view. */
-function DocumentPreview() {
-  return (
-    <div className="flex justify-center py-2">
-      <div className="flex w-full max-w-[720px] flex-col gap-6 rounded-xl border border-f1-border bg-f1-background p-10 shadow-md">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold text-f1-foreground">
-            Engineering onboarding plan
-          </h1>
-          <p className="text-f1-foreground-secondary">
-            A 30-day plan to ramp up a new engineer — accounts, environment,
-            first deliverables, and check-ins.
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <h2 className="text-lg font-medium text-f1-foreground">
-            Week 1 — Setup &amp; orientation
-          </h2>
-          <div className="h-3 w-full rounded bg-f1-background-secondary" />
-          <div className="h-3 w-11/12 rounded bg-f1-background-secondary" />
-          <div className="h-3 w-4/5 rounded bg-f1-background-secondary" />
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <h2 className="text-lg font-medium text-f1-foreground">
-            Week 2 — First contributions
-          </h2>
-          <div className="h-3 w-full rounded bg-f1-background-secondary" />
-          <div className="h-3 w-10/12 rounded bg-f1-background-secondary" />
-          <div className="h-3 w-3/4 rounded bg-f1-background-secondary" />
-        </div>
-      </div>
-    </div>
-  )
-}
-
 /**
  * The page content rendered inside the shared chat-enabled ApplicationFrame.
  * Derives the chat's open/visualization state from `phase`, keeps `phase` in
@@ -469,9 +424,13 @@ function FlowContent({
   phase: Phase
   setPhase: (phase: Phase) => void
 }) {
+  const { activeTabId, setActiveTabId, tabConfig } = useTabConfig()
   const [templatesOpen, setTemplatesOpen] = useState(false)
-  const [activeTabId, setActiveTabId] = useState("empty-table")
-  const [resourceTabId, setResourceTabId] = useState("overview")
+  const [resourceTabId, setResourceTabId] = useState("tab-1")
+  // The Surveys resource view has its own tab strip (Editor / Settings); the
+  // survey questions show under "Editor", which is the default focused tab in
+  // the co-creation flow.
+  const [surveyTabId, setSurveyTabId] = useState("editor")
   const { open, setOpen, visualizationMode, setVisualizationMode } = useAiChat()
   const {
     messages,
@@ -504,7 +463,7 @@ function FlowContent({
         onClick: () => {
           setVisualizationMode("fullscreen")
           setPhase("chat")
-          sendMessageWithThinkingOnly("I want to create a new resource.")
+          sendMessageWithThinkingOnly(tabConfig.initialMessage)
         },
       },
       { label: "Start from scratch", icon: Pencil, onClick: () => {} },
@@ -524,6 +483,15 @@ function FlowContent({
   const sourceCards = useDataCollectionSource({
     dataAdapter: filledDataAdapter,
     ...sharedSourceOptions,
+  })
+
+  const sourceEmployees = useDataCollectionSource({
+    dataAdapter: {
+      fetchData: () => Promise.resolve({ records: MOCK_EMPLOYEES }),
+    },
+    ...sharedSourceOptions,
+    // Employees don't offer templates.
+    secondaryActions: undefined,
   })
 
   // phase → chat open state. Opening from "collection" flips `open` false→true
@@ -578,6 +546,7 @@ function FlowContent({
   useEffect(() => {
     if (phase !== "split" || cardsAppendedRef.current >= 1) return
     cardsAppendedRef.current = 1
+    const card = tabConfig.cards[0]
     appendRawMessages([
       {
         role: "assistant",
@@ -585,14 +554,15 @@ function FlowContent({
         generativeUI: () => (
           <F0Card
             horizontal
+            truncateDescription
             avatar={{ type: "icon", icon: Files }}
-            title="Engineering onboarding plan"
-            description="A 30-day ramp-up covering environment setup, codebase orientation, and first deliverables."
+            title={card.title}
+            description={card.description}
           />
         ),
       },
     ])
-  }, [phase, appendRawMessages])
+  }, [phase, appendRawMessages, tabConfig])
 
   // Second card: after the post-split refinement exchange finishes.
   useEffect(() => {
@@ -604,6 +574,7 @@ function FlowContent({
     )
       return
     cardsAppendedRef.current = 2
+    const card = tabConfig.cards[1]
     appendRawMessages([
       {
         role: "assistant",
@@ -611,14 +582,15 @@ function FlowContent({
         generativeUI: () => (
           <F0Card
             horizontal
+            truncateDescription
             avatar={{ type: "icon", icon: Files }}
-            title="Engineering onboarding plan"
-            description="Expanded to 4 weeks with a buddy system, structured check-ins, and a dedicated deep-dive week."
+            title={card.title}
+            description={card.description}
           />
         ),
       },
     ])
-  }, [phase, userTurns, inProgress, appendRawMessages])
+  }, [phase, userTurns, inProgress, appendRawMessages, tabConfig])
 
   return (
     <NavigationPage
@@ -627,46 +599,102 @@ function FlowContent({
           <PageHeader
             module={COCREATION_MODULE}
             breadcrumbs={
-              phase === "split"
-                ? [{ id: "draft", label: "Untitled draft" }]
-                : undefined
+              phase === "split" ? [{ id: "draft", label: "Draft" }] : undefined
             }
           />
           {phase === "split" ? (
-            <>
-              <ResourceHeader
-                title="Engineering onboarding plan"
-                description="A 30-day ramp-up covering environment setup, codebase orientation, and first deliverables."
-                status={{ label: "Status", text: "Draft", variant: "neutral" }}
-                primaryAction={{ label: "Save", onClick: () => {} }}
-                secondaryActions={[
-                  {
-                    label: "Back to list",
-                    icon: ArrowLeft,
-                    onClick: () => setPhase("collection"),
-                  },
-                ]}
-                metadata={[
-                  { label: "Owner", value: { type: "text", content: "You" } },
-                ]}
-              />
-              <Tabs
-                tabs={[
-                  { label: "Overview", id: "overview" },
-                  { label: "Week 1", id: "week-1" },
-                  { label: "Week 2", id: "week-2" },
-                ]}
-                activeTabId={resourceTabId}
-                setActiveTabId={setResourceTabId}
-              />
-            </>
+            // The Surveys canvas mirrors a real Survey resource view: a
+            // page-level ResourceHeader (the single header — the inline survey
+            // form's own header is suppressed) plus an Editor/Settings tab
+            // strip. Other tabs keep the generic placeholder chrome.
+            activeTabId === "surveys" ? (
+              <>
+                <ResourceHeader
+                  title={tabConfig.cards[0].title}
+                  description={tabConfig.cards[0].description}
+                  status={{
+                    label: "Status",
+                    text: "Draft",
+                    variant: "neutral",
+                  }}
+                  primaryAction={{
+                    label: "Publish",
+                    icon: SolidPlay,
+                    onClick: () => {},
+                  }}
+                  otherActions={[
+                    {
+                      label: "Duplicate",
+                      icon: LayersFront,
+                      onClick: () => {},
+                    },
+                    { type: "separator" },
+                    {
+                      label: "Delete",
+                      icon: Delete,
+                      critical: true,
+                      onClick: () => {},
+                    },
+                  ]}
+                  metadata={[
+                    { label: "Owner", value: { type: "text", content: "You" } },
+                    {
+                      label: "Recurrence",
+                      value: { type: "text", content: "Does not repeat" },
+                    },
+                    {
+                      label: "Finishes on",
+                      value: { type: "text", content: "—" },
+                    },
+                    {
+                      label: "Questions",
+                      value: { type: "text", content: "10" },
+                    },
+                  ]}
+                />
+                <Tabs
+                  tabs={[
+                    { label: "Questions", id: "editor" },
+                    { label: "Settings", id: "settings" },
+                  ]}
+                  activeTabId={surveyTabId}
+                  setActiveTabId={setSurveyTabId}
+                />
+              </>
+            ) : (
+              <>
+                <ResourceHeader
+                  title={tabConfig.cards[0].title}
+                  description={tabConfig.cards[0].description}
+                  status={{
+                    label: "Status",
+                    text: "Draft",
+                    variant: "neutral",
+                  }}
+                  primaryAction={{ label: "Save", onClick: () => {} }}
+                  metadata={[
+                    { label: "Owner", value: { type: "text", content: "You" } },
+                  ]}
+                />
+                <Tabs
+                  tabs={[
+                    { label: "Tab 1", id: "tab-1" },
+                    { label: "Tab 2", id: "tab-2" },
+                    { label: "Tab 3", id: "tab-3" },
+                  ]}
+                  activeTabId={resourceTabId}
+                  setActiveTabId={setResourceTabId}
+                />
+              </>
+            )
           ) : (
             visualizationMode !== "fullscreen" && (
               <Tabs
                 tabs={[
-                  { label: "Empty table", id: "empty-table" },
-                  { label: "Table with data", id: "table-data" },
-                  { label: "Cards", id: "cards" },
+                  { label: "Tasks", id: "tasks" },
+                  { label: "Surveys", id: "surveys" },
+                  { label: "Employees", id: "employees" },
+                  { label: "Absences", id: "absences" },
                 ]}
                 activeTabId={activeTabId}
                 setActiveTabId={setActiveTabId}
@@ -678,24 +706,55 @@ function FlowContent({
     >
       <StandardLayout>
         {phase === "split" ? (
-          <DocumentPreview />
+          // The left panel hosts the resource being co-created. While the AI is
+          // thinking/updating the form we block it with the shared processing
+          // overlay so the user can't edit content that's about to change.
+          <div className="relative h-full w-full">
+            {activeTabId === "surveys" ? (
+              surveyTabId === "editor" ? (
+                <SurveyAnsweringForm
+                  inline
+                  hideResourceHeader
+                  title={tabConfig.cards[0].title}
+                  description={tabConfig.cards[0].description}
+                  elements={SURVEY_ELEMENTS}
+                  datasets={mockDatasets}
+                  defaultValues={SURVEY_DEFAULT_VALUES}
+                />
+              ) : surveyTabId === "settings" ? (
+                <SurveySettingsForm />
+              ) : (
+                <></>
+              )
+            ) : (
+              <></>
+            )}
+            {inProgress && <LoadingEnhanceOverlay isFullscreen />}
+          </div>
         ) : (
           <>
-            {activeTabId === "empty-table" && (
+            {activeTabId === "tasks" && (
               <OneDataCollection
                 source={sourceEmpty}
                 visualizations={[tableVisualization]}
                 fullHeight
               />
             )}
-            {activeTabId === "table-data" && (
+            {activeTabId === "surveys" && (
               <OneDataCollection
                 source={sourceTable}
                 visualizations={[tableVisualization]}
                 fullHeight
               />
             )}
-            {activeTabId === "cards" && (
+            {activeTabId === "employees" && (
+              <OneDataCollection
+                source={sourceEmployees}
+                visualizations={[employeeTableVisualization]}
+                fullHeight
+              />
+            )}
+            {activeTabId === "absences" && (
               <OneDataCollection
                 source={sourceCards}
                 visualizations={[cardVisualization]}
@@ -719,7 +778,7 @@ function FlowContent({
   )
 }
 
-function CreationWithAIFlow() {
+function CreationWithAIFlow({ initialTabId }: { initialTabId?: string }) {
   // Reset persisted chat state once, before the provider reads it, so the chat
   // starts closed in the collection view.
   const didResetRef = useRef(false)
@@ -762,16 +821,30 @@ function CreationWithAIFlow() {
 
   return (
     <MockAiChatRuntimeProvider>
-      <ApplicationFrame
-        ai={ai}
-        sidebar={<Sidebar {...SidebarStories.default.args} />}
-      >
-        <FlowContent phase={phase} setPhase={setPhase} />
-      </ApplicationFrame>
+      <TabConfigProvider initialTabId={initialTabId}>
+        <ApplicationFrame
+          ai={ai}
+          sidebar={<Sidebar {...SidebarStories.default.args} />}
+        >
+          <FlowContent phase={phase} setPhase={setPhase} />
+        </ApplicationFrame>
+      </TabConfigProvider>
     </MockAiChatRuntimeProvider>
   )
 }
 
-export const CreationWithAIPage: Story = {
-  render: () => <CreationWithAIFlow />,
+export const Tasks: Story = {
+  render: () => <CreationWithAIFlow initialTabId="tasks" />,
+}
+
+export const Surveys: Story = {
+  render: () => <CreationWithAIFlow initialTabId="surveys" />,
+}
+
+export const Employees: Story = {
+  render: () => <CreationWithAIFlow initialTabId="employees" />,
+}
+
+export const Absences: Story = {
+  render: () => <CreationWithAIFlow initialTabId="absences" />,
 }

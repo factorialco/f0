@@ -114,6 +114,14 @@ export interface CardInternalProps {
   description?: string
 
   /**
+   * When `true`, the description is truncated to a single line with an ellipsis.
+   * When `false`, the description is never truncated regardless of layout mode.
+   * When omitted, the default per-mode behaviour applies (horizontal → 1 line,
+   * compact → 2 lines, normal → 3 lines).
+   */
+  truncateDescription?: boolean
+
+  /**
    * Metadata items to display in the card
    */
   metadata?: CardMetadataType[]
@@ -216,6 +224,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       blurredBackground = true,
       title,
       description,
+      truncateDescription,
       metadata,
       children,
       link,
@@ -356,7 +365,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
                 "relative flex-col gap-0 p-0",
                 image && !compact && "pt-3",
                 compact && "flex-row items-center gap-2",
-                horizontal && "flex-row items-center gap-4"
+                horizontal && "min-w-0 flex-row items-start gap-4"
               )}
             >
               {avatar && (
@@ -367,7 +376,9 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
                   horizontal={horizontal}
                 />
               )}
-              <div className={cn("flex flex-col gap-0")}>
+              <div
+                className={cn("flex flex-col gap-0", horizontal && "min-w-0")}
+              >
                 <CardTitle
                   className={cn(
                     "text-lg font-semibold text-f1-foreground",
@@ -380,7 +391,19 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
                   <CardSubtitle
                     className={cn("text-base text-f1-foreground-secondary")}
                   >
-                    <OneEllipsis lines={compact ? 2 : 3}>
+                    <OneEllipsis
+                      lines={
+                        truncateDescription !== undefined
+                          ? truncateDescription
+                            ? 1
+                            : undefined
+                          : horizontal
+                            ? 1
+                            : compact
+                              ? 2
+                              : 3
+                      }
+                    >
                       {description}
                     </OneEllipsis>
                   </CardSubtitle>
