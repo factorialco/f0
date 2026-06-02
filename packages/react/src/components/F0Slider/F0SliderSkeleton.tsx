@@ -5,7 +5,7 @@ import { Skeleton } from "@/ui/skeleton"
 
 import type { F0SliderSize } from "./types"
 
-interface F0SliderSkeletonProps {
+export interface F0SliderSkeletonProps {
   size?: F0SliderSize
   hideLabel?: boolean
 }

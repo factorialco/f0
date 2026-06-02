@@ -11,9 +11,7 @@ export { sliderSizes, sliderTooltipModes } from "./types"
 /**
  * @experimental This is an experimental component, use it at your own risk.
  */
-export const F0Slider = withDataTestId(
-  experimentalComponent(
-    "F0Slider",
-    withSkeleton(F0SliderBase, F0SliderSkeleton)
-  )
+export const F0Slider = experimentalComponent(
+  "F0Slider",
+  withSkeleton(withDataTestId(F0SliderBase), F0SliderSkeleton)
 )
