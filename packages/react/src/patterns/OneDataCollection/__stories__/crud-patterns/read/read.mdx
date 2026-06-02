@@ -1,0 +1,383 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { FeatureGrid } from "~/docs/components/FeatureGrid"
+import { Table, List, CardPin, Kanban } from "@/icons/app"
+
+import * as Stories from "./read.stories"
+
+<Meta of={Stories} />
+
+# Read pattern
+
+Read patterns define how a user reads and inspects a resource from a Data
+Collection. The selected container should balance speed, context, and depth.
+Use the lightest pattern that still gives the resource enough room.
+
+For Table and List, the default Read destination is a page. Pages support
+deep linking, persistent navigation, and page-level actions, and they are the
+most common Read interaction observed across the product. Reach for
+dialog-based reads only when the resource is small enough to be fully
+understood in a dialog or a page destination does not yet exist.
+
+The stories use a neutral grey content placeholder on purpose, so the example
+focuses on the container pattern rather than implying a specific internal page
+layout.
+
+## Examples
+
+<Unstyled>
+  <FeatureGrid
+    features={[
+      {
+        icon: Table,
+        title: "Table to Page",
+        description:
+          "Default for Table reads. Clicking a row or chevron action routes to a resource page with persistent navigation and page-level actions.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-read--table-read-page",
+      },
+      {
+        icon: Table,
+        title: "Table — Dialog to Page",
+        description:
+          "Clicking an item opens a reduced Right Dialog that can lead to a full page when the resource needs a durable destination.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-read--table-read-right-dialog-to-page",
+      },
+      {
+        icon: Table,
+        title: "Table — Right Dialog",
+        description:
+          "Clicking a row opens a Right Dialog so the user can read the resource while keeping the collection visible. Use when row comparison helps the task.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-read--table-read-right-dialog",
+      },
+      {
+        icon: Table,
+        title: "Table — Default",
+        description:
+          "Centered dialog read. Reserved for lightweight inspection — small resources with no durable page destination.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-read--table-read-dialog",
+      },
+      {
+        icon: List,
+        title: "List to Page",
+        description:
+          "Default for List reads. Clicking a list item or chevron action routes to a resource page.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-read--list-read-page",
+      },
+      {
+        icon: List,
+        title: "List — Right Dialog",
+        description:
+          "Clicking a list item opens a Right Dialog so the user can read the resource while keeping the list visible.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-read--list-read-right-dialog",
+      },
+      {
+        icon: CardPin,
+        title: "Card to Dialog",
+        description: "Clicking the card opens a focused read dialog.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-read--card-read-dialog",
+      },
+      {
+        icon: Kanban,
+        title: "Kanban Card to Dialog",
+        description: "Clicking a Kanban card opens a focused read dialog.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-read--kanban-read-dialog",
+      },
+    ]}
+  />
+</Unstyled>
+
+## When to use
+
+- Use a Table to Page flow as the **default** for Table reads, and a List to
+  Page flow as the **default** for List reads — pages give the resource a
+  durable destination for follow-up actions, deep linking, and page-level
+  navigation.
+- Use a Dialog to Page flow when a reduced preview anchored to the collection
+  helps the user decide whether to commit to the full page.
+- Use a Right Dialog when keeping the collection visible materially helps
+  comparison or row-by-row scanning, and the resource fits the right rail.
+- Use a Default Dialog only for lightweight inspection — small resources with
+  a short decision loop and no durable page destination.
+- Use card click to dialog/page for Card views. **Recommended** because the card
+  is already an object-level surface.
+- Use Kanban card click to dialog/page for Kanban views. **Recommended** because
+  click reads the card while drag/move updates state.
+- In Editable Table, avoid row-click read behavior when it competes with inline
+  editing. Use an explicit action when read needs to coexist with editable cells.
+- Keep item click behavior consistent within the same collection.
+
+## Pattern options
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Container</th>
+        <th className="text-left">When to use</th>
+        <th className="text-left">Tradeoff</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-page"
+          >
+            Table to Page
+          </a>
+        </td>
+        <td>
+          <strong>Default for Table reads.</strong> Detailed resources with
+          hierarchy, navigation, or page-level actions.
+        </td>
+        <td>Higher navigation cost for very quick lookups.</td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--list-read-page"
+          >
+            List to Page
+          </a>
+        </td>
+        <td>
+          <strong>Default for List reads.</strong> Detailed resources discovered
+          through a list view, where the teaser structure helps users browse
+          before opening the full page.
+        </td>
+        <td>Adds navigation cost vs. a stay-and-read flow.</td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-right-dialog-to-page"
+          >
+            Dialog to Page
+          </a>
+        </td>
+        <td>
+          Preview the resource without leaving the collection, while preserving
+          a clear transition into a full page.
+        </td>
+        <td>
+          Introduces a two-step read flow instead of a single destination.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-right-dialog"
+          >
+            Right Dialog
+          </a>
+        </td>
+        <td>
+          Table or List reads where keeping the collection visible helps
+          comparison or scanning.
+        </td>
+        <td>
+          Less focused than a centered dialog; resource must fit comfortably in
+          the right rail.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--table-read-dialog"
+          >
+            Default Dialog
+          </a>
+        </td>
+        <td>
+          Lightweight inspection only — small resources with no durable page
+          destination and a short decision loop.
+        </td>
+        <td>Less room for tabs, dense layouts, or extended workflows.</td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--card-read-dialog"
+          >
+            Card to Dialog
+          </a>
+        </td>
+        <td>
+          <strong>Recommended</strong> for quick object inspection from a Card
+          view.
+        </td>
+        <td>
+          Requires edit to remain explicit and delete/destructive actions to
+          stay in the ellipsis, not hidden behind the same click.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-read--kanban-read-dialog"
+          >
+            Kanban Card to Dialog
+          </a>
+        </td>
+        <td>
+          <strong>Recommended</strong> for quick inspection while preserving the
+          board context.
+        </td>
+        <td>Must not conflict with drag/move interactions.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Decision criteria
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Question</th>
+        <th className="text-left">Recommended pattern</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          Does the resource have (or warrant) a durable page destination — its
+          own URL, tabs, page header, or page-level actions?
+        </td>
+        <td>Table to Page or List to Page (default)</td>
+      </tr>
+      <tr>
+        <td>Will the user likely continue into editing or configuration?</td>
+        <td>Table to Page or List to Page</td>
+      </tr>
+      <tr>
+        <td>
+          Does the user need a reduced preview before deciding to open the full
+          page?
+        </td>
+        <td>Dialog to Page</td>
+      </tr>
+      <tr>
+        <td>Does reading benefit from keeping nearby rows or items visible?</td>
+        <td>Right Dialog</td>
+      </tr>
+      <tr>
+        <td>
+          Is the resource small, with a short decision loop, and no page
+          destination available?
+        </td>
+        <td>Default Dialog (fallback)</td>
+      </tr>
+      <tr>
+        <td>Is the current visualization Card or Kanban?</td>
+        <td>Card/Kanban Card to Dialog, or to page for deep resources</td>
+      </tr>
+      <tr>
+        <td>Is the current visualization Editable Table?</td>
+        <td>Explicit read action when row click would conflict with editing</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Guidance
+
+On Table and List, routing to a page is the default Read pattern. Pages provide
+a durable destination, support deep linking, and have room for tabs,
+page-level actions, and persistent navigation. They are the most common Read
+interaction observed across the product, so prefer a page whenever the
+resource has — or could reasonably have — its own destination.
+
+Choose Table to Page when people start from dense, comparison-oriented rows and
+need a direct chevron action that routes into a full destination. Choose List
+to Page when the collection already uses list teasers and the browsing model is
+closer to scanning summaries than comparing columns.
+
+Use a Dialog to Page flow when a reduced preview anchored to the collection
+helps the user decide whether to commit to the full page. The Right Dialog
+should be a reduced view, not a compressed version of the full page.
+
+Use a Right Dialog as the final read destination when the resource fits the
+right rail and the user benefits from seeing the collection alongside — for
+example, to compare nearby rows in a Table or scan adjacent items in a List.
+
+Reserve the Default Dialog for lightweight inspection — small resources with a
+short decision loop and no durable page destination. Do not stretch a dialog
+beyond its intended scope: promote to a page when content competes for
+vertical space, sub-navigation, or multiple action groups.
+
+This dialog-to-page behavior is portable. Any compatible Default Dialog or
+right-position read dialog can expose **Open Details** as the primary action when
+the dialog is intentionally a reduced preview and the resource has a durable
+full-page destination. Do not duplicate this copy in every story; use it as the
+decision logic for Table, List, Card, or Kanban when the resource needs deeper
+page structure.
+
+For Card and Kanban, the item surface itself is a strong read affordance, so
+card click to dialog is **Recommended** for quick inspection. Keep update and
+destructive actions separate so read, edit, drag, and delete behavior do not
+compete for the same click target. In dialog headers, critical actions such as
+delete stay in the ellipsis menu even when there are only one or two header
+actions.
+
+For Editable Table, inline editing has priority. Avoid making every row click a
+read transition if users also need to focus and edit cells. Use an explicit item
+action for read when both behaviors must coexist.
+
+## Dos and don'ts
+
+<DoDonts
+  do={{
+    description:
+      "Use a page as the default Read destination on Table and List — especially when the resource has its own URL, tabs, or page-level actions.",
+  }}
+  dont={{
+    description:
+      "Do not default to a Default Dialog for Read when a page destination exists or could reasonably be built.",
+  }}
+/>
+
+<DoDonts
+  do={{
+    description:
+      "Use a Dialog to Page flow when a lightweight preview helps users decide whether they need the full resource destination.",
+  }}
+  dont={{
+    description:
+      "Do not duplicate the entire page inside the Right Dialog. Keep the first step intentionally reduced.",
+  }}
+/>
+
+<DoDonts
+  do={{
+    description:
+      "Use breadcrumbs and page framing when the resource needs a durable destination with navigation context.",
+  }}
+  dont={{
+    description:
+      "Do not mix dialog-based and page-based read behavior without a strong product reason.",
+  }}
+/>
+
+## Related documentation
+
+- <a
+    target="_parent"
+    href="/?path=/docs/patterns-data-collection-crud-patterns-overview--documentation"
+  >
+    CRUD patterns overview
+  </a>
+- <a
+    target="_parent"
+    href="/?path=/docs/experimental-crud-patterns-read--documentation"
+  >
+    Agnostic: Read principles
+  </a>

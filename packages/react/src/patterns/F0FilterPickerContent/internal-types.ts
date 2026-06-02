@@ -35,4 +35,6 @@ export interface FilterPickerInternalProps<
   onFilterChange: (key: keyof Filters, value: unknown) => void
   /** Callback when apply button is clicked */
   onApply: () => void
+  /** Callback when clear filters button is clicked */
+  onClear?: () => void
 }

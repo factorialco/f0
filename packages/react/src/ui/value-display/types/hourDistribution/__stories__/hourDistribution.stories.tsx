@@ -90,6 +90,36 @@ export const HourDistributionWithPlanned: Story = {
   },
 }
 
+export const HourDistributionWithJustifiedAbsences: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Hour distribution",
+      render: () => ({
+        type: "hourDistribution",
+        value: {
+          dataPoints: [
+            { date: "2025-12-16", value: 480, plannedValue: 480 },
+            {
+              date: "2025-12-17",
+              value: 0,
+              plannedValue: 480,
+              justifiedAbsenceFullDay: true,
+            },
+            {
+              date: "2025-12-18",
+              value: 240,
+              plannedValue: 480,
+              justifiedAbsenceValue: 120,
+            },
+            { date: "2025-12-19", value: 0, plannedValue: 480 },
+          ],
+        },
+      }),
+    },
+  },
+}
+
 export const HourDistributionEmpty: Story = {
   args: {
     item: mockItem,

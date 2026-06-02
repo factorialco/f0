@@ -71,12 +71,16 @@ export interface F0FormDefinitionSingleSchema<TSchema extends F0FormSchema> {
   schema: TSchema
   sections?: Record<string, F0SectionConfig>
   defaultValues?: Partial<z.infer<TSchema>>
+  /** Raw async function for resolving defaultValues — resolved by F0Form at render time */
+  asyncDefaultValues?: (
+    signal: AbortSignal
+  ) => Promise<Partial<z.infer<TSchema>>>
   onSubmit: (
     arg: F0WizardFormSingleSubmitArg<TSchema>
   ) => Promise<F0FormSubmitResult> | F0FormSubmitResult
   submitConfig?: F0FormSubmitConfig
   errorTriggerMode?: F0FormErrorTriggerMode
-  /** Whether async defaultValues are still being resolved */
+  /** Whether async initialFiles are still being resolved */
   isLoading?: boolean
   /** Zod schema describing params the AI can supply when calling presentForm */
   defaultValuesParamsSchema?: ZodType
@@ -103,12 +107,16 @@ export interface F0FormDefinitionPerSection<T extends F0PerSectionSchema> {
   schema: T
   sections?: Record<string, F0PerSectionSectionConfig>
   defaultValues?: { [K in keyof T]?: Partial<z.infer<T[K]>> }
+  /** Raw async function for resolving defaultValues — resolved by F0Form at render time */
+  asyncDefaultValues?: (
+    signal: AbortSignal
+  ) => Promise<{ [K in keyof T]?: Partial<z.infer<T[K]>> }>
   onSubmit: (
     arg: F0WizardFormPerSectionSubmitArg<T>
   ) => Promise<F0FormSubmitResult> | F0FormSubmitResult
   submitConfig?: F0PerSectionSubmitConfig
   errorTriggerMode?: F0FormErrorTriggerMode
-  /** Whether async defaultValues are still being resolved */
+  /** Whether async initialFiles are still being resolved */
   isLoading?: boolean
   /** Zod schema describing params the AI can supply when calling presentForm */
   defaultValuesParamsSchema?: ZodType

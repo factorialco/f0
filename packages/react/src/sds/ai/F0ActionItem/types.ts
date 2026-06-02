@@ -5,11 +5,11 @@ export interface F0ActionItemProps {
   /**
    * The title text displayed next to the status icon
    */
-  title: string
+  title?: string
   /**
    * Current status of the action item
    */
-  status?: "inProgress" | "executing" | "completed"
+  status?: "inProgress" | "executing" | "writing" | "completed"
   /**
    * Whether the action item is part of a group
    */
@@ -19,6 +19,7 @@ export interface F0ActionItemProps {
 export const actionItemStatuses = [
   "inProgress",
   "executing",
+  "writing",
   "completed",
 ] as const
 export type ActionItemStatus = (typeof actionItemStatuses)[number]

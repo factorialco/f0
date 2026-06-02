@@ -1,6 +1,10 @@
 import { experimentalComponent } from "@/lib/experimental"
 
-import { NumberInputInternal, NumberInputInternalProps } from "./internal"
+import {
+  NumberInputInternal,
+  NumberInputInternalProps,
+  NumberInputPopoverConfig,
+} from "./internal"
 
 const privateProps = ["buttonToggle"] as const
 
@@ -8,6 +12,8 @@ export type NumberInputProps = Omit<
   NumberInputInternalProps,
   (typeof privateProps)[number]
 >
+
+export type { NumberInputPopoverConfig }
 
 const NumberInputComponent = (props: NumberInputProps) => {
   const publicProps = privateProps.reduce((acc, key) => {

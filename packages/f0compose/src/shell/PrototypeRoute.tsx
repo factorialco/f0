@@ -31,8 +31,12 @@ export function PrototypeRoute() {
   }
 
   const Component = entry.component
+  const SidebarComponent = entry.sidebar
   return (
-    <FactorialShell activeModule={entry.meta.module}>
+    <FactorialShell
+      activeModule={entry.meta.module}
+      sidebar={SidebarComponent ? <SidebarComponent /> : undefined}
+    >
       <Component />
     </FactorialShell>
   )

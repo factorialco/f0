@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import PushPin from "@/icons/app/PushPin"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { CommunityPost } from "./index"
 
@@ -225,6 +226,18 @@ export const LongUnspacedText: Story = {
       title: "Averylonggroupnamewithoutanyspaces",
       onClick: () => {},
     },
+  },
+}
+
+export const ExpandableDescription: Story = {
+  decorators: Default.decorators,
+  parameters: withSnapshot({}),
+  args: {
+    ...Default.args,
+    event: undefined,
+    mediaUrl: undefined,
+    descriptionExpandable: true,
+    description: `<p class="TextEditorTheme__paragraph" dir="ltr"><span>This ticket comment contains enough context that consumers may want to keep the post compact until someone asks to read it in full. The first visible lines should stay clamped, and the See more control expands the rich text body without opening the post.</span></p><p class="TextEditorTheme__paragraph" dir="ltr"><span>Additional details can include troubleshooting steps, links, mentions, and follow-up notes from the requester.</span></p><p class="TextEditorTheme__paragraph" dir="ltr"><span>Once expanded, the full description remains visible for reading.</span></p>`,
   },
 }
 

@@ -136,13 +136,24 @@ interface FieldRendererProps {
 export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
   const form = useFormContext()
   const values = form.watch()
-  const { isSubmitting } = form.formState
+  const { isSubmitting: isFormSubmitting } = form.formState
   const {
     formName,
     isLoading: isFormLoading,
     renderCustomField,
+    submitConfig,
   } = useF0FormContext()
   const { forms } = useI18n()
+
+  const isAutosubmit = submitConfig?.type === "autosubmit"
+
+  // In autosubmit mode the form silently saves while the user keeps typing.
+  // Surfacing `isSubmitting` to field renderers would disable the active
+  // input and the browser would blur it mid-keystroke — breaking the entire
+  // point of autosubmit. Mask it out here so both the `<Controller disabled>`
+  // path (in ui/form FormField) and the inner input's `isDisabled` derivation
+  // (in renderFieldInput) treat the form as idle.
+  const isSubmitting = isAutosubmit ? false : isFormSubmitting
 
   // Evaluate if field is currently disabled
   const isDisabled = evaluateDisabled(field.disabled, values)
@@ -187,6 +198,7 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
       <FormFieldPrimitive
         control={form.control}
         name={field.id}
+        {...(isAutosubmit ? { disabled: false } : {})}
         render={() => <span className="hidden" aria-hidden="true" />}
       />
     )
@@ -196,6 +208,7 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
     <FormFieldPrimitive
       control={form.control}
       name={field.id}
+      {...(isAutosubmit ? { disabled: false } : {})}
       render={({ field: formField, fieldState }) => (
         <FormItem id={anchorId} className="scroll-mt-4">
           {showLabel && (

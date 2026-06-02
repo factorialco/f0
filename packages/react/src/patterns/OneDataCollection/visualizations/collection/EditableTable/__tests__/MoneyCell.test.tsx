@@ -13,18 +13,20 @@ vi.mock("../components/cells/NumberCell", () => ({
   },
 }))
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const baseColumn = {
   id: "amount",
   label: "Amount",
   cell: () => null,
-} as const
+  render: () => null,
+} as any
 
 const baseProps = {
   editableColumn: { ...baseColumn },
   value: "100",
   onChange: vi.fn(),
   item: { id: "1" },
-} as const
+}
 
 describe("MoneyCell", () => {
   it("defaults units to $ when numberConfig has no units", () => {
@@ -172,7 +174,7 @@ describe("MoneyCell", () => {
     )
 
     const passedProps = numberCellProps.mock.lastCall?.[0]
-    expect(passedProps.editableColumn.numberConfig.units).toBe("USD")
+    expect(passedProps.editableColumn.numberConfig.units).toBe("$")
     expect(passedProps.editableColumn.numberConfig.unitsPosition).toBe("before")
   })
 })

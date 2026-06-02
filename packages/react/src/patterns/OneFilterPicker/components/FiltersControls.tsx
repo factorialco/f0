@@ -15,6 +15,7 @@ import type { FiltersDefinition, FiltersMode, FiltersState } from "../types"
 import { ArrowLeft } from "../../../icons/app"
 import { getFilterType } from "../filterTypes"
 import { FilterTypeContext, FilterTypeSchema } from "../filterTypes/types"
+import { getClearedFiltersValue } from "../internal/getClearedFiltersValue"
 import { getActiveFilterKeys } from "../internal/getActiveFilterKeys"
 import { FilterContent } from "./FilterContent"
 import { FilterList } from "./FilterList"
@@ -108,6 +109,10 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   const handleApplyFilters = () => {
     onChange(localFiltersValue)
     onOpenChange(false)
+  }
+
+  const handleClearFilters = () => {
+    setLocalFiltersValue(getClearedFiltersValue(filters))
   }
 
   const handleGoBack = () => {
@@ -415,6 +420,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
             onFilterSelect={setSelectedFilterKey}
             onFilterChange={updateFilterValue}
             onApply={handleApplyFilters}
+            onClear={handleClearFilters}
             height={formHeight || DEFAULT_FORM_HEIGHT}
           />
         </PopoverContent>

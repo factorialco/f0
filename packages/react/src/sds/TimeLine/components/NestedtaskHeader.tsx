@@ -1,10 +1,10 @@
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon/F0AvatarIcon"
 import { F0Icon } from "@/components/F0Icon"
 import { F0Text } from "@/components/F0Text"
-import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import ChevronDown from "@/icons/app/ChevronDown"
 import ChevronUp from "@/icons/app/ChevronUp"
 import { cn, focusRing } from "@/lib/utils"
+import { Progress } from "@/ui/progress"
 
 import type { F0TimelineRowNestedtaskProps } from "../types"
 
@@ -25,15 +25,18 @@ export const NestedtaskHeader = ({
     expanded,
     onExpandToggle,
     items,
+    content,
+    collapsible = true,
   } = props
 
-  const hasItems = items.length > 0
+  const hasItems = (items?.length ?? 0) > 0 || content !== undefined
+  const showToggle = hasItems && collapsible
 
   return (
     <>
       <F0AvatarIcon icon={icon} size="sm" />
       <div className="flex flex-1 items-center justify-between">
-        {hasItems ? (
+        {showToggle ? (
           <button
             type="button"
             aria-expanded={expanded}
@@ -76,11 +79,24 @@ export const NestedtaskHeader = ({
             )}
           </div>
         )}
-        {completedCount !== undefined && (
-          <F0TagStatus
-            text={`${completedCount}/${taskCount}`}
-            variant={status === "completed" ? "positive" : "warning"}
-          />
+        {completedCount !== undefined && taskCount !== undefined && (
+          <div
+            className="flex items-center gap-2"
+            aria-label={`${completedCount} of ${taskCount} completed`}
+          >
+            <Progress
+              value={taskCount > 0 ? (completedCount / taskCount) * 100 : 0}
+              color={
+                status === "completed"
+                  ? "hsl(var(--positive-50))"
+                  : "hsl(var(--warning-50))"
+              }
+              className="h-1.5 w-20"
+            />
+            <span className="text-sm font-medium text-f1-foreground whitespace-nowrap">
+              {completedCount}/{taskCount}
+            </span>
+          </div>
         )}
       </div>
     </>
