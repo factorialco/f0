@@ -105,12 +105,12 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
   const resolvedAriaLabel =
     ariaLabel && ariaLabel.trim().length > 0
       ? ariaLabel
-      : label && label.length > 0
+      : label.trim().length > 0
         ? label
         : undefined
 
   useEffect(() => {
-    if (!resolvedAriaLabel) {
+    if (process.env.NODE_ENV !== "production" && !resolvedAriaLabel) {
       console.warn(
         "F0Slider: provide a non-empty `label` or `ariaLabel` for accessibility."
       )
@@ -159,7 +159,7 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
     (showTooltip === "onHover" && (isHovered || isFocused || isDragging))
 
   const statusType = status?.type ?? "default"
-  const showLabel = !hideLabel && label.length > 0
+  const showLabel = !hideLabel && label.trim().length > 0
   const hintStatus =
     status ?? (hint ? { type: "default" as const, message: hint } : undefined)
 
@@ -171,6 +171,12 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
       ref={ref}
       {...rest}
       className={cn("flex flex-col gap-2", disabled && "cursor-not-allowed")}
+      onPointerDownCapture={() => {
+        pointerInteractionRef.current = true
+      }}
+      onPointerUp={() => {
+        pointerInteractionRef.current = false
+      }}
     >
       {showLabel && (
         <Label
@@ -185,14 +191,8 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
         value={[currentValue]}
         onValueChange={handleValueChange}
         onValueCommit={handleValueCommit}
-        onPointerDown={() => {
-          pointerInteractionRef.current = true
-          setIsDragging(true)
-        }}
-        onPointerUp={() => {
-          pointerInteractionRef.current = false
-          setIsDragging(false)
-        }}
+        onPointerDown={() => setIsDragging(true)}
+        onPointerUp={() => setIsDragging(false)}
         min={min}
         max={max}
         step={step}

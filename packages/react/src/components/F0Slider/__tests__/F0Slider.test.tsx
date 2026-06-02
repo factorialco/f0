@@ -268,6 +268,16 @@ describe("F0Slider", () => {
     warn.mockRestore()
   })
 
+  it("treats a whitespace-only label as empty (warns, renders no visible label)", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    render(<F0Slider label="   " min={0} max={10} />)
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining("provide a non-empty `label` or `ariaLabel`")
+    )
+    expect(screen.queryByText("   ")).not.toBeInTheDocument()
+    warn.mockRestore()
+  })
+
   it("exposes the formatted value to assistive tech via aria-valuetext", () => {
     render(
       <F0Slider
@@ -366,6 +376,15 @@ describe("F0Slider", () => {
     await waitFor(() =>
       expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
     )
+  })
+
+  it("treats focus after a pointer-down on the label as pointer focus (no stuck tooltip)", () => {
+    render(<F0Slider label="Duration" min={0} max={10} defaultValue={5} />)
+    const slider = screen.getByRole("slider")
+
+    fireEvent.pointerDown(screen.getByText("Duration"))
+    fireEvent.focus(slider)
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
   })
 
   it("shows the tooltip on keyboard focus and hides it on blur", async () => {
