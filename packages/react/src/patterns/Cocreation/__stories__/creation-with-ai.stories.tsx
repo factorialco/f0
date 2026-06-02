@@ -28,7 +28,6 @@ import {
   Sparkles,
 } from "@/icons/app"
 import { F0Card } from "@/components/F0Card"
-import { LoadingEnhanceOverlay } from "@/components/RichText/RichTextEditor/Enhance/LoadingEnhance"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { Page as NavigationPage } from "@/patterns/Navigation/Page"
@@ -39,6 +38,7 @@ import { OneDataCollection } from "@/patterns/OneDataCollection"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 import { ResourceHeader } from "@/patterns/ResourceHeader"
 import { useAiChat } from "@/sds/ai/F0AiChat"
+import { F0AiProcessingOverlay } from "@/sds/ai/F0AiProcessingOverlay"
 import {
   MockAiChatRuntimeProvider,
   MockConnectedChatHeader,
@@ -281,6 +281,7 @@ function SurveySettingsForm() {
       editors: "admins",
     },
     onSubmit: async () => ({ success: true }),
+    submitConfig: { hideActionBar: true },
   })
 
   return (
@@ -707,9 +708,9 @@ function FlowContent({
       <StandardLayout>
         {phase === "split" ? (
           // The left panel hosts the resource being co-created. While the AI is
-          // thinking/updating the form we block it with the shared processing
-          // overlay so the user can't edit content that's about to change.
-          <div className="relative h-full w-full">
+          // thinking/updating the form we blur + lock it (with the "Applying
+          // changes" pill) so the user can't edit content that's about to change.
+          <F0AiProcessingOverlay active={inProgress} className="h-full w-full">
             {activeTabId === "surveys" ? (
               surveyTabId === "editor" ? (
                 <SurveyAnsweringForm
@@ -729,8 +730,7 @@ function FlowContent({
             ) : (
               <></>
             )}
-            {inProgress && <LoadingEnhanceOverlay isFullscreen />}
-          </div>
+          </F0AiProcessingOverlay>
         ) : (
           <>
             {activeTabId === "tasks" && (

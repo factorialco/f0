@@ -282,6 +282,7 @@ export const defaultTranslations = {
       "Ask about time, people, or company info and a lot of other things...",
     stopAnswerGeneration: "Stop generating",
     responseStopped: "You stopped this response",
+    applyingChanges: "Applying changes",
     sendMessage: "Send message",
     thoughtsGroupTitle: "Reasoning",
     resourcesGroupTitle: "Resources",
