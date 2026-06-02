@@ -1,6 +1,13 @@
 import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import { cva } from "cva"
-import { forwardRef, useCallback, useEffect, useId, useState } from "react"
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react"
 
 import { cn, focusRing } from "@/lib/utils"
 import { InputMessages } from "@/ui/InputField/components/InputMessages"
@@ -135,6 +142,7 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
   const [isHovered, setIsHovered] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
+  const pointerInteractionRef = useRef(false)
 
   const tooltipVisible =
     showTooltip === "always" ||
@@ -166,8 +174,14 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
       <Slider
         value={[currentValue]}
         onValueChange={handleValueChange}
-        onPointerDown={() => setIsDragging(true)}
-        onPointerUp={() => setIsDragging(false)}
+        onPointerDown={() => {
+          pointerInteractionRef.current = true
+          setIsDragging(true)
+        }}
+        onPointerUp={() => {
+          pointerInteractionRef.current = false
+          setIsDragging(false)
+        }}
         min={min}
         max={max}
         step={step}
@@ -197,7 +211,7 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
             thumbVariants({ status: statusType, disabled }),
             focusRing("focus-visible:ring-offset-1")
           )}
-          onFocus={(e) => setIsFocused(e.target.matches(":focus-visible"))}
+          onFocus={() => setIsFocused(!pointerInteractionRef.current)}
           onBlur={() => setIsFocused(false)}
         />
         {showTooltip !== "never" && (

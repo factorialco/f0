@@ -334,6 +334,32 @@ describe("F0Slider", () => {
     )
   })
 
+  it("does not leave the tooltip stuck when a drag moves focus to the thumb", async () => {
+    render(<F0Slider label="Duration" min={0} max={10} defaultValue={5} />)
+    const slider = screen.getByRole("slider")
+    const root = slider.closest(".touch-none") as HTMLElement
+
+    fireEvent.pointerDown(root)
+    fireEvent.focus(slider)
+    expect(screen.getByRole("tooltip")).toBeInTheDocument()
+    fireEvent.pointerUp(root)
+    await waitFor(() =>
+      expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
+    )
+  })
+
+  it("shows the tooltip on keyboard focus and hides it on blur", async () => {
+    render(<F0Slider label="Duration" min={0} max={10} defaultValue={5} />)
+    const slider = screen.getByRole("slider")
+
+    fireEvent.focus(slider)
+    expect(screen.getByRole("tooltip")).toBeInTheDocument()
+    fireEvent.blur(slider)
+    await waitFor(() =>
+      expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
+    )
+  })
+
   it("clamps the tooltip position when the value exceeds max", () => {
     render(
       <F0Slider
