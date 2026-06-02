@@ -2,10 +2,10 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
 
-import { Add } from "@/icons/app"
 import { F0Text } from "@/components/F0Text"
-import { useF0Form } from "@/patterns/F0Form"
+import { Add } from "@/icons/app"
 import { F0Dialog } from "@/patterns/F0Dialog"
+import { useF0Form } from "@/patterns/F0Form"
 import { F0Wizard } from "@/ui/F0Wizard"
 
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
@@ -19,6 +19,7 @@ import {
   kanbanLaneStatus,
   kanbanSourceLanes,
   kanbanVisualization,
+  listVisualization,
   Resource,
   ResourceFormF0,
   resourceFilters,
@@ -75,6 +76,7 @@ function DefaultDialogScenario() {
           label: "Cancel",
           onClick: () => setOpen(false),
         }}
+        disableContentPadding
       >
         <ResourceFormF0
           key="create"
@@ -125,7 +127,7 @@ function RightDialogScenario() {
         isOpen={open}
         onClose={() => setOpen(false)}
         title="Create resource"
-        description="Right-position dialogs are an accepted Table variation when the collection context should remain visible."
+        description="Right Dialog is an accepted Table variation when the collection context should remain visible."
         position="right"
         width="md"
         primaryAction={{
@@ -139,6 +141,7 @@ function RightDialogScenario() {
           label: "Cancel",
           onClick: () => setOpen(false),
         }}
+        disableContentPadding
       >
         <ResourceFormF0
           key="create-right-dialog"
@@ -151,7 +154,7 @@ function RightDialogScenario() {
                 name: data.name,
                 owner: data.owner,
                 status: (data.status as Resource["status"]) ?? "Draft",
-                summary: "Created from the right-position dialog.",
+                summary: "Created from the Right Dialog.",
               },
               ...resources,
             ])
@@ -313,6 +316,134 @@ export const TableCreateDialog: Story = {
 
 export const TableCreateRightDialog: Story = {
   render: () => <RightDialogScenario />,
+}
+
+function ListCreateDialogScenario() {
+  const [resources, setResources] = useState(initialResources)
+  const [open, setOpen] = useState(false)
+  const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
+
+  const source = useDataCollectionSource({
+    dataAdapter: createResourceDataAdapter(resources),
+    filters: resourceFilters,
+    primaryActions: () => ({
+      label: "Create resource",
+      icon: Add,
+      onClick: () => setOpen(true),
+    }),
+    secondaryActions: defaultCrudSecondaryActions(),
+  })
+
+  return (
+    <CrudPatternLayout>
+      <OneDataCollection source={source} visualizations={[listVisualization]} />
+      <F0Dialog
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        title="Create resource"
+        description="Use the default dialog for create flows that fit in a focused overlay."
+        primaryAction={{
+          label: "Create resource",
+          icon: Add,
+          onClick: submit,
+          loading: isSubmitting,
+          disabled: hasErrors,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          onClick: () => setOpen(false),
+        }}
+      >
+        <ResourceFormF0
+          key="list-create"
+          mode="create"
+          formRef={formRef}
+          onSuccess={(data) => {
+            setResources([
+              {
+                id: `resource-${Date.now()}`,
+                name: data.name,
+                owner: data.owner,
+                status: (data.status as Resource["status"]) ?? "Draft",
+                summary: "Created from the default dialog.",
+              },
+              ...resources,
+            ])
+            setOpen(false)
+          }}
+        />
+      </F0Dialog>
+    </CrudPatternLayout>
+  )
+}
+
+function ListCreateRightDialogScenario() {
+  const [resources, setResources] = useState(initialResources)
+  const [open, setOpen] = useState(false)
+  const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
+
+  const source = useDataCollectionSource({
+    dataAdapter: createResourceDataAdapter(resources),
+    filters: resourceFilters,
+    primaryActions: () => ({
+      label: "Create resource",
+      icon: Add,
+      onClick: () => setOpen(true),
+    }),
+    secondaryActions: defaultCrudSecondaryActions(),
+  })
+
+  return (
+    <CrudPatternLayout>
+      <OneDataCollection source={source} visualizations={[listVisualization]} />
+      <F0Dialog
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        title="Create resource"
+        description="Right Dialog is an accepted List variation when the collection context should remain visible."
+        position="right"
+        width="md"
+        primaryAction={{
+          label: "Create resource",
+          icon: Add,
+          onClick: submit,
+          loading: isSubmitting,
+          disabled: hasErrors,
+        }}
+        secondaryAction={{
+          label: "Cancel",
+          onClick: () => setOpen(false),
+        }}
+      >
+        <ResourceFormF0
+          key="list-create-right-dialog"
+          mode="create"
+          formRef={formRef}
+          onSuccess={(data) => {
+            setResources([
+              {
+                id: `resource-${Date.now()}`,
+                name: data.name,
+                owner: data.owner,
+                status: (data.status as Resource["status"]) ?? "Draft",
+                summary: "Created from the Right Dialog.",
+              },
+              ...resources,
+            ])
+            setOpen(false)
+          }}
+        />
+      </F0Dialog>
+    </CrudPatternLayout>
+  )
+}
+
+export const ListCreateDialog: Story = {
+  render: () => <ListCreateDialogScenario />,
+}
+
+export const ListCreateRightDialog: Story = {
+  render: () => <ListCreateRightDialogScenario />,
 }
 
 export const CreateWizardDialog: Story = {

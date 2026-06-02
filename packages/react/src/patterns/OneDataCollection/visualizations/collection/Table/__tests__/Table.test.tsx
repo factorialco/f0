@@ -40,6 +40,10 @@ type Person = {
   displayName: string
 }
 
+type NestedPerson = Person & {
+  hasChildren?: boolean
+}
+
 const testData: Person[] = [
   {
     id: 1,
@@ -209,6 +213,138 @@ describe("TableCollection", () => {
           expect(screen.getByText(`Dr. ${item.name}`)).toBeInTheDocument()
         })
       })
+    })
+
+    it("eagerly loads only rows listed in defaultExpandedIds", async () => {
+      const nestedParents: NestedPerson[] = [
+        {
+          id: 1,
+          name: "Parent 1",
+          email: "parent1@example.com",
+          displayName: "Dr. Parent 1",
+          hasChildren: true,
+        },
+        {
+          id: 2,
+          name: "Parent 2",
+          email: "parent2@example.com",
+          displayName: "Dr. Parent 2",
+          hasChildren: true,
+        },
+      ]
+
+      const childrenByParent: Record<number, NestedPerson[]> = {
+        1: [
+          {
+            id: 101,
+            name: "Child of Parent 1",
+            email: "child1@example.com",
+            displayName: "Dr. Child of Parent 1",
+            hasChildren: false,
+          },
+        ],
+        2: [
+          {
+            id: 201,
+            name: "Child of Parent 2",
+            email: "child2@example.com",
+            displayName: "Dr. Child of Parent 2",
+            hasChildren: false,
+          },
+        ],
+      }
+
+      const fetchChildrenMock = vi.fn(({ item }: { item: NestedPerson }) => {
+        return childrenByParent[item.id] ?? []
+      })
+
+      const source = {
+        ...createTestSource(nestedParents),
+        fetchChildren: fetchChildrenMock,
+        itemsWithChildren: (item: NestedPerson) => !!item.hasChildren,
+        defaultExpandedIds: [1],
+      }
+
+      render(
+        <TableCollection<
+          NestedPerson,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<NestedPerson>,
+          TestNavigationFilters,
+          GroupingDefinition<NestedPerson>
+        >
+          columns={testColumns}
+          source={source}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(fetchChildrenMock).toHaveBeenCalledTimes(1)
+      })
+
+      expect(fetchChildrenMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          item: expect.objectContaining({ id: 1 }),
+        })
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("Child of Parent 1")).toBeInTheDocument()
+      })
+
+      expect(screen.queryByText("Child of Parent 2")).not.toBeInTheDocument()
+    })
+
+    it("does not eagerly load children when defaultExpandedIds is empty", async () => {
+      const nestedParents: NestedPerson[] = [
+        {
+          id: 1,
+          name: "Parent without default expansion",
+          email: "parent@example.com",
+          displayName: "Dr. Parent without default expansion",
+          hasChildren: true,
+        },
+      ]
+
+      const fetchChildrenMock = vi.fn(() => [])
+
+      const source = {
+        ...createTestSource(nestedParents),
+        fetchChildren: fetchChildrenMock,
+        itemsWithChildren: (item: NestedPerson) => !!item.hasChildren,
+        defaultExpandedIds: [],
+      }
+
+      render(
+        <TableCollection<
+          NestedPerson,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<NestedPerson>,
+          TestNavigationFilters,
+          GroupingDefinition<NestedPerson>
+        >
+          columns={testColumns}
+          source={source}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("Parent without default expansion")
+        ).toBeInTheDocument()
+      })
+
+      expect(fetchChildrenMock).not.toHaveBeenCalled()
     })
   })
 

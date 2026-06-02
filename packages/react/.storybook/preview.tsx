@@ -180,6 +180,8 @@ const preview: Preview = {
               ["Overview", "By view", "Create", "Read", "Update", "Delete"],
             ],
           ],
+          "Graph",
+          ["F0Graph", "F0GraphNode", "F0GraphEdge", "F0GraphControls"],
           "Kits",
           "Layouts",
           "Library",

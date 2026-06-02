@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
+import { fn } from "storybook/test"
 
 import { Placeholder } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
@@ -16,6 +17,7 @@ const meta = {
     disabled: false,
     placeholder: "Placeholder text here",
     locale: "en-US",
+    onChange: fn(),
   },
   argTypes: {
     value: {
@@ -31,6 +33,35 @@ const meta = {
     units: {
       description: "Units to append to the value",
       control: { type: "text" },
+    },
+    inputWidth: {
+      description:
+        'CSS width for the input area when `extraContent` is present. `"auto"` (default) shrink-wraps content.',
+      control: { type: "text" },
+      table: {
+        type: { summary: "string" },
+        defaultValue: { summary: '"auto"' },
+      },
+    },
+    extraContent: {
+      description:
+        'Context rendered to the right of the input, e.g. `"of 300,00 €"`.',
+      control: { type: "text" },
+      table: {
+        type: { summary: "ReactNode" },
+      },
+    },
+    popover: {
+      description:
+        "When provided, NumberInput renders a trigger button and shows the field in a popover.",
+      control: { type: "object" },
+      table: {
+        type: {
+          summary: "NumberInputPopoverConfig | undefined",
+          detail:
+            "{ icon?: IconType; side?: 'top'|'bottom'|'left'|'right'; align?: 'start'|'center'|'end'; open?: boolean; onOpenChange?: (open: boolean) => void; triggerLabel?: string; commitMode?: 'immediate'|'deferred'; apply?: { label?: string; icon?: IconType; closeOnApply?: boolean } }",
+        },
+      },
     },
   },
   parameters: {
@@ -183,4 +214,66 @@ export const Snapshot: Story = {
       </section>
     </div>
   ),
+}
+
+export const InlineWithContext: Story = {
+  args: {
+    label: "Discount",
+    placeholder: "0",
+    units: "%",
+    extraContent: "of 300,00 €",
+    inputWidth: "100px",
+  },
+}
+
+export const AsPopover: Story = {
+  args: {
+    label: "Discount",
+    hideLabel: true,
+    placeholder: "0",
+    units: "%",
+    extraContent: "of 300,00 €",
+    inputWidth: "100px",
+    popover: {
+      triggerLabel: "Discount",
+    },
+  },
+  render: (props) => {
+    const [value, setValue] = useState<number | null>(null)
+    return (
+      <div className="flex items-center gap-2">
+        <F0NumberInput {...props} value={value} onChange={setValue} />
+        <span className="text-f1-foreground-secondary text-sm">
+          {value != null ? `${value}%` : "—"}
+        </span>
+      </div>
+    )
+  },
+}
+
+export const AsPopoverDeferredApply: Story = {
+  args: {
+    label: "Discount",
+    hideLabel: true,
+    placeholder: "0",
+    units: "%",
+    extraContent: "of 300,00 €",
+    inputWidth: "100px",
+    popover: {
+      triggerLabel: "Discount",
+      commitMode: "deferred",
+      apply: { label: "Apply" },
+    },
+  },
+  render: (props) => {
+    const [value, setValue] = useState<number | null>(null)
+    return (
+      <div className="flex items-center gap-2">
+        <F0NumberInput {...props} value={value} onChange={setValue} />
+        <span className="text-f1-foreground-secondary text-sm">
+          Committed: {value != null ? `${value}%` : "—"}
+        </span>
+      </div>
+    )
+  },
 }

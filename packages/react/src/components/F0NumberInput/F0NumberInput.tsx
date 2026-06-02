@@ -1,6 +1,10 @@
 import { forwardRef } from "react"
 
-import { NumberInputInternal, NumberInputInternalProps } from "./internal"
+import {
+  NumberInputInternal,
+  NumberInputInternalProps,
+  NumberInputPopoverConfig,
+} from "./internal"
 
 const privateProps = ["buttonToggle"] as const
 
@@ -8,6 +12,8 @@ export type F0NumberInputProps = Omit<
   NumberInputInternalProps,
   (typeof privateProps)[number]
 >
+
+export type { NumberInputPopoverConfig }
 
 /**
  * F0NumberInput is the writable numeric field for forms — a box where the

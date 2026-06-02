@@ -241,6 +241,45 @@ function OpenAsPageScenario({
   )
 }
 
+function RightDialogScenario({
+  visualization = tableVisualization,
+}: {
+  visualization?: CrudVisualization
+} = {}) {
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(
+    null
+  )
+
+  const source = useDataCollectionSource({
+    dataAdapter: createResourceDataAdapter(initialResources),
+    filters: resourceFilters,
+    itemOnClick: (item) => () => setSelectedResource(item),
+    primaryActions: () => defaultCrudPrimaryAction(() => {}),
+    secondaryActions: defaultCrudSecondaryActions(),
+  })
+
+  return (
+    <CrudPatternLayout>
+      <OneDataCollection source={source} visualizations={[visualization]} />
+      <F0Dialog
+        isOpen={selectedResource !== null}
+        onClose={() => setSelectedResource(null)}
+        title="Resource details"
+        description="Open details in a Right Dialog so the user can read the resource while keeping the collection visible."
+        position="right"
+        width="sm"
+        disableContentPadding
+        secondaryAction={{
+          label: "Close",
+          onClick: () => setSelectedResource(null),
+        }}
+      >
+        {selectedResource && <ResourceDialogPreview />}
+      </F0Dialog>
+    </CrudPatternLayout>
+  )
+}
+
 function RightDialogToPageScenario() {
   const [selectedResource, setSelectedResource] = useState<Resource | null>(
     null
@@ -277,9 +316,9 @@ function RightDialogToPageScenario() {
           setSelectedResource(null)
         }}
         title="Resource details"
-        description="Open a reduced view in a right dialog, then continue to the full page when deeper exploration is needed."
+        description="Open a reduced view in a Right Dialog, then continue to the full page when deeper exploration is needed."
         position="right"
-        width="md"
+        width="sm"
         disableContentPadding
         primaryAction={{
           label: "Open Details",
@@ -296,12 +335,20 @@ export const TableReadDialog: Story = {
   render: () => <DefaultDialogScenario />,
 }
 
+export const TableReadRightDialog: Story = {
+  render: () => <RightDialogScenario />,
+}
+
 export const TableReadRightDialogToPage: Story = {
   render: () => <RightDialogToPageScenario />,
 }
 
 export const TableReadPage: Story = {
   render: () => <OpenAsPageScenario />,
+}
+
+export const ListReadRightDialog: Story = {
+  render: () => <RightDialogScenario visualization={listVisualization} />,
 }
 
 export const ListReadPage: Story = {

@@ -156,6 +156,7 @@ const inputFieldStatusVariants = cva({
  * system itself (e.g. F0CurrencyInput, F0PhoneInput, F0PercentageInput).
  */
 export type InputFieldProps<T> = {
+  id?: string
   autoFocus?: boolean
   label: string
   placeholder?: string
@@ -275,7 +276,8 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     }: InputFieldProps<string>,
     ref
   ) => {
-    const id = useId()
+    const generatedId = useId()
+    const id = props.id ?? generatedId
 
     const noEdit = disabled || readonly
 

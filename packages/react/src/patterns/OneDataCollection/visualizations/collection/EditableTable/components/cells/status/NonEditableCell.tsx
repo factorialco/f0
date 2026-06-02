@@ -10,11 +10,12 @@ export function NonEditableCell<R extends RecordType>({
   editableColumn,
   item,
   isLastColumn,
+  hint,
 }: EditableCellProps<R>) {
   const i18n = useI18n()
 
   return (
-    <BaseCell showRightBorder={!isLastColumn} borderOnHover={false}>
+    <BaseCell showRightBorder={!isLastColumn} borderOnHover={false} hint={hint}>
       <div
         className={cn(
           "flex w-full min-w-0",

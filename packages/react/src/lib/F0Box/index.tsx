@@ -12,6 +12,7 @@ export const F0Box = Component(
 export type { F0BoxProps }
 export type {
   AlignItemsToken,
+  BoxShadowToken,
   BackgroundToken,
   BorderColorToken,
   BorderRadiusToken,

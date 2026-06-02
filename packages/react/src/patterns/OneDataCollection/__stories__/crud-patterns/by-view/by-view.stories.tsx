@@ -3,12 +3,13 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 
 import { Add, Delete, Pencil, Save } from "@/icons/app"
-import { useF0Form } from "@/patterns/F0Form"
 import { F0Dialog } from "@/patterns/F0Dialog"
+import { useF0Form } from "@/patterns/F0Form"
+
+import type { BulkAction } from "../../../types"
 
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../../../index"
-import type { BulkAction } from "../../../types"
 import {
   cardVisualization,
   createResourceDataAdapter,
@@ -227,6 +228,7 @@ function CrudByViewScenario({
           label: "Cancel",
           onClick: () => setCreateOpen(false),
         }}
+        disableContentPadding
       >
         <ResourceFormF0
           key="create-by-view"
@@ -290,6 +292,7 @@ function CrudByViewScenario({
           label: "Cancel",
           onClick: () => setEditingResource(null),
         }}
+        disableContentPadding
       >
         <ResourceFormF0
           key={editingResource?.id}

@@ -87,7 +87,12 @@ const _F0Alert = ({
       >
         <div className="flex flex-row gap-2">
           <div className="flex flex-1 flex-col items-start gap-3 @xs:flex-row @xs:items-center @xs:justify-between">
-            <div className="flex flex-row gap-2">
+            <div
+              className={cn(
+                "flex flex-row gap-2",
+                !description && "items-center"
+              )}
+            >
               <div className="h-6 w-6 flex-shrink-0">
                 {variant === "neutral" ? (
                   <F0AvatarIcon icon={icon || Placeholder} size="sm" />
@@ -97,9 +102,11 @@ const _F0Alert = ({
               </div>
               <div className="flex flex-col gap-0.5">
                 <p className={titleVariants({ variant })}>{title}</p>
-                <p className="text-base text-f1-foreground-secondary">
-                  {description}
-                </p>
+                {description && (
+                  <p className="text-base text-f1-foreground-secondary">
+                    {description}
+                  </p>
+                )}
               </div>
             </div>
             {(action || link) && (

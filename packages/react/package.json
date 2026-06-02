@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "2.19.1",
+  "version": "2.28.0",
   "private": false,
   "files": [
     "assets",
@@ -215,11 +215,6 @@
     "vitest": "^4.0.15"
   },
   "peerDependencies": {
-    "@ag-ui/client": "^0.0.47",
-    "@copilotkit/react-core": "^1.54.0",
-    "@copilotkit/react-ui": "^1.54.0",
-    "@copilotkit/runtime": "^1.54.0",
-    "@copilotkit/shared": "^1.54.0",
     "@hookform/resolvers": "^3.9.0",
     "@livekit/components-react": "^2.9.19",
     "@number-flow/react": "^0.5.10",

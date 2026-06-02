@@ -46,7 +46,9 @@ export const defaultTranslations = {
     paste: "Paste",
     close: "Close",
     collapse: "Collapse",
+    collapseItem: "Collapse {{title}}",
     expand: "Expand",
+    expandItem: "Expand {{title}}",
     showAll: "Show all",
     showLess: "Show less",
     seeMore: "See more",
@@ -65,6 +67,7 @@ export const defaultTranslations = {
     toggleDropdownMenu: "Toggle dropdown menu",
     selectAll: "Select all",
     selectAllItems: "Select all {{total}} items",
+    apply: "Apply",
   },
   status: {
     selected: {
@@ -280,7 +283,7 @@ export const defaultTranslations = {
     stopAnswerGeneration: "Stop generating",
     responseStopped: "You stopped this response",
     sendMessage: "Send message",
-    thoughtsGroupTitle: "Reflection",
+    thoughtsGroupTitle: "Reasoning",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
     feedbackModal: {

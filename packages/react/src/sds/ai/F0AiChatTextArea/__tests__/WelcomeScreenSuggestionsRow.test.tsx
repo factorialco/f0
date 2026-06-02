@@ -67,7 +67,7 @@ describe("WelcomeScreenSuggestionsRow", () => {
     ).toBeInTheDocument()
   })
 
-  it("calls onItemClick with the item and closes the popover", async () => {
+  it("calls onItemClick with the item and its parent group, and closes the popover", async () => {
     const user = userEvent.setup()
     const onItemClick = vi.fn()
     zeroRender(
@@ -84,9 +84,10 @@ describe("WelcomeScreenSuggestionsRow", () => {
     await user.click(item)
 
     expect(onItemClick).toHaveBeenCalledTimes(1)
-    expect(onItemClick).toHaveBeenCalledWith({
-      title: "April leave and overtime summary",
-    })
+    expect(onItemClick).toHaveBeenCalledWith(
+      { title: "April leave and overtime summary" },
+      groups[0]
+    )
 
     expect(
       screen.queryByRole("button", { name: /april leave and overtime/i })

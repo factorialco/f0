@@ -164,7 +164,11 @@ export type EditableTableColumnDefinition<
 
   /**
    * Returns a hint to display as an icon with tooltip inside the cell.
-   * Use to warn the user when a value diverges from its formula-inferred value.
+   * Use to warn the user when a value diverges from its formula-inferred value,
+   * or to provide extra context for non-editable / disabled cells (e.g. why a
+   * value was inferred, who a row is backfilling, why editing is locked).
+   *
+   * Supported by all `editType` values, including `display-only` and `disabled`.
    *
    * Return `undefined` to hide the hint.
    *

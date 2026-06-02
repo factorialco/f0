@@ -47,6 +47,7 @@ function TableSingleDeleteScenario() {
         label: "Delete",
         icon: Delete,
         critical: true,
+        type: "other",
         onClick: () => setSelectedResource(item),
       },
     ],
@@ -346,7 +347,7 @@ export const CardDelete: Story = {
 }
 
 export const EditableTableDeleteRowAction: Story = {
-  render: () => <EditableTableDeleteScenario actionType="secondary" />,
+  render: () => <EditableTableDeleteScenario actionType="other" />,
 }
 
 export const KanbanDeleteBulk: Story = {
