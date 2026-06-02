@@ -33,9 +33,14 @@ export type MockAiChatRuntime = {
   messages: F0Message[]
   inProgress: boolean
   sendMessage: (text: string, options?: { replyQuote?: string }) => void
+  /** Sends a user message and shows thinking steps, but emits no text response. */
+  sendMessageWithThinkingOnly: (text: string) => void
   appendMessages: (
     messages: { role: "user" | "assistant"; content: string }[],
     options?: { persist?: boolean }
+  ) => void
+  appendRawMessages: (
+    messages: (Omit<F0Message, "id"> & { id?: string })[]
   ) => void
   clear: () => void
 
@@ -276,25 +281,19 @@ export const MockAiChatRuntimeProvider = ({
     return () => clearTimers()
   }, [clearTimers])
 
-  const streamAssistantResponse = useCallback(() => {
-    const thinkingSteps = pickRandomThinkingSteps(3)
-    const response = pickRandomResponse()
-    const thinkingId = nextId()
-    const assistantId = nextId()
-
-    setInProgress(true)
-
-    // Append the thinking message + first step
-    const startThinking = setTimeout(() => {
+  // Emits thinking-step messages and returns the total duration in ms.
+  // Caller is responsible for what happens after thinking completes.
+  const emitThinkingSteps = useCallback(
+    (thinkingSteps: string[], baseId: string): number => {
       setMessages((prev) => [
         ...prev,
         {
-          id: thinkingId,
+          id: baseId,
           role: "assistant",
           content: "",
           toolCalls: [
             {
-              id: `${thinkingId}_tc0`,
+              id: `${baseId}_tc0`,
               type: "function",
               function: {
                 name: "orchestratorThinking",
@@ -305,7 +304,6 @@ export const MockAiChatRuntimeProvider = ({
         },
       ])
 
-      // Add subsequent thinking steps every THINKING_STEP_MS
       thinkingSteps.slice(1).forEach((step, i) => {
         const t = setTimeout(
           () => {
@@ -317,7 +315,7 @@ export const MockAiChatRuntimeProvider = ({
                 content: "",
                 toolCalls: [
                   {
-                    id: `${assistantId}_tc${i + 1}`,
+                    id: `${baseId}_tc${i + 1}`,
                     type: "function",
                     function: {
                       name: "orchestratorThinking",
@@ -333,8 +331,23 @@ export const MockAiChatRuntimeProvider = ({
         timersRef.current.push(t)
       })
 
+      return THINKING_STEP_MS * thinkingSteps.length
+    },
+    []
+  )
+
+  const streamAssistantResponse = useCallback(() => {
+    const thinkingSteps = pickRandomThinkingSteps(3)
+    const response = pickRandomResponse()
+    const thinkingId = nextId()
+    const assistantId = nextId()
+
+    setInProgress(true)
+
+    const startThinking = setTimeout(() => {
+      const totalThinkingMs = emitThinkingSteps(thinkingSteps, thinkingId)
+
       // Once thinking is done, open the assistant text message and stream chars.
-      const totalThinkingMs = THINKING_STEP_MS * thinkingSteps.length
       const startText = setTimeout(() => {
         setMessages((prev) => [
           ...prev,
@@ -364,7 +377,7 @@ export const MockAiChatRuntimeProvider = ({
     }, THINKING_DELAY_MS)
 
     timersRef.current.push(startThinking)
-  }, [])
+  }, [emitThinkingSteps])
 
   const sendMessage = useCallback(
     (text: string, options?: { replyQuote?: string }) => {
@@ -384,6 +397,33 @@ export const MockAiChatRuntimeProvider = ({
     [streamAssistantResponse]
   )
 
+  const sendMessageWithThinkingOnly = useCallback(
+    (text: string) => {
+      const trimmed = text.trim()
+      if (!trimmed) return
+      setMessages((prev) => [
+        ...prev,
+        { id: nextId(), role: "user", content: trimmed },
+      ])
+
+      const thinkingSteps = pickRandomThinkingSteps(3)
+      const thinkingId = nextId()
+
+      setInProgress(true)
+
+      const startThinking = setTimeout(() => {
+        const totalThinkingMs = emitThinkingSteps(thinkingSteps, thinkingId)
+        const done = setTimeout(() => {
+          setInProgress(false)
+        }, totalThinkingMs)
+        timersRef.current.push(done)
+      }, THINKING_DELAY_MS)
+
+      timersRef.current.push(startThinking)
+    },
+    [emitThinkingSteps]
+  )
+
   const appendMessages = useCallback<MockAiChatRuntime["appendMessages"]>(
     (msgs) => {
       setMessages((prev) => [
@@ -393,6 +433,16 @@ export const MockAiChatRuntimeProvider = ({
           role: m.role,
           content: m.content,
         })),
+      ])
+    },
+    []
+  )
+
+  const appendRawMessages = useCallback<MockAiChatRuntime["appendRawMessages"]>(
+    (msgs) => {
+      setMessages((prev) => [
+        ...prev,
+        ...msgs.map((m) => ({ id: nextId(), ...m })),
       ])
     },
     []
@@ -476,7 +526,9 @@ export const MockAiChatRuntimeProvider = ({
         messages,
         inProgress,
         sendMessage,
+        sendMessageWithThinkingOnly,
         appendMessages,
+        appendRawMessages,
         clear,
         currentThreadTitle,
         isLoadingThread,
