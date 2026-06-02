@@ -48,7 +48,7 @@ const NavigationSkeleton = () => (
 
 export const F0SidepanelHeader = ({
   title,
-  closeLabel = "Close",
+  closeLabel,
   onCloseClick,
   navigation,
   options,
@@ -56,6 +56,7 @@ export const F0SidepanelHeader = ({
   loading = false,
 }: Props) => {
   const i18n = useI18n()
+  const effectiveCloseLabel = closeLabel || i18n.actions.close
   const hasOptions = options && options.length > 0
   const hasRight = !!navigation || hasOptions
   const hasVisibleTitle = title !== undefined && title !== null
@@ -72,7 +73,7 @@ export const F0SidepanelHeader = ({
         size="md"
         variant="outline"
         icon={Cross}
-        label={closeLabel}
+        label={effectiveCloseLabel}
         hideLabel
         onClick={onCloseClick}
       />
@@ -103,7 +104,7 @@ export const F0SidepanelHeader = ({
         // Radix Dialog requires a Title for screen readers; keep one hidden when
         // the visual title slot is empty.
         <VisuallyHidden.Root>
-          <SheetTitle>{closeLabel}</SheetTitle>
+          <SheetTitle>{effectiveCloseLabel}</SheetTitle>
         </VisuallyHidden.Root>
       )}
 

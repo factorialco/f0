@@ -22,7 +22,7 @@ export const F0SidepanelInternal = ({
   onClose,
   onCloseClicked,
   title,
-  closeLabel = "Close",
+  closeLabel,
   side = "right",
   width = "narrow",
   boxPadding = true,
