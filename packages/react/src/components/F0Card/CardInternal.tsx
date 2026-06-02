@@ -355,7 +355,8 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
               className={cn(
                 "relative flex-col gap-0 p-0",
                 image && !compact && "pt-3",
-                (compact || horizontal) && "flex-row items-center gap-2"
+                compact && "flex-row items-center gap-2",
+                horizontal && "flex-row items-center gap-4"
               )}
             >
               {avatar && (
