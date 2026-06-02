@@ -306,6 +306,30 @@ describe("Select", () => {
     expect(container.querySelector(".h-\\[32px\\]")).toBeFalsy()
   })
 
+  it("forces at least md trigger size for a preselected status pill not yet in the dataset", () => {
+    const { container } = render(
+      <F0Select
+        {...defaultSelectProps}
+        size="sm"
+        value="approved"
+        // Dataset hasn't loaded the selected record; the pill comes from defaultItem
+        options={[]}
+        defaultItem={{
+          value: "approved",
+          label: "Approved",
+          tag: {
+            type: "status",
+            text: "Approved",
+            variant: "positive",
+          },
+        }}
+      />
+    )
+
+    expect(container.querySelector(".h-\\[40px\\]")).toBeTruthy()
+    expect(container.querySelector(".h-\\[32px\\]")).toBeFalsy()
+  })
+
   it("keeps the requested sm trigger size when no status tags are present", () => {
     const { container } = render(
       <F0Select
