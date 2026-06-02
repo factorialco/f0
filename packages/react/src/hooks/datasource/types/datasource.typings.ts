@@ -113,13 +113,6 @@ export type DataSourceDefinition<
     item: R
     pagination?: ChildrenPaginationInfo
   }) => number | undefined
-  /**
-   * Item ids that start expanded on first render. Rows matched here have
-   * their children fetched eagerly. Only rows whose `item.id` is in this
-   * list are auto-expanded — nested descendants are not, unless their own id
-   * is also included. Defaults to none.
-   */
-  defaultExpandedIds?: Array<string | number>
 }
 
 /**
