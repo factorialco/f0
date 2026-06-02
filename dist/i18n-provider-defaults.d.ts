@@ -146,7 +146,9 @@ export declare const defaultTranslations: {
         readonly paste: "Paste";
         readonly close: "Close";
         readonly collapse: "Collapse";
+        readonly collapseItem: "Collapse {{title}}";
         readonly expand: "Expand";
+        readonly expandItem: "Expand {{title}}";
         readonly showAll: "Show all";
         readonly showLess: "Show less";
         readonly seeMore: "See more";
@@ -165,6 +167,7 @@ export declare const defaultTranslations: {
         readonly toggleDropdownMenu: "Toggle dropdown menu";
         readonly selectAll: "Select all";
         readonly selectAllItems: "Select all {{total}} items";
+        readonly apply: "Apply";
     };
     readonly status: {
         readonly selected: {
@@ -187,6 +190,10 @@ export declare const defaultTranslations: {
         readonly availableFilters: "Available filters";
         readonly label: "Filters";
         readonly applyFilters: "Apply filters";
+        readonly resultsFor: {
+            readonly one: "{{count}} result for:";
+            readonly other: "{{count}} results for:";
+        };
         readonly applySelection: "Apply selection";
         readonly cancel: "Cancel";
         readonly failedToLoadOptions: "Failed to load options";
@@ -375,15 +382,9 @@ export declare const defaultTranslations: {
         readonly stopAnswerGeneration: "Stop generating";
         readonly responseStopped: "You stopped this response";
         readonly sendMessage: "Send message";
-        readonly thoughtsGroupTitle: "Reflection";
+        readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
         readonly thinking: "Thinking...";
-        readonly closeDashboard: "Close dashboard";
-        readonly unsavedChanges: "Unsaved changes";
-        readonly saveChanges: "Save changes";
-        readonly discardChanges: "Discard";
-        readonly exportTable: "Download table";
-        readonly generatedTableFilename: "OneGeneratedTable";
         readonly feedbackModal: {
             readonly positive: {
                 readonly title: "What did you like about this response?";
@@ -396,7 +397,6 @@ export declare const defaultTranslations: {
                 readonly placeholder: "Share what didn’t work";
             };
         };
-        readonly dataDownloadPreview: "Preview {{shown}} of {{total}} rows — download the Excel to see all data.";
         readonly expandChat: "Expand chat";
         readonly collapseChat: "Collapse chat";
         readonly chatHistory: "Chat history";
@@ -414,9 +414,20 @@ export declare const defaultTranslations: {
         readonly deleteChat: "Delete chat";
         readonly ask: "Ask One";
         readonly view: "View";
-        readonly tools: "Tools";
+        readonly entityRef: {
+            readonly candidate: {
+                readonly source: "Source";
+                readonly applied: "Applied on";
+            };
+            readonly requisition: {
+                readonly lineManager: "Line manager";
+                readonly reason: "Reason";
+                readonly status: "Status";
+            };
+        };
         readonly credits: {
             readonly title: "Credits";
+            readonly employeeCredits: "Your credits";
             readonly creditsLeft: "{{total}} left";
             readonly monthlyCredits: "Monthly credits";
             readonly creditsError: "Could not load credits";
@@ -424,31 +435,22 @@ export declare const defaultTranslations: {
             readonly needMoreCredits: "Need more credits?";
         };
         readonly reportCard: {
-            readonly reportLabel: "Report";
+            readonly tableLabel: "Table";
             readonly openButton: "Open";
         };
         readonly formCard: {
             readonly moreFields: "Open to see all fields";
         };
-        readonly dashboard: {
-            readonly save: "Save";
-            readonly saveToAnalytics: "Save the dashboard in Analytics";
-            readonly saveAs: "Save as";
-            readonly saveDialog: {
-                readonly title: "Save dashboard";
-                readonly titleLabel: "Title";
-                readonly descriptionLabel: "Description";
-                readonly descriptionPlaceholder: "Add a description (optional)";
-                readonly save: "Save";
-                readonly cancel: "Cancel";
-            };
+        readonly aiTable: {
+            readonly title: "Table";
+            readonly downloadExcel: "Download Excel";
+            readonly downloadCsv: "Download CSV";
         };
         readonly dataDownload: {
             readonly title: "Download";
             readonly download: "Download {{format}}";
             readonly exportDashboard: "Export dashboard as {{format}}";
-            readonly exporting: "Exporting...";
-            readonly rows: "{{amount}} rows";
+            readonly exporting: "Exporting…";
         };
         readonly dashboardItem: {
             readonly chartType: "Chart type";
@@ -468,24 +470,29 @@ export declare const defaultTranslations: {
             readonly soft: "You're running low on AI credits.";
             readonly getCredits: "Get credits";
             readonly dismiss: "Dismiss";
-            readonly messageBanner: {
-                readonly title: "This response requires credits";
-                readonly description: "Your company has run out of AI credits.";
-                readonly actionLabel: "Get credits";
-            };
         };
         readonly attachFile: "Attach file";
         readonly removeFile: "Remove";
         readonly fileUploadError: "Upload failed";
+        readonly fileUploadBlockedSubmit: "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.";
+        readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
         readonly dropFilesHere: "Drop your files here";
+        readonly reply: "Reply";
+        readonly removeQuote: "Remove quote";
         readonly clarifyingQuestion: {
             readonly submit: "Submit";
             readonly next: "Next";
             readonly back: "Back";
+            readonly skip: "Skip";
             readonly typeYourAnswer: "Type your answer…";
             readonly stepOf: "{{current}} of {{total}}";
             readonly custom: "own answer";
             readonly skipped: "skipped";
+            readonly navHint: {
+                readonly navigate: "navigate";
+                readonly select: "select";
+                readonly cancel: "cancel";
+            };
         };
         readonly growth: {
             readonly demoCard: {
@@ -518,11 +525,18 @@ export declare const defaultTranslations: {
         readonly funnel: "Funnel";
         readonly pieChart: "Pie";
         readonly table: "Table";
+        readonly emptyState: {
+            readonly title: "No data available";
+            readonly description: "Try a different date or fewer filters";
+        };
     };
     readonly select: {
         readonly noResults: "No results found";
         readonly loadingMore: "Loading...";
         readonly applySelection: "Apply selection";
+        readonly create: "Create";
+        readonly createWithValue: "Create \"{{value}}\"";
+        readonly createEmptyMessage: "Try another search or create a new item";
     };
     readonly numberInput: {
         readonly between: "It should be between {{min}} and {{max}}";
@@ -598,6 +612,7 @@ export declare const defaultTranslations: {
             readonly sectionDescriptionPlaceholder: "Describe the section in a few words";
             readonly required: "Required";
             readonly allowMultiSelection: "Allow multi-selection";
+            readonly allowCreate: "Allow creation";
             readonly singleSelection: "Single selection";
             readonly multiSelection: "Multi selection";
             readonly questionType: "Question type";
@@ -673,8 +688,6 @@ export declare const defaultTranslations: {
         };
     };
     readonly forms: {
-        readonly yes: "Yes";
-        readonly no: "No";
         readonly actionBar: {
             readonly unsavedChanges: "You have changes pending to be saved";
             readonly saving: "Saving...";
@@ -696,6 +709,7 @@ export declare const defaultTranslations: {
             readonly uploadFailed: "Upload failed";
             readonly fileTooLarge: "File exceeds {{maxSize}} MB limit";
             readonly invalidFileType: "File type not accepted. Accepted formats: {{types}}";
+            readonly maxFilesReached: "Maximum {{maxFiles}} files";
         };
         readonly moreInformation: "More information";
         readonly validation: {
@@ -726,6 +740,44 @@ export declare const defaultTranslations: {
             readonly checkbox: {
                 readonly mustBeChecked: "This option must be selected";
             };
+        };
+    };
+    readonly graph: {
+        readonly canvas: "Graph canvas";
+        readonly view: "Graph view";
+        readonly controls: {
+            readonly findMe: "Find me";
+            readonly fitToView: "Fit to view";
+            readonly zoomIn: "Zoom in";
+            readonly zoomOut: "Zoom out";
+            readonly navigation: "Graph navigation";
+            readonly metadataSettings: "Metadata visibility";
+            readonly tagTypeLabels: {
+                readonly person: "People";
+                readonly team: "Teams";
+                readonly company: "Companies";
+                readonly status: "Statuses";
+                readonly alert: "Alerts";
+                readonly balance: "Balances";
+                readonly dot: "Tags";
+                readonly raw: "Tags";
+            };
+        };
+        readonly search: {
+            readonly noResults: "No results";
+        };
+        readonly detailPanel: {
+            readonly details: "Details";
+            readonly moreActions: "More actions";
+            readonly resize: "Resize detail panel";
+        };
+        readonly expander: {
+            readonly collapse: "Collapse {{count}} items";
+            readonly expand: "Expand {{count}} items";
+            readonly expandWithParentSingular: "Expand {{parent}}, {{count}} child";
+            readonly expandWithParentPlural: "Expand {{parent}}, {{count}} children";
+            readonly collapseWithParent: "Collapse {{parent}}";
+            readonly collapseDefault: "Collapse children";
         };
     };
     readonly wizard: {
@@ -807,6 +859,16 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
@@ -816,9 +878,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
@@ -833,12 +896,16 @@ declare module "@tiptap/core" {
 }
 
 
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
-        };
-    }
+declare namespace F0GraphNodeWrapperInner {
+    var displayName: string;
+}
+
+
+declare namespace F0GraphExpanderWrapperInner {
+    var displayName: string;
+}
+
+
+declare namespace F0GraphCollapserWrapperInner {
+    var displayName: string;
 }
