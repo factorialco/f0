@@ -1,8 +1,9 @@
 import userEvent from "@testing-library/user-event"
 import React from "react"
-import { describe, expect, it, vi } from "vitest"
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest"
 import { z } from "zod"
 
+import { useF0FormDefinition } from "@/patterns/F0WizardForm/useF0FormDefinition"
 import {
   zeroRender as render,
   screen,
@@ -13,6 +14,7 @@ import {
 import type {
   FileUploadResult,
   FileUploadStatus,
+  InitialFile,
   UseFileUpload,
 } from "../types"
 
@@ -699,5 +701,315 @@ describe("FileFieldRenderer", () => {
     expect(
       screen.getByText("Drag and drop files, or click to select")
     ).toBeInTheDocument()
+  })
+
+  it("hides dropzone when maxFiles limit is reached", async () => {
+    const schema = z.object({
+      files: f0FormField(z.array(z.string()).optional(), {
+        label: "Files",
+        fieldType: "file",
+        multiple: true,
+        maxFiles: 2,
+      }),
+    })
+
+    render(
+      <F0Form
+        name="test-maxfiles-dropzone"
+        schema={schema}
+        defaultValues={{ files: ["file1.pdf", "file2.pdf"] }}
+        initialFiles={[
+          {
+            value: "file1.pdf",
+            name: "file1.pdf",
+            type: "application/pdf",
+            size: 100,
+          },
+          {
+            value: "file2.pdf",
+            name: "file2.pdf",
+            type: "application/pdf",
+            size: 100,
+          },
+        ]}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    // Both initial files rendered — limit reached, dropzone should be hidden
+    expect(screen.getByText("file1.pdf")).toBeInTheDocument()
+    expect(screen.getByText("file2.pdf")).toBeInTheDocument()
+    expect(
+      screen.queryByText("Drag and drop files, or click to select")
+    ).not.toBeInTheDocument()
+  })
+
+  it("shows maxFilesReached error when adding more files than remaining slots", async () => {
+    const schema = z.object({
+      files: f0FormField(z.array(z.string()).optional(), {
+        label: "Files",
+        fieldType: "file",
+        multiple: true,
+        maxFiles: 2,
+      }),
+    })
+
+    render(
+      <F0Form
+        name="test-maxfiles-error"
+        schema={schema}
+        defaultValues={{ files: ["file1.pdf"] }}
+        initialFiles={[
+          {
+            value: "file1.pdf",
+            name: "file1.pdf",
+            type: "application/pdf",
+            size: 100,
+          },
+        ]}
+        useUpload={createMockUploadHook()}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    // 1 initial file, 1 slot remaining — try to upload 2 at once
+    const input = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement
+
+    await userEvent.upload(input, [
+      createFile("file2.pdf"),
+      createFile("file3.pdf"),
+    ])
+
+    // file2 should be added (fits in remaining slot)
+    await waitFor(() =>
+      expect(screen.getByText("file2.pdf")).toBeInTheDocument()
+    )
+    // file3 should NOT appear (exceeded limit)
+    expect(screen.queryByText("file3.pdf")).not.toBeInTheDocument()
+    // Error message should be shown
+    await waitFor(() =>
+      expect(screen.getByText("Maximum 2 files")).toBeInTheDocument()
+    )
+  })
+})
+
+// =============================================================================
+// Async initialFiles tests
+// =============================================================================
+
+const fileSchema = z.object({
+  document: f0FormField(z.string().min(1), {
+    label: "Contract",
+    fieldType: "file",
+  }),
+  attachments: f0FormField(z.array(z.string()), {
+    label: "Attachments",
+    fieldType: "file",
+    multiple: true,
+  }),
+})
+
+function AsyncInitialFilesForm({
+  initialFiles,
+  defaultValues,
+}: {
+  initialFiles:
+    | InitialFile[]
+    | ((signal: AbortSignal) => Promise<InitialFile[]>)
+  defaultValues:
+    | Partial<z.infer<typeof fileSchema>>
+    | ((signal: AbortSignal) => Promise<Partial<z.infer<typeof fileSchema>>>)
+}) {
+  const formDefinition = useF0FormDefinition({
+    name: "async-files-test",
+    schema: fileSchema,
+    defaultValues,
+    initialFiles,
+    onSubmit: async () => ({ success: true }),
+  })
+  return (
+    <F0Form
+      formDefinition={formDefinition}
+      useUpload={createMockUploadHook()}
+    />
+  )
+}
+
+describe("FileFieldRenderer — async initialFiles", () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it("shows a loading skeleton while initialFiles are resolving", async () => {
+    const initialFiles = () =>
+      new Promise<InitialFile[]>((resolve) =>
+        setTimeout(
+          () =>
+            resolve([
+              {
+                value: "contract.pdf",
+                name: "contract_2024.pdf",
+                type: "application/pdf",
+                size: 2_500_000,
+              },
+            ]),
+          1000
+        )
+      )
+
+    render(
+      <AsyncInitialFilesForm
+        defaultValues={{ document: "contract.pdf", attachments: [] }}
+        initialFiles={initialFiles}
+      />
+    )
+
+    // Dropzone is hidden while loading
+    expect(
+      screen.queryByText("Drag and drop a file, or click to select")
+    ).not.toBeInTheDocument()
+
+    // File attachment is not shown yet
+    expect(screen.queryByText("contract_2024.pdf")).not.toBeInTheDocument()
+  })
+
+  it("displays file entries after async initialFiles resolve", async () => {
+    const initialFiles = () =>
+      Promise.resolve([
+        {
+          value: "contract.pdf",
+          name: "contract_2024.pdf",
+          type: "application/pdf",
+          size: 2_500_000,
+        },
+      ])
+
+    render(
+      <AsyncInitialFilesForm
+        defaultValues={{ document: "contract.pdf", attachments: [] }}
+        initialFiles={initialFiles}
+      />
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText("contract_2024.pdf")).toBeInTheDocument()
+    })
+
+    // Dropzone should be hidden in single-file mode once a file is loaded
+    expect(
+      screen.queryByText("Drag and drop a file, or click to select")
+    ).not.toBeInTheDocument()
+  })
+
+  it("waits for both async defaultValues and async initialFiles before showing files", async () => {
+    // defaultValues resolve faster (50ms) than initialFiles (200ms)
+    const defaultValues = () =>
+      new Promise<Partial<z.infer<typeof fileSchema>>>((resolve) =>
+        setTimeout(
+          () =>
+            resolve({
+              document: "contract.pdf",
+              attachments: ["invoice.pdf"],
+            }),
+          50
+        )
+      )
+
+    const initialFiles = () =>
+      new Promise<InitialFile[]>((resolve) =>
+        setTimeout(
+          () =>
+            resolve([
+              {
+                value: "contract.pdf",
+                name: "contract_2024.pdf",
+                type: "application/pdf",
+                size: 2_500_000,
+              },
+              {
+                value: "invoice.pdf",
+                name: "invoice_march.pdf",
+                type: "application/pdf",
+                size: 1_200_000,
+              },
+            ]),
+          200
+        )
+      )
+
+    render(
+      <AsyncInitialFilesForm
+        defaultValues={defaultValues}
+        initialFiles={initialFiles}
+      />
+    )
+
+    // Nothing resolved yet — no file names visible
+    expect(screen.queryByText("contract_2024.pdf")).not.toBeInTheDocument()
+    expect(screen.queryByText("invoice_march.pdf")).not.toBeInTheDocument()
+
+    // Advance past defaultValues (50ms) but before initialFiles (200ms)
+    vi.advanceTimersByTime(100)
+
+    // Still not visible — waiting for initialFiles
+    expect(screen.queryByText("contract_2024.pdf")).not.toBeInTheDocument()
+
+    // Advance past initialFiles resolution
+    vi.advanceTimersByTime(200)
+
+    await waitFor(() => {
+      expect(screen.getByText("contract_2024.pdf")).toBeInTheDocument()
+    })
+    await waitFor(() => {
+      expect(screen.getByText("invoice_march.pdf")).toBeInTheDocument()
+    })
+  })
+
+  it("does not overwrite user-added files after initialFiles resolve", async () => {
+    // Start loading, will resolve after user interaction
+    let resolveFiles!: (v: InitialFile[]) => void
+    const initialFiles = () =>
+      new Promise<InitialFile[]>((resolve) => (resolveFiles = resolve))
+
+    render(
+      <AsyncInitialFilesForm
+        defaultValues={{ document: "", attachments: [] }}
+        initialFiles={initialFiles}
+      />
+    )
+
+    // While loading, the user uploads a file manually
+    const input = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement
+    await userEvent.upload(input, createFile("user_upload.pdf"))
+
+    await waitFor(() =>
+      expect(screen.getByText("user_upload.pdf")).toBeInTheDocument()
+    )
+
+    // Now resolve initial files — user upload should not be replaced
+    resolveFiles([
+      {
+        value: "some_id",
+        name: "server_file.pdf",
+        type: "application/pdf",
+        size: 500_000,
+      },
+    ])
+
+    await waitFor(() => {
+      // User file still present
+      expect(screen.getByText("user_upload.pdf")).toBeInTheDocument()
+    })
+
+    // Server file NOT injected since user already added a file
+    expect(screen.queryByText("server_file.pdf")).not.toBeInTheDocument()
   })
 })

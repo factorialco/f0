@@ -134,3 +134,11 @@ export const NoColorScale: Story = {
     },
   },
 }
+
+/** No data — empty state takes over. See `F0DataChart/Empty states`. */
+export const Empty: Story = {
+  args: {
+    type: "funnel",
+    series: { name: "", data: [] },
+  },
+}

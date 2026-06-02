@@ -11,9 +11,9 @@ Everything needed to write the MDX file: template, table templates, utility comp
 ### Standard component (single stories file) — use in 95% of cases
 
 ```mdx
-import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks";
-import * as Stories from "./F0ComponentName.stories";
-import { DoDonts } from "@/lib/storybook-utils/do-donts";
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as Stories from "./F0ComponentName.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 <Meta of={Stories} />
 ```
@@ -23,10 +23,10 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 Use `<Meta title="..." />` only when the component spans multiple story files:
 
 ```mdx
-import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks";
-import * as BarStories from "./F0ComponentBar.stories";
-import * as LineStories from "./F0ComponentLine.stories";
-import { DoDonts } from "@/lib/storybook-utils/do-donts";
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as BarStories from "./F0ComponentBar.stories"
+import * as LineStories from "./F0ComponentLine.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 <Meta title="F0ComponentName/Overview" />
 ```
@@ -69,9 +69,9 @@ Filename must match the stories file: `F0Button.stories.tsx` → `F0Button.mdx`
 **Rationale:** Modes, Variants and Sizes describe the structural forms the component can take — they are anatomy, not guidance. Keeping them under `## Anatomy` gives the right-side nav three clean top-level entries: Anatomy · Guidelines · Accessibility.
 
 ```mdx
-import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks";
-import * as Stories from "./ComponentName.stories";
-import { DoDonts } from "@/lib/storybook-utils/do-donts";
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as Stories from "./ComponentName.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 <Meta of={Stories} />
 
@@ -153,13 +153,42 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts";
 
 ### Content best practices
 
-- [Copywriting rule: capitalization, punctuation, tone]
+<!--
+  Copywriting and tone rules. For each rule that includes textual examples, use the
+  inline Correct/Incorrect bullet pattern (more scannable than prose) AND pair it with a
+  <DoDonts> visual showing one representative good vs bad label rendered as the actual
+  component. Bullets and DoDonts complement each other — never drop the visual.
+-->
+
+- [Capitalization, punctuation, tone rule]
 - [Length limit or character guidance]
+- Use imperative verbs
+  - **Correct:** "Save changes", "Delete account", "Export data"
+  - **Incorrect:** "Saved", "Deletion", "Exportation"
+
+> Adapt the rendered JSX to the component's real API. Use children, `label`, or other props only if that component actually supports them.
+
+<DoDonts
+  do={{
+    description: "Use clear, action-oriented labels",
+    children: <F0ComponentName>Save changes</F0ComponentName>,
+  }}
+  dont={{
+    description: "Don't use vague or generic labels",
+    children: <F0ComponentName>OK</F0ComponentName>,
+  }}
+/>
 
 ### Behavior
 
-- [Layout or responsive behavior]
-- [State transitions]
+<!--
+  Non-obvious runtime behavior specific to this component. Apply the inclusion filter
+  from SKILL.md → Authoring Principles → `### Behavior`:
+  skip if Controls / Variants / global behavior already covers it. Omit the section
+  entirely if the component has no non-obvious behavior.
+-->
+
+- [Async handler auto-loading, polymorphic rendering driven by an href, controlled/uncontrolled rules, focus management]
 - [Generic type note — if the component is generic (`F0Component<T>`): document the type parameter, what it controls, and the full signature of any typed callback (e.g. `onClick: (value: T, item: Item<T>) => void`). Mention that `T` defaults to `string` and that callers can pass a union, enum, or literal type.]
 
 ### Usage examples
@@ -521,14 +550,14 @@ export const DoDontDoCase: Story = {
   args: {
     // props that illustrate the "do" scenario
   },
-};
+}
 
 export const DoDontDontCase: Story = {
   tags: ["no-sidebar"],
   args: {
     // props that illustrate the "don't" scenario
   },
-};
+}
 ```
 
 ```mdx
@@ -549,7 +578,7 @@ export const DoDontDontCase: Story = {
 Full pattern with `children` + `guidelines`:
 
 ```mdx
-import { F0Alert } from "../F0Alert";
+import { F0Alert } from "../F0Alert"
 
 <DoDonts
   do={{
@@ -610,7 +639,7 @@ export const Default: Story = {
   render: ({ onClose, ...args }) => (
     <F0ComponentName {...args} onClose={onClose ? fn() : undefined} />
   ),
-};
+}
 ```
 
 This pattern lets the Controls panel show a simple toggle for the optional callback, while the component receives a real `fn()` (from `@storybook/test`) or `undefined` depending on the toggle state.
@@ -653,37 +682,48 @@ const meta = {
   tags: ["!autodocs", "stable"],  // !autodocs required to disable global autodocs
 }
 export const Default: Story = {
-  tags: ["no-sidebar"],           // hidden from sidebar, still usable in Canvas
+  // Important: do NOT add `tags: ["no-sidebar"]` to the FIRST exported story.
+  // Storybook treats it as the "primary" story for the attached MDX and
+  // propagates its tags to the `--documentation` entry, which would hide
+  // the entire Documentation page from the sidebar.
+  // Hide secondary variants instead (Variants, Sizes, IconVariants, …).
+  ...
+}
+export const Variants: Story = {
+  tags: ["no-sidebar"],           // safe: not the primary story
   ...
 }
 ```
 
 **Tag reference:**
 
-| Tag            | Applied to           | Effect                                                                                |
-| -------------- | -------------------- | ------------------------------------------------------------------------------------- |
-| `"!autodocs"`  | Meta in stories file | Disables the auto-generated docs tab. Required when adding a manual MDX in this repo. |
-| `"no-sidebar"` | Story export or Meta | Hides the entry from the sidebar. Use on stories embedded only via `<Canvas>` in MDX. |
-| `"autodocs"`   | Meta in stories file | Auto-generates a docs tab. This is set globally — use `"!autodocs"` to opt out.       |
+| Tag            | Applied to              | Effect                                                                                                                                                                                                                   |
+| -------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `"!autodocs"`  | Meta in stories file    | Disables the auto-generated docs tab. Required when adding a manual MDX in this repo.                                                                                                                                    |
+| `"no-sidebar"` | Secondary story exports | Hides the entry from the sidebar. Use on stories embedded only via `<Canvas>` in MDX. **Never apply to the first exported (primary) story** — it propagates to the MDX `--documentation` entry and hides the whole page. |
+| `"autodocs"`   | Meta in stories file    | Auto-generates a docs tab. This is set globally — use `"!autodocs"` to opt out.                                                                                                                                          |
 
 ### Phase 4: Verify sidebar
 
-After both files are created/updated, the Storybook sidebar should show:
+After both files are created/updated, the Storybook sidebar should show the Documentation page plus the primary story (which cannot be hidden — see the tag reference above):
 
 ```
 Components/
 └── ComponentName/
-    └── Documentation   ← only one entry
+    ├── Documentation   ← MDX page (must be visible)
+    └── Default         ← primary story (visible by design;
+                          do NOT tag it `no-sidebar`)
 ```
 
-Not:
+Secondary stories used only as `<Canvas>` embeds inside the MDX should be hidden:
 
 ```
 Components/
 └── ComponentName/
     ├── Documentation
-    ├── Default         ← wrong: should be hidden with "no-sidebar"
-    └── Variants        ← wrong: should be hidden with "no-sidebar"
+    ├── Default
+    ├── Variants        ← wrong: should be hidden with "no-sidebar"
+    └── Sizes           ← wrong: should be hidden with "no-sidebar"
 ```
 
 ---
@@ -696,7 +736,7 @@ Before marking MDX as done:
 - [ ] Any pre-existing `controls.mdx` stub deleted
 - [ ] `<Meta of={Stories} />` for standard components (or `<Meta title="..." />` for umbrella only)
 - [ ] `"autodocs"` disabled via `tags: ["!autodocs"]` in stories meta (required — autodocs is globally enabled)
-- [ ] Stories used only in docs have `tags: ["no-sidebar"]`
+- [ ] Stories used only in docs have `tags: ["no-sidebar"]` — **except the first exported (primary) story**, which must NOT have `no-sidebar` (it propagates to the MDX `--documentation` entry and hides the whole Documentation page)
 - [ ] No `<DocsNav />` and no manual navigation menu — Storybook has native right-side nav built from heading hierarchy
 - [ ] No import of `DocsNav` in the MDX file
 - [ ] No `---` dividers between sections — use heading hierarchy only
@@ -719,6 +759,9 @@ Before marking MDX as done:
 - [ ] "When not to use" rows in the "Use instead" column name a **concrete component** (`F0Dialog`) or established pattern ("toast notification") — never abstract instructions
 - [ ] `<DoDonts>` used in Do's and don'ts subsection
 - [ ] DoDonts `children` used only when the do/don't contrast is **semantically unambiguous** — a viewer must not be able to argue the "don't" example is valid. Text-only DoDonts are preferred when the distinction requires explanation.
+- [ ] `### Content best practices` rules with textual examples use inline **Correct:** / **Incorrect:** bullets (no emojis), AND are paired with a `<DoDonts>` visual showing one representative good vs bad label
+- [ ] `### Behavior` (under `## Guidelines`) only contains non-obvious runtime behavior specific to this component (async loading, polymorphic rendering, controlled/uncontrolled rules, ref typing). Section is omitted entirely if the component has no such behavior. No "Related components" section. Section is not renamed to "Code", "Patterns", or "Advanced".
+- [ ] When restructuring an existing MDX file, valuable visuals/examples from the previous version are preserved (combined with new patterns when they serve different purposes — e.g. scannable text + visual reference) — **don't lose value when refactoring**
 - [ ] Components rendered as JSX in MDX (e.g. inside `<DoDonts children>`) are imported via relative path (`from "../F0Component"`), never from `@factorialco/f0-react` (causes module fetch error in dev)
 - [ ] Components that require a provider (e.g. `useI18n`) are NOT rendered as inline JSX in MDX — instead, dedicated stories with `tags: ["no-sidebar"]` are created and used as `<Canvas of={Stories.X} sourceState="none" />` inside DoDonts `children`
 - [ ] `## Accessibility` included only when the component type requires it — complex interactive (required), simple interactive (only if non-obvious), static display (only for live region or icon meaning), layout/typography (omit entirely)

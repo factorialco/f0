@@ -58,8 +58,8 @@ const inputFieldVariants = cva({
       false: "flex-none",
     },
     size: {
-      sm: "rounded-[10px]",
-      md: "rounded-[12px]",
+      sm: "rounded",
+      md: "rounded-md",
     },
   },
   compoundVariants: [
@@ -142,6 +142,7 @@ const inputFieldStatusVariants = cva({
 })
 
 export type InputFieldProps<T> = {
+  id?: string
   autoFocus?: boolean
   label: string
   placeholder?: string
@@ -261,7 +262,8 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
     }: InputFieldProps<string>,
     ref
   ) => {
-    const id = useId()
+    const generatedId = useId()
+    const id = props.id ?? generatedId
 
     const noEdit = disabled || readonly
 

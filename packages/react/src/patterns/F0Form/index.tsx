@@ -164,6 +164,7 @@ import type {
   F0FormPropsWithPerSectionSchema,
   F0FormPropsWithSingleSchemaDefinition,
   F0FormPropsWithPerSectionDefinition,
+  F0FormPropsWithDefinition,
   F0FormSchema,
   F0PerSectionSchema,
 } from "./types"
@@ -184,4 +185,5 @@ export const F0Form = experimentalComponent("F0Form", F0FormComponent) as {
   <T extends F0PerSectionSchema>(
     props: F0FormPropsWithPerSectionDefinition<T>
   ): React.ReactElement
+  (props: F0FormPropsWithDefinition): React.ReactElement
 }

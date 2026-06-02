@@ -7,6 +7,7 @@ import * as RadarStories from "./Radar.stories"
 import * as GaugeStories from "./Gauge.stories"
 import * as HeatmapStories from "./Heatmap.stories"
 import * as SkeletonsStories from "./Skeletons.stories"
+import * as EmptyStatesStories from "./EmptyStates.stories"
 
 <Meta title="F0DataChart/Overview" />
 
@@ -29,6 +30,45 @@ import { F0DataChart } from "@factorialco/f0-react"
 | `radar`   | Multi-dimensional comparisons        | `series`, `indicators`, `showArea`                         |
 | `gauge`   | Single KPI / progress indicator      | `value`, `min`, `max`, `name`                              |
 | `heatmap` | Density across two dimensions        | `data`, `xCategories`, `yCategories`, `showLabels`         |
+
+All variants share an optional `emptyState` prop — see [Empty states](#empty-states).
+
+---
+
+## Empty states
+
+When data is empty (empty `series`, empty `data`, all-zero values, or a missing gauge `value`), `F0DataChart` auto-renders a faded chart skeleton with a centered message so you never see a bare axis. No prop is required — it is the default behavior.
+
+Default copy is **"No data available"** / **"Try a different date or fewer filters"**.
+
+<Canvas of={EmptyStatesStories.EmptyBar} />
+
+Use the `emptyState` prop to customize copy, replace the UI entirely, or skip detection:
+
+```ts
+type F0DataChartEmptyStateProps = {
+  title?: string
+  description?: string
+  /** Render-prop escape hatch — replaces the entire UI. */
+  render?: () => ReactNode
+  /** Skip empty detection and render the chart as usual. */
+  disabled?: boolean
+}
+```
+
+### Custom copy
+
+<Canvas of={EmptyStatesStories.CustomCopy} />
+
+### Render-prop escape hatch
+
+<Canvas of={EmptyStatesStories.RenderPropEscapeHatch} />
+
+### Disabling detection
+
+For charts where zero values are legitimate (e.g. a "0 errors per day" timeline), set `emptyState.disabled` to bypass detection.
+
+<Canvas of={EmptyStatesStories.Disabled} />
 
 ---
 

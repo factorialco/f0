@@ -50,6 +50,8 @@ export interface F0AiFormEntry {
   defaultValuesFn?: (
     params: Record<string, unknown>
   ) => Promise<Record<string, unknown>>
+  /** The params most recently used to pre-populate this form (updated via updateActiveFormDefaultValuesParams through coagent state sync) */
+  defaultValuesParams?: Record<string, unknown>
   /** Field names explicitly set via setValue/setValues on a virtual ref */
   dirtyFields?: Set<string>
   /** Consumer submit callback (from availableFormDefinition). Preserved across virtual ↔ rendered transitions. */
@@ -77,12 +79,14 @@ export interface F0AiAvailableFormDefinition<
   schema: F0FormSchema
   /**
    * Default values for the form fields.
-   * Can be a static object or a function that receives params (supplied by the AI)
-   * and returns the defaults.
+   * Can be a static object, a sync function, or an async function that
+   * receives params (supplied by the AI) and returns the defaults.
    */
   defaultValues?:
     | Record<string, unknown>
-    | ((params: TParams) => Record<string, unknown>)
+    | ((
+        params: TParams
+      ) => Record<string, unknown> | Promise<Record<string, unknown>>)
   /**
    * Zod schema that describes the params accepted by a functional `defaultValues`.
    * When provided, the AI will see this schema and can supply params.
@@ -262,10 +266,37 @@ function toAvailableFormDefinition(
       | undefined
   }
 
+  // Preserve defaultValuesFn from useF0FormDefinition outputs.
+  // F0AiAvailableFormDefinition.defaultValues supports function values, so we
+  // assign the raw async fn there — downstream virtual-entry creation checks
+  // `typeof def.defaultValues === "function"` to derive defaultValuesFn on the entry.
+  let resolvedDefaultValues: F0AiAvailableFormDefinition["defaultValues"] =
+    flatDefaultValues
+  if (item.defaultValuesFn) {
+    if (item._brand === "per-section") {
+      // Wrap to flatten per-section output { sectionId: { ...fields } } → { ...fields }
+      const perSectionFn = item.defaultValuesFn as (
+        params: Record<string, unknown>
+      ) => Promise<Record<string, Record<string, unknown>>>
+      resolvedDefaultValues = async (params: Record<string, unknown>) => {
+        const result = await perSectionFn(params)
+        const flat: Record<string, unknown> = {}
+        for (const sectionValues of Object.values(result)) {
+          Object.assign(flat, sectionValues)
+        }
+        return flat
+      }
+    } else {
+      resolvedDefaultValues = item.defaultValuesFn as (
+        params: Record<string, unknown>
+      ) => Promise<Record<string, unknown>>
+    }
+  }
+
   return {
     name: item.name,
     schema,
-    defaultValues: flatDefaultValues,
+    defaultValues: resolvedDefaultValues,
     defaultValuesParamsSchema: item.defaultValuesParamsSchema,
     sections: item.sections as Record<string, F0SectionConfig> | undefined,
     onSubmit,
@@ -317,17 +348,27 @@ export function defineAvailableForm(
 }
 
 /**
- * Resolves defaultValues from a definition, handling both static objects and functions.
+ * Resolves defaultValues from a definition, handling static objects and functions.
+ * When the function returns a Promise (async defaults), returns {} synchronously —
+ * async resolution is handled by defaultValuesFn in the canvas.
  */
 function resolveDefaultValues(
   defaultValues:
     | Record<string, unknown>
-    | ((params: Record<string, unknown>) => Record<string, unknown>)
+    | ((
+        params: Record<string, unknown>
+      ) => Record<string, unknown> | Promise<Record<string, unknown>>)
     | undefined,
   params: Record<string, unknown> = {}
 ): Record<string, unknown> {
   if (typeof defaultValues === "function") {
-    return defaultValues(params)
+    const result = defaultValues(params)
+    // If the function returns a Promise (async defaults with params),
+    // return empty — async resolution is handled by defaultValuesFn.
+    if (result && typeof (result as Promise<unknown>).then === "function") {
+      return {}
+    }
+    return result as Record<string, unknown>
   }
   return defaultValues ?? {}
 }
@@ -525,6 +566,8 @@ export interface F0AiFormDescription {
   isDirty: boolean
   /** JSON Schema of defaultValuesParams (only for forms with defaultValuesParamsSchema) */
   defaultValuesParamsSchema?: Record<string, unknown>
+  /** The params most recently used to pre-populate this form (set when fillForm is called with defaultValuesParams) */
+  defaultValuesParams?: Record<string, unknown>
 }
 
 interface F0AiFormRegistryContextValue {
@@ -558,12 +601,33 @@ interface F0AiFormRegistryContextValue {
   ) => { success: boolean; error?: string }
   /** Clear the active co-editing form (e.g. after submit) */
   clearActiveForm: () => void
+  /** Write defaultValuesParams onto a registry entry (called when Mastra sets them in shared state) */
+  updateActiveFormDefaultValuesParams: (
+    formName: string,
+    params: Record<string, unknown> | undefined
+  ) => void
   /** Bump the fill-version counter for a form (called after fillForm succeeds) */
   incrementFillVersion: (formName: string) => void
   /** Reset the fill-version counter for a form (e.g. after submit) */
   resetFillVersion: (formName: string) => void
   /** Get the fill-version counter for a form (0 = never filled) */
   getFillVersion: (formName: string) => number
+  /** Whether a form's async default values have been resolved (true unless actively resolving) */
+  isDefaultValuesResolved: (formName: string) => boolean
+  /** Mark a form as currently resolving async default values (fills will be queued) */
+  markDefaultValuesResolving: (formName: string) => void
+  /** Mark a form's default values as resolved and flush any queued fill actions */
+  markDefaultValuesResolved: (
+    formName: string,
+    paramsKey?: string | null
+  ) => void
+  /** Queue a fill callback to run after a form's defaults are resolved */
+  queueFillAction: (formName: string, action: () => void) => void
+  /** Whether a form's async defaults have ever been resolved (persists across canvas close/reopen) */
+  hasDefaultValuesEverResolved: (
+    formName: string,
+    paramsKey?: string | null
+  ) => boolean
 }
 
 const F0AiFormRegistryContext =
@@ -604,6 +668,9 @@ export function F0AiFormRegistryProvider({
   const registryRef = useRef<Map<string, F0AiFormEntry>>(new Map())
   const lastDescriptionsJsonRef = useRef<string>("")
   const fillVersionsRef = useRef<Map<string, number>>(new Map())
+  const defaultValuesResolvingRef = useRef<Set<string>>(new Set())
+  const defaultsEverResolvedRef = useRef<Map<string, string | null>>(new Map())
+  const fillQueueRef = useRef<Map<string, Array<() => void>>>(new Map())
 
   // Three-field state replacing the old flat formDescriptions array.
   // formsOnCurrentPage: full runtime state for rendered (non-virtual) forms
@@ -662,6 +729,9 @@ export function F0AiFormRegistryProvider({
                   ) as Record<string, unknown>,
                 }
               : {}),
+            ...(entry.defaultValuesParams
+              ? { defaultValuesParams: entry.defaultValuesParams }
+              : {}),
           })
         } else {
           // Rendered forms → full runtime state for formsOnCurrentPage
@@ -686,6 +756,9 @@ export function F0AiFormRegistryProvider({
                     entry.defaultValuesParamsSchema
                   ) as Record<string, unknown>,
                 }
+              : {}),
+            ...(entry.defaultValuesParams
+              ? { defaultValuesParams: entry.defaultValuesParams }
               : {}),
           })
         }
@@ -715,6 +788,9 @@ export function F0AiFormRegistryProvider({
                     entry.defaultValuesParamsSchema
                   ) as Record<string, unknown>,
                 }
+              : {}),
+            ...(entry.defaultValuesParams
+              ? { defaultValuesParams: entry.defaultValuesParams }
               : {}),
           }
         }
@@ -757,8 +833,10 @@ export function F0AiFormRegistryProvider({
         description,
         module,
         sections,
-        defaultValuesParamsSchema,
-        defaultValuesFn,
+        defaultValuesParamsSchema:
+          defaultValuesParamsSchema ?? existingEntry?.defaultValuesParamsSchema,
+        defaultValuesFn: defaultValuesFn ?? existingEntry?.defaultValuesFn,
+        defaultValuesParams: existingEntry?.defaultValuesParams,
         onSubmit: existingEntry?.onSubmit,
         steps: existingEntry?.steps,
         submitConfig: existingEntry?.submitConfig,
@@ -781,13 +859,30 @@ export function F0AiFormRegistryProvider({
       // using the captured values so AI-filled data is not lost
       const virtualDef = availableFormDefinitions?.find((d) => d.name === name)
       if (virtualDef) {
-        const originalDefaults = resolveDefaultValues(virtualDef.defaultValues)
+        const originalDefaults =
+          typeof virtualDef.defaultValues === "function"
+            ? {}
+            : resolveDefaultValues(virtualDef.defaultValues)
         const mergedDefaults = { ...originalDefaults, ...currentValues }
         const { ref: virtualRef, dirtyFields } = createVirtualFormRef(
           virtualDef.schema,
           mergedDefaults,
           virtualDef.onSubmit
         )
+        const virtualDefDefaultValuesFn =
+          typeof virtualDef.defaultValues === "function"
+            ? (() => {
+                const fn = virtualDef.defaultValues
+                return async (params: Record<string, unknown>) => {
+                  const result = fn(params as never)
+                  return (
+                    typeof (result as Promise<unknown>)?.then === "function"
+                      ? await result
+                      : result
+                  ) as Record<string, unknown>
+                }
+              })()
+            : undefined
         registryRef.current.set(name, {
           ref: virtualRef,
           schema: virtualDef.schema,
@@ -796,6 +891,8 @@ export function F0AiFormRegistryProvider({
           sections: virtualDef.sections,
           virtual: true,
           defaultValuesParamsSchema: virtualDef.defaultValuesParamsSchema,
+          defaultValuesFn: virtualDefDefaultValuesFn,
+          defaultValuesParams: entry?.defaultValuesParams,
           dirtyFields,
           onSubmit: virtualDef.onSubmit,
           steps: virtualDef.steps,
@@ -852,6 +949,19 @@ export function F0AiFormRegistryProvider({
     rebuildDescriptions()
   }, [rebuildDescriptions])
 
+  const updateActiveFormDefaultValuesParams = useCallback(
+    (formName: string, params: Record<string, unknown> | undefined) => {
+      const entry = registryRef.current.get(formName)
+      if (!entry) return
+      entry.defaultValuesParams = params
+      // No rebuildDescriptions here — writing to the entry is enough.
+      // The params will appear in the next natural rebuild (e.g. fillForm).
+      // Triggering a rebuild here would cause a re-render cascade:
+      // rebuild → registry state change → coagent sync → setState → re-render.
+    },
+    []
+  )
+
   const incrementFillVersion = useCallback((formName: string) => {
     const current = fillVersionsRef.current.get(formName) ?? 0
     fillVersionsRef.current.set(formName, current + 1)
@@ -859,11 +969,56 @@ export function F0AiFormRegistryProvider({
 
   const resetFillVersion = useCallback((formName: string) => {
     fillVersionsRef.current.delete(formName)
+    defaultValuesResolvingRef.current.delete(formName)
+    defaultsEverResolvedRef.current.delete(formName)
+    fillQueueRef.current.delete(formName)
   }, [])
 
   const getFillVersion = useCallback((formName: string) => {
     return fillVersionsRef.current.get(formName) ?? 0
   }, [])
+
+  const isDefaultValuesResolved = useCallback((formName: string) => {
+    return !defaultValuesResolvingRef.current.has(formName)
+  }, [])
+
+  const markDefaultValuesResolving = useCallback((formName: string) => {
+    defaultValuesResolvingRef.current.add(formName)
+  }, [])
+
+  const markDefaultValuesResolved = useCallback(
+    (formName: string, paramsKey?: string | null) => {
+      defaultValuesResolvingRef.current.delete(formName)
+      defaultsEverResolvedRef.current.set(formName, paramsKey ?? null)
+      const queue = fillQueueRef.current.get(formName)
+      if (queue?.length) {
+        fillQueueRef.current.delete(formName)
+        for (const action of queue) {
+          action()
+        }
+      }
+      rebuildDescriptions()
+    },
+    [rebuildDescriptions]
+  )
+
+  const queueFillAction = useCallback(
+    (formName: string, action: () => void) => {
+      const queue = fillQueueRef.current.get(formName) ?? []
+      queue.push(action)
+      fillQueueRef.current.set(formName, queue)
+    },
+    []
+  )
+
+  const hasDefaultValuesEverResolved = useCallback(
+    (formName: string, paramsKey?: string | null) => {
+      if (!defaultsEverResolvedRef.current.has(formName)) return false
+      if (paramsKey === undefined) return true
+      return defaultsEverResolvedRef.current.get(formName) === paramsKey
+    },
+    []
+  )
 
   // Sync virtual form definitions: register forms that aren't rendered,
   // skip if a rendered (non-virtual) form with the same name already exists.
@@ -880,11 +1035,34 @@ export function F0AiFormRegistryProvider({
       // Skip if already registered as virtual
       if (existing?.virtual) continue
 
+      // Never invoke function-type defaultValues during virtual registration.
+      // They fire side effects (API calls) for ALL definitions, not just the active one.
+      // Functions are preserved as defDefaultValuesFn and resolved later:
+      // - With params: AI calls defaultValuesFn when the form becomes active
+      // - Without params: useAsyncDefaultValues resolves when the form renders
+      const initialValues =
+        typeof def.defaultValues === "function"
+          ? {}
+          : resolveDefaultValues(def.defaultValues)
       const { ref: virtualRef, dirtyFields } = createVirtualFormRef(
         def.schema,
-        resolveDefaultValues(def.defaultValues),
+        initialValues,
         def.onSubmit
       )
+      const defDefaultValuesFn =
+        typeof def.defaultValues === "function"
+          ? (() => {
+              const fn = def.defaultValues
+              return async (params: Record<string, unknown>) => {
+                const result = fn(params as never)
+                return (
+                  typeof (result as Promise<unknown>)?.then === "function"
+                    ? await result
+                    : result
+                ) as Record<string, unknown>
+              }
+            })()
+          : undefined
       registryRef.current.set(def.name, {
         ref: virtualRef,
         schema: def.schema,
@@ -893,6 +1071,7 @@ export function F0AiFormRegistryProvider({
         sections: def.sections,
         virtual: true,
         defaultValuesParamsSchema: def.defaultValuesParamsSchema,
+        defaultValuesFn: defDefaultValuesFn,
         dirtyFields,
         onSubmit: def.onSubmit,
         steps: def.steps,
@@ -926,21 +1105,50 @@ export function F0AiFormRegistryProvider({
     }
   }, [availableFormDefinitions, rebuildDescriptions])
 
-  const value: F0AiFormRegistryContextValue = {
-    register,
-    unregister,
-    get,
-    getFormNames,
-    rebuildDescriptions,
-    formsOnCurrentPage,
-    availableForms,
-    activeForm,
-    setActiveForm,
-    clearActiveForm,
-    incrementFillVersion,
-    resetFillVersion,
-    getFillVersion,
-  }
+  const value: F0AiFormRegistryContextValue = useMemo(
+    () => ({
+      register,
+      unregister,
+      get,
+      getFormNames,
+      rebuildDescriptions,
+      formsOnCurrentPage,
+      availableForms,
+      activeForm,
+      setActiveForm,
+      clearActiveForm,
+      updateActiveFormDefaultValuesParams,
+      incrementFillVersion,
+      resetFillVersion,
+      getFillVersion,
+      isDefaultValuesResolved,
+      markDefaultValuesResolving,
+      markDefaultValuesResolved,
+      queueFillAction,
+      hasDefaultValuesEverResolved,
+    }),
+    [
+      register,
+      unregister,
+      get,
+      getFormNames,
+      rebuildDescriptions,
+      formsOnCurrentPage,
+      availableForms,
+      activeForm,
+      setActiveForm,
+      clearActiveForm,
+      updateActiveFormDefaultValuesParams,
+      incrementFillVersion,
+      resetFillVersion,
+      getFillVersion,
+      isDefaultValuesResolved,
+      markDefaultValuesResolving,
+      markDefaultValuesResolved,
+      queueFillAction,
+      hasDefaultValuesEverResolved,
+    ]
+  )
 
   return (
     <F0AiFormRegistryContext.Provider value={value}>

@@ -23,11 +23,11 @@ type FileAction = {
 }
 
 const fileItemVariants = cva({
-  base: "flex w-fit flex-row items-center overflow-hidden bg-f1-background-tertiary",
+  base: "flex w-fit flex-row items-center overflow-hidden bg-f1-background-tertiary rounded-[10px]",
   variants: {
     size: {
-      md: "max-w-40 gap-2 rounded p-0.5",
-      lg: "max-w-56 gap-2.5 rounded p-1",
+      md: "max-w-48 gap-2 py-0.5 pl-0.5 pr-1.5",
+      lg: "max-w-56 gap-2.5 p-1",
     },
   },
   defaultVariants: {
@@ -38,11 +38,11 @@ const fileItemVariants = cva({
 type FileItemSize = NonNullable<VariantProps<typeof fileItemVariants>["size"]>
 
 const avatarSizeMap: Record<FileItemSize, "sm" | "md"> = {
-  md: "sm",
+  md: "md",
   lg: "md",
 }
 
-const iconSizeMap: Record<FileItemSize, "sm" | "md"> = {
+const buttonSizeMap: Record<FileItemSize, "sm" | "md"> = {
   md: "sm",
   lg: "md",
 }
@@ -88,7 +88,7 @@ const _FileItem = forwardRef<HTMLDivElement, FileItemProps>(
           (singleAction ? (
             <F0Button
               label={singleAction.label}
-              size={iconSizeMap[size]}
+              size={buttonSizeMap[size]}
               icon={singleAction.icon ?? CrossedCircle}
               disabled={disabled}
               onClick={disabled ? undefined : singleAction.onClick}
@@ -99,7 +99,7 @@ const _FileItem = forwardRef<HTMLDivElement, FileItemProps>(
             <DropdownInternal
               items={dropdownItems}
               icon={Ellipsis}
-              size={iconSizeMap[size]}
+              size={buttonSizeMap[size]}
             />
           ))}
       </div>

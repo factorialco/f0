@@ -1,19 +1,68 @@
-import { CopilotKitProps } from "@copilotkit/react-core"
-import { type AIMessage, type Message } from "@copilotkit/shared"
-
-import type { ModuleId } from "@/components/avatars/F0AvatarModule"
-
 import { IconType } from "@/components/F0Icon"
 import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
 
-import type { CanvasActions } from "./canvas/types"
-import type { ChatDashboardConfig } from "./canvas/entities/dashboard/types"
-import type { DataDownloadDataset } from "./actions/core/dataDownload/types"
+import type {
+  CanvasActions,
+  CanvasContent,
+  CanvasContentBase,
+  CanvasEntityDefinition,
+  DashboardCanvasContent,
+  DataDownloadCanvasContent,
+  FormCanvasContent,
+} from "../canvas/types"
+
+/**
+ * Loose message shape used inside f0. Mirrors the CopilotKit `Message`
+ * shape so adapters (factorial, mock runtime) can map back and forth
+ * with no field rename, but is owned by f0 — nothing in `src/` imports
+ * from `@copilotkit/*` anymore.
+ */
+export type F0ToolCall = {
+  id: string
+  type?: "function"
+  function: {
+    name: string
+    arguments: string
+  }
+}
+
+export type F0Message = {
+  id: string
+  role: "user" | "assistant" | "system" | "tool"
+  content?: unknown
+  toolCalls?: F0ToolCall[]
+  toolCallId?: string
+  createdAt?: string
+  generativeUI?: () => unknown
+  rawData?: unknown
+  /**
+   * Reply quote text attached to the message by the composer. Rendered
+   * as a block above the user bubble. Adapters (factorial / mock) own
+   * the wire encoding; F0 only reads this structured field.
+   */
+  replyQuote?: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any
+}
+
+/** Assistant-flavoured `F0Message`. Same shape — alias kept for clarity. */
+export type F0AIMessage = F0Message
+
+// Re-export canvas content types for backwards-compatible public API
+export type {
+  CanvasContent,
+  CanvasContentBase,
+  DashboardCanvasContent,
+  DataDownloadCanvasContent,
+  FormCanvasContent,
+}
+
 export type { PersonProfile } from "./components/markdownRenderers/entityRef/entities/person/types"
 export type { CandidateProfile } from "./components/markdownRenderers/entityRef/entities/candidate/types"
 export type { JobPostingProfile } from "./components/markdownRenderers/entityRef/entities/jobPosting/types"
 export type { RequisitionProfile } from "./components/markdownRenderers/entityRef/entities/requisition/types"
 export type { VacancyProfile } from "./components/markdownRenderers/entityRef/entities/vacancy/types"
+export type { ExpenseProfile } from "./components/markdownRenderers/entityRef/entities/expense/types"
 export type {
   EntityResolvers,
   EntityUrlBuilders,
@@ -72,81 +121,14 @@ export type PendingContext = {
 }
 
 /**
- * Base shape shared by all canvas content types.
- * Every entity adds its own fields on top of this.
+ * Quoted fragment the user is replying to. Shown as a chip above the
+ * textarea and, on submit, rendered as a markdown blockquote at the top of
+ * the resulting user message. The blockquote alone is enough context — the
+ * conversation thread tells the agent what it refers to.
  */
-export type CanvasContentBase = {
-  type: string
-  title: string
-  description?: string
-  toolCallId?: string
-}
-
-/**
- * Dashboard canvas content — renders an analytics dashboard.
- */
-export type DashboardCanvasContent = CanvasContentBase & {
-  type: "dashboard"
-  config: ChatDashboardConfig
-  apiConfig: { baseUrl: string; headers: Record<string, string> }
-  /** Present when the dashboard is a pre-saved dashboard */
-  savedDashboardId?: string
-  /** Category of the saved dashboard */
-  savedDashboardCategory?: string
-  /** Description of the saved dashboard */
-  savedDashboardDescription?: string
-  /** True when the agent has iterated on a saved dashboard but the user hasn't saved yet */
-  savedDashboardUnsaved?: boolean
-}
-
-/**
- * Form canvas content — renders an interactive F0Form in the canvas panel.
- */
-export type FormCanvasContent = CanvasContentBase & {
-  type: "form"
-  formName: string
-  formDescription?: string
-  formModule?: ModuleId
-}
-/**
- * Data download canvas content — renders a full data table with download options.
- */
-export type DataDownloadCanvasContent = CanvasContentBase & {
-  type: "dataDownload"
-  dataset: DataDownloadDataset
-  filename?: string
-  markdown?: string
-}
-
-/**
- * Discriminated union for canvas panel content.
- * Add new entity types to this union as they are implemented.
- */
-export type CanvasContent =
-  | DashboardCanvasContent
-  | FormCanvasContent
-  | DataDownloadCanvasContent
-
-/**
- * A tool hint that can be activated to prepend invisible context to the user's
- * message, telling the AI about the user's intent (e.g. "generate tables",
- * "data analysis"). Similar to Gemini's tool selector UI.
- *
- * Only one tool hint can be active at a time. It persists across messages
- * until the user explicitly removes it.
- */
-export type AiChatToolHint = {
-  /** Unique identifier for this tool hint */
-  id: string
-  /** Display label shown in the selector and chip */
-  label: string
-  /** Optional icon shown in the selector and chip */
-  icon?: IconType
-  /**
-   * Prompt text injected as invisible context before the user's message.
-   * The AI receives this but the user never sees it in the chat.
-   */
-  prompt: string
+export type PendingQuote = {
+  /** Plain-text selection (markdown stripped by the browser's toString()). */
+  text: string
 }
 
 /**
@@ -192,6 +174,40 @@ export type AiChatCreditWarning = {
 }
 
 /**
+ * Employee credits usage data returned by the host app.
+ *
+ * Represents the logged-in employee's personal monthly allocation,
+ * independent of any company-wide pool.
+ */
+export type EmployeeCreditsUsage = {
+  used: number
+  total: number
+}
+
+/**
+ * Employee credits configuration for the AI chat.
+ *
+ * Independent from `credits` (the classic company-level popover).
+ * When provided, a separate, employee-only credits popover trigger is shown
+ * in the chat header **instead of** the classic one — the host opts into
+ * this mode by passing `employeeCredits` only for employees who have a
+ * per-employee monthly allocation configured.
+ *
+ * Hosts that don't use per-employee allocations should keep using `credits`
+ * and leave `employeeCredits` undefined; behavior is unchanged.
+ */
+export type AiChatEmployeeCredits = {
+  /** Async function to fetch the employee's credits usage. Called each time the popover opens. */
+  fetchUsage: () => Promise<EmployeeCreditsUsage>
+  /** Company name displayed in the popover header. */
+  companyName?: string
+  /** Company logo URL displayed in the popover header. */
+  companyLogoUrl?: string
+  /** Plan name displayed below the company name (e.g. "Free plan", "Enterprise"). */
+  planName?: string
+}
+
+/**
  * Interaction mode for the AI chat
  */
 export type AiChatMode = "chat" | "voice"
@@ -220,12 +236,24 @@ export type AiChatFileAttachmentConfig = {
   maxFiles?: number
 }
 
+/**
+ * Payload for `tracking.onWelcomeSuggestionClick`. Carries everything an
+ * analytics layer (e.g. Amplitude) needs to attribute the click: the picked
+ * sub-item, its parent group, and the resolved prompt that was actually sent.
+ */
+export type WelcomeSuggestionClickEvent = {
+  item: WelcomeScreenSuggestionItem
+  group: WelcomeScreenSuggestion
+  /** Prompt actually sent to the AI — `item.prompt` falling back to `item.title`. */
+  prompt: string
+}
+
 export type AiChatTrackingOptions = {
   onVisibility?: () => void
   onClose?: () => void
-  onWelcomeSuggestionClick?: (suggestion: WelcomeScreenSuggestion) => void
+  onWelcomeSuggestionClick?: (event: WelcomeSuggestionClickEvent) => void
   onNewChat?: () => void
-  onMessage?: (message: Message) => void
+  onMessage?: (message: F0Message) => void
 }
 
 /**
@@ -233,7 +261,11 @@ export type AiChatTrackingOptions = {
  */
 export type AiChatProviderProps = {
   enabled?: boolean
-  greeting?: string
+  /**
+   * Greeting phrase(s) shown by the welcome screen when the chat is empty.
+   * A single string renders once; an array rotates through phrases. Purely
+   * UI config — does not affect runtime behavior.
+   */
   initialMessage?: string | string[]
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
   disclaimer?: AiChatDisclaimer
@@ -280,16 +312,28 @@ export type AiChatProviderProps = {
    */
   canvasActions?: CanvasActions
   /**
-   * Available tool hints that the user can activate to provide intent context
-   * to the AI. Renders a selector button next to the send button.
-   * Only one tool hint can be active at a time.
+   * Canvas entity definitions keyed by `CanvasContent["type"]`. The canvas
+   * panel looks up the matching definition when `openCanvas` is called.
+   *
+   * F0AiChat ships without built-in canvas entities; the host app supplies
+   * them here so canvas logic lives in one place.
    */
-  toolHints?: AiChatToolHint[]
+  canvasEntities?: Record<string, CanvasEntityDefinition>
   /**
    * Credits configuration. When provided, a credits button is shown in the chat header.
    * Groups fetchUsage, upgradePlanUrl, and company/plan display info.
    */
   credits?: AiChatCredits
+  /**
+   * Employee-only credits configuration. When provided, replaces the classic
+   * `credits` popover trigger with a simpler employee-only popover that shows
+   * just the logged-in employee's monthly allocation. Hosts opt in by passing
+   * this only when an employee has a configured per-employee allocation.
+   *
+   * Takes precedence over `credits` — when both are provided, only the
+   * employee-only popover is rendered.
+   */
+  employeeCredits?: AiChatEmployeeCredits
   /**
    * Credit warning configuration. When provided, shows a warning banner above the chat textarea.
    * Groups severity level and action callbacks.
@@ -300,32 +344,52 @@ export type AiChatProviderProps = {
    */
   fileAttachments?: AiChatFileAttachmentConfig
   onThumbsUp?: (
-    message: AIMessage,
+    message: F0AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
   onThumbsDown?: (
-    message: AIMessage,
+    message: F0AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
   tracking?: AiChatTrackingOptions
-} & Pick<
-  CopilotKitProps,
-  | "agent"
-  | "credentials"
-  | "children"
-  | "runtimeUrl"
-  | "showDevConsole"
-  | "threadId"
-  | "headers"
->
+  /**
+   * Optional name of the AI agent. Forwarded to the host runtime adapter
+   * (mock in stories, CopilotKit in factorial) — f0 itself only stores it.
+   */
+  agent?: string
+  /**
+   * Slot elements rendered inside `<F0AiChat />`. Host apps (factorial in
+   * production, the mock runtime in stories) provide their own connected
+   * wrappers — f0 ships only the shell. Passing slots here makes them
+   * available to any `<F0AiChat />` mounted under this provider (used by
+   * `ApplicationFrame`, which renders the chat itself).
+   */
+  chatHeader?: React.ReactNode
+  chatMessages?: React.ReactNode
+  chatInput?: React.ReactNode
+  /** Children rendered inside the provider. */
+  children?: React.ReactNode
+}
 
 /**
- * Welcome screen suggestion item
+ * A single sub-suggestion shown inside a welcome-screen group's popover.
+ * The `title` is the label users see; `prompt` is what gets sent to the AI
+ * when they click (falls back to `title` when omitted). They can diverge so
+ * you can show a short, scannable title while sending a fully-formed prompt.
+ */
+export type WelcomeScreenSuggestionItem = {
+  title: string
+  prompt?: string
+}
+
+/**
+ * A welcome-screen group rendered as an outline button in the welcome row.
+ * Clicking the group opens a popover listing its `items`.
  */
 export type WelcomeScreenSuggestion = {
   icon: IconType
-  message: string
-  prompt?: string
+  label: string
+  items: WelcomeScreenSuggestionItem[]
 }
 
 /**
@@ -335,6 +399,13 @@ export type AiChatDisclaimer = {
   text: string
   link?: string
   linkText?: string
+  /**
+   * Optional click handler on the disclaimer text. When set, the text becomes
+   * keyboard-activatable (Enter / Space) and gets a subtle hover hint. Used by
+   * the host to wire easter eggs (e.g. the pong game) without coupling f0 to
+   * any specific behaviour.
+   */
+  onClick?: () => void
 }
 
 /**

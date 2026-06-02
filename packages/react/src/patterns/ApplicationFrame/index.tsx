@@ -23,7 +23,7 @@ import {
   F0AiChatProvider,
   AiChatProviderProps,
 } from "@/sds/ai/F0AiChat"
-import { CanvasPanel } from "@/sds/ai/F0AiChat/components/layout/CanvasPanel"
+import { F0CanvasPanel } from "@/sds/ai/F0CanvasPanel"
 import { useAiChat } from "@/sds/ai/F0AiChat/providers/AiChatStateProvider"
 import { DEFAULT_CHAT_WIDTH } from "@/sds/ai/F0AiChat/utils/constants"
 
@@ -184,6 +184,8 @@ function ApplicationFrameContent({
     open: isAiChatOpen,
     visualizationMode,
     canvasContent,
+    canvasEntities,
+    closeCanvas,
     chatWidth,
     resizable,
   } = useAiChat()
@@ -329,16 +331,23 @@ function ApplicationFrameContent({
               {ai?.enabled && isCanvasMode && canvasContent && (
                 <div
                   className={cn(
-                    "pointer-events-none",
+                    // z-[21] sits above the chat wrapper (z-20 in canvas
+                    // mode) so the canvas card's right-side shadow paints
+                    // over the chat surface instead of being clipped by it.
+                    "pointer-events-none flex justify-end",
                     isSmallViewport
                       ? "fixed inset-0 z-[50]"
-                      : "absolute bottom-0 left-0 top-0 z-[15]"
+                      : "absolute bottom-0 left-0 top-0 z-[21]"
                   )}
                   style={
                     isSmallViewport ? undefined : { right: reservedChatWidth }
                   }
                 >
-                  <CanvasPanel />
+                  <F0CanvasPanel
+                    content={canvasContent}
+                    onClose={closeCanvas}
+                    entities={canvasEntities}
+                  />
                 </div>
               )}
 
@@ -351,7 +360,15 @@ function ApplicationFrameContent({
                       ? "fixed inset-0 z-[30]"
                       : cn(
                           "absolute right-0 top-0 bottom-0",
-                          isInFullscreenTransition ? "z-20" : "z-0",
+                          // In canvas mode the chat wrapper must sit above
+                          // the CanvasPanel (z-[15]) so the ResizeHandle's
+                          // hit-area (which extends a few pixels over the
+                          // canvas side of the seam) can receive hover
+                          // events — otherwise the canvas captures them
+                          // and the handle never lights up.
+                          isInFullscreenTransition || isCanvasMode
+                            ? "z-20"
+                            : "z-0",
                           sidebarState === "hidden" && isInFullscreenTransition
                             ? "pl-1"
                             : "pl-0"

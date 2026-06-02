@@ -3,14 +3,14 @@ import { forwardRef, useState } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
 import { EmojiImage } from "@/lib/emojis"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useTextFormatEnforcer } from "@/lib/text"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
+import { Counter } from "@/ui/Counter"
 
-import { OneEllipsis } from "@/lib/OneEllipsis"
 import { ButtonInternalProps } from "./internal-types"
 import { fontSizeVariants } from "./variants"
-import { Counter } from "@/ui/Counter"
 
 const IconMotion = motion.create(F0Icon)
 
@@ -26,6 +26,7 @@ const ButtonInternal = forwardRef<
     hideLabel,
     onClick,
     disabled,
+    withoutDisabledAppearance,
     loading: forceLoading,
     icon,
     emoji,
@@ -106,7 +107,13 @@ const ButtonInternal = forwardRef<
         tooltip={tooltip ?? (!noAutoTooltip && hideLabel && label)}
         onClick={handleClick}
         loading={isLoading}
-        className={cn("max-w-full", className)}
+        className={cn(
+          "max-w-full",
+          withoutDisabledAppearance &&
+            disabled &&
+            "disabled:pointer-events-none disabled:opacity-100 disabled:cursor-default",
+          className
+        )}
         mode={hideLabel ? "only" : "default"}
         aria-label={ariaLabel || props.title || buttonLabel}
         title={

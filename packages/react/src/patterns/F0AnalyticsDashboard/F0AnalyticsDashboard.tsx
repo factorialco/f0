@@ -1,16 +1,18 @@
 import { useEffect, useMemo, useState } from "react"
 
 import type {
-  FiltersDefinition,
-  FiltersState,
-} from "@/patterns/OneFilterPicker/types"
-import { NavigationFilters } from "@/patterns/OneDataCollection/components/NavigationFilters/NavigationFilters"
-import { navigationFilterTypes } from "@/patterns/OneDataCollection/navigationFilters"
-import type {
   NavigationFiltersDefinition,
   NavigationFiltersState,
 } from "@/patterns/OneDataCollection/navigationFilters/types"
+import type {
+  FiltersDefinition,
+  FiltersState,
+} from "@/patterns/OneFilterPicker/types"
+
 import { useI18n } from "@/lib/providers/i18n"
+import { cn } from "@/lib/utils"
+import { NavigationFilters } from "@/patterns/OneDataCollection/components/NavigationFilters/NavigationFilters"
+import { navigationFilterTypes } from "@/patterns/OneDataCollection/navigationFilters"
 
 import type { F0AnalyticsDashboardProps } from "./types"
 
@@ -78,13 +80,43 @@ export const F0AnalyticsDashboard = <
     filename: exportFilename,
   })
 
+  // For single-collection-item dashboards (the `tables` skill output) we
+  // suppress the canvas-level Excel export. Per-item Excel/CSV downloads are
+  // exposed instead from the DashboardItem dropdown (see
+  // `useCollectionDownloadActions`), which respects the user's current sort,
+  // hidden columns and search. The canvas Excel would run on the raw dataset
+  // and silently drop those view choices, which is confusing UX for a
+  // single-table surface. Multi-item dashboards keep the canvas Excel — it
+  // aggregates every item into a multi-sheet file, which the per-item
+  // download cannot do.
+  const isSingleCollection =
+    items.length === 1 && items[0]?.type === "collection"
+
   useEffect(() => {
+    if (isSingleCollection) {
+      onExportReady?.(undefined)
+      return
+    }
     onExportReady?.(exportAsExcel)
     return () => onExportReady?.(undefined)
-  }, [exportAsExcel, onExportReady])
+  }, [exportAsExcel, onExportReady, isSingleCollection])
+
+  // The root container switches to a fill-height layout (`h-full` + grid
+  // wrapper `flex-1`) so the grid can occupy exactly the remaining viewport
+  // height without producing scroll. Two cases trigger this:
+  //   1. The dashboard has a single item (auto-fullscreen).
+  //   2. The user clicked maximize on one item of a multi-item dashboard
+  //      (`DashboardGrid` reports the change via `onFullscreenChange`).
+  // Multi-item, non-fullscreen dashboards keep the natural-height layout —
+  // they handle scroll at the canvas-content level.
+  const isSingleItem = items.length === 1
+  const [isItemFullscreen, setIsItemFullscreen] = useState(false)
+  const fillHeight = isSingleItem || isItemFullscreen
 
   return (
-    <div className="flex flex-col gap-5 py-4">
+    <div
+      className={cn("flex flex-col gap-5 pb-10", fillHeight && "h-full pb-0")}
+    >
       {(filters || filtersLoading || enableExport || navigationFilters) && (
         <div className="flex items-center justify-between gap-4 px-5">
           <div className="w-full">
@@ -116,7 +148,12 @@ export const F0AnalyticsDashboard = <
           </div>
         </div>
       )}
-      <div className="px-5">
+      <div
+        className={cn(
+          "px-5",
+          fillHeight && "flex min-h-0 flex-1 flex-col pb-5"
+        )}
+      >
         <DashboardGrid
           items={items}
           filters={
@@ -129,6 +166,7 @@ export const F0AnalyticsDashboard = <
           onLayoutChange={onLayoutChange}
           onTransformChart={onTransformChart}
           resetKey={resetKey}
+          onFullscreenChange={setIsItemFullscreen}
         />
       </div>
     </div>

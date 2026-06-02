@@ -1,11 +1,10 @@
 import data from "@emoji-mart/data/sets/15/twitter.json"
 import EmojiPicker from "@emoji-mart/react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
-import { cn } from "@/lib/utils"
-
 import "@/kits/Social/Reactions/Picker/index.css"
+import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 export type ScoreEditOptionProps = {
@@ -29,6 +28,10 @@ export const ScoreEditOption = ({
   const { value, label } = option
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false)
 
+  useEffect(() => {
+    if (disabled) setIsEmojiPickerOpen(false)
+  }, [disabled])
+
   const handleClick = () => {
     if (disabled) return
     onClick(value)
@@ -41,8 +44,9 @@ export const ScoreEditOption = ({
 
   return (
     <div
+      data-testid={`score-edit-option-${value}`}
       className={cn(
-        "group relative flex h-10 min-w-20 flex-1 items-center justify-center rounded-md border border-solid border-f1-border-secondary text-center font-medium",
+        "group relative flex h-10 min-w-20 flex-1 items-center justify-center rounded-md border border-solid border-f1-border text-center font-medium",
         selected &&
           "border-f1-border-selected bg-f1-background-selected-secondary",
         !disabled ? "cursor-pointer" : "cursor-default"
@@ -50,12 +54,17 @@ export const ScoreEditOption = ({
       onClick={handleClick}
     >
       {isEmojiMode ? (
-        <Popover open={isEmojiPickerOpen} onOpenChange={setIsEmojiPickerOpen}>
+        <Popover
+          open={!disabled && isEmojiPickerOpen}
+          onOpenChange={disabled ? undefined : setIsEmojiPickerOpen}
+        >
           <PopoverTrigger asChild>
             <F0Button
               emoji={label}
               label={value.toString()}
               variant="ghost"
+              disabled={disabled}
+              withoutDisabledAppearance
               hideLabel
             />
           </PopoverTrigger>

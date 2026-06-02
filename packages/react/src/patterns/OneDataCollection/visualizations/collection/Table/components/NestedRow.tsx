@@ -16,7 +16,7 @@
  *
  */
 
-import { forwardRef, useCallback, useRef } from "react"
+import { forwardRef, useCallback, useEffect, useRef } from "react"
 
 import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
 
@@ -129,8 +129,13 @@ const NestedRowContent = <
 
   const rowId = `${props.nestedRowProps?.depth ?? 0}-${"id" in props.item ? props.item.id + "-" + props.index : props.index}`
 
-  const { expandedRowIds, setRowExpanded } = useNestedDataContext()
-  const open = expandedRowIds[rowId] ?? false
+  const { expandedRowIds, setRowExpanded, defaultExpandedIds } =
+    useNestedDataContext()
+  const itemId = "id" in props.item ? props.item.id : undefined
+  const isDefaultExpanded =
+    itemId !== undefined &&
+    (defaultExpandedIds?.includes(itemId as string | number) ?? false)
+  const open = expandedRowIds[rowId] ?? isDefaultExpanded
 
   /**
    * useLoadChildren hook manages:
@@ -171,11 +176,12 @@ const NestedRowContent = <
    * the vertical line connecting them to their parent
    */
   const { calculatedHeight, setFirstChildRef, setLastChildRef } =
-    useCalculateConectorHeight(
-      childrenType,
-      !!shouldShowLoadMore || hasAddRowActions,
-      isSticky
-    )
+    useCalculateConectorHeight({
+      nestedVariant: childrenType,
+      withHasMore: !!shouldShowLoadMore,
+      withAddRowActions: hasAddRowActions,
+      isSticky,
+    })
 
   /**
    * Combine internal and external refs
@@ -205,6 +211,18 @@ const NestedRowContent = <
       loadChildren()
     }
   }
+
+  // When defaultExpandAllRows is set, rows render with `open === true` on
+  // first mount without any user interaction — so handleExpand never fires.
+  // Trigger the initial fetch here so children load eagerly.
+  const didInitialLoadRef = useRef(false)
+  useEffect(() => {
+    if (didInitialLoadRef.current) return
+    if (open && !children.length && !isLoading) {
+      didInitialLoadRef.current = true
+      loadChildren()
+    }
+  }, [open, children.length, isLoading, loadChildren])
 
   const sharedNestedRowProps = {
     depth: props.nestedRowProps?.depth ?? 0,
@@ -238,7 +256,8 @@ const NestedRowContent = <
           // If nestedRowProps.parentHasChildren is not provided, we need to set it to true if the parent has children
           // This nestedRowProps.parentHasChildren is provided on children iteration
           parentHasChildren:
-            props.nestedRowProps?.parentHasChildren ?? children.length > 0,
+            (props.nestedRowProps?.parentHasChildren ?? children.length > 0) ||
+            hasAddRowActions,
           hasLoadedChildren: false,
           isLastChild,
           stickyRow: isSticky,
@@ -417,7 +436,10 @@ const NestedRowContent = <
           rowRef={internalRowRef}
           addRowActions={addRowActions}
           addRowLabel={addRow?.addNestedRowActionsLabel}
-          ref={setLastChildRef}
+          ref={(el: HTMLTableRowElement | null) => {
+            if (children.length === 0) setFirstChildRef(el)
+            setLastChildRef(el)
+          }}
           nestedRowProps={{
             ...props.nestedRowProps,
             parentHasChildren: true,

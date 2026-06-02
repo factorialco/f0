@@ -2,9 +2,9 @@ import { ChevronDown, ChevronRight } from "lucide-react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
-import { NestedRowProps } from "@/patterns/OneDataCollection/visualizations/collection/Table/components/Row"
 import { Add, ArrowDown } from "@/icons/app"
 import { cn } from "@/lib/utils"
+import { NestedRowProps } from "@/patterns/OneDataCollection/visualizations/collection/Table/components/Row"
 
 import {
   CHEVRON_PARENT_SIZE,
@@ -91,7 +91,10 @@ export const NestedCell = ({
     >
       {onAddRow ? (
         <div
-          className={cn("pointer-events-auto flex items-center w-full h-full")}
+          className={cn(
+            "pointer-events-auto flex items-center w-full h-full",
+            detailedVariant && "pl-3"
+          )}
         >
           {onAddRow.actions.length === 1 ? (
             <F0Button
@@ -201,7 +204,7 @@ export const NestedCell = ({
           </div>
           <div
             className={cn(
-              firstCellWithChildren && "min-w-0 w-full",
+              firstCellWithChildren && "min-w-0 w-full h-full",
               firstCellWithNoChildrenAndTableChildren &&
                 "pl-[var(--spacing-factor)]",
               "relative"

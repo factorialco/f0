@@ -100,6 +100,38 @@ export const BasicEditableTable: Story = {
   },
 }
 
+export const EditableTableWithSelectableRows: Story = {
+  render: () => {
+    const mockVisualizations = getMockVisualizations({
+      table: {
+        nestedRecords: true,
+      },
+    })
+    const { dataAdapter, onCellChange } = useEditableTableData()
+    return (
+      <ExampleComponent
+        selectable={() => ""}
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...(
+                mockVisualizations.editableTable as Extract<
+                  typeof mockVisualizations.editableTable,
+                  { type: "editableTable" }
+                >
+              ).options,
+              onCellChange,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        id="editable-table-selectable/v1"
+      />
+    )
+  },
+}
+
 export const EditableTableWithColumnSettings: Story = {
   render: () => {
     const mockVisualizations = getMockVisualizations({
@@ -1037,6 +1069,79 @@ export const EditableTableWithDateCell: Story = {
   },
 }
 
+export const EditableTableWithDateCellMinMax: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Editable date cells constrained with `dateConfig.minDate` / `dateConfig.maxDate`. Dates outside the range are disabled in the picker.",
+      },
+    },
+  },
+  render: () => {
+    const { dataAdapter, onCellChange } = useEditableTableData()
+
+    const baseOptions = (
+      getMockVisualizations().editableTable as Extract<
+        ReturnType<typeof getMockVisualizations>["editableTable"],
+        { type: "editableTable" }
+      >
+    ).options
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const oneYearOut = new Date(today)
+    oneYearOut.setFullYear(oneYearOut.getFullYear() + 1)
+
+    return (
+      <ExampleComponent
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...baseOptions,
+              columns: [
+                {
+                  label: "Name",
+                  render: (item: MockUser) => ({
+                    type: "person" as const,
+                    value: {
+                      firstName: item.name.split(" ")[0],
+                      lastName: item.name.split(" ")[1],
+                    },
+                  }),
+                  id: "name",
+                },
+                {
+                  label: "Start date (no past dates)",
+                  id: "startDate",
+                  render: (item: MockUser) =>
+                    format(item.joinedAt, "yyyy-MM-dd"),
+                  editType: () => "date" as const,
+                  inputPlaceholder: "DD/MM/YYYY",
+                  dateConfig: { minDate: today },
+                },
+                {
+                  label: "End date (today → +1y)",
+                  id: "endDate",
+                  render: (item: MockUser) =>
+                    format(item.joinedAt, "yyyy-MM-dd"),
+                  editType: () => "date" as const,
+                  inputPlaceholder: "DD/MM/YYYY",
+                  dateConfig: { minDate: today, maxDate: oneYearOut },
+                },
+              ],
+              onCellChange,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        id="editable-table-date-min-max/v1"
+      />
+    )
+  },
+}
+
 export const TableAndEditableTable: Story = {
   parameters: {
     docs: {
@@ -1192,6 +1297,200 @@ export const EditableTableWithIconOnlyActions: Story = {
           },
         ]}
         id="editable-table-icon-only-actions/v1"
+      />
+    )
+  },
+}
+
+/**
+ * Demonstrates dynamic per-row units via `numberConfig.units` as a function.
+ * Roles show "h" (hours), simple items show "u" (units).
+ */
+export const DynamicUnitsPerRow: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Shows numberConfig.units as a per-row function with nested rows. Parent phases show "h" (hours), child tasks show "u" (units) and child roles show "h" (hours).',
+      },
+    },
+  },
+  render: () => {
+    type LineItem = RecordType & {
+      name: string
+      email: string
+      department: (typeof import("@/mocks").DEPARTMENTS_MOCK)[number]
+      itemType: "phase" | "task" | "role"
+      quantity: number
+      children?: LineItem[]
+    }
+
+    const makeItem = (
+      overrides: Pick<LineItem, "id" | "name" | "itemType" | "quantity"> & {
+        children?: LineItem[]
+      }
+    ): LineItem => ({
+      index: 0,
+      email: "",
+      department: "Engineering",
+      ...overrides,
+    })
+
+    const initialItems: LineItem[] = [
+      makeItem({
+        id: "phase-1",
+        name: "Design phase",
+        itemType: "phase",
+        quantity: 40,
+        children: [
+          makeItem({
+            id: "task-1",
+            name: "Wireframes",
+            itemType: "task",
+            quantity: 16,
+          }),
+          makeItem({
+            id: "role-1",
+            name: "Senior Designer",
+            itemType: "role",
+            quantity: 24,
+          }),
+        ],
+      }),
+      makeItem({
+        id: "phase-2",
+        name: "Development phase",
+        itemType: "phase",
+        quantity: 120,
+        children: [
+          makeItem({
+            id: "task-2",
+            name: "Computers",
+            itemType: "task",
+            quantity: 80,
+          }),
+          makeItem({
+            id: "role-2",
+            name: "Senior Developer",
+            itemType: "role",
+            quantity: 40,
+          }),
+        ],
+      }),
+      makeItem({
+        id: "phase-3",
+        name: "QA phase",
+        itemType: "phase",
+        quantity: 30,
+      }),
+    ]
+
+    const [items, setItems] = useState<LineItem[]>(initialItems)
+    const itemsRef = useRef(items)
+    itemsRef.current = items
+
+    const onCellChange = async (updatedItem: LineItem) => {
+      action("onCellChange")(updatedItem)
+      setItems((prev) =>
+        prev.map((i) => (i.id === updatedItem.id ? updatedItem : i))
+      )
+    }
+
+    const dataAdapter = useMemo(() => {
+      const adapter = createDataAdapter({
+        data: items,
+        paginationType: "pages",
+        perPage: 10,
+      })
+      adapter.fetchData = (fetchOptions: unknown) => {
+        const currentAdapter = createDataAdapter({
+          data: itemsRef.current,
+          paginationType: "pages",
+          perPage: 10,
+        })
+        return currentAdapter.fetchData(fetchOptions as never)
+      }
+      return adapter
+    }, [items])
+
+    const source = useDataCollectionSource<
+      LineItem,
+      Record<string, never>,
+      never,
+      never,
+      never,
+      never,
+      never
+    >({
+      dataAdapter,
+      itemsWithChildren: (item) => !!item?.children?.length,
+      childrenCount: ({ item }) => item?.children?.length,
+      fetchChildren: async ({ item }) => {
+        await new Promise((resolve) => setTimeout(resolve, 300))
+        return item.children
+          ? {
+              records: item.children,
+              type: "basic" as const,
+              paginationInfo: {
+                cursor: "",
+                total: item.children.length,
+                perPage: 10,
+                currentPage: 1,
+                pagesCount: 1,
+                hasMore: false,
+              },
+            }
+          : { records: [] }
+      },
+    })
+
+    return (
+      <OneDataCollection
+        source={source}
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              columns: [
+                {
+                  label: "Name",
+                  id: "name",
+                  width: 250,
+                  editType: () => "text" as const,
+                  render: (item: LineItem) => item.name,
+                },
+                {
+                  label: "Type",
+                  id: "itemType",
+                  editType: () => "display-only" as const,
+                  render: (item: LineItem) => item.itemType,
+                },
+                {
+                  label: "Quantity",
+                  id: "quantity",
+                  align: "right" as const,
+                  editType: (item: LineItem) =>
+                    item.itemType === "phase"
+                      ? ("disabled" as const)
+                      : ("number" as const),
+                  numberConfig: {
+                    min: 0,
+                    units: (item: LineItem) =>
+                      item.itemType === "role" || item.itemType === "phase"
+                        ? "h"
+                        : "u",
+                  },
+                  render: (item: LineItem) =>
+                    item.quantity !== undefined
+                      ? `${item.quantity} ${item.itemType === "role" || item.itemType === "phase" ? "h" : "u"}`
+                      : "",
+                },
+              ],
+              onCellChange,
+            },
+          },
+        ]}
+        id="editable-table-dynamic-units/v1"
       />
     )
   },

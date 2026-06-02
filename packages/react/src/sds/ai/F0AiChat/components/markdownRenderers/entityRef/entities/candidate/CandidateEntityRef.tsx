@@ -27,13 +27,10 @@ const CandidateTrigger = forwardRef<HTMLButtonElement, { label: string }>(
 )
 CandidateTrigger.displayName = "CandidateTrigger"
 
-/**
- * Inline candidate entity reference with a hover card showing profile details.
- *
- * Renders the trigger as a styled link. On hover, lazily fetches
- * the candidate profile via `entityRefs.resolvers.candidate` and displays
- * avatar, name, and source. Optionally links via `entityRefs.urls.candidate`.
- */
+type CandidateRow = {
+  title: string
+  value: React.ReactNode
+}
 export function CandidateEntityRef({
   id,
   label,
@@ -49,22 +46,53 @@ export function CandidateEntityRef({
 
   const mapToCard = useMemo(
     () =>
-      (profile: CandidateProfile): F0CardProps => ({
-        avatar: {
-          type: "person",
-          firstName: profile.firstName,
-          lastName: profile.lastName,
-          src: profile.avatarUrl,
-        },
-        title: `${profile.firstName} ${profile.lastName}`,
-        description: profile.source,
-        ...(candidateUrl && {
-          secondaryActions: {
-            label: i18n.t("ai.view"),
-            href: candidateUrl,
+      (profile: CandidateProfile): F0CardProps => {
+        const rows: CandidateRow[] = []
+
+        if (profile.source) {
+          rows.push({
+            title: i18n.t("ai.entityRef.candidate.source"),
+            value: profile.source,
+          })
+        }
+
+        if (profile.appliedAt) {
+          rows.push({
+            title: i18n.t("ai.entityRef.candidate.applied"),
+            value: profile.appliedAt,
+          })
+        }
+
+        return {
+          avatar: {
+            type: "person",
+            firstName: profile.firstName,
+            lastName: profile.lastName,
+            src: profile.avatarUrl,
           },
-        }),
-      }),
+          title: `${profile.firstName} ${profile.lastName}`,
+          ...(rows.length > 0 && {
+            children: (
+              <div className="flex flex-col gap-2">
+                {rows.map((row) => (
+                  <div key={row.title} className="flex flex-col">
+                    <p className="text-f1-foreground-secondary">{row.title}</p>
+                    <div className="flex items-center gap-1.5 font-medium text-f1-foreground">
+                      {row.value}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ),
+          }),
+          ...(candidateUrl && {
+            secondaryActions: {
+              label: i18n.t("ai.view"),
+              href: candidateUrl,
+            },
+          }),
+        }
+      },
     [i18n, candidateUrl]
   )
 

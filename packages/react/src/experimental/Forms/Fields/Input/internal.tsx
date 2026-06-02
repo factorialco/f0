@@ -12,7 +12,7 @@ import { InputFieldProps } from "@/ui/InputField"
 
 export type InputInternalProps<T extends string> = Pick<
   ComponentProps<typeof ShadcnInput>,
-  "ref"
+  "ref" | "id" | "aria-describedby" | "aria-invalid"
 > &
   Pick<
     InputFieldProps<T>,
@@ -38,6 +38,8 @@ export type InputInternalProps<T extends string> = Pick<
     | "hideMaxLength"
     | "loading"
     | "transparent"
+    | "onBlur"
+    | "readonly"
   > & {
     type?: Exclude<HTMLInputTypeAttribute, "number">
     onPressEnter?: () => void

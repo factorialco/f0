@@ -51,7 +51,13 @@ export function EditableCellRenderer<
     return <>{children}</>
   }
 
-  const { localItem, cellErrors, cellLoading, handleCellChange } = editableCtx
+  const {
+    localItem,
+    cellErrors,
+    cellLoading,
+    handleCellChange,
+    batchCellChanges,
+  } = editableCtx
   const editableColumn = column as EditableTableColumnDefinition<
     R,
     Sortings,
@@ -62,9 +68,32 @@ export function EditableCellRenderer<
 
   const hasId = editableColumn.id !== undefined
 
-  const onChange = (value: string) => {
+  const onChange = (
+    value: string | null,
+    context?: { selectedItem?: RecordType }
+  ) => {
     if (editableColumn.id !== undefined) {
-      handleCellChange(editableColumn.id, value)
+      const formula = editableColumn.formula
+
+      if (formula) {
+        const formulaUpdates: Record<string, unknown> = {}
+
+        formula({
+          value,
+          item: localItem,
+          selectedItem: context?.selectedItem,
+          setCellValue: (columnId, nextValue) => {
+            formulaUpdates[columnId] = nextValue
+          },
+        })
+
+        batchCellChanges({
+          [editableColumn.id]: value,
+          ...formulaUpdates,
+        })
+      } else {
+        handleCellChange(editableColumn.id, value)
+      }
     }
   }
 
@@ -96,6 +125,7 @@ export function EditableCellRenderer<
             isLastColumn={isLastColumn}
             loading={loading}
             onChange={onChange}
+            hint={editableColumn.cellHint?.(localItem)}
           />
         </div>
       )

@@ -7,7 +7,7 @@ import { zeroRender as render } from "../../../../../../testing/test-utils"
 import { EditableCellProps } from "../components/cells"
 import { NumberCell } from "../components/cells/NumberCell"
 
-type TestRecord = { id: string; salary: number }
+type TestRecord = { id: string; salary: number; currency?: string }
 
 function makeEditableColumn(
   overrides: Partial<EditableCellProps<TestRecord>["editableColumn"]> = {}
@@ -34,11 +34,11 @@ describe("NumberCell", () => {
     expect(input).toHaveValue("42000")
   })
 
-  it("renders 0 when value is an empty string", () => {
+  it("renders empty when value is an empty string", () => {
     render(<NumberCell {...defaultProps} value="" />)
 
     const input = screen.getByRole("textbox")
-    expect(input).toHaveValue("0")
+    expect(input).toHaveValue("")
   })
 
   it("calls onChange with the serialized string value", async () => {
@@ -53,7 +53,7 @@ describe("NumberCell", () => {
     expect(onChange).toHaveBeenCalledWith("5")
   })
 
-  it("calls onChange with '0' when value is cleared", async () => {
+  it("calls onChange with null when value is cleared", async () => {
     const user = userEvent.setup()
     const onChange = vi.fn()
 
@@ -62,7 +62,7 @@ describe("NumberCell", () => {
     const input = screen.getByRole("textbox")
     await user.clear(input)
 
-    expect(onChange).toHaveBeenCalledWith("0")
+    expect(onChange).toHaveBeenCalledWith(null)
   })
 
   it("does not call onChange when value is unchanged", () => {
@@ -143,6 +143,22 @@ describe("NumberCell", () => {
     )
 
     expect(screen.getByRole("textbox")).toHaveValue("0")
+    expect(screen.getByText("€")).toBeInTheDocument()
+  })
+
+  it("resolves units from a function based on the item", () => {
+    render(
+      <NumberCell
+        {...defaultProps}
+        item={{ id: "1", salary: 42000, currency: "€" }}
+        editableColumn={makeEditableColumn({
+          numberConfig: {
+            units: (item: TestRecord) => item.currency,
+          },
+        })}
+      />
+    )
+
     expect(screen.getByText("€")).toBeInTheDocument()
   })
 })

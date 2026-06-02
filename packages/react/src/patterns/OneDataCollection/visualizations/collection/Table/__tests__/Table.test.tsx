@@ -2,7 +2,11 @@ import { act, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
-import type { GroupingDefinition, SortingsDefinition } from "@/hooks/datasource"
+import type {
+  GroupingDefinition,
+  GroupingState,
+  SortingsDefinition,
+} from "@/hooks/datasource"
 
 import { TextCell } from "@/ui/value-display/types/text"
 import { useDataCollectionData } from "@/patterns/OneDataCollection/hooks/useDataCollectionData/useDataCollectionData"
@@ -34,6 +38,10 @@ type Person = {
   name: string
   email: string
   displayName: string
+}
+
+type NestedPerson = Person & {
+  hasChildren?: boolean
 }
 
 const testData: Person[] = [
@@ -104,7 +112,7 @@ window.IntersectionObserver = MockIntersectionObserver
 
 describe("TableCollection", () => {
   describe("rendering", () => {
-    it("shows loading state initially", () => {
+    it("shows loading state initially", async () => {
       render(
         <TableCollection<
           Person,
@@ -206,10 +214,152 @@ describe("TableCollection", () => {
         })
       })
     })
-  })
 
-  describe("edge cases", () => {
-    it("handles empty data gracefully", async () => {
+    it("eagerly loads only rows listed in defaultExpandedIds", async () => {
+      const nestedParents: NestedPerson[] = [
+        {
+          id: 1,
+          name: "Parent 1",
+          email: "parent1@example.com",
+          displayName: "Dr. Parent 1",
+          hasChildren: true,
+        },
+        {
+          id: 2,
+          name: "Parent 2",
+          email: "parent2@example.com",
+          displayName: "Dr. Parent 2",
+          hasChildren: true,
+        },
+      ]
+
+      const childrenByParent: Record<number, NestedPerson[]> = {
+        1: [
+          {
+            id: 101,
+            name: "Child of Parent 1",
+            email: "child1@example.com",
+            displayName: "Dr. Child of Parent 1",
+            hasChildren: false,
+          },
+        ],
+        2: [
+          {
+            id: 201,
+            name: "Child of Parent 2",
+            email: "child2@example.com",
+            displayName: "Dr. Child of Parent 2",
+            hasChildren: false,
+          },
+        ],
+      }
+
+      const fetchChildrenMock = vi.fn(({ item }: { item: NestedPerson }) => {
+        return childrenByParent[item.id] ?? []
+      })
+
+      const source = {
+        ...createTestSource(nestedParents),
+        fetchChildren: fetchChildrenMock,
+        itemsWithChildren: (item: NestedPerson) => !!item.hasChildren,
+        defaultExpandedIds: [1],
+      }
+
+      render(
+        <TableCollection<
+          NestedPerson,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<NestedPerson>,
+          TestNavigationFilters,
+          GroupingDefinition<NestedPerson>
+        >
+          columns={testColumns}
+          source={source}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(fetchChildrenMock).toHaveBeenCalledTimes(1)
+      })
+
+      expect(fetchChildrenMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          item: expect.objectContaining({ id: 1 }),
+        })
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("Child of Parent 1")).toBeInTheDocument()
+      })
+
+      expect(screen.queryByText("Child of Parent 2")).not.toBeInTheDocument()
+    })
+
+    it("does not eagerly load children when defaultExpandedIds is empty", async () => {
+      const nestedParents: NestedPerson[] = [
+        {
+          id: 1,
+          name: "Parent without default expansion",
+          email: "parent@example.com",
+          displayName: "Dr. Parent without default expansion",
+          hasChildren: true,
+        },
+      ]
+
+      const fetchChildrenMock = vi.fn(() => [])
+
+      const source = {
+        ...createTestSource(nestedParents),
+        fetchChildren: fetchChildrenMock,
+        itemsWithChildren: (item: NestedPerson) => !!item.hasChildren,
+        defaultExpandedIds: [],
+      }
+
+      render(
+        <TableCollection<
+          NestedPerson,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<NestedPerson>,
+          TestNavigationFilters,
+          GroupingDefinition<NestedPerson>
+        >
+          columns={testColumns}
+          source={source}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("Parent without default expansion")
+        ).toBeInTheDocument()
+      })
+
+      expect(fetchChildrenMock).not.toHaveBeenCalled()
+    })
+
+    it("applies minWidth to header and row cells", async () => {
+      const columnsWithMinWidth = [
+        {
+          label: "name",
+          render: (item: Person) => item.name,
+          minWidth: 220,
+        },
+        {
+          label: "email",
+          render: (item: Person) => item.email,
+        },
+      ]
+
       render(
         <TableCollection<
           Person,
@@ -220,25 +370,78 @@ describe("TableCollection", () => {
           TestNavigationFilters,
           GroupingDefinition<Person>
         >
-          columns={testColumns}
-          source={createTestSource([])}
+          columns={columnsWithMinWidth}
+          source={createTestSource()}
           onSelectItems={vi.fn()}
           onLoadData={vi.fn()}
           onLoadError={vi.fn()}
         />
       )
 
-      // Wait for loading state to finish
       await waitFor(() => {
-        const rows = screen.getAllByRole("row")
-        expect(rows).toHaveLength(1) // Just the header row
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
       })
 
-      // Headers should still be present
-      expect(screen.getAllByRole("columnheader")).toHaveLength(2)
+      const nameHeader = screen.getByRole("columnheader", { name: "name" })
+      expect(nameHeader).toHaveStyle({ minWidth: "220px" })
+
+      const firstNameCell = screen
+        .getAllByText(testData[0].name)[0]
+        .closest("td")
+      expect(firstNameCell).toHaveStyle({ minWidth: "220px" })
     })
 
-    it("handles error states appropriately", async () => {
+    it("applies minWidth in grouped header placeholders for ungrouped columns", async () => {
+      const groupedColumns = [
+        {
+          label: "name",
+          render: (item: Person) => item.name,
+          headerGroupId: "identity",
+        },
+        {
+          label: "email",
+          render: (item: Person) => item.email,
+          minWidth: 180,
+        },
+      ]
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={groupedColumns}
+          source={createTestSource()}
+          headerGroupLabels={{ identity: "Identity" }}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const identityGroupHeader = screen.getByRole("columnheader", {
+        name: "Identity",
+      })
+      const groupedHeaderRow = identityGroupHeader.closest("tr")
+      const groupedHeaderCells = within(
+        groupedHeaderRow as HTMLElement
+      ).getAllByRole("columnheader")
+
+      const ungroupedPlaceholderHeader =
+        groupedHeaderCells[groupedHeaderCells.length - 1]
+      expect(ungroupedPlaceholderHeader).toHaveStyle({ minWidth: "180px" })
+    })
+
+    it("renders error state when data fetch fails", async () => {
       const errorMessage = "Failed to fetch data"
       const error = new Error(errorMessage)
 
@@ -1223,7 +1426,9 @@ describe("TableCollection", () => {
       // Secondary actions go to dropdown (just verify dropdown exists)
       // ItemActionsRenderer renders both desktop and mobile versions,
       // so we expect 2 buttons total (1 desktop + 1 mobile for 1 row)
-      const actionsButtons = screen.getAllByRole("button", { name: /actions/i })
+      const actionsButtons = screen.getAllByRole("button", {
+        name: /actions/i,
+      })
       expect(actionsButtons).toHaveLength(2) // Desktop + Mobile
       expect(actionsButtons[0]).toBeInTheDocument()
     })
@@ -1424,6 +1629,396 @@ describe("TableCollection", () => {
     })
   })
 
+  describe("allPagesSelection banner", () => {
+    const createSelectableSource = (
+      allPagesSelection = false,
+      totalItems = 2
+    ): DataCollectionSource<
+      Person,
+      TestFilters,
+      SortingsDefinition,
+      SummariesDefinition,
+      ItemActionsDefinition<Person>,
+      TestNavigationFilters,
+      GroupingDefinition<Person>
+    > => ({
+      ...createTestSource(),
+      selectable: (item: Person) => item.id,
+      allPagesSelection,
+      dataAdapter: {
+        paginationType: "pages",
+        perPage: totalItems,
+        fetchData: async () => ({
+          records: testData,
+          total: totalItems,
+          currentPage: 1,
+          perPage: totalItems,
+          pagesCount: 1,
+          type: "pages" as const,
+        }),
+      },
+    })
+
+    it("keeps column headers visible when items are selected", async () => {
+      const user = userEvent.setup()
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createSelectableSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // Column headers must be present before selection
+      expect(screen.getAllByRole("columnheader").length).toBeGreaterThan(0)
+
+      // Select one row via the first row's checkbox
+      const checkboxes = screen.getAllByRole("checkbox")
+      await user.click(checkboxes[1]) // index 0 is the header checkbox
+
+      // Column headers must still be present after selection
+      expect(screen.getAllByRole("columnheader").length).toBeGreaterThan(0)
+      expect(screen.getByText("name")).toBeInTheDocument()
+      expect(screen.getByText("email")).toBeInTheDocument()
+    })
+
+    it("does not render banner row when allPagesSelection is not enabled", async () => {
+      const user = userEvent.setup()
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createSelectableSource()} // allPagesSelection not enabled
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // Select one row
+      const checkboxes = screen.getAllByRole("checkbox")
+      await user.click(checkboxes[1])
+
+      await waitFor(() => {
+        // Header row is still present
+        expect(screen.getByText("name")).toBeInTheDocument()
+        expect(screen.getByText("email")).toBeInTheDocument()
+      })
+
+      // Banner content must not appear — no "Select all N items" button, no count text in thead
+      expect(
+        screen.queryByRole("button", { name: /select all/i })
+      ).not.toBeInTheDocument()
+
+      // thead must contain exactly one row (the column header row — no banner row)
+      const thead = document.querySelector("thead")
+      expect(thead?.querySelectorAll("tr")).toHaveLength(1)
+    })
+
+    it("shows allOnPage banner with 'Select all N items' button when page is fully selected and allPagesSelection is true", async () => {
+      const user = userEvent.setup()
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createSelectableSource(true, 50)}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // Select all items on the page via the header checkbox
+      const checkboxes = screen.getAllByRole("checkbox")
+      await user.click(checkboxes[0])
+
+      await waitFor(() => {
+        // "Select all 50 items" button should appear
+        expect(
+          screen.getByRole("button", { name: /select all 50/i })
+        ).toBeInTheDocument()
+      })
+    })
+
+    it("shows allItemsSelected text after clicking 'Select all N items'", async () => {
+      const user = userEvent.setup()
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createSelectableSource(true, 50)}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // Select all on page
+      const checkboxes = screen.getAllByRole("checkbox")
+      await user.click(checkboxes[0])
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", { name: /select all 50/i })
+        ).toBeInTheDocument()
+      })
+
+      // Click "Select all 50 items"
+      await user.click(screen.getByRole("button", { name: /select all 50/i }))
+
+      // "Select all N items" button should disappear (all items now selected)
+      await waitFor(() => {
+        expect(
+          screen.queryByRole("button", { name: /select all 50/i })
+        ).not.toBeInTheDocument()
+      })
+
+      // HighlightedCount splits the number into its own span so we can't use
+      // getByText directly — check via textContent instead
+      expect(document.body.textContent).toMatch(/All 50 items selected/)
+    })
+
+    it("shows header checkbox as indeterminate (unchecked + minus icon) when only some items are selected", async () => {
+      const user = userEvent.setup()
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createSelectableSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // Before selection: header checkbox is unchecked
+      const headerCheckboxBefore = screen.getAllByRole("checkbox")[0]
+      expect(headerCheckboxBefore).toHaveAttribute("aria-checked", "false")
+
+      // Select only one of two rows
+      const checkboxes = screen.getAllByRole("checkbox")
+      await user.click(checkboxes[1])
+
+      await waitFor(() => {
+        // Header checkbox is unchecked during partial selection: aria-checked="false"
+        // and data-state="unchecked" are correct for the toggle direction (clicking
+        // promotes to all-selected rather than deselecting).
+        // Note: F0Checkbox's indeterminate prop does not currently cause the minus
+        // icon to render when checked=false — Radix's Indicator only mounts when
+        // checked is truthy or "indeterminate". Forwarding Radix's indeterminate
+        // state is a known DS-level gap tracked separately.
+        const headerCheckbox = screen.getAllByRole("checkbox")[0]
+        expect(headerCheckbox).toHaveAttribute("aria-checked", "false")
+        // data-state reflects the Radix checked value — unchecked during partial
+        expect(headerCheckbox).toHaveAttribute("data-state", "unchecked")
+      })
+    })
+
+    it("shows checked header checkbox when all page items are selected", async () => {
+      const user = userEvent.setup()
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createSelectableSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // Select all via header checkbox
+      const checkboxes = screen.getAllByRole("checkbox")
+      await user.click(checkboxes[0])
+
+      await waitFor(() => {
+        const headerCheckbox = screen.getAllByRole("checkbox")[0]
+        expect(headerCheckbox).toHaveAttribute("aria-checked", "true")
+      })
+    })
+
+    it("after 'Select all N items' + deselecting one row, shows correct count and re-shows the select-all button", async () => {
+      const user = userEvent.setup()
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createSelectableSource(true, 50)}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // Select all on page via header checkbox
+      const checkboxes = screen.getAllByRole("checkbox")
+      await user.click(checkboxes[0])
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", { name: /select all 50/i })
+        ).toBeInTheDocument()
+      })
+
+      // Click "Select all 50 items"
+      await user.click(screen.getByRole("button", { name: /select all 50/i }))
+
+      await waitFor(() => {
+        expect(
+          screen.queryByRole("button", { name: /select all 50/i })
+        ).not.toBeInTheDocument()
+      })
+
+      // Deselect one row
+      const rowCheckboxes = screen.getAllByRole("checkbox")
+      await user.click(rowCheckboxes[1])
+
+      await waitFor(() => {
+        // Label must NOT say "all items selected"
+        expect(
+          screen.queryByText(/all 50 items selected/i)
+        ).not.toBeInTheDocument()
+
+        // "Select all N items" button must reappear
+        expect(
+          screen.getByRole("button", { name: /select all 50/i })
+        ).toBeInTheDocument()
+      })
+    })
+
+    it("does not show header as fully checked when cross-page selectedCount coincidentally equals page size but no current-page rows are selected", async () => {
+      // Regression test for: allSelectedStatus.selectedCount === data.records.length
+      // can be true when selections from another page match the current page size.
+      // The fix checks per-ID membership instead of comparing global counts.
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={{
+            ...createSelectableSource(true, 50),
+            // Pre-seed 2 selections with IDs that are NOT on the current page
+            // (current page has IDs 1 and 2; these are off-page IDs).
+            // selectedCount (2) would coincidentally equal data.records.length (2),
+            // triggering the bug in the old formula.
+            defaultSelectedItems: {
+              allSelected: false,
+              items: [
+                { id: 99, checked: true },
+                { id: 100, checked: true },
+              ],
+            },
+          }}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const headerCheckbox = screen.getAllByRole("checkbox")[0]
+      // No current-page row is selected — header must not appear fully checked
+      expect(headerCheckbox).toHaveAttribute("aria-checked", "false")
+      expect(headerCheckbox).toHaveAttribute("data-state", "unchecked")
+    })
+  })
+
   it("does not render add-row button when no AddRowProvider wraps the table", async () => {
     render(
       <TableCollection<
@@ -1450,5 +2045,224 @@ describe("TableCollection", () => {
     expect(
       screen.queryByRole("button", { name: /add row/i })
     ).not.toBeInTheDocument()
+  })
+  describe("grouped and selectable", () => {
+    type GroupedPerson = Person & { department: string }
+
+    const groupedTestData: GroupedPerson[] = [
+      {
+        id: 1,
+        name: "Alice",
+        email: "alice@example.com",
+        displayName: "Dr. Alice",
+        department: "Engineering",
+      },
+      {
+        id: 2,
+        name: "Bob",
+        email: "bob@example.com",
+        displayName: "Dr. Bob",
+        department: "Engineering",
+      },
+      {
+        id: 3,
+        name: "Carol",
+        email: "carol@example.com",
+        displayName: "Dr. Carol",
+        department: "Marketing",
+      },
+    ]
+
+    const groupedTestColumns = [
+      { label: "name", render: (item: GroupedPerson) => item.name },
+      { label: "email", render: (item: GroupedPerson) => item.email },
+      {
+        label: "department",
+        render: (item: GroupedPerson) => item.department,
+      },
+    ]
+
+    const createGroupedSelectableSource = (
+      data: GroupedPerson[] = groupedTestData,
+      collapsible = true
+    ): DataCollectionSource<
+      GroupedPerson,
+      TestFilters,
+      SortingsDefinition,
+      SummariesDefinition,
+      ItemActionsDefinition<GroupedPerson>,
+      TestNavigationFilters,
+      GroupingDefinition<GroupedPerson>
+    > => ({
+      currentFilters: {},
+      setCurrentFilters: vi.fn(),
+      currentSortings: null,
+      setCurrentSortings: vi.fn(),
+      currentNavigationFilters: {},
+      setCurrentNavigationFilters: vi.fn(),
+      navigationFilters: undefined,
+      currentSearch: undefined,
+      debouncedCurrentSearch: undefined,
+      setCurrentSearch: vi.fn(),
+      isLoading: false,
+      setIsLoading: vi.fn(),
+      dataAdapter: {
+        fetchData: async (_options: BaseFetchOptions<TestFilters>) => {
+          return { records: data }
+        },
+      },
+      selectable: (item: GroupedPerson) => item.id,
+      grouping: {
+        mandatory: true,
+        ...(collapsible
+          ? { collapsible: true, defaultOpenGroups: true }
+          : { collapsible: false }),
+        groupBy: {
+          department: {
+            name: "Department",
+            label: (groupId: string) => groupId,
+            itemCount: (groupId: string) =>
+              data.filter((p) => p.department === groupId).length,
+          },
+        },
+      },
+      currentGrouping: {
+        field: "department",
+        order: "asc",
+      } as GroupingState<GroupedPerson, GroupingDefinition<GroupedPerson>>,
+      setCurrentGrouping: vi.fn(),
+    })
+
+    it("renders group headers with separate checkbox cells when grouped and selectable", async () => {
+      render(
+        <TableCollection<
+          GroupedPerson,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<GroupedPerson>,
+          TestNavigationFilters,
+          GroupingDefinition<GroupedPerson>
+        >
+          columns={groupedTestColumns}
+          source={createGroupedSelectableSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          frozenColumns={2}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("Alice")).toBeInTheDocument()
+      })
+
+      // Both group headers are rendered (use getAllByText since "Engineering"
+      // also appears in department data cells)
+      expect(screen.getAllByText("Engineering").length).toBeGreaterThan(0)
+      expect(screen.getAllByText("Marketing").length).toBeGreaterThan(0)
+
+      // All data rows are rendered
+      expect(screen.getByText("Bob")).toBeInTheDocument()
+      expect(screen.getByText("Carol")).toBeInTheDocument()
+
+      // Each group header row contains a checkbox in its own cell.
+      // Target the <h6> group heading to find the group header row specifically.
+      const engineeringHeading = screen.getByRole("heading", {
+        name: "Engineering",
+      })
+      const engineeringRow = engineeringHeading.closest("tr")!
+      expect(within(engineeringRow).getByRole("checkbox")).toBeInTheDocument()
+
+      const marketingHeading = screen.getByRole("heading", {
+        name: "Marketing",
+      })
+      const marketingRow = marketingHeading.closest("tr")!
+      expect(within(marketingRow).getByRole("checkbox")).toBeInTheDocument()
+    })
+
+    it("group header checkbox toggles selection for that group's items", async () => {
+      const user = userEvent.setup()
+      const onSelectItems = vi.fn()
+
+      render(
+        <TableCollection<
+          GroupedPerson,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<GroupedPerson>,
+          TestNavigationFilters,
+          GroupingDefinition<GroupedPerson>
+        >
+          columns={groupedTestColumns}
+          source={createGroupedSelectableSource()}
+          onSelectItems={onSelectItems}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          frozenColumns={2}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("Alice")).toBeInTheDocument()
+      })
+
+      // Click the Engineering group header checkbox.
+      // Target the <h6> heading to find the group header row specifically.
+      const engineeringHeading = screen.getByRole("heading", {
+        name: "Engineering",
+      })
+      const engineeringRow = engineeringHeading.closest("tr")!
+      const groupCheckbox = within(engineeringRow).getByRole("checkbox")
+
+      await user.click(groupCheckbox)
+
+      // onSelectItems must have been called with Engineering group members selected
+      expect(onSelectItems).toHaveBeenCalled()
+      const lastCall =
+        onSelectItems.mock.calls[onSelectItems.mock.calls.length - 1]
+      const selectedItems = lastCall[0]
+      expect(selectedItems.selectedIds).toEqual(expect.arrayContaining([1, 2]))
+    })
+
+    it("group label text click does not toggle selection when table is not collapsible", async () => {
+      const user = userEvent.setup()
+      const onSelectItems = vi.fn()
+
+      render(
+        <TableCollection<
+          GroupedPerson,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<GroupedPerson>,
+          TestNavigationFilters,
+          GroupingDefinition<GroupedPerson>
+        >
+          columns={groupedTestColumns}
+          source={createGroupedSelectableSource(groupedTestData, false)}
+          onSelectItems={onSelectItems}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          frozenColumns={2}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("Alice")).toBeInTheDocument()
+      })
+
+      const callCountAfterRender = onSelectItems.mock.calls.length
+
+      // Click the group label heading text (not the checkbox) — it should not
+      // trigger group selection since the checkbox is the only selection affordance
+      const engineeringHeading = screen.getByRole("heading", {
+        name: "Engineering",
+      })
+      await user.click(engineeringHeading)
+
+      expect(onSelectItems.mock.calls.length).toBe(callCountAfterRender)
+    })
   })
 })

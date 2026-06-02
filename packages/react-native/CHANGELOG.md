@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.55.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.54.0...f0-react-native-v0.55.0) (2026-05-20)
+
+
+### Features
+
+* **react-native:** add calendar icon support to F0Metadata date value ([8e37190](https://github.com/factorialco/f0/commit/8e371909bb8435530765f4fde8a37eb5969e38c9))
+
+
+### Bug Fixes
+
+* **react-native:** drop fixed-width label column in F0Metadata horizontal mode ([da6d392](https://github.com/factorialco/f0/commit/da6d3929b95cb57636c8f8a518681ab29d2d284f))
+* **react-native:** keep date text color independent of icon color in F0Metadata ([7a80fce](https://github.com/factorialco/f0/commit/7a80fce9fb9c28b9913d5ad87b3b888b387fcd6a))
+* **react-native:** tighten F0Metadata horizontal label width ([f36c64f](https://github.com/factorialco/f0/commit/f36c64fcf876d00cd02d46a5c50ed8c7da1e9ae5))
+
+## [0.54.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.53.0...f0-react-native-v0.54.0) (2026-05-18)
+
+
+### Features
+
+* **react-native:** add F0WizardSteps component ([#4141](https://github.com/factorialco/f0/issues/4141)) ([a4f11e9](https://github.com/factorialco/f0/commit/a4f11e93a007c72cd7d521f34b440f0b141c12a1))
+
+## [0.53.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.52.1...f0-react-native-v0.53.0) (2026-04-30)
+
+
+### Features
+
+* **F0Tabs:** make tab id type generic ([a0f43e9](https://github.com/factorialco/f0/commit/a0f43e920f34c71866cc0d8254ce3a58bc4f2794))
+
+## [0.52.1](https://github.com/factorialco/f0/compare/f0-react-native-v0.52.0...f0-react-native-v0.52.1) (2026-04-24)
+
+
+### Bug Fixes
+
+* **core:** align border radius tokens with Figma design system ([#3805](https://github.com/factorialco/f0/issues/3805)) ([63e20e1](https://github.com/factorialco/f0/commit/63e20e1b72c87b0a033dd903a7211138515fcfb1))
+
 ## [0.52.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.51.0...f0-react-native-v0.52.0) (2026-04-21)
 
 

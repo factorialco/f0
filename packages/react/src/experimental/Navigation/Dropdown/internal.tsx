@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 
 import { AvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0ButtonProps } from "@/components/F0Button"
@@ -46,6 +46,15 @@ export type DropdownInternalProps = {
   open?: boolean
   onOpenChange?: (open: boolean) => void
   label?: string
+  /**
+   * Whether the dropdown trigger is disabled. When true, the menu cannot be
+   * opened via click, keyboard, or focus and the trigger receives
+   * `aria-disabled="true"`. When a custom trigger is provided via `children`,
+   * `disabled` is forwarded to it via `cloneElement` if it is a single React
+   * element; consumer-supplied `disabled` / `aria-disabled` always win.
+   * @default false
+   */
+  disabled?: boolean
 } & DataAttributes
 
 const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
@@ -130,6 +139,7 @@ export function DropdownInternal({
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
   label,
+  disabled,
   ...rest
 }: DropdownInternalProps) {
   const i18n = useI18n()
@@ -137,26 +147,64 @@ export function DropdownInternal({
 
   const isControlled =
     controlledOpen !== undefined && controlledOnOpenChange !== undefined
-  const open = isControlled ? controlledOpen : internalOpen
-  const onOpenChange = isControlled ? controlledOnOpenChange : setInternalOpen
+  const rawOpen = isControlled ? controlledOpen : internalOpen
+  const setOpen = isControlled ? controlledOnOpenChange : setInternalOpen
+  // When `disabled` flips to true while the menu is open, reset both
+  // controlled and uncontrolled state so the menu cannot reappear when
+  // `disabled` flips back to false. In controlled mode this fires the
+  // consumer's `onOpenChange(false)` — a disabled menu must never stay open.
+  useEffect(() => {
+    if (disabled && rawOpen) setOpen(false)
+  }, [disabled, rawOpen, setOpen])
+  // Mask the value passed to Radix during render so a disabled menu cannot
+  // flash open before the effect above commits the state reset.
+  const open = disabled ? false : rawOpen
+  const onOpenChange = (next: boolean) => {
+    setOpen(next)
+  }
+
+  const trigger = children ? (
+    React.isValidElement(children) ? (
+      React.cloneElement(
+        children as React.ReactElement<{
+          disabled?: boolean
+          "aria-disabled"?: boolean | "true" | "false"
+        }>,
+        {
+          // Consumer-supplied values always win.
+          disabled:
+            (children.props as { disabled?: boolean }).disabled ?? disabled,
+          "aria-disabled":
+            (
+              children.props as {
+                "aria-disabled"?: boolean | "true" | "false"
+              }
+            )["aria-disabled"] ?? (disabled ? true : undefined),
+        }
+      )
+    ) : (
+      children
+    )
+  ) : (
+    <ButtonInternal
+      {...rest}
+      hideLabel={!label}
+      icon={icon}
+      size={size}
+      label={label ?? i18n.actions.toggleDropdownMenu}
+      variant="outline"
+      pressed={open}
+      compact={!label}
+      noAutoTooltip
+      noTitle
+      disabled={disabled}
+    />
+  )
 
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange}>
-      <DropdownMenuTrigger asChild>
-        {children || (
-          <ButtonInternal
-            {...rest}
-            hideLabel={!label}
-            icon={icon}
-            size={size}
-            label={label ?? i18n.actions.toggleDropdownMenu}
-            variant="outline"
-            pressed={open}
-            compact={!label}
-            noAutoTooltip
-            noTitle
-          />
-        )}
+      <DropdownMenuTrigger asChild disabled={disabled}>
+        {trigger}
       </DropdownMenuTrigger>
       <DropdownMenuContent align={align}>
         {items.map((item, index) => renderDropdownItem(item, index))}

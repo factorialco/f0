@@ -1232,3 +1232,577 @@ describe("F0AiFormRegistryProvider with F0FormDefinition items", () => {
     expect(fieldNames).toContain("role")
   })
 })
+
+// =============================================================================
+// defaultValuesParams lifecycle tests
+// =============================================================================
+
+describe("defaultValuesParams lifecycle", () => {
+  const paramsSchema = z.object({
+    id: z.string().describe("Record id"),
+  })
+
+  const mockRecords: Record<string, { name: string; email: string }> = {
+    "rec-1": { name: "Alice", email: "alice@example.com" },
+    "rec-2": { name: "Bob", email: "bob@example.com" },
+  }
+
+  const definitionWithParams: F0AiAvailableFormDefinition = {
+    name: "edit-record",
+    schema: simpleSchema,
+    defaultValuesParamsSchema: paramsSchema,
+    defaultValues: (params) => {
+      const id = (params as { id: string }).id
+      const record = mockRecords[id]
+      return record ?? { name: "", email: "" }
+    },
+  }
+
+  it("updateActiveFormDefaultValuesParams writes params to the entry", async () => {
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider
+        availableFormDefinitions={[definitionWithParams]}
+      >
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("edit-record")).toBeDefined()
+    })
+
+    act(() => {
+      capturedRegistry!.updateActiveFormDefaultValuesParams("edit-record", {
+        id: "rec-1",
+      })
+    })
+
+    const entry = capturedRegistry!.get("edit-record")
+    expect(entry!.defaultValuesParams).toEqual({ id: "rec-1" })
+  })
+
+  it("register() preserves defaultValuesParams from existing entry", async () => {
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider
+        availableFormDefinitions={[definitionWithParams]}
+      >
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("edit-record")).toBeDefined()
+    })
+
+    // Write params to the entry
+    act(() => {
+      capturedRegistry!.updateActiveFormDefaultValuesParams("edit-record", {
+        id: "rec-1",
+      })
+    })
+
+    // Simulate what happens when F0Form mounts in canvas: register() is called
+    // with the same name but without defaultValuesParams
+    const mockRef = { current: null } as React.MutableRefObject<null>
+    act(() => {
+      capturedRegistry!.register("edit-record", mockRef, simpleSchema)
+    })
+
+    await waitFor(() => {
+      const entry = capturedRegistry!.get("edit-record")
+      expect(entry).toBeDefined()
+    })
+
+    const entry = capturedRegistry!.get("edit-record")
+    expect(entry!.defaultValuesParams).toEqual({ id: "rec-1" })
+  })
+
+  it("register() preserves defaultValuesFn from existing entry", async () => {
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider
+        availableFormDefinitions={[definitionWithParams]}
+      >
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("edit-record")).toBeDefined()
+    })
+
+    const originalDefaultValuesFn =
+      capturedRegistry!.get("edit-record")!.defaultValuesFn
+    expect(originalDefaultValuesFn).toBeDefined()
+
+    // Re-register without providing defaultValuesFn (as canvas F0Form would)
+    const mockRef = { current: null } as React.MutableRefObject<null>
+    act(() => {
+      capturedRegistry!.register("edit-record", mockRef, simpleSchema)
+    })
+
+    await waitFor(() => {
+      const entry = capturedRegistry!.get("edit-record")
+      expect(entry).toBeDefined()
+    })
+
+    const entry = capturedRegistry!.get("edit-record")
+    expect(entry!.defaultValuesFn).toBe(originalDefaultValuesFn)
+  })
+
+  it("register() preserves defaultValuesParamsSchema from existing entry", async () => {
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider
+        availableFormDefinitions={[definitionWithParams]}
+      >
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("edit-record")).toBeDefined()
+    })
+
+    const originalSchema =
+      capturedRegistry!.get("edit-record")!.defaultValuesParamsSchema
+    expect(originalSchema).toBeDefined()
+
+    // Re-register without providing defaultValuesParamsSchema
+    const mockRef = { current: null } as React.MutableRefObject<null>
+    act(() => {
+      capturedRegistry!.register("edit-record", mockRef, simpleSchema)
+    })
+
+    await waitFor(() => {
+      const entry = capturedRegistry!.get("edit-record")
+      expect(entry).toBeDefined()
+    })
+
+    const entry = capturedRegistry!.get("edit-record")
+    expect(entry!.defaultValuesParamsSchema).toBe(originalSchema)
+  })
+
+  it("unregister() preserves defaultValuesParams when recreating virtual entry", async () => {
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider
+        availableFormDefinitions={[definitionWithParams]}
+      >
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("edit-record")).toBeDefined()
+    })
+
+    // Write params, then register as rendered (non-virtual), then unregister
+    act(() => {
+      capturedRegistry!.updateActiveFormDefaultValuesParams("edit-record", {
+        id: "rec-2",
+      })
+    })
+
+    const mockRef = { current: null } as React.MutableRefObject<null>
+    act(() => {
+      capturedRegistry!.register("edit-record", mockRef, simpleSchema)
+    })
+
+    act(() => {
+      capturedRegistry!.unregister("edit-record")
+    })
+
+    await waitFor(() => {
+      const entry = capturedRegistry!.get("edit-record")
+      expect(entry?.virtual).toBe(true)
+    })
+
+    const entry = capturedRegistry!.get("edit-record")
+    expect(entry!.defaultValuesParams).toEqual({ id: "rec-2" })
+  })
+
+  it("defaultValuesParams appear in activeForm description after rebuild", async () => {
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider
+        availableFormDefinitions={[definitionWithParams]}
+      >
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("edit-record")).toBeDefined()
+    })
+
+    // Write params to entry, set as active, then trigger a rebuild
+    act(() => {
+      capturedRegistry!.updateActiveFormDefaultValuesParams("edit-record", {
+        id: "rec-1",
+      })
+    })
+
+    act(() => {
+      capturedRegistry!.setActiveForm("edit-record", {
+        cardTitle: "Edit",
+        cardDescription: "Edit record",
+      })
+    })
+
+    // rebuildDescriptions is called inside setActiveForm, which
+    // emits via queueMicrotask. Wait for the next description cycle.
+    await waitFor(() => {
+      expect(capturedRegistry!.activeForm).not.toBeNull()
+    })
+
+    expect(capturedRegistry!.activeForm!.defaultValuesParams).toEqual({
+      id: "rec-1",
+    })
+  })
+
+  it("defaultValuesFn resolves correct record when called with params", async () => {
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider
+        availableFormDefinitions={[definitionWithParams]}
+      >
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("edit-record")).toBeDefined()
+    })
+
+    const entry = capturedRegistry!.get("edit-record")!
+    expect(entry.defaultValuesFn).toBeDefined()
+
+    const result = await entry.defaultValuesFn!({ id: "rec-2" })
+    expect(result).toEqual({ name: "Bob", email: "bob@example.com" })
+  })
+
+  it("updateActiveFormDefaultValuesParams does not crash for unknown form", async () => {
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider availableFormDefinitions={[]}>
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry).not.toBeNull()
+    })
+
+    // Should be a no-op, not throw
+    act(() => {
+      capturedRegistry!.updateActiveFormDefaultValuesParams("nonexistent", {
+        id: "x",
+      })
+    })
+  })
+})
+
+describe("F0FormDefinition with defaultValuesFn threads through to registry entry", () => {
+  const mockRecords: Record<string, { name: string; email: string }> = {
+    "rec-1": { name: "Alice", email: "alice@example.com" },
+    "rec-2": { name: "Bob", email: "bob@example.com" },
+  }
+
+  const paramsSchema = z.object({ id: z.string() })
+
+  it("single-schema: entry.defaultValuesFn works when F0FormDefinition has defaultValuesFn + defaultValuesParamsSchema", async () => {
+    const asyncFn = vi.fn(
+      async (params: { id: string }) => mockRecords[params.id] ?? {}
+    )
+
+    const formDef: F0FormDefinitionSingleSchema<typeof simpleSchema> = {
+      _brand: "single",
+      name: "edit-record-single",
+      schema: simpleSchema,
+      defaultValuesParamsSchema: paramsSchema,
+      defaultValuesFn: asyncFn as (
+        params: Record<string, unknown>
+      ) => Promise<Record<string, unknown>>,
+      onSubmit: async () => ({ success: true }),
+    }
+
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider availableFormDefinitions={[formDef]}>
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("edit-record-single")).toBeDefined()
+    })
+
+    const entry = capturedRegistry!.get("edit-record-single")!
+    expect(entry.virtual).toBe(true)
+    expect(entry.defaultValuesFn).toBeDefined()
+    expect(entry.defaultValuesParamsSchema).toBe(paramsSchema)
+
+    // Call the entry's defaultValuesFn and verify it returns correct data
+    const result = await entry.defaultValuesFn!({ id: "rec-1" })
+    expect(result).toEqual({ name: "Alice", email: "alice@example.com" })
+
+    const result2 = await entry.defaultValuesFn!({ id: "rec-2" })
+    expect(result2).toEqual({ name: "Bob", email: "bob@example.com" })
+  })
+
+  it("per-section: entry.defaultValuesFn flattens per-section output to flat record", async () => {
+    const personalSchema = z.object({
+      firstName: z.string().min(1),
+    })
+    const workSchema = z.object({
+      role: z.enum(["engineer", "designer"]),
+    })
+    const perSectionSchema = { personal: personalSchema, work: workSchema }
+
+    const asyncFn = vi.fn(async (params: { id: string }) => {
+      if (params.id === "emp-1") {
+        return {
+          personal: { firstName: "Alice" },
+          work: { role: "engineer" },
+        }
+      }
+      return { personal: { firstName: "" }, work: { role: "designer" } }
+    })
+
+    const formDef: F0FormDefinitionPerSection<typeof perSectionSchema> = {
+      _brand: "per-section",
+      name: "edit-record-per-section",
+      schema: perSectionSchema,
+      defaultValuesParamsSchema: paramsSchema,
+      defaultValuesFn: asyncFn as (
+        params: Record<string, unknown>
+      ) => Promise<Record<string, unknown>>,
+      onSubmit: async () => ({ success: true }),
+    }
+
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider availableFormDefinitions={[formDef]}>
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("edit-record-per-section")).toBeDefined()
+    })
+
+    const entry = capturedRegistry!.get("edit-record-per-section")!
+    expect(entry.virtual).toBe(true)
+    expect(entry.defaultValuesFn).toBeDefined()
+    expect(entry.defaultValuesParamsSchema).toBe(paramsSchema)
+
+    // The per-section defaultValuesFn should flatten { sectionId: { ...fields } } → { ...fields }
+    const result = await entry.defaultValuesFn!({ id: "emp-1" })
+    expect(result).toEqual({ firstName: "Alice", role: "engineer" })
+
+    const result2 = await entry.defaultValuesFn!({ id: "emp-2" })
+    expect(result2).toEqual({ firstName: "", role: "designer" })
+  })
+
+  it("single-schema: entry.defaultValuesFn is undefined when no defaultValuesFn on definition", async () => {
+    const formDef: F0FormDefinitionSingleSchema<typeof simpleSchema> = {
+      _brand: "single",
+      name: "static-form",
+      schema: simpleSchema,
+      defaultValues: { name: "Static", email: "s@t.com" },
+      onSubmit: async () => ({ success: true }),
+    }
+
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider availableFormDefinitions={[formDef]}>
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("static-form")).toBeDefined()
+    })
+
+    const entry = capturedRegistry!.get("static-form")!
+    expect(entry.defaultValuesFn).toBeUndefined()
+    expect(entry.ref.current!.getValues()).toEqual({
+      name: "Static",
+      email: "s@t.com",
+    })
+  })
+})
+
+describe("availableFormDefinitions does not eagerly invoke defaultValues functions", () => {
+  const paramsSchema = z.object({ id: z.string() })
+
+  it("does not call async defaultValuesFn during virtual registration (with params schema)", async () => {
+    const asyncFn = vi.fn(async (_params: { id: string }) => ({
+      name: "resolved",
+      email: "r@e.com",
+    }))
+
+    const formDef: F0FormDefinitionSingleSchema<typeof simpleSchema> = {
+      _brand: "single",
+      name: "no-eager-call",
+      schema: simpleSchema,
+      defaultValuesParamsSchema: paramsSchema,
+      defaultValuesFn: asyncFn as (
+        params: Record<string, unknown>
+      ) => Promise<Record<string, unknown>>,
+      onSubmit: async () => ({ success: true }),
+    }
+
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider availableFormDefinitions={[formDef]}>
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("no-eager-call")).toBeDefined()
+    })
+
+    // The async function should NOT have been called during registration
+    expect(asyncFn).not.toHaveBeenCalled()
+
+    // Virtual ref should have empty initial values
+    const entry = capturedRegistry!.get("no-eager-call")!
+    expect(entry.ref.current!.getValues()).toEqual({})
+    expect(entry.defaultValuesFn).toBeDefined()
+  })
+
+  it("does not call async defaultValues function during registration (without params schema)", async () => {
+    const asyncFn = vi.fn(async () => ({
+      name: "fetched",
+      email: "f@e.com",
+    }))
+
+    const definition: F0AiAvailableFormDefinition = {
+      name: "no-eager-async",
+      schema: simpleSchema,
+      defaultValues: asyncFn,
+    }
+
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider availableFormDefinitions={[definition]}>
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("no-eager-async")).toBeDefined()
+    })
+
+    // The async function should NOT have been called during registration
+    expect(asyncFn).not.toHaveBeenCalled()
+    expect(
+      capturedRegistry!.get("no-eager-async")!.ref.current!.getValues()
+    ).toEqual({})
+  })
+
+  it("does not call sync defaultValues function during registration", async () => {
+    const syncFn = vi.fn((_params: Record<string, unknown>) => ({
+      name: "computed",
+      email: "c@e.com",
+    }))
+
+    const definition: F0AiAvailableFormDefinition = {
+      name: "no-eager-sync",
+      schema: simpleSchema,
+      defaultValues: syncFn,
+    }
+
+    let capturedRegistry: ReturnType<typeof useF0AiFormRegistry> = null
+
+    render(
+      <F0AiFormRegistryProvider availableFormDefinitions={[definition]}>
+        <RegistryInspector
+          onRegistry={(r) => {
+            capturedRegistry = r
+          }}
+        />
+      </F0AiFormRegistryProvider>
+    )
+
+    await waitFor(() => {
+      expect(capturedRegistry?.get("no-eager-sync")).toBeDefined()
+    })
+
+    // The sync function should NOT have been called during registration
+    expect(syncFn).not.toHaveBeenCalled()
+    expect(
+      capturedRegistry!.get("no-eager-sync")!.ref.current!.getValues()
+    ).toEqual({})
+  })
+})

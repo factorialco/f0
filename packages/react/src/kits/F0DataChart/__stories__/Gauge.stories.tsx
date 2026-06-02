@@ -78,3 +78,14 @@ export const ResponsiveSnapshotMatrix: Story = {
   decorators: [(Story) => <Story />],
   render: () => <ResponsiveSnapshot getProps={responsiveGaugeProps} />,
 }
+
+/**
+ * No data — undefined `value` triggers the empty state. (A gauge with
+ * `value: 0` is NOT empty — 0% is a legitimate state.)
+ * See `F0DataChart/Empty states`.
+ */
+export const Empty: Story = {
+  // Undefined value triggers the empty state — `value: 0` would NOT be empty
+  // since 0% is a legitimate gauge state.
+  args: { type: "gauge" },
+}

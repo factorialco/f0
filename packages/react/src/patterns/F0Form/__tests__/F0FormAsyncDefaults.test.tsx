@@ -2,9 +2,14 @@ import React from "react"
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest"
 import { z } from "zod"
 
-import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
-
 import { useF0FormDefinition } from "@/patterns/F0WizardForm/useF0FormDefinition"
+import {
+  zeroRender as render,
+  zeroRenderHook,
+  screen,
+  waitFor,
+} from "@/testing/test-utils"
+
 import { F0Form } from "../F0Form"
 import { f0FormField } from "../f0Schema"
 
@@ -124,7 +129,7 @@ describe("F0Form async defaultValues (single schema)", () => {
     expect(screen.getByLabelText("Name")).toHaveValue("")
 
     expect(consoleWarn).toHaveBeenCalledWith(
-      "[useF0FormDefinition] Async defaultValues rejected:",
+      "[useAsyncDefaultValues] Async defaultValues rejected:",
       expect.any(Error)
     )
 
@@ -185,5 +190,84 @@ describe("F0Form async defaultValues (per-section)", () => {
     })
 
     expect(screen.getByLabelText("Email")).toHaveValue("alice@test.com")
+  })
+})
+
+describe("useF0FormDefinition does not resolve async defaultValues", () => {
+  it("does not call the async defaultValues function", () => {
+    const asyncFn = vi.fn(
+      (_signal: AbortSignal) =>
+        Promise.resolve({ name: "Alice", email: "a@b.com" }) as Promise<
+          Partial<z.infer<typeof singleSchema>>
+        >
+    )
+
+    const { result } = zeroRenderHook(() =>
+      useF0FormDefinition({
+        name: "no-resolve-test",
+        schema: singleSchema,
+        defaultValues: asyncFn,
+        onSubmit: async () => ({ success: true }),
+      })
+    )
+
+    // The hook should NOT have called the function — resolution is deferred to F0Form
+    expect(asyncFn).not.toHaveBeenCalled()
+
+    // The definition should expose asyncDefaultValues for F0Form to resolve
+    expect(result.current.asyncDefaultValues).toBe(asyncFn)
+
+    // defaultValues should be undefined since the function was not resolved
+    expect(result.current.defaultValues).toBeUndefined()
+
+    // isLoading should only reflect initialFiles, not defaultValues
+    expect(result.current.isLoading).toBe(false)
+  })
+
+  it("does not call the async defaultValues function (per-section)", () => {
+    const asyncFn = vi.fn(
+      (_signal: AbortSignal) =>
+        Promise.resolve({
+          personal: { name: "Alice" },
+          contact: { email: "a@b.com" },
+        }) as Promise<{
+          personal?: Partial<{ name: string }>
+          contact?: Partial<{ email: string }>
+        }>
+    )
+
+    const { result } = zeroRenderHook(() =>
+      useF0FormDefinition({
+        name: "no-resolve-per-section",
+        schema: perSectionSchema,
+        defaultValues: asyncFn,
+        onSubmit: async () => ({ success: true }),
+      })
+    )
+
+    expect(asyncFn).not.toHaveBeenCalled()
+    expect(result.current.asyncDefaultValues).toBe(asyncFn)
+    expect(result.current.defaultValues).toBeUndefined()
+    expect(result.current.isLoading).toBe(false)
+  })
+
+  it("passes sync defaultValues directly without wrapping", () => {
+    const syncValues = { name: "Bob", email: "bob@test.com" }
+
+    const { result } = zeroRenderHook(() =>
+      useF0FormDefinition({
+        name: "sync-test",
+        schema: singleSchema,
+        defaultValues: syncValues,
+        onSubmit: async () => ({ success: true }),
+      })
+    )
+
+    // Sync values go directly to defaultValues
+    expect(result.current.defaultValues).toEqual(syncValues)
+
+    // No async function to resolve
+    expect(result.current.asyncDefaultValues).toBeUndefined()
+    expect(result.current.isLoading).toBe(false)
   })
 })

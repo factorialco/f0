@@ -1,19 +1,25 @@
 import { createContext, useContext } from "react"
 
 import type { InitialFile, UseFileUpload } from "./fields/file/types"
-import type { RenderCustomFieldFunction } from "./types"
+import type { F0FormSubmitConfig, RenderCustomFieldFunction } from "./types"
 
 interface F0FormContextValue {
   /** Form name used for anchor links */
   formName: string
   /** Shared pool of pre-existing file metadata for file fields */
   initialFiles?: InitialFile[]
+  /** Whether async initialFiles are still being resolved */
+  isLoadingInitialFiles?: boolean
   /** Callback that renders custom fields identified by customFieldName */
   renderCustomField?: RenderCustomFieldFunction
   /** Whether async defaultValues are still being resolved */
   isLoading?: boolean
   /** Default upload hook shared across all file fields */
   useUpload?: UseFileUpload
+  /**
+   * Submit configuration for the form.
+   */
+  submitConfig?: F0FormSubmitConfig
 }
 
 export const F0FormContext = createContext<F0FormContextValue | null>(null)

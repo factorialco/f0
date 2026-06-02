@@ -6,6 +6,7 @@ import type { DatePickerValue } from "@/components/F0DatePicker/types"
 import { F0DatePicker } from "@/components/F0DatePicker"
 import { RecordType } from "@/hooks/datasource/types/records.typings"
 import { cn } from "@/lib/utils"
+
 import type { EditableCellProps } from "."
 
 import { BaseCell } from "./BaseCell"
@@ -20,7 +21,10 @@ export function DateCell<R extends RecordType>({
   loading,
   isLastColumn,
   onChange,
+  hint,
 }: EditableCellProps<R>) {
+  const dateConfig = editableColumn.dateConfig
+
   const datePickerValue = useMemo<DatePickerValue | undefined>(() => {
     if (!value) return undefined
     const date = parseISO(value)
@@ -37,7 +41,7 @@ export function DateCell<R extends RecordType>({
   }
 
   return (
-    <BaseCell showRightBorder={!isLastColumn} error={error}>
+    <BaseCell showRightBorder={!isLastColumn} error={error} hint={hint}>
       <div
         className={cn(
           "flex w-full min-w-0 items-center",
@@ -61,6 +65,8 @@ export function DateCell<R extends RecordType>({
           value={datePickerValue}
           onChange={handleChange}
           loading={loading}
+          minDate={dateConfig?.minDate}
+          maxDate={dateConfig?.maxDate}
         />
       </div>
     </BaseCell>

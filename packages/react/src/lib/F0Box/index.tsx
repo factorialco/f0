@@ -12,6 +12,7 @@ export const F0Box = Component(
 export type { F0BoxProps }
 export type {
   AlignItemsToken,
+  BoxShadowToken,
   BackgroundToken,
   BorderColorToken,
   BorderRadiusToken,
@@ -26,11 +27,13 @@ export type {
   FlexWrapToken,
   FractionToken,
   GapToken,
+  InsetToken,
   JustifyContentToken,
   MarginToken,
   NumericSizeToken,
   OverflowToken,
   PositionToken,
+  ZIndexToken,
   RowSpanToken,
   RowsToken,
   SizeToken,

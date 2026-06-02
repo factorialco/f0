@@ -13,20 +13,24 @@ export type Action = {
 interface SelectBottomActionsProps {
   actions?: Action[]
   showApplyButton?: boolean
+  showCancelButton?: boolean
   onApply?: () => void
+  onCancel?: () => void
 }
 
 export const SelectBottomActions = ({
   actions,
   showApplyButton,
   onApply,
+  onCancel,
+  showCancelButton,
 }: SelectBottomActionsProps) => {
   const i18n = useI18n()
 
   if (!actions && !showApplyButton) return null
 
   return (
-    <div className="flex w-full flex-row items-center gap-2 border-0 border-t border-solid border-f1-border-secondary p-2">
+    <div className="flex w-full flex-row justify-between items-center gap-2 border-0 border-t border-solid border-f1-border-secondary p-2">
       {actions?.map((action) => (
         <F0Button
           key={action.label}
@@ -36,8 +40,15 @@ export const SelectBottomActions = ({
           label={action.label}
         />
       ))}
+      {showCancelButton && (
+        <F0Button
+          onClick={onCancel}
+          label={i18n.filters.cancel}
+          variant="ghost"
+        />
+      )}
       {showApplyButton && (
-        <div className="ml-auto">
+        <div className={showCancelButton ? "" : "ml-auto"}>
           <F0Button onClick={onApply} label={i18n.select.applySelection} />
         </div>
       )}

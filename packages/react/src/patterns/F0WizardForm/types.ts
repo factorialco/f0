@@ -1,6 +1,7 @@
 import { z, ZodRawShape, ZodEffects, type ZodType } from "zod"
 
 import type { ModuleId } from "@/components/avatars/F0AvatarModule"
+import type { InitialFile } from "@/patterns/F0Form/fields/file/types"
 import type {
   F0FormErrorTriggerMode,
   F0FormSubmitConfig,
@@ -70,12 +71,16 @@ export interface F0FormDefinitionSingleSchema<TSchema extends F0FormSchema> {
   schema: TSchema
   sections?: Record<string, F0SectionConfig>
   defaultValues?: Partial<z.infer<TSchema>>
+  /** Raw async function for resolving defaultValues — resolved by F0Form at render time */
+  asyncDefaultValues?: (
+    signal: AbortSignal
+  ) => Promise<Partial<z.infer<TSchema>>>
   onSubmit: (
     arg: F0WizardFormSingleSubmitArg<TSchema>
   ) => Promise<F0FormSubmitResult> | F0FormSubmitResult
   submitConfig?: F0FormSubmitConfig
   errorTriggerMode?: F0FormErrorTriggerMode
-  /** Whether async defaultValues are still being resolved */
+  /** Whether async initialFiles are still being resolved */
   isLoading?: boolean
   /** Zod schema describing params the AI can supply when calling presentForm */
   defaultValuesParamsSchema?: ZodType
@@ -83,6 +88,10 @@ export interface F0FormDefinitionSingleSchema<TSchema extends F0FormSchema> {
   defaultValuesFn?: (
     params: Record<string, unknown>
   ) => Promise<Partial<z.infer<TSchema>>>
+  /** Pre-existing file metadata for file fields — resolved before the form renders */
+  initialFiles?: InitialFile[]
+  /** Whether async initialFiles are still being resolved */
+  isLoadingInitialFiles?: boolean
   /** Wizard steps — when present, F0WizardForm uses these instead of auto-deriving from sections */
   steps?: F0WizardFormStep[]
 }
@@ -98,12 +107,16 @@ export interface F0FormDefinitionPerSection<T extends F0PerSectionSchema> {
   schema: T
   sections?: Record<string, F0PerSectionSectionConfig>
   defaultValues?: { [K in keyof T]?: Partial<z.infer<T[K]>> }
+  /** Raw async function for resolving defaultValues — resolved by F0Form at render time */
+  asyncDefaultValues?: (
+    signal: AbortSignal
+  ) => Promise<{ [K in keyof T]?: Partial<z.infer<T[K]>> }>
   onSubmit: (
     arg: F0WizardFormPerSectionSubmitArg<T>
   ) => Promise<F0FormSubmitResult> | F0FormSubmitResult
   submitConfig?: F0PerSectionSubmitConfig
   errorTriggerMode?: F0FormErrorTriggerMode
-  /** Whether async defaultValues are still being resolved */
+  /** Whether async initialFiles are still being resolved */
   isLoading?: boolean
   /** Zod schema describing params the AI can supply when calling presentForm */
   defaultValuesParamsSchema?: ZodType
@@ -111,6 +124,10 @@ export interface F0FormDefinitionPerSection<T extends F0PerSectionSchema> {
   defaultValuesFn?: (
     params: Record<string, unknown>
   ) => Promise<{ [K in keyof T]?: Partial<z.infer<T[K]>> }>
+  /** Pre-existing file metadata for file fields — resolved before the form renders */
+  initialFiles?: InitialFile[]
+  /** Whether async initialFiles are still being resolved */
+  isLoadingInitialFiles?: boolean
   /** Wizard steps — when present, F0WizardForm uses these instead of auto-deriving from sections */
   steps?: F0WizardFormStep[]
 }

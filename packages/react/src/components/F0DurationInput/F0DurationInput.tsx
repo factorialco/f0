@@ -47,7 +47,7 @@ const DEFAULT_MAX_VISIBLE_DIGITS = 2
 
 const containerVariants = cva({
   base: [
-    "inline-flex items-center gap-1 overflow-hidden rounded-[10px]",
+    "inline-flex items-center gap-1 overflow-hidden rounded",
     "border border-solid border-f1-border bg-f1-background",
     "transition-[border-color]",
     "focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-0 focus-within:transition-none active:transition-none",

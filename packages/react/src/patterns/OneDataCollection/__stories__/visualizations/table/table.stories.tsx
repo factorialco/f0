@@ -176,6 +176,42 @@ export const TableWithMixedNestedRecords: Story = {
   },
 }
 
+export const TableWithDefaultExpandedIds: Story = {
+  render: () => {
+    const mockVisualizations = getMockVisualizations({
+      table: {
+        noSorting: true,
+        allowColumnHiding: true,
+        allowColumnReordering: true,
+        nestedRecords: true,
+        applyLongText: false,
+      },
+    })
+
+    return (
+      <ExampleComponent
+        frozenColumns={2}
+        tableAllowColumnReordering
+        tableAllowColumnHiding
+        noSorting
+        storage={false}
+        visualizations={[mockVisualizations.table]}
+        id="employees/v1"
+        nestedRecords
+        defaultExpandedIds={["user-1", "user-2"]}
+      />
+    )
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "When `defaultExpandedIds` is set on the source, only the rows whose `item.id` is in the list start expanded on first render (children fetched eagerly). Nested descendants are not auto-expanded unless their own id is also included.",
+      },
+    },
+  },
+}
+
 export const TableWithSelectableNestedRecords: Story = {
   render: () => {
     const mockVisualizations = getMockVisualizations({
@@ -607,6 +643,66 @@ export const TableWithGroupedHeaders: Story = {
           },
         ]}
       />
+    )
+  },
+}
+
+export const BorderedTable: Story = {
+  render: () => {
+    const records = [
+      {
+        id: 1,
+        name: "Alice Johnson",
+        email: "alice@example.com",
+        role: "Admin",
+      },
+      { id: 2, name: "Bob Smith", email: "bob@example.com", role: "Editor" },
+      { id: 3, name: "Carol Lee", email: "carol@example.com", role: "Viewer" },
+    ]
+
+    const source = useDataCollectionSource({
+      dataAdapter: {
+        fetchData: async () => ({ records }),
+      },
+    })
+
+    return (
+      <div style={{ maxWidth: 600 }}>
+        <OneDataCollection
+          source={source}
+          visualizations={[
+            {
+              type: "table",
+              options: {
+                bordered: true,
+                columns: [
+                  {
+                    label: "Name",
+                    render: (item) => ({
+                      type: "person" as const,
+                      value: {
+                        firstName: item.name.split(" ")[0],
+                        lastName: item.name.split(" ")[1],
+                      },
+                    }),
+                    id: "name",
+                  },
+                  {
+                    label: "Email",
+                    render: (item) => item.email,
+                    id: "email",
+                  },
+                  {
+                    label: "Role",
+                    render: (item) => item.role,
+                    id: "role",
+                  },
+                ],
+              },
+            },
+          ]}
+        />
+      </div>
     )
   },
 }

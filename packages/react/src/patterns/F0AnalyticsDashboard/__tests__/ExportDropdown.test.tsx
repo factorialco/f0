@@ -34,6 +34,10 @@ describe("ExportDropdown", () => {
       screen.getByRole("button", { name: "Toggle dropdown menu" })
     )
 
-    expect(await screen.findByText("Exporting...")).toBeInTheDocument()
+    // While loading, the dropdown item swaps the label to "Exporting…" so
+    // users get clear in-progress feedback (dropdown items don't expose a
+    // built-in loading state). Re-clicking is a no-op until isExporting flips
+    // back to false.
+    expect(await screen.findByText("Exporting…")).toBeInTheDocument()
   })
 })
