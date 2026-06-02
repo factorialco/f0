@@ -108,7 +108,7 @@ export function F0CanvasCard({
         )}
         {action.type === "custom" && (
           <F0Button
-            variant="neutral"
+            variant="outline"
             size="md"
             icon={action.icon}
             label={action.label}
