@@ -269,6 +269,7 @@ const OneDataCollectionComp = <
     // Actions
     primaryActions,
     primaryActionsLabel,
+    primaryActionsOpenOnClick,
     secondaryActions,
     // Summary
     totalItemSummary,
@@ -1048,6 +1049,7 @@ const OneDataCollectionComp = <
                   <CollectionActions
                     primaryActions={primaryActionItems}
                     primaryActionsLabel={primaryActionsLabel}
+                    primaryActionsOpenOnClick={primaryActionsOpenOnClick}
                     secondaryActions={secondaryActionsItems}
                     otherActions={otherActionsItems}
                   />

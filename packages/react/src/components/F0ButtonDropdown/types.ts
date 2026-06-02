@@ -89,6 +89,14 @@ type F0ButtonDropdownSplitProps<T = string> = F0ButtonDropdownBaseProps<T> & {
    */
   value?: T
   /**
+   * When `true`, clicking the main button also opens the dropdown instead of
+   * triggering the selected item's action. The main button acts as a labeled
+   * trigger — useful when all choices are equally discoverable (e.g. a "Create"
+   * button that opens a "Create with AI / Create Manual / Templates" menu).
+   * @default false
+   */
+  openOnClick?: boolean
+  /**
    * Called when the main button or a dropdown item is clicked.
    * @param value The value of the item that was clicked.
    * @param item The item that was clicked.
