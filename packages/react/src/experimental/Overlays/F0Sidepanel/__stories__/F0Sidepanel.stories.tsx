@@ -4,6 +4,7 @@ import { useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { Delete, Pencil, Save } from "@/icons/app"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0Sidepanel } from "../index"
 import { sidepanelSides, sidepanelWidths } from "../types"
@@ -381,4 +382,45 @@ export const NoBoxPadding: Story = {
       </div>
     ),
   },
+}
+
+const SnapshotDemo = () => {
+  // Open by default so Chromatic captures the panel; the trigger button is
+  // still wired up so the story is interactable after closing.
+  const [open, setOpen] = useState(true)
+
+  return (
+    <div className="flex h-[600px] items-center justify-center">
+      <F0Button label="Open sidepanel" onClick={() => setOpen(true)} />
+      <F0Sidepanel
+        open={open}
+        onClose={() => setOpen(false)}
+        title="Ainhoa López"
+        width="wide"
+        headerBorder
+        navigation={{
+          counter: { current: 1, total: 4 },
+          previous: { onClick: () => {}, title: "Previous employee" },
+          next: { onClick: () => {}, title: "Next employee" },
+        }}
+        options={[
+          { label: "Edit", icon: Pencil, onClick: () => {} },
+          { label: "Delete", icon: Delete, critical: true, onClick: () => {} },
+        ]}
+        footer={
+          <>
+            <F0Button variant="outline" label="Cancel" />
+            <F0Button label="Save" icon={Save} />
+          </>
+        }
+      >
+        <ExampleBody />
+      </F0Sidepanel>
+    </div>
+  )
+}
+
+export const Snapshot: StoryObj = {
+  parameters: withSnapshot({}),
+  render: () => <SnapshotDemo />,
 }
