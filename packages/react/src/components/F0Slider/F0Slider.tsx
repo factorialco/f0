@@ -43,6 +43,8 @@ const rangeVariants = cva({
   },
 })
 
+const thumbSizePx = { sm: 16, md: 20 } as const
+
 const thumbVariants = cva({
   base: cn(
     "relative block rounded-full bg-f1-background border-[2px] border-solid",
@@ -51,10 +53,6 @@ const thumbVariants = cva({
     "data-[disabled]:cursor-not-allowed data-[disabled]:hover:scale-100"
   ),
   variants: {
-    size: {
-      sm: "h-4 w-4",
-      md: "h-5 w-5",
-    },
     status: {
       default: "border-f1-background-selected-bold",
       warning: "border-f1-background-warning-bold",
@@ -93,6 +91,7 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
   } = props
 
   const thumbId = useId()
+  const labelId = useId()
   const messagesId = useId()
 
   const resolvedAriaLabel =
@@ -121,7 +120,7 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
 
   const percent = max !== min ? ((clampedValue - min) / (max - min)) * 100 : 0
 
-  const thumbWidth = size === "sm" ? 16 : 20
+  const thumbWidth = thumbSizePx[size]
   const thumbInBoundsOffset = thumbWidth * (0.5 - percent / 100)
 
   const handleValueChange = useCallback(
@@ -143,7 +142,8 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
 
   const statusType = status?.type ?? "default"
   const showLabel = !hideLabel && label.length > 0
-  const hintStatus = hint ? { type: "default" as const, message: hint } : status
+  const hintStatus =
+    status ?? (hint ? { type: "default" as const, message: hint } : undefined)
 
   // aria-describedby points to messages when present
   const describedBy = hint || status?.message ? messagesId : undefined
@@ -159,6 +159,7 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
           label={label}
           required={required}
           htmlFor={thumbId}
+          id={labelId}
           disabled={disabled}
         />
       )}
@@ -186,12 +187,14 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
         </SliderTrack>
         <SliderThumb
           id={thumbId}
-          aria-label={resolvedAriaLabel}
+          aria-label={showLabel ? undefined : resolvedAriaLabel}
+          aria-labelledby={showLabel ? labelId : undefined}
           aria-valuetext={formatValue(currentValue)}
           aria-describedby={describedBy}
           aria-required={required}
+          style={{ width: thumbWidth, height: thumbWidth }}
           className={cn(
-            thumbVariants({ size, status: statusType, disabled }),
+            thumbVariants({ status: statusType, disabled }),
             focusRing("focus-visible:ring-offset-1")
           )}
           onFocus={(e) => setIsFocused(e.target.matches(":focus-visible"))}

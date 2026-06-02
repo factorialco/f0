@@ -347,4 +347,29 @@ describe("F0Slider", () => {
     const tooltip = screen.getByRole("tooltip")
     expect(tooltip.style.left).toBe("calc(100% + -10px)")
   })
+
+  it("names the thumb via the visible label using aria-labelledby", () => {
+    render(<F0Slider label="Duration" min={0} max={10} />)
+    const slider = screen.getByRole("slider")
+    expect(slider).not.toHaveAttribute("aria-label")
+    const labelledBy = slider.getAttribute("aria-labelledby")
+    expect(labelledBy).toBeTruthy()
+    expect(document.getElementById(labelledBy as string)).toHaveTextContent(
+      "Duration"
+    )
+  })
+
+  it("prioritizes the status message over the hint when both are provided", () => {
+    render(
+      <F0Slider
+        label="Duration"
+        min={0}
+        max={10}
+        hint="Helper text"
+        status={{ type: "error", message: "Out of range" }}
+      />
+    )
+    expect(screen.getByText("Out of range")).toBeInTheDocument()
+    expect(screen.queryByText("Helper text")).not.toBeInTheDocument()
+  })
 })
