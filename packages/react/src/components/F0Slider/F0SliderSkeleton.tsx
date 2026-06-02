@@ -27,6 +27,8 @@ const F0SliderSkeleton = ({
   return (
     <div
       className="flex w-full flex-col gap-2"
+      role="status"
+      aria-label="Loading slider"
       aria-busy="true"
       aria-live="polite"
     >

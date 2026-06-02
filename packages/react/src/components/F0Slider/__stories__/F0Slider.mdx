@@ -256,10 +256,11 @@ A slider input for selecting a numeric value from a range. Supports labels, hint
 ## Accessibility
 
 - The slider thumb has an implicit <code>role="slider"</code> with <code>aria-valuemin</code>, <code>aria-valuemax</code>, and <code>aria-valuenow</code>
-- The label is linked via <code>aria-labelledby</code> for screen readers
+- The thumb exposes its accessible name via <code>aria-label</code> (resolved from <code>label</code> or <code>ariaLabel</code>), and the visible label is associated through <code>htmlFor</code>
+- The formatted value is announced to assistive tech via <code>aria-valuetext</code>, so screen readers read "50%" or "€5,000" rather than the raw number
 - Keyboard navigation follows the native slider pattern: Arrow Left/Right to decrement/increment
-- When hidden, the label remains accessible as an <code>aria-label</code> on the thumb
-- Validation messages are linked via <code>aria-describedby</code>
+- Validation messages are linked via <code>aria-describedby</code> and announced through a polite <code>aria-live</code> region
+- The thumb hover animation respects <code>prefers-reduced-motion</code>
 - The disabled state uses <code>aria-disabled</code> and removes pointer events
 
 <Unstyled>

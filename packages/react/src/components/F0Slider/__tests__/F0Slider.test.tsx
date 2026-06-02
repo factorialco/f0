@@ -2,7 +2,12 @@ import { userEvent } from "@testing-library/user-event"
 import { useState } from "react"
 import { describe, expect, it, vi } from "vitest"
 
-import { zeroRender as render, screen } from "@/testing/test-utils"
+import {
+  fireEvent,
+  zeroRender as render,
+  screen,
+  waitFor,
+} from "@/testing/test-utils"
 
 import { F0Slider } from "../index"
 
@@ -232,5 +237,114 @@ describe("F0Slider", () => {
   it("renders the skeleton variant", () => {
     render(<F0Slider.Skeleton />)
     expect(screen.getAllByTestId("skeleton").length).toBeGreaterThan(0)
+  })
+
+  it("warns when neither label nor ariaLabel is provided", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    render(<F0Slider label="" min={0} max={10} />)
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining("provide a non-empty `label` or `ariaLabel`")
+    )
+    warn.mockRestore()
+  })
+
+  it("exposes the formatted value to assistive tech via aria-valuetext", () => {
+    render(
+      <F0Slider
+        label="Duration"
+        min={0}
+        max={10}
+        defaultValue={5}
+        formatValue={(v) => `${v} min`}
+      />
+    )
+    expect(screen.getByRole("slider")).toHaveAttribute(
+      "aria-valuetext",
+      "5 min"
+    )
+  })
+
+  it("sets aria-required on the thumb when required", () => {
+    render(<F0Slider label="Duration" min={0} max={10} required />)
+    expect(screen.getByRole("slider")).toHaveAttribute("aria-required", "true")
+  })
+
+  it("renders the status message inside a polite live region", () => {
+    render(
+      <F0Slider
+        label="Duration"
+        min={0}
+        max={10}
+        status={{ type: "error", message: "Out of range" }}
+      />
+    )
+    const liveRegion = screen.getByRole("status")
+    expect(liveRegion).toHaveAttribute("aria-live", "polite")
+    expect(liveRegion).toHaveTextContent("Out of range")
+  })
+
+  it("renders warning and info status messages", () => {
+    const { rerender } = render(
+      <F0Slider
+        label="Duration"
+        min={0}
+        max={10}
+        status={{ type: "warning", message: "Close to the maximum" }}
+      />
+    )
+    expect(screen.getByText("Close to the maximum")).toBeInTheDocument()
+
+    rerender(
+      <F0Slider
+        label="Duration"
+        min={0}
+        max={10}
+        status={{ type: "info", message: "Within normal range" }}
+      />
+    )
+    expect(screen.getByText("Within normal range")).toBeInTheDocument()
+  })
+
+  it("shows the tooltip on hover and hides it on leave when showTooltip is onHover", async () => {
+    render(<F0Slider label="Duration" min={0} max={10} defaultValue={5} />)
+    const root = screen
+      .getByRole("slider")
+      .closest(".touch-none") as HTMLElement
+
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
+    fireEvent.mouseEnter(root)
+    expect(screen.getByRole("tooltip")).toBeInTheDocument()
+    fireEvent.mouseLeave(root)
+    await waitFor(() =>
+      expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
+    )
+  })
+
+  it("dismisses the tooltip on pointer up after a drag", async () => {
+    render(<F0Slider label="Duration" min={0} max={10} defaultValue={5} />)
+    const root = screen
+      .getByRole("slider")
+      .closest(".touch-none") as HTMLElement
+
+    fireEvent.pointerDown(root)
+    expect(screen.getByRole("tooltip")).toBeInTheDocument()
+    fireEvent.pointerUp(root)
+    await waitFor(() =>
+      expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
+    )
+  })
+
+  it("clamps the tooltip position when the value exceeds max", () => {
+    render(
+      <F0Slider
+        label="Duration"
+        min={0}
+        max={100}
+        value={150}
+        showTooltip="always"
+      />
+    )
+    const tooltip = screen.getByRole("tooltip")
+    expect(tooltip.style.left).toBe("calc(100% + -10px)")
   })
 })

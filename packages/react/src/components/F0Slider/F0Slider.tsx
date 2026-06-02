@@ -47,6 +47,7 @@ const thumbVariants = cva({
   base: cn(
     "relative block rounded-full bg-f1-background border-[2px] border-solid",
     "transition-[transform,border-color] hover:scale-110",
+    "motion-reduce:transition-none motion-reduce:hover:scale-100",
     "data-[disabled]:cursor-not-allowed data-[disabled]:hover:scale-100"
   ),
   variants: {
@@ -91,7 +92,7 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
     ...rest
   } = props
 
-  const labelId = useId()
+  const thumbId = useId()
   const messagesId = useId()
 
   const resolvedAriaLabel =
@@ -103,7 +104,7 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
 
   useEffect(() => {
     if (!resolvedAriaLabel) {
-      console.error(
+      console.warn(
         "F0Slider: provide a non-empty `label` or `ariaLabel` for accessibility."
       )
     }
@@ -157,12 +158,11 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
         <Label
           label={label}
           required={required}
-          htmlFor={labelId}
+          htmlFor={thumbId}
           disabled={disabled}
         />
       )}
       <Slider
-        id={labelId}
         value={[currentValue]}
         onValueChange={handleValueChange}
         onPointerDown={() => setIsDragging(true)}
@@ -185,8 +185,9 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
           />
         </SliderTrack>
         <SliderThumb
-          aria-label={!showLabel ? resolvedAriaLabel : undefined}
-          aria-labelledby={showLabel ? labelId : undefined}
+          id={thumbId}
+          aria-label={resolvedAriaLabel}
+          aria-valuetext={formatValue(currentValue)}
           aria-describedby={describedBy}
           aria-required={required}
           className={cn(
@@ -205,7 +206,7 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
         )}
       </Slider>
       <SliderRangeLabels minLabel={minLabel} maxLabel={maxLabel} />
-      <div id={messagesId}>
+      <div id={messagesId} role="status" aria-live="polite">
         <InputMessages status={hintStatus} />
       </div>
     </div>

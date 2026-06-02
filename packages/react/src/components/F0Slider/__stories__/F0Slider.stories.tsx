@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0Slider } from ".."
-import { sliderSizes } from "../types"
+import { sliderSizes, sliderTooltipModes } from "../types"
 
 const meta = {
   component: F0Slider,
@@ -36,10 +36,12 @@ const meta = {
     size: {
       control: "radio",
       options: [...sliderSizes],
+      table: { type: { summary: sliderSizes.join(" | ") } },
     },
     showTooltip: {
       control: "radio",
-      options: ["onHover", "always", "never"],
+      options: [...sliderTooltipModes],
+      table: { type: { summary: sliderTooltipModes.join(" | ") } },
     },
     formatValue: { control: false },
     onChange: { control: false },
