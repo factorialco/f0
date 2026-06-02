@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.30.0](https://github.com/factorialco/f0/compare/f0-react-v2.29.0...f0-react-v2.30.0) (2026-06-02)
+
+
+### Features
+
+* one table min width ([#4203](https://github.com/factorialco/f0/issues/4203)) ([0e6eb93](https://github.com/factorialco/f0/commit/0e6eb9336acc0c61787c43bbd4255408d4cc0ccb))
+
 ## [2.29.0](https://github.com/factorialco/f0/compare/f0-react-v2.28.2...f0-react-v2.29.0) (2026-06-01)
 
 
