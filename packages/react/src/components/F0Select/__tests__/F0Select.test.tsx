@@ -255,6 +255,71 @@ describe("Select", () => {
     ).toBeTruthy()
   })
 
+  it("throws when options mix multiple tag types", () => {
+    expect(() =>
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={[
+            {
+              value: "approved",
+              label: "Approved",
+              tag: {
+                type: "status",
+                text: "Approved",
+                variant: "positive",
+              },
+            },
+            {
+              value: "isabella",
+              label: "Isabella",
+              tag: { type: "person", name: "Isabella" },
+            },
+          ]}
+          onChange={() => {}}
+        />
+      )
+    ).toThrow(/All options must use the same tag type/)
+  })
+
+  it("forces at least md trigger size when options carry status tags", () => {
+    const { container } = render(
+      <F0Select
+        {...defaultSelectProps}
+        size="sm"
+        value="approved"
+        options={[
+          {
+            value: "approved",
+            label: "Approved",
+            tag: {
+              type: "status",
+              text: "Approved",
+              variant: "positive",
+            },
+          },
+        ]}
+      />
+    )
+
+    expect(container.querySelector(".h-\\[40px\\]")).toBeTruthy()
+    expect(container.querySelector(".h-\\[32px\\]")).toBeFalsy()
+  })
+
+  it("keeps the requested sm trigger size when no status tags are present", () => {
+    const { container } = render(
+      <F0Select
+        {...defaultSelectProps}
+        size="sm"
+        value="option1"
+        options={[{ value: "option1", label: "Option 1" }]}
+      />
+    )
+
+    expect(container.querySelector(".h-\\[32px\\]")).toBeTruthy()
+    expect(container.querySelector(".h-\\[40px\\]")).toBeFalsy()
+  })
+
   it("filters options based on search input", async () => {
     const user = userEvent.setup()
     render(

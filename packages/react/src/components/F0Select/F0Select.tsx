@@ -73,6 +73,20 @@ const defaultSearchFn = (
   )
 }
 
+/**
+ * Returns a stable discriminator for an option's tag kind, or undefined when
+ * the option has no tag. String tags collapse to "string"; object tags use
+ * their `type`. Used to enforce that a single select renders a single tag type.
+ */
+const getTagType = <T extends string, R>(
+  option: F0SelectItemProps<T, R>
+): string | undefined => {
+  if (option.type === "separator" || option.tag === undefined) {
+    return undefined
+  }
+  return typeof option.tag === "string" ? "string" : option.tag.type
+}
+
 const asListContainerVariants = cva({
   base: "flex flex-col rounded-md border border-solid bg-f1-background max-h-full",
   variants: {
@@ -320,6 +334,20 @@ const F0SelectComponent = forwardRef(function Select<
 
     return Object.fromEntries(entries)
   }, [data, optionMapper])
+
+  /**
+   * Status tags render as pills, which need more vertical room than the "sm"
+   * trigger gives them — the selected pill looks cramped. When any option uses
+   * a status tag we force the trigger to at least "md".
+   */
+  const hasStatusTag = useMemo(
+    () =>
+      data.records.some(
+        (record) => getTagType(optionMapper(record)) === "status"
+      ),
+    [data.records, optionMapper]
+  )
+  const effectiveSize = hasStatusTag ? "md" : size
 
   /**
    * Initialize selection state from the value prop.
@@ -822,10 +850,24 @@ const F0SelectComponent = forwardRef(function Select<
 
   const getItems = useCallback(
     (
-      records: WithGroupId<ActualRecordType>[] | ActualRecordType[]
+      records: WithGroupId<ActualRecordType>[] | ActualRecordType[],
+      seenTagTypes: Set<string>
     ): VirtualItem[] => {
       return records.map((record, index) => {
         const mappedOption = optionMapper(record)
+        const tagType = getTagType(mappedOption)
+        if (tagType !== undefined) {
+          seenTagTypes.add(tagType)
+          if (seenTagTypes.size > 1) {
+            throw new Error(
+              `[F0Select] All options must use the same tag type, but multiple were provided: ${Array.from(
+                seenTagTypes
+              )
+                .map((type) => `"${type}"`)
+                .join(", ")}.`
+            )
+          }
+        }
         return mappedOption.type === "separator"
           ? {
               height: 1,
@@ -858,6 +900,8 @@ const F0SelectComponent = forwardRef(function Select<
   )
 
   const items: VirtualItem[] = useMemo(() => {
+    const seenTagTypes = new Set<string>()
+
     if (data.type === "grouped") {
       const items: VirtualItem[] = []
       data.groups.map((group) => {
@@ -881,7 +925,7 @@ const F0SelectComponent = forwardRef(function Select<
         })
         if (!collapsible || openGroups[group.key]) {
           items.push(
-            ...getItems(group.records).map((vi) => ({
+            ...getItems(group.records, seenTagTypes).map((vi) => ({
               ...vi,
               key: `${group.key}:${vi.key}`,
               item: collapsible ? (
@@ -895,7 +939,7 @@ const F0SelectComponent = forwardRef(function Select<
       })
       return items
     }
-    return getItems(data.records)
+    return getItems(data.records, seenTagTypes)
   }, [
     data.records,
     data.type,
@@ -1150,7 +1194,7 @@ const F0SelectComponent = forwardRef(function Select<
               placeholder={placeholder || ""}
               disabled={disabled}
               clearable={clearable}
-              size={size}
+              size={effectiveSize}
               loadingIndicator={{
                 asOverlay: true,
                 offset: 34,
@@ -1161,7 +1205,11 @@ const F0SelectComponent = forwardRef(function Select<
                 handleChangeOpenLocal(!openLocal)
               }}
               append={
-                <Arrow open={openLocal} disabled={disabled} size={size} />
+                <Arrow
+                  open={openLocal}
+                  disabled={disabled}
+                  size={effectiveSize}
+                />
               }
             >
               <button
