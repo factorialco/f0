@@ -16,7 +16,7 @@
  *
  */
 
-import { forwardRef, useCallback, useEffect, useRef } from "react"
+import { forwardRef, useCallback, useRef } from "react"
 
 import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
 
@@ -129,13 +129,8 @@ const NestedRowContent = <
 
   const rowId = `${props.nestedRowProps?.depth ?? 0}-${"id" in props.item ? props.item.id + "-" + props.index : props.index}`
 
-  const { expandedRowIds, setRowExpanded, defaultExpandedIds } =
-    useNestedDataContext()
-  const itemId = "id" in props.item ? props.item.id : undefined
-  const isDefaultExpanded =
-    itemId !== undefined &&
-    (defaultExpandedIds?.includes(itemId as string | number) ?? false)
-  const open = expandedRowIds[rowId] ?? isDefaultExpanded
+  const { expandedRowIds, setRowExpanded } = useNestedDataContext()
+  const open = expandedRowIds[rowId] ?? false
 
   /**
    * useLoadChildren hook manages:
@@ -211,18 +206,6 @@ const NestedRowContent = <
       loadChildren()
     }
   }
-
-  // When defaultExpandAllRows is set, rows render with `open === true` on
-  // first mount without any user interaction — so handleExpand never fires.
-  // Trigger the initial fetch here so children load eagerly.
-  const didInitialLoadRef = useRef(false)
-  useEffect(() => {
-    if (didInitialLoadRef.current) return
-    if (open && !children.length && !isLoading) {
-      didInitialLoadRef.current = true
-      loadChildren()
-    }
-  }, [open, children.length, isLoading, loadChildren])
 
   const sharedNestedRowProps = {
     depth: props.nestedRowProps?.depth ?? 0,
