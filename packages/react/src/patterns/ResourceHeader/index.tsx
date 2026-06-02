@@ -17,7 +17,6 @@ type Props = {} & Pick<
   | "metadata"
   | "status"
   | "deactivated"
-  | "belowTitle"
   | "showBottomBorder"
 >
 
@@ -31,7 +30,6 @@ const _ResourceHeader = ({
   status,
   metadata,
   deactivated,
-  belowTitle,
   showBottomBorder,
 }: Props) => {
   return (
@@ -45,7 +43,6 @@ const _ResourceHeader = ({
       status={status}
       metadata={metadata}
       deactivated={deactivated}
-      belowTitle={belowTitle}
       showBottomBorder={showBottomBorder}
     />
   )

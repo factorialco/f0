@@ -1,4 +1,4 @@
-import { Fragment, ReactNode } from "react"
+import { Fragment } from "react"
 
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Button } from "@/components/F0Button"
@@ -57,11 +57,6 @@ interface BaseHeaderProps {
     actions?: MetadataAction[]
   }
   metadata?: MetadataProps["items"]
-  /**
-   * Custom content rendered inside the header, directly below the title and metadata.
-   * Shares the header's vertical rhythm so it reads as part of the header.
-   */
-  belowTitle?: ReactNode
   /** Renders a 1px bottom border at the very bottom of the header. */
   showBottomBorder?: boolean
 }
@@ -79,7 +74,6 @@ export function BaseHeader({
   otherActions = [],
   status,
   metadata = [],
-  belowTitle,
   showBottomBorder = false,
 }: BaseHeaderProps) {
   const allMetadata: BaseHeaderProps["metadata"] = [
@@ -316,7 +310,6 @@ export function BaseHeader({
           <Metadata items={allMetadata} />
         </div>
       )}
-      {belowTitle != null && <div>{belowTitle}</div>}
     </div>
   )
 }
