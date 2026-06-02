@@ -1,7 +1,7 @@
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { useSearchParams } from "react-router-dom"
-import { StandardLayout } from "@factorialco/f0-react"
+import { F0AnalyticsDashboard, StandardLayout } from "@factorialco/f0-react"
 import {
   Add,
   CalendarArrowDown,
@@ -21,6 +21,7 @@ import {
 } from "@factorialco/f0-react/dist/experimental"
 import { applySort } from "@/lib/applySort"
 
+import { BudgetsTab } from "./budgets/BudgetsTab"
 import { OptimizePanel } from "./panels/OptimizePanel"
 import { RenewalPanel } from "./panels/RenewalPanel"
 import { OffboardingModal } from "./panels/OffboardingModal"
@@ -74,7 +75,7 @@ type TabId = "overview" | "applications" | "inbox" | "contracts" | "spend" | "bu
 const tabs: { id: TabId; label: string }[] = [
   { id: "overview",     label: "Overview" },
   { id: "applications", label: "Applications" },
-  { id: "inbox",        label: "Inbox" },
+  { id: "inbox",        label: "Mailbox" },
   { id: "contracts",    label: "Contracts" },
   { id: "spend",        label: "Spend" },
   { id: "budgets",      label: "Budgets" },
@@ -294,6 +295,109 @@ const SUMMARY_EXPIRING_SOON = saasApps.filter((r) => {
   return d !== null && d <= 90
 }).length
 
+// ── Team → app mapping ────────────────────────────────────────────────────────
+
+const TEAM_APP_IDS: Record<string, string[]> = {
+  engineering: ["github", "datadog", "aws", "linear", "slack", "google-workspace", "zoom"],
+  design:      ["adobe", "notion", "box", "dropbox", "slack", "google-workspace"],
+  sales:       ["salesforce", "hubspot", "intercom", "zoom", "google-meet", "slack", "google-workspace"],
+}
+
+const overviewFilters = {
+  team: {
+    type: "in" as const,
+    label: "Team",
+    options: {
+      options: [
+        { value: "engineering", label: "Engineering" },
+        { value: "design",      label: "Design" },
+        { value: "sales",       label: "Sales" },
+      ],
+    },
+  },
+} as const
+
+const overviewPresets = [
+  { label: "Engineering", filter: { team: ["engineering"] } },
+  { label: "Design",      filter: { team: ["design"] } },
+  { label: "Sales",       filter: { team: ["sales"] } },
+]
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function appsForFilters(filters: Record<string, any>): SaasApp[] {
+  const teams: string[] = Array.isArray(filters.team) && filters.team.length > 0
+    ? filters.team as string[]
+    : []
+  if (teams.length === 0) return saasApps
+  const ids = new Set(teams.flatMap((t) => TEAM_APP_IDS[t] ?? []))
+  return saasApps.filter((a) => ids.has(a.id))
+}
+
+// ── Chart data helpers (filter-reactive) ──────────────────────────────────────
+
+function computeSpendByCategory(apps: SaasApp[]) {
+  return (Object.keys(categoryLabels) as SaasCategory[])
+    .map((cat) => ({
+      name: categoryLabels[cat],
+      value: apps.reduce(
+        (s, a) => s + (a.category === cat ? (a.monthlyEur ?? a.avgMonthlyEur ?? 0) : 0),
+        0
+      ),
+    }))
+    .filter((c) => c.value > 0)
+}
+
+function computeUtilizationData(apps: SaasApp[]) {
+  return apps
+    .filter(
+      (a) =>
+        a.active !== null &&
+        a.seats !== null &&
+        a.seats > 0 &&
+        !a.shadowIT &&
+        !a.pendingSetup &&
+        !a.isVariableCost
+    )
+    .map((a) => ({
+      name: a.name,
+      pct: Math.round(((a.active as number) / (a.seats as number)) * 100),
+    }))
+    .sort((a, b) => b.pct - a.pct)
+}
+
+function computeHealthBuckets(apps: SaasApp[]) {
+  let healthy = 0, actionNeeded = 0, lowUsage = 0, untracked = 0
+  for (const a of apps) {
+    if (a.shadowIT || a.pendingSetup) { untracked++; continue }
+    if (a.isCriticalMultiAlert || isExpired(a) || isUnused(a) || isExpiringSoon(a, 30) || a.cancelling) { actionNeeded++; continue }
+    if (isLowUsage(a)) { lowUsage++; continue }
+    healthy++
+  }
+  return [
+    { name: "Healthy",       value: healthy },
+    { name: "Action Needed", value: actionNeeded },
+    { name: "Low Usage",     value: lowUsage },
+    { name: "Untracked",     value: untracked },
+  ].filter((b) => b.value > 0)
+}
+
+function computeMonthlyTotal(apps: SaasApp[]) {
+  return apps.reduce((s, a) => s + (a.monthlyEur ?? a.avgMonthlyEur ?? 0), 0)
+}
+
+function computeAvgUtilization(apps: SaasApp[]) {
+  const withSeats = apps.filter((a) => a.seats !== null && a.seats > 0 && a.active !== null)
+  if (withSeats.length === 0) return 0
+  return Math.round(
+    withSeats.reduce((s, a) => s + (a.active ?? 0), 0) /
+    withSeats.reduce((s, a) => s + (a.seats ?? 0), 0) * 100
+  )
+}
+
+// Global baseline for trend scaling
+const GLOBAL_MONTHLY = saasApps.reduce((s, a) => s + (a.monthlyEur ?? a.avgMonthlyEur ?? 0), 0)
+const TREND_BASELINE = [17200, 17800, 18100, 18500, 19000, GLOBAL_MONTHLY]
+
 // ── Overlap detection ─────────────────────────────────────────────────────────
 
 const OVERLAP_RULES: { category: string; ids: string[] }[] = [
@@ -434,6 +538,173 @@ function applyOptimisticRevoke(app: SaasApp, revokedCount: number): SaasApp {
   const perSeat    = app.seats ? app.monthlyEur / app.seats : 0
   const newMonthly = Math.round(app.monthlyEur - revokedCount * perSeat)
   return { ...app, active: newActive, monthlyEur: newMonthly }
+}
+
+// ── Overview tab ──────────────────────────────────────────────────────────────
+
+function OverviewTab() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  type F = Record<string, any>
+
+  const items = useMemo(
+    () => [
+      // ── Row 1: KPI metrics ───────────────────────────────────────────────────
+      {
+        id: "metric-spend",
+        type: "metric" as const,
+        title: "Monthly Spend",
+        description: "Total SaaS spend for selected team",
+        format: { type: "currency" as const, currency: "EUR" },
+        fetchData: async (f: F) => {
+          const apps = appsForFilters(f)
+          const total = computeMonthlyTotal(apps)
+          return { value: total, previousValue: Math.round(total * 0.94) }
+        },
+      },
+      {
+        id: "metric-apps",
+        type: "metric" as const,
+        title: "Active Apps",
+        description: "Apps used by this team",
+        fetchData: async (f: F) => {
+          const apps = appsForFilters(f)
+          return { value: apps.length, previousValue: Math.max(1, apps.length - 2) }
+        },
+      },
+      {
+        id: "metric-utilization",
+        type: "metric" as const,
+        title: "Avg Utilization",
+        description: "Across seat-based apps",
+        format: { type: "percent" as const },
+        fetchData: async (f: F) => {
+          const apps = appsForFilters(f)
+          return { value: computeAvgUtilization(apps), previousValue: 71 }
+        },
+      },
+      {
+        id: "metric-expiring",
+        type: "metric" as const,
+        title: "Expiring Soon",
+        description: "Contracts due within 90 days",
+        fetchData: async (f: F) => {
+          const apps = appsForFilters(f)
+          const count = apps.filter((a) => {
+            const d = daysUntil(a.renewalDate)
+            return d !== null && d <= 90
+          }).length
+          return { value: count }
+        },
+      },
+
+      // ── Row 2: Spend charts ──────────────────────────────────────────────────
+      {
+        id: "chart-spend-by-category",
+        type: "chart" as const,
+        title: "Spend by Category",
+        description: "Monthly cost breakdown",
+        chart: {
+          type: "pie" as const,
+          innerRadius: 0.5,
+          showLegend: true,
+          showLabels: false,
+          valueFormatter: (v: number) => formatEur(v),
+        },
+        fetchData: async (f: F) => ({
+          series: {
+            name: "Monthly spend",
+            data: computeSpendByCategory(appsForFilters(f)),
+          },
+        }),
+      },
+      {
+        id: "chart-spend-trend",
+        type: "chart" as const,
+        title: "Spend Trend",
+        description: "SaaS spend over the last 6 months",
+        chart: {
+          type: "line" as const,
+          showArea: true,
+          showDots: true,
+          showLegend: false,
+          valueFormatter: (v: number) => formatEur(v),
+        },
+        fetchData: async (f: F) => {
+          const apps = appsForFilters(f)
+          const current = computeMonthlyTotal(apps)
+          const ratio = GLOBAL_MONTHLY > 0 ? current / GLOBAL_MONTHLY : 1
+          return {
+            categories: ["Dec", "Jan", "Feb", "Mar", "Apr", "May"],
+            series: [
+              {
+                name: "Monthly Spend",
+                data: TREND_BASELINE.map((v) => Math.round(v * ratio)),
+              },
+            ],
+          }
+        },
+      },
+
+      // ── Row 3: Utilization & health ──────────────────────────────────────────
+      {
+        id: "chart-utilization",
+        type: "chart" as const,
+        title: "License Utilization",
+        description: "Active seats as % of purchased seats",
+        chart: {
+          type: "bar" as const,
+          orientation: "horizontal" as const,
+          showLegend: false,
+          showLabels: true,
+          valueFormatter: (v: number) => `${v}%`,
+        },
+        fetchData: async (f: F) => {
+          const data = computeUtilizationData(appsForFilters(f))
+          return {
+            categories: data.map((d) => d.name),
+            series: [{ name: "Utilization", data: data.map((d) => d.pct) }],
+          }
+        },
+      },
+      {
+        id: "chart-app-health",
+        type: "chart" as const,
+        title: "App Health",
+        description: "Apps grouped by status",
+        chart: {
+          type: "pie" as const,
+          innerRadius: 0.5,
+          showLegend: true,
+          showLabels: false,
+          valueFormatter: (v: number) => `${v} apps`,
+        },
+        fetchData: async (f: F) => ({
+          series: {
+            name: "Apps",
+            data: computeHealthBuckets(appsForFilters(f)),
+          },
+        }),
+      },
+    ],
+    []
+  )
+
+  return (
+    <div className="flex min-h-full flex-1 flex-col overflow-auto py-5">
+      <F0AnalyticsDashboard
+        navigationFilters={{
+          date: {
+            type: "date-navigator",
+            defaultValue: new Date("2026-06-01"),
+            granularity: ["month", "quarter", "year"],
+          },
+        }}
+        filters={overviewFilters}
+        presets={overviewPresets}
+        items={items}
+      />
+    </div>
+  )
 }
 
 // ── Applications tab ──────────────────────────────────────────────────────────
@@ -774,12 +1045,12 @@ export function SaasManagementPage() {
         </>
       }
     >
-      {activeTab === "overview"     && <PlaceholderTab label="Overview" />}
+      {activeTab === "overview"     && <OverviewTab />}
       {activeTab === "applications" && <ApplicationsTab />}
       {activeTab === "inbox"        && <PlaceholderTab label="Inbox" />}
       {activeTab === "contracts"    && <PlaceholderTab label="Contracts" />}
       {activeTab === "spend"        && <PlaceholderTab label="Spend" />}
-      {activeTab === "budgets"      && <PlaceholderTab label="Budgets" />}
+      {activeTab === "budgets"      && <BudgetsTab />}
     </Page>
   )
 }

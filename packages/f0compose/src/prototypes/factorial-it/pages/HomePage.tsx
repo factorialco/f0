@@ -355,8 +355,7 @@ export function HomePage() {
           {/* AI input */}
           <div style={s.inputWrap} ref={textareaWrapRef}>
             <F0AiChatTextArea
-              inProgress={false}
-              onSend={async () => {}}
+              onSubmit={() => {}}
               onStop={() => {}}
             />
           </div>
