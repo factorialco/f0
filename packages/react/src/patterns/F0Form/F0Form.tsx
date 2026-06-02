@@ -722,7 +722,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     const result = await onSubmit(cleanedData)
 
     if (result.success) {
-      form.reset(data)
+      form.reset(form.getValues())
       resetErrorNavigation()
       setSuccessMessage(result.message)
       setActionBarStatus("success")
