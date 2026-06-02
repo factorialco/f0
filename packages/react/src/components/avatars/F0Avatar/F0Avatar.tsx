@@ -1,5 +1,8 @@
 import { ComponentProps, ReactNode } from "react"
 
+import { DistributiveOmit } from "@/lib/typescript-utils/distributive-omit"
+
+import { F0AvatarColor, F0AvatarColorProps } from "../F0AvatarColor"
 import { F0AvatarCompany, F0AvatarCompanyProps } from "../F0AvatarCompany"
 import { F0AvatarEmoji, F0AvatarEmojiProps } from "../F0AvatarEmoji"
 import { F0AvatarFile, F0AvatarFileProps } from "../F0AvatarFile"
@@ -23,6 +26,7 @@ export type AvatarVariant =
   | ({ type: "flag" } & Omit<F0AvatarFlagProps, "size">)
   | ({ type: "emoji" } & Omit<F0AvatarEmojiProps, "size">)
   | ({ type: "icon" } & Omit<F0AvatarIconProps, "size">)
+  | ({ type: "color" } & DistributiveOmit<F0AvatarColorProps, "size">)
 
 export const F0Avatar = ({
   avatar,
@@ -106,6 +110,18 @@ export const F0Avatar = ({
           icon={avatar.icon}
           size={size as ComponentProps<typeof F0AvatarIcon>["size"]}
           state={avatar.state}
+          aria-label={avatar["aria-label"]}
+          aria-labelledby={avatar["aria-labelledby"]}
+          dataTestId={dataTestId}
+        />
+      )
+    case "color":
+      return (
+        <F0AvatarColor
+          {...("color" in avatar
+            ? { color: avatar.color }
+            : { customColor: avatar.customColor })}
+          size={size as ComponentProps<typeof F0AvatarColor>["size"]}
           aria-label={avatar["aria-label"]}
           aria-labelledby={avatar["aria-labelledby"]}
           dataTestId={dataTestId}
