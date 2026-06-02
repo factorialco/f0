@@ -71,9 +71,7 @@ export function F0CanvasCard({
       className={cn(
         "flex flex-col items-center justify-between gap-3 rounded-lg border border-solid px-3 py-2",
         isOpenAction && "cursor-pointer",
-        isActive
-          ? "border-f1-border-hover"
-          : "border-f1-border-secondary hover:border-f1-border-hover"
+        isActive ? "border-f1-border-hover" : "border-f1-border-secondary"
       )}
       onClick={handleCardClick}
     >
@@ -96,7 +94,7 @@ export function F0CanvasCard({
         </div>
         {action.type === "open" && action.showButton !== false && (
           <F0Button
-            variant="neutral"
+            variant="outline"
             size="md"
             label={
               isActive
