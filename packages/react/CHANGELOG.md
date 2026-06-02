@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.32.0](https://github.com/factorialco/f0/compare/f0-react-v2.31.0...f0-react-v2.32.0) (2026-06-02)
+
+
+### Features
+
+* **F0CanvasCard:** support file avatars, custom action button, optional description ([#4289](https://github.com/factorialco/f0/issues/4289)) ([de23a78](https://github.com/factorialco/f0/commit/de23a78dd01b24b68c76a46793fba793beea8254))
+
 ## [2.31.0](https://github.com/factorialco/f0/compare/f0-react-v2.30.2...f0-react-v2.31.0) (2026-06-02)
 
 
