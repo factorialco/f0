@@ -129,6 +129,12 @@ export type DataCollectionSourceDefinition<
   primaryActions?: PrimaryActionsDefinitionFn
   /** Label for the primary actions dropdown trigger button */
   primaryActionsLabel?: string
+  /**
+   * When `true`, clicking the main split button also opens the dropdown instead
+   * of triggering the first action. Use when all choices are equally discoverable
+   * (e.g. a "Create" button that reveals "Create with AI / Manual / Templates").
+   */
+  primaryActionsOpenOnClick?: boolean
   /** Available secondary actions that can be performed on the collection */
   secondaryActions?: SecondaryActionsDefinition
   /** Available summaries fields. If not provided, summaries is not allowed. */

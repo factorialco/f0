@@ -16,6 +16,7 @@ import {
 type CollectionActionProps = {
   primaryActions?: PrimaryActionItemDefinition[]
   primaryActionsLabel?: string
+  primaryActionsOpenOnClick?: boolean
   secondaryActions?: SecondaryActionItem[]
   otherActions?: SecondaryActionGroup[]
 }
@@ -23,6 +24,7 @@ type CollectionActionProps = {
 export const CollectionActions = ({
   primaryActions,
   primaryActionsLabel,
+  primaryActionsOpenOnClick,
   secondaryActions,
   otherActions,
 }: CollectionActionProps) => {
@@ -91,6 +93,7 @@ export const CollectionActions = ({
         primaryActionsButtons.length > 1 && (
           <F0ButtonDropdown
             size="md"
+            openOnClick={primaryActionsOpenOnClick}
             items={primaryActionsButtons.map((action, index) => ({
               label: action.label,
               icon: action.icon,

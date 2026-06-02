@@ -70,6 +70,7 @@ function isButtonDropdownItem<T = string>(
 const SplitMode = ({
   onClick,
   value,
+  openOnClick = false,
   items: rawItems,
   size,
   variant,
@@ -79,6 +80,7 @@ const SplitMode = ({
 }: {
   onClick: (value: string, item: ButtonDropdownItem<string>) => void
   value?: string
+  openOnClick?: boolean
   items:
     | ButtonDropdownItem<string>[]
     | ButtonDropdownGroup<string>[]
@@ -112,6 +114,10 @@ const SplitMode = ({
   )
 
   const handleClick = () => {
+    if (openOnClick) {
+      setIsOpen(true)
+      return
+    }
     const item = flattenedItems.find((item) => item.value === localValue)
     if (item) {
       onClick(localValue, item)
@@ -322,6 +328,7 @@ const _F0ButtonDropdown = (props: F0ButtonDropdownProps) => {
     <SplitMode
       onClick={props.onClick}
       value={"value" in props ? props.value : undefined}
+      openOnClick={"openOnClick" in props ? props.openOnClick : undefined}
       items={props.items}
       size={props.size}
       variant={props.variant}

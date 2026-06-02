@@ -459,6 +459,20 @@ export const Modes: Story = {
   ),
 }
 
+// Split mode with openOnClick: main button also opens the dropdown
+export const SplitModeOpenOnClick: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    mode: "split",
+    openOnClick: true,
+    items: [
+      { value: "create-ai", label: "Create with AI", icon: Add },
+      { value: "create-manual", label: "Create Manual", icon: Add },
+      { value: "templates", label: "Templates", icon: Add },
+    ],
+  },
+}
+
 // Split mode: one action is clearly more frequent
 export const SplitModeExample: Story = {
   tags: ["no-sidebar"],
