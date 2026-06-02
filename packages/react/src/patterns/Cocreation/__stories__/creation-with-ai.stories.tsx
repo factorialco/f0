@@ -1,13 +1,22 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { ComponentProps, useEffect, useRef, useState } from "react"
+import {
+  ComponentProps,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 
 import { StandardLayout } from "@/layouts/StandardLayout"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import { Add, ArrowLeft, Files, Pencil, Sparkles } from "@/icons/app"
+import { F0Card } from "@/components/F0Card"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { Page as NavigationPage } from "@/patterns/Navigation/Page"
+import { Tabs } from "@/patterns/Navigation/Tabs"
 import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
@@ -17,10 +26,15 @@ import { useAiChat } from "@/sds/ai/F0AiChat"
 import {
   MockAiChatRuntimeProvider,
   MockConnectedChatHeader,
-  MockConnectedChatInput,
   MockConnectedMessagesContainer,
   useMockAiChatRuntime,
 } from "@/sds/ai/F0AiChat/__stories__/_mock"
+
+import { filterNonRenderableMessages } from "@/sds/ai/F0AiChat/__stories__/_mock/turn-utils"
+import { F0AiChatTextArea } from "@/sds/ai/F0AiChatTextArea"
+import type { F0AiChatTextAreaSubmitPayload } from "@/sds/ai/F0AiChatTextArea/types"
+import { F0ClarifyingPanel } from "@/sds/ai/F0ClarifyingPanel/F0ClarifyingPanel"
+import type { ClarifyingQuestionState } from "@/sds/ai/F0ClarifyingPanel/types"
 
 /**
  * Co-creation patterns — "Creation with AI".
@@ -85,6 +99,120 @@ const resetAiChatPersistence = () => {
 /** Number of full user↔AI exchanges before the chat docks into the split view. */
 const EXCHANGES_BEFORE_SPLIT = 2
 
+// ---------------------------------------------------------------------------
+// Clarifying question — shown after the first AI reply completes.
+// ---------------------------------------------------------------------------
+
+const CREATION_CLARIFYING_STEPS = [
+  {
+    question: "What kind of resource would you like to create?",
+    options: [
+      { id: "onboarding", label: "Onboarding plan" },
+      { id: "review", label: "Performance review cycle" },
+      { id: "process", label: "Process documentation" },
+      { id: "checklist", label: "Checklist" },
+    ],
+    selectionMode: "single" as const,
+  },
+]
+
+const REFINEMENT_CLARIFYING_STEPS = [
+  {
+    question: "What would you like to adjust?",
+    options: [
+      { id: "timeline", label: "Adjust the timeline" },
+      { id: "sections", label: "Add more sections" },
+      { id: "tone", label: "Change the tone" },
+      { id: "details", label: "Add more details" },
+    ],
+    selectionMode: "single" as const,
+  },
+]
+
+/** Maps user-turn index to the clarifying steps that should appear after that turn's AI reply. */
+const CLARIFYING_STEPS_BY_TURN: Record<number, ClarifyingStep[]> = {
+  1: CREATION_CLARIFYING_STEPS,
+  [EXCHANGES_BEFORE_SPLIT + 1]: REFINEMENT_CLARIFYING_STEPS,
+}
+
+type ClarifyingStep = (typeof CREATION_CLARIFYING_STEPS)[number]
+
+interface StepInteraction {
+  selectedIds: string[]
+}
+
+const EMPTY_INTERACTION: StepInteraction = { selectedIds: [] }
+
+function useClarifyingState(
+  steps: ClarifyingStep[],
+  callbacks: { onResolve: (label: string) => void; onDismiss: () => void }
+) {
+  const [stepIndex, setStepIndex] = useState(0)
+  const [interactions, setInteractions] = useState<
+    Record<string, StepInteraction>
+  >({})
+
+  const currentStep = steps[stepIndex]
+  const interaction = currentStep
+    ? (interactions[currentStep.question] ?? EMPTY_INTERACTION)
+    : EMPTY_INTERACTION
+
+  const toggleOption = useCallback(
+    (optionId: string) => {
+      if (!currentStep) return
+      setInteractions((prev) => ({
+        ...prev,
+        [currentStep.question]: { selectedIds: [optionId] },
+      }))
+    },
+    [currentStep]
+  )
+
+  const confirm = useCallback(() => {
+    if (!currentStep) return
+    if (stepIndex < steps.length - 1) {
+      setStepIndex(stepIndex + 1)
+    } else {
+      const selected = currentStep.options.find((o) =>
+        interaction.selectedIds.includes(o.id)
+      )
+      callbacks.onResolve(selected?.label ?? interaction.selectedIds[0] ?? "")
+    }
+  }, [currentStep, stepIndex, steps.length, interaction, callbacks])
+
+  const cancel = useCallback(() => {
+    callbacks.onDismiss()
+  }, [callbacks])
+
+  const back = useCallback(() => {
+    if (stepIndex > 0) setStepIndex(stepIndex - 1)
+  }, [stepIndex])
+
+  const state: ClarifyingQuestionState | null = currentStep
+    ? {
+        currentStep: {
+          question: currentStep.question,
+          options: currentStep.options,
+          selectionMode: currentStep.selectionMode,
+          selectedOptionIds: interaction.selectedIds,
+          isCustomAnswerActive: false,
+        },
+        currentStepIndex: stepIndex,
+        totalSteps: steps.length,
+        toggleOption,
+        confirm,
+        skip: cancel,
+        cancel,
+        back,
+        setCustomAnswerText: () => {},
+        setCustomAnswerActive: () => {},
+        activateCustomAnswer: () => {},
+      }
+    : null
+
+  return { clarifyingState: state }
+}
+
 const resourceFilters = {
   status: {
     type: "in" as const,
@@ -123,6 +251,37 @@ const emptyDataAdapter = {
   fetchData: () => Promise.resolve({ records: [] as Resource[] }),
 }
 
+const MOCK_RESOURCES: Resource[] = [
+  {
+    id: "1",
+    name: "Engineering onboarding plan",
+    owner: "Alicia Keys",
+    status: "Draft",
+  },
+  {
+    id: "2",
+    name: "Q3 performance review cycle",
+    owner: "Dani Moreno",
+    status: "Complete",
+  },
+  {
+    id: "3",
+    name: "Product roadmap 2026",
+    owner: "Marta Soler",
+    status: "Needs details",
+  },
+  {
+    id: "4",
+    name: "Offboarding checklist",
+    owner: "Nora Park",
+    status: "Draft",
+  },
+]
+
+const filledDataAdapter = {
+  fetchData: () => Promise.resolve({ records: MOCK_RESOURCES }),
+}
+
 const tableVisualization = {
   type: "table" as const,
   options: {
@@ -132,6 +291,132 @@ const tableVisualization = {
       { label: "Status", render: (item: Resource) => item.status },
     ],
   },
+}
+
+const cardVisualization = {
+  type: "card" as const,
+  options: {
+    title: (item: Resource) => item.name,
+    description: (item: Resource) => item.owner,
+    cardProperties: [
+      { label: "Status", render: (item: Resource) => item.status },
+    ],
+  },
+}
+
+/**
+ * Custom chat input for the co-creation flow. Identical to MockConnectedChatInput
+ * but also shows a clarifying question panel after the first AI reply finishes.
+ */
+function CreationChatInput() {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const { messages, inProgress, sendMessage } = useMockAiChatRuntime()
+  const {
+    placeholders,
+    entityRefs,
+    fileAttachments,
+    pendingContext,
+    setPendingContext,
+    pendingQuote,
+    setPendingQuote,
+    setProcessDroppedFilesFunction,
+    disclaimer,
+    footer,
+    visualizationMode,
+    creditWarning,
+    welcomeScreenSuggestions,
+    tracking,
+    setIsClarifying,
+  } = useAiChat()
+
+  const filteredMessages = useMemo(
+    () => filterNonRenderableMessages(messages),
+    [messages]
+  )
+  const isWelcomeScreen = filteredMessages.length === 0
+  const fullscreen = visualizationMode === "fullscreen"
+
+  const userTurns = messages.filter((m) => m.role === "user").length
+  const currentClarifyingSteps = CLARIFYING_STEPS_BY_TURN[userTurns] ?? null
+  const [dismissedAtTurn, setDismissedAtTurn] = useState<number | null>(null)
+  const shouldShowClarifying =
+    !inProgress &&
+    currentClarifyingSteps !== null &&
+    dismissedAtTurn !== userTurns
+
+  const callbacks = useMemo(
+    () => ({
+      onResolve: (label: string) => {
+        setDismissedAtTurn(userTurns)
+        setIsClarifying(false)
+        sendMessage(label)
+      },
+      onDismiss: () => {
+        setDismissedAtTurn(userTurns)
+        setIsClarifying(false)
+      },
+    }),
+    [sendMessage, setIsClarifying, userTurns]
+  )
+
+  const { clarifyingState } = useClarifyingState(
+    currentClarifyingSteps ?? CREATION_CLARIFYING_STEPS,
+    callbacks
+  )
+
+  useEffect(() => {
+    setIsClarifying(shouldShowClarifying && clarifyingState !== null)
+  }, [shouldShowClarifying, clarifyingState, setIsClarifying])
+
+  const clarifyingUI =
+    shouldShowClarifying && clarifyingState ? (
+      <F0ClarifyingPanel clarifyingQuestion={clarifyingState} />
+    ) : undefined
+
+  const handleSubmit = useCallback(
+    ({ text, quote }: F0AiChatTextAreaSubmitPayload) => {
+      sendMessage(text, { replyQuote: quote?.text })
+    },
+    [sendMessage]
+  )
+
+  const handleSuggestionClick = useCallback(
+    (
+      item: NonNullable<
+        typeof welcomeScreenSuggestions
+      >[number]["items"][number],
+      group: NonNullable<typeof welcomeScreenSuggestions>[number]
+    ) => {
+      const prompt = item.prompt || item.title
+      tracking?.onWelcomeSuggestionClick?.({ item, group, prompt })
+      sendMessage(prompt)
+    },
+    [sendMessage, tracking]
+  )
+
+  return (
+    <F0AiChatTextArea
+      ref={containerRef}
+      onSubmit={handleSubmit}
+      inProgress={inProgress}
+      placeholders={placeholders}
+      creditWarning={creditWarning}
+      pendingContext={pendingContext}
+      onPendingContextChange={setPendingContext}
+      pendingQuote={pendingQuote}
+      onPendingQuoteChange={setPendingQuote}
+      fileAttachments={fileAttachments}
+      searchPersons={entityRefs?.resolvers?.searchPersons}
+      onProcessFilesRef={setProcessDroppedFilesFunction}
+      disclaimer={disclaimer}
+      footer={footer}
+      isWelcomeScreen={isWelcomeScreen}
+      fullscreen={fullscreen}
+      welcomeScreenSuggestions={welcomeScreenSuggestions}
+      onSuggestionClick={handleSuggestionClick}
+      clarifyingUI={clarifyingUI}
+    />
+  )
 }
 
 /** The AI-generated draft shown in the central panel of the split view. */
@@ -185,11 +470,17 @@ function FlowContent({
   setPhase: (phase: Phase) => void
 }) {
   const [templatesOpen, setTemplatesOpen] = useState(false)
-  const { open, setOpen, setVisualizationMode } = useAiChat()
-  const { messages, inProgress } = useMockAiChatRuntime()
+  const [activeTabId, setActiveTabId] = useState("empty-table")
+  const [resourceTabId, setResourceTabId] = useState("overview")
+  const { open, setOpen, visualizationMode, setVisualizationMode } = useAiChat()
+  const {
+    messages,
+    inProgress,
+    sendMessageWithThinkingOnly,
+    appendRawMessages,
+  } = useMockAiChatRuntime()
 
-  const source = useDataCollectionSource({
-    dataAdapter: emptyDataAdapter,
+  const sharedSourceOptions = {
     filters: resourceFilters,
     sortings: resourceSortings,
     search: {
@@ -208,14 +499,31 @@ function FlowContent({
       {
         label: "Create with AI",
         icon: Sparkles,
-        // "Create with AI" opens the chat FULL WIDTH (fullscreen).
+        // "Create with AI" opens the chat FULL WIDTH (fullscreen) and
+        // auto-sends the opening intent message so the AI can start thinking.
         onClick: () => {
           setVisualizationMode("fullscreen")
           setPhase("chat")
+          sendMessageWithThinkingOnly("I want to create a new resource.")
         },
       },
       { label: "Start from scratch", icon: Pencil, onClick: () => {} },
     ],
+  }
+
+  const sourceEmpty = useDataCollectionSource({
+    dataAdapter: emptyDataAdapter,
+    ...sharedSourceOptions,
+  })
+
+  const sourceTable = useDataCollectionSource({
+    dataAdapter: filledDataAdapter,
+    ...sharedSourceOptions,
+  })
+
+  const sourceCards = useDataCollectionSource({
+    dataAdapter: filledDataAdapter,
+    ...sharedSourceOptions,
   })
 
   // phase → chat open state. Opening from "collection" flips `open` false→true
@@ -263,46 +571,138 @@ function FlowContent({
     }
   }, [phase, userTurns, inProgress, setPhase])
 
+  // Append a persistent resource card each time an iteration is created.
+  const cardsAppendedRef = useRef(0)
+
+  // First card: on the initial split transition.
+  useEffect(() => {
+    if (phase !== "split" || cardsAppendedRef.current >= 1) return
+    cardsAppendedRef.current = 1
+    appendRawMessages([
+      {
+        role: "assistant",
+        content: "",
+        generativeUI: () => (
+          <F0Card
+            horizontal
+            avatar={{ type: "icon", icon: Files }}
+            title="Engineering onboarding plan"
+            description="A 30-day ramp-up covering environment setup, codebase orientation, and first deliverables."
+          />
+        ),
+      },
+    ])
+  }, [phase, appendRawMessages])
+
+  // Second card: after the post-split refinement exchange finishes.
+  useEffect(() => {
+    if (
+      phase !== "split" ||
+      cardsAppendedRef.current >= 2 ||
+      userTurns < EXCHANGES_BEFORE_SPLIT + 2 ||
+      inProgress
+    )
+      return
+    cardsAppendedRef.current = 2
+    appendRawMessages([
+      {
+        role: "assistant",
+        content: "",
+        generativeUI: () => (
+          <F0Card
+            horizontal
+            avatar={{ type: "icon", icon: Files }}
+            title="Engineering onboarding plan"
+            description="Expanded to 4 weeks with a buddy system, structured check-ins, and a dedicated deep-dive week."
+          />
+        ),
+      },
+    ])
+  }, [phase, userTurns, inProgress, appendRawMessages])
+
   return (
     <NavigationPage
       header={
-        <PageHeader
-          module={COCREATION_MODULE}
-          breadcrumbs={
-            phase === "split"
-              ? [{ id: "draft", label: "Untitled draft" }]
-              : undefined
-          }
-        />
+        <>
+          <PageHeader
+            module={COCREATION_MODULE}
+            breadcrumbs={
+              phase === "split"
+                ? [{ id: "draft", label: "Untitled draft" }]
+                : undefined
+            }
+          />
+          {phase === "split" ? (
+            <>
+              <ResourceHeader
+                title="Engineering onboarding plan"
+                description="A 30-day ramp-up covering environment setup, codebase orientation, and first deliverables."
+                status={{ label: "Status", text: "Draft", variant: "neutral" }}
+                primaryAction={{ label: "Save", onClick: () => {} }}
+                secondaryActions={[
+                  {
+                    label: "Back to list",
+                    icon: ArrowLeft,
+                    onClick: () => setPhase("collection"),
+                  },
+                ]}
+                metadata={[
+                  { label: "Owner", value: { type: "text", content: "You" } },
+                ]}
+              />
+              <Tabs
+                tabs={[
+                  { label: "Overview", id: "overview" },
+                  { label: "Week 1", id: "week-1" },
+                  { label: "Week 2", id: "week-2" },
+                ]}
+                activeTabId={resourceTabId}
+                setActiveTabId={setResourceTabId}
+              />
+            </>
+          ) : (
+            visualizationMode !== "fullscreen" && (
+              <Tabs
+                tabs={[
+                  { label: "Empty table", id: "empty-table" },
+                  { label: "Table with data", id: "table-data" },
+                  { label: "Cards", id: "cards" },
+                ]}
+                activeTabId={activeTabId}
+                setActiveTabId={setActiveTabId}
+              />
+            )
+          )}
+        </>
       }
     >
       <StandardLayout>
         {phase === "split" ? (
-          <>
-            <ResourceHeader
-              title="Engineering onboarding plan"
-              description="Drafted with AI — keep refining it in the chat."
-              status={{ label: "Status", text: "Draft", variant: "neutral" }}
-              primaryAction={{ label: "Save", onClick: () => {} }}
-              secondaryActions={[
-                {
-                  label: "Back to list",
-                  icon: ArrowLeft,
-                  onClick: () => setPhase("collection"),
-                },
-              ]}
-              metadata={[
-                { label: "Owner", value: { type: "text", content: "You" } },
-              ]}
-            />
-            <DocumentPreview />
-          </>
+          <DocumentPreview />
         ) : (
-          <OneDataCollection
-            source={source}
-            visualizations={[tableVisualization]}
-            fullHeight
-          />
+          <>
+            {activeTabId === "empty-table" && (
+              <OneDataCollection
+                source={sourceEmpty}
+                visualizations={[tableVisualization]}
+                fullHeight
+              />
+            )}
+            {activeTabId === "table-data" && (
+              <OneDataCollection
+                source={sourceTable}
+                visualizations={[tableVisualization]}
+                fullHeight
+              />
+            )}
+            {activeTabId === "cards" && (
+              <OneDataCollection
+                source={sourceCards}
+                visualizations={[cardVisualization]}
+                fullHeight
+              />
+            )}
+          </>
         )}
       </StandardLayout>
 
@@ -334,7 +734,7 @@ function CreationWithAIFlow() {
     enabled: true,
     chatHeader: <MockConnectedChatHeader />,
     chatMessages: <MockConnectedMessagesContainer />,
-    chatInput: <MockConnectedChatInput />,
+    chatInput: <CreationChatInput />,
     initialMessage: [
       "What do you want to create?",
       "Describe it and I'll draft it with you",
