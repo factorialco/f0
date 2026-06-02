@@ -1,6 +1,7 @@
 import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { IconType } from "@/components/F0Icon"
 import type { NewColor } from "@/components/tags/F0TagDot/types"
+import type { StatusVariant } from "@/components/tags/F0TagStatus/types"
 import type {
   DataSourceDefinition,
   FiltersDefinition,
@@ -184,6 +185,7 @@ export type F0SelectTagProp =
   | { type: "dot"; text: string; color: NewColor }
   | { type: "person"; name: string; src?: string }
   | { type: "icon"; text: string; icon: IconType }
+  | { type: "status"; text: string; variant: StatusVariant }
 
 export type F0SelectItemObject<T, R = unknown> = {
   type?: "item"
