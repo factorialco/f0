@@ -112,6 +112,31 @@ export const WithHint: Story = {
   ),
 }
 
+export const CommitOnRelease: Story = {
+  tags: ["!dev"],
+  render: () => {
+    const [live, setLive] = useState(40)
+    const [committed, setCommitted] = useState(40)
+
+    return (
+      <div className="flex w-80 flex-col gap-2">
+        <F0Slider
+          label="Volume"
+          min={0}
+          max={100}
+          value={live}
+          onChange={setLive}
+          onValueCommit={setCommitted}
+          formatValue={(v) => `${v}%`}
+        />
+        <p className="text-sm text-f1-foreground-secondary">
+          Live (onChange): {live}% · Committed (onValueCommit): {committed}%
+        </p>
+      </div>
+    )
+  },
+}
+
 export const WithStatus: Story = {
   tags: ["!dev"],
   render: () => (

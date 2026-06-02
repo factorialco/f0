@@ -86,6 +86,7 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
     value,
     defaultValue,
     onChange,
+    onValueCommit,
     min,
     max,
     step = 1,
@@ -139,6 +140,15 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
     [setInternalValue]
   )
 
+  const handleValueCommit = useCallback(
+    (next: number[]) => {
+      const [first] = next
+      if (first === undefined) return
+      onValueCommit?.(first)
+    },
+    [onValueCommit]
+  )
+
   const [isHovered, setIsHovered] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
@@ -174,6 +184,7 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
       <Slider
         value={[currentValue]}
         onValueChange={handleValueChange}
+        onValueCommit={handleValueCommit}
         onPointerDown={() => {
           pointerInteractionRef.current = true
           setIsDragging(true)

@@ -22,6 +22,14 @@ export interface F0SliderProps extends WithDataTestIdProps, DataAttributes {
   defaultValue?: number
   onChange?: (value: number) => void
 
+  /**
+   * Fires once when the user commits a value: on pointer release after a drag,
+   * and on each discrete keyboard step. Use this — not `onChange` — to trigger
+   * expensive side effects such as mutations, so dragging does not fire one
+   * call per intermediate value.
+   */
+  onValueCommit?: (value: number) => void
+
   min: number
   max: number
   step?: number

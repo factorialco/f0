@@ -65,6 +65,26 @@ describe("F0Slider", () => {
     expect(onChange).toHaveBeenCalledWith(6)
   })
 
+  it("calls onValueCommit with the committed value on a keyboard step", async () => {
+    const onChange = vi.fn()
+    const onValueCommit = vi.fn()
+    render(
+      <F0Slider
+        label="Duration"
+        min={0}
+        max={10}
+        defaultValue={5}
+        onChange={onChange}
+        onValueCommit={onValueCommit}
+      />
+    )
+    const slider = screen.getByRole("slider")
+    slider.focus()
+    await userEvent.keyboard("{ArrowRight}")
+    expect(onValueCommit).toHaveBeenCalledTimes(1)
+    expect(onValueCommit).toHaveBeenCalledWith(6)
+  })
+
   it("respects step when incrementing via keyboard", async () => {
     const onChange = vi.fn()
     render(

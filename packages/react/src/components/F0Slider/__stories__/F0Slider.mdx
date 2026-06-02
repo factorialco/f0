@@ -351,7 +351,13 @@ import { F0Slider } from "@factorialco/f0-react"
         <td><code>onChange</code></td>
         <td><code>(value: number) => void</code></td>
         <td>-</td>
-        <td>Called with the new value on every change</td>
+        <td>Called with the new value on every change (continuous; use for live UI/state)</td>
+      </tr>
+      <tr>
+        <td><code>onValueCommit</code></td>
+        <td><code>(value: number) => void</code></td>
+        <td>-</td>
+        <td>Called once when the value is committed — on pointer release after a drag, and on each keyboard step. Use for expensive side effects such as mutations</td>
       </tr>
       <tr>
         <td><code>step</code></td>
@@ -509,6 +515,38 @@ function OpacityControl() {
       onChange={setOpacity}
       showTooltip="always"
       formatValue={(v) => `${Math.round(v * 100)}%`}
+    />
+  )
+}
+```
+
+## Commit on Release
+
+Use `onChange` for live UI updates and `onValueCommit` for expensive side
+effects such as mutations. `onChange` fires on every intermediate value while
+dragging; `onValueCommit` fires once when the user releases the thumb (and on
+each discrete keyboard step), so a drag triggers a single request instead of
+one per value.
+
+<Canvas of={Stories.CommitOnRelease} />
+
+```tsx
+import { useState } from "react"
+import { F0Slider } from "@factorialco/f0-react"
+
+function VolumeControl() {
+  const [volume, setVolume] = useState(40)
+  const { mutate } = useUpdateVolumeMutation()
+
+  return (
+    <F0Slider
+      label="Volume"
+      min={0}
+      max={100}
+      value={volume}
+      onChange={setVolume} // live UI, no network
+      onValueCommit={mutate} // one mutation when the drag ends
+      formatValue={(v) => `${v}%`}
     />
   )
 }
