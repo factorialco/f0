@@ -62,6 +62,13 @@ export interface CardInternalProps {
   compact?: boolean
 
   /**
+   * Whether the card has a horizontal layout: icon left, title and description
+   * to the right, with a full-size (lg) avatar. A lightweight alternative to
+   * compact that preserves icon prominence.
+   */
+  horizontal?: boolean
+
+  /**
    * The avatar to display in the card
    */
   avatar?: CardAvatarVariant
@@ -200,6 +207,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
   function CardInternal(
     {
       compact = false,
+      horizontal = false,
       avatar,
       image,
       imageFit = "fit-width",
@@ -347,7 +355,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
               className={cn(
                 "relative flex-col gap-0 p-0",
                 image && !compact && "pt-3",
-                compact && "flex-row items-center gap-2"
+                (compact || horizontal) && "flex-row items-center gap-2"
               )}
             >
               {avatar && (
@@ -355,6 +363,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
                   avatar={avatar}
                   overlay={!!image}
                   compact={compact}
+                  horizontal={horizontal}
                 />
               )}
               <div className={cn("flex flex-col gap-0")}>

@@ -26,6 +26,11 @@ interface CardAvatarProps {
    * Whether the avatar is displayed in a compact layout
    */
   compact?: boolean
+
+  /**
+   * Whether the avatar is displayed in a horizontal layout (large icon, no bottom margin)
+   */
+  horizontal?: boolean
 }
 
 const AvatarRender = ({
@@ -51,6 +56,7 @@ export function CardAvatar({
   avatar,
   overlay = false,
   compact = false,
+  horizontal = false,
 }: CardAvatarProps) {
   const isRounded = avatar.type === "person"
 
@@ -62,7 +68,7 @@ export function CardAvatar({
           !compact &&
           "absolute -top-9 left-0 rounded-md ring-[3px] ring-f1-background",
         overlay && isRounded && "rounded-full",
-        compact && "mb-0"
+        (compact || horizontal) && "mb-0"
       )}
       data-testid="card-avatar"
     >
