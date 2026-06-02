@@ -242,13 +242,16 @@ export function FormCard({
 
   return (
     <F0CanvasCard
-      module={formModule}
+      avatar={formModule ? { type: "module", module: formModule } : undefined}
       title={title}
       description={description}
-      onClose={closeCanvas}
       isActive={isActive}
-      onOpen={handleOpen}
-      showOpenButton={isActive}
+      action={{
+        type: "open",
+        onOpen: handleOpen,
+        onClose: closeCanvas,
+        showButton: isActive,
+      }}
     >
       {visibleFields.length > 0 && !isActive && (
         <div className="-mx-3 flex w-full flex-col overflow-hidden pb-1">
