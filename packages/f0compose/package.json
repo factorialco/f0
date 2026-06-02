@@ -19,6 +19,7 @@
     "start": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "share": "vercel pull --yes --environment=production && vercel build --prod && vercel deploy --prebuilt --prod",
     "tsc": "tsc --noEmit",
     "check": "tsx checks/bin/check-prototype.ts",
     "format": "oxfmt scripts checks src vite-plugins",
