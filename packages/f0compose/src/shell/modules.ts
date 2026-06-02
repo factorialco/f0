@@ -1,6 +1,7 @@
 import type { IconType } from "@factorialco/f0-react"
 
 import {
+  BookOpen,
   Briefcase,
   Calendar,
   CheckCircleLine,
@@ -59,6 +60,8 @@ export type ModuleId =
   | "recruitment"
   | "performance"
   | "onboarding"
+  | "trainings"
+  | "factorial-campus"
   // Payroll
   | "payroll-periods"
   | "payroll-concepts"
@@ -175,6 +178,18 @@ export const modules: ModuleDef[] = [
     group: "talent",
     groupLabel: "Talent",
   },
+  {
+    id: "trainings",
+    label: "Trainings",
+    group: "talent",
+    groupLabel: "Talent",
+  },
+  {
+    id: "factorial-campus",
+    label: "Factorial Campus",
+    group: "talent",
+    groupLabel: "Talent",
+  },
 
   // Payroll
   {
@@ -225,6 +240,8 @@ export const emojiForModule: Record<ModuleId, string> = {
   recruitment: "💼",
   performance: "📈",
   onboarding: "🚀",
+  trainings: "🎓",
+  "factorial-campus": "📚",
   "payroll-periods": "📅",
   "payroll-concepts": "💰",
   "payroll-settings": "⚙️",
@@ -251,6 +268,8 @@ export const iconForModule: Record<ModuleId, IconType> = {
   recruitment: Briefcase,
   performance: Sparkles,
   onboarding: Person,
+  trainings: Sparkles,
+  "factorial-campus": BookOpen,
   "payroll-periods": Calendar,
   "payroll-concepts": Money,
   "payroll-settings": Settings,

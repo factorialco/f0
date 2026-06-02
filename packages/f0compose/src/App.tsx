@@ -16,13 +16,18 @@ import { FloatingControls } from "@/shell/FloatingControls"
  * use the same shape as their `href`. This keeps the sidebar-active state
  * decoupled from real f0compose routes (`/p/:slug`).
  */
+// Reverse map: moduleId → first prototype slug that uses it
+const moduleToSlug = Object.fromEntries(
+  Object.values(prototypeRegistry).map((e) => [e.meta.module, e.meta.slug])
+)
+
 export function App() {
   const location = useLocation()
   const navigate = useNavigate()
 
   let currentPath = "/__module/home"
   if (location.pathname.startsWith("/p/")) {
-    const slug = location.pathname.slice(3)
+    const slug = location.pathname.slice(3).split("?")[0]
     const entry = prototypeRegistry[slug]
     if (entry) {
       // If the module has a direct prototype link, use the /p/ path
@@ -49,8 +54,13 @@ export function App() {
                 return
               }
               event.preventDefault()
-              // Synthetic /__module/* hrefs are sidebar markers — no nav.
-              if (href.startsWith("/__module/")) return
+              // Synthetic /__module/* hrefs: navigate to prototype if one exists
+              if (href.startsWith("/__module/")) {
+                const moduleId = href.slice("/__module/".length)
+                const slug = moduleToSlug[moduleId]
+                if (slug) navigate(`/p/${slug}`)
+                return
+              }
               navigate(href)
             }}
           />

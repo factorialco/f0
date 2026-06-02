@@ -3,4 +3,6 @@ dist/
 generated/
 .opencode/
 .claude/
+.vercel/
 *.log
+.vercel
