@@ -354,6 +354,7 @@ function CreationWithAIFlow() {
         items: [{ title: "Use the standard onboarding template" }],
       },
     ],
+    resizable: true,
     // Start closed in sidepanel mode so the chat plays its entrance animation
     // when opened from the collection view.
     defaultVisualizationMode: "sidepanel",
