@@ -15,8 +15,12 @@ import {
   F0Icon,
   F0TagRaw,
   F0Text,
+  F0WizardForm,
   StandardLayout,
   TwoColumnLayout,
+  f0FormField,
+  useF0FormDefinition,
+  type CustomFieldRenderProps,
   type F0Field,
 } from "@factorialco/f0-react"
 import {
@@ -65,10 +69,13 @@ import {
   type ComponentType,
   type CSSProperties,
   type ReactNode,
-  Fragment,
+  useEffect,
+  useMemo,
+  useRef,
   useState,
 } from "react"
 import { useSearchParams } from "react-router-dom"
+import { z } from "zod"
 
 import { type Training, trainings } from "@/fixtures"
 import { applySort } from "@/lib/applySort"
@@ -332,79 +339,6 @@ const routes = {
   budget: (budgetId: string) =>
     `/p/trainings-enrollments?view=budget-detail&budget=${encodeURIComponent(budgetId)}`,
 }
-
-const newCourseStepTitles = [
-  "Basic information",
-  "Admin information",
-  "Course completion",
-  "Enrollment",
-] as const
-
-const basicInformationFields: F0Field[] = [
-  { id: "name", type: "text", label: "Course name", placeholder: "Course name" },
-  {
-    id: "thumbnail",
-    type: "file",
-    label: "Thumbnail",
-    description: "Add an image to show as the course thumbnail in the Catalog.",
-    accept: ["image"],
-  },
-  { id: "objectives", type: "textarea", label: "Objectives", helpText: "Define this course's goals and outcomes", rows: 9 },
-  { id: "description", type: "textarea", label: "Description", helpText: "Add information about the content and structure of the course", rows: 9 },
-  {
-    id: "competencies",
-    type: "select",
-    label: "Competencies",
-    multiple: true,
-    helpText: "Select the competencies developed within this course",
-    options: [
-      { value: "Gestión de cumplimiento.", label: "Gestión de cumplimiento." },
-      { value: "Creatividad", label: "Creatividad" },
-      { value: "Pensamiento estratégico", label: "Pensamiento estratégico" },
-      { value: "Liderazgo de equipos", label: "Liderazgo de equipos" },
-    ],
-  },
-  { id: "hours", type: "number", label: "Hours", min: 0 },
-  { id: "minutes", type: "number", label: "Minutes", min: 0, max: 59, maxDecimals: 0 },
-  { id: "mandatoryCourse", type: "checkbox", label: "Mandatory course", helpText: "Mark this course as mandatory to track completion and meet compliance requirements." },
-  { id: "courseValidity", type: "checkbox", label: "Course validity", helpText: "This course is valid for a limited time and must be retaken afterward." },
-]
-
-const adminInformationFields: RenderableField[] = [
-  { id: "year", type: "number", label: "Year", maxDecimals: 0 },
-  { id: "internalCode", type: "text", label: "Internal code", helpText: "If you use an internal code in other applications or files, add it here as well" },
-  {
-    id: "type",
-    type: "select",
-    label: "Type",
-    options: [
-      { value: "internal", label: "Internal" },
-      { value: "external", label: "External" },
-    ],
-  },
-  { id: "externalProvider", type: "text", label: "External provider" },
-  {
-    id: "tags",
-    type: "select",
-    label: "Tags",
-    multiple: true,
-    helpText: "Adding tags facilitates the process of identifying and filtering course",
-    options: [
-      { value: "Merchandising", label: "Merchandising" },
-      { value: "Creatividad", label: "Creatividad" },
-      { value: "Gestión de conflictos", label: "Gestión de conflictos" },
-    ],
-  },
-  { id: "subsidized", type: "checkbox", label: "Subsidize this course" },
-  { id: "linkedWorkflow", type: "checkbox", label: "Link this course with Workflows" },
-]
-
-const courseCompletionFields: RenderableField[] = [
-  { id: "completeAllLmsModules", type: "checkbox", label: "Complete all LMS modules", helpText: "Participants must complete all course modules and pass every quiz." },
-  { id: "attendSessions", type: "checkbox", label: "Attend sessions" },
-  { id: "minimumAttendance", type: "number", label: "Minimum attendance", min: 0, max: 100, helpText: "Set the minimum percentage of sessions in this course each participant needs to attend." },
-  { id: "knowledgeTestRequired", type: "checkbox", label: "Pass the knowledge test", helpText: "Participants must pass a test that assesses their understanding of this course's content." },
-]
 
 const newTrainingGroupStepTitles = [
   "Details",
@@ -1447,159 +1381,283 @@ function NewCourseWizardDialog({
   onToast: (toast: ToastId) => void
   onCreateCourse: (values: NewCourseValues) => void
 }) {
-  const [stepIndex, setStepIndex] = useState(0)
-  const [audienceError, setAudienceError] = useState(false)
-  const [values, setValues] = useState<Record<string, unknown>>({
-    year: 2026,
-    type: "internal",
-    competencies: [],
-    tags: [],
-    mandatoryCourse: false,
-    courseValidity: false,
-    subsidized: false,
-    linkedWorkflow: false,
-    completeAllLmsModules: false,
-    attendSessions: true,
-    minimumAttendance: 100,
-    knowledgeTestRequired: false,
-    courseType: "no-editions",
+  // F0WizardForm (design-system wizard) owns the standard fields. Two steps
+  // are rich custom UI: the course-type cards (step 1) and the entire
+  // enrollment step (step 4). The enrollment step reacts to `courseType`,
+  // chosen in step 1 — a cross-step dependency a schema-driven custom field
+  // can't read on its own. We keep that shared state here and read it from
+  // refs inside the (memoized) field renderers so the closures always see the
+  // latest value.
+  const initialEnrollment: Record<string, unknown> = {
     enableAutoEnrollment: true,
-    enrollmentAssignment: "waitlist",
     audienceCriteria: [],
+    enrollmentAssignment: "waitlist",
+    enrollmentAppliesTo: "new-only",
+  }
+  const [courseType, setCourseType] = useState<string>("no-editions")
+  const [enrollment, setEnrollment] = useState<Record<string, unknown>>(initialEnrollment)
+  const [audienceError, setAudienceError] = useState(false)
+  const [instanceKey, setInstanceKey] = useState(0)
+
+  const courseTypeRef = useRef(courseType)
+  courseTypeRef.current = courseType
+  const enrollmentRef = useRef(enrollment)
+  enrollmentRef.current = enrollment
+  const audienceErrorRef = useRef(audienceError)
+  audienceErrorRef.current = audienceError
+
+  // Each time the wizard opens, start fresh: clear the bridge state and remount
+  // F0WizardForm (via key) so its fields reset to defaults at step 1.
+  const wasOpen = useRef(false)
+  useEffect(() => {
+    if (isOpen && !wasOpen.current) {
+      setCourseType("no-editions")
+      setEnrollment({
+        enableAutoEnrollment: true,
+        audienceCriteria: [],
+        enrollmentAssignment: "waitlist",
+        enrollmentAppliesTo: "new-only",
+      })
+      setAudienceError(false)
+      setInstanceKey((key) => key + 1)
+    }
+    wasOpen.current = isOpen
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen])
+
+  const updateEnrollment = (field: string, value: unknown) => {
+    if (field === "audienceCriteria") setAudienceError(false)
+    setEnrollment((current) => ({ ...current, [field]: value }))
+  }
+
+  const thumbnailField: F0Field = {
+    id: "thumbnail",
+    type: "file",
+    label: "Thumbnail",
+    description: "Add an image to show as the course thumbnail in the Catalog.",
+    accept: ["image"],
+  }
+
+  // Built once; the custom renderers read live state via refs so the memoized
+  // closures never go stale.
+  const schema = useMemo(
+    () =>
+      z.object({
+        name: f0FormField(z.string().min(1, "Course name is required"), {
+          label: "Course name",
+          placeholder: "Course name",
+          section: "basic",
+        }),
+        courseType: f0FormField(z.any(), {
+          fieldType: "custom",
+          label: "Course type",
+          section: "basic",
+          render: () => (
+            <CourseTypeField
+              values={{ courseType: courseTypeRef.current }}
+              onUpdate={(_field, value) => setCourseType((value as string) ?? "no-editions")}
+            />
+          ),
+        }),
+        thumbnail: f0FormField(z.any().optional(), {
+          fieldType: "custom",
+          label: "Thumbnail",
+          section: "basic",
+          render: ({ value, onChange }: CustomFieldRenderProps) => (
+            <F0FormField field={thumbnailField} value={value} onChange={onChange} initialFiles={[]} />
+          ),
+        }),
+        objectives: f0FormField(z.string().optional(), {
+          fieldType: "textarea",
+          label: "Objectives",
+          helpText: "Define this course's goals and outcomes",
+          section: "basic",
+        }),
+        description: f0FormField(z.string().optional(), {
+          fieldType: "textarea",
+          label: "Description",
+          helpText: "Add information about the content and structure of the course",
+          section: "basic",
+        }),
+        competencies: f0FormField(z.array(z.string()).optional(), {
+          fieldType: "select",
+          label: "Competencies",
+          helpText: "Select the competencies developed within this course",
+          section: "basic",
+          options: [
+            { value: "Gestión de cumplimiento.", label: "Gestión de cumplimiento." },
+            { value: "Creatividad", label: "Creatividad" },
+            { value: "Pensamiento estratégico", label: "Pensamiento estratégico" },
+            { value: "Liderazgo de equipos", label: "Liderazgo de equipos" },
+          ],
+        }),
+        hours: f0FormField(z.number().min(0).optional(), {
+          label: "Hours",
+          section: "basic",
+        }),
+        minutes: f0FormField(z.number().min(0).max(59).optional(), {
+          label: "Minutes",
+          section: "basic",
+        }),
+        mandatoryCourse: f0FormField(z.boolean(), {
+          fieldType: "checkbox",
+          label: "Mandatory course",
+          helpText: "Mark this course as mandatory to track completion and meet compliance requirements.",
+          section: "basic",
+        }),
+        courseValidity: f0FormField(z.boolean(), {
+          fieldType: "checkbox",
+          label: "Course validity",
+          helpText: "This course is valid for a limited time and must be retaken afterward.",
+          section: "basic",
+        }),
+        year: f0FormField(z.number().optional(), {
+          label: "Year",
+          section: "admin",
+        }),
+        internalCode: f0FormField(z.string().optional(), {
+          label: "Internal code",
+          helpText: "If you use an internal code in other applications or files, add it here as well",
+          section: "admin",
+        }),
+        type: f0FormField(z.enum(["internal", "external"]), {
+          fieldType: "select",
+          label: "Type",
+          section: "admin",
+          options: [
+            { value: "internal", label: "Internal" },
+            { value: "external", label: "External" },
+          ],
+        }),
+        externalProvider: f0FormField(z.string().optional(), {
+          label: "External provider",
+          section: "admin",
+        }),
+        tags: f0FormField(z.array(z.string()).optional(), {
+          fieldType: "select",
+          label: "Tags",
+          helpText: "Adding tags facilitates the process of identifying and filtering course",
+          section: "admin",
+          options: [
+            { value: "Merchandising", label: "Merchandising" },
+            { value: "Creatividad", label: "Creatividad" },
+            { value: "Gestión de conflictos", label: "Gestión de conflictos" },
+          ],
+        }),
+        subsidized: f0FormField(z.boolean(), {
+          fieldType: "checkbox",
+          label: "Subsidize this course",
+          section: "admin",
+        }),
+        linkedWorkflow: f0FormField(z.boolean(), {
+          fieldType: "checkbox",
+          label: "Link this course with Workflows",
+          section: "admin",
+        }),
+        completeAllLmsModules: f0FormField(z.boolean(), {
+          fieldType: "checkbox",
+          label: "Complete all LMS modules",
+          helpText: "Participants must complete all course modules and pass every quiz.",
+          section: "completion",
+        }),
+        attendSessions: f0FormField(z.boolean(), {
+          fieldType: "checkbox",
+          label: "Attend sessions",
+          section: "completion",
+        }),
+        minimumAttendance: f0FormField(z.number().min(0).max(100).optional(), {
+          label: "Minimum attendance",
+          helpText: "Set the minimum percentage of sessions in this course each participant needs to attend.",
+          section: "completion",
+        }),
+        knowledgeTestRequired: f0FormField(z.boolean(), {
+          fieldType: "checkbox",
+          label: "Pass the knowledge test",
+          helpText: "Participants must pass a test that assesses their understanding of this course's content.",
+          section: "completion",
+        }),
+        enrollment: f0FormField(z.any(), {
+          fieldType: "custom",
+          label: "Enrollment",
+          section: "enrollment",
+          render: () => (
+            <InscripcionStep
+              values={{ ...enrollmentRef.current, courseType: courseTypeRef.current }}
+              onUpdate={updateEnrollment}
+              audienceError={audienceErrorRef.current}
+            />
+          ),
+        }),
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  )
+
+  const formDefinition = useF0FormDefinition({
+    name: "new-course",
+    schema,
+    defaultValues: {
+      name: "",
+      year: 2026,
+      type: "internal",
+      competencies: [],
+      tags: [],
+      mandatoryCourse: false,
+      courseValidity: false,
+      subsidized: false,
+      linkedWorkflow: false,
+      completeAllLmsModules: false,
+      attendSessions: true,
+      minimumAttendance: 100,
+      knowledgeTestRequired: false,
+    },
+    sections: {
+      basic: {
+        title: "Basic information",
+        description: "Provide details to easily identify this course.",
+      },
+      admin: {
+        title: "Admin information",
+        description:
+          "Details in this section are for administrative purposes, and this information won't display for participants.",
+      },
+      completion: {
+        title: "Course completion",
+        description: "Define the conditions participants must meet to complete the course.",
+      },
+      enrollment: {
+        title: "Enrollment",
+        description: inscripcionCopy.step.subtitle,
+      },
+    },
+    onSubmit: ({ data }) => {
+      // Validate on submit: automatic enrollment ON requires at least one criterion.
+      const enroll = enrollmentRef.current
+      const autoEnrollOn = enroll.enableAutoEnrollment !== false
+      const audienceSelected =
+        flattenAudienceGroups(readAudienceGroups(enroll.audienceCriteria)).length > 0
+      if (autoEnrollOn && !audienceSelected) {
+        setAudienceError(true)
+        return {
+          success: false as const,
+          message: "Select at least one criterion to enroll people automatically.",
+        }
+      }
+      onToast("draft")
+      onCreateCourse({ ...data, courseType: courseTypeRef.current, ...enroll })
+      return { success: true as const }
+    },
   })
 
-  const isLastStep = stepIndex === newCourseStepTitles.length - 1
-  // The primary button stays enabled at all times; enrollment is validated on submit.
-  const canContinue = stepIndex > 0 || (typeof values.name === "string" && values.name.trim().length > 0)
-  const stepFields: F0Field[] = stepIndex === 0 ? basicInformationFields : stepIndex === 1 ? adminInformationFields : stepIndex === 2 ? courseCompletionFields : []
-
-  const updateValue = (fieldId: string, value: unknown) => {
-    // Adding/removing an audience criterion clears the on-submit validation error.
-    if (fieldId === "audienceCriteria") setAudienceError(false)
-    setValues((currentValues) => ({ ...currentValues, [fieldId]: value }))
-  }
-
-  const handlePrimaryAction = () => {
-    if (!isLastStep) {
-      setStepIndex((currentStepIndex) => currentStepIndex + 1)
-      return
-    }
-
-    // Validate on submit: automatic enrollment ON requires at least one audience criterion.
-    const autoEnrollOn = values.enableAutoEnrollment !== false
-    const audienceSelected = flattenAudienceGroups(readAudienceGroups(values.audienceCriteria)).length > 0
-    if (autoEnrollOn && !audienceSelected) {
-      setAudienceError(true)
-      return
-    }
-
-    onToast("draft")
-    onCreateCourse(values)
-  }
-
-  const handleClose = () => {
-    setStepIndex(0)
-    onClose()
-  }
-
-  if (!isOpen) return null
-
   return (
-    <F0BoxWithClassName
-      position="fixed"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-f1-background-overlay"
-    >
-      <WizardModalFrame>
-        <F0Box display="flex" flexDirection="column" height="full">
-          <F0BoxWithClassName display="flex" style={{ height: WIZARD_BODY_HEIGHT }}>
-            <F0BoxWithClassName
-              display="flex"
-              flexDirection="column"
-              gap="2xl"
-              padding="4xl"
-              paddingRight="none"
-              style={{ width: 320, paddingTop: 60 }}
-            >
-              <F0Box display="flex" flexDirection="column" gap="md">
-                <F0Icon icon={Sliders} size="md" color="critical" />
-                <F0Heading content="New course" variant="heading-large" as="h2" />
-              </F0Box>
-              <F0Box display="flex" flexDirection="column" gap="sm" marginTop="xs">
-                {newCourseStepTitles.map((title, index) => (
-                  <WizardStepButton
-                    key={title}
-                    index={index}
-                    title={title}
-                    active={index === stepIndex}
-                    disabled={index > stepIndex}
-                    onClick={() => setStepIndex(index)}
-                  />
-                ))}
-              </F0Box>
-            </F0BoxWithClassName>
-            <F0Box
-              display="flex"
-              flexDirection="column"
-              gap="2xl"
-              overflowY="auto"
-              paddingTop="4xl"
-              paddingLeft="4xl"
-              paddingRight="4xl"
-              paddingBottom="2xl"
-              grow
-            >
-              <F0BoxWithClassName display="flex" flexDirection="column" gap="sm" style={{ width: 560 }}>
-                <F0Heading content={newCourseStepTitles[stepIndex]} variant="heading" as="h2" />
-                <F0Text content={getNewCourseStepDescription(stepIndex)} variant="description" />
-              </F0BoxWithClassName>
-              <F0BoxWithClassName display="flex" flexDirection="column" gap="xl" style={{ width: 560 }}>
-                {stepIndex === 3 ? (
-                  <InscripcionStep values={values} onUpdate={updateValue} audienceError={audienceError} />
-                ) : (
-                  <>
-                    {stepFields.map((field) => (
-                      <Fragment key={field.id}>
-                        <F0Box>
-                          {field.type === "file" ? (
-                            <F0FormField field={field} value={values[field.id]} onChange={(value) => updateValue(field.id, value)} initialFiles={[]} />
-                          ) : (
-                            <F0FormField field={field} value={values[field.id]} onChange={(value) => updateValue(field.id, value)} />
-                          )}
-                        </F0Box>
-                        {stepIndex === 0 && field.id === "name" && <CourseTypeField values={values} onUpdate={updateValue} />}
-                      </Fragment>
-                    ))}
-                  </>
-                )}
-              </F0BoxWithClassName>
-            </F0Box>
-          </F0BoxWithClassName>
-          <F0BoxWithClassName
-            borderTop="default"
-            borderColor="secondary"
-            display="flex"
-            justifyContent="end"
-            alignItems="center"
-            gap="md"
-            paddingRight="3xl"
-            style={{ height: 64 }}
-          >
-            <F0Button
-              label={stepIndex === 0 ? "Cancel" : "Previous"}
-              hideLabel={stepIndex === 0}
-              icon={stepIndex === 0 ? Cross : undefined}
-              variant="outline"
-              onClick={stepIndex === 0 ? handleClose : () => setStepIndex((currentStepIndex) => currentStepIndex - 1)}
-            />
-            <F0Button
-              label={isLastStep ? "Create" : "Next"}
-              onClick={handlePrimaryAction}
-              disabled={!canContinue}
-            />
-          </F0BoxWithClassName>
-        </F0Box>
-      </WizardModalFrame>
-    </F0BoxWithClassName>
+    <F0WizardForm
+      key={instanceKey}
+      formDefinition={formDefinition}
+      isOpen={isOpen}
+      onClose={onClose}
+      title="New course"
+      width="xl"
+    />
   )
 }
 
@@ -2628,13 +2686,6 @@ const enrollmentFilterDefinition = {
 } as const satisfies Record<string, { type: string; label: string; options?: { options: { value: string; label: string }[] } }>
 
 const enrollmentFilterDef = enrollmentFilterDefinition as unknown as Record<string, { type: "in"; label: string; options: { options: { value: string; label: string }[] } }>
-
-function getNewCourseStepDescription(stepIndex: number) {
-  if (stepIndex === 0) return "Provide details to easily identify this course."
-  if (stepIndex === 1) return "Details in this section are for administrative purposes, and this information won't display for participants."
-  if (stepIndex === 2) return "Define the conditions participants must meet to complete the course."
-  return inscripcionCopy.step.subtitle
-}
 
 function CoursesList({
   courses,

@@ -29,6 +29,7 @@ const ALLOWED_BARE = [
   "react-router-dom",
   "@factorialco/f0-react",
   "@factorialco/f0-core",
+  "zod",
 ] as const
 
 const ALLOWED_PATH_ALIASES = [
