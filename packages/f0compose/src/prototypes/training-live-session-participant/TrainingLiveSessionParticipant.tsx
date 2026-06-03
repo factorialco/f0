@@ -12,6 +12,7 @@ import {
   F0FormField,
   F0Heading,
   F0Icon,
+  F0Link,
   NotesTextEditor,
   F0Select,
   F0TagRaw,
@@ -70,6 +71,7 @@ import {
   SolidStop,
   Sparkles,
   People,
+  Reset,
   Upload,
   VideoRecorder,
   VideoRecorderNegative,
@@ -606,7 +608,6 @@ const createSessionModalFields = {
     id: "meetingLink",
     type: "text",
     label: "Meeting link",
-    helpText: "Factorial sets up a live room for this session. Edit the link to use another provider.",
   },
   location: { id: "location", type: "text", label: "Location" },
 } satisfies Record<string, RenderableField>
@@ -4544,7 +4545,21 @@ function SessionFormDialog({
               />
             </SessionToggleField>
             {hasPhysicalLocation ? <F0FormField field={createSessionModalFields.location} value={values.location} onChange={(value) => setValues((current) => ({ ...current, location: value }))} /> : null}
-            {hasOnlineSession ? <F0FormField field={createSessionModalFields.meetingLink} value={values.meetingLink} onChange={(value) => setValues((current) => ({ ...current, meetingLink: value }))} /> : null}
+            {hasOnlineSession ? (
+              <F0Box display="flex" flexDirection="column" gap="xs">
+                <F0FormField field={createSessionModalFields.meetingLink} value={values.meetingLink} onChange={(value) => setValues((current) => ({ ...current, meetingLink: value }))} />
+                {values.meetingLink === DEFAULT_FACTORIAL_LIVE_ROOM ? (
+                  <F0Text variant="description" content="Factorial sets up a live room for this session. Edit the link to use another provider." />
+                ) : (
+                  <F0Box display="flex" alignItems="center" gap="xs">
+                    <F0Icon icon={Reset} size="sm" />
+                    <F0Link onClick={() => setValues((current) => ({ ...current, meetingLink: DEFAULT_FACTORIAL_LIVE_ROOM }))}>
+                      Use Factorial room link
+                    </F0Link>
+                  </F0Box>
+                )}
+              </F0Box>
+            ) : null}
             <F0FormField field={createSessionModalFields.instructors} value={values.instructors} onChange={(value) => setValues((current) => ({ ...current, instructors: value }))} />
             <F0FormField field={createSessionModalFields.frequency} value={values.frequency} onChange={(value) => setValues((current) => ({ ...current, frequency: value }))} />
             <SessionReminderBlock />
