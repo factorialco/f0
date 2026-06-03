@@ -6,10 +6,8 @@ import {
   ComponentProps,
   createContext,
   type ReactNode,
-  useCallback,
   useContext,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react"
@@ -22,12 +20,10 @@ import {
   ExternalLink,
   Files,
   LayersFront,
-  Pencil,
   Settings,
   SolidPlay,
   Sparkles,
 } from "@/icons/app"
-import { F0Card } from "@/components/F0Card"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { Page as NavigationPage } from "@/patterns/Navigation/Page"
@@ -42,14 +38,11 @@ import { F0AiProcessingOverlay } from "@/sds/ai/F0AiProcessingOverlay"
 import {
   MockAiChatRuntimeProvider,
   MockConnectedChatHeader,
+  MockConnectedChatInput,
   MockConnectedMessagesContainer,
   useMockAiChatRuntime,
 } from "@/sds/ai/F0AiChat/__stories__/_mock"
 
-import { filterNonRenderableMessages } from "@/sds/ai/F0AiChat/__stories__/_mock/turn-utils"
-import { F0AiChatTextArea } from "@/sds/ai/F0AiChatTextArea"
-import type { F0AiChatTextAreaSubmitPayload } from "@/sds/ai/F0AiChatTextArea/types"
-import { F0ClarifyingPanel } from "@/sds/ai/F0ClarifyingPanel/F0ClarifyingPanel"
 import { f0FormField, F0Form } from "@/patterns/F0Form"
 import type { F0SectionConfig } from "@/patterns/F0Form"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm"
@@ -68,26 +61,28 @@ import {
 } from "./mockData"
 import { SURVEY_DEFAULT_VALUES, SURVEY_ELEMENTS } from "./survey-mocks"
 import { TAB_CONFIGS } from "./tab-configs"
-import type { ClarifyingStep, TabConfig } from "./tab-configs"
-import { useClarifyingState } from "./useClarifyingState"
+import type { TabConfig } from "./tab-configs"
 
 /**
  * Co-creation patterns — "Creation with AI".
  *
  * Interactive mockup of the AI-creation flow, built on a single chat-enabled
  * ApplicationFrame so the "One" switch (the F0AiChat trigger) is always in the
- * header:
- *   1. Collection — empty data collection. Open the chat via the header "One"
- *      switch (side panel) OR the `+ Create → Create with AI` dropdown item
- *      (full width).
+ * header. There are three phases:
+ *   1. Collection — data collection. Open the chat via the header "One" switch
+ *      (side panel) OR the "Create" primary button (full width).
  *   2. Chat       — F0AiChat animates in so the user can describe what they
- *      want (full width via "Create with AI", side panel via the One switch).
- *   3. Split      — after a couple of exchanges the chat docks as the right
- *      side panel and the resource (a document/preview canvas) fills the center.
+ *      want (full width via the "Create" button, side panel via the One switch).
+ *   3. Split      — the chat docks as the right side panel and the resource
+ *      (a document/preview canvas) fills the center.
  *
  * `phase` is the single source of truth; the chat's open/visualization state is
  * derived from it (and kept in sync when the user toggles the One switch).
  * Self-contained: this file owns its own mock world.
+ *
+ * NOTE: the scripted conversation choreography (canned replies, clarifying
+ * questions, the chat → split transition, and the appended resource cards) has
+ * been removed — this is the bare shell on which a new flow will be authored.
  */
 const meta = {
   title: "Co-creation/Creation with AI",
@@ -122,15 +117,10 @@ const resetAiChatPersistence = () => {
   }
 }
 
-/** Number of full user↔AI exchanges before the chat docks into the split view. */
-const EXCHANGES_BEFORE_SPLIT = 2
-
 // ---------------------------------------------------------------------------
-// Tab-config context — shares the live active tab (and its config) between
-// `FlowContent` and `CreationChatInput`, which are siblings rendered by the
-// ApplicationFrame (the chat input is passed via the `ai` prop, so it can't
-// receive the active tab as a prop). Lives inside MockAiChatRuntimeProvider so
-// it can keep the runtime's scripted responses in sync with the active tab.
+// Tab-config context — exposes the live active tab (and its config) to
+// `FlowContent`, which reads it to drive the collection tab strip, the chat's
+// opening intent message, and the resource canvas shown in the split view.
 // ---------------------------------------------------------------------------
 
 type TabConfigContextValue = {
@@ -158,12 +148,6 @@ function TabConfigProvider({
 }) {
   const [activeTabId, setActiveTabId] = useState(initialTabId)
   const tabConfig = TAB_CONFIGS[activeTabId] ?? TAB_CONFIGS.tasks
-  const { setScript } = useMockAiChatRuntime()
-
-  // Keep the runtime's scripted responses in sync with the active tab.
-  useEffect(() => {
-    setScript(tabConfig.script)
-  }, [tabConfig, setScript])
 
   return (
     <TabConfigContext.Provider
@@ -290,133 +274,9 @@ function SurveySettingsForm() {
 }
 
 /**
- * Custom chat input for the co-creation flow. Identical to MockConnectedChatInput
- * but also shows a clarifying question panel after the first AI reply finishes.
- */
-function CreationChatInput() {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const { messages, inProgress, sendMessage } = useMockAiChatRuntime()
-  const {
-    placeholders,
-    entityRefs,
-    fileAttachments,
-    pendingContext,
-    setPendingContext,
-    pendingQuote,
-    setPendingQuote,
-    setProcessDroppedFilesFunction,
-    disclaimer,
-    footer,
-    visualizationMode,
-    creditWarning,
-    welcomeScreenSuggestions,
-    tracking,
-    setIsClarifying,
-  } = useAiChat()
-
-  const filteredMessages = useMemo(
-    () => filterNonRenderableMessages(messages),
-    [messages]
-  )
-  const isWelcomeScreen = filteredMessages.length === 0
-  const fullscreen = visualizationMode === "fullscreen"
-
-  const { tabConfig } = useTabConfig()
-
-  const userTurns = messages.filter((m) => m.role === "user").length
-  // Maps user-turn index to the tab-specific clarifying steps shown after that
-  // turn's AI reply: creation after the first turn, refinement after split.
-  const clarifyingStepsByTurn: Record<number, ClarifyingStep[]> = {
-    1: tabConfig.clarifying.creation,
-    [EXCHANGES_BEFORE_SPLIT + 1]: tabConfig.clarifying.refinement,
-  }
-  const currentClarifyingSteps = clarifyingStepsByTurn[userTurns] ?? null
-  const [dismissedAtTurn, setDismissedAtTurn] = useState<number | null>(null)
-  const shouldShowClarifying =
-    !inProgress &&
-    currentClarifyingSteps !== null &&
-    dismissedAtTurn !== userTurns
-
-  const callbacks = useMemo(
-    () => ({
-      onResolve: (label: string) => {
-        setDismissedAtTurn(userTurns)
-        setIsClarifying(false)
-        sendMessage(label)
-      },
-      onDismiss: () => {
-        setDismissedAtTurn(userTurns)
-        setIsClarifying(false)
-      },
-    }),
-    [sendMessage, setIsClarifying, userTurns]
-  )
-
-  const { clarifyingState } = useClarifyingState(
-    currentClarifyingSteps ?? tabConfig.clarifying.creation,
-    callbacks
-  )
-
-  useEffect(() => {
-    setIsClarifying(shouldShowClarifying && clarifyingState !== null)
-  }, [shouldShowClarifying, clarifyingState, setIsClarifying])
-
-  const clarifyingUI =
-    shouldShowClarifying && clarifyingState ? (
-      <F0ClarifyingPanel clarifyingQuestion={clarifyingState} />
-    ) : undefined
-
-  const handleSubmit = useCallback(
-    ({ text, quote }: F0AiChatTextAreaSubmitPayload) => {
-      sendMessage(text, { replyQuote: quote?.text })
-    },
-    [sendMessage]
-  )
-
-  const handleSuggestionClick = useCallback(
-    (
-      item: NonNullable<
-        typeof welcomeScreenSuggestions
-      >[number]["items"][number],
-      group: NonNullable<typeof welcomeScreenSuggestions>[number]
-    ) => {
-      const prompt = item.prompt || item.title
-      tracking?.onWelcomeSuggestionClick?.({ item, group, prompt })
-      sendMessage(prompt)
-    },
-    [sendMessage, tracking]
-  )
-
-  return (
-    <F0AiChatTextArea
-      ref={containerRef}
-      onSubmit={handleSubmit}
-      inProgress={inProgress}
-      placeholders={placeholders}
-      creditWarning={creditWarning}
-      pendingContext={pendingContext}
-      onPendingContextChange={setPendingContext}
-      pendingQuote={pendingQuote}
-      onPendingQuoteChange={setPendingQuote}
-      fileAttachments={fileAttachments}
-      searchPersons={entityRefs?.resolvers?.searchPersons}
-      onProcessFilesRef={setProcessDroppedFilesFunction}
-      disclaimer={disclaimer}
-      footer={footer}
-      isWelcomeScreen={isWelcomeScreen}
-      fullscreen={fullscreen}
-      welcomeScreenSuggestions={welcomeScreenSuggestions}
-      onSuggestionClick={handleSuggestionClick}
-      clarifyingUI={clarifyingUI}
-    />
-  )
-}
-
-/**
  * The page content rendered inside the shared chat-enabled ApplicationFrame.
- * Derives the chat's open/visualization state from `phase`, keeps `phase` in
- * sync when the user toggles the header One switch, and runs the scripted
- * chat → split transition.
+ * Derives the chat's open/visualization state from `phase` and keeps `phase` in
+ * sync when the user toggles the header One switch.
  */
 function FlowContent({
   phase,
@@ -433,12 +293,7 @@ function FlowContent({
   // the co-creation flow.
   const [surveyTabId, setSurveyTabId] = useState("editor")
   const { open, setOpen, visualizationMode, setVisualizationMode } = useAiChat()
-  const {
-    messages,
-    inProgress,
-    sendMessageWithThinkingOnly,
-    appendRawMessages,
-  } = useMockAiChatRuntime()
+  const { inProgress, sendMessageWithThinkingOnly } = useMockAiChatRuntime()
 
   const sharedSourceOptions = {
     filters: resourceFilters,
@@ -453,21 +308,19 @@ function FlowContent({
         { label: "Explore templates", onClick: () => setTemplatesOpen(true) },
       ],
     },
-    primaryActionsOpenOnClick: true,
     primaryActions: () => [
-      { label: "Create", icon: Add, onClick: () => {} },
       {
-        label: "Create with AI",
-        icon: Sparkles,
-        // "Create with AI" opens the chat FULL WIDTH (fullscreen) and
-        // auto-sends the opening intent message so the AI can start thinking.
+        // The single primary "Create" button launches the chat FULL WIDTH
+        // (fullscreen) and auto-sends the opening intent message so the AI can
+        // start thinking immediately.
+        label: "Create",
+        icon: Add,
         onClick: () => {
           setVisualizationMode("fullscreen")
           setPhase("chat")
           sendMessageWithThinkingOnly(tabConfig.initialMessage)
         },
       },
-      { label: "Start from scratch", icon: Pencil, onClick: () => {} },
     ],
   }
 
@@ -498,8 +351,8 @@ function FlowContent({
   // phase → chat open state. Opening from "collection" flips `open` false→true
   // while the chat is closed (so `shouldPlayEntranceAnimation` is true), which
   // plays the expand-in animation. The mode is NOT forced for "chat": the
-  // header One switch opens a side panel (the chat's default), while "Create
-  // with AI" sets fullscreen before entering this phase.
+  // header One switch opens a side panel (the chat's default), while the
+  // "Create" button sets fullscreen before entering this phase.
   useEffect(() => {
     if (phase === "collection") {
       setOpen(false)
@@ -525,73 +378,6 @@ function FlowContent({
       setPhase("collection")
     }
   }, [open, phase, setPhase])
-
-  // Scripted transition: once the user has had `EXCHANGES_BEFORE_SPLIT` full
-  // exchanges and the latest reply has finished streaming, dock the chat and
-  // reveal the resource.
-  const userTurns = messages.filter((message) => message.role === "user").length
-  useEffect(() => {
-    if (
-      phase === "chat" &&
-      userTurns >= EXCHANGES_BEFORE_SPLIT &&
-      !inProgress
-    ) {
-      setPhase("split")
-    }
-  }, [phase, userTurns, inProgress, setPhase])
-
-  // Append a persistent resource card each time an iteration is created.
-  const cardsAppendedRef = useRef(0)
-
-  // First card: on the initial split transition.
-  useEffect(() => {
-    if (phase !== "split" || cardsAppendedRef.current >= 1) return
-    cardsAppendedRef.current = 1
-    const card = tabConfig.cards[0]
-    appendRawMessages([
-      {
-        role: "assistant",
-        content: "",
-        generativeUI: () => (
-          <F0Card
-            horizontal
-            truncateDescription
-            avatar={{ type: "icon", icon: Files }}
-            title={card.title}
-            description={card.description}
-          />
-        ),
-      },
-    ])
-  }, [phase, appendRawMessages, tabConfig])
-
-  // Second card: after the post-split refinement exchange finishes.
-  useEffect(() => {
-    if (
-      phase !== "split" ||
-      cardsAppendedRef.current >= 2 ||
-      userTurns < EXCHANGES_BEFORE_SPLIT + 2 ||
-      inProgress
-    )
-      return
-    cardsAppendedRef.current = 2
-    const card = tabConfig.cards[1]
-    appendRawMessages([
-      {
-        role: "assistant",
-        content: "",
-        generativeUI: () => (
-          <F0Card
-            horizontal
-            truncateDescription
-            avatar={{ type: "icon", icon: Files }}
-            title={card.title}
-            description={card.description}
-          />
-        ),
-      },
-    ])
-  }, [phase, userTurns, inProgress, appendRawMessages, tabConfig])
 
   return (
     <NavigationPage
@@ -692,8 +478,8 @@ function FlowContent({
             visualizationMode !== "fullscreen" && (
               <Tabs
                 tabs={[
-                  { label: "Tasks", id: "tasks" },
                   { label: "Surveys", id: "surveys" },
+                  { label: "Tasks", id: "tasks" },
                   { label: "Employees", id: "employees" },
                   { label: "Absences", id: "absences" },
                 ]}
@@ -793,7 +579,7 @@ function CreationWithAIFlow({ initialTabId }: { initialTabId?: string }) {
     enabled: true,
     chatHeader: <MockConnectedChatHeader />,
     chatMessages: <MockConnectedMessagesContainer />,
-    chatInput: <CreationChatInput />,
+    chatInput: <MockConnectedChatInput />,
     initialMessage: [
       "What do you want to create?",
       "Describe it and I'll draft it with you",
@@ -833,18 +619,6 @@ function CreationWithAIFlow({ initialTabId }: { initialTabId?: string }) {
   )
 }
 
-export const Tasks: Story = {
-  render: () => <CreationWithAIFlow initialTabId="tasks" />,
-}
-
 export const Surveys: Story = {
   render: () => <CreationWithAIFlow initialTabId="surveys" />,
-}
-
-export const Employees: Story = {
-  render: () => <CreationWithAIFlow initialTabId="employees" />,
-}
-
-export const Absences: Story = {
-  render: () => <CreationWithAIFlow initialTabId="absences" />,
 }
