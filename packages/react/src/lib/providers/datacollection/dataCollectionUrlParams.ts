@@ -360,7 +360,8 @@ const hasActiveState = <
 ): boolean =>
   !!state.search ||
   !!state.sortings ||
-  (!!state.filters && Object.values(state.filters).some(isUrlSerializableFilter))
+  (!!state.filters &&
+    Object.values(state.filters).some(isUrlSerializableFilter))
 
 /**
  * Builds a fresh `URLSearchParams` encoding a data collection `id` and state,
