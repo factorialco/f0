@@ -6,10 +6,18 @@ const meta = {
   title: "AI/F0HILActionConfirmation",
   component: F0HILActionConfirmation,
   parameters: {
-    layout: "centered",
+    layout: "padded",
   },
+  decorators: [
+    (Story) => (
+      <div style={{ width: "100%" }}>
+        <Story />
+      </div>
+    ),
+  ],
   tags: ["autodocs"],
   args: {
+    text: "Do you want to proceed?",
     confirmationText: "Confirm",
     onConfirm: () => {},
     cancelText: "Cancel",
@@ -18,7 +26,8 @@ const meta = {
   argTypes: {
     text: {
       control: "text",
-      description: "Optional descriptive text shown above the action buttons",
+      description:
+        "The confirmation text shown alongside the action buttons (required)",
     },
     confirmationText: {
       control: "text",

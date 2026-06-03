@@ -3,9 +3,10 @@
  */
 export type F0HILActionConfirmationProps = {
   /**
-   * Optional descriptive text shown above the action buttons
+   * The confirmation text shown alongside the action buttons. Required — an
+   * action confirmation must always state what is being confirmed.
    */
-  text?: string
+  text: string
   /**
    * Text displayed on the confirmation button
    */

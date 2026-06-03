@@ -1,4 +1,4 @@
-import { F0Button } from "@/components/F0Button"
+import { F0Card } from "@/components/F0Card"
 import Check from "@/icons/app/Check"
 
 import { F0HILActionConfirmationProps } from "./types"
@@ -11,25 +11,20 @@ export const F0HILActionConfirmation = ({
   onCancel,
 }: F0HILActionConfirmationProps) => {
   return (
-    <div className="flex flex-col gap-2">
-      {text && <p>{text}</p>}
-      <div className="flex gap-2">
-        <F0Button
-          type="button"
-          variant="default"
-          size="md"
-          icon={Check}
-          onClick={onConfirm}
-          label={confirmationText}
-        />
-        <F0Button
-          type="button"
-          variant="outline"
-          size="md"
-          onClick={onCancel}
-          label={cancelText}
-        />
-      </div>
-    </div>
+    <F0Card
+      oneLiner
+      title={text}
+      primaryAction={{
+        label: confirmationText,
+        icon: Check,
+        onClick: onConfirm,
+      }}
+      secondaryActions={[
+        {
+          label: cancelText,
+          onClick: onCancel,
+        },
+      ]}
+    />
   )
 }
