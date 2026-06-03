@@ -4689,7 +4689,10 @@ function EditSessionReminderBlock() {
 }
 
 function SessionDetailsTab({ session, role, isEnded, onJoinSession }: { session: GroupSessionRow; role: LiveSessionRole; isEnded: boolean; onJoinSession: () => void }) {
-  const startDisabled = role === "instructor" && session.liveState === "waiting"
+  // Instructors can enter the room early (up to 5 min before) to set up; the
+  // class clock and attendance only start at the scheduled time. So entry is no
+  // longer blocked while "waiting" — only an ended session can't be started.
+  const isWaitingInstructor = role === "instructor" && session.liveState === "waiting"
 
   return (
     <F0BoxWithClassName display="flex" flexDirection="column" style={{ gap: 32 }}>
@@ -4707,13 +4710,13 @@ function SessionDetailsTab({ session, role, isEnded, onJoinSession }: { session:
           <SessionField label="Minimum attendance" value={COMPLETION_THRESHOLD_PCT <= 1 ? "1% (just joining)" : `${COMPLETION_THRESHOLD_PCT}% (${thresholdMinutes(COMPLETION_THRESHOLD_PCT, SESSION_DURATION_MIN)} min)`} />
         </F0Box>
         <F0Box display="grid" columns="2" gap="5xl">
-          <SessionJoinField role={role} disabled={startDisabled || isEnded} isEnded={isEnded} onJoinSession={onJoinSession} />
+          <SessionJoinField role={role} disabled={isEnded} isEnded={isEnded} onJoinSession={onJoinSession} />
         </F0Box>
         {isEnded ? (
           <F0Alert variant="positive" title="Session ended" description="Attendance and transcript are now available for review." />
         ) : null}
-        {startDisabled ? (
-          <F0Alert variant="warning" title="Session not ready to start" description="The instructor can start the session when it is live." />
+        {!isEnded && isWaitingInstructor ? (
+          <F0Alert variant="info" title="You can enter to set up 5 minutes before" description="Open the room early to check your camera, mic and notes. The class clock and attendance only start at the scheduled time." />
         ) : null}
       </F0BoxWithClassName>
       <F0BoxWithClassName display="flex" flexDirection="column" style={{ gap: 24 }}>
@@ -4999,26 +5002,60 @@ function FullscreenCallSurface({ children }: { children: ReactNode }) {
   )
 }
 
+type GreenRoomClock = {
+  classStarted: boolean
+  secondsToStart: number
+  liveSeconds: number
+}
+
+// Drives the call header clock. A live session counts up from its elapsed time.
+// A waiting session entered early (instructor green room) counts DOWN to the
+// scheduled start (hour 0), then flips to counting up — which is when the class
+// and attendance start. Demo: the scheduled start is anchored shortly ahead.
+function useGreenRoomClock(session: GroupSessionRow): GreenRoomClock {
+  const isLive = session.liveState === "live"
+  const isWaiting = session.liveState === "waiting"
+  const [mountedAt] = useState(() => Date.now())
+  const [scheduledStartAt] = useState(() => Date.now() + DEMO_COUNTDOWN_SECONDS * 1000)
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    if (!isLive && !isWaiting) return undefined
+    const interval = window.setInterval(() => setNow(Date.now()), 1000)
+    return () => window.clearInterval(interval)
+  }, [isLive, isWaiting])
+
+  if (isLive) {
+    return {
+      classStarted: true,
+      secondsToStart: 0,
+      liveSeconds: (session.liveDurationSeconds ?? 0) + Math.floor((now - mountedAt) / 1000),
+    }
+  }
+  if (isWaiting) {
+    const secondsToStart = Math.max(0, Math.round((scheduledStartAt - now) / 1000))
+    const classStarted = secondsToStart === 0
+    return {
+      classStarted,
+      secondsToStart,
+      liveSeconds: classStarted ? Math.max(0, Math.floor((now - scheduledStartAt) / 1000)) : 0,
+    }
+  }
+  return { classStarted: false, secondsToStart: 0, liveSeconds: 0 }
+}
+
 function CallTopBar({
   course,
   groupName,
   session,
+  clock,
 }: {
   course: ExactCourse
   groupName: string
   session: GroupSessionRow
+  clock: GreenRoomClock
 }) {
-  const [durationSeconds, setDurationSeconds] = useState(session.liveDurationSeconds ?? 0)
-
-  useEffect(() => {
-    setDurationSeconds(session.liveDurationSeconds ?? 0)
-    if (session.liveState !== "live") return undefined
-
-    const interval = window.setInterval(() => setDurationSeconds((current) => current + 1), 1000)
-    return () => window.clearInterval(interval)
-  }, [session.liveDurationSeconds, session.liveState])
-
-  const statusDetail = session.liveState === "live" ? formatCallDuration(durationSeconds) : session.scheduleLabel
+  const isWaiting = session.liveState === "waiting"
+  const showLive = session.liveState === "live" || clock.classStarted
 
   return (
     <F0Box display="flex" justifyContent="between" alignItems="center" gap="lg" background="primary" borderRadius="xl" paddingX="sm" paddingY="xs">
@@ -5027,7 +5064,7 @@ function CallTopBar({
         <F0Heading content={session.name} variant="heading" as="h1" />
       </F0Box>
       <F0Box display="flex" flexDirection="column" alignItems="end" gap="xs">
-        {session.liveState === "live" ? (
+        {showLive ? (
           <F0Box display="flex" alignItems="center" gap="md">
             <F0BoxWithClassName display="flex" alignItems="center" gap="sm" background="critical" borderRadius="full" paddingX="md" paddingY="sm">
               <F0BoxWithClassName background="critical-bold" borderRadius="full" style={{ width: 9, height: 9 }} />
@@ -5036,14 +5073,21 @@ function CallTopBar({
               </F0BoxWithClassName>
             </F0BoxWithClassName>
             <F0BoxWithClassName height="8" width="0.5" background="tertiary" />
-            <F0Text content={statusDetail} variant="body" />
+            <F0Text content={formatCallDuration(clock.liveSeconds)} variant="body" />
+          </F0Box>
+        ) : isWaiting ? (
+          <F0Box display="flex" alignItems="center" gap="md">
+            <F0Icon icon={CalendarArrowRight} size="md" color="warning" />
+            <F0Text content="Class starts in" variant="body" />
+            <F0BoxWithClassName height="8" width="0.5" background="tertiary" />
+            <F0Text content={formatCallDuration(clock.secondsToStart)} variant="body" />
           </F0Box>
         ) : (
           <F0Box display="flex" alignItems="center" gap="md">
             <F0Icon icon={CalendarArrowRight} size="md" color="warning" />
             <F0Text content={session.statusLabel} variant="body" />
             <F0BoxWithClassName height="8" width="0.5" background="tertiary" />
-            <F0Text content={statusDetail} variant="body" />
+            <F0Text content={session.scheduleLabel} variant="body" />
           </F0Box>
         )}
       </F0Box>
@@ -5068,9 +5112,10 @@ function SessionWaitingRoomScreen({
   session: GroupSessionRow
   onExit: () => void
 }) {
+  const clock = useGreenRoomClock(session)
   return (
     <FullscreenCallSurface>
-      <CallTopBar course={course} groupName={groupName} session={session} />
+      <CallTopBar course={course} groupName={groupName} session={session} clock={clock} />
       <F0BoxWithClassName display="flex" flexDirection="column" gap="lg" grow style={{ minHeight: 0 }}>
         <F0Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" gap="lg" grow>
           <F0BoxWithClassName style={{ width: "min(100%, 560px)", height: 315, transform: "translateY(-20px)" }}>
@@ -5120,10 +5165,14 @@ function SessionRoomScreen({
     overflow: "hidden",
   }
   const togglePanel = (panel: Exclude<LiveSessionPanelId, null>) => setActivePanel((current) => current === panel ? null : panel)
+  const clock = useGreenRoomClock(session)
+  // Before the class starts (green-room countdown) there is nothing to end yet —
+  // the instructor can only Exit the prep room. "End session" appears once live.
+  const canEndSession = isInstructor && clock.classStarted
 
   return (
     <FullscreenCallSurface>
-      <CallTopBar course={course} groupName={groupName} session={session} />
+      <CallTopBar course={course} groupName={groupName} session={session} clock={clock} />
       <F0BoxWithClassName display="flex" gap="lg" grow style={{ minHeight: 0, paddingBottom: 88, position: "relative" }}>
         <F0BoxWithClassName display="flex" flexDirection="column" gap="lg" grow style={{ minWidth: 0 }}>
           <F0BoxWithClassName display="grid" gap="md" grow width="full" style={{ minHeight: 0, gridTemplateColumns: `repeat(${grid.columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${grid.rows}, minmax(0, 1fr))` }}>
@@ -5155,7 +5204,9 @@ function SessionRoomScreen({
           {isInstructor ? (
             <>
               <F0Button label="Exit" variant="outline" onClick={onExit} />
-              <F0Button label="End session" icon={SolidStop} variant="critical" onClick={onEndSession} />
+              {canEndSession ? (
+                <F0Button label="End session" icon={SolidStop} variant="critical" onClick={onEndSession} />
+              ) : null}
             </>
           ) : (
             <F0Button label="Exit" variant="critical" onClick={onExit} />
@@ -6692,6 +6743,10 @@ function requestStatusValue(status: RequestRow["status"]) {
 // share of the session (RFC: completion_threshold_percentage). Frozen at creation.
 const SESSION_DURATION_MIN = 60
 const COMPLETION_THRESHOLD_PCT = 1
+// Demo only: how far ahead the scheduled start is anchored when an instructor
+// enters a waiting session early, so the green-room countdown is watchable and
+// then flips to the live class clock. Real scheduling would use the session time.
+const DEMO_COUNTDOWN_SECONDS = 75
 const thresholdMinutes = (pct: number, durationMin: number) =>
   Math.round((pct / 100) * durationMin)
 
