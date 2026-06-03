@@ -334,14 +334,36 @@ export function buildReceiptDataUrl(row: SpendingRow): string {
   const seed = hash(row.id)
   const lang = pickLanguage(row)
   const loc = pickLocation(row, lang)
-  const items = buildItems(row.description, row.amount, seed, lang)
+  // Honest mismatch: when the row carries the `receipt-mismatch`
+  // policy alert, the receipt's printed TOTAL legitimately differs
+  // from `row.amount` so the approver can verify the alert against
+  // the visible artwork. Otherwise the alert was a claim without
+  // evidence — the receipt was always generated to total exactly
+  // the expense amount, contradicting the copy.
+  //
+  // Delta: €20–€50, sign + magnitude derived from the row id so
+  // every reload produces the same receipt. Floored to keep the
+  // total > 0 in case the underlying amount is very small. The
+  // line items + tax block below are computed from `displayedTotal`
+  // so the receipt's own internal math still reconciles — the
+  // mismatch is strictly between the receipt and the summary card.
+  const hasMismatch = row.alerts.includes("receipt-mismatch")
+  const mismatchMagnitude = 20 + (seed % 31) // 20 .. 50 inclusive
+  const mismatchSign = seed % 2 === 0 ? 1 : -1
+  const displayedTotal = hasMismatch
+    ? Math.max(
+        0.5,
+        Math.round((row.amount + mismatchSign * mismatchMagnitude) * 100) / 100
+      )
+    : row.amount
+  const items = buildItems(row.description, displayedTotal, seed, lang)
   const payment = syntheticPayment(row, seed, lang)
   const ticket = `T${String((seed % 900000) + 100000)}/${(seed >> 5) % 1000}`
   const dateStr = formatDate(row.date, lang)
   const timeStr = formatTime(seed)
   const baseRate = row.description === "Meals" ? 0.1 : 0.21
-  const base = Math.round((row.amount / (1 + baseRate)) * 100) / 100
-  const iva = Math.round((row.amount - base) * 100) / 100
+  const base = Math.round((displayedTotal / (1 + baseRate)) * 100) / 100
+  const iva = Math.round((displayedTotal - base) * 100) / 100
   const ivaLabel = lang === "es" ? `IVA ${Math.round(baseRate * 100)}%` : `VAT ${Math.round(baseRate * 100)}%`
 
   // Localized strings.
@@ -461,7 +483,7 @@ export function buildReceiptDataUrl(row: SpendingRow): string {
     y,
     render:
       `<text x="${PAD}" y="${y}" font-family="${fontMono}" font-size="11" fill="#1a1a1a">${STR.base} ${ivaLabel} ${STR.cuota}</text>` +
-      `<text x="${W - PAD}" y="${y}" font-family="${fontMono}" font-size="13" font-weight="700" fill="#1a1a1a" text-anchor="end">${STR.total} ${row.amount.toFixed(2)} ${currencySymbol(lang)}</text>`,
+      `<text x="${W - PAD}" y="${y}" font-family="${fontMono}" font-size="13" font-weight="700" fill="#1a1a1a" text-anchor="end">${STR.total} ${displayedTotal.toFixed(2)} ${currencySymbol(lang)}</text>`,
   })
   y += LH
   rows.push({

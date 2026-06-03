@@ -130,28 +130,43 @@ export function PolicyAlertCard(props: {
           border: "1.089px solid rgba(5, 38, 87, 0.06)",
         }}
       >
-        <div className="flex items-center justify-between gap-3 self-stretch">
-          <span className="flex items-center" style={{ gap: "8px" }}>
-            <span className="font-medium text-f1-foreground text-base">
-              {title}
+        {/* Body row — outer flex (text-block | bodyAction). The
+            outer row aligns the action button to the TOP of the
+            text block (`items-start`), not its center, so the
+            button visually anchors next to the title rather than
+            floating between title and description. The inner
+            column owns the title/description vertical rhythm at a
+            tight 4px gap regardless of whether an action is
+            present, which keeps the no-action variant pixel-
+            identical to the previous layout. `flex-1` on the
+            inner column forces the description to wrap BEFORE it
+            collides with the action button — without it, the
+            description would flow under the button (the bug from
+            the previous justify-between layout). */}
+        <div className="flex items-start gap-4 self-stretch">
+          <div className="flex flex-1 flex-col items-start gap-1">
+            <span className="flex items-center" style={{ gap: "8px" }}>
+              <span className="font-medium text-f1-foreground text-base">
+                {title}
+              </span>
+              <InfoGlyph />
             </span>
-            <InfoGlyph />
-          </span>
+            <p
+              className="m-0"
+              style={{
+                color: "rgba(1, 22, 55, 0.61)",
+                fontFamily: "Inter, sans-serif",
+                fontSize: "14px",
+                fontWeight: 400,
+                lineHeight: "20px",
+                letterSpacing: "-0.07px",
+              }}
+            >
+              {description}
+            </p>
+          </div>
           {bodyAction}
         </div>
-        <p
-          className="m-0"
-          style={{
-            color: "rgba(1, 22, 55, 0.61)",
-            fontFamily: "Inter, sans-serif",
-            fontSize: "14px",
-            fontWeight: 400,
-            lineHeight: "20px",
-            letterSpacing: "-0.07px",
-          }}
-        >
-          {description}
-        </p>
       </div>
     </div>
   )
@@ -161,8 +176,15 @@ export function PolicyAlertCard(props: {
  * Solid-fill circular badge with a white glyph. Per-variant glyph:
  *   - success → check
  *   - warning → exclamation mark
- *   - error   → X (cross)
- * Geometry matches the SVG's badge: ø 13.3px circle, stroke-width 1.6.
+ *   - error   → exclamation mark (matches F0TagAlert critical:
+ *               same glyph, just on a red circle instead of yellow)
+ *
+ * Why error switched from X to exclamation: aligns with the
+ * canonical `F0TagAlert level="critical"` which uses the same
+ * exclamation glyph. Keeping both icons identical (only the
+ * background color differs) means the eye reads "this is severe"
+ * by hue rather than by glyph — consistent with the design
+ * system's tag/badge family.
  */
 function BadgeIcon({
   variant,
@@ -191,7 +213,7 @@ function BadgeIcon({
           strokeLinejoin="round"
         />
       )}
-      {variant === "warning" && (
+      {(variant === "warning" || variant === "error") && (
         <>
           <path
             d="M8 5.2 L8 8.6"
@@ -200,22 +222,6 @@ function BadgeIcon({
             strokeLinecap="round"
           />
           <circle cx="8" cy="10.6" r="0.9" fill="#FFFFFF" />
-        </>
-      )}
-      {variant === "error" && (
-        <>
-          <path
-            d="M5.6 5.6 L10.4 10.4"
-            stroke="#FFFFFF"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-          />
-          <path
-            d="M10.4 5.6 L5.6 10.4"
-            stroke="#FFFFFF"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-          />
         </>
       )}
     </svg>

@@ -1,6 +1,6 @@
 import { OneDataCollection } from "@factorialco/f0-react/dist/experimental"
 
-import { spendingColumns } from "../shared/columns"
+import { submitColumns } from "../shared/columns"
 import type { SpendingRow } from "../shared/rows"
 import {
   useSubmitExpensesRows,
@@ -49,7 +49,7 @@ export function SubmitExpensesTab(props: {
       visualizations={[
         {
           type: "table",
-          options: { columns: [...spendingColumns] },
+          options: { columns: [...submitColumns] },
         },
       ]}
     />

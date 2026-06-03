@@ -29,21 +29,41 @@ import type { FieldRequirement } from "./fields"
 export function RequirementToggle(props: {
   value: FieldRequirement
   onChange: (value: FieldRequirement) => void
+  disabled?: boolean
 }) {
-  return (
+  // Disabled state recipe:
+  //   1. `disabled` on each F0Button \u2014 makes them non-interactive
+  //      (`pointer-events-none` + aria) and renders the natural
+  //      disabled cursor on the button itself.
+  //   2. `withoutDisabledAppearance` \u2014 cancels F0Button's built-in
+  //      `disabled:opacity-30` rule and pins the button to opacity
+  //      1.0. Without this step the wrapper opacity below would
+  //      multiply 0.3 \u00d7 0.9 = 0.27 (basically invisible).
+  //   3. Wrapper `opacity: 0.9` \u2014 dims the *whole* group uniformly
+  //      from full strength down to 90% so it still reads as a
+  //      "muted, can't touch this" control vs an enabled toggle.
+  const inner = (
     <F0Box display="flex" flexDirection="row" alignItems="center" gap="xs">
       <F0Button
         label="Required"
         size="sm"
         variant={props.value === "required" ? "outline" : "ghost"}
         onClick={() => props.onChange("required")}
+        disabled={props.disabled}
+        withoutDisabledAppearance={props.disabled}
       />
       <F0Button
         label="Optional"
         size="sm"
         variant={props.value === "optional" ? "outline" : "ghost"}
         onClick={() => props.onChange("optional")}
+        disabled={props.disabled}
+        withoutDisabledAppearance={props.disabled}
       />
     </F0Box>
   )
+  if (props.disabled) {
+    return <div style={{ opacity: 0.65 }}>{inner}</div>
+  }
+  return inner
 }

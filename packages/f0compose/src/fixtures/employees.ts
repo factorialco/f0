@@ -289,6 +289,38 @@ export const employees: Employee[] = [
   },
 ]
 
+/**
+ * The "logged-in" user surfaced by FactorialSidebar. We expose
+ * her here so prototypes that need to render "you" (e.g. the
+ * Participants field's owner chip) stay in sync with the sidebar
+ * footer avatar — same first name, same initial-derived avatar
+ * color. No `avatarUrl` so F0AvatarPerson falls back to the
+ * initial-on-color tile that matches the sidebar.
+ */
+export const CURRENT_USER_ID = "emp-current"
+
+const currentUser: Employee = {
+  id: CURRENT_USER_ID,
+  fullName: "Hellen the HR",
+  preferredName: "Hellen",
+  email: "hellen@factorial.example",
+  // Empty string → F0AvatarPerson renders initial+color, matching
+  // the pink "H" tile in the sidebar footer.
+  avatarUrl: "",
+  role: "HR Manager",
+  departmentId: "dept-people",
+  teamId: "team-people-ops",
+  managerId: null,
+  hireDate: "2021-01-04",
+  status: "active",
+  location: "Barcelona",
+}
+
+// Append the current user so `findEmployee(CURRENT_USER_ID)`
+// resolves. We keep her at the end so existing `employees[i]`
+// indices in other fixtures don't shift.
+employees.push(currentUser)
+
 export function findEmployee(id: string): Employee | undefined {
   return employees.find((e) => e.id === id)
 }

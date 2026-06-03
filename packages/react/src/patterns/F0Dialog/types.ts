@@ -8,7 +8,7 @@ export const dialogPositions = [
 ] as const
 export type DialogPosition = (typeof dialogPositions)[number]
 
-export const dialogWidths = ["sm", "md", "lg", "xl"] as const
+export const dialogWidths = ["sm", "md", "lg", "xl", "xxl"] as const
 export type DialogWidth = (typeof dialogWidths)[number]
 
 export type F0DialogPrimaryAction = {

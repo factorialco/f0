@@ -1,7 +1,11 @@
 import { F0Box, F0Button, F0Dialog, F0TagStatus, F0Text } from "@factorialco/f0-react"
 import { Tabs } from "@factorialco/f0-react/dist/experimental"
-import { useMemo, useState } from "react"
+import { useMemo, useState, type ReactNode } from "react"
 
+import {
+  AiSuggestionBadge,
+  categorySuggestionReason,
+} from "../aiSuggestion"
 import { STATUS_LABEL, STATUS_VARIANT } from "../expenseStatus"
 import type { SpendingRow } from "../rows"
 import { ControllingForm, type ControllingFormData } from "./ControllingForm"
@@ -266,22 +270,44 @@ function AccountingPane({ row }: { row: SpendingRow }) {
     )
   }
   const c = row.controlling
+  const suggestion = categorySuggestionReason(row)
   return (
     <F0Box display="flex" flexDirection="column" gap="lg">
-      <DetailRow label="Category" value={c.category ?? "—"} />
-      <DetailRow label="Subcategory" value={c.subcategory ?? "—"} />
-      <DetailRow label="Cost center" value={c.costCenter ?? "—"} />
-      <DetailRow label="Project" value={c.project ?? "—"} />
-      <DetailRow label="VAT rate" value={c.vatRate ?? "—"} />
-      <DetailRow label="Description" value={c.description ?? "—"} />
+      <DetailRow
+        label="Category"
+        value={c.category ?? "-"}
+        accessory={
+          suggestion ? <AiSuggestionBadge reason={suggestion} /> : undefined
+        }
+      />
+      <DetailRow label="Subcategory" value={c.subcategory ?? "-"} />
+      <DetailRow label="Cost center" value={c.costCenter ?? "-"} />
+      <DetailRow label="Project" value={c.project ?? "-"} />
+      <DetailRow label="VAT rate" value={c.vatRate ?? "-"} />
+      <DetailRow label="Description" value={c.description ?? "-"} />
     </F0Box>
   )
 }
 
-function DetailRow({ label, value }: { label: string; value: string }) {
+function DetailRow({
+  label,
+  value,
+  accessory,
+}: {
+  label: string
+  value: string
+  accessory?: ReactNode
+}) {
   return (
     <F0Box display="flex" flexDirection="column" gap="xs">
-      <F0Text content={label} variant="label" />
+      {accessory ? (
+        <div className="flex items-center gap-1">
+          <F0Text content={label} variant="label" />
+          {accessory}
+        </div>
+      ) : (
+        <F0Text content={label} variant="label" />
+      )}
       <F0Text content={value} variant="body" />
     </F0Box>
   )
@@ -312,6 +338,16 @@ function alertLabel(a: string) {
       return "Receipt submitted after required timeframe"
     case "receipt-mismatch":
       return "Receipt amount does not match the expense"
+    case "meal-over-limit":
+      return "Meal expense above the per-person limit"
+    case "alcohol-detected":
+      return "Alcohol detected on the receipt"
+    case "receipt-invalid":
+      return "Receipt is unreadable or in an unsupported format"
+    case "missing-merchant":
+      return "Merchant name missing from the receipt"
+    case "weekend-charge":
+      return "Charge fell on a weekend"
     default:
       return a
   }

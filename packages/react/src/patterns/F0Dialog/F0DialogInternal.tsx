@@ -51,12 +51,17 @@ const dialogContentClassName = cva({
       md: "max-w-[640px]",
       lg: "max-w-[800px]",
       xl: "max-w-[960px]",
+      // Prototype-driven addition for f0compose split-view modals.
+      // Hugs a fixed 580px editor + 385px preview + padding (16×4)
+      // + 1px divider = 1030px. Non-breaking; existing usages
+      // unaffected.
+      xxl: "max-w-[1030px]",
     },
   },
   compoundVariants: [
     {
       variant: "fullscreen",
-      width: ["sm", "md", "lg", "xl"],
+      width: ["sm", "md", "lg", "xl", "xxl"],
       class: "max-w-full",
     },
   ],

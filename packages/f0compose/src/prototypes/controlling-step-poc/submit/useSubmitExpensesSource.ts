@@ -1,4 +1,10 @@
-import { expenseGroups, expenses, type ExpenseStatus } from "@/fixtures"
+import {
+  expenseGroups,
+  expenses,
+  type ControllingFields,
+  type ExpenseCategory,
+  type ExpenseStatus,
+} from "@/fixtures"
 import { useDataCollectionSource } from "@factorialco/f0-react/dist/experimental"
 import {
   Add,
@@ -10,8 +16,20 @@ import {
 } from "@factorialco/f0-react/icons/app"
 import { useMemo } from "react"
 
-import { paginateRows } from "../shared/columns"
-import { expenseToRow, folderToRow, type SpendingRow } from "../shared/rows"
+import { useChatDrafts } from "../copilot/useChatDrafts"
+import {
+  paginateRows,
+  POLICY_STATE_OPTIONS,
+  type PolicyStateKey,
+} from "../shared/columns"
+import { mockDescriptionFor } from "../shared/mockDescriptions"
+import {
+  chatDraftToRow,
+  expenseToRow,
+  folderToRow,
+  type SpendingRow,
+} from "../shared/rows"
+import { getMissingRequiredFields } from "@/prototypes/_shared/requiredFields"
 
 /**
  * Submit > Expenses source — a single "my expenses" view that covers
@@ -27,10 +45,66 @@ import { expenseToRow, folderToRow, type SpendingRow } from "../shared/rows"
  * a folder opens its detail view via `itemUrl`.
  */
 const STATUS_FILTER_KEY = "status"
+const POLICY_FILTER_KEY = "alerts"
+
+// Module-scoped so the filters object handed to `useDataCollectionSource`
+// keeps a stable identity across renders. Re-mapping inline on each
+// render caused the source to detect a config change and silently
+// reset `currentFilters` — which surfaced as the To-Do preset
+// selecting, filtering for a moment, then visibly resetting.
+const POLICY_FILTER_OPTIONS = POLICY_STATE_OPTIONS.map((o) => ({
+  value: o.value,
+  label: o.label,
+}))
+
+/**
+ * Seed a short, category-appropriate description on a To-Do
+ * expense (`draft` or `changes-requested`) so the detail summary
+ * view has something to render in the Description row.
+ *
+ * Skips rows that are still gated by the required-fields rule
+ * (`getMissingRequiredFields(id) !== []`) — those need to STAY
+ * blank so the "Can't send this expense" alert + Review CTA have
+ * something to gate on. Once the submitter fills the description in
+ * edit mode the gate clears and the row becomes indistinguishable
+ * from the seeded ones.
+ *
+ * Preserves any pre-existing `controlling.description` (rows that
+ * came in already coded — currently none in the To-Do pool, but
+ * keeps the helper safe if seeding ever expands).
+ */
+function withMockDescription<E extends { id: string; category: ExpenseCategory; controlling?: ControllingFields }>(
+  e: E
+): E {
+  if (getMissingRequiredFields(e.id).length > 0) return e
+  const existing = e.controlling?.description
+  if (existing && existing.trim().length > 0) return e
+  return {
+    ...e,
+    controlling: {
+      ...(e.controlling ?? {}),
+      description: mockDescriptionFor(e.id, e.category),
+    },
+  }
+}
 
 export function useSubmitExpensesRows(): SpendingRow[] {
+  // Chat-created drafts (and "send for approval" promotions from the
+  // chat) are tracked in a module-scoped store outside React so the
+  // AI chat hooks — which live in `ApplicationFrame`'s subtree, not
+  // ours — can mutate them without a context plumbed all the way
+  // through. We subscribe here so the table re-renders when the
+  // agent adds a row from a receipt drop.
+  const chatDrafts = useChatDrafts()
+
   return useMemo(() => {
     const folders = expenseGroups.map(folderToRow)
+    // Rows seeded by the AI chat (receipt drops parsed by David's
+    // expenses skill, surfaced via the `bulkCreateExpenses` /
+    // `sendExpenseToReview` copilot actions). Surfaced first so a
+    // freshly-created row lands at the top of the table where the
+    // user is looking.
+    const chatRows = chatDrafts.map(chatDraftToRow)
     // To-Do groups two cohorts that both require submitter action:
     //   1. Drafts — expenses the user started but hasn't submitted yet.
     //      The bulk of the To-Do backlog. We synthesize ~13 of them
@@ -65,6 +139,7 @@ export function useSubmitExpensesRows(): SpendingRow[] {
           status: "draft" as const,
         }
       })
+      .map(withMockDescription)
       .map(expenseToRow)
 
     // 3 changes-requested — approver bounced these back to the
@@ -75,6 +150,7 @@ export function useSubmitExpensesRows(): SpendingRow[] {
         consumedSourceIds.add(e.id)
         return { ...e, status: "changes-requested" as const }
       })
+      .map(withMockDescription)
       .map(expenseToRow)
 
     // Submitted shows the rest. Skip any source row we've already
@@ -88,13 +164,34 @@ export function useSubmitExpensesRows(): SpendingRow[] {
       )
       .map(expenseToRow)
 
+    // Demo drafts owned by other employees that we still want
+    // surfaced in this table for storytelling purposes. Today
+    // this is just Alan Turing's `exp-fc-meal-002` — opening it
+    // from My Spending → To-Do pushes an Alan viewer override
+    // on the detail page so the user sees the Pre-fill banner
+    // scenario without having to log in as Alan separately.
+    // Kept as a literal allowlist (not a status filter) so we
+    // don't accidentally leak unrelated drafts from other
+    // employees into Hellen's table.
+    const DEMO_DRAFT_IDS = new Set(["exp-fc-meal-002"])
+    const demoDrafts = expenses
+      .filter(
+        (e) =>
+          DEMO_DRAFT_IDS.has(e.id) &&
+          !consumedSourceIds.has(e.id) &&
+          e.status === "draft"
+      )
+      .map(expenseToRow)
+
     return [
       ...folders,
+      ...chatRows,
+      ...demoDrafts,
       ...draftExpenses,
       ...changesRequestedExpenses,
       ...realExpenses,
     ]
-  }, [])
+  }, [chatDrafts])
 }
 
 export function useSubmitExpensesSource(args: {
@@ -146,6 +243,17 @@ export function useSubmitExpensesSource(args: {
             ],
           },
         },
+        // Alerts filter — narrows rows by their single dominant
+        // policy state (resolved via `policyStateFor`). The option
+        // list is shared with the Alerts column so what the user
+        // sees as a tag is exactly what they can filter by.
+        [POLICY_FILTER_KEY]: {
+          type: "in",
+          label: "Alerts",
+          options: {
+            options: POLICY_FILTER_OPTIONS,
+          },
+        },
       },
       currentFilters: {},
       // To-Do groups Drafts + Changes requested (both require the
@@ -187,6 +295,9 @@ export function useSubmitExpensesSource(args: {
           const wanted = Array.isArray(filters?.[STATUS_FILTER_KEY])
             ? (filters[STATUS_FILTER_KEY] as ExpenseStatus[])
             : []
+          const wantedPolicy = Array.isArray(filters?.[POLICY_FILTER_KEY])
+            ? (filters[POLICY_FILTER_KEY] as PolicyStateKey[])
+            : []
           return paginateRows(rows, {
             search: search ?? undefined,
             sortings,
@@ -194,6 +305,7 @@ export function useSubmitExpensesSource(args: {
               | { perPage?: number; currentPage?: number }
               | undefined,
             statusFilter: wanted.length > 0 ? wanted : undefined,
+            policyFilter: wantedPolicy.length > 0 ? wantedPolicy : undefined,
           })
         },
       },

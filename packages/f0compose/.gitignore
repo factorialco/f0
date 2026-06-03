@@ -4,3 +4,5 @@ generated/
 .opencode/
 .claude/
 *.log
+.vercel
+.vercel-shares

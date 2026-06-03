@@ -8,6 +8,11 @@ Factorial pantallas using only the f0 design system. Replace Figma + Lovable
 for both quick POCs and final designs — the output is real TSX an engineer
 can lift directly to a feature branch.
 
+> **First time here?** Read **[KICKSTART.md](./KICKSTART.md)** — a
+> dummy-proof, one-command path from zero to a live Vercel URL.
+> Already shipped a prototype and want to hand it off? See
+> **[SHARING.md](./SHARING.md)**.
+
 ---
 
 ## Quick start (3 commands)

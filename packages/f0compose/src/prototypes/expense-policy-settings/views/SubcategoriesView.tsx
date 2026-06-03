@@ -48,6 +48,16 @@ export function SubcategoriesView(props: {
    * back-compat — not used by the current modal entry point).
    */
   categoryId?: string
+  /**
+   * If provided, renders ONLY the listed categories as full groups
+   * (with headers + add buttons). Use to scope the modal to a
+   * subset — e.g. Mileage form → just `["cat-fuel"]`, Regular form
+   * → all categories EXCEPT per-diem + fuel.
+   *
+   * `categoryId` (single-category scoped mode) wins when both are
+   * supplied; in practice the caller chooses one.
+   */
+  categoryIds?: readonly string[]
   policyData: PolicyData
   /** Hide the heading + description (the modal renders its own title). */
   hideHeader?: boolean
@@ -63,11 +73,20 @@ export function SubcategoriesView(props: {
   // Which row is currently in inline-edit mode. Only one at a time.
   const [editingId, setEditingId] = useState<string | null>(null)
 
-  // Legacy scoped mode: render a single group, no group header.
-  // Current entry point (the modal) never uses this branch.
+  // Three modes:
+  //   1. Single-category scoped (`categoryId`): one group, no header.
+  //      Legacy mode, current modal doesn't use it.
+  //   2. Multi-category scoped (`categoryIds`): filter the full list
+  //      down to the supplied subset. Groups keep their headers.
+  //   3. Unscoped (default): every category, each as its own group.
+  const visibleCategories =
+    props.categoryIds === undefined
+      ? categories
+      : categories.filter((c) => props.categoryIds!.includes(c.id))
+
   const groups =
     props.categoryId === undefined
-      ? categories.map((cat) => ({
+      ? visibleCategories.map((cat) => ({
           id: cat.id,
           name: cat.name,
           rows: subcategories.filter((s) => s.categoryId === cat.id),

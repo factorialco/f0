@@ -30,6 +30,11 @@ export type PrototypeMeta = {
   createdAt: string
   /** Optional author display name. */
   author?: string
+  /**
+   * When true, the prototype renders without the Factorial sidebar and
+   * is centered in the full viewport. Use for mobile-frame prototypes.
+   */
+  hideSidebar?: boolean
 }
 
 /**

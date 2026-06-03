@@ -25,7 +25,13 @@ import {
   seedPaymentMethods,
   seedSubcategories,
 } from "./seeds"
-import type { Category, PaymentMethod, Subcategory } from "./types"
+import type {
+  ApprovalFlow,
+  ApprovalScope,
+  Category,
+  PaymentMethod,
+  Subcategory,
+} from "./types"
 
 // ── Q1 — Which kinds of expenses do your employees submit? ────────────
 
@@ -230,3 +236,160 @@ export const Q3_DEFAULT_SELECTION: Q3OptionId = "personal-cards"
 export const DEFAULT_CATEGORIES: Category[] = seedCategories
 export const DEFAULT_SUBCATEGORIES: Subcategory[] = seedSubcategories
 export const DEFAULT_PAYMENT_METHODS: PaymentMethod[] = seedPaymentMethods
+
+// ── Q4 — How should expenses get approved by default? ─────────────────
+//
+// The interview lays down a clean STARTER approval workflow (an ordered
+// list of WHEN→THEN rules, first match wins). Each posture maps to one
+// or two rules built from PRESET roles only (manager / self=auto-approve
+// / admins=finance review) so every starter rule is feasibility
+// "supported" — no relation/needs-setup noise on a fresh setup. The user
+// refines names, thresholds, and approvers afterwards via co-creation.
+
+export type Q4OptionId =
+  | "manager-all"
+  | "manager-finance"
+  | "auto-small"
+  | "finance-all"
+
+const EVERYONE: ApprovalScope = { kind: "everyone" }
+
+/** Default threshold (EUR) above which "larger" expenses escalate. */
+export const Q4_DEFAULT_THRESHOLD = 1000
+/** Default ceiling (EUR) under which "small" expenses auto-approve. */
+export const Q4_DEFAULT_AUTO_CEILING = 200
+
+const managerStep = (flowId: string) => ({
+  id: `${flowId}-mgr`,
+  approver: { kind: "role" as const, role: "manager" as const },
+  label: "Manager approval",
+})
+const financeStep = (flowId: string) => ({
+  id: `${flowId}-fin`,
+  approver: { kind: "role" as const, role: "admins" as const },
+  label: "Finance review",
+})
+const selfStep = (flowId: string) => ({
+  id: `${flowId}-self`,
+  approver: { kind: "role" as const, role: "self" as const },
+})
+
+export function buildApprovalIntent(option: Q4OptionId): ApprovalFlow[] {
+  switch (option) {
+    case "manager-finance":
+      return [
+        {
+          id: "flow-larger",
+          name: "Larger expenses",
+          when: `€${Q4_DEFAULT_THRESHOLD.toLocaleString()} and above`,
+          then: "Manager → Finance review",
+          feasibility: "supported",
+          trigger: {
+            amount: { min: Q4_DEFAULT_THRESHOLD },
+            categoryIds: [],
+            scope: EVERYONE,
+          },
+          steps: [managerStep("flow-larger"), financeStep("flow-larger")],
+          priority: 100,
+        },
+        {
+          id: "flow-default",
+          name: "Default approval",
+          when: "Any expense",
+          then: "Manager approves",
+          feasibility: "supported",
+          trigger: { amount: {}, categoryIds: [], scope: EVERYONE },
+          steps: [managerStep("flow-default")],
+          priority: 900,
+        },
+      ]
+    case "auto-small":
+      return [
+        {
+          id: "flow-small",
+          name: "Small expenses",
+          when: `Under €${Q4_DEFAULT_AUTO_CEILING}`,
+          then: "Auto-approve",
+          feasibility: "supported",
+          trigger: {
+            amount: { max: Q4_DEFAULT_AUTO_CEILING },
+            categoryIds: [],
+            scope: EVERYONE,
+          },
+          steps: [selfStep("flow-small")],
+          priority: 100,
+        },
+        {
+          id: "flow-default",
+          name: "Default approval",
+          when: `€${Q4_DEFAULT_AUTO_CEILING} and above`,
+          then: "Manager approves",
+          feasibility: "supported",
+          trigger: {
+            amount: { min: Q4_DEFAULT_AUTO_CEILING },
+            categoryIds: [],
+            scope: EVERYONE,
+          },
+          steps: [managerStep("flow-default")],
+          priority: 900,
+        },
+      ]
+    case "finance-all":
+      return [
+        {
+          id: "flow-default",
+          name: "Finance approval",
+          when: "Any expense",
+          then: "Finance reviews",
+          feasibility: "supported",
+          trigger: { amount: {}, categoryIds: [], scope: EVERYONE },
+          steps: [financeStep("flow-default")],
+          priority: 900,
+        },
+      ]
+    case "manager-all":
+    default:
+      return [
+        {
+          id: "flow-default",
+          name: "Default approval",
+          when: "Any expense",
+          then: "Manager approves",
+          feasibility: "supported",
+          trigger: { amount: {}, categoryIds: [], scope: EVERYONE },
+          steps: [managerStep("flow-default")],
+          priority: 900,
+        },
+      ]
+  }
+}
+
+// ── Q5 — What can people spend on meals & travel? ─────────────────────
+//
+// Drives the per-diem rate seed. Meal/travel caps live on a separate
+// surface (policy rules) that the data model doesn't yet expose as a
+// simple field, so for the starter we focus on the per-diem allowance:
+// when the user picks daily allowances, we seed a sensible per-diem rate
+// they can tune. The other options leave rates untouched (co-creation
+// fills caps later).
+
+export type Q5OptionId =
+  | "limits"
+  | "per-diems"
+  | "per-diem-travel-cap-meals"
+  | "case-by-case"
+
+/** Default daily per-diem amount (EUR) seeded for the starter. */
+export const Q5_DEFAULT_PER_DIEM = 40
+
+export type Q5Intent = {
+  /** Seed a standard per-diem rate row at this amount (EUR). */
+  addPerDiem: boolean
+  perDiemAmount: number
+}
+
+export function buildLimitsIntent(option: Q5OptionId): Q5Intent {
+  const addPerDiem =
+    option === "per-diems" || option === "per-diem-travel-cap-meals"
+  return { addPerDiem, perDiemAmount: Q5_DEFAULT_PER_DIEM }
+}

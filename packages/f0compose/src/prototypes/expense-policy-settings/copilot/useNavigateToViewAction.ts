@@ -10,8 +10,15 @@ const FORM_TYPES: readonly FormSubStepId[] = ["regular", "per-diem", "mileage"]
  * to navigate, it calls this action with the target view and we
  * mutate the URL via `setView`.
  *
- * Iterated UX: only two URL-routable views remain —
- * `forms-summary` (landing) and `forms-detail` (per form type).
+ * Supported targets:
+ *  - `forms-summary` — the 3-card landing under Expense types.
+ *  - `forms-detail`  — the per-form-type editor (requires `formType`).
+ *  - `flow-detail`   — the editor for a single approval flow
+ *    (requires `flowId`). Added so One can drill into a freshly
+ *    created flow after `createApprovalFlow` + `setFlowTrigger` +
+ *    `updateApprovalStep` so the user lands directly on the
+ *    canvas representation of their request.
+ *
  * Categories live inline (no URL), and Subcategories / Payment
  * methods open as modals on top of `forms-detail` (also no URL).
  * The agent doesn't need to navigate to those — it just guides the
@@ -23,16 +30,16 @@ export function useNavigateToViewAction(args: {
   const { setView } = args
 
   useCopilotAction({
-    name: "navigatePolicyView",
+    name: "expensePolicyPrototype.navigatePolicyView",
     description:
-      "Switch the Expense Policy settings page to a specific sub-view. Use this when the user wants to return to the forms summary, or open the editor for a particular form type.",
+      "Switch the Expense Policy settings page to a specific sub-view. Use this when the user wants to return to the forms summary, open the editor for a particular form type, or drill into a specific approval flow you just created.",
     available: "frontend",
     parameters: [
       {
         name: "target",
         type: "string",
         description:
-          "Which sub-view to open. One of: 'forms-summary' (the 3-card landing for Expense forms), 'forms-detail' (the editor for one form type — requires formType).",
+          "Which sub-view to open. One of: 'forms-summary' (the 3-card landing for Expense types), 'forms-detail' (the editor for one expense type — requires formType), 'flow-detail' (the editor for one approval flow — requires flowId).",
         required: true,
       },
       {
@@ -42,8 +49,15 @@ export function useNavigateToViewAction(args: {
           "Required when target is 'forms-detail'. One of: 'regular', 'per-diem', 'mileage'.",
         required: false,
       },
+      {
+        name: "flowId",
+        type: "string",
+        description:
+          "Required when target is 'flow-detail'. The id returned by createApprovalFlow (or an existing flow id from the readable approvalFlows list).",
+        required: false,
+      },
     ],
-    handler: ({ target, formType }) => {
+    handler: ({ target, formType, flowId }) => {
       switch (target) {
         case "forms-summary":
           setView({ kind: "forms-summary" })
@@ -62,6 +76,17 @@ export function useNavigateToViewAction(args: {
             kind: "forms-detail",
             formType: formType as FormSubStepId,
           })
+          return
+        }
+        case "flow-detail": {
+          if (typeof flowId !== "string" || flowId === "") {
+            // No flowId → drop to the forms-summary rather than a
+            // broken flow-detail URL. The agent can call again with
+            // a valid id (e.g. after createApprovalFlow returns).
+            setView({ kind: "forms-summary" })
+            return
+          }
+          setView({ kind: "flow-detail", flowId })
           return
         }
         default:

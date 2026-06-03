@@ -5,13 +5,17 @@ import { useCallback, useEffect, useState } from "react"
  *
  * Sequencing rule (per handoff §2.1 / §2.2): the admin walks through
  *
- *   1. Expense forms  →
+ *   1. Expense types  →
  *      a. Regular expense
  *      b. Per diem
  *      c. Mileage
- *   2. Rates
- *   3. Approval flows
- *   4. Certified documents
+ *   2. Approval flows
+ *   3. Certified documents
+ *
+ * Rates were previously a separate outer step but have been folded
+ * into the per-diem and mileage form tables as modal-bound rows
+ * ("Per diem rates" / "Fixed value per kilometer"). The wizard now
+ * has three top-level steps instead of four.
  *
  * Steps and sub-steps complete in order. A step is `current` once all
  * earlier steps are `done`; everything after `current` is `pending`.
@@ -22,7 +26,9 @@ import { useCallback, useEffect, useState } from "react"
  * The wizard is persisted to localStorage under
  * `expense-policy-wizard-state-v1` so a hard refresh resumes where the
  * admin left off (handoff §2.6). The `v1` suffix lets us bump the
- * schema without colliding with old saves.
+ * schema without colliding with old saves; legacy saves that contain
+ * the dropped `"rates"` outer-step id are silently filtered out by
+ * the `readStorage` validator.
  *
  * Cross-cutting tension flagged in §2.7 (chat-vs-inline edits) lives
  * elsewhere — this hook only tracks "have we completed step X" booleans,
@@ -32,13 +38,12 @@ import { useCallback, useEffect, useState } from "react"
 /** Top-level steps in the policy wizard. Order is significant. */
 export const OUTER_STEPS = [
   "expense-forms",
-  "rates",
   "approval-flows",
   "certified-documents",
 ] as const
 export type OuterStepId = (typeof OUTER_STEPS)[number]
 
-/** Sub-steps inside the "Expense forms" outer step. Order significant. */
+/** Sub-steps inside the "Expense types" outer step. Order significant. */
 export const FORM_SUB_STEPS = ["regular", "per-diem", "mileage"] as const
 export type FormSubStepId = (typeof FORM_SUB_STEPS)[number]
 

@@ -28,11 +28,23 @@ import { aiChatConfig } from "./aiChatConfig"
  */
 export function FactorialShell({
   activeModule,
+  hideSidebar,
   children,
 }: {
   activeModule: ModuleId | null
+  hideSidebar?: boolean
   children: React.ReactNode
 }) {
+  if (hideSidebar) {
+    return (
+      <F0AiFormRegistryProvider>
+        <div style={{ width: "100vw", height: "100vh", overflow: "auto" }}>
+          {children}
+        </div>
+      </F0AiFormRegistryProvider>
+    )
+  }
+
   return (
     <F0AiFormRegistryProvider>
       <ApplicationFrame

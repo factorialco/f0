@@ -14,9 +14,10 @@ import {
  * Sequencing constraint (handoff §2.1): a step can only be completed
  * once every earlier step is already done. We enforce that on the
  * frontend too, not just in the system prompt — if the agent
- * misbehaves and calls `completeStep("rates")` before forms are
- * finished, the handler refuses and tells the agent why. That keeps
- * the wizard's visual state consistent with the rules.
+ * misbehaves and calls `completeStep("approval-flows")` before the
+ * expense-forms step is finished, the handler refuses and tells the
+ * agent why. That keeps the wizard's visual state consistent with
+ * the rules.
  *
  * Hard-signal convention: the agent MUST call `completeStep` /
  * `completeSubStep` explicitly to advance (handoff §5 / item 5,
@@ -69,7 +70,7 @@ export function useWizardCompletionActions(args: {
   useCopilotAction({
     name: "completeSubStep",
     description:
-      "Mark a sub-step inside the Expense forms wizard as done (regular, per-diem, or mileage). Earlier sub-steps must already be done. Call exactly once per sub-step.",
+      "Mark a sub-step inside the Expense types wizard as done (regular, per-diem, or mileage). Earlier sub-steps must already be done. Call exactly once per sub-step.",
     available: "enabled",
     parameters: [
       {

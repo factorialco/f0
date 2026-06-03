@@ -45,7 +45,7 @@ export type FieldType =
   | "Text"
   | "File"
 
-export type ModalTarget = "subcategories" | "payment-methods"
+export type ModalTarget = "subcategories" | "payment-methods" | "rates"
 
 type CommonFieldRow = {
   id: string
@@ -81,8 +81,18 @@ export type EditableFieldRow = CommonFieldRow & {
 export type FieldRow = LockedFieldRow | EditableFieldRow
 
 /**
- * Spec §1 / §2 field list. The locked rows mirror the top block in
- * the Figma reference (system-required fields).
+ * Form types we have field lists for. Matches `FormSubStepId` from
+ * the wizard — kept as a parallel type alias rather than imported
+ * because `fields.ts` should stay leaf-level (no cycles with
+ * `wizard/`). The runtime guard in `useExpenseFormsSource` enforces
+ * the mapping.
+ */
+export type ExpenseFormType = "regular" | "per-diem" | "mileage"
+
+/**
+ * Spec §1 / §2 field list for the **Regular** expense form. The
+ * locked rows mirror the top block in the Figma reference
+ * (system-required fields).
  *
  * Category is locked (always shown, required) AND `expandable` —
  * clicking the row expands nested category rows inline. Subcategory
@@ -90,7 +100,7 @@ export type FieldRow = LockedFieldRow | EditableFieldRow
  * row opens the corresponding management modal while the Switch /
  * Required-Optional cells remain interactive.
  */
-export const initialFields: FieldRow[] = [
+export const regularFields: FieldRow[] = [
   // ── Locked block — "Always shown" ─────────────────────────────────
   {
     id: "document-currency",
@@ -151,6 +161,13 @@ export const initialFields: FieldRow[] = [
   },
 
   // ── Editable block — Show/Hide + Required/Optional ────────────────
+  // Order mirrors the form preview (top → bottom) so toggling a
+  // field shows the change in the admin's eye-line instead of off-
+  // screen. Sequence: Expense info (subcategory) → Payment info
+  // (payment-method, reimbursable-amount, reimbursable-currency,
+  // exchange-rate) → Tax (tax-type) → Budget/Project (projects;
+  // budgets is locked) → Cost centers → Additional info
+  // (description, internal-reference).
   // Subcategory + Payment method open a modal on row click; their
   // Switch / Required-Optional toggles stop propagation so the
   // controls still work without opening the modal.
@@ -206,19 +223,19 @@ export const initialFields: FieldRow[] = [
     type: "Number",
   },
   {
-    id: "cost-centers",
-    label: "Cost center",
-    kind: "editable",
-    visible: false,
-    requirement: "optional",
-    type: "Single choice",
-  },
-  {
     id: "projects",
     label: "Project",
     kind: "editable",
     visible: true,
     requirement: "required",
+    type: "Single choice",
+  },
+  {
+    id: "cost-centers",
+    label: "Cost center",
+    kind: "editable",
+    visible: false,
+    requirement: "optional",
     type: "Single choice",
   },
   {
@@ -238,3 +255,276 @@ export const initialFields: FieldRow[] = [
     type: "Text",
   },
 ]
+
+/**
+ * Field list for the **Mileage** form (spec §"Mileage form").
+ *
+ * Locked block (always shown):
+ *  - Measurement unit, Total distance, Currency, Fixed value per
+ *    kilometer, Total to reimburse, Date — all required.
+ *  - Budgets — locked but optional.
+ *
+ * Editable block (shown by default, all optional):
+ *  - Subcategory (modal-bound, shares the global Subcategories list
+ *    with the Regular form per BR-XX confirmation).
+ *  - Origin, Destination, Cost centers, Projects, Description,
+ *    Document, Internal reference.
+ *
+ * No Category row and no Payment method row — Mileage has neither
+ * concept in this prototype's data model.
+ */
+export const mileageFields: FieldRow[] = [
+  // ── Locked block — "Always shown" ─────────────────────────────────
+  {
+    id: "measurement-unit",
+    label: "Measurement unit",
+    kind: "locked",
+    requirement: "required",
+    type: "Single choice",
+  },
+  {
+    id: "total-distance",
+    label: "Total distance",
+    kind: "locked",
+    requirement: "required",
+    type: "Number",
+  },
+  {
+    id: "currency",
+    label: "Currency",
+    kind: "locked",
+    requirement: "required",
+    type: "Single choice",
+  },
+  {
+    id: "fixed-value-per-kilometer",
+    label: "Fixed value per kilometer",
+    kind: "locked",
+    requirement: "required",
+    type: "Single choice",
+    // Modal-bound: opens the Rates modal scoped to the mileage
+    // formType. The row stays locked (admins can't remove the
+    // concept of "fixed value per km" from the mileage form) but
+    // clicking the row label drills into rate management.
+    modalTarget: "rates",
+  },
+  {
+    id: "total-to-reimburse",
+    label: "Total to reimburse",
+    kind: "locked",
+    requirement: "required",
+    type: "Number",
+  },
+  {
+    id: "date",
+    label: "Date",
+    kind: "locked",
+    requirement: "required",
+    type: "Date",
+  },
+  {
+    id: "budgets",
+    label: "Budgets",
+    kind: "locked",
+    requirement: "optional",
+    type: "Single choice",
+  },
+
+  // ── Editable block — Show/Hide + Required/Optional ────────────────
+  {
+    id: "subcategory",
+    label: "Subcategory",
+    kind: "editable",
+    visible: true,
+    requirement: "optional",
+    type: "Single choice",
+    modalTarget: "subcategories",
+  },
+  {
+    id: "origin",
+    label: "Origin",
+    kind: "editable",
+    visible: true,
+    requirement: "optional",
+    type: "Text",
+  },
+  {
+    id: "destination",
+    label: "Destination",
+    kind: "editable",
+    visible: true,
+    requirement: "optional",
+    type: "Text",
+  },
+  {
+    id: "cost-centers",
+    label: "Cost centers",
+    kind: "editable",
+    visible: true,
+    requirement: "optional",
+    type: "Single choice",
+  },
+  {
+    id: "projects",
+    label: "Projects",
+    kind: "editable",
+    visible: true,
+    requirement: "optional",
+    type: "Single choice",
+  },
+  {
+    id: "description",
+    label: "Description",
+    kind: "editable",
+    visible: true,
+    requirement: "optional",
+    type: "Long text",
+  },
+  {
+    id: "document",
+    label: "Document",
+    kind: "editable",
+    visible: true,
+    requirement: "optional",
+    type: "File",
+  },
+  {
+    id: "internal-reference",
+    label: "Internal reference",
+    kind: "editable",
+    visible: true,
+    requirement: "optional",
+    type: "Text",
+  },
+]
+
+/**
+ * Field list for the **Per diem** form (spec §"Per diem form").
+ *
+ * Locked block (always shown):
+ *  - Departure date, Return date, Per diem rates — all required.
+ *  - Budgets — locked but optional.
+ *
+ * Editable block (shown by default, all optional):
+ *  - Subcategory (modal-bound, shares the global Subcategories
+ *    list).
+ *  - Origin, Destination, Cost centers, Projects, Description,
+ *    Upload the receipt (File), Internal reference.
+ *
+ * No Category and no Payment method rows. "Per diem rates" is typed
+ * as Number per the spec literal — conceptually a lookup, but we
+ * stay faithful to the table until that surface is built.
+ */
+export const perDiemFields: FieldRow[] = [
+  // ── Locked block — "Always shown" ─────────────────────────────────
+  {
+    id: "departure-date",
+    label: "Departure date",
+    kind: "locked",
+    requirement: "required",
+    type: "Date",
+  },
+  {
+    id: "return-date",
+    label: "Return date",
+    kind: "locked",
+    requirement: "required",
+    type: "Date",
+  },
+  {
+    id: "per-diem-rates",
+    label: "Per diem rates",
+    kind: "locked",
+    requirement: "required",
+    // Flipped from "Number" → "Single choice" because the value is
+    // now picked from a managed list (the Rates modal) instead of a
+    // free-form amount typed inline. Mirrors the mileage form's
+    // `fixed-value-per-kilometer` row.
+    type: "Single choice",
+    modalTarget: "rates",
+  },
+  {
+    id: "budgets",
+    label: "Budgets",
+    kind: "locked",
+    requirement: "optional",
+    type: "Single choice",
+  },
+
+  // ── Editable block — Show/Hide + Required/Optional ────────────────
+  {
+    id: "subcategory",
+    label: "Subcategory",
+    kind: "editable",
+    visible: true,
+    requirement: "optional",
+    type: "Single choice",
+    modalTarget: "subcategories",
+  },
+  {
+    id: "origin",
+    label: "Origin",
+    kind: "editable",
+    visible: true,
+    requirement: "optional",
+    type: "Text",
+  },
+  {
+    id: "destination",
+    label: "Destination",
+    kind: "editable",
+    visible: true,
+    requirement: "optional",
+    type: "Text",
+  },
+  {
+    id: "cost-centers",
+    label: "Cost centers",
+    kind: "editable",
+    visible: true,
+    requirement: "optional",
+    type: "Single choice",
+  },
+  {
+    id: "projects",
+    label: "Projects",
+    kind: "editable",
+    visible: true,
+    requirement: "optional",
+    type: "Single choice",
+  },
+  {
+    id: "description",
+    label: "Description",
+    kind: "editable",
+    visible: true,
+    requirement: "optional",
+    type: "Long text",
+  },
+  {
+    id: "upload-the-receipt",
+    label: "Upload the receipt",
+    kind: "editable",
+    visible: true,
+    requirement: "optional",
+    type: "File",
+  },
+  {
+    id: "internal-reference",
+    label: "Internal reference",
+    kind: "editable",
+    visible: true,
+    requirement: "optional",
+    type: "Text",
+  },
+]
+
+/**
+ * Lookup table consumed by `useExpenseFormsSource(formType)`. Keys
+ * match `FormSubStepId` exactly so the wizard can drive it.
+ */
+export const fieldsByFormType: Record<ExpenseFormType, FieldRow[]> = {
+  regular: regularFields,
+  "per-diem": perDiemFields,
+  mileage: mileageFields,
+}

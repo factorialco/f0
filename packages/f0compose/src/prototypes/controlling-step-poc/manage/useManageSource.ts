@@ -14,8 +14,14 @@ import {
 } from "@factorialco/f0-react/icons/app"
 import { useMemo } from "react"
 
+import { useChatDrafts } from "../copilot/useChatDrafts"
 import { paginateRows } from "../shared/columns"
-import { expenseToRow, folderToRow, type SpendingRow } from "../shared/rows"
+import {
+  chatDraftToRow,
+  expenseToRow,
+  folderToRow,
+  type SpendingRow,
+} from "../shared/rows"
 
 /**
  * The Manage tabs share a single dataset — expenses and folders that
@@ -40,16 +46,33 @@ import { expenseToRow, folderToRow, type SpendingRow } from "../shared/rows"
  *     BR-007).
  */
 export function useManageRows(): SpendingRow[] {
+  // Chat drafts that have been promoted to `pending` via the
+  // `sendExpenseToReview` copilot action need to appear in the
+  // manager's Pending Approval tab. We subscribe to the same store
+  // the submitter side uses so a single source of truth drives both.
+  const chatDrafts = useChatDrafts()
   return useMemo(() => {
-    return [...expenseGroups.map(folderToRow), ...expenses.map(expenseToRow)]
-  }, [])
+    return [
+      ...expenseGroups.map(folderToRow),
+      ...chatDrafts.map(chatDraftToRow),
+      ...expenses.map(expenseToRow),
+    ]
+  }, [chatDrafts])
 }
 
-type ManageVariant =
+// `ManageVariant` is the resolved table-shape identifier (status
+// filter + preset set + actions) used by useManageSource. It's the
+// same set of strings as `ManageSubTabId` in ../tabs.ts — we keep
+// the alias here so the data-source module stays self-describing,
+// but exporting it lets consumers (ManageTab, parent dispatcher)
+// share one type without duplicating the union.
+export type ManageVariant =
   | "pending-approval"
   | "pending-controlling"
   | "pay"
   | "all"
+  | "pending-payment"
+  | "archive"
 
 const STATUS_BY_TAB: Record<ManageVariant, ExpenseStatus[] | undefined> = {
   "pending-approval": ["pending"],
@@ -61,15 +84,40 @@ const STATUS_BY_TAB: Record<ManageVariant, ExpenseStatus[] | undefined> = {
   // Pay queue; reconciliation lives on the All tab. This keeps the
   // Pay statuses unambiguous: blue for ready, green for done.
   pay: ["approved", "controlled", "paid"],
+  // New Pending payment tab (post-IA-restructure r3). Per the
+  // designer brief: shows expenses past approval and past control
+  // that haven't been paid yet — i.e. status === controlled.
+  // `approved` rows are still upstream (waiting on controlling)
+  // and live in the Control tab; they shouldn't appear here.
+  // Once finance sends a controlled row to payroll/SEPA the
+  // status flips to in-payroll/paid and it leaves this queue.
+  "pending-payment": ["controlled", "in-payroll"],
+  // Ready to export uses the legacy "all" semantics (no status
+  // filter — the preset chips do the slicing) so it stays mapped
+  // to `all` in `subTabToManageVariant`. Listed here for
+  // exhaustiveness; never reached at runtime.
   all: undefined,
+  // Archive shows every expense, no status filter, no presets.
+  // It's the "give me everything regardless of where it is in the
+  // lifecycle" view.
+  archive: undefined,
 }
 
 export function useManageSource(args: {
   rows: SpendingRow[]
   variant: ManageVariant
   folderHref: (folderId: string) => string
+  /**
+   * Click handler for the toolbar's "Sync to Business Central"
+   * secondary action. Wired from the parent so the Sync modal
+   * (which lives in the tab component, not the source factory)
+   * can open in response. Optional — when absent, the action
+   * still renders but is a no-op (useful for the manage
+   * variants where sync isn't relevant).
+   */
+  onSyncClick?: () => void
 }) {
-  const { rows, variant, folderHref } = args
+  const { rows, variant, folderHref, onSyncClick } = args
 
   // Per-tab base-status slice — used both by fetchData and by preset counters.
   const tabRows = useMemo(() => {
@@ -114,6 +162,24 @@ export function useManageSource(args: {
         paid: rows.filter((r) => r.status === "paid").length,
       }
     }
+    if (variant === "pending-payment") {
+      // Pending payment splits into "Awaiting payment" (controlled,
+      // not yet dispatched) and "Sent to Pay" (in-payroll —
+      // finance pushed the row to payroll/SEPA but it hasn't been
+      // confirmed paid yet). Once status flips to `paid`, the row
+      // leaves this tab entirely.
+      return {
+        awaitingPayment: tabRows.filter((r) => r.status === "controlled")
+          .length,
+        sentToPay: tabRows.filter((r) => r.status === "in-payroll").length,
+      }
+    }
+    if (variant === "archive") {
+      // Archive has no presets — it's the unfiltered firehose. We
+      // still return a counts shape (empty object) so the memo
+      // doesn't drop to `null` and short-circuit downstream checks.
+      return {}
+    }
     return null
   }, [rows, tabRows, variant])
 
@@ -146,76 +212,128 @@ export function useManageSource(args: {
         },
       },
       currentFilters: {},
-      presets:
-        variant === "pending-approval"
-          ? [
+      // Presets per variant. Resolved through a small lookup that
+      // returns an empty array for the variants that don't surface
+      // preset chips (currently only `archive`, which is the
+      // unfiltered firehose view).
+      presets: (() => {
+        switch (variant) {
+          case "pending-approval":
+            return [
               {
                 label: "Needs review",
                 filter: { alerts: ["has-alerts"] },
-                itemsCount: () => presetCounts?.needsReview ?? 0,
+                itemsCount: () =>
+                  (presetCounts as { needsReview?: number } | null)
+                    ?.needsReview ?? 0,
               },
               {
                 label: "Ready to approve",
                 filter: { alerts: ["no-alerts"] },
-                itemsCount: () => presetCounts?.readyToApprove ?? 0,
+                itemsCount: () =>
+                  (presetCounts as { readyToApprove?: number } | null)
+                    ?.readyToApprove ?? 0,
               },
             ]
-          : variant === "pending-controlling"
-            ? [
-                {
-                  label: "To control",
-                  filter: { status: ["approved"] },
-                  itemsCount: () => presetCounts?.uncontrolled ?? 0,
-                },
-                {
-                  label: "Controlled",
-                  filter: { status: ["controlled"] },
-                  itemsCount: () => presetCounts?.controlled ?? 0,
-                },
-              ]
-            : variant === "pay"
-              ? [
-                  {
-                    label: "Unpaid",
-                    filter: { status: ["approved", "controlled"] },
-                    itemsCount: () => presetCounts?.unpaid ?? 0,
-                  },
-                  {
-                    label: "Paid",
-                    filter: { status: ["paid"] },
-                    itemsCount: () => presetCounts?.paid ?? 0,
-                  },
-                ]
-              : variant === "all"
-                ? [
-                    {
-                      label: "Pending",
-                      filter: { status: ["pending"] },
-                      itemsCount: () => presetCounts?.pending ?? 0,
-                    },
-                    {
-                      label: "Approved",
-                      filter: { status: ["approved"] },
-                      itemsCount: () => presetCounts?.approved ?? 0,
-                    },
-                    {
-                      label: "Controlled",
-                      filter: { status: ["controlled"] },
-                      itemsCount: () => presetCounts?.controlled ?? 0,
-                    },
-                    {
-                      label: "Sent to Pay",
-                      filter: { status: ["in-payroll"] },
-                      itemsCount: () => presetCounts?.inPayroll ?? 0,
-                    },
-                    {
-                      label: "Paid",
-                      filter: { status: ["paid"] },
-                      itemsCount: () =>
-                        (presetCounts as { paid?: number } | null)?.paid ?? 0,
-                    },
-                  ]
-                : [],
+          case "pending-controlling":
+            return [
+              {
+                label: "To control",
+                filter: { status: ["approved"] },
+                itemsCount: () =>
+                  (presetCounts as { uncontrolled?: number } | null)
+                    ?.uncontrolled ?? 0,
+              },
+              {
+                label: "Controlled",
+                filter: { status: ["controlled"] },
+                itemsCount: () =>
+                  (presetCounts as { controlled?: number } | null)
+                    ?.controlled ?? 0,
+              },
+            ]
+          case "pay":
+            return [
+              {
+                label: "Unpaid",
+                filter: { status: ["approved", "controlled"] },
+                itemsCount: () =>
+                  (presetCounts as { unpaid?: number } | null)?.unpaid ?? 0,
+              },
+              {
+                label: "Paid",
+                filter: { status: ["paid"] },
+                itemsCount: () =>
+                  (presetCounts as { paid?: number } | null)?.paid ?? 0,
+              },
+            ]
+          case "pending-payment":
+            // Default preset is "Awaiting payment" (controlled,
+            // not yet dispatched) — that's the most actionable
+            // bucket for finance on this tab. "Sent to Pay" is
+            // the terminal-for-this-tab preset; once payroll
+            // confirms paid, rows leave the tab entirely.
+            return [
+              {
+                label: "Awaiting payment",
+                filter: { status: ["controlled"] },
+                itemsCount: () =>
+                  (presetCounts as { awaitingPayment?: number } | null)
+                    ?.awaitingPayment ?? 0,
+              },
+              {
+                label: "Sent to Pay",
+                filter: { status: ["in-payroll"] },
+                itemsCount: () =>
+                  (presetCounts as { sentToPay?: number } | null)?.sentToPay ??
+                  0,
+              },
+            ]
+          case "all":
+            // The legacy "all" variant — now exposed in the IA as
+            // "Ready to export". Keeps the full preset chip set so
+            // finance can slice by status before exporting.
+            return [
+              {
+                label: "Pending",
+                filter: { status: ["pending"] },
+                itemsCount: () =>
+                  (presetCounts as { pending?: number } | null)?.pending ?? 0,
+              },
+              {
+                label: "Approved",
+                filter: { status: ["approved"] },
+                itemsCount: () =>
+                  (presetCounts as { approved?: number } | null)?.approved ?? 0,
+              },
+              {
+                label: "Controlled",
+                filter: { status: ["controlled"] },
+                itemsCount: () =>
+                  (presetCounts as { controlled?: number } | null)
+                    ?.controlled ?? 0,
+              },
+              {
+                label: "Sent to Pay",
+                filter: { status: ["in-payroll"] },
+                itemsCount: () =>
+                  (presetCounts as { inPayroll?: number } | null)?.inPayroll ??
+                  0,
+              },
+              {
+                label: "Paid",
+                filter: { status: ["paid"] },
+                itemsCount: () =>
+                  (presetCounts as { paid?: number } | null)?.paid ?? 0,
+              },
+            ]
+          case "archive":
+            // No presets — Archive is the unfiltered firehose.
+            // Finance reaches here when they want to find a row
+            // regardless of where it is in the lifecycle.
+            return []
+        }
+      })(),
       sortings: {
         name: { label: "Name" },
         date: { label: "Date" },
@@ -275,7 +393,13 @@ export function useManageSource(args: {
       secondaryActions: {
         expanded: 1,
         actions: () => [
-          { label: "Sync to Business Central", icon: ArrowCycle },
+          {
+            label: "Sync to Business Central",
+            icon: ArrowCycle,
+            onClick: () => {
+              onSyncClick?.()
+            },
+          },
         ],
       },
       bulkActions: (selected) => {
@@ -403,6 +527,47 @@ export function useManageSource(args: {
             ],
           }
         }
+        if (variant === "pending-payment") {
+          // Pending payment tab — finance hasn't paid these rows
+          // yet. Surface the same dispatch actions as the legacy
+          // Pay tab so a finance user reaching Pending payment via
+          // the new IA can still send rows to payroll/SEPA or
+          // mark them as paid without backtracking.
+          //
+          // Mixed selection collapses to the safest action
+          // (Set as paid as primary, no secondary) per the same
+          // rationale as the Pay tab.
+          if (mixed) {
+            return {
+              primary: [
+                { id: "set-as-paid", label: "Set as paid", icon: CheckCircle },
+              ],
+            }
+          }
+          return {
+            secondary: [
+              { id: "set-as-paid", label: "Set as paid" },
+              { id: "send-to-sepa", label: "Send to SEPA" },
+            ],
+            primary: [
+              {
+                id: "send-to-payroll",
+                label: "Send to payroll",
+                icon: Money,
+              },
+            ],
+          }
+        }
+        if (variant === "archive") {
+          // Archive is a browsing/search surface — no destructive
+          // bulk actions. Export to CSV is the only sensible bulk
+          // operation against an arbitrary cross-status selection.
+          return {
+            primary: [
+              { id: "export-csv", label: "Export to CSV", icon: Upload },
+            ],
+          }
+        }
         return { primary: [] }
       },
       itemActions: (_item: SpendingRow) => {
@@ -421,7 +586,10 @@ export function useManageSource(args: {
             { label: "Mark as controlled", onClick: () => {} },
             { label: "Reject", onClick: () => {}, critical: true }
           )
-        } else if (variant === "pay") {
+        } else if (variant === "pay" || variant === "pending-payment") {
+          // Pending-payment row actions mirror the legacy Pay
+          // tab — same dispatch operations apply on a per-row
+          // basis.
           actions.push(
             { label: "Send to payroll", onClick: () => {} },
             { label: "Send to SEPA", onClick: () => {} },
@@ -431,6 +599,8 @@ export function useManageSource(args: {
             { label: "Advanced export", onClick: () => {} }
           )
         }
+        // Archive intentionally has only "View details" — it's a
+        // historical/lookup surface, not an action surface.
         return actions
       },
     },

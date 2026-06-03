@@ -22,7 +22,10 @@
     "tsc": "tsc --noEmit",
     "check": "tsx checks/bin/check-prototype.ts",
     "format": "oxfmt scripts checks src vite-plugins",
-    "format:check": "oxfmt --check scripts checks src vite-plugins"
+    "format:check": "oxfmt --check scripts checks src vite-plugins",
+    "redeploy": "bash scripts/redeploy.sh",
+    "deploy-share": "bash scripts/deploy-share.sh",
+    "kickstart": "bash scripts/kickstart.sh"
   },
   "dependencies": {
     "@copilotkit/react-core": "^1.54.0",

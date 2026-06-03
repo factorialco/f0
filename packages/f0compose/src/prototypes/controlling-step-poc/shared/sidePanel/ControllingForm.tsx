@@ -64,10 +64,13 @@ const controllingSchema = z.object({
     placeholder: "Select a subcategory",
     options: ALL_SUBCATEGORIES.map((s) => ({ value: s, label: s })),
   }),
+  // Allocation: cost center and project stack vertically (each full-width)
+  // rather than sharing a row — the labels and option strings are long
+  // enough that side-by-side cramps both selects. Category / subcategory
+  // stay paired on a single row because their values are short.
   costCenter: f0FormField.select({
     label: "Cost center",
     section: "allocation",
-    row: "cost-proj",
     optional: true,
     placeholder: "Select a cost center",
     options: costCenters.map((c) => ({
@@ -78,7 +81,6 @@ const controllingSchema = z.object({
   project: f0FormField.select({
     label: "Project",
     section: "allocation",
-    row: "cost-proj",
     optional: true,
     placeholder: "Select a project",
     options: projects.map((p) => ({
@@ -212,5 +214,33 @@ export function ControllingForm(props: {
     onSubmit,
   })
 
-  return <F0Form formRef={formRef} formDefinition={formDefinition} />
+  return (
+    <div className="controlling-form-tight">
+      {/*
+        F0Form section spacing tweaks scoped to this prototype.
+
+        Defaults (packages/react/src/patterns/F0Form/{constants,components/SectionRenderer}):
+          - Section header wrapper: `py-5` (20px top + 20px bottom)
+          - Between sections: `mt-6` (24px)
+
+        Designer feedback (2026-05-13):
+          - Halve the gap between section header and its first field
+            → drop header bottom padding from 20px to 10px.
+          - Trim ~1/3 off the gap between sections (24px → 16px).
+
+        Implemented via a scoped CSS block instead of forking F0Form;
+        the selectors only apply inside `.controlling-form-tight`.
+      */}
+      <style>{`
+        .controlling-form-tight section > div.py-5 {
+          padding-top: 10px;
+          padding-bottom: 10px;
+        }
+        .controlling-form-tight section.mt-6 {
+          margin-top: 16px;
+        }
+      `}</style>
+      <F0Form formRef={formRef} formDefinition={formDefinition} />
+    </div>
+  )
 }

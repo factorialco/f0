@@ -71,15 +71,34 @@ const Messages = ({
     welcomeScreenSuggestions,
     isLoadingThread,
     setInProgress,
+    inProgress: providerInProgress,
     clarifyingQuestion,
   } = useAiChat()
 
-  const inProgress = inProgressProp ?? isLoading
+  // Prototype escape hatch (f0compose): allow external callers to
+  // force the Thinking… indicator via `useAiChat().setInProgress(true)`
+  // even when CopilotKit's `isLoading` and the prop are both false.
+  //
+  // Why the OR instead of `??`: `inProgressProp` is passed by
+  // CopilotKit's `CopilotChat` as a real boolean (typically `false`
+  // when idle), not `undefined`. A `??` would short-circuit to the
+  // prop and ignore providerInProgress entirely, which defeats the
+  // entire point of the escape hatch. We want EITHER the CopilotKit
+  // signal OR the prototype override to turn the indicator on.
+  const inProgress =
+    (inProgressProp ?? false) || isLoading || providerInProgress
 
-  // Sync inProgress to the central provider so FullscreenChatInput can read it
+  // Sync inProgress to the central provider so FullscreenChatInput
+  // can read it — but ONLY when the CopilotKit-owned signals say
+  // "true". When they say false, we must NOT stomp the provider
+  // value because an external caller (f0compose escape hatch) may
+  // have set it to true and is responsible for clearing it
+  // themselves. Stomping false here caused the indicator to flash
+  // for a single frame and vanish.
   useEffect(() => {
-    setInProgress(inProgress)
-  }, [inProgress, setInProgress])
+    const copilotSignal = (inProgressProp ?? false) || isLoading
+    if (copilotSignal) setInProgress(true)
+  }, [inProgressProp, isLoading, setInProgress])
 
   const AssistantMessage = AssistantMessageProp ?? F0AssistantMessage
   const UserMessage = UserMessageProp ?? F0UserMessage
@@ -158,6 +177,13 @@ const Messages = ({
     endRef,
     lastTurnRef,
     turnsCount: turns.length,
+    // Count messages inside the last turn so the scroll hook can
+    // pin-to-bottom when a scripted handoff appends additional
+    // assistant bubbles into an existing turn (no user message
+    // between them, so turnsCount stays flat). Array.isArray check
+    // handles the thinkingGroup sub-array shape (Turn = (Message |
+    // Message[])[]) — those groups count as one slot.
+    lastTurnMessageCount: turns[turns.length - 1]?.length ?? 0,
     // Freeze the last-turn minHeight while the clarifying question panel
     // is active — otherwise the input area's size change makes the
     // viewport shrink, which would recalculate turnMinHeight and shift
@@ -263,16 +289,27 @@ const Messages = ({
         {restMessages.map((message, index) =>
           renderMessage(message as Message, index)
         )}
-        {/* Loading indicator while waiting for the first assistant
+        {/* Loading indicator while waiting for the next assistant
             response.  Mirrors the official CopilotKit Messages
             component behaviour (show activity icon when the last
-            message is from the user and the agent is running). */}
+            message is from the user and the agent is running).
+            f0compose escape hatch: also show it when the last
+            message is an ALREADY-RENDERED assistant message AND
+            `inProgress` is true — that's the signal scripted
+            demos use to indicate "another assistant turn is
+            coming" between two appendMessages calls. Without
+            this branch, the chat looks frozen between scripted
+            turns because the trigger is a user→assistant→
+            assistant cadence and the second assistant gap is
+            invisible. */}
         {inProgress &&
+          !showActivityIndicator &&
           turnIndex === turns.length - 1 &&
           turnMessages.length > 0 &&
           !Array.isArray(turnMessages[turnMessages.length - 1]) &&
-          (turnMessages[turnMessages.length - 1] as Message).role ===
-            "user" && (
+          ((turnMessages[turnMessages.length - 1] as Message).role === "user" ||
+            (turnMessages[turnMessages.length - 1] as Message).role ===
+              "assistant") && (
             <F0ActionItem title={translations.ai.thinking} status="executing" />
           )}
         {/* Live thinking: render last thinking message while streaming */}

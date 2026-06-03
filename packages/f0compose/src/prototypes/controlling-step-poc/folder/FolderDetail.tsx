@@ -135,7 +135,6 @@ export function FolderDetail(props: {
           <PageHeader
             module={{ id: "my_spending", name: "Spend management", href: "/p/controlling-step-poc?tab=submit&sub=expenses" }}
             breadcrumbs={[{ id: "missing", label: "Folder not found" }]}
-            actions={[{ label: "Back", icon: Cross, onClick: props.onBack }]}
           />
         }
       >

@@ -7,6 +7,20 @@ type UseMessageScrollOptions = {
   lastTurnRef: RefObject<HTMLDivElement | null>
   turnsCount: number
   /**
+   * Number of messages inside the LAST turn. Used to keep the
+   * viewport pinned to the bottom when scripted demos call
+   * `appendMessages` multiple times in a row without inserting a
+   * user message between them (which would otherwise collapse into
+   * a single "turn" and never trigger the turn-count scroll
+   * effect). Optional — when omitted, only turn-level scrolling
+   * fires (the original behaviour).
+   *
+   * f0compose escape hatch: scripted handoffs append two or three
+   * assistant bubbles per turn (text → CTA → post-nav follow-up)
+   * and need the chat to keep scrolling as each one mounts.
+   */
+  lastTurnMessageCount?: number
+  /**
    * When true, pauses the ResizeObserver-driven turnMinHeight updates. Use
    * this during transient input-area size changes (e.g. the clarifying
    * question panel appearing/disappearing) to prevent the last turn's
@@ -32,11 +46,13 @@ export function useMessageScroll({
   endRef,
   lastTurnRef,
   turnsCount,
+  lastTurnMessageCount = 0,
   freezeTurnMinHeight = false,
 }: UseMessageScrollOptions): UseMessageScrollReturn {
   const [turnMinHeight, setTurnMinHeight] = useState(0)
   const [showScrollBtn, setShowScrollBtn] = useState(false)
   const prevTurnsCountRef = useRef(turnsCount)
+  const prevLastTurnMessageCountRef = useRef(lastTurnMessageCount)
   const freezeRef = useRef(freezeTurnMinHeight)
   freezeRef.current = freezeTurnMinHeight
 
@@ -101,6 +117,26 @@ export function useMessageScroll({
     }
     prevTurnsCountRef.current = turnsCount
   }, [turnsCount, lastTurnRef])
+
+  // Mid-turn auto-scroll. When the last turn grows in place (e.g.
+  // a scripted handoff appending a second/third assistant message
+  // without a user message between them), the turn-count effect
+  // above doesn't fire. Pin the viewport to the bottom instead so
+  // the new bubble doesn't render below the fold. We do a regular
+  // `scrollToBottom` here (not `lastTurnRef.scrollIntoView`) so the
+  // animation matches the streaming-response feel rather than the
+  // "new turn" jump.
+  useEffect(() => {
+    if (lastTurnMessageCount > prevLastTurnMessageCountRef.current) {
+      requestAnimationFrame(() => {
+        endRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "end",
+        })
+      })
+    }
+    prevLastTurnMessageCountRef.current = lastTurnMessageCount
+  }, [lastTurnMessageCount, endRef])
 
   return { showScrollBtn, turnMinHeight, scrollToBottom }
 }

@@ -1,4 +1,4 @@
-import { F0Box, F0Card, F0Heading, F0Icon, F0Text } from "@factorialco/f0-react"
+import { F0Alert, F0Box, F0Card, F0Text } from "@factorialco/f0-react"
 import { CheckCircle, Shield } from "@factorialco/f0-react/icons/app"
 
 import { countryCopy, regimeCopy } from "./seeds"
@@ -38,47 +38,27 @@ export function CertifiedDocumentsSection(props: {
 
   return (
     <F0Box display="flex" flexDirection="column" gap="xl">
-      {/* Section title */}
-      <F0Box display="flex" flexDirection="column" gap="xs">
-        <F0Heading
-          content="Certified documents"
-          variant="heading"
-          as="h2"
-        />
-        <F0Text
-          content="Authorize Factorial to digitally certify your expense invoices with each country's tax authority."
-          variant="description"
-        />
-      </F0Box>
+      {/* Section subtitle. The page-level `BreadcrumbBar` upstream
+          renders the "Certified documents" leaf which doubles as
+          the H1 (same pattern as Expense types + Approval flows).
+          We keep just a one-line description below the breadcrumb
+          so the landing stays calm. */}
+      <F0Text
+        content="Authorize Factorial to digitally certify your expense invoices with each country's tax authority."
+        variant="description"
+      />
 
-      {/* Hero — plain-English summary of what this does. Uses the
-          `selected` background tint so it visually anchors the section
-          without competing with the entity cards below. */}
-      <F0Box
-        display="flex"
-        flexDirection="row"
-        gap="md"
-        padding="lg"
-        borderRadius="md"
-        border="default"
-        borderColor="secondary"
-        background="secondary"
-      >
-        <F0Box shrink={false} paddingTop="xs">
-          <F0Icon icon={Shield} size="md" />
-        </F0Box>
-        <F0Box display="flex" flexDirection="column" gap="xs">
-          <F0Heading
-            content="Make your invoices legally valid for tax audits"
-            variant="heading"
-            as="h3"
-          />
-          <F0Text
-            content="Once you authorize Factorial as your certifying agent, every expense invoice for that legal entity is signed, chained, and transmitted to the local tax authority on your behalf. The signed copy is stored against the expense for audits."
-            variant="description"
-          />
-        </F0Box>
-      </F0Box>
+      {/* Hero — plain-English summary of what this does. Rendered
+          as an `F0Alert` with `variant="info"` so it picks up the
+          canonical info-alert avatar + tinted background instead of
+          a hand-rolled `F0Box`. Title + description are kept short
+          to fit on a single horizontal block; the alert handles
+          icon, spacing, and colour tokens. */}
+      <F0Alert
+        variant="info"
+        title="Make your invoices legally valid for tax audits"
+        description="Once you authorize Factorial as your certifying agent, every expense invoice for that legal entity is signed, chained, and transmitted to the local tax authority on your behalf. The signed copy is stored against the expense for audits."
+      />
 
       {/* Entities grid. CSS-grid via F0Box `columns` so cards reflow
           naturally on narrow widths — desktop will show 2-up, the

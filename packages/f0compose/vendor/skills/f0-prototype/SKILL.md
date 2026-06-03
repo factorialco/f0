@@ -72,9 +72,60 @@ git push -u origin prototype/<slug>
 gh pr create --fill   # or --title / --body if you have context
 ```
 
-Then tell them: *"Lo he subido. Aquí tienes el link para compartir: `<PR URL>`."* The CI will surface the preview URL automatically.
+Then tell them: *"Lo he subido. Aquí tienes el link del PR: `<PR URL>`."*
 
 **Never ask** for branch name, commit message, or PR title — generate them from their request. If they push back ("usa este nombre"), update and re-push.
+
+### Handle sharing (live URL) for them
+
+When they ask for *"un link para enseñar/compartir"*, *"que lo puedan abrir en el navegador"*, *"un sitio donde lo vean"*, give them a **live public URL** — NOT a PR URL, NOT a GitHub tree URL, NOT `localhost`. Non-technical users can't run code; they need a browser link.
+
+> **Reality check:** the f0 repo does NOT currently have a CI deploy-preview workflow for PRs. Older versions of this skill claimed "CI will surface the preview URL automatically" — that was wrong. The PR is for archiving the work, not for sharing.
+
+The real flow uses Vercel. First time on a given machine + prototype:
+
+1. Check if the project is already linked: does `packages/f0compose/.vercel/project.json` exist?
+2. If **yes** → run `pnpm redeploy` (one command, ~30s). It builds and pushes to the existing Vercel project, preserving the same public URL. Give them that URL.
+3. If **no** → one-time setup, do it silently:
+   ```bash
+   # If vercel CLI is missing
+   npm install -g vercel
+   # Ask the user (in plain language) to sign in at vercel.com with GitHub,
+   # then run interactive login. Vercel does NOT allow truly-anonymous deploys.
+   vercel login --github
+   # Build, then deploy + link in one shot. Use a stable, slug-derived name
+   # so the resulting alias URL is predictable and shareable.
+   pnpm build
+   vercel deploy --prod --yes --name "f0compose-<slug>" dist
+   vercel link --yes --project "f0compose-<slug>"
+   ```
+   Then capture the "Aliased:" URL from the deploy output — that's the stable share link. Subsequent runs use `pnpm redeploy`.
+
+**Always end with:** *"Aquí tienes el link público para compartir: `<URL>`. Si haces más cambios, dímelo y lo actualizo en el mismo enlace."*
+
+### Auto-redeploy after changes (skill behavior, NOT a user-facing step)
+
+After every turn that meaningfully changed a prototype, the skill MUST push the new build to every live share URL that prototype is published under. This keeps the link the user already handed to teammates current — they never have to re-share or ask "is it updated yet?".
+
+There are TWO independent share mechanisms in this repo. Both can be live at the same time, for different prototypes:
+
+1. **Root-linked share** — `packages/f0compose/.vercel/project.json` exists. One prototype lives here (historically `controlling-step-poc`). Redeploy with `pnpm redeploy`.
+2. **Per-prototype shares** — `packages/f0compose/.vercel-shares/registry` lists slugs that have their own dedicated Vercel projects (`f0-<slug>.vercel.app`), created by `pnpm deploy-share <slug>`. Redeploy each with `pnpm deploy-share <slug>` (idempotent — reuses the project).
+
+At the end of a turn that changed a prototype's code, the skill walks BOTH:
+
+- If `.vercel/project.json` exists AND the touched prototype's slug matches the one this root link was set up for, run `pnpm redeploy`.
+- For every slug listed in `.vercel-shares/registry` that the turn touched, run `pnpm deploy-share <slug>`.
+
+Both commands are safe to run sequentially in the same turn — `pnpm redeploy` and `pnpm deploy-share` each target distinct Vercel projects.
+
+Rules:
+
+- **Only when meaningful changes were made.** Skip the redeploy if the turn was purely conversational or only touched comments / docs. Otherwise: build → deploy.
+- **Silently.** Don't ask permission. The user already opted into the live link; updates are implied.
+- **Surface in the end-of-turn response.** Show every relevant live URL in the response template (see Step 13) so they can click without re-asking.
+- **If a deploy fails**, fix the build error first (typically a tsc error). Don't hand them a stale link without flagging it. If you genuinely can't fix it in one shot, tell them the local URL still works and that share link is one version behind.
+- **Cold-start guard.** If neither `.vercel/project.json` nor a matching entry in `.vercel-shares/registry` exists for the touched prototype, do NOT auto-deploy on a normal edit turn. Only deploy when the user explicitly asks to share. Auto-deploying without prior consent could create a Vercel project on their account they didn't ask for.
 
 ### Things you should NEVER ask a non-technical user
 

@@ -52,6 +52,8 @@ export const subcategoriesByCategory: Record<ExpenseCategory, string[]> = {
   Hotel: ["Client visit", "Conference", "Team offsite"],
   Office: ["Furniture", "Snacks", "Cleaning"],
   Software: ["SaaS subscription", "License", "Cloud infrastructure"],
+  Mileage: ["Personal car", "Client visit", "Conference travel"],
+  "Per diem": ["Domestic", "International", "Client onsite"],
 }
 
 export const costCenters: CostCenter[] = [
@@ -88,4 +90,43 @@ export const controllingTags: ControllingTag[] = [
   { id: "tag-one-off", label: "One-off" },
   { id: "tag-internal", label: "Internal" },
   { id: "tag-client-facing", label: "Client-facing" },
+]
+
+export type Budget = {
+  id: string
+  /** Short human-readable name. */
+  name: string
+  /** Accounting code, e.g. "BUD-2026-MKT". */
+  code: string
+}
+
+/**
+ * Budgets catalog — feeds the "Budgets" dropdown in the
+ * "Budget and project" section of the expense form. Distinct from
+ * `projects`: a budget is the spending envelope, a project is the
+ * initiative the spend is attributed to.
+ */
+export const budgets: Budget[] = [
+  { id: "bud-travel", name: "Travel & accommodation", code: "BUD-2026-TRV" },
+  { id: "bud-marketing", name: "Marketing", code: "BUD-2026-MKT" },
+  { id: "bud-engineering", name: "Engineering", code: "BUD-2026-ENG" },
+  { id: "bud-events", name: "Events & conferences", code: "BUD-2026-EVT" },
+  { id: "bud-office", name: "Office & facilities", code: "BUD-2026-OFF" },
+]
+
+export type TaxType = {
+  id: string
+  label: string
+}
+
+/**
+ * Tax types — the "Tax type" dropdown in the repeatable Tax section.
+ * Kept short and Spain-flavoured (VAT/IGIC) since designers lift these
+ * into screenshots; pair with `vatRates` for the rate column.
+ */
+export const taxTypes: TaxType[] = [
+  { id: "tax-vat", label: "VAT" },
+  { id: "tax-igic", label: "IGIC" },
+  { id: "tax-withholding", label: "Withholding (IRPF)" },
+  { id: "tax-none", label: "No tax" },
 ]

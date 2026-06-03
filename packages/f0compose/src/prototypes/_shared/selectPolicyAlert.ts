@@ -1,5 +1,11 @@
 import { hasReceipt } from "./receiptPresence"
 import type { PolicyAlertVariant } from "./PolicyAlertCard"
+import {
+  buildMissingFieldsAlert,
+  descriptionResolvesToGreen,
+  getMissingRequiredFields,
+  wasEverGated,
+} from "./requiredFields"
 
 /**
  * Picks a policy-alert variant + copy for an expense row, given the
@@ -51,9 +57,23 @@ type Context = {
   /** Stable id used to deterministically derive auxiliary signals. */
   rowId: string
   /** Specific alert kinds on the row, when known. Drives the most
-   *  specific copy. Empty array is equivalent to none. */
+   *  specific copy. Empty array is equivalent to none. The union is
+   *  intentionally a superset of the current "timeliness + match"
+   *  kinds so newer policy alerts (meal-over-limit, alcohol-detected,
+   *  receipt-invalid, missing-merchant, weekend-charge) can flow
+   *  through without triggering a TS error; the branch logic below
+   *  only special-cases the original three and falls through to the
+   *  generic review/recommendation copy for the rest. */
   alertKinds?: ReadonlyArray<
-    "late-submission" | "receipt-after-timeframe" | "receipt-mismatch"
+    | "late-submission"
+    | "receipt-after-timeframe"
+    | "receipt-mismatch"
+    | "meal-over-limit"
+    | "alcohol-detected"
+    | "receipt-invalid"
+    | "missing-merchant"
+    | "weekend-charge"
+    | "declared-split"
   >
   /** Expense category (e.g. "Meals", "Travel"). Used to decide
    *  whether category-specific copy (e.g. alcohol) applies. */
@@ -64,18 +84,11 @@ type Context = {
 
 // -- Signal helpers --------------------------------------------------
 
-/** Likely meal-context categories. We treat any category whose label
- *  hints at food/dining as "meal" for the per-person-limit rule. */
-function isMealCategory(category: string | undefined): boolean {
-  if (!category) return false
-  const c = category.toLowerCase()
-  return (
-    c.includes("meal") ||
-    c.includes("food") ||
-    c.includes("dining") ||
-    c.includes("restaurant")
-  )
-}
+// NOTE: an `isMealCategory` helper used to live here for the legacy
+// `amount > 55 && meal` synthetic alert. Removed when meal-over-limit
+// switched to an explicit seeded `ExpenseAlert` so the table tag and
+// detail card stay in sync. Kept this note so the deletion is
+// traceable from grep.
 
 /** Travel categories — used to gate the "alcohol on travel policy"
  *  reject copy so it doesn't fire on a Software subscription. */
@@ -102,14 +115,20 @@ function approverWarningOrError(ctx: Context): PolicyAlertConfig | null {
         "Policy requires a receipt for any expense above 25€. Without one, this should be rejected and returned to the employee.",
     }
   }
-  // Alcohol on travel — only if there IS a receipt (the rule infers
-  // the breach from receipt contents). Deterministic gate so it
-  // doesn't fire on every >80€ travel row.
+  // Alcohol on travel — gated on the row carrying an explicit
+  // `alcohol-detected` alert. The earlier version of this rule
+  // synthesised alcohol from `isTravelCategory + amount > 80 + id
+  // hash`, which made it fire on rows whose actual alert was
+  // something else (e.g. `late-submission`) and overrode the row's
+  // real signal. With `alcohol-detected` now in the alert taxonomy
+  // this deterministic guess is redundant; this branch only stays
+  // here (above the generic alcohol-detected handler below) so the
+  // "Travel + alcohol" rejection copy can be tailored when both
+  // signals are present.
   if (
     receipt &&
-    isTravelCategory(ctx.category) &&
-    amount > 80 &&
-    ctx.rowId.charCodeAt(ctx.rowId.length - 1) % 3 === 0
+    kinds.has("alcohol-detected") &&
+    isTravelCategory(ctx.category)
   ) {
     return {
       variant: "error",
@@ -132,15 +151,61 @@ function approverWarningOrError(ctx: Context): PolicyAlertConfig | null {
         "The receipt total doesn't match the expense amount. Worth confirming before approving.",
     }
   }
-  if (isMealCategory(ctx.category) && amount > 55) {
+  // Out-of-policy red flags below — kept as `warning` variant so the
+  // approver still has the choice to approve with context, but the
+  // stripLabel makes the recommendation clear.
+  if (kinds.has("meal-over-limit")) {
     return {
       variant: "warning",
       stripLabel: "Review recommended",
-      title: "Meal limit exceeded",
+      title: "Meal expense over the limit",
       description:
-        "This meal is above the 55€ per-person/day limit. Check the attendees before approving.",
+        "This meal is above the per-person limit. Check the attendees and the context before approving.",
     }
   }
+  if (kinds.has("alcohol-detected")) {
+    return {
+      variant: "error",
+      stripLabel: "Rejection recommended",
+      title: "Alcohol on the receipt",
+      description:
+        "The receipt includes alcohol charges, which the company policy doesn't reimburse. Returning this to the employee is the safer call.",
+    }
+  }
+  if (kinds.has("weekend-charge")) {
+    return {
+      variant: "warning",
+      stripLabel: "Review recommended",
+      title: "Weekend charge",
+      description:
+        "This expense was incurred on a weekend. Confirm the business context before approving.",
+    }
+  }
+  if (kinds.has("receipt-invalid")) {
+    return {
+      variant: "warning",
+      stripLabel: "Review recommended",
+      title: "Receipt unreadable",
+      description:
+        "We couldn't parse this receipt — it may be the wrong file or a low-quality scan. Ask the employee for a clearer copy before approving.",
+    }
+  }
+  if (kinds.has("missing-merchant")) {
+    return {
+      variant: "warning",
+      stripLabel: "Review recommended",
+      title: "Merchant missing from the receipt",
+      description:
+        "The receipt has no merchant name. Confirm where this expense was incurred before approving.",
+    }
+  }
+  // NOTE: a legacy `isMealCategory(category) && amount > 55` branch
+  // used to live here. With `meal-over-limit` in the alert taxonomy
+  // (and seeded explicitly on the rows that should carry it) the
+  // synthetic rule was firing on every meal >55€ even when the
+  // row's actual alert was something else — overriding the row tag
+  // shown in the table. Removed in favour of the explicit
+  // `meal-over-limit` branch above.
   if (receipt && kinds.has("receipt-after-timeframe")) {
     return {
       variant: "warning",
@@ -191,11 +256,12 @@ function submitterAlert(ctx: Context): PolicyAlertConfig | null {
         "Above 25€, your approver will need a receipt. Upload one or this will almost certainly come back to you.",
     }
   }
+  // Travel + alcohol — gated on an explicit `alcohol-detected` alert
+  // on the row. See the matching approver branch for context.
   if (
     receipt &&
-    isTravelCategory(ctx.category) &&
-    amount > 80 &&
-    ctx.rowId.charCodeAt(ctx.rowId.length - 1) % 3 === 0
+    kinds.has("alcohol-detected") &&
+    isTravelCategory(ctx.category)
   ) {
     return {
       variant: "error",
@@ -217,15 +283,57 @@ function submitterAlert(ctx: Context): PolicyAlertConfig | null {
         "Your receipt total is different from the expense amount. Update one of them so they line up before submitting.",
     }
   }
-  if (isMealCategory(ctx.category) && amount > 55) {
+  // Out-of-policy red flags — surfaced to the submitter as a "likely
+  // rejection" or "review recommended" so they fix the issue before
+  // sending it off.
+  if (kinds.has("meal-over-limit")) {
     return {
       variant: "warning",
       stripLabel: "Review recommended",
-      title: "Meal looks above the per-person limit",
+      title: "Meal looks over the limit",
       description:
-        "Add the attendees in the description so your approver can validate the 55€ per-person/day limit.",
+        "This meal is above the per-person limit. Add the attendees in the description so your approver can validate the spend.",
     }
   }
+  if (kinds.has("alcohol-detected")) {
+    return {
+      variant: "error",
+      stripLabel: "Likely rejection",
+      title: "Alcohol on the receipt",
+      description:
+        "Your receipt includes alcohol, which isn't covered by company policy. Most approvers will return this — split the bill or remove the line if you can.",
+    }
+  }
+  if (kinds.has("weekend-charge")) {
+    return {
+      variant: "warning",
+      stripLabel: "Review recommended",
+      title: "Weekend charge",
+      description:
+        "This was charged on a weekend. Add a short note in the description explaining the business context so your approver doesn't bounce it back.",
+    }
+  }
+  if (kinds.has("receipt-invalid")) {
+    return {
+      variant: "warning",
+      stripLabel: "Review recommended",
+      title: "Receipt looks unreadable",
+      description:
+        "We couldn't parse this receipt. Replace it with a clearer copy (or the original PDF) before submitting.",
+    }
+  }
+  if (kinds.has("missing-merchant")) {
+    return {
+      variant: "warning",
+      stripLabel: "Review recommended",
+      title: "Merchant missing from the receipt",
+      description:
+        "The receipt has no merchant name. Add the merchant in the description so your approver can validate the spend.",
+    }
+  }
+  // See the matching note in `approverWarningOrError` — legacy
+  // synthetic meal-limit branch removed in favour of the explicit
+  // `meal-over-limit` kind already handled above.
   if (receipt && kinds.has("receipt-after-timeframe")) {
     return {
       variant: "warning",
@@ -295,6 +403,31 @@ export function selectPolicyAlert(ctx: Context): PolicyAlertConfig | null {
     const isToDo =
       ctx.status === "draft" || ctx.status === "changes-requested"
     if (!isToDo) return null
+    // GATE: required fields take precedence over every policy-agent
+    // recommendation. If the row is missing fields the company
+    // considers mandatory, the submitter physically cannot send for
+    // approval — surface that fact as a hard error red alert and
+    // suppress whatever the agent would otherwise have said. The
+    // policy-agent rec only resurfaces once `markFieldsFilled` has
+    // been called for this row (after a successful Save in edit mode).
+    const missing = getMissingRequiredFields(ctx.rowId)
+    if (missing.length > 0) return buildMissingFieldsAlert(missing)
+    // GATE CLEARED → GREEN: for a designed subset of the ever-gated
+    // rows, completing the description short-circuits to a positive
+    // alert. The mental model: those rows' policy warning was
+    // exactly "we need attendees / context in the description" — the
+    // submitter has now provided it, so the agent confirms it's
+    // ready. The complementary subset stays on the regular pipeline
+    // below so the demo shows BOTH outcomes.
+    if (wasEverGated(ctx.rowId) && descriptionResolvesToGreen(ctx.rowId)) {
+      return {
+        variant: "success",
+        stripLabel: "Send for approval",
+        title: "Looks ready to send",
+        description:
+          "Thanks for adding the context — the description covers what your approver needs. You can submit this for approval.",
+      }
+    }
     // Derive a row-specific alert; fall through to "looks ready" if
     // no rules match — that's the genuine all-clear case.
     return (
@@ -308,7 +441,44 @@ export function selectPolicyAlert(ctx: Context): PolicyAlertConfig | null {
     )
   }
 
-  // Controlling and Pay tabs don't surface policy alerts — those
-  // JTBDs are post-approval and the agent has nothing to recommend.
+  // Manage > Pending Controlling. Designers want the approval-time
+  // policy-agent recommendation to persist into the controlling
+  // step — the controller benefits from the same context the
+  // approver saw (alcohol on receipt, meal over limit, etc.) when
+  // deciding whether to code or reject the expense.
+  //
+  // Audit trail semantics: BOTH the strip label and the body
+  // description are shown VERBATIM from what the approver saw, so
+  // the controller can tell exactly what the agent's original
+  // verdict was. The warning/error descriptions are written
+  // approval-side ("should be rejected", "before approving") but
+  // the verbs still apply — the controller has the same Approve /
+  // Reject affordances. The green description is tense-neutral
+  // ("Amount, vendor and date all check out") so it reads
+  // identically in both contexts.
+  if (ctx.tabRole === "controlling") {
+    if (ctx.hasAlerts) {
+      return (
+        approverWarningOrError(ctx) ?? {
+          variant: "warning",
+          stripLabel: "Review recommended",
+          title: "Worth a closer look",
+          description:
+            "A few small signals on this expense — give it a quick review before approving.",
+        }
+      )
+    }
+    return {
+      variant: "success",
+      stripLabel: "Approval recommended",
+      title: "Expense within policy",
+      description:
+        "Amount, vendor and date all check out. Receipt is attached and matches the expense.",
+    }
+  }
+
+  // Pay tab doesn't surface policy alerts — by the time we reach
+  // it, the expense is approved and controlled and the agent has
+  // nothing further to recommend.
   return null
 }

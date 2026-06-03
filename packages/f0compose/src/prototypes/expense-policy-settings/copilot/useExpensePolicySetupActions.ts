@@ -141,7 +141,9 @@ export function useExpensePolicySetupActions(args: {
       )
       const intent = buildQ2Intent(cleaned)
       for (const [fieldId, visible] of Object.entries(intent.fieldVisibility)) {
-        formsSource.setVisible(fieldId, visible)
+        // Q2 cascade only touches the Regular form's field visibility.
+        // Per diem / Mileage edits flow through their own editors.
+        formsSource.setVisible("regular", fieldId, visible)
       }
       setupState.setQ2(
         cleaned,

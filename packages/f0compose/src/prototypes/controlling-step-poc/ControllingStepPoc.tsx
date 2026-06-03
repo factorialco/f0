@@ -6,8 +6,12 @@ import { useSearchParams } from "react-router-dom"
 import { expenses } from "@/fixtures"
 import type { ExpenseStatus } from "@/fixtures"
 import type { PrototypeMeta } from "../types"
+import { useBulkCreateExpensesAction } from "./copilot/useBulkCreateExpensesAction"
+import { useExposeContext } from "./copilot/useExposeContext"
+import { useSendExpenseToReviewAction } from "./copilot/useSendExpenseToReviewAction"
 import { FolderDetail } from "./folder/FolderDetail"
 import { ManageTab } from "./manage/ManageTab"
+import { BulkEditor } from "./manage/bulkEditor/BulkEditor"
 import { useManageRows } from "./manage/useManageSource"
 import { useSubmitExpensesRows } from "./submit/useSubmitExpensesSource"
 import { ExpenseDetailPage } from "./shared/detail/ExpenseDetailPage"
@@ -16,56 +20,55 @@ import type { ControllingFormData } from "./shared/sidePanel/ControllingForm"
 import { expenseToRow, type SpendingRow } from "./shared/rows"
 import { SubmitExpensesTab } from "./submit/SubmitExpensesTab"
 import {
-  MANAGE_SUB_TABS,
+  EXPENSES_SUB_TABS,
   PRIMARY_TABS,
-  SUBMIT_SUB_TABS,
+  subTabToManageVariant,
+  type ExpensesSubTabId,
   type ManageSubTabId,
   type PrimaryTabId,
 } from "./tabs"
 
 /**
- * Unified Spending page — implements PSPEC-spending-unified-page (Spec A r2),
- * PSPEC-spending-manage-tab (Spec C r2) and
- * PSPEC-spending-pending-controlling (Spec D r1).
+ * Unified Spending page — Spec A revision 3 (admin IA restructure).
  *
- * Tab row 1:
- *   - Submit  — personal lifecycle (everyone sees this)
- *   - Manage  — review / approve / pay (only visible if the user has
- *               anything to manage; inferred from the dataset, not a role)
+ * Tab row 1 (4 top-level surfaces, one per spend instrument):
+ *   - Expenses                    — wired
+ *   - Purchase invoices           — placement-only stub
+ *   - Purchase requests and orders — placement-only stub
+ *   - Cards                       — placement-only stub
  *
- * Tab row 2:
- *   - Submit  > Expenses · Purchase Requests · Cards
- *   - Manage  > Pending approval · Pending controlling · Pay · All
+ * Tab row 2 inside Expenses (6 lifecycle stops):
+ *   - Submit          → personal lifecycle (To do + Submitted)
+ *   - Approve         → manager review (pending status, alert split)
+ *   - Control         → finance coding (approved + controlled)
+ *   - Pending payment → controlled + sent-to-pay, awaiting paid
+ *   - Ready to export → terminal preset-chip view across statuses
+ *   - Archive         → all expenses, no filter
  *
- * Default landing follows directly from Manage visibility:
- *   - hasManageQueue → Manage > Pending Approval (Manager / Finance flow)
- *   - otherwise      → Submit > Expenses          (Employee flow)
+ * Default landing for cold links is `expenses > submit`. The IA is
+ * symmetric: every audience sees the same tabs (manage visibility
+ * no longer gates the tab list). Production gating lives behind a
+ * permission flag we don't model here.
  *
  * URL state:
- *   ?tab=submit|manage
- *   ?sub=<sub-tab-id>          — secondary tab inside the active primary
- *   ?folder=<folderId>         — folder detail sub-screen (BR-008 / AC-007)
- *   ?expense=<expenseId>       — expense side panel (Spec C/D)
+ *   ?tab=<PrimaryTabId>        — top-level tab
+ *   ?sub=<ExpensesSubTabId>    — sub-tab inside Expenses; ignored
+ *                                on the other three top-level tabs
+ *   ?folder=<folderId>         — folder detail sub-screen
+ *   ?expense=<expenseId>       — expense side panel / full-page detail
  *
  * Side-panel variant resolution:
- *   - On Pending Controlling → variant = "controlling" (form, footer with
+ *   - On Control                 → variant = "controlling" (form, footer with
  *     Save / Mark as controlled / Reject).
- *   - Everywhere else        → variant = "detail" (read-only, tabs).
- *   - When the user triggers the "Bulk edit" bulk action, we open the
- *     same panel in "bulk-edit" variant — applies the form to every
- *     selected row on submit. Mark-as-controlled is a separate bulk
- *     action that NEVER auto-edits fields (BR-005).
- *
- * Manager visibility (BR-008 / DT-001 from Spec D) is intentionally not
- * implemented here — this prototype shows the finance-rich UI to every
- * audience so reviewers see the full surface. Production gates the
- * controlling action set behind a permission.
+ *   - Everywhere else            → variant = "detail" (read-only, tabs).
+ *   - "Bulk edit" bulk action    → variant = "bulk-edit"; applies the form
+ *     to every selected row on submit.
  */
 export const meta: PrototypeMeta = {
   slug: "controlling-step-poc",
   title: "Controlling Step (POC)",
   description:
-    "Single Spending page (Finance sidebar). Tab row 1: Submit · Manage (Manage only when the user has something to review). Submit > Expenses · Purchase Requests · Cards. Manage > Pending approval · Pending controlling · Pay · All. Pending Controlling has its own coding form (Spec D); Pay groups Unpaid + Paid presets across approved/controlled/in-payroll (Spec C r2).",
+    "Spend management — IA r3. Top-level tabs: Expenses · Purchase invoices · Purchase requests and orders · Cards. Inside Expenses: Submit · Approve · Control · Pending payment · Ready to export · Archive. Submit hosts the personal lifecycle; the five manage sub-tabs reuse ManageTab with variant-driven datasets. Pending payment surfaces controlled + sent-to-pay rows; Archive is the unfiltered firehose; Ready to export is the legacy 'Export' surface (5 preset chips).",
   category: "Other",
   module: "spending",
   audience: ["employee", "manager", "admin"],
@@ -73,31 +76,50 @@ export const meta: PrototypeMeta = {
   createdAt: "2026-05-11",
 }
 
-const SUBMIT_DEFAULT_SUB = SUBMIT_SUB_TABS[0].id // "expenses"
-const MANAGE_DEFAULT_SUB = MANAGE_SUB_TABS[0].id // "pending-approval"
+const EXPENSES_DEFAULT_SUB: ExpensesSubTabId = EXPENSES_SUB_TABS[0].id // "submit"
 
 export default function ControllingStepPoc() {
   const [searchParams, setSearchParams] = useSearchParams()
 
-  // Manage visibility is inferred from the dataset, not a role flag.
-  // Employee = "no expenses to review" → Manage tab is hidden.
-  // Manager / Finance = "has expenses to review" → Manage tab is visible.
+  // Datasets — fetched unconditionally so hook order is stable.
+  // Manage rows feed every sub-tab inside Expenses except Submit;
+  // Submit rows feed Submit. We no longer gate the Manage tab on
+  // queue presence (Spec A r3 removes the role-inference rule —
+  // the IA is symmetric across audiences).
   const manageRows = useManageRows()
   const submitRows = useSubmitExpensesRows()
-  const hasManageQueue = manageRows.length > 0
 
   // Bulk-edit selection (Spec D F-002 / BR-003 / BR-005). When non-null
   // we render the side panel in "bulk-edit" variant. Lives in component
   // state — not URL — because the selection itself is volatile and we
   // don't want refresh to silently re-trigger a bulk overwrite.
   const [bulkEditIds, setBulkEditIds] = useState<string[] | null>(null)
+  // Control has its own bulk-edit affordance: an INLINE
+  // spreadsheet-style editor (Shopify-style) that replaces the table
+  // in-place rather than opening the side panel. Spec E lives in the
+  // designer brief. Kept separate from `bulkEditIds` so the existing
+  // side-panel flow on the other Manage sub-tabs is untouched.
+  const [inlineBulkEditIds, setInlineBulkEditIds] = useState<string[] | null>(
+    null
+  )
 
-  const visiblePrimaryTabs = hasManageQueue
-    ? PRIMARY_TABS
-    : PRIMARY_TABS.filter((t) => t.id !== "manage")
+  // Wire the AI chat actions. These hooks register the "shadow"
+  // implementations of David's expense skill (bulkCreateExpenses,
+  // sendExpenseToReview) so receipts dropped into the chat surface
+  // as rows in our local prototype. The hooks have no return value;
+  // they only register render callbacks against CopilotKit's tool
+  // dispatcher. See `copilot/useBulkCreateExpensesAction.tsx` for
+  // the rationale and the `available: "frontend"` mechanism that
+  // keeps these from being sent to the agent runtime as redundant
+  // tools.
+  useBulkCreateExpensesAction()
+  useSendExpenseToReviewAction()
 
-  // Default landing follows directly from Manage visibility.
-  const defaultPrimary: PrimaryTabId = hasManageQueue ? "manage" : "submit"
+  // Default landing — cold links open on Expenses > Submit. The
+  // submitter flow is the more universal entry point (every
+  // employee submits, not every employee approves), so a shared
+  // demo URL should drop viewers there.
+  const defaultPrimary: PrimaryTabId = "expenses"
 
   // Folder detail takes precedence over tabs.
   const folderId = searchParams.get("folder")
@@ -112,19 +134,29 @@ export default function ControllingStepPoc() {
     [searchParams]
   )
 
-  // Primary tab from URL (must be in visible set; otherwise fall back).
+  // Primary tab from URL (fall back if the param is missing or
+  // typo'd).
   const rawPrimary = searchParams.get("tab")
   const primaryTab: PrimaryTabId =
-    visiblePrimaryTabs.find((t) => t.id === rawPrimary)?.id ?? defaultPrimary
+    PRIMARY_TABS.find((t) => t.id === rawPrimary)?.id ?? defaultPrimary
 
-  // Sub-tab from URL.
-  const subTabsForPrimary =
-    primaryTab === "submit" ? SUBMIT_SUB_TABS : MANAGE_SUB_TABS
-  const defaultSubForPrimary =
-    primaryTab === "submit" ? SUBMIT_DEFAULT_SUB : MANAGE_DEFAULT_SUB
+  // Sub-tab — only Expenses has sub-tabs in this prototype. The
+  // other three top-level tabs are placement-only stubs and ignore
+  // the `sub` param.
   const rawSub = searchParams.get("sub")
-  const subTab =
-    subTabsForPrimary.find((t) => t.id === rawSub)?.id ?? defaultSubForPrimary
+  const subTab: ExpensesSubTabId =
+    primaryTab === "expenses"
+      ? (EXPENSES_SUB_TABS.find((t) => t.id === rawSub)?.id ??
+        EXPENSES_DEFAULT_SUB)
+      : EXPENSES_DEFAULT_SUB
+
+  // Resolve the legacy ManageVariant for the active sub-tab.
+  // Returns `null` for the Submit sub-tab (which renders a
+  // dedicated component instead of ManageTab).
+  const manageVariant: ManageSubTabId | null = useMemo(
+    () => (primaryTab === "expenses" ? subTabToManageVariant(subTab) : null),
+    [primaryTab, subTab]
+  )
 
   // The expense being viewed in the full-page detail view. Null when:
   //   - no `?expense` in the URL, OR
@@ -154,8 +186,9 @@ export default function ControllingStepPoc() {
     // Submit-side rows can also have synthetic ids prefixed
     // `draft-…` that don't exist anywhere else; those only resolve
     // through `submitRows`.
-    const primaryPool = primaryTab === "submit" ? submitRows : manageRows
-    const fallbackPool = primaryTab === "submit" ? manageRows : submitRows
+    const onSubmitTab = primaryTab === "expenses" && subTab === "submit"
+    const primaryPool = onSubmitTab ? submitRows : manageRows
+    const fallbackPool = onSubmitTab ? manageRows : submitRows
     const fromPrimary = primaryPool.find(
       (r) => r.kind === "expense" && r.id === expenseId
     )
@@ -166,7 +199,7 @@ export default function ControllingStepPoc() {
     if (fromFallback) return fromFallback
     const raw = expenses.find((e) => e.id === expenseId)
     return raw ? expenseToRow(raw) : null
-  }, [expenseId, primaryTab, manageRows, submitRows])
+  }, [expenseId, primaryTab, subTab, manageRows, submitRows])
 
   // Sibling expense IDs in the active preset of the active tab —
   // used by the detail page's header navigation (1/N + up/down
@@ -176,7 +209,7 @@ export default function ControllingStepPoc() {
   //
   // OneDataCollection owns preset state internally (no URL param to
   // read), so we infer the active preset from the *opened row* by
-  // matching it against per-(tab, subTab) bucket predicates. A row
+  // matching it against per-sub-tab bucket predicates. A row
   // belongs to the first bucket whose predicate it satisfies — so
   // bucket order matters when buckets overlap (e.g. Approve splits
   // by alerts on the same status set).
@@ -189,41 +222,43 @@ export default function ControllingStepPoc() {
       (r) =>
         statuses.includes(r.status)
     return {
-      // My spending > Expenses
-      "submit:expenses": [
+      // Expenses > Submit
+      submit: [
         byStatus("draft", "changes-requested"), // To-Do
         byStatus("pending", "approved", "in-payroll", "paid"), // Submitted
       ],
-      // Approve & Pay > Approve splits by alerts on the same status
+      // Expenses > Approve splits by alerts on the same status
       // ("pending"). Order matters: rows with alerts → Needs review,
       // rows without → Ready to approve.
-      "manage:pending-approval": [
-        (r) => r.status === "pending" && r.alerts.length > 0, // Needs review
-        (r) => r.status === "pending" && r.alerts.length === 0, // Ready to approve
+      approve: [
+        (r) => r.status === "pending" && r.alerts.length > 0,
+        (r) => r.status === "pending" && r.alerts.length === 0,
       ],
-      // Control > Uncontrolled / Controlled
-      "manage:pending-controlling": [byStatus("approved"), byStatus("controlled")],
-      // Pay > Unpaid / Paid
-      "manage:pay": [byStatus("controlled"), byStatus("paid")],
-      // All > Pending / Approved / Controlled / In Payroll / Paid
-      "manage:all": [
+      // Expenses > Control — Uncontrolled / Controlled
+      control: [byStatus("approved"), byStatus("controlled")],
+      // Expenses > Pending payment — Awaiting payment / Sent to Pay
+      "pending-payment": [byStatus("controlled"), byStatus("in-payroll")],
+      // Expenses > Ready to export — 5 preset chips across every
+      // status (legacy "all"-variant surface).
+      "ready-to-export": [
         byStatus("pending"),
         byStatus("approved"),
         byStatus("controlled"),
         byStatus("in-payroll"),
         byStatus("paid"),
       ],
+      // Expenses > Archive — no preset segmentation. Treat as one
+      // big bucket so the chevrons walk every expense.
+      archive: [() => true],
     }
   }, [])
 
   const siblingIds = useMemo(() => {
     if (!expenseId) return []
-    const pool =
-      primaryTab === "manage"
-        ? manageRows
-        : primaryTab === "submit" && subTab === "expenses"
-          ? submitRows
-          : []
+    if (primaryTab !== "expenses") return []
+    // Submit reads from `submitRows`; every other sub-tab inside
+    // Expenses reads from `manageRows`.
+    const pool = subTab === "submit" ? submitRows : manageRows
     if (pool.length === 0) return []
 
     // Find the opened row to read its signals; if it's not in the
@@ -235,7 +270,7 @@ export default function ControllingStepPoc() {
     const expensesInPool = pool.filter((r) => r.kind === "expense")
     if (!openedRow) return expensesInPool.map((r) => r.id)
 
-    const buckets = PRESET_BUCKETS[`${primaryTab}:${subTab}`]
+    const buckets = PRESET_BUCKETS[subTab]
     if (!buckets) return expensesInPool.map((r) => r.id)
     const bucket = buckets.find((pred) => pred(openedRow))
     if (!bucket) return expensesInPool.map((r) => r.id)
@@ -283,17 +318,24 @@ export default function ControllingStepPoc() {
   // Bulk action dispatcher. Spec D BR-003/005: "Bulk edit" opens the
   // panel pre-filled empty; "Mark as controlled" / "Reject" / Pay
   // actions are no-op stubs in the prototype (we'd hit an API in prod).
+  //
+  // Spec E (Control sub-tab): on Control, "Bulk edit" routes to the
+  // inline spreadsheet editor instead of the side panel.
   const handleBulkAction = useCallback(
     (actionId: string, ids: string[]) => {
       if (actionId === "bulk-edit") {
         if (ids.length === 0) return
-        setBulkEditIds(ids)
+        if (subTab === "control") {
+          setInlineBulkEditIds(ids)
+        } else {
+          setBulkEditIds(ids)
+        }
       }
       // Other bulk actions intentionally fall through — production
       // wires them to mutations + toast confirmations, but the
       // prototype has nothing to mutate.
     },
-    []
+    [subTab]
   )
 
   const setPrimary = (id: string) => {
@@ -310,14 +352,20 @@ export default function ControllingStepPoc() {
     setSearchParams(next)
   }
 
-  const primaryTabsWithNav = visiblePrimaryTabs.map((t) => ({
+  // Tab navigation lists. Top row is the full 4-tab IA; the
+  // sub-row only renders when the user is on Expenses (the other
+  // three top-level tabs are placement-only stubs).
+  const primaryTabsWithNav = PRIMARY_TABS.map((t) => ({
     ...t,
     onClick: () => setPrimary(t.id),
   }))
-  const subTabsWithNav = subTabsForPrimary.map((t) => ({
-    ...t,
-    onClick: () => setSub(t.id),
-  }))
+  const subTabsWithNav =
+    primaryTab === "expenses"
+      ? EXPENSES_SUB_TABS.map((t) => ({
+          ...t,
+          onClick: () => setSub(t.id),
+        }))
+      : []
 
   // Side-panel variant: bulk-edit ONLY now. Single-expense detail/
   // controlling flows render full-page via `ExpenseDetailPage` below.
@@ -329,48 +377,69 @@ export default function ControllingStepPoc() {
   const sidePanelVariant = "bulk-edit" as const
 
   // Whether the open expense lives on a tab where the controlling
-  // block matters (Pending Controlling, Pay, All). Drives the
-  // ResourceHeader's Edit / Mark-as-controlled actions.
+  // block matters (Control, Pending payment, Ready to export,
+  // Archive). Drives the ResourceHeader's Edit / Mark-as-controlled
+  // actions.
   const isControllableTab =
-    primaryTab === "manage" &&
-    (subTab === "pending-controlling" ||
-      subTab === "pay" ||
-      subTab === "all")
+    primaryTab === "expenses" &&
+    (subTab === "control" ||
+      subTab === "pending-payment" ||
+      subTab === "ready-to-export" ||
+      subTab === "archive")
 
   // The detail page's CTA set depends on which JTBD owns the tab the
   // user came from:
   //   - "approval"    → approver flow: Approve / Reject as primary CTAs.
   //   - "controlling" → finance review: Mark as controlled / Reject.
-  //   - "pay"         → treasury: Mark as paid / Reject.
+  //   - "pay"         → treasury: Mark as paid / Reject (Pending payment).
   //   - "view"        → no destructive primary action; only Edit + overflow.
-  // Submit and Folder tabs map to "view" because the user owns those
-  // expenses but isn't approving them from the detail page.
+  // Submit and the read-only export/archive surfaces map to "view"
+  // because the user owns those expenses but isn't acting on them
+  // from the detail page.
   const tabRole: "approval" | "controlling" | "pay" | "view" =
-    primaryTab === "manage" && subTab === "pending-approval"
+    primaryTab === "expenses" && subTab === "approve"
       ? "approval"
-      : primaryTab === "manage" && subTab === "pending-controlling"
+      : primaryTab === "expenses" && subTab === "control"
         ? "controlling"
-        : primaryTab === "manage" && subTab === "pay"
+        : primaryTab === "expenses" && subTab === "pending-payment"
           ? "pay"
           : "view"
 
-  // Breadcrumb label for the expense page. Falls back to "Spending"
-  // when nothing useful is in the URL (e.g. deep link to ?expense=…).
+  // Breadcrumb label for the expense page. Combines the top-level
+  // tab name + the active sub-tab inside Expenses so the user
+  // knows exactly which row list they came from. Other top-level
+  // tabs (Purchase invoices, Purchase requests and orders, Cards)
+  // are placement-only in this prototype but we still surface
+  // their label so the breadcrumb stays correct if a designer
+  // wires content there later.
   const sourceTabLabel = useMemo(() => {
-    if (primaryTab === "manage") {
-      const sub = MANAGE_SUB_TABS.find((t) => t.id === subTab)
-      return sub ? `Approve & Pay · ${sub.label}` : "Approve & Pay"
-    }
-    const sub = SUBMIT_SUB_TABS.find((t) => t.id === subTab)
-    return sub ? `My spending · ${sub.label}` : "My spending"
+    const primaryLabel =
+      PRIMARY_TABS.find((t) => t.id === primaryTab)?.label ?? "Spending"
+    if (primaryTab !== "expenses") return primaryLabel
+    const sub = EXPENSES_SUB_TABS.find((t) => t.id === subTab)
+    return sub ? `${primaryLabel} · ${sub.label}` : primaryLabel
   }, [primaryTab, subTab])
 
   // Deep-link URL for the source-tab breadcrumb so clicking it
   // restores the same primary+sub tab the user came from.
   const sourceTabHref = useMemo(
-    () => `/p/controlling-step-poc?tab=${primaryTab}&sub=${subTab}`,
+    () =>
+      primaryTab === "expenses"
+        ? `/p/controlling-step-poc?tab=${primaryTab}&sub=${subTab}`
+        : `/p/controlling-step-poc?tab=${primaryTab}`,
     [primaryTab, subTab]
   )
+
+  // Tell the agent what the user is looking at. This is what lets
+  // it answer "where am I" type questions and pick the right tool
+  // (e.g. submit vs approve vs pay) without having to ask.
+  useExposeContext({
+    primaryTab,
+    subTab,
+    rows: primaryTab === "expenses" && subTab === "submit"
+      ? submitRows
+      : manageRows,
+  })
 
   // Stub mutation handlers — the prototype doesn't persist anything.
   // They close the panel so the interaction reads as "done". Memoised
@@ -434,7 +503,7 @@ export default function ControllingStepPoc() {
             module={{
               id: "my_spending",
               name: "Spend management",
-              href: "/p/controlling-step-poc?tab=submit&sub=expenses",
+              href: "/p/controlling-step-poc?tab=expenses&sub=submit",
             }}
             actions={[]}
           />
@@ -443,73 +512,84 @@ export default function ControllingStepPoc() {
             tabs={primaryTabsWithNav}
             activeTabId={primaryTab}
           />
-          <Tabs
-            key={`${primaryTab}:${subTab}`}
-            secondary
-            tabs={subTabsWithNav}
-            activeTabId={subTab}
-          />
+          {primaryTab === "expenses" && (
+            <Tabs
+              key={`${primaryTab}:${subTab}`}
+              secondary
+              tabs={subTabsWithNav}
+              activeTabId={subTab}
+            />
+          )}
         </>
       }
     >
       <StandardLayout>
         <F0Box display="flex" flexDirection="column" gap="lg">
-          {primaryTab === "submit" && subTab === "expenses" && (
+          {/* Expenses > Submit — dedicated component (personal
+              lifecycle). Everything else routes through ManageTab
+              with a variant prop. */}
+          {primaryTab === "expenses" && subTab === "submit" && (
             <SubmitExpensesTab
               folderHref={folderHref}
               onExpenseClick={openExpense}
             />
           )}
-          {primaryTab === "submit" && subTab === "purchase-requests" && (
-            <F0Box
-              display="flex"
-              flexDirection="column"
-              gap="sm"
-              padding="lg"
-              background="secondary"
-              borderRadius="md"
-            >
-              <F0Text
-                variant="label"
-                content="Purchase Requests — placement only"
-              />
-              <F0Text
-                variant="description"
-                content="The existing Purchase Requests page (its internal tabs, presets, table and side panel) will be rendered here unchanged."
-              />
-            </F0Box>
-          )}
-          {primaryTab === "submit" && subTab === "cards" && (
-            <F0Box
-              display="flex"
-              flexDirection="column"
-              gap="sm"
-              padding="lg"
-              background="secondary"
-              borderRadius="md"
-            >
-              <F0Text variant="label" content="Cards — placement only" />
-              <F0Text
-                variant="description"
-                content="The existing Cards page (its internal tabs, presets, table and side panel) will be rendered here unchanged."
-              />
-            </F0Box>
-          )}
-          {primaryTab === "manage" &&
-            (
-              ["pending-approval", "pending-controlling", "pay", "all"] as const
-            ).map(
-              (id) =>
-                subTab === id && (
-                  <ManageTab
-                    key={id}
-                    variant={id as ManageSubTabId}
-                    folderHref={folderHref}
-                    onExpenseClick={openExpense}
-                    onBulkAction={handleBulkAction}
+
+          {/* Expenses > Approve / Control / Pending payment /
+              Ready to export / Archive — all delegate to ManageTab,
+              which receives the resolved variant from
+              `subTabToManageVariant`. Control gets the inline
+              spreadsheet editor (Spec E) when the user clicks Bulk
+              edit; everything else uses the side-panel flow. */}
+          {primaryTab === "expenses" &&
+            subTab !== "submit" &&
+            manageVariant !== null &&
+            (subTab === "control" && inlineBulkEditIds !== null ? (
+              (() => {
+                const selected = manageRows.filter((r) =>
+                  inlineBulkEditIds.includes(r.id)
+                )
+                return (
+                  <BulkEditor
+                    key={`${subTab}-editor`}
+                    rows={selected}
+                    onClose={() => setInlineBulkEditIds(null)}
                   />
                 )
-            )}
+              })()
+            ) : (
+              <ManageTab
+                key={`${primaryTab}:${subTab}`}
+                variant={manageVariant}
+                folderHref={folderHref}
+                onExpenseClick={openExpense}
+                onBulkAction={handleBulkAction}
+              />
+            ))}
+
+          {/* Placement-only stubs for the three non-Expenses
+              top-level tabs. Production will render the existing
+              Purchase invoices / Purchase requests & orders /
+              Cards pages here unchanged — this is just a header
+              + tab IA exercise, not a content migration. */}
+          {primaryTab === "purchase-invoices" && (
+            <PlacementStub
+              title="Purchase invoices — placement only"
+              description="The existing Purchase invoices page (its internal tabs, presets, table and side panel) will be rendered here unchanged."
+            />
+          )}
+          {primaryTab === "purchase-requests-orders" && (
+            <PlacementStub
+              title="Procurement — placement only"
+              description="The existing Procurement page (its internal tabs, presets, table and side panel) will be rendered here unchanged."
+            />
+          )}
+          {primaryTab === "cards" && (
+            <PlacementStub
+              title="Cards — placement only"
+              description="The existing Cards page (its internal tabs, presets, table and side panel) will be rendered here unchanged."
+            />
+          )}
         </F0Box>
 
         {/* Side panel — single component, three variants. We mount it
@@ -534,5 +614,28 @@ export default function ControllingStepPoc() {
         )}
       </StandardLayout>
     </Page>
+  )
+}
+
+/**
+ * Shared chrome for the three placement-only top-level tabs
+ * (Purchase invoices, Purchase requests and orders, Cards). Keeps
+ * the message + tint consistent so reviewers immediately read
+ * these surfaces as "intentionally empty in this prototype, not a
+ * loading state".
+ */
+function PlacementStub(props: { title: string; description: string }) {
+  return (
+    <F0Box
+      display="flex"
+      flexDirection="column"
+      gap="sm"
+      padding="lg"
+      background="secondary"
+      borderRadius="md"
+    >
+      <F0Text variant="label" content={props.title} />
+      <F0Text variant="description" content={props.description} />
+    </F0Box>
   )
 }
