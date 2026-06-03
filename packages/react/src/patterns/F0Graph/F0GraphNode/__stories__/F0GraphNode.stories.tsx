@@ -206,7 +206,7 @@ export const WithTags: Story = {
     docs: {
       description: {
         story:
-          "Tags are grouped by type automatically. A single tag type renders directly, while 2+ tags of the same type collapse into a summary tag with member names in the tooltip.",
+          "Every tag is rendered individually — tags are never grouped or collapsed into a summary, even when several share the same type.",
       },
     },
   },

@@ -26,6 +26,16 @@ export type ButtonInternalProps = Pick<
      */
     "aria-label"?: string
     /**
+     * Forwarded to the underlying button. Useful for buttons that toggle an
+     * expandable region (e.g. a tree/graph expander).
+     */
+    "aria-expanded"?: boolean
+    /**
+     * Forwarded to the underlying button. Use `-1` to take the button out of the
+     * tab order (e.g. when a parent manages focus via roving tabindex).
+     */
+    tabIndex?: number
+    /**
      * The variant of the button.
      */
     variant?: ActionButtonVariant

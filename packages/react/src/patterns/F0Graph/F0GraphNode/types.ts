@@ -7,11 +7,8 @@ import type { TagVariant } from "@/components/tags/F0Tag/F0Tag"
 export type F0GraphNodeTagType = TagVariant["type"]
 
 /**
- * Optional labels for the auto-generated multi-tag summary text.
- * One label per `TagVariant` `type`. Used when 2+ tags of the same type
- * are present and need to collapse to a single summary tag.
- *
- * Default English plural labels are provided when omitted.
+ * Optional human-readable label per `TagVariant` `type`. Used as the metadata
+ * row label inside the node's hover card (see [[F0GraphNodeHoverCard]]).
  */
 export interface F0GraphNodeTagLabels {
   person?: string
@@ -68,9 +65,8 @@ export interface F0GraphNodeProps {
   subtitle?: ReactNode
   /**
    * Tag metadata rendered as a flex-wrap row below the pill (detail variant
-   * only). Tags are grouped by their `type`: a single tag of a given type
-   * renders directly; multiple tags of the same type collapse into one
-   * summary tag ("3 teams") with all member names exposed via tooltip.
+   * only). Every tag is rendered individually — tags are never grouped or
+   * collapsed, even when several share the same `type`.
    */
   tags?: TagVariant[]
   /**
@@ -79,7 +75,7 @@ export interface F0GraphNodeProps {
    * rendered. Used by the parent `<F0Graph>` per-type visibility toggles.
    */
   visibleTagTypes?: ReadonlySet<F0GraphNodeTagType>
-  /** Optional labels override for multi-tag summary text. */
+  /** Optional per-type labels, used as metadata row labels in the hover card. */
   tagLabels?: F0GraphNodeTagLabels
   /**
    * Floating toolbar shown above the node when it is selected (detail
@@ -90,6 +86,13 @@ export interface F0GraphNodeProps {
   actions?: ReactNode
   /** Show a skeleton/loading placeholder instead of real content. */
   loading?: boolean
+  /**
+   * In the compacted modes (compact/dot), reveal the rest of the node's info in
+   * an F0Card popover on hover. Shows only the non-hidden tags (those allowed by
+   * `visibleTagTypes`). No-op in the detail variant, where everything is already
+   * on screen.
+   */
+  hoverCard?: boolean
   /** DOM id for aria-owns cross-references */
   nodeId?: string
   /** Space-separated DOM ids for aria-owns (accessible tree hierarchy) */

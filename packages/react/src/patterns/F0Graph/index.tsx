@@ -1,4 +1,4 @@
-/** Interactive tree/graph visualization with zoom levels, expand/collapse, selection, search, and detail panels. */
+/** Interactive tree/graph visualization with zoom levels, expand/collapse, and selection. */
 export { F0Graph } from "./F0Graph"
 /** Props for configuring F0Graph — data, rendering, zoom, selection, layout, and customization. */
 export type { F0GraphProps } from "./F0Graph"
@@ -30,8 +30,6 @@ export * from "./F0GraphEdge"
 export * from "./F0GraphExpander"
 /** Card wrapper for nodes with avatar, title, subtitle, metadata, and actions slots. */
 export * from "./F0GraphNode"
-/** Side panel that displays details about the currently selected node. */
-export * from "./F0GraphDetailPanel"
 
 // Hooks
 /** Focus context hook for reading/controlling roving tabindex focus within the graph. */

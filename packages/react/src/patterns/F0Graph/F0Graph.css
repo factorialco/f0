@@ -21,32 +21,15 @@
   ); /* f1-border-selected-bold (viridian secondary) */
 }
 
-:root.dark .f0-graph {
-  /* Pre-blended white.30 on the dark surface (#1B1F25 ≈ neutral-2 dark). */
-  --f0-graph-edge-default: #545961;
-  --f0-graph-edge-highlighted: hsl(
-    var(--selected-50)
-  ); /* f1-border-selected-bold (viridian secondary) */
-}
-
-.f0-graph .react-flow__pane.draggable {
-  cursor: default;
-}
-
+.f0-graph .react-flow__pane.draggable,
 .f0-graph .react-flow__pane.dragging {
-  cursor: default;
+  @apply cursor-default;
 }
 
-.f0-graph .react-flow__node {
-  cursor: pointer;
-}
-
-.f0-graph .react-flow__node.selectable {
-  cursor: pointer;
-}
-
+.f0-graph .react-flow__node,
+.f0-graph .react-flow__node.selectable,
 .f0-graph .react-flow__node.draggable {
-  cursor: pointer;
+  @apply cursor-pointer;
 }
 
 /* Respect OS reduced-motion preference — disable CSS transitions */

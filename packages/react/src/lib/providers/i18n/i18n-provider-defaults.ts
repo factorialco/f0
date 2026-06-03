@@ -164,6 +164,7 @@ export const defaultTranslations = {
       card: "Card view",
       list: "List view",
       kanban: "Kanban view",
+      graph: "Graph view",
       pagination: {
         of: "of",
       },

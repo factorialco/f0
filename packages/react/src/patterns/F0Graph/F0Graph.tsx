@@ -25,7 +25,6 @@ import {
 } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
-import { cn } from "@/lib/utils"
 
 import type {
   F0GraphNodeTagType,
@@ -54,13 +53,8 @@ import {
   useF0GraphRenderConfigInternal,
 } from "./contexts"
 import { F0GraphControls } from "./F0GraphControls"
-import {
-  F0GraphDetailPanel,
-  type F0GraphDetailPanelProps,
-} from "./F0GraphDetailPanel"
 import { type EdgeVariant, type F0GraphEdgeProps } from "./F0GraphEdge"
 import { F0GraphEdgeBase } from "./F0GraphEdge/F0GraphEdge"
-import { F0GraphSearch, useGraphSearch, type Searchable } from "./F0GraphSearch"
 import { useDeferredMerge } from "./hooks/useDeferredMerge"
 import { useGraphZoomLevel } from "./hooks/useGraphZoomLevel"
 import "./F0Graph.css"
@@ -68,7 +62,6 @@ import { useLayoutEngine } from "./hooks/useLayoutEngine"
 import { useLazyTree } from "./hooks/useLazyTree"
 import { useTreeBuilder } from "./hooks/useTreeBuilder"
 import { ClickSpark } from "./internal/ClickSpark"
-import { Search } from "./internal/Search"
 
 // Singleton empty set used as a stable default for `highlightedNodes`.
 // A fresh Set per render would invalidate the selection context and
@@ -164,7 +157,6 @@ export interface F0GraphProps<T = unknown> {
   highlightedNodes?: Set<string>
 
   // ---- Layout ----
-  fullScreen?: boolean
   /** Layout sizing hint passed to the built-in layout engine. Defaults to 256. Override for compact nodes (icons, file rows). */
   nodeWidth?: number
   /** Layout sizing hint passed to the built-in layout engine. Defaults to 56. Override for compact nodes (icons, file rows). */
@@ -172,49 +164,13 @@ export interface F0GraphProps<T = unknown> {
   /** Optional custom layout engine. When provided, overrides the built-in tree layout. */
   layoutEngine?: LayoutEngine
 
-  // ---- Search ----
-  /**
-   * Raw controlled search input. Renders the bare expandable search pill
-   * with no popover. Mutually exclusive with `searchable`.
-   */
-  searchValue?: string
-  onSearchChange?: (value: string | undefined) => void
-  searchLoading?: boolean
-  /**
-   * Declarative search-with-popover. F0Graph builds the index from the
-   * source `nodes`/`rootNodes`, filters/sorts results, and on select:
-   * (1) auto-expands collapsed ancestors, (2) selects the node,
-   * (3) fly-to/fitView. Mutually exclusive with `searchValue`/`onSearchChange`.
-   */
-  searchable?: Searchable<T>
-  /** Optional observability callback when a search result is picked. */
-  onSearchResultSelect?: (id: string) => void
-
   // ---- Canvas actions ----
   /**
-   * Optional action buttons rendered below the search input, aligned to the
-   * left edge of the canvas. Consumers provide their own `<F0Button>` elements
-   * (use `size="md"` to match the navigation controls).
+   * Optional action buttons rendered at the top-left of the canvas. Consumers
+   * provide their own `<F0Button>` elements (use `size="md"` to match the
+   * navigation controls).
    */
   canvasActions?: ReactNode
-
-  // ---- Detail panel ----
-  /**
-   * When provided, clicking a node opens a right-side detail panel and
-   * centers the node in the remaining canvas space (offset by the panel
-   * width). Returns the full panel configuration for the given node —
-   * either the `default` variant (with title/description/alert/menu) or the
-   * `resource` variant (with custom header + primary/secondary action row).
-   */
-  detailPanel?: (
-    node: GraphNode<T>
-  ) => Omit<F0GraphDetailPanelProps, "open" | "onClose" | "width" | "ariaLabel">
-  /** Optional aria-label for the panel landmark. */
-  detailPanelAriaLabel?: string
-  /** Initial width of the detail panel in pixels. Defaults to 384 (matches F0 spec). If the user has resized the panel, the persisted width takes precedence. */
-  detailPanelWidth?: number
-  /** Stable identifier used to scope persisted detail-panel width in localStorage. Defaults to `"default"`. */
-  graphId?: string
 
   // ---- Controls ----
   showControls?: boolean
@@ -224,6 +180,14 @@ export interface F0GraphProps<T = unknown> {
    * centers the viewport on that node. When omitted, the button is hidden.
    */
   currentUserNodeId?: string
+  /**
+   * Custom handler for the "Find me" button. Use this when the current-user
+   * node may be collapsed or not yet loaded (e.g. a lazy org chart): the
+   * consumer can reveal it — expanding ancestors and centering — instead of the
+   * default `fitView`, which can only target an already-visible node. When set,
+   * the button stays enabled even while the node is off-screen.
+   */
+  onFocusUser?: () => void
   /** Override default English labels for interactive controls. */
   controlLabels?: {
     zoomIn?: string
@@ -248,18 +212,15 @@ export interface F0GraphProps<T = unknown> {
   nodeTagTypes?: ReadonlyArray<F0GraphNodeTagType>
   /**
    * Controlled set of currently visible tag types. When omitted, falls
-   * back to `defaultVisibleTagTypes`.
+   * back to `defaultVisibleTagTypes` (or all of `nodeTagTypes`). The
+   * visibility UI itself is owned by the consumer.
    */
   visibleTagTypes?: ReadonlyArray<F0GraphNodeTagType>
   /**
-   * Initial visible tag types for uncontrolled usage. Defaults to all of
-   * `nodeTagTypes`.
+   * Initial visible tag types when `visibleTagTypes` is not controlled.
+   * Defaults to all of `nodeTagTypes`.
    */
   defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagType>
-  /** Fired when the visible tag types change (in either mode). */
-  onVisibleTagTypesChange?: (next: ReadonlyArray<F0GraphNodeTagType>) => void
-  /** Optional friendly labels per tag type, used in the popover toggles. */
-  nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagType, string>>
   /**
    * Whether the layout should reserve vertical room for one tag row beneath
    * each node so the source handle (and outgoing edges) anchors below the
@@ -279,9 +240,19 @@ export interface F0GraphProps<T = unknown> {
   onVisibleNodesChange?: (count: number) => void
 }
 
-// Visual nudge to keep the collapser button optically aligned with the
-// node it sits next to. Determined empirically.
-const COLLAPSER_OFFSET_ADJUSTMENT = -6
+// The collapser is an F0Button (md/lg) inside a top-aligned box with `pt-2`,
+// whereas the expander is a bare pill of `EXPANDER_SIZE`. These per-zoom nudges
+// account for that difference so the collapser lands on the same lane center as
+// the expander. `dot` is unused (the collapser is hidden at dot zoom).
+const COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM: Record<ZoomLevel, number> = {
+  detail: -8,
+  compact: -4,
+  dot: 0,
+}
+
+// Canvas background dot spacing. Shared with the layout engine so node
+// columns/rows snap onto the dot grid (nodes "squared" with the dots).
+const BACKGROUND_DOT_GAP = 32
 
 // Delay used after a layout-affecting change before calling `fitView`,
 // so React Flow can settle the new node positions in its store.
@@ -291,10 +262,6 @@ const FOCUS_SETTLE_DELAY_MS = 100
 // fitView paddings used in different fly-to scenarios.
 const FIT_VIEW_PADDING_TIGHT = 0.1
 const FIT_VIEW_PADDING_LOOSE = 0.5
-
-// Fallback dimensions when React Flow has not yet measured a node.
-const DEFAULT_NODE_WIDTH_FALLBACK = 240
-const DEFAULT_NODE_HEIGHT_FALLBACK = 80
 
 // Squared pixel threshold matching React Flow's `nodeClickDistance` so a
 // pan drag ending over a node does not register as a click.
@@ -525,14 +492,8 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     onSelectedNodesChange,
     focusedNode,
     highlightedNodes: highlightedProp,
-    fullScreen = true,
     nodeWidth: nodeWidthProp,
     nodeHeight: nodeHeightProp,
-    searchValue,
-    onSearchChange,
-    searchLoading,
-    searchable,
-    onSearchResultSelect,
     canvasActions,
     showControls = false,
     onZoomLevelChange,
@@ -541,13 +502,12 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     nodeTagTypes,
     visibleTagTypes: controlledVisibleTagTypes,
     defaultVisibleTagTypes,
-    onVisibleTagTypesChange,
-    nodeTagTypeLabels,
     reserveTagRow,
     onVisibleNodesChange,
     layoutEngine: layoutEngineProp,
     controlLabels,
     currentUserNodeId,
+    onFocusUser: onFocusUserProp,
   } = props
 
   const i18n = useI18n()
@@ -560,43 +520,16 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
   // ── Direction ── (hardcoded to TB; layout engine still supports other values internally)
   const direction = "TB" as LayoutDirection
 
-  // ── Per-type tag visibility state (controlled / uncontrolled) ──
-  // When `nodeTagTypes` is undefined the popover is hidden and tags render
-  // unfiltered (no visibleTagTypes set is published into context).
-  const initialVisibleTagTypes = useMemo<ReadonlyArray<F0GraphNodeTagType>>(
-    () => defaultVisibleTagTypes ?? nodeTagTypes ?? [],
-    // Initial only — don't recompute on prop changes; consumers should use
-    // the controlled API to update visibility.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  )
-  const [internalVisibleTagTypes, setInternalVisibleTagTypes] = useState<
-    ReadonlyArray<F0GraphNodeTagType>
-  >(initialVisibleTagTypes)
+  // ── Per-type tag visibility (controlled by the consumer) ──
+  // `nodeTagTypes` defines the universe of tag types; `visibleTagTypes` (or
+  // `defaultVisibleTagTypes`) selects which ones render. This is filtering
+  // only — the visibility UI lives in the consumer (e.g. Data Collection
+  // settings), not inside F0Graph.
   const visibleTagTypesArr =
-    controlledVisibleTagTypes ?? internalVisibleTagTypes
+    controlledVisibleTagTypes ?? defaultVisibleTagTypes ?? nodeTagTypes ?? []
   const visibleTagTypesSet = useMemo(
     () => new Set<F0GraphNodeTagType>(visibleTagTypesArr),
     [visibleTagTypesArr]
-  )
-  const setVisibleTagTypes = useCallback(
-    (next: ReadonlyArray<F0GraphNodeTagType>) => {
-      if (controlledVisibleTagTypes === undefined) {
-        setInternalVisibleTagTypes(next)
-      }
-      onVisibleTagTypesChange?.(next)
-    },
-    [controlledVisibleTagTypes, onVisibleTagTypesChange]
-  )
-  const toggleTagType = useCallback(
-    (type: F0GraphNodeTagType) => {
-      const has = visibleTagTypesSet.has(type)
-      const next = has
-        ? visibleTagTypesArr.filter((t) => t !== type)
-        : [...visibleTagTypesArr, type]
-      setVisibleTagTypes(next)
-    },
-    [visibleTagTypesSet, visibleTagTypesArr, setVisibleTagTypes]
   )
 
   // ── Stabilize renderNode: store in ref so rfNodes deps don't include the function ──
@@ -919,11 +852,12 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
   // ── Layout edges: include expander edges so the engine sees the full graph ──
   const layoutEdges = useMemo(() => visibleEdges, [visibleEdges])
 
-  // Extra vertical room for the tag row when any tag types are visible.
-  // Approximates one row of small F0Tag pills; multi-row wrap will overlap
-  // the next rank gap (still readable) — refine to per-node measurement
-  // in a follow-up.
+  // Extra vertical room for the tags below the pill. Each row of small F0Tag
+  // pills is ~`TAG_ROW_HEIGHT`; when several tag types are visible they wrap to
+  // multiple rows, so we reserve height per estimated row to keep the expander
+  // (and the next rank) below the metadata instead of overlapping it.
   const TAG_ROW_HEIGHT = 36
+  const ESTIMATED_TAGS_PER_ROW = 2
   // The tag row only contributes to layout when the consumer opts into the
   // popover (`nodeTagTypes`) and at least one type is currently visible, or
   // when `reserveTagRow` is explicitly set (e.g. tags rendered via
@@ -931,12 +865,19 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
   // would push the source handle and the expander below the pill.
   const tagsAffectLayout =
     reserveTagRow ?? (nodeTagTypes ? visibleTagTypesSet.size > 0 : false)
-  const effectiveNodeHeight =
-    (nodeHeightProp ?? 56) + (tagsAffectLayout ? TAG_ROW_HEIGHT : 0)
+  // Same-type tags collapse to a single pill, so the visible tag-type count is
+  // a good proxy for how many pills (and therefore rows) are rendered.
+  const visibleTagCount = nodeTagTypes ? visibleTagTypesSet.size : 1
+  const tagRowCount = tagsAffectLayout
+    ? Math.max(1, Math.ceil(visibleTagCount / ESTIMATED_TAGS_PER_ROW))
+    : 0
+  const reservedTagHeight = tagRowCount * TAG_ROW_HEIGHT
+  const effectiveNodeHeight = (nodeHeightProp ?? 56) + reservedTagHeight
 
   const builtInEngine = useLayoutEngine({
     nodeWidth: nodeWidthProp,
     nodeHeight: effectiveNodeHeight,
+    snapGrid: BACKGROUND_DOT_GAP,
   })
   const layoutEngine = layoutEngineProp ?? builtInEngine
   const layout = useMemo(
@@ -948,6 +889,8 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
   // Scales per zoom level (+100% each step) so the larger expander button remains
   // visually centered in its lane.
   const EXPANDER_Y_OFFSET = EXPANDER_Y_OFFSET_BY_ZOOM[zoomLevel]
+  const COLLAPSER_OFFSET_ADJUSTMENT =
+    COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM[zoomLevel]
 
   // Compute anchor offset (pure — no ref mutations)
   const anchorOffset = useMemo(() => {
@@ -1131,6 +1074,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     stableRenderNode,
     anchorOffset,
     EXPANDER_Y_OFFSET,
+    COLLAPSER_OFFSET_ADJUSTMENT,
     nodeWidthProp,
     nodeHeightProp,
     direction,
@@ -1307,63 +1251,10 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     onExpandedNodesChange?.(empty)
   }, [controlledExpanded, onExpandedNodesChange])
 
-  // ── Detail panel state ──
-  const {
-    detailPanel,
-    detailPanelAriaLabel,
-    detailPanelWidth = 384,
-    graphId,
-  } = props
-  const detailPanelEnabled = Boolean(detailPanel)
-  const [detailNodeId, setDetailNodeId] = useState<string | null>(null)
-  const detailNode = useMemo<GraphNode<T> | null>(() => {
-    if (!detailNodeId) return null
-    const entry = nodeMap.get(detailNodeId)
-    if (!entry) return null
-    return {
-      id: detailNodeId,
-      parentId: entry.parentId ?? null,
-      data: entry.data,
-      childrenCount: entry.childrenCount,
-      childrenLoaded: entry.childrenLoaded,
-    }
-  }, [detailNodeId, nodeMap])
-  const detailOpen = detailPanelEnabled && detailNode !== null
-
   // Canvas ref — wraps the ReactFlow viewport plus overlays (controls,
-  // search, detail panel). Declared here so it can be read by the
-  // panel-aware centering callback below; the same ref is attached to the
-  // canvas element further down.
+  // canvas actions). Attached to the canvas element further down and used to
+  // restore focus when the selection is cleared.
   const canvasRef = useRef<HTMLDivElement>(null)
-
-  // Read the actual rendered detail-panel width from the DOM. The panel
-  // persists its width to localStorage and may differ from the
-  // `detailPanelWidth` prop after the user resizes. Falling back to the
-  // prop value covers the first-paint case before the panel is measurable.
-  const getActualPanelWidth = useCallback((): number => {
-    const root = canvasRef.current
-    if (!root) return detailPanelWidth
-    const panel = root.querySelector<HTMLElement>('[role="complementary"]')
-    if (!panel) return detailPanelWidth
-    const measured = panel.getBoundingClientRect().width
-    return measured > 0 ? measured : detailPanelWidth
-  }, [detailPanelWidth])
-
-  const centerNodeWithPanelOffset = useCallback(
-    (id: string, panelOpen: boolean) => {
-      const rfNode = reactFlow.getNode(id)
-      if (!rfNode) return
-      const nodeWidth = rfNode.width ?? DEFAULT_NODE_WIDTH_FALLBACK
-      const nodeHeight = rfNode.height ?? DEFAULT_NODE_HEIGHT_FALLBACK
-      const targetZoom = Math.max(reactFlow.getZoom(), 1)
-      const panelWidth = panelOpen ? getActualPanelWidth() : 0
-      const offsetWorldX = panelWidth / 2 / targetZoom
-      const cx = rfNode.position.x + nodeWidth / 2 + offsetWorldX
-      const cy = rfNode.position.y + nodeHeight / 2
-      reactFlow.setCenter(cx, cy, { zoom: targetZoom, duration: 400 })
-    },
-    [reactFlow, getActualPanelWidth]
-  )
 
   // ── Selection (focus semantics: click selects, click again keeps, pane click clears) ──
   const selectedNodesRef = useRef(selectedNodes)
@@ -1394,24 +1285,8 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
           onSelectedNodesChange?.(next)
         }
       }
-
-      // Open detail panel + center accounting for offset
-      if (detailPanelEnabled) {
-        setDetailNodeId(nodeId)
-        // Defer centering to next frame so the panel width is committed.
-        window.requestAnimationFrame(() => {
-          centerNodeWithPanelOffset(nodeId, true)
-        })
-      }
     },
-    [
-      selectionMode,
-      controlledSelected,
-      onNodeSelect,
-      onSelectedNodesChange,
-      detailPanelEnabled,
-      centerNodeWithPanelOffset,
-    ]
+    [selectionMode, controlledSelected, onNodeSelect, onSelectedNodesChange]
   )
 
   const containerRef = useRef<HTMLDivElement>(null)
@@ -1434,7 +1309,6 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     if (current.size > 0) {
       onSelectedNodesChange?.(new Set())
     }
-    setDetailNodeId(null)
     setFocusedNodeId(null)
     canvasRef.current?.focus()
   }, [controlledSelected, onSelectedNodesChange])
@@ -1697,84 +1571,12 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
 
   const handleFocusUser = useCallback(() => {
     if (!currentUserNodeId) return
-    centerNodeWithPanelOffset(currentUserNodeId, detailOpen)
-  }, [currentUserNodeId, centerNodeWithPanelOffset, detailOpen])
-
-  // ── Internal search-with-popover state ──
-  const [internalSearchQuery, setInternalSearchQuery] = useState("")
-  const searchFlyTimerRef = useRef<number | null>(null)
-  const clearSearchFlyTimer = useCallback(() => {
-    if (searchFlyTimerRef.current !== null) {
-      window.clearTimeout(searchFlyTimerRef.current)
-      searchFlyTimerRef.current = null
-    }
-  }, [])
-  const {
-    results: searchResults,
-    hasQuery: hasSearchQuery,
-    pending: searchPending,
-  } = useGraphSearch(resolvedNodes, internalSearchQuery, searchable)
-
-  const handleSearchResultSelect = useCallback(
-    (id: string) => {
-      // 1) Auto-expand collapsed ancestors so the node becomes visible.
-      const current = expandedNodesRef.current
-      const ancestorsToExpand: string[] = []
-      let cursor = nodeMap.get(id)?.parentId ?? null
-      while (cursor) {
-        if (!current.has(cursor)) ancestorsToExpand.push(cursor)
-        cursor = nodeMap.get(cursor)?.parentId ?? null
-      }
-      if (ancestorsToExpand.length > 0) {
-        const next = new Set(current)
-        for (const ancestorId of ancestorsToExpand) next.add(ancestorId)
-        if (!controlledExpanded) {
-          setInternalExpanded(next)
-        }
-        for (const ancestorId of ancestorsToExpand) {
-          onExpandToggle?.(ancestorId, true)
-        }
-        onExpandedNodesChange?.(next)
-      }
-
-      // 2) Select the node (no-op if selectionMode === "none").
-      selectNode(id)
-
-      // 3) Fly to it once the next layout pass has settled.
-      clearSearchFlyTimer()
-      searchFlyTimerRef.current = window.setTimeout(() => {
-        searchFlyTimerRef.current = null
-        if (detailPanelEnabled) {
-          centerNodeWithPanelOffset(id, true)
-        } else {
-          reactFlow.fitView({
-            nodes: [{ id }],
-            duration: 300,
-            padding: FIT_VIEW_PADDING_LOOSE,
-          })
-        }
-      }, FOCUS_SETTLE_DELAY_MS)
-
-      onSearchResultSelect?.(id)
-    },
-    [
-      nodeMap,
-      expandedNodes,
-      controlledExpanded,
-      onExpandToggle,
-      selectNode,
-      reactFlow,
-      onSearchResultSelect,
-      detailPanelEnabled,
-      centerNodeWithPanelOffset,
-      clearSearchFlyTimer,
-    ]
-  )
-
-  // Clean up the search-fly timer on unmount.
-  useEffect(() => {
-    return clearSearchFlyTimer
-  }, [clearSearchFlyTimer])
+    reactFlow.fitView({
+      nodes: [{ id: currentUserNodeId }],
+      duration: 400,
+      padding: FIT_VIEW_PADDING_LOOSE,
+    })
+  }, [currentUserNodeId, reactFlow])
 
   // ── Split context values (for performance — wrappers subscribe to only what they need) ──
   const zoomContextValue = useMemo(
@@ -1810,7 +1612,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
       // Tells the node wrapper how much extra height the layout reserved
       // for tags. In compact/dot (where tags are hidden) the wrapper uses
       // this to top-align the pill and pull the source Handle up.
-      tagRowHeight: tagsAffectLayout ? TAG_ROW_HEIGHT : 0,
+      tagRowHeight: reservedTagHeight,
       // Snap variant transitions when the rendered tree exceeds this
       // threshold. Animating thousands of pills (chrome opacity, avatar
       // transform, text reveal, backdrop-blur activation) on a single
@@ -1853,12 +1655,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
                     aria-label={controlLabels?.graphCanvas ?? i18n.graph.canvas}
                     onKeyDown={handleCanvasKeyDown}
                     data-zoom-level={zoomLevel}
-                    className={cn(
-                      "f0-graph relative bg-f1-background-tertiary outline-none",
-                      fullScreen
-                        ? "h-full w-full"
-                        : "mx-3 my-3 h-[calc(100%-24px)] w-[calc(100%-24px)] overflow-hidden rounded-xl border border-solid border-f1-border-secondary"
-                    )}
+                    className="f0-graph relative h-full w-full outline-none"
                   >
                     <div
                       ref={containerRef}
@@ -1939,58 +1736,16 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
                         <Background
                           id="f0-graph-bg"
                           variant={BackgroundVariant.Dots}
-                          gap={32}
+                          gap={BACKGROUND_DOT_GAP}
                           size={4}
                           color="var(--f0-graph-bg-dot)"
                         />
                       </ReactFlow>
                     </div>
 
-                    {searchable ? (
+                    {canvasActions && (
                       <div
-                        className="absolute left-3 top-3 z-10 flex w-[240px] flex-col gap-2"
-                        data-no-spark
-                      >
-                        <F0GraphSearch
-                          value={internalSearchQuery}
-                          onChange={setInternalSearchQuery}
-                          results={searchResults}
-                          hasQuery={hasSearchQuery}
-                          pending={searchPending}
-                          loading={searchLoading}
-                          placeholder={searchable.placeholder}
-                          noResultsLabel={searchable.noResultsLabel}
-                          onSelect={handleSearchResultSelect}
-                        />
-                        {canvasActions && (
-                          <div className="flex w-fit flex-col gap-2 rounded-md backdrop-blur-[140px]">
-                            {canvasActions}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      onSearchChange && (
-                        <div
-                          className="absolute left-3 top-3 z-10 flex w-[240px] flex-col gap-2"
-                          data-no-spark
-                        >
-                          <Search
-                            value={searchValue}
-                            onChange={onSearchChange}
-                            loading={searchLoading}
-                          />
-                          {canvasActions && (
-                            <div className="flex w-fit flex-col gap-2 rounded-md backdrop-blur-[140px]">
-                              {canvasActions}
-                            </div>
-                          )}
-                        </div>
-                      )
-                    )}
-
-                    {!searchable && !onSearchChange && canvasActions && (
-                      <div
-                        className="absolute left-3 top-3 z-10 flex flex-col gap-2 rounded-md backdrop-blur-[140px]"
+                        className="absolute left-6 top-3 z-10 flex flex-col gap-2 rounded-md backdrop-blur-[140px]"
                         data-no-spark
                       >
                         {canvasActions}
@@ -1999,7 +1754,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
 
                     {showControls && (
                       <div
-                        className="absolute bottom-3 left-3 z-10"
+                        className="absolute bottom-6 left-6 z-10"
                         data-no-spark
                       >
                         <F0GraphControls
@@ -2007,41 +1762,21 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
                           onZoomOut={handleZoomOut}
                           onFitView={handleFitView}
                           onFocusUser={
-                            currentUserNodeId && nodeMap.has(currentUserNodeId)
-                              ? handleFocusUser
-                              : undefined
+                            !currentUserNodeId
+                              ? undefined
+                              : // A consumer handler can reveal a collapsed /
+                                // not-yet-loaded node, so keep the button enabled
+                                // even when it isn't on screen. Without one, fall
+                                // back to fitView, which needs a visible node.
+                                (onFocusUserProp ??
+                                (nodeMap.has(currentUserNodeId)
+                                  ? handleFocusUser
+                                  : undefined))
                           }
-                          tagTypes={nodeTagTypes}
-                          visibleTagTypes={visibleTagTypesSet}
-                          onToggleTagType={toggleTagType}
-                          tagTypeLabels={nodeTagTypeLabels}
                           labels={controlLabels}
                         />
                       </div>
                     )}
-
-                    {detailPanelEnabled &&
-                      detailNode &&
-                      detailPanel &&
-                      (() => {
-                        const config = detailPanel(detailNode as GraphNode<T>)
-                        // TS can't narrow discriminated unions through JSX
-                        // spreads — config has the correct variant props, the
-                        // assertion is safe.
-                        const panelProps = {
-                          ...config,
-                          open: detailOpen,
-                          initialWidth: detailPanelWidth,
-                          graphId,
-                          ariaLabel: detailPanelAriaLabel,
-                          onClose: () => setDetailNodeId(null),
-                        } as F0GraphDetailPanelProps
-                        return (
-                          <div data-no-spark>
-                            <F0GraphDetailPanel {...panelProps} />
-                          </div>
-                        )
-                      })()}
                   </div>
                 </ClickSpark>
               </F0GraphSelectionContext.Provider>

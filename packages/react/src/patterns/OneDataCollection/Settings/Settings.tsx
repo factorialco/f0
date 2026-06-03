@@ -113,7 +113,13 @@ export const Settings = <
 
   const hasVisualizations = visualizations && visualizations.length > 1
   const hasGrouping = grouping && groupByOptions > 0
-  const hasSortings = sortings && Object.keys(sortings).length > 0
+
+  // A visualization can override the available sortings (e.g. the org chart
+  // passes `sortings: {}` because it's a tree, not a sortable row list).
+  const sortingsOverride = visualizations[currentVisualization]?.sortings
+  const effectiveSortings = (sortingsOverride ?? sortings) as SortingsDefinition
+  const hasSortings =
+    effectiveSortings && Object.keys(effectiveSortings).length > 0
 
   const currentVisualizationDef = useMemo(
     () => visualizations[currentVisualization],
@@ -232,7 +238,7 @@ export const Settings = <
                   key="sorting"
                   currentSortings={currentSortings}
                   onChange={onSortingsChange}
-                  sortings={sortings}
+                  sortings={effectiveSortings}
                 />
               </div>
             ),

@@ -99,7 +99,8 @@ export type CardMetadataProperty = {
 
 export type CardMetadata =
   | {
-      icon: IconType
+      /** Leading icon. Optional — when omitted the row renders just the value. */
+      icon?: IconType
       property: Exclude<CardMetadataProperty, { type: "file" }>
     }
   | {

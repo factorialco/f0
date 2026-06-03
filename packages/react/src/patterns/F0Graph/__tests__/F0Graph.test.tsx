@@ -418,4 +418,45 @@ describe("F0Graph keyboard navigation", () => {
     dispatchKey(tree, "ArrowLeft")
     expect(onExpandToggle).toHaveBeenCalledWith("1", false)
   })
+
+  describe("find me", () => {
+    it("keeps the button enabled and calls onFocusUser when the user node is not in view", async () => {
+      const { fireEvent } = await import("@testing-library/react")
+      const onFocusUser = vi.fn()
+
+      zeroRender(
+        <div style={{ width: 800, height: 600 }}>
+          <F0Graph
+            nodes={makeNodes()}
+            renderNode={renderNodeFn}
+            showControls
+            // Node "999" is not in the tree (collapsed / not yet loaded).
+            currentUserNodeId="999"
+            onFocusUser={onFocusUser}
+          />
+        </div>
+      )
+
+      const button = screen.getByRole("button", { name: "Find me" })
+      fireEvent.click(button)
+      expect(onFocusUser).toHaveBeenCalledOnce()
+    })
+
+    it("hides the button when the user node is off-screen and no onFocusUser is given", () => {
+      zeroRender(
+        <div style={{ width: 800, height: 600 }}>
+          <F0Graph
+            nodes={makeNodes()}
+            renderNode={renderNodeFn}
+            showControls
+            currentUserNodeId="999"
+          />
+        </div>
+      )
+
+      expect(
+        screen.queryByRole("button", { name: "Find me" })
+      ).not.toBeInTheDocument()
+    })
+  })
 })

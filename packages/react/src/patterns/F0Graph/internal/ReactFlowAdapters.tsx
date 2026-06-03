@@ -87,10 +87,18 @@ const EXPANDER_SIZE: Record<ZoomLevel, number> = {
   dot: 72,
 }
 
+// Vertical lane between a node's bottom and its children's top. Matches
+// `DEFAULT_RANK_SEP` in useLayoutEngine — keep them in sync.
+const NODE_RANK_SEP = 130
+
+// Place the expander/collapser button so it sits exactly in the middle of the
+// lane between a node and its children: the button (anchored at the top of its
+// wrapper box) is pushed down by half the leftover space. Measured from the
+// node's bottom edge.
 export const EXPANDER_Y_OFFSET_BY_ZOOM: Record<ZoomLevel, number> = {
-  detail: 18,
-  compact: 18,
-  dot: 72,
+  detail: (NODE_RANK_SEP - EXPANDER_SIZE.detail) / 2,
+  compact: (NODE_RANK_SEP - EXPANDER_SIZE.compact) / 2,
+  dot: (NODE_RANK_SEP - EXPANDER_SIZE.dot) / 2,
 }
 
 // ─── F0GraphNodeWrapper ────────────────────────────────────────

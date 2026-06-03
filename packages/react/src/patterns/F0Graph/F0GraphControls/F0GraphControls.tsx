@@ -1,36 +1,14 @@
-import { forwardRef, useState } from "react"
+import { forwardRef } from "react"
 
 import { F0Button } from "@/components/F0Button"
-import { ButtonInternal } from "@/components/F0Button/internal"
-import { Switch } from "@/experimental/Forms/Fields/Switch"
-import { Add, FitView, Minus, SearchPerson, Sliders } from "@/icons/app"
+import { Add, FitView, Minus, SearchPerson } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 import type { F0GraphControlsProps } from "./types"
 
 export const F0GraphControls = forwardRef<HTMLDivElement, F0GraphControlsProps>(
-  (
-    {
-      onZoomIn,
-      onZoomOut,
-      onFitView,
-      onFocusUser,
-      tagTypes,
-      visibleTagTypes,
-      onToggleTagType,
-      tagTypeLabels,
-      labels,
-    },
-    ref
-  ) => {
+  ({ onZoomIn, onZoomOut, onFitView, onFocusUser, labels }, ref) => {
     const i18n = useI18n()
-    const [tagPopoverOpen, setTagPopoverOpen] = useState(false)
-
-    const showTagButton = !!tagTypes && tagTypes.length > 0 && !!onToggleTagType
-
-    const tagButtonLabel =
-      labels?.metadataSettings ?? i18n.graph.controls.metadataSettings
 
     return (
       <div
@@ -59,55 +37,8 @@ export const F0GraphControls = forwardRef<HTMLDivElement, F0GraphControlsProps>(
           onClick={onFitView}
         />
 
-        {showTagButton && (
-          <Popover open={tagPopoverOpen} onOpenChange={setTagPopoverOpen}>
-            <PopoverTrigger asChild>
-              <ButtonInternal
-                variant="outline"
-                size="md"
-                label={tagButtonLabel}
-                icon={Sliders}
-                hideLabel
-                pressed={tagPopoverOpen}
-                onClick={() => setTagPopoverOpen((o) => !o)}
-              />
-            </PopoverTrigger>
-            <PopoverContent
-              align="start"
-              side="right"
-              sideOffset={8}
-              className="w-[220px] rounded-md border border-solid border-f1-border-secondary p-2"
-            >
-              <div className="flex flex-col gap-1">
-                {tagTypes!.map((type) => {
-                  const label =
-                    tagTypeLabels?.[type] ??
-                    i18n.graph.controls.tagTypeLabels[type]
-                  const checked = visibleTagTypes?.has(type) ?? false
-                  return (
-                    <label
-                      key={type}
-                      className="flex cursor-pointer items-center justify-between gap-2 rounded px-2 py-1.5 hover:bg-f1-background-secondary"
-                    >
-                      <span className="text-sm font-medium text-f1-foreground">
-                        {label}
-                      </span>
-                      <Switch
-                        title={label}
-                        hideLabel
-                        checked={checked}
-                        onCheckedChange={() => onToggleTagType?.(type)}
-                      />
-                    </label>
-                  )
-                })}
-              </div>
-            </PopoverContent>
-          </Popover>
-        )}
-
         {/* Divider */}
-        <div className="h-px w-4 bg-f1-foreground/10" />
+        <div className="h-px w-4 bg-f1-border rounded" />
 
         <F0Button
           variant="outline"

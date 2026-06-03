@@ -62,6 +62,7 @@ import {
   type PresetFormValues,
 } from "./components/PresetFormDialog"
 import { Search } from "./components/Search"
+import { useSearchPreview } from "./components/Search/useSearchPreview"
 import { TotalItemsSummary } from "./components/TotalItemsSummary"
 import {
   DataCollectionStatusComplete,
@@ -340,6 +341,11 @@ const OneDataCollectionComp = <
     const params = new URLSearchParams(window.location.search)
     return decodeSharedPreset(params.get(SHARED_PRESET_PARAM))
   })
+
+  const searchPreview = useSearchPreview(
+    source.searchPreview,
+    source.debouncedCurrentSearch
+  )
 
   const {
     effectiveFilters,
@@ -1559,7 +1565,13 @@ const OneDataCollectionComp = <
                 </motion.div>
               )}
               {search && (
-                <Search onChange={setCurrentSearch} value={currentSearch} />
+                <Search
+                  onChange={setCurrentSearch}
+                  value={currentSearch}
+                  results={searchPreview.results}
+                  resultsLoading={searchPreview.loading}
+                  onResultSelect={searchPreview.onSelect}
+                />
               )}
               {shouldShowSettings && (
                 <Settings

@@ -242,4 +242,123 @@ describe("F0GraphNode", () => {
     render(<F0GraphNode nodeRef={nodeRef} />)
     expect(nodeRef).toHaveBeenCalledWith(expect.any(HTMLDivElement))
   })
+
+  describe("hover card", () => {
+    it("compact: reveals the hidden subtitle on hover", async () => {
+      const { userEvent } = await import("@testing-library/user-event")
+      const { waitFor } = await import("@testing-library/react")
+      const user = userEvent.setup()
+
+      render(
+        <F0GraphNode
+          hoverCard
+          variant="compact"
+          avatar={personAvatar}
+          title="Alice"
+          subtitle="Engineer"
+        />
+      )
+
+      // Subtitle is hidden on the compact node itself.
+      expect(screen.queryByText("Engineer")).not.toBeInTheDocument()
+
+      await user.hover(screen.getByRole("treeitem"))
+
+      await waitFor(() => {
+        expect(screen.getByText("Engineer")).toBeInTheDocument()
+      })
+    })
+
+    it("dot: reveals title and tags on hover", async () => {
+      const { userEvent } = await import("@testing-library/user-event")
+      const { waitFor } = await import("@testing-library/react")
+      const user = userEvent.setup()
+
+      render(
+        <F0GraphNode
+          hoverCard
+          variant="dot"
+          avatar={personAvatar}
+          title="Alice"
+          subtitle="Engineer"
+          tags={[{ type: "raw", text: "Madrid" }]}
+        />
+      )
+
+      expect(screen.queryByText("Madrid")).not.toBeInTheDocument()
+
+      await user.hover(screen.getByRole("treeitem"))
+
+      await waitFor(() => {
+        expect(screen.getByText("Madrid")).toBeInTheDocument()
+      })
+    })
+
+    it("detail: never wires a hover card (everything is already visible)", async () => {
+      const { userEvent } = await import("@testing-library/user-event")
+      const user = userEvent.setup()
+
+      render(
+        <F0GraphNode
+          hoverCard
+          variant="detail"
+          avatar={personAvatar}
+          title="Alice"
+          subtitle="Engineer"
+          tags={[{ type: "raw", text: "Madrid" }]}
+        />
+      )
+
+      // Detail shows it all, so the node is rendered without a hover trigger.
+      expect(screen.getByRole("treeitem")).not.toHaveAttribute("data-state")
+
+      await user.hover(screen.getByRole("treeitem"))
+
+      // No popover card appears — the single "Madrid" is the node's own tag.
+      expect(screen.getAllByText("Madrid")).toHaveLength(1)
+    })
+
+    it("compact: card omits tags hidden via visibleTagTypes", async () => {
+      const { userEvent } = await import("@testing-library/user-event")
+      const { waitFor } = await import("@testing-library/react")
+      const user = userEvent.setup()
+
+      render(
+        <F0GraphNode
+          hoverCard
+          variant="compact"
+          avatar={personAvatar}
+          title="Alice"
+          subtitle="Engineer"
+          tags={[
+            { type: "raw", text: "Madrid" },
+            { type: "status", text: "Active", variant: "positive" },
+          ]}
+          // Only "raw" tags are allowed in view; "status" is blocked.
+          visibleTagTypes={new Set(["raw"])}
+        />
+      )
+
+      await user.hover(screen.getByRole("treeitem"))
+
+      await waitFor(() => {
+        expect(screen.getByText("Madrid")).toBeInTheDocument()
+      })
+      // The blocked "status" tag must not be surfaced in the card.
+      expect(screen.queryByText("Active")).not.toBeInTheDocument()
+    })
+
+    it("does not wrap in a hover card when hoverCard is not set", () => {
+      render(
+        <F0GraphNode
+          variant="dot"
+          avatar={personAvatar}
+          title="Alice"
+          subtitle="Engineer"
+        />
+      )
+
+      expect(screen.getByRole("treeitem")).not.toHaveAttribute("data-state")
+    })
+  })
 })

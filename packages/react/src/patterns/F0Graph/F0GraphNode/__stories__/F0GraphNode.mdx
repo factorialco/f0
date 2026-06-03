@@ -51,12 +51,11 @@ readable as the tree scales.
 ### Tag rows
 
 In `detail` variant, tags are rendered from `tags` as a wrapped row below
-the pill. Tags are auto-grouped by `type`: a single tag of a type renders
-directly, while 2+ tags of the same type collapse into one summary tag
-(for example, `3 teams`) with member names exposed in a tooltip.
+the pill. Every tag is shown individually — tags are never grouped or
+collapsed into a summary, even when several share the same `type`.
 
-Use `visibleTagTypes` to filter which tag types are rendered and
-`tagLabels` to override the summary labels.
+Use `visibleTagTypes` to filter which tag types are rendered. `tagLabels`
+provides per-type labels used as metadata row labels in the node hover card.
 
 <Canvas of={Stories.WithTags} />
 
@@ -95,9 +94,9 @@ context:
 | `avatar`          | `AvatarVariant`                                        | —           | Avatar shown on the leading side of the pill                                                                                                  |
 | `title`           | `ReactNode`                                            | —           | Primary line of text (hidden in dot variant)                                                                                                  |
 | `subtitle`        | `ReactNode`                                            | —           | Secondary line of text (hidden in compact and dot)                                                                                            |
-| `tags`            | `TagVariant[]`                                         | —           | Tag row rendered in detail variant with per-type grouping                                                                                     |
+| `tags`            | `TagVariant[]`                                         | —           | Tag row rendered in detail variant; every tag shown individually (no grouping)                                                                |
 | `visibleTagTypes` | `ReadonlySet<F0GraphNodeTagType>`                      | —           | Filters rendered tags by type when provided                                                                                                   |
-| `tagLabels`       | `F0GraphNodeTagLabels`                                 | —           | Optional labels override for multi-tag summary text                                                                                           |
+| `tagLabels`       | `F0GraphNodeTagLabels`                                 | —           | Per-type labels used as metadata row labels in the node hover card                                                                            |
 | `actions`         | `ReactNode`                                            | —           | Floating toolbar (`NodeToolbar`) shown above the node when `state="selected"` in the detail variant. Requires a `ReactFlowProvider` ancestor. |
 | `loading`         | `boolean`                                              | `false`     | Show a skeleton/loading placeholder instead of real content                                                                                   |
 | `nodeId`          | `string`                                               | —           | DOM id for aria-owns cross-references                                                                                                         |

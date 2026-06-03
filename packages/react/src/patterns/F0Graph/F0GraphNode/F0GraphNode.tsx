@@ -16,6 +16,7 @@ import { Skeleton } from "@/ui/skeleton"
 import type { F0GraphNodeProps } from "./types"
 
 import { useF0GraphRenderConfigInternal } from "../contexts"
+import { F0GraphNodeHoverCard } from "./F0GraphNodeHoverCard"
 import { F0GraphNodeTags } from "./F0GraphNodeTags"
 import { graphNodeContainerVariants } from "./variants"
 
@@ -53,6 +54,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
       tagLabels,
       actions,
       loading,
+      hoverCard,
     },
     ref
   ) => {
@@ -126,7 +128,17 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
       : undefined
     const tagsVisible = isDetail && !!filteredTags && filteredTags.length > 0
 
-    return (
+    // The hover card only makes sense in the compacted modes, where part of the
+    // node's info is not on screen. In detail everything is already visible, so
+    // there's nothing to reveal. Only the non-hidden tags (`filteredTags`,
+    // respecting `visibleTagTypes`) are surfaced — blocked metadata stays out.
+    const hasHiddenInfo = isDot
+      ? !!(title || subtitle || filteredTags?.length)
+      : isCompact
+        ? !!(subtitle || filteredTags?.length)
+        : false
+
+    const node = (
       <div
         ref={combinedRef}
         id={nodeId ? `f0-graph-node-${nodeId}` : undefined}
@@ -158,8 +170,8 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
             visually jump when the wrapper width snaps. */}
         <div
           className={cn(
-            "group/pill relative inline-flex max-w-full flex-col items-stretch rounded-full",
-            "outline-none",
+            "group/pill relative inline-flex max-w-full flex-col items-stretch",
+            "outline-none rounded-full",
             // Selection / highlight rings stay on the wrapper so they wrap
             // the layout box (which matches the visible compact/detail pill).
             // For dot variant the ring is moved to the avatar (see below).
@@ -169,14 +181,11 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
             // Dimmed visually applies to the whole wrapper only in dot
             // (matches previous behaviour).
             state === "dimmed" && isDot && "opacity-40",
-            "group-focus-visible:ring-2 group-focus-visible:ring-f1-background-selected group-focus-visible:ring-offset-0"
+            "group-focus-visible:ring-2 group-focus-visible:ring-f1-background-selected group-focus-visible:ring-offset-0",
+            "px-2.5 py-2",
+            "min-h-11"
           )}
           style={{
-            paddingTop: 6,
-            paddingBottom: 6,
-            paddingLeft: 8,
-            paddingRight: isDot ? 8 : isCompact ? 24 : 16,
-            minHeight: 40,
             // Isolate reflow so a node's layout snap does not invalidate
             // ancestors or siblings. `paint` is intentionally omitted —
             // it would clip the scaled-up dot avatar (transform: scale 2.4)
@@ -204,7 +213,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
               state !== "selected" &&
                 state !== "highlighted" &&
                 !isDot &&
-                "group-hover/pill:border-f1-border-hover group-hover/pill:bg-f1-background-hover",
+                "group-hover/pill:border-transparent group-hover/pill:bg-f1-background-hover",
               (state === "selected" || state === "highlighted") &&
                 "border-f1-border-selected-bold"
             )}
@@ -228,7 +237,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
                 along with the avatar. */}
             <div
               className={cn(
-                "flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full",
+                "flex  shrink-0 items-center justify-center overflow-hidden rounded-full",
                 isDot &&
                   (state === "selected" || state === "highlighted") &&
                   "ring-2 ring-f1-background-selected ring-offset-0"
@@ -242,21 +251,11 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
                 willChange: "transform",
               }}
             >
-              {/* Avatar frame — circular border using the secondary
-                  border token. F0Avatar variants render with different
-                  intrinsic shapes (Person is round, Team/Company/Flag/
-                  Emoji/Icon are rounded squares). The graph node always
-                  wants a circular silhouette, so we frame the avatar
-                  with a rounded-full bordered wrapper. The clip is also
-                  rounded-full so the avatar content stays inside the
-                  circle. */}
-              <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-solid border-f1-border-secondary">
-                {loading ? (
-                  <Skeleton className="h-10 w-10 rounded-full" />
-                ) : (
-                  avatar && <F0Avatar size="lg" avatar={avatar} />
-                )}
-              </div>
+              {loading ? (
+                <Skeleton className="h-10 w-10 rounded-full" />
+              ) : (
+                avatar && <F0Avatar size="lg" avatar={avatar} />
+              )}
             </div>
 
             {/* Text column — width/margin snap once per variant; only
@@ -373,11 +372,26 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
             }
             className="max-w-[256px]"
           >
-            <F0GraphNodeTags tags={filteredTags!} labels={tagLabels} />
+            <F0GraphNodeTags tags={filteredTags!} />
           </motion.div>
         )}
       </div>
     )
+
+    if (hoverCard && hasHiddenInfo && !loading) {
+      return (
+        <F0GraphNodeHoverCard
+          trigger={node}
+          avatar={avatar}
+          title={typeof title === "string" ? title : undefined}
+          subtitle={typeof subtitle === "string" ? subtitle : undefined}
+          tags={filteredTags}
+          tagLabels={tagLabels}
+        />
+      )
+    }
+
+    return node
   }
 )
 

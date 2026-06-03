@@ -1,14 +1,15 @@
 import { forwardRef } from "react"
 
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn, focusRing } from "@/lib/utils"
 
 import type { F0GraphExpanderProps } from "./types"
 
-// CUSTOM: F0Button only supports sm/md/lg (24/32/40px). The expander needs
-// arbitrary pixel sizes (up to 72px at dot zoom). A native <button> styled
-// with F0 neutral-variant tokens is used instead.
-
+// Rendered with the shared neutral F0 button. `aria-expanded` / `tabIndex` are
+// forwarded to the underlying button so the expander keeps its tree a11y and
+// plays along with the roving tabindex managed by `F0GraphExpanderWrapper`.
+// The pixel `size` is applied via style because the layout centers the button
+// in the lane based on it.
 export const F0GraphExpander = forwardRef<HTMLDivElement, F0GraphExpanderProps>(
   (
     { count, expanded, onClick, size = 24, tabIndex, ariaLabel, loading },
@@ -16,44 +17,24 @@ export const F0GraphExpander = forwardRef<HTMLDivElement, F0GraphExpanderProps>(
   ) => {
     const i18n = useI18n()
     const displayCount = count > 99 ? "+99" : String(count)
-    const isOverflow = count > 99
-    const fontSize = Math.round(size * 0.5)
+    const label = i18n.t(
+      expanded ? "graph.expander.collapse" : "graph.expander.expand",
+      { count }
+    )
 
     return (
       <div ref={ref} className="inline-flex">
-        <button
-          type="button"
-          tabIndex={tabIndex}
-          onClick={onClick}
+        <ButtonInternal
+          variant="neutral"
+          label={displayCount}
+          aria-label={ariaLabel ?? label}
           aria-expanded={expanded}
-          aria-label={
-            ariaLabel ??
-            i18n.t(
-              expanded ? "graph.expander.collapse" : "graph.expander.expand",
-              { count }
-            )
-          }
-          className={cn(
-            "inline-flex items-center justify-center rounded-full border-none p-0 font-medium",
-            "bg-f1-background-secondary text-f1-foreground",
-            "shadow-[0_2px_6px_-1px_rgba(13,22,37,.04),inset_0_-2px_4px_rgba(13,22,37,.04)]",
-            "transition-colors",
-            "hover:bg-f1-background-secondary-hover",
-            "active:bg-f1-background-secondary-hover active:shadow-[inset_0_2px_8px_0_rgba(13,22,37,.16)]",
-            focusRing(),
-            isOverflow && "px-2",
-            loading && "animate-pulse"
-          )}
-          style={{
-            height: size,
-            minWidth: size,
-            width: isOverflow ? "auto" : size,
-            fontSize,
-            lineHeight: 1,
-          }}
-        >
-          {displayCount}
-        </button>
+          tabIndex={tabIndex}
+          loading={loading}
+          onClick={onClick}
+          tooltip={label}
+          style={{ height: size, minWidth: size }}
+        />
       </div>
     )
   }

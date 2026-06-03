@@ -2,16 +2,9 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
 import "@xyflow/react/dist/style.css"
-import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
-import { F0Card } from "@/components/F0Card"
-import { F0TagPerson } from "@/components/tags/F0TagPerson"
-import { DataList } from "@/experimental/Lists/DataList"
-import { Weekdays } from "@/experimental/Widgets/Content/Weekdays"
-import { WhatsappChat } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import type { Searchable } from "../F0GraphSearch"
 import type { DeferredNodesPayload, GraphNode } from "../types"
 
 import {
@@ -39,7 +32,6 @@ const meta = {
       options: ["single", "multi", "none"],
     },
     showControls: { control: "boolean" },
-    fullScreen: { control: "boolean" },
     defaultExpandDepth: { control: { type: "number", min: 0, max: 5 } },
     zoomPreset: {
       control: "select",
@@ -50,9 +42,6 @@ const meta = {
     },
     maxZoom: {
       control: { type: "number", min: 1, max: 4, step: 0.1 },
-    },
-    detailPanelWidth: {
-      control: { type: "range", min: 200, max: 600, step: 8 },
     },
 
     // ---- Hidden from controls ----
@@ -72,13 +61,6 @@ const meta = {
     focusedNode: { table: { disable: true } },
     highlightedNodes: { table: { disable: true } },
     layoutEngine: { table: { disable: true } },
-    searchValue: { table: { disable: true } },
-    onSearchChange: { table: { disable: true } },
-    searchLoading: { table: { disable: true } },
-    searchable: { table: { disable: true } },
-    onSearchResultSelect: { table: { disable: true } },
-    detailPanel: { table: { disable: true } },
-    detailPanelAriaLabel: { table: { disable: true } },
     controlLabels: { table: { disable: true } },
     onZoomLevelChange: { table: { disable: true } },
     onViewportChange: { table: { disable: true } },
@@ -105,18 +87,6 @@ interface Employee {
   workplace?: string
   workableDays?: ReadonlyArray<"M" | "T" | "W" | "R" | "F" | "S" | "U">
   teams?: ReadonlyArray<Team>
-}
-
-const ALL_DAYS = ["M", "T", "W", "R", "F", "S", "U"] as const
-
-const DAY_CODE_TO_INDEX: Record<(typeof ALL_DAYS)[number], number> = {
-  M: 0,
-  T: 1,
-  W: 2,
-  R: 3,
-  F: 4,
-  S: 5,
-  U: 6,
 }
 
 function profileDefaults(
@@ -328,25 +298,6 @@ export const WithControls: Story = {
     renderNode: renderEmployee,
     showControls: true,
     defaultExpandDepth: 2,
-  },
-}
-
-/** F0Graph rendered without the fullscreen toggle — useful when embedding inside a constrained container, modal, or panel. */
-export const WithoutFullscreen: Story = {
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "F0Graph rendered with `fullScreen={false}`. The canvas is inset from its container with a rounded border instead of bleeding edge-to-edge — use this when embedding the graph inside a card, modal, or constrained panel rather than as a standalone page.",
-      },
-    },
-  },
-  args: {
-    nodes: BASIC_NODES,
-    renderNode: renderEmployee,
-    showControls: true,
-    defaultExpandDepth: 2,
-    fullScreen: false,
   },
 }
 
@@ -871,186 +822,6 @@ export const Controlled: Story = {
   },
 }
 
-/** Demonstrates declarative `searchable` config for indexed search with auto-expand and fly-to. */
-export const WithSearch: Story = {
-  args: {
-    nodes: makeLargeTree(60),
-    renderNode: renderEmployee,
-    searchable: {
-      getLabel: (node: GraphNode<Employee>) => node.data.name,
-      getSecondaryLabel: (node: GraphNode<Employee>) => node.data.title,
-      placeholder: "Search people…",
-      noResultsLabel: "No matches found",
-    } satisfies Searchable<Employee>,
-    showControls: true,
-    defaultExpandDepth: 1,
-  },
-}
-
-// ─── Detail Panel ──────────────────────────────────────────────
-
-function DetailPanelSection({
-  title,
-  children,
-}: {
-  title: string
-  children: React.ReactNode
-}) {
-  return (
-    <section className="flex flex-col border-0 border-t border-dashed border-f1-border-secondary">
-      <header className="flex items-center px-4 pb-2 pt-3">
-        <span className="text-base font-semibold leading-5 text-f1-foreground">
-          {title}
-        </span>
-      </header>
-      <div className="flex flex-col gap-2 pb-2">{children}</div>
-    </section>
-  )
-}
-
-const DETAIL_NODES_BY_ID = new Map(BASIC_NODES.map((n) => [n.id, n]))
-
-/**
- * Demonstrates the `resource` detail-panel variant with a rich header,
- * primary + secondary actions, an overflow menu, and grouped content
- * sections — the same pattern used in the F0Graph dev playground.
- */
-export const WithDetailPanel: Story = {
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "The detail panel uses the `resource` variant: a custom avatar header, action row (primary + secondary + overflow), and grouped sections built with `DataList`, `Weekdays`, `F0TagPerson`, and `F0Card`. Click any node to open it.",
-      },
-    },
-  },
-  args: {
-    nodes: BASIC_NODES,
-    renderNode: renderEmployee,
-    detailPanel: (node: GraphNode<Employee>) => {
-      const e = node.data
-      const [firstName = "", lastName = ""] = e.name.split(" ")
-      const manager = node.parentId
-        ? DETAIL_NODES_BY_ID.get(node.parentId)
-        : undefined
-      const days = e.workableDays ?? []
-      return {
-        variant: "resource" as const,
-        header: (
-          <div className="flex flex-col gap-[10px] px-5 pb-3 pt-6">
-            <F0AvatarPerson
-              firstName={firstName}
-              lastName={lastName}
-              size="xl"
-            />
-            <div className="flex flex-col">
-              <div className="flex items-end gap-1.5">
-                <span className="text-xl font-semibold leading-7 text-f1-foreground">
-                  {e.name}
-                </span>
-                {e.pronouns && (
-                  <span className="text-sm font-medium leading-5 text-f1-foreground-secondary">
-                    {`(${e.pronouns})`}
-                  </span>
-                )}
-              </div>
-              {e.title && (
-                <span className="text-lg text-f1-foreground-secondary">
-                  {e.title}
-                </span>
-              )}
-            </div>
-          </div>
-        ),
-        actions: [
-          {
-            label: "View profile",
-            // eslint-disable-next-line no-console
-            onClick: () => console.log("view profile", node.id),
-          },
-          {
-            label: "Send message",
-            icon: WhatsappChat,
-            // eslint-disable-next-line no-console
-            onClick: () => console.log("message", node.id),
-          },
-          {
-            label: "Copy link",
-            // eslint-disable-next-line no-console
-            onClick: () => console.log("copy link", node.id),
-          },
-          {
-            label: "Remove",
-            // eslint-disable-next-line no-console
-            onClick: () => console.log("remove", node.id),
-          },
-        ],
-        children: (
-          <>
-            <DetailPanelSection title="Contact details">
-              <div className="flex flex-col px-3 pb-1">
-                <DataList label="Email">
-                  <DataList.Item text={e.email ?? "—"} />
-                </DataList>
-                <DataList label="Phone number">
-                  <DataList.Item text={e.phone ?? "—"} />
-                </DataList>
-              </div>
-            </DetailPanelSection>
-            <DetailPanelSection title="Work details">
-              <div className="flex flex-col px-3 pb-1">
-                <DataList label="Email">
-                  <DataList.Item text={e.workEmail ?? "—"} />
-                </DataList>
-                <DataList label="Workplace">
-                  <DataList.Item text={e.workplace ?? "—"} />
-                </DataList>
-              </div>
-              <div className="flex flex-col gap-0.5 px-4 pb-2">
-                <span className="text-base leading-5 text-f1-foreground-secondary">
-                  Workable days
-                </span>
-                <Weekdays
-                  activatedDays={days
-                    .map((d) => DAY_CODE_TO_INDEX[d])
-                    .filter((i): i is number => typeof i === "number")}
-                />
-              </div>
-              {manager && (
-                <div className="flex flex-col gap-0.5 px-4 pb-2">
-                  <span className="text-base leading-5 text-f1-foreground-secondary">
-                    Managed by
-                  </span>
-                  <F0TagPerson name={manager.data.name} />
-                </div>
-              )}
-            </DetailPanelSection>
-            {e.teams && e.teams.length > 0 && (
-              <DetailPanelSection title="Teams">
-                <div className="flex items-stretch gap-2 px-3 pb-5">
-                  {e.teams.map((t) => (
-                    <div key={t.name} className="flex-1">
-                      <F0Card
-                        compact
-                        fullHeight
-                        avatar={{ type: "team", name: t.name }}
-                        title={t.name}
-                        description={`${t.members} members`}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </DetailPanelSection>
-            )}
-          </>
-        ),
-      }
-    },
-    defaultExpandDepth: 2,
-    showControls: true,
-  },
-}
-
 // ─── Progressive / staged loading stories ─────────────────────
 
 const INITIAL_STAGED_NODES = makeLargeTree(30)
@@ -1153,46 +924,6 @@ export const Snapshot: Story = {
           renderNode={renderEmployee}
           showControls
           defaultExpandDepth={2}
-        />
-      </div>
-      <div className="min-h-0 flex-1 overflow-hidden rounded-md border border-f1-border-secondary bg-f1-background">
-        <F0Graph<Employee>
-          nodes={makeLargeTree(60)}
-          renderNode={renderEmployee}
-          searchable={{
-            getLabel: (node: GraphNode<Employee>) => node.data.name,
-            getSecondaryLabel: (node: GraphNode<Employee>) => node.data.title,
-            placeholder: "Search people…",
-            noResultsLabel: "No matches found",
-          }}
-          showControls
-          defaultExpandDepth={1}
-        />
-      </div>
-      <div className="min-h-0 flex-1 overflow-hidden rounded-md border border-f1-border-secondary bg-f1-background">
-        <F0Graph<Employee>
-          nodes={BASIC_NODES}
-          renderNode={renderEmployee}
-          detailPanel={(node: GraphNode<Employee>) => {
-            const { name, title } = node.data
-            return {
-              variant: "default" as const,
-              title: name,
-              description: title,
-              children: (
-                <div className="flex flex-col gap-3 p-4">
-                  <p className="text-sm text-f1-foreground">
-                    Direct reports: {node.childrenCount ?? 0}
-                  </p>
-                  <p className="text-xs text-f1-foreground-secondary">
-                    Node ID: {node.id}
-                  </p>
-                </div>
-              ),
-            }
-          }}
-          defaultExpandDepth={2}
-          showControls
         />
       </div>
     </div>
