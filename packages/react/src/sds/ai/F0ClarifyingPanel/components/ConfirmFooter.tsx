@@ -3,6 +3,8 @@ import { useI18n } from "@/lib/providers/i18n"
 
 interface ConfirmFooterProps {
   canProceed: boolean
+  /** Disables both submit actions (confirm and skip), e.g. while the assistant is still responding */
+  submitDisabled?: boolean
   label: string
   onConfirm: () => void
   onSkip?: () => void
@@ -12,6 +14,7 @@ interface ConfirmFooterProps {
 
 export const ConfirmFooter = ({
   canProceed,
+  submitDisabled,
   label,
   onConfirm,
   onSkip,
@@ -27,11 +30,12 @@ export const ConfirmFooter = ({
             variant="outline"
             label={translation.ai.clarifyingQuestion.skip}
             onClick={onSkip}
+            disabled={submitDisabled}
           />
         )}
       </div>
       <F0Button
-        disabled={!canProceed}
+        disabled={!canProceed || submitDisabled}
         variant={"default"}
         label={label}
         onClick={onConfirm}

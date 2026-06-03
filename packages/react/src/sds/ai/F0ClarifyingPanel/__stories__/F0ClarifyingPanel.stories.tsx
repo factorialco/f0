@@ -229,14 +229,23 @@ function useLocalClarifyingState(steps: StoryStep[]) {
 // Story shell — renders the panel plus a "resolved" log. No F0AiChat anywhere.
 // ---------------------------------------------------------------------------
 
-const StoryShell = ({ steps }: { steps: StoryStep[] }) => {
+const StoryShell = ({
+  steps,
+  isSubmitDisabled,
+}: {
+  steps: StoryStep[]
+  isSubmitDisabled?: boolean
+}) => {
   const { state, resolved, reset } = useLocalClarifyingState(steps)
 
   return (
     <div className="w-[360px] space-y-3">
       <div className="rounded-lg border border-solid border-f1-border-secondary bg-f1-background">
         {state ? (
-          <F0ClarifyingPanel clarifyingQuestion={state} />
+          <F0ClarifyingPanel
+            clarifyingQuestion={state}
+            isSubmitDisabled={isSubmitDisabled}
+          />
         ) : (
           <div className="flex flex-col gap-2 p-4">
             <div className="text-sm font-medium text-f1-foreground">
@@ -367,6 +376,42 @@ export const CustomAnswerMultiple: Story = {
       []
     )
     return <StoryShell steps={steps} />
+  },
+}
+
+/**
+ * Simulates the assistant still streaming a response: submission (final-step
+ * confirm, Enter on the custom answer, and Skip) is disabled until the toggle
+ * is turned off, while option selection and step navigation stay interactive.
+ */
+export const SubmitDisabled: Story = {
+  render: () => {
+    const [isResponding, setIsResponding] = useState(true)
+    const steps = useMemo<StoryStep[]>(
+      () => [
+        {
+          question: "What time period should the report cover?",
+          options: SINGLE_OPTIONS,
+          selectionMode: "single",
+          optional: true,
+          allowCustomAnswer: true,
+        },
+      ],
+      []
+    )
+    return (
+      <div className="space-y-3">
+        <label className="flex items-center gap-2 text-sm text-f1-foreground">
+          <input
+            type="checkbox"
+            checked={isResponding}
+            onChange={(e) => setIsResponding(e.target.checked)}
+          />
+          Assistant is responding (submit disabled)
+        </label>
+        <StoryShell steps={steps} isSubmitDisabled={isResponding} />
+      </div>
+    )
   },
 }
 
