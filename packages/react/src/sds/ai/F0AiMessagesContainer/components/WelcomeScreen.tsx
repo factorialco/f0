@@ -87,7 +87,7 @@ export const WelcomeScreen = ({ messages, onClick }: WelcomeScreenProps) => {
         onClick={onClick}
         onKeyDown={handleKeyDown}
         className={cn(
-          "bg-gradient-to-r from-[#E55619] to-[#A1ADE5] bg-clip-text text-center text-2xl font-semibold leading-[28px] text-transparent",
+          "bg-gradient-to-r from-[#E55619] via-[#E51943] to-[#A1ADE5] bg-clip-text text-center text-2xl font-semibold leading-[28px] text-transparent",
           interactive &&
             cn(
               "cursor-pointer transition-transform duration-200",
