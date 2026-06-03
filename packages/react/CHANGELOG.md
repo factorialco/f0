@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.34.0](https://github.com/factorialco/f0/compare/f0-react-v2.33.0...f0-react-v2.34.0) (2026-06-03)
+
+
+### Features
+
+* **F0ClarifyingPanel:** add isSubmitDisabled prop ([#4304](https://github.com/factorialco/f0/issues/4304)) ([820a702](https://github.com/factorialco/f0/commit/820a7023e1f210bfe957b693f5d244905b448b77))
+
 ## [2.33.0](https://github.com/factorialco/f0/compare/f0-react-v2.32.2...f0-react-v2.33.0) (2026-06-03)
 
 
