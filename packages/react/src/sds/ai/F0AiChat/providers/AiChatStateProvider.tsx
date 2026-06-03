@@ -71,6 +71,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   employeeCredits,
   creditWarning,
   fileAttachments,
+  onTranscribe,
   onThumbsDown,
   onThumbsUp,
   tracking,
@@ -278,6 +279,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         employeeCredits,
         creditWarning,
         fileAttachments,
+        onTranscribe,
         canvasContent,
         openCanvas,
         closeCanvas,
@@ -344,6 +346,7 @@ const UNDEFINED_KEYS = new Set<ProviderKey>([
   "employeeCredits",
   "creditWarning",
   "fileAttachments",
+  "onTranscribe",
   "onThumbsUp",
   "onThumbsDown",
 ])
