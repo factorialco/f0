@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.32.1](https://github.com/factorialco/f0/compare/f0-react-v2.32.0...f0-react-v2.32.1) (2026-06-03)
+
+
+### Bug Fixes
+
+* **CompanySelector:** remove asymmetric avatar rounding ([#4297](https://github.com/factorialco/f0/issues/4297)) ([6f5baa0](https://github.com/factorialco/f0/commit/6f5baa0195afe4df7ee8083f206c07ba146f36f8))
+
 ## [2.32.0](https://github.com/factorialco/f0/compare/f0-react-v2.31.0...f0-react-v2.32.0) (2026-06-02)
 
 
