@@ -5,12 +5,12 @@ import { fn } from "storybook/test"
 
 import { Placeholder } from "@/icons/app"
 
-import { NumberInput } from "../index"
+import { F0NumberInput } from "../index"
 
 const meta = {
-  render: (props) => <NumberInput key={JSON.stringify(props)} {...props} />,
-  title: "Input/Number",
-  component: NumberInput,
+  render: (props) => <F0NumberInput key={JSON.stringify(props)} {...props} />,
+  title: "Inputs/Number input",
+  component: F0NumberInput,
   tags: ["autodocs", "experimental"],
   args: {
     disabled: false,
@@ -68,7 +68,7 @@ const meta = {
       filterProps: (_: unknown, propName: string) => propName !== "key",
     },
   },
-} satisfies Meta<typeof NumberInput>
+} satisfies Meta<typeof F0NumberInput>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -79,7 +79,7 @@ export const Primary: Story = {
   },
   render: (props) => {
     const [value, setValue] = useState<number | null>(props.value ?? 1)
-    return <NumberInput {...props} value={value} onChange={setValue} />
+    return <F0NumberInput {...props} value={value} onChange={setValue} />
   },
 }
 
@@ -94,7 +94,7 @@ export const WithStep: Story = {
   render: (props) => {
     const [value, setValue] = useState<number | null>(props.value ?? 1)
     return (
-      <NumberInput
+      <F0NumberInput
         {...props}
         value={value}
         onChange={setValue}
@@ -194,7 +194,7 @@ export const AsPopover: Story = {
     const [value, setValue] = useState<number | null>(null)
     return (
       <div className="flex items-center gap-2">
-        <NumberInput {...props} value={value} onChange={setValue} />
+        <F0NumberInput {...props} value={value} onChange={setValue} />
         <span className="text-f1-foreground-secondary text-sm">
           {value != null ? `${value}%` : "—"}
         </span>
@@ -221,7 +221,7 @@ export const AsPopoverDeferredApply: Story = {
     const [value, setValue] = useState<number | null>(null)
     return (
       <div className="flex items-center gap-2">
-        <NumberInput {...props} value={value} onChange={setValue} />
+        <F0NumberInput {...props} value={value} onChange={setValue} />
         <span className="text-f1-foreground-secondary text-sm">
           Committed: {value != null ? `${value}%` : "—"}
         </span>

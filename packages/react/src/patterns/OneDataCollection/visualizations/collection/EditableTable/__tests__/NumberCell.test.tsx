@@ -112,7 +112,7 @@ describe("NumberCell", () => {
     expect(input).toBeInTheDocument()
   })
 
-  it("passes units to NumberInput when provided in numberConfig", () => {
+  it("passes units to F0NumberInput when provided in numberConfig", () => {
     render(
       <NumberCell
         {...defaultProps}

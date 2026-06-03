@@ -2,17 +2,17 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { Placeholder } from "@/icons/app"
 
-import { Textarea } from "./index"
+import { F0TextAreaInput } from "../index"
 
 const meta = {
-  title: "Input/TextArea",
-  component: Textarea,
+  title: "Inputs/Text area input",
+  component: F0TextAreaInput,
   tags: ["autodocs", "experimental"],
   args: {
     disabled: false,
     placeholder: "Placeholder text here",
   },
-} satisfies Meta<typeof Textarea>
+} satisfies Meta<typeof F0TextAreaInput>
 
 export default meta
 type Story = StoryObj<typeof meta>

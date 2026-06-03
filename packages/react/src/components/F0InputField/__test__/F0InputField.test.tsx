@@ -4,9 +4,9 @@ import "@testing-library/jest-dom/vitest"
 import { Archive } from "@/icons/app"
 import { zeroRender as render } from "@/testing/test-utils"
 
-import { InputField, InputFieldStatusType } from "../InputField"
+import { F0InputField, InputFieldStatusType } from "../F0InputField"
 
-describe("InputField", () => {
+describe("F0InputField", () => {
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>
 
   beforeEach(() => {
@@ -20,21 +20,21 @@ describe("InputField", () => {
   describe("Label validation", () => {
     it("should emit an error when label is empty string", () => {
       render(
-        <InputField label="">
+        <F0InputField label="">
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "InputField: label is required for accessibility reasons. If you don't want to show a label, set hideLabel to true."
+        "F0InputField: label is required for accessibility reasons. If you don't want to show a label, set hideLabel to true."
       )
     })
 
     it("should not emit an error when label is provided", () => {
       render(
-        <InputField label="Test Label">
+        <F0InputField label="Test Label">
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       expect(consoleErrorSpy).not.toHaveBeenCalled()
@@ -44,9 +44,9 @@ describe("InputField", () => {
   describe("Basic rendering", () => {
     it("should render with required props", () => {
       render(
-        <InputField label="Test Label">
+        <F0InputField label="Test Label">
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       expect(screen.getByText("Test Label")).toBeInTheDocument()
@@ -55,9 +55,9 @@ describe("InputField", () => {
 
     it("should render with placeholder", () => {
       render(
-        <InputField label="Test Label" placeholder="Enter text">
+        <F0InputField label="Test Label" placeholder="Enter text">
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       expect(screen.getByText("Enter text")).toBeInTheDocument()
@@ -65,9 +65,9 @@ describe("InputField", () => {
 
     it("should hide label when hideLabel is true", () => {
       render(
-        <InputField label="Test Label" hideLabel>
+        <F0InputField label="Test Label" hideLabel>
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       expect(screen.queryByText("Test Label")).not.toBeInTheDocument()
@@ -75,9 +75,9 @@ describe("InputField", () => {
 
     it("should render with icon", () => {
       render(
-        <InputField label="Test Label" icon={Archive}>
+        <F0InputField label="Test Label" icon={Archive}>
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       expect(screen.getByTestId("input-field-wrapper")).toBeInTheDocument()
@@ -85,9 +85,9 @@ describe("InputField", () => {
 
     it("should render with label icon", () => {
       render(
-        <InputField label="Test Label" labelIcon={Archive}>
+        <F0InputField label="Test Label" labelIcon={Archive}>
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       expect(screen.getByText("Test Label")).toBeInTheDocument()
@@ -99,9 +99,9 @@ describe("InputField", () => {
       const handleChange = vi.fn()
 
       render(
-        <InputField label="Test Label" onChange={handleChange}>
+        <F0InputField label="Test Label" onChange={handleChange}>
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       const input = screen.getByRole("textbox")
@@ -112,17 +112,17 @@ describe("InputField", () => {
 
     it("should handle controlled value", () => {
       const { rerender } = render(
-        <InputField label="Test Label" value="initial">
+        <F0InputField label="Test Label" value="initial">
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       expect(screen.getByRole("textbox")).toHaveValue("initial")
 
       rerender(
-        <InputField label="Test Label" value="updated">
+        <F0InputField label="Test Label" value="updated">
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       expect(screen.getByRole("textbox")).toHaveValue("updated")
@@ -132,9 +132,9 @@ describe("InputField", () => {
       const handleChange = vi.fn()
 
       render(
-        <InputField label="Test Label" maxLength={5} onChange={handleChange}>
+        <F0InputField label="Test Label" maxLength={5} onChange={handleChange}>
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       const input = screen.getByRole("textbox")
@@ -145,9 +145,9 @@ describe("InputField", () => {
 
     it("should display character count when maxLength is provided", () => {
       render(
-        <InputField label="Test Label" maxLength={10} value="test">
+        <F0InputField label="Test Label" maxLength={10} value="test">
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       expect(screen.getByText("4/10")).toBeInTheDocument()
@@ -155,9 +155,9 @@ describe("InputField", () => {
 
     it("should hide character count when hideMaxLength is true", () => {
       render(
-        <InputField label="Test Label" maxLength={10} hideMaxLength>
+        <F0InputField label="Test Label" maxLength={10} hideMaxLength>
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       expect(screen.queryByText("0/10")).not.toBeInTheDocument()
@@ -167,9 +167,9 @@ describe("InputField", () => {
   describe("Clear functionality", () => {
     it("should show clear button when clearable and has value", () => {
       const { container } = render(
-        <InputField label="Test Label" clearable value="test">
+        <F0InputField label="Test Label" clearable value="test">
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       // Look for the clear button in the AnimatePresence container
@@ -183,14 +183,14 @@ describe("InputField", () => {
       const handleChange = vi.fn()
 
       const { container } = render(
-        <InputField
+        <F0InputField
           label="Test Label"
           clearable
           value="test"
           onChange={handleChange}
         >
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       const clearButton =
@@ -204,9 +204,9 @@ describe("InputField", () => {
 
     it("should not show clear button when value is empty", () => {
       const { container } = render(
-        <InputField label="Test Label" clearable value="">
+        <F0InputField label="Test Label" clearable value="">
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       // When value is empty, the clear button should not be rendered
@@ -220,9 +220,9 @@ describe("InputField", () => {
   describe("Loading state", () => {
     it("should show spinner when loading", () => {
       const { container } = render(
-        <InputField label="Test Label" loading>
+        <F0InputField label="Test Label" loading>
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       expect(
@@ -232,9 +232,9 @@ describe("InputField", () => {
 
     it("should not show spinner when not loading", () => {
       render(
-        <InputField label="Test Label">
+        <F0InputField label="Test Label">
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       expect(screen.queryByTestId("spinner")).not.toBeInTheDocument()
@@ -244,9 +244,9 @@ describe("InputField", () => {
   describe("Error handling", () => {
     it("should display error message", () => {
       render(
-        <InputField label="Test Label" error="This is an error">
+        <F0InputField label="Test Label" error="This is an error">
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       expect(screen.getByText("This is an error")).toBeInTheDocument()
@@ -254,9 +254,9 @@ describe("InputField", () => {
 
     it("should apply error styling when error is present", () => {
       render(
-        <InputField label="Test Label" error="This is an error">
+        <F0InputField label="Test Label" error="This is an error">
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       const wrapper = screen.getByTestId("input-field-wrapper")
@@ -289,7 +289,7 @@ describe("InputField", () => {
     Object.entries(statuses).forEach(([type, status]) => {
       it(`should display status message for ${type}`, () => {
         render(
-          <InputField
+          <F0InputField
             label="Test Label"
             status={{
               type: status.type as InputFieldStatusType,
@@ -297,7 +297,7 @@ describe("InputField", () => {
             }}
           >
             <input />
-          </InputField>
+          </F0InputField>
         )
 
         expect(screen.getByText(status.message)).toBeInTheDocument()
@@ -305,7 +305,7 @@ describe("InputField", () => {
 
       it(`should apply ${type} styling when ${type} is present`, () => {
         render(
-          <InputField
+          <F0InputField
             label="Test Label"
             status={{
               type: status.type as InputFieldStatusType,
@@ -313,7 +313,7 @@ describe("InputField", () => {
             }}
           >
             <input />
-          </InputField>
+          </F0InputField>
         )
 
         const wrapper = screen.getByTestId("input-field-wrapper")
@@ -325,9 +325,9 @@ describe("InputField", () => {
   describe("Disabled and readonly states", () => {
     it("should disable input when disabled", () => {
       render(
-        <InputField label="Test Label" disabled>
+        <F0InputField label="Test Label" disabled>
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       expect(screen.getByRole("textbox")).toBeDisabled()
@@ -335,9 +335,9 @@ describe("InputField", () => {
 
     it("should make input readonly when readonly", () => {
       render(
-        <InputField label="Test Label" readonly>
+        <F0InputField label="Test Label" readonly>
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       expect(screen.getByRole("textbox")).toHaveAttribute("readonly")
@@ -345,9 +345,9 @@ describe("InputField", () => {
 
     it("should not show clear button when disabled", () => {
       const { container } = render(
-        <InputField label="Test Label" disabled clearable value="test">
+        <F0InputField label="Test Label" disabled clearable value="test">
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       // When disabled, clearable section should not be rendered
@@ -359,9 +359,9 @@ describe("InputField", () => {
 
     it("should not show character count when disabled", () => {
       render(
-        <InputField label="Test Label" disabled maxLength={10}>
+        <F0InputField label="Test Label" disabled maxLength={10}>
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       expect(screen.queryByText("0/10")).not.toBeInTheDocument()
@@ -371,9 +371,13 @@ describe("InputField", () => {
   describe("Placeholder handling", () => {
     it("should hide placeholder when hidePlaceholder is true", () => {
       render(
-        <InputField label="Test Label" placeholder="Enter text" hidePlaceholder>
+        <F0InputField
+          label="Test Label"
+          placeholder="Enter text"
+          hidePlaceholder
+        >
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       // The placeholder div is still in the DOM but should have opacity-0
@@ -383,9 +387,9 @@ describe("InputField", () => {
 
     it("should hide placeholder when input has value", () => {
       render(
-        <InputField label="Test Label" placeholder="Enter text" value="test">
+        <F0InputField label="Test Label" placeholder="Enter text" value="test">
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       const placeholder = screen.getByText("Enter text")
@@ -394,9 +398,9 @@ describe("InputField", () => {
 
     it("should show placeholder when input is empty", () => {
       render(
-        <InputField label="Test Label" placeholder="Enter text" value="">
+        <F0InputField label="Test Label" placeholder="Enter text" value="">
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       const placeholder = screen.getByText("Enter text")
@@ -407,14 +411,14 @@ describe("InputField", () => {
       const handleClickPlaceholder = vi.fn()
 
       render(
-        <InputField
+        <F0InputField
           label="Test Label"
           placeholder="Enter text"
           onClickPlaceholder={handleClickPlaceholder}
           value=""
         >
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       const placeholder = screen.getByText("Enter text")
@@ -427,9 +431,9 @@ describe("InputField", () => {
   describe("Size variants", () => {
     it("should apply small size classes", () => {
       render(
-        <InputField label="Test Label" size="sm">
+        <F0InputField label="Test Label" size="sm">
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       const wrapper = screen.getByTestId("input-field-wrapper")
@@ -438,9 +442,9 @@ describe("InputField", () => {
 
     it("should apply medium size classes", () => {
       render(
-        <InputField label="Test Label" size="md">
+        <F0InputField label="Test Label" size="md">
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       const wrapper = screen.getByTestId("input-field-wrapper")
@@ -449,9 +453,9 @@ describe("InputField", () => {
 
     it("should handle canGrow prop", () => {
       render(
-        <InputField label="Test Label" canGrow size="md">
+        <F0InputField label="Test Label" canGrow size="md">
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       const wrapper = screen.getByTestId("input-field-wrapper")
@@ -462,7 +466,7 @@ describe("InputField", () => {
   describe("Accessibility", () => {
     it("should have proper ARIA attributes", () => {
       render(
-        <InputField
+        <F0InputField
           label="Test Label"
           required
           role="combobox"
@@ -470,7 +474,7 @@ describe("InputField", () => {
           aria-expanded={false}
         >
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       const input = screen.getByRole("combobox")
@@ -481,9 +485,9 @@ describe("InputField", () => {
 
     it("should set aria-busy when loading", () => {
       render(
-        <InputField label="Test Label" loading>
+        <F0InputField label="Test Label" loading>
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       const input = screen.getByRole("textbox")
@@ -492,9 +496,9 @@ describe("InputField", () => {
 
     it("should set aria-disabled when disabled", () => {
       render(
-        <InputField label="Test Label" disabled>
+        <F0InputField label="Test Label" disabled>
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       const input = screen.getByRole("textbox")
@@ -503,9 +507,9 @@ describe("InputField", () => {
 
     it("should associate label with input through id", () => {
       render(
-        <InputField label="Test Label">
+        <F0InputField label="Test Label">
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       const input = screen.getByRole("textbox")
@@ -521,9 +525,9 @@ describe("InputField", () => {
       const handleFocus = vi.fn()
 
       render(
-        <InputField label="Test Label" onFocus={handleFocus}>
+        <F0InputField label="Test Label" onFocus={handleFocus}>
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       const input = screen.getByRole("textbox")
@@ -536,9 +540,9 @@ describe("InputField", () => {
       const handleBlur = vi.fn()
 
       render(
-        <InputField label="Test Label" onBlur={handleBlur}>
+        <F0InputField label="Test Label" onBlur={handleBlur}>
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       const input = screen.getByRole("textbox")
@@ -551,9 +555,9 @@ describe("InputField", () => {
       const handleClickContent = vi.fn()
 
       render(
-        <InputField label="Test Label" onClickContent={handleClickContent}>
+        <F0InputField label="Test Label" onClickContent={handleClickContent}>
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       const wrapper = screen.getByTestId("input-field-wrapper")
@@ -568,9 +572,9 @@ describe("InputField", () => {
       const handleClickChildren = vi.fn()
 
       render(
-        <InputField label="Test Label" onClickChildren={handleClickChildren}>
+        <F0InputField label="Test Label" onClickChildren={handleClickChildren}>
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       const input = screen.getByRole("textbox")
@@ -584,14 +588,14 @@ describe("InputField", () => {
       const handleClickChildren = vi.fn()
 
       render(
-        <InputField
+        <F0InputField
           label="Test Label"
           disabled
           onClickContent={handleClickContent}
           onClickChildren={handleClickChildren}
         >
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       const wrapper = screen.getByTestId("input-field-wrapper")
@@ -608,9 +612,9 @@ describe("InputField", () => {
   describe("Append functionality", () => {
     it("should render append content", () => {
       render(
-        <InputField label="Test Label" append={<button>Append</button>}>
+        <F0InputField label="Test Label" append={<button>Append</button>}>
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       expect(screen.getByText("Append")).toBeInTheDocument()
@@ -622,14 +626,14 @@ describe("InputField", () => {
       const customIsEmpty = vi.fn().mockReturnValue(false)
 
       const { container } = render(
-        <InputField
+        <F0InputField
           label="Test Label"
           isEmpty={customIsEmpty}
           clearable
           value=""
         >
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       expect(customIsEmpty).toHaveBeenCalledWith("")
@@ -642,7 +646,7 @@ describe("InputField", () => {
       const handleChange = vi.fn()
 
       const { container } = render(
-        <InputField
+        <F0InputField
           label="Test Label"
           emptyValue="custom-empty"
           onChange={handleChange}
@@ -650,7 +654,7 @@ describe("InputField", () => {
           value="test"
         >
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       const clearButton = container.querySelector("svg")
@@ -664,14 +668,14 @@ describe("InputField", () => {
       const customLengthProvider = vi.fn().mockReturnValue(3)
 
       render(
-        <InputField
+        <F0InputField
           label="Test Label"
           lengthProvider={customLengthProvider}
           maxLength={5}
           value="test"
         >
           <input />
-        </InputField>
+        </F0InputField>
       )
 
       expect(customLengthProvider).toHaveBeenCalledWith("test")

@@ -218,7 +218,7 @@ export type InputFieldProps<T> = {
   transparent?: boolean
 }
 
-const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
+const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
   (
     {
       children,
@@ -287,7 +287,7 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
 
     if (!label) {
       console.error(
-        "InputField: label is required for accessibility reasons. If you don't want to show a label, set hideLabel to true."
+        "F0InputField: label is required for accessibility reasons. If you don't want to show a label, set hideLabel to true."
       )
     }
 
@@ -623,6 +623,6 @@ const InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
   }
 )
 
-InputField.displayName = "InputField"
+F0InputField.displayName = "F0InputField"
 
-export { InputField }
+export { F0InputField }

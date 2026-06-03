@@ -586,7 +586,7 @@ describe("Select", () => {
       expect(screen.getByText("Option 1")).toBeInTheDocument()
     })
 
-    // Find the clear button using the same approach as InputField tests
+    // Find the clear button using the same approach as F0InputField tests
     // The clear button should be visible when there's a value
     const clearButton = container.querySelector(
       "button[data-testid='clear-button']"

@@ -1,9 +1,9 @@
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-import { F1SearchBox } from "./index"
+import { F0SearchInput } from "../index"
 
-describe("F1SearchBox", () => {
+describe("F0SearchInput", () => {
   beforeEach(() => {
     vi.useFakeTimers()
   })
@@ -11,7 +11,7 @@ describe("F1SearchBox", () => {
   describe("threshold behavior", () => {
     it("does not trigger onChange when input length is below threshold", () => {
       const onChange = vi.fn()
-      render(<F1SearchBox threshold={3} onChange={onChange} />)
+      render(<F0SearchInput threshold={3} onChange={onChange} />)
 
       const input = screen.getByRole("searchbox")
       fireEvent.change(input, { target: { value: "ab" } })
@@ -21,7 +21,7 @@ describe("F1SearchBox", () => {
 
     it("triggers onChange when input length reaches threshold", () => {
       const onChange = vi.fn()
-      render(<F1SearchBox threshold={3} onChange={onChange} />)
+      render(<F0SearchInput threshold={3} onChange={onChange} />)
 
       const input = screen.getByRole("searchbox")
       fireEvent.change(input, { target: { value: "abc" } })
@@ -35,7 +35,9 @@ describe("F1SearchBox", () => {
 
     it("always triggers onChange when clearing the input", () => {
       const onChange = vi.fn()
-      render(<F1SearchBox threshold={3} onChange={onChange} value="initial" />)
+      render(
+        <F0SearchInput threshold={3} onChange={onChange} value="initial" />
+      )
 
       const input = screen.getByRole("searchbox")
       fireEvent.change(input, { target: { value: "" } })
@@ -51,7 +53,7 @@ describe("F1SearchBox", () => {
   describe("debounce behavior", () => {
     it("debounces the onChange callback", () => {
       const onChange = vi.fn()
-      render(<F1SearchBox debounceTime={500} onChange={onChange} />)
+      render(<F0SearchInput debounceTime={500} onChange={onChange} />)
 
       const input = screen.getByRole("searchbox")
 
@@ -73,7 +75,7 @@ describe("F1SearchBox", () => {
 
     it("updates the value with the most recent input after debounce", () => {
       const onChange = vi.fn()
-      render(<F1SearchBox debounceTime={500} onChange={onChange} />)
+      render(<F0SearchInput debounceTime={500} onChange={onChange} />)
 
       const input = screen.getByRole("searchbox")
 
@@ -98,7 +100,7 @@ describe("F1SearchBox", () => {
     it("respects both threshold and debounce", () => {
       const onChange = vi.fn()
       render(
-        <F1SearchBox threshold={3} debounceTime={500} onChange={onChange} />
+        <F0SearchInput threshold={3} debounceTime={500} onChange={onChange} />
       )
 
       const input = screen.getByRole("searchbox")

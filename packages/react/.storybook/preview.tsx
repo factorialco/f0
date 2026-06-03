@@ -171,6 +171,7 @@ const preview: Preview = {
           "Foundations",
           ["Colors", "Typography", "Spacing", "Borders", "Shadows", "Icons"],
           "Components",
+          ["Primitives", "Inputs"],
           "Patterns",
           [
             "Data collection",

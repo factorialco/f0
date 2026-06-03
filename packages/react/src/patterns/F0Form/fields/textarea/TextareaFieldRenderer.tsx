@@ -1,8 +1,8 @@
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
-import type { InputFieldStatus } from "@/ui/InputField/types"
+import type { InputFieldStatus } from "@/components/F0InputField/types"
 
-import { Textarea } from "@/experimental/Forms/Fields/TextArea"
+import { F0TextAreaInput } from "@/components/F0TextAreaInput"
 
 import type { ResolvedField } from "../types"
 import type { F0TextareaField } from "./types"
@@ -28,7 +28,7 @@ export function TextareaFieldRenderer({
   status,
 }: TextareaFieldRendererProps) {
   return (
-    <Textarea
+    <F0TextAreaInput
       {...formField}
       label={field.label}
       placeholder={field.placeholder}

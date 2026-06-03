@@ -5,15 +5,15 @@ import { describe, expect, test, vi } from "vitest"
 
 import { zeroRender as render } from "@/testing/test-utils"
 
-import Meta, { WithStep } from "../__stories__/NumberInput.stories"
-import { NumberInput } from "../index"
+import Meta, { WithStep } from "../__stories__/F0NumberInput.stories"
+import { F0NumberInput } from "../index"
 
 const WithStepStory = composeStory(WithStep, Meta)
 
-describe("NumberInput", () => {
+describe("F0NumberInput", () => {
   test("renders the input", () => {
     render(
-      <NumberInput
+      <F0NumberInput
         locale="es-ES"
         value={123.456}
         maxDecimals={2}
@@ -26,7 +26,7 @@ describe("NumberInput", () => {
 
   describe("when the value is null", () => {
     test("renders an empty input", () => {
-      render(<NumberInput locale="en-US" value={null} label="Number Input" />)
+      render(<F0NumberInput locale="en-US" value={null} label="Number Input" />)
       const input = screen.getByRole("textbox")
       expect(input).toHaveValue("")
     })
@@ -36,7 +36,7 @@ describe("NumberInput", () => {
     test("trigger the onChange callback with the number", async () => {
       const onChange = vi.fn()
       render(
-        <NumberInput
+        <F0NumberInput
           locale="en-US"
           maxDecimals={0}
           onChange={onChange}
@@ -56,7 +56,7 @@ describe("NumberInput", () => {
     test("onChange strips decimal values in integer mode", async () => {
       const onChange = vi.fn()
       render(
-        <NumberInput
+        <F0NumberInput
           locale="en-US"
           maxDecimals={0}
           onChange={onChange}
@@ -76,7 +76,7 @@ describe("NumberInput", () => {
     test("allows decimal values with dot separator", async () => {
       const onChange = vi.fn()
       render(
-        <NumberInput
+        <F0NumberInput
           locale="en-US"
           maxDecimals={2}
           onChange={onChange}
@@ -94,7 +94,7 @@ describe("NumberInput", () => {
     test("limits decimals to maxDecimals", async () => {
       const onChange = vi.fn()
       render(
-        <NumberInput
+        <F0NumberInput
           locale="en-US"
           maxDecimals={2}
           onChange={onChange}
@@ -148,7 +148,7 @@ describe("NumberInput", () => {
   describe("inline extraContent mode", () => {
     test("renders extraContent to the right of the input", () => {
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           units="%"
@@ -161,7 +161,7 @@ describe("NumberInput", () => {
 
     test("hoists the label outside the row when extraContent is present", () => {
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           units="%"
@@ -176,7 +176,7 @@ describe("NumberInput", () => {
 
     test("renders hint outside the row when extraContent is present", () => {
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           units="%"
@@ -192,7 +192,7 @@ describe("NumberInput", () => {
   describe("popover mode", () => {
     test("renders a trigger button instead of a visible input", () => {
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           popover={{}}
@@ -205,7 +205,7 @@ describe("NumberInput", () => {
 
     test("uses the label as the accessible name of the trigger button", () => {
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           popover={{}}
@@ -219,7 +219,7 @@ describe("NumberInput", () => {
 
     test("opens the popover and shows the input when trigger is clicked", async () => {
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           units="%"
@@ -238,7 +238,7 @@ describe("NumberInput", () => {
     test("calls onChange when user types inside the popover input", async () => {
       const onChange = vi.fn()
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           units="%"
@@ -258,7 +258,7 @@ describe("NumberInput", () => {
     test("deferred commit mode calls onChange only when Apply is clicked", async () => {
       const onChange = vi.fn()
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           units="%"
@@ -286,7 +286,7 @@ describe("NumberInput", () => {
     test("deferred commit mode keeps popover open when closeOnApply is false", async () => {
       const onChange = vi.fn()
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           units="%"
@@ -309,7 +309,7 @@ describe("NumberInput", () => {
 
     test("does not open popover when disabled", async () => {
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           popover={{}}
@@ -328,7 +328,7 @@ describe("NumberInput", () => {
 
     test("shows status message in popover mode and hides NumberInput duplicate", async () => {
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           popover={{}}
@@ -353,7 +353,7 @@ describe("NumberInput", () => {
 
     test("controlled open state: respects popover.open=false", () => {
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           popover={{ open: false, onOpenChange: vi.fn() }}
@@ -365,7 +365,7 @@ describe("NumberInput", () => {
 
     test("controlled open state: respects popover.open=true", async () => {
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           popover={{ open: true, onOpenChange: vi.fn() }}
@@ -380,7 +380,7 @@ describe("NumberInput", () => {
     test("calls onOpenChange when trigger is clicked", async () => {
       const onOpenChange = vi.fn()
       render(
-        <NumberInput
+        <F0NumberInput
           label="Discount"
           locale="en-US"
           popover={{ open: false, onOpenChange }}
@@ -397,7 +397,7 @@ describe("NumberInput", () => {
     test("preserves trailing dot while typing", async () => {
       const onChange = vi.fn()
       render(
-        <NumberInput
+        <F0NumberInput
           locale="en-US"
           maxDecimals={2}
           onChange={onChange}
@@ -415,7 +415,7 @@ describe("NumberInput", () => {
     test("preserves trailing comma while typing", async () => {
       const onChange = vi.fn()
       render(
-        <NumberInput
+        <F0NumberInput
           locale="es-ES"
           maxDecimals={2}
           onChange={onChange}
