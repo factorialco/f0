@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.35.0](https://github.com/factorialco/f0/compare/f0-react-v2.34.0...f0-react-v2.35.0) (2026-06-03)
+
+
+### Features
+
+* **ResourceHeader:** leading icon on metadata items + showBottomBorder ([#4274](https://github.com/factorialco/f0/issues/4274)) ([62cff45](https://github.com/factorialco/f0/commit/62cff45763ef1ab7f8f935fbf782ac5260eb165d))
+
 ## [2.34.0](https://github.com/factorialco/f0/compare/f0-react-v2.33.0...f0-react-v2.34.0) (2026-06-03)
 
 
