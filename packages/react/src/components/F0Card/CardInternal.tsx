@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/ui/Card"
 import { Skeleton } from "@/ui/skeleton"
+import { Text } from "@/ui/Text"
 
 import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import {
@@ -293,19 +294,13 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
             </F0Link>
           )}
 
-          <div className="flex flex-col gap-3 @md:flex-row @md:items-center @md:justify-between @md:gap-4">
+          <div className="flex flex-col @md:flex-row @md:items-center @md:justify-between @md:gap-4">
             <div className="flex min-w-0 flex-col gap-0">
-              <CardTitle
-                className={cn(
-                  "text-base font-medium text-f1-foreground @md:truncate"
-                )}
-              >
-                {title}
-              </CardTitle>
+              {title && (
+                <Text variant="body" content={title} className="font-medium" />
+              )}
               {description && (
-                <CardSubtitle className="text-base text-f1-foreground-secondary">
-                  {description}
-                </CardSubtitle>
+                <Text variant="description" content={description} />
               )}
             </div>
 

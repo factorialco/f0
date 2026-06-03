@@ -58,10 +58,14 @@ export function CardActions({
     return (
       <div
         className={cn(
-          "relative z-[1] flex w-full flex-col gap-2",
-          "@md:w-auto @md:flex-row @md:items-center @md:gap-2",
-          "[&_button]:w-full @md:[&_button]:w-fit",
-          "[&_div]:w-full [&_div]:justify-center @md:[&_div]:w-fit"
+          "relative z-[1] flex flex-row flex-wrap items-center justify-end gap-2",
+          // Narrow (default): a footer-style grey separator spanning the card
+          // width, with the actions right-aligned beneath the text — matching
+          // the regular CardActions footer.
+          "-mx-4 mt-4 border-0 border-t border-solid border-t-f1-border-secondary px-4 pt-4",
+          compact && "mt-3 pt-3",
+          // Wide: inline to the right of the text, no separator.
+          "@md:mx-0 @md:mt-0 @md:border-t-0 @md:px-0 @md:pt-0"
         )}
       >
         {secondaryActions &&
