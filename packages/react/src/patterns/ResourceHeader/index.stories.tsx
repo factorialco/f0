@@ -529,6 +529,36 @@ export const TeamHeader: Story = {
   },
 }
 
+export const WithIconMetadataAndBorder: Story = {
+  tags: ["!dev"],
+  args: {
+    title: 'MacBook Pro 14" M5',
+    showBottomBorder: true,
+    metadata: [
+      {
+        icon: Icon.Laptop,
+        label: "Category",
+        hideLabel: true,
+        value: { type: "text", content: "Laptops" },
+      },
+      {
+        label: "Brand",
+        value: { type: "text", content: "Apple" },
+      },
+      {
+        icon: Icon.Calendar,
+        label: "Delivery",
+        hideLabel: true,
+        value: { type: "text", content: "24h delivery" },
+      },
+      {
+        label: "SKU",
+        value: { type: "text", content: "000017" },
+      },
+    ],
+  },
+}
+
 export const WithLongDescription: Story = {
   tags: ["!dev"],
   args: {

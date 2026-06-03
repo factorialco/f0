@@ -57,6 +57,8 @@ interface BaseHeaderProps {
     actions?: MetadataAction[]
   }
   metadata?: MetadataProps["items"]
+  /** Renders a 1px bottom border at the very bottom of the header. */
+  showBottomBorder?: boolean
 }
 
 const isVisible = (action: { isVisible?: boolean }) =>
@@ -72,6 +74,7 @@ export function BaseHeader({
   otherActions = [],
   status,
   metadata = [],
+  showBottomBorder = false,
 }: BaseHeaderProps) {
   const allMetadata: BaseHeaderProps["metadata"] = [
     status && {
@@ -117,7 +120,12 @@ export function BaseHeader({
   }
 
   return (
-    <div className="resource-header px-page flex flex-col gap-3 pb-5 pt-3">
+    <div
+      className={cn(
+        "resource-header px-page flex flex-col gap-3 pb-5 pt-3",
+        showBottomBorder && "border-b border-solid border-f1-border"
+      )}
+    >
       <div
         className={cn(
           "flex flex-col items-start justify-start gap-4 md:flex-row",
