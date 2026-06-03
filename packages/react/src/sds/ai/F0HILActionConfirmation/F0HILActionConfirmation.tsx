@@ -1,5 +1,6 @@
 import { F0Card } from "@/components/F0Card"
 import Check from "@/icons/app/Check"
+import Cross from "@/icons/app/Cross"
 
 import { F0HILActionConfirmationProps } from "./types"
 
@@ -17,11 +18,14 @@ export const F0HILActionConfirmation = ({
       primaryAction={{
         label: confirmationText,
         icon: Check,
+        hideLabel: true,
         onClick: onConfirm,
       }}
       secondaryActions={[
         {
           label: cancelText,
+          icon: Cross,
+          hideLabel: true,
           onClick: onCancel,
         },
       ]}
