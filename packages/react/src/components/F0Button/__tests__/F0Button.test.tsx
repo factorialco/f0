@@ -41,6 +41,18 @@ describe("F0Button", () => {
     expect(screen.getByText("Add Item")).toBeInTheDocument()
   })
 
+  it("should render the icon after the label when iconPosition is right", () => {
+    render(<F0Button label="Open Details" icon={Add} iconPosition="right" />)
+    const button = screen.getByRole("button")
+    const svg = button.querySelector("svg")
+    const label = screen.getByText("Open Details")
+    expect(svg).toBeInTheDocument()
+    // The icon node should follow the label in DOM order.
+    expect(
+      label.compareDocumentPosition(svg!) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+  })
+
   it("should render as icon-only when hideLabel is true", () => {
     render(<F0Button label="Add Item" icon={Add} hideLabel round />)
     const button = screen.getByRole("button")
