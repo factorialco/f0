@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.32.2](https://github.com/factorialco/f0/compare/f0-react-v2.32.1...f0-react-v2.32.2) (2026-06-03)
+
+
+### Bug Fixes
+
+* **docs:** correct dead Data Collection Storybook doc links ([#4276](https://github.com/factorialco/f0/issues/4276)) ([1a740eb](https://github.com/factorialco/f0/commit/1a740eb27fbdacd59b1b0aa4bbea7c6043cf9b3e))
+
 ## [2.32.1](https://github.com/factorialco/f0/compare/f0-react-v2.32.0...f0-react-v2.32.1) (2026-06-03)
 
 
