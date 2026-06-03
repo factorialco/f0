@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="EU AI Act Compliance Pack">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0A2A8A"/>
+      <stop offset="55%" stop-color="#003399"/>
+      <stop offset="100%" stop-color="#001E66"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="42%" r="60%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <path id="eustar" d="M0,-26 L6.3,-8.6 L24.7,-8.0 L10.2,3.3 L15.3,21.0 L0,10.6 L-15.3,21.0 L-10.2,3.3 L-24.7,-8.0 L-6.3,-8.6 Z" fill="#FFCC00"/>
+  </defs>
+
+  <rect width="1200" height="675" fill="url(#bg)"/>
+  <rect width="1200" height="675" fill="url(#glow)"/>
+
+  <!-- EU circle of 12 stars, centred at 600,300 radius 200 -->
+  <g>
+    <use href="#eustar" transform="translate(600,100)"/>
+    <use href="#eustar" transform="translate(700,127)"/>
+    <use href="#eustar" transform="translate(773,200)"/>
+    <use href="#eustar" transform="translate(800,300)"/>
+    <use href="#eustar" transform="translate(773,400)"/>
+    <use href="#eustar" transform="translate(700,473)"/>
+    <use href="#eustar" transform="translate(600,500)"/>
+    <use href="#eustar" transform="translate(500,473)"/>
+    <use href="#eustar" transform="translate(427,400)"/>
+    <use href="#eustar" transform="translate(400,300)"/>
+    <use href="#eustar" transform="translate(427,200)"/>
+    <use href="#eustar" transform="translate(500,127)"/>
+  </g>
+
+  <!-- "stack of 3" motif suggesting a bundle, bottom band -->
+  <g opacity="0.9">
+    <rect x="470" y="586" width="260" height="14" rx="7" fill="#FFCC00" opacity="0.35"/>
+    <rect x="500" y="606" width="200" height="14" rx="7" fill="#FFCC00" opacity="0.55"/>
+    <rect x="530" y="626" width="140" height="14" rx="7" fill="#FFCC00"/>
+  </g>
+</svg>
