@@ -16,6 +16,12 @@ const DURATION = 0.3
 
 interface F0ClarifyingPanelProps {
   clarifyingQuestion: ClarifyingQuestionState
+  /**
+   * Disables submitting the final step (confirm button, Enter on the custom
+   * answer input, and Skip) — e.g. while the assistant is still streaming a
+   * response. Step navigation and option selection stay interactive.
+   */
+  isSubmitDisabled?: boolean
 }
 
 /**
@@ -32,6 +38,7 @@ interface F0ClarifyingPanelProps {
  */
 export const F0ClarifyingPanel = ({
   clarifyingQuestion,
+  isSubmitDisabled,
 }: F0ClarifyingPanelProps) => {
   const shouldReduceMotion = useReducedMotion()
   const duration = shouldReduceMotion ? 0 : DURATION
@@ -44,13 +51,17 @@ export const F0ClarifyingPanel = ({
       transition={{ duration, ease: EASE }}
       className="overflow-hidden"
     >
-      <F0ClarifyingPanelContent clarifyingQuestion={clarifyingQuestion} />
+      <F0ClarifyingPanelContent
+        clarifyingQuestion={clarifyingQuestion}
+        isSubmitDisabled={isSubmitDisabled}
+      />
     </motion.div>
   )
 }
 
 const F0ClarifyingPanelContent = ({
   clarifyingQuestion,
+  isSubmitDisabled,
 }: F0ClarifyingPanelProps) => {
   const translation = useI18n()
   const shouldReduceMotion = useReducedMotion()
@@ -96,6 +107,20 @@ const F0ClarifyingPanelContent = ({
   const hasCustomText = (customAnswerText ?? "").trim().length > 0
   const canProceed =
     hasSelection || (isCustomAnswerActive && hasCustomText) || optional === true
+
+  // Only the final step submits (sends a message back to the assistant) —
+  // navigating between steps stays allowed while submission is disabled.
+  const isSubmitBlocked = isSubmitDisabled === true && isFinalStep
+
+  const handleConfirm = () => {
+    if (isSubmitBlocked) return
+    confirm()
+  }
+
+  const handleSkip = () => {
+    if (isSubmitBlocked) return
+    skip()
+  }
 
   // In single-select mode, auto-advance on selection when this is not the
   // last step — avoids requiring an explicit "Next" click. Only advance when
@@ -179,7 +204,7 @@ const F0ClarifyingPanelContent = ({
               onActivateCustom={handleActivateCustom}
               onChangeCustomText={setCustomAnswerText}
               onToggleCustomActive={setCustomAnswerActive}
-              onConfirm={confirm}
+              onConfirm={handleConfirm}
             />
           </motion.div>
         </AnimatePresence>
@@ -187,9 +212,10 @@ const F0ClarifyingPanelContent = ({
 
       <ConfirmFooter
         canProceed={canProceed}
+        submitDisabled={isSubmitBlocked}
         label={confirmButtonLabel}
-        onConfirm={confirm}
-        onSkip={skip}
+        onConfirm={handleConfirm}
+        onSkip={handleSkip}
         showSkip={showSkip}
       />
     </div>
