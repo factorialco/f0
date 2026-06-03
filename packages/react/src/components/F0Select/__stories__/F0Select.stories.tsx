@@ -168,7 +168,7 @@ const meta: Meta = {
         "  label: string\n" +
         "  description?: string\n" +
         "  avatar?: AvatarVariant\n" +
-        "  tag?: string | { type: 'dot'; text: string; color: NewColor } | { type: 'person'; name: string; src?: string }\n" +
+        "  tag?: string | { type: 'dot'; text: string; color: NewColor } | { type: 'person'; name: string; src?: string } | { type: 'status'; text: string; variant: StatusVariant }\n" +
         "  icon?: IconType\n" +
         "  item?: unknown\n" +
         "  disabled?: boolean\n" +
@@ -486,6 +486,76 @@ export const WithIconTags: Story = {
           type: "icon",
           text: "System",
           icon: Desktop,
+        },
+      },
+    ],
+  },
+}
+
+export const WithStatusTags: Story = {
+  args: {
+    label: "Status",
+    placeholder: "Select a status",
+    onChange: fn(),
+    value: "pending",
+    options: [
+      {
+        value: "draft",
+        label: "Draft",
+        tag: { type: "status", text: "Draft", variant: "neutral" },
+      },
+      {
+        value: "pending",
+        label: "Pending",
+        tag: { type: "status", text: "Pending", variant: "warning" },
+      },
+      {
+        value: "approved",
+        label: "Approved",
+        tag: { type: "status", text: "Approved", variant: "positive" },
+      },
+      {
+        value: "rejected",
+        label: "Rejected",
+        tag: { type: "status", text: "Rejected", variant: "critical" },
+      },
+    ],
+  },
+}
+
+export const WithPersonAvatar: Story = {
+  args: {
+    label: "Select a reviewer",
+    placeholder: "Select a reviewer",
+    onChange: fn(),
+    value: "isabella",
+    options: [
+      {
+        value: "isabella",
+        label: "Isabella Tangari",
+        description: "Product Designer",
+        avatar: {
+          type: "person",
+          firstName: "Isabella",
+          lastName: "Tangari",
+        },
+      },
+      {
+        value: "saul",
+        label: "Saul Dominguez",
+        avatar: {
+          type: "person",
+          firstName: "Saul",
+          lastName: "Dominguez",
+        },
+      },
+      {
+        value: "marta",
+        label: "Marta Serrano",
+        avatar: {
+          type: "person",
+          firstName: "Marta",
+          lastName: "Serrano",
         },
       },
     ],

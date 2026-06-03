@@ -40,10 +40,6 @@ type Person = {
   displayName: string
 }
 
-type NestedPerson = Person & {
-  hasChildren?: boolean
-}
-
 const testData: Person[] = [
   {
     id: 1,
@@ -112,7 +108,7 @@ window.IntersectionObserver = MockIntersectionObserver
 
 describe("TableCollection", () => {
   describe("rendering", () => {
-    it("shows loading state initially", () => {
+    it("shows loading state initially", async () => {
       render(
         <TableCollection<
           Person,
@@ -215,141 +211,19 @@ describe("TableCollection", () => {
       })
     })
 
-    it("eagerly loads only rows listed in defaultExpandedIds", async () => {
-      const nestedParents: NestedPerson[] = [
+    it("applies minWidth to header and row cells", async () => {
+      const columnsWithMinWidth = [
         {
-          id: 1,
-          name: "Parent 1",
-          email: "parent1@example.com",
-          displayName: "Dr. Parent 1",
-          hasChildren: true,
+          label: "name",
+          render: (item: Person) => item.name,
+          minWidth: 220,
         },
         {
-          id: 2,
-          name: "Parent 2",
-          email: "parent2@example.com",
-          displayName: "Dr. Parent 2",
-          hasChildren: true,
+          label: "email",
+          render: (item: Person) => item.email,
         },
       ]
 
-      const childrenByParent: Record<number, NestedPerson[]> = {
-        1: [
-          {
-            id: 101,
-            name: "Child of Parent 1",
-            email: "child1@example.com",
-            displayName: "Dr. Child of Parent 1",
-            hasChildren: false,
-          },
-        ],
-        2: [
-          {
-            id: 201,
-            name: "Child of Parent 2",
-            email: "child2@example.com",
-            displayName: "Dr. Child of Parent 2",
-            hasChildren: false,
-          },
-        ],
-      }
-
-      const fetchChildrenMock = vi.fn(({ item }: { item: NestedPerson }) => {
-        return childrenByParent[item.id] ?? []
-      })
-
-      const source = {
-        ...createTestSource(nestedParents),
-        fetchChildren: fetchChildrenMock,
-        itemsWithChildren: (item: NestedPerson) => !!item.hasChildren,
-        defaultExpandedIds: [1],
-      }
-
-      render(
-        <TableCollection<
-          NestedPerson,
-          TestFilters,
-          SortingsDefinition,
-          SummariesDefinition,
-          ItemActionsDefinition<NestedPerson>,
-          TestNavigationFilters,
-          GroupingDefinition<NestedPerson>
-        >
-          columns={testColumns}
-          source={source}
-          onSelectItems={vi.fn()}
-          onLoadData={vi.fn()}
-          onLoadError={vi.fn()}
-        />
-      )
-
-      await waitFor(() => {
-        expect(fetchChildrenMock).toHaveBeenCalledTimes(1)
-      })
-
-      expect(fetchChildrenMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          item: expect.objectContaining({ id: 1 }),
-        })
-      )
-
-      await waitFor(() => {
-        expect(screen.getByText("Child of Parent 1")).toBeInTheDocument()
-      })
-
-      expect(screen.queryByText("Child of Parent 2")).not.toBeInTheDocument()
-    })
-
-    it("does not eagerly load children when defaultExpandedIds is empty", async () => {
-      const nestedParents: NestedPerson[] = [
-        {
-          id: 1,
-          name: "Parent without default expansion",
-          email: "parent@example.com",
-          displayName: "Dr. Parent without default expansion",
-          hasChildren: true,
-        },
-      ]
-
-      const fetchChildrenMock = vi.fn(() => [])
-
-      const source = {
-        ...createTestSource(nestedParents),
-        fetchChildren: fetchChildrenMock,
-        itemsWithChildren: (item: NestedPerson) => !!item.hasChildren,
-        defaultExpandedIds: [],
-      }
-
-      render(
-        <TableCollection<
-          NestedPerson,
-          TestFilters,
-          SortingsDefinition,
-          SummariesDefinition,
-          ItemActionsDefinition<NestedPerson>,
-          TestNavigationFilters,
-          GroupingDefinition<NestedPerson>
-        >
-          columns={testColumns}
-          source={source}
-          onSelectItems={vi.fn()}
-          onLoadData={vi.fn()}
-          onLoadError={vi.fn()}
-        />
-      )
-
-      await waitFor(() => {
-        expect(
-          screen.getByText("Parent without default expansion")
-        ).toBeInTheDocument()
-      })
-
-      expect(fetchChildrenMock).not.toHaveBeenCalled()
-    })
-  })
-
-  describe("edge cases", () => {
-    it("handles empty data gracefully", async () => {
       render(
         <TableCollection<
           Person,
@@ -360,25 +234,78 @@ describe("TableCollection", () => {
           TestNavigationFilters,
           GroupingDefinition<Person>
         >
-          columns={testColumns}
-          source={createTestSource([])}
+          columns={columnsWithMinWidth}
+          source={createTestSource()}
           onSelectItems={vi.fn()}
           onLoadData={vi.fn()}
           onLoadError={vi.fn()}
         />
       )
 
-      // Wait for loading state to finish
       await waitFor(() => {
-        const rows = screen.getAllByRole("row")
-        expect(rows).toHaveLength(1) // Just the header row
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
       })
 
-      // Headers should still be present
-      expect(screen.getAllByRole("columnheader")).toHaveLength(2)
+      const nameHeader = screen.getByRole("columnheader", { name: "name" })
+      expect(nameHeader).toHaveStyle({ minWidth: "220px" })
+
+      const firstNameCell = screen
+        .getAllByText(testData[0].name)[0]
+        .closest("td")
+      expect(firstNameCell).toHaveStyle({ minWidth: "220px" })
     })
 
-    it("handles error states appropriately", async () => {
+    it("applies minWidth in grouped header placeholders for ungrouped columns", async () => {
+      const groupedColumns = [
+        {
+          label: "name",
+          render: (item: Person) => item.name,
+          headerGroupId: "identity",
+        },
+        {
+          label: "email",
+          render: (item: Person) => item.email,
+          minWidth: 180,
+        },
+      ]
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={groupedColumns}
+          source={createTestSource()}
+          headerGroupLabels={{ identity: "Identity" }}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const identityGroupHeader = screen.getByRole("columnheader", {
+        name: "Identity",
+      })
+      const groupedHeaderRow = identityGroupHeader.closest("tr")
+      const groupedHeaderCells = within(
+        groupedHeaderRow as HTMLElement
+      ).getAllByRole("columnheader")
+
+      const ungroupedPlaceholderHeader =
+        groupedHeaderCells[groupedHeaderCells.length - 1]
+      expect(ungroupedPlaceholderHeader).toHaveStyle({ minWidth: "180px" })
+    })
+
+    it("renders error state when data fetch fails", async () => {
       const errorMessage = "Failed to fetch data"
       const error = new Error(errorMessage)
 

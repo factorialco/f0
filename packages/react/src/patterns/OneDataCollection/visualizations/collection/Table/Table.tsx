@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
-import { Fragment, ReactNode, useEffect, useMemo, useState } from "react"
+import { Fragment, useEffect, useMemo, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
@@ -384,13 +384,7 @@ export const TableCollection = <
       ? i18n.status.selected.singular
       : i18n.status.selected.plural
 
-  const TableWrapper = tableWithChildren
-    ? ({ children }: { children: ReactNode }) => (
-        <NestedDataProvider defaultExpandedIds={source.defaultExpandedIds}>
-          {children}
-        </NestedDataProvider>
-      )
-    : Fragment
+  const TableWrapper = tableWithChildren ? NestedDataProvider : Fragment
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
@@ -437,6 +431,7 @@ export const TableCollection = <
                         align="right"
                         className={borderClass}
                         width={columns[entry.columnIndices[0]].width}
+                        minWidth={columns[entry.columnIndices[0]].minWidth}
                         key={`header-ungrouped-${entry.columnIndices[0]}`}
                         sticky={getStickyPosition(entry.columnIndices[0])}
                       >

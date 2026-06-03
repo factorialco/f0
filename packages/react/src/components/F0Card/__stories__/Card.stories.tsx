@@ -105,6 +105,26 @@ const meta = {
         defaultValue: { summary: "sm" },
       },
     },
+    subtleBorder: {
+      control: "boolean",
+      description:
+        "Use a softer/lighter border (`border-f1-border-secondary`). Opt-in so " +
+        "existing cards keep the default `border-f1-border`.",
+      table: {
+        defaultValue: { summary: "false" },
+      },
+    },
+    bookmark: {
+      control: false,
+      description:
+        "Optional save/bookmark toggle rendered as a circular icon button in the " +
+        "card overlay. Pass `{ bookmarked, onBookmarkChange, label? }`. Shows an " +
+        "outline icon when not saved and a filled icon when saved; it is revealed " +
+        "on card hover and stays visible while bookmarked.",
+      table: {
+        type: { summary: "CardBookmark" },
+      },
+    },
     ...dataTestIdArgs,
   } as never,
   args: {
@@ -284,6 +304,65 @@ export const Selectable: Story = {
   render: (args) => {
     const [selected, setSelected] = useState(false)
     return <F0Card {...args} selected={selected} onSelect={setSelected} />
+  },
+}
+
+export const Bookmarkable: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Pass `bookmark` to add a save/bookmark toggle. The control is a circular " +
+          "icon button shown in the card overlay — outline when not saved, filled when " +
+          "saved. It toggles without triggering the card's `link`/`onClick`.",
+      },
+    },
+  },
+  args: {
+    ...Default.args,
+  },
+  render: (args) => {
+    const [bookmarked, setBookmarked] = useState(false)
+    return (
+      <F0Card
+        {...args}
+        bookmark={{
+          bookmarked,
+          onBookmarkChange: setBookmarked,
+          label: "Save",
+        }}
+      />
+    )
+  },
+}
+
+export const BookmarkableWithImage: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "With an image, the bookmark toggle overlays the top-right corner. It is " +
+          "revealed on card hover and stays visible while bookmarked, so the saved " +
+          "state is always recognisable at a glance.",
+      },
+    },
+  },
+  args: {
+    ...Default.args,
+    image: image,
+  },
+  render: (args) => {
+    const [bookmarked, setBookmarked] = useState(false)
+    return (
+      <F0Card
+        {...args}
+        bookmark={{
+          bookmarked,
+          onBookmarkChange: setBookmarked,
+          label: "Save",
+        }}
+      />
+    )
   },
 }
 

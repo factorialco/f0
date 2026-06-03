@@ -105,3 +105,25 @@ export type CardMetadata =
   | {
       property: Extract<CardMetadataProperty, { type: "file" }>
     }
+
+/**
+ * Bookmark (save) toggle rendered as an icon button in the card's options overlay.
+ * Shows an outline bookmark icon when not bookmarked and a filled one when bookmarked,
+ * giving an at-a-glance indication of the saved state.
+ */
+export interface CardBookmark {
+  /**
+   * Whether the card is currently bookmarked (saved).
+   * Controls the filled vs. outline icon and keeps the toggle visible while active.
+   */
+  bookmarked: boolean
+  /**
+   * Called with the next bookmarked state when the user toggles the bookmark.
+   */
+  onBookmarkChange: (bookmarked: boolean) => void
+  /**
+   * Accessible label for the toggle button (e.g. "Save product").
+   * Falls back to the card `title` when omitted.
+   */
+  label?: string
+}

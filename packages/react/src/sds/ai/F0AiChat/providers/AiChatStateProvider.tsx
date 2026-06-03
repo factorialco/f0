@@ -158,13 +158,28 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   // forwards files here. ChatTextarea registers its handler via
   // `setProcessDroppedFilesFunction`. Same pattern factorial uses, just
   // hoisted into f0 since it's pure UI wiring.
+  //
+  // pendingDropsRef buffers drops that arrive while the textarea's handler
+  // is momentarily unregistered (the textarea re-registers whenever its
+  // processFiles identity changes). Without it those drops were lost
+  // silently and the user had to drop the file again.
   const processFilesRef = useRef<((files: File[]) => void) | null>(null)
+  const pendingDropsRef = useRef<File[][]>([])
   const processDroppedFiles = useCallback((files: File[]) => {
-    processFilesRef.current?.(files)
+    if (processFilesRef.current) {
+      processFilesRef.current(files)
+    } else {
+      pendingDropsRef.current.push(files)
+    }
   }, [])
   const setProcessDroppedFilesFunction = useCallback(
     (fn: ((files: File[]) => void) | null) => {
       processFilesRef.current = fn
+      if (fn && pendingDropsRef.current.length > 0) {
+        const buffered = pendingDropsRef.current
+        pendingDropsRef.current = []
+        buffered.forEach((files) => fn(files))
+      }
     },
     []
   )

@@ -92,6 +92,12 @@ interface MetadataItem {
   hideLabel?: boolean
 
   /**
+   * Optional leading icon shown before the label/value. Useful when the icon itself
+   * conveys the field (e.g. with `hideLabel`), so the item reads as "icon + value".
+   */
+  icon?: IconType
+
+  /**
    * Optional info text. When provided, displays an info icon next to the label
    * that shows this text in a tooltip when hovered.
    */
@@ -159,6 +165,11 @@ function MetadataItem({ item }: { item: MetadataItem }) {
 
   return (
     <div className="flex h-8 items-center gap-2">
+      {item.icon && (
+        <span className="flex shrink-0 items-center text-f1-foreground-secondary">
+          <F0Icon icon={item.icon} size="md" />
+        </span>
+      )}
       <div
         className={cn(
           "flex w-28 items-center gap-1 truncate text-f1-foreground-secondary md:w-fit",

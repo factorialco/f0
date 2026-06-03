@@ -11,7 +11,7 @@ import * as EditableTableStories from "./editable-table.stories"
 ## Introduction
 
 The Editable Table visualization is a tabular view that uses the same layout and
-features as the [Table](/?path=/docs/components-data-collection-visualizations-table--documentation)
+features as the [Table](/?path=/docs/patterns-data-collection-visualizations-table--documentation)
 visualization (columns, sorting, selection, grouping, pagination, summaries).
 Its main differences are:
 
@@ -93,7 +93,7 @@ Use `type: "editableTable"` in the `visualizations` prop:
 The Editable Table accepts the same base options as the Table visualization,
 plus editable-specific ones:
 
-- **columns** – Column definitions (extends the [Table column definition](/?path=/docs/components-data-collection-visualizations-table--documentation) with `editType` and `editable`; see [Editable Table Column Definition](#editable-table-column-definition) below).
+- **columns** – Column definitions (extends the [Table column definition](/?path=/docs/patterns-data-collection-visualizations-table--documentation) with `editType` and `editable`; see [Editable Table Column Definition](#editable-table-column-definition) below).
 - **onCellChange** – `(updatedItem: R) => Promise<void | Record<string, string>>`. Called whenever a user changes a cell value. `updatedItem` is the full row object with the edited field already updated. Resolve with nothing for success, or with `{ columnId: "message" }` to set errors on specific columns. If the promise rejects, the edited cell displays an error state. See [Error handling](#error-handling) below.
 - **frozenColumns** – Number of columns to freeze on the left (`0`, `1`, or `2`). Frozen columns stay visible when the user scrolls horizontally.
 - **allowColumnReordering** – Let users reorder columns via settings.

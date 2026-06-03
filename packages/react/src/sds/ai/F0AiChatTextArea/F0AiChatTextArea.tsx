@@ -85,6 +85,10 @@ export const F0AiChatTextArea = ({
   const [inputValue, setInputValue] = useState("")
   const [cursorPosition, setCursorPosition] = useState(0)
   const [isPreSending, setIsPreSending] = useState(false)
+  // Set when the user hits send while an attachment is still uploading: the
+  // submit is queued and fired once uploads finish (see effect below), so the
+  // message goes WITH the file instead of being dropped or sent without it.
+  const [pendingSubmit, setPendingSubmit] = useState(false)
   const [hoveredSuggestion, setHoveredSuggestion] =
     useState<WelcomeScreenSuggestionItem | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
@@ -122,6 +126,7 @@ export const F0AiChatTextArea = ({
     handleRemoveFile,
     clearFiles,
     transientError,
+    showTransientError,
   } = useFileAttachments(fileAttachments)
 
   const mentions = useMentions({
@@ -155,7 +160,28 @@ export const F0AiChatTextArea = ({
   const resolvedDefaultPlaceholder = translation.ai.inputPlaceholder
   const uploadedFiles = attachedFiles.filter((f) => f.status === "uploaded")
   const isUploading = attachedFiles.some((f) => f.status === "uploading")
+  const hasErrorFiles = attachedFiles.some((f) => f.status === "error")
   const hasDataToSend = inputValue.trim().length > 0
+
+  // Fire a queued submit once all attachments finish uploading. If an upload
+  // failed, do NOT auto-send (the message would go without the file) — surface
+  // a transient banner so the user knows the click was acknowledged but the
+  // send was blocked, instead of silently swallowing the event.
+  useEffect(() => {
+    if (!pendingSubmit || isUploading) return
+    setPendingSubmit(false)
+    if (hasErrorFiles) {
+      showTransientError(translation.ai.fileUploadBlockedSubmit)
+      return
+    }
+    formRef.current?.requestSubmit()
+  }, [
+    pendingSubmit,
+    isUploading,
+    hasErrorFiles,
+    showTransientError,
+    translation.ai.fileUploadBlockedSubmit,
+  ])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -166,7 +192,13 @@ export const F0AiChatTextArea = ({
     mentions.close()
     if (inProgress) {
       onStop?.()
-    } else if (hasDataToSend && !isUploading && !isPreSending) {
+    } else if (hasDataToSend && !isPreSending) {
+      // Attachment still uploading: queue the send instead of dropping it.
+      if (isUploading) {
+        setPendingSubmit(true)
+        textareaRef.current?.focus()
+        return
+      }
       if (onBeforeSubmit) {
         setIsPreSending(true)
         try {
@@ -402,8 +434,7 @@ export const F0AiChatTextArea = ({
                     handleFileSelect={handleFileSelect}
                     inProgress={inProgress}
                     hasDataToSend={hasDataToSend}
-                    isUploading={isUploading}
-                    isPreSending={isPreSending}
+                    isPreSending={isPreSending || pendingSubmit}
                   />
                 </motion.div>
               )}
@@ -444,9 +475,32 @@ export const F0AiChatTextArea = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15, ease: "easeOut" }}
             >
-              <OneEllipsis className="text-sm font-medium text-f1-foreground-tertiary">
-                {disclaimer.text}
-              </OneEllipsis>
+              {disclaimer.onClick ? (
+                <button
+                  type="button"
+                  onClick={disclaimer.onClick}
+                  className={cn(
+                    "group min-w-0 cursor-pointer bg-transparent p-0 text-inherit",
+                    "transition-transform duration-700 ease-out",
+                    "hover:scale-[1.02] focus-visible:scale-[1.02]",
+                    "motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:focus-visible:scale-100"
+                  )}
+                >
+                  <OneEllipsis
+                    className={cn(
+                      "text-sm font-medium text-f1-foreground-tertiary transition-colors duration-700 ease-out",
+                      "group-hover:bg-gradient-to-r group-hover:from-[#E55619] group-hover:to-[#A1ADE5] group-hover:bg-clip-text group-hover:text-transparent",
+                      "group-focus-visible:bg-gradient-to-r group-focus-visible:from-[#E55619] group-focus-visible:to-[#A1ADE5] group-focus-visible:bg-clip-text group-focus-visible:text-transparent"
+                    )}
+                  >
+                    {disclaimer.text}
+                  </OneEllipsis>
+                </button>
+              ) : (
+                <OneEllipsis className="text-sm font-medium text-f1-foreground-tertiary">
+                  {disclaimer.text}
+                </OneEllipsis>
+              )}
 
               {disclaimer.link && disclaimer.linkText && (
                 <Link
