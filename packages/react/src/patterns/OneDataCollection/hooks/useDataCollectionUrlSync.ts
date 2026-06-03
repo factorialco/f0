@@ -24,14 +24,24 @@ type UseDataCollectionUrlSyncOptions = {
   filters: FiltersState<FiltersDefinition>
   search: string | undefined
   sortings: SortingsState<SortingsDefinition>
+  /** Index of the active visualization. */
+  visualization: number
+  /**
+   * Ordered visualization type/keys (e.g. `["table", "kanban"]`), used to map
+   * the index to/from the readable `dc_view` value. URL `dc_view` is only synced
+   * when there is more than one visualization. Duplicate types resolve to the
+   * first matching index on read.
+   */
+  visualizationKeys: readonly string[]
   setFilters: (value: FiltersState<FiltersDefinition>) => void
   setSearch: (value: string | undefined) => void
   setSortings: (value: SortingsState<SortingsDefinition>) => void
+  setVisualization: (value: number) => void
 }
 
 /**
- * Keeps a OneDataCollection's filters/search/sortings in two-way sync with the
- * URL query params (see `dataCollectionUrlParams`):
+ * Keeps a OneDataCollection's filters/search/sortings/visualization in two-way
+ * sync with the URL query params (see `dataCollectionUrlParams`):
  *
  * - **URL → collection:** once, after storage has hydrated (so the URL takes
  *   precedence over persisted state), any `dc`-addressed params matching this
@@ -52,11 +62,16 @@ export const useDataCollectionUrlSync = ({
   filters,
   search,
   sortings,
+  visualization,
+  visualizationKeys,
   setFilters,
   setSearch,
   setSortings,
+  setVisualization,
 }: UseDataCollectionUrlSyncOptions): void => {
   const active = !disabled && !!id
+  // Only sync the visualization when there is a real choice to reflect.
+  const syncVisualization = visualizationKeys.length > 1
   const [urlApplied, setUrlApplied] = useState(false)
 
   // URL → collection (run once, after hydration so the URL wins over storage).
@@ -75,6 +90,11 @@ export const useDataCollectionUrlSync = ({
       }
       if ("search" in state) setSearch(state.search)
       if ("sortings" in state) setSortings(state.sortings ?? null)
+      // Map the readable view key back to its index; ignore unknown keys.
+      if (syncVisualization && state.visualization !== undefined) {
+        const index = visualizationKeys.indexOf(state.visualization)
+        if (index >= 0) setVisualization(index)
+      }
     }
 
     // Enable writing in the same render as the applied state, so the first
@@ -86,6 +106,25 @@ export const useDataCollectionUrlSync = ({
   // collection → URL.
   useDeepCompareEffect(() => {
     if (!active || !urlApplied || !id) return
-    syncDataCollectionUrlParams(id, { filters, search, sortings })
-  }, [active, urlApplied, id, filters, search, sortings])
+    syncDataCollectionUrlParams(id, {
+      filters,
+      search,
+      sortings,
+      // Omit the default (first) view; reflect others by their type/key.
+      visualization:
+        syncVisualization && visualization > 0
+          ? visualizationKeys[visualization]
+          : undefined,
+    })
+  }, [
+    active,
+    urlApplied,
+    id,
+    filters,
+    search,
+    sortings,
+    visualization,
+    visualizationKeys,
+    syncVisualization,
+  ])
 }

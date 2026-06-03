@@ -840,6 +840,8 @@ const OneDataCollectionComp = <
     filters: activeCurrentFilters as FiltersState<FiltersDefinition>,
     search: currentSearch,
     sortings: currentSortings as SortingsState<SortingsDefinition>,
+    visualization: currentVisualization,
+    visualizationKeys: visualizations.map((v) => v.type),
     setFilters: activeSetCurrentFilters as (
       value: FiltersState<FiltersDefinition>
     ) => void,
@@ -847,6 +849,7 @@ const OneDataCollectionComp = <
     setSortings: setCurrentSortings as (
       value: SortingsState<SortingsDefinition>
     ) => void,
+    setVisualization: setCurrentVisualization,
   })
 
   const showTotalItemSummarySkeleton = useDebounceBoolean({

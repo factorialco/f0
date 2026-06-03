@@ -18,6 +18,7 @@ const setup = (overrides: Partial<Props> = {}) => {
   const setFilters = vi.fn()
   const setSearch = vi.fn()
   const setSortings = vi.fn()
+  const setVisualization = vi.fn()
 
   let props: Props = {
     id: ID,
@@ -27,9 +28,12 @@ const setup = (overrides: Partial<Props> = {}) => {
     filters: {},
     search: undefined,
     sortings: null,
+    visualization: 0,
+    visualizationKeys: ["table", "card", "list"],
     setFilters,
     setSearch,
     setSortings,
+    setVisualization,
     ...overrides,
   }
 
@@ -42,6 +46,7 @@ const setup = (overrides: Partial<Props> = {}) => {
     setFilters,
     setSearch,
     setSortings,
+    setVisualization,
     rerender: (next: Partial<Props> = {}) => {
       props = { ...props, ...next }
       view.rerender(props)
@@ -114,6 +119,50 @@ describe("useDataCollectionUrlSync — collection → URL", () => {
 
     rerender({ search: "" })
     expect(hasDcParams()).toBe(false)
+  })
+})
+
+describe("useDataCollectionUrlSync — visualization", () => {
+  it("maps a view key from the URL back to its index", () => {
+    window.history.replaceState(null, "", `/?dc_id=${ID}&dc_view=list`)
+
+    const { setVisualization } = setup({
+      visualizationKeys: ["table", "card", "list"],
+    })
+    expect(setVisualization).toHaveBeenCalledWith(2)
+  })
+
+  it("ignores an unknown view key", () => {
+    window.history.replaceState(null, "", `/?dc_id=${ID}&dc_view=gallery`)
+
+    const { setVisualization } = setup({
+      visualizationKeys: ["table", "card", "list"],
+    })
+    expect(setVisualization).not.toHaveBeenCalled()
+  })
+
+  it("does not sync visualization when there is only one", () => {
+    window.history.replaceState(null, "", `/?dc_id=${ID}&dc_view=card`)
+
+    const { setVisualization, rerender } = setup({
+      visualizationKeys: ["table"],
+    })
+    expect(setVisualization).not.toHaveBeenCalled()
+
+    rerender({ visualization: 0 })
+    expect(currentParams().has("dc_view")).toBe(false)
+  })
+
+  it("reflects a visualization change into the URL by type (omitting the first)", () => {
+    window.history.replaceState(null, "", "/people")
+
+    const { rerender } = setup({ visualizationKeys: ["table", "card", "list"] })
+
+    rerender({ visualization: 2 })
+    expect(currentParams().get("dc_view")).toBe("list")
+
+    rerender({ visualization: 0 })
+    expect(currentParams().has("dc_view")).toBe(false)
   })
 })
 

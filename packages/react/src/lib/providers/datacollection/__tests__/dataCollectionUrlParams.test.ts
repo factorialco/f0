@@ -114,6 +114,30 @@ describe("parseDataCollectionUrlParams", () => {
     })
   })
 
+  it("parses the visualization as a type/key string", () => {
+    expect(
+      parseDataCollectionUrlParams(`dc_id=${ID}&dc_view=kanban`)?.state
+        .visualization
+    ).toBe("kanban")
+    // Absent → not present.
+    expect(
+      parseDataCollectionUrlParams(`dc_id=${ID}`)?.state
+    ).not.toHaveProperty("visualization")
+  })
+
+  it("parses the page (1-indexed)", () => {
+    expect(
+      parseDataCollectionUrlParams(`dc_id=${ID}&dc_page=3`)?.state.page
+    ).toBe(3)
+    expect(
+      parseDataCollectionUrlParams(`dc_id=${ID}`)?.state
+    ).not.toHaveProperty("page")
+    // page 0 / negative are ignored.
+    expect(
+      parseDataCollectionUrlParams(`dc_id=${ID}&dc_page=0`)?.state
+    ).not.toHaveProperty("page")
+  })
+
   it("skips filters when no definition is provided", () => {
     expect(
       parseDataCollectionUrlParams(`dc_id=${ID}&dc_department=Sales`)?.state
@@ -203,6 +227,54 @@ describe("buildDataCollectionUrlParams", () => {
   it("emits only dc_id for an empty state", () => {
     const params = buildDataCollectionUrlParams(ID)
     expect([...params.keys()]).toEqual([DATA_COLLECTION_URL_PARAMS.id])
+  })
+
+  it("encodes the visualization as its type/key", () => {
+    expect(
+      buildDataCollectionUrlParams(ID, { visualization: "kanban" }).get(
+        "dc_view"
+      )
+    ).toBe("kanban")
+    // No view → no dc_view (the caller omits the default view).
+    expect(buildDataCollectionUrlParams(ID, {}).has("dc_view")).toBe(false)
+    expect([...buildDataCollectionUrlParams(ID, {}).keys()]).toEqual([
+      DATA_COLLECTION_URL_PARAMS.id,
+    ])
+  })
+
+  it("encodes the page, omitting the first one", () => {
+    expect(buildDataCollectionUrlParams(ID, { page: 3 }).get("dc_page")).toBe(
+      "3"
+    )
+    expect(buildDataCollectionUrlParams(ID, { page: 1 }).has("dc_page")).toBe(
+      false
+    )
+    expect([...buildDataCollectionUrlParams(ID, { page: 1 }).keys()]).toEqual([
+      DATA_COLLECTION_URL_PARAMS.id,
+    ])
+  })
+
+  it("keeps page and sorting together (they don't clobber each other)", () => {
+    const state = {
+      sortings: { field: "salary", order: "desc" as const },
+      page: 3,
+    }
+    const params = buildDataCollectionUrlParams(ID, state)
+    expect(params.get(DATA_COLLECTION_URL_PARAMS.sortings)).toBe("salary:desc")
+    expect(params.get(DATA_COLLECTION_URL_PARAMS.page)).toBe("3")
+    expect(parseDataCollectionUrlParams(params)).toEqual({ id: ID, state })
+  })
+
+  it("round-trips the visualization with other state", () => {
+    const state = {
+      filters: { department: ["Design"] },
+      visualization: "kanban",
+    }
+    const params = buildDataCollectionUrlParams(ID, state)
+    expect(parseDataCollectionUrlParams(params, FILTERS)).toEqual({
+      id: ID,
+      state,
+    })
   })
 })
 

@@ -27,6 +27,10 @@ export const DATA_COLLECTION_URL_PARAMS = {
   id: "dc_id",
   search: "dc_search",
   sortings: "dc_sort",
+  /** Active visualization type/key, e.g. `table` (omitted for the default one). */
+  visualization: "dc_view",
+  /** Current page (1-indexed; omitted for the first page). */
+  page: "dc_page",
 } as const
 
 /** Separator for range-style values (number / date ranges): `from..to`. */
@@ -63,7 +67,17 @@ export type DataCollectionUrlState<
 > = Pick<
   DataCollectionStorage<CurrentFiltersState>,
   "filters" | "search" | "sortings"
->
+> & {
+  /**
+   * Active visualization, addressed by its **type/key** (e.g. `"table"`,
+   * `"kanban"`) rather than a positional index — readable and stable across
+   * reordering. Mapping to/from the index is the caller's job (the data
+   * collection knows the visualization list).
+   */
+  visualization?: string
+  /** Current page (1-indexed). Not part of persisted storage — URL only. */
+  page?: number
+}
 
 export type DataCollectionUrlParams<
   CurrentFiltersState extends FiltersState<FiltersDefinition> =
@@ -277,6 +291,16 @@ export const parseDataCollectionUrlParams = <
     )
   }
 
+  if (params.has(DATA_COLLECTION_URL_PARAMS.visualization)) {
+    const view = params.get(DATA_COLLECTION_URL_PARAMS.visualization)
+    if (view) state.visualization = view
+  }
+
+  if (params.has(DATA_COLLECTION_URL_PARAMS.page)) {
+    const page = Number(params.get(DATA_COLLECTION_URL_PARAMS.page))
+    if (Number.isInteger(page) && page >= 1) state.page = page
+  }
+
   if (filtersDefinition) {
     const filters: Record<string, unknown> = {}
     let hasFilters = false
@@ -351,6 +375,14 @@ const writeStateToParams = <
       serializeSortings(state.sortings)
     )
   }
+  // The caller omits the default view, so any value here should be reflected.
+  if (state.visualization) {
+    params.set(DATA_COLLECTION_URL_PARAMS.visualization, state.visualization)
+  }
+  // Omit the first page (1) to keep the URL clean.
+  if (state.page && state.page > 1) {
+    params.set(DATA_COLLECTION_URL_PARAMS.page, String(state.page))
+  }
 }
 
 const hasActiveState = <
@@ -360,6 +392,8 @@ const hasActiveState = <
 ): boolean =>
   !!state.search ||
   !!state.sortings ||
+  !!state.visualization ||
+  (state.page !== undefined && state.page > 1) ||
   (!!state.filters &&
     Object.values(state.filters).some(isUrlSerializableFilter))
 

@@ -25,9 +25,11 @@ import {
   InfiniteScrollPaginatedResponse,
   OnSelectItemsCallback,
   PaginatedResponse,
+  PaginationInfo,
   PaginationType,
   RecordType,
   SelectedItemsState,
+  SortingsDefinition,
   SortingsState,
 } from "@/hooks/datasource/types"
 import { SearchOptions } from "@/hooks/datasource/types/search.typings"
@@ -1647,76 +1649,6 @@ export const manyOptionFilters = {
   },
 } as const
 
-export type ManyOptionFiltersType = typeof manyOptionFilters
-
-/**
- * A collection whose only filter (`assignee`) has 60 options. Use it to exercise
- * "select all" → the selection applies and persists, but is dropped from the URL
- * once it exceeds the value cap (see `MAX_URL_FILTER_VALUES`).
- */
-export const ManyOptionsFilterExampleComponent = ({ id }: { id?: string }) => {
-  const dataAdapterMemoized = useMemo(
-    () => ({
-      fetchData: (
-        options: DataCollectionBaseFetchOptions<
-          ManyOptionFiltersType,
-          NavigationFiltersDefinition
-        >
-      ) => {
-        const { sortings: s, search } = options
-        return new Promise<BaseResponse<MockUser>>((resolve) => {
-          setTimeout(() => {
-            // The assignee selection is irrelevant to the mock data; we only
-            // honor search so the list still reacts to something.
-            const filtered = filterUsers(
-              mockUsers,
-              {} as FiltersState<FiltersType>,
-              s,
-              undefined,
-              search
-            )
-            resolve({ records: filtered })
-          }, 100)
-        })
-      },
-    }),
-    []
-  )
-
-  const dataSource = useDataCollectionSource(
-    {
-      filters: manyOptionFilters,
-      sortings,
-      itemOnClick: (item) => () => console.log(`Clicking ${item.name}`),
-      dataAdapter: dataAdapterMemoized,
-    },
-    []
-  )
-
-  const mockVisualizations = getMockVisualizations({}) as unknown as Record<
-    string,
-    Visualization<
-      MockUser,
-      ManyOptionFiltersType,
-      typeof sortings,
-      SummariesDefinition,
-      ItemActionsDefinition<MockUser>,
-      NavigationFiltersDefinition,
-      GroupingDefinition<MockUser>
-    >
-  >
-
-  return (
-    <OneDataCollection
-      dataTestId={`one-data-collection-${id ?? "many-options"}`}
-      id={id}
-      storage={{ features: ["filters", "search", "sortings"] }}
-      source={dataSource}
-      visualizations={[mockVisualizations.table, mockVisualizations.list]}
-    />
-  )
-}
-
 interface DataAdapterOptions<TRecord> {
   data: TRecord[]
   delay?: number
@@ -2107,6 +2039,105 @@ export function createDataAdapter<
   }
 
   return adapter
+}
+
+/**
+ * Filters used by the combined URL-params story: the standard set plus an
+ * `assignee` filter with 60 options (to exercise the "select all" URL value
+ * cap).
+ */
+export const paginationFilters = {
+  ...filters,
+  assignee: manyOptionFilters.assignee,
+} as const
+
+export type PaginationFiltersType = typeof paginationFilters
+
+/**
+ * A page-paginated collection (8 per page over 48 records → 6 pages) with
+ * filters (including a 60-option multi-select) and sorting. It exposes the
+ * current page via `onPaginationChange` and the rest of the state via
+ * `onStateChange`, and seeds `currentFilters` / `currentSortings` /
+ * `currentPage` synchronously. The built-in URL sync is disabled and storage is
+ * off, so the consumer (the story) owns reflecting *all* of them in the URL —
+ * which is what lets page + sorting + filters coexist without clobbering.
+ *
+ * Seeding synchronously means the very first fetch already has filters + sorting
+ * + page, so loading a `?dc_page=3&dc_sort=…&dc_department=…` URL lands on the
+ * right page with the right filters/sorting and no reset race.
+ */
+export const PaginationExampleComponent = ({
+  id,
+  currentFilters,
+  currentPage,
+  currentSortings,
+  onPaginationChange,
+  onStateChange,
+}: {
+  id?: string
+  currentFilters?: FiltersState<PaginationFiltersType>
+  currentPage?: number
+  currentSortings?: SortingsState<SortingsDefinition>
+  onPaginationChange?: (paginationInfo: PaginationInfo | null) => void
+  onStateChange?: (
+    state: DataCollectionStatusComplete<FiltersState<PaginationFiltersType>>
+  ) => void
+}) => {
+  const dataAdapter = useMemo(
+    () =>
+      createDataAdapter<
+        MockUser,
+        PaginationFiltersType,
+        NavigationFiltersDefinition
+      >({
+        data: generateMockUsers(48),
+        paginationType: "pages",
+        perPage: 8,
+        delay: 100,
+      }),
+    []
+  )
+
+  const dataSource = useDataCollectionSource(
+    {
+      filters: paginationFilters,
+      currentFilters,
+      sortings,
+      currentSortings: currentSortings as SortingsState<typeof sortings>,
+      currentPage,
+      onPaginationChange,
+      dataAdapter,
+      itemOnClick: (item) => () => console.log(`Clicking ${item.name}`),
+    },
+    []
+  )
+
+  const mockVisualizations = getMockVisualizations({}) as unknown as Record<
+    string,
+    Visualization<
+      MockUser,
+      PaginationFiltersType,
+      typeof sortings,
+      SummariesDefinition,
+      ItemActionsDefinition<MockUser>,
+      NavigationFiltersDefinition,
+      GroupingDefinition<MockUser>
+    >
+  >
+
+  return (
+    <OneDataCollection
+      dataTestId={`one-data-collection-${id ?? "pagination"}`}
+      id={id}
+      // The story manages the params itself; keep the built-in sync and
+      // storage out of the way.
+      disableUrlParams
+      storage={false}
+      source={dataSource}
+      onStateChange={onStateChange}
+      visualizations={[mockVisualizations.table]}
+    />
+  )
 }
 
 // Example of a comprehensive actions definition with various types of actions
