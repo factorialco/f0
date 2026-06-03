@@ -56,6 +56,10 @@ export type ButtonInternalProps = Pick<
      */
     icon?: IconType
     /**
+     * Sets the side of the label the icon is placed on. Defaults to "left".
+     */
+    iconPosition?: "left" | "right"
+    /**
      * Adds an emoji to the button, can be used as a special case of icon-only button.
      */
     emoji?: string

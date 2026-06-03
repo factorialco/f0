@@ -322,6 +322,8 @@ function RightDialogToPageScenario() {
         disableContentPadding
         primaryAction={{
           label: "Open Details",
+          icon: ChevronRight,
+          iconPosition: "right",
           onClick: () => setSurface("page"),
         }}
       >
