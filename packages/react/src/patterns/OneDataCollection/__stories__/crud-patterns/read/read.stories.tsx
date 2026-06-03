@@ -4,7 +4,7 @@ import { ComponentProps, useState } from "react"
 
 import { StandardLayout } from "@/layouts/StandardLayout"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
-import { ChevronRight, Download, Files, Pencil } from "@/icons/app"
+import { ArrowRight, Download, Files, Pencil } from "@/icons/app"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
 import { F0Dialog } from "@/patterns/F0Dialog"
@@ -219,7 +219,7 @@ function OpenAsPageScenario({
       },
       {
         label: "Open",
-        icon: ChevronRight,
+        icon: ArrowRight,
         type: "primary",
         hideLabel: true,
         hideInMobileDropdown: true,
@@ -322,7 +322,7 @@ function RightDialogToPageScenario() {
         disableContentPadding
         primaryAction={{
           label: "Open Details",
-          icon: ChevronRight,
+          icon: ArrowRight,
           iconPosition: "right",
           onClick: () => setSurface("page"),
         }}
