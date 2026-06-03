@@ -1,6 +1,5 @@
 import { type RefObject } from "react"
 
-import { F0ActionItem } from "@/ai"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import {
   ArrowUp,
@@ -120,7 +119,7 @@ export const ActionBar = ({
         )}
       </div>
       <div className="flex items-center gap-2">
-        {canRecord && recordingStatus !== "transcribing" && (
+        {canRecord && (
           <ButtonInternal
             label={translation.ai.recordAudio}
             hideLabel
@@ -130,13 +129,10 @@ export const ActionBar = ({
             size="md"
             disabled={inProgress}
             onClick={onStartRecording}
+            loading={recordingStatus === "transcribing"}
           />
         )}
-        {recordingStatus === "transcribing" ? (
-          <div className="flex items-center gap-2 pr-1 text-f1-foreground-secondary h-8">
-            <F0ActionItem status="writing" />
-          </div>
-        ) : inProgress ? (
+        {recordingStatus !== "transcribing" && inProgress ? (
           <ButtonInternal
             type="submit"
             variant="neutral"
