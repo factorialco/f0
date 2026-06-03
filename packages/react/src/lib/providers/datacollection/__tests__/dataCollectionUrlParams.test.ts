@@ -123,9 +123,9 @@ describe("parseDataCollectionUrlParams", () => {
     expect(
       parseDataCollectionUrlParams(`dc_id=${ID}&dc_search=`)?.state
     ).toHaveProperty("search", "")
-    expect(parseDataCollectionUrlParams(`dc_id=${ID}`)?.state).not.toHaveProperty(
-      "search"
-    )
+    expect(
+      parseDataCollectionUrlParams(`dc_id=${ID}`)?.state
+    ).not.toHaveProperty("search")
   })
 })
 
@@ -273,7 +273,11 @@ describe("setDataCollectionUrlParams", () => {
       sortings: null,
     })
 
-    expect([...params.keys()].some((k) => k.startsWith(DATA_COLLECTION_URL_PARAM_PREFIX))).toBe(false)
+    expect(
+      [...params.keys()].some((k) =>
+        k.startsWith(DATA_COLLECTION_URL_PARAM_PREFIX)
+      )
+    ).toBe(false)
     expect(params.get("keep")).toBe("1")
   })
 
@@ -302,16 +306,16 @@ describe("syncDataCollectionUrlParams", () => {
   })
 
   it("clears all dc_ params when the state becomes empty", () => {
-    window.history.replaceState(
-      null,
-      "",
-      `/?keep=1&dc_id=${ID}&dc_search=ada`
-    )
+    window.history.replaceState(null, "", `/?keep=1&dc_id=${ID}&dc_search=ada`)
 
     syncDataCollectionUrlParams(ID, { search: "", filters: {}, sortings: null })
 
     const params = new URLSearchParams(window.location.search)
-    expect([...params.keys()].some((k) => k.startsWith(DATA_COLLECTION_URL_PARAM_PREFIX))).toBe(false)
+    expect(
+      [...params.keys()].some((k) =>
+        k.startsWith(DATA_COLLECTION_URL_PARAM_PREFIX)
+      )
+    ).toBe(false)
     expect(params.get("keep")).toBe("1")
   })
 

@@ -108,6 +108,28 @@ describe("OneDataCollection URL sync — clearing a filter chip", () => {
     )
   })
 
+  it("syncs and then clears the search bar value in the URL", async () => {
+    render(<ExampleComponent id="people/v1" searchBar />)
+
+    const toggle = await screen.findByRole("button", { name: /search/i })
+    await userEvent.click(toggle)
+
+    const input = await screen.findByPlaceholderText(/search/i)
+    await userEvent.type(input, "ada")
+
+    await waitFor(
+      () => expect(window.location.search).toContain("dc_search=ada"),
+      { timeout: 2000 }
+    )
+
+    await userEvent.clear(input)
+
+    await waitFor(
+      () => expect(window.location.search).not.toContain("dc_search"),
+      { timeout: 2000 }
+    )
+  })
+
   it("removes the param when clearing a chip for a filter loaded from the URL", async () => {
     window.history.replaceState(
       null,

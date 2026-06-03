@@ -1,8 +1,5 @@
 import { DateRange } from "@/components/OneCalendar/types"
-import {
-  SortingsDefinition,
-  SortingsState,
-} from "@/hooks/datasource"
+import { SortingsDefinition, SortingsState } from "@/hooks/datasource"
 import { NumberFilterValue } from "@/patterns/OneFilterPicker/filterTypes/NumberFilter/NumberFilter"
 import {
   FilterDefinition,
@@ -151,7 +148,9 @@ const encodeFilterValue = (value: unknown): string[] => {
       return single === undefined || single === null ? [] : [String(single)]
     }
     if (record.mode === "range") {
-      const from = record.from as { value?: number; closed?: boolean } | undefined
+      const from = record.from as
+        | { value?: number; closed?: boolean }
+        | undefined
       const to = record.to as { value?: number; closed?: boolean } | undefined
       if (from?.value == null && to?.value == null) return []
       const bound = (
@@ -203,7 +202,9 @@ const decodeDate = (raw: string): Date | DateRange | undefined => {
   if (raw.includes(RANGE_SEPARATOR)) {
     const [from, to] = raw.split(RANGE_SEPARATOR)
     if (!from) return undefined
-    return to ? { from: new Date(from), to: new Date(to) } : { from: new Date(from) }
+    return to
+      ? { from: new Date(from), to: new Date(to) }
+      : { from: new Date(from) }
   }
   return raw ? new Date(raw) : undefined
 }
