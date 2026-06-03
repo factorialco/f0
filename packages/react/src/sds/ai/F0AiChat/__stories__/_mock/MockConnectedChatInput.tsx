@@ -33,8 +33,18 @@ export const MockConnectedChatInput = () => {
     creditWarning,
     welcomeScreenSuggestions,
     tracking,
+    openGame,
   } = useAiChat()
   const containerRef = useRef<HTMLDivElement>(null)
+
+  // Wire the pong easter egg to the disclaimer text.
+  const disclaimerWithGame = useMemo(
+    () =>
+      disclaimer
+        ? { ...disclaimer, onClick: () => openGame("pong") }
+        : undefined,
+    [disclaimer, openGame]
+  )
 
   const filteredMessages = useMemo(
     () => filterNonRenderableMessages(messages),
@@ -73,7 +83,7 @@ export const MockConnectedChatInput = () => {
       fileAttachments={fileAttachments}
       searchPersons={entityRefs?.resolvers?.searchPersons}
       onProcessFilesRef={setProcessDroppedFilesFunction}
-      disclaimer={disclaimer}
+      disclaimer={disclaimerWithGame}
       footer={footer}
       isWelcomeScreen={isWelcomeScreen}
       fullscreen={fullscreen}

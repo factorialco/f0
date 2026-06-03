@@ -176,42 +176,6 @@ export const TableWithMixedNestedRecords: Story = {
   },
 }
 
-export const TableWithDefaultExpandedIds: Story = {
-  render: () => {
-    const mockVisualizations = getMockVisualizations({
-      table: {
-        noSorting: true,
-        allowColumnHiding: true,
-        allowColumnReordering: true,
-        nestedRecords: true,
-        applyLongText: false,
-      },
-    })
-
-    return (
-      <ExampleComponent
-        frozenColumns={2}
-        tableAllowColumnReordering
-        tableAllowColumnHiding
-        noSorting
-        storage={false}
-        visualizations={[mockVisualizations.table]}
-        id="employees/v1"
-        nestedRecords
-        defaultExpandedIds={["user-1", "user-2"]}
-      />
-    )
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "When `defaultExpandedIds` is set on the source, only the rows whose `item.id` is in the list start expanded on first render (children fetched eagerly). Nested descendants are not auto-expanded unless their own id is also included.",
-      },
-    },
-  },
-}
-
 export const TableWithSelectableNestedRecords: Story = {
   render: () => {
     const mockVisualizations = getMockVisualizations({

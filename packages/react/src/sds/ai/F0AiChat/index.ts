@@ -1,6 +1,12 @@
 // Main components
 export { F0AiChat, type F0AiChatProps, F0AiChatProvider } from "./F0AiChat"
 
+// Markdown renderers (consumed by host's markdown library via `components` override).
+export {
+  markdownRenderers,
+  type MarkdownTagRenderers,
+} from "./components/markdownRenderers/MarkdownRenderers"
+
 // Types
 export type {
   AiChatCredits,

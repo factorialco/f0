@@ -171,7 +171,7 @@ const SelectedCompanyLabel = ({
   return (
     <div
       className={cn(
-        "flex min-w-0 max-w-full flex-1 items-center gap-2 overflow-hidden rounded text-lg font-semibold text-f1-foreground transition-colors"
+        "flex min-w-0 max-w-full flex-1 items-center gap-2 overflow-hidden text-lg font-semibold text-f1-foreground transition-colors"
       )}
     >
       <F0AvatarCompany

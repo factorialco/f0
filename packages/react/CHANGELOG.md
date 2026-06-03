@@ -1,5 +1,96 @@
 # Changelog
 
+## [2.35.0](https://github.com/factorialco/f0/compare/f0-react-v2.34.0...f0-react-v2.35.0) (2026-06-03)
+
+
+### Features
+
+* **ResourceHeader:** leading icon on metadata items + showBottomBorder ([#4274](https://github.com/factorialco/f0/issues/4274)) ([62cff45](https://github.com/factorialco/f0/commit/62cff45763ef1ab7f8f935fbf782ac5260eb165d))
+
+## [2.34.0](https://github.com/factorialco/f0/compare/f0-react-v2.33.0...f0-react-v2.34.0) (2026-06-03)
+
+
+### Features
+
+* **F0ClarifyingPanel:** add isSubmitDisabled prop ([#4304](https://github.com/factorialco/f0/issues/4304)) ([820a702](https://github.com/factorialco/f0/commit/820a7023e1f210bfe957b693f5d244905b448b77))
+
+## [2.33.0](https://github.com/factorialco/f0/compare/f0-react-v2.32.2...f0-react-v2.33.0) (2026-06-03)
+
+
+### Features
+
+* **inputs:** rename and relocate F0*Input + InputField to src/components/ ([#4199](https://github.com/factorialco/f0/issues/4199)) ([001a96c](https://github.com/factorialco/f0/commit/001a96c86a49f7c9905d89fb1a196e29f908c8ee))
+
+## [2.32.2](https://github.com/factorialco/f0/compare/f0-react-v2.32.1...f0-react-v2.32.2) (2026-06-03)
+
+
+### Bug Fixes
+
+* **docs:** correct dead Data Collection Storybook doc links ([#4276](https://github.com/factorialco/f0/issues/4276)) ([1a740eb](https://github.com/factorialco/f0/commit/1a740eb27fbdacd59b1b0aa4bbea7c6043cf9b3e))
+
+## [2.32.1](https://github.com/factorialco/f0/compare/f0-react-v2.32.0...f0-react-v2.32.1) (2026-06-03)
+
+
+### Bug Fixes
+
+* **CompanySelector:** remove asymmetric avatar rounding ([#4297](https://github.com/factorialco/f0/issues/4297)) ([6f5baa0](https://github.com/factorialco/f0/commit/6f5baa0195afe4df7ee8083f206c07ba146f36f8))
+
+## [2.32.0](https://github.com/factorialco/f0/compare/f0-react-v2.31.0...f0-react-v2.32.0) (2026-06-02)
+
+
+### Features
+
+* **F0CanvasCard:** support file avatars, custom action button, optional description ([#4289](https://github.com/factorialco/f0/issues/4289)) ([de23a78](https://github.com/factorialco/f0/commit/de23a78dd01b24b68c76a46793fba793beea8254))
+
+## [2.31.0](https://github.com/factorialco/f0/compare/f0-react-v2.30.2...f0-react-v2.31.0) (2026-06-02)
+
+
+### Features
+
+* editable table status pill select ([#4200](https://github.com/factorialco/f0/issues/4200)) ([0adf37e](https://github.com/factorialco/f0/commit/0adf37e97957c0a9d262f6809a7401718d164720))
+
+## [2.30.2](https://github.com/factorialco/f0/compare/f0-react-v2.30.1...f0-react-v2.30.2) (2026-06-02)
+
+
+### Reverts
+
+* expand specific parent rows in nested table by default ([#4206](https://github.com/factorialco/f0/issues/4206)) ([#4290](https://github.com/factorialco/f0/issues/4290)) ([600a44d](https://github.com/factorialco/f0/commit/600a44de6b38bdfa251e5217b8e4c4628e0e5069))
+
+## [2.30.1](https://github.com/factorialco/f0/compare/f0-react-v2.30.0...f0-react-v2.30.1) (2026-06-02)
+
+
+### Bug Fixes
+
+* granularityDefinitions type ([#4286](https://github.com/factorialco/f0/issues/4286)) ([c8986c2](https://github.com/factorialco/f0/commit/c8986c21ef63ede7c81d17935854cd2c654ad11e))
+
+## [2.30.0](https://github.com/factorialco/f0/compare/f0-react-v2.29.0...f0-react-v2.30.0) (2026-06-02)
+
+
+### Features
+
+* one table min width ([#4203](https://github.com/factorialco/f0/issues/4203)) ([0e6eb93](https://github.com/factorialco/f0/commit/0e6eb9336acc0c61787c43bbd4255408d4cc0ccb))
+
+## [2.29.0](https://github.com/factorialco/f0/compare/f0-react-v2.28.2...f0-react-v2.29.0) (2026-06-01)
+
+
+### Features
+
+* **F0Card:** add a bookmark (save) toggle overlay ([#4273](https://github.com/factorialco/f0/issues/4273)) ([d65ad0c](https://github.com/factorialco/f0/commit/d65ad0cc22b2340b9ce5982db2ecacfbe3dc20b7))
+
+## [2.28.2](https://github.com/factorialco/f0/compare/f0-react-v2.28.1...f0-react-v2.28.2) (2026-06-01)
+
+
+### Bug Fixes
+
+* **RichText:** normalize NBSPs in pasted content to prevent mid-word breaks ([#4269](https://github.com/factorialco/f0/issues/4269)) ([0006d9c](https://github.com/factorialco/f0/commit/0006d9c6e7850393a55be0d0ce737a3ef8975ae2))
+
+## [2.28.1](https://github.com/factorialco/f0/compare/f0-react-v2.28.0...f0-react-v2.28.1) (2026-06-01)
+
+
+### Bug Fixes
+
+* **F0AiChat:** prevent file attachments from being silently dropped ([#4277](https://github.com/factorialco/f0/issues/4277)) ([42c1d4b](https://github.com/factorialco/f0/commit/42c1d4b57cd48ca02964561b82d2c11188bab71e))
+
 ## [2.28.0](https://github.com/factorialco/f0/compare/f0-react-v2.27.0...f0-react-v2.28.0) (2026-06-01)
 
 

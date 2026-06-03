@@ -58,7 +58,6 @@ export const MockConnectedMessagesContainer = ({
     initialMessage,
     isClarifying,
     visualizationMode,
-    openGame,
     onThumbsUp,
     onThumbsDown,
     setPendingQuote,
@@ -138,10 +137,6 @@ export const MockConnectedMessagesContainer = ({
     })
   }, [filteredMessages, inProgress])
 
-  const onWelcomeClick = useCallback(() => {
-    openGame("pong")
-  }, [openGame])
-
   const onReplyQuote = useCallback(
     (text: string) => {
       setPendingQuote({ text })
@@ -165,7 +160,6 @@ export const MockConnectedMessagesContainer = ({
     <F0AiMessagesContainer
       turns={turns}
       initialMessage={initialMessage}
-      onWelcomeClick={onWelcomeClick}
       onReplyQuote={onReplyQuote}
       isLoadingThread={isLoadingThread}
       autoScrollUserIntoView={visualizationMode !== "fullscreen"}

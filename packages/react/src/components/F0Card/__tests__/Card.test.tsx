@@ -411,4 +411,105 @@ describe("F0Card Component", () => {
       ).not.toBeInTheDocument()
     })
   })
+
+  describe("bookmark", () => {
+    it("renders a bookmark toggle with the provided label", () => {
+      render(
+        <F0Card
+          title="Card"
+          bookmark={{
+            bookmarked: false,
+            onBookmarkChange: vi.fn(),
+            label: "Save product",
+          }}
+        />
+      )
+
+      expect(
+        screen.getByRole("button", { name: "Save product" })
+      ).toBeInTheDocument()
+    })
+
+    it("calls onBookmarkChange with the next state when toggled", async () => {
+      const onBookmarkChange = vi.fn()
+      render(
+        <F0Card
+          title="Card"
+          bookmark={{
+            bookmarked: false,
+            onBookmarkChange,
+            label: "Save product",
+          }}
+        />
+      )
+
+      await userEvent.click(
+        screen.getByRole("button", { name: "Save product" })
+      )
+
+      expect(onBookmarkChange).toHaveBeenCalledWith(true)
+    })
+
+    it("does not trigger card navigation when the bookmark is toggled", async () => {
+      const onClick = vi.fn()
+      const onBookmarkChange = vi.fn()
+      render(
+        <F0Card
+          title="Card"
+          onClick={onClick}
+          bookmark={{
+            bookmarked: false,
+            onBookmarkChange,
+            label: "Save product",
+          }}
+        />
+      )
+
+      await userEvent.click(
+        screen.getByRole("button", { name: "Save product" })
+      )
+
+      expect(onBookmarkChange).toHaveBeenCalledWith(true)
+      expect(onClick).not.toHaveBeenCalled()
+    })
+
+    it("falls back to the card title as the accessible label", () => {
+      render(
+        <F0Card
+          title="My device"
+          bookmark={{ bookmarked: true, onBookmarkChange: vi.fn() }}
+        />
+      )
+
+      expect(screen.getByTestId("card-bookmark-toggle")).toHaveAccessibleName(
+        "My device"
+      )
+    })
+
+    it("always has an accessible name when no label or title is provided", () => {
+      render(
+        <F0Card bookmark={{ bookmarked: false, onBookmarkChange: vi.fn() }} />
+      )
+
+      const toggle = screen.getByTestId("card-bookmark-toggle")
+      expect(toggle).toHaveAttribute("aria-label")
+      expect(toggle.getAttribute("aria-label")).toBeTruthy()
+    })
+  })
+
+  describe("subtleBorder", () => {
+    it("does not apply the subtle border by default", () => {
+      render(<F0Card title="Card" />)
+      expect(screen.getByTestId("card")).not.toHaveClass(
+        "border-f1-border-secondary"
+      )
+    })
+
+    it("applies the subtle border when enabled", () => {
+      render(<F0Card title="Card" subtleBorder />)
+      expect(screen.getByTestId("card")).toHaveClass(
+        "border-f1-border-secondary"
+      )
+    })
+  })
 })

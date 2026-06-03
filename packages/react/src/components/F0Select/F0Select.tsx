@@ -73,6 +73,26 @@ const defaultSearchFn = (
   )
 }
 
+/**
+ * Returns the discriminator for an option's *typed* tag (dot/person/icon/status),
+ * or undefined when the option has no tag or a plain string tag. String tags are
+ * intentionally excluded: they coexist with typed tags in existing usages (e.g. a
+ * `"Disabled"` string tag alongside `dot`/`person` options), so they must not trip
+ * the single-tag-type enforcement below.
+ */
+const getTagType = <T extends string, R>(
+  option: F0SelectItemProps<T, R>
+): string | undefined => {
+  if (
+    option.type === "separator" ||
+    option.tag === undefined ||
+    typeof option.tag === "string"
+  ) {
+    return undefined
+  }
+  return option.tag.type
+}
+
 const asListContainerVariants = cva({
   base: "flex flex-col rounded-md border border-solid bg-f1-background max-h-full",
   variants: {
@@ -461,6 +481,26 @@ const F0SelectComponent = forwardRef(function Select<
     return result
   }, [localValue, itemsByValue, defaultItems])
 
+  /**
+   * Status tags render as pills, which need more vertical room than the "sm"
+   * trigger gives them — the selected pill looks cramped. Force the trigger to
+   * at least "md" when a status tag is in play, whether it comes from a loaded
+   * option or from the currently displayed selection (which resolves through
+   * the cache and `defaultItem`). Covering the displayed selection keeps the
+   * height correct for a preselected status pill even before its record loads,
+   * avoiding a layout shift.
+   */
+  const hasStatusTag = useMemo(() => {
+    const inOptions = data.records.some(
+      (record) => getTagType(optionMapper(record)) === "status"
+    )
+    return (
+      inOptions ||
+      getDisplayItemsForSelection.some((item) => getTagType(item) === "status")
+    )
+  }, [data.records, optionMapper, getDisplayItemsForSelection])
+  const effectiveSize = hasStatusTag ? "md" : size
+
   const onSearchChangeLocal = (value: string) => {
     setCurrentSearch(value)
     onSearchChange?.(value)
@@ -822,10 +862,24 @@ const F0SelectComponent = forwardRef(function Select<
 
   const getItems = useCallback(
     (
-      records: WithGroupId<ActualRecordType>[] | ActualRecordType[]
+      records: WithGroupId<ActualRecordType>[] | ActualRecordType[],
+      seenTagTypes: Set<string>
     ): VirtualItem[] => {
-      return records.map((option, index) => {
-        const mappedOption = optionMapper(option)
+      return records.map((record, index) => {
+        const mappedOption = optionMapper(record)
+        const tagType = getTagType(mappedOption)
+        if (tagType !== undefined) {
+          seenTagTypes.add(tagType)
+          if (seenTagTypes.size > 1) {
+            throw new Error(
+              `[F0Select] All options must use the same tag type, but multiple were provided: ${Array.from(
+                seenTagTypes
+              )
+                .map((type) => `"${type}"`)
+                .join(", ")}.`
+            )
+          }
+        }
         return mappedOption.type === "separator"
           ? {
               height: 1,
@@ -858,6 +912,8 @@ const F0SelectComponent = forwardRef(function Select<
   )
 
   const items: VirtualItem[] = useMemo(() => {
+    const seenTagTypes = new Set<string>()
+
     if (data.type === "grouped") {
       const items: VirtualItem[] = []
       data.groups.map((group) => {
@@ -881,7 +937,7 @@ const F0SelectComponent = forwardRef(function Select<
         })
         if (!collapsible || openGroups[group.key]) {
           items.push(
-            ...getItems(group.records).map((vi) => ({
+            ...getItems(group.records, seenTagTypes).map((vi) => ({
               ...vi,
               key: `${group.key}:${vi.key}`,
               item: collapsible ? (
@@ -895,7 +951,7 @@ const F0SelectComponent = forwardRef(function Select<
       })
       return items
     }
-    return getItems(data.records)
+    return getItems(data.records, seenTagTypes)
   }, [
     data.records,
     data.type,
@@ -1150,7 +1206,7 @@ const F0SelectComponent = forwardRef(function Select<
               placeholder={placeholder || ""}
               disabled={disabled}
               clearable={clearable}
-              size={size}
+              size={effectiveSize}
               loadingIndicator={{
                 asOverlay: true,
                 offset: 34,
@@ -1161,7 +1217,11 @@ const F0SelectComponent = forwardRef(function Select<
                 handleChangeOpenLocal(!openLocal)
               }}
               append={
-                <Arrow open={openLocal} disabled={disabled} size={size} />
+                <Arrow
+                  open={openLocal}
+                  disabled={disabled}
+                  size={effectiveSize}
+                />
               }
             >
               <button
