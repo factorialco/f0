@@ -180,7 +180,7 @@ type Story = StoryObj<typeof meta>
  * preset to load that state from the URL into the collection.
  */
 export const Default: Story = {
-  render: () => <LargeFilterExample />,
+  render: () => <UrlParamsExample />,
 }
 
 const LARGE_FILTER_STORAGE_ID = "examples/url-params-large/v1"
