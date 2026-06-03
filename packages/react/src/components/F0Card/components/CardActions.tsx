@@ -29,18 +29,82 @@ interface CardActionsProps {
   primaryAction?: CardPrimaryAction
   secondaryActions?: CardSecondaryAction[] | CardSecondaryLink
   compact?: boolean
+  /**
+   * Inline variant used by the one-liner card: actions sit on the same row as
+   * the text and only stack (full width) when the card's own width drops below
+   * the `@md` container breakpoint. No footer chrome, no viewport media query.
+   */
+  oneLiner?: boolean
 }
 
 export function CardActions({
   primaryAction,
   secondaryActions,
   compact = false,
+  oneLiner = false,
 }: CardActionsProps) {
   const isDesktop = useMediaQuery("(min-width: 640px)")
   const hasActions = primaryAction || hasSecondaryActions()
 
   if (!hasActions) {
     return null
+  }
+
+  if (oneLiner) {
+    // Button `size` is a prop, not a CSS value, so it can't be switched by a
+    // container query — we keep it constant and let CSS handle layout/width.
+    const size = compact ? "sm" : "md"
+
+    return (
+      <div
+        className={cn(
+          "relative z-[1] flex w-full flex-col gap-2",
+          "@md:w-auto @md:flex-row @md:items-center @md:gap-2",
+          "[&_button]:w-full @md:[&_button]:w-fit",
+          "[&_div]:w-full [&_div]:justify-center @md:[&_div]:w-fit"
+        )}
+      >
+        {secondaryActions &&
+          (Array.isArray(secondaryActions) ? (
+            secondaryActions.map((action, index) => (
+              <F0Button
+                key={index}
+                label={action.label}
+                icon={action.icon}
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  action.onClick()
+                }}
+                size={size}
+              />
+            ))
+          ) : (
+            <F0Link
+              href={secondaryActions.href}
+              target={secondaryActions.target}
+              disabled={secondaryActions.disabled}
+              onClick={(e) => e.stopPropagation()}
+              data-testid="secondary-link"
+            >
+              {secondaryActions.label}
+            </F0Link>
+          ))}
+
+        {primaryAction && (
+          <F0Button
+            label={primaryAction.label}
+            icon={primaryAction.icon}
+            onClick={(e) => {
+              e.stopPropagation()
+              primaryAction.onClick()
+            }}
+            size={size}
+            data-testid="primary-button"
+          />
+        )}
+      </div>
+    )
   }
 
   return (
