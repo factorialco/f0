@@ -41,6 +41,18 @@ const RANGE_SEPARATOR = ".."
 const EXCLUSIVE_BOUND = "*"
 const SORTINGS_NONE = "none"
 
+/**
+ * Maximum number of values a single filter may contribute to the URL.
+ *
+ * A multi-select (`in`) filter materializes one URL param per selected value,
+ * so "select all" over a large or paginated data source would otherwise dump
+ * hundreds of ids into the query string (bloated, and beyond browser/server URL
+ * length limits). Past this cap the filter is left out of the URL — it is still
+ * applied in-memory and persisted via storage, just not shareable through the
+ * URL. Deliberately conservative; tune if a use case needs more.
+ */
+export const MAX_URL_FILTER_VALUES = 25
+
 const filterParamName = (key: string): string =>
   `${DATA_COLLECTION_URL_PARAM_PREFIX}${key}`
 
@@ -287,6 +299,25 @@ export const parseDataCollectionUrlParams = <
 /* Write: state -> URL                                                 */
 /* ------------------------------------------------------------------ */
 
+/** Dev warning, emitted once per filter key, when a filter is too big for the URL. */
+const oversizedFilterWarned = new Set<string>()
+const warnOversizedFilter = (key: string, count: number): void => {
+  if (oversizedFilterWarned.has(key)) return
+  oversizedFilterWarned.add(key)
+  // eslint-disable-next-line no-console -- intentional dev guidance
+  console.warn(
+    `[OneDataCollection] Filter "${key}" has ${count} selected values, ` +
+      `over the URL limit of ${MAX_URL_FILTER_VALUES}; it will not be reflected ` +
+      `in the URL (still applied in-memory and persisted via storage).`
+  )
+}
+
+/** Whether a filter value is non-empty and small enough to put in the URL. */
+const isUrlSerializableFilter = (value: unknown): boolean => {
+  const length = encodeFilterValue(value).length
+  return length > 0 && length <= MAX_URL_FILTER_VALUES
+}
+
 const writeStateToParams = <
   CurrentFiltersState extends FiltersState<FiltersDefinition>,
 >(
@@ -298,9 +329,14 @@ const writeStateToParams = <
   // reserved params below are written with `set` and therefore win on a clash.
   if (state.filters) {
     for (const [key, value] of Object.entries(state.filters)) {
-      encodeFilterValue(value).forEach((entry) =>
-        params.append(filterParamName(key), entry)
-      )
+      const encoded = encodeFilterValue(value)
+      // Skip filters that would dump an unbounded number of values (e.g.
+      // "select all" over a large/paginated source) into the URL.
+      if (encoded.length > MAX_URL_FILTER_VALUES) {
+        warnOversizedFilter(key, encoded.length)
+        continue
+      }
+      encoded.forEach((entry) => params.append(filterParamName(key), entry))
     }
   }
 
@@ -324,10 +360,7 @@ const hasActiveState = <
 ): boolean =>
   !!state.search ||
   !!state.sortings ||
-  (!!state.filters &&
-    Object.values(state.filters).some(
-      (value) => encodeFilterValue(value).length > 0
-    ))
+  (!!state.filters && Object.values(state.filters).some(isUrlSerializableFilter))
 
 /**
  * Builds a fresh `URLSearchParams` encoding a data collection `id` and state,

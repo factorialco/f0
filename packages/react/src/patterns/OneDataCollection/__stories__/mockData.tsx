@@ -1629,6 +1629,94 @@ export const SubfiltersExampleComponent = () => {
   )
 }
 
+/**
+ * An `in` filter with many options — stands in for a filter backed by a large /
+ * paginated data source. Selecting all of them produces a big value array, which
+ * is exactly the case the URL-params value cap guards against.
+ */
+export const manyOptionFilters = {
+  assignee: {
+    type: "in" as const,
+    label: "Assignee (60 options)",
+    options: {
+      options: Array.from({ length: 60 }, (_, i) => ({
+        value: `user-${i + 1}`,
+        label: `Teammate ${i + 1}`,
+      })),
+    },
+  },
+} as const
+
+export type ManyOptionFiltersType = typeof manyOptionFilters
+
+/**
+ * A collection whose only filter (`assignee`) has 60 options. Use it to exercise
+ * "select all" → the selection applies and persists, but is dropped from the URL
+ * once it exceeds the value cap (see `MAX_URL_FILTER_VALUES`).
+ */
+export const ManyOptionsFilterExampleComponent = ({ id }: { id?: string }) => {
+  const dataAdapterMemoized = useMemo(
+    () => ({
+      fetchData: (
+        options: DataCollectionBaseFetchOptions<
+          ManyOptionFiltersType,
+          NavigationFiltersDefinition
+        >
+      ) => {
+        const { sortings: s, search } = options
+        return new Promise<BaseResponse<MockUser>>((resolve) => {
+          setTimeout(() => {
+            // The assignee selection is irrelevant to the mock data; we only
+            // honor search so the list still reacts to something.
+            const filtered = filterUsers(
+              mockUsers,
+              {} as FiltersState<FiltersType>,
+              s,
+              undefined,
+              search
+            )
+            resolve({ records: filtered })
+          }, 100)
+        })
+      },
+    }),
+    []
+  )
+
+  const dataSource = useDataCollectionSource(
+    {
+      filters: manyOptionFilters,
+      sortings,
+      itemOnClick: (item) => () => console.log(`Clicking ${item.name}`),
+      dataAdapter: dataAdapterMemoized,
+    },
+    []
+  )
+
+  const mockVisualizations = getMockVisualizations({}) as unknown as Record<
+    string,
+    Visualization<
+      MockUser,
+      ManyOptionFiltersType,
+      typeof sortings,
+      SummariesDefinition,
+      ItemActionsDefinition<MockUser>,
+      NavigationFiltersDefinition,
+      GroupingDefinition<MockUser>
+    >
+  >
+
+  return (
+    <OneDataCollection
+      dataTestId={`one-data-collection-${id ?? "many-options"}`}
+      id={id}
+      storage={{ features: ["filters", "search", "sortings"] }}
+      source={dataSource}
+      visualizations={[mockVisualizations.table, mockVisualizations.list]}
+    />
+  )
+}
+
 interface DataAdapterOptions<TRecord> {
   data: TRecord[]
   delay?: number

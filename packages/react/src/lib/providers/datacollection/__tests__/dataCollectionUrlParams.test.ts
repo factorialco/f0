@@ -7,6 +7,7 @@ import {
   buildDataCollectionUrlParams,
   DATA_COLLECTION_URL_PARAM_PREFIX,
   DATA_COLLECTION_URL_PARAMS,
+  MAX_URL_FILTER_VALUES,
   parseDataCollectionUrlParams,
   setDataCollectionUrlParams,
   syncDataCollectionUrlParams,
@@ -247,6 +248,48 @@ describe("search-type filters", () => {
       filters: { search: "filter" },
     })
     expect(params.getAll("dc_search")).toEqual(["top"])
+  })
+})
+
+describe("large multi-select values (e.g. select-all over a data source)", () => {
+  const many = (n: number) => Array.from({ length: n }, (_, i) => `id-${i}`)
+
+  it("keeps a selection at the cap but omits one over it", () => {
+    const atCap = buildDataCollectionUrlParams(ID, {
+      filters: { department: many(MAX_URL_FILTER_VALUES) },
+    })
+    expect(atCap.getAll("dc_department")).toHaveLength(MAX_URL_FILTER_VALUES)
+
+    const overCap = buildDataCollectionUrlParams(ID, {
+      filters: { department: many(MAX_URL_FILTER_VALUES + 1) },
+    })
+    expect(overCap.has("dc_department")).toBe(false)
+  })
+
+  it("drops only the oversized filter, keeping smaller filters, search and sort", () => {
+    const params = buildDataCollectionUrlParams(ID, {
+      search: "ada",
+      filters: { department: many(100), role: ["Manager"] },
+      sortings: { field: "name", order: "asc" },
+    })
+
+    expect(params.has("dc_department")).toBe(false)
+    expect(params.getAll("dc_role")).toEqual(["Manager"])
+    expect(params.get(DATA_COLLECTION_URL_PARAMS.search)).toBe("ada")
+    expect(params.get(DATA_COLLECTION_URL_PARAMS.sortings)).toBe("name:asc")
+  })
+
+  it("leaves the URL free of dc_ params when only an oversized filter is active", () => {
+    const params = setDataCollectionUrlParams("keep=1", ID, {
+      filters: { department: many(100) },
+    })
+
+    expect(
+      [...params.keys()].some((k) =>
+        k.startsWith(DATA_COLLECTION_URL_PARAM_PREFIX)
+      )
+    ).toBe(false)
+    expect(params.get("keep")).toBe("1")
   })
 })
 

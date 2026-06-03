@@ -1,15 +1,20 @@
-import { useCallback, useEffect, useState } from "react"
 import { Meta, StoryObj } from "@storybook/react-vite"
+import { useCallback, useEffect, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import {
   buildDataCollectionUrlParams,
   type DataCollectionUrlState,
+  MAX_URL_FILTER_VALUES,
   writeDataCollectionStorage,
 } from "@/lib/providers/datacollection/dataCollectionUrlParams"
 import { FiltersState } from "@/patterns/OneFilterPicker/types"
 
-import { ExampleComponent, type FiltersType } from "./mockData"
+import {
+  ExampleComponent,
+  type FiltersType,
+  ManyOptionsFilterExampleComponent,
+} from "./mockData"
 
 /**
  * Identifier persisted to (and read from) the URL + localStorage cache. The URL
@@ -144,7 +149,7 @@ const UrlParamsExample = () => {
         <F0Button label="Reset" variant="critical" size="sm" onClick={reset} />
       </div>
 
-      <div className="text-f1-foreground-secondary font-mono text-sm">
+      <div className="font-mono text-sm text-f1-foreground-secondary">
         URL query: <span data-testid="url-params-query">{query || "—"}</span>
       </div>
 
@@ -175,5 +180,56 @@ type Story = StoryObj<typeof meta>
  * preset to load that state from the URL into the collection.
  */
 export const Default: Story = {
-  render: () => <UrlParamsExample />,
+  render: () => <LargeFilterExample />,
+}
+
+const LARGE_FILTER_STORAGE_ID = "examples/url-params-large/v1"
+
+/**
+ * A collection whose only filter (`Assignee`) has 60 options — a stand-in for a
+ * filter backed by a large / paginated data source.
+ *
+ * Open the filter and hit **Select all**: the selection applies (and persists
+ * via storage), but it is deliberately left out of the URL because it exceeds
+ * the {@link MAX_URL_FILTER_VALUES}-value cap — otherwise "select all" would dump
+ * 60 ids into the query string. Selecting just a few keeps them in the URL.
+ */
+const LargeFilterExample = () => {
+  const [query, setQuery] = useState("")
+
+  useEffect(() => {
+    const update = () => setQuery(window.location.search.replace(/^\?/, ""))
+    update()
+    const interval = setInterval(update, 300)
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <div className="space-y-4">
+      <p className="max-w-prose text-sm text-f1-foreground-secondary">
+        The <strong>Assignee</strong> filter has 60 options. Selecting a handful
+        reflects them as <code>dc_assignee=…</code> params; “Select all” exceeds
+        the {MAX_URL_FILTER_VALUES}-value cap, so it is applied and persisted
+        but kept out of the URL (no 60-id query string).
+      </p>
+
+      <div className="font-mono text-sm text-f1-foreground-secondary">
+        URL query: <span data-testid="url-params-query">{query || "—"}</span>
+      </div>
+
+      <ManyOptionsFilterExampleComponent id={LARGE_FILTER_STORAGE_ID} />
+    </div>
+  )
+}
+
+/**
+ * Exercises the URL value cap for large multi-select filters (e.g. select-all
+ * over a data source).
+ */
+export const LargeMultiSelectFilter: Story = {
+  render: () => <LargeFilterExample />,
+  tags: ["experimental"],
+  parameters: {
+    layout: "padded",
+  },
 }
