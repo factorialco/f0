@@ -17,7 +17,7 @@ import { employees, expenses, findEmployee, type Expense } from "@/fixtures"
 import {
   setInviteStatus,
   useParticipantInvites,
-} from "@/prototypes/controlling-step-poc/shared/participants/inviteStore"
+} from "@/prototypes/_shared/inviteStore"
 import { useViewerOverride } from "@/lib/viewer"
 
 import type { PrototypeMeta } from "../types"
