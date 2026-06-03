@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.33.0](https://github.com/factorialco/f0/compare/f0-react-v2.32.2...f0-react-v2.33.0) (2026-06-03)
+
+
+### Features
+
+* **inputs:** rename and relocate F0*Input + InputField to src/components/ ([#4199](https://github.com/factorialco/f0/issues/4199)) ([001a96c](https://github.com/factorialco/f0/commit/001a96c86a49f7c9905d89fb1a196e29f908c8ee))
+
 ## [2.32.2](https://github.com/factorialco/f0/compare/f0-react-v2.32.1...f0-react-v2.32.2) (2026-06-03)
 
 
