@@ -63,13 +63,6 @@ export interface CardInternalProps {
   compact?: boolean
 
   /**
-   * Whether the card has a horizontal layout: icon left, title and description
-   * to the right, with a full-size (lg) avatar. A lightweight alternative to
-   * compact that preserves icon prominence.
-   */
-  horizontal?: boolean
-
-  /**
    * The avatar to display in the card
    */
   avatar?: CardAvatarVariant
@@ -113,14 +106,6 @@ export interface CardInternalProps {
    * The description of the card
    */
   description?: string
-
-  /**
-   * When `true`, the description is truncated to a single line with an ellipsis.
-   * When `false`, the description is never truncated regardless of layout mode.
-   * When omitted, the default per-mode behaviour applies (horizontal → 1 line,
-   * compact → 2 lines, normal → 3 lines).
-   */
-  truncateDescription?: boolean
 
   /**
    * Metadata items to display in the card
@@ -226,7 +211,6 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
   function CardInternal(
     {
       compact = false,
-      horizontal = false,
       avatar,
       image,
       imageFit = "fit-width",
@@ -235,7 +219,6 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       blurredBackground = true,
       title,
       description,
-      truncateDescription,
       metadata,
       children,
       link,
@@ -426,8 +409,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
               className={cn(
                 "relative flex-col gap-0 p-0",
                 image && !compact && "pt-3",
-                compact && "flex-row items-center gap-2",
-                horizontal && "min-w-0 flex-row items-start gap-4"
+                compact && "flex-row items-center gap-2"
               )}
             >
               {avatar && (
@@ -435,12 +417,9 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
                   avatar={avatar}
                   overlay={!!image}
                   compact={compact}
-                  horizontal={horizontal}
                 />
               )}
-              <div
-                className={cn("flex flex-col gap-0", horizontal && "min-w-0")}
-              >
+              <div className={cn("flex flex-col gap-0")}>
                 <CardTitle
                   className={cn(
                     "text-lg font-semibold text-f1-foreground",
@@ -453,19 +432,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
                   <CardSubtitle
                     className={cn("text-base text-f1-foreground-secondary")}
                   >
-                    <OneEllipsis
-                      lines={
-                        truncateDescription !== undefined
-                          ? truncateDescription
-                            ? 1
-                            : undefined
-                          : horizontal
-                            ? 1
-                            : compact
-                              ? 2
-                              : 3
-                      }
-                    >
+                    <OneEllipsis lines={compact ? 2 : 3}>
                       {description}
                     </OneEllipsis>
                   </CardSubtitle>
