@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.36.1](https://github.com/factorialco/f0/compare/f0-react-v2.36.0...f0-react-v2.36.1) (2026-06-03)
+
+
+### Bug Fixes
+
+* **TableOfContent:** use background-hover for active item and reduce padding without icon ([#4309](https://github.com/factorialco/f0/issues/4309)) ([1315ba6](https://github.com/factorialco/f0/commit/1315ba6d502734dde2062562db50cb3593c0fd42))
+* **WelcomeScreen:** add coral red mid-stop to welcome gradient ([#4314](https://github.com/factorialco/f0/issues/4314)) ([5d0d23a](https://github.com/factorialco/f0/commit/5d0d23a6caca515610a0236e356113fb44297bcd))
+
 ## [2.36.0](https://github.com/factorialco/f0/compare/f0-react-v2.35.0...f0-react-v2.36.0) (2026-06-03)
 
 
