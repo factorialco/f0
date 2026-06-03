@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.36.0](https://github.com/factorialco/f0/compare/f0-react-v2.35.0...f0-react-v2.36.0) (2026-06-03)
+
+
+### Features
+
+* **F0Button:** right-positioned icon + ArrowRight on CRUD Read open actions ([#4302](https://github.com/factorialco/f0/issues/4302)) ([e4c7861](https://github.com/factorialco/f0/commit/e4c7861208e9a57cf911d317ce5324e3ffece4ce))
+
 ## [2.35.0](https://github.com/factorialco/f0/compare/f0-react-v2.34.0...f0-react-v2.35.0) (2026-06-03)
 
 
