@@ -96,13 +96,9 @@ jobs:
             --output /tmp/summary.md
 
           echo "summary_file=/tmp/summary.md" >> "$GITHUB_OUTPUT"
-
-          # The CLI writes the thread file as <output>-thread.txt and already
-          # appends `thread_file=` to $GITHUB_OUTPUT, but we guard here too in
-          # case the env var wasn't set.
-          if [ -f /tmp/summary-thread.txt ]; then
-            echo "thread_file=/tmp/summary-thread.txt" >> "$GITHUB_OUTPUT"
-          fi
+          # index.ts pre-renders the Block Kit payload (sections already split
+          # under Slack's 3000-char limit) next to the summary.
+          echo "blocks_file=/tmp/summary.blocks.json" >> "$GITHUB_OUTPUT"
         working-directory: ${{ github.workspace }}/packages/changelog-summarizer
 
       - name: Save last-run cache
@@ -121,134 +117,25 @@ jobs:
           SUMMARY_FILE: ${{ steps.summarize.outputs.summary_file }}
         run: cat "$SUMMARY_FILE"
 
-      - name: Publish summary to Slack
+      - name: Publish to Slack
         if: ${{ inputs.dry_run != 'true' }}
         env:
-          SUMMARY_FILE: ${{ steps.summarize.outputs.summary_file }}
-          THREAD_FILE: ${{ steps.summarize.outputs.thread_file }}
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_F0_SUMMARIZER }}
+          BLOCKS_FILE: ${{ steps.summarize.outputs.blocks_file }}
+          # Incoming webhook for #f0-design-system. Use a webhook created in the
+          # "Zero Updater" Slack app so the message posts as that bot (zerito).
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_F0_SUMMARIZER }}
         run: |
-          # The summary file has the structure:
-          #   Line 1: plain-text title (e.g. "F0 Weekly Summary (2026-02-23 – 2026-03-01)")
-          #   ---
-          #   <section title line>   (e.g. "🚀 What's new")
-          #   <body lines...>
-          #   ---
-          #   <next section title>
-          #   ...
-          #
-          # We build a Block Kit payload:
-          #   • One top-level "header" block for the title
-          #   • For each section: "divider" + "header" (title) + "section" (body)
-
-          CONTENT=$(cat "$SUMMARY_FILE")
-
-          # Extract the top-level title (first line before the first ---)
-          TITLE=$(printf '%s' "$CONTENT" | head -n1)
-
-          # Start the blocks array with the top-level header
-          BLOCKS=$(jq -n --arg t "$TITLE" \
-            '[{ type: "header", text: { type: "plain_text", text: $t, emoji: true } }]')
-
-          # Split the file into sections on lines that are exactly "---"
-          # Skip the first segment (it's the title line we already handled).
-          # Each subsequent segment's first line is the section title; the rest is the body.
-          SEGMENT=""
-          FIRST_SEGMENT=true
-
-          while IFS= read -r line; do
-            if [ "$line" = "---" ]; then
-              if $FIRST_SEGMENT; then
-                # Discard the title segment — already captured above
-                FIRST_SEGMENT=false
-                SEGMENT=""
-                continue
-              fi
-              # Flush the accumulated segment as a section
-              if [ -n "$SEGMENT" ]; then
-                SECTION_TITLE=$(printf '%s' "$SEGMENT" | head -n1)
-                SECTION_BODY=$(printf '%s' "$SEGMENT" | tail -n +2)
-                BLOCKS=$(printf '%s' "$BLOCKS" | jq \
-                  --arg h "$SECTION_TITLE" \
-                  --arg b "$SECTION_BODY" \
-                  '. + [
-                    { type: "divider" },
-                    { type: "header", text: { type: "plain_text", text: $h, emoji: true } },
-                    { type: "section", text: { type: "mrkdwn", text: $b } }
-                  ]')
-              fi
-              SEGMENT=""
-            else
-              if [ -z "$SEGMENT" ]; then
-                SEGMENT="$line"
-              else
-                SEGMENT="${SEGMENT}"$'\n'"${line}"
-              fi
-            fi
-          done <<< "$CONTENT"
-
-          # Flush the last segment (no trailing --- in the file)
-          if [ -n "$SEGMENT" ] && ! $FIRST_SEGMENT; then
-            SECTION_TITLE=$(printf '%s' "$SEGMENT" | head -n1)
-            SECTION_BODY=$(printf '%s' "$SEGMENT" | tail -n +2)
-            BLOCKS=$(printf '%s' "$BLOCKS" | jq \
-              --arg h "$SECTION_TITLE" \
-              --arg b "$SECTION_BODY" \
-              '. + [
-                { type: "divider" },
-                { type: "header", text: { type: "plain_text", text: $h, emoji: true } },
-                { type: "section", text: { type: "mrkdwn", text: $b } }
-              ]')
-          fi
-
-          # Build the chat.postMessage payload. `text` is required as a fallback
-          # for notifications and accessibility (mobile, screen readers).
-          jq -n \
-            --arg channel "$SLACK_CHANNEL_ID" \
-            --arg fallback "$TITLE" \
-            --argjson blocks "$BLOCKS" \
-            '{ channel: $channel, text: $fallback, blocks: $blocks }' > /tmp/payload.json
-
-          RESPONSE=$(curl --silent --show-error \
-            -X POST \
-            -H "Content-Type: application/json; charset=utf-8" \
-            -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
-            --data @/tmp/payload.json \
-            "https://slack.com/api/chat.postMessage")
-
-          echo "$RESPONSE" | jq -c '{ ok, error, ts }' || true
-
-          OK=$(printf '%s' "$RESPONSE" | jq -r '.ok')
-          if [ "$OK" != "true" ]; then
-            ERR=$(printf '%s' "$RESPONSE" | jq -r '.error // "unknown"')
-            echo "::error::Slack chat.postMessage failed: $ERR"
+          if [ -z "$SLACK_WEBHOOK" ]; then
+            echo "::error::SLACK_WEBHOOK_F0_SUMMARIZER is not set"
             exit 1
           fi
-
-          TS=$(printf '%s' "$RESPONSE" | jq -r '.ts')
-
-          # Post the threaded reply with technical details (best-effort).
-          if [ -n "$THREAD_FILE" ] && [ -f "$THREAD_FILE" ]; then
-            THREAD_TEXT=$(cat "$THREAD_FILE")
-            if [ -n "$THREAD_TEXT" ]; then
-              jq -n \
-                --arg channel "$SLACK_CHANNEL_ID" \
-                --arg thread_ts "$TS" \
-                --arg text "$THREAD_TEXT" \
-                '{ channel: $channel, thread_ts: $thread_ts, text: $text }' > /tmp/thread-payload.json
-
-              THREAD_RESPONSE=$(curl --silent --show-error \
-                -X POST \
-                -H "Content-Type: application/json; charset=utf-8" \
-                -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
-                --data @/tmp/thread-payload.json \
-                "https://slack.com/api/chat.postMessage")
-
-              THREAD_OK=$(printf '%s' "$THREAD_RESPONSE" | jq -r '.ok')
-              if [ "$THREAD_OK" != "true" ]; then
-                THREAD_ERR=$(printf '%s' "$THREAD_RESPONSE" | jq -r '.error // "unknown"')
-                echo "::warning::Threaded reply failed ($THREAD_ERR) — main message already published"
-              fi
-            fi
+          # index.ts already produced the Block Kit payload ({ "blocks": [...] })
+          # with long sections split under Slack's 3000-char limit — just post it.
+          RESPONSE=$(curl --silent --show-error --fail \
+            -X POST -H "Content-Type: application/json; charset=utf-8" \
+            --data @"$BLOCKS_FILE" "$SLACK_WEBHOOK")
+          echo "Slack response: $RESPONSE"
+          if [ "$RESPONSE" != "ok" ]; then
+            echo "::error::Slack webhook post failed: $RESPONSE"
+            exit 1
           fi

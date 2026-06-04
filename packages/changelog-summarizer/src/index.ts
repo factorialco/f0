@@ -20,6 +20,7 @@ import { collectStoryIndex } from "./collectors/stories.js";
 import { resolveApiKey, resolveModel } from "./providers.js";
 import { polishSummary, reconcileSummary } from "./summarizer.js";
 import { jsonToSlackText } from "./formatters/json-formatter.js";
+import { buildBlocks } from "./formatters/blockkit.js";
 import type { Provider, SummaryJson } from "./types.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -313,40 +314,38 @@ async function main(): Promise<void> {
     jsonToSlackText(finalJson, storyIndex.urlByKey) ?? "_No changes this week._";
   const threadDetails = finalJson.thread_details?.trim() || undefined;
 
-  // Prepend a plain-text title line (the top-level Slack header block) + ---.
-  const output = `:f0-dev: F0 Weekly Summary (${fromStr} – ${toStr})\n---\n${summary}`;
+  // Title line (top-level Slack header) + the product sections. The technical
+  // notes go in a final "For engineers" section (webhook publishing can't post
+  // a threaded reply, so we keep the detail at the bottom of the same message).
+  let publishText = `:f0-dev: F0 Weekly Summary (${fromStr} – ${toStr})\n---\n${summary}`;
+  if (threadDetails) {
+    publishText += `\n---\n🛠️ For engineers\n\n${threadDetails}`;
+  }
 
-  // Output
+  // Pre-render the Block Kit payload so the workflow just posts it (no fragile
+  // bash parsing, and long sections are split under Slack's 3000-char limit).
+  const payload = JSON.stringify({ blocks: buildBlocks(publishText) }, null, 2);
+
   if (opts.output) {
-    writeFileSync(resolve(opts.output), output);
-    console.error(`[done] Summary written to ${opts.output}`);
+    const outputPath = resolve(opts.output);
+    writeFileSync(outputPath, publishText);
+    const blocksPath = outputPath.replace(/(\.[^./]+)?$/, ".blocks.json");
+    writeFileSync(blocksPath, payload);
+    console.error(`[done] Summary written to ${outputPath}`);
+    console.error(`[done] Block Kit payload written to ${blocksPath}`);
 
-    if (threadDetails) {
-      const outputPath = resolve(opts.output);
-      const threadPath = outputPath.replace(/(\.[^./]+)?$/, "-thread.txt");
-      writeFileSync(threadPath, threadDetails);
-      console.error(`[done] Thread details written to ${threadPath}`);
-
-      const githubOutput = process.env["GITHUB_OUTPUT"];
-      if (githubOutput) {
-        try {
-          writeFileSync(
-            githubOutput,
-            `thread_file=${threadPath}\n`,
-            { flag: "a" },
-          );
-        } catch (err) {
-          console.warn(
-            `[done] Could not append thread_file to GITHUB_OUTPUT: ${err instanceof Error ? err.message : String(err)}`,
-          );
-        }
+    const githubOutput = process.env["GITHUB_OUTPUT"];
+    if (githubOutput) {
+      try {
+        writeFileSync(githubOutput, `blocks_file=${blocksPath}\n`, { flag: "a" });
+      } catch (err) {
+        console.warn(
+          `[done] Could not append blocks_file to GITHUB_OUTPUT: ${err instanceof Error ? err.message : String(err)}`,
+        );
       }
     }
   } else {
-    process.stdout.write(output + "\n");
-    if (threadDetails) {
-      process.stdout.write(`\n--- THREAD ---\n${threadDetails}\n`);
-    }
+    process.stdout.write(publishText + "\n");
   }
 
   // Save last run date for next invocation

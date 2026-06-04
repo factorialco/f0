@@ -29,6 +29,7 @@ import {
   jsonToSlackText,
   parseSummaryJson,
 } from "../src/formatters/json-formatter.js";
+import { buildBlocks } from "../src/formatters/blockkit.js";
 import type { SummaryJson } from "../src/types.js";
 
 function arg(name: string): string | undefined {
@@ -100,9 +101,11 @@ async function main(): Promise<void> {
     return;
   }
 
-  const summaryFile = `:f0-dev: F0 Weekly Summary (${from} – ${to})\n---\n${slackText}`;
+  let summaryFile = `:f0-dev: F0 Weekly Summary (${from} – ${to})\n---\n${slackText}`;
+  if (summaryJson.thread_details?.trim()) {
+    summaryFile += `\n---\n🛠️ For engineers\n\n${summaryJson.thread_details.trim()}`;
+  }
   writeFileSync("/tmp/zerito-prs.md", summaryFile);
-  writeFileSync("/tmp/zerito-prs-thread.txt", summaryJson.thread_details ?? "");
   writeFileSync(
     "/tmp/zerito-prs-blocks.json",
     JSON.stringify({ blocks: buildBlocks(summaryFile) }, null, 2),
@@ -111,7 +114,7 @@ async function main(): Promise<void> {
   // Report
   const s = json.sections;
   console.error("\n✅ PR-driven preview ready (deterministic, no LLM):");
-  console.error("   /tmp/zerito-prs.md / -thread.txt / -blocks.json");
+  console.error("   /tmp/zerito-prs.md / -blocks.json");
   console.error(
     `\n   ${prs.length} merged PRs → new:${s.new?.length ?? 0} stabilized:${s.stabilized?.length ?? 0} enhancements:${s.enhancements?.length ?? 0} breaking:${s.breaking_changes?.length ?? 0} | fixes:${facts.fixes.length} infra:${facts.infra.length}`,
   );
@@ -129,66 +132,6 @@ async function main(): Promise<void> {
   if (facts.unclassified.length) {
     console.error(`\n   ⚠️ Unclassified (non-conventional titles): ${facts.unclassified.length}`);
   }
-}
-
-interface BlockKitBlock {
-  type: string;
-  text?: { type: string; text: string; emoji?: boolean };
-}
-
-/** Split a section body into <3000-char chunks at bullet boundaries. */
-function chunkMrkdwn(body: string, limit = 2900): string[] {
-  if (body.length <= limit) return [body];
-  const bullets = body.split("\n\n");
-  const chunks: string[] = [];
-  let current = "";
-  for (const bullet of bullets) {
-    const candidate = current ? `${current}\n\n${bullet}` : bullet;
-    if (candidate.length > limit && current) {
-      chunks.push(current);
-      current = bullet;
-    } else {
-      current = candidate;
-    }
-  }
-  if (current) chunks.push(current);
-  return chunks;
-}
-
-function buildBlocks(content: string): BlockKitBlock[] {
-  const lines = content.split("\n");
-  const blocks: BlockKitBlock[] = [
-    { type: "header", text: { type: "plain_text", text: lines[0], emoji: true } },
-  ];
-  let firstSeen = false;
-  let segment: string[] = [];
-  const flush = () => {
-    if (segment.length === 0) return;
-    blocks.push({ type: "divider" });
-    blocks.push({
-      type: "header",
-      text: { type: "plain_text", text: segment[0], emoji: true },
-    });
-    for (const chunk of chunkMrkdwn(segment.slice(1).join("\n"))) {
-      blocks.push({ type: "section", text: { type: "mrkdwn", text: chunk } });
-    }
-    segment = [];
-  };
-  for (let i = 1; i < lines.length; i++) {
-    const line = lines[i];
-    if (line === "---") {
-      if (!firstSeen) {
-        firstSeen = true;
-        segment = [];
-        continue;
-      }
-      flush();
-      continue;
-    }
-    segment.push(line);
-  }
-  if (firstSeen) flush();
-  return blocks;
 }
 
 main().catch((err) => {
