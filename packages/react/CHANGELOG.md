@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.37.0](https://github.com/factorialco/f0/compare/f0-react-v2.36.1...f0-react-v2.37.0) (2026-06-04)
+
+
+### Features
+
+* add support to persist data collection filters/sorting/search with url params ([#4303](https://github.com/factorialco/f0/issues/4303)) ([70c459b](https://github.com/factorialco/f0/commit/70c459bf14256a3da6050ab0bb4fbee1bf4e87f3))
+
 ## [2.36.1](https://github.com/factorialco/f0/compare/f0-react-v2.36.0...f0-react-v2.36.1) (2026-06-03)
 
 
