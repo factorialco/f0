@@ -50,6 +50,17 @@ export const buttonGroupVariants = cva({
       true: "",
       false: "",
     },
+    /**
+     * Reverse the *stacked* (column) order so the LAST child renders on top,
+     * then restore source order once the row layout kicks in. Use it to promote
+     * the primary (passed last) above the secondaries when the group stacks.
+     * Note: this flips the WHOLE column, so secondary buttons also reverse.
+     * No-op when `stack="none"`. Resolved via compound variants below.
+     */
+    reverseOnStack: {
+      true: "",
+      false: "",
+    },
     wrap: {
       true: "flex-wrap",
       false: "",
@@ -72,12 +83,18 @@ export const buttonGroupVariants = cva({
       fullWidthOnStack: true,
       class: "[&>*]:w-full @md:[&>*]:w-auto",
     },
+    // reverse only the stacked (column) part; `flex-col-reverse` wins over the
+    // stack variant's `flex-col` via tailwind-merge, leaving the row class intact
+    { stack: "sm", reverseOnStack: true, class: "flex-col-reverse" },
+    { stack: "md", reverseOnStack: true, class: "flex-col-reverse" },
+    { stack: "container-md", reverseOnStack: true, class: "flex-col-reverse" },
   ],
   defaultVariants: {
     align: "end",
     gap: "md",
     stack: "none",
     fullWidthOnStack: false,
+    reverseOnStack: false,
     wrap: false,
   },
 })

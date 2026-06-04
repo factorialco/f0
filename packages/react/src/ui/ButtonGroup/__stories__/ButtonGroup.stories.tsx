@@ -25,6 +25,7 @@ const meta = {
       options: ["none", "sm", "md", "container-md"],
     },
     fullWidthOnStack: { control: "boolean" },
+    reverseOnStack: { control: "boolean" },
     wrap: { control: "boolean" },
   },
   args: {
@@ -32,6 +33,7 @@ const meta = {
     gap: "md",
     stack: "none",
     fullWidthOnStack: false,
+    reverseOnStack: false,
     wrap: false,
   },
   decorators: [
@@ -65,6 +67,16 @@ export const SpaceBetween: Story = {
  */
 export const StackOnMobile: Story = {
   args: { stack: "sm", fullWidthOnStack: true },
+}
+
+/**
+ * `reverseOnStack` flips the stacked column order so the primary (last child)
+ * sits on top when stacked, while the row order is unchanged at/above the
+ * breakpoint. Resize across 640px: below it the primary is on top; above it the
+ * primary is rightmost. (The whole column reverses, so any secondaries flip too.)
+ */
+export const StackReversed: Story = {
+  args: { stack: "sm", fullWidthOnStack: true, reverseOnStack: true },
 }
 
 /** A `ButtonGroupSeparator` divides logical groups (hidden when stacked). */

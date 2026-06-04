@@ -14,7 +14,8 @@ export interface ButtonGroupProps
  *
  * It controls ONLY arrangement: alignment, orientation, gap, responsive
  * stacking (viewport via `stack="sm"|"md"` or container via
- * `stack="container-md"`), and full-width-on-stack.
+ * `stack="container-md"`), full-width-on-stack, and stacked-order reversal
+ * (`reverseOnStack`, to promote the primary to the top when stacked).
  *
  * It does NOT own footer/header chrome (borders, padding), button `size`, or
  * collapse-into-dropdown behavior. Compose `F0ButtonDropdown` (array → split
@@ -31,6 +32,7 @@ export function ButtonGroup({
   gap,
   stack,
   fullWidthOnStack,
+  reverseOnStack,
   wrap,
   className,
   ...props
@@ -43,6 +45,7 @@ export function ButtonGroup({
           gap,
           stack,
           fullWidthOnStack,
+          reverseOnStack,
           wrap,
         }),
         className
