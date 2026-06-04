@@ -24,39 +24,39 @@ export type LegalEntity = {
 export const legalEntities: LegalEntity[] = [
   {
     id: "le-factorial-spain",
-    legalName: "Factorial Spain",
+    legalName: "Factorial Spain, S.L.",
     countryCode: "ES",
     currency: "EUR",
   },
   {
     id: "le-casa-tarraee",
-    legalName: "Acme France",
-    countryCode: "FR",
+    legalName: "Factorial Germany GmbH",
+    countryCode: "DE",
     currency: "EUR",
   },
   {
     id: "le-bcn-casa-ee",
-    legalName: "Northstar BCN",
-    countryCode: "ES",
-    currency: "EUR",
-  },
-  {
-    id: "le-001",
-    legalName: "Luma Iberia",
-    countryCode: "ES",
-    currency: "EUR",
-  },
-  {
-    id: "le-002",
-    legalName: "Cobalt France",
+    legalName: "Factorial France SAS",
     countryCode: "FR",
     currency: "EUR",
   },
   {
+    id: "le-001",
+    legalName: "Factorial Nordics AB",
+    countryCode: "SE",
+    currency: "SEK",
+  },
+  {
+    id: "le-002",
+    legalName: "Factorial APAC Pte. Ltd.",
+    countryCode: "SG",
+    currency: "SGD",
+  },
+  {
     id: "le-003",
-    legalName: "Atlas Portugal",
-    countryCode: "PT",
-    currency: "EUR",
+    legalName: "Factorial Japan K.K.",
+    countryCode: "JP",
+    currency: "JPY",
   },
 ]
 
