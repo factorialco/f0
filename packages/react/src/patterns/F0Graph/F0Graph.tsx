@@ -191,9 +191,10 @@ export interface F0GraphProps<T = unknown> {
    * node may be collapsed or not yet loaded (e.g. a lazy org chart): the
    * consumer can reveal it — expanding ancestors and centering — instead of the
    * default `fitView`, which can only target an already-visible node. When set,
-   * the button stays enabled even while the node is off-screen.
+   * the button stays enabled even while the node is off-screen. Return the
+   * reveal promise to drive the button's loading spinner while it resolves.
    */
-  onFocusUser?: () => void
+  onFocusUser?: () => void | Promise<void>
   /** Override default English labels for interactive controls. */
   controlLabels?: {
     zoomIn?: string
@@ -912,14 +913,30 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     return { dx: 0, dy: 0 }
   }, [layout.nodes])
 
-  // Persist positions and clear anchor after commit (safe for strict mode)
+  // Persist positions and clear the anchor once the toggle has settled (safe for
+  // strict mode). In lazy mode an expand resolves in two phases: the node is
+  // marked expanded first, then its children arrive asynchronously. Clearing the
+  // anchor on the first commit would leave the big reflow (when many children
+  // appear) uncompensated and the view would jump. So keep the anchor until the
+  // toggled node's children are actually loaded.
   useLayoutEffect(() => {
     const { dx, dy } = anchorOffset
     prevPositionsRef.current = new Map(
       layout.nodes.map((pn) => [pn.id, { x: pn.x + dx, y: pn.y + dy }])
     )
-    anchorNodeRef.current = null
-  }, [layout.nodes, anchorOffset])
+    const anchorId = anchorNodeRef.current
+    if (anchorId) {
+      const anchorNode = nodeMap.get(anchorId)
+      const stillExpanding =
+        isLazyMode &&
+        anchorNode !== undefined &&
+        expandedNodes.has(anchorId) &&
+        !anchorNode.childrenLoaded
+      if (!stillExpanding) {
+        anchorNodeRef.current = null
+      }
+    }
+  }, [layout.nodes, anchorOffset, nodeMap, expandedNodes, isLazyMode])
 
   const rfNodes = useMemo((): RFNode[] => {
     const { dx: anchorDx, dy: anchorDy } = anchorOffset
@@ -1135,6 +1152,18 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
       const next = new Set(current)
       if (wasExpanded) {
         next.delete(nodeId)
+        // Collapse the whole subtree too, so re-expanding this node reveals only
+        // its immediate children — not the deeper levels that were open before.
+        const collapseDescendants = (
+          node: NonNullable<ReturnType<typeof nodeMap.get>>
+        ): void => {
+          for (const child of node.children) {
+            next.delete(child.id)
+            collapseDescendants(child)
+          }
+        }
+        const toggled = nodeMap.get(nodeId)
+        if (toggled) collapseDescendants(toggled)
       } else {
         next.add(nodeId)
       }

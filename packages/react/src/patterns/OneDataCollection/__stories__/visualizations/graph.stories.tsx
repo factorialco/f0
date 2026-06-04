@@ -254,6 +254,26 @@ const EMPLOYEES: Employee[] = [
     department: "Marketing",
     managerId: "growth-lead-b",
   },
+  // A deliberately large team: a lead with 87 direct reports. Expanding (and
+  // collapsing) this node must keep the viewport anchored on it — never jump —
+  // even though the children load lazily.
+  {
+    id: "vp-support-a",
+    name: "Nadia Haddad",
+    title: "VP Customer Support",
+    department: "Support",
+    managerId: "ceo-a",
+  },
+  ...Array.from(
+    { length: 87 },
+    (_unused, index): Employee => ({
+      id: `support-${index + 1}`,
+      name: `Support Agent ${index + 1}`,
+      title: "Customer Support Agent",
+      department: "Support",
+      managerId: "vp-support-a",
+    })
+  ),
 ]
 
 const childrenOf = (parentId: string | null): Employee[] =>

@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 
 import {
   GroupingDefinition,
@@ -19,34 +19,68 @@ import { useDataCollectionTreeData } from "./useDataCollectionTreeData"
 
 export type { GraphVisualizationOptions } from "./types"
 
-/**
- * Placeholder tree shown while the graph loads. One row per visible level
- * (roots + `depth` levels of children), each row wider than the one above, so
- * the skeleton roughly matches the tree that is about to appear.
- */
-const GraphSkeleton = ({ depth }: { depth: number }) => {
-  const rowSizes = [2]
-  for (let level = 1; level <= Math.max(0, depth); level++) {
-    rowSizes.push(Math.min(3 + level * 3, 9))
-  }
+/** A single node-card placeholder: avatar + name/role lines, like a real node. */
+const SkeletonNodeCard = () => (
+  <div className="flex h-[52px] w-64 items-center gap-3 rounded-xl border border-solid border-f1-border-secondary bg-f1-background px-3">
+    <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
+    <div className="flex flex-1 flex-col gap-1.5">
+      <Skeleton className="h-3 w-28 rounded" />
+      <Skeleton className="h-2.5 w-20 rounded" />
+    </div>
+  </div>
+)
 
-  return (
-    <div className="flex h-full min-h-0 flex-1 flex-col items-center justify-center gap-10 pb-4">
-      {rowSizes.map((count, rowIndex) => (
-        <div key={rowIndex} className="flex flex-wrap justify-center gap-4">
-          {Array.from({ length: count }).map((_, index) => (
-            <Skeleton
-              key={index}
-              className={
-                "h-14 rounded-xl " + (rowIndex === 0 ? "w-52" : "w-40")
-              }
-            />
-          ))}
+const SkeletonReportsPill = () => <Skeleton className="h-5 w-20 rounded-full" />
+
+const SkeletonExpander = () => <Skeleton className="h-7 w-10 rounded-lg" />
+
+// Connecting bus (riser + horizontal bus + droppers) drawn to align with the
+// three children below. Width matches the children row: 3·256 + 2·40 = 848.
+const SkeletonConnectors = () => (
+  <svg width={848} height={40} viewBox="0 0 848 40" fill="none" aria-hidden>
+    <path
+      d="M424 0 V20"
+      className="stroke-f1-border-secondary"
+      strokeWidth={1.5}
+    />
+    <path
+      d="M128 40 V28 Q128 20 136 20 H712 Q720 20 720 28 V40"
+      className="stroke-f1-border-secondary"
+      strokeWidth={1.5}
+    />
+    <path
+      d="M424 20 V40"
+      className="stroke-f1-border-secondary"
+      strokeWidth={1.5}
+    />
+  </svg>
+)
+
+/**
+ * Placeholder that mirrors the org chart about to appear: a root node with its
+ * reports pill, the connecting bus, and a row of child nodes (each with a
+ * reports pill and an expander), so the loading state matches the real shape.
+ */
+const GraphSkeleton = () => (
+  <div className="flex h-full min-h-0 flex-1 flex-col items-center justify-center pb-4">
+    <div className="flex flex-col items-center gap-2">
+      <SkeletonNodeCard />
+      <SkeletonReportsPill />
+    </div>
+
+    <SkeletonConnectors />
+
+    <div className="flex items-start gap-10">
+      {Array.from({ length: 3 }).map((_, index) => (
+        <div key={index} className="flex flex-col items-center gap-2">
+          <SkeletonNodeCard />
+          <SkeletonReportsPill />
+          <SkeletonExpander />
         </div>
       ))}
     </div>
-  )
-}
+  </div>
+)
 
 export type GraphCollectionProps<
   Record extends RecordType,
@@ -141,16 +175,36 @@ export const GraphCollection = <
     { onLoadData, onLoadError }
   )
 
-  // Reveal a node selected from the shared Data Collection search.
-  // Wait for the initial load to finish first: `loadInitial` resets `nodes`
-  // and the expanded set, so revealing during it (e.g. when switching back from
-  // the table view with a search still active) would be wiped out, leaving the
-  // viewport focused on a node that isn't in the tree.
+  // Reveal a node selected from the shared Data Collection search — but NEVER on
+  // entry: opening the graph must not auto-focus anyone (a consistent default
+  // view + clean search). We adopt whatever `revealNodeId` exists when the tree
+  // first becomes ready as "already handled", then only react to LATER changes
+  // (a fresh search selection). "Find me" reveals directly via the controls and
+  // is unaffected.
+  const lastRevealedRef = useRef<string | undefined>(undefined)
+  const initialRevealConsumedRef = useRef(false)
   useEffect(() => {
-    if (revealNodeId && !isInitialLoading) {
+    if (isInitialLoading) return
+    if (!initialRevealConsumedRef.current) {
+      initialRevealConsumedRef.current = true
+      lastRevealedRef.current = revealNodeId
+      return
+    }
+    if (revealNodeId && revealNodeId !== lastRevealedRef.current) {
+      lastRevealedRef.current = revealNodeId
       void revealNode(revealNodeId)
     }
   }, [revealNodeId, revealNode, isInitialLoading])
+
+  // Clear the shared header search when ENTERING and LEAVING the graph view, so
+  // it never points at a node here (the graph is a tree, not a filtered list).
+  // Mount/unmount only — typing a search while in the graph must not be wiped.
+  const setCurrentSearchRef = useRef(source.setCurrentSearch)
+  setCurrentSearchRef.current = source.setCurrentSearch
+  useEffect(() => {
+    setCurrentSearchRef.current(undefined)
+    return () => setCurrentSearchRef.current(undefined)
+  }, [])
 
   // Metadata visibility + order are configured from the shared Data Collection
   // settings (the same SortAndHideList as table columns), not F0Graph's controls.
@@ -189,7 +243,7 @@ export const GraphCollection = <
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col border-solid border-t border-0 border-f1-border-secondary bg-[hsl(var(--neutral-3))]">
       {isInitialLoading ? (
-        <GraphSkeleton depth={defaultExpandDepth ?? 1} />
+        <GraphSkeleton />
       ) : (
         <F0Graph<Record>
           nodes={nodes}
@@ -205,9 +259,9 @@ export const GraphCollection = <
           visibleTagTypes={visibleTagTypes}
           currentUserNodeId={currentUserNodeId}
           onFocusUser={
-            currentUserNodeId
-              ? () => void revealNode(currentUserNodeId)
-              : undefined
+            // Return the reveal promise so the "Find me" button shows a loading
+            // spinner while it loads the path, expands and centers the node.
+            currentUserNodeId ? () => revealNode(currentUserNodeId) : undefined
           }
           onPaneClick={clearFocus}
           renderNode={(node, ctx) => {

@@ -16,8 +16,9 @@ export interface F0GraphControlsProps {
    * Callback to focus the "current user" node. When provided, a "Find me"
    * button is rendered as the first control. When omitted, the button is
    * hidden — consumers without a current-user concept get a clean toolbar.
+   * Returning a promise drives the button's loading spinner while it resolves.
    */
-  onFocusUser?: () => void
+  onFocusUser?: () => void | Promise<void>
   /** Override default English labels */
   labels?: F0GraphControlLabels
 }
