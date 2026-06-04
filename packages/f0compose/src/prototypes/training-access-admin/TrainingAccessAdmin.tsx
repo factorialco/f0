@@ -3,6 +3,7 @@ import {
   F0Box,
   F0Button,
   F0ButtonDropdown,
+  F0Checkbox,
   F0Dialog,
   F0Select,
   F0Text,
@@ -373,14 +374,14 @@ export default function TrainingAccessAdmin() {
     setIsPeopleListOpen(true)
   }
 
+  // Multi-select via checkboxes: toggling a person keeps the list open so the
+  // admin can tick several (or the whole filtered group) before pressing Add.
   const handleSelectedEmployeeChange = (employeeId: string) => {
     setSelectedEmployeeIds((current) =>
       current.includes(employeeId)
         ? current.filter((id) => id !== employeeId)
         : [...current, employeeId]
     )
-    setPersonSearch("")
-    setIsPeopleListOpen(false)
   }
 
   const handleSelectedEmployeeRemove = (employeeId: string) => {
@@ -924,22 +925,23 @@ function PeopleSelectorPopover({
     // F0Box cannot express the top-full placement needed by this selector popover.
     <div className="isolate absolute left-0 right-0 top-full z-50 mt-1 max-h-80 overflow-hidden rounded-md border border-solid border-f1-border-secondary bg-f1-background shadow-lg">
       <div className="flex items-center justify-between border-0 border-b border-solid border-f1-border-secondary px-3 py-2">
-        <F0Text
-          content={showFilters ? "Filters" : `${selectedEmployeeIds.length} selected`}
-          variant={showFilters ? "label" : "description"}
-        />
+        {showFilters ? (
+          <F0Text content="Filters" variant="label" />
+        ) : (
+          <div className="flex items-center gap-2">
+            {candidateIds.length > 0 && (
+              <F0Checkbox
+                checked={allCandidatesSelected}
+                onCheckedChange={() => onSelectAll(candidateIds)}
+                title="Select all"
+                hideLabel
+              />
+            )}
+            <F0Text content={`${selectedEmployeeIds.length} selected`} variant="description" />
+          </div>
+        )}
         {showFilters && selectedCount > 0 && (
           <F0Button label="Clear" variant="neutral" size="sm" onClick={onClearFilters} />
-        )}
-        {!showFilters && candidateIds.length > 0 && (
-          <F0Button
-            label={
-              allCandidatesSelected ? "Deselect all" : `Select all (${candidateIds.length})`
-            }
-            variant="neutral"
-            size="sm"
-            onClick={() => onSelectAll(candidateIds)}
-          />
         )}
       </div>
       {showFilters ? (
@@ -992,20 +994,23 @@ function PeopleSelectorPopover({
             candidates.map((candidate) => {
               const selected = selectedEmployeeIds.includes(candidate.value)
               return (
-                <button
+                <div
                   key={candidate.value}
-                  type="button"
-                  className={`flex w-full items-center justify-between rounded-md border-0 bg-transparent p-2 text-left hover:bg-f1-background-hover ${
+                  className={`flex w-full items-center gap-2 rounded-md p-2 hover:bg-f1-background-hover ${
                     selected ? "bg-f1-background-selected" : ""
                   }`}
-                  onClick={() => onSelect(candidate.value)}
                 >
+                  <F0Checkbox
+                    checked={selected}
+                    onCheckedChange={() => onSelect(candidate.value)}
+                    title={`Select ${candidate.employee.fullName}`}
+                    hideLabel
+                  />
                   <PersonCell
                     employee={candidate.employee}
                     supportingText={candidate.employee.email}
                   />
-                  {selected && <F0Text content="Selected" variant="description" />}
-                </button>
+                </div>
               )
             })
           ) : (
