@@ -6,9 +6,17 @@ import { fileURLToPath } from "url";
 import { execSync } from "child_process";
 import { collectChangelogs } from "./collectors/changelog.js";
 import { collectCommits } from "./collectors/commits.js";
+import { extractPrNumbers, fetchPrBodies } from "./collectors/github.js";
+import type { PrInfo } from "./collectors/github.js";
+import { collectStoryUrls } from "./collectors/stories.js";
 import { resolveApiKey, resolveModel } from "./providers.js";
 import { generateSummary } from "./summarizer.js";
 import { buildContextMessage } from "./formatters/markdown.js";
+import {
+  jsonToSlackText,
+  parseSummaryJson,
+} from "./formatters/json-formatter.js";
+import { postprocess } from "./formatters/postprocess.js";
 import type { Provider } from "./types.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -195,6 +203,10 @@ async function main(): Promise<void> {
       "--debug-dir <path>",
       "Directory to save debug files (default: /tmp/changelog-summarizer-debug-{timestamp})",
     )
+    .option(
+      "--github-token <token>",
+      "GitHub token used to fetch PR descriptions (falls back to $GITHUB_TOKEN)",
+    )
     .parse(process.argv);
 
   const opts = program.opts<{
@@ -209,6 +221,7 @@ async function main(): Promise<void> {
     ignoreLastRun?: boolean;
     debug?: boolean;
     debugDir?: string;
+    githubToken?: string;
   }>();
 
   // Validate provider
@@ -266,6 +279,30 @@ async function main(): Promise<void> {
   const commits = collectCommits(repoRoot, from, to);
   console.error(`[collect] Found ${commits.length} commits`);
 
+  // Build precise Storybook URL map from the published index.json.
+  console.error("[collect] Fetching Storybook index…");
+  const storyUrls = await collectStoryUrls();
+  console.error(`[collect] Built story URL map (${storyUrls.size} entries)`);
+
+  // Fetch PR bodies only for *features* — bug fix one-liners from the
+  // CHANGELOG are usually enough and fetching every PR explodes the token.
+  const featureText = [
+    ...changelogs.flatMap((e) => e.features),
+    ...commits
+      .filter((c) => /^feat(\(|:|!)/.test(c.message))
+      .map((c) => c.message),
+  ].join(" ");
+  const prNumbers = extractPrNumbers(featureText);
+  const githubToken = opts.githubToken ?? process.env["GITHUB_TOKEN"];
+  let prBodies: Map<number, PrInfo> = new Map();
+  if (prNumbers.length > 0) {
+    console.error(
+      `[collect] Fetching ${prNumbers.length} PR description(s)…`,
+    );
+    prBodies = await fetchPrBodies(prNumbers, githubToken);
+    console.error(`[collect] Got ${prBodies.size} PR description(s)`);
+  }
+
   // Save debug files if requested
   if (opts.debug) {
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
@@ -277,6 +314,7 @@ async function main(): Promise<void> {
       commits,
       fromStr,
       toStr,
+      prBodies,
     );
 
     saveDebugFiles(debugDir, {
@@ -303,12 +341,40 @@ async function main(): Promise<void> {
 
   // Generate summary
   console.error(`[llm] Generating summary with ${provider}…`);
-  const summary = await generateSummary(model, systemPrompt, {
+  const rawSummary = await generateSummary(model, systemPrompt, {
     from: fromStr,
     to: toStr,
     changelogs,
     commits,
+    prBodies,
   });
+
+  // Decide post-processing path based on what the model returned. The
+  // product-v2 prompt asks for strict JSON; the legacy prompt asks for
+  // free-form mrkdwn that just needs cleanup.
+  let summary: string;
+  let threadDetails: string | undefined;
+
+  const trimmedRaw = rawSummary.trim();
+  const looksLikeJson =
+    trimmedRaw.startsWith("{") || trimmedRaw.startsWith("```");
+
+  if (looksLikeJson) {
+    console.error("[post] Detected JSON output — using product-v2 path");
+    const json = parseSummaryJson(rawSummary);
+    const slackText = jsonToSlackText(json, storyUrls);
+    if (slackText === null) {
+      summary = "_No changes this week._";
+    } else {
+      summary = slackText;
+    }
+    if (typeof json.thread_details === "string" && json.thread_details.trim()) {
+      threadDetails = json.thread_details.trim();
+    }
+  } else {
+    console.error("[post] Plain text output — using legacy postprocess path");
+    summary = postprocess(rawSummary);
+  }
 
   // Prepend a plain-text title line (used as the top-level Slack header block)
   // followed by --- so the workflow parser treats it as the first section delimiter.
@@ -318,8 +384,33 @@ async function main(): Promise<void> {
   if (opts.output) {
     writeFileSync(resolve(opts.output), output);
     console.error(`[done] Summary written to ${opts.output}`);
+
+    if (threadDetails) {
+      const outputPath = resolve(opts.output);
+      const threadPath = outputPath.replace(/(\.[^./]+)?$/, "-thread.txt");
+      writeFileSync(threadPath, threadDetails);
+      console.error(`[done] Thread details written to ${threadPath}`);
+
+      const githubOutput = process.env["GITHUB_OUTPUT"];
+      if (githubOutput) {
+        try {
+          writeFileSync(
+            githubOutput,
+            `thread_file=${threadPath}\n`,
+            { flag: "a" },
+          );
+        } catch (err) {
+          console.warn(
+            `[done] Could not append thread_file to GITHUB_OUTPUT: ${err instanceof Error ? err.message : String(err)}`,
+          );
+        }
+      }
+    }
   } else {
     process.stdout.write(output + "\n");
+    if (threadDetails) {
+      process.stdout.write(`\n--- THREAD ---\n${threadDetails}\n`);
+    }
   }
 
   // Save last run date for next invocation

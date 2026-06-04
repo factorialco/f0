@@ -13,6 +13,7 @@ export async function generateSummary(
     context.commits,
     context.from,
     context.to,
+    context.prBodies,
   );
 
   const { text } = await generateText({

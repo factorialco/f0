@@ -72,6 +72,7 @@ jobs:
           FROM_DATE: ${{ inputs.from || '' }}
           TO_DATE: ${{ inputs.to || '' }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ARGS=(--provider "$PROVIDER")
 
@@ -89,10 +90,19 @@ jobs:
 
           pnpm tsx src/index.ts \
             "${ARGS[@]}" \
+            --prompt src/prompts/product-v2.md \
+            --github-token "$GITHUB_TOKEN" \
             --repo-root "${{ github.workspace }}" \
             --output /tmp/summary.md
 
           echo "summary_file=/tmp/summary.md" >> "$GITHUB_OUTPUT"
+
+          # The CLI writes the thread file as <output>-thread.txt and already
+          # appends `thread_file=` to $GITHUB_OUTPUT, but we guard here too in
+          # case the env var wasn't set.
+          if [ -f /tmp/summary-thread.txt ]; then
+            echo "thread_file=/tmp/summary-thread.txt" >> "$GITHUB_OUTPUT"
+          fi
         working-directory: ${{ github.workspace }}/packages/changelog-summarizer
 
       - name: Save last-run cache
@@ -115,19 +125,22 @@ jobs:
         if: ${{ inputs.dry_run != 'true' }}
         env:
           SUMMARY_FILE: ${{ steps.summarize.outputs.summary_file }}
+          THREAD_FILE: ${{ steps.summarize.outputs.thread_file }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_F0_SUMMARIZER }}
         run: |
           # The summary file has the structure:
           #   Line 1: plain-text title (e.g. "F0 Weekly Summary (2026-02-23 – 2026-03-01)")
           #   ---
-          #   <package title line>   (e.g. "⚛️ F0 React — v1.380.0 → v1.384.0")
+          #   <section title line>   (e.g. "🚀 What's new")
           #   <body lines...>
           #   ---
-          #   <next package title>
+          #   <next section title>
           #   ...
           #
           # We build a Block Kit payload:
           #   • One top-level "header" block for the title
-          #   • For each package section: "divider" + "header" (title) + "section" (body)
+          #   • For each section: "divider" + "header" (title) + "section" (body)
 
           CONTENT=$(cat "$SUMMARY_FILE")
 
@@ -140,7 +153,7 @@ jobs:
 
           # Split the file into sections on lines that are exactly "---"
           # Skip the first segment (it's the title line we already handled).
-          # Each subsequent segment's first line is the package title; the rest is the body.
+          # Each subsequent segment's first line is the section title; the rest is the body.
           SEGMENT=""
           FIRST_SEGMENT=true
 
@@ -152,13 +165,13 @@ jobs:
                 SEGMENT=""
                 continue
               fi
-              # Flush the accumulated segment as a package section
+              # Flush the accumulated segment as a section
               if [ -n "$SEGMENT" ]; then
-                PKG_TITLE=$(printf '%s' "$SEGMENT" | head -n1)
-                PKG_BODY=$(printf '%s' "$SEGMENT" | tail -n +2)
+                SECTION_TITLE=$(printf '%s' "$SEGMENT" | head -n1)
+                SECTION_BODY=$(printf '%s' "$SEGMENT" | tail -n +2)
                 BLOCKS=$(printf '%s' "$BLOCKS" | jq \
-                  --arg h "$PKG_TITLE" \
-                  --arg b "$PKG_BODY" \
+                  --arg h "$SECTION_TITLE" \
+                  --arg b "$SECTION_BODY" \
                   '. + [
                     { type: "divider" },
                     { type: "header", text: { type: "plain_text", text: $h, emoji: true } },
@@ -177,11 +190,11 @@ jobs:
 
           # Flush the last segment (no trailing --- in the file)
           if [ -n "$SEGMENT" ] && ! $FIRST_SEGMENT; then
-            PKG_TITLE=$(printf '%s' "$SEGMENT" | head -n1)
-            PKG_BODY=$(printf '%s' "$SEGMENT" | tail -n +2)
+            SECTION_TITLE=$(printf '%s' "$SEGMENT" | head -n1)
+            SECTION_BODY=$(printf '%s' "$SEGMENT" | tail -n +2)
             BLOCKS=$(printf '%s' "$BLOCKS" | jq \
-              --arg h "$PKG_TITLE" \
-              --arg b "$PKG_BODY" \
+              --arg h "$SECTION_TITLE" \
+              --arg b "$SECTION_BODY" \
               '. + [
                 { type: "divider" },
                 { type: "header", text: { type: "plain_text", text: $h, emoji: true } },
@@ -189,9 +202,53 @@ jobs:
               ]')
           fi
 
-          # Build and send the final payload
-          jq -n --argjson blocks "$BLOCKS" '{ blocks: $blocks }' > /tmp/payload.json
+          # Build the chat.postMessage payload. `text` is required as a fallback
+          # for notifications and accessibility (mobile, screen readers).
+          jq -n \
+            --arg channel "$SLACK_CHANNEL_ID" \
+            --arg fallback "$TITLE" \
+            --argjson blocks "$BLOCKS" \
+            '{ channel: $channel, text: $fallback, blocks: $blocks }' > /tmp/payload.json
 
-          curl -X POST -H "Content-Type: application/json" \
+          RESPONSE=$(curl --silent --show-error \
+            -X POST \
+            -H "Content-Type: application/json; charset=utf-8" \
+            -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
             --data @/tmp/payload.json \
-            "${{ secrets.SLACK_WEBHOOK_F0_SUMMARIZER }}"
+            "https://slack.com/api/chat.postMessage")
+
+          echo "$RESPONSE" | jq -c '{ ok, error, ts }' || true
+
+          OK=$(printf '%s' "$RESPONSE" | jq -r '.ok')
+          if [ "$OK" != "true" ]; then
+            ERR=$(printf '%s' "$RESPONSE" | jq -r '.error // "unknown"')
+            echo "::error::Slack chat.postMessage failed: $ERR"
+            exit 1
+          fi
+
+          TS=$(printf '%s' "$RESPONSE" | jq -r '.ts')
+
+          # Post the threaded reply with technical details (best-effort).
+          if [ -n "$THREAD_FILE" ] && [ -f "$THREAD_FILE" ]; then
+            THREAD_TEXT=$(cat "$THREAD_FILE")
+            if [ -n "$THREAD_TEXT" ]; then
+              jq -n \
+                --arg channel "$SLACK_CHANNEL_ID" \
+                --arg thread_ts "$TS" \
+                --arg text "$THREAD_TEXT" \
+                '{ channel: $channel, thread_ts: $thread_ts, text: $text }' > /tmp/thread-payload.json
+
+              THREAD_RESPONSE=$(curl --silent --show-error \
+                -X POST \
+                -H "Content-Type: application/json; charset=utf-8" \
+                -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+                --data @/tmp/thread-payload.json \
+                "https://slack.com/api/chat.postMessage")
+
+              THREAD_OK=$(printf '%s' "$THREAD_RESPONSE" | jq -r '.ok')
+              if [ "$THREAD_OK" != "true" ]; then
+                THREAD_ERR=$(printf '%s' "$THREAD_RESPONSE" | jq -r '.error // "unknown"')
+                echo "::warning::Threaded reply failed ($THREAD_ERR) — main message already published"
+              fi
+            fi
+          fi
