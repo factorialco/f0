@@ -29,7 +29,6 @@ export interface ButtonGroupProps
  */
 export function ButtonGroup({
   align,
-  gap,
   stack,
   fullWidthOnStack,
   reverseOnStack,
@@ -39,10 +38,10 @@ export function ButtonGroup({
 }: ButtonGroupProps) {
   return (
     <div
+      role="group"
       className={cn(
         buttonGroupVariants({
           align,
-          gap,
           stack,
           fullWidthOnStack,
           reverseOnStack,
@@ -56,36 +55,18 @@ export function ButtonGroup({
 }
 
 /**
- * Vertical hairline separator for dividing logical action groups inside a
- * `ButtonGroup` (e.g. the otherActions/primary divider in ResourceHeader, or
- * the actions/close divider in the Dialog header). Hidden while the group is
- * stacked into a column, mirroring the existing components which only show the
- * divider in the horizontal (row) layout.
- *
- * `showOn` must match the parent `ButtonGroup`'s `stack` breakpoint so the
- * divider appears exactly when the group becomes a row.
+ * Vertical hairline that divides logical groups inside a **row-layout**
+ * `ButtonGroup` — e.g. the actions/close divider in a dialog header, or the
+ * otherActions/primary divider in a page header. It is intended for horizontal
+ * layouts and renders unconditionally, so don't place it inside a group that
+ * stacks into a column (it would float oddly mid-column).
  */
-export function ButtonGroupSeparator({
-  showOn = "always",
-}: {
-  /** Breakpoint at which the group becomes a row and the divider should show. */
-  showOn?: "always" | "sm" | "md" | "container-md"
-}) {
-  const visibility = {
-    always: "block",
-    sm: "hidden sm:block",
-    md: "hidden md:block",
-    "container-md": "hidden @md:block",
-  }[showOn]
-
+export function ButtonGroupSeparator() {
   return (
     <div
       role="separator"
       aria-orientation="vertical"
-      className={cn(
-        "h-4 w-px self-center bg-f1-background-secondary-hover",
-        visibility
-      )}
+      className="h-4 w-px self-center bg-f1-background-secondary"
     />
   )
 }

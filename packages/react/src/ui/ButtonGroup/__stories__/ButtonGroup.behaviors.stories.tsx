@@ -63,7 +63,7 @@ const Case = ({
   </div>
 )
 
-const Stack = ({ children }: { children: React.ReactNode }) => (
+const Cases = ({ children }: { children: React.ReactNode }) => (
   <div className="flex max-w-xl flex-col gap-8">{children}</div>
 )
 
@@ -127,10 +127,10 @@ const OneLinerRow = ({ width }: { width: number }) => (
 export const TrailingActions: Story = {
   name: "Trailing actions",
   render: () => (
-    <Stack>
+    <Cases>
       <Case caption="Confirm row — secondary → primary (e.g. dialog footer)">
         <MockFooter>
-          <ButtonGroup align="end" gap="md" stack="none" className="w-full">
+          <ButtonGroup align="end" stack="none" className="w-full">
             <F0Button variant="outline" label="Cancel" onClick={noop} />
             <F0Button variant="default" label="Confirm" onClick={noop} />
           </ButtonGroup>
@@ -139,7 +139,7 @@ export const TrailingActions: Story = {
 
       <Case caption="+ Split button — an action array collapses to F0ButtonDropdown">
         <MockFooter>
-          <ButtonGroup align="end" gap="md" stack="none" className="w-full">
+          <ButtonGroup align="end" stack="none" className="w-full">
             <F0ButtonDropdown
               variant="outline"
               items={[
@@ -162,7 +162,7 @@ export const TrailingActions: Story = {
 
       <Case caption="+ Icon-only + separator + close (e.g. dialog header, ≤2 non-critical)">
         <MockHeader>
-          <ButtonGroup align="end" gap="md" stack="none">
+          <ButtonGroup align="end" stack="none">
             <F0Button
               variant="outline"
               icon={Pencil}
@@ -191,7 +191,7 @@ export const TrailingActions: Story = {
 
       <Case caption="+ Overflow menu — extra actions collapse under an ellipsis (e.g. dialog header, 3+ / critical)">
         <MockHeader>
-          <ButtonGroup align="end" gap="md" stack="none">
+          <ButtonGroup align="end" stack="none">
             <DropdownInternal
               icon={Ellipsis}
               items={[
@@ -223,7 +223,7 @@ export const TrailingActions: Story = {
           <OneLinerRow width={360} />
         </div>
       </Case>
-    </Stack>
+    </Cases>
   ),
 }
 
@@ -240,13 +240,11 @@ const SplitRow = ({ width }: { width: number }) => (
       <div className="border-0 border-t border-solid border-t-f1-border-secondary pt-4">
         <ButtonGroup
           align="between"
-          gap="lg"
           stack="container-md"
           fullWidthOnStack
           className="w-full"
         >
           <ButtonGroup
-            gap="md"
             stack="container-md"
             fullWidthOnStack
             className="w-full @md:w-fit"
@@ -274,21 +272,22 @@ const SplitRow = ({ width }: { width: number }) => (
 export const SplitActions: Story = {
   name: "Split actions",
   render: () => (
-    <Stack>
+    <Cases>
       <Case caption="Wide surface — secondary ‖ primary at opposite edges (e.g. card footer)">
         <SplitRow width={560} />
       </Case>
       <Case caption="Narrow surface — collapses to a full-width column, by container width (@md)">
         <SplitRow width={360} />
       </Case>
-    </Stack>
+    </Cases>
   ),
 }
 
 // =============================================================================
 // Pattern 3 — Reflowing actions
-// The actions REORDER between compact and wide, so it composes two ButtonGroups
-// (one per breakpoint) — the one case that doesn't reduce to a single group.
+// The actions REORDER between compact and wide. The order alone fits one group
+// (stack + reverseOnStack); two groups are used here only because the button
+// SIZE and the overflow-menu component also change across the breakpoint.
 // Recognized in page / resource headers.
 // =============================================================================
 
@@ -309,7 +308,7 @@ const WideCluster = ({
   primaryAsDropdown?: boolean
   exportAsDropdown?: boolean
 }) => (
-  <ButtonGroup align="end" gap="md" wrap className="w-full">
+  <ButtonGroup align="end" wrap className="w-full">
     {withOverflow && <Dropdown items={reflowOverflow} />}
     <F0Button variant="outline" icon={Pencil} label="Edit" onClick={noop} />
     {exportAsDropdown ? (
@@ -365,11 +364,13 @@ export const ReflowingActions: Story = {
           <div className="hidden md:block">
             <WideCluster />
           </div>
-          {/* Compact (< md): full-width column, size lg, primary first */}
+          {/* Compact (< md): full-width column, size lg, primary first.
+              The order alone could be one group via `reverseOnStack`; two are
+              used because the size (lg→md) and the overflow component (Dropdown
+              ↔ MobileDropdown) also change here. */}
           <div className="md:hidden">
             <ButtonGroup
               stack="md"
-              gap="md"
               fullWidthOnStack
               className="[&_button]:w-full"
             >
@@ -433,12 +434,6 @@ export const ReflowingActions: Story = {
 // Composition — Overflow menu (width-driven)
 // =============================================================================
 
-/**
- * `ButtonGroupOverflow` sheds the buttons that don't fit under an ellipsis "⋯"
- * trigger (a menu of icon + label rows), wrapping the measurement-based
- * `OverflowList`. Width-driven — distinct from a fixed count-independent bucket
- * (the experimental `Dropdown`). Narrow the canvas to watch buttons collapse.
- */
 const toolbarActions = [
   { id: "edit", label: "Edit", icon: Pencil, onClick: noop },
   { id: "share", label: "Share", icon: Share, onClick: noop },
@@ -446,6 +441,12 @@ const toolbarActions = [
   { id: "delete", label: "Delete", icon: Delete, onClick: noop },
 ]
 
+/**
+ * `ButtonGroupOverflow` sheds the buttons that don't fit under a real ellipsis
+ * "⋯" `Dropdown` (closes on select), measured by `useOverflowCalculation`.
+ * Width-driven — distinct from a fixed count-independent bucket. Narrow the
+ * canvas to watch buttons collapse; shown here at three fixed widths.
+ */
 export const OverflowMenu: Story = {
   name: "Overflow menu (width-driven)",
   render: () => (

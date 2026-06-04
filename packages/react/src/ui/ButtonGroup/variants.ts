@@ -14,7 +14,9 @@ import { cva } from "cva"
  * Every generated class is a static string so Tailwind's JIT can see it.
  */
 export const buttonGroupVariants = cva({
-  base: "flex",
+  // Gap is a fixed `gap-md` (8px) for every button group — a constant rhythm
+  // across surfaces, not a per-call knob.
+  base: "flex gap-md",
   variants: {
     // Action groups are never left-aligned (a left-positioned primary is an
     // anti-pattern), so only `end` (default, right-aligned) and `between`
@@ -22,11 +24,6 @@ export const buttonGroupVariants = cva({
     align: {
       end: "justify-end",
       between: "justify-between",
-    },
-    gap: {
-      sm: "gap-1",
-      md: "gap-2", // Dialog header/footer
-      lg: "gap-md", // Card desktop footer
     },
     /**
      * Orientation + responsive stacking, encoded as ONE axis:
@@ -91,7 +88,6 @@ export const buttonGroupVariants = cva({
   ],
   defaultVariants: {
     align: "end",
-    gap: "md",
     stack: "none",
     fullWidthOnStack: false,
     reverseOnStack: false,

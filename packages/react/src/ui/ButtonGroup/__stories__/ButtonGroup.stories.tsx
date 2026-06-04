@@ -16,10 +16,6 @@ const meta = {
       control: "inline-radio",
       options: ["end", "between"],
     },
-    gap: {
-      control: "inline-radio",
-      options: ["sm", "md", "lg"],
-    },
     stack: {
       control: "inline-radio",
       options: ["none", "sm", "md", "container-md"],
@@ -30,15 +26,17 @@ const meta = {
   },
   args: {
     align: "end",
-    gap: "md",
     stack: "none",
     fullWidthOnStack: false,
     reverseOnStack: false,
     wrap: false,
   },
   decorators: [
+    // `@container` so the `stack="container-md"` option reacts to this box's
+    // width (resize the canvas); the viewport `sm`/`md` options react to the
+    // browser width instead.
     (Story) => (
-      <div className="w-full max-w-xl rounded-lg border border-solid border-f1-border-secondary p-4">
+      <div className="@container w-full max-w-xl rounded-lg border border-solid border-f1-border-secondary p-4">
         <Story />
       </div>
     ),

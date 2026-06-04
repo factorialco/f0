@@ -54,11 +54,24 @@ container query.
 
 The actions **reorder** between compact and wide: wide is
 `… → secondary → divider → primary`; compact promotes the primary to the top of a
-full-width column. A single flex container can't express both orderings, so this
-pattern composes **two ButtonGroups**, one per breakpoint — the one layout that
-doesn't reduce to a single group. _Recognized in: page / resource headers._
+full-width column. _Recognized in: page / resource headers._
+
+The reorder itself fits a **single** group via **`reverseOnStack`** (below). What
+forces this example to use **two** groups is everything a flex container can't
+switch on its own across the breakpoint: the button **`size`** (`lg` stacked →
+`md` row — a React prop, see [What ButtonGroup does NOT own](#what-buttongroup-does-not-own)),
+and the overflow **menu component** (a desktop `Dropdown` popover ↔ a mobile
+`MobileDropdown` drawer). With a constant size and one menu, a single
+`stack="md" reverseOnStack fullWidthOnStack` group would do.
 
 <Canvas of={Patterns.ReflowingActions} />
+
+### `reverseOnStack`
+
+Reverses the **stacked (column) order** so the last child — the primary — lands on
+top when the group stacks, while the row order at/above the breakpoint is
+unchanged. It flips the _whole_ column, so multiple secondaries reverse too
+(usually fine). No effect when `stack="none"`.
 
 ## Composition building blocks
 
