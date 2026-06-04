@@ -1,6 +1,5 @@
 import { F0Button } from "@/components/F0Button"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
-import { ButtonGroup } from "@/ui/ButtonGroup"
 
 import {
   F0DialogActionsProps,
@@ -98,11 +97,12 @@ export const F0DialogFooter = ({
   }
 
   return (
-    <div className="border-x-0 border-b-0 border-t border-solid border-f1-border-secondary px-4 py-3">
-      <ButtonGroup align="end">
+    <div className="flex flex-row items-center justify-between border-x-0 border-b-0 border-t border-solid border-f1-border-secondary px-4 py-3">
+      <div className="flex-1" />
+      <div className="flex flex-row items-center gap-2">
         {renderSecondaryAction()}
         {renderPrimaryAction()}
-      </ButtonGroup>
+      </div>
     </div>
   )
 }

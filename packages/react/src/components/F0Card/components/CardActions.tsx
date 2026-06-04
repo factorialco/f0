@@ -4,29 +4,18 @@ import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { F0Link, type F0LinkProps } from "@/components/F0Link"
 import { cn } from "@/lib/utils"
-import { ButtonGroup } from "@/ui/ButtonGroup"
 import { CardFooter } from "@/ui/Card"
 
 export interface CardPrimaryAction {
   label: string
   icon?: IconType
   onClick: () => void
-  /**
-   * Render the button icon-only, hiding the label visually. The label is kept
-   * as an accessible tooltip/aria-label. Requires `icon`.
-   */
-  hideLabel?: boolean
 }
 
 export interface CardSecondaryAction {
   label: string
   icon?: IconType
   onClick: () => void
-  /**
-   * Render the button icon-only, hiding the label visually. The label is kept
-   * as an accessible tooltip/aria-label. Requires `icon`.
-   */
-  hideLabel?: boolean
 }
 
 export interface CardSecondaryLink extends Pick<
@@ -91,7 +80,6 @@ export function CardActions({
                   e.stopPropagation()
                   action.onClick()
                 }}
-                hideLabel={action.hideLabel}
                 size={size}
               />
             ))
@@ -115,7 +103,6 @@ export function CardActions({
               e.stopPropagation()
               primaryAction.onClick()
             }}
-            hideLabel={primaryAction.hideLabel}
             size={size}
             data-testid="primary-button"
           />
@@ -127,58 +114,56 @@ export function CardActions({
   return (
     <CardFooter
       className={cn(
+        "flex-col gap-2 sm:flex-row sm:justify-between [&>div]:z-[1]",
         "relative -mx-4 mt-4 border-0 border-t border-solid border-t-f1-border-secondary px-4 pt-4",
         compact && "pt-3"
       )}
     >
-      <ButtonGroup align="end" stackOnMobile className="relative z-[1] w-full">
-        {secondaryActions && (
-          <div className="flex w-full flex-col gap-md sm:w-fit sm:flex-row [&_a]:justify-center sm:[&_a]:justify-start [&_button]:w-full sm:[&_button]:w-fit [&_div]:w-full [&_div]:justify-center sm:[&_div]:w-fit">
-            {Array.isArray(secondaryActions) ? (
-              secondaryActions.map((action, index) => (
-                <F0Button
-                  key={index}
-                  label={action.label}
-                  icon={action.icon}
-                  variant="outline"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    action.onClick()
-                  }}
-                  hideLabel={action.hideLabel || (isDesktop && index > 0)}
-                  size={isDesktop ? (compact ? "sm" : "md") : "lg"}
-                />
-              ))
-            ) : (
-              <F0Link
-                href={secondaryActions.href}
-                target={secondaryActions.target}
-                disabled={secondaryActions.disabled}
-                onClick={(e) => e.stopPropagation()}
-                data-testid="secondary-link"
-              >
-                {secondaryActions.label}
-              </F0Link>
-            )}
-          </div>
-        )}
+      {secondaryActions && (
+        <div className="flex w-full flex-col gap-md sm:flex-row [&_a]:justify-center sm:[&_a]:justify-start [&_button]:w-full sm:[&_button]:w-fit [&_div]:w-full [&_div]:justify-center sm:[&_div]:w-fit">
+          {Array.isArray(secondaryActions) ? (
+            secondaryActions.map((action, index) => (
+              <F0Button
+                key={index}
+                label={action.label}
+                icon={action.icon}
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  action.onClick()
+                }}
+                hideLabel={isDesktop && index > 0}
+                size={isDesktop ? (compact ? "sm" : "md") : "lg"}
+              />
+            ))
+          ) : (
+            <F0Link
+              href={secondaryActions.href}
+              target={secondaryActions.target}
+              disabled={secondaryActions.disabled}
+              onClick={(e) => e.stopPropagation()}
+              data-testid="secondary-link"
+            >
+              {secondaryActions.label}
+            </F0Link>
+          )}
+        </div>
+      )}
 
-        {primaryAction && (
-          <div className="w-full sm:w-fit [&_button]:w-full sm:[&_button]:w-fit [&_div]:w-full [&_div]:justify-center">
-            <F0Button
-              label={primaryAction.label}
-              icon={primaryAction.icon}
-              onClick={(e) => {
-                e.stopPropagation()
-                primaryAction.onClick()
-              }}
-              hideLabel={primaryAction.hideLabel}
-              size={isDesktop ? (compact ? "sm" : "md") : "lg"}
-              data-testid="primary-button"
-            />
-          </div>
-        )}
-      </ButtonGroup>
+      {primaryAction && (
+        <div className="w-full sm:w-fit [&_button]:w-full sm:[&_button]:w-fit [&_div]:w-full [&_div]:justify-center">
+          <F0Button
+            label={primaryAction.label}
+            icon={primaryAction.icon}
+            onClick={(e) => {
+              e.stopPropagation()
+              primaryAction.onClick()
+            }}
+            size={isDesktop ? (compact ? "sm" : "md") : "lg"}
+            data-testid="primary-button"
+          />
+        </div>
+      )}
     </CardFooter>
   )
 
