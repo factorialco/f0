@@ -72,6 +72,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+      issues: write
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -144,3 +145,28 @@ jobs:
           comment-type: api_breaking
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-body: ${{ steps.compare.outputs.body }}
+      - name: Toggle "breaking changes" label
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          HAS_BREAKING: ${{ steps.compare.outputs.has_breaking }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const label = "breaking changes";
+            const breaking = process.env.HAS_BREAKING === "true";
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            if (breaking) {
+              // addLabels creates the label automatically if it doesn't exist yet.
+              await github.rest.issues.addLabels({ owner, repo, issue_number, labels: [label] });
+              core.info(`Added "${label}" label`);
+            } else {
+              try {
+                await github.rest.issues.removeLabel({ owner, repo, issue_number, name: label });
+                core.info(`Removed "${label}" label`);
+              } catch (error) {
+                if (error.status !== 404) throw error;
+                core.info(`Label "${label}" not present; nothing to remove`);
+              }
+            }

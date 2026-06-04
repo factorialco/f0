@@ -4,21 +4,36 @@
  * Snapshots the public TypeScript API of each shipped entry point
  * (`f0`, `experimental`, `ai`) from a set of rolled-up `.d.ts` files, then
  * compares two snapshots (a `--base` directory vs a `--head` directory) and
- * classifies every difference as either:
+ * classifies every difference.
  *
- *   - BREAKING: an export present in base is gone in head (removed / renamed),
- *     or an export present in both has a different resolved type
- *     (changed signature, prop, or type).
- *   - ADDITIVE (safe): an export present in head but not in base.
+ * Classification is **structural and member-level**, so backward-compatible
+ * changes are not flagged:
+ *
+ *   BREAKING
+ *     - an export present in base is gone in head (removed / renamed)
+ *     - a property/parameter was removed or had its type changed
+ *     - a new REQUIRED property/parameter was added
+ *     - an optional property became required
+ *     - the kind or type parameters of an export changed
+ *   SAFE (not flagged)
+ *     - a brand-new export (new component/type)
+ *     - a new OPTIONAL property/parameter
+ *     - a required property became optional (widening)
  *
  * A rename surfaces, correctly, as a BREAKING removal of the old name plus a
  * safe addition of the new name.
  *
  * Both sides are analyzed by the *same* TypeScript in a single process, so the
- * comparison is deterministic and immune to compiler-version drift. The type
- * fingerprint is built by resolving structural types through the checker, which
- * normalizes away api-extractor's rollup noise (the `F0TextInputProps_2`
- * suffixes / dangling `./types` imports) instead of diffing raw `.d.ts` text.
+ * comparison is deterministic and immune to compiler-version drift. Structural
+ * types are resolved through the checker, which normalizes away api-extractor's
+ * rollup noise (the `F0TextInputProps_2` suffixes / dangling `./types` imports)
+ * instead of diffing raw `.d.ts` text.
+ *
+ * Known simplification: leaf types (unions, primitives, external types) are
+ * compared by their normalized string, so a *widening* of a leaf type (e.g. a
+ * prop `string` → `string | number`, which is safe for an input) is reported as
+ * breaking. Object/parameter shape changes — the common case — are classified
+ * precisely.
  *
  * Usage:
  *   tsx .scripts/check-api-surface.ts --base <dir> --head <dir> [--json]
@@ -37,48 +52,72 @@ import consola from "consola"
 import ts from "typescript"
 
 /** Public entry points shipped in `dist/`. */
-const ENTRIES = ["f0", "experimental", "ai"] as const
-type Entry = (typeof ENTRIES)[number]
+export const ENTRIES = ["f0", "experimental", "ai"] as const
+export type Entry = (typeof ENTRIES)[number]
 
-/** How deep to expand F0-owned object/signature types before falling back to
- * a by-name reference. Keeps the fingerprint bounded while still catching
- * prop/signature changes one or two levels in. */
-const MAX_DEPTH = 2
+/** How deep to expand object/signature types before treating them as opaque
+ * leaves. Bounds the work while still reaching component props
+ * (export → call signature → props object → member). */
+const MAX_DEPTH = 4
 
-interface ApiSnapshot {
-  /** export name -> normalized type fingerprint */
-  items: Map<string, string>
+/**
+ * A normalized, structural representation of a type used for comparison.
+ *  - `object`: an object/props type, compared member by member.
+ *  - `callable`: a function/component, compared signature by signature.
+ *  - `opaque`: anything else (union, primitive, external type), compared by
+ *    its normalized string.
+ */
+export type ApiItem =
+  | {
+      k: "object"
+      members: Record<
+        string,
+        { optional: boolean; readonly: boolean; type: ApiItem }
+      >
+      index?: string
+    }
+  | {
+      k: "callable"
+      sigs: Array<{
+        params: Array<{ name: string; optional: boolean; type: ApiItem }>
+        ret: ApiItem
+      }>
+    }
+  | { k: "opaque"; text: string }
+
+interface ExportSnapshot {
+  kind: string
+  typeParams: string
+  /** human-readable type, for the PR comment */
+  display: string
+  /** structural representation, for classification */
+  item: ApiItem
 }
 
-interface EntryDiff {
+type EntrySnapshot = Map<string, ExportSnapshot>
+
+export interface EntryDiff {
   entry: Entry
-  /** present in base but missing/changed in head */
   breaking: Array<{
     name: string
     kind: "removed" | "changed"
+    reasons?: string[]
     before: string
     after?: string
   }>
-  /** present in head but not in base */
   added: string[]
-  /** true when the entry could not be analyzed on one side */
   skipped?: "no-base" | "no-head"
 }
 
-function parseArgs(): { base?: string; head?: string; json: boolean } {
-  const args = process.argv.slice(2)
-  const valueOf = (flag: string): string | undefined => {
-    const i = args.indexOf(flag)
-    return i !== -1 && args[i + 1] ? args[i + 1] : undefined
-  }
-  return {
-    base: valueOf("--base"),
-    head: valueOf("--head"),
-    json: args.includes("--json"),
-  }
+export interface AnalysisResult {
+  hasBreaking: boolean
+  breakingTotal: number
+  addedTotal: number
+  entries: EntryDiff[]
 }
 
-/** Resolve `<dir>/<entry>.d.ts` if it exists. */
+/* ----------------------------- snapshotting ----------------------------- */
+
 function entryDtsPath(dir: string, entry: Entry): string | undefined {
   const p = path.resolve(dir, `${entry}.d.ts`)
   return existsSync(p) ? p : undefined
@@ -86,11 +125,12 @@ function entryDtsPath(dir: string, entry: Entry): string | undefined {
 
 /**
  * Build a snapshot of the public exports of a single rolled `.d.ts` file.
- *
- * Returns `undefined` when the file does not exist (e.g. the base build did not
- * produce it), which the caller treats as "no baseline".
+ * Returns `undefined` when the file does not exist (treated as "no baseline").
  */
-function snapshotEntry(dir: string, entry: Entry): ApiSnapshot | undefined {
+export function snapshotEntry(
+  dir: string,
+  entry: Entry
+): EntrySnapshot | undefined {
   const dtsPath = entryDtsPath(dir, entry)
   if (!dtsPath) return undefined
 
@@ -113,66 +153,55 @@ function snapshotEntry(dir: string, entry: Entry): ApiSnapshot | undefined {
 
   const checker = program.getTypeChecker()
   const sourceFile = program.getSourceFile(dtsPath)
-  if (!sourceFile) return { items: new Map() }
+  if (!sourceFile) return new Map()
 
   const moduleSymbol = checker.getSymbolAtLocation(sourceFile)
-  if (!moduleSymbol) return { items: new Map() }
+  if (!moduleSymbol) return new Map()
 
-  const items = new Map<string, string>()
+  const snapshot: EntrySnapshot = new Map()
   for (const exp of checker.getExportsOfModule(moduleSymbol)) {
     const name = exp.getName()
     if (name === "default") continue
-    items.set(name, fingerprintSymbol(exp, checker, sourceFile, dirAbsolute))
+    snapshot.set(name, snapshotExport(exp, checker, sourceFile, dirAbsolute))
   }
-  return { items }
+  return snapshot
 }
 
-/** Whether a type is declared inside the analyzed dist directory (an F0-owned
- * type, worth expanding) versus an external type (React/DOM/lib, referenced by
- * name to keep the fingerprint stable and bounded). */
-function isOwned(sym: ts.Symbol | undefined, dirAbsolute: string): boolean {
-  const decls = sym?.getDeclarations()
-  if (!decls || decls.length === 0) return false
-  return decls.some((d) =>
-    d.getSourceFile().fileName.startsWith(dirAbsolute + path.sep)
-  )
-}
-
-function fingerprintSymbol(
+function snapshotExport(
   symbol: ts.Symbol,
   checker: ts.TypeChecker,
   location: ts.Node,
   dirAbsolute: string
-): string {
-  // Follow re-export aliases to the real declaration.
+): ExportSnapshot {
   let sym = symbol
   if (sym.flags & ts.SymbolFlags.Alias) {
     try {
       sym = checker.getAliasedSymbol(sym)
     } catch {
-      // keep original on failure
+      // keep original
     }
   }
 
   const kind = symbolKind(sym)
   const typeParams = typeParameterText(sym)
-
-  // Type-only symbols use the declared type; value symbols use the type of the
-  // value at the export location.
   const isTypeOnly =
     !!(sym.flags & ts.SymbolFlags.Type) && !(sym.flags & ts.SymbolFlags.Value)
 
-  let body: string
+  let item: ApiItem = { k: "opaque", text: "<unresolved>" }
+  let display = "<unresolved>"
   try {
     const type = isTypeOnly
       ? checker.getDeclaredTypeOfSymbol(sym)
       : checker.getTypeOfSymbolAtLocation(sym, location)
-    body = serializeType(type, checker, dirAbsolute, MAX_DEPTH, new Set())
+    item = buildApiItem(type, checker, dirAbsolute, MAX_DEPTH, new Set())
+    display = normalize(
+      checker.typeToString(type, undefined, TYPE_TO_STRING_FLAGS)
+    )
   } catch (err) {
-    body = `<unresolved: ${(err as Error).message}>`
+    display = `<unresolved: ${(err as Error).message}>`
   }
 
-  return normalizeFingerprint(`${kind} ${typeParams}${body}`)
+  return { kind, typeParams, display, item }
 }
 
 function symbolKind(sym: ts.Symbol): string {
@@ -200,103 +229,131 @@ function typeParameterText(sym: ts.Symbol): string {
     return ""
   }
   if (tps.length === 0) return ""
-  return `<${tps.map((t) => t.getText()).join(", ")}> `
+  return `<${tps.map((t) => t.getText()).join(", ")}>`
 }
 
 const TYPE_TO_STRING_FLAGS =
   ts.TypeFormatFlags.NoTruncation | ts.TypeFormatFlags.WriteArrayAsGenericType
 
 /**
- * Make a fingerprint comparable across the two analyzed directories:
+ * Normalize a type string so it is comparable across the two analyzed dirs:
  *  - strip `import("<abs path>").` qualifiers — the path is base-dir vs
  *    head-dir specific and would make every cross-referenced type look changed;
  *  - strip per-program unique-id suffixes on computed/internal names
  *    (e.g. `__@iterator@968`), which differ run-to-run.
  */
-function normalizeFingerprint(s: string): string {
+export function normalize(s: string): string {
   return s.replace(/import\("[^"]*"\)\./g, "").replace(/@\d+/g, "")
 }
 
-/**
- * Produce a normalized structural string for a type. F0-owned object/union and
- * signature types are expanded up to `depth` levels so prop/signature changes
- * are visible; external and too-deep types fall back to `typeToString` (a
- * by-name reference), which is stable.
- */
-function serializeType(
+/** A type declared only outside the analyzed dir (React/DOM/lib) — referenced
+ * by name rather than expanded, to keep snapshots stable and bounded.
+ * Anonymous types (no symbol) are treated as local and expanded. */
+function isExternal(type: ts.Type, dirAbsolute: string): boolean {
+  const sym = type.aliasSymbol ?? type.getSymbol()
+  const decls = sym?.getDeclarations()
+  if (!decls || decls.length === 0) return false
+  return decls.every((d) => {
+    const f = d.getSourceFile().fileName
+    return f.includes("node_modules") || !f.startsWith(dirAbsolute + path.sep)
+  })
+}
+
+function buildApiItem(
   type: ts.Type,
   checker: ts.TypeChecker,
   dirAbsolute: string,
   depth: number,
   visited: Set<ts.Type>
-): string {
-  const plain = () =>
-    checker.typeToString(type, undefined, TYPE_TO_STRING_FLAGS)
+): ApiItem {
+  const opaque = (): ApiItem => ({
+    k: "opaque",
+    text: normalize(
+      checker.typeToString(type, undefined, TYPE_TO_STRING_FLAGS)
+    ),
+  })
 
-  if (depth <= 0 || visited.has(type)) return plain()
-
-  // Unions / intersections: serialize each constituent (sorted for stability).
-  if (type.isUnion() || type.isIntersection()) {
-    const sep = type.isUnion() ? " | " : " & "
-    const parts = (type as ts.UnionOrIntersectionType).types
-      .map((t) => serializeType(t, checker, dirAbsolute, depth, visited))
-      .sort()
-    return parts.join(sep)
-  }
+  if (depth <= 0 || visited.has(type)) return opaque()
+  // Unions/intersections are compared as a whole (leaf), not member-expanded.
+  if (type.isUnion() || type.isIntersection()) return opaque()
 
   const callSigs = type.getCallSignatures()
   const ctorSigs = type.getConstructSignatures()
-  if (callSigs.length > 0 || ctorSigs.length > 0) {
+  const sigs = [...callSigs, ...ctorSigs]
+  if (sigs.length > 0) {
     const next = new Set(visited).add(type)
-    const sigStr = (s: ts.Signature, isCtor: boolean) =>
-      (isCtor ? "new " : "") +
-      `(${s
-        .getParameters()
-        .map((p) => {
-          const optional = !!(p.flags & ts.SymbolFlags.Optional)
-          const pt = checker.getTypeOfSymbolAtLocation(
-            p,
-            p.valueDeclaration ?? p.declarations![0]
-          )
-          return `${p.getName()}${optional ? "?" : ""}: ${serializeType(pt, checker, dirAbsolute, depth - 1, next)}`
-        })
-        .join(
-          ", "
-        )}) => ${serializeType(s.getReturnType(), checker, dirAbsolute, depth - 1, next)}`
-    return [
-      ...callSigs.map((s) => sigStr(s, false)),
-      ...ctorSigs.map((s) => sigStr(s, true)),
-    ].join(" & ")
+    return {
+      k: "callable",
+      sigs: sigs.map((s) => ({
+        params: s.getParameters().map((p) => {
+          const decl = p.valueDeclaration ?? p.declarations?.[0]
+          const pt = decl
+            ? checker.getTypeOfSymbolAtLocation(p, decl)
+            : checker.getDeclaredTypeOfSymbol(p)
+          // A parameter is optional via `?`, a default value, or rest `...`;
+          // parameter symbols do not carry SymbolFlags.Optional.
+          const pdecl = ts.isParameter(decl as ts.Node)
+            ? (decl as ts.ParameterDeclaration)
+            : undefined
+          const optional =
+            !!pdecl &&
+            (!!pdecl.questionToken ||
+              !!pdecl.initializer ||
+              !!pdecl.dotDotDotToken)
+          return {
+            name: p.getName(),
+            optional,
+            type: buildApiItem(pt, checker, dirAbsolute, depth - 1, next),
+          }
+        }),
+        ret: buildApiItem(
+          s.getReturnType(),
+          checker,
+          dirAbsolute,
+          depth - 1,
+          next
+        ),
+      })),
+    }
   }
 
-  // Only expand object types we own; external types (React/DOM) stay by-name.
-  const symbol = type.aliasSymbol ?? type.getSymbol()
+  // Only expand genuine object types (interfaces, type literals, anonymous
+  // object shapes). Primitives (string/number/…) have no Object flag, so they
+  // stay opaque instead of leaking their prototype methods (e.g. the
+  // program-specific `__@iterator@N`). Arrays/built-ins are Object types but
+  // are caught by `isExternal` (declared in lib/node_modules) and stay opaque.
+  const isObjectType = !!(type.flags & ts.TypeFlags.Object)
   const props = type.getProperties()
-  const isExpandableObject =
-    props.length > 0 || checker.getIndexInfosOfType(type).length > 0
-  if (isExpandableObject && isOwned(symbol, dirAbsolute)) {
+  const indexInfos = checker.getIndexInfosOfType(type)
+  const isObjectLike = props.length > 0 || indexInfos.length > 0
+  if (isObjectType && isObjectLike && !isExternal(type, dirAbsolute)) {
     const next = new Set(visited).add(type)
-    const members = props
-      .map((p) => {
-        const optional = !!(p.flags & ts.SymbolFlags.Optional)
-        const readonly = isReadonlySymbol(p)
-        const decl = p.valueDeclaration ?? p.declarations?.[0]
-        const pt = decl
-          ? checker.getTypeOfSymbolAtLocation(p, decl)
-          : checker.getDeclaredTypeOfSymbol(p)
-        return `${readonly ? "readonly " : ""}${p.getName()}${optional ? "?" : ""}: ${serializeType(pt, checker, dirAbsolute, depth - 1, next)}`
-      })
-      .sort()
-    const indexInfos = checker
-      .getIndexInfosOfType(type)
+    const members: Record<
+      string,
+      { optional: boolean; readonly: boolean; type: ApiItem }
+    > = {}
+    for (const p of props) {
+      const decl = p.valueDeclaration ?? p.declarations?.[0]
+      const pt = decl
+        ? checker.getTypeOfSymbolAtLocation(p, decl)
+        : checker.getDeclaredTypeOfSymbol(p)
+      members[normalize(p.getName())] = {
+        optional: !!(p.flags & ts.SymbolFlags.Optional),
+        readonly: isReadonlySymbol(p),
+        type: buildApiItem(pt, checker, dirAbsolute, depth - 1, next),
+      }
+    }
+    const index = indexInfos
       .map(
         (info) =>
-          `[index: ${checker.typeToString(info.keyType)}]: ${serializeType(info.type, checker, dirAbsolute, depth - 1, next)}`
+          `[${checker.typeToString(info.keyType)}]: ${normalize(checker.typeToString(info.type))}`
       )
-    return `{ ${[...members, ...indexInfos].join("; ")} }`
+      .sort()
+      .join("; ")
+    return { k: "object", members, index: index || undefined }
   }
 
-  return plain()
+  return opaque()
 }
 
 function isReadonlySymbol(sym: ts.Symbol): boolean {
@@ -309,47 +366,156 @@ function isReadonlySymbol(sym: ts.Symbol): boolean {
     )
 }
 
-/** Diff two snapshots for a single entry. */
-function diffEntry(
-  entry: Entry,
-  base: ApiSnapshot | undefined,
-  head: ApiSnapshot | undefined
-): EntryDiff {
-  const diff: EntryDiff = { entry, breaking: [], added: [] }
-  if (!base) {
-    diff.skipped = "no-base"
-    return diff
-  }
-  if (!head) {
-    diff.skipped = "no-head"
-    return diff
-  }
+/* ----------------------------- classification ---------------------------- */
 
-  for (const [name, beforeFp] of base.items) {
-    if (!head.items.has(name)) {
-      diff.breaking.push({ name, kind: "removed", before: beforeFp })
-    } else {
-      const afterFp = head.items.get(name)!
-      if (afterFp !== beforeFp) {
-        diff.breaking.push({
-          name,
-          kind: "changed",
-          before: beforeFp,
-          after: afterFp,
-        })
-      }
-    }
+/** Compare two exports; returns the list of breaking reasons (empty = safe). */
+export function classifyExport(
+  before: ExportSnapshot,
+  after: ExportSnapshot
+): string[] {
+  if (before.kind !== after.kind) {
+    return [`kind changed (${before.kind} → ${after.kind})`]
   }
-  for (const name of head.items.keys()) {
-    if (!base.items.has(name)) diff.added.push(name)
+  if (before.typeParams !== after.typeParams) {
+    return [
+      `type parameters changed (${before.typeParams} → ${after.typeParams})`,
+    ]
   }
-  diff.breaking.sort((a, b) => a.name.localeCompare(b.name))
-  diff.added.sort()
-  return diff
+  return classifyItem(before.item, after.item, "")
 }
 
-/** Truncate a long type fingerprint for display inside the PR comment. */
-function clip(s: string, max = 600): string {
+function at(path: string, name: string): string {
+  return path ? `${path}.${name}` : name
+}
+
+/**
+ * Structural breaking-change comparison. Variance is modelled the way a
+ * consumer experiences component props: adding an optional member or relaxing
+ * a required member to optional is safe; removing a member, retyping it, adding
+ * a required member, or tightening optional→required is breaking.
+ */
+function classifyItem(before: ApiItem, after: ApiItem, path: string): string[] {
+  if (before.k !== after.k) {
+    return [`${path || "type"} changed shape (${before.k} → ${after.k})`]
+  }
+
+  if (before.k === "opaque" && after.k === "opaque") {
+    return before.text !== after.text
+      ? [`${path || "type"} changed: \`${before.text}\` → \`${after.text}\``]
+      : []
+  }
+
+  if (before.k === "object" && after.k === "object") {
+    const reasons: string[] = []
+    for (const name of Object.keys(before.members)) {
+      const b = before.members[name]
+      const a = after.members[name]
+      if (!a) {
+        reasons.push(`\`${at(path, name)}\` was removed`)
+        continue
+      }
+      if (b.optional && !a.optional) {
+        reasons.push(`\`${at(path, name)}\` became required`)
+      }
+      reasons.push(...classifyItem(b.type, a.type, at(path, name)))
+    }
+    for (const name of Object.keys(after.members)) {
+      if (!before.members[name] && !after.members[name].optional) {
+        reasons.push(`required \`${at(path, name)}\` was added`)
+      }
+    }
+    if ((before.index ?? "") !== (after.index ?? "")) {
+      reasons.push(`${path || "type"} index signature changed`)
+    }
+    return reasons
+  }
+
+  if (before.k === "callable" && after.k === "callable") {
+    // Compare the first signature (components/most exports have one). A change
+    // in overload count is itself breaking.
+    if (before.sigs.length !== after.sigs.length) {
+      return [`${path || "type"} call signatures changed`]
+    }
+    const reasons: string[] = []
+    const bs = before.sigs[0]
+    const as = after.sigs[0]
+    const max = Math.max(bs.params.length, as.params.length)
+    for (let i = 0; i < max; i++) {
+      const bp = bs.params[i]
+      const ap = as.params[i]
+      const label = `param \`${(ap ?? bp).name}\``
+      if (bp && !ap) {
+        reasons.push(`${label} was removed`)
+      } else if (!bp && ap) {
+        if (!ap.optional) reasons.push(`required ${label} was added`)
+      } else {
+        if (bp.optional && !ap.optional)
+          reasons.push(`${label} became required`)
+        reasons.push(...classifyItem(bp.type, ap.type, at(path, ap.name)))
+      }
+    }
+    reasons.push(...classifyItem(bs.ret, as.ret, at(path, "return")))
+    return reasons
+  }
+
+  return []
+}
+
+/* -------------------------------- diffing -------------------------------- */
+
+function diffEntry(
+  entry: Entry,
+  base: EntrySnapshot | undefined,
+  head: EntrySnapshot | undefined
+): EntryDiff {
+  if (!base) return { entry, breaking: [], added: [], skipped: "no-base" }
+  if (!head) return { entry, breaking: [], added: [], skipped: "no-head" }
+
+  const breaking: EntryDiff["breaking"] = []
+  const added: string[] = []
+
+  for (const [name, b] of base) {
+    const h = head.get(name)
+    if (!h) {
+      breaking.push({ name, kind: "removed", before: b.display })
+      continue
+    }
+    const reasons = classifyExport(b, h)
+    if (reasons.length > 0) {
+      breaking.push({
+        name,
+        kind: "changed",
+        reasons,
+        before: b.display,
+        after: h.display,
+      })
+    }
+  }
+  for (const name of head.keys()) {
+    if (!base.has(name)) added.push(name)
+  }
+
+  breaking.sort((a, b) => a.name.localeCompare(b.name))
+  added.sort()
+  return { entry, breaking, added }
+}
+
+export function analyze(baseDir: string, headDir: string): AnalysisResult {
+  const entries = ENTRIES.map((entry) =>
+    diffEntry(
+      entry,
+      snapshotEntry(baseDir, entry),
+      snapshotEntry(headDir, entry)
+    )
+  )
+  const breakingTotal = entries.reduce((n, d) => n + d.breaking.length, 0)
+  const addedTotal = entries.reduce((n, d) => n + d.added.length, 0)
+  return { hasBreaking: breakingTotal > 0, breakingTotal, addedTotal, entries }
+}
+
+/* ------------------------------- reporting ------------------------------- */
+
+function clip(s: string, max = 400): string {
   return s.length > max ? `${s.slice(0, max)} …` : s
 }
 
@@ -357,32 +523,31 @@ function clip(s: string, max = 600): string {
  * Render the PR comment body. Posted whether or not breaking changes exist, so
  * a prior "⚠️ breaking" comment is cleared to "✅" once resolved.
  */
-function buildCommentMarkdown(diffs: EntryDiff[]): string {
-  const breakingTotal = diffs.reduce((n, d) => n + d.breaking.length, 0)
-  const addedTotal = diffs.reduce((n, d) => n + d.added.length, 0)
+export function buildCommentMarkdown(result: AnalysisResult): string {
+  const { hasBreaking, breakingTotal, addedTotal, entries } = result
   const lines: string[] = []
 
-  if (breakingTotal > 0) {
+  if (hasBreaking) {
     lines.push(`## ⚠️ Breaking public API changes (${breakingTotal})`)
     lines.push("")
     lines.push(
-      "These public exports were **renamed/removed or had their type changed** compared to `main`. " +
-        "Renaming components or changing existing props/types breaks consumers. " +
-        "If this is intentional, call it out in the PR description (and use a `feat!:`/`BREAKING CHANGE` commit so the release is a major bump)."
+      "These public exports were **renamed/removed, or had a property/parameter removed, retyped, or newly required** compared to `main` — that breaks consumers. " +
+        "Adding new exports or new *optional* props is always safe and is not flagged. " +
+        "If a breaking change is intentional, note it in the PR description and use a `feat!:`/`BREAKING CHANGE` commit so the release is a major bump."
     )
   } else {
     lines.push("## ✅ No breaking public API changes")
     lines.push("")
     lines.push(
-      "No public exports were renamed, removed, or retyped compared to `main`."
+      "No public exports were removed, renamed, or had existing props/types changed in a breaking way compared to `main`."
     )
   }
   lines.push("")
   lines.push(
-    "_Comparing `f0`, `experimental` and `ai` against `main`. Adding new components/types is always safe. This check is non-blocking._"
+    "_Comparing `f0`, `experimental` and `ai` against `main`. Adding components, types, or optional props is safe. This check is non-blocking._"
   )
 
-  for (const d of diffs) {
+  for (const d of entries) {
     if (d.skipped || d.breaking.length === 0) continue
     lines.push("")
     lines.push(`### \`${d.entry}\``)
@@ -390,7 +555,10 @@ function buildCommentMarkdown(diffs: EntryDiff[]): string {
       if (b.kind === "removed") {
         lines.push(`- ❌ \`${b.name}\` — **removed** (renamed or deleted)`)
       } else {
-        lines.push(`- ✏️ \`${b.name}\` — **type changed**`)
+        lines.push(`- ✏️ \`${b.name}\` — **breaking change**`)
+        for (const reason of b.reasons ?? []) {
+          lines.push(`  - ${reason}`)
+        }
         lines.push("")
         lines.push("  <details><summary>before → after</summary>")
         lines.push("")
@@ -411,7 +579,7 @@ function buildCommentMarkdown(diffs: EntryDiff[]): string {
       `<details><summary>➕ Additive changes (safe) — ${addedTotal}</summary>`
     )
     lines.push("")
-    for (const d of diffs) {
+    for (const d of entries) {
       if (d.added.length > 0) {
         lines.push(
           `- \`${d.entry}\`: ${d.added.map((n) => `\`${n}\``).join(", ")}`
@@ -421,7 +589,7 @@ function buildCommentMarkdown(diffs: EntryDiff[]): string {
     lines.push("</details>")
   }
 
-  const skipped = diffs.filter((d) => d.skipped)
+  const skipped = entries.filter((d) => d.skipped)
   if (skipped.length > 0) {
     lines.push("")
     lines.push(
@@ -430,6 +598,21 @@ function buildCommentMarkdown(diffs: EntryDiff[]): string {
   }
 
   return lines.join("\n")
+}
+
+/* --------------------------------- main ---------------------------------- */
+
+function parseArgs(): { base?: string; head?: string; json: boolean } {
+  const args = process.argv.slice(2)
+  const valueOf = (flag: string): string | undefined => {
+    const i = args.indexOf(flag)
+    return i !== -1 && args[i + 1] ? args[i + 1] : undefined
+  }
+  return {
+    base: valueOf("--base"),
+    head: valueOf("--head"),
+    json: args.includes("--json"),
+  }
 }
 
 function main(): void {
@@ -441,26 +624,13 @@ function main(): void {
     process.exit(2)
   }
 
-  const diffs = ENTRIES.map((entry) =>
-    diffEntry(entry, snapshotEntry(base, entry), snapshotEntry(head, entry))
-  )
-
-  const breakingTotal = diffs.reduce((n, d) => n + d.breaking.length, 0)
-  const addedTotal = diffs.reduce((n, d) => n + d.added.length, 0)
-  const hasBreaking = breakingTotal > 0
+  const result = analyze(base, head)
 
   if (json) {
-    // Machine-readable output must go to stdout (the CI workflow reads it);
-    // use process.stdout.write rather than console.log to satisfy oxlint.
+    // Machine-readable output to stdout (the CI workflow reads it).
     process.stdout.write(
       JSON.stringify(
-        {
-          hasBreaking,
-          breakingTotal,
-          addedTotal,
-          entries: diffs,
-          commentMarkdown: buildCommentMarkdown(diffs),
-        },
+        { ...result, commentMarkdown: buildCommentMarkdown(result) },
         null,
         2
       ) + "\n"
@@ -468,7 +638,7 @@ function main(): void {
     process.exit(0)
   }
 
-  for (const d of diffs) {
+  for (const d of result.entries) {
     if (d.skipped) {
       consola.warn(`[${d.entry}] skipped (${d.skipped})`)
       continue
@@ -485,23 +655,25 @@ function main(): void {
         consola.log(`  - removed: ${b.name}`)
       } else {
         consola.log(`  - changed: ${b.name}`)
-        consola.log(`      before: ${b.before}`)
-        consola.log(`      after:  ${b.after}`)
+        for (const reason of b.reasons ?? []) consola.log(`      • ${reason}`)
       }
     }
   }
   consola.log("")
-  if (hasBreaking) {
+  if (result.hasBreaking) {
     consola.error(
-      `${breakingTotal} breaking public API change(s) across ${ENTRIES.length} entries (${addedTotal} additive).`
+      `${result.breakingTotal} breaking public API change(s) (${result.addedTotal} additive).`
     )
   } else {
     consola.success(
-      `No breaking public API changes (${addedTotal} additive change(s)).`
+      `No breaking public API changes (${result.addedTotal} additive change(s)).`
     )
   }
   // Non-blocking: always exit 0.
   process.exit(0)
 }
 
-main()
+// Run as a CLI only when invoked directly (not when imported by tests).
+if (process.argv[1] && /check-api-surface\.(ts|js)$/.test(process.argv[1])) {
+  main()
+}
