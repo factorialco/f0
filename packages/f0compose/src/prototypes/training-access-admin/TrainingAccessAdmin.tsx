@@ -367,7 +367,6 @@ export default function TrainingAccessAdmin() {
         .toLowerCase()
         .includes(term)
     })
-    .slice(0, 12)
 
   const handlePersonSearchChange = (value: string | undefined) => {
     setPersonSearch(value ?? "")
@@ -386,6 +385,17 @@ export default function TrainingAccessAdmin() {
 
   const handleSelectedEmployeeRemove = (employeeId: string) => {
     setSelectedEmployeeIds((current) => current.filter((id) => id !== employeeId))
+  }
+
+  // Bulk add/remove every employee matching the current filter+search, so the
+  // admin can grant a whole team/department at once instead of one by one.
+  const handleSelectAllCandidates = (ids: string[]) => {
+    setSelectedEmployeeIds((current) => {
+      const allSelected = ids.length > 0 && ids.every((id) => current.includes(id))
+      return allSelected
+        ? current.filter((id) => !ids.includes(id))
+        : Array.from(new Set([...current, ...ids]))
+    })
   }
 
   const handlePeopleFilterToggle = (filterKey: PeopleFilterKey, value: string) => {
@@ -630,6 +640,7 @@ export default function TrainingAccessAdmin() {
         onPeopleFiltersClear={handlePeopleFiltersClear}
         onSelectedEmployeeRemove={handleSelectedEmployeeRemove}
         onSelectedEmployeeChange={handleSelectedEmployeeChange}
+        onSelectAll={handleSelectAllCandidates}
         onSelectedRoleChange={setSelectedRole}
       />
 
@@ -679,6 +690,7 @@ function ShareTrainingDialog({
   onPeopleFiltersClear,
   onSelectedEmployeeRemove,
   onSelectedEmployeeChange,
+  onSelectAll,
   onSelectedRoleChange,
 }: {
   isOpen: boolean
@@ -703,6 +715,7 @@ function ShareTrainingDialog({
   onPeopleFiltersClear: () => void
   onSelectedEmployeeRemove: (employeeId: string) => void
   onSelectedEmployeeChange: (employeeId: string) => void
+  onSelectAll: (ids: string[]) => void
   onSelectedRoleChange: (role: EditableRole) => void
 }) {
   const searchAreaRef = useRef<HTMLDivElement | null>(null)
@@ -756,6 +769,7 @@ function ShareTrainingDialog({
                   onSelect={(employeeId) => {
                     onSelectedEmployeeChange(employeeId)
                   }}
+                  onSelectAll={onSelectAll}
                   onToggleFilter={(filterKey, value) => {
                     onPeopleFilterToggle(filterKey, value)
                     onPeopleFiltersOpenChange(false)
@@ -885,6 +899,7 @@ function PeopleSelectorPopover({
   showFilters,
   selectedEmployeeIds,
   onSelect,
+  onSelectAll,
   onToggleFilter,
   onClearFilters,
 }: {
@@ -893,10 +908,15 @@ function PeopleSelectorPopover({
   showFilters: boolean
   selectedEmployeeIds: string[]
   onSelect: (employeeId: string) => void
+  onSelectAll: (ids: string[]) => void
   onToggleFilter: (filterKey: PeopleFilterKey, value: string) => void
   onClearFilters: () => void
 }) {
   const selectedCount = activeFiltersCount(filters)
+  const candidateIds = candidates.map((candidate) => candidate.value)
+  const allCandidatesSelected =
+    candidateIds.length > 0 &&
+    candidateIds.every((id) => selectedEmployeeIds.includes(id))
   const [activeFilterKey, setActiveFilterKey] = useState<PeopleFilterKey>("workplace")
   const activeFilter = peopleFilterConfigs.find((config) => config.key === activeFilterKey)
 
@@ -910,6 +930,16 @@ function PeopleSelectorPopover({
         />
         {showFilters && selectedCount > 0 && (
           <F0Button label="Clear" variant="neutral" size="sm" onClick={onClearFilters} />
+        )}
+        {!showFilters && candidateIds.length > 0 && (
+          <F0Button
+            label={
+              allCandidatesSelected ? "Deselect all" : `Select all (${candidateIds.length})`
+            }
+            variant="neutral"
+            size="sm"
+            onClick={() => onSelectAll(candidateIds)}
+          />
         )}
       </div>
       {showFilters ? (
