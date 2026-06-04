@@ -220,6 +220,10 @@ export function ReadOnlyClassDetail({
   const trainingBudget =
     training.totalCost > 0 ? currencyFmt.format(training.totalCost) : null
 
+  // Viewer ("Can view") hides operational CTAs entirely; editor keeps them
+  // visible-but-disabled.
+  const hideAdminActions = access.label === "Can view"
+
   return (
     <Page
       header={
@@ -283,19 +287,41 @@ export function ReadOnlyClassDetail({
       }
     >
       <PageContent>
-        {activeTab === "sessions" && <ReadOnlySessionsTab klass={klass} />}
-        {activeTab === "participants" && <ReadOnlyClassParticipantsTab klass={klass} />}
-        {activeTab === "materials" && <ReadOnlyClassMaterialsTab training={training} />}
-        {activeTab === "documents" && (
-          <ReadOnlyClassDocumentsTab training={training} klass={klass} />
+        {activeTab === "sessions" && (
+          <ReadOnlySessionsTab klass={klass} hideActions={hideAdminActions} />
         )}
-        {activeTab === "costs" && <ReadOnlyClassCostsTab training={training} klass={klass} />}
+        {activeTab === "participants" && (
+          <ReadOnlyClassParticipantsTab klass={klass} hideActions={hideAdminActions} />
+        )}
+        {activeTab === "materials" && (
+          <ReadOnlyClassMaterialsTab training={training} hideActions={hideAdminActions} />
+        )}
+        {activeTab === "documents" && (
+          <ReadOnlyClassDocumentsTab
+            training={training}
+            klass={klass}
+            hideActions={hideAdminActions}
+          />
+        )}
+        {activeTab === "costs" && (
+          <ReadOnlyClassCostsTab
+            training={training}
+            klass={klass}
+            hideActions={hideAdminActions}
+          />
+        )}
       </PageContent>
     </Page>
   )
 }
 
-function ReadOnlySessionsTab({ klass }: { klass: TrainingClass }) {
+function ReadOnlySessionsTab({
+  klass,
+  hideActions,
+}: {
+  klass: TrainingClass
+  hideActions: boolean
+}) {
   const source = useDataCollectionSource<TrainingSession>(
     {
       search: { enabled: true, sync: false },
@@ -339,14 +365,18 @@ function ReadOnlySessionsTab({ klass }: { klass: TrainingClass }) {
           return { records: sorted, totalCount: sorted.length }
         },
       },
-      primaryActions: () => ({
-        label: "New session",
-        icon: Add,
-        disabled: true,
-        description: "Only admins can create sessions.",
-      }),
+      ...(hideActions
+        ? {}
+        : {
+            primaryActions: () => ({
+              label: "New session",
+              icon: Add,
+              disabled: true,
+              description: "Only admins can create sessions.",
+            }),
+          }),
     },
-    [klass.id]
+    [klass.id, hideActions]
   )
 
   return (
@@ -424,7 +454,13 @@ type ParticipantRow = {
   totalModules: number
 }
 
-function ReadOnlyClassParticipantsTab({ klass }: { klass: TrainingClass }) {
+function ReadOnlyClassParticipantsTab({
+  klass,
+  hideActions,
+}: {
+  klass: TrainingClass
+  hideActions: boolean
+}) {
   const rows = useClassParticipantRows(klass)
   const source = useDataCollectionSource<ParticipantRow>(
     {
@@ -467,14 +503,18 @@ function ReadOnlyClassParticipantsTab({ klass }: { klass: TrainingClass }) {
           return { records: filtered, totalCount: filtered.length }
         },
       },
-      primaryActions: () => ({
-        label: "Add participants",
-        icon: Add,
-        disabled: true,
-        description: "Only admins can manage participants.",
-      }),
+      ...(hideActions
+        ? {}
+        : {
+            primaryActions: () => ({
+              label: "Add participants",
+              icon: Add,
+              disabled: true,
+              description: "Only admins can manage participants.",
+            }),
+          }),
     },
-    [rows]
+    [rows, hideActions]
   )
 
   return (
@@ -634,7 +674,13 @@ function getParticipantColumns() {
   ]
 }
 
-function ReadOnlyClassMaterialsTab({ training }: { training: Training }) {
+function ReadOnlyClassMaterialsTab({
+  training,
+  hideActions,
+}: {
+  training: Training
+  hideActions: boolean
+}) {
   const [filter, setFilter] = useState<"all" | "file" | "link">("all")
   const materials = filesForTraining(training.id).map((file) => ({
     ...file,
@@ -656,22 +702,24 @@ function ReadOnlyClassMaterialsTab({ training }: { training: Training }) {
           content="Files and links shared with this group's participants."
         />
       </F0Box>
-      <F0Box display="flex" gap="sm">
-        <F0Button
-          label="Upload"
-          icon={Add}
-          disabled
-          variant="default"
-          size="sm"
-        />
-        <F0Button
-          label="New link"
-          icon={Add}
-          disabled
-          variant="outline"
-          size="sm"
-        />
-      </F0Box>
+      {!hideActions && (
+        <F0Box display="flex" gap="sm">
+          <F0Button
+            label="Upload"
+            icon={Add}
+            disabled
+            variant="default"
+            size="sm"
+          />
+          <F0Button
+            label="New link"
+            icon={Add}
+            disabled
+            variant="outline"
+            size="sm"
+          />
+        </F0Box>
+      )}
       <F0Box display="flex" gap="sm">
         <FilterButton active={filter === "all"} label="All" onClick={() => setFilter("all")} />
         <FilterButton active={filter === "file"} label="Files" onClick={() => setFilter("file")} />
@@ -725,9 +773,11 @@ function FilterButton({
 function ReadOnlyClassDocumentsTab({
   training,
   klass,
+  hideActions,
 }: {
   training: Training
   klass: TrainingClass
+  hideActions: boolean
 }) {
   const participantNames = new Set(
     klass.participants.map((participant) =>
@@ -751,15 +801,17 @@ function ReadOnlyClassDocumentsTab({
           variant="description"
         />
       </F0Box>
-      <F0Box display="flex" gap="sm">
-        <F0Button
-          label="Upload document"
-          icon={Add}
-          disabled
-          variant="default"
-          size="sm"
-        />
-      </F0Box>
+      {!hideActions && (
+        <F0Box display="flex" gap="sm">
+          <F0Button
+            label="Upload document"
+            icon={Add}
+            disabled
+            variant="default"
+            size="sm"
+          />
+        </F0Box>
+      )}
       {certificates.length === 0 ? (
         <F0Alert
           variant="info"
@@ -795,9 +847,11 @@ function ReadOnlyClassDocumentsTab({
 function ReadOnlyClassCostsTab({
   training,
   klass,
+  hideActions,
 }: {
   training: Training
   klass: TrainingClass
+  hideActions: boolean
 }) {
   const splitCount = Math.max(training.classes.length, 1)
   const directCost = klass.cost ?? currencyFmt.format(Math.round(training.totalCost / splitCount))
@@ -814,15 +868,17 @@ function ReadOnlyClassCostsTab({
           content="Shared access can inspect costs but cannot edit budget values."
         />
       </F0Box>
-      <F0Box display="flex" gap="sm">
-        <F0Button
-          label="Add cost"
-          icon={Add}
-          disabled
-          variant="default"
-          size="sm"
-        />
-      </F0Box>
+      {!hideActions && (
+        <F0Box display="flex" gap="sm">
+          <F0Button
+            label="Add cost"
+            icon={Add}
+            disabled
+            variant="default"
+            size="sm"
+          />
+        </F0Box>
+      )}
       <F0Box display="grid" columns="3" gap="md">
         <ReadOnlyCostCard
           title="Direct costs"

@@ -26,7 +26,9 @@ import { applySort } from "@/lib/applySort"
 
 import { FormsModals } from "../trainings/detail/FormsModals"
 
-type TrainingTabProps = { training: Training }
+// `hideActions` is true only for the Viewer ("Can view") experience, which hides
+// every admin/operational CTA outright. Editor keeps them visible-but-disabled.
+type TrainingTabProps = { training: Training; hideActions?: boolean }
 type ReadOnlyClassesTabProps = TrainingTabProps & { baseHref?: string }
 
 type SyllabusItem = {
@@ -254,6 +256,7 @@ export function ReadOnlyContentTab({ training }: TrainingTabProps) {
 export function ReadOnlyClassesTab({
   training,
   baseHref = "/p/training-access-viewer",
+  hideActions,
 }: ReadOnlyClassesTabProps) {
   const startDateOptions = Array.from(
     new Set(
@@ -342,14 +345,18 @@ export function ReadOnlyClassesTab({
           }
         },
       },
-      primaryActions: () => ({
-        label: "New group",
-        icon: Add,
-        disabled: true,
-        description: "Only admins can create training groups.",
-      }),
+      ...(hideActions
+        ? {}
+        : {
+            primaryActions: () => ({
+              label: "New group",
+              icon: Add,
+              disabled: true,
+              description: "Only admins can create training groups.",
+            }),
+          }),
     },
-    [training.id]
+    [training.id, hideActions]
   )
 
   return (
@@ -436,9 +443,9 @@ export function ReadOnlyClassesTab({
   )
 }
 
-export function ReadOnlyParticipantsTab({ training }: TrainingTabProps) {
+export function ReadOnlyParticipantsTab({ training, hideActions }: TrainingTabProps) {
   const rows = participantsForTraining(training.id)
-  const source = useParticipantsSource(training, rows)
+  const source = useParticipantsSource(training, rows, hideActions)
 
   return (
     <OneDataCollection
@@ -460,7 +467,8 @@ export function ReadOnlyParticipantsTab({ training }: TrainingTabProps) {
 
 function useParticipantsSource(
   training: Training,
-  rows: TrainingParticipant[]
+  rows: TrainingParticipant[],
+  hideActions?: boolean
 ) {
   return useDataCollectionSource<TrainingParticipant>(
     {
@@ -529,14 +537,18 @@ function useParticipantsSource(
           }
         },
       },
-      primaryActions: () => ({
-        label: "Add participants",
-        icon: Add,
-        disabled: true,
-        description: "Only admins can manage participants.",
-      }),
+      ...(hideActions
+        ? {}
+        : {
+            primaryActions: () => ({
+              label: "Add participants",
+              icon: Add,
+              disabled: true,
+              description: "Only admins can manage participants.",
+            }),
+          }),
     },
-    [training.id, rows]
+    [training.id, rows, hideActions]
   )
 }
 
@@ -687,12 +699,12 @@ function getKnowledgeTestCell(row: TrainingParticipant) {
   }
 }
 
-export function ReadOnlyAttachmentsTab({ training }: TrainingTabProps) {
+export function ReadOnlyAttachmentsTab({ training, hideActions }: TrainingTabProps) {
   const allFiles = filesForTraining(training.id)
     .slice()
     .sort((first, second) => (first.name > second.name ? 1 : -1))
 
-  const source = useFilesSource(training, allFiles)
+  const source = useFilesSource(training, allFiles, hideActions)
 
   return (
     <F0Box display="flex" flexDirection="column" gap="lg">
@@ -746,7 +758,7 @@ export function ReadOnlyAttachmentsTab({ training }: TrainingTabProps) {
   )
 }
 
-function useFilesSource(training: Training, allFiles: TrainingFile[]) {
+function useFilesSource(training: Training, allFiles: TrainingFile[], hideActions?: boolean) {
   return useDataCollectionSource<TrainingFile>(
     {
       search: { enabled: true, sync: true },
@@ -777,25 +789,29 @@ function useFilesSource(training: Training, allFiles: TrainingFile[]) {
           }
         },
       },
-      primaryActions: () => ({
-        label: "Upload",
-        icon: Add,
-        disabled: true,
-        description: "Only admins can manage materials and documents.",
-      }),
-      secondaryActions: {
-        expanded: 1,
-        actions: () => [
-          {
-            label: "New link",
-            icon: LinkIcon,
-            disabled: true,
-            description: "Only admins can manage materials and documents.",
-          },
-        ],
-      },
+      ...(hideActions
+        ? {}
+        : {
+            primaryActions: () => ({
+              label: "Upload",
+              icon: Add,
+              disabled: true,
+              description: "Only admins can manage materials and documents.",
+            }),
+            secondaryActions: {
+              expanded: 1,
+              actions: () => [
+                {
+                  label: "New link",
+                  icon: LinkIcon,
+                  disabled: true,
+                  description: "Only admins can manage materials and documents.",
+                },
+              ],
+            },
+          }),
     },
-    [training.id, allFiles]
+    [training.id, allFiles, hideActions]
   )
 }
 
@@ -874,10 +890,10 @@ export function ReadOnlyDocumentsTab({ training }: TrainingTabProps) {
   )
 }
 
-export function ReadOnlyFormsTab({ training }: TrainingTabProps) {
+export function ReadOnlyFormsTab({ training, hideActions }: TrainingTabProps) {
   const allForms = buildForms(training)
   const [selectedTemplate, setSelectedTemplate] = useState<SurveyTemplate | null>(null)
-  const source = useFormsSource(training, allForms, setSelectedTemplate)
+  const source = useFormsSource(training, allForms, setSelectedTemplate, hideActions)
 
   return (
     <>
@@ -954,7 +970,8 @@ export function ReadOnlyFormsTab({ training }: TrainingTabProps) {
 function useFormsSource(
   training: Training,
   allForms: FormItem[],
-  setSelectedTemplate: (template: SurveyTemplate) => void
+  setSelectedTemplate: (template: SurveyTemplate) => void,
+  hideActions?: boolean
 ) {
   return useDataCollectionSource<FormItem>(
     {
@@ -1007,19 +1024,23 @@ function useFormsSource(
           }
         },
       },
-      primaryActions: () => ({
-        label: "New survey",
-        icon: Add,
-        disabled: true,
-        description: "Only admins can create surveys.",
-      }),
+      ...(hideActions
+        ? {}
+        : {
+            primaryActions: () => ({
+              label: "New survey",
+              icon: Add,
+              disabled: true,
+              description: "Only admins can create surveys.",
+            }),
+          }),
       itemOnClick: (item) => () => setSelectedTemplate(item.template),
     },
-    [training.id, allForms, setSelectedTemplate]
+    [training.id, allForms, setSelectedTemplate, hideActions]
   )
 }
 
-export function ReadOnlyFundaeTab({ training }: TrainingTabProps) {
+export function ReadOnlyFundaeTab({ training, hideActions }: TrainingTabProps) {
   if (!training.fundaeSubsidized) {
     return (
       <F0Box display="flex" flexDirection="column" gap="lg" padding="xl">
@@ -1042,10 +1063,10 @@ export function ReadOnlyFundaeTab({ training }: TrainingTabProps) {
     )
   }
 
-  return <ReadOnlyFundaeDashboard training={training} />
+  return <ReadOnlyFundaeDashboard training={training} hideActions={hideActions} />
 }
 
-function ReadOnlyFundaeDashboard({ training }: TrainingTabProps) {
+function ReadOnlyFundaeDashboard({ training, hideActions }: TrainingTabProps) {
   const classes = training.classes
   const [selectedClassId, setSelectedClassId] = useState(classes[0]?.id ?? "")
   const selectedClass = classes.find((group) => group.id === selectedClassId)
@@ -1060,22 +1081,24 @@ function ReadOnlyFundaeDashboard({ training }: TrainingTabProps) {
         description="Review the Fundae data prepared for the selected training group."
       />
       <F0Box display="flex" flexDirection="column" gap="2xl">
-        <F0Box display="flex" gap="sm">
-          <F0Button
-            label="Open Fundae portal"
-            icon={LinkIcon}
-            disabled
-            variant="outline"
-            size="sm"
-          />
-          <F0Button
-            label="Export XML"
-            icon={Download}
-            disabled
-            variant="outline"
-            size="sm"
-          />
-        </F0Box>
+        {!hideActions && (
+          <F0Box display="flex" gap="sm">
+            <F0Button
+              label="Open Fundae portal"
+              icon={LinkIcon}
+              disabled
+              variant="outline"
+              size="sm"
+            />
+            <F0Button
+              label="Export XML"
+              icon={Download}
+              disabled
+              variant="outline"
+              size="sm"
+            />
+          </F0Box>
+        )}
         <F0Box maxWidth="md">
           <F0Select
             label="Training group"

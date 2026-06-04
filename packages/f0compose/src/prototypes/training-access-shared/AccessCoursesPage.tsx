@@ -249,7 +249,7 @@ function AccessCoursesList({
                       "checked" in item ? item.checked : false
                     ).length
                 const kind: BulkActionKind = action === "display-catalog"
-                  ? "display-catalog"
+                  ? "show-catalog"
                   : action === "hide-catalog"
                     ? "hide-catalog"
                     : action === "delete"
@@ -565,54 +565,60 @@ function useAccessTrainingsSource(
         },
       },
       itemUrl: (item) => `${baseHref}?training=${item.id}`,
-      primaryActions: () => ({
-        label: "New course",
-        icon: Add,
-        ...(role === "admin"
-          ? { onClick: onAdd }
-          : {
-              disabled: true,
-              description: "Only admins can create courses.",
+      // Viewer ("Can view") hides every admin/operational CTA outright. Editor
+      // keeps them visible-but-disabled with an explanatory message.
+      ...(role === "viewer"
+        ? {}
+        : {
+            primaryActions: () => ({
+              label: "New course",
+              icon: Add,
+              ...(role === "admin"
+                ? { onClick: onAdd }
+                : {
+                    disabled: true,
+                    description: "Only admins can create courses.",
+                  }),
             }),
-      }),
-      secondaryActions: {
-        expanded: 0,
-        actions: () => [
-          {
-            label: "Export",
-            description:
-              role === "admin"
-                ? "Download trainings as CSV"
-                : "Only admins can export training data.",
-            icon: Upload,
-            ...(role === "admin"
-              ? { onClick: () => onAction({ kind: "export" as const }) }
-              : { disabled: true }),
-          },
-          {
-            label: "Import",
-            description:
-              role === "admin"
-                ? "Import trainings from CSV"
-                : "Only admins can import trainings.",
-            icon: Download,
-            ...(role === "admin"
-              ? { onClick: () => onAction({ kind: "import" as const }) }
-              : { disabled: true }),
-          },
-          {
-            label: "Import courses",
-            description:
-              role === "admin"
-                ? "Bulk-import courses from a provider"
-                : "Only admins can import courses.",
-            icon: Download,
-            ...(role === "admin"
-              ? { onClick: () => onAction({ kind: "import-courses" as const }) }
-              : { disabled: true }),
-          },
-        ],
-      },
+            secondaryActions: {
+              expanded: 0,
+              actions: () => [
+                {
+                  label: "Export",
+                  description:
+                    role === "admin"
+                      ? "Download trainings as CSV"
+                      : "Only admins can export training data.",
+                  icon: Upload,
+                  ...(role === "admin"
+                    ? { onClick: () => onAction({ kind: "export" as const }) }
+                    : { disabled: true }),
+                },
+                {
+                  label: "Import",
+                  description:
+                    role === "admin"
+                      ? "Import trainings from CSV"
+                      : "Only admins can import trainings.",
+                  icon: Download,
+                  ...(role === "admin"
+                    ? { onClick: () => onAction({ kind: "import" as const }) }
+                    : { disabled: true }),
+                },
+                {
+                  label: "Import courses",
+                  description:
+                    role === "admin"
+                      ? "Bulk-import courses from a provider"
+                      : "Only admins can import courses.",
+                  icon: Download,
+                  ...(role === "admin"
+                    ? { onClick: () => onAction({ kind: "import-courses" as const }) }
+                    : { disabled: true }),
+                },
+              ],
+            },
+          }),
       ...(role === "admin"
         ? {
             selectable: (item: Training) => item.id,

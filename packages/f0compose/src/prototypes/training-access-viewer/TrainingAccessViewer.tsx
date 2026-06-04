@@ -248,17 +248,17 @@ export default function TrainingAccessViewer() {
           {activeTab === "overview" && <OverviewTab training={training} />}
           {activeTab === "content" && <ReadOnlyContentTab training={training} />}
           {activeTab === "groups" && (
-            <ReadOnlyClassesTab training={training} baseHref={BASE_HREF} />
+            <ReadOnlyClassesTab training={training} baseHref={BASE_HREF} hideActions />
           )}
           {activeTab === "participants" && (
-            <ReadOnlyParticipantsTab training={training} />
+            <ReadOnlyParticipantsTab training={training} hideActions />
           )}
           {activeTab === "attachments" && (
-            <ReadOnlyAttachmentsTab training={training} />
+            <ReadOnlyAttachmentsTab training={training} hideActions />
           )}
           {activeTab === "documents" && <ReadOnlyDocumentsTab training={training} />}
-          {activeTab === "surveys" && <ReadOnlyFormsTab training={training} />}
-          {activeTab === "fundae" && <ReadOnlyFundaeTab training={training} />}
+          {activeTab === "surveys" && <ReadOnlyFormsTab training={training} hideActions />}
+          {activeTab === "fundae" && <ReadOnlyFundaeTab training={training} hideActions />}
         </PageContent>
       </Page>
       {copyTooltipPosition && <LinkCopiedTooltip position={copyTooltipPosition} />}

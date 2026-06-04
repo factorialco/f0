@@ -93,10 +93,15 @@ What remains to close Admin is not a new UI surface. It is confirming the exact 
   adding/editing costs.
 - `Can view` is read-only. It can navigate, search, filter, open allowed detail
   pages, and preview existing survey content, but it cannot execute mutations.
-- Admin-only and operational CTAs in `Can edit` and `Can view` should remain
-  visible but disabled, with copy explaining that admin access is required. Do
-  not hide them silently unless the upstream product intentionally hides that
-  surface for the role.
+- Admin-only and operational CTAs are treated differently per role:
+  - `Can view` (Viewer): these CTAs are **hidden entirely** — no greyed-out
+    buttons. The header still shows the role as a metadata item ("Access: Can
+    view") so the user understands why the surface is read-only. The
+    `hideActions` flag drives this in `ReadOnlyTabs` / `ReadOnlyClassDetail`,
+    and the Courses list omits `primaryActions`/`secondaryActions`/bulk/row
+    admin actions for `role === "viewer"` in `AccessCoursesPage`.
+  - `Can edit` (Editor): these CTAs remain **visible but disabled**, with copy
+    explaining that admin access is required.
 
 ## Admin UI decisions
 
