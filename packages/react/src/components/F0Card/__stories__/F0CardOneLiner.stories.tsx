@@ -32,7 +32,7 @@ const meta: Meta<typeof F0CardOneLiner> = {
       options: ["sm", "md", "lg", "never"],
       description:
         "Container width at which the actions drop to their own line. `never` keeps them inline at every width.",
-      table: { defaultValue: { summary: "sm" } },
+      table: { defaultValue: { summary: "never" } },
     },
     compact: {
       control: "boolean",
@@ -46,29 +46,31 @@ const meta: Meta<typeof F0CardOneLiner> = {
       control: "text",
       description: "When set, the whole row becomes a link to this href.",
     },
+    // Function-bearing props: disable the control so it doesn't dump the
+    // serialized mock fn() source. They still appear in the args table.
     primaryAction: {
-      control: "object",
+      control: false,
       description: "Primary action button, pinned at the trailing edge.",
     },
     secondaryActions: {
-      control: "object",
+      control: false,
       description: "Secondary actions (buttons) or a single link.",
     },
     otherActions: {
-      control: "object",
+      control: false,
       description: "Overflow (⋯) menu actions, kept in the left more-menu.",
     },
     confirmAction: {
-      control: "object",
+      control: false,
       description:
         "Confirm (✓) icon-only action of the confirm/reject variant.",
     },
     rejectAction: {
-      control: "object",
+      control: false,
       description: "Reject (✗) icon-only action of the confirm/reject variant.",
     },
     alert: {
-      control: "object",
+      control: false,
       description: "Alert banner displayed above the row.",
     },
     onClick: {
@@ -131,10 +133,12 @@ export const ConfirmReject: Story = {
 }
 
 /**
- * `stackAt` controls the container width at which the actions drop to their own
- * line. `never` keeps them inline at every width (the title truncates instead).
+ * Actions stay inline at every width by default (`stackAt: "never"`). Opt into a
+ * responsive collapse with `stackAt` (e.g. `"md"`): below that container width the
+ * actions drop onto their own line with a separator, and secondary buttons fold
+ * into the left ⋯. Resize the card narrower than ~448px to see it.
  */
-export const NeverStack: Story = {
+export const Stacking: Story = {
   args: {
     avatar: {
       type: "person",
@@ -143,9 +147,14 @@ export const NeverStack: Story = {
       src: image,
     },
     title: "Jane Cooper",
-    description: "Actions stay inline at every width",
-    stackAt: "never",
+    description: "Drops to its own line below @md",
+    stackAt: "md",
     secondaryActions: [{ label: "Edit", onClick: fn() }],
+    otherActions: [
+      { label: "Mail", icon: Envelope, onClick: fn() },
+      { type: "separator" },
+      { label: "Delete", icon: Delete, onClick: fn(), critical: true },
+    ],
     primaryAction: { label: "Open", onClick: fn() },
   },
 }

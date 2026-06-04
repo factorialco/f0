@@ -75,7 +75,7 @@ export interface F0CardOneLinerProps {
   /**
    * Container width at which the actions drop to their own line (below it) vs.
    * sit inline (at/above it). `never` keeps them inline at every width.
-   * @default "sm"
+   * @default "never"
    */
   stackAt?: OneLinerStackAt
 
@@ -110,10 +110,10 @@ export interface F0CardOneLinerProps {
 
 /**
  * A single-row card: optional avatar on the left, stacked title + description,
- * and actions on the right. It collapses to a stacked layout when the card's own
- * width drops below the `stackAt` container breakpoint (default `sm` ≈ 384px; a
- * container query on the card's width, not the viewport), so it reacts correctly
- * inside grids and columns.
+ * and actions on the right. By default the actions stay inline at every width;
+ * set `stackAt` to drop them onto their own line below a container breakpoint
+ * (a container query on the card's width, not the viewport), so it reacts
+ * correctly inside grids and columns.
  */
 const F0CardOneLinerBase = forwardRef<HTMLDivElement, F0CardOneLinerProps>(
   function F0CardOneLiner(
@@ -132,7 +132,7 @@ const F0CardOneLinerBase = forwardRef<HTMLDivElement, F0CardOneLinerProps>(
       alert,
       onClick,
       disableOverlayLink = false,
-      stackAt = "sm",
+      stackAt = "never",
     },
     ref
   ) {
