@@ -11,7 +11,7 @@ import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
-import { ChevronDown, ChevronLeft, ChevronUp, Menu } from "@/icons/app"
+import { ChevronLeft, Menu } from "@/icons/app"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
 import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
@@ -21,6 +21,7 @@ import { Skeleton } from "@/ui/skeleton"
 
 import { Breadcrumbs, BreadcrumbsProps } from "../Breadcrumbs"
 import { FavoriteButton } from "../Favorites"
+import { NavigationProps, PageNavigation } from "../PageNavigation"
 import { ProductUpdates, ProductUpdatesProp } from "../ProductUpdates"
 
 export type PageAction = {
@@ -38,21 +39,6 @@ export type PageAction = {
       actions: Array<{ label: string; href: string }>
     }
 )
-
-type NavigationProps = {
-  previous?: {
-    url: string
-    title: string
-  }
-  next?: {
-    url: string
-    title: string
-  }
-  counter?: {
-    current: number
-    total: number
-  }
-}
 
 type HeaderProps = {
   module: {
@@ -82,34 +68,6 @@ type HeaderProps = {
     whenEnabled?: string
   }
   oneSwitchAutoOpen?: boolean
-}
-
-function PageNavigationLink({
-  icon,
-  href,
-  label,
-  disabled,
-}: {
-  icon: IconType
-  href: string
-  label: string
-  disabled?: boolean
-}) {
-  const ref = useRef<HTMLAnchorElement>(null)
-  return (
-    <F0Button
-      href={href}
-      title={label}
-      aria-label={label}
-      disabled={disabled}
-      ref={ref}
-      size="sm"
-      variant="outline"
-      label={label}
-      icon={icon}
-      hideLabel
-    />
-  )
 }
 
 export function PageHeader({
@@ -237,29 +195,7 @@ export function PageHeader({
           (navigation || hasActions || hasProductUpdates) && (
             <div className="h-4 w-px bg-f1-border-secondary" />
           )}
-        {navigation && (
-          <div className="flex items-center gap-3">
-            {navigation.counter && (
-              <span className="text-sm text-f1-foreground-secondary">
-                {navigation.counter.current}/{navigation.counter.total}
-              </span>
-            )}
-            <div className="flex items-center gap-2">
-              <PageNavigationLink
-                icon={ChevronUp}
-                label={navigation.previous?.title || "Previous"}
-                href={navigation.previous?.url || ""}
-                disabled={!navigation.previous}
-              />
-              <PageNavigationLink
-                icon={ChevronDown}
-                label={navigation.next?.title || "Next"}
-                href={navigation.next?.url || ""}
-                disabled={!navigation.next}
-              />
-            </div>
-          </div>
-        )}
+        {navigation && <PageNavigation {...navigation} />}
         {navigation && hasActions && (
           <div className="h-4 w-px bg-f1-border-secondary" />
         )}
