@@ -6,8 +6,7 @@ import {
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-import { F0Graph, F0GraphNode } from "@/patterns/F0Graph"
-import { Skeleton } from "@/ui/skeleton"
+import { F0Graph, F0GraphNode, F0GraphSkeleton } from "@/patterns/F0Graph"
 
 import { useDataCollectionSettings } from "../../../Settings/SettingsProvider"
 import { ItemActionsDefinition } from "../../../item-actions"
@@ -18,69 +17,6 @@ import { GraphVisualizationOptions } from "./types"
 import { useDataCollectionTreeData } from "./useDataCollectionTreeData"
 
 export type { GraphVisualizationOptions } from "./types"
-
-/** A single node-card placeholder: avatar + name/role lines, like a real node. */
-const SkeletonNodeCard = () => (
-  <div className="flex h-[52px] w-64 items-center gap-3 rounded-xl border border-solid border-f1-border-secondary bg-f1-background px-3">
-    <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
-    <div className="flex flex-1 flex-col gap-1.5">
-      <Skeleton className="h-3 w-28 rounded" />
-      <Skeleton className="h-2.5 w-20 rounded" />
-    </div>
-  </div>
-)
-
-const SkeletonReportsPill = () => <Skeleton className="h-5 w-20 rounded-full" />
-
-const SkeletonExpander = () => <Skeleton className="h-7 w-10 rounded-lg" />
-
-// Connecting bus (riser + horizontal bus + droppers) drawn to align with the
-// three children below. Width matches the children row: 3·256 + 2·40 = 848.
-const SkeletonConnectors = () => (
-  <svg width={848} height={40} viewBox="0 0 848 40" fill="none" aria-hidden>
-    <path
-      d="M424 0 V20"
-      className="stroke-f1-border-secondary"
-      strokeWidth={1.5}
-    />
-    <path
-      d="M128 40 V28 Q128 20 136 20 H712 Q720 20 720 28 V40"
-      className="stroke-f1-border-secondary"
-      strokeWidth={1.5}
-    />
-    <path
-      d="M424 20 V40"
-      className="stroke-f1-border-secondary"
-      strokeWidth={1.5}
-    />
-  </svg>
-)
-
-/**
- * Placeholder that mirrors the org chart about to appear: a root node with its
- * reports pill, the connecting bus, and a row of child nodes (each with a
- * reports pill and an expander), so the loading state matches the real shape.
- */
-const GraphSkeleton = () => (
-  <div className="flex h-full min-h-0 flex-1 flex-col items-center justify-center pb-4">
-    <div className="flex flex-col items-center gap-2">
-      <SkeletonNodeCard />
-      <SkeletonReportsPill />
-    </div>
-
-    <SkeletonConnectors />
-
-    <div className="flex items-start gap-10">
-      {Array.from({ length: 3 }).map((_, index) => (
-        <div key={index} className="flex flex-col items-center gap-2">
-          <SkeletonNodeCard />
-          <SkeletonReportsPill />
-          <SkeletonExpander />
-        </div>
-      ))}
-    </div>
-  </div>
-)
 
 export type GraphCollectionProps<
   Record extends RecordType,
@@ -243,7 +179,7 @@ export const GraphCollection = <
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col border-solid border-t border-0 border-f1-border-secondary bg-[hsl(var(--neutral-3))]">
       {isInitialLoading ? (
-        <GraphSkeleton />
+        <F0GraphSkeleton showTags={tags !== undefined} />
       ) : (
         <F0Graph<Record>
           nodes={nodes}

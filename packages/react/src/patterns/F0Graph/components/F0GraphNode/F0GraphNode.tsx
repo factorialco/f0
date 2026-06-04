@@ -15,7 +15,7 @@ import { Skeleton } from "@/ui/skeleton"
 
 import type { F0GraphNodeProps } from "./types"
 
-import { useF0GraphRenderConfigInternal } from "../contexts"
+import { useF0GraphRenderConfigInternal } from "../../contexts"
 import { F0GraphNodeHoverCard } from "./F0GraphNodeHoverCard"
 import { F0GraphNodeTags } from "./F0GraphNodeTags"
 import { graphNodeContainerVariants } from "./variants"

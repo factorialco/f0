@@ -9,7 +9,7 @@ import { memo } from "react"
 
 import type { EdgeVariant, F0GraphEdgeProps } from "./types"
 
-import { useF0GraphZoomInternal } from "../contexts"
+import { useF0GraphZoomInternal } from "../../contexts"
 
 // Semantic edge stroke colors. Defined as CSS vars on .f0-graph in
 // F0Graph.css so they flip automatically in dark mode and stay aligned

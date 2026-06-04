@@ -12,7 +12,10 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 
 import type { F0GraphNodeRenderContext } from "../F0Graph"
-import type { GraphNodeState, GraphNodeVariant } from "../F0GraphNode"
+import type {
+  GraphNodeState,
+  GraphNodeVariant,
+} from "../components/F0GraphNode"
 import type { GraphNode, LayoutDirection, ZoomLevel } from "../types"
 
 function handlePositions(direction: LayoutDirection): {
@@ -40,7 +43,7 @@ import {
   useF0GraphFocusInternal,
   useF0GraphRenderConfigInternal,
 } from "../contexts"
-import { F0GraphExpander } from "../F0GraphExpander"
+import { F0GraphExpander } from "../components/F0GraphExpander"
 
 // ─── Shared types ──────────────────────────────────────────────
 

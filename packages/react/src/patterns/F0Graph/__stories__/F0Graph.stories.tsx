@@ -12,7 +12,7 @@ import {
   type F0GraphNodeRenderContext,
   type F0GraphProps,
 } from "../F0Graph"
-import { F0GraphNode } from "../F0GraphNode"
+import { F0GraphNode } from "../components/F0GraphNode"
 
 const meta = {
   title: "Graph/F0Graph",

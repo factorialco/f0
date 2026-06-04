@@ -2,9 +2,9 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import type { GraphNode } from "../../types"
+import type { GraphNode } from "../../../types"
 
-import { F0Graph, type F0GraphNodeRenderContext } from "../../F0Graph"
+import { F0Graph, type F0GraphNodeRenderContext } from "../../../F0Graph"
 import { F0GraphNode } from "../../F0GraphNode"
 import { F0GraphControls } from "../F0GraphControls"
 
