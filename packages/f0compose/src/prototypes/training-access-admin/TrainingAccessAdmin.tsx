@@ -920,6 +920,15 @@ function PeopleSelectorPopover({
     candidateIds.every((id) => selectedEmployeeIds.includes(id))
   const [activeFilterKey, setActiveFilterKey] = useState<PeopleFilterKey>("workplace")
   const activeFilter = peopleFilterConfigs.find((config) => config.key === activeFilterKey)
+  const activeFilterChips = peopleFilterConfigs.flatMap((config) =>
+    filters[config.key].map((value) => ({
+      key: config.key,
+      value,
+      label: `${config.label}: ${
+        config.options.find((option) => option.value === value)?.label ?? value
+      }`,
+    }))
+  )
 
   return (
     // F0Box cannot express the top-full placement needed by this selector popover.
@@ -989,7 +998,28 @@ function PeopleSelectorPopover({
           </div>
         </div>
       ) : (
-        <div className="max-h-72 overflow-y-auto p-1">
+        <>
+          {activeFilterChips.length > 0 && (
+            <div className="flex flex-wrap gap-1 border-0 border-b border-solid border-f1-border-secondary px-3 py-2">
+              {activeFilterChips.map((chip) => (
+                <span
+                  key={`${chip.key}-${chip.value}`}
+                  className="inline-flex items-center gap-1 rounded-full border border-solid border-f1-border-secondary bg-f1-background px-2 py-0.5 text-sm text-f1-foreground"
+                >
+                  {chip.label}
+                  <button
+                    type="button"
+                    aria-label={`Remove ${chip.label}`}
+                    className="cursor-pointer border-0 bg-transparent p-0 leading-none text-f1-foreground-secondary"
+                    onClick={() => onToggleFilter(chip.key, chip.value)}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+          <div className="max-h-72 overflow-y-auto p-1">
           {candidates.length > 0 ? (
             candidates.map((candidate) => {
               const selected = selectedEmployeeIds.includes(candidate.value)
@@ -1018,7 +1048,8 @@ function PeopleSelectorPopover({
               <F0Text content="No people found" variant="description" />
             </F0Box>
           )}
-        </div>
+          </div>
+        </>
       )}
     </div>
   )
