@@ -11,6 +11,8 @@ type CardAvatarVariant =
   | { type: "file"; file: File }
   | { type: "icon"; icon: IconType }
 
+type CardAvatarSize = "sm" | "md" | "lg"
+
 interface CardAvatarProps {
   /**
    * The avatar to display
@@ -26,33 +28,42 @@ interface CardAvatarProps {
    * Whether the avatar is displayed in a compact layout
    */
   compact?: boolean
+
+  /**
+   * Explicit size override. When omitted, the size derives from `compact`
+   * (sm) or the default vertical layout (lg). Passing a size also signals
+   * inline usage (e.g. the one-liner card) and drops the vertical margin.
+   */
+  size?: CardAvatarSize
 }
 
 const AvatarRender = ({
   avatar,
-  compact = false,
+  size,
 }: {
   avatar: CardAvatarVariant
-  compact?: boolean
+  size: CardAvatarSize
 }) => {
   if (avatar.type === "emoji") {
-    return <F0AvatarEmoji emoji={avatar.emoji} size={compact ? "sm" : "lg"} />
+    return <F0AvatarEmoji emoji={avatar.emoji} size={size} />
   }
   if (avatar.type === "file") {
-    return <F0AvatarFile file={avatar.file} size={compact ? "sm" : "lg"} />
+    return <F0AvatarFile file={avatar.file} size={size} />
   }
   if (avatar.type === "icon") {
-    return <F0AvatarIcon icon={avatar.icon} size={compact ? "sm" : "lg"} />
+    return <F0AvatarIcon icon={avatar.icon} size={size} />
   }
-  return <F0Avatar avatar={avatar} size={compact ? "sm" : "lg"} />
+  return <F0Avatar avatar={avatar} size={size} />
 }
 
 export function CardAvatar({
   avatar,
   overlay = false,
   compact = false,
+  size,
 }: CardAvatarProps) {
   const isRounded = avatar.type === "person"
+  const resolvedSize: CardAvatarSize = size ?? (compact ? "sm" : "lg")
 
   return (
     <div
@@ -62,11 +73,11 @@ export function CardAvatar({
           !compact &&
           "absolute -top-9 left-0 rounded-md ring-[3px] ring-f1-background",
         overlay && isRounded && "rounded-full",
-        compact && "mb-0"
+        (compact || size) && "mb-0"
       )}
       data-testid="card-avatar"
     >
-      <AvatarRender avatar={avatar} compact={compact} />
+      <AvatarRender avatar={avatar} size={resolvedSize} />
     </div>
   )
 }

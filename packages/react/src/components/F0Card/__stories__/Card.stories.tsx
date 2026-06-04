@@ -269,36 +269,6 @@ export const WithActionsAndLink: Story = {
   },
 }
 
-export const OneLiner: Story = {
-  args: {
-    oneLiner: true,
-    title: "Do you want to proceed?",
-    primaryAction: {
-      label: "Confirm",
-      onClick: fn(),
-    },
-    secondaryActions: [
-      {
-        label: "Cancel",
-        onClick: fn(),
-      },
-    ],
-  },
-  parameters: {
-    noMetaLayout: true,
-    docs: { story: { inline: false, height: "160px" } },
-  },
-  decorators: [
-    (Story) => (
-      <div className="flex h-[calc(100vh-32px)] w-full items-center justify-center">
-        <div className="w-[640px]">
-          <Story />
-        </div>
-      </div>
-    ),
-  ],
-}
-
 export const WithLink: Story = {
   args: {
     ...Default.args,

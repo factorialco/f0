@@ -12,7 +12,6 @@ import {
   CardTitle,
 } from "@/ui/Card"
 import { Skeleton } from "@/ui/skeleton"
-import { Text } from "@/ui/Text"
 
 import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import {
@@ -133,16 +132,6 @@ export interface CardInternalProps {
   secondaryActions?: CardSecondaryAction[] | CardSecondaryLink
 
   /**
-   * Renders the card as a single horizontal line — text on the left, actions on
-   * the right. It collapses to the stacked layout when the card itself becomes
-   * too narrow, driven by a container query on the card's own width (not the
-   * viewport), so it reacts correctly inside grids and columns.
-   * Only the title, description and actions are shown in this mode.
-   * @default false
-   */
-  oneLiner?: boolean
-
-  /**
    * Actions to display in the dropdown menu inside the card content
    */
   otherActions?: DropdownItem[]
@@ -233,7 +222,6 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       fullHeight = false,
       disableOverlayLink = false,
       alert,
-      oneLiner = false,
     },
     ref
   ) {
@@ -246,56 +234,6 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       onClick?.()
       e.preventDefault()
       e.stopPropagation()
-    }
-
-    if (oneLiner) {
-      return (
-        <Card
-          ref={ref}
-          className={cn(
-            "group relative @container bg-f1-background shadow-none transition-all",
-            compact && "p-3",
-            fullHeight && "h-full",
-            link &&
-              "focus-within:border-f1-border-hover focus-within:shadow-md hover:border-f1-border-hover hover:shadow-md"
-          )}
-          onClick={onClick}
-          data-testid="card"
-        >
-          {link && !disableOverlayLink && (
-            <F0Link
-              href={link}
-              variant="unstyled"
-              className={cn(
-                "z-1 absolute inset-0 block rounded-xl",
-                focusRing()
-              )}
-              aria-label={title}
-              ref={linkRef}
-            >
-              &nbsp;
-            </F0Link>
-          )}
-
-          <div className="flex flex-col @md:flex-row @md:items-center @md:justify-between @md:gap-4">
-            <div className="flex min-w-0 flex-col gap-0">
-              {title && (
-                <Text variant="body" content={title} className="font-medium" />
-              )}
-              {description && (
-                <Text variant="description" content={description} />
-              )}
-            </div>
-
-            <CardActions
-              oneLiner
-              primaryAction={primaryAction}
-              secondaryActions={secondaryActions}
-              compact={compact}
-            />
-          </div>
-        </Card>
-      )
     }
 
     // The card body — extracted so it can be placed inside either the plain root
