@@ -8,10 +8,10 @@ import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/uti
 import { avatarSizes } from "../../internal/BaseAvatar/types"
 import { F0AvatarPerson } from "../F0AvatarPerson"
 
-const meta: Meta<typeof F0AvatarPerson> = {
+const meta = {
   component: F0AvatarPerson,
   title: "Avatars/AvatarPerson",
-  tags: ["autodocs"],
+  tags: ["stable", "!autodocs"],
   argTypes: {
     ...getBaseAvatarArgTypes([
       "size",
@@ -30,7 +30,7 @@ export const Default: Story = {
   args: {
     firstName: "Dani",
     lastName: "Moreno",
-    size: "md",
+    size: "lg",
   },
 }
 

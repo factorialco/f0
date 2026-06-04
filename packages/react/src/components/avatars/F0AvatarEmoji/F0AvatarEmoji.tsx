@@ -11,7 +11,7 @@ export type F0AvatarEmojiProps = {
 
 const sizes = {
   sm: "w-6 h-6 rounded-sm",
-  md: "w-9 h-9 rounded",
+  md: "w-8 h-8 rounded",
   lg: "w-10 h-10 rounded-md",
   xl: "w-14 h-14 rounded-lg",
 }
