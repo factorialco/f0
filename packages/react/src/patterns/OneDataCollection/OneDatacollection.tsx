@@ -55,6 +55,7 @@ import { useDataCollectionStorage } from "./hooks/useDataColectionStorage/useDat
 import { DataCollectionSource } from "./hooks/useDataCollectionSource"
 import { CustomEmptyStates, useEmptyState } from "./hooks/useEmptyState"
 import { useExportAction } from "./hooks/useExportAction"
+import { useDataCollectionUrlSync } from "./hooks/useDataCollectionUrlSync"
 import { usePerVisualizationFilters } from "./hooks/usePerVisualizationFilters"
 import { ItemActionsDefinition } from "./item-actions"
 import { NavigationFiltersDefinition } from "./navigationFilters/types"
@@ -189,6 +190,14 @@ export type OneDataCollectionProps<
          */
         features?: DataCollectionStorageFeaturesDefinition
       }
+
+  /**
+   * By default, when an `id` is set, the data collection reads its
+   * filters/search/sortings from the URL query params on mount and reflects any
+   * later changes back into them (see `dataCollectionUrlParams`). Set this to
+   * `true` to opt out of that URL syncing.
+   */
+  disableUrlParams?: boolean
   /**
    * @deprecated removes the horizontal padding from the data collection
    */
@@ -222,6 +231,7 @@ const OneDataCollectionComp = <
   fullHeight,
   storage,
   id,
+  disableUrlParams,
   tmpFullWidth,
   csvExport,
 }: OneDataCollectionProps<
@@ -819,6 +829,28 @@ const OneDataCollectionComp = <
     },
     storage === false
   )
+
+  // Two-way sync between the collection state and the URL query params. Enabled
+  // by default whenever an `id` is set; opt out with `disableUrlParams`.
+  useDataCollectionUrlSync({
+    id,
+    disabled: !!disableUrlParams,
+    storageReady,
+    filtersDefinition: filters as FiltersDefinition | undefined,
+    filters: activeCurrentFilters as FiltersState<FiltersDefinition>,
+    search: currentSearch,
+    sortings: currentSortings as SortingsState<SortingsDefinition>,
+    visualization: currentVisualization,
+    visualizationKeys: visualizations.map((v) => v.type),
+    setFilters: activeSetCurrentFilters as (
+      value: FiltersState<FiltersDefinition>
+    ) => void,
+    setSearch: setCurrentSearch,
+    setSortings: setCurrentSortings as (
+      value: SortingsState<SortingsDefinition>
+    ) => void,
+    setVisualization: setCurrentVisualization,
+  })
 
   const showTotalItemSummarySkeleton = useDebounceBoolean({
     value: isInitialLoading && storageReady,
