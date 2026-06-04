@@ -23,27 +23,29 @@ const STORAGE_ID = "examples/url-params/v1"
 /**
  * Filters, sorting and pagination for one collection, all reflected in the URL
  * together — each filter in its own readable `dc_<key>` param (`dc_department`,
- * `dc_assignee`, …), plus `dc_sort` and `dc_page`.
+ * `dc_assignee`, …), plus `dc_sort` and `dc_page`. There is no `dc_id`: a single
+ * URL-synced collection per page is assumed.
  *
  * Filter, sort and page through: the URL updates with all of them at once, and
- * reloading (or opening a shared URL) restores the same filters, sorting and
- * page. Because pagination lives inside the data hook, page + the rest are read
- * from the URL synchronously (seeding the first fetch — no race) and written
- * back by a single writer, which is what lets them coexist without clobbering.
- * Try `Assignee` → "Select all": over {@link MAX_URL_FILTER_VALUES} values it is
- * dropped from the URL (still applied). Storage is off here, so this also shows
- * URL syncing needs no storage.
+ * reloading (or opening a shared URL) restores the same state. Because
+ * pagination lives inside the data hook, everything is read from the URL
+ * synchronously (seeding the first fetch — no race) and written back by a single
+ * writer, which is what lets them coexist without clobbering. Try `Assignee` →
+ * "Select all": over {@link MAX_URL_FILTER_VALUES} values it is dropped from the
+ * URL (still applied). Storage is off here, so this also shows URL syncing needs
+ * no storage.
  */
 const UrlParamsExample = () => {
-  // Read filters + sorting + page synchronously from the URL so the data hook's
-  // first fetch already has all of them.
-  const initial = useMemo(() => {
-    const parsed = parseDataCollectionUrlParams(
-      window.location.search,
-      paginationFilters as unknown as FiltersDefinition
-    )
-    return parsed?.id === STORAGE_ID ? parsed.state : {}
-  }, [])
+  // Read everything synchronously from the URL so the first fetch/render already
+  // has filters + sorting + page.
+  const initial = useMemo(
+    () =>
+      parseDataCollectionUrlParams(
+        window.location.search,
+        paginationFilters as unknown as FiltersDefinition
+      ),
+    []
+  )
 
   const [filters, setFilters] = useState(
     (initial.filters ?? {}) as FiltersState<PaginationFiltersType>
@@ -54,7 +56,7 @@ const UrlParamsExample = () => {
 
   // A single writer for every param, so none clobbers the others.
   useEffect(() => {
-    const params = buildDataCollectionUrlParams(STORAGE_ID, {
+    const params = buildDataCollectionUrlParams({
       filters: filters as FiltersState<FiltersDefinition>,
       sortings,
       page,

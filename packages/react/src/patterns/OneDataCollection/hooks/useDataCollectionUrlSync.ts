@@ -13,9 +13,12 @@ import {
 } from "@/lib/providers/datacollection/dataCollectionUrlParams"
 
 type UseDataCollectionUrlSyncOptions = {
-  /** The OneDataCollection `id`; required to address its `?dc_id=<id>` params. */
-  id: string | undefined
-  /** When true, no reading from or writing to the URL happens. */
+  /**
+   * When true, no reading from or writing to the URL happens. URL syncing is on
+   * by default for *any* collection (an `id` is not required) — params are not
+   * scoped to a collection, so a single URL-synced collection per page is
+   * assumed.
+   */
   disabled: boolean
   /** Storage hydration gate — we apply the URL only after it resolves. */
   storageReady: boolean
@@ -44,8 +47,8 @@ type UseDataCollectionUrlSyncOptions = {
  * sync with the URL query params (see `dataCollectionUrlParams`):
  *
  * - **URL → collection:** once, after storage has hydrated (so the URL takes
- *   precedence over persisted state), any `dc`-addressed params matching this
- *   collection's `id` are applied to the current state.
+ *   precedence over persisted state), the `dc_`-prefixed params are applied to
+ *   the current state.
  * - **collection → URL:** thereafter, every change to filters/search/sortings is
  *   reflected back into the URL via `history.replaceState`.
  *
@@ -55,7 +58,6 @@ type UseDataCollectionUrlSyncOptions = {
  * state, so the first write re-affirms the URL rather than wiping it).
  */
 export const useDataCollectionUrlSync = ({
-  id,
   disabled,
   storageReady,
   filtersDefinition,
@@ -69,7 +71,7 @@ export const useDataCollectionUrlSync = ({
   setSortings,
   setVisualization,
 }: UseDataCollectionUrlSyncOptions): void => {
-  const active = !disabled && !!id
+  const active = !disabled
   // Only sync the visualization when there is a real choice to reflect.
   const syncVisualization = visualizationKeys.length > 1
   const [urlApplied, setUrlApplied] = useState(false)
@@ -78,35 +80,32 @@ export const useDataCollectionUrlSync = ({
   useEffect(() => {
     if (!active || !storageReady || urlApplied) return
 
-    const parsed = parseDataCollectionUrlParams(
+    const state = parseDataCollectionUrlParams(
       typeof window !== "undefined" ? window.location.search : "",
       filtersDefinition
     )
-    if (parsed && parsed.id === id) {
-      const { state } = parsed
-      // Only the params present in the URL override the current state.
-      if ("filters" in state) {
-        setFilters((state.filters ?? {}) as FiltersState<FiltersDefinition>)
-      }
-      if ("search" in state) setSearch(state.search)
-      if ("sortings" in state) setSortings(state.sortings ?? null)
-      // Map the readable view key back to its index; ignore unknown keys.
-      if (syncVisualization && state.visualization !== undefined) {
-        const index = visualizationKeys.indexOf(state.visualization)
-        if (index >= 0) setVisualization(index)
-      }
+    // Only the params present in the URL override the current state.
+    if ("filters" in state) {
+      setFilters((state.filters ?? {}) as FiltersState<FiltersDefinition>)
+    }
+    if ("search" in state) setSearch(state.search)
+    if ("sortings" in state) setSortings(state.sortings ?? null)
+    // Map the readable view key back to its index; ignore unknown keys.
+    if (syncVisualization && state.visualization !== undefined) {
+      const index = visualizationKeys.indexOf(state.visualization)
+      if (index >= 0) setVisualization(index)
     }
 
     // Enable writing in the same render as the applied state, so the first
     // write reflects the URL we just read rather than the prior snapshot.
     setUrlApplied(true)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- apply once when ready
-  }, [active, storageReady, id])
+  }, [active, storageReady])
 
   // collection → URL.
   useDeepCompareEffect(() => {
-    if (!active || !urlApplied || !id) return
-    syncDataCollectionUrlParams(id, {
+    if (!active || !urlApplied) return
+    syncDataCollectionUrlParams({
       filters,
       search,
       sortings,
@@ -119,7 +118,6 @@ export const useDataCollectionUrlSync = ({
   }, [
     active,
     urlApplied,
-    id,
     filters,
     search,
     sortings,

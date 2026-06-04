@@ -192,10 +192,12 @@ export type OneDataCollectionProps<
       }
 
   /**
-   * By default, when an `id` is set, the data collection reads its
-   * filters/search/sortings from the URL query params on mount and reflects any
-   * later changes back into them (see `dataCollectionUrlParams`). Set this to
-   * `true` to opt out of that URL syncing.
+   * By default the data collection reads its filters/search/sortings/
+   * visualization/page from the URL query params on mount and reflects any later
+   * changes back into them (see `dataCollectionUrlParams`). This applies to any
+   * collection — no `id` is required, and params are not scoped to one, so a
+   * single URL-synced collection per page is assumed. Set this to `true` to opt
+   * out of URL syncing.
    */
   disableUrlParams?: boolean
   /**
@@ -831,9 +833,9 @@ const OneDataCollectionComp = <
   )
 
   // Two-way sync between the collection state and the URL query params. Enabled
-  // by default whenever an `id` is set; opt out with `disableUrlParams`.
+  // by default for any collection (no `id` required); opt out with
+  // `disableUrlParams`.
   useDataCollectionUrlSync({
-    id,
     disabled: !!disableUrlParams,
     storageReady,
     filtersDefinition: filters as FiltersDefinition | undefined,

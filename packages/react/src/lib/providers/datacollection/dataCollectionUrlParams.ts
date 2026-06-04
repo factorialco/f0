@@ -12,19 +12,19 @@ import { DataCollectionStorage } from "./types"
 
 /**
  * Every data collection URL param shares this prefix, so each filter is its own
- * readable param — e.g. `?dc_id=people/v1&dc_department=Sales&dc_search=ada`
- * instead of a single JSON blob.
+ * readable param — e.g. `?dc_department=Sales&dc_search=ada&dc_view=kanban`
+ * instead of a single JSON blob. Params are not scoped to a collection id, so
+ * this assumes a single URL-synced collection per page.
  */
 export const DATA_COLLECTION_URL_PARAM_PREFIX = "dc_"
 
 /**
  * The reserved (non-filter) param names. Individual filters are encoded as
- * `dc_<filterKey>`; these three names are written last (via `set`) so that on
- * the rare clash where a filter key is exactly `id`, `search` or `sort`, the
+ * `dc_<filterKey>`; these names are written last (via `set`) so that on the rare
+ * clash where a filter key is exactly `search`, `sort`, `view` or `page`, the
  * reserved param wins.
  */
 export const DATA_COLLECTION_URL_PARAMS = {
-  id: "dc_id",
   search: "dc_search",
   sortings: "dc_sort",
   /** Active visualization type/key, e.g. `table` (omitted for the default one). */
@@ -44,6 +44,13 @@ const RANGE_SEPARATOR = ".."
  */
 const EXCLUSIVE_BOUND = "*"
 const SORTINGS_NONE = "none"
+/**
+ * Separator between a sorting's field and order, e.g. `email-asc`. A hyphen is
+ * used (rather than `:`) so the URL stays free of percent-encoding (`:` → `%3A`).
+ * Decoding splits on the *last* hyphen, so field names may themselves contain
+ * one.
+ */
+const SORTINGS_SEPARATOR = "-"
 
 /**
  * Maximum number of values a single filter may contribute to the URL.
@@ -77,14 +84,6 @@ export type DataCollectionUrlState<
   visualization?: string
   /** Current page (1-indexed). Not part of persisted storage — URL only. */
   page?: number
-}
-
-export type DataCollectionUrlParams<
-  CurrentFiltersState extends FiltersState<FiltersDefinition> =
-    FiltersState<FiltersDefinition>,
-> = {
-  id: string
-  state: DataCollectionUrlState<CurrentFiltersState>
 }
 
 /** How {@link syncDataCollectionUrlParams} should update the browser history. */
@@ -121,15 +120,24 @@ const parseSortings = (raw: string): SortingsState<SortingsDefinition> => {
   if (trimmed === "" || trimmed === SORTINGS_NONE || trimmed === "null") {
     return null
   }
-  const [field, order] = trimmed.split(":")
-  if (!field) return null
-  return { field, order: order === "desc" ? "desc" : "asc" }
+  // Split on the last separator (so field names may contain one), and only
+  // treat the suffix as the order when it is a recognized one.
+  const sep = trimmed.lastIndexOf(SORTINGS_SEPARATOR)
+  const suffix = sep === -1 ? "" : trimmed.slice(sep + 1)
+  if (suffix === "asc" || suffix === "desc") {
+    const field = trimmed.slice(0, sep)
+    return field ? { field, order: suffix } : null
+  }
+  // No recognizable order suffix → default to ascending on the whole value.
+  return { field: trimmed, order: "asc" }
 }
 
 const serializeSortings = (
   sortings: SortingsState<SortingsDefinition>
 ): string =>
-  sortings ? `${String(sortings.field)}:${sortings.order}` : SORTINGS_NONE
+  sortings
+    ? `${String(sortings.field)}${SORTINGS_SEPARATOR}${sortings.order}`
+    : SORTINGS_NONE
 
 /* ------------------------------------------------------------------ */
 /* Per-filter value <-> param values                                   */
@@ -260,13 +268,15 @@ const decodeFilterValue = (type: string, values: string[]): unknown => {
 /* ------------------------------------------------------------------ */
 
 /**
- * Parses the data collection identifier and state out of URL query params.
+ * Parses a data collection's state out of URL query params.
  *
  * @param input - A query string, a `URLSearchParams`, or omitted to read from
  *                `window.location.search`.
  * @param filtersDefinition - Needed to decode the `dc_<filterKey>` params back
  *                into correctly-typed filter values. Omit to skip filters.
- * @returns `{ id, state }`, or `null` when no `dc_id` is present.
+ * @returns The state encoded in the URL (empty when no `dc_` params are present).
+ *          Params are not scoped to a collection id — one synced collection per
+ *          page is assumed.
  */
 export const parseDataCollectionUrlParams = <
   CurrentFiltersState extends FiltersState<FiltersDefinition> =
@@ -274,11 +284,8 @@ export const parseDataCollectionUrlParams = <
 >(
   input?: string | URLSearchParams,
   filtersDefinition?: FiltersDefinition
-): DataCollectionUrlParams<CurrentFiltersState> | null => {
+): DataCollectionUrlState<CurrentFiltersState> => {
   const params = toSearchParams(input)
-  const id = params.get(DATA_COLLECTION_URL_PARAMS.id)
-  if (!id) return null
-
   const state: DataCollectionUrlState<CurrentFiltersState> = {}
 
   if (params.has(DATA_COLLECTION_URL_PARAMS.search)) {
@@ -316,7 +323,7 @@ export const parseDataCollectionUrlParams = <
     if (hasFilters) state.filters = filters as CurrentFiltersState
   }
 
-  return { id, state }
+  return state
 }
 
 /* ------------------------------------------------------------------ */
@@ -346,7 +353,6 @@ const writeStateToParams = <
   CurrentFiltersState extends FiltersState<FiltersDefinition>,
 >(
   params: URLSearchParams,
-  id: string,
   state: DataCollectionUrlState<CurrentFiltersState>
 ): void => {
   // Filters first (via `append`, so multi-select keeps repeated params); the
@@ -363,8 +369,6 @@ const writeStateToParams = <
       encoded.forEach((entry) => params.append(filterParamName(key), entry))
     }
   }
-
-  params.set(DATA_COLLECTION_URL_PARAMS.id, id)
 
   if (state.search) {
     params.set(DATA_COLLECTION_URL_PARAMS.search, state.search)
@@ -398,46 +402,44 @@ const hasActiveState = <
     Object.values(state.filters).some(isUrlSerializableFilter))
 
 /**
- * Builds a fresh `URLSearchParams` encoding a data collection `id` and state,
- * symmetric with {@link parseDataCollectionUrlParams}. Always sets `dc_id`.
+ * Builds a fresh `URLSearchParams` encoding a data collection's state, symmetric
+ * with {@link parseDataCollectionUrlParams}.
  */
 export const buildDataCollectionUrlParams = <
   CurrentFiltersState extends FiltersState<FiltersDefinition> =
     FiltersState<FiltersDefinition>,
 >(
-  id: string,
   state: DataCollectionUrlState<CurrentFiltersState> = {}
 ): URLSearchParams => {
   const params = new URLSearchParams()
-  writeStateToParams(params, id, state)
+  writeStateToParams(params, state)
   return params
 }
 
 /**
- * Writes a data collection's current filters/search/sortings onto an existing
- * query string, preserving any unrelated params. Every `dc_`-prefixed param is
- * rebuilt from `state`, so cleared filters drop out and an entirely empty state
- * leaves the URL free of `dc_` params (rather than a bare `?dc_id=<id>`).
+ * Writes a data collection's current state onto an existing query string,
+ * preserving any unrelated params. Every `dc_`-prefixed param is rebuilt from
+ * `state`, so cleared values drop out and an entirely empty state leaves the URL
+ * free of `dc_` params.
  */
 export const setDataCollectionUrlParams = <
   CurrentFiltersState extends FiltersState<FiltersDefinition> =
     FiltersState<FiltersDefinition>,
 >(
   current: string | URLSearchParams | undefined,
-  id: string,
   state: DataCollectionUrlState<CurrentFiltersState>
 ): URLSearchParams => {
   // Clone so we never mutate a caller-owned URLSearchParams (e.g. the live one).
   const params = new URLSearchParams(toSearchParams(current))
   deleteDataCollectionParams(params)
   if (hasActiveState(state)) {
-    writeStateToParams(params, id, state)
+    writeStateToParams(params, state)
   }
   return params
 }
 
 /**
- * Reflects a data collection's current filters/search/sortings into the URL.
+ * Reflects a data collection's current state into the URL.
  *
  * Pairs with {@link parseDataCollectionUrlParams} (which reads the other way).
  * `OneDataCollection` wires this up by default when an `id` is set.
@@ -448,13 +450,12 @@ export const syncDataCollectionUrlParams = <
   CurrentFiltersState extends FiltersState<FiltersDefinition> =
     FiltersState<FiltersDefinition>,
 >(
-  id: string,
   state: DataCollectionUrlState<CurrentFiltersState>,
   options?: { history?: DataCollectionUrlHistoryMode }
 ): string | null => {
   if (typeof window === "undefined") return null
 
-  const params = setDataCollectionUrlParams(window.location.search, id, state)
+  const params = setDataCollectionUrlParams(window.location.search, state)
   const query = params.toString()
   const url = query
     ? `${window.location.pathname}?${query}`
