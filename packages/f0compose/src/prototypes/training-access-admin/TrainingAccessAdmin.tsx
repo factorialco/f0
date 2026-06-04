@@ -745,17 +745,42 @@ function ShareTrainingDialog({
       primaryAction={{ label: "Done", icon: Check, onClick: onClose }}
     >
       <F0Box display="flex" flexDirection="column" gap="lg">
-        <F0Box display="flex" flexDirection="column" gap="sm" ref={searchAreaRef}>
+        <F0Box display="flex" flexDirection="column" gap="xs">
           <F0Box display="flex" alignItems="start" gap="sm">
-            <F0Box grow>
-              <PeopleSearchInput
-                selectedEmployeeIds={selectedEmployeeIds}
-                searchValue={personSearch}
-                filtersCount={activeFiltersCount(peopleFilters)}
-                onSearchChange={onPersonSearchChange}
-                onRemove={onSelectedEmployeeRemove}
-                onToggleFilters={() => onPeopleFiltersOpenChange(!isPeopleFiltersOpen)}
-              />
+            <F0Box grow position="relative" ref={searchAreaRef}>
+              <F0Box onClick={() => onPeopleListOpenChange(true)}>
+                <PeopleSearchInput
+                  selectedEmployeeIds={selectedEmployeeIds}
+                  searchValue={personSearch}
+                  filtersCount={activeFiltersCount(peopleFilters)}
+                  onSearchChange={onPersonSearchChange}
+                  onRemove={onSelectedEmployeeRemove}
+                  onToggleFilters={() => {
+                    onPeopleListOpenChange(true)
+                    onPeopleFiltersOpenChange(!isPeopleFiltersOpen)
+                  }}
+                />
+              </F0Box>
+              {isPeopleListOpen && (
+                <PeopleSelectorPopover
+                  candidates={candidateOptions}
+                  filters={peopleFilters}
+                  showFilters={isPeopleFiltersOpen}
+                  selectedEmployeeIds={selectedEmployeeIds}
+                  onSelect={(employeeId) => {
+                    onSelectedEmployeeChange(employeeId)
+                  }}
+                  onSelectAll={onSelectAll}
+                  onToggleFilter={(filterKey, value) => {
+                    onPeopleFilterToggle(filterKey, value)
+                    onPeopleFiltersOpenChange(false)
+                  }}
+                  onClearFilters={() => {
+                    onPeopleFiltersClear()
+                    onPeopleFiltersOpenChange(false)
+                  }}
+                />
+              )}
             </F0Box>
             <F0Box width="1/4" paddingTop="xl">
               <F0Select
@@ -776,22 +801,6 @@ function ShareTrainingDialog({
               />
             </F0Box>
           </F0Box>
-          <PeopleSelectorPopover
-            candidates={candidateOptions}
-            filters={peopleFilters}
-            showFilters={isPeopleFiltersOpen}
-            selectedEmployeeIds={selectedEmployeeIds}
-            onSelect={(employeeId) => onSelectedEmployeeChange(employeeId)}
-            onSelectAll={onSelectAll}
-            onToggleFilter={(filterKey, value) => {
-              onPeopleFilterToggle(filterKey, value)
-              onPeopleFiltersOpenChange(false)
-            }}
-            onClearFilters={() => {
-              onPeopleFiltersClear()
-              onPeopleFiltersOpenChange(false)
-            }}
-          />
         </F0Box>
 
         {notice && <NoticeText notice={notice} />}
@@ -922,18 +931,14 @@ function PeopleSelectorPopover({
   )
 
   return (
-    // Inline list (asList), imitating the production EmployeeSelectorV2.
-    <div className="mt-2 flex max-h-80 flex-col overflow-hidden rounded-md border border-solid border-f1-border-secondary bg-f1-background">
+    // F0Box cannot express the top-full placement needed by this selector popover.
+    <div className="isolate absolute left-0 right-0 top-full z-50 mt-1 max-h-80 overflow-hidden rounded-md border border-solid border-f1-border-secondary bg-f1-background shadow-lg">
       <div className="flex items-center justify-between border-0 border-b border-solid border-f1-border-secondary px-3 py-2">
-        <F0Text
-          content={showFilters ? "Filters" : `${selectedEmployeeIds.length} selected`}
-          variant={showFilters ? "label" : "description"}
-        />
-        {showFilters
-          ? selectedCount > 0 && (
-              <F0Button label="Clear" variant="neutral" size="sm" onClick={onClearFilters} />
-            )
-          : candidateIds.length > 0 && (
+        {showFilters ? (
+          <F0Text content="Filters" variant="label" />
+        ) : (
+          <div className="flex items-center gap-2">
+            {candidateIds.length > 0 && (
               <F0Checkbox
                 checked={allCandidatesSelected}
                 onCheckedChange={() => onSelectAll(candidateIds)}
@@ -941,6 +946,12 @@ function PeopleSelectorPopover({
                 hideLabel
               />
             )}
+            <F0Text content={`${selectedEmployeeIds.length} selected`} variant="description" />
+          </div>
+        )}
+        {showFilters && selectedCount > 0 && (
+          <F0Button label="Clear" variant="neutral" size="sm" onClick={onClearFilters} />
+        )}
       </div>
       {showFilters ? (
         <div className="flex max-h-72 overflow-hidden">
