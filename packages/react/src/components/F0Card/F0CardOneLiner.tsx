@@ -16,7 +16,12 @@ import {
 } from "./components/CardActions"
 import { CardAlertWrapper, alertBorderColor } from "./components/CardAlert"
 import { CardAvatar, type CardAvatarVariant } from "./components/CardAvatar"
-import { OneLinerActions } from "./components/OneLinerActions"
+import {
+  OneLinerActions,
+  type OneLinerConfirmAction,
+  type OneLinerStackAt,
+  oneLinerRowClassName,
+} from "./components/OneLinerActions"
 import { type CardAlertProps } from "./types"
 
 export interface F0CardOneLinerProps {
@@ -52,9 +57,27 @@ export interface F0CardOneLinerProps {
   otherActions?: DropdownItem[]
 
   /**
+   * Confirm/reject variant: renders an icon-only ✗ (reject) + ✓ (confirm) pair
+   * instead of the standard actions. Provide either or both.
+   */
+  confirmAction?: OneLinerConfirmAction
+
+  /**
+   * Reject (✗) action of the confirm/reject variant. See {@link confirmAction}.
+   */
+  rejectAction?: OneLinerConfirmAction
+
+  /**
    * Compact layout: tighter padding and smaller controls.
    */
   compact?: boolean
+
+  /**
+   * Container width at which the actions drop to their own line (below it) vs.
+   * sit inline (at/above it). `never` keeps them inline at every width.
+   * @default "md"
+   */
+  stackAt?: OneLinerStackAt
 
   /**
    * When set, the whole row becomes a link to this href.
@@ -88,8 +111,9 @@ export interface F0CardOneLinerProps {
 /**
  * A single-row card: optional avatar on the left, stacked title + description,
  * and actions on the right. It collapses to a stacked layout when the card's own
- * width drops below the `@md` container breakpoint (a container query on the
- * card's width, not the viewport), so it reacts correctly inside grids and columns.
+ * width drops below the `stackAt` container breakpoint (default `@md`; a container
+ * query on the card's width, not the viewport), so it reacts correctly inside
+ * grids and columns.
  */
 const F0CardOneLinerBase = forwardRef<HTMLDivElement, F0CardOneLinerProps>(
   function F0CardOneLiner(
@@ -100,12 +124,15 @@ const F0CardOneLinerBase = forwardRef<HTMLDivElement, F0CardOneLinerProps>(
       primaryAction,
       secondaryActions,
       otherActions,
+      confirmAction,
+      rejectAction,
       compact = false,
       link,
       fullHeight = false,
       alert,
       onClick,
       disableOverlayLink = false,
+      stackAt = "md",
     },
     ref
   ) {
@@ -143,7 +170,7 @@ const F0CardOneLinerBase = forwardRef<HTMLDivElement, F0CardOneLinerProps>(
           </F0Link>
         )}
 
-        <div className="flex flex-col @md:flex-row @md:items-center @md:justify-between @md:gap-4">
+        <div className={oneLinerRowClassName[stackAt]}>
           <div className="flex min-w-0 flex-row items-center gap-3">
             {avatar && <CardAvatar avatar={avatar} size="md" />}
             <div className="flex min-w-0 flex-col gap-0">
@@ -165,7 +192,10 @@ const F0CardOneLinerBase = forwardRef<HTMLDivElement, F0CardOneLinerProps>(
             primaryAction={primaryAction}
             secondaryActions={secondaryActions}
             otherActions={otherActions}
+            confirmAction={confirmAction}
+            rejectAction={rejectAction}
             compact={compact}
+            stackAt={stackAt}
           />
         </div>
       </Card>

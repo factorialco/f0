@@ -49,6 +49,45 @@ export const Default: Story = {
   },
 }
 
+/**
+ * Confirm/reject variant: icon-only ✗ (reject) + ✓ (confirm) buttons instead of
+ * the standard actions. Useful for inline approve/reject rows.
+ */
+export const ConfirmReject: Story = {
+  args: {
+    avatar: {
+      type: "person",
+      firstName: "Jane",
+      lastName: "Cooper",
+      src: image,
+    },
+    title: "Jane Cooper",
+    description: "Requested 3 days off",
+    rejectAction: { label: "Reject", onClick: fn() },
+    confirmAction: { label: "Approve", onClick: fn() },
+  },
+}
+
+/**
+ * `stackAt` controls the container width at which the actions drop to their own
+ * line. `never` keeps them inline at every width (the title truncates instead).
+ */
+export const NeverStack: Story = {
+  args: {
+    avatar: {
+      type: "person",
+      firstName: "Jane",
+      lastName: "Cooper",
+      src: image,
+    },
+    title: "Jane Cooper",
+    description: "Actions stay inline at every width",
+    stackAt: "never",
+    secondaryActions: [{ label: "Edit", onClick: fn() }],
+    primaryAction: { label: "Open", onClick: fn() },
+  },
+}
+
 export const WithAvatar: Story = {
   args: {
     avatar: {
