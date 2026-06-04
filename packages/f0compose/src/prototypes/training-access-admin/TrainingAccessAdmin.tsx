@@ -773,12 +773,11 @@ function ShareTrainingDialog({
                   onSelectAll={onSelectAll}
                   onToggleFilter={(filterKey, value) => {
                     onPeopleFilterToggle(filterKey, value)
-                    onPeopleFiltersOpenChange(false)
                   }}
                   onClearFilters={() => {
                     onPeopleFiltersClear()
-                    onPeopleFiltersOpenChange(false)
                   }}
+                  onCloseFilters={() => onPeopleFiltersOpenChange(false)}
                 />
               )}
             </F0Box>
@@ -903,6 +902,7 @@ function PeopleSelectorPopover({
   onSelectAll,
   onToggleFilter,
   onClearFilters,
+  onCloseFilters,
 }: {
   candidates: CandidateOption[]
   filters: PeopleFilters
@@ -912,6 +912,7 @@ function PeopleSelectorPopover({
   onSelectAll: (ids: string[]) => void
   onToggleFilter: (filterKey: PeopleFilterKey, value: string) => void
   onClearFilters: () => void
+  onCloseFilters: () => void
 }) {
   const selectedCount = activeFiltersCount(filters)
   const candidateIds = candidates.map((candidate) => candidate.value)
@@ -949,8 +950,13 @@ function PeopleSelectorPopover({
             <F0Text content={`${selectedEmployeeIds.length} selected`} variant="description" />
           </div>
         )}
-        {showFilters && selectedCount > 0 && (
-          <F0Button label="Clear" variant="neutral" size="sm" onClick={onClearFilters} />
+        {showFilters && (
+          <div className="flex items-center gap-2">
+            {selectedCount > 0 && (
+              <F0Button label="Clear" variant="neutral" size="sm" onClick={onClearFilters} />
+            )}
+            <F0Button label="Done" variant="default" size="sm" onClick={onCloseFilters} />
+          </div>
         )}
       </div>
       {showFilters ? (
@@ -1024,23 +1030,27 @@ function PeopleSelectorPopover({
             candidates.map((candidate) => {
               const selected = selectedEmployeeIds.includes(candidate.value)
               return (
-                <div
+                <button
                   key={candidate.value}
-                  className={`flex w-full items-center gap-2 rounded-md p-2 hover:bg-f1-background-hover ${
+                  type="button"
+                  onClick={() => onSelect(candidate.value)}
+                  className={`flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent p-2 text-left hover:bg-f1-background-hover ${
                     selected ? "bg-f1-background-selected" : ""
                   }`}
                 >
-                  <F0Checkbox
-                    checked={selected}
-                    onCheckedChange={() => onSelect(candidate.value)}
-                    title={`Select ${candidate.employee.fullName}`}
-                    hideLabel
-                  />
+                  <span className="pointer-events-none flex">
+                    <F0Checkbox
+                      checked={selected}
+                      onCheckedChange={() => onSelect(candidate.value)}
+                      title={`Select ${candidate.employee.fullName}`}
+                      hideLabel
+                    />
+                  </span>
                   <PersonCell
                     employee={candidate.employee}
                     supportingText={candidate.employee.email}
                   />
-                </div>
+                </button>
               )
             })
           ) : (
