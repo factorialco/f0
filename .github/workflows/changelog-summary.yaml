@@ -90,7 +90,7 @@ jobs:
 
           pnpm tsx src/index.ts \
             "${ARGS[@]}" \
-            --prompt src/prompts/product-v2.md \
+            --prompt src/prompts/product-v3.md \
             --github-token "$GITHUB_TOKEN" \
             --repo-root "${{ github.workspace }}" \
             --output /tmp/summary.md

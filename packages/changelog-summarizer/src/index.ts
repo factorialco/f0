@@ -4,20 +4,23 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { resolve, join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { execSync } from "child_process";
-import { collectChangelogs } from "./collectors/changelog.js";
-import { collectCommits } from "./collectors/commits.js";
-import { extractPrNumbers, fetchPrBodies } from "./collectors/github.js";
-import type { PrInfo } from "./collectors/github.js";
-import { collectStoryUrls } from "./collectors/stories.js";
-import { resolveApiKey, resolveModel } from "./providers.js";
-import { generateSummary } from "./summarizer.js";
-import { buildContextMessage } from "./formatters/markdown.js";
 import {
-  jsonToSlackText,
-  parseSummaryJson,
-} from "./formatters/json-formatter.js";
-import { postprocess } from "./formatters/postprocess.js";
-import type { Provider } from "./types.js";
+  listMergedPRs,
+  fetchPrFiles,
+  fetchPrBodies,
+  type PrFile,
+} from "./collectors/github.js";
+import {
+  classifyMergedPrs,
+  parseConventionalTitle,
+  TYPES_NEEDING_FILES,
+  type PrWithFiles,
+} from "./collectors/prs.js";
+import { collectStoryIndex } from "./collectors/stories.js";
+import { resolveApiKey, resolveModel } from "./providers.js";
+import { polishSummary, reconcileSummary } from "./summarizer.js";
+import { jsonToSlackText } from "./formatters/json-formatter.js";
+import type { Provider, SummaryJson } from "./types.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -110,54 +113,6 @@ function saveLastRunDate(repoRoot: string): void {
   } catch {
     console.warn("[cache] Could not save last-run date");
   }
-}
-
-function saveDebugFiles(
-  debugDir: string,
-  data: {
-    fromStr: string;
-    toStr: string;
-    changelogs: ReturnType<typeof collectChangelogs>;
-    commits: ReturnType<typeof collectCommits>;
-    systemPrompt: string;
-    contextMessage: string;
-  },
-): void {
-  mkdirSync(debugDir, { recursive: true });
-
-  writeFileSync(
-    join(debugDir, "changelogs.json"),
-    JSON.stringify(data.changelogs, null, 2),
-  );
-
-  writeFileSync(
-    join(debugDir, "commits.json"),
-    JSON.stringify(data.commits, null, 2),
-  );
-
-  writeFileSync(join(debugDir, "system-prompt.md"), data.systemPrompt);
-
-  writeFileSync(join(debugDir, "context-message.md"), data.contextMessage);
-
-  const meta = {
-    from: data.fromStr,
-    to: data.toStr,
-    changelogEntries: data.changelogs.length,
-    commits: data.commits.length,
-    generatedAt: new Date().toISOString(),
-  };
-  writeFileSync(join(debugDir, "meta.json"), JSON.stringify(meta, null, 2));
-
-  console.error(`[debug] Context saved to ${debugDir}/`);
-  console.error(
-    `[debug]   changelogs.json    — ${data.changelogs.length} entries`,
-  );
-  console.error(
-    `[debug]   commits.json       — ${data.commits.length} commits`,
-  );
-  console.error(`[debug]   system-prompt.md   — system prompt`);
-  console.error(`[debug]   context-message.md — full LLM user message`);
-  console.error(`[debug]   meta.json          — run metadata`);
 }
 
 async function main(): Promise<void> {
@@ -266,118 +221,99 @@ async function main(): Promise<void> {
     }
     systemPrompt = readFileSync(promptPath, "utf-8");
   } else {
-    const defaultPromptPath = join(__dirname, "prompts", "default.md");
+    const defaultPromptPath = join(__dirname, "prompts", "product-v3.md");
     systemPrompt = readFileSync(defaultPromptPath, "utf-8");
   }
 
-  // Collect data
-  console.error("[collect] Reading changelogs…");
-  const changelogs = collectChangelogs(repoRoot, from, to);
-  console.error(`[collect] Found ${changelogs.length} changelog entries`);
-
-  console.error("[collect] Reading commits…");
-  const commits = collectCommits(repoRoot, from, to);
-  console.error(`[collect] Found ${commits.length} commits`);
-
-  // Build precise Storybook URL map from the published index.json.
-  console.error("[collect] Fetching Storybook index…");
-  const storyUrls = await collectStoryUrls();
-  console.error(`[collect] Built story URL map (${storyUrls.size} entries)`);
-
-  // Fetch PR bodies only for *features* — bug fix one-liners from the
-  // CHANGELOG are usually enough and fetching every PR explodes the token.
-  const featureText = [
-    ...changelogs.flatMap((e) => e.features),
-    ...commits
-      .filter((c) => /^feat(\(|:|!)/.test(c.message))
-      .map((c) => c.message),
-  ].join(" ");
-  const prNumbers = extractPrNumbers(featureText);
+  // ---- Collect: merged PRs are the source of truth for what shipped ----
   const githubToken = opts.githubToken ?? process.env["GITHUB_TOKEN"];
-  let prBodies: Map<number, PrInfo> = new Map();
-  if (prNumbers.length > 0) {
-    console.error(
-      `[collect] Fetching ${prNumbers.length} PR description(s)…`,
-    );
-    prBodies = await fetchPrBodies(prNumbers, githubToken);
-    console.error(`[collect] Got ${prBodies.size} PR description(s)`);
-  }
 
-  // Save debug files if requested
-  if (opts.debug) {
-    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-    const debugDir =
-      opts.debugDir ?? `/tmp/changelog-summarizer-debug-${timestamp}`;
+  console.error("[collect] Fetching Storybook index…");
+  const storyIndex = await collectStoryIndex();
 
-    const contextMessage = buildContextMessage(
-      changelogs,
-      commits,
-      fromStr,
-      toStr,
-      prBodies,
-    );
+  console.error("[collect] Listing merged PRs…");
+  const prs = await listMergedPRs(fromStr, toStr, githubToken);
 
-    saveDebugFiles(debugDir, {
-      fromStr,
-      toStr,
-      changelogs,
-      commits,
-      systemPrompt,
-      contextMessage,
-    });
-  }
-
-  // Check for empty context
-  if (changelogs.length === 0 && commits.length === 0) {
-    console.error("[warn] No changes found for the given date range");
-    const emptyMessage = `:f0-dev: F0 Weekly Summary (${fromStr} – ${toStr})\n---\n_No changes this week._`;
-    if (opts.output) {
-      writeFileSync(resolve(opts.output), emptyMessage);
-    } else {
-      process.stdout.write(emptyMessage + "\n");
+  console.error("[collect] Fetching changed files / PR bodies…");
+  const withFiles: PrWithFiles[] = [];
+  for (const pr of prs) {
+    const { type, breaking } = parseConventionalTitle(pr.title);
+    let files: PrFile[] = [];
+    if (breaking || TYPES_NEEDING_FILES.has(type)) {
+      files = await fetchPrFiles(pr.number, githubToken);
     }
+    let body: string | undefined;
+    if (breaking) {
+      body = (await fetchPrBodies([pr.number], githubToken)).get(pr.number)
+        ?.body;
+    }
+    withFiles.push({ ...pr, files, body });
+  }
+
+  const facts = classifyMergedPrs(withFiles, storyIndex);
+
+  // Technical thread reply (for engineers): bug fixes + infra + thanks.
+  const threadParts: string[] = [];
+  if (facts.fixes.length > 0)
+    threadParts.push(`Fixes this week: ${facts.fixes.join("; ")}.`);
+  if (facts.infra.length > 0)
+    threadParts.push(`Infra & tooling: ${facts.infra.join("; ")}.`);
+  if (facts.contributors.length > 0)
+    threadParts.push(
+      `Thanks to ${facts.contributors.map((c) => `@${c}`).join(", ")}.`,
+    );
+
+  const skeleton: SummaryJson = {
+    ...facts.skeleton,
+    thread_details: threadParts.join(" "),
+  };
+
+  // Empty week → short placeholder.
+  const hasContent = Object.values(skeleton.sections).some((v) =>
+    Array.isArray(v) ? v.length > 0 : Boolean(v),
+  );
+  if (!hasContent) {
+    console.error("[warn] No product-visible changes for the given date range");
+    const emptyMessage = `:f0-dev: F0 Weekly Summary (${fromStr} – ${toStr})\n---\n_No changes this week._`;
+    if (opts.output) writeFileSync(resolve(opts.output), emptyMessage);
+    else process.stdout.write(emptyMessage + "\n");
+    saveLastRunDate(repoRoot);
     return;
   }
 
-  // Generate summary
-  console.error(`[llm] Generating summary with ${provider}…`);
-  const rawSummary = await generateSummary(model, systemPrompt, {
-    from: fromStr,
-    to: toStr,
-    changelogs,
-    commits,
-    prBodies,
-  });
-
-  // Decide post-processing path based on what the model returned. The
-  // product-v2 prompt asks for strict JSON; the legacy prompt asks for
-  // free-form mrkdwn that just needs cleanup.
-  let summary: string;
-  let threadDetails: string | undefined;
-
-  const trimmedRaw = rawSummary.trim();
-  const looksLikeJson =
-    trimmedRaw.startsWith("{") || trimmedRaw.startsWith("```");
-
-  if (looksLikeJson) {
-    console.error("[post] Detected JSON output — using product-v2 path");
-    const json = parseSummaryJson(rawSummary);
-    const slackText = jsonToSlackText(json, storyUrls);
-    if (slackText === null) {
-      summary = "_No changes this week._";
-    } else {
-      summary = slackText;
-    }
-    if (typeof json.thread_details === "string" && json.thread_details.trim()) {
-      threadDetails = json.thread_details.trim();
-    }
-  } else {
-    console.error("[post] Plain text output — using legacy postprocess path");
-    summary = postprocess(rawSummary);
+  // ---- Polish: the LLM rewrites each summary into product language with the
+  //      "why", bounded to the facts above (it may drop/merge, never invent).
+  //      If it fails, we publish the factual summary as-is.
+  let finalJson: SummaryJson = skeleton;
+  try {
+    console.error(`[llm] Polishing summary with ${provider}…`);
+    const polished = await polishSummary(model, systemPrompt, skeleton);
+    finalJson = reconcileSummary(skeleton, polished);
+  } catch (err) {
+    console.error(
+      `[llm] Polish failed (${err instanceof Error ? err.message : String(err)}) — using the factual summary`,
+    );
   }
 
-  // Prepend a plain-text title line (used as the top-level Slack header block)
-  // followed by --- so the workflow parser treats it as the first section delimiter.
+  if (opts.debug) {
+    const debugDir = opts.debugDir ?? "/tmp/changelog-summarizer-debug";
+    mkdirSync(debugDir, { recursive: true });
+    writeFileSync(
+      join(debugDir, "skeleton.json"),
+      JSON.stringify(skeleton, null, 2),
+    );
+    writeFileSync(
+      join(debugDir, "final.json"),
+      JSON.stringify(finalJson, null, 2),
+    );
+    console.error(`[debug] Wrote skeleton.json + final.json to ${debugDir}/`);
+  }
+
+  const summary =
+    jsonToSlackText(finalJson, storyIndex.urlByKey) ?? "_No changes this week._";
+  const threadDetails = finalJson.thread_details?.trim() || undefined;
+
+  // Prepend a plain-text title line (the top-level Slack header block) + ---.
   const output = `:f0-dev: F0 Weekly Summary (${fromStr} – ${toStr})\n---\n${summary}`;
 
   // Output
