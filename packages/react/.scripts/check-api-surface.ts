@@ -123,6 +123,54 @@ function entryDtsPath(dir: string, entry: Entry): string | undefined {
   return existsSync(p) ? p : undefined
 }
 
+const COMPILER_OPTIONS: ts.CompilerOptions = {
+  noEmit: true,
+  skipLibCheck: true,
+  skipDefaultLibCheck: true,
+  target: ts.ScriptTarget.ESNext,
+  module: ts.ModuleKind.ESNext,
+  moduleResolution: ts.ModuleResolutionKind.Bundler,
+  jsx: ts.JsxEmit.Preserve,
+  allowJs: false,
+  strict: false,
+}
+
+// One `analyze()` run creates many small programs (per entry, per side). The
+// dominant cost is parsing the multi-megabyte default TypeScript lib, which is
+// identical across every program. Share a compiler host that caches parsed
+// source files by name so the lib is parsed once instead of per program — this
+// keeps each program from blowing the test timeout on slower CI runners.
+let sharedHost: ts.CompilerHost | undefined
+const sourceFileCache = new Map<string, ts.SourceFile | undefined>()
+
+function getCompilerHost(): ts.CompilerHost {
+  if (sharedHost) return sharedHost
+  const host = ts.createCompilerHost(COMPILER_OPTIONS)
+  const original = host.getSourceFile.bind(host)
+  host.getSourceFile = (
+    fileName,
+    languageVersionOrOptions,
+    onError,
+    shouldCreate
+  ) => {
+    const cached = sourceFileCache.get(fileName)
+    if (cached !== undefined) return cached
+    const sf = original(
+      fileName,
+      languageVersionOrOptions,
+      onError,
+      shouldCreate
+    )
+    // Entry `.d.ts` files live at unique paths (temp dirs / base-vs-head dirs)
+    // and are read once, so caching every file by name is safe and reuses the
+    // expensive lib/node_modules parses across programs.
+    sourceFileCache.set(fileName, sf)
+    return sf
+  }
+  sharedHost = host
+  return host
+}
+
 /**
  * Build a snapshot of the public exports of a single rolled `.d.ts` file.
  * Returns `undefined` when the file does not exist (treated as "no baseline").
@@ -138,17 +186,8 @@ export function snapshotEntry(
 
   const program = ts.createProgram({
     rootNames: [dtsPath],
-    options: {
-      noEmit: true,
-      skipLibCheck: true,
-      skipDefaultLibCheck: true,
-      target: ts.ScriptTarget.ESNext,
-      module: ts.ModuleKind.ESNext,
-      moduleResolution: ts.ModuleResolutionKind.Bundler,
-      jsx: ts.JsxEmit.Preserve,
-      allowJs: false,
-      strict: false,
-    },
+    options: COMPILER_OPTIONS,
+    host: getCompilerHost(),
   })
 
   const checker = program.getTypeChecker()

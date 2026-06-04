@@ -2,9 +2,13 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import path from "node:path"
 
-import { afterEach, describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { analyze, type EntryDiff } from "../check-api-surface"
+
+// Each test spins up TypeScript programs (the first parses the multi-megabyte
+// default lib), which is slower than a typical unit test on CI runners.
+vi.setConfig({ testTimeout: 30000 })
 
 /**
  * Each test writes a minimal `f0.d.ts` for the "base" and "head" sides into
