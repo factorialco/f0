@@ -46,6 +46,7 @@
     "format": "sh -c 'oxfmt \"${@:-src/}\"' --",
     "format:check": "sh -c 'oxfmt --check \"${@:-src/}\"' --",
     "tsc": "tsc --noEmit",
+    "check:api-surface": "tsx .scripts/check-api-surface.ts",
     "vitest": "vitest --project=unit",
     "vitest:ui": "vitest --project=unit --ui",
     "vitest:watch": "vitest --project=unit dev",
