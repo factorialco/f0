@@ -1,6 +1,6 @@
 export * from "./F0TextAreaInput"
 
-import { F0TextAreaInput } from "./F0TextAreaInput"
+import { F0TextAreaInput, type F0TextAreaInputProps } from "./F0TextAreaInput"
 export type { F0TextAreaInputProps } from "./F0TextAreaInput"
 
 /**
@@ -21,4 +21,4 @@ export const Textarea = F0TextAreaInput
  * deprecation note.
  * @removeIn 2.0.0
  */
-export type TextareaProps = import("./F0TextAreaInput").F0TextAreaInputProps
+export type TextareaProps = F0TextAreaInputProps
