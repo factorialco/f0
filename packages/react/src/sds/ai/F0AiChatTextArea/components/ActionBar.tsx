@@ -1,8 +1,18 @@
 import { type RefObject } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { ArrowUp, Paperclip, SolidStop } from "@/icons/app"
+import {
+  ArrowUp,
+  Check,
+  Cross,
+  Microphone,
+  Paperclip,
+  SolidStop,
+} from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+
+import { type RecorderStatus } from "../useAudioRecorder"
+import { RecordingWaveform } from "./RecordingWaveform"
 
 interface ActionBarProps {
   onUploadFiles: ((files: File[]) => Promise<unknown>) | undefined
@@ -14,6 +24,13 @@ interface ActionBarProps {
   inProgress?: boolean
   hasDataToSend: boolean
   isPreSending?: boolean
+  /** Voice dictation — when canRecord is false the microphone is hidden. */
+  canRecord?: boolean
+  recordingStatus?: RecorderStatus
+  recordingStream?: MediaStream | null
+  onStartRecording?: () => void
+  onStopRecording?: () => void
+  onCancelRecording?: () => void
 }
 
 export const ActionBar = ({
@@ -26,8 +43,48 @@ export const ActionBar = ({
   inProgress,
   hasDataToSend,
   isPreSending,
+  canRecord,
+  recordingStatus = "idle",
+  recordingStream,
+  onStartRecording,
+  onStopRecording,
+  onCancelRecording,
 }: ActionBarProps) => {
   const translation = useI18n()
+
+  // Recording: a scrolling amplitude timeline fills the row (building up as
+  // seconds pass) with the cancel · confirm actions grouped on the right, so
+  // the regular send/submit button can't fire mid-record.
+  if (recordingStatus === "recording") {
+    return (
+      <div className="flex shrink-0 items-center gap-3 p-3">
+        <RecordingWaveform
+          stream={recordingStream ?? null}
+          className="min-w-0 flex-1"
+        />
+        <div className="flex shrink-0 items-center gap-2">
+          <ButtonInternal
+            label={translation.ai.cancelRecording}
+            hideLabel
+            type="button"
+            icon={Cross}
+            variant="outline"
+            size="md"
+            onClick={onCancelRecording}
+          />
+          <ButtonInternal
+            label={translation.ai.stopRecording}
+            hideLabel
+            type="button"
+            icon={Check}
+            variant="default"
+            size="md"
+            onClick={onStopRecording}
+          />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex shrink-0 items-center justify-between p-3">
@@ -41,7 +98,7 @@ export const ActionBar = ({
               icon={Paperclip}
               variant="outline"
               size="md"
-              disabled={isAtMaxFiles}
+              disabled={isAtMaxFiles || recordingStatus === "transcribing"}
               onClick={(e) => {
                 e.preventDefault()
                 fileInputRef.current?.click()
@@ -61,8 +118,21 @@ export const ActionBar = ({
           </>
         )}
       </div>
-      <div className="flex items-center">
-        {inProgress ? (
+      <div className="flex items-center gap-2">
+        {canRecord && (
+          <ButtonInternal
+            label={translation.ai.recordAudio}
+            hideLabel
+            type="button"
+            icon={Microphone}
+            variant="ghost"
+            size="md"
+            disabled={inProgress}
+            onClick={onStartRecording}
+            loading={recordingStatus === "transcribing"}
+          />
+        )}
+        {recordingStatus !== "transcribing" && inProgress ? (
           <ButtonInternal
             type="submit"
             variant="neutral"
@@ -76,7 +146,7 @@ export const ActionBar = ({
             // Stays enabled while an attachment uploads so the click queues the
             // send (fired once the upload finishes) instead of being a no-op.
             disabled={!hasDataToSend || isPreSending}
-            variant={hasDataToSend && !isPreSending ? "default" : "neutral"}
+            variant={"default"}
             label={translation.ai.sendMessage}
             icon={ArrowUp}
             hideLabel

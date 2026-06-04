@@ -15,6 +15,7 @@ import {
   type F0AIMessage,
   type PendingContext,
   type PendingQuote,
+  type TranscribeFn,
   type VisualizationMode,
   WelcomeScreenSuggestion,
 } from "./types"
@@ -46,6 +47,7 @@ export interface AiChatState {
   employeeCredits?: AiChatEmployeeCredits
   creditWarning?: AiChatCreditWarning
   fileAttachments?: AiChatFileAttachmentConfig
+  onTranscribe?: TranscribeFn
   placeholders?: string[]
   setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>
   onThumbsUp?: (
@@ -187,6 +189,7 @@ export type AiChatProviderReturnValue = {
   | "employeeCredits"
   | "creditWarning"
   | "fileAttachments"
+  | "onTranscribe"
 > & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null

@@ -109,11 +109,7 @@ describe("OneDataCollection URL sync — clearing a filter chip", () => {
   })
 
   it("removes the param when clearing a chip for a filter loaded from the URL", async () => {
-    window.history.replaceState(
-      null,
-      "",
-      "/people?dc_id=people/v1&dc_department=Engineering"
-    )
+    window.history.replaceState(null, "", "/people?dc_department=Engineering")
 
     render(<ExampleComponent id="people/v1" />)
 

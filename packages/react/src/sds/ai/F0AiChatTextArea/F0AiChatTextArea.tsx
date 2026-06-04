@@ -22,6 +22,7 @@ import type {
 } from "../F0AiChat/types"
 import { buildHighlightSegments } from "./highlight-utils"
 import { type F0AiChatTextAreaProps } from "./types"
+import { type RecorderError, useAudioRecorder } from "./useAudioRecorder"
 import { useFileAttachments } from "./useFileAttachments"
 import { useMentions } from "./useMentions"
 
@@ -70,6 +71,7 @@ export const F0AiChatTextArea = ({
   pendingQuote = null,
   onPendingQuoteChange,
   fileAttachments,
+  onTranscribe,
   searchPersons,
   onProcessFilesRef,
   disclaimer,
@@ -137,6 +139,36 @@ export const F0AiChatTextArea = ({
     textareaRef,
   })
 
+  // Voice dictation. Transcripts are written onto whatever was already typed
+  // (captured when recording starts) so dictation appends instead of replacing.
+  const dictationBaseRef = useRef("")
+  const applyDictation = useCallback((text: string) => {
+    const base = dictationBaseRef.current
+    const separator = base && !/\s$/.test(base) ? " " : ""
+    const next = `${base}${separator}${text}`
+    setInputValue(next)
+    setCursorPosition(next.length)
+  }, [])
+  const recorderErrorMessage: Record<RecorderError, string> = {
+    "permission-denied": translation.ai.micPermissionDenied,
+    "device-error": translation.ai.micError,
+    "transcription-failed": translation.ai.transcriptionError,
+  }
+  const recorder = useAudioRecorder({
+    onTranscribe,
+    onPartial: applyDictation,
+    onFinal: (text) => {
+      applyDictation(text)
+      textareaRef.current?.focus()
+    },
+    onError: (error) => showTransientError(recorderErrorMessage[error]),
+  })
+  const canRecord = !!onTranscribe && recorder.isSupported
+  const handleStartRecording = useCallback(() => {
+    dictationBaseRef.current = inputValue
+    void recorder.start()
+  }, [inputValue, recorder])
+
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash.length === 0) {
       textareaRef.current?.focus()
@@ -157,7 +189,12 @@ export const F0AiChatTextArea = ({
     }
   }, [onProcessFilesRef, processFiles])
 
-  const resolvedDefaultPlaceholder = translation.ai.inputPlaceholder
+  // While recording, the placeholder becomes "Listening…" so the empty
+  // textarea signals that dictation is live.
+  const isRecording = recorder.status === "recording"
+  const resolvedDefaultPlaceholder = isRecording
+    ? translation.ai.listening
+    : translation.ai.inputPlaceholder
   const uploadedFiles = attachedFiles.filter((f) => f.status === "uploaded")
   const isUploading = attachedFiles.some((f) => f.status === "uploading")
   const hasErrorFiles = attachedFiles.some((f) => f.status === "error")
@@ -266,9 +303,11 @@ export const F0AiChatTextArea = ({
   const previewPlaceholder = hoveredSuggestion
     ? (hoveredSuggestion.prompt ?? hoveredSuggestion.title)
     : null
-  const effectivePlaceholders = previewPlaceholder
-    ? [previewPlaceholder]
-    : (placeholders ?? [])
+  const effectivePlaceholders = isRecording
+    ? [translation.ai.listening]
+    : previewPlaceholder
+      ? [previewPlaceholder]
+      : (placeholders ?? [])
   const multiplePlaceholders = effectivePlaceholders.length > 1
 
   const highlightSegments = useMemo(() => {
@@ -435,6 +474,12 @@ export const F0AiChatTextArea = ({
                     inProgress={inProgress}
                     hasDataToSend={hasDataToSend}
                     isPreSending={isPreSending || pendingSubmit}
+                    canRecord={canRecord}
+                    recordingStatus={recorder.status}
+                    recordingStream={recorder.stream}
+                    onStartRecording={handleStartRecording}
+                    onStopRecording={recorder.stop}
+                    onCancelRecording={recorder.cancel}
                   />
                 </motion.div>
               )}

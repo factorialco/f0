@@ -373,6 +373,15 @@ export const defaultTranslations = {
       dismiss: "Dismiss",
     },
     attachFile: "Attach file",
+    recordAudio: "Record audio",
+    listening: "Listening…",
+    stopRecording: "Stop and transcribe",
+    cancelRecording: "Cancel recording",
+    transcribing: "Transcribing…",
+    micPermissionDenied:
+      "Microphone access is blocked. Allow it in your browser settings to dictate.",
+    micError: "Couldn't access the microphone.",
+    transcriptionError: "Couldn't transcribe the audio. Try again.",
     removeFile: "Remove",
     fileUploadError: "Upload failed",
     fileUploadBlockedSubmit:

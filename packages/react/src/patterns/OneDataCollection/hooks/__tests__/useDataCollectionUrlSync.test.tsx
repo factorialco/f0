@@ -6,8 +6,6 @@ import { zeroRenderHook as renderHook } from "@/testing/test-utils"
 
 import { useDataCollectionUrlSync } from "../useDataCollectionUrlSync"
 
-const ID = "team/people/v1"
-
 const FILTERS = {
   department: { type: "in", label: "Department", options: { options: [] } },
 } as unknown as FiltersDefinition
@@ -21,7 +19,6 @@ const setup = (overrides: Partial<Props> = {}) => {
   const setVisualization = vi.fn()
 
   let props: Props = {
-    id: ID,
     disabled: false,
     storageReady: true,
     filtersDefinition: FILTERS,
@@ -65,11 +62,11 @@ afterEach(() => {
 })
 
 describe("useDataCollectionUrlSync — URL → collection", () => {
-  it("applies matching, per-filter URL params on mount", () => {
+  it("applies per-filter URL params on mount", () => {
     window.history.replaceState(
       null,
       "",
-      `/?dc_id=${ID}&dc_department=Engineering&dc_department=Product&dc_sort=salary:desc`
+      `/?dc_department=Engineering&dc_department=Product&dc_sort=salary-desc`
     )
 
     const { setFilters, setSortings, setSearch } = setup()
@@ -82,19 +79,13 @@ describe("useDataCollectionUrlSync — URL → collection", () => {
   })
 
   it("waits for storage hydration before applying", () => {
-    window.history.replaceState(null, "", `/?dc_id=${ID}&dc_search=ada`)
+    window.history.replaceState(null, "", `/?dc_search=ada`)
 
     const { setSearch, rerender } = setup({ storageReady: false })
     expect(setSearch).not.toHaveBeenCalled()
 
     rerender({ storageReady: true })
     expect(setSearch).toHaveBeenCalledWith("ada")
-  })
-
-  it("ignores params addressed to a different collection id", () => {
-    window.history.replaceState(null, "", `/?dc_id=other/v1&dc_search=ada`)
-    const { setSearch } = setup()
-    expect(setSearch).not.toHaveBeenCalled()
   })
 })
 
@@ -106,7 +97,7 @@ describe("useDataCollectionUrlSync — collection → URL", () => {
     rerender({ filters: { department: ["Design", "Sales"] } })
 
     expect(window.location.pathname).toBe("/people")
-    expect(currentParams().get("dc_id")).toBe(ID)
+    expect(currentParams().has("dc_id")).toBe(false)
     expect(currentParams().getAll("dc_department")).toEqual(["Design", "Sales"])
   })
 
@@ -124,7 +115,7 @@ describe("useDataCollectionUrlSync — collection → URL", () => {
 
 describe("useDataCollectionUrlSync — visualization", () => {
   it("maps a view key from the URL back to its index", () => {
-    window.history.replaceState(null, "", `/?dc_id=${ID}&dc_view=list`)
+    window.history.replaceState(null, "", `/?dc_view=list`)
 
     const { setVisualization } = setup({
       visualizationKeys: ["table", "card", "list"],
@@ -133,7 +124,7 @@ describe("useDataCollectionUrlSync — visualization", () => {
   })
 
   it("ignores an unknown view key", () => {
-    window.history.replaceState(null, "", `/?dc_id=${ID}&dc_view=gallery`)
+    window.history.replaceState(null, "", `/?dc_view=gallery`)
 
     const { setVisualization } = setup({
       visualizationKeys: ["table", "card", "list"],
@@ -142,7 +133,7 @@ describe("useDataCollectionUrlSync — visualization", () => {
   })
 
   it("does not sync visualization when there is only one", () => {
-    window.history.replaceState(null, "", `/?dc_id=${ID}&dc_view=card`)
+    window.history.replaceState(null, "", `/?dc_view=card`)
 
     const { setVisualization, rerender } = setup({
       visualizationKeys: ["table"],
@@ -166,9 +157,9 @@ describe("useDataCollectionUrlSync — visualization", () => {
   })
 })
 
-describe("useDataCollectionUrlSync — disabled / no id", () => {
+describe("useDataCollectionUrlSync — enabled regardless of id", () => {
   it("neither reads nor writes when disabled", () => {
-    window.history.replaceState(null, "", `/?dc_id=${ID}&dc_search=ada`)
+    window.history.replaceState(null, "", `/?dc_search=ada`)
 
     const { setSearch, rerender } = setup({ disabled: true })
     expect(setSearch).not.toHaveBeenCalled()
@@ -177,13 +168,14 @@ describe("useDataCollectionUrlSync — disabled / no id", () => {
     expect(currentParams().get("dc_search")).toBe("ada")
   })
 
-  it("does nothing without an id", () => {
-    window.history.replaceState(null, "", "/people")
+  it("syncs both ways with no id involved (the hook takes no id)", () => {
+    // URL → collection
+    window.history.replaceState(null, "", `/?dc_search=ada`)
+    const { setSearch, rerender } = setup()
+    expect(setSearch).toHaveBeenCalledWith("ada")
 
-    const { setSearch, rerender } = setup({ id: undefined })
-    rerender({ search: "ada" })
-
-    expect(setSearch).not.toHaveBeenCalled()
-    expect(window.location.search).toBe("")
+    // collection → URL
+    rerender({ search: "bob" })
+    expect(currentParams().get("dc_search")).toBe("bob")
   })
 })

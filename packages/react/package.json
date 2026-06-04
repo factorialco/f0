@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "2.37.1",
+  "version": "2.39.0",
   "private": false,
   "files": [
     "assets",
@@ -46,6 +46,7 @@
     "format": "sh -c 'oxfmt \"${@:-src/}\"' --",
     "format:check": "sh -c 'oxfmt --check \"${@:-src/}\"' --",
     "tsc": "tsc --noEmit",
+    "check:api-surface": "tsx .scripts/check-api-surface.ts",
     "vitest": "vitest --project=unit",
     "vitest:ui": "vitest --project=unit --ui",
     "vitest:watch": "vitest --project=unit dev",

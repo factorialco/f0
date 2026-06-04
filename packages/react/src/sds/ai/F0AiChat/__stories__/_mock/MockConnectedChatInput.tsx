@@ -22,6 +22,7 @@ export const MockConnectedChatInput = () => {
     placeholders,
     entityRefs,
     fileAttachments,
+    onTranscribe,
     pendingContext,
     setPendingContext,
     pendingQuote,
@@ -81,6 +82,7 @@ export const MockConnectedChatInput = () => {
       pendingQuote={pendingQuote}
       onPendingQuoteChange={setPendingQuote}
       fileAttachments={fileAttachments}
+      onTranscribe={onTranscribe}
       searchPersons={entityRefs?.resolvers?.searchPersons}
       onProcessFilesRef={setProcessDroppedFilesFunction}
       disclaimer={disclaimerWithGame}
