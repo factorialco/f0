@@ -14,6 +14,68 @@ const meta: Meta<typeof F0CardOneLiner> = {
     docs: { story: { inline: false, height: "160px" } },
   },
   tags: ["autodocs", "stable"],
+  // Explicit argTypes: docgen can't infer props through the
+  // withDataTestId(withSkeleton(...)) wrapper, so we declare the controls here.
+  argTypes: {
+    title: { control: "text", description: "The primary line of text." },
+    description: {
+      control: "text",
+      description: "Optional secondary line (single line, truncated).",
+    },
+    avatar: {
+      control: "object",
+      description:
+        "Optional avatar rendered at md on the left. Any avatar type: person, team, company, file, flag, emoji, icon, module.",
+    },
+    stackAt: {
+      control: "select",
+      options: ["sm", "md", "lg", "never"],
+      description:
+        "Container width at which the actions drop to their own line. `never` keeps them inline at every width.",
+      table: { defaultValue: { summary: "sm" } },
+    },
+    compact: {
+      control: "boolean",
+      description: "Tighter padding and smaller controls.",
+    },
+    fullHeight: {
+      control: "boolean",
+      description: "Stretch to fill the height of the container.",
+    },
+    link: {
+      control: "text",
+      description: "When set, the whole row becomes a link to this href.",
+    },
+    primaryAction: {
+      control: "object",
+      description: "Primary action button, pinned at the trailing edge.",
+    },
+    secondaryActions: {
+      control: "object",
+      description: "Secondary actions (buttons) or a single link.",
+    },
+    otherActions: {
+      control: "object",
+      description: "Overflow (⋯) menu actions, kept in the left more-menu.",
+    },
+    confirmAction: {
+      control: "object",
+      description:
+        "Confirm (✓) icon-only action of the confirm/reject variant.",
+    },
+    rejectAction: {
+      control: "object",
+      description: "Reject (✗) icon-only action of the confirm/reject variant.",
+    },
+    alert: {
+      control: "object",
+      description: "Alert banner displayed above the row.",
+    },
+    onClick: {
+      action: "clicked",
+      description: "Called when the row is clicked.",
+    },
+  },
   decorators: [
     (Story, context) => {
       if (context.parameters?.noMetaLayout) {
@@ -200,6 +262,12 @@ export const AvatarTypes: Story = {
         avatar={{ type: "emoji", emoji: "🚀" }}
         title="Launch"
         description="Emoji avatar"
+        primaryAction={{ label: "Open", onClick: fn() }}
+      />
+      <F0CardOneLiner
+        avatar={{ type: "module", module: "goals" }}
+        title="Goals"
+        description="Module avatar"
         primaryAction={{ label: "Open", onClick: fn() }}
       />
     </div>

@@ -100,7 +100,7 @@ export function OneLinerActions({
   confirmAction,
   rejectAction,
   compact = false,
-  stackAt = "md",
+  stackAt = "sm",
 }: OneLinerActionsProps) {
   const size = compact ? "sm" : "md"
 

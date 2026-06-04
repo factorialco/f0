@@ -2,6 +2,10 @@ import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0AvatarEmoji } from "@/components/avatars/F0AvatarEmoji"
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
+import {
+  F0AvatarModule,
+  type ModuleId,
+} from "@/components/avatars/F0AvatarModule"
 import { IconType } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
 
@@ -10,6 +14,7 @@ type CardAvatarVariant =
   | { type: "emoji"; emoji: string }
   | { type: "file"; file: File }
   | { type: "icon"; icon: IconType }
+  | { type: "module"; module: ModuleId }
 
 type CardAvatarSize = "sm" | "md" | "lg"
 
@@ -52,6 +57,9 @@ const AvatarRender = ({
   }
   if (avatar.type === "icon") {
     return <F0AvatarIcon icon={avatar.icon} size={size} />
+  }
+  if (avatar.type === "module") {
+    return <F0AvatarModule module={avatar.module} size={size} />
   }
   return <F0Avatar avatar={avatar} size={size} />
 }
