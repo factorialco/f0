@@ -7,6 +7,7 @@ import type {
   PendingContext,
   PendingQuote,
   PersonProfile,
+  TranscribeFn,
   UploadedFile,
   WelcomeScreenSuggestion,
   WelcomeScreenSuggestionItem,
@@ -84,6 +85,13 @@ export type F0AiChatTextAreaProps = {
 
   /** File attachment configuration. When omitted, attachments are disabled. */
   fileAttachments?: AiChatFileAttachmentConfig
+
+  /**
+   * Voice dictation. When provided, a microphone button is shown: recorded
+   * audio is transcribed and the transcript fills the textarea (the user
+   * reviews and sends it manually). When omitted, the microphone is hidden.
+   */
+  onTranscribe?: TranscribeFn
 
   /** Async search used by the @-mention popover. When omitted, mentions are disabled. */
   searchPersons?: (query: string) => Promise<PersonProfile[]>

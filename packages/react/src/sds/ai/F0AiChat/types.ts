@@ -236,6 +236,28 @@ export type AiChatFileAttachmentConfig = {
   maxFiles?: number
 }
 
+export type TranscribeOptions = {
+  /**
+   * Primary channel for live dictation: fires with the cumulative transcript
+   * as it streams in, so the composer can fill the textarea while the user
+   * speaks. Implementations that don't stream may call it once at the end.
+   */
+  onPartial: (text: string) => void
+  /** Aborted when the user cancels an in-flight transcription. */
+  signal?: AbortSignal
+}
+
+/**
+ * Transcribes a recorded audio blob to text (voice dictation). The returned
+ * promise resolves with the final transcript; `onPartial` delivers
+ * intermediate results for live textarea fill. When omitted from the chat
+ * config, the microphone button is not rendered.
+ */
+export type TranscribeFn = (
+  audio: Blob,
+  options: TranscribeOptions
+) => Promise<string>
+
 /**
  * Payload for `tracking.onWelcomeSuggestionClick`. Carries everything an
  * analytics layer (e.g. Amplitude) needs to attribute the click: the picked
@@ -343,6 +365,13 @@ export type AiChatProviderProps = {
    * File attachment configuration. When provided, enables file uploads in the chat.
    */
   fileAttachments?: AiChatFileAttachmentConfig
+  /**
+   * Voice dictation. When provided, a microphone button is shown in the
+   * composer: recorded audio is transcribed and the result fills the textarea
+   * (the user reviews and sends it as a normal text message). When omitted,
+   * the microphone is hidden.
+   */
+  onTranscribe?: TranscribeFn
   onThumbsUp?: (
     message: F0AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }

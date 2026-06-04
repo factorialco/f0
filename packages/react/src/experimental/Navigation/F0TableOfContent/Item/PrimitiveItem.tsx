@@ -77,7 +77,7 @@ export function PrimitiveItem({
         className={cn(
           focusRing("focus:border-f1-border-focus"),
           "relative flex h-[36px] min-w-0 flex-grow items-center gap-1 rounded border border-solid border-transparent px-1.5 text-sm transition-colors",
-          isActive && "bg-f1-background-selected",
+          isActive && "bg-f1-background-hover",
           onClick && !disabled && "cursor-pointer hover:bg-f1-background-hover",
           disabled && "cursor-not-allowed opacity-30"
         )}
@@ -132,7 +132,7 @@ export function PrimitiveItem({
           lines={1}
           className={cn(
             "flex-grow text-[14px] font-medium text-f1-foreground transition-all",
-            showHandleIcon || icon ? "pl-7" : "pl-0"
+            showHandleIcon || icon ? "pl-7" : "pl-0.5"
           )}
         >
           {label}

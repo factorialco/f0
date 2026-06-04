@@ -1,6 +1,6 @@
 export * from "./F0NumberInput"
 
-import { F0NumberInput } from "./F0NumberInput"
+import { F0NumberInput, type F0NumberInputProps } from "./F0NumberInput"
 export type { F0NumberInputProps } from "./F0NumberInput"
 
 /**
@@ -21,4 +21,4 @@ export const NumberInput = F0NumberInput
  * deprecation note.
  * @removeIn 2.0.0
  */
-export type NumberInputProps = import("./F0NumberInput").F0NumberInputProps
+export type NumberInputProps = F0NumberInputProps

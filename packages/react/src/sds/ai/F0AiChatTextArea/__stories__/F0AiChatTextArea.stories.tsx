@@ -13,6 +13,7 @@ import type {
   PendingContext,
   PendingQuote,
   PersonProfile,
+  TranscribeFn,
   UploadedFile,
 } from "../../F0AiChat/types"
 
@@ -82,6 +83,21 @@ const FILE_UPLOAD_CONFIG: AiChatFileAttachmentConfig = {
   maxFiles: 3,
 }
 
+// Simulates a streaming STT endpoint: emits the same transcript word by word
+// so the textarea fills live (Wispr Flow feel) without any backend.
+const MOCK_TRANSCRIPT = "How many vacation days do I have left this year?"
+const mockTranscribe: TranscribeFn = async (_audio, { onPartial, signal }) => {
+  const words = MOCK_TRANSCRIPT.split(" ")
+  let acc = ""
+  for (const word of words) {
+    if (signal?.aborted) break
+    await new Promise((r) => setTimeout(r, 140))
+    acc = acc ? `${acc} ${word}` : word
+    onPartial(acc)
+  }
+  return MOCK_TRANSCRIPT
+}
+
 const CREDIT_WARNING: AiChatCreditWarning = {
   level: "soft",
   onGetCredits: () => console.log("get credits clicked"),
@@ -124,6 +140,7 @@ const buildClarifyingState = (
 type WrapperProps = {
   placeholders?: string[]
   fileAttachments?: AiChatFileAttachmentConfig
+  onTranscribe?: TranscribeFn
   searchPersons?: (query: string) => Promise<PersonProfile[]>
   initialPendingContext?: PendingContext | null
   initialPendingQuote?: PendingQuote | null
@@ -139,6 +156,7 @@ type WrapperProps = {
 const Wrapper = ({
   placeholders,
   fileAttachments,
+  onTranscribe,
   searchPersons,
   initialPendingContext = null,
   initialPendingQuote = null,
@@ -185,6 +203,7 @@ const Wrapper = ({
         pendingQuote={pendingQuote}
         onPendingQuoteChange={setPendingQuote}
         fileAttachments={fileAttachments}
+        onTranscribe={onTranscribe}
         searchPersons={searchPersons}
         disclaimer={disclaimer}
         footer={footer}
@@ -301,6 +320,13 @@ export const WithMentions: Story = {
   },
 }
 
+export const WithVoiceDictation: Story = {
+  args: {
+    onTranscribe: mockTranscribe,
+    placeholders: ["Tap the mic and start talking…"],
+  },
+}
+
 export const Clarifying: Story = {
   args: {
     clarifyingQuestion: buildClarifyingState(),
@@ -337,6 +363,7 @@ export const Everything: Story = {
   args: {
     placeholders: ROTATING_PLACEHOLDERS,
     fileAttachments: FILE_UPLOAD_CONFIG,
+    onTranscribe: mockTranscribe,
     searchPersons: mockSearchPersons,
     creditWarning: CREDIT_WARNING,
     disclaimer: DISCLAIMER,

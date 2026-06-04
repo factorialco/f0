@@ -1,5 +1,48 @@
 # Changelog
 
+## [2.39.0](https://github.com/factorialco/f0/compare/f0-react-v2.38.0...f0-react-v2.39.0) (2026-06-04)
+
+
+### Features
+
+* **F0AiChat:** voice dictation with live transcription ([#4312](https://github.com/factorialco/f0/issues/4312)) ([87ca5a5](https://github.com/factorialco/f0/commit/87ca5a5bc8e49f6e06dbd0ff21e4692ba927ac8b))
+
+## [2.38.0](https://github.com/factorialco/f0/compare/f0-react-v2.37.1...f0-react-v2.38.0) (2026-06-04)
+
+
+### Features
+
+* drop dc_id from data collection url params + cleaner sort encoding ([#4319](https://github.com/factorialco/f0/issues/4319)) ([d9872ac](https://github.com/factorialco/f0/commit/d9872acbdef21ff0b4d26a8b26372342bf1441dc))
+
+## [2.37.1](https://github.com/factorialco/f0/compare/f0-react-v2.37.0...f0-react-v2.37.1) (2026-06-04)
+
+
+### Bug Fixes
+
+* **inputs:** preserve generic prop types for deprecated experimental re-exports ([#4317](https://github.com/factorialco/f0/issues/4317)) ([aa52db5](https://github.com/factorialco/f0/commit/aa52db5b2c22ad4260c1b115fa50962af9dd698e))
+
+## [2.37.0](https://github.com/factorialco/f0/compare/f0-react-v2.36.1...f0-react-v2.37.0) (2026-06-04)
+
+
+### Features
+
+* add support to persist data collection filters/sorting/search with url params ([#4303](https://github.com/factorialco/f0/issues/4303)) ([70c459b](https://github.com/factorialco/f0/commit/70c459bf14256a3da6050ab0bb4fbee1bf4e87f3))
+
+## [2.36.1](https://github.com/factorialco/f0/compare/f0-react-v2.36.0...f0-react-v2.36.1) (2026-06-03)
+
+
+### Bug Fixes
+
+* **TableOfContent:** use background-hover for active item and reduce padding without icon ([#4309](https://github.com/factorialco/f0/issues/4309)) ([1315ba6](https://github.com/factorialco/f0/commit/1315ba6d502734dde2062562db50cb3593c0fd42))
+* **WelcomeScreen:** add coral red mid-stop to welcome gradient ([#4314](https://github.com/factorialco/f0/issues/4314)) ([5d0d23a](https://github.com/factorialco/f0/commit/5d0d23a6caca515610a0236e356113fb44297bcd))
+
+## [2.36.0](https://github.com/factorialco/f0/compare/f0-react-v2.35.0...f0-react-v2.36.0) (2026-06-03)
+
+
+### Features
+
+* **F0Button:** right-positioned icon + ArrowRight on CRUD Read open actions ([#4302](https://github.com/factorialco/f0/issues/4302)) ([e4c7861](https://github.com/factorialco/f0/commit/e4c7861208e9a57cf911d317ce5324e3ffece4ce))
+
 ## [2.35.0](https://github.com/factorialco/f0/compare/f0-react-v2.34.0...f0-react-v2.35.0) (2026-06-03)
 
 

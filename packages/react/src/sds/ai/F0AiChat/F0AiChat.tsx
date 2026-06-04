@@ -48,6 +48,7 @@ const F0AiChatProviderComponent = ({
   employeeCredits,
   creditWarning,
   fileAttachments,
+  onTranscribe,
   onThumbsUp,
   onThumbsDown,
   children,
@@ -80,6 +81,7 @@ const F0AiChatProviderComponent = ({
       employeeCredits={employeeCredits}
       creditWarning={creditWarning}
       fileAttachments={fileAttachments}
+      onTranscribe={onTranscribe}
     >
       {children}
     </AiChatStateProvider>
