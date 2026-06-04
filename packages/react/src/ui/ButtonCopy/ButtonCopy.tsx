@@ -25,9 +25,9 @@ export type ButtonCopyProps = Omit<
 }
 
 const copyIconMotionVariants = {
-  initial: { scale: 0.5, opacity: 0 },
+  initial: { scale: 0.9, opacity: 0 },
   animate: { scale: 1, opacity: 1 },
-  exit: { scale: 0.5, opacity: 0 },
+  exit: { scale: 0.9, opacity: 0 },
 }
 const copyIconTransition = { duration: 0.15, ease: "easeOut" }
 
