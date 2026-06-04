@@ -229,7 +229,7 @@ function findEmployee(employeeId: string) {
 }
 
 function roleLabel(role: DirectAccessRole) {
-  if (role === "author") return "Owner"
+  if (role === "author") return "Author"
   if (role === "editor") return "Can edit"
   return "Can view"
 }

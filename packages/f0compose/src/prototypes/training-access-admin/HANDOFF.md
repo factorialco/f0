@@ -59,7 +59,7 @@ The Admin UI surface is considered closed when the modal supports the product mo
 - Admin can batch-select multiple employees before adding them with one role.
 - Admin can update a direct collaborator role from the access list.
 - Admin can remove a direct collaborator from the access list.
-- Author/Owner is visible and protected from removal in this modal.
+- Author is visible and protected from removal in this modal.
 - Instructor-derived access is visible but not managed in this modal.
 - Direct collaborator + instructor is shown as one effective row, not duplicates.
 
@@ -69,8 +69,8 @@ What remains to close Admin is not a new UI surface. It is confirming the exact 
 
 - The Admin v1 permission surface can live in a modal. No separate Admin permissions page is needed for training-level collaborators.
 - The entry CTA stays `Share`, because the user intent is sharing a course with people, even if the implementation is access management.
-- The prototype keeps the protected creator row labelled `Owner`, matching the current UI and the ownership language in `Training Permissions`.
-- The source docs still conflict on `Owner` vs `Author`, so implementation should reconcile that naming before build.
+- The protected creator row is labelled `Author` (team decision), is an editor
+  by default, and cannot be removed or have its role changed.
 - Managing collaborators is Admin-only for v1.
 - Editors do not see `Share` for now. Do not show a disabled Share button with tooltip in this Admin prototype.
 - Removing direct collaborator access is immediate. No confirmation modal for v1.
@@ -83,25 +83,28 @@ What remains to close Admin is not a new UI surface. It is confirming the exact 
 
 - The course list in `training-access-editor` and `training-access-viewer` is
   filtered by the effective training permission. Users should only see courses
-  they can access through `Owner`, direct `Can edit`, direct `Can view`, or
+  they can access through `Author`, direct `Can edit`, direct `Can view`, or
   instructor-derived access according to the prototype role.
-- `Can edit` keeps course-content editing available, but operational/admin
-  actions are not executable unless the user is an admin. This includes creating
-  courses, importing/exporting training data, creating groups, adding
-  participants, creating sessions, uploading materials or documents, creating
-  surveys, exporting Fundae data, opening the Fundae portal from this flow, and
-  adding/editing costs.
+- `Can edit` (Editor) **can fully edit the course** through collaborator access,
+  even with zero permissions configured on the permissions page. The editor uses
+  the same editable surfaces as the admin for content, groups, participants,
+  sessions, materials, documents, surveys, Fundae and costs. What stays
+  admin-only is **managing access/permissions** (the Share modal and the
+  permissions page) and course lifecycle/creation at the list level.
 - `Can view` is read-only. It can navigate, search, filter, open allowed detail
   pages, and preview existing survey content, but it cannot execute mutations.
-- Admin-only and operational CTAs are treated differently per role:
-  - `Can view` (Viewer): these CTAs are **hidden entirely** — no greyed-out
-    buttons. The header still shows the role as a metadata item ("Access: Can
-    view") so the user understands why the surface is read-only. The
-    `hideActions` flag drives this in `ReadOnlyTabs` / `ReadOnlyClassDetail`,
-    and the Courses list omits `primaryActions`/`secondaryActions`/bulk/row
-    admin actions for `role === "viewer"` in `AccessCoursesPage`.
-  - `Can edit` (Editor): these CTAs remain **visible but disabled**, with copy
-    explaining that admin access is required.
+- Per-role treatment of admin/operational CTAs:
+  - `Can view` (Viewer): CTAs are **hidden entirely** — no greyed-out buttons.
+    The header still shows the role as a metadata item ("Access: Can view"). The
+    `hideActions` flag drives this in `ReadOnlyTabs` / `ReadOnlyClassDetail`, and
+    the Courses list omits `primaryActions`/`secondaryActions`/bulk/row admin
+    actions for `role === "viewer"` in `AccessCoursesPage`.
+  - `Can edit` (Editor): editing CTAs are **enabled** — the editor renders the
+    admin's editable tab components (`EditableClassesTab`, `EditableClassDetail`,
+    `ParticipantsTab`, `AttachmentsTab`, `DocumentsTab`, `FormsTab`, `FundaeTab`).
+    It does not render `Share` / `Course settings` / `Revert to draft`.
+- The course author appears in the access list labelled **`Author`**, is an
+  editor by default, and cannot be removed or have their role changed.
 
 ## Admin UI decisions
 
@@ -128,7 +131,7 @@ What remains to close Admin is not a new UI surface. It is confirming the exact 
 - Each person appears once.
 - Direct collaborators show their effective direct role: `Can edit` or `Can view`.
 - Direct collaborators can change role or remove access from their row action.
-- Owner is read-only in this modal.
+- Author is read-only in this modal.
 - Instructor-only access is read-only in this modal.
 - If someone is both direct collaborator and instructor, show one row only.
 - For direct + instructor, keep the editable direct role control and show instructor context as secondary text.
@@ -136,7 +139,7 @@ What remains to close Admin is not a new UI surface. It is confirming the exact 
 
 ## Copy rules
 
-- Use user-facing labels only: `Owner`, `Can edit`, `Can view`, `Instructor`.
+- Use user-facing labels only: `Author`, `Can edit`, `Can view`, `Instructor`.
 - Do not expose internal terms such as `direct`, `derived`, `source`, or `direct + instructor`.
 - Success/warning messages appear only after user action, not as persistent explanatory banners.
 
@@ -162,6 +165,6 @@ These are not fully settled by the prototype and should be confirmed in the sour
 - Change an existing collaborator from `Can edit` to `Can view`.
 - Remove an existing direct collaborator.
 - Attempt to add a person who already has access.
-- Owner row cannot be changed or removed.
+- Author row cannot be changed or removed.
 - Instructor-only row cannot be changed or removed.
 - Direct + instructor row appears once and keeps instructor context.
