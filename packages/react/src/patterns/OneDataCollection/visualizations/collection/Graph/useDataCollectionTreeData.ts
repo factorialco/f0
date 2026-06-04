@@ -59,6 +59,8 @@ export type UseDataCollectionTreeData<R extends RecordType> = {
    * focuses and highlights it. Used by the in-graph search on result select.
    */
   revealNode: (nodeId: string) => Promise<void>
+  /** Clears the centered/highlighted node (e.g. on empty-canvas click). */
+  clearFocus: () => void
   isInitialLoading: boolean
   error: DataError | null
 }
@@ -360,6 +362,13 @@ export function useDataCollectionTreeData<
     [getId, toNode, loadChildrenOf, setExpandedNodes]
   )
 
+  // Drop the centered/highlighted node (e.g. when the user clicks the empty
+  // canvas) so the reveal highlight from search / "find me" doesn't linger.
+  const clearFocus = useCallback(() => {
+    setFocusedNode(undefined)
+    setHighlightedNodes(new Set())
+  }, [])
+
   const loadInitial = useCallback(async (): Promise<void> => {
     setIsInitialLoading(true)
     setError(null)
@@ -428,6 +437,7 @@ export function useDataCollectionTreeData<
     focusedNode,
     highlightedNodes,
     revealNode,
+    clearFocus,
     isInitialLoading,
     error,
   }

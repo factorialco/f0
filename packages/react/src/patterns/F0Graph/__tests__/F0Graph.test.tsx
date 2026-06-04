@@ -113,6 +113,26 @@ describe("F0Graph", () => {
     expect(toolbar).toBeTruthy()
   })
 
+  it("calls onPaneClick when the empty canvas is clicked", async () => {
+    const { fireEvent } = await import("@testing-library/react")
+    const onPaneClick = vi.fn()
+
+    const { container } = zeroRender(
+      <div style={{ width: 800, height: 600 }}>
+        <F0Graph
+          nodes={makeNodes()}
+          renderNode={renderNodeFn}
+          onPaneClick={onPaneClick}
+        />
+      </div>
+    )
+
+    const pane = container.querySelector(".react-flow__pane")
+    expect(pane).toBeTruthy()
+    fireEvent.click(pane as Element)
+    expect(onPaneClick).toHaveBeenCalled()
+  })
+
   it("does not render controls toolbar when showControls is false", () => {
     zeroRender(
       <div style={{ width: 800, height: 600 }}>

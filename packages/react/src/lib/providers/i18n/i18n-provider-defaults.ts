@@ -159,17 +159,18 @@ export const defaultTranslations = {
       cancel: "Cancel",
     },
     visualizations: {
-      table: "Table view",
-      editableTable: "Editable table view",
-      card: "Card view",
-      list: "List view",
-      kanban: "Kanban view",
-      graph: "Graph view",
+      table: "Table",
+      editableTable: "Editable table",
+      card: "Card",
+      list: "List",
+      kanban: "Kanban",
+      graph: "Graph",
       pagination: {
         of: "of",
       },
       settings: "{{visualizationName}} settings",
       reset: "Reset to default",
+      viewSelectorLabel: "Select view",
     },
     table: {
       settings: {

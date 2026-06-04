@@ -218,6 +218,35 @@ describe("useDataCollectionTreeData", () => {
     expect(result.current.nodes.map((node) => node.id)).toContain("mgr1")
   })
 
+  it("clearFocus drops the centered/highlighted node", async () => {
+    const fetchData = vi.fn(fetchByParent)
+    const source = buildSource(fetchData)
+    const loadNodePath = vi.fn(async () => [employees.ceo, employees.vp1])
+
+    const { result } = renderHook(() =>
+      useDataCollectionTreeData(
+        source,
+        buildOptions({ defaultExpandDepth: 0, loadNodePath }),
+        callbacks()
+      )
+    )
+
+    await waitFor(() => expect(result.current.isInitialLoading).toBe(false))
+
+    await act(async () => {
+      await result.current.revealNode("vp1")
+    })
+    expect(result.current.focusedNode).toBe("vp1")
+    expect(result.current.highlightedNodes.has("vp1")).toBe(true)
+
+    act(() => {
+      result.current.clearFocus()
+    })
+
+    expect(result.current.focusedNode).toBeUndefined()
+    expect(result.current.highlightedNodes.size).toBe(0)
+  })
+
   it("reports load errors via onLoadError", async () => {
     const fetchData = vi.fn(() => {
       throw new Error("boom")

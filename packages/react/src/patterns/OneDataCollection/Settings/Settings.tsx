@@ -24,7 +24,6 @@ import {
 import { isVisualizationSettingsDefault } from "../internal/isSettingsDefault"
 import { GroupingSelector } from "./components/GroupingSelector"
 import { SortingSelector } from "./components/SortingSelector"
-import { VisualizationSelector } from "./components/VisualizationSelector"
 import { useDataCollectionSettings } from "./SettingsProvider"
 import {
   hasVisualizacionSettings as hasVisualizacionSettingsHelper,
@@ -52,7 +51,6 @@ type SettingsProps<
     >
   >
   currentVisualization: number
-  onVisualizationChange: (index: number) => void
   grouping?: Grouping
   currentGrouping?: GroupingState<R, Grouping>
   onGroupingChange: (groupingState: GroupingState<R, Grouping>) => void
@@ -74,7 +72,6 @@ export const Settings = <
 >({
   visualizations,
   currentVisualization,
-  onVisualizationChange,
   grouping,
   // summaries, // TODO: implement summaries selector
   currentGrouping,
@@ -100,18 +97,12 @@ export const Settings = <
 
   const [open, setOpen] = useState(false)
 
-  const handleVisualizationChange = (index: number) => {
-    setOpen(false)
-    onVisualizationChange(index)
-  }
-
   const handleGroupingChange = (
     grouping: GroupingState<R, Grouping> | undefined
   ) => {
     onGroupingChange(grouping)
   }
 
-  const hasVisualizations = visualizations && visualizations.length > 1
   const hasGrouping = grouping && groupByOptions > 0
 
   // A visualization can override the available sortings (e.g. the org chart
@@ -209,14 +200,6 @@ export const Settings = <
           sideOffset={8}
         >
           {[
-            hasVisualizations && (
-              <VisualizationSelector
-                key="visualization"
-                visualizations={visualizations}
-                currentVisualization={currentVisualization}
-                onVisualizationChange={handleVisualizationChange}
-              />
-            ),
             hasGrouping &&
               !grouping?.hideSelector &&
               !(

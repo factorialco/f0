@@ -113,6 +113,7 @@ export const GraphCollection = <
     focusedNode,
     highlightedNodes,
     revealNode,
+    clearFocus,
     isInitialLoading,
   } = useDataCollectionTreeData<
     Record,
@@ -141,11 +142,15 @@ export const GraphCollection = <
   )
 
   // Reveal a node selected from the shared Data Collection search.
+  // Wait for the initial load to finish first: `loadInitial` resets `nodes`
+  // and the expanded set, so revealing during it (e.g. when switching back from
+  // the table view with a search still active) would be wiped out, leaving the
+  // viewport focused on a node that isn't in the tree.
   useEffect(() => {
-    if (revealNodeId) {
+    if (revealNodeId && !isInitialLoading) {
       void revealNode(revealNodeId)
     }
-  }, [revealNodeId, revealNode])
+  }, [revealNodeId, revealNode, isInitialLoading])
 
   // Metadata visibility + order are configured from the shared Data Collection
   // settings (the same SortAndHideList as table columns), not F0Graph's controls.
@@ -204,6 +209,7 @@ export const GraphCollection = <
               ? () => void revealNode(currentUserNodeId)
               : undefined
           }
+          onPaneClick={clearFocus}
           renderNode={(node, ctx) => {
             const itemOnClick = source.itemOnClick?.(node.data)
             return (

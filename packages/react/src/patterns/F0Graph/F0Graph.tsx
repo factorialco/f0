@@ -151,6 +151,12 @@ export interface F0GraphProps<T = unknown> {
   onNodeSelect?: (nodeId: string, selected: boolean) => void
   /** Fired with the complete new Set on every selection change, in both controlled and uncontrolled mode. */
   onSelectedNodesChange?: (next: Set<string>) => void
+  /**
+   * Fired when the user clicks the empty canvas. F0Graph already clears its own
+   * selection/focus; use this to also clear consumer-controlled state such as
+   * `highlightedNodes` / `focusedNode`.
+   */
+  onPaneClick?: () => void
 
   // ---- Navigation ----
   focusedNode?: string
@@ -490,6 +496,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     selectedNodes: controlledSelected,
     onNodeSelect,
     onSelectedNodesChange,
+    onPaneClick: onPaneClickProp,
     focusedNode,
     highlightedNodes: highlightedProp,
     nodeWidth: nodeWidthProp,
@@ -1313,6 +1320,13 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
     canvasRef.current?.focus()
   }, [controlledSelected, onSelectedNodesChange])
 
+  // Empty-canvas click: clear our own selection/focus and let the consumer
+  // clear any controlled highlight/focus (e.g. a search/"find me" reveal).
+  const handlePaneClick = useCallback(() => {
+    clearSelection()
+    onPaneClickProp?.()
+  }, [clearSelection, onPaneClickProp])
+
   // ── Ref for nodeMap (used in keyboard handler without re-creating) ──
   const nodeMapRef = useRef(nodeMap)
   useEffect(() => {
@@ -1701,7 +1715,7 @@ function F0GraphInner<T = unknown>(props: F0GraphProps<T>) {
                         maxZoom={maxZoom}
                         defaultViewport={{ x: 0, y: 0, zoom: defaultZoom }}
                         onViewportChange={handleViewportChange}
-                        onPaneClick={clearSelection}
+                        onPaneClick={handlePaneClick}
                         onEdgeMouseEnter={(_, edge) => {
                           const ge = (edge.data as GraphEdgeData | undefined)
                             ?.graphEdge

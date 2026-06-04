@@ -89,6 +89,8 @@ import {
   DataCollectionSettings,
   useDataCollectionSettings,
 } from "./Settings/SettingsProvider"
+import { useHeaderActionsCollapse } from "./components/useHeaderActionsCollapse"
+import { VisualizationSwitcher } from "./components/VisualizationSwitcher"
 import { SummariesDefinition } from "./summary"
 import { useEventEmitter } from "./useEventEmitter"
 import { VisualizationRenderer } from "./visualizations/collection"
@@ -570,6 +572,17 @@ const OneDataCollectionComp = <
 
   const actionBarRef = useRef<F0ActionBarRef>(null)
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // When the header row runs out of room, collapse the view switcher to
+  // icon-only so it keeps fitting next to the rest of the header controls.
+  const toolbarRef = useRef<HTMLDivElement>(null)
+  const headerActionsRef = useRef<HTMLDivElement>(null)
+  const headerSummaryRef = useRef<HTMLDivElement>(null)
+  const collapseHeaderActions = useHeaderActionsCollapse(
+    toolbarRef,
+    headerActionsRef,
+    headerSummaryRef
+  )
   // isControlledModeActive: true when controlled status is non-idle and not
   // an already-dismissed success. Drives the auto-manage bail-out in onClick.
   // Repeated for resolvedBulkActionStatus and isControlledModeActive — helper
@@ -1441,8 +1454,9 @@ const OneDataCollectionComp = <
       (!!tableVisualization.options?.allowColumnHiding ||
         !!tableVisualization.options?.allowColumnReordering)
 
+    // Switching visualizations lives in the header view switcher, not here, so
+    // multiple visualizations alone no longer open the Settings popover.
     return (
-      (visualizations && visualizations.length > 1) ||
       (groupByOptions > 0 && !grouping?.hideSelector) ||
       (sortings && Object.keys(sortings).length > 0) ||
       showTableSettings
@@ -1525,6 +1539,7 @@ const OneDataCollectionComp = <
       )}
       {showBottomToolbar && (
         <div
+          ref={toolbarRef}
           className={cn(
             "flex flex-row gap-4 px-page",
             fullHeight && "max-h-full",
@@ -1532,10 +1547,12 @@ const OneDataCollectionComp = <
           )}
         >
           {totalItemSummaryPosition === "bottom" && (
-            <TotalItemsSummary
-              isReady={!showTotalItemSummarySkeleton}
-              totalItemSummaryResult={totalItemSummaryResult}
-            />
+            <div ref={headerSummaryRef} className="flex items-center">
+              <TotalItemsSummary
+                isReady={!showTotalItemSummarySkeleton}
+                totalItemSummaryResult={totalItemSummaryResult}
+              />
+            </div>
           )}
           <div className="flex-1">
             <OneFilterPicker
@@ -1552,61 +1569,70 @@ const OneDataCollectionComp = <
               presetActionState={presetActionState}
               onPresetAction={onPresetAction}
             >
-              {isLoading && (
-                <motion.div
-                  className="flex h-8 w-8 items-center justify-center"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{
-                    opacity: 0,
-                  }}
-                >
-                  <Spinner size="small" />
-                </motion.div>
-              )}
-              {search && (
-                <Search
-                  onChange={setCurrentSearch}
-                  value={currentSearch}
-                  results={searchPreview.results}
-                  resultsLoading={searchPreview.loading}
-                  onResultSelect={searchPreview.onSelect}
-                />
-              )}
-              {shouldShowSettings && (
-                <Settings
-                  visualizations={visualizations}
-                  currentVisualization={currentVisualization}
-                  onVisualizationChange={setCurrentVisualization}
-                  grouping={grouping}
-                  currentGrouping={currentGrouping}
-                  onGroupingChange={setCurrentGrouping}
-                  sortings={sortings}
-                  currentSortings={currentSortings}
-                  defaultSortings={defaultSortings.current}
-                  onSortingsChange={setCurrentSortings}
-                />
-              )}
-              {hasCollectionsActions && (
-                <>
-                  {elementsRightActions && (
-                    <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
-                  )}
-                  <CollectionActions
-                    primaryActions={primaryActionItems}
-                    primaryActionsLabel={primaryActionsLabel}
-                    secondaryActions={secondaryActionsItems}
-                    otherActions={otherActionsItems}
+              <div ref={headerActionsRef} className="flex items-center gap-2">
+                {isLoading && (
+                  <motion.div
+                    className="flex h-8 w-8 items-center justify-center"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{
+                      opacity: 0,
+                    }}
+                  >
+                    <Spinner size="small" />
+                  </motion.div>
+                )}
+                {search && (
+                  <Search
+                    onChange={setCurrentSearch}
+                    value={currentSearch}
+                    results={searchPreview.results}
+                    resultsLoading={searchPreview.loading}
+                    onResultSelect={searchPreview.onSelect}
                   />
-                </>
-              )}
-              {navigationFiltersPosition === "bottom" && (
-                <NavigationFiltersComponent
-                  navigationFilters={navigationFilters}
-                  currentNavigationFilters={currentNavigationFilters}
-                  onChangeNavigationFilters={setCurrentNavigationFilters}
-                />
-              )}
+                )}
+                {visualizations && visualizations.length > 1 && (
+                  <VisualizationSwitcher
+                    visualizations={visualizations}
+                    currentVisualization={currentVisualization}
+                    onVisualizationChange={setCurrentVisualization}
+                    hideLabels={collapseHeaderActions}
+                  />
+                )}
+                {shouldShowSettings && (
+                  <Settings
+                    visualizations={visualizations}
+                    currentVisualization={currentVisualization}
+                    grouping={grouping}
+                    currentGrouping={currentGrouping}
+                    onGroupingChange={setCurrentGrouping}
+                    sortings={sortings}
+                    currentSortings={currentSortings}
+                    defaultSortings={defaultSortings.current}
+                    onSortingsChange={setCurrentSortings}
+                  />
+                )}
+                {hasCollectionsActions && (
+                  <>
+                    {elementsRightActions && (
+                      <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
+                    )}
+                    <CollectionActions
+                      primaryActions={primaryActionItems}
+                      primaryActionsLabel={primaryActionsLabel}
+                      secondaryActions={secondaryActionsItems}
+                      otherActions={otherActionsItems}
+                    />
+                  </>
+                )}
+                {navigationFiltersPosition === "bottom" && (
+                  <NavigationFiltersComponent
+                    navigationFilters={navigationFilters}
+                    currentNavigationFilters={currentNavigationFilters}
+                    onChangeNavigationFilters={setCurrentNavigationFilters}
+                  />
+                )}
+              </div>
             </OneFilterPicker>
           </div>
         </div>
