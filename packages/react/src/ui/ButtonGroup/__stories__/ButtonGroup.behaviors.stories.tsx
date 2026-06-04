@@ -28,18 +28,15 @@ import { ButtonGroupOverflow } from "../ButtonGroupOverflow"
 const noop = () => {}
 
 /**
- * Proof-of-replaceability stories: each one reconstructs an existing component's
- * action layout using `ButtonGroup` + composed primitives, WITHOUT importing or
- * editing the component. We're documenting **button arrangements only**, so the
- * framing is intentionally minimal — just a caption per case plus the *intrinsic*
- * separator/border that is itself part of the behavior (e.g. the footer
- * top-border, the oneLiner's container-query chrome). Everything else (titles,
- * bodies, card content) is omitted on purpose.
+ * The action layouts across F0 reconcile to THREE agnostic patterns — **Trailing**,
+ * **Split**, and **Reflowing** — plus orthogonal **composition** pieces (split
+ * button, overflow menu, separator, icon-only). Each example is reconstructed with
+ * `ButtonGroup` on a minimal mock surface, without importing the real component.
  *
- * See `ButtonGroup.mdx` for the per-component behavior matrix.
+ * See `ButtonGroup.mdx` for the at-a-glance matrix.
  */
 const meta = {
-  title: "ButtonGroup/Behaviors",
+  title: "ButtonGroup/Patterns",
   component: ButtonGroup,
   parameters: { layout: "padded" },
   tags: ["experimental"],
@@ -48,7 +45,11 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Minimal labeled wrapper for a single case — caption above, group below. */
+// --- Captioned case + minimal mock surfaces ---------------------------------
+// The buttons are the point; the surfaces are just clean white frames (footer
+// bar, header bar, card) so examples don't float on the canvas. ButtonGroup owns
+// none of this chrome.
+
 const Case = ({
   caption,
   children,
@@ -62,86 +63,82 @@ const Case = ({
   </div>
 )
 
-const Cases = ({ children }: { children: React.ReactNode }) => (
+const Stack = ({ children }: { children: React.ReactNode }) => (
   <div className="flex max-w-xl flex-col gap-8">{children}</div>
 )
-
-// --- Minimal mock surfaces ---------------------------------------------------
-// The buttons are the point; these just give each example a real-looking surface
-// (instead of floating on the canvas) using neutral placeholder blocks for the
-// title/body content. None of this is owned by ButtonGroup.
 
 const surface =
   "rounded-lg border border-solid border-f1-border-secondary bg-f1-background"
 
-/** Static neutral placeholder block standing in for title/body content. */
-const Bar = ({ className }: { className?: string }) => (
-  <div className={cn("rounded bg-f1-background-secondary", className)} />
-)
-
-/** Mock dialog: placeholder body, then a footer bar holding the actions. */
-const MockDialog = ({ children }: { children: React.ReactNode }) => (
+/** A footer surface: empty body, then a bottom action bar. */
+const MockFooter = ({ children }: { children: React.ReactNode }) => (
   <div className={cn(surface, "max-w-md")}>
-    <div className="flex flex-col gap-2 p-4">
-      <Bar className="h-3 w-2/5" />
-      <Bar className="h-2 w-full" />
-      <Bar className="h-2 w-4/5" />
-    </div>
+    <div className="h-14" />
     <div className="border-0 border-t border-solid border-f1-border-secondary px-4 py-3">
       {children}
     </div>
   </div>
 )
 
-/** Mock dialog header: a title placeholder + the actions in the header bar. */
-const MockDialogHeader = ({ children }: { children: React.ReactNode }) => (
+/** A header surface: a top action bar, then an empty body. */
+const MockHeader = ({ children }: { children: React.ReactNode }) => (
   <div className={cn(surface, "max-w-md")}>
-    <div className="flex items-center justify-between gap-3 border-0 border-b border-solid border-f1-border-secondary px-4 py-3">
-      <Bar className="h-3 w-28" />
+    <div className="flex items-center justify-end border-0 border-b border-solid border-f1-border-secondary px-4 py-3">
       {children}
     </div>
-    <div className="flex flex-col gap-2 p-4">
-      <Bar className="h-2 w-full" />
-      <Bar className="h-2 w-3/5" />
-    </div>
+    <div className="h-14" />
   </div>
 )
 
-/** Mock page header: title/subtitle placeholder + the action cluster. */
-const MockResourceHeader = ({ children }: { children: React.ReactNode }) => (
-  <div className={cn(surface, "p-4")}>
-    <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-      <div className="flex flex-col gap-2 py-1">
-        <Bar className="h-4 w-48 max-w-full" />
-        <Bar className="h-2.5 w-64 max-w-full" />
+/** A page-header / card surface holding the (right-aligned) action cluster. */
+const MockPageHeader = ({ children }: { children: React.ReactNode }) => (
+  <div className={cn(surface, "p-4")}>{children}</div>
+)
+
+// =============================================================================
+// Pattern 1 — Trailing actions
+// align="end" stack="none": actions packed at the trailing edge, primary last,
+// no stacking. Recognized in dialog footers, dialog header actions, one-liners.
+// =============================================================================
+
+/** One-liner card: actions inline when wide, stacked under the text when the card
+ * is narrow. Same trailing recipe — only the surrounding chrome toggles by the
+ * CONTAINER width (`@md`). */
+const OneLinerRow = ({ width }: { width: number }) => (
+  <div className="@container" style={{ width }}>
+    <div className="rounded-lg border border-solid border-f1-border-secondary p-4">
+      <div className="flex flex-col @md:flex-row @md:items-center @md:justify-between @md:gap-4">
+        <div className="text-f1-foreground">
+          Enable two-factor authentication
+        </div>
+        <ButtonGroup
+          align="end"
+          stack="none"
+          className="relative z-[1] -mx-4 mt-4 border-0 border-t border-solid border-t-f1-border-secondary px-4 pt-4 @md:mx-0 @md:mt-0 @md:border-t-0 @md:px-0 @md:pt-0"
+        >
+          <F0Button variant="outline" label="Later" onClick={noop} />
+          <F0Button variant="default" label="Enable" onClick={noop} />
+        </ButtonGroup>
       </div>
-      <div className="shrink-0">{children}</div>
     </div>
   </div>
 )
 
-// --- 1. Dialog footer --------------------------------------------------------
-
-/**
- * Dialog footer: a single right-aligned row, secondary → primary, `gap-2`, no
- * responsive stacking. The top border is the footer's intrinsic separator.
- * Reproduces `F0DialogFooter.tsx`.
- */
-export const DialogFooter: Story = {
-  name: "Dialog footer",
+export const TrailingActions: Story = {
+  name: "Trailing actions",
   render: () => (
-    <Cases>
-      <Case caption="Single buttons — secondary → primary, right-aligned">
-        <MockDialog>
+    <Stack>
+      <Case caption="Confirm row — secondary → primary (e.g. dialog footer)">
+        <MockFooter>
           <ButtonGroup align="end" gap="md" stack="none" className="w-full">
             <F0Button variant="outline" label="Cancel" onClick={noop} />
             <F0Button variant="default" label="Confirm" onClick={noop} />
           </ButtonGroup>
-        </MockDialog>
+        </MockFooter>
       </Case>
 
-      <Case caption="Action arrays → F0ButtonDropdown (split buttons)">
-        <MockDialog>
+      <Case caption="+ Split button — an action array collapses to F0ButtonDropdown">
+        <MockFooter>
           <ButtonGroup align="end" gap="md" stack="none" className="w-full">
             <F0ButtonDropdown
               variant="outline"
@@ -160,27 +157,11 @@ export const DialogFooter: Story = {
               onClick={noop}
             />
           </ButtonGroup>
-        </MockDialog>
+        </MockFooter>
       </Case>
-    </Cases>
-  ),
-}
 
-// --- 2. Dialog header --------------------------------------------------------
-
-/**
- * Dialog header actions: a right-aligned row with a `ButtonGroupSeparator` before
- * the always-present icon-only close button. With ≤2 non-critical actions they
- * render icon-only (`hideLabel`); with 3+ or a critical action they collapse into
- * an Ellipsis dropdown. The count/critical *decision* stays in the consumer.
- * Reproduces `F0DialogHeader.tsx`.
- */
-export const DialogHeaderActions: Story = {
-  name: "Dialog header",
-  render: () => (
-    <Cases>
-      <Case caption="≤2 non-critical actions → icon-only, divider, close">
-        <MockDialogHeader>
+      <Case caption="+ Icon-only + separator + close (e.g. dialog header, ≤2 non-critical)">
+        <MockHeader>
           <ButtonGroup align="end" gap="md" stack="none">
             <F0Button
               variant="outline"
@@ -205,11 +186,11 @@ export const DialogHeaderActions: Story = {
               onClick={noop}
             />
           </ButtonGroup>
-        </MockDialogHeader>
+        </MockHeader>
       </Case>
 
-      <Case caption="3+ / critical → Ellipsis dropdown, divider, close">
-        <MockDialogHeader>
+      <Case caption="+ Overflow menu — extra actions collapse under an ellipsis (e.g. dialog header, 3+ / critical)">
+        <MockHeader>
           <ButtonGroup align="end" gap="md" stack="none">
             <DropdownInternal
               icon={Ellipsis}
@@ -233,38 +214,103 @@ export const DialogHeaderActions: Story = {
               onClick={noop}
             />
           </ButtonGroup>
-        </MockDialogHeader>
+        </MockHeader>
       </Case>
-    </Cases>
+
+      <Case caption="One-liner — inline when wide, stacked when the card is narrow (container @md)">
+        <div className="flex flex-col gap-4">
+          <OneLinerRow width={560} />
+          <OneLinerRow width={360} />
+        </div>
+      </Case>
+    </Stack>
   ),
 }
 
-// --- 3. ResourceHeader -------------------------------------------------------
+// =============================================================================
+// Pattern 2 — Split actions
+// align="between" stack="container-md" fullWidthOnStack: secondary and primary at
+// opposite edges, collapsing to a full-width column when the surface is narrow.
+// Recognized in card footers.
+// =============================================================================
 
-// `otherActions` is ALWAYS a single "more" menu (experimental Dropdown on
-// desktop, MobileDropdown on mobile) — a fixed bucket, NOT width-driven overflow.
-const resourceOtherActions: DropdownItem[] = [
+const SplitRow = ({ width }: { width: number }) => (
+  <div className="@container" style={{ width }}>
+    <div className="rounded-lg border border-solid border-f1-border-secondary p-4">
+      <div className="border-0 border-t border-solid border-t-f1-border-secondary pt-4">
+        <ButtonGroup
+          align="between"
+          gap="lg"
+          stack="container-md"
+          fullWidthOnStack
+          className="w-full"
+        >
+          <ButtonGroup
+            gap="md"
+            stack="container-md"
+            fullWidthOnStack
+            className="w-full @md:w-fit"
+          >
+            <F0Button
+              variant="outline"
+              label="Discard"
+              icon={Delete}
+              onClick={noop}
+            />
+            <F0Button
+              variant="outline"
+              label="Preview"
+              icon={Share}
+              onClick={noop}
+            />
+          </ButtonGroup>
+          <F0Button variant="default" label="Save changes" onClick={noop} />
+        </ButtonGroup>
+      </div>
+    </div>
+  </div>
+)
+
+export const SplitActions: Story = {
+  name: "Split actions",
+  render: () => (
+    <Stack>
+      <Case caption="Wide surface — secondary ‖ primary at opposite edges (e.g. card footer)">
+        <SplitRow width={560} />
+      </Case>
+      <Case caption="Narrow surface — collapses to a full-width column, by container width (@md)">
+        <SplitRow width={360} />
+      </Case>
+    </Stack>
+  ),
+}
+
+// =============================================================================
+// Pattern 3 — Reflowing actions
+// The actions REORDER between compact and wide, so it composes two ButtonGroups
+// (one per breakpoint) — the one case that doesn't reduce to a single group.
+// Recognized in page / resource headers.
+// =============================================================================
+
+const reflowOverflow: DropdownItem[] = [
   { label: "Archive", icon: Archive, onClick: noop },
   { label: "Copy URL", icon: LayersFront, onClick: noop },
   { type: "separator" },
   { label: "Unlist", icon: Delete, critical: true, onClick: noop },
 ]
 
-/**
- * The desktop ResourceHeader action cluster: right-aligned wrapping row, size md,
- * order more → secondary → divider → primary. Parametrized to cover the cases.
- */
-const RhDesktopCluster = ({
-  withOtherActions = true,
+/** The wide cluster: more → secondary → divider → primary, right-aligned. */
+const WideCluster = ({
+  withOverflow = true,
   primaryAsDropdown = false,
   exportAsDropdown = false,
 }: {
-  withOtherActions?: boolean
+  withOverflow?: boolean
   primaryAsDropdown?: boolean
   exportAsDropdown?: boolean
 }) => (
   <ButtonGroup align="end" gap="md" wrap className="w-full">
-    {withOtherActions && <Dropdown items={resourceOtherActions} />}
+    {withOverflow && <Dropdown items={reflowOverflow} />}
     <F0Button variant="outline" icon={Pencil} label="Edit" onClick={noop} />
     {exportAsDropdown ? (
       <F0ButtonDropdown
@@ -309,30 +355,17 @@ const RhDesktopCluster = ({
   </ButtonGroup>
 )
 
-/**
- * ResourceHeader actions — the cases from the real `Resource header` stories,
- * buttons only (no avatar/title/metadata). `otherActions` is always a single
- * "more" menu.
- *
- * The real component renders TWO action trees because its mobile and desktop
- * orderings differ — mobile is primary → secondary → more (full-width column,
- * size lg); desktop is more → secondary → divider → primary (wrapping row, size
- * md). A single flex container can't express both, so — like the component — the
- * Default case composes one ButtonGroup per breakpoint. The remaining cases show
- * the desktop cluster only (they vary the button *types*, not the responsiveness).
- */
-export const ResourceHeaderActions: Story = {
-  name: "ResourceHeader · cases",
+export const ReflowingActions: Story = {
+  name: "Reflowing actions",
   render: () => (
-    <div className="flex max-w-4xl flex-col gap-8">
-      <Case caption="Default — resize across 768px (desktop row ↔ mobile full-width column)">
-        <MockResourceHeader>
-          {/* Desktop (≥ md): more → Edit → Export(icon) → Syncing → │ → Publish */}
+    <div className="flex max-w-3xl flex-col gap-8">
+      <Case caption="Reorders across 768px — wide: more → secondary → divider → primary; narrow: primary on top of a full-width column (e.g. page / resource header)">
+        <MockPageHeader>
+          {/* Wide (≥ md) */}
           <div className="hidden md:block">
-            <RhDesktopCluster />
+            <WideCluster />
           </div>
-          {/* Mobile (< md): full-width column, size lg, primary → secondary → more.
-              `stack="md"` only ever shows its column state here (hidden at md). */}
+          {/* Compact (< md): full-width column, size lg, primary first */}
           <div className="md:hidden">
             <ButtonGroup
               stack="md"
@@ -369,172 +402,67 @@ export const ResourceHeaderActions: Story = {
                 size="lg"
                 onClick={noop}
               />
-              <MobileDropdown items={resourceOtherActions} />
+              <MobileDropdown items={reflowOverflow} />
             </ButtonGroup>
           </div>
-        </MockResourceHeader>
+        </MockPageHeader>
       </Case>
 
-      <Case caption="Primary as dropdown (desktop cluster)">
-        <MockResourceHeader>
-          <RhDesktopCluster primaryAsDropdown />
-        </MockResourceHeader>
+      <Case caption="+ Split button — primary as a dropdown">
+        <MockPageHeader>
+          <WideCluster primaryAsDropdown />
+        </MockPageHeader>
       </Case>
 
-      <Case caption="A secondary as dropdown (desktop cluster)">
-        <MockResourceHeader>
-          <RhDesktopCluster exportAsDropdown />
-        </MockResourceHeader>
+      <Case caption="+ Split button — a secondary as a dropdown">
+        <MockPageHeader>
+          <WideCluster exportAsDropdown />
+        </MockPageHeader>
       </Case>
 
-      <Case caption="Without otherActions (no “more” menu)">
-        <MockResourceHeader>
-          <RhDesktopCluster withOtherActions={false} />
-        </MockResourceHeader>
+      <Case caption="Without the overflow menu">
+        <MockPageHeader>
+          <WideCluster withOverflow={false} />
+        </MockPageHeader>
       </Case>
     </div>
   ),
 }
+
+// =============================================================================
+// Composition — Overflow menu (width-driven)
+// =============================================================================
 
 /**
- * `ButtonGroupOverflow` (generic): a row of actions that sheds buttons into a
- * "more" popover as available width shrinks, via the measurement-based
- * `OverflowList`. The overflow affordance is an ellipsis "⋯" trigger that opens a
- * menu (icon + label rows). This is **width-driven** overflow (e.g. a toolbar) —
- * distinct from a fixed "more" bucket like ResourceHeader's `otherActions`.
- * Narrow the canvas/container to watch buttons collapse under the ellipsis.
+ * `ButtonGroupOverflow` sheds the buttons that don't fit under an ellipsis "⋯"
+ * trigger (a menu of icon + label rows), wrapping the measurement-based
+ * `OverflowList`. Width-driven — distinct from a fixed count-independent bucket
+ * (the experimental `Dropdown`). Narrow the canvas to watch buttons collapse.
  */
-export const ToolbarOverflow: Story = {
-  name: "Width-driven overflow (toolbar)",
+const toolbarActions = [
+  { id: "edit", label: "Edit", icon: Pencil, onClick: noop },
+  { id: "share", label: "Share", icon: Share, onClick: noop },
+  { id: "duplicate", label: "Duplicate", icon: Plus, onClick: noop },
+  { id: "delete", label: "Delete", icon: Delete, onClick: noop },
+]
+
+export const OverflowMenu: Story = {
+  name: "Overflow menu (width-driven)",
   render: () => (
-    <div className="w-full max-w-xs rounded-lg border border-solid border-f1-border-secondary p-3">
-      <ButtonGroupOverflow
-        actions={[
-          { id: "edit", label: "Edit", icon: Pencil, onClick: noop },
-          { id: "share", label: "Share", icon: Share, onClick: noop },
-          { id: "duplicate", label: "Duplicate", icon: Plus, onClick: noop },
-          { id: "delete", label: "Delete", icon: Delete, onClick: noop },
-        ]}
-      />
-    </div>
-  ),
-}
-
-// --- 4. Card footer (container query) ---------------------------------------
-
-const CardFooterRow = ({ width }: { width: number }) => (
-  <div className="@container" style={{ width }}>
-    <div className="rounded-lg border border-solid border-f1-border-secondary p-4">
-      {/* footer top-border chrome (not owned by ButtonGroup) */}
-      <div className="border-0 border-t border-solid border-t-f1-border-secondary pt-4">
-        <ButtonGroup
-          align="between"
-          gap="lg"
-          stack="container-md"
-          fullWidthOnStack
-          className="w-full"
-        >
-          {/* secondary group: full-width column when the card is narrow, row when wide */}
-          <ButtonGroup
-            gap="md"
-            stack="container-md"
-            fullWidthOnStack
-            className="w-full @md:w-fit"
+    <div className="flex flex-col gap-6">
+      {[560, 360, 240].map((w) => (
+        <div key={w} className="flex flex-col gap-2">
+          <span className="text-sm text-f1-foreground-secondary">
+            {w}px — buttons that don't fit collapse under the ellipsis
+          </span>
+          <div
+            style={{ width: w }}
+            className="rounded-lg border border-solid border-f1-border-secondary p-3"
           >
-            <F0Button
-              variant="outline"
-              label="Discard"
-              icon={Delete}
-              onClick={noop}
-            />
-            <F0Button
-              variant="outline"
-              label="Preview"
-              icon={Share}
-              onClick={noop}
-            />
-          </ButtonGroup>
-          <F0Button variant="default" label="Save changes" onClick={noop} />
-        </ButtonGroup>
-      </div>
-    </div>
-  </div>
-)
-
-/**
- * Card footer: stacking is driven by the **card's own width** (container `@md` =
- * 28rem / 448px), not the viewport — so a small card always stacks regardless of
- * screen size. Narrow: full-width column. Wide: `justify-between` row. This is the
- * recommended target and intentionally upgrades today's `CardActions` footer
- * (which uses a viewport `sm` media query). Button size stays constant — it can't
- * follow a container query. Both widths shown.
- */
-export const CardFooter: Story = {
-  name: "Card footer · container query",
-  render: () => (
-    <div className="flex flex-col gap-6">
-      <div>
-        <div className="mb-2 text-sm text-f1-foreground-secondary">
-          Narrow card (&lt; @md / 448px): full-width column
+            <ButtonGroupOverflow actions={toolbarActions} />
+          </div>
         </div>
-        <CardFooterRow width={360} />
-      </div>
-      <div>
-        <div className="mb-2 text-sm text-f1-foreground-secondary">
-          Wide card (≥ @md / 448px): justify-between row
-        </div>
-        <CardFooterRow width={560} />
-      </div>
-    </div>
-  ),
-}
-
-// --- 5. Card oneLiner (container query) -------------------------------------
-
-const OneLinerRow = ({ width }: { width: number }) => (
-  <div className="@container" style={{ width }}>
-    <div className="rounded-lg border border-solid border-f1-border-secondary p-4">
-      <div className="flex flex-col @md:flex-row @md:items-center @md:justify-between @md:gap-4">
-        <div className="text-f1-foreground">
-          Enable two-factor authentication
-        </div>
-        {/* Actions are always a row; the CONTAINER query toggles the footer
-            chrome (separator + spacing) on/off — not the button arrangement. */}
-        <ButtonGroup
-          align="end"
-          stack="none"
-          className="relative z-[1] -mx-4 mt-4 border-0 border-t border-solid border-t-f1-border-secondary px-4 pt-4 @md:mx-0 @md:mt-0 @md:border-t-0 @md:px-0 @md:pt-0"
-        >
-          <F0Button variant="outline" label="Later" onClick={noop} />
-          <F0Button variant="default" label="Enable" onClick={noop} />
-        </ButtonGroup>
-      </div>
-    </div>
-  </div>
-)
-
-/**
- * Card oneLiner: a CONTAINER query (`@md` = 28rem / 448px). Narrow: actions wrap
- * beneath the text with a footer separator. Wide: actions sit inline to the
- * right, no separator. Button size stays constant (size can't follow a container
- * query). Reproduces the oneLiner path of `CardActions.tsx`. Both states shown.
- */
-export const CardOneLiner: Story = {
-  name: "Card oneLiner · container query",
-  render: () => (
-    <div className="flex flex-col gap-6">
-      <div>
-        <div className="mb-2 text-sm text-f1-foreground-secondary">
-          Narrow (&lt; @md / 448px): stacked, with footer separator
-        </div>
-        <OneLinerRow width={360} />
-      </div>
-      <div>
-        <div className="mb-2 text-sm text-f1-foreground-secondary">
-          Wide (≥ @md / 448px): inline, no separator
-        </div>
-        <OneLinerRow width={560} />
-      </div>
+      ))}
     </div>
   ),
 }

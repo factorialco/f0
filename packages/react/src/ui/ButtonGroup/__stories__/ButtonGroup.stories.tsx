@@ -25,7 +25,6 @@ const meta = {
       options: ["none", "sm", "md", "container-md"],
     },
     fullWidthOnStack: { control: "boolean" },
-    reverseOnStack: { control: "boolean" },
     wrap: { control: "boolean" },
   },
   args: {
@@ -33,7 +32,6 @@ const meta = {
     gap: "md",
     stack: "none",
     fullWidthOnStack: false,
-    reverseOnStack: false,
     wrap: false,
   },
   decorators: [
