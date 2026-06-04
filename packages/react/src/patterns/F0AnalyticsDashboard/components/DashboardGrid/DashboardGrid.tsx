@@ -115,12 +115,12 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
   // ─── Rows state ─────────────────────────────────────────────
   const [rows, setRows] = useState<Row[]>(() => buildInitialRows(items))
 
-  // Sync rows when items change from outside
-  const prevItemIdsRef = useRef(items.map((i) => i.id).join(","))
+  // Sync rows when externally-owned item layout changes.
+  const prevItemLayoutSignatureRef = useRef(buildItemLayoutSignature(items))
   useEffect(() => {
-    const newIds = items.map((i) => i.id).join(",")
-    if (newIds !== prevItemIdsRef.current) {
-      prevItemIdsRef.current = newIds
+    const newLayoutSignature = buildItemLayoutSignature(items)
+    if (newLayoutSignature !== prevItemLayoutSignatureRef.current) {
+      prevItemLayoutSignatureRef.current = newLayoutSignature
       setRows(buildInitialRows(items))
     }
   }, [items])
@@ -628,6 +628,24 @@ function buildInitialRows<Filters extends FiltersDefinition>(
   }
 
   return buildRowsGreedy(items)
+}
+
+function buildItemLayoutSignature<Filters extends FiltersDefinition>(
+  items: DashboardItemType<Filters>[]
+): string {
+  return items
+    .map((item) =>
+      [
+        item.id,
+        item.type,
+        item.itemHeight ?? "",
+        item.rowSpan ?? "",
+        item.x ?? "",
+        item.y ?? "",
+        item.colSpan ?? "",
+      ].join(":")
+    )
+    .join("|")
 }
 
 /** Group items by saved `y` coordinate to reconstruct saved rows. */
