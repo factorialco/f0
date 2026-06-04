@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.38.0](https://github.com/factorialco/f0/compare/f0-react-v2.37.1...f0-react-v2.38.0) (2026-06-04)
+
+
+### Features
+
+* drop dc_id from data collection url params + cleaner sort encoding ([#4319](https://github.com/factorialco/f0/issues/4319)) ([d9872ac](https://github.com/factorialco/f0/commit/d9872acbdef21ff0b4d26a8b26372342bf1441dc))
+
 ## [2.37.1](https://github.com/factorialco/f0/compare/f0-react-v2.37.0...f0-react-v2.37.1) (2026-06-04)
 
 
