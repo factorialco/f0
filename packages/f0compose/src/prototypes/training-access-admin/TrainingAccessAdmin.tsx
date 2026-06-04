@@ -355,7 +355,7 @@ export default function TrainingAccessAdmin() {
   }))
 
   const candidateOptions: CandidateOption[] = availablePersonOptions
-    .filter((option) => !option.disabled && !selectedEmployeeIds.includes(option.value))
+    .filter((option) => !option.disabled)
     .map((option) => ({
       ...option,
       employee: findEmployee(option.value),
@@ -382,10 +382,6 @@ export default function TrainingAccessAdmin() {
         ? current.filter((id) => id !== employeeId)
         : [...current, employeeId]
     )
-  }
-
-  const handleSelectedEmployeeRemove = (employeeId: string) => {
-    setSelectedEmployeeIds((current) => current.filter((id) => id !== employeeId))
   }
 
   // Bulk add/remove every employee matching the current filter+search, so the
@@ -639,7 +635,6 @@ export default function TrainingAccessAdmin() {
         onPeopleFiltersOpenChange={setIsPeopleFiltersOpen}
         onPeopleFilterToggle={handlePeopleFilterToggle}
         onPeopleFiltersClear={handlePeopleFiltersClear}
-        onSelectedEmployeeRemove={handleSelectedEmployeeRemove}
         onSelectedEmployeeChange={handleSelectedEmployeeChange}
         onSelectAll={handleSelectAllCandidates}
         onSelectedRoleChange={setSelectedRole}
@@ -689,7 +684,6 @@ function ShareTrainingDialog({
   onPeopleFiltersOpenChange,
   onPeopleFilterToggle,
   onPeopleFiltersClear,
-  onSelectedEmployeeRemove,
   onSelectedEmployeeChange,
   onSelectAll,
   onSelectedRoleChange,
@@ -714,7 +708,6 @@ function ShareTrainingDialog({
   onPeopleFiltersOpenChange: (isOpen: boolean) => void
   onPeopleFilterToggle: (filterKey: PeopleFilterKey, value: string) => void
   onPeopleFiltersClear: () => void
-  onSelectedEmployeeRemove: (employeeId: string) => void
   onSelectedEmployeeChange: (employeeId: string) => void
   onSelectAll: (ids: string[]) => void
   onSelectedRoleChange: (role: EditableRole) => void
@@ -750,11 +743,9 @@ function ShareTrainingDialog({
             <F0Box grow position="relative" ref={searchAreaRef}>
               <F0Box onClick={() => onPeopleListOpenChange(true)}>
                 <PeopleSearchInput
-                  selectedEmployeeIds={selectedEmployeeIds}
                   searchValue={personSearch}
                   filtersCount={activeFiltersCount(peopleFilters)}
                   onSearchChange={onPersonSearchChange}
-                  onRemove={onSelectedEmployeeRemove}
                   onToggleFilters={() => {
                     onPeopleListOpenChange(true)
                     onPeopleFiltersOpenChange(!isPeopleFiltersOpen)
@@ -824,60 +815,28 @@ function ShareTrainingDialog({
 }
 
 function PeopleSearchInput({
-  selectedEmployeeIds,
   searchValue,
   filtersCount,
   onSearchChange,
-  onRemove,
   onToggleFilters,
 }: {
-  selectedEmployeeIds: string[]
   searchValue: string
   filtersCount: number
   onSearchChange: (value: string | undefined) => void
-  onRemove: (employeeId: string) => void
   onToggleFilters: () => void
 }) {
   return (
     <F0Box display="flex" flexDirection="column" gap="xs">
       <F0Text content="Add people" variant="label" />
       {/* The production EmployeeSelectorV2 trigger is not available in f0compose. */}
-      <div className="flex min-h-8 w-full items-start gap-1 rounded-md border border-solid border-f1-border-secondary bg-f1-background px-2 py-1 focus-within:border-f1-border-selected">
-        <div className="flex flex-1 flex-wrap items-center gap-1">
-          {selectedEmployeeIds.length > 0 && (
-            <div className="flex max-h-24 flex-wrap gap-1 overflow-y-auto">
-              {selectedEmployeeIds.map((employeeId) => {
-                const employee = findEmployee(employeeId)
-                return (
-                  <div
-                    key={employeeId}
-                    className="flex w-fit items-center gap-1 rounded-md border border-solid border-f1-border-secondary bg-f1-background-secondary px-2 py-1 text-sm text-f1-foreground"
-                  >
-                    <span>{employee.email}</span>
-                    <button
-                      type="button"
-                      className="border-0 bg-transparent p-0 text-f1-foreground-secondary"
-                      aria-label={`Remove ${employee.fullName}`}
-                      onClick={(event) => {
-                        event.stopPropagation()
-                        onRemove(employeeId)
-                      }}
-                    >
-                      x
-                    </button>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-          <input
-            aria-label="Add people"
-            className="min-w-28 flex-1 border-0 bg-transparent p-1 text-sm text-f1-foreground outline-none placeholder:text-f1-foreground-secondary"
-            value={searchValue}
-            onChange={(event) => onSearchChange(event.target.value)}
-            placeholder={selectedEmployeeIds.length === 0 ? "Search by name or email" : ""}
-          />
-        </div>
+      <div className="flex min-h-8 w-full items-center gap-1 rounded-md border border-solid border-f1-border-secondary bg-f1-background px-2 py-1 focus-within:border-f1-border-selected">
+        <input
+          aria-label="Add people"
+          className="min-w-28 flex-1 border-0 bg-transparent p-1 text-sm text-f1-foreground outline-none placeholder:text-f1-foreground-secondary"
+          value={searchValue}
+          onChange={(event) => onSearchChange(event.target.value)}
+          placeholder="Search by name or email"
+        />
         <button
           type="button"
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-solid border-f1-border-secondary bg-f1-background text-f1-icon hover:bg-f1-background-hover"
