@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { F0Button } from "@/components/F0Button"
 
-import { ButtonGroup } from "../ButtonGroup"
+import { ButtonGroup, ButtonGroupSeparator } from "../ButtonGroup"
 
 const meta = {
   title: "ButtonGroup",
@@ -14,15 +14,27 @@ const meta = {
   argTypes: {
     align: {
       control: "inline-radio",
-      options: ["start", "end", "between"],
+      options: ["end", "between"],
     },
-    stackOnMobile: {
-      control: "boolean",
+    gap: {
+      control: "inline-radio",
+      options: ["sm", "md", "lg"],
     },
+    stack: {
+      control: "inline-radio",
+      options: ["none", "sm", "md", "container-md"],
+    },
+    fullWidthOnStack: { control: "boolean" },
+    reverseOnStack: { control: "boolean" },
+    wrap: { control: "boolean" },
   },
   args: {
     align: "end",
-    stackOnMobile: false,
+    gap: "md",
+    stack: "none",
+    fullWidthOnStack: false,
+    reverseOnStack: false,
+    wrap: false,
   },
   decorators: [
     (Story) => (
@@ -42,13 +54,28 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Default: right-stacked, primary (last child) rightmost. */
+/** Default: right-aligned row, primary (last child) rightmost. */
 export const Default: Story = {}
 
 export const SpaceBetween: Story = {
   args: { align: "between" },
 }
 
+/**
+ * Stack into a full-width column below the viewport `sm` breakpoint; resize the
+ * canvas across 640px to see it become a row.
+ */
 export const StackOnMobile: Story = {
-  args: { stackOnMobile: true },
+  args: { stack: "sm", fullWidthOnStack: true },
+}
+
+/** A `ButtonGroupSeparator` divides logical groups (hidden when stacked). */
+export const WithSeparator: Story = {
+  render: (args) => (
+    <ButtonGroup {...args}>
+      <F0Button variant="outline" label="Discard" onClick={() => {}} />
+      <ButtonGroupSeparator />
+      <F0Button variant="default" label="Save" onClick={() => {}} />
+    </ButtonGroup>
+  ),
 }

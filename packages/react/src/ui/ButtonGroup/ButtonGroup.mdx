@@ -1,0 +1,144 @@
+import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
+
+import * as ButtonGroupStories from "./__stories__/ButtonGroup.stories"
+import * as Behaviors from "./__stories__/ButtonGroup.behaviors.stories"
+
+<Meta of={ButtonGroupStories} />
+
+# ButtonGroup
+
+`ButtonGroup` is a low-level layout primitive that arranges a group of action
+buttons. It is intentionally **dumb about its children**: it only controls how
+they are arranged.
+
+Today F0 has four components that each hand-roll their action-button layout with
+different rules — **Dialog footer**, **Dialog header**, **ResourceHeader**, and
+**Card** (footer + oneLiner). None share a primitive. This page documents the
+reasoning behind each of those behaviors and shows that `ButtonGroup`'s variants
+can reproduce every one of them, so they can later be unified without changing
+what users see.
+
+<Canvas of={ButtonGroupStories.Default} />
+<Controls of={ButtonGroupStories.Default} />
+
+## What ButtonGroup does NOT own
+
+Keeping the primitive thin is deliberate. Three things stay **outside** it:
+
+- **Footer/header chrome** — borders, padding, background. Those belong to the
+  surrounding container. (In the stories below, only the intrinsic separator or
+  border that defines the behavior is kept.)
+- **Button `size`** — `size` is a React prop, not a CSS class, so it **cannot be
+  switched by a container query**. It stays a consumer concern: drive it from a
+  viewport `useMediaQuery` where the layout is viewport-based, or keep it
+  constant under a container query (see Card oneLiner).
+- **Collapse decisions** — "is this action critical?", "which secondary is the
+  first?", "should this array collapse to a dropdown?". These are domain logic.
+  Compose them instead:
+  - array of actions → **`F0ButtonDropdown`** (split / menu button),
+  - a fixed "more" menu (a count-independent bucket of extra actions) → an
+    experimental **`Dropdown`** / **`MobileDropdown`** (e.g. ResourceHeader's
+    `otherActions`),
+  - width-driven overflow (shed buttons as space shrinks, e.g. a toolbar) →
+    **`ButtonGroupOverflow`** (wraps `OverflowList`),
+  - count-threshold icon-only / hide-label-after-first → a few lines in the
+    consumer (shown in the recipes below).
+
+This avoids a configuration enum that quietly accretes every caller's special
+case. The clarity lives **here**, in one matrix, not spread silently across
+components.
+
+## Viewport vs container — they are not interchangeable
+
+Two different responsive mechanisms appear across the four components:
+
+- **Viewport** queries (`stack="sm" | "md"`) react to the browser/viewport width
+  via Tailwind `sm:` / `md:`. Used by Card footer (`sm` = 640px) and
+  ResourceHeader (`md` = 768px).
+- **Container** queries (`stack="container-md"`) react to the _nearest
+  `@container` ancestor's_ width via `@md:` (**28rem / 448px**). Used by the
+  Card oneLiner so a card reflows based on its own width, not the viewport.
+
+`ButtonGroup` surfaces this choice explicitly rather than hiding it behind a
+single boolean.
+
+## Behavior matrix
+
+| Component          | Responsive mechanism                                   | Stack (mobile → desktop)                                     | Order (L→R)                                                                 | Size               | Collapse rule                                         | Separator / chrome                  | ButtonGroup recipe                                                                                                                                       |
+| ------------------ | ------------------------------------------------------ | ------------------------------------------------------------ | --------------------------------------------------------------------------- | ------------------ | ----------------------------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Dialog footer**  | none                                                   | always row, right-aligned                                    | secondary → primary                                                         | md                 | action array → `F0ButtonDropdown`                     | top border (chrome)                 | `align="end" gap="md" stack="none"`                                                                                                                      |
+| **Dialog header**  | none                                                   | always row                                                   | actions → divider → close                                                   | md                 | `≤2 && !critical` → icon-only; else Ellipsis dropdown | `h-4 w-px` divider; always-on close | `align="end" gap="md" stack="none"` + `ButtonGroupSeparator`                                                                                             |
+| **ResourceHeader** | viewport `md`                                          | full-width column → wrapping row                             | mobile: primary→secondary→other; desktop: other→secondary→[divider]→primary | lg → md            | otherActions → single "more" menu (`Dropdown`)        | desktop divider before primary      | **two ButtonGroups**: desktop `align="end" gap="md" wrap` + `Dropdown` + `ButtonGroupSeparator`; mobile `stack="md" fullWidthOnStack` + `MobileDropdown` |
+| **Card footer**    | container `@md` (current `CardActions`: viewport `sm`) | full-width column → `justify-between` row, by **card width** | secondary group ‖ primary                                                   | constant md        | —                                                     | top border (chrome)                 | `align="between" gap="lg" stack="container-md" fullWidthOnStack`                                                                                         |
+| **Card oneLiner**  | container `@md`                                        | stacked + top border → inline, no chrome                     | secondary → primary                                                         | constant md / `sm` | none                                                  | narrow: top border; wide: none      | `stack="none"` + container-query chrome on the wrapper                                                                                                   |
+
+## Recipes
+
+### Dialog footer
+
+Right-aligned row, secondary → primary. Action _arrays_ collapse to an
+`F0ButtonDropdown` (the second case below).
+
+<Canvas of={Behaviors.DialogFooter} />
+
+### Dialog header
+
+`≤2` non-critical actions render icon-only (`hideLabel`); otherwise they collapse
+into an Ellipsis dropdown. A `ButtonGroupSeparator` precedes the always-present
+icon-only close button. The count/critical decision stays in the consumer (both
+cases shown).
+
+<Canvas of={Behaviors.DialogHeaderActions} />
+
+### ResourceHeader
+
+The **least clean fit**: its mobile and desktop orderings differ (mobile is
+primary → secondary → more, full-width and `lg`; desktop is more → secondary →
+divider → primary, a wrapping row at `md`). A single flex container can't express
+both — you can't move the primary from top (mobile) to last (desktop) while
+keeping the secondary order — so, exactly like the real component, it composes
+**two ButtonGroups**, one per breakpoint. `otherActions` is always a single
+"more" menu (`Dropdown` on desktop, `MobileDropdown` on mobile), not width-driven
+overflow, and button `size` flips lg → md in the consumer. The `Default` case
+resizes across 768px; the others (primary as dropdown, a secondary as dropdown, no
+`otherActions`) show the desktop cluster.
+
+<Canvas of={Behaviors.ResourceHeaderActions} />
+
+### Card footer
+
+Stacking is driven by the **card's own width** (container `@md`), not the viewport,
+so a small card always stacks. Narrow card → full-width column; wide card →
+`justify-between` row. The secondary actions are a nested `ButtonGroup`. This is the
+recommended target and upgrades today's `CardActions` footer (which uses a viewport
+`sm` media query); button size stays constant since it can't follow a container query.
+
+<Canvas of={Behaviors.CardFooter} />
+
+### Card oneLiner
+
+A **container** query toggles the footer chrome (separator + spacing); the button
+arrangement itself is always a row. Size stays constant because it can't follow a
+container query. Both container widths shown.
+
+<Canvas of={Behaviors.CardOneLiner} />
+
+### Width-driven overflow (generic)
+
+Separate from the four components: `ButtonGroupOverflow` lays out an action row
+and sheds buttons that don't fit under an **ellipsis "⋯" trigger** that opens a
+menu (icon + label rows), wrapping `OverflowList`. Use it for toolbars / action
+rows that overflow by available width — distinct from a fixed "more" bucket like
+ResourceHeader's `otherActions`. Narrow the canvas to see it collapse.
+
+<Canvas of={Behaviors.ToolbarOverflow} />
+
+## Known divergences
+
+- **ResourceHeader** needs **two ButtonGroups** (one per breakpoint) because its
+  mobile and desktop orderings differ — a single flex container can't move the
+  primary from top (mobile) to last (desktop) while keeping the secondary order.
+  This mirrors the real component's two DOM trees. The real component also
+  branches each secondary action on button-vs-dropdown — that stays consumer logic.
+- **Button size** never follows a container query; the Card oneLiner keeps a
+  constant size for exactly this reason.
