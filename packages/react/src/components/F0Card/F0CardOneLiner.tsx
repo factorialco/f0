@@ -111,9 +111,9 @@ export interface F0CardOneLinerProps {
 /**
  * A single-row card: optional avatar on the left, stacked title + description,
  * and actions on the right. It collapses to a stacked layout when the card's own
- * width drops below the `stackAt` container breakpoint (default `@sm`; a container
- * query on the card's width, not the viewport), so it reacts correctly inside
- * grids and columns.
+ * width drops below the `stackAt` container breakpoint (default `sm` ≈ 384px; a
+ * container query on the card's width, not the viewport), so it reacts correctly
+ * inside grids and columns.
  */
 const F0CardOneLinerBase = forwardRef<HTMLDivElement, F0CardOneLinerProps>(
   function F0CardOneLiner(
