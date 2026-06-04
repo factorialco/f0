@@ -101,10 +101,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  let summaryFile = `:f0-dev: F0 Weekly Summary (${from} – ${to})\n---\n${slackText}`;
-  if (summaryJson.thread_details?.trim()) {
-    summaryFile += `\n---\n🛠️ For engineers\n\n${summaryJson.thread_details.trim()}`;
-  }
+  const summaryFile = `:f0-dev: F0 Weekly Summary (${from} – ${to})\n---\n${slackText}`;
   writeFileSync("/tmp/zerito-prs.md", summaryFile);
   writeFileSync(
     "/tmp/zerito-prs-blocks.json",

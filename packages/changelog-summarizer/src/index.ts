@@ -312,15 +312,10 @@ async function main(): Promise<void> {
 
   const summary =
     jsonToSlackText(finalJson, storyIndex.urlByKey) ?? "_No changes this week._";
-  const threadDetails = finalJson.thread_details?.trim() || undefined;
 
-  // Title line (top-level Slack header) + the product sections. The technical
-  // notes go in a final "For engineers" section (webhook publishing can't post
-  // a threaded reply, so we keep the detail at the bottom of the same message).
-  let publishText = `:f0-dev: F0 Weekly Summary (${fromStr} – ${toStr})\n---\n${summary}`;
-  if (threadDetails) {
-    publishText += `\n---\n🛠️ For engineers\n\n${threadDetails}`;
-  }
+  // Product-focused message only: title + the product sections. Bug fixes and
+  // infra are intentionally NOT published (too technical for this audience).
+  const publishText = `:f0-dev: F0 Weekly Summary (${fromStr} – ${toStr})\n---\n${summary}`;
 
   // Pre-render the Block Kit payload so the workflow just posts it (no fragile
   // bash parsing, and long sections are split under Slack's 3000-char limit).
