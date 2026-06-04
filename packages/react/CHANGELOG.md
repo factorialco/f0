@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.37.1](https://github.com/factorialco/f0/compare/f0-react-v2.37.0...f0-react-v2.37.1) (2026-06-04)
+
+
+### Bug Fixes
+
+* **inputs:** preserve generic prop types for deprecated experimental re-exports ([#4317](https://github.com/factorialco/f0/issues/4317)) ([aa52db5](https://github.com/factorialco/f0/commit/aa52db5b2c22ad4260c1b115fa50962af9dd698e))
+
 ## [2.37.0](https://github.com/factorialco/f0/compare/f0-react-v2.36.1...f0-react-v2.37.0) (2026-06-04)
 
 
