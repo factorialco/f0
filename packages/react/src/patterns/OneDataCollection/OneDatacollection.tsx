@@ -1651,8 +1651,10 @@ const OneDataCollectionComp = <
       />
       {typeof document !== "undefined" &&
         createPortal(
-          // Portaled into a z-[100] stacking context so the confirmation paints
-          // above the preset dialog's overlay (z-50) it's triggered from.
+          // Portal into the SAME container the preset dialog uses (`#content`,
+          // see DialogContent) with a z above its overlay (z-50), so the
+          // confirmation paints on top of the overlay it's triggered from
+          // rather than being trapped under that container's stacking context.
           <div className="relative z-[100]">
             <F0ActionBar
               isOpen={shareCopied}
@@ -1661,7 +1663,7 @@ const OneDataCollectionComp = <
               label={i18n.collections.presets.copiedToClipboard}
             />
           </div>,
-          document.body
+          document.getElementById("content") ?? document.body
         )}
     </div>
   )
