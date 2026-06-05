@@ -67,37 +67,36 @@ export const BaseQuestion = ({
 
   // The textareas are controlled, but consumers may back the title/description
   // with an eventually-consistent store (e.g. CopilotKit's `useCoAgent`, whose
-  // state propagation lands via a subscription callback rather than the React
-  // batch that fires the keystroke handler). In that gap React would re-render
-  // with a stale `value` prop, snap the DOM back, and bump the caret to the
-  // end — making mid-string typing impossible. Keep a synchronous local mirror
-  // so the textarea always reflects the just-typed value on the very next
-  // render; pull from the parent only when it diverges from what we last
-  // emitted (e.g. an AI-driven edit or programmatic reset).
+  // state propagates via a subscription callback a tick after the keystroke's
+  // React batch). In that gap a re-render arrives carrying the *stale* prop;
+  // binding the textarea straight to it snaps the DOM value back and throws
+  // the caret to the end, so mid-string typing is impossible.
+  //
+  // Fix: keep a synchronous local mirror that the change handler updates
+  // immediately, and accept the incoming prop only while the field is NOT
+  // being edited (i.e. not focused). During active editing the local value is
+  // authoritative and lagging props are ignored; when the field is idle, an
+  // external/AI edit or programmatic reset flows in normally.
+  const titleRef = useRef<HTMLTextAreaElement>(null)
+  const descriptionRef = useRef<HTMLTextAreaElement>(null)
   const [localTitle, setLocalTitle] = useState(title)
-  const lastEmittedTitleRef = useRef(title)
   const [localDescription, setLocalDescription] = useState(description ?? "")
-  const lastEmittedDescriptionRef = useRef(description ?? "")
 
   useEffect(() => {
-    if (title !== lastEmittedTitleRef.current) {
+    if (document.activeElement !== titleRef.current) {
       setLocalTitle(title)
-      lastEmittedTitleRef.current = title
     }
   }, [title])
 
   useEffect(() => {
-    const next = description ?? ""
-    if (next !== lastEmittedDescriptionRef.current) {
-      setLocalDescription(next)
-      lastEmittedDescriptionRef.current = next
+    if (document.activeElement !== descriptionRef.current) {
+      setLocalDescription(description ?? "")
     }
   }, [description])
 
   const handleChangeTitle = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const next = e.target.value
     setLocalTitle(next)
-    lastEmittedTitleRef.current = next
     onQuestionChange?.({
       id,
       type: questionType,
@@ -112,7 +111,6 @@ export const BaseQuestion = ({
   ) => {
     const next = e.target.value
     setLocalDescription(next)
-    lastEmittedDescriptionRef.current = next
     onQuestionChange?.({
       id,
       type: questionType,
@@ -149,7 +147,6 @@ export const BaseQuestion = ({
 
   const isSingleQuestionInSection = getIsSingleQuestionInSection(id)
 
-  const titleRef = useRef<HTMLTextAreaElement>(null)
   // One-shot: focuses the title on first mount for freshly added questions,
   // then flips off so any subsequent effect run (StrictMode double-invoke, or
   // a stray remount from upstream identity churn) cannot bump the caret to
@@ -249,6 +246,7 @@ export const BaseQuestion = ({
           ) : null
         ) : (
           <textarea
+            ref={descriptionRef}
             value={localDescription}
             aria-label={t("surveyFormBuilder.labels.description")}
             placeholder={t(

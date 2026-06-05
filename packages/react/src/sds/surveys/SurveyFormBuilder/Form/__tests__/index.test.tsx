@@ -1,7 +1,13 @@
 import { userEvent } from "@testing-library/user-event"
+import { useState } from "react"
 import { describe, expect, it, vi } from "vitest"
 
-import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
+import {
+  act,
+  zeroRender as render,
+  screen,
+  waitFor,
+} from "@/testing/test-utils"
 
 import { SurveyDatasets, SurveyFormBuilderElement } from "../../types"
 import { SurveyFormBuilder } from "../index"
@@ -45,6 +51,54 @@ describe("SurveyFormBuilder", () => {
 
     expect(screen.getByDisplayValue("Question 1")).toBeInTheDocument()
     expect(screen.getByDisplayValue("Section 1")).toBeInTheDocument()
+  })
+
+  it("keeps the local title while focused when the parent prop lags behind", () => {
+    // Reproduces the caret-reset bug: consumers can back the title with an
+    // eventually-consistent store (e.g. CopilotKit's useCoAgent, whose state
+    // propagates via a subscription a tick later than the keystroke). While
+    // the user is mid-edit (textarea focused), a stale/lagging `title` prop
+    // must NOT overwrite the controlled textarea — doing so snaps the DOM
+    // value back and throws the caret to the end.
+    let pushTitle: (next: string) => void = () => {}
+
+    const Harness = () => {
+      const [title, setTitle] = useState("Hello")
+      pushTitle = setTitle
+      return (
+        <SurveyFormBuilder
+          elements={[
+            { type: "question", question: { id: "q1", title, type: "text" } },
+          ]}
+          onChange={vi.fn()}
+        />
+      )
+    }
+
+    render(<Harness />)
+    const titleArea = screen.getByDisplayValue("Hello") as HTMLTextAreaElement
+
+    act(() => {
+      titleArea.focus()
+    })
+    expect(document.activeElement).toBe(titleArea)
+
+    // A lagging/stale prop arrives while the field is focused.
+    act(() => {
+      pushTitle("STALE")
+    })
+
+    // Focused → local value is authoritative, textarea is not reset.
+    expect(titleArea.value).toBe("Hello")
+
+    // Once the field is idle, external/programmatic updates apply normally.
+    act(() => {
+      titleArea.blur()
+    })
+    act(() => {
+      pushTitle("EXTERNAL UPDATE")
+    })
+    expect(titleArea.value).toBe("EXTERNAL UPDATE")
   })
 
   it("renders drag handles", () => {
