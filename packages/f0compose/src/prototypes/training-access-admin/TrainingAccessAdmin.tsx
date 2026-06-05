@@ -355,7 +355,7 @@ export default function TrainingAccessAdmin() {
   }))
 
   const candidateOptions: CandidateOption[] = availablePersonOptions
-    .filter((option) => !option.disabled && !selectedEmployeeIds.includes(option.value))
+    .filter((option) => !option.disabled)
     .map((option) => ({
       ...option,
       employee: findEmployee(option.value),
@@ -773,6 +773,7 @@ function ShareTrainingDialog({
                   onSelectAll={onSelectAll}
                   onToggleFilter={(filterKey, value) => {
                     onPeopleFilterToggle(filterKey, value)
+                    onPeopleFiltersOpenChange(false)
                   }}
                   onClearFilters={() => {
                     onPeopleFiltersClear()
@@ -919,6 +920,9 @@ function PeopleSelectorPopover({
   const allCandidatesSelected =
     candidateIds.length > 0 &&
     candidateIds.every((id) => selectedEmployeeIds.includes(id))
+  const someCandidatesSelected = candidateIds.some((id) =>
+    selectedEmployeeIds.includes(id)
+  )
   const [activeFilterKey, setActiveFilterKey] = useState<PeopleFilterKey>("workplace")
   const activeFilter = peopleFilterConfigs.find((config) => config.key === activeFilterKey)
   const activeFilterChips = peopleFilterConfigs.flatMap((config) =>
@@ -935,28 +939,27 @@ function PeopleSelectorPopover({
     // F0Box cannot express the top-full placement needed by this selector popover.
     <div className="isolate absolute left-0 right-0 top-full z-50 mt-1 max-h-80 overflow-hidden rounded-md border border-solid border-f1-border-secondary bg-f1-background shadow-lg">
       <div className="flex items-center justify-between border-0 border-b border-solid border-f1-border-secondary px-3 py-2">
+        <F0Text
+          content={showFilters ? "Filters" : `${selectedEmployeeIds.length} selected`}
+          variant={showFilters ? "label" : "description"}
+        />
         {showFilters ? (
-          <F0Text content="Filters" variant="label" />
-        ) : (
-          <div className="flex items-center gap-2">
-            {candidateIds.length > 0 && (
-              <F0Checkbox
-                checked={allCandidatesSelected}
-                onCheckedChange={() => onSelectAll(candidateIds)}
-                title="Select all"
-                hideLabel
-              />
-            )}
-            <F0Text content={`${selectedEmployeeIds.length} selected`} variant="description" />
-          </div>
-        )}
-        {showFilters && (
           <div className="flex items-center gap-2">
             {selectedCount > 0 && (
               <F0Button label="Clear" variant="neutral" size="sm" onClick={onClearFilters} />
             )}
             <F0Button label="Done" variant="default" size="sm" onClick={onCloseFilters} />
           </div>
+        ) : (
+          candidateIds.length > 0 && (
+            <F0Checkbox
+              checked={allCandidatesSelected}
+              indeterminate={someCandidatesSelected && !allCandidatesSelected}
+              onCheckedChange={() => onSelectAll(candidateIds)}
+              title="Select all"
+              hideLabel
+            />
+          )
         )}
       </div>
       {showFilters ? (
@@ -1034,10 +1037,14 @@ function PeopleSelectorPopover({
                   key={candidate.value}
                   type="button"
                   onClick={() => onSelect(candidate.value)}
-                  className={`flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent p-2 text-left hover:bg-f1-background-hover ${
+                  className={`flex w-full cursor-pointer items-center justify-between gap-2 rounded-md border-0 bg-transparent p-2 text-left hover:bg-f1-background-hover ${
                     selected ? "bg-f1-background-selected" : ""
                   }`}
                 >
+                  <PersonCell
+                    employee={candidate.employee}
+                    supportingText={candidate.employee.email}
+                  />
                   <span className="pointer-events-none flex">
                     <F0Checkbox
                       checked={selected}
@@ -1046,10 +1053,6 @@ function PeopleSelectorPopover({
                       hideLabel
                     />
                   </span>
-                  <PersonCell
-                    employee={candidate.employee}
-                    supportingText={candidate.employee.email}
-                  />
                 </button>
               )
             })
