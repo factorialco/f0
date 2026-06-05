@@ -55,7 +55,10 @@ const personFromEmployee = (id: string) => {
 }
 
 export const aiChatConfig = {
-  enabled: true,
+  // Disabled in this standalone build: there is no CopilotKit/Mastra backend, so
+  // the chat fails its network fetch and can crash the page on load in a real
+  // browser (blank screen). It is non-functional here regardless.
+  enabled: false,
   agent: import.meta.env.VITE_AGENT_NAME ?? DEFAULT_AGENT_NAME,
   runtimeUrl: import.meta.env.VITE_AGENT_URL ?? DEFAULT_AGENT_URL,
   credentials: "include" as const,

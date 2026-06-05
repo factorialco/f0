@@ -1,5 +1,4 @@
 import {
-  CardSelectableContainer,
   Chip,
   F0Alert,
   F0AvatarList,
@@ -13,6 +12,8 @@ import {
   F0FormField,
   F0Heading,
   F0Icon,
+  F0Link,
+  F0Select,
   F0TagRaw,
   F0Text,
   F0WizardForm,
@@ -24,7 +25,6 @@ import {
   type F0Field,
 } from "@factorialco/f0-react"
 import {
-  Input,
   OneDataCollection,
   Page,
   PageHeader,
@@ -61,8 +61,8 @@ import {
   Sliders,
   Sparkles,
   People,
+  Search,
   Upload,
-  Warning,
 } from "@factorialco/f0-react/icons/app"
 import {
   type ComponentProps,
@@ -80,9 +80,6 @@ import { z } from "zod"
 import { type Training, trainings } from "@/fixtures"
 import { applySort } from "@/lib/applySort"
 
-import { SmartEnrollmentsTab } from "../trainings/smart-enrollments-v2/SmartEnrollmentsTab"
-import { OneCreateView } from "../trainings/smart-enrollments-v2/OneCreateView"
-
 import type { PrototypeMeta } from "../types"
 
 type F0BoxWithClassNameProps = ComponentProps<typeof F0Box> & {
@@ -92,7 +89,7 @@ type F0BoxWithClassNameProps = ComponentProps<typeof F0Box> & {
 
 const F0BoxWithClassName = F0Box as ComponentType<F0BoxWithClassNameProps>
 
-type MainTabId = "courses" | "requests" | "budgets" | "insights" | "enrollments"
+type MainTabId = "courses" | "requests" | "budgets" | "insights"
 type CoursesSubTabId = "all" | "categories" | "survey-templates"
 type MyCoursesTabId = "my-courses" | "catalog" | "my-requests" | "my-surveys"
 type CourseDetailTabId =
@@ -535,7 +532,6 @@ const exportFields: RenderableField[] = [
 
 const mainTabs = [
   { id: "courses", label: "Courses" },
-  { id: "enrollments", label: "Enrollments" },
   { id: "requests", label: "Requests" },
   { id: "budgets", label: "Budgets" },
   { id: "insights", label: "Insights" },
@@ -1048,7 +1044,6 @@ export default function TrainingsEnrollments() {
   const [requests, setRequests] = useState<RequestRow[]>(initialRequests)
   const [budgets, setBudgets] = useState<BudgetRow[]>(initialBudgets)
   const [pendingListAction, setPendingListAction] = useState<PendingListAction | null>(null)
-  const [isEnrollmentCreateOpen, setIsEnrollmentCreateOpen] = useState(false)
 
   const activeTab = getValidParam(searchParams.get("tab"), VALID_TABS, "courses") as MainTabId
   const activeSubTab = getValidParam(
@@ -1091,8 +1086,7 @@ export default function TrainingsEnrollments() {
     const name = typeof values.name === "string" && values.name.trim() ? values.name.trim() : "Untitled course"
     const courseType: "no-editions" | "with-editions" = values.courseType === "with-editions" ? "with-editions" : "no-editions"
     const autoEnroll = values.enableAutoEnrollment !== false
-    const audienceGroups = readAudienceGroups(values.audienceCriteria)
-    const { criteria, matchCount } = audienceSummary(audienceGroups)
+    const { criteria, matchCount } = filterStateSummary(values.audienceCriteria)
     const withEditions = courseType === "with-editions"
     const enrollmentRule = autoEnroll
       ? {
@@ -1118,6 +1112,9 @@ export default function TrainingsEnrollments() {
       creationYear: String(values.year ?? "2026"),
       courseType,
       enrollmentRule,
+      // A freshly created course has no training group yet → its settings show the
+      // "no group" assignment case (warning + create group).
+      groups: [],
     }
     setCourses((currentCourses) => [newCourse, ...currentCourses])
     setToast(null)
@@ -1178,6 +1175,10 @@ export default function TrainingsEnrollments() {
         initialSection={initialSection}
         onSave={() => {
           setToast("settings")
+          setSearchParams({ view: "detail", course: selectedCourse.id })
+        }}
+        onCreateGroup={() => {
+          // Take the user to the course where training groups are managed.
           setSearchParams({ view: "detail", course: selectedCourse.id })
         }}
       />
@@ -1335,7 +1336,6 @@ export default function TrainingsEnrollments() {
           {activeTab === "requests" && <RequestsTab requests={requests} onUpdateRequests={setRequests} />}
           {activeTab === "budgets" && <BudgetsTab budgets={budgets} onUpdateBudgets={setBudgets} onOpenBudget={(budgetId) => setSearchParams({ view: "budget-detail", budget: budgetId })} />}
           {activeTab === "insights" && <InsightsTab courses={courses} />}
-          {activeTab === "enrollments" && <SmartEnrollmentsTab onStartCreate={() => setIsEnrollmentCreateOpen(true)} />}
         </F0Box>
         <TrainingActionDialog
           detail={pendingListAction ? getListActionDetail(pendingListAction, courses) : null}
@@ -1359,12 +1359,6 @@ export default function TrainingsEnrollments() {
           onToast={setToast}
           onCreateCourse={handleCreateCourse}
         />
-        {isEnrollmentCreateOpen && (
-          <OneCreateView
-            onClose={() => setIsEnrollmentCreateOpen(false)}
-            onSubmit={() => setIsEnrollmentCreateOpen(false)}
-          />
-        )}
       </StandardLayout>
     </Page>
   )
@@ -1389,12 +1383,12 @@ function NewCourseWizardDialog({
   // refs inside the (memoized) field renderers so the closures always see the
   // latest value.
   const initialEnrollment: Record<string, unknown> = {
-    enableAutoEnrollment: true,
-    audienceCriteria: [],
+    enableAutoEnrollment: false,
+    audienceCriteria: {},
     enrollmentAssignment: "waitlist",
     enrollmentAppliesTo: "new-only",
   }
-  const [courseType, setCourseType] = useState<string>("no-editions")
+  const [courseType, setCourseType] = useState<string>("with-editions")
   const [enrollment, setEnrollment] = useState<Record<string, unknown>>(initialEnrollment)
   const [audienceError, setAudienceError] = useState(false)
   const [instanceKey, setInstanceKey] = useState(0)
@@ -1406,15 +1400,37 @@ function NewCourseWizardDialog({
   const audienceErrorRef = useRef(audienceError)
   audienceErrorRef.current = audienceError
 
+  // F0WizardForm invokes `onSubmit` on render of the last step (not just on the
+  // "Create" click), which would flag the audience error prematurely. We only
+  // want the error when the user actually clicks the final "Create" button, so
+  // we capture real submit clicks here and let onSubmit check this flag.
+  const submitClickedRef = useRef(false)
+  useEffect(() => {
+    if (!isOpen) return
+    const onDocClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null
+      const button = target?.closest("button")
+      if (button && /^(create|submit)$/i.test((button.textContent ?? "").trim())) {
+        submitClickedRef.current = true
+        // Safety net: clear if no submit actually runs shortly after.
+        window.setTimeout(() => {
+          submitClickedRef.current = false
+        }, 1000)
+      }
+    }
+    document.addEventListener("click", onDocClick, true)
+    return () => document.removeEventListener("click", onDocClick, true)
+  }, [isOpen])
+
   // Each time the wizard opens, start fresh: clear the bridge state and remount
   // F0WizardForm (via key) so its fields reset to defaults at step 1.
   const wasOpen = useRef(false)
   useEffect(() => {
     if (isOpen && !wasOpen.current) {
-      setCourseType("no-editions")
+      setCourseType("with-editions")
       setEnrollment({
-        enableAutoEnrollment: true,
-        audienceCriteria: [],
+        enableAutoEnrollment: false,
+        audienceCriteria: {},
         enrollmentAssignment: "waitlist",
         enrollmentAppliesTo: "new-only",
       })
@@ -1426,7 +1442,7 @@ function NewCourseWizardDialog({
   }, [isOpen])
 
   const updateEnrollment = (field: string, value: unknown) => {
-    if (field === "audienceCriteria") setAudienceError(false)
+    if (field === "audienceCriteria" || field === "enableAutoEnrollment") setAudienceError(false)
     setEnrollment((current) => ({ ...current, [field]: value }))
   }
 
@@ -1596,6 +1612,7 @@ function NewCourseWizardDialog({
   const formDefinition = useF0FormDefinition({
     name: "new-course",
     schema,
+    submitConfig: { label: "Create" },
     defaultValues: {
       name: "",
       year: 2026,
@@ -1631,11 +1648,18 @@ function NewCourseWizardDialog({
       },
     },
     onSubmit: ({ data }) => {
-      // Validate on submit: automatic enrollment ON requires at least one criterion.
+      // F0WizardForm calls onSubmit on every render of the last step, not only on
+      // the Submit click. We must ONLY act on a genuine Submit click — otherwise
+      // selecting a criterion (which passes validation) would create the course
+      // and navigate away on the next render. Consume the click flag here.
+      const isRealSubmit = submitClickedRef.current
+      submitClickedRef.current = false
+      if (!isRealSubmit) {
+        return { success: false as const }
+      }
       const enroll = enrollmentRef.current
       const autoEnrollOn = enroll.enableAutoEnrollment !== false
-      const audienceSelected =
-        flattenAudienceGroups(readAudienceGroups(enroll.audienceCriteria)).length > 0
+      const audienceSelected = filterStateSelectedCount(enroll.audienceCriteria) > 0
       if (autoEnrollOn && !audienceSelected) {
         setAudienceError(true)
         return {
@@ -1860,15 +1884,13 @@ const inscripcionCopy = {
   courseType: {
     label: "Course type",
     noEditions: {
-      title: "No editions",
-      description: "Each person takes it on their own. No groups or sessions.",
+      title: "One-time",
+      description: "Runs once, on set dates or at each person's own pace.",
     },
     withEditions: {
-      title: "With editions",
-      description: "Delivered to groups of people at different times.",
+      title: "Recurring",
+      description: "Delivered in separate training groups over time, each with its own dates.",
     },
-    hintNoEditions: "No editions: enrollment is directly into the course.",
-    hintWithEditions: "With editions: people are assigned to groups. Since there are no groups yet, they'll be pending group assignment.",
   },
   step: {
     title: "Enrollment",
@@ -1876,7 +1898,7 @@ const inscripcionCopy = {
   },
   toggle: {
     label: "Automatic enrollment",
-    hint: "Anyone who matches the criteria is enrolled automatically, now and as new people join.",
+    hint: "People who match the criteria are added automatically, now and as new people join.",
   },
   audience: {
     label: "Who should take this course?",
@@ -1894,19 +1916,34 @@ const inscripcionCopy = {
     addGroup: "And also must match",
     removeGroup: "Remove group",
     zeroMatch: "No one matches this combination. Check your criteria.",
+    pendingNote: "They'll stay in pending group assignment until this course has a group.",
   },
-  // PATTERN A — "people are added": a criterion was added (or the match broadened).
-  // In edit mode we always ask, because adding people in bulk has consequences.
+  // "Who does this apply to?" — shown ONLY when a criterion change ADDS people who
+  // already match. It names the concrete change rather than a generic warning, and
+  // the count of affected people lives here (once), not in a separate alert.
   appliesTo: {
-    label: "Who does this apply to?",
-    hint: "This course already has history. Adding people now has consequences, so choose who this applies to.",
-    newOnly: {
-      title: "Only new people",
-      description: "Only future matches will be enrolled.",
+    changeLabel: (added: string) => `You added ${added}. Who should this apply to?`,
+    changeHint: (count: number, added: string) =>
+      `${count} ${count === 1 ? "person" : "people"} in ${added} ${count === 1 ? "matches" : "match"} but ${count === 1 ? "isn't" : "aren't"} enrolled yet.`,
+    newOnly: "New people only",
+    addExisting: (count: number) => `Add the ${count} too`,
+  },
+  // "How are people assigned?" — assignment follows whichever group is running at
+  // match time; no fixed group is pinned (a pinned group could later expire).
+  groupAssign: {
+    label: "How are people assigned?",
+    currentGroup: {
+      title: "Add to the current group",
+      subtitle:
+        "People are enrolled in whichever group is running when they match — no need to pick or update it.",
+      now: (group: string, dates: string) => `Now: ${group} · ${dates}`,
+      multiActive: (count: number) =>
+        `${count} groups are running now. When more than one is active, people stay pending so you can choose.`,
+      noneActive: "No group is running now — people stay pending until one starts.",
     },
-    everyone: {
-      title: (count: number) => `Everyone who already matches · ${count} ${count === 1 ? "person" : "people"}`,
-      description: "Also enrolls people who already match the new criteria now.",
+    leavePending: {
+      title: "Leave as pending",
+      subtitle: "People wait in pending group assignment until you assign them manually.",
     },
   },
   // PATTERN B — "people are removed": a criterion was removed/swapped, or automatic
@@ -1931,140 +1968,6 @@ const inscripcionCopy = {
   manualCallout: "No automatic enrollment. You'll be able to enroll participants manually from the course once it's created, in the Participants tab.",
 } as const
 
-// Audience criteria — each option resolves to a set of people. Counts and the
-// combined preview are derived from a deterministic mock population so that OR
-// (within a group) and AND (across groups) behave realistically, including the
-// "impossible AND → nobody matches" case (e.g. Team: Engineering AND Team: Sales).
-type AudienceDimension = "workplace" | "team" | "role"
-type AudienceOption = { id: string; label: string; count: number; category: string; dimension: AudienceDimension }
-
-const AUDIENCE_DIMENSIONS: {
-  category: string
-  dimension: AudienceDimension
-  options: { id: string; label: string; weight: number }[]
-}[] = [
-  {
-    category: "Workplace",
-    dimension: "workplace",
-    options: [
-      { id: "wp-bcn", label: "Barcelona", weight: 0.34 },
-      { id: "wp-mad", label: "Madrid", weight: 0.23 },
-      { id: "wp-remote", label: "Remote", weight: 0.19 },
-      { id: "wp-lon", label: "London", weight: 0.13 },
-      { id: "wp-ber", label: "Berlin", weight: 0.11 },
-    ],
-  },
-  {
-    category: "Team",
-    dimension: "team",
-    options: [
-      { id: "tm-eng", label: "Engineering", weight: 0.3 },
-      { id: "tm-sales", label: "Sales", weight: 0.22 },
-      { id: "tm-mkt", label: "Marketing", weight: 0.16 },
-      { id: "tm-product", label: "Product", weight: 0.16 },
-      { id: "tm-people", label: "People", weight: 0.16 },
-    ],
-  },
-  {
-    category: "Role",
-    dimension: "role",
-    options: [
-      { id: "rl-manager", label: "Manager", weight: 0.14 },
-      { id: "rl-ic", label: "Individual contributor", weight: 0.74 },
-      { id: "rl-lead", label: "Team lead", weight: 0.12 },
-    ],
-  },
-]
-
-type MockPerson = Record<AudienceDimension, string>
-
-// Deterministic synthetic population. Each person has exactly one workplace,
-// team and role, so any AND between two values of the same dimension yields 0.
-const AUDIENCE_POPULATION: MockPerson[] = (() => {
-  let seed = 1337
-  const rand = () => {
-    seed = (seed * 1103515245 + 12345) & 0x7fffffff
-    return seed / 0x7fffffff
-  }
-  const weightedPick = (options: { label: string; weight: number }[]) => {
-    const r = rand()
-    let acc = 0
-    for (const option of options) {
-      acc += option.weight
-      if (r <= acc) return option.label
-    }
-    return options[options.length - 1].label
-  }
-  const optionsFor = (dimension: AudienceDimension) =>
-    AUDIENCE_DIMENSIONS.find((group) => group.dimension === dimension)?.options ?? []
-  return Array.from({ length: 140 }, () => ({
-    workplace: weightedPick(optionsFor("workplace")),
-    team: weightedPick(optionsFor("team")),
-    role: weightedPick(optionsFor("role")),
-  }))
-})()
-
-const AUDIENCE_BY_ID: Record<string, { dimension: AudienceDimension; label: string; category: string }> =
-  Object.fromEntries(
-    AUDIENCE_DIMENSIONS.flatMap((group) =>
-      group.options.map((option) => [
-        option.id,
-        { dimension: group.dimension, label: option.label, category: group.category },
-      ])
-    )
-  )
-
-const optionMatchesPerson = (id: string, person: MockPerson) => {
-  const meta = AUDIENCE_BY_ID[id]
-  return Boolean(meta) && person[meta.dimension] === meta.label
-}
-
-const countForOption = (id: string) =>
-  AUDIENCE_POPULATION.filter((person) => optionMatchesPerson(id, person)).length
-
-// Flat list with derived counts — used for chips, labels and the dropdown.
-const AUDIENCE_FLAT: AudienceOption[] = AUDIENCE_DIMENSIONS.flatMap((group) =>
-  group.options.map((option) => ({
-    id: option.id,
-    label: option.label,
-    category: group.category,
-    dimension: group.dimension,
-    count: countForOption(option.id),
-  }))
-)
-
-// Dropdown groups (category header + its options), with counts.
-const AUDIENCE_GROUPS: { category: string; options: { id: string; label: string; count: number }[] }[] =
-  AUDIENCE_DIMENSIONS.map((group) => ({
-    category: group.category,
-    options: group.options.map((option) => ({
-      id: option.id,
-      label: option.label,
-      count: countForOption(option.id),
-    })),
-  }))
-
-const flattenAudienceGroups = (groups: string[][]): string[] => groups.flat()
-
-// People matching ALL groups = intersection (AND) across groups, where each
-// group is a union (OR) of its criteria. Empty groups are ignored.
-function peopleMatchingGroups(groups: string[][]): number {
-  const active = groups.filter((group) => group.length > 0)
-  if (active.length === 0) return 0
-  return AUDIENCE_POPULATION.filter((person) =>
-    active.every((group) => group.some((id) => optionMatchesPerson(id, person)))
-  ).length
-}
-
-// Summary for the saved enrollment rule: flattened criteria labels + combined count.
-function audienceSummary(groups: string[][]): { criteria: string[]; matchCount: number } {
-  const labels = flattenAudienceGroups(groups)
-    .map((id) => AUDIENCE_FLAT.find((option) => option.id === id))
-    .filter((option): option is AudienceOption => Boolean(option))
-    .map((option) => `${option.category}: ${option.label}`)
-  return { criteria: labels, matchCount: peopleMatchingGroups(groups) }
-}
-
 const AUDIENCE_PREVIEW_AVATARS = [
   { firstName: "Laura", lastName: "García" },
   { firstName: "Marc", lastName: "López" },
@@ -2077,57 +1980,187 @@ const AUDIENCE_PREVIEW_AVATARS = [
 function CourseTypeField({ values, onUpdate }: { values: Record<string, unknown>; onUpdate: (field: string, value: unknown) => void }) {
   const courseType = (values.courseType as string) ?? "no-editions"
   const copy = inscripcionCopy.courseType
+  const options = [
+    { value: "no-editions", title: copy.noEditions.title, description: copy.noEditions.description },
+    { value: "with-editions", title: copy.withEditions.title, description: copy.withEditions.description },
+  ]
   return (
-    <div className="flex flex-col gap-3">
-      <F0Text variant="label" content={copy.label} />
-      <CardSelectableContainer
-        label={copy.label}
-        layout="vertical"
-        value={courseType}
-        onChange={(val) => onUpdate("courseType", val ?? "no-editions")}
-        items={[
-          {
-            value: "no-editions",
-            title: copy.noEditions.title,
-            description: copy.noEditions.description,
-          },
-          {
-            value: "with-editions",
-            title: copy.withEditions.title,
-            description: copy.withEditions.description,
-          },
-        ]}
-      />
-      <F0Text variant="small" content={courseType === "with-editions" ? copy.hintWithEditions : copy.hintNoEditions} />
+    <div className="flex flex-col gap-2">
+      {/* Exact F0 input-field label style (matches the DS <label> markup) so
+          "Course type" reads like every other field label. */}
+      <span className="text-base font-medium leading-normal text-f1-foreground-secondary">
+        {copy.label}
+      </span>
+      {/* Compact radio group — two distinct course types (not an on/off toggle), so
+          radios, per the F0ButtonToggle guidance. Both descriptions stay visible so
+          the TM can compare the types without interacting. Subordinate to Course
+          name: no big bordered cards, just radio + title + description rows. */}
+      <div className="flex flex-col gap-2.5">
+        {options.map((option) => {
+          const selected = courseType === option.value
+          return (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => onUpdate("courseType", option.value)}
+              className="flex items-start gap-2.5 text-left"
+            >
+              <span
+                className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-solid ${selected ? "border-f1-border-selected" : "border-f1-border-secondary"}`}
+              >
+                {selected && <span className="h-2 w-2 rounded-full bg-f1-background-selected-bold" />}
+              </span>
+              <div className="flex flex-col gap-0.5">
+                <F0Text variant="body" as="span" content={option.title} />
+                <F0Text variant="description" as="span" content={option.description} />
+              </div>
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
 
-// Step 4 — Inscripción
-function InscripcionStep({ values, onUpdate, audienceError = false, hasGroups = false, showAppliesTo = false, originalAudienceCriteria = [] }: { values: Record<string, unknown>; onUpdate: (field: string, value: unknown) => void; audienceError?: boolean; hasGroups?: boolean; showAppliesTo?: boolean; originalAudienceCriteria?: string[] }) {
+// Trigger field ("Search workplace, team, role…" with selected chips). Clicking
+// it reveals the faceted panel below — mirrors the real product flow where the
+// FilterPickerContent panel opens from a trigger.
+function WizardAudienceFilterPicker({
+  value,
+  onChange,
+  error = false,
+  showPendingNote = true,
+}: {
+  value: AudienceFilterState
+  onChange: (next: AudienceFilterState) => void
+  error?: boolean
+  // The "they'll stay pending until this course has a group" note only applies
+  // at creation (no group exists yet). Settings handles assignment explicitly,
+  // so it hides this note.
+  showPendingNote?: boolean
+}) {
+  const facetKeys = Object.keys(enrollmentFilterDef)
+
+  // Flatten every facet into a single searchable option list. The option value
+  // is namespaced "facetKey::optionValue" so a label shared across facets (e.g.
+  // a manager listed under both "Direct reports of" and "All reportees of")
+  // stays unique, and the label is prefixed with its facet so the origin is
+  // visible inside the dropdown too. Memoized so the array identity is stable:
+  // F0Select keys its internal data source on the `options` reference, and the
+  // wizard re-renders this step often — a fresh array each render would reset
+  // the data source mid-fetch and leave the dropdown empty.
+  const selectOptions = useMemo(
+    () =>
+      facetKeys.flatMap((key, index) => {
+        const facet = enrollmentFilterDef[key]
+        const items = (facet?.options.options ?? []).map((option) => ({
+          value: `${key}::${option.value}`,
+          label: `${facet?.label ?? key}: ${option.label}`,
+        }))
+        return index === 0 ? items : [{ type: "separator" as const }, ...items]
+      }),
+    // enrollmentFilterDef is a module-level constant → compute once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  )
+
+  const selectedValues = facetKeys.flatMap((key) =>
+    (value[key] ?? []).map((optionValue) => `${key}::${optionValue}`)
+  )
+
+  const handleSelectChange = (next: string[]) => {
+    const grouped: AudienceFilterState = {}
+    for (const composite of next) {
+      const separator = composite.indexOf("::")
+      if (separator === -1) continue
+      const key = composite.slice(0, separator)
+      const optionValue = composite.slice(separator + 2)
+      grouped[key] = [...(grouped[key] ?? []), optionValue]
+    }
+    onChange(grouped)
+  }
+
+  const chips = facetKeys.flatMap((key) =>
+    (value[key] ?? []).map((optionValue) => ({
+      key,
+      optionValue,
+      facetLabel: enrollmentFilterDef[key]?.label ?? key,
+      count: mockAudienceCount(optionValue),
+    }))
+  )
+  const removeChip = (key: string, optionValue: string) => {
+    const next = (value[key] ?? []).filter((item) => item !== optionValue)
+    const updated: AudienceFilterState = { ...value, [key]: next }
+    if (next.length === 0) delete updated[key]
+    onChange(updated)
+  }
+  const total = filterStateSummary(value).matchCount
+  return (
+    <div className="flex flex-col gap-3">
+      <F0Select
+        multiple
+        options={selectOptions}
+        value={selectedValues}
+        onChange={handleSelectChange}
+        label={inscripcionCopy.audience.label}
+        placeholder={inscripcionCopy.audience.searchPlaceholder}
+        icon={Search}
+        showSearchBox
+        searchBoxPlaceholder={inscripcionCopy.audience.searchPlaceholder}
+        error={error ? inscripcionCopy.audience.error : false}
+      />
+      {chips.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5">
+          {chips.map((chip) => (
+            <Chip
+              key={`${chip.key}:${chip.optionValue}`}
+              label={`${chip.facetLabel}: ${chip.optionValue} · ${chip.count}`}
+              onClose={() => removeChip(chip.key, chip.optionValue)}
+            />
+          ))}
+        </div>
+      )}
+      {chips.length > 0 &&
+        (total > 0 ? (
+          <F0Box
+            display="flex"
+            flexDirection="column"
+            gap="md"
+            padding="lg"
+            borderRadius="lg"
+            border="default"
+            borderColor="secondary"
+            background="primary"
+          >
+            <div className="flex items-center gap-3">
+              <F0AvatarList
+                size="sm"
+                type="person"
+                avatars={AUDIENCE_PREVIEW_AVATARS}
+                max={4}
+                remainingCount={Math.max(total - 4, 0)}
+              />
+              <F0Text variant="body" content={peopleMatchPhrase(total)} />
+            </div>
+            {showPendingNote && (
+              <>
+                <div className="h-px w-full bg-f1-border-secondary" />
+                <F0Text variant="description" content={inscripcionCopy.audience.pendingNote} />
+              </>
+            )}
+          </F0Box>
+        ) : (
+          <F0Alert variant="warning" title="" description={inscripcionCopy.audience.zeroMatch} />
+        ))}
+    </div>
+  )
+}
+
+// Step 4 — Inscripción (creation wizard). Settings reuses the same picker via
+// EditCourseEnrollmentSection, which adds the live-course fields.
+function InscripcionStep({ values, onUpdate, audienceError = false }: { values: Record<string, unknown>; onUpdate: (field: string, value: unknown) => void; audienceError?: boolean }) {
   // Toggle defaults ON.
   const autoEnroll = values.enableAutoEnrollment !== false
-  const courseType = (values.courseType as string) ?? "no-editions"
-  const withEditions = courseType === "with-editions"
-  const appliesTo = (values.enrollmentAppliesTo as string) ?? "new-only"
-
-  // Diff current vs original criteria to drive the edit-mode messages.
-  // - added  → PATTERN A ("Who does this apply to?"), always asked in edit mode.
-  // - removed → PATTERN B (informational note, nobody is unenrolled).
-  // Editing a criterion NEVER unenrolls anyone; removals are always manual.
-  const labelFor = (id: string) => {
-    const option = AUDIENCE_FLAT.find((o) => o.id === id)
-    return option ? `${option.category}: ${option.label}` : id
-  }
-  const currentCriteria = flattenAudienceGroups(readAudienceGroups(values.audienceCriteria))
-  const addedCriteria = currentCriteria.filter((id) => !originalAudienceCriteria.includes(id))
-  const removedCriteria = originalAudienceCriteria.filter((id) => !currentCriteria.includes(id))
-  const addedTotal = addedCriteria
-    .map((id) => AUDIENCE_FLAT.find((o) => o.id === id))
-    .filter((o): o is AudienceOption => Boolean(o))
-    .reduce((sum, o) => sum + o.count, 0)
-  const removedLabels = removedCriteria.map(labelFor).join(", ")
-  const hadRule = originalAudienceCriteria.length > 0
 
   return (
     <div className="flex flex-col gap-6">
@@ -2146,457 +2179,14 @@ function InscripcionStep({ values, onUpdate, audienceError = false, hasGroups = 
       </div>
 
       {autoEnroll ? (
-        <>
-          <AudienceSelector values={values} onUpdate={onUpdate} error={audienceError} hideHint={showAppliesTo} />
-
-          {/* PATTERN B — a criterion was removed (people stop being auto-enrolled). */}
-          {showAppliesTo && removedCriteria.length > 0 && (
-            <F0Alert variant="info" title="" description={inscripcionCopy.ruleRemoval.note(removedLabels)} />
-          )}
-
-          {/* PATTERN A — a criterion was added: ask who it applies to. */}
-          {showAppliesTo && addedCriteria.length > 0 && (
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-col gap-0.5">
-                <F0Text variant="label" content={inscripcionCopy.appliesTo.label} />
-                <F0Text variant="description" content={inscripcionCopy.appliesTo.hint} />
-              </div>
-              <CardSelectableContainer
-                label={inscripcionCopy.appliesTo.label}
-                value={appliesTo}
-                onChange={(val) => onUpdate("enrollmentAppliesTo", val ?? "new-only")}
-                items={[
-                  {
-                    value: "new-only",
-                    title: inscripcionCopy.appliesTo.newOnly.title,
-                    description: inscripcionCopy.appliesTo.newOnly.description,
-                  },
-                  {
-                    value: "everyone",
-                    title: inscripcionCopy.appliesTo.everyone.title(addedTotal),
-                    description: inscripcionCopy.appliesTo.everyone.description,
-                  },
-                ]}
-              />
-            </div>
-          )}
-
-          {withEditions && (
-            <div className="flex flex-col gap-3">
-              <F0Text variant="label" content={inscripcionCopy.assignment.label} />
-              <CardSelectableContainer
-                label={inscripcionCopy.assignment.label}
-                value={(values.enrollmentAssignment as string) ?? "waitlist"}
-                onChange={(val) => onUpdate("enrollmentAssignment", val ?? "waitlist")}
-                items={[
-                  {
-                    value: "waitlist",
-                    title: inscripcionCopy.assignment.waitlist.title,
-                    description: inscripcionCopy.assignment.waitlist.description,
-                  },
-                  {
-                    value: "group",
-                    title: inscripcionCopy.assignment.group.title,
-                    description: hasGroups
-                      ? inscripcionCopy.assignment.group.description
-                      : inscripcionCopy.assignment.group.descriptionNoGroups,
-                    disabled: !hasGroups,
-                  },
-                ]}
-              />
-              {!hasGroups && (
-                <F0Alert variant="warning" title="" description={inscripcionCopy.assignment.warning} />
-              )}
-            </div>
-          )}
-        </>
-      ) : showAppliesTo && hadRule ? (
-        // PATTERN B variant — automatic enrollment was turned off entirely.
-        <F0Alert variant="info" title="" description={inscripcionCopy.ruleRemoval.automationOff} />
+        <WizardAudienceFilterPicker
+          value={readAudienceFilterState(values.audienceCriteria)}
+          onChange={(next) => onUpdate("audienceCriteria", next)}
+          error={audienceError}
+        />
       ) : (
         <F0Alert variant="info" title="" description={inscripcionCopy.manualCallout} />
       )}
-    </div>
-  )
-}
-
-// Normalize the stored value into a list of groups. Supports the legacy flat
-// shape (string[]) by wrapping it as a single group.
-function readAudienceGroups(value: unknown): string[][] {
-  if (!Array.isArray(value) || value.length === 0) return []
-  if (Array.isArray(value[0])) return value as string[][]
-  return [value as string[]]
-}
-
-// Search field that adds a criterion to one group. Two looks:
-// - "input": full search input (the single-group default view).
-// - "trigger": a discreet "+ or" button that opens the same dropdown (inside group boxes).
-// `autoOpen` opens the dropdown on mount (used by a freshly added group), and
-// `onDismiss` fires when it closes without a pick (so a pending group can be discarded).
-function CriteriaSearchField({
-  selectedIds,
-  onAdd,
-  error,
-  variant = "input",
-  autoOpen = false,
-  onDismiss,
-}: {
-  selectedIds: string[]
-  onAdd: (id: string) => void
-  error?: string
-  variant?: "input" | "trigger"
-  autoOpen?: boolean
-  onDismiss?: () => void
-}) {
-  const [query, setQuery] = useState("")
-  const [open, setOpen] = useState(autoOpen)
-
-  const normalizedQuery = query.trim().toLowerCase()
-  const filteredGroups = AUDIENCE_GROUPS.map((group) => ({
-    category: group.category,
-    options: group.options.filter(
-      (option) =>
-        !selectedIds.includes(option.id) &&
-        (normalizedQuery === "" ||
-          option.label.toLowerCase().includes(normalizedQuery) ||
-          group.category.toLowerCase().includes(normalizedQuery))
-    ),
-  })).filter((group) => group.options.length > 0)
-
-  return (
-    <div className={`relative${open ? " z-30" : ""}`}>
-      {variant === "input" ? (
-        <div onClick={() => setOpen(true)}>
-          <Input
-            label={inscripcionCopy.audience.label}
-            hideLabel
-            value={query}
-            onChange={(value) => {
-              setQuery(value)
-              setOpen(true)
-            }}
-            placeholder={inscripcionCopy.audience.searchPlaceholder}
-            error={error}
-          />
-        </div>
-      ) : (
-        <F0Button
-          label={inscripcionCopy.audience.addCriterion}
-          icon={Add}
-          variant="outline"
-          size="sm"
-          onClick={() => setOpen(true)}
-        />
-      )}
-      {open && (
-        <>
-          <button
-            aria-hidden
-            tabIndex={-1}
-            className="fixed inset-0 z-10 cursor-default"
-            onClick={() => {
-              setOpen(false)
-              setQuery("")
-              onDismiss?.()
-            }}
-          />
-          <div className="absolute left-0 top-full z-20 mt-1 max-h-64 min-w-64 overflow-y-auto rounded-lg border border-solid border-f1-border bg-f1-background py-1 shadow-md">
-            {filteredGroups.length === 0 ? (
-              <div className="px-3 py-2">
-                <F0Text variant="description" content={inscripcionCopy.audience.noResults} />
-              </div>
-            ) : (
-              filteredGroups.map((group) => (
-                <div key={group.category}>
-                  <div className="px-3 py-1">
-                    <F0Text variant="small" content={group.category} />
-                  </div>
-                  {group.options.map((option) => (
-                    <button
-                      key={option.id}
-                      onClick={(event) => {
-                        event.stopPropagation()
-                        setQuery("")
-                        setOpen(false)
-                        onAdd(option.id)
-                      }}
-                      className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left transition-colors hover:bg-f1-background-secondary"
-                    >
-                      <F0Text variant="body" content={option.label} />
-                      <F0Text variant="description" content={String(option.count)} />
-                    </button>
-                  ))}
-                </div>
-              ))
-            )}
-          </div>
-        </>
-      )}
-    </div>
-  )
-}
-
-// Criteria pills for one group, joined by a faint "or" (OR within a group).
-// Each pill carries its own leading "or" as a single inline-flex unit, so the
-// separator stays glued to its pill and reads consistently when wrapping lines.
-function CriteriaPills({ ids, onRemove }: { ids: string[]; onRemove: (id: string) => void }) {
-  const options = ids
-    .map((id) => AUDIENCE_FLAT.find((option) => option.id === id))
-    .filter((option): option is AudienceOption => Boolean(option))
-  if (options.length === 0) return null
-  return (
-    <div className="flex flex-wrap items-center gap-y-1.5">
-      {options.map((option, index) => (
-        <div key={option.id} className="flex items-center">
-          {index > 0 && (
-            <span className="px-1.5 text-sm text-f1-foreground-tertiary">
-              {inscripcionCopy.audience.addCriterion}
-            </span>
-          )}
-          <Chip
-            label={`${option.category}: ${option.label} · ${option.count}`}
-            onClose={() => onRemove(option.id)}
-          />
-        </div>
-      ))}
-    </div>
-  )
-}
-
-// Live combined result — visually weighted as the outcome of the whole builder
-// (filled background), or the soft zero-match warning when nobody matches.
-function AudiencePreview({ total }: { total: number }) {
-  if (total === 0) {
-    return (
-      <F0Alert variant="warning" title="" description={inscripcionCopy.audience.zeroMatch} />
-    )
-  }
-  return (
-    <F0Box
-      display="flex"
-      alignItems="center"
-      gap="md"
-      padding="lg"
-      borderRadius="lg"
-      background="secondary"
-    >
-      <F0AvatarList
-        size="sm"
-        type="person"
-        avatars={AUDIENCE_PREVIEW_AVATARS}
-        max={4}
-        remainingCount={Math.max(total - 4, 0)}
-      />
-      <F0Text variant="label" content={`${total} ${inscripcionCopy.audience.previewSuffix}`} />
-    </F0Box>
-  )
-}
-
-// One group rendered as a light box: "match any of these" label, a remove
-// control, its pills, and an "+ or" trigger to add more criteria.
-function AudienceGroupBox({
-  ids,
-  onAdd,
-  onRemove,
-  onRemoveGroup,
-  autoOpen,
-  onDismissEmpty,
-}: {
-  ids: string[]
-  onAdd: (id: string) => void
-  onRemove: (id: string) => void
-  onRemoveGroup: () => void
-  autoOpen?: boolean
-  onDismissEmpty?: () => void
-}) {
-  return (
-    <div
-      className="flex flex-col gap-2.5 rounded-md border-solid border-f1-border-secondary px-3 py-2.5"
-      style={{ borderWidth: "0.5px" }}
-    >
-      <div className="flex items-center justify-between">
-        <F0Text variant="small" content={inscripcionCopy.audience.groupLabel} />
-        <F0Button
-          label={inscripcionCopy.audience.removeGroup}
-          icon={Cross}
-          hideLabel
-          variant="ghost"
-          size="sm"
-          onClick={onRemoveGroup}
-        />
-      </div>
-      <CriteriaPills ids={ids} onRemove={onRemove} />
-      <div>
-        <CriteriaSearchField
-          selectedIds={ids}
-          onAdd={onAdd}
-          variant="trigger"
-          autoOpen={autoOpen}
-          onDismiss={onDismissEmpty}
-        />
-      </div>
-    </div>
-  )
-}
-
-// Audience selector — progressive any/all builder. Never shows "AND"/"OR" as
-// operators: OR within a group = faint "or"; AND across groups = "match all" +
-// "and also" separators. Same component for creation and edit.
-//
-// Empty groups never persist: adding a group opens a transient "pending" group
-// (local state). It only commits to the value when a criterion is picked; if
-// dismissed without a pick it is discarded. So the preview never counts a group
-// with no criteria, and you can never chain empty groups.
-function AudienceSelector({ values, onUpdate, error = false, hideHint = false }: { values: Record<string, unknown>; onUpdate: (field: string, value: unknown) => void; error?: boolean; hideHint?: boolean }) {
-  const groups = readAudienceGroups(values.audienceCriteria).filter((group) => group.length > 0)
-  const [pendingGroup, setPendingGroup] = useState(false)
-  const errorText = error ? inscripcionCopy.audience.error : undefined
-
-  const total = peopleMatchingGroups(groups)
-  // The "match all" structure shows once there are two or more groups in play —
-  // real groups plus the pending one being added.
-  const isMulti = groups.length + (pendingGroup ? 1 : 0) >= 2
-  const isEmpty = groups.length === 0 && !pendingGroup
-
-  const setGroups = (next: string[][]) => onUpdate("audienceCriteria", next)
-
-  const addCriterion = (groupIndex: number, id: string) => {
-    if (groups.length === 0) {
-      setGroups([[id]])
-      return
-    }
-    setGroups(
-      groups.map((group, index) =>
-        index === groupIndex ? (group.includes(id) ? group : [...group, id]) : group
-      )
-    )
-  }
-
-  // Commit the pending group: it becomes a real group with its first criterion.
-  const commitPendingCriterion = (id: string) => {
-    setPendingGroup(false)
-    setGroups([...groups, [id]])
-  }
-
-  const removeCriterion = (groupIndex: number, id: string) => {
-    const next = groups
-      .map((group, index) => (index === groupIndex ? group.filter((x) => x !== id) : group))
-      .filter((group) => group.length > 0)
-    setGroups(next)
-  }
-
-  const removeGroup = (groupIndex: number) => {
-    setGroups(groups.filter((_, index) => index !== groupIndex))
-  }
-
-  // Add-group is only available when the last real group already has content and
-  // we're not already mid-adding one, and we're under the 3-group cap.
-  const canAddGroup = !pendingGroup && groups.length < 3
-  const startGroup = () => {
-    if (canAddGroup) setPendingGroup(true)
-  }
-
-  // STATE 1 — Empty: only the search field, no group structure at all.
-  if (isEmpty) {
-    return (
-      <div className="flex flex-col gap-3">
-        <F0Text variant="label" content={inscripcionCopy.audience.label} />
-        <CriteriaSearchField selectedIds={[]} onAdd={(id) => addCriterion(0, id)} error={errorText} />
-        <F0Text variant="small" content={inscripcionCopy.audience.emptyHint} />
-      </div>
-    )
-  }
-
-  // STATE 2 — Single group, not adding another: plain OR selector (search +
-  // pills with faint "or"). No boxes, no "match all" header, no separators.
-  if (!isMulti) {
-    return (
-      <div className="flex flex-col gap-3">
-        <F0Text variant="label" content={inscripcionCopy.audience.label} />
-        <CriteriaSearchField
-          selectedIds={groups[0] ?? []}
-          onAdd={(id) => addCriterion(0, id)}
-          error={errorText}
-        />
-        <CriteriaPills ids={groups[0] ?? []} onRemove={(id) => removeCriterion(0, id)} />
-        <div>
-          <F0Button
-            label={inscripcionCopy.audience.addGroup}
-            icon={Add}
-            variant="outline"
-            size="sm"
-            onClick={startGroup}
-          />
-        </div>
-        <AudiencePreview total={total} />
-        {!hideHint && <F0Text variant="small" content={inscripcionCopy.audience.hint} />}
-      </div>
-    )
-  }
-
-  // STATE 3 — Two or more groups: "match all" header + a light box per group
-  // ("match any of these") separated by "and also". Max 3 groups. The pending
-  // group renders as an extra box with its dropdown already open.
-  return (
-    <div className="flex flex-col gap-3">
-      <F0Text variant="label" content={inscripcionCopy.audience.label} />
-      <F0Text variant="description" content={inscripcionCopy.audience.groupsHeader} />
-
-      <div className="flex flex-col gap-2.5">
-        {groups.map((group, index) => (
-          <div key={index} className="flex flex-col gap-2.5">
-            {index > 0 && (
-              <div className="flex items-center gap-3">
-                <div className="h-px flex-1 bg-f1-border-secondary" />
-                <F0Text variant="small" content={inscripcionCopy.audience.andAlso} />
-                <div className="h-px flex-1 bg-f1-border-secondary" />
-              </div>
-            )}
-            <AudienceGroupBox
-              ids={group}
-              onAdd={(id) => addCriterion(index, id)}
-              onRemove={(id) => removeCriterion(index, id)}
-              onRemoveGroup={() => removeGroup(index)}
-            />
-          </div>
-        ))}
-
-        {pendingGroup && (
-          <div className="flex flex-col gap-2.5">
-            {groups.length > 0 && (
-              <div className="flex items-center gap-3">
-                <div className="h-px flex-1 bg-f1-border-secondary" />
-                <F0Text variant="small" content={inscripcionCopy.audience.andAlso} />
-                <div className="h-px flex-1 bg-f1-border-secondary" />
-              </div>
-            )}
-            <AudienceGroupBox
-              ids={[]}
-              onAdd={commitPendingCriterion}
-              onRemove={() => {}}
-              onRemoveGroup={() => setPendingGroup(false)}
-              autoOpen
-              onDismissEmpty={() => setPendingGroup(false)}
-            />
-          </div>
-        )}
-      </div>
-
-      {groups.length < 3 && (
-        <div>
-          <F0Button
-            label={inscripcionCopy.audience.addGroup}
-            icon={Add}
-            variant="outline"
-            size="sm"
-            disabled={pendingGroup}
-            onClick={startGroup}
-          />
-        </div>
-      )}
-
-      <AudiencePreview total={total} />
-      {!hideHint && <F0Text variant="small" content={inscripcionCopy.audience.hint} />}
     </div>
   )
 }
@@ -2686,6 +2276,140 @@ const enrollmentFilterDefinition = {
 } as const satisfies Record<string, { type: string; label: string; options?: { options: { value: string; label: string }[] } }>
 
 const enrollmentFilterDef = enrollmentFilterDefinition as unknown as Record<string, { type: "in"; label: string; options: { options: { value: string; label: string }[] } }>
+
+type AudienceFilterState = Record<string, string[] | undefined>
+function readAudienceFilterState(value: unknown): AudienceFilterState {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {}
+  return value as AudienceFilterState
+}
+
+function filterStateSelectedCount(value: unknown): number {
+  return Object.values(readAudienceFilterState(value)).reduce(
+    (sum, vals) => sum + (Array.isArray(vals) ? vals.length : 0),
+    0
+  )
+}
+
+// Deterministic, believable per-criterion headcount for the audience preview.
+function mockAudienceCount(optionValue: string): number {
+  let hash = 0
+  for (let i = 0; i < optionValue.length; i++) {
+    hash = (hash * 31 + optionValue.charCodeAt(i)) >>> 0
+  }
+  return 14 + (hash % 33) // 14..46
+}
+
+// Deterministic set of people (indices into a fixed population) matched by a
+// single criterion. Drawing every criterion from the SAME population lets us
+// model the real matching semantics: within one facet criteria are OR'd (union
+// of these sets), and across different facets they are AND'd (intersection).
+const FILTER_POPULATION_SIZE = 180
+function optionPersonSet(facetKey: string, optionValue: string): Set<number> {
+  const size = mockAudienceCount(optionValue)
+  const key = `${facetKey}::${optionValue}`
+  let seed = 0
+  for (let i = 0; i < key.length; i++) seed = (seed * 31 + key.charCodeAt(i)) >>> 0
+  const rand = () => {
+    seed = (seed * 1103515245 + 12345) & 0x7fffffff
+    return seed / 0x7fffffff
+  }
+  const set = new Set<number>()
+  while (set.size < size) set.add(Math.floor(rand() * FILTER_POPULATION_SIZE))
+  return set
+}
+
+// People matched by the whole audience: OR within each facet (union), AND across
+// facets (intersection) — same semantics as the OneFilterPicker.
+function filterStatePeopleMatch(state: AudienceFilterState): number {
+  const facetKeys = Object.keys(state).filter((key) => (state[key] ?? []).length > 0)
+  if (facetKeys.length === 0) return 0
+  let matched: Set<number> | null = null
+  for (const facetKey of facetKeys) {
+    const union = new Set<number>()
+    for (const optionValue of state[facetKey] ?? []) {
+      for (const idx of optionPersonSet(facetKey, optionValue)) union.add(idx)
+    }
+    if (matched === null) {
+      matched = union
+    } else {
+      const intersection = new Set<number>()
+      for (const idx of matched) if (union.has(idx)) intersection.add(idx)
+      matched = intersection
+    }
+  }
+  return matched ? matched.size : 0
+}
+
+function filterStateSummary(value: unknown): {
+  criteria: string[]
+  matchCount: number
+} {
+  const state = readAudienceFilterState(value)
+  const criteria: string[] = []
+  for (const key of Object.keys(state)) {
+    const vals = state[key]
+    if (!Array.isArray(vals) || vals.length === 0) continue
+    const label =
+      enrollmentFilterDefinition[key as keyof typeof enrollmentFilterDefinition]
+        ?.label ?? key
+    for (const v of vals) criteria.push(`${label}: ${v}`)
+  }
+  return { criteria, matchCount: filterStatePeopleMatch(state) }
+}
+
+// A single facet-value criterion flattened from a FiltersState, with its display
+// label (e.g. "Team: Engineering"). Used to diff the edited audience against the
+// course's baseline so we can show the right add/remove edit messages.
+type AudienceCriterion = { key: string; value: string; label: string }
+function filterStateCriteria(state: AudienceFilterState): AudienceCriterion[] {
+  return Object.keys(state).flatMap((key) =>
+    (state[key] ?? []).map((value) => ({
+      key,
+      value,
+      label: `${enrollmentFilterDef[key]?.label ?? key}: ${value}`,
+    }))
+  )
+}
+// Criteria present in `next` but not in `base` (added — broadens the audience).
+function filterStateAdded(base: AudienceFilterState, next: AudienceFilterState): AudienceCriterion[] {
+  const baseKeys = new Set(filterStateCriteria(base).map((c) => `${c.key}::${c.value}`))
+  return filterStateCriteria(next).filter((c) => !baseKeys.has(`${c.key}::${c.value}`))
+}
+// Criteria present in `base` but not in `next` (removed).
+function filterStateRemoved(base: AudienceFilterState, next: AudienceFilterState): AudienceCriterion[] {
+  const nextKeys = new Set(filterStateCriteria(next).map((c) => `${c.key}::${c.value}`))
+  return filterStateCriteria(base).filter((c) => !nextKeys.has(`${c.key}::${c.value}`))
+}
+// Rebuild a FiltersState from a flat criteria list, so we can count the people a
+// subset of criteria (e.g. just the added ones) matches.
+function audienceStateFromCriteria(criteria: AudienceCriterion[]): AudienceFilterState {
+  const state: AudienceFilterState = {}
+  for (const c of criteria) state[c.key] = [...(state[c.key] ?? []), c.value]
+  return state
+}
+// "1 person matches" / "N people match" — correct singular/plural.
+function peopleMatchPhrase(count: number): string {
+  return count === 1 ? "1 person matches" : `${count} people match`
+}
+// Which of a course's training groups are running right now. The data model only
+// stores names, so for the prototype every existing group is treated as currently
+// running — this maps the course's group count onto the three assignment states:
+// none → pending, one → auto-enroll, several → pending so the TM picks.
+function runningTrainingGroups(groups: string[]): string[] {
+  return groups
+}
+
+// Deterministic, believable date range for a training group (the data model only
+// stores group names). Produces e.g. "26 Feb – 27 Feb".
+function trainingGroupDateLabel(name: string): string {
+  let hash = 0
+  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+  const month = months[hash % 12]
+  const startDay = 1 + (hash % 25)
+  const span = 1 + ((hash >> 4) % 3)
+  return `${startDay} ${month} – ${startDay + span} ${month}`
+}
 
 function CoursesList({
   courses,
@@ -2847,9 +2571,7 @@ function useCoursesSource({
           },
         },
       },
-      currentFilters: {
-        status: ["active"],
-      },
+      currentFilters: {},
       presets: [
         { label: "Validity expired", filter: { retake: ["expired"] } },
         { label: "Published", filter: { status: ["active"] } },
@@ -4198,6 +3920,190 @@ function AssignParticipantsDialog({
 }
 
 // ---------------------------------------------------------------------------
+// Settings Enrollment section — the creation wizard's enrollment form reused in
+// Course Settings. Two visual levels: "Who should take this course" carries full
+// weight; "How are people assigned" is a compact radio list. "Who does this apply
+// to" is NOT a permanent field — it surfaces only as the consequence of a criterion
+// change. There is intentionally NO Course validity here (it lives in Basic info).
+// ---------------------------------------------------------------------------
+
+// Small inline radio dot (no F0 radio primitive is exported; CardSelectable is the
+// heavy card variant we're deliberately avoiding for the secondary controls).
+function InlineRadio({
+  selected,
+  label,
+  onSelect,
+}: {
+  selected: boolean
+  label: string
+  onSelect: () => void
+}) {
+  return (
+    <button type="button" onClick={onSelect} className="flex items-center gap-2 text-left">
+      <span
+        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-solid ${selected ? "border-f1-border-selected" : "border-f1-border-secondary"}`}
+      >
+        {selected && <span className="h-2 w-2 rounded-full bg-f1-background-selected-bold" />}
+      </span>
+      <F0Text variant="body" content={label} />
+    </button>
+  )
+}
+
+function EditCourseEnrollmentSection({
+  course,
+  values,
+  onUpdate,
+  audienceError,
+  originalAudienceCriteria,
+  onCreateGroup,
+}: {
+  course: ExactCourse
+  values: Record<string, unknown>
+  onUpdate: (field: string, value: unknown) => void
+  audienceError: boolean
+  originalAudienceCriteria: AudienceFilterState
+  onCreateGroup: () => void
+}) {
+  const autoEnroll = values.enableAutoEnrollment !== false
+  const criteria = readAudienceFilterState(values.audienceCriteria)
+  const hasCriteria = filterStateSelectedCount(criteria) > 0
+  const appliesTo = (values.enrollmentAppliesTo as string) ?? "new-only"
+  // New model: assignment follows the running group; "current" is the default,
+  // "waitlist" = leave as pending. Existing data uses "group"/"waitlist".
+  const leavePending = (values.enrollmentAssignment as string) === "waitlist"
+
+  // Diff against the course's saved criteria to surface the consequence of an edit.
+  const added = filterStateAdded(originalAudienceCriteria, criteria)
+  const removed = filterStateRemoved(originalAudienceCriteria, criteria)
+  const addedLabels = added.map((c) => c.label).join(", ")
+  const removedLabels = removed.map((c) => c.label).join(", ")
+  const addedCount = filterStatePeopleMatch(audienceStateFromCriteria(added))
+
+  // Groups running right now drive the assignment behaviour (no fixed group pinned).
+  const running = runningTrainingGroups(course.groups)
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Automatic enrollment toggle — the switch sits beside a column holding the
+          title and hint, so the hint lines up under the title (not under the switch).
+          The switch and title share the same line height, so they stay aligned. */}
+      <div className="flex items-start gap-3">
+        <Switch
+          checked={autoEnroll}
+          onCheckedChange={(checked) => onUpdate("enableAutoEnrollment", checked)}
+          title={inscripcionCopy.toggle.label}
+          hideLabel
+        />
+        <div className="flex flex-col gap-1">
+          <F0Text variant="label" content={inscripcionCopy.toggle.label} />
+          <F0Text variant="description" content={inscripcionCopy.toggle.hint} />
+        </div>
+      </div>
+
+      {autoEnroll ? (
+        <>
+          {/* PRIMARY — Who should take this course? (full weight: picker + chips + count) */}
+          <WizardAudienceFilterPicker
+            value={criteria}
+            onChange={(next) => onUpdate("audienceCriteria", next)}
+            error={audienceError}
+            showPendingNote={false}
+          />
+
+          {/* Consequence of a criterion change, attached right under the criterion.
+              Added → scope question ("applies to"). Removed → reassurance note. */}
+          {added.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-0.5">
+                <F0Text variant="label" content={inscripcionCopy.appliesTo.changeLabel(addedLabels)} />
+                <F0Text
+                  variant="description"
+                  content={inscripcionCopy.appliesTo.changeHint(addedCount, addedLabels)}
+                />
+              </div>
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+                <InlineRadio
+                  selected={appliesTo !== "everyone"}
+                  label={inscripcionCopy.appliesTo.newOnly}
+                  onSelect={() => onUpdate("enrollmentAppliesTo", "new-only")}
+                />
+                <InlineRadio
+                  selected={appliesTo === "everyone"}
+                  label={inscripcionCopy.appliesTo.addExisting(addedCount)}
+                  onSelect={() => onUpdate("enrollmentAppliesTo", "everyone")}
+                />
+              </div>
+            </div>
+          )}
+          {removed.length > 0 && (
+            <F0Text variant="description" content={inscripcionCopy.ruleRemoval.note(removedLabels)} />
+          )}
+
+          {/* SECONDARY — How are people assigned? Compact radios; the detail (and the
+              live group state) only shows under the selected option. */}
+          {hasCriteria && (
+            <div className="flex flex-col gap-3">
+              <F0Text variant="label" content={inscripcionCopy.groupAssign.label} />
+
+              <div className="flex flex-col gap-1.5">
+                <InlineRadio
+                  selected={!leavePending}
+                  label={inscripcionCopy.groupAssign.currentGroup.title}
+                  onSelect={() => onUpdate("enrollmentAssignment", "current")}
+                />
+                {!leavePending && (
+                  <div className="flex flex-col gap-2 pl-6">
+                    <F0Text variant="description" content={inscripcionCopy.groupAssign.currentGroup.subtitle} />
+                    {running.length === 1 ? (
+                      <F0Text
+                        variant="description"
+                        content={inscripcionCopy.groupAssign.currentGroup.now(
+                          running[0],
+                          trainingGroupDateLabel(running[0])
+                        )}
+                      />
+                    ) : running.length > 1 ? (
+                      <F0Alert
+                        variant="warning"
+                        title=""
+                        description={inscripcionCopy.groupAssign.currentGroup.multiActive(running.length)}
+                      />
+                    ) : (
+                      <F0Alert
+                        variant="warning"
+                        title=""
+                        description={inscripcionCopy.groupAssign.currentGroup.noneActive}
+                        action={{ label: "Create group", onClick: onCreateGroup }}
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <InlineRadio
+                  selected={leavePending}
+                  label={inscripcionCopy.groupAssign.leavePending.title}
+                  onSelect={() => onUpdate("enrollmentAssignment", "waitlist")}
+                />
+                {leavePending && (
+                  <div className="pl-6">
+                    <F0Text variant="description" content={inscripcionCopy.groupAssign.leavePending.subtitle} />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+        <F0Alert variant="info" title="" description={inscripcionCopy.manualCallout} />
+      )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Edit Course Settings — fullscreen settings page
 // ---------------------------------------------------------------------------
 
@@ -4206,23 +4112,28 @@ type EditCourseSection = "basic" | "admin" | "completion" | "enrollment"
 function EditCourseSettings({
   course,
   onSave,
+  onCreateGroup,
   initialSection = "basic",
 }: {
   course: ExactCourse
   onSave: () => void
+  onCreateGroup: () => void
   initialSection?: EditCourseSection
 }) {
   const [activeSection, setActiveSection] = useState<EditCourseSection>(initialSection)
   // Shared values so the course type chosen in Basic information drives the Enrollment
   // section exactly like the creation wizard does.
-  // Existing courses already have criteria; this is the baseline we diff against
-  // to decide which edit-mode messages (added / removed) to show.
-  const originalAudienceCriteria = course.enrollmentRule ? ["tm-eng", "wp-bcn"] : []
+  // Existing courses already have criteria; this baseline (in the same FiltersState
+  // model as the creation picker) is what we diff against to decide which edit-mode
+  // messages (added / removed) to show.
+  const originalAudienceCriteria: AudienceFilterState = course.enrollmentRule
+    ? { team: ["Engineering"], workplace: ["Barcelona"] }
+    : {}
   const [values, setValues] = useState<Record<string, unknown>>(() => ({
     courseType: course.courseType ?? "no-editions",
     enableAutoEnrollment: Boolean(course.enrollmentRule),
     enrollmentAssignment: course.enrollmentRule?.assignment === "direct" ? "group" : "waitlist",
-    audienceCriteria: originalAudienceCriteria.length > 0 ? [[...originalAudienceCriteria]] : [],
+    audienceCriteria: originalAudienceCriteria,
     enrollmentAppliesTo: course.enrollmentRule?.appliesTo === "everyone" ? "everyone" : "new-only",
   }))
 
@@ -4237,7 +4148,7 @@ function EditCourseSettings({
   const handleSave = () => {
     // Same rule as the creation wizard: automatic enrollment ON requires a criterion.
     const autoEnrollOn = values.enableAutoEnrollment !== false
-    const audienceSelected = flattenAudienceGroups(readAudienceGroups(values.audienceCriteria)).length > 0
+    const audienceSelected = filterStateSelectedCount(values.audienceCriteria) > 0
     if (autoEnrollOn && !audienceSelected) {
       setAudienceError(true)
       setActiveSection("enrollment")
@@ -4307,7 +4218,14 @@ function EditCourseSettings({
                   <F0Heading content={inscripcionCopy.step.title} variant="heading" as="h2" />
                   <F0Text content={inscripcionCopy.step.subtitle} variant="body" />
                 </div>
-                <InscripcionStep values={values} onUpdate={updateValue} hasGroups={course.groups.length > 0} showAppliesTo audienceError={audienceError} originalAudienceCriteria={originalAudienceCriteria} />
+                <EditCourseEnrollmentSection
+                  course={course}
+                  values={values}
+                  onUpdate={updateValue}
+                  audienceError={audienceError}
+                  originalAudienceCriteria={originalAudienceCriteria}
+                  onCreateGroup={onCreateGroup}
+                />
               </div>
             )}
           </div>
@@ -4556,6 +4474,9 @@ function CourseDetail({
               onSetUpEnrollment={() =>
                 setSearchParams({ view: "edit-course", course: course.id, section: "enrollment" })
               }
+              onViewPending={() =>
+                setSearchParams({ view: "detail", course: course.id, dtab: "participants", pfilter: "pending" })
+              }
           />
         </F0Box>
         <NewTrainingGroupWizardDialog
@@ -4596,6 +4517,7 @@ function CourseDetailTabBody({
   onOpenClassWizard,
   onGoToSurveys,
   onSetUpEnrollment,
+  onViewPending,
 }: {
   course: ExactCourse
   activeDetailTab: CourseDetailTabId
@@ -4603,9 +4525,10 @@ function CourseDetailTabBody({
   onOpenClassWizard: () => void
   onGoToSurveys: () => void
   onSetUpEnrollment: () => void
+  onViewPending: () => void
 }) {
   if (activeDetailTab === "overview") {
-    return <CourseOverviewTab course={course} onGoToSurveys={onGoToSurveys} onCreateGroup={onOpenClassWizard} onSetUp={onSetUpEnrollment} />
+    return <CourseOverviewTab course={course} onGoToSurveys={onGoToSurveys} onCreateGroup={onOpenClassWizard} onSetUp={onSetUpEnrollment} onViewPending={onViewPending} />
   }
   if (activeDetailTab === "content") return <CourseContentTab onOpenDialog={onOpenDialog} />
   if (activeDetailTab === "training-groups") return <CourseGroupsTab course={course} onOpenDialog={onOpenDialog} onOpenClassWizard={onOpenClassWizard} />
@@ -4620,11 +4543,13 @@ function CourseOverviewTab({
   onGoToSurveys,
   onCreateGroup,
   onSetUp,
+  onViewPending,
 }: {
   course: ExactCourse
   onGoToSurveys: () => void
   onCreateGroup: () => void
   onSetUp: () => void
+  onViewPending: () => void
 }) {
   const mainContent = (
     <F0Box display="flex" flexDirection="column" gap="2xl">
@@ -4665,7 +4590,7 @@ function CourseOverviewTab({
   )
 
   return (
-    <TwoColumnLayout sideContent={<SideInfo course={course} onCreateGroup={onCreateGroup} onSetUp={onSetUp} />}>
+    <TwoColumnLayout sideContent={<SideInfo course={course} onCreateGroup={onCreateGroup} onSetUp={onSetUp} onViewPending={onViewPending} />}>
       {mainContent}
     </TwoColumnLayout>
   )
@@ -4811,6 +4736,9 @@ function CourseGroupsTab({
 }
 
 function CourseParticipantsTab({ onOpenDialog }: { onOpenDialog: (dialog: CourseActionDialogId) => void }) {
+  // The overview's "View pending" link lands here with the pending filter pre-applied.
+  const [searchParams] = useSearchParams()
+  const pendingPreset = searchParams.get("pfilter") === "pending"
   const statusColor = (status: CourseParticipantRow["status"]): "positive" | "info" | "warning" | "critical" | "neutral" => {
     switch (status) {
       case "Completed": return "positive"
@@ -4824,6 +4752,7 @@ function CourseParticipantsTab({ onOpenDialog }: { onOpenDialog: (dialog: Course
   const source = useDataCollectionSource<CourseParticipantRow>(
     {
       search: { enabled: true, sync: true },
+      ...(pendingPreset ? { defaultFilters: { status: ["Pending group assignment"] } } : {}),
       filters: {
         status: {
           type: "in",
@@ -6357,92 +6286,77 @@ function getGroupActionDetail(dialog: GroupActionDialogId, groupName: string): T
   }
 }
 
-function EnrollmentStatusLine({
+// Enrollment status in the course overview sidebar. Read-only and styled exactly
+// like the other sidebar fields (bold label + value, no box / dot / edit link).
+// The only colour licence is the amber "[N] pending a group" in the incidence
+// state; action links appear only when there's an operational step to take.
+function EnrollmentSidebarBlock({
   course,
-  onCreateGroup,
+  onViewPending,
   onSetUp,
 }: {
   course: ExactCourse
-  onCreateGroup?: () => void
+  onViewPending?: () => void
   onSetUp?: () => void
 }) {
   const rule = course.enrollmentRule
-  const withEditions = course.courseType === "with-editions"
 
-  // State 1 — Not set up: no rule. Empty circle + a link straight into the
-  // Enrollment step of the course settings editor.
+  // State 3 — Manual: no automatic rule. Also covers "just created, not configured"
+  // (same state, not a separate "Not set up"). A legitimate mode, not an error.
   if (!rule) {
     return (
-      <EnrollmentStatusCard
-        indicator={<span className="inline-block h-2 w-2 shrink-0 rounded-full border border-solid border-f1-border" />}
-        status="Not set up"
-        details={["Participants are enrolled manually"]}
-        action={{ label: "Set up", icon: Settings, onClick: onSetUp }}
-      />
+      <F0Box display="flex" flexDirection="column" gap="xs">
+        <F0Text content="Enrollment" variant="label" />
+        <F0Text content="Manual · added by hand from Participants" variant="body" />
+        <EnrollmentActionLink label="Set up automatic enrollment" onClick={onSetUp} />
+      </F0Box>
     )
   }
 
-  // Audience line — the criteria that drive the rule. Shared by every active state.
-  const audienceText =
-    rule.criteria.length > 2 ? `${rule.criteria.length} criteria` : rule.criteria.join(" · ")
+  // "Who" summary, truncated by criteria count so a long rule never breaks layout.
+  const criteria = rule.criteria
+  const audience =
+    criteria.length > 2 ? `${criteria[0]} · +${criteria.length - 1} more` : criteria.join(" · ")
+  const pending = rule.waitlisted ?? 0
 
-  // State 2 — Problem: people are pending group assignment with no group to land in.
-  // The dot turns into an amber triangle and we surface the one allowed action here:
-  // creating a group. Unblocking isn't editing configuration, so it's the exception.
-  const waitlisted = rule.waitlisted ?? 0
-  if (waitlisted > 0) {
+  // State 2 — Automatic with people pending. The overview does NOT work out the
+  // cause (no groups / TM chose pending / several groups running) — that lives in
+  // the Participants list. It only surfaces the count and a generic "View" link.
+  if (pending > 0) {
     return (
-      <EnrollmentStatusCard
-        indicator={<F0Icon icon={Warning} size="sm" color="warning" />}
-        status={`${waitlisted} pending group assignment`}
-        details={[audienceText]}
-        action={{ label: "Create group", icon: ExternalLink, onClick: onCreateGroup }}
-      />
+      <F0Box display="flex" flexDirection="column" gap="xs">
+        <F0Text content="Enrollment" variant="label" />
+        <div className="flex flex-wrap items-baseline gap-x-1">
+          <F0Text content="Automatic" variant="body" as="span" />
+          <F0Text content="·" variant="body" as="span" />
+          <span className="text-base font-normal leading-normal text-f1-foreground-warning">
+            {`${pending} pending`}
+          </span>
+        </div>
+        <F0Text content={audience} variant="body" />
+        <EnrollmentActionLink label="View pending" onClick={onViewPending} />
+      </F0Box>
     )
   }
 
-  // State 3 — Active and healthy: green dot + audience. With-editions courses also
-  // show the group behavior line; no-editions courses drop it (they have a single group).
-  const behaviorText =
-    rule.assignment === "direct" ? "Assigned to a group" : "Pending group assignment"
-  const details = withEditions ? [audienceText, behaviorText] : [audienceText]
-
+  // State 1 — Automatic, active and healthy: nothing to act on, so no link.
   return (
-    <EnrollmentStatusCard
-      indicator={<span className="inline-block h-2 w-2 shrink-0 rounded-full bg-f1-foreground-positive" />}
-      status="Active"
-      details={details}
-    />
+    <F0Box display="flex" flexDirection="column" gap="xs">
+      <F0Text content="Enrollment" variant="label" />
+      <F0Text content="Automatic · active" variant="body" />
+      <F0Text content={audience} variant="body" />
+    </F0Box>
   )
 }
 
-function EnrollmentStatusCard({
-  indicator,
-  status,
-  details,
-  action,
-}: {
-  indicator: React.ReactNode
-  status: string
-  details: string[]
-  action?: { label: string; icon: typeof Settings; onClick?: () => void }
-}) {
+// Subtle text link (info colour) used only for the operational actions above.
+function EnrollmentActionLink({ label, onClick }: { label: string; onClick?: () => void }) {
   return (
-    <F0Box display="flex" flexDirection="column" gap="md" padding="lg" border="default" borderColor="secondary" borderRadius="lg">
-      <F0Text content="Enrollment" variant="label" />
-      <F0Box display="flex" alignItems="center" gap="sm">
-        {indicator}
-        <F0Text content={status} variant="body" />
-      </F0Box>
-      {details.map((detail) => (
-        <F0Text key={detail} content={detail} variant="small" />
-      ))}
-      {action && (
-        <F0Box display="flex">
-          <F0Button label={action.label} variant="outline" size="sm" icon={action.icon} onClick={action.onClick ?? (() => {})} />
-        </F0Box>
-      )}
-    </F0Box>
+    <div className="flex">
+      <F0Link variant="link" onClick={() => onClick?.()} append={<F0Icon icon={ExternalLink} size="xs" />}>
+        {label}
+      </F0Link>
+    </div>
   )
 }
 
@@ -6535,12 +6449,13 @@ function InfoPanel({ title, items }: { title: string; items: string[] }) {
 
 function SideInfo({
   course,
-  onCreateGroup,
   onSetUp,
+  onViewPending,
 }: {
   course: ExactCourse
   onCreateGroup?: () => void
   onSetUp?: () => void
+  onViewPending?: () => void
 }) {
   return (
     <F0BoxWithClassName
@@ -6551,13 +6466,7 @@ function SideInfo({
       style={{ flex: 1 }}
     >
       <CourseThumbnailField course={course} />
-      <EnrollmentStatusLine course={course} onCreateGroup={onCreateGroup} onSetUp={onSetUp} />
-      {course.courseType === "with-editions" && (
-        <SidebarField
-          label="Assignment"
-          value={course.enrollmentRule?.assignment === "direct" ? "Direct to course" : "Pending group assignment"}
-        />
-      )}
+      <EnrollmentSidebarBlock course={course} onViewPending={onViewPending} onSetUp={onSetUp} />
       <SidebarField
         label="Completion settings"
         value="Complete all modules, 100% attendance required, Pass knowledge test"

@@ -36,7 +36,7 @@ export function FactorialShell({
   return (
     <F0AiFormRegistryProvider>
       <ApplicationFrame
-        ai={aiChatConfig}
+        {...(aiChatConfig.enabled ? { ai: aiChatConfig } : {})}
         sidebar={<FactorialSidebar activeModule={activeModule} />}
       >
         {children}
