@@ -84,6 +84,14 @@ export type GraphVisualizationOptions<
   currentUserNodeId?: string
   /** Initial zoom preset passed through to F0Graph. */
   zoomPreset?: ZoomPreset
+  /**
+   * Smallest zoom the user can pan to (the zoom-out limit), passed through to
+   * F0Graph. Defaults to F0Graph's own default. Raise it (e.g. `0.3`) to keep
+   * the tree readable and avoid the most zoomed-out "dot" level.
+   */
+  minZoom?: number
+  /** Largest zoom the user can pan to (the zoom-in limit), passed through to F0Graph. */
+  maxZoom?: number
   /** Whether to render the zoom/fit controls. Defaults to `true`. */
   showControls?: boolean
 }

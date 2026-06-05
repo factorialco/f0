@@ -64,6 +64,8 @@ export const GraphCollection = <
   loadNodePath,
   getParentId,
   zoomPreset,
+  minZoom,
+  maxZoom,
   showControls,
   onLoadData,
   onLoadError,
@@ -190,6 +192,8 @@ export const GraphCollection = <
           selectionMode="single"
           showControls={showControls ?? true}
           zoomPreset={zoomPreset}
+          minZoom={minZoom}
+          maxZoom={maxZoom}
           reserveTagRow={tags !== undefined}
           nodeTagTypes={nodeTagTypes}
           visibleTagTypes={visibleTagTypes}
