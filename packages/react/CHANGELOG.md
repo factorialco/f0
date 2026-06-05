@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.41.0](https://github.com/factorialco/f0/compare/f0-react-v2.40.2...f0-react-v2.41.0) (2026-06-05)
+
+
+### Features
+
+* **F0Checkbox:** promote to stable ([#4323](https://github.com/factorialco/f0/issues/4323)) ([aa379e9](https://github.com/factorialco/f0/commit/aa379e97d6e8095fc4deae028cfbe74a537002b9))
+
 ## [2.40.2](https://github.com/factorialco/f0/compare/f0-react-v2.40.1...f0-react-v2.40.2) (2026-06-05)
 
 
