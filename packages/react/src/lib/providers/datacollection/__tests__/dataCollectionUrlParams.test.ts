@@ -124,6 +124,15 @@ describe("parseDataCollectionUrlParams", () => {
     expect(parseDataCollectionUrlParams(`dc_page=0`)).not.toHaveProperty("page")
   })
 
+  it("parses the selected preset id", () => {
+    expect(parseDataCollectionUrlParams(`dc_preset=eng`).preset).toBe("eng")
+    expect(parseDataCollectionUrlParams(``)).not.toHaveProperty("preset")
+    // empty value is ignored
+    expect(parseDataCollectionUrlParams(`dc_preset=`)).not.toHaveProperty(
+      "preset"
+    )
+  })
+
   it("skips filters when no definition is provided", () => {
     expect(
       parseDataCollectionUrlParams(`dc_department=Sales`)
@@ -239,6 +248,17 @@ describe("buildDataCollectionUrlParams", () => {
   it("encodes the page, omitting the first one", () => {
     expect(buildDataCollectionUrlParams({ page: 3 }).get("dc_page")).toBe("3")
     expect(buildDataCollectionUrlParams({ page: 1 }).has("dc_page")).toBe(false)
+  })
+
+  it("encodes and round-trips the selected preset id", () => {
+    expect(
+      buildDataCollectionUrlParams({ preset: "eng" }).get("dc_preset")
+    ).toBe("eng")
+    expect([...buildDataCollectionUrlParams({}).keys()]).toEqual([])
+    const state = { preset: "eng" }
+    expect(
+      parseDataCollectionUrlParams(buildDataCollectionUrlParams(state))
+    ).toEqual(state)
   })
 
   it("round-trips sorting + page together (no clobber)", () => {

@@ -87,17 +87,59 @@ export type CurrentFilters<F extends FilterOptions<string>> = F extends {
   : Record<string, never>
 
 /**
- * Defines preset filter configurations that can be applied to a collection.
+ * Structural snapshot of the visualization (column order/visibility) settings a
+ * preset can capture. Typed structurally (rather than importing
+ * `DataCollectionSettings`) to keep the filter pattern free of a dependency on
+ * OneDataCollection. Narrowed to `DataCollectionSettings` at the OneDataCollection
+ * boundary.
+ */
+export type PresetSettings = {
+  visualization?: Record<string, { order?: string[]; hidden?: string[] }>
+}
+
+/**
+ * Defines preset configurations that can be applied to a collection.
+ *
+ * A preset is a saveable snapshot of the collection view. Historically it only
+ * captured a group of filters; it can now also capture the sorting, view mode
+ * (visualization), grouping and column order/visibility. All non-filter fields are
+ * optional so existing filter-only presets remain valid.
+ *
  * @template Filters - The available filter configurations
  */
 export type PresetDefinition<Filters extends FiltersDefinition> = {
+  /**
+   * Stable identifier for the preset. Optional for developer-provided presets (a
+   * fallback id is derived from the label at merge time); user-created custom
+   * presets always carry a generated id.
+   */
+  id?: string
   /** Display name for the preset */
   label: string
+  /** Optional longer description, shown/edited in the preset form */
+  description?: string
+  /** Optional emoji shown on the preset chip (left of the label). */
+  emoji?: string
   /** Filter configuration to apply when this preset is selected.
    * Clicking a preset replaces all current filters with this value.
-   * The preset shows as selected only when the current filters exactly match this value.
    */
   filter: FiltersState<Filters>
+  /**
+   * Captured sorting state (`SortingsState`). Typed loosely here to avoid forcing
+   * the `Sortings` generic onto every preset consumer; narrowed at the
+   * OneDataCollection boundary.
+   */
+  sortings?: unknown
+  /** Captured grouping state (`GroupingState`). Typed loosely; see `sortings`. */
+  grouping?: unknown
+  /** Captured view mode as the visualization index. */
+  visualization?: number
+  /**
+   * Captured column order/visibility settings (`DataCollectionSettings`, shaped
+   * like `PresetSettings`). Typed loosely; narrowed at the OneDataCollection
+   * boundary.
+   */
+  settings?: unknown
   /** Function to count the number of items that match the filter */
   itemsCount?: (
     filters: FiltersState<Filters>

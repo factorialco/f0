@@ -387,3 +387,100 @@ describe("FiltersPresets - No Multiple Selection", () => {
     expect(mockOnPresetsChange).toHaveBeenCalledWith({})
   })
 })
+
+describe("FiltersPresets - groups, separator and save chip", () => {
+  const mixedPresets: PresetsDefinition<FiltersDefinition> = [
+    { id: "dev-1", label: "Dev One", filter: { department: ["a"] } },
+    { id: "dev-2", label: "Dev Two", filter: { department: ["b"] } },
+    { id: "custom-1", label: "Custom One", filter: { department: ["c"] } },
+  ]
+
+  it("renders a separator between developer and custom presets", () => {
+    zeroRender(
+      <FiltersPresets
+        presets={mixedPresets}
+        value={{}}
+        onPresetsChange={vi.fn()}
+        onSelectPreset={vi.fn()}
+        editablePresetIds={["custom-1"]}
+      />
+    )
+
+    expect(
+      screen.getAllByTestId("preset-group-separator").length
+    ).toBeGreaterThan(0)
+  })
+
+  it("does not render a separator when there are no custom presets", () => {
+    zeroRender(
+      <FiltersPresets
+        presets={mixedPresets}
+        value={{}}
+        onPresetsChange={vi.fn()}
+        onSelectPreset={vi.fn()}
+        editablePresetIds={[]}
+      />
+    )
+
+    expect(
+      screen.queryByTestId("preset-group-separator")
+    ).not.toBeInTheDocument()
+  })
+
+  it("shows a 'Save as preset' chip when presetActionState is 'save' and triggers onPresetAction", async () => {
+    const user = userEvent.setup()
+    const onPresetAction = vi.fn()
+
+    zeroRender(
+      <FiltersPresets
+        presets={mixedPresets}
+        value={{}}
+        onPresetsChange={vi.fn()}
+        onSelectPreset={vi.fn()}
+        editablePresetIds={["custom-1"]}
+        presetActionState="save"
+        onPresetAction={onPresetAction}
+      />
+    )
+
+    // The save chip is a list item; in jsdom (0-width) it may land in the
+    // overflow measurement copy, so query by text (incl. aria-hidden).
+    await user.click(getVisibleByText("Save as preset"))
+    expect(onPresetAction).toHaveBeenCalledTimes(1)
+  })
+
+  it("renders the save chip even when there are no presets", () => {
+    zeroRender(
+      <FiltersPresets
+        presets={[]}
+        value={{}}
+        onPresetsChange={vi.fn()}
+        onSelectPreset={vi.fn()}
+        presetActionState="save"
+        onPresetAction={vi.fn()}
+      />
+    )
+
+    expect(
+      screen.getByRole("button", { name: "Save as preset" })
+    ).toBeInTheDocument()
+  })
+
+  it("does not show the save chip when presetActionState is not 'save'", () => {
+    zeroRender(
+      <FiltersPresets
+        presets={mixedPresets}
+        value={{}}
+        onPresetsChange={vi.fn()}
+        onSelectPreset={vi.fn()}
+        editablePresetIds={["custom-1"]}
+        presetActionState="persist"
+        onPresetAction={vi.fn()}
+      />
+    )
+
+    expect(
+      screen.queryByRole("button", { name: "Save as preset" })
+    ).not.toBeInTheDocument()
+  })
+})

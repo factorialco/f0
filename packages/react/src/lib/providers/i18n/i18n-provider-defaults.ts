@@ -68,6 +68,9 @@ export const defaultTranslations = {
     selectAll: "Select all",
     selectAllItems: "Select all {{total}} items",
     apply: "Apply",
+    saveAsPreset: "Save as preset",
+    persistInPreset: "Persist in preset",
+    editPreset: "Edit preset",
   },
   status: {
     selected: {
@@ -137,6 +140,22 @@ export const defaultTranslations = {
     },
     actions: {
       actions: "Actions",
+    },
+    presets: {
+      createTitle: "Save as preset",
+      createDescription:
+        "Save the current filters, sorting, view and columns as a preset.",
+      updateTitle: "Update preset",
+      updateDescription: "Update this preset with the current view.",
+      emojiLabel: "Emoji",
+      selectEmoji: "Select an emoji",
+      nameLabel: "Title",
+      namePlaceholder: "Preset title",
+      descriptionLabel: "Description",
+      descriptionPlaceholder: "Optional description",
+      save: "Save",
+      delete: "Remove",
+      cancel: "Cancel",
     },
     visualizations: {
       table: "Table view",
