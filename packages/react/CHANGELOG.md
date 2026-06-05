@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.40.2](https://github.com/factorialco/f0/compare/f0-react-v2.40.1...f0-react-v2.40.2) (2026-06-05)
+
+
+### Bug Fixes
+
+* **inputs:** resolve InputFieldProps in bundled types at the source ([#4334](https://github.com/factorialco/f0/issues/4334)) ([48cd62d](https://github.com/factorialco/f0/commit/48cd62d159eb146a24abe238040dc2d6b2f91e8a))
+
 ## [2.40.1](https://github.com/factorialco/f0/compare/f0-react-v2.40.0...f0-react-v2.40.1) (2026-06-05)
 
 
