@@ -115,11 +115,16 @@ export const BaseQuestion = ({
   const isSingleQuestionInSection = getIsSingleQuestionInSection(id)
 
   const titleRef = useRef<HTMLTextAreaElement>(null)
-  const shouldFocusTitleOnMountRef = useRef(!isSingleQuestionInSection)
+  // One-shot: focuses the title on first mount for freshly added questions,
+  // then flips off so any subsequent effect run (StrictMode double-invoke, or
+  // a stray remount from upstream identity churn) cannot bump the caret to
+  // the end while the user is mid-edit.
+  const pendingFocusRef = useRef(!isSingleQuestionInSection)
 
   useEffect(() => {
-    if (shouldFocusTitleOnMountRef.current) {
+    if (pendingFocusRef.current) {
       titleRef.current?.focus({ preventScroll: true })
+      pendingFocusRef.current = false
     }
   }, [])
 

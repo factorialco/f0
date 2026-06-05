@@ -1,5 +1,5 @@
 import { motion, Reorder } from "motion/react"
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useRef } from "react"
 
 import { withDataTestId } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
@@ -15,7 +15,12 @@ import { QuestionItem } from "./QuestionItem"
 import { SectionHeaderItem } from "./SectionHeaderItem"
 import { TableOfContent } from "./TableOfContent"
 import { useReorderHandler } from "./useReorderHandler"
-import { computeSectionEndIds, flattenElements } from "./utils"
+import {
+  computeSectionEndIds,
+  FlatFormItem,
+  flattenElements,
+  stabilizeFlatItems,
+} from "./utils"
 
 // Re-export utilities and types for consumers (including tests)
 export {
@@ -84,7 +89,19 @@ const _SurveyFormBuilder = ({
     [elementsProp, disallowOptionalQuestions]
   )
 
-  const flatItems = useMemo(() => flattenElements(elements), [elements])
+  // Preserve item identities across renders when their content is unchanged.
+  // motion's Reorder identifies items by `value` reference, so without this
+  // the textarea inside each Reorder.Item is recreated on every keystroke
+  // and BaseQuestion's mount-focus effect bumps the caret to the end.
+  const stableFlatItemsRef = useRef<Map<string, FlatFormItem>>(new Map())
+  const flatItems = useMemo(() => {
+    const { items, map } = stabilizeFlatItems(
+      stableFlatItemsRef.current,
+      flattenElements(elements)
+    )
+    stableFlatItemsRef.current = map
+    return items
+  }, [elements])
 
   // Items without section-end markers — used for Reorder.Group which
   // requires every value to have a matching Reorder.Item child.

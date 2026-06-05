@@ -1,3 +1,5 @@
+import isEqual from "lodash/isEqual"
+
 import {
   SurveyFormBuilderElement,
   QuestionElement,
@@ -8,6 +10,29 @@ export type FlatFormItem =
   | { type: "section-header"; id: string; section: SectionElement }
   | { type: "question"; id: string; question: QuestionElement }
   | { type: "section-end"; id: string; sectionId: string }
+
+/**
+ * Reuses prior-render `FlatFormItem` references when their content is
+ * unchanged. Motion's `Reorder` tracks items by `value` reference equality
+ * (not by any `id` field), so handing it a fresh object on every render —
+ * which `flattenElements` always does — makes it tear down and rebuild each
+ * `Reorder.Item`'s DOM. That recreates the inner `<textarea>`, which (via
+ * `BaseQuestion`'s mount focus effect) places the caret at the end and
+ * breaks mid-string typing.
+ */
+export function stabilizeFlatItems(
+  prev: Map<string, FlatFormItem>,
+  next: FlatFormItem[]
+): { items: FlatFormItem[]; map: Map<string, FlatFormItem> } {
+  const map = new Map<string, FlatFormItem>()
+  const items = next.map((item) => {
+    const previous = prev.get(item.id)
+    const stable = previous && isEqual(previous, item) ? previous : item
+    map.set(item.id, stable)
+    return stable
+  })
+  return { items, map }
+}
 
 export function flattenElements(
   elements: SurveyFormBuilderElement[]

@@ -8,6 +8,7 @@ import {
   injectSectionEnds,
   FlatFormItem,
 } from "../index"
+import { stabilizeFlatItems } from "../utils"
 
 // --- Test fixtures ---
 
@@ -605,6 +606,96 @@ describe("injectSectionEnds", () => {
     const result = injectSectionEnds(items, new Set())
 
     expect(result).toEqual(items)
+  })
+})
+
+describe("stabilizeFlatItems", () => {
+  it("reuses prior references for content-equal items", () => {
+    const first = flattenElements([
+      makeQuestion("q1", "Q1"),
+      makeQuestion("q2", "Q2"),
+    ])
+    const initial = stabilizeFlatItems(new Map(), first)
+
+    // flattenElements always produces new object literals — different references.
+    const second = flattenElements([
+      makeQuestion("q1", "Q1"),
+      makeQuestion("q2", "Q2"),
+    ])
+    expect(second[0]).not.toBe(first[0])
+
+    const stabilized = stabilizeFlatItems(initial.map, second)
+
+    expect(stabilized.items[0]).toBe(initial.items[0])
+    expect(stabilized.items[1]).toBe(initial.items[1])
+  })
+
+  it("swaps in a new reference when content changes", () => {
+    const initial = stabilizeFlatItems(
+      new Map(),
+      flattenElements([makeQuestion("q1", "Q1")])
+    )
+
+    const next = flattenElements([makeQuestion("q1", "Q1 edited")])
+    const stabilized = stabilizeFlatItems(initial.map, next)
+
+    expect(stabilized.items[0]).not.toBe(initial.items[0])
+    expect(stabilized.items[0]).toEqual(next[0])
+  })
+
+  it("keeps unchanged neighbours stable when one item changes", () => {
+    const initial = stabilizeFlatItems(
+      new Map(),
+      flattenElements([
+        makeQuestion("q1", "Q1"),
+        makeQuestion("q2", "Q2"),
+        makeQuestion("q3", "Q3"),
+      ])
+    )
+
+    const next = flattenElements([
+      makeQuestion("q1", "Q1"),
+      makeQuestion("q2", "Q2 edited"),
+      makeQuestion("q3", "Q3"),
+    ])
+    const stabilized = stabilizeFlatItems(initial.map, next)
+
+    expect(stabilized.items[0]).toBe(initial.items[0])
+    expect(stabilized.items[1]).not.toBe(initial.items[1])
+    expect(stabilized.items[2]).toBe(initial.items[2])
+  })
+
+  it("stabilises section headers and ends across renders", () => {
+    const initial = stabilizeFlatItems(
+      new Map(),
+      flattenElements([
+        makeSection("s1", "Section 1", [{ id: "q1", title: "Q1" }]),
+      ])
+    )
+
+    const next = flattenElements([
+      makeSection("s1", "Section 1", [{ id: "q1", title: "Q1" }]),
+    ])
+    const stabilized = stabilizeFlatItems(initial.map, next)
+
+    expect(stabilized.items.map((i) => i.type)).toEqual([
+      "section-header",
+      "question",
+      "section-end",
+    ])
+    expect(stabilized.items[0]).toBe(initial.items[0])
+    expect(stabilized.items[1]).toBe(initial.items[1])
+    expect(stabilized.items[2]).toBe(initial.items[2])
+  })
+
+  it("returns the map needed to stabilise the next render", () => {
+    const initial = stabilizeFlatItems(
+      new Map(),
+      flattenElements([makeQuestion("q1", "Q1")])
+    )
+
+    expect(initial.map.size).toBe(1)
+    expect(initial.map.get("question-q1")).toBe(initial.items[0])
   })
 })
 
