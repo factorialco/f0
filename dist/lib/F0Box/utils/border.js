@@ -1,0 +1,120 @@
+const d = {
+  // -- Color --
+  borderColor: {
+    default: "border-f1-border",
+    secondary: "border-f1-border-secondary",
+    bold: "border-f1-border-bold",
+    selected: "border-f1-border-selected",
+    "selected-bold": "border-f1-border-selected-bold",
+    critical: "border-f1-border-critical",
+    "critical-bold": "border-f1-border-critical-bold",
+    warning: "border-f1-border-warning",
+    "warning-bold": "border-f1-border-warning-bold",
+    info: "border-f1-border-info",
+    "info-bold": "border-f1-border-info-bold",
+    positive: "border-f1-border-positive",
+    "positive-bold": "border-f1-border-positive-bold",
+    promote: "border-f1-border-promote"
+  },
+  // -- Width (all sides) --
+  border: {
+    none: "border-0",
+    default: "border border-solid",
+    thick: "border-2 border-solid"
+  },
+  // -- Width per side (includes reset so only the specified side shows) --
+  borderTop: {
+    none: "border-t-0",
+    default: "border-t border-solid",
+    thick: "border-t-2 border-solid"
+  },
+  borderBottom: {
+    none: "border-b-0",
+    default: "border-b border-solid",
+    thick: "border-b-2 border-solid"
+  },
+  borderLeft: {
+    none: "border-l-0",
+    default: "border-l border-solid",
+    thick: "border-l-2 border-solid"
+  },
+  borderRight: {
+    none: "border-r-0",
+    default: "border-r border-solid",
+    thick: "border-r-2 border-solid"
+  },
+  // -- Radius (all corners) --
+  borderRadius: {
+    none: "rounded-none",
+    "2xs": "rounded-2xs",
+    xs: "rounded-xs",
+    sm: "rounded-sm",
+    md: "rounded-md",
+    lg: "rounded-lg",
+    xl: "rounded-xl",
+    "2xl": "rounded-2xl",
+    "3xl": "rounded-3xl",
+    full: "rounded-full"
+  },
+  // -- Radius per corner --
+  borderRadiusTopLeft: {
+    none: "rounded-tl-none",
+    "2xs": "rounded-tl-2xs",
+    xs: "rounded-tl-xs",
+    sm: "rounded-tl-sm",
+    md: "rounded-tl-md",
+    lg: "rounded-tl-lg",
+    xl: "rounded-tl-xl",
+    "2xl": "rounded-tl-2xl",
+    "3xl": "rounded-tl-3xl",
+    full: "rounded-tl-full"
+  },
+  borderRadiusTopRight: {
+    none: "rounded-tr-none",
+    "2xs": "rounded-tr-2xs",
+    xs: "rounded-tr-xs",
+    sm: "rounded-tr-sm",
+    md: "rounded-tr-md",
+    lg: "rounded-tr-lg",
+    xl: "rounded-tr-xl",
+    "2xl": "rounded-tr-2xl",
+    "3xl": "rounded-tr-3xl",
+    full: "rounded-tr-full"
+  },
+  borderRadiusBottomLeft: {
+    none: "rounded-bl-none",
+    "2xs": "rounded-bl-2xs",
+    xs: "rounded-bl-xs",
+    sm: "rounded-bl-sm",
+    md: "rounded-bl-md",
+    lg: "rounded-bl-lg",
+    xl: "rounded-bl-xl",
+    "2xl": "rounded-bl-2xl",
+    "3xl": "rounded-bl-3xl",
+    full: "rounded-bl-full"
+  },
+  borderRadiusBottomRight: {
+    none: "rounded-br-none",
+    "2xs": "rounded-br-2xs",
+    xs: "rounded-br-xs",
+    sm: "rounded-br-sm",
+    md: "rounded-br-md",
+    lg: "rounded-br-lg",
+    xl: "rounded-br-xl",
+    "2xl": "rounded-br-2xl",
+    "3xl": "rounded-br-3xl",
+    full: "rounded-br-full"
+  },
+  // -- Style --
+  borderStyle: {
+    solid: "border-solid",
+    dashed: "border-dashed",
+    dotted: "border-dotted",
+    double: "border-double",
+    none: "border-none"
+  }
+}, r = {};
+export {
+  r as borderDefaults,
+  d as borderVariants
+};
