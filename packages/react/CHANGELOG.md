@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.39.1](https://github.com/factorialco/f0/compare/f0-react-v2.39.0...f0-react-v2.39.1) (2026-06-05)
+
+
+### Bug Fixes
+
+* **kanban:** isolate per-lane loading state in DataCollection lanes ([#4329](https://github.com/factorialco/f0/issues/4329)) ([c0def9d](https://github.com/factorialco/f0/commit/c0def9d23785a31d4f08f34bb0c0575c612a2564))
+
 ## [2.39.0](https://github.com/factorialco/f0/compare/f0-react-v2.38.0...f0-react-v2.39.0) (2026-06-04)
 
 
