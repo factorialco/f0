@@ -11,7 +11,18 @@ const meta: Meta<typeof F0CardOneLiner> = {
   component: F0CardOneLiner,
   title: "Card/OneLiner",
   parameters: {
-    docs: { story: { inline: false, height: "160px" } },
+    docs: {
+      description: {
+        component: [
+          "`F0CardOneLiner` is a compact, single-row card: an optional avatar on the left, a title with an optional description, and trailing actions on the right.",
+          "Use it for list rows, inline confirmations and dense layouts where a full `F0Card` is too heavy — e.g. a settings toggle row, a pending-approval item, or a selectable entity.",
+          "Actions stay inline at every width by default. Set <code>stackAt</code> to collapse them onto their own line below a container breakpoint — secondary buttons fold into a left ⋯ menu while the primary stays pinned. For an approve/reject row, use the icon-only <code>confirmAction</code> / <code>rejectAction</code> variant. The avatar renders at a fixed size and accepts any avatar type in the system.",
+        ]
+          .map((line) => `<p>${line}</p>`)
+          .join("\n"),
+      },
+      story: { inline: false, height: "160px" },
+    },
   },
   tags: ["autodocs", "stable"],
   // Explicit argTypes: docgen can't infer props through the

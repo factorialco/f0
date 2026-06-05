@@ -80,6 +80,13 @@ export function extractComponentName(
   const candidates: string[] = []
 
   if (fileName) {
+    // Story file basename, e.g. ".../F0CardOneLiner.stories.tsx" → "F0CardOneLiner".
+    // Checked first so a component co-located in another component's folder (e.g.
+    // F0CardOneLiner living under F0Card/__stories__/) resolves to its own export
+    // rather than the folder name.
+    const storyFile = fileName.match(/\/([^/]+)\.stories\.tsx?$/)
+    if (storyFile && storyFile[1] !== "index") candidates.push(storyFile[1])
+
     const storiesDir = fileName.match(/\/([^/]+)\/__stories__\//)
     if (storiesDir) candidates.push(storiesDir[1])
 

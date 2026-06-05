@@ -1,3 +1,5 @@
+import { type Ref } from "react"
+
 import { F0Button } from "@/components/F0Button"
 import { F0Link } from "@/components/F0Link"
 import { Dropdown, type DropdownItem } from "@/experimental/Navigation/Dropdown"
@@ -219,7 +221,7 @@ export function OneLinerActions({
     />
   )
 
-  const more = (items: DropdownItem[], ref?: React.Ref<HTMLDivElement>) =>
+  const more = (items: DropdownItem[], ref?: Ref<HTMLDivElement>) =>
     items.length > 0 ? (
       <div ref={ref} onClick={(e) => e.stopPropagation()}>
         <Dropdown items={items} size={size} />
@@ -266,36 +268,40 @@ export function OneLinerActions({
         {primary}
       </div>
 
-      {/* Narrow: own full-width line; measured left-overflow. */}
-      <div
-        className={cn(
-          "relative z-[1] flex-row items-center justify-end gap-2",
-          narrowClusterVisibility[stackAt],
-          chrome
-        )}
-      >
+      {/* Narrow: own full-width line; measured left-overflow. Only rendered when
+          a breakpoint is set — with `never` the inline cluster above is enough,
+          and we avoid a hidden measurement subtree + its ResizeObserver. */}
+      {stackAt !== "never" && (
         <div
-          ref={containerRef}
-          className="relative flex min-w-0 flex-1 items-center justify-end"
-          style={{ gap: GAP }}
+          className={cn(
+            "relative z-[1] flex-row items-center justify-end gap-2",
+            narrowClusterVisibility[stackAt],
+            chrome
+          )}
         >
-          {/* Hidden measurement copy of every secondary button. */}
           <div
-            ref={measurementContainerRef}
-            aria-hidden="true"
-            className="pointer-events-none invisible absolute left-0 top-0 flex items-center whitespace-nowrap"
+            ref={containerRef}
+            className="relative flex min-w-0 flex-1 items-center justify-end"
             style={{ gap: GAP }}
           >
-            {secondaryArray.map(renderSecondary)}
+            {/* Hidden measurement copy of every secondary button. */}
+            <div
+              ref={measurementContainerRef}
+              aria-hidden="true"
+              className="pointer-events-none invisible absolute left-0 top-0 flex items-center whitespace-nowrap"
+              style={{ gap: GAP }}
+            >
+              {secondaryArray.map(renderSecondary)}
+            </div>
+
+            {more(narrowMenu, customOverflowIndicatorRef)}
+            {shown.map(renderSecondary)}
           </div>
 
-          {more(narrowMenu, customOverflowIndicatorRef)}
-          {shown.map(renderSecondary)}
+          {link}
+          {primary}
         </div>
-
-        {link}
-        {primary}
-      </div>
+      )}
     </>
   )
 }
