@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
 
-import { agentUrlOverride } from "@/shell/aiChatConfig"
-
 /**
  * Top-level setup phase for the Expense Policy page.
  *
@@ -36,42 +34,14 @@ export type SetupPhase = "empty" | "interview" | "generating" | "cocreation"
 
 const STORAGE_KEY = "expense-policy-setup-phase-v1"
 
-function coerceOnLoad(raw: string | null): SetupPhase {
-  switch (raw) {
-    case "cocreation":
-      return "cocreation"
-    case "generating":
-      // Was mid-generation on refresh — the policy is (or will be)
-      // written, so drop straight into the editor.
-      return "cocreation"
-    case "interview":
-      // Interview can't resume without One mid-turn — restart clean.
-      return "empty"
-    case "empty":
-    default:
-      return "empty"
-  }
-}
-
 function readPhase(): SetupPhase {
-  if (typeof window === "undefined") return "empty"
-  // Share/tunnel links always carry `?agent=<url>` (the live agent override).
-  // Those are the links testers open, and each tester session should START
-  // FRESH at the empty-state landing — NOT resume a `cocreation` phase left in
-  // localStorage by an earlier run in the same (incognito) session. So when an
-  // agent override is present, ignore the persisted phase and begin at empty.
-  // Local dev (no `?agent=`, uses the default Traefik agent) keeps the durable
-  // refresh-resume behaviour untouched.
-  try {
-    if (agentUrlOverride()) return "empty"
-  } catch {
-    // best-effort — fall through to the persisted value
-  }
-  try {
-    return coerceOnLoad(window.localStorage.getItem(STORAGE_KEY))
-  } catch {
-    return "empty"
-  }
+  // ALWAYS open on the empty-state landing. This is a guided demo: every fresh
+  // load — a shared link, a refresh, a new tab — should start clean at the
+  // two-option landing ("Describe your way" / "Use defaults"), NOT resume a
+  // mid-flow phase saved from a previous session. Phase transitions WITHIN a
+  // session are in-memory (setPhase), so the interview → editor flow is
+  // unaffected; only a brand-new page load resets to empty.
+  return "empty"
 }
 
 function writePhase(phase: SetupPhase): void {
