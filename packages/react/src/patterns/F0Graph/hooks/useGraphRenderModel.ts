@@ -156,7 +156,7 @@ export function useGraphRenderModel<T>({
     return deriveEdgesFromTree(roots)
   }, [resolvedEdgesProp, roots])
 
-  // ── Visible edges rewritten through expanders ──
+  // ── Visible edges + expander nodes ──
   const { visibleEdges, expanderNodes } = useMemo(() => {
     const visibleIds = new Set(visibleTreeNodes.map((n) => n.id))
     const edges: GraphEdge[] = []
@@ -167,40 +167,32 @@ export function useGraphRenderModel<T>({
       count: number
     }> = []
 
-    // Collect parents that have expanders
+    // An expander hangs below every visible collapsed parent that HAS children
+    // (per `childrenCount`). This is driven by `expanderMap`, NOT by edges, so
+    // a node shows its expander even when its children have not been loaded yet
+    // (lazy trees, or consumers that load children on demand). Relying on a
+    // derived parent→child edge would hide the affordance until a fetch ran.
     const parentsWithExpanders = new Set(expanderMap.keys())
+    for (const [parentId, exp] of expanderMap) {
+      if (!visibleIds.has(parentId)) continue
+      edges.push({
+        id: `${parentId}->${exp.expanderId}`,
+        source: parentId,
+        target: exp.expanderId,
+      })
+      expNodes.push({
+        id: exp.expanderId,
+        parentId,
+        avatars: exp.avatars,
+        count: exp.count,
+      })
+    }
 
+    // Plain edges between two visible nodes. Skip any whose source is collapsed
+    // (its children are hidden behind the expander created above).
     for (const edge of resolvedEdges) {
-      // If the source has an expander, rewrite edges
-      if (parentsWithExpanders.has(edge.source)) {
-        const exp = expanderMap.get(edge.source)!
-        // We only add parent→expander edge once
-        if (
-          !edges.some(
-            (e) => e.source === edge.source && e.target === exp.expanderId
-          )
-        ) {
-          edges.push({
-            id: `${edge.source}->${exp.expanderId}`,
-            source: edge.source,
-            target: exp.expanderId,
-          })
-          expNodes.push({
-            id: exp.expanderId,
-            parentId: edge.source,
-            avatars: exp.avatars,
-            count: exp.count,
-          })
-        }
-        // If child is visible, add expander→child edge
-        if (visibleIds.has(edge.target)) {
-          edges.push({
-            id: `${exp.expanderId}->${edge.target}`,
-            source: exp.expanderId,
-            target: edge.target,
-          })
-        }
-      } else if (visibleIds.has(edge.source) && visibleIds.has(edge.target)) {
+      if (parentsWithExpanders.has(edge.source)) continue
+      if (visibleIds.has(edge.source) && visibleIds.has(edge.target)) {
         edges.push(edge)
       }
     }
