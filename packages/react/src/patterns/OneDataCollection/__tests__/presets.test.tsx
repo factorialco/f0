@@ -16,6 +16,10 @@ import {
 import type { PresetsDefinition } from "@/patterns/OneFilterPicker/types"
 
 import { useDataCollectionSource } from "../hooks/useDataCollectionSource"
+import {
+  encodeSharedPreset,
+  SHARED_PRESET_PARAM,
+} from "../internal/sharedPreset"
 import { OneDataCollection } from "../index"
 
 type Row = { name: string; department: string }
@@ -694,5 +698,100 @@ describe("OneDataCollection - presets", () => {
     await waitFor(() =>
       expect(screen.queryByText("Save as preset")).not.toBeInTheDocument()
     )
+  })
+})
+
+describe("OneDataCollection - share preset", () => {
+  it("copies a self-contained shareable link to the clipboard", async () => {
+    const user = userEvent.setup()
+    // Spy on whatever clipboard the component will actually use (userEvent.setup
+    // installs its own stub, so spy on that rather than redefining it).
+    if (!navigator.clipboard) {
+      Object.defineProperty(navigator, "clipboard", {
+        value: { writeText: async () => {} },
+        configurable: true,
+      })
+    }
+    const writeText = vi
+      .spyOn(navigator.clipboard, "writeText")
+      .mockResolvedValue(undefined)
+
+    renderHarness()
+    await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument())
+
+    // Create a custom preset to share.
+    await sortByName(user)
+    await user.click(
+      await screen.findByRole("button", { name: "Save as preset" })
+    )
+    await user.type(await screen.findByLabelText("Preset title"), "Shared view")
+    await user.click(screen.getByRole("button", { name: "Save" }))
+    await waitFor(() =>
+      expect(screen.getAllByText("Shared view").length).toBeGreaterThan(0)
+    )
+
+    // Open the edit dialog → overflow menu → Share preset.
+    await user.hover(
+      screen
+        .getAllByText("Shared view")
+        .find((el) => !el.closest('[aria-hidden="true"]'))!
+        .closest("label")!
+    )
+    await user.click(
+      (await screen.findAllByRole("button", { name: "Edit preset" })).find(
+        (el) => !el.closest('[aria-hidden="true"]')
+      )!
+    )
+    await user.click(
+      await screen.findByRole("button", { name: "Toggle dropdown menu" })
+    )
+    await user.click(
+      await screen.findByRole("menuitem", { name: "Share preset" })
+    )
+
+    // The dropdown defers the action slightly (Radix close/animation workaround).
+    await waitFor(() => expect(writeText).toHaveBeenCalledTimes(1))
+    const url = new URL(writeText.mock.calls[0]![0] as string)
+    expect(url.searchParams.has(SHARED_PRESET_PARAM)).toBe(true)
+  })
+
+  it("opens the prefilled create dialog from a shared link and saves the shared config", async () => {
+    const user = userEvent.setup()
+    const encoded = encodeSharedPreset({
+      label: "Imported view",
+      description: "from a teammate",
+      emoji: "🚀",
+      filter: { department: ["eng"] },
+      sortings: { field: "name", order: "desc" },
+      visualization: 0,
+    })
+    window.history.replaceState({}, "", `/?${SHARED_PRESET_PARAM}=${encoded}`)
+
+    const { set } = renderHarness()
+    await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument())
+
+    // The create dialog opens prefilled with the shared title...
+    const titleInput = await screen.findByLabelText("Preset title")
+    expect(titleInput).toHaveValue("Imported view")
+
+    // ...and the shared link param is stripped so a reload won't reopen it.
+    expect(
+      new URLSearchParams(window.location.search).has(SHARED_PRESET_PARAM)
+    ).toBe(false)
+
+    // Saving creates the preset with the shared config (not the current view).
+    await user.click(screen.getByRole("button", { name: "Save" }))
+    await waitFor(() =>
+      expect(screen.getAllByText("Imported view").length).toBeGreaterThan(0)
+    )
+    await waitFor(() => {
+      const call = set.mock.calls.find(
+        ([, storage]) => (storage.customPresets?.length ?? 0) > 0
+      )
+      expect(call).toBeTruthy()
+      const saved = call![1].customPresets![0]
+      expect(saved.label).toBe("Imported view")
+      expect(saved.filter).toEqual({ department: ["eng"] })
+    })
   })
 })

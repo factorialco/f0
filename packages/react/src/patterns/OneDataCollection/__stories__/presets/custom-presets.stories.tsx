@@ -64,9 +64,14 @@ type Story = StoryObj<typeof meta>
  *   creates a custom preset, which becomes selected. (A view-mode-only change
  *   does not offer to save.)
  * - Hover a preset box → after a short delay its description shows in a tooltip.
- * - Hover a custom (user-created) preset → edit and delete icon buttons appear
- *   (the box grows smoothly); edit opens the form to rename it / change the
- *   emoji, delete asks for confirmation first.
+ * - Hover a custom (user-created) preset → an edit icon button appears (the box
+ *   grows smoothly); edit opens the form to rename it / change the emoji. The
+ *   edit dialog's overflow ("…") menu holds extra actions: "Share preset" and
+ *   "Remove".
+ * - "Share preset" copies a self-contained link (the whole preset — title,
+ *   description, emoji and config — base64url-encoded in `dc_shared_preset`).
+ *   Opening that link prefills the create dialog so the recipient can just hit
+ *   Save.
  * - Select the custom preset → the whole captured view is applied; its emoji (if
  *   any) shows on the left of the chip.
  * - Change something on top → a persist (save) icon appears on the selected

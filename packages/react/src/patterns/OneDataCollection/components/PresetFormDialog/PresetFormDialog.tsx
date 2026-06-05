@@ -1,7 +1,7 @@
 import { z } from "zod"
 
 import { F0TextInput } from "@/components/F0TextInput"
-import { Delete } from "@/icons/app"
+import { Delete, Share } from "@/icons/app"
 import { Picker } from "@/kits/Social/Reactions/Picker"
 import { useI18n } from "@/lib/providers/i18n"
 import { F0Dialog } from "@/patterns/F0Dialog"
@@ -26,9 +26,14 @@ interface PresetFormDialogProps {
   onSubmit: (values: PresetFormValues) => void
   /**
    * Called when the user removes the preset. Only shown in "update" mode, as a
-   * critical action between Cancel and Save in the dialog footer.
+   * critical action in the dialog's overflow ("extra actions") menu.
    */
   onDelete?: () => void
+  /**
+   * Called when the user shares the preset (copies a shareable link to the
+   * clipboard). Only shown in "update" mode, in the overflow menu.
+   */
+  onShare?: () => void
 }
 
 /**
@@ -44,6 +49,7 @@ export function PresetFormDialog({
   onClose,
   onSubmit,
   onDelete,
+  onShare,
 }: PresetFormDialogProps) {
   const i18n = useI18n()
   const presets = i18n.collections.presets
@@ -138,14 +144,21 @@ export function PresetFormDialog({
         onClick: onClose,
       }}
       otherActions={
-        mode === "update" && onDelete
+        mode === "update"
           ? [
-              {
-                label: presets.delete,
-                onClick: onDelete,
-                icon: Delete,
-                critical: true,
-              },
+              ...(onShare
+                ? [{ label: presets.share, onClick: onShare, icon: Share }]
+                : []),
+              ...(onDelete
+                ? [
+                    {
+                      label: presets.delete,
+                      onClick: onDelete,
+                      icon: Delete,
+                      critical: true,
+                    },
+                  ]
+                : []),
             ]
           : []
       }

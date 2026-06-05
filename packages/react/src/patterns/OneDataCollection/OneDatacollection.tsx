@@ -72,6 +72,12 @@ import { useDataCollectionUrlSync } from "./hooks/useDataCollectionUrlSync"
 import { usePerVisualizationFilters } from "./hooks/usePerVisualizationFilters"
 import { getDefaultDataCollectionSettings } from "./internal/isSettingsDefault"
 import { derivePresetId } from "./internal/presetId"
+import {
+  buildSharedPresetUrl,
+  decodeSharedPreset,
+  SHARED_PRESET_PARAM,
+  type SharedPresetPayload,
+} from "./internal/sharedPreset"
 import { ItemActionsDefinition } from "./item-actions"
 import { NavigationFiltersDefinition } from "./navigationFilters/types"
 import { Settings } from "./Settings"
@@ -312,8 +318,19 @@ const OneDataCollectionComp = <
   // custom preset's title/description via its hover edit icon). "Persist in
   // preset" updates the selected preset's captured options in place, no dialog.
   const [presetDialog, setPresetDialog] = useState<
-    { mode: "create" } | { mode: "update"; presetId: string } | null
+    | { mode: "create"; shared?: SharedPresetPayload }
+    | { mode: "update"; presetId: string }
+    | null
   >(null)
+
+  // A preset shared via a `dc_shared_preset` link, captured once at mount (so a
+  // later URL sync can't wipe it before we read it). When present, we open the
+  // create dialog prefilled with it; saving stores the shared config verbatim.
+  const [sharedPreset] = useState<SharedPresetPayload | null>(() => {
+    if (typeof window === "undefined") return null
+    const params = new URLSearchParams(window.location.search)
+    return decodeSharedPreset(params.get(SHARED_PRESET_PARAM))
+  })
 
   const {
     effectiveFilters,
@@ -1047,6 +1064,25 @@ const OneDataCollectionComp = <
 
   const handleSavePreset = useCallback(
     (values: PresetFormValues) => {
+      // A shared-link preset carries its own config; a regular "Save as preset"
+      // captures the current view.
+      const shared =
+        presetDialog?.mode === "create" ? presetDialog.shared : undefined
+      const config = shared
+        ? {
+            filter: shared.filter,
+            sortings: shared.sortings,
+            grouping: shared.grouping,
+            visualization: shared.visualization,
+            settings: shared.settings,
+          }
+        : {
+            filter: activeCurrentFilters,
+            sortings: currentSortings,
+            grouping: currentGrouping,
+            visualization: currentVisualization,
+            settings,
+          }
       const newPreset = {
         // Title-derived id (doubles as the readable `dc_preset` URL value).
         id: derivePresetId(
@@ -1056,17 +1092,14 @@ const OneDataCollectionComp = <
         label: values.title,
         description: values.description,
         emoji: values.emoji,
-        filter: activeCurrentFilters,
-        sortings: currentSortings,
-        grouping: currentGrouping,
-        visualization: currentVisualization,
-        settings,
+        ...config,
       } as PresetsDefinition<Filters>[number]
       setCustomPresets((prev) => [...prev, newPreset])
       setSelectedPresetId(newPreset.id)
       setPresetDialog(null)
     },
     [
+      presetDialog,
       activeCurrentFilters,
       currentSortings,
       currentGrouping,
@@ -1157,6 +1190,47 @@ const OneDataCollectionComp = <
     (presetId: string) => setPresetDialog({ mode: "update", presetId }),
     []
   )
+
+  // Copies a self-contained shareable link for a custom preset to the clipboard.
+  const onSharePreset = useCallback(
+    (presetId: string) => {
+      const preset = customPresets.find((p) => p.id === presetId)
+      if (!preset) return
+      const url = buildSharedPresetUrl({
+        label: preset.label,
+        description: preset.description,
+        emoji: preset.emoji,
+        filter: preset.filter,
+        sortings: preset.sortings,
+        grouping: preset.grouping,
+        visualization: preset.visualization,
+        settings: preset.settings,
+      })
+      if (url) void navigator.clipboard?.writeText(url)
+    },
+    [customPresets]
+  )
+
+  // A shared preset link prefills (once) the create dialog so the recipient can
+  // just hit Save; strip the param afterwards so a reload doesn't reopen it.
+  useEffect(() => {
+    if (!sharedPreset) return
+    setPresetDialog({ mode: "create", shared: sharedPreset })
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search)
+      params.delete(SHARED_PRESET_PARAM)
+      const query = params.toString()
+      window.history.replaceState(
+        null,
+        "",
+        query
+          ? `${window.location.pathname}?${query}`
+          : window.location.pathname
+      )
+    }
+    // Run once on mount for a captured shared preset.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // The custom preset currently being edited (for the form's default values).
   const editingPreset = useMemo(
@@ -1529,7 +1603,13 @@ const OneDataCollectionComp = <
                 description: editingPreset.description,
                 emoji: editingPreset.emoji,
               }
-            : undefined
+            : presetDialog?.mode === "create" && presetDialog.shared
+              ? {
+                  title: presetDialog.shared.label,
+                  description: presetDialog.shared.description,
+                  emoji: presetDialog.shared.emoji,
+                }
+              : undefined
         }
         onClose={() => setPresetDialog(null)}
         onSubmit={
@@ -1540,6 +1620,11 @@ const OneDataCollectionComp = <
         onDelete={
           presetDialog?.mode === "update"
             ? handleDeleteEditingPreset
+            : undefined
+        }
+        onShare={
+          presetDialog?.mode === "update"
+            ? () => onSharePreset(presetDialog.presetId)
             : undefined
         }
       />

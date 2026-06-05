@@ -155,6 +155,7 @@ export const defaultTranslations = {
       descriptionPlaceholder: "Optional description",
       save: "Save",
       delete: "Remove",
+      share: "Share preset",
       cancel: "Cancel",
     },
     visualizations: {
