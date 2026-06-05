@@ -29,6 +29,9 @@ const ALLOWED_BARE = [
   "react-router-dom",
   "@factorialco/f0-react",
   "@factorialco/f0-core",
+  // ReactFlow for org-chart / graph prototypes — mirrors the Vite
+  // allowlist in vite-plugins/allowlist.ts.
+  "@xyflow/react",
 ] as const
 
 const ALLOWED_PATH_ALIASES = [

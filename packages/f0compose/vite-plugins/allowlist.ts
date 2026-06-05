@@ -24,6 +24,8 @@ const ALLOWED_BARE = new Set([
   // Zod is the schema language used by F0Form (`f0FormField` wraps a Zod
   // schema). Prototypes that build co-created forms need it directly.
   "zod",
+  // ReactFlow for org-chart / graph prototypes (e.g. mercer-benchmark).
+  "@xyflow/react",
 ])
 
 export function allowlistPlugin(): Plugin {

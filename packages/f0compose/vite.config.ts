@@ -8,6 +8,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": resolve(__dirname, "./src"),
+      "@copilotkit/react-ui": resolve(__dirname, "./src/lib/copilotkit-react-ui-shim.ts"),
     },
   },
   server: {
