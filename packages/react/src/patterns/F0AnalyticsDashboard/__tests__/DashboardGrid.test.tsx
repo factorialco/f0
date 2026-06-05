@@ -4,6 +4,23 @@ import { zeroRender as render, waitFor } from "@/testing/test-utils"
 import { DashboardGrid } from "../components/DashboardGrid/DashboardGrid"
 import type { DashboardItem } from "../types"
 
+type ExpenseRecord = {
+  employee: string
+  category: string
+  amount: number
+}
+
+const expenseTableVisualization = {
+  type: "table",
+  options: {
+    columns: [
+      { label: "Employee", render: (item: ExpenseRecord) => item.employee },
+      { label: "Category", render: (item: ExpenseRecord) => item.category },
+      { label: "Amount", render: (item: ExpenseRecord) => item.amount },
+    ],
+  },
+}
+
 function makeMetricItems(itemHeight: number): DashboardItem[] {
   return [
     {
@@ -18,6 +35,35 @@ function makeMetricItems(itemHeight: number): DashboardItem[] {
       type: "metric",
       title: "Turnover",
       fetchData: async () => ({ value: 7 }),
+    },
+  ]
+}
+
+function makeCollectionItems(itemHeight: number): DashboardItem[] {
+  return [
+    {
+      id: "expenses",
+      type: "collection",
+      title: "Expenses",
+      itemHeight,
+      visualizations: [expenseTableVisualization],
+      createSource: () => ({
+        dataAdapter: {
+          fetchData: async () => ({ records: [], total: 0 }),
+        },
+      }),
+    },
+    {
+      id: "category-totals",
+      type: "collection",
+      title: "Category totals",
+      itemHeight: 480,
+      visualizations: [expenseTableVisualization],
+      createSource: () => ({
+        dataAdapter: {
+          fetchData: async () => ({ records: [], total: 0 }),
+        },
+      }),
     },
   ]
 }
@@ -48,6 +94,30 @@ describe("DashboardGrid", () => {
 
     await waitFor(() => {
       expect(getDashboardRowHeight(container)).toBe("288px")
+    })
+  })
+
+  it("recomputes collection row height when itemHeight changes after data loads", async () => {
+    const { container, rerender } = render(
+      <DashboardGrid items={makeCollectionItems(480)} filters={{}} />
+    )
+
+    const collectionCard = container.querySelector('[data-card-id="expenses"]')
+    if (!(collectionCard instanceof HTMLElement)) {
+      throw new Error("Expected collection item to be rendered")
+    }
+
+    const collectionRow = collectionCard.parentElement
+    if (!(collectionRow instanceof HTMLElement)) {
+      throw new Error("Expected collection row to be rendered")
+    }
+
+    expect(collectionRow.style.height).toBe("480px")
+
+    rerender(<DashboardGrid items={makeCollectionItems(960)} filters={{}} />)
+
+    await waitFor(() => {
+      expect(collectionRow.style.height).toBe("960px")
     })
   })
 })

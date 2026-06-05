@@ -633,19 +633,17 @@ function buildInitialRows<Filters extends FiltersDefinition>(
 function buildItemLayoutSignature<Filters extends FiltersDefinition>(
   items: DashboardItemType<Filters>[]
 ): string {
-  return items
-    .map((item) =>
-      [
-        item.id,
-        item.type,
-        item.itemHeight ?? "",
-        item.rowSpan ?? "",
-        item.x ?? "",
-        item.y ?? "",
-        item.colSpan ?? "",
-      ].join(":")
-    )
-    .join("|")
+  return JSON.stringify(
+    items.map((item) => [
+      item.id,
+      item.type,
+      item.itemHeight ?? null,
+      item.rowSpan ?? null,
+      item.x ?? null,
+      item.y ?? null,
+      item.colSpan ?? null,
+    ])
+  )
 }
 
 /** Group items by saved `y` coordinate to reconstruct saved rows. */
