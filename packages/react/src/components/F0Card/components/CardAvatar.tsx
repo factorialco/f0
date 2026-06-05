@@ -65,10 +65,6 @@ const AvatarRender = ({
   avatar: CardAvatarVariant
   size: CardAvatarSize
 }) => {
-  // The icon and module glyphs read visually smaller than the other avatars at
-  // the same token, so render them one step larger (capped at lg) to match.
-  const bumpedSize: CardAvatarSize = size === "sm" ? "md" : "lg"
-
   if (avatar.type === "emoji") {
     return <F0AvatarEmoji emoji={avatar.emoji} size={size} />
   }
@@ -76,10 +72,10 @@ const AvatarRender = ({
     return <F0AvatarFile file={avatar.file} size={size} />
   }
   if (avatar.type === "icon") {
-    return <F0AvatarIcon icon={avatar.icon} size={bumpedSize} />
+    return <F0AvatarIcon icon={avatar.icon} size={size} />
   }
   if (avatar.type === "module") {
-    return <F0AvatarModule module={avatar.module} size={bumpedSize} />
+    return <F0AvatarModule module={avatar.module} size={size} />
   }
   if (avatar.type === "alert") {
     return <F0AvatarAlert type={avatar.variant} size={size} />

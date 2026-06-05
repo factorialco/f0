@@ -36,8 +36,10 @@ export interface F0CardOneLinerProps {
   description?: string
 
   /**
-   * Optional avatar rendered at `md` on the left. Accepts any avatar type in the
-   * system (person, company, team, icon, emoji, flag, file).
+   * Optional avatar rendered at a fixed `lg` size on the left (the size is not
+   * configurable). Accepts any avatar type in the system: person, company, team,
+   * file, flag, icon, emoji, module, alert, date, pulse. Types without a `lg`
+   * variant (date, pulse) render at their intrinsic size.
    */
   avatar?: CardAvatarVariant
 
@@ -172,7 +174,7 @@ const F0CardOneLinerBase = forwardRef<HTMLDivElement, F0CardOneLinerProps>(
 
         <div className={oneLinerRowClassName[stackAt]}>
           <div className="flex min-w-0 flex-row items-center gap-3">
-            {avatar && <CardAvatar avatar={avatar} size="md" />}
+            {avatar && <CardAvatar avatar={avatar} size="lg" />}
             <div className="flex min-w-0 flex-col gap-0">
               {title && (
                 <Text
