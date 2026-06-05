@@ -1,6 +1,5 @@
 import { z } from "zod"
 
-import { F0Button } from "@/components/F0Button"
 import { F0TextInput } from "@/components/F0TextInput"
 import { Delete } from "@/icons/app"
 import { Picker } from "@/kits/Social/Reactions/Picker"
@@ -118,8 +117,6 @@ export function PresetFormDialog({
     submitConfig: { type: "default", hideSubmitButton: true },
   })
 
-  const showRemove = mode === "update" && !!onDelete
-
   return (
     <F0Dialog
       isOpen={isOpen}
@@ -130,36 +127,32 @@ export function PresetFormDialog({
           ? presets.createDescription
           : presets.updateDescription
       }
+      primaryAction={{
+        label: presets.save,
+        onClick: submit,
+        loading: isSubmitting,
+        disabled: hasErrors,
+      }}
+      secondaryAction={{
+        label: presets.cancel,
+        onClick: onClose,
+      }}
+      otherActions={
+        mode === "update" && onDelete
+          ? [
+              {
+                label: presets.delete,
+                onClick: onDelete,
+                icon: Delete,
+                critical: true,
+              },
+            ]
+          : []
+      }
       disableContentPadding
     >
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-4">
         <F0Form formDefinition={formDefinition} formRef={formRef} />
-        {/*
-          Custom footer (instead of the dialog's primary/secondary actions) so
-          the "Remove" action can sit between Cancel and Save.
-        */}
-        <div className="flex flex-row items-center justify-end gap-2 border-x-0 border-b-0 border-t border-solid border-f1-border-secondary px-4 py-3">
-          <F0Button
-            variant="outline"
-            label={presets.cancel}
-            onClick={onClose}
-          />
-          {showRemove && (
-            <F0Button
-              variant="critical"
-              label={presets.delete}
-              icon={Delete}
-              onClick={onDelete}
-            />
-          )}
-          <F0Button
-            variant="default"
-            label={presets.save}
-            onClick={submit}
-            loading={isSubmitting}
-            disabled={hasErrors}
-          />
-        </div>
       </div>
     </F0Dialog>
   )

@@ -587,8 +587,12 @@ describe("OneDataCollection - presets", () => {
       )!
     )
 
-    // The edit dialog exposes a Remove action (no separate confirmation step).
-    await user.click(await screen.findByRole("button", { name: "Remove" }))
+    // The edit dialog exposes a Remove action in its overflow menu (no separate
+    // confirmation step).
+    await user.click(
+      await screen.findByRole("button", { name: "Toggle dropdown menu" })
+    )
+    await user.click(await screen.findByRole("menuitem", { name: "Remove" }))
     await waitFor(() =>
       expect(screen.queryByText("Temp view")).not.toBeInTheDocument()
     )
