@@ -16,6 +16,7 @@ import type {
   PresetsDefinition,
 } from "@/patterns/OneFilterPicker/types"
 
+import { F0ActionBar } from "@/components/F0ActionBar"
 import { OneEmptyState } from "@/components/OneEmptyState"
 import {
   GroupingDefinition,
@@ -90,6 +91,7 @@ import { useEventEmitter } from "./useEventEmitter"
 import { VisualizationRenderer } from "./visualizations/collection"
 
 const SUCCESS_DISMISS_MS = 1500
+const SHARE_COPIED_DISMISS_MS = 2000
 
 /**
  * A component that renders a collection of data with filtering and visualization capabilities.
@@ -1191,7 +1193,8 @@ const OneDataCollectionComp = <
     []
   )
 
-  // Copies a self-contained shareable link for a custom preset to the clipboard.
+  // Copies a self-contained shareable link for a custom preset to the clipboard,
+  // then flashes a "Copied to your clipboard" action bar.
   const onSharePreset = useCallback(
     (presetId: string) => {
       const preset = customPresets.find((p) => p.id === presetId)
@@ -1206,10 +1209,27 @@ const OneDataCollectionComp = <
         visualization: preset.visualization,
         settings: preset.settings,
       })
-      if (url) void navigator.clipboard?.writeText(url)
+      const clipboard =
+        typeof navigator !== "undefined" ? navigator.clipboard : undefined
+      if (!url || !clipboard) return
+      void clipboard
+        .writeText(url)
+        .then(() => setShareCopied(true))
+        .catch(() => {})
     },
     [customPresets]
   )
+
+  // Transient confirmation shown after a successful "Share preset" copy.
+  const [shareCopied, setShareCopied] = useState(false)
+  useEffect(() => {
+    if (!shareCopied) return
+    const timer = setTimeout(
+      () => setShareCopied(false),
+      SHARE_COPIED_DISMISS_MS
+    )
+    return () => clearTimeout(timer)
+  }, [shareCopied])
 
   // A shared preset link prefills (once) the create dialog so the recipient can
   // just hit Save; strip the param afterwards so a reload doesn't reopen it.
@@ -1627,6 +1647,12 @@ const OneDataCollectionComp = <
             ? () => onSharePreset(presetDialog.presetId)
             : undefined
         }
+      />
+      <F0ActionBar
+        isOpen={shareCopied}
+        variant="light"
+        status="success"
+        label={i18n.collections.presets.copiedToClipboard}
       />
     </div>
   )

@@ -156,6 +156,7 @@ export const defaultTranslations = {
       save: "Save",
       delete: "Remove",
       share: "Share preset",
+      copiedToClipboard: "Copied to your clipboard",
       cancel: "Cancel",
     },
     visualizations: {

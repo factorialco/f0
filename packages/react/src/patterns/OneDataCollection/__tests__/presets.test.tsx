@@ -753,6 +753,11 @@ describe("OneDataCollection - share preset", () => {
     await waitFor(() => expect(writeText).toHaveBeenCalledTimes(1))
     const url = new URL(writeText.mock.calls[0]![0] as string)
     expect(url.searchParams.has(SHARED_PRESET_PARAM)).toBe(true)
+
+    // ...and a confirmation action bar is shown.
+    expect(
+      await screen.findByText("Copied to your clipboard")
+    ).toBeInTheDocument()
   })
 
   it("opens the prefilled create dialog from a shared link and saves the shared config", async () => {
