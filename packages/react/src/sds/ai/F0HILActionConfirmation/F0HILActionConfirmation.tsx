@@ -1,29 +1,31 @@
 import { F0CardRow } from "@/components/F0Card"
-import Check from "@/icons/app/Check"
 
 import { F0HILActionConfirmationProps } from "./types"
 
 export const F0HILActionConfirmation = ({
   text,
+  description,
+  avatar,
   confirmationText,
   onConfirm,
   cancelText,
   onCancel,
+  stackAt = "sm",
 }: F0HILActionConfirmationProps) => {
   return (
     <F0CardRow
       title={text ?? ""}
-      primaryAction={{
+      description={description}
+      avatar={avatar}
+      stackAt={stackAt}
+      confirmAction={{
         label: confirmationText,
-        icon: Check,
         onClick: onConfirm,
       }}
-      secondaryActions={[
-        {
-          label: cancelText,
-          onClick: onCancel,
-        },
-      ]}
+      rejectAction={{
+        label: cancelText,
+        onClick: onCancel,
+      }}
     />
   )
 }
