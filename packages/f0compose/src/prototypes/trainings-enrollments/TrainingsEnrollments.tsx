@@ -202,6 +202,10 @@ type ExactCourse = Omit<Training, "objectives" | "courseType"> & {
   categories: string[]
   competencies: string[]
   courseType?: "no-editions" | "with-editions"
+  // People in "Pending group assignment" for this course. Independent of the
+  // enrollment mode — manual courses can have pending people too (from requests,
+  // manual assignment without a group, etc.).
+  pendingCount?: number
   enrollmentRule?: {
     criteria: string[]
     appliesTo: "new-only" | "everyone"
@@ -612,6 +616,9 @@ const exactCourses = trainings.slice(0, 4).map((training, index) => {
     subsidizedCost: index === 0 ? "2000 EUR" : "-",
     creationYear: index === 0 ? "2026" : "2025",
     courseType: index === 0 || index === 2 ? "with-editions" : "no-editions",
+    // Pending group assignment count — independent of mode. Index 0 (automatic)
+    // has pending; index 3 (manual) also has pending to show that case.
+    pendingCount: index === 0 ? 12 : index === 3 ? 4 : 0,
     enrollmentRule: index === 0 ? {
       criteria: ["Team: Quality & Compliance", "Legal entity: Factorial ES"],
       appliesTo: "everyone",
@@ -1175,10 +1182,6 @@ export default function TrainingsEnrollments() {
         initialSection={initialSection}
         onSave={() => {
           setToast("settings")
-          setSearchParams({ view: "detail", course: selectedCourse.id })
-        }}
-        onCreateGroup={() => {
-          // Take the user to the course where training groups are managed.
           setSearchParams({ view: "detail", course: selectedCourse.id })
         }}
       />
@@ -1885,11 +1888,11 @@ const inscripcionCopy = {
     label: "Course type",
     noEditions: {
       title: "One-time",
-      description: "Runs once, on set dates or at each person's own pace.",
+      description: "Runs once. No separate groups to manage.",
     },
     withEditions: {
       title: "Recurring",
-      description: "Delivered in separate training groups over time, each with its own dates.",
+      description: "Runs in separate training groups over time. You create each group.",
     },
   },
   step: {
@@ -1916,7 +1919,9 @@ const inscripcionCopy = {
     addGroup: "And also must match",
     removeGroup: "Remove group",
     zeroMatch: "No one matches this combination. Check your criteria.",
-    pendingNote: "They'll stay in pending group assignment until this course has a group.",
+    // What happens to matching people, by course type (no "rule" wording at creation).
+    enrolledNote: "People who match are enrolled right away.",
+    waitlistNote: "People who match wait to be assigned to a training group.",
   },
   // "Who does this apply to?" — shown ONLY when a criterion change ADDS people who
   // already match. It names the concrete change rather than a generic warning, and
@@ -1927,24 +1932,6 @@ const inscripcionCopy = {
       `${count} ${count === 1 ? "person" : "people"} in ${added} ${count === 1 ? "matches" : "match"} but ${count === 1 ? "isn't" : "aren't"} enrolled yet.`,
     newOnly: "New people only",
     addExisting: (count: number) => `Add the ${count} too`,
-  },
-  // "How are people assigned?" — assignment follows whichever group is running at
-  // match time; no fixed group is pinned (a pinned group could later expire).
-  groupAssign: {
-    label: "How are people assigned?",
-    currentGroup: {
-      title: "Add to the current group",
-      subtitle:
-        "People are enrolled in whichever group is running when they match — no need to pick or update it.",
-      now: (group: string, dates: string) => `Now: ${group} · ${dates}`,
-      multiActive: (count: number) =>
-        `${count} groups are running now. When more than one is active, people stay pending so you can choose.`,
-      noneActive: "No group is running now — people stay pending until one starts.",
-    },
-    leavePending: {
-      title: "Leave as pending",
-      subtitle: "People wait in pending group assignment until you assign them manually.",
-    },
   },
   // PATTERN B — "people are removed": a criterion was removed/swapped, or automatic
   // enrollment was turned off. Informational note (nobody is unenrolled).
@@ -2029,15 +2016,14 @@ function WizardAudienceFilterPicker({
   value,
   onChange,
   error = false,
-  showPendingNote = true,
+  pendingNote,
 }: {
   value: AudienceFilterState
   onChange: (next: AudienceFilterState) => void
   error?: boolean
-  // The "they'll stay pending until this course has a group" note only applies
-  // at creation (no group exists yet). Settings handles assignment explicitly,
-  // so it hides this note.
-  showPendingNote?: boolean
+  // Discreet note shown under the people-match count explaining what happens to
+  // matching people. Differs by course type at creation; settings omits it.
+  pendingNote?: string
 }) {
   const facetKeys = Object.keys(enrollmentFilterDef)
 
@@ -2142,10 +2128,10 @@ function WizardAudienceFilterPicker({
               />
               <F0Text variant="body" content={peopleMatchPhrase(total)} />
             </div>
-            {showPendingNote && (
+            {pendingNote && (
               <>
                 <div className="h-px w-full bg-f1-border-secondary" />
-                <F0Text variant="description" content={inscripcionCopy.audience.pendingNote} />
+                <F0Text variant="description" content={pendingNote} />
               </>
             )}
           </F0Box>
@@ -2161,6 +2147,12 @@ function WizardAudienceFilterPicker({
 function InscripcionStep({ values, onUpdate, audienceError = false }: { values: Record<string, unknown>; onUpdate: (field: string, value: unknown) => void; audienceError?: boolean }) {
   // Toggle defaults ON.
   const autoEnroll = values.enableAutoEnrollment !== false
+  // One-time courses enroll matching people right away (always-active group);
+  // recurring courses send them to the waitlist until assigned to a group.
+  const isRecurring = ((values.courseType as string) ?? "no-editions") === "with-editions"
+  const pendingNote = isRecurring
+    ? inscripcionCopy.audience.waitlistNote
+    : inscripcionCopy.audience.enrolledNote
 
   return (
     <div className="flex flex-col gap-6">
@@ -2183,6 +2175,7 @@ function InscripcionStep({ values, onUpdate, audienceError = false }: { values: 
           value={readAudienceFilterState(values.audienceCriteria)}
           onChange={(next) => onUpdate("audienceCriteria", next)}
           error={audienceError}
+          pendingNote={pendingNote}
         />
       ) : (
         <F0Alert variant="info" title="" description={inscripcionCopy.manualCallout} />
@@ -2391,26 +2384,6 @@ function audienceStateFromCriteria(criteria: AudienceCriterion[]): AudienceFilte
 function peopleMatchPhrase(count: number): string {
   return count === 1 ? "1 person matches" : `${count} people match`
 }
-// Which of a course's training groups are running right now. The data model only
-// stores names, so for the prototype every existing group is treated as currently
-// running — this maps the course's group count onto the three assignment states:
-// none → pending, one → auto-enroll, several → pending so the TM picks.
-function runningTrainingGroups(groups: string[]): string[] {
-  return groups
-}
-
-// Deterministic, believable date range for a training group (the data model only
-// stores group names). Produces e.g. "26 Feb – 27 Feb".
-function trainingGroupDateLabel(name: string): string {
-  let hash = 0
-  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-  const month = months[hash % 12]
-  const startDay = 1 + (hash % 25)
-  const span = 1 + ((hash >> 4) % 3)
-  return `${startDay} ${month} – ${startDay + span} ${month}`
-}
-
 function CoursesList({
   courses,
   onOpenOne,
@@ -3951,37 +3924,27 @@ function InlineRadio({
 }
 
 function EditCourseEnrollmentSection({
-  course,
   values,
   onUpdate,
   audienceError,
   originalAudienceCriteria,
-  onCreateGroup,
 }: {
-  course: ExactCourse
   values: Record<string, unknown>
   onUpdate: (field: string, value: unknown) => void
   audienceError: boolean
   originalAudienceCriteria: AudienceFilterState
-  onCreateGroup: () => void
 }) {
   const autoEnroll = values.enableAutoEnrollment !== false
   const criteria = readAudienceFilterState(values.audienceCriteria)
-  const hasCriteria = filterStateSelectedCount(criteria) > 0
   const appliesTo = (values.enrollmentAppliesTo as string) ?? "new-only"
-  // New model: assignment follows the running group; "current" is the default,
-  // "waitlist" = leave as pending. Existing data uses "group"/"waitlist".
-  const leavePending = (values.enrollmentAssignment as string) === "waitlist"
 
   // Diff against the course's saved criteria to surface the consequence of an edit.
+  // (How people are assigned is determined by the course type, not chosen here.)
   const added = filterStateAdded(originalAudienceCriteria, criteria)
   const removed = filterStateRemoved(originalAudienceCriteria, criteria)
   const addedLabels = added.map((c) => c.label).join(", ")
   const removedLabels = removed.map((c) => c.label).join(", ")
   const addedCount = filterStatePeopleMatch(audienceStateFromCriteria(added))
-
-  // Groups running right now drive the assignment behaviour (no fixed group pinned).
-  const running = runningTrainingGroups(course.groups)
 
   return (
     <div className="flex flex-col gap-6">
@@ -4008,7 +3971,6 @@ function EditCourseEnrollmentSection({
             value={criteria}
             onChange={(next) => onUpdate("audienceCriteria", next)}
             error={audienceError}
-            showPendingNote={false}
           />
 
           {/* Consequence of a criterion change, attached right under the criterion.
@@ -4040,61 +4002,9 @@ function EditCourseEnrollmentSection({
             <F0Text variant="description" content={inscripcionCopy.ruleRemoval.note(removedLabels)} />
           )}
 
-          {/* SECONDARY — How are people assigned? Compact radios; the detail (and the
-              live group state) only shows under the selected option. */}
-          {hasCriteria && (
-            <div className="flex flex-col gap-3">
-              <F0Text variant="label" content={inscripcionCopy.groupAssign.label} />
-
-              <div className="flex flex-col gap-1.5">
-                <InlineRadio
-                  selected={!leavePending}
-                  label={inscripcionCopy.groupAssign.currentGroup.title}
-                  onSelect={() => onUpdate("enrollmentAssignment", "current")}
-                />
-                {!leavePending && (
-                  <div className="flex flex-col gap-2 pl-6">
-                    <F0Text variant="description" content={inscripcionCopy.groupAssign.currentGroup.subtitle} />
-                    {running.length === 1 ? (
-                      <F0Text
-                        variant="description"
-                        content={inscripcionCopy.groupAssign.currentGroup.now(
-                          running[0],
-                          trainingGroupDateLabel(running[0])
-                        )}
-                      />
-                    ) : running.length > 1 ? (
-                      <F0Alert
-                        variant="warning"
-                        title=""
-                        description={inscripcionCopy.groupAssign.currentGroup.multiActive(running.length)}
-                      />
-                    ) : (
-                      <F0Alert
-                        variant="warning"
-                        title=""
-                        description={inscripcionCopy.groupAssign.currentGroup.noneActive}
-                        action={{ label: "Create group", onClick: onCreateGroup }}
-                      />
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <InlineRadio
-                  selected={leavePending}
-                  label={inscripcionCopy.groupAssign.leavePending.title}
-                  onSelect={() => onUpdate("enrollmentAssignment", "waitlist")}
-                />
-                {leavePending && (
-                  <div className="pl-6">
-                    <F0Text variant="description" content={inscripcionCopy.groupAssign.leavePending.subtitle} />
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+          {/* How people are assigned is determined by the course type (one-time =
+              enrolled right away, recurring = waitlist), not chosen here — so there
+              is no "How are people assigned?" section in settings. */}
         </>
       ) : (
         <F0Alert variant="info" title="" description={inscripcionCopy.manualCallout} />
@@ -4112,12 +4022,10 @@ type EditCourseSection = "basic" | "admin" | "completion" | "enrollment"
 function EditCourseSettings({
   course,
   onSave,
-  onCreateGroup,
   initialSection = "basic",
 }: {
   course: ExactCourse
   onSave: () => void
-  onCreateGroup: () => void
   initialSection?: EditCourseSection
 }) {
   const [activeSection, setActiveSection] = useState<EditCourseSection>(initialSection)
@@ -4219,12 +4127,10 @@ function EditCourseSettings({
                   <F0Text content={inscripcionCopy.step.subtitle} variant="body" />
                 </div>
                 <EditCourseEnrollmentSection
-                  course={course}
                   values={values}
                   onUpdate={updateValue}
                   audienceError={audienceError}
                   originalAudienceCriteria={originalAudienceCriteria}
-                  onCreateGroup={onCreateGroup}
                 />
               </div>
             )}
@@ -6286,10 +6192,24 @@ function getGroupActionDetail(dialog: GroupActionDialogId, groupName: string): T
   }
 }
 
+// "[mode] · [N] pending" line — amber on the pending count, the rest grey.
+function EnrollmentModeLine({ mode, count }: { mode: string; count: number }) {
+  return (
+    <div className="flex flex-wrap items-baseline gap-x-1">
+      <F0Text content={mode} variant="body" as="span" />
+      <F0Text content="·" variant="body" as="span" />
+      <span className="text-base font-normal leading-normal text-f1-foreground-warning">
+        {`${count} pending`}
+      </span>
+    </div>
+  )
+}
+
 // Enrollment status in the course overview sidebar. Read-only and styled exactly
 // like the other sidebar fields (bold label + value, no box / dot / edit link).
-// The only colour licence is the amber "[N] pending a group" in the incidence
-// state; action links appear only when there's an operational step to take.
+// The only colour licence is the amber "[N] pending"; action links appear only
+// when there's an operational step to take. The overview just COUNTS pending —
+// it doesn't compute its cause (that lives in the Participants list).
 function EnrollmentSidebarBlock({
   course,
   onViewPending,
@@ -6300,51 +6220,44 @@ function EnrollmentSidebarBlock({
   onSetUp?: () => void
 }) {
   const rule = course.enrollmentRule
+  const pending = course.pendingCount ?? 0
 
-  // State 3 — Manual: no automatic rule. Also covers "just created, not configured"
-  // (same state, not a separate "Not set up"). A legitimate mode, not an error.
+  // Manual: no automatic rule (also covers "just created, not configured"). Pending
+  // can still happen here (requests, manual assignment without a group, etc.).
   if (!rule) {
     return (
       <F0Box display="flex" flexDirection="column" gap="xs">
         <F0Text content="Enrollment" variant="label" />
-        <F0Text content="Manual · added by hand from Participants" variant="body" />
-        <EnrollmentActionLink label="Set up automatic enrollment" onClick={onSetUp} />
+        {pending > 0 ? (
+          <>
+            <EnrollmentModeLine mode="Manual" count={pending} />
+            <EnrollmentActionLink label="View pending" onClick={onViewPending} />
+          </>
+        ) : (
+          <>
+            <F0Text content="Manual · added by hand from Participants" variant="body" />
+            <EnrollmentActionLink label="Set up automatic enrollment" onClick={onSetUp} />
+          </>
+        )}
       </F0Box>
     )
   }
 
-  // "Who" summary, truncated by criteria count so a long rule never breaks layout.
+  // Automatic. "Who" summary, truncated by criteria count so it never breaks layout.
   const criteria = rule.criteria
   const audience =
     criteria.length > 2 ? `${criteria[0]} · +${criteria.length - 1} more` : criteria.join(" · ")
-  const pending = rule.waitlisted ?? 0
 
-  // State 2 — Automatic with people pending. The overview does NOT work out the
-  // cause (no groups / TM chose pending / several groups running) — that lives in
-  // the Participants list. It only surfaces the count and a generic "View" link.
-  if (pending > 0) {
-    return (
-      <F0Box display="flex" flexDirection="column" gap="xs">
-        <F0Text content="Enrollment" variant="label" />
-        <div className="flex flex-wrap items-baseline gap-x-1">
-          <F0Text content="Automatic" variant="body" as="span" />
-          <F0Text content="·" variant="body" as="span" />
-          <span className="text-base font-normal leading-normal text-f1-foreground-warning">
-            {`${pending} pending`}
-          </span>
-        </div>
-        <F0Text content={audience} variant="body" />
-        <EnrollmentActionLink label="View pending" onClick={onViewPending} />
-      </F0Box>
-    )
-  }
-
-  // State 1 — Automatic, active and healthy: nothing to act on, so no link.
   return (
     <F0Box display="flex" flexDirection="column" gap="xs">
       <F0Text content="Enrollment" variant="label" />
-      <F0Text content="Automatic · active" variant="body" />
+      {pending > 0 ? (
+        <EnrollmentModeLine mode="Automatic" count={pending} />
+      ) : (
+        <F0Text content="Automatic · active" variant="body" />
+      )}
       <F0Text content={audience} variant="body" />
+      {pending > 0 && <EnrollmentActionLink label="View pending" onClick={onViewPending} />}
     </F0Box>
   )
 }
