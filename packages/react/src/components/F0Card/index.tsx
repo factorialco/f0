@@ -1,2 +1,2 @@
 export * from "./F0Card"
-export * from "./F0CardOneLiner"
+export * from "./F0CardRow"

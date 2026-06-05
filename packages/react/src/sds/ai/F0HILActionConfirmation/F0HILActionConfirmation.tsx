@@ -1,4 +1,4 @@
-import { F0CardOneLiner } from "@/components/F0Card"
+import { F0CardRow } from "@/components/F0Card"
 import Check from "@/icons/app/Check"
 
 import { F0HILActionConfirmationProps } from "./types"
@@ -11,7 +11,7 @@ export const F0HILActionConfirmation = ({
   onCancel,
 }: F0HILActionConfirmationProps) => {
   return (
-    <F0CardOneLiner
+    <F0CardRow
       title={text}
       primaryAction={{
         label: confirmationText,

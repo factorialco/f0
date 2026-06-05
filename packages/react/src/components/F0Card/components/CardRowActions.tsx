@@ -17,14 +17,14 @@ import {
 const GAP = 8
 
 /**
- * Container breakpoint at which the one-liner switches between its inline row
- * and its stacked (actions-on-their-own-line) layout. `never` keeps it inline
- * at every width.
+ * Container breakpoint at which the card row switches between its inline and its
+ * stacked (actions-on-their-own-line) layout. `never` keeps it inline at every
+ * width.
  */
-export type OneLinerStackAt = "sm" | "md" | "lg" | "never"
+export type CardRowStackAt = "sm" | "md" | "lg" | "never"
 
 /**
- * Outer one-liner row: a stacked column that becomes an inline row at the chosen
+ * Outer row layout: a stacked column that becomes an inline row at the chosen
  * container breakpoint. Exported so the card root and the actions share one source
  * of truth (the breakpoint must match for the layout to stay coherent).
  * Each value is a full static string so Tailwind's JIT can see the classes.
@@ -34,7 +34,7 @@ export type OneLinerStackAt = "sm" | "md" | "lg" | "never"
  * `@md` (28rem / 448px) — so using `@sm` here would (wrongly) stack *before*
  * `md`. `@xs < @md < @lg` keeps sm < md < lg as expected.
  */
-export const oneLinerRowClassName: Record<OneLinerStackAt, string> = {
+export const cardRowClassName: Record<CardRowStackAt, string> = {
   sm: "flex flex-col @xs:flex-row @xs:items-center @xs:justify-between @xs:gap-4",
   md: "flex flex-col @md:flex-row @md:items-center @md:justify-between @md:gap-4",
   lg: "flex flex-col @lg:flex-row @lg:items-center @lg:justify-between @lg:gap-4",
@@ -42,7 +42,7 @@ export const oneLinerRowClassName: Record<OneLinerStackAt, string> = {
 }
 
 // Inline ("wide") cluster — shown only at/above the breakpoint.
-const wideClusterVisibility: Record<OneLinerStackAt, string> = {
+const wideClusterVisibility: Record<CardRowStackAt, string> = {
   sm: "hidden @xs:flex",
   md: "hidden @md:flex",
   lg: "hidden @lg:flex",
@@ -50,7 +50,7 @@ const wideClusterVisibility: Record<OneLinerStackAt, string> = {
 }
 
 // Stacked ("narrow") cluster — shown only below the breakpoint.
-const narrowClusterVisibility: Record<OneLinerStackAt, string> = {
+const narrowClusterVisibility: Record<CardRowStackAt, string> = {
   sm: "flex @xs:hidden",
   md: "flex @md:hidden",
   lg: "flex @lg:hidden",
@@ -59,37 +59,37 @@ const narrowClusterVisibility: Record<OneLinerStackAt, string> = {
 
 // Footer-style separator shown while the actions sit on their own stacked line;
 // removed once they go inline at the breakpoint.
-const stackedChrome: Record<OneLinerStackAt, string> = {
+const stackedChrome: Record<CardRowStackAt, string> = {
   sm: "-mx-4 mt-4 border-0 border-t border-solid border-t-f1-border-secondary px-4 pt-4 @xs:mx-0 @xs:mt-0 @xs:border-t-0 @xs:px-0 @xs:pt-0",
   md: "-mx-4 mt-4 border-0 border-t border-solid border-t-f1-border-secondary px-4 pt-4 @md:mx-0 @md:mt-0 @md:border-t-0 @md:px-0 @md:pt-0",
   lg: "-mx-4 mt-4 border-0 border-t border-solid border-t-f1-border-secondary px-4 pt-4 @lg:mx-0 @lg:mt-0 @lg:border-t-0 @lg:px-0 @lg:pt-0",
   never: "",
 }
 
-export interface OneLinerConfirmAction {
+export interface CardRowConfirmAction {
   onClick: () => void
   /** Accessible label and tooltip. Defaults to "Confirm" / "Reject". */
   label?: string
   disabled?: boolean
 }
 
-interface OneLinerActionsProps {
+interface CardRowActionsProps {
   primaryAction?: CardPrimaryAction
   secondaryActions?: CardSecondaryAction[] | CardSecondaryLink
   /** Overflow (⋯) menu actions — always live in the left "more" menu. */
   otherActions?: DropdownItem[]
   /** Confirm (✓) icon-only action — enables the confirm/reject variant. */
-  confirmAction?: OneLinerConfirmAction
+  confirmAction?: CardRowConfirmAction
   /** Reject (✗) icon-only action — enables the confirm/reject variant. */
-  rejectAction?: OneLinerConfirmAction
+  rejectAction?: CardRowConfirmAction
   compact?: boolean
   /** Container breakpoint at which the actions drop to their own line. */
-  stackAt?: OneLinerStackAt
+  stackAt?: CardRowStackAt
 }
 
 /**
- * Trailing action row for the one-liner card. The "more" (⋯) menu sits on the
- * LEFT and the primary stays pinned at the trailing edge.
+ * Trailing actions for the card row. The "more" (⋯) menu sits on the LEFT and
+ * the primary stays pinned at the trailing edge.
  *
  * Two layouts, toggled by the card's container width at `stackAt`:
  * - Wide (inline): all secondary buttons shown; the ⋯ holds only `otherActions`.
@@ -100,7 +100,7 @@ interface OneLinerActionsProps {
  * Pass `confirmAction` / `rejectAction` for the icon-only confirm/reject variant
  * (✗ then ✓), which replaces the standard actions.
  */
-export function OneLinerActions({
+export function CardRowActions({
   primaryAction,
   secondaryActions,
   otherActions,
@@ -108,7 +108,7 @@ export function OneLinerActions({
   rejectAction,
   compact = false,
   stackAt = "never",
-}: OneLinerActionsProps) {
+}: CardRowActionsProps) {
   const size = compact ? "sm" : "md"
 
   // Hook must run unconditionally, before any early return.

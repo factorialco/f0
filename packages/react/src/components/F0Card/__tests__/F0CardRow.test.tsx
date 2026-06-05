@@ -11,13 +11,11 @@ import {
 import type { CardSecondaryLink } from "../components/CardActions"
 import type { CardAvatarVariant } from "../components/CardAvatar"
 
-import { F0CardOneLiner } from "../F0CardOneLiner"
+import { F0CardRow } from "../F0CardRow"
 
-describe("F0CardOneLiner", () => {
+describe("F0CardRow", () => {
   it("renders title and description", () => {
-    render(
-      <F0CardOneLiner title="Jane Cooper" description="Product designer" />
-    )
+    render(<F0CardRow title="Jane Cooper" description="Product designer" />)
 
     expect(screen.getByText("Jane Cooper")).toBeInTheDocument()
     expect(screen.getByText("Product designer")).toBeInTheDocument()
@@ -25,7 +23,7 @@ describe("F0CardOneLiner", () => {
 
   it("renders an avatar when provided", () => {
     render(
-      <F0CardOneLiner
+      <F0CardRow
         title="Jane Cooper"
         avatar={{ type: "person", firstName: "Jane", lastName: "Cooper" }}
       />
@@ -55,16 +53,14 @@ describe("F0CardOneLiner", () => {
     ]
 
     avatars.forEach((avatar) => {
-      const { unmount } = render(
-        <F0CardOneLiner title="Title" avatar={avatar} />
-      )
+      const { unmount } = render(<F0CardRow title="Title" avatar={avatar} />)
       expect(screen.getByTestId("card-avatar")).toBeInTheDocument()
       unmount()
     })
   })
 
   it("renders as a clickable link when link is provided", () => {
-    render(<F0CardOneLiner title="Linked row" link="/test-link" />)
+    render(<F0CardRow title="Linked row" link="/test-link" />)
 
     const link = screen.getByRole("link", { name: "Linked row" })
     expect(link).toHaveAttribute("href", "/test-link")
@@ -74,7 +70,7 @@ describe("F0CardOneLiner", () => {
     const user = userEvent.setup()
     const handleClick = vi.fn()
 
-    render(<F0CardOneLiner title="Clickable" onClick={handleClick} />)
+    render(<F0CardRow title="Clickable" onClick={handleClick} />)
 
     await user.click(screen.getByText("Clickable"))
     expect(handleClick).toHaveBeenCalledTimes(1)
@@ -84,9 +80,7 @@ describe("F0CardOneLiner", () => {
     const user = userEvent.setup()
     const onClick = vi.fn()
 
-    render(
-      <F0CardOneLiner title="Row" primaryAction={{ label: "Open", onClick }} />
-    )
+    render(<F0CardRow title="Row" primaryAction={{ label: "Open", onClick }} />)
 
     await user.click(screen.getByTestId("primary-button"))
     expect(onClick).toHaveBeenCalledTimes(1)
@@ -97,7 +91,7 @@ describe("F0CardOneLiner", () => {
     const onEdit = vi.fn()
 
     render(
-      <F0CardOneLiner
+      <F0CardRow
         title="Row"
         secondaryActions={[{ label: "Edit", onClick: onEdit }]}
         primaryAction={{ label: "Open", onClick: vi.fn() }}
@@ -115,7 +109,7 @@ describe("F0CardOneLiner", () => {
       target: "_blank",
     }
 
-    render(<F0CardOneLiner title="Row" secondaryActions={secondaryLink} />)
+    render(<F0CardRow title="Row" secondaryActions={secondaryLink} />)
 
     const link = screen.getByTestId("secondary-link")
     expect(link).toHaveAttribute("href", "/test-page")
@@ -127,7 +121,7 @@ describe("F0CardOneLiner", () => {
     const onArchive = vi.fn()
 
     render(
-      <F0CardOneLiner
+      <F0CardRow
         title="Row"
         otherActions={[{ label: "Archive", onClick: onArchive }]}
       />
@@ -145,9 +139,7 @@ describe("F0CardOneLiner", () => {
       const user = userEvent.setup()
       const onConfirm = vi.fn()
 
-      render(
-        <F0CardOneLiner title="Row" confirmAction={{ onClick: onConfirm }} />
-      )
+      render(<F0CardRow title="Row" confirmAction={{ onClick: onConfirm }} />)
 
       await user.click(screen.getByTestId("confirm-button"))
       expect(onConfirm).toHaveBeenCalledTimes(1)
@@ -157,9 +149,7 @@ describe("F0CardOneLiner", () => {
       const user = userEvent.setup()
       const onReject = vi.fn()
 
-      render(
-        <F0CardOneLiner title="Row" rejectAction={{ onClick: onReject }} />
-      )
+      render(<F0CardRow title="Row" rejectAction={{ onClick: onReject }} />)
 
       await user.click(screen.getByTestId("reject-button"))
       expect(onReject).toHaveBeenCalledTimes(1)
@@ -167,7 +157,7 @@ describe("F0CardOneLiner", () => {
 
     it("replaces the standard actions", () => {
       render(
-        <F0CardOneLiner
+        <F0CardRow
           title="Row"
           confirmAction={{ onClick: vi.fn() }}
           rejectAction={{ onClick: vi.fn() }}
@@ -183,7 +173,7 @@ describe("F0CardOneLiner", () => {
 
   it("renders the alert banner when alert is provided", () => {
     render(
-      <F0CardOneLiner
+      <F0CardRow
         title="Row"
         alert={{ variant: "warning", title: "Action required" }}
       />
@@ -197,7 +187,7 @@ describe("F0CardOneLiner", () => {
 
     values.forEach((stackAt) => {
       const { unmount } = render(
-        <F0CardOneLiner
+        <F0CardRow
           title="Row"
           stackAt={stackAt}
           primaryAction={{ label: "Open", onClick: vi.fn() }}

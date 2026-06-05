@@ -5,16 +5,16 @@ import { fn } from "storybook/test"
 
 import { Briefcase, Delete, Envelope } from "@/icons/app"
 
-import { F0CardOneLiner } from "../F0CardOneLiner"
+import { F0CardRow } from "../F0CardRow"
 
-const meta: Meta<typeof F0CardOneLiner> = {
-  component: F0CardOneLiner,
-  title: "Card/OneLiner",
+const meta: Meta<typeof F0CardRow> = {
+  component: F0CardRow,
+  title: "Card/Row",
   parameters: {
     docs: {
       description: {
         component: [
-          "`F0CardOneLiner` is a compact, single-row card: an optional avatar on the left, a title with an optional description, and trailing actions on the right.",
+          "`F0CardRow` is a compact, single-row card: an optional avatar on the left, a title with an optional description, and trailing actions on the right.",
           "Use it for list rows, inline confirmations and dense layouts where a full `F0Card` is too heavy — e.g. a settings toggle row, a pending-approval item, or a selectable entity.",
           "Actions stay inline at every width by default. Set <code>stackAt</code> to collapse them onto their own line below a container breakpoint — secondary buttons fold into a left ⋯ menu while the primary stays pinned. For an approve/reject row, use the icon-only <code>confirmAction</code> / <code>rejectAction</code> variant. The avatar renders at a fixed size and accepts any avatar type in the system.",
         ]
@@ -249,7 +249,7 @@ export const AvatarTypes: Story = {
   },
   render: () => (
     <div className="flex w-[640px] flex-col gap-3">
-      <F0CardOneLiner
+      <F0CardRow
         avatar={{
           type: "person",
           firstName: "Jane",
@@ -260,19 +260,19 @@ export const AvatarTypes: Story = {
         description="Person avatar"
         primaryAction={{ label: "Open", onClick: fn() }}
       />
-      <F0CardOneLiner
+      <F0CardRow
         avatar={{ type: "company", name: "Acme Inc" }}
         title="Acme Inc"
         description="Company avatar"
         primaryAction={{ label: "Open", onClick: fn() }}
       />
-      <F0CardOneLiner
+      <F0CardRow
         avatar={{ type: "team", name: "Design" }}
         title="Design Team"
         description="Team avatar"
         primaryAction={{ label: "Open", onClick: fn() }}
       />
-      <F0CardOneLiner
+      <F0CardRow
         avatar={{
           type: "file",
           file: { name: "contract.pdf", type: "application/pdf" },
@@ -281,43 +281,43 @@ export const AvatarTypes: Story = {
         description="File avatar"
         primaryAction={{ label: "Open", onClick: fn() }}
       />
-      <F0CardOneLiner
+      <F0CardRow
         avatar={{ type: "flag", flag: "es" }}
         title="Spain"
         description="Flag avatar"
         primaryAction={{ label: "Open", onClick: fn() }}
       />
-      <F0CardOneLiner
+      <F0CardRow
         avatar={{ type: "icon", icon: Briefcase }}
         title="Engineering"
         description="Icon avatar"
         primaryAction={{ label: "Open", onClick: fn() }}
       />
-      <F0CardOneLiner
+      <F0CardRow
         avatar={{ type: "emoji", emoji: "🚀" }}
         title="Launch"
         description="Emoji avatar"
         primaryAction={{ label: "Open", onClick: fn() }}
       />
-      <F0CardOneLiner
+      <F0CardRow
         avatar={{ type: "module", module: "goals" }}
         title="Goals"
         description="Module avatar"
         primaryAction={{ label: "Open", onClick: fn() }}
       />
-      <F0CardOneLiner
+      <F0CardRow
         avatar={{ type: "alert", variant: "warning" }}
         title="Action required"
         description="Alert avatar"
         primaryAction={{ label: "Open", onClick: fn() }}
       />
-      <F0CardOneLiner
+      <F0CardRow
         avatar={{ type: "date", date: new Date(2026, 5, 5) }}
         title="Team offsite"
         description="Date avatar"
         primaryAction={{ label: "Open", onClick: fn() }}
       />
-      <F0CardOneLiner
+      <F0CardRow
         avatar={{
           type: "pulse",
           firstName: "Jane",
