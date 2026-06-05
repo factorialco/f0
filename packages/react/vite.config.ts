@@ -166,6 +166,8 @@ export default defineConfig({
         globals: {
           react: "React",
         },
+        preserveModules: true,
+        preserveModulesRoot: "src",
       },
     },
   },
