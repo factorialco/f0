@@ -171,7 +171,11 @@ function CrudByViewScenario({
             ...editableTableVisualization,
             options: {
               ...editableTableVisualization.options,
-              onCellChange: async (updatedResource: Resource) => {
+              onCellChange: async ({
+                updatedItem: updatedResource,
+              }: {
+                updatedItem: Resource
+              }) => {
                 setResources((currentResources) =>
                   currentResources.map((resource) =>
                     resource.id === updatedResource.id

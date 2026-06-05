@@ -3,10 +3,11 @@ import { format } from "date-fns"
 import { useMemo, useRef, useState } from "react"
 import { action } from "storybook/actions"
 
+import type { StatusVariant } from "@/components/tags/F0TagStatus/types"
+
 import { createDataSourceDefinition, RecordType } from "@/hooks/datasource"
 import { Delete, Pencil } from "@/icons/app"
 import { ROLES_MOCK } from "@/mocks"
-import type { StatusVariant } from "@/components/tags/F0TagStatus/types"
 
 import { OneDataCollection } from "../../.."
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
@@ -43,7 +44,7 @@ function useEditableTableData(
   const itemsRef = useRef(items)
   itemsRef.current = items
 
-  const onCellChange = async (updatedItem: MockUser) => {
+  const onCellChange = async ({ updatedItem }: { updatedItem: MockUser }) => {
     action("onCellChange")(updatedItem)
     setItems((prev) =>
       prev.map((i) => (i.id === updatedItem.id ? updatedItem : i))
@@ -180,7 +181,7 @@ export const EditableTableWithErrors: Story = {
     const mockVisualizations = getMockVisualizations()
     const { dataAdapter } = useEditableTableData()
 
-    const onCellChange = async (updatedItem: MockUser) => {
+    const onCellChange = async ({ updatedItem }: { updatedItem: MockUser }) => {
       action("onCellChange")(updatedItem)
       // Simulate an API call that always fails
       await new Promise((resolve) => setTimeout(resolve, 300))
@@ -398,7 +399,7 @@ export const EditableTableWithNestedRecords: Story = {
       },
     })
 
-    const onCellChange = async (updatedItem: MockUser) => {
+    const onCellChange = async ({ updatedItem }: { updatedItem: MockUser }) => {
       action("onCellChange")(updatedItem)
     }
 
@@ -452,7 +453,7 @@ export const EditableTableWithStickyNestedRecords: Story = {
       },
     })
 
-    const onCellChange = async (updatedItem: MockUser) => {
+    const onCellChange = async ({ updatedItem }: { updatedItem: MockUser }) => {
       action("onCellChange")(updatedItem)
     }
 
@@ -500,7 +501,7 @@ export const EditableTableWithNestedRecordsDetailed: Story = {
       },
     })
 
-    const onCellChange = async (updatedItem: MockUser) => {
+    const onCellChange = async ({ updatedItem }: { updatedItem: MockUser }) => {
       action("onCellChange")(updatedItem)
     }
 
@@ -548,7 +549,7 @@ export const EditableTableWithSelectableNestedRecordsDetailed: Story = {
       },
     })
 
-    const onCellChange = async (updatedItem: MockUser) => {
+    const onCellChange = async ({ updatedItem }: { updatedItem: MockUser }) => {
       action("onCellChange")(updatedItem)
     }
 
@@ -599,7 +600,7 @@ export const EditableTableWithNestedRecordsAndAddRow: Story = {
       },
     })
 
-    const onCellChange = async (updatedItem: MockUser) => {
+    const onCellChange = async ({ updatedItem }: { updatedItem: MockUser }) => {
       action("onCellChange")(updatedItem)
     }
 
@@ -652,7 +653,7 @@ export const EditableTableWithMultipleAddRowActions: Story = {
       table: { noSorting: true, nestedRecords: true, applyLongText: false },
     })
 
-    const onCellChange = async (updatedItem: MockUser) => {
+    const onCellChange = async ({ updatedItem }: { updatedItem: MockUser }) => {
       action("onCellChange")(updatedItem)
     }
 
@@ -793,7 +794,7 @@ export const EditableTableWithSummaryRowAndAddRow: Story = {
     itemsRef.current = items
     const counter = useRef(0)
 
-    const onCellChange = async (updatedItem: MockUser) => {
+    const onCellChange = async ({ updatedItem }: { updatedItem: MockUser }) => {
       const normalized: MockUser = {
         ...updatedItem,
         salary:
@@ -1390,7 +1391,7 @@ export const DynamicUnitsPerRow: Story = {
     const itemsRef = useRef(items)
     itemsRef.current = items
 
-    const onCellChange = async (updatedItem: LineItem) => {
+    const onCellChange = async ({ updatedItem }: { updatedItem: LineItem }) => {
       action("onCellChange")(updatedItem)
       setItems((prev) =>
         prev.map((i) => (i.id === updatedItem.id ? updatedItem : i))

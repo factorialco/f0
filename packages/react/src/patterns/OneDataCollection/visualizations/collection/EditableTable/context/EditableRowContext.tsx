@@ -13,7 +13,10 @@ import type { RecordType } from "@/hooks/datasource"
 
 import { useI18n } from "@/lib/providers/i18n"
 
-import type { EditableTableCellChanges } from "../types"
+import type {
+  EditableTableCellChanges,
+  EditableTableOnCellChangeParams,
+} from "../types"
 
 type EditableRowContextValue<R extends RecordType> = {
   /** The optimistic local copy of the item, updated immediately on change */
@@ -36,8 +39,7 @@ const EditableRowContext =
 export type EditableRowProviderProps<R extends RecordType> = {
   item: R
   onCellChange: (
-    updatedItem: R,
-    changes: EditableTableCellChanges<R>
+    params: EditableTableOnCellChangeParams<R>
   ) => Promise<void | Record<string, string>>
   children: React.ReactNode
 }
@@ -87,7 +89,7 @@ export function EditableRowProvider<R extends RecordType>({
 
       setCellLoading((prev) => ({ ...prev, [columnId]: true }))
 
-      onCellChange(updatedItem, changes)
+      onCellChange({ updatedItem, changes })
         .then((errors) => {
           if (errors && Object.keys(errors).length > 0) {
             setCellErrors((prev) => ({ ...prev, ...errors }))
@@ -146,7 +148,7 @@ export function EditableRowProvider<R extends RecordType>({
       }
       setCellLoading((prev) => ({ ...prev, ...loadingOn }))
 
-      onCellChange(updatedItem, changes)
+      onCellChange({ updatedItem, changes })
         .then((errors) => {
           if (errors && Object.keys(errors).length > 0) {
             setCellErrors((prev) => ({ ...prev, ...errors }))
