@@ -237,6 +237,8 @@ describe("OneDataCollection - presets", () => {
       )
       expect(call).toBeTruthy()
       expect(call![1].customPresets![0].label).toBe("My view")
+      // The id is derived from the title (doubles as the readable dc_preset).
+      expect(call![1].customPresets![0].id).toBe("My view")
     })
   })
 
@@ -625,6 +627,33 @@ describe("OneDataCollection - presets", () => {
       expect(new URLSearchParams(window.location.search).has("dc_preset")).toBe(
         false
       )
+    )
+  })
+
+  it("writes a custom preset's title-derived id to the URL, with spaces as '+'", async () => {
+    const user = userEvent.setup()
+    renderHarness({ urlSync: true })
+
+    await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument())
+
+    // Create a custom preset with a multi-word title.
+    await sortByName(user)
+    await user.click(
+      await screen.findByRole("button", { name: "Save as preset" })
+    )
+    await user.type(
+      await screen.findByLabelText("Preset title"),
+      "My cool view"
+    )
+    await user.click(screen.getByRole("button", { name: "Save" }))
+
+    // Spaces in the title render as '+' in the URL (standard query encoding)...
+    await waitFor(() =>
+      expect(window.location.search).toContain("dc_preset=My+cool+view")
+    )
+    // ...and decode back to the stored, space-separated id.
+    expect(new URLSearchParams(window.location.search).get("dc_preset")).toBe(
+      "My cool view"
     )
   })
 

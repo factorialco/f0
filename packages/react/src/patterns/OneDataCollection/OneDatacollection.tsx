@@ -71,6 +71,7 @@ import { useExportAction } from "./hooks/useExportAction"
 import { useDataCollectionUrlSync } from "./hooks/useDataCollectionUrlSync"
 import { usePerVisualizationFilters } from "./hooks/usePerVisualizationFilters"
 import { getDefaultDataCollectionSettings } from "./internal/isSettingsDefault"
+import { derivePresetId } from "./internal/presetId"
 import { ItemActionsDefinition } from "./item-actions"
 import { NavigationFiltersDefinition } from "./navigationFilters/types"
 import { Settings } from "./Settings"
@@ -1047,7 +1048,11 @@ const OneDataCollectionComp = <
   const handleSavePreset = useCallback(
     (values: PresetFormValues) => {
       const newPreset = {
-        id: `custom-${Date.now()}`,
+        // Title-derived id (doubles as the readable `dc_preset` URL value).
+        id: derivePresetId(
+          values.title,
+          mergedPresets.map((preset) => preset.id ?? preset.label)
+        ),
         label: values.title,
         description: values.description,
         emoji: values.emoji,
@@ -1067,6 +1072,7 @@ const OneDataCollectionComp = <
       currentGrouping,
       currentVisualization,
       settings,
+      mergedPresets,
     ]
   )
 
