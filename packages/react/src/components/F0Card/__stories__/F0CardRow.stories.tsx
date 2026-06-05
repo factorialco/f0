@@ -9,7 +9,7 @@ import { F0CardRow } from "../F0CardRow"
 
 const meta: Meta<typeof F0CardRow> = {
   component: F0CardRow,
-  title: "Card/Row",
+  title: "Card Row",
   parameters: {
     docs: {
       description: {
