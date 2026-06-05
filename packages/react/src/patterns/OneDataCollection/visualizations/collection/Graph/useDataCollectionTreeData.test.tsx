@@ -110,7 +110,7 @@ const countParentFetches = (
     .length
 
 describe("useDataCollectionTreeData", () => {
-  it("loads roots collapsed but pre-loads their children so they can expand", async () => {
+  it("loads only the roots at depth 0; children stay unloaded", async () => {
     const fetchData = vi.fn(fetchByParent)
     const source = buildSource(fetchData)
     const cbs = callbacks()
@@ -125,17 +125,16 @@ describe("useDataCollectionTreeData", () => {
 
     await waitFor(() => expect(result.current.isInitialLoading).toBe(false))
 
-    // Root is collapsed, but its children are already loaded so the CEO shows
-    // an expander (F0Graph only draws it for parents with loaded children).
+    // Root is collapsed and its children are NOT pre-loaded: the CEO shows an
+    // expander purely from `childrenCount`. A single fetch (the roots), no fan-out.
     expect(result.current.expandedNodes.size).toBe(0)
-    const ids = result.current.nodes.map((node) => node.id)
-    expect(ids).toContain("ceo")
-    expect(ids).toContain("vp1")
-    expect(ids).toContain("vp2")
+    expect(result.current.nodes.map((node) => node.id)).toEqual(["ceo"])
+    expect(fetchData).toHaveBeenCalledTimes(1)
+    expect(countParentFetches(fetchData, "ceo")).toBe(0)
     expect(cbs.onLoadData).toHaveBeenCalled()
   })
 
-  it("expands the configured depth and keeps one level ahead loaded", async () => {
+  it("expands the configured depth and loads only that level", async () => {
     const fetchData = vi.fn(fetchByParent)
     const source = buildSource(fetchData)
 
@@ -149,13 +148,17 @@ describe("useDataCollectionTreeData", () => {
 
     await waitFor(() => expect(result.current.isInitialLoading).toBe(false))
 
-    // CEO expanded, its reports visible, and the reports' children pre-loaded
-    // (so vp1 — which has a report — shows an expander).
+    // CEO expanded and its reports visible — but their children are NOT
+    // pre-loaded (no "one level ahead"); vp1 still shows an expander via count.
     expect(result.current.expandedNodes.has("ceo")).toBe(true)
-    expect(result.current.nodes.map((node) => node.id)).toContain("mgr1")
+    const ids = result.current.nodes.map((node) => node.id)
+    expect(ids).toContain("vp1")
+    expect(ids).toContain("vp2")
+    expect(ids).not.toContain("mgr1")
+    expect(countParentFetches(fetchData, "vp1")).toBe(0)
   })
 
-  it("loads the next level when a node is expanded, only once", async () => {
+  it("loads only the expanded node's children, once (no fan-out)", async () => {
     const fetchData = vi.fn(fetchByParent)
     const source = buildSource(fetchData)
 
@@ -168,13 +171,23 @@ describe("useDataCollectionTreeData", () => {
     )
 
     await waitFor(() => expect(result.current.isInitialLoading).toBe(false))
-    expect(countParentFetches(fetchData, "vp1")).toBe(0)
 
-    // Expand the CEO: vp1 becomes visible, so its children are pre-loaded.
+    // Expand the CEO: only the CEO's direct children are fetched (one call),
+    // never their children — so vp1's child is not loaded yet.
     await act(async () => {
       result.current.setExpandedNodes(new Set(["ceo"]))
     })
+    await waitFor(() =>
+      expect(result.current.nodes.map((node) => node.id)).toContain("vp1")
+    )
+    expect(countParentFetches(fetchData, "ceo")).toBe(1)
+    expect(countParentFetches(fetchData, "vp1")).toBe(0)
+    expect(result.current.nodes.map((node) => node.id)).not.toContain("mgr1")
 
+    // Expanding vp1 then loads its child — incrementally, a single fetch.
+    await act(async () => {
+      result.current.setExpandedNodes(new Set(["ceo", "vp1"]))
+    })
     await waitFor(() =>
       expect(result.current.nodes.map((node) => node.id)).toContain("mgr1")
     )
@@ -182,7 +195,7 @@ describe("useDataCollectionTreeData", () => {
 
     // Re-applying the same expansion does not refetch.
     await act(async () => {
-      result.current.setExpandedNodes(new Set(["ceo"]))
+      result.current.setExpandedNodes(new Set(["ceo", "vp1"]))
     })
     expect(countParentFetches(fetchData, "vp1")).toBe(1)
   })

@@ -273,35 +273,43 @@ export function useDataCollectionTreeData<
   )
 
   /**
-   * Walks the tree from the roots and ensures the children of every *visible*
-   * node are loaded — i.e. roots plus the descendants of expanded nodes. This
-   * keeps the "one level ahead" invariant so collapsed-but-visible nodes render
-   * an expander (F0Graph only draws it for parents that have loaded children).
+   * Ensures the direct children of every *expanded* node are loaded, so their
+   * children render. Collapsed nodes need no loading: F0Graph draws their
+   * expander affordance from `childrenCount` alone, so there is no "one level
+   * ahead" pre-loading — expanding a node with N children is a single fetch,
+   * not 1 + N. Walks down only through expanded nodes (the expanded set is
+   * always a connected subtree from the roots) and reads the children returned
+   * by `loadChildrenOf` so it never depends on React committing state between
+   * awaits. Already-loaded parents short-circuit, so re-applying the same
+   * expansion does not refetch.
    */
   const ensureFrontierLoaded = useCallback(
     async (expanded: Set<string>): Promise<void> => {
-      let frontier = nodesRef.current.filter((node) => node.parentId === null)
+      let frontier = nodesRef.current.filter(
+        (node) =>
+          node.parentId === null && expanded.has(node.id) && hasChildren(node)
+      )
       const seen = new Set<string>()
 
       while (frontier.length > 0) {
-        const loadable = frontier.filter(
-          (node) => hasChildren(node) && !seen.has(node.id)
-        )
+        const loadable = frontier.filter((node) => !seen.has(node.id))
         loadable.forEach((node) => seen.add(node.id))
         if (loadable.length === 0) break
 
         const results = await Promise.all(
           loadable.map((node) =>
-            loadChildrenOf(node.id).then((children) => ({ node, children }))
+            loadChildrenOf(node.id).then((children) => ({ children }))
           )
         )
 
+        // Descend only into children that are themselves expanded — their
+        // children become visible and so must be loaded too.
         const next: GraphNode<R>[] = []
-        for (const { node, children } of results) {
-          // Only descend into expanded nodes — their children become visible
-          // and therefore need their own children pre-loaded.
-          if (expanded.has(node.id)) {
-            next.push(...children)
+        for (const { children } of results) {
+          for (const child of children) {
+            if (expanded.has(child.id) && hasChildren(child)) {
+              next.push(child)
+            }
           }
         }
         frontier = next
@@ -376,8 +384,10 @@ export function useDataCollectionTreeData<
     nodesRef.current = []
     loadedParents.current = new Set()
     try {
-      // Number of levels expanded by default. The children of the deepest
-      // expanded level are still loaded (one level ahead) so they show expanders.
+      // Number of levels expanded by default. We only load the children of the
+      // nodes we actually expand — the children of the deepest expanded level
+      // render an expander from their `childrenCount`, so there is no need to
+      // pre-load one level beyond (which would fan out into one fetch per node).
       const depth = Math.max(0, optionsRef.current.defaultExpandDepth ?? 1)
       const records = await fetchRecords(
         optionsRef.current.childrenFilters(null)
@@ -388,20 +398,15 @@ export function useDataCollectionTreeData<
 
       const expanded = new Set<string>()
       let frontier = roots
-      for (let level = 0; frontier.length > 0; level++) {
+      for (let level = 0; level < depth && frontier.length > 0; level++) {
         const loadable = frontier.filter(hasChildren)
         if (loadable.length === 0) break
 
         const childArrays = await Promise.all(
           loadable.map((node) => loadChildrenOf(node.id))
         )
-        if (level < depth) {
-          loadable.forEach((node) => expanded.add(node.id))
-          frontier = loadable.flatMap((_, index) => childArrays[index])
-        } else {
-          // Children of the deepest expanded level are loaded; stop here.
-          frontier = []
-        }
+        loadable.forEach((node) => expanded.add(node.id))
+        frontier = loadable.flatMap((_, index) => childArrays[index])
       }
 
       setExpandedState(expanded)

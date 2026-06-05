@@ -46,7 +46,6 @@ interface UseGraphRenderModelOptions<T> {
   nodeMap: Map<string, TreeNode<T>>
   expandedNodes: Set<string>
   anchorNodeRef: MutableRefObject<string | null>
-  isLazyMode: boolean
   resolvedEdgesProp?: GraphEdge[]
   stableRenderNode: (
     node: GraphNode<unknown>,
@@ -83,7 +82,6 @@ export function useGraphRenderModel<T>({
   nodeMap,
   expandedNodes,
   anchorNodeRef,
-  isLazyMode,
   resolvedEdgesProp,
   stableRenderNode,
   nodeTagTypes,
@@ -293,23 +291,22 @@ export function useGraphRenderModel<T>({
     const anchorId = anchorNodeRef.current
     if (anchorId) {
       const anchorNode = nodeMap.get(anchorId)
+      // Keep the anchor while an expanded node is still waiting for its children
+      // to materialize — they may arrive in a later commit (F0Graph's own lazy
+      // mode, or a consumer like the DataCollection adapter that loads children
+      // asynchronously into the `nodes` prop). Without this the big reflow when
+      // the children appear would be uncompensated and the viewport would jump.
+      // Mode-agnostic: keyed on the tree shape, not on how the data is sourced.
       const stillExpanding =
-        isLazyMode &&
         anchorNode !== undefined &&
         expandedNodes.has(anchorId) &&
-        !anchorNode.childrenLoaded
+        anchorNode.childrenCount > 0 &&
+        anchorNode.children.length === 0
       if (!stillExpanding) {
         anchorNodeRef.current = null
       }
     }
-  }, [
-    layout.nodes,
-    anchorOffset,
-    nodeMap,
-    expandedNodes,
-    isLazyMode,
-    anchorNodeRef,
-  ])
+  }, [layout.nodes, anchorOffset, nodeMap, expandedNodes, anchorNodeRef])
 
   const rfNodes = useMemo((): RFNode[] => {
     const { dx: anchorDx, dy: anchorDy } = anchorOffset

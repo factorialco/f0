@@ -322,7 +322,6 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
     nodeMap,
     expandedNodes,
     anchorNodeRef,
-    isLazyMode,
     resolvedEdgesProp,
     stableRenderNode,
     nodeTagTypes,
