@@ -1,0 +1,163 @@
+import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
+import * as Stories from "./F0PdfViewer.stories"
+
+<Meta of={Stories} />
+
+# F0PdfViewer
+
+An experimental, read-only PDF viewer built on
+[`react-pdf`](https://github.com/wojtekmaj/react-pdf) (which wraps `pdf.js`).
+It renders the document as a continuous, scrollable list of pages with a toolbar
+for page navigation, zooming, printing, and downloading.
+
+<Canvas of={Stories.Default} />
+<Controls of={Stories.Default} />
+
+## Import
+
+```tsx
+import { F0PdfViewer } from "@factorialco/f0-react"
+;<F0PdfViewer url="/path/to/document.pdf" filename="document.pdf" />
+```
+
+The component fills its container, so give it a sized wrapper (height + width).
+
+## Worker setup
+
+`pdf.js` renders in a Web Worker. F0 configures the worker automatically,
+matched to the bundled `pdfjs-dist` version, so **no setup is required** in most
+apps. For strict CSP or offline environments where you self-host the worker,
+override it once at startup:
+
+```tsx
+import { configurePdfWorker } from "@factorialco/f0-react"
+
+configurePdfWorker("/static/pdf.worker.min.js")
+```
+
+## Zoom
+
+`initialScale` accepts `"page-width"` (default), `"page-fit"`, or a fixed zoom
+(`"0.5"` … `"4"`). The toolbar exposes the same options plus zoom in/out steps.
+
+<Canvas of={Stories.PageFit} />
+
+## Loading
+
+While the document loads (and as a `F0PdfViewer.Skeleton` placeholder) the
+viewer shows a status region announced to assistive tech.
+
+<Canvas of={Stories.Skeleton} />
+
+## Props
+
+<table>
+  <thead>
+    <tr>
+      <th>Prop</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>url</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>Source URL of the PDF document (required)</td>
+    </tr>
+    <tr>
+      <td>
+        <code>filename</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>File name used when downloading (required)</td>
+    </tr>
+    <tr>
+      <td>
+        <code>page</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>0</code>
+      </td>
+      <td>Zero-based page index to scroll to initially and on change</td>
+    </tr>
+    <tr>
+      <td>
+        <code>pagesToDisplay</code>
+      </td>
+      <td>
+        <code>number[]</code>
+      </td>
+      <td>—</td>
+      <td>Restrict rendering to a subset of pages (zero-based indexes)</td>
+    </tr>
+    <tr>
+      <td>
+        <code>initialScale</code>
+      </td>
+      <td>
+        <code>"page-width" | "page-fit" | "0.5"…"4"</code>
+      </td>
+      <td>
+        <code>"page-width"</code>
+      </td>
+      <td>Initial zoom level</td>
+    </tr>
+    <tr>
+      <td>
+        <code>withCredentials</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>
+        <code>true</code>
+      </td>
+      <td>Send credentials with the document request</td>
+    </tr>
+    <tr>
+      <td>
+        <code>onPdfLoaded</code>
+      </td>
+      <td>
+        <code>(pdf: PDFDocumentProxy) =&gt; void</code>
+      </td>
+      <td>—</td>
+      <td>Called once the document has loaded</td>
+    </tr>
+    <tr>
+      <td>
+        <code>onPageChange</code>
+      </td>
+      <td>
+        <code>(page: number) =&gt; void</code>
+      </td>
+      <td>—</td>
+      <td>Called with the 1-based page number when the visible page changes</td>
+    </tr>
+  </tbody>
+</table>
+
+## Accessibility
+
+- The toolbar uses <code>role="toolbar"</code>; every control is an icon-only
+  button with an accessible label (previous/next page, zoom in/out, print,
+  download).
+- The current page indicator (<code>page X / Y</code>) is announced via an
+  <code>aria-live="polite"</code> region.
+- Links inside the document open in a new tab with
+  <code>rel="noopener noreferrer"</code>.
+- The loading and skeleton states expose <code>role="status"</code> with
+  <code>aria-busy</code> / <code>aria-live</code>.
