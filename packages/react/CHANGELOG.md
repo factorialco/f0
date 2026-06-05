@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.40.1](https://github.com/factorialco/f0/compare/f0-react-v2.40.0...f0-react-v2.40.1) (2026-06-05)
+
+
+### Bug Fixes
+
+* **react:** animation polish — easing, scale, tooltip origin, dropdown zoom ([#4330](https://github.com/factorialco/f0/issues/4330)) ([d094f25](https://github.com/factorialco/f0/commit/d094f2528bfed91f6895b242095bd3b38936401b))
+
 ## [2.40.0](https://github.com/factorialco/f0/compare/f0-react-v2.39.1...f0-react-v2.40.0) (2026-06-05)
 
 
