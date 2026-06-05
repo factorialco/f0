@@ -1,90 +1,43 @@
-import { F0Button, F0Icon, F0Text } from "@factorialco/f0-react"
-import { Sparkles, Upload } from "@factorialco/f0-react/icons/app"
+import { F0Button } from "@factorialco/f0-react"
+import { Paperclip } from "@factorialco/f0-react/icons/app"
 
-import { useAiChat, useCopilotAction } from "@/copilot"
+import { useCopilotAction } from "@/copilot"
 
 /**
- * `interviewWelcome` — the opening turn of the One-led interview.
+ * `interviewWelcome` — renders the "Upload supporting docs" affordance
+ * directly under One's opening greeting in the guided interview.
  *
- * Triggered when the admin clicks "Get started" on the empty state: the
- * parent flips the chat to FULLSCREEN and appends an assistant message
- * whose `content` is One's welcome copy and whose toolCall renders this
- * widget below it (mirrors the `startSetup` / `certifiedDocsConvo`
- * pattern — F0AiChat routes the toolCall name to this action's render).
+ * Flow (see the `expensePolicySetup` skill, Section 1): clicking
+ * "Describe your way" on the empty state posts the kickoff message
+ * ("Help me create an expense policy for my company"); the skill greets
+ * the user, calls THIS action (rendering the button below its greeting),
+ * and immediately fires the 5-step `askClarifyingQuestion` panel. So the
+ * interview starts right away — no welcome/skip gate — while the user
+ * still has the option to hand over an existing policy doc.
  *
- * The widget is:
- *  - a VISUAL document drop zone (NOT wired — uploading a policy doc is
- *    a later iteration; it renders so the screen matches the design but
- *    does nothing on click), and
- *  - a "Skip and start guided tour" button. Clicking it posts that as a
- *    user message, which wakes the `expensePolicySetup` skill: One shows
- *    a Thinking… state and then asks the 3–5 interview questions via
- *    `askClarifyingQuestion`.
+ * The button is VISUAL ONLY (uploading isn't wired — it's an affordance
+ * that says "you can also give me your doc instead of answering"). If a
+ * viewer asks what happens on upload: One would read the document,
+ * extract the rules, confirm them, and skip straight to co-creation.
  */
 export function useInterviewWelcomeAction(): void {
-  const { sendMessage, clearAndAppend } = useAiChat()
-
   useCopilotAction({
     name: "interviewWelcome",
     description:
-      "Renders the Expense Policy interview welcome widget: a (visual-only) document drop zone and a 'Skip and start guided tour' button. The parent appends this as an assistant turn when the user clicks Get started. Do not call this yourself.",
+      "Renders the 'Upload supporting docs' affordance shown directly under One's greeting at the start of the guided Expenses interview. Call this once, in the kickoff turn, right after the greeting line and before askClarifyingQuestion.",
     available: "enabled",
     parameters: [],
     render: () => (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 16,
-          width: "100%",
-          maxWidth: 720,
-        }}
-      >
-        {/* Visual-only drop zone — uploading is not wired yet. */}
-        <div
-          style={{
-            border: "1.5px dashed #cdd2da",
-            borderRadius: 14,
-            padding: "44px 24px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 12,
-            color: "#6b7280",
-            background: "#fff",
-            userSelect: "none",
-          }}
-          aria-hidden
-        >
-          <F0Icon icon={Upload} size="md" />
-          <F0Text variant="body" color="muted" content="Drag and drop or click here" />
-        </div>
-
-        <div>
-          <F0Button
-            variant="outline"
-            size="md"
-            label="I don't have documents to upload"
-            icon={Sparkles}
-            // The sent message (and visible bubble) is phrased so it
-            // routes unambiguously to the expensePolicySetup skill and
-            // signals the interview kickoff — "guided tour" alone
-            // misroutes to a generic navigation/tour intent.
-            //
-            // Clear the welcome (text + drop zone) FIRST so the thread is
-            // empty when One replies — otherwise the tall welcome lingers
-            // and fullscreen auto-scroll pushes One's lead-in above the
-            // fold. clearAndAppend([]) wipes the thread; sendMessage then
-            // adds the kickoff bubble and triggers One's turn, so One's
-            // "On it…" lead-in is the top message when the panel appears.
-            onClick={() => {
-              clearAndAppend([])
-              sendMessage(
-                "Skip ahead and set up my Expenses with the guided interview."
-              )
-            }}
-          />
-        </div>
+      <div style={{ display: "flex", marginTop: 4 }}>
+        <F0Button
+          variant="outline"
+          size="md"
+          label="Attach your expenses policy"
+          icon={Paperclip}
+          // Visual-only — uploading a policy doc isn't wired in the
+          // prototype. It signals the alternative route into setup.
+          onClick={() => {}}
+        />
       </div>
     ),
   })

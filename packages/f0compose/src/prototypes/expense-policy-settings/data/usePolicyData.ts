@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react"
 
+import { SEED_APPROVAL_WORKFLOW, type WorkflowDoc } from "./approvalWorkflow"
 import {
   seedApprovalFlows,
   seedCategories,
@@ -55,6 +56,14 @@ export function usePolicyData() {
   // can reference users by id but slice 1 doesn't add/remove them.
   const [approvalFlows, setApprovalFlows] =
     useState<ApprovalFlow[]>(seedApprovalFlows)
+  // Approval WORKFLOW document — the real `{ steps: [...] }` shape the
+  // approval-flow view now renders (handlers / router cases / default).
+  // Source of truth for the Approval flows screen; One regenerates it
+  // wholesale via `setApprovalWorkflow` (matches how the real product's
+  // One emits the JSON). Kept alongside the legacy `approvalFlows` (still
+  // used by the interview cascade + exposed context) during the swap.
+  const [approvalWorkflow, setApprovalWorkflowState] =
+    useState<WorkflowDoc>(SEED_APPROVAL_WORKFLOW)
   const [users] = useState<User[]>(seedUsers)
   const [entities] = useState<LegalEntity[]>(seedEntities)
 
@@ -369,6 +378,13 @@ export function usePolicyData() {
     setApprovalFlows(next)
   }, [])
 
+  // Replace the whole approval workflow document. One emits the full
+  // `{ steps: [...] }` JSON (as it does in the real product) and the
+  // Approval flows screen re-renders it.
+  const setApprovalWorkflow = useCallback((next: WorkflowDoc) => {
+    setApprovalWorkflowState(next)
+  }, [])
+
   const addStep = useCallback((flowId: string): string => {
     const stepId = `step-new-${Date.now()}`
     setApprovalFlows((prev) =>
@@ -448,6 +464,8 @@ export function usePolicyData() {
     paymentMethods,
     rates,
     approvalFlows,
+    approvalWorkflow,
+    setApprovalWorkflow,
     users,
     entities,
     expenseGroupsEnabled,

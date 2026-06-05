@@ -55,18 +55,19 @@ export function EmptyStateView(props: {
         }}
       >
         <ChoiceCard
-          icon={List}
-          title="Use defaults"
-          body="Start with a setup based on common practice. Review and adjust anything."
-          meta="~5 min review"
-          onClick={onUseDefaults}
-        />
-        <ChoiceCard
           icon={Comment}
           title="Describe your way"
           body="Tell me how expenses work at your company. I'll ask what I need and build it."
           meta="~10 min conversation"
           onClick={onDescribe}
+          recommended
+        />
+        <ChoiceCard
+          icon={List}
+          title="Use defaults"
+          body="Start with a setup based on common practice. Review and adjust anything."
+          meta="~5 min review"
+          onClick={onUseDefaults}
         />
       </div>
     </div>
@@ -79,12 +80,14 @@ function ChoiceCard(props: {
   body: string
   meta: string
   onClick: () => void
+  recommended?: boolean
 }): React.ReactElement {
   return (
     <button
       type="button"
       onClick={props.onClick}
       style={{
+        position: "relative",
         flex: "1 1 340px",
         minWidth: 300,
         maxWidth: 360,
@@ -99,6 +102,25 @@ function ChoiceCard(props: {
         gap: 12,
       }}
     >
+      {props.recommended && (
+        <span
+          style={{
+            position: "absolute",
+            top: 16,
+            right: 16,
+            background: "var(--f1-background-info, #e0e7ff)",
+            color: "var(--f1-foreground-info, #2563eb)",
+            fontSize: 12,
+            fontWeight: 600,
+            lineHeight: 1,
+            padding: "5px 10px",
+            borderRadius: 999,
+            letterSpacing: 0.2,
+          }}
+        >
+          Recommended
+        </span>
+      )}
       <div
         style={{
           width: 44,
@@ -107,11 +129,11 @@ function ChoiceCard(props: {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "var(--f1-background-info, rgba(59,130,246,0.08))",
+          background: "var(--f1-background-secondary, #f3f4f6)",
         }}
         aria-hidden
       >
-        <F0Icon icon={props.icon} color="info" size="md" />
+        <F0Icon icon={props.icon} color="default" size="md" />
       </div>
       <F0Heading as="h2" variant="heading" content={props.title} />
       <F0Text variant="body" color="muted" content={props.body} />

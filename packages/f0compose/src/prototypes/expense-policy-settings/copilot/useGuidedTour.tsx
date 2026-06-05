@@ -45,13 +45,21 @@ export function useGuidedTour(args: {
   // No tour navigation anymore — kept only for call-site compatibility.
   void args
 
-  const { clearAndAppend } = useAiChat()
+  const { appendMessages } = useAiChat()
 
   const postGreeting = (route: SetupRoute = "interview") => {
-    // RESET the chat (drop any prior transcript) and seed the one clean
-    // intro message for this route, so the editor opens with a single
-    // fresh greeting and an open composer below it — nothing else.
-    clearAndAppend([{ role: "assistant", content: GREETING_BODY[route] }])
+    // APPEND the closing message to the existing transcript (do NOT wipe
+    // it). When the interview hands off to the editor the chat collapses
+    // from fullscreen to the side panel and the interview conversation
+    // correctly carries over; clearing it here caused a jarring ~2s flash
+    // where the carried-over conversation was visible and then abruptly
+    // replaced by a lone greeting. Appending instead reads as One closing
+    // off the interview ("here's your draft — edit or publish"), so the
+    // transition is seamless. persist:false keeps it a client-only display
+    // message (it never needs to round-trip the backend thread).
+    appendMessages([{ role: "assistant", content: GREETING_BODY[route] }], {
+      persist: false,
+    })
   }
 
   return { postGreeting }

@@ -81,7 +81,7 @@ const STEPS: StepDef[] = [
     selectionMode: "single",
     options: [
       { id: "manager-all", label: "Manager approves everything" },
-      { id: "manager-finance", label: "Manager approves; finance reviews larger amounts" },
+      { id: "manager-finance", label: "Manager approves, then finance reviews" },
       { id: "auto-small", label: "Auto-approve small amounts; manager for the rest" },
       { id: "finance-all", label: "Everything goes to finance" },
     ],

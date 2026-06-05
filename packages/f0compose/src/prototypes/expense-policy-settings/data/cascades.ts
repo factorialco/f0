@@ -277,29 +277,18 @@ const selfStep = (flowId: string) => ({
 export function buildApprovalIntent(option: Q4OptionId): ApprovalFlow[] {
   switch (option) {
     case "manager-finance":
+      // "Everything goes through the manager, then finance" — ONE flat rule
+      // for all expenses (no amount tiering). Keep it a single Manager →
+      // Finance chain so it matches what the user described.
       return [
-        {
-          id: "flow-larger",
-          name: "Larger expenses",
-          when: `€${Q4_DEFAULT_THRESHOLD.toLocaleString()} and above`,
-          then: "Manager → Finance review",
-          feasibility: "supported",
-          trigger: {
-            amount: { min: Q4_DEFAULT_THRESHOLD },
-            categoryIds: [],
-            scope: EVERYONE,
-          },
-          steps: [managerStep("flow-larger"), financeStep("flow-larger")],
-          priority: 100,
-        },
         {
           id: "flow-default",
           name: "Default approval",
           when: "Any expense",
-          then: "Manager approves",
+          then: "Manager → Finance review",
           feasibility: "supported",
           trigger: { amount: {}, categoryIds: [], scope: EVERYONE },
-          steps: [managerStep("flow-default")],
+          steps: [managerStep("flow-default"), financeStep("flow-default")],
           priority: 900,
         },
       ]

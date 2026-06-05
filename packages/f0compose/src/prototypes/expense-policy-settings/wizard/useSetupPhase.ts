@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 
+import { agentUrlOverride } from "@/shell/aiChatConfig"
+
 /**
  * Top-level setup phase for the Expense Policy page.
  *
@@ -53,6 +55,18 @@ function coerceOnLoad(raw: string | null): SetupPhase {
 
 function readPhase(): SetupPhase {
   if (typeof window === "undefined") return "empty"
+  // Share/tunnel links always carry `?agent=<url>` (the live agent override).
+  // Those are the links testers open, and each tester session should START
+  // FRESH at the empty-state landing — NOT resume a `cocreation` phase left in
+  // localStorage by an earlier run in the same (incognito) session. So when an
+  // agent override is present, ignore the persisted phase and begin at empty.
+  // Local dev (no `?agent=`, uses the default Traefik agent) keeps the durable
+  // refresh-resume behaviour untouched.
+  try {
+    if (agentUrlOverride()) return "empty"
+  } catch {
+    // best-effort — fall through to the persisted value
+  }
   try {
     return coerceOnLoad(window.localStorage.getItem(STORAGE_KEY))
   } catch {

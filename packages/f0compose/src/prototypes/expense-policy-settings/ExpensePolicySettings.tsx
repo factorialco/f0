@@ -1,4 +1,4 @@
-import { F0Box, F0Heading, F0Text, StandardLayout } from "@factorialco/f0-react"
+import { F0Box, F0Button, F0Heading, F0Text, StandardLayout } from "@factorialco/f0-react"
 import {
   Page,
   PageHeader,
@@ -7,9 +7,11 @@ import {
   CheckDouble,
   FileSigned,
   Files,
+  Paperclip,
   Settings,
 } from "@factorialco/f0-react/icons/app"
 import { useEffect, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import { useSearchParams } from "react-router-dom"
 
 import { useAiChat } from "@/copilot"
@@ -20,6 +22,7 @@ import { useEnableCertificationAction } from "./certified-documents/copilot/useE
 import { useExposeCertificationContext } from "./certified-documents/copilot/useExposeCertificationContext"
 import { useCertificationData } from "./certified-documents/useCertificationData"
 import { useApprovalFlowActions } from "./copilot/useApprovalFlowActions"
+import { useSetApprovalWorkflowAction } from "./copilot/useSetApprovalWorkflowAction"
 import { useExpenseTypesActions } from "./copilot/useExpenseTypesActions"
 import { usePolicyRulesActions } from "./copilot/usePolicyRulesActions"
 import { useApplyInterviewAnswersAction } from "./copilot/useApplyInterviewAnswersAction"
@@ -146,8 +149,13 @@ export default function ExpensePolicySettings() {
   // below and the `onRequestAuthorize` handler in the certified-
   // documents branch). Restore it from the destructure if you
   // re-enable either flow.
-  const { appendMessages, clearAndAppend, setOpen, setVisualizationMode } =
-    useAiChat()
+  const {
+    appendMessages,
+    clearAndAppend,
+    sendMessage,
+    setOpen,
+    setVisualizationMode,
+  } = useAiChat()
   const setupState = useExpensePolicySetup()
 
   // Front-of-funnel phase: empty → interview → generating → cocreation
@@ -156,6 +164,15 @@ export default function ExpensePolicySettings() {
   const setup = useSetupPhase()
   // Guards the one-time greeting when the editor is first entered.
   const greetedRef = useRef(false)
+  // Guards the one-time interview kickoff message so re-entering the
+  // "interview" phase (or a stray re-render) can't post a second kickoff
+  // and make One greet twice (re-armed whenever we leave the interview).
+  const kickoffFiredRef = useRef(false)
+  // DOM anchor injected into One's interview message column, between the
+  // greeting and the One loading icon, so the "Upload supporting docs"
+  // button renders IN FLOW (reflows the icon down) rather than overlaying
+  // it. We portal the React button into this anchor (null = not placed).
+  const [uploadAnchor, setUploadAnchor] = useState<HTMLElement | null>(null)
 
   // Chat-aware phase transitions. The One chat goes FULLSCREEN for the
   // interview, then collapses to the side panel for generating + the
@@ -167,30 +184,32 @@ export default function ExpensePolicySettings() {
         setOpen(true)
         setVisualizationMode("fullscreen")
         setup.enterInterview()
-        // One opens the interview as TWO turns so they render in order:
-        // (1) the welcome copy in One's voice, then (2) the welcome
-        // widget (visual drop zone + "Skip and start guided tour").
-        // clearAndAppend (not appendMessages) wipes any prior transcript
-        // first, so restarting from Settings → Get started never stacks
-        // duplicate welcomes. The actual 3–5 questions come from the
-        // skill once the user clicks Skip (see useInterviewWelcomeAction).
-        clearAndAppend([
-          {
-            role: "assistant",
-            content:
-              "Welcome to **Expenses setup** 🚀 — this takes about 5 minutes.\n\nFirst, a couple of quick questions. Then I'll build a starter setup you can review and refine with me, section by section.\n\nIf you have an existing expenses document, upload it — I'll extract your rules so you don't start from scratch.",
-          },
-          {
-            role: "assistant",
-            content: "",
-            toolCalls: [
-              {
-                id: "interview-welcome",
-                function: { name: "interviewWelcome", arguments: "{}" },
-              },
-            ],
-          },
-        ])
+        // Fire the interview DIRECTLY — no welcome/drop-zone/skip gate.
+        // Posting this kickoff message wakes the `expensePolicySetup`
+        // skill, which (per Section 1 of the skill) greets the user by
+        // name, renders the "Upload supporting docs" affordance under its
+        // greeting (the `interviewWelcome` action), and immediately fires
+        // the 5-step clarifying-question panel. The short delay lets the
+        // fullscreen transition settle; the chat bridge is already wired
+        // (the shell mounts it on page load), and this is a post-load
+        // user-initiated action, so it does NOT hit the old on-mount
+        // sendMessage race that the earlier auto-opener suffered.
+        // Fire the kickoff at most once per interview entry — without
+        // this guard a re-entry/re-render could post a second kickoff and
+        // One would greet twice. Re-armed when we leave the interview
+        // (see the upload-seed effect's phase!=="interview" branch).
+        if (!kickoffFiredRef.current) {
+          kickoffFiredRef.current = true
+          window.setTimeout(() => {
+            // Wipe any prior thread first so the interview always starts
+            // clean (no stale post-generation "Done…" messages bleeding
+            // in from an earlier run), then post the kickoff. Same
+            // clearAndAppend([])-then-sendMessage pattern the old skip
+            // button used.
+            clearAndAppend([])
+            sendMessage("Help me create an expense policy for my company.")
+          }, 450)
+        }
         break
       case "generating":
         setVisualizationMode("sidepanel")
@@ -315,6 +334,104 @@ export default function ExpensePolicySettings() {
     }
     return () => {
       delete document.body.dataset.epsHideComposer
+    }
+  }, [setup.phase])
+
+  // Interview-phase housekeeping + place the "Upload supporting docs"
+  // button IN FLOW, between One's greeting and the One loading icon.
+  //
+  // Not a chat message: injecting a client message mid-turn makes
+  // CopilotKit re-render and duplicate One's greeting (the "looping
+  // greeting" we chased). Not a fixed overlay either: an overlay floats
+  // ON TOP of the loading icon and can't push it down. Instead we insert
+  // a plain <div> anchor as a sibling right after the greeting bubble
+  // inside One's message column (a `flex flex-col gap-2`), so the flex
+  // column reflows to greeting → button → loading icon. The React button
+  // is portaled into that anchor. A short poll re-inserts the anchor if a
+  // CopilotKit re-render drops it. Visual only.
+  useEffect(() => {
+    if (setup.phase !== "interview") {
+      kickoffFiredRef.current = false
+      document.getElementById("eps-upload-anchor")?.remove()
+      setUploadAnchor(null)
+      return
+    }
+    let cancelled = false
+    const anchor = document.createElement("div")
+    anchor.id = "eps-upload-anchor"
+    anchor.style.width = "100%"
+    const place = () => {
+      if (cancelled) return
+      const p = Array.from(document.querySelectorAll("p")).find((e) =>
+        /to get started, answer a couple of questions/i.test(
+          e.textContent || ""
+        )
+      )
+      if (!p) return
+      // Climb to the greeting's "bubble" = the direct child of One's
+      // vertical message column (the flex-col that also holds the loading
+      // icon as the next sibling).
+      let bubble: HTMLElement = p
+      while (
+        bubble.parentElement &&
+        !/flex flex-col items-start justify-start gap-2/.test(
+          (bubble.parentElement.className || "").toString()
+        )
+      ) {
+        bubble = bubble.parentElement
+      }
+      const col = bubble.parentElement
+      if (!col) return
+      if (anchor.previousElementSibling !== bubble || anchor.parentElement !== col) {
+        col.insertBefore(anchor, bubble.nextSibling)
+      }
+      setUploadAnchor((prev) => (prev === anchor ? prev : anchor))
+    }
+    place()
+    const id = window.setInterval(place, 300)
+    return () => {
+      cancelled = true
+      window.clearInterval(id)
+      anchor.remove()
+    }
+  }, [setup.phase])
+
+  // In co-creation, label the composer's attach (paperclip) button so it
+  // reads "Attach your expenses policy". The f0 button lays its content out
+  // in an inner `.main` element (flex, items-center, gap-1, its own padding +
+  // height). We append the label text INSIDE that `.main`, AFTER the icon, so
+  // the button grows naturally into a proper icon+label pill — inheriting the
+  // f0 button's own alignment/height/padding (no box-model overrides). Visual
+  // only (upload isn't wired). A short poll re-injects it if a chat re-render
+  // drops it.
+  useEffect(() => {
+    const LABEL_ID = "eps-attach-label"
+    if (setup.phase !== "cocreation") {
+      document.getElementById(LABEL_ID)?.remove()
+      return
+    }
+    let cancelled = false
+    const place = () => {
+      if (cancelled) return
+      if (document.getElementById(LABEL_ID)) return
+      const btn = document.querySelector<HTMLElement>(
+        'button[aria-label="Attach file"]'
+      )
+      if (!btn) return
+      const main = btn.querySelector<HTMLElement>(".main") ?? btn
+      const label = document.createElement("span")
+      label.id = LABEL_ID
+      label.textContent = "Attach your expenses policy"
+      label.style.cssText =
+        "font-size:14px;line-height:1;white-space:nowrap;pointer-events:none;"
+      main.appendChild(label)
+    }
+    place()
+    const id = window.setInterval(place, 400)
+    return () => {
+      cancelled = true
+      window.clearInterval(id)
+      document.getElementById(LABEL_ID)?.remove()
     }
   }, [setup.phase])
 
@@ -460,6 +577,20 @@ export default function ExpensePolicySettings() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (setup.phase !== "cocreation") return
+    // The INTERVIEW route's closing message is now posted by the skill
+    // itself (a real agent turn, so it renders reliably — `appendMessages`
+    // here was getting dropped right after the interview). Only the
+    // "Use defaults" route (no agent turn) needs the prototype to seed a
+    // greeting, so skip this effect entirely for the interview route.
+    let route: "interview" | "defaults" = "interview"
+    try {
+      if (window.localStorage.getItem(SETUP_ROUTE_KEY) === "defaults") {
+        route = "defaults"
+      }
+    } catch {
+      // best-effort
+    }
+    if (route !== "defaults") return
     if (greetedRef.current) return
     greetedRef.current = true
     let lastText = ""
@@ -476,15 +607,7 @@ export default function ExpensePolicySettings() {
       else stable = 0
       lastText = txt
       if ((stable >= 2 && !thinking && elapsed >= MIN) || elapsed >= MAX) {
-        let route: "interview" | "defaults" = "interview"
-        try {
-          if (window.localStorage.getItem(SETUP_ROUTE_KEY) === "defaults") {
-            route = "defaults"
-          }
-        } catch {
-          // fall back to the interview greeting
-        }
-        postGreeting(route)
+        postGreeting("defaults")
         return
       }
       window.setTimeout(tick, STEP)
@@ -502,6 +625,10 @@ export default function ExpensePolicySettings() {
   // (the user might describe a flow change while still configuring
   // Expense types, and we want the agent to be able to apply it).
   useApprovalFlowActions({ policyData })
+  // Co-creation for the approval WORKFLOW document — One regenerates the
+  // whole { steps: [...] } JSON and we render it on the Approval flows
+  // screen (the real product's co-creation pattern).
+  useSetApprovalWorkflowAction({ policyData })
   useExpenseTypesActions({ policyData })
   // Co-creation for the Policy-rules sections (meals/travel/reimbursements/
   // receipts/exceptions): the generic setPolicyRule tool so One can
@@ -648,6 +775,25 @@ export default function ExpensePolicySettings() {
             onComplete={enterEditorWithLoading}
           />
         )}
+        {/* "Upload supporting docs" affordance for the live-agent interview,
+            portaled IN FLOW into One's message column (see the placing
+            effect) so it sits between the greeting and the loading icon and
+            reflows the icon down rather than covering it. Visual only. */}
+        {!isDemoMode() &&
+          setup.phase === "interview" &&
+          uploadAnchor &&
+          createPortal(
+            <div style={{ display: "flex", paddingTop: 2 }}>
+              <F0Button
+                variant="outline"
+                size="md"
+                label="Attach your expenses policy"
+                icon={Paperclip}
+                onClick={() => {}}
+              />
+            </div>,
+            uploadAnchor
+          )}
       </Page>
     )
   }

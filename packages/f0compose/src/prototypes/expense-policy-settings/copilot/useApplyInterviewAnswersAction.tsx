@@ -115,7 +115,7 @@ export function useApplyInterviewAnswersAction(args: {
         ok: true,
         applied,
         message:
-          "Applied and generating. Output NO text — no acknowledgement, recap, or summary. The screen takes over and the prototype posts its own greeting. End the turn silently.",
+          "Applied — the canvas is populated. Now post your ONE recap message and then STOP. It MUST end with this EXACT closing line as its final paragraph: \"Take a look at the canvas and edit anything you like — or just tell me what to change and we'll do it together. When it looks right, hit **Publish changes**.\" The recap is incomplete without that closing line. Never post a second recap in any wording.",
       }
     },
   })

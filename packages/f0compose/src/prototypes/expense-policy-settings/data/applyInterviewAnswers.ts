@@ -1,6 +1,7 @@
 import type { useExpenseFormsSource } from "../forms/useExpenseFormsSource"
 import type { useExpensePolicySetup } from "../copilot/useExpensePolicySetup"
 
+import { buildApprovalWorkflow } from "./approvalWorkflow"
 import {
   buildApprovalIntent,
   buildLimitsIntent,
@@ -127,7 +128,10 @@ export function applyInterviewAnswers(
   // Q4 — approval posture → starter approval workflow (replace seeds)
   const q4 = answers.approvalPosture?.trim().toLowerCase()
   if (q4 && Q4_IDS.has(q4 as Q4OptionId)) {
+    // Legacy model (still exposed in context) + the real workflow document
+    // the Approval flows screen now renders.
     policyData.replaceApprovalFlows(buildApprovalIntent(q4 as Q4OptionId))
+    policyData.setApprovalWorkflow(buildApprovalWorkflow(q4 as Q4OptionId))
     applied.push("approval workflow")
   }
 
