@@ -68,6 +68,16 @@ const LaneProvider = <
   NavigationFilters,
   Grouping
 >) => {
+  const [laneIsLoading, setLaneIsLoading] = useState(false)
+  const laneSource = useMemo(
+    () => ({
+      ...source,
+      isLoading: laneIsLoading,
+      setIsLoading: setLaneIsLoading,
+    }),
+    [source, laneIsLoading]
+  )
+
   const mergedFilters = useMemo(
     () => mergeFiltersWithIntersection(source.currentFilters, lane.filters),
     [source.currentFilters, lane.filters]
@@ -80,7 +90,7 @@ const LaneProvider = <
     Summaries,
     NavigationFilters,
     Grouping
-  >(source, {
+  >(laneSource, {
     filters: mergedFilters,
     onError,
   })

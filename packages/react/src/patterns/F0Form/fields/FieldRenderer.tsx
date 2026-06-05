@@ -19,7 +19,7 @@ import type { F0Field } from "./types"
 import { generateAnchorId, useF0FormContext } from "../context"
 import { renderFieldInput } from "./renderFieldInput"
 import { isFieldRequired } from "./schema"
-import { evaluateDisabled, evaluateRenderIf } from "./utils"
+import { evaluateDisabled, evaluateRenderIf, resolveFieldAlert } from "./utils"
 
 function isSelectConfig(
   result: unknown
@@ -247,11 +247,11 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
             </F0Link>
           )}
           {(() => {
-            if (!field.alert) return null
-            const alertProps =
-              typeof field.alert === "function"
-                ? field.alert({ fieldValue: formField.value, values })
-                : field.alert
+            const alertProps = resolveFieldAlert(
+              field.alert,
+              formField.value,
+              values
+            )
             if (!alertProps) return null
             return (
               <F0Alert {...alertProps} variant={alertProps.variant ?? "info"} />
@@ -260,7 +260,10 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
           {showFormMessage && !fieldState.error && (
             <InputMessages status={field.status} />
           )}
-          {showFormMessage && (
+          {/* A critical alert already conveys the message via the F0Alert above,
+              so suppress the redundant FormMessage text (the input still shows
+              error styling because fieldState.error is set). */}
+          {showFormMessage && fieldState.error?.type !== "alertCritical" && (
             <FormMessage
               fallback={
                 isRequired

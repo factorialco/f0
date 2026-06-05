@@ -1538,6 +1538,108 @@ describe("createConditionalResolver - null to undefined conversion", () => {
   })
 })
 
+describe("createConditionalResolver - critical alert errors", () => {
+  const resolverOptions = {
+    fields: {},
+    shouldUseNativeValidation: false,
+  }
+
+  it("marks a field as errored when its alert resolves to variant 'critical'", async () => {
+    const schema = z.object({
+      amount: f0FormField(z.number(), {
+        label: "Amount",
+        alert: ({ fieldValue }) =>
+          typeof fieldValue === "number" && fieldValue > 100
+            ? {
+                title: "Too high",
+                description: "Exceeds the allowed limit",
+                variant: "critical" as const,
+              }
+            : null,
+      }),
+    })
+
+    const resolver = createConditionalResolver(schema)
+    const result = await resolver({ amount: 150 }, undefined, resolverOptions)
+
+    const amountError =
+      "amount" in result.errors ? result.errors.amount : undefined
+    expect(amountError).toBeDefined()
+    expect(amountError?.type).toBe("alertCritical")
+    expect(amountError?.message).toBe("Too high")
+  })
+
+  it("marks a field as errored for a static 'critical' alert", async () => {
+    const schema = z.object({
+      amount: f0FormField(z.number(), {
+        label: "Amount",
+        alert: { title: "Always critical", variant: "critical" as const },
+      }),
+    })
+
+    const resolver = createConditionalResolver(schema)
+    const result = await resolver({ amount: 1 }, undefined, resolverOptions)
+
+    const amountError =
+      "amount" in result.errors ? result.errors.amount : undefined
+    expect(amountError?.type).toBe("alertCritical")
+    expect(amountError?.message).toBe("Always critical")
+  })
+
+  it("does not mark a field as errored for non-critical alert variants", async () => {
+    const schema = z.object({
+      amount: f0FormField(z.number(), {
+        label: "Amount",
+        alert: { title: "Heads up", variant: "warning" as const },
+      }),
+    })
+
+    const resolver = createConditionalResolver(schema)
+    const result = await resolver({ amount: 1 }, undefined, resolverOptions)
+
+    expect(result.errors).toEqual({})
+  })
+
+  it("does not mark a hidden field (renderIf false) as errored", async () => {
+    const schema = z.object({
+      toggle: f0FormField(z.boolean(), {
+        label: "Toggle",
+        fieldType: "switch",
+      }),
+      amount: f0FormField(z.number(), {
+        label: "Amount",
+        renderIf: { fieldId: "toggle", equalsTo: true },
+        alert: { title: "Critical", variant: "critical" as const },
+      }),
+    })
+
+    const resolver = createConditionalResolver(schema)
+    const result = await resolver(
+      { toggle: false, amount: 1 },
+      undefined,
+      resolverOptions
+    )
+
+    expect(result.errors).toEqual({})
+  })
+
+  it("does not overwrite an existing validation error with the critical alert", async () => {
+    const schema = z.object({
+      name: f0FormField(z.string().min(3, "Too short"), {
+        label: "Name",
+        alert: { title: "Critical alert", variant: "critical" as const },
+      }),
+    })
+
+    const resolver = createConditionalResolver(schema)
+    const result = await resolver({ name: "ab" }, undefined, resolverOptions)
+
+    const nameError = "name" in result.errors ? result.errors.name : undefined
+    expect(nameError?.message).toBe("Too short")
+    expect(nameError?.type).not.toBe("alertCritical")
+  })
+})
+
 describe("F0Form clearing optional fields with default values", () => {
   it("clears optional text field to empty instead of default value", async () => {
     const user = userEvent.setup()
@@ -2633,6 +2735,119 @@ describe("F0Form alert feature", () => {
 
     expect(screen.getByText("Group alert title")).toBeInTheDocument()
     expect(screen.getByText("Group alert description")).toBeInTheDocument()
+  })
+
+  it("marks the field as errored and blocks submit when the alert resolves to 'critical'", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    const formSchema = z.object({
+      code: f0FormField(z.string(), {
+        label: "Code",
+        alert: ({ fieldValue }) =>
+          fieldValue === "bad"
+            ? {
+                title: "Invalid code",
+                description: "This code is not allowed",
+                variant: "critical" as const,
+              }
+            : null,
+      }),
+    })
+
+    render(
+      <F0Form
+        name="alert-critical-error"
+        schema={formSchema}
+        defaultValues={{ code: "bad" }}
+        onSubmit={onSubmit}
+      />
+    )
+
+    // The critical alert is rendered below the field
+    expect(screen.getByText("Invalid code")).toBeInTheDocument()
+
+    const submitButton = screen.getByText("Submit").closest("button")!
+    await user.click(submitButton)
+
+    // The field is marked as errored, so submission is blocked
+    await waitFor(() => {
+      expect(submitButton).toBeDisabled()
+    })
+    expect(onSubmit).not.toHaveBeenCalled()
+  })
+
+  it("clears the error and allows submit once the alert is no longer 'critical'", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    const formSchema = z.object({
+      code: f0FormField(z.string(), {
+        label: "Code",
+        alert: ({ fieldValue }) =>
+          fieldValue === "bad"
+            ? { title: "Invalid code", variant: "critical" as const }
+            : null,
+      }),
+    })
+
+    render(
+      <F0Form
+        name="alert-critical-recover"
+        schema={formSchema}
+        defaultValues={{ code: "bad" }}
+        onSubmit={onSubmit}
+      />
+    )
+
+    const submitButton = screen.getByText("Submit").closest("button")!
+    await user.click(submitButton)
+    await waitFor(() => {
+      expect(submitButton).toBeDisabled()
+    })
+    expect(onSubmit).not.toHaveBeenCalled()
+
+    // Fix the value so the alert no longer resolves to critical
+    const input = screen.getByRole("textbox")
+    await user.clear(input)
+    await user.type(input, "good")
+
+    // The critical alert clears, re-enabling submission
+    await waitFor(() => {
+      expect(submitButton).toBeEnabled()
+    })
+    await user.click(submitButton)
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({ code: "good" })
+    })
+  })
+
+  it("does not block submit for non-critical alert variants", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    const formSchema = z.object({
+      code: f0FormField(z.string(), {
+        label: "Code",
+        alert: { title: "Just a warning", variant: "warning" as const },
+      }),
+    })
+
+    render(
+      <F0Form
+        name="alert-warning-no-block"
+        schema={formSchema}
+        defaultValues={{ code: "anything" }}
+        onSubmit={onSubmit}
+      />
+    )
+
+    expect(screen.getByText("Just a warning")).toBeInTheDocument()
+
+    await user.click(screen.getByText("Submit"))
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({ code: "anything" })
+    })
   })
 })
 

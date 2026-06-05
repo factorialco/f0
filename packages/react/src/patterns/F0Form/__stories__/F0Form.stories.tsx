@@ -111,6 +111,52 @@ export const Default: Story = {
 }
 
 /**
+ * A field whose `alert` resolves to `variant: "critical"` is treated as an
+ * error: the input shows error styling and the form cannot be submitted while
+ * the alert is active.
+ *
+ * Here, ordering more than the available stock (10) surfaces a critical alert
+ * and disables the submit button. Lower the quantity to 10 or below and the
+ * alert clears, re-enabling submission.
+ */
+export const CriticalAlertBlocksSubmit: Story = {
+  render() {
+    const formSchema = z.object({
+      quantity: f0FormField.number({
+        label: "Quantity",
+        placeholder: "How many units?",
+        helpText: "Only 10 units are in stock",
+        min: 0,
+        alert: ({ fieldValue }) =>
+          typeof fieldValue === "number" && fieldValue > 10
+            ? {
+                title: "Not enough stock",
+                description:
+                  "Only 10 units are available. Reduce the quantity to continue.",
+                variant: "critical" as const,
+              }
+            : null,
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "critical-alert-blocks-submit",
+      schema: formSchema,
+      defaultValues: {
+        quantity: 25,
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
  * Form with fields arranged in rows using the `row` property.
  * Fields with the same `row` value are grouped horizontally.
  */

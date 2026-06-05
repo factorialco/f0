@@ -1,5 +1,26 @@
 # Changelog
 
+## [2.40.1](https://github.com/factorialco/f0/compare/f0-react-v2.40.0...f0-react-v2.40.1) (2026-06-05)
+
+
+### Bug Fixes
+
+* **react:** animation polish — easing, scale, tooltip origin, dropdown zoom ([#4330](https://github.com/factorialco/f0/issues/4330)) ([d094f25](https://github.com/factorialco/f0/commit/d094f2528bfed91f6895b242095bd3b38936401b))
+
+## [2.40.0](https://github.com/factorialco/f0/compare/f0-react-v2.39.1...f0-react-v2.40.0) (2026-06-05)
+
+
+### Features
+
+* **F0Form:** mark field as error when its alert resolves to "critical" ([#4327](https://github.com/factorialco/f0/issues/4327)) ([cf19d63](https://github.com/factorialco/f0/commit/cf19d6380576b259bb9fbd3b409540a64d761eb1))
+
+## [2.39.1](https://github.com/factorialco/f0/compare/f0-react-v2.39.0...f0-react-v2.39.1) (2026-06-05)
+
+
+### Bug Fixes
+
+* **kanban:** isolate per-lane loading state in DataCollection lanes ([#4329](https://github.com/factorialco/f0/issues/4329)) ([c0def9d](https://github.com/factorialco/f0/commit/c0def9d23785a31d4f08f34bb0c0575c612a2564))
+
 ## [2.39.0](https://github.com/factorialco/f0/compare/f0-react-v2.38.0...f0-react-v2.39.0) (2026-06-04)
 
 
