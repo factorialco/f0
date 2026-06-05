@@ -122,6 +122,8 @@ jobs:
             echo "::error::ZERITO_SLACK_BOT_TOKEN is not set"
             exit 1
           fi
+          # Debug: print token prefix to verify it's a bot token (xoxb-)
+          echo "Token prefix: $(echo "$SLACK_BOT_TOKEN" | cut -c1-10)..."
           # index.ts already produced the Block Kit payload ({ "blocks": [...] })
           # with long sections split under Slack's 3000-char limit.
           # We inject the target channel and post via chat.postMessage.
