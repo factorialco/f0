@@ -14,4 +14,8 @@ export type { F0SearchInputProps } from "./F0SearchInput"
  *
  * @removeIn 2.0.0
  */
-export const F1SearchBox = F0SearchInput
+// Typed as `typeof F0SearchInput` (rather than inferred) so the bundled
+// declaration references F0SearchInput's type instead of re-expanding the
+// forwardRef type — which otherwise produces a circular `InputFieldProps_2`
+// self-import that resolves to `any` for consumers.
+export const F1SearchBox: typeof F0SearchInput = F0SearchInput

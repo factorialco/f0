@@ -1,7 +1,8 @@
 import * as React from "react"
 
+import { F0InputField, InputFieldProps } from "@/components/F0InputField"
+
 import { cn } from "../lib/utils"
-import { F0InputField, InputFieldProps } from "../components/F0InputField"
 
 export type InputProps = Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
