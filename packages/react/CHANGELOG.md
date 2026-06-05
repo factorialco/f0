@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.40.0](https://github.com/factorialco/f0/compare/f0-react-v2.39.1...f0-react-v2.40.0) (2026-06-05)
+
+
+### Features
+
+* **F0Form:** mark field as error when its alert resolves to "critical" ([#4327](https://github.com/factorialco/f0/issues/4327)) ([cf19d63](https://github.com/factorialco/f0/commit/cf19d6380576b259bb9fbd3b409540a64d761eb1))
+
 ## [2.39.1](https://github.com/factorialco/f0/compare/f0-react-v2.39.0...f0-react-v2.39.1) (2026-06-05)
 
 
