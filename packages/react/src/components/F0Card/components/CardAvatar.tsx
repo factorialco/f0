@@ -1,4 +1,9 @@
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
+import {
+  type AlertAvatarProps,
+  F0AvatarAlert,
+} from "@/components/avatars/F0AvatarAlert"
+import { F0AvatarDate } from "@/components/avatars/F0AvatarDate"
 import { F0AvatarEmoji } from "@/components/avatars/F0AvatarEmoji"
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
@@ -6,6 +11,7 @@ import {
   F0AvatarModule,
   type ModuleId,
 } from "@/components/avatars/F0AvatarModule"
+import { F0AvatarPulse, type Pulse } from "@/components/avatars/F0AvatarPulse"
 import { IconType } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
 
@@ -15,6 +21,16 @@ type CardAvatarVariant =
   | { type: "file"; file: File }
   | { type: "icon"; icon: IconType }
   | { type: "module"; module: ModuleId }
+  | { type: "alert"; variant: AlertAvatarProps["type"] }
+  | { type: "date"; date: Date }
+  | {
+      type: "pulse"
+      firstName: string
+      lastName: string
+      src?: string
+      pulse?: Pulse
+      onPulseClick: () => void
+    }
 
 type CardAvatarSize = "sm" | "md" | "lg"
 
@@ -64,6 +80,25 @@ const AvatarRender = ({
   }
   if (avatar.type === "module") {
     return <F0AvatarModule module={avatar.module} size={bumpedSize} />
+  }
+  if (avatar.type === "alert") {
+    return <F0AvatarAlert type={avatar.variant} size={size} />
+  }
+  if (avatar.type === "date") {
+    // F0AvatarDate has a fixed intrinsic size (no size prop).
+    return <F0AvatarDate date={avatar.date} />
+  }
+  if (avatar.type === "pulse") {
+    // F0AvatarPulse has a fixed intrinsic size (no size prop).
+    return (
+      <F0AvatarPulse
+        firstName={avatar.firstName}
+        lastName={avatar.lastName}
+        src={avatar.src}
+        pulse={avatar.pulse}
+        onPulseClick={avatar.onPulseClick}
+      />
+    )
   }
   return <F0Avatar avatar={avatar} size={size} />
 }

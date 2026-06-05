@@ -227,14 +227,14 @@ export const WithAlert: Story = {
 }
 
 /**
- * The `avatar` prop is not limited to people — it accepts any avatar type in the
- * system (person, company, team, icon, emoji, flag, file), all rendered at `md`
- * on the left.
+ * The `avatar` prop accepts every single-avatar type in the system — person,
+ * company, team, file, flag, icon, emoji, module, alert, date and pulse — each
+ * rendered at a single, fixed size on the left (the size is not configurable).
  */
 export const AvatarTypes: Story = {
   parameters: {
     noMetaLayout: true,
-    docs: { story: { inline: false, height: "420px" } },
+    docs: { story: { inline: false, height: "840px" } },
   },
   render: () => (
     <div className="flex w-[640px] flex-col gap-3">
@@ -262,6 +262,21 @@ export const AvatarTypes: Story = {
         primaryAction={{ label: "Open", onClick: fn() }}
       />
       <F0CardOneLiner
+        avatar={{
+          type: "file",
+          file: { name: "contract.pdf", type: "application/pdf" },
+        }}
+        title="contract.pdf"
+        description="File avatar"
+        primaryAction={{ label: "Open", onClick: fn() }}
+      />
+      <F0CardOneLiner
+        avatar={{ type: "flag", flag: "es" }}
+        title="Spain"
+        description="Flag avatar"
+        primaryAction={{ label: "Open", onClick: fn() }}
+      />
+      <F0CardOneLiner
         avatar={{ type: "icon", icon: Briefcase }}
         title="Engineering"
         description="Icon avatar"
@@ -277,6 +292,30 @@ export const AvatarTypes: Story = {
         avatar={{ type: "module", module: "goals" }}
         title="Goals"
         description="Module avatar"
+        primaryAction={{ label: "Open", onClick: fn() }}
+      />
+      <F0CardOneLiner
+        avatar={{ type: "alert", variant: "warning" }}
+        title="Action required"
+        description="Alert avatar"
+        primaryAction={{ label: "Open", onClick: fn() }}
+      />
+      <F0CardOneLiner
+        avatar={{ type: "date", date: new Date(2026, 5, 5) }}
+        title="Team offsite"
+        description="Date avatar"
+        primaryAction={{ label: "Open", onClick: fn() }}
+      />
+      <F0CardOneLiner
+        avatar={{
+          type: "pulse",
+          firstName: "Jane",
+          lastName: "Cooper",
+          pulse: "positive",
+          onPulseClick: fn(),
+        }}
+        title="Jane Cooper"
+        description="Pulse avatar"
         primaryAction={{ label: "Open", onClick: fn() }}
       />
     </div>
