@@ -1,0 +1,139 @@
+name: "Zerito — Weekly F0 Product Summary"
+
+on:
+  schedule:
+    - cron: "0 10 * * 5" # Every Friday at 10:00 UTC
+  workflow_dispatch:
+    inputs:
+      from:
+        description: "Start date (YYYY-MM-DD). Defaults to 7 days ago or last run."
+        required: false
+      to:
+        description: "End date (YYYY-MM-DD). Defaults to today."
+        required: false
+      dry_run:
+        description: "Skip publishing to Slack (summary is printed to the workflow log instead)"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+      ignore_last_run:
+        description: "Ignore the cached last-run date and always use the last 7 days"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+env:
+  PROVIDER: groq
+  SLACK_CHANNEL: "#testing-zerito"
+
+jobs:
+  summarize:
+    name: "Generate and publish product summary"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: pnpm
+
+      - name: Install changelog-summarizer dependencies
+        run: pnpm install --filter @factorialco/f0-changelog-summarizer
+        working-directory: ${{ github.workspace }}
+
+      - name: Restore last-run cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .cache/zerito-product-last-run
+          key: zerito-product-last-run
+
+      - name: Generate summary
+        id: summarize
+        env:
+          FROM_DATE: ${{ inputs.from || '' }}
+          TO_DATE: ${{ inputs.to || '' }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ARGS=(--provider "$PROVIDER")
+
+          if [ -n "$FROM_DATE" ]; then
+            ARGS+=(--from "$FROM_DATE")
+          fi
+
+          if [ -n "$TO_DATE" ]; then
+            ARGS+=(--to "$TO_DATE")
+          fi
+
+          if [ "${{ inputs.ignore_last_run }}" = "true" ]; then
+            ARGS+=(--ignore-last-run)
+          fi
+
+          pnpm tsx src/index.ts \
+            "${ARGS[@]}" \
+            --prompt src/prompts/product-v3.md \
+            --github-token "$GITHUB_TOKEN" \
+            --repo-root "${{ github.workspace }}" \
+            --output /tmp/summary.md
+
+          echo "summary_file=/tmp/summary.md" >> "$GITHUB_OUTPUT"
+          # index.ts pre-renders the Block Kit payload (sections already split
+          # under Slack's 3000-char limit) next to the summary.
+          echo "blocks_file=/tmp/summary.blocks.json" >> "$GITHUB_OUTPUT"
+        working-directory: ${{ github.workspace }}/packages/changelog-summarizer
+
+      - name: Save last-run cache
+        if: ${{ inputs.dry_run != 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: .cache/zerito-product-last-run
+          key: zerito-product-last-run
+
+      - name: Print summary (dry run)
+        if: ${{ inputs.dry_run == 'true' }}
+        env:
+          SUMMARY_FILE: ${{ steps.summarize.outputs.summary_file }}
+        run: cat "$SUMMARY_FILE"
+
+      - name: Publish to Slack via Zerito
+        if: ${{ inputs.dry_run != 'true' }}
+        env:
+          BLOCKS_FILE: ${{ steps.summarize.outputs.blocks_file }}
+          SLACK_BOT_TOKEN: ${{ secrets.ZERITO_SLACK_BOT_TOKEN }}
+        run: |
+          if [ -z "$SLACK_BOT_TOKEN" ]; then
+            echo "::error::ZERITO_SLACK_BOT_TOKEN is not set"
+            exit 1
+          fi
+          # index.ts already produced the Block Kit payload ({ "blocks": [...] })
+          # with long sections split under Slack's 3000-char limit.
+          # We inject the target channel and post via chat.postMessage.
+          jq --arg channel "$SLACK_CHANNEL" '. + {channel: $channel}' "$BLOCKS_FILE" > /tmp/payload.json
+          RESPONSE=$(curl --silent --show-error --fail \
+            -X POST \
+            -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            --data @/tmp/payload.json \
+            https://slack.com/api/chat.postMessage)
+          echo "Slack response: $RESPONSE"
+          if ! echo "$RESPONSE" | jq -e '.ok' > /dev/null; then
+            echo "::error::chat.postMessage failed: $(echo "$RESPONSE" | jq -r '.error')"
+            exit 1
+          fi

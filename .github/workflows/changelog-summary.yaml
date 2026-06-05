@@ -72,7 +72,6 @@ jobs:
           FROM_DATE: ${{ inputs.from || '' }}
           TO_DATE: ${{ inputs.to || '' }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ARGS=(--provider "$PROVIDER")
 
@@ -90,15 +89,10 @@ jobs:
 
           pnpm tsx src/index.ts \
             "${ARGS[@]}" \
-            --prompt src/prompts/product-v3.md \
-            --github-token "$GITHUB_TOKEN" \
             --repo-root "${{ github.workspace }}" \
             --output /tmp/summary.md
 
           echo "summary_file=/tmp/summary.md" >> "$GITHUB_OUTPUT"
-          # index.ts pre-renders the Block Kit payload (sections already split
-          # under Slack's 3000-char limit) next to the summary.
-          echo "blocks_file=/tmp/summary.blocks.json" >> "$GITHUB_OUTPUT"
         working-directory: ${{ github.workspace }}/packages/changelog-summarizer
 
       - name: Save last-run cache
@@ -117,25 +111,87 @@ jobs:
           SUMMARY_FILE: ${{ steps.summarize.outputs.summary_file }}
         run: cat "$SUMMARY_FILE"
 
-      - name: Publish to Slack
+      - name: Publish summary to Slack
         if: ${{ inputs.dry_run != 'true' }}
         env:
-          BLOCKS_FILE: ${{ steps.summarize.outputs.blocks_file }}
-          # Incoming webhook for #f0-design-system. Use a webhook created in the
-          # "Zero Updater" Slack app so the message posts as that bot (zerito).
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_F0_SUMMARIZER }}
+          SUMMARY_FILE: ${{ steps.summarize.outputs.summary_file }}
         run: |
-          if [ -z "$SLACK_WEBHOOK" ]; then
-            echo "::error::SLACK_WEBHOOK_F0_SUMMARIZER is not set"
-            exit 1
+          # The summary file has the structure:
+          #   Line 1: plain-text title (e.g. "F0 Weekly Summary (2026-02-23 – 2026-03-01)")
+          #   ---
+          #   <package title line>   (e.g. "⚛️ F0 React — v1.380.0 → v1.384.0")
+          #   <body lines...>
+          #   ---
+          #   <next package title>
+          #   ...
+          #
+          # We build a Block Kit payload:
+          #   • One top-level "header" block for the title
+          #   • For each package section: "divider" + "header" (title) + "section" (body)
+
+          CONTENT=$(cat "$SUMMARY_FILE")
+
+          # Extract the top-level title (first line before the first ---)
+          TITLE=$(printf '%s' "$CONTENT" | head -n1)
+
+          # Start the blocks array with the top-level header
+          BLOCKS=$(jq -n --arg t "$TITLE" \
+            '[{ type: "header", text: { type: "plain_text", text: $t, emoji: true } }]')
+
+          # Split the file into sections on lines that are exactly "---"
+          # Skip the first segment (it's the title line we already handled).
+          # Each subsequent segment's first line is the package title; the rest is the body.
+          SEGMENT=""
+          FIRST_SEGMENT=true
+
+          while IFS= read -r line; do
+            if [ "$line" = "---" ]; then
+              if $FIRST_SEGMENT; then
+                # Discard the title segment — already captured above
+                FIRST_SEGMENT=false
+                SEGMENT=""
+                continue
+              fi
+              # Flush the accumulated segment as a package section
+              if [ -n "$SEGMENT" ]; then
+                PKG_TITLE=$(printf '%s' "$SEGMENT" | head -n1)
+                PKG_BODY=$(printf '%s' "$SEGMENT" | tail -n +2)
+                BLOCKS=$(printf '%s' "$BLOCKS" | jq \
+                  --arg h "$PKG_TITLE" \
+                  --arg b "$PKG_BODY" \
+                  '. + [
+                    { type: "divider" },
+                    { type: "header", text: { type: "plain_text", text: $h, emoji: true } },
+                    { type: "section", text: { type: "mrkdwn", text: $b } }
+                  ]')
+              fi
+              SEGMENT=""
+            else
+              if [ -z "$SEGMENT" ]; then
+                SEGMENT="$line"
+              else
+                SEGMENT="${SEGMENT}"$'\n'"${line}"
+              fi
+            fi
+          done <<< "$CONTENT"
+
+          # Flush the last segment (no trailing --- in the file)
+          if [ -n "$SEGMENT" ] && ! $FIRST_SEGMENT; then
+            PKG_TITLE=$(printf '%s' "$SEGMENT" | head -n1)
+            PKG_BODY=$(printf '%s' "$SEGMENT" | tail -n +2)
+            BLOCKS=$(printf '%s' "$BLOCKS" | jq \
+              --arg h "$PKG_TITLE" \
+              --arg b "$PKG_BODY" \
+              '. + [
+                { type: "divider" },
+                { type: "header", text: { type: "plain_text", text: $h, emoji: true } },
+                { type: "section", text: { type: "mrkdwn", text: $b } }
+              ]')
           fi
-          # index.ts already produced the Block Kit payload ({ "blocks": [...] })
-          # with long sections split under Slack's 3000-char limit — just post it.
-          RESPONSE=$(curl --silent --show-error --fail \
-            -X POST -H "Content-Type: application/json; charset=utf-8" \
-            --data @"$BLOCKS_FILE" "$SLACK_WEBHOOK")
-          echo "Slack response: $RESPONSE"
-          if [ "$RESPONSE" != "ok" ]; then
-            echo "::error::Slack webhook post failed: $RESPONSE"
-            exit 1
-          fi
+
+          # Build and send the final payload
+          jq -n --argjson blocks "$BLOCKS" '{ blocks: $blocks }' > /tmp/payload.json
+
+          curl -X POST -H "Content-Type: application/json" \
+            --data @/tmp/payload.json \
+            "${{ secrets.SLACK_WEBHOOK_F0_SUMMARIZER }}"
