@@ -1,8 +1,12 @@
-name: "Weekly F0 Changelog Summary"
+name: "Weekly F0 Changelog Summary (legacy — auto-run disabled)"
 
+# NOTE: superseded by `zerito-product-summary.yaml`. This legacy engineering
+# summarizer shares `src/index.ts`, which now produces the PRODUCT summary, so
+# the per-package publish step below would post a malformed message. The weekly
+# schedule is therefore removed to avoid a broken/duplicate Friday post; the
+# workflow is kept as manual-only until we decide to retire it or give the
+# engineering summary its own code path.
 on:
-  schedule:
-    - cron: "0 10 * * 5" # Every Friday at 10:00 UTC
   workflow_dispatch:
     inputs:
       from:
