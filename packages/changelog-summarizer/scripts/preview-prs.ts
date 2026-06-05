@@ -30,6 +30,7 @@ import {
   parseSummaryJson,
 } from "../src/formatters/json-formatter.js";
 import { buildBlocks } from "../src/formatters/blockkit.js";
+import { FOUNDATIONS_AUTHORS } from "../src/foundations.js";
 import type { SummaryJson } from "../src/types.js";
 
 function arg(name: string): string | undefined {
@@ -72,7 +73,11 @@ async function main(): Promise<void> {
 
   const storyIndex = await collectStoryIndex();
   const storyUrls = storyIndex.urlByKey;
-  const facts = classifyMergedPrs(withFiles, storyIndex);
+  const facts = classifyMergedPrs(
+    withFiles,
+    storyIndex,
+    new Set(FOUNDATIONS_AUTHORS),
+  );
 
   // Compose the technical thread reply deterministically from fixes + infra.
   const threadParts: string[] = [];

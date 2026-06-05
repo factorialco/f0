@@ -17,6 +17,7 @@ import {
   type PrWithFiles,
 } from "./collectors/prs.js";
 import { collectStoryIndex } from "./collectors/stories.js";
+import { FOUNDATIONS_AUTHORS } from "./foundations.js";
 import { resolveApiKey, resolveModel } from "./providers.js";
 import { polishSummary, reconcileSummary } from "./summarizer.js";
 import { jsonToSlackText } from "./formatters/json-formatter.js";
@@ -251,7 +252,11 @@ async function main(): Promise<void> {
     withFiles.push({ ...pr, files, body });
   }
 
-  const facts = classifyMergedPrs(withFiles, storyIndex);
+  const facts = classifyMergedPrs(
+    withFiles,
+    storyIndex,
+    new Set(FOUNDATIONS_AUTHORS),
+  );
 
   // Technical thread reply (for engineers): bug fixes + infra + thanks.
   const threadParts: string[] = [];
