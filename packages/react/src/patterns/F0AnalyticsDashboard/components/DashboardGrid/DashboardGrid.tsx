@@ -114,6 +114,9 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
 
   // ─── Rows state ─────────────────────────────────────────────
   const [rows, setRows] = useState<Row[]>(() => buildInitialRows(items))
+  const [measuredItemHeights, setMeasuredItemHeights] = useState<
+    Map<string, number>
+  >(new Map())
 
   // Sync rows when externally-owned item layout changes.
   const prevItemLayoutSignatureRef = useRef(buildItemLayoutSignature(items))
@@ -133,6 +136,24 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       setRows(buildInitialRows(items))
     }
   }, [resetKey, items])
+
+  useEffect(() => {
+    const itemIds = new Set(items.map((item) => item.id))
+    setMeasuredItemHeights((prev) => {
+      let changed = false
+      const next = new Map<string, number>()
+
+      for (const [id, height] of prev) {
+        if (itemIds.has(id)) {
+          next.set(id, height)
+        } else {
+          changed = true
+        }
+      }
+
+      return changed ? next : prev
+    })
+  }, [items])
 
   // ─── Narrow detection ───────────────────────────────────────
   useEffect(() => {
@@ -177,6 +198,31 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       onLayoutChange(layout)
     },
     [onLayoutChange]
+  )
+
+  const handleItemContentHeightChange = useCallback(
+    (itemId: string, contentHeight: number) => {
+      const item = itemMap.get(itemId)
+      const minHeight = item
+        ? (MIN_ROW_HEIGHTS[item.type] ?? DEFAULT_MIN_ROW_HEIGHT)
+        : DEFAULT_MIN_ROW_HEIGHT
+      const nextHeight = Math.max(minHeight, Math.ceil(contentHeight))
+
+      setMeasuredItemHeights((prev) => {
+        const currentHeight = prev.get(itemId)
+        if (
+          currentHeight !== undefined &&
+          Math.abs(currentHeight - nextHeight) < 1
+        ) {
+          return prev
+        }
+
+        const next = new Map(prev)
+        next.set(itemId, nextHeight)
+        return next
+      })
+    },
+    [itemMap]
   )
 
   // ─── Delete ─────────────────────────────────────────────────
@@ -306,9 +352,11 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
 
   // ─── Row resize ─────────────────────────────────────────────
   const startResize = useCallback(
-    (rowIdx: number, startY: number) => {
-      const startHeight = rows[rowIdx].height
-      const minHeight = getMinRowHeight(rows[rowIdx], itemMap)
+    (rowIdx: number, startY: number, startHeight: number) => {
+      const minHeight = Math.max(
+        getMinRowHeight(rows[rowIdx], itemMap),
+        getMeasuredRowHeight(rows[rowIdx], measuredItemHeights)
+      )
       const onMove = (e: MouseEvent) => {
         const newHeight = Math.max(minHeight, startHeight + e.clientY - startY)
         setRows((prev) =>
@@ -328,7 +376,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       document.addEventListener("mousemove", onMove)
       document.addEventListener("mouseup", onUp)
     },
-    [rows, emitLayout]
+    [rows, emitLayout, itemMap, measuredItemHeights]
   )
 
   // ─── Render ─────────────────────────────────────────────────
@@ -421,7 +469,10 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
                 "flex rounded-lg transition-colors duration-200",
                 isDropRow && "bg-f1-background-hover"
               )}
-              style={{ gap: GAP, height: row.height }}
+              style={{
+                gap: GAP,
+                height: getRenderableRowHeight(row, measuredItemHeights),
+              }}
               onDragOver={canDrag ? (e) => handleRowDragOver(e, ri) : undefined}
               onDrop={canDrag ? () => {} : undefined}
             >
@@ -449,6 +500,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
                     draggable={canDrag}
                     onDragStart={handleDragStart}
                     onDragEnd={handleDragEnd}
+                    onContentHeightChange={handleItemContentHeightChange}
                   >
                     <DashboardGridItem
                       item={item}
@@ -470,7 +522,11 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
                 className="group/resize absolute -bottom-3.5 mx-auto flex h-3 w-full items-center justify-center hover:cursor-ns-resize"
                 onMouseDown={(e) => {
                   e.preventDefault()
-                  startResize(ri, e.clientY)
+                  startResize(
+                    ri,
+                    e.clientY,
+                    getRenderableRowHeight(row, measuredItemHeights)
+                  )
                 }}
               >
                 <div className="h-1 w-16 rounded-full bg-transparent transition-colors group-hover/resize:bg-f1-foreground-tertiary" />
@@ -502,6 +558,7 @@ function RowItem({
   draggable: canDrag,
   onDragStart,
   onDragEnd,
+  onContentHeightChange,
   children,
 }: {
   id: string
@@ -511,15 +568,68 @@ function RowItem({
   draggable: boolean
   onDragStart: (id: string) => void
   onDragEnd: () => void
+  onContentHeightChange: (id: string, height: number) => void
   children: React.ReactNode
 }) {
   // Track whether the drag started from the handle. If not, cancel it.
   const fromHandleRef = useRef(false)
+  const itemRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = itemRef.current
+    if (!el) return
+
+    let frame: number | undefined
+    const requestFrame =
+      typeof requestAnimationFrame === "function"
+        ? requestAnimationFrame
+        : (callback: FrameRequestCallback) => window.setTimeout(callback, 0)
+    const cancelFrame =
+      typeof cancelAnimationFrame === "function"
+        ? cancelAnimationFrame
+        : window.clearTimeout
+
+    const scheduleMeasure = () => {
+      if (frame !== undefined) {
+        cancelFrame(frame)
+      }
+
+      frame = requestFrame(() => {
+        frame = undefined
+        const height = Math.max(
+          el.scrollHeight,
+          el.getBoundingClientRect().height
+        )
+        onContentHeightChange(id, height)
+      })
+    }
+
+    scheduleMeasure()
+
+    const resizeObserver = new ResizeObserver(scheduleMeasure)
+    resizeObserver.observe(el)
+
+    const mutationObserver = new MutationObserver(scheduleMeasure)
+    mutationObserver.observe(el, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    })
+
+    return () => {
+      if (frame !== undefined) {
+        cancelFrame(frame)
+      }
+      resizeObserver.disconnect()
+      mutationObserver.disconnect()
+    }
+  }, [id, onContentHeightChange])
 
   return (
     <>
       {showIndicatorBefore && <DropIndicator />}
       <div
+        ref={itemRef}
         data-card-id={id}
         draggable={canDrag}
         onDragStart={
@@ -720,6 +830,25 @@ function getMinRowHeight<Filters extends FiltersDefinition>(
     if (h > min) min = h
   }
   return min
+}
+
+function getMeasuredRowHeight(
+  row: Row,
+  measuredItemHeights: Map<string, number>
+): number {
+  let measuredHeight = 0
+  for (const id of row.ids) {
+    const itemHeight = measuredItemHeights.get(id) ?? 0
+    if (itemHeight > measuredHeight) measuredHeight = itemHeight
+  }
+  return measuredHeight
+}
+
+function getRenderableRowHeight(
+  row: Row,
+  measuredItemHeights: Map<string, number>
+): number {
+  return Math.max(row.height, getMeasuredRowHeight(row, measuredItemHeights))
 }
 
 function getSlotWeight<Filters extends FiltersDefinition>(

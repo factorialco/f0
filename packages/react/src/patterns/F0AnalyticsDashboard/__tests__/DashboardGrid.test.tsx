@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import { zeroRender as render, waitFor } from "@/testing/test-utils"
 
 import { DashboardGrid } from "../components/DashboardGrid/DashboardGrid"
@@ -83,6 +83,10 @@ function getDashboardRowHeight(container: HTMLElement): string {
 }
 
 describe("DashboardGrid", () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   it("recomputes row height when itemHeight changes for existing items", async () => {
     const { container, rerender } = render(
       <DashboardGrid items={makeMetricItems(144)} filters={{}} />
@@ -115,6 +119,33 @@ describe("DashboardGrid", () => {
     expect(collectionRow.style.height).toBe("480px")
 
     rerender(<DashboardGrid items={makeCollectionItems(960)} filters={{}} />)
+
+    await waitFor(() => {
+      expect(collectionRow.style.height).toBe("960px")
+    })
+  })
+
+  it("grows a row when loaded content is taller than the configured itemHeight", async () => {
+    vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation(
+      function getScrollHeight(this: HTMLElement) {
+        if (this.dataset.cardId === "expenses") return 960
+        return 0
+      }
+    )
+
+    const { container } = render(
+      <DashboardGrid items={makeCollectionItems(480)} filters={{}} />
+    )
+
+    const collectionCard = container.querySelector('[data-card-id="expenses"]')
+    if (!(collectionCard instanceof HTMLElement)) {
+      throw new Error("Expected collection item to be rendered")
+    }
+
+    const collectionRow = collectionCard.parentElement
+    if (!(collectionRow instanceof HTMLElement)) {
+      throw new Error("Expected collection row to be rendered")
+    }
 
     await waitFor(() => {
       expect(collectionRow.style.height).toBe("960px")
