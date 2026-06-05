@@ -125,7 +125,11 @@ export function useGraphRenderModel<T>({
     return info
   }, [visibleTreeNodes])
 
-  // ── Expander data: for each visible parent with children, create an expander ──
+  // ── Expander data ──
+  // An expander is shown for a node with children that is either collapsed
+  // (click to open) OR expanded but still waiting for its children to arrive
+  // (shown with a spinner). Keeping it visible during that load avoids the
+  // blank gap between the expand click and the children appearing.
   const expanderMap = useMemo(() => {
     const map = new Map<
       string,
@@ -133,15 +137,20 @@ export function useGraphRenderModel<T>({
         expanderId: string
         avatars: { firstName: string; lastName: string; src?: string }[]
         count: number
+        loading: boolean
       }
     >()
 
     for (const treeNode of visibleTreeNodes) {
-      if (treeNode.childrenCount > 0 && !expandedNodes.has(treeNode.id)) {
+      if (treeNode.childrenCount === 0) continue
+      const expanded = expandedNodes.has(treeNode.id)
+      const loading = expanded && treeNode.children.length === 0
+      if (!expanded || loading) {
         map.set(treeNode.id, {
           expanderId: `expander-${treeNode.id}`,
           avatars: [],
           count: treeNode.childrenCount,
+          loading,
         })
       }
     }
@@ -165,6 +174,7 @@ export function useGraphRenderModel<T>({
       parentId: string
       avatars: { firstName: string; lastName: string; src?: string }[]
       count: number
+      loading: boolean
     }> = []
 
     // An expander hangs below every visible collapsed parent that HAS children
@@ -185,6 +195,7 @@ export function useGraphRenderModel<T>({
         parentId,
         avatars: exp.avatars,
         count: exp.count,
+        loading: exp.loading,
       })
     }
 
@@ -405,6 +416,7 @@ export function useGraphRenderModel<T>({
           parentId: exp.parentId,
           parentWidth: BASE_W,
           parentName: exp.parentId,
+          loading: exp.loading,
         } as ExpanderNodeData,
       }
     })

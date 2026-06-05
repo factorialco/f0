@@ -68,6 +68,12 @@ export interface ExpanderNodeData {
   parentId: string
   parentWidth: number
   parentName?: string
+  /**
+   * `true` while the parent has been expanded but its children have not arrived
+   * yet (lazy / on-demand loading). The expander stays visible and shows a
+   * spinner so the open action gives immediate feedback instead of a blank gap.
+   */
+  loading?: boolean
 }
 
 export type ExpanderRFNode = RFNode<ExpanderNodeData>
@@ -229,7 +235,8 @@ function F0GraphExpanderWrapperInner({ data, id }: NodeProps<ExpanderRFNode>) {
   const i18n = useI18n()
   if (!zoomCtx || !expandCtx || !actionsCtx) return null
 
-  const { count, parentId, parentWidth, parentName } = data as ExpanderNodeData
+  const { count, parentId, parentWidth, parentName, loading } =
+    data as ExpanderNodeData
   const expanded = expandCtx.expandedNodes.has(parentId)
   const expanderSize = EXPANDER_SIZE[zoomCtx.zoomLevel]
   const { source: sourcePos, target: targetPos } = handlePositions(
@@ -277,7 +284,7 @@ function F0GraphExpanderWrapperInner({ data, id }: NodeProps<ExpanderRFNode>) {
           size={expanderSize}
           tabIndex={-1}
           onClick={() => actionsCtx.toggleExpand(parentId)}
-          loading={renderCfg?.deferredLoading}
+          loading={loading || renderCfg?.deferredLoading}
         />
       </div>
       <Handle type="source" position={sourcePos} className="!invisible" />
@@ -296,6 +303,7 @@ export const F0GraphExpanderWrapper = memo(
     if (prevData.parentId !== nextData.parentId) return false
     if (prevData.count !== nextData.count) return false
     if (prevData.parentWidth !== nextData.parentWidth) return false
+    if (prevData.loading !== nextData.loading) return false
     if (prev.positionAbsoluteX !== next.positionAbsoluteX) return false
     if (prev.positionAbsoluteY !== next.positionAbsoluteY) return false
     return true

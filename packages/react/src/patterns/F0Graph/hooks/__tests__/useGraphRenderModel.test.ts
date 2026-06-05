@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 
 import type { MutableRefObject } from "react"
 
+import type { ExpanderNodeData } from "../../internal/ReactFlowAdapters"
 import type { TreeNode } from "../../types"
 import { useGraphRenderModel } from "../useGraphRenderModel"
 
@@ -43,6 +44,11 @@ const baseOptions = (roots: TreeNode<null>[], expanded: string[]) => {
   }
 }
 
+const expanderFor = (
+  rfNodes: ReturnType<typeof useGraphRenderModel>["rfNodes"],
+  id: string
+) => rfNodes.find((n) => n.id === `expander-${id}`)
+
 describe("useGraphRenderModel — expander affordance", () => {
   it("renders an expander for a collapsed node with childrenCount but NO loaded children", () => {
     // ceo (expanded) → cto (collapsed, 81 reports, children NOT loaded)
@@ -52,24 +58,33 @@ describe("useGraphRenderModel — expander affordance", () => {
       useGraphRenderModel(baseOptions([ceo], ["ceo"]))
     )
 
-    const expander = result.current.rfNodes.find((n) => n.id === "expander-cto")
-    expect(expander).toBeDefined()
+    const expander = expanderFor(result.current.rfNodes, "cto")
     expect(expander?.type).toBe("expanderNode")
-    expect(expander?.data?.count).toBe(81)
+    expect((expander?.data as ExpanderNodeData).count).toBe(81)
+    expect((expander?.data as ExpanderNodeData).loading).toBe(false)
   })
 
-  it("does NOT render an expander for an expanded node", () => {
+  it("keeps the expander with a loading flag while an expanded node waits for children", () => {
+    // cto is expanded but its 81 children have not arrived yet.
     const cto = treeNode("cto", "ceo", 81, [], 1)
     const ceo = treeNode("ceo", null, 1, [cto])
     const { result } = renderHook(() =>
-      // Both expanded — cto's children still aren't loaded, so it has no
-      // visible subtree, but being expanded it shows no expander.
       useGraphRenderModel(baseOptions([ceo], ["ceo", "cto"]))
     )
 
-    expect(result.current.rfNodes.some((n) => n.id === "expander-cto")).toBe(
-      false
+    const expander = expanderFor(result.current.rfNodes, "cto")
+    expect(expander).toBeDefined()
+    expect((expander?.data as ExpanderNodeData).loading).toBe(true)
+  })
+
+  it("removes the expander once an expanded node's children are loaded", () => {
+    const report = treeNode("report", "boss", 0, [], 1)
+    const boss = treeNode("boss", null, 1, [report])
+    const { result } = renderHook(() =>
+      useGraphRenderModel(baseOptions([boss], ["boss"]))
     )
+
+    expect(expanderFor(result.current.rfNodes, "boss")).toBeUndefined()
   })
 
   it("renders no expander for a true leaf (childrenCount 0)", () => {
@@ -79,8 +94,6 @@ describe("useGraphRenderModel — expander affordance", () => {
       useGraphRenderModel(baseOptions([ceo], ["ceo"]))
     )
 
-    expect(result.current.rfNodes.some((n) => n.id === "expander-leaf")).toBe(
-      false
-    )
+    expect(expanderFor(result.current.rfNodes, "leaf")).toBeUndefined()
   })
 })
