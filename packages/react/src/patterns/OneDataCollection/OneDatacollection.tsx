@@ -1651,11 +1651,12 @@ const OneDataCollectionComp = <
       />
       {typeof document !== "undefined" &&
         createPortal(
-          // Portal into the SAME container the preset dialog uses (`#content`,
-          // see DialogContent) with a z above its overlay (z-50), so the
-          // confirmation paints on top of the overlay it's triggered from
-          // rather than being trapped under that container's stacking context.
-          <div className="relative z-[100]">
+          // Portal next to the preset dialog (same container it uses) inside a
+          // stacking context above its overlay (z-50), so the confirmation
+          // paints on top of the overlay it's triggered from. The z-index is
+          // set inline (not a Tailwind arbitrary class) so it always applies
+          // regardless of the consumer's CSS build.
+          <div style={{ position: "relative", zIndex: 9999 }}>
             <F0ActionBar
               isOpen={shareCopied}
               variant="light"
