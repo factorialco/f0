@@ -31,7 +31,8 @@ export interface F0CardRowProps {
   title: string
 
   /**
-   * Optional secondary line shown beneath the title (single line, truncated).
+   * Optional secondary line shown beneath the title (wraps across multiple
+   * lines when long).
    */
   description?: string
 

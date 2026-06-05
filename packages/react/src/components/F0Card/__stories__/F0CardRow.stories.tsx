@@ -31,7 +31,7 @@ const meta: Meta<typeof F0CardRow> = {
     title: { control: "text", description: "The primary line of text." },
     description: {
       control: "text",
-      description: "Optional secondary line (single line, truncated).",
+      description: "Optional secondary line (wraps when long).",
     },
     avatar: {
       control: "object",
