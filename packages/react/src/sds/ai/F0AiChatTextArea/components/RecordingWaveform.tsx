@@ -3,13 +3,19 @@ import { useEffect, useRef, useState } from "react"
 import { cn } from "@/lib/utils"
 
 const BAR_WIDTH = 2 // px
-const BAR_GAP = 3 // px
+const BAR_GAP = 2 // px
 /** How often a new amplitude sample is appended to the timeline. */
 const SAMPLE_MS = 70
 /** Resting height fraction so silent moments render as small dots. */
 const MIN_SCALE = 0.08
 /** Gain applied to RMS so normal speech uses a good chunk of the height. */
-const LEVEL_GAIN = 3
+const LEVEL_GAIN = 6
+/**
+ * Perceptual curve (<1) applied after the gain: lifts quiet/medium speech
+ * toward the top so you don't have to shout for tall bars, while loud peaks
+ * still clamp at the max. 1 would be the old linear response.
+ */
+const LEVEL_CURVE = 0.6
 
 type WindowWithWebkitAudio = Window &
   typeof globalThis & {
@@ -82,7 +88,7 @@ export const RecordingWaveform = ({
         sum += deviation * deviation
       }
       const rms = Math.sqrt(sum / data.length)
-      const level = Math.min(1, rms * LEVEL_GAIN)
+      const level = Math.min(1, Math.pow(rms * LEVEL_GAIN, LEVEL_CURVE))
       setLevels((prev) => {
         const next =
           prev.length >= capacity
@@ -106,20 +112,16 @@ export const RecordingWaveform = ({
     <div
       ref={containerRef}
       className={cn(
-        "flex h-6 items-center justify-end overflow-hidden",
+        "flex h-6 items-center justify-end overflow-hidden gap-0.5",
         className
       )}
-      style={{ gap: `${BAR_GAP}px` }}
       aria-hidden="true"
     >
       {levels.map((level, i) => (
         <span
           key={i}
-          className="shrink-0 rounded-full bg-f1-foreground-secondary"
-          style={{
-            width: `${BAR_WIDTH}px`,
-            height: `${(MIN_SCALE + level * (1 - MIN_SCALE)) * 100}%`,
-          }}
+          className="shrink-0 rounded-full bg-f1-foreground-secondary w-0.5"
+          style={{ height: `${(MIN_SCALE + level * (1 - MIN_SCALE)) * 100}%` }}
         />
       ))}
     </div>
