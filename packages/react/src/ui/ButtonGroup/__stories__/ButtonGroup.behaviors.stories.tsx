@@ -309,7 +309,7 @@ const WideCluster = ({
   exportAsDropdown?: boolean
 }) => (
   <ButtonGroup align="end" wrap className="w-full">
-    {withOverflow && <Dropdown items={reflowOverflow} />}
+    {withOverflow && <Dropdown items={reflowOverflow} icon={Ellipsis} />}
     <F0Button variant="outline" icon={Pencil} label="Edit" onClick={noop} />
     {exportAsDropdown ? (
       <F0ButtonDropdown

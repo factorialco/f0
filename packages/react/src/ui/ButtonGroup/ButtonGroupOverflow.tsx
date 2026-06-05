@@ -5,7 +5,7 @@ import {
 } from "@/components/F0Button/types"
 import { type IconType } from "@/components/F0Icon"
 import { Dropdown, type DropdownItem } from "@/experimental/Navigation/Dropdown"
-import { EllipsisHorizontal } from "@/icons/app"
+import { Ellipsis } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { useOverflowCalculation } from "@/ui/OverflowList/useOverflowCalculation"
 
@@ -101,7 +101,7 @@ export function ButtonGroupOverflow({
 
       {menuItems.length > 0 && (
         <div ref={customOverflowIndicatorRef}>
-          <Dropdown items={menuItems} icon={EllipsisHorizontal} size={size} />
+          <Dropdown items={menuItems} icon={Ellipsis} size={size} />
         </div>
       )}
     </div>
