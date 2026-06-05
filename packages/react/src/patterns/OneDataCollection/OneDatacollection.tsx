@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from "react"
+import { createPortal } from "react-dom"
 
 import type {
   FiltersDefinition,
@@ -1648,12 +1649,20 @@ const OneDataCollectionComp = <
             : undefined
         }
       />
-      <F0ActionBar
-        isOpen={shareCopied}
-        variant="light"
-        status="success"
-        label={i18n.collections.presets.copiedToClipboard}
-      />
+      {typeof document !== "undefined" &&
+        createPortal(
+          // Portaled into a z-[100] stacking context so the confirmation paints
+          // above the preset dialog's overlay (z-50) it's triggered from.
+          <div className="relative z-[100]">
+            <F0ActionBar
+              isOpen={shareCopied}
+              variant="light"
+              status="success"
+              label={i18n.collections.presets.copiedToClipboard}
+            />
+          </div>,
+          document.body
+        )}
     </div>
   )
 }
