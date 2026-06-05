@@ -1,0 +1,108 @@
+import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
+
+import * as ButtonGroupStories from "./__stories__/ButtonGroup.stories"
+import * as Patterns from "./__stories__/ButtonGroup.behaviors.stories"
+
+<Meta of={ButtonGroupStories} />
+
+# ButtonGroup
+
+`ButtonGroup` is a low-level layout primitive that arranges a group of action
+buttons. It is intentionally **dumb about its children**: it only controls how
+they are arranged — alignment, gap, and responsive stacking.
+
+Across F0, the action rows that are hand-rolled per surface reduce to just **three
+layout patterns** — Trailing, Split, and Reflowing — plus a few orthogonal
+**composition** pieces you drop into any of them. Documenting them by pattern
+(rather than per component) is what lets those surfaces share one primitive without
+changing what users see.
+
+<Canvas of={ButtonGroupStories.Default} />
+<Controls of={ButtonGroupStories.Default} />
+
+## At a glance
+
+| Pattern       | Recipe                                                  | Responsive                                    |
+| ------------- | ------------------------------------------------------- | --------------------------------------------- |
+| **Trailing**  | `align="end" stack="none"`                              | none — always a row                           |
+| **Split**     | `align="between" stack="container-md" fullWidthOnStack` | full-width column when the surface is narrow  |
+| **Reflowing** | two groups (one per breakpoint)                         | stacks **and** reorders across the breakpoint |
+
+## Trailing actions
+
+Actions packed at the trailing (end) edge, primary last, no stacking — the most
+common pattern. _Recognized in: dialog footers, dialog header actions, one-liner
+cards._
+
+It's the same recipe in every case; what changes is what you **compose** into it —
+a `ButtonGroupSeparator`, an icon-only button (`hideLabel`), an `F0ButtonDropdown`
+for an action array, or an ellipsis "more" menu. The one-liner is this recipe too;
+only its surrounding chrome toggles by container width.
+
+<Canvas of={Patterns.TrailingActions} />
+
+## Split actions
+
+Secondary and primary pushed to opposite edges (`align="between"`), collapsing to a
+full-width column when the **surface itself** is narrow (container `@md`).
+_Recognized in: card footers._ Button size stays constant — it can't follow a
+container query.
+
+<Canvas of={Patterns.SplitActions} />
+
+## Reflowing actions
+
+The actions **reorder** between compact and wide: wide is
+`… → secondary → divider → primary`; compact promotes the primary to the top of a
+full-width column. _Recognized in: page / resource headers._
+
+The reorder itself fits a **single** group via **`reverseOnStack`** (below). What
+forces this example to use **two** groups is everything a flex container can't
+switch on its own across the breakpoint: the button **`size`** (`lg` stacked →
+`md` row — a React prop, see [What ButtonGroup does NOT own](#what-buttongroup-does-not-own)),
+and the overflow **menu component** (a desktop `Dropdown` popover ↔ a mobile
+`MobileDropdown` drawer). With a constant size and one menu, a single
+`stack="md" reverseOnStack fullWidthOnStack` group would do.
+
+<Canvas of={Patterns.ReflowingActions} />
+
+### `reverseOnStack`
+
+Reverses the **stacked (column) order** so the last child — the primary — lands on
+top when the group stacks, while the row order at/above the breakpoint is
+unchanged. It flips the _whole_ column, so multiple secondaries reverse too
+(usually fine). No effect when `stack="none"`.
+
+## Composition building blocks
+
+Orthogonal to the patterns — drop these into any of them. They stay outside
+`ButtonGroup` because the decisions behind them are domain logic, not arrangement.
+
+- **Split button** — an action _array_ collapses to a split / menu button via
+  `F0ButtonDropdown`.
+- **Overflow menu** — extra actions collapse under an ellipsis "⋯". Either
+  width-driven (`ButtonGroupOverflow`, wrapping `OverflowList`) or a fixed,
+  count-independent bucket (the experimental `Dropdown` / `MobileDropdown`).
+- **Separator** — a `ButtonGroupSeparator` hairline divides logical groups.
+- **Icon-only** — `hideLabel` on a button (a per-button decision).
+
+<Canvas of={Patterns.OverflowMenu} />
+
+## What ButtonGroup does NOT own
+
+- **Chrome** — borders, padding, and background belong to the surrounding surface.
+- **Button `size`** — a React prop, so it **can't follow a container query**; drive
+  it from a viewport `useMediaQuery` for viewport-based layouts, or keep it constant
+  under a container query.
+- **Collapse decisions** — "is this action critical?", "which secondary is first?",
+  "should this array become a dropdown?" are domain logic. Compose the building
+  blocks above instead of adding a configuration enum that accretes every special
+  case.
+
+## Viewport vs container
+
+Stacking can react to the **viewport** (`stack="sm" | "md"`, via Tailwind `sm:` /
+`md:`) or to the **container** (`stack="container-md"`, via `@md` = 28rem / 448px on
+the nearest `@container` ancestor). They are **not** interchangeable — a card footer
+should stack on its own width (container), not the viewport. `ButtonGroup` surfaces
+this choice explicitly rather than hiding it behind a single boolean.
