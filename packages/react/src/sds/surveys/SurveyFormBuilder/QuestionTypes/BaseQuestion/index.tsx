@@ -65,11 +65,43 @@ export const BaseQuestion = ({
   const { isDragging } = useDragContext()
   const { t } = useI18n()
 
+  // The textareas are controlled, but consumers may back the title/description
+  // with an eventually-consistent store (e.g. CopilotKit's `useCoAgent`, whose
+  // state propagation lands via a subscription callback rather than the React
+  // batch that fires the keystroke handler). In that gap React would re-render
+  // with a stale `value` prop, snap the DOM back, and bump the caret to the
+  // end — making mid-string typing impossible. Keep a synchronous local mirror
+  // so the textarea always reflects the just-typed value on the very next
+  // render; pull from the parent only when it diverges from what we last
+  // emitted (e.g. an AI-driven edit or programmatic reset).
+  const [localTitle, setLocalTitle] = useState(title)
+  const lastEmittedTitleRef = useRef(title)
+  const [localDescription, setLocalDescription] = useState(description ?? "")
+  const lastEmittedDescriptionRef = useRef(description ?? "")
+
+  useEffect(() => {
+    if (title !== lastEmittedTitleRef.current) {
+      setLocalTitle(title)
+      lastEmittedTitleRef.current = title
+    }
+  }, [title])
+
+  useEffect(() => {
+    const next = description ?? ""
+    if (next !== lastEmittedDescriptionRef.current) {
+      setLocalDescription(next)
+      lastEmittedDescriptionRef.current = next
+    }
+  }, [description])
+
   const handleChangeTitle = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const next = e.target.value
+    setLocalTitle(next)
+    lastEmittedTitleRef.current = next
     onQuestionChange?.({
       id,
       type: questionType,
-      title: e.target.value,
+      title: next,
     } as Parameters<
       NonNullable<SurveyFormBuilderCallbacks["onQuestionChange"]>
     >[0])
@@ -78,10 +110,13 @@ export const BaseQuestion = ({
   const handleChangeDescription = (
     e: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
+    const next = e.target.value
+    setLocalDescription(next)
+    lastEmittedDescriptionRef.current = next
     onQuestionChange?.({
       id,
       type: questionType,
-      description: e.target.value,
+      description: next,
     } as Parameters<
       NonNullable<SurveyFormBuilderCallbacks["onQuestionChange"]>
     >[0])
@@ -155,7 +190,7 @@ export const BaseQuestion = ({
               <>
                 <textarea
                   ref={titleRef}
-                  value={title}
+                  value={localTitle}
                   aria-label={t("surveyFormBuilder.labels.title")}
                   placeholder={t("surveyFormBuilder.labels.titlePlaceholder")}
                   onChange={handleChangeTitle}
@@ -168,13 +203,14 @@ export const BaseQuestion = ({
                 />
                 <div className="textarea-overlay pointer-events-none absolute left-0 top-0 h-full w-full whitespace-pre-wrap break-words px-2 py-1 text-lg font-semibold">
                   <span className="opacity-0">
-                    {title || t("surveyFormBuilder.labels.titlePlaceholder")}
+                    {localTitle ||
+                      t("surveyFormBuilder.labels.titlePlaceholder")}
                   </span>
                   {required && (
                     <span
                       className={cn(
                         "text-f1-foreground-critical",
-                        !title && "text-f1-foreground-secondary"
+                        !localTitle && "text-f1-foreground-secondary"
                       )}
                     >
                       {" "}
@@ -213,7 +249,7 @@ export const BaseQuestion = ({
           ) : null
         ) : (
           <textarea
-            value={description}
+            value={localDescription}
             aria-label={t("surveyFormBuilder.labels.description")}
             placeholder={t(
               "surveyFormBuilder.labels.questionDescriptionPlaceholder"
