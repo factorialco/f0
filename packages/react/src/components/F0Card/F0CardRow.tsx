@@ -177,15 +177,10 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
             {avatar && <CardAvatar avatar={avatar} size="lg" />}
             <div className="flex min-w-0 flex-col gap-0">
               {title && (
-                <Text
-                  variant="body"
-                  content={title}
-                  className="font-medium"
-                  ellipsis
-                />
+                <Text variant="body" content={title} className="font-medium" />
               )}
               {description && (
-                <Text variant="description" content={description} ellipsis />
+                <Text variant="description" content={description} />
               )}
             </div>
           </div>
