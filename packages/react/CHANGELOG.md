@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.41.1](https://github.com/factorialco/f0/compare/f0-react-v2.41.0...f0-react-v2.41.1) (2026-06-06)
+
+
+### Bug Fixes
+
+* **F0AiChatTextArea:** make recording waveform more sensitive ([#4345](https://github.com/factorialco/f0/issues/4345)) ([54ab099](https://github.com/factorialco/f0/commit/54ab09971e30880b0bfb7f2169b36ef98455b99f))
+
 ## [2.41.0](https://github.com/factorialco/f0/compare/f0-react-v2.40.2...f0-react-v2.41.0) (2026-06-05)
 
 
