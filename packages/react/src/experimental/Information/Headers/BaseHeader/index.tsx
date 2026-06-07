@@ -123,7 +123,10 @@ export function BaseHeader({
     <div
       className={cn(
         "resource-header px-page flex flex-col gap-3 pb-5 pt-3",
-        showBottomBorder && "border-b border-solid border-f1-border"
+        // `border-0` zeroes all sides first so this renders bottom-only even in apps that
+        // don't load the Tailwind preflight border reset (otherwise `border-solid` would
+        // light up all four sides at the CSS-initial `medium` width).
+        showBottomBorder && "border-0 border-b border-solid border-f1-border"
       )}
     >
       <div
