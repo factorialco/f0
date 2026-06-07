@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.41.2](https://github.com/factorialco/f0/compare/f0-react-v2.41.1...f0-react-v2.41.2) (2026-06-07)
+
+
+### Bug Fixes
+
+* **ResourceHeader:** make showBottomBorder render bottom-only without Tailwind preflight ([#4347](https://github.com/factorialco/f0/issues/4347)) ([f23bc50](https://github.com/factorialco/f0/commit/f23bc50c968f345a81cf5ae6c3aa05e759510a61))
+
 ## [2.41.1](https://github.com/factorialco/f0/compare/f0-react-v2.41.0...f0-react-v2.41.1) (2026-06-06)
 
 
