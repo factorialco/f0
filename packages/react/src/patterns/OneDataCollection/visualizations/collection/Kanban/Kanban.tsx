@@ -215,7 +215,7 @@ export const KanbanCollection = <
           variant: l.variant,
           total: totalItems,
           hasMore,
-          loading: laneData?.isLoading || false,
+          loading: laneData?.isLoading ?? true,
           loadingMore: laneData?.isLoadingMore || false,
           fetchMore: hasMore ? () => laneData.loadMore() : undefined,
         }
