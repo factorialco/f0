@@ -47,6 +47,13 @@ interface TableHeadProps {
   onSortClick?: () => void
 
   /**
+   * Callback fired when the header label is clicked. Independent of sorting —
+   * when provided, the header label becomes an interactive button. Use this to
+   * trigger actions such as opening a side panel for the column.
+   */
+  onHeaderClick?: () => void
+
+  /**
    * Optional tooltip text. When provided, displays an info icon next to the header content
    * that shows this text in a tooltip when hovered.
    */
@@ -87,6 +94,7 @@ export function TableHead({
   minWidth,
   sortState = "none",
   onSortClick,
+  onHeaderClick,
   info,
   infoIcon = InfoCircleLine,
   sticky,
@@ -105,6 +113,17 @@ export function TableHead({
 
   const hasContent = onSortClick || info
 
+  const label =
+    typeof children === "string" ? (
+      <OneEllipsis className={cn(width !== "auto" && "overflow-hidden")}>
+        {children}
+      </OneEllipsis>
+    ) : (
+      <div className={cn("truncate", width !== "auto" && "overflow-hidden")}>
+        {children}
+      </div>
+    )
+
   const content = (
     <>
       <div
@@ -114,16 +133,19 @@ export function TableHead({
           align === "right" && "flex-row-reverse"
         )}
       >
-        {typeof children === "string" ? (
-          <OneEllipsis className={cn(width !== "auto" && "overflow-hidden")}>
-            {children}
-          </OneEllipsis>
-        ) : (
-          <div
-            className={cn("truncate", width !== "auto" && "overflow-hidden")}
+        {onHeaderClick ? (
+          <button
+            type="button"
+            onClick={onHeaderClick}
+            className={cn(
+              "flex min-w-0 items-center rounded-xs text-left transition-colors hover:text-f1-foreground-secondary",
+              focusRing()
+            )}
           >
-            {children}
-          </div>
+            {label}
+          </button>
+        ) : (
+          label
         )}
         {hasContent && (
           <div className="flex items-center">
