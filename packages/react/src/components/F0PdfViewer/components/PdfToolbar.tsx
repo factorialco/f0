@@ -78,11 +78,13 @@ export const PdfToolbar = ({
           label={pdfViewer.previousPage}
           onClick={onPreviousPage}
           icon={ChevronUp}
+          size="sm"
         />
         <ToolbarButton
           label={pdfViewer.nextPage}
           onClick={onNextPage}
           icon={ChevronDown}
+          size="sm"
         />
       </div>
 
