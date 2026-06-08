@@ -58,6 +58,13 @@ export function PresetFormDialog({
   const presets = i18n.collections.presets
   const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
 
+  // `submit()` rejects when validation fails (e.g. a duplicate name). The errors
+  // are already surfaced inline on the fields, so swallow the rejection to avoid
+  // an unhandled promise rejection.
+  const handleSubmit = () => {
+    void submit().catch(() => {})
+  }
+
   const takenNames = new Set(
     existingNames.map((name) => name.trim().toLowerCase())
   )
@@ -123,7 +130,7 @@ export function PresetFormDialog({
       }
       primaryAction={{
         label: presets.save,
-        onClick: submit,
+        onClick: handleSubmit,
         loading: isSubmitting,
         disabled: hasErrors,
       }}
