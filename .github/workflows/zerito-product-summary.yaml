@@ -115,10 +115,10 @@ jobs:
         if: ${{ inputs.dry_run != 'true' }}
         env:
           BLOCKS_FILE: ${{ steps.summarize.outputs.blocks_file }}
-          SLACK_WEBHOOK: ${{ secrets.ZERITO_SLACK_WEBHOOK }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_ZERITO_PRODUCT_UPDATE }}
         run: |
           if [ -z "$SLACK_WEBHOOK" ]; then
-            echo "::error::ZERITO_SLACK_WEBHOOK is not set"
+            echo "::error::SLACK_WEBHOOK_ZERITO_PRODUCT_UPDATE is not set"
             exit 1
           fi
           # index.ts already produced the Block Kit payload ({ "blocks": [...] })
