@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.41.5](https://github.com/factorialco/f0/compare/f0-react-v2.41.4...f0-react-v2.41.5) (2026-06-08)
+
+
+### Bug Fixes
+
+* **F0Form:** preserve cleared optional values after submit ([#4287](https://github.com/factorialco/f0/issues/4287)) ([925990e](https://github.com/factorialco/f0/commit/925990ea1d6793d987e8bae6c0c90a6b2649a993))
+
 ## [2.41.4](https://github.com/factorialco/f0/compare/f0-react-v2.41.3...f0-react-v2.41.4) (2026-06-08)
 
 
