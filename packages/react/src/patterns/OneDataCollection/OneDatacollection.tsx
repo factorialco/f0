@@ -81,7 +81,6 @@ import {
   SHARED_PRESET_PARAM,
   type SharedPresetPayload,
 } from "./internal/sharedPreset"
-import { deriveFallbackStorageKey } from "./internal/storageKey"
 import { ItemActionsDefinition } from "./item-actions"
 import { NavigationFiltersDefinition } from "./navigationFilters/types"
 import { Settings } from "./Settings"
@@ -1303,19 +1302,8 @@ const OneDataCollectionComp = <
     [presetDialog, customPresets]
   )
 
-  // Effective storage key: an explicit `id` wins; otherwise derive one from the
-  // current URL pathname so the persistence story (settings + custom presets)
-  // still works without an `id`. The "auto/" prefix on the derived key makes
-  // its provenance obvious in localStorage and isolates it from intentional
-  // consumer-chosen ids. See `deriveFallbackStorageKey` for the collision caveat.
-  const effectiveStorageKey = useMemo(() => {
-    if (id) return id
-    if (typeof window === "undefined") return undefined
-    return deriveFallbackStorageKey(window.location.pathname)
-  }, [id])
-
   const { storageReady } = useDataCollectionStorage(
-    effectiveStorageKey,
+    id,
     typeof storage === "object" ? (storage?.features ?? ["*"]) : ["*"],
     {
       settings: {

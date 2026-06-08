@@ -84,8 +84,7 @@ function Harness({
   urlSync = false,
 }: {
   presets?: PresetsDefinition<typeof filters>
-  /** `null` to render the collection without an `id` (auto-derived key). */
-  id?: string | null
+  id?: string
   onState?: (state: {
     filters: unknown
     sortings: unknown
@@ -105,7 +104,7 @@ function Harness({
 
   return (
     <OneDataCollection
-      id={id ?? undefined}
+      id={id}
       source={source}
       visualizations={visualizations}
       onStateChange={(state) =>
@@ -279,29 +278,6 @@ describe("OneDataCollection - presets", () => {
     expect(
       screen.queryByText("A view with this name already exists")
     ).not.toBeInTheDocument()
-  })
-
-  it("persists custom presets even without an `id`, under an `auto/` storage key derived from the URL", async () => {
-    const user = userEvent.setup()
-    const { set } = renderHarness({ id: null })
-
-    await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument())
-
-    await sortByName(user)
-    await user.click(await screen.findByRole("button", { name: "Save view" }))
-    await user.type(await screen.findByLabelText("Title"), "Anon-saved view")
-    await user.click(screen.getByRole("button", { name: "Save" }))
-
-    await waitFor(() => {
-      const call = set.mock.calls.find(
-        ([, storage]) => (storage.customPresets?.length ?? 0) > 0
-      )
-      expect(call).toBeTruthy()
-      // Without an explicit `id`, OneDataCollection writes under a URL-derived
-      // key prefixed with "auto/" (here the harness lives at "/").
-      expect(call![0]).toMatch(/^auto\/.*\/v1$/)
-      expect(call![1].customPresets![0].label).toBe("Anon-saved view")
-    })
   })
 
   it("de-selects a custom view (offering 'Save view') when it is edited — no in-place persist", async () => {
