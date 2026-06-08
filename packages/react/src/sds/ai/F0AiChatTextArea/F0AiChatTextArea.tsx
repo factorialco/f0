@@ -8,6 +8,7 @@ import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
+import { useRevealOnChange } from "../F0AiChat/hooks/useRevealOnChange"
 import { useAiChat } from "../F0AiChat/providers/AiChatStateProvider"
 import { ActionBar } from "./components/ActionBar"
 import { AttachedFilesList } from "./components/AttachedFilesList"
@@ -338,48 +339,31 @@ export const F0AiChatTextArea = ({
     />
   ) : null
 
-  // Spring used for the layout (position) animations that glide the composer
-  // and the welcome phrase to their new spots when toggling fullscreen ↔
-  // sidepanel — scoped to mode changes via `layoutDependency={fullscreen}`, so
-  // it never fires on unrelated re-renders (e.g. sending the first message).
-  const layoutSpring = shouldReduceMotion
-    ? { duration: 0 }
-    : { type: "spring" as const, stiffness: 380, damping: 38, mass: 1 }
-
-  // The suggestions row remounts when it swaps sides (above ↔ below the
-  // textarea). It slides a few px toward the textarea as it enters/leaves so
-  // the swap reads as movement, not a flat fade.
-  const suggestionsMotion = (fromBelow: boolean) =>
-    ({
-      initial: { opacity: 0, y: fromBelow ? -6 : 6 },
-      animate: { opacity: 1, y: 0 },
-      exit: { opacity: 0, y: fromBelow ? -6 : 6 },
-      transition: { duration: shouldReduceMotion ? 0 : 0.22, ease: "easeOut" },
-    }) as const
-
   const isFullscreenWelcome = fullscreen && isWelcomeScreen
 
+  // Reveal the composer when the welcome screen gives way to the conversation
+  // (sending the first message) — the textarea drops from the centered welcome
+  // position to the bottom. Hide-before-paint + soft fade, same as the
+  // mode-change reveal. Only applied in fullscreen, where the textarea actually
+  // repositions (in sidepanel it already sits at the bottom). Mode toggles are
+  // handled one level up in F0AiChat, so this never double-fires.
+  const { motionProps: composerReveal } = useRevealOnChange(
+    isWelcomeScreen,
+    160,
+    0.5
+  )
+
   return (
-    <div
+    <motion.div
       ref={ref}
       className={cn(
         "flex flex-col items-center gap-2 px-4 pb-3 pt-2",
-        isFullscreenWelcome && "min-h-0 flex-1 justify-start"
+        isFullscreenWelcome && "min-h-0 flex-1 justify-start -mt-20"
       )}
+      {...(fullscreen ? composerReveal : {})}
     >
-      <motion.div
-        className="flex w-full max-w-content flex-col gap-2"
-        layout={shouldReduceMotion ? false : "position"}
-        layoutDependency={fullscreen}
-        transition={{ layout: layoutSpring }}
-      >
-        <AnimatePresence initial={false}>
-          {suggestionsRow && !fullscreen && (
-            <motion.div key="suggestions-top" {...suggestionsMotion(false)}>
-              {suggestionsRow}
-            </motion.div>
-          )}
-        </AnimatePresence>
+      <div className="flex w-full max-w-content flex-col gap-2">
+        {suggestionsRow && !fullscreen && <div>{suggestionsRow}</div>}
         <CreditWarningWrapper creditWarning={creditWarning}>
           <motion.form
             aria-busy={inProgress}
@@ -559,37 +543,17 @@ export const F0AiChatTextArea = ({
             </AnimatePresence>
           </motion.form>
         </CreditWarningWrapper>
-      </motion.div>
+      </div>
 
-      <AnimatePresence initial={false}>
-        {suggestionsRow && fullscreen && (
-          <motion.div
-            key="suggestions-bottom"
-            className="w-full max-w-content"
-            {...suggestionsMotion(true)}
-          >
-            {suggestionsRow}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {suggestionsRow && fullscreen && (
+        <div className="w-full max-w-content">{suggestionsRow}</div>
+      )}
 
-      <AnimatePresence>
-        {footer && isWelcomeScreen && fullscreen && (
-          <motion.div
-            key="chat-footer"
-            className="w-full py-4 mx-auto flex max-w-content justify-center"
-            initial={{ opacity: 0, height: 0, y: 4, overflow: "hidden" }}
-            animate={{ opacity: 1, height: "auto", y: 0 }}
-            exit={{ opacity: 0, height: 0, y: 4, overflow: "hidden" }}
-            transition={{
-              duration: shouldReduceMotion ? 0 : 0.3,
-              ease: "easeInOut",
-            }}
-          >
-            {footer}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {footer && isWelcomeScreen && fullscreen && (
+        <div className="w-full py-4 mx-auto flex max-w-content justify-center">
+          {footer}
+        </div>
+      )}
 
       <AnimatePresence mode="wait" initial={false}>
         {isClarifying ? (
@@ -669,6 +633,6 @@ export const F0AiChatTextArea = ({
           )
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   )
 }

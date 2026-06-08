@@ -1,4 +1,5 @@
-import type { ReactNode } from "react"
+import { motion } from "motion/react"
+import { type ReactNode } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import Cross from "@/icons/app/Cross"
@@ -6,8 +7,13 @@ import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 
 import { SidebarWindow } from "./components/layout/ChatWindow"
+import { useRevealOnChange } from "./hooks/useRevealOnChange"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
-import { AiChatProviderProps, type WelcomeScreenSuggestion } from "./types"
+import {
+  AiChatProviderProps,
+  type VisualizationMode,
+  type WelcomeScreenSuggestion,
+} from "./types"
 
 /**
  * Slot composition for the F0 AI chat shell. F0 ships the shell + UI
@@ -97,6 +103,7 @@ const F0AiChatComponent = ({
     enabled,
     setOpen,
     mode,
+    visualizationMode,
     VoiceMode,
     tracking,
     chatHeader,
@@ -104,6 +111,17 @@ const F0AiChatComponent = ({
     chatInput,
   } = useAiChat()
   const translations = useI18n()
+
+  // Mode-change reveal: switching between sidepanel / fullscreen / canvas
+  // changes the whole content layout. Rather than animating each element into
+  // place (busy), hide the content the instant the mode flips and reveal it
+  // already settled with a soft fade. Hold ≈ the chat window's resize
+  // animation (see ApplicationFrame: ~0.15s entering, ~0.4s exiting).
+  const { motionProps: contentReveal } = useRevealOnChange(
+    visualizationMode,
+    (prev: VisualizationMode, next: VisualizationMode) =>
+      next === "fullscreen" ? 220 : prev === "fullscreen" ? 460 : 260
+  )
 
   // Props take precedence over provider-supplied slots. The provider slots
   // are how `ApplicationFrame` (which mounts `<F0AiChat />` itself) gets
@@ -142,10 +160,12 @@ const F0AiChatComponent = ({
     <SidebarWindow>
       <div className="flex h-full w-full flex-col">
         {header}
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-          {messages}
-        </div>
-        {input}
+        <motion.div className="flex min-h-0 flex-1 flex-col" {...contentReveal}>
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            {messages}
+          </div>
+          {input}
+        </motion.div>
       </div>
     </SidebarWindow>
   )
