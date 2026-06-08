@@ -30,7 +30,8 @@ export const F0Wizard: FC<F0WizardProps> = ({
   isOpen,
   onClose = noop,
   title,
-  width = "xl",
+  width,
+  size,
   defaultStepIndex,
   nextLabel,
   previousLabel,
@@ -103,7 +104,7 @@ export const F0Wizard: FC<F0WizardProps> = ({
     <F0Dialog
       isOpen={isOpen}
       onClose={onClose}
-      width={width}
+      width={size && size !== "fullscreen" ? size : (width ?? "xl")}
       title={title}
       primaryAction={primaryAction}
       secondaryAction={secondaryAction}
