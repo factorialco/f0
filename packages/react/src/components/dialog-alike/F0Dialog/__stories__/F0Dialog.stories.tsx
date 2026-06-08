@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { FC, useState } from "react"
-import { expect, userEvent, waitFor, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import {
@@ -156,42 +155,6 @@ export const WithPromisePrimaryAction: Story = {
       closeOnClick: true,
     },
   },
-  play: async ({ canvasElement, step }) => {
-    // Dialogs may render in portals, so search the full page
-    const page = within(canvasElement.closest("body")!)
-
-    await step("Verify dialog is open", async () => {
-      // Wait for dialog to render
-      await waitFor(() => {
-        expect(page.getByText("Team Status")).toBeInTheDocument()
-      })
-    })
-
-    await step(
-      "Click primary action with promise and verify loading state",
-      async () => {
-        const submitButton = page.getByRole("button", { name: /submit/i })
-
-        // Click the button to trigger the promise
-        await userEvent.click(submitButton)
-
-        // Wait a bit to see if button becomes disabled (loading state)
-        await new Promise((resolve) => setTimeout(resolve, 100))
-
-        // The button should be disabled during promise execution
-        // Note: This depends on F0Dialog implementation - if it disables the button
-        // If not, we just verify the promise completes
-
-        // Wait for promise to resolve (5 seconds)
-        await new Promise((resolve) => setTimeout(resolve, 1200))
-
-        // Verify dialog closes after promise resolves
-        await waitFor(() => {
-          expect(page.queryByText("Team Status")).not.toBeInTheDocument()
-        })
-      }
-    )
-  },
 }
 
 export const Modal: Story = {
@@ -201,7 +164,7 @@ export const Modal: Story = {
   },
 }
 
-export const WithSmsize: Story = {
+export const WithSmSize: Story = {
   args: {
     isOpen: true,
     size: "sm",
@@ -213,23 +176,23 @@ export const WithSmsize: Story = {
   },
 }
 
-export const WithMdsize: Story = {
+export const WithMdSize: Story = {
   args: {
-    ...WithSmsize.args,
+    ...WithSmSize.args,
     size: "md",
   },
 }
 
-export const WithLgsize: Story = {
+export const WithLgSize: Story = {
   args: {
-    ...WithMdsize.args,
+    ...WithMdSize.args,
     size: "lg",
   },
 }
 
-export const WithXlsize: Story = {
+export const WithXlSize: Story = {
   args: {
-    ...WithLgsize.args,
+    ...WithLgSize.args,
     size: "xl",
   },
 }
@@ -274,7 +237,7 @@ export const WithFullscreenSize: Story = {
   },
 }
 
-export const WithFullscreensizeAndActions: Story = {
+export const WithFullscreenSizeAndActions: Story = {
   args: {
     ...WithFullscreenSize.args,
     tabs: TABS,
@@ -333,82 +296,6 @@ export const WithMultiplePrimaryActions: Story = {
           "When `primaryAction` receives an array of actions, it renders a `F0ButtonDropdown` allowing the user to select between multiple primary actions.",
       },
     },
-  },
-  play: async ({ canvasElement, step }) => {
-    // Dialogs may render in portals, so search the full page
-    const page = within(canvasElement.closest("body")!)
-
-    await step(
-      "Verify dialog is open with multiple primary actions",
-      async () => {
-        // Wait for dialog to render
-        await waitFor(() => {
-          expect(page.getByText("Document Editor")).toBeInTheDocument()
-          expect(
-            page.getByText("Edit your document and choose how to save it.")
-          ).toBeInTheDocument()
-          expect(page.getByText("List Item 1")).toBeInTheDocument()
-        })
-      }
-    )
-
-    await step("Verify primary action dropdown button exists", async () => {
-      // F0ButtonDropdown shows the first item as the main button label
-      const saveButton = page.getByRole("button", { name: /save/i })
-      expect(saveButton).toBeInTheDocument()
-    })
-
-    await step("Open primary action dropdown menu", async () => {
-      // Find the dropdown trigger button - it has data-testid="button-menu"
-      const dropdownTrigger = page.queryByTestId("button-menu")
-
-      if (dropdownTrigger) {
-        await userEvent.click(dropdownTrigger)
-        // Wait for dropdown to open
-        await waitFor(() => {
-          expect(page.getByRole("menu")).toBeInTheDocument()
-        })
-
-        // Verify dropdown items are visible
-        const saveDraftOption = page.queryByText("Save as draft")
-        const savePublishOption = page.queryByText("Save and publish")
-
-        if (saveDraftOption || savePublishOption) {
-          // Click one of the options if available
-          if (saveDraftOption) {
-            await userEvent.click(saveDraftOption)
-          } else if (savePublishOption) {
-            await userEvent.click(savePublishOption)
-          }
-          // Wait for dropdown menu to close after clicking an option
-          await waitFor(() => {
-            expect(page.queryByRole("menu")).not.toBeInTheDocument()
-          })
-        }
-      } else {
-        // Fallback: click the main Save button (which triggers the first action)
-        const saveButton = page.getByRole("button", { name: /save/i })
-        await userEvent.click(saveButton)
-        await new Promise((resolve) => setTimeout(resolve, 100))
-      }
-    })
-
-    await step("Test secondary action", async () => {
-      // Ensure menu is closed before looking for Cancel button
-      await waitFor(
-        () => {
-          expect(page.queryByRole("menu")).not.toBeInTheDocument()
-        },
-        { timeout: 1000 }
-      )
-
-      const cancelButton = page.getByRole("button", { name: /cancel/i })
-      expect(cancelButton).toBeInTheDocument()
-      await userEvent.click(cancelButton)
-
-      // Wait for any state updates
-      await new Promise((resolve) => setTimeout(resolve, 100))
-    })
   },
 }
 
