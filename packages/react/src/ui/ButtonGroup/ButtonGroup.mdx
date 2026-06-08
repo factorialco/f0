@@ -1,0 +1,100 @@
+import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
+
+import * as ButtonGroupStories from "./__stories__/ButtonGroup.stories"
+import * as Patterns from "./__stories__/ButtonGroup.behaviors.stories"
+
+<Meta of={ButtonGroupStories} />
+
+# ButtonGroup
+
+`ButtonGroup` is a **data-driven action bar**. You describe the actions as props —
+never as JSX children — and it handles arrangement, width-driven overflow, and
+responsive stacking for you.
+
+- **`primaryAction`** — the single solid button, pinned at the trailing edge. A
+  single object structurally guarantees there is never more than one primary.
+- **`secondaryActions`** — outline buttons (or split buttons, or inline
+  separators). The ones that don't fit shed into a "⋯" menu; the rest stay inline.
+- **`otherActions`** — extra actions that always live in the "⋯" menu (a
+  `DropdownItem[]`, so they support separators and `critical`).
+
+<Canvas of={ButtonGroupStories.Default} />
+<Controls of={ButtonGroupStories.Default} />
+
+Across F0 the hand-rolled action rows reduce to **three patterns** — Trailing,
+Split, and Reflowing — all of which are now just different prop combinations.
+
+## At a glance
+
+| Pattern       | Recipe                                                  | Responsive                                    |
+| ------------- | ------------------------------------------------------- | --------------------------------------------- |
+| **Trailing**  | `align="end"` (default)                                 | secondaries shed into "⋯" as width shrinks    |
+| **Split**     | `align="between" stack="container-md" fullWidthOnStack` | full-width column when the surface is narrow  |
+| **Reflowing** | `stack="md" reverseOnStack` + `size={{ base, md }}`     | stacks **and** reorders across the breakpoint |
+
+## Trailing actions
+
+Actions packed at the trailing (end) edge, primary last — the most common
+pattern. _Recognized in: dialog footers, dialog header actions, one-liner cards._
+Compose it by mixing the action props: split buttons (`type: "split"`), icon-only
+buttons (`hideLabel`), an inline `{ type: "separator" }`, or an `otherActions`
+"⋯" menu.
+
+<Canvas of={Patterns.TrailingActions} />
+
+## Split actions
+
+Secondary and primary pushed to opposite edges (`align="between"`), collapsing to
+a full-width column when the **surface itself** is narrow (`stack="container-md"`,
+the container `@md` breakpoint = 28rem / 448px). _Recognized in: card footers._
+
+<Canvas of={Patterns.SplitActions} />
+
+## Reflowing actions
+
+The actions **reorder** between compact and wide: wide is a row
+(`… → secondary → divider → primary`); compact promotes the primary to the top of
+a full-width column (`reverseOnStack`). _Recognized in: page / resource headers._
+
+A single group now expresses the whole behavior. Two things switch automatically
+at the breakpoint: the button **`size`** (pass `size={{ base: "lg", md: "md" }}`)
+and the overflow **menu component** — a desktop `Dropdown` popover above the
+breakpoint, a mobile `MobileDropdown` drawer below it.
+
+<Canvas of={Patterns.ReflowingActions} />
+
+### `reverseOnStack`
+
+Reverses the **stacked (column) order** so the primary lands on top when the group
+stacks, while the row order at/above the breakpoint is unchanged. It flips the
+_whole_ column, so multiple secondaries reverse too. No effect when `stack="none"`.
+
+## Overflow
+
+Secondary buttons that don't fit shed into a "⋯" menu automatically, measured by
+width. Plain secondaries shed first; **split buttons and the primary are pinned**
+and never collapse. The shed actions merge into the same menu as `otherActions`.
+
+<Canvas of={Patterns.OverflowMenu} />
+
+## Destructive actions
+
+`critical` renders a red, destructive action — and `ButtonGroup` lets you choose
+how guarded it is, rather than enforcing one rule:
+
+- **Guarded (default for permanent resources):** put it in `otherActions` with
+  `critical`, so it lives behind the "⋯". The extra click is the safety gate.
+- **One-click (for cheap / recoverable resources):** mark an inline
+  `secondaryActions` button `critical` to render a red button with no extra click.
+
+Whether a delete should be guarded is a judgment about blast radius and
+recoverability, so it stays an author decision. Default to guarding; reach for the
+inline critical button only when a one-click delete is genuinely warranted.
+
+## Viewport vs container
+
+Stacking can react to the **viewport** (`stack="sm" | "md"`) or to the
+**container** (`stack="container-md"`). They are **not** interchangeable — a card
+footer should stack on its own width (container), not the viewport. The branch (and
+the responsive `size`) is chosen in JS from the matching breakpoint, so only one
+layout mounts at a time.
