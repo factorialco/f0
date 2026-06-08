@@ -77,6 +77,20 @@ and never collapse. The shed actions merge into the same menu as `otherActions`.
 
 <Canvas of={Patterns.OverflowMenu} />
 
+## Destructive actions
+
+`critical` renders a red, destructive action — and `ButtonGroup` lets you choose
+how guarded it is, rather than enforcing one rule:
+
+- **Guarded (default for permanent resources):** put it in `otherActions` with
+  `critical`, so it lives behind the "⋯". The extra click is the safety gate.
+- **One-click (for cheap / recoverable resources):** mark an inline
+  `secondaryActions` button `critical` to render a red button with no extra click.
+
+Whether a delete should be guarded is a judgment about blast radius and
+recoverability, so it stays an author decision. Default to guarding; reach for the
+inline critical button only when a one-click delete is genuinely warranted.
+
 ## Viewport vs container
 
 Stacking can react to the **viewport** (`stack="sm" | "md"`) or to the

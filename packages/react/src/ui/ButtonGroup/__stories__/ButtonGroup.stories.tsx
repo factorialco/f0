@@ -88,6 +88,34 @@ export const WithOtherActions: Story = {
   },
 }
 
+/**
+ * Destructive actions, two ways. **Guard** it (default for permanent resources):
+ * put it in `otherActions` with `critical` so it sits behind the "⋯" — the extra
+ * click is the safety gate. **One-click** (for cheap/recoverable resources): mark
+ * an inline `secondaryActions` button `critical` to render a red button with no
+ * extra click.
+ */
+export const CriticalActions: Story = {
+  args: {
+    secondaryActions: [
+      { id: "edit", label: "Edit", onClick: noop },
+      // One-click destructive button — use only when the resource is cheap to recreate.
+      {
+        id: "delete",
+        label: "Delete",
+        icon: Delete,
+        critical: true,
+        onClick: noop,
+      },
+    ],
+    // Guarded destructive action — the safer default for permanent resources.
+    otherActions: [
+      { label: "Delete permanently", critical: true, onClick: noop },
+    ],
+    primaryAction: { id: "save", label: "Save", onClick: noop },
+  },
+}
+
 /** An inline `{ type: "separator" }` divides logical groups (hidden when stacked). */
 export const WithSeparator: Story = {
   args: {

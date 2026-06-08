@@ -33,6 +33,12 @@ export interface ButtonGroupButtonBase {
   loading?: boolean
   hideLabel?: boolean
   tooltip?: string
+  /**
+   * Render as a destructive (red) action. Prefer guarding destructive actions in
+   * the "⋯" menu via `otherActions`; reach for an inline critical button only
+   * when the resource is cheap to recreate and a one-click delete is warranted.
+   */
+  critical?: boolean
 }
 
 /** A single clickable (or link) action. `onClick` and `href` are mutually exclusive. */
@@ -199,7 +205,7 @@ export function ButtonGroup({
       label={action.label}
       icon={action.icon}
       iconPosition={action.iconPosition}
-      variant={variant}
+      variant={action.critical ? "critical" : variant}
       size={resolvedSize}
       disabled={action.disabled}
       loading={action.loading}
@@ -318,6 +324,7 @@ export function ButtonGroup({
         icon: action.icon,
         onClick: action.onClick,
         href: action.href,
+        critical: action.critical,
       })
     ),
     ...(overflowedPlain.length > 0 && otherActions.length > 0
