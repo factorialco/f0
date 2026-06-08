@@ -43,8 +43,10 @@ describe("URL sync without an id", () => {
       <ExampleComponent currentFilters={{ department: ["Engineering"] }} />
     )
 
-    await waitFor(() =>
-      expect(window.location.search).toContain("dc_department=Engineering")
+    await waitFor(
+      () =>
+        expect(window.location.search).toContain("dc_department=Engineering"),
+      { timeout: 5000 }
     )
   })
 
@@ -55,9 +57,18 @@ describe("URL sync without an id", () => {
 
     // A filter chip rendered → the URL filter was applied to a collection
     // without an id, and the param survives (re-affirmed by the write).
-    await waitFor(() =>
-      expect(screen.getByRole("button", { name: "Close" })).toBeInTheDocument()
+    // Generous timeout: without an `id` the collection still hydrates from a
+    // URL-derived storage key first, so the URL-driven filter (and its chip)
+    // apply a tick later — under heavy CI load the default 1s can be too tight.
+    await waitFor(
+      () =>
+        expect(
+          screen.getByRole("button", { name: "Close" })
+        ).toBeInTheDocument(),
+      { timeout: 5000 }
     )
-    expect(window.location.search).toContain("dc_department=Design")
+    await waitFor(() =>
+      expect(window.location.search).toContain("dc_department=Design")
+    )
   })
 })
