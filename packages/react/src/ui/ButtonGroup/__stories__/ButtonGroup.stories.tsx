@@ -1,8 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { F0Button } from "@/components/F0Button"
+import { Delete, Pencil, Share } from "@/icons/app"
 
-import { ButtonGroup, ButtonGroupSeparator } from "../ButtonGroup"
+import { ButtonGroup } from "../ButtonGroup"
+
+const noop = () => {}
 
 const meta = {
   title: "ButtonGroup",
@@ -20,16 +22,21 @@ const meta = {
       control: "inline-radio",
       options: ["none", "sm", "md", "container-md"],
     },
+    size: {
+      control: "inline-radio",
+      options: ["sm", "md", "lg"],
+    },
     fullWidthOnStack: { control: "boolean" },
     reverseOnStack: { control: "boolean" },
-    wrap: { control: "boolean" },
   },
   args: {
     align: "end",
     stack: "none",
+    size: "md",
     fullWidthOnStack: false,
     reverseOnStack: false,
-    wrap: false,
+    secondaryActions: [{ id: "cancel", label: "Cancel", onClick: noop }],
+    primaryAction: { id: "confirm", label: "Confirm", onClick: noop },
   },
   decorators: [
     // `@container` so the `stack="container-md"` option reacts to this box's
@@ -41,22 +48,55 @@ const meta = {
       </div>
     ),
   ],
-  render: (args) => (
-    <ButtonGroup {...args}>
-      <F0Button variant="outline" label="Cancel" onClick={() => {}} />
-      <F0Button variant="default" label="Confirm" onClick={() => {}} />
-    </ButtonGroup>
-  ),
 } satisfies Meta<typeof ButtonGroup>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Default: right-aligned row, primary (last child) rightmost. */
+/** Default: right-aligned row, the primary (solid) pinned at the trailing edge. */
 export const Default: Story = {}
 
 export const SpaceBetween: Story = {
   args: { align: "between" },
+}
+
+/**
+ * More secondaries than fit: the ones that don't shed into a "⋯" menu, while the
+ * primary stays pinned. Narrow the canvas to watch buttons collapse.
+ */
+export const Overflowing: Story = {
+  args: {
+    secondaryActions: [
+      { id: "edit", label: "Edit", icon: Pencil, onClick: noop },
+      { id: "share", label: "Share", icon: Share, onClick: noop },
+      { id: "delete", label: "Delete", icon: Delete, onClick: noop },
+    ],
+    primaryAction: { id: "save", label: "Save changes", onClick: noop },
+  },
+}
+
+/** Extra actions always live in the "⋯" menu via `otherActions`. */
+export const WithOtherActions: Story = {
+  args: {
+    secondaryActions: [{ id: "edit", label: "Edit", onClick: noop }],
+    otherActions: [
+      { label: "Duplicate", onClick: noop },
+      { type: "separator" },
+      { label: "Delete", critical: true, onClick: noop },
+    ],
+    primaryAction: { id: "save", label: "Save", onClick: noop },
+  },
+}
+
+/** An inline `{ type: "separator" }` divides logical groups (hidden when stacked). */
+export const WithSeparator: Story = {
+  args: {
+    secondaryActions: [
+      { id: "discard", label: "Discard", onClick: noop },
+      { type: "separator" },
+    ],
+    primaryAction: { id: "save", label: "Save", onClick: noop },
+  },
 }
 
 /**
@@ -68,22 +108,25 @@ export const StackOnMobile: Story = {
 }
 
 /**
- * `reverseOnStack` flips the stacked column order so the primary (last child)
- * sits on top when stacked, while the row order is unchanged at/above the
- * breakpoint. Resize across 640px: below it the primary is on top; above it the
- * primary is rightmost. (The whole column reverses, so any secondaries flip too.)
+ * `reverseOnStack` promotes the primary to the top of the stacked column, while
+ * the row order is unchanged at/above the breakpoint. Resize across 640px.
  */
 export const StackReversed: Story = {
   args: { stack: "sm", fullWidthOnStack: true, reverseOnStack: true },
 }
 
-/** A `ButtonGroupSeparator` divides logical groups (hidden when stacked). */
-export const WithSeparator: Story = {
-  render: (args) => (
-    <ButtonGroup {...args}>
-      <F0Button variant="outline" label="Discard" onClick={() => {}} />
-      <ButtonGroupSeparator />
-      <F0Button variant="default" label="Save" onClick={() => {}} />
-    </ButtonGroup>
-  ),
+/** The primary can be a split button (`type: "split"`), wrapping `F0ButtonDropdown`. */
+export const SplitPrimary: Story = {
+  args: {
+    secondaryActions: [{ id: "discard", label: "Discard", onClick: noop }],
+    primaryAction: {
+      id: "publish",
+      type: "split",
+      items: [
+        { value: "now", label: "Publish now" },
+        { value: "schedule", label: "Schedule" },
+      ],
+      onClick: noop,
+    },
+  },
 }

@@ -1,20 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { F0Button } from "@/components/F0Button"
-import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
-import {
-  Dropdown,
-  type DropdownItem,
-  MobileDropdown,
-} from "@/experimental/Navigation/Dropdown"
-import { DropdownInternal } from "@/experimental/Navigation/Dropdown/internal"
+import { type DropdownItem } from "@/experimental/Navigation/Dropdown"
 import {
   Archive,
   ArrowUp,
   Cross,
   Delete,
   Download,
-  Ellipsis,
   LayersFront,
   Pencil,
   Plus,
@@ -22,18 +14,15 @@ import {
 } from "@/icons/app"
 import { cn } from "@/lib/utils"
 
-import { ButtonGroup, ButtonGroupSeparator } from "../ButtonGroup"
-import { ButtonGroupOverflow } from "../ButtonGroupOverflow"
+import { ButtonGroup } from "../ButtonGroup"
 
 const noop = () => {}
 
 /**
- * The action layouts across F0 reconcile to THREE agnostic patterns — **Trailing**,
- * **Split**, and **Reflowing** — plus orthogonal **composition** pieces (split
- * button, overflow menu, separator, icon-only). Each example is reconstructed with
- * `ButtonGroup` on a minimal mock surface, without importing the real component.
- *
- * See `ButtonGroup.mdx` for the at-a-glance matrix.
+ * The action layouts across F0 reconcile to THREE patterns — **Trailing**,
+ * **Split**, and **Reflowing** — all expressed through `ButtonGroup`'s action
+ * props (`primaryAction` / `secondaryActions` / `otherActions`), without passing
+ * any JSX children. See `ButtonGroup.mdx` for the at-a-glance matrix.
  */
 const meta = {
   title: "ButtonGroup/Patterns",
@@ -102,8 +91,7 @@ const MockPageHeader = ({ children }: { children: React.ReactNode }) => (
 // =============================================================================
 
 /** One-liner card: actions inline when wide, stacked under the text when the card
- * is narrow. Same trailing recipe — only the surrounding chrome toggles by the
- * CONTAINER width (`@md`). */
+ * is narrow — driven by the CONTAINER width (`stack="container-md"`). */
 const OneLinerRow = ({ width }: { width: number }) => (
   <div className="@container" style={{ width }}>
     <div className="rounded-lg border border-solid border-f1-border-secondary p-4">
@@ -113,12 +101,12 @@ const OneLinerRow = ({ width }: { width: number }) => (
         </div>
         <ButtonGroup
           align="end"
-          stack="none"
-          className="relative z-[1] -mx-4 mt-4 border-0 border-t border-solid border-t-f1-border-secondary px-4 pt-4 @md:mx-0 @md:mt-0 @md:border-t-0 @md:px-0 @md:pt-0"
-        >
-          <F0Button variant="outline" label="Later" onClick={noop} />
-          <F0Button variant="default" label="Enable" onClick={noop} />
-        </ButtonGroup>
+          stack="container-md"
+          fullWidthOnStack
+          className="mt-4 @md:mt-0"
+          secondaryActions={[{ id: "later", label: "Later", onClick: noop }]}
+          primaryAction={{ id: "enable", label: "Enable", onClick: noop }}
+        />
       </div>
     </div>
   </div>
@@ -130,90 +118,91 @@ export const TrailingActions: Story = {
     <Cases>
       <Case caption="Confirm row — secondary → primary (e.g. dialog footer)">
         <MockFooter>
-          <ButtonGroup align="end" stack="none" className="w-full">
-            <F0Button variant="outline" label="Cancel" onClick={noop} />
-            <F0Button variant="default" label="Confirm" onClick={noop} />
-          </ButtonGroup>
+          <ButtonGroup
+            secondaryActions={[
+              { id: "cancel", label: "Cancel", onClick: noop },
+            ]}
+            primaryAction={{ id: "confirm", label: "Confirm", onClick: noop }}
+          />
         </MockFooter>
       </Case>
 
-      <Case caption="+ Split button — an action array collapses to F0ButtonDropdown">
+      <Case caption="+ Split buttons — primary and secondary as F0ButtonDropdown">
         <MockFooter>
-          <ButtonGroup align="end" stack="none" className="w-full">
-            <F0ButtonDropdown
-              variant="outline"
-              items={[
-                { value: "discard", label: "Discard" },
-                { value: "save-draft", label: "Save as draft" },
-              ]}
-              onClick={noop}
-            />
-            <F0ButtonDropdown
-              variant="default"
-              items={[
+          <ButtonGroup
+            secondaryActions={[
+              {
+                id: "discard",
+                type: "split",
+                items: [
+                  { value: "discard", label: "Discard" },
+                  { value: "save-draft", label: "Save as draft" },
+                ],
+                onClick: noop,
+              },
+            ]}
+            primaryAction={{
+              id: "publish",
+              type: "split",
+              items: [
                 { value: "publish", label: "Publish" },
                 { value: "schedule", label: "Schedule" },
-              ]}
-              onClick={noop}
-            />
-          </ButtonGroup>
+              ],
+              onClick: noop,
+            }}
+          />
         </MockFooter>
       </Case>
 
       <Case caption="+ Icon-only + separator + close (e.g. dialog header, ≤2 non-critical)">
         <MockHeader>
-          <ButtonGroup align="end" stack="none">
-            <F0Button
-              variant="outline"
-              icon={Pencil}
-              label="Edit"
-              hideLabel
-              onClick={noop}
-            />
-            <F0Button
-              variant="outline"
-              icon={Share}
-              label="Share"
-              hideLabel
-              onClick={noop}
-            />
-            <ButtonGroupSeparator />
-            <F0Button
-              variant="outline"
-              icon={Cross}
-              label="Close"
-              hideLabel
-              onClick={noop}
-            />
-          </ButtonGroup>
+          <ButtonGroup
+            secondaryActions={[
+              {
+                id: "edit",
+                icon: Pencil,
+                label: "Edit",
+                hideLabel: true,
+                onClick: noop,
+              },
+              {
+                id: "share",
+                icon: Share,
+                label: "Share",
+                hideLabel: true,
+                onClick: noop,
+              },
+              { type: "separator" },
+              {
+                id: "close",
+                icon: Cross,
+                label: "Close",
+                hideLabel: true,
+                onClick: noop,
+              },
+            ]}
+          />
         </MockHeader>
       </Case>
 
       <Case caption="+ Overflow menu — extra actions collapse under an ellipsis (e.g. dialog header, 3+ / critical)">
         <MockHeader>
-          <ButtonGroup align="end" stack="none">
-            <DropdownInternal
-              icon={Ellipsis}
-              items={[
-                { label: "Edit", icon: Pencil, onClick: noop },
-                { label: "Share", icon: Share, onClick: noop },
-                {
-                  label: "Delete",
-                  icon: Delete,
-                  onClick: noop,
-                  critical: true,
-                },
-              ]}
-            />
-            <ButtonGroupSeparator />
-            <F0Button
-              variant="outline"
-              icon={Cross}
-              label="Close"
-              hideLabel
-              onClick={noop}
-            />
-          </ButtonGroup>
+          <ButtonGroup
+            otherActions={[
+              { label: "Edit", icon: Pencil, onClick: noop },
+              { label: "Share", icon: Share, onClick: noop },
+              { label: "Delete", icon: Delete, onClick: noop, critical: true },
+            ]}
+            secondaryActions={[
+              {
+                id: "close",
+                icon: Cross,
+                label: "Close",
+                hideLabel: true,
+                onClick: noop,
+              },
+            ]}
+          />
         </MockHeader>
       </Case>
 
@@ -242,28 +231,12 @@ const SplitRow = ({ width }: { width: number }) => (
           align="between"
           stack="container-md"
           fullWidthOnStack
-          className="w-full"
-        >
-          <ButtonGroup
-            stack="container-md"
-            fullWidthOnStack
-            className="w-full @md:w-fit"
-          >
-            <F0Button
-              variant="outline"
-              label="Discard"
-              icon={Delete}
-              onClick={noop}
-            />
-            <F0Button
-              variant="outline"
-              label="Preview"
-              icon={Share}
-              onClick={noop}
-            />
-          </ButtonGroup>
-          <F0Button variant="default" label="Save changes" onClick={noop} />
-        </ButtonGroup>
+          secondaryActions={[
+            { id: "discard", label: "Discard", icon: Delete, onClick: noop },
+            { id: "preview", label: "Preview", icon: Share, onClick: noop },
+          ]}
+          primaryAction={{ id: "save", label: "Save changes", onClick: noop }}
+        />
       </div>
     </div>
   </div>
@@ -285,9 +258,10 @@ export const SplitActions: Story = {
 
 // =============================================================================
 // Pattern 3 — Reflowing actions
-// The actions REORDER between compact and wide. The order alone fits one group
-// (stack + reverseOnStack); two groups are used here only because the button
-// SIZE and the overflow-menu component also change across the breakpoint.
+// One ButtonGroup that REORDERS across the breakpoint: wide is a row
+// (more → secondary → divider → primary, size md, ⋯ popover); compact is a
+// full-width column with the primary on top (size lg, ⋯ mobile drawer). The
+// size swap and the Dropdown↔MobileDropdown swap are handled internally.
 // Recognized in page / resource headers.
 // =============================================================================
 
@@ -298,132 +272,88 @@ const reflowOverflow: DropdownItem[] = [
   { label: "Unlist", icon: Delete, critical: true, onClick: noop },
 ]
 
-/** The wide cluster: more → secondary → divider → primary, right-aligned. */
-const WideCluster = ({
-  withOverflow = true,
+const ReflowCluster = ({
   primaryAsDropdown = false,
   exportAsDropdown = false,
+  withOverflow = true,
 }: {
-  withOverflow?: boolean
   primaryAsDropdown?: boolean
   exportAsDropdown?: boolean
+  withOverflow?: boolean
 }) => (
-  <ButtonGroup align="end" wrap className="w-full">
-    {withOverflow && <Dropdown items={reflowOverflow} icon={Ellipsis} />}
-    <F0Button variant="outline" icon={Pencil} label="Edit" onClick={noop} />
-    {exportAsDropdown ? (
-      <F0ButtonDropdown
-        variant="outline"
-        items={[
-          { value: "excel", label: "Export Excel", icon: Download },
-          { value: "csv", label: "Export CSV", icon: Download },
-        ]}
-        value="excel"
-        onClick={noop}
-      />
-    ) : (
-      <F0Button
-        variant="outline"
-        icon={Download}
-        label="Export"
-        hideLabel
-        onClick={noop}
-      />
-    )}
-    <F0Button variant="outline" label="Syncing" loading onClick={noop} />
-    <ButtonGroupSeparator />
-    {primaryAsDropdown ? (
-      <F0ButtonDropdown
-        variant="default"
-        items={[
-          { value: "now", label: "Publish now", icon: ArrowUp },
-          { value: "schedule", label: "Schedule" },
-          { value: "draft", label: "Save as draft" },
-        ]}
-        value="now"
-        onClick={noop}
-      />
-    ) : (
-      <F0Button
-        variant="default"
-        icon={ArrowUp}
-        label="Publish"
-        onClick={noop}
-      />
-    )}
-  </ButtonGroup>
+  <ButtonGroup
+    align="end"
+    stack="md"
+    fullWidthOnStack
+    reverseOnStack
+    size={{ base: "lg", md: "md" }}
+    otherActions={withOverflow ? reflowOverflow : []}
+    secondaryActions={[
+      { id: "edit", icon: Pencil, label: "Edit", onClick: noop },
+      exportAsDropdown
+        ? {
+            id: "export",
+            type: "split",
+            items: [
+              { value: "excel", label: "Export Excel", icon: Download },
+              { value: "csv", label: "Export CSV", icon: Download },
+            ],
+            value: "excel",
+            onClick: noop,
+          }
+        : {
+            id: "export",
+            icon: Download,
+            label: "Export",
+            hideLabel: true,
+            onClick: noop,
+          },
+      { id: "sync", label: "Syncing", loading: true, onClick: noop },
+      { type: "separator" },
+    ]}
+    primaryAction={
+      primaryAsDropdown
+        ? {
+            id: "publish",
+            type: "split",
+            items: [
+              { value: "now", label: "Publish now", icon: ArrowUp },
+              { value: "schedule", label: "Schedule" },
+              { value: "draft", label: "Save as draft" },
+            ],
+            value: "now",
+            onClick: noop,
+          }
+        : { id: "publish", icon: ArrowUp, label: "Publish", onClick: noop }
+    }
+  />
 )
 
 export const ReflowingActions: Story = {
   name: "Reflowing actions",
   render: () => (
     <div className="flex max-w-3xl flex-col gap-8">
-      <Case caption="Reorders across 768px — wide: more → secondary → divider → primary; narrow: primary on top of a full-width column (e.g. page / resource header)">
+      <Case caption="Reorders across 768px — wide: more → secondary → divider → primary (size md); narrow: primary on top of a full-width column (size lg, ⋯ becomes a drawer)">
         <MockPageHeader>
-          {/* Wide (≥ md) */}
-          <div className="hidden md:block">
-            <WideCluster />
-          </div>
-          {/* Compact (< md): full-width column, size lg, primary first.
-              The order alone could be one group via `reverseOnStack`; two are
-              used because the size (lg→md) and the overflow component (Dropdown
-              ↔ MobileDropdown) also change here. */}
-          <div className="md:hidden">
-            <ButtonGroup
-              stack="md"
-              fullWidthOnStack
-              className="[&_button]:w-full"
-            >
-              <F0Button
-                variant="default"
-                icon={ArrowUp}
-                label="Publish"
-                size="lg"
-                onClick={noop}
-              />
-              <F0Button
-                variant="outline"
-                icon={Pencil}
-                label="Edit"
-                size="lg"
-                onClick={noop}
-              />
-              <F0Button
-                variant="outline"
-                icon={Download}
-                label="Export"
-                hideLabel
-                size="lg"
-                onClick={noop}
-              />
-              <F0Button
-                variant="outline"
-                label="Syncing"
-                loading
-                size="lg"
-                onClick={noop}
-              />
-              <MobileDropdown items={reflowOverflow} />
-            </ButtonGroup>
-          </div>
+          <ReflowCluster />
         </MockPageHeader>
       </Case>
 
       <Case caption="+ Split button — primary as a dropdown">
         <MockPageHeader>
-          <WideCluster primaryAsDropdown />
+          <ReflowCluster primaryAsDropdown />
         </MockPageHeader>
       </Case>
 
       <Case caption="+ Split button — a secondary as a dropdown">
         <MockPageHeader>
-          <WideCluster exportAsDropdown />
+          <ReflowCluster exportAsDropdown />
         </MockPageHeader>
       </Case>
 
       <Case caption="Without the overflow menu">
         <MockPageHeader>
-          <WideCluster withOverflow={false} />
+          <ReflowCluster withOverflow={false} />
         </MockPageHeader>
       </Case>
     </div>
@@ -442,10 +372,9 @@ const toolbarActions = [
 ]
 
 /**
- * `ButtonGroupOverflow` sheds the buttons that don't fit under a real ellipsis
- * "⋯" `Dropdown` (closes on select), measured by `useOverflowCalculation`.
- * Width-driven — distinct from a fixed count-independent bucket. Narrow the
- * canvas to watch buttons collapse; shown here at three fixed widths.
+ * Width-driven overflow is now native: secondaries that don't fit shed under a
+ * real ellipsis "⋯" `Dropdown` (closes on select), measured automatically.
+ * Narrow the canvas to watch buttons collapse; shown here at three fixed widths.
  */
 export const OverflowMenu: Story = {
   name: "Overflow menu (width-driven)",
@@ -460,7 +389,7 @@ export const OverflowMenu: Story = {
             style={{ width: w }}
             className="rounded-lg border border-solid border-f1-border-secondary p-3"
           >
-            <ButtonGroupOverflow actions={toolbarActions} />
+            <ButtonGroup secondaryActions={toolbarActions} />
           </div>
         </div>
       ))}

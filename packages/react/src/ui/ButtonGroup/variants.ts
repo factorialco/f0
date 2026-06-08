@@ -1,15 +1,11 @@
 import { cva } from "cva"
 
 /**
- * Layout variants for {@link ButtonGroup}. This primitive controls ONLY the
- * arrangement of a group of action buttons (alignment, orientation, gap,
- * responsive stacking, full-width-on-stack). It deliberately does NOT own:
- *
- * - footer/header chrome (borders, padding) — that stays on the surrounding container,
- * - button `size` — a React prop that can't be switched by a container query, so it
- *   stays a consumer concern,
- * - collapse decisions (array→dropdown, count thresholds, hide-label-after-first) —
- *   those are domain logic; compose `F0ButtonDropdown` / `ButtonGroupOverflow` instead.
+ * Class variants for {@link ButtonGroup}'s **stacked (column) branch** —
+ * alignment, the stack breakpoint, full-width-on-stack, and stacked-order
+ * reversal. The row branch builds its flex layout inline (it also runs the
+ * width-measured overflow), so these classes only apply once the group collapses
+ * into a column below the breakpoint.
  *
  * Every generated class is a static string so Tailwind's JIT can see it.
  */
