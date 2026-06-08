@@ -1,23 +1,16 @@
 import { jsx as e, jsxs as j } from "react/jsx-runtime";
-import { ChartContainer as I, ChartTooltip as K, ChartTooltipContent as B, ChartLegend as E, ChartLegendContent as G } from "../../../ui/chart.js";
+import { ComposedChart as I, CartesianGrid as K, YAxis as N, XAxis as B, Bar as E, LabelList as G, Line as M, Scatter as R } from "recharts";
+import { ChartContainer as V, ChartTooltip as X, ChartTooltipContent as Y, ChartLegend as _, ChartLegendContent as q } from "../../../ui/chart.js";
 import { getColor as L, getCategoricalColor as A } from "../utils/colors.js";
-import { measureTextWidth as M, chartTooltipProps as R, cartesianGridProps as V, yAxisProps as N, xAxisProps as X } from "../utils/elements.js";
-import { fixedForwardRef as Y } from "../utils/forwardRef.js";
-import { prepareData as _ } from "../utils/muncher.js";
-import { ComposedChart as q } from "../../../node_modules/.pnpm/recharts@2.15.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/recharts/es6/chart/ComposedChart.js";
-import { CartesianGrid as H } from "../../../node_modules/.pnpm/recharts@2.15.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/recharts/es6/cartesian/CartesianGrid.js";
-import { YAxis as T } from "../../../node_modules/.pnpm/recharts@2.15.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/recharts/es6/cartesian/YAxis.js";
-import { XAxis as J } from "../../../node_modules/.pnpm/recharts@2.15.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/recharts/es6/cartesian/XAxis.js";
-import { Bar as Q } from "../../../node_modules/.pnpm/recharts@2.15.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/recharts/es6/cartesian/Bar.js";
-import { LabelList as Z } from "../../../node_modules/.pnpm/recharts@2.15.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/recharts/es6/component/LabelList.js";
-import { Line as U } from "../../../node_modules/.pnpm/recharts@2.15.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/recharts/es6/cartesian/Line.js";
-import { Scatter as tt } from "../../../node_modules/.pnpm/recharts@2.15.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/recharts/es6/cartesian/Scatter.js";
-const et = (o) => {
-  const h = (p) => {
-    const { cx: r, cy: g, fill: b, payload: l } = p, C = () => {
+import { measureTextWidth as H, chartTooltipProps as J, cartesianGridProps as Q, yAxisProps as T, xAxisProps as Z } from "../utils/elements.js";
+import { fixedForwardRef as U } from "../utils/forwardRef.js";
+import { prepareData as tt } from "../utils/muncher.js";
+const et = (a) => {
+  const m = (p) => {
+    const { cx: i, cy: g, fill: b, payload: l } = p, C = () => {
       if (!l) return "-";
-      if (l[o] !== void 0)
-        return l[o];
+      if (l[a] !== void 0)
+        return l[a];
       for (const [n, f] of Object.entries(l))
         if (typeof f == "number" && n !== "x")
           return f;
@@ -26,7 +19,7 @@ const et = (o) => {
     return /* @__PURE__ */ e(
       "circle",
       {
-        cx: r,
+        cx: i,
         cy: g,
         r: 4,
         fill: b,
@@ -41,12 +34,12 @@ const et = (o) => {
       }
     );
   };
-  return h.displayName = `Scatter-${o}`, h;
-}, rt = ({
-  dataConfig: o,
-  data: h,
+  return m.displayName = `Scatter-${a}`, m;
+}, it = ({
+  dataConfig: a,
+  data: m,
   xAxis: p,
-  yAxis: r = { hide: !0 },
+  yAxis: i = { hide: !0 },
   label: g = !1,
   hideTooltip: b = !1,
   hideGrid: l = !1,
@@ -54,34 +47,34 @@ const et = (o) => {
   legend: n,
   showValueUnderLabel: f = !1,
   bar: c,
-  line: a,
+  line: o,
   scatter: s,
   onClick: k
 }, D) => {
-  const $ = _(h), u = c?.categories ? Array.isArray(c.categories) ? c.categories : [c.categories] : [], S = a?.categories ? Array.isArray(a.categories) ? a.categories : [a.categories] : [], P = s?.categories ? Array.isArray(s.categories) ? s.categories : [s.categories] : [], O = [
+  const $ = tt(m), u = c?.categories ? Array.isArray(c.categories) ? c.categories : [c.categories] : [], S = o?.categories ? Array.isArray(o.categories) ? o.categories : [o.categories] : [], P = s?.categories ? Array.isArray(s.categories) ? s.categories : [s.categories] : [], O = [
     ...u,
     ...S,
     ...P
   ], y = Math.max(
     ...$.flatMap(
       (t) => O.map(
-        (i) => M(
-          r?.tickFormatter ? r.tickFormatter(`${t[i]}`) : `${t[i]}`
+        (r) => H(
+          i?.tickFormatter ? i.tickFormatter(`${t[r]}`) : `${t[r]}`
         )
       )
     )
-  ), m = [c, a, s].filter(
+  ), d = [c, o, s].filter(
     (t) => t?.axisPosition === "left"
-  ), d = [c, a, s].filter(
+  ), h = [c, o, s].filter(
     (t) => t?.axisPosition === "right"
   );
-  return /* @__PURE__ */ e(I, { config: o, ref: D, aspect: C, children: /* @__PURE__ */ j(
-    q,
+  return /* @__PURE__ */ e(V, { config: a, ref: D, aspect: C, children: /* @__PURE__ */ j(
+    I,
     {
       accessibilityLayer: !0,
       data: $,
       margin: {
-        left: r && !r.hide ? 0 : 12,
+        left: i && !i.hide ? 0 : 12,
         right: 12,
         top: g ? 24 : 0,
         bottom: f ? 24 : 12
@@ -90,61 +83,61 @@ const et = (o) => {
       onClick: (t) => {
         if (!k || !t.activeLabel || !t.activePayload)
           return;
-        const i = {
+        const r = {
           label: t.activeLabel,
           values: {}
         };
         for (const v of t.activePayload)
-          i.values[v.name] = v.value;
-        k(i);
+          r.values[v.name] = v.value;
+        k(r);
       },
       children: [
         !b && /* @__PURE__ */ e(
-          K,
+          X,
           {
-            ...R(),
-            content: /* @__PURE__ */ e(B, { yAxisFormatter: r.tickFormatter })
+            ...J(),
+            content: /* @__PURE__ */ e(Y, { yAxisFormatter: i.tickFormatter })
           }
         ),
-        !l && /* @__PURE__ */ e(H, { ...V() }),
-        m.length > 0 && /* @__PURE__ */ e(
-          T,
+        !l && /* @__PURE__ */ e(K, { ...Q() }),
+        d.length > 0 && /* @__PURE__ */ e(
+          N,
           {
-            ...N(r),
+            ...T(i),
             tick: !0,
-            width: r.width ?? y + 20 + (d.length > 0 && m[0]?.axisLabel ? 20 : 0),
-            hide: r.hide || m.some((t) => t?.hideAxis),
-            label: m[0]?.axisLabel ? {
-              value: m[0].axisLabel,
+            width: i.width ?? y + 20 + (h.length > 0 && d[0]?.axisLabel ? 20 : 0),
+            hide: i.hide || d.some((t) => t?.hideAxis),
+            label: d[0]?.axisLabel ? {
+              value: d[0].axisLabel,
               angle: -90,
               position: "insideLeft"
             } : void 0
           }
         ),
-        d.length > 0 && /* @__PURE__ */ e(
-          T,
+        h.length > 0 && /* @__PURE__ */ e(
+          N,
           {
-            ...N(r),
+            ...T(i),
             yAxisId: "right",
             orientation: "right",
             tick: !0,
-            width: r.width ?? y + 20 + (m.length > 0 && d[0]?.axisLabel ? 20 : 0),
-            hide: r.hide || d.some((t) => t?.hideAxis),
-            label: d[0]?.axisLabel ? {
-              value: d[0].axisLabel,
+            width: i.width ?? y + 20 + (d.length > 0 && h[0]?.axisLabel ? 20 : 0),
+            hide: i.hide || h.some((t) => t?.hideAxis),
+            label: h[0]?.axisLabel ? {
+              value: h[0].axisLabel,
               angle: 90,
               position: "insideRight"
             } : void 0
           }
         ),
         /* @__PURE__ */ e(
-          J,
+          B,
           {
-            ...X(p),
+            ...Z(p),
             hide: p?.hide,
             tick: f ? (t) => {
-              const { x: i, y: v, payload: F } = t, w = h.find((z) => z.label === F.value)?.values || "", x = Object.keys(w).length === 1 ? Object.values(w)?.[0] : void 0, W = x !== void 0 && r.tickFormatter ? r.tickFormatter(`${x}`) : x.toLocaleString();
-              return /* @__PURE__ */ j("g", { transform: `translate(${i},${v})`, children: [
+              const { x: r, y: v, payload: F } = t, w = m.find((z) => z.label === F.value)?.values || "", x = Object.keys(w).length === 1 ? Object.values(w)?.[0] : void 0, W = x !== void 0 && i.tickFormatter ? i.tickFormatter(`${x}`) : x.toLocaleString();
+              return /* @__PURE__ */ j("g", { transform: `translate(${r},${v})`, children: [
                 /* @__PURE__ */ e(
                   "text",
                   {
@@ -171,16 +164,16 @@ const et = (o) => {
             } : void 0
           }
         ),
-        u.map((t, i) => /* @__PURE__ */ e(
-          Q,
+        u.map((t, r) => /* @__PURE__ */ e(
+          E,
           {
             isAnimationActive: !1,
             dataKey: String(t),
-            fill: o[t].color ? L(o[t].color) : A(i),
+            fill: a[t].color ? L(a[t].color) : A(r),
             radius: 4,
             maxBarSize: 32,
             children: g && /* @__PURE__ */ e(
-              Z,
+              G,
               {
                 position: "top",
                 offset: 10,
@@ -192,25 +185,25 @@ const et = (o) => {
           },
           `bar-${String(t)}`
         )),
-        S.map((t, i) => /* @__PURE__ */ e(
-          U,
+        S.map((t, r) => /* @__PURE__ */ e(
+          M,
           {
-            type: a?.lineType ?? "natural",
+            type: o?.lineType ?? "natural",
             dataKey: String(t),
-            stroke: o[t].color ? L(o[t].color) : A(u.length + i),
+            stroke: a[t].color ? L(a[t].color) : A(u.length + r),
             strokeWidth: 2,
-            dot: a?.dot ?? !1,
+            dot: o?.dot ?? !1,
             isAnimationActive: !1,
-            yAxisId: a?.axisPosition === "right" ? "right" : void 0
+            yAxisId: o?.axisPosition === "right" ? "right" : void 0
           },
           `line-${String(t)}`
         )),
-        P.map((t, i) => /* @__PURE__ */ e(
-          tt,
+        P.map((t, r) => /* @__PURE__ */ e(
+          R,
           {
             dataKey: String(t),
-            fill: o[t].color ? L(o[t].color) : A(
-              u.length + S.length + i
+            fill: a[t].color ? L(a[t].color) : A(
+              u.length + S.length + r
             ),
             r: 4,
             isAnimationActive: !1,
@@ -220,9 +213,9 @@ const et = (o) => {
           `scatter-${String(t)}`
         )),
         n && /* @__PURE__ */ e(
-          E,
+          _,
           {
-            content: /* @__PURE__ */ e(G, { nameKey: "label" }),
+            content: /* @__PURE__ */ e(q, { nameKey: "label" }),
             align: "center",
             verticalAlign: "bottom",
             layout: "vertical",
@@ -232,7 +225,7 @@ const et = (o) => {
       ]
     }
   ) });
-}, vt = Y(rt);
+}, dt = U(it);
 export {
-  vt as ComboChart
+  dt as ComboChart
 };

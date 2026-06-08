@@ -1,7 +1,7 @@
 import { jsxs as l, jsx as o } from "react/jsx-runtime";
 import { cn as m } from "../../../../../lib/utils.js";
-import { ItemActionsDropdown as s } from "../ItemActionsDropdown/ItemActionsDropdown.js";
-import { F0Button as a } from "../../../../../components/F0Button/F0Button.js";
+import { F0Button as s } from "../../../../../components/F0Button/F0Button.js";
+import { ItemActionsDropdown as a } from "../ItemActionsDropdown/ItemActionsDropdown.js";
 const b = ({
   className: n,
   primaryItemActions: t,
@@ -16,7 +16,7 @@ const b = ({
     ),
     children: [
       t.map((e) => /* @__PURE__ */ o(
-        a,
+        s,
         {
           label: e.label,
           hideLabel: e.hideLabel,
@@ -27,7 +27,7 @@ const b = ({
         e.label
       )),
       /* @__PURE__ */ o(
-        s,
+        a,
         {
           align: "end",
           items: i,

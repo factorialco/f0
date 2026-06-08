@@ -1,48 +1,43 @@
 import { jsx as t, jsxs as n, Fragment as h } from "react/jsx-runtime";
 import { nanoid as x } from "../../../node_modules/.pnpm/nanoid@5.1.5/node_modules/nanoid/index.browser.js";
-import { ChartContainer as g, ChartTooltip as T, ChartTooltipContent as G, ChartLegend as M, ChartLegendContent as U } from "../../../ui/chart.js";
-import { usePrivacyMode as j } from "../../../lib/privacyMode.js";
+import { AreaChart as g, CartesianGrid as T, XAxis as G, YAxis as M, Area as U, Text as j } from "recharts";
+import { ChartContainer as S, ChartTooltip as W, ChartTooltipContent as D, ChartLegend as P, ChartLegendContent as X } from "../../../ui/chart.js";
+import { usePrivacyMode as K } from "../../../lib/privacyMode.js";
 import { getColor as f, getCategoricalColor as k } from "../utils/colors.js";
-import { measureTextWidth as S, cartesianGridProps as W, chartTooltipProps as D } from "../utils/elements.js";
-import { fixedForwardRef as P } from "../utils/forwardRef.js";
-import { prepareData as X } from "../utils/muncher.js";
-import { AreaChart as K } from "../../../node_modules/.pnpm/recharts@2.15.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/recharts/es6/chart/AreaChart.js";
-import { CartesianGrid as N } from "../../../node_modules/.pnpm/recharts@2.15.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/recharts/es6/cartesian/CartesianGrid.js";
-import { XAxis as V } from "../../../node_modules/.pnpm/recharts@2.15.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/recharts/es6/cartesian/XAxis.js";
-import { YAxis as Y } from "../../../node_modules/.pnpm/recharts@2.15.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/recharts/es6/cartesian/YAxis.js";
-import { Area as E } from "../../../node_modules/.pnpm/recharts@2.15.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/recharts/es6/cartesian/Area.js";
-import { Text as I } from "../../../node_modules/.pnpm/recharts@2.15.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/recharts/es6/component/Text.js";
+import { measureTextWidth as N, cartesianGridProps as V, chartTooltipProps as Y } from "../utils/elements.js";
+import { fixedForwardRef as E } from "../utils/forwardRef.js";
+import { prepareData as I } from "../utils/muncher.js";
 const R = ({
   index: p,
-  visibleTicksCount: r,
-  payload: i,
-  tickFormatter: e,
+  visibleTicksCount: e,
+  payload: s,
+  tickFormatter: r,
   ...l
 }) => {
-  const a = p === 0, m = p === r - 1;
-  return /* @__PURE__ */ t(I, { ...l, textAnchor: a ? "start" : m ? "end" : "middle", children: e?.(i.value, i.index) ?? i.value });
+  const a = p === 0, d = p === e - 1;
+  return /* @__PURE__ */ t(j, { ...l, textAnchor: a ? "start" : d ? "end" : "middle", children: r?.(s.value, s.index) ?? s.value });
 }, _ = ({
   data: p,
-  dataConfig: r,
-  xAxis: i,
-  yAxis: e,
+  dataConfig: e,
+  xAxis: s,
+  yAxis: r,
   canBeBlurred: l,
   blurArea: a,
-  lineType: m = "monotoneX",
+  lineType: d = "monotoneX",
   aspect: w,
   marginTop: $ = 0
 }, v) => {
-  const { enabled: C } = j(), d = Object.keys(r), c = x(12), y = X(p), F = Math.max(
+  const { enabled: C } = K(), m = Object.keys(e), c = x(12), y = I(p), F = Math.max(
     ...y.flatMap(
-      (o) => d.map(
-        (s) => S(
-          e?.tickFormatter ? e.tickFormatter(`${o[s]}`) : `${o[s]}`
+      (o) => m.map(
+        (i) => N(
+          r?.tickFormatter ? r.tickFormatter(`${o[i]}`) : `${o[i]}`
         )
       )
     )
-  ), O = e?.width ?? F + 20, u = !e?.hide, L = !i?.hide, b = !l || !C;
-  return /* @__PURE__ */ t(g, { config: r, ref: v, aspect: w, children: /* @__PURE__ */ n(
-    K,
+  ), O = r?.width ?? F + 20, u = !r?.hide, L = !s?.hide, b = !l || !C;
+  return /* @__PURE__ */ t(S, { config: e, ref: v, aspect: w, children: /* @__PURE__ */ n(
+    g,
     {
       accessibilityLayer: !0,
       data: y,
@@ -97,7 +92,7 @@ const R = ({
               )
             }
           ),
-          d.map((o, s) => /* @__PURE__ */ n(
+          m.map((o, i) => /* @__PURE__ */ n(
             "linearGradient",
             {
               id: `fill${String(o)}-${c}`,
@@ -110,7 +105,7 @@ const R = ({
                   "stop",
                   {
                     offset: "5%",
-                    stopColor: r[o].color ? f(r[o].color) : k(s),
+                    stopColor: e[o].color ? f(e[o].color) : k(i),
                     stopOpacity: 0.8
                   }
                 ),
@@ -118,89 +113,89 @@ const R = ({
                   "stop",
                   {
                     offset: "95%",
-                    stopColor: r[o].color ? f(r[o].color) : k(s),
+                    stopColor: e[o].color ? f(e[o].color) : k(i),
                     stopOpacity: 0.1
                   }
                 )
               ]
             },
-            s
+            i
           ))
         ] }),
         /* @__PURE__ */ t(
-          N,
+          T,
           {
-            ...W(),
+            ...V(),
             mask: `url(#${c}-transparent-edges)`
           }
         ),
         L && /* @__PURE__ */ t(
-          V,
+          G,
           {
             dataKey: "x",
             tickLine: !1,
             axisLine: !1,
             tickMargin: 8,
-            tickFormatter: i?.tickFormatter,
-            ticks: i?.ticks,
-            domain: i?.domain,
+            tickFormatter: s?.tickFormatter,
+            ticks: s?.ticks,
+            domain: s?.domain,
             interval: 0,
             tick: R
           }
         ),
         u && /* @__PURE__ */ t(
-          Y,
+          M,
           {
             tickLine: !1,
             axisLine: !1,
             tickMargin: 8,
-            tickCount: e?.tickCount,
-            tickFormatter: l && C ? () => "**" : e?.tickFormatter,
-            ticks: e?.ticks,
-            domain: e?.domain,
+            tickCount: r?.tickCount,
+            tickFormatter: l && C ? () => "**" : r?.tickFormatter,
+            ticks: r?.ticks,
+            domain: r?.domain,
             width: O
           }
         ),
         b && /* @__PURE__ */ t(
-          T,
+          W,
           {
-            ...D(),
+            ...Y(),
             content: /* @__PURE__ */ t(
-              G,
+              D,
               {
                 indicator: "dot",
-                yAxisFormatter: e?.tickFormatter
+                yAxisFormatter: r?.tickFormatter
               }
             )
           }
         ),
-        d.map((o, s) => /* @__PURE__ */ t(
-          E,
+        m.map((o, i) => /* @__PURE__ */ t(
+          U,
           {
             isAnimationActive: !1,
             dataKey: o,
-            type: m,
+            type: d,
             mask: `url(#${c}-transparent-edges)`,
             fill: `url(#fill${o}-${c})`,
-            fillOpacity: r[o].dashed ? 0 : 0.4,
-            stroke: r[o].color ? f(r[o].color) : k(s),
+            fillOpacity: e[o].dashed ? 0 : 0.4,
+            stroke: e[o].color ? f(e[o].color) : k(i),
             strokeWidth: 1.5,
-            strokeDasharray: r[o].dashed ? "4 4" : void 0
+            strokeDasharray: e[o].dashed ? "4 4" : void 0
           },
           o
         )),
-        Object.keys(r).length > 1 && /* @__PURE__ */ t(
-          M,
+        Object.keys(e).length > 1 && /* @__PURE__ */ t(
+          P,
           {
             className: "flex justify-start",
-            content: /* @__PURE__ */ t(U, {})
+            content: /* @__PURE__ */ t(X, {})
           }
         )
       ]
     }
   ) });
-}, at = P(_);
+}, ot = E(_);
 export {
-  at as AreaChart,
+  ot as AreaChart,
   _ as BaseAreaChart
 };

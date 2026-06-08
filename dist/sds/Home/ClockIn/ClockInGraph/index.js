@@ -1,32 +1,30 @@
-import { jsxs as o, jsx as e } from "react/jsx-runtime";
-import { normalizeData as d, getLabels as u } from "./helpers.js";
-import { PieChart as f } from "../../../../node_modules/.pnpm/recharts@2.15.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/recharts/es6/chart/PieChart.js";
-import { Pie as h } from "../../../../node_modules/.pnpm/recharts@2.15.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/recharts/es6/polar/Pie.js";
-import { Cell as p } from "../../../../node_modules/.pnpm/recharts@2.15.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/recharts/es6/component/Cell.js";
-const N = {
+import { jsxs as s, jsx as e } from "react/jsx-runtime";
+import { PieChart as d, Pie as u, Cell as h } from "recharts";
+import { normalizeData as f, getLabels as p } from "./helpers.js";
+const y = {
   "clocked-in": "hsl(var(--positive-50))",
   break: "hsl(var(--promote-50))",
   empty: "hsl(var(--neutral-10))",
   "clocked-out": "hsl(var(--neutral-10))",
   overtime: "hsl(var(--warning-50))"
 };
-function C({
-  data: t = [],
-  trackedMinutes: a = 0,
+function g({
+  data: a = [],
+  trackedMinutes: t = 0,
   remainingMinutes: l
 }) {
-  const r = d({
-    data: t,
-    trackedMinutes: a,
+  const r = f({
+    data: a,
+    trackedMinutes: t,
     remainingMinutes: l
-  }), { primaryLabel: s, secondaryLabel: n, time: m } = u({
-    data: t,
-    trackedMinutes: a,
+  }), { primaryLabel: n, secondaryLabel: o, time: c } = p({
+    data: a,
+    trackedMinutes: t,
     remainingMinutes: l
   });
-  return /* @__PURE__ */ o("div", { className: "relative h-40 w-40", children: [
-    /* @__PURE__ */ e(f, { width: 156, height: 156, children: /* @__PURE__ */ e(
-      h,
+  return /* @__PURE__ */ s("div", { className: "relative h-40 w-40", children: [
+    /* @__PURE__ */ e(d, { width: 156, height: 156, children: /* @__PURE__ */ e(
+      u,
       {
         data: r,
         cx: 74,
@@ -40,25 +38,25 @@ function C({
         dataKey: "value",
         strokeWidth: 0,
         isAnimationActive: !1,
-        children: r.map((i, c) => /* @__PURE__ */ e(
-          p,
+        children: r.map((i, m) => /* @__PURE__ */ e(
+          h,
           {
             fill: i.color,
             role: "presentation",
             "aria-label": `${i.value} minutes`
           },
-          `cell-${c}`
+          `cell-${m}`
         ))
       }
     ) }),
-    /* @__PURE__ */ e("div", { className: "absolute inset-0 flex items-center justify-center", children: /* @__PURE__ */ e("span", { className: "text-3xl font-semibold tabular-nums text-f1-foreground", children: m }) }),
-    /* @__PURE__ */ o("div", { className: "absolute bottom-3 flex w-full justify-between px-8 text-f1-foreground-secondary", children: [
-      /* @__PURE__ */ e("span", { className: "text-sm font-medium opacity-60", children: s }),
-      /* @__PURE__ */ e("span", { className: "text-sm font-medium opacity-60", children: n })
+    /* @__PURE__ */ e("div", { className: "absolute inset-0 flex items-center justify-center", children: /* @__PURE__ */ e("span", { className: "text-3xl font-semibold tabular-nums text-f1-foreground", children: c }) }),
+    /* @__PURE__ */ s("div", { className: "absolute bottom-3 flex w-full justify-between px-8 text-f1-foreground-secondary", children: [
+      /* @__PURE__ */ e("span", { className: "text-sm font-medium opacity-60", children: n }),
+      /* @__PURE__ */ e("span", { className: "text-sm font-medium opacity-60", children: o })
     ] })
   ] });
 }
 export {
-  N as CLOCK_IN_COLORS,
-  C as ClockInGraph
+  y as CLOCK_IN_COLORS,
+  g as ClockInGraph
 };
