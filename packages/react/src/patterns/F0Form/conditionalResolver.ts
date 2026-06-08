@@ -1,4 +1,9 @@
-import type { Resolver, FieldValues, ResolverOptions } from "react-hook-form"
+import type {
+  Resolver,
+  FieldValues,
+  ResolverOptions,
+  FieldError,
+} from "react-hook-form"
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z, ZodTypeAny, ZodRawShape, ZodObject, ZodEffects } from "zod"
@@ -6,7 +11,7 @@ import { z, ZodTypeAny, ZodRawShape, ZodObject, ZodEffects } from "zod"
 import type { F0FormSchema } from "./types"
 
 import { getF0Config, isZodType, unwrapToZodObject } from "./f0Schema"
-import { evaluateRenderIf } from "./fields/utils"
+import { evaluateRenderIf, resolveFieldAlert } from "./fields/utils"
 
 /**
  * Creates a conditional Zod resolver that only validates visible fields.
@@ -45,7 +50,56 @@ export function createConditionalResolver<TSchema extends F0FormSchema>(
 
     // Use the standard zodResolver with the dynamic schema
     const resolver = zodResolver(dynamicSchema, schemaOptions)
-    return resolver(processedValues, context, options)
+    const result = await resolver(processedValues, context, options)
+
+    // Mark fields as errored when their `alert` resolves to `variant: "critical"`.
+    // This both surfaces error styling on the input and blocks submission, on top
+    // of the alert that already renders below the field.
+    applyCriticalAlertErrors(
+      schema,
+      values,
+      result.errors as Record<string, FieldError>
+    )
+
+    return result
+  }
+}
+
+/**
+ * Augments a resolver's `errors` with a synthetic error for every visible field
+ * whose `alert` resolves to `variant: "critical"`. Existing errors are never
+ * overwritten, and hidden fields (via `renderIf`) are skipped.
+ */
+function applyCriticalAlertErrors<TSchema extends F0FormSchema>(
+  schema: TSchema,
+  values: Record<string, unknown>,
+  errors: Record<string, FieldError>
+): void {
+  const objectSchema = unwrapToZodObject(schema)
+
+  for (const [fieldId, fieldSchema] of Object.entries(objectSchema.shape)) {
+    // Don't clobber an existing validation error for this field.
+    if (errors[fieldId]) {
+      continue
+    }
+
+    const config = getF0Config(fieldSchema as ZodTypeAny)
+    if (!config?.alert) {
+      continue
+    }
+
+    // Skip hidden fields — they can't be acted on, so they must not block submit.
+    if (config.renderIf && !evaluateRenderIf(config.renderIf, values)) {
+      continue
+    }
+
+    const alertProps = resolveFieldAlert(config.alert, values[fieldId], values)
+    if (alertProps?.variant === "critical") {
+      errors[fieldId] = {
+        type: "alertCritical",
+        message: alertProps.title,
+      }
+    }
   }
 }
 

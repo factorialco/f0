@@ -299,6 +299,7 @@ const RowComponentInner = <
             href={itemHref}
             onClick={itemOnClick}
             width={column.width}
+            minWidth={column.minWidth}
             sticky={getStickyPosition(cellIndex)}
             loading={loading}
             nestedRowProps={{
@@ -338,7 +339,7 @@ const RowComponentInner = <
             key={`table-cell-${groupIndex}-${index}-actions`}
             sticky={{ right: 0 }}
             referenceRowType={referenceRowType}
-            className="border-0 border-b-[1px] border-l-[1px] border-solid border-f1-border-secondary bg-f1-background !px-3 align-middle"
+            className="bg-f1-background !px-3 align-middle"
           >
             <ItemActionsRow
               className="flex flex-nowrap justify-center"

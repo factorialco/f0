@@ -8,7 +8,7 @@ import {
 } from "react"
 
 import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
-import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
+import { F0SearchInput } from "@/components/F0SearchInput"
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 
 import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
@@ -900,7 +900,7 @@ function TOCContent({
         <div className="shrink-0 bg-f1-background pb-2 pl-5 pr-4 pt-5">
           {showSearchBox && (
             <div className="mb-4">
-              <F1SearchBox
+              <F0SearchInput
                 placeholder={searchPlaceholder ?? i18n.toc.search}
                 onChange={handleSearchChange}
                 value={searchValue}

@@ -1,5 +1,7 @@
 import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { FeatureGrid } from "~/docs/components/FeatureGrid"
+import { Table, List, Kanban, Pencil, Add } from "@/icons/app"
 
 import * as Stories from "./create.stories"
 
@@ -12,13 +14,69 @@ collection toolbar should expose the action, and the chosen container should
 match the amount of guidance, structure, and time the user needs to complete
 the task.
 
+## Examples
+
+<Unstyled>
+  <FeatureGrid
+    features={[
+      {
+        icon: Table,
+        title: "Table — Default",
+        description:
+          "Collection primary action triggers a default create dialog.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-create--table-create-dialog",
+      },
+      {
+        icon: Table,
+        title: "Table — Right Dialog",
+        description:
+          "Collection primary action opens a Right Dialog to keep the collection visible while creating.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-create--table-create-right-dialog",
+      },
+      {
+        icon: List,
+        title: "List — Default",
+        description: "List primary action triggers a default create dialog.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-create--list-create-dialog",
+      },
+      {
+        icon: List,
+        title: "List — Right Dialog",
+        description:
+          "List primary action opens a Right Dialog to keep the list visible while creating.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-create--list-create-right-dialog",
+      },
+      {
+        icon: Add,
+        title: "Wizard Dialog",
+        description: "Collection primary action triggers a Wizard Dialog.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-create--create-wizard-dialog",
+      },
+      {
+        icon: Kanban,
+        title: "Kanban — Lane",
+        description:
+          "Lane create action creates a resource already scoped to the selected workflow state.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-create--kanban-create-lane",
+      },
+      {
+        icon: Pencil,
+        title: "Editable Table — Add Row",
+        description:
+          "Inline add-row action creates a lightweight row directly in the table.",
+        href: "/?path=/story/patterns-data-collection-crud-patterns-create--editable-table-create-row",
+      },
+    ]}
+  />
+</Unstyled>
+
 ## When to use
 
-- Use a default dialog when the form is short, focused, and can be completed in
+- Use a Default Dialog when the form is short, focused, and can be completed in
   one pass.
-- Use a wizard dialog when creation requires multiple steps, staged decisions,
+- Use a Wizard Dialog when creation requires multiple steps, staged decisions,
   or review before submission.
-- Use Kanban lane create when the new resource should start in a specific lane
+- Use Kanban Lane Create when the new resource should start in a specific lane
   or workflow state. **Recommended** for scoped Kanban creation.
 - Use Editable Table add-row actions for lightweight rows that can be created
   inline. **Recommended** only when the row does not need a full setup form.
@@ -41,8 +99,11 @@ the task.
     <tbody>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-create--table-create-dialog">
-            Default dialog
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-create--table-create-dialog"
+          >
+            Default Dialog
           </a>
         </td>
         <td>Standard create flows that fit in a compact overlay.</td>
@@ -50,8 +111,11 @@ the task.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-create--table-create-right-dialog">
-            Right dialog
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-create--table-create-right-dialog"
+          >
+            Right Dialog
           </a>
         </td>
         <td>
@@ -64,8 +128,11 @@ the task.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-create--create-wizard-dialog">
-            Wizard dialog
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-create--create-wizard-dialog"
+          >
+            Wizard Dialog
           </a>
         </td>
         <td>
@@ -76,8 +143,11 @@ the task.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-create--kanban-create-lane">
-            Kanban lane create
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-create--kanban-create-lane"
+          >
+            Kanban Lane Create
           </a>
         </td>
         <td>
@@ -88,8 +158,11 @@ the task.
       </tr>
       <tr>
         <td>
-          <a href="/?path=/story/patterns-data-collection-crud-patterns-create--editable-table-create-row">
-            Editable Table add row
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-data-collection-crud-patterns-create--editable-table-create-row"
+          >
+            Editable Table Add Row
           </a>
         </td>
         <td>
@@ -115,31 +188,31 @@ the task.
     <tbody>
       <tr>
         <td>Can the user complete the task with a single focused form?</td>
-        <td>Default dialog</td>
+        <td>Default Dialog</td>
       </tr>
       <tr>
         <td>Does the user need to keep the table visible while creating?</td>
-        <td>Right dialog</td>
+        <td>Right Dialog</td>
       </tr>
       <tr>
         <td>Does the flow require multiple stages or a review step?</td>
-        <td>Wizard dialog</td>
+        <td>Wizard Dialog</td>
       </tr>
       <tr>
         <td>Does the user need help understanding what comes next?</td>
-        <td>Wizard dialog</td>
+        <td>Wizard Dialog</td>
       </tr>
       <tr>
         <td>Is the task frequent and lightweight?</td>
-        <td>Default dialog</td>
+        <td>Default Dialog</td>
       </tr>
       <tr>
         <td>Does the new Kanban item belong directly in one lane?</td>
-        <td>Kanban lane create</td>
+        <td>Kanban Lane Create</td>
       </tr>
       <tr>
         <td>Can the user create the resource as a simple editable row?</td>
-        <td>Editable Table add row</td>
+        <td>Editable Table Add Row</td>
       </tr>
     </tbody>
   </table>
@@ -155,7 +228,7 @@ When a wizard is needed, split the flow into steps that match a real decision
 model. Each step should have a distinct purpose. Do not turn a short single-form
 create flow into a wizard only to make it feel more structured.
 
-For table-heavy contexts, a right-position dialog can work as an alternative
+For table-heavy contexts, a Right Dialog can work as an alternative
 when people need to preserve list context while creating. Keep this as a table
 variant, not the default create pattern.
 
@@ -169,7 +242,7 @@ can be created with defaults and refined inline.
 <DoDonts
   do={{
     description:
-      "Use a default dialog for short create flows that users can finish quickly without leaving the collection.",
+      "Use a Default Dialog for short create flows that users can finish quickly without leaving the collection.",
   }}
   dont={{
     description:
@@ -188,12 +261,17 @@ can be created with defaults and refined inline.
   }}
 />
 
-## Related stories
+## Related documentation
 
-- [Default dialog](/?path=/story/patterns-data-collection-crud-patterns-create--table-create-dialog)
-- [Right dialog](/?path=/story/patterns-data-collection-crud-patterns-create--table-create-right-dialog)
-- [Wizard dialog](/?path=/story/patterns-data-collection-crud-patterns-create--create-wizard-dialog)
-- [Kanban lane create](/?path=/story/patterns-data-collection-crud-patterns-create--kanban-create-lane)
-- [Editable Table add row](/?path=/story/patterns-data-collection-crud-patterns-create--editable-table-create-row)
-- [CRUD patterns overview](/?path=/docs/patterns-data-collection-crud-patterns-overview--documentation)
-- [Agnostic: Create & Update principles](/?path=/docs/experimental-crud-patterns-create-update--documentation)
+- <a
+    target="_parent"
+    href="/?path=/docs/patterns-data-collection-crud-patterns-overview--documentation"
+  >
+    CRUD patterns overview
+  </a>
+- <a
+    target="_parent"
+    href="/?path=/docs/experimental-crud-patterns-create-update--documentation"
+  >
+    Agnostic: Create & Update principles
+  </a>

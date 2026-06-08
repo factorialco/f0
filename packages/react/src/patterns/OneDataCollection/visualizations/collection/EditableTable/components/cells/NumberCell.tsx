@@ -1,6 +1,6 @@
 import { useCallback } from "react"
 
-import { NumberInput } from "@/experimental/Forms/Fields/NumberInput"
+import { F0NumberInput } from "@/components/F0NumberInput"
 import { RecordType } from "@/hooks/datasource/types/records.typings"
 import { cn } from "@/lib/utils"
 
@@ -81,7 +81,7 @@ export function NumberCell<R extends RecordType>({
           style={{ width }}
         >
           {unitsBefore && unitsSpan}
-          <NumberInput
+          <F0NumberInput
             label={editableColumn.label}
             hideLabel
             value={numericValue}

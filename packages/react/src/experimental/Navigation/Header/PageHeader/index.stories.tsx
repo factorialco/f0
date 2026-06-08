@@ -18,7 +18,7 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <F0AiChatProvider enabled runtimeUrl="https://example.com">
+      <F0AiChatProvider enabled>
         <div className="bg-f1-background">
           <Story />
         </div>

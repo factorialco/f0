@@ -44,7 +44,9 @@ export const NestedtaskRow = ({
     isLast = false,
     hideStatus = false,
     expanded,
+    collapsible = true,
     items,
+    content,
     metadata,
     primaryAction,
     secondaryActions,
@@ -52,6 +54,7 @@ export const NestedtaskRow = ({
   } = props
 
   const contentId = useId()
+  const isExpanded = collapsible ? expanded : true
   const hasMetadata = metadata?.some(Boolean)
   const hasActions =
     primaryAction ||
@@ -68,11 +71,13 @@ export const NestedtaskRow = ({
           <Metadata items={metadata} />
         </div>
       )}
-      {expanded && (
+      {isExpanded && (
         <div id={contentId} role="region" className="flex flex-col gap-0 pl-4">
-          {items.map((item: F0TimelineRowTaskProps, index: number) => (
-            <NestedItem key={`${item.title}-${index}`} props={item} />
-          ))}
+          {content !== undefined
+            ? content
+            : items?.map((item: F0TimelineRowTaskProps, index: number) => (
+                <NestedItem key={`${item.title}-${index}`} props={item} />
+              ))}
         </div>
       )}
       {hasActions && (

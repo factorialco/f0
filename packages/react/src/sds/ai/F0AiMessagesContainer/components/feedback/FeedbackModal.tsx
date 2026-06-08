@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 
 import { F0Dialog } from "@/patterns/F0Dialog"
-import { Input } from "@/experimental/Forms/Fields/Input"
+import { F0TextInput } from "@/components/F0TextInput"
 import { useI18n } from "@/lib/providers/i18n"
 
 import { type AIMessage } from "../../types"
@@ -69,7 +69,7 @@ export const FeedbackModal = ({
       }}
     >
       <div className="flex flex-col gap-6">
-        <Input
+        <F0TextInput
           autoFocus
           label={label}
           placeholder={placeholder}

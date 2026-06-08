@@ -117,6 +117,7 @@ const OTHER_ACTIONS = [
   {
     label: "Delete",
     icon: DeleteIcon,
+    critical: true,
     onClick: () => {},
   },
 ]

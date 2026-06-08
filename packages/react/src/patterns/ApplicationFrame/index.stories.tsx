@@ -14,13 +14,20 @@ import { Page } from "@/patterns/Navigation/Page"
 import * as PageStories from "@/patterns/Navigation/Page/index.stories"
 import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
 import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
-import { useAiChat } from "@/sds/ai/F0AiChat"
+import {
+  MockAiChatRuntimeProvider,
+  MockConnectedChatHeader,
+  MockConnectedChatInput,
+  MockConnectedMessagesContainer,
+  useMockAiChatRuntime,
+} from "@/sds/ai/F0AiChat/__stories__/_mock"
 import {
   type CandidateProfile,
   type ExpenseProfile,
   type JobPostingProfile,
   type RequisitionProfile,
   type PersonProfile,
+  type TranscribeFn,
   type UploadedFile,
   type VacancyProfile,
 } from "@/sds/ai/F0AiChat/types"
@@ -343,6 +350,21 @@ const mockUploadFiles = (files: File[]): Promise<UploadedFile[]> =>
     }, 1000)
   })
 
+// Simulates a streaming STT endpoint: streams the same transcript word by word
+// so the textarea fills live (Wispr Flow feel) without any backend.
+const MOCK_TRANSCRIPT = "How many vacation days do I have left this year?"
+const mockTranscribe: TranscribeFn = async (_audio, { onPartial, signal }) => {
+  const words = MOCK_TRANSCRIPT.split(" ")
+  let acc = ""
+  for (const word of words) {
+    if (signal?.aborted) break
+    await new Promise((r) => setTimeout(r, 140))
+    acc = acc ? `${acc} ${word}` : word
+    onPartial(acc)
+  }
+  return MOCK_TRANSCRIPT
+}
+
 const meta: Meta<typeof ApplicationFrame> = {
   title: "ApplicationFrame",
   component: ApplicationFrame,
@@ -353,13 +375,21 @@ const meta: Meta<typeof ApplicationFrame> = {
   args: {
     ai: {
       historyEnabled: true,
-      runtimeUrl: "https://mastra.local.factorial.dev/copilotkit",
-      agent: "one-workflow",
-      credentials: "include",
-      showDevConsole: false,
       enabled: true,
       resizable: true,
-      greeting: "Hello, John",
+      onThumbsUp: (message, { threadId, feedback }) => {
+        console.log("thumbs up", { message, threadId, feedback })
+      },
+      onThumbsDown: (message, { threadId, feedback }) => {
+        console.log("thumbs down", { message, threadId, feedback })
+      },
+      initialMessage: [
+        "Operational work, automated by One",
+        "Ask anything about your company",
+        "Skip the boring part of your job",
+        "Ask anything about your people, policies, or payroll",
+        "Turn months of data into a one-line answer",
+      ],
       canvasActions: {
         dashboard: {
           save: async (id, category, config) => {
@@ -532,6 +562,7 @@ const meta: Meta<typeof ApplicationFrame> = {
         onUploadFiles: mockUploadFiles,
         maxFiles: 5,
       },
+      onTranscribe: mockTranscribe,
       disclaimer: {
         text: "One works within your permissions.",
         link: "/permissions",
@@ -584,17 +615,30 @@ export default meta
 
 type Story = StoryObj<typeof ApplicationFrame>
 
+const mockChatSlots = {
+  chatHeader: <MockConnectedChatHeader />,
+  chatMessages: <MockConnectedMessagesContainer />,
+  chatInput: <MockConnectedChatInput />,
+}
+
+const withMockChatSlots = (
+  ai: ComponentProps<typeof ApplicationFrame>["ai"]
+): ComponentProps<typeof ApplicationFrame>["ai"] =>
+  ai ? { ...ai, ...mockChatSlots } : ai
+
 const DefaultStoryComponent = (
   args: ComponentProps<typeof ApplicationFrame>
 ) => {
   return (
-    <ApplicationFrame
-      ai={args.ai}
-      aiPromotion={args.aiPromotion}
-      sidebar={<Sidebar {...SidebarStories.default.args} />}
-    >
-      <Page {...PageStories.Default.args} />
-    </ApplicationFrame>
+    <MockAiChatRuntimeProvider>
+      <ApplicationFrame
+        ai={withMockChatSlots(args.ai)}
+        aiPromotion={args.aiPromotion}
+        sidebar={<Sidebar {...SidebarStories.default.args} />}
+      >
+        <Page {...PageStories.Default.args} />
+      </ApplicationFrame>
+    </MockAiChatRuntimeProvider>
   )
 }
 
@@ -653,7 +697,7 @@ export const WithAiPromotion: Story = {
 }
 
 const QuickActions = () => {
-  const { sendMessage } = useAiChat()
+  const { sendMessage } = useMockAiChatRuntime()
 
   const buttonWithMessage = (action: {
     label: string
@@ -721,23 +765,33 @@ const QuickActions = () => {
 
 export const FullscreenWithActions: Story = {
   render: (args) => (
-    <ApplicationFrame
-      ai={args.ai}
-      aiPromotion={args.aiPromotion}
-      sidebar={<Sidebar {...SidebarStories.default.args} />}
-    >
-      <Page {...PageStories.Default.args} />
-    </ApplicationFrame>
+    <MockAiChatRuntimeProvider>
+      <ApplicationFrame
+        ai={withMockChatSlots(args.ai)}
+        aiPromotion={args.aiPromotion}
+        sidebar={<Sidebar {...SidebarStories.default.args} />}
+      >
+        <Page {...PageStories.Default.args} />
+      </ApplicationFrame>
+    </MockAiChatRuntimeProvider>
   ),
   args: {
     ai: {
-      runtimeUrl: "https://mastra.local.factorial.dev/copilotkit",
-      agent: "one-workflow",
-      credentials: "include",
-      showDevConsole: false,
       enabled: true,
       resizable: true,
-      greeting: "Hello, John",
+      onThumbsUp: (message, { threadId, feedback }) => {
+        console.log("thumbs up", { message, threadId, feedback })
+      },
+      onThumbsDown: (message, { threadId, feedback }) => {
+        console.log("thumbs down", { message, threadId, feedback })
+      },
+      initialMessage: [
+        "Operational work, automated by One",
+        "Ask anything about your company",
+        "Skip the boring part of your job",
+        "Ask anything about your people, policies, or payroll",
+        "Turn months of data into a one-line answer",
+      ],
       defaultVisualizationMode: "fullscreen",
       lockVisualizationMode: true,
       footer: <QuickActions />,
@@ -861,6 +915,7 @@ export const FullscreenWithActions: Story = {
         onUploadFiles: mockUploadFiles,
         maxFiles: 5,
       },
+      onTranscribe: mockTranscribe,
       disclaimer: {
         text: "One works within your permissions.",
         link: "/permissions",
@@ -880,13 +935,15 @@ export const WithEmployeeCredits: Story = {
   render: (args) => <DefaultStoryComponent {...args} />,
   args: {
     ai: {
-      runtimeUrl: "https://mastra.local.factorial.dev/copilotkit",
-      agent: "one-workflow",
-      credentials: "include",
-      showDevConsole: false,
       enabled: true,
       resizable: true,
-      greeting: "Hello, John",
+      initialMessage: [
+        "Operational work, automated by One",
+        "Ask anything about your company",
+        "Skip the boring part of your job",
+        "Ask anything about your people, policies, or payroll",
+        "Turn months of data into a one-line answer",
+      ],
       employeeCredits: {
         fetchUsage: mockFetchEmployeeCreditsUsage,
         companyName: "Factorial",

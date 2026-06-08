@@ -29,8 +29,15 @@ function pickRandomItems(
 
 export type WelcomeScreenSuggestionsRowProps = {
   suggestions: WelcomeScreenSuggestion[]
-  /** Fired when the user picks a sub-suggestion. */
-  onItemClick: (item: WelcomeScreenSuggestionItem) => void
+  /**
+   * Fired when the user picks a sub-suggestion. Receives the picked `item`
+   * AND its parent `group` so callers (tracking, analytics) can attribute
+   * the click to the full path the user took.
+   */
+  onItemClick: (
+    item: WelcomeScreenSuggestionItem,
+    group: WelcomeScreenSuggestion
+  ) => void
   /**
    * Fires while the user hovers an item (passes the item) and when the
    * hover ends (passes null). Used to preview the item's prompt as the
@@ -103,7 +110,7 @@ export const WelcomeScreenSuggestionsRow = ({
                 key={index}
                 type="button"
                 onClick={() => {
-                  onItemClick(item)
+                  onItemClick(item, activeGroup)
                   setActiveIdx(null)
                   onItemHover?.(null)
                 }}

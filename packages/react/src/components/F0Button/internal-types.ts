@@ -56,6 +56,10 @@ export type ButtonInternalProps = Pick<
      */
     icon?: IconType
     /**
+     * Sets the side of the label the icon is placed on. Defaults to "left".
+     */
+    iconPosition?: "left" | "right"
+    /**
      * Adds an emoji to the button, can be used as a special case of icon-only button.
      */
     emoji?: string
@@ -108,6 +112,12 @@ export type ButtonInternalProps = Pick<
      * The style of the button.
      */
     style?: React.CSSProperties
+
+    /**
+     * @private
+     * If true, the button will stretch to the full width of its container.
+     */
+    block?: boolean
   } & ( // Target can only be used if href is provided
     | {
         /**

@@ -1,7 +1,8 @@
 import * as React from "react"
 
+import { F0InputField, InputFieldProps } from "@/components/F0InputField"
+
 import { cn } from "../lib/utils"
-import { InputField, InputFieldProps } from "./InputField"
 
 export type InputProps = Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
@@ -82,7 +83,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     ref
   ) => {
     return (
-      <InputField
+      <F0InputField
         label={label}
         icon={icon}
         labelIcon={labelIcon}
@@ -127,7 +128,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             "w-full shrink placeholder:-z-10 disabled:cursor-not-allowed"
           )}
         />
-      </InputField>
+      </F0InputField>
     )
   }
 )

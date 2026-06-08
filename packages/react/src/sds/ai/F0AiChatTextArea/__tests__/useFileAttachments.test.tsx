@@ -121,3 +121,79 @@ describe("useFileAttachments maxFiles", () => {
     )
   })
 })
+
+describe("useFileAttachments processFiles identity", () => {
+  it("keeps processFiles stable when attachedFiles grows so consumers don't re-register their handler on every upload", async () => {
+    const onUploadFiles = vi.fn(async (files: File[]) => makeUploaded(files))
+    const config: AiChatFileAttachmentConfig = { onUploadFiles }
+
+    const { result } = renderHook(() => useFileAttachments(config), {
+      wrapper,
+    })
+
+    const first = result.current.processFiles
+
+    await act(async () => {
+      await result.current.processFiles(makeFiles(2))
+    })
+    expect(result.current.attachedFiles).toHaveLength(2)
+    expect(result.current.processFiles).toBe(first)
+
+    await act(async () => {
+      await result.current.processFiles(makeFiles(3))
+    })
+    expect(result.current.attachedFiles).toHaveLength(5)
+    expect(result.current.processFiles).toBe(first)
+  })
+})
+
+describe("useFileAttachments upload contract", () => {
+  it("marks the whole batch as error when the uploader returns fewer results than files", async () => {
+    // Simulates a consumer whose onUploadFiles silently drops an entry —
+    // we'd previously index uploaded[idx] === undefined and end up with a
+    // file that has status='error' AND another that quietly looks 'uploaded'
+    // but with no uploadedFile, which then got filtered at send time.
+    const onUploadFiles = vi.fn(async (files: File[]) =>
+      makeUploaded(files).slice(0, files.length - 1)
+    )
+    const config: AiChatFileAttachmentConfig = { onUploadFiles }
+
+    const { result } = renderHook(() => useFileAttachments(config), {
+      wrapper,
+    })
+
+    await act(async () => {
+      await result.current.processFiles(makeFiles(3))
+    })
+
+    expect(result.current.attachedFiles).toHaveLength(3)
+    expect(
+      result.current.attachedFiles.every((f) => f.status === "error")
+    ).toBe(true)
+  })
+
+  it("marks the whole batch as error when the uploader returns more results than files", async () => {
+    const onUploadFiles = vi.fn(async (files: File[]) => [
+      ...makeUploaded(files),
+      {
+        id: "extra",
+        url: "https://example.com/extra",
+        filename: "extra",
+        mimetype: "text/plain",
+      },
+    ])
+    const config: AiChatFileAttachmentConfig = { onUploadFiles }
+
+    const { result } = renderHook(() => useFileAttachments(config), {
+      wrapper,
+    })
+
+    await act(async () => {
+      await result.current.processFiles(makeFiles(2))
+    })
+
+    expect(
+      result.current.attachedFiles.every((f) => f.status === "error")
+    ).toBe(true)
+  })
+})

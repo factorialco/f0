@@ -11,7 +11,7 @@ import * as EditableTableStories from "./editable-table.stories"
 ## Introduction
 
 The Editable Table visualization is a tabular view that uses the same layout and
-features as the [Table](/?path=/docs/components-data-collection-visualizations-table--documentation)
+features as the [Table](/?path=/docs/patterns-data-collection-visualizations-table--documentation)
 visualization (columns, sorting, selection, grouping, pagination, summaries).
 Its main differences are:
 
@@ -76,8 +76,8 @@ Use `type: "editableTable"` in the `visualizations` prop:
             // No editType + editable false → cell is rendered read-only
           },
         ],
-        onCellChange: (updatedItem) => {
-          console.log("Cell changed", updatedItem)
+        onCellChange: ({ updatedItem, changes }) => {
+          console.log("Cell changed", updatedItem, changes)
         },
         frozenColumns: 0,
         allowColumnReordering: true,
@@ -93,8 +93,8 @@ Use `type: "editableTable"` in the `visualizations` prop:
 The Editable Table accepts the same base options as the Table visualization,
 plus editable-specific ones:
 
-- **columns** – Column definitions (extends the [Table column definition](/?path=/docs/components-data-collection-visualizations-table--documentation) with `editType` and `editable`; see [Editable Table Column Definition](#editable-table-column-definition) below).
-- **onCellChange** – `(updatedItem: R) => Promise<void | Record<string, string>>`. Called whenever a user changes a cell value. `updatedItem` is the full row object with the edited field already updated. Resolve with nothing for success, or with `{ columnId: "message" }` to set errors on specific columns. If the promise rejects, the edited cell displays an error state. See [Error handling](#error-handling) below.
+- **columns** – Column definitions (extends the [Table column definition](/?path=/docs/patterns-data-collection-visualizations-table--documentation) with `editType` and `editable`; see [Editable Table Column Definition](#editable-table-column-definition) below).
+- **onCellChange** – `({ updatedItem, changes }) => Promise<void | Record<string, string>>`. Called whenever a user changes a cell value. `updatedItem` is the full row object with the edited field already updated. `changes` is a map of the modified attributes keyed by record key, where each entry is a `[previousValue, newValue]` tuple. Resolve with nothing for success, or with `{ columnId: "message" }` to set errors on specific columns. If the promise rejects, the edited cell displays an error state. See [Error handling](#error-handling) below.
 - **frozenColumns** – Number of columns to freeze on the left (`0`, `1`, or `2`). Frozen columns stay visible when the user scrolls horizontally.
 - **allowColumnReordering** – Let users reorder columns via settings.
 - **allowColumnHiding** – Let users show/hide columns via settings.
@@ -111,7 +111,7 @@ its initial position.
   options: {
     allowColumnReordering: true,
     columns: [/* ... */],
-    onCellChange: (updatedItem) => { /* ... */ },
+    onCellChange: ({ updatedItem }) => { /* ... */ },
   },
 }
 ```
@@ -144,7 +144,7 @@ Frozen columns are also excluded from hiding automatically.
       },
       /* ... */
     ],
-    onCellChange: (updatedItem) => { /* ... */ },
+    onCellChange: ({ updatedItem }) => { /* ... */ },
   },
 }
 ```
@@ -163,7 +163,7 @@ remaining columns.
   options: {
     frozenColumns: 1,
     columns: [/* ... */],
-    onCellChange: (updatedItem) => { /* ... */ },
+    onCellChange: ({ updatedItem }) => { /* ... */ },
   },
 }
 ```
@@ -212,7 +212,7 @@ can resolve in three ways:
 Resolve without returning a value. No errors are set on any cell.
 
 ```tsx
-onCellChange: async (updatedItem) => {
+onCellChange: async ({ updatedItem }) => {
   await api.updateUser(updatedItem)
 }
 ```
@@ -223,7 +223,7 @@ Return a `Record<string, string>` mapping column IDs to error messages. This is
 useful for server-side validation that may flag multiple fields at once.
 
 ```tsx
-onCellChange: async (updatedItem) => {
+onCellChange: async ({ updatedItem }) => {
   const errors = await api.validateUser(updatedItem)
   // errors might be { email: "Already taken", name: "Too short" }
   return errors
@@ -236,7 +236,7 @@ If the promise rejects, the edited cell displays `error.message` (or
 "Save failed" if the rejection value is not an `Error`).
 
 ```tsx
-onCellChange: async (updatedItem) => {
+onCellChange: async ({ updatedItem }) => {
   const response = await api.updateUser(updatedItem)
   if (!response.ok) {
     throw new Error("Invalid value")

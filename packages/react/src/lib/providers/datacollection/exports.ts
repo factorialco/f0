@@ -1,2 +1,5 @@
 export * from "./dataCollectionLocalStorageHandler"
+export * from "./dataCollectionStorageKey"
+export * from "./dataCollectionUrlParams"
+export * from "./readDataCollectionStorage"
 export * from "./types"

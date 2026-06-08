@@ -58,6 +58,7 @@ export const F0DialogFooter = ({
         onClick={primaryAction.onClick}
         variant="default"
         icon={primaryAction.icon}
+        iconPosition={primaryAction.iconPosition}
         disabled={primaryAction.disabled}
         loading={primaryAction.loading}
       />
@@ -90,6 +91,7 @@ export const F0DialogFooter = ({
         onClick={secondaryAction.onClick}
         variant="outline"
         icon={secondaryAction.icon}
+        iconPosition={secondaryAction.iconPosition}
         disabled={secondaryAction.disabled}
         loading={secondaryAction.loading}
       />

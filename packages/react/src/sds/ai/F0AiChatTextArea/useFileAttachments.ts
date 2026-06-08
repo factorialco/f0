@@ -33,6 +33,17 @@ export function useFileAttachments(
   const isAtMaxFiles =
     maxFiles !== undefined && attachedFiles.length >= maxFiles
 
+  // Mirror attachedFiles.length in a ref so processFiles can read the current
+  // count without depending on it. Keeping length out of processFiles's deps
+  // means the callback identity stays stable across uploads — parents that
+  // register it via onProcessFilesRef won't see their handler de- and
+  // re-registered every time a file lands, which previously opened a window
+  // where a concurrent drop could be dropped silently.
+  const attachedCountRef = useRef(0)
+  useEffect(() => {
+    attachedCountRef.current = attachedFiles.length
+  }, [attachedFiles])
+
   const showTransientError = useCallback((message: string) => {
     if (transientErrorTimeoutRef.current) {
       clearTimeout(transientErrorTimeoutRef.current)
@@ -65,7 +76,7 @@ export function useFileAttachments(
       // selection.
       if (
         maxFiles !== undefined &&
-        attachedFiles.length + files.length > maxFiles
+        attachedCountRef.current + files.length > maxFiles
       ) {
         showTransientError(
           translation.ai.tooManyFilesError.replace(
@@ -81,11 +92,29 @@ export function useFileAttachments(
         file,
         status: "uploading" as const,
       }))
+      const errorIds = newAttached.map((n) => n.id)
 
       setAttachedFiles((prev) => [...prev, ...newAttached])
 
+      const markBatchAsError = (errorMessage: string) =>
+        setAttachedFiles((prev) =>
+          prev.map((att) =>
+            errorIds.includes(att.id)
+              ? { ...att, status: "error" as const, errorMessage }
+              : att
+          )
+        )
+
       try {
         const uploaded = await onUploadFiles(files)
+        // The contract is length-and-order parity with `files`. If a consumer
+        // returns a shorter/longer array we'd silently send the message with
+        // `files: []` (uploadedFile would be undefined → filtered out at send
+        // time), so fail loud instead and let the user retry.
+        if (!Array.isArray(uploaded) || uploaded.length !== files.length) {
+          markBatchAsError(translation.ai.fileUploadError)
+          return
+        }
         setAttachedFiles((prev) =>
           prev.map((att) => {
             const idx = newAttached.findIndex((n) => n.id === att.id)
@@ -109,20 +138,12 @@ export function useFileAttachments(
           err instanceof Error && err.message
             ? err.message
             : translation.ai.fileUploadError
-        const errorIds = newAttached.map((n) => n.id)
-        setAttachedFiles((prev) =>
-          prev.map((att) =>
-            errorIds.includes(att.id)
-              ? { ...att, status: "error" as const, errorMessage }
-              : att
-          )
-        )
+        markBatchAsError(errorMessage)
       }
     },
     [
       onUploadFiles,
       maxFiles,
-      attachedFiles.length,
       allowedMimeTypes,
       translation.ai.tooManyFilesError,
       translation.ai.fileUploadError,
@@ -158,5 +179,6 @@ export function useFileAttachments(
     handleRemoveFile,
     clearFiles,
     transientError,
+    showTransientError,
   }
 }

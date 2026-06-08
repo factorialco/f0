@@ -13,8 +13,8 @@ import {
 import { F0Icon } from "@/components/F0Icon"
 import { Bullet } from "@/icons/app"
 import { cn } from "@/lib/utils"
-import { InputMessages } from "@/ui/InputField/components/InputMessages"
-import { Label } from "@/ui/InputField/components/Label"
+import { InputMessages } from "@/components/F0InputField/components/InputMessages"
+import { Label } from "@/components/F0InputField/components/Label"
 
 import type {
   DurationFields,

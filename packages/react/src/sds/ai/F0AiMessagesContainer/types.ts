@@ -18,6 +18,13 @@ export type Message = {
   }>
   generativeUI?: () => unknown
   rawData?: unknown
+  /**
+   * Reply quote text the composer attached to this (user) message.
+   * Rendered as a block above the bubble. The wire protocol that carries
+   * this is owned by the adapter (factorial) — F0 only consumes the
+   * structured field.
+   */
+  replyQuote?: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any
 }
