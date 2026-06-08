@@ -20,7 +20,7 @@ import { F0Drawer } from "../index"
 import { drawerSizes } from "../types"
 
 const meta: Meta<typeof F0Drawer> = {
-  title: "Drawer",
+  title: "Components/Drawer",
   component: F0Drawer,
   parameters: {
     layout: "fullscreen",
