@@ -24,6 +24,8 @@ interface ActionBarProps {
   inProgress?: boolean
   hasDataToSend: boolean
   isPreSending?: boolean
+  /** Render the built-in submit / stop button. Defaults to true. */
+  showSubmitButton?: boolean
   /** Voice dictation — when canRecord is false the microphone is hidden. */
   canRecord?: boolean
   recordingStatus?: RecorderStatus
@@ -43,6 +45,7 @@ export const ActionBar = ({
   inProgress,
   hasDataToSend,
   isPreSending,
+  showSubmitButton = true,
   canRecord,
   recordingStatus = "idle",
   recordingStream,
@@ -132,26 +135,27 @@ export const ActionBar = ({
             loading={recordingStatus === "transcribing"}
           />
         )}
-        {recordingStatus !== "transcribing" && inProgress ? (
-          <ButtonInternal
-            type="submit"
-            variant="neutral"
-            label={translation.ai.stopAnswerGeneration}
-            icon={SolidStop}
-            hideLabel
-          />
-        ) : (
-          <ButtonInternal
-            type="submit"
-            // Stays enabled while an attachment uploads so the click queues the
-            // send (fired once the upload finishes) instead of being a no-op.
-            disabled={!hasDataToSend || isPreSending}
-            variant={"default"}
-            label={translation.ai.sendMessage}
-            icon={ArrowUp}
-            hideLabel
-          />
-        )}
+        {showSubmitButton &&
+          (recordingStatus !== "transcribing" && inProgress ? (
+            <ButtonInternal
+              type="submit"
+              variant="neutral"
+              label={translation.ai.stopAnswerGeneration}
+              icon={SolidStop}
+              hideLabel
+            />
+          ) : (
+            <ButtonInternal
+              type="submit"
+              // Stays enabled while an attachment uploads so the click queues the
+              // send (fired once the upload finishes) instead of being a no-op.
+              disabled={!hasDataToSend || isPreSending}
+              variant={"default"}
+              label={translation.ai.sendMessage}
+              icon={ArrowUp}
+              hideLabel
+            />
+          ))}
       </div>
     </div>
   )

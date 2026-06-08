@@ -1,8 +1,13 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useRef, useState } from "react"
 
+import { ButtonInternal } from "@/components/F0Button/internal"
+
 import { F0AiChatTextArea } from "../F0AiChatTextArea"
-import type { F0AiChatTextAreaSubmitPayload } from "../types"
+import type {
+  F0AiChatTextAreaHandle,
+  F0AiChatTextAreaSubmitPayload,
+} from "../types"
 
 import { F0ClarifyingPanel } from "../../F0ClarifyingPanel"
 import type { ClarifyingQuestionState } from "../../F0ClarifyingPanel/types"
@@ -369,5 +374,63 @@ export const Everything: Story = {
     disclaimer: DISCLAIMER,
     initialPendingContext: PENDING_CONTEXT,
     initialPendingQuote: PENDING_QUOTE,
+  },
+}
+
+/**
+ * Headless usage. `showSubmitButton={false}` hides the built-in button and
+ * external buttons drive the composer through `apiRef`: `setContent()` populates
+ * the textarea and `submit()` runs the full send pipeline. `onChange`
+ * mirrors the content into host state, so the external Send button stays
+ * disabled until something is typed. Enter still submits.
+ */
+export const HeadlessExternalControls: Story = {
+  render: () => {
+    const apiRef = useRef<F0AiChatTextAreaHandle>(null)
+    const containerRef = useRef<HTMLDivElement>(null)
+    const [value, setValue] = useState("")
+    const [submissions, setSubmissions] = useState<
+      F0AiChatTextAreaSubmitPayload[]
+    >([])
+
+    return (
+      <div className="flex w-[640px] flex-col gap-4">
+        <div className="flex gap-2">
+          <ButtonInternal
+            label="Populate (setContent)"
+            type="button"
+            variant="outline"
+            onClick={() => {
+              apiRef.current?.setContent("Draft my weekly update")
+              apiRef.current?.focus()
+            }}
+          />
+          <ButtonInternal
+            label="Submit (submit)"
+            type="button"
+            variant="default"
+            // Reacts to `onChange`: disabled while the textarea is empty.
+            disabled={value.trim().length === 0}
+            onClick={() => apiRef.current?.submit()}
+          />
+        </div>
+        <F0AiChatTextArea
+          ref={containerRef}
+          apiRef={apiRef}
+          showSubmitButton={false}
+          onChange={setValue}
+          placeholders={ROTATING_PLACEHOLDERS}
+          onSubmit={(payload) => setSubmissions((prev) => [...prev, payload])}
+        />
+        {submissions.length > 0 && (
+          <div className="rounded-md border border-f1-border p-3 text-sm">
+            <div className="pb-2 font-medium">Last submission</div>
+            <pre className="whitespace-pre-wrap text-xs">
+              {JSON.stringify(submissions[submissions.length - 1], null, 2)}
+            </pre>
+          </div>
+        )}
+      </div>
+    )
   },
 }

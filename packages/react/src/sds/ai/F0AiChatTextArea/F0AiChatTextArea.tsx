@@ -1,5 +1,12 @@
 import { AnimatePresence, motion } from "motion/react"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import {
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { useReducedMotion } from "@/lib/a11y"
@@ -81,6 +88,9 @@ export const F0AiChatTextArea = ({
   welcomeScreenSuggestions,
   onSuggestionClick,
   ref,
+  apiRef,
+  onChange,
+  showSubmitButton = true,
 }: F0AiChatTextAreaProps) => {
   const translation = useI18n()
   const shouldReduceMotion = useReducedMotion()
@@ -168,6 +178,31 @@ export const F0AiChatTextArea = ({
     dictationBaseRef.current = inputValue
     void recorder.start()
   }, [inputValue, recorder])
+
+  // Imperative handle for external control: populate the textarea, submit it
+  // (same path as the built-in button and Enter, so the full pipeline runs),
+  // or focus it. Mirrors the house pattern used by `RichTextEditorHandle`.
+  // The plain `ref` stays the container DOM node; this rides on `apiRef`.
+  useImperativeHandle(apiRef, () => ({
+    setContent: (content: string) => {
+      setInputValue(content)
+      setCursorPosition(content.length)
+    },
+    getContent: () => inputValue,
+    clear: () => {
+      setInputValue("")
+      setCursorPosition(0)
+    },
+    submit: () => formRef.current?.requestSubmit(),
+    focus: () => textareaRef.current?.focus(),
+  }))
+
+  // Notify the host of every content change (typing, dictation, mention
+  // insertion, setContent, clear-on-submit) so it can react to the value —
+  // e.g. enable/disable an external submit button.
+  useEffect(() => {
+    onChange?.(inputValue)
+  }, [inputValue, onChange])
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash.length === 0) {
@@ -474,6 +509,7 @@ export const F0AiChatTextArea = ({
                     inProgress={inProgress}
                     hasDataToSend={hasDataToSend}
                     isPreSending={isPreSending || pendingSubmit}
+                    showSubmitButton={showSubmitButton}
                     canRecord={canRecord}
                     recordingStatus={recorder.status}
                     recordingStream={recorder.stream}
