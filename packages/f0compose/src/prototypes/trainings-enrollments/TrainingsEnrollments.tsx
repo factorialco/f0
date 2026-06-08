@@ -1898,7 +1898,7 @@ const inscripcionCopy = {
   },
   step: {
     title: "Enrollment",
-    subtitle: "Define who takes this course.",
+    subtitle: "Set up automatic enrollment for this course.",
   },
   toggle: {
     label: "Automatic enrollment",
