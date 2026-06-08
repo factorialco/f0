@@ -58,6 +58,24 @@ const actionsWidthClassName: Record<CardRowStackAt, string> = {
   never: "min-w-0 flex-1",
 }
 
+// Visibility of the icon-only inline cluster — shown at/above the breakpoint
+// (and always, for `never`). Pairs with `stackedClusterVisibility` below; only
+// the confirm/reject variant renders both, to swap icon-only ↔ labelled on stack.
+const inlineClusterVisibility: Record<CardRowStackAt, string> = {
+  sm: "hidden @xs:flex",
+  md: "hidden @md:flex",
+  lg: "hidden @lg:flex",
+  never: "flex",
+}
+
+// Visibility of the labelled stacked cluster — shown only below the breakpoint.
+const stackedClusterVisibility: Record<CardRowStackAt, string> = {
+  sm: "flex @xs:hidden",
+  md: "flex @md:hidden",
+  lg: "flex @lg:hidden",
+  never: "hidden",
+}
+
 // Footer-style separator shown while the actions sit on their own stacked line;
 // removed once they go inline at the breakpoint.
 const stackedChrome: Record<CardRowStackAt, string> = {
@@ -101,8 +119,10 @@ interface CardRowActionsProps {
  *   hairline) below a container breakpoint; the breakpoint mapping is shared
  *   with the row root via {@link cardRowClassName}.
  *
- * Pass `confirmAction` / `rejectAction` for the icon-only confirm/reject variant
- * (✗ then ✓), which replaces the standard actions.
+ * Pass `confirmAction` / `rejectAction` for the confirm/reject variant — reject
+ * (✗, outline) then confirm (✓, solid primary), which replaces the standard
+ * actions. Icon-only while inline; the buttons reveal their labels once the row
+ * stacks onto its own line.
  */
 export function CardRowActions({
   primaryAction,
@@ -129,31 +149,78 @@ export function CardRowActions({
     </div>
   )
 
-  // Confirm/reject variant: icon-only outline buttons, reject (✗) then confirm (✓).
+  // Confirm/reject variant: reject (✗, outline) then confirm (✓, solid primary).
+  // Icon-only while inline; once the row stacks, the buttons drop onto their own
+  // line and reveal their labels. `hideLabel` is a static per-button prop and the
+  // stack is a container query (invisible to ButtonGroup), so we render both
+  // clusters and toggle them with CSS — mirroring the row root's breakpoint.
   if (confirmAction || rejectAction) {
-    const variantActions: ButtonGroupButton[] = []
-    if (rejectAction) {
-      variantActions.push({
-        id: "reject",
-        icon: Cross,
-        label: rejectAction.label ?? "Reject",
-        hideLabel: true,
-        disabled: rejectAction.disabled,
-        onClick: rejectAction.onClick,
-      })
+    const variant = (hideLabel: boolean) => {
+      const reject: ButtonGroupButton | undefined = rejectAction
+        ? {
+            id: "reject",
+            icon: Cross,
+            label: rejectAction.label ?? "Cancel",
+            hideLabel,
+            disabled: rejectAction.disabled,
+            onClick: rejectAction.onClick,
+          }
+        : undefined
+      const confirm: ButtonGroupButton | undefined = confirmAction
+        ? {
+            id: "confirm",
+            icon: Check,
+            label: confirmAction.label ?? "Confirm",
+            hideLabel,
+            disabled: confirmAction.disabled,
+            onClick: confirmAction.onClick,
+          }
+        : undefined
+      return (
+        <ButtonGroup
+          primaryAction={confirm}
+          secondaryActions={reject ? [reject] : undefined}
+          size={size}
+          gap={GAP}
+        />
+      )
     }
-    if (confirmAction) {
-      variantActions.push({
-        id: "confirm",
-        icon: Check,
-        label: confirmAction.label ?? "Confirm",
-        hideLabel: true,
-        disabled: confirmAction.disabled,
-        onClick: confirmAction.onClick,
-      })
+
+    const inline = (
+      // Icon-only, inline at the trailing edge.
+      <div
+        className={cn(
+          "relative z-[1] min-w-0 flex-1",
+          inlineClusterVisibility[stackAt]
+        )}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {variant(true)}
+      </div>
+    )
+
+    // `never` never stacks, so the labelled cluster (and its duplicate
+    // ButtonGroup) is skipped entirely.
+    if (stackAt === "never") {
+      return inline
     }
-    return wrap(
-      <ButtonGroup secondaryActions={variantActions} size={size} gap={GAP} />
+
+    return (
+      <>
+        {inline}
+        {/* Labelled, on its own full-width line below the breakpoint. */}
+        <div
+          className={cn(
+            "relative z-[1] w-full",
+            stackedClusterVisibility[stackAt],
+            stackedChrome[stackAt],
+            compact && "mt-3 pt-3"
+          )}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {variant(false)}
+        </div>
+      </>
     )
   }
 

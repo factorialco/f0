@@ -138,6 +138,7 @@ export const ConfirmReject: Story = {
     },
     title: "Jane Cooper",
     description: "Requested 3 days off",
+    stackAt: "md",
     rejectAction: { label: "Reject", onClick: fn() },
     confirmAction: { label: "Approve", onClick: fn() },
   },

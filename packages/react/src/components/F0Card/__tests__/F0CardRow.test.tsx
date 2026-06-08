@@ -166,7 +166,7 @@ describe("F0CardRow", () => {
 
       render(<F0CardRow title="Row" rejectAction={{ onClick: onReject }} />)
 
-      await user.click(screen.getByRole("button", { name: "Reject" }))
+      await user.click(screen.getByRole("button", { name: "Cancel" }))
       expect(onReject).toHaveBeenCalledTimes(1)
     })
 
@@ -183,7 +183,7 @@ describe("F0CardRow", () => {
       expect(
         screen.getByRole("button", { name: "Confirm" })
       ).toBeInTheDocument()
-      expect(screen.getByRole("button", { name: "Reject" })).toBeInTheDocument()
+      expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument()
       expect(
         screen.queryByRole("button", { name: "Open" })
       ).not.toBeInTheDocument()
