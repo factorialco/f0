@@ -195,16 +195,14 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
           <div className="flex min-w-0 flex-row items-center gap-3">
             {avatar && <CardAvatar avatar={avatar} size="lg" />}
             <div className="flex min-w-0 flex-col gap-0">
-              {title && (
-                <Text
-                  variant="body"
-                  content={title}
-                  className={cn(
-                    "font-medium",
-                    inactive && "text-f1-foreground-secondary line-through"
-                  )}
-                />
-              )}
+              <Text
+                variant="body"
+                content={title}
+                className={cn(
+                  "font-medium",
+                  inactive && "text-f1-foreground-secondary line-through"
+                )}
+              />
               {description && (
                 <Text
                   variant="description"
