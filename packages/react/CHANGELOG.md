@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.46.0](https://github.com/factorialco/f0/compare/f0-react-v2.45.0...f0-react-v2.46.0) (2026-06-08)
+
+
+### Features
+
+* **sds:** render F0HILActionConfirmation with F0CardRow ([#4341](https://github.com/factorialco/f0/issues/4341)) ([e0c8cf0](https://github.com/factorialco/f0/commit/e0c8cf03b5706fb322685001d655acbbe1e9ee98))
+
 ## [2.45.0](https://github.com/factorialco/f0/compare/f0-react-v2.44.0...f0-react-v2.45.0) (2026-06-08)
 
 
