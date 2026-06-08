@@ -63,7 +63,7 @@ const meta: Meta<typeof F0Drawer> = {
 
       return (
         <div className="flex flex-1 items-center justify-center rounded-md border border-solid border-f1-border-secondary bg-f1-background">
-          <F0Button label="Open dialog" onClick={handleOpen} />
+          <F0Button label="Open drawer" onClick={handleOpen} />
           <Story args={{ ...rest, isOpen: open, onClose: handleClose }} />
         </div>
       )
