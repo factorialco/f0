@@ -4872,6 +4872,7 @@ export declare const defaultTranslations: {
         readonly scaleSelector: "Zoom level";
         readonly pageWidth: "Page width";
         readonly pageFit: "Page fit";
+        readonly rotate: "Rotate";
         readonly print: "Print";
         readonly download: "Download";
         readonly loading: "Loading document";
@@ -9084,6 +9085,8 @@ export declare type F0OneSwitchProps = React.ComponentPropsWithoutRef<typeof Swi
     autoOpen?: boolean;
 };
 
+declare type F0PdfRotation = 0 | 90 | 180 | 270;
+
 export declare type F0PdfScale = (typeof pdfScales)[number];
 
 /**
@@ -9096,8 +9099,8 @@ Skeleton: () => JSX_2.Element;
 export declare interface F0PdfViewerProps extends WithDataTestIdProps, DataAttributes_2 {
     /** Source URL of the PDF document. */
     url: string;
-    /** File name used when downloading the document. */
-    filename: string;
+    /** File name used when downloading the document. Defaults to "document.pdf". */
+    filename?: string;
     /** Zero-based page index to scroll to initially (and on change). */
     page?: number;
     /** Restrict rendering to a subset of pages (zero-based indexes). */
@@ -9106,6 +9109,12 @@ export declare interface F0PdfViewerProps extends WithDataTestIdProps, DataAttri
     initialScale?: F0PdfScale;
     /** Send credentials with the document request. Defaults to true. */
     withCredentials?: boolean;
+    /** Show a toolbar control to rotate the document in 90° steps. */
+    rotatable?: boolean;
+    /** Initial rotation in degrees. Defaults to 0. */
+    initialRotation?: F0PdfRotation;
+    /** Called with the new rotation in degrees whenever the user rotates. */
+    onRotationChange?: (rotation: F0PdfRotation) => void;
     /** Called once the document has loaded, with the pdf.js document proxy. */
     onPdfLoaded?: (pdf: PDFDocumentProxy) => void;
     /** Called with the 1-based page number when the visible page changes. */
@@ -15600,8 +15609,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
@@ -15609,10 +15620,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
