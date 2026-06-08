@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.48.0](https://github.com/factorialco/f0/compare/f0-react-v2.47.0...f0-react-v2.48.0) (2026-06-08)
+
+
+### Features
+
+* **OneDataCollection:** capture the full view in user-creatable presets ([#4344](https://github.com/factorialco/f0/issues/4344)) ([9b8fb10](https://github.com/factorialco/f0/commit/9b8fb10a28a777f8b99a6f42227b5d92c05afd9e))
+
 ## [2.47.0](https://github.com/factorialco/f0/compare/f0-react-v2.46.0...f0-react-v2.47.0) (2026-06-08)
 
 
