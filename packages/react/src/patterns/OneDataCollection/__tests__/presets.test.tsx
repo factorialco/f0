@@ -649,6 +649,48 @@ describe("OneDataCollection - presets", () => {
     expect(screen.queryByText("My view")).not.toBeInTheDocument()
   })
 
+  it("reflects a renamed view in the URL (dc_preset updates to the new title)", async () => {
+    const user = userEvent.setup()
+    renderHarness({ urlSync: true })
+
+    await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument())
+
+    // Create a custom view (auto-selected) → dc_preset is its title-derived id.
+    await sortByName(user)
+    await user.click(await screen.findByRole("button", { name: "Save view" }))
+    await user.type(await screen.findByLabelText("Title"), "My view")
+    await user.click(screen.getByRole("button", { name: "Save" }))
+    await waitFor(() =>
+      expect(new URLSearchParams(window.location.search).get("dc_preset")).toBe(
+        "My view"
+      )
+    )
+
+    // Rename it via the edit dialog.
+    await user.hover(
+      screen
+        .getAllByText("My view")
+        .find((el) => !el.closest('[aria-hidden="true"]'))!
+        .closest("label")!
+    )
+    await user.click(
+      (await screen.findAllByRole("button", { name: "Edit view" })).find(
+        (el) => !el.closest('[aria-hidden="true"]')
+      )!
+    )
+    const titleInput = await screen.findByLabelText("Title")
+    await user.clear(titleInput)
+    await user.type(titleInput, "Renamed view")
+    await user.click(screen.getByRole("button", { name: "Save" }))
+
+    // The URL now reflects the new title (spaces render as '+').
+    await waitFor(() =>
+      expect(new URLSearchParams(window.location.search).get("dc_preset")).toBe(
+        "Renamed view"
+      )
+    )
+  })
+
   it("removes a custom preset via the Remove action in the edit dialog", async () => {
     const user = userEvent.setup()
     renderHarness()

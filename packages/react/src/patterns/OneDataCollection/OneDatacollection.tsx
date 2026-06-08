@@ -1178,20 +1178,31 @@ const OneDataCollectionComp = <
       const targetId =
         presetDialog?.mode === "update" ? presetDialog.presetId : undefined
       if (!targetId) return
+      // The id is title-derived and doubles as the readable `dc_preset` URL
+      // value, so a rename must regenerate it (deduped against the other views)
+      // and re-point the selection — otherwise the URL keeps the old name.
+      const newId = derivePresetId(
+        values.title,
+        mergedPresets
+          .filter((preset) => preset.id !== targetId)
+          .map((preset) => preset.id ?? preset.label)
+      )
       setCustomPresets((prev) =>
         prev.map((preset) =>
           preset.id === targetId
             ? {
                 ...preset,
+                id: newId,
                 label: values.title,
                 description: values.description,
               }
             : preset
         )
       )
+      setSelectedPresetId((current) => (current === targetId ? newId : current))
       setPresetDialog(null)
     },
-    [presetDialog]
+    [presetDialog, mergedPresets]
   )
 
   // Delete the preset being edited (from the update dialog's "Remove" action).
