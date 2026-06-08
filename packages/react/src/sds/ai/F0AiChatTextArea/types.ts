@@ -1,4 +1,4 @@
-import type { ReactNode, RefObject } from "react"
+import type { ReactNode, Ref, RefObject } from "react"
 
 import type {
   AiChatCreditWarning,
@@ -43,14 +43,57 @@ export type F0AiChatTextAreaSubmitPayload = {
   quote: PendingQuote | null
 }
 
+/**
+ * Imperative handle exposed via `apiRef` for driving the composer from
+ * outside — e.g. an external button that populates the textarea or submits
+ * it. Mirrors the house pattern used by `F0RichTextEditorHandle`.
+ */
+export type F0AiChatTextAreaHandle = {
+  /** Replace the textarea content; the caret moves to the end. */
+  setContent: (content: string) => void
+  /** Read the current textarea content (the value as of the last render). */
+  getContent: () => string
+  /** Clear the textarea content. */
+  clear: () => void
+  /** Run the full submit pipeline (same path as the built-in button and Enter). */
+  submit: () => void
+  /** Focus the textarea. */
+  focus: () => void
+}
+
 export type F0AiChatTextAreaProps = {
   ref: RefObject<HTMLDivElement>
+  /**
+   * Imperative handle for driving the composer from outside: `setContent()`
+   * populates, `submit()` sends, `clear()` empties, `focus()` focuses. Lets a
+   * host pair an external "send" button (with `showSubmitButton={false}`) or a
+   * "use template" button with the composer. Method names mirror
+   * `F0RichTextEditorHandle`. The plain `ref` stays the container DOM node; the
+   * handle rides on this separate prop.
+   */
+  apiRef?: Ref<F0AiChatTextAreaHandle>
+
+  /**
+   * Called whenever the textarea content changes — typing, dictation,
+   * @-mention insertion, `apiRef.setContent()`, or clear-on-submit. Mirror it
+   * into host state to react to the value, e.g. to enable/disable an external
+   * submit button. Fires once on mount with the initial value. Named `onChange`
+   * to mirror `RichTextEditor`.
+   */
+  onChange?: (value: string) => void
   /** Emitted when the user submits. Awaited so the textarea can stay disabled. */
   onSubmit: (payload: F0AiChatTextAreaSubmitPayload) => void | Promise<void>
   /** Called when the user clicks the stop button while a response is streaming. */
   onStop?: () => void
   /** Whether a response is currently streaming. Switches the submit button to "stop". */
   inProgress?: boolean
+
+  /**
+   * Render the built-in submit / stop button. Defaults to `true`. Set to
+   * `false` to hide it and drive submission from an external button via
+   * `apiRef.current?.submit()`. Enter-to-submit still works regardless.
+   */
+  showSubmitButton?: boolean
   /**
    * Optional gate run before submission. Return `false` to abort the send
    * (e.g. show a quota dialog). The textarea stays focused and the input
