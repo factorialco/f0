@@ -781,8 +781,10 @@ export function useData<
   useEffect(() => {
     return () => {
       cleanup.current?.()
+      // Reset on unmount so a fetch canceled mid-flight can't leave the shared source's isLoading stuck true.
+      setIsLoading(false)
     }
-  }, [])
+  }, [setIsLoading])
 
   const total = totalItems ? totalItems - filteredItemsCount : 0
 

@@ -1,5 +1,47 @@
 # Changelog
 
+## [2.41.4](https://github.com/factorialco/f0/compare/f0-react-v2.41.3...f0-react-v2.41.4) (2026-06-08)
+
+
+### Bug Fixes
+
+* **react:** smooth F0ClarifyingPanel ↔ textarea transition ([#4355](https://github.com/factorialco/f0/issues/4355)) ([0f2535a](https://github.com/factorialco/f0/commit/0f2535a1aae37c393e6e9878a8cb37b977c9cb9b))
+
+## [2.41.3](https://github.com/factorialco/f0/compare/f0-react-v2.41.2...f0-react-v2.41.3) (2026-06-08)
+
+
+### Bug Fixes
+
+* **datacollection:** prevent stuck kanban loading on view-restore bounce ([#4350](https://github.com/factorialco/f0/issues/4350)) ([c97eb32](https://github.com/factorialco/f0/commit/c97eb32bc04e806cf5c2cbbbddc8f6584f4c4f50))
+
+## [2.41.2](https://github.com/factorialco/f0/compare/f0-react-v2.41.1...f0-react-v2.41.2) (2026-06-07)
+
+
+### Bug Fixes
+
+* **ResourceHeader:** make showBottomBorder render bottom-only without Tailwind preflight ([#4347](https://github.com/factorialco/f0/issues/4347)) ([f23bc50](https://github.com/factorialco/f0/commit/f23bc50c968f345a81cf5ae6c3aa05e759510a61))
+
+## [2.41.1](https://github.com/factorialco/f0/compare/f0-react-v2.41.0...f0-react-v2.41.1) (2026-06-06)
+
+
+### Bug Fixes
+
+* **F0AiChatTextArea:** make recording waveform more sensitive ([#4345](https://github.com/factorialco/f0/issues/4345)) ([54ab099](https://github.com/factorialco/f0/commit/54ab09971e30880b0bfb7f2169b36ef98455b99f))
+
+## [2.41.0](https://github.com/factorialco/f0/compare/f0-react-v2.40.2...f0-react-v2.41.0) (2026-06-05)
+
+
+### Features
+
+* **F0Checkbox:** promote to stable ([#4323](https://github.com/factorialco/f0/issues/4323)) ([aa379e9](https://github.com/factorialco/f0/commit/aa379e97d6e8095fc4deae028cfbe74a537002b9))
+
+## [2.40.2](https://github.com/factorialco/f0/compare/f0-react-v2.40.1...f0-react-v2.40.2) (2026-06-05)
+
+
+### Bug Fixes
+
+* **inputs:** resolve InputFieldProps in bundled types at the source ([#4334](https://github.com/factorialco/f0/issues/4334)) ([48cd62d](https://github.com/factorialco/f0/commit/48cd62d159eb146a24abe238040dc2d6b2f91e8a))
+
 ## [2.40.1](https://github.com/factorialco/f0/compare/f0-react-v2.40.0...f0-react-v2.40.1) (2026-06-05)
 
 

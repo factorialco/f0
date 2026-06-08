@@ -1,3 +1,4 @@
+import type { PrInfo } from "../collectors/github.js";
 import type { ChangelogEntry, CommitEntry } from "../types.js";
 
 const PACKAGE_PATH_MAP: Record<string, string> = {
@@ -68,6 +69,7 @@ export function buildContextMessage(
   commits: CommitEntry[],
   from: string,
   to: string,
+  prBodies?: Map<number, PrInfo>,
 ): string {
   const sections: string[] = [`Weekly summary period: ${from} to ${to}`, ""];
 
@@ -107,6 +109,18 @@ export function buildContextMessage(
 
   sections.push("## Additional commits not in changelog");
   sections.push(formatCommits(extraCommits));
+
+  if (prBodies && prBodies.size > 0) {
+    sections.push("");
+    sections.push("## PR descriptions");
+    // Sort by PR number desc so the most recent context appears first.
+    const ordered = [...prBodies.values()].sort((a, b) => b.number - a.number);
+    for (const pr of ordered) {
+      sections.push("");
+      sections.push(`PR #${pr.number}:`);
+      sections.push(pr.body);
+    }
+  }
 
   return sections.join("\n");
 }
