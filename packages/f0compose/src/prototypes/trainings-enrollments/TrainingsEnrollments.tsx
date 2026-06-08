@@ -1932,7 +1932,10 @@ const inscripcionCopy = {
     changeHint: (count: number, added: string) =>
       `${count} ${count === 1 ? "person" : "people"} in ${added} ${count === 1 ? "matches" : "match"} but ${count === 1 ? "isn't" : "aren't"} enrolled yet.`,
     newOnly: "New people only",
+    newOnlyDescription: "From now on, as people match.",
     addExisting: (count: number) => `Add the ${count} too`,
+    addExistingDescription: (count: number) =>
+      `Includes the ${count} who already match.`,
   },
   // PATTERN B — "people are removed": a criterion was removed/swapped, or automatic
   // enrollment was turned off. Informational note (nobody is unenrolled).
@@ -3884,29 +3887,6 @@ function AssignParticipantsDialog({
 // change. There is intentionally NO Course validity here (it lives in Basic info).
 // ---------------------------------------------------------------------------
 
-// Small inline radio dot (no F0 radio primitive is exported; CardSelectable is the
-// heavy card variant we're deliberately avoiding for the secondary controls).
-function InlineRadio({
-  selected,
-  label,
-  onSelect,
-}: {
-  selected: boolean
-  label: string
-  onSelect: () => void
-}) {
-  return (
-    <button type="button" onClick={onSelect} className="flex items-center gap-2 text-left">
-      <span
-        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-solid ${selected ? "border-f1-border-selected" : "border-f1-border-secondary"}`}
-      >
-        {selected && <span className="h-2 w-2 rounded-full bg-f1-background-selected-bold" />}
-      </span>
-      <F0Text variant="body" content={label} />
-    </button>
-  )
-}
-
 function EditCourseEnrollmentSection({
   values,
   onUpdate,
@@ -3968,18 +3948,25 @@ function EditCourseEnrollmentSection({
                   content={inscripcionCopy.appliesTo.changeHint(addedCount, addedLabels)}
                 />
               </div>
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-                <InlineRadio
-                  selected={appliesTo !== "everyone"}
-                  label={inscripcionCopy.appliesTo.newOnly}
-                  onSelect={() => onUpdate("enrollmentAppliesTo", "new-only")}
-                />
-                <InlineRadio
-                  selected={appliesTo === "everyone"}
-                  label={inscripcionCopy.appliesTo.addExisting(addedCount)}
-                  onSelect={() => onUpdate("enrollmentAppliesTo", "everyone")}
-                />
-              </div>
+              {/* Same native grouped CardSelectable as Course type, for consistency. */}
+              <CardSelectableContainer
+                grouped
+                label={inscripcionCopy.appliesTo.changeLabel(addedLabels)}
+                value={appliesTo === "everyone" ? "everyone" : "new-only"}
+                onChange={(val) => onUpdate("enrollmentAppliesTo", val ?? "new-only")}
+                items={[
+                  {
+                    value: "new-only",
+                    title: inscripcionCopy.appliesTo.newOnly,
+                    description: inscripcionCopy.appliesTo.newOnlyDescription,
+                  },
+                  {
+                    value: "everyone",
+                    title: inscripcionCopy.appliesTo.addExisting(addedCount),
+                    description: inscripcionCopy.appliesTo.addExistingDescription(addedCount),
+                  },
+                ]}
+              />
             </div>
           )}
           {removed.length > 0 && (
