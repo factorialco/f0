@@ -1,117 +1,72 @@
-import { F0Button, F0Heading, F0Icon, F0Text } from "@factorialco/f0-react"
-import { ArrowUp, Delete, Pencil, Plus } from "@factorialco/f0-react/icons/app"
-import { useRef, useState } from "react"
+import { F0Button, F0Heading } from "@factorialco/f0-react"
+import { Pencil } from "@factorialco/f0-react/icons/app"
+import { useState } from "react"
 
-import { NumberInput, RuleSelect, ToggleSwitch } from "./accrualControls"
-import { OneRuleModal, type OneRuleKind } from "./OneRuleModal"
+import { useAiChat, useCopilotAction, useCopilotReadable } from "@/copilot"
+
+import {
+  type AccrualProration,
+  accrualSummary,
+  type BaseAllocation,
+  baseSummary,
+  MONTHS,
+} from "./allowanceRuleModel"
+import { RuleSelect } from "./accrualControls"
 import { type Allowance } from "./policiesData"
 
-type OneRule = { id: string; text: string }
-
 // ─────────────────────────────────────────────────────────────────────────────
-// Exploration 4 — plain-language inline-edit
+// Exploration 4 — Allowance page + One panel pattern
 //
-// Base allowance and Accrual rules are written as English sentences; every
-// configurable value is an inline-editable token (bold + dotted underline) that
-// opens a dark anchored popover with suggestion chips + a manual input. Basic
-// info, Deduction and Carryover stay as conventional labelled fields — the
-// contrast between the two styles is intentional.
+// A single-column allowance editor with four stacked sections, each a bare
+// title over a list of full-width divider rows (no card containers, no section
+// descriptions):
+//   1. Basic information       — labelled fields
+//   2. Allowance & accrual     — a plain-language PROSE summary (base layer)
+//                                with the key settings bolded inline, plus a
+//                                low-emphasis "Customise accrual rule" button
+//   3. Deduction rules         — labelled fields
+//   4. Carryover rules         — labelled fields
+//
+// The accrual section is NOT a form — it's the prose foundation that rules
+// modify. "Customise accrual rule" opens the NATIVE f0 One chat (via
+// `@/copilot`), loaded with the current rule restated. One can rewrite the
+// rule through the `applyAccrualRule` copilot action, and the prose
+// re-derives from the underlying settings — no prose is ever stored.
 // ─────────────────────────────────────────────────────────────────────────────
 
-type ChipOpt = { label: string; value: string }
-type TokenSpec = {
-  title: string
-  chips: ChipOpt[]
-  manual?: "number" | "text"
-}
-
-const chips = (...vals: string[]): ChipOpt[] => vals.map((v) => ({ label: v, value: v }))
-
-const TOKENS: Record<string, TokenSpec> = {
-  baseAmount: { title: "How many days?", chips: chips("15", "22", "25"), manual: "number" },
-  baseUnit: { title: "Days or hours?", chips: [{ label: "Days", value: "days" }, { label: "Hours", value: "hours" }] },
-  baseCount: {
-    title: "Counted against which days?",
-    chips: [{ label: "Working", value: "working" }, { label: "Calendar", value: "calendar" }],
-  },
-  cycleMonth: { title: "When does the cycle begin?", chips: chips("January", "April"), manual: "text" },
-  cycleDuration: { title: "How long does the cycle run?", chips: chips("12 months", "6 months"), manual: "text" },
-  prorated: {
-    title: "Prorated for mid-cycle joiners?",
-    chips: [{ label: "Prorated", value: "prorated" }, { label: "Not prorated", value: "not prorated" }],
-  },
-  maxDays: { title: "Maximum allowance days?", chips: chips("Unlimited"), manual: "number" },
-  howAccrued: {
-    title: "How are days accrued?",
-    chips: [
-      { label: "All at once — first day of cycle", value: "all at once on the first day of the cycle" },
-      { label: "Monthly", value: "monthly" },
-      { label: "Per pay period", value: "per pay period" },
-    ],
-  },
-  whenUsed: {
-    title: "When can they be used?",
-    chips: [
-      { label: "Same cycle acquired", value: "in the same cycle acquired" },
-      { label: "Carried to next cycle", value: "carried to the next cycle" },
-    ],
-  },
-  tenureNum: { title: "Required tenure?", chips: chips("1", "3", "5"), manual: "number" },
-  tenureUnit: {
-    title: "Tenure unit?",
-    chips: [{ label: "Months", value: "months" }, { label: "Years", value: "years" }],
-  },
-  tenureTiming: {
-    title: "When does the change take effect?",
-    chips: [{ label: "Immediately", value: "immediately" }, { label: "Next cycle", value: "at the next cycle" }],
-  },
-  additionalDays: { title: "How many extra days?", chips: chips("1", "2", "5"), manual: "number" },
-  tenureMax: { title: "Tenure maximum days?", chips: chips("Unlimited"), manual: "number" },
-}
-
-const DEFAULTS: Record<string, string> = {
-  baseAmount: "0",
-  baseUnit: "days",
-  baseCount: "working",
-  cycleMonth: "January",
-  cycleDuration: "12 months",
-  prorated: "prorated",
-  maxDays: "Unlimited",
-  howAccrued: "all at once on the first day of the cycle",
-  whenUsed: "in the same cycle acquired",
-  tenureNum: "",
-  tenureUnit: "months",
-  tenureTiming: "immediately",
-  additionalDays: "",
-  tenureMax: "Unlimited",
-}
+// ── Field option lists (Basic info / Deduction / Carryover) ───────────────────
 
 const ALLOWANCE_TYPE_OPTS = [
-  { value: "paid", label: "Paid time off" },
-  { value: "unpaid", label: "Unpaid leave" },
+  { value: "fixed", label: "Fixed balance" },
+  { value: "overtime", label: "Overtime" },
+  { value: "worked", label: "Based on time worked" },
 ]
 const ABSENCE_TYPE_OPTS = [
+  { value: "", label: "Select absences" },
   { value: "vacation", label: "Vacation" },
   { value: "sick", label: "Sick leave" },
   { value: "personal", label: "Personal day" },
+]
+const DISPLAY_OPTS = [
+  { value: "days-half", label: "Days & Half days" },
+  { value: "days", label: "Days only" },
+  { value: "hours", label: "Hours" },
+  { value: "decimals", label: "Decimals" },
 ]
 const BANK_HOLIDAY_OPTS = [
   { value: "exclude", label: "Don't count it as an absence day" },
   { value: "count", label: "Count it as an absence day" },
 ]
-const YES_NO_OPTS = [
-  { value: "no", label: "No" },
-  { value: "yes", label: "Yes" },
+const NEGATIVE_OPTS = [
+  { value: "no", label: "No, it is not possible to request more than available" },
+  { value: "yes", label: "Yes, the balance can go negative" },
 ]
-const RESTRICT_OPTS = [
-  { value: "yes", label: "Yes" },
-  { value: "no", label: "No" },
-]
-const DISPLAY_OPTS = [
-  { value: "days-half", label: "Days & half days" },
-  { value: "days", label: "Days only" },
-  { value: "hours", label: "Hours" },
-  { value: "decimals", label: "Decimals" },
+const CARRY_DAYS_OPTS = [
+  { value: "0", label: "0" },
+  { value: "5", label: "5 days" },
+  { value: "10", label: "10 days" },
+  { value: "15", label: "15 days" },
+  { value: "unlimited", label: "Unlimited" },
 ]
 const EXPIRE_OPTS = [
   { value: "12m", label: "12 months after cycle ends" },
@@ -119,241 +74,225 @@ const EXPIRE_OPTS = [
   { value: "custom", label: "Custom" },
 ]
 
-export function Exploration4View({ allowance }: { allowance: Allowance }) {
-  const [name, setName] = useState(allowance.name)
-  const [allowanceType, setAllowanceType] = useState("paid")
-  const [absenceType, setAbsenceType] = useState("vacation")
+const CONTROL_WIDTH = "w-72"
 
-  const [values, setValues] = useState<Record<string, string>>(DEFAULTS)
-  const [openId, setOpenId] = useState<string | null>(null)
-  const setValue = (id: string, v: string) => setValues((s) => ({ ...s, [id]: v }))
+// One's opening turn when the panel is summoned: restate → simulate → confirm.
+function openingMessage(base: BaseAllocation, accrual: AccrualProration): string {
+  return (
+    `Let's customise this accrual rule. Right now: ${baseSummary(base)}. ` +
+    `${accrualSummary(accrual)}.\n\n` +
+    `So an employee starting on day one of the cycle would see ${base.amount} ` +
+    `working days available ${accrual.accrualTiming}.\n\n` +
+    `Tell me what to change in plain language — e.g. "give everyone 22 days", ` +
+    `"start the cycle in April", "cap it at 25 days", or "accrue monthly" — and ` +
+    `I'll restate it and confirm before applying.`
+  )
+}
+
+export function Exploration4View({ allowance }: { allowance: Allowance }) {
+  const { setOpen, setPlaceholders, appendMessages } = useAiChat()
+
+  const [name, setName] = useState(allowance.name)
+  const [allowanceType, setAllowanceType] = useState("fixed")
+  const [absenceType, setAbsenceType] = useState("")
+
+  // Base allocation + accrual defaults — the prose foundation.
+  const [base, setBase] = useState<BaseAllocation>(() => ({
+    amount: allowance.amount,
+    startMonth: "January",
+    cycleMonths: 12,
+  }))
+  const [accrual, setAccrual] = useState<AccrualProration>(() => ({
+    proration: "prorated",
+    maxDays: "unlimited",
+    accrualTiming: "all at once on the first day of the cycle",
+    usabilityWindow: "within the same cycle",
+  }))
 
   // Deduction
+  const [display, setDisplay] = useState("days-half")
   const [bankHoliday, setBankHoliday] = useState("exclude")
   const [negative, setNegative] = useState("no")
-  const [restrict, setRestrict] = useState("yes")
-  const [display, setDisplay] = useState("days-half")
 
   // Carryover
-  const [carryUnlimited, setCarryUnlimited] = useState(false)
-  const [carryDays, setCarryDays] = useState(0)
+  const [carryDays, setCarryDays] = useState("0")
   const [expire, setExpire] = useState("12m")
 
-  // Optional blocks — collapsed until the user adds them (no empty-token sentences)
-  const [tenureOn, setTenureOn] = useState(false)
-  const [carryOn, setCarryOn] = useState(false)
-  const addTenure = () => {
-    setValues((s) => ({
-      ...s,
-      tenureNum: s.tenureNum || "1",
-      additionalDays: s.additionalDays || "1",
-    }))
-    setTenureOn(true)
+  // ── Co-create with One (native f0 chat) ─────────────────────────────────────
+  // Expose the live rule so One reasons about exactly what the admin sees.
+  useCopilotReadable({
+    description:
+      "The accrual rule currently shown on this allowance page, as a plain-language summary plus its structured settings. The on-screen prose re-derives from these settings.",
+    value: {
+      allowanceName: name,
+      summary: `${baseSummary(base)}. ${accrualSummary(accrual)}.`,
+      base,
+      accrual,
+    },
+  })
+
+  // Let One rewrite the rule. Only the provided fields change; the prose
+  // re-derives, so the on-screen summary updates the moment One applies.
+  useCopilotAction({
+    name: "applyAccrualRule",
+    description:
+      "Apply a change to this allowance's accrual rule. Pass only the fields that change. After restating the change and getting the admin's confirmation, call this to write it back — the on-screen prose summary updates automatically.",
+    parameters: [
+      {
+        name: "amount",
+        type: "number",
+        description: "Base working days granted per cycle",
+        required: false,
+      },
+      {
+        name: "startMonth",
+        type: "string",
+        description: `Cycle start month (one of: ${MONTHS.join(", ")})`,
+        required: false,
+      },
+      {
+        name: "cycleMonths",
+        type: "number",
+        description: "Cycle length in months",
+        required: false,
+      },
+      {
+        name: "proration",
+        type: "string",
+        description: 'Either "prorated" or "not prorated"',
+        required: false,
+      },
+      {
+        name: "maxDays",
+        type: "string",
+        description: '"unlimited" or a number of days as a string (e.g. "25")',
+        required: false,
+      },
+      {
+        name: "accrualTiming",
+        type: "string",
+        description:
+          'When days accrue, e.g. "all at once on the first day of the cycle" or "monthly"',
+        required: false,
+      },
+      {
+        name: "usabilityWindow",
+        type: "string",
+        description:
+          'When accrued days can be used, e.g. "within the same cycle" or "in the next cycle"',
+        required: false,
+      },
+    ],
+    handler: ({
+      amount,
+      startMonth,
+      cycleMonths,
+      proration,
+      maxDays,
+      accrualTiming,
+      usabilityWindow,
+    }) => {
+      setBase((b) => ({
+        ...b,
+        ...(amount !== undefined ? { amount } : {}),
+        ...(startMonth !== undefined ? { startMonth } : {}),
+        ...(cycleMonths !== undefined ? { cycleMonths } : {}),
+      }))
+      setAccrual((a) => ({
+        ...a,
+        ...(proration === "prorated" || proration === "not prorated"
+          ? { proration }
+          : {}),
+        ...(maxDays !== undefined ? { maxDays } : {}),
+        ...(accrualTiming !== undefined ? { accrualTiming } : {}),
+        ...(usabilityWindow !== undefined ? { usabilityWindow } : {}),
+      }))
+    },
+  })
+
+  const customiseAccrual = () => {
+    setPlaceholders([
+      'e.g. "give everyone 22 days and start the cycle in April"',
+      'e.g. "cap it at 25 days and accrue monthly"',
+    ])
+    appendMessages?.(
+      [{ role: "assistant", content: openingMessage(base, accrual) }],
+      { persist: false }
+    )
+    setOpen(true)
   }
-
-  // One-authored rules per section
-  const [baseRules, setBaseRules] = useState<OneRule[]>([])
-  const [accrualRules, setAccrualRules] = useState<OneRule[]>([])
-  const [oneModal, setOneModal] = useState<{ kind: OneRuleKind; editingId: string | null } | null>(
-    null
-  )
-  const ruleIdRef = useRef(0)
-
-  const rulesFor = (kind: OneRuleKind) => (kind === "base" ? baseRules : accrualRules)
-  const setRulesFor = (kind: OneRuleKind) =>
-    kind === "base" ? setBaseRules : setAccrualRules
-  const removeRule = (kind: OneRuleKind, id: string) =>
-    setRulesFor(kind)((rs) => rs.filter((r) => r.id !== id))
-  const saveOne = (text: string) => {
-    if (!oneModal || text === "") return
-    const { kind, editingId } = oneModal
-    if (editingId) {
-      setRulesFor(kind)((rs) => rs.map((r) => (r.id === editingId ? { ...r, text } : r)))
-    } else {
-      setRulesFor(kind)((rs) => [...rs, { id: `r-${ruleIdRef.current++}`, text }])
-    }
-    setOneModal(null)
-  }
-  const deleteOne = () => {
-    if (!oneModal) return
-    if (oneModal.editingId) removeRule(oneModal.kind, oneModal.editingId)
-    setOneModal(null)
-  }
-
-  const addRuleButton = (kind: OneRuleKind) => (
-    <F0Button
-      label="Add condition"
-      variant="outline"
-      icon={Plus}
-      onClick={() => setOneModal({ kind, editingId: null })}
-    />
-  )
-
-  const editingRule = oneModal?.editingId
-    ? rulesFor(oneModal.kind).find((r) => r.id === oneModal.editingId)
-    : undefined
-
-  const token = (id: string) => (
-    <InlineToken
-      spec={TOKENS[id]}
-      value={values[id]}
-      isOpen={openId === id}
-      onOpen={() => setOpenId(id)}
-      onClose={() => setOpenId(null)}
-      onChange={(v) => setValue(id, v)}
-    />
-  )
 
   return (
-    // -mt-5 cancels StandardLayout's top padding (py-5) per the "no top padding" spec.
-    <div className="-mt-5 flex w-full flex-col gap-10">
-      {/* 1. Basic information — labelled fields */}
-      <section className="flex flex-col gap-6">
-        <SectionHeader title="Basic information" subtitle="Set the core details of this allowance" />
-        <div className="divide-y divide-f1-border-secondary rounded-xl border border-solid border-f1-border-secondary bg-f1-background">
+    // Single-column form, centered, ~1080px max width, 40px section gaps.
+    <div className="mx-auto flex w-full max-w-[1080px] flex-col gap-10">
+      {/* 1. Basic information */}
+      <section className="flex flex-col gap-3">
+        <SectionHeader title="Basic information" />
+        <div className="flex flex-col">
           <FieldRow label="Allowance name">
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Vacaciones"
-              className="h-10 w-64 rounded-md border border-solid border-f1-border bg-f1-background px-3 text-sm text-f1-foreground placeholder:text-f1-foreground-secondary focus:border-f1-border-hover focus:outline-none"
+              className={`h-10 ${CONTROL_WIDTH} rounded-md border border-solid border-f1-border bg-f1-background px-3 text-sm text-f1-foreground placeholder:text-f1-foreground-secondary focus:border-f1-border-hover focus:outline-none`}
             />
           </FieldRow>
           <FieldRow label="Type of allowance">
-            <RuleSelect value={allowanceType} onChange={setAllowanceType} options={ALLOWANCE_TYPE_OPTS} />
+            <RuleSelect value={allowanceType} onChange={setAllowanceType} options={ALLOWANCE_TYPE_OPTS} width={CONTROL_WIDTH} />
           </FieldRow>
-          <FieldRow label="Absence types">
-            <RuleSelect value={absenceType} onChange={setAbsenceType} options={ABSENCE_TYPE_OPTS} />
+          <FieldRow label="Absence type">
+            <RuleSelect value={absenceType} onChange={setAbsenceType} options={ABSENCE_TYPE_OPTS} width={CONTROL_WIDTH} />
           </FieldRow>
         </div>
       </section>
 
-      {/* 2. Base entitlement — plain language */}
-      <section className="flex flex-col gap-4">
-        <SectionHeader title="Base entitlement" action={addRuleButton("base")} />
-        <Sentence>
-          This allowance gives {token("baseAmount")} {token("baseUnit")}, counted against{" "}
-          {token("baseCount")} days. The cycle begins in {token("cycleMonth")} and runs for{" "}
-          {token("cycleDuration")}.
-        </Sentence>
-        <SavedRules
-          rules={baseRules}
-          onEdit={(id) => setOneModal({ kind: "base", editingId: id })}
-          onDelete={(id) => removeRule("base", id)}
-        />
-      </section>
-
-      {/* 3. Accrual rules — plain language */}
-      <section className="flex flex-col gap-4">
-        <SectionHeader
-          title="Accrual rules"
-          subtitle="How the allowance is generated and grows over time"
-          action={addRuleButton("accrual")}
-        />
-        <Sentence>
-          Base days are {token("prorated")} for mid-cycle joiners, up to a maximum of{" "}
-          {token("maxDays")}. Days are accrued {token("howAccrued")} and can be used{" "}
-          {token("whenUsed")}.
-        </Sentence>
-
-        {tenureOn ? (
-          <div className="flex flex-col gap-2">
-            <Sentence>
-              By tenure, after {token("tenureNum")} {token("tenureUnit")} of service, the allowance
-              changes {token("tenureTiming")}, granting {token("additionalDays")} extra days, up to a
-              maximum of {token("tenureMax")}.
-            </Sentence>
-            <button
-              type="button"
-              onClick={() => setTenureOn(false)}
-              className="self-start text-xs font-medium text-f1-foreground-secondary hover:text-f1-foreground-critical"
-            >
-              Remove tenure rule
-            </button>
+      {/* 2. Allowance & accrual rules — prose summary, customised via One */}
+      <section className="flex flex-col gap-3">
+        <SectionHeader title="Allowance & accrual rules" />
+        <div className="flex flex-col">
+          <div className="border-b border-solid border-f1-border-secondary pb-4">
+            <AccrualProse base={base} accrual={accrual} />
           </div>
-        ) : (
-          <CollapsedLine
-            text="No tenure period defined."
-            actionLabel="Add tenure rule"
-            onAdd={addTenure}
-          />
-        )}
-        <SavedRules
-          rules={accrualRules}
-          onEdit={(id) => setOneModal({ kind: "accrual", editingId: id })}
-          onDelete={(id) => removeRule("accrual", id)}
-        />
+          <div className="pt-4">
+            <F0Button
+              label="Customise accrual rule"
+              variant="ghost"
+              icon={Pencil}
+              onClick={customiseAccrual}
+            />
+          </div>
+        </div>
       </section>
 
-      {/* 4. Deduction rules — labelled fields */}
-      <section className="flex flex-col gap-6">
-        <SectionHeader title="Deduction rules" subtitle="How absences are counted against the balance" />
-        <div className="divide-y divide-f1-border-secondary rounded-xl border border-solid border-f1-border-secondary bg-f1-background">
+      {/* 3. Deduction rules */}
+      <section className="flex flex-col gap-3">
+        <SectionHeader title="Deduction rules" />
+        <div className="flex flex-col">
+          <FieldRow label="How should we display?">
+            <RuleSelect value={display} onChange={setDisplay} options={DISPLAY_OPTS} width={CONTROL_WIDTH} />
+          </FieldRow>
           <FieldRow label="If a bank holiday falls on the absence">
-            <RuleSelect value={bankHoliday} onChange={setBankHoliday} options={BANK_HOLIDAY_OPTS} width="w-80" />
+            <RuleSelect value={bankHoliday} onChange={setBankHoliday} options={BANK_HOLIDAY_OPTS} width={CONTROL_WIDTH} />
           </FieldRow>
           <FieldRow label="Can the counter be negative?">
-            <RuleSelect value={negative} onChange={setNegative} options={YES_NO_OPTS} />
-          </FieldRow>
-          <FieldRow label="Restrict leave to available days?">
-            <RuleSelect value={restrict} onChange={setRestrict} options={RESTRICT_OPTS} />
-          </FieldRow>
-          <FieldRow label="How should we display?">
-            <RuleSelect value={display} onChange={setDisplay} options={DISPLAY_OPTS} />
+            <RuleSelect value={negative} onChange={setNegative} options={NEGATIVE_OPTS} width={CONTROL_WIDTH} />
           </FieldRow>
         </div>
       </section>
 
-      {/* 5. Carryover — labelled fields, collapsed until configured */}
-      <section className="flex flex-col gap-6">
-        <SectionHeader title="Carryover" subtitle="What happens to unused balance at the end of a cycle" />
-        {carryOn ? (
-          <div className="flex flex-col gap-3">
-            <div className="divide-y divide-f1-border-secondary rounded-xl border border-solid border-f1-border-secondary bg-f1-background">
-              <FieldRow label="How many days carry over?">
-                <div className="inline-flex items-center gap-3">
-                  {carryUnlimited ? (
-                    <span className="text-sm font-medium text-f1-foreground">Unlimited</span>
-                  ) : (
-                    <NumberInput value={carryDays} onChange={setCarryDays} unit="days" />
-                  )}
-                  <span className="inline-flex items-center gap-1.5">
-                    <ToggleSwitch on={carryUnlimited} onChange={setCarryUnlimited} />
-                    <span className="text-xs text-f1-foreground-secondary">Unlimited</span>
-                  </span>
-                </div>
-              </FieldRow>
-              <FieldRow label="When do carryover days expire?">
-                <RuleSelect value={expire} onChange={setExpire} options={EXPIRE_OPTS} />
-              </FieldRow>
-            </div>
-            <button
-              type="button"
-              onClick={() => setCarryOn(false)}
-              className="self-start text-xs font-medium text-f1-foreground-secondary hover:text-f1-foreground-critical"
-            >
-              Remove carryover
-            </button>
-          </div>
-        ) : (
-          <CollapsedLine
-            text="No carryover defined."
-            actionLabel="Add carryover"
-            onAdd={() => setCarryOn(true)}
-          />
-        )}
+      {/* 4. Carryover rules */}
+      <section className="flex flex-col gap-3">
+        <SectionHeader title="Carryover rules" />
+        <div className="flex flex-col">
+          <FieldRow label="How many days carry over?">
+            <RuleSelect value={carryDays} onChange={setCarryDays} options={CARRY_DAYS_OPTS} width={CONTROL_WIDTH} />
+          </FieldRow>
+          <FieldRow label="When do carryover days expire?">
+            <RuleSelect value={expire} onChange={setExpire} options={EXPIRE_OPTS} width={CONTROL_WIDTH} />
+          </FieldRow>
+        </div>
       </section>
-
-      {oneModal ? (
-        <OneRuleModal
-          kind={oneModal.kind}
-          initialText={editingRule?.text}
-          onCancel={() => setOneModal(null)}
-          onSave={saveOne}
-          onDelete={deleteOne}
-        />
-      ) : null}
     </div>
   )
 }
@@ -362,63 +301,12 @@ export function Exploration4View({ allowance }: { allowance: Allowance }) {
 // Building blocks
 // ─────────────────────────────────────────────────────────────────────────────
 
-function SectionHeader({
-  title,
-  subtitle,
-  action,
-}: {
-  title: string
-  subtitle?: string
-  action?: React.ReactNode
-}) {
-  return (
-    <div className="flex items-start justify-between gap-4">
-      <div className="flex flex-col gap-1">
-        <F0Heading content={title} variant="heading" as="h2" />
-        {subtitle ? <F0Text content={subtitle} variant="description" /> : null}
-      </div>
-      {action ? <div className="shrink-0">{action}</div> : null}
-    </div>
-  )
+function SectionHeader({ title }: { title: string }) {
+  return <F0Heading content={title} variant="heading" as="h2" />
 }
 
-function SavedRules({
-  rules,
-  onEdit,
-  onDelete,
-}: {
-  rules: OneRule[]
-  onEdit: (id: string) => void
-  onDelete: (id: string) => void
-}) {
-  if (rules.length === 0) return null
-  return (
-    <div className="divide-y divide-f1-border-secondary rounded-xl border border-solid border-f1-border-secondary bg-f1-background">
-      {rules.map((r) => (
-        <div key={r.id} className="flex items-center gap-3 px-4 py-2.5">
-          <span className="flex-1 text-sm text-f1-foreground">{r.text}</span>
-          <button
-            type="button"
-            onClick={() => onEdit(r.id)}
-            aria-label="Edit rule"
-            className="flex h-8 w-8 items-center justify-center rounded-md text-f1-foreground-secondary hover:bg-f1-background-hover hover:text-f1-foreground"
-          >
-            <F0Icon icon={Pencil} size="sm" />
-          </button>
-          <button
-            type="button"
-            onClick={() => onDelete(r.id)}
-            aria-label="Delete rule"
-            className="flex h-8 w-8 items-center justify-center rounded-md text-f1-foreground-secondary hover:bg-f1-background-hover hover:text-f1-foreground-critical"
-          >
-            <F0Icon icon={Delete} size="sm" />
-          </button>
-        </div>
-      ))}
-    </div>
-  )
-}
-
+// Full-width divider row: label left, control right. Every row carries its own
+// bottom hairline (no surrounding card).
 function FieldRow({
   label,
   children,
@@ -427,126 +315,36 @@ function FieldRow({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex flex-col gap-2 px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-      <span className="text-sm font-semibold text-f1-foreground">{label}</span>
+    <div className="flex flex-col gap-2 border-b border-solid border-f1-border-secondary py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+      <span className="text-sm font-medium text-f1-foreground">{label}</span>
       <div className="shrink-0">{children}</div>
     </div>
   )
 }
 
-function CollapsedLine({
-  text,
-  actionLabel,
-  onAdd,
+// Plain-language base + accrual summary. Connective words stay muted; the key
+// settings are dark + bold — the two-tone prose treatment from the spec.
+function AccrualProse({
+  base,
+  accrual,
 }: {
-  text: string
-  actionLabel: string
-  onAdd: () => void
+  base: BaseAllocation
+  accrual: AccrualProration
 }) {
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-dashed border-f1-border-secondary bg-f1-background px-5 py-4">
-      <span className="text-base text-f1-foreground-secondary">{text}</span>
-      <F0Button label={actionLabel} variant="outline" icon={Plus} onClick={onAdd} />
-    </div>
+  const Key = ({ children }: { children: React.ReactNode }) => (
+    <strong className="font-semibold text-f1-foreground">{children}</strong>
   )
-}
-
-function Sentence({ children }: { children: React.ReactNode }) {
   return (
-    <div className="text-base leading-[2.2] text-f1-foreground">{children}</div>
-  )
-}
-
-function InlineToken({
-  spec,
-  value,
-  isOpen,
-  onOpen,
-  onClose,
-  onChange,
-}: {
-  spec: TokenSpec
-  value: string
-  isOpen: boolean
-  onOpen: () => void
-  onClose: () => void
-  onChange: (v: string) => void
-}) {
-  const [manual, setManual] = useState("")
-  const isEmpty = value === undefined || value === ""
-  const display = isEmpty ? "set a value" : value
-
-  const submitManual = () => {
-    const t = manual.trim()
-    if (t === "") return
-    onChange(t)
-    setManual("")
-    onClose()
-  }
-
-  return (
-    <span className="relative inline-block">
-      <button
-        type="button"
-        onClick={isOpen ? onClose : onOpen}
-        aria-label={spec.title}
-        className={`border-b-2 border-dotted border-f1-border-hover font-semibold transition-colors hover:border-f1-foreground hover:bg-f1-background-hover ${
-          isEmpty ? "text-f1-foreground-secondary" : "text-f1-foreground"
-        }`}
-      >
-        {display}
-      </button>
-
-      {isOpen ? (
-        <>
-          <span className="fixed inset-0 z-40 block" onClick={onClose} aria-hidden />
-          <span className="absolute left-0 top-full z-50 mt-2 flex w-72 flex-col gap-3 rounded-xl bg-f1-background-inverse p-3 shadow-lg">
-            <span className="text-sm font-medium text-f1-foreground-inverse">{spec.title}</span>
-            <span className="flex flex-wrap gap-2">
-              {spec.chips.map((c) => (
-                <button
-                  key={c.value}
-                  type="button"
-                  onClick={() => {
-                    onChange(c.value)
-                    onClose()
-                  }}
-                  className={`rounded-full border border-solid px-3 py-1 text-xs font-medium transition-colors ${
-                    value === c.value
-                      ? "border-f1-border-inverse bg-f1-background-inverse-secondary text-f1-foreground-inverse"
-                      : "border-f1-border-inverse text-f1-foreground-inverse hover:bg-f1-background-inverse-secondary"
-                  }`}
-                >
-                  {c.label}
-                </button>
-              ))}
-            </span>
-            {spec.manual ? (
-              <span className="flex items-center gap-2 rounded-lg bg-f1-background-inverse-secondary px-2 py-1">
-                <input
-                  type={spec.manual}
-                  value={manual}
-                  onChange={(e) => setManual(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") submitManual()
-                  }}
-                  placeholder="Type your own answer…"
-                  className="h-7 flex-1 bg-transparent text-sm text-f1-foreground-inverse placeholder:text-f1-foreground-inverse-secondary focus:outline-none"
-                />
-                <button
-                  type="button"
-                  aria-label="Confirm"
-                  onClick={submitManual}
-                  disabled={manual.trim() === ""}
-                  className="flex h-7 w-7 items-center justify-center rounded-md bg-f1-background-accent-bold text-f1-foreground-inverse disabled:opacity-40"
-                >
-                  <F0Icon icon={ArrowUp} size="sm" />
-                </button>
-              </span>
-            ) : null}
-          </span>
-        </>
-      ) : null}
-    </span>
+    <p className="m-0 text-sm leading-relaxed text-f1-foreground-secondary">
+      Employees receive <Key>{base.amount} working days</Key> of allowance per
+      cycle, starting on{" "}
+      <Key>
+        {base.startMonth} for {base.cycleMonths} months
+      </Key>
+      . Base allowance is <Key>{accrual.proration}</Key>, with{" "}
+      <Key>{accrual.maxDays}</Key> maximum days, accrued{" "}
+      <Key>{accrual.accrualTiming}</Key>, and usable{" "}
+      <Key>{accrual.usabilityWindow}</Key>.
+    </p>
   )
 }

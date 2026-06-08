@@ -7,12 +7,14 @@ export type ExplorationId =
   | "guided-wizard"
   | "templates"
   | "hybrid"
+  | "one-led"
 
 export const EXPLORATIONS: { id: ExplorationId; label: string }[] = [
   { id: "open-chat", label: "E1 · Open Chat" },
   { id: "guided-wizard", label: "E2 · Guided Wizard" },
   { id: "templates", label: "E3 · Templates" },
   { id: "hybrid", label: "E4 · Hybrid" },
+  { id: "one-led", label: "E5 · One-led" },
 ]
 
 export function ExplorationSwitcher({
@@ -292,6 +294,13 @@ function initialMessages(
           text: `Start from a template, then we'll refine it together for "${fieldLabel}".`,
         },
       ]
+    case "one-led":
+      return [
+        {
+          from: "one",
+          text: `Let's set up "${fieldLabel}". Describe the rule in your own words.`,
+        },
+      ]
   }
 }
 
@@ -327,5 +336,7 @@ function placeholderFor(exploration: ExplorationId): string {
       return "Tweak the template (optional)…"
     case "hybrid":
       return "Refine the template with One…"
+    case "one-led":
+      return "Describe the rule — One will configure it."
   }
 }

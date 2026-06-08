@@ -1,44 +1,34 @@
-import { StandardLayout } from "@factorialco/f0-react"
+import { F0Dialog, StandardLayout } from "@factorialco/f0-react"
 import {
   Page,
   PageHeader,
   ResourceHeader,
   Tabs,
 } from "@factorialco/f0-react/dist/experimental"
-import {
-  Ai,
-  Calendar,
-  Filter,
-  Plus,
-  Settings as SettingsIcon,
-  Shield,
-} from "@factorialco/f0-react/icons/app"
+import { Calendar, Filter, Plus, Shield } from "@factorialco/f0-react/icons/app"
+import { useState } from "react"
 import { useSearchParams } from "react-router-dom"
 
 import type { PrototypeMeta } from "../types"
-import { AuthoringView } from "./authoring/AuthoringView"
-import { EmployeeView } from "./employee/EmployeeView"
 import { SettingsHome } from "./settings/SettingsHome"
-import { SimulateView } from "./simulate/SimulateView"
 import {
   AllowanceDetailView,
   type ExpTabId,
 } from "./time-off/AllowanceDetailView"
 import {
-  EXPLORATIONS,
-  ExplorationSwitcher,
-  type ExplorationId,
-} from "./time-off/explorations"
+  type E5AllowanceData,
+  type E5AllowanceType,
+} from "./time-off/E5AllowanceCreationModal"
 import { PlaceholderTab } from "./time-off/PlaceholderTab"
 import { PoliciesTab } from "./time-off/PoliciesTab"
 import { PolicyDetailView } from "./time-off/PolicyDetailView"
-import { getAllowance, getPolicy } from "./time-off/policiesData"
+import { type Allowance, getAllowance, getPolicy, policies } from "./time-off/policiesData"
 
 export const meta: PrototypeMeta = {
   slug: "flexible-accrual",
   title: "Flexible accrual rules",
   description:
-    "Functional Settings prototype with Flexible Accrual Rules: policy/allowance flow (Option A), standalone Accrual Rules tab (Option B), and four UX explorations (E1–E4).",
+    "Functional Settings prototype: Time off policy → allowance flow with an AI-driven, plain-language allowance editor (Exploration 4).",
   category: "Settings",
   module: "time-off",
   audience: ["admin", "employee"],
@@ -49,7 +39,6 @@ export const meta: PrototypeMeta = {
 
 const TIME_OFF_TABS = [
   { id: "policies", label: "Time off policies" },
-  { id: "accrual-rules", label: "Accrual Rules" },
   { id: "absence-types", label: "Absence types" },
   { id: "approval-groups", label: "Approval groups" },
   { id: "blocked-periods", label: "Blocked periods" },
@@ -57,29 +46,34 @@ const TIME_OFF_TABS = [
 
 type TimeOffTabId = (typeof TIME_OFF_TABS)[number]["id"]
 
-const ACCRUAL_SUBTABS = [
-  { id: "authoring", label: "Rule Authoring" },
-  { id: "simulate", label: "Simulate" },
-  { id: "employee", label: "Employee View" },
-] as const
-type AccrualSubTabId = (typeof ACCRUAL_SUBTABS)[number]["id"]
-
 // Fixed exploration tabs on the allowance detail page. Switching swaps the
-// whole accrual-rules experience. Exploration 2 is the default this iteration.
+// whole accrual-rules experience.
 const EXP_TABS = [
-  { id: "e1", label: "Exploration 1" },
-  { id: "e2", label: "Exploration 2" },
-  { id: "e3", label: "Exploration 3" },
   { id: "e4", label: "Exploration 4" },
+  { id: "e5", label: "Exploration 5" },
 ] as const
 
 const VALID_TIME_OFF = new Set(TIME_OFF_TABS.map((t) => t.id))
-const VALID_ACCRUAL = new Set(ACCRUAL_SUBTABS.map((t) => t.id))
-const VALID_EXPLORATIONS = new Set(EXPLORATIONS.map((e) => e.id))
 
 export default function FlexibleAccrual() {
   const [searchParams, setSearchParams] = useSearchParams()
   const view = searchParams.get("view")
+
+  // Extra allowances created through E5 modal, keyed by policyId then allowanceId.
+  const [extraAllowances, setExtraAllowances] = useState<
+    Record<string, Record<string, Allowance>>
+  >({})
+  // E5AllowanceData keyed by allowanceId, for type/absenceTypes on the detail page.
+  const [extraE5Data, setExtraE5Data] = useState<Record<string, E5AllowanceData>>({})
+  const [crossPolicySaveOpen, setCrossPolicySaveOpen] = useState(false)
+  // Policies selected for cross-policy propagation (toggle set).
+  const [propagatePolicies, setPropagatePolicies] = useState<Set<string>>(new Set())
+
+  const resolveAllowance = (pId: string, aId: string) => {
+    const extra = extraAllowances[pId]?.[aId]
+    if (extra) return { policy: getPolicy(pId)!, allowance: extra }
+    return getAllowance(pId, aId)
+  }
 
   const update = (mut: (p: URLSearchParams) => void) => {
     const next = new URLSearchParams(searchParams)
@@ -125,32 +119,17 @@ export default function FlexibleAccrual() {
   const policyId = searchParams.get("policy")
   const allowanceId = searchParams.get("allowance")
   const policyTab = (searchParams.get("policyTab") as "basic" | "employees") || "basic"
-  const rawExploration = searchParams.get("e")
-  const exploration: ExplorationId =
-    rawExploration && VALID_EXPLORATIONS.has(rawExploration as ExplorationId)
-      ? (rawExploration as ExplorationId)
-      : "open-chat"
 
-  // Exploration tab on the allowance detail page (defaults to Exploration 2).
+  // Exploration tab on the allowance detail page (defaults to Exploration 5).
   const rawExpTab = searchParams.get("exp")
-  const expTab: ExpTabId =
-    rawExpTab === "e1"
-      ? "e1"
-      : rawExpTab === "e3"
-        ? "e3"
-        : rawExpTab === "e4"
-          ? "e4"
-          : "e2"
+  const expTab: ExpTabId = rawExpTab === "e4" ? "e4" : "e5"
   const setExpTab = (id: ExpTabId) =>
     update((p) => {
       p.set("exp", id)
     })
 
-  const goSettings = () => setSearchParams(new URLSearchParams())
   const goTimeOffTab = (tab: TimeOffTabId) =>
-    setSearchParams(
-      new URLSearchParams({ view: "time-off", tab, ...(tab === "accrual-rules" && rawExploration ? { e: exploration } : {}) })
-    )
+    setSearchParams(new URLSearchParams({ view: "time-off", tab }))
   const goPolicy = (id: string) =>
     setSearchParams(
       new URLSearchParams({ view: "time-off", tab: "policies", policy: id })
@@ -158,11 +137,6 @@ export default function FlexibleAccrual() {
   const goAllowance = (id: string) =>
     update((p) => {
       p.set("allowance", id)
-      if (!p.get("e")) p.set("e", exploration)
-    })
-  const setExploration = (id: ExplorationId) =>
-    update((p) => {
-      p.set("e", id)
     })
 
   const timeOffTabs = TIME_OFF_TABS.map((t) => ({
@@ -173,14 +147,12 @@ export default function FlexibleAccrual() {
   // Breadcrumb construction
   const policy = policyId ? getPolicy(policyId) : undefined
   const allowanceCtx =
-    policyId && allowanceId ? getAllowance(policyId, allowanceId) : undefined
+    policyId && allowanceId ? resolveAllowance(policyId, allowanceId) : undefined
 
   const breadcrumbs: { id: string; label: string; onClick?: () => void }[] = [
     { id: "time-off", label: "Time off", onClick: () => goTimeOffTab("policies") },
   ]
-  if (activeTab === "accrual-rules") {
-    breadcrumbs.push({ id: "accrual-rules", label: "Accrual Rules" })
-  } else if (policy) {
+  if (policy) {
     breadcrumbs.push({
       id: "policies",
       label: "Policies",
@@ -191,7 +163,8 @@ export default function FlexibleAccrual() {
       label: policy.name,
       onClick: allowanceCtx ? () => goPolicy(policy.id) : undefined,
     })
-    if (allowanceCtx) breadcrumbs.push({ id: allowanceCtx.allowance.id, label: allowanceCtx.allowance.name })
+    if (allowanceCtx)
+      breadcrumbs.push({ id: allowanceCtx.allowance.id, label: allowanceCtx.allowance.name })
   }
 
   // Page-level chrome (PageHeader + ResourceHeader + Tabs) lives in the
@@ -225,12 +198,38 @@ export default function FlexibleAccrual() {
     onClick: () => setExpTab(t.id),
   }))
 
+  const E5_TYPE_LABELS: Record<E5AllowanceType, string> = {
+    fixed: "Fixed balance",
+    overtime: "Overtime",
+    "time-worked": "Based on time worked",
+  }
+
   let header: React.ReactNode
   if (allowanceCtx) {
-    // Fixed exploration tab bar pinned at the top of the allowance page.
+    const currentE5Data = allowanceId ? extraE5Data[allowanceId] : undefined
+    // When on E5, show ResourceHeader with allowance name, type and Save.
+    // Other explorations keep the plain tab bar only.
     header = (
       <>
         {pageHeader}
+        {expTab === "e5" && (
+          <ResourceHeader
+            title={allowanceCtx.allowance.name}
+            metadata={
+              currentE5Data
+                ? [
+                    {
+                      label: "Type",
+                      value: {
+                        type: "text" as const,
+                        content: E5_TYPE_LABELS[currentE5Data.type],
+                      },
+                    },
+                  ]
+                : undefined
+            }
+          />
+        )}
         <Tabs key={expTab} tabs={expTabsConfig} activeTabId={expTab} />
       </>
     )
@@ -241,15 +240,6 @@ export default function FlexibleAccrual() {
         <ResourceHeader
           title={policy.name}
           description={policy.description}
-          primaryAction={
-            policyTab === "basic"
-              ? {
-                  label: "Add time off allowance",
-                  icon: Plus,
-                  onClick: () => {},
-                }
-              : undefined
-          }
         />
         <Tabs key={policyTab} tabs={policyTabsConfig} activeTabId={policyTab} />
       </>
@@ -278,21 +268,61 @@ export default function FlexibleAccrual() {
 
   // ───── Drill-down: allowance detail ───────────────────────────────────
   if (allowanceCtx) {
+    const currentE5Data = allowanceId ? extraE5Data[allowanceId] : undefined
     return (
-      <Page header={header}>
-        <StandardLayout>
-          <AllowanceDetailView
-            policy={allowanceCtx.policy}
-            allowance={allowanceCtx.allowance}
-            expTab={expTab}
-          />
-        </StandardLayout>
-      </Page>
+      <>
+        <Page header={header}>
+          <StandardLayout>
+            <AllowanceDetailView
+              policy={allowanceCtx.policy}
+              allowance={allowanceCtx.allowance}
+              expTab={expTab}
+              e5Data={currentE5Data}
+            />
+          </StandardLayout>
+        </Page>
+        <CrossPolicySaveDialog
+          isOpen={crossPolicySaveOpen}
+          allowanceName={allowanceCtx.allowance.name}
+          otherPolicies={policies.filter((p) => p.id !== policyId)}
+          selected={propagatePolicies}
+          onToggle={(id) =>
+            setPropagatePolicies((prev) => {
+              const next = new Set(prev)
+              next.has(id) ? next.delete(id) : next.add(id)
+              return next
+            })
+          }
+          onConfirm={() => setCrossPolicySaveOpen(false)}
+          onClose={() => setCrossPolicySaveOpen(false)}
+        />
+      </>
     )
   }
 
   // ───── Drill-down: policy detail ──────────────────────────────────────
   if (policy) {
+    const handleE5Complete = (data: E5AllowanceData) => {
+      const newId = `new-${Date.now()}`
+      const newAllowance: Allowance = {
+        id: newId,
+        name: data.name,
+        amount: 0,
+        unit: "working days",
+        accrual: "flat",
+      }
+      setExtraAllowances((prev) => ({
+        ...prev,
+        [policy.id]: { ...(prev[policy.id] ?? {}), [newId]: newAllowance },
+      }))
+      setExtraE5Data((prev) => ({ ...prev, [newId]: data }))
+      // Navigate to the new allowance in E5 mode.
+      const next = new URLSearchParams(searchParams)
+      next.set("allowance", newId)
+      next.set("exp", "e5")
+      setSearchParams(next)
+    }
+
     return (
       <Page header={header}>
         <StandardLayout>
@@ -300,6 +330,7 @@ export default function FlexibleAccrual() {
             policy={policy}
             activeTab={policyTab}
             onOpenAllowance={goAllowance}
+            onAddAllowance={handleE5Complete}
           />
         </StandardLayout>
       </Page>
@@ -307,17 +338,6 @@ export default function FlexibleAccrual() {
   }
 
   // ───── Top-level tabs ─────────────────────────────────────────────────
-  if (activeTab === "accrual-rules") {
-    return <AccrualRulesScreen
-      header={header}
-      exploration={exploration}
-      onSetExploration={setExploration}
-      searchParams={searchParams}
-      setSearchParams={setSearchParams}
-      goSettings={goSettings}
-    />
-  }
-
   return (
     <Page header={header}>
       <StandardLayout>
@@ -346,64 +366,78 @@ export default function FlexibleAccrual() {
       </StandardLayout>
     </Page>
   )
-  // unused import keepers
-  void SettingsIcon
-  void Ai
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Accrual Rules tab (Option B): existing Authoring / Simulate / Employee
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Cross-policy propagation dialog ──────────────────────────────────────────
 
-function AccrualRulesScreen({
-  header,
-  exploration,
-  onSetExploration,
-  searchParams,
-  setSearchParams,
+type Policy = { id: string; name: string; employees: number }
+
+function CrossPolicySaveDialog({
+  isOpen,
+  allowanceName,
+  otherPolicies,
+  selected,
+  onToggle,
+  onConfirm,
+  onClose,
 }: {
-  header: React.ReactNode
-  exploration: ExplorationId
-  onSetExploration: (id: ExplorationId) => void
-  searchParams: URLSearchParams
-  setSearchParams: (p: URLSearchParams) => void
-  goSettings: () => void
+  isOpen: boolean
+  allowanceName: string
+  otherPolicies: Policy[]
+  selected: Set<string>
+  onToggle: (id: string) => void
+  onConfirm: () => void
+  onClose: () => void
 }) {
-  const rawSubTab = searchParams.get("ruleTab")
-  const activeSubTab: AccrualSubTabId =
-    rawSubTab && VALID_ACCRUAL.has(rawSubTab as AccrualSubTabId)
-      ? (rawSubTab as AccrualSubTabId)
-      : "authoring"
-
-  const setSubTab = (id: AccrualSubTabId) => {
-    const next = new URLSearchParams(searchParams)
-    next.set("ruleTab", id)
-    setSearchParams(next)
-  }
-
-  const goSimulate = () => setSubTab("simulate")
-
-  const subTabs = ACCRUAL_SUBTABS.map((t) => ({
-    ...t,
-    onClick: () => setSubTab(t.id),
-  }))
-
   return (
-    <Page header={header}>
-      <StandardLayout>
-        <div className="flex w-full flex-col gap-4">
-          <Tabs key={activeSubTab} tabs={subTabs} activeTabId={activeSubTab} />
-          {activeSubTab === "authoring" && (
-            <AuthoringView onSimulate={goSimulate} />
-          )}
-          {activeSubTab === "simulate" && <SimulateView />}
-          {activeSubTab === "employee" && <EmployeeView />}
-        </div>
-      </StandardLayout>
-      <ExplorationSwitcher
-        exploration={exploration}
-        onChange={onSetExploration}
-      />
-    </Page>
+    <F0Dialog
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Apply to other policies?"
+      description={`"${allowanceName}" has been saved. Do you want to apply the same allowance configuration to other policies?`}
+      width="sm"
+      primaryAction={{
+        label: selected.size > 0 ? `Apply to ${selected.size} ${selected.size === 1 ? "policy" : "policies"}` : "Skip",
+        onClick: onConfirm,
+      }}
+      secondaryAction={{ label: "Cancel", onClick: onClose }}
+    >
+      <div className="flex flex-col gap-0.5 pb-2">
+        {otherPolicies.map((p) => {
+          const isSelected = selected.has(p.id)
+          return (
+            <div
+              key={p.id}
+              role="checkbox"
+              aria-checked={isSelected}
+              tabIndex={0}
+              className="flex cursor-pointer items-center gap-2.5 rounded-md px-2 py-2 transition-colors hover:bg-f1-background-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-f1-border-hover"
+              onClick={() => onToggle(p.id)}
+              onKeyDown={(e) => {
+                if (e.key === " " || e.key === "Enter") { e.preventDefault(); onToggle(p.id) }
+              }}
+            >
+              <div
+                className={`flex h-4 w-4 shrink-0 items-center justify-center rounded transition-colors ${
+                  isSelected
+                    ? "bg-f1-background-selected-bold"
+                    : "border border-solid border-f1-border bg-f1-background"
+                }`}
+              >
+                {isSelected && (
+                  <svg viewBox="0 0 10 8" className="h-2.5 w-2.5 fill-none stroke-f1-background stroke-2">
+                    <polyline points="1 4 3.5 6.5 9 1" />
+                  </svg>
+                )}
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-f1-foreground">{p.name}</span>
+                <span className="text-xs text-f1-foreground-secondary">{p.employees} employees</span>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </F0Dialog>
   )
 }
