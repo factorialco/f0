@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.43.0](https://github.com/factorialco/f0/compare/f0-react-v2.42.0...f0-react-v2.43.0) (2026-06-08)
+
+
+### Features
+
+* **EditableTable:** pass changes map to onCellChange ([#4342](https://github.com/factorialco/f0/issues/4342)) ([7d7543a](https://github.com/factorialco/f0/commit/7d7543a41ec668db8e84a5e0099e9a3a07671bac))
+
+## [2.42.0](https://github.com/factorialco/f0/compare/f0-react-v2.41.5...f0-react-v2.42.0) (2026-06-08)
+
+
+### Features
+
+* **ui:** add ButtonGroup — a data-driven action bar ([#4339](https://github.com/factorialco/f0/issues/4339)) ([170314e](https://github.com/factorialco/f0/commit/170314ec4f9f24ed79b2e0257189744c17459ab4))
+
 ## [2.41.5](https://github.com/factorialco/f0/compare/f0-react-v2.41.4...f0-react-v2.41.5) (2026-06-08)
 
 

@@ -13,6 +13,11 @@ import type { RecordType } from "@/hooks/datasource"
 
 import { useI18n } from "@/lib/providers/i18n"
 
+import type {
+  EditableTableCellChanges,
+  EditableTableOnCellChangeParams,
+} from "../types"
+
 type EditableRowContextValue<R extends RecordType> = {
   /** The optimistic local copy of the item, updated immediately on change */
   localItem: R
@@ -33,7 +38,9 @@ const EditableRowContext =
 
 export type EditableRowProviderProps<R extends RecordType> = {
   item: R
-  onCellChange: (updatedItem: R) => Promise<void | Record<string, string>>
+  onCellChange: (
+    params: EditableTableOnCellChangeParams<R>
+  ) => Promise<void | Record<string, string>>
   children: React.ReactNode
 }
 
@@ -62,8 +69,13 @@ export function EditableRowProvider<R extends RecordType>({
 
   const handleCellChange = useCallback(
     (columnId: string, value: unknown) => {
-      const updatedItem = { ...localItemRef.current, [columnId]: value } as R
+      const previousItem = localItemRef.current
+      const updatedItem = { ...previousItem, [columnId]: value } as R
       localItemRef.current = updatedItem
+
+      const changes: EditableTableCellChanges<R> = {
+        [columnId]: [previousItem[columnId], value],
+      } as EditableTableCellChanges<R>
 
       setLocalItem(updatedItem)
 
@@ -77,7 +89,7 @@ export function EditableRowProvider<R extends RecordType>({
 
       setCellLoading((prev) => ({ ...prev, [columnId]: true }))
 
-      onCellChange(updatedItem)
+      onCellChange({ updatedItem, changes })
         .then((errors) => {
           if (errors && Object.keys(errors).length > 0) {
             setCellErrors((prev) => ({ ...prev, ...errors }))
@@ -104,8 +116,17 @@ export function EditableRowProvider<R extends RecordType>({
       const columnIds = Object.keys(updates)
       if (columnIds.length === 0) return
 
-      const updatedItem = { ...localItemRef.current, ...updates } as R
+      const previousItem = localItemRef.current
+      const updatedItem = { ...previousItem, ...updates } as R
       localItemRef.current = updatedItem
+
+      const changes: EditableTableCellChanges<R> = {}
+      for (const id of columnIds) {
+        ;(changes as Record<string, [unknown, unknown]>)[id] = [
+          previousItem[id],
+          updates[id],
+        ]
+      }
 
       setLocalItem(updatedItem)
 
@@ -127,7 +148,7 @@ export function EditableRowProvider<R extends RecordType>({
       }
       setCellLoading((prev) => ({ ...prev, ...loadingOn }))
 
-      onCellChange(updatedItem)
+      onCellChange({ updatedItem, changes })
         .then((errors) => {
           if (errors && Object.keys(errors).length > 0) {
             setCellErrors((prev) => ({ ...prev, ...errors }))
