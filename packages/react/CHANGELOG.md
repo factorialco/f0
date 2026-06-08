@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.45.0](https://github.com/factorialco/f0/compare/f0-react-v2.44.0...f0-react-v2.45.0) (2026-06-08)
+
+
+### Features
+
+* **ui:** add F0CardRow component ([#4340](https://github.com/factorialco/f0/issues/4340)) ([806cd55](https://github.com/factorialco/f0/commit/806cd55c60d5a6b8765798e98ea3b68cc9a043b1))
+
+## [2.44.0](https://github.com/factorialco/f0/compare/f0-react-v2.43.0...f0-react-v2.44.0) (2026-06-08)
+
+
+### Features
+
+* **F0Box:** expose subtle "sm" boxShadow token ([#4354](https://github.com/factorialco/f0/issues/4354)) ([4b77a5c](https://github.com/factorialco/f0/commit/4b77a5c9db2f1fe58614577311da8bea13c58872))
+
 ## [2.43.0](https://github.com/factorialco/f0/compare/f0-react-v2.42.0...f0-react-v2.43.0) (2026-06-08)
 
 
